@@ -40,7 +40,7 @@ public class RandomFissClaimGeneratorTest {
     final String json = JsonFormat.printer().print(claim);
     assertEquals(1, generator.getPreviousSequenceNumber());
     assertEquals(
-        """
+"""
 {
   "dcn": "65686447345742655016681",
   "hicNo": "897538270399",

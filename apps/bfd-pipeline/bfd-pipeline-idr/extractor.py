@@ -22,12 +22,6 @@ transform_timer = Timer("transform")
 logger = logging.getLogger(__name__)
 
 
-def print_timers() -> None:
-    cursor_execute_timer.print_results()
-    cursor_fetch_timer.print_results()
-    transform_timer.print_results()
-
-
 def get_min_transaction_date() -> datetime:
     min_date = os.environ.get("PIPELINE_MIN_TRANSACTION_DATE")
     if min_date is not None:
@@ -150,7 +144,6 @@ class PostgresExtractor(Extractor):
 class SnowflakeExtractor(Extractor):
     def __init__(self, batch_size: int) -> None:
         super().__init__()
-
         self.conn = SnowflakeExtractor._connect()
         self.batch_size = batch_size
 
@@ -160,7 +153,9 @@ class SnowflakeExtractor(Extractor):
     @staticmethod
     def _connect() -> SnowflakeConnection:
         private_key = serialization.load_pem_private_key(
-            os.environ["IDR_PRIVATE_KEY"].encode(), password=None, backend=default_backend()
+            os.environ["IDR_PRIVATE_KEY"].encode(),
+            password=None,
+            backend=default_backend(),
         )
         private_key_bytes = private_key.private_bytes(
             encoding=serialization.Encoding.DER,
@@ -183,24 +178,24 @@ class SnowflakeExtractor(Extractor):
             cursor_execute_timer.start()
             cur = self.conn.cursor(DictCursor)
             cur.execute(sql, params)
-            cursor_execute_timer.stop()
+            cursor_execute_timer.stop(cls)
 
             cursor_fetch_timer.start()
             # fetchmany can return list[dict] or list[tuple] but we'll only use
             # queries that return dicts
             batch: list[dict[str, DbType]] = cur.fetchmany(self.batch_size)  # type: ignore[assignment]
-            cursor_fetch_timer.stop()
+            cursor_fetch_timer.stop(cls)
 
             while len(batch) > 0:  # type: ignore
                 transform_timer.start()
                 data = [cls(**{k.lower(): v for k, v in row.items()}) for row in batch]
-                transform_timer.stop()
+                transform_timer.stop(cls)
 
                 yield data
 
                 cursor_fetch_timer.start()
                 batch = cur.fetchmany(self.batch_size)  # type: ignore[assignment]
-                cursor_fetch_timer.stop()
+                cursor_fetch_timer.stop(cls)
             return
 
         finally:

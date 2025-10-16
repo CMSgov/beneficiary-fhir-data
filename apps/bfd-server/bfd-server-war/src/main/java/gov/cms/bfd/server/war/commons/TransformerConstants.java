@@ -194,7 +194,7 @@ public final class TransformerConstants {
    */
   public static final String CODING_SYSTEM_HCPCS = BASE_URL_BBAPI_RESOURCES + "/codesystem/hcpcs";
 
-  /** Used as the {@link Coding#getSystem()} for {@link ItemComponent#getType()} entries. */
+  /** Used as the {@link Coding#getSystem()} for {@link ItemComponent} type entries. */
   public static final String CODING_SYSTEM_CARIN_HCPCS =
       "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets";
 

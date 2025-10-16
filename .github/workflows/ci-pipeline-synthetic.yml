@@ -27,7 +27,7 @@ jobs:
       - name: "Setup JDK"
         uses: actions/setup-java@v4
         with:
-          java-version: "21"
+          java-version: "25"
           distribution: "corretto"
       - name: Install dependencies
         run: npm install -g fsh-sushi
