@@ -5,6 +5,7 @@ import logging
 import os
 import ssl
 import sys
+from dataclasses import dataclass
 from datetime import datetime
 from enum import StrEnum, auto
 from pathlib import Path
@@ -71,6 +72,12 @@ class DatabaseDetailsModel(BaseModel):
             "port": os.environ.get("PGPORT"),
             "dbname": os.environ.get("PGDATABASE"),
         })
+
+
+@dataclass(frozen=True, eq=True)
+class BeneWithSamshaClaims:
+    bene_sk: str
+    samhsa_claim_ids: list[str]
 
 
 async def __query_samhsa_claim_any_ids(
@@ -174,12 +181,12 @@ async def query_samhsa_claim_item_ids(
     )
 
 
-async def query_samhsa_bene_sks(
+async def query_samhsa_benes_with_claims(
     tablesample: int,
     limit: int,
     security_labels: list[SecurityLabelModel],
     db_details: DatabaseDetailsModel,
-) -> list[str]:
+) -> list[BeneWithSamshaClaims]:
     clm_uniq_ids = set(
         itertools.chain.from_iterable(
             await asyncio.gather(
@@ -219,14 +226,24 @@ async def query_samhsa_bene_sks(
         result = await (
             await curs.execute(
                 """
-            SELECT bene_sk from idr.claim
+            SELECT bene_sk, clm_uniq_id from idr.claim
             WHERE clm_uniq_id = ANY(%s);
             """,
                 [list(clm_uniq_ids)],
             )
         ).fetchall()
         logger.info("%d potential SAMHSA bene_sks returned", len(result))
-        return [str(row["bene_sk"]) for row in result]
+
+        bene_sks_and_clms = [(str(row["bene_sk"]), str(row["clm_uniq_id"])) for row in result]
+        uniq_bene_sks = set(x[0] for x in bene_sks_and_clms)
+
+        return [
+            BeneWithSamshaClaims(
+                bene_sk=bene_sk,
+                samhsa_claim_ids=[x[1] for x in bene_sks_and_clms if bene_sk == x[0]],
+            )
+            for bene_sk in uniq_bene_sks
+        ]
 
 
 async def verify_samhsa_filtered(
@@ -381,7 +398,7 @@ async def main(
         else DatabaseDetailsModel.from_env()
     )
 
-    samhsa_bene_sks = await query_samhsa_bene_sks(
+    samhsa_benes = await query_samhsa_benes_with_claims(
         security_labels=samhsa_labels, db_details=db_details, tablesample=tablesample, limit=limit
     )
 
@@ -416,9 +433,9 @@ async def main(
                     url=full_eob_url,
                     samhsa_session=samhsa_session,
                     no_samhsa_session=no_samhsa_session,
-                    bene_sk=bene_sk,
+                    bene_sk=samhsa_bene.bene_sk,
                 )
-                for bene_sk in samhsa_bene_sks
+                for samhsa_bene in samhsa_benes
             )
         )
 
