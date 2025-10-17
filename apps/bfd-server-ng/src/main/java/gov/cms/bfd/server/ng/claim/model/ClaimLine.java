@@ -86,7 +86,6 @@ public class ClaimLine {
         .map(ClaimLineInstitutional::getExtensions)
         .ifPresent(e -> line.setExtension(e.toFhir()));
 
-
     return Optional.of(line);
   }
 

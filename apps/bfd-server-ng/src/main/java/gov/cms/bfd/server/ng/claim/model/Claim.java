@@ -146,8 +146,8 @@ public class Claim {
               .toFhirDiagnosis(item.getClaimItemId().getBfdRowId(), claimTypeCode)
               .ifPresent(eob::addDiagnosis);
           item.getClaimLineProfessional()
-                  .flatMap(i -> i.toFhirObservation(item.getClaimItemId().getBfdRowId()))
-                  .ifPresent(eob::addContained);
+              .flatMap(i -> i.toFhirObservation(item.getClaimItemId().getBfdRowId()))
+              .ifPresent(eob::addContained);
         });
     billingProvider
         .toFhir(claimTypeCode)
@@ -217,16 +217,15 @@ public class Claim {
     return sortedEob(eob);
   }
 
-    Optional<Reference> toFhirReference() {
-        return Stream.of(
+  Optional<Reference> toFhirReference() {
+    return Stream.of(
             claimRecordTypeCode.map(ClaimRecordTypeCode::getDisplay),
             claimNearLineRecordTypeCode.map(ClaimNearLineRecordTypeCode::getDisplay),
-            claimTypeCode.toDisplay()
-            )
-            .flatMap(Optional::stream)
-            .findFirst()
-            .map(display -> new Reference().setDisplay(display));
-    }
+            claimTypeCode.toDisplay())
+        .flatMap(Optional::stream)
+        .findFirst()
+        .map(display -> new Reference().setDisplay(display));
+  }
 
   private List<ClaimValue> getClaimValues() {
     return claimItems.stream().map(ClaimItem::getClaimValue).toList();

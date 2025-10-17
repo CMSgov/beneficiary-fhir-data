@@ -14,9 +14,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Embeddable
 public class ClaimLineProfessionalId implements Serializable {
-    @Column(name = "clm_uniq_id", insertable = false, updatable = false)
-    private long claimUniqueId;
+  @Column(name = "clm_uniq_id", insertable = false, updatable = false)
+  private long claimUniqueId;
 
-    @Column(name = "clm_line_num", insertable = false, updatable = false)
-    private int claimLineNumber;
+  @Column(name = "clm_line_num", insertable = false, updatable = false)
+  private int claimLineNumber;
 }

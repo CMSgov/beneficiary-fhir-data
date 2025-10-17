@@ -2,9 +2,8 @@ package gov.cms.bfd.server.ng.claim.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
-import org.hl7.fhir.r4.model.ExplanationOfBenefit;
-
 import java.util.List;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 @Embeddable
 class AdjudicationCharge {
@@ -23,10 +22,9 @@ class AdjudicationCharge {
 
   List<ExplanationOfBenefit.TotalComponent> toFhir() {
     return List.of(
-            AdjudicationChargeType.ALLOWED_CHARGE_AMOUNT.toFhirTotal(allowedChargeAmount),
-            AdjudicationChargeType.SUBMITTED_CHARGE_AMOUNT.toFhirTotal(submittedChargeAmount),
-            AdjudicationChargeType.BENE_PAYMENT_AMOUNT.toFhirTotal(benePaymentAmount),
-            AdjudicationChargeType.PROVIDER_PAYMENT_AMOUNT.toFhirTotal(providerPaymentAmount)
-    );
+        AdjudicationChargeType.ALLOWED_CHARGE_AMOUNT.toFhirTotal(allowedChargeAmount),
+        AdjudicationChargeType.SUBMITTED_CHARGE_AMOUNT.toFhirTotal(submittedChargeAmount),
+        AdjudicationChargeType.BENE_PAYMENT_AMOUNT.toFhirTotal(benePaymentAmount),
+        AdjudicationChargeType.PROVIDER_PAYMENT_AMOUNT.toFhirTotal(providerPaymentAmount));
   }
 }

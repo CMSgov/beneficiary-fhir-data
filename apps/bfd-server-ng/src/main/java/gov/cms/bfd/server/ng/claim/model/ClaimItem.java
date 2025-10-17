@@ -40,16 +40,15 @@ public class ClaimItem implements Comparable<ClaimItem> {
   @OneToOne
   private ClaimLineInstitutional claimLineInstitutional;
 
-  @OneToOne
-  private ClaimLineProfessional claimLineProfessional;
+  @OneToOne private ClaimLineProfessional claimLineProfessional;
 
   Optional<ClaimLineInstitutional> getClaimLineInstitutional() {
     return Optional.ofNullable(claimLineInstitutional);
   }
 
   Optional<ClaimLineProfessional> getClaimLineProfessional() {
-        return Optional.ofNullable(claimLineProfessional);
-    }
+    return Optional.ofNullable(claimLineProfessional);
+  }
 
   @Override
   public int compareTo(@NotNull ClaimItem o) {
