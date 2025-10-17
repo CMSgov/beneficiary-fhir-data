@@ -114,7 +114,7 @@ async def __query_samhsa_claim_any_ids(
                 sql.SQL("""
                 SELECT {table}.clm_uniq_id, claim.clm_thru_dt, {table}.{column} from idr.{table}
                 TABLESAMPLE SYSTEM({tablesample})
-                LEFT JOIN idr.claim ON claim.clm_uniq_id = {table}.clm_uniq_id
+                JOIN idr.claim ON claim.clm_uniq_id = {table}.clm_uniq_id
                 WHERE {column} = ANY(%s)
                 LIMIT {limit};
                 """).format(
