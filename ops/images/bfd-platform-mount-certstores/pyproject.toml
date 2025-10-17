@@ -3,30 +3,26 @@ name = "bfd-mgmt-mount-certstores"
 version = "1.0.0"
 readme = "README.md"
 requires-python = ">=3.13,<3.14"
-dependencies = ["boto3", "click"]
+dependencies = [ "boto3", "click" ]
+
 
 [dependency-groups]
-dev = ["boto3-stubs[s3,ssm]", "ruff", "uv"]
+dev = [ "boto3-stubs[s3,ssm]", "ruff", "uv" ]
+
 
 [tool.ruff]
-# Set the maximum line length to 100.
 line-length = 100
+
 
 [tool.ruff.lint]
 select = [
-  "D",    # pydocstyle
+  "D",
   "E501",
-  # pycodestyle
   "E",
-  # Pyflakes
   "F",
-  # pyupgrade
   "UP",
-  # flake8-bugbear
   "B",
-  # flake8-simplify
   "SIM",
-  # isort
   "I",
   "ANN",
   "LOG",
@@ -42,19 +38,21 @@ select = [
   "PLW",
   "PERF",
   "FURB",
-  "RUF",
+  "RUF"
 ]
+
 
 [tool.ruff.lint.pydocstyle]
 convention = "pep257"
+
 
 [tool.ruff.format]
 quote-style = "double"
 indent-style = "space"
 docstring-code-format = true
 
+
 [tool.pyright]
-# ...
 typeCheckingMode = "strict"
 venvPath = "."
 venv = ".venv"
