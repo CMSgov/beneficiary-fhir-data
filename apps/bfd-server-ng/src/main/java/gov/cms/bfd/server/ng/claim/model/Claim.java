@@ -211,7 +211,7 @@ public class Claim {
     toFhirReference().ifPresent(insurance::setCoverage);
 
     claimTypeCode.toFhirInsurance().ifPresent(eob::addInsurance);
-    eob.addTotal(adjudicationCharge.toFhir());
+    eob.setTotal(adjudicationCharge.toFhir());
     eob.setPayment(claimPaymentAmount.toFhir());
 
     return sortedEob(eob);

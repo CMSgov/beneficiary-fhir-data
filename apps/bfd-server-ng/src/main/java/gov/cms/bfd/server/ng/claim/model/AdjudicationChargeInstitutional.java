@@ -24,10 +24,10 @@ class AdjudicationChargeInstitutional {
 
   List<ExplanationOfBenefit.AdjudicationComponent> toFhir() {
     return List.of(
-        AdjudicationChargeType.INSTITUTIONAL_ADJUSTED_AMOUNT.toFhirAdjudication(adjustedAmount),
-        AdjudicationChargeType.INSTITUTIONAL_REDUCED_AMOUNT.toFhirAdjudication(reducedAmount),
-        AdjudicationChargeType.INSTITUTIONAL_1ST_MSP_PAID_AMOUNT.toFhirAdjudication(msp1PaidAmount),
-        AdjudicationChargeType.INSTITUTIONAL_2ND_PAID_AMOUNT.toFhirAdjudication(msp2PaidAmount),
-        AdjudicationChargeType.INSTITUTIONAL_RATE_AMOUNT.toFhirAdjudication(rateAmount));
+        AdjudicationChargeType.LINE_INSTITUTIONAL_ADJUSTED_AMOUNT.toFhirAdjudication(adjustedAmount),
+        AdjudicationChargeType.LINE_INSTITUTIONAL_REDUCED_AMOUNT.toFhirAdjudication(reducedAmount),
+        AdjudicationChargeType.LINE_INSTITUTIONAL_1ST_MSP_PAID_AMOUNT.toFhirAdjudication(msp1PaidAmount),
+        AdjudicationChargeType.LINE_INSTITUTIONAL_2ND_PAID_AMOUNT.toFhirAdjudication(msp2PaidAmount),
+        AdjudicationChargeType.LINE_INSTITUTIONAL_RATE_AMOUNT.toFhirAdjudication(rateAmount));
   }
 }

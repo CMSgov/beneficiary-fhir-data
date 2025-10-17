@@ -10,13 +10,13 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @Getter
 @AllArgsConstructor
 enum AdjudicationChargeType {
-  NONCOVERED_CHARGE_AMOUNT(
+  LINE_NONCOVERED_CHARGE_AMOUNT(
       SystemUrls.CARIN_CODE_SYSTEM_ADJUDICATION,
       "noncovered",
       "Noncovered",
       "CLM_LINE_NCVRD_CHRG_AMT",
       "Revenue Center Non-Covered Charge Amount"),
-  ALLOWED_CHARGE_AMOUNT(
+  LINE_ALLOWED_CHARGE_AMOUNT(
       SystemUrls.HL7_ADJUDICATION,
       "eligible",
       "Eligible Amount",
@@ -28,78 +28,96 @@ enum AdjudicationChargeType {
       "Submitted Amount",
       "CLM_LINE_SBMT_CHRG_AMT",
       "Line Submitted Charge Amount"),
-  PROVIDER_PAYMENT_AMOUNT(
+  LINE_PROVIDER_PAYMENT_AMOUNT(
       SystemUrls.CARIN_CODE_SYSTEM_ADJUDICATION,
       "paidtoprovider",
       "Paid to provider",
       "CLM_LINE_PRVDR_PMT_AMT",
       "Line Provider Payment Amount"),
-  BENE_PAYMENT_AMOUNT(
+  LINE_BENE_PAYMENT_AMOUNT(
       SystemUrls.CARIN_CODE_SYSTEM_ADJUDICATION,
       "paidbypatient",
       "Paid by patient",
       "CLM_LINE_BENE_PMT_AMT",
       "Revenue Center Patient Responsibility Payment Amount"),
-  BENE_PAID_AMOUNT(
+  LINE_BENE_PAID_AMOUNT(
       SystemUrls.CARIN_CODE_SYSTEM_ADJUDICATION,
       "paidtopatient",
       "Paid to patient",
       "CLM_LINE_BENE_PD_AMT",
       "Revenue Center Payment Amount to Beneficiary"),
-  COVERED_PAID_AMOUNT(
+  LINE_COVERED_PAID_AMOUNT(
       SystemUrls.HL7_ADJUDICATION,
       "benefit",
       "Benefit Amount",
       "CLM_LINE_CVRD_PD_AMT",
       "Revenue Center Payment Amount"),
-  BLOOD_DEDUCTIBLE_AMOUNT(
+  LINE_BLOOD_DEDUCTIBLE_AMOUNT(
       SystemUrls.HL7_ADJUDICATION,
       "deductible",
       "Deductible",
       "CLM_LINE_BLOOD_DDCTBL_AMT",
       "Revenue Center Blood Deductible Amount"),
-  MEDICARE_DEDUCTIBLE_AMOUNT(
+  LINE_MEDICARE_DEDUCTIBLE_AMOUNT(
       SystemUrls.HL7_ADJUDICATION,
       "deductible",
       "Deductible",
       "CLM_LINE_MDCR_DDCTBL_AMT",
       "Revenue Center Cash Deductible Amount"),
-  INSTITUTIONAL_ADJUSTED_AMOUNT(
+  LINE_INSTITUTIONAL_ADJUSTED_AMOUNT(
       SystemUrls.CARIN_CODE_SYSTEM_ADJUDICATION,
       "coinsurance",
       "Co-insurance",
       "CLM_LINE_INSTNL_ADJSTD_AMT",
       "Revenue Center Coinsurance/Wage Adjusted Coinsurance Amount"),
-  INSTITUTIONAL_REDUCED_AMOUNT(
+  LINE_INSTITUTIONAL_REDUCED_AMOUNT(
       SystemUrls.CARIN_CODE_SYSTEM_ADJUDICATION,
       "coinsurance",
       "Co-insurance",
       "CLM_LINE_INSTNL_RDCD_AMT",
       "Revenue Center Reduced Coinsurance Amount"),
-  INSTITUTIONAL_1ST_MSP_PAID_AMOUNT(
+  LINE_INSTITUTIONAL_1ST_MSP_PAID_AMOUNT(
       SystemUrls.CARIN_CODE_SYSTEM_ADJUDICATION,
       "priorpayerpaid",
       "Prior payer paid",
       "CLM_LINE_INSTNL_MSP1_PD_AMT",
       "Revenue Center 1st MSP Paid Amount"),
-  INSTITUTIONAL_2ND_PAID_AMOUNT(
+  LINE_INSTITUTIONAL_2ND_PAID_AMOUNT(
       SystemUrls.CARIN_CODE_SYSTEM_ADJUDICATION,
       "priorpayerpaid",
       "Prior payer paid",
       "CLM_LINE_INSTNL_MSP2_PD_AMT",
       "Revenue Center 2nd MSP Paid Amount"),
-  INSTITUTIONAL_RATE_AMOUNT(
+  LINE_INSTITUTIONAL_RATE_AMOUNT(
       SystemUrls.HL7_ADJUDICATION,
       "submitted",
       "Submitted Amount",
       "CLM_LINE_INSTNL_RATE_AMT",
       "Revenue Center Rate Amount"),
+  ALLOWED_CHARGE_AMOUNT(
+      SystemUrls.HL7_ADJUDICATION,
+      "eligible",
+      "Allowed Amount",
+      "CLM_ALOWD_CHRG_AMT",
+      "Total Allowed Charge Amount"),
   SUBMITTED_CHARGE_AMOUNT(
       SystemUrls.HL7_ADJUDICATION,
       "submitted",
       "Submitted Amount",
       "CLM_SBMT_CHRG_AMT",
-      "Total Charge Amount");
+      "Total Submitted Charge Amount"),
+  BENE_PAYMENT_AMOUNT(
+      SystemUrls.CARIN_CODE_SYSTEM_ADJUDICATION,
+      "paidbypatient",
+      "Paid by patient",
+      "CLM_BENE_PMT_AMT",
+      "Revenue Center Patient Responsibility Payment Amount"),
+  PROVIDER_PAYMENT_AMOUNT(
+      SystemUrls.CARIN_CODE_SYSTEM_ADJUDICATION,
+      "paidtoprovider",
+      "Paid to provider",
+      "CLM_PRVDR_PMT_AMT",
+      "Provider Payment Amount");
 
   private final String coding1System;
   private final String coding1Code;
