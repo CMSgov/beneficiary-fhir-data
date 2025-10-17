@@ -1284,14 +1284,14 @@ class IdrClaimProfessional(IdrBaseModel):
     clm_clncl_tril_num: Annotated[str, BeforeValidator(transform_default_string)]
     clm_mdcr_prfnl_prmry_pyr_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_mdcr_prfnl_prvdr_asgnmt_sw: Annotated[str, BeforeValidator(transform_default_string)]
-    idr_insrt_ts: Annotated[
+    idr_insrt_ts_clm_prfnl: Annotated[
         datetime,
-        {BATCH_TIMESTAMP: True, ALIAS: ALIAS_PRFNL},
+        {BATCH_TIMESTAMP: True, ALIAS: ALIAS_PRFNL, COLUMN_MAP: "idr_insrt_ts"},
         BeforeValidator(transform_null_date_to_min),
     ]
-    idr_updt_ts: Annotated[
+    idr_updt_ts_clm_prfnl: Annotated[
         datetime,
-        {UPDATE_TIMESTAMP: True, ALIAS: ALIAS_PRFNL},
+        {UPDATE_TIMESTAMP: True, ALIAS: ALIAS_PRFNL, COLUMN_MAP: "idr_insrt_ts"},
         BeforeValidator(transform_null_date_to_min),
     ]
     # column from v2_mdcr_clm_lctn_hstry

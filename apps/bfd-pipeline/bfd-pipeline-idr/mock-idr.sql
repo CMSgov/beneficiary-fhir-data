@@ -485,7 +485,7 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_lctn_hstry (
     clm_lctn_cd_sqnc_num BIGINT NOT NULL,
     idr_insrt_ts TIMESTAMPTZ,
     idr_updt_ts TIMESTAMPTZ,
-    PRIMARY KEY(geo_bene_sk, clm_dt_sgntr_sk, clm_type_cd, clm_num_sk)
+    PRIMARY KEY(geo_bene_sk, clm_dt_sgntr_sk, clm_type_cd, clm_num_sk, clm_lctn_cd_sqnc_num)
 );
 
 CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_rx (

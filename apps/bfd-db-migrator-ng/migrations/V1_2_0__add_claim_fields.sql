@@ -8,6 +8,12 @@ ADD COLUMN clm_lctn_cd_sqnc_num BIGINT,
 ADD COLUMN idr_insrt_ts_lctn_hstry TIMESTAMPTZ,
 ADD COLUMN idr_updt_ts_lctn_hstry TIMESTAMPTZ;
 
+ALTER TABLE idr.claim_professional
+RENAME COLUMN idr_insrt_ts TO idr_insrt_ts_clm_prfnl;
+
+ALTER TABLE idr.claim_professional
+RENAME COLUMN idr_updt_ts TO idr_updt_ts_clm_prfnl;
+
 ALTER TABLE idr.claim_institutional
 ADD COLUMN dgns_drg_outlier_cd VARCHAR(1);
 
