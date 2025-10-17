@@ -2,6 +2,8 @@ package gov.cms.bfd.server.ng.claim.model;
 
 import gov.cms.bfd.server.ng.beneficiary.model.BeneficiarySimple;
 import gov.cms.bfd.server.ng.util.DateUtil;
+import gov.cms.bfd.server.ng.util.IdrConstants;
+import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -19,6 +21,7 @@ import java.util.Optional;
 import java.util.SortedSet;
 import java.util.stream.Stream;
 import lombok.Getter;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Reference;
@@ -108,9 +111,10 @@ public class Claim {
   /**
    * Convert the claim info to a FHIR ExplanationOfBenefit.
    *
+   * @param claimHasSamhsa claimHasSamhsa
    * @return ExplanationOfBenefit
    */
-  public ExplanationOfBenefit toFhir() {
+  public ExplanationOfBenefit toFhir(boolean claimHasSamhsa) {
     var eob = new ExplanationOfBenefit();
     eob.setId(String.valueOf(claimUniqueId));
     eob.setPatient(PatientReferenceFactory.toFhir(beneficiary.getXrefSk()));
@@ -206,6 +210,16 @@ public class Claim {
     claimTypeCode.toFhirInsurance().ifPresent(eob::addInsurance);
     eob.addTotal(adjudicationCharge.toFhir());
     eob.setPayment(claimPaymentAmount.toFhir());
+
+    if (claimHasSamhsa) {
+      var coding = new Coding();
+      coding
+          .setSystem(SystemUrls.SAMHSA_ACT_CODE_SYSTEM_URL)
+          .setCode(IdrConstants.SAMHSA_SECURITY_CODE)
+          .setDisplay(IdrConstants.SAMHSA_SECURITY_DISPLAY);
+
+      eob.getMeta().addSecurity(coding);
+    }
 
     return sortedEob(eob);
   }

@@ -18,6 +18,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
@@ -82,8 +83,12 @@ public class EobHandler {
             beneXrefSk.get(), serviceDate, lastUpdated, count, startIndex, sourceIds);
 
     var filteredClaims = filterSamhsaClaims(claims, samhsaFilterMode);
+
     return FhirUtil.bundleOrDefault(
-        filteredClaims.map(Claim::toFhir), claimRepository::claimLastUpdated);
+        filteredClaims
+            .map(claim -> claim.toFhir(claimHasSamhsa(claim)))
+            .collect(Collectors.toList()),
+        claimRepository::claimLastUpdated);
   }
 
   private Stream<Claim> filterSamhsaClaims(List<Claim> claims, SamhsaFilterMode samhsaFilterMode) {
@@ -129,7 +134,7 @@ public class EobHandler {
     if (samhsaFilterMode == SamhsaFilterMode.EXCLUDE && claimHasSamhsa(claim)) {
       return Optional.empty();
     }
-    return Optional.of(claim.toFhir());
+    return Optional.of(claim.toFhir(claimHasSamhsa(claim)));
   }
 
   private boolean isCodeSamhsa(String targetCode, LocalDate claimDate, SecurityLabel entry) {
