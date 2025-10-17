@@ -1,6 +1,6 @@
 [project]
-# Support Python 3.14+.
-requires-python = ">=3.13.7,<3.14"
+# Support Python 3.13+.
+requires-python = ">=3.13,<3.14"
 name = "ccw-runner"
 version = "1.0.0"
 dependencies = [
