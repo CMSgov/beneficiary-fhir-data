@@ -25,7 +25,7 @@ public class ClaimLineProfessional {
   private Optional<ClaimLineHCTHGBTestTypeCode> claimLineHCTHGBTestTypeCode;
 
   @Column(name = "clm_line_hct_hgb_rslt_num")
-  private Optional<Integer> claimLineHCTHGBTestResult;
+  private double claimLineHCTHGBTestResult;
 
   @Column(name = "clm_line_carr_clncl_lab_num")
   private Optional<String> claimLineCarrierClinicalLabNumber;

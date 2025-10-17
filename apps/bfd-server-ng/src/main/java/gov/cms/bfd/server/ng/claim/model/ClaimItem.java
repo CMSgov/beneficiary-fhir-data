@@ -40,6 +40,16 @@ public class ClaimItem implements Comparable<ClaimItem> {
   @OneToOne
   private ClaimLineInstitutional claimLineInstitutional;
 
+  @JoinColumn(
+      name = "clm_uniq_id",
+      insertable = false,
+      updatable = false,
+      referencedColumnName = "clm_uniq_id")
+  @JoinColumn(
+      name = "clm_line_num",
+      insertable = false,
+      updatable = false,
+      referencedColumnName = "clm_line_num")
   @OneToOne private ClaimLineProfessional claimLineProfessional;
 
   Optional<ClaimLineInstitutional> getClaimLineInstitutional() {
