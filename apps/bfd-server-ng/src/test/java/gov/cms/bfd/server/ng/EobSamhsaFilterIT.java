@@ -14,6 +14,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.bfd.server.ng.eob.EobHandler;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.util.DateUtil;
+import gov.cms.bfd.server.ng.util.IdrConstants;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.util.Collection;
 import java.util.List;
@@ -293,6 +294,41 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
     // Bundle from endpoint _should_ contain sensitive codes because the "cert" provided is allowed
     // to get SAMHSA data
     assertTrue(anyClaimsContainSamhsaCode(getEobFromBundle(bundle), true));
+  }
+
+  @Test
+  void samhsaClaimsIncludeSecurityTagsWhenAllowed() {
+    var beneSk = BENE_SK;
+    var bundle = searchBundle(beneSk, SamhsaCertType.SAMHSA_ALLOWED_CERT).execute();
+
+    var samhsaEob =
+        getEobFromBundle(bundle).stream()
+            .filter(
+                eob ->
+                    eob.getIdPart()
+                        .equals(String.valueOf(CLAIM_UNIQUE_ID_WITH_MULTIPLE_SAMHSA_CODES)))
+            .findFirst();
+
+    assertTrue(samhsaEob.isPresent(), "Expected SAMHSA EOB found in bundle.");
+
+    var hasSamhsaTag =
+        samhsaEob.get().getMeta().getSecurity().stream()
+            .anyMatch(
+                tag ->
+                    SystemUrls.SAMHSA_ACT_CODE_SYSTEM_URL.equals(tag.getSystem())
+                        && IdrConstants.SAMHSA_SECURITY_CODE.equals(tag.getCode()));
+
+    assertTrue(hasSamhsaTag, "Expected SAMHSA security tag found in EOB meta.");
+
+    samhsaEob.get().getMeta().getSecurity().stream()
+        .filter(
+            tag ->
+                SystemUrls.SAMHSA_ACT_CODE_SYSTEM_URL.equals(tag.getSystem())
+                    && IdrConstants.SAMHSA_SECURITY_CODE.equals(tag.getCode()))
+        .findFirst()
+        .ifPresent(tag -> assertEquals(IdrConstants.SAMHSA_SECURITY_DISPLAY, tag.getDisplay()));
+
+    expectFhir().scenario(String.valueOf(beneSk)).toMatchSnapshot(bundle);
   }
 
   // The following group of tests is used to ensure the validity of the test data.

@@ -2,6 +2,7 @@ package gov.cms.bfd.server.ng.claim.model;
 
 import gov.cms.bfd.server.ng.beneficiary.model.BeneficiarySimple;
 import gov.cms.bfd.server.ng.util.DateUtil;
+import gov.cms.bfd.server.ng.util.IdrConstants;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
@@ -214,8 +215,8 @@ public class Claim {
       var coding = new Coding();
       coding
           .setSystem(SystemUrls.SAMHSA_ACT_CODE_SYSTEM_URL)
-          .setCode("42CFRPart2")
-          .setDisplay("42 CFR Part 2");
+          .setCode(IdrConstants.SAMHSA_SECURITY_CODE)
+          .setDisplay(IdrConstants.SAMHSA_SECURITY_DISPLAY);
 
       eob.getMeta().addSecurity(coding);
     }

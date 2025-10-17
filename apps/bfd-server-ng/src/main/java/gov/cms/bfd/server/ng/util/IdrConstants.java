@@ -27,4 +27,10 @@ public class IdrConstants {
 
   /** The code for fully adjudicated claims. */
   public static final String ADJUDICATION_STATUS_FINAL = "Adjudicated";
+
+  /** The Samhsa Security code. */
+  public static final String SAMHSA_SECURITY_CODE = "42CFRPart2";
+
+  /** The display value for the 42 CFR Part 2 security tag. */
+  public static final String SAMHSA_SECURITY_DISPLAY = "42 CFR Part 2";
 }
