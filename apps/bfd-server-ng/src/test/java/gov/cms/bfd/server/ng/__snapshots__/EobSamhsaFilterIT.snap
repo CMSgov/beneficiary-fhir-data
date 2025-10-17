@@ -2627,6 +2627,22 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
       "total" : [ {
         "amount" : {
           "currency" : "USD",
+          "value" : 0.0
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "eligible",
+            "display" : "Allowed Amount",
+            "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+          }, {
+            "code" : "CLM_ALOWD_CHRG_AMT",
+            "display" : "Total Allowed Charge Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
           "value" : 485618.5625
         },
         "category" : {
@@ -2636,7 +2652,39 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
           }, {
             "code" : "CLM_SBMT_CHRG_AMT",
-            "display" : "Total Charge Amount",
+            "display" : "Total Submitted Charge Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 0.0
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Paid by patient",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_BENE_PMT_AMT",
+            "display" : "Revenue Center Patient Responsibility Payment Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 0.0
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidtoprovider",
+            "display" : "Paid to provider",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_PRVDR_PMT_AMT",
+            "display" : "Provider Payment Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -3053,6 +3101,22 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
       "total" : [ {
         "amount" : {
           "currency" : "USD",
+          "value" : 0.0
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "eligible",
+            "display" : "Allowed Amount",
+            "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+          }, {
+            "code" : "CLM_ALOWD_CHRG_AMT",
+            "display" : "Total Allowed Charge Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
           "value" : 766500.0
         },
         "category" : {
@@ -3062,7 +3126,39 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
           }, {
             "code" : "CLM_SBMT_CHRG_AMT",
-            "display" : "Total Charge Amount",
+            "display" : "Total Submitted Charge Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 0.0
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Paid by patient",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_BENE_PMT_AMT",
+            "display" : "Revenue Center Patient Responsibility Payment Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 0.0
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidtoprovider",
+            "display" : "Paid to provider",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_PRVDR_PMT_AMT",
+            "display" : "Provider Payment Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -4976,6 +5072,22 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
       "total" : [ {
         "amount" : {
           "currency" : "USD",
+          "value" : 0.0
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "eligible",
+            "display" : "Allowed Amount",
+            "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+          }, {
+            "code" : "CLM_ALOWD_CHRG_AMT",
+            "display" : "Total Allowed Charge Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
           "value" : 164176.8125
         },
         "category" : {
@@ -4985,7 +5097,39 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
           }, {
             "code" : "CLM_SBMT_CHRG_AMT",
-            "display" : "Total Charge Amount",
+            "display" : "Total Submitted Charge Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 0.0
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Paid by patient",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_BENE_PMT_AMT",
+            "display" : "Revenue Center Patient Responsibility Payment Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 0.0
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidtoprovider",
+            "display" : "Paid to provider",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_PRVDR_PMT_AMT",
+            "display" : "Provider Payment Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -7546,6 +7690,22 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
       "total" : [ {
         "amount" : {
           "currency" : "USD",
+          "value" : 0.0
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "eligible",
+            "display" : "Allowed Amount",
+            "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+          }, {
+            "code" : "CLM_ALOWD_CHRG_AMT",
+            "display" : "Total Allowed Charge Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
           "value" : 622674.5625
         },
         "category" : {
@@ -7555,7 +7715,39 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
           }, {
             "code" : "CLM_SBMT_CHRG_AMT",
-            "display" : "Total Charge Amount",
+            "display" : "Total Submitted Charge Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 0.0
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Paid by patient",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_BENE_PMT_AMT",
+            "display" : "Revenue Center Patient Responsibility Payment Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 0.0
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidtoprovider",
+            "display" : "Paid to provider",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_PRVDR_PMT_AMT",
+            "display" : "Provider Payment Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -7919,7 +8111,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "sequence" : 1,
         "type" : [ {
           "coding" : [ {
-            "code" : "other",
+            "code" : "secondary",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
           } ]
         } ]
@@ -7933,7 +8125,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "sequence" : 2,
         "type" : [ {
           "coding" : [ {
-            "code" : "other",
+            "code" : "secondary",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
           } ]
         } ]
@@ -7947,7 +8139,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "sequence" : 3,
         "type" : [ {
           "coding" : [ {
-            "code" : "other",
+            "code" : "secondary",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
           } ]
         } ]
@@ -7961,7 +8153,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "sequence" : 4,
         "type" : [ {
           "coding" : [ {
-            "code" : "other",
+            "code" : "secondary",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
           } ]
         } ]
@@ -7975,7 +8167,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "sequence" : 5,
         "type" : [ {
           "coding" : [ {
-            "code" : "other",
+            "code" : "secondary",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
           } ]
         } ]
@@ -9055,6 +9247,22 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
       "total" : [ {
         "amount" : {
           "currency" : "USD",
+          "value" : 559626.4375
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "eligible",
+            "display" : "Allowed Amount",
+            "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+          }, {
+            "code" : "CLM_ALOWD_CHRG_AMT",
+            "display" : "Total Allowed Charge Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
           "value" : 11335.2998046875
         },
         "category" : {
@@ -9064,7 +9272,39 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
           }, {
             "code" : "CLM_SBMT_CHRG_AMT",
-            "display" : "Total Charge Amount",
+            "display" : "Total Submitted Charge Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 117377.93
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Paid by patient",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_BENE_PMT_AMT",
+            "display" : "Revenue Center Patient Responsibility Payment Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 0.0
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidtoprovider",
+            "display" : "Paid to provider",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_PRVDR_PMT_AMT",
+            "display" : "Provider Payment Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -11757,6 +11997,22 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
       "total" : [ {
         "amount" : {
           "currency" : "USD",
+          "value" : 0.0
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "eligible",
+            "display" : "Allowed Amount",
+            "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+          }, {
+            "code" : "CLM_ALOWD_CHRG_AMT",
+            "display" : "Total Allowed Charge Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
           "value" : 485618.5625
         },
         "category" : {
@@ -11766,7 +12022,39 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
           }, {
             "code" : "CLM_SBMT_CHRG_AMT",
-            "display" : "Total Charge Amount",
+            "display" : "Total Submitted Charge Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 0.0
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Paid by patient",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_BENE_PMT_AMT",
+            "display" : "Revenue Center Patient Responsibility Payment Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 0.0
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidtoprovider",
+            "display" : "Paid to provider",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_PRVDR_PMT_AMT",
+            "display" : "Provider Payment Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -12183,6 +12471,22 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
       "total" : [ {
         "amount" : {
           "currency" : "USD",
+          "value" : 0.0
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "eligible",
+            "display" : "Allowed Amount",
+            "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+          }, {
+            "code" : "CLM_ALOWD_CHRG_AMT",
+            "display" : "Total Allowed Charge Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
           "value" : 766500.0
         },
         "category" : {
@@ -12192,7 +12496,39 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
           }, {
             "code" : "CLM_SBMT_CHRG_AMT",
-            "display" : "Total Charge Amount",
+            "display" : "Total Submitted Charge Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 0.0
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Paid by patient",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_BENE_PMT_AMT",
+            "display" : "Revenue Center Patient Responsibility Payment Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 0.0
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidtoprovider",
+            "display" : "Paid to provider",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_PRVDR_PMT_AMT",
+            "display" : "Provider Payment Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -14106,6 +14442,22 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
       "total" : [ {
         "amount" : {
           "currency" : "USD",
+          "value" : 0.0
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "eligible",
+            "display" : "Allowed Amount",
+            "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+          }, {
+            "code" : "CLM_ALOWD_CHRG_AMT",
+            "display" : "Total Allowed Charge Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
           "value" : 164176.8125
         },
         "category" : {
@@ -14115,7 +14467,39 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
           }, {
             "code" : "CLM_SBMT_CHRG_AMT",
-            "display" : "Total Charge Amount",
+            "display" : "Total Submitted Charge Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 0.0
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Paid by patient",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_BENE_PMT_AMT",
+            "display" : "Revenue Center Patient Responsibility Payment Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 0.0
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidtoprovider",
+            "display" : "Paid to provider",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_PRVDR_PMT_AMT",
+            "display" : "Provider Payment Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -16676,6 +17060,22 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
       "total" : [ {
         "amount" : {
           "currency" : "USD",
+          "value" : 0.0
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "eligible",
+            "display" : "Allowed Amount",
+            "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+          }, {
+            "code" : "CLM_ALOWD_CHRG_AMT",
+            "display" : "Total Allowed Charge Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
           "value" : 622674.5625
         },
         "category" : {
@@ -16685,7 +17085,39 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
           }, {
             "code" : "CLM_SBMT_CHRG_AMT",
-            "display" : "Total Charge Amount",
+            "display" : "Total Submitted Charge Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 0.0
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Paid by patient",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_BENE_PMT_AMT",
+            "display" : "Revenue Center Patient Responsibility Payment Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 0.0
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidtoprovider",
+            "display" : "Paid to provider",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_PRVDR_PMT_AMT",
+            "display" : "Provider Payment Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -17049,7 +17481,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "sequence" : 1,
         "type" : [ {
           "coding" : [ {
-            "code" : "other",
+            "code" : "secondary",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
           } ]
         } ]
@@ -17063,7 +17495,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "sequence" : 2,
         "type" : [ {
           "coding" : [ {
-            "code" : "other",
+            "code" : "secondary",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
           } ]
         } ]
@@ -17077,7 +17509,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "sequence" : 3,
         "type" : [ {
           "coding" : [ {
-            "code" : "other",
+            "code" : "secondary",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
           } ]
         } ]
@@ -17091,7 +17523,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "sequence" : 4,
         "type" : [ {
           "coding" : [ {
-            "code" : "other",
+            "code" : "secondary",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
           } ]
         } ]
@@ -17105,7 +17537,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "sequence" : 5,
         "type" : [ {
           "coding" : [ {
-            "code" : "other",
+            "code" : "secondary",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
           } ]
         } ]
@@ -18185,6 +18617,22 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
       "total" : [ {
         "amount" : {
           "currency" : "USD",
+          "value" : 559626.4375
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "eligible",
+            "display" : "Allowed Amount",
+            "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+          }, {
+            "code" : "CLM_ALOWD_CHRG_AMT",
+            "display" : "Total Allowed Charge Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
           "value" : 11335.2998046875
         },
         "category" : {
@@ -18194,7 +18642,39 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
           }, {
             "code" : "CLM_SBMT_CHRG_AMT",
-            "display" : "Total Charge Amount",
+            "display" : "Total Submitted Charge Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 117377.93
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Paid by patient",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_BENE_PMT_AMT",
+            "display" : "Revenue Center Patient Responsibility Payment Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 0.0
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidtoprovider",
+            "display" : "Paid to provider",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_PRVDR_PMT_AMT",
+            "display" : "Provider Payment Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }

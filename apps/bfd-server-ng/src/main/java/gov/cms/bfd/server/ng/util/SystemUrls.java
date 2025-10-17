@@ -626,9 +626,9 @@ public class SystemUrls {
   /** <a href="https://www.usps.com">USPS</a>. */
   public static final String USPS = "https://www.usps.com";
 
-  /** LOINC */
+  /** LOINC. */
   public static final String LOINC = "http://loinc.org";
 
-  /** CLIA */
+  /** CLIA. */
   public static final String CLIA = "http://terminology.hl7.org/NamingSystem/CLIA";
 }

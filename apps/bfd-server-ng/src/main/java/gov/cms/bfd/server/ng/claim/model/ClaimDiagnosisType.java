@@ -40,6 +40,9 @@ public enum ClaimDiagnosisType {
   /**
    * Returns FHIR code based on claim context. Professional context overrides only one case (idrCode
    * "D").
+   *
+   * @param professionalContext context flag
+   * @return override value for professional PRESENT_ON_ADMISSION value
    */
   public String getFhirCode(boolean professionalContext) {
     if (professionalContext && this == PRESENT_ON_ADMISSION) {

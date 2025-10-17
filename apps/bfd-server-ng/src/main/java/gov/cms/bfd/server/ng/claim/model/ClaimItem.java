@@ -50,7 +50,8 @@ public class ClaimItem implements Comparable<ClaimItem> {
       insertable = false,
       updatable = false,
       referencedColumnName = "clm_line_num")
-  @OneToOne private ClaimLineProfessional claimLineProfessional;
+  @OneToOne
+  private ClaimLineProfessional claimLineProfessional;
 
   Optional<ClaimLineInstitutional> getClaimLineInstitutional() {
     return Optional.ofNullable(claimLineInstitutional);

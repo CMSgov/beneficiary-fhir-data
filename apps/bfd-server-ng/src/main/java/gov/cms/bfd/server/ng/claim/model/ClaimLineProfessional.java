@@ -14,6 +14,7 @@ import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Reference;
 
+/** Professional claim line table. */
 @Entity
 @Getter
 @Table(name = "claim_line_professional", schema = "idr")
@@ -33,6 +34,11 @@ public class ClaimLineProfessional {
   @OneToOne(mappedBy = "claimLineProfessional")
   private ClaimItem claimLine;
 
+  /**
+  * Return claim observation data if available.
+  *
+  * @return claim Observation
+  */
   public Optional<Observation> toFhirObservation(int bfdRowId) {
     if (claimLineHCTHGBTestTypeCode.isEmpty()) {
       return Optional.empty();
