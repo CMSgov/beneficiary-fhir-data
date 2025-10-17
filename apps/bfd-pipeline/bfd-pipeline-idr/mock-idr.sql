@@ -519,8 +519,6 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_rx (
     clm_prcng_excptn_cd VARCHAR(1),
     clm_ptnt_rsdnc_cd VARCHAR(2),
     clm_rptd_mftr_dscnt_amt NUMERIC,
-    idr_insrt_ts TIMESTAMPTZ,
-    idr_updt_ts TIMESTAMPTZ,
     PRIMARY KEY(clm_uniq_id, clm_line_num)
 );
 

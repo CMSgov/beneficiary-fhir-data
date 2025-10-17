@@ -72,6 +72,7 @@ ALIAS_DCMTN = "dcmtn"
 ALIAS_LINE_DCMTN = "line_dcmtn"
 ALIAS_SGNTR = "sgntr"
 ALIAS_LINE = "line"
+ALIAS_RX_LINE = "rx_line"
 ALIAS_FISS = "fiss"
 ALIAS_PROCEDURE = "prod"
 ALIAS_INSTNL = "instnl"
@@ -1435,7 +1436,7 @@ class LoadProgress(IdrBaseModel):
 
 class IdrClaimLineRx(IdrBaseModel):
     clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, ALIAS: ALIAS_CLM}]
-    clm_line_num: Annotated[int, {PRIMARY_KEY: True}]
+    clm_line_num: Annotated[int, {PRIMARY_KEY: True, ALIAS: ALIAS_RX_LINE}]
     clm_brnd_gnrc_cd: Annotated[str, BeforeValidator(transform_null_string)]
     clm_cmpnd_cd: Annotated[str, BeforeValidator(transform_null_string)]
     clm_ctstrphc_cvrg_ind_cd: Annotated[str, BeforeValidator(transform_null_string)]
@@ -1479,16 +1480,24 @@ class IdrClaimLineRx(IdrBaseModel):
     @staticmethod
     def _current_fetch_query(start_time: datetime) -> str:
         clm = ALIAS_CLM
+        rx_line = ALIAS_RX_LINE
         line = ALIAS_LINE
         return f"""
             SELECT {{COLUMNS}}
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
-            JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_rx {line}
-                ON {line}.geo_bene_sk = {clm}.geo_bene_sk
-                AND {line}.clm_type_cd = {clm}.clm_type_cd
-                AND {line}.clm_num_sk = {clm}.clm_num_sk 
-                AND {line}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
-                AND {line}.clm_uniq_id = {clm}.clm_uniq_id
+            JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_rx {rx_line}
+                ON {rx_line}.geo_bene_sk = {clm}.geo_bene_sk
+                AND {rx_line}.clm_type_cd = {clm}.clm_type_cd
+                AND {rx_line}.clm_num_sk = {clm}.clm_num_sk 
+                AND {rx_line}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
+                AND {rx_line}.clm_uniq_id = {clm}.clm_uniq_id
+            JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_line {line}
+                ON {line}.geo_bene_sk = {rx_line}.geo_bene_sk
+                AND {line}.clm_type_cd = {rx_line}.clm_type_cd
+                AND {line}.clm_num_sk = {rx_line}.clm_num_sk 
+                AND {line}.clm_dt_sgntr_sk = {rx_line}.clm_dt_sgntr_sk
+                AND {line}.clm_uniq_id = {rx_line}.clm_uniq_id
+                AND {line}.clm_line_num = {rx_line}.clm_line_num
             {{WHERE_CLAUSE}} AND {claim_type_clause(start_time)}
             {{ORDER_BY}}
         """
