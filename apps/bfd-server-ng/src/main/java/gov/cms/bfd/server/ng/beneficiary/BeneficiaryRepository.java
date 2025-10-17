@@ -32,7 +32,7 @@ public class BeneficiaryRepository {
             """
             SELECT identity
             FROM BeneficiaryIdentity identity
-            WHERE identity.xrefSk = :beneXrefSk
+            WHERE identity.id.xrefSk = :beneXrefSk
             """,
             BeneficiaryIdentity.class)
         .setParameter("beneXrefSk", beneXrefSk)

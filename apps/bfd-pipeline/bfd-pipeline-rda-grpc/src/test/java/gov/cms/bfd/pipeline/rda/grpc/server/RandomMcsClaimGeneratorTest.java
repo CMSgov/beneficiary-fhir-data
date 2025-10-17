@@ -44,7 +44,7 @@ public class RandomMcsClaimGeneratorTest {
       assertEquals(claim.getIdrClmHdIcn(), diagnosisCode.getIdrClmHdIcn());
     }
     assertEquals(
-        """
+"""
 {
   "idrClmHdIcn": "543185449367619",
   "idrContrId": "0546",

@@ -4,7 +4,11 @@ import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-/** DAO of claimWithSecurityTags. */
+/**
+ * DAO of claimWithSecurityTags.
+ *
+ * @param <T> the claim entity type
+ */
 @Getter
 @AllArgsConstructor
 public class ClaimWithSecurityTags<T> {
