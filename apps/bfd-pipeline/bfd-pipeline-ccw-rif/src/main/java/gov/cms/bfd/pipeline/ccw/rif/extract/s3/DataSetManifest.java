@@ -456,27 +456,27 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
   @XmlAccessorType(XmlAccessType.FIELD)
   public static class PreValidationProperties {
     /**
-     * a {@link long} value denoting the lower-bound of claim group identifiers for the RIF dataset.
+     * a {@code long} value denoting the lower-bound of claim group identifiers for the RIF dataset.
      */
     @XmlElement(name = "clm_grp_id_start", required = true)
     protected long clmGrpIdStart;
 
     /**
-     * a {@link long} value denoting the lower-bound of Part D Event identifiers for the RIF
+     * a {@code long} value denoting the lower-bound of Part D Event identifiers for the RIF
      * dataset.
      */
     @XmlElement(name = "pde_id_start", required = true)
     protected long pdeIdStart;
 
     /**
-     * a {@link long} value denoting the lower-bound of Carrier Claim control number for the RIF
+     * a {@code long} value denoting the lower-bound of Carrier Claim control number for the RIF
      * dataset.
      */
     @XmlElement(name = "carr_clm_cntl_num_start", required = true)
     protected long carrClmCntlNumStart;
 
     /**
-     * a {@link long} value denoting the lower-bound of FI document control number for the RIF
+     * a {@code long} value denoting the lower-bound of FI document control number for the RIF
      * dataset.
      */
     @XmlElement(name = "fi_doc_cntl_num_start", required = true)
@@ -487,13 +487,13 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     protected String hicnStart;
 
     /**
-     * a {@link long} value denoting the lower-bound of the set of beneficiary identifiers for the
+     * a {@code long} value denoting the lower-bound of the set of beneficiary identifiers for the
      * RIF dataset.
      */
     @XmlElement(name = "bene_id_start", required = true)
     protected long beneIdStart;
 
-    /** a {@link long} value denoting the lower-bound of Claim ID(s) for the RIF dataset. */
+    /** a {@code long} value denoting the lower-bound of Claim ID(s) for the RIF dataset. */
     @XmlElement(name = "clm_id_start", required = true)
     protected long clmIdStart;
 
@@ -502,21 +502,21 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     protected String mbiStart;
 
     /**
-     * a {@link long} value denoting the upper-bound of the set of beneficiary identifiers for the
+     * a {@code long} value denoting the upper-bound of the set of beneficiary identifiers for the
      * RIF dataset.
      */
     @XmlElement(name = "bene_id_end", required = true)
     protected long beneIdEnd;
 
     /**
-     * a {@link long} value denoting the upper-bound of the set of Claim identifiers for the RIF
+     * a {@code long} value denoting the upper-bound of the set of Claim identifiers for the RIF
      * claims dataset.
      */
     @XmlElement(name = "clm_id_end", required = true)
     protected long clmIdEnd;
 
     /**
-     * a {@link long} value denoting the upper-bound of the set of Part D events identifiers for the
+     * a {@code long} value denoting the upper-bound of the set of Part D events identifiers for the
      * RIF claims dataset.
      */
     @XmlElement(name = "pde_id_end", required = true)
@@ -575,7 +575,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     /**
      * Gets the value of the {@link #clmGrpIdStart} property.
      *
-     * @return value {@link long }
+     * @return value {@code long }
      */
     public long getClmGrpIdStart() {
       return clmGrpIdStart;
@@ -584,7 +584,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     /**
      * Sets the {@link #clmGrpIdStart}.
      *
-     * @param value {@link long} to set
+     * @param value {@code long} to set
      */
     public void setClmGrpIdStart(long value) {
       this.clmGrpIdStart = value;
@@ -593,7 +593,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     /**
      * Gets the value of the {@link #pdeIdStart} property.
      *
-     * @return value {@link long }
+     * @return value {@code long }
      */
     public long getPdeIdStart() {
       return pdeIdStart;
@@ -602,7 +602,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     /**
      * Sets the {@link #pdeIdStart}.
      *
-     * @param value {@link long} to set
+     * @param value {@code long} to set
      */
     public void setPdeIdStart(long value) {
       this.pdeIdStart = value;
@@ -611,7 +611,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     /**
      * Gets the value of the {@link #carrClmCntlNumStart} property.
      *
-     * @return value {@link long }
+     * @return value {@code long }
      */
     public long getCarrClmCntlNumStart() {
       return carrClmCntlNumStart;
@@ -620,7 +620,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     /**
      * Sets the {@link #carrClmCntlNumStart}.
      *
-     * @param value {@link long} to set
+     * @param value {@code long} to set
      */
     public void setCarrClmCntlNumStart(long value) {
       this.carrClmCntlNumStart = value;
@@ -665,7 +665,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     /**
      * Gets the value of the {@link #beneIdStart} property.
      *
-     * @return value {@link long }
+     * @return value {@code long }
      */
     public long getBeneIdStart() {
       return beneIdStart;
@@ -674,7 +674,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     /**
      * Sets the {@link #beneIdStart}.
      *
-     * @param value {@link long} to set
+     * @param value {@code long} to set
      */
     public void setBeneIdStart(long value) {
       this.beneIdStart = value;
@@ -683,7 +683,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     /**
      * Gets the value of the {@link #clmIdStart} property.
      *
-     * @return value {@link long }
+     * @return value {@code long }
      */
     public long getClmIdStart() {
       return clmIdStart;
@@ -692,7 +692,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     /**
      * Sets the {@link #clmIdStart}.
      *
-     * @param value {@link long} to set
+     * @param value {@code long} to set
      */
     public void setClmIdStart(long value) {
       this.clmIdStart = value;
@@ -719,7 +719,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     /**
      * Gets the value of the {@link #beneIdEnd} property.
      *
-     * @return value {@link long }
+     * @return value {@code long }
      */
     public long getBeneIdEnd() {
       return beneIdEnd;
@@ -728,7 +728,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     /**
      * Sets the {@link #beneIdEnd}.
      *
-     * @param value {@link long} to set
+     * @param value {@code long} to set
      */
     public void setBeneIdEnd(long value) {
       this.beneIdEnd = value;
@@ -737,7 +737,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     /**
      * Gets the value of the {@link #clmIdEnd} property.
      *
-     * @return value {@link long }
+     * @return value {@code long }
      */
     public long getClmIdEnd() {
       return clmIdEnd;
@@ -746,7 +746,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     /**
      * Sets the {@link #clmIdEnd}.
      *
-     * @param value {@link long} to set
+     * @param value {@code long} to set
      */
     public void setClmIdEnd(long value) {
       this.clmIdEnd = value;
@@ -755,7 +755,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     /**
      * Gets the value of the {@link #pdeIdEnd} property.
      *
-     * @return value {@link long }
+     * @return value {@code long }
      */
     public long getPdeIdEnd() {
       return pdeIdEnd;
@@ -764,7 +764,7 @@ public final class DataSetManifest implements Comparable<DataSetManifest> {
     /**
      * Sets the {@link #pdeIdEnd}.
      *
-     * @param value {@link long} to set
+     * @param value {@code long} to set
      */
     public void setPdeIdEnd(long value) {
       this.pdeIdEnd = value;

@@ -33,6 +33,7 @@ public class IntegrationTestBase {
   protected static final String HISTORICAL_MERGED_BENE_SK2 = "121212121";
   protected static final String CURRENT_MERGED_BENE_SK = "517782585";
   protected static final String HISTORICAL_MERGED_BENE_SK_KILL_CREDIT = "232323232";
+  protected static final String HISTORICAL_MERGED_BENE_SK_MULTIPLE_HISTORICAL_MBIS = "617782589";
   protected static final String HISTORICAL_MERGED_MBI_KILL_CREDIT = "2B19C89AA37";
   protected static final String HISTORICAL_MERGED_MBI = "2B19C89AA36";
   protected static final String HISTORICAL_AND_CURRENT_MBI = "2B19C89AA35";
