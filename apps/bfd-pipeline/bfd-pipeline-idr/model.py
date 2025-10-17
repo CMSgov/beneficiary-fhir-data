@@ -862,27 +862,27 @@ class IdrClaimInstitutional(IdrBaseModel):
     clm_mdcr_instnl_mco_pd_sw: str
     clm_admsn_src_cd: str
     clm_fi_actn_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_mdcr_ip_lrd_use_cnt: int
-    clm_hipps_uncompd_care_amt: float
+    clm_mdcr_ip_lrd_use_cnt: Annotated[int, BeforeValidator(transform_null_int)]
+    clm_hipps_uncompd_care_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_hha_rfrl_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_hha_lup_ind_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_mdcr_hha_tot_visit_cnt: Annotated[float, BeforeValidator(transform_null_float)]
-    clm_instnl_mdcr_coins_day_cnt: int
-    clm_instnl_ncvrd_day_cnt: float
-    clm_instnl_per_diem_amt: float
+    clm_instnl_mdcr_coins_day_cnt: Annotated[int, BeforeValidator(transform_null_int)]
+    clm_instnl_ncvrd_day_cnt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_instnl_per_diem_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_mdcr_instnl_bene_pd_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_mdcr_hospc_prd_cnt: Annotated[int, BeforeValidator(transform_null_int)]
     clm_mdcr_npmt_rsn_cd: Annotated[str, BeforeValidator(transform_null_string)]
-    clm_mdcr_ip_pps_drg_wt_num: float
-    clm_mdcr_ip_pps_dsprprtnt_amt: float
-    clm_mdcr_ip_pps_excptn_amt: float
-    clm_mdcr_ip_pps_cptl_fsp_amt: float
-    clm_mdcr_ip_pps_cptl_ime_amt: float
-    clm_mdcr_ip_pps_outlier_amt: float
-    clm_mdcr_ip_pps_cptl_hrmls_amt: float
+    clm_mdcr_ip_pps_drg_wt_num: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_mdcr_ip_pps_dsprprtnt_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_mdcr_ip_pps_excptn_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_mdcr_ip_pps_cptl_fsp_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_mdcr_ip_pps_cptl_ime_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_mdcr_ip_pps_outlier_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_mdcr_ip_pps_cptl_hrmls_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_pps_ind_cd: Annotated[str, BeforeValidator(transform_null_string)]
-    clm_mdcr_ip_pps_cptl_tot_amt: float
-    clm_instnl_cvrd_day_cnt: float
+    clm_mdcr_ip_pps_cptl_tot_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_instnl_cvrd_day_cnt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_mdcr_instnl_prmry_pyr_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_instnl_prfnl_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_mdcr_ip_bene_ddctbl_amt: Annotated[float, BeforeValidator(transform_null_float)]
