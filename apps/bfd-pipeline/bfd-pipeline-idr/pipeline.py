@@ -26,7 +26,7 @@ def parse_bool(var: str) -> bool:
 def main() -> None:
     logger.info("load start")
 
-    parallelism = int(os.environ.get("PARALLELISM", "6"))
+    parallelism = int(os.environ.get("PARALLELISM", "10"))
     ray.init(logging_level="info", num_cpus=parallelism)  # type: ignore
 
     dict_builder = base.DictResult()
