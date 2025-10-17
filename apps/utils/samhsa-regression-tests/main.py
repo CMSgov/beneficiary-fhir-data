@@ -23,6 +23,13 @@ from pydantic import BaseModel, ConfigDict, Field, TypeAdapter
 
 CLM_UNIQ_ID_IDENTIFIER_SYSTEM = "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType"
 CLM_UNIQ_ID_IDENTIFIER_CODE = "uc"
+SECURITY_LABEL_CPT_SYSTEM = "http://www.ama-assn.org/go/cpt"
+SECURITY_LABEL_HCPCS_SYSTEM = "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
+SECURITY_LABEL_DRG_SYSTEM = "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
+SECURITY_LABEL_HL7_ICD10_SYSTEM = "http://hl7.org/fhir/sid/icd-10-cm"
+SECURITY_LABEL_MEDICARE_ICD10_SYSTEM = "http://www.cms.gov/Medicare/Coding/ICD10"
+SECURITY_LABEL_HL7_ICD9_SYSTEM = "http://hl7.org/fhir/sid/icd-9-cm"
+SECURITY_LABEL_MEDICARE_ICD9_SYSTEM = "http://www.cms.gov/Medicare/Coding/ICD9"
 
 logging.basicConfig(level=os.environ.get("LOG_LEVEL", "INFO").upper())
 logger = logging.getLogger()
@@ -35,13 +42,51 @@ class VerifyFilteringResult(StrEnum):
 
 
 class ClaimItemSamhsaColumn(StrEnum):
-    CLM_DGNS_CD = auto()
-    CLM_PRCDR_CD = auto()
-    CLM_LINE_HCPCS_CD = auto()
+    CLM_DGNS_CD = (
+        auto(),
+        [
+            SECURITY_LABEL_HL7_ICD10_SYSTEM,
+            SECURITY_LABEL_MEDICARE_ICD10_SYSTEM,
+            SECURITY_LABEL_MEDICARE_ICD9_SYSTEM,
+            SECURITY_LABEL_HL7_ICD9_SYSTEM,
+        ],
+    )
+    CLM_PRCDR_CD = (
+        auto(),
+        [
+            SECURITY_LABEL_HL7_ICD10_SYSTEM,
+            SECURITY_LABEL_MEDICARE_ICD10_SYSTEM,
+            SECURITY_LABEL_MEDICARE_ICD9_SYSTEM,
+            SECURITY_LABEL_HL7_ICD9_SYSTEM,
+        ],
+    )
+    CLM_LINE_HCPCS_CD = auto(), [SECURITY_LABEL_HCPCS_SYSTEM, SECURITY_LABEL_CPT_SYSTEM]
+
+    def __init__(self, _: str, systems: list[str]) -> None:
+        self.systems = systems
+
+    def __new__(
+        cls: type["ClaimItemSamhsaColumn"], value: str, systems: list[str]
+    ) -> "ClaimItemSamhsaColumn":
+        obj = str.__new__(cls, value)
+        obj._value_ = value
+        obj.systems = systems
+        return obj
 
 
 class ClaimInstitutionalSamhsaColumn(StrEnum):
-    DGNS_DRG_CD = auto()
+    DGNS_DRG_CD = auto(), [SECURITY_LABEL_DRG_SYSTEM]
+
+    def __init__(self, _: str, systems: list[str]) -> None:
+        self.systems = systems
+
+    def __new__(
+        cls: type["ClaimInstitutionalSamhsaColumn"], value: str, systems: list[str]
+    ) -> "ClaimInstitutionalSamhsaColumn":
+        obj = str.__new__(cls, value)
+        obj._value_ = value
+        obj.systems = systems
+        return obj
 
 
 class SecurityLabelModel(BaseModel):
@@ -160,7 +205,15 @@ async def query_samhsa_claim_institutional_ids(
         column=column,
         tablesample=tablesample,
         limit=limit,
-        query_params=[[int(label.code) for label in security_labels if label.code.isdigit()]],
+        query_params=[
+            [
+                int(dotless_code)
+                for label in security_labels
+                if label.system in column.systems
+                and (dotless_code := label.code.replace(".", ""))
+                and dotless_code.isdigit()
+            ]
+        ],
         db_details=db_details,
         security_labels=security_labels,
     )
@@ -178,7 +231,13 @@ async def query_samhsa_claim_item_ids(
         column=column,
         tablesample=tablesample,
         limit=limit,
-        query_params=[[label.code for label in security_labels]],
+        query_params=[
+            [
+                label.code.replace(".", "")
+                for label in security_labels
+                if label.system in column.systems
+            ]
+        ],
         db_details=db_details,
         security_labels=security_labels,
     )
@@ -303,15 +362,22 @@ async def verify_samhsa_filtering(
                 for entry in no_samhsa_bundle_entries
             ]
             bene_samhsa_claims_set = set(samhsa_bene.samhsa_claim_ids)
-            samhsa_claims_filtered_if_needed = (
+            # We should expect the intersection of the set of all claims on the SAMHSA unuthorized
+            # response to have _zero_ SAMHSA claim IDs on it.
+            samhsa_claims_filtered_when_not_authorized = (
                 len(set(all_samhsa_filtered_clm_ids).intersection(bene_samhsa_claims_set)) == 0
             )
+            # We should expect the intersection of the set of all claims on the SAMHSA _authorized_
+            # response to be exactly the set of SAMHSA claims retrieved from the database, as we
+            # expect that no SAMHSA claims are filtered
             samhsa_claims_unfiltered_when_authorized = (
-                len(set(all_samhsa_allowed_clm_ids).intersection(bene_samhsa_claims_set)) > 0
+                set(all_samhsa_allowed_clm_ids).intersection(bene_samhsa_claims_set)
+                == bene_samhsa_claims_set
             )
             final_result = (
                 VerifyFilteringResult.PASS
-                if samhsa_claims_filtered_if_needed and samhsa_claims_unfiltered_when_authorized
+                if samhsa_claims_filtered_when_not_authorized
+                and samhsa_claims_unfiltered_when_authorized
                 else VerifyFilteringResult.FAIL
             )
             logger.info(
@@ -320,7 +386,7 @@ async def verify_samhsa_filtering(
                     "included for SAMHSA cert: %s, final result: %s"
                 ),
                 samhsa_bene.bene_sk,
-                samhsa_claims_filtered_if_needed,
+                samhsa_claims_filtered_when_not_authorized,
                 samhsa_claims_unfiltered_when_authorized,
                 final_result,
             )
