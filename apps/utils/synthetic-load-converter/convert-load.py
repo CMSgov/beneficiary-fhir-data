@@ -29,13 +29,9 @@ files.mkdir(exist_ok=True)
 new_incoming = Path(f"./Incoming/{timestamp}")
 new_incoming.mkdir(parents=True, exist_ok=True)
 
-response = client.list_objects_v2(
-    Bucket=source_bucket, Delimiter="/", Prefix=source_prefix
-)
+response = client.list_objects_v2(Bucket=source_bucket, Delimiter="/", Prefix=source_prefix)
 for item in response["Contents"]:
-    client.download_file(
-        source_bucket, item["Key"], f"./{files.name}/{item["Key"].split("/")[-1]}"
-    )
+    client.download_file(source_bucket, item["Key"], f"./{files.name}/{item['Key'].split('/')[-1]}")
 
 manifest_template = open("./manifest-template.xml").read()
 id_num = 1
@@ -47,7 +43,7 @@ for f_name in listdir(files.name):
         copyfile("./manifest-template.xml", new_manifest_path)
         copyfile(
             f"{files.name}/{f_name}",
-            f"{new_incoming.absolute()}/{f_name.replace(".csv", ".txt")}",
+            f"{new_incoming.absolute()}/{f_name.replace('.csv', '.txt')}",
         )
         with open(new_manifest_path, "w") as manifest:
             contents = (

@@ -22,6 +22,3 @@ new_fn = datetime.datetime.now().strftime(f"V%Y%m%d%H%M%S{str(ms).zfill(3)}__{de
 new_fn = f"{path}/{new_fn}"
 os.rename(fn, new_fn)
 print(f"Renamed {fn} to {new_fn}")
-
-
-
