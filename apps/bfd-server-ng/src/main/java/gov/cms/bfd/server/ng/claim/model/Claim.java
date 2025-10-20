@@ -13,6 +13,7 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -83,12 +84,21 @@ public class Claim {
   @JoinColumn(name = "clm_uniq_id")
   private ClaimInstitutional claimInstitutional;
 
+  @Nullable
+  @OneToOne
+  @JoinColumn(name = "clm_uniq_id")
+  private ClaimProfessional claimProfessional;
+
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "clm_uniq_id")
   private SortedSet<ClaimItem> claimItems;
 
   private Optional<ClaimInstitutional> getClaimInstitutional() {
     return Optional.ofNullable(claimInstitutional);
+  }
+
+  private Optional<ClaimProfessional> getClaimProfessional() {
+    return Optional.ofNullable(claimProfessional);
   }
 
   private Optional<ClaimFiss> getClaimFiss() {
@@ -137,6 +147,11 @@ public class Claim {
             List.of(claimDateSignature.getClaimProcessDate().toFhir()))
         .flatMap(Collection::stream)
         .forEach(eob::addExtension);
+
+    getClaimProfessional().ifPresent(professional -> {
+        eob.getExtension().addAll(professional.toFhirExtension());
+        eob.setTotal(Collections.singletonList(professional.toFhirTotal()));
+    });
 
     claimItems.forEach(
         item -> {

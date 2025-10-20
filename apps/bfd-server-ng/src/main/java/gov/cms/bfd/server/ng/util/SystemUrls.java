@@ -351,6 +351,18 @@ public class SystemUrls {
   public static final String BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION =
       "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication";
 
+  /** Blue Button structure definition = claim payment denial code */
+  public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_CLAIM_PAYMENT_DENIAL_CODE =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CARR-PMT-DNL-CD";
+
+  /** Blue Button structure definition - claim provider assignment indicator switch */
+  public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_CLAIM_PROVIDER_ASSIGNMENT_INDICATOR_SWITCH =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MDCR-PRFNL-PRVDR-ASGNMT-SW";
+
+  /** Blue Button structure definition - claim clinical trial number */
+  public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_CLAIM_CLINICAL_TRIAL_NUMBER =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CLNCL-TRIL-NUM";
+
   /** Blue Button identifier - claim control number. */
   public static final String BLUE_BUTTON_CLAIM_CONTROL_NUMBER =
       "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM";

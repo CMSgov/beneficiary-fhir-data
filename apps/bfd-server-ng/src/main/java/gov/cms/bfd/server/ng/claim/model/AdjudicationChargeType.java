@@ -117,7 +117,13 @@ enum AdjudicationChargeType {
       "paidtoprovider",
       "Paid to provider",
       "CLM_PRVDR_PMT_AMT",
-      "Provider Payment Amount");
+      "Provider Payment Amount"),
+  PAYER_PAID_AMOUNT(
+      SystemUrls.CARIN_CODE_SYSTEM_ADJUDICATION,
+      "paidtoprovider",
+      "Paid to provider",
+      "CLM_MDCR_PRFNL_PRMRY_PYR_AMT",
+      "Primary Payer Paid Amount");
 
   private final String coding1System;
   private final String coding1Code;
