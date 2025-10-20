@@ -2,7 +2,6 @@ import logging
 import os
 import sys
 import time
-from pathlib import Path
 
 import pipeline_nodes
 import ray
@@ -30,8 +29,6 @@ def main() -> None:
     parallelism = int(os.environ.get("PARALLELISM", "18"))
     ray.init(logging_level="info", num_cpus=parallelism)  # type: ignore
 
-    dict_builder = base.DictResult()
-    adapter = RayGraphAdapter(result_builder=dict_builder)
     load_type = str(os.environ.get("LOAD_TYPE", "incremental"))
     logger.info("load_type %s", load_type)
     dr = (
