@@ -26,7 +26,14 @@ def main() -> None:
     logger.info("load start")
 
     parallelism = int(os.environ.get("PARALLELISM", "6"))
-    ray.init(logging_level="info", num_cpus=parallelism)  # type: ignore
+    # Shutdown any existing Ray instance first to avoid conflicts.
+    if ray.is_initialized():  # type: ignore
+        ray.shutdown()  # type: ignore
+    ray.init(
+        logging_level="info",
+        num_cpus=parallelism,
+        runtime_env={"working_dir": os.getcwd()},
+    )  # type: ignore
 
     dict_builder = base.DictResult()
     adapter = RayGraphAdapter(result_builder=dict_builder)
