@@ -10,7 +10,6 @@ from pathlib import Path
 
 import pandas as pd
 from faker import Faker
-
 from generator_util import GeneratorUtil
 
 generator = GeneratorUtil()

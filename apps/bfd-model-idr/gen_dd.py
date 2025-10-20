@@ -82,7 +82,7 @@ for walk_info in os.walk(dd_support_folder):
             data = yaml.safe_load(file)
             current_resource_type = file_name[0 : len(file_name) - 5]
             for entry in data:
-                if 'suppressInDD' in entry and entry['suppressInDD']:
+                if entry.get('suppressInDD'):
                     continue
                 if "fhirPath" in entry:
                     entry["appliesTo"].sort()
