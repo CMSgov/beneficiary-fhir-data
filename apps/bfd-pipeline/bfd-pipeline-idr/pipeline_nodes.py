@@ -1,7 +1,6 @@
 # ruff: noqa: ARG001
 # type: ignore [reportUntypedFunctionDecorator]
 from hamilton.function_modifiers import config, parameterize, value
-
 from model import (
     IdrBeneficiary,
     IdrBeneficiaryDualEligibility,
