@@ -39,7 +39,7 @@ sample_sources_by_profile = {
     "Carrier": "out/ExplanationOfBenefit-Carrier.json",
     "DME": "out/ExplanationOfBenefit-DME.json",
     "Pharmacy": "out/ExplanationOfBenefit-Pharmacy.json",
-    "Patient": "out/Patient.json"
+    "Patient": "out/Patient.json",
 }
 
 sample_resources_by_profile = {}
@@ -73,8 +73,8 @@ for walk_info in os.walk(idr_ref_folder):
         for _, row in df.iterrows():
             idr_table_descriptors[file_name[0 : len(file_name) - 4]][row["name"]] = row["comment"]
 
-coverage_parts = ['PartA','PartB','PartC','PartD','DUAL']
-claim_profiles = ['HHA','Hospice','SNF','DME','Carrier','Inpatient','Outpatient','Pharmacy']
+coverage_parts = ["PartA", "PartB", "PartC", "PartD", "DUAL"]
+claim_profiles = ["HHA", "Hospice", "SNF", "DME", "Carrier", "Inpatient", "Outpatient", "Pharmacy"]
 for walk_info in os.walk(dd_support_folder):
     files = list(filter(lambda file: ".yaml" in file, walk_info[2]))
     for file_name in files:
@@ -82,33 +82,33 @@ for walk_info in os.walk(dd_support_folder):
             data = yaml.safe_load(file)
             current_resource_type = file_name[0 : len(file_name) - 5]
             for entry in data:
-                if entry.get('suppressInDD'):
+                if entry.get("suppressInDD"):
                     continue
                 if "fhirPath" in entry:
                     entry["appliesTo"].sort()
                     if "sources" in entry:
                         entry["sources"].sort()
-                    if('Patient' in entry['appliesTo']):
-                        entry['FHIR Resource'] = 'Patient'
-                    elif(any(x in coverage_parts for x in entry['appliesTo'])):
-                        entry['FHIR Resource'] = 'Coverage'
-                        entry['Coverage / Claim Type'] = entry['appliesTo']
-                    elif(any(x in claim_profiles for x in entry['appliesTo'])):
-                        entry['FHIR Resource'] = 'ExplanationOfBenefit'
-                        entry['Coverage / Claim Type'] = entry['appliesTo']
+                    if "Patient" in entry["appliesTo"]:
+                        entry["FHIR Resource"] = "Patient"
+                    elif any(x in coverage_parts for x in entry["appliesTo"]):
+                        entry["FHIR Resource"] = "Coverage"
+                        entry["Coverage / Claim Type"] = entry["appliesTo"]
+                    elif any(x in claim_profiles for x in entry["appliesTo"]):
+                        entry["FHIR Resource"] = "ExplanationOfBenefit"
+                        entry["Coverage / Claim Type"] = entry["appliesTo"]
 
-                    #This opportunistically populates examples based upon the samples created from executing FML
+                    # This opportunistically populates examples based upon the samples created from executing FML
                     result = subprocess.run(
                         [
                             "node",
                             "eval_fhirpath.js",
-                            json.dumps(sample_resources_by_profile[entry['appliesTo'][0]]),
+                            json.dumps(sample_resources_by_profile[entry["appliesTo"][0]]),
                             entry["fhirPath"],
                         ],
                         check=True,
                         stdout=subprocess.PIPE,
                     )
-                    entry['example']=json.loads(result.stdout)
+                    entry["example"] = json.loads(result.stdout)
                     if "iif" in entry["fhirPath"] or "union" in entry["fhirPath"]:
                         pass
                     elif len(entry["example"]) > 0:
@@ -122,9 +122,9 @@ for walk_info in os.walk(dd_support_folder):
 
                     # Populate the element names + missing descriptions
                     if entry["inputPath"] in structure_def_names_descriptions:
-                        entry["Field Name"] = structure_def_names_descriptions[
-                            entry["inputPath"]
-                        ]["name"]
+                        entry["Field Name"] = structure_def_names_descriptions[entry["inputPath"]][
+                            "name"
+                        ]
                         if "definition" in structure_def_names_descriptions[entry["inputPath"]]:
                             entry["Description"] = structure_def_names_descriptions[
                                 entry["inputPath"]
@@ -163,7 +163,7 @@ dd_df.to_csv(
         "sources",
         "referenceTable",
         "cclfMapping",
-        "ccwMapping"
+        "ccwMapping",
     ],
 )
 export_columns = [
@@ -180,7 +180,7 @@ export_columns = [
     "sources",
     "referenceTable",
     "cclfMapping",
-    "ccwMapping"
+    "ccwMapping",
 ]
 export_df = dd_df[export_columns]
 tips_df = pd.read_csv(dd_support_folder + "/tips.csv")
