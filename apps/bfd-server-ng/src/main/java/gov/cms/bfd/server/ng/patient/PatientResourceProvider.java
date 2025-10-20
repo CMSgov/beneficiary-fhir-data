@@ -76,12 +76,13 @@ public class PatientResourceProvider implements IResourceProvider {
   /**
    * Searches for Medicare Digital Insurance Card Coverage resources by beneficiary reference.
    *
+   * @param beneSK the ID of the coverage to search for.
    * @return A Bundle of Coverage resources.
    */
   @Operation(name = "generate-insurance-card", typeName = "Coverage", idempotent = true)
-  public Bundle searchC4DICByBeneficiary(@IdParam final IdType coverageId) {
+  public Bundle searchC4DICByBeneficiary(@IdParam final IdType beneSK) {
 
-    var beneSk = FhirInputConverter.toLong(new IdType(coverageId.getValue()));
+    var beneSk = FhirInputConverter.toLong(new IdType(beneSK.getValue()));
     return patientHandler.searchByBeneficiary(beneSk);
   }
 }

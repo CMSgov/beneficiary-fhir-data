@@ -33,7 +33,7 @@ public class SystemUrls {
   public static final String PROFILE_C4BB_COVERAGE_2_1_0 =
       "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage|2.1.0";
 
-  /** TODO: description for C4DIC */
+  /** TODO: description for C4DIC. */
   // add version numbers
   public static final String PROFILE_C4DIC_PATIENT =
       "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Patient";
@@ -46,7 +46,7 @@ public class SystemUrls {
   public static final String PROFILE_US_CORE_COVERAGE_6_1_0 =
       "http://hl7.org/fhir/us/core/StructureDefinition/us-core-coverage|6.1.0";
 
-  /** TODO: description */
+  /** TODO: description. */
   public static final String PROFILE_C4DIC_COVERAGE =
       "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Coverage";
 

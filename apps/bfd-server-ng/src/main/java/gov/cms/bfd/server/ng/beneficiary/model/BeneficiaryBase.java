@@ -63,6 +63,7 @@ public abstract class BeneficiaryBase {
   /**
    * Transforms the beneficiary record to its FHIR representation.
    *
+   * @param profile optional FHIR profile URL to apply; may be null
    * @return patient record
    */
   public Patient buildPatientFhirResource(String profile) {
@@ -72,9 +73,6 @@ public abstract class BeneficiaryBase {
       patient.setId(id);
     } else {
       patient.setId(String.valueOf(beneSk));
-      patient.setCommunication(List.of(languageCode.toFhir()));
-      deathDate.toFhir().ifPresent(patient::setDeceased);
-      patient.addExtension(raceCode.toFhir());
     }
 
     // Only return a skeleton resource or merged beneficiaries
@@ -82,6 +80,8 @@ public abstract class BeneficiaryBase {
       return patient;
     }
 
+    patient.setCommunication(List.of(languageCode.toFhir()));
+    deathDate.toFhir().ifPresent(patient::setDeceased);
     patient.setName(List.of(beneficiaryName.toFhir()));
     patient.setBirthDate(DateUtil.toDate(birthDate));
     address.toFhir().ifPresent(a -> patient.setAddress(List.of(a)));
@@ -90,16 +90,27 @@ public abstract class BeneficiaryBase {
           patient.setGender(s.toFhirAdministrativeGender());
           patient.addExtension(s.toFhirSexExtension());
         });
-
+    patient.addExtension(raceCode.toFhir());
     patient.setMeta(meta.toFhirPatient(profile));
 
     return patient;
   }
 
+  /**
+   * Convenience method to convert to FHIR Patient with no profile.
+   *
+   * @return patient record
+   */
   public Patient toFhir() {
     return buildPatientFhirResource(null);
   }
 
+  /**
+   * Convenience method to convert to FHIR Patient with a specific profile.
+   *
+   * @param profile the FHIR profile to apply
+   * @return patient record
+   */
   public Patient toFhir(String profile) {
     return buildPatientFhirResource(profile);
   }

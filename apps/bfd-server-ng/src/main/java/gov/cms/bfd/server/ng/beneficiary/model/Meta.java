@@ -15,6 +15,7 @@ public class Meta {
   /**
    * Returns meta information for the Patient resource.
    *
+   * @param profile optional FHIR profile URL to add; if null, defaults are used
    * @return meta
    */
   org.hl7.fhir.r4.model.Meta toFhirPatient(String profile) {
@@ -33,6 +34,7 @@ public class Meta {
   /**
    * Returns meta information for the Coverage resource.
    *
+   * @param profile optional FHIR profile URL to add; if null, defaults are used
    * @return meta
    */
   public org.hl7.fhir.r4.model.Meta toFhirCoverage(String profile) {

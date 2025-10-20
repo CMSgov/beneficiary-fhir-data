@@ -132,7 +132,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
 
     return switch (coveragePart) {
       case PART_A, PART_B -> mapCoverageAB(coverage, coveragePart, false, null);
-      case DUAL -> mapCoverageDual(coverage, false);
+      case DUAL -> mapCoverageDual(coverage, false, null);
     };
   }
 
@@ -140,10 +140,10 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
    * Creates a FHIR Coverage resource.
    *
    * @param coverageCompositeId The full ID for the Coverage resource.
+   * @param orgId The organization reference ID.
    * @return A FHIR Coverage object.
    */
-  public Coverage toFhirC4DIC(
-      CoverageCompositeId coverageCompositeId, String profile, String orgId) {
+  public Coverage toFhirC4DIC(CoverageCompositeId coverageCompositeId, String orgId) {
     var coverage = setupBaseCoverage(coverageCompositeId, true);
     var coveragePart = coverageCompositeId.coveragePart();
 
@@ -169,12 +169,13 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
    * Creates a FHIR Coverage resource or None if the beneficiary does not have the matching coverage
    * type.
    *
+   * @param orgId The organization reference ID (only used if isC4DIC is true).
    * @param coverageCompositeId The full ID for the Coverage resource.
    * @return A FHIR Coverage object.
    */
   public Optional<Coverage> toFhirCoverageIfPresentC4DIC(
-      CoverageCompositeId coverageCompositeId, String profile, String orgId) {
-    return Optional.ofNullable(toFhirC4DIC(coverageCompositeId, profile, orgId))
+      CoverageCompositeId coverageCompositeId, String orgId) {
+    return Optional.ofNullable(toFhirC4DIC(coverageCompositeId, orgId))
         .filter(c -> !c.getIdentifier().isEmpty());
   }
 
@@ -199,9 +200,6 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
     var entitlement = entitlementOpt.get();
     coverage.setPeriod(entitlement.toFhirPeriod());
     coverage.setStatus(entitlement.toFhirStatus());
-    getEntitlementReason()
-        .flatMap(BeneficiaryEntitlementReason::toFhir)
-        .ifPresent(coverage::addExtension);
 
     if (isC4DIC) {
       coverage.addPayor(new Reference().setReference(orgId));
@@ -221,6 +219,10 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
       entitlement.toFhirExtensions().forEach(coverage::addExtension);
       getStatus().map(BeneficiaryStatus::toFhir).orElse(List.of()).forEach(coverage::addExtension);
     }
+
+    getEntitlementReason()
+        .flatMap(BeneficiaryEntitlementReason::toFhir)
+        .ifPresent(coverage::addExtension);
 
     return coverage;
   }
@@ -245,7 +247,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
    * @param orgId The organization reference ID (only used if isC4DIC is true).
    * @return The populated Coverage object.
    */
-  private Coverage mapCoverageDual(Coverage coverage, boolean isC4DIC, String... orgId) {
+  private Coverage mapCoverageDual(Coverage coverage, boolean isC4DIC, String orgId) {
     var dualEligibilityOpt = getDualEligibility();
     if (dualEligibilityOpt.isEmpty()) {
       return toEmptyResource(coverage);
@@ -257,7 +259,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
     identifier.toFhir(null).ifPresent(coverage::addIdentifier);
 
     if (isC4DIC) {
-      coverage.addPayor(new Reference().setReference(orgId[0]));
+      coverage.addPayor(new Reference().setReference(orgId));
       coverage.addExtension(
           new Extension(SystemUrls.EXT_BENE_BUYIN_CD_URL)
               .setValue(new Annotation(new MarkdownType(C4DIC_ADD_INFO))));

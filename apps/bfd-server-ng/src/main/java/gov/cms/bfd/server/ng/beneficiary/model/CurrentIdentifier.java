@@ -31,6 +31,7 @@ public class CurrentIdentifier {
    * the MBI. This identifier does not include a period, as it represents the beneficiary's primary
    * MBI in the context of the Coverage resource.
    *
+   * @param assigner optional reference to the organization assigning this identifier; may be null
    * @return An {@link Optional} containing the FHIR {@link org.hl7.fhir.r4.model.Identifier} if an
    *     MBI is present, otherwise {@link Optional#empty()}.
    */

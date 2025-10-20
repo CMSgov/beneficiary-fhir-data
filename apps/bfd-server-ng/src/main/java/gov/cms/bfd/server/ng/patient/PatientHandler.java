@@ -73,7 +73,7 @@ public class PatientHandler {
   }
 
   /**
-   * Searches for all Coverage resources associated with a given beneficiary SK
+   * Searches for all Coverage resources associated with a given beneficiary SK.
    *
    * @param beneSk The beneficiary surrogate key.
    * @return A Bundle of Coverage resources.
@@ -98,9 +98,7 @@ public class PatientHandler {
             .map(
                 c ->
                     beneficiary.toFhirCoverageIfPresentC4DIC(
-                        new CoverageCompositeId(c, beneficiary.getBeneSk()),
-                        SystemUrls.PROFILE_C4DIC_COVERAGE,
-                        cmsOrg.getId()))
+                        new CoverageCompositeId(c, beneficiary.getBeneSk()), cmsOrg.getId()))
             .flatMap(Optional::stream);
 
     var resources = Stream.concat(Stream.of(patient, cmsOrg), coverages);
