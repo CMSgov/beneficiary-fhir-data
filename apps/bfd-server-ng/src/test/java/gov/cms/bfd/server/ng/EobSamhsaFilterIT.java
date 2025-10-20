@@ -21,10 +21,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -311,23 +314,19 @@ public class EobSamhsaFilterIT extends IntegrationTestBase {
 
     assertTrue(samhsaEob.isPresent(), "Expected SAMHSA EOB found in bundle.");
 
-    var hasSamhsaTag =
-        samhsaEob.get().getMeta().getSecurity().stream()
-            .anyMatch(
-                tag ->
-                    SystemUrls.SAMHSA_ACT_CODE_SYSTEM_URL.equals(tag.getSystem())
-                        && IdrConstants.SAMHSA_SECURITY_CODE.equals(tag.getCode()));
-
-    assertTrue(hasSamhsaTag, "Expected SAMHSA security tag found in EOB meta.");
+    Predicate<Coding> isSamhsaSecurityTag =
+        tag ->
+            SystemUrls.SAMHSA_ACT_CODE_SYSTEM_URL.equals(tag.getSystem())
+                && IdrConstants.SAMHSA_SECURITY_CODE.equals(tag.getCode());
 
     samhsaEob.get().getMeta().getSecurity().stream()
-        .filter(
-            tag ->
-                SystemUrls.SAMHSA_ACT_CODE_SYSTEM_URL.equals(tag.getSystem())
-                    && IdrConstants.SAMHSA_SECURITY_CODE.equals(tag.getCode()))
+        .filter(isSamhsaSecurityTag)
         .findFirst()
-        .ifPresent(tag -> assertEquals(IdrConstants.SAMHSA_SECURITY_DISPLAY, tag.getDisplay()));
-
+        .ifPresentOrElse(
+            tag -> assertEquals(IdrConstants.SAMHSA_SECURITY_DISPLAY, tag.getDisplay()),
+            () ->
+                Assertions.fail(
+                    "Expected SAMHSA security tag not found in EOB meta or had incorrect code/system."));
     expectFhir().scenario(String.valueOf(beneSk)).toMatchSnapshot(bundle);
   }
 
