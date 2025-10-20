@@ -1,6 +1,7 @@
 import logging
 import os
 import sys
+import time
 from pathlib import Path
 
 import pipeline_nodes
@@ -30,10 +31,13 @@ def main() -> None:
     # Shutdown any existing Ray instance first to avoid conflicts.
     if ray.is_initialized():  # type: ignore
         ray.shutdown()  # type: ignore
+        time.sleep(1)
     ray.init(
         logging_level="info",
         num_cpus=parallelism,
-        runtime_env={"working_dir": str(Path.cwd())},
+        local_mode=True,  # Run tasks inprocess to avoid worker version mismatches
+        ignore_reinit_error=True,
+        runtime_env=None,
     )  # type: ignore
 
     dict_builder = base.DictResult()

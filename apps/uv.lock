@@ -1,6 +1,6 @@
 version = 1
 revision = 2
-requires-python = ">=3.13, <3.14"
+requires-python = "==3.13.*"
 
 [manifest]
 members = [
@@ -125,21 +125,41 @@ dev = [{ name = "testcontainers", specifier = ">=4.13.1" }]
 name = "bfd-workspace"
 version = "0.1.0"
 source = { virtual = "." }
+dependencies = [
+    { name = "cryptography" },
+    { name = "psycopg", extra = ["binary", "pool"] },
+    { name = "pydantic" },
+    { name = "ray" },
+    { name = "sf-hamilton", extra = ["ray"] },
+    { name = "snowflake-connector-python" },
+]
 
 [package.dev-dependencies]
 dev = [
     { name = "pyright" },
     { name = "pytest" },
+    { name = "pytest-timeout" },
     { name = "ruff" },
+    { name = "testcontainers" },
 ]
 
 [package.metadata]
+requires-dist = [
+    { name = "cryptography", specifier = ">=45.0.6" },
+    { name = "psycopg", extras = ["binary", "pool"], specifier = ">=3.2.10" },
+    { name = "pydantic", specifier = ">=2.11.9" },
+    { name = "ray", specifier = "==2.47" },
+    { name = "sf-hamilton", extras = ["ray"], specifier = "==1.88.0" },
+    { name = "snowflake-connector-python", specifier = ">=3.17.4" },
+]
 
 [package.metadata.requires-dev]
 dev = [
     { name = "pyright", specifier = "==1.1.406" },
     { name = "pytest", specifier = "==8.4.2" },
+    { name = "pytest-timeout", specifier = ">=2.1.0" },
     { name = "ruff", specifier = "==0.13.2" },
+    { name = "testcontainers", specifier = ">=4.13.1" },
 ]
 
 [[package]]
@@ -1103,6 +1123,18 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/a3/5c/00a0e072241553e1a7496d638deababa67c5058571567b92a7eaa258397c/pytest-8.4.2.tar.gz", hash = "sha256:86c0d0b93306b961d58d62a4db4879f27fe25513d4b969df351abdddb3c30e01", size = 1519618, upload-time = "2025-09-04T14:34:22.711Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/a8/a4/20da314d277121d6534b3a980b29035dcd51e6744bd79075a6ce8fa4eb8d/pytest-8.4.2-py3-none-any.whl", hash = "sha256:872f880de3fc3a5bdc88a11b39c9710c3497a547cfa9320bc3c5e62fbf272e79", size = 365750, upload-time = "2025-09-04T14:34:20.226Z" },
+]
+
+[[package]]
+name = "pytest-timeout"
+version = "2.4.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pytest" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/ac/82/4c9ecabab13363e72d880f2fb504c5f750433b2b6f16e99f4ec21ada284c/pytest_timeout-2.4.0.tar.gz", hash = "sha256:7e68e90b01f9eff71332b25001f85c75495fc4e3a836701876183c4bcfd0540a", size = 17973, upload-time = "2025-05-05T19:44:34.99Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/fa/b6/3127540ecdf1464a00e5a01ee60a1b09175f6913f0644ac748494d9c4b21/pytest_timeout-2.4.0-py3-none-any.whl", hash = "sha256:c42667e5cdadb151aeb5b26d114aff6bdf5a907f176a007a30b940d3d865b5c2", size = 14382, upload-time = "2025-05-05T19:44:33.502Z" },
 ]
 
 [[package]]
