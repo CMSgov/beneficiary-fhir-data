@@ -27,6 +27,7 @@ dev-dependencies = [
     "ruff==0.13.2",
     "pyright==1.1.406",
     "pytest==8.4.2",
+    "pytest-timeout>=2.1.0",
     # bfd-pipeline-idr dev dependencies
     "testcontainers>=4.13.1",
 ]
@@ -86,3 +87,8 @@ venv = ".venv"
 exclude = [".venv", "**/bfd-model-idr/**", "**/bfd-model-rif/**", "**/bfd-pipeline-idr/**", "**/locust_tests/**", "**/synthetic-load-converter/**"]
 reportMissingImports = false
 reportMissingTypeStubs = false
+
+[tool.pytest.ini_options]
+timeout = 600
+testpaths = ["bfd-pipeline/bfd-pipeline-idr"]
+

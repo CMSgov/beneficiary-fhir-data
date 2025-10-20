@@ -23,50 +23,81 @@ from testcontainers.postgres import PostgresContainer  # type: ignore
 # seems to have issues with podman https://github.com/testcontainers/testcontainers-python/issues/753
 testcontainers_config.ryuk_disabled = True
 
+# Set longer timeout for CI environments where image pulls take longer
+os.environ.setdefault("TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE", "/var/run/docker.sock")
+os.environ.setdefault("TESTCONTAINERS_RYUK_DISABLED", "true")
+
 
 def _run_migrator(postgres: PostgresContainer) -> None:
     # Python recommends using an absolute path when running an executable
     # to avoid any ambiguity
     mvn = shutil.which("mvn") or "mvn"
+    test_dir = Path(__file__).parent
+    migrator_dir = test_dir.parent.parent / "bfd-db-migrator-ng"
+    print(f"[MIGRATOR] Running mvn from: {migrator_dir}")
+    print(f"[MIGRATOR] Using mvn: {mvn}")
     try:
-        subprocess.run(
+        result = subprocess.run(
             f"{mvn} flyway:migrate "
             "-Dflyway.url="
             f"jdbc:postgresql://localhost:{postgres.get_exposed_port(5432)}/{postgres.dbname} "
             f"-Dflyway.user={postgres.username} "
             f"-Dflyway.password={postgres.password}",
-            cwd="../../bfd-db-migrator-ng",
+            cwd=str(migrator_dir),
             shell=True,
             capture_output=True,
             check=True,
+            timeout=60,
         )
+        print("[MIGRATOR] Migration completed successfully")
+        if result.stdout:
+            print(f"[MIGRATOR] stdout: {result.stdout.decode()}")
+    except subprocess.TimeoutExpired:
+        print("[MIGRATOR] Migration timed out after 60 seconds", file=sys.stderr)
+        raise
     except subprocess.CalledProcessError as ex:
-        print(ex.output)
+        print(f"[MIGRATOR] Migration failed with exit code {ex.returncode}", file=sys.stderr)
+        if ex.stdout:
+            print(f"[MIGRATOR] stdout: {ex.stdout.decode()}", file=sys.stderr)
+        if ex.stderr:
+            print(f"[MIGRATOR] stderr: {ex.stderr.decode()}", file=sys.stderr)
         raise
 
 
 @pytest.fixture(scope="module")
 def setup_db() -> Generator[PostgresContainer]:
-    with PostgresContainer("postgres:16", driver="") as postgres:
-        with psycopg.connect(postgres.get_connection_url()) as conn:
-            with Path("./mock-idr.sql").open() as f:
-                conn.execute(f.read())  # type: ignore
-            conn.commit()
+    test_dir = Path(__file__).parent
+    print("\n[FIXTURE] Starting PostgreSQL container with postgres:16")
+    try:
+        with PostgresContainer("postgres:16", driver="") as postgres:
+            print(f"[FIXTURE] Container started on {postgres.get_exposed_port(5432)}")
+            with psycopg.connect(postgres.get_connection_url()) as conn:
+                print("[FIXTURE] Connected to database")
+                print("[FIXTURE] Loading mock-idr.sql")
+                with (test_dir / "mock-idr.sql").open() as f:
+                    conn.execute(f.read())  # type: ignore
+                conn.commit()
 
-            _run_migrator(postgres)
-            load_from_csv(conn, "./test_samples1")  # type: ignore
+                print("[FIXTURE] Running flyway migrator")
+                _run_migrator(postgres)
+                print("[FIXTURE] Loading test samples")
+                load_from_csv(conn, str(test_dir / "test_samples1"))  # type: ignore
 
-            info = conn.info
-            os.environ["BFD_DB_ENDPOINT"] = info.host
-            os.environ["BFD_DB_PORT"] = str(info.port)
-            os.environ["BFD_DB_NAME"] = info.dbname
-            os.environ["BFD_DB_USERNAME"] = info.user
-            os.environ["BFD_DB_PASSWORD"] = info.password
-            os.environ["PARALLELISM"] = "2"
-            os.environ["IDR_BATCH_SIZE"] = "100000"
-            os.environ["IDR_LOAD_BENES"] = "true"
-            os.environ["IDR_LOAD_CLAIMS"] = "true"
-        yield postgres
+                info = conn.info
+                os.environ["BFD_DB_ENDPOINT"] = info.host
+                os.environ["BFD_DB_PORT"] = str(info.port)
+                os.environ["BFD_DB_NAME"] = info.dbname
+                os.environ["BFD_DB_USERNAME"] = info.user
+                os.environ["BFD_DB_PASSWORD"] = info.password
+                os.environ["PARALLELISM"] = "2"
+                os.environ["IDR_BATCH_SIZE"] = "100000"
+                os.environ["IDR_LOAD_BENES"] = "true"
+                os.environ["IDR_LOAD_CLAIMS"] = "true"
+                print("[FIXTURE] Database setup complete")
+            yield postgres
+    except Exception as e:
+        print(f"[FIXTURE] Error during database setup: {e}", file=sys.stderr)
+        raise
 
 
 def test_pipeline(setup_db: PostgresContainer) -> None:
