@@ -90,5 +90,4 @@ reportMissingTypeStubs = false
 
 [tool.pytest.ini_options]
 timeout = 600
-testpaths = ["bfd-pipeline/bfd-pipeline-idr"]
 

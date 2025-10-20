@@ -2,7 +2,6 @@ import logging
 import os
 import sys
 import time
-from pathlib import Path
 
 import pipeline_nodes
 import ray
@@ -28,20 +27,26 @@ def main() -> None:
     logger.info("load start")
 
     parallelism = int(os.environ.get("PARALLELISM", "6"))
-    # Shutdown any existing Ray instance first to avoid conflicts.
-    if ray.is_initialized():  # type: ignore
-        ray.shutdown()  # type: ignore
-        time.sleep(1)
-    ray.init(
-        logging_level="info",
-        num_cpus=parallelism,
-        local_mode=True,  # Run tasks inprocess to avoid worker version mismatches
-        ignore_reinit_error=True,
-        runtime_env=None,
-    )  # type: ignore
+    mode = sys.argv[1] if len(sys.argv) > 1 else ""
+    use_ray = mode not in ("synthetic", "local")
 
-    dict_builder = base.DictResult()
-    adapter = RayGraphAdapter(result_builder=dict_builder)
+    if use_ray:
+        # Shutdown any existing Ray instance first to avoid conflicts.
+        if ray.is_initialized():
+            ray.shutdown()
+            time.sleep(1)
+
+        ray.init(
+            logging_level="info",
+            num_cpus=parallelism,
+        )
+        dict_builder = base.DictResult()
+        adapter = RayGraphAdapter(result_builder=dict_builder)
+    else:
+        # Use simple non distributed adapter for tests
+        dict_builder = base.DictResult()
+        adapter = base.SimplePythonGraphAdapter(result_builder=dict_builder)
+
     load_type = str(os.environ.get("LOAD_TYPE", "incremental"))
     logger.info("load_type %s", load_type)
     dr = (

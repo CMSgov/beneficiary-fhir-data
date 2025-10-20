@@ -63,10 +63,10 @@ jobs:
           cd ${{ github.workspace }}/apps
           uv run pyright
       
-      - name: Run tests (pytest) for bfd-pipeline-idr
+      - name: Run tests (pytest)
         run: |
           cd ${{ github.workspace }}/apps
-          uv run pytest bfd-pipeline/bfd-pipeline-idr
+          uv run pytest
   
   non-workspace-checks:
     name: Non-Workspace Project - sftp-outbound-transfer
