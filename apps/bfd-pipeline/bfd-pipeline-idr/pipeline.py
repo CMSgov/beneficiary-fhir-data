@@ -1,6 +1,7 @@
 import logging
 import os
 import sys
+from pathlib import Path
 
 import pipeline_nodes
 import ray
@@ -32,7 +33,7 @@ def main() -> None:
     ray.init(
         logging_level="info",
         num_cpus=parallelism,
-        runtime_env={"working_dir": os.getcwd()},
+        runtime_env={"working_dir": str(Path.cwd())},
     )  # type: ignore
 
     dict_builder = base.DictResult()
