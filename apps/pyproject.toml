@@ -3,6 +3,15 @@ name = "bfd-workspace"
 version = "0.1.0"
 description = "BFD Python workspace for unified dependency management"
 requires-python = ">=3.13,<3.14"
+dependencies = [
+    # bfd-pipeline-idr dependencies
+    "cryptography>=45.0.6",
+    "psycopg[binary,pool]>=3.2.10",
+    "pydantic>=2.11.9",
+    "snowflake-connector-python>=3.17.4",
+    "ray==2.47",
+    "sf-hamilton[ray]==1.88.0",
+]
 
 [tool.uv.workspace]
 members = [
@@ -18,6 +27,8 @@ dev-dependencies = [
     "ruff==0.13.2",
     "pyright==1.1.406",
     "pytest==8.4.2",
+    # bfd-pipeline-idr dev dependencies
+    "testcontainers>=4.13.1",
 ]
 
 [tool.ruff]
@@ -71,3 +82,7 @@ docstring-code-format = true
 typeCheckingMode = "strict"
 venvPath = "."
 venv = ".venv"
+
+exclude = [".venv", "**/bfd-model-idr/**", "**/bfd-model-rif/**", "**/bfd-pipeline-idr/**", "**/locust_tests/**", "**/synthetic-load-converter/**"]
+reportMissingImports = false
+reportMissingTypeStubs = false
