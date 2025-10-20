@@ -11,6 +11,10 @@ dependencies = [
     "snowflake-connector-python>=3.17.4",
     "ray==2.47",
     "sf-hamilton[ray]==1.88.0",
+    # sftp-outbound-transfer dependencies
+    "aws-lambda-powertools[all]",
+    "paramiko",
+    "boto3",
 ]
 
 [tool.uv.workspace]
@@ -20,6 +24,7 @@ members = [
     "bfd-server-ng/codegen",
     "utils/synthetic-load-converter",
     "utils/locust_tests",
+    "../ops/services/02-eft/lambda_src/sftp_outbound_transfer",
 ]
 
 [tool.uv]
@@ -30,6 +35,8 @@ dev-dependencies = [
     "pytest-timeout>=2.1.0",
     # bfd-pipeline-idr dev dependencies
     "testcontainers>=4.13.1",
+    # sftp-outbound-transfer dev dependencies
+    "boto3-stubs[sns,ssm]",
 ]
 
 [tool.ruff]
@@ -78,13 +85,14 @@ docstring-code-format = true
 "bfd-model/bfd-model-rif/**/*.py" = ["ANN", "D200", "D401"]
 "bfd-server-ng/codegen/**/*.py" = ["ANN", "PTH123", "SIM108"]
 "utils/**/*.py" = ["ANN", "PTH104", "PTH119", "PTH120", "PTH123", "PTH208", "SIM115"]
+"../ops/services/02-eft/lambda_src/sftp_outbound_transfer/**/*.py" = ["D100", "D101", "D102", "D103", "D104", "D105", "D107", "E501"]
 
 [tool.pyright]
 typeCheckingMode = "strict"
 venvPath = "."
 venv = ".venv"
 
-exclude = [".venv", "**/bfd-model-idr/**", "**/bfd-model-rif/**", "**/bfd-pipeline-idr/**", "**/locust_tests/**", "**/synthetic-load-converter/**"]
+exclude = [".venv", "**/bfd-model-idr/**", "**/bfd-model-rif/**", "**/bfd-pipeline-idr/**", "**/locust_tests/**", "**/synthetic-load-converter/**", "**/sftp_outbound_transfer/**"]
 reportMissingImports = false
 reportMissingTypeStubs = false
 
