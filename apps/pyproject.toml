@@ -60,6 +60,13 @@ quote-style = "double"
 indent-style = "space"
 docstring-code-format = true
 
+[tool.ruff.lint.per-file-ignores]
+# Legacy scripts: relax linting rules for data generation, database scripts, and utilities
+"bfd-model-idr/**/*.py" = ["ANN", "E501", "SIM102", "SIM108", "SIM115", "PTH104", "PTH119", "PTH120", "PTH123", "PTH208", "D200", "D401"]
+"bfd-model/bfd-model-rif/**/*.py" = ["ANN", "D200", "D401"]
+"bfd-server-ng/codegen/**/*.py" = ["ANN", "PTH123", "SIM108"]
+"utils/**/*.py" = ["ANN", "PTH104", "PTH119", "PTH120", "PTH123", "PTH208", "SIM115"]
+
 [tool.pyright]
 typeCheckingMode = "strict"
 venvPath = "."

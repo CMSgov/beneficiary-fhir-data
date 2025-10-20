@@ -7,7 +7,6 @@ import sys
 
 import pandas as pd
 from faker import Faker
-
 from generator_util import GeneratorUtil
 
 fake = Faker()

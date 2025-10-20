@@ -1,10 +1,8 @@
 #!/usr/bin/python3
-'''Create SQL scripts to delete synthetic data.
-'''
+"""Create SQL scripts to delete synthetic data.
+"""
 
 import sys
-from typing import List
-
 
 # List of predefined Beneficiary IDs to delete and pattern of bene_ids to match in a NOT LIKE
 # clause. Source: https://jira.cms.gov/browse/BFD-1686
@@ -58,10 +56,9 @@ NEW_CLAIMS_TABLES = [
 # Helpers
 
 
-def make_bene_id_pattern(bene_ids: List[str], pattern: str, cast_id: bool = False) -> str:
-    '''Make the WHERE clause to handle bene_ids that are in the list or fit the pattern.
-    '''
-
+def make_bene_id_pattern(bene_ids: list[str], pattern: str, cast_id: bool = False) -> str:
+    """Make the WHERE clause to handle bene_ids that are in the list or fit the pattern.
+    """
     output = '  bene_id IN (\'' + '\', \''.join(bene_ids) + '\')'
     if pattern is not None:
         bene_id = 'CAST(bene_id AS CHARACTER VARYING(15))' if cast_id else 'bene_id'
@@ -72,12 +69,11 @@ def make_bene_id_pattern(bene_ids: List[str], pattern: str, cast_id: bool = Fals
 
 def make_claims_sql(bene_id_clause: str, claims_table: str, claim_lines_table: str,
     is_count: bool) -> str:
-    '''Create SQL to count or delete from a claims table and its corresponding claim_lines table.
+    """Create SQL to count or delete from a claims table and its corresponding claim_lines table.
 
     We want to run the claims table after the claim_lines table, because we couldn't join / union
     if we don't.
-    '''
-
+    """
     # Generate SQL for Claims Lines
     output  = f"-- {claim_lines_table}\n\n"
     if is_count:
@@ -101,8 +97,8 @@ def make_claims_sql(bene_id_clause: str, claims_table: str, claim_lines_table: s
 
 
 def make_base_sql(bene_id_clause: str, base_table: str, is_count: bool) -> str:
-    '''Create SQL to count or delete from a table containing a bene_id clause.
-    '''
+    """Create SQL to count or delete from a table containing a bene_id clause.
+    """
     output  = f"-- {base_table}\n\n"
 
     output += f"SELECT COUNT(*) AS {base_table}\n" if is_count else 'DELETE\n'
@@ -113,19 +109,17 @@ def make_base_sql(bene_id_clause: str, base_table: str, is_count: bool) -> str:
 
 
 def help_text() -> str:
-    '''Provide help text if the user does not provide valid arguments or asks for help.
-    '''
-
+    """Provide help text if the user does not provide valid arguments or asks for help.
+    """
     return 'Usage: make_sql.py [count | delete] [test|prod-sbx|prod]'
 
 
 # Main
 
 
-def main(args: List):
-    '''Main function, called from the command line.
-    '''
-
+def main(args: list):
+    """Main function, called from the command line.
+    """
     if not args or len(args) < 2:
         print(help_text(), file=sys.stderr)
         sys.exit()

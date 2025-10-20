@@ -1,13 +1,12 @@
+import argparse
+import html
 import json
 import re
-import html
-import argparse
 
 
 def gen_enum(fsh_output_file: str, int_codes=False):
     with open(
         f"../../bfd-model-idr/sushi/fsh-generated/resources/{fsh_output_file}.json",
-        "r",
     ) as f:
         content = f.read()
         json_content = json.loads(content)
@@ -24,16 +23,15 @@ def get_enum_val(concept, int_codes):
     if re.match("\\d", code[0]):
         prefix = "_"
     if code == "~":
-        javadoc = f"/**\nNA.\n*/"
+        javadoc = "/**\nNA.\n*/"
         return f'{javadoc}\nNA("","{concept['display']}")'
+    if int_codes:
+        code_fmt = code
     else:
-        if int_codes:
-            code_fmt = code
-        else:
-            code_fmt = f'"{code}"'
-        punct = "" if concept["display"].endswith(".") else "."
-        javadoc = html.escape(f"/**\n{code} - {concept['display']}{punct}\n*/")
-        return f"{javadoc}\n{prefix}{code}({code_fmt},\"{concept['display']}\")"
+        code_fmt = f'"{code}"'
+    punct = "" if concept["display"].endswith(".") else "."
+    javadoc = html.escape(f"/**\n{code} - {concept['display']}{punct}\n*/")
+    return f"{javadoc}\n{prefix}{code}({code_fmt},\"{concept['display']}\")"
 
 
 if __name__ == "__main__":
