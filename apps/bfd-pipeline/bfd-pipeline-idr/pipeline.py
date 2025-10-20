@@ -2,12 +2,11 @@ import logging
 import os
 import sys
 
+import pipeline_nodes
 import ray
+from constants import CLAIM_AUX_TABLES
 from hamilton import base, driver  # type: ignore
 from hamilton.plugins.h_ray import RayGraphAdapter  # type: ignore
-
-import pipeline_nodes
-from constants import CLAIM_AUX_TABLES
 from loader import get_connection_string
 
 console_handler = logging.StreamHandler()

@@ -11,14 +11,13 @@ from typing import cast
 import psycopg
 import pytest
 import ray
+from load_synthetic import load_from_csv
+from pipeline import main
 from psycopg.rows import DictRow, dict_row
 from testcontainers.core.config import testcontainers_config  # type: ignore
 
 # https://github.com/testcontainers/testcontainers-python/issues/305
 from testcontainers.postgres import PostgresContainer  # type: ignore
-
-from load_synthetic import load_from_csv
-from pipeline import main
 
 # ryuk throws a 500 or 404 error for some reason
 # seems to have issues with podman https://github.com/testcontainers/testcontainers-python/issues/753
