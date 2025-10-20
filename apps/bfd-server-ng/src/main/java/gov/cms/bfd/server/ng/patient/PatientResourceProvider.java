@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.ng.patient;
 
 import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
@@ -70,5 +71,17 @@ public class PatientResourceProvider implements IResourceProvider {
     return patientHandler.searchByIdentifier(
         FhirInputConverter.toString(identifier, SystemUrls.CMS_MBI),
         FhirInputConverter.toDateTimeRange(lastUpdated));
+  }
+
+  /**
+   * Searches for Medicare Digital Insurance Card Coverage resources by beneficiary reference.
+   *
+   * @return A Bundle of Coverage resources.
+   */
+  @Operation(name = "generate-insurance-card", typeName = "Coverage", idempotent = true)
+  public Bundle searchC4DICByBeneficiary(@IdParam final IdType coverageId) {
+
+    var beneSk = FhirInputConverter.toLong(new IdType(coverageId.getValue()));
+    return patientHandler.searchByBeneficiary(beneSk);
   }
 }

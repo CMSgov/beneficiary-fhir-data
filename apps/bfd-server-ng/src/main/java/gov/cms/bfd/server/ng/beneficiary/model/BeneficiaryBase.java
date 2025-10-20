@@ -1,13 +1,19 @@
 package gov.cms.bfd.server.ng.beneficiary.model;
 
+import gov.cms.bfd.server.ng.util.DateUtil;
+import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.Transient;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import lombok.Getter;
+import org.hl7.fhir.r4.model.Patient;
 
 /**
  * Base class for beneficiary entities. This is used to prevent excessive fetching for patient
@@ -43,6 +49,7 @@ public abstract class BeneficiaryBase {
   @Embedded protected Meta meta;
   @Embedded protected DeathDate deathDate;
   @Embedded protected CurrentIdentifier identifier;
+  @Transient protected String id = UUID.randomUUID().toString();
 
   /**
    * Determines if this beneficiary has been merged into another.
@@ -51,5 +58,49 @@ public abstract class BeneficiaryBase {
    */
   public boolean isMergedBeneficiary() {
     return beneSk != xrefSk;
+  }
+
+  /**
+   * Transforms the beneficiary record to its FHIR representation.
+   *
+   * @return patient record
+   */
+  public Patient buildPatientFhirResource(String profile) {
+    var patient = new Patient();
+
+    if (profile != null && profile.equals(SystemUrls.PROFILE_C4DIC_PATIENT)) {
+      patient.setId(id);
+    } else {
+      patient.setId(String.valueOf(beneSk));
+      patient.setCommunication(List.of(languageCode.toFhir()));
+      deathDate.toFhir().ifPresent(patient::setDeceased);
+      patient.addExtension(raceCode.toFhir());
+    }
+
+    // Only return a skeleton resource or merged beneficiaries
+    if (isMergedBeneficiary()) {
+      return patient;
+    }
+
+    patient.setName(List.of(beneficiaryName.toFhir()));
+    patient.setBirthDate(DateUtil.toDate(birthDate));
+    address.toFhir().ifPresent(a -> patient.setAddress(List.of(a)));
+    sexCode.ifPresent(
+        s -> {
+          patient.setGender(s.toFhirAdministrativeGender());
+          patient.addExtension(s.toFhirSexExtension());
+        });
+
+    patient.setMeta(meta.toFhirPatient(profile));
+
+    return patient;
+  }
+
+  public Patient toFhir() {
+    return buildPatientFhirResource(null);
+  }
+
+  public Patient toFhir(String profile) {
+    return buildPatientFhirResource(profile);
   }
 }

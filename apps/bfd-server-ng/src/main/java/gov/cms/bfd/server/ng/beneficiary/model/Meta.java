@@ -17,11 +17,17 @@ public class Meta {
    *
    * @return meta
    */
-  org.hl7.fhir.r4.model.Meta toFhirPatient() {
-    return new org.hl7.fhir.r4.model.Meta()
-        .setLastUpdated(DateUtil.toDate(updatedTimestamp))
-        .addProfile(SystemUrls.PROFILE_C4BB_PATIENT_2_1_0)
-        .addProfile(SystemUrls.PROFILE_US_CORE_PATIENT_6_1_0);
+  org.hl7.fhir.r4.model.Meta toFhirPatient(String profile) {
+    var meta = new org.hl7.fhir.r4.model.Meta().setLastUpdated(DateUtil.toDate(updatedTimestamp));
+
+    if (profile != null) {
+      meta.addProfile(profile);
+    } else {
+      meta.addProfile(SystemUrls.PROFILE_C4BB_PATIENT_2_1_0)
+          .addProfile(SystemUrls.PROFILE_US_CORE_PATIENT_6_1_0);
+    }
+
+    return meta;
   }
 
   /**
@@ -29,10 +35,16 @@ public class Meta {
    *
    * @return meta
    */
-  public org.hl7.fhir.r4.model.Meta toFhirCoverage() {
-    return new org.hl7.fhir.r4.model.Meta()
-        .setLastUpdated(DateUtil.toDate(updatedTimestamp))
-        .addProfile(SystemUrls.PROFILE_C4BB_COVERAGE_2_1_0)
-        .addProfile(SystemUrls.PROFILE_US_CORE_COVERAGE_6_1_0);
+  public org.hl7.fhir.r4.model.Meta toFhirCoverage(String profile) {
+    var meta = new org.hl7.fhir.r4.model.Meta().setLastUpdated(DateUtil.toDate(updatedTimestamp));
+
+    if (profile != null) {
+      meta.addProfile(profile);
+    } else {
+      meta.addProfile(SystemUrls.PROFILE_C4BB_COVERAGE_2_1_0)
+          .addProfile(SystemUrls.PROFILE_US_CORE_COVERAGE_6_1_0);
+    }
+
+    return meta;
   }
 }
