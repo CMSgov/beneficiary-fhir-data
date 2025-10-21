@@ -81,6 +81,7 @@ ALIAS_VAL = "val"
 ALIAS_HSTRY = "hstry"
 ALIAS_XREF = "xref"
 ALIAS_LCTN_HSTRY = "lctn_hstry"
+ALIAS_CLM_GRP = "clm_grp"
 
 
 class IdrBaseModel(BaseModel, ABC):
@@ -923,7 +924,7 @@ class IdrClaimInstitutional(IdrBaseModel):
 
 class IdrClaimItem(IdrBaseModel):
     clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, ALIAS: ALIAS_CLM}]
-    bfd_row_id: Annotated[int, {PRIMARY_KEY: True}]
+    bfd_row_id: Annotated[int, {PRIMARY_KEY: True, ALIAS: ALIAS_CLM_GRP}]
     # columns from V2_MDCR_CLM_LINE
     clm_line_num: Annotated[int, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_null_int)]
     clm_line_sbmt_chrg_amt: Annotated[float, BeforeValidator(transform_null_float)]
@@ -1056,6 +1057,7 @@ class IdrClaimItem(IdrBaseModel):
     @staticmethod
     def _current_fetch_query(start_time: datetime) -> str:
         clm = ALIAS_CLM
+        clm_grp = ALIAS_CLM_GRP
         prod = ALIAS_PROCEDURE
         line = ALIAS_LINE
         val = ALIAS_VAL
@@ -1092,9 +1094,9 @@ class IdrClaimItem(IdrBaseModel):
                     FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
                     WHERE {claim_type_clause(start_time, CLAIM_TYPE_CODES)}
                 ),
-                claim_groups AS (
-                    SELECT 
-                        {clm}.clm_uniq_id, 
+                claim_lines AS (
+                    SELECT
+                        {line}.*,
                         ROW_NUMBER() OVER (
                             PARTITION BY {clm}.clm_uniq_id 
                             ORDER BY {clm}.clm_uniq_id
@@ -1106,27 +1108,32 @@ class IdrClaimItem(IdrBaseModel):
                         AND {line}.clm_num_sk = {clm}.clm_num_sk 
                         AND {line}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
                         AND {line}.clm_uniq_id = {clm}.clm_uniq_id
-                    UNION
+                ),
+                claim_procedures AS (
                     SELECT 
-                        {clm}.clm_uniq_id, 
+                        {clm}.clm_uniq_id,
+                        {prod}.*,
                         ROW_NUMBER() OVER (
                             PARTITION BY {clm}.clm_uniq_id 
                             ORDER BY {clm}.clm_uniq_id,
                                 {prod}.clm_prod_type_cd,
                                 {prod}.clm_val_sqnc_num
-                        ) AS row_id
+                        ) AS bfd_row_id
                     FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_prod {prod}
                     JOIN claims {clm} 
                         ON {prod}.geo_bene_sk = {clm}.geo_bene_sk
                         AND {prod}.clm_type_cd = {clm}.clm_type_cd
                         AND {prod}.clm_num_sk = {clm}.clm_num_sk 
                         AND {prod}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
-                    UNION
+                ),
+                claim_vals AS (
                     SELECT
                         {clm}.clm_uniq_id, 
+                        {val}.*,
                         ROW_NUMBER() OVER (
                             PARTITION BY {clm}.clm_uniq_id 
-                            ORDER BY {clm}.clm_uniq_id, {val}.clm_val_sqnc_num
+                            ORDER BY {clm}.clm_uniq_id,
+                                {val}.clm_val_sqnc_num
                         ) AS bfd_row_id
                     FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_val {val}
                     JOIN claims {clm} 
@@ -1135,46 +1142,40 @@ class IdrClaimItem(IdrBaseModel):
                         AND {val}.clm_num_sk = {clm}.clm_num_sk 
                         AND {val}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
                 ),
-                procedures AS (
-                    SELECT 
-                    {clm}.clm_uniq_id, 
-                    {prod}.*, 
-                    ROW_NUMBER() OVER (
-                        PARTITION BY {clm}.clm_uniq_id 
-                        ORDER BY {clm}.clm_uniq_id,
-                            {prod}.clm_prod_type_cd,
-                            {prod}.clm_val_sqnc_num
-                    ) AS line_num
-                    FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_prod {prod}
-                    JOIN claims {clm} 
-                        ON {prod}.geo_bene_sk = {clm}.geo_bene_sk
-                        AND {prod}.clm_type_cd = {clm}.clm_type_cd
-                        AND {prod}.clm_num_sk = {clm}.clm_num_sk 
-                        AND {prod}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
+                claim_groups AS (
+                    SELECT clm_uniq_id, bfd_row_id
+                    FROM claim_lines
+                    UNION
+                    SELECT clm_uniq_id, bfd_row_id
+                    FROM claim_procedures
+                    UNION
+                    SELECT clm_uniq_id, bfd_row_id
+                    FROM claim_vals
                 )
                 SELECT {{COLUMNS}}
                 FROM claims {clm}
-                JOIN claim_groups cg on cg.clm_uniq_id = {clm}.clm_uniq_id
-                LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_line {line} 
+                JOIN claim_groups {clm_grp} 
+                    ON {clm_grp}.clm_uniq_id = {clm}.clm_uniq_id
+                LEFT JOIN claim_lines {line} 
                     ON {line}.geo_bene_sk = {clm}.geo_bene_sk
                     AND {line}.clm_type_cd = {clm}.clm_type_cd
                     AND {line}.clm_num_sk = {clm}.clm_num_sk 
                     AND {line}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
-                    AND {line}.clm_line_num = cg.bfd_row_id
+                    AND {line}.clm_line_num = {clm_grp}.bfd_row_id
                     AND {line}.clm_uniq_id = {clm}.clm_uniq_id
-                LEFT JOIN procedures {prod}
+                LEFT JOIN claim_procedures {prod}
                     ON {prod}.geo_bene_sk = {clm}.geo_bene_sk
                     AND {prod}.clm_type_cd = {clm}.clm_type_cd
                     AND {prod}.clm_num_sk = {clm}.clm_num_sk 
                     AND {prod}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
-                    AND {prod}.line_num = cg.bfd_row_id
+                    AND {prod}.bfd_row_id = {clm_grp}.bfd_row_id
                     AND {prod}.clm_uniq_id = {clm}.clm_uniq_id
-                LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_val {val}
+                LEFT JOIN claim_vals {val}
                     ON {val}.geo_bene_sk = {clm}.geo_bene_sk
                     AND {val}.clm_type_cd = {clm}.clm_type_cd
                     AND {val}.clm_num_sk = {clm}.clm_num_sk 
                     AND {val}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
-                    AND {val}.clm_val_sqnc_num = cg.bfd_row_id
+                    AND {val}.clm_val_sqnc_num = {clm_grp}.bfd_row_id
                 LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_dcmtn {line_dcmtn}
                     ON {line_dcmtn}.geo_bene_sk = {line}.geo_bene_sk
                     AND {line_dcmtn}.clm_type_cd = {line}.clm_type_cd
