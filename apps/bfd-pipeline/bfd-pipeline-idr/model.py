@@ -741,6 +741,7 @@ class IdrClaim(IdrBaseModel):
                 {clm}.clm_type_cd = {dcmtn}.clm_type_cd AND
                 {clm}.clm_num_sk = {dcmtn}.clm_num_sk
             {{WHERE_CLAUSE}} AND {claim_type_clause(start_time)}
+             AND {clm}.clm_from_dt > {clm}.clm_thru_dt
             {{ORDER_BY}}
         """
 
@@ -788,6 +789,7 @@ class IdrClaimDateSignature(IdrBaseModel):
                 JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_dt_sgntr {sgntr}
                 ON {clm}.clm_dt_sgntr_sk = {sgntr}.clm_dt_sgntr_sk
                 {{WHERE_CLAUSE}} AND {claim_type_clause(start_time)}
+                 AND {clm}.clm_from_dt > {clm}.clm_thru_dt
                 {{ORDER_BY}}
             )
             SELECT {{COLUMNS_NO_ALIAS}} FROM dupes WHERE row_order = 1
@@ -825,6 +827,7 @@ class IdrClaimFiss(IdrBaseModel):
                 {clm}.clm_type_cd = {fiss}.clm_type_cd AND
                 {clm}.clm_num_sk = {fiss}.clm_num_sk
             {{WHERE_CLAUSE}} AND {claim_type_clause(start_time)}
+             AND {clm}.clm_from_dt > {clm}.clm_thru_dt
             {{ORDER_BY}}
         """
 
@@ -891,6 +894,7 @@ class IdrClaimInstitutional(IdrBaseModel):
                 {clm}.clm_type_cd = {instnl}.clm_type_cd AND
                 {clm}.clm_num_sk = {instnl}.clm_num_sk
             {{WHERE_CLAUSE}} AND {claim_type_clause(start_time)}
+             AND {clm}.clm_from_dt > {clm}.clm_thru_dt
             {{ORDER_BY}}
         """
 
@@ -1022,6 +1026,7 @@ class IdrClaimItem(IdrBaseModel):
                         {clm}.clm_idr_ld_dt
                     FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
                     WHERE {claim_type_clause(start_time)}
+                     AND {clm}.clm_from_dt > {clm}.clm_thru_dt
                 ),
                 claim_groups AS (
                     SELECT 
@@ -1163,6 +1168,7 @@ class IdrClaimLineInstitutional(IdrBaseModel):
                 {clm}.clm_type_cd = {line}.clm_type_cd AND
                 {clm}.clm_num_sk = {line}.clm_num_sk
             {{WHERE_CLAUSE}} AND {claim_type_clause(start_time)}
+             AND {clm}.clm_from_dt > {clm}.clm_thru_dt
             {{ORDER_BY}}
         """
 
@@ -1238,6 +1244,7 @@ class IdrClaimProfessional(IdrBaseModel):
                 {clm}.clm_dt_sgntr_sk = {prfnl}.clm_dt_sgntr_sk AND
                 {clm}.clm_num_sk = {prfnl}.clm_num_sk
             {{WHERE_CLAUSE}} AND {claim_type_clause(start_time)}
+             AND {clm}.clm_from_dt > {clm}.clm_thru_dt
             {{ORDER_BY}}
         """
 
@@ -1291,6 +1298,7 @@ class IdrClaimLineProfessional(IdrBaseModel):
                 {clm}.clm_type_cd = {prfnl}.clm_type_cd AND
                 {clm}.clm_num_sk = {prfnl}.clm_num_sk
             {{WHERE_CLAUSE}} AND {claim_type_clause(start_time)}
+            AND {clm}.clm_from_dt > {clm}.clm_thru_dt
             {{ORDER_BY}}
         """
 
