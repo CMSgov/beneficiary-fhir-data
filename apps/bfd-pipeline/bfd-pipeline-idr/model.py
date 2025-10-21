@@ -53,6 +53,13 @@ def transform_null_int(value: int | None) -> int:
     return value
 
 
+def get_min_transaction_date() -> datetime:
+    min_date = os.environ.get("PIPELINE_MIN_TRANSACTION_DATE")
+    if min_date is not None:
+        return datetime.strptime(min_date, "%Y-%m-%d").replace(tzinfo=UTC)
+    return datetime.strptime("0001-01-01", "%Y-%m-%d").replace(tzinfo=UTC)
+
+
 PRIMARY_KEY = "primary_key"
 BATCH_TIMESTAMP = "batch_timestamp"
 HISTORICAL_BATCH_TIMESTAMP = "historical_batch_timestamp"
@@ -1072,6 +1079,10 @@ class IdrClaimItem(IdrBaseModel):
         # equal to max(len(clm_prod), len(clm_line), len(clm_val)). The number of rows here will
         # usually only be a few dozen, maybe a few hundred at worst.
 
+        # We need to eagerly filter by the claim date in the first CTE at the top to prevent the
+        # query from pulling back all of the claims and only filtering at the end. This has a
+        # massive impact on the query performance.
+
         # There's a few steps here:
         #   1. Figure out how many rows we need for each claim.
         #      We do this by taking the UNION of the rows for each table. The end result will be
@@ -1092,7 +1103,9 @@ class IdrClaimItem(IdrBaseModel):
                         {clm}.clm_dt_sgntr_sk,
                         {clm}.clm_idr_ld_dt
                     FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
-                    WHERE {claim_type_clause(start_time, CLAIM_TYPE_CODES)}
+                    WHERE 
+                        {claim_type_clause(start_time, CLAIM_TYPE_CODES)} AND 
+                        {clm}.clm_idr_ld_dt >= '{get_min_transaction_date()}'
                 ),
                 claim_lines AS (
                     SELECT
