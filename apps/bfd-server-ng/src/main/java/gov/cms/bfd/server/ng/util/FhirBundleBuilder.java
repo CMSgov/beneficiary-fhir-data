@@ -66,6 +66,7 @@ public class FhirBundleBuilder {
     }
 
     Bundle bundle = new Bundle();
+    bundle.setType(Bundle.BundleType.COLLECTION);
     bundle.setEntry(
         resourceList.stream()
             .map(

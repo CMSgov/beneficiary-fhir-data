@@ -36,6 +36,7 @@ public class JdbcConfiguration implements JdbcConnectionDetails {
   @Override
   public String getJdbcUrl() {
     if (useRds) {
+      System.out.println("if");
       try (var rdsClient = RdsClient.create()) {
         var clusterIdentifier = String.format(nonsensitiveDb.getClusterIdentifierTemplate(), env);
         var clusters =
@@ -44,6 +45,7 @@ public class JdbcConfiguration implements JdbcConnectionDetails {
         return getConnectionString(clusters.dbClusters().getFirst().readerEndpoint());
       }
     } else {
+      System.out.println("else");
       return getConnectionString(localDbHost);
     }
   }
