@@ -405,6 +405,7 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_line (
     idr_insrt_ts TIMESTAMPTZ,
     idr_updt_ts TIMESTAMPTZ,
     clm_rndrg_prvdr_type_cd VARCHAR(3),
+    clm_line_pmd_uniq_trkng_num VARCHAR(14),
     PRIMARY KEY (geo_bene_sk, clm_dt_sgntr_sk, clm_type_cd, clm_num_sk, clm_line_num)
 );
 
@@ -538,6 +539,7 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_dcmtn (
     clm_line_ngaco_tlhlth_sw VARCHAR(1),
     clm_line_aco_care_mgmt_hcbs_sw VARCHAR(1),
     clm_line_ngaco_pbpmt_sw VARCHAR(1),
+    clm_line_pa_uniq_trkng_num VARCHAR(50),
     idr_insrt_ts TIMESTAMPTZ,
     idr_updt_ts TIMESTAMPTZ,
     PRIMARY KEY(geo_bene_sk, clm_dt_sgntr_sk, clm_type_cd, clm_num_sk, clm_line_num)

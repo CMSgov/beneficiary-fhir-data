@@ -964,6 +964,7 @@ class IdrClaimItem(IdrBaseModel):
     hcpcs_4_mdfr_cd: Annotated[str, BeforeValidator(transform_default_string)]
     hcpcs_5_mdfr_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_idr_ld_dt: Annotated[date, {INSERT_EXCLUDE: True, HISTORICAL_BATCH_TIMESTAMP: True}]
+    clm_line_pmd_uniq_trkng_num: Annotated[str, BeforeValidator(transform_null_string)]
     idr_insrt_ts_line: Annotated[
         datetime,
         {BATCH_TIMESTAMP: True, ALIAS: ALIAS_LINE, COLUMN_MAP: "idr_insrt_ts"},
@@ -1046,6 +1047,9 @@ class IdrClaimItem(IdrBaseModel):
         str, {ALIAS: ALIAS_LINE_DCMTN}, BeforeValidator(transform_null_string)
     ]
     clm_rndrg_prvdr_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
+    clm_line_pa_uniq_trkng_num: Annotated[
+        str, {ALIAS: ALIAS_LINE_DCMTN}, BeforeValidator(transform_null_string)
+    ]
     idr_insrt_ts_line_dcmtn: Annotated[
         datetime,
         {ALIAS: ALIAS_LINE_DCMTN, COLUMN_MAP: "idr_insrt_ts"},
