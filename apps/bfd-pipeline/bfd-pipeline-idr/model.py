@@ -619,7 +619,7 @@ class IdrContractPbpNumber(IdrBaseModel):
         """
 
 
-def claim_type_clause(start_time: datetime) -> str:
+def claim_type_clause(start_time: datetime, claim_type_codes: list[int]) -> str:
     fetch_latest_claims = os.environ.get("IDR_LATEST_CLAIMS", "").lower() in ("1", "true")
     add_latest_claim_ind = ""
     if fetch_latest_claims:
@@ -634,7 +634,7 @@ def claim_type_clause(start_time: datetime) -> str:
     start_time_sql = pac_cutoff_date.strftime("'%Y-%m-%d %H:%M:%S'")
     return f"""
     (
-        {ALIAS_CLM}.clm_type_cd IN ({",".join([str(c) for c in CLAIM_TYPE_CODES])})
+        {ALIAS_CLM}.clm_type_cd IN ({",".join([str(c) for c in claim_type_codes])})
         {add_latest_claim_ind}
         AND
         (
@@ -765,7 +765,7 @@ class IdrClaim(IdrBaseModel):
                 {clm}.clm_dt_sgntr_sk = {dcmtn}.clm_dt_sgntr_sk AND
                 {clm}.clm_type_cd = {dcmtn}.clm_type_cd AND
                 {clm}.clm_num_sk = {dcmtn}.clm_num_sk
-            {{WHERE_CLAUSE}} AND {claim_type_clause(start_time)}
+            {{WHERE_CLAUSE}} AND {claim_type_clause(start_time, CLAIM_TYPE_CODES)}
             {{ORDER_BY}}
         """
 
@@ -812,7 +812,7 @@ class IdrClaimDateSignature(IdrBaseModel):
                 FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
                 JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_dt_sgntr {sgntr}
                 ON {clm}.clm_dt_sgntr_sk = {sgntr}.clm_dt_sgntr_sk
-                {{WHERE_CLAUSE}} AND {claim_type_clause(start_time)}
+                {{WHERE_CLAUSE}} AND {claim_type_clause(start_time, CLAIM_TYPE_CODES)}
                 {{ORDER_BY}}
             )
             SELECT {{COLUMNS_NO_ALIAS}} FROM dupes WHERE row_order = 1
@@ -849,7 +849,7 @@ class IdrClaimFiss(IdrBaseModel):
                 {clm}.clm_dt_sgntr_sk = {fiss}.clm_dt_sgntr_sk AND
                 {clm}.clm_type_cd = {fiss}.clm_type_cd AND
                 {clm}.clm_num_sk = {fiss}.clm_num_sk
-            {{WHERE_CLAUSE}} AND {claim_type_clause(start_time)}
+            {{WHERE_CLAUSE}} AND {claim_type_clause(start_time, CLAIM_TYPE_CODES)}
             {{ORDER_BY}}
         """
 
@@ -916,7 +916,7 @@ class IdrClaimInstitutional(IdrBaseModel):
                 {clm}.clm_dt_sgntr_sk = {instnl}.clm_dt_sgntr_sk AND
                 {clm}.clm_type_cd = {instnl}.clm_type_cd AND
                 {clm}.clm_num_sk = {instnl}.clm_num_sk
-            {{WHERE_CLAUSE}} AND {claim_type_clause(start_time)}
+            {{WHERE_CLAUSE}} AND {claim_type_clause(start_time, CLAIM_TYPE_CODES)}
             {{ORDER_BY}}
         """
 
@@ -1090,7 +1090,7 @@ class IdrClaimItem(IdrBaseModel):
                         {clm}.clm_dt_sgntr_sk,
                         {clm}.clm_idr_ld_dt
                     FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
-                    WHERE {claim_type_clause(start_time)}
+                    WHERE {claim_type_clause(start_time, CLAIM_TYPE_CODES)}
                 ),
                 claim_groups AS (
                     SELECT 
@@ -1237,7 +1237,7 @@ class IdrClaimLineInstitutional(IdrBaseModel):
                 {clm}.clm_dt_sgntr_sk = {line}.clm_dt_sgntr_sk AND
                 {clm}.clm_type_cd = {line}.clm_type_cd AND
                 {clm}.clm_num_sk = {line}.clm_num_sk
-            {{WHERE_CLAUSE}} AND {claim_type_clause(start_time)}
+            {{WHERE_CLAUSE}} AND {claim_type_clause(start_time, CLAIM_TYPE_CODES)}
             {{ORDER_BY}}
         """
 
@@ -1348,7 +1348,7 @@ class IdrClaimProfessional(IdrBaseModel):
                 {clm}.clm_dt_sgntr_sk = {lctn_hstry}.clm_dt_sgntr_sk AND
                 {clm}.clm_num_sk = {lctn_hstry}.clm_num_sk AND
                 {lctn_hstry}.clm_lctn_cd_sqnc_num = latest_lctn.max_clm_lctn_cd_sqnc_num
-            {{WHERE_CLAUSE}} AND {claim_type_clause(start_time)}
+            {{WHERE_CLAUSE}} AND {claim_type_clause(start_time, CLAIM_TYPE_CODES)}
             {{ORDER_BY}}
         """
 
@@ -1401,7 +1401,7 @@ class IdrClaimLineProfessional(IdrBaseModel):
                 {clm}.clm_dt_sgntr_sk = {prfnl}.clm_dt_sgntr_sk AND
                 {clm}.clm_type_cd = {prfnl}.clm_type_cd AND
                 {clm}.clm_num_sk = {prfnl}.clm_num_sk
-            {{WHERE_CLAUSE}} AND {claim_type_clause(start_time)}
+            {{WHERE_CLAUSE}} AND {claim_type_clause(start_time, CLAIM_TYPE_CODES)}
             {{ORDER_BY}}
         """
 
@@ -1498,6 +1498,6 @@ class IdrClaimLineRx(IdrBaseModel):
                 AND {line}.clm_dt_sgntr_sk = {rx_line}.clm_dt_sgntr_sk
                 AND {line}.clm_uniq_id = {rx_line}.clm_uniq_id
                 AND {line}.clm_line_num = {rx_line}.clm_line_num
-            {{WHERE_CLAUSE}} AND {claim_type_clause(start_time)}
+            {{WHERE_CLAUSE}} AND {claim_type_clause(start_time, PART_D_CLAIM_TYPE_CODES)}
             {{ORDER_BY}}
         """
