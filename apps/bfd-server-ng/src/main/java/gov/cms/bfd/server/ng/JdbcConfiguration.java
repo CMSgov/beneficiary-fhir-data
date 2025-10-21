@@ -39,8 +39,8 @@ public class JdbcConfiguration implements JdbcConnectionDetails {
       try (var rdsClient = RdsClient.create()) {
         var clusterIdentifier = String.format(nonsensitiveDb.getClusterIdentifierTemplate(), env);
         var clusters =
-                rdsClient.describeDBClusters(
-                        DescribeDbClustersRequest.builder().dbClusterIdentifier(clusterIdentifier).build());
+            rdsClient.describeDBClusters(
+                DescribeDbClustersRequest.builder().dbClusterIdentifier(clusterIdentifier).build());
         return getConnectionString(clusters.dbClusters().getFirst().readerEndpoint());
       }
     } else {
@@ -50,9 +50,9 @@ public class JdbcConfiguration implements JdbcConnectionDetails {
 
   private String getConnectionString(String dbHost) {
     return String.format(
-            nonsensitiveDb.getConnectionStringTemplate(),
-            dbHost,
-            nonsensitiveDb.getPort(),
-            nonsensitiveDb.getName());
+        nonsensitiveDb.getConnectionStringTemplate(),
+        dbHost,
+        nonsensitiveDb.getPort(),
+        nonsensitiveDb.getName());
   }
 }
