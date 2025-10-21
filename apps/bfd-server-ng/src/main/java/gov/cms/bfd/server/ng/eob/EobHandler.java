@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.ng.eob;
 
+import gov.cms.bfd.server.ng.ClaimSecurityStatus;
 import gov.cms.bfd.server.ng.SamhsaFilterMode;
 import gov.cms.bfd.server.ng.SecurityLabel;
 import gov.cms.bfd.server.ng.beneficiary.BeneficiaryRepository;
@@ -86,7 +87,18 @@ public class EobHandler {
 
     return FhirUtil.bundleOrDefault(
         filteredClaims
-            .map(claim -> claim.toFhir(claimHasSamhsa(claim)))
+            .map(
+                claim -> {
+                  var hasSamhsaServices =
+                      samhsaFilterMode == SamhsaFilterMode.INCLUDE && claimHasSamhsa(claim);
+
+                  ClaimSecurityStatus securityStatus =
+                      hasSamhsaServices
+                          ? ClaimSecurityStatus.SAMHSA_APPLICABLE
+                          : ClaimSecurityStatus.NONE;
+
+                  return claim.toFhir(securityStatus);
+                })
             .collect(Collectors.toList()),
         claimRepository::claimLastUpdated);
   }
@@ -134,7 +146,11 @@ public class EobHandler {
     if (samhsaFilterMode == SamhsaFilterMode.EXCLUDE && claimHasSamhsa(claim)) {
       return Optional.empty();
     }
-    return Optional.of(claim.toFhir(claimHasSamhsa(claim)));
+
+    ClaimSecurityStatus securityStatus =
+        claimHasSamhsa(claim) ? ClaimSecurityStatus.SAMHSA_APPLICABLE : ClaimSecurityStatus.NONE;
+
+    return Optional.of(claim.toFhir(securityStatus));
   }
 
   private boolean isCodeSamhsa(String targetCode, LocalDate claimDate, SecurityLabel entry) {

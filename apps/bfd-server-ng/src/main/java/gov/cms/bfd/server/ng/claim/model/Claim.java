@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model;
 
+import gov.cms.bfd.server.ng.ClaimSecurityStatus;
 import gov.cms.bfd.server.ng.beneficiary.model.BeneficiarySimple;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import gov.cms.bfd.server.ng.util.IdrConstants;
@@ -111,10 +112,10 @@ public class Claim {
   /**
    * Convert the claim info to a FHIR ExplanationOfBenefit.
    *
-   * @param claimHasSamhsa claimHasSamhsa
+   * @param securityStatus securityStatus
    * @return ExplanationOfBenefit
    */
-  public ExplanationOfBenefit toFhir(boolean claimHasSamhsa) {
+  public ExplanationOfBenefit toFhir(ClaimSecurityStatus securityStatus) {
     var eob = new ExplanationOfBenefit();
     eob.setId(String.valueOf(claimUniqueId));
     eob.setPatient(PatientReferenceFactory.toFhir(beneficiary.getXrefSk()));
@@ -211,7 +212,7 @@ public class Claim {
     eob.addTotal(adjudicationCharge.toFhir());
     eob.setPayment(claimPaymentAmount.toFhir());
 
-    if (claimHasSamhsa) {
+    if (securityStatus == ClaimSecurityStatus.SAMHSA_APPLICABLE) {
       var coding = new Coding();
       coding
           .setSystem(SystemUrls.SAMHSA_ACT_CODE_SYSTEM_URL)
