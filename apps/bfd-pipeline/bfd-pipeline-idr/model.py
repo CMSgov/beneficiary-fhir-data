@@ -1099,7 +1099,8 @@ class IdrClaimItem(IdrBaseModel):
                         {line}.*,
                         ROW_NUMBER() OVER (
                             PARTITION BY {clm}.clm_uniq_id 
-                            ORDER BY {clm}.clm_uniq_id
+                            ORDER BY {clm}.clm_uniq_id,
+                                {line}.clm_line_num
                         ) AS bfd_row_id
                     FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_line {line}
                     JOIN claims {clm} 
@@ -1161,7 +1162,7 @@ class IdrClaimItem(IdrBaseModel):
                     AND {line}.clm_type_cd = {clm}.clm_type_cd
                     AND {line}.clm_num_sk = {clm}.clm_num_sk 
                     AND {line}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
-                    AND {line}.clm_line_num = {clm_grp}.bfd_row_id
+                    AND {line}.bfd_row_id = {clm_grp}.bfd_row_id
                     AND {line}.clm_uniq_id = {clm}.clm_uniq_id
                 LEFT JOIN claim_procedures {prod}
                     ON {prod}.geo_bene_sk = {clm}.geo_bene_sk
@@ -1175,7 +1176,7 @@ class IdrClaimItem(IdrBaseModel):
                     AND {val}.clm_type_cd = {clm}.clm_type_cd
                     AND {val}.clm_num_sk = {clm}.clm_num_sk 
                     AND {val}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
-                    AND {val}.clm_val_sqnc_num = {clm_grp}.bfd_row_id
+                    AND {val}.bfd_row_id = {clm_grp}.bfd_row_id
                 LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_dcmtn {line_dcmtn}
                     ON {line_dcmtn}.geo_bene_sk = {line}.geo_bene_sk
                     AND {line_dcmtn}.clm_type_cd = {line}.clm_type_cd
