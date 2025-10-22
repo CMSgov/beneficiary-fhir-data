@@ -625,7 +625,6 @@ def claim_type_clause(start_time: datetime) -> str:
             f"OR {ALIAS_CLM}.clm_type_cd IN ({
                 ','.join([str(c) for c in PART_D_CLAIM_TYPE_CODES])
             }))"
-            f" AND {ALIAS_CLM}.clm_from_dt <= {ALIAS_CLM}.clm_thru_dt"
         )
     # PAC data older than 60 days should be filtered
     pac_cutoff_date = start_time - timedelta(days=60)
@@ -650,6 +649,7 @@ def claim_type_clause(start_time: datetime) -> str:
             )
             OR {ALIAS_CLM}.clm_src_id = '{NCH_CLM_SOURCE}'
         )
+        AND {ALIAS_CLM}.clm_from_dt <= {ALIAS_CLM}.clm_thru_dt
     )
     """
 
