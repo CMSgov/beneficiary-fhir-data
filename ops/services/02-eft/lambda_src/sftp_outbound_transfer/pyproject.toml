@@ -1,11 +1,7 @@
 [project]
 name = "sftp-outbound-transfer"
 version = "1.0.0"
-requires-python = ">=3.13"
-dependencies = ["aws-lambda-powertools[all]", "paramiko", "boto3", "pydantic"]
-
-[dependency-groups]
-dev = ["pytest", "pyright", "ruff", "boto3-stubs[sns,ssm]"]
+dependencies = ["aws-lambda-powertools[all]", "paramiko", "boto3"]
 
 [tool.ruff]
 # Set the maximum line length to 100.

@@ -1,6 +1,6 @@
 [project]
 # Support Python 3.13+.
-requires-python = ">=3.13"
+requires-python = ">=3.13,<3.14"
 name = "slack-alerter"
 version = "1.0.0"
 dependencies = ["aws-lambda-powertools[all]", "boto3", "pydantic"]

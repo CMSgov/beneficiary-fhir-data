@@ -7,11 +7,6 @@ import ssl
 from collections.abc import Callable, Mapping
 from typing import Any
 
-from locust import FastHttpUser, events
-from locust.argument_parser import LocustArgumentParser
-from locust.contrib.fasthttp import ResponseContextManager
-from locust.env import Environment
-
 from common import custom_args, data, validation
 from common.locust_utils import is_distributed, is_locust_worker
 from common.stats import stats_compare, stats_writers
@@ -19,6 +14,10 @@ from common.stats.aggregated_stats import FinalCompareResult, StatsCollector
 from common.stats.stats_config import StatsConfiguration
 from common.url_path import create_url_path
 from common.validation import ValidationResult
+from locust import FastHttpUser, events
+from locust.argument_parser import LocustArgumentParser
+from locust.contrib.fasthttp import ResponseContextManager
+from locust.env import Environment
 
 _COMPARISONS_METADATA_PATH = None
 """The path to a given stats comparison metadata JSON file for a particular test suite. Should be

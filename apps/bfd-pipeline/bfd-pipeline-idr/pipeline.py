@@ -1,13 +1,13 @@
 import logging
 import os
 import sys
-
-import ray
-from hamilton import base, driver  # type: ignore
-from hamilton.plugins.h_ray import RayGraphAdapter  # type: ignore
+import time
 
 import pipeline_nodes
+import ray
 from constants import CLAIM_AUX_TABLES
+from hamilton import base, driver  # type: ignore
+from hamilton.plugins.h_ray import RayGraphAdapter  # type: ignore
 from loader import get_connection_string
 
 console_handler = logging.StreamHandler()
@@ -27,10 +27,26 @@ def main() -> None:
     logger.info("load start")
 
     parallelism = int(os.environ.get("PARALLELISM", "6"))
-    ray.init(logging_level="info", num_cpus=parallelism)  # type: ignore
+    mode = sys.argv[1] if len(sys.argv) > 1 else ""
+    use_ray = mode not in ("synthetic", "local")
 
-    dict_builder = base.DictResult()
-    adapter = RayGraphAdapter(result_builder=dict_builder)
+    if use_ray:
+        # Shutdown any existing Ray instance first to avoid conflicts.
+        if ray.is_initialized():
+            ray.shutdown()
+            time.sleep(1)
+
+        ray.init(
+            logging_level="info",
+            num_cpus=parallelism,
+        )
+        dict_builder = base.DictResult()
+        adapter = RayGraphAdapter(result_builder=dict_builder)
+    else:
+        # Use simple non distributed adapter for tests
+        dict_builder = base.DictResult()
+        adapter = base.SimplePythonGraphAdapter(result_builder=dict_builder)
+
     load_type = str(os.environ.get("LOAD_TYPE", "incremental"))
     logger.info("load_type %s", load_type)
     dr = (
