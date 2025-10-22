@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.ng.eob;
 
+import gov.cms.bfd.server.ng.ClaimSecurityStatus;
 import gov.cms.bfd.server.ng.SamhsaFilterMode;
 import gov.cms.bfd.server.ng.SecurityLabel;
 import gov.cms.bfd.server.ng.beneficiary.BeneficiaryRepository;
@@ -18,6 +19,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
@@ -82,8 +84,23 @@ public class EobHandler {
             beneXrefSk.get(), serviceDate, lastUpdated, count, startIndex, sourceIds);
 
     var filteredClaims = filterSamhsaClaims(claims, samhsaFilterMode);
+
     return FhirUtil.bundleOrDefault(
-        filteredClaims.map(Claim::toFhir), claimRepository::claimLastUpdated);
+        filteredClaims
+            .map(
+                claim -> {
+                  var hasSamhsaServices =
+                      samhsaFilterMode == SamhsaFilterMode.INCLUDE && claimHasSamhsa(claim);
+
+                  ClaimSecurityStatus securityStatus =
+                      hasSamhsaServices
+                          ? ClaimSecurityStatus.SAMHSA_APPLICABLE
+                          : ClaimSecurityStatus.NONE;
+
+                  return claim.toFhir(securityStatus);
+                })
+            .collect(Collectors.toList()),
+        claimRepository::claimLastUpdated);
   }
 
   private Stream<Claim> filterSamhsaClaims(List<Claim> claims, SamhsaFilterMode samhsaFilterMode) {
@@ -129,7 +146,11 @@ public class EobHandler {
     if (samhsaFilterMode == SamhsaFilterMode.EXCLUDE && claimHasSamhsa(claim)) {
       return Optional.empty();
     }
-    return Optional.of(claim.toFhir());
+
+    ClaimSecurityStatus securityStatus =
+        claimHasSamhsa(claim) ? ClaimSecurityStatus.SAMHSA_APPLICABLE : ClaimSecurityStatus.NONE;
+
+    return Optional.of(claim.toFhir(securityStatus));
   }
 
   private boolean isCodeSamhsa(String targetCode, LocalDate claimDate, SecurityLabel entry) {
