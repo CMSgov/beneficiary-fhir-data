@@ -1339,36 +1339,58 @@ class IdrClaimProfessional(IdrBaseModel):
         prfnl = ALIAS_PRFNL
         lctn_hstry = ALIAS_LCTN_HSTRY
         return f"""
-            WITH latest_clm_lctn_hstry AS (
-                SELECT 
-                    geo_bene_sk, 
-                    clm_type_cd, 
-                    clm_dt_sgntr_sk, 
-                    clm_num_sk, 
-                    MAX(clm_lctn_cd_sqnc_num) AS max_clm_lctn_cd_sqnc_num
-                FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_lctn_hstry
-                GROUP BY geo_bene_sk, clm_dt_sgntr_sk, clm_type_cd, clm_num_sk
-            )
-            SELECT {{COLUMNS}}
-            FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
-            JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_prfnl {prfnl} ON
-                {clm}.geo_bene_sk = {prfnl}.geo_bene_sk AND
-                {clm}.clm_type_cd = {prfnl}.clm_type_cd AND
-                {clm}.clm_dt_sgntr_sk = {prfnl}.clm_dt_sgntr_sk AND
-                {clm}.clm_num_sk = {prfnl}.clm_num_sk
-            LEFT JOIN latest_clm_lctn_hstry latest_lctn ON
-                {clm}.geo_bene_sk = latest_lctn.geo_bene_sk AND
-                {clm}.clm_type_cd = latest_lctn.clm_type_cd AND
-                {clm}.clm_dt_sgntr_sk = latest_lctn.clm_dt_sgntr_sk AND
-                {clm}.clm_num_sk = latest_lctn.clm_num_sk
-            LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_lctn_hstry {lctn_hstry} ON
-                {clm}.geo_bene_sk = {lctn_hstry}.geo_bene_sk AND
-                {clm}.clm_type_cd = {lctn_hstry}.clm_type_cd AND
-                {clm}.clm_dt_sgntr_sk = {lctn_hstry}.clm_dt_sgntr_sk AND
-                {clm}.clm_num_sk = {lctn_hstry}.clm_num_sk AND
-                {lctn_hstry}.clm_lctn_cd_sqnc_num = latest_lctn.max_clm_lctn_cd_sqnc_num
-            {{WHERE_CLAUSE}} AND {claim_type_clause(start_time, CLAIM_TYPE_CODES)}
-            {{ORDER_BY}}
+            WITH claims AS (
+                    SELECT 
+                        {clm}.clm_uniq_id, 
+                        {clm}.geo_bene_sk, 
+                        {clm}.clm_type_cd, 
+                        {clm}.clm_num_sk, 
+                        {clm}.clm_dt_sgntr_sk,
+                        {clm}.clm_idr_ld_dt
+                    FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
+                    WHERE 
+                        {claim_type_clause(start_time, CLAIM_TYPE_CODES)} AND 
+                        {clm}.clm_idr_ld_dt >= '{get_min_transaction_date()}'
+                ),
+                latest_clm_lctn_hstry AS (
+                    SELECT 
+                        claims.geo_bene_sk, 
+                        claims.clm_type_cd, 
+                        claims.clm_dt_sgntr_sk, 
+                        claims.clm_num_sk, 
+                        MAX(hstry.clm_lctn_cd_sqnc_num) AS max_clm_lctn_cd_sqnc_num
+                    FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_lctn_hstry hstry
+                    JOIN claims ON
+                        hstry.geo_bene_sk = claims.geo_bene_sk AND
+                        hstry.clm_type_cd = claims.clm_type_cd AND
+                        hstry.clm_dt_sgntr_sk = claims.clm_dt_sgntr_sk AND
+                        hstry.clm_num_sk = claims.clm_num_sk
+                    GROUP BY 
+                        claims.geo_bene_sk, 
+                        claims.clm_type_cd, 
+                        claims.clm_dt_sgntr_sk, 
+                        claims.clm_num_sk
+                )
+                SELECT {{COLUMNS}}
+                FROM claims {clm}
+                JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_prfnl {prfnl} ON
+                    {clm}.geo_bene_sk = {prfnl}.geo_bene_sk AND
+                    {clm}.clm_type_cd = {prfnl}.clm_type_cd AND
+                    {clm}.clm_dt_sgntr_sk = {prfnl}.clm_dt_sgntr_sk AND
+                    {clm}.clm_num_sk = {prfnl}.clm_num_sk
+                LEFT JOIN latest_clm_lctn_hstry latest_lctn ON
+                    {clm}.geo_bene_sk = latest_lctn.geo_bene_sk AND
+                    {clm}.clm_type_cd = latest_lctn.clm_type_cd AND
+                    {clm}.clm_dt_sgntr_sk = latest_lctn.clm_dt_sgntr_sk AND
+                    {clm}.clm_num_sk = latest_lctn.clm_num_sk
+                LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_lctn_hstry {lctn_hstry} ON
+                    {clm}.geo_bene_sk = {lctn_hstry}.geo_bene_sk AND
+                    {clm}.clm_type_cd = {lctn_hstry}.clm_type_cd AND
+                    {clm}.clm_dt_sgntr_sk = {lctn_hstry}.clm_dt_sgntr_sk AND
+                    {clm}.clm_num_sk = {lctn_hstry}.clm_num_sk AND
+                    {lctn_hstry}.clm_lctn_cd_sqnc_num = latest_lctn.max_clm_lctn_cd_sqnc_num
+                {{WHERE_CLAUSE}} AND {claim_type_clause(start_time, CLAIM_TYPE_CODES)}
+                {{ORDER_BY}}
         """
 
 
