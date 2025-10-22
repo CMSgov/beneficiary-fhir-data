@@ -342,7 +342,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD"
           }
         } ],
-        "start" : "2025-03-30"
+        "start" : "2025-04-30"
       },
       "careTeam" : [ {
         "provider" : {
@@ -2661,7 +2661,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD"
           }
         } ],
-        "start" : "2020-02-18"
+        "start" : "2020-03-18"
       },
       "created" : "2025-08-26T00:00:00+00:00",
       "extension" : [ {
@@ -3438,7 +3438,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD"
           }
         } ],
-        "start" : "2019-11-17"
+        "start" : "2019-12-17"
       },
       "careTeam" : [ {
         "provider" : {
@@ -5328,7 +5328,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD"
           }
         } ],
-        "start" : "2019-09-23"
+        "start" : "2019-10-23"
       },
       "careTeam" : [ {
         "provider" : {
@@ -7897,7 +7897,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD"
           }
         } ],
-        "start" : "2020-09-01"
+        "start" : "2020-10-01"
       },
       "contained" : [ {
         "active" : true,
@@ -9472,7 +9472,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD"
           }
         } ],
-        "start" : "2025-03-30"
+        "start" : "2025-04-30"
       },
       "careTeam" : [ {
         "provider" : {
@@ -11791,7 +11791,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD"
           }
         } ],
-        "start" : "2020-02-18"
+        "start" : "2020-03-18"
       },
       "created" : "2025-08-26T00:00:00+00:00",
       "extension" : [ {
@@ -12568,7 +12568,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD"
           }
         } ],
-        "start" : "2019-11-17"
+        "start" : "2019-12-17"
       },
       "careTeam" : [ {
         "provider" : {
@@ -14458,7 +14458,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD"
           }
         } ],
-        "start" : "2019-09-23"
+        "start" : "2019-10-23"
       },
       "careTeam" : [ {
         "provider" : {
@@ -17027,7 +17027,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD"
           }
         } ],
-        "start" : "2020-09-01"
+        "start" : "2020-10-01"
       },
       "contained" : [ {
         "active" : true,
