@@ -371,6 +371,8 @@ CREATE TABLE idr.claim_item (
     clm_pos_cd VARCHAR(2) NOT NULL,
     clm_rndrg_prvdr_prtcptg_cd VARCHAR(1) NOT NULL,
     clm_rndrg_prvdr_tax_num VARCHAR(10) NOT NULL,
+    clm_rndrg_prvdr_type_cd VARCHAR(3) NOT NULL,
+    clm_rndrg_prvdr_npi_num VARCHAR(10) NOT NULL,
     hcpcs_1_mdfr_cd VARCHAR(2) NOT NULL,
     hcpcs_2_mdfr_cd VARCHAR(2) NOT NULL,
     hcpcs_3_mdfr_cd VARCHAR(2) NOT NULL,

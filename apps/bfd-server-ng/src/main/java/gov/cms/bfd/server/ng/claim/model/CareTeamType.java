@@ -20,8 +20,8 @@ enum CareTeamType {
   RENDERING("rendering", "Rendering provider"),
   OTHER("otheroperating", "Other Operating");
 
-  private final String roleCode;
-  private final String roleDisplay;
+  public final String roleCode;
+  public final String roleDisplay;
 
   CareTeamComponents toFhir(
       SequenceGenerator sequenceGenerator, String value, Optional<String> familyName) {

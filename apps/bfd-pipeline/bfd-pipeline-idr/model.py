@@ -924,6 +924,8 @@ class IdrClaimItem(IdrBaseModel):
     clm_pos_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_rndrg_prvdr_prtcptg_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_rndrg_prvdr_tax_num: Annotated[str, BeforeValidator(transform_default_string)]
+    clm_rndrg_prvdr_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
+    clm_rndrg_prvdr_npi_num: Annotated[str, BeforeValidator(transform_default_string)]
     hcpcs_1_mdfr_cd: Annotated[str, BeforeValidator(transform_default_string)]
     hcpcs_2_mdfr_cd: Annotated[str, BeforeValidator(transform_default_string)]
     hcpcs_3_mdfr_cd: Annotated[str, BeforeValidator(transform_default_string)]

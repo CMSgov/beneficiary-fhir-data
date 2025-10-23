@@ -38,6 +38,7 @@ public class ClaimLine {
   @Embedded private ClaimLineServiceUnitQuantity serviceUnitQuantity;
   @Embedded private ClaimLineHcpcsModifierCode hcpcsModifierCode;
   @Embedded private ClaimLineAdjudicationCharge adjudicationCharge;
+  @Embedded private ClaimRenderingProvider claimRenderingProvider;
 
   Optional<ExplanationOfBenefit.ItemComponent> toFhir(ClaimItem claimItem) {
     if (claimLineNumber.isEmpty()) {

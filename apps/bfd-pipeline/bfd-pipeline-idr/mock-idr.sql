@@ -375,6 +375,8 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_line (
     clm_line_thru_dt DATE,
     clm_rndrg_prvdr_prtcptg_cd VARCHAR(1),
     clm_rndrg_prvdr_tax_num VARCHAR(10),
+    clm_rndrg_prvdr_type_cd VARCHAR(3),
+    clm_rndrg_prvdr_npi_num VARCHAR(10),
     clm_pos_cd VARCHAR(2),
     -- SAMHSA (HCPCS/CPT)
     clm_line_hcpcs_cd VARCHAR(5),

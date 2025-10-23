@@ -156,6 +156,14 @@ public class Claim {
     claimItems.forEach(
         item -> {
           item.getClaimLine().toFhir(item).ifPresent(eob::addItem);
+          item.getClaimLine()
+                  .getClaimRenderingProvider()
+                  .toFhirPractitioner(item.getClaimLine().getClaimLineNumber())
+                  .ifPresent(eob::addContained);
+          item.getClaimLine()
+                  .getClaimRenderingProvider()
+                  .toFhirCareTeam(item.getClaimLine().getClaimLineNumber())
+                          .ifPresent(eob::addCareTeam);
           item.getClaimProcedure().toFhirProcedure().ifPresent(eob::addProcedure);
           item.getClaimProcedure()
               .toFhirDiagnosis(item.getClaimItemId().getBfdRowId(), claimTypeCode)

@@ -547,6 +547,22 @@ public class SystemUrls {
   public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_MEDICAID_STATE_CODE =
       "https://bluebutton.cms.gov/fhir/StructureDefinition/MEDICAID-STATE-CD";
 
+  /** Blue Button structure definition - provider participating code. */
+  public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_PROVIDER_PARTICIPATING_CODE =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-RNDRG-PRVDR-PRTCPTG-CD";
+
+  /** Blue Button code system - provider participating code. */
+  public static final String BLUE_BUTTON_CODE_SYSTEM_PROVIDER_PARTICIPATING_CODE =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RNDRG-PRVDR-PRTCPTG-CD";
+
+  /** Blue Button structure definition - provider type code. */
+  public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_PROVIDER_TYPE_CODE =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRVDR-TYPE-CD";
+
+  /** Blue Button code system - provider type code. */
+  public static final String BLUE_BUTTON_CODE_SYSTEM_PROVIDER_TYPE_CODE =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRVDR-TYPE-CD";
+
   /** CMS ICD - ICD-9. */
   public static final String CMS_ICD_9_PROCEDURE = "http://www.cms.gov/Medicare/Coding/ICD9";
 
