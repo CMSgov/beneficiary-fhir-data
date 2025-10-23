@@ -1097,8 +1097,14 @@ class IdrClaimItem(IdrBaseModel):
         #   3. Take our list of claim_uniq_id + line number and left join each table against it to
         #      get the final result.
 
+        # In Postgres, we need to tell the query planner to NOT materialize the CTEs because
+        # it will behave extremely poorly when trying to join against these large sets of
+        # non-indexed data in memory. This is fine in Snowflake because it's fundamentally
+        # different, but we need to force this behavior for local testing.
+        not_materialized = "" if os.environ.get("IDR_USERNAME", "") else "NOT MATERIALIZED"
+
         return f"""
-                WITH claims AS (
+                WITH claims AS {not_materialized} (
                     SELECT 
                         {clm}.clm_uniq_id, 
                         {clm}.geo_bene_sk, 
@@ -1111,7 +1117,7 @@ class IdrClaimItem(IdrBaseModel):
                         {claim_type_clause(start_time, CLAIM_TYPE_CODES)} AND 
                         {clm}.clm_idr_ld_dt >= '{get_min_transaction_date()}'
                 ),
-                claim_lines AS NOT MATERIALIZED (
+                claim_lines AS {not_materialized} (
                     SELECT
                         {line}.*,
                         ROW_NUMBER() OVER (
@@ -1126,7 +1132,7 @@ class IdrClaimItem(IdrBaseModel):
                         AND {line}.clm_num_sk = {clm}.clm_num_sk 
                         AND {line}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
                 ),
-                claim_procedures AS NOT MATERIALIZED (
+                claim_procedures AS {not_materialized} (
                     SELECT 
                         {clm}.clm_uniq_id,
                         {prod}.*,
@@ -1143,7 +1149,7 @@ class IdrClaimItem(IdrBaseModel):
                         AND {prod}.clm_num_sk = {clm}.clm_num_sk 
                         AND {prod}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
                 ),
-                claim_vals AS NOT MATERIALIZED (
+                claim_vals AS {not_materialized} (
                     SELECT
                         {clm}.clm_uniq_id, 
                         {val}.*,
