@@ -12,7 +12,11 @@ import ca.uhn.fhir.rest.gclient.ICriterion;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import gov.cms.bfd.server.ng.coverage.CoverageResourceProvider;
+import gov.cms.bfd.server.ng.testUtil.ThreadSafeAppender;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import java.time.ZonedDateTime;
 import java.util.Comparator;
@@ -24,8 +28,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.beans.factory.annotation.Autowired;
 
-public class CoverageSearchIT extends IntegrationTestBase {
+class CoverageSearchIT extends IntegrationTestBase {
+  @Autowired private CoverageResourceProvider coverageResourceProvider;
+
   private IQuery<Bundle> searchBundle() {
     return getFhirClient().search().forResource(Coverage.class).returnBundle(Bundle.class);
   }
@@ -53,6 +60,17 @@ public class CoverageSearchIT extends IntegrationTestBase {
         coverageBundle.getEntry().size(),
         "Should find exactly one Coverage for this composite ID");
     expectFhir().scenario(searchStyle.name()).toMatchSnapshot(coverageBundle);
+  }
+
+  @Test
+  void coverageSearchQueryCount() {
+    var events = ThreadSafeAppender.startRecord();
+    var coverage =
+        coverageResourceProvider.searchByBeneficiary(
+            new ReferenceParam(BENE_ID_ALL_PARTS_WITH_XREF), new DateRangeParam());
+    // This should increase when we map the other coverage types
+    assertEquals(3, coverage.getEntry().size());
+    assertEquals(1, queryCount(events));
   }
 
   @ParameterizedTest
