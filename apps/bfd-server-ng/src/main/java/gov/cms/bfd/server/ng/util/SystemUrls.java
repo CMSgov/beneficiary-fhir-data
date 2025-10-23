@@ -356,8 +356,9 @@ public class SystemUrls {
       "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CARR-PMT-DNL-CD";
 
   /** Blue Button structure definition - claim provider assignment indicator switch */
-  public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_CLAIM_PROVIDER_ASSIGNMENT_INDICATOR_SWITCH =
-      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MDCR-PRFNL-PRVDR-ASGNMT-SW";
+  public static final String
+      BLUE_BUTTON_STRUCTURE_DEFINITION_CLAIM_PROVIDER_ASSIGNMENT_INDICATOR_SWITCH =
+          "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MDCR-PRFNL-PRVDR-ASGNMT-SW";
 
   /** Blue Button structure definition - claim clinical trial number */
   public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_CLAIM_CLINICAL_TRIAL_NUMBER =
