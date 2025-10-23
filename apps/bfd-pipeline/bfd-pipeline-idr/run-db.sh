@@ -16,6 +16,7 @@ docker run \
   -e 'POSTGRES_PASSWORD=InsecureLocalDev' \
   -p '5432:5432' \
   -v 'bfd-idr-db:/var/lib/postgresql/data' \
+  --shm-size=1g \
   $image \
   postgres -N $max_connections
 
@@ -42,7 +43,9 @@ docker exec -u postgres bfd-idr-db psql fhirdb bfd -f docker-entrypoint-initdb.d
 "$script_dir/../../bfd-db-migrator-ng/migrate-local.sh"
 
 uv sync
-BFD_DB_ENDPOINT=localhost BFD_DB_USERNAME=bfd BFD_DB_PASSWORD=InsecureLocalDev uv run load_synthetic.py "$1" && uv run pipeline.py local
+BFD_DB_ENDPOINT=localhost BFD_DB_USERNAME=bfd BFD_DB_PASSWORD=InsecureLocalDev uv run load_synthetic.py "$1" 
+docker exec -u postgres bfd-idr-db psql fhirdb bfd -c "VACUUM FULL ANALYZE"
+BFD_DB_ENDPOINT=localhost BFD_DB_USERNAME=bfd BFD_DB_PASSWORD=InsecureLocalDev uv run pipeline.py local
 
 echo
 echo Schema created successfully.

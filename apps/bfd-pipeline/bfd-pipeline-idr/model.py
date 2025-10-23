@@ -1111,7 +1111,7 @@ class IdrClaimItem(IdrBaseModel):
                         {claim_type_clause(start_time, CLAIM_TYPE_CODES)} AND 
                         {clm}.clm_idr_ld_dt >= '{get_min_transaction_date()}'
                 ),
-                claim_lines AS (
+                claim_lines AS NOT MATERIALIZED (
                     SELECT
                         {line}.*,
                         ROW_NUMBER() OVER (
@@ -1126,7 +1126,7 @@ class IdrClaimItem(IdrBaseModel):
                         AND {line}.clm_num_sk = {clm}.clm_num_sk 
                         AND {line}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
                 ),
-                claim_procedures AS (
+                claim_procedures AS NOT MATERIALIZED (
                     SELECT 
                         {clm}.clm_uniq_id,
                         {prod}.*,
@@ -1143,7 +1143,7 @@ class IdrClaimItem(IdrBaseModel):
                         AND {prod}.clm_num_sk = {clm}.clm_num_sk 
                         AND {prod}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
                 ),
-                claim_vals AS (
+                claim_vals AS NOT MATERIALIZED (
                     SELECT
                         {clm}.clm_uniq_id, 
                         {val}.*,
@@ -1179,14 +1179,12 @@ class IdrClaimItem(IdrBaseModel):
                     AND {line}.clm_num_sk = {clm}.clm_num_sk 
                     AND {line}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
                     AND {line}.bfd_row_id = {clm_grp}.bfd_row_id
-                    AND {line}.clm_uniq_id = {clm}.clm_uniq_id
                 LEFT JOIN claim_procedures {prod}
                     ON {prod}.geo_bene_sk = {clm}.geo_bene_sk
                     AND {prod}.clm_type_cd = {clm}.clm_type_cd
                     AND {prod}.clm_num_sk = {clm}.clm_num_sk 
                     AND {prod}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
                     AND {prod}.bfd_row_id = {clm_grp}.bfd_row_id
-                    AND {prod}.clm_uniq_id = {clm}.clm_uniq_id
                 LEFT JOIN claim_vals {val}
                     ON {val}.geo_bene_sk = {clm}.geo_bene_sk
                     AND {val}.clm_type_cd = {clm}.clm_type_cd
