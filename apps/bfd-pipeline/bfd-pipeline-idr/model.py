@@ -1125,7 +1125,6 @@ class IdrClaimItem(IdrBaseModel):
                         AND {line}.clm_type_cd = {clm}.clm_type_cd
                         AND {line}.clm_num_sk = {clm}.clm_num_sk 
                         AND {line}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
-                        AND {line}.clm_uniq_id = {clm}.clm_uniq_id
                 ),
                 claim_procedures AS (
                     SELECT 

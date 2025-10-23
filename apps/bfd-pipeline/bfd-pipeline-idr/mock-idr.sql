@@ -544,3 +544,15 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_dcmtn (
     idr_updt_ts TIMESTAMPTZ,
     PRIMARY KEY(geo_bene_sk, clm_dt_sgntr_sk, clm_type_cd, clm_num_sk, clm_line_num)
 );
+
+CREATE INDEX index_on_clm_joins
+	ON cms_vdm_view_mdcr_prd.v2_mdcr_clm (geo_bene_sk, clm_type_cd, clm_num_sk, clm_dt_sgntr_sk);
+CREATE INDEX index_on_clm_filters
+	ON cms_vdm_view_mdcr_prd.v2_mdcr_clm (clm_idr_ld_dt, clm_type_cd, clm_src_id, idr_updt_ts, idr_insrt_ts);
+
+CREATE INDEX index_on_clm_line
+	ON cms_vdm_view_mdcr_prd.v2_mdcr_clm_line (geo_bene_sk, clm_type_cd, clm_num_sk, clm_dt_sgntr_sk);
+CREATE INDEX index_on_clm_procedures
+	ON cms_vdm_view_mdcr_prd.v2_mdcr_clm_prod (geo_bene_sk, clm_type_cd, clm_num_sk, clm_dt_sgntr_sk);
+CREATE INDEX index_on_clm_val
+	ON cms_vdm_view_mdcr_prd.v2_mdcr_clm_val (geo_bene_sk, clm_type_cd, clm_num_sk, clm_dt_sgntr_sk);
