@@ -953,7 +953,7 @@ class IdrClaimItem(IdrBaseModel):
     clm_line_ndc_qty: Annotated[float, BeforeValidator(transform_null_float)]
     clm_line_ndc_qty_qlfyr_cd: Annotated[str, BeforeValidator(transform_null_string)]
     clm_line_srvc_unit_qty: Annotated[float, BeforeValidator(transform_null_float)]
-    clm_line_rev_ctr_cd: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_line_rev_ctr_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_line_rx_num: Annotated[str, BeforeValidator(transform_default_string)]
     clm_pos_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_rndrg_prvdr_prtcptg_cd: Annotated[str, BeforeValidator(transform_default_string)]
@@ -1017,16 +1017,16 @@ class IdrClaimItem(IdrBaseModel):
     ]
     # columns from v2_mdcr_clm_line_dcmtn
     clm_line_bnft_enhncmt_2_cd: Annotated[
-        str, {ALIAS: ALIAS_LINE_DCMTN}, BeforeValidator(transform_null_string)
+        str, {ALIAS: ALIAS_LINE_DCMTN}, BeforeValidator(transform_default_string)
     ]
     clm_line_bnft_enhncmt_3_cd: Annotated[
-        str, {ALIAS: ALIAS_LINE_DCMTN}, BeforeValidator(transform_null_string)
+        str, {ALIAS: ALIAS_LINE_DCMTN}, BeforeValidator(transform_default_string)
     ]
     clm_line_bnft_enhncmt_4_cd: Annotated[
-        str, {ALIAS: ALIAS_LINE_DCMTN}, BeforeValidator(transform_null_string)
+        str, {ALIAS: ALIAS_LINE_DCMTN}, BeforeValidator(transform_default_string)
     ]
     clm_line_bnft_enhncmt_5_cd: Annotated[
-        str, {ALIAS: ALIAS_LINE_DCMTN}, BeforeValidator(transform_null_string)
+        str, {ALIAS: ALIAS_LINE_DCMTN}, BeforeValidator(transform_default_string)
     ]
     clm_line_ngaco_cptatn_sw: Annotated[
         str, {ALIAS: ALIAS_LINE_DCMTN}, BeforeValidator(transform_null_string)
