@@ -75,6 +75,7 @@ def extract_and_load(cls: type[T], connection_string: str, mode: str, batch_size
             if error_count < max_errors:
                 last_error = datetime.now(UTC)
                 logger.warning("received transient error, retrying...", exc_info=ex)
+                data_extractor.reconnect()
             else:
                 logger.error("max attempts exceeded")
                 raise ex
