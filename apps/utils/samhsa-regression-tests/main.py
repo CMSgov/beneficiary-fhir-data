@@ -362,7 +362,7 @@ async def verify_samhsa_filtering(
                 for entry in no_samhsa_bundle_entries
             ]
             bene_samhsa_claims_set = set(samhsa_bene.samhsa_claim_ids)
-            # We should expect the intersection of the set of all claims on the SAMHSA unuthorized
+            # We should expect the intersection of the set of all claims on the SAMHSA unauthorized
             # response to have _zero_ SAMHSA claim IDs on it.
             samhsa_claims_filtered_when_not_authorized = (
                 len(set(all_samhsa_filtered_clm_ids).intersection(bene_samhsa_claims_set)) == 0
