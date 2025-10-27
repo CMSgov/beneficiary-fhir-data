@@ -44,7 +44,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * claim via the FHIR EOB endpoint returns no results (i.e. it was filtered).
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class EobSamhsaFilterIT extends IntegrationTestBase {
+class EobSamhsaFilterIT extends IntegrationTestBase {
   private final FhirContext context = FhirContext.forR4();
 
   private static final Map<String, List<SecurityLabel>> SECURITY_LABELS =
