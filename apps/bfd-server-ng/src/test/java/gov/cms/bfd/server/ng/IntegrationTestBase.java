@@ -4,6 +4,7 @@ import au.com.origin.snapshots.Expect;
 import au.com.origin.snapshots.junit5.SnapshotExtension;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ch.qos.logback.classic.spi.ILoggingEvent;
 import jakarta.persistence.EntityManager;
 import java.util.List;
 import org.hl7.fhir.r4.model.Bundle;
@@ -32,6 +33,7 @@ public class IntegrationTestBase {
   protected static final String HISTORICAL_MERGED_BENE_SK2 = "121212121";
   protected static final String CURRENT_MERGED_BENE_SK = "517782585";
   protected static final String HISTORICAL_MERGED_BENE_SK_KILL_CREDIT = "232323232";
+  protected static final String HISTORICAL_MERGED_BENE_SK_MULTIPLE_HISTORICAL_MBIS = "617782589";
   protected static final String HISTORICAL_MERGED_MBI_KILL_CREDIT = "2B19C89AA37";
   protected static final String HISTORICAL_MERGED_MBI = "2B19C89AA36";
   protected static final String HISTORICAL_AND_CURRENT_MBI = "2B19C89AA35";
@@ -100,5 +102,10 @@ public class IntegrationTestBase {
 
   protected List<Extension> getExtensionByUrl(DomainResource resource, String url) {
     return resource.getExtension().stream().filter(e -> e.getUrl().equals(url)).toList();
+  }
+
+  protected long queryCount(List<ILoggingEvent> events) {
+    // SQL queries are logged under the org.hibernate.SQL logger
+    return events.stream().filter(l -> l.getLoggerName().equals("org.hibernate.SQL")).count();
   }
 }

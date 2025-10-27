@@ -4,7 +4,7 @@
     <parent>
         <groupId>gov.cms.bfd</groupId>
         <artifactId>bfd-pipeline-parent</artifactId>
-        <version>2.223.0-SNAPSHOT</version>
+        <version>2.224.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>bfd-pipeline-rda-grpc</artifactId>
@@ -224,6 +224,7 @@
                     <pluginId>grpc-java</pluginId>
                     <pluginArtifact>io.grpc:protoc-gen-grpc-java:${grpc_java.version}:exe:${os.detected.classifier}
                     </pluginArtifact>
+                    <protoSourceRoot>${project.basedir}/src/main/proto</protoSourceRoot>
                 </configuration>
                 <executions>
                     <execution>
@@ -278,6 +279,14 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <!-- Include generated sources so javadoc can resolve Protobuf class imports -->
+                    <sourcepath>${project.basedir}/src/main/java:${project.basedir}/target/generated-sources/protobuf/java:${project.basedir}/target/generated-sources/protobuf/grpc-java:${project.basedir}/target/generated-sources/transformers</sourcepath>
+                </configuration>
             </plugin>
         </plugins>
     </build>

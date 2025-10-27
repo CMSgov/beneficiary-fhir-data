@@ -1,30 +1,15 @@
 [project]
-name = "bfd-pipeline-idr"
-version = "0.1.0"
-description = "Add your description here"
-readme = "README.md"
+name = "samhsa-regression-tests"
+version = "1.0.0"
 requires-python = ">=3.13"
 dependencies = [
-    "cryptography>=45.0.6",
-    "psycopg[binary,pool]>=3.2.10",
-    "pydantic>=2.11.9",
-    "snowflake-connector-python>=3.17.4",
-    "ray==2.47",
-    "sf-hamilton[ray]==1.88.0",
+    "aiohttp>=3.13.0",
+    "psycopg[binary]>=3.2.10",
+    "asyncclick>=8.3.0.5",
+    "anyio>=4.11.0",
+    "pydantic>=2.12.2",
+    "pyyaml>=6.0.3",
 ]
-
-[dependency-groups]
-dev = [
-    "ruff>=0.13.2",
-    "uv>=0.8.22",
-    "pytest>=8.4.2",
-    "testcontainers>=4.13.1",
-    "pyright>=1.1.406",
-]
-
-# [[tool.mypy.overrides]]
-# module = ["testcontainers.*"]
-# follow_untyped_imports = true
 
 [tool.ruff]
 # Set the maximum line length to 100.

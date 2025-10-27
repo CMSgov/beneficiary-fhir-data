@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.ng;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -10,7 +11,14 @@ import ca.uhn.fhir.rest.gclient.DateClientParam;
 import ca.uhn.fhir.rest.gclient.ICriterion;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import gov.cms.bfd.server.ng.beneficiary.BeneficiaryRepository;
+import gov.cms.bfd.server.ng.beneficiary.model.BeneficiaryIdentity;
+import gov.cms.bfd.server.ng.beneficiary.model.BeneficiaryIdentityId;
+import gov.cms.bfd.server.ng.input.DateTimeRange;
+import gov.cms.bfd.server.ng.patient.PatientResourceProvider;
+import gov.cms.bfd.server.ng.testUtil.ThreadSafeAppender;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.time.ZonedDateTime;
@@ -18,6 +26,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
@@ -26,11 +35,16 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EmptySource;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.beans.factory.annotation.Autowired;
 
-public class PatientSearchIT extends IntegrationTestBase {
+class PatientSearchIT extends IntegrationTestBase {
+  @Autowired private PatientResourceProvider patientResourceProvider;
+
   private IQuery<Bundle> searchBundle() {
     return getFhirClient().search().forResource(Patient.class).returnBundle(Bundle.class);
   }
+
+  @Autowired private BeneficiaryRepository beneficiaryRepository;
 
   @ParameterizedTest
   @EnumSource(SearchStyleEnum.class)
@@ -43,6 +57,62 @@ public class PatientSearchIT extends IntegrationTestBase {
             .execute();
     assertEquals(1, patientBundle.getEntry().size());
 
+    expectFhir().scenario(searchStyle.name()).toMatchSnapshot(patientBundle);
+  }
+
+  @Test
+  void patientQueryCount() {
+    var events = ThreadSafeAppender.startRecord();
+    var patient =
+        patientResourceProvider.searchByLogicalId(
+            new IdType(BENE_ID_PART_A_ONLY), new DateRangeParam());
+    assertNotNull(patient);
+    assertEquals(2, queryCount(events));
+  }
+
+  @ParameterizedTest
+  @EnumSource(SearchStyleEnum.class)
+  void patientSearchByIdMergedBeneMultipleLinks(SearchStyleEnum searchStyle) {
+    var beneficiary =
+        beneficiaryRepository.findById(
+            Long.parseLong(HISTORICAL_MERGED_BENE_SK_MULTIPLE_HISTORICAL_MBIS),
+            new DateTimeRange());
+    var identities =
+        beneficiaryRepository.getValidBeneficiaryIdentities(beneficiary.get().getXrefSk());
+
+    // Ensure the test data has more than one historical MBI.
+    // This will produce duplicate links if not filtered correctly.
+    var historicalMbis =
+        identities.stream()
+            .map(BeneficiaryIdentity::getId)
+            .filter(i -> i.getBeneSk() != i.getXrefSk())
+            .map(BeneficiaryIdentityId::getMbi)
+            .collect(Collectors.toSet());
+    assertTrue(historicalMbis.size() > 1);
+
+    var patientBundle =
+        searchBundle()
+            .where(
+                new TokenClientParam(Patient.SP_RES_ID)
+                    .exactly()
+                    .identifier(HISTORICAL_MERGED_BENE_SK_MULTIPLE_HISTORICAL_MBIS))
+            .usingStyle(searchStyle)
+            .execute();
+
+    var patient = (Patient) patientBundle.getEntryFirstRep().getResource();
+    assertNotNull(patient.getLink(), "Patient links should not be null");
+
+    var uniqueLinkRepresentations =
+        patient.getLink().stream()
+            .map(link -> link.getType().toCode() + "_" + link.getOther().getReference())
+            .collect(Collectors.toSet());
+
+    assertEquals(
+        patient.getLink().size(),
+        uniqueLinkRepresentations.size(),
+        "Expected no duplicate links in the Patient resource.");
+
+    assertEquals(1, patientBundle.getEntry().size());
     expectFhir().scenario(searchStyle.name()).toMatchSnapshot(patientBundle);
   }
 

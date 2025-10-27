@@ -9,7 +9,7 @@ public final class OpenAPIContentProvider {
 
   /** Open API content value for /Patient's identifier parameter. */
   public static final String PATIENT_SP_RES_ID_VALUE =
-      """
+"""
 **NOTE: TO MAKE A REQUEST TO THIS ENDPOINT IT IS REQUIRED TO CHOOSE ONE OUT OF THE FOLLOWING THREE PARAMETERS AT A GIVEN TIME (_id, identifier, _has:Coverage.extension)**
 
 Fetch _Patient_ data using a FHIR _IdType_ identifier; an IdType
@@ -32,7 +32,7 @@ represent the same resource:
 
   /** Open API content value for /Patient's identifier parameter. */
   public static final String PATIENT_SP_IDENTIFIER_VALUE =
-      """
+"""
 **NOTE: TO MAKE A REQUEST TO THIS ENDPOINT IT IS REQUIRED TO CHOOSE ONE OUT OF THE FOLLOWING THREE PARAMETERS AT A GIVEN TIME (_id, identifier, _has:Coverage.extension)**
 
 Fetch _Patient_ data using a FHIR _identifier_; an identifier contains a set of values that
@@ -68,7 +68,7 @@ This class contains the identifier, which is usually represented as a URL, along
 
   /** Open API content value for /Patient's lastUpdated parameter. */
   public static final String PATIENT_LAST_UPDATED_VALUE =
-      """
+"""
 Only satisfy the Search if the Beneficiary's `last_updated` Date falls within a specified _DateRange_.
 A _DateRange_ can be defined by providing less than `lt` and/or greater than `gt` values.
 This parameter can be included in a request one or more times.
@@ -88,7 +88,7 @@ Examples:
    * events.
    */
   public static final String PATIENT_PARTD_CONTRACT_VALUE =
-      """
+"""
 **NOTE: TO MAKE A REQUEST TO THIS ENDPOINT IT IS REQUIRED TO CHOOSE ONE OUT OF THE FOLLOWING THREE PARAMETERS AT A GIVEN TIME (_id, identifier, _has:Coverage.extension)**
 
 When searching for a Patient's Part D events information, this resource identifies
@@ -127,7 +127,7 @@ Example:
    * data.
    */
   public static final String PATIENT_PARTD_CURSOR_VALUE =
-      """
+"""
 Provides a pagination cursor or numeric _offset_ for processing Patient's Part D events information.
 
 Examples:
@@ -143,7 +143,7 @@ Examples:
    * Open API content for the _count parameter.
    */
   public static final String COUNT_VALUE =
-      """
+"""
 Provides the number of records to be used for pagination.
 
 Examples:
@@ -156,7 +156,7 @@ Examples:
 
   /** Open API content value for /Patient's identifier parameter. */
   public static final String BENEFICIARY_SP_RES_ID_VALUE =
-      """
+"""
 Fetch _Beneficiary_ data using a FHIR _IdType_ identifier; an IdType
 represents the logical identity for a resource, or as much of that
 identity that is known. In FHIR, every resource must have a _logical ID_ which is
@@ -190,7 +190,7 @@ represent the same resource:
 
   /** Open API content value for /ExplanationOfBenefit's EOB claim type parameter. */
   public static final String EOB_CLAIM_TYPE_VALUE =
-      """
+"""
 One or more comma-delimited claim types that filters the response to contain only EoBs that include the specified claim types.
 This is optional and defaults to `*` denoting all types.
 Supported values for claim type:
@@ -215,7 +215,7 @@ Examples:
 
   /** Open API content value for /ExplanationOfBenefit's serviceDate parameter. */
   public static final String EOB_SERVICE_DATE_VALUE =
-      """
+"""
 Only satisfy the Search request if a claim's _billable period_
 falls within a specified _DateRange_. A _DateRange_ can be
 defined by providing less than `lt` and/or greater than `gt` values.
@@ -232,7 +232,7 @@ Examples:
 
   /** Open API content value for /ExplanationOfBenefit's excludeSAMSHA parameter. */
   public static final String EOB_EXCLUDE_SAMSHA_VALUE =
-      """
+"""
 The _Substance Abuse and Mental Health Services Administration_ (SAMHSA)
 is the agency within the U.S. Department of HHS that leads public health efforts to advance the behavioral health of the nation.
 Setting this flag to _true_, modifies the request to filter out all SAMSHA-related claims from the response.
@@ -246,7 +246,7 @@ Examples:
 
   /** Open API content value for /ExplanationOfBenefit's includeTaxNumbers parameter. */
   public static final String EOB_INCLUDE_TAX_NUMBERS_VALUE =
-      """
+"""
 Setting this flag to _true_, provides tax number in the EOB transformed data for the response.
 
 Example:
@@ -258,7 +258,7 @@ Example:
 
   /** Open API content value for partially adjudicated claim MBI ID to be used. */
   public static final String PAC_MBI_VALUE =
-      """
+"""
  **NOTE: THIS IS A REQUIRED FIELD**
 
 Fetch _Beneficiary_ data using a FHIR _MBI_ identifier; an MBI
@@ -284,7 +284,7 @@ represent the same resource:
 
   /** Open API content value for partially aducated claim MBI ID being hashed or not. */
   public static final String PAC_IS_HASHED_VALUE =
-      """
+"""
 Setting this flag to _true_, provides tax number in the EOB transformed data for the response.
 
 Example:
@@ -296,7 +296,7 @@ Example:
 
   /** Open API content value for partially adjudicated claim type parameter. */
   public static final String PAC_CLAIM_TYPE_VALUE =
-      """
+"""
 A list of one or more comma-separated claim types to be included in the request;
 within BFD, the claim types represent an _OR_ inclusion logic meaning any claims matching one of the specified
 claim types will be checked
@@ -315,7 +315,7 @@ Examples:
 
   /** Open API content value for partially adjudicated claims excludeSAMSHA parameter. */
   public static final String PAC_EXCLUDE_SAMSHA_VALUE =
-      """
+"""
 The _Substance Abuse and Mental Health Services Administration_ (SAMHSA)
 is the agency within the U.S. Department of HHS that leads public health efforts to advance the behavioral health of the nation.
 Setting this flag to _true_, modifies the request to filter out all SAMSHA-related claims from the response.
@@ -348,7 +348,7 @@ Example:
 
   /** Open API content value for /ExplanationOfBenefit's _elements parameter. */
   public static final String EOB_CLIENT_ELEMENTS_VALUE =
-      """
+"""
 The _elements parameter consists of a comma-separated list of base element names. Only elements that are listed are to be returned.
  Clients SHOULD list desired elements in a resource as part of
 the list of elements. The list of elements does not apply to included resources.

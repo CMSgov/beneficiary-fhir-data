@@ -3,7 +3,7 @@
 
     <groupId>gov.cms.bfd</groupId>
     <artifactId>bfd-parent</artifactId>
-    <version>2.223.0-SNAPSHOT</version>
+    <version>2.224.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>bfd-parent</name>
@@ -64,9 +64,10 @@
         <project.reporting.outputEncoding>${project.build.sourceEncoding}</project.reporting.outputEncoding>
 
         <!-- The version of Java that we'll use for everything. -->
-        <javaSourceVersion>21</javaSourceVersion>
+        <javaSourceVersion>25</javaSourceVersion>
+        <maven.compiler.release>25</maven.compiler.release>
 
-        <project.build.outputTimestamp>2025-09-22T16:39:42Z</project.build.outputTimestamp>
+        <project.build.outputTimestamp>2025-10-27T19:39:57Z</project.build.outputTimestamp>
         <!-- Disable jacoco until automated coverage generation is desired -->
         <maven.jacoco.skip>true</maven.jacoco.skip>
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
@@ -124,8 +125,8 @@
         <aws-java-sdk-bom.version>2.33.4</aws-java-sdk-bom.version>
         <aws.crt.version>0.35.0</aws.crt.version>
         <aws-advanced-jdbc-wrapper.version>2.5.4</aws-advanced-jdbc-wrapper.version>
-        <spring-data-jpa.version>3.4.9</spring-data-jpa.version>
-        <spring-framework.version>6.2.8</spring-framework.version>
+        <spring-data-jpa.version>3.4.10</spring-data-jpa.version>
+        <spring-framework.version>6.2.11</spring-framework.version>
         <spring-retry.version>2.0.8</spring-retry.version>
         <spring-boot.version>3.4.4</spring-boot.version>
         <spring-cloud.version>4.2.1</spring-cloud.version>
@@ -180,7 +181,7 @@
         <jakarta.el.version>4.0.2</jakarta.el.version>
         <poi.version>5.2.5</poi.version>
         <javapoet.version>1.13.0</javapoet.version>
-        <jetty.version>12.0.19</jetty.version>
+        <jetty.version>12.1.0</jetty.version>
         <org.apache.httpcomponents.httpclient.version>4.5.14</org.apache.httpcomponents.httpclient.version>
         <datasource-proxy.version>1.10</datasource-proxy.version>
         <cors.filter.version>1.0.1</cors.filter.version>
@@ -199,7 +200,8 @@
         <commons-text.version>1.14.0</commons-text.version>
         <hamcrest-library.version>2.2</hamcrest-library.version>
         <awaitility.version>4.3.0</awaitility.version>
-        <lombok.version>1.18.36</lombok.version>
+        <lombok.version>1.18.42</lombok.version>
+        <asm.version>9.8</asm.version>
         <jaxb.java.time.adapters.version>1.1.3</jaxb.java.time.adapters.version>
         <javax.activation.version>1.1.1</javax.activation.version>
         <commons-cli.version>1.6.0</commons-cli.version>
@@ -244,7 +246,7 @@
         <tests.thread.count>4</tests.thread.count>
         <!-- The jib maven plugin produces optimized docker images from maven projects. -->
         <!-- https://github.com/GoogleContainerTools/jib/tree/master/jib-maven-plugin#quickstart -->
-        <jib.version>3.4.4</jib.version>
+        <jib.version>3.4.6</jib.version>
         <jib-spring-boot-extension-maven.version>0.1.0</jib-spring-boot-extension-maven.version>
         <!-- The base image (FROM) used to build images with jib. Defaults to pulling from the
         Docker daemon; override with -Djib.from=<image> -->
@@ -275,23 +277,24 @@
         <maven.assembly.plugin.version>3.6.0</maven.assembly.plugin.version>
         <maven.antrun.plugin.version>3.1.0</maven.antrun.plugin.version>
         <maven.clean.plugin.version>3.4.1</maven.clean.plugin.version>
-        <maven.compiler.plugin.version>3.14.0</maven.compiler.plugin.version>
+        <maven.compiler.plugin.version>3.14.1</maven.compiler.plugin.version>
         <maven.dependency.plugin.version>3.6.1</maven.dependency.plugin.version>
         <maven.enforcer.plugin.version>3.5.0</maven.enforcer.plugin.version>
-        <maven.failsafe.plugin.version>3.5.2</maven.failsafe.plugin.version>
+        <maven.failsafe.plugin.version>3.5.3</maven.failsafe.plugin.version>
         <maven.resources.plugin.version>3.3.1</maven.resources.plugin.version>
         <maven.release.plugin.version>3.1.1</maven.release.plugin.version>
         <maven.surefire.plugin.version>3.5.3</maven.surefire.plugin.version>
         <maven.toolchains.plugin.version>3.2.0</maven.toolchains.plugin.version>
         <maven-core.version>3.9.8</maven-core.version>
-        <maven.jacoco.plugin.version>0.8.12</maven.jacoco.plugin.version>
+        <maven.jacoco.plugin.version>0.8.13</maven.jacoco.plugin.version>
         <maven-plugin-annotations.version>3.10.2</maven-plugin-annotations.version>
         <maven-plugin-api.version>3.9.8</maven-plugin-api.version>
-        <maven.plugin.version>3.10.2</maven.plugin.version>
+        <maven.plugin.version>3.15.1</maven.plugin.version>
         <build.helper.maven.plugin.version>3.6.0</build.helper.maven.plugin.version>
         <checkstyle.plugin.version>3.6.0</checkstyle.plugin.version>
         <exec.maven.plugin.version>3.1.1</exec.maven.plugin.version>
-        <fmt.maven.plugin.version>2.25</fmt.maven.plugin.version>
+        <fmt.maven.plugin.version>2.29</fmt.maven.plugin.version>
+        <google.java.format.version>1.29.0</google.java.format.version>
         <protobuf.maven.plugin.version>0.6.1</protobuf.maven.plugin.version>
         <versions.maven.plugin.version>2.18.0</versions.maven.plugin.version>
         <antlr4.version>4.13.2</antlr4.version>
@@ -808,6 +811,11 @@
                 <version>${jacoco.version}</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>org.ow2.asm</groupId>
+                <artifactId>asm</artifactId>
+                <version>${asm.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -906,6 +914,14 @@
                         <!-- Set the Java source version used by the compiler. -->
                         <source>${javaSourceVersion}</source>
                         <target>${javaSourceVersion}</target>
+                        <!-- Ensure annotation processors like Lombok are available to javac -->
+                        <annotationProcessorPaths>
+                            <path>
+                                <groupId>org.projectlombok</groupId>
+                                <artifactId>lombok</artifactId>
+                                <version>${lombok.version}</version>
+                            </path>
+                        </annotationProcessorPaths>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -1152,6 +1168,7 @@
             <plugin>
                 <groupId>com.spotify.fmt</groupId>
                 <artifactId>fmt-maven-plugin</artifactId>
+                <version>${fmt.maven.plugin.version}</version>
                 <executions>
                     <execution>
                         <goals>
@@ -1162,6 +1179,13 @@
                         </goals>
                     </execution>
                 </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.google.googlejavaformat</groupId>
+                        <artifactId>google-java-format</artifactId>
+                        <version>${google.java.format.version}</version>
+                    </dependency>
+                </dependencies>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

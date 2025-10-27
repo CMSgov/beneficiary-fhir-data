@@ -10,16 +10,22 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.rest.gclient.IReadTyped;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import gov.cms.bfd.server.ng.coverage.CoverageResourceProvider;
+import gov.cms.bfd.server.ng.testUtil.ThreadSafeAppender;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import io.restassured.RestAssured;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Coverage;
+import org.hl7.fhir.r4.model.IdType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.springframework.beans.factory.annotation.Autowired;
 
-public class CoverageReadIT extends IntegrationTestBase {
+class CoverageReadIT extends IntegrationTestBase {
+
+  @Autowired private CoverageResourceProvider coverageResourceProvider;
 
   private IReadTyped<Coverage> coverageRead() {
     return getFhirClient().read().resource(Coverage.class);
@@ -48,6 +54,15 @@ public class CoverageReadIT extends IntegrationTestBase {
   }
 
   @Test
+  void coverageReadQueryCount() {
+    var events = ThreadSafeAppender.startRecord();
+    var coverage =
+        coverageResourceProvider.read(new IdType(createCoverageId("part-a", BENE_ID_PART_A_ONLY)));
+    assertNotNull(coverage);
+    assertEquals(1, queryCount(events));
+  }
+
+  @Test
   void coverageReadValidPartBCompositeId() {
     var validCoverageId = createCoverageId("part-b", BENE_ID_PART_B_ONLY);
 
@@ -73,12 +88,12 @@ public class CoverageReadIT extends IntegrationTestBase {
         ResourceNotFoundException.class,
         readWithId::execute,
         String.format(
-            "Should throw ResourceNotFoundException for Coverage ID 'part-a-%s 'because the beneficiary record is not the current effective version.",
+            "Should throw ResourceNotFoundException for Coverage ID 'part-a-%s 'because the"
+                + " beneficiary record is not the current effective version.",
             BENE_ID_NON_CURRENT));
   }
 
-  @ParameterizedTest
-  @ValueSource(strings = {"a", "-12345", "part-a-abc", "foo-12345", "part-e-12345"})
+  @Test
   void coverageReadPartAWithAllCoverage() {
     var validCoverageId = createCoverageId("part-a", BENE_ID_ALL_PARTS_WITH_XREF);
 
@@ -143,7 +158,7 @@ public class CoverageReadIT extends IntegrationTestBase {
   @ParameterizedTest
   @ValueSource(strings = {"part-A", "part-B", "dual"})
   void coverageReadBeneWithNoCoverageReturnsEmpty(String part) {
-    final String partId = createCoverageId(part, BENE_ID_NO_COVERAGE);
+    final var partId = createCoverageId(part, BENE_ID_NO_COVERAGE);
     var coverage = coverageRead().withId(partId).execute();
     assertEquals(partId.toLowerCase(), coverage.getIdPart());
     assertTrue(coverage.getIdentifier().isEmpty());
@@ -153,7 +168,7 @@ public class CoverageReadIT extends IntegrationTestBase {
   @ParameterizedTest
   @ValueSource(strings = {"part-A", "part-B", "dual"})
   void coverageReadBeneWithAllCoverage(String part) {
-    final String partId = createCoverageId(part, BENE_ID_ALL_PARTS_WITH_XREF);
+    final var partId = createCoverageId(part, BENE_ID_ALL_PARTS_WITH_XREF);
     var coverage = coverageRead().withId(partId).execute();
     assertEquals(partId.toLowerCase(), coverage.getIdPart());
     expectFhir().scenario("allCoverage" + part).toMatchSnapshot(coverage);

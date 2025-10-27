@@ -114,7 +114,7 @@ public class CcwRifLoadPreValidateSynthea implements CcwRifLoadPreValidateInterf
    *
    * @param manifest the {@link DataSetManifest} which will provide the various Synthea end-state
    *     property values that can be used to perform the pre-validation.
-   * @return {@link boolean} asserting that the pre-validation succeeded (true) or failed (false).
+   * @return {@code boolean} asserting that the pre-validation succeeded (true) or failed (false).
    */
   @Override
   public boolean isValid(DataSetManifest manifest) throws Exception {
@@ -136,7 +136,7 @@ public class CcwRifLoadPreValidateSynthea implements CcwRifLoadPreValidateInterf
    * this {@link DataSetManifest} can proceed.
    *
    * @param props the {@link PreValidationProperties} specific to a Synthea pre-validation.
-   * @return {@link boolean} asserting that the pre-validation succeeded (true) or failed (false).
+   * @return {@code boolean} asserting that the pre-validation succeeded (true) or failed (false).
    */
   boolean validateValues(PreValidationProperties props) throws Exception {
     boolean isValid = true;

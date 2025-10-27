@@ -143,7 +143,7 @@ public final class RifParsingUtils {
    * Parse a short from a {@link String}.
    *
    * @param shortText the number string to parse
-   * @return the specified text parsed into an {@link short}
+   * @return the specified text parsed into a {@code short}
    */
   public static short parseShort(String shortText) {
     try {
