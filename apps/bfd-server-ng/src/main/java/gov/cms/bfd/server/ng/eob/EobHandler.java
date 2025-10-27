@@ -14,6 +14,7 @@ import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.util.FhirUtil;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +25,8 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
@@ -33,6 +36,8 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class EobHandler {
+  private static final Logger LOGGER = LoggerFactory.getLogger(EobHandler.class);
+
   private final BeneficiaryRepository beneficiaryRepository;
   private final ClaimRepository claimRepository;
 
@@ -93,7 +98,15 @@ public class EobHandler {
     // Ordering may have changed during filtering, ensure we re-order before returning the final
     // result
     return claims.stream()
-        .filter(claim -> !claimHasSamhsa(claim))
+        .filter(
+            claim -> {
+              var samhsaCodes = findSamhsaCodesInClaim(claim);
+              if (!samhsaCodes.isEmpty()) {
+                logSamhsaClaimFiltered(claim.getClaimUniqueId(), samhsaCodes);
+                return false; // exclude the claim
+              }
+              return true; // Keep the claim
+            })
         .sorted(Comparator.comparing(Claim::getClaimUniqueId));
   }
 
@@ -192,5 +205,114 @@ public class EobHandler {
     var entryStart = entry.getStartDateAsDate();
     var entryEnd = entry.getEndDateAsDate();
     return !entryStart.isAfter(claimDate) && !entryEnd.isBefore(claimDate);
+  }
+
+  // Finds all SAMHSA codes in the given claim.
+  private List<SamhsaCodeMatch> findSamhsaCodesInClaim(Claim claim) {
+    var claimThroughDate = claim.getBillablePeriod().getClaimThroughDate();
+    var matches = new ArrayList<SamhsaCodeMatch>();
+
+    // Check DRG codes
+    var drgCodes = findSamhsaDrgCodes(claim, claimThroughDate);
+    matches.addAll(drgCodes);
+
+    // Check Procedures and HCPCS codes
+    for (var claimItem : claim.getClaimItems()) {
+      var procedureCodes =
+          findSamhsaProcedureCodes(claimItem.getClaimProcedure(), claimThroughDate);
+      matches.addAll(procedureCodes);
+
+      var hcpcsCodes = findSamhsaHcpcsCodes(claimItem.getClaimLine(), claimThroughDate);
+      matches.addAll(hcpcsCodes);
+    }
+
+    return matches;
+  }
+
+  // Finds SAMHSA DRG codes in the claim.
+  private List<SamhsaCodeMatch> findSamhsaDrgCodes(Claim claim, LocalDate claimDate) {
+    var matches = new ArrayList<SamhsaCodeMatch>();
+    var entries = SECURITY_LABELS.get(SystemUrls.CMS_MS_DRG);
+    var drg = claim.getDrgCode().map(Object::toString).orElse("");
+
+    if (!drg.isEmpty()) {
+      for (var entry : entries) {
+        if (isCodeSamhsa(drg, claimDate, entry)) {
+          matches.add(new SamhsaCodeMatch(drg, SystemUrls.CMS_MS_DRG, "DRG"));
+        }
+      }
+    }
+
+    return matches;
+  }
+
+  // Finds SAMHSA procedure/diagnosis codes in the claim item.
+  private List<SamhsaCodeMatch> findSamhsaProcedureCodes(
+      ClaimProcedure procedure, LocalDate claimDate) {
+    var matches = new ArrayList<SamhsaCodeMatch>();
+    var diagnosisCode = procedure.getDiagnosisCode().orElse("");
+    var procedureCode = procedure.getProcedureCode().orElse("");
+    var icdIndicator = procedure.getIcdIndicator().orElse(IcdIndicator.ICD_10);
+
+    var procedureEntries = SECURITY_LABELS.get(icdIndicator.getProcedureSystem());
+    var diagnosisEntries = SECURITY_LABELS.get(icdIndicator.getDiagnosisSystem());
+
+    // Check procedure codes
+    if (!procedureCode.isEmpty()) {
+      for (var entry : procedureEntries) {
+        if (isCodeSamhsa(procedureCode, claimDate, entry)) {
+          matches.add(
+              new SamhsaCodeMatch(procedureCode, icdIndicator.getProcedureSystem(), "Procedure"));
+        }
+      }
+    }
+
+    // Check diagnosis codes
+    if (!diagnosisCode.isEmpty()) {
+      for (var entry : diagnosisEntries) {
+        if (isCodeSamhsa(diagnosisCode, claimDate, entry)) {
+          matches.add(
+              new SamhsaCodeMatch(diagnosisCode, icdIndicator.getDiagnosisSystem(), "Diagnosis"));
+        }
+      }
+    }
+
+    return matches;
+  }
+
+  // Finds SAMHSA HCPCS/CPT codes in the claim line.
+  private List<SamhsaCodeMatch> findSamhsaHcpcsCodes(ClaimLine claimLine, LocalDate claimDate) {
+    var matches = new ArrayList<SamhsaCodeMatch>();
+    var hcpcs = claimLine.getHcpcsCode().getHcpcsCode().orElse("");
+
+    if (!hcpcs.isEmpty()) {
+      for (var system : List.of(SystemUrls.AMA_CPT, SystemUrls.CMS_HCPCS)) {
+        var entries = SECURITY_LABELS.get(system);
+        for (var entry : entries) {
+          if (isCodeSamhsa(hcpcs, claimDate, entry)) {
+            matches.add(new SamhsaCodeMatch(hcpcs, system, "HCPCS"));
+          }
+        }
+      }
+    }
+
+    return matches;
+  }
+
+  // Logs when a claim is filtered due to SAMHSA codes.
+  private void logSamhsaClaimFiltered(long claimId, List<SamhsaCodeMatch> samhsaCodes) {
+    var codeDetails =
+        samhsaCodes.stream()
+            .map(
+                c ->
+                    String.format(
+                        "%s (system: %s, type: %s)", c.getCode(), c.getSystem(), c.getCodeType()))
+            .reduce((a, b) -> a + "; " + b)
+            .orElse("N/A");
+    LOGGER.info(
+        "SAMHSA claim filtered: claimId={}, matchedCodes=[{}], count={}",
+        claimId,
+        codeDetails,
+        samhsaCodes.size());
   }
 }
