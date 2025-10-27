@@ -177,7 +177,6 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
 
     return allTimestamps
         .flatMap(s -> s)
-        .filter(java.util.Objects::nonNull)
         .max(Comparator.naturalOrder())
         .orElse(meta.getUpdatedTimestamp());
   }

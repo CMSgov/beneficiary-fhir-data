@@ -3,7 +3,6 @@ package gov.cms.bfd.server.ng.loadprogress;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import jakarta.persistence.EntityManager;
 import java.time.ZonedDateTime;
-import java.util.Objects;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -32,7 +31,6 @@ public class LoadProgressRepository {
             ZonedDateTime.class)
         .getResultList()
         .stream()
-        .filter(Objects::nonNull)
         .findFirst()
         .orElse(DateUtil.MIN_DATETIME);
   }

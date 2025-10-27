@@ -6,15 +6,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import gov.cms.bfd.server.ng.beneficiary.BeneficiaryRepository;
 import gov.cms.bfd.server.ng.claim.ClaimRepository;
-import gov.cms.bfd.server.ng.claim.LastUpdatedTestHelper;
+import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.loadprogress.LoadProgressRepository;
 import gov.cms.bfd.server.ng.util.DateUtil;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -32,8 +32,6 @@ public class LastUpdatedRepositoryIT extends IntegrationTestBase {
   private final ClaimRepository claimRepository;
   private final BeneficiaryRepository beneficiaryRepository;
 
-  private LastUpdatedTestHelper testHelper;
-
   @Autowired
   public LastUpdatedRepositoryIT(
       LoadProgressRepository loadProgressLastUpdatedProvider,
@@ -44,16 +42,13 @@ public class LastUpdatedRepositoryIT extends IntegrationTestBase {
     this.beneficiaryRepository = beneficiaryRepository;
   }
 
-  @BeforeEach
-  void setUp() {
-    testHelper = new LastUpdatedTestHelper(claimRepository, beneficiaryRepository);
-  }
-
   @Test
   void eobMetaLastUpdatedMatchesClaimBfdUpdatedTs() {
     // Fetch a claim and get its bfd_updated_ts from the database
-    var claimTimestamp = testHelper.getClaimBfdUpdatedTs(CLAIM_ID_ADJUDICATED);
-    assertNotNull(claimTimestamp, "Claim should have a bfd_updated_ts in the database");
+    var claimTimestamp =
+        getClaimBfdUpdatedTs(CLAIM_ID_ADJUDICATED)
+            .orElseThrow(
+                () -> new AssertionError("Claim should have a bfd_updated_ts in the database"));
 
     // Fetch the same claim via the FHIR API
     var eob =
@@ -75,8 +70,11 @@ public class LastUpdatedRepositoryIT extends IntegrationTestBase {
 
   @Test
   void patientMetaLastUpdatedMatchesBeneficiaryBfdUpdatedTs() {
-    var beneTimestamp = testHelper.getBeneficiaryBfdUpdatedTs(BENE_ID_PART_A_ONLY);
-    assertNotNull(beneTimestamp, "Beneficiary should have a bfd_updated_ts in the database");
+    var beneTimestamp =
+        getBeneficiaryBfdUpdatedTs(BENE_ID_PART_A_ONLY)
+            .orElseThrow(
+                () ->
+                    new AssertionError("Beneficiary should have a bfd_updated_ts in the database"));
 
     var patient =
         getFhirClient().read().resource(Patient.class).withId(BENE_ID_PART_A_ONLY).execute();
@@ -92,8 +90,11 @@ public class LastUpdatedRepositoryIT extends IntegrationTestBase {
 
   @Test
   void coverageMetaLastUpdatedMatchesBeneficiaryBfdUpdatedTs() {
-    var beneTimestamp = testHelper.getBeneficiaryBfdUpdatedTs(BENE_ID_PART_A_ONLY);
-    assertNotNull(beneTimestamp, "Beneficiary should have a bfd_updated_ts in the database");
+    var beneTimestamp =
+        getBeneficiaryBfdUpdatedTs(BENE_ID_PART_A_ONLY)
+            .orElseThrow(
+                () ->
+                    new AssertionError("Beneficiary should have a bfd_updated_ts in the database"));
 
     var bundle =
         getFhirClient()
@@ -116,12 +117,13 @@ public class LastUpdatedRepositoryIT extends IntegrationTestBase {
 
   @Test
   void eobSearchReturnsCorrectBfdUpdatedTsForEachClaim() {
-    var claimTimestamp1 = testHelper.getClaimBfdUpdatedTs(CLAIM_ID_ADJUDICATED);
-    var claimTimestamp2 = testHelper.getClaimBfdUpdatedTs(CLAIM_ID_PHASE_1);
-    assertNotNull(claimTimestamp1, "First claim should have a bfd_updated_ts");
-    assertNotNull(claimTimestamp2, "Second claim should have a bfd_updated_ts");
+    var claimTimestamp1 =
+        getClaimBfdUpdatedTs(CLAIM_ID_ADJUDICATED)
+            .orElseThrow(() -> new AssertionError("First claim should have a bfd_updated_ts"));
 
-    var patientId = testHelper.getBeneficiaryIdForClaim(CLAIM_ID_ADJUDICATED);
+    var patientId =
+        getBeneficiaryIdForClaim(CLAIM_ID_ADJUDICATED)
+            .orElseThrow(() -> new AssertionError("Could not find beneficiary for claim"));
     var bundle =
         getFhirClient()
             .search()
@@ -174,5 +176,31 @@ public class LastUpdatedRepositoryIT extends IntegrationTestBase {
             + "s actual="
             + actualSeconds
             + "s (comparing second precision)");
+  }
+
+  private java.util.Optional<ZonedDateTime> getClaimBfdUpdatedTs(String claimId) {
+    var id = Long.parseLong(claimId);
+    var claimOpt = claimRepository.findById(id, new DateTimeRange(), new DateTimeRange());
+    return claimOpt.map(
+        claim -> {
+          var eob = claim.toFhir();
+          return eob.getMeta().getLastUpdated().toInstant().atZone(ZoneId.of("UTC"));
+        });
+  }
+
+  private java.util.Optional<ZonedDateTime> getBeneficiaryBfdUpdatedTs(String beneSk) {
+    var beneId = Long.parseLong(beneSk);
+    var beneOpt = beneficiaryRepository.findById(beneId, new DateTimeRange());
+    return beneOpt.map(
+        bene -> {
+          var patient = bene.toFhir();
+          return patient.getMeta().getLastUpdated().toInstant().atZone(ZoneId.of("UTC"));
+        });
+  }
+
+  private java.util.Optional<String> getBeneficiaryIdForClaim(String claimId) {
+    var id = Long.parseLong(claimId);
+    var claimOpt = claimRepository.findById(id, new DateTimeRange(), new DateTimeRange());
+    return claimOpt.map(claim -> String.valueOf(claim.getBeneficiary().getXrefSk()));
   }
 }

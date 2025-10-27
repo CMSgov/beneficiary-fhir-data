@@ -27,6 +27,7 @@ public class ClaimRepository {
       JOIN FETCH c.claimItems AS cl
       LEFT JOIN FETCH c.claimInstitutional ci
       LEFT JOIN FETCH cl.claimLineInstitutional cli
+      LEFT JOIN FETCH c.claimFiss cf
       LEFT JOIN FETCH cli.ansiSignature a
     """;
 
@@ -40,7 +41,26 @@ public class ClaimRepository {
    */
   public Optional<Claim> findById(
       long claimUniqueId, DateTimeRange claimThroughDate, DateTimeRange lastUpdated) {
-    return queryById(claimUniqueId, claimThroughDate, lastUpdated, CLAIM_TABLES_BASE);
+    var jpql =
+        String.format(
+            """
+              %s
+              WHERE c.claimUniqueId = :claimUniqueId
+              %s
+            """,
+            CLAIM_TABLES_BASE, getFilters(claimThroughDate, lastUpdated));
+    var results =
+        withParams(
+                entityManager.createQuery(jpql, Claim.class),
+                claimThroughDate,
+                lastUpdated,
+                new ArrayList<>())
+            .setParameter("claimUniqueId", claimUniqueId)
+            .getResultList();
+
+    var optionalClaim = results.stream().findFirst();
+    optionalClaim.ifPresent(claim -> LogUtil.logBeneSk(claim.getBeneficiary().getBeneSk()));
+    return optionalClaim;
   }
 
   /**
@@ -132,29 +152,5 @@ public class ClaimRepository {
         .setParameter("lastUpdatedUpperBound", lastUpdated.getUpperBoundDateTime().orElse(null))
         .setParameter("hasSourceIds", !sourceIds.isEmpty())
         .setParameter("sourceIds", sourceIds);
-  }
-
-  private Optional<Claim> queryById(
-      long claimUniqueId, DateTimeRange claimThroughDate, DateTimeRange lastUpdated, String base) {
-    var jpql =
-        String.format(
-            """
-              %s
-              WHERE c.claimUniqueId = :claimUniqueId
-              %s
-            """,
-            base, getFilters(claimThroughDate, lastUpdated));
-    var results =
-        withParams(
-                entityManager.createQuery(jpql, Claim.class),
-                claimThroughDate,
-                lastUpdated,
-                new ArrayList<>())
-            .setParameter("claimUniqueId", claimUniqueId)
-            .getResultList();
-
-    var optionalClaim = results.stream().findFirst();
-    optionalClaim.ifPresent(claim -> LogUtil.logBeneSk(claim.getBeneficiary().getBeneSk()));
-    return optionalClaim;
   }
 }
