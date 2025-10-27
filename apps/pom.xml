@@ -246,7 +246,7 @@
         <tests.thread.count>4</tests.thread.count>
         <!-- The jib maven plugin produces optimized docker images from maven projects. -->
         <!-- https://github.com/GoogleContainerTools/jib/tree/master/jib-maven-plugin#quickstart -->
-        <jib.version>3.4.4</jib.version>
+        <jib.version>3.4.6</jib.version>
         <jib-spring-boot-extension-maven.version>0.1.0</jib-spring-boot-extension-maven.version>
         <!-- The base image (FROM) used to build images with jib. Defaults to pulling from the
         Docker daemon; override with -Djib.from=<image> -->
@@ -811,6 +811,11 @@
                 <version>${jacoco.version}</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>org.ow2.asm</groupId>
+                <artifactId>asm</artifactId>
+                <version>${asm.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -1176,9 +1181,9 @@
                 </executions>
                 <dependencies>
                     <dependency>
-                    <groupId>com.google.googlejavaformat</groupId>
-                    <artifactId>google-java-format</artifactId>
-                    <version>${google.java.format.version}</version>
+                        <groupId>com.google.googlejavaformat</groupId>
+                        <artifactId>google-java-format</artifactId>
+                        <version>${google.java.format.version}</version>
                     </dependency>
                 </dependencies>
             </plugin>
