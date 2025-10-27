@@ -19,7 +19,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
@@ -86,20 +85,18 @@ public class EobHandler {
     var filteredClaims = filterSamhsaClaims(claims, samhsaFilterMode);
 
     return FhirUtil.bundleOrDefault(
-        filteredClaims
-            .map(
-                claim -> {
-                  var hasSamhsaServices =
-                      samhsaFilterMode == SamhsaFilterMode.INCLUDE && claimHasSamhsa(claim);
+        filteredClaims.map(
+            claim -> {
+              var hasSamhsaClaims =
+                  samhsaFilterMode == SamhsaFilterMode.INCLUDE && claimHasSamhsa(claim);
 
-                  ClaimSecurityStatus securityStatus =
-                      hasSamhsaServices
-                          ? ClaimSecurityStatus.SAMHSA_APPLICABLE
-                          : ClaimSecurityStatus.NONE;
+              var securityStatus =
+                  hasSamhsaClaims
+                      ? ClaimSecurityStatus.SAMHSA_APPLICABLE
+                      : ClaimSecurityStatus.NONE;
 
-                  return claim.toFhir(securityStatus);
-                })
-            .collect(Collectors.toList()),
+              return claim.toFhir(securityStatus);
+            }),
         claimRepository::claimLastUpdated);
   }
 
@@ -142,13 +139,13 @@ public class EobHandler {
       return Optional.empty();
     }
     var claim = claimOpt.get();
+    var claimHasSamhsa = claimHasSamhsa(claim);
 
-    if (samhsaFilterMode == SamhsaFilterMode.EXCLUDE && claimHasSamhsa(claim)) {
+    if (samhsaFilterMode == SamhsaFilterMode.EXCLUDE && claimHasSamhsa) {
       return Optional.empty();
     }
-
-    ClaimSecurityStatus securityStatus =
-        claimHasSamhsa(claim) ? ClaimSecurityStatus.SAMHSA_APPLICABLE : ClaimSecurityStatus.NONE;
+    var securityStatus =
+        claimHasSamhsa ? ClaimSecurityStatus.SAMHSA_APPLICABLE : ClaimSecurityStatus.NONE;
 
     return Optional.of(claim.toFhir(securityStatus));
   }
