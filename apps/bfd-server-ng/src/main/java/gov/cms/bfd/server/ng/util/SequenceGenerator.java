@@ -11,6 +11,12 @@ public class SequenceGenerator implements Iterator<Integer> {
     return true;
   }
 
+  public SequenceGenerator(int start) {
+    this.current = start;
+  }
+
+  public SequenceGenerator() {}
+
   @Override
   public Integer next() {
     return current++;

@@ -39,7 +39,7 @@ public class ClaimRenderingProvider {
 
 
         var practitioner = new Practitioner();
-        practitioner.setId("careteam-provider-line-"+claimLineNum);
+        practitioner.setId("careteam-provider-line-"+claimLineNum.get());
         practitioner.setMeta(
                 new Meta()
                         .addProfile(SystemUrls.PROFILE_CARIN_BB_PRACTITIONER_2_1_0)
@@ -88,6 +88,6 @@ public class ClaimRenderingProvider {
                                         .setSystem(SystemUrls.CARIN_CODE_SYSTEM_CLAIM_CARE_TEAM_ROLE)
                                         .setCode(CareTeamType.RENDERING.roleCode)
                                         .setDisplay(CareTeamType.RENDERING.roleDisplay)))
-                .setProvider(new Reference("careteam-provider-line-" + claimLineNum)));
+                .setProvider(new Reference("#careteam-provider-line-" + claimLineNum.get())));
     }
 }

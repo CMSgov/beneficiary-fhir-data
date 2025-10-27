@@ -34,8 +34,8 @@ class CareTeam {
   @Column(name = "clm_rndrg_prvdr_last_name")
   private Optional<String> renderingProviderLastName;
 
-  List<CareTeamType.CareTeamComponents> toFhir() {
-    var sequenceGenerator = new SequenceGenerator();
+  List<CareTeamType.CareTeamComponents> toFhir(int sequenceStart) {
+    var sequenceGenerator = new SequenceGenerator(sequenceStart);
     var components =
         Stream.of(
             attendingProviderNpiNumber.map(
