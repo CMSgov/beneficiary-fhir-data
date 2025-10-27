@@ -20,8 +20,9 @@ public class Meta {
    * @return meta
    */
   public org.hl7.fhir.r4.model.Meta toFhirPatient(String profile) {
-    return toFhirProfile(profile,
-            List.of(SystemUrls.PROFILE_C4BB_PATIENT_2_1_0, SystemUrls.PROFILE_US_CORE_PATIENT_6_1_0));
+    return toFhirProfile(
+        profile,
+        List.of(SystemUrls.PROFILE_C4BB_PATIENT_2_1_0, SystemUrls.PROFILE_US_CORE_PATIENT_6_1_0));
   }
 
   /**
@@ -31,13 +32,13 @@ public class Meta {
    * @return meta
    */
   public org.hl7.fhir.r4.model.Meta toFhirCoverage(String profile) {
-    return toFhirProfile(profile,
-            List.of(SystemUrls.PROFILE_C4BB_COVERAGE_2_1_0, SystemUrls.PROFILE_US_CORE_COVERAGE_6_1_0));
+    return toFhirProfile(
+        profile,
+        List.of(SystemUrls.PROFILE_C4BB_COVERAGE_2_1_0, SystemUrls.PROFILE_US_CORE_COVERAGE_6_1_0));
   }
 
   private org.hl7.fhir.r4.model.Meta toFhirProfile(String profile, List<String> defaultProfiles) {
-    var meta = new org.hl7.fhir.r4.model.Meta()
-            .setLastUpdated(DateUtil.toDate(updatedTimestamp));
+    var meta = new org.hl7.fhir.r4.model.Meta().setLastUpdated(DateUtil.toDate(updatedTimestamp));
 
     if (profile != null) {
       meta.addProfile(profile);

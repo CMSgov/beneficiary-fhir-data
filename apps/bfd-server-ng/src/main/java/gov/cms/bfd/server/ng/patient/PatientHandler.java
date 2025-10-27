@@ -87,8 +87,9 @@ public class PatientHandler {
       return FhirUtil.bundleOrDefault(List.of(), beneficiaryRepository::beneficiaryLastUpdated);
     }
     var beneficiary = beneficiaryOpt.get();
-    // TODO: Add mappings for Part C and B
+
     var patient = beneficiary.toFhir(SystemUrls.PROFILE_C4DIC_PATIENT);
+    // Two more organization may be needed, once mappings for Part C and D are added.
     var cmsOrg =
         OrganizationFactory.createCmsOrganization(
             UUID.randomUUID().toString(), SystemUrls.PROFILE_C4DIC_ORGANIZATION);
