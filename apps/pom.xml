@@ -3,7 +3,7 @@
 
     <groupId>gov.cms.bfd</groupId>
     <artifactId>bfd-parent</artifactId>
-    <version>2.224.0-SNAPSHOT</version>
+    <version>2.223.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>bfd-parent</name>
@@ -67,7 +67,7 @@
         <javaSourceVersion>25</javaSourceVersion>
         <maven.compiler.release>25</maven.compiler.release>
 
-        <project.build.outputTimestamp>2025-10-27T18:37:48Z</project.build.outputTimestamp>
+        <project.build.outputTimestamp>2025-09-22T16:39:42Z</project.build.outputTimestamp>
         <!-- Disable jacoco until automated coverage generation is desired -->
         <maven.jacoco.skip>true</maven.jacoco.skip>
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
