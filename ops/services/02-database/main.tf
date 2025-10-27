@@ -122,10 +122,27 @@ resource "aws_db_parameter_group" "this" {
 }
 
 resource "aws_rds_cluster" "this" {
+  # Ignore all changes to these properties as the below local-exec(s) manages them. Yes, this makes
+  # it so that manual changes to these values are ignored, but setting them via Terraform does not
+  # work properly anyways
+  lifecycle {
+    ignore_changes = [
+      # We ignore engine_version so that auto minor version upgrades do not cause apply failures
+      engine_version,
+      # The below are ignored due to the AWS Provider not properly supporting them on Aurora
+      # Postgres Clusters
+      monitoring_interval,
+      monitoring_role_arn,
+      performance_insights_enabled,
+      performance_insights_kms_key_id,
+      performance_insights_retention_period,
+    ]
+  }
+
   allow_major_version_upgrade = false
   engine                      = "aurora-postgresql"
   engine_mode                 = "provisioned"
-  engine_version              = "16.6"
+  engine_version              = "16.8"
   apply_immediately           = false
 
   backtrack_window                    = 0
@@ -191,19 +208,6 @@ resource "aws_rds_cluster" "this" {
     interpreter = ["/bin/bash", "-c"]
   }
 
-  # Ignore all changes to these properties as the above local-exec manages them. Yes, this makes is
-  # so that manual changes to these values are ignored, but setting them via Terraform does not work
-  # properly anyways
-  lifecycle {
-    ignore_changes = [
-      monitoring_interval,
-      monitoring_role_arn,
-      performance_insights_enabled,
-      performance_insights_kms_key_id,
-      performance_insights_retention_period,
-    ]
-  }
-
   # Autoscaled reader nodes are not managed by Terraform and Terraform is unable to destroy a
   # cluster with nodes still within it. To support simply running "terraform destroy" in
   # environments with autoscaling enabled, a helper script is used that will automatically mark all
@@ -224,6 +228,15 @@ resource "aws_rds_cluster" "this" {
 }
 
 resource "aws_rds_cluster_instance" "writer" {
+  lifecycle {
+    ignore_changes = [
+      # We ignore this so that auto minor version upgrades do not cause apply failures
+      engine_version,
+      # monitoring_interval is inherited from the cluster
+      monitoring_interval
+    ]
+  }
+
   auto_minor_version_upgrade   = true
   ca_cert_identifier           = "rds-ca-rsa4096-g1"
   cluster_identifier           = aws_rds_cluster.this.id
@@ -237,11 +250,6 @@ resource "aws_rds_cluster_instance" "writer" {
   preferred_maintenance_window = aws_rds_cluster.this.preferred_maintenance_window
   publicly_accessible          = false
   tags                         = { Layer = "data" }
-
-  lifecycle {
-    # monitoring_interval is inherited from the cluster
-    ignore_changes = [monitoring_interval]
-  }
 }
 
 resource "aws_appautoscaling_target" "dynamic_replicas" {
