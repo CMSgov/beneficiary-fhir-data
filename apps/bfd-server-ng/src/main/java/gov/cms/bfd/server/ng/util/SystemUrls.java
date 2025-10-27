@@ -35,7 +35,7 @@ public class SystemUrls {
 
   /**
    * <a href="http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Patient">CARIN Digital
-   * Insurance Card 1.1.0</a>
+   * Insurance Card 1.1.0.</a>
    */
   public static final String PROFILE_C4DIC_PATIENT =
       "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Patient";
@@ -66,8 +66,8 @@ public class SystemUrls {
       "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0";
 
   /**
-   * URL for the CARIN Digital Insurance Card (C4DIC) Organization Profile, version 1.1.0. Used for the
-   * referenced CMS Organization. <a
+   * URL for the CARIN Digital Insurance Card (C4DIC) Organization Profile, version 1.1.0. Used for
+   * the referenced CMS Organization. <a
    * href="http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Organization">C4DIC
    * Organization 1.1.0</a>
    */
