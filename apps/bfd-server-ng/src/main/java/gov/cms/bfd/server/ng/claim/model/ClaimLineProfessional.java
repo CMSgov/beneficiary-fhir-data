@@ -35,10 +35,10 @@ public class ClaimLineProfessional {
   private ClaimItem claimLine;
 
   /**
-  * Return claim observation data if available.
-  *
-  * @return claim Observation
-  */
+   * Return claim observation data if available.
+   *
+   * @return claim Observation
+   */
   public Optional<Observation> toFhirObservation(int bfdRowId) {
     if (claimLineHCTHGBTestTypeCode.isEmpty()) {
       return Optional.empty();

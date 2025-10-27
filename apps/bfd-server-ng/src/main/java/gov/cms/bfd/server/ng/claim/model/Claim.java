@@ -148,22 +148,24 @@ public class Claim {
         .flatMap(Collection::stream)
         .forEach(eob::addExtension);
 
-    getClaimProfessional().ifPresent(professional -> {
-        eob.getExtension().addAll(professional.toFhirExtension());
-        eob.setTotal(Collections.singletonList(professional.toFhirTotal()));
-    });
+    getClaimProfessional()
+        .ifPresent(
+            professional -> {
+              eob.getExtension().addAll(professional.toFhirExtension());
+              eob.setTotal(Collections.singletonList(professional.toFhirTotal()));
+            });
 
     claimItems.forEach(
         item -> {
           item.getClaimLine().toFhir(item).ifPresent(eob::addItem);
           item.getClaimLine()
-                  .getClaimRenderingProvider()
-                  .toFhirPractitioner(item.getClaimLine().getClaimLineNumber())
-                  .ifPresent(eob::addContained);
+              .getClaimRenderingProvider()
+              .toFhirPractitioner(item.getClaimLine().getClaimLineNumber())
+              .ifPresent(eob::addContained);
           item.getClaimLine()
-                  .getClaimRenderingProvider()
-                  .toFhirCareTeam(item.getClaimLine().getClaimLineNumber())
-                          .ifPresent(eob::addCareTeam);
+              .getClaimRenderingProvider()
+              .toFhirCareTeam(item.getClaimLine().getClaimLineNumber())
+              .ifPresent(eob::addCareTeam);
           item.getClaimProcedure().toFhirProcedure().ifPresent(eob::addProcedure);
           item.getClaimProcedure()
               .toFhirDiagnosis(item.getClaimItemId().getBfdRowId(), claimTypeCode)
