@@ -590,7 +590,6 @@
 /bfd/${env}/server-ng/nonsensitive/ecs/capacity_provider/FARGATE/weight: 0
 /bfd/${env}/server-ng/nonsensitive/ecs/capacity_provider/FARGATE_SPOT/base: 0
 /bfd/${env}/server-ng/nonsensitive/ecs/capacity_provider/FARGATE_SPOT/weight: 100
-/bfd/${env}/server-ng/nonsensitive/eob_enabled: "false"
 /bfd/${env}/server-alarms/nonsensitive/error_alerter/rate: 5 minutes
 /bfd/${env}/server-alarms/nonsensitive/error_alerter/log_lookback_seconds: 330
 /bfd/${env}/server-alarms/nonsensitive/error_alerter/slack_webhook_ssm: /bfd/platform/alerting/sensitive/slack/bfd-internal-alerts/webhook
