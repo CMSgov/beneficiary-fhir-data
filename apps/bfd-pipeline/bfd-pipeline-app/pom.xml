@@ -75,7 +75,7 @@
         </dependency>
 
         <dependency>
-            <!-- Used to collect metrics in a registry that can be transmitted to CloudWatch efficiently. -->
+           <!-- Used to collect metrics in a registry that can be transmitted to CloudWatch efficiently. -->
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-core</artifactId>
         </dependency>
@@ -230,6 +230,13 @@
                 <!-- Used to build docker image for the project. -->
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.ow2.asm</groupId>
+                        <artifactId>asm</artifactId>
+                        <version>${asm.version}</version>
+                    </dependency>
+                </dependencies>
                 <executions>
                     <execution>
                         <id>build-image</id>
