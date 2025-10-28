@@ -19,7 +19,7 @@ enum CareTeamType {
   OPERATING("operating", "Operating"),
   RENDERING("rendering", "Rendering provider"),
   OTHER("otheroperating", "Other Operating"),
-    PRESCRIBING("prescribing", "Prescribing");
+  PRESCRIBING("prescribing", "Prescribing");
 
   private final String roleCode;
   private final String roleDisplay;
@@ -29,9 +29,9 @@ enum CareTeamType {
     var practitioner = new Practitioner();
     var sequence = sequenceGenerator.next();
     if (roleCode.equals("prescribing")) {
-        practitioner.setId("careteam-prescriber-practitioner-" + sequence);
+      practitioner.setId("careteam-prescriber-practitioner-" + sequence);
     } else {
-        practitioner.setId("careteam-provider-" + sequence);
+      practitioner.setId("careteam-provider-" + sequence);
     }
     practitioner.setMeta(
         new Meta()
