@@ -16,8 +16,12 @@ class ClaimExtensions {
   @Embedded private SubmitterContractPbpNumber submitterContractPbpNumber;
 
   List<Extension> toFhir() {
-    return Stream.of(claimContractorNumber.toFhir(), claimDispositionCode.toFhir(), claimFormatCode.toFhir(),
-                    submitterContractNumber.toFhir(), submitterContractPbpNumber.toFhir())
+    return Stream.of(
+            claimContractorNumber.toFhir(),
+            claimDispositionCode.toFhir(),
+            claimFormatCode.toFhir(),
+            submitterContractNumber.toFhir(),
+            submitterContractPbpNumber.toFhir())
         .flatMap(Optional::stream)
         .toList();
   }
