@@ -52,6 +52,7 @@
         <module>bfd-server-openapi</module>
         <module>bfd-server-ng</module>
         <module>bfd-db-migrator</module>
+        <module>bfd-db-migrator-ng</module>
         <module>bfd-ops</module>
     </modules>
 
