@@ -129,7 +129,7 @@ async def __query_samhsa_claim_any_ids(
     table: str,
     column: str,
     query_params: list[Any],
-    tablesample: int,
+    tablesample: float,
     limit: int,
     db_details: DatabaseDetailsModel,
     security_labels: list[SecurityLabelModel],
@@ -198,7 +198,7 @@ async def __query_samhsa_claim_any_ids(
 async def query_samhsa_claim_institutional_ids(
     security_labels: list[SecurityLabelModel],
     column: ClaimInstitutionalSamhsaColumn,
-    tablesample: int,
+    tablesample: float,
     limit: int,
     db_details: DatabaseDetailsModel,
 ) -> list[int]:
@@ -224,7 +224,7 @@ async def query_samhsa_claim_institutional_ids(
 async def query_samhsa_claim_item_ids(
     security_labels: list[SecurityLabelModel],
     column: ClaimItemSamhsaColumn,
-    tablesample: int,
+    tablesample: float,
     limit: int,
     db_details: DatabaseDetailsModel,
 ) -> list[int]:
@@ -248,7 +248,7 @@ async def query_samhsa_claim_item_ids(
 
 
 async def query_samhsa_benes_with_claims(
-    tablesample: int,
+    tablesample: float,
     limit: int,
     security_labels: list[SecurityLabelModel],
     db_details: DatabaseDetailsModel,
@@ -489,7 +489,7 @@ async def verify_samhsa_filtering(
     "-t",
     "--tablesample",
     envvar="TABLESAMPLE",
-    type=int,
+    type=float,
     default=10,
     help=(
         "Tamplesample percentage from 0-100 of which claim_item and claim_institutional rows will "
