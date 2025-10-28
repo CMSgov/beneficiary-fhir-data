@@ -464,7 +464,9 @@ class HighVolumeUser(BFDUserBase):
                 continue
             passing = True
             if hasattr(cur_task, "tasks"):
-                HighVolumeUser.filter_tasks_by_tags(cur_task, tags, exclude_tags, checked)
+                HighVolumeUser.filter_tasks_by_tags(
+                    cur_task, tags, exclude_tags, checked
+                )
                 passing = len(cur_task.tasks) > 0
             else:
                 if len(tags) > 0:
@@ -508,7 +510,9 @@ class HighVolumeUser(BFDUserBase):
         # Filter each task holder's tasks by the given tags and exclude_tags
         tasks = []
         for task_holder in list(map(lambda task_set: task_set[1], potential_tasks)):
-            tasks.extend(HighVolumeUser.filter_tasks_by_tags(task_holder, tags, exclude_tags))
+            tasks.extend(
+                HighVolumeUser.filter_tasks_by_tags(task_holder, tags, exclude_tags)
+            )
         return tasks
 
     def get_runnable_tasks(self, tags: set[str], exclude_tags: set[str]) -> list[Any]:

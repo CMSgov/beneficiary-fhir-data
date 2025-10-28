@@ -42,7 +42,9 @@ be compared"""
 class StatsLoader(ABC):
     """Loads AggregatedStats depending on what type of comparison is requested."""
 
-    def __init__(self, stats_config: StatsConfiguration, metadata: StatsMetadata) -> None:
+    def __init__(
+        self, stats_config: StatsConfiguration, metadata: StatsMetadata
+    ) -> None:
         self.stats_config = stats_config
         self.metadata = metadata
 
@@ -78,7 +80,9 @@ class StatsLoader(ABC):
         """
 
     @staticmethod
-    def create(stats_config: StatsConfiguration, metadata: StatsMetadata) -> "StatsLoader":
+    def create(
+        stats_config: StatsConfiguration, metadata: StatsMetadata
+    ) -> "StatsLoader":
         """Construct a new concrete instance of StatsLoader that will load from the appropriate
         store as specified in stats_config.
 
@@ -136,13 +140,17 @@ class StatsFileLoader(StatsLoader):
 
         return _get_average_all_stats(limited_stats)
 
-    def __load_stats_from_files(self, suffix: str = ".stats.json") -> list[AggregatedStats]:
+    def __load_stats_from_files(
+        self, suffix: str = ".stats.json"
+    ) -> list[AggregatedStats]:
         path = (
             self.stats_config.stats_store_file_path
             if self.stats_config and self.stats_config.stats_store_file_path
             else ""
         )
-        stats_files = [path / file for file in Path(path).iterdir() if file.name.endswith(suffix)]
+        stats_files = [
+            path / file for file in Path(path).iterdir() if file.name.endswith(suffix)
+        ]
 
         aggregated_stats_list = []
         for stats_file in stats_files:
@@ -163,7 +171,8 @@ class StatsFileLoader(StatsLoader):
                 # Pick some delta that the runtimes should be under -- in this case, we're using 3
                 # seconds
                 # TODO: Determine the right delta for checking for matching runtimes
-                loaded_metadata.total_runtime - self.metadata.total_runtime < TOTAL_RUNTIME_DELTA,
+                loaded_metadata.total_runtime - self.metadata.total_runtime
+                < TOTAL_RUNTIME_DELTA,
             ]
         )
 
@@ -171,7 +180,9 @@ class StatsFileLoader(StatsLoader):
 class StatsAthenaLoader(StatsLoader):
     """Child class of StatsLoader that loads aggregated task stats from S3 via Athena."""
 
-    def __init__(self, stats_config: StatsConfiguration, metadata: StatsMetadata) -> None:
+    def __init__(
+        self, stats_config: StatsConfiguration, metadata: StatsMetadata
+    ) -> None:
         self.client = boto3.client("athena", region_name="us-east-1")
 
         super().__init__(stats_config, metadata)
@@ -210,7 +221,9 @@ class StatsAthenaLoader(StatsLoader):
     def __start_athena_query(self, query: str) -> dict[str, Any]:
         return self.client.start_query_execution(
             QueryString=query,
-            QueryExecutionContext={"Database": self.stats_config.stats_store_s3_database},
+            QueryExecutionContext={
+                "Database": self.stats_config.stats_store_s3_database
+            },
             WorkGroup=self.stats_config.stats_store_s3_workgroup,
         )
 
@@ -221,14 +234,18 @@ class StatsAthenaLoader(StatsLoader):
             "QueryExecution"
         ]["Status"]["State"]
 
-    def __get_athena_query_result(self, query_execution_id: str) -> list[AthenaQueryRowResult]:
+    def __get_athena_query_result(
+        self, query_execution_id: str
+    ) -> list[AthenaQueryRowResult]:
         # See https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/athena.html#Athena.Client.get_query_results
         # for the structure of the returned Dict
-        return self.client.get_query_results(QueryExecutionId=query_execution_id)["ResultSet"][
-            "Rows"
-        ]
+        return self.client.get_query_results(QueryExecutionId=query_execution_id)[
+            "ResultSet"
+        ]["Rows"]
 
-    def __run_query(self, query: str, max_retries: int = 10) -> list[AthenaQueryRowResult] | None:
+    def __run_query(
+        self, query: str, max_retries: int = 10
+    ) -> list[AthenaQueryRowResult] | None:
         start_response = self.__start_athena_query(query)
         query_execution_id = start_response["QueryExecutionId"]
 
@@ -242,7 +259,9 @@ class StatsAthenaLoader(StatsLoader):
             if status == "SUCCEEDED":
                 break
             if status == "FAILED" or status == "CANCELLED":
-                raise RuntimeError(f"Query failed to complete -- status returned was {status}")
+                raise RuntimeError(
+                    f"Query failed to complete -- status returned was {status}"
+                )
 
         return self.__get_athena_query_result(query_execution_id)
 
@@ -279,7 +298,9 @@ class StatsAthenaLoader(StatsLoader):
         raw_data = [item["Data"] for item in query_result[1:]]
         return [(data[0]["VarCharValue"], data[1]["VarCharValue"]) for data in raw_data]
 
-    def __stats_from_json_data(self, raw_json_data: list[tuple[str, str]]) -> list[AggregatedStats]:
+    def __stats_from_json_data(
+        self, raw_json_data: list[tuple[str, str]]
+    ) -> list[AggregatedStats]:
         # Deserializing from a tuple of raw JSON objects; first tuple is a raw JSON object string
         # representing the aggregated totals and second tuple is a raw JSON list of objects
         # representing the statistics for each task
@@ -292,13 +313,17 @@ class StatsAthenaLoader(StatsLoader):
         return [
             AggregatedStats(
                 totals=TaskStats(**totals_as_dict),
-                tasks=[TaskStats(**task_vals_dict) for task_vals_dict in tasks_as_lists],
+                tasks=[
+                    TaskStats(**task_vals_dict) for task_vals_dict in tasks_as_lists
+                ],
             )
             for totals_as_dict, tasks_as_lists in serialized_tuples
         ]
 
 
-def _bucket_tasks_by_name(all_stats: list[AggregatedStats]) -> dict[str, list[TaskStats]]:
+def _bucket_tasks_by_name(
+    all_stats: list[AggregatedStats],
+) -> dict[str, list[TaskStats]]:
     tasks_by_name: dict[str, list[TaskStats]] = {}
     for stats in all_stats:
         for task in stats.tasks:
@@ -340,7 +365,8 @@ def _get_average_task_stats(all_tasks: list[TaskStats]) -> TaskStats:
     # get the mean of each percentile across all tasks and make it the value of a new
     # percentile dict
     avg_task_percents = {
-        p: mean(task.response_time_percentiles[p] for task in all_tasks) for p in common_percents
+        p: mean(task.response_time_percentiles[p] for task in all_tasks)
+        for p in common_percents
     }
 
     return TaskStats(
@@ -361,4 +387,8 @@ def _get_average_all_stats(all_stats: list[AggregatedStats]) -> AggregatedStats 
     except ValueError:
         return None
 
-    return AggregatedStats(totals=averaged_totals, tasks=averaged_tasks) if averaged_tasks else None
+    return (
+        AggregatedStats(totals=averaged_totals, tasks=averaged_tasks)
+        if averaged_tasks
+        else None
+    )

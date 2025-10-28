@@ -251,7 +251,8 @@ class RegressionV2User(BFDUserBase):
         """Get single Claim with last updated and service date."""
         self.run_task_by_parameters(
             base_path="/v2/fhir/Claim",
-            params={"mbi": next(self.pac_hashed_mbis)} | self.PAC_SERVICE_DATE_LAST_UPDATED,
+            params={"mbi": next(self.pac_hashed_mbis)}
+            | self.PAC_SERVICE_DATE_LAST_UPDATED,
             name=(
                 "/v2/fhir/claim search by mbi hash /"
                 f" {params_to_str(self.PAC_SERVICE_DATE_LAST_UPDATED)}"
@@ -310,7 +311,8 @@ class RegressionV2User(BFDUserBase):
         """Get single ClaimResponse with last updated and service date."""
         self.run_task_by_parameters(
             base_path="/v2/fhir/ClaimResponse",
-            params={"mbi": next(self.pac_hashed_mbis)} | self.PAC_SERVICE_DATE_LAST_UPDATED,
+            params={"mbi": next(self.pac_hashed_mbis)}
+            | self.PAC_SERVICE_DATE_LAST_UPDATED,
             name=(
                 "/v2/fhir/claimResponse search by mbi hash /"
                 f" {params_to_str(self.PAC_SERVICE_DATE_LAST_UPDATED)}"

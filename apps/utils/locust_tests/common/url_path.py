@@ -4,7 +4,9 @@ from collections.abc import Mapping
 from urllib.parse import urlencode
 
 
-def create_url_path(path: str, query_params: Mapping[str, str | int | list] | None = None) -> str:
+def create_url_path(
+    path: str, query_params: Mapping[str, str | int | list] | None = None
+) -> str:
     """Create a query path from a base path (i.e. /v2/fhir/Coverage) and a dictionary of query
     parameters.
     """

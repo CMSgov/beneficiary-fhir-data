@@ -54,7 +54,9 @@ def _get_regression_query(select_query: str) -> str:
     )
 
 
-def get_regression_bene_ids(uri: str, table_sample_pct: float | None = None) -> list[str]:  # noqa: ARG001
+def get_regression_bene_ids(
+    uri: str, table_sample_pct: float | None = None
+) -> list[str]:  # noqa: ARG001
     """Retrieve a list of beneficiary IDs within the range of 20,000 contiguous synthetic
     beneficiaries that exist in each environment. Returned list is sorted in ascending order.
 
@@ -68,7 +70,9 @@ def get_regression_bene_ids(uri: str, table_sample_pct: float | None = None) -> 
     return [str(r[0]) for r in _execute(uri, bene_query)]
 
 
-def get_regression_hashed_mbis(uri: str, table_sample_pct: float | None = None) -> list[str]:  # noqa: ARG001
+def get_regression_hashed_mbis(
+    uri: str, table_sample_pct: float | None = None
+) -> list[str]:  # noqa: ARG001
     """Retrieve a list of hashed MBIs within the range of 20,000 contiguous synthetic
     beneficiaries that exist in each environment. Returned list is sorted in ascending order.
 
@@ -126,7 +130,9 @@ def get_regression_contract_ids(
     ]
 
 
-def get_regression_pac_hashed_mbis(uri: str, table_sample_pct: float | None = None) -> list[str]:  # noqa: ARG001
+def get_regression_pac_hashed_mbis(
+    uri: str, table_sample_pct: float | None = None
+) -> list[str]:  # noqa: ARG001
     """Return a list of MBI hashes within the set of static, synthetic PAC data.
 
     Args:
@@ -135,13 +141,13 @@ def get_regression_pac_hashed_mbis(uri: str, table_sample_pct: float | None = No
     Returns:
         list[str]: A list of MBI hashes
     """
-    claims_mbis_query = (
-        r"select hash from rda.mbi_cache where regexp_like(mbi, '\dS.+') order by hash limit 300"
-    )
+    claims_mbis_query = r"select hash from rda.mbi_cache where regexp_like(mbi, '\dS.+') order by hash limit 300"
     return [str(r[0]) for r in _execute(uri, claims_mbis_query)]
 
 
-def get_regression_pac_mbis(uri: str, table_sample_pct: float | None = None) -> list[str]:  # noqa: ARG001
+def get_regression_pac_mbis(
+    uri: str, table_sample_pct: float | None = None
+) -> list[str]:  # noqa: ARG001
     """Return a list of MBI within the set of static, synthetic PAC data.
 
     Args:
@@ -150,9 +156,7 @@ def get_regression_pac_mbis(uri: str, table_sample_pct: float | None = None) -> 
     Returns:
         list[str]: A list of MBI
     """
-    claims_mbis_query = (
-        r"select mbi from rda.mbi_cache where regexp_like(mbi, '\dS.+') order by mbi limit 300"
-    )
+    claims_mbis_query = r"select mbi from rda.mbi_cache where regexp_like(mbi, '\dS.+') order by mbi limit 300"
     return [str(r[0]) for r in _execute(uri, claims_mbis_query)]
 
 
@@ -163,7 +167,9 @@ def get_bene_ids(uri: str, table_sample_pct: float | None = None) -> list:
     else:
         table_sample_text = f"TABLESAMPLE SYSTEM ({table_sample_pct}) "
 
-    bene_query = f'SELECT "bene_id" FROM ccw.beneficiaries {table_sample_text} LIMIT {LIMIT}'
+    bene_query = (
+        f'SELECT "bene_id" FROM ccw.beneficiaries {table_sample_text} LIMIT {LIMIT}'
+    )
 
     return [str(r[0]) for r in _execute(uri, bene_query)]
 
@@ -253,7 +259,9 @@ def get_pac_mbis(uri: str) -> list:
     mixture of claim data elements, better testing our FHIR transformers' ability to
     correctly render them.
     """
-    per_status_max = int(LIMIT / 40)  # Based on ~40 distinct status values between FISS/MCS
+    per_status_max = int(
+        LIMIT / 40
+    )  # Based on ~40 distinct status values between FISS/MCS
 
     sub_select_day_age = 30
 

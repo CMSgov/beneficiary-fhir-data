@@ -46,7 +46,9 @@ class UserInitAwareLoadShape(LoadTestShape):
         self.target_runtime = self.environment.parsed_options.spawned_runtime
 
         if self.target_runtime is None:
-            self.logger.info("--spawned-runtime not specified, tests will run indefinitely.")
+            self.logger.info(
+                "--spawned-runtime not specified, tests will run indefinitely."
+            )
 
         if self.target_runtime == 0:
             self.logger.info(
@@ -88,7 +90,10 @@ class UserInitAwareLoadShape(LoadTestShape):
                 self.reset_time()
                 self.has_time_activated = True
 
-            if self.target_runtime is not None and self.get_run_time() > self.target_runtime:
+            if (
+                self.target_runtime is not None
+                and self.get_run_time() > self.target_runtime
+            ):
                 return None
 
         self.logger.debug("Current runtime: %f", self.get_run_time())

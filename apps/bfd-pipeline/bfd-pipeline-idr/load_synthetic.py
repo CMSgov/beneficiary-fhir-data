@@ -17,7 +17,10 @@ tables = [
     },
     {"csv_name": "SYNTHETIC_BENE_MDCR_STUS.csv", "table": "v2_mdcr_bene_mdcr_stus"},
     {"csv_name": "SYNTHETIC_BENE_TP.csv", "table": "v2_mdcr_bene_tp"},
-    {"csv_name": "SYNTHETIC_BENE_CMBND_DUAL_MDCR.csv", "table": "v2_mdcr_bene_cmbnd_dual_mdcr"},
+    {
+        "csv_name": "SYNTHETIC_BENE_CMBND_DUAL_MDCR.csv",
+        "table": "v2_mdcr_bene_cmbnd_dual_mdcr",
+    },
     {"csv_name": "SYNTHETIC_CLM.csv", "table": "v2_mdcr_clm"},
     {"csv_name": "SYNTHETIC_CLM_INSTNL.csv", "table": "v2_mdcr_clm_instnl"},
     {"csv_name": "SYNTHETIC_CLM_PRFNL.csv", "table": "v2_mdcr_clm_prfnl"},
@@ -80,7 +83,11 @@ def _load_file(
 
 
 if __name__ == "__main__":
-    baseDir = sys.argv[1] if len(sys.argv) > 1 and sys.argv[1] != "" else "../../bfd-model-idr/out"
+    baseDir = (
+        sys.argv[1]
+        if len(sys.argv) > 1 and sys.argv[1] != ""
+        else "../../bfd-model-idr/out"
+    )
     load_from_csv(
         psycopg.connect(get_connection_string()),
         baseDir,

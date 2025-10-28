@@ -13,7 +13,9 @@ fake = Faker()
 
 # Command line argument parsing
 parser = argparse.ArgumentParser(description="Generate synthetic patient data")
-parser.add_argument("--benes", type=str, help="Path to CSV file containing beneficiary data")
+parser.add_argument(
+    "--benes", type=str, help="Path to CSV file containing beneficiary data"
+)
 parser.add_argument(
     "--claims",
     action="store_true",
@@ -46,7 +48,9 @@ generator = GeneratorUtil()
 csv_data = None
 if args.benes:
     try:
-        csv_data = pd.read_csv(args.benes, dtype={"BENE_SEX_CD": "Int64", "BENE_RACE_CD": "Int64"})
+        csv_data = pd.read_csv(
+            args.benes, dtype={"BENE_SEX_CD": "Int64", "BENE_RACE_CD": "Int64"}
+        )
         print(f"Loaded {len(csv_data)} rows from CSV file: {args.benes}")
 
         patients_to_generate = len(csv_data)
@@ -96,7 +100,9 @@ for i in range(patients_to_generate):
             if pd.notna(row.get("BENE_VRFY_DEATH_DAY_SW")):
                 patient["BENE_VRFY_DEATH_DAY_SW"] = str(row["BENE_VRFY_DEATH_DAY_SW"])
             else:
-                patient["BENE_VRFY_DEATH_DAY_SW"] = "Y" if random.randint(0, 1) == 1 else "N"
+                patient["BENE_VRFY_DEATH_DAY_SW"] = (
+                    "Y" if random.randint(0, 1) == 1 else "N"
+                )
         else:
             if random.randint(0, 10) < 2:
                 # death!
@@ -181,7 +187,9 @@ for i in range(patients_to_generate):
             patient["BENE_VRFY_DEATH_DAY_SW"] = "~"
 
         patient["BENE_SEX_CD"] = str(random.randint(1, 2))
-        patient["BENE_RACE_CD"] = random.choice(["~", "0", "1", "2", "3", "4", "5", "6", "7", "8"])
+        patient["BENE_RACE_CD"] = random.choice(
+            ["~", "0", "1", "2", "3", "4", "5", "6", "7", "8"]
+        )
 
         pt_bene_sk = generator.gen_bene_sk()
         patient["BENE_SK"] = str(pt_bene_sk)
@@ -219,10 +227,14 @@ for i in range(patients_to_generate):
 
         generator.generate_bene_xref(pt_bene_sk, old_bene_sk)
 
-        generator.set_timestamps(prior_patient, datetime.date(year=2017, month=5, day=20))
+        generator.set_timestamps(
+            prior_patient, datetime.date(year=2017, month=5, day=20)
+        )
 
         # Override the obsolete timestamp to be in the past year instead of future
-        past_year_date = datetime.date.today() - datetime.timedelta(days=random.randint(30, 365))
+        past_year_date = datetime.date.today() - datetime.timedelta(
+            days=random.randint(30, 365)
+        )
         prior_patient["IDR_TRANS_OBSLT_TS"] = f"{past_year_date}T00:00:00.000000+0000"
 
         generator.bene_hstry_table.append(prior_patient)

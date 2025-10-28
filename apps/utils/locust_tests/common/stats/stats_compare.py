@@ -155,13 +155,21 @@ def do_stats_comparison(
 
     logger.info(
         "Totals comparison results: %s",
-        json.dumps([asdict(x, dict_factory=ignore_nulls_factory) for x in totals_exceeded_results]),
+        json.dumps(
+            [
+                asdict(x, dict_factory=ignore_nulls_factory)
+                for x in totals_exceeded_results
+            ]
+        ),
     )
     logger.info(
         "Tasks comparison results: %s",
         json.dumps(
             {
-                k: [asdict(meta_dict, dict_factory=ignore_nulls_factory) for meta_dict in v]
+                k: [
+                    asdict(meta_dict, dict_factory=ignore_nulls_factory)
+                    for meta_dict in v
+                ]
                 for k, v in tasks_exceeded_results.items()
             }
         ),
@@ -175,7 +183,10 @@ def do_stats_comparison(
     any_failures, any_warnings = functools.reduce(
         lambda a, b: (a[0] or b[0], a[1] or b[1]),
         (
-            (x.result == StatCompareResult.FAILURE, x.result == StatCompareResult.WARNING)
+            (
+                x.result == StatCompareResult.FAILURE,
+                x.result == StatCompareResult.WARNING,
+            )
             for x in [
                 *totals_exceeded_results,
                 *itertools.chain.from_iterable(tasks_exceeded_results.values()),
@@ -236,7 +247,9 @@ def get_stats_compare_results(
 
 
 def validate_aggregated_stats(
-    previous: AggregatedStats, current: AggregatedStats, all_comparisons_meta: AllComparisonMetadata
+    previous: AggregatedStats,
+    current: AggregatedStats,
+    all_comparisons_meta: AllComparisonMetadata,
 ) -> tuple[list[StatComparison], dict[str, list[StatComparison]]]:
     """Validate and compare the given AggregatedStats instances against each other, checking each
     of their common TaskStats and returning a dictionary of the name of those tasks that exceed the
@@ -265,13 +278,17 @@ def validate_aggregated_stats(
         prev_task = prev_tasks[task]
         cur_task = cur_tasks[task]
 
-        compare_results = get_stats_compare_results(prev_task, cur_task, all_comparisons_meta.tasks)
+        compare_results = get_stats_compare_results(
+            prev_task, cur_task, all_comparisons_meta.tasks
+        )
         all_tasks_results[task] = compare_results
 
     # Compare totals
     prev_totals = previous.totals
     cur_totals = current.totals
-    totals_results = get_stats_compare_results(prev_totals, cur_totals, all_comparisons_meta.totals)
+    totals_results = get_stats_compare_results(
+        prev_totals, cur_totals, all_comparisons_meta.totals
+    )
 
     return (totals_results, all_tasks_results)
 
@@ -280,8 +297,12 @@ def _load_stats_comparison_metadata(path: str) -> AllComparisonMetadata:
     with Path(path).open(encoding="utf-8") as json_file:
         as_json = json.load(json_file)
         return AllComparisonMetadata(
-            totals=[StatsComparisonMetadata(**meta_dict) for meta_dict in as_json["totals"]],
-            tasks=[StatsComparisonMetadata(**meta_dict) for meta_dict in as_json["tasks"]],
+            totals=[
+                StatsComparisonMetadata(**meta_dict) for meta_dict in as_json["totals"]
+            ],
+            tasks=[
+                StatsComparisonMetadata(**meta_dict) for meta_dict in as_json["tasks"]
+            ],
         )
 
 
@@ -325,7 +346,9 @@ def _compute_results_list(
         compare_meta.name: compare_meta for compare_meta in comparisons_metadata
     }
     return [
-        _compare_stat(stat, prev_stats[stat], cur_stats[stat], comparison_meta_by_name[stat])
+        _compare_stat(
+            stat, prev_stats[stat], cur_stats[stat], comparison_meta_by_name[stat]
+        )
         for stat in comparison_meta_by_name
     ]
 

@@ -42,7 +42,9 @@ class PostgresLoader:
         batch_start: datetime,
         progress: LoadProgress | None,
     ) -> bool:
-        return BatchLoader(self.conn, fetch_results, model, batch_start, progress).load()
+        return BatchLoader(
+            self.conn, fetch_results, model, batch_start, progress
+        ).load()
 
 
 class BatchLoader:
@@ -69,7 +71,9 @@ class BatchLoader:
         self.progress = progress
         self.immutable = not model.update_timestamp_col()
         self.meta_keys = (
-            ["bfd_created_ts"] if self.immutable else ["bfd_created_ts", "bfd_updated_ts"]
+            ["bfd_created_ts"]
+            if self.immutable
+            else ["bfd_created_ts", "bfd_updated_ts"]
         )
 
     def load(
@@ -249,7 +253,9 @@ class BatchLoader:
         with cur.copy(f"COPY {self.temp_table} ({self.cols_str}) FROM STDIN") as copy:  # type: ignore
             for row in results:
                 model_dump = row.model_dump()
-                copy.write_row([_remove_null_bytes(model_dump[k]) for k in self.insert_cols])
+                copy.write_row(
+                    [_remove_null_bytes(model_dump[k]) for k in self.insert_cols]
+                )
 
 
 def _remove_null_bytes(val: DbType) -> DbType:

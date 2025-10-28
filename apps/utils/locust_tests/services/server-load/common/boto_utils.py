@@ -17,7 +17,9 @@ else:
     SSMClient = object
 
 
-def get_ssm_parameter(ssm_client: SSMClient, name: str, with_decrypt: bool = False) -> str:
+def get_ssm_parameter(
+    ssm_client: SSMClient, name: str, with_decrypt: bool = False
+) -> str:
     """Retrieve the value of the given SSM parameter optionally decrypting it if specified.
 
     Args:
@@ -122,6 +124,8 @@ def get_warm_pool_count(message: dict[str, str]) -> int:
         r"increasing the capacity from \d+ to (\d+)", scaling_cause, re.IGNORECASE
     )
     if not count_search:
-        raise ValueError(f"Cause in message {message} does not indicate any scaling occurred")
+        raise ValueError(
+            f"Cause in message {message} does not indicate any scaling occurred"
+        )
 
     return int(count_search.group(1))

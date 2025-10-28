@@ -151,7 +151,9 @@ def handler(event: dict[str, Any], context: LambdaContext) -> dict[str, Any]:
             )
 
         if invoke_event.store:
-            store_tag_args = [f"--stats-store-tag={tag}" for tag in invoke_event.store.tags]
+            store_tag_args = [
+                f"--stats-store-tag={tag}" for tag in invoke_event.store.tags
+            ]
             locust_process_args += [
                 "--stats-store-s3",
                 f"--stats-store-s3-workgroup={STATS_ATHENA_WORKGROUP}",
