@@ -347,6 +347,22 @@ public class SystemUrls {
   public static final String BLUE_BUTTON_CLAIM_TYPE_CODE =
       "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-TYPE-CD";
 
+    /** URL. */
+    public static final String BLUE_BUTTON_GENERIC_BRAND_IND =
+            "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BRND-GNRC-CD";
+
+    /** URL. */
+    public static final String HL7_GENERIC_BRAND_IND =
+            "http://terminology.hl7.org/CodeSystem/NCPDPBrandGenericIndicator";
+
+    /** URL. */
+    public static final String BLUE_BUTTON_CLAIM_COMPOUND_CODE =
+            "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CMPND-CD";
+
+    /** URL. */
+    public static final String HL7_CLAIM_COMPOUND_CODE =
+            "http://terminology.hl7.org/CodeSystem/NCPDPCompoundCode";
+
   /** URL. */
   public static final String BLUE_BUTTON_ADJUDICATION_STATUS =
       "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication-Status";
@@ -358,6 +374,10 @@ public class SystemUrls {
   /** Blue Button identifier - claim control number. */
   public static final String BLUE_BUTTON_CLAIM_CONTROL_NUMBER =
       "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM";
+
+    /** Blue Button identifier - claim original control number. */
+    public static final String BLUE_BUTTON_CLAIM_ORIGINAL_CONTROL_NUMBER =
+            "https://bluebutton.cms.gov/identifiers/CLM_ORIG_CNTL_NUM";
 
   /** Blue Button structure definition - claim query code. */
   public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_CLAIM_QUERY_CODE =
@@ -390,6 +410,22 @@ public class SystemUrls {
   /** Blue Button code system - claim disposition code. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_CLAIM_DISPOSITION_CODE =
       "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DISP-CD";
+
+  /** Blue Button structure definition - part D claim format code. */
+  public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_CLAIM_FORMAT_CODE =
+          "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-SBMT-FRMT-CD";
+
+  /** Blue Button code system - part D claim format code. */
+  public static final String BLUE_BUTTON_CODE_SYSTEM_CLAIM_FORMAT_CODE =
+          "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-SBMT-FRMT-CD";
+
+  /** Blue Button structure definition - claim submitter contract number. */
+  public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_CLAIM_SUBMITTER_CONTRACT_NUMBER =
+          "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-SBMTR-CNTRCT-NUM";
+
+    /** Blue Button structure definition - claim submitter contract number. */
+    public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_CLAIM_SUBMITTER_CONTRACT_PBP_NUMBER =
+            "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-SBMTR-CNTRCT-PBP-NUM";
 
   /** Blue Button structure definition - claim process date. */
   public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_CLAIM_PROCESS_DATE =

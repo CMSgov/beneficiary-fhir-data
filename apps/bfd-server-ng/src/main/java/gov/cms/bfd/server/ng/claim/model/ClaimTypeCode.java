@@ -331,6 +331,18 @@ public enum ClaimTypeCode {
     return Optional.of(organization);
   }
 
+    Optional<Organization> toFhirInsurerPartD(String pbpName) {
+        if (!isBetween(1, 4)) {
+            return Optional.empty();
+        }
+
+        var organization = OrganizationFactory.toFhir();
+        organization.setId(INSURER_ORG);
+        // src.CNTRCT_PBP_NAME as pbpName
+        organization.setName(pbpName);
+        return Optional.of(organization);
+    }
+
   Optional<ExplanationOfBenefit.InsuranceComponent> toFhirInsurance() {
     return Optional.of(
         new ExplanationOfBenefit.InsuranceComponent()
