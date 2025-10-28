@@ -876,11 +876,11 @@ class IdrClaimFiss(IdrBaseModel):
 
 class IdrClaimInstitutional(IdrBaseModel):
     clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
-    clm_admsn_type_cd: str
+    clm_admsn_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
     bene_ptnt_stus_cd: Annotated[str, BeforeValidator(transform_default_string)]
     dgns_drg_cd: int
     clm_mdcr_instnl_mco_pd_sw: str
-    clm_admsn_src_cd: str
+    clm_admsn_src_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_fi_actn_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_mdcr_ip_lrd_use_cnt: Annotated[int, BeforeValidator(transform_null_int)]
     clm_hipps_uncompd_care_amt: Annotated[float, BeforeValidator(transform_null_float)]
