@@ -2,7 +2,7 @@
 name = "bfd-workspace"
 version = "0.1.0"
 description = "BFD Python workspace for unified dependency management"
-requires-python = ">=3.13,<3.14"
+requires-python = "~=3.13"
 dependencies = [
     # bfd-pipeline-idr dependencies
     "cryptography>=45.0.6",
@@ -39,45 +39,7 @@ dev-dependencies = [
     "boto3-stubs[sns,ssm]",
 ]
 
-[tool.ruff]
-line-length = 100
-
-[tool.ruff.lint]
-select = [
-    "D",    # pydocstyle
-    "E501", # line-length
-    "E",    # pycodestyle
-    "F",    # Pyflakes
-    "UP",   # pyupgrade
-    "B",    # flake8-bugbear
-    "SIM",  # flake8-simplify
-    "I",    # isort
-    "ANN",  # flake8-annotations
-    "LOG",  # flake8-logging
-    "G",    # flake8-logging-format
-    "PT",   # flake8-pytest-style
-    "RSE",  # flake8-raise
-    "PIE",  # flake8-pie
-    "RET",  # flake8-return
-    "SLF",  # flake8-self
-    "ARG",  # flake8-unused-arguments
-    "PTH",  # flake8-use-pathlib
-    "PLE",  # pylint-error
-    "PLW",  # pylint-warning
-    "PERF", # perflint
-    "FURB", # refurb
-    "RUF",  # ruff-specific
-]
-# Don't require docstrings
-ignore = ["D100", "D101", "D102", "D103", "D104", "D105", "D107", "D205"]
-
-[tool.ruff.lint.pydocstyle]
-convention = "pep257"
-
-[tool.ruff.format]
-quote-style = "double"
-indent-style = "space"
-docstring-code-format = true
+# Inherit common tool configurations from root pyproject.toml
 
 [tool.ruff.lint.per-file-ignores]
 # Legacy scripts: relax linting rules for data generation, database scripts, and utilities
@@ -88,14 +50,7 @@ docstring-code-format = true
 "../ops/services/02-eft/lambda_src/sftp_outbound_transfer/**/*.py" = ["D100", "D101", "D102", "D103", "D104", "D105", "D107", "E501"]
 
 [tool.pyright]
-typeCheckingMode = "strict"
 venvPath = "."
 venv = ".venv"
-
 exclude = [".venv", "**/bfd-model-idr/**", "**/bfd-model-rif/**", "**/bfd-pipeline-idr/**", "**/locust_tests/**", "**/synthetic-load-converter/**", "**/sftp_outbound_transfer/**"]
-reportMissingImports = false
-reportMissingTypeStubs = false
-
-[tool.pytest.ini_options]
-timeout = 600
 

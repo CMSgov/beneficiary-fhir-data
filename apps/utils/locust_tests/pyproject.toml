@@ -25,6 +25,10 @@ dev = [
 # run-locust Lambda
 lambda-run-locust = ["aws-lambda-powertools[all]>=3.8.0"]
 
+# Inherits tool configurations from 
+# ../../pyproject.toml (apps workspace) and 
+# ../../../pyproject.toml (root)
+
 [tool.locust]
 # Specify locust test parameters here or on the command line
 # See https://docs.locust.io/en/stable/configuration.html#pyproject-toml
