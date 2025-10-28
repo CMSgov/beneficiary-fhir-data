@@ -64,6 +64,7 @@ public class Claim {
   @Embedded private BenefitBalance benefitBalance;
   @Embedded private AdjudicationCharge adjudicationCharge;
   @Embedded private ClaimPaymentAmount claimPaymentAmount;
+  @Embedded private PharmacyProvider pharmacyProvider;
 
   @OneToOne
   @JoinColumn(name = "bene_sk")
@@ -87,6 +88,20 @@ public class Claim {
   @JoinColumn(name = "clm_uniq_id")
   private SortedSet<ClaimItem> claimItems;
 
+  @Nullable
+  @OneToOne
+  @JoinColumn(
+          name = "clm_sbmtr_cntrct_num",
+          insertable = false,
+          updatable = false,
+          referencedColumnName = "cntrct_num")
+  @JoinColumn(
+          name = "clm_sbmtr_cntrct_pbp_num",
+          insertable = false,
+          updatable = false,
+          referencedColumnName = "cntrct_pbp_num")
+  private Contract contract;
+
   private Optional<ClaimInstitutional> getClaimInstitutional() {
     return Optional.ofNullable(claimInstitutional);
   }
@@ -94,6 +109,10 @@ public class Claim {
   private Optional<ClaimFiss> getClaimFiss() {
     return Optional.ofNullable(claimFiss);
   }
+
+  private Optional<Contract> getContract() {
+        return Optional.ofNullable(contract);
+    }
 
   /**
    * Accessor for institutional DRG code, if this is an institutional claim.
@@ -130,6 +149,8 @@ public class Claim {
               eob.addContained(i);
               eob.setInsurer(new Reference(i));
             });
+    var contract = getContract();
+    contract.flatMap(Contract::getContractName).ifPresent(name -> claimTypeCode.toFhirInsurerPartD(name));
     var institutional = getClaimInstitutional();
     Stream.of(
             claimExtensions.toFhir(),
@@ -153,6 +174,13 @@ public class Claim {
               eob.addContained(p);
               eob.setProvider(new Reference(p));
             });
+    pharmacyProvider
+            .toFhir(claimTypeCode)
+            .ifPresent(
+                    p -> {
+                        eob.addContained(p);
+                        eob.setProvider(new Reference(p));
+                    });
 
     // Each toFhirOutcome() evaluates independently, but their logic is mutually exclusive
     // based on claim type. At most one Optional will be non-empty, so only one call
@@ -193,7 +221,7 @@ public class Claim {
         .forEach(
             c -> {
               eob.addCareTeam(c.careTeam());
-              eob.addContained(c.practitioner());
+              eob.addContained(c.practitioner()); //here
             });
 
     institutional.ifPresent(

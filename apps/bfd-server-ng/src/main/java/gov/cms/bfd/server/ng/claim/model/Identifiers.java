@@ -16,6 +16,9 @@ class Identifiers {
   @Column(name = "clm_cntl_num")
   private String claimControlNumber;
 
+  @Column(name = "clm_orig_cntl_num")
+  private String claimOriginalControlNumber;
+
   public List<Identifier> toFhir() {
     return List.of(
         new Identifier()
@@ -29,6 +32,9 @@ class Identifiers {
                             .setDisplay("Unique Claim ID"))),
         new Identifier()
             .setSystem(SystemUrls.BLUE_BUTTON_CLAIM_CONTROL_NUMBER)
-            .setValue(claimControlNumber));
+            .setValue(claimControlNumber),
+            new Identifier()
+                    .setSystem(SystemUrls.BLUE_BUTTON_CLAIM_ORIGINAL_CONTROL_NUMBER)
+                    .setValue(claimOriginalControlNumber));
   }
 }
