@@ -2,7 +2,7 @@
 name = "bfd-workspace"
 version = "0.1.0"
 description = "BFD Python workspace for unified dependency management"
-requires-python = "~=3.13"
+requires-python = "~=3.13.0"
 dependencies = [
     # bfd-pipeline-idr dependencies
     "cryptography>=45.0.6",
@@ -15,6 +15,11 @@ dependencies = [
     "aws-lambda-powertools[all]",
     "paramiko",
     "boto3",
+    # samhsa-regression-tests dependencies
+    "aiohttp>=3.13.0",
+    "asyncclick>=8.3.0.5",
+    "anyio>=4.11.0",
+    "pyyaml>=6.0.3",
 ]
 
 [tool.uv.workspace]
@@ -24,13 +29,14 @@ members = [
     "bfd-server-ng/codegen",
     "utils/synthetic-load-converter",
     "utils/locust_tests",
+    "utils/samhsa-regression-tests",
     "../ops/services/02-eft/lambda_src/sftp_outbound_transfer",
 ]
 
 [tool.uv]
 dev-dependencies = [
     "ruff==0.13.2",
-    "pyright==1.1.406",
+    "pyright==1.1.407",
     "pytest==8.4.2",
     "pytest-timeout>=2.1.0",
     # bfd-pipeline-idr dev dependencies

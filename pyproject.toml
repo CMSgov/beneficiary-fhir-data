@@ -7,7 +7,7 @@ build-backend = "hatchling.build"
 
 # Standard Python version for all BFD projects
 [project]
-requires-python = "~=3.13"
+requires-python = "~=3.13.0"
 
 [tool.ruff]
 line-length = 100
