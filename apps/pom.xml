@@ -1071,6 +1071,13 @@
                     <groupId>com.google.cloud.tools</groupId>
                     <artifactId>jib-maven-plugin</artifactId>
                     <version>${jib.version}</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.ow2.asm</groupId>
+                            <artifactId>asm</artifactId>
+                            <version>${asm.version}</version>
+                        </dependency>
+                    </dependencies>
                     <configuration>
                         <to>
                             <image>${jib.namespace}${project.artifactId}:${project.version}</image>
