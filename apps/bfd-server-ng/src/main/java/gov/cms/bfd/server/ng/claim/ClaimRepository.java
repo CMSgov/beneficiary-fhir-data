@@ -22,16 +22,16 @@ public class ClaimRepository {
 
   private static final String CLAIM_TABLES =
       """
-      SELECT c
-      FROM Claim c
-      JOIN FETCH c.beneficiary b
-      JOIN FETCH c.claimDateSignature AS cds
-      JOIN FETCH c.claimItems AS cl
-      LEFT JOIN FETCH c.claimInstitutional ci
-      LEFT JOIN FETCH cl.claimLineInstitutional cli
-      LEFT JOIN FETCH c.claimFiss cf
-      LEFT JOIN FETCH cli.ansiSignature a
-    """;
+        SELECT c
+        FROM Claim c
+        JOIN FETCH c.beneficiary b
+        JOIN FETCH c.claimDateSignature AS cds
+        JOIN FETCH c.claimItems AS cl
+        LEFT JOIN FETCH c.claimInstitutional ci
+        LEFT JOIN FETCH cl.claimLineInstitutional cli
+        LEFT JOIN FETCH c.claimFiss cf
+        LEFT JOIN FETCH cli.ansiSignature a
+      """;
 
   /**
    * Search for a claim by its ID.
@@ -86,14 +86,21 @@ public class ClaimRepository {
       List<ClaimSourceId> sourceIds) {
     // JPQL doesn't support LIMIT/OFFSET unfortunately, so we have to load this separately.
     // setMaxResults will only limit the results in memory rather than at the database level.
+
+    // We need to get a distinct list of bene_sk values here because there will be duplicates
+    // since this is a history table.
     var claimIds =
         entityManager
             .createNativeQuery(
                 """
+                WITH benes AS (
+                    SELECT DISTINCT b.bene_sk
+                    FROM idr.beneficiary b
+                    WHERE b.bene_xref_efctv_sk_computed = :beneSk
+                )
                 SELECT c.clm_uniq_id
                 FROM idr.claim c
-                JOIN idr.beneficiary b ON b.bene_sk = c.bene_sk
-                WHERE b.bene_xref_efctv_sk_computed = :beneSk
+                JOIN benes b ON b.bene_sk = c.bene_sk
                 ORDER BY c.clm_uniq_id
                 LIMIT :limit
                 OFFSET :offset
