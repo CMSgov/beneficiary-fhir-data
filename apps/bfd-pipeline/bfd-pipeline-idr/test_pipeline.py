@@ -132,14 +132,6 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
         {"none": None},
     )
 
-    conn.execute(
-        """
-            UPDATE cms_vdm_view_mdcr_prd.v2_mdcr_clm
-            SET idr_updt_ts=%(none)s
-            WHERE clm_uniq_id = 8244064276500
-            """,
-        {"none": None},
-    )
     conn.commit()
 
     sys.argv = ["pipeline.py", "synthetic"]
