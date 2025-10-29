@@ -1,7 +1,7 @@
 import logging
 import os
 import sys
-import time
+from pathlib import Path
 
 import pipeline_nodes
 import ray
@@ -27,8 +27,12 @@ def main() -> None:
     logger.info("load start")
 
     parallelism = int(os.environ.get("PARALLELISM", "18"))
-    ray.init(logging_level="info", num_cpus=parallelism)  # type: ignore
+    # Ensure local modules (model.py, pipeline_nodes, etc.) are available in Ray workers
+    working_dir = str(Path(__file__).resolve().parent)
+    ray.init(logging_level="info", num_cpus=parallelism, runtime_env={"working_dir": working_dir})  # type: ignore
 
+    dict_builder = base.DictResult()
+    adapter = RayGraphAdapter(result_builder=dict_builder)
     load_type = str(os.environ.get("LOAD_TYPE", "incremental"))
     logger.info("load_type %s", load_type)
     dr = (
@@ -42,9 +46,7 @@ def main() -> None:
     batch_size = int(os.environ.get("IDR_BATCH_SIZE", "100_000"))
     mode = sys.argv[1] if len(sys.argv) > 1 else ""
     if mode == "local":
-        connection_string = (
-            "host=localhost dbname=fhirdb user=bfd password=InsecureLocalDev"
-        )
+        connection_string = "host=localhost dbname=fhirdb user=bfd password=InsecureLocalDev"
     else:
         connection_string = get_connection_string()
 

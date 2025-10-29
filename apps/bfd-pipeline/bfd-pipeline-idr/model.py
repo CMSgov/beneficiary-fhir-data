@@ -641,7 +641,7 @@ class IdrContractPbpNumber(IdrBaseModel):
         """
 
 
-def claim_type_clause(start_time: datetime) -> str:
+def claim_type_clause(start_time: datetime, claim_type_codes: list[int]) -> str:
     fetch_latest_claims = os.environ.get("IDR_LATEST_CLAIMS", "").lower() in (
         "1",
         "true",
