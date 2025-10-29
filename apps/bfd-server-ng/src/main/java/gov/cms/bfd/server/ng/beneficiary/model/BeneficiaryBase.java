@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.Getter;
+import lombok.NonNull;
 import org.hl7.fhir.r4.model.Patient;
 
 /**
@@ -61,15 +62,15 @@ public abstract class BeneficiaryBase {
   }
 
   /**
-   * Transforms the beneficiary record to its FHIR representation.
+   * Convenience method to convert to FHIR Patient with a specific profile.
    *
-   * @param profile optional FHIR profile URL to apply; may be null
+   * @param profile the FHIR profile to apply
    * @return patient record
    */
-  public Patient buildPatientFhirResource(String profile) {
+  public Patient toFhir(String profile) {
     var patient = new Patient();
 
-    if (profile != null && profile.equals(SystemUrls.PROFILE_C4DIC_PATIENT)) {
+    if (profile.equals(SystemUrls.PROFILE_C4DIC_PATIENT)) {
       patient.setId(id);
     } else {
       patient.setId(String.valueOf(beneSk));
@@ -86,32 +87,13 @@ public abstract class BeneficiaryBase {
     patient.setBirthDate(DateUtil.toDate(birthDate));
     address.toFhir().ifPresent(a -> patient.setAddress(List.of(a)));
     sexCode.ifPresent(
-        s -> {
-          patient.setGender(s.toFhirAdministrativeGender());
-          patient.addExtension(s.toFhirSexExtension());
-        });
+            s -> {
+              patient.setGender(s.toFhirAdministrativeGender());
+              patient.addExtension(s.toFhirSexExtension());
+            });
     patient.addExtension(raceCode.toFhir());
     patient.setMeta(meta.toFhirPatient(profile));
 
     return patient;
-  }
-
-  /**
-   * Convenience method to convert to FHIR Patient with no profile.
-   *
-   * @return patient record
-   */
-  public Patient toFhir() {
-    return buildPatientFhirResource(null);
-  }
-
-  /**
-   * Convenience method to convert to FHIR Patient with a specific profile.
-   *
-   * @param profile the FHIR profile to apply
-   * @return patient record
-   */
-  public Patient toFhir(String profile) {
-    return buildPatientFhirResource(profile);
   }
 }

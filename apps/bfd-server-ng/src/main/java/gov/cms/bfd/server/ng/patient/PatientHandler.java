@@ -112,7 +112,7 @@ public class PatientHandler {
 
   private Patient toFhir(Beneficiary beneficiary) {
     var identities = beneficiaryRepository.getValidBeneficiaryIdentities(beneficiary.getXrefSk());
-    var patient = beneficiary.toFhir();
+    var patient = beneficiary.toFhir(SystemUrls.PROFILE_C4BB_PATIENT_2_1_0);
 
     for (var id : identities) {
       // check for merged bene and if mbi identifier has already been added to the patient
