@@ -164,7 +164,8 @@ public class EobHandler {
     var drg = claim.getDrgCode().map(Object::toString).orElse("");
     var hasSamhsa = entries.stream().anyMatch(e -> isCodeSamhsa(drg, claimDate, e));
     if (hasSamhsa) {
-      LOGGER.atInfo()
+      LOGGER
+          .atInfo()
           .setMessage("SAMHSA claim filtered: type=DRG")
           .addKeyValue("claimId", claimUniqueId)
           .addKeyValue("matchedCode", drg)
@@ -180,7 +181,8 @@ public class EobHandler {
       var entries = SECURITY_LABELS.get(system);
       var hasSamhsa = entries.stream().anyMatch(c -> isCodeSamhsa(hcpcs, claimDate, c));
       if (hasSamhsa) {
-        LOGGER.atInfo()
+        LOGGER
+            .atInfo()
             .setMessage("SAMHSA claim filtered: type=HCPCS")
             .addKeyValue("claimId", claimUniqueId)
             .addKeyValue("matchedCode", hcpcs)
@@ -210,7 +212,8 @@ public class EobHandler {
         procedureEntries.stream()
             .anyMatch(pEntries -> isCodeSamhsa(procedureCode, claimDate, pEntries));
     if (procedureHasSamhsa) {
-      LOGGER.atInfo()
+      LOGGER
+          .atInfo()
           .setMessage("SAMHSA claim filtered: type=Procedure")
           .addKeyValue("claimId", claimUniqueId)
           .addKeyValue("matchedCode", procedureCode)
@@ -223,7 +226,8 @@ public class EobHandler {
         diagnosisEntries.stream()
             .anyMatch(dEntry -> isCodeSamhsa(diagnosisCode, claimDate, dEntry));
     if (diagnosisHasSamhsa) {
-      LOGGER.atInfo()
+      LOGGER
+          .atInfo()
           .setMessage("SAMHSA claim filtered: type=Diagnosis")
           .addKeyValue("claimId", claimUniqueId)
           .addKeyValue("matchedCode", diagnosisCode)
