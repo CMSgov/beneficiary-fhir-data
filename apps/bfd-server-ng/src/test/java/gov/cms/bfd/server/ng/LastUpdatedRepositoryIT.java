@@ -11,6 +11,7 @@ import gov.cms.bfd.server.ng.loadprogress.LoadProgressRepository;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
@@ -25,22 +26,13 @@ import org.springframework.beans.factory.annotation.Autowired;
  * <p>These tests verify that the existing bfd_updated_ts values in the database are properly
  * reflected in the API responses, without mutating the test data.
  */
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class LastUpdatedRepositoryIT extends IntegrationTestBase {
 
   private static final String EOB_META_LAST_UPDATED_MSG = "EOB meta.lastUpdated should be set";
   private final LoadProgressRepository loadProgressLastUpdatedProvider;
   private final ClaimRepository claimRepository;
   private final BeneficiaryRepository beneficiaryRepository;
-
-  @Autowired
-  public LastUpdatedRepositoryIT(
-      LoadProgressRepository loadProgressLastUpdatedProvider,
-      ClaimRepository claimRepository,
-      BeneficiaryRepository beneficiaryRepository) {
-    this.loadProgressLastUpdatedProvider = loadProgressLastUpdatedProvider;
-    this.claimRepository = claimRepository;
-    this.beneficiaryRepository = beneficiaryRepository;
-  }
 
   @Test
   void eobMetaLastUpdatedMatchesClaimBfdUpdatedTs() {
