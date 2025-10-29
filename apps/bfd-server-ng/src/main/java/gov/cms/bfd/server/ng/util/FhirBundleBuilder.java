@@ -1,7 +1,6 @@
 package gov.cms.bfd.server.ng.util;
 
 import java.time.ZonedDateTime;
-import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.Bundle;
@@ -59,13 +58,13 @@ public class FhirBundleBuilder {
    * @return a FHIR bundle
    */
   public Bundle build() {
-    List<Resource> resourceList = resources.toList();
+    var resourceList = resources.toList();
 
     if (resourceList.isEmpty()) {
       return defaultBundle();
     }
 
-    Bundle bundle = new Bundle();
+    var bundle = new Bundle();
     bundle.setType(Bundle.BundleType.COLLECTION);
     bundle.setEntry(
         resourceList.stream()
@@ -74,7 +73,7 @@ public class FhirBundleBuilder {
                   var entry = new Bundle.BundleEntryComponent().setResource(r);
                   if (includeFullUrls) {
                     // Use UUID or existing ID if present
-                    String idPart = r.getIdElement().getIdPart();
+                    var idPart = r.getIdElement().getIdPart();
                     if (idPart == null || idPart.isEmpty()) {
                       idPart = java.util.UUID.randomUUID().toString();
                       r.setId(idPart);

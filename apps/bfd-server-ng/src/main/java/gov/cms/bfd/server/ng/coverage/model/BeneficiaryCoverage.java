@@ -109,8 +109,8 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
     if (isC4DIC) {
       coverage.setMeta(meta.toFhirCoverage(SystemUrls.PROFILE_C4DIC_COVERAGE));
       coverage.setId(UUID.randomUUID().toString());
-      coverage.setBeneficiary(new Reference(id));
-      coverage.setSubscriber(new Reference(id));
+      coverage.setBeneficiary(new Reference("Patient/" + id));
+      coverage.setSubscriber(new Reference("Patient/" + id));
     } else {
       coverage.setId(coverageCompositeId.fullId());
       coverage.setMeta(meta.toFhirCoverage(null));
@@ -195,14 +195,14 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
       return toEmptyResource(coverage);
     }
 
-    identifier.toFhir(isC4DIC ? id : null).ifPresent(coverage::addIdentifier);
+    identifier.toFhir(isC4DIC ? orgId : "").ifPresent(coverage::addIdentifier);
 
     var entitlement = entitlementOpt.get();
     coverage.setPeriod(entitlement.toFhirPeriod());
     coverage.setStatus(entitlement.toFhirStatus());
 
     if (isC4DIC) {
-      coverage.addPayor(new Reference().setReference(orgId));
+      coverage.addPayor(new Reference().setReference("Organization/" + orgId));
       coverage.addExtension(
           new Extension(SystemUrls.EXT_BENE_BUYIN_CD_URL)
               .setValue(new Annotation(new MarkdownType(C4DIC_ADD_INFO))));
@@ -256,10 +256,10 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
     var dualEligibility = dualEligibilityOpt.get();
     coverage.setPeriod(dualEligibility.toFhirPeriod());
     coverage.setStatus(dualEligibility.toFhirStatus());
-    identifier.toFhir(null).ifPresent(coverage::addIdentifier);
+    identifier.toFhir(isC4DIC ? orgId : "").ifPresent(coverage::addIdentifier);
 
     if (isC4DIC) {
-      coverage.addPayor(new Reference().setReference(orgId));
+      coverage.addPayor(new Reference().setReference("Organization/" + orgId));
       coverage.addExtension(
           new Extension(SystemUrls.EXT_BENE_BUYIN_CD_URL)
               .setValue(new Annotation(new MarkdownType(C4DIC_ADD_INFO))));

@@ -4,10 +4,10 @@ import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.util.Optional;
-import javax.annotation.Nullable;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Reference;
@@ -35,7 +35,7 @@ public class CurrentIdentifier {
    * @return An {@link Optional} containing the FHIR {@link org.hl7.fhir.r4.model.Identifier} if an
    *     MBI is present, otherwise {@link Optional#empty()}.
    */
-  public Optional<org.hl7.fhir.r4.model.Identifier> toFhir(@Nullable String assigner) {
+  public Optional<org.hl7.fhir.r4.model.Identifier> toFhir(@NonNull String assigner) {
     if (mbi.isEmpty()) {
       return Optional.empty();
     }
@@ -48,8 +48,8 @@ public class CurrentIdentifier {
                 ));
     mbiIdentifier.setSystem(SystemUrls.CMS_MBI);
     mbiIdentifier.setValue(mbi);
-    if (assigner != null) {
-      mbiIdentifier.setAssigner(new Reference(assigner));
+    if (!assigner.isEmpty()) {
+      mbiIdentifier.setAssigner(new Reference("Organization/" + assigner));
     }
 
     // No period is set here, as this represents the general MBI for the beneficiary
