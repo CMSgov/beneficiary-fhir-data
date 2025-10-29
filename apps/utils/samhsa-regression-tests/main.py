@@ -125,6 +125,10 @@ class BeneWithSamshaClaims:
     samhsa_claim_ids: list[str]
 
 
+def normalize_code(code: str) -> str:
+    return code.replace(".", "")
+
+
 async def __query_samhsa_claim_any_ids(
     table: str,
     column: str,
@@ -175,7 +179,7 @@ async def __query_samhsa_claim_any_ids(
                 matching_label := next(
                     x
                     for x in security_labels
-                    if x.code.replace(".", "") == str(row[column]).replace(".", "")
+                    if normalize_code(x.code) == normalize_code(str(row[column]))
                 )
             )
             and row["clm_thru_dt"] >= matching_label.start_date
@@ -209,11 +213,11 @@ async def query_samhsa_claim_institutional_ids(
         limit=limit,
         query_params=[
             [
-                int(dotless_code)
+                int(normalized_code)
                 for label in security_labels
                 if label.system in column.systems
-                and (dotless_code := label.code.replace(".", ""))
-                and dotless_code.isdigit()
+                and (normalized_code := normalize_code(label.code))
+                and normalized_code.isdigit()
             ]
         ],
         db_details=db_details,
@@ -236,7 +240,7 @@ async def query_samhsa_claim_item_ids(
         query_params=[
             list(
                 itertools.chain.from_iterable(
-                    [label.code, label.code.replace(".", "")]
+                    [label.code, normalize_code(label.code)]
                     for label in security_labels
                     if label.system in column.systems
                 )
