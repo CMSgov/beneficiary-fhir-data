@@ -6,6 +6,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.time.ZonedDateTime;
 import java.util.List;
+import lombok.NonNull;
 
 /** FHIR metadata information. */
 @Embeddable
@@ -19,7 +20,7 @@ public class Meta {
    * @param profile optional FHIR profile URL to add; if null, defaults are used
    * @return meta
    */
-  public org.hl7.fhir.r4.model.Meta toFhirPatient(String profile) {
+  public org.hl7.fhir.r4.model.Meta toFhirPatient(@NonNull String profile) {
     return toFhirProfile(
         profile,
         List.of(SystemUrls.PROFILE_C4BB_PATIENT_2_1_0, SystemUrls.PROFILE_US_CORE_PATIENT_6_1_0));
@@ -31,16 +32,17 @@ public class Meta {
    * @param profile optional FHIR profile URL to add; if null, defaults are used
    * @return meta
    */
-  public org.hl7.fhir.r4.model.Meta toFhirCoverage(String profile) {
+  public org.hl7.fhir.r4.model.Meta toFhirCoverage(@NonNull String profile) {
     return toFhirProfile(
         profile,
         List.of(SystemUrls.PROFILE_C4BB_COVERAGE_2_1_0, SystemUrls.PROFILE_US_CORE_COVERAGE_6_1_0));
   }
 
-  private org.hl7.fhir.r4.model.Meta toFhirProfile(String profile, List<String> defaultProfiles) {
+  private org.hl7.fhir.r4.model.Meta toFhirProfile(
+      @NonNull String profile, List<String> defaultProfiles) {
     var meta = new org.hl7.fhir.r4.model.Meta().setLastUpdated(DateUtil.toDate(updatedTimestamp));
 
-    if (profile != null) {
+    if (!profile.isEmpty()) {
       meta.addProfile(profile);
     } else {
       defaultProfiles.forEach(meta::addProfile);

@@ -113,7 +113,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
       coverage.setSubscriber(new Reference("Patient/" + id));
     } else {
       coverage.setId(coverageCompositeId.fullId());
-      coverage.setMeta(meta.toFhirCoverage(null));
+      coverage.setMeta(meta.toFhirCoverage(""));
       coverage.setBeneficiary(new Reference("Patient/" + beneSk));
     }
 

@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.Getter;
+import lombok.NonNull;
 import org.hl7.fhir.r4.model.Patient;
 
 /**
@@ -66,7 +67,7 @@ public abstract class BeneficiaryBase {
    * @param profile the FHIR profile to apply
    * @return patient record
    */
-  public Patient toFhir(String profile) {
+  public Patient toFhir(@NonNull String profile) {
     var patient = new Patient();
 
     if (profile.equals(SystemUrls.PROFILE_C4DIC_PATIENT)) {
