@@ -121,7 +121,7 @@ public class Claim {
     eob.setType(claimTypeCode.toFhirType());
     claimTypeCode.toFhirSubtype().ifPresent(eob::setSubType);
 
-    eob.setMeta(meta.toFhir(claimTypeCode, claimSourceId));
+    eob.setMeta(meta.toFhir(claimTypeCode, claimSourceId, securityStatus));
     eob.setIdentifier(identifiers.toFhir());
     eob.setBillablePeriod(billablePeriod.toFhir());
     eob.setCreated(DateUtil.toDate(claimEffectiveDate));
@@ -208,7 +208,6 @@ public class Claim {
     claimTypeCode.toFhirInsurance().ifPresent(eob::addInsurance);
     eob.addTotal(adjudicationCharge.toFhir());
     eob.setPayment(claimPaymentAmount.toFhir());
-    eob.getMeta().addSecurity(ClaimSecurityStatus.toFhir(securityStatus));
 
     return sortedEob(eob);
   }
