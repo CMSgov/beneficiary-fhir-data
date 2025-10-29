@@ -30,7 +30,7 @@ def _execute(uri: str, query: LiteralString) -> list:
 # table_sample_pct is required for the interface even though it's unused here
 def get_regression_bene_sks(
     uri: str, table_sample_pct: float | None = None
-) -> list[str]:  # noqa: ARG001
+) -> list[str]:
     """Retrieve a random list of beneficiary IDs.
 
     Args:
@@ -45,7 +45,7 @@ def get_regression_bene_sks(
 
 def get_regression_current_part_a_bene_sks(
     uri: str,
-    table_sample_pct: float | None = None,  # noqa: ARG001
+    table_sample_pct: float | None = None,
 ) -> list[str]:
     """Retrieve a random list of beneficiary IDs.
 
@@ -67,7 +67,7 @@ def get_regression_current_part_a_bene_sks(
 
 def get_regression_current_part_b_bene_sks(
     uri: str,
-    table_sample_pct: float | None = None,  # noqa: ARG001
+    table_sample_pct: float | None = None,
 ) -> list[str]:
     """Retrieve a random list of beneficiary IDs.
 
@@ -88,7 +88,7 @@ def get_regression_current_part_b_bene_sks(
 
 def get_regression_bene_mbis(
     uri: str, table_sample_pct: float | None = None
-) -> list[str]:  # noqa: ARG001
+) -> list[str]:
     """Retrieve a random list list of MBIs.
 
     Args:
@@ -103,7 +103,7 @@ def get_regression_bene_mbis(
 
 def get_regression_claim_ids(
     uri: str, table_sample_pct: float | None = None
-) -> list[str]:  # noqa: ARG001
+) -> list[str]:
     """Retrieve a random list list of clam Ids.
 
     Args:

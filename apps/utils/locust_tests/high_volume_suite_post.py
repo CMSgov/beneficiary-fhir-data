@@ -26,7 +26,7 @@ EXCLUDE_TAGS: set[str] = set()
 
 
 @events.test_start.add_listener
-def _(environment: Environment, **kwargs: dict[str, Any]) -> None:  # noqa: ARG001
+def _(environment: Environment, **kwargs: dict[str, Any]) -> None:
     if (
         is_distributed(environment) and is_locust_master(environment)
     ) or not environment.parsed_options:
@@ -142,7 +142,7 @@ class EobTaskSet(HighVolumeTaskSet):
                 "_lastUpdated": f"gt{self.user.last_updated}",
                 "_IncludeTaxNumbers": "true",
             },
-            name="/v1/fhir/ExplanationOfBenefit/_search search by id / lastUpdated / includeTaxNumbers",  # noqa: E501
+            name="/v1/fhir/ExplanationOfBenefit/_search search by id / lastUpdated / includeTaxNumbers",
         )
 
     @tag("eob_test_id_last_updated_v1", "v1")
@@ -206,7 +206,7 @@ class EobTaskSet(HighVolumeTaskSet):
                 "patient": self.user.bene_ids.pop(),
                 "_IncludeTaxNumbers": "true",
             },
-            name="/v2/fhir/ExplanationOfBenefit/_search search by id / lastUpdated / includeTaxNumbers",  # noqa: E501
+            name="/v2/fhir/ExplanationOfBenefit/_search search by id / lastUpdated / includeTaxNumbers",
         )
 
 

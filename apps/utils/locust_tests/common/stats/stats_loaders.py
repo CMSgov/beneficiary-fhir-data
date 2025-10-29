@@ -190,7 +190,7 @@ class StatsAthenaLoader(StatsLoader):
     def load_previous(self) -> AggregatedStats | None:
         query = (
             f"SELECT cast(totals as JSON), cast(tasks as JSON) "
-            f'FROM "{self.stats_config.stats_store_s3_database}"."{self.stats_config.stats_store_s3_table}" '  # noqa: E501
+            f'FROM "{self.stats_config.stats_store_s3_database}"."{self.stats_config.stats_store_s3_table}" '
             f"WHERE {self.__get_where_clause()} ORDER BY metadata.timestamp DESC "
             "LIMIT 1"
         )
@@ -201,7 +201,7 @@ class StatsAthenaLoader(StatsLoader):
     def load_average(self) -> AggregatedStats | None:
         query = (
             f"SELECT cast(totals as JSON), cast(tasks as JSON) "
-            f'FROM "{self.stats_config.stats_store_s3_database}"."{self.stats_config.stats_store_s3_table}" '  # noqa: E501
+            f'FROM "{self.stats_config.stats_store_s3_database}"."{self.stats_config.stats_store_s3_table}" '
             f"WHERE {self.__get_where_clause()} "
             "ORDER BY metadata.timestamp DESC "
             f"LIMIT {self.stats_config.stats_compare_load_limit}"
