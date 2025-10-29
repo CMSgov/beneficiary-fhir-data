@@ -132,20 +132,15 @@ public class LastUpdatedRepositoryIT extends IntegrationTestBase {
             .returnBundle(Bundle.class)
             .execute();
 
-    var maybeEob =
+    var eob1 =
         bundle.getEntry().stream()
             .map(e -> (ExplanationOfBenefit) e.getResource())
             .filter(eob -> eob.getIdElement().getIdPart().equals(CLAIM_ID_ADJUDICATED))
-            .findFirst();
-
-    ExplanationOfBenefit eob1 =
-        maybeEob.orElseGet(
-            () ->
-                getFhirClient()
-                    .read()
-                    .resource(ExplanationOfBenefit.class)
-                    .withId(CLAIM_ID_ADJUDICATED)
-                    .execute());
+            .findFirst()
+            .orElseThrow(
+                () ->
+                    new AssertionError(
+                        "EOB " + CLAIM_ID_ADJUDICATED + " not found in search results"));
 
     assertTimestampSame(
         claimTimestamp1,
