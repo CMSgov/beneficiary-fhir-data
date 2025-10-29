@@ -137,7 +137,7 @@
         <junit.version>5.12.0</junit.version>
         <junit.platform.version>1.12.0</junit.platform.version>
         <javadoc.version>3.11.2</javadoc.version>
-        <testcontainers.version>1.19.3</testcontainers.version>
+        <testcontainers.version>2.0.0</testcontainers.version>
 
         <!-- Jackson versions should be kept in sync when possible but can diverge slightly
             when vulnerabilities or other fixes affect some but not all components -->
@@ -172,7 +172,7 @@
             The version used here should be compatible with SLF4J.
             See the compatible versions here: https://www.slf4j.org/manual.html
         -->
-        <logback.core.version>1.5.15</logback.core.version>
+        <logback.core.version>1.5.19</logback.core.version>
         <zjsonpatch.version>0.4.16</zjsonpatch.version>
         <freemarker.version>2.3.32</freemarker.version>
         <reflections.version>0.10.2</reflections.version>
@@ -222,8 +222,8 @@
         <!-- Note: See gov.cms.bfd.model.rif.schema.DatabaseTestHelper for details
             on the default 'jdbc:bfd-test:' URL here. -->
         <its.db.url>jdbc:bfd-test:tc</its.db.url>
-        <its.db.username />
-        <its.db.password />
+        <its.db.username/>
+        <its.db.password/>
         <!-- Docker image used with testcontainers to provide a working database for testing. -->
         <!-- This has a default value in gov.cms.bfd.DatabaseTestUtils that must also be changed
         when changing this property. -->
@@ -264,7 +264,7 @@
         <!-- Additional image tag for images built by jib.  (e.g. release number or commit hash)-->
         <jib.tag>${project.version}</jib.tag>
         <!-- Optional image namespace. -->
-        <jib.namespace />
+        <jib.namespace/>
         <!-- Skip by default.  Override to allow images to be built. -->
         <jib.skip>true</jib.skip>
 
