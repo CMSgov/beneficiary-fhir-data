@@ -136,7 +136,7 @@
         <hibernate.version>6.4.4.Final</hibernate.version>
         <junit.version>5.12.0</junit.version>
         <junit.platform.version>1.12.0</junit.platform.version>
-        <javadoc.version>3.11.2</javadoc.version>
+        <javadoc.version>3.12.0</javadoc.version>
         <testcontainers.version>2.0.1</testcontainers.version>
 
         <!-- Jackson versions should be kept in sync when possible but can diverge slightly
