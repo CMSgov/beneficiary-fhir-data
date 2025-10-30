@@ -11,17 +11,11 @@ import org.hl7.fhir.r4.model.Extension;
 class ClaimExtensions {
   @Embedded private ClaimContractorNumber claimContractorNumber;
   @Embedded private ClaimDispositionCode claimDispositionCode;
-  @Embedded private PartDClaimFormatCode claimFormatCode;
-  @Embedded private SubmitterContractNumber submitterContractNumber;
-  @Embedded private SubmitterContractPbpNumber submitterContractPbpNumber;
+  @Embedded private ClaimSubmissionFormatCode claimFormatCode;
 
   List<Extension> toFhir() {
     return Stream.of(
-            claimContractorNumber.toFhir(),
-            claimDispositionCode.toFhir(),
-            claimFormatCode.toFhir(),
-            submitterContractNumber.toFhir(),
-            submitterContractPbpNumber.toFhir())
+            claimContractorNumber.toFhir(), claimDispositionCode.toFhir(), claimFormatCode.toFhir())
         .flatMap(Optional::stream)
         .toList();
   }

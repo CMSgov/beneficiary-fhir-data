@@ -44,6 +44,7 @@ enum CareTeamType {
                     new Coding().setSystem(SystemUrls.HL7_IDENTIFIER).setCode("NPI")))
             .setSystem(SystemUrls.NPI)
             .setValue(value));
+    // todo: modify based on BFD-4286
     familyName.ifPresent(n -> practitioner.addName(new HumanName().setFamily(n)));
 
     var component =

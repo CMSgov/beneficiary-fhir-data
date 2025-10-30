@@ -8,7 +8,7 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Extension;
 
 @Embeddable
-public class PartDClaimFormatCode {
+public class ClaimSubmissionFormatCode {
   @Column(name = "clm_sbmt_frmt_cd")
   private Optional<String> claimFormatCode;
 

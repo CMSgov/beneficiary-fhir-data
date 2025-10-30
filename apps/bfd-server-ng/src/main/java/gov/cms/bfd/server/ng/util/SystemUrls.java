@@ -360,6 +360,14 @@ public class SystemUrls {
       "http://terminology.hl7.org/CodeSystem/NCPDPCompoundCode";
 
   /** URL. */
+  public static final String HL7_CLAIM_DAW_PROD_SELECT_CODE =
+      "http://terminology.hl7.org/CodeSystem/NCPDPDispensedAsWrittenOrProductSelectionCode";
+
+  /** URL. */
+  public static final String HL7_CLAIM_PRESCRIPTION_ORIGIN_CODE =
+      "http://terminology.hl7.org/CodeSystem/NCPDPPrescriptionOriginCode";
+
+  /** URL. */
   public static final String BLUE_BUTTON_ADJUDICATION_STATUS =
       "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication-Status";
 
@@ -370,10 +378,6 @@ public class SystemUrls {
   /** Blue Button identifier - claim control number. */
   public static final String BLUE_BUTTON_CLAIM_CONTROL_NUMBER =
       "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM";
-
-  /** Blue Button identifier - claim original control number. */
-  public static final String BLUE_BUTTON_CLAIM_ORIGINAL_CONTROL_NUMBER =
-      "https://bluebutton.cms.gov/identifiers/CLM_ORIG_CNTL_NUM";
 
   /** Blue Button structure definition - claim query code. */
   public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_CLAIM_QUERY_CODE =
@@ -475,6 +479,14 @@ public class SystemUrls {
   public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_PPS_DRG_WEIGHT_NUMBER =
       "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MDCR-IP-PPS-DRG-WT-NUM";
 
+  /** Blue Button structure definition - Submitter contract number. */
+  public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_SUBMITTER_CONTRACT_NUMBER =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-SBMTR-CNTRCT-NUM";
+
+  /** Blue Button structure definition - Submitter Contract PBP Number. */
+  public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_SUBMITTER_CONTRACT_PBP_NUMBER =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-SBMTR-CNTRCT-NUM";
+
   /** Blue Button structure definition - nonpayment reason code. */
   public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_NONPAYMENT_REASON_CODE =
       "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MDCR-NPMT-RSN-CD";
@@ -538,6 +550,34 @@ public class SystemUrls {
   /** URL. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_HHA_REFERAL_CODE =
       "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD";
+
+  /** URL. */
+  public static final String BLUE_BUTTON_CODE_SYSTEM_CATASTROPHIC_COVERAGE_CODE =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_CTSTRPHC_CVRG_IND_CD";
+
+  /** URL. */
+  public static final String BLUE_BUTTON_CODE_SYSTEM_DRUG_COVERAGE_STATUS_CODE =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DRUG-CVRG-STUS-CD";
+
+  /** URL. */
+  public static final String BLUE_BUTTON_CODE_SYSTEM_CLAIM_DISPENSE_STATUS_CODE =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DSPNSNG-STUS-CD";
+
+  /** URL. */
+  public static final String BLUE_BUTTON_CODE_SYSTEM_CLAIM_SUBMISSION_CLARIFICATION_CODE =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_LTC_DSPNSNG_MTHD_CD";
+
+  /** URL. */
+  public static final String BLUE_BUTTON_CODE_SYSTEM_PHARMACY_SRVC_TYPE_CODE =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_PHRMCY_SRVC_TYPE_CD";
+
+  /** URL. */
+  public static final String BLUE_BUTTON_CODE_SYSTEM_PATIENT_RESIDENCE_CODE =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_PTNT_RSDNC_CD";
+
+  /** Blue Button code system - Prescription Origination Code. */
+  public static final String BLUE_BUTTON_CODE_SYSTEM_CLAIM_PRESCRIPTION_ORIGIN_CODE =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-LINE-RX-ORGN-CD";
 
   /** URL. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_ANSI_GRP_CODE =
