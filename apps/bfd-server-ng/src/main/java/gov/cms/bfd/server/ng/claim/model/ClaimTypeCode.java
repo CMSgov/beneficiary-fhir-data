@@ -1,8 +1,14 @@
 package gov.cms.bfd.server.ng.claim.model;
 
+import ca.uhn.fhir.rest.param.TokenParam;
 import gov.cms.bfd.server.ng.util.SystemUrls;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -384,5 +390,98 @@ public enum ClaimTypeCode {
       case 71, 72, 81, 82 -> Optional.of(ClaimType.PROFESSIONAL);
       default -> Optional.empty();
     };
+  }
+
+  /**
+   * Gets claim type codes mapped to type params.
+   *
+   * @param tokens The token from the type parameter.
+   * @return A list of matching ClaimTypeCode
+   */
+  public static List<ClaimTypeCode> getClaimTypeCodes(List<TokenParam> tokens) {
+
+    if (tokens == null || tokens.isEmpty()) {
+      return Collections.emptyList();
+    }
+    Set<ClaimTypeCode> claimTypeCodes = new HashSet<>();
+
+    for (TokenParam param : tokens) {
+      var type = param.getValue();
+      var normalizedType = type.trim().toLowerCase();
+
+      if ("*".equals(normalizedType)) {
+        return Collections.emptyList();
+      }
+
+      ClaimSubtype claimSubtype = ClaimSubtype.fromCode(normalizedType);
+
+      switch (claimSubtype) {
+        case ClaimSubtype.CARRIER:
+          claimTypeCodes.addAll(mapCarrierToClaimTypeCodes());
+          break;
+        case ClaimSubtype.DME:
+          claimTypeCodes.addAll(mapDmeToClaimTypeCodes());
+          break;
+        case ClaimSubtype.HHA:
+          claimTypeCodes.addAll(mapHhaToClaimTypeCodes());
+          break;
+        case ClaimSubtype.HOSPICE:
+          claimTypeCodes.addAll(mapHospiceToClaimTypeCodes());
+          break;
+        case ClaimSubtype.INPATIENT:
+          claimTypeCodes.addAll(mapInpatientToClaimTypeCodes());
+          break;
+        case ClaimSubtype.OUTPATIENT:
+          claimTypeCodes.addAll(mapOutpatientToClaimTypeCodes());
+          break;
+        case ClaimSubtype.PDE:
+          claimTypeCodes.addAll(mapPDEToClaimTypeCodes());
+          break;
+        case ClaimSubtype.SNF:
+          claimTypeCodes.addAll(mapSnfToClaimTypeCodes());
+          break;
+        default:
+          throw new IllegalArgumentException("Unsupported claim type: " + type);
+      }
+    }
+    return new ArrayList<>(claimTypeCodes);
+  }
+
+  private static List<ClaimTypeCode> mapCarrierToClaimTypeCodes() {
+    return List.of(_71, _72, _1700, _2700);
+  }
+
+  private static List<ClaimTypeCode> mapDmeToClaimTypeCodes() {
+    return List.of(_81, _82, _1800, _2800);
+  }
+
+  private static List<ClaimTypeCode> mapHhaToClaimTypeCodes() {
+    return List.of(_10, _1032, _1033, _2032, _2033);
+  }
+
+  private static List<ClaimTypeCode> mapHospiceToClaimTypeCodes() {
+    return List.of(_50, _1081, _1082, _1900, _2081, _2082, _2900);
+  }
+
+  private static List<ClaimTypeCode> mapInpatientToClaimTypeCodes() {
+    return List.of(_60, _61, _62, _63, _64, _1011, _1041, _2011, _2041);
+  }
+
+  private static List<ClaimTypeCode> mapOutpatientToClaimTypeCodes() {
+    return List.of(
+        _40, _1012, _1013, _1014, _1022, _1023, _1034, _1071, _1072, _1073, _1074, _1075, _1076,
+        _1077, _1083, _1085, _1087, _1089, _2012, _2013, _2014, _2022, _2023, _2034, _2071, _2072,
+        _2073, _2074, _2075, _2076, _2077, _2083, _2085, _2087, _2089);
+  }
+
+  private static List<ClaimTypeCode> mapPDEToClaimTypeCodes() {
+    return List.of(_1, _2, _3, _4);
+  }
+
+  private static List<ClaimTypeCode> mapSnfToClaimTypeCodes() {
+    return List.of(
+        _20, // Adjucated
+        _30, // Adjucated
+        _1018, _1021, _1022, _1028, _2018, _2021, _2022, _2023, _2028);
   }
 }
