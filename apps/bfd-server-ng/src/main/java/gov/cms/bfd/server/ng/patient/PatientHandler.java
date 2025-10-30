@@ -103,8 +103,7 @@ public class PatientHandler {
 
     var resources = Stream.concat(Stream.of(patient, cmsOrg), coverages);
 
-    return FhirUtil.bundleWithFullUrls(resources,beneficiaryRepository::beneficiaryLastUpdated);
-
+    return FhirUtil.bundleWithFullUrls(resources, beneficiaryRepository::beneficiaryLastUpdated);
   }
 
   private Patient toFhir(Beneficiary beneficiary) {
