@@ -6,7 +6,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.StringType;
 
 @Embeddable
-public class ClaimLineRxNumber {
+class ClaimLineRxNumber {
   @Column(name = "clm_line_rx_num")
   private String claimLineRxNum;
 

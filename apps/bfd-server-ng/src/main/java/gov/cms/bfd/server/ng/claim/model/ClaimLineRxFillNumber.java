@@ -6,7 +6,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Quantity;
 
 @Embeddable
-public class ClaimLineRxFillNumber {
+class ClaimLineRxFillNumber {
   @Column(name = "clm_line_rx_fill_num")
   private int fullNumber;
 

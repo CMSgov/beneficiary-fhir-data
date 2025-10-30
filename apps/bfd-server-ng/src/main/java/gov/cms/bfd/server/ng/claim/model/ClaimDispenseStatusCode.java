@@ -9,12 +9,13 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
+/** Claim Dispensing Status Codes. */
 @AllArgsConstructor
 @Getter
 public enum ClaimDispenseStatusCode {
-  /** P - Partially filled */
+  /** P - Partially filled. */
   P("P", "Partially filled"),
-  /** C - Completely filled */
+  /** C - Completely filled. */
   C("C", "Completely filled");
 
   private final String code;

@@ -9,15 +9,16 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
+/** Compound codes. */
 @AllArgsConstructor
 @Getter
 public enum ClaimLineCompoundCode {
 
-  /** 1 - Not specified (missing values are also possible) */
+  /** 1 - Not specified (missing values are also possible). */
   _1("1", "Not specified (missing values are also possible)"),
-  /** 2 - Not a compound */
+  /** 2 - Not a compound. */
   _2("2", "Not a compound"),
-  /** 3 - Compound */
+  /** 3 - Compound. */
   _3("3", "Compound");
 
   private final String code;

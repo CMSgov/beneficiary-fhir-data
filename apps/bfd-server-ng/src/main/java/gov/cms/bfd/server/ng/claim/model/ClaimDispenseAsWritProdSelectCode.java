@@ -8,6 +8,7 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
+/** Dispense as Written Product Selection Codes. */
 @Embeddable
 public class ClaimDispenseAsWritProdSelectCode {
   @Column(name = "clm_daw_prod_slctn_cd")

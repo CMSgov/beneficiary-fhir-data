@@ -64,7 +64,8 @@ public class Claim {
   @Embedded private BenefitBalance benefitBalance;
   @Embedded private AdjudicationCharge adjudicationCharge;
   @Embedded private ClaimPaymentAmount claimPaymentAmount;
-  @Embedded private PharmacyProvider pharmacyProvider;
+  @Embedded private PharmacyOrgProvider pharmacyOrgProvider;
+  @Embedded private PharmacyPractitionerProvider pharmacyPractitionerProvider;
 
   @OneToOne
   @JoinColumn(name = "bene_sk")
@@ -191,7 +192,14 @@ public class Claim {
               eob.addContained(p);
               eob.setProvider(new Reference(p));
             });
-    pharmacyProvider
+    pharmacyOrgProvider
+        .toFhir(claimTypeCode)
+        .ifPresent(
+            p -> {
+              eob.addContained(p);
+              eob.setProvider(new Reference(p));
+            });
+    pharmacyPractitionerProvider
         .toFhir(claimTypeCode)
         .ifPresent(
             p -> {
@@ -240,7 +248,7 @@ public class Claim {
         .forEach(
             c -> {
               eob.addCareTeam(c.careTeam());
-              eob.addContained(c.practitioner()); // here
+              eob.addContained(c.practitioner());
             });
 
     institutional.ifPresent(

@@ -9,14 +9,15 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
+/** Drug Coverage Status Codes. */
 @AllArgsConstructor
 @Getter
 public enum DrugCoverageStatusCode {
-  /** C - Covered */
+  /** C - Covered. */
   C("C", "Covered"),
-  /** E - Supplemental drugs (reported by plans that provide Enhanced Alternative coverage) */
+  /** E - Supplemental drugs (reported by plans that provide Enhanced Alternative coverage). */
   E("E", "Supplemental drugs (reported by plans that provide Enhanced Alternative coverage)"),
-  /** O - Over-the-counter drugs */
+  /** O - Over-the-counter drugs. */
   O("O", "Over-the-counter drugs");
 
   private final String code;

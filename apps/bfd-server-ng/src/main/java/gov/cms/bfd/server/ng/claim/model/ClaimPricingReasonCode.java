@@ -7,14 +7,15 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.Coding;
 
+/** Pricing Exception Codes. */
 @Getter
 @AllArgsConstructor
 public enum ClaimPricingReasonCode {
-  /** "" - innetwork */
+  /** "" - innetwork. */
   IN_NETWORK("", "innetwork"),
-  /** 2 - outofnetwork */
+  /** 2 - outofnetwork. */
   O("O", "outofnetwork"),
-  /** 3 - other */
+  /** 3 - other. */
   M("M", "other");
 
   private final String code;

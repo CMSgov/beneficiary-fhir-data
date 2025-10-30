@@ -3,27 +3,31 @@ package gov.cms.bfd.server.ng.claim.model;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import java.util.List;
 import java.util.Optional;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.Identifier;
-import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.Meta;
 
 @Embeddable
-public class PharmacyProvider {
+class PharmacyPractitionerProvider {
   @Column(name = "clm_srvc_prvdr_gnrc_id_num")
   private String serviceProviderNpiNumber;
 
-  private static final String PROVIDER_ORG = "provider-org";
+  private static final String PROVIDER_ORG = "provider-practitioner";
 
-  Optional<Organization> toFhir(ClaimTypeCode claimTypeCode) {
+  Optional<Practitioner> toFhir(ClaimTypeCode claimTypeCode) {
     if (!claimTypeCode.isBetween(1, 4)) {
       return Optional.empty();
     }
 
-    var organization = OrganizationFactory.toFhir();
-    organization.setId(PROVIDER_ORG);
-    organization.addIdentifier(
+    var practitioner = new Practitioner();
+    practitioner.setId(PROVIDER_ORG);
+    practitioner.setMeta(
+        new Meta()
+            .addProfile(SystemUrls.PROFILE_CARIN_BB_ORGANIZATION_2_1_0)
+            .addProfile(SystemUrls.PROFILE_US_CORE_ORGANIZATION_6_1_0));
+
+    practitioner.addIdentifier(
         new Identifier()
             .setSystem(SystemUrls.NPI)
             .setValue(serviceProviderNpiNumber)
@@ -34,9 +38,11 @@ public class PharmacyProvider {
                             .setSystem(SystemUrls.HL7_IDENTIFIER)
                             .setCode("NPI")
                             .setDisplay("National provider identifier"))));
+    var name = new HumanName();
+    name.setFamily("LAST NAME HERE");
+    name.setUse(HumanName.NameUse.OFFICIAL);
+    practitioner.setName(List.of(name));
 
-    organization.setName("PHARMACY ORG SOURCED FROM NPPES");
-
-    return Optional.of(organization);
+    return Optional.of(practitioner);
   }
 }
