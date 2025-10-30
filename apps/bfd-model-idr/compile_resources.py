@@ -39,12 +39,9 @@ def get_referenced_maps(compiled_map_path):
 
 def get_structure_definitions():
     try:
-        source_dir = (
-            Path(__file__).parent.absolute() / "StructureDefinitions" / "Source"
-        )
+        source_dir = Path(__file__).parent.absolute() / "StructureDefinitions" / "Source"
         structure_defs = [
-            f"StructureDefinitions/Source/{file.name}"
-            for file in source_dir.glob("*.json")
+            f"StructureDefinitions/Source/{file.name}" for file in source_dir.glob("*.json")
         ]
         return " ".join([f"-ig {def_file}" for def_file in structure_defs])
     except Exception as e:
@@ -54,12 +51,9 @@ def get_structure_definitions():
 
 def get_sushi_resources():
     try:
-        sushi_dir = (
-            Path(__file__).parent.absolute() / "sushi" / "fsh-generated" / "resources"
-        )
+        sushi_dir = Path(__file__).parent.absolute() / "sushi" / "fsh-generated" / "resources"
         sushi_resources = [
-            f"sushi/fsh-generated/resources/{file.name}"
-            for file in sushi_dir.glob("*.json")
+            f"sushi/fsh-generated/resources/{file.name}" for file in sushi_dir.glob("*.json")
         ]
         return " ".join([f"-ig {resource}" for resource in sushi_resources])
     except Exception as e:
@@ -75,10 +69,8 @@ def run_conformance_test(input_file, output_file):
         sushi_resources = get_sushi_resources()
 
         print("Running conformance testing")
-        test_cmd = (
-            f"java -jar validator_cli.jar {input_file} -output {output_file} -version 4.0.1 \
+        test_cmd = f"java -jar validator_cli.jar {input_file} -output {output_file} -version 4.0.1 \
             {structure_defs} -ig hl7.fhir.us.carin-bb#2.1.0 {sushi_resources}"
-        )
         stdout, stderr = run_command(test_cmd, cwd=script_dir)
 
         print("Conformance test output:")
@@ -100,9 +92,7 @@ def run_conformance_test(input_file, output_file):
 
 def main():
     # Parse args instead of just putting everything in separate READMEs.
-    parser = argparse.ArgumentParser(
-        description="Compile and execute FHIR structure maps."
-    )
+    parser = argparse.ArgumentParser(description="Compile and execute FHIR structure maps.")
     parser.add_argument(
         "--map", "-m", type=str, help="Path to the structure map file", required=True
     )
@@ -148,8 +138,10 @@ def main():
     # Compile FML files.
     print("Compiling FML ")
     compiled_map_path = f"StructureMaps/BFD-{Path(args.map).stem}-StructureMap.json"
-    compile_cmd = f"java -jar validator_cli.jar -version 4.0.1 -ig {args.map} -compile {args.resource} \
+    compile_cmd = (
+        f"java -jar validator_cli.jar -version 4.0.1 -ig {args.map} -compile {args.resource} \
         -output {compiled_map_path}"
+    )
     print("Input compilation command was:" + compile_cmd)
     stdout, stderr = run_command(compile_cmd, cwd=script_dir)
     print("Compilation output:")
@@ -163,11 +155,9 @@ def main():
     map_imports = " ".join([f"-ig {map_file}" for map_file in referenced_maps])
 
     print("Executing Transform")
-    execute_cmd = (
-        f"java -jar validator_cli.jar {args.input} -output {args.output} -transform \
+    execute_cmd = f"java -jar validator_cli.jar {args.input} -output {args.output} -transform \
         {args.resource} -version 4.0.1 -ig {compiled_map_path} {structure_defs} \
             -ig hl7.fhir.us.carin-bb#2.1.0 {map_imports} {sushi_resources}"
-    )
     stdout, stderr = run_command(execute_cmd, cwd=script_dir)
 
     print("Execution output:")

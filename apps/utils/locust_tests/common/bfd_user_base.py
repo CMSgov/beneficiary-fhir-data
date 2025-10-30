@@ -99,10 +99,7 @@ def _(environment: Environment, **kwargs: dict[str, Any]) -> None:
     logger.info("Final comparison result was: %s", compare_result.value)
     logger.info("Final validation result was: %s", validation_result.value)
 
-    if (
-        compare_result == FinalCompareResult.FAILED
-        or validation_result == ValidationResult.FAILED
-    ):
+    if compare_result == FinalCompareResult.FAILED or validation_result == ValidationResult.FAILED:
         environment.process_exit_code = 1
         logger.error(
             "Test run failed overall as comparison or validation result failed; locust exiting with"
@@ -279,17 +276,13 @@ class BFDUserBase(FastHttpUser):
 
             # Should we also terminate future tests?
             worker_num = (
-                self.environment.runner.client_id
-                if is_locust_worker(self.environment)
-                else None
+                self.environment.runner.client_id if is_locust_worker(self.environment) else None
             )
             if self.END_ON_NO_DATA:
                 if worker_num is None:
                     self.logger.error("Ran out of data, stopping test...")
                 else:
-                    self.logger.error(
-                        "Worker %s ran out of data and will terminate.", worker_num
-                    )
+                    self.logger.error("Worker %s ran out of data and will terminate.", worker_num)
 
                 self.environment.runner.quit()
             elif name not in self.has_reported_no_data:

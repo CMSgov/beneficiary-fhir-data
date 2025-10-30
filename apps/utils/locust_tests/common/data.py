@@ -8,9 +8,7 @@ from typing import Any, Protocol
 
 
 class LoadFunction(Protocol):
-    def __call__(
-        self, uri: str, table_sample_pct: float | None = None
-    ) -> Collection[Any]: ...
+    def __call__(self, uri: str, table_sample_pct: float | None = None) -> Collection[Any]: ...
 
 
 def load_from_parsed_opts(
@@ -60,9 +58,7 @@ def load_from_uri(
     logger.info("Collecting %s test data...", data_type_name)
     if use_table_sample:
         logger.info("Table Sampling at %s", table_sample_percent)
-        results = load_function(
-            uri=database_constr, table_sample_pct=table_sample_percent
-        )
+        results = load_function(uri=database_constr, table_sample_pct=table_sample_percent)
     else:
         results = load_function(uri=database_constr)
 

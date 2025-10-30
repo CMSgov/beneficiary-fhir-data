@@ -21,9 +21,7 @@ from psycopg import sql
 from psycopg.rows import dict_row
 from pydantic import BaseModel, ConfigDict, Field, TypeAdapter
 
-CLM_UNIQ_ID_IDENTIFIER_SYSTEM = (
-    "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType"
-)
+CLM_UNIQ_ID_IDENTIFIER_SYSTEM = "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType"
 CLM_UNIQ_ID_IDENTIFIER_CODE = "uc"
 SECURITY_LABEL_CPT_SYSTEM = "http://www.ama-assn.org/go/cpt"
 SECURITY_LABEL_HCPCS_SYSTEM = "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
@@ -178,16 +176,8 @@ async def __query_samhsa_claim_any_ids(
         valid_samhsa_claim_ids = [
             int(row["clm_uniq_id"])
             for row in result
-            if (
-                matching_label := next(
-                    x for x in security_labels if x.code == str(row[column])
-                )
-            )
-            and (
-                claim_datetime := datetime.combine(
-                    row["clm_thru_dt"], datetime.min.time()
-                )
-            )
+            if (matching_label := next(x for x in security_labels if x.code == str(row[column])))
+            and (claim_datetime := datetime.combine(row["clm_thru_dt"], datetime.min.time()))
             and claim_datetime >= matching_label.start_date
             and claim_datetime <= matching_label.end_date
         ]
@@ -308,9 +298,7 @@ async def query_samhsa_benes_with_claims(
         ).fetchall()
         logger.info("%d potential SAMHSA bene_sks returned", len(result))
 
-        bene_sks_and_clms = [
-            (str(row["bene_sk"]), str(row["clm_uniq_id"])) for row in result
-        ]
+        bene_sks_and_clms = [(str(row["bene_sk"]), str(row["clm_uniq_id"])) for row in result]
         uniq_bene_sks = set(x[0] for x in bene_sks_and_clms)
 
         return [
@@ -353,9 +341,7 @@ async def verify_samhsa_filtering(
             no_samhsa_bundle = json.loads(await no_samhsa_response.read())
 
             samhsa_bundle_entries: list[dict[str, Any]] = samhsa_bundle.get("entry", [])
-            no_samhsa_bundle_entries: list[dict[str, Any]] = no_samhsa_bundle.get(
-                "entry", []
-            )
+            no_samhsa_bundle_entries: list[dict[str, Any]] = no_samhsa_bundle.get("entry", [])
             samhsa_entry_size = len(samhsa_bundle_entries)
             no_samhsa_entry_size = len(no_samhsa_bundle_entries)
             logger.debug(
@@ -381,12 +367,7 @@ async def verify_samhsa_filtering(
             # We should expect the intersection of the set of all claims on the SAMHSA unauthorized
             # response to have _zero_ SAMHSA claim IDs on it.
             samhsa_claims_filtered_when_not_authorized = (
-                len(
-                    set(all_samhsa_filtered_clm_ids).intersection(
-                        bene_samhsa_claims_set
-                    )
-                )
-                == 0
+                len(set(all_samhsa_filtered_clm_ids).intersection(bene_samhsa_claims_set)) == 0
             )
             # We should expect the intersection of the set of all claims on the SAMHSA _authorized_
             # response to be exactly the set of SAMHSA claims retrieved from the database, as we
@@ -563,12 +544,8 @@ async def main(
         no_samhsa_ssl_ctx.verify_mode = ssl.CERT_NONE
 
     async with (
-        aiohttp.ClientSession(
-            connector=TCPConnector(ssl=samhsa_ssl_ctx)
-        ) as samhsa_session,
-        aiohttp.ClientSession(
-            connector=TCPConnector(ssl=no_samhsa_ssl_ctx)
-        ) as no_samhsa_session,
+        aiohttp.ClientSession(connector=TCPConnector(ssl=samhsa_ssl_ctx)) as samhsa_session,
+        aiohttp.ClientSession(connector=TCPConnector(ssl=no_samhsa_ssl_ctx)) as no_samhsa_session,
     ):
         results = await asyncio.gather(
             *(
@@ -598,9 +575,7 @@ async def main(
         )
         logger.info(
             "Empty responses count: %d",
-            len(
-                [res for res in results if res == VerifyFilteringResult.EMPTY_RESPONSE]
-            ),
+            len([res for res in results if res == VerifyFilteringResult.EMPTY_RESPONSE]),
         )
         logger.log(
             logging.INFO if all_samhsa_filtered else logging.ERROR,

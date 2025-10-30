@@ -37,9 +37,7 @@ for cur_profile in translations:
         usecols=["Target Table", "Target Column"],
     )
     for _, row in df.iterrows():
-        element_concatenated = (
-            f"{row['Target Table'].strip()}.{row['Target Column'].strip()}"
-        )
+        element_concatenated = f"{row['Target Table'].strip()}.{row['Target Column'].strip()}"
         # there are newlines in some, we should ask IDR to consider changing the DD structure?
         if (
             row["Target Table"] != "-"
@@ -48,12 +46,9 @@ for cur_profile in translations:
         ):
             if (
                 element_concatenated in applies_to
-                and translations[cur_profile]
-                not in applies_to[element_concatenated]["profiles"]
+                and translations[cur_profile] not in applies_to[element_concatenated]["profiles"]
             ):
-                applies_to[element_concatenated]["profiles"].append(
-                    translations[cur_profile]
-                )
+                applies_to[element_concatenated]["profiles"].append(translations[cur_profile])
             else:
                 applies_to[element_concatenated] = {
                     "profiles": [translations[cur_profile]],

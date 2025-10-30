@@ -237,9 +237,7 @@ class StatsConfiguration:
         common_keys = opts_as_dict.keys() & {
             field.name for field in dataclasses.fields(StatsConfiguration)
         }
-        stats_args: dict[str, Any] = {
-            k: v for k, v in opts_as_dict.items() if k in common_keys
-        }
+        stats_args: dict[str, Any] = {k: v for k, v in opts_as_dict.items() if k in common_keys}
 
         try:
             stats_config = StatsConfiguration(**stats_args)

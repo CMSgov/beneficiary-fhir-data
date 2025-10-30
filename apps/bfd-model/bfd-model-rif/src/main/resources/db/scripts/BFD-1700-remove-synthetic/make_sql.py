@@ -125,9 +125,7 @@ NEW_CLAIMS_TABLES = [("snf_claims_new", "snf_claim_lines_new")]
 # Helpers
 
 
-def make_bene_id_pattern(
-    bene_ids: list[str], pattern: str, cast_id: bool = False
-) -> str:
+def make_bene_id_pattern(bene_ids: list[str], pattern: str, cast_id: bool = False) -> str:
     """Make the WHERE clause to handle bene_ids that are in the list or fit the pattern."""
     output = "  bene_id IN ('" + "', '".join(bene_ids) + "')"
     if pattern is not None:
@@ -150,9 +148,7 @@ def make_claims_sql(
     if is_count:
         output += f"SELECT COUNT(lines.*) AS {claim_lines_table}\n"
         output += f"FROM {claim_lines_table} AS lines\n"
-        output += (
-            f"LEFT JOIN {claims_table} AS claims ON (claims.clm_id = lines.clm_id)\n"
-        )
+        output += f"LEFT JOIN {claims_table} AS claims ON (claims.clm_id = lines.clm_id)\n"
         output += f"WHERE\n{bene_id_clause};\n\n\n"
     else:
         output += f"DELETE FROM {claim_lines_table} AS lines\n"
@@ -212,21 +208,13 @@ def main(args: list):
         sys.exit()
 
     bene_id_pattern = make_bene_id_pattern(bene_ids["ids"], bene_ids["pattern"], False)
-    new_bene_id_pattern = make_bene_id_pattern(
-        bene_ids["ids"], bene_ids["pattern"], True
-    )
+    new_bene_id_pattern = make_bene_id_pattern(bene_ids["ids"], bene_ids["pattern"], True)
 
     for claims_table, claim_lines_table in CLAIMS_TABLES:
-        print(
-            make_claims_sql(bene_id_pattern, claims_table, claim_lines_table, is_count)
-        )
+        print(make_claims_sql(bene_id_pattern, claims_table, claim_lines_table, is_count))
 
     for claims_table, claim_lines_table in NEW_CLAIMS_TABLES:
-        print(
-            make_claims_sql(
-                new_bene_id_pattern, claims_table, claim_lines_table, is_count
-            )
-        )
+        print(make_claims_sql(new_bene_id_pattern, claims_table, claim_lines_table, is_count))
 
     for base_table in BASE_TABLES:
         print(make_base_sql(bene_id_pattern, base_table, is_count))

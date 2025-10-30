@@ -225,23 +225,17 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
         rows = cur.fetchmany(1)
         assert rows[0]["bene_sk"] == 10464258
 
-        cur = conn.execute(
-            "select * from idr.beneficiary_entitlement_reason order by bene_sk"
-        )
+        cur = conn.execute("select * from idr.beneficiary_entitlement_reason order by bene_sk")
         assert cur.rowcount == 15
         rows = cur.fetchmany(1)
         assert rows[0]["bene_sk"] == 10464258
 
-        cur = conn.execute(
-            "select * from idr.beneficiary_dual_eligibility order by bene_sk"
-        )
+        cur = conn.execute("select * from idr.beneficiary_dual_eligibility order by bene_sk")
         assert cur.rowcount == 4
         rows = cur.fetchmany(1)
         assert rows[0]["bene_sk"] == 47347082
 
-        cur = conn.execute(
-            "select * from idr.beneficiary_overshare_mbi order by bene_mbi_id"
-        )
+        cur = conn.execute("select * from idr.beneficiary_overshare_mbi order by bene_mbi_id")
         assert cur.rowcount == 2
         rows = cur.fetchmany(2)
         assert rows[0]["bene_mbi_id"] == "5OH0K85GU23"
@@ -258,9 +252,7 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
         rows = cur.fetchmany(1)
         assert rows[0]["clm_uniq_id"] == 113370100080
 
-        cur = conn.execute(
-            "select * from idr.claim_date_signature order by clm_dt_sgntr_sk"
-        )
+        cur = conn.execute("select * from idr.claim_date_signature order by clm_dt_sgntr_sk")
         assert cur.rowcount == 142
         rows = cur.fetchmany(1)
         assert rows[0]["clm_dt_sgntr_sk"] == 2334117069
@@ -275,23 +267,17 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
         rows = cur.fetchmany(1)
         assert rows[0]["clm_uniq_id"] == 113370100080
 
-        cur = conn.execute(
-            "select * from idr.claim_line_institutional order by clm_uniq_id"
-        )
+        cur = conn.execute("select * from idr.claim_line_institutional order by clm_uniq_id")
         assert cur.rowcount == 594
         rows = cur.fetchmany(1)
         assert rows[0]["clm_uniq_id"] == 113370100080
 
-        cur = conn.execute(
-            "select * from idr.claim_line_professional order by clm_uniq_id"
-        )
+        cur = conn.execute("select * from idr.claim_line_professional order by clm_uniq_id")
         assert cur.rowcount == 281
         rows = cur.fetchmany(1)
         assert rows[0]["clm_uniq_id"] == 797757725380
 
-        cur = conn.execute(
-            "select * from idr.claim_ansi_signature order by clm_ansi_sgntr_sk"
-        )
+        cur = conn.execute("select * from idr.claim_ansi_signature order by clm_ansi_sgntr_sk")
         assert cur.rowcount == 12072
         rows = cur.fetchmany(1)
         assert rows[0]["clm_ansi_sgntr_sk"] == 0

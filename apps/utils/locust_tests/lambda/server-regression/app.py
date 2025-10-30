@@ -71,9 +71,7 @@ def get_sqs_queue_url(sqs_queue_name: str) -> str:
     try:
         return response["QueueUrl"]
     except KeyError as exc:
-        raise ValueError(
-            f'SQS Queue URL not found for queue "{sqs_queue_name}"'
-        ) from exc
+        raise ValueError(f'SQS Queue URL not found for queue "{sqs_queue_name}"') from exc
 
 
 def send_sqs_message(sqs_queue_url: str, msg_body: PipelineSignalMessage) -> bool:
@@ -226,9 +224,7 @@ def handler(event: dict, context: LambdaContext) -> str | None:
         # Signal the outcome of the locust test run
         send_pipeline_signal(
             signal_queue_url=signal_queue_url,
-            result=TestResult.SUCCESS
-            if regression_suite_succeeded
-            else TestResult.FAILURE,
+            result=TestResult.SUCCESS if regression_suite_succeeded else TestResult.FAILURE,
             message="Pipeline run finished, check the CloudWatch logs for more information",
             context=context,
         )

@@ -30,9 +30,7 @@ def get_progress(
     )
 
 
-def extract_and_load(
-    cls: type[T], connection_string: str, mode: str, batch_size: int
-) -> bool:
+def extract_and_load(cls: type[T], connection_string: str, mode: str, batch_size: int) -> bool:
     if mode == "local" or mode == "synthetic":
         data_extractor = PostgresExtractor(
             connection_string=connection_string, batch_size=batch_size

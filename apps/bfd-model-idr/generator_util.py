@@ -119,9 +119,7 @@ class GeneratorUtil:
         return bene_sk
 
     def generate_bene_xref(self, new_bene_sk, old_bene_sk):
-        bene_hicn_num = str(random.randint(1000, 100000000)) + random.choice(
-            string.ascii_letters
-        )
+        bene_hicn_num = str(random.randint(1000, 100000000)) + random.choice(string.ascii_letters)
 
         # 10% chance for invalid xref.
         kill_cred_cd = 1 if random.randint(1, 10) == 1 else 2
@@ -248,9 +246,7 @@ class GeneratorUtil:
             patient["BENE_MBI_ID"] = current_mbi
 
     def generate_coverages(self, patient):
-        parts = random.choices(
-            [["A"], ["B"], ["A", "B"], []], weights=[0.2, 0.2, 0.5, 0.1]
-        )[0]
+        parts = random.choices([["A"], ["B"], ["A", "B"], []], weights=[0.2, 0.2, 0.5, 0.1])[0]
         include_tp = random.random() > 0.2
         expired = random.random() < 0.2
         future = random.random() < 0.2
@@ -314,12 +310,9 @@ class GeneratorUtil:
                 "BENE_SK": patient["BENE_SK"],
                 "IDR_LTST_TRANS_FLG": "Y",
                 "BENE_MDCR_ENTLMT_TYPE_CD": coverage_type,
-                "BENE_MDCR_ENRLMT_RSN_CD": random.choice(
-                    self.code_systems["BENE_ENRLMT_RSN_CD"]
-                ),
+                "BENE_MDCR_ENRLMT_RSN_CD": random.choice(self.code_systems["BENE_ENRLMT_RSN_CD"]),
                 "BENE_MDCR_ENTLMT_STUS_CD": "Y",
-                "IDR_TRANS_EFCTV_TS": str(medicare_start_date)
-                + "T00:00:00.000000+0000",
+                "IDR_TRANS_EFCTV_TS": str(medicare_start_date) + "T00:00:00.000000+0000",
                 "IDR_INSRT_TS": str(medicare_start_date) + "T00:00:00.000000+0000",
                 "IDR_UPDT_TS": str(medicare_start_date) + "T00:00:00.000000+0000",
                 "IDR_TRANS_OBSLT_TS": "9999-12-31T00:00:00.000000+0000",
@@ -333,8 +326,7 @@ class GeneratorUtil:
                     "BENE_SK": patient["BENE_SK"],
                     "IDR_LTST_TRANS_FLG": "Y",
                     "BENE_TP_TYPE_CD": coverage_type,
-                    "IDR_TRANS_EFCTV_TS": str(medicare_start_date)
-                    + "T00:00:00.000000+0000",
+                    "IDR_TRANS_EFCTV_TS": str(medicare_start_date) + "T00:00:00.000000+0000",
                     "IDR_INSRT_TS": str(medicare_start_date) + "T00:00:00.000000+0000",
                     "IDR_UPDT_TS": str(medicare_start_date) + "T00:00:00.000000+0000",
                     "IDR_TRANS_OBSLT_TS": "9999-12-31T00:00:00.000000+0000",

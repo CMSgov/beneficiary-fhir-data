@@ -165,9 +165,7 @@ class TaskStats:
             return {str(k): 0 for k in PERCENTILES_TO_REPORT}
 
         return {
-            str(percentile): int(
-                stats_entry.get_response_time_percentile(percentile) or 0
-            )
+            str(percentile): int(stats_entry.get_response_time_percentile(percentile) or 0)
             for percentile in PERCENTILES_TO_REPORT
         }
 
@@ -261,15 +259,12 @@ class StatsMetadata:
         if not locust_env.stats.last_request_timestamp:
             raise ValueError("No requests were ran, stats cannot be aggregated")
 
-        ran_user_classes = [
-            user_class.__name__ for user_class in locust_env.user_classes
-        ]
+        ran_user_classes = [user_class.__name__ for user_class in locust_env.user_classes]
         num_users = locust_env.parsed_options.num_users
         spawn_rate = locust_env.parsed_options.spawn_rate
         stats_reset_after_spawn = locust_env.reset_stats
         requested_runtime = int(
-            locust_env.parsed_options.spawned_runtime
-            or locust_env.parsed_options.runtime
+            locust_env.parsed_options.spawned_runtime or locust_env.parsed_options.runtime
         )
 
         return cls(
@@ -280,8 +275,7 @@ class StatsMetadata:
             num_total_users=num_users,
             num_users_per_second=spawn_rate,
             requested_runtime=requested_runtime,
-            total_runtime=locust_env.stats.last_request_timestamp
-            - locust_env.stats.start_time,
+            total_runtime=locust_env.stats.last_request_timestamp - locust_env.stats.start_time,
             user_classes=ran_user_classes,
             hash=cls.__generate_hash_str(
                 user_classes_names=ran_user_classes,

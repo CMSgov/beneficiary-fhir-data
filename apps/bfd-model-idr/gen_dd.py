@@ -59,13 +59,11 @@ for walk_info in os.walk(structure_def_folder):
             test_resource = json.load(file)
             for element in test_resource["differential"]["element"]:
                 structure_def_names_descriptions[element["id"]] = {}
-                structure_def_names_descriptions[element["id"]]["name"] = element[
-                    "label"
-                ]
+                structure_def_names_descriptions[element["id"]]["name"] = element["label"]
                 if "definition" in element:
-                    structure_def_names_descriptions[element["id"]]["definition"] = (
-                        element["definition"]
-                    )
+                    structure_def_names_descriptions[element["id"]]["definition"] = element[
+                        "definition"
+                    ]
 
 for walk_info in os.walk(idr_ref_folder):
     files = list(filter(lambda file: ".csv" in file, walk_info[2]))
@@ -73,9 +71,7 @@ for walk_info in os.walk(idr_ref_folder):
         idr_table_descriptors[file_name[0 : len(file_name) - 4]] = {}
         df = pd.read_csv(idr_ref_folder + "/" + str(file_name))
         for _, row in df.iterrows():
-            idr_table_descriptors[file_name[0 : len(file_name) - 4]][row["name"]] = row[
-                "comment"
-            ]
+            idr_table_descriptors[file_name[0 : len(file_name) - 4]][row["name"]] = row["comment"]
 
 coverage_parts = ["PartA", "PartB", "PartC", "PartD", "DUAL"]
 claim_profiles = [
@@ -115,9 +111,7 @@ for walk_info in os.walk(dd_support_folder):
                         [
                             "node",
                             "eval_fhirpath.js",
-                            json.dumps(
-                                sample_resources_by_profile[entry["appliesTo"][0]]
-                            ),
+                            json.dumps(sample_resources_by_profile[entry["appliesTo"][0]]),
                             entry["fhirPath"],
                         ],
                         check=True,
@@ -130,23 +124,17 @@ for walk_info in os.walk(dd_support_folder):
                         entry["example"] = entry["example"][0]
                     else:
                         entry["example"] = ""
-                    if (
-                        "sourceView" in entry
-                        and entry["sourceView"] in idr_table_descriptors
-                    ):
-                        entry["Description"] = idr_table_descriptors[
-                            entry["sourceView"]
-                        ][entry["sourceColumn"]]
+                    if "sourceView" in entry and entry["sourceView"] in idr_table_descriptors:
+                        entry["Description"] = idr_table_descriptors[entry["sourceView"]][
+                            entry["sourceColumn"]
+                        ]
 
                     # Populate the element names + missing descriptions
                     if entry["inputPath"] in structure_def_names_descriptions:
-                        entry["Field Name"] = structure_def_names_descriptions[
-                            entry["inputPath"]
-                        ]["name"]
-                        if (
-                            "definition"
-                            in structure_def_names_descriptions[entry["inputPath"]]
-                        ):
+                        entry["Field Name"] = structure_def_names_descriptions[entry["inputPath"]][
+                            "name"
+                        ]
+                        if "definition" in structure_def_names_descriptions[entry["inputPath"]]:
                             entry["Description"] = structure_def_names_descriptions[
                                 entry["inputPath"]
                             ]["definition"]
@@ -162,9 +150,7 @@ dd_df = pd.DataFrame(dd_df)
 def replace_str(input_str):
     # Yes, the below is intentional.
     if input_str == input_str and len(str(input_str)) > 0:
-        return "https://bluebutton.cms.gov/fhir/CodeSystem/" + str(input_str).replace(
-            "_", "-"
-        )
+        return "https://bluebutton.cms.gov/fhir/CodeSystem/" + str(input_str).replace("_", "-")
     return ""
 
 
@@ -213,9 +199,7 @@ with pd.ExcelWriter("out/bfd_data_dictionary.xlsx", engine="xlsxwriter") as writ
 
     workbook = writer.book
     worksheet = writer.sheets["Data Dictionary"]
-    header_format = workbook.add_format(
-        {"bold": True, "bg_color": "#DCE6F2", "border": 1}
-    )
+    header_format = workbook.add_format({"bold": True, "bg_color": "#DCE6F2", "border": 1})
     text_format = workbook.add_format({"border": 1})
 
     worksheet.write(0, 0, "Row", header_format)

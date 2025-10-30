@@ -11,9 +11,7 @@ def gen_enum(fsh_output_file: str, int_codes: bool = False) -> None:
     ) as f:
         content = f.read()
         json_content = json.loads(content)
-        enum_vals = [
-            get_enum_val(concept, int_codes) for concept in json_content["concept"]
-        ]
+        enum_vals = [get_enum_val(concept, int_codes) for concept in json_content["concept"]]
         with open("out/" + fsh_output_file.replace(".json", ".txt"), "w") as f_out:
             f_out.write(",\n".join(enum_vals) + ";")
 

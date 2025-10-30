@@ -23,9 +23,7 @@ logger = logging.getLogger(__name__)
 
 class Extractor(ABC):
     @abstractmethod
-    def extract_many(
-        self, cls: type[T], sql: str, params: dict[str, DbType]
-    ) -> Iterator[list[T]]:
+    def extract_many(self, cls: type[T], sql: str, params: dict[str, DbType]) -> Iterator[list[T]]:
         pass
 
     @abstractmethod
@@ -42,9 +40,7 @@ class Extractor(ABC):
         query = cls.fetch_query(is_historical, start_time)
         columns = ",".join(cls.column_aliases())
         columns_raw = ",".join(cls.columns_raw())
-        return query.replace("{COLUMNS}", columns).replace(
-            "{COLUMNS_NO_ALIAS}", columns_raw
-        )
+        return query.replace("{COLUMNS}", columns).replace("{COLUMNS_NO_ALIAS}", columns_raw)
 
     def extract_idr_data(
         self, cls: type[T], progress: LoadProgress | None, start_time: datetime
@@ -52,15 +48,11 @@ class Extractor(ABC):
         is_historical = progress is None or progress.is_historical()
         fetch_query = self.get_query(cls, is_historical, start_time)
         # GREATEST doesn't work with nulls so we need to coalesce here
-        batch_timestamp_cols = self._coalesce_dates(
-            cls.batch_timestamp_col_alias(is_historical)
-        )
+        batch_timestamp_cols = self._coalesce_dates(cls.batch_timestamp_col_alias(is_historical))
         update_timestamp_cols = self._coalesce_dates(cls.update_timestamp_col_alias())
         # We need to create batches using the most recent timestamp from all of the
         # insert/update timestamps
-        batch_timestamp_clause = self._greatest_col(
-            [*batch_timestamp_cols, *update_timestamp_cols]
-        )
+        batch_timestamp_clause = self._greatest_col([*batch_timestamp_cols, *update_timestamp_cols])
         min_transaction_date = get_min_transaction_date()
 
         batch_id_order = ""
@@ -135,9 +127,7 @@ class PostgresExtractor(Extractor):
                 yield batch
                 batch = cur.fetchmany(self.batch_size)
 
-    def extract_single(
-        self, cls: type[T], sql: str, params: dict[str, DbType]
-    ) -> T | None:
+    def extract_single(self, cls: type[T], sql: str, params: dict[str, DbType]) -> T | None:
         with self.conn.cursor(row_factory=class_row(cls)) as cur:
             cur.execute(sql, params)  # type: ignore
             return cur.fetchone()
@@ -173,9 +163,7 @@ class SnowflakeExtractor(Extractor):
             schema=os.environ["IDR_SCHEMA"],
         )
 
-    def extract_many(
-        self, cls: type[T], sql: str, params: dict[str, DbType]
-    ) -> Iterator[list[T]]:
+    def extract_many(self, cls: type[T], sql: str, params: dict[str, DbType]) -> Iterator[list[T]]:
         cur = None
 
         try:

@@ -13,9 +13,7 @@ WARM_POOL_INSTANCE_LAUNCH_FILTERS = [
 """Filters that indicate a scaling event against the target ASG has occurred"""
 
 
-def filter_message_by_keys(
-    message: dict[str, Any], message_filters: list[dict[str, Any]]
-) -> bool:
+def filter_message_by_keys(message: dict[str, Any], message_filters: list[dict[str, Any]]) -> bool:
     """Return if a message (typically the inner Dict of an SQS message, but could be any Dict)
     matches any of the message filters given.
 

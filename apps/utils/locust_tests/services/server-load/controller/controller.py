@@ -138,17 +138,9 @@ def _main() -> None:
             "--csv=logs/load",
             "--headless",
         ]
-        + (
-            [f"--expect-workers={initial_worker_nodes}"]
-            if initial_worker_nodes > 0
-            else []
-        )
+        + ([f"--expect-workers={initial_worker_nodes}"] if initial_worker_nodes > 0 else [])
         + ([f"--locust-tags={locust_tags}"] if locust_tags else [])
-        + (
-            [f"--locust-exclude-tags={locust_exclude_tags}"]
-            if locust_exclude_tags
-            else []
-        ),
+        + ([f"--locust-exclude-tags={locust_exclude_tags}"] if locust_exclude_tags else []),
         cwd="../../../",
         stderr=subprocess.STDOUT,
     )
@@ -158,9 +150,7 @@ def _main() -> None:
     queue.purge()
 
     if locust_tags:
-        print(
-            f"Running tasks with an annotated @tag including any of the following: {locust_tags}"
-        )
+        print(f"Running tasks with an annotated @tag including any of the following: {locust_tags}")
 
     if locust_exclude_tags:
         print(
@@ -170,9 +160,7 @@ def _main() -> None:
 
     spawn_count = 0
     for _ in range(initial_worker_nodes):
-        print(
-            f"Spawning initial worker node #{spawn_count + 1} of {max_spawned_nodes}..."
-        )
+        print(f"Spawning initial worker node #{spawn_count + 1} of {max_spawned_nodes}...")
         _start_node(
             controller_ip=controller_host_ip,
             host=test_host,
@@ -191,9 +179,7 @@ def _main() -> None:
     )
     while locust_process.poll() is None:
         if datetime.now() >= runtime_limit_end:
-            print(
-                f"User provided runtime of {runtime_limit} seconds has been exceeded, stopping"
-            )
+            print(f"User provided runtime of {runtime_limit} seconds has been exceeded, stopping")
             break
 
         scale_or_stop_events = check_queue(
@@ -202,8 +188,7 @@ def _main() -> None:
         )
 
         if any(
-            filter_message_by_keys(msg, QUEUE_STOP_SIGNAL_FILTERS)
-            for msg in scale_or_stop_events
+            filter_message_by_keys(msg, QUEUE_STOP_SIGNAL_FILTERS) for msg in scale_or_stop_events
         ):
             has_received_stop = True
             print("Stop signal encountered, stopping")
@@ -223,9 +208,7 @@ def _main() -> None:
 
         if spawn_count < max_spawned_nodes:
             if datetime.now() >= next_node_spawn:
-                print(
-                    f"Spawning worker node #{spawn_count + 1} of {max_spawned_nodes}..."
-                )
+                print(f"Spawning worker node #{spawn_count + 1} of {max_spawned_nodes}...")
                 _start_node(
                     controller_ip=controller_host_ip,
                     host=test_host,
@@ -236,9 +219,7 @@ def _main() -> None:
 
                 next_node_spawn = datetime.now() + timedelta(seconds=node_spawn_time)
         elif stop_on_node_limit:
-            print(
-                f"Worker node spawn limit of {max_spawned_nodes} encountered, stopping..."
-            )
+            print(f"Worker node spawn limit of {max_spawned_nodes} encountered, stopping...")
             break
 
     if has_scaling_target_hit and coasting_time > 0:
@@ -254,10 +235,7 @@ def _main() -> None:
                 timeout=1,
             )
 
-            if any(
-                filter_message_by_keys(msg, QUEUE_STOP_SIGNAL_FILTERS)
-                for msg in messages
-            ):
+            if any(filter_message_by_keys(msg, QUEUE_STOP_SIGNAL_FILTERS) for msg in messages):
                 has_received_stop = True
                 print("Stop signal encountered, stopping")
                 break
@@ -276,9 +254,7 @@ def _main() -> None:
         return
 
     if not has_received_stop:
-        print(
-            "Waiting an additional 10 seconds to allow worker nodes to submit statistics..."
-        )
+        print("Waiting an additional 10 seconds to allow worker nodes to submit statistics...")
         time.sleep(10)
         print("10 second wait period has elapsed")
 

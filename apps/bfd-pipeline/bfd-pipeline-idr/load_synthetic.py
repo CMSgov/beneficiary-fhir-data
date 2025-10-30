@@ -83,11 +83,7 @@ def _load_file(
 
 
 if __name__ == "__main__":
-    baseDir = (
-        sys.argv[1]
-        if len(sys.argv) > 1 and sys.argv[1] != ""
-        else "../../bfd-model-idr/out"
-    )
+    baseDir = sys.argv[1] if len(sys.argv) > 1 and sys.argv[1] != "" else "../../bfd-model-idr/out"
     load_from_csv(
         psycopg.connect(get_connection_string()),
         baseDir,

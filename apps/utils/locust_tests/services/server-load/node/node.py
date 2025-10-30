@@ -147,8 +147,7 @@ def handler(event: dict[str, Any], _context: LambdaContext) -> None:
         )
 
         if any(
-            filter_message_by_keys(msg, QUEUE_STOP_SIGNAL_FILTERS)
-            for msg in scale_or_stop_events
+            filter_message_by_keys(msg, QUEUE_STOP_SIGNAL_FILTERS) for msg in scale_or_stop_events
         ):
             print("Stop signal encountered, stopping")
             break
@@ -184,10 +183,7 @@ def handler(event: dict[str, Any], _context: LambdaContext) -> None:
                 timeout=1,
             )
 
-            if any(
-                filter_message_by_keys(msg, QUEUE_STOP_SIGNAL_FILTERS)
-                for msg in messages
-            ):
+            if any(filter_message_by_keys(msg, QUEUE_STOP_SIGNAL_FILTERS) for msg in messages):
                 print("Stop signal encountered, stopping")
                 break
 

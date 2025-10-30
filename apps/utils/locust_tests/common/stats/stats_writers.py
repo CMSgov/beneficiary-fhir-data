@@ -59,9 +59,7 @@ def _write_file(stats_config: StatsConfiguration, stats: AggregatedStats) -> Non
     ) as json_file:
         json_file.write(json.dumps(asdict(stats), indent=4))
 
-    logging.getLogger().info(
-        "Wrote aggregated performance statistics to file path: %s", full_path
-    )
+    logging.getLogger().info("Wrote aggregated performance statistics to file path: %s", full_path)
 
 
 def _write_s3(stats_config: StatsConfiguration, stats: AggregatedStats) -> None:
@@ -114,8 +112,6 @@ def _write_s3(stats_config: StatsConfiguration, stats: AggregatedStats) -> None:
                 f"Storing stats to {s3_path} failed as an invalid response from AWS was returned"
             )
     except __s3_client.exceptions.NoSuchBucket as exc:
-        raise ValueError(
-            f"S3 bucket {stats_config.stats_store_s3_bucket} does not exist"
-        ) from exc
+        raise ValueError(f"S3 bucket {stats_config.stats_store_s3_bucket} does not exist") from exc
     except __s3_client.exceptions.ClientError as exc:
         raise RuntimeError(f"Unable to upload to {s3_path}") from exc

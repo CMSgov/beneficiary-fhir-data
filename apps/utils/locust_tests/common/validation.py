@@ -94,21 +94,15 @@ def check_validation_goals(environment: Environment) -> ValidationResult:
 
         logger.info("Checking 50%, 95% and 99% SLAs...")
         if environment.stats.total.get_response_time_percentile(0.50) > sla_50:
-            logger.error(
-                "Test failed due to 50th percentile response time > %d ms", sla_50
-            )
+            logger.error("Test failed due to 50th percentile response time > %d ms", sla_50)
             return ValidationResult.FAILED
 
         if environment.stats.total.get_response_time_percentile(0.95) > sla_95:
-            logger.error(
-                "Test failed due to 95th percentile response time > %d ms", sla_95
-            )
+            logger.error("Test failed due to 95th percentile response time > %d ms", sla_95)
             return ValidationResult.FAILED
 
         if environment.stats.total.get_response_time_percentile(0.99) > sla_99:
-            logger.error(
-                "Test failed due to 99th percentile response time > %d ms", sla_99
-            )
+            logger.error("Test failed due to 99th percentile response time > %d ms", sla_99)
             return ValidationResult.FAILED
 
         logger.info("SLAs within acceptable bounds")
