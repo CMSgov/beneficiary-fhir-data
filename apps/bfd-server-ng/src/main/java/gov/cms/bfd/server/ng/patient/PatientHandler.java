@@ -7,7 +7,6 @@ import gov.cms.bfd.server.ng.coverage.CoverageRepository;
 import gov.cms.bfd.server.ng.input.CoverageCompositeId;
 import gov.cms.bfd.server.ng.input.CoveragePart;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
-import gov.cms.bfd.server.ng.util.FhirBundleBuilder;
 import gov.cms.bfd.server.ng.util.FhirUtil;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.util.Arrays;
@@ -104,11 +103,8 @@ public class PatientHandler {
 
     var resources = Stream.concat(Stream.of(patient, cmsOrg), coverages);
 
-    return FhirBundleBuilder.fromResources(resources.map(c -> c))
-        .withBatchLastUpdated(beneficiaryRepository::beneficiaryLastUpdated)
-        .withIncludeFullUrls(true) // optional
-        .build()
-        .toBundle();
+    return FhirUtil.bundleWithFullUrls(resources,beneficiaryRepository::beneficiaryLastUpdated);
+
   }
 
   private Patient toFhir(Beneficiary beneficiary) {

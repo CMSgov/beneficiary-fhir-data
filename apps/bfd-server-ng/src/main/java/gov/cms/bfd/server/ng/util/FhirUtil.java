@@ -93,6 +93,36 @@ public class FhirUtil {
         .orElseGet(() -> defaultBundle(batchLastUpdated));
   }
 
+
+  /**
+   * Builds the bundle and includes full urls to every entry in the bundle.
+   *
+   * @return a FHIR bundle
+   */
+  public static Bundle bundleWithFullUrls(Stream<? extends Resource> resources,Supplier<ZonedDateTime> batchLastUpdated) {
+    var resourceList = resources.toList();
+
+    if (resourceList.isEmpty()) {
+      return defaultBundle(batchLastUpdated);
+    }
+
+    var bundle = new Bundle()
+            .setType(Bundle.BundleType.COLLECTION)
+            .setEntry(
+                    resourceList.stream()
+                            .map(r -> new Bundle.BundleEntryComponent()
+                                    .setResource(r)
+                                    .setFullUrl("urn:uuid:" + r.getIdElement().getIdPart()))
+                            .toList()
+            );
+
+    if (batchLastUpdated != null) {
+      bundle.setMeta(new Meta().setLastUpdated(DateUtil.toDate(batchLastUpdated.get())));
+    }
+
+    return bundle;
+  }
+
   private static Bundle getBundle(Stream<Resource> resources) {
     return new Bundle()
         .setEntry(resources.map(r -> new Bundle.BundleEntryComponent().setResource(r)).toList());
