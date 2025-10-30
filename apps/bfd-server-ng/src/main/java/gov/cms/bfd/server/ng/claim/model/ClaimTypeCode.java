@@ -5,11 +5,7 @@ import java.util.Arrays;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.ExplanationOfBenefit;
-import org.hl7.fhir.r4.model.Organization;
-import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.*;
 
 /**
  * Claim type codes. Suppress SonarQube warning that constant names should comply with naming
@@ -338,12 +334,35 @@ public enum ClaimTypeCode {
 
     var organization = OrganizationFactory.toFhir();
     organization.setId(INSURER_ORG);
-    // src.CNTRCT_PBP_NAME as pbpName
     organization.setName(pbpName);
     return Optional.of(organization);
   }
 
+  Optional<ExplanationOfBenefit.InsuranceComponent> toFhirPartDInsurance(
+      String contractNum, String contractPbpNum) {
+    if (!isBetween(1, 4)) {
+      return Optional.empty();
+    }
+
+    var insurance = new ExplanationOfBenefit.InsuranceComponent();
+    insurance.setFocal(true);
+    insurance.setCoverage(new Reference().setDisplay("Part D"));
+    insurance.addExtension(
+        new Extension()
+            .setUrl(SystemUrls.BLUE_BUTTON_STRUCTURE_DEFINITION_SUBMITTER_CONTRACT_NUMBER)
+            .setValue(new StringType(contractNum)));
+    insurance.addExtension(
+        new Extension()
+            .setUrl(SystemUrls.BLUE_BUTTON_STRUCTURE_DEFINITION_SUBMITTER_CONTRACT_PBP_NUMBER)
+            .setValue(new StringType(contractPbpNum)));
+    return Optional.of(insurance);
+  }
+
   Optional<ExplanationOfBenefit.InsuranceComponent> toFhirInsurance() {
+    if (!isBetween(5, 3999)) {
+      return Optional.empty();
+    }
+
     return Optional.of(
         new ExplanationOfBenefit.InsuranceComponent()
             .setFocal(true)

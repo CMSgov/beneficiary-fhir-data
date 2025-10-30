@@ -85,9 +85,20 @@ public class Claim {
   @JoinColumn(name = "clm_uniq_id")
   private ClaimInstitutional claimInstitutional;
 
+  @Nullable
+  @OneToOne
+  @JoinColumn(name = "clm_uniq_id")
+  private ClaimRx claimRx;
+
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "clm_uniq_id")
   private SortedSet<ClaimItem> claimItems;
+
+  @Column(name = "clm_sbmtr_cntrct_num")
+  private String contractNumber;
+
+  @Column(name = "clm_sbmtr_cntrct_pbp_num")
+  private String contractPbpNumber;
 
   @Nullable
   @OneToOne
@@ -105,6 +116,10 @@ public class Claim {
 
   private Optional<ClaimInstitutional> getClaimInstitutional() {
     return Optional.ofNullable(claimInstitutional);
+  }
+
+  private Optional<ClaimRx> getClaimRx() {
+    return Optional.ofNullable(claimRx);
   }
 
   private Optional<ClaimFiss> getClaimFiss() {
@@ -211,12 +226,14 @@ public class Claim {
                 recordTypeCodes)
             .toList();
 
+    var rx = getClaimRx();
     Stream.of(
             initialSupportingInfo,
             claimDateSignature.getSupportingInfo().toFhir(supportingInfoFactory),
             institutional
                 .map(i -> i.getSupportingInfo().toFhir(supportingInfoFactory))
-                .orElse(List.of()))
+                .orElse(List.of()),
+            rx.map(r -> r.getSupportingInfo().toFhir(supportingInfoFactory)).orElse(List.of()))
         .flatMap(Collection::stream)
         .forEach(eob::addSupportingInfo);
 
@@ -236,6 +253,9 @@ public class Claim {
         });
 
     claimTypeCode.toFhirInsurance().ifPresent(eob::addInsurance);
+    claimTypeCode
+        .toFhirPartDInsurance(contractNumber, contractPbpNumber)
+        .ifPresent(eob::addInsurance);
     eob.addTotal(adjudicationCharge.toFhir());
     eob.setPayment(claimPaymentAmount.toFhir());
 

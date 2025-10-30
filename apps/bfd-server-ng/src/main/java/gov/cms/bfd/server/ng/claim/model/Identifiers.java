@@ -34,7 +34,7 @@ class Identifiers {
             .setSystem(SystemUrls.BLUE_BUTTON_CLAIM_CONTROL_NUMBER)
             .setValue(claimControlNumber),
         new Identifier()
-            .setSystem(SystemUrls.BLUE_BUTTON_CLAIM_ORIGINAL_CONTROL_NUMBER)
+            .setSystem(SystemUrls.BLUE_BUTTON_CLAIM_CONTROL_NUMBER)
             .setValue(claimOriginalControlNumber));
   }
 }

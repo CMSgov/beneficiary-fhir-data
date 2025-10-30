@@ -7,6 +7,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -33,6 +34,9 @@ public class ClaimLine {
   @Column(name = "clm_line_dgns_cd")
   private Optional<String> diagnosisCode;
 
+  @Column(name = "clm_line_from_dt")
+  private Optional<LocalDate> fromDate;
+
   @Embedded private ClaimLineHcpcsCode hcpcsCode;
   @Embedded private ClaimLineNdc ndc;
   @Embedded private ClaimLineServiceUnitQuantity serviceUnitQuantity;
@@ -47,6 +51,7 @@ public class ClaimLine {
     line.setSequence(claimLineNumber.get());
 
     var claimLineInstitutional = claimItem.getClaimLineInstitutional();
+    var claimLineRx = claimItem.getClaimLineRx();
     var productOrService = new CodeableConcept();
     hcpcsCode.toFhir().ifPresent(productOrService::addCoding);
     claimLineInstitutional
@@ -71,11 +76,15 @@ public class ClaimLine {
         .map(ClaimLineInstitutional::getRevenueCenterDate)
         .ifPresent(d -> line.setServiced(new DateType(DateUtil.toDate(d))));
 
+    // CLM_LINE_FROM_DT
+    fromDate.map(d -> line.setServiced(new DateType(DateUtil.toDate(d))));
+
     Stream.of(
             claimLineInstitutional.flatMap(
                 c -> c.getAnsiSignature().map(ClaimAnsiSignature::toFhir)),
             Optional.of(adjudicationCharge.toFhir()),
-            claimLineInstitutional.map(c -> c.getAdjudicationCharge().toFhir()))
+            claimLineInstitutional.map(c -> c.getAdjudicationCharge().toFhir()),
+            claimLineRx.map(c -> c.getAdjudicationCharge().toFhir()))
         .flatMap(Optional::stream)
         .flatMap(Collection::stream)
         .forEach(line::addAdjudication);
