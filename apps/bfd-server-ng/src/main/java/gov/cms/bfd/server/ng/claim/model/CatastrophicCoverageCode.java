@@ -9,12 +9,13 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
+/** Catastrophic coverage codes. */
 @AllArgsConstructor
 @Getter
 public enum CatastrophicCoverageCode {
-  /** A - Attachment point met on this even */
+  /** A - Attachment point met on this even. */
   A("A", "Attachment point met on this even"),
-  /** C - Above attachment point */
+  /** C - Above attachment point. */
   C("C", "Above attachment point");
 
   private final String code;

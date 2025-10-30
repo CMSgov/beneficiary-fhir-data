@@ -6,7 +6,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Quantity;
 
 @Embeddable
-public class ClaimLineRxDaysSupplyQuantity {
+class ClaimLineRxDaysSupplyQuantity {
   @Column(name = "clm_line_days_suply_qty")
   private int daysSupply;
 

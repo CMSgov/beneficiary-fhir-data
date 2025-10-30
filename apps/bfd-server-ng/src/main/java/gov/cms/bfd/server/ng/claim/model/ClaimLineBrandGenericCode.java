@@ -9,13 +9,14 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
+/** Brand Generic Codes. */
 @AllArgsConstructor
 @Getter
 public enum ClaimLineBrandGenericCode {
 
-  /** B - Brand */
+  /** B - Brand. */
   B("B", "Brand"),
-  /** G - Generic Null/Missing */
+  /** G - Generic Null/Missing. */
   G("G", "Generic Null/Missing");
 
   private final String code;

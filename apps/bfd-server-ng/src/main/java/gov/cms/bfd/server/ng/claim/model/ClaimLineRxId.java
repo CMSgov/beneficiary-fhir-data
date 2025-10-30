@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Embeddable
-public class ClaimLineRxId implements Serializable {
+class ClaimLineRxId implements Serializable {
   @Column(name = "clm_uniq_id", insertable = false, updatable = false)
   private long claimUniqueId;
 

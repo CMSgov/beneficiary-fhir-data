@@ -9,20 +9,21 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
+/** Prescription Origination Codes. */
 @AllArgsConstructor
 @Getter
 public enum ClaimPrescriptionOriginCode {
-  /** 0 - Not specified */
+  /** 0 - Not specified. */
   _0("0", "Not specified"),
-  /** 1 - Written */
+  /** 1 - Written. */
   _1("1", "Written"),
-  /** 2 - Telephone */
+  /** 2 - Telephone. */
   _2("2", "Telephone"),
-  /** 3 - Electronic */
+  /** 3 - Electronic. */
   _3("3", "Electronic"),
-  /** 4 - Facsimile */
+  /** 4 - Facsimile. */
   _4("4", "Facsimile"),
-  /** 5 - Pharmacy */
+  /** 5 - Pharmacy. */
   _5("5", "Pharmacy");
 
   private final String code;

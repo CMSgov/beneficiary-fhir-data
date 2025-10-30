@@ -6,7 +6,7 @@ import jakarta.persistence.Embeddable;
 import org.hl7.fhir.r4.model.*;
 
 @Embeddable
-public class ClaimLineRxRefillNumber {
+class ClaimLineRxRefillNumber {
   @Column(name = "clm_line_authrzd_fill_num")
   private String refillsAuthorized;
 

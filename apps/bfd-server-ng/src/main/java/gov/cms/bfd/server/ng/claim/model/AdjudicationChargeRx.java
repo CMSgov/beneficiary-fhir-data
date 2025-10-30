@@ -12,7 +12,7 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 @Embeddable
-public class AdjudicationChargeRx {
+class AdjudicationChargeRx {
   @Column(name = "clm_rptd_mftr_dscnt_amt")
   private double gapDiscountAmount;
 

@@ -9,40 +9,41 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
+/** Patient Residence Codes. */
 @AllArgsConstructor
 @Getter
 public enum ClaimPatientResidenceCode {
-  /** 00 - Not specified, other patient residence not identified below */
+  /** 00 - Not specified, other patient residence not identified below. */
   _00("00", "Not specified, other patient residence not identified below"),
-  /** 01 - Home */
+  /** 01 - Home. */
   _01("01", "Home"),
-  /** 02 - Skilled Nursing Facility */
+  /** 02 - Skilled Nursing Facility. */
   _02("02", "Skilled Nursing Facility"),
-  /** 03 - Nursing facility (long-term care facility) */
+  /** 03 - Nursing facility (long-term care facility). */
   _03("03", "Nursing facility (long-term care facility)"),
-  /** 04 - Assisted living facility */
+  /** 04 - Assisted living facility. */
   _04("04", "Assisted living facility"),
-  /** 05 - Custodial Care Facility (residential but not medical care) */
+  /** 05 - Custodial Care Facility (residential but not medical care). */
   _05("05", "Custodial Care Facility (residential but not medical care)"),
-  /** 06 - Group home (e.g., congregate residential foster care) */
+  /** 06 - Group home (e.g., congregate residential foster care). */
   _06("06", "Group home (e.g., congregate residential foster care)"),
-  /** 07 - Inpatient Psychiatric Facility */
+  /** 07 - Inpatient Psychiatric Facility. */
   _07("07", "Inpatient Psychiatric Facility"),
-  /** 08 - Psychiatric Facility – Partial Hospitalization */
+  /** 08 - Psychiatric Facility – Partial Hospitalization. */
   _08("08", "Psychiatric Facility – Partial Hospitalization"),
-  /** 09 - Intermediate care facility for the mentally retarded (ICF/MR) */
+  /** 09 - Intermediate care facility for the mentally retarded (ICF/MR). */
   _09("09", "Intermediate care facility for the mentally retarded (ICF/MR)"),
-  /** 10 - Residential Substance Abuse Treatment Facility */
+  /** 10 - Residential Substance Abuse Treatment Facility. */
   _10("10", "Residential Substance Abuse Treatment Facility"),
-  /** 11 - Hospice */
+  /** 11 - Hospice. */
   _11("11", "Hospice"),
-  /** 12 - Psychiatric Residential Treatment Facility */
+  /** 12 - Psychiatric Residential Treatment Facility. */
   _12("12", "Psychiatric Residential Treatment Facility"),
-  /** 13 - Comprehensive Inpatient Rehabilitation Facility */
+  /** 13 - Comprehensive Inpatient Rehabilitation Facility. */
   _13("13", "Comprehensive Inpatient Rehabilitation Facility"),
-  /** 14 - Homeless Shelter */
+  /** 14 - Homeless Shelter. */
   _14("14", "Homeless Shelter"),
-  /** 15 - Correctional Institution */
+  /** 15 - Correctional Institution. */
   _15("15", "Correctional Institution");
 
   private final String code;

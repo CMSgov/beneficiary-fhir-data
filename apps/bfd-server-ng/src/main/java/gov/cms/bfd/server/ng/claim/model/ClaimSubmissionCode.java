@@ -9,26 +9,27 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
+/** Submission clarification codes. */
 @AllArgsConstructor
 @Getter
 public enum ClaimSubmissionCode {
-  /** 01 - Community/retail pharmacy */
+  /** 01 - Community/retail pharmacy. */
   _01("01", "Community/retail pharmacy"),
-  /** 02 - Compounding pharmacy */
+  /** 02 - Compounding pharmacy. */
   _02("02", "Compounding pharmacy"),
-  /** 03 - Home infusion therapy provider */
+  /** 03 - Home infusion therapy provider. */
   _03("03", "Home infusion therapy provider"),
-  /** 04 - Institutional pharmacy */
+  /** 04 - Institutional pharmacy. */
   _04("04", "Institutional pharmacy"),
-  /** 05 - Long-term care pharmacy */
+  /** 05 - Long-term care pharmacy. */
   _05("05", "Long-term care pharmacy"),
-  /** 06 - Mail order pharmacy */
+  /** 06 - Mail order pharmacy. */
   _06("06", "Mail order pharmacy"),
-  /** 07 - Managed care organization (MCO) pharmacy */
+  /** 07 - Managed care organization (MCO) pharmacy. */
   _07("07", "Managed care organization (MCO) pharmacy"),
-  /** 08 - Specialty care pharmacy */
+  /** 08 - Specialty care pharmacy. */
   _08("99", "Specialty care pharmacy"),
-  /** 18 - Other */
+  /** 18 - Other. */
   _99("99", "Other");
 
   private final String code;

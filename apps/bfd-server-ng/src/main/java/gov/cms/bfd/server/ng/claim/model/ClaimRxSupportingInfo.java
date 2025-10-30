@@ -11,7 +11,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 @Embeddable
 @Getter
-public class ClaimRxSupportingInfo {
+class ClaimRxSupportingInfo {
 
   @Embedded private ClaimLineRxRefillNumber refillsAuthorized;
 
