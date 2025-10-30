@@ -3,6 +3,8 @@ package gov.cms.bfd.server.ng.util;
 import java.time.ZonedDateTime;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
+import lombok.Builder;
+import lombok.Getter;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Resource;
@@ -10,15 +12,13 @@ import org.hl7.fhir.r4.model.Resource;
 /**
  * Builder for creating FHIR Bundles with configurable options such as full URLs and lastUpdated.
  */
+@Getter
+@Builder(builderClassName = "Builder", builderMethodName = "internalBuilder", setterPrefix = "with")
 public class FhirBundleBuilder {
 
   private final Stream<Resource> resources;
-  private Supplier<ZonedDateTime> batchLastUpdated;
-  private boolean includeFullUrls = false;
-
-  private FhirBundleBuilder(Stream<Resource> resources) {
-    this.resources = resources;
-  }
+  private final Supplier<ZonedDateTime> batchLastUpdated;
+  private final boolean includeFullUrls;
 
   /**
    * Initialize a builder from a stream of FHIR resources.
@@ -26,30 +26,8 @@ public class FhirBundleBuilder {
    * @param resources the stream of resources to include in the bundle
    * @return a new builder instance
    */
-  public static FhirBundleBuilder fromResources(Stream<Resource> resources) {
-    return new FhirBundleBuilder(resources);
-  }
-
-  /**
-   * Sets the lastUpdated timestamp for the bundle.
-   *
-   * @param batchLastUpdated supplier for last updated timestamp
-   * @return the builder
-   */
-  public FhirBundleBuilder withLastUpdated(Supplier<ZonedDateTime> batchLastUpdated) {
-    this.batchLastUpdated = batchLastUpdated;
-    return this;
-  }
-
-  /**
-   * Configures the builder to include full URLs using resource IDs.
-   *
-   * @param include whether to include full URLs
-   * @return the builder
-   */
-  public FhirBundleBuilder includeFullUrls(boolean include) {
-    this.includeFullUrls = include;
-    return this;
+  public static Builder fromResources(Stream<Resource> resources) {
+    return internalBuilder().withResources(resources);
   }
 
   /**
@@ -57,7 +35,7 @@ public class FhirBundleBuilder {
    *
    * @return a FHIR bundle
    */
-  public Bundle build() {
+  public Bundle toBundle() {
     var resourceList = resources.toList();
 
     if (resourceList.isEmpty()) {

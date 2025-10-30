@@ -105,9 +105,10 @@ public class PatientHandler {
     var resources = Stream.concat(Stream.of(patient, cmsOrg), coverages);
 
     return FhirBundleBuilder.fromResources(resources.map(c -> c))
-        .withLastUpdated(beneficiaryRepository::beneficiaryLastUpdated)
-        .includeFullUrls(true) // optional
-        .build();
+        .withBatchLastUpdated(beneficiaryRepository::beneficiaryLastUpdated)
+        .withIncludeFullUrls(true) // optional
+        .build()
+        .toBundle();
   }
 
   private Patient toFhir(Beneficiary beneficiary) {

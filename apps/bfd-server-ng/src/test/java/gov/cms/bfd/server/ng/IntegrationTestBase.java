@@ -5,6 +5,7 @@ import au.com.origin.snapshots.junit5.SnapshotExtension;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ch.qos.logback.classic.spi.ILoggingEvent;
+import gov.cms.bfd.server.ng.testUtil.JsonSnapshotSerializer;
 import jakarta.persistence.EntityManager;
 import java.util.List;
 import org.hl7.fhir.r4.model.Bundle;
@@ -76,6 +77,10 @@ public class IntegrationTestBase {
 
   protected Expect expectFhir() {
     return expect.serializer(FHIR_JSON);
+  }
+
+  protected Expect expectFhirNormalized() {
+    return expect.serializer(new JsonSnapshotSerializer());
   }
 
   protected List<Patient> getPatientsFromBundle(Bundle patientBundle) {
