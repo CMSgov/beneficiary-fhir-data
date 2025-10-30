@@ -35,7 +35,6 @@ public class JsonSnapshotSerializer extends ToStringSnapshotSerializer {
   @Override
   public Snapshot apply(Object object, SnapshotSerializerContext snapshotSerializerContext) {
 
-    System.out.println("APPLYING");
     // Clean up the patch file if it exists. If the test fails again, it will generate a new one.
     var patchFile =
         SnapshotHelper.getPatchfile(this.getClass(), snapshotSerializerContext.getName());
