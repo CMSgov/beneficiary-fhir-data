@@ -65,6 +65,9 @@ public class Claim {
   @Embedded private AdjudicationCharge adjudicationCharge;
   @Embedded private ClaimPaymentAmount claimPaymentAmount;
 
+  // @Embedded private PharmacyOrgProvider pharmacyOrgProvider;
+  // @Embedded private PharmacyPractitionerProvider pharmacyPractitionerProvider;
+
   @OneToOne
   @JoinColumn(name = "bene_sk")
   private BeneficiarySimple beneficiary;
@@ -87,12 +90,36 @@ public class Claim {
   @JoinColumn(name = "clm_uniq_id")
   private SortedSet<ClaimItem> claimItems;
 
+  @Column(name = "clm_sbmtr_cntrct_num")
+  private String contractNumber;
+
+  @Column(name = "clm_sbmtr_cntrct_pbp_num")
+  private String contractPbpNumber;
+
+  @Nullable
+  @OneToOne
+  @JoinColumn(
+      name = "clm_sbmtr_cntrct_num",
+      insertable = false,
+      updatable = false,
+      referencedColumnName = "cntrct_num")
+  @JoinColumn(
+      name = "clm_sbmtr_cntrct_pbp_num",
+      insertable = false,
+      updatable = false,
+      referencedColumnName = "cntrct_pbp_num")
+  private Contract contract; // TODO: double check one to one relationship
+
   private Optional<ClaimInstitutional> getClaimInstitutional() {
     return Optional.ofNullable(claimInstitutional);
   }
 
   private Optional<ClaimFiss> getClaimFiss() {
     return Optional.ofNullable(claimFiss);
+  }
+
+  private Optional<Contract> getContract() {
+    return Optional.ofNullable(contract);
   }
 
   /**
@@ -130,6 +157,10 @@ public class Claim {
               eob.addContained(i);
               eob.setInsurer(new Reference(i));
             });
+    var contract = getContract(); // 4th query
+    contract
+        .flatMap(Contract::getContractName)
+        .ifPresent(name -> claimTypeCode.toFhirInsurerPartD(name));
     var institutional = getClaimInstitutional();
     Stream.of(
             claimExtensions.toFhir(),
@@ -153,6 +184,21 @@ public class Claim {
               eob.addContained(p);
               eob.setProvider(new Reference(p));
             });
+    // TODO: below depends on clm_srvc_prvdr_gnrc_id_type which will be decided in BFD-4286
+    /*pharmacyOrgProvider
+        .toFhir(claimTypeCode)
+        .ifPresent(
+            p -> {
+              eob.addContained(p);
+              eob.setProvider(new Reference(p));
+            });
+    pharmacyPractitionerProvider
+        .toFhir(claimTypeCode)
+        .ifPresent(
+            p -> {
+              eob.addContained(p);
+              eob.setProvider(new Reference(p));
+            });*/
 
     // Each toFhirOutcome() evaluates independently, but their logic is mutually exclusive
     // based on claim type. At most one Optional will be non-empty, so only one call
@@ -179,12 +225,26 @@ public class Claim {
                 recordTypeCodes)
             .toList();
 
+    var claimRxSupportingInfo =
+        getAllClaimRxSupportingInfo().stream()
+            .flatMap(rxSupportingInfo -> rxSupportingInfo.toFhir(supportingInfoFactory).stream())
+            .toList();
+
+    var claimLineRxNumbers =
+        claimItems.stream()
+            .map(ClaimItem::getClaimLineRxNum)
+            .map(claimLineRxNumber -> claimLineRxNumber.toFhir(supportingInfoFactory))
+            .flatMap(Optional::stream)
+            .toList();
+
     Stream.of(
             initialSupportingInfo,
             claimDateSignature.getSupportingInfo().toFhir(supportingInfoFactory),
             institutional
                 .map(i -> i.getSupportingInfo().toFhir(supportingInfoFactory))
-                .orElse(List.of()))
+                .orElse(List.of()),
+            claimRxSupportingInfo,
+            claimLineRxNumbers)
         .flatMap(Collection::stream)
         .forEach(eob::addSupportingInfo);
 
@@ -204,6 +264,9 @@ public class Claim {
         });
 
     claimTypeCode.toFhirInsurance().ifPresent(eob::addInsurance);
+    claimTypeCode
+        .toFhirPartDInsurance(contractNumber, contractPbpNumber)
+        .ifPresent(eob::addInsurance);
     eob.addTotal(adjudicationCharge.toFhir());
     eob.setPayment(claimPaymentAmount.toFhir());
 
@@ -212,6 +275,14 @@ public class Claim {
 
   private List<ClaimValue> getClaimValues() {
     return claimItems.stream().map(ClaimItem::getClaimValue).toList();
+  }
+
+  private List<ClaimRxSupportingInfo> getAllClaimRxSupportingInfo() {
+    return claimItems.stream()
+        .map(ClaimItem::getClaimLineRx)
+        .flatMap(Optional::stream)
+        .map(ClaimLineRx::getClaimRxSupportingInfo)
+        .toList();
   }
 
   private ExplanationOfBenefit sortedEob(ExplanationOfBenefit eob) {

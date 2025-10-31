@@ -22,6 +22,7 @@ public class ClaimItem implements Comparable<ClaimItem> {
   @Embedded private ClaimLine claimLine;
   @Embedded private ClaimProcedure claimProcedure;
   @Embedded private ClaimValue claimValue;
+  @Embedded private ClaimLineRxNumber claimLineRxNum;
 
   @JoinColumn(name = "clm_uniq_id")
   @ManyToOne
@@ -42,6 +43,23 @@ public class ClaimItem implements Comparable<ClaimItem> {
 
   Optional<ClaimLineInstitutional> getClaimLineInstitutional() {
     return Optional.ofNullable(claimLineInstitutional);
+  }
+
+  @JoinColumn(
+      name = "clm_uniq_id",
+      insertable = false,
+      updatable = false,
+      referencedColumnName = "clm_uniq_id")
+  @JoinColumn(
+      name = "clm_line_num",
+      insertable = false,
+      updatable = false,
+      referencedColumnName = "clm_line_num")
+  @OneToOne
+  private ClaimLineRx claimLineRx;
+
+  Optional<ClaimLineRx> getClaimLineRx() {
+    return Optional.ofNullable(claimLineRx);
   }
 
   @Override

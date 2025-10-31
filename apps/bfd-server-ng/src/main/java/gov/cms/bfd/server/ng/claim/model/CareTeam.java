@@ -34,6 +34,12 @@ class CareTeam {
   @Column(name = "clm_rndrg_prvdr_last_name")
   private Optional<String> renderingProviderLastName;
 
+  @Column(name = "prvdr_prscrbng_prvdr_npi_num")
+  private Optional<String> prescribingProviderNpiNumber;
+
+  /** Temp string value for provider last name. To be implemented in BFD-4286 */
+  public static final String PROVIDER_LAST_NAME = "LAST NAME HERE";
+
   List<CareTeamType.CareTeamComponents> toFhir() {
     var sequenceGenerator = new SequenceGenerator();
     var components =
@@ -52,7 +58,13 @@ class CareTeam {
             renderingProviderNpiNumber.map(
                 npi ->
                     CareTeamType.RENDERING.toFhir(
-                        sequenceGenerator, npi, renderingProviderLastName)));
+                        sequenceGenerator, npi, renderingProviderLastName)),
+            prescribingProviderNpiNumber
+                .filter(npi -> !npi.equals("0"))
+                .map(
+                    npi ->
+                        CareTeamType.PRESCRIBING.toFhir(
+                            sequenceGenerator, npi, Optional.of(PROVIDER_LAST_NAME))));
 
     return components.flatMap(Optional::stream).toList();
   }

@@ -893,7 +893,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET]=[
           } ]
         },
         "sequence" : 1,
-        "servicedDate" : "2021-09-26"
+        "servicedDate" : "2024-03-04"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -2159,7 +2159,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET_WITH_SEARCH]=[
           } ]
         },
         "sequence" : 1,
-        "servicedDate" : "2021-09-26"
+        "servicedDate" : "2024-03-04"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -3425,7 +3425,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[POST]=[
           } ]
         },
         "sequence" : 1,
-        "servicedDate" : "2021-09-26"
+        "servicedDate" : "2024-03-04"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -4691,7 +4691,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset0]=[
           } ]
         },
         "sequence" : 1,
-        "servicedDate" : "2021-09-26"
+        "servicedDate" : "2024-03-04"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -5958,7 +5958,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset1]=[
           } ]
         },
         "sequence" : 1,
-        "servicedDate" : "2021-09-26"
+        "servicedDate" : "2024-03-04"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -7225,7 +7225,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
           } ]
         },
         "sequence" : 1,
-        "servicedDate" : "2021-09-26"
+        "servicedDate" : "2024-03-04"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -7968,7 +7968,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 1
+        "sequence" : 1,
+        "servicedDate" : "2021-12-21"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -8565,7 +8566,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 1
+        "sequence" : 1,
+        "servicedDate" : "2024-03-04"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -9136,7 +9138,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 1
+        "sequence" : 1,
+        "servicedDate" : "2021-12-21"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -10230,7 +10233,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
           } ]
         },
         "sequence" : 1,
-        "servicedDate" : "2021-09-26"
+        "servicedDate" : "2024-03-04"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -10973,7 +10976,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 1
+        "sequence" : 1,
+        "servicedDate" : "2021-12-21"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -11570,7 +11574,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 1
+        "sequence" : 1,
+        "servicedDate" : "2024-03-04"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -12141,7 +12146,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 1
+        "sequence" : 1,
+        "servicedDate" : "2021-12-21"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -13235,7 +13241,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
           } ]
         },
         "sequence" : 1,
-        "servicedDate" : "2021-09-26"
+        "servicedDate" : "2024-03-04"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -13978,7 +13984,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 1
+        "sequence" : 1,
+        "servicedDate" : "2021-12-21"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -14575,7 +14582,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 1
+        "sequence" : 1,
+        "servicedDate" : "2024-03-04"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -15146,7 +15154,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 1
+        "sequence" : 1,
+        "servicedDate" : "2021-12-21"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -16240,7 +16249,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WITH_SEARCH_WithSy
           } ]
         },
         "sequence" : 1,
-        "servicedDate" : "2021-09-26"
+        "servicedDate" : "2024-03-04"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -16983,7 +16992,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WITH_SEARCH_WithSy
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 1
+        "sequence" : 1,
+        "servicedDate" : "2021-12-21"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -18103,7 +18113,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WithSystemTag_Adju
           } ]
         },
         "sequence" : 1,
-        "servicedDate" : "2021-09-26"
+        "servicedDate" : "2024-03-04"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -18846,7 +18856,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WithSystemTag_Adju
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 1
+        "sequence" : 1,
+        "servicedDate" : "2021-12-21"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -19966,7 +19977,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[POST_WithSystemTag_Adj
           } ]
         },
         "sequence" : 1,
-        "servicedDate" : "2021-09-26"
+        "servicedDate" : "2024-03-04"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -20709,7 +20720,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[POST_WithSystemTag_Adj
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 1
+        "sequence" : 1,
+        "servicedDate" : "2021-12-21"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -21323,7 +21335,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[GET_WITH_SEARCH_WithTag_Em
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 1
+        "sequence" : 1,
+        "servicedDate" : "2024-03-04"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -21894,7 +21907,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[GET_WITH_SEARCH_WithTag_Em
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 1
+        "sequence" : 1,
+        "servicedDate" : "2021-12-21"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -22482,7 +22496,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[GET_WithTag_EmptyResult]=[
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 1
+        "sequence" : 1,
+        "servicedDate" : "2024-03-04"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -23053,7 +23068,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[GET_WithTag_EmptyResult]=[
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 1
+        "sequence" : 1,
+        "servicedDate" : "2021-12-21"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -23641,7 +23657,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[POST_WithTag_EmptyResult]=
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 1
+        "sequence" : 1,
+        "servicedDate" : "2024-03-04"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -24212,7 +24229,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[POST_WithTag_EmptyResult]=
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 1
+        "sequence" : 1,
+        "servicedDate" : "2021-12-21"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -25306,7 +25324,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WITH_SEARCH_WithTag_Adjudic
           } ]
         },
         "sequence" : 1,
-        "servicedDate" : "2021-09-26"
+        "servicedDate" : "2024-03-04"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -26049,7 +26067,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WITH_SEARCH_WithTag_Adjudic
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 1
+        "sequence" : 1,
+        "servicedDate" : "2021-12-21"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -27169,7 +27188,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WithTag_Adjudicated]=[
           } ]
         },
         "sequence" : 1,
-        "servicedDate" : "2021-09-26"
+        "servicedDate" : "2024-03-04"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -27912,7 +27931,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WithTag_Adjudicated]=[
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 1
+        "sequence" : 1,
+        "servicedDate" : "2021-12-21"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -29032,7 +29052,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[POST_WithTag_Adjudicated]=[
           } ]
         },
         "sequence" : 1,
-        "servicedDate" : "2021-09-26"
+        "servicedDate" : "2024-03-04"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -29775,7 +29795,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[POST_WithTag_Adjudicated]=[
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 1
+        "sequence" : 1,
+        "servicedDate" : "2021-12-21"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",

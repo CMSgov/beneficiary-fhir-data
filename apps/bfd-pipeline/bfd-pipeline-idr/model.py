@@ -613,6 +613,8 @@ class IdrContractPbpNumber(IdrBaseModel):
     cntrct_drug_plan_ind_cd: str
     cntrct_pbp_type_cd: str
     cntrct_pbp_name: Annotated[str, BeforeValidator(transform_null_string)]
+    cntrct_num: Annotated[str, BeforeValidator(transform_default_string)]
+    cntrct_pbp_num: Annotated[str, BeforeValidator(transform_default_string)]
 
     @staticmethod
     def table() -> str:

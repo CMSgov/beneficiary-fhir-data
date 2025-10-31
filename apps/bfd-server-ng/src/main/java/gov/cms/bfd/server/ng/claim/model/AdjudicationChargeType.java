@@ -99,13 +99,41 @@ enum AdjudicationChargeType {
       "submitted",
       "Submitted Amount",
       "CLM_SBMT_CHRG_AMT",
-      "Total Charge Amount");
+      "Total Charge Amount"),
+  GAP_DISCOUNT_AMOUNT(
+      SystemUrls.HL7_ADJUDICATION, "CLM_RPTD_MFTR_DSCNT_AMT", "Gap Discount Amount"),
+  VACCINATION_ADMIN_FEE(
+      SystemUrls.HL7_ADJUDICATION, "CLM_LINE_VCCN_ADMIN_FEE_AMT", "Vaccination Administration Fee"),
+  OTHER_AMOUNT(
+      SystemUrls.HL7_ADJUDICATION,
+      "CLM_LINE_TROOP_TOT_AMT",
+      "Other True Out Of Pocket Paid Amount"),
+  DISPENSING_FEE(SystemUrls.HL7_ADJUDICATION, "CLM_LINE_SRVC_CST_AMT", "Dispensing Fee"),
+  SALES_TAX_AMOUNT(SystemUrls.HL7_ADJUDICATION, "CLM_LINE_SLS_TAX_AMT", "Sales Tax Amount"),
+  PATIENT_LIABILITY_REDUCT_AMOUNT(
+      SystemUrls.HL7_ADJUDICATION, "CLM_LINE_PLRO_AMT", "Sales Tax Amount"),
+  LOW_INCOME_COST_SHARE_SUB_AMOUNT(
+      SystemUrls.HL7_ADJUDICATION, "CLM_LINE_LIS_AMT", "Low Income Cost Sharing Subsidy Amount"),
+  INGREDIENT_COST_AMOUNT(
+      SystemUrls.HL7_ADJUDICATION, "CLM_LINE_INGRDNT_CST_AMT", "Ingredient Cost Amount"),
+  GROSS_DRUG_COST_BLW_THRESHOLD_AMOUNT(
+      SystemUrls.HL7_ADJUDICATION,
+      "CLM_LINE_GRS_BLW_THRSHLD_AMT",
+      "Gross Drug Cost Below Out Of Pocket Threshold"),
+  GROSS_DRUG_COST_ABOVE_THRESHOLD_AMOUNT(
+      SystemUrls.HL7_ADJUDICATION,
+      "CLM_LINE_GRS_ABOVE_THRSHLD_AMT",
+      "Gross Drug Cost Above Out Of Pocket Threshold");
 
   private final String coding1System;
   private final String coding1Code;
   private final String coding1Display;
   private final String coding2Code;
   private final String coding2Display;
+
+  AdjudicationChargeType(String coding1System, String coding1Code, String coding1Display) {
+    this(coding1System, coding1Code, coding1Display, "", "");
+  }
 
   ExplanationOfBenefit.AdjudicationComponent toFhirAdjudication(double value) {
     return new ExplanationOfBenefit.AdjudicationComponent()
@@ -121,6 +149,18 @@ enum AdjudicationChargeType {
                         .setSystem(SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION)
                         .setCode(coding2Code)
                         .setDisplay(coding2Display)))
+        .setAmount(USD.toFhir(value));
+  }
+
+  ExplanationOfBenefit.AdjudicationComponent toFhirAdjudicationRx(double value) {
+    return new ExplanationOfBenefit.AdjudicationComponent()
+        .setCategory(
+            new CodeableConcept()
+                .addCoding(
+                    new Coding()
+                        .setSystem(SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION)
+                        .setCode(coding1Code)
+                        .setDisplay(coding1Display)))
         .setAmount(USD.toFhir(value));
   }
 
