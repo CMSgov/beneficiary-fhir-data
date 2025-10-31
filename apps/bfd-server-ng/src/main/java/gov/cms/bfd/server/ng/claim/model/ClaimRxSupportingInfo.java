@@ -15,8 +15,6 @@ class ClaimRxSupportingInfo {
 
   @Embedded private ClaimLineRxRefillNumber refillsAuthorized;
 
-  @Embedded private ClaimLineRxNumber claimLineRxNum;
-
   @Column(name = "clm_phrmcy_srvc_type_cd")
   private Optional<PharmacySrvcTypeCode> pharmacyServiceTypeCode;
 
@@ -52,7 +50,6 @@ class ClaimRxSupportingInfo {
       SupportingInfoFactory supportingInfoFactory) {
     return Stream.of(
             Optional.of(refillsAuthorized.toFhir(supportingInfoFactory)),
-            Optional.of(claimLineRxNum.toFhir(supportingInfoFactory)),
             pharmacyServiceTypeCode.map(c -> c.toFhir(supportingInfoFactory)),
             claimPrescriptionOriginCode.map(c -> c.toFhir(supportingInfoFactory)),
             brandGenericCode.map(s -> s.toFhir(supportingInfoFactory)),
