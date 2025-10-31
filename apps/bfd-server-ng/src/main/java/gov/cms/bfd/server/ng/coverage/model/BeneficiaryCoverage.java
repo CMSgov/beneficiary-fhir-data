@@ -67,10 +67,10 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
     federal y es sancionada por la ley.\
     """;
 
-  /** Patient reference */
+  /** Patient reference. */
   public static final String PATIENT_REF = "Patient/";
 
-  /** Organization reference */
+  /** Organization reference. */
   public static final String ORGANIZATION_REF = "Organization/";
 
   private Optional<BeneficiaryEntitlementReason> getEntitlementReason() {
