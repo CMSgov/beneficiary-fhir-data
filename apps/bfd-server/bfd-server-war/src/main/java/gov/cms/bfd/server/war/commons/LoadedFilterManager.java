@@ -298,6 +298,8 @@ public class LoadedFilterManager {
                         loadedTuples.stream()
                             .noneMatch(t -> t.getLoadedFileId() == f.getLoadedFileId())),
             buildFilters(loadedTuples, fetchById))
+        // Sort each filter in descending order to optimize search time when determining if a result
+        // would be empty
         .sorted((a, b) -> b.getFirstUpdated().compareTo(a.getFirstUpdated()));
   }
 
