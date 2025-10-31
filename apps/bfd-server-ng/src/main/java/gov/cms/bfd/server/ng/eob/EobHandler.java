@@ -24,6 +24,8 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
@@ -33,6 +35,8 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class EobHandler {
+  private static final Logger LOGGER = LoggerFactory.getLogger(EobHandler.class);
+
   private final BeneficiaryRepository beneficiaryRepository;
   private final ClaimRepository claimRepository;
 
@@ -139,34 +143,60 @@ public class EobHandler {
   // Returns true if the given claim contains any procedure that matches a SAMHSA
   // security label code from the dictionary.
   private boolean claimHasSamhsa(Claim claim) {
+    var claimUniqueId = claim.getClaimUniqueId();
     var claimThroughDate = claim.getBillablePeriod().getClaimThroughDate();
-    var drgSamhsa = drgIsSamhsa(claim, claimThroughDate);
+    var drgSamhsa = drgIsSamhsa(claim, claimThroughDate, claimUniqueId);
     var claimItemSamhsa =
-        claim.getClaimItems().stream().anyMatch(e -> claimItemIsSamhsa(e, claimThroughDate));
+        claim.getClaimItems().stream()
+            .anyMatch(e -> claimItemIsSamhsa(e, claimThroughDate, claimUniqueId));
 
     return drgSamhsa || claimItemSamhsa;
   }
 
-  private boolean claimItemIsSamhsa(ClaimItem claimItem, LocalDate claimThroughDate) {
-    return procedureIsSamhsa(claimItem.getClaimProcedure(), claimThroughDate)
-        || hcpcsIsSamhsa(claimItem.getClaimLine(), claimThroughDate);
+  private boolean claimItemIsSamhsa(
+      ClaimItem claimItem, LocalDate claimThroughDate, long claimUniqueId) {
+    return procedureIsSamhsa(claimItem.getClaimProcedure(), claimThroughDate, claimUniqueId)
+        || hcpcsIsSamhsa(claimItem.getClaimLine(), claimThroughDate, claimUniqueId);
   }
 
-  private boolean drgIsSamhsa(Claim claim, LocalDate claimDate) {
+  private boolean drgIsSamhsa(Claim claim, LocalDate claimDate, long claimUniqueId) {
     var entries = SECURITY_LABELS.get(SystemUrls.CMS_MS_DRG);
     var drg = claim.getDrgCode().map(Object::toString).orElse("");
-    return entries.stream().anyMatch(e -> isCodeSamhsa(drg, claimDate, e));
+    var hasSamhsa = entries.stream().anyMatch(e -> isCodeSamhsa(drg, claimDate, e));
+    if (hasSamhsa) {
+      LOGGER
+          .atInfo()
+          .setMessage("SAMHSA claim filtered: type=DRG")
+          .addKeyValue("claimId", claimUniqueId)
+          .addKeyValue("matchedCode", drg)
+          .addKeyValue("system", SystemUrls.CMS_MS_DRG)
+          .log();
+    }
+    return hasSamhsa;
   }
 
-  private boolean hcpcsIsSamhsa(ClaimLine claimLine, LocalDate claimDate) {
+  private boolean hcpcsIsSamhsa(ClaimLine claimLine, LocalDate claimDate, long claimUniqueId) {
     var hcpcs = claimLine.getHcpcsCode().getHcpcsCode().orElse("");
-    return Stream.of(SystemUrls.AMA_CPT, SystemUrls.CMS_HCPCS)
-        .flatMap(s -> SECURITY_LABELS.get(s).stream())
-        .anyMatch(c -> isCodeSamhsa(hcpcs, claimDate, c));
+    for (var system : List.of(SystemUrls.AMA_CPT, SystemUrls.CMS_HCPCS)) {
+      var entries = SECURITY_LABELS.get(system);
+      var hasSamhsa = entries.stream().anyMatch(c -> isCodeSamhsa(hcpcs, claimDate, c));
+      if (hasSamhsa) {
+        LOGGER
+            .atInfo()
+            .setMessage("SAMHSA claim filtered: type=HCPCS")
+            .addKeyValue("claimId", claimUniqueId)
+            .addKeyValue("matchedCode", hcpcs)
+            .addKeyValue("system", system)
+            .log();
+        return true;
+      }
+    }
+    return false;
   }
 
   // Checks ICDs.
-  private boolean procedureIsSamhsa(ClaimProcedure procedure, LocalDate claimDate) {
+  private boolean procedureIsSamhsa(
+      ClaimProcedure procedure, LocalDate claimDate, long claimUniqueId) {
     var diagnosisCode = procedure.getDiagnosisCode().orElse("");
     var procedureCode = procedure.getProcedureCode().orElse("");
     // If the ICD indicator isn't something valid, it's probably a PAC claim with a mistake in the
@@ -181,11 +211,32 @@ public class EobHandler {
     var procedureHasSamhsa =
         procedureEntries.stream()
             .anyMatch(pEntries -> isCodeSamhsa(procedureCode, claimDate, pEntries));
+    if (procedureHasSamhsa) {
+      LOGGER
+          .atInfo()
+          .setMessage("SAMHSA claim filtered: type=Procedure")
+          .addKeyValue("claimId", claimUniqueId)
+          .addKeyValue("matchedCode", procedureCode)
+          .addKeyValue("system", icdIndicator.getProcedureSystem())
+          .log();
+      return true;
+    }
+
     var diagnosisHasSamhsa =
         diagnosisEntries.stream()
             .anyMatch(dEntry -> isCodeSamhsa(diagnosisCode, claimDate, dEntry));
+    if (diagnosisHasSamhsa) {
+      LOGGER
+          .atInfo()
+          .setMessage("SAMHSA claim filtered: type=Diagnosis")
+          .addKeyValue("claimId", claimUniqueId)
+          .addKeyValue("matchedCode", diagnosisCode)
+          .addKeyValue("system", icdIndicator.getDiagnosisSystem())
+          .log();
+      return true;
+    }
 
-    return procedureHasSamhsa || diagnosisHasSamhsa;
+    return false;
   }
 
   private boolean isClaimDateWithinBounds(LocalDate claimDate, SecurityLabel entry) {
