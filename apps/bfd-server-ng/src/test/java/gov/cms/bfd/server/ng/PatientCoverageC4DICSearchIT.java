@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import ca.uhn.fhir.rest.api.SearchStyleEnum;
-import gov.cms.bfd.server.ng.beneficiary.BeneficiaryRepository;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coverage;
@@ -19,7 +18,6 @@ import org.hl7.fhir.r4.model.Resource;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public class PatientCoverageC4DICSearchIT extends IntegrationTestBase {
   private Bundle searchBundle(String beneSK) {
@@ -31,8 +29,6 @@ public class PatientCoverageC4DICSearchIT extends IntegrationTestBase {
         .returnResourceType(Bundle.class)
         .execute();
   }
-
-  @Autowired private BeneficiaryRepository beneficiaryRepository;
 
   @Test
   void patientCoverageSearchByIdPartA() {
@@ -126,6 +122,7 @@ public class PatientCoverageC4DICSearchIT extends IntegrationTestBase {
     assertEquals(1, patientCount);
     assertEquals(1, orgCount);
     assertEquals(3, coverageCount);
+    // Checking IDs are present because snapshot is suppressing IDs.
     assertAllResourcesHaveValidProfilesAndIds(response);
     expectFhir().toMatchSnapshot(response);
   }
@@ -137,9 +134,9 @@ public class PatientCoverageC4DICSearchIT extends IntegrationTestBase {
 
       String expectedProfile =
           switch (resource) {
-            case Patient p -> SystemUrls.PROFILE_C4DIC_PATIENT;
-            case Organization o -> SystemUrls.PROFILE_C4DIC_ORGANIZATION;
-            case Coverage c -> SystemUrls.PROFILE_C4DIC_COVERAGE;
+            case Patient _ -> SystemUrls.PROFILE_C4DIC_PATIENT;
+            case Organization _ -> SystemUrls.PROFILE_C4DIC_ORGANIZATION;
+            case Coverage _ -> SystemUrls.PROFILE_C4DIC_COVERAGE;
             default -> fail("Unexpected resource type: " + resource.getClass().getSimpleName());
           };
 
@@ -157,7 +154,7 @@ public class PatientCoverageC4DICSearchIT extends IntegrationTestBase {
 
   @ParameterizedTest
   @EnumSource(SearchStyleEnum.class)
-  void patientSearchByIdEmpty(SearchStyleEnum searchStyle) {
+  void patientSearchByIdEmpty() {
     var patientBundle = searchBundle("999");
     assertEquals(0, patientBundle.getEntry().size());
   }

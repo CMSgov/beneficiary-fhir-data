@@ -78,7 +78,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
-import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -1188,7 +1187,7 @@ public class OpenApiInterceptor {
     parameter.setDescription("The resource version ID");
     parameter.setExample("1");
     parameter.setRequired(true);
-    parameter.setSchema(new Schema().type("string").minimum(new BigDecimal(1)));
+    parameter.setSchema(new Schema().type("string"));
     parameter.setStyle(Parameter.StyleEnum.SIMPLE);
     theOperation.addParametersItem(parameter);
   }
@@ -1261,7 +1260,7 @@ public class OpenApiInterceptor {
     parameter.setDescription("The resource ID");
     parameter.setExample("123");
     parameter.setRequired(true);
-    parameter.setSchema(new Schema().type("string").minimum(new BigDecimal(1)));
+    parameter.setSchema(new Schema().type("string"));
     parameter.setStyle(Parameter.StyleEnum.SIMPLE);
     theOperation.addParametersItem(parameter);
   }
