@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import java.time.ZonedDateTime;
 import java.util.Optional;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
@@ -23,6 +24,9 @@ public class ClaimFiss {
 
   @Column(name = "clm_crnt_stus_cd")
   private Optional<ClaimCurrentStatusCode> claimCurrentStatusCode;
+
+  @Column(name = "bfd_updated_ts", nullable = false)
+  private ZonedDateTime bfdUpdatedTimestamp;
 
   Optional<ExplanationOfBenefit.RemittanceOutcome> toFhirOutcome(ClaimTypeCode claimTypecode) {
     if (claimTypecode.isPacStage2()) {

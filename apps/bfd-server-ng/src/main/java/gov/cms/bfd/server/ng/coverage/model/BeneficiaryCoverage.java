@@ -11,9 +11,12 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import java.time.ZonedDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.SortedSet;
+import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.Reference;
@@ -64,7 +67,8 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
   public Coverage toFhir(CoverageCompositeId coverageCompositeId) {
     var coverage = new Coverage();
     coverage.setId(coverageCompositeId.fullId());
-    coverage.setMeta(meta.toFhirCoverage());
+    var latestTs = getMostRecentUpdated();
+    coverage.setMeta(meta.toFhirCoverage(latestTs));
 
     coverage.setBeneficiary(new Reference("Patient/" + beneSk));
     coverage.setRelationship(RelationshipFactory.createSelfSubscriberRelationship());
@@ -156,5 +160,24 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
     dualEligibility.toFhirExtensions().forEach(coverage::addExtension);
 
     return coverage;
+  }
+
+  private ZonedDateTime getMostRecentUpdated() {
+    // Collect timestamps from beneficiary and all related child entities
+    var allTimestamps =
+        Stream.of(
+            Stream.of(meta.getUpdatedTimestamp()),
+            getStatus().map(BeneficiaryStatus::getBfdUpdatedTimestamp).stream(),
+            getEntitlementReason()
+                .map(BeneficiaryEntitlementReason::getBfdUpdatedTimestamp)
+                .stream(),
+            getDualEligibility().map(BeneficiaryDualEligibility::getBfdUpdatedTimestamp).stream(),
+            beneficiaryEntitlements.stream().map(BeneficiaryEntitlement::getBfdUpdatedTimestamp),
+            beneficiaryThirdParties.stream().map(BeneficiaryThirdParty::getBfdUpdatedTimestamp));
+
+    return allTimestamps
+        .flatMap(s -> s)
+        .max(Comparator.naturalOrder())
+        .orElse(meta.getUpdatedTimestamp());
   }
 }
