@@ -215,7 +215,7 @@ public class LoadedFilterManager {
 
         List<LoadedTuple> loadedTuples = fetchLoadedTuples(this.lastBatchCreated);
         Stream<LoadedFileFilter> updatedFilters =
-            buildUpdatedFilters(this.filters, loadedTuples, this::fetchLoadedBatches);
+            buildMergedFilters(this.filters, loadedTuples, this::fetchLoadedBatches);
 
         // If batches been trimmed, then remove filters which are no longer present
         final Instant currentFirstBatchUpdate =
@@ -279,7 +279,7 @@ public class LoadedFilterManager {
    */
 
   /**
-   * Create an updated {@link LoadedFileFilter} {@link Stream} from existing filters and newly
+   * Create an updated, merged {@link LoadedFileFilter} {@link Stream} from existing filters and newly
    * loaded files and batches.
    *
    * @param existingFilters that should be included
@@ -287,7 +287,7 @@ public class LoadedFilterManager {
    * @param fetchById to use retrieve list of LoadedBatch by id
    * @return a new filter {@link Stream}
    */
-  public static Stream<LoadedFileFilter> buildUpdatedFilters(
+  public static Stream<LoadedFileFilter> buildMergedFilters(
       List<LoadedFileFilter> existingFilters,
       List<LoadedTuple> loadedTuples,
       Function<Long, List<LoadedBatch>> fetchById) {
@@ -297,7 +297,7 @@ public class LoadedFilterManager {
                     f ->
                         loadedTuples.stream()
                             .noneMatch(t -> t.getLoadedFileId() == f.getLoadedFileId())),
-            buildFilters(loadedTuples, fetchById))
+            buildNewFilters(loadedTuples, fetchById))
         // Sort each filter in descending order to optimize search time when determining if a result
         // would be empty
         .sorted((a, b) -> b.getFirstUpdated().compareTo(a.getFirstUpdated()));
@@ -310,7 +310,7 @@ public class LoadedFilterManager {
    * @param fetchById to use retrieve list of LoadedBatch by id
    * @return a new filter {@link Stream}
    */
-  public static Stream<LoadedFileFilter> buildFilters(
+  public static Stream<LoadedFileFilter> buildNewFilters(
       List<LoadedTuple> loadedTuples, Function<Long, List<LoadedBatch>> fetchById) {
     return loadedTuples.stream()
         .map(t -> buildFilter(t.getLoadedFileId(), t.getFirstUpdated(), fetchById));
