@@ -279,8 +279,8 @@ public class LoadedFilterManager {
    */
 
   /**
-   * Create an updated, merged {@link LoadedFileFilter} {@link Stream} from existing filters and newly
-   * loaded files and batches.
+   * Create an updated, merged {@link LoadedFileFilter} {@link Stream} from existing filters and
+   * newly loaded files and batches.
    *
    * @param existingFilters that should be included
    * @param loadedTuples that come from new LoadedBatch
