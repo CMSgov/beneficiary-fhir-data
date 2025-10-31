@@ -14,16 +14,20 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.bfd.server.ng.eob.EobHandler;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.util.DateUtil;
+import gov.cms.bfd.server.ng.util.IdrConstants;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -293,6 +297,37 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
     // Bundle from endpoint _should_ contain sensitive codes because the "cert" provided is allowed
     // to get SAMHSA data
     assertTrue(anyClaimsContainSamhsaCode(getEobFromBundle(bundle), true));
+  }
+
+  @Test
+  void samhsaClaimsIncludeSecurityTagsWhenAllowed() {
+    var beneSk = BENE_SK;
+    var bundle = searchBundle(beneSk, SamhsaCertType.SAMHSA_ALLOWED_CERT).execute();
+
+    var samhsaEob =
+        getEobFromBundle(bundle).stream()
+            .filter(
+                eob ->
+                    eob.getIdPart()
+                        .equals(String.valueOf(CLAIM_UNIQUE_ID_WITH_MULTIPLE_SAMHSA_CODES)))
+            .findFirst();
+
+    assertTrue(samhsaEob.isPresent(), "Expected SAMHSA EOB found in bundle.");
+
+    Predicate<Coding> isSamhsaSecurityTag =
+        tag ->
+            SystemUrls.SAMHSA_ACT_CODE_SYSTEM_URL.equals(tag.getSystem())
+                && IdrConstants.SAMHSA_SECURITY_CODE.equals(tag.getCode());
+
+    samhsaEob.get().getMeta().getSecurity().stream()
+        .filter(isSamhsaSecurityTag)
+        .findFirst()
+        .ifPresentOrElse(
+            tag -> assertEquals(IdrConstants.SAMHSA_SECURITY_DISPLAY, tag.getDisplay()),
+            () ->
+                Assertions.fail(
+                    "Expected SAMHSA security tag not found in EOB meta or had incorrect code/system."));
+    expectFhir().scenario(String.valueOf(beneSk)).toMatchSnapshot(bundle);
   }
 
   // The following group of tests is used to ensure the validity of the test data.
