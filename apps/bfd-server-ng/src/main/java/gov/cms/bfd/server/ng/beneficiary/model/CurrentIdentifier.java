@@ -7,8 +7,10 @@ import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Reference;
 
 /**
  * Represents the beneficiary's primary identity information (specifically MBI) as relevant for
@@ -29,10 +31,11 @@ public class CurrentIdentifier {
    * the MBI. This identifier does not include a period, as it represents the beneficiary's primary
    * MBI in the context of the Coverage resource.
    *
+   * @param assigner optional reference to the organization assigning this identifier; may be null
    * @return An {@link Optional} containing the FHIR {@link org.hl7.fhir.r4.model.Identifier} if an
    *     MBI is present, otherwise {@link Optional#empty()}.
    */
-  public Optional<org.hl7.fhir.r4.model.Identifier> toFhir() {
+  public Optional<org.hl7.fhir.r4.model.Identifier> toFhir(@NonNull String assigner) {
     if (mbi.isEmpty()) {
       return Optional.empty();
     }
@@ -45,6 +48,10 @@ public class CurrentIdentifier {
                 ));
     mbiIdentifier.setSystem(SystemUrls.CMS_MBI);
     mbiIdentifier.setValue(mbi);
+    if (!assigner.isEmpty()) {
+      mbiIdentifier.setAssigner(new Reference("Organization/" + assigner));
+    }
+
     // No period is set here, as this represents the general MBI for the beneficiary
     // in the context of this Coverage.
 

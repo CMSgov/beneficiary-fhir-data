@@ -16,7 +16,15 @@ public class JsonSnapshotSerializer extends ToStringSnapshotSerializer {
   private static final Pattern UUID_REGEX =
       Pattern.compile(
           "\"id\"\\s*:\\s*\"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\"");
+  private static final Pattern FULLURL_UUID_REGEX =
+      Pattern.compile(
+          "\"fullUrl\"\\s*:\\s*\"urn:uuid:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\"",
+          Pattern.MULTILINE | Pattern.DOTALL);
   private static final Pattern LAST_UPDATED_REGEX = Pattern.compile("\"lastUpdated\":\\s*\".*\"");
+  private static final Pattern REFERENCE_UUID_REGEX =
+      Pattern.compile(
+          "\"reference\"\\s*:\\s*\"([A-Za-z]+)/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\"",
+          Pattern.MULTILINE | Pattern.DOTALL);
 
   @Override
   public String getOutputFormat() {
@@ -49,7 +57,10 @@ public class JsonSnapshotSerializer extends ToStringSnapshotSerializer {
     json = LOCALHOST_REGEX.matcher(json).replaceAll("http://localhost");
     // Generated UUIDs are random
     json = UUID_REGEX.matcher(json).replaceAll("\"id\" : \"{uuid}\"");
+    json = FULLURL_UUID_REGEX.matcher(json).replaceAll("\"fullUrl\" : \"{uuid}\"");
+    json = REFERENCE_UUID_REGEX.matcher(json).replaceAll("\"reference\": \"$1/{uuid}\"");
     // lastUpdated gets reset whenever we recreate the test data
+
     json =
         LAST_UPDATED_REGEX
             .matcher(json)

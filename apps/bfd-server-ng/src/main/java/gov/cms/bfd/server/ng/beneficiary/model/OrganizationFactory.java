@@ -15,15 +15,17 @@ public final class OrganizationFactory {
   /**
    * Creates a FHIR {@link Organization} resource representing the CMS.
    *
+   * @param id the resource ID to assign to the Organization
+   * @param profile the FHIR profile URL to set in the Organization's Meta
    * @return A fully populated FHIR {@link Organization} resource for CMS.
    */
-  public static Organization createCmsOrganization() {
+  public static Organization createCmsOrganization(String id, String profile) {
     Organization cmsOrg = new Organization();
-    cmsOrg.setId("cms-org");
+    cmsOrg.setId(id);
 
     // Set the Meta information, including the C4BB Organization profile.
     Meta orgMeta = new Meta();
-    orgMeta.addProfile(SystemUrls.PROFILE_C4BB_ORGANIZATION_2_1_0);
+    orgMeta.addProfile(profile);
     cmsOrg.setMeta(orgMeta);
     cmsOrg.setActive(true);
     cmsOrg.setName("Centers for Medicare and Medicaid Services");
@@ -51,5 +53,15 @@ public final class OrganizationFactory {
     cmsOrg.addContact(contact);
 
     return cmsOrg;
+  }
+
+  /**
+   * Creates a FHIR {@link Organization} resource representing CMS with default ID and default
+   * profile.
+   *
+   * @return a fully populated FHIR {@link Organization} resource for CMS
+   */
+  public static Organization createCmsOrganization() {
+    return createCmsOrganization("cms-org", SystemUrls.PROFILE_C4BB_ORGANIZATION_2_1_0);
   }
 }

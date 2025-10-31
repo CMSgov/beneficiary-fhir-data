@@ -34,12 +34,27 @@ public class SystemUrls {
       "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage|2.1.0";
 
   /**
+   * <a href="http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Patient">CARIN Digital
+   * Insurance Card 1.1.0.</a>
+   */
+  public static final String PROFILE_C4DIC_PATIENT =
+      "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Patient";
+
+  /**
    * URL for the US Core Coverage Profile, version 6.1.0. <a
    * href="http://hl7.org/fhir/us/core/STU6.1/StructureDefinition-us-core-coverage.html">US Core
    * Coverage 6.1.0</a>
    */
   public static final String PROFILE_US_CORE_COVERAGE_6_1_0 =
       "http://hl7.org/fhir/us/core/StructureDefinition/us-core-coverage|6.1.0";
+
+  /**
+   * URL for the CARIN Digital Insurance Card Coverage Profile, version 1.1.0. <a
+   * href="http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Coverage">CARIN Digital
+   * Insurance Card Coverage 1.1.0</a>
+   */
+  public static final String PROFILE_C4DIC_COVERAGE =
+      "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Coverage";
 
   /**
    * URL for the CARIN Blue Button (C4BB) Organization Profile, version 2.1.0. Used for the
@@ -49,6 +64,15 @@ public class SystemUrls {
    */
   public static final String PROFILE_C4BB_ORGANIZATION_2_1_0 =
       "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0";
+
+  /**
+   * URL for the CARIN Digital Insurance Card (C4DIC) Organization Profile, version 1.1.0. Used for
+   * the referenced CMS Organization. <a
+   * href="http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Organization">C4DIC
+   * Organization 1.1.0</a>
+   */
+  public static final String PROFILE_C4DIC_ORGANIZATION =
+      "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Organization";
 
   /**
    * System URL for the HL7 Subscriber Relationship code system. Used for {@code
