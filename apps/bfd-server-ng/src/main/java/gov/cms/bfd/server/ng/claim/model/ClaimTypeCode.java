@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import lombok.AllArgsConstructor;
@@ -392,18 +393,41 @@ public enum ClaimTypeCode {
     };
   }
 
+  private static final Map<ClaimSubtype, List<ClaimTypeCode>> CLAIM_TYPE_CODE_MAP;
+
+  static {
+    CLAIM_TYPE_CODE_MAP =
+        Map.of(
+            ClaimSubtype.CARRIER,
+            Collections.unmodifiableList(mapCarrierToClaimTypeCodes()),
+            ClaimSubtype.DME,
+            Collections.unmodifiableList(mapDmeToClaimTypeCodes()),
+            ClaimSubtype.HHA,
+            Collections.unmodifiableList(mapHhaToClaimTypeCodes()),
+            ClaimSubtype.HOSPICE,
+            Collections.unmodifiableList(mapHospiceToClaimTypeCodes()),
+            ClaimSubtype.INPATIENT,
+            Collections.unmodifiableList(mapInpatientToClaimTypeCodes()),
+            ClaimSubtype.OUTPATIENT,
+            Collections.unmodifiableList(mapOutpatientToClaimTypeCodes()),
+            ClaimSubtype.PDE,
+            Collections.unmodifiableList(mapPDEToClaimTypeCodes()),
+            ClaimSubtype.SNF,
+            Collections.unmodifiableList(mapSnfToClaimTypeCodes()));
+  }
+
   /**
    * Gets claim type codes mapped to type params.
    *
    * @param tokens The token from the type parameter.
    * @return A list of matching ClaimTypeCode
    */
-  public static List<ClaimTypeCode> getClaimTypeCodes(List<TokenParam> tokens) {
+  public static List<ClaimTypeCode> getClaimTypeCodesByType(List<TokenParam> tokens) {
 
     if (tokens == null || tokens.isEmpty()) {
       return Collections.emptyList();
     }
-    Set<ClaimTypeCode> claimTypeCodes = new HashSet<>();
+    Set<ClaimTypeCode> collectedClaimTypeCodes = new HashSet<>();
 
     for (TokenParam param : tokens) {
       var type = param.getValue();
@@ -413,38 +437,19 @@ public enum ClaimTypeCode {
         return Collections.emptyList();
       }
 
-      ClaimSubtype claimSubtype = ClaimSubtype.fromCode(normalizedType);
+      ClaimSubtype claimType = ClaimSubtype.fromCode(normalizedType);
 
-      switch (claimSubtype) {
-        case ClaimSubtype.CARRIER:
-          claimTypeCodes.addAll(mapCarrierToClaimTypeCodes());
-          break;
-        case ClaimSubtype.DME:
-          claimTypeCodes.addAll(mapDmeToClaimTypeCodes());
-          break;
-        case ClaimSubtype.HHA:
-          claimTypeCodes.addAll(mapHhaToClaimTypeCodes());
-          break;
-        case ClaimSubtype.HOSPICE:
-          claimTypeCodes.addAll(mapHospiceToClaimTypeCodes());
-          break;
-        case ClaimSubtype.INPATIENT:
-          claimTypeCodes.addAll(mapInpatientToClaimTypeCodes());
-          break;
-        case ClaimSubtype.OUTPATIENT:
-          claimTypeCodes.addAll(mapOutpatientToClaimTypeCodes());
-          break;
-        case ClaimSubtype.PDE:
-          claimTypeCodes.addAll(mapPDEToClaimTypeCodes());
-          break;
-        case ClaimSubtype.SNF:
-          claimTypeCodes.addAll(mapSnfToClaimTypeCodes());
-          break;
-        default:
-          throw new IllegalArgumentException("Unsupported claim type: " + type);
+      List<ClaimTypeCode> codesForThisType = CLAIM_TYPE_CODE_MAP.get(claimType);
+
+      if (codesForThisType != null) {
+        collectedClaimTypeCodes.addAll(codesForThisType);
+
+      } else {
+        throw new IllegalStateException("Not a valid claim type code");
       }
+      return new ArrayList<>(collectedClaimTypeCodes);
     }
-    return new ArrayList<>(claimTypeCodes);
+    return Collections.emptyList();
   }
 
   private static List<ClaimTypeCode> mapCarrierToClaimTypeCodes() {

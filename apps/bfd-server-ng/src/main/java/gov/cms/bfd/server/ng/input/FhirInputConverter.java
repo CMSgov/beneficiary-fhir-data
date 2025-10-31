@@ -187,7 +187,8 @@ public class FhirInputConverter {
    * @param typeParam The type from the type parameter.
    * @return A list of matching ClaimTypeCode.
    */
-  public static List<ClaimTypeCode> getClaimTypeCodes(@Nullable TokenAndListParam typeParam) {
+  public static List<ClaimTypeCode> getClaimTypeCodesForType(
+      @Nullable TokenAndListParam typeParam) {
 
     List<ClaimTypeCode> claimTypeCodes = new ArrayList<>();
 
@@ -197,7 +198,7 @@ public class FhirInputConverter {
     var typeParams = typeParam.getValuesAsQueryTokens();
 
     for (TokenOrListParam type : typeParams) {
-      claimTypeCodes = ClaimTypeCode.getClaimTypeCodes(type.getValuesAsQueryTokens());
+      claimTypeCodes = ClaimTypeCode.getClaimTypeCodesByType(type.getValuesAsQueryTokens());
     }
 
     return claimTypeCodes;

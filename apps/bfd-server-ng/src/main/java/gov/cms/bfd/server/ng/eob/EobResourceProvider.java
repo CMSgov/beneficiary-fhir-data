@@ -81,7 +81,7 @@ public class EobResourceProvider implements IResourceProvider {
       final HttpServletRequest request) {
 
     var sourceIds = FhirInputConverter.getSourceIdsForTagCode(tag);
-    var claimTypeCodes = FhirInputConverter.getClaimTypeCodes(type);
+    var claimTypeCodes = FhirInputConverter.getClaimTypeCodesForType(type);
 
     return eobHandler.searchByBene(
         FhirInputConverter.toLong(patient, "Patient"),
