@@ -55,7 +55,7 @@ public class PatientCoverageC4DICSearchIT extends IntegrationTestBase {
     assertEquals(1, orgCount);
     assertEquals(1, coverageCount);
     assertAllResourcesHaveValidProfilesAndIds(response);
-    expectFhirNormalized().toMatchSnapshot(response);
+    expectFhir().toMatchSnapshot(response);
   }
 
   @Test
@@ -79,7 +79,7 @@ public class PatientCoverageC4DICSearchIT extends IntegrationTestBase {
     assertEquals(1, orgCount);
     assertEquals(1, coverageCount);
     assertAllResourcesHaveValidProfilesAndIds(response);
-    expectFhirNormalized().toMatchSnapshot(response);
+    expectFhir().toMatchSnapshot(response);
   }
 
   @Test
@@ -103,7 +103,7 @@ public class PatientCoverageC4DICSearchIT extends IntegrationTestBase {
     assertEquals(1, orgCount);
     assertEquals(1, coverageCount);
     assertAllResourcesHaveValidProfilesAndIds(response);
-    expectFhirNormalized().toMatchSnapshot(response);
+    expectFhir().toMatchSnapshot(response);
   }
 
   @Test
@@ -127,7 +127,7 @@ public class PatientCoverageC4DICSearchIT extends IntegrationTestBase {
     assertEquals(1, orgCount);
     assertEquals(3, coverageCount);
     assertAllResourcesHaveValidProfilesAndIds(response);
-    expectFhirNormalized().toMatchSnapshot(response);
+    expectFhir().toMatchSnapshot(response);
   }
 
   private void assertAllResourcesHaveValidProfilesAndIds(Bundle bundle) {
