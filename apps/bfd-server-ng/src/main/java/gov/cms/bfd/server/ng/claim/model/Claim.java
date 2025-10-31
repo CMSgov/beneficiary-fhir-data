@@ -65,8 +65,9 @@ public class Claim {
   @Embedded private BenefitBalance benefitBalance;
   @Embedded private AdjudicationCharge adjudicationCharge;
   @Embedded private ClaimPaymentAmount claimPaymentAmount;
-  @Embedded private PharmacyOrgProvider pharmacyOrgProvider;
-  @Embedded private PharmacyPractitionerProvider pharmacyPractitionerProvider;
+
+  // @Embedded private PharmacyOrgProvider pharmacyOrgProvider;
+  // @Embedded private PharmacyPractitionerProvider pharmacyPractitionerProvider;
 
   @OneToOne
   @JoinColumn(name = "bene_sk")
@@ -85,11 +86,6 @@ public class Claim {
   @OneToOne
   @JoinColumn(name = "clm_uniq_id")
   private ClaimInstitutional claimInstitutional;
-
-  @Nullable
-  @OneToOne
-  @JoinColumn(name = "clm_uniq_id")
-  private ClaimRx claimRx;
 
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "clm_uniq_id")
@@ -113,14 +109,10 @@ public class Claim {
       insertable = false,
       updatable = false,
       referencedColumnName = "cntrct_pbp_num")
-  private Contract contract;
+  private Contract contract; // TODO: double check one to one relationship
 
   private Optional<ClaimInstitutional> getClaimInstitutional() {
     return Optional.ofNullable(claimInstitutional);
-  }
-
-  private Optional<ClaimRx> getClaimRx() {
-    return Optional.ofNullable(claimRx);
   }
 
   private Optional<ClaimFiss> getClaimFiss() {
@@ -167,7 +159,7 @@ public class Claim {
               eob.addContained(i);
               eob.setInsurer(new Reference(i));
             });
-    var contract = getContract();
+    var contract = getContract(); // 4th query
     contract
         .flatMap(Contract::getContractName)
         .ifPresent(name -> claimTypeCode.toFhirInsurerPartD(name));
@@ -194,7 +186,8 @@ public class Claim {
               eob.addContained(p);
               eob.setProvider(new Reference(p));
             });
-    pharmacyOrgProvider
+    // TODO: below depends on clm_srvc_prvdr_gnrc_id_type which will be decided in BFD-4286
+    /*pharmacyOrgProvider
         .toFhir(claimTypeCode)
         .ifPresent(
             p -> {
@@ -207,7 +200,7 @@ public class Claim {
             p -> {
               eob.addContained(p);
               eob.setProvider(new Reference(p));
-            });
+            });*/
 
     // Each toFhirOutcome() evaluates independently, but their logic is mutually exclusive
     // based on claim type. At most one Optional will be non-empty, so only one call
@@ -234,14 +227,26 @@ public class Claim {
                 recordTypeCodes)
             .toList();
 
-    var rx = getClaimRx();
+    var claimRxSupportingInfo =
+        getAllClaimRxSupportingInfo().stream()
+            .flatMap(rxSupportingInfo -> rxSupportingInfo.toFhir(supportingInfoFactory).stream())
+            .toList();
+
+    var claimLineRxNumbers =
+        claimItems.stream()
+            .map(ClaimItem::getClaimLineRxNum)
+            .map(claimLineRxNumber -> claimLineRxNumber.toFhir(supportingInfoFactory))
+            .flatMap(Optional::stream)
+            .toList();
+
     Stream.of(
             initialSupportingInfo,
             claimDateSignature.getSupportingInfo().toFhir(supportingInfoFactory),
             institutional
                 .map(i -> i.getSupportingInfo().toFhir(supportingInfoFactory))
                 .orElse(List.of()),
-            rx.map(r -> r.getSupportingInfo().toFhir(supportingInfoFactory)).orElse(List.of()))
+            claimRxSupportingInfo,
+            claimLineRxNumbers)
         .flatMap(Collection::stream)
         .forEach(eob::addSupportingInfo);
 
@@ -272,6 +277,14 @@ public class Claim {
 
   private List<ClaimValue> getClaimValues() {
     return claimItems.stream().map(ClaimItem::getClaimValue).toList();
+  }
+
+  private List<ClaimRxSupportingInfo> getAllClaimRxSupportingInfo() {
+    return claimItems.stream()
+        .map(ClaimItem::getClaimLineRx)
+        .flatMap(Optional::stream)
+        .map(ClaimLineRx::getClaimRxSupportingInfo)
+        .toList();
   }
 
   private ExplanationOfBenefit sortedEob(ExplanationOfBenefit eob) {

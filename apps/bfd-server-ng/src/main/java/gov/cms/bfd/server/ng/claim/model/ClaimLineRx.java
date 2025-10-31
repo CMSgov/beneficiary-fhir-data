@@ -10,6 +10,7 @@ import lombok.Getter;
 public class ClaimLineRx {
   @EmbeddedId ClaimLineRxId claimLineInstitutionalId;
   @Embedded private AdjudicationChargeRx adjudicationCharge;
+  @Embedded private ClaimRxSupportingInfo claimRxSupportingInfo;
 
   @OneToOne(mappedBy = "claimLineRx")
   private ClaimItem claimLine;

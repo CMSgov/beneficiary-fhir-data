@@ -13,7 +13,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @AllArgsConstructor
 @Getter
 public enum PharmacySrvcTypeCode {
-  /** 00 - (Unknown value – rarely populated) */
+  /** 00 - (Unknown value – rarely populated). */
   _00("00", "(Unknown value – rarely populated)"),
   /**
    * 05 - Therapy change. Physician determined that a change in therapy was required – either the
@@ -53,8 +53,8 @@ public enum PharmacySrvcTypeCode {
       "19",
       "Split billing. The quantity dispensed is the remainder billed to a subsequent payer after Medicare Part A benefits expired (partial payment under Part A)."),
   /**
-   * 21 - LTC dispensing rule for <=14 day supply is not applicable due to CMS exclusion or the fact
-   * that the manufacturer’s packaging does not allow for special dispensing.
+   * 21 - LTC dispensing rule for less than or equal to 14 day supply is not applicable due to CMS
+   * exclusion or the fact that the manufacturer’s packaging does not allow for special dispensing.
    */
   _21(
       "21",
@@ -81,7 +81,7 @@ public enum PharmacySrvcTypeCode {
   _31("31", "LTC dispensing, per medication pass"),
   /** 32 - LTC dispensing, PRN on demand. */
   _32("32", "LTC dispensing, PRN on demand"),
-  /** 33 - LTC dispensing, other <=7 day cycle. */
+  /** 33 - LTC dispensing, other less than or equal to 7 day cycle. */
   _33("33", "LTC dispensing, other <=7 day cycle"),
   /** 34 - LTC dispensing, 14-day supply. */
   _34("34", "LTC dispensing, 14-day supply"),

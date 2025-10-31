@@ -22,6 +22,12 @@ public class Contract {
   @Column(name = "cntrct_pbp_name")
   private Optional<String> contractName;
 
+  @Column(name = "cntrct_num")
+  private Optional<String> contractNumber;
+
+  @Column(name = "cntrct_pbp_num")
+  private Optional<String> contractPbpNumber;
+
   @OneToOne(mappedBy = "contract")
   private Claim claim;
 }

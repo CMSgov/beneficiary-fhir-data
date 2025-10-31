@@ -22,6 +22,7 @@ public class ClaimItem implements Comparable<ClaimItem> {
   @Embedded private ClaimLine claimLine;
   @Embedded private ClaimProcedure claimProcedure;
   @Embedded private ClaimValue claimValue;
+  @Embedded private ClaimLineRxNumber claimLineRxNum;
 
   @JoinColumn(name = "clm_uniq_id")
   @ManyToOne

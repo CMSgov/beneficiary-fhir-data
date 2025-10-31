@@ -76,7 +76,6 @@ public class ClaimLine {
         .map(ClaimLineInstitutional::getRevenueCenterDate)
         .ifPresent(d -> line.setServiced(new DateType(DateUtil.toDate(d))));
 
-    // CLM_LINE_FROM_DT
     fromDate.map(d -> line.setServiced(new DateType(DateUtil.toDate(d))));
 
     Stream.of(
