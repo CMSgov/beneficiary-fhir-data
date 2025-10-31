@@ -152,6 +152,7 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
             new DateTimeRange(),
             Optional.empty(),
             List.of(),
+            List.of(),
             samhsaFilterMode);
     return getEobFromBundle(claims);
   }
