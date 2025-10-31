@@ -4,7 +4,6 @@ import typing
 from pathlib import Path
 
 import psycopg
-
 from loader import get_connection_string
 
 tables = [
@@ -18,7 +17,10 @@ tables = [
     },
     {"csv_name": "SYNTHETIC_BENE_MDCR_STUS.csv", "table": "v2_mdcr_bene_mdcr_stus"},
     {"csv_name": "SYNTHETIC_BENE_TP.csv", "table": "v2_mdcr_bene_tp"},
-    {"csv_name": "SYNTHETIC_BENE_CMBND_DUAL_MDCR.csv", "table": "v2_mdcr_bene_cmbnd_dual_mdcr"},
+    {
+        "csv_name": "SYNTHETIC_BENE_CMBND_DUAL_MDCR.csv",
+        "table": "v2_mdcr_bene_cmbnd_dual_mdcr",
+    },
     {"csv_name": "SYNTHETIC_CLM.csv", "table": "v2_mdcr_clm"},
     {"csv_name": "SYNTHETIC_CLM_INSTNL.csv", "table": "v2_mdcr_clm_instnl"},
     {"csv_name": "SYNTHETIC_CLM_PRFNL.csv", "table": "v2_mdcr_clm_prfnl"},

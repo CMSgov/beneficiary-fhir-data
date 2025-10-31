@@ -162,7 +162,9 @@ def _main() -> None:
     for _ in range(initial_worker_nodes):
         print(f"Spawning initial worker node #{spawn_count + 1} of {max_spawned_nodes}...")
         _start_node(
-            controller_ip=controller_host_ip, host=test_host, locust_port=controller_host_port
+            controller_ip=controller_host_ip,
+            host=test_host,
+            locust_port=controller_host_port,
         )
         spawn_count += 1
         print(f"Spawned initial worker node #{spawn_count} successfully")

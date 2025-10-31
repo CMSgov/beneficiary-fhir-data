@@ -1,7 +1,7 @@
 from diagrams import Cluster, Diagram, Node
-from diagrams.aws.compute import EC2, Lambda, ApplicationAutoScaling
+from diagrams.aws.compute import EC2, Lambda
 from diagrams.aws.database import Aurora
-from diagrams.aws.network import ELB, PrivateSubnet, VPC
+from diagrams.aws.network import ELB
 from diagrams.aws.storage import S3
 
 #######################################################

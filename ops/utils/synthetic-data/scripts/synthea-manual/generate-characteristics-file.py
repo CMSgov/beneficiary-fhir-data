@@ -16,9 +16,7 @@
 
 import sys
 import psycopg2
-import re
 import csv
-from pathlib import Path
 
 import ssmutil
 
@@ -112,10 +110,10 @@ def get_bene_data(bene_id_start, bene_id_end, db_string):
         f" ptd_cntrct_jul_id, ptd_cntrct_aug_id, ptd_cntrct_sept_id, ptd_cntrct_oct_id, ptd_cntrct_nov_id, ptd_cntrct_dec_id) as \"Part D Contract Number\""\
         f" FROM ccw.beneficiaries WHERE bene_id <= {bene_id_start} and bene_id > {bene_id_end} order by bene_id desc"
         
-    print(f"Starting query for bene data...");
+    print("Starting query for bene data...")
     raw_query_response = _execute_query(db_string, query)
     rows = len(raw_query_response)
-    print(f"Got {rows} results from bene data query.");
+    print(f"Got {rows} results from bene data query.")
     return raw_query_response
     
 def get_table_count(table_name, bene_id_start, bene_id_end, db_string):
@@ -131,10 +129,10 @@ def get_table_count(table_name, bene_id_start, bene_id_end, db_string):
             " GROUP BY bene_id"\
             " ORDER BY bene_id desc;"\
             
-    print(f"Starting query for {table_name} count...");
+    print(f"Starting query for {table_name} count...")
     raw_query_response = _execute_query(db_string, query)
     rows = len(raw_query_response)
-    print(f"Got {table_name} counts for {rows} benes.");
+    print(f"Got {table_name} counts for {rows} benes.")
     # put the entries in a dict for faster lookup later
     dict_response = {}
     for entry in raw_query_response:

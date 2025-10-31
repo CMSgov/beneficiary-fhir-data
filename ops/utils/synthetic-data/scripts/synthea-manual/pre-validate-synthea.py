@@ -22,11 +22,6 @@
 
 import sys
 import psycopg2
-import os
-import time
-import fileinput
-import subprocess
-import shlex
 
 import ssmutil
 

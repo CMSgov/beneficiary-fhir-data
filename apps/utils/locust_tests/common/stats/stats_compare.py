@@ -175,7 +175,10 @@ def do_stats_comparison(
     any_failures, any_warnings = functools.reduce(
         lambda a, b: (a[0] or b[0], a[1] or b[1]),
         (
-            (x.result == StatCompareResult.FAILURE, x.result == StatCompareResult.WARNING)
+            (
+                x.result == StatCompareResult.FAILURE,
+                x.result == StatCompareResult.WARNING,
+            )
             for x in [
                 *totals_exceeded_results,
                 *itertools.chain.from_iterable(tasks_exceeded_results.values()),
@@ -236,7 +239,9 @@ def get_stats_compare_results(
 
 
 def validate_aggregated_stats(
-    previous: AggregatedStats, current: AggregatedStats, all_comparisons_meta: AllComparisonMetadata
+    previous: AggregatedStats,
+    current: AggregatedStats,
+    all_comparisons_meta: AllComparisonMetadata,
 ) -> tuple[list[StatComparison], dict[str, list[StatComparison]]]:
     """Validate and compare the given AggregatedStats instances against each other, checking each
     of their common TaskStats and returning a dictionary of the name of those tasks that exceed the

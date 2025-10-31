@@ -25,8 +25,6 @@
 
 import os
 import sys
-import fileinput
-import shlex
 import concurrent.futures
 
 import datetime
@@ -153,7 +151,7 @@ def create_manifest(path, file_list, timestamp):
         for file in file_list:
             type = file.rstrip('.csv').upper()
             manifest_lines += f'  <entry name="{file}" type="{type}"/>\n'
-        manifest_lines += f'</dataSetManifest>'
+        manifest_lines += '</dataSetManifest>'
         manifest.write(manifest_lines)
     
 def split_future_from_file(file_path, synthea_output_filepath, today):

@@ -1,10 +1,8 @@
 import boto3
 import json
 import random
-import time
 from datetime import datetime, timedelta
-from apps import App, Humana, Evidation
-import events
+from apps import Humana, Evidation
 import csv
 
 """

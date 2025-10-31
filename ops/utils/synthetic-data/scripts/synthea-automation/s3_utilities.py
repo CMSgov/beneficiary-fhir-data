@@ -1,12 +1,8 @@
 import sys
 import os
 import boto3
-import botocore
-import fnmatch
-import time
 from botocore.config import Config
 from botocore.exceptions import ClientError, WaiterError
-from pathlib import Path
 
 boto_config = Config(region_name="us-east-1")
 s3_client = boto3.client('s3', config=boto_config)
@@ -302,7 +298,7 @@ def upload_synthea_results(synthea_output_dir, s3_bucket):
     using the timestamp just derived, upload all RIF (.csv) files to the S3 bucket/folder
     '''
     s3_folder = "Synthetic/Incoming/" + manifest_ts
-    print(f"uploading RIF S3: {s3_bucket}, folder: {s3_folder}");
+    print(f"uploading RIF S3: {s3_bucket}, folder: {s3_folder}")
     upload_rif_files(synthea_output_dir, s3_bucket, s3_folder)
 
     '''
@@ -329,7 +325,7 @@ def upload_synthea_result_folder(folder_dir, s3_bucket):
     using the timestamp just derived, upload all RIF (.csv) files to the S3 bucket/folder
     '''
     s3_folder = "Synthetic/Incoming/" + folder_name
-    print(f"uploading RIF S3: {s3_bucket}, folder: {s3_folder}");
+    print(f"uploading RIF S3: {s3_bucket}, folder: {s3_folder}")
     upload_rif_files(folder_dir, s3_bucket, s3_folder)
 
     '''

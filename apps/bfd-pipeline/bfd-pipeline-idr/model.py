@@ -4,9 +4,13 @@ from collections.abc import Iterable
 from datetime import UTC, date, datetime, timedelta
 from typing import Annotated, TypeVar
 
+from constants import (
+    CLAIM_TYPE_CODES,
+    DEFAULT_MAX_DATE,
+    DEFAULT_MIN_DATE,
+    PART_D_CLAIM_TYPE_CODES,
+)
 from pydantic import BaseModel, BeforeValidator
-
-from constants import CLAIM_TYPE_CODES, DEFAULT_MAX_DATE, DEFAULT_MIN_DATE, PART_D_CLAIM_TYPE_CODES
 
 type DbType = str | float | int | bool | date | datetime
 
@@ -256,7 +260,8 @@ class IdrBeneficiary(IdrBaseModel):
     idr_trans_efctv_ts: Annotated[datetime, {PRIMARY_KEY: True}]
     idr_trans_obslt_ts: datetime
     idr_insrt_ts_bene: Annotated[
-        datetime, {BATCH_TIMESTAMP: True, ALIAS: ALIAS_HSTRY, COLUMN_MAP: "idr_insrt_ts"}
+        datetime,
+        {BATCH_TIMESTAMP: True, ALIAS: ALIAS_HSTRY, COLUMN_MAP: "idr_insrt_ts"},
     ]
     idr_updt_ts_bene: Annotated[
         datetime,
@@ -628,7 +633,10 @@ class IdrContractPbpNumber(IdrBaseModel):
 
 
 def claim_type_clause(start_time: datetime, claim_type_codes: list[int]) -> str:
-    fetch_latest_claims = os.environ.get("IDR_LATEST_CLAIMS", "").lower() in ("1", "true")
+    fetch_latest_claims = os.environ.get("IDR_LATEST_CLAIMS", "").lower() in (
+        "1",
+        "true",
+    )
     add_latest_claim_ind = ""
     if fetch_latest_claims:
         add_latest_claim_ind = (
@@ -976,7 +984,6 @@ class IdrClaimItem(IdrBaseModel):
     hcpcs_4_mdfr_cd: Annotated[str, BeforeValidator(transform_default_string)]
     hcpcs_5_mdfr_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_idr_ld_dt: Annotated[date, {INSERT_EXCLUDE: True, HISTORICAL_BATCH_TIMESTAMP: True}]
-    clm_line_pmd_uniq_trkng_num: Annotated[str, BeforeValidator(transform_null_string)]
     idr_insrt_ts_line: Annotated[
         datetime,
         {BATCH_TIMESTAMP: True, ALIAS: ALIAS_LINE, COLUMN_MAP: "idr_insrt_ts"},
@@ -1013,7 +1020,9 @@ class IdrClaimItem(IdrBaseModel):
     ]
     # columns from V2_MDCR_CLM_VAL
     clm_val_sqnc_num_val: Annotated[
-        int, {ALIAS: ALIAS_VAL, COLUMN_MAP: "clm_val_sqnc_num"}, BeforeValidator(transform_null_int)
+        int,
+        {ALIAS: ALIAS_VAL, COLUMN_MAP: "clm_val_sqnc_num"},
+        BeforeValidator(transform_null_int),
     ]
     clm_val_cd: Annotated[str, BeforeValidator(transform_null_string)]
     clm_val_amt: Annotated[float, BeforeValidator(transform_null_float)]
@@ -1322,7 +1331,7 @@ class IdrClaimProfessional(IdrBaseModel):
     clm_clncl_tril_num: Annotated[str, BeforeValidator(transform_default_string)]
     clm_mdcr_prfnl_prmry_pyr_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_mdcr_prfnl_prvdr_asgnmt_sw: Annotated[str, BeforeValidator(transform_default_string)]
-    idr_insrt_ts_clm_prfnl: Annotated[
+    idr_insrt_ts: Annotated[
         datetime,
         {BATCH_TIMESTAMP: True, ALIAS: ALIAS_PRFNL, COLUMN_MAP: "idr_insrt_ts"},
         BeforeValidator(transform_null_date_to_min),

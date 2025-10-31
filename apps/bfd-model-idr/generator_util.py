@@ -46,7 +46,11 @@ class GeneratorUtil:
             try:
                 sushi_dir = "./sushi"
                 result = subprocess.run(
-                    ["sushi", "build"], check=True, cwd=sushi_dir, capture_output=True, text=True
+                    ["sushi", "build"],
+                    check=True,
+                    cwd=sushi_dir,
+                    capture_output=True,
+                    text=True,
                 )
                 if result.returncode == 0:
                     print("Sushi build completed successfully")
