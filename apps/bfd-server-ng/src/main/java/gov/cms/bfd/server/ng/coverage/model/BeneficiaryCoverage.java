@@ -54,16 +54,21 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
    * C4DIC Additional Insurance Card Information </a>.
    */
   public static final String C4DIC_ADD_INFO =
-      "You may be asked to show this card when you get health care services. Only give your personal Medicare "
-          + "information to health care providers, or people you trust who work with Medicare on your behalf. "
-          + "WARNING: Intentionally misusing this card may be considered fraud and/or other violation of "
-          + "federal law and is punishable by law.\n"
-          + "\n"
-          + "Es posible que le pidan que muestre esta tarjeta cuando reciba servicios de cuidado médico. "
-          + "Solamente dé su información personal de Medicare a los proveedores de salud, sus aseguradores o "
-          + "personas de su confianza que trabajan con Medicare en su nombre. ¡ADVERTENCIA! El mal uso "
-          + "intencional de esta tarjeta puede ser considerado como fraude y/u otra violación de la ley "
-          + "federal y es sancionada por la ley.";
+      """
+    You may be asked to show this card when you get health care services. Only give your personal Medicare \
+    information to health care providers, or people you trust who work with Medicare on your behalf. \
+    WARNING: Intentionally misusing this card may be considered fraud and/or other violation of \
+    federal law and is punishable by law.
+
+    Es posible que le pidan que muestre esta tarjeta cuando reciba servicios de cuidado médico. \
+    Solamente dé su información personal de Medicare a los proveedores de salud, sus aseguradores o \
+    personas de su confianza que trabajan con Medicare en su nombre. ¡ADVERTENCIA! El mal uso \
+    intencional de esta tarjeta puede ser considerado como fraude y/u otra violación de la ley \
+    federal y es sancionada por la ley.\
+    """;
+
+  public static final String PATIENT_REF = "Patient/";
+  public static final String ORGANIZATION_REF = "Organization/";
 
   private Optional<BeneficiaryEntitlementReason> getEntitlementReason() {
     return Optional.ofNullable(beneficiaryEntitlementReason);
@@ -109,12 +114,12 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
     if (isC4DIC) {
       coverage.setMeta(meta.toFhirCoverage(SystemUrls.PROFILE_C4DIC_COVERAGE));
       coverage.setId(UUID.randomUUID().toString());
-      coverage.setBeneficiary(new Reference("Patient/" + id));
-      coverage.setSubscriber(new Reference("Patient/" + id));
+      coverage.setBeneficiary(new Reference(PATIENT_REF + id));
+      coverage.setSubscriber(new Reference(PATIENT_REF + id));
     } else {
       coverage.setId(coverageCompositeId.fullId());
       coverage.setMeta(meta.toFhirCoverage(""));
-      coverage.setBeneficiary(new Reference("Patient/" + beneSk));
+      coverage.setBeneficiary(new Reference(PATIENT_REF + beneSk));
     }
 
     return coverage;
@@ -202,7 +207,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
     coverage.setStatus(entitlement.toFhirStatus());
 
     if (isC4DIC) {
-      coverage.addPayor(new Reference().setReference("Organization/" + orgId));
+      coverage.addPayor(new Reference().setReference(ORGANIZATION_REF + orgId));
       coverage.addExtension(
           new Extension(SystemUrls.EXT_BENE_BUYIN_CD_URL)
               .setValue(new Annotation(new MarkdownType(C4DIC_ADD_INFO))));
@@ -259,7 +264,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
     identifier.toFhir(isC4DIC ? orgId : "").ifPresent(coverage::addIdentifier);
 
     if (isC4DIC) {
-      coverage.addPayor(new Reference().setReference("Organization/" + orgId));
+      coverage.addPayor(new Reference().setReference(ORGANIZATION_REF + orgId));
       coverage.addExtension(
           new Extension(SystemUrls.EXT_BENE_BUYIN_CD_URL)
               .setValue(new Annotation(new MarkdownType(C4DIC_ADD_INFO))));
