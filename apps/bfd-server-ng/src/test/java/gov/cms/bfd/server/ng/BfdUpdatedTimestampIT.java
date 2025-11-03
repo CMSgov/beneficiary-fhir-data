@@ -164,7 +164,7 @@ public class BfdUpdatedTimestampIT extends IntegrationTestBase {
     var claimOpt = claimRepository.findById(id, new DateTimeRange(), new DateTimeRange());
     return claimOpt.map(
         claim -> {
-          var eob = claim.toFhir();
+          var eob = claim.toFhir(ClaimSecurityStatus.NONE);
           return eob.getMeta().getLastUpdated().toInstant().atZone(ZoneId.of("UTC"));
         });
   }
