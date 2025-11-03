@@ -140,6 +140,18 @@ public class EobHandler {
     return isClaimDateWithinBounds(claimDate, entry) && entry.matches(targetCode);
   }
 
+  private void logSamhsaFiltered(
+      String type, long claimId, String matchedCode, String system) {
+    LOGGER
+        .atInfo()
+        .setMessage("SAMHSA claim filtered: type=" + type)
+        .addKeyValue("type", type)
+        .addKeyValue("claimId", claimId)
+        .addKeyValue("matchedCode", matchedCode)
+        .addKeyValue("system", system)
+        .log();
+  }
+
   // Returns true if the given claim contains any procedure that matches a SAMHSA
   // security label code from the dictionary.
   private boolean claimHasSamhsa(Claim claim) {
@@ -164,13 +176,7 @@ public class EobHandler {
     var drg = claim.getDrgCode().map(Object::toString).orElse("");
     var hasSamhsa = entries.stream().anyMatch(e -> isCodeSamhsa(drg, claimDate, e));
     if (hasSamhsa) {
-      LOGGER
-          .atInfo()
-          .setMessage("SAMHSA claim filtered: type=DRG")
-          .addKeyValue("claimId", claimUniqueId)
-          .addKeyValue("matchedCode", drg)
-          .addKeyValue("system", SystemUrls.CMS_MS_DRG)
-          .log();
+      logSamhsaFiltered("DRG", claimUniqueId, drg, SystemUrls.CMS_MS_DRG);
     }
     return hasSamhsa;
   }
@@ -181,13 +187,7 @@ public class EobHandler {
       var entries = SECURITY_LABELS.get(system);
       var hasSamhsa = entries.stream().anyMatch(c -> isCodeSamhsa(hcpcs, claimDate, c));
       if (hasSamhsa) {
-        LOGGER
-            .atInfo()
-            .setMessage("SAMHSA claim filtered: type=HCPCS")
-            .addKeyValue("claimId", claimUniqueId)
-            .addKeyValue("matchedCode", hcpcs)
-            .addKeyValue("system", system)
-            .log();
+        logSamhsaFiltered("HCPCS", claimUniqueId, hcpcs, system);
         return true;
       }
     }
@@ -212,13 +212,7 @@ public class EobHandler {
         procedureEntries.stream()
             .anyMatch(pEntries -> isCodeSamhsa(procedureCode, claimDate, pEntries));
     if (procedureHasSamhsa) {
-      LOGGER
-          .atInfo()
-          .setMessage("SAMHSA claim filtered: type=Procedure")
-          .addKeyValue("claimId", claimUniqueId)
-          .addKeyValue("matchedCode", procedureCode)
-          .addKeyValue("system", icdIndicator.getProcedureSystem())
-          .log();
+      logSamhsaFiltered("Procedure", claimUniqueId, procedureCode, icdIndicator.getProcedureSystem());
       return true;
     }
 
@@ -226,13 +220,7 @@ public class EobHandler {
         diagnosisEntries.stream()
             .anyMatch(dEntry -> isCodeSamhsa(diagnosisCode, claimDate, dEntry));
     if (diagnosisHasSamhsa) {
-      LOGGER
-          .atInfo()
-          .setMessage("SAMHSA claim filtered: type=Diagnosis")
-          .addKeyValue("claimId", claimUniqueId)
-          .addKeyValue("matchedCode", diagnosisCode)
-          .addKeyValue("system", icdIndicator.getDiagnosisSystem())
-          .log();
+      logSamhsaFiltered("Diagnosis", claimUniqueId, diagnosisCode, icdIndicator.getDiagnosisSystem());
       return true;
     }
 
