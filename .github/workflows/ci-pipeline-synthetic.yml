@@ -25,7 +25,7 @@ jobs:
           node-version: "22"
       # Maven is needed to run the migrator
       - name: "Setup JDK"
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: "25"
           distribution: "corretto"
