@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.apache.spark.util.sketch.BloomFilter;
@@ -214,8 +214,8 @@ public class LoadedFilterManager {
             currentLastBatchCreated);
 
         List<LoadedTuple> loadedTuples = fetchLoadedTuples(this.lastBatchCreated);
-        List<LoadedFileFilter> newFilters =
-            updateFilters(this.filters, loadedTuples, this::fetchLoadedBatches);
+        Stream<LoadedFileFilter> updatedFilters =
+            buildMergedFilters(this.filters, loadedTuples, this::fetchLoadedBatches);
 
         // If batches been trimmed, then remove filters which are no longer present
         final Instant currentFirstBatchUpdate =
@@ -225,7 +225,7 @@ public class LoadedFilterManager {
             || this.firstBatchCreated.isBefore(currentFirstBatchUpdate)) {
           LOGGER.info("Trimmed LoadedFile filters before {}", currentFirstBatchUpdate);
           List<LoadedFile> loadedFiles = fetchLoadedFiles();
-          newFilters = trimFilters(newFilters, loadedFiles);
+          updatedFilters = buildTrimmedFilters(updatedFilters, loadedFiles);
         }
 
         LOGGER.info(
@@ -233,7 +233,7 @@ public class LoadedFilterManager {
             currentFirstBatchUpdate,
             currentLastBatchCreated);
 
-        set(newFilters, currentFirstBatchUpdate, currentLastBatchCreated);
+        set(updatedFilters.toList(), currentFirstBatchUpdate, currentLastBatchCreated);
       }
     } catch (Throwable ex) {
       LOGGER.error("Error found refreshing LoadedFile filters", ex);
@@ -279,57 +279,57 @@ public class LoadedFilterManager {
    */
 
   /**
-   * Create an updated {@link LoadedFileFilter} list from existing filters and newly loaded files
-   * and batches.
+   * Create an updated, merged {@link LoadedFileFilter} {@link Stream} from existing filters and
+   * newly loaded files and batches.
    *
    * @param existingFilters that should be included
    * @param loadedTuples that come from new LoadedBatch
    * @param fetchById to use retrieve list of LoadedBatch by id
-   * @return a new filter list
+   * @return a new filter {@link Stream}
    */
-  public static List<LoadedFileFilter> updateFilters(
+  public static Stream<LoadedFileFilter> buildMergedFilters(
       List<LoadedFileFilter> existingFilters,
       List<LoadedTuple> loadedTuples,
       Function<Long, List<LoadedBatch>> fetchById) {
-    List<LoadedFileFilter> result = new ArrayList<>(existingFilters);
-    List<LoadedFileFilter> newFilters = buildFilters(loadedTuples, fetchById);
-    newFilters.forEach(
-        filter -> {
-          result.removeIf(f -> f.getLoadedFileId() == filter.getLoadedFileId());
-          result.add(filter);
-        });
-    result.sort((a, b) -> b.getFirstUpdated().compareTo(a.getFirstUpdated())); // Descending
-    return result;
+    return Stream.concat(
+            existingFilters.stream()
+                .filter(
+                    f ->
+                        loadedTuples.stream()
+                            .noneMatch(t -> t.getLoadedFileId() == f.getLoadedFileId())),
+            buildNewFilters(loadedTuples, fetchById))
+        // Sort each filter in descending order to optimize search time when determining if a result
+        // would be empty
+        .sorted((a, b) -> b.getFirstUpdated().compareTo(a.getFirstUpdated()));
   }
 
   /**
-   * Build a new {@link LoadedFileFilter} list.
+   * Build a new {@link LoadedFileFilter} {@link Stream}.
    *
    * @param loadedTuples that come from new LoadedBatch
    * @param fetchById to use retrieve list of LoadedBatch by id
-   * @return a new filter list
+   * @return a new filter {@link Stream}
    */
-  public static List<LoadedFileFilter> buildFilters(
+  public static Stream<LoadedFileFilter> buildNewFilters(
       List<LoadedTuple> loadedTuples, Function<Long, List<LoadedBatch>> fetchById) {
     return loadedTuples.stream()
-        .map(t -> buildFilter(t.getLoadedFileId(), t.getFirstUpdated(), fetchById))
-        .collect(Collectors.toList());
+        .map(t -> buildFilter(t.getLoadedFileId(), t.getFirstUpdated(), fetchById));
   }
 
   /**
-   * Trim filters to match current {@link LoadedFile} list. Only deletes filters.
+   * Trim filters to match current {@link LoadedFile} {@link Stream}. Filters out any {@link
+   * LoadedFileFilter}s that are not in the {@code loaded_files} table.
    *
-   * @param existingFilters to reuse if possible
-   * @param loadedFiles list of current loaded files
-   * @return a new filter list
+   * @param existingFilters {@link Stream} of current {@link LoadedFileFilter}s
+   * @param loadedFiles {@link Stream} of current {@link LoadedFile}s
+   * @return a new filter {@link Stream}
    */
-  public static List<LoadedFileFilter> trimFilters(
-      List<LoadedFileFilter> existingFilters, List<LoadedFile> loadedFiles) {
-    List<LoadedFileFilter> newFilters = new ArrayList<>(existingFilters);
-    newFilters.removeIf(
+  public static Stream<LoadedFileFilter> buildTrimmedFilters(
+      Stream<LoadedFileFilter> existingFilters, List<LoadedFile> loadedFiles) {
+    return existingFilters.filter(
         filter ->
-            loadedFiles.stream().noneMatch(f -> f.getLoadedFileId() == filter.getLoadedFileId()));
-    return newFilters;
+            loadedFiles.stream()
+                .anyMatch(file -> file.getLoadedFileId() == filter.getLoadedFileId()));
   }
 
   /**

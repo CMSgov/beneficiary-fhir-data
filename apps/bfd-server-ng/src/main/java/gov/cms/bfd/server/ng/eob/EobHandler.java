@@ -140,8 +140,7 @@ public class EobHandler {
     return isClaimDateWithinBounds(claimDate, entry) && entry.matches(targetCode);
   }
 
-  private void logSamhsaFiltered(
-      String type, long claimId, String matchedCode, String system) {
+  private void logSamhsaFiltered(String type, long claimId, String matchedCode, String system) {
     LOGGER
         .atInfo()
         .setMessage("SAMHSA claim filtered: type=" + type)
@@ -212,7 +211,8 @@ public class EobHandler {
         procedureEntries.stream()
             .anyMatch(pEntries -> isCodeSamhsa(procedureCode, claimDate, pEntries));
     if (procedureHasSamhsa) {
-      logSamhsaFiltered("Procedure", claimUniqueId, procedureCode, icdIndicator.getProcedureSystem());
+      logSamhsaFiltered(
+          "Procedure", claimUniqueId, procedureCode, icdIndicator.getProcedureSystem());
       return true;
     }
 
@@ -220,7 +220,8 @@ public class EobHandler {
         diagnosisEntries.stream()
             .anyMatch(dEntry -> isCodeSamhsa(diagnosisCode, claimDate, dEntry));
     if (diagnosisHasSamhsa) {
-      logSamhsaFiltered("Diagnosis", claimUniqueId, diagnosisCode, icdIndicator.getDiagnosisSystem());
+      logSamhsaFiltered(
+          "Diagnosis", claimUniqueId, diagnosisCode, icdIndicator.getDiagnosisSystem());
       return true;
     }
 

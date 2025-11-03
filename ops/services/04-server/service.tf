@@ -271,8 +271,8 @@ resource "aws_ecs_task_definition" "server" {
             value = join(" ", [
               "-Dlogback.configurationFile=all-stdout.logback.xml",
               "-XX:+UseContainerSupport",
-              "-XX:MaxRAMPercentage=75.0",
-              "-XX:+PreserveFramePointer",
+              "-XX:MaxRAMPercentage=95.0",
+              "-XX:+UseCompactObjectHeaders",
               "-Dnetworkaddress.cache.ttl=5",
               "-Dsun.net.inetaddr.ttl=0"
             ])
