@@ -350,7 +350,6 @@
                 ]
             },
             {
-
                 "id": "SupportingInfoComponent.CLM_LINE_HCT_HGB_RSLT_NUM",
                 "path": "SupportingInfoComponent.CLM_LINE_HCT_HGB_RSLT_NUM",
                 "label": "HCT/HGB Test Result Value",
@@ -363,7 +362,6 @@
                 ]
             },
             {
-
                 "id": "SupportingInfoComponent.CLM_LINE_HCT_HGB_TYPE_CD",
                 "path": "SupportingInfoComponent.CLM_LINE_HCT_HGB_TYPE_CD",
                 "label": "HCT/HGB Test Type",
@@ -509,7 +507,7 @@
                 "id": "SupportingInfoComponent.CLM_CTSTRPHC_CVRG_IND_CD",
                 "path": "SupportingInfoComponent.CLM_CTSTRPHC_CVRG_IND_CD",
                 "label": "Catastrophic Coverage Indicator Code",
-                "definition":"This variable indicates whether the PDE occurred within the catastrophic benefit phase of the Medicare Part D benefit, according to the source PDE.",
+                "definition": "This variable indicates whether the PDE occurred within the catastrophic benefit phase of the Medicare Part D benefit, according to the source PDE.",
                 "min": 0,
                 "max": "1",
                 "type": [
@@ -567,30 +565,43 @@
                     }
                 ]
             },
-          {
-            "id": "SupportingInfoComponent.CLM_NRLN_RIC_CD",
-            "path": "SupportingInfoComponent.CLM_NRLN_RIC_CD",
-            "label": "Near Line Record Identification Code",
-            "min": 0,
-            "max": "1",
-            "type": [
-              {
-                "code": "string"
-              }
-            ]
-          },
-          {
-            "id": "SupportingInfoComponent.CLM_RIC_CD",
-            "path": "SupportingInfoComponent.CLM_RIC_CD",
-            "label": "Record Identification Code",
-            "min": 0,
-            "max": "1",
-            "type": [
-              {
-                "code": "string"
-              }
-            ]
-          }
+            {
+                "id": "SupportingInfoComponent.CLM_NRLN_RIC_CD",
+                "path": "SupportingInfoComponent.CLM_NRLN_RIC_CD",
+                "label": "Near Line Record Identification Code",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "SupportingInfoComponent.CLM_RIC_CD",
+                "path": "SupportingInfoComponent.CLM_RIC_CD",
+                "label": "Record Identification Code",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "SupportingInfoComponent.CLM_RLT_COND_CD",
+                "path": "SupportingInfoComponent.CLM_RLT_COND_CD",
+                "label": "Claim Related Condition Code",
+                "definition": "This field contains a set of 'claim related condition codes' for a given claim, indicating information related to how the claim should be processed.",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            }
         ]
     }
 }
