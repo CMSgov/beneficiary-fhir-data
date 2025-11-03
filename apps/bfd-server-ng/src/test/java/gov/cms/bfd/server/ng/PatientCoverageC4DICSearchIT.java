@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import ca.uhn.fhir.rest.api.SearchStyleEnum;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coverage;
@@ -16,8 +15,6 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Resource;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
 
 public class PatientCoverageC4DICSearchIT extends IntegrationTestBase {
   private Bundle searchBundle(String beneSK) {
@@ -152,8 +149,7 @@ public class PatientCoverageC4DICSearchIT extends IntegrationTestBase {
     return uuid.matches("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}");
   }
 
-  @ParameterizedTest
-  @EnumSource(SearchStyleEnum.class)
+  @Test
   void patientSearchByIdEmpty() {
     var patientBundle = searchBundle("999");
     assertEquals(0, patientBundle.getEntry().size());
