@@ -11,6 +11,7 @@ import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import gov.cms.bfd.server.ng.claim.model.ClaimSubtype;
 import gov.cms.bfd.server.ng.eob.EobResourceProvider;
 import gov.cms.bfd.server.ng.testUtil.ThreadSafeAppender;
 import gov.cms.bfd.server.ng.util.DateUtil;
@@ -272,6 +273,46 @@ class EobSearchIT extends IntegrationTestBase {
             .execute();
 
     expectFhir().scenario(searchStyle.name() + "_WithTag_EmptyResult").toMatchSnapshot(eobBundle);
+  }
+
+  @ParameterizedTest
+  @EnumSource(SearchStyleEnum.class)
+  void eobSearchByType(SearchStyleEnum searchStyle) {
+    String outPatientType = ClaimSubtype.OUTPATIENT.getCode();
+
+    Bundle eobBundle =
+        searchBundle()
+            .where(
+                new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
+                    .exactly()
+                    .identifier(BENE_ID_ALL_PARTS_WITH_XREF))
+            .and(new TokenClientParam("type").exactly().identifier(outPatientType))
+            .usingStyle(searchStyle)
+            .execute();
+
+    assertEquals(3, eobBundle.getEntry().size(), "Should find EOBs with the outpatient claim type");
+
+    expectFhir()
+        .scenario(searchStyle.name() + "_WithClaimType_" + outPatientType)
+        .toMatchSnapshot(eobBundle);
+
+    String hhaType = ClaimSubtype.HHA.getCode();
+
+    Bundle eobBundle2 =
+        searchBundle()
+            .where(
+                new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
+                    .exactly()
+                    .identifier(BENE_ID_ALL_PARTS_WITH_XREF))
+            .and(new TokenClientParam("type").exactly().identifier(hhaType))
+            .usingStyle(searchStyle)
+            .execute();
+
+    assertEquals(1, eobBundle2.getEntry().size(), "Should find EOBs with hha claim type");
+
+    expectFhir()
+        .scenario(searchStyle.name() + "_WithClaimType_" + hhaType)
+        .toMatchSnapshot(eobBundle2);
   }
 
   @ParameterizedTest
