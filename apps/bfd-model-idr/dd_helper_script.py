@@ -1,7 +1,9 @@
-'''
+"""
 This script can be used, with the requisite copybooks from the IDR, to do some comparisons for accuracy on given profiles/applicability in BFD v3.
 This will be used as part of future work to enhance the IDR copybooks and improve the quality of our data dictionary.
-'''
+"""
+from collections import Counter
+
 import pandas as pd
 import yaml
 
@@ -39,7 +41,7 @@ for element in applies_to:
 
 #If we pull more than the current CLM_FISS / CLM_MCS fields (1 and 0, respectively) then we'll need to profile 
 #the individual claim types within PAC data. Otherwise, this just updates the source
-for cur_source in otherSources:
+for cur_source in other_sources:
     df = pd.read_excel(other_sources[cur_source], sheet_name='Claim Header',header=3, usecols=['Target Table','Target Column'])
     for _, row in df.iterrows():
         element_concatenated = f"{str(row['Target Table']).strip()}.{str(row['Target Column']).strip()}"
@@ -47,19 +49,17 @@ for cur_source in otherSources:
         if row['Target Table'] != '-' and row['Target Column'] != '-' and "\n" not in element_concatenated:
             if element_concatenated in applies_to and cur_source not in applies_to[element_concatenated]['sources']:
                 applies_to[element_concatenated]['sources'].append(cur_source)
-            pass
     df = pd.read_excel(other_sources[cur_source], sheet_name='Claim Line',header=3, usecols=['Target Table','Target Column'])
     for _, row in df.iterrows():
         element_concatenated = f"{str(row['Target Table']).strip()}.{str(row['Target Column']).strip()}"
         #there are newlines in some, we should ask IDR to consider changing the DD structure?
         if row['Target Table'] != '-' and row['Target Column'] != '-' and "\n" not in element_concatenated:
-            if element_concatenated in appliesTo and cur_source not in applies_to[element_concatenated]['sources']:
+            if element_concatenated in applies_to and cur_source not in applies_to[element_concatenated]['sources']:
                 applies_to[element_concatenated]['sources'].append(cur_source)
-            pass
 
 #this is more of a heuristic. for example, HCPCS_5_MDFR_CD appears to be missing from the copybook but it's there in reality. 
 profile_divergence_counter = 0
-with open(eob_dict_yaml, "r") as f:
+with open(eob_dict_yaml) as f:
     data = yaml.safe_load(f)
 for i in data:
     if 'sourceView' in i:
@@ -72,7 +72,7 @@ for i in data:
 print("remaining diverging for profiles:",profile_divergence_counter)
 
 source_divergence_counter = 0
-with open(eob_dict_yaml, "r") as f:
+with open(eob_dict_yaml) as f:
     data = yaml.safe_load(f)
 for i in data:
     if 'sourceView' in i:

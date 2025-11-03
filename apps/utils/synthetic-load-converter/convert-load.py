@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 
-import boto3
 import argparse
-from pathlib import Path
 from os import listdir
+from pathlib import Path
 from shutil import copyfile
+
+import boto3
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-s", "--source-bucket", required=True)
@@ -36,7 +37,7 @@ for item in response["Contents"]:
         source_bucket, item["Key"], f"./{files.name}/{item["Key"].split("/")[-1]}"
     )
 
-manifest_template = open("./manifest-template.xml", "r").read()
+manifest_template = open("./manifest-template.xml").read()
 id_num = 1
 manifest_names = []
 for f_name in listdir(files.name):

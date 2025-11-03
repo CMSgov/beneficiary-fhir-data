@@ -2,16 +2,15 @@ import logging
 import time
 from datetime import UTC, datetime, timedelta
 
-from snowflake.connector import ProgrammingError
-from snowflake.connector.errors import ForbiddenError
-from snowflake.connector.network import ReauthenticationRequest, RetryRequest
-
 from extractor import PostgresExtractor, SnowflakeExtractor
 from loader import PostgresLoader
 from model import (
     LoadProgress,
     T,
 )
+from snowflake.connector import ProgrammingError
+from snowflake.connector.errors import ForbiddenError
+from snowflake.connector.network import ReauthenticationRequest, RetryRequest
 
 console_handler = logging.StreamHandler()
 formatter = logging.Formatter("[%(levelname)s] %(asctime)s %(message)s")

@@ -4,7 +4,6 @@ from collections.abc import Iterator
 from datetime import UTC, date, datetime
 
 import psycopg
-
 from constants import DEFAULT_MIN_DATE
 from model import DbType, LoadProgress, T
 from timer import Timer
