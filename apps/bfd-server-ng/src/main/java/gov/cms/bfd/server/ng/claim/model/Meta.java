@@ -21,7 +21,7 @@ class Meta {
             .setSource(claimSourceId.getSource());
     claimTypeCode.toFhirStructureDefinition().ifPresent(meta::addProfile);
     claimSourceId.toFhirAdjudicationStatus().ifPresent(meta::addTag);
-    ClaimSecurityStatus.toFhir(securityStatus).ifPresent(meta::addSecurity);
+    meta.addSecurity(ClaimSecurityStatus.toFhir(securityStatus));
     return meta;
   }
 }

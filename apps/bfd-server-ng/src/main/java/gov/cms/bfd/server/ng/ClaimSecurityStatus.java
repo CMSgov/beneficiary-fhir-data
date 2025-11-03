@@ -2,7 +2,6 @@ package gov.cms.bfd.server.ng;
 
 import gov.cms.bfd.server.ng.util.IdrConstants;
 import gov.cms.bfd.server.ng.util.SystemUrls;
-import java.util.Optional;
 import org.hl7.fhir.r4.model.Coding;
 
 /** Represents Claim Security status. */
@@ -20,7 +19,7 @@ public enum ClaimSecurityStatus {
    * @param securityStatus securityStatus
    * @return coding
    */
-  public static Optional<Coding> toFhir(ClaimSecurityStatus securityStatus) {
+  public static Coding toFhir(ClaimSecurityStatus securityStatus) {
 
     var coding = new Coding();
     if (securityStatus == ClaimSecurityStatus.SAMHSA_APPLICABLE) {
@@ -29,6 +28,6 @@ public enum ClaimSecurityStatus {
           .setCode(IdrConstants.SAMHSA_SECURITY_CODE)
           .setDisplay(IdrConstants.SAMHSA_SECURITY_DISPLAY);
     }
-    return Optional.of(coding);
+    return coding;
   }
 }
