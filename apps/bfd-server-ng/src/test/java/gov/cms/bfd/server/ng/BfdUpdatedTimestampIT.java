@@ -27,10 +27,10 @@ import org.springframework.beans.factory.annotation.Autowired;
  * reflected in the API responses, without mutating the test data.
  */
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-public class LastUpdatedRepositoryIT extends IntegrationTestBase {
+public class BfdUpdatedTimestampIT extends IntegrationTestBase {
 
   private static final String EOB_META_LAST_UPDATED_MSG = "EOB meta.lastUpdated should be set";
-  private final LoadProgressRepository loadProgressLastUpdatedProvider;
+  private final LoadProgressRepository loadProgressRepository;
   private final ClaimRepository claimRepository;
   private final BeneficiaryRepository beneficiaryRepository;
 
@@ -143,7 +143,7 @@ public class LastUpdatedRepositoryIT extends IntegrationTestBase {
   @Test
   void repositoryReturnsCorrectLastUpdatedFromLoadProgress() {
 
-    var lastUpdated = loadProgressLastUpdatedProvider.lastUpdated();
+    var lastUpdated = loadProgressRepository.lastUpdated();
     assertNotNull(lastUpdated, "LoadProgressRepository should return a non-null timestamp");
     assertTrue(
         lastUpdated.isAfter(DateUtil.MIN_DATETIME),
