@@ -1,7 +1,6 @@
 [project]
 name = "samhsa-regression-tests"
 version = "1.0.0"
-requires-python = ">=3.13"
 dependencies = [
     "aiohttp>=3.13.0",
     "psycopg[binary]>=3.2.10",
@@ -11,54 +10,10 @@ dependencies = [
     "pyyaml>=6.0.3",
 ]
 
-[tool.ruff]
-# Set the maximum line length to 100.
-line-length = 100
-
-[tool.ruff.lint]
-select = [
-    "D",    # pydocstyle
-    "E501",
-    # pycodestyle
-    "E",
-    # Pyflakes
-    "F",
-    # pyupgrade
-    "UP",
-    # flake8-bugbear
-    "B",
-    # flake8-simplify
-    "SIM",
-    # isort
-    "I",
-    "ANN",
-    "LOG",
-    "G",
-    "PT",
-    "RSE",
-    "PIE",
-    "RET",
-    "SLF",
-    "ARG",
-    "PTH",
-    "PLE",
-    "PLW",
-    "PERF",
-    "FURB",
-    "RUF",
-]
-# Don't require docstrings
-ignore = ["D100", "D101", "D102", "D103", "D104", "D105", "D107"]
-
-[tool.ruff.lint.pydocstyle]
-convention = "pep257"
-
-[tool.ruff.format]
-quote-style = "double"
-indent-style = "space"
-docstring-code-format = true
+# Inherits tool configurations from 
+# ../../pyproject.toml (apps workspace) and 
+# ../../../pyproject.toml (root)
 
 [tool.pyright]
-typeCheckingMode = "strict"
 venvPath = "."
 venv = ".venv"

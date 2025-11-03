@@ -54,7 +54,7 @@ def _get_regression_query(select_query: str) -> str:
     )
 
 
-def get_regression_bene_ids(uri: str, table_sample_pct: float | None = None) -> list[str]:  # noqa: ARG001
+def get_regression_bene_ids(uri: str, table_sample_pct: float | None = None) -> list[str]:
     """Retrieve a list of beneficiary IDs within the range of 20,000 contiguous synthetic
     beneficiaries that exist in each environment. Returned list is sorted in ascending order.
 
@@ -68,7 +68,7 @@ def get_regression_bene_ids(uri: str, table_sample_pct: float | None = None) -> 
     return [str(r[0]) for r in _execute(uri, bene_query)]
 
 
-def get_regression_hashed_mbis(uri: str, table_sample_pct: float | None = None) -> list[str]:  # noqa: ARG001
+def get_regression_hashed_mbis(uri: str, table_sample_pct: float | None = None) -> list[str]:
     """Retrieve a list of hashed MBIs within the range of 20,000 contiguous synthetic
     beneficiaries that exist in each environment. Returned list is sorted in ascending order.
 
@@ -82,7 +82,7 @@ def get_regression_hashed_mbis(uri: str, table_sample_pct: float | None = None) 
     return [str(r[0]) for r in _execute(uri, mbi_query)]
 
 
-def get_regression_mbis(uri: str, table_sample_pct: float | None = None) -> list[str]:  # noqa: ARG001
+def get_regression_mbis(uri: str, table_sample_pct: float | None = None) -> list[str]:
     """Retrieve a list of MBIs within the range of 20,000 contiguous synthetic
     beneficiaries that exist in each environment. Returned list is sorted in ascending order.
 
@@ -98,7 +98,7 @@ def get_regression_mbis(uri: str, table_sample_pct: float | None = None) -> list
 
 def get_regression_contract_ids(
     uri: str,
-    table_sample_pct: float | None = None,  # noqa: ARG001
+    table_sample_pct: float | None = None,
 ) -> list[dict[str, str]]:
     """Retrieve a list of contract IDs within the range of 20,000 contiguous synthetic
     beneficiaries that exist in each environment. Returned list is sorted in ascending order, and
@@ -126,7 +126,7 @@ def get_regression_contract_ids(
     ]
 
 
-def get_regression_pac_hashed_mbis(uri: str, table_sample_pct: float | None = None) -> list[str]:  # noqa: ARG001
+def get_regression_pac_hashed_mbis(uri: str, table_sample_pct: float | None = None) -> list[str]:
     """Return a list of MBI hashes within the set of static, synthetic PAC data.
 
     Args:
@@ -141,7 +141,7 @@ def get_regression_pac_hashed_mbis(uri: str, table_sample_pct: float | None = No
     return [str(r[0]) for r in _execute(uri, claims_mbis_query)]
 
 
-def get_regression_pac_mbis(uri: str, table_sample_pct: float | None = None) -> list[str]:  # noqa: ARG001
+def get_regression_pac_mbis(uri: str, table_sample_pct: float | None = None) -> list[str]:
     """Return a list of MBI within the set of static, synthetic PAC data.
 
     Args:
