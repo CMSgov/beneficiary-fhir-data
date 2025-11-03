@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.ng;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -155,14 +156,7 @@ public class BfdUpdatedTimestampIT extends IntegrationTestBase {
     assertNotNull(actualDate, message + " - actual timestamp missing");
     long actualSeconds = actualDate.toInstant().getEpochSecond();
     long expectedSeconds = expected.toInstant().getEpochSecond();
-    assertTrue(
-        actualSeconds == expectedSeconds,
-        message
-            + " expected="
-            + expectedSeconds
-            + "s actual="
-            + actualSeconds
-            + "s (comparing second precision)");
+    assertEquals(expectedSeconds, actualSeconds, message + " (comparing second precision)");
   }
 
   private java.util.Optional<ZonedDateTime> getClaimBfdUpdatedTs(String claimId) {
