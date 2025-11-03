@@ -20,7 +20,7 @@ jobs:
         with:
           version: "0.8.10"
       - name: Install node
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v6
         with:
           node-version: "22"
       # Maven is needed to run the migrator
