@@ -6,11 +6,8 @@ updates:
       interval: "weekly"
       day: "monday"
       time: "09:00"
-      timezone: "America/Chicago"
+      timezone: "America/New_York"
     reviewers:
       - "CMSgov/bfd-team"
     allow:
       - dependency-type: "direct"
-    ignore:
-      - dependency-name: "*"
-        update-types: ["version-update:semver-major"]
