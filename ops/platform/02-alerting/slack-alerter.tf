@@ -177,6 +177,7 @@ resource "aws_lambda_permission" "slack_alerter" {
 
 resource "aws_cloudwatch_event_rule" "guardduty_runtime_health" {
   name        = "${local.name_prefix}-guardduty-runtime-health-status"
+  state       = "DISABLED" # TODO: Disabled until BFD-4379 makes these alerts more useful
   description = "Capture events indicating a runtime agent is no longer sending telemtry"
   event_pattern = jsonencode({
     "source" : ["aws.guardduty"],
