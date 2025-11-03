@@ -90,7 +90,7 @@ jobs:
 
       - name: Configure AWS credentials
         id: config-aws-creds
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: ${{ secrets.NON_PROD_ACCOUNT_GHA_ROLE_ARN }}
           role-session-name: ci-java

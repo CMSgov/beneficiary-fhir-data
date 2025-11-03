@@ -190,7 +190,7 @@ jobs:
     steps:
       - name: Configure AWS credentials
         if: ${{ !inputs.skipBasePull }}
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: ${{ secrets.NON_PROD_ACCOUNT_GHA_ROLE_ARN }}
           role-session-name: build-container-images-${{ github.run_id }}-${{ github.run_attempt }}
@@ -349,7 +349,7 @@ jobs:
           merge-multiple: true
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: ${{ steps.get-role-arn.outputs.role-arn }}
           role-session-name: build-container-images-${{ github.run_id }}-${{ github.run_attempt }}
