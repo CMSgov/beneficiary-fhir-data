@@ -188,7 +188,7 @@ jobs:
           token: ${{ steps.generate_token.outputs.token }}
 
       - name: Retrieve base java image
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           pattern: '*bfd-platform-base-java*'
           merge-multiple: true
@@ -318,7 +318,7 @@ jobs:
           echo "role-arn=$role_arn" >> "$GITHUB_OUTPUT"
 
       - name: Download jib image artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           name: jib-images
           path: ${{ runner.temp }}
@@ -400,7 +400,7 @@ jobs:
     steps:
       - name: Pull release artifacts
         id: pull-release-artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           name: release-artifacts
 
