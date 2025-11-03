@@ -447,9 +447,8 @@ public enum ClaimTypeCode {
       } else {
         throw new IllegalStateException("Not a valid claim type code");
       }
-      return new ArrayList<>(collectedClaimTypeCodes);
     }
-    return Collections.emptyList();
+    return new ArrayList<>(collectedClaimTypeCodes);
   }
 
   private static List<ClaimTypeCode> mapCarrierToClaimTypeCodes() {
