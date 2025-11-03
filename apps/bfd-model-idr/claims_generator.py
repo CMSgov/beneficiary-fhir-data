@@ -439,7 +439,9 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
     claim["CLM"]["BENE_SK"] = bene_sk
     claim["CLM"]["CLM_DISP_CD"] = random.choice(generator.code_systems["CLM_DISP_CD"])
     claim["CLM"]["CLM_QUERY_CD"] = random.choice(generator.code_systems["CLM_QUERY_CD"])
-    claim['CLM']['CLM_ADJSTMT_TYPE_CD'] = random.choice(generator.code_systems['CLM_ADJSTMT_TYPE_CD'])
+    claim["CLM"]["CLM_ADJSTMT_TYPE_CD"] = random.choice(
+        generator.code_systems["CLM_ADJSTMT_TYPE_CD"]
+    )
 
     if clm_type_cd in (1, 2, 3, 4):
         claim["CLM"]["CLM_SRVC_PRVDR_GNRC_ID_NUM"] = random.choice(type_2_npis)
@@ -474,7 +476,7 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
         claim_line["CLM_LINE_MDCR_DDCTBL_AMT"] = round(random.uniform(0, 5), 2)
         claim_line["CLM_LINE_NUM"] = "1"
         claim_line["CLM_FROM_DT"] = claim["CLM"]["CLM_FROM_DT"]
-        claim_line['CLM_LINE_RX_NUM'] = round(random.uniform(0,100000),2)
+        claim_line["CLM_LINE_RX_NUM"] = round(random.uniform(0, 100000), 2)
 
         claim_line_rx = {}
         claim_line_rx["CLM_UNIQ_ID"] = claim["CLM"]["CLM_UNIQ_ID"]
@@ -483,7 +485,7 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
         claim_line_rx["GEO_BENE_SK"] = claim["CLM"]["GEO_BENE_SK"]
         claim_line_rx["CLM_LINE_NUM"] = "1"
         claim_line_rx["CLM_FROM_DT"] = claim["CLM"]["CLM_FROM_DT"]
-        claim_line_rx['CLM_DSPNSNG_STUS_CD'] = random.choice(['P','C'])
+        claim_line_rx["CLM_DSPNSNG_STUS_CD"] = random.choice(["P", "C"])
         claim_line_rx["CLM_LINE_RX_ORGN_CD"] = random.choice(
             generator.code_systems["CLM_LINE_RX_ORGN_CD"]
         )
@@ -582,7 +584,7 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
         claim["CLM"]["CLM_RNDRG_PRVDR_NPI_NUM"] = random.choice(type_1_npis)
         claim["CLM"]["CLM_BLG_PRVDR_OSCAR_NUM"] = random.choice(avail_oscar_codes_institutional)
         claim["CLM"]["CLM_MDCR_COINSRNC_AMT"] = round(random.uniform(0, 25), 2)
-        claim['CLM']['CLM_BLG_PRVDR_ZIP5_CD'] = random.choice(['75205','77550','77005'])
+        claim["CLM"]["CLM_BLG_PRVDR_ZIP5_CD"] = random.choice(["75205", "77550", "77005"])
 
     if clm_type_cd == 40 or (clm_type_cd > 70 and clm_type_cd <= 82):
         claim["CLM"]["PRVDR_RFRG_PRVDR_NPI_NUM"] = random.choice(type_1_npis)
@@ -708,7 +710,7 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
         institutional_parts["CLM_TYPE_CD"] = claim["CLM"]["CLM_TYPE_CD"]
         institutional_parts["CLM_NUM_SK"] = claim["CLM"]["CLM_NUM_SK"]
         if clm_type_cd == 40:
-            institutional_parts['CLM_OP_SRVC_TYPE_CD'] = random.choice(
+            institutional_parts["CLM_OP_SRVC_TYPE_CD"] = random.choice(
                 generator.code_systems["CLM_OP_SRVC_TYPE_CD"]
             )
         institutional_parts["CLM_FI_ACTN_CD"] = random.choice(
@@ -727,7 +729,9 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
             generator.code_systems["CLM_ADMSN_SRC_CD"]
         )
         institutional_parts["DGNS_DRG_CD"] = random.randint(0, 42)
-        institutional_parts['DGNS_DRG_OUTLIER_CD'] = random.choice(generator.code_systems["DGNS_DRG_OUTLIER_CD"])
+        institutional_parts["DGNS_DRG_OUTLIER_CD"] = random.choice(
+            generator.code_systems["DGNS_DRG_OUTLIER_CD"]
+        )
         institutional_parts["CLM_INSTNL_CVRD_DAY_CNT"] = random.randint(0, 10)
         institutional_parts["CLM_MDCR_IP_LRD_USE_CNT"] = random.randint(0, 10)
         institutional_parts["CLM_INSTNL_PER_DIEM_AMT"] = round(random.uniform(0, 350), 2)
@@ -805,7 +809,9 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
             claim_line_inst["CLM_NUM_SK"] = claim["CLM"]["CLM_NUM_SK"]
 
         if clm_type_cd >= 71 and clm_type_cd <= 82:
-            claim_line['CLM_RNDRG_PRVDR_TYPE_CD'] = random.choice(generator.code_systems["CLM_PRVDR_TYPE_CD"])
+            claim_line["CLM_RNDRG_PRVDR_TYPE_CD"] = random.choice(
+                generator.code_systems["CLM_PRVDR_TYPE_CD"]
+            )
             claim_line_prfnl["GEO_BENE_SK"] = claim["CLM"]["GEO_BENE_SK"]
             claim_line_prfnl["CLM_DT_SGNTR_SK"] = claim["CLM"]["CLM_DT_SGNTR_SK"]
             claim_line_prfnl["CLM_TYPE_CD"] = claim["CLM"]["CLM_TYPE_CD"]
