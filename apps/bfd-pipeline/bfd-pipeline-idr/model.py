@@ -34,6 +34,7 @@ def transform_default_string(value: str | None) -> str:
         return ""
     return value
 
+
 def transform_default_and_zero_string(value: str | None) -> str:
     if value is None or value == "~" or value == "0":
         return ""
