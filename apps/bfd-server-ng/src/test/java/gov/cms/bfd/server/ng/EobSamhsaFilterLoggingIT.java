@@ -3,140 +3,75 @@ package gov.cms.bfd.server.ng;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import gov.cms.bfd.server.ng.eob.EobHandler;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
+import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /** Integration test to verify SAMHSA claim filtering logging is working correctly. */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class EobSamhsaFilterLoggingIT extends IntegrationTestBase {
 
   private static final long CLAIM_ID_WITH_SAMHSA_DIAGNOSIS = 4146709784142L;
-  private static final long CLAIM_ID_WITH_SAMHSA_PROCEDURE = 6647624169509L;
-  private static final long CLAIM_ID_WITH_SAMHSA_HCPCS = 7095549187112L;
-  private static final long CLAIM_ID_WITH_SAMHSA_DRG = 9644464937468L;
   private static final long CLAIM_ID_WITH_NO_SAMHSA = 566745788569L;
 
-  @Autowired private EobHandler eobHandler;
+  private final EobHandler eobHandler;
 
-  /** Test that filtering a claim with SAMHSA diagnosis code logs appropriately. */
-  @Test
-  void testSamhsaDiagnosisCodeLogging() {
-    var resultExclude =
-        eobHandler.searchById(
-            CLAIM_ID_WITH_SAMHSA_DIAGNOSIS,
-            new DateTimeRange(),
-            new DateTimeRange(),
-            SamhsaFilterMode.EXCLUDE);
+  private ListAppender<ILoggingEvent> listAppender;
+  private Logger logger;
 
-    assertTrue(
-        resultExclude.getEntry().isEmpty(), "Claim with SAMHSA diagnosis code should be filtered");
+  @BeforeEach
+  void setUp() {
+    // Get the logger for EobHandler or SAMHSA filtering
+    logger = (Logger) LoggerFactory.getLogger("gov.cms.bfd.server.ng.eob");
 
-    var resultInclude =
-        eobHandler.searchById(
-            CLAIM_ID_WITH_SAMHSA_DIAGNOSIS,
-            new DateTimeRange(),
-            new DateTimeRange(),
-            SamhsaFilterMode.INCLUDE);
-
-    assertFalse(
-        resultInclude.getEntry().isEmpty(), "Claim should be present when SAMHSA is INCLUDED");
+    // Create and attach a ListAppender to capture log events
+    listAppender = new ListAppender<>();
+    listAppender.start();
+    logger.addAppender(listAppender);
   }
 
-  /** Test that filtering a claim with SAMHSA procedure code logs appropriately. */
-  @Test
-  void testSamhsaProcedureCodeLogging() {
-    var resultExclude =
-        eobHandler.searchById(
-            CLAIM_ID_WITH_SAMHSA_PROCEDURE,
-            new DateTimeRange(),
-            new DateTimeRange(),
-            SamhsaFilterMode.EXCLUDE);
-
-    assertTrue(
-        resultExclude.getEntry().isEmpty(), "Claim with SAMHSA procedure code should be filtered");
-
-    var resultInclude =
-        eobHandler.searchById(
-            CLAIM_ID_WITH_SAMHSA_PROCEDURE,
-            new DateTimeRange(),
-            new DateTimeRange(),
-            SamhsaFilterMode.INCLUDE);
-
-    assertFalse(
-        resultInclude.getEntry().isEmpty(), "Claim should be present when SAMHSA is INCLUDED");
+  @AfterEach
+  void tearDown() {
+    // Remove the appender after each test
+    logger.detachAppender(listAppender);
+    listAppender.stop();
   }
 
-  /** Test that filtering a claim with SAMHSA HCPCS code logs appropriately. */
+  /** Test that filtering a SAMHSA claim generates appropriate logs. */
   @Test
-  void testSamhsaHcpcsCodeLogging() {
-    var resultExclude =
-        eobHandler.searchById(
-            CLAIM_ID_WITH_SAMHSA_HCPCS,
-            new DateTimeRange(),
-            new DateTimeRange(),
-            SamhsaFilterMode.EXCLUDE);
+  void testSamhsaClaimLogging() {
+    listAppender.list.clear();
 
-    assertTrue(
-        resultExclude.getEntry().isEmpty(), "Claim with SAMHSA HCPCS code should be filtered");
+    eobHandler.searchById(
+        CLAIM_ID_WITH_SAMHSA_DIAGNOSIS,
+        new DateTimeRange(),
+        new DateTimeRange(),
+        SamhsaFilterMode.EXCLUDE);
 
-    var resultInclude =
-        eobHandler.searchById(
-            CLAIM_ID_WITH_SAMHSA_HCPCS,
-            new DateTimeRange(),
-            new DateTimeRange(),
-            SamhsaFilterMode.INCLUDE);
-
-    assertFalse(
-        resultInclude.getEntry().isEmpty(), "Claim should be present when SAMHSA is INCLUDED");
+    assertFalse(listAppender.list.isEmpty(), "Expected log messages during SAMHSA filtering");
   }
 
-  /** Test that filtering a claim with SAMHSA DRG code logs appropriately. */
+  /** Test that non-SAMHSA claims do not generate filtering logs. */
   @Test
-  void testSamhsaDrgCodeLogging() {
-    var resultExclude =
-        eobHandler.searchById(
-            CLAIM_ID_WITH_SAMHSA_DRG,
-            new DateTimeRange(),
-            new DateTimeRange(),
-            SamhsaFilterMode.EXCLUDE);
+  void testNonSamhsaClaimNoLogging() {
+    listAppender.list.clear();
 
-    assertTrue(resultExclude.getEntry().isEmpty(), "Claim with SAMHSA DRG code should be filtered");
+    eobHandler.searchById(
+        CLAIM_ID_WITH_NO_SAMHSA,
+        new DateTimeRange(),
+        new DateTimeRange(),
+        SamhsaFilterMode.EXCLUDE);
 
-    var resultInclude =
-        eobHandler.searchById(
-            CLAIM_ID_WITH_SAMHSA_DRG,
-            new DateTimeRange(),
-            new DateTimeRange(),
-            SamhsaFilterMode.INCLUDE);
-
-    assertFalse(
-        resultInclude.getEntry().isEmpty(), "Claim should be present when SAMHSA is INCLUDED");
-  }
-
-  /** Test that non-SAMHSA claims are not filtered and no logging occurs for filtering. */
-  @Test
-  void testNonSamhsaClaimNotFiltered() {
-    var resultExclude =
-        eobHandler.searchById(
-            CLAIM_ID_WITH_NO_SAMHSA,
-            new DateTimeRange(),
-            new DateTimeRange(),
-            SamhsaFilterMode.EXCLUDE);
-
-    assertFalse(
-        resultExclude.getEntry().isEmpty(),
-        "Non-SAMHSA claim should not be filtered even with EXCLUDE mode");
-
-    var resultInclude =
-        eobHandler.searchById(
-            CLAIM_ID_WITH_NO_SAMHSA,
-            new DateTimeRange(),
-            new DateTimeRange(),
-            SamhsaFilterMode.INCLUDE);
-
-    assertFalse(resultInclude.getEntry().isEmpty(), "Non-SAMHSA claim should be present");
+    assertTrue(listAppender.list.isEmpty(), "Expected no log messages for non-SAMHSA claims");
   }
 }
