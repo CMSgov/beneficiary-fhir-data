@@ -5,8 +5,12 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.util.List;
 import java.util.Optional;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.HumanName;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Meta;
+import org.hl7.fhir.r4.model.Practitioner;
 
 @Embeddable
 class PharmacyPractitionerProvider {

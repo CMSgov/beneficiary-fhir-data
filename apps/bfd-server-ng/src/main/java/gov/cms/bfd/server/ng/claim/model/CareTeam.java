@@ -59,9 +59,7 @@ class CareTeam {
                 npi ->
                     CareTeamType.RENDERING.toFhir(
                         sequenceGenerator, npi, renderingProviderLastName)),
-            prescribingProviderNpiNumber
-                .filter(npi -> !npi.equals("0"))
-                .map(
+            prescribingProviderNpiNumber.map(
                     npi ->
                         CareTeamType.PRESCRIBING.toFhir(
                             sequenceGenerator, npi, Optional.of(PROVIDER_LAST_NAME))));
