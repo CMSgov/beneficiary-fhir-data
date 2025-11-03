@@ -50,7 +50,7 @@ jobs:
     steps:
       - name: Checkout code
         id: code-checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ inputs.branch }}
       # Maven is needed to run the migrator
