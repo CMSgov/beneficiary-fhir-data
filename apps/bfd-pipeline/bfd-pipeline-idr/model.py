@@ -668,6 +668,7 @@ def claim_type_clause(start_time: datetime, claim_type_codes: list[int]) -> str:
             )
             OR {ALIAS_CLM}.clm_src_id = '{NCH_CLM_SOURCE}'
         )
+        AND {ALIAS_CLM}.clm_from_dt <= {ALIAS_CLM}.clm_thru_dt
     )
     """
 

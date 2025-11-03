@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model;
 
+import gov.cms.bfd.server.ng.ClaimSecurityStatus;
 import gov.cms.bfd.server.ng.beneficiary.model.BeneficiarySimple;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import jakarta.persistence.Column;
@@ -135,9 +136,10 @@ public class Claim {
   /**
    * Convert the claim info to a FHIR ExplanationOfBenefit.
    *
+   * @param securityStatus securityStatus
    * @return ExplanationOfBenefit
    */
-  public ExplanationOfBenefit toFhir() {
+  public ExplanationOfBenefit toFhir(ClaimSecurityStatus securityStatus) {
     var eob = new ExplanationOfBenefit();
     eob.setId(String.valueOf(claimUniqueId));
     eob.setPatient(PatientReferenceFactory.toFhir(beneficiary.getXrefSk()));
@@ -146,7 +148,7 @@ public class Claim {
     eob.setType(claimTypeCode.toFhirType());
     claimTypeCode.toFhirSubtype().ifPresent(eob::setSubType);
 
-    eob.setMeta(meta.toFhir(claimTypeCode, claimSourceId));
+    eob.setMeta(meta.toFhir(claimTypeCode, claimSourceId, securityStatus));
     eob.setIdentifier(identifiers.toFhir());
     eob.setBillablePeriod(billablePeriod.toFhir());
     eob.setCreated(DateUtil.toDate(claimEffectiveDate));

@@ -258,6 +258,10 @@ public class SystemUrls {
   public static final String HL7_BENEFIT_CATEGORY =
       "http://terminology.hl7.org/CodeSystem/ex-benefitcategory";
 
+  /** URL. */
+  public static final String SAMHSA_ACT_CODE_SYSTEM_URL =
+      "http://terminology.hl7.org/CodeSystem/v3-ActCode";
+
   // US Core
   /**
    * <a href="https://hl7.org/fhir/us/core/STU7/StructureDefinition-us-core-ethnicity.html">US Core
