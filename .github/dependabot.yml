@@ -9,3 +9,8 @@ updates:
       timezone: "America/Chicago"
     reviewers:
       - "CMSgov/bfd-team"
+    allow:
+      - dependency-type: "direct"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
