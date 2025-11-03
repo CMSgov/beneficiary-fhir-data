@@ -7,3 +7,9 @@ updates:
       day: "monday"
       time: "09:00"
       timezone: "America/New_York"
+    pull-request-branch-name:
+      separator: "/"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
