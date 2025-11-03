@@ -7,5 +7,3 @@ updates:
       day: "monday"
       time: "09:00"
       timezone: "America/New_York"
-    reviewers:
-      - "CMSgov/bfd-team"
