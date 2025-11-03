@@ -423,14 +423,6 @@ public class SystemUrls {
   public static final String BLUE_BUTTON_CODE_SYSTEM_CLAIM_FORMAT_CODE =
       "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-SBMT-FRMT-CD";
 
-  /** Blue Button structure definition - claim submitter contract number. */
-  public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_CLAIM_SUBMITTER_CONTRACT_NUMBER =
-      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-SBMTR-CNTRCT-NUM";
-
-  /** Blue Button structure definition - claim submitter contract number. */
-  public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_CLAIM_SUBMITTER_CONTRACT_PBP_NUMBER =
-      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-SBMTR-CNTRCT-PBP-NUM";
-
   /** Blue Button structure definition - claim process date. */
   public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_CLAIM_PROCESS_DATE =
       "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CMS-PROC-DT";
@@ -489,7 +481,7 @@ public class SystemUrls {
 
   /** Blue Button structure definition - Submitter Contract PBP Number. */
   public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_SUBMITTER_CONTRACT_PBP_NUMBER =
-      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-SBMTR-CNTRCT-NUM";
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-SBMTR-CNTRCT-PBP-NUM";
 
   /** Blue Button structure definition - nonpayment reason code. */
   public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_NONPAYMENT_REASON_CODE =

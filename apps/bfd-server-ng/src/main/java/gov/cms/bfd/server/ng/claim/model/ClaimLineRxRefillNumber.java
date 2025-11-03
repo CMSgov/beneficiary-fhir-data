@@ -3,7 +3,8 @@ package gov.cms.bfd.server.ng.claim.model;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+import org.hl7.fhir.r4.model.Quantity;
 
 @Embeddable
 class ClaimLineRxRefillNumber {
