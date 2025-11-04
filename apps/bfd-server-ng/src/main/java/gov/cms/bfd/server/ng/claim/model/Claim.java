@@ -67,6 +67,7 @@ public class Claim {
   @Embedded private AdjudicationCharge adjudicationCharge;
   @Embedded private ClaimPaymentAmount claimPaymentAmount;
 
+  //TODO: to be added in BFD-4286
   // @Embedded private PharmacyOrgProvider pharmacyOrgProvider;
   // @Embedded private PharmacyPractitionerProvider pharmacyPractitionerProvider;
 
@@ -110,7 +111,7 @@ public class Claim {
       insertable = false,
       updatable = false,
       referencedColumnName = "cntrct_pbp_num")
-  private Contract contract; // TODO: double check one to one relationship
+  private Contract contract;
 
   Optional<ClaimInstitutional> getClaimInstitutional() {
     return Optional.ofNullable(claimInstitutional);
@@ -161,8 +162,7 @@ public class Claim {
               eob.addContained(i);
               eob.setInsurer(new Reference(i));
             });
-    var contract = getContract(); // 4th query
-    contract
+    getContract()
         .flatMap(Contract::getContractName)
         .ifPresent(name -> claimTypeCode.toFhirInsurerPartD(name));
     var institutional = getClaimInstitutional();

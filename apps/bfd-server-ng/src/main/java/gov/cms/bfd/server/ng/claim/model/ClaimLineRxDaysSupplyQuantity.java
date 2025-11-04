@@ -16,6 +16,6 @@ class ClaimLineRxDaysSupplyQuantity {
     return supportingInfoFactory
         .createSupportingInfo()
         .setCategory(CarinSupportingInfoCategory.DAYS_SUPPLY.toFhir())
-        .setValue(new Quantity().setValue((long) daysSupply).setUnit("days"));
+        .setValue(new Quantity().setValue(daysSupply).setUnit("days"));
   }
 }

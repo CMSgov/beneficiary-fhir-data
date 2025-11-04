@@ -22,6 +22,7 @@ import org.hl7.fhir.r4.model.PositiveIntType;
 /** Claim line info. */
 @Embeddable
 @Getter
+@SuppressWarnings("java:S2201")
 public class ClaimLine {
 
   @Convert(converter = NonZeroIntConverter.class)
