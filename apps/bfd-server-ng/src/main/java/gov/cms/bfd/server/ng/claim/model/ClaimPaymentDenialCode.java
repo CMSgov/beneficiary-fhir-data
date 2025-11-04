@@ -8,6 +8,7 @@ import lombok.Getter;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Extension;
 
+/** Claim Payment denial code enum. * */
 @AllArgsConstructor
 @Getter
 @SuppressWarnings("java:S115")
@@ -141,9 +142,7 @@ public enum ClaimPaymentDenialCode {
    */
   GREATER_THAN(
       ">", "MSP COST AVOIDED - MIR NON-GROUP HEALTH PLAN ('22' 2-BYTE CODE) (EFF. 1/2009)"),
-  /**
-   * @ - MSP COST AVOIDED - BC/BS VOLUNTARY AGREEMENTS (&#x27;12&#x27; 2-BYTE CODE).
-   */
+  /** &#64; - MSP COST AVOIDED - BC/BS VOLUNTARY AGREEMENTS (&#x27;12&#x27; 2-BYTE CODE). */
   AT("@", "MSP COST AVOIDED - BC/BS VOLUNTARY AGREEMENTS ('12' 2-BYTE CODE)"),
   /** A - ALLOWED. */
   A("A", "ALLOWED"),

@@ -8,6 +8,7 @@ import lombok.Getter;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Extension;
 
+/** Provider Assignment Indicator Switch info. * */
 @AllArgsConstructor
 @Getter
 @SuppressWarnings("java:S115")

@@ -14,6 +14,7 @@ import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Reference;
 
+/** Claim Rendering provider info. * */
 @Embeddable
 public class ClaimRenderingProvider {
 
@@ -38,14 +39,15 @@ public class ClaimRenderingProvider {
       return Optional.empty();
     }
 
-
-        var practitioner = new Practitioner();
-        practitioner.setId("careteam-provider-line-"+claimLineNum);
-        practitioner.setMeta(
-                new Meta()
-                        .addProfile(SystemUrls.PROFILE_CARIN_BB_PRACTITIONER_2_1_0)
-                        .addProfile(SystemUrls.PROFILE_US_CORE_PRACTITIONER_6_1_0));
-        npiNumber.ifPresent(s -> practitioner.addIdentifier(
+    var practitioner = new Practitioner();
+    practitioner.setId("careteam-provider-line-" + claimLineNum);
+    practitioner.setMeta(
+        new Meta()
+            .addProfile(SystemUrls.PROFILE_CARIN_BB_PRACTITIONER_2_1_0)
+            .addProfile(SystemUrls.PROFILE_US_CORE_PRACTITIONER_6_1_0));
+    npiNumber.ifPresent(
+        s ->
+            practitioner.addIdentifier(
                 new Identifier()
                     .setType(
                         new CodeableConcept(
@@ -85,18 +87,19 @@ public class ClaimRenderingProvider {
     return Optional.of(practitioner);
   }
 
-    Optional<ExplanationOfBenefit.CareTeamComponent> toFhirCareTeam(Optional<Integer> claimLineNum) {
-        if (claimLineNum.isEmpty()){
-            return Optional.empty();
-        }
-        return Optional.of(new ExplanationOfBenefit.CareTeamComponent()
-                .setSequence(claimLineNum.get())
-                .setRole(
-                        new CodeableConcept(
-                                new Coding()
-                                        .setSystem(SystemUrls.CARIN_CODE_SYSTEM_CLAIM_CARE_TEAM_ROLE)
-                                        .setCode(CareTeamType.RENDERING.roleCode)
-                                        .setDisplay(CareTeamType.RENDERING.roleDisplay)))
-                .setProvider(new Reference("#careteam-provider-line-" + claimLineNum.get())));
+  Optional<ExplanationOfBenefit.CareTeamComponent> toFhirCareTeam(Optional<Integer> claimLineNum) {
+    if (claimLineNum.isEmpty()) {
+      return Optional.empty();
     }
+    return Optional.of(
+        new ExplanationOfBenefit.CareTeamComponent()
+            .setSequence(claimLineNum.get())
+            .setRole(
+                new CodeableConcept(
+                    new Coding()
+                        .setSystem(SystemUrls.CARIN_CODE_SYSTEM_CLAIM_CARE_TEAM_ROLE)
+                        .setCode(CareTeamType.RENDERING.roleCode)
+                        .setDisplay(CareTeamType.RENDERING.roleDisplay)))
+            .setProvider(new Reference("#careteam-provider-line-" + claimLineNum.get())));
+  }
 }

@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.StringType;
 
+/** Clinical Trial number. * */
 public class ClinicalTrialNumber {
   @Column(name = "clm_clncl_tril_num")
   private Optional<String> clinicalTrailNum;

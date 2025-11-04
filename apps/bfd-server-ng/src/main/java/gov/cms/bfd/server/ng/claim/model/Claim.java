@@ -217,7 +217,7 @@ public class Claim {
         .forEach(eob::addSupportingInfo);
 
     careTeam
-        .toFhir(eob.getCareTeam().size()+1)
+        .toFhir(eob.getCareTeam().size() + 1)
         .forEach(
             c -> {
               eob.addCareTeam(c.careTeam());

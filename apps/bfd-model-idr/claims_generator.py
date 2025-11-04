@@ -48,43 +48,53 @@ def save_output_files(
         "CLM_OPRTG_PRVDR_NPI_NUM",
         "CLM_OTHR_PRVDR_NPI_NUM",
         "CLM_RNDRG_PRVDR_NPI_NUM",
+        "CLM_BLG_PRVDR_NPI_NUM",
+        "CLM_RFRG_PRVDR_PIN_NUM",
     ]
 
-    for col in int_to_string_cols:
-        df[col] = (
-            df[col]
-            .astype("Int64")  # Handle floats like 1234.0 → 1234
-            .astype("string")  # Pandas nullable string type
-            .fillna("")  # Replace <NA> with empty string
-        )
+
+    df = clean_int_columns(df, int_to_string_cols)
     df.to_csv("out/SYNTHETIC_CLM.csv", index=False)
 
     df = pd.json_normalize(clm_line)
+    df = clean_int_columns(df, int_to_string_cols)
     df["CLM_LINE_NUM"] = df["CLM_LINE_NUM"].astype("str")
     df.to_csv("out/SYNTHETIC_CLM_LINE.csv", index=False)
     df = pd.json_normalize(clm_val)
+    df = clean_int_columns(df, int_to_string_cols)
     df.to_csv("out/SYNTHETIC_CLM_VAL.csv", index=False)
     df = pd.json_normalize(clm_dt_sgntr)
+    df = clean_int_columns(df, int_to_string_cols)
     df.to_csv("out/SYNTHETIC_CLM_DT_SGNTR.csv", index=False)
     df = pd.json_normalize(clm_prod)
+    df = clean_int_columns(df, int_to_string_cols)
     df.to_csv("out/SYNTHETIC_CLM_PROD.csv", index=False)
     df = pd.json_normalize(clm_instnl)
+    df = clean_int_columns(df, int_to_string_cols)
     df.to_csv("out/SYNTHETIC_CLM_INSTNL.csv", index=False)
     df = pd.DataFrame(clm_line_instnl)
+    df = clean_int_columns(df, int_to_string_cols)
     df["CLM_LINE_NUM"] = df["CLM_LINE_NUM"].astype("str")
     df.to_csv("out/SYNTHETIC_CLM_LINE_INSTNL.csv", index=False)
     df = pd.json_normalize(clm_dcmtn)
+    df = clean_int_columns(df, int_to_string_cols)
     df.to_csv("out/SYNTHETIC_CLM_DCMTN.csv", index=False)
     df = pd.json_normalize(clm_lctn_hstry)
+    df = clean_int_columns(df, int_to_string_cols)
     df.to_csv("out/SYNTHETIC_CLM_LCTN_HSTRY.csv", index=False)
     df = pd.json_normalize(clm_fiss)
+    df = clean_int_columns(df, int_to_string_cols)
+    df = clean_int_columns(df, int_to_string_cols)
     df.to_csv("out/SYNTHETIC_CLM_FISS.csv", index=False)
     df = pd.json_normalize(clm_prfnl)
+    df = clean_int_columns(df, int_to_string_cols)
     df.to_csv("out/SYNTHETIC_CLM_PRFNL.csv", index=False)
     df = pd.json_normalize(clm_line_prfnl)
+    df = clean_int_columns(df, int_to_string_cols)
     df["CLM_LINE_NUM"] = df["CLM_LINE_NUM"].astype("str")
     df.to_csv("out/SYNTHETIC_CLM_LINE_PRFNL.csv", index=False)
     df = pd.json_normalize(clm_line_rx)
+    df = clean_int_columns(df, int_to_string_cols)
     df.to_csv("out/SYNTHETIC_CLM_LINE_RX.csv", index=False)
     # these are mostly static
     shutil.copy("sample-data/SYNTHETIC_CLM_ANSI_SGNTR.csv", "out/SYNTHETIC_CLM_ANSI_SGNTR.csv")
@@ -1161,6 +1171,17 @@ def add_meta_timestamps(obj, clm, max_date):
         else None
     )
 
+def clean_int_columns(df, cols):
+    for col in cols:
+        if col in df.columns:
+            df[col] = (
+                pd.to_numeric(df[col], errors="coerce")
+                .round(0)
+                .astype("Int64")
+                .astype("string")
+                .fillna("")
+            )
+    return df
 
 def main():
     parser = argparse.ArgumentParser(

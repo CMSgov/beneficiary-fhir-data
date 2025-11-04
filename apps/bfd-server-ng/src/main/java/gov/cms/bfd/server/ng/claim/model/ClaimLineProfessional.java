@@ -37,6 +37,7 @@ public class ClaimLineProfessional {
   /**
    * Return claim observation data if available.
    *
+   * @param bfdRowId Observation ID
    * @return claim Observation
    */
   public Optional<Observation> toFhirObservation(int bfdRowId) {

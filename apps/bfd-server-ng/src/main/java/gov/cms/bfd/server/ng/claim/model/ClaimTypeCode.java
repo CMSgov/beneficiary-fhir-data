@@ -292,6 +292,8 @@ public enum ClaimTypeCode {
   _2900(2900, "HOSPICE NOTICE OF ELECTION");
   ;
 
+  private static final Set<Integer> PART_B_CODES =
+      Set.of(_1700.code, _1800.code, _2700.code, _2800.code);
   private final int code;
   private final String display;
   private static final String INSURER_ORG = "insurer-org";
@@ -340,12 +342,7 @@ public enum ClaimTypeCode {
   }
 
   Optional<String> toDisplay() {
-    var partBCodes = Set.of(1700, 1800, 2700, 2800);
-
-    if (partBCodes.contains(code)) {
-      return Optional.of("Part B");
-    }
-    return Optional.empty();
+    return PART_B_CODES.contains(code) ? Optional.of("Part B") : Optional.empty();
   }
 
   Optional<ExplanationOfBenefit.RemittanceOutcome> toFhirOutcome() {

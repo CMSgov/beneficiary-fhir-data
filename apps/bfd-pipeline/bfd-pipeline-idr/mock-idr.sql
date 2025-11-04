@@ -410,7 +410,6 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_line (
     hcpcs_5_mdfr_cd VARCHAR(2),
     idr_insrt_ts TIMESTAMPTZ,
     idr_updt_ts TIMESTAMPTZ,
-    clm_rndrg_prvdr_type_cd VARCHAR(3),
     clm_line_pmd_uniq_trkng_num VARCHAR(14),
     PRIMARY KEY (geo_bene_sk, clm_dt_sgntr_sk, clm_type_cd, clm_num_sk, clm_line_num)
 );
