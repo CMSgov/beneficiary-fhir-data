@@ -171,8 +171,7 @@ class EobSearchIT extends IntegrationTestBase {
         (LocalDate)
             entityManager
                 .createQuery(
-                    "SELECT billablePeriod.claimThroughDate FROM Claim c WHERE c.claimUniqueId ="
-                        + " :id",
+                    "SELECT billablePeriod.claimThroughDate FROM Claim c WHERE c.claimUniqueId = :id",
                     Optional.class)
                 .setParameter("id", claimId)
                 .getResultList()
