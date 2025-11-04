@@ -113,14 +113,24 @@ venvPath = "."
 venv = ".venv"
 exclude = [
     ".venv",
+    "**/.venv",
+    "**/node_modules",
+    "**/__pycache__",
     "**/bfd-model-idr/**",
     "**/bfd-model-rif/**",
     "**/bfd-pipeline-idr/**",
     "**/locust_tests/**",
     "**/synthetic-load-converter/**",
     "**/sftp_outbound_transfer/**",
+    "apps/bfd-model/**",
+    "apps/bfd-pipeline/**",
+    "apps/bfd-server/**",
+    "apps/utils/**",
     "docs/**",
-    "ops/utils/**",
+    "ops/**",
+    "insights/**",
+    "src/**",
+    "static-site/**",
 ]
 
 [tool.pytest.ini_options]
