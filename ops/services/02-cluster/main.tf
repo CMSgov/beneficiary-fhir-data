@@ -18,6 +18,8 @@ module "terraservice" {
     Name  = local.full_name
     role  = local.service
   }
+
+  subnet_layers        = ["private"]
 }
 
 locals {
@@ -33,6 +35,13 @@ locals {
   # Local module definitions
   layer     = "data"
   full_name = "bfd-${local.env}-${local.service}"
+
+  app_subnet_ids = module.terraservice.subnets_map["private"][*].id
+  # app_subnet_ids = local.app_subnets[*].id
+  iam_path                 = module.terraservice.default_iam_path
+  region                   = module.terraservice.region
+  vpc                      = module.terraservice.vpc
+  bfd_version              = module.terraservice.bfd_version
 }
 
 resource "aws_cloudwatch_log_group" "this" {

@@ -14,11 +14,11 @@ locals {
   server_truststore_path              = "/data/${local.truststore_filename}"
   server_keystore_path                = "/data/${local.keystore_filename}"
   server_port                         = nonsensitive(local.ssm_config["/bfd/${local.service}/service_port"])
-  server_min_capacity                 = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/capacity/min"])
-  server_max_capacity                 = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/capacity/max"])
+  server_min_capacity                 = 1 #2 #nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/capacity/min"])
+  server_max_capacity                 = 1 #nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/capacity/max"])
   server_capacity_provider_strategies = module.data_strategies.strategies
   server_cpu                          = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/resources/cpu"])
-  server_memory                       = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/resources/memory"])
+  server_memory                       = 16384 # nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/resources/memory"])
   server_ssm_hierarchies = [
     "/bfd/${local.env}/${local.service}/sensitive/",
     "/bfd/${local.env}/${local.service}/nonsensitive/",
@@ -28,6 +28,9 @@ locals {
   server_healthcheck_pem_path = "/data/healthcheck.pem"
   server_healthcheck_bene_id  = nonsensitive(local.ssm_config["/bfd/${local.service}/heathcheck/testing_bene_id"])
   server_healthcheck_uri      = "https://localhost:${local.server_port}/v2/fhir/ExplanationOfBenefit/?_format=application%2Ffhir%2Bjson&patient=${local.server_healthcheck_bene_id}"
+
+  server_jmx_export_port        = "9404"
+  server_jmx_export_config_path = "/opt/jmx_exporter/config.yaml"
 }
 
 data "aws_rds_cluster" "main" {
@@ -71,6 +74,19 @@ data "aws_ecr_repository" "server" {
 data "aws_ecr_image" "server" {
   repository_name = data.aws_ecr_repository.server.name
   image_tag       = local.server_version
+}
+
+
+resource "aws_cloudwatch_log_group" "otel_messages" {
+  name         = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/otel/messages"
+  kms_key_id   = local.env_key_arn
+  skip_destroy = true
+}
+
+resource "aws_cloudwatch_log_group" "otel_metrics" {
+  name         = "/metrics/${local.env}/${local.service}" #TODO
+  kms_key_id   = local.env_key_arn
+  skip_destroy = true
 }
 
 resource "aws_cloudwatch_log_group" "certstores_messages" {
@@ -255,6 +271,10 @@ resource "aws_ecs_task_definition" "server" {
         volumesFrom    = []
       },
       {
+        dockerLabels = {
+          Java_EMF_Metrics             = "true"
+          ECS_PROMETHEUS_EXPORTER_PORT = local.server_jmx_export_port
+        }
         name      = local.service
         image     = data.aws_ecr_image.server.image_uri
         essential = true
@@ -267,11 +287,16 @@ resource "aws_ecs_task_definition" "server" {
         ]
         environment = [
           {
+            name  = "JAVA_TOOL_OPTIONS"
+            value = "-javaagent:/opt/jmx_exporter/jmx_prometheus_javaagent.jar=${local.server_jmx_export_port}:${local.server_jmx_export_config_path}"
+          },
+          {
             name = "JDK_JAVA_OPTIONS"
             value = join(" ", [
               "-Dlogback.configurationFile=all-stdout.logback.xml",
               "-XX:+UseContainerSupport",
-              "-XX:MaxRAMPercentage=95.0",
+              "-Xms${floor(local.server_memory * 0.70)}m",
+              "-Xmx${floor(local.server_memory * 0.70)}m",
               "-XX:+UseCompactObjectHeaders",
               "-Dnetworkaddress.cache.ttl=5",
               "-Dsun.net.inetaddr.ttl=0"
@@ -338,10 +363,16 @@ resource "aws_ecs_task_definition" "server" {
         readonlyRootFilesystem = true
         portMappings = [
           {
+            containerPort = tonumber(local.server_jmx_export_port)
+            hostPort      = tonumber(local.server_jmx_export_port)
+            name          = "${local.service}-${local.server_jmx_export_port}-${local.server_protocol}"
+            protocol      = local.server_protocol
+          },
+          {
             containerPort = tonumber(local.server_port)
             hostPort      = tonumber(local.server_port)
             name          = "${local.service}-${local.server_port}-${local.server_protocol}"
-            protocol      = "${local.server_protocol}"
+            protocol      = local.server_protocol
           },
         ]
         stopTimeout = 120 # Allow enough time for server to gracefully stop on spot termination.
@@ -368,6 +399,29 @@ resource "aws_vpc_security_group_ingress_rule" "server_allow_tls_nlb" {
   from_port                    = local.server_port
   ip_protocol                  = local.server_protocol
   to_port                      = local.server_port
+}
+
+data "aws_security_group" "adot" {
+  name   = "bfd-${local.env}-adot-sg"
+  vpc_id = local.vpc.id
+}
+
+resource "aws_vpc_security_group_ingress_rule" "adot" {
+  security_group_id            = aws_security_group.server.id
+  referenced_security_group_id = data.aws_security_group.adot.id
+  from_port                    = local.server_jmx_export_port
+  ip_protocol                  = local.server_protocol
+  to_port                      = local.server_jmx_export_port
+}
+
+resource "aws_vpc_security_group_ingress_rule" "prometheus" {
+  for_each = local.listeners
+
+  security_group_id            = aws_security_group.server.id
+  referenced_security_group_id = aws_security_group.lb[each.key].id
+  from_port                    = local.server_jmx_export_port
+  ip_protocol                  = local.server_protocol
+  to_port                      = local.server_jmx_export_port
 }
 
 resource "aws_vpc_security_group_egress_rule" "server_allow_all_traffic_ipv4" {
@@ -427,6 +481,12 @@ resource "aws_ecs_service" "server" {
     container_port   = local.server_port
   }
 
+  load_balancer {
+    target_group_arn = aws_lb_target_group.prometheus.arn
+    container_name   = local.service
+    container_port   = local.server_jmx_export_port
+  }
+
   dynamic "capacity_provider_strategy" {
     for_each = local.server_capacity_provider_strategies
     content {
@@ -472,3 +532,8 @@ resource "aws_appautoscaling_policy" "server_track_cpu" {
     scale_out_cooldown = 60
   }
 }
+
+# data "aws_ecs_container_definition" "server" {
+#   task_definition = aws_ecs_task_definition.server.id
+#   container_name  = "server"
+# }

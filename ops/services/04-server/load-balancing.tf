@@ -10,15 +10,15 @@ locals {
   lb_subnets                    = !local.lb_blue_is_public ? local.app_subnet_ids : local.dmz_subnet_ids
   listeners = {
     # TODO: Fundamentally incompatible with public LBs; need to figure out how to reconcile with port rules
-    "${local.green_state}" = {
+    lower(local.green_state) = {
       port = local.server_port
       ingress = {
         cidrs        = local.lb_internal_ingress_cidrs
         prefix_lists = local.lb_internal_ingress_pl_ids
       }
     }
-    "${local.blue_state}" = {
-      port = 443
+    lower(local.blue_state) = {
+      port = local.lb_ingress_port
       ingress = {
         cidrs        = !local.lb_blue_is_public ? local.lb_internal_ingress_cidrs : ["0.0.0.0/0"]
         prefix_lists = !local.lb_blue_is_public ? local.lb_internal_ingress_pl_ids : []
@@ -74,6 +74,13 @@ resource "aws_security_group" "lb" {
     cidr_blocks = each.value.ingress.cidrs
   }
 
+  ingress {
+    from_port   = local.server_jmx_export_port
+    to_port     = local.server_jmx_export_port
+    protocol    = local.lb_protocol
+    cidr_blocks = ["10.0.0.0/8"]
+  }
+
   # Dynamically create ingress rule for Prefix Lists iff they are specified
   dynamic "ingress" {
     for_each = length(each.value.ingress.prefix_lists) > 0 ? [1] : []
@@ -91,6 +98,53 @@ resource "aws_security_group" "lb" {
     protocol        = local.lb_protocol
     security_groups = [aws_security_group.server.id]
   }
+
+  egress {
+    from_port       = local.server_jmx_export_port
+    to_port         = local.server_jmx_export_port
+    protocol        = local.lb_protocol
+    security_groups = [aws_security_group.server.id]
+  }
+}
+
+
+resource "aws_lb_listener" "prometheus" {
+  lifecycle {
+    # CodeDeploy will swap the target group during a blue/green deployment, so we need to ignore any
+    # changes
+    ignore_changes = [default_action]
+  }
+
+  load_balancer_arn = aws_lb.this.arn
+  port              = local.server_jmx_export_port
+  protocol          = local.lb_protocol
+  # protocol          = "HTTP"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.prometheus.arn
+  }
+}
+
+resource "aws_lb_target_group" "prometheus" {
+  name                   = "${local.name_prefix}-tg-prom"
+  port                   = local.server_jmx_export_port
+  # protocol               = "HTTP"
+  protocol               = upper(local.server_protocol)
+  vpc_id                 = local.vpc.id
+  deregistration_delay   = 30
+  connection_termination = true
+  target_type            = "ip"
+  # health_check {
+  #   healthy_threshold   = 2
+  #   interval            = 5
+  #   timeout             = 4
+  #   unhealthy_threshold = 5
+  #   port                = local.server_jmx_export_port
+  #   # protocol            = "HTTP" #upper(local.server_protocol)
+  #   protocol               = upper(local.server_protocol)
+  #   # path                = "/metrics"
+  # }
 }
 
 resource "aws_lb_target_group" "this" {

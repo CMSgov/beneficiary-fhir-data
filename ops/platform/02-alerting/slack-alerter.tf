@@ -184,6 +184,7 @@ resource "aws_cloudwatch_event_rule" "guardduty_runtime_health" {
     "detail-type" : ["GuardDuty Runtime Protection Unhealthy"]
   })
 }
+
 resource "aws_cloudwatch_event_target" "guardduty_runtime_health" {
   rule = aws_cloudwatch_event_rule.guardduty_runtime_health.name
   arn  = aws_sns_topic.slack["bfd-warnings"].arn

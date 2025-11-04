@@ -42,3 +42,11 @@ locals {
   green_state = "green"
   blue_state  = "blue"
 }
+
+output "leftovers" {
+  value = [
+    local._canary_exists,
+    local.azs,
+    local.keystore_local_path
+  ]
+}

@@ -1091,7 +1091,9 @@
                         </from>
                         <containerizingMode>packaged</containerizingMode>
                         <container>
-                            <jvmFlags>-Dorg.jboss.logging.provider=slf4j</jvmFlags>
+                            <jvmFlags>
+                                <jvmFlag>-Dorg.jboss.logging.provider=slf4j</jvmFlag>
+                            </jvmFlags>
                         </container>
                     </configuration>
                 </plugin>

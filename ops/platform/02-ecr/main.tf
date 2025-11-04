@@ -33,6 +33,8 @@ locals {
     "bfd-platform-run-locust",
     "bfd-platform-pipeline-ccw-runner",
     "bfd-platform-synthea-generation",
+    # cluster container image repositories
+    "bfd-platform-o11y-collector",
     # base container image repositories
     "bfd-platform-base-python",
     "bfd-platform-base-java",
