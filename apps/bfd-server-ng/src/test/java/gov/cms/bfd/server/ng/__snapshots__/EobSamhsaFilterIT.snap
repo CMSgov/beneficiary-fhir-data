@@ -8671,7 +8671,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
   "id" : "{uuid}",
   "link" : [ {
     "relation" : "self",
-    "url" : "http://localhost/v3/fhir/ExplanationOfBenefit?patient=412457726"
+    "url" : "http://localhost/v3/fhir/ExplanationOfBenefit?_sort=id&patient=412457726"
   } ],
   "meta" : {
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
@@ -8687,7 +8687,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[167719446]=[
   "id" : "{uuid}",
   "link" : [ {
     "relation" : "self",
-    "url" : "http://localhost/v3/fhir/ExplanationOfBenefit?patient=167719446"
+    "url" : "http://localhost/v3/fhir/ExplanationOfBenefit?_sort=id&patient=167719446"
   } ],
   "meta" : {
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
@@ -11780,7 +11780,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
   "id" : "{uuid}",
   "link" : [ {
     "relation" : "self",
-    "url" : "http://localhost/v3/fhir/ExplanationOfBenefit?patient=186315498"
+    "url" : "http://localhost/v3/fhir/ExplanationOfBenefit?_sort=id&patient=186315498"
   } ],
   "meta" : {
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
@@ -11796,7 +11796,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[27590072]=[
   "id" : "{uuid}",
   "link" : [ {
     "relation" : "self",
-    "url" : "http://localhost/v3/fhir/ExplanationOfBenefit?patient=27590072"
+    "url" : "http://localhost/v3/fhir/ExplanationOfBenefit?_sort=id&patient=27590072"
   } ],
   "meta" : {
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
@@ -17791,7 +17791,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
   "id" : "{uuid}",
   "link" : [ {
     "relation" : "self",
-    "url" : "http://localhost/v3/fhir/ExplanationOfBenefit?patient=412457726"
+    "url" : "http://localhost/v3/fhir/ExplanationOfBenefit?_sort=id&patient=412457726"
   } ],
   "meta" : {
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
@@ -17807,7 +17807,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[455108118]=[
   "id" : "{uuid}",
   "link" : [ {
     "relation" : "self",
-    "url" : "http://localhost/v3/fhir/ExplanationOfBenefit?patient=455108118"
+    "url" : "http://localhost/v3/fhir/ExplanationOfBenefit?_sort=id&patient=455108118"
   } ],
   "meta" : {
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
@@ -17823,7 +17823,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[794471559]=[
   "id" : "{uuid}",
   "link" : [ {
     "relation" : "self",
-    "url" : "http://localhost/v3/fhir/ExplanationOfBenefit?patient=794471559"
+    "url" : "http://localhost/v3/fhir/ExplanationOfBenefit?_sort=id&patient=794471559"
   } ],
   "meta" : {
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
@@ -17839,7 +17839,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
   "id" : "{uuid}",
   "link" : [ {
     "relation" : "self",
-    "url" : "http://localhost/v3/fhir/ExplanationOfBenefit?patient=167719446"
+    "url" : "http://localhost/v3/fhir/ExplanationOfBenefit?_sort=id&patient=167719446"
   } ],
   "meta" : {
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
@@ -20932,7 +20932,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
   "id" : "{uuid}",
   "link" : [ {
     "relation" : "self",
-    "url" : "http://localhost/v3/fhir/ExplanationOfBenefit?patient=186315498"
+    "url" : "http://localhost/v3/fhir/ExplanationOfBenefit?_sort=id&patient=186315498"
   } ],
   "meta" : {
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
@@ -20948,7 +20948,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[2
   "id" : "{uuid}",
   "link" : [ {
     "relation" : "self",
-    "url" : "http://localhost/v3/fhir/ExplanationOfBenefit?patient=27590072"
+    "url" : "http://localhost/v3/fhir/ExplanationOfBenefit?_sort=id&patient=27590072"
   } ],
   "meta" : {
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
@@ -26943,7 +26943,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
   "id" : "{uuid}",
   "link" : [ {
     "relation" : "self",
-    "url" : "http://localhost/v3/fhir/ExplanationOfBenefit?patient=412457726"
+    "url" : "http://localhost/v3/fhir/ExplanationOfBenefit?_sort=id&patient=412457726"
   } ],
   "meta" : {
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
@@ -26959,7 +26959,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
   "id" : "{uuid}",
   "link" : [ {
     "relation" : "self",
-    "url" : "http://localhost/v3/fhir/ExplanationOfBenefit?patient=455108118"
+    "url" : "http://localhost/v3/fhir/ExplanationOfBenefit?_sort=id&patient=455108118"
   } ],
   "meta" : {
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
@@ -26975,7 +26975,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[7
   "id" : "{uuid}",
   "link" : [ {
     "relation" : "self",
-    "url" : "http://localhost/v3/fhir/ExplanationOfBenefit?patient=794471559"
+    "url" : "http://localhost/v3/fhir/ExplanationOfBenefit?_sort=id&patient=794471559"
   } ],
   "meta" : {
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
