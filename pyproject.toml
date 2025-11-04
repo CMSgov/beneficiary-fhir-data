@@ -111,6 +111,11 @@ reportMissingImports = false
 reportMissingTypeStubs = false
 venvPath = "."
 venv = ".venv"
+# AWS Lambda Powertools compatibility - relaxed type checking for ops services
+reportUnknownMemberType = false
+reportUnknownVariableType = false
+reportUnknownArgumentType = false
+reportUnknownParameterType = false
 exclude = [
     ".venv",
     "**/.venv",
