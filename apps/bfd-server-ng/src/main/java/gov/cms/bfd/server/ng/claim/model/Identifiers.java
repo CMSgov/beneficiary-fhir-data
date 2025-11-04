@@ -36,12 +36,12 @@ class Identifiers {
                 new Identifier()
                     .setSystem(SystemUrls.BLUE_BUTTON_CLAIM_CONTROL_NUMBER)
                     .setValue(claimControlNumber)));
-    claimOriginalControlNumber.map(
-        originalControlNumber ->
+    claimOriginalControlNumber.ifPresent(
+        s ->
             identifiers.add(
                 new Identifier()
                     .setSystem(SystemUrls.BLUE_BUTTON_CLAIM_CONTROL_NUMBER)
-                    .setValue(originalControlNumber)));
+                    .setValue(s)));
     return identifiers;
   }
 }

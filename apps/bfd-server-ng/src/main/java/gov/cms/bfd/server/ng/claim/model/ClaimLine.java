@@ -78,12 +78,14 @@ public class ClaimLine {
 
     fromDate.map(d -> line.setServiced(new DateType(DateUtil.toDate(d))));
 
-    Stream.of(
+    var adjudicationLines =
+        Stream.of(
             claimLineInstitutional.flatMap(
                 c -> c.getAnsiSignature().map(ClaimAnsiSignature::toFhir)),
             Optional.of(adjudicationCharge.toFhir()),
             claimLineInstitutional.map(c -> c.getAdjudicationCharge().toFhir()),
-            claimLineRx.map(c -> c.getAdjudicationCharge().toFhir()))
+            claimLineRx.map(c -> c.getAdjudicationCharge().toFhir()));
+    adjudicationLines
         .flatMap(Optional::stream)
         .flatMap(Collection::stream)
         .forEach(line::addAdjudication);
