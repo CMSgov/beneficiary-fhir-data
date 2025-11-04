@@ -3,7 +3,10 @@ package gov.cms.bfd.server.ng.claim.model;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Identifier;
@@ -14,10 +17,10 @@ class Identifiers {
   private long claimUniqueId;
 
   @Column(name = "clm_cntl_num")
-  private String claimControlNumber;
+  private Optional<String> claimControlNumber;
 
   public List<Identifier> toFhir() {
-    return List.of(
+    var claimId =
         new Identifier()
             .setValue(String.valueOf(claimUniqueId))
             .setType(
@@ -26,9 +29,14 @@ class Identifiers {
                         new Coding()
                             .setSystem(SystemUrls.CARIN_CODE_SYSTEM_IDENTIFIER_TYPE)
                             .setCode("uc")
-                            .setDisplay("Unique Claim ID"))),
-        new Identifier()
-            .setSystem(SystemUrls.BLUE_BUTTON_CLAIM_CONTROL_NUMBER)
-            .setValue(claimControlNumber));
+                            .setDisplay("Unique Claim ID")));
+    var identifiers = new ArrayList<>(Collections.singletonList(claimId));
+    claimControlNumber.ifPresent(
+        s ->
+            identifiers.add(
+                new Identifier()
+                    .setSystem(SystemUrls.BLUE_BUTTON_CLAIM_CONTROL_NUMBER)
+                    .setValue(s)));
+    return identifiers;
   }
 }

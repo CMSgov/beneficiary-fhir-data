@@ -19,6 +19,7 @@ import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
+import java.util.Optional;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.junit.jupiter.api.Test;
@@ -163,13 +164,15 @@ class EobSearchIT extends IntegrationTestBase {
   void eobSearchByServiceDate() {
     var claimId = "1071939711295";
     var serviceDate =
-        entityManager
-            .createQuery(
-                "SELECT billablePeriod.claimThroughDate FROM Claim c WHERE c.claimUniqueId = :id",
-                LocalDate.class)
-            .setParameter("id", claimId)
-            .getResultList()
-            .getFirst();
+        (LocalDate)
+            entityManager
+                .createQuery(
+                    "SELECT billablePeriod.claimThroughDate FROM Claim c WHERE c.claimUniqueId = :id",
+                    Optional.class)
+                .setParameter("id", claimId)
+                .getResultList()
+                .getFirst()
+                .get();
 
     var eobBundle =
         searchBundle()
