@@ -67,7 +67,7 @@ public class Claim {
   @Embedded private AdjudicationCharge adjudicationCharge;
   @Embedded private ClaimPaymentAmount claimPaymentAmount;
 
-  //TODO: to be added in BFD-4286
+  // TODO: to be added in BFD-4286
   // @Embedded private PharmacyOrgProvider pharmacyOrgProvider;
   // @Embedded private PharmacyPractitionerProvider pharmacyPractitionerProvider;
 
