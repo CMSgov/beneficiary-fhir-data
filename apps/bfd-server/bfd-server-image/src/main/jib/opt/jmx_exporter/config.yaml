@@ -1,0 +1,5 @@
+startDelaySeconds: 0
+ssl: false
+whitelistObjectNames: ["java.lang:*"]
+rules:
+  - pattern: ".*"
