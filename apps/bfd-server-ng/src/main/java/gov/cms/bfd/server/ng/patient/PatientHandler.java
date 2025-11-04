@@ -3,6 +3,7 @@ package gov.cms.bfd.server.ng.patient;
 import gov.cms.bfd.server.ng.beneficiary.BeneficiaryRepository;
 import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
+import gov.cms.bfd.server.ng.loadprogress.LoadProgressRepository;
 import gov.cms.bfd.server.ng.util.FhirUtil;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class PatientHandler {
   private final BeneficiaryRepository beneficiaryRepository;
+  private final LoadProgressRepository loadProgressRepository;
 
   /**
    * Returns a {@link Patient} by their {@link IdType}.
@@ -42,7 +44,7 @@ public class PatientHandler {
     var beneficiary = beneficiaryRepository.findById(fhirId, lastUpdated);
 
     return FhirUtil.bundleOrDefault(
-        beneficiary.map(this::toFhir), beneficiaryRepository::beneficiaryLastUpdated);
+        beneficiary.map(this::toFhir), loadProgressRepository::lastUpdated);
   }
 
   /**
@@ -57,7 +59,7 @@ public class PatientHandler {
     var beneficiary = xrefBeneSk.flatMap(x -> beneficiaryRepository.findById(x, lastUpdated));
 
     return FhirUtil.bundleOrDefault(
-        beneficiary.map(this::toFhir), beneficiaryRepository::beneficiaryLastUpdated);
+        beneficiary.map(this::toFhir), loadProgressRepository::lastUpdated);
   }
 
   private Patient toFhir(Beneficiary beneficiary) {

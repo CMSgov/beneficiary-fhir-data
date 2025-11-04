@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
@@ -7,7 +8,9 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import java.time.ZonedDateTime;
 import java.util.Optional;
+import java.util.stream.Stream;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
@@ -23,6 +26,9 @@ public class ClaimItem implements Comparable<ClaimItem> {
   @Embedded private ClaimProcedure claimProcedure;
   @Embedded private ClaimValue claimValue;
   @Embedded private ClaimLineRxNumber claimLineRxNum;
+
+  @Column(name = "bfd_updated_ts")
+  private ZonedDateTime bfdUpdatedTimestamp;
 
   @JoinColumn(name = "clm_uniq_id")
   @ManyToOne
@@ -60,6 +66,29 @@ public class ClaimItem implements Comparable<ClaimItem> {
 
   Optional<ClaimLineRx> getClaimLineRx() {
     return Optional.ofNullable(claimLineRx);
+  }
+
+  /**
+   * Returns a stream of relevant timestamps for this ClaimItem, including the item's own updated
+   * timestamp and any timestamps from the associated ClaimLineInstitutional.
+   *
+   * @return stream of ZonedDateTimes
+   */
+  Stream<ZonedDateTime> streamTimestamps() {
+    var itemTs = Stream.of(bfdUpdatedTimestamp);
+    var lineInstitutionalStream =
+        getClaimLineInstitutional()
+            .map(
+                cli ->
+                    Stream.concat(
+                        Stream.of(cli.getBfdUpdatedTimestamp()),
+                        cli
+                            .getAnsiSignature()
+                            .map(ClaimAnsiSignature::getBfdUpdatedTimestamp)
+                            .stream()))
+            .stream()
+            .flatMap(s -> s);
+    return Stream.concat(itemTs, lineInstitutionalStream);
   }
 
   @Override
