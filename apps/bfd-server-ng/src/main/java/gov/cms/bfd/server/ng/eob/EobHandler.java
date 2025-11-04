@@ -154,19 +154,25 @@ public class EobHandler {
     return Optional.of(claim.toFhir(securityStatus));
   }
 
-  private boolean isCodeSamhsa(String targetCode, LocalDate claimDate, SecurityLabel entry) {
-    return isClaimDateWithinBounds(claimDate, entry) && entry.matches(targetCode);
-  }
-
-  private void logSamhsaFiltered(String type, long claimId, String matchedCode, String system) {
-    LOGGER
-        .atInfo()
-        .setMessage("SAMHSA claim filtered: type=" + type)
-        .addKeyValue("type", type)
-        .addKeyValue("claimId", claimId)
-        .addKeyValue("matchedCode", matchedCode)
-        .addKeyValue("system", system)
-        .log();
+  private boolean isCodeSamhsa(
+      String targetCode,
+      LocalDate claimDate,
+      SecurityLabel entry,
+      String type,
+      long claimId,
+      String system) {
+    var isSamhsa = isClaimDateWithinBounds(claimDate, entry) && entry.matches(targetCode);
+    if (isSamhsa) {
+      LOGGER
+          .atInfo()
+          .setMessage("SAMHSA claim filtered: type=" + type)
+          .addKeyValue("type", type)
+          .addKeyValue("claimId", claimId)
+          .addKeyValue("matchedCode", targetCode)
+          .addKeyValue("system", system)
+          .log();
+    }
+    return isSamhsa;
   }
 
   // Returns true if the given claim contains any procedure that matches a SAMHSA
@@ -191,25 +197,21 @@ public class EobHandler {
   private boolean drgIsSamhsa(Claim claim, LocalDate claimDate, long claimUniqueId) {
     var entries = SECURITY_LABELS.get(SystemUrls.CMS_MS_DRG);
     var drg = claim.getDrgCode().map(Object::toString).orElse("");
-    var hasSamhsa = entries.stream().anyMatch(e -> isCodeSamhsa(drg, claimDate, e));
-    if (hasSamhsa) {
-      logSamhsaFiltered("DRG", claimUniqueId, drg, SystemUrls.CMS_MS_DRG);
-    }
-    return hasSamhsa;
+    return entries.stream()
+        .anyMatch(
+            e -> isCodeSamhsa(drg, claimDate, e, "DRG", claimUniqueId, SystemUrls.CMS_MS_DRG));
   }
 
   private boolean hcpcsIsSamhsa(ClaimLine claimLine, LocalDate claimDate, long claimUniqueId) {
     var hcpcs = claimLine.getHcpcsCode().getHcpcsCode().orElse("");
-    var hasSamhsa = false;
     for (var system : List.of(SystemUrls.AMA_CPT, SystemUrls.CMS_HCPCS)) {
       var entries = SECURITY_LABELS.get(system);
-      hasSamhsa = entries.stream().anyMatch(c -> isCodeSamhsa(hcpcs, claimDate, c));
-      if (hasSamhsa) {
-        logSamhsaFiltered("HCPCS", claimUniqueId, hcpcs, system);
-        break;
+      if (entries.stream()
+          .anyMatch(c -> isCodeSamhsa(hcpcs, claimDate, c, "HCPCS", claimUniqueId, system))) {
+        return true;
       }
     }
-    return hasSamhsa;
+    return false;
   }
 
   // Checks ICDs.
@@ -228,19 +230,27 @@ public class EobHandler {
 
     var procedureHasSamhsa =
         procedureEntries.stream()
-            .anyMatch(pEntries -> isCodeSamhsa(procedureCode, claimDate, pEntries));
-    if (procedureHasSamhsa) {
-      logSamhsaFiltered(
-          "Procedure", claimUniqueId, procedureCode, icdIndicator.getProcedureSystem());
-    }
+            .anyMatch(
+                pEntries ->
+                    isCodeSamhsa(
+                        procedureCode,
+                        claimDate,
+                        pEntries,
+                        "Procedure",
+                        claimUniqueId,
+                        icdIndicator.getProcedureSystem()));
 
     var diagnosisHasSamhsa =
         diagnosisEntries.stream()
-            .anyMatch(dEntry -> isCodeSamhsa(diagnosisCode, claimDate, dEntry));
-    if (diagnosisHasSamhsa) {
-      logSamhsaFiltered(
-          "Diagnosis", claimUniqueId, diagnosisCode, icdIndicator.getDiagnosisSystem());
-    }
+            .anyMatch(
+                dEntry ->
+                    isCodeSamhsa(
+                        diagnosisCode,
+                        claimDate,
+                        dEntry,
+                        "Diagnosis",
+                        claimUniqueId,
+                        icdIndicator.getDiagnosisSystem()));
 
     return procedureHasSamhsa || diagnosisHasSamhsa;
   }
