@@ -12,6 +12,7 @@ import gov.cms.bfd.server.ng.claim.model.ClaimProcedure;
 import gov.cms.bfd.server.ng.claim.model.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.IcdIndicator;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
+import gov.cms.bfd.server.ng.loadprogress.LoadProgressRepository;
 import gov.cms.bfd.server.ng.util.FhirUtil;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.time.LocalDate;
@@ -23,8 +24,6 @@ import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Patient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -40,17 +39,18 @@ public class EobHandler {
 
   private final BeneficiaryRepository beneficiaryRepository;
   private final ClaimRepository claimRepository;
+  private final LoadProgressRepository loadProgressRepository;
 
   // Cache the security labels map to avoid repeated I/O and parsing
   private static final Map<String, List<SecurityLabel>> SECURITY_LABELS =
       SecurityLabel.getSecurityLabels();
 
   /**
-   * Returns a {@link Patient} by their {@link IdType}.
+   * Returns an {@link ExplanationOfBenefit} by its FHIR ID.
    *
    * @param fhirId FHIR ID
    * @param samhsaFilterMode SAMHSA filter mode
-   * @return patient
+   * @return an Optional containing the ExplanationOfBenefit if found
    */
   public Optional<ExplanationOfBenefit> find(final Long fhirId, SamhsaFilterMode samhsaFilterMode) {
     return searchByIdInner(fhirId, new DateTimeRange(), new DateTimeRange(), samhsaFilterMode);
@@ -101,7 +101,7 @@ public class EobHandler {
 
               return claim.toFhir(securityStatus);
             }),
-        claimRepository::claimLastUpdated);
+        loadProgressRepository::lastUpdated);
   }
 
   private Stream<Claim> filterSamhsaClaims(List<Claim> claims, SamhsaFilterMode samhsaFilterMode) {
@@ -130,7 +130,7 @@ public class EobHandler {
       DateTimeRange lastUpdated,
       SamhsaFilterMode samhsaFilterMode) {
     var eob = searchByIdInner(claimUniqueId, serviceDate, lastUpdated, samhsaFilterMode);
-    return FhirUtil.bundleOrDefault(eob.map(e -> e), claimRepository::claimLastUpdated);
+    return FhirUtil.bundleOrDefault(eob.map(e -> e), loadProgressRepository::lastUpdated);
   }
 
   private Optional<ExplanationOfBenefit> searchByIdInner(
