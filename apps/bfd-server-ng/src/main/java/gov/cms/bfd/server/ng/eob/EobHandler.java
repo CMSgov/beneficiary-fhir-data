@@ -200,15 +200,16 @@ public class EobHandler {
 
   private boolean hcpcsIsSamhsa(ClaimLine claimLine, LocalDate claimDate, long claimUniqueId) {
     var hcpcs = claimLine.getHcpcsCode().getHcpcsCode().orElse("");
+    var hasSamhsa = false;
     for (var system : List.of(SystemUrls.AMA_CPT, SystemUrls.CMS_HCPCS)) {
       var entries = SECURITY_LABELS.get(system);
-      var hasSamhsa = entries.stream().anyMatch(c -> isCodeSamhsa(hcpcs, claimDate, c));
+      hasSamhsa = entries.stream().anyMatch(c -> isCodeSamhsa(hcpcs, claimDate, c));
       if (hasSamhsa) {
         logSamhsaFiltered("HCPCS", claimUniqueId, hcpcs, system);
-        return true;
+        break;
       }
     }
-    return false;
+    return hasSamhsa;
   }
 
   // Checks ICDs.
@@ -231,7 +232,6 @@ public class EobHandler {
     if (procedureHasSamhsa) {
       logSamhsaFiltered(
           "Procedure", claimUniqueId, procedureCode, icdIndicator.getProcedureSystem());
-      return true;
     }
 
     var diagnosisHasSamhsa =
@@ -240,10 +240,9 @@ public class EobHandler {
     if (diagnosisHasSamhsa) {
       logSamhsaFiltered(
           "Diagnosis", claimUniqueId, diagnosisCode, icdIndicator.getDiagnosisSystem());
-      return true;
     }
 
-    return false;
+    return procedureHasSamhsa || diagnosisHasSamhsa;
   }
 
   private boolean isClaimDateWithinBounds(LocalDate claimDate, SecurityLabel entry) {
