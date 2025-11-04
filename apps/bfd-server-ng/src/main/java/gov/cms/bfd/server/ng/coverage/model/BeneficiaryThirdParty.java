@@ -2,6 +2,7 @@ package gov.cms.bfd.server.ng.coverage.model;
 
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.*;
+import java.time.ZonedDateTime;
 import java.util.Optional;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -20,6 +21,9 @@ public class BeneficiaryThirdParty implements Comparable<BeneficiaryThirdParty> 
 
   @Column(name = "bene_buyin_cd")
   private Optional<String> buyInCode;
+
+  @Column(name = "bfd_updated_ts")
+  private ZonedDateTime bfdUpdatedTimestamp;
 
   /**
    * create BuyIn Code Extension.
