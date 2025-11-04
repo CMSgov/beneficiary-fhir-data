@@ -26,23 +26,23 @@ dependencies = [
 members = [
     # NOTE: apps/** and ops/** will include the every subdirectory and fail on those without pyproject.toml
     # Apps directory
-    "bfd-model-idr",
-    "bfd-pipeline/bfd-pipeline-idr",
-    "bfd-server-ng/codegen",
-    "utils/locust_tests",
-    "utils/samhsa-regression-tests",
-    "utils/synthetic-load-converter",
+    "apps/bfd-model-idr",
+    "apps/bfd-pipeline/bfd-pipeline-idr",
+    "apps/bfd-server-ng/codegen",
+    "apps/utils/locust_tests",
+    "apps/utils/samhsa-regression-tests",
+    "apps/utils/synthetic-load-converter",
     # Ops directory add new members here as needed
-    "../ops/images/bfd-platform-mount-certstores",
-    "../ops/platform/02-alerting/lambda_src/slack-alerter",
-    "../ops/services/02-eft/lambda_src/sftp_outbound_transfer",
-    "../ops/services/03-eft-o11y/lambda_src/outbound_slack_notifier",
-    "../ops/services/04-ccw-pipeline/lambda-src/ccw-runner",
-    "../ops/services/04-server/lambda_src/regression-wrapper",
-    "../ops/services/05-server-insights/lambda_src/cw-to-flattened-json",
-    "../ops/services/06-ccw-pipeline-alarms/lambda_src/manifests-verifier",
-    "../ops/services/06-server-alarms/lambda_src/error_alerter",
-    "../ops/terraform-modules/general/trigger-glue-crawler/lambda_src",
+    "ops/images/bfd-platform-mount-certstores",
+    "ops/platform/02-alerting/lambda_src/slack-alerter",
+    "ops/services/02-eft/lambda_src/sftp_outbound_transfer",
+    "ops/services/03-eft-o11y/lambda_src/outbound_slack_notifier",
+    "ops/services/04-ccw-pipeline/lambda-src/ccw-runner",
+    "ops/services/04-server/lambda_src/regression-wrapper",
+    "ops/services/05-server-insights/lambda_src/cw-to-flattened-json",
+    "ops/services/06-ccw-pipeline-alarms/lambda_src/manifests-verifier",
+    "ops/services/06-server-alarms/lambda_src/error_alerter",
+    "ops/terraform-modules/general/trigger-glue-crawler/lambda_src",
 ]
 
 [tool.uv]
@@ -99,11 +99,11 @@ docstring-code-format = true
 
 [tool.ruff.lint.per-file-ignores]
 # Legacy scripts: relax linting rules for data generation, database scripts, and utilities
-"bfd-model-idr/**/*.py" = ["ANN", "E501", "SIM102", "SIM108", "SIM115", "PTH104", "PTH119", "PTH120", "PTH123", "PTH208", "D200", "D401"]
-"bfd-model/bfd-model-rif/**/*.py" = ["ANN", "D200", "D401"]
-"bfd-server-ng/codegen/**/*.py" = ["ANN", "PTH123", "SIM108"]
-"utils/**/*.py" = ["ANN", "ARG", "PTH104", "PTH119", "PTH120", "PTH123", "PTH208", "SIM115", "E501"]
-"../ops/services/02-eft/lambda_src/sftp_outbound_transfer/**/*.py" = ["D100", "D101", "D102", "D103", "D104", "D105", "D107", "E501"]
+"apps/bfd-model-idr/**/*.py" = ["ANN", "E501", "SIM102", "SIM108", "SIM115", "PTH104", "PTH119", "PTH120", "PTH123", "PTH208", "D200", "D401"]
+"apps/bfd-model/bfd-model-rif/**/*.py" = ["ANN", "D200", "D401"]
+"apps/bfd-server-ng/codegen/**/*.py" = ["ANN", "PTH123", "SIM108"]
+"apps/utils/**/*.py" = ["ANN", "ARG", "PTH104", "PTH119", "PTH120", "PTH123", "PTH208", "SIM115", "E501"]
+"ops/services/02-eft/lambda_src/sftp_outbound_transfer/**/*.py" = ["D100", "D101", "D102", "D103", "D104", "D105", "D107", "E501"]
 
 [tool.pyright]
 typeCheckingMode = "strict"
@@ -111,8 +111,17 @@ reportMissingImports = false
 reportMissingTypeStubs = false
 venvPath = "."
 venv = ".venv"
-exclude = [".venv", "**/bfd-model-idr/**", "**/bfd-model-rif/**", "**/bfd-pipeline-idr/**", "**/locust_tests/**", "**/synthetic-load-converter/**", "**/sftp_outbound_transfer/**"]
+exclude = [
+    ".venv",
+    "**/bfd-model-idr/**",
+    "**/bfd-model-rif/**",
+    "**/bfd-pipeline-idr/**",
+    "**/locust_tests/**",
+    "**/synthetic-load-converter/**",
+    "**/sftp_outbound_transfer/**",
+    "docs/**",
+    "ops/utils/**",
+]
 
 [tool.pytest.ini_options]
 timeout = 600
-
