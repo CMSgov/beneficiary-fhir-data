@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.ng.eob;
 
+import gov.cms.bfd.server.ng.ClaimSecurityStatus;
 import gov.cms.bfd.server.ng.SamhsaFilterMode;
 import gov.cms.bfd.server.ng.SecurityLabel;
 import gov.cms.bfd.server.ng.beneficiary.BeneficiaryRepository;
@@ -82,8 +83,21 @@ public class EobHandler {
             beneXrefSk.get(), serviceDate, lastUpdated, count, startIndex, sourceIds);
 
     var filteredClaims = filterSamhsaClaims(claims, samhsaFilterMode);
+
     return FhirUtil.bundleOrDefault(
-        filteredClaims.map(Claim::toFhir), claimRepository::claimLastUpdated);
+        filteredClaims.map(
+            claim -> {
+              var hasSamhsaClaims =
+                  samhsaFilterMode == SamhsaFilterMode.INCLUDE && claimHasSamhsa(claim);
+
+              var securityStatus =
+                  hasSamhsaClaims
+                      ? ClaimSecurityStatus.SAMHSA_APPLICABLE
+                      : ClaimSecurityStatus.NONE;
+
+              return claim.toFhir(securityStatus);
+            }),
+        claimRepository::claimLastUpdated);
   }
 
   private Stream<Claim> filterSamhsaClaims(List<Claim> claims, SamhsaFilterMode samhsaFilterMode) {
@@ -125,11 +139,15 @@ public class EobHandler {
       return Optional.empty();
     }
     var claim = claimOpt.get();
+    var claimHasSamhsa = claimHasSamhsa(claim);
 
-    if (samhsaFilterMode == SamhsaFilterMode.EXCLUDE && claimHasSamhsa(claim)) {
+    if (samhsaFilterMode == SamhsaFilterMode.EXCLUDE && claimHasSamhsa) {
       return Optional.empty();
     }
-    return Optional.of(claim.toFhir());
+    var securityStatus =
+        claimHasSamhsa ? ClaimSecurityStatus.SAMHSA_APPLICABLE : ClaimSecurityStatus.NONE;
+
+    return Optional.of(claim.toFhir(securityStatus));
   }
 
   private boolean isCodeSamhsa(String targetCode, LocalDate claimDate, SecurityLabel entry) {
