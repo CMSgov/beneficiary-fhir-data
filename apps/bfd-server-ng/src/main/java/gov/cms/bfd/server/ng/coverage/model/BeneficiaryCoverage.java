@@ -212,7 +212,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
     if (isC4DIC) {
       coverage.addPayor(new Reference().setReference(ORGANIZATION_REF + orgId));
       coverage.addExtension(
-          new Extension(SystemUrls.EXT_BENE_BUYIN_CD_URL)
+          new Extension(SystemUrls.C4DIC_ADD_INFO_EXT_URL)
               .setValue(new Annotation(new MarkdownType(C4DIC_ADD_INFO))));
     } else {
       var cmsOrg = OrganizationFactory.createCmsOrganization();
@@ -269,7 +269,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
     if (isC4DIC) {
       coverage.addPayor(new Reference().setReference(ORGANIZATION_REF + orgId));
       coverage.addExtension(
-          new Extension(SystemUrls.EXT_BENE_BUYIN_CD_URL)
+          new Extension(SystemUrls.C4DIC_ADD_INFO_EXT_URL)
               .setValue(new Annotation(new MarkdownType(C4DIC_ADD_INFO))));
     } else {
       var cmsOrg = OrganizationFactory.createCmsOrganization();
