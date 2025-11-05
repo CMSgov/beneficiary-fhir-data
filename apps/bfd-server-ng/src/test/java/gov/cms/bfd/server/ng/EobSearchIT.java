@@ -21,6 +21,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
@@ -167,13 +168,15 @@ class EobSearchIT extends IntegrationTestBase {
   void eobSearchByServiceDate() {
     var claimId = "1071939711295";
     var serviceDate =
-        entityManager
-            .createQuery(
-                "SELECT billablePeriod.claimThroughDate FROM Claim c WHERE c.claimUniqueId = :id",
-                LocalDate.class)
-            .setParameter("id", claimId)
-            .getResultList()
-            .getFirst();
+        (LocalDate)
+            entityManager
+                .createQuery(
+                    "SELECT billablePeriod.claimThroughDate FROM Claim c WHERE c.claimUniqueId = :id",
+                    Optional.class)
+                .setParameter("id", claimId)
+                .getResultList()
+                .getFirst()
+                .get();
 
     var eobBundle =
         searchBundle()
@@ -312,7 +315,8 @@ class EobSearchIT extends IntegrationTestBase {
         (Integer)
             entityManager
                 .createNativeQuery(
-                    "SELECT COUNT(*) FROM idr.beneficiary WHERE bene_xref_efctv_sk_computed = :beneSk AND bene_sk = :beneSk",
+                    "SELECT COUNT(*) FROM idr.beneficiary WHERE bene_xref_efctv_sk_computed ="
+                        + " :beneSk AND bene_sk = :beneSk",
                     Integer.class)
                 .setParameter("beneSk", Long.parseLong(CURRENT_MERGED_BENE_SK))
                 .getResultList()
