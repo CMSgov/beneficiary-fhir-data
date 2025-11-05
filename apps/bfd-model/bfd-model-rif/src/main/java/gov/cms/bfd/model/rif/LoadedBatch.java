@@ -52,7 +52,7 @@ public class LoadedBatch {
    *     the Server. At most, this list will be 100 elements large, so the extra memory consumption
    *     is worth the tradeoff in reduced computation time.
    */
-  private List<Long> beneficiariesList;
+  @Transient private List<Long> beneficiariesList;
 
   /**
    * Creates a new LoadedBatch with known values.
