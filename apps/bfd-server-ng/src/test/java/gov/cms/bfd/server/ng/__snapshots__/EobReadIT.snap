@@ -1681,13 +1681,13 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
           "system" : "https://x12.org/codes/claim-adjustment-group-codes"
         }, {
           "code" : "PR",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE"
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CODE"
         }, {
           "code" : "22",
           "system" : "https://x12.org/codes/claim-adjustment-reason-codes"
         }, {
           "code" : "22",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE"
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CODE"
         } ]
       }
     }, {
@@ -1704,13 +1704,13 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
           "system" : "https://x12.org/codes/claim-adjustment-group-codes"
         }, {
           "code" : "CO",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE"
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CODE"
         }, {
           "code" : "B10",
           "system" : "https://x12.org/codes/claim-adjustment-reason-codes"
         }, {
           "code" : "B10",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE"
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CODE"
         } ]
       }
     }, {
@@ -1727,13 +1727,13 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
           "system" : "https://x12.org/codes/claim-adjustment-group-codes"
         }, {
           "code" : "CO",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE"
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CODE"
         }, {
           "code" : "4",
           "system" : "https://x12.org/codes/claim-adjustment-reason-codes"
         }, {
           "code" : "4",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE"
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CODE"
         } ]
       }
     }, {
@@ -2933,13 +2933,13 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
           "system" : "https://x12.org/codes/claim-adjustment-group-codes"
         }, {
           "code" : "PR",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE"
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CODE"
         }, {
           "code" : "22",
           "system" : "https://x12.org/codes/claim-adjustment-reason-codes"
         }, {
           "code" : "22",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE"
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CODE"
         } ]
       }
     }, {
@@ -2956,13 +2956,13 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
           "system" : "https://x12.org/codes/claim-adjustment-group-codes"
         }, {
           "code" : "CO",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE"
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CODE"
         }, {
           "code" : "B10",
           "system" : "https://x12.org/codes/claim-adjustment-reason-codes"
         }, {
           "code" : "B10",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE"
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CODE"
         } ]
       }
     }, {
@@ -2979,13 +2979,13 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
           "system" : "https://x12.org/codes/claim-adjustment-group-codes"
         }, {
           "code" : "CO",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE"
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CODE"
         }, {
           "code" : "4",
           "system" : "https://x12.org/codes/claim-adjustment-reason-codes"
         }, {
           "code" : "4",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE"
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CODE"
         } ]
       }
     }, {

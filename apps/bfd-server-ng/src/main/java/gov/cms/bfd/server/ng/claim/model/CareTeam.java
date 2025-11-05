@@ -37,7 +37,7 @@ class CareTeam {
   @Column(name = "prvdr_prscrbng_prvdr_npi_num")
   private Optional<String> prescribingProviderNpiNumber;
 
-  /** Temp string value for provider last name. To be implemented in BFD-4286 */
+  /** TODO: Temp string value for provider last name. To be implemented in BFD-4286 */
   public static final String PROVIDER_LAST_NAME = "LAST NAME HERE";
 
   List<CareTeamType.CareTeamComponents> toFhir() {

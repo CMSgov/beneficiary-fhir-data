@@ -3,6 +3,7 @@ package gov.cms.bfd.server.ng.claim.model;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -22,7 +23,7 @@ class Identifiers {
 
   public List<Identifier> toFhir() {
     var identifiers =
-        new java.util.ArrayList<>(
+        new ArrayList<>(
             List.of(
                 new Identifier()
                     .setValue(String.valueOf(claimUniqueId))

@@ -37,7 +37,7 @@ public class EobPharmacyIT extends IntegrationTestBase {
   void eobReadPharmacyQueryCount() {
     var events = ThreadSafeAppender.startRecord();
     eobResourceProvider.find(new IdType(CLAIM_ID_RX), request);
-    assertEquals(3, queryCount(events));
+    assertEquals(1, queryCount(events));
   }
 
   @Test

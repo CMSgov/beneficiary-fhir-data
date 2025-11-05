@@ -28,7 +28,7 @@ enum CareTeamType {
       SequenceGenerator sequenceGenerator, String value, Optional<String> familyName) {
     var practitioner = new Practitioner();
     var sequence = sequenceGenerator.next();
-    if (roleCode.equals("prescribing")) {
+    if (roleCode.equals(PRESCRIBING.roleCode)) {
       practitioner.setId("careteam-prescriber-practitioner-" + sequence);
     } else {
       practitioner.setId("careteam-provider-" + sequence);
