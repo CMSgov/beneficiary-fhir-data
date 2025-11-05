@@ -393,28 +393,24 @@ public enum ClaimTypeCode {
     };
   }
 
-  private static final Map<ClaimSubtype, List<ClaimTypeCode>> CLAIM_TYPE_CODE_MAP;
-
-  static {
-    CLAIM_TYPE_CODE_MAP =
-        Map.of(
-            ClaimSubtype.CARRIER,
-            Collections.unmodifiableList(mapCarrierToClaimTypeCodes()),
-            ClaimSubtype.DME,
-            Collections.unmodifiableList(mapDmeToClaimTypeCodes()),
-            ClaimSubtype.HHA,
-            Collections.unmodifiableList(mapHhaToClaimTypeCodes()),
-            ClaimSubtype.HOSPICE,
-            Collections.unmodifiableList(mapHospiceToClaimTypeCodes()),
-            ClaimSubtype.INPATIENT,
-            Collections.unmodifiableList(mapInpatientToClaimTypeCodes()),
-            ClaimSubtype.OUTPATIENT,
-            Collections.unmodifiableList(mapOutpatientToClaimTypeCodes()),
-            ClaimSubtype.PDE,
-            Collections.unmodifiableList(mapPDEToClaimTypeCodes()),
-            ClaimSubtype.SNF,
-            Collections.unmodifiableList(mapSnfToClaimTypeCodes()));
-  }
+  private static final Map<ClaimSubtype, List<ClaimTypeCode>> CLAIM_TYPE_CODE_MAP =
+      Map.of(
+          ClaimSubtype.CARRIER,
+          mapCarrierToClaimTypeCodes(),
+          ClaimSubtype.DME,
+          mapDmeToClaimTypeCodes(),
+          ClaimSubtype.HHA,
+          mapHhaToClaimTypeCodes(),
+          ClaimSubtype.HOSPICE,
+          mapHospiceToClaimTypeCodes(),
+          ClaimSubtype.INPATIENT,
+          mapInpatientToClaimTypeCodes(),
+          ClaimSubtype.OUTPATIENT,
+          mapOutpatientToClaimTypeCodes(),
+          ClaimSubtype.PDE,
+          mapPDEToClaimTypeCodes(),
+          ClaimSubtype.SNF,
+          mapSnfToClaimTypeCodes());
 
   /**
    * Gets claim type codes mapped to type params.
