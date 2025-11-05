@@ -83,8 +83,8 @@ class AdjudicationChargeRx {
                 new CodeableConcept(
                     new Coding()
                         .setSystem(SystemUrls.CARIN_CODE_SYSTEM_ADJUDICATION_DISCRIMINATOR)
-                        .setCode("adjustmentreason")
-                        .setDisplay("Adjustment Reason")))
+                        .setCode("benefitpaymentstatus")
+                        .setDisplay("Benefit Payment Status")))
             .setReason(reasonCodeableConcept));
   }
 }

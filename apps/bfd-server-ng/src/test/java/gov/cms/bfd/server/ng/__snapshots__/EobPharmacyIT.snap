@@ -347,8 +347,8 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
     }, {
       "category" : {
         "coding" : [ {
-          "code" : "adjustmentreason",
-          "display" : "Adjustment Reason",
+          "code" : "benefitpaymentstatus",
+          "display" : "Benefit Payment Status",
           "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
         } ]
       },
