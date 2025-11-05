@@ -198,7 +198,12 @@ public class FhirInputConverter {
     var typeParams = typeParam.getValuesAsQueryTokens();
 
     for (TokenOrListParam type : typeParams) {
-      claimTypeCodes.addAll(ClaimTypeCode.getClaimTypeCodesByType(type.getValuesAsQueryTokens()));
+      var tokens = type.getValuesAsQueryTokens();
+
+      if (tokens == null || tokens.isEmpty()) {
+        return Collections.emptyList();
+      }
+      claimTypeCodes.addAll(ClaimTypeCode.getClaimTypeCodesByType(tokens));
     }
 
     return claimTypeCodes;

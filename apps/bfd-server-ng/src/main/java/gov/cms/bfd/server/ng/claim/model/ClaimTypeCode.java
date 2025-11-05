@@ -420,9 +420,6 @@ public enum ClaimTypeCode {
    */
   public static List<ClaimTypeCode> getClaimTypeCodesByType(List<TokenParam> tokens) {
 
-    if (tokens == null || tokens.isEmpty()) {
-      return Collections.emptyList();
-    }
     Set<ClaimTypeCode> collectedClaimTypeCodes = new HashSet<>();
 
     for (TokenParam param : tokens) {
