@@ -10,15 +10,23 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Root;
+import java.sql.SQLException;
 import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
+import java.util.function.LongFunction;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+import javax.sql.DataSource;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.apache.spark.util.sketch.BloomFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -37,6 +45,9 @@ public class LoadedFilterManager {
 
   /** The connection to the DB. */
   private EntityManager entityManager;
+
+  /** The direct data source connection to the DB. */
+  private DataSource dataSource;
 
   /** The filter set. */
   @Getter private List<LoadedFileFilter> filters;
@@ -67,9 +78,15 @@ public class LoadedFilterManager {
     private Instant lastUpdated;
   }
 
-  /** Create a manager for {@link LoadedFileFilter}s. */
-  public LoadedFilterManager() {
+  /**
+   * Create a manager for {@link LoadedFileFilter}s.
+   *
+   * @param dataSource the {@link DataSource} provided by {@link
+   *     gov.cms.bfd.server.war.SpringConfiguration}
+   */
+  public LoadedFilterManager(DataSource dataSource) {
     this.filters = new ArrayList<>();
+    this.dataSource = dataSource;
   }
 
   /**
@@ -215,7 +232,12 @@ public class LoadedFilterManager {
 
         List<LoadedTuple> loadedTuples = fetchLoadedTuples(this.lastBatchCreated);
         Stream<LoadedFileFilter> updatedFilters =
-            buildMergedFilters(this.filters, loadedTuples, this::fetchLoadedBatches);
+            buildMergedFilters(
+                this.filters,
+                loadedTuples,
+                this::fetchLoadedBatches,
+                this::fetchBatchSizeByFileId,
+                this::fetchEstimatedBeneficiariesCountByFileId);
 
         // If batches been trimmed, then remove filters which are no longer present
         final Instant currentFirstBatchUpdate =
@@ -285,19 +307,26 @@ public class LoadedFilterManager {
    * @param existingFilters that should be included
    * @param loadedTuples that come from new LoadedBatch
    * @param fetchById to use retrieve list of LoadedBatch by id
+   * @param fetchBatchSizeByFileId used to retrieve number of {@link LoadedBatch} per {@link
+   *     LoadedTuple}
+   * @param fetchEstimatedBenesCountByFileId a function that returns an estimated count of
+   *     beneficiaries per-{@link LoadedBatch} for the given {@link LoadedFile} ID
    * @return a new filter {@link Stream}
    */
   public static Stream<LoadedFileFilter> buildMergedFilters(
       List<LoadedFileFilter> existingFilters,
       List<LoadedTuple> loadedTuples,
-      Function<Long, List<LoadedBatch>> fetchById) {
+      BiFunction<Long, Integer, Stream<LoadedBatch>> fetchById,
+      LongFunction<Long> fetchBatchSizeByFileId,
+      LongFunction<Long> fetchEstimatedBenesCountByFileId) {
     return Stream.concat(
             existingFilters.stream()
                 .filter(
                     f ->
                         loadedTuples.stream()
                             .noneMatch(t -> t.getLoadedFileId() == f.getLoadedFileId())),
-            buildNewFilters(loadedTuples, fetchById))
+            buildNewFilters(
+                loadedTuples, fetchById, fetchBatchSizeByFileId, fetchEstimatedBenesCountByFileId))
         // Sort each filter in descending order to optimize search time when determining if a result
         // would be empty
         .sorted((a, b) -> b.getFirstUpdated().compareTo(a.getFirstUpdated()));
@@ -308,12 +337,26 @@ public class LoadedFilterManager {
    *
    * @param loadedTuples that come from new LoadedBatch
    * @param fetchById to use retrieve list of LoadedBatch by id
+   * @param fetchBatchSizeByFileId used to retrieve number of {@link LoadedBatch} per {@link
+   *     LoadedTuple}
+   * @param fetchEstimatedBenesCountByFileId a function that returns an estimated count of
+   *     beneficiaries per-{@link LoadedBatch} for the given {@link LoadedFile} ID
    * @return a new filter {@link Stream}
    */
   public static Stream<LoadedFileFilter> buildNewFilters(
-      List<LoadedTuple> loadedTuples, Function<Long, List<LoadedBatch>> fetchById) {
+      List<LoadedTuple> loadedTuples,
+      BiFunction<Long, Integer, Stream<LoadedBatch>> fetchById,
+      LongFunction<Long> fetchBatchSizeByFileId,
+      LongFunction<Long> fetchEstimatedBenesCountByFileId) {
     return loadedTuples.stream()
-        .map(t -> buildFilter(t.getLoadedFileId(), t.getFirstUpdated(), fetchById));
+        .map(
+            t ->
+                buildFilter(
+                    t.getLoadedFileId(),
+                    t.getFirstUpdated(),
+                    fetchById,
+                    fetchBatchSizeByFileId,
+                    fetchEstimatedBenesCountByFileId));
   }
 
   /**
@@ -338,35 +381,53 @@ public class LoadedFilterManager {
    * @param fileId to build a filter for
    * @param firstUpdated time stamp
    * @param fetchById a function which returns a list of batches
+   * @param fetchBatchSizeByFileId a function that returns the batch size of the file
+   * @param fetchEstimatedBenesCountByFileId a function that returns an estimated count of
+   *     beneficiaries per-{@link LoadedBatch} for the given {@link LoadedFile} ID
    * @return a new filter
    */
   public static LoadedFileFilter buildFilter(
-      long fileId, Instant firstUpdated, Function<Long, List<LoadedBatch>> fetchById) {
-    final List<LoadedBatch> loadedBatches = fetchById.apply(fileId);
-    final int batchCount = loadedBatches.size();
+      long fileId,
+      Instant firstUpdated,
+      BiFunction<Long, Integer, Stream<LoadedBatch>> fetchById,
+      LongFunction<Long> fetchBatchSizeByFileId,
+      LongFunction<Long> fetchEstimatedBenesCountByFileId) {
+    final var batchCount = fetchBatchSizeByFileId.apply(fileId).intValue();
     if (batchCount == 0) {
       throw new IllegalArgumentException("Batches cannot be empty for a filter");
     }
-    final String[] loadedBatchBenes = loadedBatches.get(0).getBeneficiaries().split(",");
-    final int batchSize = loadedBatchBenes.length;
+
+    final var estimatedBeneficiaryCount = fetchEstimatedBenesCountByFileId.apply(fileId).intValue();
 
     // It is important to get a good estimate of the number of entries for
-    // an accurate FFP and minimal memory size. This one assumes that all batches are of equal size.
-    final BloomFilter bloomFilter = LoadedFileFilter.createFilter(batchSize * batchCount);
+    // an accurate FFP and minimal memory size. This one assumes that all batches are equally-sized
+    // with respect to their beneficiaries
+    final var bloomFilter = LoadedFileFilter.createFilter(batchCount * estimatedBeneficiaryCount);
 
-    // Loop through all batches, filling the bloom filter and finding the lastUpdated
-    Instant lastUpdated = firstUpdated;
-    for (LoadedBatch batch : loadedBatches) {
-      for (Long beneficiary : batch.getBeneficiariesAsList()) {
-        bloomFilter.putLong(beneficiary);
-      }
-      if (batch.getCreated().isAfter(lastUpdated)) {
-        lastUpdated = batch.getCreated();
-      }
+    final var lastUpdated = new AtomicReference<>(firstUpdated);
+    try (final var loadedBatches = fetchById.apply(fileId, batchCount)) {
+      // Loop through all batches, filling the bloom filter and finding the lastUpdated
+      loadedBatches.forEach(
+          batch -> {
+            var curLastUpdated = firstUpdated;
+            for (Long beneficiary : batch.getBeneficiariesAsList()) {
+              bloomFilter.putLong(beneficiary);
+            }
+            if (batch.getCreated().isAfter(curLastUpdated)) {
+              curLastUpdated = batch.getCreated();
+            }
+
+            lastUpdated.set(curLastUpdated);
+          });
+
+      LOGGER.info(
+          "Built a filter for {} with {} batches; BloomFilter size {}, BloomFilter cardinality {}",
+          fileId,
+          batchCount,
+          bloomFilter.bitSize(),
+          bloomFilter.cardinality());
+      return new LoadedFileFilter(fileId, batchCount, firstUpdated, lastUpdated.get(), bloomFilter);
     }
-
-    LOGGER.info("Built a filter for {} with {} batches", fileId, loadedBatches.size());
-    return new LoadedFileFilter(fileId, batchCount, firstUpdated, lastUpdated, bloomFilter);
   }
 
   /* DB Operations */
@@ -436,16 +497,105 @@ public class LoadedFilterManager {
   }
 
   /**
+   * Fetch the number of {@link LoadedBatch}s associated with the given {@link LoadedFile}.
+   *
+   * @param fileId id of the {@link LoadedFile}
+   * @return the number of {@link LoadedBatch}s associated with the given {@link LoadedFile} ID
+   */
+  private long fetchBatchSizeByFileId(long fileId) {
+    return entityManager
+        .createQuery("select count(b) from LoadedBatch b where loadedFileId = :fileId", Long.class)
+        .setParameter("fileId", fileId)
+        .getSingleResult();
+  }
+
+  /**
+   * Fetch the number of {@link LoadedBatch}s associated with the given {@link LoadedFile}.
+   *
+   * @param fileId id of the {@link LoadedFile}
+   * @return the number of {@link LoadedBatch}s associated with the given {@link LoadedFile} ID
+   */
+  private long fetchEstimatedBeneficiariesCountByFileId(long fileId) {
+    try (final var conn = dataSource.getConnection();
+        final var stm =
+            conn.prepareStatement(
+                "SELECT ARRAY_LENGTH(STRING_TO_ARRAY(beneficiaries, ','), 1) AS bene_count FROM ccw.loaded_batches WHERE loaded_file_id = ? LIMIT 1")) {
+      stm.setLong(1, fileId);
+
+      final var result = stm.executeQuery();
+
+      result.next();
+      return result.getLong("bene_count");
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  /**
    * Fetch all the batches associated with LoadedFile.
    *
-   * @param loadedFileId of the LoadedFile
+   * @param loadedFileId of the {@link LoadedFile}
+   * @param batchCount number of batches associated with the {@link LoadedFile}
    * @return a list of LoadedBatches or an empty list
+   * @implNote We avoid using the {@link EntityManager}/JPA in order to use a cursor to load the
+   *     {@link LoadedBatch}s as otherwise upto 10 million {@link LoadedBatch}s could be loaded into
+   *     memory for a single {@link LoadedFile} in prod. This causes immense memory utilization, and
+   *     has led to multiple instances of running Server containers falling over due to OOM.
    */
-  private List<LoadedBatch> fetchLoadedBatches(long loadedFileId) {
-    return entityManager
-        .createQuery(
-            "select b from LoadedBatch b where b.loadedFileId = :loadedFileId", LoadedBatch.class)
-        .setParameter("loadedFileId", loadedFileId)
-        .getResultList();
+  private Stream<LoadedBatch> fetchLoadedBatches(long loadedFileId, int batchCount) {
+    try {
+      final var conn = dataSource.getConnection();
+      conn.setAutoCommit(false);
+
+      final var stm =
+          conn.prepareStatement(
+              "SELECT loaded_batch_id, loaded_file_id, beneficiaries, created FROM ccw.loaded_batches WHERE loaded_file_id = ?");
+      stm.setLong(1, loadedFileId);
+      // Turn use of the cursor on.
+      stm.setFetchSize(100_000);
+
+      final var rs = stm.executeQuery();
+
+      // enable parallelism only if it's worth the overhead
+      final var isParallel = batchCount > 100_000;
+      // turn iterator into a stream
+      return StreamSupport.stream(
+              new Spliterators.AbstractSpliterator<LoadedBatch>(
+                  Long.MAX_VALUE, Spliterator.ORDERED) {
+                @Override
+                public boolean tryAdvance(Consumer<? super LoadedBatch> action) {
+                  try {
+                    if (!rs.next()) {
+                      return false;
+                    }
+
+                    action.accept(
+                        new LoadedBatch(
+                            rs.getLong("loaded_batch_id"),
+                            rs.getLong("loaded_file_id"),
+                            rs.getString("beneficiaries"),
+                            rs.getObject("created", OffsetDateTime.class).toInstant()));
+                    return true;
+                  } catch (SQLException e) {
+                    throw new RuntimeException(e); // Or handle more gracefully
+                  }
+                }
+              },
+              isParallel)
+          .onClose(
+              () -> {
+                try (conn;
+                    stm;
+                    rs) {
+                  LOGGER.debug(
+                      "Closed connection, statement, and result set for loading batches from {}",
+                      loadedFileId);
+                } catch (SQLException e) {
+                  throw new RuntimeException(e);
+                }
+              }); // make sure to close resources when done with the stream
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
   }
 }

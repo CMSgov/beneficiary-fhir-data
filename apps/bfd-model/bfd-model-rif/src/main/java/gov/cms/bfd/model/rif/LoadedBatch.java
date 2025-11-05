@@ -2,7 +2,7 @@ package gov.cms.bfd.model.rif;
 
 import jakarta.persistence.*;
 import java.time.Instant;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -45,6 +45,16 @@ public class LoadedBatch {
   private Instant created;
 
   /**
+   * The beneficiaries as an actual {@code List<String>}.
+   *
+   * @implNote We store this as a field on this object to avoid unnecessary string splitting/joining
+   *     operations each time we want to use this object during the creation of Bloom Filters within
+   *     the Server. At most, this list will be 100 elements large, so the extra memory consumption
+   *     is worth the tradeoff in reduced computation time.
+   */
+  private List<Long> beneficiariesList;
+
+  /**
    * Creates a new LoadedBatch with known values.
    *
    * @param loadedBatchId unique sequence id
@@ -58,6 +68,32 @@ public class LoadedBatch {
     this.loadedBatchId = loadedBatchId;
     this.loadedFileId = loadedFileId;
     this.beneficiaries = convertToString(beneficiaries);
+    this.beneficiariesList = beneficiaries;
+    this.created = created;
+  }
+
+  /**
+   * Creates a new LoadedBatch with known values where {@code beneficiaries} has not yet been
+   * transformed into a {@link List} of {@link Long}s.
+   *
+   * @param loadedBatchId unique sequence id
+   * @param loadedFileId associated file
+   * @param beneficiariesCsv to associate with this
+   * @param created batch creation date
+   * @implNote This constructor avoids an unnecessary, immediate conversion from an actual {@link
+   *     List} back to a {@link String} for {@code beneficiaries} when building this object from raw
+   *     {@link java.sql.ResultSet}s in the V1/V2 Server Bloom Filter manager. Essentially, we
+   *     _have_ to do some work to convert the CSV into a {@link List}, but we do not need to do any
+   *     work to just store the CSV as-is from the database.
+   */
+  public LoadedBatch(
+      long loadedBatchId, long loadedFileId, String beneficiariesCsv, Instant created) {
+    this();
+    this.loadedBatchId = loadedBatchId;
+    this.loadedFileId = loadedFileId;
+    this.beneficiaries = beneficiariesCsv;
+    this.beneficiariesList =
+        Arrays.stream(beneficiariesCsv.split(",")).map(Long::parseLong).toList();
     this.created = created;
   }
 
@@ -76,7 +112,7 @@ public class LoadedBatch {
    * @return beneficiaries as list
    */
   public List<Long> getBeneficiariesAsList() {
-    return convertToList(this.beneficiaries);
+    return beneficiariesList;
   }
 
   /**
@@ -89,23 +125,13 @@ public class LoadedBatch {
   public static LoadedBatch combine(LoadedBatch a, LoadedBatch b) {
     if (a == null) return b;
     if (b == null) return a;
-    LoadedBatch sum = new LoadedBatch();
-    sum.loadedBatchId = a.loadedBatchId;
-    sum.loadedFileId = a.loadedFileId;
-    sum.beneficiaries =
-        a.beneficiaries.isEmpty()
-            ? b.beneficiaries
-            : b.beneficiaries.isEmpty()
-                ? a.beneficiaries
-                : a.beneficiaries + SEPARATOR + b.beneficiaries;
-    sum.created = (a.created.isAfter(b.created)) ? a.created : b.created;
-    return sum;
-  }
 
-  /*
-   * Dev Note: A JPA AttributeConverter could be created instead of these static methods. This is
-   * slightly simpler and, since conversion is done once, just as efficient.
-   */
+    return new LoadedBatch(
+        a.loadedBatchId,
+        a.loadedFileId,
+        Stream.concat(a.beneficiariesList.stream(), b.beneficiariesList.stream()).toList(),
+        (a.created.isAfter(b.created)) ? a.created : b.created);
+  }
 
   /**
    * Converts a string list to a single string, delimited by {@link #SEPARATOR}.
@@ -118,20 +144,5 @@ public class LoadedBatch {
       return "";
     }
     return list.stream().map(String::valueOf).collect(Collectors.joining(SEPARATOR));
-  }
-
-  /**
-   * Converts a {@link #SEPARATOR} delimited string to a list of strings.
-   *
-   * @param commaSeparated the {@link #SEPARATOR} separated string
-   * @return the list of string values
-   */
-  private static List<Long> convertToList(String commaSeparated) {
-    if (commaSeparated == null || commaSeparated.isEmpty()) {
-      return new ArrayList<Long>();
-    }
-    return Stream.of(commaSeparated.split(SEPARATOR))
-        .map(Long::parseLong)
-        .collect(Collectors.toList());
   }
 }
