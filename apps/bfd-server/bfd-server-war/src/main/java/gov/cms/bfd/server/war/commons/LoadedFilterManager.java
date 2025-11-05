@@ -542,6 +542,9 @@ public class LoadedFilterManager {
    *     memory for a single {@link LoadedFile} in prod. This causes immense memory utilization, and
    *     has led to multiple instances of running Server containers falling over due to OOM.
    */
+  // We suppress the S2095 warning (unclosed closeable) because we close them outside
+  // the scope of this method via Stream::onClose once the Stream is exhausted.
+  @SuppressWarnings("java:S2095")
   private Stream<LoadedBatch> fetchLoadedBatches(long loadedFileId, int batchCount) {
     try {
       final var conn = dataSource.getConnection();
@@ -577,7 +580,7 @@ public class LoadedFilterManager {
                             rs.getObject("created", OffsetDateTime.class).toInstant()));
                     return true;
                   } catch (SQLException e) {
-                    throw new RuntimeException(e); // Or handle more gracefully
+                    throw new RuntimeException(e);
                   }
                 }
               },
