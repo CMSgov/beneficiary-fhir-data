@@ -45,7 +45,7 @@ public class LoadedBatch {
   private Instant created;
 
   /**
-   * The beneficiaries as an actual {@code List<String>}.
+   * The beneficiaries as an actual {@link List}.
    *
    * @implNote We store this as a field on this object to avoid unnecessary string splitting/joining
    *     operations each time we want to use this object during the creation of Bloom Filters within
@@ -104,6 +104,23 @@ public class LoadedBatch {
    */
   public void setBeneficiaries(List<Long> beneficiaries) {
     this.beneficiaries = convertToString(beneficiaries);
+    this.beneficiariesList = beneficiaries;
+  }
+
+  /**
+   * Conditionally lazy-loads the {@link List} of beneficiaries; if the {@link List} is not set on
+   * object initialization, it is computed from {@link #beneficiaries}, else the existing {@link
+   * #beneficiariesList} is returned.
+   *
+   * @return a {@link List} of beneficiaries associated with this batch
+   */
+  public List<Long> getBeneficiariesList() {
+    if (this.beneficiariesList == null) {
+      this.beneficiariesList =
+          Arrays.stream(this.beneficiaries.split(",")).map(Long::parseLong).toList();
+    }
+
+    return this.beneficiariesList;
   }
 
   /**
