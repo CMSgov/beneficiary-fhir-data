@@ -327,7 +327,12 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
             () ->
                 Assertions.fail(
                     "Expected SAMHSA security tag not found in EOB meta or had incorrect code/system."));
-    expectFhir().scenario(String.valueOf(beneSk)).toMatchSnapshot(bundle);
+
+    // Snapshot only the SAMHSA EOB to avoid environment specific bundle composition differences.
+    var snapshotBundle = new Bundle();
+    snapshotBundle.setType(bundle.getType());
+    snapshotBundle.addEntry().setResource(samhsaEob.get());
+    expectFhir().scenario(String.valueOf(beneSk)).toMatchSnapshot(snapshotBundle);
   }
 
   // The following group of tests is used to ensure the validity of the test data.
