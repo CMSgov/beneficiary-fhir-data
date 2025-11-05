@@ -476,9 +476,6 @@ public enum ClaimTypeCode {
   }
 
   private static List<ClaimTypeCode> mapSnfToClaimTypeCodes() {
-    return List.of(
-        _20, // Adjucated
-        _30, // Adjucated
-        _1018, _1021, _1022, _1028, _2018, _2021, _2022, _2023, _2028);
+    return List.of(_20, _30, _1018, _1021, _1022, _1028, _2018, _2021, _2022, _2023, _2028);
   }
 }
