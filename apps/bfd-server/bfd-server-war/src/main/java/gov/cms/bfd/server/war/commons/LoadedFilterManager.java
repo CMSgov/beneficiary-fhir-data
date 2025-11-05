@@ -410,7 +410,7 @@ public class LoadedFilterManager {
       loadedBatches.forEach(
           batch -> {
             var curLastUpdated = firstUpdated;
-            for (Long beneficiary : batch.getBeneficiariesAsList()) {
+            for (Long beneficiary : batch.getBeneficiariesList()) {
               bloomFilter.putLong(beneficiary);
             }
             if (batch.getCreated().isAfter(curLastUpdated)) {

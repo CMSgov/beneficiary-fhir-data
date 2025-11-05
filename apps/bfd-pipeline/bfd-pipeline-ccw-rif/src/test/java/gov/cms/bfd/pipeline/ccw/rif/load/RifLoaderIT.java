@@ -357,7 +357,7 @@ public final class RifLoaderIT {
               assertTrue(batches.size() > 0, "Expected to have at least one beneficiary loaded");
               assertEquals(
                   567834L,
-                  allBatches.getBeneficiariesAsList().get(0),
+                  allBatches.getBeneficiariesList().get(0),
                   "Expected to match the sample-a beneficiary");
             });
   }

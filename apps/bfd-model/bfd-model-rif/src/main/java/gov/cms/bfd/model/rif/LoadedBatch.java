@@ -107,15 +107,6 @@ public class LoadedBatch {
   }
 
   /**
-   * Get the {@link #beneficiaries} as a list.
-   *
-   * @return beneficiaries as list
-   */
-  public List<Long> getBeneficiariesAsList() {
-    return beneficiariesList;
-  }
-
-  /**
    * Utility function to combine to batch into a larger batch. Useful for small number of batches.
    *
    * @param a batch to combine
