@@ -1405,7 +1405,9 @@
                             <outputDirectory>
                                 ${project.build.directory}/coverage-reports/jacoco-aggregate
                             </outputDirectory>
-                            <formats>XML</formats>
+                            <reports>
+                                <report>XML</report>
+                            </reports>
                         </configuration>
                     </execution>
                 </executions>
