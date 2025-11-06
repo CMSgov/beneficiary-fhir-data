@@ -79,7 +79,7 @@ public class LoadedBatch {
         return List.of();
       }
 
-      return Arrays.stream(benesCsv.split(",")).map(Long::parseLong).toList();
+      return Arrays.stream(benesCsv.split(SEPARATOR)).map(Long::parseLong).toList();
     }
 
     @Override
