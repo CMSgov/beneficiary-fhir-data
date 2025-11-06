@@ -1,6 +1,5 @@
 package gov.cms.bfd.server.ng.claim.model;
 
-import ca.uhn.fhir.rest.param.TokenParam;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -415,31 +414,26 @@ public enum ClaimTypeCode {
   /**
    * Gets claim type codes mapped to type params.
    *
-   * @param tokens The token from the type parameter.
+   * @param normalizedType The normalized claim type.
    * @return A list of matching ClaimTypeCode
    */
-  public static List<ClaimTypeCode> getClaimTypeCodesByType(List<TokenParam> tokens) {
+  public static List<ClaimTypeCode> getClaimTypeCodesByType(String normalizedType) {
 
     Set<ClaimTypeCode> collectedClaimTypeCodes = new HashSet<>();
 
-    for (TokenParam param : tokens) {
-      var type = param.getValue();
-      var normalizedType = type.trim().toLowerCase();
+    if ("*".equals(normalizedType)) {
+      return Collections.emptyList();
+    }
 
-      if ("*".equals(normalizedType)) {
-        return Collections.emptyList();
-      }
+    ClaimSubtype claimType = ClaimSubtype.fromCode(normalizedType);
 
-      ClaimSubtype claimType = ClaimSubtype.fromCode(normalizedType);
+    List<ClaimTypeCode> codesForThisType = CLAIM_TYPE_CODE_MAP.get(claimType);
 
-      List<ClaimTypeCode> codesForThisType = CLAIM_TYPE_CODE_MAP.get(claimType);
+    if (codesForThisType != null) {
+      collectedClaimTypeCodes.addAll(codesForThisType);
 
-      if (codesForThisType != null) {
-        collectedClaimTypeCodes.addAll(codesForThisType);
-
-      } else {
-        throw new IllegalStateException("Not a valid claim type code");
-      }
+    } else {
+      throw new IllegalStateException("Not a valid claim type code");
     }
     return new ArrayList<>(collectedClaimTypeCodes);
   }
