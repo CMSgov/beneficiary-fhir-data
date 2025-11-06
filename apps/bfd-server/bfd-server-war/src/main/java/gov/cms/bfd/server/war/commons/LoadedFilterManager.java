@@ -519,7 +519,7 @@ public class LoadedFilterManager {
     try (final var conn = dataSource.getConnection();
         final var stm =
             conn.prepareStatement(
-                "SELECT ARRAY_LENGTH(STRING_TO_ARRAY(beneficiaries, ','), 1) AS bene_count FROM ccw.loaded_batches WHERE loaded_file_id = ? LIMIT 1")) {
+                "select array_length(string_to_array(beneficiaries, ','), 1) as bene_count from ccw.loaded_batches where loaded_file_id = ? limit 1")) {
       stm.setLong(1, fileId);
 
       final var result = stm.executeQuery();
@@ -552,7 +552,7 @@ public class LoadedFilterManager {
 
       final var stm =
           conn.prepareStatement(
-              "SELECT loaded_batch_id, loaded_file_id, beneficiaries, created FROM ccw.loaded_batches WHERE loaded_file_id = ?");
+              "select loaded_batch_id, loaded_file_id, beneficiaries, created from ccw.loaded_batches where loaded_file_id = ?");
       stm.setLong(1, loadedFileId);
       // Turn use of the cursor on.
       stm.setFetchSize(100_000);
