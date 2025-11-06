@@ -276,7 +276,6 @@ resource "aws_ecs_task_definition" "server" {
               "-Xmx${floor(local.server_memory * 0.70)}m",
               "-XX:+UseCompactObjectHeaders",
               "-XX:+UseZGC",
-              "-XX:+ZGenerational",
               "-Dnetworkaddress.cache.ttl=5",
               "-Dsun.net.inetaddr.ttl=0"
             ])
