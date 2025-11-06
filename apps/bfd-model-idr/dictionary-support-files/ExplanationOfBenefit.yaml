@@ -2970,3 +2970,21 @@
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_ADJSTMT_TYPE_CD
   fhirPath: ExplanationOfBenefit.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-ADJSTMT-TYPE-CD').value.code
+- inputPath: SupportingInfoComponent.CLM_RLT_COND_CD
+  appliesTo:
+    - Inpatient
+    - Outpatient
+    - SNF
+    - HHA
+    - Hospice
+  sources:
+    - NCH
+    - FISS
+  referenceTable: CLM_RLT_COND_CD
+  sourceView: V2_MDCR_CLM
+  sourceColumn: CLM_RLT_COND_SGNTR_SK
+  cclfMapping:
+    - CCLFA.CLM_RLT_COND_CD
+  bfdDerived: true
+  notes: The actual values are not derived, but this variable as marked as derived to call attention to the flattened structure compared to the upstream source.
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(code.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD').code.coding.code

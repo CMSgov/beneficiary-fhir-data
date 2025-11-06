@@ -53,6 +53,13 @@ def transform_null_int(value: int | None) -> int:
     return value
 
 
+def get_min_transaction_date() -> datetime:
+    min_date = os.environ.get("PIPELINE_MIN_TRANSACTION_DATE")
+    if min_date is not None:
+        return datetime.strptime(min_date, "%Y-%m-%d").replace(tzinfo=UTC)
+    return datetime.strptime("0001-01-01", "%Y-%m-%d").replace(tzinfo=UTC)
+
+
 PRIMARY_KEY = "primary_key"
 BATCH_TIMESTAMP = "batch_timestamp"
 HISTORICAL_BATCH_TIMESTAMP = "historical_batch_timestamp"
@@ -69,8 +76,10 @@ NCH_CLM_SOURCE = "20000"
 
 ALIAS_CLM = "clm"
 ALIAS_DCMTN = "dcmtn"
+ALIAS_LINE_DCMTN = "line_dcmtn"
 ALIAS_SGNTR = "sgntr"
 ALIAS_LINE = "line"
+ALIAS_RX_LINE = "rx_line"
 ALIAS_FISS = "fiss"
 ALIAS_PROCEDURE = "prod"
 ALIAS_INSTNL = "instnl"
@@ -78,6 +87,8 @@ ALIAS_PRFNL = "prfnl"
 ALIAS_VAL = "val"
 ALIAS_HSTRY = "hstry"
 ALIAS_XREF = "xref"
+ALIAS_LCTN_HSTRY = "lctn_hstry"
+ALIAS_CLM_GRP = "clm_grp"
 
 
 class IdrBaseModel(BaseModel, ABC):
@@ -433,7 +444,6 @@ class IdrBeneficiaryStatus(IdrBaseModel):
     mdcr_stus_bgn_dt: Annotated[date, {PRIMARY_KEY: True}]
     mdcr_stus_end_dt: Annotated[date, {PRIMARY_KEY: True}]
     idr_ltst_trans_flg: Annotated[str, BeforeValidator(transform_null_string)]
-    idr_insrt_ts: datetime
     idr_trans_efctv_ts: Annotated[datetime, {PRIMARY_KEY: True}]
     idr_trans_obslt_ts: datetime
     idr_insrt_ts: Annotated[datetime, {BATCH_TIMESTAMP: True}]
@@ -602,6 +612,7 @@ class IdrContractPbpNumber(IdrBaseModel):
     cntrct_pbp_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
     cntrct_drug_plan_ind_cd: str
     cntrct_pbp_type_cd: str
+    cntrct_pbp_name: Annotated[str, BeforeValidator(transform_null_string)]
 
     @staticmethod
     def table() -> str:
@@ -616,7 +627,7 @@ class IdrContractPbpNumber(IdrBaseModel):
         """
 
 
-def claim_type_clause(start_time: datetime) -> str:
+def claim_type_clause(start_time: datetime, claim_type_codes: list[int]) -> str:
     fetch_latest_claims = os.environ.get("IDR_LATEST_CLAIMS", "").lower() in ("1", "true")
     add_latest_claim_ind = ""
     if fetch_latest_claims:
@@ -631,7 +642,7 @@ def claim_type_clause(start_time: datetime) -> str:
     start_time_sql = pac_cutoff_date.strftime("'%Y-%m-%d %H:%M:%S'")
     return f"""
     (
-        {ALIAS_CLM}.clm_type_cd IN ({",".join([str(c) for c in CLAIM_TYPE_CODES])})
+        {ALIAS_CLM}.clm_type_cd IN ({",".join([str(c) for c in claim_type_codes])})
         {add_latest_claim_ind}
         AND
         (
@@ -649,6 +660,7 @@ def claim_type_clause(start_time: datetime) -> str:
             )
             OR {ALIAS_CLM}.clm_src_id = '{NCH_CLM_SOURCE}'
         )
+        AND {ALIAS_CLM}.clm_from_dt <= {ALIAS_CLM}.clm_thru_dt
     )
     """
 
@@ -684,13 +696,13 @@ class IdrClaim(IdrBaseModel):
     clm_pmt_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_ltst_clm_ind: str
     clm_atndg_prvdr_npi_num: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_atndg_prvdr_last_name: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_atndg_prvdr_last_name: Annotated[str, BeforeValidator(transform_default_string)]
     clm_oprtg_prvdr_npi_num: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_oprtg_prvdr_last_name: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_oprtg_prvdr_last_name: Annotated[str, BeforeValidator(transform_default_string)]
     clm_othr_prvdr_npi_num: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_othr_prvdr_last_name: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_othr_prvdr_last_name: Annotated[str, BeforeValidator(transform_default_string)]
     clm_rndrg_prvdr_npi_num: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_rndrg_prvdr_last_name: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_rndrg_prvdr_last_name: Annotated[str, BeforeValidator(transform_default_string)]
     prvdr_blg_prvdr_npi_num: Annotated[str, BeforeValidator(transform_default_string)]
     prvdr_rfrg_prvdr_npi_num: Annotated[str, BeforeValidator(transform_default_string)]
     clm_ric_cd: Annotated[str, BeforeValidator(transform_default_string)]
@@ -703,6 +715,40 @@ class IdrClaim(IdrBaseModel):
     clm_idr_ld_dt: Annotated[date, {HISTORICAL_BATCH_TIMESTAMP: True}]
     clm_srvc_prvdr_gnrc_id_num: Annotated[str, BeforeValidator(transform_default_string)]
     prvdr_prscrbng_prvdr_npi_num: Annotated[str, BeforeValidator(transform_default_string)]
+    clm_adjstmt_type_cd: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_bene_pd_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_blg_prvdr_zip5_cd: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_sbmt_frmt_cd: Annotated[str, BeforeValidator(transform_default_string)]
+    clm_sbmtr_cntrct_num: Annotated[str, BeforeValidator(transform_default_string)]
+    clm_sbmtr_cntrct_pbp_num: Annotated[str, BeforeValidator(transform_default_string)]
+    clm_bnft_enhncmt_1_cd: Annotated[
+        str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_default_string)
+    ]
+    clm_bnft_enhncmt_2_cd: Annotated[
+        str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_default_string)
+    ]
+    clm_bnft_enhncmt_3_cd: Annotated[
+        str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_default_string)
+    ]
+    clm_bnft_enhncmt_4_cd: Annotated[
+        str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_default_string)
+    ]
+    clm_bnft_enhncmt_5_cd: Annotated[
+        str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_default_string)
+    ]
+    clm_ngaco_pbpmt_sw: Annotated[str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_null_string)]
+    clm_ngaco_cptatn_sw: Annotated[
+        str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_null_string)
+    ]
+    clm_ngaco_pdschrg_hcbs_sw: Annotated[
+        str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_null_string)
+    ]
+    clm_ngaco_snf_wvr_sw: Annotated[
+        str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_null_string)
+    ]
+    clm_ngaco_tlhlth_sw: Annotated[
+        str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_null_string)
+    ]
     idr_insrt_ts_clm: Annotated[
         datetime,
         {BATCH_TIMESTAMP: True, ALIAS: ALIAS_CLM, COLUMN_MAP: "idr_insrt_ts"},
@@ -715,7 +761,7 @@ class IdrClaim(IdrBaseModel):
     ]
     idr_insrt_ts_dcmtn: Annotated[
         datetime,
-        {ALIAS: ALIAS_DCMTN, COLUMN_MAP: "idr_insrt_ts"},
+        {BATCH_TIMESTAMP: True, ALIAS: ALIAS_DCMTN, COLUMN_MAP: "idr_insrt_ts"},
         BeforeValidator(transform_null_date_to_min),
     ]
     idr_updt_ts_dcmtn: Annotated[
@@ -740,7 +786,7 @@ class IdrClaim(IdrBaseModel):
                 {clm}.clm_dt_sgntr_sk = {dcmtn}.clm_dt_sgntr_sk AND
                 {clm}.clm_type_cd = {dcmtn}.clm_type_cd AND
                 {clm}.clm_num_sk = {dcmtn}.clm_num_sk
-            {{WHERE_CLAUSE}} AND {claim_type_clause(start_time)}
+            {{WHERE_CLAUSE}} AND {claim_type_clause(start_time, CLAIM_TYPE_CODES)}
             {{ORDER_BY}}
         """
 
@@ -787,7 +833,7 @@ class IdrClaimDateSignature(IdrBaseModel):
                 FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
                 JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_dt_sgntr {sgntr}
                 ON {clm}.clm_dt_sgntr_sk = {sgntr}.clm_dt_sgntr_sk
-                {{WHERE_CLAUSE}} AND {claim_type_clause(start_time)}
+                {{WHERE_CLAUSE}} AND {claim_type_clause(start_time, CLAIM_TYPE_CODES)}
                 {{ORDER_BY}}
             )
             SELECT {{COLUMNS_NO_ALIAS}} FROM dupes WHERE row_order = 1
@@ -824,44 +870,45 @@ class IdrClaimFiss(IdrBaseModel):
                 {clm}.clm_dt_sgntr_sk = {fiss}.clm_dt_sgntr_sk AND
                 {clm}.clm_type_cd = {fiss}.clm_type_cd AND
                 {clm}.clm_num_sk = {fiss}.clm_num_sk
-            {{WHERE_CLAUSE}} AND {claim_type_clause(start_time)}
+            {{WHERE_CLAUSE}} AND {claim_type_clause(start_time, CLAIM_TYPE_CODES)}
             {{ORDER_BY}}
         """
 
 
 class IdrClaimInstitutional(IdrBaseModel):
     clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
-    clm_admsn_type_cd: str
+    clm_admsn_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
     bene_ptnt_stus_cd: Annotated[str, BeforeValidator(transform_default_string)]
     dgns_drg_cd: int
     clm_mdcr_instnl_mco_pd_sw: str
-    clm_admsn_src_cd: str
+    clm_admsn_src_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_fi_actn_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_mdcr_ip_lrd_use_cnt: int
-    clm_hipps_uncompd_care_amt: float
+    clm_mdcr_ip_lrd_use_cnt: Annotated[int, BeforeValidator(transform_null_int)]
+    clm_hipps_uncompd_care_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_hha_rfrl_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_hha_lup_ind_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_mdcr_hha_tot_visit_cnt: Annotated[float, BeforeValidator(transform_null_float)]
-    clm_instnl_mdcr_coins_day_cnt: int
-    clm_instnl_ncvrd_day_cnt: float
-    clm_instnl_per_diem_amt: float
+    clm_instnl_mdcr_coins_day_cnt: Annotated[int, BeforeValidator(transform_null_int)]
+    clm_instnl_ncvrd_day_cnt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_instnl_per_diem_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_mdcr_instnl_bene_pd_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_mdcr_hospc_prd_cnt: Annotated[int, BeforeValidator(transform_null_int)]
     clm_mdcr_npmt_rsn_cd: Annotated[str, BeforeValidator(transform_null_string)]
-    clm_mdcr_ip_pps_drg_wt_num: float
-    clm_mdcr_ip_pps_dsprprtnt_amt: float
-    clm_mdcr_ip_pps_excptn_amt: float
-    clm_mdcr_ip_pps_cptl_fsp_amt: float
-    clm_mdcr_ip_pps_cptl_ime_amt: float
-    clm_mdcr_ip_pps_outlier_amt: float
-    clm_mdcr_ip_pps_cptl_hrmls_amt: float
-    clm_pps_ind_cd: Annotated[str, BeforeValidator(transform_null_string)]
-    clm_mdcr_ip_pps_cptl_tot_amt: float
-    clm_instnl_cvrd_day_cnt: float
+    clm_mdcr_ip_pps_drg_wt_num: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_mdcr_ip_pps_dsprprtnt_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_mdcr_ip_pps_excptn_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_mdcr_ip_pps_cptl_fsp_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_mdcr_ip_pps_cptl_ime_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_mdcr_ip_pps_outlier_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_mdcr_ip_pps_cptl_hrmls_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_pps_ind_cd: Annotated[str, BeforeValidator(transform_default_string)]
+    clm_mdcr_ip_pps_cptl_tot_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_instnl_cvrd_day_cnt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_mdcr_instnl_prmry_pyr_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_instnl_prfnl_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_mdcr_ip_bene_ddctbl_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_instnl_drg_outlier_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    dgns_drg_outlier_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_idr_ld_dt: Annotated[date, {INSERT_EXCLUDE: True, HISTORICAL_BATCH_TIMESTAMP: True}]
     idr_insrt_ts: Annotated[
         datetime,
@@ -890,16 +937,16 @@ class IdrClaimInstitutional(IdrBaseModel):
                 {clm}.clm_dt_sgntr_sk = {instnl}.clm_dt_sgntr_sk AND
                 {clm}.clm_type_cd = {instnl}.clm_type_cd AND
                 {clm}.clm_num_sk = {instnl}.clm_num_sk
-            {{WHERE_CLAUSE}} AND {claim_type_clause(start_time)}
+            {{WHERE_CLAUSE}} AND {claim_type_clause(start_time, CLAIM_TYPE_CODES)}
             {{ORDER_BY}}
         """
 
 
 class IdrClaimItem(IdrBaseModel):
     clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, ALIAS: ALIAS_CLM}]
-    bfd_row_id: Annotated[int, {PRIMARY_KEY: True}]
+    bfd_row_id: Annotated[int, {PRIMARY_KEY: True, ALIAS: ALIAS_CLM_GRP}]
     # columns from V2_MDCR_CLM_LINE
-    clm_line_num: Annotated[int, BeforeValidator(transform_null_int)]
+    clm_line_num: Annotated[int, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_null_int)]
     clm_line_sbmt_chrg_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_line_alowd_chrg_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_line_ansthsa_unit_cnt: Annotated[float, BeforeValidator(transform_null_float)]
@@ -917,9 +964,9 @@ class IdrClaimItem(IdrBaseModel):
     clm_line_ndc_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_line_mdcr_coinsrnc_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_line_ndc_qty: Annotated[float, BeforeValidator(transform_null_float)]
-    clm_line_ndc_qty_qlfyr_cd: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_line_ndc_qty_qlfyr_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_line_srvc_unit_qty: Annotated[float, BeforeValidator(transform_null_float)]
-    clm_line_rev_ctr_cd: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_line_rev_ctr_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_line_rx_num: Annotated[str, BeforeValidator(transform_default_string)]
     clm_pos_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_rndrg_prvdr_prtcptg_cd: Annotated[str, BeforeValidator(transform_default_string)]
@@ -930,6 +977,7 @@ class IdrClaimItem(IdrBaseModel):
     hcpcs_4_mdfr_cd: Annotated[str, BeforeValidator(transform_default_string)]
     hcpcs_5_mdfr_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_idr_ld_dt: Annotated[date, {INSERT_EXCLUDE: True, HISTORICAL_BATCH_TIMESTAMP: True}]
+    clm_line_pmd_uniq_trkng_num: Annotated[str, BeforeValidator(transform_null_string)]
     idr_insrt_ts_line: Annotated[
         datetime,
         {BATCH_TIMESTAMP: True, ALIAS: ALIAS_LINE, COLUMN_MAP: "idr_insrt_ts"},
@@ -949,7 +997,7 @@ class IdrClaimItem(IdrBaseModel):
     clm_prod_type_cd: Annotated[str, BeforeValidator(transform_null_string)]
     clm_prcdr_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_dgns_prcdr_icd_ind: Annotated[
-        str, {ALIAS: ALIAS_PROCEDURE}, BeforeValidator(transform_empty_string)
+        str, {ALIAS: ALIAS_PROCEDURE}, BeforeValidator(transform_default_string)
     ]
     clm_dgns_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_poa_ind: Annotated[str, BeforeValidator(transform_default_string)]
@@ -968,7 +1016,7 @@ class IdrClaimItem(IdrBaseModel):
     clm_val_sqnc_num_val: Annotated[
         int, {ALIAS: ALIAS_VAL, COLUMN_MAP: "clm_val_sqnc_num"}, BeforeValidator(transform_null_int)
     ]
-    clm_val_cd: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_val_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_val_amt: Annotated[float, BeforeValidator(transform_null_float)]
     idr_insrt_ts_val: Annotated[
         datetime,
@@ -980,6 +1028,54 @@ class IdrClaimItem(IdrBaseModel):
         {UPDATE_TIMESTAMP: True, ALIAS: ALIAS_VAL, COLUMN_MAP: "idr_updt_ts"},
         BeforeValidator(transform_null_date_to_min),
     ]
+    # columns from v2_mdcr_clm_line_dcmtn
+    clm_line_bnft_enhncmt_1_cd: Annotated[
+        str, {ALIAS: ALIAS_LINE_DCMTN}, BeforeValidator(transform_default_string)
+    ]
+    clm_line_bnft_enhncmt_2_cd: Annotated[
+        str, {ALIAS: ALIAS_LINE_DCMTN}, BeforeValidator(transform_default_string)
+    ]
+    clm_line_bnft_enhncmt_3_cd: Annotated[
+        str, {ALIAS: ALIAS_LINE_DCMTN}, BeforeValidator(transform_default_string)
+    ]
+    clm_line_bnft_enhncmt_4_cd: Annotated[
+        str, {ALIAS: ALIAS_LINE_DCMTN}, BeforeValidator(transform_default_string)
+    ]
+    clm_line_bnft_enhncmt_5_cd: Annotated[
+        str, {ALIAS: ALIAS_LINE_DCMTN}, BeforeValidator(transform_default_string)
+    ]
+    clm_line_ngaco_cptatn_sw: Annotated[
+        str, {ALIAS: ALIAS_LINE_DCMTN}, BeforeValidator(transform_default_string)
+    ]
+    clm_line_ngaco_pdschrg_hcbs_sw: Annotated[
+        str, {ALIAS: ALIAS_LINE_DCMTN}, BeforeValidator(transform_default_string)
+    ]
+    clm_line_ngaco_snf_wvr_sw: Annotated[
+        str, {ALIAS: ALIAS_LINE_DCMTN}, BeforeValidator(transform_default_string)
+    ]
+    clm_line_ngaco_tlhlth_sw: Annotated[
+        str, {ALIAS: ALIAS_LINE_DCMTN}, BeforeValidator(transform_default_string)
+    ]
+    clm_line_aco_care_mgmt_hcbs_sw: Annotated[
+        str, {ALIAS: ALIAS_LINE_DCMTN}, BeforeValidator(transform_default_string)
+    ]
+    clm_line_ngaco_pbpmt_sw: Annotated[
+        str, {ALIAS: ALIAS_LINE_DCMTN}, BeforeValidator(transform_default_string)
+    ]
+    clm_rndrg_prvdr_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
+    clm_line_pa_uniq_trkng_num: Annotated[
+        str, {ALIAS: ALIAS_LINE_DCMTN}, BeforeValidator(transform_null_string)
+    ]
+    idr_insrt_ts_line_dcmtn: Annotated[
+        datetime,
+        {ALIAS: ALIAS_LINE_DCMTN, COLUMN_MAP: "idr_insrt_ts"},
+        BeforeValidator(transform_null_date_to_min),
+    ]
+    idr_updt_ts_line_dcmtn: Annotated[
+        datetime,
+        {UPDATE_TIMESTAMP: True, ALIAS: ALIAS_LINE_DCMTN, COLUMN_MAP: "idr_updt_ts"},
+        BeforeValidator(transform_null_date_to_min),
+    ]
 
     @staticmethod
     def table() -> str:
@@ -988,9 +1084,11 @@ class IdrClaimItem(IdrBaseModel):
     @staticmethod
     def _current_fetch_query(start_time: datetime) -> str:
         clm = ALIAS_CLM
+        clm_grp = ALIAS_CLM_GRP
         prod = ALIAS_PROCEDURE
         line = ALIAS_LINE
         val = ALIAS_VAL
+        line_dcmtn = ALIAS_LINE_DCMTN
         # This query is taking all the values for CLM_PROD, CLM_LINE, and CLM_VAL and storing
         # them in a unified table. This is necessary because each of these tables have a different
         # number of rows for each claim. If we don't combine these values, we would either have to
@@ -1000,6 +1098,10 @@ class IdrClaimItem(IdrBaseModel):
         # Performing this normalization means we can perform a single query to generate the rows
         # equal to max(len(clm_prod), len(clm_line), len(clm_val)). The number of rows here will
         # usually only be a few dozen, maybe a few hundred at worst.
+
+        # We need to eagerly filter by the claim date in the first CTE at the top to prevent the
+        # query from pulling back all of the claims and only filtering at the end. This has a
+        # massive impact on the query performance.
 
         # There's a few steps here:
         #   1. Figure out how many rows we need for each claim.
@@ -1011,6 +1113,12 @@ class IdrClaimItem(IdrBaseModel):
         #   3. Take our list of claim_uniq_id + line number and left join each table against it to
         #      get the final result.
 
+        # In Postgres, we need to tell the query planner to NOT materialize the CTEs because
+        # it will behave extremely poorly when trying to join against these large sets of
+        # non-indexed data in memory. This is fine in Snowflake because it's fundamentally
+        # different, but we need to force this behavior for local testing.
+        not_materialized = "" if os.environ.get("IDR_USERNAME", "") else "NOT MATERIALIZED"
+
         return f"""
                 WITH claims AS (
                     SELECT 
@@ -1021,14 +1129,17 @@ class IdrClaimItem(IdrBaseModel):
                         {clm}.clm_dt_sgntr_sk,
                         {clm}.clm_idr_ld_dt
                     FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
-                    WHERE {claim_type_clause(start_time)}
+                    WHERE 
+                        {claim_type_clause(start_time, CLAIM_TYPE_CODES)} AND 
+                        {clm}.clm_idr_ld_dt >= '{get_min_transaction_date()}'
                 ),
-                claim_groups AS (
-                    SELECT 
-                        {clm}.clm_uniq_id, 
+                claim_lines AS {not_materialized} (
+                    SELECT
+                        {line}.*,
                         ROW_NUMBER() OVER (
                             PARTITION BY {clm}.clm_uniq_id 
-                            ORDER BY {clm}.clm_uniq_id
+                            ORDER BY {clm}.clm_uniq_id,
+                                {line}.clm_line_num
                         ) AS bfd_row_id
                     FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_line {line}
                     JOIN claims {clm} 
@@ -1036,28 +1147,32 @@ class IdrClaimItem(IdrBaseModel):
                         AND {line}.clm_type_cd = {clm}.clm_type_cd
                         AND {line}.clm_num_sk = {clm}.clm_num_sk 
                         AND {line}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
-                        AND {line}.clm_uniq_id = {clm}.clm_uniq_id
-                    UNION
+                ),
+                claim_procedures AS {not_materialized} (
                     SELECT 
-                        {clm}.clm_uniq_id, 
+                        {clm}.clm_uniq_id,
+                        {prod}.*,
                         ROW_NUMBER() OVER (
                             PARTITION BY {clm}.clm_uniq_id 
                             ORDER BY {clm}.clm_uniq_id,
                                 {prod}.clm_prod_type_cd,
                                 {prod}.clm_val_sqnc_num
-                        ) AS row_id
+                        ) AS bfd_row_id
                     FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_prod {prod}
                     JOIN claims {clm} 
                         ON {prod}.geo_bene_sk = {clm}.geo_bene_sk
                         AND {prod}.clm_type_cd = {clm}.clm_type_cd
                         AND {prod}.clm_num_sk = {clm}.clm_num_sk 
                         AND {prod}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
-                    UNION
+                ),
+                claim_vals AS {not_materialized} (
                     SELECT
                         {clm}.clm_uniq_id, 
+                        {val}.*,
                         ROW_NUMBER() OVER (
                             PARTITION BY {clm}.clm_uniq_id 
-                            ORDER BY {clm}.clm_uniq_id, {val}.clm_val_sqnc_num
+                            ORDER BY {clm}.clm_uniq_id,
+                                {val}.clm_val_sqnc_num
                         ) AS bfd_row_id
                     FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_val {val}
                     JOIN claims {clm} 
@@ -1066,46 +1181,44 @@ class IdrClaimItem(IdrBaseModel):
                         AND {val}.clm_num_sk = {clm}.clm_num_sk 
                         AND {val}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
                 ),
-                procedures AS (
-                    SELECT 
-                    {clm}.clm_uniq_id, 
-                    {prod}.*, 
-                    ROW_NUMBER() OVER (
-                        PARTITION BY {clm}.clm_uniq_id 
-                        ORDER BY {clm}.clm_uniq_id,
-                            {prod}.clm_prod_type_cd,
-                            {prod}.clm_val_sqnc_num
-                    ) AS line_num
-                    FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_prod {prod}
-                    JOIN claims {clm} 
-                        ON {prod}.geo_bene_sk = {clm}.geo_bene_sk
-                        AND {prod}.clm_type_cd = {clm}.clm_type_cd
-                        AND {prod}.clm_num_sk = {clm}.clm_num_sk 
-                        AND {prod}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
+                claim_groups AS (
+                    SELECT clm_uniq_id, bfd_row_id
+                    FROM claim_lines
+                    UNION
+                    SELECT clm_uniq_id, bfd_row_id
+                    FROM claim_procedures
+                    UNION
+                    SELECT clm_uniq_id, bfd_row_id
+                    FROM claim_vals
                 )
                 SELECT {{COLUMNS}}
                 FROM claims {clm}
-                JOIN claim_groups cg on cg.clm_uniq_id = {clm}.clm_uniq_id
-                LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_line {line} 
+                JOIN claim_groups {clm_grp} 
+                    ON {clm_grp}.clm_uniq_id = {clm}.clm_uniq_id
+                LEFT JOIN claim_lines {line} 
                     ON {line}.geo_bene_sk = {clm}.geo_bene_sk
                     AND {line}.clm_type_cd = {clm}.clm_type_cd
                     AND {line}.clm_num_sk = {clm}.clm_num_sk 
                     AND {line}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
-                    AND {line}.clm_line_num = cg.bfd_row_id
-                    AND {line}.clm_uniq_id = {clm}.clm_uniq_id
-                LEFT JOIN procedures {prod}
+                    AND {line}.bfd_row_id = {clm_grp}.bfd_row_id
+                LEFT JOIN claim_procedures {prod}
                     ON {prod}.geo_bene_sk = {clm}.geo_bene_sk
                     AND {prod}.clm_type_cd = {clm}.clm_type_cd
                     AND {prod}.clm_num_sk = {clm}.clm_num_sk 
                     AND {prod}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
-                    AND {prod}.line_num = cg.bfd_row_id
-                    AND {prod}.clm_uniq_id = {clm}.clm_uniq_id
-                LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_val {val}
+                    AND {prod}.bfd_row_id = {clm_grp}.bfd_row_id
+                LEFT JOIN claim_vals {val}
                     ON {val}.geo_bene_sk = {clm}.geo_bene_sk
                     AND {val}.clm_type_cd = {clm}.clm_type_cd
                     AND {val}.clm_num_sk = {clm}.clm_num_sk 
                     AND {val}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
-                    AND {val}.clm_val_sqnc_num = cg.bfd_row_id
+                    AND {val}.bfd_row_id = {clm_grp}.bfd_row_id
+                LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_dcmtn {line_dcmtn}
+                    ON {line_dcmtn}.geo_bene_sk = {line}.geo_bene_sk
+                    AND {line_dcmtn}.clm_type_cd = {line}.clm_type_cd
+                    AND {line_dcmtn}.clm_num_sk = {line}.clm_num_sk 
+                    AND {line_dcmtn}.clm_dt_sgntr_sk = {line}.clm_dt_sgntr_sk
+                    AND {line_dcmtn}.clm_line_num = {line}.clm_line_num
                 {{WHERE_CLAUSE}}
                 {{ORDER_BY}}
         """
@@ -1121,11 +1234,11 @@ class IdrClaimLineInstitutional(IdrBaseModel):
     clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
     clm_line_num: Annotated[int, {PRIMARY_KEY: True}]
     clm_rev_apc_hipps_cd: Annotated[str, BeforeValidator(transform_default_hipps_code)]
-    clm_otaf_one_ind_cd: Annotated[str, BeforeValidator(transform_null_string)]
-    clm_rev_dscnt_ind_cd: Annotated[str, BeforeValidator(transform_null_string)]
-    clm_rev_packg_ind_cd: Annotated[str, BeforeValidator(transform_null_string)]
-    clm_rev_cntr_stus_cd: Annotated[str, BeforeValidator(transform_null_string)]
-    clm_rev_pmt_mthd_cd: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_otaf_one_ind_cd: Annotated[str, BeforeValidator(transform_default_string)]
+    clm_rev_dscnt_ind_cd: Annotated[str, BeforeValidator(transform_default_string)]
+    clm_rev_packg_ind_cd: Annotated[str, BeforeValidator(transform_default_string)]
+    clm_rev_cntr_stus_cd: Annotated[str, BeforeValidator(transform_default_string)]
+    clm_rev_pmt_mthd_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_ansi_sgntr_sk: Annotated[int, BeforeValidator(transform_null_int)]
     clm_ddctbl_coinsrnc_cd: str
     clm_line_instnl_rate_amt: float
@@ -1162,7 +1275,7 @@ class IdrClaimLineInstitutional(IdrBaseModel):
                 {clm}.clm_dt_sgntr_sk = {line}.clm_dt_sgntr_sk AND
                 {clm}.clm_type_cd = {line}.clm_type_cd AND
                 {clm}.clm_num_sk = {line}.clm_num_sk
-            {{WHERE_CLAUSE}} AND {claim_type_clause(start_time)}
+            {{WHERE_CLAUSE}} AND {claim_type_clause(start_time, CLAIM_TYPE_CODES)}
             {{ORDER_BY}}
         """
 
@@ -1210,14 +1323,28 @@ class IdrClaimProfessional(IdrBaseModel):
     clm_clncl_tril_num: Annotated[str, BeforeValidator(transform_default_string)]
     clm_mdcr_prfnl_prmry_pyr_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_mdcr_prfnl_prvdr_asgnmt_sw: Annotated[str, BeforeValidator(transform_default_string)]
-    idr_insrt_ts: Annotated[
+    idr_insrt_ts_clm_prfnl: Annotated[
         datetime,
-        {BATCH_TIMESTAMP: True, ALIAS: ALIAS_PRFNL},
+        {BATCH_TIMESTAMP: True, ALIAS: ALIAS_PRFNL, COLUMN_MAP: "idr_insrt_ts"},
         BeforeValidator(transform_null_date_to_min),
     ]
-    idr_updt_ts: Annotated[
+    idr_updt_ts_clm_prfnl: Annotated[
         datetime,
-        {UPDATE_TIMESTAMP: True, ALIAS: ALIAS_PRFNL},
+        {UPDATE_TIMESTAMP: True, ALIAS: ALIAS_PRFNL, COLUMN_MAP: "idr_insrt_ts"},
+        BeforeValidator(transform_null_date_to_min),
+    ]
+    # column from v2_mdcr_clm_lctn_hstry
+    clm_audt_trl_stus_cd: Annotated[
+        str, {ALIAS: ALIAS_LCTN_HSTRY}, BeforeValidator(transform_null_string)
+    ]
+    idr_insrt_ts_lctn_hstry: Annotated[
+        datetime,
+        {BATCH_TIMESTAMP: True, ALIAS: ALIAS_LCTN_HSTRY, COLUMN_MAP: "idr_insrt_ts"},
+        BeforeValidator(transform_null_date_to_min),
+    ]
+    idr_updt_ts_lctn_hstry: Annotated[
+        datetime,
+        {UPDATE_TIMESTAMP: True, ALIAS: ALIAS_LCTN_HSTRY, COLUMN_MAP: "idr_updt_ts"},
         BeforeValidator(transform_null_date_to_min),
     ]
 
@@ -1229,16 +1356,60 @@ class IdrClaimProfessional(IdrBaseModel):
     def _current_fetch_query(start_time: datetime) -> str:
         clm = ALIAS_CLM
         prfnl = ALIAS_PRFNL
+        lctn_hstry = ALIAS_LCTN_HSTRY
         return f"""
-            SELECT {{COLUMNS}}
-            FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
-            JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_prfnl {prfnl} ON
-                {clm}.geo_bene_sk = {prfnl}.geo_bene_sk AND
-                {clm}.clm_type_cd = {prfnl}.clm_type_cd AND
-                {clm}.clm_dt_sgntr_sk = {prfnl}.clm_dt_sgntr_sk AND
-                {clm}.clm_num_sk = {prfnl}.clm_num_sk
-            {{WHERE_CLAUSE}} AND {claim_type_clause(start_time)}
-            {{ORDER_BY}}
+            WITH claims AS (
+                    SELECT 
+                        {clm}.clm_uniq_id, 
+                        {clm}.geo_bene_sk, 
+                        {clm}.clm_type_cd, 
+                        {clm}.clm_num_sk, 
+                        {clm}.clm_dt_sgntr_sk,
+                        {clm}.clm_idr_ld_dt
+                    FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
+                    WHERE 
+                        {claim_type_clause(start_time, CLAIM_TYPE_CODES)} AND 
+                        {clm}.clm_idr_ld_dt >= '{get_min_transaction_date()}'
+                ),
+                latest_clm_lctn_hstry AS (
+                    SELECT 
+                        claims.geo_bene_sk, 
+                        claims.clm_type_cd, 
+                        claims.clm_dt_sgntr_sk, 
+                        claims.clm_num_sk, 
+                        MAX({lctn_hstry}.clm_lctn_cd_sqnc_num) AS max_clm_lctn_cd_sqnc_num
+                    FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_lctn_hstry {lctn_hstry}
+                    JOIN claims ON
+                        {lctn_hstry}.geo_bene_sk = claims.geo_bene_sk AND
+                        {lctn_hstry}.clm_type_cd = claims.clm_type_cd AND
+                        {lctn_hstry}.clm_dt_sgntr_sk = claims.clm_dt_sgntr_sk AND
+                        {lctn_hstry}.clm_num_sk = claims.clm_num_sk
+                    GROUP BY 
+                        claims.geo_bene_sk, 
+                        claims.clm_type_cd, 
+                        claims.clm_dt_sgntr_sk, 
+                        claims.clm_num_sk
+                )
+                SELECT {{COLUMNS}}
+                FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
+                JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_prfnl {prfnl} ON
+                    {clm}.geo_bene_sk = {prfnl}.geo_bene_sk AND
+                    {clm}.clm_type_cd = {prfnl}.clm_type_cd AND
+                    {clm}.clm_dt_sgntr_sk = {prfnl}.clm_dt_sgntr_sk AND
+                    {clm}.clm_num_sk = {prfnl}.clm_num_sk
+                LEFT JOIN latest_clm_lctn_hstry latest_lctn ON
+                    {clm}.geo_bene_sk = latest_lctn.geo_bene_sk AND
+                    {clm}.clm_type_cd = latest_lctn.clm_type_cd AND
+                    {clm}.clm_dt_sgntr_sk = latest_lctn.clm_dt_sgntr_sk AND
+                    {clm}.clm_num_sk = latest_lctn.clm_num_sk
+                LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_lctn_hstry {lctn_hstry} ON
+                    {clm}.geo_bene_sk = {lctn_hstry}.geo_bene_sk AND
+                    {clm}.clm_type_cd = {lctn_hstry}.clm_type_cd AND
+                    {clm}.clm_dt_sgntr_sk = {lctn_hstry}.clm_dt_sgntr_sk AND
+                    {clm}.clm_num_sk = {lctn_hstry}.clm_num_sk AND
+                    {lctn_hstry}.clm_lctn_cd_sqnc_num = latest_lctn.max_clm_lctn_cd_sqnc_num
+                {{WHERE_CLAUSE}}
+                {{ORDER_BY}}
         """
 
 
@@ -1290,7 +1461,7 @@ class IdrClaimLineProfessional(IdrBaseModel):
                 {clm}.clm_dt_sgntr_sk = {prfnl}.clm_dt_sgntr_sk AND
                 {clm}.clm_type_cd = {prfnl}.clm_type_cd AND
                 {clm}.clm_num_sk = {prfnl}.clm_num_sk
-            {{WHERE_CLAUSE}} AND {claim_type_clause(start_time)}
+            {{WHERE_CLAUSE}} AND {claim_type_clause(start_time, CLAIM_TYPE_CODES)}
             {{ORDER_BY}}
         """
 
@@ -1321,3 +1492,72 @@ class LoadProgress(IdrBaseModel):
     def is_historical(self) -> bool:
         # 2021-4-18 is the most recent date where idr_insrt_ts could be null in claims data
         return self.last_ts <= datetime(2021, 4, 19, tzinfo=UTC)
+
+
+class IdrClaimLineRx(IdrBaseModel):
+    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, ALIAS: ALIAS_CLM}]
+    clm_line_num: Annotated[int, {PRIMARY_KEY: True, ALIAS: ALIAS_RX_LINE}]
+    clm_brnd_gnrc_cd: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_cmpnd_cd: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_ctstrphc_cvrg_ind_cd: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_daw_prod_slctn_cd: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_drug_cvrg_stus_cd: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_dspnsng_stus_cd: Annotated[str, BeforeValidator(transform_default_string)]
+    clm_line_authrzd_fill_num: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_line_days_suply_qty: Annotated[int, BeforeValidator(transform_null_int)]
+    clm_line_grs_above_thrshld_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_line_grs_blw_thrshld_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_line_ingrdnt_cst_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_line_lis_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_line_plro_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_line_rx_fill_num: Annotated[int, BeforeValidator(transform_null_int)]
+    clm_line_rx_orgn_cd: Annotated[str, BeforeValidator(transform_default_string)]
+    clm_line_sls_tax_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_line_srvc_cst_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_line_troop_tot_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_line_vccn_admin_fee_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_ltc_dspnsng_mthd_cd: Annotated[str, BeforeValidator(transform_default_string)]
+    clm_phrmcy_srvc_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
+    clm_prcng_excptn_cd: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_ptnt_rsdnc_cd: Annotated[str, BeforeValidator(transform_default_string)]
+    clm_rptd_mftr_dscnt_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_idr_ld_dt: Annotated[date, {INSERT_EXCLUDE: True, HISTORICAL_BATCH_TIMESTAMP: True}]
+    idr_insrt_ts: Annotated[
+        datetime,
+        {BATCH_TIMESTAMP: True, ALIAS: ALIAS_LINE},
+        BeforeValidator(transform_null_date_to_min),
+    ]
+    idr_updt_ts: Annotated[
+        datetime,
+        {UPDATE_TIMESTAMP: True, ALIAS: ALIAS_LINE},
+        BeforeValidator(transform_null_date_to_min),
+    ]
+
+    @staticmethod
+    def table() -> str:
+        return "idr.claim_line_rx"
+
+    @staticmethod
+    def _current_fetch_query(start_time: datetime) -> str:
+        clm = ALIAS_CLM
+        rx_line = ALIAS_RX_LINE
+        line = ALIAS_LINE
+        return f"""
+            SELECT {{COLUMNS}}
+            FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
+            JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_rx {rx_line}
+                ON {rx_line}.geo_bene_sk = {clm}.geo_bene_sk
+                AND {rx_line}.clm_type_cd = {clm}.clm_type_cd
+                AND {rx_line}.clm_num_sk = {clm}.clm_num_sk 
+                AND {rx_line}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
+                AND {rx_line}.clm_uniq_id = {clm}.clm_uniq_id
+            JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_line {line}
+                ON {line}.geo_bene_sk = {rx_line}.geo_bene_sk
+                AND {line}.clm_type_cd = {rx_line}.clm_type_cd
+                AND {line}.clm_num_sk = {rx_line}.clm_num_sk 
+                AND {line}.clm_dt_sgntr_sk = {rx_line}.clm_dt_sgntr_sk
+                AND {line}.clm_uniq_id = {rx_line}.clm_uniq_id
+                AND {line}.clm_line_num = {rx_line}.clm_line_num
+            {{WHERE_CLAUSE}} AND {claim_type_clause(start_time, PART_D_CLAIM_TYPE_CODES)}
+            {{ORDER_BY}}
+        """

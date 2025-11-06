@@ -7,6 +7,7 @@ import gov.cms.bfd.server.ng.coverage.CoverageRepository;
 import gov.cms.bfd.server.ng.input.CoverageCompositeId;
 import gov.cms.bfd.server.ng.input.CoveragePart;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
+import gov.cms.bfd.server.ng.loadprogress.LoadProgressRepository;
 import gov.cms.bfd.server.ng.util.FhirUtil;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.util.Arrays;
@@ -28,6 +29,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class PatientHandler {
   private final BeneficiaryRepository beneficiaryRepository;
+  private final LoadProgressRepository loadProgressRepository;
 
   private final CoverageRepository coverageRepository;
 
@@ -53,7 +55,7 @@ public class PatientHandler {
     var beneficiary = beneficiaryRepository.findById(fhirId, lastUpdated);
 
     return FhirUtil.bundleOrDefault(
-        beneficiary.map(this::toFhir), beneficiaryRepository::beneficiaryLastUpdated);
+        beneficiary.map(this::toFhir), loadProgressRepository::lastUpdated);
   }
 
   /**
@@ -68,7 +70,7 @@ public class PatientHandler {
     var beneficiary = xrefBeneSk.flatMap(x -> beneficiaryRepository.findById(x, lastUpdated));
 
     return FhirUtil.bundleOrDefault(
-        beneficiary.map(this::toFhir), beneficiaryRepository::beneficiaryLastUpdated);
+        beneficiary.map(this::toFhir), loadProgressRepository::lastUpdated);
   }
 
   /**
@@ -83,7 +85,7 @@ public class PatientHandler {
             .searchBeneficiaryWithCoverage(beneSk, new DateTimeRange())
             .filter(b -> !b.isMergedBeneficiary());
     if (beneficiaryOpt.isEmpty()) {
-      return FhirUtil.bundleOrDefault(List.of(), beneficiaryRepository::beneficiaryLastUpdated);
+      return FhirUtil.bundleOrDefault(List.of(), loadProgressRepository::lastUpdated);
     }
     var beneficiary = beneficiaryOpt.get();
 
@@ -103,7 +105,7 @@ public class PatientHandler {
 
     var resources = Stream.concat(Stream.of(patient, cmsOrg), coverages);
 
-    return FhirUtil.bundleWithFullUrls(resources, beneficiaryRepository::beneficiaryLastUpdated);
+    return FhirUtil.bundleWithFullUrls(resources, loadProgressRepository::lastUpdated);
   }
 
   private Patient toFhir(Beneficiary beneficiary) {

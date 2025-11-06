@@ -29,7 +29,6 @@ public class SystemUrls {
    * href="http://hl7.org/fhir/us/carin-bb/STU2.1/StructureDefinition-C4BB-Coverage.html">C4BB
    * Coverage 2.1.0</a>
    */
-  // add version numbers
   public static final String PROFILE_C4BB_COVERAGE_2_1_0 =
       "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage|2.1.0";
 
@@ -64,6 +63,9 @@ public class SystemUrls {
    */
   public static final String PROFILE_C4BB_ORGANIZATION_2_1_0 =
       "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0";
+
+  public static final String C4DIC_ADD_INFO_EXT_URL =
+      "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-AdditionalCardInformation-extension";
 
   /**
    * URL for the CARIN Digital Insurance Card (C4DIC) Organization Profile, version 1.1.0. Used for
@@ -281,6 +283,10 @@ public class SystemUrls {
   /** URL. */
   public static final String HL7_BENEFIT_CATEGORY =
       "http://terminology.hl7.org/CodeSystem/ex-benefitcategory";
+
+  /** URL. */
+  public static final String SAMHSA_ACT_CODE_SYSTEM_URL =
+      "http://terminology.hl7.org/CodeSystem/v3-ActCode";
 
   // US Core
   /**

@@ -131,6 +131,7 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
             """,
         {"none": None},
     )
+
     conn.commit()
 
     sys.argv = ["pipeline.py", "synthetic"]
@@ -212,6 +213,9 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
     rows = cur.fetchmany(1)
     assert rows[0]["clm_uniq_id"] == 113370100080
     assert rows[0]["clm_nrln_ric_cd"] == "W"
+
+    cur = conn.execute("select * from idr.claim where clm_uniq_id = 8244064276500")
+    assert cur.rowcount == 0
 
     cur = conn.execute("select * from idr.claim_institutional order by clm_uniq_id")
     assert cur.rowcount == 72

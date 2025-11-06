@@ -12,10 +12,13 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import java.time.ZonedDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.SortedSet;
 import java.util.UUID;
+import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.Annotation;
 import org.hl7.fhir.r4.model.Coverage;
@@ -55,17 +58,17 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
    */
   public static final String C4DIC_ADD_INFO =
       """
-    You may be asked to show this card when you get health care services. Only give your personal Medicare \
-    information to health care providers, or people you trust who work with Medicare on your behalf. \
-    WARNING: Intentionally misusing this card may be considered fraud and/or other violation of \
-    federal law and is punishable by law.
+      You may be asked to show this card when you get health care services. Only give your personal Medicare \
+      information to health care providers, or people you trust who work with Medicare on your behalf. \
+      WARNING: Intentionally misusing this card may be considered fraud and/or other violation of \
+      federal law and is punishable by law.
 
-    Es posible que le pidan que muestre esta tarjeta cuando reciba servicios de cuidado médico. \
-    Solamente dé su información personal de Medicare a los proveedores de salud, sus aseguradores o \
-    personas de su confianza que trabajan con Medicare en su nombre. ¡ADVERTENCIA! El mal uso \
-    intencional de esta tarjeta puede ser considerado como fraude y/u otra violación de la ley \
-    federal y es sancionada por la ley.\
-    """;
+      Es posible que le pidan que muestre esta tarjeta cuando reciba servicios de cuidado médico. \
+      Solamente dé su información personal de Medicare a los proveedores de salud, sus aseguradores o \
+      personas de su confianza que trabajan con Medicare en su nombre. ¡ADVERTENCIA! El mal uso \
+      intencional de esta tarjeta puede ser considerado como fraude y/u otra violación de la ley \
+      federal y es sancionada por la ley.\
+      """;
 
   /** Patient reference. */
   public static final String PATIENT_REF = "Patient/";
@@ -115,13 +118,14 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
     coverage.addClass_(coveragePart.toFhirClassComponent());
 
     if (isC4DIC) {
-      coverage.setMeta(meta.toFhirCoverage(SystemUrls.PROFILE_C4DIC_COVERAGE));
+      coverage.setMeta(
+          meta.toFhirCoverage(SystemUrls.PROFILE_C4DIC_COVERAGE, getMostRecentUpdated()));
       coverage.setId(UUID.randomUUID().toString());
       coverage.setBeneficiary(new Reference(PATIENT_REF + id));
       coverage.setSubscriber(new Reference(PATIENT_REF + id));
     } else {
       coverage.setId(coverageCompositeId.fullId());
-      coverage.setMeta(meta.toFhirCoverage(""));
+      coverage.setMeta(meta.toFhirCoverage("", getMostRecentUpdated()));
       coverage.setBeneficiary(new Reference(PATIENT_REF + beneSk));
     }
 
@@ -136,6 +140,14 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
    */
   public Coverage toFhir(CoverageCompositeId coverageCompositeId) {
     var coverage = setupBaseCoverage(coverageCompositeId, false);
+    coverage.setId(coverageCompositeId.fullId());
+
+    coverage.setMeta(meta.toFhirCoverage("", getMostRecentUpdated()));
+
+    coverage.setBeneficiary(new Reference(PATIENT_REF + beneSk));
+    coverage.setRelationship(RelationshipFactory.createSelfSubscriberRelationship());
+
+    coverage.setSubscriberId(identifier.getMbi());
     var coveragePart = coverageCompositeId.coveragePart();
 
     return switch (coveragePart) {
@@ -279,5 +291,24 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
     }
 
     return coverage;
+  }
+
+  private ZonedDateTime getMostRecentUpdated() {
+    // Collect timestamps from beneficiary and all related child entities
+    var allTimestamps =
+        Stream.of(
+            Stream.of(meta.getUpdatedTimestamp()),
+            getStatus().map(BeneficiaryStatus::getBfdUpdatedTimestamp).stream(),
+            getEntitlementReason()
+                .map(BeneficiaryEntitlementReason::getBfdUpdatedTimestamp)
+                .stream(),
+            getDualEligibility().map(BeneficiaryDualEligibility::getBfdUpdatedTimestamp).stream(),
+            beneficiaryEntitlements.stream().map(BeneficiaryEntitlement::getBfdUpdatedTimestamp),
+            beneficiaryThirdParties.stream().map(BeneficiaryThirdParty::getBfdUpdatedTimestamp));
+
+    return allTimestamps
+        .flatMap(s -> s)
+        .max(Comparator.naturalOrder())
+        .orElse(meta.getUpdatedTimestamp());
   }
 }

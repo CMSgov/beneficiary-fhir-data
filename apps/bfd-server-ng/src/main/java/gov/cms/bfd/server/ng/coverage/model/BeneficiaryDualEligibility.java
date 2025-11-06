@@ -7,14 +7,17 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
+import lombok.Getter;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Period;
 
 /** Dual Medicare/Medicaid eligibility info. */
+@Getter
 @Entity
 @Table(name = "beneficiary_dual_eligibility_latest", schema = "idr")
 public class BeneficiaryDualEligibility {
@@ -36,6 +39,9 @@ public class BeneficiaryDualEligibility {
 
   @Column(name = "geo_usps_state_cd")
   private String stateCode;
+
+  @Column(name = "bfd_updated_ts")
+  private ZonedDateTime bfdUpdatedTimestamp;
 
   Period toFhirPeriod() {
     var period = new Period().setStartElement(DateUtil.toFhirDate(eligibilityBeginDate));

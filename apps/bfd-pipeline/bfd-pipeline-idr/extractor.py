@@ -2,7 +2,7 @@ import logging
 import os
 from abc import ABC, abstractmethod
 from collections.abc import Iterator, Mapping
-from datetime import UTC, datetime
+from datetime import datetime
 
 import psycopg
 import snowflake.connector
@@ -12,7 +12,7 @@ from psycopg.rows import class_row
 from snowflake.connector import DictCursor, SnowflakeConnection
 
 from constants import DEFAULT_MIN_DATE
-from model import DbType, LoadProgress, T
+from model import DbType, LoadProgress, T, get_min_transaction_date
 from timer import Timer
 
 cursor_execute_timer = Timer("cursor_execute")
@@ -20,13 +20,6 @@ cursor_fetch_timer = Timer("cursor_fetch")
 transform_timer = Timer("transform")
 
 logger = logging.getLogger(__name__)
-
-
-def get_min_transaction_date() -> datetime:
-    min_date = os.environ.get("PIPELINE_MIN_TRANSACTION_DATE")
-    if min_date is not None:
-        return datetime.strptime(min_date, "%Y-%m-%d").replace(tzinfo=UTC)
-    return datetime.strptime("0001-01-01", "%Y-%m-%d").replace(tzinfo=UTC)
 
 
 class Extractor(ABC):
