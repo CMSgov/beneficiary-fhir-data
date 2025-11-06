@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Spliterator;
 import java.util.Spliterators;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.LongFunction;
@@ -352,11 +351,7 @@ public class LoadedFilterManager {
         .map(
             t ->
                 buildFilter(
-                    t.getLoadedFileId(),
-                    t.getFirstUpdated(),
-                    fetchById,
-                    fetchBatchSizeByFileId,
-                    fetchEstimatedBenesCountByFileId));
+                    t, fetchById, fetchBatchSizeByFileId, fetchEstimatedBenesCountByFileId));
   }
 
   /**
@@ -378,20 +373,19 @@ public class LoadedFilterManager {
   /**
    * Build a filter for this loaded file. Should be a pure function.
    *
-   * @param fileId to build a filter for
-   * @param firstUpdated time stamp
+   * @param tuple the {@link LoadedTuple} for a given file
    * @param fetchById a function which returns a list of batches
    * @param fetchBatchSizeByFileId a function that returns the batch size of the file
    * @param fetchEstimatedBenesCountByFileId a function that returns an estimated count of
-   *     beneficiaries per-{@link LoadedBatch} for the given {@link LoadedFile} ID
+   *     beneficiaries per-{@link LoadedBatch} for the given {@link LoadedTuple} file ID
    * @return a new filter
    */
   public static LoadedFileFilter buildFilter(
-      long fileId,
-      Instant firstUpdated,
+      LoadedTuple tuple,
       BiFunction<Long, Integer, Stream<LoadedBatch>> fetchById,
       LongFunction<Long> fetchBatchSizeByFileId,
       LongFunction<Long> fetchEstimatedBenesCountByFileId) {
+    final var fileId = tuple.getLoadedFileId();
     final var batchCount = fetchBatchSizeByFileId.apply(fileId).intValue();
     if (batchCount == 0) {
       throw new IllegalArgumentException("Batches cannot be empty for a filter");
@@ -404,21 +398,9 @@ public class LoadedFilterManager {
     // with respect to their beneficiaries
     final var bloomFilter = LoadedFileFilter.createFilter(batchCount * estimatedBeneficiaryCount);
 
-    final var lastUpdated = new AtomicReference<>(firstUpdated);
     try (final var loadedBatches = fetchById.apply(fileId, batchCount)) {
-      // Loop through all batches, filling the bloom filter and finding the lastUpdated
-      loadedBatches.forEach(
-          batch -> {
-            var curLastUpdated = firstUpdated;
-            for (Long beneficiary : batch.getBeneficiaries()) {
-              bloomFilter.putLong(beneficiary);
-            }
-            if (batch.getCreated().isAfter(curLastUpdated)) {
-              curLastUpdated = batch.getCreated();
-            }
-
-            lastUpdated.set(curLastUpdated);
-          });
+      // Loop through all batches, filling the bloom filter based upon each beneficiary ID
+      loadedBatches.flatMap(b -> b.getBeneficiaries().stream()).forEach(bloomFilter::putLong);
 
       LOGGER.info(
           "Built a filter for {} with {} batches; BloomFilter size {}, BloomFilter cardinality {}",
@@ -426,7 +408,8 @@ public class LoadedFilterManager {
           batchCount,
           bloomFilter.bitSize(),
           bloomFilter.cardinality());
-      return new LoadedFileFilter(fileId, batchCount, firstUpdated, lastUpdated.get(), bloomFilter);
+      return new LoadedFileFilter(
+          fileId, batchCount, tuple.getFirstUpdated(), tuple.getLastUpdated(), bloomFilter);
     }
   }
 
