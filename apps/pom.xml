@@ -1421,8 +1421,8 @@
                     <argLine>${surefire.jacoco.args}</argLine>
                     <!-- Excludes integration tests when unit tests are run. -->
                     <excludes>
-                        <exclude>**/IT.java</exclude>
-                        <exclude>**/E2E.java</exclude>
+                        <exclude>**/*IT.java</exclude>
+                        <exclude>**/*E2E.java</exclude>
                     </excludes>
                 </configuration>
             </plugin>
