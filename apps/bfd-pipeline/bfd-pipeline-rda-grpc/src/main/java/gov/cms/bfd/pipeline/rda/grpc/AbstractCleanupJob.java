@@ -2,6 +2,7 @@ package gov.cms.bfd.pipeline.rda.grpc;
 
 import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
 import jakarta.persistence.Query;
+import java.time.Instant;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import lombok.AllArgsConstructor;
@@ -26,7 +27,8 @@ public abstract class AbstractCleanupJob implements CleanupJob {
           + "  select ${parentTableKey} "
           + "  from ${parentTableName} "
           + "  where last_updated between "
-          + "  (select min(last_updated) from ${parentTableName}) and (Now() -Interval '${interval} days') "
+          + "  (select min(last_updated) from ${parentTableName}) "
+          + "  and ('${iso8601Now}'::::timestamptz -Interval '${interval} days') "
           + "  and api_source not like 'S3%' "
           + "  limit ${limit})";
 
@@ -136,6 +138,7 @@ public abstract class AbstractCleanupJob implements CleanupJob {
               Map.of(
                   "parentTableName", parentTableName,
                   "parentTableKey", getParentTableKey(),
+                  "iso8601Now", Instant.now().toString(),
                   "interval", String.valueOf(OLDEST_CLAIM_AGE_IN_DAYS),
                   "limit", Integer.toString(cleanupTransactionSize));
           StringSubstitutor strSub = new StringSubstitutor(params);
