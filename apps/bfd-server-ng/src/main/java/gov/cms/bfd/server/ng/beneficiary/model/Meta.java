@@ -33,6 +33,7 @@ public class Meta {
    * Builds Coverage meta using a supplied lastUpdated.
    *
    * @param profile optional FHIR profile URL to add; if null, defaults are used
+   * @param overrideLastUpdated last updated value
    * @return meta
    */
   public org.hl7.fhir.r4.model.Meta toFhirCoverage(

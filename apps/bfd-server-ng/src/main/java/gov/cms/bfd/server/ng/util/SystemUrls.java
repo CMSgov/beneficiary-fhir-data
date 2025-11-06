@@ -64,6 +64,11 @@ public class SystemUrls {
   public static final String PROFILE_C4BB_ORGANIZATION_2_1_0 =
       "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0";
 
+  /**
+   * URL for the CARIN Digital Insurance Card Coverage Profile, version 1.1.0. <a
+   * href="http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-AdditionalCardInformation-extension">CARIN
+   * Digital Insurance Card Additional Card Information extension 1.1.0</a>
+   */
   public static final String C4DIC_ADD_INFO_EXT_URL =
       "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-AdditionalCardInformation-extension";
 
