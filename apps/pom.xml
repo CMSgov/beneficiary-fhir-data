@@ -1403,6 +1403,7 @@
                         <configuration>
                             <!-- Sets the path to the file which contains the aggregated report. -->
                             <outputDirectory>${project.build.directory}/coverage-reports/jacoco-aggregate</outputDirectory>
+                            <dataFile>${project.build.directory}/coverage-reports/aggregate.exec</dataFile>
                             <reports>
                                 <report>XML</report>
                             </reports>
