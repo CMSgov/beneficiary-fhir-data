@@ -140,4 +140,5 @@ CLAIM_AUX_TABLES = [
     "idr_claim_ansi_signature",
     "idr_claim_professional",
     "idr_claim_line_professional",
+    "idr_claim_line_rx",
 ]

@@ -12,7 +12,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 @AllArgsConstructor
 public class CoverageRepository {
-  private EntityManager entityManager;
+  private final EntityManager entityManager;
 
   /**
    * Retrieves a {@link BeneficiaryCoverage} record by its ID and last updated timestamp.

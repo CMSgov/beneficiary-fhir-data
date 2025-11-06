@@ -223,6 +223,7 @@ available_ndc = [
 ]
 clm_poa_ind_choices = ["N", "1", "U", "X", "W", "0", "~", "Z", "Y", ""]
 avail_pbp_nums = ["001", "002", "003", "004", "005", "006", "007", "008", "009", "010"]
+avail_clm_rlt_cond_sk = ["193064687", "117814", "193065597", "117853", "193074307"]
 
 
 def run_command(cmd, cwd=None):
@@ -428,6 +429,7 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
         claim["CLM"]["CLM_ORIG_CNTL_NUM"] = "".join(random.choices(string.digits, k=14)) + "".join(
             random.choices(string.ascii_uppercase, k=3)
         )
+        claim['CLM']['CLM_RLT_COND_SGNTR_SK'] = '-1'
 
     if clm_type_cd in (20, 30, 40, 60, 61, 62, 63, 71, 72):
         claim["CLM"]["CLM_BLOOD_PT_FRNSH_QTY"] = random.randint(0, 20)
@@ -584,11 +586,13 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
         claim["CLM"]["CLM_BLG_PRVDR_OSCAR_NUM"] = random.choice(avail_oscar_codes_institutional)
         claim["CLM"]["CLM_MDCR_COINSRNC_AMT"] = round(random.uniform(0, 25), 2)
         claim['CLM']['CLM_BLG_PRVDR_ZIP5_CD'] = random.choice(['75205','77550','77005'])
+        claim['CLM']['CLM_RLT_COND_SGNTR_SK'] = random.choice(avail_clm_rlt_cond_sk)
 
     if clm_type_cd == 40 or (clm_type_cd > 70 and clm_type_cd <= 82):
         claim["CLM"]["PRVDR_RFRG_PRVDR_NPI_NUM"] = random.choice(type_1_npis)
     if clm_type_cd > 70 and clm_type_cd <= 82:
         claim["CLM"]["CLM_BLG_PRVDR_NPI_NUM"] = random.choice(type_1_npis)
+        claim['CLM']['CLM_RLT_COND_SGNTR_SK'] = '0'
         if random.choice([0, 1]):
             claim["CLM"]["CLM_BLG_PRVDR_NPI_NUM"] = random.choice(type_2_npis)
 

@@ -3,6 +3,7 @@ package gov.cms.bfd.server.ng;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SearchStyleEnum;
@@ -17,9 +18,12 @@ import gov.cms.bfd.server.ng.testUtil.ThreadSafeAppender;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import gov.cms.bfd.server.ng.util.IdrConstants;
 import gov.cms.bfd.server.ng.util.SystemUrls;
+import jakarta.persistence.EntityManager;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.junit.jupiter.api.Test;
@@ -31,6 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 class EobSearchIT extends IntegrationTestBase {
   @Autowired private EobResourceProvider eobResourceProvider;
+  @Autowired private EntityManager entityManager;
   @Mock HttpServletRequest request;
 
   private IQuery<Bundle> searchBundle() {
@@ -164,13 +169,15 @@ class EobSearchIT extends IntegrationTestBase {
   void eobSearchByServiceDate() {
     var claimId = "1071939711295";
     var serviceDate =
-        entityManager
-            .createQuery(
-                "SELECT billablePeriod.claimThroughDate FROM Claim c WHERE c.claimUniqueId = :id",
-                LocalDate.class)
-            .setParameter("id", claimId)
-            .getResultList()
-            .getFirst();
+        (LocalDate)
+            entityManager
+                .createQuery(
+                    "SELECT billablePeriod.claimThroughDate FROM Claim c WHERE c.claimUniqueId = :id",
+                    Optional.class)
+                .setParameter("id", claimId)
+                .getResultList()
+                .getFirst()
+                .get();
 
     var eobBundle =
         searchBundle()
@@ -211,7 +218,7 @@ class EobSearchIT extends IntegrationTestBase {
   void eobSearchByTag(SearchStyleEnum searchStyle) {
     String validTag = IdrConstants.ADJUDICATION_STATUS_FINAL;
 
-    Bundle eobBundle =
+    var eobBundle =
         searchBundle()
             .where(
                 new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
@@ -233,7 +240,7 @@ class EobSearchIT extends IntegrationTestBase {
     String tagSystem = SystemUrls.SYS_ADJUDICATION_STATUS;
     String tagCode = "Adjudicated";
 
-    Bundle eobBundle =
+    var eobBundle =
         searchBundle()
             .where(
                 new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
@@ -335,5 +342,38 @@ class EobSearchIT extends IntegrationTestBase {
         InvalidRequestException.class,
         searchWithIdentifier::execute,
         "Should throw InvalidRequestException for unsupported _tag value: " + invalidTag);
+  }
+
+  @Test
+  void returnsCorrectClaimsWhenFilteringWithMergedBenes() {
+    // Ensure claim IDs are de-duplicated correctly when using a limit
+    // This could have problems with merged benes since they can produce duplicate claim IDs if not
+    // filtered properly
+
+    // There should be more than one bene_sk/xref_sk pair here to ensure this test has the
+    // correct preconditions.
+    var beneCount =
+        (Integer)
+            entityManager
+                .createNativeQuery(
+                    "SELECT COUNT(*) FROM idr.beneficiary WHERE bene_xref_efctv_sk_computed ="
+                        + " :beneSk AND bene_sk = :beneSk",
+                    Integer.class)
+                .setParameter("beneSk", Long.parseLong(CURRENT_MERGED_BENE_SK))
+                .getResultList()
+                .getFirst();
+    assertTrue(beneCount > 1);
+
+    var searchWithIdentifier =
+        searchBundle()
+            .where(
+                new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
+                    .exactly()
+                    .identifier(CURRENT_MERGED_BENE_SK))
+            .count(2);
+    var bundle = searchWithIdentifier.execute();
+    var results =
+        bundle.getEntry().stream().map(e -> e.getResource().getId()).collect(Collectors.toSet());
+    assertEquals(2, results.size());
   }
 }

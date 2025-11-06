@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.ng.eob;
 
+import gov.cms.bfd.server.ng.ClaimSecurityStatus;
 import gov.cms.bfd.server.ng.SamhsaFilterMode;
 import gov.cms.bfd.server.ng.SecurityLabel;
 import gov.cms.bfd.server.ng.beneficiary.BeneficiaryRepository;
@@ -12,7 +13,9 @@ import gov.cms.bfd.server.ng.claim.model.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.ClaimTypeCode;
 import gov.cms.bfd.server.ng.claim.model.IcdIndicator;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
+import gov.cms.bfd.server.ng.loadprogress.LoadProgressRepository;
 import gov.cms.bfd.server.ng.util.FhirUtil;
+import gov.cms.bfd.server.ng.util.IdrConstants;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.time.LocalDate;
 import java.util.Comparator;
@@ -23,8 +26,6 @@ import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Patient;
 import org.springframework.stereotype.Component;
 
 /**
@@ -36,17 +37,18 @@ import org.springframework.stereotype.Component;
 public class EobHandler {
   private final BeneficiaryRepository beneficiaryRepository;
   private final ClaimRepository claimRepository;
+  private final LoadProgressRepository loadProgressRepository;
 
   // Cache the security labels map to avoid repeated I/O and parsing
   private static final Map<String, List<SecurityLabel>> SECURITY_LABELS =
       SecurityLabel.getSecurityLabels();
 
   /**
-   * Returns a {@link Patient} by their {@link IdType}.
+   * Returns an {@link ExplanationOfBenefit} by its FHIR ID.
    *
    * @param fhirId FHIR ID
    * @param samhsaFilterMode SAMHSA filter mode
-   * @return patient
+   * @return an Optional containing the ExplanationOfBenefit if found
    */
   public Optional<ExplanationOfBenefit> find(final Long fhirId, SamhsaFilterMode samhsaFilterMode) {
     return searchByIdInner(fhirId, new DateTimeRange(), new DateTimeRange(), samhsaFilterMode);
@@ -91,19 +93,29 @@ public class EobHandler {
             claimTypeCodes);
 
     var filteredClaims = filterSamhsaClaims(claims, samhsaFilterMode);
+
     return FhirUtil.bundleOrDefault(
-        filteredClaims.map(Claim::toFhir), claimRepository::claimLastUpdated);
+        filteredClaims.map(
+            claim -> {
+              var hasSamhsaClaims =
+                  samhsaFilterMode == SamhsaFilterMode.INCLUDE && claimHasSamhsa(claim);
+
+              var securityStatus =
+                  hasSamhsaClaims
+                      ? ClaimSecurityStatus.SAMHSA_APPLICABLE
+                      : ClaimSecurityStatus.NONE;
+
+              return claim.toFhir(securityStatus);
+            }),
+        loadProgressRepository::lastUpdated);
   }
 
   private Stream<Claim> filterSamhsaClaims(List<Claim> claims, SamhsaFilterMode samhsaFilterMode) {
+    var claimStream = claims.stream().sorted(Comparator.comparing(Claim::getClaimUniqueId));
     if (samhsaFilterMode == SamhsaFilterMode.INCLUDE) {
-      return claims.stream();
+      return claimStream;
     }
-    // Ordering may have changed during filtering, ensure we re-order before returning the final
-    // result
-    return claims.stream()
-        .filter(claim -> !claimHasSamhsa(claim))
-        .sorted(Comparator.comparing(Claim::getClaimUniqueId));
+    return claimStream.filter(claim -> !claimHasSamhsa(claim));
   }
 
   /**
@@ -121,7 +133,7 @@ public class EobHandler {
       DateTimeRange lastUpdated,
       SamhsaFilterMode samhsaFilterMode) {
     var eob = searchByIdInner(claimUniqueId, serviceDate, lastUpdated, samhsaFilterMode);
-    return FhirUtil.bundleOrDefault(eob.map(e -> e), claimRepository::claimLastUpdated);
+    return FhirUtil.bundleOrDefault(eob.map(e -> e), loadProgressRepository::lastUpdated);
   }
 
   private Optional<ExplanationOfBenefit> searchByIdInner(
@@ -134,11 +146,15 @@ public class EobHandler {
       return Optional.empty();
     }
     var claim = claimOpt.get();
+    var claimHasSamhsa = claimHasSamhsa(claim);
 
-    if (samhsaFilterMode == SamhsaFilterMode.EXCLUDE && claimHasSamhsa(claim)) {
+    if (samhsaFilterMode == SamhsaFilterMode.EXCLUDE && claimHasSamhsa) {
       return Optional.empty();
     }
-    return Optional.of(claim.toFhir());
+    var securityStatus =
+        claimHasSamhsa ? ClaimSecurityStatus.SAMHSA_APPLICABLE : ClaimSecurityStatus.NONE;
+
+    return Optional.of(claim.toFhir(securityStatus));
   }
 
   private boolean isCodeSamhsa(String targetCode, LocalDate claimDate, SecurityLabel entry) {
@@ -148,7 +164,8 @@ public class EobHandler {
   // Returns true if the given claim contains any procedure that matches a SAMHSA
   // security label code from the dictionary.
   private boolean claimHasSamhsa(Claim claim) {
-    var claimThroughDate = claim.getBillablePeriod().getClaimThroughDate();
+    var claimThroughDate =
+        claim.getBillablePeriod().getClaimThroughDate().orElse(IdrConstants.DEFAULT_DATE);
     var drgSamhsa = drgIsSamhsa(claim, claimThroughDate);
     var claimItemSamhsa =
         claim.getClaimItems().stream().anyMatch(e -> claimItemIsSamhsa(e, claimThroughDate));
