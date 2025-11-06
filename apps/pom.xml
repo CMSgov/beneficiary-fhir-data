@@ -74,7 +74,7 @@
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
         <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
         <sonar.coverage.jacoco.xmlReportPaths>
-            ${project.build.directory}/coverage-reports/jacoco-ut/jacoco.xml
+            ${project.build.directory}/coverage-reports/jacoco-aggregate/jacoco.xml
         </sonar.coverage.jacoco.xmlReportPaths>
         <sonar.issue.ignore.multicriteria>e1,e2,e3,e4,e5</sonar.issue.ignore.multicriteria>
         <!-- rule for "JUnit5 test classes and methods should have default package visibility" -->
