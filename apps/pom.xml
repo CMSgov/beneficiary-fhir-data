@@ -1330,9 +1330,7 @@
                             <dataFile>${project.build.directory}/coverage-reports/jacoco-ut.exec</dataFile>
                             <outputDirectory>${project.build.directory}/coverage-reports/jacoco-ut</outputDirectory>
                             <!-- Only generate the XML version of the report -->
-                            <reports>
-                                <report>XML</report>
-                            </reports>
+                            <formats>XML</formats>
                         </configuration>
                     </execution>
                     <!--
@@ -1371,9 +1369,7 @@
                             <!-- Sets the output directory for the code coverage report. -->
                             <outputDirectory>${project.build.directory}/coverage-reports/jacoco-it</outputDirectory>
                             <!-- Only generate the XML version of the report -->
-                            <reports>
-                                <report>XML</report>
-                            </reports>
+                            <formats>XML</formats>
                         </configuration>
                     </execution>
                 </executions>
