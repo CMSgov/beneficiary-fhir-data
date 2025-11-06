@@ -151,10 +151,8 @@ public class ClaimRepository {
       DateTimeRange lastUpdated,
       List<ClaimSourceId> sourceIds) {
     return query
-        .setParameter(
-            "claimThroughDateLowerBound", claimThroughDate.getLowerBoundDate().orElse(null))
-        .setParameter(
-            "claimThroughDateUpperBound", claimThroughDate.getUpperBoundDate().orElse(null))
+        .setParameter("claimThroughDateLowerBound", claimThroughDate.getLowerBoundDate())
+        .setParameter("claimThroughDateUpperBound", claimThroughDate.getUpperBoundDate())
         .setParameter("lastUpdatedLowerBound", lastUpdated.getLowerBoundDateTime().orElse(null))
         .setParameter("lastUpdatedUpperBound", lastUpdated.getUpperBoundDateTime().orElse(null))
         .setParameter("hasSourceIds", !sourceIds.isEmpty())

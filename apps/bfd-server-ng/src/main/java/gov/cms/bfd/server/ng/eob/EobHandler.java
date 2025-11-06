@@ -14,6 +14,7 @@ import gov.cms.bfd.server.ng.claim.model.IcdIndicator;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.loadprogress.LoadProgressRepository;
 import gov.cms.bfd.server.ng.util.FhirUtil;
+import gov.cms.bfd.server.ng.util.IdrConstants;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.time.LocalDate;
 import java.util.Comparator;
@@ -179,7 +180,8 @@ public class EobHandler {
   // security label code from the dictionary.
   private boolean claimHasSamhsa(Claim claim) {
     var claimUniqueId = claim.getClaimUniqueId();
-    var claimThroughDate = claim.getBillablePeriod().getClaimThroughDate();
+    var claimThroughDate =
+        claim.getBillablePeriod().getClaimThroughDate().orElse(IdrConstants.DEFAULT_DATE);
     var drgSamhsa = drgIsSamhsa(claim, claimThroughDate, claimUniqueId);
     var claimItemSamhsa =
         claim.getClaimItems().stream()
