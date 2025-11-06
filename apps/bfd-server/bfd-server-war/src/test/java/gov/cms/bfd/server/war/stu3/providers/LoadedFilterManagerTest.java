@@ -396,10 +396,7 @@ public final class LoadedFilterManagerTest {
 
     Long fetchEstimatedBeneSize(Long loadedFileId) {
       return (long)
-          fetchById(loadedFileId, 0)
-              .map(b -> b.getBeneficiariesList().size())
-              .findFirst()
-              .orElse(1);
+          fetchById(loadedFileId, 0).map(b -> b.getBeneficiaries().size()).findFirst().orElse(1);
     }
 
     /**
