@@ -10,6 +10,9 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Root;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Instant;
 import java.time.OffsetDateTime;
@@ -17,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Spliterator;
-import java.util.Spliterators;
+import java.util.Spliterators.AbstractSpliterator;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.LongFunction;
@@ -397,20 +400,20 @@ public class LoadedFilterManager {
     // an accurate FFP and minimal memory size. This one assumes that all batches are equally-sized
     // with respect to their beneficiaries
     final var bloomFilter = LoadedFileFilter.createFilter(batchCount * estimatedBeneficiaryCount);
+    // Loop through all batches, filling the bloom filter based upon each beneficiary ID
+    fetchById
+        .apply(fileId, batchCount)
+        .flatMap(b -> b.getBeneficiaries().stream())
+        .forEach(bloomFilter::putLong);
+    LOGGER.info(
+        "Built a filter for {} with {} batches; BloomFilter size {}, BloomFilter cardinality {}",
+        fileId,
+        batchCount,
+        bloomFilter.bitSize(),
+        bloomFilter.cardinality());
 
-    try (final var loadedBatches = fetchById.apply(fileId, batchCount)) {
-      // Loop through all batches, filling the bloom filter based upon each beneficiary ID
-      loadedBatches.flatMap(b -> b.getBeneficiaries().stream()).forEach(bloomFilter::putLong);
-
-      LOGGER.info(
-          "Built a filter for {} with {} batches; BloomFilter size {}, BloomFilter cardinality {}",
-          fileId,
-          batchCount,
-          bloomFilter.bitSize(),
-          bloomFilter.cardinality());
-      return new LoadedFileFilter(
-          fileId, batchCount, tuple.getFirstUpdated(), tuple.getLastUpdated(), bloomFilter);
-    }
+    return new LoadedFileFilter(
+        fileId, batchCount, tuple.getFirstUpdated(), tuple.getLastUpdated(), bloomFilter);
   }
 
   /* DB Operations */
@@ -546,42 +549,51 @@ public class LoadedFilterManager {
       final var isParallel = batchCount > 100_000;
       // turn iterator into a stream
       return StreamSupport.stream(
-              new Spliterators.AbstractSpliterator<LoadedBatch>(
-                  Long.MAX_VALUE, Spliterator.ORDERED) {
-                @Override
-                public boolean tryAdvance(Consumer<? super LoadedBatch> action) {
-                  try {
-                    if (!rs.next()) {
-                      return false;
-                    }
-
-                    action.accept(
-                        new LoadedBatch(
-                            rs.getLong("loaded_batch_id"),
-                            rs.getLong("loaded_file_id"),
-                            rs.getString("beneficiaries"),
-                            rs.getObject("created", OffsetDateTime.class).toInstant()));
-                    return true;
-                  } catch (SQLException e) {
-                    throw new RuntimeException(e);
-                  }
-                }
-              },
-              isParallel)
-          .onClose(
-              () -> {
-                try (conn;
-                    stm;
-                    rs) {
-                  LOGGER.debug(
-                      "Closed connection, statement, and result set for loading batches from {}",
-                      loadedFileId);
-                } catch (SQLException e) {
-                  throw new RuntimeException(e);
-                }
-              }); // make sure to close resources when done with the stream
+          new LoadedBatchSpliterator(batchCount, rs, conn, stm, loadedFileId), isParallel);
     } catch (SQLException e) {
       throw new RuntimeException(e);
+    }
+  }
+
+  private static class LoadedBatchSpliterator extends AbstractSpliterator<LoadedBatch> {
+    private final ResultSet rs;
+    private final Connection conn;
+    private final PreparedStatement stm;
+    private final long loadedFileId;
+
+    public LoadedBatchSpliterator(
+        int batchCount, ResultSet rs, Connection conn, PreparedStatement stm, long loadedFileId) {
+      super(batchCount, Spliterator.ORDERED);
+      this.rs = rs;
+      this.conn = conn;
+      this.stm = stm;
+      this.loadedFileId = loadedFileId;
+    }
+
+    @Override
+    public boolean tryAdvance(Consumer<? super LoadedBatch> action) {
+      try {
+        if (!rs.next()) {
+          conn.close();
+          stm.close();
+          rs.close();
+          LOGGER.debug(
+              "Closed connection, statement, and result set for loading batches from {}",
+              loadedFileId);
+
+          return false;
+        }
+
+        action.accept(
+            new LoadedBatch(
+                rs.getLong("loaded_batch_id"),
+                rs.getLong("loaded_file_id"),
+                rs.getString("beneficiaries"),
+                rs.getObject("created", OffsetDateTime.class).toInstant()));
+        return true;
+      } catch (SQLException e) {
+        throw new RuntimeException(e);
+      }
     }
   }
 }
