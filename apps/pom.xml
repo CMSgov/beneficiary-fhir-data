@@ -44,6 +44,7 @@
     </scm>
 
     <modules>
+        <module>coverage-aggregate</module>
         <module>bfd-shared-utils</module>
         <module>bfd-shared-test-utils</module>
         <module>bfd-model</module>
@@ -73,9 +74,7 @@
         <maven.jacoco.skip>true</maven.jacoco.skip>
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
         <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
-        <sonar.coverage.jacoco.xmlReportPaths>
-            ${project.build.directory}/coverage-reports/jacoco-aggregate/jacoco.xml
-        </sonar.coverage.jacoco.xmlReportPaths>
+        <sonar.coverage.jacoco.xmlReportPaths>coverage-reports/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
         <sonar.issue.ignore.multicriteria>e1,e2,e3,e4,e5</sonar.issue.ignore.multicriteria>
         <!-- rule for "JUnit5 test classes and methods should have default package visibility" -->
         <sonar.issue.ignore.multicriteria.e1.ruleKey>java:S5786</sonar.issue.ignore.multicriteria.e1.ruleKey>
@@ -1331,7 +1330,9 @@
                             <dataFile>${project.build.directory}/coverage-reports/jacoco-ut.exec</dataFile>
                             <outputDirectory>${project.build.directory}/coverage-reports/jacoco-ut</outputDirectory>
                             <!-- Only generate the XML version of the report -->
-                            <formats>XML</formats>
+                            <reports>
+                                <report>XML</report>
+                            </reports>
                         </configuration>
                     </execution>
                     <!--
@@ -1370,40 +1371,6 @@
                             <!-- Sets the output directory for the code coverage report. -->
                             <outputDirectory>${project.build.directory}/coverage-reports/jacoco-it</outputDirectory>
                             <!-- Only generate the XML version of the report -->
-                            <formats>XML</formats>
-                        </configuration>
-                    </execution>
-                    <!-- Merges the Jacoco .exec files to be aggregated. -->
-                    <execution>
-                        <id>merge-results</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>merge</goal>
-                        </goals>
-                        <configuration>
-                            <fileSets>
-                                <fileSet>
-                                    <!-- Sets the path to the file which contains the execution data. -->
-                                    <directory>${project.basedir}</directory>
-                                    <includes>
-                                        <include>**/target/coverage-reports/*.exec</include>
-                                    </includes>
-                                </fileSet>
-                            </fileSets>
-                            <destFile>${project.build.directory}/coverage-reports/aggregate.exec</destFile>
-                        </configuration>
-                    </execution>
-                    <!-- Generates the aggregated XML file -->
-                    <execution>
-                        <id>post-merge-report</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>report-aggregate</goal>
-                        </goals>
-                        <configuration>
-                            <!-- Sets the path to the file which contains the aggregated report. -->
-                            <outputDirectory>${project.build.directory}/coverage-reports/jacoco-aggregate</outputDirectory>
-                            <dataFile>${project.build.directory}/coverage-reports/aggregate.exec</dataFile>
                             <reports>
                                 <report>XML</report>
                             </reports>
