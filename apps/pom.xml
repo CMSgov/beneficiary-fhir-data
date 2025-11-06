@@ -1384,9 +1384,9 @@
                             <fileSets>
                                 <fileSet>
                                     <!-- Sets the path to the file which contains the execution data. -->
-                                    <directory>${project.build.directory}/coverage-reports</directory>
+                                    <directory>${project.basedir}</directory>
                                     <includes>
-                                        <include>*.exec</include>
+                                        <include>**/target/coverage-reports/*.exec</include>
                                     </includes>
                                 </fileSet>
                             </fileSets>
