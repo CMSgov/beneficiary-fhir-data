@@ -106,14 +106,11 @@ public class EobHandler {
   }
 
   private Stream<Claim> filterSamhsaClaims(List<Claim> claims, SamhsaFilterMode samhsaFilterMode) {
+    var claimStream = claims.stream().sorted(Comparator.comparing(Claim::getClaimUniqueId));
     if (samhsaFilterMode == SamhsaFilterMode.INCLUDE) {
-      return claims.stream();
+      return claimStream;
     }
-    // Ordering may have changed during filtering, ensure we re-order before returning the final
-    // result
-    return claims.stream()
-        .filter(claim -> !claimHasSamhsa(claim))
-        .sorted(Comparator.comparing(Claim::getClaimUniqueId));
+    return claimStream.filter(claim -> !claimHasSamhsa(claim));
   }
 
   /**
