@@ -1,7 +1,7 @@
 package gov.cms.bfd.pipeline.sharedutils.npi_fda;
 
 import static gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome.NOTHING_TO_DO;
-import static gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome.WORK_DONE;
+import static gov.cms.bfd.pipeline.sharedutils.PipelineJobOutcome.SHOULD_TERMINATE;
 
 import gov.cms.bfd.pipeline.sharedutils.PipelineApplicationState;
 import gov.cms.bfd.pipeline.sharedutils.PipelineJob;
@@ -61,12 +61,13 @@ public class NpiFdaLoadJob implements PipelineJob {
   /** {@inheritDoc} */
   @Override
   public Optional<PipelineJobSchedule> getSchedule() {
-    // Run the service to see if the data should be loaded once per day.
-    // If we relied on this schedule by itself to check if the data should be loaded,
-    // the data load would happen everytime the Pipeline restarted.
-    // instead, we will check a database last_updated value once inside the service.
-
-    return Optional.of(new PipelineJobSchedule(1, ChronoUnit.DAYS));
+    // With the switch to ECS, we no longer rely on any of the Pipeline's complex scheduling
+    // mechanisms to schedule jobs; instead, we run purpose-built Tasks for each of the various
+    // Pipeline Jobs and define their schedules in our infrastructure. As such, we want this Job to
+    // run right after the Pipeline process starts, so setting the schedule to 1 second ensures the
+    // Job starts near-immediately. Additionally, the Job returns SHOULD_TERMINATE on completion, so
+    // the Pipeline process will exit after Job completion, ensuring we do not run this Job again.
+    return Optional.of(new PipelineJobSchedule(1, ChronoUnit.SECONDS));
   }
 
   /** {@inheritDoc} */
@@ -105,7 +106,7 @@ public class NpiFdaLoadJob implements PipelineJob {
           throw new Exception(ex);
         }
       }
-      return (npiTotal == -1 && fdaTotal == -1) ? NOTHING_TO_DO : WORK_DONE;
+      return (npiTotal == -1 && fdaTotal == -1) ? NOTHING_TO_DO : SHOULD_TERMINATE;
     } finally {
       runningSemaphore.release();
     }
