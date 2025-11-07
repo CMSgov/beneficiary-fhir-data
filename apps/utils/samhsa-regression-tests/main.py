@@ -155,13 +155,28 @@ async def __query_samhsa_claim_any_ids(
             table,
         )
 
+        # This query looks a bit strange since it's doing a lot of JOINs, but this mimics the Claim
+        # entity in the V3 Server as it joins on many tables to construct a full Claim for an
+        # ExplanationOfBenefit response. In particular, if a "claim" row does not have one or more
+        # corresponding "claim_item", "claim_date_signature", or "beneficiary" row(s), the V3 Server
+        # will disregard the Claim as it is incomplete (likely still loading). This is why this
+        # query INNER JOINs on those tables. "claim_institutional" is optional, so a LEFT JOIN
+        # ensures we take it if it is there, but we do not exclude "claim" rows without it.
         result = await (
             await curs.execute(
                 sql.SQL("""
-                SELECT {table}.clm_uniq_id, claim.clm_thru_dt, {table}.{column} from idr.{table}
+                SELECT claim.clm_uniq_id, claim.clm_thru_dt, {table}.{column}
+                FROM idr.claim
                 TABLESAMPLE SYSTEM({tablesample})
-                JOIN idr.claim ON claim.clm_uniq_id = {table}.clm_uniq_id
-                WHERE {column} = ANY(%s)
+                LEFT JOIN idr.claim_institutional
+                    ON claim.clm_uniq_id = claim_institutional.clm_uniq_id
+                INNER JOIN idr.claim_item
+                    ON claim.clm_uniq_id = claim_item.clm_uniq_id
+                INNER JOIN idr.claim_date_signature
+                    ON claim.clm_dt_sgntr_sk = claim_date_signature.clm_dt_sgntr_sk
+                INNER JOIN idr.beneficiary
+                    ON claim.bene_sk = beneficiary.bene_sk
+                WHERE {table}.{column} = ANY(%s)
                 LIMIT {limit};
                 """).format(
                     table=sql.Identifier(table),
