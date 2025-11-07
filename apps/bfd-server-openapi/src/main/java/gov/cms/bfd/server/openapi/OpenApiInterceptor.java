@@ -145,6 +145,7 @@ public class OpenApiInterceptor {
   public static final FhirContext FHIR_CONTEXT_CANONICAL = FhirContext.forR4();
   public static final String REQUEST_DETAILS = "REQUEST_DETAILS";
   public static final String RACCOON_PNG = "raccoon.png";
+  public static final String TYPE_STRING = "string";
   private final String mySwaggerUiVersion;
   private final TemplateEngine myTemplateEngine;
   private final Parser myFlexmarkParser;
@@ -1058,7 +1059,7 @@ public class OpenApiInterceptor {
           case "uri":
           case "url":
           case "code":
-          case "string":
+          case TYPE_STRING:
             {
               IPrimitiveType<?> type =
                   (IPrimitiveType<?>)
@@ -1187,7 +1188,7 @@ public class OpenApiInterceptor {
     parameter.setDescription("The resource version ID");
     parameter.setExample("1");
     parameter.setRequired(true);
-    parameter.setSchema(new Schema().type("string"));
+    parameter.setSchema(new Schema<String>().type(TYPE_STRING));
     parameter.setStyle(Parameter.StyleEnum.SIMPLE);
     theOperation.addParametersItem(parameter);
   }
@@ -1260,7 +1261,7 @@ public class OpenApiInterceptor {
     parameter.setDescription("The resource ID");
     parameter.setExample("123");
     parameter.setRequired(true);
-    parameter.setSchema(new Schema().type("string"));
+    parameter.setSchema(new Schema<String>().type(TYPE_STRING));
     parameter.setStyle(Parameter.StyleEnum.SIMPLE);
     theOperation.addParametersItem(parameter);
   }
@@ -1401,7 +1402,7 @@ public class OpenApiInterceptor {
 
   private String toExamplePlaceholder(Enumerations.SearchParamType type) {
     if (type == null) {
-      return "string";
+      return TYPE_STRING;
     }
     switch (type) {
       case NUMBER, QUANTITY:
@@ -1416,7 +1417,7 @@ public class OpenApiInterceptor {
       case SPECIAL:
       case NULL:
       default:
-        return "string";
+        return TYPE_STRING;
     }
   }
 }
