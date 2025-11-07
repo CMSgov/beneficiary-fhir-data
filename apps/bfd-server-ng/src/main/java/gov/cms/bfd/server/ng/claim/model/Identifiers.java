@@ -40,11 +40,12 @@ class Identifiers {
                 new Identifier()
                     .setSystem(SystemUrls.BLUE_BUTTON_CLAIM_CONTROL_NUMBER)
                     .setValue(s)));
-    claimOriginalControlNumber.ifPresent(s ->
+    claimOriginalControlNumber.ifPresent(
+        s ->
             identifiers.add(
-                    new Identifier()
-                            .setSystem(SystemUrls.BLUE_BUTTON_CLAIM_CONTROL_NUMBER)
-                            .setValue(s)));
+                new Identifier()
+                    .setSystem(SystemUrls.BLUE_BUTTON_CLAIM_CONTROL_NUMBER)
+                    .setValue(s)));
     return identifiers;
   }
 }
