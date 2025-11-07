@@ -14,6 +14,7 @@ import gov.cms.bfd.server.ng.claim.model.IcdIndicator;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.loadprogress.LoadProgressRepository;
 import gov.cms.bfd.server.ng.util.FhirUtil;
+import gov.cms.bfd.server.ng.util.IdrConstants;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.time.LocalDate;
 import java.util.Comparator;
@@ -101,14 +102,11 @@ public class EobHandler {
   }
 
   private Stream<Claim> filterSamhsaClaims(List<Claim> claims, SamhsaFilterMode samhsaFilterMode) {
+    var claimStream = claims.stream().sorted(Comparator.comparing(Claim::getClaimUniqueId));
     if (samhsaFilterMode == SamhsaFilterMode.INCLUDE) {
-      return claims.stream();
+      return claimStream;
     }
-    // Ordering may have changed during filtering, ensure we re-order before returning the final
-    // result
-    return claims.stream()
-        .filter(claim -> !claimHasSamhsa(claim))
-        .sorted(Comparator.comparing(Claim::getClaimUniqueId));
+    return claimStream.filter(claim -> !claimHasSamhsa(claim));
   }
 
   /**
@@ -157,7 +155,8 @@ public class EobHandler {
   // Returns true if the given claim contains any procedure that matches a SAMHSA
   // security label code from the dictionary.
   private boolean claimHasSamhsa(Claim claim) {
-    var claimThroughDate = claim.getBillablePeriod().getClaimThroughDate();
+    var claimThroughDate =
+        claim.getBillablePeriod().getClaimThroughDate().orElse(IdrConstants.DEFAULT_DATE);
     var drgSamhsa = drgIsSamhsa(claim, claimThroughDate);
     var claimItemSamhsa =
         claim.getClaimItems().stream().anyMatch(e -> claimItemIsSamhsa(e, claimThroughDate));
