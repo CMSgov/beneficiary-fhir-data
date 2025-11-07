@@ -20,12 +20,13 @@
     "CLM_CMS_PROC_DT": "2024-01-18",
     "PRVDR_PRSCRBNG_PRVDR_NPI_NUM": "1942945159",
     "PRVDR_LAST_NAME": "JOHNSON",
-    "CLM_SBMT_CHRG_AMT": "100.00",
     "CLM_SBMTR_CNTRCT_NUM": "H1234",
     "CLM_SBMTR_CNTRCT_PBP_NUM": "001",
     "CNTRCT_PBP_NAME": "Super Saver Medicare Rx Saver Plus (PDP)",
     "CLM_SBMT_FRMT_CD": "X",
     "CLM_ADJSTMT_TYPE_CD": "0",
+    "CLM_BENE_PMT_AMT": "100.00",
+    "CLM_OTHR_TP_PD_AMT": "100.00",
     "supportingInfoComponents": [
         {
             "ROW_NUM": 1,
@@ -105,7 +106,12 @@
             "CLM_LINE_SRVC_CST_AMT": "8.50",
             "CLM_LINE_SLS_TAX_AMT": "2.00",
             "CLM_LINE_VCCN_ADMIN_FEE_AMT": "0.00",
-            "CLM_PRCNG_EXCPTN_CD": "O"
+            "CLM_PRCNG_EXCPTN_CD": "O",
+            "CLM_LINE_BENE_PMT_AMT": "10.00",
+            "CLM_CMS_CALCD_MFTR_DSCNT_AMT":"10.01",
+            "CLM_LINE_GRS_CVRD_CST_TOT_AMT":"10.02",
+            "CLM_LINE_REBT_PASSTHRU_POS_AMT":"10.03",
+            "CLM_PHRMCY_PRICE_DSCNT_AT_POS_AMT":"10.04"
         }
     ]
 } 

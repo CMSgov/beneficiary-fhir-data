@@ -552,3 +552,19 @@
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_LINE_RX_NUM
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information' and code='CLM_LINE_RX_NUM').exists()).value
+- inputPath: LineItemComponent.CLM_LINE_NCVRD_PD_AMT
+  appliesTo:
+    - Pharmacy
+  sources:
+    - NCH
+  sourceView: V2_MDCR_CLM_LINE
+  sourceColumn: CLM_LINE_NCVRD_PD_AMT
+  fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_NCVRD_PD_AMT')).amount.value
+- inputPath: LineItemComponent.CLM_LINE_OTHR_TP_PD_AMT
+  appliesTo:
+    - Pharmacy
+  sources:
+    - NCH
+  sourceView: V2_MDCR_CLM_LINE
+  sourceColumn: CLM_LINE_OTHR_TP_PD_AMT
+  fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_OTHR_TP_PD_AMT')).amount.value

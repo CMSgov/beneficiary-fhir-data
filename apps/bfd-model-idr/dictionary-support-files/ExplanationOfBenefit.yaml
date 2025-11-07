@@ -2970,3 +2970,252 @@
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_ADJSTMT_TYPE_CD
   fhirPath: ExplanationOfBenefit.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-ADJSTMT-TYPE-CD').value.code
+- inputPath: ExplanationOfBenefit-Base.CLM_BENE_INTRST_PD_AMT
+  appliesTo:
+    - Carrier
+    - DME
+  sources:
+    - MCS
+    - VMS
+  sourceView: V2_MDCR_CLM
+  sourceColumn: CLM_BENE_INTRST_PD_AMT
+  fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_BENE_INTRST_PD_AMT')).amount.value
+- inputPath: ExplanationOfBenefit-Base.CLM_BENE_PMT_COINSRNC_AMT
+  appliesTo:
+    - Inpatient
+    - Outpatient
+    - Hospice
+    - HHA
+    - SNF
+    - Carrier
+  sources:
+    - FISS
+    - MCS
+  sourceView: V2_MDCR_CLM
+  sourceColumn: CLM_BENE_PMT_COINSRNC_AMT
+  fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_BENE_PMT_COINSRNC_AMT')).amount.value
+- inputPath: ExplanationOfBenefit-Base.CLM_BLOOD_CHRG_AMT
+  appliesTo:
+    - Inpatient
+    - SNF
+  sources:
+    - NCH
+  sourceView: V2_MDCR_CLM
+  sourceColumn: CLM_BLOOD_CHRG_AMT
+  fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_BLOOD_CHRG_AMT')).amount.value
+- inputPath: ExplanationOfBenefit-Base.CLM_BLOOD_NCVRD_CHRG_AMT
+  appliesTo:
+    - Inpatient
+    - SNF
+  sources:
+    - NCH
+  sourceView: V2_MDCR_CLM
+  sourceColumn: CLM_BLOOD_NCVRD_CHRG_AMT
+  fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_BLOOD_NCVRD_CHRG_AMT')).amount.value
+- inputPath: ExplanationOfBenefit-Base.CLM_COB_PTNT_RESP_AMT
+  appliesTo:
+    - Inpatient
+    - Outpatient
+    - Hospice
+    - SNF
+    - HHA
+  sources:
+    - FISS
+  sourceView: V2_MDCR_CLM
+  sourceColumn: CLM_COB_PTNT_RESP_AMT
+  fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_COB_PTNT_RESP_AMT')).amount.value
+- inputPath: ExplanationOfBenefit-Base.CLM_OTHR_TP_PD_AMT
+  appliesTo:
+    - DME
+  sources:
+    - VMS
+  sourceView: V2_MDCR_CLM
+  sourceColumn: CLM_OTHR_TP_PD_AMT
+  fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_OTHR_TP_PD_AMT')).amount.value
+- inputPath: ExplanationOfBenefit-Base.CLM_PRVDR_INTRST_PD_AMT
+  appliesTo:
+    - Inpatient
+    - Outpatient
+    - Hospice
+    - Carrier
+    - DME
+    - HHA
+    - SNF
+  sources:
+    - MCS
+    - FISS
+    - VMS
+  sourceView: V2_MDCR_CLM
+  sourceColumn: CLM_PRVDR_INTRST_PD_AMT
+  fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_PRVDR_INTRST_PD_AMT')).amount.value
+- inputPath: ExplanationOfBenefit-Base.CLM_PRVDR_OTAF_AMT
+  appliesTo:
+    - Inpatient
+    - Outpatient
+    - Hospice
+    - HHA
+    - SNF
+  sources:
+    - MCS
+    - FISS
+    - VMS
+  sourceView: V2_MDCR_CLM
+  sourceColumn: CLM_PRVDR_OTAF_AMT
+  fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_PRVDR_OTAF_AMT')).amount.value
+- inputPath: ExplanationOfBenefit-Base.CLM_PRVDR_RMNG_DUE_AMT
+  appliesTo:
+    - Outpatient
+    - HHA
+    - DME
+  sources:
+    - FISS
+    - VMS
+  sourceView: V2_MDCR_CLM
+  sourceColumn: CLM_PRVDR_RMNG_DUE_AMT
+  fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_PRVDR_RMNG_DUE_AMT')).amount.value
+- inputPath: ExplanationOfBenefit-Base.CLM_TOT_CNTRCTL_AMT
+  appliesTo:
+    - Inpatient
+    - Outpatient
+    - SNF
+  sources:
+    - FISS
+  sourceView: V2_MDCR_CLM
+  sourceColumn: CLM_TOT_CNTRCTL_AMT
+  fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_TOT_CNTRCTL_AMT')).amount.value
+- inputPath: ExplanationOfBenefit-Institutional-Base.CLM_FINL_STDZD_PYMT_AMT
+  appliesTo:
+    - HHA
+    - Inpatient
+  sources:
+    - FISS
+    - NCH
+  sourceView: V2_MDCR_CLM_INSTNL
+  sourceColumn: CLM_FINL_STDZD_PYMT_AMT
+  fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_FINL_STDZD_PYMT_AMT')).amount.value
+- inputPath: ExplanationOfBenefit-Institutional-Base.CLM_HAC_RDCTN_PYMT_AMT
+  appliesTo:
+    - Inpatient
+  sources:
+    - FISS
+    - NCH
+  sourceView: V2_MDCR_CLM_INSTNL
+  sourceColumn: CLM_HAC_RDCTN_PYMT_AMT
+  fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_HAC_RDCTN_PYMT_AMT')).amount.value
+- inputPath: ExplanationOfBenefit-Institutional-Base.CLM_HIPPS_MODEL_BNDLD_PMT_AMT
+  appliesTo:
+    - Inpatient
+  sources:
+    - FISS
+    - NCH
+  sourceView: V2_MDCR_CLM_INSTNL
+  sourceColumn: CLM_HIPPS_MODEL_BNDLD_PMT_AMT
+  fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_HIPPS_MODEL_BNDLD_PYMT_AMT')).amount.value
+- inputPath: ExplanationOfBenefit-Institutional-Base.CLM_HIPPS_READMSN_RDCTN_AMT
+  appliesTo:
+    - Inpatient
+    - SNF
+  sources:
+    - FISS
+    - NCH
+  sourceView: V2_MDCR_CLM_INSTNL
+  sourceColumn: CLM_HIPPS_READMSN_RDCTN_AMT
+  fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_HIPPS_READMSN_RDCTN_AMT')).amount.value
+- inputPath: ExplanationOfBenefit-Institutional-Base.CLM_HIPPS_VBP_AMT
+  appliesTo:
+    - Inpatient
+    - SNF
+  sources:
+    - FISS
+    - NCH
+  sourceView: V2_MDCR_CLM_INSTNL
+  sourceColumn: CLM_HIPPS_VBP_AMT
+  fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_HIPPS_VBP_AMT')).amount.value
+- inputPath: ExplanationOfBenefit-Institutional-Base.CLM_INSTNL_LOW_VOL_PMT_AMT
+  appliesTo:
+    - Inpatient
+    - SNF
+  sources:
+    - NCH
+  sourceView: V2_MDCR_CLM_INSTNL
+  sourceColumn: CLM_INSTNL_LOW_VOL_PMT_AMT
+  fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_INSTNL_LOW_VOL_PMT_AMT')).amount.value
+- inputPath: ExplanationOfBenefit-Institutional-Base.CLM_MDCR_IP_1ST_YR_RATE_AMT
+  appliesTo:
+    - Inpatient
+    - SNF
+  sources:
+    - NCH
+  sourceView: V2_MDCR_CLM_INSTNL
+  sourceColumn: CLM_MDCR_IP_1ST_YR_RATE_AMT
+  fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_MDCR_IP_1ST_YR_RATE_AMT')).amount.value 
+- inputPath: ExplanationOfBenefit-Institutional-Base.CLM_MDCR_IP_SCND_YR_RATE_AMT
+  appliesTo:
+    - Inpatient
+    - SNF
+  sources:
+    - NCH
+  sourceView: V2_MDCR_CLM_INSTNL
+  sourceColumn: CLM_MDCR_IP_SCND_YR_RATE_AMT
+  fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_MDCR_IP_SCND_YR_RATE_AMT')).amount.value  
+- inputPath: ExplanationOfBenefit-Institutional-Base.CLM_PPS_MD_WVR_STDZD_VAL_AMT
+  appliesTo:
+    - Inpatient
+    - SNF
+  sources:
+    - FISS
+    - NCH
+  sourceView: V2_MDCR_CLM_INSTNL
+  sourceColumn: CLM_PPS_MD_WVR_STDZD_VAL_AMT
+  fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_PPS_MD_WVR_STDZD_VAL_AMT')).amount.value
+- inputPath: ExplanationOfBenefit-Institutional-Base.CLM_SITE_NTRL_CST_BSD_PYMT_AMT
+  appliesTo:
+    - Inpatient
+  sources:
+    - FISS
+    - NCH
+  sourceView: V2_MDCR_CLM_INSTNL
+  sourceColumn: CLM_SITE_NTRL_CST_BSD_PYMT_AMT
+  fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_SITE_NTRL_CST_BSD_PYMT_AMT')).amount.value
+- inputPath: ExplanationOfBenefit-Institutional-Base.CLM_SITE_NTRL_IP_PPS_PYMT_AMT
+  appliesTo:
+    - Inpatient
+  sources:
+    - FISS
+    - NCH
+  sourceView: V2_MDCR_CLM_INSTNL
+  sourceColumn: CLM_SITE_NTRL_IP_PPS_PYMT_AMT
+  fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_SITE_NTRL_IP_PPS_PYMT_AMT')).amount.value
+- inputPath: ExplanationOfBenefit-Institutional-Base.CLM_SS_OUTLIER_STD_PYMT_AMT
+  appliesTo:
+    - Inpatient
+  sources:
+    - FISS
+    - NCH
+  sourceView: V2_MDCR_CLM_INSTNL
+  sourceColumn: CLM_SS_OUTLIER_STD_PYMT_AMT
+  fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_SS_OUTLIER_STD_PYMT_AMT')).amount.value
+- inputPath: ExplanationOfBenefit-Professional-Base.CLM_PRVDR_ACNT_RCVBL_OFST_AMT
+  appliesTo:
+    - Carrier
+    - DME
+  sources:
+    - MCS
+    - VMS
+  sourceView: V2_MDCR_CLM_PRFNL
+  sourceColumn: CLM_PRVDR_ACNT_RCVBL_OFST_AMT
+  fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_PRVDR_ACNT_RCVBL_OFST_AMT')).amount.value
+- inputPath: LineItemComponent.CLM_LINE_OTAF_AMT
+  appliesTo:
+    - SNF
+    - Outpatient
+    - Carrier
+    - DME
+  sources:
+    - NCH
+    - VMS
+    - MCS
+    - FISS
+  sourceView: V2_MDCR_CLM_LINE
+  sourceColumn: CLM_LINE_OTAF_AMT
+  fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_OTAF_AMT')).amount.value
