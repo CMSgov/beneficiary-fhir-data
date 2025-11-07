@@ -1,7 +1,7 @@
 package gov.cms.bfd.server.ng.beneficiary.model;
 
+import gov.cms.bfd.server.ng.model.ProfileType;
 import gov.cms.bfd.server.ng.util.DateUtil;
-import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Id;
@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.Getter;
-import lombok.NonNull;
 import org.hl7.fhir.r4.model.Patient;
 
 /**
@@ -64,13 +63,13 @@ public abstract class BeneficiaryBase {
   /**
    * Convenience method to convert to FHIR Patient with a specific profile.
    *
-   * @param profile the FHIR profile to apply
+   * @param profileType the FHIR profile type
    * @return patient record
    */
-  public Patient toFhir(@NonNull String profile) {
+  public Patient toFhir(ProfileType profileType) {
     var patient = new Patient();
 
-    if (profile.equals(SystemUrls.PROFILE_C4DIC_PATIENT)) {
+    if (profileType == ProfileType.C4DIC) {
       patient.setId(id);
     } else {
       patient.setId(String.valueOf(beneSk));
@@ -92,7 +91,7 @@ public abstract class BeneficiaryBase {
           patient.addExtension(s.toFhirSexExtension());
         });
     patient.addExtension(raceCode.toFhir());
-    patient.setMeta(meta.toFhirPatient(profile));
+    patient.setMeta(meta.toFhirPatient(profileType));
 
     return patient;
   }

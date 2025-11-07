@@ -131,9 +131,9 @@ public class PatientCoverageC4DICSearchIT extends IntegrationTestBase {
 
       String expectedProfile =
           switch (resource) {
-            case Patient _ -> SystemUrls.PROFILE_C4DIC_PATIENT;
+            case Patient _ -> SystemUrls.PROFILE_C4DIC_PATIENT_1_1_0;
             case Organization _ -> SystemUrls.PROFILE_C4DIC_ORGANIZATION;
-            case Coverage _ -> SystemUrls.PROFILE_C4DIC_COVERAGE;
+            case Coverage _ -> SystemUrls.PROFILE_C4DIC_COVERAGE_1_1_0;
             default -> fail("Unexpected resource type: " + resource.getClass().getSimpleName());
           };
 

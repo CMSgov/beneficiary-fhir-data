@@ -8,6 +8,7 @@ import gov.cms.bfd.server.ng.input.CoverageCompositeId;
 import gov.cms.bfd.server.ng.input.CoveragePart;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.loadprogress.LoadProgressRepository;
+import gov.cms.bfd.server.ng.model.ProfileType;
 import gov.cms.bfd.server.ng.util.FhirUtil;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.util.Arrays;
@@ -79,7 +80,7 @@ public class PatientHandler {
    * @param beneSk The beneficiary surrogate key.
    * @return A Bundle of Coverage resources.
    */
-  public Bundle searchByBeneficiary(Long beneSk) {
+  public Bundle searchByBeneficiaryC4DIC(Long beneSk) {
     var beneficiaryOpt =
         coverageRepository
             .searchBeneficiaryWithCoverage(beneSk, new DateTimeRange())
@@ -89,7 +90,7 @@ public class PatientHandler {
     }
     var beneficiary = beneficiaryOpt.get();
 
-    var patient = beneficiary.toFhir(SystemUrls.PROFILE_C4DIC_PATIENT);
+    var patient = beneficiary.toFhir(ProfileType.C4DIC);
     // Two more organization may be needed, once mappings for Part C and D are added.
     var cmsOrg =
         OrganizationFactory.createCmsOrganization(
@@ -104,13 +105,12 @@ public class PatientHandler {
             .flatMap(Optional::stream);
 
     var resources = Stream.concat(Stream.of(patient, cmsOrg), coverages);
-
     return FhirUtil.bundleWithFullUrls(resources, loadProgressRepository::lastUpdated);
   }
 
   private Patient toFhir(Beneficiary beneficiary) {
     var identities = beneficiaryRepository.getValidBeneficiaryIdentities(beneficiary.getXrefSk());
-    var patient = beneficiary.toFhir("");
+    var patient = beneficiary.toFhir(ProfileType.C4BB);
 
     for (var id : identities) {
       // check for merged bene and if mbi identifier has already been added to the patient

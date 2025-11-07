@@ -81,8 +81,7 @@ public class PatientResourceProvider implements IResourceProvider {
    */
   @Operation(name = "generate-insurance-card", typeName = "Coverage", idempotent = true)
   public Bundle searchC4DICByBeneficiary(@IdParam final IdType beneSK) {
-
     var beneSk = FhirInputConverter.toLong(new IdType(beneSK.getValue()));
-    return patientHandler.searchByBeneficiary(beneSk);
+    return patientHandler.searchByBeneficiaryC4DIC(beneSk);
   }
 }

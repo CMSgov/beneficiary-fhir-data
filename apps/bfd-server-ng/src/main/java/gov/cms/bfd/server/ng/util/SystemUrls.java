@@ -36,7 +36,7 @@ public class SystemUrls {
    * <a href="http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Patient">CARIN Digital
    * Insurance Card 1.1.0.</a>
    */
-  public static final String PROFILE_C4DIC_PATIENT =
+  public static final String PROFILE_C4DIC_PATIENT_1_1_0 =
       "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Patient";
 
   /**
@@ -52,7 +52,7 @@ public class SystemUrls {
    * href="http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Coverage">CARIN Digital
    * Insurance Card Coverage 1.1.0</a>
    */
-  public static final String PROFILE_C4DIC_COVERAGE =
+  public static final String PROFILE_C4DIC_COVERAGE_1_1_0 =
       "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Coverage";
 
   /**

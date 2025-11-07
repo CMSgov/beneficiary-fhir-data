@@ -5,6 +5,7 @@ import gov.cms.bfd.server.ng.beneficiary.model.OrganizationFactory;
 import gov.cms.bfd.server.ng.beneficiary.model.RelationshipFactory;
 import gov.cms.bfd.server.ng.input.CoverageCompositeId;
 import gov.cms.bfd.server.ng.input.CoveragePart;
+import gov.cms.bfd.server.ng.model.ProfileType;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -105,10 +106,11 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
    * Sets up the base coverage resource with common fields.
    *
    * @param coverageCompositeId The full ID for the Coverage resource.
-   * @param isC4DIC Whether this is a C4DIC profile coverage.
+   * @param profileType Whether this is a C4DIC profile coverage.
    * @return A base Coverage object with common fields populated.
    */
-  private Coverage setupBaseCoverage(CoverageCompositeId coverageCompositeId, boolean isC4DIC) {
+  private Coverage setupBaseCoverage(
+      CoverageCompositeId coverageCompositeId, ProfileType profileType) {
     var coverage = new Coverage();
     coverage.setRelationship(RelationshipFactory.createSelfSubscriberRelationship());
     coverage.setSubscriberId(identifier.getMbi());
@@ -117,15 +119,14 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
     coverage.setType(coveragePart.toFhirTypeCode());
     coverage.addClass_(coveragePart.toFhirClassComponent());
 
-    if (isC4DIC) {
-      coverage.setMeta(
-          meta.toFhirCoverage(SystemUrls.PROFILE_C4DIC_COVERAGE, getMostRecentUpdated()));
+    if (profileType == ProfileType.C4DIC) {
+      coverage.setMeta(meta.toFhirCoverage(profileType, getMostRecentUpdated()));
       coverage.setId(UUID.randomUUID().toString());
       coverage.setBeneficiary(new Reference(PATIENT_REF + id));
       coverage.setSubscriber(new Reference(PATIENT_REF + id));
     } else {
       coverage.setId(coverageCompositeId.fullId());
-      coverage.setMeta(meta.toFhirCoverage("", getMostRecentUpdated()));
+      coverage.setMeta(meta.toFhirCoverage(profileType, getMostRecentUpdated()));
       coverage.setBeneficiary(new Reference(PATIENT_REF + beneSk));
     }
 
@@ -139,10 +140,10 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
    * @return A FHIR Coverage object.
    */
   public Coverage toFhir(CoverageCompositeId coverageCompositeId) {
-    var coverage = setupBaseCoverage(coverageCompositeId, false);
+    var coverage = setupBaseCoverage(coverageCompositeId, ProfileType.C4BB);
     coverage.setId(coverageCompositeId.fullId());
 
-    coverage.setMeta(meta.toFhirCoverage("", getMostRecentUpdated()));
+    coverage.setMeta(meta.toFhirCoverage(ProfileType.C4BB, getMostRecentUpdated()));
 
     coverage.setBeneficiary(new Reference(PATIENT_REF + beneSk));
     coverage.setRelationship(RelationshipFactory.createSelfSubscriberRelationship());
@@ -151,8 +152,8 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
     var coveragePart = coverageCompositeId.coveragePart();
 
     return switch (coveragePart) {
-      case PART_A, PART_B -> mapCoverageAB(coverage, coveragePart, false, null);
-      case DUAL -> mapCoverageDual(coverage, false, null);
+      case PART_A, PART_B -> mapCoverageAB(coverage, coveragePart, ProfileType.C4BB, null);
+      case DUAL -> mapCoverageDual(coverage, ProfileType.C4BB, null);
     };
   }
 
@@ -164,12 +165,12 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
    * @return A FHIR Coverage object.
    */
   public Coverage toFhirC4DIC(CoverageCompositeId coverageCompositeId, String orgId) {
-    var coverage = setupBaseCoverage(coverageCompositeId, true);
+    var coverage = setupBaseCoverage(coverageCompositeId, ProfileType.C4DIC);
     var coveragePart = coverageCompositeId.coveragePart();
 
     return switch (coveragePart) {
-      case PART_A, PART_B -> mapCoverageAB(coverage, coveragePart, true, orgId);
-      case DUAL -> mapCoverageDual(coverage, true, orgId);
+      case PART_A, PART_B -> mapCoverageAB(coverage, coveragePart, ProfileType.C4DIC, orgId);
+      case DUAL -> mapCoverageDual(coverage, ProfileType.C4DIC, orgId);
     };
   }
 
@@ -204,24 +205,26 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
    *
    * @param coverage The base coverage object.
    * @param coveragePart The coverage part (A or B).
-   * @param isC4DIC Whether this is C4DIC format.
+   * @param profileType Profile type.
    * @param orgId The organization reference ID (only used if isC4DIC is true).
    * @return The populated Coverage object.
    */
   private Coverage mapCoverageAB(
-      Coverage coverage, CoveragePart coveragePart, boolean isC4DIC, String orgId) {
+      Coverage coverage, CoveragePart coveragePart, ProfileType profileType, String orgId) {
     var entitlementOpt = findEntitlement(coveragePart);
     if (entitlementOpt.isEmpty()) {
       return toEmptyResource(coverage);
     }
 
-    identifier.toFhir(isC4DIC ? orgId : "").ifPresent(coverage::addIdentifier);
+    identifier
+        .toFhir(profileType == ProfileType.C4DIC ? orgId : "")
+        .ifPresent(coverage::addIdentifier);
 
     var entitlement = entitlementOpt.get();
     coverage.setPeriod(entitlement.toFhirPeriod());
     coverage.setStatus(entitlement.toFhirStatus());
 
-    if (isC4DIC) {
+    if (profileType == ProfileType.C4DIC) {
       coverage.addPayor(new Reference().setReference(ORGANIZATION_REF + orgId));
       coverage.addExtension(
           new Extension(SystemUrls.C4DIC_ADD_INFO_EXT_URL)
@@ -263,11 +266,11 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
    * Maps Dual eligibility coverage for both standard and C4DIC formats.
    *
    * @param coverage The base coverage object.
-   * @param isC4DIC Whether this is C4DIC format.
+   * @param profileType The profile type.
    * @param orgId The organization reference ID (only used if isC4DIC is true).
    * @return The populated Coverage object.
    */
-  private Coverage mapCoverageDual(Coverage coverage, boolean isC4DIC, String orgId) {
+  private Coverage mapCoverageDual(Coverage coverage, ProfileType profileType, String orgId) {
     var dualEligibilityOpt = getDualEligibility();
     if (dualEligibilityOpt.isEmpty()) {
       return toEmptyResource(coverage);
@@ -276,9 +279,11 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
     var dualEligibility = dualEligibilityOpt.get();
     coverage.setPeriod(dualEligibility.toFhirPeriod());
     coverage.setStatus(dualEligibility.toFhirStatus());
-    identifier.toFhir(isC4DIC ? orgId : "").ifPresent(coverage::addIdentifier);
+    identifier
+        .toFhir(profileType == ProfileType.C4DIC ? orgId : "")
+        .ifPresent(coverage::addIdentifier);
 
-    if (isC4DIC) {
+    if (profileType == ProfileType.C4DIC) {
       coverage.addPayor(new Reference().setReference(ORGANIZATION_REF + orgId));
       coverage.addExtension(
           new Extension(SystemUrls.C4DIC_ADD_INFO_EXT_URL)

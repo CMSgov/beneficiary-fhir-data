@@ -9,6 +9,7 @@ import gov.cms.bfd.server.ng.beneficiary.BeneficiaryRepository;
 import gov.cms.bfd.server.ng.claim.ClaimRepository;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.loadprogress.LoadProgressRepository;
+import gov.cms.bfd.server.ng.model.ProfileType;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -174,7 +175,7 @@ public class BfdUpdatedTimestampIT extends IntegrationTestBase {
     var beneOpt = beneficiaryRepository.findById(beneId, new DateTimeRange());
     return beneOpt.map(
         bene -> {
-          var patient = bene.toFhir("");
+          var patient = bene.toFhir(ProfileType.C4BB);
           return patient.getMeta().getLastUpdated().toInstant().atZone(ZoneId.of("UTC"));
         });
   }
