@@ -25,6 +25,10 @@ class SecurityLabelModel(BaseModel):
     start_date: datetime = Field(validation_alias="startDate")
     end_date: datetime = Field(validation_alias="endDate")
 
+    @property
+    def normalized_code(self) -> str:
+        return self.code.replace(".", "")
+
 
 SECURITY_LABELS_ICD10_PROCEDURE_SYSTEMS = ["http://www.cms.gov/Medicare/Coding/ICD10"]
 SECURITY_LABELS_ICD10_DIAGNOSIS_SYSTEMS = ["http://hl7.org/fhir/sid/icd-10-cm"]
@@ -207,7 +211,7 @@ avail_oscar_codes_institutional = [
 code_systems = {}
 
 available_samhsa_icd_10_dgns_codes = [
-    x.code.replace(".", "")  # IDR has codes without the dot
+    x.normalized_code  # IDR has codes without the dot
     for x in SECURITY_LABELS
     if x.system in SECURITY_LABELS_ICD10_DIAGNOSIS_SYSTEMS
 ]
@@ -232,7 +236,7 @@ available_non_samhsa_icd_10_dgns_codes = [
     "W303XXA",
 ]
 available_samhsa_icd_10_prcdr_codes = [
-    x.code.replace(".", "")
+    x.normalized_code
     for x in SECURITY_LABELS
     if x.system in SECURITY_LABELS_ICD10_PROCEDURE_SYSTEMS
 ]
@@ -248,7 +252,7 @@ available_non_samhsa_icd_10_prcdr_codes = [
     "5A1945Z",
 ]
 proc_codes_samhsa_cpt_hcpcs = [
-    x.code.replace(".", "")
+    x.normalized_code
     for x in SECURITY_LABELS
     if x.system in SECURITY_LABELS_HCPCS_SYSTEMS or x.system in SECURITY_LABELS_CPT_SYSTEMS
 ]
@@ -267,7 +271,7 @@ avail_clm_rlt_cond_sk = ["193064687", "117814", "193065597", "117853", "19307430
 
 non_samhsa_dgns_drg_cds = list(range(43))
 samhsa_dgns_drg_cds = [
-    int(x.code.replace(".", "")) for x in SECURITY_LABELS if x.system in SECURITY_LABELS_DRG_SYSTEMS
+    int(x.normalized_code) for x in SECURITY_LABELS if x.system in SECURITY_LABELS_DRG_SYSTEMS
 ]
 
 
