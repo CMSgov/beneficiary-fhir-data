@@ -48,7 +48,7 @@ public final class LoadedFilterManagerE2E extends ServerRequiredTest {
     PipelineTestUtils.get()
         .doTestWithDb(
             (dataSource, entityManager) -> {
-              final LoadedFilterManager filterManager = new LoadedFilterManager();
+              final LoadedFilterManager filterManager = new LoadedFilterManager(dataSource);
               filterManager.setEntityManager(entityManager);
               filterManager.init();
 
@@ -87,7 +87,7 @@ public final class LoadedFilterManagerE2E extends ServerRequiredTest {
     PipelineTestUtils.get()
         .doTestWithDb(
             (dataSource, entityManager) -> {
-              final LoadedFilterManager filterManager = new LoadedFilterManager();
+              final LoadedFilterManager filterManager = new LoadedFilterManager(dataSource);
               filterManager.setEntityManager(entityManager);
               filterManager.init();
               final Instant initialTransactionTime = filterManager.getTransactionTime();
@@ -122,7 +122,7 @@ public final class LoadedFilterManagerE2E extends ServerRequiredTest {
     PipelineTestUtils.get()
         .doTestWithDb(
             (dataSource, entityManager) -> {
-              final LoadedFilterManager filterManager = new LoadedFilterManager();
+              final LoadedFilterManager filterManager = new LoadedFilterManager(dataSource);
               filterManager.setEntityManager(entityManager);
               filterManager.init();
 
@@ -175,7 +175,7 @@ public final class LoadedFilterManagerE2E extends ServerRequiredTest {
     PipelineTestUtils.get()
         .doTestWithDb(
             (dataSource, entityManager) -> {
-              final LoadedFilterManager filterManager = new LoadedFilterManager();
+              final LoadedFilterManager filterManager = new LoadedFilterManager(dataSource);
               filterManager.setEntityManager(entityManager);
               filterManager.init();
               loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));

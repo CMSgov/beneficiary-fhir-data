@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model;
 
+import gov.cms.bfd.server.ng.ClaimSecurityStatus;
 import gov.cms.bfd.server.ng.beneficiary.model.BeneficiarySimple;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import jakarta.persistence.Column;
@@ -12,6 +13,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -93,15 +95,15 @@ public class Claim {
   @JoinColumn(name = "clm_uniq_id")
   private SortedSet<ClaimItem> claimItems;
 
-  private Optional<ClaimInstitutional> getClaimInstitutional() {
+  Optional<ClaimInstitutional> getClaimInstitutional() {
     return Optional.ofNullable(claimInstitutional);
   }
 
-  private Optional<ClaimProfessional> getClaimProfessional() {
+  Optional<ClaimProfessional> getClaimProfessional() {
     return Optional.ofNullable(claimProfessional);
   }
 
-  private Optional<ClaimFiss> getClaimFiss() {
+  Optional<ClaimFiss> getClaimFiss() {
     return Optional.ofNullable(claimFiss);
   }
 
@@ -118,9 +120,10 @@ public class Claim {
   /**
    * Convert the claim info to a FHIR ExplanationOfBenefit.
    *
+   * @param securityStatus securityStatus
    * @return ExplanationOfBenefit
    */
-  public ExplanationOfBenefit toFhir() {
+  public ExplanationOfBenefit toFhir(ClaimSecurityStatus securityStatus) {
     var eob = new ExplanationOfBenefit();
     eob.setId(String.valueOf(claimUniqueId));
     eob.setPatient(PatientReferenceFactory.toFhir(beneficiary.getXrefSk()));
@@ -129,7 +132,8 @@ public class Claim {
     eob.setType(claimTypeCode.toFhirType());
     claimTypeCode.toFhirSubtype().ifPresent(eob::setSubType);
 
-    eob.setMeta(meta.toFhir(claimTypeCode, claimSourceId));
+    var latestTs = getMostRecentUpdated();
+    eob.setMeta(meta.toFhir(claimTypeCode, claimSourceId, securityStatus, latestTs));
     eob.setIdentifier(identifiers.toFhir());
     eob.setBillablePeriod(billablePeriod.toFhir());
     eob.setCreated(DateUtil.toDate(claimEffectiveDate));
@@ -182,9 +186,6 @@ public class Claim {
               eob.setProvider(new Reference(p));
             });
 
-    // Each toFhirOutcome() evaluates independently, but their logic is mutually exclusive
-    // based on claim type. At most one Optional will be non-empty, so only one call
-    // will actually set EOB.outcome.
     claimSourceId.toFhirOutcome().ifPresent(eob::setOutcome);
     claimTypeCode.toFhirOutcome().ifPresent(eob::setOutcome);
     getClaimFiss().flatMap(f -> f.toFhirOutcome(claimTypeCode)).ifPresent(eob::setOutcome);
@@ -254,6 +255,20 @@ public class Claim {
 
   private List<ClaimValue> getClaimValues() {
     return claimItems.stream().map(ClaimItem::getClaimValue).toList();
+  }
+
+  private ZonedDateTime getMostRecentUpdated() {
+    // Collect timestamps (claim + child entities) then pick the max.
+    var ciStream = getClaimInstitutional().map(ClaimInstitutional::getBfdUpdatedTimestamp).stream();
+    var cfStream = getClaimFiss().map(ClaimFiss::getBfdUpdatedTimestamp).stream();
+    var cdsStream = Stream.of(claimDateSignature.getBfdUpdatedTimestamp());
+    var itemsStream = claimItems.stream().flatMap(ClaimItem::streamTimestamps);
+
+    return Stream.of(
+            Stream.of(meta.getUpdatedTimestamp()), ciStream, cfStream, cdsStream, itemsStream)
+        .flatMap(s -> s)
+        .max(Comparator.naturalOrder())
+        .orElse(meta.getUpdatedTimestamp());
   }
 
   private ExplanationOfBenefit sortedEob(ExplanationOfBenefit eob) {

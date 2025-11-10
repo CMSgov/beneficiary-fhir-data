@@ -3,11 +3,9 @@ package gov.cms.bfd.server.ng.claim;
 import gov.cms.bfd.server.ng.claim.model.Claim;
 import gov.cms.bfd.server.ng.claim.model.ClaimSourceId;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
-import gov.cms.bfd.server.ng.util.DateUtil;
 import gov.cms.bfd.server.ng.util.LogUtil;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -18,20 +16,20 @@ import org.springframework.stereotype.Repository;
 @Repository
 @AllArgsConstructor
 public class ClaimRepository {
-  private EntityManager entityManager;
+  private final EntityManager entityManager;
 
-  private static final String CLAIM_TABLES =
+  private static final String CLAIM_TABLES_BASE =
       """
-      SELECT c
-      FROM Claim c
-      JOIN FETCH c.beneficiary b
-      JOIN FETCH c.claimDateSignature AS cds
-      JOIN FETCH c.claimItems AS cl
-      LEFT JOIN FETCH c.claimInstitutional ci
-      LEFT JOIN FETCH cl.claimLineInstitutional cli
-      LEFT JOIN FETCH c.claimFiss cf
-      LEFT JOIN FETCH cli.ansiSignature a
-    """;
+        SELECT c
+        FROM Claim c
+        JOIN FETCH c.beneficiary b
+        JOIN FETCH c.claimDateSignature AS cds
+        JOIN FETCH c.claimItems AS cl
+        LEFT JOIN FETCH c.claimInstitutional ci
+        LEFT JOIN FETCH cl.claimLineInstitutional cli
+        LEFT JOIN FETCH c.claimFiss cf
+        LEFT JOIN FETCH cli.ansiSignature a
+      """;
 
   /**
    * Search for a claim by its ID.
@@ -43,25 +41,24 @@ public class ClaimRepository {
    */
   public Optional<Claim> findById(
       long claimUniqueId, DateTimeRange claimThroughDate, DateTimeRange lastUpdated) {
-    var optionalClaim =
+    var jpql =
+        String.format(
+            """
+              %s
+              WHERE c.claimUniqueId = :claimUniqueId
+              %s
+            """,
+            CLAIM_TABLES_BASE, getFilters(claimThroughDate, lastUpdated));
+    var results =
         withParams(
-                entityManager.createQuery(
-                    String.format(
-                        """
-                        %s
-                        WHERE c.claimUniqueId = :claimUniqueId
-                        %s
-                        """,
-                        CLAIM_TABLES, getFilters(claimThroughDate, lastUpdated)),
-                    Claim.class),
+                entityManager.createQuery(jpql, Claim.class),
                 claimThroughDate,
                 lastUpdated,
                 new ArrayList<>())
             .setParameter("claimUniqueId", claimUniqueId)
-            .getResultList()
-            .stream()
-            .findFirst();
+            .getResultList();
 
+    var optionalClaim = results.stream().findFirst();
     optionalClaim.ifPresent(claim -> LogUtil.logBeneSk(claim.getBeneficiary().getBeneSk()));
     return optionalClaim;
   }
@@ -86,14 +83,21 @@ public class ClaimRepository {
       List<ClaimSourceId> sourceIds) {
     // JPQL doesn't support LIMIT/OFFSET unfortunately, so we have to load this separately.
     // setMaxResults will only limit the results in memory rather than at the database level.
+
+    // We need to get a distinct list of bene_sk values here because there will be duplicates
+    // since this is a history table.
     var claimIds =
         entityManager
             .createNativeQuery(
                 """
+                WITH benes AS (
+                    SELECT DISTINCT b.bene_sk
+                    FROM idr.beneficiary b
+                    WHERE b.bene_xref_efctv_sk_computed = :beneSk
+                )
                 SELECT c.clm_uniq_id
                 FROM idr.claim c
-                JOIN idr.beneficiary b ON b.bene_sk = c.bene_sk
-                WHERE b.bene_xref_efctv_sk_computed = :beneSk
+                JOIN benes b ON b.bene_sk = c.bene_sk
                 ORDER BY c.clm_uniq_id
                 LIMIT :limit
                 OFFSET :offset
@@ -103,17 +107,17 @@ public class ClaimRepository {
             .setParameter("limit", limit.orElse(5000))
             .setParameter("offset", offset.orElse(0))
             .getResultList();
+    var jpql =
+        String.format(
+            """
+            %s
+            WHERE c.claimUniqueId IN (:claimIds)
+            %s
+            """,
+            CLAIM_TABLES_BASE, getFilters(claimThroughDate, lastUpdated));
     var claims =
         withParams(
-                entityManager.createQuery(
-                    String.format(
-                        """
-                        %s
-                        WHERE c.claimUniqueId IN (:claimIds)
-                        %s
-                        """,
-                        CLAIM_TABLES, getFilters(claimThroughDate, lastUpdated)),
-                    Claim.class),
+                entityManager.createQuery(jpql, Claim.class),
                 claimThroughDate,
                 lastUpdated,
                 sourceIds)
@@ -124,26 +128,6 @@ public class ClaimRepository {
         .findFirst()
         .ifPresent(claim -> LogUtil.logBeneSk(claim.getBeneficiary().getBeneSk()));
     return claims;
-  }
-
-  /**
-   * Returns the last updated timestamp for the claims data ingestion process.
-   *
-   * @return last updated timestamp
-   */
-  public ZonedDateTime claimLastUpdated() {
-    return entityManager
-        .createQuery(
-            """
-            SELECT MAX(p.batchCompletionTimestamp)
-            FROM LoadProgress p
-            WHERE p.tableName LIKE 'idr.claim%'
-            """,
-            ZonedDateTime.class)
-        .getResultList()
-        .stream()
-        .findFirst()
-        .orElse(DateUtil.MIN_DATETIME);
   }
 
   private String getFilters(DateTimeRange claimThroughDate, DateTimeRange lastUpdated) {
@@ -167,10 +151,8 @@ public class ClaimRepository {
       DateTimeRange lastUpdated,
       List<ClaimSourceId> sourceIds) {
     return query
-        .setParameter(
-            "claimThroughDateLowerBound", claimThroughDate.getLowerBoundDate().orElse(null))
-        .setParameter(
-            "claimThroughDateUpperBound", claimThroughDate.getUpperBoundDate().orElse(null))
+        .setParameter("claimThroughDateLowerBound", claimThroughDate.getLowerBoundDate())
+        .setParameter("claimThroughDateUpperBound", claimThroughDate.getUpperBoundDate())
         .setParameter("lastUpdatedLowerBound", lastUpdated.getLowerBoundDateTime().orElse(null))
         .setParameter("lastUpdatedUpperBound", lastUpdated.getUpperBoundDateTime().orElse(null))
         .setParameter("hasSourceIds", !sourceIds.isEmpty())
