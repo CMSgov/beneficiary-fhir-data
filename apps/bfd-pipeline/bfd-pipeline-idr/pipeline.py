@@ -4,6 +4,7 @@ import sys
 
 import ray
 from hamilton import base, driver  # type: ignore
+from hamilton.execution import executors
 from hamilton.plugins.h_ray import RayGraphAdapter  # type: ignore
 
 import pipeline_nodes
@@ -35,9 +36,13 @@ def main() -> None:
     logger.info("load_type %s", load_type)
     dr = (
         driver.Builder()
+        .enable_dynamic_execution(allow_experimental_mode=True)
         .with_config({"load_type": load_type})
         .with_modules(pipeline_nodes)
         .with_adapters(adapter)
+        .with_local_executor(executors.SynchronousLocalTaskExecutor())
+        # TODO: This probably needs to be something from Ray, not Hamilton
+        .with_remote_executor(executors.MultiProcessingExecutor(max_tasks=5))
         .build()
     )
 
