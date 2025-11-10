@@ -220,16 +220,6 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
 
     //Add header level adjudication.
     src -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then {
-      //CLM_MDCR_IP_PPS_DRG_WT_NUM - Claim PPS Capital DRG Weight Number
-     
-     /*
-      src.institutionalComponents as institutionalComponents -> tgt then {
-        institutionalComponents.CLM_MDCR_IP_PPS_DRG_WT_NUM as amtUsed -> tgtAdjudication.extension = create('Extension') as tgtExtension then{
-          src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MDCR-IP-PPS-DRG-WT-NUM" "Add url";
-          amtUsed -> tgtExtension.value = cast(amtUsed,'decimal') "set amtUsed";
-        } "add PPS DRG WT ";
-      }"Add adjudication extension for PPS weight number.";
-      */
       src -> tgtAdjudication.reason = cc("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus","other") "Set adjudication reason";
       src -> tgtAdjudication.category = cc("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator","benefitpaymentstatus") "Set adjudication category";
     } "Add header-level adjudication";

@@ -40,7 +40,8 @@
         {"ROW_NUM":"16","CLM_NCH_PRMRY_PYR_CD":"I"},
         {"ROW_NUM":"17","CLM_QLFY_STAY_FROM_DT":"2025-01-02"},
         {"ROW_NUM":"18","CLM_QLFY_STAY_THRU_DT":"2025-01-01"},
-        {"ROW_NUM":"19","CLM_LINE_HCT_HGB_TYPE_CD":"R1","CLM_LINE_HCT_HGB_RSLT_NUM":"1.11","CLM_LINE_CARR_CLNCL_LAB_NUM":"11D1343434"}
+        {"ROW_NUM":"19","CLM_LINE_HCT_HGB_TYPE_CD":"R1","CLM_LINE_HCT_HGB_RSLT_NUM":"1.11","CLM_LINE_CARR_CLNCL_LAB_NUM":"11D1343434"},
+        {"ROW_NUM":"20","CLM_NRLN_RIC_CD":"O"}
         
     ],
     "lineItemComponents":[
@@ -52,7 +53,6 @@
     "profComponents":{"CLM_PRVDR_ACNT_RCVBL_OFST_AMT":"19.00","CLM_CARR_PMT_DNL_CD":"8","CLM_MDCR_PRFNL_PRMRY_PYR_AMT":"8201.1","CLM_MDCR_PRFNL_PRVDR_ASGNMT_SW":"L","CLM_CLNCL_TRIL_NUM":"1337","CLM_AUDT_TRL_STUS_CD":"D"},
     "CLM_QUERY_CD":"3",
     "CLM_MDCR_DDCTBL_AMT":"17.85",
-    "CLM_NRLN_RIC_CD":"O",
     "CLM_CMS_PROC_DT":"2025-01-01",
     "CLM_PMT_AMT":"3.50",
     "CLM_PRVDR_PMT_AMT":"11.11",
@@ -67,5 +67,6 @@
     "CLM_BENE_PD_AMT":"1.50",
     "CLM_ALOWD_CHRG_AMT":"10.22",
     "clm_blg_prvdr_npi_type":"1",
-    "blg_name_professional":"test"
+    "blg_name_professional":"test",
+    "CLM_BENE_PMT_COINSRNC_AMT":"11.11"
 }

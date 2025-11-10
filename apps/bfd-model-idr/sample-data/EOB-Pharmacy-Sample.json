@@ -111,7 +111,9 @@
             "CLM_CMS_CALCD_MFTR_DSCNT_AMT":"10.01",
             "CLM_LINE_GRS_CVRD_CST_TOT_AMT":"10.02",
             "CLM_LINE_REBT_PASSTHRU_POS_AMT":"10.03",
-            "CLM_PHRMCY_PRICE_DSCNT_AT_POS_AMT":"10.04"
+            "CLM_PHRMCY_PRICE_DSCNT_AT_POS_AMT":"10.04",
+            "CLM_LINE_OTHR_TP_PD_AMT":"10.05",
+            "CLM_LINE_NCVRD_PD_AMT":"10.08"
         }
     ]
 } 
