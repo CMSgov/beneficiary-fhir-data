@@ -1,11 +1,11 @@
 package gov.cms.bfd.model.rif;
 
 import jakarta.persistence.*;
+import java.sql.ResultSet;
 import java.time.Instant;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,8 +19,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @Table(name = "loaded_batches", schema = "ccw")
 public class LoadedBatch {
-  /** Separator for joining and splitting data. */
-  public static final String SEPARATOR = ",";
 
   /** The batch identifier. */
   @Id
@@ -38,100 +36,60 @@ public class LoadedBatch {
 
   /** The beneficiaries in this batch. */
   @Column(name = "beneficiaries", columnDefinition = "varchar", nullable = false)
-  private String beneficiaries;
+  @Convert(converter = BeneficiariesConverter.class)
+  private List<Long> beneficiaries;
 
   /** The batch creation timestamp. */
   @Column(name = "created", nullable = false)
   private Instant created;
 
   /**
-   * Creates a new LoadedBatch with known values.
+   * Creates a new LoadedBatch with known values where {@code beneficiaries} has not yet been
+   * transformed into a {@link List} of {@link Long}s; e.g. when loading {@link LoadedBatch}s from
+   * the database using raw {@link ResultSet}s
    *
    * @param loadedBatchId unique sequence id
-   * @param loadedFileId associated file
-   * @param beneficiaries to associate
+   * @param loadedFileId associated {@link LoadedFile} ID
+   * @param beneficiariesCsv comma-delimited {@link String} list of beneficiary IDs
    * @param created batch creation date
    */
   public LoadedBatch(
-      long loadedBatchId, long loadedFileId, List<Long> beneficiaries, Instant created) {
+      long loadedBatchId, long loadedFileId, String beneficiariesCsv, Instant created) {
     this();
     this.loadedBatchId = loadedBatchId;
     this.loadedFileId = loadedFileId;
-    this.beneficiaries = convertToString(beneficiaries);
+    this.beneficiaries = BeneficiariesConverter.toBeneficiariesList(beneficiariesCsv);
     this.created = created;
   }
 
-  /**
-   * Set the {@link #beneficiaries} from a list.
-   *
-   * @param beneficiaries list to convert
-   */
-  public void setBeneficiaries(List<Long> beneficiaries) {
-    this.beneficiaries = convertToString(beneficiaries);
-  }
+  @Converter
+  private static class BeneficiariesConverter implements AttributeConverter<List<Long>, String> {
+    public static final String SEPARATOR = ",";
 
-  /**
-   * Get the {@link #beneficiaries} as a list.
-   *
-   * @return beneficiaries as list
-   */
-  public List<Long> getBeneficiariesAsList() {
-    return convertToList(this.beneficiaries);
-  }
+    public static String toBenesCsv(List<Long> benes) {
+      if (benes == null) {
+        return "";
+      }
 
-  /**
-   * Utility function to combine to batch into a larger batch. Useful for small number of batches.
-   *
-   * @param a batch to combine
-   * @param b batch to combine
-   * @return batch which has id of a, beneficiaries of both, and the latest created
-   */
-  public static LoadedBatch combine(LoadedBatch a, LoadedBatch b) {
-    if (a == null) return b;
-    if (b == null) return a;
-    LoadedBatch sum = new LoadedBatch();
-    sum.loadedBatchId = a.loadedBatchId;
-    sum.loadedFileId = a.loadedFileId;
-    sum.beneficiaries =
-        a.beneficiaries.isEmpty()
-            ? b.beneficiaries
-            : b.beneficiaries.isEmpty()
-                ? a.beneficiaries
-                : a.beneficiaries + SEPARATOR + b.beneficiaries;
-    sum.created = (a.created.isAfter(b.created)) ? a.created : b.created;
-    return sum;
-  }
-
-  /*
-   * Dev Note: A JPA AttributeConverter could be created instead of these static methods. This is
-   * slightly simpler and, since conversion is done once, just as efficient.
-   */
-
-  /**
-   * Converts a string list to a single string, delimited by {@link #SEPARATOR}.
-   *
-   * @param list the list to convert
-   * @return the string containing the values of the string list delimited by {@link #SEPARATOR}
-   */
-  private static String convertToString(List<Long> list) {
-    if (list == null || list.isEmpty()) {
-      return "";
+      return benes.stream().map(String::valueOf).collect(Collectors.joining(SEPARATOR));
     }
-    return list.stream().map(String::valueOf).collect(Collectors.joining(SEPARATOR));
-  }
 
-  /**
-   * Converts a {@link #SEPARATOR} delimited string to a list of strings.
-   *
-   * @param commaSeparated the {@link #SEPARATOR} separated string
-   * @return the list of string values
-   */
-  private static List<Long> convertToList(String commaSeparated) {
-    if (commaSeparated == null || commaSeparated.isEmpty()) {
-      return new ArrayList<Long>();
+    public static List<Long> toBeneficiariesList(String benesCsv) {
+      if (benesCsv == null) {
+        return List.of();
+      }
+
+      return Arrays.stream(benesCsv.split(SEPARATOR)).map(Long::parseLong).toList();
     }
-    return Stream.of(commaSeparated.split(SEPARATOR))
-        .map(Long::parseLong)
-        .collect(Collectors.toList());
+
+    @Override
+    public String convertToDatabaseColumn(List<Long> benes) {
+      return toBenesCsv(benes);
+    }
+
+    @Override
+    public List<Long> convertToEntityAttribute(String benesCsv) {
+      return toBeneficiariesList(benesCsv);
+    }
   }
 }

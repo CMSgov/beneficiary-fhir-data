@@ -336,6 +336,17 @@ public final class RifLoaderIT {
     assertEquals("Load errors encountered. ==> expected: <0> but was: <1>", thrown.getMessage());
   }
 
+  private static LoadedBatch combineBatches(LoadedBatch a, LoadedBatch b) {
+    if (a == null) return b;
+    if (b == null) return a;
+
+    return new LoadedBatch(
+        a.getLoadedBatchId(),
+        a.getLoadedFileId(),
+        Stream.concat(a.getBeneficiaries().stream(), b.getBeneficiaries().stream()).toList(),
+        (a.getCreated().isAfter(b.getCreated())) ? a.getCreated() : b.getCreated());
+  }
+
   /** Ensures that loading a single file results in a loaded file in the loaded batches. */
   @Test
   public void singleFileLoad() {
@@ -353,11 +364,12 @@ public final class RifLoaderIT {
               // Verify that beneficiaries table was loaded
               final List<LoadedBatch> batches =
                   loadBatches(entityManager, loadedFile.getLoadedFileId());
-              final LoadedBatch allBatches = batches.stream().reduce(null, LoadedBatch::combine);
+              final LoadedBatch allBatches =
+                  batches.stream().reduce(null, RifLoaderIT::combineBatches);
               assertTrue(batches.size() > 0, "Expected to have at least one beneficiary loaded");
               assertEquals(
                   567834L,
-                  allBatches.getBeneficiariesAsList().get(0),
+                  allBatches.getBeneficiaries().get(0),
                   "Expected to match the sample-a beneficiary");
             });
   }
