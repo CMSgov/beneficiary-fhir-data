@@ -56,7 +56,7 @@ resource "aws_cloudwatch_metric_alarm" "smoketest_failures" {
   metric_name = "messages/count/smoketest-failure"
   namespace   = local.metrics_namespace
 
-  alarm_actions = local.msgs_topic_arns["high_alert"]
+  alarm_actions = local.msgs_topic_arns["alert"]
 
   datapoints_to_alarm = 1
   treat_missing_data  = "notBreaching"
