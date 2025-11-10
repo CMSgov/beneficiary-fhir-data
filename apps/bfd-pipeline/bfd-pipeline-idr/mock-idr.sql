@@ -226,7 +226,17 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm (
     clm_blg_prvdr_zip5_cd VARCHAR(5),
     clm_sbmt_frmt_cd VARCHAR(1),
     clm_sbmtr_cntrct_num VARCHAR(5),
-    clm_sbmtr_cntrct_pbp_num VARCHAR(3)
+    clm_sbmtr_cntrct_pbp_num VARCHAR(3),
+    clm_rlt_cond_sgntr_sk BIGINT
+);
+
+CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_rlt_cond_sgntr_mbr (
+      clm_rlt_cond_sgntr_sk BIGINT NOT NULL,
+      clm_rlt_cond_sgntr_sqnc_num INT NOT NULL,
+      clm_rlt_cond_cd VARCHAR(20) NOT NULL,
+      idr_insrt_ts TIMESTAMPTZ,
+      idr_updt_ts TIMESTAMPTZ,
+      PRIMARY KEY(clm_rlt_cond_sgntr_sk, clm_rlt_cond_sgntr_sqnc_num)
 );
 
 CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_dcmtn (

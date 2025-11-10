@@ -89,6 +89,7 @@ ALIAS_HSTRY = "hstry"
 ALIAS_XREF = "xref"
 ALIAS_LCTN_HSTRY = "lctn_hstry"
 ALIAS_CLM_GRP = "clm_grp"
+ALIAS_RLT_COND = "rltcond"
 
 
 class IdrBaseModel(BaseModel, ABC):
@@ -1276,6 +1277,52 @@ class IdrClaimLineInstitutional(IdrBaseModel):
                 {clm}.clm_type_cd = {line}.clm_type_cd AND
                 {clm}.clm_num_sk = {line}.clm_num_sk
             {{WHERE_CLAUSE}} AND {claim_type_clause(start_time, CLAIM_TYPE_CODES)}
+            {{ORDER_BY}}
+        """
+
+class IdrClaimRelatedCondition(IdrBaseModel):
+    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, ALIAS: ALIAS_CLM}]
+    clm_rlt_cond_sgntr_sqnc_num: Annotated[int, {PRIMARY_KEY: True, ALIAS: ALIAS_RLT_COND}]
+    clm_rlt_cond_cd: Annotated[str, BeforeValidator(transform_default_string)]
+
+    idr_insrt_ts: Annotated[
+        datetime,
+        {BATCH_TIMESTAMP: True, ALIAS: ALIAS_RLT_COND, COLUMN_MAP: "idr_insrt_ts"},
+        BeforeValidator(transform_null_date_to_min),
+    ]
+    idr_updt_ts: Annotated[
+        datetime,
+        {UPDATE_TIMESTAMP: True, ALIAS: ALIAS_RLT_COND, COLUMN_MAP: "idr_updt_ts"},
+        BeforeValidator(transform_null_date_to_min),
+    ]
+
+    @staticmethod
+    def table() -> str:
+        return "idr.claim_related_condition"
+
+    @staticmethod
+    def _current_fetch_query(start_time: datetime) -> str:
+        clm = ALIAS_CLM
+        rltcond = ALIAS_RLT_COND
+        return f"""
+            WITH claims AS (
+                SELECT
+                    {clm}.clm_uniq_id,
+                    {clm}.geo_bene_sk,
+                    {clm}.clm_type_cd,
+                    {clm}.clm_num_sk,
+                    {clm}.clm_dt_sgntr_sk,
+                    {clm}.clm_rlt_cond_sgntr_sk
+                FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
+                WHERE {claim_type_clause(start_time)}
+            )
+            SELECT {{COLUMNS}}
+            FROM claims {clm}
+            JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_rlt_cond_sgntr_mbr {rltcond}
+                ON {rltcond}.clm_rlt_cond_sgntr_sk = {clm}.clm_rlt_cond_sgntr_sk
+            WHERE {clm}.clm_rlt_cond_sgntr_sk <> 0
+            AND {clm}.clm_rlt_cond_sgntr_sk <> 1
+            {{WHERE_CLAUSE}}
             {{ORDER_BY}}
         """
 

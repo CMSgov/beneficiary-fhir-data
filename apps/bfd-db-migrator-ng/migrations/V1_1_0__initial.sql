@@ -423,6 +423,15 @@ CREATE TABLE idr.claim_line_institutional (
     PRIMARY KEY(clm_uniq_id, clm_line_num)
 );
 
+CREATE TABLE idr.claim_related_condition (
+     clm_uniq_id BIGINT NOT NULL,
+     clm_rlt_cond_sgntr_sqnc_num INT NOT NULL,
+     clm_rlt_cond_cd VARCHAR(20) NOT NULL,
+     idr_insrt_ts TIMESTAMPTZ NOT NULL,
+     idr_updt_ts TIMESTAMPTZ NOT NULL,
+     PRIMARY KEY(clm_uniq_id, clm_rlt_cond_sgntr_sqnc_num)
+);
+
 CREATE TABLE idr.claim_ansi_signature (
     clm_ansi_sgntr_sk BIGINT NOT NULL PRIMARY KEY,
     clm_1_rev_cntr_ansi_grp_cd VARCHAR(2) NOT NULL,
