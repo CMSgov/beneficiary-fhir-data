@@ -3219,3 +3219,21 @@
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_LINE_OTAF_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_OTAF_AMT')).amount.value
+- inputPath: SupportingInfoComponent.CLM_RLT_COND_CD
+  appliesTo:
+    - Inpatient
+    - Outpatient
+    - SNF
+    - HHA
+    - Hospice
+  sources:
+    - NCH
+    - FISS
+  referenceTable: CLM_RLT_COND_CD
+  sourceView: V2_MDCR_CLM
+  sourceColumn: CLM_RLT_COND_SGNTR_SK
+  cclfMapping:
+    - CCLFA.CLM_RLT_COND_CD
+  bfdDerived: true
+  notes: The actual values are not derived, but this variable as marked as derived to call attention to the flattened structure compared to the upstream source.
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(code.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD').code.coding.code
