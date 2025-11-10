@@ -12,9 +12,8 @@ from pathlib import Path
 import pandas as pd
 import yaml
 from faker import Faker
-from pydantic import BaseModel, ConfigDict, Field, TypeAdapter
-
 from generator_util import GeneratorUtil
+from pydantic import BaseModel, ConfigDict, Field, TypeAdapter
 
 
 class SecurityLabelModel(BaseModel):
