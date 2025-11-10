@@ -6,7 +6,7 @@ import os
 import ssl
 import sys
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import date
 from enum import StrEnum, auto
 from pathlib import Path
 from typing import Any
@@ -21,15 +21,16 @@ from psycopg import sql
 from psycopg.rows import dict_row
 from pydantic import BaseModel, ConfigDict, Field, TypeAdapter
 
+LOCALHOST_CERTIFICATE_HEADER = "X-Amzn-Mtls-Clientcert"
 CLM_UNIQ_ID_IDENTIFIER_SYSTEM = "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType"
 CLM_UNIQ_ID_IDENTIFIER_CODE = "uc"
 SECURITY_LABEL_CPT_SYSTEM = "http://www.ama-assn.org/go/cpt"
 SECURITY_LABEL_HCPCS_SYSTEM = "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
 SECURITY_LABEL_DRG_SYSTEM = "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
-SECURITY_LABEL_HL7_ICD10_SYSTEM = "http://hl7.org/fhir/sid/icd-10-cm"
-SECURITY_LABEL_MEDICARE_ICD10_SYSTEM = "http://www.cms.gov/Medicare/Coding/ICD10"
-SECURITY_LABEL_HL7_ICD9_SYSTEM = "http://hl7.org/fhir/sid/icd-9-cm"
-SECURITY_LABEL_MEDICARE_ICD9_SYSTEM = "http://www.cms.gov/Medicare/Coding/ICD9"
+SECURITY_LABEL_HL7_ICD10_DIAGNOSIS_SYSTEM = "http://hl7.org/fhir/sid/icd-10-cm"
+SECURITY_LABEL_MEDICARE_ICD10_PROCEDURE_SYSTEM = "http://www.cms.gov/Medicare/Coding/ICD10"
+SECURITY_LABEL_HL7_ICD9_DIAGNOSIS_SYSTEM = "http://hl7.org/fhir/sid/icd-9-cm"
+SECURITY_LABEL_MEDICARE_ICD9_PROCEDURE_SYSTEM = "http://www.cms.gov/Medicare/Coding/ICD9"
 
 logging.basicConfig(level=os.environ.get("LOG_LEVEL", "INFO").upper())
 logger = logging.getLogger()
@@ -45,19 +46,15 @@ class ClaimItemSamhsaColumn(StrEnum):
     CLM_DGNS_CD = (
         auto(),
         [
-            SECURITY_LABEL_HL7_ICD10_SYSTEM,
-            SECURITY_LABEL_MEDICARE_ICD10_SYSTEM,
-            SECURITY_LABEL_MEDICARE_ICD9_SYSTEM,
-            SECURITY_LABEL_HL7_ICD9_SYSTEM,
+            SECURITY_LABEL_HL7_ICD10_DIAGNOSIS_SYSTEM,
+            SECURITY_LABEL_HL7_ICD9_DIAGNOSIS_SYSTEM,
         ],
     )
     CLM_PRCDR_CD = (
         auto(),
         [
-            SECURITY_LABEL_HL7_ICD10_SYSTEM,
-            SECURITY_LABEL_MEDICARE_ICD10_SYSTEM,
-            SECURITY_LABEL_MEDICARE_ICD9_SYSTEM,
-            SECURITY_LABEL_HL7_ICD9_SYSTEM,
+            SECURITY_LABEL_MEDICARE_ICD10_PROCEDURE_SYSTEM,
+            SECURITY_LABEL_MEDICARE_ICD9_PROCEDURE_SYSTEM,
         ],
     )
     CLM_LINE_HCPCS_CD = auto(), [SECURITY_LABEL_HCPCS_SYSTEM, SECURITY_LABEL_CPT_SYSTEM]
@@ -94,8 +91,8 @@ class SecurityLabelModel(BaseModel):
 
     system: str
     code: str
-    start_date: datetime = Field(validation_alias="startDate")
-    end_date: datetime = Field(validation_alias="endDate")
+    start_date: date = Field(validation_alias="startDate")
+    end_date: date = Field(validation_alias="endDate")
 
 
 class DatabaseDetailsModel(BaseModel):
@@ -130,11 +127,15 @@ class BeneWithSamshaClaims:
     samhsa_claim_ids: list[str]
 
 
+def normalize_code(code: str) -> str:
+    return code.replace(".", "")
+
+
 async def __query_samhsa_claim_any_ids(
     table: str,
     column: str,
     query_params: list[Any],
-    tablesample: int,
+    tablesample: float,
     limit: int,
     db_details: DatabaseDetailsModel,
     security_labels: list[SecurityLabelModel],
@@ -156,13 +157,28 @@ async def __query_samhsa_claim_any_ids(
             table,
         )
 
+        # This query looks a bit strange since it's doing a lot of JOINs, but this mimics the Claim
+        # entity in the V3 Server as it joins on many tables to construct a full Claim for an
+        # ExplanationOfBenefit response. In particular, if a "claim" row does not have one or more
+        # corresponding "claim_item", "claim_date_signature", or "beneficiary" row(s), the V3 Server
+        # will disregard the Claim as it is incomplete (likely still loading). This is why this
+        # query INNER JOINs on those tables. "claim_institutional" is optional, so a LEFT JOIN
+        # ensures we take it if it is there, but we do not exclude "claim" rows without it.
         result = await (
             await curs.execute(
                 sql.SQL("""
-                SELECT {table}.clm_uniq_id, claim.clm_thru_dt, {table}.{column} from idr.{table}
+                SELECT claim.clm_uniq_id, claim.clm_thru_dt, {table}.{column}
+                FROM idr.claim
                 TABLESAMPLE SYSTEM({tablesample})
-                JOIN idr.claim ON claim.clm_uniq_id = {table}.clm_uniq_id
-                WHERE {column} = ANY(%s)
+                LEFT JOIN idr.claim_institutional
+                    ON claim.clm_uniq_id = claim_institutional.clm_uniq_id
+                INNER JOIN idr.claim_item
+                    ON claim.clm_uniq_id = claim_item.clm_uniq_id
+                INNER JOIN idr.claim_date_signature
+                    ON claim.clm_dt_sgntr_sk = claim_date_signature.clm_dt_sgntr_sk
+                INNER JOIN idr.beneficiary
+                    ON claim.bene_sk = beneficiary.bene_sk
+                WHERE {table}.{column} = ANY(%s)
                 LIMIT {limit};
                 """).format(
                     table=sql.Identifier(table),
@@ -176,10 +192,15 @@ async def __query_samhsa_claim_any_ids(
         valid_samhsa_claim_ids = [
             int(row["clm_uniq_id"])
             for row in result
-            if (matching_label := next(x for x in security_labels if x.code == str(row[column])))
-            and (claim_datetime := datetime.combine(row["clm_thru_dt"], datetime.min.time()))
-            and claim_datetime >= matching_label.start_date
-            and claim_datetime <= matching_label.end_date
+            if (
+                matching_label := next(
+                    x
+                    for x in security_labels
+                    if normalize_code(x.code) == normalize_code(str(row[column]))
+                )
+            )
+            and row["clm_thru_dt"] >= matching_label.start_date
+            and row["clm_thru_dt"] <= matching_label.end_date
         ]
         logger.info(
             (
@@ -198,7 +219,7 @@ async def __query_samhsa_claim_any_ids(
 async def query_samhsa_claim_institutional_ids(
     security_labels: list[SecurityLabelModel],
     column: ClaimInstitutionalSamhsaColumn,
-    tablesample: int,
+    tablesample: float,
     limit: int,
     db_details: DatabaseDetailsModel,
 ) -> list[int]:
@@ -209,11 +230,11 @@ async def query_samhsa_claim_institutional_ids(
         limit=limit,
         query_params=[
             [
-                int(dotless_code)
+                int(normalized_code)
                 for label in security_labels
                 if label.system in column.systems
-                and (dotless_code := label.code.replace(".", ""))
-                and dotless_code.isdigit()
+                and (normalized_code := normalize_code(label.code))
+                and normalized_code.isdigit()
             ]
         ],
         db_details=db_details,
@@ -224,7 +245,7 @@ async def query_samhsa_claim_institutional_ids(
 async def query_samhsa_claim_item_ids(
     security_labels: list[SecurityLabelModel],
     column: ClaimItemSamhsaColumn,
-    tablesample: int,
+    tablesample: float,
     limit: int,
     db_details: DatabaseDetailsModel,
 ) -> list[int]:
@@ -234,11 +255,13 @@ async def query_samhsa_claim_item_ids(
         tablesample=tablesample,
         limit=limit,
         query_params=[
-            [
-                label.code.replace(".", "")
-                for label in security_labels
-                if label.system in column.systems
-            ]
+            list(
+                itertools.chain.from_iterable(
+                    [label.code, normalize_code(label.code)]
+                    for label in security_labels
+                    if label.system in column.systems
+                )
+            )
         ],
         db_details=db_details,
         security_labels=security_labels,
@@ -246,7 +269,7 @@ async def query_samhsa_claim_item_ids(
 
 
 async def query_samhsa_benes_with_claims(
-    tablesample: int,
+    tablesample: float,
     limit: int,
     security_labels: list[SecurityLabelModel],
     db_details: DatabaseDetailsModel,
@@ -382,7 +405,8 @@ async def verify_samhsa_filtering(
                 and samhsa_claims_unfiltered_when_authorized
                 else VerifyFilteringResult.FAIL
             )
-            logger.info(
+            logger.log(
+                logging.INFO if final_result == VerifyFilteringResult.PASS else logging.ERROR,
                 (
                     "Bene SK: %s, SAMHSA claims excluded for non-SAMHSA cert: %s, SAMHSA claims "
                     "included for SAMHSA cert: %s, final result: %s"
@@ -392,6 +416,18 @@ async def verify_samhsa_filtering(
                 samhsa_claims_unfiltered_when_authorized,
                 final_result,
             )
+
+            if final_result == VerifyFilteringResult.FAIL:
+                logger.debug(
+                    (
+                        "Bene SK: %s, SAMHSA claim IDs: %s, authorized response claim IDs: %s, "
+                        "unauthorized response claim IDs: %s"
+                    ),
+                    samhsa_bene.bene_sk,
+                    samhsa_bene.samhsa_claim_ids,
+                    all_samhsa_allowed_clm_ids,
+                    all_samhsa_filtered_clm_ids,
+                )
 
             return final_result
     except Exception:
@@ -474,7 +510,7 @@ async def verify_samhsa_filtering(
     "-t",
     "--tablesample",
     envvar="TABLESAMPLE",
-    type=int,
+    type=float,
     default=10,
     help=(
         "Tamplesample percentage from 0-100 of which claim_item and claim_institutional rows will "
@@ -522,30 +558,46 @@ async def main(
         limit=limit,
     )
 
-    full_eob_url = f"https://{hostname}/v3/fhir/ExplanationOfBenefit"
-    samhsa_ssl_ctx = ssl.create_default_context(purpose=ssl.Purpose.SERVER_AUTH)
-    samhsa_ssl_ctx.load_cert_chain(
-        certfile=samhsa_cert.absolute(),
-        keyfile=samhsa_cert_key.absolute(),
-    )
-    no_samhsa_ssl_ctx = ssl.create_default_context(purpose=ssl.Purpose.SERVER_AUTH)
-    no_samhsa_ssl_ctx.load_cert_chain(
-        certfile=no_samhsa_cert.absolute(),
-        keyfile=no_samhsa_cert_key.absolute(),
-    )
+    # We check for localhost or 127.0.0.1 (the most common local addresses) to determine if this is
+    # a local test. If it is, we don't supply real certificate values or worry about loading
+    # certificates at all. We just provide the dummy certificates directly via the header. We use
+    # any() instead of a single "in" expression to allow for hostnames like "localhost:8080" and
+    # so-on
+    is_local = any(x in hostname for x in ["localhost", "127.0.0.1"])
 
-    if host_cert:
-        samhsa_ssl_ctx.load_verify_locations(cafile=host_cert.absolute())
-        no_samhsa_ssl_ctx.load_verify_locations(cafile=host_cert.absolute())
-    else:
-        samhsa_ssl_ctx.check_hostname = False
-        samhsa_ssl_ctx.verify_mode = ssl.CERT_NONE
-        no_samhsa_ssl_ctx.check_hostname = False
-        no_samhsa_ssl_ctx.verify_mode = ssl.CERT_NONE
+    base_url = f"https://{hostname}" if not is_local else f"http://{hostname}"
+    full_eob_url = f"{base_url.lstrip('/')}/v3/fhir/ExplanationOfBenefit"
+
+    samhsa_ssl_ctx = ssl.create_default_context(purpose=ssl.Purpose.SERVER_AUTH)
+    no_samhsa_ssl_ctx = ssl.create_default_context(purpose=ssl.Purpose.SERVER_AUTH)
+    if not is_local:
+        samhsa_ssl_ctx.load_cert_chain(
+            certfile=samhsa_cert.absolute(),
+            keyfile=samhsa_cert_key.absolute(),
+        )
+        no_samhsa_ssl_ctx.load_cert_chain(
+            certfile=no_samhsa_cert.absolute(),
+            keyfile=no_samhsa_cert_key.absolute(),
+        )
+
+        if host_cert:
+            samhsa_ssl_ctx.load_verify_locations(cafile=host_cert.absolute())
+            no_samhsa_ssl_ctx.load_verify_locations(cafile=host_cert.absolute())
+        else:
+            samhsa_ssl_ctx.check_hostname = False
+            samhsa_ssl_ctx.verify_mode = ssl.CERT_NONE
+            no_samhsa_ssl_ctx.check_hostname = False
+            no_samhsa_ssl_ctx.verify_mode = ssl.CERT_NONE
 
     async with (
-        aiohttp.ClientSession(connector=TCPConnector(ssl=samhsa_ssl_ctx)) as samhsa_session,
-        aiohttp.ClientSession(connector=TCPConnector(ssl=no_samhsa_ssl_ctx)) as no_samhsa_session,
+        aiohttp.ClientSession(
+            connector=TCPConnector(ssl=samhsa_ssl_ctx) if not is_local else None,
+            headers={LOCALHOST_CERTIFICATE_HEADER: "samhsa_allowed"} if is_local else None,
+        ) as samhsa_session,
+        aiohttp.ClientSession(
+            connector=TCPConnector(ssl=no_samhsa_ssl_ctx) if not is_local else None,
+            headers={LOCALHOST_CERTIFICATE_HEADER: "samhsa_not_allowed"} if is_local else None,
+        ) as no_samhsa_session,
     ):
         results = await asyncio.gather(
             *(

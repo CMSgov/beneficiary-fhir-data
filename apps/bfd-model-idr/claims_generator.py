@@ -1,5 +1,6 @@
 import argparse
 import copy
+import os
 import random
 import shutil
 import string
@@ -9,8 +10,37 @@ from datetime import date, datetime, timedelta
 from pathlib import Path
 
 import pandas as pd
+import yaml
 from faker import Faker
+from pydantic import BaseModel, ConfigDict, Field, TypeAdapter
+
 from generator_util import GeneratorUtil
+
+
+class SecurityLabelModel(BaseModel):
+    model_config = ConfigDict(coerce_numbers_to_str=True)
+
+    system: str
+    code: str
+    start_date: datetime = Field(validation_alias="startDate")
+    end_date: datetime = Field(validation_alias="endDate")
+
+    @property
+    def normalized_code(self) -> str:
+        return self.code.replace(".", "")
+
+
+SECURITY_LABELS_ICD10_PROCEDURE_SYSTEMS = ["http://www.cms.gov/Medicare/Coding/ICD10"]
+SECURITY_LABELS_ICD10_DIAGNOSIS_SYSTEMS = ["http://hl7.org/fhir/sid/icd-10-cm"]
+SECURITY_LABELS_HCPCS_SYSTEMS = ["https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"]
+SECURITY_LABELS_CPT_SYSTEMS = ["http://www.ama-assn.org/go/cpt"]
+SECURITY_LABELS_DRG_SYSTEMS = [
+    "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
+]
+SECURITY_LABELS_YML = Path(os.path.realpath(__file__)).parent.joinpath("security_labels.yml")
+SECURITY_LABELS = TypeAdapter(list[SecurityLabelModel]).validate_python(
+    yaml.safe_load(SECURITY_LABELS_YML.read_text()), by_alias=True
+)
 
 generator = GeneratorUtil()
 faker = Faker()
@@ -180,7 +210,12 @@ avail_oscar_codes_institutional = [
 
 code_systems = {}
 
-available_icd_10_codes = [
+available_samhsa_icd_10_dgns_codes = [
+    x.normalized_code  # IDR has codes without the dot
+    for x in SECURITY_LABELS
+    if x.system in SECURITY_LABELS_ICD10_DIAGNOSIS_SYSTEMS
+]
+available_non_samhsa_icd_10_dgns_codes = [
     "W6162",
     "V972",
     "V970",
@@ -200,7 +235,12 @@ available_icd_10_codes = [
     "W5813XD",
     "W303XXA",
 ]
-available_procedure_codes_icd10_pcs = [
+available_samhsa_icd_10_prcdr_codes = [
+    x.normalized_code
+    for x in SECURITY_LABELS
+    if x.system in SECURITY_LABELS_ICD10_PROCEDURE_SYSTEMS
+]
+available_non_samhsa_icd_10_prcdr_codes = [
     "02HV33Z",
     "5A1D70Z",
     "30233N1",
@@ -211,7 +251,12 @@ available_procedure_codes_icd10_pcs = [
     "5A1955Z",
     "5A1945Z",
 ]
-proc_codes_cpt_hcpcs = ["99213", "99453", "J2270"]
+proc_codes_samhsa_cpt_hcpcs = [
+    x.normalized_code
+    for x in SECURITY_LABELS
+    if x.system in SECURITY_LABELS_HCPCS_SYSTEMS or x.system in SECURITY_LABELS_CPT_SYSTEMS
+]
+proc_codes_non_samhsa_cpt_hcpcs = ["99213", "99453", "J2270"]
 hcpcs_mods = ["1P", "22", "23", "28", "32", "U6", "US", "PC", "PD"]
 available_ndc = [
     "00338004904",
@@ -223,6 +268,44 @@ available_ndc = [
 clm_poa_ind_choices = ["N", "1", "U", "X", "W", "0", "~", "Z", "Y", ""]
 avail_pbp_nums = ["001", "002", "003", "004", "005", "006", "007", "008", "009", "010"]
 avail_clm_rlt_cond_sk = ["193064687", "117814", "193065597", "117853", "193074307"]
+
+non_samhsa_dgns_drg_cds = list(range(43))
+samhsa_dgns_drg_cds = [
+    int(x.normalized_code) for x in SECURITY_LABELS if x.system in SECURITY_LABELS_DRG_SYSTEMS
+]
+
+
+# Choose SAMHSA codes 1% of the time
+def get_icd_10_dgns_codes() -> list[str]:
+    return random.choices(
+        population=[available_samhsa_icd_10_dgns_codes, available_non_samhsa_icd_10_dgns_codes],
+        weights=(1, 99),
+        k=1,
+    )[0]
+
+
+def get_icd_10_prcdr_codes() -> list[str]:
+    return random.choices(
+        population=[available_samhsa_icd_10_prcdr_codes, available_non_samhsa_icd_10_prcdr_codes],
+        weights=(1, 99),
+        k=1,
+    )[0]
+
+
+def get_hcpcs_proc_codes() -> list[str]:
+    return random.choices(
+        population=[proc_codes_samhsa_cpt_hcpcs, proc_codes_non_samhsa_cpt_hcpcs],
+        weights=(1, 99),
+        k=1,
+    )[0]
+
+
+def get_drg_dgns_codes() -> list[int]:
+    return random.choices(
+        population=[samhsa_dgns_drg_cds, non_samhsa_dgns_drg_cds],
+        weights=(1, 99),
+        k=1,
+    )[0]
 
 
 def run_command(cmd, cwd=None):
@@ -263,7 +346,7 @@ def add_diagnoses(clm_type_cd=-1):
     if clm_type_cd in (10, 20, 30, 50, 60, 61, 62, 63, 64):
         # inpatient uses concepts of principal, admitting, other, external
         principal_diagnosis = {
-            "CLM_DGNS_CD": random.choice(available_icd_10_codes),
+            "CLM_DGNS_CD": random.choice(get_icd_10_dgns_codes()),
             "CLM_VAL_SQNC_NUM": "1",
             "CLM_DGNS_PRCDR_ICD_IND": "0",
             "CLM_PROD_TYPE_CD": "P",
@@ -277,14 +360,14 @@ def add_diagnoses(clm_type_cd=-1):
             "CLM_POA_IND": random.choice(clm_poa_ind_choices),
         }
         admitting_diagnosis = {
-            "CLM_DGNS_CD": random.choice(available_icd_10_codes),
+            "CLM_DGNS_CD": random.choice(get_icd_10_dgns_codes()),
             "CLM_VAL_SQNC_NUM": "1",
             "CLM_DGNS_PRCDR_ICD_IND": "0",
             "CLM_PROD_TYPE_CD": "A",
             "CLM_POA_IND": "~",
         }
         external_1 = {
-            "CLM_DGNS_CD": random.choice(available_icd_10_codes),
+            "CLM_DGNS_CD": random.choice(get_icd_10_dgns_codes()),
             "CLM_VAL_SQNC_NUM": "1",
             "CLM_DGNS_PRCDR_ICD_IND": "0",
             "CLM_PROD_TYPE_CD": "E",
@@ -306,7 +389,7 @@ def add_diagnoses(clm_type_cd=-1):
     elif clm_type_cd == 40:
         # outpatient uses principal, other, external cause of injury, patient reason for visit
         principal_diagnosis = {
-            "CLM_DGNS_CD": random.choice(available_icd_10_codes),
+            "CLM_DGNS_CD": random.choice(get_icd_10_dgns_codes()),
             "CLM_VAL_SQNC_NUM": "1",
             "CLM_DGNS_PRCDR_ICD_IND": "0",
             "CLM_PROD_TYPE_CD": "P",
@@ -333,7 +416,7 @@ def add_diagnoses(clm_type_cd=-1):
     elif clm_type_cd in (71, 72, 81, 82):
         # professional claims use principal diagnosis and other diagnoses
         principal_diagnosis = {
-            "CLM_DGNS_CD": random.choice(available_icd_10_codes),
+            "CLM_DGNS_CD": random.choice(get_icd_10_dgns_codes()),
             "CLM_VAL_SQNC_NUM": "1",
             "CLM_DGNS_PRCDR_ICD_IND": "0",
             "CLM_PROD_TYPE_CD": "P",
@@ -353,7 +436,7 @@ def add_diagnoses(clm_type_cd=-1):
     if num_diagnoses > 1 and clm_type_cd in (10, 20, 30, 50, 60, 61, 62, 63, 64):
         for diagnosis_sqnc in range(2, num_diagnoses):
             diagnosis = {
-                "CLM_DGNS_CD": random.choice(available_icd_10_codes),
+                "CLM_DGNS_CD": random.choice(get_icd_10_dgns_codes()),
                 "CLM_VAL_SQNC_NUM": diagnosis_sqnc,
                 "CLM_DGNS_PRCDR_ICD_IND": "0",
                 "CLM_PROD_TYPE_CD": "D",
@@ -363,7 +446,7 @@ def add_diagnoses(clm_type_cd=-1):
     elif clm_type_cd == 40:
         for diagnosis_sqnc in range(2, num_diagnoses):
             diagnosis = {
-                "CLM_DGNS_CD": random.choice(available_icd_10_codes),
+                "CLM_DGNS_CD": random.choice(get_icd_10_dgns_codes()),
                 "CLM_VAL_SQNC_NUM": diagnosis_sqnc,
                 "CLM_DGNS_PRCDR_ICD_IND": "0",
                 "CLM_PROD_TYPE_CD": "D",
@@ -372,7 +455,7 @@ def add_diagnoses(clm_type_cd=-1):
     elif clm_type_cd in (71, 72, 81, 82):
         for diagnosis_sqnc in range(2, num_diagnoses):
             diagnosis = {
-                "CLM_DGNS_CD": random.choice(available_icd_10_codes),
+                "CLM_DGNS_CD": random.choice(get_icd_10_dgns_codes()),
                 "CLM_VAL_SQNC_NUM": diagnosis_sqnc,
                 "CLM_DGNS_PRCDR_ICD_IND": "0",
                 "CLM_PROD_TYPE_CD": "D",
@@ -386,7 +469,7 @@ def add_diagnoses(clm_type_cd=-1):
 def gen_procedure_icd10pcs():
     procedure = {}
     procedure["CLM_PROD_TYPE_CD"] = "S"
-    procedure["CLM_PRCDR_CD"] = random.choice(available_procedure_codes_icd10_pcs)
+    procedure["CLM_PRCDR_CD"] = random.choice(get_icd_10_prcdr_codes())
     procedure["CLM_DGNS_PRCDR_ICD_IND"] = "0"
     return procedure
 
@@ -600,9 +683,11 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
     # generate claim header financial elements here
     claim["CLM"]["CLM_SBMT_CHRG_AMT"] = round(random.uniform(1, 1000000), 2)
     if clm_type_cd == 71 or clm_type_cd == 72:
-        claim["CLM"]["CLM_RFRG_PRVDR_PIN_NUM"] = random.choice(
-            [9181272397, 9181272391, 918127239123]
-        )
+        claim["CLM"]["CLM_RFRG_PRVDR_PIN_NUM"] = random.choice([
+            9181272397,
+            9181272391,
+            918127239123,
+        ])
     if clm_type_cd > 70 and clm_type_cd <= 82:
         claim["CLM"]["CLM_ALOWD_CHRG_AMT"] = round(random.uniform(1, 1000000), 2)
         claim["CLM"]["CLM_BENE_PD_AMT"] = round(random.uniform(1, 1000000), 2)
@@ -732,7 +817,7 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
         institutional_parts["CLM_ADMSN_SRC_CD"] = random.choice(
             generator.code_systems["CLM_ADMSN_SRC_CD"]
         )
-        institutional_parts["DGNS_DRG_CD"] = random.randint(0, 42)
+        institutional_parts["DGNS_DRG_CD"] = random.choice(get_drg_dgns_codes())
         institutional_parts["DGNS_DRG_OUTLIER_CD"] = random.choice(
             generator.code_systems["DGNS_DRG_OUTLIER_CD"]
         )
@@ -845,9 +930,10 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
 
             if random.randint(0, 10) == 6:
                 claim_line_prfnl["CLM_LINE_HCT_HGB_TYPE_CD"] = random.choice(["R1", "R2"])
-                claim_line_prfnl["CLM_LINE_CARR_CLNCL_LAB_NUM"] = random.choice(
-                    ["11D1111111", "22D2222222"]
-                )
+                claim_line_prfnl["CLM_LINE_CARR_CLNCL_LAB_NUM"] = random.choice([
+                    "11D1111111",
+                    "22D2222222",
+                ])
 
             # these don't have much variance in our synthetic data, but they are not strictly
             # the same in actual data!
@@ -880,7 +966,7 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
 
         add_meta_timestamps(claim_line_prfnl, claim["CLM"], max_date)
 
-        claim_line["CLM_LINE_HCPCS_CD"] = random.choice(proc_codes_cpt_hcpcs)
+        claim_line["CLM_LINE_HCPCS_CD"] = random.choice(get_hcpcs_proc_codes())
         num_mods = random.randint(0, 5)
         if num_mods:
             claim_line["HCPCS_1_MDFR_CD"] = random.choice(hcpcs_mods)
@@ -937,9 +1023,17 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
         claim_line_inst["CLM_REV_CNTR_STUS_CD"] = random.choice(
             generator.code_systems["CLM_REV_CNTR_STUS_CD"]
         )
-        claim_line_inst["CLM_ANSI_SGNTR_SK"] = random.choice(
-            ["8585", "1", "4365", "1508", "5555", "9204", "6857", "5816", "11978"]
-        )
+        claim_line_inst["CLM_ANSI_SGNTR_SK"] = random.choice([
+            "8585",
+            "1",
+            "4365",
+            "1508",
+            "5555",
+            "9204",
+            "6857",
+            "5816",
+            "11978",
+        ])
         add_meta_timestamps(claim_line_inst, claim["CLM"], max_date)
 
         claim_line["CLM_UNIQ_ID"] = claim["CLM"]["CLM_UNIQ_ID"]
@@ -1006,9 +1100,18 @@ def gen_pac_version_of_claim(claim, max_date):
     pac_claim["CLM_FISS"]["GEO_BENE_SK"] = pac_claim["CLM"]["GEO_BENE_SK"]
     pac_claim["CLM_FISS"]["CLM_NUM_SK"] = pac_claim["CLM"]["CLM_NUM_SK"]
     pac_claim["CLM_FISS"]["CLM_TYPE_CD"] = pac_claim["CLM"]["CLM_TYPE_CD"]
-    pac_claim["CLM_FISS"]["CLM_CRNT_STUS_CD"] = random.choice(
-        ["A", "F", "I", "S", "M", "P", "R", "D", "T", "U"]
-    )
+    pac_claim["CLM_FISS"]["CLM_CRNT_STUS_CD"] = random.choice([
+        "A",
+        "F",
+        "I",
+        "S",
+        "M",
+        "P",
+        "R",
+        "D",
+        "T",
+        "U",
+    ])
     add_meta_timestamps(pac_claim["CLM_FISS"], claim["CLM"], max_date)
 
     pac_claim["CLM_LCTN_HSTRY"] = {}
@@ -1017,9 +1120,22 @@ def gen_pac_version_of_claim(claim, max_date):
     pac_claim["CLM_LCTN_HSTRY"]["CLM_NUM_SK"] = pac_claim["CLM"]["CLM_NUM_SK"]
     pac_claim["CLM_LCTN_HSTRY"]["CLM_TYPE_CD"] = pac_claim["CLM"]["CLM_TYPE_CD"]
     pac_claim["CLM_LCTN_HSTRY"]["CLM_LCTN_CD_SQNC_NUM"] = "1"
-    pac_claim["CLM_LCTN_HSTRY"]["CLM_AUDT_TRL_STUS_CD"] = random.choice(
-        ["A", "F", "I", "S", "M", "P", "R", "D", "T", "U", "1", "2", "4", "8"]
-    )
+    pac_claim["CLM_LCTN_HSTRY"]["CLM_AUDT_TRL_STUS_CD"] = random.choice([
+        "A",
+        "F",
+        "I",
+        "S",
+        "M",
+        "P",
+        "R",
+        "D",
+        "T",
+        "U",
+        "1",
+        "2",
+        "4",
+        "8",
+    ])
     add_meta_timestamps(pac_claim["CLM_LCTN_HSTRY"], claim["CLM"], max_date)
 
     for i in range(len(pac_claim["CLM_LINE"])):
