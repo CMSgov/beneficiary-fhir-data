@@ -152,18 +152,6 @@ enum AdjudicationChargeType {
         .setAmount(USD.toFhir(value));
   }
 
-  ExplanationOfBenefit.AdjudicationComponent toFhirAdjudicationRx(double value) {
-    return new ExplanationOfBenefit.AdjudicationComponent()
-        .setCategory(
-            new CodeableConcept()
-                .addCoding(
-                    new Coding()
-                        .setSystem(SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION)
-                        .setCode(coding1Code)
-                        .setDisplay(coding1Display)))
-        .setAmount(USD.toFhir(value));
-  }
-
   ExplanationOfBenefit.TotalComponent toFhirTotal(double value) {
     return new ExplanationOfBenefit.TotalComponent()
         .setCategory(

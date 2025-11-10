@@ -1249,8 +1249,8 @@ def main():
             CLM_DCMTN.append(claim["CLM_DCMTN"])
             if claim["CLM"]["CLM_TYPE_CD"] in (1, 2, 3, 4):
                 CLM_LINE_RX.extend(claim["CLM_LINE_RX"])
-            # Only add professional data for non-Part D claims
-            if claim["CLM"]["CLM_TYPE_CD"] not in (1, 2, 3, 4):
+            else:
+                # Only add professional data for non-Part D claims
                 CLM_PRFNL.append(claim["CLM_PRFNL"])
                 CLM_LINE_PRFNL.extend(claim["CLM_LINE_PRFNL"])
             # obviously we don't have pac claims for PD claims

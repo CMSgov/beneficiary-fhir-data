@@ -4,7 +4,6 @@ import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -46,7 +45,7 @@ class AdjudicationChargeRx {
   @Column(name = "clm_prcng_excptn_cd")
   private Optional<ClaimPricingReasonCode> pricingCode;
 
-  List<ExplanationOfBenefit.AdjudicationComponent> toFhir() {
+  ArrayList<ExplanationOfBenefit.AdjudicationComponent> toFhir() {
     ArrayList<ExplanationOfBenefit.AdjudicationComponent> adjudicationComponent =
         new ArrayList<>(
             List.of(
@@ -69,7 +68,7 @@ class AdjudicationChargeRx {
                     grossCostAboveThresholdAmount)));
     toAdjudicationComponent().ifPresent(adjudicationComponent::add);
 
-    return Collections.unmodifiableList(adjudicationComponent);
+    return adjudicationComponent;
   }
 
   private Optional<ExplanationOfBenefit.AdjudicationComponent> toAdjudicationComponent() {
