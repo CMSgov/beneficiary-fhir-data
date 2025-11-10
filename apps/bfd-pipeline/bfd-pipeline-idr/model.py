@@ -16,6 +16,8 @@ from constants import (
 )
 
 type DbType = str | float | int | bool | date | datetime
+type FetchQueryPartition = list[str | int]
+type FetchQueryPartitions = list[FetchQueryPartition] | None
 
 
 def transform_null_date_to_max(value: date | None) -> date:
@@ -127,7 +129,7 @@ class IdrBaseModel(BaseModel, ABC):
 
     @staticmethod
     @abstractmethod
-    def fetch_query_partitions() -> list[list[str | int]] | None:
+    def fetch_query_partitions() -> FetchQueryPartitions:
         """Partitions fetch queries of this model to allow for parallel fetching of data via ray.
 
         None is returned for models that do not do any such partitioning.
@@ -359,7 +361,7 @@ class IdrBeneficiary(IdrBaseModel):
         """
 
     @staticmethod
-    def fetch_query_partitions() -> list[list[str | int]] | None:
+    def fetch_query_partitions() -> FetchQueryPartitions:
         return None
 
 
@@ -389,7 +391,7 @@ class IdrBeneficiaryMbiId(IdrBaseModel):
         """
 
     @staticmethod
-    def fetch_query_partitions() -> list[list[str | int]] | None:
+    def fetch_query_partitions() -> FetchQueryPartitions:
         return None
 
 
@@ -429,7 +431,7 @@ class IdrBeneficiaryOvershareMbi(IdrBaseModel):
         """
 
     @staticmethod
-    def fetch_query_partitions() -> list[list[str | int]] | None:
+    def fetch_query_partitions() -> FetchQueryPartitions:
         return None
 
 
@@ -466,7 +468,7 @@ class IdrBeneficiaryThirdParty(IdrBaseModel):
         """
 
     @staticmethod
-    def fetch_query_partitions() -> list[list[str | int]] | None:
+    def fetch_query_partitions() -> FetchQueryPartitions:
         return None
 
 
@@ -502,7 +504,7 @@ class IdrBeneficiaryStatus(IdrBaseModel):
         """
 
     @staticmethod
-    def fetch_query_partitions() -> list[list[str | int]] | None:
+    def fetch_query_partitions() -> FetchQueryPartitions:
         return None
 
 
@@ -540,7 +542,7 @@ class IdrBeneficiaryEntitlement(IdrBaseModel):
         """
 
     @staticmethod
-    def fetch_query_partitions() -> list[list[str | int]] | None:
+    def fetch_query_partitions() -> FetchQueryPartitions:
         return None
 
 
@@ -576,7 +578,7 @@ class IdrBeneficiaryEntitlementReason(IdrBaseModel):
         """
 
     @staticmethod
-    def fetch_query_partitions() -> list[list[str | int]] | None:
+    def fetch_query_partitions() -> FetchQueryPartitions:
         return None
 
 
@@ -614,7 +616,7 @@ class IdrBeneficiaryDualEligibility(IdrBaseModel):
         """
 
     @staticmethod
-    def fetch_query_partitions() -> list[list[str | int]] | None:
+    def fetch_query_partitions() -> FetchQueryPartitions:
         return None
 
 
@@ -656,7 +658,7 @@ class IdrElectionPeriodUsage(IdrBaseModel):
             """
 
     @staticmethod
-    def fetch_query_partitions() -> list[list[str | int]] | None:
+    def fetch_query_partitions() -> FetchQueryPartitions:
         return None
 
 
@@ -679,7 +681,7 @@ class IdrContractPbpNumber(IdrBaseModel):
         """
 
     @staticmethod
-    def fetch_query_partitions() -> list[list[str | int]] | None:
+    def fetch_query_partitions() -> FetchQueryPartitions:
         return None
 
 
@@ -847,7 +849,7 @@ class IdrClaim(IdrBaseModel):
         """
 
     @staticmethod
-    def fetch_query_partitions() -> list[list[str | int]] | None:
+    def fetch_query_partitions() -> FetchQueryPartitions:
         return None
 
 
@@ -900,7 +902,7 @@ class IdrClaimDateSignature(IdrBaseModel):
         """
 
     @staticmethod
-    def fetch_query_partitions() -> list[list[str | int]] | None:
+    def fetch_query_partitions() -> FetchQueryPartitions:
         return None
 
 
@@ -939,7 +941,7 @@ class IdrClaimFiss(IdrBaseModel):
         """
 
     @staticmethod
-    def fetch_query_partitions() -> list[list[str | int]] | None:
+    def fetch_query_partitions() -> FetchQueryPartitions:
         return None
 
 
@@ -1010,7 +1012,7 @@ class IdrClaimInstitutional(IdrBaseModel):
         """
 
     @staticmethod
-    def fetch_query_partitions() -> list[list[str | int]] | None:
+    def fetch_query_partitions() -> FetchQueryPartitions:
         return None
 
 
@@ -1296,7 +1298,7 @@ class IdrClaimItem(IdrBaseModel):
         """
 
     @staticmethod
-    def fetch_query_partitions() -> list[list[str | int]] | None:
+    def fetch_query_partitions() -> FetchQueryPartitions:
         # Partition each fetch query by a number of claim type codes (partition/indexes in the IDR)
         # to speed-up query times and reduce the possibility of timeouts
         return list(
@@ -1363,7 +1365,7 @@ class IdrClaimLineInstitutional(IdrBaseModel):
         """
 
     @staticmethod
-    def fetch_query_partitions() -> list[list[str | int]] | None:
+    def fetch_query_partitions() -> FetchQueryPartitions:
         return None
 
 
@@ -1404,7 +1406,7 @@ class IdrClaimAnsiSignature(IdrBaseModel):
         """
 
     @staticmethod
-    def fetch_query_partitions() -> list[list[str | int]] | None:
+    def fetch_query_partitions() -> FetchQueryPartitions:
         return None
 
 
@@ -1504,7 +1506,7 @@ class IdrClaimProfessional(IdrBaseModel):
         """
 
     @staticmethod
-    def fetch_query_partitions() -> list[list[str | int]] | None:
+    def fetch_query_partitions() -> FetchQueryPartitions:
         return None
 
 
@@ -1561,7 +1563,7 @@ class IdrClaimLineProfessional(IdrBaseModel):
         """
 
     @staticmethod
-    def fetch_query_partitions() -> list[list[str | int]] | None:
+    def fetch_query_partitions() -> FetchQueryPartitions:
         return None
 
 
@@ -1589,7 +1591,7 @@ class LoadProgress(IdrBaseModel):
         """
 
     @staticmethod
-    def fetch_query_partitions() -> list[list[str | int]] | None:
+    def fetch_query_partitions() -> FetchQueryPartitions:
         return None
 
     def is_historical(self) -> bool:
@@ -1666,5 +1668,5 @@ class IdrClaimLineRx(IdrBaseModel):
         """
 
     @staticmethod
-    def fetch_query_partitions() -> list[list[str | int]] | None:
+    def fetch_query_partitions() -> FetchQueryPartitions:
         return None
