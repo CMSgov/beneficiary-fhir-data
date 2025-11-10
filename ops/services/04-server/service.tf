@@ -274,7 +274,7 @@ resource "aws_ecs_task_definition" "server" {
               "-XX:+AlwaysPreTouch",
               "-Xms${floor(local.server_memory * 0.70)}m",
               "-Xmx${floor(local.server_memory * 0.70)}m",
-              # TODO: TEMPORARY hack to ensure rollback to JDK 21 versions of BFD Server is possible
+              # TODO: TEMPORARY hack to ensure rollback to JDK 21 versions of BFD Server is possible; remove ASAP
               regex("^2\\.(\\d+)\\..*", local.server_version)[0] > 222 ? "-XX:+UseCompactObjectHeaders" : "",
               "-XX:+UseZGC",
               "-Dnetworkaddress.cache.ttl=5",
