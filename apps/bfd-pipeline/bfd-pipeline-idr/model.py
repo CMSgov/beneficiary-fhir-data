@@ -1280,6 +1280,7 @@ class IdrClaimLineInstitutional(IdrBaseModel):
             {{ORDER_BY}}
         """
 
+
 class IdrClaimRelatedCondition(IdrBaseModel):
     clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, ALIAS: ALIAS_CLM}]
     clm_rlt_cond_sgntr_sqnc_num: Annotated[int, {PRIMARY_KEY: True, ALIAS: ALIAS_RLT_COND}]
