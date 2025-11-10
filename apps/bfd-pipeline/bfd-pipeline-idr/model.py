@@ -1,3 +1,4 @@
+import itertools
 import os
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
@@ -6,7 +7,13 @@ from typing import Annotated, TypeVar
 
 from pydantic import BaseModel, BeforeValidator
 
-from constants import CLAIM_TYPE_CODES, DEFAULT_MAX_DATE, DEFAULT_MIN_DATE, PART_D_CLAIM_TYPE_CODES
+from constants import (
+    CLAIM_TYPE_CODES,
+    DEFAULT_MAX_DATE,
+    DEFAULT_MIN_DATE,
+    IDR_CLAIM_ITEM_FETCH_PART_BATCHED_SIZE,
+    PART_D_CLAIM_TYPE_CODES,
+)
 
 type DbType = str | float | int | bool | date | datetime
 
@@ -119,6 +126,15 @@ class IdrBaseModel(BaseModel, ABC):
         return cls._current_fetch_query(start_time)
 
     @staticmethod
+    @abstractmethod
+    def fetch_query_partitions() -> list[list[str | int]] | None:
+        """Partitions fetch queries of this model to allow for parallel fetching of data via ray.
+
+        None is returned for models that do not do any such partitioning.
+        """
+        return None
+
+    @staticmethod
     def computed_keys() -> list[str]:
         return []
 
@@ -224,7 +240,7 @@ def _deceased_bene_filter(alias: str) -> str:
     return f"""
             SELECT bene_sk
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry {alias}
-            WHERE {alias}.bene_vrfy_death_day_sw = 'Y' 
+            WHERE {alias}.bene_vrfy_death_day_sw = 'Y'
             AND {alias}.bene_death_dt < CURRENT_DATE - INTERVAL '{DEATH_DATE_CUTOFF_YEARS} years'
     """
 
@@ -301,26 +317,26 @@ class IdrBeneficiary(IdrBaseModel):
         return f"""
             WITH ordered_xref AS (
                 SELECT bene_sk,
-                    bene_xref_sk, 
-                    bene_hicn_num, 
-                    src_rec_crte_ts, 
+                    bene_xref_sk,
+                    bene_hicn_num,
+                    src_rec_crte_ts,
                     ROW_NUMBER() OVER (
-                        PARTITION BY bene_sk, bene_xref_sk 
+                        PARTITION BY bene_sk, bene_xref_sk
                         ORDER BY src_rec_updt_ts DESC
                     ) AS row_order
                 FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_xref
-            ), 
+            ),
             current_xref AS (
-                SELECT 
-                    ox.bene_sk, 
-                    ox.bene_xref_sk, 
-                    bx.bene_kill_cred_cd, 
+                SELECT
+                    ox.bene_sk,
+                    ox.bene_xref_sk,
+                    bx.bene_kill_cred_cd,
                     bx.src_rec_updt_ts,
                     bx.idr_insrt_ts,
                     bx.idr_updt_ts
                 FROM ordered_xref ox
                 JOIN cms_vdm_view_mdcr_prd.v2_mdcr_bene_xref bx
-                    ON bx.bene_sk = ox.bene_sk 
+                    ON bx.bene_sk = ox.bene_sk
                     AND bx.bene_xref_sk = ox.bene_xref_sk
                     AND bx.bene_hicn_num = ox.bene_hicn_num
                     AND bx.src_rec_crte_ts = ox.src_rec_crte_ts
@@ -333,14 +349,18 @@ class IdrBeneficiary(IdrBaseModel):
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry {hstry}
             -- NOTE: the join condition is intentionally inverted here
             -- In the xref table, the bene_sk and bene_xref_sk fields are mirrored
-            LEFT JOIN current_xref {xref} 
-                ON {xref}.bene_sk = {hstry}.bene_xref_sk 
+            LEFT JOIN current_xref {xref}
+                ON {xref}.bene_sk = {hstry}.bene_xref_sk
                 AND {xref}.bene_xref_sk = {hstry}.bene_sk
             {{WHERE_CLAUSE}}
             AND {hstry}.bene_mbi_id IS NOT NULL
             AND NOT EXISTS (SELECT 1 FROM deceased_benes db WHERE db.bene_sk = {hstry}.bene_sk)
             {{ORDER_BY}}
         """
+
+    @staticmethod
+    def fetch_query_partitions() -> list[list[str | int]] | None:
+        return None
 
 
 class IdrBeneficiaryMbiId(IdrBaseModel):
@@ -367,6 +387,10 @@ class IdrBeneficiaryMbiId(IdrBaseModel):
             {WHERE_CLAUSE}
             {ORDER_BY}
         """
+
+    @staticmethod
+    def fetch_query_partitions() -> list[list[str | int]] | None:
+        return None
 
 
 class IdrBeneficiaryOvershareMbi(IdrBaseModel):
@@ -404,6 +428,10 @@ class IdrBeneficiaryOvershareMbi(IdrBaseModel):
             HAVING COUNT(DISTINCT hstry.bene_sk) > 1
         """
 
+    @staticmethod
+    def fetch_query_partitions() -> list[list[str | int]] | None:
+        return None
+
 
 class IdrBeneficiaryThirdParty(IdrBaseModel):
     bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
@@ -437,6 +465,10 @@ class IdrBeneficiaryThirdParty(IdrBaseModel):
             {{ORDER_BY}}
         """
 
+    @staticmethod
+    def fetch_query_partitions() -> list[list[str | int]] | None:
+        return None
+
 
 class IdrBeneficiaryStatus(IdrBaseModel):
     bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
@@ -468,6 +500,10 @@ class IdrBeneficiaryStatus(IdrBaseModel):
             )
             {{ORDER_BY}}
         """
+
+    @staticmethod
+    def fetch_query_partitions() -> list[list[str | int]] | None:
+        return None
 
 
 class IdrBeneficiaryEntitlement(IdrBaseModel):
@@ -503,6 +539,10 @@ class IdrBeneficiaryEntitlement(IdrBaseModel):
             {{ORDER_BY}}
         """
 
+    @staticmethod
+    def fetch_query_partitions() -> list[list[str | int]] | None:
+        return None
+
 
 class IdrBeneficiaryEntitlementReason(IdrBaseModel):
     bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
@@ -534,6 +574,10 @@ class IdrBeneficiaryEntitlementReason(IdrBaseModel):
             )
             {{ORDER_BY}}
         """
+
+    @staticmethod
+    def fetch_query_partitions() -> list[list[str | int]] | None:
+        return None
 
 
 class IdrBeneficiaryDualEligibility(IdrBaseModel):
@@ -569,6 +613,10 @@ class IdrBeneficiaryDualEligibility(IdrBaseModel):
             {{ORDER_BY}}
         """
 
+    @staticmethod
+    def fetch_query_partitions() -> list[list[str | int]] | None:
+        return None
+
 
 class IdrElectionPeriodUsage(IdrBaseModel):
     bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
@@ -594,7 +642,7 @@ class IdrElectionPeriodUsage(IdrBaseModel):
         return f"""
             WITH dupes as (
                 SELECT {{COLUMNS}}, ROW_NUMBER() OVER (
-                    PARTITION BY bene_sk, cntrct_pbp_sk, bene_enrlmt_efctv_dt 
+                    PARTITION BY bene_sk, cntrct_pbp_sk, bene_enrlmt_efctv_dt
                 {{ORDER_BY}} DESC) as row_order
                 FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_elctn_prd_usg usg
                 {{WHERE_CLAUSE}}
@@ -606,6 +654,10 @@ class IdrElectionPeriodUsage(IdrBaseModel):
             )
             SELECT {{COLUMNS}} FROM dupes WHERE row_order = 1
             """
+
+    @staticmethod
+    def fetch_query_partitions() -> list[list[str | int]] | None:
+        return None
 
 
 class IdrContractPbpNumber(IdrBaseModel):
@@ -625,6 +677,10 @@ class IdrContractPbpNumber(IdrBaseModel):
         FROM cms_vdm_view_mdcr_prd.v2_mdcr_cntrct_pbp_num
         WHERE cntrct_pbp_sk_obslt_dt >= '{DEFAULT_MAX_DATE}'
         """
+
+    @staticmethod
+    def fetch_query_partitions() -> list[list[str | int]] | None:
+        return None
 
 
 def claim_type_clause(start_time: datetime, claim_type_codes: list[int]) -> str:
@@ -790,6 +846,10 @@ class IdrClaim(IdrBaseModel):
             {{ORDER_BY}}
         """
 
+    @staticmethod
+    def fetch_query_partitions() -> list[list[str | int]] | None:
+        return None
+
 
 class IdrClaimDateSignature(IdrBaseModel):
     clm_dt_sgntr_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, ALIAS: ALIAS_SGNTR}]
@@ -827,8 +887,8 @@ class IdrClaimDateSignature(IdrBaseModel):
         return f"""
             WITH dupes as (
                 SELECT {{COLUMNS}}, ROW_NUMBER() OVER (
-                    PARTITION BY {sgntr}.clm_dt_sgntr_sk 
-                    {{ORDER_BY}} DESC) 
+                    PARTITION BY {sgntr}.clm_dt_sgntr_sk
+                    {{ORDER_BY}} DESC)
                 AS row_order
                 FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
                 JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_dt_sgntr {sgntr}
@@ -838,6 +898,10 @@ class IdrClaimDateSignature(IdrBaseModel):
             )
             SELECT {{COLUMNS_NO_ALIAS}} FROM dupes WHERE row_order = 1
         """
+
+    @staticmethod
+    def fetch_query_partitions() -> list[list[str | int]] | None:
+        return None
 
 
 class IdrClaimFiss(IdrBaseModel):
@@ -873,6 +937,10 @@ class IdrClaimFiss(IdrBaseModel):
             {{WHERE_CLAUSE}} AND {claim_type_clause(start_time, CLAIM_TYPE_CODES)}
             {{ORDER_BY}}
         """
+
+    @staticmethod
+    def fetch_query_partitions() -> list[list[str | int]] | None:
+        return None
 
 
 class IdrClaimInstitutional(IdrBaseModel):
@@ -940,6 +1008,10 @@ class IdrClaimInstitutional(IdrBaseModel):
             {{WHERE_CLAUSE}} AND {claim_type_clause(start_time, CLAIM_TYPE_CODES)}
             {{ORDER_BY}}
         """
+
+    @staticmethod
+    def fetch_query_partitions() -> list[list[str | int]] | None:
+        return None
 
 
 class IdrClaimItem(IdrBaseModel):
@@ -1121,64 +1193,64 @@ class IdrClaimItem(IdrBaseModel):
 
         return f"""
                 WITH claims AS (
-                    SELECT 
-                        {clm}.clm_uniq_id, 
-                        {clm}.geo_bene_sk, 
-                        {clm}.clm_type_cd, 
-                        {clm}.clm_num_sk, 
+                    SELECT
+                        {clm}.clm_uniq_id,
+                        {clm}.geo_bene_sk,
+                        {clm}.clm_type_cd,
+                        {clm}.clm_num_sk,
                         {clm}.clm_dt_sgntr_sk,
                         {clm}.clm_idr_ld_dt
                     FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
-                    WHERE 
-                        {claim_type_clause(start_time, CLAIM_TYPE_CODES)} AND 
+                    WHERE
+                        {claim_type_clause(start_time, CLAIM_TYPE_CODES)} AND
                         {clm}.clm_idr_ld_dt >= '{get_min_transaction_date()}'
                 ),
                 claim_lines AS {not_materialized} (
                     SELECT
                         {line}.*,
                         ROW_NUMBER() OVER (
-                            PARTITION BY {clm}.clm_uniq_id 
+                            PARTITION BY {clm}.clm_uniq_id
                             ORDER BY {clm}.clm_uniq_id,
                                 {line}.clm_line_num
                         ) AS bfd_row_id
                     FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_line {line}
-                    JOIN claims {clm} 
+                    JOIN claims {clm}
                         ON {line}.geo_bene_sk = {clm}.geo_bene_sk
                         AND {line}.clm_type_cd = {clm}.clm_type_cd
-                        AND {line}.clm_num_sk = {clm}.clm_num_sk 
+                        AND {line}.clm_num_sk = {clm}.clm_num_sk
                         AND {line}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
                 ),
                 claim_procedures AS {not_materialized} (
-                    SELECT 
+                    SELECT
                         {clm}.clm_uniq_id,
                         {prod}.*,
                         ROW_NUMBER() OVER (
-                            PARTITION BY {clm}.clm_uniq_id 
+                            PARTITION BY {clm}.clm_uniq_id
                             ORDER BY {clm}.clm_uniq_id,
                                 {prod}.clm_prod_type_cd,
                                 {prod}.clm_val_sqnc_num
                         ) AS bfd_row_id
                     FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_prod {prod}
-                    JOIN claims {clm} 
+                    JOIN claims {clm}
                         ON {prod}.geo_bene_sk = {clm}.geo_bene_sk
                         AND {prod}.clm_type_cd = {clm}.clm_type_cd
-                        AND {prod}.clm_num_sk = {clm}.clm_num_sk 
+                        AND {prod}.clm_num_sk = {clm}.clm_num_sk
                         AND {prod}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
                 ),
                 claim_vals AS {not_materialized} (
                     SELECT
-                        {clm}.clm_uniq_id, 
+                        {clm}.clm_uniq_id,
                         {val}.*,
                         ROW_NUMBER() OVER (
-                            PARTITION BY {clm}.clm_uniq_id 
+                            PARTITION BY {clm}.clm_uniq_id
                             ORDER BY {clm}.clm_uniq_id,
                                 {val}.clm_val_sqnc_num
                         ) AS bfd_row_id
                     FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_val {val}
-                    JOIN claims {clm} 
+                    JOIN claims {clm}
                         ON {val}.geo_bene_sk = {clm}.geo_bene_sk
                         AND {val}.clm_type_cd = {clm}.clm_type_cd
-                        AND {val}.clm_num_sk = {clm}.clm_num_sk 
+                        AND {val}.clm_num_sk = {clm}.clm_num_sk
                         AND {val}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
                 ),
                 claim_groups AS (
@@ -1193,35 +1265,46 @@ class IdrClaimItem(IdrBaseModel):
                 )
                 SELECT {{COLUMNS}}
                 FROM claims {clm}
-                JOIN claim_groups {clm_grp} 
+                JOIN claim_groups {clm_grp}
                     ON {clm_grp}.clm_uniq_id = {clm}.clm_uniq_id
-                LEFT JOIN claim_lines {line} 
+                LEFT JOIN claim_lines {line}
                     ON {line}.geo_bene_sk = {clm}.geo_bene_sk
                     AND {line}.clm_type_cd = {clm}.clm_type_cd
-                    AND {line}.clm_num_sk = {clm}.clm_num_sk 
+                    AND {line}.clm_num_sk = {clm}.clm_num_sk
                     AND {line}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
                     AND {line}.bfd_row_id = {clm_grp}.bfd_row_id
                 LEFT JOIN claim_procedures {prod}
                     ON {prod}.geo_bene_sk = {clm}.geo_bene_sk
                     AND {prod}.clm_type_cd = {clm}.clm_type_cd
-                    AND {prod}.clm_num_sk = {clm}.clm_num_sk 
+                    AND {prod}.clm_num_sk = {clm}.clm_num_sk
                     AND {prod}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
                     AND {prod}.bfd_row_id = {clm_grp}.bfd_row_id
                 LEFT JOIN claim_vals {val}
                     ON {val}.geo_bene_sk = {clm}.geo_bene_sk
                     AND {val}.clm_type_cd = {clm}.clm_type_cd
-                    AND {val}.clm_num_sk = {clm}.clm_num_sk 
+                    AND {val}.clm_num_sk = {clm}.clm_num_sk
                     AND {val}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
                     AND {val}.bfd_row_id = {clm_grp}.bfd_row_id
                 LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_dcmtn {line_dcmtn}
                     ON {line_dcmtn}.geo_bene_sk = {line}.geo_bene_sk
                     AND {line_dcmtn}.clm_type_cd = {line}.clm_type_cd
-                    AND {line_dcmtn}.clm_num_sk = {line}.clm_num_sk 
+                    AND {line_dcmtn}.clm_num_sk = {line}.clm_num_sk
                     AND {line_dcmtn}.clm_dt_sgntr_sk = {line}.clm_dt_sgntr_sk
                     AND {line_dcmtn}.clm_line_num = {line}.clm_line_num
                 {{WHERE_CLAUSE}}
                 {{ORDER_BY}}
         """
+
+    @staticmethod
+    def fetch_query_partitions() -> list[list[str | int]] | None:
+        # Partition each fetch query by a number of claim type codes (partition/indexes in the IDR)
+        # to speed-up query times and reduce the possibility of timeouts
+        return list(
+            list(x)
+            for x in itertools.batched(
+                CLAIM_TYPE_CODES, IDR_CLAIM_ITEM_FETCH_PART_BATCHED_SIZE, strict=False
+            )
+        )
 
 
 def transform_default_hipps_code(value: str | None) -> str:
@@ -1279,6 +1362,10 @@ class IdrClaimLineInstitutional(IdrBaseModel):
             {{ORDER_BY}}
         """
 
+    @staticmethod
+    def fetch_query_partitions() -> list[list[str | int]] | None:
+        return None
+
 
 class IdrClaimAnsiSignature(IdrBaseModel):
     clm_ansi_sgntr_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
@@ -1315,6 +1402,10 @@ class IdrClaimAnsiSignature(IdrBaseModel):
             SELECT {COLUMNS}
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_ansi_sgntr
         """
+
+    @staticmethod
+    def fetch_query_partitions() -> list[list[str | int]] | None:
+        return None
 
 
 class IdrClaimProfessional(IdrBaseModel):
@@ -1359,24 +1450,24 @@ class IdrClaimProfessional(IdrBaseModel):
         lctn_hstry = ALIAS_LCTN_HSTRY
         return f"""
             WITH claims AS (
-                    SELECT 
-                        {clm}.clm_uniq_id, 
-                        {clm}.geo_bene_sk, 
-                        {clm}.clm_type_cd, 
-                        {clm}.clm_num_sk, 
+                    SELECT
+                        {clm}.clm_uniq_id,
+                        {clm}.geo_bene_sk,
+                        {clm}.clm_type_cd,
+                        {clm}.clm_num_sk,
                         {clm}.clm_dt_sgntr_sk,
                         {clm}.clm_idr_ld_dt
                     FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
-                    WHERE 
-                        {claim_type_clause(start_time, CLAIM_TYPE_CODES)} AND 
+                    WHERE
+                        {claim_type_clause(start_time, CLAIM_TYPE_CODES)} AND
                         {clm}.clm_idr_ld_dt >= '{get_min_transaction_date()}'
                 ),
                 latest_clm_lctn_hstry AS (
-                    SELECT 
-                        claims.geo_bene_sk, 
-                        claims.clm_type_cd, 
-                        claims.clm_dt_sgntr_sk, 
-                        claims.clm_num_sk, 
+                    SELECT
+                        claims.geo_bene_sk,
+                        claims.clm_type_cd,
+                        claims.clm_dt_sgntr_sk,
+                        claims.clm_num_sk,
                         MAX({lctn_hstry}.clm_lctn_cd_sqnc_num) AS max_clm_lctn_cd_sqnc_num
                     FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_lctn_hstry {lctn_hstry}
                     JOIN claims ON
@@ -1384,10 +1475,10 @@ class IdrClaimProfessional(IdrBaseModel):
                         {lctn_hstry}.clm_type_cd = claims.clm_type_cd AND
                         {lctn_hstry}.clm_dt_sgntr_sk = claims.clm_dt_sgntr_sk AND
                         {lctn_hstry}.clm_num_sk = claims.clm_num_sk
-                    GROUP BY 
-                        claims.geo_bene_sk, 
-                        claims.clm_type_cd, 
-                        claims.clm_dt_sgntr_sk, 
+                    GROUP BY
+                        claims.geo_bene_sk,
+                        claims.clm_type_cd,
+                        claims.clm_dt_sgntr_sk,
                         claims.clm_num_sk
                 )
                 SELECT {{COLUMNS}}
@@ -1411,6 +1502,10 @@ class IdrClaimProfessional(IdrBaseModel):
                 {{WHERE_CLAUSE}}
                 {{ORDER_BY}}
         """
+
+    @staticmethod
+    def fetch_query_partitions() -> list[list[str | int]] | None:
+        return None
 
 
 class IdrClaimLineProfessional(IdrBaseModel):
@@ -1465,6 +1560,10 @@ class IdrClaimLineProfessional(IdrBaseModel):
             {{ORDER_BY}}
         """
 
+    @staticmethod
+    def fetch_query_partitions() -> list[list[str | int]] | None:
+        return None
+
 
 class LoadProgress(IdrBaseModel):
     table_name: str
@@ -1484,10 +1583,14 @@ class LoadProgress(IdrBaseModel):
     @staticmethod
     def _current_fetch_query(start_time: datetime) -> str:  # noqa: ARG004
         return f"""
-        SELECT table_name, last_ts, last_id, batch_start_ts, batch_complete_ts 
+        SELECT table_name, last_ts, last_id, batch_start_ts, batch_complete_ts
         FROM idr.load_progress
         WHERE table_name = %({LoadProgress.query_placeholder()})s
         """
+
+    @staticmethod
+    def fetch_query_partitions() -> list[list[str | int]] | None:
+        return None
 
     def is_historical(self) -> bool:
         # 2021-4-18 is the most recent date where idr_insrt_ts could be null in claims data
@@ -1548,16 +1651,20 @@ class IdrClaimLineRx(IdrBaseModel):
             JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_rx {rx_line}
                 ON {rx_line}.geo_bene_sk = {clm}.geo_bene_sk
                 AND {rx_line}.clm_type_cd = {clm}.clm_type_cd
-                AND {rx_line}.clm_num_sk = {clm}.clm_num_sk 
+                AND {rx_line}.clm_num_sk = {clm}.clm_num_sk
                 AND {rx_line}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
                 AND {rx_line}.clm_uniq_id = {clm}.clm_uniq_id
             JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_line {line}
                 ON {line}.geo_bene_sk = {rx_line}.geo_bene_sk
                 AND {line}.clm_type_cd = {rx_line}.clm_type_cd
-                AND {line}.clm_num_sk = {rx_line}.clm_num_sk 
+                AND {line}.clm_num_sk = {rx_line}.clm_num_sk
                 AND {line}.clm_dt_sgntr_sk = {rx_line}.clm_dt_sgntr_sk
                 AND {line}.clm_uniq_id = {rx_line}.clm_uniq_id
                 AND {line}.clm_line_num = {rx_line}.clm_line_num
             {{WHERE_CLAUSE}} AND {claim_type_clause(start_time, PART_D_CLAIM_TYPE_CODES)}
             {{ORDER_BY}}
         """
+
+    @staticmethod
+    def fetch_query_partitions() -> list[list[str | int]] | None:
+        return None

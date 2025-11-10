@@ -142,3 +142,5 @@ CLAIM_AUX_TABLES = [
     "idr_claim_line_professional",
     "idr_claim_line_rx",
 ]
+
+IDR_CLAIM_ITEM_FETCH_PART_BATCHED_SIZE = 5
