@@ -32,6 +32,7 @@ tables = [
     {"csv_name": "SYNTHETIC_CLM_PROD.csv", "table": "v2_mdcr_clm_prod"},
     {"csv_name": "SYNTHETIC_CLM_FISS.csv", "table": "v2_mdcr_clm_fiss"},
     {"csv_name": "SYNTHETIC_CLM_LINE_RX.csv", "table": "v2_mdcr_clm_line_rx"},
+    {"csv_name": "SYNTHETIC_CLM_LCTN_HSTRY.csv", "table": "v2_mdcr_clm_lctn_hstry"},
 ]
 
 

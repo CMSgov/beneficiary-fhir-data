@@ -12,6 +12,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 /** Pharmacy service type codes. */
 @AllArgsConstructor
 @Getter
+@SuppressWarnings("java:S115")
 public enum PharmacySrvcTypeCode {
   /** 01 - Community/retail pharmacy. */
   _01("01", "Community/retail pharmacy"),

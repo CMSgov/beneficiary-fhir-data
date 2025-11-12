@@ -20,7 +20,7 @@ public class StringToIntConverter implements AttributeConverter<Integer, String>
     try {
       return Integer.parseInt(value.trim());
     } catch (NumberFormatException e) {
-      throw new RuntimeException("Invalid authorized fill number: " + value, e);
+      throw new RuntimeException("Numeric input was not in a valid format: " + value, e);
     }
   }
 }

@@ -12,6 +12,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 /** Prescription Origination Codes. */
 @AllArgsConstructor
 @Getter
+@SuppressWarnings("java:S115")
 public enum ClaimPrescriptionOriginCode {
   /** 0 - Not specified. */
   _0("0", "Not specified"),

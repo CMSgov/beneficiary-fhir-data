@@ -46,7 +46,7 @@ class AdjudicationChargeRx {
   private Optional<ClaimPricingReasonCode> pricingCode;
 
   ArrayList<ExplanationOfBenefit.AdjudicationComponent> toFhir() {
-    ArrayList<ExplanationOfBenefit.AdjudicationComponent> adjudicationComponent =
+    var adjudicationComponent =
         new ArrayList<>(
             List.of(
                 AdjudicationChargeType.GAP_DISCOUNT_AMOUNT.toFhirAdjudication(gapDiscountAmount),

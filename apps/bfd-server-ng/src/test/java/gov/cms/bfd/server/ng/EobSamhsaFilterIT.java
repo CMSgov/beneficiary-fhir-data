@@ -17,7 +17,6 @@ import gov.cms.bfd.server.ng.util.DateUtil;
 import gov.cms.bfd.server.ng.util.IdrConstants;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -329,7 +328,6 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
             () ->
                 Assertions.fail(
                     "Expected SAMHSA security tag not found in EOB meta or had incorrect code/system."));
-    bundle.getEntry().sort(Comparator.comparing(e -> e.getResource().getIdElement().getIdPart()));
     expectFhir().scenario(String.valueOf(beneSk)).toMatchSnapshot(bundle);
   }
 

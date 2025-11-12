@@ -164,7 +164,12 @@ public class Claim {
             });
     getContract()
         .flatMap(Contract::getContractName)
-        .ifPresent(name -> claimTypeCode.toFhirInsurerPartD(name));
+        .flatMap(name -> claimTypeCode.toFhirInsurerPartD(name))
+        .ifPresent(
+            i -> {
+              eob.addContained(i);
+              eob.setInsurer(new Reference(i));
+            });
     var institutional = getClaimInstitutional();
     Stream.of(
             claimExtensions.toFhir(),

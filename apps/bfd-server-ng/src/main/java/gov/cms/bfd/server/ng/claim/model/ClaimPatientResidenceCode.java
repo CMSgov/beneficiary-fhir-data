@@ -12,6 +12,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 /** Patient Residence Codes. */
 @AllArgsConstructor
 @Getter
+@SuppressWarnings("java:S115")
 public enum ClaimPatientResidenceCode {
   /** 00 - Not specified, other patient residence not identified below. */
   _00("00", "Not specified, other patient residence not identified below"),
