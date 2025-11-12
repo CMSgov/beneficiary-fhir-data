@@ -130,7 +130,8 @@ jobs:
           -Dsonar.projectVersion="$(git log -1 --format=%H)" \
           -Dsonar.qualitygate.wait=true \
           -Dsonar.token="$SONAR_TOKEN" \
-          -Dsonar.java.jdkHome=${{ env.JAVA_HOME }}
+          -Dsonar.java.jdkHome=${{ env.JAVA_HOME }} \
+          -Dsonar.java.skipUnchanged=false
         working-directory: ./apps
 
 # TODO: Conformance testing is currently missing from mvn-verify. BFD-3245 will re-examine conformance regression testing in BFD.
