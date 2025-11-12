@@ -116,30 +116,19 @@ jobs:
 
       - name: 'Run Maven Build'
         run: |
-          mvn clean install \
+          mvn clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
           --threads 1C \
           --no-transfer-progress \
           -Dapidocgen.skip=false \
           -Dmaven.build.cache.enabled=false \
           -Dmaven.jacoco.skip=false
-        working-directory: ./apps
-
-      - name: 'Generate, Upload Build Reports'
-        if: ${{ github.event_name != 'merge_group' }}
-        env:
-          BFD_BRANCH: ${{ inputs.branch }}
-        run: |
-          mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
-          -DskipITs \
-          -DskipTests \
-          --no-transfer-progress \
-          -Dmaven.build.cache.enabled=false \
           ${{ inputs.branch != null && '-Dsonar.branch.name=$BFD_BRANCH' || null }} -Dsonar.ci.autoconfig.disabled=true \
           -Dsonar.host.url="$SONAR_HOST_URL" \
           -Dsonar.projectKey="$SONAR_PROJECT_KEY" \
           -Dsonar.projectVersion="$(git log -1 --format=%H)" \
           -Dsonar.qualitygate.wait=true \
           -Dsonar.token="$SONAR_TOKEN"
+          -Dsonar.java.jdkHome="$JAVA_HOME"
         working-directory: ./apps
 
 # TODO: Conformance testing is currently missing from mvn-verify. BFD-3245 will re-examine conformance regression testing in BFD.
