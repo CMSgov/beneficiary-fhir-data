@@ -182,8 +182,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
    * @return A FHIR Coverage object.
    */
   public Optional<Coverage> toFhirCoverageIfPresent(CoverageCompositeId coverageCompositeId) {
-    return Optional.ofNullable(toFhir(coverageCompositeId))
-        .filter(c -> !c.getIdentifier().isEmpty());
+    return Optional.of(toFhir(coverageCompositeId)).filter(c -> !c.getIdentifier().isEmpty());
   }
 
   /**
@@ -196,7 +195,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
    */
   public Optional<Coverage> toFhirCoverageIfPresentC4DIC(
       CoverageCompositeId coverageCompositeId, String orgId) {
-    return Optional.ofNullable(toFhirC4DIC(coverageCompositeId, orgId))
+    return Optional.of(toFhirC4DIC(coverageCompositeId, orgId))
         .filter(c -> !c.getIdentifier().isEmpty());
   }
 
