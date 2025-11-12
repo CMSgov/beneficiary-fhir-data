@@ -152,8 +152,8 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
     var coveragePart = coverageCompositeId.coveragePart();
 
     return switch (coveragePart) {
-      case PART_A, PART_B -> mapCoverageAB(coverage, coveragePart, ProfileType.C4BB, null);
-      case DUAL -> mapCoverageDual(coverage, ProfileType.C4BB, null);
+      case PART_A, PART_B -> mapCoverageAB(coverage, coveragePart, ProfileType.C4BB, "");
+      case DUAL -> mapCoverageDual(coverage, ProfileType.C4BB, "");
     };
   }
 
@@ -216,9 +216,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
       return toEmptyResource(coverage);
     }
 
-    identifier
-        .toFhir(profileType == ProfileType.C4DIC ? orgId : "")
-        .ifPresent(coverage::addIdentifier);
+    identifier.toFhir(orgId).ifPresent(coverage::addIdentifier);
 
     var entitlement = entitlementOpt.get();
     coverage.setPeriod(entitlement.toFhirPeriod());

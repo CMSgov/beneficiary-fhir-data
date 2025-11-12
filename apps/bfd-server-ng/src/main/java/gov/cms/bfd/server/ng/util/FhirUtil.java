@@ -119,10 +119,7 @@ public class FhirUtil {
                                 .setResource(r)
                                 .setFullUrl("urn:uuid:" + r.getIdElement().getIdPart()))
                     .toList());
-
-    if (batchLastUpdated != null) {
-      bundle.setMeta(new Meta().setLastUpdated(DateUtil.toDate(batchLastUpdated.get())));
-    }
+    bundle.setMeta(new Meta().setLastUpdated(DateUtil.toDate(batchLastUpdated.get())));
 
     return bundle;
   }
