@@ -115,6 +115,7 @@
         <sonar.issue.ignore.multicriteria.e5.resourceKey>
             **/*.java
         </sonar.issue.ignore.multicriteria.e5.resourceKey>
+        <sonar.version>5.3.0.6276</sonar.version>
         <jacoco.version>0.8.14</jacoco.version>
         <micrometer.version>1.12.1</micrometer.version>
         <metrics.version>4.2.30</metrics.version>
@@ -842,6 +843,11 @@
                     of all plugins used in the module builds here to help ensure that the builds
                     are always reproducible. This is actually enforced down below by the maven-enforcer-plugin
                     execution. -->
+                <plugin>
+                    <groupId>org.sonarsource.scanner.maven</groupId>
+                    <artifactId>sonar-maven-plugin</artifactId>
+                    <version>${sonar.version}</version>
+                </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>build-helper-maven-plugin</artifactId>
