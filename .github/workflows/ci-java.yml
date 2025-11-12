@@ -115,8 +115,10 @@ jobs:
             SONAR_TOKEN=/bfd/platform/sonar/sensitive/service_account_access_key
 
       - name: 'Run Maven Build'
+        env:
+          BFD_BRANCH: ${{ inputs.branch }}
         run: |
-          mvn clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+          mvn clean verify ${{ github.event_name != 'merge_group' && 'org.sonarsource.scanner.maven:sonar-maven-plugin:sonar' || null }} \
           --threads 1C \
           --no-transfer-progress \
           -Dapidocgen.skip=false \
