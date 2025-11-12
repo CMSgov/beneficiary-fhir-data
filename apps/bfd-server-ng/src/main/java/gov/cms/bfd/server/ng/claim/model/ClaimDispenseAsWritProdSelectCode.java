@@ -10,13 +10,13 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /** Dispense as Written Product Selection Codes. */
 @Embeddable
-public class ClaimDispenseAsWritProdSelectCode {
+public class ClaimDispenseAsWrittenProdSelectCode {
   @Column(name = "clm_daw_prod_slctn_cd")
-  private Optional<String> dispenseAsWritProdSelectCode;
+  private Optional<String> dispenseAsWrittenProdSelectCode;
 
   Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {
-    if (dispenseAsWritProdSelectCode.isEmpty()) {
+    if (dispenseAsWrittenProdSelectCode.isEmpty()) {
       return Optional.empty();
     }
     var supportingInfo = supportingInfoFactory.createSupportingInfo();
@@ -25,7 +25,7 @@ public class ClaimDispenseAsWritProdSelectCode {
         new CodeableConcept(
             new Coding()
                 .setSystem(SystemUrls.HL7_CLAIM_DAW_PROD_SELECT_CODE)
-                .setCode(dispenseAsWritProdSelectCode.get())));
+                .setCode(dispenseAsWrittenProdSelectCode.get())));
 
     return Optional.of(supportingInfo);
   }

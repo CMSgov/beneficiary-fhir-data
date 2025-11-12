@@ -35,7 +35,7 @@ class ClaimRxSupportingInfo {
 
   @Embedded private ClaimLineRxDaysSupplyQuantity daysSupply;
   @Embedded private ClaimLineRxFillNumber fillNumber;
-  @Embedded private ClaimDispenseAsWritProdSelectCode claimDispenseAsWritProdSelectCode;
+  @Embedded private ClaimDispenseAsWrittenProdSelectCode claimDispenseAsWrittenProdSelectCode;
 
   @Column(name = "clm_drug_cvrg_stus_cd")
   private Optional<DrugCoverageStatusCode> drugCoverageStatusCode;
@@ -58,7 +58,7 @@ class ClaimRxSupportingInfo {
             compoundCode.map(s -> s.toFhir(supportingInfoFactory)),
             Optional.of(daysSupply.toFhir(supportingInfoFactory)),
             Optional.of(fillNumber.toFhir(supportingInfoFactory)),
-            claimDispenseAsWritProdSelectCode.toFhir(supportingInfoFactory),
+            claimDispenseAsWrittenProdSelectCode.toFhir(supportingInfoFactory),
             drugCoverageStatusCode.map(s -> s.toFhir(supportingInfoFactory)),
             catastrophicCovCode.map(s -> s.toFhir(supportingInfoFactory)),
             claimDispensingStatusCode.map(s -> s.toFhir(supportingInfoFactory)))
