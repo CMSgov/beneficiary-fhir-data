@@ -35,15 +35,18 @@ tables = [
 
 
 def load_from_csv(conn: psycopg.Connection, src_folder: str) -> None:
-    for table in tables:
-        with conn.cursor() as cur:
+    with conn.cursor() as cur:
+        # timestamps will be all over the place for synthetic data,
+        # so we need to make sure that the progress tracking doesn't mess with it.
+        cur.execute("DELETE FROM idr.load_progress")
+        for table in tables:
             # Clear out any previous data
             sql_table = table["table"]
             full_table = f"cms_vdm_view_mdcr_prd.{sql_table}"
             cur.execute(f"TRUNCATE TABLE {full_table}")  # type: ignore
             file = table["csv_name"]
             _load_file(cur, src_folder, file, sql_table, full_table)
-        conn.commit()
+            conn.commit()
 
 
 def _load_file(
@@ -72,12 +75,15 @@ def _load_file(
                 for col in typing.cast(typing.Iterable[str], reader.fieldnames)
                 if col.lower().strip() in db_columns
             ]
-            cols_str = ",".join(cols)
-            with cur.copy(
-                f"COPY {full_table} ({cols_str}) FROM STDIN"  # type: ignore
-            ) as copy:
-                for row in reader:
-                    copy.write_row([row[c] if row[c] else None for c in cols])
+            # skip empty files since we won't have any valid columns
+            # which causes the COPY command below to fail
+            if cols:
+                cols_str = ",".join(cols)
+                with cur.copy(
+                    f"COPY {full_table} ({cols_str}) FROM STDIN"  # type: ignore
+                ) as copy:
+                    for row in reader:
+                        copy.write_row([row[c] if row[c] else None for c in cols])
 
 
 if __name__ == "__main__":
