@@ -205,9 +205,9 @@ resource "aws_ecs_task_definition" "server" {
         name              = "log_router"
         image             = data.aws_ecr_image.log_router.image_uri
         essential         = true
-        cpu               = 128
-        memoryReservation = 50
-        memory            = 100
+        cpu               = max(min(1024, floor(0.05 * local.server_cpu)), 256) # Max 1 CPU, min 1/4
+        memoryReservation = max(min(1024, floor(0.08 * local.server_memory)), 256) # Max 1 GB, min 256 MiB
+        memory            = max(min(1024, floor(0.10 * local.server_memory)), 312) # Max 1 GB, min 312 MiB
         user              = "0" # Default; reduces unnecessary terraform diff output
         environment = [
           {
@@ -271,8 +271,12 @@ resource "aws_ecs_task_definition" "server" {
             value = join(" ", [
               "-Dlogback.configurationFile=all-stdout.logback.xml",
               "-XX:+UseContainerSupport",
-              "-XX:MaxRAMPercentage=75.0",
-              "-XX:+PreserveFramePointer",
+              "-XX:+AlwaysPreTouch",
+              "-Xms${floor(local.server_memory * 0.70)}m",
+              "-Xmx${floor(local.server_memory * 0.70)}m",
+              # TODO: TEMPORARY hack to ensure rollback to JDK 21 versions of BFD Server is possible; remove ASAP
+              regex("^2\\.(\\d+)\\..*", local.server_version)[0] > 222 ? "-XX:+UseCompactObjectHeaders" : "",
+              "-XX:+UseZGC",
               "-Dnetworkaddress.cache.ttl=5",
               "-Dsun.net.inetaddr.ttl=0"
             ])

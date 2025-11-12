@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import gov.cms.bfd.model.rif.LoadedBatch;
@@ -21,7 +22,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import javax.sql.DataSource;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -59,7 +61,12 @@ public final class LoadedFilterManagerTest {
   public void buildEmptyFilter() {
     final MockDb mockDb = new MockDb().insert(1, preDates[2]);
     final List<LoadedFileFilter> loadedFilter =
-        LoadedFilterManager.buildFilters(mockDb.fetchAllTuples(), mockDb::fetchById);
+        LoadedFilterManager.buildNewFilters(
+                mockDb.fetchAllTuples(),
+                mockDb::fetchById,
+                mockDb::fetchBatchSizeById,
+                mockDb::fetchEstimatedBeneSize)
+            .toList();
     assertEquals(0, loadedFilter.size());
   }
 
@@ -70,7 +77,12 @@ public final class LoadedFilterManagerTest {
   public void buildOneFilter() {
     final MockDb mockDb = new MockDb().insert(1, preDates[0]).insert(preBatches[0]);
     final List<LoadedFileFilter> filters =
-        LoadedFilterManager.buildFilters(mockDb.fetchAllTuples(), mockDb::fetchById);
+        LoadedFilterManager.buildNewFilters(
+                mockDb.fetchAllTuples(),
+                mockDb::fetchById,
+                mockDb::fetchBatchSizeById,
+                mockDb::fetchEstimatedBeneSize)
+            .toList();
     assertEquals(1, filters.size());
 
     // Test the filter
@@ -95,7 +107,12 @@ public final class LoadedFilterManagerTest {
             .insert(3, preDates[21])
             .insert(preBatches[0], preBatches[2], preBatches[4]);
     final List<LoadedFileFilter> filters =
-        LoadedFilterManager.buildFilters(mockDb.fetchAllTuples(), mockDb::fetchById);
+        LoadedFilterManager.buildNewFilters(
+                mockDb.fetchAllTuples(),
+                mockDb::fetchById,
+                mockDb::fetchBatchSizeById,
+                mockDb::fetchEstimatedBeneSize)
+            .toList();
     assertEquals(3, filters.size());
     assertEquals(1, filters.get(2).getBatchesCount());
   }
@@ -113,22 +130,39 @@ public final class LoadedFilterManagerTest {
             .insert(3, preDates[21])
             .insert(preBatches[0], preBatches[2], preBatches[4]);
     final List<LoadedFileFilter> filters1 =
-        LoadedFilterManager.updateFilters(
-            Collections.emptyList(), mockDb1.fetchAllTuples(), mockDb1::fetchById);
+        LoadedFilterManager.buildMergedFilters(
+                Collections.emptyList(),
+                mockDb1.fetchAllTuples(),
+                mockDb1::fetchById,
+                mockDb1::fetchBatchSizeById,
+                mockDb1::fetchEstimatedBeneSize)
+            .toList();
     assertEquals(3, filters1.size());
     assertEquals(1, filters1.get(2).getLoadedFileId());
     assertEquals(1, filters1.get(2).getBatchesCount());
 
     final MockDb mockDb2 = new MockDb().insert(1, preDates[1]).insert(preBatches[0], preBatches[1]);
     final List<LoadedFileFilter> filters2 =
-        LoadedFilterManager.updateFilters(filters1, mockDb2.fetchAllTuples(), mockDb2::fetchById);
+        LoadedFilterManager.buildMergedFilters(
+                filters1,
+                mockDb2.fetchAllTuples(),
+                mockDb2::fetchById,
+                mockDb2::fetchBatchSizeById,
+                mockDb2::fetchEstimatedBeneSize)
+            .toList();
     assertEquals(3, filters2.size());
     assertEquals(1, filters2.get(2).getLoadedFileId());
     assertEquals(2, filters2.get(2).getBatchesCount());
 
     final MockDb mockDb3 = new MockDb().insert(4, preDates[31]).insert(preBatches[6]);
     final List<LoadedFileFilter> filters3 =
-        LoadedFilterManager.updateFilters(filters1, mockDb3.fetchAllTuples(), mockDb3::fetchById);
+        LoadedFilterManager.buildMergedFilters(
+                filters1,
+                mockDb3.fetchAllTuples(),
+                mockDb3::fetchById,
+                mockDb3::fetchBatchSizeById,
+                mockDb3::fetchEstimatedBeneSize)
+            .toList();
     assertEquals(4, filters3.size());
     assertEquals(1, filters3.get(3).getLoadedFileId());
     assertEquals(4, filters3.get(0).getLoadedFileId());
@@ -144,11 +178,16 @@ public final class LoadedFilterManagerTest {
             .insert(preBatches[0], preBatches[1], preBatches[2]);
     final List<LoadedFilterManager.LoadedTuple> tuples = mockDb.fetchAllTuples();
     final List<LoadedFileFilter> aFilters =
-        LoadedFilterManager.buildFilters(tuples, mockDb::fetchById);
+        LoadedFilterManager.buildNewFilters(
+                tuples,
+                mockDb::fetchById,
+                mockDb::fetchBatchSizeById,
+                mockDb::fetchEstimatedBeneSize)
+            .toList();
     assertEquals(2, aFilters.size());
 
     // Setup the manager and test a few lastUpdated ranges
-    final LoadedFilterManager filterManagerA = new LoadedFilterManager();
+    final LoadedFilterManager filterManagerA = new LoadedFilterManager(mock(DataSource.class));
     filterManagerA.set(aFilters, preDates[1], preBatches[2].getCreated());
     final DateRangeParam beforeRange =
         new DateRangeParam(Date.from(preDates[0]), Date.from(preDates[1]));
@@ -181,19 +220,34 @@ public final class LoadedFilterManagerTest {
             .insert(2, preDates[11])
             .insert(preBatches[0], preBatches[1], preBatches[2]);
     final List<LoadedFileFilter> aFilters =
-        LoadedFilterManager.buildFilters(mockDb.fetchAllTuples(), mockDb::fetchById);
+        LoadedFilterManager.buildNewFilters(
+                mockDb.fetchAllTuples(),
+                mockDb::fetchById,
+                mockDb::fetchBatchSizeById,
+                mockDb::fetchEstimatedBeneSize)
+            .toList();
     assertEquals(2, aFilters.size());
 
     // Simulate starting a new file with no mockDb
     mockDb.insert(3, preDates[21]);
     final List<LoadedFileFilter> bFilters =
-        LoadedFilterManager.buildFilters(mockDb.fetchAllTuples(), mockDb::fetchById);
+        LoadedFilterManager.buildNewFilters(
+                mockDb.fetchAllTuples(),
+                mockDb::fetchById,
+                mockDb::fetchBatchSizeById,
+                mockDb::fetchEstimatedBeneSize)
+            .toList();
     assertEquals(2, bFilters.size());
 
     // Simulate adding a new batch with the same fileId
     mockDb.insert(preBatches[4]);
     final List<LoadedFileFilter> cFilters =
-        LoadedFilterManager.buildFilters(mockDb.fetchAllTuples(), mockDb::fetchById);
+        LoadedFilterManager.buildNewFilters(
+                mockDb.fetchAllTuples(),
+                mockDb::fetchById,
+                mockDb::fetchBatchSizeById,
+                mockDb::fetchEstimatedBeneSize)
+            .toList();
     assertEquals(3, cFilters.size());
     assertEquals(1, cFilters.get(1).getBatchesCount());
   }
@@ -207,19 +261,34 @@ public final class LoadedFilterManagerTest {
             .insert(2, preDates[11])
             .insert(preBatches[0], preBatches[1], preBatches[2]);
     final List<LoadedFileFilter> aFilters =
-        LoadedFilterManager.buildFilters(mockDb.fetchAllTuples(), mockDb::fetchById);
+        LoadedFilterManager.buildNewFilters(
+                mockDb.fetchAllTuples(),
+                mockDb::fetchById,
+                mockDb::fetchBatchSizeById,
+                mockDb::fetchEstimatedBeneSize)
+            .toList();
     assertEquals(2, aFilters.size());
 
     // Simulate starting a new file with no mockDb. Don't complete this batch
     mockDb.insert(3, preDates[21]);
     final List<LoadedFileFilter> bFilters =
-        LoadedFilterManager.buildFilters(mockDb.fetchAllTuples(), mockDb::fetchById);
+        LoadedFilterManager.buildNewFilters(
+                mockDb.fetchAllTuples(),
+                mockDb::fetchById,
+                mockDb::fetchBatchSizeById,
+                mockDb::fetchEstimatedBeneSize)
+            .toList();
     assertEquals(2, bFilters.size());
 
     // Simulate adding a new batch not in the same file id
     mockDb.insert(4, preDates[28]).insert(preBatches[6]);
     final List<LoadedFileFilter> cFilters =
-        LoadedFilterManager.buildFilters(mockDb.fetchAllTuples(), mockDb::fetchById);
+        LoadedFilterManager.buildNewFilters(
+                mockDb.fetchAllTuples(),
+                mockDb::fetchById,
+                mockDb::fetchBatchSizeById,
+                mockDb::fetchEstimatedBeneSize)
+            .toList();
     assertEquals(3, cFilters.size());
     assertEquals(1, cFilters.get(0).getBatchesCount());
   }
@@ -251,7 +320,7 @@ public final class LoadedFilterManagerTest {
    * Tests that removing a loaded file still has a remaining filter for a file that was not removed.
    */
   @Test
-  public void testTrimFilters() {
+  public void testBuildTrimmedFilters() {
     // Build a couple of filters
     final MockDb mockDb =
         new MockDb()
@@ -259,7 +328,12 @@ public final class LoadedFilterManagerTest {
             .insert(2, preDates[11])
             .insert(preBatches[0], preBatches[1], preBatches[2]);
     final List<LoadedFileFilter> aFilters =
-        LoadedFilterManager.buildFilters(mockDb.fetchAllTuples(), mockDb::fetchById);
+        LoadedFilterManager.buildNewFilters(
+                mockDb.fetchAllTuples(),
+                mockDb::fetchById,
+                mockDb::fetchBatchSizeById,
+                mockDb::fetchEstimatedBeneSize)
+            .toList();
     assertEquals(2, aFilters.size());
 
     // Trim the loadedFiles
@@ -268,7 +342,8 @@ public final class LoadedFilterManagerTest {
     files.remove(0);
 
     // Trim the map and test results. Should have the filter for
-    final List<LoadedFileFilter> bFilters = LoadedFilterManager.trimFilters(aFilters, files);
+    final List<LoadedFileFilter> bFilters =
+        LoadedFilterManager.buildTrimmedFilters(aFilters.stream(), files).toList();
     assertEquals(1, bFilters.size());
     assertSame(bFilters.get(0), aFilters.get(0));
   }
@@ -308,12 +383,20 @@ public final class LoadedFilterManagerTest {
      * Fetches from the database by id.
      *
      * @param loadedFiledId the loaded filed id
+     * @param beneCount the bene count
      * @return the list of results
      */
-    List<LoadedBatch> fetchById(Long loadedFiledId) {
-      return batches.stream()
-          .filter(b -> b.getLoadedFileId() == loadedFiledId)
-          .collect(Collectors.toList());
+    Stream<LoadedBatch> fetchById(Long loadedFiledId, Integer beneCount) {
+      return batches.stream().filter(b -> b.getLoadedFileId() == loadedFiledId);
+    }
+
+    Long fetchBatchSizeById(Long loadedFileId) {
+      return (long) fetchById(loadedFileId, 0).toList().size();
+    }
+
+    Long fetchEstimatedBeneSize(Long loadedFileId) {
+      return (long)
+          fetchById(loadedFileId, 0).map(b -> b.getBeneficiaries().size()).findFirst().orElse(1);
     }
 
     /**
