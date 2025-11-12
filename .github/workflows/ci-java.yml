@@ -123,8 +123,8 @@ jobs:
           --no-transfer-progress \
           -Dapidocgen.skip=false \
           -Dmaven.build.cache.enabled=false \
-          -Dmaven.jacoco.skip=false
-          ${{ inputs.branch != null && '-Dsonar.branch.name=$BFD_BRANCH' || null }} -Dsonar.ci.autoconfig.disabled=true \
+          -Dmaven.jacoco.skip=false \
+          -Dsonar.ci.autoconfig.disabled=true ${{ inputs.branch != null && '-Dsonar.branch.name=$BFD_BRANCH' || null }}\
           -Dsonar.host.url="$SONAR_HOST_URL" \
           -Dsonar.projectKey="$SONAR_PROJECT_KEY" \
           -Dsonar.projectVersion="$(git log -1 --format=%H)" \
