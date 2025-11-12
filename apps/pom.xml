@@ -115,6 +115,7 @@
         <sonar.issue.ignore.multicriteria.e5.resourceKey>
             **/*.java
         </sonar.issue.ignore.multicriteria.e5.resourceKey>
+        <jacoco.version>0.8.14</jacoco.version>
         <micrometer.version>1.12.1</micrometer.version>
         <metrics.version>4.2.30</metrics.version>
         <git-build-hook-maven-plugin.version>3.5.0</git-build-hook-maven-plugin.version>
@@ -211,7 +212,6 @@
         <grpc_java.version>1.70.0</grpc_java.version>
         <protoc.version>3.25.1</protoc.version>
         <protobuf.version>4.29.3</protobuf.version>
-        <jacoco.version>0.8.14</jacoco.version>
         <jakarta.servlet.version>6.1.0</jakarta.servlet.version>
         <java-snapshot-testing.version>4.0.6</java-snapshot-testing.version>
         <json-diff.version>1.1.0</json-diff.version>
@@ -284,7 +284,7 @@
         <maven.surefire.plugin.version>3.5.3</maven.surefire.plugin.version>
         <maven.toolchains.plugin.version>3.2.0</maven.toolchains.plugin.version>
         <maven-core.version>3.9.8</maven-core.version>
-        <maven.jacoco.plugin.version>0.8.13</maven.jacoco.plugin.version>
+        <maven.jacoco.plugin.version>${jacoco.version}</maven.jacoco.plugin.version>
         <maven-plugin-annotations.version>3.10.2</maven-plugin-annotations.version>
         <maven-plugin-api.version>3.9.8</maven-plugin-api.version>
         <maven.plugin.version>3.15.1</maven.plugin.version>
