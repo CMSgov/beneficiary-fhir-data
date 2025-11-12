@@ -18,13 +18,15 @@ enum CareTeamType {
   ATTENDING("attending", "Attending"),
   OPERATING("operating", "Operating"),
   RENDERING("rendering", "Rendering provider"),
+  REFERRING("referring", "Referring provider"),
   OTHER("otheroperating", "Other Operating");
+
 
   public final String roleCode;
   public final String roleDisplay;
 
   CareTeamComponents toFhir(
-      SequenceGenerator sequenceGenerator, String value, Optional<String> familyName) {
+      SequenceGenerator sequenceGenerator, String value, Optional<String> familyName, Optional<String> pinNumber) {
     var practitioner = new Practitioner();
     var sequence = sequenceGenerator.next();
     practitioner.setId("careteam-provider-" + sequence);
@@ -40,6 +42,11 @@ enum CareTeamType {
             .setSystem(SystemUrls.NPI)
             .setValue(value));
     familyName.ifPresent(n -> practitioner.addName(new HumanName().setFamily(n)));
+
+    pinNumber.ifPresent(p ->  practitioner.addIdentifier(
+            new Identifier()
+                    .setSystem(SystemUrls.BLUE_BUTTON_PIN_NUM)
+                    .setValue(p)));
 
     var component =
         new ExplanationOfBenefit.CareTeamComponent()

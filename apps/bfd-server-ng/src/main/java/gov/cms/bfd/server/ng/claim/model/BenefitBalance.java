@@ -40,6 +40,19 @@ class BenefitBalance {
                 .toList());
   }
 
+    ExplanationOfBenefit.BenefitBalanceComponent toFhir() {
+        return new ExplanationOfBenefit.BenefitBalanceComponent()
+                .setCategory(
+                        new CodeableConcept(
+                                new Coding()
+                                        .setSystem(SystemUrls.HL7_BENEFIT_CATEGORY)
+                                        .setCode("1")
+                                        .setDisplay("Medical Care")))
+                .setFinancial(
+                        Stream.of(BenefitBalanceInstitutionalType.CLM_MDCR_DDCTBL_AMT.toFhirMoney(deductibleAmount))
+                                .toList());
+    }
+
   List<ExplanationOfBenefit.BenefitComponent> toFhirBenefits() {
     return List.of(
         BenefitBalanceInstitutionalType.CLM_MDCR_DDCTBL_AMT.toFhirMoney(deductibleAmount),

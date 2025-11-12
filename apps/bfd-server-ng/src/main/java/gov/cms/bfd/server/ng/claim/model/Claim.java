@@ -15,7 +15,6 @@ import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -152,13 +151,6 @@ public class Claim {
         .flatMap(Collection::stream)
         .forEach(eob::addExtension);
 
-    getClaimProfessional()
-        .ifPresent(
-            professional -> {
-              eob.getExtension().addAll(professional.toFhirExtension());
-              eob.setTotal(Collections.singletonList(professional.toFhirTotal()));
-            });
-
     claimItems.forEach(
         item -> {
           item.getClaimLine().toFhir(item).ifPresent(eob::addItem);
@@ -174,6 +166,7 @@ public class Claim {
           item.getClaimProcedure()
               .toFhirDiagnosis(item.getClaimItemId().getBfdRowId(), claimTypeCode)
               .ifPresent(eob::addDiagnosis);
+
           item.getClaimLineProfessional()
               .flatMap(i -> i.toFhirObservation(item.getClaimItemId().getBfdRowId()))
               .ifPresent(eob::addContained);
@@ -239,6 +232,14 @@ public class Claim {
     claimTypeCode.toFhirInsurance().ifPresent(eob::addInsurance);
     eob.setTotal(adjudicationCharge.toFhir());
     eob.setPayment(claimPaymentAmount.toFhir());
+
+      getClaimProfessional()
+              .ifPresent(
+                      professional -> {
+                          eob.getExtension().addAll(professional.toFhirExtension());
+                          eob.addTotal(professional.toFhirTotal());
+                          eob.addBenefitBalance(benefitBalance.toFhir());
+                      });
 
     return sortedEob(eob);
   }

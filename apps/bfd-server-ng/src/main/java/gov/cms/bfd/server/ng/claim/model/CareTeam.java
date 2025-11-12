@@ -34,25 +34,38 @@ class CareTeam {
   @Column(name = "clm_rndrg_prvdr_last_name")
   private Optional<String> renderingProviderLastName;
 
-  List<CareTeamType.CareTeamComponents> toFhir(int sequenceStart) {
+  @Column(name = "prvdr_rfrg_prvdr_npi_num")
+  private Optional<String> refferingProviderNpiNumber;
+
+  @Column(name = "clm_rfrg_prvdr_pin_num")
+  private Optional<String> refferingProviderPinNumber;
+
+
+
+
+    List<CareTeamType.CareTeamComponents> toFhir(int sequenceStart) {
     var sequenceGenerator = new SequenceGenerator(sequenceStart);
     var components =
         Stream.of(
             attendingProviderNpiNumber.map(
                 npi ->
                     CareTeamType.ATTENDING.toFhir(
-                        sequenceGenerator, npi, attendingProviderLastName)),
+                        sequenceGenerator, npi, attendingProviderLastName,Optional.empty())),
             operatingProviderNpiNumber.map(
                 npi ->
                     CareTeamType.OPERATING.toFhir(
-                        sequenceGenerator, npi, operatingProviderLastName)),
+                        sequenceGenerator, npi, operatingProviderLastName,Optional.empty())),
             otherProviderNpiNumber.map(
                 npi ->
-                    CareTeamType.RENDERING.toFhir(sequenceGenerator, npi, otherProviderLastName)),
+                    CareTeamType.RENDERING.toFhir(sequenceGenerator, npi, otherProviderLastName,Optional.empty())),
             renderingProviderNpiNumber.map(
                 npi ->
                     CareTeamType.RENDERING.toFhir(
-                        sequenceGenerator, npi, renderingProviderLastName)));
+                        sequenceGenerator, npi, renderingProviderLastName,Optional.empty())),
+            refferingProviderNpiNumber.map(
+                npi ->
+                        CareTeamType.REFERRING.toFhir(
+                                sequenceGenerator, npi, renderingProviderLastName, refferingProviderPinNumber)));
 
     return components.flatMap(Optional::stream).toList();
   }

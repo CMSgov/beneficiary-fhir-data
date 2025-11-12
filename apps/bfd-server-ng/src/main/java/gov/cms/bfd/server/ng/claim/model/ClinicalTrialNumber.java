@@ -12,12 +12,8 @@ public class ClinicalTrialNumber {
   private Optional<String> clinicalTrailNum;
 
   Optional<Extension> toFhir() {
-    if (clinicalTrailNum.isEmpty()) {
-      return Optional.empty();
-    }
-    return Optional.of(
-        new Extension()
-            .setUrl(SystemUrls.BLUE_BUTTON_STRUCTURE_DEFINITION_CLAIM_CLINICAL_TRIAL_NUMBER)
-            .setValue(new StringType(clinicalTrailNum.toString())));
+      return clinicalTrailNum.map(s -> new Extension()
+              .setUrl(SystemUrls.BLUE_BUTTON_STRUCTURE_DEFINITION_CLAIM_CLINICAL_TRIAL_NUMBER)
+              .setValue(new StringType(s)));
   }
 }

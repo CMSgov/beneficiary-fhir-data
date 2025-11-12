@@ -63,6 +63,10 @@ public class ClaimItem implements Comparable<ClaimItem> {
     return Optional.ofNullable(claimLineInstitutional);
   }
 
+  Optional<ClaimLineProfessional> getClaimLineProfessional() {
+    return Optional.ofNullable(claimLineProfessional);
+  }
+
   /**
    * Returns a stream of relevant timestamps for this ClaimItem, including the item's own updated
    * timestamp and any timestamps from the associated ClaimLineInstitutional.
@@ -84,10 +88,6 @@ public class ClaimItem implements Comparable<ClaimItem> {
             .stream()
             .flatMap(s -> s);
     return Stream.concat(itemTs, lineInstitutionalStream);
-  }
-
-  Optional<ClaimLineProfessional> getClaimLineProfessional() {
-    return Optional.ofNullable(claimLineProfessional);
   }
 
   @Override
