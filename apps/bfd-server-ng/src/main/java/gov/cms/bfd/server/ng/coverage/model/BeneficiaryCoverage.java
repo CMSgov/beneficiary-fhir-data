@@ -182,7 +182,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
    * @return A FHIR Coverage object.
    */
   public Optional<Coverage> toFhirCoverageIfPresent(CoverageCompositeId coverageCompositeId) {
-    return Optional.ofNullable(toFhir(coverageCompositeId))
+    return Optional.of(toFhir(coverageCompositeId))
         .filter(c -> !c.getIdentifier().isEmpty());
   }
 
