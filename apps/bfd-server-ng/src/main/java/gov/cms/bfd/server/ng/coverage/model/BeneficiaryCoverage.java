@@ -196,7 +196,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
    */
   public Optional<Coverage> toFhirCoverageIfPresentC4DIC(
       CoverageCompositeId coverageCompositeId, String orgId) {
-    return Optional.ofNullable(toFhirC4DIC(coverageCompositeId, orgId))
+    return Optional.of(toFhirC4DIC(coverageCompositeId, orgId))
         .filter(c -> !c.getIdentifier().isEmpty());
   }
 
