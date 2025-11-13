@@ -235,19 +235,12 @@ public class SystemUrls {
       "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-DSBLD-STUS-ID";
 
   // Hl7
-  /** URL. */
-  public static final String PROFILE_CARIN_BB_ORGANIZATION_2_1_0 =
-      "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0";
 
-  /** URL. */
+  /** HL7 - US Core Organization Profile. */
   public static final String PROFILE_US_CORE_ORGANIZATION_6_1_0 =
       "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|6.1.0";
 
-  /** URL. */
-  public static final String PROFILE_CARIN_BB_PRACTITIONER_2_1_0 =
-      "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0";
-
-  /** URL. */
+  /** HL7 - US Core Practitioner Profile. */
   public static final String PROFILE_US_CORE_PRACTITIONER_6_1_0 =
       "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0";
 
@@ -266,30 +259,30 @@ public class SystemUrls {
   /** <a href="https://terminology.hl7.org/2.1.0/CodeSystem-v2-0203.html">Hl7 Identifier.</a> */
   public static final String HL7_IDENTIFIER = "http://terminology.hl7.org/CodeSystem/v2-0203";
 
-  /** URL. */
+  /** HL7 - Claim Type Codes. */
   public static final String HL7_CLAIM_TYPE = "http://terminology.hl7.org/CodeSystem/claim-type";
 
-  /** URL. */
+  /** HL7 - Example Diagnosis Type Codes. */
   public static final String HL7_DIAGNOSIS_TYPE =
       "http://terminology.hl7.org/CodeSystem/ex-diagnosistype";
 
-  /** URL. */
+  /** HL7 - Claim Information Category Codes. */
   public static final String HL7_CLAIM_INFORMATION =
       "http://terminology.hl7.org/CodeSystem/claiminformationcategory";
 
-  /** URL. */
+  /** HL7 - DataAbsentReason. */
   public static final String HL7_DATA_ABSENT =
       "http://terminology.hl7.org/CodeSystem/data-absent-reason";
 
-  /** URL. */
+  /** HL7 - Adjudication Value Codes. */
   public static final String HL7_ADJUDICATION =
       "http://terminology.hl7.org/CodeSystem/adjudication";
 
-  /** URL. */
+  /** HL7 - Benefit Category Codes. */
   public static final String HL7_BENEFIT_CATEGORY =
       "http://terminology.hl7.org/CodeSystem/ex-benefitcategory";
 
-  /** URL. */
+  /** HL7 - code system for a kind of act. */
   public static final String SAMHSA_ACT_CODE_SYSTEM_URL =
       "http://terminology.hl7.org/CodeSystem/v3-ActCode";
 
@@ -317,68 +310,100 @@ public class SystemUrls {
 
   // Carin Blue Button
 
-  /** URL. */
+  /** CARIN Blue Button - Organization. */
+  public static final String PROFILE_CARIN_BB_ORGANIZATION_2_1_0 =
+      "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0";
+
+  /** CARIN Blue Button - Practitioner. */
+  public static final String PROFILE_CARIN_BB_PRACTITIONER_2_1_0 =
+      "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0";
+
+  /** CARIN Blue Button - Institutional Claim SubType Code System. */
   public static final String CARIN_CLAIM_SUBTYPE =
       "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBInstitutionalClaimSubType";
 
-  /** URL. */
+  /** CARIN Blue Button - ExplanationOfBenefit Pharmacy. */
   public static final String CARIN_STRUCTURE_DEFINITION_PHARMACY =
       "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Pharmacy|2.1.0";
 
-  /** URL. */
+  /** CARIN Blue Button - ExplanationOfBenefit Inpatient Institutional. */
   public static final String CARIN_STRUCTURE_DEFINITION_INPATIENT_INSTITUTIONAL =
       "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional|2.1.0";
 
-  /** URL. */
+  /** CARIN Blue Button - ExplanationOfBenefit Outpatient Institutional. */
   public static final String CARIN_STRUCTURE_DEFINITION_OUTPATIENT_INSTITUTIONAL =
       "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Outpatient-Institutional|2.1.0";
 
-  /** URL. */
+  /** CARIN Blue Button - ExplanationOfBenefit Professional NonClinician. */
   public static final String CARIN_STRUCTURE_DEFINITION_PROFESSIONAL =
       "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Professional-NonClinician|2.1.0";
 
-  /** URL. */
+  /** CARIN Blue Button - Identifier Type Code System. */
   public static final String CARIN_CODE_SYSTEM_IDENTIFIER_TYPE =
       "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType";
 
-  /** URL. */
+  /** CARIN Blue Button - Claim Procedure Type Code System. */
   public static final String CARIN_CODE_SYSTEM_CLAIM_PROCEDURE_TYPE =
       "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimProcedureType";
 
-  /** URL. */
+  /** CMS - Present on Admission Indicator. */
   public static final String POA_CODING =
       "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding";
 
-  /** URL. */
+  /** CARIN Blue Button - Claim Diagnosis Type Code System. */
   public static final String CARIN_CODE_SYSTEM_DIAGNOSIS_TYPE =
       "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType";
 
-  /** URL. */
+  /** CARIN Blue Button - Supporting Info Type Code System. */
   public static final String CARIN_CODE_SYSTEM_SUPPORTING_INFO_TYPE =
       "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType";
 
-  /** URL. */
+  /** CARIN Blue Button - Adjudication Discriminator Code System. */
   public static final String CARIN_CODE_SYSTEM_ADJUDICATION_DISCRIMINATOR =
       "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator";
 
-  /** URL. */
+  /** CARIN Blue Button - Adjudication Code System. */
   public static final String CARIN_CODE_SYSTEM_ADJUDICATION =
       "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication";
 
-  /** URL. */
+  /** CARIN Blue Button - Claim Care Team Role Code System. */
   public static final String CARIN_CODE_SYSTEM_CLAIM_CARE_TEAM_ROLE =
       "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole";
 
-  /** URL. */
+  /** CARIN Blue Button - C4BB Payer Adjudication Status. */
   public static final String CARIN_CODE_SYSTEM_PAYER_ADJUDICATION_STATUS =
       "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus";
 
   // CMS Blue Button
-  /** URL. */
+  /** Blue Button code system - Code system for clm type cd. */
   public static final String BLUE_BUTTON_CLAIM_TYPE_CODE =
       "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-TYPE-CD";
 
-  /** URL. */
+  /** Blue Button code system - Brand Generic Code. */
+  public static final String BLUE_BUTTON_GENERIC_BRAND_IND =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BRND-GNRC-CD";
+
+  /** HL7 - National Council for Prescription Drug Programs Brand Generic Indicator. */
+  public static final String HL7_GENERIC_BRAND_IND =
+      "http://terminology.hl7.org/CodeSystem/NCPDPBrandGenericIndicator";
+
+  /** Blue Button code system - Compound Code. */
+  public static final String BLUE_BUTTON_CLAIM_COMPOUND_CODE =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CMPND-CD";
+
+  /** HL7 - National Council for Prescription Drug Programs Compound Code. */
+  public static final String HL7_CLAIM_COMPOUND_CODE =
+      "http://terminology.hl7.org/CodeSystem/NCPDPCompoundCode";
+
+  /** HL7 - NCPDP Dispense As Written (DAW)/Product Selection Code. */
+  public static final String HL7_CLAIM_DAW_PROD_SELECT_CODE =
+      "http://terminology.hl7.org/CodeSystem/NCPDPDispensedAsWrittenOrProductSelectionCode";
+
+  /** HL7 - National Council for Prescription Drug Programs Prescription Origin Code. */
+  public static final String HL7_CLAIM_PRESCRIPTION_ORIGIN_CODE =
+      "http://terminology.hl7.org/CodeSystem/NCPDPPrescriptionOriginCode";
+
+  /** Blue Button code system - Claim Adjudication Status. */
   public static final String BLUE_BUTTON_ADJUDICATION_STATUS =
       "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication-Status";
 
@@ -421,6 +446,14 @@ public class SystemUrls {
   /** Blue Button code system - claim disposition code. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_CLAIM_DISPOSITION_CODE =
       "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DISP-CD";
+
+  /** Blue Button structure definition - part D claim format code. */
+  public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_CLAIM_FORMAT_CODE =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-SBMT-FRMT-CD";
+
+  /** Blue Button code system - part D claim format code. */
+  public static final String BLUE_BUTTON_CODE_SYSTEM_CLAIM_FORMAT_CODE =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-SBMT-FRMT-CD";
 
   /** Blue Button structure definition - claim process date. */
   public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_CLAIM_PROCESS_DATE =
@@ -473,6 +506,14 @@ public class SystemUrls {
   /** Blue Button structure definition - PPS DRG weight number. */
   public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_PPS_DRG_WEIGHT_NUMBER =
       "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MDCR-IP-PPS-DRG-WT-NUM";
+
+  /** Blue Button structure definition - Submitter contract number. */
+  public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_SUBMITTER_CONTRACT_NUMBER =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-SBMTR-CNTRCT-NUM";
+
+  /** Blue Button structure definition - Submitter Contract PBP Number. */
+  public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_SUBMITTER_CONTRACT_PBP_NUMBER =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-SBMTR-CNTRCT-PBP-NUM";
 
   /** Blue Button structure definition - nonpayment reason code. */
   public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_NONPAYMENT_REASON_CODE =
@@ -530,23 +571,51 @@ public class SystemUrls {
   public static final String BLUE_BUTTON_CODE_SYSTEM_REVENUE_CENTER_STATUS_CODE =
       "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-STUS-CD";
 
-  /** URL. */
+  /** Blue Button code system - Claim LUPA Indicator Code. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_HHA_LUPA_INDICATOR_CODE =
       "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD";
 
-  /** URL. */
+  /** Blue Button code system - Claim Referral Code. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_HHA_REFERAL_CODE =
       "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD";
 
-  /** URL. */
+  /** Blue Button code system - Catastrophic Coverage Indicator Code. */
+  public static final String BLUE_BUTTON_CODE_SYSTEM_CATASTROPHIC_COVERAGE_CODE =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_CTSTRPHC_CVRG_IND_CD";
+
+  /** Blue Button code system - Drug Coverage Status Code. */
+  public static final String BLUE_BUTTON_CODE_SYSTEM_DRUG_COVERAGE_STATUS_CODE =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DRUG-CVRG-STUS-CD";
+
+  /** Blue Button code system - Claim Dispensing Status Code. */
+  public static final String BLUE_BUTTON_CODE_SYSTEM_CLAIM_DISPENSE_STATUS_CODE =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DSPNSNG-STUS-CD";
+
+  /** Blue Button code system - Submission Clarification Code. */
+  public static final String BLUE_BUTTON_CODE_SYSTEM_CLAIM_SUBMISSION_CLARIFICATION_CODE =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_LTC_DSPNSNG_MTHD_CD";
+
+  /** Blue Button code system - Pharmacy Service Type Code. */
+  public static final String BLUE_BUTTON_CODE_SYSTEM_PHARMACY_SRVC_TYPE_CODE =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_PHRMCY_SRVC_TYPE_CD";
+
+  /** Blue Button code system - Patient Residence Code. */
+  public static final String BLUE_BUTTON_CODE_SYSTEM_PATIENT_RESIDENCE_CODE =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_PTNT_RSDNC_CD";
+
+  /** Blue Button code system - Prescription Origination Code. */
+  public static final String BLUE_BUTTON_CODE_SYSTEM_CLAIM_PRESCRIPTION_ORIGIN_CODE =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-LINE-RX-ORGN-CD";
+
+  /** Blue Button code system - ANSI Group Code - Claim Adjustment Group Code. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_ANSI_GRP_CODE =
-      "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE";
+      "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CODE";
 
-  /** URL. */
+  /** Blue Button code system - ANSI Reason Code - Claim Adjustment Reason Code. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_ANSI_RSN_CODE =
-      "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE";
+      "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CODE";
 
-  /** URL. */
+  /** Blue Button code system - Benefit Balance. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_BENEFIT_BALANCE =
       "https://bluebutton.cms.gov/fhir/CodeSystem/Benefit-Balance";
 
