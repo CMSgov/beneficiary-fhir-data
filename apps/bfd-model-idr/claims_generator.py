@@ -60,6 +60,7 @@ def save_output_files(
     clm_prfnl,
     clm_line_prfnl,
     clm_line_rx,
+    prvdr_hstry,
 ):
     Path("out").mkdir(exist_ok=True)
 
@@ -115,6 +116,8 @@ def save_output_files(
     df.to_csv("out/SYNTHETIC_CLM_LINE_PRFNL.csv", index=False)
     df = pd.json_normalize(clm_line_rx)
     df.to_csv("out/SYNTHETIC_CLM_LINE_RX.csv", index=False)
+    df = pd.json_normalize(prvdr_hstry)
+    df.to_csv("out/SYNTHETIC_PRVDR_HSTRY.csv", index=False)
     # these are mostly static
     shutil.copy("sample-data/SYNTHETIC_CLM_ANSI_SGNTR.csv", "out/SYNTHETIC_CLM_ANSI_SGNTR.csv")
 
@@ -307,6 +310,54 @@ def get_drg_dgns_codes() -> list[int]:
         k=1,
     )[0]
 
+available_given_names = [
+    "Wallace",
+    "Gromit",
+    "Wednesday",
+    "Indiana",
+    "Tiana",
+    "Tony",
+    "Jack",
+    "Sally",
+    "Coraline",
+    "Victor",
+    "Chip",
+    "Colin",
+    "Nadia",
+    "",
+]
+available_family_names = [
+    "Madrigal",
+    "Stark",
+    "Addams",
+    "Jones",
+    "Rogers",
+    "Garcia",
+    "Frankenstein",
+    "",
+]
+available_provider_names = [
+    "CBS PHARMACY",
+    "WAL-PART PHARMACY",
+    "BITE AID PHARMACY",
+    "HEALTHCARE CENTER",
+    "",
+]
+available_provider_legal_names = [
+    "HEALTHCARE SERVICES LLC",
+    "CBS Health Corporation",
+    "WALPART INC",
+    "Bite Aid Corporation",
+    "",
+]
+available_provider_tx_codes = [
+    "2081P0301X",
+    "208VP0000X",
+    "207XX0004X",
+    "207VX0201X",
+    "207RC0000X",
+    "207QB0505X",
+]
 
 def run_command(cmd, cwd=None):
     try:
@@ -487,6 +538,7 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
         "CLM_PRFNL": {},
         "CLM_LINE_PRFNL": [],
         "CLM_LINE_RX": [],
+        "PRVDR_HSTRY": [],
     }
     clm_dt_sgntr = {}
     clm_dt_sgntr["CLM_DT_SGNTR_SK"] = "".join(random.choices(string.digits, k=12))
@@ -612,8 +664,23 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
         claim_line_rx["CLM_LINE_SLS_TAX_AMT"] = round(random.uniform(1, 1000000), 2)
         claim_line_rx["CLM_PRCNG_EXCPTN_CD"] = random.choice(["", "O", "M"])
 
+        provider_history = {}
+        provider_history["PRVDR_SK"] = "".join(random.choices(string.digits, k=12))
+        provider_history["PRVDR_HSTRY_EFCTV_DT"] = str(date.today())
+        provider_history["PRVDR_HSTRY_OBSLT_DT"] = "9999-12-31"
+        provider_history["PRVDR_1ST_NAME"] = random.choice(available_given_names)
+        provider_history["PRVDR_MDL_NAME"] = random.choice(available_given_names)
+        provider_history["PRVDR_LAST_NAME"] = random.choice(available_family_names)
+        provider_history["PRVDR_NAME"] = random.choice(available_provider_names)
+        provider_history["PRVDR_LGL_NAME"] = random.choice(available_provider_legal_names)
+        provider_history["PRVDR_NPI_NUM"] = random.choice(type_2_npis)
+        provider_history["PRVDR_EMPLR_ID_NUM"] = "".join(random.choices(string.digits, k=10))
+        provider_history["PRVDR_OSCAR_NUM"] = "".join(random.choices(string.digits, k=6))
+        provider_history["PRVDR_TXNMY_CMPST_CD"] = random.choice(available_provider_tx_codes)
+
         claim["CLM_LINE"].append(claim_line)
         claim["CLM_LINE_RX"].append(claim_line_rx)
+        claim["PRVDR_HSTRY"].append(provider_history)
 
     tob_code = random.choice(generator.code_systems["CLM_BILL_FREQ_CD"])
     claim["CLM"]["CLM_BILL_FAC_TYPE_CD"] = tob_code[0]
@@ -1339,6 +1406,7 @@ def main():
     CLM_PRFNL = []
     CLM_LINE_PRFNL = []
     CLM_LINE_RX = []
+    PRVDR_HSTRY = []
     pt_complete = 0
     min_claims = args.min_claims
     max_claims = args.max_claims
@@ -1370,6 +1438,7 @@ def main():
             CLM_DCMTN.append(claim["CLM_DCMTN"])
             if claim["CLM"]["CLM_TYPE_CD"] in (1, 2, 3, 4):
                 CLM_LINE_RX.extend(claim["CLM_LINE_RX"])
+                PRVDR_HSTRY.extend(claim["PRVDR_HSTRY"])
             else:
                 # Only add professional data for non-Part D claims
                 CLM_PRFNL.append(claim["CLM_PRFNL"])
@@ -1409,6 +1478,7 @@ def main():
         CLM_PRFNL,
         CLM_LINE_PRFNL,
         CLM_LINE_RX,
+        PRVDR_HSTRY
     )
 
 

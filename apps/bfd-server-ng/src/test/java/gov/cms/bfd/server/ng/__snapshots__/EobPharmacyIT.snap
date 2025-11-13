@@ -25,6 +25,28 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
     "sequence" : 1
   } ],
   "contained" : [ {
+    "id" : "provider-practitioner",
+    "identifier" : [ {
+      "system" : "http://hl7.org/fhir/sid/us-npi",
+      "type" : {
+        "coding" : [ {
+          "code" : "NPI",
+          "display" : "National provider identifier",
+          "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+        } ]
+      },
+      "value" : "1548226988"
+    } ],
+    "meta" : {
+      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|6.1.0" ]
+    },
+    "name" : [ {
+      "family" : "Garcia",
+      "given" : [ "Indiana" ],
+      "use" : "official"
+    } ],
+    "resourceType" : "Practitioner"
+  }, {
     "id" : "careteam-prescriber-practitioner-1",
     "identifier" : [ {
       "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -414,6 +436,9 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
       "value" : 241515.19
     },
     "date" : "2018-08-20"
+  },
+  "provider" : {
+    "reference" : "#provider-practitioner"
   },
   "resourceType" : "ExplanationOfBenefit",
   "status" : "active",

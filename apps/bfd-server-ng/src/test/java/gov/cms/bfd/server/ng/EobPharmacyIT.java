@@ -61,6 +61,7 @@ public class EobPharmacyIT extends IntegrationTestBase {
       assertTrue(hasPrescribingRole.isPresent());
     }
 
+    assertEquals("#provider-practitioner", eob.getProvider().getReference());
     var containedResources = eob.getContained();
     var hasPractitioner =
         containedResources.stream()
@@ -68,10 +69,9 @@ public class EobPharmacyIT extends IntegrationTestBase {
             .findFirst();
     assertTrue(hasPractitioner.isPresent());
     Practitioner practitioner = (Practitioner) hasPractitioner.get();
+    assertEquals("provider-practitioner", practitioner.getId());
     var familyName =
-        practitioner.getName().stream()
-            .filter(p -> p.getFamily().equals("LAST NAME HERE"))
-            .findFirst();
+        practitioner.getName().stream().filter(p -> p.getFamily().equals("Garcia")).findFirst();
     assertTrue(familyName.isPresent());
 
     var partDInsurance =

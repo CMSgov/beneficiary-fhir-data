@@ -54,6 +54,9 @@ public class Claim {
   @Column(name = "clm_ric_cd")
   private Optional<ClaimRecordTypeCode> claimRecordTypeCode;
 
+  @Column(name = "clm_srvc_prvdr_gnrc_id_num")
+  private String serviceProviderNpiNumber;
+
   @Embedded private Meta meta;
   @Embedded private Identifiers identifiers;
   @Embedded private BillablePeriod billablePeriod;
@@ -66,10 +69,6 @@ public class Claim {
   @Embedded private BenefitBalance benefitBalance;
   @Embedded private AdjudicationCharge adjudicationCharge;
   @Embedded private ClaimPaymentAmount claimPaymentAmount;
-
-  // TODO: to be added in BFD-4286
-  // @Embedded private PharmacyOrgProvider pharmacyOrgProvider;
-  // @Embedded private PharmacyPractitionerProvider pharmacyPractitionerProvider;
 
   @OneToOne
   @JoinColumn(name = "bene_sk")
@@ -113,6 +112,15 @@ public class Claim {
       referencedColumnName = "cntrct_pbp_num")
   private Contract contract;
 
+  @Nullable
+  @OneToOne
+  @JoinColumn(
+      name = "clm_srvc_prvdr_gnrc_id_num",
+      insertable = false,
+      updatable = false,
+      referencedColumnName = "prvdr_npi_num")
+  private ProviderHistory providerHistory;
+
   Optional<ClaimInstitutional> getClaimInstitutional() {
     return Optional.ofNullable(claimInstitutional);
   }
@@ -123,6 +131,10 @@ public class Claim {
 
   private Optional<Contract> getContract() {
     return Optional.ofNullable(contract);
+  }
+
+  private Optional<ProviderHistory> getProviderHistory() {
+    return Optional.ofNullable(providerHistory);
   }
 
   /**
@@ -193,21 +205,28 @@ public class Claim {
               eob.addContained(p);
               eob.setProvider(new Reference(p));
             });
-    // TODO: below depends on clm_srvc_prvdr_gnrc_id_type which will be decided in BFD-4286
-    /*pharmacyOrgProvider
-        .toFhir(claimTypeCode)
-        .ifPresent(
-            p -> {
-              eob.addContained(p);
-              eob.setProvider(new Reference(p));
-            });
-    pharmacyPractitionerProvider
-        .toFhir(claimTypeCode)
-        .ifPresent(
-            p -> {
-              eob.addContained(p);
-              eob.setProvider(new Reference(p));
-            });*/
+    var providerContext = getProviderHistory();
+    if (providerContext.isPresent()) {
+      var provider = providerContext.get();
+      var npiType = provider.getNpiType();
+      if (npiType == 1) {
+        provider
+            .toPractitionerFhir(claimTypeCode, serviceProviderNpiNumber)
+            .ifPresent(
+                p -> {
+                  eob.addContained(p);
+                  eob.setProvider(new Reference(p));
+                });
+      } else {
+        provider
+            .toOrganizationFhir(claimTypeCode, serviceProviderNpiNumber)
+            .ifPresent(
+                p -> {
+                  eob.addContained(p);
+                  eob.setProvider(new Reference(p));
+                });
+      }
+    }
 
     claimSourceId.toFhirOutcome().ifPresent(eob::setOutcome);
     claimTypeCode.toFhirOutcome().ifPresent(eob::setOutcome);
