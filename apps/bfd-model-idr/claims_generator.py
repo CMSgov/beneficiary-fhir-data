@@ -31,6 +31,7 @@ def save_output_files(
     clm_prfnl,
     clm_line_prfnl,
     clm_line_rx,
+    clm_rlt_cond_sgntr_mbr,
 ):
     Path("out").mkdir(exist_ok=True)
 
@@ -86,6 +87,8 @@ def save_output_files(
     df.to_csv("out/SYNTHETIC_CLM_LINE_PRFNL.csv", index=False)
     df = pd.json_normalize(clm_line_rx)
     df.to_csv("out/SYNTHETIC_CLM_LINE_RX.csv", index=False)
+    df = pd.json_normalize(clm_rlt_cond_sgntr_mbr)
+    df.to_csv("out/SYNTHETIC_CLM_RLT_COND_SGNTR_MBR.csv", index=False)
     # these are mostly static
     shutil.copy("sample-data/SYNTHETIC_CLM_ANSI_SGNTR.csv", "out/SYNTHETIC_CLM_ANSI_SGNTR.csv")
 
@@ -223,6 +226,8 @@ available_ndc = [
 ]
 clm_poa_ind_choices = ["N", "1", "U", "X", "W", "0", "~", "Z", "Y", ""]
 avail_pbp_nums = ["001", "002", "003", "004", "005", "006", "007", "008", "009", "010"]
+target_sequence_numbers = [0, 1, 2, 3, 4, 5, 6, 7]
+target_rlt_cond_codes = ["21", "39", "C5", "42", "64", "W2", "D9", "09", "R1"]
 
 
 def run_command(cmd, cwd=None):
@@ -404,11 +409,24 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
         "CLM_PRFNL": {},
         "CLM_LINE_PRFNL": [],
         "CLM_LINE_RX": [],
+        "CLM_RLT_COND_SGNTR_MBR": {},
+        "RLT_COND_MBR_RECORD": {},
     }
     clm_dt_sgntr = {}
     clm_dt_sgntr["CLM_DT_SGNTR_SK"] = "".join(random.choices(string.digits, k=12))
     claim["CLM"]["CLM_DT_SGNTR_SK"] = clm_dt_sgntr["CLM_DT_SGNTR_SK"]
     claim["CLM"]["CLM_UNIQ_ID"] = "-" + "".join(random.choices(string.digits, k=13))
+
+    clm_rlt_cond_sgntr_sk = random.randint(2, 999999999999)
+    claim["CLM"]["CLM_RLT_COND_SGNTR_SK"] = clm_rlt_cond_sgntr_sk
+
+    rlt_cond_mbr_record = {}
+    rlt_cond_mbr_record["CLM_RLT_COND_SGNTR_SK"] = clm_rlt_cond_sgntr_sk
+    rlt_cond_mbr_record["CLM_RLT_COND_SGNTR_SQNC_NUM"] = random.choice(target_sequence_numbers)
+    rlt_cond_mbr_record["CLM_RLT_COND_CD"] = random.choice(target_rlt_cond_codes)
+
+    claim["CLM_RLT_COND_SGNTR_MBR"] = rlt_cond_mbr_record
+
     # clm_type_cd = 60
     clm_type_cd = random.choice([1, 2, 3, 4, 10, 20, 30, 40, 50, 60, 71, 72, 81, 82])
     claim["CLM"]["CLM_TYPE_CD"] = clm_type_cd
@@ -540,6 +558,7 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
 
     add_meta_timestamps(claim["CLM"], claim["CLM"], max_date)
     add_meta_timestamps(clm_dt_sgntr, claim["CLM"], max_date)
+    add_meta_timestamps(rlt_cond_mbr_record, claim["CLM"], max_date)
 
     clm_finl_actn_ind = "N"
     if clm_type_cd in (1, 2, 3, 4, 10, 20, 30, 40, 50, 60, 61, 62, 63, 71, 72, 81, 82):
@@ -1138,6 +1157,17 @@ def gen_pac_version_of_claim(claim, max_date):
 
     if "CLM_DCMTN" in pac_claim:
         pac_claim.pop("CLM_DCMTN")
+    
+    pac_clm_rlt_cond_sgntr_sk = random.randint(2, 999999999999)
+    pac_claim["CLM"]["CLM_RLT_COND_SGNTR_SK"] = pac_clm_rlt_cond_sgntr_sk
+
+    pac_rlt_cond_mbr_record = {}
+    pac_rlt_cond_mbr_record["CLM_RLT_COND_SGNTR_SK"] = pac_clm_rlt_cond_sgntr_sk
+    pac_rlt_cond_mbr_record["CLM_RLT_COND_SGNTR_SQNC_NUM"] = random.choice(target_sequence_numbers)
+    pac_rlt_cond_mbr_record["CLM_RLT_COND_CD"] = random.choice(target_rlt_cond_codes)
+    
+    add_meta_timestamps(pac_rlt_cond_mbr_record, pac_claim["CLM"], max_date)
+    pac_claim["CLM_RLT_COND_SGNTR_MBR"] = pac_rlt_cond_mbr_record  
 
     return pac_claim
 
@@ -1213,6 +1243,7 @@ def main():
     CLM_PRFNL = []
     CLM_LINE_PRFNL = []
     CLM_LINE_RX = []
+    CLM_RLT_COND_SGNTR_MBR = []
     pt_complete = 0
     min_claims = args.min_claims
     max_claims = args.max_claims
@@ -1237,6 +1268,7 @@ def main():
             CLM_VAL.extend(claim["CLM_VAL"])
             CLM_DT_SGNTR.append(claim["CLM_DT_SGNTR"])
             CLM_PROD.extend(claim["CLM_PROD"])
+            CLM_RLT_COND_SGNTR_MBR.append(claim["CLM_RLT_COND_SGNTR_MBR"])
 
             if "CLM_INSTNL" in claim:
                 CLM_INSTNL.append(claim["CLM_INSTNL"])
@@ -1260,6 +1292,7 @@ def main():
                 CLM_VAL.extend(pac_claim["CLM_VAL"])
                 CLM_DT_SGNTR.append(pac_claim["CLM_DT_SGNTR"])
                 CLM_PROD.extend(pac_claim["CLM_PROD"])
+                CLM_RLT_COND_SGNTR_MBR.append(pac_claim["CLM_RLT_COND_SGNTR_MBR"])
 
                 if pac_claim.get("CLM_INSTNL"):
                     CLM_INSTNL.append(pac_claim["CLM_INSTNL"])
@@ -1282,6 +1315,7 @@ def main():
         CLM_PRFNL,
         CLM_LINE_PRFNL,
         CLM_LINE_RX,
+        CLM_RLT_COND_SGNTR_MBR,
     )
 
 

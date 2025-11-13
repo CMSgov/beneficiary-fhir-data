@@ -1285,15 +1285,16 @@ class IdrClaimRelatedCondition(IdrBaseModel):
     clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, ALIAS: ALIAS_CLM}]
     clm_rlt_cond_sgntr_sqnc_num: Annotated[int, {PRIMARY_KEY: True, ALIAS: ALIAS_RLT_COND}]
     clm_rlt_cond_cd: Annotated[str, BeforeValidator(transform_default_string)]
+    clm_idr_ld_dt: Annotated[date, {INSERT_EXCLUDE: True, HISTORICAL_BATCH_TIMESTAMP: True}]
 
     idr_insrt_ts: Annotated[
         datetime,
-        {BATCH_TIMESTAMP: True, ALIAS: ALIAS_RLT_COND, COLUMN_MAP: "idr_insrt_ts"},
+        {BATCH_TIMESTAMP: True, ALIAS: ALIAS_RLT_COND},
         BeforeValidator(transform_null_date_to_min),
     ]
     idr_updt_ts: Annotated[
         datetime,
-        {UPDATE_TIMESTAMP: True, ALIAS: ALIAS_RLT_COND, COLUMN_MAP: "idr_updt_ts"},
+        {UPDATE_TIMESTAMP: True, ALIAS: ALIAS_RLT_COND},
         BeforeValidator(transform_null_date_to_min),
     ]
 
@@ -1313,17 +1314,17 @@ class IdrClaimRelatedCondition(IdrBaseModel):
                     {clm}.clm_type_cd,
                     {clm}.clm_num_sk,
                     {clm}.clm_dt_sgntr_sk,
-                    {clm}.clm_rlt_cond_sgntr_sk
+                    {clm}.clm_rlt_cond_sgntr_sk,
+                    {clm}.clm_idr_ld_dt
                 FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
-                WHERE {claim_type_clause(start_time)}
+                WHERE {claim_type_clause(start_time, CLAIM_TYPE_CODES)}
             )
             SELECT {{COLUMNS}}
             FROM claims {clm}
             JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_rlt_cond_sgntr_mbr {rltcond}
                 ON {rltcond}.clm_rlt_cond_sgntr_sk = {clm}.clm_rlt_cond_sgntr_sk
-            WHERE {clm}.clm_rlt_cond_sgntr_sk <> 0
+            {{WHERE_CLAUSE}} AND {clm}.clm_rlt_cond_sgntr_sk <> 0
             AND {clm}.clm_rlt_cond_sgntr_sk <> 1
-            {{WHERE_CLAUSE}}
             {{ORDER_BY}}
         """
 

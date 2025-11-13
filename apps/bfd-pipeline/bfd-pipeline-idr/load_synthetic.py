@@ -31,6 +31,7 @@ tables = [
     {"csv_name": "SYNTHETIC_CLM_ANSI_SGNTR.csv", "table": "v2_mdcr_clm_ansi_sgntr"},
     {"csv_name": "SYNTHETIC_CLM_PROD.csv", "table": "v2_mdcr_clm_prod"},
     {"csv_name": "SYNTHETIC_CLM_FISS.csv", "table": "v2_mdcr_clm_fiss"},
+    {"csv_name": "SYNTHETIC_CLM_RLT_COND_SGNTR_MBR.csv", "table": "v2_mdcr_clm_rlt_cond_sgntr_mbr"},
 ]
 
 
