@@ -425,9 +425,9 @@ public enum ClaimTypeCode {
       return Collections.emptyList();
     }
 
-    ClaimSubtype claimType = ClaimSubtype.fromCode(normalizedType);
+    var claimType = ClaimSubtype.fromCode(normalizedType);
 
-    List<ClaimTypeCode> codesForThisType = CLAIM_TYPE_CODE_MAP.get(claimType);
+    var codesForThisType = CLAIM_TYPE_CODE_MAP.get(claimType);
 
     if (codesForThisType != null) {
       collectedClaimTypeCodes.addAll(codesForThisType);

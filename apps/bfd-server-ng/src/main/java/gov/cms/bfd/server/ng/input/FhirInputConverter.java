@@ -4,18 +4,17 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
-import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import gov.cms.bfd.server.ng.claim.model.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.ClaimTypeCode;
 import gov.cms.bfd.server.ng.util.IdrConstants;
 import gov.cms.bfd.server.ng.util.SystemUrls;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.IdType;
@@ -190,26 +189,19 @@ public class FhirInputConverter {
   public static List<ClaimTypeCode> getClaimTypeCodesForType(
       @Nullable TokenAndListParam typeParam) {
 
-    List<ClaimTypeCode> claimTypeCodes = new ArrayList<>();
-
     if (typeParam == null || typeParam.getValuesAsQueryTokens().isEmpty()) {
       return Collections.emptyList();
     }
     var typeParams = typeParam.getValuesAsQueryTokens();
 
-    for (TokenOrListParam param : typeParams) {
-      var tokens = param.getValuesAsQueryTokens();
-
-      if (tokens == null || tokens.isEmpty()) {
-        continue;
-      }
-      for (TokenParam token : tokens) {
-        var type = token.getValue();
-        var normalizedType = type.trim().toLowerCase();
-        claimTypeCodes.addAll(ClaimTypeCode.getClaimTypeCodesByType(normalizedType));
-      }
-    }
-
-    return claimTypeCodes;
+    return typeParams.stream()
+        .flatMap(
+            param ->
+                param.getValuesAsQueryTokens() == null
+                    ? Stream.empty()
+                    : param.getValuesAsQueryTokens().stream())
+        .map(token -> token.getValue().trim().toLowerCase())
+        .flatMap(normalizedType -> ClaimTypeCode.getClaimTypeCodesByType(normalizedType).stream())
+        .collect(Collectors.toList());
   }
 }
