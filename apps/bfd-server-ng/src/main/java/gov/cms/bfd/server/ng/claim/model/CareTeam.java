@@ -40,32 +40,33 @@ class CareTeam {
   @Column(name = "clm_rfrg_prvdr_pin_num")
   private Optional<String> refferingProviderPinNumber;
 
-
-
-
-    List<CareTeamType.CareTeamComponents> toFhir(int sequenceStart) {
-    var sequenceGenerator = new SequenceGenerator(sequenceStart);
+  List<CareTeamType.CareTeamComponents> toFhir() {
+    var sequenceGenerator = new SequenceGenerator();
     var components =
         Stream.of(
             attendingProviderNpiNumber.map(
                 npi ->
                     CareTeamType.ATTENDING.toFhir(
-                        sequenceGenerator, npi, attendingProviderLastName,Optional.empty())),
+                        sequenceGenerator, npi, attendingProviderLastName, Optional.empty())),
             operatingProviderNpiNumber.map(
                 npi ->
                     CareTeamType.OPERATING.toFhir(
-                        sequenceGenerator, npi, operatingProviderLastName,Optional.empty())),
+                        sequenceGenerator, npi, operatingProviderLastName, Optional.empty())),
             otherProviderNpiNumber.map(
                 npi ->
-                    CareTeamType.RENDERING.toFhir(sequenceGenerator, npi, otherProviderLastName,Optional.empty())),
+                    CareTeamType.RENDERING.toFhir(
+                        sequenceGenerator, npi, otherProviderLastName, Optional.empty())),
             renderingProviderNpiNumber.map(
                 npi ->
                     CareTeamType.RENDERING.toFhir(
-                        sequenceGenerator, npi, renderingProviderLastName,Optional.empty())),
+                        sequenceGenerator, npi, renderingProviderLastName, Optional.empty())),
             refferingProviderNpiNumber.map(
                 npi ->
-                        CareTeamType.REFERRING.toFhir(
-                                sequenceGenerator, npi, renderingProviderLastName, refferingProviderPinNumber)));
+                    CareTeamType.REFERRING.toFhir(
+                        sequenceGenerator,
+                        npi,
+                        renderingProviderLastName,
+                        refferingProviderPinNumber)));
 
     return components.flatMap(Optional::stream).toList();
   }

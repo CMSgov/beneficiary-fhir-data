@@ -26,7 +26,9 @@ public class ClaimRepository {
         JOIN FETCH c.claimDateSignature AS cds
         JOIN FETCH c.claimItems AS cl
         LEFT JOIN FETCH c.claimInstitutional ci
+        LEFT JOIN FETCH c.claimProfessional cp
         LEFT JOIN FETCH cl.claimLineInstitutional cli
+        LEFT JOIN FETCH cl.claimLineProfessional clp
         LEFT JOIN FETCH c.claimFiss cf
         LEFT JOIN FETCH cli.ansiSignature a
       """;

@@ -12,8 +12,10 @@ public class ClinicalTrialNumber {
   private Optional<String> clinicalTrailNum;
 
   Optional<Extension> toFhir() {
-      return clinicalTrailNum.map(s -> new Extension()
-              .setUrl(SystemUrls.BLUE_BUTTON_STRUCTURE_DEFINITION_CLAIM_CLINICAL_TRIAL_NUMBER)
-              .setValue(new StringType(s)));
+    return clinicalTrailNum.map(
+        s ->
+            new Extension()
+                .setUrl(SystemUrls.BLUE_BUTTON_STRUCTURE_DEFINITION_CLAIM_CLINICAL_TRIAL_NUMBER)
+                .setValue(new StringType(s)));
   }
 }

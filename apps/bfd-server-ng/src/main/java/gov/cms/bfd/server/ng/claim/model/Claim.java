@@ -156,23 +156,24 @@ public class Claim {
           item.getClaimLine().toFhir(item).ifPresent(eob::addItem);
           item.getClaimLine()
               .getClaimRenderingProvider()
-              .toFhirPractitioner(item.getClaimLine().getClaimLineNumber())
-              .ifPresent(eob::addContained);
-          item.getClaimLine()
-              .getClaimRenderingProvider()
               .toFhirCareTeam(item.getClaimLine().getClaimLineNumber())
-              .ifPresent(eob::addCareTeam);
+              .ifPresent(
+                  c -> {
+                    eob.addCareTeam(c.careTeam());
+                    eob.addContained(c.practitioner());
+                  });
           item.getClaimProcedure().toFhirProcedure().ifPresent(eob::addProcedure);
           item.getClaimProcedure()
               .toFhirDiagnosis(item.getClaimItemId().getBfdRowId(), claimTypeCode)
               .ifPresent(eob::addDiagnosis);
-
           item.getClaimLineProfessional()
               .flatMap(i -> i.toFhirObservation(item.getClaimItemId().getBfdRowId()))
               .ifPresent(eob::addContained);
         });
+
+    // Passing NPI type = 1 for now until NPI type is added
     billingProvider
-        .toFhir(claimTypeCode)
+        .toFhir(claimTypeCode, 1)
         .ifPresent(
             p -> {
               eob.addContained(p);
@@ -211,7 +212,7 @@ public class Claim {
         .forEach(eob::addSupportingInfo);
 
     careTeam
-        .toFhir(eob.getCareTeam().size() + 1)
+        .toFhir()
         .forEach(
             c -> {
               eob.addCareTeam(c.careTeam());
@@ -233,13 +234,13 @@ public class Claim {
     eob.setTotal(adjudicationCharge.toFhir());
     eob.setPayment(claimPaymentAmount.toFhir());
 
-      getClaimProfessional()
-              .ifPresent(
-                      professional -> {
-                          eob.getExtension().addAll(professional.toFhirExtension());
-                          eob.addTotal(professional.toFhirTotal());
-                          eob.addBenefitBalance(benefitBalance.toFhir());
-                      });
+    getClaimProfessional()
+        .ifPresent(
+            professional -> {
+              eob.getExtension().addAll(professional.toFhirExtension());
+              eob.addTotal(professional.toFhirTotal());
+              eob.addBenefitBalance(benefitBalance.toFhir());
+            });
 
     return sortedEob(eob);
   }

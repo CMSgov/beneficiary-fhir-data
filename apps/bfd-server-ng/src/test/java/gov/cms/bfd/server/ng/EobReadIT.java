@@ -82,6 +82,13 @@ class EobReadIT extends IntegrationTestBase {
     assertThrows(InvalidRequestException.class, readWithId::execute);
   }
 
+  @Test
+  void eobReadProfessionalClaim() {
+    var eob = eobRead().withId(Long.parseLong(CLAIM_ID_PROFESSIONAL)).execute();
+    assertFalse(eob.isEmpty());
+    expectFhir().toMatchSnapshot(eob);
+  }
+
   @ParameterizedTest
   @EmptySource
   void eobReadNoIdBadRequest(String id) {

@@ -11,18 +11,6 @@ public class SequenceGenerator implements Iterator<Integer> {
     return true;
   }
 
-  /**
-   * Creates a new {@code SequenceGenerator} starting from the specified number.
-   *
-   * @param start the initial value of the sequence
-   */
-  public SequenceGenerator(int start) {
-    this.current = start;
-  }
-
-  /** Creates a new {@code SequenceGenerator} starting from 1. */
-  public SequenceGenerator() {}
-
   @Override
   public Integer next() {
     return current++;

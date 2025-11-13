@@ -6,14 +6,13 @@ import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-
 import java.math.BigDecimal;
 import java.util.Optional;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Identifier;
-import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 
 /** Professional claim line table. */
@@ -43,31 +42,30 @@ public class ClaimLineProfessional {
    * @return claim Observation
    */
   public Optional<Observation> toFhirObservation(int bfdRowId) {
-    if (claimLineHCTHGBTestTypeCode.isEmpty() || claimLineHCTHGBTestResult <= 0 ) {
+    if (claimLineHCTHGBTestTypeCode.isEmpty() || claimLineHCTHGBTestResult <= 0) {
       return Optional.empty();
     }
 
     var observation = new Observation();
     observation.setId(String.valueOf(bfdRowId));
-      claimLineHCTHGBTestTypeCode.ifPresent(testTypeCode ->
-              observation.setCode(new CodeableConcept().addCoding(testTypeCode.toFhirCoding()))
-      );
+    claimLineHCTHGBTestTypeCode.ifPresent(
+        testTypeCode ->
+            observation.setCode(new CodeableConcept().addCoding(testTypeCode.toFhirCoding())));
 
-      observation.setStatus(Observation.ObservationStatus.FINAL);
-      observation.setValue(
-              new Quantity()
-                      .setValue(BigDecimal.valueOf(claimLineHCTHGBTestResult))
-                      .setUnit("g/dL") // or the proper UCUM unit
-                      .setSystem("http://unitsofmeasure.org")
-                      .setCode("g/dL"));
+    observation.setStatus(Observation.ObservationStatus.FINAL);
+    observation.setValue(
+        new Quantity()
+            .setValue(BigDecimal.valueOf(claimLineHCTHGBTestResult))
+            .setUnit("g/dL") // or the proper UCUM unit
+            .setSystem("http://unitsofmeasure.org")
+            .setCode("g/dL"));
 
-      claimLineCarrierClinicalLabNumber.ifPresent(labNumber -> {
-          var identifier = new Identifier()
-                  .setSystem(SystemUrls.CLIA)
-                  .setValue(labNumber);
+    claimLineCarrierClinicalLabNumber.ifPresent(
+        labNumber -> {
+          var identifier = new Identifier().setSystem(SystemUrls.CLIA).setValue(labNumber);
 
           observation.addPerformer(new Reference().setIdentifier(identifier));
-      });
+        });
 
     return Optional.of(observation);
   }

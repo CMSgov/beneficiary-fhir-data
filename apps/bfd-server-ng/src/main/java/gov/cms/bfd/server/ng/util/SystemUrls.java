@@ -569,8 +569,7 @@ public class SystemUrls {
       "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRVDR-TYPE-CD";
 
   /** Blue Button code system - pin number */
-  public static final String BLUE_BUTTON_PIN_NUM =
-      "https://bluebutton.cms.gov/identifiers/PIN-NUM";
+  public static final String BLUE_BUTTON_PIN_NUM = "https://bluebutton.cms.gov/identifiers/PIN-NUM";
 
   /** CMS ICD - ICD-9. */
   public static final String CMS_ICD_9_PROCEDURE = "http://www.cms.gov/Medicare/Coding/ICD9";

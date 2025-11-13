@@ -78,18 +78,17 @@ public class ClaimProcedure {
       return Optional.empty();
     }
     ClaimContext claimContext;
-     if (claimTypeCode.isBetween(5, 69)
-                  || claimTypeCode.isBetween(2000, 2699)
-                  || claimTypeCode.isBetween(1000, 1699)) {
-         claimContext = ClaimContext.INSTITUTIONAL;
-      }
-      else  if(claimTypeCode.isBetween(71, 82)
-                  || claimTypeCode.isBetween(2700, 2899)
-                  || claimTypeCode.isBetween(1700, 1899)) {
-         claimContext = ClaimContext.PROFESSIONAL;
-      } else {
-         return Optional.empty();
-     }
+    if (claimTypeCode.isBetween(5, 69)
+        || claimTypeCode.isBetween(2000, 2699)
+        || claimTypeCode.isBetween(1000, 1699)) {
+      claimContext = ClaimContext.INSTITUTIONAL;
+    } else if (claimTypeCode.isBetween(71, 82)
+        || claimTypeCode.isBetween(2700, 2899)
+        || claimTypeCode.isBetween(1700, 1899)) {
+      claimContext = ClaimContext.PROFESSIONAL;
+    } else {
+      return Optional.empty();
+    }
     var diagnosis = new ExplanationOfBenefit.DiagnosisComponent();
     diagnosis.setSequence(bfdRowId);
 
@@ -97,9 +96,7 @@ public class ClaimProcedure {
         d ->
             diagnosis.addType(
                 new CodeableConcept(
-                    new Coding()
-                        .setSystem(d.getSystem())
-                        .setCode(d.getFhirCode(claimContext)))));
+                    new Coding().setSystem(d.getSystem()).setCode(d.getFhirCode(claimContext)))));
 
     String formattedCode = icdIndicator.get().formatDiagnosisCode(diagnosisCode.get());
     diagnosis.setDiagnosis(

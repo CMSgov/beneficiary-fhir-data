@@ -30,17 +30,13 @@ public class ClaimRenderingProvider {
   @Column(name = "clm_rndrg_prvdr_type_cd")
   private Optional<String> typeCode;
 
-  Optional<Practitioner> toFhirPractitioner(Optional<Integer> claimLineNum) {
-
-    if (npiNumber.isEmpty()
-        && taxNumber.isEmpty()
-        && participatingIndicatorCode.isEmpty()
-        && typeCode.isEmpty()) {
+  Optional<CareTeamType.CareTeamComponents> toFhirCareTeam(Optional<Integer> claimLineNum) {
+    if (claimLineNum.isEmpty() || npiNumber.isEmpty()) {
       return Optional.empty();
     }
 
     var practitioner = new Practitioner();
-    practitioner.setId("careteam-provider-line-" + claimLineNum);
+    practitioner.setId("careteam-provider-line-" + claimLineNum.get());
     practitioner.setMeta(
         new Meta()
             .addProfile(SystemUrls.PROFILE_CARIN_BB_PRACTITIONER_2_1_0)
@@ -84,14 +80,7 @@ public class ClaimRenderingProvider {
                             .setCode(s)
                             .setSystem(SystemUrls.BLUE_BUTTON_CODE_SYSTEM_PROVIDER_TYPE_CODE))));
 
-    return Optional.of(practitioner);
-  }
-
-  Optional<ExplanationOfBenefit.CareTeamComponent> toFhirCareTeam(Optional<Integer> claimLineNum) {
-    if (claimLineNum.isEmpty()) {
-      return Optional.empty();
-    }
-    return Optional.of(
+    var component =
         new ExplanationOfBenefit.CareTeamComponent()
             .setSequence(claimLineNum.get())
             .setRole(
@@ -100,6 +89,8 @@ public class ClaimRenderingProvider {
                         .setSystem(SystemUrls.CARIN_CODE_SYSTEM_CLAIM_CARE_TEAM_ROLE)
                         .setCode(CareTeamType.RENDERING.roleCode)
                         .setDisplay(CareTeamType.RENDERING.roleDisplay)))
-            .setProvider(new Reference("#careteam-provider-line-" + claimLineNum.get())));
+            .setProvider(new Reference("#careteam-provider-line-" + claimLineNum.get()));
+
+    return Optional.of(new CareTeamType.CareTeamComponents(practitioner, component));
   }
 }
