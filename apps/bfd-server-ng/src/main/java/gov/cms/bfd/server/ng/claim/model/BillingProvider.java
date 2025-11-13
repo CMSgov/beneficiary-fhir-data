@@ -35,6 +35,7 @@ class BillingProvider {
    *
    * @param claimTypeCode - Claim Type code
    * @param npiType - NPI type
+   * @return a bundle resource containing either the Organization or Practitioner.
    */
   Optional<Resource> toFhir(ClaimTypeCode claimTypeCode, Integer npiType) {
     // --- 1. Institutional claims ---
