@@ -960,7 +960,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
         "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
       } ]
     },
-    "sequence" : 1
+    "sequence" : 1,
+    "servicedDate" : "2021-12-21"
   } ],
   "meta" : {
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00",

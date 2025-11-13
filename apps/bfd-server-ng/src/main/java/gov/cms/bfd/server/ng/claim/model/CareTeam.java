@@ -65,12 +65,11 @@ class CareTeam {
             renderingProviderNpiNumber.map(
                 npi ->
                     CareTeamType.RENDERING.toFhir(
-                        sequenceGenerator, npi, renderingProviderLastName)),
+                        sequenceGenerator, npi, renderingProviderLastName, Optional.empty())),
             prescribingProviderNpiNumber.map(
                 npi ->
                     CareTeamType.PRESCRIBING.toFhir(
-                        sequenceGenerator, npi, Optional.of(PROVIDER_LAST_NAME))));
-                        sequenceGenerator, npi, renderingProviderLastName, Optional.empty())),
+                        sequenceGenerator, npi, Optional.of(PROVIDER_LAST_NAME), Optional.empty())),
             refferingProviderNpiNumber.map(
                 npi ->
                     CareTeamType.REFERRING.toFhir(

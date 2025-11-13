@@ -14,6 +14,7 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Resource;
 
+/** Billing Provider. * */
 @Embeddable
 class BillingProvider {
   @Column(name = "prvdr_blg_prvdr_npi_num")

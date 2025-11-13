@@ -4,6 +4,7 @@ import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
@@ -14,6 +15,7 @@ import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Reference;
 
 @AllArgsConstructor
+@Getter
 enum CareTeamType {
   ATTENDING("attending", "Attending"),
   OPERATING("operating", "Operating"),
