@@ -45,6 +45,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class EobSamhsaFilterIT extends IntegrationTestBase {
+
   private final FhirContext context = FhirContext.forR4();
 
   private static final Map<String, List<SecurityLabel>> SECURITY_LABELS =
@@ -328,7 +329,7 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
                 Assertions.fail(
                     "Expected SAMHSA security tag not found in EOB meta or had incorrect code/system."));
 
-    // Snapshot only the SAMHSA EOB to avoid environment specific bundle composition differences.
+    // Snapshot only the SAMHSA EOB to avoid storing irrelevant objects.
     var snapshotBundle = new Bundle();
     snapshotBundle.setType(bundle.getType());
     snapshotBundle.addEntry().setResource(samhsaEob.get());
@@ -339,7 +340,6 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
   // Since the tests above are largely checking for the absence of some codes,
   // the only way to ensure the data is set up correctly is to make sure the relevant codes
   // do appear in the responses when filtering is not enabled.
-
   private static Stream<Arguments> ensureDiagnosis() {
     return Stream.of(
         Arguments.of(
