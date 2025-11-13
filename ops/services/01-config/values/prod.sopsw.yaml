@@ -515,10 +515,10 @@
 /bfd/${env}/server/nonsensitive/ecs/capacity/max: 12
 /bfd/${env}/server/nonsensitive/ecs/resources/cpu: 8192
 /bfd/${env}/server/nonsensitive/ecs/resources/memory: 32768
-/bfd/${env}/server/nonsensitive/ecs/capacity_provider/FARGATE/base: 2
-/bfd/${env}/server/nonsensitive/ecs/capacity_provider/FARGATE/weight: 0
+/bfd/${env}/server/nonsensitive/ecs/capacity_provider/FARGATE/base: 6
+/bfd/${env}/server/nonsensitive/ecs/capacity_provider/FARGATE/weight: 50
 /bfd/${env}/server/nonsensitive/ecs/capacity_provider/FARGATE_SPOT/base: 0
-/bfd/${env}/server/nonsensitive/ecs/capacity_provider/FARGATE_SPOT/weight: 100
+/bfd/${env}/server/nonsensitive/ecs/capacity_provider/FARGATE_SPOT/weight: 50
 /bfd/${env}/server-ng/sensitive/db/password: ENC[AES256_GCM,data:8P46w9KmBtuyh9BczF9/jWjaeXb6w/tz,iv:Dew1zi/k4ISsDacYVoEqfewEklD1XFZPKsnrdSWez20=,tag:ualXUPI9kEnGtSIrgXIt5g==,type:str]
 /bfd/${env}/server-ng/sensitive/db/username: ENC[AES256_GCM,data:CSHfc8j+76PD7DO62esDyQ==,iv:i06x4UlsjJacfX9FKEeHX3kpVTBELYu1pjHJ03QWBQ4=,tag:wO+H91++xuBtxWGwVw3UvQ==,type:str]
 /bfd/${env}/server-ng/sensitive/service_port: ENC[AES256_GCM,data:99aDJg==,iv:K65UJJWsv4IX0LefMMzf0XXJcwQfInxB0g8BV9dDFDY=,tag:FnWpv24I7aTAaaUx9UrxzQ==,type:int]
