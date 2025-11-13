@@ -19,6 +19,9 @@ class Identifiers {
   @Column(name = "clm_cntl_num")
   private Optional<String> claimControlNumber;
 
+  @Column(name = "clm_orig_cntl_num")
+  private Optional<String> claimOriginalControlNumber;
+
   public List<Identifier> toFhir() {
     var claimId =
         new Identifier()
@@ -32,6 +35,12 @@ class Identifiers {
                             .setDisplay("Unique Claim ID")));
     var identifiers = new ArrayList<>(Collections.singletonList(claimId));
     claimControlNumber.ifPresent(
+        s ->
+            identifiers.add(
+                new Identifier()
+                    .setSystem(SystemUrls.BLUE_BUTTON_CLAIM_CONTROL_NUMBER)
+                    .setValue(s)));
+    claimOriginalControlNumber.ifPresent(
         s ->
             identifiers.add(
                 new Identifier()
