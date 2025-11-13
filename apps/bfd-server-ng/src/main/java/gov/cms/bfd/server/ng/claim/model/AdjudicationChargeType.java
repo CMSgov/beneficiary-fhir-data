@@ -123,8 +123,7 @@ enum AdjudicationChargeType {
       "paidtoprovider",
       "Paid to provider",
       "CLM_MDCR_PRFNL_PRMRY_PYR_AMT",
-      "Primary Payer Paid Amount");
-      "Total Charge Amount"),
+      "Primary Payer Paid Amount"),
   GAP_DISCOUNT_AMOUNT(
       SystemUrls.HL7_ADJUDICATION, "CLM_RPTD_MFTR_DSCNT_AMT", "Gap Discount Amount"),
   VACCINATION_ADMIN_FEE(

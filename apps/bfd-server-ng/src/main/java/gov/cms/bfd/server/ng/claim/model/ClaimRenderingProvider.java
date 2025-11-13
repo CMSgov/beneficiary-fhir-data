@@ -87,8 +87,8 @@ public class ClaimRenderingProvider {
                 new CodeableConcept(
                     new Coding()
                         .setSystem(SystemUrls.CARIN_CODE_SYSTEM_CLAIM_CARE_TEAM_ROLE)
-                        .setCode(CareTeamType.RENDERING.roleCode)
-                        .setDisplay(CareTeamType.RENDERING.roleDisplay)))
+                        .setCode(CareTeamType.RENDERING.getRoleCode())
+                        .setDisplay(CareTeamType.RENDERING.getRoleDisplay())))
             .setProvider(new Reference("#careteam-provider-line-" + claimLineNum.get()));
 
     return Optional.of(new CareTeamType.CareTeamComponents(practitioner, component));
