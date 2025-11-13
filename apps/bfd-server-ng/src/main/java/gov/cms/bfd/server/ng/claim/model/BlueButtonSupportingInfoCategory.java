@@ -36,7 +36,14 @@ enum BlueButtonSupportingInfoCategory {
   /** CLM_HHA_RFRL_CD - Claim Referral Code. */
   CLM_HHA_RFRL_CD("CLM_HHA_RFRL_CD", "Claim Referral Code"),
   /** CLM_NRLN_RIC_CD - Near Line Record Identification Code. */
-  CLM_NRLN_RIC_CD("CLM_NRLN_RIC_CD", "Near Line Record Identification Code");
+  CLM_NRLN_RIC_CD("CLM_NRLN_RIC_CD", "Near Line Record Identification Code"),
+  CLM_CTSTRPHC_CVRG_IND_CD("CLM_CTSTRPHC_CVRG_IND_CD", "Catastrophic Coverage Code"),
+  CLM_DRUG_CVRG_STUS_CD("CLM_DRUG_CVRG_STUS_CD", "Drug Coverage Status Code"),
+  CLM_DSPNSNG_STUS_CD("CLM_DSPNSNG_STUS_CD", "Claim Dispensing Status Code"),
+  CLM_LTC_DSPNSNG_MTHD_CD("CLM_LTC_DSPNSNG_MTHD_CD", "Submission clarification code"),
+  CLM_PHRMCY_SRVC_TYPE_CD("CLM_PHRMCY_SRVC_TYPE_CD", "Pharmacy service type code"),
+  CLM_PTNT_RSDNC_CD("CLM_PTNT_RSDNC_CD", "Patient Residence Code"),
+  CLM_LINE_RX_NUM("CLM_LINE_RX_NUM", "Claim Line Prescription Service Reference Number");
 
   private final String code;
   private final String display;

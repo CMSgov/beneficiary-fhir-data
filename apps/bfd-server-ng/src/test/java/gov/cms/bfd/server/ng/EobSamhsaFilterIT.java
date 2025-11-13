@@ -45,6 +45,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class EobSamhsaFilterIT extends IntegrationTestBase {
+
   private final FhirContext context = FhirContext.forR4();
 
   private static final Map<String, List<SecurityLabel>> SECURITY_LABELS =
@@ -334,7 +335,6 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
   // Since the tests above are largely checking for the absence of some codes,
   // the only way to ensure the data is set up correctly is to make sure the relevant codes
   // do appear in the responses when filtering is not enabled.
-
   private static Stream<Arguments> ensureDiagnosis() {
     return Stream.of(
         Arguments.of(
