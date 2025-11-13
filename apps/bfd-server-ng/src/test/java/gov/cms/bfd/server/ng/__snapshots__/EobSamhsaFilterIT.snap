@@ -939,13 +939,13 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
               "system" : "https://x12.org/codes/claim-adjustment-group-codes"
             }, {
               "code" : "PR",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE"
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CODE"
             }, {
               "code" : "22",
               "system" : "https://x12.org/codes/claim-adjustment-reason-codes"
             }, {
               "code" : "22",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE"
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CODE"
             } ]
           }
         }, {
@@ -962,13 +962,13 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
               "system" : "https://x12.org/codes/claim-adjustment-group-codes"
             }, {
               "code" : "CO",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE"
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CODE"
             }, {
               "code" : "B10",
               "system" : "https://x12.org/codes/claim-adjustment-reason-codes"
             }, {
               "code" : "B10",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE"
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CODE"
             } ]
           }
         }, {
@@ -985,13 +985,13 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
               "system" : "https://x12.org/codes/claim-adjustment-group-codes"
             }, {
               "code" : "CO",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE"
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CODE"
             }, {
               "code" : "4",
               "system" : "https://x12.org/codes/claim-adjustment-reason-codes"
             }, {
               "code" : "4",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE"
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CODE"
             } ]
           }
         }, {
@@ -2857,7 +2857,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 1
+        "sequence" : 1,
+        "servicedDate" : "2019-09-23"
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -2997,7 +2998,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 2
+        "sequence" : 2,
+        "servicedDate" : "2019-09-23"
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -3164,7 +3166,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 3
+        "sequence" : 3,
+        "servicedDate" : "2019-09-23"
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -3313,7 +3316,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 4
+        "sequence" : 4,
+        "servicedDate" : "2019-09-23"
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -3468,7 +3472,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 5
+        "sequence" : 5,
+        "servicedDate" : "2019-09-23"
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -3614,7 +3619,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 6
+        "sequence" : 6,
+        "servicedDate" : "2019-09-23"
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -3775,7 +3781,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 7
+        "sequence" : 7,
+        "servicedDate" : "2019-09-23"
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -3936,7 +3943,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 8
+        "sequence" : 8,
+        "servicedDate" : "2019-09-23"
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -4085,7 +4093,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 9
+        "sequence" : 9,
+        "servicedDate" : "2019-09-23"
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -4234,7 +4243,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 10
+        "sequence" : 10,
+        "servicedDate" : "2019-09-23"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -5582,7 +5592,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 1
+        "sequence" : 1,
+        "servicedDate" : "2019-09-23"
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -5722,7 +5733,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 2
+        "sequence" : 2,
+        "servicedDate" : "2019-09-23"
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -5889,7 +5901,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 3
+        "sequence" : 3,
+        "servicedDate" : "2019-09-23"
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -6038,7 +6051,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 4
+        "sequence" : 4,
+        "servicedDate" : "2019-09-23"
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -6193,7 +6207,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 5
+        "sequence" : 5,
+        "servicedDate" : "2019-09-23"
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -6339,7 +6354,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 6
+        "sequence" : 6,
+        "servicedDate" : "2019-09-23"
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -6500,7 +6516,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 7
+        "sequence" : 7,
+        "servicedDate" : "2019-09-23"
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -6661,7 +6678,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 8
+        "sequence" : 8,
+        "servicedDate" : "2019-09-23"
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -6810,7 +6828,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 9
+        "sequence" : 9,
+        "servicedDate" : "2019-09-23"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -7843,7 +7862,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
           } ]
         },
         "sequence" : 1,
-        "servicedDate" : "2019-10-01"
+        "servicedDate" : "2020-09-01"
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -8074,7 +8093,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
           } ]
         },
         "sequence" : 2,
-        "servicedDate" : "2019-09-29"
+        "servicedDate" : "2020-09-01"
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -8309,7 +8328,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
           } ]
         },
         "sequence" : 3,
-        "servicedDate" : "2019-09-26"
+        "servicedDate" : "2020-09-01"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -9441,7 +9460,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 1
+        "sequence" : 1,
+        "servicedDate" : "2025-03-30"
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -9605,7 +9625,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 2
+        "sequence" : 2,
+        "servicedDate" : "2025-03-30"
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -9766,7 +9787,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 3
+        "sequence" : 3,
+        "servicedDate" : "2025-03-30"
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -9930,7 +9952,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 4
+        "sequence" : 4,
+        "servicedDate" : "2025-03-30"
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -10076,7 +10099,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 5
+        "sequence" : 5,
+        "servicedDate" : "2025-03-30"
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -10243,7 +10267,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 6
+        "sequence" : 6,
+        "servicedDate" : "2025-03-30"
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -10392,7 +10417,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 7
+        "sequence" : 7,
+        "servicedDate" : "2025-03-30"
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -10541,7 +10567,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 8
+        "sequence" : 8,
+        "servicedDate" : "2025-03-30"
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -10681,7 +10708,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 9
+        "sequence" : 9,
+        "servicedDate" : "2025-03-30"
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -10836,7 +10864,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 10
+        "sequence" : 10,
+        "servicedDate" : "2025-03-30"
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -10979,7 +11008,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 11,
+        "servicedDate" : "2025-03-30"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -11409,7 +11439,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
       } ],
       "insurance" : [ {
         "coverage" : {
-          "display" : "Part A"
+          "display" : "Part D"
         },
         "focal" : true
       } ],
@@ -11559,7 +11589,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 1
+        "sequence" : 1,
+        "servicedDate" : "2020-02-18"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -11578,7 +11609,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
         "amount" : {
           "currency" : "USD",
           "value" : 487910.09
-        }
+        },
+        "date" : "2020-03-03"
       },
       "resourceType" : "ExplanationOfBenefit",
       "status" : "active",
@@ -12812,13 +12844,13 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
               "system" : "https://x12.org/codes/claim-adjustment-group-codes"
             }, {
               "code" : "PR",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE"
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CODE"
             }, {
               "code" : "22",
               "system" : "https://x12.org/codes/claim-adjustment-reason-codes"
             }, {
               "code" : "22",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE"
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CODE"
             } ]
           }
         }, {
@@ -12835,13 +12867,13 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
               "system" : "https://x12.org/codes/claim-adjustment-group-codes"
             }, {
               "code" : "CO",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE"
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CODE"
             }, {
               "code" : "B10",
               "system" : "https://x12.org/codes/claim-adjustment-reason-codes"
             }, {
               "code" : "B10",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE"
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CODE"
             } ]
           }
         }, {
@@ -12858,13 +12890,13 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
               "system" : "https://x12.org/codes/claim-adjustment-group-codes"
             }, {
               "code" : "CO",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE"
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CODE"
             }, {
               "code" : "4",
               "system" : "https://x12.org/codes/claim-adjustment-reason-codes"
             }, {
               "code" : "4",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE"
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CODE"
             } ]
           }
         }, {
@@ -14824,7 +14856,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 1
+        "sequence" : 1,
+        "servicedDate" : "2019-09-23"
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -14964,7 +14997,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 2
+        "sequence" : 2,
+        "servicedDate" : "2019-09-23"
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -15131,7 +15165,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 3
+        "sequence" : 3,
+        "servicedDate" : "2019-09-23"
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -15280,7 +15315,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 4
+        "sequence" : 4,
+        "servicedDate" : "2019-09-23"
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -15435,7 +15471,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 5
+        "sequence" : 5,
+        "servicedDate" : "2019-09-23"
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -15581,7 +15618,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 6
+        "sequence" : 6,
+        "servicedDate" : "2019-09-23"
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -15742,7 +15780,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 7
+        "sequence" : 7,
+        "servicedDate" : "2019-09-23"
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -15903,7 +15942,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 8
+        "sequence" : 8,
+        "servicedDate" : "2019-09-23"
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -16052,7 +16092,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 9
+        "sequence" : 9,
+        "servicedDate" : "2019-09-23"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -17133,7 +17174,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           } ]
         },
         "sequence" : 1,
-        "servicedDate" : "2019-10-01"
+        "servicedDate" : "2020-09-01"
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -17364,7 +17405,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           } ]
         },
         "sequence" : 2,
-        "servicedDate" : "2019-09-29"
+        "servicedDate" : "2020-09-01"
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -17599,7 +17640,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           } ]
         },
         "sequence" : 3,
-        "servicedDate" : "2019-09-26"
+        "servicedDate" : "2020-09-01"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -18811,7 +18852,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 1
+        "sequence" : 1,
+        "servicedDate" : "2025-03-30"
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -18975,7 +19017,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 2
+        "sequence" : 2,
+        "servicedDate" : "2025-03-30"
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -19136,7 +19179,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 3
+        "sequence" : 3,
+        "servicedDate" : "2025-03-30"
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -19300,7 +19344,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 4
+        "sequence" : 4,
+        "servicedDate" : "2025-03-30"
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -19446,7 +19491,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 5
+        "sequence" : 5,
+        "servicedDate" : "2025-03-30"
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -19613,7 +19659,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 6
+        "sequence" : 6,
+        "servicedDate" : "2025-03-30"
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -19762,7 +19809,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 7
+        "sequence" : 7,
+        "servicedDate" : "2025-03-30"
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -19911,7 +19959,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 8
+        "sequence" : 8,
+        "servicedDate" : "2025-03-30"
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -20051,7 +20100,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 9
+        "sequence" : 9,
+        "servicedDate" : "2025-03-30"
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -20206,7 +20256,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 10
+        "sequence" : 10,
+        "servicedDate" : "2025-03-30"
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -20349,7 +20400,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 11,
+        "servicedDate" : "2025-03-30"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -20779,7 +20831,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
       } ],
       "insurance" : [ {
         "coverage" : {
-          "display" : "Part A"
+          "display" : "Part D"
         },
         "focal" : true
       } ],
@@ -20929,7 +20981,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 1
+        "sequence" : 1,
+        "servicedDate" : "2020-02-18"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -20948,7 +21001,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
         "amount" : {
           "currency" : "USD",
           "value" : 487910.09
-        }
+        },
+        "date" : "2020-03-03"
       },
       "resourceType" : "ExplanationOfBenefit",
       "status" : "active",
@@ -22182,13 +22236,13 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
               "system" : "https://x12.org/codes/claim-adjustment-group-codes"
             }, {
               "code" : "PR",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE"
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CODE"
             }, {
               "code" : "22",
               "system" : "https://x12.org/codes/claim-adjustment-reason-codes"
             }, {
               "code" : "22",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE"
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CODE"
             } ]
           }
         }, {
@@ -22205,13 +22259,13 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
               "system" : "https://x12.org/codes/claim-adjustment-group-codes"
             }, {
               "code" : "CO",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE"
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CODE"
             }, {
               "code" : "B10",
               "system" : "https://x12.org/codes/claim-adjustment-reason-codes"
             }, {
               "code" : "B10",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE"
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CODE"
             } ]
           }
         }, {
@@ -22228,13 +22282,13 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
               "system" : "https://x12.org/codes/claim-adjustment-group-codes"
             }, {
               "code" : "CO",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE"
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CODE"
             }, {
               "code" : "4",
               "system" : "https://x12.org/codes/claim-adjustment-reason-codes"
             }, {
               "code" : "4",
-              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE"
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CODE"
             } ]
           }
         }, {
@@ -24194,7 +24248,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 1
+        "sequence" : 1,
+        "servicedDate" : "2019-09-23"
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -24334,7 +24389,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 2
+        "sequence" : 2,
+        "servicedDate" : "2019-09-23"
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -24501,7 +24557,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 3
+        "sequence" : 3,
+        "servicedDate" : "2019-09-23"
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -24650,7 +24707,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 4
+        "sequence" : 4,
+        "servicedDate" : "2019-09-23"
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -24805,7 +24863,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 5
+        "sequence" : 5,
+        "servicedDate" : "2019-09-23"
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -24951,7 +25010,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 6
+        "sequence" : 6,
+        "servicedDate" : "2019-09-23"
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -25112,7 +25172,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 7
+        "sequence" : 7,
+        "servicedDate" : "2019-09-23"
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -25273,7 +25334,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 8
+        "sequence" : 8,
+        "servicedDate" : "2019-09-23"
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -25422,7 +25484,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           } ]
         },
-        "sequence" : 9
+        "sequence" : 9,
+        "servicedDate" : "2019-09-23"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -26503,7 +26566,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           } ]
         },
         "sequence" : 1,
-        "servicedDate" : "2019-10-01"
+        "servicedDate" : "2020-09-01"
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -26734,7 +26797,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           } ]
         },
         "sequence" : 2,
-        "servicedDate" : "2019-09-29"
+        "servicedDate" : "2020-09-01"
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -26969,7 +27032,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           } ]
         },
         "sequence" : 3,
-        "servicedDate" : "2019-09-26"
+        "servicedDate" : "2020-09-01"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",

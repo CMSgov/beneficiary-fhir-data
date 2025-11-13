@@ -575,6 +575,7 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
 
         claim_line_rx = {}
         claim_line_rx["CLM_UNIQ_ID"] = claim["CLM"]["CLM_UNIQ_ID"]
+        claim_line_rx["CLM_DT_SGNTR_SK"] = claim["CLM"]["CLM_DT_SGNTR_SK"]
         claim_line_rx["CLM_NUM_SK"] = claim["CLM"]["CLM_NUM_SK"]
         claim_line_rx["CLM_TYPE_CD"] = claim["CLM"]["CLM_TYPE_CD"]
         claim_line_rx["GEO_BENE_SK"] = claim["CLM"]["GEO_BENE_SK"]
@@ -1388,11 +1389,12 @@ def main():
                 CLM_INSTNL.append(claim["CLM_INSTNL"])
             CLM_LINE_INSTNL.extend(claim["CLM_LINE_INSTNL"])
             CLM_DCMTN.append(claim["CLM_DCMTN"])
-            # Only add professional data for non-Part D claims
-            if claim["CLM"]["CLM_TYPE_CD"] not in (1, 2, 3, 4):
+            if claim["CLM"]["CLM_TYPE_CD"] in (1, 2, 3, 4):
+                CLM_LINE_RX.extend(claim["CLM_LINE_RX"])
+            else:
+                # Only add professional data for non-Part D claims
                 CLM_PRFNL.append(claim["CLM_PRFNL"])
                 CLM_LINE_PRFNL.extend(claim["CLM_LINE_PRFNL"])
-                CLM_LINE_RX.extend(claim["CLM_LINE_RX"])
             # obviously we don't have pac claims for PD claims
             if random.choice([0, 1]) and claim["CLM"]["CLM_TYPE_CD"] not in (
                 1,

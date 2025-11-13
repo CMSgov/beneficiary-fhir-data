@@ -337,7 +337,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
         "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
       } ]
     },
-    "sequence" : 1
+    "sequence" : 1,
+    "servicedDate" : "2024-03-04"
   } ],
   "meta" : {
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -1787,7 +1788,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
         "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
       } ]
     },
-    "sequence" : 1
+    "sequence" : 1,
+    "servicedDate" : "2021-12-21"
   } ],
   "meta" : {
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -2657,13 +2659,13 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
           "system" : "https://x12.org/codes/claim-adjustment-group-codes"
         }, {
           "code" : "PR",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE"
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CODE"
         }, {
           "code" : "22",
           "system" : "https://x12.org/codes/claim-adjustment-reason-codes"
         }, {
           "code" : "22",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE"
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CODE"
         } ]
       }
     }, {
@@ -2680,13 +2682,13 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
           "system" : "https://x12.org/codes/claim-adjustment-group-codes"
         }, {
           "code" : "CO",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE"
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CODE"
         }, {
           "code" : "B10",
           "system" : "https://x12.org/codes/claim-adjustment-reason-codes"
         }, {
           "code" : "B10",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE"
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CODE"
         } ]
       }
     }, {
@@ -2703,13 +2705,13 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
           "system" : "https://x12.org/codes/claim-adjustment-group-codes"
         }, {
           "code" : "CO",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE"
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CODE"
         }, {
           "code" : "4",
           "system" : "https://x12.org/codes/claim-adjustment-reason-codes"
         }, {
           "code" : "4",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE"
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CODE"
         } ]
       }
     }, {
@@ -2969,7 +2971,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
       } ]
     },
     "sequence" : 1,
-    "servicedDate" : "2021-09-26"
+    "servicedDate" : "2024-03-04"
   } ],
   "meta" : {
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -3957,13 +3959,13 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
           "system" : "https://x12.org/codes/claim-adjustment-group-codes"
         }, {
           "code" : "PR",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE"
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CODE"
         }, {
           "code" : "22",
           "system" : "https://x12.org/codes/claim-adjustment-reason-codes"
         }, {
           "code" : "22",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE"
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CODE"
         } ]
       }
     }, {
@@ -3980,13 +3982,13 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
           "system" : "https://x12.org/codes/claim-adjustment-group-codes"
         }, {
           "code" : "CO",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE"
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CODE"
         }, {
           "code" : "B10",
           "system" : "https://x12.org/codes/claim-adjustment-reason-codes"
         }, {
           "code" : "B10",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE"
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CODE"
         } ]
       }
     }, {
@@ -4003,13 +4005,13 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
           "system" : "https://x12.org/codes/claim-adjustment-group-codes"
         }, {
           "code" : "CO",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_GRP_CODE"
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CODE"
         }, {
           "code" : "4",
           "system" : "https://x12.org/codes/claim-adjustment-reason-codes"
         }, {
           "code" : "4",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI_RSN_CODE"
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CODE"
         } ]
       }
     }, {
@@ -4269,7 +4271,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
       } ]
     },
     "sequence" : 1,
-    "servicedDate" : "2021-09-26"
+    "servicedDate" : "2024-03-04"
   } ],
   "meta" : {
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00",

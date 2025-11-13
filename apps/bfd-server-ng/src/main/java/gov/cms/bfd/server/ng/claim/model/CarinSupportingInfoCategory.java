@@ -13,7 +13,14 @@ enum CarinSupportingInfoCategory {
   PATIENT_STATUS_CODE("discharge-status"),
   DIAGNOSIS_DRG_CODE("drg"),
   ADMISSION_SOURCE_CODE("pointoforigin"),
-  TYPE_OF_BILL_CODE("typeofbill");
+  TYPE_OF_BILL_CODE("typeofbill"),
+  DAYS_SUPPLY("dayssupply"),
+  REFILL_NUM("refillnum"),
+  DAW_CODE("dawcode"),
+  COMPOUND_CODE("compoundcode"),
+  BRAND_GENERIC_IND_CODE("brandgenericindicator"),
+  RX_ORIGIN_CODE("rxorigincode"),
+  REFILLS_AUTHORIZED("refillsauthorized");
 
   private final String code;
 

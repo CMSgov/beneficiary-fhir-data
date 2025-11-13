@@ -34,6 +34,12 @@ class CareTeam {
   @Column(name = "clm_rndrg_prvdr_last_name")
   private Optional<String> renderingProviderLastName;
 
+  @Column(name = "prvdr_prscrbng_prvdr_npi_num")
+  private Optional<String> prescribingProviderNpiNumber;
+
+  /** TODO: Temp string value for provider last name. To be implemented in BFD-4286 */
+  public static final String PROVIDER_LAST_NAME = "LAST NAME HERE";
+
   @Column(name = "prvdr_rfrg_prvdr_npi_num")
   private Optional<String> refferingProviderNpiNumber;
 
@@ -59,6 +65,11 @@ class CareTeam {
             renderingProviderNpiNumber.map(
                 npi ->
                     CareTeamType.RENDERING.toFhir(
+                        sequenceGenerator, npi, renderingProviderLastName)),
+            prescribingProviderNpiNumber.map(
+                npi ->
+                    CareTeamType.PRESCRIBING.toFhir(
+                        sequenceGenerator, npi, Optional.of(PROVIDER_LAST_NAME))));
                         sequenceGenerator, npi, renderingProviderLastName, Optional.empty())),
             refferingProviderNpiNumber.map(
                 npi ->

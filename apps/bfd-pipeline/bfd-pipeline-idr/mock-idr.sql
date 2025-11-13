@@ -167,7 +167,9 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_cntrct_pbp_num (
     cntrct_drug_plan_ind_cd VARCHAR(1),
     cntrct_pbp_type_cd VARCHAR(2),
     cntrct_pbp_sk_obslt_dt DATE,
-    cntrct_pbp_name VARCHAR(75)
+    cntrct_pbp_name VARCHAR(75),
+    cntrct_num VARCHAR(5),
+    cntrct_pbp_num VARCHAR(3) NOT NULL
 );
 
 CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm (

@@ -31,6 +31,8 @@ public class ClaimRepository {
         LEFT JOIN FETCH cl.claimLineProfessional clp
         LEFT JOIN FETCH c.claimFiss cf
         LEFT JOIN FETCH cli.ansiSignature a
+        LEFT JOIN FETCH cl.claimLineRx clr
+        LEFT JOIN FETCH c.contract ct
       """;
 
   /**

@@ -18,11 +18,12 @@ enum CareTeamType {
   ATTENDING("attending", "Attending"),
   OPERATING("operating", "Operating"),
   RENDERING("rendering", "Rendering provider"),
-  REFERRING("referring", "Referring provider"),
-  OTHER("otheroperating", "Other Operating");
+  OTHER("otheroperating", "Other Operating"),
+  PRESCRIBING("prescribing", "Prescribing"),
+  REFERRING("referring", "Referring provider");
 
-  public final String roleCode;
-  public final String roleDisplay;
+  private final String roleCode;
+  private final String roleDisplay;
 
   CareTeamComponents toFhir(
       SequenceGenerator sequenceGenerator,
@@ -31,7 +32,11 @@ enum CareTeamType {
       Optional<String> pinNumber) {
     var practitioner = new Practitioner();
     var sequence = sequenceGenerator.next();
-    practitioner.setId("careteam-provider-" + sequence);
+    if (roleCode.equals(PRESCRIBING.roleCode)) {
+      practitioner.setId("careteam-prescriber-practitioner-" + sequence);
+    } else {
+      practitioner.setId("careteam-provider-" + sequence);
+    }
     practitioner.setMeta(
         new Meta()
             .addProfile(SystemUrls.PROFILE_CARIN_BB_PRACTITIONER_2_1_0)
@@ -43,6 +48,7 @@ enum CareTeamType {
                     new Coding().setSystem(SystemUrls.HL7_IDENTIFIER).setCode("NPI")))
             .setSystem(SystemUrls.NPI)
             .setValue(value));
+    // todo: modify based on BFD-4286
     familyName.ifPresent(n -> practitioner.addName(new HumanName().setFamily(n)));
 
     pinNumber.ifPresent(
