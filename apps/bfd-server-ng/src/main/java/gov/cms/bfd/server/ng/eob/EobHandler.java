@@ -203,14 +203,10 @@ public class EobHandler {
 
   private boolean hcpcsIsSamhsa(ClaimLine claimLine, LocalDate claimDate, long claimUniqueId) {
     var hcpcs = claimLine.getHcpcsCode().getHcpcsCode().orElse("");
-    for (var system : List.of(SystemUrls.AMA_CPT, SystemUrls.CMS_HCPCS)) {
-      var entries = SECURITY_LABELS.get(system);
-      if (entries.stream()
-          .anyMatch(c -> isCodeSamhsa(hcpcs, claimDate, c, "HCPCS", claimUniqueId, system))) {
-        return true;
-      }
-    }
-    return false;
+    return Stream.of(SystemUrls.AMA_CPT, SystemUrls.CMS_HCPCS)
+        .flatMap(s -> SECURITY_LABELS.get(s).stream().map(c -> Map.entry(s, c)))
+        .anyMatch(
+            e -> isCodeSamhsa(hcpcs, claimDate, e.getValue(), "HCPCS", claimUniqueId, e.getKey()));
   }
 
   // Checks ICDs.
