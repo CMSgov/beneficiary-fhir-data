@@ -2,10 +2,20 @@ package gov.cms.bfd.server.ng.patient;
 
 import gov.cms.bfd.server.ng.beneficiary.BeneficiaryRepository;
 import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
+import gov.cms.bfd.server.ng.beneficiary.model.OrganizationFactory;
+import gov.cms.bfd.server.ng.coverage.CoverageRepository;
+import gov.cms.bfd.server.ng.input.CoverageCompositeId;
+import gov.cms.bfd.server.ng.input.CoveragePart;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.loadprogress.LoadProgressRepository;
+import gov.cms.bfd.server.ng.model.ProfileType;
 import gov.cms.bfd.server.ng.util.FhirUtil;
+import gov.cms.bfd.server.ng.util.SystemUrls;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
@@ -21,6 +31,8 @@ import org.springframework.stereotype.Component;
 public class PatientHandler {
   private final BeneficiaryRepository beneficiaryRepository;
   private final LoadProgressRepository loadProgressRepository;
+
+  private final CoverageRepository coverageRepository;
 
   /**
    * Returns a {@link Patient} by their {@link IdType}.
@@ -62,9 +74,43 @@ public class PatientHandler {
         beneficiary.map(this::toFhir), loadProgressRepository::lastUpdated);
   }
 
+  /**
+   * Searches for all Coverage resources associated with a given beneficiary SK.
+   *
+   * @param beneSk The beneficiary surrogate key.
+   * @return A Bundle of Coverage resources.
+   */
+  public Bundle searchByBeneficiaryC4DIC(Long beneSk) {
+    var beneficiaryOpt =
+        coverageRepository
+            .searchBeneficiaryWithCoverage(beneSk, new DateTimeRange())
+            .filter(b -> !b.isMergedBeneficiary());
+    if (beneficiaryOpt.isEmpty()) {
+      return FhirUtil.bundleOrDefault(List.of(), loadProgressRepository::lastUpdated);
+    }
+    var beneficiary = beneficiaryOpt.get();
+
+    var patient = beneficiary.toFhir(ProfileType.C4DIC);
+    // Two more organization may be needed, once mappings for Part C and D are added.
+    var cmsOrg =
+        OrganizationFactory.createCmsOrganization(
+            UUID.randomUUID().toString(), SystemUrls.PROFILE_C4DIC_ORGANIZATION);
+
+    var coverages =
+        Arrays.stream(CoveragePart.values())
+            .map(
+                c ->
+                    beneficiary.toFhirCoverageIfPresentC4DIC(
+                        new CoverageCompositeId(c, beneficiary.getBeneSk()), cmsOrg.getId()))
+            .flatMap(Optional::stream);
+
+    var resources = Stream.concat(Stream.of(patient, cmsOrg), coverages);
+    return FhirUtil.bundleWithFullUrls(resources, loadProgressRepository::lastUpdated);
+  }
+
   private Patient toFhir(Beneficiary beneficiary) {
     var identities = beneficiaryRepository.getValidBeneficiaryIdentities(beneficiary.getXrefSk());
-    var patient = beneficiary.toFhir();
+    var patient = beneficiary.toFhir(ProfileType.C4BB);
 
     for (var id : identities) {
       // check for merged bene and if mbi identifier has already been added to the patient

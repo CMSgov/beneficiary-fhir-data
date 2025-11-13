@@ -78,7 +78,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
-import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -146,6 +145,7 @@ public class OpenApiInterceptor {
   public static final FhirContext FHIR_CONTEXT_CANONICAL = FhirContext.forR4();
   public static final String REQUEST_DETAILS = "REQUEST_DETAILS";
   public static final String RACCOON_PNG = "raccoon.png";
+  public static final String TYPE_STRING = "string";
   private final String mySwaggerUiVersion;
   private final TemplateEngine myTemplateEngine;
   private final Parser myFlexmarkParser;
@@ -1056,10 +1056,7 @@ public class OpenApiInterceptor {
         param.setName(nextSearchParam.getName());
         String paramType = nextSearchParam.getType();
         switch (defaultString(paramType)) {
-          case "uri":
-          case "url":
-          case "code":
-          case "string":
+          case "uri", "url", "code", TYPE_STRING:
             {
               IPrimitiveType<?> type =
                   (IPrimitiveType<?>)
@@ -1188,7 +1185,7 @@ public class OpenApiInterceptor {
     parameter.setDescription("The resource version ID");
     parameter.setExample("1");
     parameter.setRequired(true);
-    parameter.setSchema(new Schema().type("string").minimum(new BigDecimal(1)));
+    parameter.setSchema(new Schema<String>().type(TYPE_STRING));
     parameter.setStyle(Parameter.StyleEnum.SIMPLE);
     theOperation.addParametersItem(parameter);
   }
@@ -1261,7 +1258,7 @@ public class OpenApiInterceptor {
     parameter.setDescription("The resource ID");
     parameter.setExample("123");
     parameter.setRequired(true);
-    parameter.setSchema(new Schema().type("string").minimum(new BigDecimal(1)));
+    parameter.setSchema(new Schema<String>().type(TYPE_STRING));
     parameter.setStyle(Parameter.StyleEnum.SIMPLE);
     theOperation.addParametersItem(parameter);
   }
@@ -1402,7 +1399,7 @@ public class OpenApiInterceptor {
 
   private String toExamplePlaceholder(Enumerations.SearchParamType type) {
     if (type == null) {
-      return "string";
+      return TYPE_STRING;
     }
     switch (type) {
       case NUMBER, QUANTITY:
@@ -1417,7 +1414,7 @@ public class OpenApiInterceptor {
       case SPECIAL:
       case NULL:
       default:
-        return "string";
+        return TYPE_STRING;
     }
   }
 }
