@@ -12,6 +12,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -73,6 +74,53 @@ public class EobPharmacyIT extends IntegrationTestBase {
     var familyName =
         practitioner.getName().stream().filter(p -> p.getFamily().equals("Garcia")).findFirst();
     assertTrue(familyName.isPresent());
+
+    var partDInsurance =
+        eob.getInsurance().stream()
+            .filter(i -> i.getCoverage().getDisplay().equals("Part D"))
+            .findFirst();
+    assertTrue(partDInsurance.isPresent());
+    var extensions = partDInsurance.get().getExtension();
+    List<String> systems =
+        List.of(
+            SystemUrls.BLUE_BUTTON_STRUCTURE_DEFINITION_SUBMITTER_CONTRACT_NUMBER,
+            SystemUrls.BLUE_BUTTON_STRUCTURE_DEFINITION_SUBMITTER_CONTRACT_PBP_NUMBER);
+    var hasContractSystems =
+        extensions.stream().allMatch(extension -> systems.contains(extension.getUrl()));
+    assertTrue(hasContractSystems);
+  }
+
+  @Test
+  void eobReadPharmacyWithOrganization() {
+    var eob = eobRead().withId(CLAIM_ID_RX_ORGANIZATION).execute();
+    assertFalse(eob.isEmpty());
+    expectFhir().toMatchSnapshot(eob);
+
+    var careTeam = eob.getCareTeam();
+    assertFalse(careTeam.isEmpty());
+    for (ExplanationOfBenefit.CareTeamComponent careTeamMember : careTeam) {
+      var provider = careTeamMember.getProvider();
+      assertFalse(provider.isEmpty());
+      assertEquals("#careteam-prescriber-practitioner-1", provider.getReference());
+
+      var role = careTeamMember.getRole();
+      assertFalse(role.isEmpty());
+      assertEquals("prescribing", role.getCoding().get(0).getCode());
+      var hasPrescribingRole =
+          role.getCoding().stream().filter(r -> r.getCode().equals("prescribing")).findFirst();
+      assertTrue(hasPrescribingRole.isPresent());
+    }
+
+    assertEquals("#provider-org", eob.getProvider().getReference());
+    var containedResources = eob.getContained();
+    var hasOrganization =
+        containedResources.stream()
+            .filter(r -> r.getResourceType().toString().equals("Organization"))
+            .findFirst();
+    assertTrue(hasOrganization.isPresent());
+    Organization organization = (Organization) hasOrganization.get();
+    assertEquals("provider-org", organization.getId());
+    assertEquals("CBS Health Corporation", organization.getName());
 
     var partDInsurance =
         eob.getInsurance().stream()
