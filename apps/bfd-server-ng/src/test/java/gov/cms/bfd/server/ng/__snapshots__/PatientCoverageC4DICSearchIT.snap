@@ -1,0 +1,740 @@
+gov.cms.bfd.server.ng.PatientCoverageC4DICSearchIT.patientCoverageSearchAllParts=[
+{
+  "entry" : [ {
+    "fullUrl" : "{uuid}",
+    "resource" : {
+      "birthDate" : "1967-03-19",
+      "communication" : [ {
+        "language" : {
+          "coding" : [ {
+            "code" : "es",
+            "system" : "urn:ietf:bcp:47"
+          } ]
+        }
+      } ],
+      "extension" : [ {
+        "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
+        "valueCode" : "248152002"
+      }, {
+        "extension" : [ {
+          "url" : "ombCategory",
+          "valueCoding" : {
+            "code" : "2054-5",
+            "display" : "Black or African American",
+            "system" : "urn:oid:2.16.840.1.113883.6.238"
+          }
+        }, {
+          "url" : "text",
+          "valueCode" : "Black or African American"
+        } ],
+        "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
+      } ],
+      "gender" : "female",
+      "meta" : {
+        "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
+        "profile" : [ "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Patient" ]
+      },
+      "name" : [ {
+        "family" : "Erdapfel",
+        "given" : [ "Bluey", "Caroline" ]
+      } ],
+      "resourceType" : "Patient"
+    }
+  }, {
+    "fullUrl" : "{uuid}",
+    "resource" : {
+      "active" : true,
+      "contact" : [ {
+        "purpose" : {
+          "coding" : [ {
+            "code" : "PATINF",
+            "display" : "Patient",
+            "system" : "http://terminology.hl7.org/CodeSystem/contactentity-type"
+          } ]
+        },
+        "telecom" : [ {
+          "system" : "phone",
+          "value" : "1-800-633-4227"
+        }, {
+          "system" : "phone",
+          "value" : "TTY: 1-877-486-2048"
+        }, {
+          "system" : "url",
+          "value" : "www.medicare.gov"
+        } ]
+      } ],
+      "meta" : {
+        "profile" : [ "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Organization" ]
+      },
+      "name" : "Centers for Medicare and Medicaid Services",
+      "resourceType" : "Organization"
+    }
+  }, {
+    "fullUrl" : "{uuid}",
+    "resource" : {
+      "beneficiary" : {
+        "reference" : "Patient/{uuid}"
+      },
+      "class" : [ {
+        "type" : {
+          "coding" : [ {
+            "code" : "plan",
+            "system" : "http://terminology.hl7.org/CodeSystem/coverage-class"
+          } ]
+        },
+        "value" : "Part A"
+      } ],
+      "extension" : [ {
+        "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-AdditionalCardInformation-extension",
+        "valueAnnotation" : {
+          "text" : "You may be asked to show this card when you get health care services. Only give your personal Medicare information to health care providers, or people you trust who work with Medicare on your behalf. WARNING: Intentionally misusing this card may be considered fraud and/or other violation of federal law and is punishable by law.\n\nEs posible que le pidan que muestre esta tarjeta cuando reciba servicios de cuidado médico. Solamente dé su información personal de Medicare a los proveedores de salud, sus aseguradores o personas de su confianza que trabajan con Medicare en su nombre. ¡ADVERTENCIA! El mal uso intencional de esta tarjeta puede ser considerado como fraude y/u otra violación de la ley federal y es sancionada por la ley."
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-ENTLMT-RSN-CD",
+        "valueCoding" : {
+          "code" : "0",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-RSN-CD"
+        }
+      } ],
+      "identifier" : [ {
+        "assigner" : {
+          "reference" : "Organization/{uuid}"
+        },
+        "system" : "http://hl7.org/fhir/sid/us-mbi",
+        "type" : {
+          "coding" : [ {
+            "code" : "MB",
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+          } ]
+        },
+        "value" : "8Z73WV0QC20"
+      } ],
+      "meta" : {
+        "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
+        "profile" : [ "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Coverage" ]
+      },
+      "payor" : [ {
+        "reference" : "Organization/{uuid}"
+      } ],
+      "period" : {
+        "end" : "2099-12-31",
+        "start" : "2024-01-01"
+      },
+      "relationship" : {
+        "coding" : [ {
+          "code" : "self",
+          "display" : "Self",
+          "system" : "http://terminology.hl7.org/CodeSystem/subscriber-relationship"
+        } ]
+      },
+      "resourceType" : "Coverage",
+      "status" : "active",
+      "subscriber" : {
+        "reference" : "Patient/{uuid}"
+      },
+      "subscriberId" : "8Z73WV0QC20",
+      "type" : {
+        "coding" : [ {
+          "code" : "1",
+          "display" : "MEDICARE",
+          "system" : "https://nahdo.org/sopt"
+        } ]
+      }
+    }
+  }, {
+    "fullUrl" : "{uuid}",
+    "resource" : {
+      "beneficiary" : {
+        "reference" : "Patient/{uuid}"
+      },
+      "class" : [ {
+        "type" : {
+          "coding" : [ {
+            "code" : "plan",
+            "system" : "http://terminology.hl7.org/CodeSystem/coverage-class"
+          } ]
+        },
+        "value" : "Part B"
+      } ],
+      "extension" : [ {
+        "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-AdditionalCardInformation-extension",
+        "valueAnnotation" : {
+          "text" : "You may be asked to show this card when you get health care services. Only give your personal Medicare information to health care providers, or people you trust who work with Medicare on your behalf. WARNING: Intentionally misusing this card may be considered fraud and/or other violation of federal law and is punishable by law.\n\nEs posible que le pidan que muestre esta tarjeta cuando reciba servicios de cuidado médico. Solamente dé su información personal de Medicare a los proveedores de salud, sus aseguradores o personas de su confianza que trabajan con Medicare en su nombre. ¡ADVERTENCIA! El mal uso intencional de esta tarjeta puede ser considerado como fraude y/u otra violación de la ley federal y es sancionada por la ley."
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-ENTLMT-RSN-CD",
+        "valueCoding" : {
+          "code" : "0",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-RSN-CD"
+        }
+      } ],
+      "identifier" : [ {
+        "assigner" : {
+          "reference" : "Organization/{uuid}"
+        },
+        "system" : "http://hl7.org/fhir/sid/us-mbi",
+        "type" : {
+          "coding" : [ {
+            "code" : "MB",
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+          } ]
+        },
+        "value" : "8Z73WV0QC20"
+      } ],
+      "meta" : {
+        "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
+        "profile" : [ "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Coverage" ]
+      },
+      "payor" : [ {
+        "reference" : "Organization/{uuid}"
+      } ],
+      "period" : {
+        "end" : "2099-12-31",
+        "start" : "2022-01-01"
+      },
+      "relationship" : {
+        "coding" : [ {
+          "code" : "self",
+          "display" : "Self",
+          "system" : "http://terminology.hl7.org/CodeSystem/subscriber-relationship"
+        } ]
+      },
+      "resourceType" : "Coverage",
+      "status" : "active",
+      "subscriber" : {
+        "reference" : "Patient/{uuid}"
+      },
+      "subscriberId" : "8Z73WV0QC20",
+      "type" : {
+        "coding" : [ {
+          "code" : "121",
+          "display" : "MEDICARE FFS",
+          "system" : "https://nahdo.org/sopt"
+        } ]
+      }
+    }
+  }, {
+    "fullUrl" : "{uuid}",
+    "resource" : {
+      "beneficiary" : {
+        "reference" : "Patient/{uuid}"
+      },
+      "class" : [ {
+        "type" : {
+          "coding" : [ {
+            "code" : "plan",
+            "system" : "http://terminology.hl7.org/CodeSystem/coverage-class"
+          } ]
+        },
+        "value" : "Dual Medicare/Medicaid"
+      } ],
+      "extension" : [ {
+        "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-AdditionalCardInformation-extension",
+        "valueAnnotation" : {
+          "text" : "You may be asked to show this card when you get health care services. Only give your personal Medicare information to health care providers, or people you trust who work with Medicare on your behalf. WARNING: Intentionally misusing this card may be considered fraud and/or other violation of federal law and is punishable by law.\n\nEs posible que le pidan que muestre esta tarjeta cuando reciba servicios de cuidado médico. Solamente dé su información personal de Medicare a los proveedores de salud, sus aseguradores o personas de su confianza que trabajan con Medicare en su nombre. ¡ADVERTENCIA! El mal uso intencional de esta tarjeta puede ser considerado como fraude y/u otra violación de la ley federal y es sancionada por la ley."
+        }
+      } ],
+      "identifier" : [ {
+        "assigner" : {
+          "reference" : "Organization/{uuid}"
+        },
+        "system" : "http://hl7.org/fhir/sid/us-mbi",
+        "type" : {
+          "coding" : [ {
+            "code" : "MB",
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+          } ]
+        },
+        "value" : "8Z73WV0QC20"
+      } ],
+      "meta" : {
+        "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
+        "profile" : [ "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Coverage" ]
+      },
+      "payor" : [ {
+        "reference" : "Organization/{uuid}"
+      } ],
+      "period" : {
+        "start" : "2018-07-01"
+      },
+      "relationship" : {
+        "coding" : [ {
+          "code" : "self",
+          "display" : "Self",
+          "system" : "http://terminology.hl7.org/CodeSystem/subscriber-relationship"
+        } ]
+      },
+      "resourceType" : "Coverage",
+      "status" : "active",
+      "subscriber" : {
+        "reference" : "Patient/{uuid}"
+      },
+      "subscriberId" : "8Z73WV0QC20",
+      "type" : {
+        "coding" : [ {
+          "code" : "14",
+          "display" : "Dual Eligibility Medicare/Medicaid Organization",
+          "system" : "https://nahdo.org/sopt"
+        } ]
+      }
+    }
+  } ],
+  "meta" : {
+    "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
+  },
+  "resourceType" : "Bundle",
+  "type" : "collection"
+}
+]
+
+
+gov.cms.bfd.server.ng.PatientCoverageC4DICSearchIT.patientCoverageSearchByIdDual=[
+{
+  "entry" : [ {
+    "fullUrl" : "{uuid}",
+    "resource" : {
+      "birthDate" : "1922-04-01",
+      "communication" : [ {
+        "language" : {
+          "coding" : [ {
+            "code" : "unknown",
+            "system" : "urn:ietf:bcp:47"
+          } ]
+        }
+      } ],
+      "extension" : [ {
+        "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
+        "valueCode" : "248153007"
+      }, {
+        "extension" : [ {
+          "url" : "ombCategory",
+          "valueCoding" : {
+            "code" : "1002-5",
+            "display" : "American Indian or Alaska Native",
+            "system" : "urn:oid:2.16.840.1.113883.6.238"
+          }
+        }, {
+          "url" : "text",
+          "valueCode" : "American Indian or Alaska Native"
+        } ],
+        "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
+      } ],
+      "gender" : "male",
+      "meta" : {
+        "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
+        "profile" : [ "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Patient" ]
+      },
+      "name" : [ {
+        "family" : "Jones",
+        "given" : [ "Abby" ]
+      } ],
+      "resourceType" : "Patient"
+    }
+  }, {
+    "fullUrl" : "{uuid}",
+    "resource" : {
+      "active" : true,
+      "contact" : [ {
+        "purpose" : {
+          "coding" : [ {
+            "code" : "PATINF",
+            "display" : "Patient",
+            "system" : "http://terminology.hl7.org/CodeSystem/contactentity-type"
+          } ]
+        },
+        "telecom" : [ {
+          "system" : "phone",
+          "value" : "1-800-633-4227"
+        }, {
+          "system" : "phone",
+          "value" : "TTY: 1-877-486-2048"
+        }, {
+          "system" : "url",
+          "value" : "www.medicare.gov"
+        } ]
+      } ],
+      "meta" : {
+        "profile" : [ "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Organization" ]
+      },
+      "name" : "Centers for Medicare and Medicaid Services",
+      "resourceType" : "Organization"
+    }
+  }, {
+    "fullUrl" : "{uuid}",
+    "resource" : {
+      "beneficiary" : {
+        "reference" : "Patient/{uuid}"
+      },
+      "class" : [ {
+        "type" : {
+          "coding" : [ {
+            "code" : "plan",
+            "system" : "http://terminology.hl7.org/CodeSystem/coverage-class"
+          } ]
+        },
+        "value" : "Dual Medicare/Medicaid"
+      } ],
+      "extension" : [ {
+        "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-AdditionalCardInformation-extension",
+        "valueAnnotation" : {
+          "text" : "You may be asked to show this card when you get health care services. Only give your personal Medicare information to health care providers, or people you trust who work with Medicare on your behalf. WARNING: Intentionally misusing this card may be considered fraud and/or other violation of federal law and is punishable by law.\n\nEs posible que le pidan que muestre esta tarjeta cuando reciba servicios de cuidado médico. Solamente dé su información personal de Medicare a los proveedores de salud, sus aseguradores o personas de su confianza que trabajan con Medicare en su nombre. ¡ADVERTENCIA! El mal uso intencional de esta tarjeta puede ser considerado como fraude y/u otra violación de la ley federal y es sancionada por la ley."
+        }
+      } ],
+      "identifier" : [ {
+        "assigner" : {
+          "reference" : "Organization/{uuid}"
+        },
+        "system" : "http://hl7.org/fhir/sid/us-mbi",
+        "type" : {
+          "coding" : [ {
+            "code" : "MB",
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+          } ]
+        },
+        "value" : "1SJ2CG2UC85"
+      } ],
+      "meta" : {
+        "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
+        "profile" : [ "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Coverage" ]
+      },
+      "payor" : [ {
+        "reference" : "Organization/{uuid}"
+      } ],
+      "period" : {
+        "start" : "2020-04-08"
+      },
+      "relationship" : {
+        "coding" : [ {
+          "code" : "self",
+          "display" : "Self",
+          "system" : "http://terminology.hl7.org/CodeSystem/subscriber-relationship"
+        } ]
+      },
+      "resourceType" : "Coverage",
+      "status" : "active",
+      "subscriber" : {
+        "reference" : "Patient/{uuid}"
+      },
+      "subscriberId" : "1SJ2CG2UC85",
+      "type" : {
+        "coding" : [ {
+          "code" : "14",
+          "display" : "Dual Eligibility Medicare/Medicaid Organization",
+          "system" : "https://nahdo.org/sopt"
+        } ]
+      }
+    }
+  } ],
+  "meta" : {
+    "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
+  },
+  "resourceType" : "Bundle",
+  "type" : "collection"
+}
+]
+
+
+gov.cms.bfd.server.ng.PatientCoverageC4DICSearchIT.patientCoverageSearchByIdPartA=[
+{
+  "entry" : [ {
+    "fullUrl" : "{uuid}",
+    "resource" : {
+      "birthDate" : "1922-04-01",
+      "communication" : [ {
+        "language" : {
+          "coding" : [ {
+            "code" : "unknown",
+            "system" : "urn:ietf:bcp:47"
+          } ]
+        }
+      } ],
+      "extension" : [ {
+        "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
+        "valueCode" : "248153007"
+      }, {
+        "extension" : [ {
+          "url" : "ombCategory",
+          "valueCoding" : {
+            "code" : "1002-5",
+            "display" : "American Indian or Alaska Native",
+            "system" : "urn:oid:2.16.840.1.113883.6.238"
+          }
+        }, {
+          "url" : "text",
+          "valueCode" : "American Indian or Alaska Native"
+        } ],
+        "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
+      } ],
+      "gender" : "male",
+      "meta" : {
+        "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
+        "profile" : [ "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Patient" ]
+      },
+      "name" : [ {
+        "family" : "Jones",
+        "given" : [ "Abby" ]
+      } ],
+      "resourceType" : "Patient"
+    }
+  }, {
+    "fullUrl" : "{uuid}",
+    "resource" : {
+      "active" : true,
+      "contact" : [ {
+        "purpose" : {
+          "coding" : [ {
+            "code" : "PATINF",
+            "display" : "Patient",
+            "system" : "http://terminology.hl7.org/CodeSystem/contactentity-type"
+          } ]
+        },
+        "telecom" : [ {
+          "system" : "phone",
+          "value" : "1-800-633-4227"
+        }, {
+          "system" : "phone",
+          "value" : "TTY: 1-877-486-2048"
+        }, {
+          "system" : "url",
+          "value" : "www.medicare.gov"
+        } ]
+      } ],
+      "meta" : {
+        "profile" : [ "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Organization" ]
+      },
+      "name" : "Centers for Medicare and Medicaid Services",
+      "resourceType" : "Organization"
+    }
+  }, {
+    "fullUrl" : "{uuid}",
+    "resource" : {
+      "beneficiary" : {
+        "reference" : "Patient/{uuid}"
+      },
+      "class" : [ {
+        "type" : {
+          "coding" : [ {
+            "code" : "plan",
+            "system" : "http://terminology.hl7.org/CodeSystem/coverage-class"
+          } ]
+        },
+        "value" : "Part A"
+      } ],
+      "extension" : [ {
+        "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-AdditionalCardInformation-extension",
+        "valueAnnotation" : {
+          "text" : "You may be asked to show this card when you get health care services. Only give your personal Medicare information to health care providers, or people you trust who work with Medicare on your behalf. WARNING: Intentionally misusing this card may be considered fraud and/or other violation of federal law and is punishable by law.\n\nEs posible que le pidan que muestre esta tarjeta cuando reciba servicios de cuidado médico. Solamente dé su información personal de Medicare a los proveedores de salud, sus aseguradores o personas de su confianza que trabajan con Medicare en su nombre. ¡ADVERTENCIA! El mal uso intencional de esta tarjeta puede ser considerado como fraude y/u otra violación de la ley federal y es sancionada por la ley."
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-ENTLMT-RSN-CD",
+        "valueCoding" : {
+          "code" : "0",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-RSN-CD"
+        }
+      } ],
+      "identifier" : [ {
+        "assigner" : {
+          "reference" : "Organization/{uuid}"
+        },
+        "system" : "http://hl7.org/fhir/sid/us-mbi",
+        "type" : {
+          "coding" : [ {
+            "code" : "MB",
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+          } ]
+        },
+        "value" : "9OJ2CG2UC85"
+      } ],
+      "meta" : {
+        "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
+        "profile" : [ "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Coverage" ]
+      },
+      "payor" : [ {
+        "reference" : "Organization/{uuid}"
+      } ],
+      "period" : {
+        "end" : "2099-12-31",
+        "start" : "2024-01-01"
+      },
+      "relationship" : {
+        "coding" : [ {
+          "code" : "self",
+          "display" : "Self",
+          "system" : "http://terminology.hl7.org/CodeSystem/subscriber-relationship"
+        } ]
+      },
+      "resourceType" : "Coverage",
+      "status" : "active",
+      "subscriber" : {
+        "reference" : "Patient/{uuid}"
+      },
+      "subscriberId" : "9OJ2CG2UC85",
+      "type" : {
+        "coding" : [ {
+          "code" : "1",
+          "display" : "MEDICARE",
+          "system" : "https://nahdo.org/sopt"
+        } ]
+      }
+    }
+  } ],
+  "meta" : {
+    "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
+  },
+  "resourceType" : "Bundle",
+  "type" : "collection"
+}
+]
+
+
+gov.cms.bfd.server.ng.PatientCoverageC4DICSearchIT.patientCoverageSearchByIdPartB=[
+{
+  "entry" : [ {
+    "fullUrl" : "{uuid}",
+    "resource" : {
+      "birthDate" : "1959-03-14",
+      "communication" : [ {
+        "language" : {
+          "coding" : [ {
+            "code" : "es",
+            "system" : "urn:ietf:bcp:47"
+          } ]
+        }
+      } ],
+      "extension" : [ {
+        "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
+        "valueCode" : "248153007"
+      }, {
+        "extension" : [ {
+          "url" : "ombCategory",
+          "valueCoding" : {
+            "code" : "2028-9",
+            "display" : "Asian",
+            "system" : "urn:oid:2.16.840.1.113883.6.238"
+          }
+        }, {
+          "url" : "text",
+          "valueCode" : "Asian"
+        } ],
+        "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
+      } ],
+      "gender" : "male",
+      "meta" : {
+        "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
+        "profile" : [ "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Patient" ]
+      },
+      "name" : [ {
+        "family" : "Abby",
+        "given" : [ "Abby" ]
+      } ],
+      "resourceType" : "Patient"
+    }
+  }, {
+    "fullUrl" : "{uuid}",
+    "resource" : {
+      "active" : true,
+      "contact" : [ {
+        "purpose" : {
+          "coding" : [ {
+            "code" : "PATINF",
+            "display" : "Patient",
+            "system" : "http://terminology.hl7.org/CodeSystem/contactentity-type"
+          } ]
+        },
+        "telecom" : [ {
+          "system" : "phone",
+          "value" : "1-800-633-4227"
+        }, {
+          "system" : "phone",
+          "value" : "TTY: 1-877-486-2048"
+        }, {
+          "system" : "url",
+          "value" : "www.medicare.gov"
+        } ]
+      } ],
+      "meta" : {
+        "profile" : [ "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Organization" ]
+      },
+      "name" : "Centers for Medicare and Medicaid Services",
+      "resourceType" : "Organization"
+    }
+  }, {
+    "fullUrl" : "{uuid}",
+    "resource" : {
+      "beneficiary" : {
+        "reference" : "Patient/{uuid}"
+      },
+      "class" : [ {
+        "type" : {
+          "coding" : [ {
+            "code" : "plan",
+            "system" : "http://terminology.hl7.org/CodeSystem/coverage-class"
+          } ]
+        },
+        "value" : "Part B"
+      } ],
+      "extension" : [ {
+        "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-AdditionalCardInformation-extension",
+        "valueAnnotation" : {
+          "text" : "You may be asked to show this card when you get health care services. Only give your personal Medicare information to health care providers, or people you trust who work with Medicare on your behalf. WARNING: Intentionally misusing this card may be considered fraud and/or other violation of federal law and is punishable by law.\n\nEs posible que le pidan que muestre esta tarjeta cuando reciba servicios de cuidado médico. Solamente dé su información personal de Medicare a los proveedores de salud, sus aseguradores o personas de su confianza que trabajan con Medicare en su nombre. ¡ADVERTENCIA! El mal uso intencional de esta tarjeta puede ser considerado como fraude y/u otra violación de la ley federal y es sancionada por la ley."
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-ENTLMT-RSN-CD",
+        "valueCoding" : {
+          "code" : "0",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-RSN-CD"
+        }
+      } ],
+      "identifier" : [ {
+        "assigner" : {
+          "reference" : "Organization/{uuid}"
+        },
+        "system" : "http://hl7.org/fhir/sid/us-mbi",
+        "type" : {
+          "coding" : [ {
+            "code" : "MB",
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+          } ]
+        },
+        "value" : "1L26RW8YW56"
+      } ],
+      "meta" : {
+        "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
+        "profile" : [ "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Coverage" ]
+      },
+      "payor" : [ {
+        "reference" : "Organization/{uuid}"
+      } ],
+      "period" : {
+        "end" : "2099-12-31",
+        "start" : "2024-01-01"
+      },
+      "relationship" : {
+        "coding" : [ {
+          "code" : "self",
+          "display" : "Self",
+          "system" : "http://terminology.hl7.org/CodeSystem/subscriber-relationship"
+        } ]
+      },
+      "resourceType" : "Coverage",
+      "status" : "active",
+      "subscriber" : {
+        "reference" : "Patient/{uuid}"
+      },
+      "subscriberId" : "1L26RW8YW56",
+      "type" : {
+        "coding" : [ {
+          "code" : "121",
+          "display" : "MEDICARE FFS",
+          "system" : "https://nahdo.org/sopt"
+        } ]
+      }
+    }
+  } ],
+  "meta" : {
+    "lastUpdated" : "9999-12-31T00:00:00.000+00:00"
+  },
+  "resourceType" : "Bundle",
+  "type" : "collection"
+}
+]
