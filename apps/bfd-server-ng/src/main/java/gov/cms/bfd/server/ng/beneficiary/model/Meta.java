@@ -1,10 +1,11 @@
 package gov.cms.bfd.server.ng.beneficiary.model;
 
+import gov.cms.bfd.server.ng.model.ProfileType;
 import gov.cms.bfd.server.ng.util.DateUtil;
-import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.time.ZonedDateTime;
+import java.util.List;
 import lombok.Getter;
 
 /** FHIR metadata information. */
@@ -17,25 +18,32 @@ public class Meta {
   /**
    * Returns meta information for the Patient resource.
    *
+   * @param profileType FHIR profile URL to add
    * @return meta
    */
-  org.hl7.fhir.r4.model.Meta toFhirPatient() {
-    return new org.hl7.fhir.r4.model.Meta()
-        .setLastUpdated(DateUtil.toDate(updatedTimestamp))
-        .addProfile(SystemUrls.PROFILE_C4BB_PATIENT_2_1_0)
-        .addProfile(SystemUrls.PROFILE_US_CORE_PATIENT_6_1_0);
+  public org.hl7.fhir.r4.model.Meta toFhirPatient(ProfileType profileType) {
+    return toFhirProfile(updatedTimestamp, profileType.getPatientProfiles());
   }
 
   /**
    * Builds Coverage meta using a supplied lastUpdated.
    *
-   * @param overrideLastUpdated timestamp to set as lastUpdated
-   * @return FHIR Meta for Coverage
+   * @param profileType FHIR profile URL to add
+   * @param overrideLastUpdated last updated value
+   * @return meta
    */
-  public org.hl7.fhir.r4.model.Meta toFhirCoverage(ZonedDateTime overrideLastUpdated) {
-    return new org.hl7.fhir.r4.model.Meta()
-        .setLastUpdated(DateUtil.toDate(overrideLastUpdated))
-        .addProfile(SystemUrls.PROFILE_C4BB_COVERAGE_2_1_0)
-        .addProfile(SystemUrls.PROFILE_US_CORE_COVERAGE_6_1_0);
+  public org.hl7.fhir.r4.model.Meta toFhirCoverage(
+      ProfileType profileType, ZonedDateTime overrideLastUpdated) {
+    return toFhirProfile(overrideLastUpdated, profileType.getCoverageProfiles());
+  }
+
+  private org.hl7.fhir.r4.model.Meta toFhirProfile(
+      ZonedDateTime overrideLastUpdated, List<String> profiles) {
+    var meta =
+        new org.hl7.fhir.r4.model.Meta().setLastUpdated(DateUtil.toDate(overrideLastUpdated));
+
+    profiles.forEach(meta::addProfile);
+
+    return meta;
   }
 }
