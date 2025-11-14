@@ -299,7 +299,7 @@ public class Claim {
     claimTypeCode
         .toFhirPartDInsurance(contractNumber, contractPbpNumber)
         .ifPresent(eob::addInsurance);
-    eob.setTotal(adjudicationCharge.toFhir());
+    adjudicationCharge.toFhir().forEach(eob::addTotal);
     eob.setPayment(claimPaymentAmount.toFhir());
 
     getClaimProfessional()
