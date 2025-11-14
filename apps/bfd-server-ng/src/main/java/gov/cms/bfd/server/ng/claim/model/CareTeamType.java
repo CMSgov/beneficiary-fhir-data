@@ -4,6 +4,7 @@ import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
@@ -14,18 +15,23 @@ import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Reference;
 
 @AllArgsConstructor
+@Getter
 enum CareTeamType {
   ATTENDING("attending", "Attending"),
   OPERATING("operating", "Operating"),
   RENDERING("rendering", "Rendering provider"),
   OTHER("otheroperating", "Other Operating"),
-  PRESCRIBING("prescribing", "Prescribing");
+  PRESCRIBING("prescribing", "Prescribing"),
+  REFERRING("referring", "Referring provider");
 
   private final String roleCode;
   private final String roleDisplay;
 
   CareTeamComponents toFhir(
-      SequenceGenerator sequenceGenerator, String value, Optional<String> familyName) {
+      SequenceGenerator sequenceGenerator,
+      String value,
+      Optional<String> familyName,
+      Optional<String> pinNumber) {
     var practitioner = new Practitioner();
     var sequence = sequenceGenerator.next();
     if (roleCode.equals(PRESCRIBING.roleCode)) {
@@ -46,6 +52,11 @@ enum CareTeamType {
             .setValue(value));
     // todo: modify based on BFD-4286
     familyName.ifPresent(n -> practitioner.addName(new HumanName().setFamily(n)));
+
+    pinNumber.ifPresent(
+        p ->
+            practitioner.addIdentifier(
+                new Identifier().setSystem(SystemUrls.BLUE_BUTTON_PIN_NUM).setValue(p)));
 
     var component =
         new ExplanationOfBenefit.CareTeamComponent()

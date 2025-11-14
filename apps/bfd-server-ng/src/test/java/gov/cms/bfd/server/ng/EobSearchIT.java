@@ -92,7 +92,7 @@ class EobSearchIT extends IntegrationTestBase {
                     .identifier(BENE_ID_ALL_PARTS_WITH_XREF))
             .usingStyle(searchStyle)
             .execute();
-    assertEquals(4, eobBundle.getEntry().size());
+    assertEquals(5, eobBundle.getEntry().size());
     expectFhir().scenario(searchStyle.name()).toMatchSnapshot(eobBundle);
   }
 
@@ -148,7 +148,7 @@ class EobSearchIT extends IntegrationTestBase {
                     .afterOrEquals()
                     .day(DateUtil.toDate(lastUpdated)))
             .execute();
-    assertEquals(4, eobBundle.getEntry().size());
+    assertEquals(5, eobBundle.getEntry().size());
 
     eobBundle =
         searchBundle()
@@ -228,7 +228,7 @@ class EobSearchIT extends IntegrationTestBase {
             .execute();
 
     assertEquals(
-        2, eobBundle.getEntry().size(), "Should find EOBs with the specified adjudication status");
+        3, eobBundle.getEntry().size(), "Should find EOBs with the specified adjudication status");
 
     expectFhir().scenario(searchStyle.name() + "_WithTag_" + validTag).toMatchSnapshot(eobBundle);
   }
@@ -253,7 +253,7 @@ class EobSearchIT extends IntegrationTestBase {
             .execute();
 
     assertEquals(
-        2, eobBundle.getEntry().size(), "Should find EOBs with the specified adjudication status");
+        3, eobBundle.getEntry().size(), "Should find EOBs with the specified adjudication status");
 
     expectFhir()
         .scenario(searchStyle.name() + "_WithSystemTag_Adjudicated")

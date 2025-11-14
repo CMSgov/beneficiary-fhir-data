@@ -40,6 +40,12 @@ class CareTeam {
   /** TODO: Temp string value for provider last name. To be implemented in BFD-4286 */
   public static final String PROVIDER_LAST_NAME = "LAST NAME HERE";
 
+  @Column(name = "prvdr_rfrg_prvdr_npi_num")
+  private Optional<String> refferingProviderNpiNumber;
+
+  @Column(name = "clm_rfrg_prvdr_pin_num")
+  private Optional<String> refferingProviderPinNumber;
+
   List<CareTeamType.CareTeamComponents> toFhir() {
     var sequenceGenerator = new SequenceGenerator();
     var components =
@@ -47,22 +53,30 @@ class CareTeam {
             attendingProviderNpiNumber.map(
                 npi ->
                     CareTeamType.ATTENDING.toFhir(
-                        sequenceGenerator, npi, attendingProviderLastName)),
+                        sequenceGenerator, npi, attendingProviderLastName, Optional.empty())),
             operatingProviderNpiNumber.map(
                 npi ->
                     CareTeamType.OPERATING.toFhir(
-                        sequenceGenerator, npi, operatingProviderLastName)),
+                        sequenceGenerator, npi, operatingProviderLastName, Optional.empty())),
             otherProviderNpiNumber.map(
                 npi ->
-                    CareTeamType.RENDERING.toFhir(sequenceGenerator, npi, otherProviderLastName)),
+                    CareTeamType.RENDERING.toFhir(
+                        sequenceGenerator, npi, otherProviderLastName, Optional.empty())),
             renderingProviderNpiNumber.map(
                 npi ->
                     CareTeamType.RENDERING.toFhir(
-                        sequenceGenerator, npi, renderingProviderLastName)),
+                        sequenceGenerator, npi, renderingProviderLastName, Optional.empty())),
             prescribingProviderNpiNumber.map(
                 npi ->
                     CareTeamType.PRESCRIBING.toFhir(
-                        sequenceGenerator, npi, Optional.of(PROVIDER_LAST_NAME))));
+                        sequenceGenerator, npi, Optional.of(PROVIDER_LAST_NAME), Optional.empty())),
+            refferingProviderNpiNumber.map(
+                npi ->
+                    CareTeamType.REFERRING.toFhir(
+                        sequenceGenerator,
+                        npi,
+                        renderingProviderLastName,
+                        refferingProviderPinNumber)));
 
     return components.flatMap(Optional::stream).toList();
   }
