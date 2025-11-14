@@ -38,7 +38,7 @@ public class EobPharmacyIT extends IntegrationTestBase {
   void eobReadPharmacyQueryCount() {
     var events = ThreadSafeAppender.startRecord();
     eobResourceProvider.find(new IdType(CLAIM_ID_RX), request);
-    assertEquals(1, queryCount(events));
+    assertEquals(3, queryCount(events));
   }
 
   @Test
@@ -46,6 +46,18 @@ public class EobPharmacyIT extends IntegrationTestBase {
     var eob = eobRead().withId(CLAIM_ID_RX).execute();
     assertFalse(eob.isEmpty());
     expectFhir().toMatchSnapshot(eob);
+
+    assertEquals("#provider-practitioner", eob.getProvider().getReference());
+    var containedResources = eob.getContained();
+    var hasPractitioner =
+        containedResources.stream()
+            .filter(r -> r.getId().equals("provider-practitioner"))
+            .findFirst();
+    assertTrue(hasPractitioner.isPresent());
+    Practitioner practitioner = (Practitioner) hasPractitioner.get();
+    var familyName =
+        practitioner.getName().stream().filter(p -> p.getFamily().equals("Garcia")).findFirst();
+    assertTrue(familyName.isPresent());
 
     var careTeam = eob.getCareTeam();
     assertFalse(careTeam.isEmpty());
@@ -62,18 +74,17 @@ public class EobPharmacyIT extends IntegrationTestBase {
       assertTrue(hasPrescribingRole.isPresent());
     }
 
-    assertEquals("#provider-practitioner", eob.getProvider().getReference());
-    var containedResources = eob.getContained();
-    var hasPractitioner =
+    var hasContainedPrescriber =
         containedResources.stream()
-            .filter(r -> r.getResourceType().toString().equals("Practitioner"))
+            .filter(r -> r.getId().equals("careteam-prescriber-practitioner-1"))
             .findFirst();
-    assertTrue(hasPractitioner.isPresent());
-    Practitioner practitioner = (Practitioner) hasPractitioner.get();
-    assertEquals("provider-practitioner", practitioner.getId());
-    var familyName =
-        practitioner.getName().stream().filter(p -> p.getFamily().equals("Garcia")).findFirst();
-    assertTrue(familyName.isPresent());
+    assertTrue(hasContainedPrescriber.isPresent());
+    Practitioner prescriber = (Practitioner) hasContainedPrescriber.get();
+    var hasPrescriberRogers =
+        prescriber.getName().stream()
+            .filter(humanName -> humanName.getFamily().equals("Rogers"))
+            .findFirst();
+    assertTrue(hasPrescriberRogers.isPresent());
 
     var partDInsurance =
         eob.getInsurance().stream()
@@ -96,6 +107,17 @@ public class EobPharmacyIT extends IntegrationTestBase {
     assertFalse(eob.isEmpty());
     expectFhir().toMatchSnapshot(eob);
 
+    assertEquals("#provider-org", eob.getProvider().getReference());
+    var containedResources = eob.getContained();
+    var hasOrganization =
+        containedResources.stream()
+            .filter(r -> r.getResourceType().toString().equals("Organization"))
+            .findFirst();
+    assertTrue(hasOrganization.isPresent());
+    Organization organization = (Organization) hasOrganization.get();
+    assertEquals("provider-org", organization.getId());
+    assertEquals("CBS Health Corporation", organization.getName());
+
     var careTeam = eob.getCareTeam();
     assertFalse(careTeam.isEmpty());
     for (ExplanationOfBenefit.CareTeamComponent careTeamMember : careTeam) {
@@ -111,16 +133,17 @@ public class EobPharmacyIT extends IntegrationTestBase {
       assertTrue(hasPrescribingRole.isPresent());
     }
 
-    assertEquals("#provider-org", eob.getProvider().getReference());
-    var containedResources = eob.getContained();
-    var hasOrganization =
+    var hasContainedPrescriber =
         containedResources.stream()
-            .filter(r -> r.getResourceType().toString().equals("Organization"))
+            .filter(r -> r.getId().equals("careteam-prescriber-practitioner-1"))
             .findFirst();
-    assertTrue(hasOrganization.isPresent());
-    Organization organization = (Organization) hasOrganization.get();
-    assertEquals("provider-org", organization.getId());
-    assertEquals("CBS Health Corporation", organization.getName());
+    assertTrue(hasContainedPrescriber.isPresent());
+    Practitioner prescriber = (Practitioner) hasContainedPrescriber.get();
+    var hasPrescriberStark =
+        prescriber.getName().stream()
+            .filter(humanName -> humanName.getFamily().equals("Stark"))
+            .findFirst();
+    assertTrue(hasPrescriberStark.isPresent());
 
     var partDInsurance =
         eob.getInsurance().stream()

@@ -44,7 +44,7 @@ class EobReadIT extends IntegrationTestBase {
   void eobReadQueryCount() {
     var events = ThreadSafeAppender.startRecord();
     eobResourceProvider.find(new IdType(CLAIM_ID_ADJUDICATED_ICD_9), request);
-    assertEquals(1, queryCount(events));
+    assertEquals(6, queryCount(events));
   }
 
   @Test

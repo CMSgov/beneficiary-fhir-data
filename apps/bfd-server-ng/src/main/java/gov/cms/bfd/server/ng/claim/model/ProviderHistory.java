@@ -4,15 +4,19 @@ import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import lombok.Getter;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.HumanName;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Meta;
+import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Practitioner;
 
 /** Provider History table. */
 @Entity
@@ -55,9 +59,6 @@ public class ProviderHistory {
 
   @Column(name = "prvdr_emplr_id_num")
   private Optional<String> employerIdNumber;
-
-  @OneToOne(mappedBy = "providerHistory")
-  private Claim claim;
 
   /**
    * Derives the NPI_TYPE based on the presence of the providerLegalName. NPI_TYPE = 1 means the NPI

@@ -9,6 +9,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
@@ -113,13 +114,78 @@ public class Claim {
   private Contract contract;
 
   @Nullable
-  @OneToOne
+  @ManyToOne
   @JoinColumn(
       name = "clm_srvc_prvdr_gnrc_id_num",
       insertable = false,
       updatable = false,
       referencedColumnName = "prvdr_npi_num")
   private ProviderHistory providerHistory;
+
+  @Nullable
+  @ManyToOne
+  @JoinColumn(
+      name = "clm_atndg_prvdr_npi_num",
+      insertable = false,
+      updatable = false,
+      referencedColumnName = "prvdr_npi_num")
+  private ProviderHistory attendingProviderHistory;
+
+  private Optional<ProviderHistory> getAttendingProviderHistory() {
+    return Optional.ofNullable(attendingProviderHistory);
+  }
+
+  @Nullable
+  @ManyToOne
+  @JoinColumn(
+      name = "clm_oprtg_prvdr_npi_num",
+      insertable = false,
+      updatable = false,
+      referencedColumnName = "prvdr_npi_num")
+  private ProviderHistory operatingProviderHistory;
+
+  private Optional<ProviderHistory> getOperatingProviderHistory() {
+    return Optional.ofNullable(operatingProviderHistory);
+  }
+
+  @Nullable
+  @ManyToOne
+  @JoinColumn(
+      name = "clm_othr_prvdr_npi_num",
+      insertable = false,
+      updatable = false,
+      referencedColumnName = "prvdr_npi_num")
+  private ProviderHistory otherProviderHistory;
+
+  private Optional<ProviderHistory> getOtherProviderHistory() {
+    return Optional.ofNullable(otherProviderHistory);
+  }
+
+  @Nullable
+  @ManyToOne
+  @JoinColumn(
+      name = "clm_rndrg_prvdr_npi_num",
+      insertable = false,
+      updatable = false,
+      referencedColumnName = "prvdr_npi_num")
+  private ProviderHistory renderingProviderHistory;
+
+  private Optional<ProviderHistory> getRenderingProviderHistory() {
+    return Optional.ofNullable(renderingProviderHistory);
+  }
+
+  @Nullable
+  @ManyToOne
+  @JoinColumn(
+      name = "prvdr_prscrbng_prvdr_npi_num",
+      insertable = false,
+      updatable = false,
+      referencedColumnName = "prvdr_npi_num")
+  private ProviderHistory prescribingProviderHistory;
+
+  private Optional<ProviderHistory> getPrescribingProviderHistory() {
+    return Optional.ofNullable(prescribingProviderHistory);
+  }
 
   Optional<ClaimInstitutional> getClaimInstitutional() {
     return Optional.ofNullable(claimInstitutional);
@@ -274,7 +340,12 @@ public class Claim {
         .forEach(eob::addSupportingInfo);
 
     careTeam
-        .toFhir()
+        .toFhir(
+            getAttendingProviderHistory(),
+            getOperatingProviderHistory(),
+            getOtherProviderHistory(),
+            getRenderingProviderHistory(),
+            getPrescribingProviderHistory())
         .forEach(
             c -> {
               eob.addCareTeam(c.careTeam());
