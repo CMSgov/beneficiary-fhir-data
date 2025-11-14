@@ -285,7 +285,7 @@ class EobSearchIT extends IntegrationTestBase {
   @ParameterizedTest
   @EnumSource(SearchStyleEnum.class)
   void eobSearchByType(SearchStyleEnum searchStyle) {
-    var outPatientType = ClaimSubtype.OUTPATIENT.getCode();
+    var outpatientType = ClaimSubtype.OUTPATIENT.getCode();
 
     var eobBundleOutpatient =
         searchBundle()
@@ -293,7 +293,7 @@ class EobSearchIT extends IntegrationTestBase {
                 new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
                     .exactly()
                     .identifier(BENE_ID_ALL_PARTS_WITH_XREF))
-            .and(new TokenClientParam("type").exactly().identifier(outPatientType))
+            .and(new TokenClientParam("type").exactly().identifier(outpatientType))
             .usingStyle(searchStyle)
             .execute();
 
@@ -303,7 +303,7 @@ class EobSearchIT extends IntegrationTestBase {
         "Should find EOBs with the outpatient claim type");
 
     expectFhir()
-        .scenario(searchStyle.name() + "_WithClaimType_" + outPatientType)
+        .scenario(searchStyle.name() + "_WithClaimType_" + outpatientType)
         .toMatchSnapshot(eobBundleOutpatient);
 
     var hhaType = ClaimSubtype.HHA.getCode();
@@ -315,7 +315,7 @@ class EobSearchIT extends IntegrationTestBase {
                     .exactly()
                     .identifier(BENE_ID_ALL_PARTS_WITH_XREF))
             .and(new TokenClientParam("type").exactly().identifier(hhaType))
-            .and(new TokenClientParam("type").exactly().identifier(outPatientType))
+            .and(new TokenClientParam("type").exactly().identifier(outpatientType))
             .usingStyle(searchStyle)
             .execute();
     assertEquals(
@@ -324,7 +324,7 @@ class EobSearchIT extends IntegrationTestBase {
         "Should find EOBs with both HHA and Outpatient claim types");
 
     expectFhir()
-        .scenario(searchStyle.name() + "_WithMultipleClaimTypes_" + hhaType + "_" + outPatientType)
+        .scenario(searchStyle.name() + "_WithMultipleClaimTypes_" + hhaType + "," + outpatientType)
         .toMatchSnapshot(eobBundleMultipleTypes);
 
     var wildcardType = "*";

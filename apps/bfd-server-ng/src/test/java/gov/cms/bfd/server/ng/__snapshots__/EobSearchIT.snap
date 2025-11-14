@@ -31924,7 +31924,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
 ]
 
 
-gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleClaimTypes_hha_outpatient]=[
+gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleClaimTypes_hha,outpatient]=[
 {
   "entry" : [ {
     "resource" : {
@@ -39795,7 +39795,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
 ]
 
 
-gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha_outpatient]=[
+gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha,outpatient]=[
 {
   "entry" : [ {
     "resource" : {
@@ -47666,7 +47666,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
 ]
 
 
-gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hha_outpatient]=[
+gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hha,outpatient]=[
 {
   "entry" : [ {
     "resource" : {
