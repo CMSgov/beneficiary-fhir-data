@@ -222,6 +222,12 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
     rows = cur.fetchmany(1)
     assert rows[0]["clm_uniq_id"] == 113370100080
 
+    cur = conn.execute("select * from  idr.claim_related_condition order by clm_uniq_id")
+    assert cur.rowcount == 19
+    rows = cur.fetchmany(1)
+    assert rows[0]["clm_uniq_id"] == 113370100080
+
+
     cur = conn.execute("select * from idr.claim_date_signature order by clm_dt_sgntr_sk")
     assert cur.rowcount == 142
     rows = cur.fetchmany(1)
