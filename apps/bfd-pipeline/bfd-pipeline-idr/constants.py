@@ -141,4 +141,5 @@ CLAIM_AUX_TABLES = [
     "idr_claim_professional",
     "idr_claim_line_professional",
     "idr_claim_line_rx",
+    "idr_claim_related_condition",
 ]
