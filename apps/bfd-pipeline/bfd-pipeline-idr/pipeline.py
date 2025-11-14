@@ -1,13 +1,13 @@
 import logging
 import os
 import sys
-
-import ray
-from hamilton import base, driver  # type: ignore
-from hamilton.plugins.h_ray import RayGraphAdapter  # type: ignore
+from pathlib import Path
 
 import pipeline_nodes
+import ray
 from constants import CLAIM_AUX_TABLES
+from hamilton import base, driver  # type: ignore
+from hamilton.plugins.h_ray import RayGraphAdapter  # type: ignore
 from loader import get_connection_string
 
 console_handler = logging.StreamHandler()
@@ -27,7 +27,9 @@ def main() -> None:
     logger.info("load start")
 
     parallelism = int(os.environ.get("PARALLELISM", "18"))
-    ray.init(logging_level="info", num_cpus=parallelism)  # type: ignore
+    # Ensure local modules (model.py, pipeline_nodes, etc.) are available in Ray workers
+    working_dir = str(Path(__file__).resolve().parent)
+    ray.init(logging_level="info", num_cpus=parallelism, runtime_env={"working_dir": working_dir})  # type: ignore
 
     dict_builder = base.DictResult()
     adapter = RayGraphAdapter(result_builder=dict_builder)

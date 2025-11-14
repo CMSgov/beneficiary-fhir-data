@@ -110,13 +110,15 @@ class DatabaseDetailsModel(BaseModel):
 
     @classmethod
     def from_env(cls) -> "DatabaseDetailsModel":
-        return DatabaseDetailsModel.model_validate({
-            "host": os.environ.get("PGHOST"),
-            "user": os.environ.get("PGUSER"),
-            "password": os.environ.get("PGPASSWORD"),
-            "port": os.environ.get("PGPORT"),
-            "dbname": os.environ.get("PGDATABASE"),
-        })
+        return DatabaseDetailsModel.model_validate(
+            {
+                "host": os.environ.get("PGHOST"),
+                "user": os.environ.get("PGUSER"),
+                "password": os.environ.get("PGPASSWORD"),
+                "port": os.environ.get("PGPORT"),
+                "dbname": os.environ.get("PGDATABASE"),
+            }
+        )
 
 
 @dataclass(frozen=True, eq=True)
@@ -550,7 +552,10 @@ async def main(
     )
 
     samhsa_benes = await query_samhsa_benes_with_claims(
-        security_labels=samhsa_labels, db_details=db_details, tablesample=tablesample, limit=limit
+        security_labels=samhsa_labels,
+        db_details=db_details,
+        tablesample=tablesample,
+        limit=limit,
     )
 
     # We check for localhost or 127.0.0.1 (the most common local addresses) to determine if this is
@@ -627,15 +632,17 @@ async def main(
         logger.log(
             logging.INFO if all_samhsa_filtered else logging.ERROR,
             "Filtering validation test of %d non-empty SAMHSA EoBs: %s",
-            len([
-                res
-                for res in results
-                if res
-                in [
-                    VerifyFilteringResult.PASS,
-                    VerifyFilteringResult.FAIL,
+            len(
+                [
+                    res
+                    for res in results
+                    if res
+                    in [
+                        VerifyFilteringResult.PASS,
+                        VerifyFilteringResult.FAIL,
+                    ]
                 ]
-            ]),
+            ),
             "PASSED" if all_samhsa_filtered else "FAILED",
         )
 

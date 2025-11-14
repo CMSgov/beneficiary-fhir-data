@@ -11,14 +11,13 @@ from typing import cast
 import psycopg
 import pytest
 import ray
+from load_synthetic import load_from_csv
+from pipeline import main
 from psycopg.rows import DictRow, dict_row
 from testcontainers.core.config import testcontainers_config  # type: ignore
 
 # https://github.com/testcontainers/testcontainers-python/issues/305
 from testcontainers.postgres import PostgresContainer  # type: ignore
-
-from load_synthetic import load_from_csv
-from pipeline import main
 
 # ryuk throws a 500 or 404 error for some reason
 # seems to have issues with podman https://github.com/testcontainers/testcontainers-python/issues/753
@@ -29,6 +28,7 @@ def _run_migrator(postgres: PostgresContainer) -> None:
     # Python recommends using an absolute path when running an executable
     # to avoid any ambiguity
     mvn = shutil.which("mvn") or "mvn"
+    migrator_dir = Path(__file__).parent.parent.parent / "bfd-db-migrator-ng"
     try:
         subprocess.run(
             f"{mvn} flyway:migrate "
@@ -36,7 +36,7 @@ def _run_migrator(postgres: PostgresContainer) -> None:
             f"jdbc:postgresql://localhost:{postgres.get_exposed_port(5432)}/{postgres.dbname} "
             f"-Dflyway.user={postgres.username} "
             f"-Dflyway.password={postgres.password}",
-            cwd="../../bfd-db-migrator-ng",
+            cwd=str(migrator_dir),
             shell=True,
             capture_output=True,
             check=True,
@@ -48,14 +48,15 @@ def _run_migrator(postgres: PostgresContainer) -> None:
 
 @pytest.fixture(scope="module")
 def setup_db() -> Generator[PostgresContainer]:
+    test_dir = Path(__file__).parent
     with PostgresContainer("postgres:16", driver="") as postgres:
         with psycopg.connect(postgres.get_connection_url()) as conn:
-            with Path("./mock-idr.sql").open() as f:
+            with (test_dir / "mock-idr.sql").open() as f:
                 conn.execute(f.read())  # type: ignore
             conn.commit()
 
             _run_migrator(postgres)
-            load_from_csv(conn, "./test_samples1")  # type: ignore
+            load_from_csv(conn, str(test_dir / "test_samples1"))  # type: ignore
 
             info = conn.info
             os.environ["BFD_DB_ENDPOINT"] = info.host
