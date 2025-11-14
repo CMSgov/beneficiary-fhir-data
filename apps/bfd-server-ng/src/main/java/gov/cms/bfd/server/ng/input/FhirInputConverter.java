@@ -3,9 +3,11 @@ package gov.cms.bfd.server.ng.input;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import gov.cms.bfd.server.ng.claim.model.ClaimSourceId;
+import gov.cms.bfd.server.ng.claim.model.ClaimTypeCode;
 import gov.cms.bfd.server.ng.util.IdrConstants;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.util.Collections;
@@ -174,6 +176,31 @@ public class FhirInputConverter {
               return adjudicationStatus.isPresent()
                   && adjudicationStatus.get().equalsIgnoreCase(statusValue);
             })
+        .toList();
+  }
+
+  /**
+   * Gets claim type codes mapped to type params.
+   *
+   * @param typeParam The type from the type parameter.
+   * @return A list of matching ClaimTypeCode.
+   */
+  public static List<ClaimTypeCode> getClaimTypeCodesForType(
+      @Nullable TokenAndListParam typeParam) {
+
+    if (typeParam == null || typeParam.getValuesAsQueryTokens().isEmpty()) {
+      return Collections.emptyList();
+    }
+    var typeParams = typeParam.getValuesAsQueryTokens();
+
+    return typeParams.stream()
+        .flatMap(
+            param ->
+                param.getValuesAsQueryTokens() == null
+                    ? Stream.empty()
+                    : param.getValuesAsQueryTokens().stream())
+        .map(token -> token.getValue().trim().toLowerCase())
+        .flatMap(normalizedType -> ClaimTypeCode.getClaimTypeCodesByType(normalizedType).stream())
         .toList();
   }
 }

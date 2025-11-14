@@ -1,8 +1,14 @@
 package gov.cms.bfd.server.ng.claim.model;
 
 import gov.cms.bfd.server.ng.util.SystemUrls;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -421,5 +427,86 @@ public enum ClaimTypeCode {
       case 71, 72, 81, 82 -> Optional.of(ClaimType.PROFESSIONAL);
       default -> Optional.empty();
     };
+  }
+
+  private static final Map<ClaimSubtype, List<ClaimTypeCode>> CLAIM_TYPE_CODE_MAP =
+      Map.of(
+          ClaimSubtype.CARRIER,
+          mapCarrierToClaimTypeCodes(),
+          ClaimSubtype.DME,
+          mapDmeToClaimTypeCodes(),
+          ClaimSubtype.HHA,
+          mapHhaToClaimTypeCodes(),
+          ClaimSubtype.HOSPICE,
+          mapHospiceToClaimTypeCodes(),
+          ClaimSubtype.INPATIENT,
+          mapInpatientToClaimTypeCodes(),
+          ClaimSubtype.OUTPATIENT,
+          mapOutpatientToClaimTypeCodes(),
+          ClaimSubtype.PDE,
+          mapPDEToClaimTypeCodes(),
+          ClaimSubtype.SNF,
+          mapSnfToClaimTypeCodes());
+
+  /**
+   * Gets claim type codes mapped to type params.
+   *
+   * @param normalizedType The normalized claim type.
+   * @return A list of matching ClaimTypeCode
+   */
+  public static List<ClaimTypeCode> getClaimTypeCodesByType(String normalizedType) {
+
+    Set<ClaimTypeCode> collectedClaimTypeCodes = new HashSet<>();
+
+    if ("*".equals(normalizedType)) {
+      return Collections.emptyList();
+    }
+
+    var claimType = ClaimSubtype.fromCode(normalizedType);
+
+    var codesForThisType = CLAIM_TYPE_CODE_MAP.get(claimType);
+
+    if (codesForThisType != null) {
+      collectedClaimTypeCodes.addAll(codesForThisType);
+
+    } else {
+      throw new IllegalStateException("Not a valid claim type code");
+    }
+    return new ArrayList<>(collectedClaimTypeCodes);
+  }
+
+  private static List<ClaimTypeCode> mapCarrierToClaimTypeCodes() {
+    return List.of(_71, _72, _1700, _2700);
+  }
+
+  private static List<ClaimTypeCode> mapDmeToClaimTypeCodes() {
+    return List.of(_81, _82, _1800, _2800);
+  }
+
+  private static List<ClaimTypeCode> mapHhaToClaimTypeCodes() {
+    return List.of(_10, _1032, _1033, _2032, _2033);
+  }
+
+  private static List<ClaimTypeCode> mapHospiceToClaimTypeCodes() {
+    return List.of(_50, _1081, _1082, _1900, _2081, _2082, _2900);
+  }
+
+  private static List<ClaimTypeCode> mapInpatientToClaimTypeCodes() {
+    return List.of(_60, _61, _62, _63, _64, _1011, _1041, _2011, _2041);
+  }
+
+  private static List<ClaimTypeCode> mapOutpatientToClaimTypeCodes() {
+    return List.of(
+        _40, _1012, _1013, _1014, _1022, _1023, _1034, _1071, _1072, _1073, _1074, _1075, _1076,
+        _1077, _1083, _1085, _1087, _1089, _2012, _2013, _2014, _2022, _2023, _2034, _2071, _2072,
+        _2073, _2074, _2075, _2076, _2077, _2083, _2085, _2087, _2089);
+  }
+
+  private static List<ClaimTypeCode> mapPDEToClaimTypeCodes() {
+    return List.of(_1, _2, _3, _4);
+  }
+
+  private static List<ClaimTypeCode> mapSnfToClaimTypeCodes() {
+    return List.of(_20, _30, _1018, _1021, _1022, _1028, _2018, _2021, _2022, _2023, _2028);
   }
 }
