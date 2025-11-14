@@ -285,9 +285,9 @@ class EobSearchIT extends IntegrationTestBase {
   @ParameterizedTest
   @EnumSource(SearchStyleEnum.class)
   void eobSearchByType(SearchStyleEnum searchStyle) {
-    String outPatientType = ClaimSubtype.OUTPATIENT.getCode();
+    var outPatientType = ClaimSubtype.OUTPATIENT.getCode();
 
-    var eobBundleOutPatient =
+    var eobBundleOutpatient =
         searchBundle()
             .where(
                 new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
@@ -299,31 +299,35 @@ class EobSearchIT extends IntegrationTestBase {
 
     assertEquals(
         3,
-        eobBundleOutPatient.getEntry().size(),
+        eobBundleOutpatient.getEntry().size(),
         "Should find EOBs with the outpatient claim type");
 
     expectFhir()
         .scenario(searchStyle.name() + "_WithClaimType_" + outPatientType)
-        .toMatchSnapshot(eobBundleOutPatient);
+        .toMatchSnapshot(eobBundleOutpatient);
 
-    String hhaType = ClaimSubtype.HHA.getCode();
-    var eobBundleHha =
+    var hhaType = ClaimSubtype.HHA.getCode();
+
+    var eobBundleMultipleTypes =
         searchBundle()
             .where(
                 new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
                     .exactly()
                     .identifier(BENE_ID_ALL_PARTS_WITH_XREF))
             .and(new TokenClientParam("type").exactly().identifier(hhaType))
+            .and(new TokenClientParam("type").exactly().identifier(outPatientType))
             .usingStyle(searchStyle)
             .execute();
-
-    assertEquals(1, eobBundleHha.getEntry().size(), "Should find EOBs with hha claim type");
+    assertEquals(
+        4,
+        eobBundleMultipleTypes.getEntry().size(),
+        "Should find EOBs with both HHA and Outpatient claim types");
 
     expectFhir()
-        .scenario(searchStyle.name() + "_WithClaimType_" + hhaType)
-        .toMatchSnapshot(eobBundleHha);
+        .scenario(searchStyle.name() + "_WithMultipleClaimTypes_" + hhaType + "_" + outPatientType)
+        .toMatchSnapshot(eobBundleMultipleTypes);
 
-    String wildcardType = "*";
+    var wildcardType = "*";
     var eobBundleWildcard =
         searchBundle()
             .where(
@@ -346,7 +350,7 @@ class EobSearchIT extends IntegrationTestBase {
       ClaimSubtype.INPATIENT.getCode()
     };
 
-    for (String claimType : zeroResultClaimTypes) {
+    for (var claimType : zeroResultClaimTypes) {
       var eobBundleZero =
           searchBundle()
               .where(
