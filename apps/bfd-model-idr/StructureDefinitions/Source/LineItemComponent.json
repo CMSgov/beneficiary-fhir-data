@@ -322,7 +322,7 @@
             {
                 "id": "LineItemComponent.CLM_LINE_BENE_PMT_AMT",
                 "path": "LineItemComponent.CLM_LINE_BENE_PMT_AMT",
-                "label": "Revenue Center Patient Responsibility Payment Amount",
+                "label": "Patient Responsibility Payment Amount",
                 "min": 0,
                 "max": "1",
                 "type": [
@@ -995,6 +995,174 @@
                 "id": "LineItemComponent.CLM_RNDRG_PRVDR_TYPE_CD",
                 "path": "LineItemComponent.CLM_RNDRG_PRVDR_TYPE_CD",
                 "label": "Claim Rendering Provider Type Code",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.CLM_LINE_OTAF_AMT",
+                "path": "LineItemComponent.CLM_LINE_OTAF_AMT",
+                "label": "Provider Obligation To Accept as Full Amount",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.CLM_LINE_OTHR_TP_PD_AMT",
+                "path": "LineItemComponent.CLM_LINE_OTHR_TP_PD_AMT",
+                "label": "Other Third Party Paid Amount",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.CLM_LINE_NCVRD_PD_AMT",
+                "path": "LineItemComponent.CLM_LINE_NCVRD_PD_AMT",
+                "label": "Noncovered Paid Amount",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.CLM_LINE_ADD_ON_PYMT_AMT",
+                "path": "LineItemComponent.CLM_LINE_ADD_ON_PYMT_AMT",
+                "label": "Add On Payment Amount",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.CLM_LINE_NON_EHR_RDCTN_AMT",
+                "path": "LineItemComponent.CLM_LINE_NON_EHR_RDCTN_AMT",
+                "label": "Non-EHR Reduction Amount",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.CLM_REV_CTR_TDAPA_AMT",
+                "path": "LineItemComponent.CLM_REV_CTR_TDAPA_AMT",
+                "label": "Transitional Drug Add-On Payment Adjustment",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.CLM_LINE_CARR_CLNCL_CHRG_AMT",
+                "path": "LineItemComponent.CLM_LINE_CARR_CLNCL_CHRG_AMT",
+                "label": "Carrier Clinical Charge Amount",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.CLM_LINE_CARR_PSYCH_OT_LMT_AMT",
+                "path": "LineItemComponent.CLM_LINE_CARR_PSYCH_OT_LMT_AMT",
+                "label": "Therapy Amount Applied to Limit",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.CLM_LINE_PRFNL_INTRST_AMT",
+                "path": "LineItemComponent.CLM_LINE_PRFNL_INTRST_AMT",
+                "label": "Professional Interest Amount",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.CLM_MDCR_PRMRY_PYR_ALOWD_AMT",
+                "path": "LineItemComponent.CLM_MDCR_PRMRY_PYR_ALOWD_AMT",
+                "label": "Line Primary Payer Allowed Amount",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.CLM_CMS_CALCD_MFTR_DSCNT_AMT",
+                "path": "LineItemComponent.CLM_CMS_CALCD_MFTR_DSCNT_AMT",
+                "label": "CMS Calculated Manufacturer Discount Amount",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.CLM_LINE_GRS_CVRD_CST_TOT_AMT",
+                "path": "LineItemComponent.CLM_LINE_GRS_CVRD_CST_TOT_AMT",
+                "label": "Gross Covered Cost Total Amount",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.CLM_LINE_REBT_PASSTHRU_POS_AMT",
+                "path": "LineItemComponent.CLM_LINE_REBT_PASSTHRU_POS_AMT",
+                "label": "Reimbursement Pass Through Positive Amount",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "LineItemComponent.CLM_PHRMCY_PRICE_DSCNT_AT_POS_AMT",
+                "path": "LineItemComponent.CLM_PHRMCY_PRICE_DSCNT_AT_POS_AMT",
+                "label": "Pharmacy Price Discount At POS Amount",
                 "min": 0,
                 "max": "1",
                 "type": [

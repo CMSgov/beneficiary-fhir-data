@@ -406,49 +406,10 @@
                 ]
             },
             {
-                "id": "ExplanationOfBenefit-Pharmacy.CLM_LINE_CVRD_PD_AMT",
-                "path": "ExplanationOfBenefit-Pharmacy.CLM_LINE_CVRD_PD_AMT",
-                "label": "Covered Paid Amount",
-                "definition": "This is the net amount that the Part D plan paid for a PDE that was covered by the Medicare Part D benefit.",
-                "min": 0,
-                "max": "1",
-                "type": [
-                    {
-                        "code": "string"
-                    }
-                ]
-            },
-            {
-                "id": "ExplanationOfBenefit-Pharmacy.CLM_LINE_NCVRD_CHRG_AMT",
-                "path": "ExplanationOfBenefit-Pharmacy.CLM_LINE_NCVRD_CHRG_AMT",
-                "label": "Noncovered Charge Amount",
-                "definition": "The amount that was not covered by the plan.",
-                "min": 0,
-                "max": "1",
-                "type": [
-                    {
-                        "code": "string"
-                    }
-                ]
-            },
-            {
                 "id": "ExplanationOfBenefit-Pharmacy.CLM_LINE_NUM",
                 "path": "ExplanationOfBenefit-Pharmacy.CLM_LINE_NUM",
                 "label": "Line Number",
                 "definition": "The line number for this item.",
-                "min": 0,
-                "max": "1",
-                "type": [
-                    {
-                        "code": "string"
-                    }
-                ]
-            },
-            {
-                "id": "ExplanationOfBenefit-Pharmacy.CLM_SBMT_CHRG_AMT",
-                "path": "ExplanationOfBenefit-Pharmacy.CLM_SBMT_CHRG_AMT",
-                "label": "Submitted Charge Amount",
-                "definition": "The total amount submitted for the claim.",
                 "min": 0,
                 "max": "1",
                 "type": [
@@ -565,6 +526,32 @@
                         "code": "date"
                     }
                 ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Pharmacy.CLM_BENE_PMT_AMT",
+                "path": "ExplanationOfBenefit-Pharmacy.CLM_BENE_PMT_AMT",
+                "label": "Beneficiary Payment Amount",
+                "definition": "The amount that was paid by the beneficiary.",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Pharmacy.CLM_OTHR_TP_PD_AMT",
+                "path": "ExplanationOfBenefit-Pharmacy.CLM_OTHR_TP_PD_AMT",
+                "label": "Other Third Party Paid Amount",
+                "definition": "The amount that was paid by other third parties.",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]  
             }
         ]
     }

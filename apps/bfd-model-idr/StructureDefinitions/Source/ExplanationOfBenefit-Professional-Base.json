@@ -78,6 +78,18 @@
                         "code": "string"
                     }
                 ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Professional-Base.CLM_PRVDR_ACNT_RCVBL_OFST_AMT",
+                "path": "ExplanationOfBenefit-Professional-Base.CLM_PRVDR_ACNT_RCVBL_OFST_AMT",
+                "label": "Provider Account Receivable Offset Amount",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
             }
         ]
     }
