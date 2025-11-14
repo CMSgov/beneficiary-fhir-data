@@ -135,7 +135,6 @@ jobs:
           --no-transfer-progress \
           -Dmaven.build.cache.enabled=false \
           ${{ inputs.branch != null && '-Dsonar.branch.name=$BFD_BRANCH' || null }} -Dsonar.ci.autoconfig.disabled=true \
-          -Dsonar.coverage.jacoco.xmlReportPaths=target/coverage-reports/jacoco-it/jacoco.xml,target/coverage-reports/jacoco-ut/jacoco.xml \
           -Dsonar.exclusions='*.java' \
           -Dsonar.host.url="$SONAR_HOST_URL" \
           -Dsonar.projectKey="$SONAR_PROJECT_KEY" \

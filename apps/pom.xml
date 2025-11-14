@@ -44,6 +44,7 @@
     </scm>
 
     <modules>
+        <module>coverage-aggregate</module>
         <module>bfd-shared-utils</module>
         <module>bfd-shared-test-utils</module>
         <module>bfd-model</module>
@@ -73,12 +74,7 @@
         <maven.jacoco.skip>true</maven.jacoco.skip>
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
         <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
-        <sonar.coverage.jacoco.xmlReportPaths>
-            ${project.build.directory}/coverage-reports/jacoco-ut/jacoco.xml
-        </sonar.coverage.jacoco.xmlReportPaths>
-        <sonar.coverage.jacoco.itReportPath>
-            ${project.build.directory}/coverage-reports/jacoco-it/jacoco.xml
-        </sonar.coverage.jacoco.itReportPath>
+        <sonar.coverage.jacoco.xmlReportPaths>coverage-reports/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
         <sonar.issue.ignore.multicriteria>e1,e2,e3,e4,e5</sonar.issue.ignore.multicriteria>
         <!-- rule for "JUnit5 test classes and methods should have default package visibility" -->
         <sonar.issue.ignore.multicriteria.e1.ruleKey>java:S5786</sonar.issue.ignore.multicriteria.e1.ruleKey>
@@ -202,7 +198,7 @@
         <hamcrest-library.version>2.2</hamcrest-library.version>
         <awaitility.version>4.3.0</awaitility.version>
         <lombok.version>1.18.42</lombok.version>
-        <asm.version>9.8</asm.version>
+        <asm.version>9.9</asm.version>
         <jaxb.java.time.adapters.version>1.1.3</jaxb.java.time.adapters.version>
         <javax.activation.version>1.1.1</javax.activation.version>
         <commons-cli.version>1.6.0</commons-cli.version>
@@ -214,7 +210,7 @@
         <grpc_java.version>1.70.0</grpc_java.version>
         <protoc.version>3.25.1</protoc.version>
         <protobuf.version>4.29.3</protobuf.version>
-        <jacoco.version>0.8.12</jacoco.version>
+        <jacoco.version>0.8.14</jacoco.version>
         <jakarta.servlet.version>6.1.0</jakarta.servlet.version>
         <java-snapshot-testing.version>4.0.6</java-snapshot-testing.version>
         <json-diff.version>1.1.0</json-diff.version>
@@ -287,7 +283,7 @@
         <maven.surefire.plugin.version>3.5.3</maven.surefire.plugin.version>
         <maven.toolchains.plugin.version>3.2.0</maven.toolchains.plugin.version>
         <maven-core.version>3.9.8</maven-core.version>
-        <maven.jacoco.plugin.version>0.8.13</maven.jacoco.plugin.version>
+        <maven.jacoco.plugin.version>${jacoco.version}</maven.jacoco.plugin.version>
         <maven-plugin-annotations.version>3.10.2</maven-plugin-annotations.version>
         <maven-plugin-api.version>3.9.8</maven-plugin-api.version>
         <maven.plugin.version>3.15.1</maven.plugin.version>
@@ -1376,41 +1372,6 @@
                             <formats>XML</formats>
                         </configuration>
                     </execution>
-                    <!-- Merges the Jacoco .exec files to be aggregated. -->
-                    <execution>
-                        <id>merge-results</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>merge</goal>
-                        </goals>
-                        <configuration>
-                            <fileSets>
-                                <fileSet>
-                                    <!-- Sets the path to the file which contains the execution data. -->
-                                    <directory>${project.build.directory}/coverage-reports</directory>
-                                    <includes>
-                                        <include>*.exec</include>
-                                    </includes>
-                                </fileSet>
-                            </fileSets>
-                            <destFile>${project.build.directory}/coverage-reports/aggregate.exec</destFile>
-                        </configuration>
-                    </execution>
-                    <!-- Generates the aggregated XML file -->
-                    <execution>
-                        <id>post-merge-report</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>report-aggregate</goal>
-                        </goals>
-                        <configuration>
-                            <!-- Sets the path to the file which contains the aggregated report. -->
-                            <outputDirectory>
-                                ${project.build.directory}/coverage-reports/jacoco-aggregate
-                            </outputDirectory>
-                            <formats>XML</formats>
-                        </configuration>
-                    </execution>
                 </executions>
             </plugin>
             <plugin>
@@ -1422,8 +1383,8 @@
                     <argLine>${surefire.jacoco.args}</argLine>
                     <!-- Excludes integration tests when unit tests are run. -->
                     <excludes>
-                        <exclude>**/IT.java</exclude>
-                        <exclude>**/E2E.java</exclude>
+                        <exclude>**/*IT.java</exclude>
+                        <exclude>**/*E2E.java</exclude>
                     </excludes>
                 </configuration>
             </plugin>
