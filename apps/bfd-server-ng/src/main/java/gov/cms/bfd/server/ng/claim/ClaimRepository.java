@@ -16,6 +16,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 @AllArgsConstructor
 public class ClaimRepository {
+
   private final EntityManager entityManager;
 
   private static final String CLAIM_TABLES_BASE =
@@ -31,6 +32,7 @@ public class ClaimRepository {
         LEFT JOIN FETCH cli.ansiSignature a
         LEFT JOIN FETCH cl.claimLineRx clr
         LEFT JOIN FETCH c.contract ct
+        LEFT JOIN FETCH c.providerHistory p
       """;
 
   /**
