@@ -134,6 +134,7 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
 
     conn.commit()
 
+    os.environ["LOAD_TYPE"] = "initial"
     sys.argv = ["pipeline.py", "synthetic"]
     main()
 

@@ -1,6 +1,8 @@
 # ruff: noqa: ARG001
 # type: ignore [reportUntypedFunctionDecorator]
 
+from datetime import datetime
+
 from hamilton.function_modifiers import (
     config,
     parameterize,
@@ -43,13 +45,10 @@ def _gen_partitioned_node_inputs(
 ) -> list[NodePartitionedModelInput]:
     models_and_partitions = [(m, m.fetch_query_partitions()) for m in model_types]
     models_with_partitions: list[NodePartitionedModelInput] = [
-        (m, p)
-        for m, partitions in models_and_partitions
-        if partitions is not None
-        for p in partitions
+        (m, p) for m, partitions in models_and_partitions if partitions for p in partitions
     ]
     models_without_partitions = [
-        (m, None) for m, partitions in models_and_partitions if partitions is None
+        (m, None) for m, partitions in models_and_partitions if not partitions
     ]
     return models_with_partitions + models_without_partitions
 
@@ -57,23 +56,21 @@ def _gen_partitioned_node_inputs(
 # INITIAL FLOW
 # Stage 1: Load ALL claim tables in parallel if load_type is set to initial
 @config.when(load_type="initial")
-def initial_idr_claims(
-    config_connection_string: str,
-    config_mode: str,
-    config_batch_size: int,  # TODO: args necessary?
-) -> Parallelizable[PipelineInitialIdrClaims]:
-    yield from _gen_partitioned_node_inputs([
-        IdrClaimInstitutional,
-        IdrClaimDateSignature,
-        IdrClaimFiss,
-        IdrClaimItem,
-        IdrClaimLineInstitutional,
-        IdrClaimAnsiSignature,
-        IdrClaimProfessional,
-        IdrClaimLineProfessional,
-        IdrClaimLineRx,
-        IdrClaim,
-    ])
+def initial_idr_claims() -> Parallelizable[PipelineInitialIdrClaims]:
+    yield from _gen_partitioned_node_inputs(
+        [
+            IdrClaimInstitutional,
+            IdrClaimDateSignature,
+            IdrClaimFiss,
+            IdrClaimItem,
+            IdrClaimLineInstitutional,
+            IdrClaimAnsiSignature,
+            IdrClaimProfessional,
+            IdrClaimLineProfessional,
+            IdrClaimLineRx,
+            IdrClaim,
+        ]
+    )
 
 
 @config.when(load_type="initial")
@@ -82,11 +79,13 @@ def do_initial_idr_claims(
     config_connection_string: str,
     config_mode: str,
     config_batch_size: int,
+    start_time: datetime,
 ) -> bool:
     model_type, partition = initial_idr_claims
     return extract_and_load(
         cls=model_type,
-        # partition=partition, # TODO
+        partition=partition,
+        batch_start=start_time,
         connection_string=config_connection_string,
         mode=config_mode,
         batch_size=config_batch_size,
@@ -96,80 +95,57 @@ def do_initial_idr_claims(
 @config.when(load_type="initial")
 def collect_initial_idr_claims(
     do_initial_idr_claims: Collect[bool],
-    config_connection_string: str,
-    config_mode: str,
-    config_batch_size: int,
 ) -> bool:
     return all(do_initial_idr_claims)
 
 
-# Stage 2: Load only overshared MBIs after loading in ALL claim tables
 @config.when(load_type="initial")
-def initial_idr_beneficiary_overshare_mbi(
+def idr_beneficiary_overshare_mbi(
     collect_initial_idr_claims: bool,
-    config_mode: str,
-    config_batch_size: int,
     config_connection_string: str,
-) -> Parallelizable[PipelineInitialIdrBeneficiaryOvershareMbi]:
-    yield from _gen_partitioned_node_inputs([IdrBeneficiaryOvershareMbi])
-
-
-@config.when(load_type="initial")
-def do_initial_idr_beneficiary_overshare_mbi(
-    initial_idr_beneficiary_overshare_mbi: PipelineInitialIdrBeneficiaryOvershareMbi,
-    config_connection_string: str,
+    start_time: datetime,
     config_mode: str,
     config_batch_size: int,
 ) -> bool:
-    model_type, partition = initial_idr_beneficiary_overshare_mbi
     return extract_and_load(
-        cls=model_type,
-        # partition=partition, # TODO
+        cls=IdrBeneficiaryOvershareMbi,
         connection_string=config_connection_string,
+        batch_start=start_time,
         mode=config_mode,
         batch_size=config_batch_size,
     )
 
 
-@config.when(load_type="initial")
-def collect_idr_beneficiary_overshare_mbi_initial(
-    do_initial_idr_beneficiary_overshare_mbi: Collect[bool],
-    config_connection_string: str,
-    config_mode: str,
-    config_batch_size: int,
-) -> bool:
-    return all(do_initial_idr_beneficiary_overshare_mbi)
-
-
 # Stage 3: Load auxiliary beneficiary tables in parallel
 @config.when(load_type="initial")
 def initial_idr_beneficiary_aux_table(
-    collect_idr_beneficiary_overshare_mbi_initial: bool,
-    config_connection_string: str,
-    config_mode: str,
-    config_batch_size: int,
+    idr_beneficiary_overshare_mbi: bool,
 ) -> Parallelizable[PipelineInitialIdrBeneficiaryAuxTable]:
-    yield from _gen_partitioned_node_inputs([
-        IdrBeneficiaryStatus,
-        IdrBeneficiaryThirdParty,
-        IdrBeneficiaryEntitlement,
-        IdrBeneficiaryEntitlementReason,
-        IdrBeneficiaryDualEligibility,
-        IdrBeneficiaryMbiId,
-    ])
+    yield from _gen_partitioned_node_inputs(
+        [
+            IdrBeneficiaryStatus,
+            IdrBeneficiaryThirdParty,
+            IdrBeneficiaryEntitlement,
+            IdrBeneficiaryEntitlementReason,
+            IdrBeneficiaryDualEligibility,
+            IdrBeneficiaryMbiId,
+        ]
+    )
 
 
 @config.when(load_type="initial")
 def do_initial_idr_beneficiary_aux_table(
     initial_idr_beneficiary_aux_table: PipelineInitialIdrBeneficiaryAuxTable,
     config_connection_string: str,
+    start_time: datetime,
     config_mode: str,
     config_batch_size: int,
-) -> Parallelizable[PipelineInitialIdrBeneficiaryAuxTable]:
+) -> bool:
     model_type, partition = initial_idr_beneficiary_aux_table
     return extract_and_load(
         cls=model_type,
-        # partition=partition, # TODO
+        partition=partition,
+        batch_start=start_time,
         connection_string=config_connection_string,
         mode=config_mode,
         batch_size=config_batch_size,
@@ -179,10 +155,7 @@ def do_initial_idr_beneficiary_aux_table(
 @config.when(load_type="initial")
 def collect_initial_idr_beneficiary_aux_table(
     do_initial_idr_beneficiary_aux_table: Collect[bool],
-    config_connection_string: str,
-    config_mode: str,
-    config_batch_size: int,
-) -> Parallelizable[PipelineInitialIdrBeneficiaryAuxTable]:
+) -> bool:
     return all(do_initial_idr_beneficiary_aux_table)
 
 
@@ -278,19 +251,22 @@ def idr_beneficiary_aux_table_incremental(
 
 # Final Stage for EITHER flow: Load main beneficiary tables last
 def idr_beneficiary(
-    idr_beneficiary_status: bool,
-    idr_beneficiary_third_party: bool,
-    idr_beneficiary_entitlement: bool,
-    idr_beneficiary_entitlement_reason: bool,
-    idr_beneficiary_dual_eligibility: bool,
-    idr_beneficiary_mbi_id: bool,
+    # idr_beneficiary_status: bool,
+    # idr_beneficiary_third_party: bool,
+    # idr_beneficiary_entitlement: bool,
+    # idr_beneficiary_entitlement_reason: bool,
+    # idr_beneficiary_dual_eligibility: bool,
+    # idr_beneficiary_mbi_id: bool,
+    collect_initial_idr_beneficiary_aux_table: bool,
     config_connection_string: str,
     config_mode: str,
     config_batch_size: int,
+    start_time: datetime,
 ) -> bool:
     return extract_and_load(
         cls=IdrBeneficiary,
         connection_string=config_connection_string,
+        batch_start=start_time,
         mode=config_mode,
         batch_size=config_batch_size,
     )

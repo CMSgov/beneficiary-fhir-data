@@ -6,7 +6,7 @@ from datetime import UTC, date, datetime
 import psycopg
 
 from constants import DEFAULT_MIN_DATE
-from model import DbType, LoadProgress, T
+from model import DbType, FetchQueryPartition, LoadProgress, T
 from timer import Timer
 
 idr_query_timer = Timer("idr_query")
@@ -41,9 +41,10 @@ class PostgresLoader:
         fetch_results: Iterator[list[T]],
         model: type[T],
         batch_start: datetime,
+        partition: FetchQueryPartition,
         progress: LoadProgress | None,
     ) -> bool:
-        return BatchLoader(self.conn, fetch_results, model, batch_start, progress).load()
+        return BatchLoader(self.conn, fetch_results, model, batch_start, partition, progress).load()
 
 
 class BatchLoader:
@@ -53,6 +54,7 @@ class BatchLoader:
         fetch_results: Iterator[list[T]],
         model: type[T],
         batch_start: datetime,
+        partition: FetchQueryPartition,
         progress: LoadProgress | None,
     ) -> None:
         self.conn = conn
@@ -67,6 +69,7 @@ class BatchLoader:
         self.batch_timestamp_cols = model.batch_timestamp_col(
             progress is None or progress.is_historical()
         )
+        self.partition_str = str(partition) if partition else ""
         self.progress = progress
         self.immutable = not model.update_timestamp_col()
         self.meta_keys = (
@@ -132,14 +135,23 @@ class BatchLoader:
                 table_name, 
                 last_ts, 
                 last_id,
+                batch_partition,
                 batch_start_ts, 
                 batch_complete_ts)
-            VALUES(%(table)s, '{DEFAULT_MIN_DATE}', 0, %(start_ts)s, '{DEFAULT_MIN_DATE}')
+            VALUES(
+                %(table)s, 
+                '{DEFAULT_MIN_DATE}', 
+                0, 
+                %(partition_str)s, 
+                %(start_ts)s, 
+                '{DEFAULT_MIN_DATE}'
+            )
             ON CONFLICT (table_name) DO UPDATE 
             SET batch_start_ts = EXCLUDED.batch_start_ts
             """,
             {
                 "table": self.table,
+                "partition_str": self.partition_str,
                 "start_ts": self.batch_start,
             },
         )
@@ -149,9 +161,9 @@ class BatchLoader:
             """
             UPDATE idr.load_progress
             SET batch_complete_ts = NOW()
-            WHERE table_name = %(table)s
+            WHERE table_name = %(table)s AND batch_partition = %(batch_partition)s
             """,
-            {"table": self.table},
+            {"table": self.table, "batch_partition": self.partition_str},
         )
 
     def _setup_temp_table(self, cur: psycopg.Cursor) -> None:
@@ -196,10 +208,11 @@ class BatchLoader:
             UPDATE idr.load_progress
             SET last_ts = %(last_ts)s,
                 last_id = %(last_id)s
-            WHERE table_name = %(table)s
+            WHERE table_name = %(table)s AND batch_partition = %(partition_str)s
             """,
                 {
                     "table": self.table,
+                    "partition_str": self.partition_str,
                     "last_ts": max_timestamp,
                     "last_id": batch_id,
                 },

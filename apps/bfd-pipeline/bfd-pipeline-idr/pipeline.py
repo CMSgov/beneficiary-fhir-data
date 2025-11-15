@@ -1,11 +1,10 @@
 import logging
 import os
 import sys
+from datetime import UTC, datetime
 
-import ray
-from hamilton import base, driver  # type: ignore
-from hamilton.execution import executors
-from hamilton.plugins.h_ray import RayGraphAdapter  # type: ignore
+from hamilton import driver  # type: ignore
+from hamilton.execution import executors  # type: ignore
 
 import pipeline_nodes
 from constants import CLAIM_AUX_TABLES
@@ -27,20 +26,20 @@ def parse_bool(var: str) -> bool:
 def main() -> None:
     logger.info("load start")
 
-    parallelism = int(os.environ.get("PARALLELISM", "18"))
-    ray.init(logging_level="info", num_cpus=parallelism)  # type: ignore
+    # parallelism = int(os.environ.get("PARALLELISM", "18"))
+    # ray.init(logging_level="info", num_cpus=parallelism)  # type: ignore
 
-    dict_builder = base.DictResult()
-    adapter = RayGraphAdapter(result_builder=dict_builder)
+    # dict_builder = base.DictResult()
+    # adapter = FutureAdapter(result_builder=dict_builder)
     load_type = str(os.environ.get("LOAD_TYPE", "incremental"))
     logger.info("load_type %s", load_type)
-    dr = (
+    hamilton_driver = (
         driver.Builder()
         .enable_dynamic_execution(allow_experimental_mode=True)
         .with_config({"load_type": load_type})
         .with_modules(pipeline_nodes)
-        .with_adapters(adapter)
-        .with_local_executor(executors.SynchronousLocalTaskExecutor())
+        #  .with_adapters(adapter)
+        .with_local_executor(executors.MultiThreadingExecutor(max_tasks=5))
         # TODO: This probably needs to be something from Ray, not Hamilton
         .with_remote_executor(executors.MultiProcessingExecutor(max_tasks=5))
         .build()
@@ -59,48 +58,53 @@ def main() -> None:
 
     logger.info("load_benes %s", load_benes)
     logger.info("load_claims %s", load_claims)
+    start_time = datetime.now(UTC)
 
     if load_benes and load_claims:
-        dr.execute(  # type: ignore
+        hamilton_driver.execute(  # type: ignore
             final_vars=["idr_beneficiary"],
             inputs={
                 "config_mode": mode,
                 "config_batch_size": batch_size,
                 "config_connection_string": connection_string,
+                "start_time": start_time,
             },
         )
     elif load_benes:
         # Since the DAG contains the dependency ordering, we need to override all claims nodes
         # in order to skip them and load only beneficiary data
-        overrides = {table: None for table in CLAIM_AUX_TABLES}
+        overrides = dict.fromkeys(CLAIM_AUX_TABLES)
         overrides["idr_claim"] = None
-        dr.execute(  # type: ignore
+        hamilton_driver.execute(  # type: ignore
             final_vars=["idr_beneficiary"],
             overrides=overrides,
             inputs={
                 "config_mode": mode,
                 "config_batch_size": batch_size,
                 "config_connection_string": connection_string,
+                "start_time": start_time,
             },
         )
     elif load_claims and load_type == "initial":
         # idr_claim only depends on claim aux nodes so we set idr_claim as our last node to execute
-        dr.execute(  # type: ignore
+        hamilton_driver.execute(  # type: ignore
             final_vars=CLAIM_AUX_TABLES,  # type: ignore
             inputs={
                 "config_mode": mode,
                 "config_batch_size": batch_size,
                 "config_connection_string": connection_string,
+                "start_time": start_time,
             },
         )
     elif load_claims and load_type == "incremental":
         # idr_claim only depends on claim aux nodes so we set idr_claim as our last node to execute
-        dr.execute(  # type: ignore
+        hamilton_driver.execute(  # type: ignore
             final_vars=["idr_claim"],
             inputs={
                 "config_mode": mode,
                 "config_batch_size": batch_size,
                 "config_connection_string": connection_string,
+                "start_time": start_time,
             },
         )
 
