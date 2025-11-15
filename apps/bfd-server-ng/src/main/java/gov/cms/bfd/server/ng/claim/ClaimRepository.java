@@ -33,6 +33,11 @@ public class ClaimRepository {
         LEFT JOIN FETCH cl.claimLineRx clr
         LEFT JOIN FETCH c.contract ct
         LEFT JOIN FETCH c.providerHistory p
+        LEFT JOIN FETCH c.attendingProviderHistory ap
+        LEFT JOIN FETCH c.operatingProviderHistory orp
+        LEFT JOIN FETCH c.otherProviderHistory otp
+        LEFT JOIN FETCH c.renderingProviderHistory rp
+        LEFT JOIN FETCH c.prescribingProviderHistory pp
       """;
 
   /**

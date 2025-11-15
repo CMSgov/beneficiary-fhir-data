@@ -1,5 +1,8 @@
 package gov.cms.bfd.server.ng.claim.model;
 
+import static gov.cms.bfd.server.ng.claim.model.ProviderHistory.NPI_TYPE.INDIVIDUAL;
+import static gov.cms.bfd.server.ng.claim.model.ProviderHistory.NPI_TYPE.ORGANIZATION;
+
 import gov.cms.bfd.server.ng.ClaimSecurityStatus;
 import gov.cms.bfd.server.ng.beneficiary.model.BeneficiarySimple;
 import gov.cms.bfd.server.ng.util.DateUtil;
@@ -275,7 +278,7 @@ public class Claim {
     if (providerContext.isPresent()) {
       var provider = providerContext.get();
       var npiType = provider.getNpiType();
-      if (npiType == 1) {
+      if (npiType == INDIVIDUAL) {
         provider
             .toPractitionerFhir(claimTypeCode, serviceProviderNpiNumber)
             .ifPresent(
@@ -283,7 +286,7 @@ public class Claim {
                   eob.addContained(p);
                   eob.setProvider(new Reference(p));
                 });
-      } else {
+      } else if (npiType == ORGANIZATION) {
         provider
             .toOrganizationFhir(claimTypeCode, serviceProviderNpiNumber)
             .ifPresent(

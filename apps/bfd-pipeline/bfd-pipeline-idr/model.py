@@ -6,7 +6,13 @@ from typing import Annotated, TypeVar
 
 from pydantic import BaseModel, BeforeValidator
 
-from constants import CLAIM_TYPE_CODES, DEFAULT_MAX_DATE, DEFAULT_MIN_DATE, PART_D_CLAIM_TYPE_CODES
+from constants import (
+    CLAIM_TYPE_CODES,
+    DEFAULT_MAX_DATE,
+    DEFAULT_MIN_DATE,
+    PART_D_CLAIM_TYPE_CODES,
+    PRVDR_HSTRY_MIN_DATE,
+)
 
 type DbType = str | float | int | bool | date | datetime
 
@@ -1594,5 +1600,5 @@ class IdrProviderHistory(IdrBaseModel):
         return f"""
             SELECT {{COLUMNS}}
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_prvdr_hstry
-            WHERE prvdr_hstry_efctv_dt > '{DEFAULT_MIN_DATE}'
+            WHERE prvdr_hstry_efctv_dt > '{PRVDR_HSTRY_MIN_DATE}'
         """

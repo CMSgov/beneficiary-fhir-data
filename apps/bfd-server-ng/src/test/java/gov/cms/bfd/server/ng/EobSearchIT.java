@@ -66,7 +66,7 @@ class EobSearchIT extends IntegrationTestBase {
         eobResourceProvider.searchByPatient(
             new ReferenceParam("178083966"), null, null, null, null, null, request);
     assertFalse(bundle.getEntry().isEmpty());
-    assertEquals(8, queryCount(events));
+    assertEquals(3, queryCount(events));
   }
 
   @ParameterizedTest

@@ -21,7 +21,7 @@ import org.hl7.fhir.r4.model.Practitioner;
 /** Provider History table. */
 @Entity
 @Getter
-@Table(name = "provider_history", schema = "idr")
+@Table(name = "provider_history_latest", schema = "idr")
 public class ProviderHistory {
   @Id
   @Column(name = "prvdr_sk", insertable = false, updatable = false)
@@ -60,19 +60,30 @@ public class ProviderHistory {
   @Column(name = "prvdr_emplr_id_num")
   private Optional<String> employerIdNumber;
 
+  public enum NPI_TYPE {
+    INDIVIDUAL(1),
+    ORGANIZATION(2);
+
+    private final int value;
+
+    NPI_TYPE(int value) {
+      this.value = value;
+    }
+  }
+
   /**
-   * Derives the NPI_TYPE based on the presence of the providerLegalName. NPI_TYPE = 1 means the NPI
-   * is for an individual (legal name is null/empty). NPI_TYPE = 2 means the NPI is for an
-   * organization (legal name is present).
+   * Derives the NPI_TYPE based on the presence of the providerLegalName. NPI_TYPE = INDIVIDUAL
+   * means the NPI is for an individual (legal name is null/empty). NPI_TYPE = ORGANIZATION means
+   * the NPI is for an organization (legal name is present).
    *
-   * @return the NPI type as an Integer (1 or 2).
+   * @return the NPI type
    */
   @Transient
-  public Integer getNpiType() {
+  public NPI_TYPE getNpiType() {
     if (providerLegalName.isPresent() && !providerLegalName.get().isBlank()) {
-      return 2;
+      return NPI_TYPE.ORGANIZATION;
     } else {
-      return 1;
+      return NPI_TYPE.INDIVIDUAL;
     }
   }
 
