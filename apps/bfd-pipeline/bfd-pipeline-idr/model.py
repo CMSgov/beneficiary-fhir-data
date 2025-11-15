@@ -14,6 +14,7 @@ from constants import (
     DEFAULT_MIN_DATE,
     INSTITUTIONAL_ADJUDICATED_PARTITIONS,
     INSTITUTIONAL_PAC_PARTITIONS,
+    MIN_CLAIM_LOAD_DATE,
     PART_D_PARTITIONS,
     PROFESSIONAL_ADJUDICATED_PARTITIONS,
     PROFESSIONAL_PAC_PARTITIONS,
@@ -659,9 +660,10 @@ class IdrContractPbpNumber(IdrBaseModel):
 
 
 def claim_type_clause(start_time: datetime, partition: FetchQueryPartition) -> str:
+    clm = ALIAS_CLM
     fetch_latest_claims = os.environ.get("IDR_LATEST_CLAIMS", "").lower() in ("1", "true")
     latest_claim_ind = (
-        f" AND ({ALIAS_CLM}.clm_ltst_clm_ind = 'Y') "
+        f" AND ({clm}.clm_ltst_clm_ind = 'Y') "
         if fetch_latest_claims and PartitionType.PART_D not in partition.partition_type
         else ""
     )
@@ -672,9 +674,9 @@ def claim_type_clause(start_time: datetime, partition: FetchQueryPartition) -> s
     pac_filter = (
         f"""
     AND (COALESCE(
-        {ALIAS_CLM}.idr_updt_ts,
-        {ALIAS_CLM}.idr_insrt_ts,
-        {ALIAS_CLM}.clm_idr_ld_dt) >= {start_time_sql})
+        {clm}.idr_updt_ts,
+        {clm}.idr_insrt_ts,
+        {clm}.clm_idr_ld_dt) >= {start_time_sql})
     """
         if PartitionType.PAC in partition.partition_type
         else ""
@@ -682,7 +684,8 @@ def claim_type_clause(start_time: datetime, partition: FetchQueryPartition) -> s
 
     return f"""
     (
-        {ALIAS_CLM}.clm_type_cd IN ({",".join([str(c) for c in partition.claim_type_codes])})
+        {clm}.clm_type_cd IN ({",".join([str(c) for c in partition.claim_type_codes])})
+        AND {clm}.clm_from_dt >= '{MIN_CLAIM_LOAD_DATE}'
         {latest_claim_ind}
         {pac_filter}
         AND {ALIAS_CLM}.clm_from_dt <= {ALIAS_CLM}.clm_thru_dt
