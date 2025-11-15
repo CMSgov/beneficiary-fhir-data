@@ -12,7 +12,7 @@ from psycopg.rows import class_row
 from snowflake.connector import DictCursor, SnowflakeConnection
 
 from constants import DEFAULT_MIN_DATE
-from model import DbType, LoadProgress, T, get_min_transaction_date
+from model import DbType, FetchQueryPartition, LoadProgress, T, get_min_transaction_date
 from timer import Timer
 
 cursor_execute_timer = Timer("cursor_execute")
@@ -37,17 +37,27 @@ class Extractor(ABC):
     def _greatest_col(self, cols: list[str]) -> str:
         return f"GREATEST({','.join(cols)})"
 
-    def get_query(self, cls: type[T], is_historical: bool, start_time: datetime) -> str:
-        query = cls.fetch_query(is_historical, start_time)
+    def get_query(
+        self,
+        cls: type[T],
+        partition: FetchQueryPartition,
+        is_historical: bool,
+        start_time: datetime,
+    ) -> str:
+        query = cls.fetch_query(partition, is_historical, start_time)
         columns = ",".join(cls.column_aliases())
         columns_raw = ",".join(cls.columns_raw())
         return query.replace("{COLUMNS}", columns).replace("{COLUMNS_NO_ALIAS}", columns_raw)
 
     def extract_idr_data(
-        self, cls: type[T], progress: LoadProgress | None, start_time: datetime
+        self,
+        cls: type[T],
+        partition: FetchQueryPartition,
+        progress: LoadProgress | None,
+        start_time: datetime,
     ) -> Iterator[list[T]]:
         is_historical = progress is None or progress.is_historical()
-        fetch_query = self.get_query(cls, is_historical, start_time)
+        fetch_query = self.get_query(cls, partition, is_historical, start_time)
         # GREATEST doesn't work with nulls so we need to coalesce here
         batch_timestamp_cols = self._coalesce_dates(cls.batch_timestamp_col_alias(is_historical))
         update_timestamp_cols = self._coalesce_dates(cls.update_timestamp_col_alias())
@@ -121,6 +131,7 @@ class PostgresExtractor(Extractor):
     def extract_many(
         self, cls: type[T], sql: str, params: Mapping[str, DbType]
     ) -> Iterator[list[T]]:
+        logger.debug(sql)
         with self.conn.cursor(row_factory=class_row(cls)) as cur:
             cur.execute(sql, params)  # type: ignore
             batch: list[T] = cur.fetchmany(self.batch_size)
@@ -166,7 +177,7 @@ class SnowflakeExtractor(Extractor):
 
     def extract_many(self, cls: type[T], sql: str, params: dict[str, DbType]) -> Iterator[list[T]]:
         cur = None
-
+        logger.debug(sql)
         try:
             cursor_execute_timer.start()
             cur = self.conn.cursor(DictCursor)

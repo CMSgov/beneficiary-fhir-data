@@ -37,7 +37,6 @@ dependencies = [
     { name = "cryptography" },
     { name = "psycopg", extra = ["binary", "pool"] },
     { name = "pydantic" },
-    { name = "ray" },
     { name = "sf-hamilton", extra = ["ray"] },
     { name = "snowflake-connector-python" },
 ]
@@ -56,8 +55,7 @@ requires-dist = [
     { name = "cryptography", specifier = ">=45.0.6" },
     { name = "psycopg", extras = ["binary", "pool"], specifier = ">=3.2.10" },
     { name = "pydantic", specifier = ">=2.11.9" },
-    { name = "ray", specifier = "==2.47" },
-    { name = "sf-hamilton", extras = ["ray"], specifier = "==1.88.0" },
+    { name = "sf-hamilton", extras = ["ray"], specifier = "==1.89.0" },
     { name = "snowflake-connector-python", specifier = ">=3.17.4" },
 ]
 
@@ -964,7 +962,7 @@ wheels = [
 
 [[package]]
 name = "sf-hamilton"
-version = "1.88.0"
+version = "1.89.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "numpy" },
@@ -972,9 +970,9 @@ dependencies = [
     { name = "typing-extensions" },
     { name = "typing-inspect" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/ce/86/e438f07946e7319aad035a0327bff99323d2eed88e6f978aa852dee0c85d/sf_hamilton-1.88.0.tar.gz", hash = "sha256:58fbc5ad1e5b130d7256b11d3e5e6823afd06fe9f4b1d49203a72ff99eaa94cc", size = 516857, upload-time = "2025-03-29T18:55:08.616Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/12/1c/5205e36ca4eebfef29a6f75398812bfb923c9aad71fd9ad3248b7703a9b9/sf_hamilton-1.89.0.tar.gz", hash = "sha256:dec10455ce5dacd9402c7c8325c2eb2959c0f96f912dfcf2c999ef556421d2d2", size = 360574, upload-time = "2025-10-11T17:43:55.68Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/0b/ab/39089368c4bacab984e9d9bc3df1d225d49e6064aed0ddb51e2ed31e1c80/sf_hamilton-1.88.0-py3-none-any.whl", hash = "sha256:f725d6f9cdcf39023dfab117d6b07d613580ab1dfcdd324fa86fa8d6301aa4f4", size = 407510, upload-time = "2025-03-29T18:55:06.664Z" },
+    { url = "https://files.pythonhosted.org/packages/66/ce/3591411d90bf0f6829fec4403f77a63280c8eee942f55715ae1ed7ff8492/sf_hamilton-1.89.0-py3-none-any.whl", hash = "sha256:25c0efeb498cd1847aec5fbde2e69b4756c4e0c2a5238bbedbe2178d559fd677", size = 468919, upload-time = "2025-10-11T17:43:53.902Z" },
 ]
 
 [package.optional-dependencies]
