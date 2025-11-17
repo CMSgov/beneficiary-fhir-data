@@ -1621,12 +1621,11 @@ class LoadProgress(IdrBaseModel):
 
     @staticmethod
     def _current_fetch_query(partition: FetchQueryPartition, start_time: datetime) -> str:  # noqa: ARG004
-        partition_str = str(partition) if partition else ""
         return f"""
         SELECT table_name, last_ts, last_id, batch_partition, batch_start_ts, batch_complete_ts
         FROM idr.load_progress
         WHERE table_name = %({LoadProgress.query_placeholder()})s 
-        AND batch_partition = '{partition_str}'
+        AND batch_partition = '{partition.name}'
         """
 
     def is_historical(self) -> bool:

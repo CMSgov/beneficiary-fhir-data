@@ -1,7 +1,7 @@
 import logging
 import os
 from abc import ABC, abstractmethod
-from collections.abc import Iterator, Mapping
+from collections.abc import Iterator, Mapping, Sequence
 from datetime import datetime
 
 import psycopg
@@ -12,20 +12,29 @@ from psycopg.rows import class_row
 from snowflake.connector import DictCursor, SnowflakeConnection
 
 from constants import DEFAULT_MIN_DATE
-from model import DbType, FetchQueryPartition, LoadProgress, T, get_min_transaction_date
+from load_partition import LoadPartition
+from model import (
+    DbType,
+    IdrBaseModel,
+    LoadProgress,
+    T,
+    get_min_transaction_date,
+)
 from timer import Timer
 
 logger = logging.getLogger(__name__)
 
 
 class Extractor(ABC):
-    def __init__(self) -> None:
-        self.cursor_execute_timer = Timer("cursor_execute")
-        self.cursor_fetch_timer = Timer("cursor_fetch")
-        self.transform_timer = Timer("transform")
+    def __init__(self, cls: type[T], partition: LoadPartition) -> None:
+        self.cls = cls
+        self.partition = partition
+        self.cursor_execute_timer = Timer("cursor_execute", cls, partition)
+        self.cursor_fetch_timer = Timer("cursor_fetch", cls, partition)
+        self.transform_timer = Timer("transform", cls, partition)
 
     @abstractmethod
-    def extract_many(self, cls: type[T], sql: str, params: dict[str, DbType]) -> Iterator[list[T]]:
+    def extract_many(self, sql: str, params: dict[str, DbType]) -> Iterator[Sequence[IdrBaseModel]]:
         pass
 
     @abstractmethod
@@ -40,28 +49,26 @@ class Extractor(ABC):
 
     def get_query(
         self,
-        cls: type[T],
-        partition: FetchQueryPartition,
         is_historical: bool,
         start_time: datetime,
     ) -> str:
-        query = cls.fetch_query(partition, is_historical, start_time)
-        columns = ",".join(cls.column_aliases())
-        columns_raw = ",".join(cls.columns_raw())
+        query = self.cls.fetch_query(self.partition, is_historical, start_time)
+        columns = ",".join(self.cls.column_aliases())
+        columns_raw = ",".join(self.cls.columns_raw())
         return query.replace("{COLUMNS}", columns).replace("{COLUMNS_NO_ALIAS}", columns_raw)
 
     def extract_idr_data(
         self,
-        cls: type[T],
-        partition: FetchQueryPartition,
         progress: LoadProgress | None,
         start_time: datetime,
-    ) -> Iterator[list[T]]:
+    ) -> Iterator[Sequence[IdrBaseModel]]:
         is_historical = progress is None or progress.is_historical()
-        fetch_query = self.get_query(cls, partition, is_historical, start_time)
+        fetch_query = self.get_query(is_historical, start_time)
         # GREATEST doesn't work with nulls so we need to coalesce here
-        batch_timestamp_cols = self._coalesce_dates(cls.batch_timestamp_col_alias(is_historical))
-        update_timestamp_cols = self._coalesce_dates(cls.update_timestamp_col_alias())
+        batch_timestamp_cols = self._coalesce_dates(
+            self.cls.batch_timestamp_col_alias(is_historical)
+        )
+        update_timestamp_cols = self._coalesce_dates(self.cls.update_timestamp_col_alias())
         # We need to create batches using the most recent timestamp from all of the
         # insert/update timestamps
         batch_timestamp_clause = self._greatest_col([*batch_timestamp_cols, *update_timestamp_cols])
@@ -69,15 +76,14 @@ class Extractor(ABC):
 
         batch_id_order = ""
         batch_id_clause = ""
-        batch_id_col = cls.batch_id_col_alias()
+        batch_id_col = self.cls.batch_id_col_alias()
         if batch_id_col is not None:
             batch_id_order = f", {batch_id_col}"
-        logger.info("extracting %s", cls.table())
+        logger.info("extracting %s", self.cls.table())
         order_by = f"ORDER BY {batch_timestamp_clause} {batch_id_order}"
         if progress is None:
             # No saved progress, process the whole table from the beginning
             return self.extract_many(
-                cls,
                 fetch_query.replace(
                     "{WHERE_CLAUSE}",
                     f"WHERE ({batch_timestamp_clause} >= '{min_transaction_date}')",
@@ -105,7 +111,6 @@ class Extractor(ABC):
 
         # Saved progress found, start processing from where we left off
         return self.extract_many(
-            cls,
             fetch_query.replace(
                 "{WHERE_CLAUSE}",
                 f"""
@@ -120,8 +125,10 @@ class Extractor(ABC):
 
 
 class PostgresExtractor(Extractor):
-    def __init__(self, connection_string: str, batch_size: int) -> None:
-        super().__init__()
+    def __init__(
+        self, cls: type[T], partition: LoadPartition, connection_string: str, batch_size: int
+    ) -> None:
+        super().__init__(cls, partition)
         self.connection_string = connection_string
         self.conn = psycopg.connect(connection_string)
         self.batch_size = batch_size
@@ -130,12 +137,14 @@ class PostgresExtractor(Extractor):
         self.conn = psycopg.connect(self.connection_string)
 
     def extract_many(
-        self, cls: type[T], sql: str, params: Mapping[str, DbType]
-    ) -> Iterator[list[T]]:
+        self,
+        sql: str,
+        params: Mapping[str, DbType],
+    ) -> Iterator[Sequence[IdrBaseModel]]:
         logger.debug(sql)
-        with self.conn.cursor(row_factory=class_row(cls)) as cur:
+        with self.conn.cursor(row_factory=class_row(self.cls)) as cur:
             cur.execute(sql, params)  # type: ignore
-            batch: list[T] = cur.fetchmany(self.batch_size)
+            batch: Sequence[IdrBaseModel] = cur.fetchmany(self.batch_size)
             while len(batch) > 0:
                 yield batch
                 batch = cur.fetchmany(self.batch_size)
@@ -147,8 +156,8 @@ class PostgresExtractor(Extractor):
 
 
 class SnowflakeExtractor(Extractor):
-    def __init__(self, batch_size: int) -> None:
-        super().__init__()
+    def __init__(self, batch_size: int, cls: type[T], partition: LoadPartition) -> None:
+        super().__init__(cls, partition)
         self.conn = SnowflakeExtractor._connect()
         self.batch_size = batch_size
 
@@ -176,31 +185,35 @@ class SnowflakeExtractor(Extractor):
             schema=os.environ["IDR_SCHEMA"],
         )
 
-    def extract_many(self, cls: type[T], sql: str, params: dict[str, DbType]) -> Iterator[list[T]]:
+    def extract_many(
+        self,
+        sql: str,
+        params: dict[str, DbType],
+    ) -> Iterator[Sequence[IdrBaseModel]]:
         cur = None
         logger.debug(sql)
         try:
             self.cursor_execute_timer.start()
             cur = self.conn.cursor(DictCursor)
             cur.execute(sql, params)
-            self.cursor_execute_timer.stop(cls)
+            self.cursor_execute_timer.stop()
 
             self.cursor_fetch_timer.start()
             # fetchmany can return list[dict] or list[tuple] but we'll only use
             # queries that return dicts
             batch: list[dict[str, DbType]] = cur.fetchmany(self.batch_size)  # type: ignore[assignment]
-            self.cursor_fetch_timer.stop(cls)
+            self.cursor_fetch_timer.stop()
 
             while len(batch) > 0:  # type: ignore
                 self.transform_timer.start()
-                data = [cls(**{k.lower(): v for k, v in row.items()}) for row in batch]
-                self.transform_timer.stop(cls)
+                data = [self.cls(**{k.lower(): v for k, v in row.items()}) for row in batch]
+                self.transform_timer.stop()
 
                 yield data
 
                 self.cursor_fetch_timer.start()
                 batch = cur.fetchmany(self.batch_size)  # type: ignore[assignment]
-                self.cursor_fetch_timer.stop(cls)
+                self.cursor_fetch_timer.stop()
             return
 
         finally:

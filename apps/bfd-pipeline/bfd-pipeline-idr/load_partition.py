@@ -12,8 +12,9 @@ class PartitionType(IntFlag):
 
 @dataclass
 class LoadPartition:
+    name: str
     claim_type_codes: list[int]
     partition_type: PartitionType
 
 
-DEFAULT_PARTITION = LoadPartition([], PartitionType.DEFAULT)
+DEFAULT_PARTITION = LoadPartition("default", [], PartitionType.DEFAULT)

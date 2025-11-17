@@ -8,19 +8,22 @@ DEATH_DATE_CUTOFF_YEARS = 4
 
 
 PART_D_PARTITIONS = [
-    LoadPartition([1], PartitionType.PART_D),
-    LoadPartition([2, 3, 4], PartitionType.PART_D),
+    LoadPartition("part_d_original", [1], PartitionType.PART_D),
+    LoadPartition("part_d_adjustment", [2, 3, 4], PartitionType.PART_D),
 ]
 
 INSTITUTIONAL_ADJUDICATED_PARTITIONS = [
     # Outpatient
-    LoadPartition([40], PartitionType.INSTITUTIONAL),
+    LoadPartition("outpatient", [40], PartitionType.INSTITUTIONAL),
     # HHA, SNF, Hospice, Inpatient, MA
-    LoadPartition([10, 20, 30, 50, 60, 61, 62, 63, 64], PartitionType.INSTITUTIONAL),
+    LoadPartition(
+        "institutional", [10, 20, 30, 50, 60, 61, 62, 63, 64], PartitionType.INSTITUTIONAL
+    ),
 ]
 
 INSTITUTIONAL_PAC_PARTITIONS = [
     LoadPartition(
+        "institututional_pac",
         [
             1000,
             1011,
@@ -130,11 +133,13 @@ INSTITUTIONAL_PAC_PARTITIONS = [
 ]
 
 PROFESSIONAL_ADJUDICATED_PARTITIONS = [
-    LoadPartition([71, 72, 81, 82], PartitionType.PROFESSIONAL),
+    LoadPartition("professional", [71, 72, 81, 82], PartitionType.PROFESSIONAL),
 ]
 
 PROFESSIONAL_PAC_PARTITIONS = [
-    LoadPartition([1700, 1800, 2700, 2800], PartitionType.PROFESSIONAL | PartitionType.PAC)
+    LoadPartition(
+        "professional_pac", [1700, 1800, 2700, 2800], PartitionType.PROFESSIONAL | PartitionType.PAC
+    )
 ]
 
 
@@ -147,6 +152,7 @@ ALL_CLAIM_PARTITIONS = [
 ]
 
 COMBINED_CLAIM_PARTITION = LoadPartition(
+    "all_claims",
     [code for partition in ALL_CLAIM_PARTITIONS for code in partition.claim_type_codes],
     PartitionType.INSTITUTIONAL
     | PartitionType.PROFESSIONAL

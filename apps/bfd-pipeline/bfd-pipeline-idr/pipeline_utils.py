@@ -29,7 +29,9 @@ def get_progress(
     start_time: datetime,
     partition: FetchQueryPartition,
 ) -> LoadProgress | None:
-    return PostgresExtractor(connection_string, batch_size=1).extract_single(
+    return PostgresExtractor(
+        connection_string=connection_string, batch_size=1, cls=LoadProgress, partition=partition
+    ).extract_single(
         LoadProgress,
         LoadProgress.fetch_query(partition, False, start_time),
         {LoadProgress.query_placeholder(): table_name},
@@ -47,10 +49,10 @@ def extract_and_load(
     partition = partition or DEFAULT_PARTITION
     if mode == "local" or mode == "synthetic":
         data_extractor = PostgresExtractor(
-            connection_string=connection_string, batch_size=batch_size
+            connection_string=connection_string, batch_size=batch_size, cls=cls, partition=partition
         )
     else:
-        data_extractor = SnowflakeExtractor(batch_size=batch_size)
+        data_extractor = SnowflakeExtractor(batch_size=batch_size, cls=cls, partition=partition)
 
     logger.info("loading %s", cls.table())
     last_error = datetime.min.replace(tzinfo=UTC)
@@ -69,7 +71,7 @@ def extract_and_load(
                 progress.batch_start_ts if progress else "none",
                 progress.batch_complete_ts if progress else "none",
             )
-            data_iter = data_extractor.extract_idr_data(cls, partition, progress, batch_start)
+            data_iter = data_extractor.extract_idr_data(progress, batch_start)
             return loader.load(data_iter, cls, batch_start, partition, progress)
         # Snowflake will throw a reauth error if the pipeline has been running for several hours
         # but it seems to be wrapped in a ProgrammingError.
