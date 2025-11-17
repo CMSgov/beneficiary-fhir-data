@@ -60,8 +60,11 @@ public class ProviderHistory {
   @Column(name = "prvdr_emplr_id_num")
   private Optional<String> employerIdNumber;
 
+  /** Represents the enum NPI Type. */
   public enum NPI_TYPE {
+    /** NPI belongs to an individual. */
     INDIVIDUAL(1),
+    /** NPI belongs to an organization. */
     ORGANIZATION(2);
 
     private final int value;

@@ -675,6 +675,126 @@
                         "code": "string"
                     }
                 ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Base.CLM_BENE_INTRST_PD_AMT",
+                "path": "ExplanationOfBenefit-Base.CLM_BENE_INTRST_PD_AMT",
+                "label": "Beneficiary Interest Paid Amount",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Base.CLM_BENE_PMT_COINSRNC_AMT",
+                "path": "ExplanationOfBenefit-Base.CLM_BENE_PMT_COINSRNC_AMT",
+                "label": "Beneficiary Coinsurance Amount",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Base.CLM_BLOOD_CHRG_AMT",
+                "path": "ExplanationOfBenefit-Base.CLM_BLOOD_CHRG_AMT",
+                "label": "Blood Charge Amount",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Base.CLM_BLOOD_NCVRD_CHRG_AMT",
+                "path": "ExplanationOfBenefit-Base.CLM_BLOOD_NCVRD_CHRG_AMT",
+                "label": "Blood Noncovered Charge Amount",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Base.CLM_COB_PTNT_RESP_AMT",
+                "path": "ExplanationOfBenefit-Base.CLM_COB_PTNT_RESP_AMT",
+                "label": "Coordination of Benefits Patient Responsibility Amount",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Base.CLM_OTHR_TP_PD_AMT",
+                "path": "ExplanationOfBenefit-Base.CLM_OTHR_TP_PD_AMT",
+                "label": "Other Third Party Payer Paid Amount",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Base.CLM_PRVDR_INTRST_PD_AMT",
+                "path": "ExplanationOfBenefit-Base.CLM_PRVDR_INTRST_PD_AMT",
+                "label": "Provider Interest Paid Amount",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Base.CLM_PRVDR_OTAF_AMT",
+                "path": "ExplanationOfBenefit-Base.CLM_PRVDR_OTAF_AMT",
+                "label": "Provider Obligation To Accept as Full Amount",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Base.CLM_PRVDR_RMNG_DUE_AMT",
+                "path": "ExplanationOfBenefit-Base.CLM_PRVDR_RMNG_DUE_AMT",
+                "label": "Remaining Amount to Provider",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Base.CLM_TOT_CNTRCTL_AMT",
+                "path": "ExplanationOfBenefit-Base.CLM_TOT_CNTRCTL_AMT",
+                "label": "Total Contractual Amount Discrepancy",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
             }
         ]
     }
