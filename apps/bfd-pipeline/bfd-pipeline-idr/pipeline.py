@@ -3,12 +3,14 @@ import os
 import sys
 from datetime import UTC, datetime
 
-from hamilton import driver  # type: ignore
+from hamilton import driver, telemetry  # type: ignore
 from hamilton.execution import executors  # type: ignore
 
 import pipeline_nodes
 from constants import CLAIM_AUX_TABLES
 from loader import get_connection_string
+
+telemetry.disable_telemetry()
 
 console_handler = logging.StreamHandler()
 formatter = logging.Formatter("[%(levelname)s] %(asctime)s %(message)s")
@@ -39,9 +41,8 @@ def main() -> None:
         .with_config({"load_type": load_type})
         .with_modules(pipeline_nodes)
         #  .with_adapters(adapter)
-        .with_local_executor(executors.MultiProcessingExecutor(max_tasks=16))
-        # TODO: This probably needs to be something from Ray, not Hamilton
-        .with_remote_executor(executors.MultiProcessingExecutor(max_tasks=16))
+        .with_local_executor(executors.MultiProcessingExecutor(max_tasks=32))
+        .with_remote_executor(executors.MultiProcessingExecutor(max_tasks=32))
         .build()
     )
 

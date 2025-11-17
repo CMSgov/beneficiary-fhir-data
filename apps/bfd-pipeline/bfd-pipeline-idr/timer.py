@@ -1,14 +1,7 @@
 import logging
-import sys
 import time
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-if not logger.handlers:
-    console_handler = logging.StreamHandler(sys.stdout)
-    formatter = logging.Formatter("[%(levelname)s] %(asctime)s %(message)s")
-    console_handler.setFormatter(formatter)
-    logger.addHandler(console_handler)
 
 
 class Timer:

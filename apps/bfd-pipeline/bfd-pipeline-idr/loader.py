@@ -9,12 +9,6 @@ from constants import DEFAULT_MIN_DATE
 from model import DbType, FetchQueryPartition, LoadProgress, T
 from timer import Timer
 
-idr_query_timer = Timer("idr_query")
-temp_table_timer = Timer("temp_table")
-copy_timer = Timer("copy")
-insert_timer = Timer("insert")
-commit_timer = Timer("commit")
-
 logger = logging.getLogger(__name__)
 
 
@@ -75,6 +69,11 @@ class BatchLoader:
         self.meta_keys = (
             ["bfd_created_ts"] if self.immutable else ["bfd_created_ts", "bfd_updated_ts"]
         )
+        self.idr_query_timer = Timer("idr_query")
+        self.temp_table_timer = Timer("temp_table")
+        self.copy_timer = Timer("copy")
+        self.insert_timer = Timer("insert")
+        self.commit_timer = Timer("commit")
 
     def load(
         self,
@@ -91,11 +90,11 @@ class BatchLoader:
 
             # load each batch in a separate transaction
             while True:
-                idr_query_timer.start()
+                self.idr_query_timer.start()
                 # We unfortunately need to use a while true loop here since we need to wrap the
                 # iterator with the timer calls.
                 results = next(self.fetch_results, None)
-                idr_query_timer.stop(self.table)
+                self.idr_query_timer.stop(self.table)
                 if results is None:
                     break
 
@@ -103,25 +102,25 @@ class BatchLoader:
                 logger.info("loading next %s results", len(results))
                 num_rows += len(results)
 
-                temp_table_timer.start()
+                self.temp_table_timer.start()
                 self._setup_temp_table(cur)
-                temp_table_timer.stop(self.table)
+                self.temp_table_timer.stop(self.table)
 
-                copy_timer.start()
+                self.copy_timer.start()
                 self._copy_data(cur, results)
-                copy_timer.stop(self.table)
+                self.copy_timer.stop(self.table)
 
                 if results:
                     # Upsert into the main table
-                    insert_timer.start()
+                    self.insert_timer.start()
                     self._merge(cur, timestamp)
-                    insert_timer.stop(self.table)
+                    self.insert_timer.stop(self.table)
 
                     self._calculate_load_progress(cur, results)
 
-                commit_timer.start()
+                self.commit_timer.start()
                 self.conn.commit()
-                commit_timer.stop(self.table)
+                self.commit_timer.stop(self.table)
 
             self._mark_batch_complete(cur)
             self.conn.commit()

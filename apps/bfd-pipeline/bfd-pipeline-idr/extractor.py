@@ -15,14 +15,15 @@ from constants import DEFAULT_MIN_DATE
 from model import DbType, FetchQueryPartition, LoadProgress, T, get_min_transaction_date
 from timer import Timer
 
-cursor_execute_timer = Timer("cursor_execute")
-cursor_fetch_timer = Timer("cursor_fetch")
-transform_timer = Timer("transform")
-
 logger = logging.getLogger(__name__)
 
 
 class Extractor(ABC):
+    def __init__(self) -> None:
+        self.cursor_execute_timer = Timer("cursor_execute")
+        self.cursor_fetch_timer = Timer("cursor_fetch")
+        self.transform_timer = Timer("transform")
+
     @abstractmethod
     def extract_many(self, cls: type[T], sql: str, params: dict[str, DbType]) -> Iterator[list[T]]:
         pass
@@ -179,27 +180,27 @@ class SnowflakeExtractor(Extractor):
         cur = None
         logger.debug(sql)
         try:
-            cursor_execute_timer.start()
+            self.cursor_execute_timer.start()
             cur = self.conn.cursor(DictCursor)
             cur.execute(sql, params)
-            cursor_execute_timer.stop(cls)
+            self.cursor_execute_timer.stop(cls)
 
-            cursor_fetch_timer.start()
+            self.cursor_fetch_timer.start()
             # fetchmany can return list[dict] or list[tuple] but we'll only use
             # queries that return dicts
             batch: list[dict[str, DbType]] = cur.fetchmany(self.batch_size)  # type: ignore[assignment]
-            cursor_fetch_timer.stop(cls)
+            self.cursor_fetch_timer.stop(cls)
 
             while len(batch) > 0:  # type: ignore
-                transform_timer.start()
+                self.transform_timer.start()
                 data = [cls(**{k.lower(): v for k, v in row.items()}) for row in batch]
-                transform_timer.stop(cls)
+                self.transform_timer.stop(cls)
 
                 yield data
 
-                cursor_fetch_timer.start()
+                self.cursor_fetch_timer.start()
                 batch = cur.fetchmany(self.batch_size)  # type: ignore[assignment]
-                cursor_fetch_timer.stop(cls)
+                self.cursor_fetch_timer.stop(cls)
             return
 
         finally:
