@@ -138,14 +138,14 @@ class BatchLoader:
                 batch_start_ts, 
                 batch_complete_ts)
             VALUES(
-                %(table)s, 
+                %(table)s,
                 '{DEFAULT_MIN_DATE}', 
-                0, 
-                %(partition_str)s, 
-                %(start_ts)s, 
+                0,
+                %(partition_str)s,
+                %(start_ts)s,
                 '{DEFAULT_MIN_DATE}'
             )
-            ON CONFLICT (table_name) DO UPDATE 
+            ON CONFLICT (table_name, batch_partition) DO UPDATE 
             SET batch_start_ts = EXCLUDED.batch_start_ts
             """,
             {
