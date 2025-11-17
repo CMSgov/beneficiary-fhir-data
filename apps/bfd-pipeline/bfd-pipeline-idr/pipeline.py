@@ -39,9 +39,9 @@ def main() -> None:
         .with_config({"load_type": load_type})
         .with_modules(pipeline_nodes)
         #  .with_adapters(adapter)
-        .with_local_executor(executors.MultiThreadingExecutor(max_tasks=5))
+        .with_local_executor(executors.MultiProcessingExecutor(max_tasks=16))
         # TODO: This probably needs to be something from Ray, not Hamilton
-        .with_remote_executor(executors.MultiProcessingExecutor(max_tasks=5))
+        .with_remote_executor(executors.MultiProcessingExecutor(max_tasks=16))
         .build()
     )
 
