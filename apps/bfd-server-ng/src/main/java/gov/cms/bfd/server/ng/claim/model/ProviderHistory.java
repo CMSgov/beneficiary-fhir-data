@@ -31,10 +31,13 @@ public class ProviderHistory {
   private Optional<LocalDate> providerHistoryEffectiveDate;
 
   @Column(name = "prvdr_txnmy_cmpst_cd")
-  private Optional<String> contractName;
+  private Optional<String> providerTaxonomyCode;
+
+  @Column(name = "prvdr_type_cd")
+  private Optional<String> providerTypeCode;
 
   @Column(name = "prvdr_oscar_num")
-  private Optional<String> contractNumber;
+  private Optional<String> providerOscarNumber;
 
   @Column(name = "prvdr_1st_name")
   private Optional<String> providerFirstName;

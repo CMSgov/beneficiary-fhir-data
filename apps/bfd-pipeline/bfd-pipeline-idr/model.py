@@ -1581,6 +1581,7 @@ class IdrProviderHistory(IdrBaseModel):
     prvdr_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
     prvdr_hstry_efctv_dt: Annotated[datetime, {PRIMARY_KEY: True}]
     prvdr_mdl_name: Annotated[str, BeforeValidator(transform_null_string)]
+    prvdr_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
     prvdr_txnmy_cmpst_cd: Annotated[str, BeforeValidator(transform_default_string)]
     prvdr_oscar_num: Annotated[str, BeforeValidator(transform_default_string)]
     prvdr_1st_name: Annotated[str, BeforeValidator(transform_null_string)]

@@ -565,6 +565,7 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_prvdr_hstry (
     prvdr_sk BIGINT NOT NULL,
     prvdr_hstry_efctv_dt DATE NOT NULL,
     prvdr_mdl_name VARCHAR(25),
+    prvdr_type_cd VARCHAR(2) NOT NULL,
     prvdr_txnmy_cmpst_cd VARCHAR(150),
     prvdr_oscar_num VARCHAR(13) NOT NULL,
     prvdr_1st_name VARCHAR(35),
