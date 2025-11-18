@@ -16,9 +16,3 @@ CREATE TABLE idr.provider_history (
     bfd_updated_ts TIMESTAMPTZ,
     PRIMARY KEY(prvdr_sk, prvdr_hstry_efctv_dt)
 );
-
-CREATE VIEW idr.provider_history_latest AS
-SELECT DISTINCT ON (prvdr_sk) *
-FROM idr.provider_history
-WHERE prvdr_hstry_efctv_dt > '1000-01-01'
-ORDER BY prvdr_sk, prvdr_hstry_efctv_dt DESC;

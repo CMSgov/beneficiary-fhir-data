@@ -21,7 +21,7 @@ import org.hl7.fhir.r4.model.Practitioner;
 /** Provider History table. */
 @Entity
 @Getter
-@Table(name = "provider_history_latest", schema = "idr")
+@Table(name = "provider_history", schema = "idr")
 public class ProviderHistory {
   @Id
   @Column(name = "prvdr_sk", insertable = false, updatable = false)
