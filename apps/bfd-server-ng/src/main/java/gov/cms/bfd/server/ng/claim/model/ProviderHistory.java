@@ -24,6 +24,9 @@ import org.hl7.fhir.r4.model.Practitioner;
 @Table(name = "provider_history", schema = "idr")
 public class ProviderHistory {
   @Id
+  @Column(name = "prvdr_npi_num")
+  private String providerNpiNumber;
+
   @Column(name = "prvdr_sk", insertable = false, updatable = false)
   private long providerSk;
 
@@ -53,9 +56,6 @@ public class ProviderHistory {
 
   @Column(name = "prvdr_hstry_obslt_dt")
   private Optional<LocalDate> providerObsoleteDate;
-
-  @Column(name = "prvdr_npi_num")
-  private Optional<String> providerNpiNumber;
 
   @Column(name = "prvdr_lgl_name")
   private Optional<String> providerLegalName;

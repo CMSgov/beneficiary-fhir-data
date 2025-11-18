@@ -675,7 +675,7 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
         claim_line_rx["CLM_PHRMCY_PRICE_DSCNT_AT_POS_AMT"] = round(random.uniform(0, 1000), 2)
 
         provider_history = {}
-        provider_history["PRVDR_SK"] = "".join(random.choices(string.digits, k=12))
+        provider_history["PRVDR_SK"] = "".join(random.choices(string.digits, k=10))
         provider_history["PRVDR_HSTRY_EFCTV_DT"] = str(date.today())
         provider_history["PRVDR_HSTRY_OBSLT_DT"] = "9999-12-31"
         provider_history["PRVDR_1ST_NAME"] = random.choice(available_given_names)
@@ -683,11 +683,7 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
         provider_history["PRVDR_LAST_NAME"] = random.choice(available_family_names)
         provider_history["PRVDR_NAME"] = random.choice(available_provider_names)
         provider_history["PRVDR_LGL_NAME"] = random.choice(available_provider_legal_names)
-        provider_history["PRVDR_NPI_NUM"] = (
-            random.choice(type_1_npis)
-            if provider_history["PRVDR_LGL_NAME"] == ""
-            else random.choice(type_2_npis)
-        )
+        provider_history["PRVDR_NPI_NUM"] = provider_history["PRVDR_SK"]
         provider_history["PRVDR_EMPLR_ID_NUM"] = "".join(random.choices(string.digits, k=10))
         provider_history["PRVDR_OSCAR_NUM"] = "".join(random.choices(string.digits, k=6))
         provider_history["PRVDR_TXNMY_CMPST_CD"] = random.choice(available_provider_tx_codes)

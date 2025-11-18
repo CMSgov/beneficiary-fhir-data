@@ -1572,8 +1572,9 @@ class IdrClaimLineRx(IdrBaseModel):
 
 
 class IdrProviderHistory(IdrBaseModel):
-    prvdr_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
-    prvdr_hstry_efctv_dt: Annotated[datetime, {PRIMARY_KEY: True}]
+    prvdr_npi_num: Annotated[str, {PRIMARY_KEY: True, BATCH_ID: True}]
+    prvdr_sk: int
+    prvdr_hstry_efctv_dt: datetime
     prvdr_mdl_name: Annotated[str, BeforeValidator(transform_null_string)]
     prvdr_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
     prvdr_txnmy_cmpst_cd: Annotated[str, BeforeValidator(transform_default_string)]
@@ -1581,7 +1582,6 @@ class IdrProviderHistory(IdrBaseModel):
     prvdr_1st_name: Annotated[str, BeforeValidator(transform_null_string)]
     prvdr_name: Annotated[str, BeforeValidator(transform_null_string)]
     prvdr_hstry_obslt_dt: Annotated[date, BeforeValidator(transform_null_date_to_max)]
-    prvdr_npi_num: Annotated[str, BeforeValidator(transform_default_string)]
     prvdr_lgl_name: Annotated[str, BeforeValidator(transform_null_string)]
     prvdr_emplr_id_num: Annotated[str, BeforeValidator(transform_null_string)]
     prvdr_last_name: Annotated[str, BeforeValidator(transform_null_string)]
