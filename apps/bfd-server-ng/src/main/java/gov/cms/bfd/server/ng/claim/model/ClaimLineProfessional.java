@@ -1,11 +1,8 @@
 package gov.cms.bfd.server.ng.claim.model;
 
+import gov.cms.bfd.server.ng.converter.NonZeroDoubleConverter;
 import gov.cms.bfd.server.ng.util.SystemUrls;
-import jakarta.persistence.Column;
-import jakarta.persistence.EmbeddedId;
-import jakarta.persistence.Entity;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.util.Optional;
 import lombok.Getter;
@@ -27,7 +24,8 @@ public class ClaimLineProfessional {
   private Optional<ClaimLineHCTHGBTestTypeCode> claimLineHCTHGBTestTypeCode;
 
   @Column(name = "clm_line_hct_hgb_rslt_num")
-  private double claimLineHCTHGBTestResult;
+  @Convert(converter = NonZeroDoubleConverter.class)
+  private Optional<Double> claimLineHCTHGBTestResult;
 
   @Column(name = "clm_line_carr_clncl_lab_num")
   private Optional<String> claimLineCarrierClinicalLabNumber;
@@ -42,7 +40,7 @@ public class ClaimLineProfessional {
    * @return claim Observation
    */
   public Optional<Observation> toFhirObservation(int bfdRowId) {
-    if (claimLineHCTHGBTestTypeCode.isEmpty() || claimLineHCTHGBTestResult <= 0) {
+    if (claimLineHCTHGBTestTypeCode.isEmpty() || claimLineHCTHGBTestResult.isEmpty()) {
       return Optional.empty();
     }
 
@@ -53,12 +51,14 @@ public class ClaimLineProfessional {
             observation.setCode(new CodeableConcept().addCoding(testTypeCode.toFhirCoding())));
 
     observation.setStatus(Observation.ObservationStatus.FINAL);
-    observation.setValue(
-        new Quantity()
-            .setValue(BigDecimal.valueOf(claimLineHCTHGBTestResult))
-            .setUnit("g/dL") // or the proper UCUM unit
-            .setSystem("http://unitsofmeasure.org")
-            .setCode("g/dL"));
+    claimLineHCTHGBTestResult.ifPresent(
+        result ->
+            observation.setValue(
+                new Quantity()
+                    .setValue(BigDecimal.valueOf(result))
+                    .setUnit("g/dL") // or the proper UCUM unit
+                    .setSystem(SystemUrls.UNITS_OF_MEASURE)
+                    .setCode("g/dL")));
 
     claimLineCarrierClinicalLabNumber.ifPresent(
         labNumber -> {

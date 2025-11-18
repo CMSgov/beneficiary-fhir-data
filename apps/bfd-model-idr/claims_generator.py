@@ -37,10 +37,33 @@ SECURITY_LABELS_CPT_SYSTEMS = ["http://www.ama-assn.org/go/cpt"]
 SECURITY_LABELS_DRG_SYSTEMS = [
     "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
 ]
+
+
 SECURITY_LABELS_YML = Path(os.path.realpath(__file__)).parent.joinpath("security_labels.yml")
 SECURITY_LABELS = TypeAdapter(list[SecurityLabelModel]).validate_python(
     yaml.safe_load(SECURITY_LABELS_YML.read_text()), by_alias=True
 )
+
+NORMALIZE = "normalize"
+NO_NORMALIZE = "no_normalize"
+
+CAST_LINE_NUM = "cast_line_num"
+NO_CAST_LINE_NUM = "no_cast_line_num"
+
+# Columns you want as string without decimal/nan
+INT_TO_STRING_COLS = [
+    "CLM_TYPE_CD",
+    "CLM_NUM_SK",
+    "PRVDR_PRSCRBNG_PRVDR_NPI_NUM",
+    "PRVDR_RFRG_PRVDR_NPI_NUM",
+    "PRVDR_BLG_PRVDR_NPI_NUM",
+    "CLM_ATNDG_PRVDR_NPI_NUM",
+    "CLM_OPRTG_PRVDR_NPI_NUM",
+    "CLM_OTHR_PRVDR_NPI_NUM",
+    "CLM_RNDRG_PRVDR_NPI_NUM",
+    "CLM_BLG_PRVDR_NPI_NUM",
+    "CLM_RFRG_PRVDR_PIN_NUM",
+]
 
 generator = GeneratorUtil()
 faker = Faker()
@@ -66,65 +89,23 @@ def save_output_files(
     df = pd.json_normalize(clm)
     df["CLM_BLOOD_PT_FRNSH_QTY"] = df["CLM_BLOOD_PT_FRNSH_QTY"].astype("Int64")
     df["CLM_BLG_PRVDR_OSCAR_NUM"] = df["CLM_BLG_PRVDR_OSCAR_NUM"].astype("string")
-    # Columns you want as string without decimal/nan
-    int_to_string_cols = [
-        "CLM_TYPE_CD",
-        "CLM_NUM_SK",
-        "PRVDR_PRSCRBNG_PRVDR_NPI_NUM",
-        "PRVDR_RFRG_PRVDR_NPI_NUM",
-        "PRVDR_BLG_PRVDR_NPI_NUM",
-        "CLM_ATNDG_PRVDR_NPI_NUM",
-        "CLM_OPRTG_PRVDR_NPI_NUM",
-        "CLM_OTHR_PRVDR_NPI_NUM",
-        "CLM_RNDRG_PRVDR_NPI_NUM",
-        "CLM_BLG_PRVDR_NPI_NUM",
-        "CLM_RFRG_PRVDR_PIN_NUM",
+
+    exports = [
+        (df,                 "out/SYNTHETIC_CLM.csv",             NO_NORMALIZE, NO_CAST_LINE_NUM),
+        (clm_line,           "out/SYNTHETIC_CLM_LINE.csv",        NORMALIZE,    CAST_LINE_NUM),
+        (clm_val,            "out/SYNTHETIC_CLM_VAL.csv",         NORMALIZE,    NO_CAST_LINE_NUM),
+        (clm_dt_sgntr,       "out/SYNTHETIC_CLM_DT_SGNTR.csv",    NORMALIZE,    NO_CAST_LINE_NUM),
+        (clm_prod,           "out/SYNTHETIC_CLM_PROD.csv",        NORMALIZE,    NO_CAST_LINE_NUM),
+        (clm_instnl,         "out/SYNTHETIC_CLM_INSTNL.csv",      NORMALIZE,    NO_CAST_LINE_NUM),
+        (clm_line_instnl,    "out/SYNTHETIC_CLM_LINE_INSTNL.csv", NO_NORMALIZE, CAST_LINE_NUM),
+        (clm_dcmtn,          "out/SYNTHETIC_CLM_DCMTN.csv",       NORMALIZE,    NO_CAST_LINE_NUM),
+        (clm_lctn_hstry,     "out/SYNTHETIC_CLM_LCTN_HSTRY.csv",  NORMALIZE,    NO_CAST_LINE_NUM),
+        (clm_fiss,           "out/SYNTHETIC_CLM_FISS.csv",        NORMALIZE,    NO_CAST_LINE_NUM),
+        (clm_prfnl,          "out/SYNTHETIC_CLM_PRFNL.csv",       NORMALIZE,    NO_CAST_LINE_NUM),
+        (clm_line_prfnl,     "out/SYNTHETIC_CLM_LINE_PRFNL.csv",  NORMALIZE,    CAST_LINE_NUM),
+        (clm_line_rx,        "out/SYNTHETIC_CLM_LINE_RX.csv",     NORMALIZE,    NO_CAST_LINE_NUM),
     ]
 
-
-    df = clean_int_columns(df, int_to_string_cols)
-    df.to_csv("out/SYNTHETIC_CLM.csv", index=False)
-
-    df = pd.json_normalize(clm_line)
-    df = clean_int_columns(df, int_to_string_cols)
-    df["CLM_LINE_NUM"] = df["CLM_LINE_NUM"].astype("str")
-    df.to_csv("out/SYNTHETIC_CLM_LINE.csv", index=False)
-    df = pd.json_normalize(clm_val)
-    df = clean_int_columns(df, int_to_string_cols)
-    df.to_csv("out/SYNTHETIC_CLM_VAL.csv", index=False)
-    df = pd.json_normalize(clm_dt_sgntr)
-    df = clean_int_columns(df, int_to_string_cols)
-    df.to_csv("out/SYNTHETIC_CLM_DT_SGNTR.csv", index=False)
-    df = pd.json_normalize(clm_prod)
-    df = clean_int_columns(df, int_to_string_cols)
-    df.to_csv("out/SYNTHETIC_CLM_PROD.csv", index=False)
-    df = pd.json_normalize(clm_instnl)
-    df = clean_int_columns(df, int_to_string_cols)
-    df.to_csv("out/SYNTHETIC_CLM_INSTNL.csv", index=False)
-    df = pd.DataFrame(clm_line_instnl)
-    df = clean_int_columns(df, int_to_string_cols)
-    df["CLM_LINE_NUM"] = df["CLM_LINE_NUM"].astype("str")
-    df.to_csv("out/SYNTHETIC_CLM_LINE_INSTNL.csv", index=False)
-    df = pd.json_normalize(clm_dcmtn)
-    df = clean_int_columns(df, int_to_string_cols)
-    df.to_csv("out/SYNTHETIC_CLM_DCMTN.csv", index=False)
-    df = pd.json_normalize(clm_lctn_hstry)
-    df = clean_int_columns(df, int_to_string_cols)
-    df.to_csv("out/SYNTHETIC_CLM_LCTN_HSTRY.csv", index=False)
-    df = pd.json_normalize(clm_fiss)
-    df = clean_int_columns(df, int_to_string_cols)
-    df = clean_int_columns(df, int_to_string_cols)
-    df.to_csv("out/SYNTHETIC_CLM_FISS.csv", index=False)
-    df = pd.json_normalize(clm_prfnl)
-    df = clean_int_columns(df, int_to_string_cols)
-    df.to_csv("out/SYNTHETIC_CLM_PRFNL.csv", index=False)
-    df = pd.json_normalize(clm_line_prfnl)
-    df = clean_int_columns(df, int_to_string_cols)
-    df["CLM_LINE_NUM"] = df["CLM_LINE_NUM"].astype("str")
-    df.to_csv("out/SYNTHETIC_CLM_LINE_PRFNL.csv", index=False)
-    df = pd.json_normalize(clm_line_rx)
-    df = clean_int_columns(df, int_to_string_cols)
-    df.to_csv("out/SYNTHETIC_CLM_LINE_RX.csv", index=False)
     # these are mostly static
     shutil.copy("sample-data/SYNTHETIC_CLM_ANSI_SGNTR.csv", "out/SYNTHETIC_CLM_ANSI_SGNTR.csv")
 
@@ -292,6 +273,15 @@ def get_icd_10_dgns_codes() -> list[str]:
         weights=(1, 99),
         k=1,
     )[0]
+
+def export_df(data, out_path, normalize=NORMALIZE, line_num_cast=NO_CAST_LINE_NUM):
+    df = pd.json_normalize(data) if normalize == NORMALIZE else pd.DataFrame(data)
+    df = clean_int_columns(df, INT_TO_STRING_COLS)
+
+    if line_num_cast == CAST_LINE_NUM and "CLM_LINE_NUM" in df.columns:
+        df["CLM_LINE_NUM"] = df["CLM_LINE_NUM"].astype("str")
+    df.to_csv(out_path, index=False)
+
 
 
 def get_icd_10_prcdr_codes() -> list[str]:
