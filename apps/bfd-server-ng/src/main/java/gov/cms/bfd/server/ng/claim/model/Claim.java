@@ -48,12 +48,6 @@ public class Claim {
   @Column(name = "clm_efctv_dt")
   private LocalDate claimEffectiveDate;
 
-  @Column(name = "clm_nrln_ric_cd")
-  private Optional<ClaimNearLineRecordTypeCode> claimNearLineRecordTypeCode;
-
-  @Column(name = "clm_ric_cd")
-  private Optional<ClaimRecordTypeCode> claimRecordTypeCode;
-
   @Embedded private Meta meta;
   @Embedded private Identifiers identifiers;
   @Embedded private BillablePeriod billablePeriod;
@@ -66,6 +60,7 @@ public class Claim {
   @Embedded private BenefitBalance benefitBalance;
   @Embedded private AdjudicationCharge adjudicationCharge;
   @Embedded private ClaimPaymentAmount claimPaymentAmount;
+  @Embedded private ClaimRecordType claimRecordType;
 
   // TODO: to be added in BFD-4286
   // @Embedded private PharmacyOrgProvider pharmacyOrgProvider;
@@ -236,14 +231,8 @@ public class Claim {
     getClaimFiss().flatMap(f -> f.toFhirOutcome(claimTypeCode)).ifPresent(eob::setOutcome);
 
     var supportingInfoFactory = new SupportingInfoFactory();
-    var recordTypeCodes =
-        Stream.concat(
-            claimRecordTypeCode.stream()
-                .map(recordTypeCode -> recordTypeCode.toFhir(supportingInfoFactory)),
-            claimNearLineRecordTypeCode.stream()
-                .map(
-                    nearLineRecordTypeCode ->
-                        nearLineRecordTypeCode.toFhir(supportingInfoFactory)));
+    var recordTypeCodes = claimRecordType.toFhir(supportingInfoFactory);
+
     var initialSupportingInfo =
         Stream.concat(
                 Stream.of(
@@ -293,7 +282,7 @@ public class Claim {
 
     var insurance = new ExplanationOfBenefit.InsuranceComponent();
     insurance.setFocal(true);
-    toFhirReference().ifPresent(insurance::setCoverage);
+    claimRecordType.toFhirReference(claimTypeCode).ifPresent(insurance::setCoverage);
 
     claimTypeCode.toFhirInsurance().ifPresent(eob::addInsurance);
     claimTypeCode
@@ -311,16 +300,6 @@ public class Claim {
             });
 
     return sortedEob(eob);
-  }
-
-  Optional<Reference> toFhirReference() {
-    return Stream.of(
-            claimRecordTypeCode.map(ClaimRecordTypeCode::getDisplay),
-            claimNearLineRecordTypeCode.map(ClaimNearLineRecordTypeCode::getDisplay),
-            claimTypeCode.toDisplay())
-        .flatMap(Optional::stream)
-        .findFirst()
-        .map(display -> new Reference().setDisplay(display));
   }
 
   private List<ClaimValue> getClaimValues() {
