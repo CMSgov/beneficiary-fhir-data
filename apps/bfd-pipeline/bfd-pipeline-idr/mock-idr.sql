@@ -238,7 +238,7 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_rlt_cond_sgntr_mbr (
       clm_rlt_cond_cd VARCHAR(20) NOT NULL,
       idr_insrt_ts TIMESTAMPTZ,
       idr_updt_ts TIMESTAMPTZ,
-      PRIMARY KEY(clm_rlt_cond_sgntr_sk, clm_rlt_cond_sgntr_sqnc_num)
+      PRIMARY KEY(clm_rlt_cond_sgntr_sk, clm_rlt_cond_sgntr_sqnc_num, clm_rlt_cond_cd)
 );
 
 CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_dcmtn (

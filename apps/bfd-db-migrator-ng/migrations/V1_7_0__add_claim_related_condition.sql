@@ -1,10 +1,6 @@
-CREATE TABLE idr.claim_related_condition (
-                                             clm_uniq_id BIGINT NOT NULL,
-                                             clm_rlt_cond_sgntr_sqnc_num INT NOT NULL,
-                                             clm_rlt_cond_cd VARCHAR(20) NOT NULL,
-                                             idr_insrt_ts TIMESTAMPTZ NOT NULL,
-                                             idr_updt_ts TIMESTAMPTZ NOT NULL,
-                                             bfd_created_ts TIMESTAMPTZ NOT NULL,
-                                             bfd_updated_ts TIMESTAMPTZ NOT NULL,
-                                             PRIMARY KEY(clm_uniq_id, clm_rlt_cond_sgntr_sqnc_num)
-);
+ALTER TABLE idr.claim_item
+    ADD COLUMN clm_rlt_cond_sgntr_sk BIGINT,
+    ADD COLUMN clm_rlt_cond_cd VARCHAR(20),
+    ADD COLUMN clm_rlt_cond_sgntr_sqnc_num INT,
+    ADD COLUMN idr_insrt_ts_rlt_cond TIMESTAMPTZ,
+    ADD COLUMN idr_updt_ts_rlt_cond TIMESTAMPTZ;

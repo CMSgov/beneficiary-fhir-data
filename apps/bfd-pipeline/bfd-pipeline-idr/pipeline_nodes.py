@@ -21,7 +21,6 @@ from model import (
     IdrClaimLineProfessional,
     IdrClaimLineRx,
     IdrClaimProfessional,
-    IdrClaimRelatedCondition,
 )
 from pipeline_utils import extract_and_load
 
@@ -39,7 +38,6 @@ from pipeline_utils import extract_and_load
     idr_claim_professional=dict(cls=value(IdrClaimProfessional)),
     idr_claim_line_professional=dict(cls=value(IdrClaimLineProfessional)),
     idr_claim_line_rx=dict(cls=value(IdrClaimLineRx)),
-    idr_claim_related_condition=dict(cls=value(IdrClaimRelatedCondition)),
     idr_claim_initial=dict(cls=value(IdrClaim)),
 )
 def idr_claims(
@@ -65,7 +63,6 @@ def idr_beneficiary_overshare_mbi_initial(
     idr_claim_professional: bool,
     idr_claim_line_professional: bool,
     idr_claim_line_rx: bool,
-    idr_claim_related_condition: bool,
     idr_claim_initial: bool,
     config_mode: str,
     config_batch_size: int,
@@ -117,7 +114,6 @@ def idr_beneficiary_aux_table_initial(
     idr_claim_professional=dict(cls=value(IdrClaimProfessional)),
     idr_claim_line_professional=dict(cls=value(IdrClaimLineProfessional)),
     idr_claim_line_rx=dict(cls=value(IdrClaimLineRx)),
-    idr_claim_related_condition=dict(cls=value(IdrClaimRelatedCondition)),
 )
 def idr_claim_aux_table(
     cls: type, config_connection_string: str, config_mode: str, config_batch_size: int
@@ -142,7 +138,6 @@ def idr_claim(
     idr_claim_professional: bool,
     idr_claim_line_professional: bool,
     idr_claim_line_rx: bool,
-    idr_claim_related_condition: bool,
     config_mode: str,
     config_batch_size: int,
     config_connection_string: str,
