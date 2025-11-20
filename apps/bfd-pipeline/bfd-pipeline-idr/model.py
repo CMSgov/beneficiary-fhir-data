@@ -1571,3 +1571,31 @@ class IdrClaimLineRx(IdrBaseModel):
             {{WHERE_CLAUSE}} AND {claim_type_clause(start_time, PART_D_CLAIM_TYPE_CODES)}
             {{ORDER_BY}}
         """
+
+
+class IdrProviderHistory(IdrBaseModel):
+    prvdr_npi_num: Annotated[str, {PRIMARY_KEY: True, BATCH_ID: True}]
+    prvdr_sk: int
+    prvdr_hstry_efctv_dt: datetime
+    prvdr_mdl_name: Annotated[str, BeforeValidator(transform_null_string)]
+    prvdr_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
+    prvdr_txnmy_cmpst_cd: Annotated[str, BeforeValidator(transform_default_string)]
+    prvdr_oscar_num: Annotated[str, BeforeValidator(transform_default_string)]
+    prvdr_1st_name: Annotated[str, BeforeValidator(transform_null_string)]
+    prvdr_name: Annotated[str, BeforeValidator(transform_null_string)]
+    prvdr_hstry_obslt_dt: Annotated[date, BeforeValidator(transform_null_date_to_max)]
+    prvdr_lgl_name: Annotated[str, BeforeValidator(transform_null_string)]
+    prvdr_emplr_id_num: Annotated[str, BeforeValidator(transform_null_string)]
+    prvdr_last_name: Annotated[str, BeforeValidator(transform_null_string)]
+
+    @staticmethod
+    def table() -> str:
+        return "idr.provider_history"
+
+    @staticmethod
+    def _current_fetch_query(start_time: datetime) -> str:  # noqa: ARG004
+        return f"""
+            SELECT {{COLUMNS}}
+            FROM cms_vdm_view_mdcr_prd.v2_mdcr_prvdr_hstry
+            WHERE prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
+        """

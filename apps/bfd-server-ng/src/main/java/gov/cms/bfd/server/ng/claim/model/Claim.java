@@ -1,5 +1,8 @@
 package gov.cms.bfd.server.ng.claim.model;
 
+import static gov.cms.bfd.server.ng.claim.model.ProviderHistory.NPI_TYPE.INDIVIDUAL;
+import static gov.cms.bfd.server.ng.claim.model.ProviderHistory.NPI_TYPE.ORGANIZATION;
+
 import gov.cms.bfd.server.ng.ClaimSecurityStatus;
 import gov.cms.bfd.server.ng.beneficiary.model.BeneficiarySimple;
 import gov.cms.bfd.server.ng.util.DateUtil;
@@ -9,6 +12,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
@@ -48,6 +52,15 @@ public class Claim {
   @Column(name = "clm_efctv_dt")
   private LocalDate claimEffectiveDate;
 
+  @Column(name = "clm_nrln_ric_cd")
+  private Optional<ClaimNearLineRecordTypeCode> claimNearLineRecordTypeCode;
+
+  @Column(name = "clm_ric_cd")
+  private Optional<ClaimRecordTypeCode> claimRecordTypeCode;
+
+  @Column(name = "clm_srvc_prvdr_gnrc_id_num")
+  private String serviceProviderNpiNumber;
+
   @Embedded private Meta meta;
   @Embedded private Identifiers identifiers;
   @Embedded private BillablePeriod billablePeriod;
@@ -61,10 +74,6 @@ public class Claim {
   @Embedded private AdjudicationCharge adjudicationCharge;
   @Embedded private ClaimPaymentAmount claimPaymentAmount;
   @Embedded private ClaimRecordType claimRecordType;
-
-  // TODO: to be added in BFD-4286
-  // @Embedded private PharmacyOrgProvider pharmacyOrgProvider;
-  // @Embedded private PharmacyPractitionerProvider pharmacyPractitionerProvider;
 
   @OneToOne
   @JoinColumn(name = "bene_sk")
@@ -113,6 +122,80 @@ public class Claim {
       referencedColumnName = "cntrct_pbp_num")
   private Contract contract;
 
+  @Nullable
+  @ManyToOne
+  @JoinColumn(
+      name = "clm_srvc_prvdr_gnrc_id_num",
+      insertable = false,
+      updatable = false,
+      referencedColumnName = "prvdr_npi_num")
+  private ProviderHistory providerHistory;
+
+  @Nullable
+  @ManyToOne
+  @JoinColumn(
+      name = "clm_atndg_prvdr_npi_num",
+      insertable = false,
+      updatable = false,
+      referencedColumnName = "prvdr_npi_num")
+  private ProviderHistory attendingProviderHistory;
+
+  private Optional<ProviderHistory> getAttendingProviderHistory() {
+    return Optional.ofNullable(attendingProviderHistory);
+  }
+
+  @Nullable
+  @ManyToOne
+  @JoinColumn(
+      name = "clm_oprtg_prvdr_npi_num",
+      insertable = false,
+      updatable = false,
+      referencedColumnName = "prvdr_npi_num")
+  private ProviderHistory operatingProviderHistory;
+
+  private Optional<ProviderHistory> getOperatingProviderHistory() {
+    return Optional.ofNullable(operatingProviderHistory);
+  }
+
+  @Nullable
+  @ManyToOne
+  @JoinColumn(
+      name = "clm_othr_prvdr_npi_num",
+      insertable = false,
+      updatable = false,
+      referencedColumnName = "prvdr_npi_num")
+  private ProviderHistory otherProviderHistory;
+
+  private Optional<ProviderHistory> getOtherProviderHistory() {
+    return Optional.ofNullable(otherProviderHistory);
+  }
+
+  @Nullable
+  @ManyToOne
+  @JoinColumn(
+      name = "clm_rndrg_prvdr_npi_num",
+      insertable = false,
+      updatable = false,
+      referencedColumnName = "prvdr_npi_num")
+  private ProviderHistory renderingProviderHistory;
+
+  private Optional<ProviderHistory> getRenderingProviderHistory() {
+    return Optional.ofNullable(renderingProviderHistory);
+  }
+
+  @Nullable
+  @ManyToOne
+  @JoinColumn(
+      name = "prvdr_prscrbng_prvdr_npi_num",
+      insertable = false,
+      updatable = false,
+      referencedColumnName = "prvdr_npi_num")
+  private ProviderHistory prescribingProviderHistory;
+
+  private Optional<ProviderHistory> getPrescribingProviderHistory() {
+    return Optional.ofNullable(prescribingProviderHistory);
+  }
+
   Optional<ClaimInstitutional> getClaimInstitutional() {
     return Optional.ofNullable(claimInstitutional);
   }
@@ -127,6 +210,10 @@ public class Claim {
 
   private Optional<Contract> getContract() {
     return Optional.ofNullable(contract);
+  }
+
+  private Optional<ProviderHistory> getProviderHistory() {
+    return Optional.ofNullable(providerHistory);
   }
 
   /**
@@ -210,21 +297,28 @@ public class Claim {
               eob.addContained(p);
               eob.setProvider(new Reference(p));
             });
-    // TODO: below depends on clm_srvc_prvdr_gnrc_id_type which will be decided in BFD-4286
-    /*pharmacyOrgProvider
-        .toFhir(claimTypeCode)
-        .ifPresent(
-            p -> {
-              eob.addContained(p);
-              eob.setProvider(new Reference(p));
-            });
-    pharmacyPractitionerProvider
-        .toFhir(claimTypeCode)
-        .ifPresent(
-            p -> {
-              eob.addContained(p);
-              eob.setProvider(new Reference(p));
-            });*/
+    var providerContext = getProviderHistory();
+    if (providerContext.isPresent()) {
+      var provider = providerContext.get();
+      var npiType = provider.getNpiType();
+      if (npiType == INDIVIDUAL) {
+        provider
+            .toPractitionerFhir(claimTypeCode, serviceProviderNpiNumber)
+            .ifPresent(
+                p -> {
+                  eob.addContained(p);
+                  eob.setProvider(new Reference(p));
+                });
+      } else if (npiType == ORGANIZATION) {
+        provider
+            .toOrganizationFhir(claimTypeCode, serviceProviderNpiNumber)
+            .ifPresent(
+                p -> {
+                  eob.addContained(p);
+                  eob.setProvider(new Reference(p));
+                });
+      }
+    }
 
     claimSourceId.toFhirOutcome().ifPresent(eob::setOutcome);
     claimTypeCode.toFhirOutcome().ifPresent(eob::setOutcome);
@@ -266,7 +360,12 @@ public class Claim {
         .forEach(eob::addSupportingInfo);
 
     careTeam
-        .toFhir()
+        .toFhir(
+            getAttendingProviderHistory(),
+            getOperatingProviderHistory(),
+            getOtherProviderHistory(),
+            getRenderingProviderHistory(),
+            getPrescribingProviderHistory())
         .forEach(
             c -> {
               eob.addCareTeam(c.careTeam());

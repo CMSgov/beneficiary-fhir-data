@@ -41,8 +41,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
     },
     "role" : {
       "coding" : [ {
-        "code" : "rendering",
-        "display" : "Rendering provider",
+        "code" : "otheroperating",
+        "display" : "Other Operating",
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
       } ]
     },
@@ -105,6 +105,9 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
     "meta" : {
       "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
     },
+    "name" : [ {
+      "family" : "Stark"
+    } ],
     "resourceType" : "Practitioner"
   }, {
     "id" : "careteam-provider-2",
@@ -664,8 +667,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
     },
     "role" : {
       "coding" : [ {
-        "code" : "rendering",
-        "display" : "Rendering provider",
+        "code" : "otheroperating",
+        "display" : "Other Operating",
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
       } ]
     },
@@ -1461,6 +1464,9 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
     "meta" : {
       "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
     },
+    "name" : [ {
+      "family" : "Stark"
+    } ],
     "resourceType" : "Practitioner"
   }, {
     "id" : "careteam-provider-2",
@@ -2485,8 +2491,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
     },
     "role" : {
       "coding" : [ {
-        "code" : "rendering",
-        "display" : "Rendering provider",
+        "code" : "otheroperating",
+        "display" : "Other Operating",
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
       } ]
     },
@@ -2549,6 +2555,9 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
     "meta" : {
       "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
     },
+    "name" : [ {
+      "family" : "Stark"
+    } ],
     "resourceType" : "Practitioner"
   }, {
     "id" : "careteam-provider-2",
@@ -3785,8 +3794,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
     },
     "role" : {
       "coding" : [ {
-        "code" : "rendering",
-        "display" : "Rendering provider",
+        "code" : "otheroperating",
+        "display" : "Other Operating",
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
       } ]
     },
@@ -3849,6 +3858,9 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
     "meta" : {
       "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
     },
+    "name" : [ {
+      "family" : "Stark"
+    } ],
     "resourceType" : "Practitioner"
   }, {
     "id" : "careteam-provider-2",
