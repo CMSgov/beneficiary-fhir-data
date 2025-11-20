@@ -57,6 +57,7 @@ public class IntegrationTestBase {
   protected static final String CLAIM_ID_PHASE_1 = "1071939711297";
   protected static final String CLAIM_ID_PHASE_2 = "1071939711298";
   protected static final String CLAIM_ID_RX = "5213363418309";
+  protected static final String CLAIM_ID_RX_ORGANIZATION = "1409088853940";
 
   protected static final String DUAL_ONLY_BENE_COVERAGE_STATUS_CODE = "XX";
 
