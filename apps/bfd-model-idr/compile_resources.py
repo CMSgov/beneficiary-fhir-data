@@ -130,7 +130,7 @@ def main():
     structure_defs = get_structure_definitions()
 
     # Generate Structure Definitions + CodeSystems
-    if(not args.sushi):
+    if(args.sushi):
         print("Running sushi build")
         stdout, stderr = run_command("sushi build", cwd=script_dir / "sushi")
         print("SUSHI output:")
