@@ -5,8 +5,6 @@ prvdr_info_file = 'sample-data/PRVDR_HSTRY_POC.csv'
 df = pd.read_csv(prvdr_info_file, dtype={"PRVDR_SK": str})
 df.head()
 
-cur_sample = 'sample-data/EOB-Carrier-Sample.json'
-
 cur_sample = sys.argv[1]
 print(cur_sample)
 cur_sample_data = {}
@@ -59,7 +57,11 @@ for column in header_columns:
                     cur_sample_data['lineItemComponents'][idx]['careTeamSequence'].append(provider_object['careTeamSequenceNumber'])
                 else:
                     cur_sample_data['lineItemComponents'][idx]['careTeamSequence'] = [provider_object['careTeamSequenceNumber']]
-    
+
+    #We may want to remove this in the future, depending on requirements regarding address info.
+    if(column == 'PRVDR_BLG_PRVDR_NPI_NUM' and 'CLM_BLG_PRVDR_ZIP5_CD' in cur_sample_data):
+        provider_object['prvdr_zip'] = cur_sample_data['CLM_BLG_PRVDR_ZIP5_CD']
+
     provider_list.append(provider_object)
 
 

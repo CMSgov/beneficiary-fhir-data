@@ -2130,7 +2130,7 @@
     - FISS
   sourceView: V2_MDCR_CLM
   sourceColumn: PRVDR_RNDRNG_PRVDR_NPI_NUM
-  fhirPath: ExplanationOfBenefit.contained.where(id = %root.careTeam.where(role.coding.code='rendering').provider.reference.substring(1)).identifier.where(system='http://hl7.org/fhir/sid/us-npi').value
+  fhirPath: ExplanationOfBenefit.contained.where(id = %root.careTeam.where(role.coding.code='rendering').provider[0].reference.substring(1)).identifier.where(system='http://hl7.org/fhir/sid/us-npi').value
 - inputPath: LineItemComponent.PRVDR_RNDRNG_PRVDR_NPI_NUM
   appliesTo:
     - Carrier
@@ -2146,7 +2146,8 @@
     - CCLF5.CLM_RNDRG_PRVDR_NPI_NUM
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: PRVDR_RNDRNG_PRVDR_NPI_NUM
-  fhirPath: ExplanationOfBenefit.contained.where(id = %root.careTeam.where(role.coding.code='rendering').provider.reference.substring(1)).identifier.where(system='http://hl7.org/fhir/sid/us-npi').value
+  fhirPath: ExplanationOfBenefit.contained.where(id = %root.careTeam.where(role.coding.code='rendering').provider[0].reference.substring(1)).identifier.where(system='http://hl7.org/fhir/sid/us-npi').value
+  notes: This can be either the same or different as the other rendering provider fields. The FHIRPath expression provider[0] will need to be modified depending on this condition to get the related one. An alternative way to connect the nodes is to refer to the relevant careTeam sequence and then get the Provider's NPI from there. 
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_INSTNL_PRFNL_AMT
   appliesTo:
     - Inpatient
@@ -2206,7 +2207,7 @@
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_MDCR_COINSRNC_AMT
   fhirPath: ExplanationOfBenefit.total.where(category.coding.where(system='http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication' and code='coinsurance').exists() and category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_MDCR_COINSRNC_AMT').exists()).amount.value
-- inputPath: ExplanationOfBenefit-Base.CLM_OTHR_PRVDR_NPI_NUM
+- inputPath: ExplanationOfBenefit-Base.PRVDR_OTHR_PRVDR_NPI_NUM
   appliesTo:
     - Inpatient
     - Outpatient
@@ -2221,7 +2222,7 @@
   cclfMapping:
     - CCLF1.OTHR_PRVDR_NPI_NUM
   sourceView: V2_MDCR_CLM
-  sourceColumn: CLM_OTHR_PRVDR_NPI_NUM
+  sourceColumn: PRVDR_OTHR_PRVDR_NPI_NUM
   fhirPath: ExplanationOfBenefit.contained.where(id = %root.careTeam.where(role.coding.code='otheroperating').provider.reference.substring(1)).identifier.where(system='http://hl7.org/fhir/sid/us-npi').value
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_INSTNL_DRG_OUTLIER_AMT
   appliesTo:
@@ -2651,7 +2652,7 @@
   referenceTable: PRTCPTNG_IND_CD
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_RNDRG_PRVDR_PRTCPTG_CD
-  fhirPath: ExplanationOfBenefit.contained.where(id = %root.careTeam.where(role.coding.code='rendering').provider.reference.substring(1)).extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-RNDRG-PRVDR-PRTCPTG-CD').coding.code
+  fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-RNDRG-PRVDR-PRTCPTG-CD').value.code
 - inputPath: LineItemComponent.CLM_RNDRG_PRVDR_TYPE_CD
   appliesTo:
     - Carrier
@@ -2663,7 +2664,7 @@
   referenceTable: CLM_PRVDR_TYPE_CD
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_RNDRG_PRVDR_TYPE_CD
-  fhirPath: ExplanationOfBenefit.contained.where(id = %root.careTeam.where(role.coding.code='rendering').provider.reference.substring(1)).extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRVDR-TYPE-CD').coding.code
+  fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRVDR-TYPE-CD').value.code
 - inputPath: ExplanationOfBenefit-Professional-Base.CLM_CARR_PMT_DNL_CD
   appliesTo:
     - Carrier

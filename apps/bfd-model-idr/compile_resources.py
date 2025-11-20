@@ -115,6 +115,12 @@ def main():
         action="store_true",
         help="Run conformance testing after transformation",
     )
+    parser.add_argument(
+        "--sushi",
+        "-s",
+        action="store_true",
+        help="Use to run sushi beforehand.",
+    )
     args = parser.parse_args()
 
     script_dir = Path(__file__).parent.absolute()
@@ -124,13 +130,14 @@ def main():
     structure_defs = get_structure_definitions()
 
     # Generate Structure Definitions + CodeSystems
-    print("Running sushi build")
-    stdout, stderr = run_command("sushi build", cwd=script_dir / "sushi")
-    print("SUSHI output:")
-    print(stdout)
-    if stderr:
-        print("SUSHI errors:")
-        print(stderr)
+    if(not args.sushi):
+        print("Running sushi build")
+        stdout, stderr = run_command("sushi build", cwd=script_dir / "sushi")
+        print("SUSHI output:")
+        print(stdout)
+        if stderr:
+            print("SUSHI errors:")
+            print(stderr)
 
     sushi_resources = get_sushi_resources()
     print(f"Using SUSHI resources: {sushi_resources}")
