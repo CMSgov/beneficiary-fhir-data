@@ -1214,15 +1214,13 @@ class IdrClaimItem(IdrBaseModel):
                         AND {val}.clm_num_sk = {clm}.clm_num_sk 
                         AND {val}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
                 ),
-                claim_related_conditions AS {not_materialized} (
+                claim_related_conditions AS (
                     SELECT
                         {clm}.clm_uniq_id,
                         {rlt_cond}.*,
                         ROW_NUMBER() OVER (
                             PARTITION BY {clm}.clm_uniq_id 
-                            ORDER BY {clm}.clm_uniq_id,
-                                {rlt_cond}.clm_rlt_cond_sgntr_sk,
-                                {rlt_cond}.clm_rlt_cond_cd,
+                            ORDER BY {rlt_cond}.clm_rlt_cond_cd,
                                 {rlt_cond}.clm_rlt_cond_sgntr_sqnc_num
                         ) AS bfd_row_id
                     FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_rlt_cond_sgntr_mbr {rlt_cond}
