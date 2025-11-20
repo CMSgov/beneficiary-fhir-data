@@ -441,7 +441,7 @@
 - inputPath: ExplanationOfBenefit-Base.family_name_atndg
   appliesTo:
     - Inpatient
-- inputPath: ExplanationOfBenefit-Base.CLM_ATNDG_PRVDR_NPI_NUM
+- inputPath: ExplanationOfBenefit-Base.PRVDR_ATNDG_PRVDR_NPI_NUM
   appliesTo:
     - Inpatient
     - Outpatient
@@ -456,12 +456,12 @@
   cclfMapping:
     - CCLF1.ATNDG_PRVDR_NPI_NUM
   sourceView: V2_MDCR_CLM
-  sourceColumn: CLM_ATNDG_PRVDR_NPI_NUM
+  sourceColumn: PRVDR_ATNDG_PRVDR_NPI_NUM
   fhirPath: ExplanationOfBenefit.contained.where(id = %root.careTeam.where(role.coding.code='attending').provider.reference.substring(1)).identifier.where(system='http://hl7.org/fhir/sid/us-npi').value
 - inputPath: ExplanationOfBenefit-Base.family_name_oprtg
   appliesTo:
     - Inpatient
-- inputPath: ExplanationOfBenefit-Base.CLM_OPRTG_PRVDR_NPI_NUM
+- inputPath: ExplanationOfBenefit-Base.PRVDR_OPRTG_PRVDR_NPI_NUM
   appliesTo:
     - Inpatient
     - Outpatient
@@ -476,7 +476,7 @@
   cclfMapping:
     - CCLF1.OPRTG_PRVDR_NPI_NUM
   sourceView: V2_MDCR_CLM
-  sourceColumn: CLM_OPRTG_PRVDR_NPI_NUM
+  sourceColumn: PRVDR_OPRTG_PRVDR_NPI_NUM
   fhirPath: ExplanationOfBenefit.contained.where(id = %root.careTeam.where(role.coding.code='operating').provider.reference.substring(1)).identifier.where(system='http://hl7.org/fhir/sid/us-npi').value
 - inputPath: DiagnosisComponent.CLM_VAL_SQNC_NUM
   appliesTo:
@@ -2120,7 +2120,7 @@
   sourceView: V2_MDCR_CLM_INSTNL
   sourceColumn: CLM_MDCR_INSTNL_PRMRY_PYR_AMT
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_MDCR_INSTNL_PRMRY_PYR_AMT').exists()).amount.value
-- inputPath: ExplanationOfBenefit-Base.CLM_RNDRG_PRVDR_NPI_NUM
+- inputPath: ExplanationOfBenefit-Base.PRVDR_RNDRNG_PRVDR_NPI_NUM
   appliesTo:
     - Inpatient
     - HHA
@@ -2129,9 +2129,9 @@
     - NCH
     - FISS
   sourceView: V2_MDCR_CLM
-  sourceColumn: CLM_RNDRG_PRVDR_NPI_NUM
+  sourceColumn: PRVDR_RNDRNG_PRVDR_NPI_NUM
   fhirPath: ExplanationOfBenefit.contained.where(id = %root.careTeam.where(role.coding.code='rendering').provider.reference.substring(1)).identifier.where(system='http://hl7.org/fhir/sid/us-npi').value
-- inputPath: ExplanationOfBenefit-Base.CLM_RNDRG_PRVDR_NPI_NUM
+- inputPath: LineItemComponent.PRVDR_RNDRNG_PRVDR_NPI_NUM
   appliesTo:
     - Carrier
   sources:
@@ -2145,7 +2145,7 @@
     - CCLF5.RNDRG_PRVDR_NPI_NUM
     - CCLF5.CLM_RNDRG_PRVDR_NPI_NUM
   sourceView: V2_MDCR_CLM_LINE
-  sourceColumn: CLM_RNDRG_PRVDR_NPI_NUM
+  sourceColumn: PRVDR_RNDRNG_PRVDR_NPI_NUM
   fhirPath: ExplanationOfBenefit.contained.where(id = %root.careTeam.where(role.coding.code='rendering').provider.reference.substring(1)).identifier.where(system='http://hl7.org/fhir/sid/us-npi').value
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_INSTNL_PRFNL_AMT
   appliesTo:

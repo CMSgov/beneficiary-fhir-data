@@ -74,6 +74,7 @@ def save_output_files(
         "PRVDR_RFRG_PRVDR_NPI_NUM",
         "PRVDR_BLG_PRVDR_NPI_NUM",
         "CLM_ATNDG_PRVDR_NPI_NUM",
+        "PRVDR_ATNDG_PRVDR_NPI_NUM",
         "CLM_OPRTG_PRVDR_NPI_NUM",
         "CLM_OTHR_PRVDR_NPI_NUM",
         "CLM_RNDRG_PRVDR_NPI_NUM",
@@ -672,9 +673,13 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
     if (clm_type_cd < 65 and clm_type_cd >= 10) or clm_type_cd in fiss_clm_type_cds:
         claim["CLM"]["PRVDR_BLG_PRVDR_NPI_NUM"] = random.choice(type_2_npis)
         claim["CLM"]["CLM_ATNDG_PRVDR_NPI_NUM"] = random.choice(type_1_npis)
+        claim["CLM"]["PRVDR_ATNDG_PRVDR_NPI_NUM"] = claim["CLM"]["CLM_ATNDG_PRVDR_NPI_NUM"]
         claim["CLM"]["CLM_OPRTG_PRVDR_NPI_NUM"] = random.choice(type_1_npis)
+        claim["CLM"]["PRVDR_OPRTG_PRVDR_NPI_NUM"] = claim["CLM"]["CLM_OPRTG_PRVDR_NPI_NUM"]
         claim["CLM"]["CLM_OTHR_PRVDR_NPI_NUM"] = random.choice(type_1_npis)
+        claim["CLM"]["PRVDR_OTHR_PRVDR_NPI_NUM"] = claim["CLM"]["CLM_OTHR_PRVDR_NPI_NUM"]
         claim["CLM"]["CLM_RNDRG_PRVDR_NPI_NUM"] = random.choice(type_1_npis)
+        claim["CLM"]["PRVDR_RNDRG_PRVDR_NPI_NUM"] = claim["CLM"]["CLM_RNDRG_PRVDR_NPI_NUM"]
         claim["CLM"]["CLM_BLG_PRVDR_OSCAR_NUM"] = random.choice(avail_oscar_codes_institutional)
         claim["CLM"]["CLM_MDCR_COINSRNC_AMT"] = round(random.uniform(0, 25), 2)
         claim["CLM"]["CLM_BLG_PRVDR_ZIP5_CD"] = random.choice(["75205", "77550", "77005"])
@@ -687,6 +692,7 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
         claim["CLM"]["CLM_RLT_COND_SGNTR_SK"] = "0"
         if random.choice([0, 1]):
             claim["CLM"]["CLM_BLG_PRVDR_NPI_NUM"] = random.choice(type_2_npis)
+            claim["CLM"]["PRVDR_BLG_PRVDR_NPI_NUM"] = claim["CLM"]["CLM_BLG_PRVDR_NPI_NUM"]
 
     # generate claim header financial elements here
     claim["CLM"]["CLM_SBMT_CHRG_AMT"] = round(random.uniform(1, 1000000), 2)
@@ -997,7 +1003,8 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
         if clm_type_cd >= 71 and clm_type_cd <= 72:
             claim_line["CLM_RNDRG_PRVDR_TAX_NUM"] = random.choice(["1928347912", "912834729"])
             claim_line["CLM_RNDRG_PRVDR_PIN_NUM"] = random.choice(["29364819", "19238747"])
-            claim_line["CLM_RNDRG_PRVDR_NPI_NUM"] = random.choice(type_1_npis)
+            claim_line["PRVDR_RNDRNG_PRVDR_NPI_NUM"] = random.choice(type_1_npis)
+            claim_line["CLM_RNDRG_PRVDR_NPI_NUM"] = claim_line["PRVDR_RNDRNG_PRVDR_NPI_NUM"]
             if random.choice([0, 10]) == 7:
                 claim_line["CLM_LINE_ANSTHSA_UNIT_CNT"] = random.uniform(0, 10)
             if random.choice([0, 15]) == 7:
@@ -1009,7 +1016,8 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
                 generator.code_systems["CLM_SUPLR_TYPE_CD"]
             )
             claim_line_prfnl["CLM_LINE_PRFNL_DME_PRICE_AMT"] = round(random.uniform(0, 10000), 2)
-            claim_line["CLM_RNDRG_PRVDR_NPI_NUM"] = random.choice(type_1_npis)
+            claim_line["PRVDR_RNDRNG_PRVDR_NPI_NUM"] = random.choice(type_1_npis)
+            claim_line["CLM_RNDRG_PRVDR_NPI_NUM"] = claim_line["PRVDR_RNDRNG_PRVDR_NPI_NUM"]
 
         add_meta_timestamps(claim_line_prfnl, claim["CLM"], max_date)
 

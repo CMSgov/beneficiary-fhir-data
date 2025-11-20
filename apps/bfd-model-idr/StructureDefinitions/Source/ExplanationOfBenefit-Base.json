@@ -413,8 +413,8 @@
                 ]
             },
             {
-                "id": "ExplanationOfBenefit-Base.CLM_ATNDG_PRVDR_NPI_NUM",
-                "path": "ExplanationOfBenefit-Base.CLM_ATNDG_PRVDR_NPI_NUM",
+                "id": "ExplanationOfBenefit-Base.PRVDR_ATNDG_PRVDR_NPI_NUM",
+                "path": "ExplanationOfBenefit-Base.PRVDR_ATNDG_PRVDR_NPI_NUM",
                 "label": "Attending Physician NPI",
                 "min": 0,
                 "max": "1",
@@ -437,8 +437,8 @@
                 ]
             },
             {
-                "id": "ExplanationOfBenefit-Base.CLM_OPRTG_PRVDR_NPI_NUM",
-                "path": "ExplanationOfBenefit-Base.CLM_OPRTG_PRVDR_NPI_NUM",
+                "id": "ExplanationOfBenefit-Base.PRVDR_OPRTG_PRVDR_NPI_NUM",
+                "path": "ExplanationOfBenefit-Base.PRVDR_OPRTG_PRVDR_NPI_NUM",
                 "label": "Operating Physician NPI",
                 "min": 0,
                 "max": "1",
@@ -795,7 +795,22 @@
                         "code": "string"
                     }
                 ]
-            }
+            },
+            {
+                "id": "ExplanationOfBenefit-Base.providerList",
+                "path": "ExplanationOfBenefit-Base.providerList",
+                "label": "Provider List",
+                "min": 0,
+                "max": "*",
+                "type": [
+                    {
+                        "code": "Provider",
+                        "targetProfile": [
+                            "http://hl7.org/fhir/StructureDefinition/Provider"
+                        ]
+                    }
+                ]
+            },
         ]
     }
 }

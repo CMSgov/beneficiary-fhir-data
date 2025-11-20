@@ -154,8 +154,16 @@ def main():
     referenced_maps = get_referenced_maps(compiled_map_path)
     map_imports = " ".join([f"-ig {map_file}" for map_file in referenced_maps])
 
+    #Augment source file if needed. Currently just for providers.
+    (input_file,) = {args.input}
+    if 'EOB' in input_file:
+        print("Augmenting input file")
+        augmentation_cmd = f"python augment_sample_resources.py {args.input}"
+        stdout, stderr = run_command(augmentation_cmd, cwd=script_dir)
+        input_file = 'out/temporary-sample.json'
+
     print("Executing Transform")
-    execute_cmd = f"java -jar validator_cli.jar {args.input} -output {args.output} -transform \
+    execute_cmd = f"java -jar validator_cli.jar {input_file} -output {args.output} -transform \
         {args.resource} -version 4.0.1 -ig {compiled_map_path} {structure_defs} \
             -ig hl7.fhir.us.carin-bb#2.1.0 {map_imports} {sushi_resources}"
     stdout, stderr = run_command(execute_cmd, cwd=script_dir)

@@ -1,0 +1,103 @@
+import pandas as pd
+import json
+import sys
+prvdr_info_file = 'sample-data/PRVDR_HSTRY_POC.csv'
+df = pd.read_csv(prvdr_info_file, dtype={"PRVDR_SK": str})
+df.head()
+
+cur_sample = 'sample-data/EOB-Carrier-Sample.json'
+
+cur_sample = sys.argv[1]
+print(cur_sample)
+cur_sample_data = {}
+with open(cur_sample, 'r') as file:
+    cur_sample_data = json.load(file)
+
+header_columns = {"PRVDR_BLG_PRVDR_NPI_NUM":"","PRVDR_RFRG_PRVDR_NPI_NUM":"referring","PRVDR_OTHR_PRVDR_NPI_NUM":"otheroperating","PRVDR_ATNDG_PRVDR_NPI_NUM":"attending","PRVDR_OPRTG_PRVDR_NPI_NUM":"operating","PRVDR_RNDRNG_PRVDR_NPI_NUM":"rendering","PRVDR_PRSCRBG_PRVDR_NPI_NUM":"prescribing"}
+line_columns = {"PRVDR_RNDRNG_PRVDR_NPI_NUM":"rendering","CLM_LINE_ORDRG_PRVDR_NPI_NUM":"","CLM_FAC_PRVDR_NPI_NUM":""}
+npis_used = []
+cur_sample_data['providerList'] = []
+cur_careteam_sequence = 1
+
+populate_fields_except_na = ['PRVDR_LGL_NAME','PRVDR_OSCAR_NUM','PRVDR_LAST_NAME','PRVDR_1ST_NAME','PRVDR_MDL_NAME','PRVDR_TYPE_CD']
+provider_list = []
+
+#There may be an opportunity to consolidate even the duplicate NPIs into a single careTeam reference, but we should wait to get feedback on this
+#The reason being: it's possible to lose context on rendering vs ordering 
+for column in header_columns:
+    if(column not in cur_sample_data):
+        continue
+    provider_object = {}
+    provider_object['PRVDR_SK'] = cur_sample_data[column]
+    if(provider_object['PRVDR_SK'] in npis_used):
+        provider_object['isDuplicate']=True
+    else:
+        npis_used.append(provider_object['PRVDR_SK'])
+    prvdr_hstry_for_npi = json.loads(df[df["PRVDR_SK"] == str(provider_object['PRVDR_SK'])].iloc[0].to_json())
+    provider_object['NPI_TYPE'] = '2' if prvdr_hstry_for_npi['PRVDR_LGL_NAME'] is not None else '1'
+
+    for field in populate_fields_except_na:
+        if(prvdr_hstry_for_npi[field] is not None):
+            provider_object[field] = prvdr_hstry_for_npi[field]
+
+    if(prvdr_hstry_for_npi['PRVDR_TXNMY_CMPST_CD'] is not None ):
+        taxonomy_codes = [prvdr_hstry_for_npi['PRVDR_TXNMY_CMPST_CD'][i:i+10] for i in range(0, len(prvdr_hstry_for_npi['PRVDR_TXNMY_CMPST_CD']), 10)]
+        provider_object['taxonomyCodes'] = taxonomy_codes
+        
+    #assign care team type + sequence for header-level info
+    
+    if(len(header_columns[column]) > 0):
+        provider_object['careTeamType'] = header_columns[column]
+        provider_object['careTeamSequenceNumber'] = cur_careteam_sequence
+        cur_careteam_sequence += 1
+    
+        for idx in range(0,len(cur_sample_data['lineItemComponents'])):
+            #If there's a column that matches the header level NPI at the line level, then we want to populate the sequence.
+            #Because there can be multiple rendering providers on line items, we need to ensure those NPIs match. 
+            if(column in cur_sample_data['lineItemComponents'][idx] and cur_sample_data['lineItemComponents'][idx][column] == cur_sample_data[column] ):
+                if('careTeamSequences' in cur_sample_data['lineItemComponents'][idx]):
+                    cur_sample_data['lineItemComponents'][idx]['careTeamSequence'].append(provider_object['careTeamSequenceNumber'])
+                else:
+                    cur_sample_data['lineItemComponents'][idx]['careTeamSequence'] = [provider_object['careTeamSequenceNumber']]
+    
+    provider_list.append(provider_object)
+
+
+#There can be line item NPIs that are not present at header level, but need to be added to the CareTeam. This populates those.
+for line in range(0,len(cur_sample_data['lineItemComponents'])):
+    for line_col in line_columns:
+        if (line_col in cur_sample_data['lineItemComponents'][line] and cur_sample_data['lineItemComponents'][line][line_col] not in npis_used):
+            npi = cur_sample_data['lineItemComponents'][line][line_col]
+            print(npi)
+            provider_object = {}
+            provider_object['PRVDR_SK'] = cur_sample_data['lineItemComponents'][line][line_col]
+            npis_used.append(provider_object['PRVDR_SK'])
+            prvdr_hstry_for_npi = json.loads(df[df["PRVDR_SK"] == str(provider_object['PRVDR_SK'])].iloc[0].to_json())
+            provider_object['NPI_TYPE'] = '2' if prvdr_hstry_for_npi['PRVDR_LGL_NAME'] is not None else '1'
+            for field in populate_fields_except_na:
+                if(prvdr_hstry_for_npi[field] is not None):
+                    provider_object[field] = prvdr_hstry_for_npi[field]
+            if(prvdr_hstry_for_npi['PRVDR_TXNMY_CMPST_CD'] is not None):
+                taxonomy_codes = [prvdr_hstry_for_npi['PRVDR_TXNMY_CMPST_CD'][i:i+10] for i in range(0, len(prvdr_hstry_for_npi['PRVDR_TXNMY_CMPST_CD']), 10)]
+                provider_object['taxonomyCodes'] = taxonomy_codes
+            if(len(line_columns[line_col]) > 0):
+                provider_object['careTeamType'] = line_columns[line_col]
+                provider_object['careTeamSequenceNumber'] = cur_careteam_sequence
+                cur_careteam_sequence += 1
+            cur_sample_data['lineItemComponents'][line]['careTeamSequence'] = [provider_object['careTeamSequenceNumber']]
+            provider_list.append(provider_object)
+                
+        elif(line_col in cur_sample_data['lineItemComponents'][line] and 'careTeamSequence' not in cur_sample_data['lineItemComponents'][line] and cur_sample_data['lineItemComponents'][line][line_col] in npis_used ):
+            npi = cur_sample_data['lineItemComponents'][line][line_col]
+            careTeamSequence = [x['careTeamSequenceNumber'] for x in provider_list if 'careTeamSequenceNumber' in x and x['PRVDR_SK'] == npi and 'careTeamType' in x and x['careTeamType'] == line_columns[line_col]][0]
+            cur_sample_data['lineItemComponents'][line]['careTeamSequence'] = [careTeamSequence]
+            print(cur_sample_data['lineItemComponents'][line])
+print(provider_list)
+cur_sample_data['providerList'] = provider_list
+
+filename = "out/temporary-sample.json"
+
+with open(filename, 'w') as f:
+    json.dump(cur_sample_data, f, indent=4)
+
+print("Temporary augmented file created")
