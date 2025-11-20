@@ -1165,8 +1165,6 @@ class IdrClaimItem(IdrBaseModel):
                     WHERE 
                         {claim_type_clause(start_time, CLAIM_TYPE_CODES)} AND 
                         {clm}.clm_idr_ld_dt >= '{get_min_transaction_date()}'
-                        AND {clm}.clm_rlt_cond_sgntr_sk <> 0
-                        AND {clm}.clm_rlt_cond_sgntr_sk <> 1
                 ),
                 claim_lines AS {not_materialized} (
                     SELECT
@@ -1230,7 +1228,9 @@ class IdrClaimItem(IdrBaseModel):
                     FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_rlt_cond_sgntr_mbr {rlt_cond}
                     JOIN claims {clm}
                         ON {rlt_cond}.clm_rlt_cond_sgntr_sk = {clm}.clm_rlt_cond_sgntr_sk
-                        
+                    WHERE 
+                        {clm}.clm_rlt_cond_sgntr_sk <> 0
+                        AND {clm}.clm_rlt_cond_sgntr_sk <> 1
                 ),
                 claim_groups AS (
                     SELECT clm_uniq_id, bfd_row_id
