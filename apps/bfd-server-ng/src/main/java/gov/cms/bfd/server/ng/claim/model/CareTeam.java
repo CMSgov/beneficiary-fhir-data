@@ -12,7 +12,6 @@ class CareTeam {
   @Column(name = "clm_atndg_prvdr_npi_num")
   private Optional<String> attendingProviderNpiNumber;
 
-  // TODO: last names should be sourced from NPPES in the future
   @Column(name = "clm_atndg_prvdr_last_name")
   private Optional<String> attendingProviderLastName;
 
@@ -37,33 +36,52 @@ class CareTeam {
   @Column(name = "prvdr_prscrbng_prvdr_npi_num")
   private Optional<String> prescribingProviderNpiNumber;
 
-  /** TODO: Temp string value for provider last name. To be implemented in BFD-4286 */
-  public static final String PROVIDER_LAST_NAME = "LAST NAME HERE";
+  public static final String DEFAULT_PRESCRIBER_PROVIDER_LAST_NAME = "LAST NAME HERE";
 
-  List<CareTeamType.CareTeamComponents> toFhir() {
+  List<CareTeamType.CareTeamComponents> toFhir(
+      Optional<ProviderHistory> attending,
+      Optional<ProviderHistory> operating,
+      Optional<ProviderHistory> other,
+      Optional<ProviderHistory> rendering,
+      Optional<ProviderHistory> prescribing) {
     var sequenceGenerator = new SequenceGenerator();
     var components =
         Stream.of(
             attendingProviderNpiNumber.map(
                 npi ->
                     CareTeamType.ATTENDING.toFhir(
-                        sequenceGenerator, npi, attendingProviderLastName)),
+                        sequenceGenerator,
+                        npi,
+                        resolveLastName(attendingProviderLastName, attending))),
             operatingProviderNpiNumber.map(
                 npi ->
                     CareTeamType.OPERATING.toFhir(
-                        sequenceGenerator, npi, operatingProviderLastName)),
+                        sequenceGenerator,
+                        npi,
+                        resolveLastName(operatingProviderLastName, operating))),
             otherProviderNpiNumber.map(
                 npi ->
-                    CareTeamType.RENDERING.toFhir(sequenceGenerator, npi, otherProviderLastName)),
+                    CareTeamType.OTHER.toFhir(
+                        sequenceGenerator, npi, resolveLastName(otherProviderLastName, other))),
             renderingProviderNpiNumber.map(
                 npi ->
                     CareTeamType.RENDERING.toFhir(
-                        sequenceGenerator, npi, renderingProviderLastName)),
+                        sequenceGenerator,
+                        npi,
+                        resolveLastName(renderingProviderLastName, rendering))),
             prescribingProviderNpiNumber.map(
                 npi ->
                     CareTeamType.PRESCRIBING.toFhir(
-                        sequenceGenerator, npi, Optional.of(PROVIDER_LAST_NAME))));
+                        sequenceGenerator,
+                        npi,
+                        resolveLastName(
+                            Optional.of(DEFAULT_PRESCRIBER_PROVIDER_LAST_NAME), prescribing))));
 
     return components.flatMap(Optional::stream).toList();
+  }
+
+  private Optional<String> resolveLastName(
+      Optional<String> legacyLastName, Optional<ProviderHistory> providerHistory) {
+    return providerHistory.flatMap(ProviderHistory::getProviderLastName).or(() -> legacyLastName);
   }
 }

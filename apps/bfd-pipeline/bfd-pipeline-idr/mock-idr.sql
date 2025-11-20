@@ -570,3 +570,19 @@ CREATE INDEX
 	ON cms_vdm_view_mdcr_prd.v2_mdcr_clm_prod (geo_bene_sk, clm_type_cd, clm_num_sk, clm_dt_sgntr_sk);
 CREATE INDEX
 	ON cms_vdm_view_mdcr_prd.v2_mdcr_clm_val (geo_bene_sk, clm_type_cd, clm_num_sk, clm_dt_sgntr_sk);
+
+CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_prvdr_hstry (
+    prvdr_npi_num VARCHAR(10) PRIMARY KEY,
+    prvdr_sk BIGINT NOT NULL,
+    prvdr_hstry_efctv_dt DATE NOT NULL,
+    prvdr_mdl_name VARCHAR(25),
+    prvdr_type_cd VARCHAR(2) NOT NULL,
+    prvdr_txnmy_cmpst_cd VARCHAR(150),
+    prvdr_oscar_num VARCHAR(13) NOT NULL,
+    prvdr_1st_name VARCHAR(35),
+    prvdr_name VARCHAR(70),
+    prvdr_hstry_obslt_dt DATE NOT NULL,
+    prvdr_lgl_name VARCHAR(100),
+    prvdr_emplr_id_num VARCHAR(10),
+    prvdr_last_name VARCHAR(35)
+);

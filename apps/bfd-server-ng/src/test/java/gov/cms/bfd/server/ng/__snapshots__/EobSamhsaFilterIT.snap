@@ -358,8 +358,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
         },
         "role" : {
           "coding" : [ {
-            "code" : "rendering",
-            "display" : "Rendering provider",
+            "code" : "otheroperating",
+            "display" : "Other Operating",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
           } ]
         },
@@ -3072,8 +3072,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
         },
         "role" : {
           "coding" : [ {
-            "code" : "rendering",
-            "display" : "Rendering provider",
+            "code" : "otheroperating",
+            "display" : "Other Operating",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
           } ]
         },
@@ -3136,6 +3136,9 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
         "meta" : {
           "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
         },
+        "name" : [ {
+          "family" : "Rogers"
+        } ],
         "resourceType" : "Practitioner"
       }, {
         "id" : "careteam-provider-2",
@@ -3168,6 +3171,9 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
         "meta" : {
           "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
         },
+        "name" : [ {
+          "family" : "Rogers"
+        } ],
         "resourceType" : "Practitioner"
       }, {
         "id" : "careteam-provider-4",
@@ -6181,8 +6187,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         },
         "role" : {
           "coding" : [ {
-            "code" : "rendering",
-            "display" : "Rendering provider",
+            "code" : "otheroperating",
+            "display" : "Other Operating",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
           } ]
         },
@@ -8071,8 +8077,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         },
         "role" : {
           "coding" : [ {
-            "code" : "rendering",
-            "display" : "Rendering provider",
+            "code" : "otheroperating",
+            "display" : "Other Operating",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
           } ]
         },
@@ -12224,8 +12230,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
         },
         "role" : {
           "coding" : [ {
-            "code" : "rendering",
-            "display" : "Rendering provider",
+            "code" : "otheroperating",
+            "display" : "Other Operating",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
           } ]
         },
@@ -12288,6 +12294,9 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
         "meta" : {
           "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
         },
+        "name" : [ {
+          "family" : "Rogers"
+        } ],
         "resourceType" : "Practitioner"
       }, {
         "id" : "careteam-provider-2",
@@ -12320,6 +12329,9 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
         "meta" : {
           "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
         },
+        "name" : [ {
+          "family" : "Rogers"
+        } ],
         "resourceType" : "Practitioner"
       }, {
         "id" : "careteam-provider-4",
@@ -15333,8 +15345,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         },
         "role" : {
           "coding" : [ {
-            "code" : "rendering",
-            "display" : "Rendering provider",
+            "code" : "otheroperating",
+            "display" : "Other Operating",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
           } ]
         },
@@ -17223,8 +17235,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         },
         "role" : {
           "coding" : [ {
-            "code" : "rendering",
-            "display" : "Rendering provider",
+            "code" : "otheroperating",
+            "display" : "Other Operating",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
           } ]
         },
