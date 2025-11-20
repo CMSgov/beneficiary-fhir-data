@@ -106,8 +106,8 @@ public class ProviderHistory {
     practitioner.setId(PROVIDER_PRACTITIONER);
     practitioner.setMeta(
         new Meta()
-            .addProfile(SystemUrls.PROFILE_CARIN_BB_ORGANIZATION_2_1_0)
-            .addProfile(SystemUrls.PROFILE_US_CORE_ORGANIZATION_6_1_0));
+            .addProfile(SystemUrls.PROFILE_CARIN_BB_PRACTITIONER_2_1_0)
+            .addProfile(SystemUrls.PROFILE_US_CORE_PRACTITIONER_6_1_0));
 
     practitioner.addIdentifier(
         new Identifier()

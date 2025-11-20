@@ -38,7 +38,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
       "value" : "1548226988"
     } ],
     "meta" : {
-      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|6.1.0" ]
+      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
     },
     "name" : [ {
       "family" : "Garcia",
