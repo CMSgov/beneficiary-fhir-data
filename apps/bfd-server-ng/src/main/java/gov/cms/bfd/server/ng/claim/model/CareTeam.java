@@ -49,7 +49,8 @@ class CareTeam {
       Optional<ProviderHistory> operating,
       Optional<ProviderHistory> other,
       Optional<ProviderHistory> rendering,
-      Optional<ProviderHistory> prescribing) {
+      Optional<ProviderHistory> prescribing,
+      Optional<ProviderHistory> referring) {
     var sequenceGenerator = new SequenceGenerator();
     var components =
         Stream.of(
@@ -58,37 +59,44 @@ class CareTeam {
                     CareTeamType.ATTENDING.toFhir(
                         sequenceGenerator,
                         npi,
-                        resolveLastName(attendingProviderLastName, attending))),
+                        resolveLastName(attendingProviderLastName, attending),
+                        Optional.empty())),
             operatingProviderNpiNumber.map(
                 npi ->
                     CareTeamType.OPERATING.toFhir(
                         sequenceGenerator,
                         npi,
-                        resolveLastName(operatingProviderLastName, operating))),
+                        resolveLastName(operatingProviderLastName, operating),
+                        Optional.empty())),
             otherProviderNpiNumber.map(
                 npi ->
                     CareTeamType.OTHER.toFhir(
-                        sequenceGenerator, npi, resolveLastName(otherProviderLastName, other))),
+                        sequenceGenerator,
+                        npi,
+                        resolveLastName(otherProviderLastName, other),
+                        Optional.empty())),
             renderingProviderNpiNumber.map(
                 npi ->
                     CareTeamType.RENDERING.toFhir(
                         sequenceGenerator,
                         npi,
-                        resolveLastName(renderingProviderLastName, rendering))),
+                        resolveLastName(renderingProviderLastName, rendering),
+                        Optional.empty())),
             prescribingProviderNpiNumber.map(
                 npi ->
                     CareTeamType.PRESCRIBING.toFhir(
                         sequenceGenerator,
                         npi,
                         resolveLastName(
-                            Optional.of(DEFAULT_PRESCRIBER_PROVIDER_LAST_NAME), prescribing))),
-
+                            Optional.of(DEFAULT_PRESCRIBER_PROVIDER_LAST_NAME), prescribing),
+                        Optional.empty())),
             refferingProviderNpiNumber.map(
                 npi ->
                     CareTeamType.REFERRING.toFhir(
                         sequenceGenerator,
                         npi,
-                        renderingProviderLastName,
+                        resolveLastName(
+                            Optional.of(DEFAULT_PRESCRIBER_PROVIDER_LAST_NAME), referring),
                         refferingProviderPinNumber)));
 
     return components.flatMap(Optional::stream).toList();

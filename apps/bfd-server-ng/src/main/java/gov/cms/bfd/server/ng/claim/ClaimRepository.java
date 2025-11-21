@@ -40,6 +40,8 @@ public class ClaimRepository {
         LEFT JOIN FETCH c.otherProviderHistory otp
         LEFT JOIN FETCH c.renderingProviderHistory rp
         LEFT JOIN FETCH c.prescribingProviderHistory pp
+        LEFT JOIN FETCH c.billingProviderHistory bp
+        LEFT JOIN FETCH c.referringProviderHistory rph
       """;
 
   /**

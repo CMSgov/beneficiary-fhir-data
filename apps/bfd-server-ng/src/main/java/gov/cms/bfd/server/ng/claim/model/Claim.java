@@ -52,12 +52,6 @@ public class Claim {
   @Column(name = "clm_efctv_dt")
   private LocalDate claimEffectiveDate;
 
-  @Column(name = "clm_nrln_ric_cd")
-  private Optional<ClaimNearLineRecordTypeCode> claimNearLineRecordTypeCode;
-
-  @Column(name = "clm_ric_cd")
-  private Optional<ClaimRecordTypeCode> claimRecordTypeCode;
-
   @Column(name = "clm_srvc_prvdr_gnrc_id_num")
   private String serviceProviderNpiNumber;
 
@@ -160,6 +154,19 @@ public class Claim {
   @Nullable
   @ManyToOne
   @JoinColumn(
+      name = "prvdr_blg_prvdr_npi_num",
+      insertable = false,
+      updatable = false,
+      referencedColumnName = "prvdr_npi_num")
+  private ProviderHistory billingProviderHistory;
+
+  private Optional<ProviderHistory> getBillingProviderHistory() {
+    return Optional.ofNullable(billingProviderHistory);
+  }
+
+  @Nullable
+  @ManyToOne
+  @JoinColumn(
       name = "clm_othr_prvdr_npi_num",
       insertable = false,
       updatable = false,
@@ -194,6 +201,19 @@ public class Claim {
 
   private Optional<ProviderHistory> getPrescribingProviderHistory() {
     return Optional.ofNullable(prescribingProviderHistory);
+  }
+
+  @Nullable
+  @ManyToOne
+  @JoinColumn(
+      name = "prvdr_rfrg_prvdr_npi_num",
+      insertable = false,
+      updatable = false,
+      referencedColumnName = "prvdr_npi_num")
+  private ProviderHistory referringProviderHistory;
+
+  private Optional<ProviderHistory> getReferringProviderHistory() {
+    return Optional.ofNullable(referringProviderHistory);
   }
 
   Optional<ClaimInstitutional> getClaimInstitutional() {
@@ -290,13 +310,14 @@ public class Claim {
         });
 
     // Passing NPI type = 1 for now until NPI type is added
-    billingProvider
-        .toFhir(claimTypeCode, 1)
+    getBillingProviderHistory()
+        .flatMap(ph -> billingProvider.toFhir(claimTypeCode, ph))
         .ifPresent(
             p -> {
               eob.addContained(p);
               eob.setProvider(new Reference(p));
             });
+
     var providerContext = getProviderHistory();
     if (providerContext.isPresent()) {
       var provider = providerContext.get();
@@ -365,7 +386,8 @@ public class Claim {
             getOperatingProviderHistory(),
             getOtherProviderHistory(),
             getRenderingProviderHistory(),
-            getPrescribingProviderHistory())
+            getPrescribingProviderHistory(),
+            getReferringProviderHistory())
         .forEach(
             c -> {
               eob.addCareTeam(c.careTeam());

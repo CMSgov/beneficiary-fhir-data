@@ -1,20 +1,13 @@
 package gov.cms.bfd.server.ng.claim.model;
 
-import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Optional;
 import lombok.Getter;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.HumanName;
-import org.hl7.fhir.r4.model.Identifier;
-import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Practitioner;
 
@@ -102,30 +95,9 @@ public class ProviderHistory {
       return Optional.empty();
     }
 
-    var practitioner = new Practitioner();
-    practitioner.setId(PROVIDER_PRACTITIONER);
-    practitioner.setMeta(
-        new Meta()
-            .addProfile(SystemUrls.PROFILE_CARIN_BB_PRACTITIONER_2_1_0)
-            .addProfile(SystemUrls.PROFILE_US_CORE_PRACTITIONER_6_1_0));
-
-    practitioner.addIdentifier(
-        new Identifier()
-            .setSystem(SystemUrls.NPI)
-            .setValue(serviceProviderNpiNumber)
-            .setType(
-                new CodeableConcept()
-                    .addCoding(
-                        new Coding()
-                            .setSystem(SystemUrls.HL7_IDENTIFIER)
-                            .setCode("NPI")
-                            .setDisplay("National provider identifier"))));
-    var name = new HumanName();
-    providerFirstName.ifPresent(name::addGiven);
-    providerLastName.ifPresent(name::setFamily);
-    name.setUse(HumanName.NameUse.OFFICIAL);
-    practitioner.setName(List.of(name));
-
+    var practitioner =
+        ProviderFhirHelper.createPractitioner(
+            PROVIDER_PRACTITIONER, serviceProviderNpiNumber, providerFirstName, providerLastName);
     return Optional.of(practitioner);
   }
 
@@ -134,23 +106,9 @@ public class ProviderHistory {
     if (!claimTypeCode.isBetween(1, 4)) {
       return Optional.empty();
     }
-
-    var organization = OrganizationFactory.toFhir();
-    organization.setId(PROVIDER_ORG);
-    organization.addIdentifier(
-        new Identifier()
-            .setSystem(SystemUrls.NPI)
-            .setValue(serviceProviderNpiNumber)
-            .setType(
-                new CodeableConcept()
-                    .addCoding(
-                        new Coding()
-                            .setSystem(SystemUrls.HL7_IDENTIFIER)
-                            .setCode("NPI")
-                            .setDisplay("National provider identifier"))));
-
-    providerLegalName.ifPresent(organization::setName);
-
+    var organization =
+        ProviderFhirHelper.createOrganizationWithNpi(
+            PROVIDER_ORG, serviceProviderNpiNumber, providerLegalName);
     return Optional.of(organization);
   }
 }
