@@ -1,4 +1,6 @@
-from load_partition import LoadPartition, PartitionType
+from datetime import timedelta
+
+from load_partition import LoadPartitionGroup, PartitionType
 
 DEFAULT_MAX_DATE = "9999-12-31"
 DEFAULT_MIN_DATE = "0001-01-01"
@@ -8,21 +10,24 @@ DEATH_DATE_CUTOFF_YEARS = 4
 
 
 PART_D_PARTITIONS = [
-    LoadPartition("part_d_original", [1], PartitionType.PART_D),
-    LoadPartition("part_d_adjustment", [2, 3, 4], PartitionType.PART_D),
+    LoadPartitionGroup("part_d_original", [1], PartitionType.PART_D, timedelta(days=365)),
+    LoadPartitionGroup("part_d_adjustment", [2, 3, 4], PartitionType.PART_D, timedelta(days=365)),
 ]
 
 INSTITUTIONAL_ADJUDICATED_PARTITIONS = [
     # Outpatient
-    LoadPartition("outpatient", [40], PartitionType.INSTITUTIONAL),
+    LoadPartitionGroup("outpatient", [40], PartitionType.INSTITUTIONAL, timedelta(days=365)),
     # HHA, SNF, Hospice, Inpatient, MA
-    LoadPartition(
-        "institutional", [10, 20, 30, 50, 60, 61, 62, 63, 64], PartitionType.INSTITUTIONAL
+    LoadPartitionGroup(
+        "institutional",
+        [10, 20, 30, 50, 60, 61, 62, 63, 64],
+        PartitionType.INSTITUTIONAL,
+        timedelta(days=365),
     ),
 ]
 
 INSTITUTIONAL_PAC_PARTITIONS = [
-    LoadPartition(
+    LoadPartitionGroup(
         "institututional_pac",
         [
             1000,
@@ -129,16 +134,22 @@ INSTITUTIONAL_PAC_PARTITIONS = [
             2900,
         ],
         PartitionType.INSTITUTIONAL | PartitionType.PAC,
+        timedelta(days=365),
     )
 ]
 
 PROFESSIONAL_ADJUDICATED_PARTITIONS = [
-    LoadPartition("professional", [71, 72, 81, 82], PartitionType.PROFESSIONAL),
+    LoadPartitionGroup(
+        "professional", [71, 72, 81, 82], PartitionType.PROFESSIONAL, timedelta(days=365)
+    ),
 ]
 
 PROFESSIONAL_PAC_PARTITIONS = [
-    LoadPartition(
-        "professional_pac", [1700, 1800, 2700, 2800], PartitionType.PROFESSIONAL | PartitionType.PAC
+    LoadPartitionGroup(
+        "professional_pac",
+        [1700, 1800, 2700, 2800],
+        PartitionType.PROFESSIONAL | PartitionType.PAC,
+        timedelta(days=365),
     )
 ]
 
@@ -151,13 +162,14 @@ ALL_CLAIM_PARTITIONS = [
     *PROFESSIONAL_PAC_PARTITIONS,
 ]
 
-COMBINED_CLAIM_PARTITION = LoadPartition(
+COMBINED_CLAIM_PARTITION = LoadPartitionGroup(
     "all_claims",
     [code for partition in ALL_CLAIM_PARTITIONS for code in partition.claim_type_codes],
     PartitionType.INSTITUTIONAL
     | PartitionType.PROFESSIONAL
     | PartitionType.PART_D
     | PartitionType.PAC,
+    timedelta(days=365),
 )
 
 

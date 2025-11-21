@@ -1,7 +1,7 @@
 import logging
 import time
 
-from constants import LoadPartition
+from load_partition import LoadPartition
 from model import T
 
 logger = logging.getLogger(__name__)

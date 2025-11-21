@@ -20,11 +20,9 @@ from constants import (
     PROFESSIONAL_PAC_PARTITIONS,
     PartitionType,
 )
-from load_partition import LoadPartition
+from load_partition import LoadPartition, LoadPartitionGroup
 
 type DbType = str | float | int | bool | date | datetime
-type FetchQueryPartition = LoadPartition
-type FetchQueryPartitions = Sequence[FetchQueryPartition]
 
 
 def transform_null_date_to_max(value: date | None) -> date:
@@ -79,7 +77,7 @@ def get_min_transaction_date() -> datetime:
     min_date = os.environ.get("PIPELINE_MIN_TRANSACTION_DATE")
     if min_date is not None:
         return datetime.strptime(min_date, "%Y-%m-%d").replace(tzinfo=UTC)
-    return datetime.strptime("0001-01-01", "%Y-%m-%d").replace(tzinfo=UTC)
+    return datetime.strptime(MIN_CLAIM_LOAD_DATE, "%Y-%m-%d").replace(tzinfo=UTC)
 
 
 PRIMARY_KEY = "primary_key"
@@ -126,24 +124,24 @@ class IdrBaseModel(BaseModel, ABC):
 
     @staticmethod
     @abstractmethod
-    def _current_fetch_query(partition: FetchQueryPartition, start_time: datetime) -> str:
+    def _current_fetch_query(partition: LoadPartition, start_time: datetime) -> str:
         """Query to populate the table for non-historical data."""
 
     @classmethod
-    def _historical_fetch_query(cls, partition: FetchQueryPartition, start_time: datetime) -> str:
+    def _historical_fetch_query(cls, partition: LoadPartition, start_time: datetime) -> str:
         """Query to populate the table for historical data."""
         return cls._current_fetch_query(partition, start_time)
 
     @classmethod
     def fetch_query(
-        cls, partition: FetchQueryPartition, is_historical: bool, start_time: datetime
+        cls, partition: LoadPartition, is_historical: bool, start_time: datetime
     ) -> str:
         if is_historical:
             return cls._historical_fetch_query(partition, start_time)
         return cls._current_fetch_query(partition, start_time)
 
     @staticmethod
-    def fetch_query_partitions() -> FetchQueryPartitions:
+    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
         """Partitions fetch queries of this model to allow for parallel fetching of data via ray.
 
         None is returned for models that do not do any such partitioning.
@@ -316,7 +314,7 @@ class IdrBeneficiary(IdrBaseModel):
         return ["bene_xref_efctv_sk_computed"]
 
     @staticmethod
-    def _current_fetch_query(partition: FetchQueryPartition, start_time: datetime) -> str:  # noqa: ARG004
+    def _current_fetch_query(partition: LoadPartition, start_time: datetime) -> str:  # noqa: ARG004
         hstry = ALIAS_HSTRY
         xref = ALIAS_XREF
         # There can be multiple xref records for the same bene_sk/bene_ref_sk combo
@@ -390,7 +388,7 @@ class IdrBeneficiaryMbiId(IdrBaseModel):
         return "idr.beneficiary_mbi_id"
 
     @staticmethod
-    def _current_fetch_query(partition: FetchQueryPartition, start_time: datetime) -> str:  # noqa: ARG004
+    def _current_fetch_query(partition: LoadPartition, start_time: datetime) -> str:  # noqa: ARG004
         return """
             SELECT {COLUMNS}
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_mbi_id
@@ -411,7 +409,7 @@ class IdrBeneficiaryOvershareMbi(IdrBaseModel):
         return True
 
     @staticmethod
-    def _current_fetch_query(partition: FetchQueryPartition, start_time: datetime) -> str:  # noqa: ARG004
+    def _current_fetch_query(partition: LoadPartition, start_time: datetime) -> str:  # noqa: ARG004
         # The xref data in the bene_hstry table is not completely reliable
         # because sometimes HICNs can be reused, causing two records to be
         # xref'd even if they're not the same person.
@@ -454,7 +452,7 @@ class IdrBeneficiaryThirdParty(IdrBaseModel):
         return "idr.beneficiary_third_party"
 
     @staticmethod
-    def _current_fetch_query(partition: FetchQueryPartition, start_time: datetime) -> str:  # noqa: ARG004
+    def _current_fetch_query(partition: LoadPartition, start_time: datetime) -> str:  # noqa: ARG004
         hstry = ALIAS_HSTRY
         return f"""
             SELECT {{COLUMNS}}
@@ -486,7 +484,7 @@ class IdrBeneficiaryStatus(IdrBaseModel):
         return "idr.beneficiary_status"
 
     @staticmethod
-    def _current_fetch_query(partition: FetchQueryPartition, start_time: datetime) -> str:  # noqa: ARG004
+    def _current_fetch_query(partition: LoadPartition, start_time: datetime) -> str:  # noqa: ARG004
         hstry = ALIAS_HSTRY
         return f"""
             SELECT {{COLUMNS}}
@@ -520,7 +518,7 @@ class IdrBeneficiaryEntitlement(IdrBaseModel):
         return "idr.beneficiary_entitlement"
 
     @staticmethod
-    def _current_fetch_query(partition: FetchQueryPartition, start_time: datetime) -> str:  # noqa: ARG004
+    def _current_fetch_query(partition: LoadPartition, start_time: datetime) -> str:  # noqa: ARG004
         hstry = ALIAS_HSTRY
         return f"""
             SELECT {{COLUMNS}}
@@ -552,7 +550,7 @@ class IdrBeneficiaryEntitlementReason(IdrBaseModel):
         return "idr.beneficiary_entitlement_reason"
 
     @staticmethod
-    def _current_fetch_query(partition: FetchQueryPartition, start_time: datetime) -> str:  # noqa: ARG004
+    def _current_fetch_query(partition: LoadPartition, start_time: datetime) -> str:  # noqa: ARG004
         hstry = ALIAS_HSTRY
         return f"""
             SELECT {{COLUMNS}}
@@ -586,7 +584,7 @@ class IdrBeneficiaryDualEligibility(IdrBaseModel):
         return "idr.beneficiary_dual_eligibility"
 
     @staticmethod
-    def _current_fetch_query(partition: FetchQueryPartition, start_time: datetime) -> str:  # noqa: ARG004
+    def _current_fetch_query(partition: LoadPartition, start_time: datetime) -> str:  # noqa: ARG004
         hstry = ALIAS_HSTRY
         return f"""
             SELECT {{COLUMNS}}
@@ -617,7 +615,7 @@ class IdrElectionPeriodUsage(IdrBaseModel):
         return "idr.election_period_usage"
 
     @staticmethod
-    def _current_fetch_query(partition: FetchQueryPartition, start_time: datetime) -> str:  # noqa: ARG004
+    def _current_fetch_query(partition: LoadPartition, start_time: datetime) -> str:  # noqa: ARG004
         # equivalent to "select distinct on", but Snowflake has different syntax for that,
         # so it's unfortunately not portable
         hstry = ALIAS_HSTRY
@@ -651,7 +649,7 @@ class IdrContractPbpNumber(IdrBaseModel):
         return "idr.contract_pbp_number"
 
     @staticmethod
-    def _current_fetch_query(partition: FetchQueryPartition, start_time: datetime) -> str:  # noqa: ARG004
+    def _current_fetch_query(partition: LoadPartition, start_time: datetime) -> str:  # noqa: ARG004
         return f"""
         SELECT {{COLUMNS}}
         FROM cms_vdm_view_mdcr_prd.v2_mdcr_cntrct_pbp_num
@@ -659,7 +657,7 @@ class IdrContractPbpNumber(IdrBaseModel):
         """
 
 
-def claim_type_clause(start_time: datetime, partition: FetchQueryPartition) -> str:
+def _claim_filter(start_time: datetime, partition: LoadPartition) -> str:
     clm = ALIAS_CLM
     fetch_latest_claims = os.environ.get("IDR_LATEST_CLAIMS", "").lower() in ("1", "true")
     latest_claim_ind = (
@@ -682,10 +680,20 @@ def claim_type_clause(start_time: datetime, partition: FetchQueryPartition) -> s
         else ""
     )
 
+    clm_from_filter = (
+        (
+            f" AND ({clm}.clm_from_dt BETWEEN "
+            f"'{partition.start_date.strftime('%Y-%m-%d')}' AND "
+            f"'{partition.end_date.strftime('%Y-%m-%d')}')"
+        )
+        if (partition.start_date is not None and partition.end_date is not None)
+        else f" AND {clm}.clm_from_dt >= '{MIN_CLAIM_LOAD_DATE}'"
+    )
+
     return f"""
     (
         {clm}.clm_type_cd IN ({",".join([str(c) for c in partition.claim_type_codes])})
-        AND {clm}.clm_from_dt >= '{MIN_CLAIM_LOAD_DATE}'
+        {clm_from_filter}
         {latest_claim_ind}
         {pac_filter}
         AND {ALIAS_CLM}.clm_from_dt <= {ALIAS_CLM}.clm_thru_dt
@@ -803,7 +811,7 @@ class IdrClaim(IdrBaseModel):
         return "idr.claim"
 
     @staticmethod
-    def _current_fetch_query(partition: FetchQueryPartition, start_time: datetime) -> str:
+    def _current_fetch_query(partition: LoadPartition, start_time: datetime) -> str:
         clm = ALIAS_CLM
         dcmtn = ALIAS_DCMTN
         return f"""
@@ -814,12 +822,12 @@ class IdrClaim(IdrBaseModel):
                 {clm}.clm_dt_sgntr_sk = {dcmtn}.clm_dt_sgntr_sk AND
                 {clm}.clm_type_cd = {dcmtn}.clm_type_cd AND
                 {clm}.clm_num_sk = {dcmtn}.clm_num_sk
-            {{WHERE_CLAUSE}} AND {claim_type_clause(start_time, partition)}
+            {{WHERE_CLAUSE}} AND {_claim_filter(start_time, partition)}
             {{ORDER_BY}}
         """
 
     @staticmethod
-    def fetch_query_partitions() -> FetchQueryPartitions:
+    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
         return ALL_CLAIM_PARTITIONS
 
 
@@ -853,7 +861,7 @@ class IdrClaimDateSignature(IdrBaseModel):
         return "idr.claim_date_signature"
 
     @staticmethod
-    def _current_fetch_query(partition: FetchQueryPartition, start_time: datetime) -> str:
+    def _current_fetch_query(partition: LoadPartition, start_time: datetime) -> str:
         clm = ALIAS_CLM
         sgntr = ALIAS_SGNTR
         return f"""
@@ -865,14 +873,14 @@ class IdrClaimDateSignature(IdrBaseModel):
                 FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
                 JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_dt_sgntr {sgntr}
                 ON {clm}.clm_dt_sgntr_sk = {sgntr}.clm_dt_sgntr_sk
-                {{WHERE_CLAUSE}} AND {claim_type_clause(start_time, partition)}
+                {{WHERE_CLAUSE}} AND {_claim_filter(start_time, partition)}
                 {{ORDER_BY}}
             )
             SELECT {{COLUMNS_NO_ALIAS}} FROM dupes WHERE row_order = 1
         """
 
     @staticmethod
-    def fetch_query_partitions() -> FetchQueryPartitions:
+    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
         return [COMBINED_CLAIM_PARTITION]
 
 
@@ -895,7 +903,7 @@ class IdrClaimFiss(IdrBaseModel):
         return "idr.claim_fiss"
 
     @staticmethod
-    def _current_fetch_query(partition: FetchQueryPartition, start_time: datetime) -> str:
+    def _current_fetch_query(partition: LoadPartition, start_time: datetime) -> str:
         clm = ALIAS_CLM
         fiss = ALIAS_FISS
         return f"""
@@ -906,12 +914,12 @@ class IdrClaimFiss(IdrBaseModel):
                 {clm}.clm_dt_sgntr_sk = {fiss}.clm_dt_sgntr_sk AND
                 {clm}.clm_type_cd = {fiss}.clm_type_cd AND
                 {clm}.clm_num_sk = {fiss}.clm_num_sk
-            {{WHERE_CLAUSE}} AND {claim_type_clause(start_time, partition)}
+            {{WHERE_CLAUSE}} AND {_claim_filter(start_time, partition)}
             {{ORDER_BY}}
         """
 
     @staticmethod
-    def fetch_query_partitions() -> FetchQueryPartitions:
+    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
         return INSTITUTIONAL_PAC_PARTITIONS
 
 
@@ -966,7 +974,7 @@ class IdrClaimInstitutional(IdrBaseModel):
         return "idr.claim_institutional"
 
     @staticmethod
-    def _current_fetch_query(partition: FetchQueryPartition, start_time: datetime) -> str:
+    def _current_fetch_query(partition: LoadPartition, start_time: datetime) -> str:
         clm = ALIAS_CLM
         instnl = ALIAS_INSTNL
         return f"""
@@ -977,12 +985,12 @@ class IdrClaimInstitutional(IdrBaseModel):
                 {clm}.clm_dt_sgntr_sk = {instnl}.clm_dt_sgntr_sk AND
                 {clm}.clm_type_cd = {instnl}.clm_type_cd AND
                 {clm}.clm_num_sk = {instnl}.clm_num_sk
-            {{WHERE_CLAUSE}} AND {claim_type_clause(start_time, partition)}
+            {{WHERE_CLAUSE}} AND {_claim_filter(start_time, partition)}
             {{ORDER_BY}}
         """
 
     @staticmethod
-    def fetch_query_partitions() -> FetchQueryPartitions:
+    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
         return INSTITUTIONAL_ADJUDICATED_PARTITIONS + INSTITUTIONAL_PAC_PARTITIONS
 
 
@@ -1126,7 +1134,7 @@ class IdrClaimItem(IdrBaseModel):
         return "idr.claim_item"
 
     @staticmethod
-    def _current_fetch_query(partition: FetchQueryPartition, start_time: datetime) -> str:
+    def _current_fetch_query(partition: LoadPartition, start_time: datetime) -> str:
         clm = ALIAS_CLM
         clm_grp = ALIAS_CLM_GRP
         prod = ALIAS_PROCEDURE
@@ -1174,7 +1182,7 @@ class IdrClaimItem(IdrBaseModel):
                         {clm}.clm_idr_ld_dt
                     FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
                     WHERE
-                        {claim_type_clause(start_time, partition)} AND
+                        {_claim_filter(start_time, partition)} AND
                         {clm}.clm_idr_ld_dt >= '{get_min_transaction_date()}'
                 ),
                 claim_lines AS {not_materialized} (
@@ -1268,7 +1276,7 @@ class IdrClaimItem(IdrBaseModel):
         """
 
     @staticmethod
-    def fetch_query_partitions() -> FetchQueryPartitions:
+    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
         return ALL_CLAIM_PARTITIONS
 
 
@@ -1312,7 +1320,7 @@ class IdrClaimLineInstitutional(IdrBaseModel):
         return "idr.claim_line_institutional"
 
     @staticmethod
-    def _current_fetch_query(partition: FetchQueryPartition, start_time: datetime) -> str:
+    def _current_fetch_query(partition: LoadPartition, start_time: datetime) -> str:
         clm = ALIAS_CLM
         line = ALIAS_LINE
         return f"""
@@ -1323,12 +1331,12 @@ class IdrClaimLineInstitutional(IdrBaseModel):
                 {clm}.clm_dt_sgntr_sk = {line}.clm_dt_sgntr_sk AND
                 {clm}.clm_type_cd = {line}.clm_type_cd AND
                 {clm}.clm_num_sk = {line}.clm_num_sk
-            {{WHERE_CLAUSE}} AND {claim_type_clause(start_time, partition)}
+            {{WHERE_CLAUSE}} AND {_claim_filter(start_time, partition)}
             {{ORDER_BY}}
         """
 
     @staticmethod
-    def fetch_query_partitions() -> FetchQueryPartitions:
+    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
         return INSTITUTIONAL_ADJUDICATED_PARTITIONS + INSTITUTIONAL_PAC_PARTITIONS
 
 
@@ -1354,7 +1362,7 @@ class IdrClaimAnsiSignature(IdrBaseModel):
         return "idr.claim_ansi_signature"
 
     @staticmethod
-    def _current_fetch_query(partition: FetchQueryPartition, start_time: datetime) -> str:  # noqa: ARG004
+    def _current_fetch_query(partition: LoadPartition, start_time: datetime) -> str:  # noqa: ARG004
         return """
             SELECT {COLUMNS_NO_ALIAS}
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_ansi_sgntr
@@ -1362,14 +1370,14 @@ class IdrClaimAnsiSignature(IdrBaseModel):
         """
 
     @classmethod
-    def _historical_fetch_query(cls, partition: FetchQueryPartition, start_time: datetime) -> str:  # noqa: ARG003
+    def _historical_fetch_query(cls, partition: LoadPartition, start_time: datetime) -> str:  # noqa: ARG003
         return """
             SELECT {COLUMNS}
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_ansi_sgntr
         """
 
     @staticmethod
-    def fetch_query_partitions() -> FetchQueryPartitions:
+    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
         return [COMBINED_CLAIM_PARTITION]
 
 
@@ -1409,7 +1417,7 @@ class IdrClaimProfessional(IdrBaseModel):
         return "idr.claim_professional"
 
     @staticmethod
-    def _current_fetch_query(partition: FetchQueryPartition, start_time: datetime) -> str:
+    def _current_fetch_query(partition: LoadPartition, start_time: datetime) -> str:
         clm = ALIAS_CLM
         prfnl = ALIAS_PRFNL
         lctn_hstry = ALIAS_LCTN_HSTRY
@@ -1424,7 +1432,7 @@ class IdrClaimProfessional(IdrBaseModel):
                         {clm}.clm_idr_ld_dt
                     FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
                     WHERE
-                        {claim_type_clause(start_time, partition)} AND
+                        {_claim_filter(start_time, partition)} AND
                         {clm}.clm_idr_ld_dt >= '{get_min_transaction_date()}'
                 ),
                 latest_clm_lctn_hstry AS (
@@ -1469,7 +1477,7 @@ class IdrClaimProfessional(IdrBaseModel):
         """
 
     @staticmethod
-    def fetch_query_partitions() -> FetchQueryPartitions:
+    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
         return PROFESSIONAL_ADJUDICATED_PARTITIONS + PROFESSIONAL_PAC_PARTITIONS
 
 
@@ -1510,7 +1518,7 @@ class IdrClaimLineProfessional(IdrBaseModel):
         return "idr.claim_line_professional"
 
     @staticmethod
-    def _current_fetch_query(partition: FetchQueryPartition, start_time: datetime) -> str:
+    def _current_fetch_query(partition: LoadPartition, start_time: datetime) -> str:
         clm = ALIAS_CLM
         prfnl = ALIAS_PRFNL
         return f"""
@@ -1521,12 +1529,12 @@ class IdrClaimLineProfessional(IdrBaseModel):
                 {clm}.clm_dt_sgntr_sk = {prfnl}.clm_dt_sgntr_sk AND
                 {clm}.clm_type_cd = {prfnl}.clm_type_cd AND
                 {clm}.clm_num_sk = {prfnl}.clm_num_sk
-            {{WHERE_CLAUSE}} AND {claim_type_clause(start_time, partition)}
+            {{WHERE_CLAUSE}} AND {_claim_filter(start_time, partition)}
             {{ORDER_BY}}
         """
 
     @staticmethod
-    def fetch_query_partitions() -> FetchQueryPartitions:
+    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
         return PROFESSIONAL_ADJUDICATED_PARTITIONS + PROFESSIONAL_PAC_PARTITIONS
 
 
@@ -1574,7 +1582,7 @@ class IdrClaimLineRx(IdrBaseModel):
         return "idr.claim_line_rx"
 
     @staticmethod
-    def _current_fetch_query(partition: FetchQueryPartition, start_time: datetime) -> str:
+    def _current_fetch_query(partition: LoadPartition, start_time: datetime) -> str:
         clm = ALIAS_CLM
         rx_line = ALIAS_RX_LINE
         line = ALIAS_LINE
@@ -1594,12 +1602,12 @@ class IdrClaimLineRx(IdrBaseModel):
                 AND {line}.clm_dt_sgntr_sk = {rx_line}.clm_dt_sgntr_sk
                 AND {line}.clm_uniq_id = {rx_line}.clm_uniq_id
                 AND {line}.clm_line_num = {rx_line}.clm_line_num
-            {{WHERE_CLAUSE}} AND {claim_type_clause(start_time, partition)}
+            {{WHERE_CLAUSE}} AND {_claim_filter(start_time, partition)}
             {{ORDER_BY}}
         """
 
     @staticmethod
-    def fetch_query_partitions() -> FetchQueryPartitions:
+    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
         return PART_D_PARTITIONS
 
 
@@ -1620,7 +1628,7 @@ class LoadProgress(IdrBaseModel):
         return "idr.load_progress"
 
     @staticmethod
-    def _current_fetch_query(partition: FetchQueryPartition, start_time: datetime) -> str:  # noqa: ARG004
+    def _current_fetch_query(partition: LoadPartition, start_time: datetime) -> str:  # noqa: ARG004
         return f"""
         SELECT table_name, last_ts, last_id, batch_partition, batch_start_ts, batch_complete_ts
         FROM idr.load_progress

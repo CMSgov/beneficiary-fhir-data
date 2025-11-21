@@ -6,7 +6,8 @@ from datetime import UTC, date, datetime
 import psycopg
 
 from constants import DEFAULT_MIN_DATE
-from model import DbType, FetchQueryPartition, LoadProgress, T
+from load_partition import LoadPartition
+from model import DbType, LoadProgress, T
 from timer import Timer
 
 logger = logging.getLogger(__name__)
@@ -35,7 +36,7 @@ class PostgresLoader:
         fetch_results: Iterator[Sequence[T]],
         model: type[T],
         batch_start: datetime,
-        partition: FetchQueryPartition,
+        partition: LoadPartition,
         progress: LoadProgress | None,
     ) -> bool:
         return BatchLoader(self.conn, fetch_results, model, batch_start, partition, progress).load()
@@ -48,7 +49,7 @@ class BatchLoader:
         fetch_results: Iterator[Sequence[T]],
         model: type[T],
         batch_start: datetime,
-        partition: FetchQueryPartition,
+        partition: LoadPartition,
         progress: LoadProgress | None,
     ) -> None:
         self.conn = conn

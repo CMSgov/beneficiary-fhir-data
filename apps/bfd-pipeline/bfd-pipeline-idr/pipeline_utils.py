@@ -7,10 +7,9 @@ from snowflake.connector.errors import ForbiddenError
 from snowflake.connector.network import ReauthenticationRequest, RetryRequest
 
 from extractor import PostgresExtractor, SnowflakeExtractor
-from load_partition import DEFAULT_PARTITION
+from load_partition import DEFAULT_PARTITION, LoadPartition
 from loader import PostgresLoader
 from model import (
-    FetchQueryPartition,
     LoadProgress,
     T,
 )
@@ -27,7 +26,7 @@ def get_progress(
     connection_string: str,
     table_name: str,
     start_time: datetime,
-    partition: FetchQueryPartition,
+    partition: LoadPartition,
 ) -> LoadProgress | None:
     return PostgresExtractor(
         connection_string=connection_string, batch_size=1, cls=LoadProgress, partition=partition
@@ -44,7 +43,7 @@ def extract_and_load(
     mode: str,
     batch_size: int,
     batch_start: datetime,
-    partition: FetchQueryPartition | None = None,
+    partition: LoadPartition | None = None,
 ) -> bool:
     partition = partition or DEFAULT_PARTITION
     if mode == "local" or mode == "synthetic":

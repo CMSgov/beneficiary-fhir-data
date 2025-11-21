@@ -1,7 +1,7 @@
 # ruff: noqa: ARG001
 # type: ignore [reportUntypedFunctionDecorator]
 
-from datetime import datetime
+from datetime import date, datetime
 
 from hamilton.function_modifiers import (
     config,
@@ -10,8 +10,8 @@ from hamilton.function_modifiers import (
 )
 from hamilton.htypes import Collect, Parallelizable
 
+from load_partition import LoadPartition
 from model import (
-    FetchQueryPartition,
     IdrBaseModel,
     IdrBeneficiary,
     IdrBeneficiaryDualEligibility,
@@ -31,19 +31,29 @@ from model import (
     IdrClaimLineProfessional,
     IdrClaimLineRx,
     IdrClaimProfessional,
+    get_min_transaction_date,
 )
 from pipeline_utils import extract_and_load
 
-type NodePartitionedModelInput = tuple[type[IdrBaseModel], FetchQueryPartition | None]
-type PipelineInitialIdrClaims = NodePartitionedModelInput
-type PipelineInitialIdrBeneficiaryOvershareMbi = NodePartitionedModelInput
-type PipelineInitialIdrBeneficiaryAuxTable = NodePartitionedModelInput
+type NodePartitionedModelInput = tuple[type[IdrBaseModel], LoadPartition | None]
 
 
 def _gen_partitioned_node_inputs(
     model_types: list[type[IdrBaseModel]],
 ) -> list[NodePartitionedModelInput]:
-    models_and_partitions = [(m, m.fetch_query_partitions()) for m in model_types]
+    start_date = get_min_transaction_date()
+
+    models_and_partitions = [
+        (
+            m,
+            [
+                partition
+                for partition_group in m.fetch_query_partitions()
+                for partition in partition_group.generate_ranges(datetime.date(start_date))
+            ],
+        )
+        for m in model_types
+    ]
     models_with_partitions: list[NodePartitionedModelInput] = [
         (m, p) for m, partitions in models_and_partitions if partitions for p in partitions
     ]
@@ -56,7 +66,7 @@ def _gen_partitioned_node_inputs(
 # INITIAL FLOW
 # Stage 1: Load ALL claim tables in parallel if load_type is set to initial
 @config.when(load_type="initial")
-def initial_idr_claims() -> Parallelizable[PipelineInitialIdrClaims]:
+def initial_idr_claims() -> Parallelizable[NodePartitionedModelInput]:
     yield from _gen_partitioned_node_inputs(
         [
             IdrClaimInstitutional,
@@ -75,7 +85,7 @@ def initial_idr_claims() -> Parallelizable[PipelineInitialIdrClaims]:
 
 @config.when(load_type="initial")
 def do_initial_idr_claims(
-    initial_idr_claims: PipelineInitialIdrClaims,
+    initial_idr_claims: NodePartitionedModelInput,
     config_connection_string: str,
     config_mode: str,
     config_batch_size: int,
@@ -120,7 +130,7 @@ def idr_beneficiary_overshare_mbi(
 @config.when(load_type="initial")
 def initial_idr_beneficiary_aux_table(
     idr_beneficiary_overshare_mbi: bool,
-) -> Parallelizable[PipelineInitialIdrBeneficiaryAuxTable]:
+) -> Parallelizable[NodePartitionedModelInput]:
     yield from _gen_partitioned_node_inputs(
         [
             IdrBeneficiaryStatus,
@@ -135,7 +145,7 @@ def initial_idr_beneficiary_aux_table(
 
 @config.when(load_type="initial")
 def do_initial_idr_beneficiary_aux_table(
-    initial_idr_beneficiary_aux_table: PipelineInitialIdrBeneficiaryAuxTable,
+    initial_idr_beneficiary_aux_table: NodePartitionedModelInput,
     config_connection_string: str,
     start_time: datetime,
     config_mode: str,
