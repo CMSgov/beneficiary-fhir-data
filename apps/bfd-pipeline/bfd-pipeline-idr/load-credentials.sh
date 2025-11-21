@@ -23,3 +23,7 @@ export BFD_DB_PASSWORD
 db_cluster="bfd-${BFD_ENV}-aurora-cluster"
 BFD_DB_ENDPOINT="$(aws rds describe-db-clusters --db-cluster-identifier $db_cluster --query "DBClusters[0].Endpoint" --output text)"
 export BFD_DB_ENDPOINT
+
+export PIPELINE_MIN_TRANSACTION_DATE=2024-07-01
+export LOAD_TYPE=initial
+export IDR_LATEST_CLAIMS=1
