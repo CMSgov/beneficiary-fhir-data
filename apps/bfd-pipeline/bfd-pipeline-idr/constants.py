@@ -1,4 +1,4 @@
-from datetime import timedelta
+from dateutil.relativedelta import relativedelta
 
 from load_partition import LoadPartitionGroup, PartitionType
 
@@ -10,19 +10,21 @@ DEATH_DATE_CUTOFF_YEARS = 4
 
 
 PART_D_PARTITIONS = [
-    LoadPartitionGroup("part_d_original", [1], PartitionType.PART_D, timedelta(days=365)),
-    LoadPartitionGroup("part_d_adjustment", [2, 3, 4], PartitionType.PART_D, timedelta(days=365)),
+    LoadPartitionGroup("part_d_original", [1], PartitionType.PART_D, relativedelta(years=1)),
+    LoadPartitionGroup(
+        "part_d_adjustment", [2, 3, 4], PartitionType.PART_D, relativedelta(years=1)
+    ),
 ]
 
 INSTITUTIONAL_ADJUDICATED_PARTITIONS = [
     # Outpatient
-    LoadPartitionGroup("outpatient", [40], PartitionType.INSTITUTIONAL, timedelta(days=365)),
+    LoadPartitionGroup("outpatient", [40], PartitionType.INSTITUTIONAL, relativedelta(years=1)),
     # HHA, SNF, Hospice, Inpatient, MA
     LoadPartitionGroup(
         "institutional",
         [10, 20, 30, 50, 60, 61, 62, 63, 64],
         PartitionType.INSTITUTIONAL,
-        timedelta(days=365),
+        relativedelta(years=1),
     ),
 ]
 
@@ -134,13 +136,13 @@ INSTITUTIONAL_PAC_PARTITIONS = [
             2900,
         ],
         PartitionType.INSTITUTIONAL | PartitionType.PAC,
-        timedelta(days=365),
+        relativedelta(years=1),
     )
 ]
 
 PROFESSIONAL_ADJUDICATED_PARTITIONS = [
     LoadPartitionGroup(
-        "professional", [71, 72, 81, 82], PartitionType.PROFESSIONAL, timedelta(days=365)
+        "professional", [71, 72, 81, 82], PartitionType.PROFESSIONAL, relativedelta(years=1)
     ),
 ]
 
@@ -149,7 +151,7 @@ PROFESSIONAL_PAC_PARTITIONS = [
         "professional_pac",
         [1700, 1800, 2700, 2800],
         PartitionType.PROFESSIONAL | PartitionType.PAC,
-        timedelta(days=365),
+        relativedelta(years=1),
     )
 ]
 
@@ -169,7 +171,7 @@ COMBINED_CLAIM_PARTITION = LoadPartitionGroup(
     | PartitionType.PROFESSIONAL
     | PartitionType.PART_D
     | PartitionType.PAC,
-    timedelta(days=365),
+    relativedelta(years=1),
 )
 
 

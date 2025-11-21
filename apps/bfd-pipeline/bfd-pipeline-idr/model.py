@@ -73,11 +73,11 @@ def transform_null_int(value: int | None) -> int:
     return value
 
 
-def get_min_transaction_date() -> datetime:
+def get_min_transaction_date(default_date: str = DEFAULT_MIN_DATE) -> datetime:
     min_date = os.environ.get("PIPELINE_MIN_TRANSACTION_DATE")
     if min_date is not None:
         return datetime.strptime(min_date, "%Y-%m-%d").replace(tzinfo=UTC)
-    return datetime.strptime(MIN_CLAIM_LOAD_DATE, "%Y-%m-%d").replace(tzinfo=UTC)
+    return datetime.strptime(default_date, "%Y-%m-%d").replace(tzinfo=UTC)
 
 
 PRIMARY_KEY = "primary_key"
@@ -1431,9 +1431,7 @@ class IdrClaimProfessional(IdrBaseModel):
                         {clm}.clm_dt_sgntr_sk,
                         {clm}.clm_idr_ld_dt
                     FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
-                    WHERE
-                        {_claim_filter(start_time, partition)} AND
-                        {clm}.clm_idr_ld_dt >= '{get_min_transaction_date()}'
+                    WHERE {_claim_filter(start_time, partition)}
                 ),
                 latest_clm_lctn_hstry AS (
                     SELECT
@@ -1455,7 +1453,7 @@ class IdrClaimProfessional(IdrBaseModel):
                         claims.clm_num_sk
                 )
                 SELECT {{COLUMNS}}
-                FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
+                FROM claims {clm}
                 JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_prfnl {prfnl} ON
                     {clm}.geo_bene_sk = {prfnl}.geo_bene_sk AND
                     {clm}.clm_type_cd = {prfnl}.clm_type_cd AND

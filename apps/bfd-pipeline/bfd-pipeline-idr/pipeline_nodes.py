@@ -10,6 +10,7 @@ from hamilton.function_modifiers import (
 )
 from hamilton.htypes import Collect, Parallelizable
 
+from constants import MIN_CLAIM_LOAD_DATE
 from load_partition import LoadPartition
 from model import (
     IdrBaseModel,
@@ -41,7 +42,7 @@ type NodePartitionedModelInput = tuple[type[IdrBaseModel], LoadPartition | None]
 def _gen_partitioned_node_inputs(
     model_types: list[type[IdrBaseModel]],
 ) -> list[NodePartitionedModelInput]:
-    start_date = get_min_transaction_date()
+    start_date = get_min_transaction_date(MIN_CLAIM_LOAD_DATE)
 
     models_and_partitions = [
         (

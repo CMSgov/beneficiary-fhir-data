@@ -1,7 +1,9 @@
 from collections.abc import Generator
 from dataclasses import dataclass
-from datetime import UTC, date, datetime, timedelta
+from datetime import UTC, date, datetime
 from enum import IntFlag, auto
+
+from dateutil.relativedelta import relativedelta
 
 
 class PartitionType(IntFlag):
@@ -26,14 +28,15 @@ class LoadPartitionGroup:
     name: str
     claim_type_codes: list[int]
     partition_type: PartitionType
-    date_interval: timedelta | None
+    date_interval: relativedelta | None
 
     def generate_ranges(self, start_date: date) -> Generator[LoadPartition]:
         if self.date_interval is None:
             yield LoadPartition(self.name, self.claim_type_codes, self.partition_type, None, None)
             return
-        start = start_date
-        end = start_date + self.date_interval
+
+        start = date(year=start_date.year, month=start_date.month, day=1)
+        end = start + self.date_interval - relativedelta(days=1)
         now = datetime.date(datetime.now(UTC))
         while start < now:
             start_str = start.strftime("%Y-%m-%d")
@@ -46,7 +49,7 @@ class LoadPartitionGroup:
                 end,
             )
             next_end = end + self.date_interval
-            start = end
+            start = end + relativedelta(days=1)
             end = next_end
 
 
