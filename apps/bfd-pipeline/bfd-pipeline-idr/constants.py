@@ -8,23 +8,23 @@ MIN_CLAIM_LOAD_DATE = "2014-06-30"
 
 DEATH_DATE_CUTOFF_YEARS = 4
 
+partition_range = relativedelta(months=1)
+
 
 PART_D_PARTITIONS = [
-    LoadPartitionGroup("part_d_original", [1], PartitionType.PART_D, relativedelta(years=1)),
-    LoadPartitionGroup(
-        "part_d_adjustment", [2, 3, 4], PartitionType.PART_D, relativedelta(years=1)
-    ),
+    LoadPartitionGroup("part_d_original", [1], PartitionType.PART_D, partition_range),
+    LoadPartitionGroup("part_d_adjustment", [2, 3, 4], PartitionType.PART_D, partition_range),
 ]
 
 INSTITUTIONAL_ADJUDICATED_PARTITIONS = [
     # Outpatient
-    LoadPartitionGroup("outpatient", [40], PartitionType.INSTITUTIONAL, relativedelta(years=1)),
+    LoadPartitionGroup("outpatient", [40], PartitionType.INSTITUTIONAL, partition_range),
     # HHA, SNF, Hospice, Inpatient, MA
     LoadPartitionGroup(
         "institutional",
         [10, 20, 30, 50, 60, 61, 62, 63, 64],
         PartitionType.INSTITUTIONAL,
-        relativedelta(years=1),
+        partition_range,
     ),
 ]
 
@@ -136,13 +136,13 @@ INSTITUTIONAL_PAC_PARTITIONS = [
             2900,
         ],
         PartitionType.INSTITUTIONAL | PartitionType.PAC,
-        relativedelta(years=1),
+        None,
     )
 ]
 
 PROFESSIONAL_ADJUDICATED_PARTITIONS = [
     LoadPartitionGroup(
-        "professional", [71, 72, 81, 82], PartitionType.PROFESSIONAL, relativedelta(years=1)
+        "professional", [71, 72, 81, 82], PartitionType.PROFESSIONAL, partition_range
     ),
 ]
 
@@ -151,7 +151,7 @@ PROFESSIONAL_PAC_PARTITIONS = [
         "professional_pac",
         [1700, 1800, 2700, 2800],
         PartitionType.PROFESSIONAL | PartitionType.PAC,
-        relativedelta(years=1),
+        None,
     )
 ]
 
@@ -171,7 +171,7 @@ COMBINED_CLAIM_PARTITION = LoadPartitionGroup(
     | PartitionType.PROFESSIONAL
     | PartitionType.PART_D
     | PartitionType.PAC,
-    relativedelta(years=1),
+    partition_range,
 )
 
 
