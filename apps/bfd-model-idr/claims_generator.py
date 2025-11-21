@@ -60,6 +60,7 @@ def save_output_files(
     clm_prfnl,
     clm_line_prfnl,
     clm_line_rx,
+    prvdr_hstry,
 ):
     Path("out").mkdir(exist_ok=True)
 
@@ -115,6 +116,8 @@ def save_output_files(
     df.to_csv("out/SYNTHETIC_CLM_LINE_PRFNL.csv", index=False)
     df = pd.json_normalize(clm_line_rx)
     df.to_csv("out/SYNTHETIC_CLM_LINE_RX.csv", index=False)
+    df = pd.json_normalize(prvdr_hstry)
+    df.to_csv("out/SYNTHETIC_PRVDR_HSTRY.csv", index=False)
     # these are mostly static
     shutil.copy("sample-data/SYNTHETIC_CLM_ANSI_SGNTR.csv", "out/SYNTHETIC_CLM_ANSI_SGNTR.csv")
 
@@ -308,6 +311,57 @@ def get_drg_dgns_codes() -> list[int]:
     )[0]
 
 
+available_given_names = [
+    "Wallace",
+    "Gromit",
+    "Wednesday",
+    "Indiana",
+    "Tiana",
+    "Tony",
+    "Jack",
+    "Sally",
+    "Coraline",
+    "Victor",
+    "Chip",
+    "Colin",
+    "Nadia",
+    "",
+]
+available_family_names = [
+    "Madrigal",
+    "Stark",
+    "Addams",
+    "Jones",
+    "Rogers",
+    "Garcia",
+    "Frankenstein",
+    "",
+]
+available_provider_names = [
+    "CBS PHARMACY",
+    "WAL-PART PHARMACY",
+    "BITE AID PHARMACY",
+    "HEALTHCARE CENTER",
+    "",
+]
+available_provider_legal_names = [
+    "HEALTHCARE SERVICES LLC",
+    "CBS Health Corporation",
+    "WALPART INC",
+    "Bite Aid Corporation",
+    "",
+]
+available_provider_tx_codes = [
+    "2081P0301X",
+    "208VP0000X",
+    "207XX0004X",
+    "207VX0201X",
+    "207RC0000X",
+    "207QB0505X",
+]
+available_provider_type_codes = ["BP", "D", "N2", "UI", "BG", "A", "~"]
+
+
 def run_command(cmd, cwd=None):
     try:
         result = subprocess.run(
@@ -487,6 +541,7 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
         "CLM_PRFNL": {},
         "CLM_LINE_PRFNL": [],
         "CLM_LINE_RX": [],
+        "PRVDR_HSTRY": [],
     }
     clm_dt_sgntr = {}
     clm_dt_sgntr["CLM_DT_SGNTR_SK"] = "".join(random.choices(string.digits, k=12))
@@ -538,6 +593,8 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
         claim["CLM"]["CLM_SBMT_FRMT_CD"] = random.choice(generator.code_systems["CLM_SBMT_FRMT_CD"])
         claim["CLM"]["CLM_SBMTR_CNTRCT_NUM"] = "Z0001"
         claim["CLM"]["CLM_SBMTR_CNTRCT_PBP_NUM"] = random.choice(avail_pbp_nums)
+        claim["CLM"]["CLM_BENE_PMT_AMT"] = round(random.uniform(0, 1000), 2)
+        claim["CLM"]["CLM_OTHR_TP_PD_AMT"] = round(random.uniform(0, 1000), 2)
         claim_line = {}
         claim_line["CLM_UNIQ_ID"] = claim["CLM"]["CLM_UNIQ_ID"]
         claim_line["CLM_NUM_SK"] = claim["CLM"]["CLM_NUM_SK"]
@@ -562,6 +619,8 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
         claim_line["CLM_LINE_NUM"] = "1"
         claim_line["CLM_FROM_DT"] = claim["CLM"]["CLM_FROM_DT"]
         claim_line["CLM_LINE_RX_NUM"] = round(random.uniform(0, 100000), 2)
+        claim_line["CLM_LINE_GRS_CVRD_CST_TOT_AMT"] = round(random.uniform(0, 1000), 2)
+        claim_line["CLM_LINE_OTHR_TP_PD_AMT"] = round(random.uniform(0, 1000), 2)
 
         claim_line_rx = {}
         claim_line_rx["CLM_UNIQ_ID"] = claim["CLM"]["CLM_UNIQ_ID"]
@@ -611,9 +670,28 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
         claim_line_rx["CLM_LINE_SRVC_CST_AMT"] = round(random.uniform(1, 1000000), 2)
         claim_line_rx["CLM_LINE_SLS_TAX_AMT"] = round(random.uniform(1, 1000000), 2)
         claim_line_rx["CLM_PRCNG_EXCPTN_CD"] = random.choice(["", "O", "M"])
+        claim_line_rx["CLM_CMS_CALCD_MFTR_DSCNT_AMT"] = round(random.uniform(0, 1000), 2)
+        claim_line_rx["CLM_LINE_REBT_PASSTHRU_POS_AMT"] = round(random.uniform(0, 1000), 2)
+        claim_line_rx["CLM_PHRMCY_PRICE_DSCNT_AT_POS_AMT"] = round(random.uniform(0, 1000), 2)
+
+        provider_history = {}
+        provider_history["PRVDR_SK"] = "".join(random.choices(string.digits, k=10))
+        provider_history["PRVDR_HSTRY_EFCTV_DT"] = str(date.today())
+        provider_history["PRVDR_HSTRY_OBSLT_DT"] = "9999-12-31"
+        provider_history["PRVDR_1ST_NAME"] = random.choice(available_given_names)
+        provider_history["PRVDR_MDL_NAME"] = random.choice(available_given_names)
+        provider_history["PRVDR_LAST_NAME"] = random.choice(available_family_names)
+        provider_history["PRVDR_NAME"] = random.choice(available_provider_names)
+        provider_history["PRVDR_LGL_NAME"] = random.choice(available_provider_legal_names)
+        provider_history["PRVDR_NPI_NUM"] = provider_history["PRVDR_SK"]
+        provider_history["PRVDR_EMPLR_ID_NUM"] = "".join(random.choices(string.digits, k=10))
+        provider_history["PRVDR_OSCAR_NUM"] = "".join(random.choices(string.digits, k=6))
+        provider_history["PRVDR_TXNMY_CMPST_CD"] = random.choice(available_provider_tx_codes)
+        provider_history["PRVDR_TYPE_CD"] = random.choice(available_provider_type_codes)
 
         claim["CLM_LINE"].append(claim_line)
         claim["CLM_LINE_RX"].append(claim_line_rx)
+        claim["PRVDR_HSTRY"].append(provider_history)
 
     tob_code = random.choice(generator.code_systems["CLM_BILL_FREQ_CD"])
     claim["CLM"]["CLM_BILL_FAC_TYPE_CD"] = tob_code[0]
@@ -684,11 +762,13 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
     # generate claim header financial elements here
     claim["CLM"]["CLM_SBMT_CHRG_AMT"] = round(random.uniform(1, 1000000), 2)
     if clm_type_cd == 71 or clm_type_cd == 72:
-        claim["CLM"]["CLM_RFRG_PRVDR_PIN_NUM"] = random.choice([
-            9181272397,
-            9181272391,
-            918127239123,
-        ])
+        claim["CLM"]["CLM_RFRG_PRVDR_PIN_NUM"] = random.choice(
+            [
+                9181272397,
+                9181272391,
+                918127239123,
+            ]
+        )
     if clm_type_cd > 70 and clm_type_cd <= 82:
         claim["CLM"]["CLM_ALOWD_CHRG_AMT"] = round(random.uniform(1, 1000000), 2)
         claim["CLM"]["CLM_BENE_PD_AMT"] = round(random.uniform(1, 1000000), 2)
@@ -704,6 +784,26 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
     if clm_type_cd in (40, 71, 72, 81, 82):
         # be sure to check that DME claims meet the above.
         claim["CLM"]["CLM_PRVDR_PMT_AMT"] = round(random.uniform(0, 25), 2)
+
+    if clm_type_cd in (71, 72, 81, 82):
+        claim["CLM"]["CLM_BENE_INTRST_PD_AMT"] = round(random.uniform(0, 1000), 2)
+    if clm_type_cd in (10, 20, 30, 40, 50, 60, 61, 62, 63, 64):
+        claim["CLM"]["CLM_BENE_PMT_COINSRNC_AMT"] = round(random.uniform(0, 1000), 2)
+    if clm_type_cd in (10, 20, 30, 50, 60, 61, 62, 63, 64):
+        claim["CLM"]["CLM_BLOOD_CHRG_AMT"] = round(random.uniform(0, 500), 2)
+        claim["CLM"]["CLM_BLOOD_NCVRD_CHRG_AMT"] = round(random.uniform(0, 500), 2)
+    if clm_type_cd in (10, 20, 30, 40, 50, 60, 61, 62, 63, 64):
+        claim["CLM"]["CLM_COB_PTNT_RESP_AMT"] = round(random.uniform(0, 1000), 2)
+    if clm_type_cd in (81, 82):
+        claim["CLM"]["CLM_OTHR_TP_PD_AMT"] = round(random.uniform(0, 1000), 2)
+    if clm_type_cd in (10, 20, 30, 40, 50, 60, 61, 62, 63, 64, 71, 72, 81, 82):
+        claim["CLM"]["CLM_PRVDR_INTRST_PD_AMT"] = round(random.uniform(0, 1000), 2)
+    if clm_type_cd in (10, 20, 30, 40, 50, 60, 61, 62, 63, 64):
+        claim["CLM"]["CLM_PRVDR_OTAF_AMT"] = round(random.uniform(0, 1000), 2)
+    if clm_type_cd in (40, 50, 60, 61, 62, 63, 64, 81, 82):
+        claim["CLM"]["CLM_PRVDR_RMNG_DUE_AMT"] = round(random.uniform(0, 1000), 2)
+    if clm_type_cd in (10, 20, 30, 40, 50, 60, 61, 62, 63, 64):
+        claim["CLM"]["CLM_TOT_CNTRCTL_AMT"] = round(random.uniform(0, 10000), 2)
 
     claim["CLM_VAL"] = []
     # CLM_OPRTNL_DSPRTNT_AMT + CLM_OPRTNL_IME_AMT
@@ -840,6 +940,29 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
         institutional_parts["CLM_MDCR_IP_PPS_CPTL_TOT_AMT"] = round(random.uniform(0, 25), 2)
         institutional_parts["CLM_MDCR_IP_BENE_DDCTBL_AMT"] = round(random.uniform(0, 25), 2)
         institutional_parts["CLM_PPS_IND_CD"] = random.choice(["", "2"])
+
+        if clm_type_cd in (10, 20):
+            institutional_parts["CLM_FINL_STDZD_PYMT_AMT"] = round(random.uniform(0, 10000), 2)
+        if clm_type_cd == 20:
+            institutional_parts["CLM_HAC_RDCTN_PYMT_AMT"] = round(random.uniform(0, 5000), 2)
+            institutional_parts["CLM_HIPPS_MODEL_BNDLD_PMT_AMT"] = round(
+                random.uniform(0, 10000), 2
+            )
+            institutional_parts["CLM_SITE_NTRL_CST_BSD_PYMT_AMT"] = round(
+                random.uniform(0, 10000), 2
+            )
+            institutional_parts["CLM_SITE_NTRL_IP_PPS_PYMT_AMT"] = round(
+                random.uniform(0, 10000), 2
+            )
+            institutional_parts["CLM_SS_OUTLIER_STD_PYMT_AMT"] = round(random.uniform(0, 10000), 2)
+        if clm_type_cd in (20, 30, 60, 61, 62, 63, 64):
+            institutional_parts["CLM_HIPPS_READMSN_RDCTN_AMT"] = round(random.uniform(0, 5000), 2)
+            institutional_parts["CLM_HIPPS_VBP_AMT"] = round(random.uniform(0, 5000), 2)
+            institutional_parts["CLM_INSTNL_LOW_VOL_PMT_AMT"] = round(random.uniform(0, 10000), 2)
+            institutional_parts["CLM_MDCR_IP_1ST_YR_RATE_AMT"] = round(random.uniform(0, 10000), 2)
+            institutional_parts["CLM_MDCR_IP_SCND_YR_RATE_AMT"] = round(random.uniform(0, 10000), 2)
+            institutional_parts["CLM_PPS_MD_WVR_STDZD_VAL_AMT"] = round(random.uniform(0, 10000), 2)
+
         add_meta_timestamps(institutional_parts, claim["CLM"], max_date)
 
         if clm_type_cd == 10:
@@ -875,6 +998,8 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
         generator.code_systems["CLM_MDCR_PRFNL_PRVDR_ASGNMT_SW"]
     )
     claim["CLM_PRFNL"]["CLM_CLNCL_TRIL_NUM"] = str(random.randint(0, 10000))
+    if clm_type_cd in (71, 72, 81, 82):
+        claim["CLM_PRFNL"]["CLM_PRVDR_ACNT_RCVBL_OFST_AMT"] = round(random.uniform(0, 1000), 2)
     add_meta_timestamps(claim["CLM_PRFNL"], claim["CLM"], max_date)
 
     num_clm_lines = random.randint(1, 15)
@@ -931,10 +1056,12 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
 
             if random.randint(0, 10) == 6:
                 claim_line_prfnl["CLM_LINE_HCT_HGB_TYPE_CD"] = random.choice(["R1", "R2"])
-                claim_line_prfnl["CLM_LINE_CARR_CLNCL_LAB_NUM"] = random.choice([
-                    "11D1111111",
-                    "22D2222222",
-                ])
+                claim_line_prfnl["CLM_LINE_CARR_CLNCL_LAB_NUM"] = random.choice(
+                    [
+                        "11D1111111",
+                        "22D2222222",
+                    ]
+                )
 
             # these don't have much variance in our synthetic data, but they are not strictly
             # the same in actual data!
@@ -996,6 +1123,11 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
         claim_line["CLM_LINE_PRVDR_PMT_AMT"] = round(random.uniform(0, 1500), 2)
         claim_line["CLM_LINE_NCVRD_CHRG_AMT"] = round(random.uniform(0, 1500), 2)
 
+        claim_line["CLM_LINE_FINL_ACTN_IND"] = random.choice(["Y", "N"])
+        claim_line["CLM_LINE_LTST_CLM_IND"] = random.choice(["Y", "N"])
+        if clm_type_cd in (20, 30, 40, 50, 60, 61, 62, 63, 64, 71, 72, 81, 82):
+            claim_line["CLM_LINE_OTAF_AMT"] = round(random.uniform(0, 1000), 2)
+
         add_meta_timestamps(claim_line, claim["CLM"], max_date)
 
         claim_line_inst["CLM_LINE_INSTNL_ADJSTD_AMT"] = round(random.uniform(0, 1500), 2)
@@ -1024,17 +1156,19 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
         claim_line_inst["CLM_REV_CNTR_STUS_CD"] = random.choice(
             generator.code_systems["CLM_REV_CNTR_STUS_CD"]
         )
-        claim_line_inst["CLM_ANSI_SGNTR_SK"] = random.choice([
-            "8585",
-            "1",
-            "4365",
-            "1508",
-            "5555",
-            "9204",
-            "6857",
-            "5816",
-            "11978",
-        ])
+        claim_line_inst["CLM_ANSI_SGNTR_SK"] = random.choice(
+            [
+                "8585",
+                "1",
+                "4365",
+                "1508",
+                "5555",
+                "9204",
+                "6857",
+                "5816",
+                "11978",
+            ]
+        )
         add_meta_timestamps(claim_line_inst, claim["CLM"], max_date)
 
         claim_line["CLM_UNIQ_ID"] = claim["CLM"]["CLM_UNIQ_ID"]
@@ -1101,18 +1235,20 @@ def gen_pac_version_of_claim(claim, max_date):
     pac_claim["CLM_FISS"]["GEO_BENE_SK"] = pac_claim["CLM"]["GEO_BENE_SK"]
     pac_claim["CLM_FISS"]["CLM_NUM_SK"] = pac_claim["CLM"]["CLM_NUM_SK"]
     pac_claim["CLM_FISS"]["CLM_TYPE_CD"] = pac_claim["CLM"]["CLM_TYPE_CD"]
-    pac_claim["CLM_FISS"]["CLM_CRNT_STUS_CD"] = random.choice([
-        "A",
-        "F",
-        "I",
-        "S",
-        "M",
-        "P",
-        "R",
-        "D",
-        "T",
-        "U",
-    ])
+    pac_claim["CLM_FISS"]["CLM_CRNT_STUS_CD"] = random.choice(
+        [
+            "A",
+            "F",
+            "I",
+            "S",
+            "M",
+            "P",
+            "R",
+            "D",
+            "T",
+            "U",
+        ]
+    )
     add_meta_timestamps(pac_claim["CLM_FISS"], claim["CLM"], max_date)
 
     pac_claim["CLM_LCTN_HSTRY"] = {}
@@ -1121,22 +1257,24 @@ def gen_pac_version_of_claim(claim, max_date):
     pac_claim["CLM_LCTN_HSTRY"]["CLM_NUM_SK"] = pac_claim["CLM"]["CLM_NUM_SK"]
     pac_claim["CLM_LCTN_HSTRY"]["CLM_TYPE_CD"] = pac_claim["CLM"]["CLM_TYPE_CD"]
     pac_claim["CLM_LCTN_HSTRY"]["CLM_LCTN_CD_SQNC_NUM"] = "1"
-    pac_claim["CLM_LCTN_HSTRY"]["CLM_AUDT_TRL_STUS_CD"] = random.choice([
-        "A",
-        "F",
-        "I",
-        "S",
-        "M",
-        "P",
-        "R",
-        "D",
-        "T",
-        "U",
-        "1",
-        "2",
-        "4",
-        "8",
-    ])
+    pac_claim["CLM_LCTN_HSTRY"]["CLM_AUDT_TRL_STUS_CD"] = random.choice(
+        [
+            "A",
+            "F",
+            "I",
+            "S",
+            "M",
+            "P",
+            "R",
+            "D",
+            "T",
+            "U",
+            "1",
+            "2",
+            "4",
+            "8",
+        ]
+    )
     add_meta_timestamps(pac_claim["CLM_LCTN_HSTRY"], claim["CLM"], max_date)
 
     for i in range(len(pac_claim["CLM_LINE"])):
@@ -1339,6 +1477,7 @@ def main():
     CLM_PRFNL = []
     CLM_LINE_PRFNL = []
     CLM_LINE_RX = []
+    PRVDR_HSTRY = []
     pt_complete = 0
     min_claims = args.min_claims
     max_claims = args.max_claims
@@ -1370,6 +1509,7 @@ def main():
             CLM_DCMTN.append(claim["CLM_DCMTN"])
             if claim["CLM"]["CLM_TYPE_CD"] in (1, 2, 3, 4):
                 CLM_LINE_RX.extend(claim["CLM_LINE_RX"])
+                PRVDR_HSTRY.extend(claim["PRVDR_HSTRY"])
             else:
                 # Only add professional data for non-Part D claims
                 CLM_PRFNL.append(claim["CLM_PRFNL"])
@@ -1409,6 +1549,7 @@ def main():
         CLM_PRFNL,
         CLM_LINE_PRFNL,
         CLM_LINE_RX,
+        PRVDR_HSTRY,
     )
 
 

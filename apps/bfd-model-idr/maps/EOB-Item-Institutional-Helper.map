@@ -39,7 +39,13 @@ group addItem(source src: LineItemComponent, target tgt: BackboneElement){
 
     src.CLM_LINE_PRFNL_DME_PRICE_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addLineDMEPrice(amt, tgtAdjudication) "Add amount";
     src.CLM_LINE_DMERC_SCRN_SVGS_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addLineDMESvgs(amt, tgtAdjudication) "Add amount";
-
+    src.CLM_LINE_ADD_ON_PYMT_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addLineAddOnPayment(amt, tgtAdjudication) "Add amount";
+    src.CLM_LINE_NON_EHR_RDCTN_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addLineNonEHRReduction(amt, tgtAdjudication) "Add amount";
+    src.CLM_REV_CTR_TDAPA_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addLineTransitionalDrugAddOnPaymentAdjustment(amt, tgtAdjudication) "Add amount";
+    src.CLM_LINE_CARR_CLNCL_CHRG_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addLineCarrierClinicalCharge(amt, tgtAdjudication) "Add amount";
+    src.CLM_LINE_CARR_PSYCH_OT_LMT_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addLineTherapyAmountAppliedToLimit(amt, tgtAdjudication) "Add amount";
+    src.CLM_LINE_PRFNL_INTRST_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addLineProfessionalInterest(amt, tgtAdjudication) "Add amount";
+    src.CLM_MDCR_PRMRY_PYR_ALOWD_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addLinePrimaryPayerAllowed(amt, tgtAdjudication) "Add amount";
     src.CLM_LINE_INSTNL_REV_CTR_DT as revCtrDate -> tgt.servicedDate = revCtrDate "add revenue center date";
 
     //These fields never ended up getting mapped in v2. We should actively seek feedback on their placement. They appeared to all show up in extension in v1, anyway.
@@ -363,18 +369,12 @@ group addAdjudicationPartBDeductible(source src: String, target tgt: BackboneEle
 }
 
 group addAdjustedInstitutionalAmt(source src: String, target tgt: BackboneElement){
-    src -> tgt.category = create('CodeableConcept') as tgtCC then {
-        src -> tgtCC.coding = c("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication", "coinsurance") "Add coding 1";
-        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_INSTNL_ADJSTD_AMT") "Add coding 2";
-    } "add category";
+    src -> tgt.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_INSTNL_ADJSTD_AMT") "Add coding 2";
     src -> tgt.amount = create('Money') as tgtMoney then addMoney(src, tgtMoney) "Add Money";
 }
 
 group addAdjudicationReducedAmt(source src: String, target tgt: BackboneElement){
-    src -> tgt.category = create('CodeableConcept') as tgtCC then {
-        src -> tgtCC.coding = c("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication", "coinsurance") "Add coding 1";
-        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_INSTNL_RDCD_AMT") "Add coding 2";
-    } "add category";
+    src -> tgt.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_INSTNL_RDCD_AMT") "Add coding 2";
     src -> tgt.amount = create('Money') as tgtMoney then addMoney(src, tgtMoney) "Add Money";
 }
 
@@ -395,10 +395,7 @@ group addAdjudicationMSP2(source src: String, target tgt: BackboneElement){
 }
 
 group addAdjudicationRateAmt(source src: String, target tgt: BackboneElement){
-    src -> tgt.category = create('CodeableConcept') as tgtCC then {
-        src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/adjudication", "submitted") "Add coding 1";
-        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_INSTNL_RATE_AMT") "Add coding 2";
-    } "add category";
+    src -> tgt.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_INSTNL_RATE_AMT") "Add coding 2";
     src -> tgt.amount = create('Money') as tgtMoney then addMoney(src, tgtMoney) "Add Money";
 }
 
@@ -433,7 +430,40 @@ group addBenePrmyAmt(source src: String, target tgt: BackboneElement){
     } "add category";
     src -> tgt.amount = create('Money') as tgtMoney then addMoney(src, tgtMoney) "Add Money";
 }
+group addLineAddOnPayment(source src: String, target tgt: BackboneElement){
+    src -> tgt.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_ADD_ON_PYMT_AMT") "Add coding 2";
+    src -> tgt.amount = create('Money') as tgtMoney then addMoney(src, tgtMoney) "Add Money";
+}
 
+group addLineNonEHRReduction(source src: String, target tgt: BackboneElement){
+    src -> tgt.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_NON_EHR_RDCTN_AMT") "Add coding 2";
+    src -> tgt.amount = create('Money') as tgtMoney then addMoney(src, tgtMoney) "Add Money";
+}
+
+group addLineTransitionalDrugAddOnPaymentAdjustment(source src: String, target tgt: BackboneElement){
+    src -> tgt.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_REV_CTR_TDAPA_AMT") "Add coding 2";
+    src -> tgt.amount = create('Money') as tgtMoney then addMoney(src, tgtMoney) "Add Money";
+}
+
+group addLineCarrierClinicalCharge(source src: String, target tgt: BackboneElement){
+    src -> tgt.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_CARR_CLNCL_CHRG_AMT") "Add coding 2";
+    src -> tgt.amount = create('Money') as tgtMoney then addMoney(src, tgtMoney) "Add Money";
+}
+
+group addLineTherapyAmountAppliedToLimit(source src: String, target tgt: BackboneElement){
+    src -> tgt.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_CARR_PSYCH_OT_LMT_AMT") "Add coding 2";
+    src -> tgt.amount = create('Money') as tgtMoney then addMoney(src, tgtMoney) "Add Money";
+}
+
+group addLineProfessionalInterest(source src: String, target tgt: BackboneElement){
+    src -> tgt.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_PRFNL_INTRST_AMT") "Add coding 2";
+    src -> tgt.amount = create('Money') as tgtMoney then addMoney(src, tgtMoney) "Add Money";
+}
+
+group addLinePrimaryPayerAllowed(source src: String, target tgt: BackboneElement){
+    src -> tgt.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_MDCR_PRMRY_PYR_ALOWD_AMT") "Add coding 2";
+    src -> tgt.amount = create('Money') as tgtMoney then addMoney(src, tgtMoney) "Add Money";
+}
 group addRevenue(source src: LineItemComponent, target tgt: CodeableConcept){
     src.CLM_LINE_REV_CTR_CD as revCtrCode -> tgt.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD",revCtrCode) "Add coding";
     src.CLM_LINE_REV_CTR_CD as revCtrCode -> tgt.coding = create('Coding') as tgtCoding then {
