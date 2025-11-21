@@ -1171,8 +1171,7 @@ class IdrClaimItem(IdrBaseModel):
                         {line}.*,
                         ROW_NUMBER() OVER (
                             PARTITION BY {clm}.clm_uniq_id 
-                            ORDER BY {clm}.clm_uniq_id,
-                                {line}.clm_line_num
+                            ORDER BY {line}.clm_line_num
                         ) AS bfd_row_id
                     FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_line {line}
                     JOIN claims {clm} 
@@ -1187,8 +1186,7 @@ class IdrClaimItem(IdrBaseModel):
                         {prod}.*,
                         ROW_NUMBER() OVER (
                             PARTITION BY {clm}.clm_uniq_id 
-                            ORDER BY {clm}.clm_uniq_id,
-                                {prod}.clm_prod_type_cd,
+                            ORDER BY {prod}.clm_prod_type_cd,
                                 {prod}.clm_val_sqnc_num
                         ) AS bfd_row_id
                     FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_prod {prod}
@@ -1204,8 +1202,7 @@ class IdrClaimItem(IdrBaseModel):
                         {val}.*,
                         ROW_NUMBER() OVER (
                             PARTITION BY {clm}.clm_uniq_id 
-                            ORDER BY {clm}.clm_uniq_id,
-                                {val}.clm_val_sqnc_num
+                            ORDER BY {val}.clm_val_sqnc_num
                         ) AS bfd_row_id
                     FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_val {val}
                     JOIN claims {clm} 
@@ -1227,8 +1224,8 @@ class IdrClaimItem(IdrBaseModel):
                     JOIN claims {clm}
                         ON {rlt_cond}.clm_rlt_cond_sgntr_sk = {clm}.clm_rlt_cond_sgntr_sk
                     WHERE 
-                        {clm}.clm_rlt_cond_sgntr_sk <> 0
-                        AND {clm}.clm_rlt_cond_sgntr_sk <> 1
+                        {clm}.clm_rlt_cond_sgntr_sk != 0
+                        AND {clm}.clm_rlt_cond_sgntr_sk != 1
                 ),
                 claim_groups AS (
                     SELECT clm_uniq_id, bfd_row_id
