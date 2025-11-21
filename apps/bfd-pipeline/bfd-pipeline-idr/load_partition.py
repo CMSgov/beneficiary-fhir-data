@@ -36,9 +36,9 @@ class LoadPartitionGroup:
             return
 
         start = date(year=start_date.year, month=start_date.month, day=1)
-        end = start + self.date_interval - relativedelta(days=1)
         now = datetime.date(datetime.now(UTC))
         while start < now:
+            end = start + self.date_interval - relativedelta(days=1)
             start_str = start.strftime("%Y-%m-%d")
             end_str = end.strftime("%Y-%m-%d")
             yield LoadPartition(
@@ -48,9 +48,7 @@ class LoadPartitionGroup:
                 start,
                 end,
             )
-            next_end = end + self.date_interval
-            start = end + relativedelta(days=1)
-            end = next_end
+            start += self.date_interval
 
 
 DEFAULT_PARTITION = LoadPartition("default", [], PartitionType.DEFAULT, None, None)
