@@ -44,6 +44,10 @@ class Extractor(ABC, Generic[T]):  # noqa: UP046
     def reconnect(self) -> None:
         pass
 
+    @abstractmethod
+    def close(self) -> None:
+        pass
+
     def _coalesce_dates(self, cols: list[str]) -> list[str]:
         return [f"COALESCE({col}, '{DEFAULT_MIN_DATE}')" for col in cols]
 
@@ -168,6 +172,9 @@ class PostgresExtractor(Extractor[T]):
                 return self._transform([res])[0]
             return None
 
+    def close(self) -> None:
+        self.conn.close()
+
 
 class SnowflakeExtractor(Extractor[T]):
     def __init__(self, batch_size: int, cls: type[T], partition: LoadPartition) -> None:
@@ -229,3 +236,6 @@ class SnowflakeExtractor(Extractor[T]):
         finally:
             if cur:
                 cur.close()
+
+    def close(self) -> None:
+        self.conn.close()

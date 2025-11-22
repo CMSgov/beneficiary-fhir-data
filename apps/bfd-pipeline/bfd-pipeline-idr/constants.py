@@ -183,7 +183,7 @@ COMBINED_CLAIM_PARTITION = LoadPartitionGroup(
     | PartitionType.PROFESSIONAL
     | PartitionType.PART_D
     | PartitionType.PAC,
-    partition_range,
+    None,
 )
 
 
