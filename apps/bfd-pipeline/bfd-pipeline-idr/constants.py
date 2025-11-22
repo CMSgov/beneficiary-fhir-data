@@ -1,3 +1,5 @@
+import os
+
 from dateutil.relativedelta import relativedelta
 
 from load_partition import LoadPartitionGroup, PartitionType
@@ -8,7 +10,17 @@ MIN_CLAIM_LOAD_DATE = "2014-06-30"
 
 DEATH_DATE_CUTOFF_YEARS = 4
 
-partition_range = relativedelta(months=1)
+partition_size = os.environ.get("IDR_PARTITION_SIZE", "1")
+partition_type = os.environ.get("IDR_PARTITION_TYPE", "year")
+if partition_type not in ("month", "months", "year", "years"):
+    raise ValueError("invalid partition type " + partition_type)
+
+partition_size = int(partition_size)
+partition_range = (
+    relativedelta(months=partition_size)
+    if partition_type in ("month", "months")
+    else relativedelta(years=partition_size)
+)
 
 
 PART_D_PARTITIONS = [

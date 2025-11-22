@@ -74,7 +74,7 @@ def transform_null_int(value: int | None) -> int:
 
 
 def get_min_transaction_date(default_date: str = DEFAULT_MIN_DATE) -> datetime:
-    min_date = os.environ.get("PIPELINE_MIN_TRANSACTION_DATE")
+    min_date = os.environ.get("IDR_MIN_TRANSACTION_DATE")
     if min_date is not None:
         return datetime.strptime(min_date, "%Y-%m-%d").replace(tzinfo=UTC)
     return datetime.strptime(default_date, "%Y-%m-%d").replace(tzinfo=UTC)

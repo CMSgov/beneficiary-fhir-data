@@ -33,7 +33,7 @@ def main() -> None:
 
     # dict_builder = base.DictResult()
     # adapter = FutureAdapter(result_builder=dict_builder)
-    load_type = str(os.environ.get("LOAD_TYPE", "incremental"))
+    load_type = str(os.environ.get("IDR_LOAD_TYPE", "incremental"))
     logger.info("load_type %s", load_type)
     hamilton_driver = (
         driver.Builder()

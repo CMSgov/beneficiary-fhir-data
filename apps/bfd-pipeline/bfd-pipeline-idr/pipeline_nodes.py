@@ -1,7 +1,8 @@
 # ruff: noqa: ARG001
 # type: ignore [reportUntypedFunctionDecorator]
 
-from datetime import date, datetime
+import random
+from datetime import datetime
 
 from hamilton.function_modifiers import (
     config,
@@ -62,7 +63,10 @@ def _gen_partitioned_node_inputs(
     models_without_partitions = [
         (m, None) for m, partitions in models_and_partitions if not partitions
     ]
-    return models_with_partitions + models_without_partitions
+    res = models_with_partitions + models_without_partitions
+    # randomize to reduce contention on a single table
+    random.shuffle(res)
+    return res
 
 
 # INITIAL FLOW

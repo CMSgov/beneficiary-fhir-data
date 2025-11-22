@@ -15,11 +15,11 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "ruff>=0.13.2",
-    "uv>=0.8.22",
-    "pytest>=8.4.2",
-    "testcontainers>=4.13.1",
-    "pyright>=1.1.406",
+    "ruff>=0.14.6",
+    "uv>=0.9.11",
+    "pytest>=9.0.1",
+    "testcontainers>=4.13.3",
+    "pyright>=1.1.407",
 ]
 
 # [[tool.mypy.overrides]]

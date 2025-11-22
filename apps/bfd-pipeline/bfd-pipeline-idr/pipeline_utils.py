@@ -31,7 +31,6 @@ def get_progress(
     return PostgresExtractor(
         connection_string=connection_string, batch_size=1, cls=LoadProgress, partition=partition
     ).extract_single(
-        LoadProgress,
         LoadProgress.fetch_query(partition, False, start_time),
         {LoadProgress.query_placeholder(): table_name},
     )

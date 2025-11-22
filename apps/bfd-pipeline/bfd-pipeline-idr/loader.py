@@ -208,7 +208,8 @@ class BatchLoader:
             UPDATE idr.load_progress
             SET last_ts = %(last_ts)s,
                 last_id = %(last_id)s
-            WHERE table_name = %(table)s AND batch_partition = %(partition)s
+            WHERE table_name = %(table)s 
+                AND batch_partition = %(partition)s
             """,
                 {
                     "table": self.table,

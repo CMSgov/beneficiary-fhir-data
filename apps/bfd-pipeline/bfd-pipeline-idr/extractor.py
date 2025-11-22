@@ -3,19 +3,20 @@ import os
 from abc import ABC, abstractmethod
 from collections.abc import Iterator, Mapping, Sequence
 from datetime import datetime
+from typing import Generic
 
 import psycopg
 import snowflake.connector
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
-from psycopg.rows import class_row
+from psycopg.rows import dict_row
+from pydantic import TypeAdapter
 from snowflake.connector import DictCursor, SnowflakeConnection
 
 from constants import DEFAULT_MIN_DATE
 from load_partition import LoadPartition
 from model import (
     DbType,
-    IdrBaseModel,
     LoadProgress,
     T,
     get_min_transaction_date,
@@ -25,16 +26,18 @@ from timer import Timer
 logger = logging.getLogger(__name__)
 
 
-class Extractor(ABC):
+# TODO: UP046 seems to cause issues with pyright
+class Extractor(ABC, Generic[T]):  # noqa: UP046
     def __init__(self, cls: type[T], partition: LoadPartition) -> None:
         self.cls = cls
+        self.type_adapter = TypeAdapter(list[self.cls])
         self.partition = partition
         self.cursor_execute_timer = Timer("cursor_execute", cls, partition)
         self.cursor_fetch_timer = Timer("cursor_fetch", cls, partition)
         self.transform_timer = Timer("transform", cls, partition)
 
     @abstractmethod
-    def extract_many(self, sql: str, params: dict[str, DbType]) -> Iterator[Sequence[IdrBaseModel]]:
+    def extract_many(self, sql: str, params: dict[str, DbType]) -> Iterator[Sequence[T]]:
         pass
 
     @abstractmethod
@@ -61,7 +64,7 @@ class Extractor(ABC):
         self,
         progress: LoadProgress | None,
         start_time: datetime,
-    ) -> Iterator[Sequence[IdrBaseModel]]:
+    ) -> Iterator[Sequence[T]]:
         is_historical = progress is None or progress.is_historical()
         fetch_query = self.get_query(is_historical, start_time)
         # GREATEST doesn't work with nulls so we need to coalesce here
@@ -123,8 +126,16 @@ class Extractor(ABC):
             {"timestamp": compare_timestamp},
         )
 
+    def _transform(self, batch: list[dict[str, DbType]]) -> Sequence[T]:
+        self.transform_timer.start()
+        res = self.type_adapter.validate_python(
+            [{k.lower(): v for k, v in row.items()} for row in batch]
+        )
+        self.transform_timer.stop()
+        return res
 
-class PostgresExtractor(Extractor):
+
+class PostgresExtractor(Extractor[T]):
     def __init__(
         self, cls: type[T], partition: LoadPartition, connection_string: str, batch_size: int
     ) -> None:
@@ -140,22 +151,25 @@ class PostgresExtractor(Extractor):
         self,
         sql: str,
         params: Mapping[str, DbType],
-    ) -> Iterator[Sequence[IdrBaseModel]]:
+    ) -> Iterator[Sequence[T]]:
         logger.debug(sql)
-        with self.conn.cursor(row_factory=class_row(self.cls)) as cur:
+        with self.conn.cursor(row_factory=dict_row) as cur:
             cur.execute(sql, params)  # type: ignore
-            batch: Sequence[IdrBaseModel] = cur.fetchmany(self.batch_size)
+            batch = cur.fetchmany(self.batch_size)
             while len(batch) > 0:
-                yield batch
+                yield self._transform(batch)
                 batch = cur.fetchmany(self.batch_size)
 
-    def extract_single(self, cls: type[T], sql: str, params: dict[str, DbType]) -> T | None:
-        with self.conn.cursor(row_factory=class_row(cls)) as cur:
+    def extract_single(self, sql: str, params: dict[str, DbType]) -> T | None:
+        with self.conn.cursor(row_factory=dict_row) as cur:
             cur.execute(sql, params)  # type: ignore
-            return cur.fetchone()
+            res = cur.fetchone()
+            if res:
+                return self._transform([res])[0]
+            return None
 
 
-class SnowflakeExtractor(Extractor):
+class SnowflakeExtractor(Extractor[T]):
     def __init__(self, batch_size: int, cls: type[T], partition: LoadPartition) -> None:
         super().__init__(cls, partition)
         self.conn = SnowflakeExtractor._connect()
@@ -189,7 +203,7 @@ class SnowflakeExtractor(Extractor):
         self,
         sql: str,
         params: dict[str, DbType],
-    ) -> Iterator[Sequence[IdrBaseModel]]:
+    ) -> Iterator[Sequence[T]]:
         cur = None
         logger.debug(sql)
         try:
@@ -205,11 +219,7 @@ class SnowflakeExtractor(Extractor):
             self.cursor_fetch_timer.stop()
 
             while len(batch) > 0:  # type: ignore
-                self.transform_timer.start()
-                data = [self.cls(**{k.lower(): v for k, v in row.items()}) for row in batch]
-                self.transform_timer.stop()
-
-                yield data
+                yield self._transform(batch)
 
                 self.cursor_fetch_timer.start()
                 batch = cur.fetchmany(self.batch_size)  # type: ignore[assignment]
