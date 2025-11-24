@@ -226,9 +226,10 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
 
     cur = conn.execute("select * from idr.claim_date_signature order by clm_dt_sgntr_sk")
     assert cur.rowcount == 142
-    rows = cur.fetchmany(1)
+    rows = cur.fetchmany(2)
     assert rows[0]["clm_dt_sgntr_sk"] == 2334117069
     assert rows[0]["clm_cms_proc_dt"] == datetime.strptime(DEFAULT_MAX_DATE, "%Y-%m-%d").date()
+    assert rows[1]["clm_cms_proc_dt"] == datetime.strptime(DEFAULT_MAX_DATE, "%Y-%m-%d").date()
 
     cur = conn.execute("select * from idr.claim_professional order by clm_uniq_id")
     assert cur.rowcount == 86
