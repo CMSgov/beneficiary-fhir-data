@@ -10,17 +10,17 @@ MIN_CLAIM_LOAD_DATE = "2014-06-30"
 
 DEATH_DATE_CUTOFF_YEARS = 4
 
-partition_size = os.environ.get("IDR_PARTITION_SIZE", "1")
-partition_type = os.environ.get("IDR_PARTITION_TYPE", "year")
-if partition_type not in ("month", "months", "year", "years"):
-    raise ValueError("invalid partition type " + partition_type)
+partition_type = os.environ.get("IDR_PARTITION_TYPE", "year").lower()
 
-partition_size = int(partition_size)
-partition_range = (
-    relativedelta(months=partition_size)
-    if partition_type in ("month", "months")
-    else relativedelta(years=partition_size)
-)
+match partition_type:
+    case "year" | "years":
+        partition_range = relativedelta(years=1)
+    case "month" | "months":
+        partition_range = relativedelta(months=1)
+    case "day" | "days":
+        partition_range = relativedelta(days=1)
+    case _:
+        raise ValueError("invalid partition type " + partition_type)
 
 
 PART_D_PARTITIONS = [
@@ -154,7 +154,10 @@ INSTITUTIONAL_PAC_PARTITIONS = [
 
 PROFESSIONAL_ADJUDICATED_PARTITIONS = [
     LoadPartitionGroup(
-        "professional", [71, 72, 81, 82], PartitionType.PROFESSIONAL, partition_range
+        "professional",
+        [71, 72, 81, 82],
+        PartitionType.PROFESSIONAL,
+        partition_range,
     ),
 ]
 
