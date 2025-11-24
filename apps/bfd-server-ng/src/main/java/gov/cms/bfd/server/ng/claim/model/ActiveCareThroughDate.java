@@ -13,15 +13,17 @@ class ActiveCareThroughDate {
   @Column(name = "clm_actv_care_thru_dt")
   private Optional<LocalDate> activeCareThroughDate;
 
-  ExplanationOfBenefit.SupportingInformationComponent toFhir(
+  Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {
     if (activeCareThroughDate.isEmpty()) {
-      return null;
+      return Optional.empty();
     }
 
-    return supportingInfoFactory
-        .createSupportingInfo()
-        .setCategory(BlueButtonSupportingInfoCategory.CLM_ACTV_CARE_THRU_DT.toFhir())
-        .setTiming(new DateType().setValue(DateUtil.toDate(activeCareThroughDate.get())));
+    ExplanationOfBenefit.SupportingInformationComponent component =
+        supportingInfoFactory
+            .createSupportingInfo()
+            .setCategory(BlueButtonSupportingInfoCategory.CLM_ACTV_CARE_THRU_DT.toFhir())
+            .setTiming(new DateType().setValue(DateUtil.toDate(activeCareThroughDate.get())));
+    return Optional.of(component);
   }
 }
