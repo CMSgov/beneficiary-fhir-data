@@ -44,19 +44,22 @@
     </scm>
 
     <modules>
-        <module>bfd-shared-utils</module>
-        <module>bfd-shared-test-utils</module>
+        <module>bfd-db-migrator-ng</module>
+        <module>bfd-db-migrator</module>
         <module>bfd-model</module>
+        <module>bfd-ops</module>
         <module>bfd-pipeline</module>
         <module>bfd-server</module>
-        <module>bfd-server-openapi</module>
         <module>bfd-server-ng</module>
-        <module>bfd-db-migrator</module>
-        <module>bfd-db-migrator-ng</module>
-        <module>bfd-ops</module>
+        <module>bfd-server-openapi</module>
+        <module>bfd-shared-test-utils</module>
+        <module>bfd-shared-utils</module>
+        <module>report-aggregate</module>
     </modules>
 
     <properties>
+        <surefire.jvm.args/>
+        <failsafe.jvm.args/>
         <!-- As specified in
         http://docs.codehaus.org/display/MAVENUSER/POM+Element+for+Source+File+Encoding,
             this property is used by many different plugins to specify the source file
@@ -71,9 +74,9 @@
         <project.build.outputTimestamp>2025-11-24T18:24:46Z</project.build.outputTimestamp>
         <!-- Disable jacoco until automated coverage generation is desired -->
         <maven.jacoco.skip>true</maven.jacoco.skip>
-        <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
+        <sonar.coverageReportPaths>coverage.xml</sonar.coverageReportPaths>
         <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
-        <sonar.coverage.jacoco.xmlReportPaths>**/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+        <sonar.junit.reportPaths>**/TEST-*.xml</sonar.junit.reportPaths>
         <sonar.issue.ignore.multicriteria>e1,e2,e3,e4,e5</sonar.issue.ignore.multicriteria>
         <!-- rule for "JUnit5 test classes and methods should have default package visibility" -->
         <sonar.issue.ignore.multicriteria.e1.ruleKey>java:S5786</sonar.issue.ignore.multicriteria.e1.ruleKey>
@@ -931,7 +934,8 @@
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${maven.surefire.plugin.version}</version>
                     <configuration>
-                        <argLine>${surefire.jacoco.args}</argLine>
+                        <!-- Sets the VM argument line used when unit tests are run. -->
+                        <argLine>${jacoco.agent.args} ${surefire.jvm.args}</argLine>
                         <trimStackTrace>false</trimStackTrace>
                         <redirectTestOutputToFile>true</redirectTestOutputToFile>
                         <!-- run ITs w/multiple threads -->
@@ -954,7 +958,7 @@
                     <version>${maven.failsafe.plugin.version}</version>
                     <configuration>
                         <!-- Sets the VM argument line used when integration tests are run. -->
-                        <argLine>${failsafe.jacoco.args}</argLine>
+                        <argLine>${jacoco.agent.args} ${failsafe.jvm.args}</argLine>
                         <trimStackTrace>false</trimStackTrace>
                         <redirectTestOutputToFile>true</redirectTestOutputToFile>
                         <systemPropertyVariables>
@@ -1274,8 +1278,6 @@
                 </executions>
             </plugin>
             <plugin>
-                <!-- Will run the `*IT.java` integration tests in the modules, as part
-                    of the build. -->
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <executions>
@@ -1301,8 +1303,7 @@
                             <goal>prepare-agent</goal>
                         </goals>
                         <configuration>
-                            <destFile>${project.build.directory}/jacoco-ut.exec</destFile>
-                            <propertyName>surefire.jacoco.args</propertyName>
+                            <propertyName>jacoco.agent.args</propertyName>
                         </configuration>
                     </execution>
                     <execution>
@@ -1311,20 +1312,7 @@
                             <goal>prepare-agent-integration</goal>
                         </goals>
                         <configuration>
-                            <destFile>${project.build.directory}/jacoco-it.exec</destFile> <!-- default value added for symmetry with jacoco-ut -->
-                            <propertyName>failsafe.jacoco.args</propertyName>
-                        </configuration>
-                    </execution>
-                    <!-- Generate aggregate XML files -->
-                    <execution>
-                        <id>jacoco-report-aggregate</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>report-aggregate</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.reporting.outputDirectory}/jacoco-aggregate</outputDirectory>
-                            <formats>XML</formats>
+                            <propertyName>jacoco.agent.args</propertyName>
                         </configuration>
                     </execution>
                 </executions>
@@ -1373,5 +1361,4 @@
             </properties>
         </profile>
     </profiles>
-
 </project>

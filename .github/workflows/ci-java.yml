@@ -115,23 +115,43 @@ jobs:
             SONAR_TOKEN=/bfd/platform/sonar/sensitive/service_account_access_key
 
       - name: 'Run Maven Build'
-        env:
-          BFD_BRANCH: ${{ inputs.branch }}
         run: |
-          mvn clean verify ${{ github.event_name != 'merge_group' && 'org.sonarsource.scanner.maven:sonar-maven-plugin:sonar' || null }} \
+          mvn clean install \
           --threads 1C \
           --no-transfer-progress \
           -Dapidocgen.skip=false \
           -Dmaven.build.cache.enabled=false \
-          -Dmaven.jacoco.skip=false \
-          -Dsonar.ci.autoconfig.disabled=true ${{ inputs.branch != null && '-Dsonar.branch.name=$BFD_BRANCH' || null }} \
-          -Dsonar.host.url="$SONAR_HOST_URL" \
-          -Dsonar.projectKey="$SONAR_PROJECT_KEY" \
-          -Dsonar.projectVersion="$(git log -1 --format=%H)" \
-          -Dsonar.qualitygate.wait=true \
-          -Dsonar.token="$SONAR_TOKEN" \
-          -Dsonar.java.jdkHome=${{ env.JAVA_HOME }} \
-          -Dsonar.java.skipUnchanged=false
+          -Dmaven.jacoco.skip=false
         working-directory: ./apps
+
+      - name: 'Convert JaCoCo to Generic Coverage'
+        if: ${{ github.event_name != 'merge_group' }}
+        run: |
+          python utils/scripts/jacoco-to-generic.py \
+          --src-root $(pwd) \
+          --in report-aggregate/target/site/jacoco-aggregate/jacoco.xml \
+          --out coverage.xml
+        working-directory: ./apps
+
+      - name: 'Upload Analysis'
+        if: ${{ github.event_name != 'merge_group' }}
+        env:
+          BFD_BRANCH: ${{ inputs.branch }}
+        run: |
+          mvn -X org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+            -DskipITs \
+            -DskipTests \
+            --no-transfer-progress \
+            -Dsonar.ci.autoconfig.disabled=true \
+            -Dsonar.host.url="$SONAR_HOST_URL" \
+            -Dsonar.projectKey="$SONAR_PROJECT_KEY" \
+            -Dsonar.projectVersion="$(git log -1 --format=%H)" \
+            -Dsonar.qualitygate.wait=true \
+            -Dsonar.token="$SONAR_TOKEN" \
+            -Dsonar.java.jdkHome="${JAVA_HOME}" \
+            -Dsonar.coverageReportPaths=coverage.xml \
+            -Dsonar.junit.reportPaths="**/TEST-*.xml"
+        working-directory: ./apps
+
 
 # TODO: Conformance testing is currently missing from mvn-verify. BFD-3245 will re-examine conformance regression testing in BFD.
