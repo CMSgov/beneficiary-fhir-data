@@ -6,8 +6,13 @@ from typing import Annotated, TypeVar
 
 from pydantic import BaseModel, BeforeValidator
 
-from constants import CLAIM_TYPE_CODES, DEFAULT_MAX_DATE, DEFAULT_MIN_DATE, PART_D_CLAIM_TYPE_CODES, \
-    ALTERNATE_DEFAULT_DATE
+from constants import (
+    ALTERNATE_DEFAULT_DATE,
+    CLAIM_TYPE_CODES,
+    DEFAULT_MAX_DATE,
+    DEFAULT_MIN_DATE,
+    PART_D_CLAIM_TYPE_CODES,
+)
 
 type DbType = str | float | int | bool | date | datetime
 
@@ -24,7 +29,10 @@ def transform_null_date_to_min(value: date | None) -> date:
     return value
 
 def transform_null_or_default_date_to_max(value: date | None) -> date:
-    if value is None or value in (date.fromisoformat(DEFAULT_MIN_DATE), date.fromisoformat(ALTERNATE_DEFAULT_DATE)) :
+    if value is None or value in (
+        date.fromisoformat(ALTERNATE_DEFAULT_DATE),
+        date.fromisoformat(DEFAULT_MIN_DATE),
+    ):
         return date.fromisoformat(DEFAULT_MAX_DATE)
     return value
 
