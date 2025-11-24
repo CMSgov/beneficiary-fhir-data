@@ -138,7 +138,7 @@ jobs:
         env:
           BFD_BRANCH: ${{ inputs.branch }}
         run: |
-          mvn -X org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+          mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
             -DskipITs \
             -DskipTests \
             --no-transfer-progress \
