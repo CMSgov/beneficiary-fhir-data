@@ -28,6 +28,7 @@ def transform_null_date_to_min(value: date | None) -> date:
         return date.fromisoformat(DEFAULT_MIN_DATE)
     return value
 
+
 def transform_null_or_default_date_to_max(value: date | None) -> date:
     if value is None or value in (
         date.fromisoformat(ALTERNATE_DEFAULT_DATE),
@@ -35,6 +36,7 @@ def transform_null_or_default_date_to_max(value: date | None) -> date:
     ):
         return date.fromisoformat(DEFAULT_MAX_DATE)
     return value
+
 
 def transform_null_string(value: str | None) -> str:
     if value is None:
