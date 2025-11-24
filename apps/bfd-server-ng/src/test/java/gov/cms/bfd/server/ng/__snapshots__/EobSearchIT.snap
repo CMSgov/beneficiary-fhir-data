@@ -1118,34 +1118,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET]=[
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "CLM_QLFY_STAY_FROM_DT",
-            "display" : "Qualified Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 12,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_THRU_DT",
-            "display" : "Qualified Stay Thru Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 13,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
             "code" : "pointoforigin",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -1160,7 +1132,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -1178,7 +1150,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -1195,7 +1167,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -1215,7 +1187,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -1229,7 +1201,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 18
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -1249,7 +1221,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
           } ]
         },
-        "sequence" : 19
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -1269,7 +1241,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
           } ]
         },
-        "sequence" : 20
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
@@ -2387,34 +2359,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET_WITH_SEARCH]=[
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "CLM_QLFY_STAY_FROM_DT",
-            "display" : "Qualified Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 12,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_THRU_DT",
-            "display" : "Qualified Stay Thru Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 13,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
             "code" : "pointoforigin",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -2429,7 +2373,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET_WITH_SEARCH]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -2447,7 +2391,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET_WITH_SEARCH]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -2464,7 +2408,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET_WITH_SEARCH]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -2484,7 +2428,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET_WITH_SEARCH]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -2498,7 +2442,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET_WITH_SEARCH]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 18
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -2518,7 +2462,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET_WITH_SEARCH]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
           } ]
         },
-        "sequence" : 19
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -2538,7 +2482,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET_WITH_SEARCH]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
           } ]
         },
-        "sequence" : 20
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
@@ -3656,34 +3600,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[POST]=[
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "CLM_QLFY_STAY_FROM_DT",
-            "display" : "Qualified Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 12,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_THRU_DT",
-            "display" : "Qualified Stay Thru Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 13,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
             "code" : "pointoforigin",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -3698,7 +3614,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[POST]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -3716,7 +3632,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[POST]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -3733,7 +3649,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[POST]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -3753,7 +3669,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[POST]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -3767,7 +3683,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[POST]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 18
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -3787,7 +3703,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[POST]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
           } ]
         },
-        "sequence" : 19
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -3807,7 +3723,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[POST]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
           } ]
         },
-        "sequence" : 20
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
@@ -4925,34 +4841,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset0]=[
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "CLM_QLFY_STAY_FROM_DT",
-            "display" : "Qualified Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 12,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_THRU_DT",
-            "display" : "Qualified Stay Thru Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 13,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
             "code" : "pointoforigin",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -4967,7 +4855,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset0]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -4985,7 +4873,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset0]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -5002,7 +4890,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset0]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -5022,7 +4910,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset0]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -5036,7 +4924,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset0]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 18
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -5056,7 +4944,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset0]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
           } ]
         },
-        "sequence" : 19
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -5076,7 +4964,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset0]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
           } ]
         },
-        "sequence" : 20
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
@@ -6195,34 +6083,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset1]=[
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "CLM_QLFY_STAY_FROM_DT",
-            "display" : "Qualified Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 12,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_THRU_DT",
-            "display" : "Qualified Stay Thru Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 13,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
             "code" : "pointoforigin",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -6237,7 +6097,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset1]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -6255,7 +6115,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset1]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -6272,7 +6132,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset1]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -6292,7 +6152,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset1]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -6306,7 +6166,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset1]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 18
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -6326,7 +6186,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset1]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
           } ]
         },
-        "sequence" : 19
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -6346,7 +6206,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset1]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
           } ]
         },
-        "sequence" : 20
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
@@ -7465,34 +7325,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "CLM_QLFY_STAY_FROM_DT",
-            "display" : "Qualified Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 12,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_THRU_DT",
-            "display" : "Qualified Stay Thru Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 13,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
             "code" : "pointoforigin",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -7507,7 +7339,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -7525,7 +7357,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -7542,7 +7374,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -7562,7 +7394,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -7576,7 +7408,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 18
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -7596,7 +7428,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
           } ]
         },
-        "sequence" : 19
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -7616,7 +7448,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
           } ]
         },
-        "sequence" : 20
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
@@ -8190,34 +8022,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
         },
         "sequence" : 10,
         "timingDate" : "2021-10-03"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_FROM_DT",
-            "display" : "Qualified Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 11,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_THRU_DT",
-            "display" : "Qualified Stay Thru Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 12,
-        "timingDate" : "9999-12-31"
       } ],
       "total" : [ {
         "amount" : {
@@ -8768,34 +8572,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
         },
         "sequence" : 10,
         "timingDate" : "2021-10-03"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_FROM_DT",
-            "display" : "Qualified Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 11,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_THRU_DT",
-            "display" : "Qualified Stay Thru Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 12,
-        "timingDate" : "9999-12-31"
       } ],
       "total" : [ {
         "amount" : {
@@ -9343,34 +9119,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
         },
         "sequence" : 10,
         "timingDate" : "2021-10-03"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_FROM_DT",
-            "display" : "Qualified Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 11,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_THRU_DT",
-            "display" : "Qualified Stay Thru Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 12,
-        "timingDate" : "9999-12-31"
       } ],
       "total" : [ {
         "amount" : {
@@ -10485,34 +10233,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "CLM_QLFY_STAY_FROM_DT",
-            "display" : "Qualified Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 12,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_THRU_DT",
-            "display" : "Qualified Stay Thru Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 13,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
             "code" : "pointoforigin",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -10527,7 +10247,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -10545,7 +10265,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -10562,7 +10282,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -10582,7 +10302,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -10596,7 +10316,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 18
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -10616,7 +10336,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
           } ]
         },
-        "sequence" : 19
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -10636,7 +10356,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
           } ]
         },
-        "sequence" : 20
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
@@ -11210,34 +10930,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
         },
         "sequence" : 10,
         "timingDate" : "2021-10-03"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_FROM_DT",
-            "display" : "Qualified Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 11,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_THRU_DT",
-            "display" : "Qualified Stay Thru Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 12,
-        "timingDate" : "9999-12-31"
       } ],
       "total" : [ {
         "amount" : {
@@ -11788,34 +11480,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
         },
         "sequence" : 10,
         "timingDate" : "2021-10-03"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_FROM_DT",
-            "display" : "Qualified Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 11,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_THRU_DT",
-            "display" : "Qualified Stay Thru Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 12,
-        "timingDate" : "9999-12-31"
       } ],
       "total" : [ {
         "amount" : {
@@ -12363,34 +12027,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
         },
         "sequence" : 10,
         "timingDate" : "2021-10-03"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_FROM_DT",
-            "display" : "Qualified Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 11,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_THRU_DT",
-            "display" : "Qualified Stay Thru Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 12,
-        "timingDate" : "9999-12-31"
       } ],
       "total" : [ {
         "amount" : {
@@ -13505,34 +13141,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "CLM_QLFY_STAY_FROM_DT",
-            "display" : "Qualified Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 12,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_THRU_DT",
-            "display" : "Qualified Stay Thru Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 13,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
             "code" : "pointoforigin",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -13547,7 +13155,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -13565,7 +13173,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -13582,7 +13190,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -13602,7 +13210,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -13616,7 +13224,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 18
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -13636,7 +13244,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
           } ]
         },
-        "sequence" : 19
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -13656,7 +13264,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
           } ]
         },
-        "sequence" : 20
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
@@ -14230,34 +13838,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
         },
         "sequence" : 10,
         "timingDate" : "2021-10-03"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_FROM_DT",
-            "display" : "Qualified Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 11,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_THRU_DT",
-            "display" : "Qualified Stay Thru Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 12,
-        "timingDate" : "9999-12-31"
       } ],
       "total" : [ {
         "amount" : {
@@ -14808,34 +14388,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
         },
         "sequence" : 10,
         "timingDate" : "2021-10-03"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_FROM_DT",
-            "display" : "Qualified Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 11,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_THRU_DT",
-            "display" : "Qualified Stay Thru Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 12,
-        "timingDate" : "9999-12-31"
       } ],
       "total" : [ {
         "amount" : {
@@ -15383,34 +14935,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
         },
         "sequence" : 10,
         "timingDate" : "2021-10-03"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_FROM_DT",
-            "display" : "Qualified Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 11,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_THRU_DT",
-            "display" : "Qualified Stay Thru Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 12,
-        "timingDate" : "9999-12-31"
       } ],
       "total" : [ {
         "amount" : {
@@ -16525,34 +16049,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WITH_SEARCH_WithSy
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "CLM_QLFY_STAY_FROM_DT",
-            "display" : "Qualified Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 12,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_THRU_DT",
-            "display" : "Qualified Stay Thru Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 13,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
             "code" : "pointoforigin",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -16567,7 +16063,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WITH_SEARCH_WithSy
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -16585,7 +16081,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WITH_SEARCH_WithSy
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -16602,7 +16098,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WITH_SEARCH_WithSy
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -16622,7 +16118,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WITH_SEARCH_WithSy
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -16636,7 +16132,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WITH_SEARCH_WithSy
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 18
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -16656,7 +16152,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WITH_SEARCH_WithSy
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
           } ]
         },
-        "sequence" : 19
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -16676,7 +16172,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WITH_SEARCH_WithSy
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
           } ]
         },
-        "sequence" : 20
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
@@ -17250,34 +16746,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WITH_SEARCH_WithSy
         },
         "sequence" : 10,
         "timingDate" : "2021-10-03"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_FROM_DT",
-            "display" : "Qualified Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 11,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_THRU_DT",
-            "display" : "Qualified Stay Thru Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 12,
-        "timingDate" : "9999-12-31"
       } ],
       "total" : [ {
         "amount" : {
@@ -18395,34 +17863,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WithSystemTag_Adju
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "CLM_QLFY_STAY_FROM_DT",
-            "display" : "Qualified Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 12,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_THRU_DT",
-            "display" : "Qualified Stay Thru Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 13,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
             "code" : "pointoforigin",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -18437,7 +17877,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WithSystemTag_Adju
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -18455,7 +17895,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WithSystemTag_Adju
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -18472,7 +17912,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WithSystemTag_Adju
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -18492,7 +17932,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WithSystemTag_Adju
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -18506,7 +17946,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WithSystemTag_Adju
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 18
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -18526,7 +17966,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WithSystemTag_Adju
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
           } ]
         },
-        "sequence" : 19
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -18546,7 +17986,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WithSystemTag_Adju
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
           } ]
         },
-        "sequence" : 20
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
@@ -19120,34 +18560,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WithSystemTag_Adju
         },
         "sequence" : 10,
         "timingDate" : "2021-10-03"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_FROM_DT",
-            "display" : "Qualified Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 11,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_THRU_DT",
-            "display" : "Qualified Stay Thru Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 12,
-        "timingDate" : "9999-12-31"
       } ],
       "total" : [ {
         "amount" : {
@@ -20265,34 +19677,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[POST_WithSystemTag_Adj
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "CLM_QLFY_STAY_FROM_DT",
-            "display" : "Qualified Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 12,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_THRU_DT",
-            "display" : "Qualified Stay Thru Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 13,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
             "code" : "pointoforigin",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -20307,7 +19691,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[POST_WithSystemTag_Adj
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -20325,7 +19709,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[POST_WithSystemTag_Adj
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -20342,7 +19726,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[POST_WithSystemTag_Adj
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -20362,7 +19746,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[POST_WithSystemTag_Adj
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -20376,7 +19760,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[POST_WithSystemTag_Adj
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 18
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -20396,7 +19780,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[POST_WithSystemTag_Adj
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
           } ]
         },
-        "sequence" : 19
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -20416,7 +19800,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[POST_WithSystemTag_Adj
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
           } ]
         },
-        "sequence" : 20
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
@@ -20990,34 +20374,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[POST_WithSystemTag_Adj
         },
         "sequence" : 10,
         "timingDate" : "2021-10-03"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_FROM_DT",
-            "display" : "Qualified Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 11,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_THRU_DT",
-            "display" : "Qualified Stay Thru Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 12,
-        "timingDate" : "9999-12-31"
       } ],
       "total" : [ {
         "amount" : {
@@ -21585,34 +20941,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[GET_WITH_SEARCH_WithTag_Em
         },
         "sequence" : 10,
         "timingDate" : "2021-10-03"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_FROM_DT",
-            "display" : "Qualified Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 11,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_THRU_DT",
-            "display" : "Qualified Stay Thru Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 12,
-        "timingDate" : "9999-12-31"
       } ],
       "total" : [ {
         "amount" : {
@@ -22160,34 +21488,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[GET_WITH_SEARCH_WithTag_Em
         },
         "sequence" : 10,
         "timingDate" : "2021-10-03"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_FROM_DT",
-            "display" : "Qualified Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 11,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_THRU_DT",
-            "display" : "Qualified Stay Thru Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 12,
-        "timingDate" : "9999-12-31"
       } ],
       "total" : [ {
         "amount" : {
@@ -22752,34 +22052,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[GET_WithTag_EmptyResult]=[
         },
         "sequence" : 10,
         "timingDate" : "2021-10-03"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_FROM_DT",
-            "display" : "Qualified Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 11,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_THRU_DT",
-            "display" : "Qualified Stay Thru Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 12,
-        "timingDate" : "9999-12-31"
       } ],
       "total" : [ {
         "amount" : {
@@ -23327,34 +22599,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[GET_WithTag_EmptyResult]=[
         },
         "sequence" : 10,
         "timingDate" : "2021-10-03"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_FROM_DT",
-            "display" : "Qualified Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 11,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_THRU_DT",
-            "display" : "Qualified Stay Thru Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 12,
-        "timingDate" : "9999-12-31"
       } ],
       "total" : [ {
         "amount" : {
@@ -23919,34 +23163,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[POST_WithTag_EmptyResult]=
         },
         "sequence" : 10,
         "timingDate" : "2021-10-03"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_FROM_DT",
-            "display" : "Qualified Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 11,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_THRU_DT",
-            "display" : "Qualified Stay Thru Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 12,
-        "timingDate" : "9999-12-31"
       } ],
       "total" : [ {
         "amount" : {
@@ -24494,34 +23710,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[POST_WithTag_EmptyResult]=
         },
         "sequence" : 10,
         "timingDate" : "2021-10-03"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_FROM_DT",
-            "display" : "Qualified Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 11,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_THRU_DT",
-            "display" : "Qualified Stay Thru Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 12,
-        "timingDate" : "9999-12-31"
       } ],
       "total" : [ {
         "amount" : {
@@ -25636,34 +24824,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WITH_SEARCH_WithTag_Adjudic
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "CLM_QLFY_STAY_FROM_DT",
-            "display" : "Qualified Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 12,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_THRU_DT",
-            "display" : "Qualified Stay Thru Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 13,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
             "code" : "pointoforigin",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -25678,7 +24838,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WITH_SEARCH_WithTag_Adjudic
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -25696,7 +24856,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WITH_SEARCH_WithTag_Adjudic
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -25713,7 +24873,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WITH_SEARCH_WithTag_Adjudic
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -25733,7 +24893,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WITH_SEARCH_WithTag_Adjudic
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -25747,7 +24907,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WITH_SEARCH_WithTag_Adjudic
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 18
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -25767,7 +24927,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WITH_SEARCH_WithTag_Adjudic
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
           } ]
         },
-        "sequence" : 19
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -25787,7 +24947,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WITH_SEARCH_WithTag_Adjudic
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
           } ]
         },
-        "sequence" : 20
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
@@ -26361,34 +25521,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WITH_SEARCH_WithTag_Adjudic
         },
         "sequence" : 10,
         "timingDate" : "2021-10-03"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_FROM_DT",
-            "display" : "Qualified Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 11,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_THRU_DT",
-            "display" : "Qualified Stay Thru Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 12,
-        "timingDate" : "9999-12-31"
       } ],
       "total" : [ {
         "amount" : {
@@ -27506,34 +26638,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WithTag_Adjudicated]=[
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "CLM_QLFY_STAY_FROM_DT",
-            "display" : "Qualified Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 12,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_THRU_DT",
-            "display" : "Qualified Stay Thru Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 13,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
             "code" : "pointoforigin",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -27548,7 +26652,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WithTag_Adjudicated]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -27566,7 +26670,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WithTag_Adjudicated]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -27583,7 +26687,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WithTag_Adjudicated]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -27603,7 +26707,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WithTag_Adjudicated]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -27617,7 +26721,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WithTag_Adjudicated]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 18
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -27637,7 +26741,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WithTag_Adjudicated]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
           } ]
         },
-        "sequence" : 19
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -27657,7 +26761,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WithTag_Adjudicated]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
           } ]
         },
-        "sequence" : 20
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
@@ -28231,34 +27335,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WithTag_Adjudicated]=[
         },
         "sequence" : 10,
         "timingDate" : "2021-10-03"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_FROM_DT",
-            "display" : "Qualified Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 11,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_THRU_DT",
-            "display" : "Qualified Stay Thru Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 12,
-        "timingDate" : "9999-12-31"
       } ],
       "total" : [ {
         "amount" : {
@@ -29376,34 +28452,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[POST_WithTag_Adjudicated]=[
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "CLM_QLFY_STAY_FROM_DT",
-            "display" : "Qualified Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 12,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_THRU_DT",
-            "display" : "Qualified Stay Thru Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 13,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
             "code" : "pointoforigin",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -29418,7 +28466,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[POST_WithTag_Adjudicated]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -29436,7 +28484,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[POST_WithTag_Adjudicated]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -29453,7 +28501,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[POST_WithTag_Adjudicated]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -29473,7 +28521,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[POST_WithTag_Adjudicated]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -29487,7 +28535,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[POST_WithTag_Adjudicated]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 18
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -29507,7 +28555,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[POST_WithTag_Adjudicated]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
           } ]
         },
-        "sequence" : 19
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -29527,7 +28575,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[POST_WithTag_Adjudicated]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
           } ]
         },
-        "sequence" : 20
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
@@ -30101,34 +29149,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[POST_WithTag_Adjudicated]=[
         },
         "sequence" : 10,
         "timingDate" : "2021-10-03"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_FROM_DT",
-            "display" : "Qualified Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 11,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_THRU_DT",
-            "display" : "Qualified Stay Thru Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 12,
-        "timingDate" : "9999-12-31"
       } ],
       "total" : [ {
         "amount" : {

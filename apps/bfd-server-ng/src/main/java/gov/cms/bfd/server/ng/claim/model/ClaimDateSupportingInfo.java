@@ -3,6 +3,8 @@ package gov.cms.bfd.server.ng.claim.model;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 @Embeddable
@@ -19,15 +21,17 @@ class ClaimDateSupportingInfo {
 
   List<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {
-    return List.of(
-        admissionPeriod.toFhir(supportingInfoFactory),
-        claimSubmissionDate.toFhir(supportingInfoFactory),
-        nchWeeklyProcessingDate.toFhir(supportingInfoFactory),
-        activeCareThroughDate.toFhir(supportingInfoFactory),
-        noncoveredFromDate.toFhir(supportingInfoFactory),
-        noncoveredThroughDate.toFhir(supportingInfoFactory),
-        benefitsExhaustedDate.toFhir(supportingInfoFactory),
-        qualifyStayFromDate.toFhir(supportingInfoFactory),
-        qualifyStayThruDate.toFhir(supportingInfoFactory));
+    return Stream.of(
+            admissionPeriod.toFhir(supportingInfoFactory),
+            claimSubmissionDate.toFhir(supportingInfoFactory),
+            nchWeeklyProcessingDate.toFhir(supportingInfoFactory),
+            activeCareThroughDate.toFhir(supportingInfoFactory),
+            noncoveredFromDate.toFhir(supportingInfoFactory),
+            noncoveredThroughDate.toFhir(supportingInfoFactory),
+            benefitsExhaustedDate.toFhir(supportingInfoFactory),
+            qualifyStayFromDate.toFhir(supportingInfoFactory),
+            qualifyStayThruDate.toFhir(supportingInfoFactory))
+        .filter(Objects::nonNull)
+        .toList();
   }
 }
