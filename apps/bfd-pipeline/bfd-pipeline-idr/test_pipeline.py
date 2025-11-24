@@ -20,6 +20,8 @@ from testcontainers.postgres import PostgresContainer  # type: ignore
 from load_synthetic import load_from_csv
 from pipeline import main
 
+from constants import DEFAULT_MAX_DATE
+
 # ryuk throws a 500 or 404 error for some reason
 # seems to have issues with podman https://github.com/testcontainers/testcontainers-python/issues/753
 testcontainers_config.ryuk_disabled = True
@@ -226,6 +228,7 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
     assert cur.rowcount == 142
     rows = cur.fetchmany(1)
     assert rows[0]["clm_dt_sgntr_sk"] == 2334117069
+    assert rows[0]["clm_cms_proc_dt"] == datetime.strptime(DEFAULT_MAX_DATE, "%Y-%m-%d").date()
 
     cur = conn.execute("select * from idr.claim_professional order by clm_uniq_id")
     assert cur.rowcount == 86
