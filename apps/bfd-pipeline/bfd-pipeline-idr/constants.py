@@ -148,7 +148,7 @@ INSTITUTIONAL_PAC_PARTITIONS = [
             2900,
         ],
         PartitionType.INSTITUTIONAL | PartitionType.PAC,
-        None,
+        partition_range,
     )
 ]
 
@@ -166,7 +166,7 @@ PROFESSIONAL_PAC_PARTITIONS = [
         "professional_pac",
         [1700, 1800, 2700, 2800],
         PartitionType.PROFESSIONAL | PartitionType.PAC,
-        None,
+        partition_range,
     )
 ]
 
