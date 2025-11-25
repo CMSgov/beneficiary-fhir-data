@@ -188,17 +188,3 @@ COMBINED_CLAIM_PARTITION = LoadPartitionGroup(
     | PartitionType.PAC,
     None,
 )
-
-
-CLAIM_AUX_TABLES = [
-    "idr_claim_initial",
-    "idr_claim_institutional",
-    "idr_claim_date_signature",
-    "idr_claim_fiss",
-    "idr_claim_item",
-    "idr_claim_line_institutional",
-    "idr_claim_ansi_signature",
-    "idr_claim_professional",
-    "idr_claim_line_professional",
-    "idr_claim_line_rx",
-]

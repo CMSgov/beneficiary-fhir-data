@@ -1,7 +1,6 @@
 import os
 import shutil
 import subprocess
-import sys
 import time
 from collections.abc import Generator
 from datetime import UTC, datetime, timedelta
@@ -10,7 +9,6 @@ from typing import cast
 
 import psycopg
 import pytest
-import ray
 from psycopg.rows import DictRow, dict_row
 from testcontainers.core.config import testcontainers_config  # type: ignore
 
@@ -18,7 +16,7 @@ from testcontainers.core.config import testcontainers_config  # type: ignore
 from testcontainers.postgres import PostgresContainer  # type: ignore
 
 from load_synthetic import load_from_csv
-from pipeline import main
+from pipeline import run
 
 # ryuk throws a 500 or 404 error for some reason
 # seems to have issues with podman https://github.com/testcontainers/testcontainers-python/issues/753
@@ -134,9 +132,7 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
 
     conn.commit()
 
-    os.environ["IDR_LOAD_TYPE"] = "initial"
-    sys.argv = ["pipeline.py", "synthetic"]
-    main()
+    run("synthetic")
 
     cur = conn.execute("select * from idr.beneficiary order by bene_sk")
     assert cur.rowcount == 25
@@ -163,8 +159,8 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
         {"timestamp": datetime.now(UTC)},
     )
     conn.commit()
-    ray.shutdown()  # type: ignore
-    main()
+
+    run("synthetic")
 
     cur = conn.execute("select * from idr.beneficiary order by bene_sk")
     rows = cur.fetchmany(2)

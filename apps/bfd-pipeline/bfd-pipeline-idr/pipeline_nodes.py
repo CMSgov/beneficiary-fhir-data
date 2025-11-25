@@ -40,6 +40,27 @@ from pipeline_utils import extract_and_load
 
 type NodePartitionedModelInput = tuple[type[IdrBaseModel], LoadPartition | None]
 
+CLAIM_AUX_TABLES = [
+    IdrClaimInstitutional,
+    IdrClaimDateSignature,
+    IdrClaimFiss,
+    IdrClaimItem,
+    IdrClaimLineInstitutional,
+    IdrClaimAnsiSignature,
+    IdrClaimProfessional,
+    IdrClaimLineProfessional,
+    IdrClaimLineRx,
+    IdrProviderHistory,
+]
+BENE_AUX_TABLES = [
+    IdrBeneficiaryStatus,
+    IdrBeneficiaryThirdParty,
+    IdrBeneficiaryEntitlement,
+    IdrBeneficiaryEntitlementReason,
+    IdrBeneficiaryDualEligibility,
+    IdrBeneficiaryMbiId,
+]
+
 
 def _gen_partitioned_node_inputs(
     model_types: list[type[IdrBaseModel]],
@@ -69,36 +90,40 @@ def _gen_partitioned_node_inputs(
     return res
 
 
+def stage1(
+    config_connection_string: str, config_mode: str, config_batch_size: int, start_time: datetime
+) -> bool:
+    return extract_and_load(
+        cls=IdrBeneficiaryOvershareMbi,
+        partition=None,
+        batch_start=start_time,
+        connection_string=config_connection_string,
+        mode=config_mode,
+        batch_size=config_batch_size,
+    )
+
+
 # INITIAL FLOW
 # Stage 1: Load ALL claim tables in parallel if load_type is set to initial
-@config.when(load_type="initial")
-def initial_idr_claims() -> Parallelizable[NodePartitionedModelInput]:
-    yield from _gen_partitioned_node_inputs(
-        [
-            IdrClaimInstitutional,
-            IdrClaimDateSignature,
-            IdrClaimFiss,
-            IdrClaimItem,
-            IdrClaimLineInstitutional,
-            IdrClaimAnsiSignature,
-            IdrClaimProfessional,
-            IdrClaimLineProfessional,
-            IdrClaimLineRx,
-            IdrClaim,
-            IdrProviderHistory,
-        ]
-    )
+# @config.when(load_type="initial")
+def stage2_inputs(load_type: str, stage1: bool) -> Parallelizable[NodePartitionedModelInput]:
+    if load_type == "initial":
+        yield from _gen_partitioned_node_inputs(
+            [*CLAIM_AUX_TABLES, *BENE_AUX_TABLES, IdrClaim, IdrBeneficiary]
+        )
+    else:
+        yield from _gen_partitioned_node_inputs([*CLAIM_AUX_TABLES, *BENE_AUX_TABLES])
 
 
-@config.when(load_type="initial")
-def do_initial_idr_claims(
-    initial_idr_claims: NodePartitionedModelInput,
+# @config.when(load_type="initial")
+def do_stage2(
+    stage2_inputs: NodePartitionedModelInput,
     config_connection_string: str,
     config_mode: str,
     config_batch_size: int,
     start_time: datetime,
 ) -> bool:
-    model_type, partition = initial_idr_claims
+    model_type, partition = stage2_inputs
     return extract_and_load(
         cls=model_type,
         partition=partition,
@@ -109,56 +134,29 @@ def do_initial_idr_claims(
     )
 
 
-@config.when(load_type="initial")
-def collect_initial_idr_claims(
-    do_initial_idr_claims: Collect[bool],
+def collect_stage2(
+    do_stage2: Collect[bool],
 ) -> bool:
-    return all(do_initial_idr_claims)
+    return all(do_stage2)
 
 
-@config.when(load_type="initial")
-def idr_beneficiary_overshare_mbi(
-    collect_initial_idr_claims: bool,
-    config_connection_string: str,
-    start_time: datetime,
-    config_mode: str,
-    config_batch_size: int,
-) -> bool:
-    return extract_and_load(
-        cls=IdrBeneficiaryOvershareMbi,
-        connection_string=config_connection_string,
-        batch_start=start_time,
-        mode=config_mode,
-        batch_size=config_batch_size,
-    )
-
-
-# Stage 3: Load auxiliary beneficiary tables in parallel
-@config.when(load_type="initial")
-def initial_idr_beneficiary_aux_table(
-    idr_beneficiary_overshare_mbi: bool,
+def stage3_inputs(
+    load_type: str, collect_stage2: bool
 ) -> Parallelizable[NodePartitionedModelInput]:
-    yield from _gen_partitioned_node_inputs(
-        [
-            IdrBeneficiaryStatus,
-            IdrBeneficiaryThirdParty,
-            IdrBeneficiaryEntitlement,
-            IdrBeneficiaryEntitlementReason,
-            IdrBeneficiaryDualEligibility,
-            IdrBeneficiaryMbiId,
-        ]
-    )
+    if load_type == "incremental":
+        yield from _gen_partitioned_node_inputs([IdrClaim])
+    else:
+        yield from _gen_partitioned_node_inputs([])
 
 
-@config.when(load_type="initial")
-def do_initial_idr_beneficiary_aux_table(
-    initial_idr_beneficiary_aux_table: NodePartitionedModelInput,
+def do_stage3(
+    stage3_inputs: NodePartitionedModelInput,
     config_connection_string: str,
-    start_time: datetime,
     config_mode: str,
     config_batch_size: int,
+    start_time: datetime,
 ) -> bool:
-    model_type, partition = initial_idr_beneficiary_aux_table
+    model_type, partition = stage3_inputs
     return extract_and_load(
         cls=model_type,
         partition=partition,
@@ -169,123 +167,27 @@ def do_initial_idr_beneficiary_aux_table(
     )
 
 
-@config.when(load_type="initial")
-def collect_initial_idr_beneficiary_aux_table(
-    do_initial_idr_beneficiary_aux_table: Collect[bool],
+def collect_stage3(
+    do_stage3: Collect[bool],
 ) -> bool:
-    return all(do_initial_idr_beneficiary_aux_table)
+    return all(do_stage3)
 
 
-# INCREMENTAL FLOW
-# Stage 1: Load auxiliary claim tables in parallel
-@config.when(load_type="incremental")
-@parameterize(
-    idr_claim_institutional=dict(cls=value(IdrClaimInstitutional)),
-    idr_claim_date_signature=dict(cls=value(IdrClaimDateSignature)),
-    idr_claim_fiss=dict(cls=value(IdrClaimFiss)),
-    idr_claim_item=dict(cls=value(IdrClaimItem)),
-    idr_claim_line_institutional=dict(cls=value(IdrClaimLineInstitutional)),
-    idr_claim_ansi_signature=dict(cls=value(IdrClaimAnsiSignature)),
-    idr_claim_professional=dict(cls=value(IdrClaimProfessional)),
-    idr_claim_line_professional=dict(cls=value(IdrClaimLineProfessional)),
-    idr_claim_line_rx=dict(cls=value(IdrClaimLineRx)),
-    idr_provider_history=dict(cls=value(IdrProviderHistory)),
-)
-def idr_claim_aux_table(
-    cls: type, config_connection_string: str, config_mode: str, config_batch_size: int
-) -> bool:
-    return extract_and_load(
-        cls=cls,
-        connection_string=config_connection_string,
-        mode=config_mode,
-        batch_size=config_batch_size,
-    )
-
-
-# Stage 2: Load main claim table separately after loading all aux claim tables
-@config.when(load_type="incremental")
-def idr_claim(
-    idr_claim_institutional: bool,
-    idr_claim_date_signature: bool,
-    idr_claim_fiss: bool,
-    idr_claim_item: bool,
-    idr_claim_line_institutional: bool,
-    idr_claim_ansi_signature: bool,
-    idr_claim_professional: bool,
-    idr_claim_line_professional: bool,
-    idr_claim_line_rx: bool,
-    idr_provider_history: bool,
-    config_mode: str,
-    config_batch_size: int,
-    config_connection_string: str,
-) -> bool:
-    return extract_and_load(
-        cls=IdrClaim,
-        connection_string=config_connection_string,
-        mode=config_mode,
-        batch_size=config_batch_size,
-    )
-
-
-# Stage 3: Load only overshared MBIs after loading in claim table
-@config.when(load_type="incremental")
-def idr_beneficiary_overshare_mbi_incremental(
-    idr_claim: bool,
-    config_mode: str,
-    config_batch_size: int,
-    config_connection_string: str,
-) -> bool:
-    return extract_and_load(
-        cls=IdrBeneficiaryOvershareMbi,
-        connection_string=config_connection_string,
-        mode=config_mode,
-        batch_size=config_batch_size,
-    )
-
-
-# Stage 4: Load auxiliary beneficiary tables in parallel
-@config.when(load_type="incremental")
-@parameterize(
-    idr_beneficiary_status=dict(cls=value(IdrBeneficiaryStatus)),
-    idr_beneficiary_third_party=dict(cls=value(IdrBeneficiaryThirdParty)),
-    idr_beneficiary_entitlement=dict(cls=value(IdrBeneficiaryEntitlement)),
-    idr_beneficiary_entitlement_reason=dict(cls=value(IdrBeneficiaryEntitlementReason)),
-    idr_beneficiary_dual_eligibility=dict(cls=value(IdrBeneficiaryDualEligibility)),
-    idr_beneficiary_mbi_id=dict(cls=value(IdrBeneficiaryMbiId)),
-)
-def idr_beneficiary_aux_table_incremental(
-    idr_beneficiary_overshare_mbi_incremental: bool,
-    cls: type,
-    config_connection_string: str,
-    config_mode: str,
-    config_batch_size: int,
-) -> bool:
-    return extract_and_load(
-        cls=cls,
-        connection_string=config_connection_string,
-        mode=config_mode,
-        batch_size=config_batch_size,
-    )
-
-
-# Final Stage for EITHER flow: Load main beneficiary tables last
-def idr_beneficiary(
-    # idr_beneficiary_status: bool,
-    # idr_beneficiary_third_party: bool,
-    # idr_beneficiary_entitlement: bool,
-    # idr_beneficiary_entitlement_reason: bool,
-    # idr_beneficiary_dual_eligibility: bool,
-    # idr_beneficiary_mbi_id: bool,
-    collect_initial_idr_beneficiary_aux_table: bool,
+def do_stage4(
+    collect_stage3: bool,
+    load_type: str,
     config_connection_string: str,
     config_mode: str,
     config_batch_size: int,
     start_time: datetime,
 ) -> bool:
-    return extract_and_load(
-        cls=IdrBeneficiary,
-        connection_string=config_connection_string,
-        batch_start=start_time,
-        mode=config_mode,
-        batch_size=config_batch_size,
-    )
+    if load_type == "incremental":
+        return extract_and_load(
+            cls=IdrBeneficiary,
+            partition=None,
+            batch_start=start_time,
+            connection_string=config_connection_string,
+            mode=config_mode,
+            batch_size=config_batch_size,
+        )
+    return False
