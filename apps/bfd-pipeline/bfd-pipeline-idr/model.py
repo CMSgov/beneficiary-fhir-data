@@ -727,6 +727,51 @@ class IdrContractPbpNumber(IdrBaseModel):
     def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
         return [NON_CLAIM_PARTITION]
 
+class IdrContractPbpContact(IdrBaseModel):
+    cntrct_pbp_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
+    cntrct_plan_cntct_obslt_dt: date
+    cntrct_plan_cntct_type_cd: Annotated[
+        str, {PRIMARY_KEY: True}, BeforeValidator(transform_default_string)
+    ]
+    cntrct_plan_free_extnsn_num: Annotated[str, BeforeValidator(transform_default_string)]
+    cntrct_plan_cntct_free_num: Annotated[str, BeforeValidator(transform_default_string)]
+    cntrct_plan_cntct_extnsn_num: Annotated[str, BeforeValidator(transform_default_string)]
+    cntrct_plan_cntct_tel_num: Annotated[str, BeforeValidator(transform_null_string)]
+    cntrct_pbp_end_dt: Annotated[date, {PRIMARY_KEY: True}]
+    cntrct_pbp_bgn_dt: date
+    cntrct_plan_cntct_st_1_adr: Annotated[str, BeforeValidator(transform_null_string)]
+    cntrct_plan_cntct_st_2_adr: Annotated[str, BeforeValidator(transform_null_string)]
+    cntrct_plan_cntct_city_name: Annotated[str, BeforeValidator(transform_default_string)]
+    cntrct_plan_cntct_state_cd: Annotated[str, BeforeValidator(transform_default_string)]
+    cntrct_plan_cntct_zip_cd: Annotated[str, BeforeValidator(transform_default_string)]
+
+    @staticmethod
+    def table() -> str:
+        return "idr.contract_pbp_contact"
+
+    @staticmethod
+    def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
+        return f"""
+            WITH contract_contacts as (
+                SELECT {{COLUMNS}}, ROW_NUMBER() OVER (
+                    PARTITION BY cntrct_pbp_sk
+                ORDER BY cntrct_pbp_bgn_dt,
+                CASE
+                    WHEN cntrct_plan_cntct_type_cd = '62' THEN 1
+                    WHEN cntrct_plan_cntct_type_cd = '30' THEN 2
+                    ELSE 3
+                END) as row_order
+                FROM cms_vdm_view_mdcr_prd.v2_mdcr_cntrct_pbp_cntct cntct
+                WHERE cntrct_plan_cntct_obslt_dt >= '{DEFAULT_MAX_DATE}'
+                AND cntrct_pbp_bgn_dt >= DATE_TRUNC('MONTH', CURRENT_DATE)
+                AND cntrct_pbp_bgn_dt < cntrct_pbp_end_dt
+            )
+            SELECT {{COLUMNS}} FROM contract_contacts WHERE row_order = 1
+        """
+
+    @staticmethod
+    def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+        return [NON_CLAIM_PARTITION]
 
 def _claim_filter(start_time: datetime, partition: LoadPartition) -> str:
     clm = ALIAS_CLM

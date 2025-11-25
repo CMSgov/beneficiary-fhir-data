@@ -88,6 +88,8 @@ def save_output_files(
     clm_line_rx,
     clm_rlt_cond_sgntr_mbr,
     prvdr_hstry,
+    cntrct_pbp_num,
+    cntrct_pbp_cntct,
 ):
     Path("out").mkdir(exist_ok=True)
 
@@ -109,8 +111,10 @@ def save_output_files(
         (clm_prfnl, "out/SYNTHETIC_CLM_PRFNL.csv", NORMALIZE, NO_CAST_LINE_NUM),
         (clm_line_prfnl, "out/SYNTHETIC_CLM_LINE_PRFNL.csv", NORMALIZE, CAST_LINE_NUM),
         (clm_line_rx, "out/SYNTHETIC_CLM_LINE_RX.csv", NORMALIZE, NO_CAST_LINE_NUM),
-        (clm_rlt_cond_sgntr_mbr, "out/SYNTHETIC_PRVDR_HSTRY.csv", NORMALIZE, NO_CAST_LINE_NUM),
+        (clm_rlt_cond_sgntr_mbr, "out/SYNTHETIC_CLM_RLT_COND_SGNTR_MBR.csv", NORMALIZE, NO_CAST_LINE_NUM),
         (prvdr_hstry, "out/SYNTHETIC_PRVDR_HSTRY.csv", NORMALIZE, NO_CAST_LINE_NUM),
+        (cntrct_pbp_num, "out/SYNTHETIC_CNTRCT_PBP_NUM.csv", NORMALIZE, NO_CAST_LINE_NUM),
+        (cntrct_pbp_cntct, "out/SYNTHETIC_CNTRCT_PBP_CNTCT.csv", NORMALIZE, NO_CAST_LINE_NUM),
     ]
     for data, path, normalize_flag, line_flag in exports:
         export_df(data, path, normalize_flag, line_flag)
@@ -278,6 +282,15 @@ available_ndc = [
 ]
 clm_poa_ind_choices = ["N", "1", "U", "X", "W", "0", "~", "Z", "Y", ""]
 avail_pbp_nums = ["001", "002", "003", "004", "005", "006", "007", "008", "009", "010"]
+avail_pbp_type_codes = ["01", "02", "48", "04", "09", "18", "10"]
+avail_contract_names = [
+    "Health Plan",
+    "Wellness",
+    "Silver Fox",
+    "Vitality Plan",
+    "Wellness Plus",
+    "Happy Heart",
+]
 avail_clm_rlt_cond_sk = ["193064687", "117814", "193065597", "117853", "193074307"]
 
 non_samhsa_dgns_drg_cds = list(range(43))
@@ -600,6 +613,8 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
         "CLM_RLT_COND_SGNTR_MBR": {},
         "RLT_COND_MBR_RECORD": {},
         "PRVDR_HSTRY": [],
+        "CNTRCT_PBP_NUM": [],
+        "CNTRCT_PBP_CNTCT": [],
     }
     clm_dt_sgntr = {}
     clm_dt_sgntr["CLM_DT_SGNTR_SK"] = "".join(random.choices(string.digits, k=12))
@@ -651,6 +666,42 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
     claim["CLM"]["CLM_ADJSTMT_TYPE_CD"] = random.choice(
         generator.code_systems["CLM_ADJSTMT_TYPE_CD"]
     )
+
+    contract_pbp_num = {}
+    contract_pbp_num["CNTRCT_PBP_SK"] = "".join(random.choices(string.digits, k=12))
+    contract_pbp_num["CNTRCT_NUM"] = "Z0001"
+    contract_pbp_num["CNTRCT_PBP_NUM"] = random.choice(avail_pbp_nums)
+    contract_pbp_num["CNTRCT_PBP_NAME"] = random.choice(avail_contract_names)
+    contract_pbp_num["CNTRCT_PBP_TYPE_CD"] = random.choice(avail_pbp_type_codes)
+    contract_pbp_num["CNTRCT_DRUG_PLAN_IND_CD"] = random.choice(["Y", "N"])
+    claim["CNTRCT_PBP_NUM"].append(contract_pbp_num)
+
+    contract_pbp_contact = {}
+    contract_pbp_contact["cntrct_pbp_sk"] = "".join(random.choices(string.digits, k=12))
+    contract_pbp_contact["cntrct_plan_cntct_obslt_dt"] = "9999-12-31"
+    contract_pbp_contact["cntrct_plan_cntct_type_cd"] = random.choice(["~", "30", "62"])
+    contract_pbp_contact["cntrct_plan_free_extnsn_num"] = "".join(
+        random.choices(string.digits, k=7)
+    )
+    contract_pbp_contact["cntrct_plan_cntct_free_num"] = "".join(
+        random.choices(string.digits, k=10)
+    )
+    contract_pbp_contact["cntrct_plan_cntct_extnsn_num"] = "".join(
+        random.choices(string.digits, k=7)
+    )
+    contract_pbp_contact["cntrct_plan_cntct_tel_num"] = "".join(random.choices(string.digits, k=10))
+    contract_pbp_contact["cntrct_pbp_end_dt"] = "2025-12-31"
+    contract_pbp_contact["cntrct_pbp_bgn_dt"] = "2025-01-01"
+    contract_pbp_contact["cntrct_plan_cntct_st_1_adr"] = random.choice(
+        ["319 E. Street", "North Street", "West Street"]
+    )
+    contract_pbp_contact["cntrct_plan_cntct_st_2_adr"] = random.choice(["Avenue M", ""])
+    contract_pbp_contact["cntrct_plan_cntct_obslt_dt"] = random.choice(
+        ["Los Angeles", "San Jose", "San Francisco"]
+    )
+    contract_pbp_contact["cntrct_plan_cntct_obslt_dt"] = "CA"
+    contract_pbp_contact["cntrct_plan_cntct_obslt_dt"] = "".join(random.choices(string.digits, k=9))
+    claim["CNTRCT_PBP_CNTCT"].append(contract_pbp_contact)
 
     if clm_type_cd in (1, 2, 3, 4):
         claim["CLM"]["CLM_SRVC_PRVDR_GNRC_ID_NUM"] = random.choice(type_2_npis)
@@ -1574,6 +1625,8 @@ def main():
     CLM_LINE_RX = []
     CLM_RLT_COND_SGNTR_MBR = []
     PRVDR_HSTRY = []
+    CNTRCT_PBP_NUM = []
+    CNTRCT_PBP_CNTCT = []
     pt_complete = 0
     min_claims = args.min_claims
     max_claims = args.max_claims
@@ -1604,6 +1657,8 @@ def main():
                 CLM_INSTNL.append(claim["CLM_INSTNL"])
             CLM_LINE_INSTNL.extend(claim["CLM_LINE_INSTNL"])
             CLM_DCMTN.append(claim["CLM_DCMTN"])
+            CNTRCT_PBP_NUM.extend(claim["CNTRCT_PBP_NUM"])
+            CNTRCT_PBP_CNTCT.extend(claim["CNTRCT_PBP_CNTCT"])
             if claim["CLM"]["CLM_TYPE_CD"] in (1, 2, 3, 4):
                 CLM_LINE_RX.extend(claim["CLM_LINE_RX"])
                 PRVDR_HSTRY.extend(claim["PRVDR_HSTRY"])
@@ -1650,6 +1705,8 @@ def main():
         CLM_LINE_RX,
         CLM_RLT_COND_SGNTR_MBR,
         PRVDR_HSTRY,
+        CNTRCT_PBP_NUM,
+        CNTRCT_PBP_CNTCT,
     )
 
 
