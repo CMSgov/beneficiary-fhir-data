@@ -125,7 +125,7 @@
         <telemetry-http-okhttp.version>0.16.0</telemetry-http-okhttp.version>
         <aws-java-sdk-bom.version>2.33.4</aws-java-sdk-bom.version>
         <aws.crt.version>0.35.0</aws.crt.version>
-        <aws-advanced-jdbc-wrapper.version>2.5.4</aws-advanced-jdbc-wrapper.version>
+        <aws-advanced-jdbc-wrapper.version>2.6.5</aws-advanced-jdbc-wrapper.version>
         <spring-data-jpa.version>3.4.10</spring-data-jpa.version>
         <spring-framework.version>6.2.11</spring-framework.version>
         <spring-retry.version>2.0.8</spring-retry.version>
@@ -221,8 +221,8 @@
         <!-- Note: See gov.cms.bfd.model.rif.schema.DatabaseTestHelper for details
             on the default 'jdbc:bfd-test:' URL here. -->
         <its.db.url>jdbc:bfd-test:tc</its.db.url>
-        <its.db.username />
-        <its.db.password />
+        <its.db.username/>
+        <its.db.password/>
         <!-- Docker image used with testcontainers to provide a working database for testing. -->
         <!-- This has a default value in gov.cms.bfd.DatabaseTestUtils that must also be changed
         when changing this property. -->
@@ -263,7 +263,7 @@
         <!-- Additional image tag for images built by jib.  (e.g. release number or commit hash)-->
         <jib.tag>${project.version}</jib.tag>
         <!-- Optional image namespace. -->
-        <jib.namespace />
+        <jib.namespace/>
         <!-- Skip by default.  Override to allow images to be built. -->
         <jib.skip>true</jib.skip>
 
