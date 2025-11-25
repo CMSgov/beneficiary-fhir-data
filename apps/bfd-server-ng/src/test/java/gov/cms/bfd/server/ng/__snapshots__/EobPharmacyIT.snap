@@ -398,9 +398,8 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
     } ],
     "productOrService" : {
       "coding" : [ {
-        "code" : "not-applicable",
-        "display" : "Not Applicable",
-        "system" : "http://terminology.hl7.org/CodeSystem/data-absent-reason"
+        "code" : "compound",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBCompoundLiteral"
       } ]
     },
     "quantity" : {
@@ -614,11 +613,30 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
   }, {
     "category" : {
       "coding" : [ {
+        "code" : "compoundcode",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "2",
+        "display" : "Not a compound",
+        "system" : "http://terminology.hl7.org/CodeSystem/NCPDPCompoundCode"
+      }, {
+        "code" : "2",
+        "display" : "Not a compound",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CMPND-CD"
+      } ]
+    },
+    "sequence" : 10
+  }, {
+    "category" : {
+      "coding" : [ {
         "code" : "dayssupply",
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
       } ]
     },
-    "sequence" : 10,
+    "sequence" : 11,
     "valueQuantity" : {
       "unit" : "days",
       "value" : 7
@@ -630,7 +648,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
       } ]
     },
-    "sequence" : 11,
+    "sequence" : 12,
     "valueQuantity" : {
       "unit" : "fill",
       "value" : 4
@@ -648,7 +666,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
         "system" : "http://terminology.hl7.org/CodeSystem/NCPDPDispensedAsWrittenOrProductSelectionCode"
       } ]
     },
-    "sequence" : 12
+    "sequence" : 13
   }, {
     "category" : {
       "coding" : [ {
@@ -668,7 +686,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DRUG-CVRG-STUS-CD"
       } ]
     },
-    "sequence" : 13
+    "sequence" : 14
   }, {
     "category" : {
       "coding" : [ {
@@ -688,7 +706,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_CTSTRPHC_CVRG_IND_CD"
       } ]
     },
-    "sequence" : 14
+    "sequence" : 15
   }, {
     "category" : {
       "coding" : [ {
@@ -708,7 +726,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DSPNSNG-STUS-CD"
       } ]
     },
-    "sequence" : 15
+    "sequence" : 16
   }, {
     "category" : {
       "coding" : [ {
@@ -721,7 +739,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 16,
+    "sequence" : 17,
     "valueString" : "54025.5"
   }, {
     "category" : {
@@ -730,7 +748,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
       } ]
     },
-    "sequence" : 17,
+    "sequence" : 18,
     "timingPeriod" : {
       "end" : "9999-12-31",
       "start" : "2023-11-30"
@@ -742,7 +760,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
       } ]
     },
-    "sequence" : 18,
+    "sequence" : 19,
     "timingDate" : "2023-12-06"
   }, {
     "category" : {
@@ -756,7 +774,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 19,
+    "sequence" : 20,
     "timingDate" : "2018-08-21"
   }, {
     "category" : {
@@ -770,7 +788,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 20,
+    "sequence" : 21,
     "timingDate" : "9999-12-31"
   }, {
     "category" : {
@@ -784,7 +802,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 21,
+    "sequence" : 22,
     "timingDate" : "9999-12-31"
   }, {
     "category" : {
@@ -798,7 +816,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 22,
+    "sequence" : 23,
     "timingDate" : "2018-08-21"
   }, {
     "category" : {
@@ -812,7 +830,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 23,
+    "sequence" : 24,
     "timingDate" : "9999-12-31"
   }, {
     "category" : {
@@ -826,7 +844,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 24,
+    "sequence" : 25,
     "timingDate" : "9999-12-31"
   }, {
     "category" : {
@@ -840,7 +858,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 25,
+    "sequence" : 26,
     "timingDate" : "9999-12-31"
   } ],
   "total" : [ {
@@ -1261,26 +1279,10 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
         } ]
       }
     } ],
-    "detail" : [ {
-      "productOrService" : {
-        "coding" : [ {
-          "code" : "00338004904",
-          "system" : "http://hl7.org/fhir/sid/ndc"
-        } ]
-      },
-      "quantity" : {
-        "code" : "mL",
-        "system" : "http://unitsofmeasure.org",
-        "unit" : "ML",
-        "value" : 1.0
-      },
-      "sequence" : 1
-    } ],
     "productOrService" : {
       "coding" : [ {
-        "code" : "not-applicable",
-        "display" : "Not Applicable",
-        "system" : "http://terminology.hl7.org/CodeSystem/data-absent-reason"
+        "code" : "00338004904",
+        "system" : "http://hl7.org/fhir/sid/ndc"
       } ]
     },
     "quantity" : {

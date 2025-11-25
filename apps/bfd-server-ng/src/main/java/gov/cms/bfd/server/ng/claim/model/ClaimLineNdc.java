@@ -19,7 +19,7 @@ class ClaimLineNdc {
   @Column(name = "clm_line_ndc_qty_qlfyr_cd")
   private Optional<IdrUnit> ndcQuantityQualifierCode;
 
-  Optional<ExplanationOfBenefit.DetailComponent> toFhir() {
+  Optional<ExplanationOfBenefit.DetailComponent> toDetail() {
     if (ndcCode.isEmpty()) {
       return Optional.empty();
     }
@@ -29,5 +29,12 @@ class ClaimLineNdc {
         new CodeableConcept(new Coding().setSystem(SystemUrls.NDC).setCode(ndcCode.get())));
     ndcQuantityQualifierCode.ifPresent(c -> detail.setQuantity(c.toFhir(ndcQuantity)));
     return Optional.of(detail);
+  }
+
+  Optional<Coding> toFhir() {
+    if (ndcCode.isEmpty()) {
+      return Optional.empty();
+    }
+    return Optional.of(new Coding().setSystem(SystemUrls.NDC).setCode(ndcCode.get()));
   }
 }

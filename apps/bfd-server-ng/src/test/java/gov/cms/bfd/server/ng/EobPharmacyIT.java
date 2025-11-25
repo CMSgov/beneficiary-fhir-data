@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.ng;
 
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -58,6 +59,14 @@ public class EobPharmacyIT extends IntegrationTestBase {
     var familyName =
         practitioner.getName().stream().filter(p -> p.getFamily().equals("Garcia")).findFirst();
     assertTrue(familyName.isPresent());
+
+    var productOrService = eob.getItem().getFirst().getProductOrService();
+    assertFalse(productOrService.isEmpty());
+    assertEquals("compound", productOrService.getCoding().get(0).getCode());
+
+    var itemDetail = eob.getItem().getFirst().getDetailFirstRep();
+    assertFalse(itemDetail.isEmpty());
+    assertEquals("00338004904", itemDetail.getProductOrService().getCoding().get(0).getCode());
 
     var careTeam = eob.getCareTeam();
     assertFalse(careTeam.isEmpty());
@@ -158,5 +167,9 @@ public class EobPharmacyIT extends IntegrationTestBase {
     var hasContractSystems =
         extensions.stream().allMatch(extension -> systems.contains(extension.getUrl()));
     assertTrue(hasContractSystems);
+
+    var productOrService = eob.getItem().getFirst().getProductOrService();
+    assertFalse(productOrService.isEmpty());
+    assertNotEquals("compound", productOrService.getCoding().get(0).getCode());
   }
 }

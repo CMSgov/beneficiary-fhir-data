@@ -3,6 +3,7 @@ package gov.cms.bfd.server.ng.claim.model;
 import gov.cms.bfd.server.ng.converter.NonZeroIntConverter;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import gov.cms.bfd.server.ng.util.FhirUtil;
+import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Embeddable;
@@ -15,6 +16,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.PositiveIntType;
@@ -58,9 +60,21 @@ public class ClaimLine {
     claimLineInstitutional
         .flatMap(i -> i.getHippsCode().toFhir())
         .ifPresent(productOrService::addCoding);
+    boolean isNDCCompound =
+        claimLineRx
+            .flatMap(c -> c.getClaimRxSupportingInfo().getCompoundCode())
+            .filter(c -> c == ClaimLineCompoundCode._2)
+            .isPresent();
+    if (isNDCCompound) {
+      ndc.toDetail().ifPresent(line::addDetail);
+      productOrService.addCoding(
+          new Coding().setSystem(SystemUrls.CARIN_COMPOUND_LITERAL).setCode("compound"));
+    } else {
+      ndc.toFhir().ifPresent(productOrService::addCoding);
+    }
 
     line.setProductOrService(FhirUtil.checkDataAbsent(productOrService));
-    ndc.toFhir().ifPresent(line::addDetail);
+
     line.setQuantity(serviceUnitQuantity.toFhir());
 
     revenueCenterCode.ifPresent(
