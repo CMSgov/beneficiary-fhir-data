@@ -75,7 +75,9 @@ public class ClaimLine {
 
     line.setProductOrService(FhirUtil.checkDataAbsent(productOrService));
 
-    line.setQuantity(serviceUnitQuantity.toFhir());
+    var quantity = serviceUnitQuantity.toFhir();
+    ndc.getQualifier().ifPresent(quantity::setUnit);
+    line.setQuantity(quantity);
 
     revenueCenterCode.ifPresent(
         c -> {

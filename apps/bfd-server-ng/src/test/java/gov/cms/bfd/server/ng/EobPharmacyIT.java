@@ -64,6 +64,10 @@ public class EobPharmacyIT extends IntegrationTestBase {
     assertFalse(productOrService.isEmpty());
     assertEquals("compound", productOrService.getCoding().get(0).getCode());
 
+    var itemQuantity = eob.getItem().getFirst().getQuantity();
+    assertFalse(itemQuantity.isEmpty());
+    assertFalse(itemQuantity.getUnit().isEmpty());
+
     var itemDetail = eob.getItem().getFirst().getDetailFirstRep();
     assertFalse(itemDetail.isEmpty());
     assertEquals("00338004904", itemDetail.getProductOrService().getCoding().get(0).getCode());

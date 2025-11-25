@@ -37,4 +37,11 @@ class ClaimLineNdc {
     }
     return Optional.of(new Coding().setSystem(SystemUrls.NDC).setCode(ndcCode.get()));
   }
+
+  Optional<String> getQualifier() {
+    if (ndcQuantityQualifierCode.isEmpty()) {
+      return Optional.empty();
+    }
+    return Optional.of(ndcQuantityQualifierCode.get().toString());
+  }
 }

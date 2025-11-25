@@ -403,6 +403,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
       } ]
     },
     "quantity" : {
+      "unit" : "ML",
       "value" : 2.0
     },
     "revenue" : {
@@ -1286,6 +1287,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
       } ]
     },
     "quantity" : {
+      "unit" : "ML",
       "value" : 10.0
     },
     "revenue" : {
