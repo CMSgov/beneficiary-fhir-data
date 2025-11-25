@@ -88,14 +88,6 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v7
 
-      - name: Configure AWS credentials
-        id: config-aws-creds
-        uses: aws-actions/configure-aws-credentials@v5
-        with:
-          role-to-assume: ${{ secrets.NON_PROD_ACCOUNT_GHA_ROLE_ARN }}
-          role-session-name: ci-java
-          aws-region: us-east-1
-
       - name: Mask sensitive AWS data
         id: mask-sensitive-aws-data
         run: |
