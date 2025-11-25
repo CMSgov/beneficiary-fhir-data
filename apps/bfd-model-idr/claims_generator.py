@@ -613,8 +613,6 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
         "CLM_RLT_COND_SGNTR_MBR": {},
         "RLT_COND_MBR_RECORD": {},
         "PRVDR_HSTRY": [],
-        "CNTRCT_PBP_NUM": [],
-        "CNTRCT_PBP_CNTCT": [],
     }
     clm_dt_sgntr = {}
     clm_dt_sgntr["CLM_DT_SGNTR_SK"] = "".join(random.choices(string.digits, k=12))
@@ -666,42 +664,6 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
     claim["CLM"]["CLM_ADJSTMT_TYPE_CD"] = random.choice(
         generator.code_systems["CLM_ADJSTMT_TYPE_CD"]
     )
-
-    contract_pbp_num = {}
-    contract_pbp_num["CNTRCT_PBP_SK"] = "".join(random.choices(string.digits, k=12))
-    contract_pbp_num["CNTRCT_NUM"] = "Z0001"
-    contract_pbp_num["CNTRCT_PBP_NUM"] = random.choice(avail_pbp_nums)
-    contract_pbp_num["CNTRCT_PBP_NAME"] = random.choice(avail_contract_names)
-    contract_pbp_num["CNTRCT_PBP_TYPE_CD"] = random.choice(avail_pbp_type_codes)
-    contract_pbp_num["CNTRCT_DRUG_PLAN_IND_CD"] = random.choice(["Y", "N"])
-    claim["CNTRCT_PBP_NUM"].append(contract_pbp_num)
-
-    contract_pbp_contact = {}
-    contract_pbp_contact["CNTRCT_PBP_SK"] = "".join(random.choices(string.digits, k=12))
-    contract_pbp_contact["CNTRCT_PLAN_CNTCT_OBSLT_DT"] = "9999-12-31"
-    contract_pbp_contact["CNTRCT_PLAN_CNTCT_TYPE_CD"] = random.choice(["~", "30", "62"])
-    contract_pbp_contact["CNTRCT_PLAN_FREE_EXTNSN_NUM"] = "".join(
-        random.choices(string.digits, k=7)
-    )
-    contract_pbp_contact["CNTRCT_PLAN_CNTCT_FREE_NUM"] = "".join(
-        random.choices(string.digits, k=10)
-    )
-    contract_pbp_contact["CNTRCT_PLAN_CNTCT_EXTNSN_NUM"] = "".join(
-        random.choices(string.digits, k=7)
-    )
-    contract_pbp_contact["CNTRCT_PLAN_CNTCT_TEL_NUM"] = "".join(random.choices(string.digits, k=10))
-    contract_pbp_contact["CNTRCT_PBP_END_DT"] = "2025-12-31"
-    contract_pbp_contact["CNTRCT_PBP_BGN_DT"] = "2025-01-01"
-    contract_pbp_contact["CNTRCT_PLAN_CNTCT_ST_1_ADR"] = random.choice(
-        ["319 E. Street", "North Street", "West Street"]
-    )
-    contract_pbp_contact["CNTRCT_PLAN_CNTCT_ST_2_ADR"] = random.choice(["Avenue M", ""])
-    contract_pbp_contact["CNTRCT_PLAN_CNTCT_CITY_NAME"] = random.choice(
-        ["Los Angeles", "San Jose", "San Francisco"]
-    )
-    contract_pbp_contact["CNTRCT_PLAN_CNTCT_STATE_CD"] = "CA"
-    contract_pbp_contact["CNTRCT_PLAN_CNTCT_ZIP_CD"] = "".join(random.choices(string.digits, k=9))
-    claim["CNTRCT_PBP_CNTCT"].append(contract_pbp_contact)
 
     if clm_type_cd in (1, 2, 3, 4):
         claim["CLM"]["CLM_SRVC_PRVDR_GNRC_ID_NUM"] = random.choice(type_2_npis)
@@ -1546,6 +1508,49 @@ def gen_pac_version_of_claim(claim, max_date):
     return pac_claim
 
 
+def gen_contract_plan(amount):
+    pbp_nums = random.sample(avail_pbp_nums, amount)
+    contract_pbp_num = []
+    contract_pbp_contact = []
+
+    for pbp_num in pbp_nums:
+        contract_pbp_num.append(
+            {
+                "CNTRCT_PBP_SK": "".join(random.choices(string.digits, k=12)),
+                "CNTRCT_NUM": "Z0001",
+                "CNTRCT_PBP_NUM": pbp_num,
+                "CNTRCT_PBP_NAME": random.choice(avail_contract_names),
+                "CNTRCT_PBP_TYPE_CD": random.choice(avail_pbp_type_codes),
+                "CNTRCT_DRUG_PLAN_IND_CD": random.choice(["Y", "N"]),
+            }
+        )
+
+        contract_pbp_contact.append(
+            {
+                "CNTRCT_PBP_SK": "".join(random.choices(string.digits, k=12)),
+                "CNTRCT_PLAN_CNTCT_OBSLT_DT": "9999-12-31",
+                "CNTRCT_PLAN_CNTCT_TYPE_CD": random.choice(["~", "30", "62"]),
+                "CNTRCT_PLAN_FREE_EXTNSN_NUM": "".join(random.choices(string.digits, k=7)),
+                "CNTRCT_PLAN_CNTCT_FREE_NUM": "".join(random.choices(string.digits, k=10)),
+                "CNTRCT_PLAN_CNTCT_EXTNSN_NUM": "".join(random.choices(string.digits, k=7)),
+                "CNTRCT_PLAN_CNTCT_TEL_NUM": "".join(random.choices(string.digits, k=10)),
+                "CNTRCT_PBP_END_DT": "2025-12-31",
+                "CNTRCT_PBP_BGN_DT": "2025-01-01",
+                "CNTRCT_PLAN_CNTCT_ST_1_ADR": random.choice(
+                    ["319 E. Street", "North Street", "West Street"]
+                ),
+                "CNTRCT_PLAN_CNTCT_ST_2_ADR": random.choice(["Avenue M", ""]),
+                "CNTRCT_PLAN_CNTCT_CITY_NAME": random.choice(
+                    ["Los Angeles", "San Jose", "San Francisco"]
+                ),
+                "CNTRCT_PLAN_CNTCT_STATE_CD": "CA",
+                "CNTRCT_PLAN_CNTCT_ZIP_CD": "".join(random.choices(string.digits, k=9)),
+            }
+        )
+
+    return contract_pbp_num, contract_pbp_contact
+
+
 def add_meta_timestamps(obj, clm, max_date):
     if date.fromisoformat(clm["CLM_IDR_LD_DT"]) < date(2021, 4, 19):
         has_insrt_ts = random.random() > 0.5
@@ -1625,9 +1630,8 @@ def main():
     CLM_LINE_RX = []
     CLM_RLT_COND_SGNTR_MBR = []
     PRVDR_HSTRY = []
-    CNTRCT_PBP_NUM = []
-    CNTRCT_PBP_CNTCT = []
     pt_complete = 0
+    CNTRCT_PBP_NUM, CNTRCT_PBP_CNTCT = gen_contract_plan(amount=10)
     min_claims = args.min_claims
     max_claims = args.max_claims
     if min_claims > max_claims:
@@ -1657,8 +1661,6 @@ def main():
                 CLM_INSTNL.append(claim["CLM_INSTNL"])
             CLM_LINE_INSTNL.extend(claim["CLM_LINE_INSTNL"])
             CLM_DCMTN.append(claim["CLM_DCMTN"])
-            CNTRCT_PBP_NUM.extend(claim["CNTRCT_PBP_NUM"])
-            CNTRCT_PBP_CNTCT.extend(claim["CNTRCT_PBP_CNTCT"])
             if claim["CLM"]["CLM_TYPE_CD"] in (1, 2, 3, 4):
                 CLM_LINE_RX.extend(claim["CLM_LINE_RX"])
                 PRVDR_HSTRY.extend(claim["PRVDR_HSTRY"])
