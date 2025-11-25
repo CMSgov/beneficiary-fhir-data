@@ -82,8 +82,11 @@ resource "aws_iam_policy" "codebuild_ecr" {
 
 data "aws_iam_policy_document" "codebuild_ssm" {
   statement {
-    sid       = "AllowSSMGetParamter"
-    actions   = ["ssm:GetParameter"]
+    sid = "AllowSSMGetParamter"
+    actions = [
+      "ssm:GetParameter",
+      "ssm:GetParameters"
+    ]
     resources = ["arn:aws:ssm:${local.region}:${local.account_id}:parameter/bfd/platform/sonar/sensitive/service_account_access_key"]
   }
 }
@@ -91,10 +94,10 @@ data "aws_iam_policy_document" "codebuild_ssm" {
 resource "aws_iam_policy" "codebuild_ssm" {
   for_each = local.codebuild_runner_config
 
-  name = "${each.value.name}-ssm"
-  path = local.iam_path
+  name        = "${each.value.name}-ssm"
+  path        = local.iam_path
   description = "Grants permissions for the ${each.value.name} CodeBuild Runner fetch SSM Parameter Store values"
-  policy = data.aws_iam_policy_document.codebuild_ssm.json
+  policy      = data.aws_iam_policy_document.codebuild_ssm.json
 }
 
 data "aws_iam_policy_document" "codebuild_kms" {
