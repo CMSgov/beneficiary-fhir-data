@@ -13,7 +13,7 @@
     "CLM_FROM_DT": "2024-01-15",
     "CLM_THRU_DT": "2024-01-15",
     "CLM_EFCTV_DT": "2024-01-15",
-    "CLM_IDR_LD_DT":"2025-01-18",
+    "CLM_IDR_LD_DT": "2025-01-18",
     "CLM_SRVC_PRVDR_GNRC_ID_NUM": "1942945159",
     "clm_srvc_prvdr_gnrc_id_type": "1",
     "CLM_PD_DT": "2024-01-20",
@@ -82,7 +82,7 @@
         },
         {
             "ROW_NUM": 14,
-            "CLM_DSPNSNG_STUS_CD":"P"
+            "CLM_DSPNSNG_STUS_CD": "P"
         }
     ],
     "lineItemComponents": [
@@ -108,12 +108,13 @@
             "CLM_LINE_VCCN_ADMIN_FEE_AMT": "0.00",
             "CLM_PRCNG_EXCPTN_CD": "O",
             "CLM_LINE_BENE_PMT_AMT": "10.00",
-            "CLM_CMS_CALCD_MFTR_DSCNT_AMT":"10.01",
-            "CLM_LINE_GRS_CVRD_CST_TOT_AMT":"10.02",
-            "CLM_LINE_REBT_PASSTHRU_POS_AMT":"10.03",
-            "CLM_PHRMCY_PRICE_DSCNT_AT_POS_AMT":"10.04",
-            "CLM_LINE_OTHR_TP_PD_AMT":"10.05",
-            "CLM_LINE_NCVRD_PD_AMT":"10.08"
+            "CLM_CMS_CALCD_MFTR_DSCNT_AMT": "10.01",
+            "CLM_LINE_GRS_CVRD_CST_TOT_AMT": "10.02",
+            "CLM_LINE_REBT_PASSTHRU_POS_AMT": "10.03",
+            "CLM_PHRMCY_PRICE_DSCNT_AT_POS_AMT": "10.04",
+            "CLM_LINE_OTHR_TP_PD_AMT": "10.05",
+            "CLM_LINE_NCVRD_PD_AMT": "10.08",
+            "isCompound": "true"
         }
     ]
-} 
+}

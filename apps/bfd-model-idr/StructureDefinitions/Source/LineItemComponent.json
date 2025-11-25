@@ -1170,6 +1170,18 @@
                         "code": "string"
                     }
                 ]
+            },
+            {
+                "id": "LineItemComponent.isCompound",
+                "path": "LineItemComponent.isCompound",
+                "label": "Is Compound - derived",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
             }
         ]
     }

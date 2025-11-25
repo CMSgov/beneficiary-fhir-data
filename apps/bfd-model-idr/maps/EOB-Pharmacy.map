@@ -341,19 +341,24 @@ group addPharmacyItem(source src: LineItemComponent, target tgt: BackboneElement
     src.CLM_LINE_NUM as lineNum -> tgt.sequence = lineNum "set sequence number";
     
     src.CLM_LINE_FROM_DT as servicedDate -> tgt.serviced = servicedDate "Set serviced date";
-    
-    src.CLM_LINE_NDC_CD as ndcCode -> tgt.productOrService = create('CodeableConcept') as tgtCC then {
-        src -> tgtCC.coding = create('Coding') as tgtCoding then {
-            src -> tgtCoding.system = "http://hl7.org/fhir/sid/ndc" "Set NDC system";
-            ndcCode -> tgtCoding.code = ndcCode "Set NDC code";
-        } "Add NDC coding";
-    } "Set product/service";
-    
-    // Quantity dispensed
-    src.CLM_LINE_NDC_QTY as qty -> tgt.quantity = create('Quantity') as tgtQuantity then {
-        qty -> tgtQuantity.value = cast(qty, 'decimal') "Set quantity value";
-        src.CLM_LINE_NDC_QTY_QLFYR_CD as qtyQual -> tgtQuantity.unit = qtyQual "Set quantity unit";
-    } "Set quantity";
+
+    src.isCompound as compounded where compounded = "true" -> tgt.productOrService = cc("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBCompoundLiteral","compound") "Add compounded item";
+    src.isCompound as compounded where compounded = "true" -> tgt.detail = create('BackboneElement') as tgtDetail then {
+        src -> tgtDetail.sequence = "1" "Add sequence number. Always 1.";
+        src.CLM_LINE_NDC_CD as ndcCode -> tgtDetail.productOrService = cc("http://hl7.org/fhir/sid/ndc",ndcCode) "Add NDC coding";
+        src.CLM_LINE_NDC_QTY as qty -> tgtDetail.quantity = create('Quantity') as tgtQuantity then {
+            qty -> tgtQuantity.value = cast(qty, 'decimal') "Set quantity value";
+            src.CLM_LINE_NDC_QTY_QLFYR_CD as qtyQual -> tgtQuantity.unit = qtyQual "Set quantity unit";
+        } "Set quantity";
+    } "Add detail";
+
+    src.isCompound as compounded where compounded = "false" -> tgt then{
+      src.CLM_LINE_NDC_CD as ndcCode -> tgt.productOrService = cc("http://hl7.org/fhir/sid/ndc",ndcCode) "Add NDC coding";
+      src.CLM_LINE_NDC_QTY as qty -> tgt.quantity = create('Quantity') as tgtQuantity then {
+            qty -> tgtQuantity.value = cast(qty, 'decimal') "Set quantity value";
+            src.CLM_LINE_NDC_QTY_QLFYR_CD as qtyQual -> tgtQuantity.unit = qtyQual "Set quantity unit";
+        } "Set quantity";
+    } "Add non-compound item";
 
     src.CLM_LINE_CVRD_PD_AMT as coveredAmt -> tgt.adjudication = create('BackboneElement') as tgtAdj then {
       src -> tgtAdj.category = create('CodeableConcept') as tgtCC then {
