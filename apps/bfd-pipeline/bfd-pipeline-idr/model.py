@@ -636,6 +636,37 @@ class IdrContractPbpNumber(IdrBaseModel):
         """
 
 
+class IdrContractPbpContact(IdrBaseModel):
+    cntrct_pbp_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
+    cntrct_plan_cntct_obslt_dt: date
+    cntrct_plan_cntct_type_cd: Annotated[
+        str, {PRIMARY_KEY: True}, BeforeValidator(transform_default_string)
+    ]
+    cntrct_plan_free_extnsn_num: Annotated[str, BeforeValidator(transform_default_string)]
+    cntrct_plan_cntct_free_num: Annotated[str, BeforeValidator(transform_default_string)]
+    cntrct_plan_cntct_extnsn_num: Annotated[str, BeforeValidator(transform_default_string)]
+    cntrct_plan_cntct_tel_num: Annotated[str, BeforeValidator(transform_null_string)]
+    cntrct_pbp_end_dt: Annotated[date, {PRIMARY_KEY: True}]
+    cntrct_pbp_bgn_dt: date
+    cntrct_plan_cntct_st_1_adr: Annotated[str, BeforeValidator(transform_null_string)]
+    cntrct_plan_cntct_st_2_adr: Annotated[str, BeforeValidator(transform_null_string)]
+    cntrct_plan_cntct_city_name: Annotated[str, BeforeValidator(transform_default_string)]
+    cntrct_plan_cntct_state_cd: Annotated[str, BeforeValidator(transform_default_string)]
+    cntrct_plan_cntct_zip_cd: Annotated[str, BeforeValidator(transform_default_string)]
+
+    @staticmethod
+    def table() -> str:
+        return "idr.contract_pbp_contact"
+
+    @staticmethod
+    def _current_fetch_query(start_time: datetime) -> str:  # noqa: ARG004
+        return f"""
+        SELECT {{COLUMNS}}
+        FROM cms_vdm_view_mdcr_prd.v2_mdcr_cntrct_pbp_cntct
+        WHERE cntrct_plan_cntct_obslt_dt >= '{DEFAULT_MAX_DATE}'
+        """
+
+
 def claim_type_clause(start_time: datetime, claim_type_codes: list[int]) -> str:
     fetch_latest_claims = os.environ.get("IDR_LATEST_CLAIMS", "").lower() in ("1", "true")
     add_latest_claim_ind = ""
