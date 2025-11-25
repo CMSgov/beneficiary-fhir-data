@@ -15,15 +15,17 @@ public class QualifyStayThruDate {
   @Column(name = "clm_qlfy_stay_thru_dt")
   private Optional<LocalDate> qualifyStayThruDate;
 
-  ExplanationOfBenefit.SupportingInformationComponent toFhir(
+  Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {
     if (qualifyStayThruDate.isEmpty()) {
-      return null;
+      return Optional.empty();
     }
 
-    return supportingInfoFactory
-        .createSupportingInfo()
-        .setCategory(BlueButtonSupportingInfoCategory.CLM_QLFY_STAY_THRU_DT.toFhir())
-        .setTiming(new DateType().setValue(DateUtil.toDate(qualifyStayThruDate.get())));
+    var component =
+        supportingInfoFactory
+            .createSupportingInfo()
+            .setCategory(BlueButtonSupportingInfoCategory.CLM_QLFY_STAY_THRU_DT.toFhir())
+            .setTiming(new DateType().setValue(DateUtil.toDate(qualifyStayThruDate.get())));
+    return Optional.of(component);
   }
 }

@@ -14,15 +14,17 @@ public class QualifyStayFromDate {
   @Column(name = "clm_qlfy_stay_from_dt")
   private Optional<LocalDate> qualifyStayFromDate;
 
-  ExplanationOfBenefit.SupportingInformationComponent toFhir(
+  Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {
     if (qualifyStayFromDate.isEmpty()) {
-      return null;
+      return Optional.empty();
     }
 
-    return supportingInfoFactory
-        .createSupportingInfo()
-        .setCategory(BlueButtonSupportingInfoCategory.CLM_QLFY_STAY_FROM_DT.toFhir())
-        .setTiming(new DateType().setValue(DateUtil.toDate(qualifyStayFromDate.get())));
+    var component =
+        supportingInfoFactory
+            .createSupportingInfo()
+            .setCategory(BlueButtonSupportingInfoCategory.CLM_QLFY_STAY_FROM_DT.toFhir())
+            .setTiming(new DateType().setValue(DateUtil.toDate(qualifyStayFromDate.get())));
+    return Optional.of(component);
   }
 }

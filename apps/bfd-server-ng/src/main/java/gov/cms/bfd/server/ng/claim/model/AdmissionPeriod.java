@@ -16,19 +16,18 @@ class AdmissionPeriod {
   @Column(name = "clm_dschrg_dt")
   private Optional<LocalDate> claimDischargeDate;
 
-  ExplanationOfBenefit.SupportingInformationComponent toFhir(
+  Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {
     if (claimActiveCareFromDate.isEmpty()) {
-      return null;
+      return Optional.empty();
     }
 
-    var supportingInfo = supportingInfoFactory.createSupportingInfo();
+    var component = supportingInfoFactory.createSupportingInfo();
     var period = new Period();
     period.setStartElement(DateUtil.toFhirDate(claimActiveCareFromDate.get()));
     claimDischargeDate.ifPresent(date -> period.setEndElement(DateUtil.toFhirDate(date)));
-
-    supportingInfo.setTiming(period);
-    supportingInfo.setCategory(CarinSupportingInfoCategory.ACTIVE_CARE_FROM_DATE.toFhir());
-    return supportingInfo;
+    component.setTiming(period);
+    component.setCategory(CarinSupportingInfoCategory.ACTIVE_CARE_FROM_DATE.toFhir());
+    return Optional.of(component);
   }
 }

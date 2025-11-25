@@ -13,15 +13,17 @@ class NoncoveredThroughDate {
   @Column(name = "clm_ncvrd_thru_dt")
   private Optional<LocalDate> noncoveredThroughDate;
 
-  ExplanationOfBenefit.SupportingInformationComponent toFhir(
+  Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {
     if (noncoveredThroughDate.isEmpty()) {
-      return null;
+      return Optional.empty();
     }
 
-    return supportingInfoFactory
-        .createSupportingInfo()
-        .setCategory(BlueButtonSupportingInfoCategory.CLM_NCVRD_THRU_DT.toFhir())
-        .setTiming(new DateType().setValue(DateUtil.toDate(noncoveredThroughDate.get())));
+    var component =
+        supportingInfoFactory
+            .createSupportingInfo()
+            .setCategory(BlueButtonSupportingInfoCategory.CLM_NCVRD_THRU_DT.toFhir())
+            .setTiming(new DateType().setValue(DateUtil.toDate(noncoveredThroughDate.get())));
+    return Optional.of(component);
   }
 }

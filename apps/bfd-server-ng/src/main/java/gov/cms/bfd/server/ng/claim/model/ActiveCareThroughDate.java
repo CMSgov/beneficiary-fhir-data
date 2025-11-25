@@ -19,7 +19,7 @@ class ActiveCareThroughDate {
       return Optional.empty();
     }
 
-    ExplanationOfBenefit.SupportingInformationComponent component =
+    var component =
         supportingInfoFactory
             .createSupportingInfo()
             .setCategory(BlueButtonSupportingInfoCategory.CLM_ACTV_CARE_THRU_DT.toFhir())

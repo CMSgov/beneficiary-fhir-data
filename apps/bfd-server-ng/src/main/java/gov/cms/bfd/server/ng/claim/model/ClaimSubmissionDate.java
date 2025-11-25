@@ -13,15 +13,15 @@ class ClaimSubmissionDate {
   @Column(name = "clm_submsn_dt")
   private Optional<LocalDate> claimSubmissionDate;
 
-  ExplanationOfBenefit.SupportingInformationComponent toFhir(
+  Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {
     if (claimSubmissionDate.isEmpty()) {
-      return null;
+      return Optional.empty();
     }
 
-    var supportingInfo = supportingInfoFactory.createSupportingInfo();
-    supportingInfo.setTiming(new DateType().setValue(DateUtil.toDate(claimSubmissionDate.get())));
-    supportingInfo.setCategory(CarinSupportingInfoCategory.SUBMISSION_DATE.toFhir());
-    return supportingInfo;
+    var component = supportingInfoFactory.createSupportingInfo();
+    component.setTiming(new DateType().setValue(DateUtil.toDate(claimSubmissionDate.get())));
+    component.setCategory(CarinSupportingInfoCategory.SUBMISSION_DATE.toFhir());
+    return Optional.of(component);
   }
 }

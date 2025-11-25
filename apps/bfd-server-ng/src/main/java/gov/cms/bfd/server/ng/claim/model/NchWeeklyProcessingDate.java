@@ -13,15 +13,17 @@ class NchWeeklyProcessingDate {
   @Column(name = "clm_nch_wkly_proc_dt")
   private Optional<LocalDate> weeklyProcessingDate;
 
-  ExplanationOfBenefit.SupportingInformationComponent toFhir(
+  Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {
     if (weeklyProcessingDate.isEmpty()) {
-      return null;
+      return Optional.empty();
     }
 
-    return supportingInfoFactory
-        .createSupportingInfo()
-        .setCategory(BlueButtonSupportingInfoCategory.CLM_NCH_WKLY_PROC_DT.toFhir())
-        .setTiming(new DateType().setValue(DateUtil.toDate(weeklyProcessingDate.get())));
+    var component =
+        supportingInfoFactory
+            .createSupportingInfo()
+            .setCategory(BlueButtonSupportingInfoCategory.CLM_NCH_WKLY_PROC_DT.toFhir())
+            .setTiming(new DateType().setValue(DateUtil.toDate(weeklyProcessingDate.get())));
+    return Optional.of(component);
   }
 }
