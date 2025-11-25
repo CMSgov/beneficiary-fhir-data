@@ -26,6 +26,7 @@ public class ClaimItem implements Comparable<ClaimItem> {
   @Embedded private ClaimProcedure claimProcedure;
   @Embedded private ClaimValue claimValue;
   @Embedded private ClaimLineRxNumber claimLineRxNum;
+  @Embedded private ClaimRelatedCondition claimRelatedCondition;
 
   @Column(name = "bfd_updated_ts")
   private ZonedDateTime bfdUpdatedTimestamp;

@@ -43,7 +43,8 @@ enum BlueButtonSupportingInfoCategory {
   CLM_LTC_DSPNSNG_MTHD_CD("CLM_LTC_DSPNSNG_MTHD_CD", "Submission clarification code"),
   CLM_PHRMCY_SRVC_TYPE_CD("CLM_PHRMCY_SRVC_TYPE_CD", "Pharmacy service type code"),
   CLM_PTNT_RSDNC_CD("CLM_PTNT_RSDNC_CD", "Patient Residence Code"),
-  CLM_LINE_RX_NUM("CLM_LINE_RX_NUM", "Claim Line Prescription Service Reference Number");
+  CLM_LINE_RX_NUM("CLM_LINE_RX_NUM", "Claim Line Prescription Service Reference Number"),
+  CLM_RLT_COND_CD("CLM_RLT_COND_CD", "Claim Related Condition Code");
 
   private final String code;
   private final String display;
