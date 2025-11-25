@@ -10633,6 +10633,24 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         },
         "name" : "Centers for Medicare and Medicaid Services",
         "resourceType" : "Organization"
+      }, {
+        "active" : true,
+        "id" : "provider-org",
+        "identifier" : [ {
+          "system" : "http://hl7.org/fhir/sid/us-npi",
+          "type" : {
+            "coding" : [ {
+              "code" : "NPI",
+              "display" : "National provider identifier",
+              "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+            } ]
+          }
+        } ],
+        "meta" : {
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|6.1.0" ]
+        },
+        "name" : "PROVIDER ORG SOURCED FROM NPPES",
+        "resourceType" : "Organization"
       } ],
       "created" : "2025-08-26T00:00:00+00:00",
       "diagnosis" : [ {
@@ -11472,7 +11490,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
-        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Professional-NonClinician|2.1.0" ],
         "source" : "NationalClaimsHistory",
         "tag" : [ {
           "code" : "Adjudicated",
@@ -11488,6 +11505,9 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           "currency" : "USD",
           "value" : 2690.19
         }
+      },
+      "provider" : {
+        "reference" : "#provider-org"
       },
       "resourceType" : "ExplanationOfBenefit",
       "status" : "active",
@@ -11797,12 +11817,9 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
       } ],
       "type" : {
         "coding" : [ {
-          "code" : "71",
-          "display" : "MEDICARE PART B PROFESSIONAL PHYSICIAN/SUPPLIER CLAIM (NON-DMEPOS)",
+          "code" : "64",
+          "display" : "MEDICARE ADVANTAGE (PAID AS FFS) CLAIMS",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-TYPE-CD"
-        }, {
-          "code" : "professional",
-          "system" : "http://terminology.hl7.org/CodeSystem/claim-type"
         } ]
       },
       "use" : "claim"
@@ -19791,6 +19808,24 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         },
         "name" : "Centers for Medicare and Medicaid Services",
         "resourceType" : "Organization"
+      }, {
+        "active" : true,
+        "id" : "provider-org",
+        "identifier" : [ {
+          "system" : "http://hl7.org/fhir/sid/us-npi",
+          "type" : {
+            "coding" : [ {
+              "code" : "NPI",
+              "display" : "National provider identifier",
+              "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+            } ]
+          }
+        } ],
+        "meta" : {
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|6.1.0" ]
+        },
+        "name" : "PROVIDER ORG SOURCED FROM NPPES",
+        "resourceType" : "Organization"
       } ],
       "created" : "2025-08-26T00:00:00+00:00",
       "diagnosis" : [ {
@@ -20630,7 +20665,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
-        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Professional-NonClinician|2.1.0" ],
         "source" : "NationalClaimsHistory",
         "tag" : [ {
           "code" : "Adjudicated",
@@ -20646,6 +20680,9 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           "currency" : "USD",
           "value" : 2690.19
         }
+      },
+      "provider" : {
+        "reference" : "#provider-org"
       },
       "resourceType" : "ExplanationOfBenefit",
       "status" : "active",
@@ -20955,12 +20992,9 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
       } ],
       "type" : {
         "coding" : [ {
-          "code" : "71",
-          "display" : "MEDICARE PART B PROFESSIONAL PHYSICIAN/SUPPLIER CLAIM (NON-DMEPOS)",
+          "code" : "64",
+          "display" : "MEDICARE ADVANTAGE (PAID AS FFS) CLAIMS",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-TYPE-CD"
-        }, {
-          "code" : "professional",
-          "system" : "http://terminology.hl7.org/CodeSystem/claim-type"
         } ]
       },
       "use" : "claim"

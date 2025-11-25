@@ -24,7 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
-public class EobPharmacyIT extends IntegrationTestBase {
+class EobPharmacyIT extends IntegrationTestBase {
 
   @Autowired private EobResourceProvider eobResourceProvider;
 

@@ -96,6 +96,8 @@ public class IntegrationTestConfiguration {
     env.put("BFD_DB_USERNAME", container.getUsername());
     env.put("BFD_DB_PASSWORD", container.getPassword());
     env.put("BFD_DB_NAME", container.getDatabaseName());
+    // Makes the pipeline go slightly faster
+    env.put("IDR_LOAD_TYPE", "initial");
 
     processBuilder
         .directory(new File(Paths.get(baseDir, "../bfd-pipeline/bfd-pipeline-idr").toString()))

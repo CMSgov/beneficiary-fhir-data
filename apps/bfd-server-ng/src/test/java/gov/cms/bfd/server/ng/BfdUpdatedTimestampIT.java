@@ -29,7 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * reflected in the API responses, without mutating the test data.
  */
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-public class BfdUpdatedTimestampIT extends IntegrationTestBase {
+class BfdUpdatedTimestampIT extends IntegrationTestBase {
 
   private static final String EOB_META_LAST_UPDATED_MSG = "EOB meta.lastUpdated should be set";
   private final LoadProgressRepository loadProgressRepository;

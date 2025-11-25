@@ -8,13 +8,11 @@ import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.testUtil.ThreadSafeAppender;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /** Integration test to verify SAMHSA claim filtering logging is working correctly. */
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-public class EobSamhsaFilterLoggingIT extends IntegrationTestBase {
+class EobSamhsaFilterLoggingIT extends IntegrationTestBase {
 
   private static final long CLAIM_ID_WITH_SAMHSA_DIAGNOSIS = 4146709784142L;
   private static final long CLAIM_ID_WITH_NO_SAMHSA = 566745788569L;
