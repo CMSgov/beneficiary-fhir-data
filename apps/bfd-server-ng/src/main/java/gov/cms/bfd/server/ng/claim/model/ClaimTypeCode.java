@@ -1,14 +1,11 @@
 package gov.cms.bfd.server.ng.claim.model;
 
 import gov.cms.bfd.server.ng.util.SystemUrls;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -456,23 +453,15 @@ public enum ClaimTypeCode {
    */
   public static List<ClaimTypeCode> getClaimTypeCodesByType(String normalizedType) {
 
-    Set<ClaimTypeCode> collectedClaimTypeCodes = new HashSet<>();
-
     if ("*".equals(normalizedType)) {
       return Collections.emptyList();
     }
-
     var claimType = ClaimSubtype.fromCode(normalizedType);
-
-    var codesForThisType = CLAIM_TYPE_CODE_MAP.get(claimType);
-
-    if (codesForThisType != null) {
-      collectedClaimTypeCodes.addAll(codesForThisType);
-
-    } else {
+    var codesForThisType = CLAIM_TYPE_CODE_MAP.getOrDefault(claimType, List.of());
+    if (codesForThisType.isEmpty()) {
       throw new IllegalStateException("Not a valid claim type code");
     }
-    return new ArrayList<>(collectedClaimTypeCodes);
+    return codesForThisType;
   }
 
   private static List<ClaimTypeCode> mapCarrierToClaimTypeCodes() {
