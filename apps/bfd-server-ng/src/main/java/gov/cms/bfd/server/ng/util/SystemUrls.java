@@ -715,6 +715,12 @@ public class SystemUrls {
   public static final String CDC_RACE_ETHNICITY = "urn:oid:2.16.840.1.113883.6.238";
 
   /**
+   * <a href="https://terminology.hl7.org/NamingSystem-USEIN.html">United States Employee
+   * Identification Number</a>
+   */
+  public static final String US_EIN = "urn:oid:2.16.840.1.113883.4.4";
+
+  /**
    * <a href="https://build.fhir.org/ig/HL7/US-Core/ValueSet-omb-race-category.html">OMB Race
    * categories.</a>
    */

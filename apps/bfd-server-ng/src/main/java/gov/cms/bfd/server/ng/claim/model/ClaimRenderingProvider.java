@@ -57,7 +57,7 @@ public class ClaimRenderingProvider {
                     .setType(
                         new CodeableConcept(
                             new Coding().setSystem(SystemUrls.HL7_IDENTIFIER).setCode("TAX")))
-                    .setSystem("urn:oid:2.16.840.1.113883.4.4")
+                    .setSystem(SystemUrls.US_EIN)
                     .setValue(s)));
     practitioner.addName(new HumanName().setFamily("MOCK-FAMILY-NAME"));
     participatingIndicatorCode.ifPresent(

@@ -309,7 +309,6 @@ public class Claim {
               .ifPresent(eob::addContained);
         });
 
-    // Passing NPI type = 1 for now until NPI type is added
     getBillingProviderHistory()
         .flatMap(ph -> billingProvider.toFhir(claimTypeCode, ph))
         .ifPresent(
