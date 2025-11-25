@@ -6,7 +6,6 @@ import java.util.Optional;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.StringType;
 
-/** Claim Related Condition table. */
 @Embeddable
 class ClaimRelatedCondition {
 
