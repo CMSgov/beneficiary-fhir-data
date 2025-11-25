@@ -46,8 +46,8 @@ import software.amazon.jdbc.HostSpecBuilder;
 import software.amazon.jdbc.PluginService;
 import software.amazon.jdbc.hostavailability.HostAvailability;
 import software.amazon.jdbc.hostavailability.HostAvailabilityStrategy;
-import software.amazon.jdbc.util.storage.CacheMap;
 import software.amazon.jdbc.util.RdsUrlType;
+import software.amazon.jdbc.util.storage.CacheMap;
 
 /** Unit tests for {@link StateAwareClusterTopologyMonitor}. */
 class StateAwareClusterTopologyMonitorTest {
