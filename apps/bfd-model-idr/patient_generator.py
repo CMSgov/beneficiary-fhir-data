@@ -208,9 +208,7 @@ for i in range(patients_to_generate):
         generator.generate_bene_mapd_enrlmt_rx(patient, contract_info)
         generator.generate_bene_lis(patient)
 
-    for idx in range(random.randint(0, 2)):
-        if idx == 0:
-            continue
+    if random.random() < 0.05:
         prior_patient = copy.deepcopy(patient)
         old_bene_sk = prior_patient["BENE_SK"]
         pt_bene_sk = generator.gen_bene_sk()
