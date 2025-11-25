@@ -1,6 +1,4 @@
 [project]
-# Support Python 3.13+.
-requires-python = ">=3.13"
 name = "trigger-glue-trigger"
 version = "1.0.0"
 dependencies = ["boto3", "aws-lambda-powertools[all]"]
@@ -8,54 +6,5 @@ dependencies = ["boto3", "aws-lambda-powertools[all]"]
 [dependency-groups]
 dev = ["boto3-stubs[glue]", "ruff", "uv"]
 
-[tool.ruff]
-# Set the maximum line length to 100.
-line-length = 100
-
-[tool.ruff.lint]
-select = [
-  "D",    # pydocstyle
-  "E501",
-  # pycodestyle
-  "E",
-  # Pyflakes
-  "F",
-  # pyupgrade
-  "UP",
-  # flake8-bugbear
-  "B",
-  # flake8-simplify
-  "SIM",
-  # isort
-  "I",
-  "ANN",
-  "LOG",
-  "G",
-  "PT",
-  "RSE",
-  "PIE",
-  "RET",
-  "SLF",
-  "ARG",
-  "PTH",
-  "PLE",
-  "PLW",
-  "PERF",
-  "FURB",
-  "RUF",
-]
-
-[tool.ruff.lint.pydocstyle]
-convention = "pep257"
-
-[tool.ruff.format]
-quote-style = "double"
-indent-style = "space"
-docstring-code-format = true
-
-[tool.pyright]
-# ...
-typeCheckingMode = "strict"
-venvPath = "."
-venv = ".venv"
-reportMissingTypeStubs = "none"
+# Inherits all tool configurations from 
+# ../../../../pyproject.toml (ops intermediate)

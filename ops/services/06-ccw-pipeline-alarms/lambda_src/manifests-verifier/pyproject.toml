@@ -1,6 +1,4 @@
 [project]
-# Support Python 3.13+.
-requires-python = ">=3.13"
 name = "ccw-manifests-verifier"
 version = "1.0.0"
 dependencies = [
@@ -13,61 +11,5 @@ dependencies = [
 [dependency-groups]
 dev = ["boto3-stubs[rds,s3,sns]", "ruff", "uv"]
 
-[tool.ruff]
-# Set the maximum line length to 100.
-line-length = 100
-
-[tool.ruff.lint]
-select = [
-    "D",    # pydocstyle
-    "E501",
-    # pycodestyle
-    "E",
-    # Pyflakes
-    "F",
-    # pyupgrade
-    "UP",
-    # flake8-bugbear
-    "B",
-    # flake8-simplify
-    "SIM",
-    # isort
-    "I",
-    "ANN",
-    "LOG",
-    "G",
-    "PT",
-    "RSE",
-    "PIE",
-    "RET",
-    "SLF",
-    "ARG",
-    "PTH",
-    "PLE",
-    "PLW",
-    "PERF",
-    "FURB",
-    "RUF",
-]
-
-[tool.ruff.lint.pydocstyle]
-convention = "pep257"
-
-[tool.ruff.format]
-quote-style = "double"
-indent-style = "space"
-docstring-code-format = true
-
-[tool.pyright]
-# ...
-typeCheckingMode = "strict"
-venvPath = "."
-venv = ".venv"
-reportMissingTypeStubs = "none"
-# Usage of _some_ of Powertools for AWS Lambda necessitates disabling some of Pyright's strict mode
-# features, sadly. The Powertools team seems to be aware of this incompatibility, but it seems
-# unlikely that any improvements will be made.
-reportUnknownMemberType = false
-reportUnknownVariableType = false
-reportUnknownArgumentType = false
-reportUnknownParameterType = false
+# Inherits all tool configurations from 
+# ../../../../pyproject.toml (ops intermediate)

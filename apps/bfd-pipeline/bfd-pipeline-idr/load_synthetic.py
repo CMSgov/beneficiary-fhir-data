@@ -4,7 +4,6 @@ import typing
 from pathlib import Path
 
 import psycopg
-
 from loader import get_connection_string
 
 tables = [

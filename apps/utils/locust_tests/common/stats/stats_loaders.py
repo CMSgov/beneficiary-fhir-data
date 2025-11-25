@@ -11,8 +11,6 @@ from pathlib import Path
 from statistics import mean
 from typing import Any
 
-from gevent import monkey
-
 from common.stats.aggregated_stats import (
     AggregatedStats,
     FinalCompareResult,
@@ -25,6 +23,7 @@ from common.stats.stats_config import (
     StatsStorageType,
 )
 from common.validation import ValidationResult
+from gevent import monkey
 
 # botocore/boto3 is incompatible with gevent out-of-box causing issues with SSL.
 # We need to monkey patch gevent _before_ importing boto3 to ensure this doesn't happen.
@@ -180,7 +179,7 @@ class StatsAthenaLoader(StatsLoader):
     def load_previous(self) -> AggregatedStats | None:
         query = (
             f"SELECT cast(totals as JSON), cast(tasks as JSON) "
-            f'FROM "{self.stats_config.stats_store_s3_database}"."{self.stats_config.stats_store_s3_table}" '  # noqa: E501
+            f'FROM "{self.stats_config.stats_store_s3_database}"."{self.stats_config.stats_store_s3_table}" '
             f"WHERE {self.__get_where_clause()} ORDER BY metadata.timestamp DESC "
             "LIMIT 1"
         )
@@ -191,7 +190,7 @@ class StatsAthenaLoader(StatsLoader):
     def load_average(self) -> AggregatedStats | None:
         query = (
             f"SELECT cast(totals as JSON), cast(tasks as JSON) "
-            f'FROM "{self.stats_config.stats_store_s3_database}"."{self.stats_config.stats_store_s3_table}" '  # noqa: E501
+            f'FROM "{self.stats_config.stats_store_s3_database}"."{self.stats_config.stats_store_s3_table}" '
             f"WHERE {self.__get_where_clause()} "
             "ORDER BY metadata.timestamp DESC "
             f"LIMIT {self.stats_config.stats_compare_load_limit}"

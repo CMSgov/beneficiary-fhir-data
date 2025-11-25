@@ -6,13 +6,12 @@ from datetime import datetime
 
 import psycopg
 import snowflake.connector
+from constants import DEFAULT_MIN_DATE
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
+from model import DbType, LoadProgress, T, get_min_transaction_date
 from psycopg.rows import class_row
 from snowflake.connector import DictCursor, SnowflakeConnection
-
-from constants import DEFAULT_MIN_DATE
-from model import DbType, LoadProgress, T, get_min_transaction_date
 from timer import Timer
 
 cursor_execute_timer = Timer("cursor_execute")

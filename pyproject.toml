@@ -1,0 +1,142 @@
+[project]
+name = "bfd-workspace"
+version = "0.1.0"
+description = "BFD Python workspace for unified dependency management"
+requires-python = "~=3.13.0"
+dependencies = [
+    # bfd-pipeline-idr dependencies
+    "cryptography>=45.0.6",
+    "psycopg[binary,pool]>=3.2.10",
+    "pydantic>=2.11.9",
+    "snowflake-connector-python>=3.17.4",
+    "ray==2.47",
+    "sf-hamilton[ray]==1.88.0",
+    # sftp-outbound-transfer dependencies
+    "aws-lambda-powertools[all]",
+    "paramiko",
+    "boto3",
+    # samhsa-regression-tests dependencies
+    "aiohttp>=3.13.0",
+    "asyncclick>=8.3.0.5",
+    "anyio>=4.11.0",
+    "pyyaml>=6.0.3",
+]
+
+[tool.uv.workspace]
+members = [
+    # NOTE: apps/** and ops/** will include the every subdirectory and fail on those without pyproject.toml
+    # Apps directory
+    "apps/bfd-model-idr",
+    "apps/bfd-pipeline/bfd-pipeline-idr",
+    "apps/bfd-server-ng/codegen",
+    "apps/utils/locust_tests",
+    "apps/utils/samhsa-regression-tests",
+    "apps/utils/synthetic-load-converter",
+    # Ops directory add new members here as needed
+    "ops/images/bfd-platform-mount-certstores",
+    "ops/platform/02-alerting/lambda_src/slack-alerter",
+    "ops/services/02-eft/lambda_src/sftp_outbound_transfer",
+    "ops/services/03-eft-o11y/lambda_src/outbound_slack_notifier",
+    "ops/services/04-ccw-pipeline/lambda-src/ccw-runner",
+    "ops/services/04-server/lambda_src/regression-wrapper",
+    "ops/services/05-server-insights/lambda_src/cw-to-flattened-json",
+    "ops/services/06-ccw-pipeline-alarms/lambda_src/manifests-verifier",
+    "ops/services/06-server-alarms/lambda_src/error_alerter",
+    "ops/terraform-modules/general/trigger-glue-crawler/lambda_src",
+]
+
+[tool.uv]
+dev-dependencies = [
+    "ruff==0.13.2",
+    "pyright==1.1.407",
+    "pytest==8.4.2",
+    "pytest-timeout>=2.1.0",
+    # bfd-pipeline-idr dev dependencies
+    "testcontainers>=4.13.1",
+    # sftp-outbound-transfer dev dependencies
+    "boto3-stubs[sns,ssm]",
+]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = [
+    "D",    # pydocstyle
+    "E501", # line-length
+    "E",    # pycodestyle
+    "F",    # Pyflakes
+    "UP",   # pyupgrade
+    "B",    # flake8-bugbear
+    "SIM",  # flake8-simplify
+    "I",    # isort
+    "ANN",  # flake8-annotations
+    "LOG",  # flake8-logging
+    "G",    # flake8-logging-format
+    "PT",   # flake8-pytest-style
+    "RSE",  # flake8-raise
+    "PIE",  # flake8-pie
+    "RET",  # flake8-return
+    "SLF",  # flake8-self
+    "ARG",  # flake8-unused-arguments
+    "PTH",  # flake8-use-pathlib
+    "PLE",  # pylint-error
+    "PLW",  # pylint-warning
+    "PERF", # perflint
+    "FURB", # refurb
+    "RUF",  # ruff-specific
+]
+# Don't require docstrings
+ignore = ["D100", "D101", "D102", "D103", "D104", "D105", "D107", "D205"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "pep257"
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = true
+
+[tool.ruff.lint.per-file-ignores]
+# Legacy scripts: relax linting rules for data generation, database scripts, and utilities
+"apps/bfd-model-idr/**/*.py" = ["ANN", "E501", "SIM102", "SIM108", "SIM115", "PTH104", "PTH119", "PTH120", "PTH123", "PTH208", "D200", "D401"]
+"apps/bfd-model/bfd-model-rif/**/*.py" = ["ANN", "D200", "D401"]
+"apps/bfd-server-ng/codegen/**/*.py" = ["ANN", "PTH123", "SIM108"]
+"apps/utils/**/*.py" = ["ANN", "ARG", "PTH104", "PTH119", "PTH120", "PTH123", "PTH208", "SIM115", "E501"]
+"ops/services/02-eft/lambda_src/sftp_outbound_transfer/**/*.py" = ["D100", "D101", "D102", "D103", "D104", "D105", "D107", "E501"]
+
+[tool.pyright]
+typeCheckingMode = "strict"
+reportMissingImports = false
+reportMissingTypeStubs = false
+venvPath = "."
+venv = ".venv"
+# AWS Lambda Powertools compatibility - relaxed type checking for ops services
+reportUnknownMemberType = false
+reportUnknownVariableType = false
+reportUnknownArgumentType = false
+reportUnknownParameterType = false
+exclude = [
+    ".venv",
+    "**/.venv",
+    "**/node_modules",
+    "**/__pycache__",
+    "**/bfd-model-idr/**",
+    "**/bfd-model-rif/**",
+    "**/bfd-pipeline-idr/**",
+    "**/locust_tests/**",
+    "**/synthetic-load-converter/**",
+    "**/sftp_outbound_transfer/**",
+    "apps/bfd-model/**",
+    "apps/bfd-pipeline/**",
+    "apps/bfd-server/**",
+    "apps/utils/**",
+    "docs/**",
+    "ops/**",
+    "insights/**",
+    "src/**",
+    "static-site/**",
+]
+
+[tool.pytest.ini_options]
+timeout = 600

@@ -7,11 +7,6 @@ import ssl
 from collections.abc import Callable, Mapping
 from typing import Any
 
-from locust import FastHttpUser, events
-from locust.argument_parser import LocustArgumentParser
-from locust.contrib.fasthttp import ResponseContextManager
-from locust.env import Environment
-
 from common import custom_args, data, validation
 from common.locust_utils import is_distributed, is_locust_worker
 from common.stats import stats_compare, stats_writers
@@ -19,6 +14,10 @@ from common.stats.aggregated_stats import FinalCompareResult, StatsCollector
 from common.stats.stats_config import StatsConfiguration
 from common.url_path import create_url_path
 from common.validation import ValidationResult
+from locust import FastHttpUser, events
+from locust.argument_parser import LocustArgumentParser
+from locust.contrib.fasthttp import ResponseContextManager
+from locust.env import Environment
 
 _COMPARISONS_METADATA_PATH = None
 """The path to a given stats comparison metadata JSON file for a particular test suite. Should be
@@ -27,12 +26,12 @@ Also overriden by the value of --stats-compare-meta-file"""
 
 
 @events.init_command_line_parser.add_listener
-def _(parser: LocustArgumentParser, **kwargs: dict[str, Any]) -> None:  # noqa: ARG001
+def _(parser: LocustArgumentParser, **kwargs: dict[str, Any]) -> None:
     custom_args.register_custom_args(parser)
 
 
 @events.init.add_listener
-def _(environment: Environment, **kwargs: dict[str, Any]) -> None:  # noqa: ARG001
+def _(environment: Environment, **kwargs: dict[str, Any]) -> None:
     if is_distributed(environment) and is_locust_worker(environment):
         return
 
@@ -44,7 +43,7 @@ def _(environment: Environment, **kwargs: dict[str, Any]) -> None:  # noqa: ARG0
 
 
 @events.quitting.add_listener
-def _(environment: Environment, **kwargs: dict[str, Any]) -> None:  # noqa: ARG001
+def _(environment: Environment, **kwargs: dict[str, Any]) -> None:
     """Run one-time teardown tasks after the tests have completed.
 
     Args:
@@ -163,7 +162,8 @@ class BFDUserBase(FastHttpUser):
             context.load_cert_chain(certfile=self.client_cert)
         except Exception as e:
             self.logger.error(
-                "Error loading certificate. Ensure the certificate is formatted correctly. %s", e
+                "Error loading certificate. Ensure the certificate is formatted correctly. %s",
+                e,
             )
             raise e
         if self.server_public_key:

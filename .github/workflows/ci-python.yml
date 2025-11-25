@@ -4,7 +4,7 @@ on:
   pull_request:
     paths:
       - "**/*.py"
-      - "**/*requirement*.txt"
+      - "**/pyproject.toml"
       - "**/uv.lock"
       - ".github/workflows/ci-python.yml"
 
@@ -13,65 +13,57 @@ on:
 env:
   BASE_COMMIT: ""
   GH_TOKEN: ${{ github.token }}
+  # Pin tool versions to match workspace configuration
+  PYTHON_VERSION: "3.13"
+  UV_VERSION: "0.5.18"
 
 jobs:
-  matrix-pytest:
+  workspace-checks:
+    name: Workspace Tests & Checks
     runs-on: ubuntu-24.04
-    strategy:
-      matrix:
-        projects: [
-            {
-              projectName: "sftp-outbound-transfer-lambda",
-              projectRoot: "ops/services/02-eft/lambda_src/sftp_outbound_transfer",
-              testsRoot: "ops/services/02-eft/lambda_src/sftp_outbound_transfer/tests",
-              uvCommand: "uv sync",
-              pytestCommand: "uv run pytest",
-              pythonVersion: "3.13",
-            },
-            {
-              projectName: "locust",
-              projectRoot: "apps/utils/locust_tests",
-              testsRoot: "apps/utils/locust_tests",
-              uvCommand: "uv sync --group lambda-run-locust",
-              # no tests
-              pytestCommand: "echo 'no tests'",
-              pythonVersion: "3.13",
-            },
-            {
-              projectName: "idr-pipeline",
-              projectRoot: "apps/bfd-pipeline/bfd-pipeline-idr",
-              testsRoot: "apps/bfd-pipeline/bfd-pipeline-idr",
-              uvCommand: "uv sync",
-              pytestCommand: "uv run pytest",
-              pythonVersion: "3.13",
-            },
-          ]
-      fail-fast: false
     steps:
       - name: Checkout code
         id: code-checkout
         uses: actions/checkout@v4
         with:
           ref: ${{ inputs.branch }}
-      # Maven is needed to run the migrator
+      
+      # Maven is needed to run the migrator for bfd-pipeline-idr tests
       - name: "Setup JDK"
         uses: actions/setup-java@v4
         with:
           java-version: "25"
           distribution: "corretto"
-      - uses: astral-sh/setup-uv@v6
-      - name: Run Python Tests per project
-        id: run-pytest-set
+      
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          version: ${{ env.UV_VERSION }}
+      
+      - name: Set up Python
+        run: uv python install ${{ env.PYTHON_VERSION }}
+      
+      - name: Install workspace dependencies
         run: |
-          echo "Testing ${{ matrix.projects.projectName }}"
-          cd ${{ github.workspace }}/${{ matrix.projects.projectRoot }}
-          uv python install
-          ${{ matrix.projects.uvCommand }}
-          # check linting
+          cd ${{ github.workspace }}/apps
+          uv sync --all-groups
+      
+      - name: Run linting (ruff check)
+        run: |
+          cd ${{ github.workspace }}/apps
           uv run ruff check
-          # check formatting
+      
+      - name: Run formatting check (ruff format)
+        run: |
+          cd ${{ github.workspace }}/apps
           uv run ruff format --check
-          # check types
-          uv run pyright .
-          # tests
-          ${{ matrix.projects.pytestCommand }} ${{ github.workspace }}/${{ matrix.projects.testsRoot }}
+      
+      - name: Run type checking (pyright)
+        run: |
+          cd ${{ github.workspace }}/apps
+          uv run pyright
+      
+      - name: Run tests (pytest)
+        run: |
+          cd ${{ github.workspace }}/apps
+          uv run pytest
