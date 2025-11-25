@@ -24,7 +24,7 @@ import software.amazon.jdbc.dialect.Dialect;
 import software.amazon.jdbc.ds.AwsWrapperDataSource;
 import software.amazon.jdbc.hostlistprovider.monitoring.ClusterTopologyMonitor;
 import software.amazon.jdbc.hostlistprovider.monitoring.ClusterTopologyMonitorImpl;
-import software.amazon.jdbc.util.CacheMap;
+import software.amazon.jdbc.util.storage.CacheMap;
 import software.amazon.jdbc.util.RdsUtils;
 
 /**
