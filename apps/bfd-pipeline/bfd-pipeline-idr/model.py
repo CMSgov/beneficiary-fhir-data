@@ -737,8 +737,8 @@ class IdrContractPbpContact(IdrBaseModel):
     cntrct_plan_cntct_free_num: Annotated[str, BeforeValidator(transform_default_string)]
     cntrct_plan_cntct_extnsn_num: Annotated[str, BeforeValidator(transform_default_string)]
     cntrct_plan_cntct_tel_num: Annotated[str, BeforeValidator(transform_null_string)]
-    cntrct_pbp_end_dt: Annotated[date, {PRIMARY_KEY: True}]
-    cntrct_pbp_bgn_dt: date
+    cntrct_pbp_end_dt: date
+    cntrct_pbp_bgn_dt: Annotated[date, {PRIMARY_KEY: True}]
     cntrct_plan_cntct_st_1_adr: Annotated[str, BeforeValidator(transform_null_string)]
     cntrct_plan_cntct_st_2_adr: Annotated[str, BeforeValidator(transform_null_string)]
     cntrct_plan_cntct_city_name: Annotated[str, BeforeValidator(transform_default_string)]

@@ -677,30 +677,30 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
     claim["CNTRCT_PBP_NUM"].append(contract_pbp_num)
 
     contract_pbp_contact = {}
-    contract_pbp_contact["cntrct_pbp_sk"] = "".join(random.choices(string.digits, k=12))
-    contract_pbp_contact["cntrct_plan_cntct_obslt_dt"] = "9999-12-31"
-    contract_pbp_contact["cntrct_plan_cntct_type_cd"] = random.choice(["~", "30", "62"])
-    contract_pbp_contact["cntrct_plan_free_extnsn_num"] = "".join(
+    contract_pbp_contact["CNTRCT_PBP_SK"] = "".join(random.choices(string.digits, k=12))
+    contract_pbp_contact["CNTRCT_PLAN_CNTCT_OBSLT_DT"] = "9999-12-31"
+    contract_pbp_contact["CNTRCT_PLAN_CNTCT_TYPE_CD"] = random.choice(["~", "30", "62"])
+    contract_pbp_contact["CNTRCT_PLAN_FREE_EXTNSN_NUM"] = "".join(
         random.choices(string.digits, k=7)
     )
-    contract_pbp_contact["cntrct_plan_cntct_free_num"] = "".join(
+    contract_pbp_contact["CNTRCT_PLAN_CNTCT_FREE_NUM"] = "".join(
         random.choices(string.digits, k=10)
     )
-    contract_pbp_contact["cntrct_plan_cntct_extnsn_num"] = "".join(
+    contract_pbp_contact["CNTRCT_PLAN_CNTCT_EXTNSN_NUM"] = "".join(
         random.choices(string.digits, k=7)
     )
-    contract_pbp_contact["cntrct_plan_cntct_tel_num"] = "".join(random.choices(string.digits, k=10))
-    contract_pbp_contact["cntrct_pbp_end_dt"] = "2025-12-31"
-    contract_pbp_contact["cntrct_pbp_bgn_dt"] = "2025-01-01"
-    contract_pbp_contact["cntrct_plan_cntct_st_1_adr"] = random.choice(
+    contract_pbp_contact["CNTRCT_PLAN_CNTCT_TEL_NUM"] = "".join(random.choices(string.digits, k=10))
+    contract_pbp_contact["CNTRCT_PBP_END_DT"] = "2025-12-31"
+    contract_pbp_contact["CNTRCT_PBP_BGN_DT"] = "2025-01-01"
+    contract_pbp_contact["CNTRCT_PLAN_CNTCT_ST_1_ADR"] = random.choice(
         ["319 E. Street", "North Street", "West Street"]
     )
-    contract_pbp_contact["cntrct_plan_cntct_st_2_adr"] = random.choice(["Avenue M", ""])
-    contract_pbp_contact["cntrct_plan_cntct_obslt_dt"] = random.choice(
+    contract_pbp_contact["CNTRCT_PLAN_CNTCT_ST_2_ADR"] = random.choice(["Avenue M", ""])
+    contract_pbp_contact["CNTRCT_PLAN_CNTCT_CITY_NAME"] = random.choice(
         ["Los Angeles", "San Jose", "San Francisco"]
     )
-    contract_pbp_contact["cntrct_plan_cntct_obslt_dt"] = "CA"
-    contract_pbp_contact["cntrct_plan_cntct_obslt_dt"] = "".join(random.choices(string.digits, k=9))
+    contract_pbp_contact["CNTRCT_PLAN_CNTCT_STATE_CD"] = "CA"
+    contract_pbp_contact["CNTRCT_PLAN_CNTCT_ZIP_CD"] = "".join(random.choices(string.digits, k=9))
     claim["CNTRCT_PBP_CNTCT"].append(contract_pbp_contact)
 
     if clm_type_cd in (1, 2, 3, 4):
