@@ -211,7 +211,7 @@
         <jpa.version>1.0.2.Final</jpa.version>
 
         <!-- Dependencies required for connecting to a gRPC API -->
-        <grpc_java.version>1.70.0</grpc_java.version>
+        <grpc_java.version>1.75.0</grpc_java.version>
         <protoc.version>3.25.1</protoc.version>
         <protobuf.version>4.29.3</protobuf.version>
         <jakarta.servlet.version>6.1.0</jakarta.servlet.version>
