@@ -522,9 +522,6 @@ class GeneratorUtil:
         df = pd.json_normalize(self.bene_cmbnd_dual_mdcr)
         df.to_csv("out/SYNTHETIC_BENE_CMBND_DUAL_MDCR.csv", index=False)
 
-        df = pd.json_normalize(self.bene_xref_table)
-        df.to_csv("out/SYNTHETIC_BENE_XREF.csv", index=False)
-
         # Save new synthetic data tables
         df = pd.json_normalize(self.bene_lis)
         df.to_csv("out/SYNTHETIC_BENE_LIS.csv", index=False)
