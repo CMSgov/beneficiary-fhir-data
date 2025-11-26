@@ -915,6 +915,21 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             } ]
           }
         } ],
+        "detail" : [ {
+          "productOrService" : {
+            "coding" : [ {
+              "code" : "00338011704",
+              "system" : "http://hl7.org/fhir/sid/ndc"
+            } ]
+          },
+          "quantity" : {
+            "code" : "mL",
+            "system" : "http://unitsofmeasure.org",
+            "unit" : "ML",
+            "value" : 824.9
+          },
+          "sequence" : 1
+        } ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "23",
@@ -937,13 +952,9 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
           "coding" : [ {
             "code" : "99213",
             "system" : "http://www.ama-assn.org/go/cpt"
-          }, {
-            "code" : "00338011704",
-            "system" : "http://hl7.org/fhir/sid/ndc"
           } ]
         },
         "quantity" : {
-          "unit" : "ML",
           "value" : 0.2
         },
         "revenue" : {
@@ -1213,6 +1224,21 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             } ]
           }
         } ],
+        "detail" : [ {
+          "productOrService" : {
+            "coding" : [ {
+              "code" : "00338011704",
+              "system" : "http://hl7.org/fhir/sid/ndc"
+            } ]
+          },
+          "quantity" : {
+            "code" : "mL",
+            "system" : "http://unitsofmeasure.org",
+            "unit" : "ML",
+            "value" : 734.67
+          },
+          "sequence" : 1
+        } ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "1P",
@@ -1235,13 +1261,9 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
           "coding" : [ {
             "code" : "J2270",
             "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          }, {
-            "code" : "00338011704",
-            "system" : "http://hl7.org/fhir/sid/ndc"
           } ]
         },
         "quantity" : {
-          "unit" : "ML",
           "value" : 2.76
         },
         "revenue" : {
@@ -1370,17 +1392,28 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             } ]
           }
         } ],
+        "detail" : [ {
+          "productOrService" : {
+            "coding" : [ {
+              "code" : "00338011704",
+              "system" : "http://hl7.org/fhir/sid/ndc"
+            } ]
+          },
+          "quantity" : {
+            "code" : "mL",
+            "system" : "http://unitsofmeasure.org",
+            "unit" : "ML",
+            "value" : 928.44
+          },
+          "sequence" : 1
+        } ],
         "productOrService" : {
           "coding" : [ {
             "code" : "99213",
             "system" : "http://www.ama-assn.org/go/cpt"
-          }, {
-            "code" : "00338011704",
-            "system" : "http://hl7.org/fhir/sid/ndc"
           } ]
         },
         "quantity" : {
-          "unit" : "ML",
           "value" : 4.74
         },
         "revenue" : {
@@ -1509,6 +1542,21 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             } ]
           }
         } ],
+        "detail" : [ {
+          "productOrService" : {
+            "coding" : [ {
+              "code" : "00338004904",
+              "system" : "http://hl7.org/fhir/sid/ndc"
+            } ]
+          },
+          "quantity" : {
+            "code" : "mL",
+            "system" : "http://unitsofmeasure.org",
+            "unit" : "ML",
+            "value" : 569.45
+          },
+          "sequence" : 1
+        } ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "PD",
@@ -1519,13 +1567,9 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
           "coding" : [ {
             "code" : "99213",
             "system" : "http://www.ama-assn.org/go/cpt"
-          }, {
-            "code" : "00338004904",
-            "system" : "http://hl7.org/fhir/sid/ndc"
           } ]
         },
         "quantity" : {
-          "unit" : "ML",
           "value" : 4.79
         },
         "revenue" : {
@@ -1801,6 +1845,21 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             } ]
           }
         } ],
+        "detail" : [ {
+          "productOrService" : {
+            "coding" : [ {
+              "code" : "00264180031",
+              "system" : "http://hl7.org/fhir/sid/ndc"
+            } ]
+          },
+          "quantity" : {
+            "code" : "mL",
+            "system" : "http://unitsofmeasure.org",
+            "unit" : "ML",
+            "value" : 180.12
+          },
+          "sequence" : 1
+        } ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "U6",
@@ -1817,13 +1876,9 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
           "coding" : [ {
             "code" : "99453",
             "system" : "http://www.ama-assn.org/go/cpt"
-          }, {
-            "code" : "00264180031",
-            "system" : "http://hl7.org/fhir/sid/ndc"
           } ]
         },
         "quantity" : {
-          "unit" : "ML",
           "value" : 4.97
         },
         "revenue" : {
@@ -1952,6 +2007,21 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             } ]
           }
         } ],
+        "detail" : [ {
+          "productOrService" : {
+            "coding" : [ {
+              "code" : "00338004904",
+              "system" : "http://hl7.org/fhir/sid/ndc"
+            } ]
+          },
+          "quantity" : {
+            "code" : "mL",
+            "system" : "http://unitsofmeasure.org",
+            "unit" : "ML",
+            "value" : 550.12
+          },
+          "sequence" : 1
+        } ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "23",
@@ -1968,13 +2038,9 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
           "coding" : [ {
             "code" : "J2270",
             "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          }, {
-            "code" : "00338004904",
-            "system" : "http://hl7.org/fhir/sid/ndc"
           } ]
         },
         "quantity" : {
-          "unit" : "ML",
           "value" : 3.21
         },
         "revenue" : {
@@ -2103,17 +2169,28 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             } ]
           }
         } ],
+        "detail" : [ {
+          "productOrService" : {
+            "coding" : [ {
+              "code" : "00264180032",
+              "system" : "http://hl7.org/fhir/sid/ndc"
+            } ]
+          },
+          "quantity" : {
+            "code" : "mL",
+            "system" : "http://unitsofmeasure.org",
+            "unit" : "ML",
+            "value" : 618.73
+          },
+          "sequence" : 1
+        } ],
         "productOrService" : {
           "coding" : [ {
             "code" : "0078U",
             "system" : "http://www.ama-assn.org/go/cpt"
-          }, {
-            "code" : "00264180032",
-            "system" : "http://hl7.org/fhir/sid/ndc"
           } ]
         },
         "quantity" : {
-          "unit" : "ML",
           "value" : 1.65
         },
         "revenue" : {
@@ -2242,17 +2319,28 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             } ]
           }
         } ],
+        "detail" : [ {
+          "productOrService" : {
+            "coding" : [ {
+              "code" : "00264180032",
+              "system" : "http://hl7.org/fhir/sid/ndc"
+            } ]
+          },
+          "quantity" : {
+            "code" : "mL",
+            "system" : "http://unitsofmeasure.org",
+            "unit" : "ML",
+            "value" : 618.73
+          },
+          "sequence" : 1
+        } ],
         "productOrService" : {
           "coding" : [ {
             "code" : "H0050",
             "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          }, {
-            "code" : "00264180032",
-            "system" : "http://hl7.org/fhir/sid/ndc"
           } ]
         },
         "quantity" : {
-          "unit" : "ML",
           "value" : 1.65
         },
         "revenue" : {
@@ -3508,6 +3596,21 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             } ]
           }
         } ],
+        "detail" : [ {
+          "productOrService" : {
+            "coding" : [ {
+              "code" : "00338004904",
+              "system" : "http://hl7.org/fhir/sid/ndc"
+            } ]
+          },
+          "quantity" : {
+            "code" : "mL",
+            "system" : "http://unitsofmeasure.org",
+            "unit" : "ML",
+            "value" : 357.91
+          },
+          "sequence" : 1
+        } ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "US",
@@ -3527,13 +3630,9 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
           "coding" : [ {
             "code" : "99213",
             "system" : "http://www.ama-assn.org/go/cpt"
-          }, {
-            "code" : "00338004904",
-            "system" : "http://hl7.org/fhir/sid/ndc"
           } ]
         },
         "quantity" : {
-          "unit" : "ML",
           "value" : 0.24
         },
         "revenue" : {
@@ -3662,6 +3761,21 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             } ]
           }
         } ],
+        "detail" : [ {
+          "productOrService" : {
+            "coding" : [ {
+              "code" : "00264180032",
+              "system" : "http://hl7.org/fhir/sid/ndc"
+            } ]
+          },
+          "quantity" : {
+            "code" : "mL",
+            "system" : "http://unitsofmeasure.org",
+            "unit" : "ML",
+            "value" : 880.23
+          },
+          "sequence" : 1
+        } ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "PC",
@@ -3678,13 +3792,9 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
           "coding" : [ {
             "code" : "99453",
             "system" : "http://www.ama-assn.org/go/cpt"
-          }, {
-            "code" : "00264180032",
-            "system" : "http://hl7.org/fhir/sid/ndc"
           } ]
         },
         "quantity" : {
-          "unit" : "ML",
           "value" : 2.71
         },
         "revenue" : {
@@ -3813,6 +3923,21 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             } ]
           }
         } ],
+        "detail" : [ {
+          "productOrService" : {
+            "coding" : [ {
+              "code" : "00264180032",
+              "system" : "http://hl7.org/fhir/sid/ndc"
+            } ]
+          },
+          "quantity" : {
+            "code" : "mL",
+            "system" : "http://unitsofmeasure.org",
+            "unit" : "ML",
+            "value" : 345.55
+          },
+          "sequence" : 1
+        } ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "32",
@@ -3832,13 +3957,9 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
           "coding" : [ {
             "code" : "99213",
             "system" : "http://www.ama-assn.org/go/cpt"
-          }, {
-            "code" : "00264180032",
-            "system" : "http://hl7.org/fhir/sid/ndc"
           } ]
         },
         "quantity" : {
-          "unit" : "ML",
           "value" : 3.93
         },
         "revenue" : {
@@ -4114,6 +4235,21 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             } ]
           }
         } ],
+        "detail" : [ {
+          "productOrService" : {
+            "coding" : [ {
+              "code" : "00264180032",
+              "system" : "http://hl7.org/fhir/sid/ndc"
+            } ]
+          },
+          "quantity" : {
+            "code" : "mL",
+            "system" : "http://unitsofmeasure.org",
+            "unit" : "ML",
+            "value" : 27.58
+          },
+          "sequence" : 1
+        } ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "22",
@@ -4136,13 +4272,9 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
           "coding" : [ {
             "code" : "99453",
             "system" : "http://www.ama-assn.org/go/cpt"
-          }, {
-            "code" : "00264180032",
-            "system" : "http://hl7.org/fhir/sid/ndc"
           } ]
         },
         "quantity" : {
-          "unit" : "ML",
           "value" : 1.29
         },
         "revenue" : {
@@ -4712,6 +4844,21 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             } ]
           }
         } ],
+        "detail" : [ {
+          "productOrService" : {
+            "coding" : [ {
+              "code" : "00264180031",
+              "system" : "http://hl7.org/fhir/sid/ndc"
+            } ]
+          },
+          "quantity" : {
+            "code" : "mL",
+            "system" : "http://unitsofmeasure.org",
+            "unit" : "ML",
+            "value" : 698.28
+          },
+          "sequence" : 1
+        } ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "PC",
@@ -4722,13 +4869,9 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
           "coding" : [ {
             "code" : "99213",
             "system" : "http://www.ama-assn.org/go/cpt"
-          }, {
-            "code" : "00264180031",
-            "system" : "http://hl7.org/fhir/sid/ndc"
           } ]
         },
         "quantity" : {
-          "unit" : "ML",
           "value" : 1.42
         },
         "revenue" : {
@@ -5386,17 +5529,28 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             } ]
           }
         } ],
+        "detail" : [ {
+          "productOrService" : {
+            "coding" : [ {
+              "code" : "00264180031",
+              "system" : "http://hl7.org/fhir/sid/ndc"
+            } ]
+          },
+          "quantity" : {
+            "code" : "mL",
+            "system" : "http://unitsofmeasure.org",
+            "unit" : "ML",
+            "value" : 9.0
+          },
+          "sequence" : 1
+        } ],
         "productOrService" : {
           "coding" : [ {
             "code" : "G0534",
             "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          }, {
-            "code" : "00264180031",
-            "system" : "http://hl7.org/fhir/sid/ndc"
           } ]
         },
         "quantity" : {
-          "unit" : "ML",
           "value" : 4.0
         },
         "revenue" : {
@@ -6544,6 +6698,21 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             } ]
           }
         } ],
+        "detail" : [ {
+          "productOrService" : {
+            "coding" : [ {
+              "code" : "00264780020",
+              "system" : "http://hl7.org/fhir/sid/ndc"
+            } ]
+          },
+          "quantity" : {
+            "code" : "mL",
+            "system" : "http://unitsofmeasure.org",
+            "unit" : "ML",
+            "value" : 542.38
+          },
+          "sequence" : 1
+        } ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "US",
@@ -6563,13 +6732,9 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           "coding" : [ {
             "code" : "J2270",
             "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          }, {
-            "code" : "00264780020",
-            "system" : "http://hl7.org/fhir/sid/ndc"
           } ]
         },
         "quantity" : {
-          "unit" : "ML",
           "value" : 4.35
         },
         "revenue" : {
@@ -6851,6 +7016,21 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             } ]
           }
         } ],
+        "detail" : [ {
+          "productOrService" : {
+            "coding" : [ {
+              "code" : "00264780020",
+              "system" : "http://hl7.org/fhir/sid/ndc"
+            } ]
+          },
+          "quantity" : {
+            "code" : "mL",
+            "system" : "http://unitsofmeasure.org",
+            "unit" : "ML",
+            "value" : 746.88
+          },
+          "sequence" : 1
+        } ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "1P",
@@ -6861,13 +7041,9 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           "coding" : [ {
             "code" : "J2270",
             "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          }, {
-            "code" : "00264780020",
-            "system" : "http://hl7.org/fhir/sid/ndc"
           } ]
         },
         "quantity" : {
-          "unit" : "ML",
           "value" : 3.03
         },
         "revenue" : {
@@ -7080,6 +7256,21 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             } ]
           }
         } ],
+        "detail" : [ {
+          "productOrService" : {
+            "coding" : [ {
+              "code" : "00264180031",
+              "system" : "http://hl7.org/fhir/sid/ndc"
+            } ]
+          },
+          "quantity" : {
+            "code" : "mL",
+            "system" : "http://unitsofmeasure.org",
+            "unit" : "ML",
+            "value" : 814.66
+          },
+          "sequence" : 1
+        } ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "23",
@@ -7099,13 +7290,9 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           "coding" : [ {
             "code" : "99213",
             "system" : "http://www.ama-assn.org/go/cpt"
-          }, {
-            "code" : "00264180031",
-            "system" : "http://hl7.org/fhir/sid/ndc"
           } ]
         },
         "quantity" : {
-          "unit" : "ML",
           "value" : 4.98
         },
         "revenue" : {
@@ -8493,6 +8680,21 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             } ]
           }
         } ],
+        "detail" : [ {
+          "productOrService" : {
+            "coding" : [ {
+              "code" : "00338011704",
+              "system" : "http://hl7.org/fhir/sid/ndc"
+            } ]
+          },
+          "quantity" : {
+            "code" : "mL",
+            "system" : "http://unitsofmeasure.org",
+            "unit" : "ML",
+            "value" : 824.9
+          },
+          "sequence" : 1
+        } ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "23",
@@ -8515,13 +8717,9 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           "coding" : [ {
             "code" : "99213",
             "system" : "http://www.ama-assn.org/go/cpt"
-          }, {
-            "code" : "00338011704",
-            "system" : "http://hl7.org/fhir/sid/ndc"
           } ]
         },
         "quantity" : {
-          "unit" : "ML",
           "value" : 0.2
         },
         "revenue" : {
@@ -8791,6 +8989,21 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             } ]
           }
         } ],
+        "detail" : [ {
+          "productOrService" : {
+            "coding" : [ {
+              "code" : "00338011704",
+              "system" : "http://hl7.org/fhir/sid/ndc"
+            } ]
+          },
+          "quantity" : {
+            "code" : "mL",
+            "system" : "http://unitsofmeasure.org",
+            "unit" : "ML",
+            "value" : 734.67
+          },
+          "sequence" : 1
+        } ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "1P",
@@ -8813,13 +9026,9 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           "coding" : [ {
             "code" : "J2270",
             "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          }, {
-            "code" : "00338011704",
-            "system" : "http://hl7.org/fhir/sid/ndc"
           } ]
         },
         "quantity" : {
-          "unit" : "ML",
           "value" : 2.76
         },
         "revenue" : {
@@ -8948,17 +9157,28 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             } ]
           }
         } ],
+        "detail" : [ {
+          "productOrService" : {
+            "coding" : [ {
+              "code" : "00338011704",
+              "system" : "http://hl7.org/fhir/sid/ndc"
+            } ]
+          },
+          "quantity" : {
+            "code" : "mL",
+            "system" : "http://unitsofmeasure.org",
+            "unit" : "ML",
+            "value" : 928.44
+          },
+          "sequence" : 1
+        } ],
         "productOrService" : {
           "coding" : [ {
             "code" : "99213",
             "system" : "http://www.ama-assn.org/go/cpt"
-          }, {
-            "code" : "00338011704",
-            "system" : "http://hl7.org/fhir/sid/ndc"
           } ]
         },
         "quantity" : {
-          "unit" : "ML",
           "value" : 4.74
         },
         "revenue" : {
@@ -9087,6 +9307,21 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             } ]
           }
         } ],
+        "detail" : [ {
+          "productOrService" : {
+            "coding" : [ {
+              "code" : "00338004904",
+              "system" : "http://hl7.org/fhir/sid/ndc"
+            } ]
+          },
+          "quantity" : {
+            "code" : "mL",
+            "system" : "http://unitsofmeasure.org",
+            "unit" : "ML",
+            "value" : 569.45
+          },
+          "sequence" : 1
+        } ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "PD",
@@ -9097,13 +9332,9 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           "coding" : [ {
             "code" : "99213",
             "system" : "http://www.ama-assn.org/go/cpt"
-          }, {
-            "code" : "00338004904",
-            "system" : "http://hl7.org/fhir/sid/ndc"
           } ]
         },
         "quantity" : {
-          "unit" : "ML",
           "value" : 4.79
         },
         "revenue" : {
@@ -9379,6 +9610,21 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             } ]
           }
         } ],
+        "detail" : [ {
+          "productOrService" : {
+            "coding" : [ {
+              "code" : "00264180031",
+              "system" : "http://hl7.org/fhir/sid/ndc"
+            } ]
+          },
+          "quantity" : {
+            "code" : "mL",
+            "system" : "http://unitsofmeasure.org",
+            "unit" : "ML",
+            "value" : 180.12
+          },
+          "sequence" : 1
+        } ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "U6",
@@ -9395,13 +9641,9 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           "coding" : [ {
             "code" : "99453",
             "system" : "http://www.ama-assn.org/go/cpt"
-          }, {
-            "code" : "00264180031",
-            "system" : "http://hl7.org/fhir/sid/ndc"
           } ]
         },
         "quantity" : {
-          "unit" : "ML",
           "value" : 4.97
         },
         "revenue" : {
@@ -9530,6 +9772,21 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             } ]
           }
         } ],
+        "detail" : [ {
+          "productOrService" : {
+            "coding" : [ {
+              "code" : "00338004904",
+              "system" : "http://hl7.org/fhir/sid/ndc"
+            } ]
+          },
+          "quantity" : {
+            "code" : "mL",
+            "system" : "http://unitsofmeasure.org",
+            "unit" : "ML",
+            "value" : 550.12
+          },
+          "sequence" : 1
+        } ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "23",
@@ -9546,13 +9803,9 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           "coding" : [ {
             "code" : "J2270",
             "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          }, {
-            "code" : "00338004904",
-            "system" : "http://hl7.org/fhir/sid/ndc"
           } ]
         },
         "quantity" : {
-          "unit" : "ML",
           "value" : 3.21
         },
         "revenue" : {
@@ -9681,17 +9934,28 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             } ]
           }
         } ],
+        "detail" : [ {
+          "productOrService" : {
+            "coding" : [ {
+              "code" : "00264180032",
+              "system" : "http://hl7.org/fhir/sid/ndc"
+            } ]
+          },
+          "quantity" : {
+            "code" : "mL",
+            "system" : "http://unitsofmeasure.org",
+            "unit" : "ML",
+            "value" : 618.73
+          },
+          "sequence" : 1
+        } ],
         "productOrService" : {
           "coding" : [ {
             "code" : "99453",
             "system" : "http://www.ama-assn.org/go/cpt"
-          }, {
-            "code" : "00264180032",
-            "system" : "http://hl7.org/fhir/sid/ndc"
           } ]
         },
         "quantity" : {
-          "unit" : "ML",
           "value" : 1.65
         },
         "revenue" : {
@@ -10933,18 +11197,29 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             } ]
           }
         } ],
+        "detail" : [ {
+          "productOrService" : {
+            "coding" : [ {
+              "code" : "00264180031",
+              "system" : "http://hl7.org/fhir/sid/ndc"
+            } ]
+          },
+          "quantity" : {
+            "code" : "mL",
+            "system" : "http://unitsofmeasure.org",
+            "unit" : "ML",
+            "value" : 256.94
+          },
+          "sequence" : 1
+        } ],
         "diagnosisSequence" : [ 3 ],
         "productOrService" : {
           "coding" : [ {
             "code" : "99213",
             "system" : "http://www.ama-assn.org/go/cpt"
-          }, {
-            "code" : "00264180031",
-            "system" : "http://hl7.org/fhir/sid/ndc"
           } ]
         },
         "quantity" : {
-          "unit" : "ML",
           "value" : 1.45
         },
         "revenue" : {
@@ -11153,18 +11428,29 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             } ]
           }
         } ],
+        "detail" : [ {
+          "productOrService" : {
+            "coding" : [ {
+              "code" : "00338011704",
+              "system" : "http://hl7.org/fhir/sid/ndc"
+            } ]
+          },
+          "quantity" : {
+            "code" : "mL",
+            "system" : "http://unitsofmeasure.org",
+            "unit" : "ML",
+            "value" : 573.12
+          },
+          "sequence" : 1
+        } ],
         "diagnosisSequence" : [ 4 ],
         "productOrService" : {
           "coding" : [ {
             "code" : "J2270",
             "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          }, {
-            "code" : "00338011704",
-            "system" : "http://hl7.org/fhir/sid/ndc"
           } ]
         },
         "quantity" : {
-          "unit" : "ML",
           "value" : 2.87
         },
         "revenue" : {
@@ -12468,6 +12754,21 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             } ]
           }
         } ],
+        "detail" : [ {
+          "productOrService" : {
+            "coding" : [ {
+              "code" : "00338004904",
+              "system" : "http://hl7.org/fhir/sid/ndc"
+            } ]
+          },
+          "quantity" : {
+            "code" : "mL",
+            "system" : "http://unitsofmeasure.org",
+            "unit" : "ML",
+            "value" : 357.91
+          },
+          "sequence" : 1
+        } ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "US",
@@ -12487,13 +12788,9 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
           "coding" : [ {
             "code" : "99213",
             "system" : "http://www.ama-assn.org/go/cpt"
-          }, {
-            "code" : "00338004904",
-            "system" : "http://hl7.org/fhir/sid/ndc"
           } ]
         },
         "quantity" : {
-          "unit" : "ML",
           "value" : 0.24
         },
         "revenue" : {
@@ -12622,6 +12919,21 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             } ]
           }
         } ],
+        "detail" : [ {
+          "productOrService" : {
+            "coding" : [ {
+              "code" : "00264180032",
+              "system" : "http://hl7.org/fhir/sid/ndc"
+            } ]
+          },
+          "quantity" : {
+            "code" : "mL",
+            "system" : "http://unitsofmeasure.org",
+            "unit" : "ML",
+            "value" : 880.23
+          },
+          "sequence" : 1
+        } ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "PC",
@@ -12638,13 +12950,9 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
           "coding" : [ {
             "code" : "99453",
             "system" : "http://www.ama-assn.org/go/cpt"
-          }, {
-            "code" : "00264180032",
-            "system" : "http://hl7.org/fhir/sid/ndc"
           } ]
         },
         "quantity" : {
-          "unit" : "ML",
           "value" : 2.71
         },
         "revenue" : {
@@ -12773,6 +13081,21 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             } ]
           }
         } ],
+        "detail" : [ {
+          "productOrService" : {
+            "coding" : [ {
+              "code" : "00264180032",
+              "system" : "http://hl7.org/fhir/sid/ndc"
+            } ]
+          },
+          "quantity" : {
+            "code" : "mL",
+            "system" : "http://unitsofmeasure.org",
+            "unit" : "ML",
+            "value" : 345.55
+          },
+          "sequence" : 1
+        } ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "32",
@@ -12792,13 +13115,9 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
           "coding" : [ {
             "code" : "99213",
             "system" : "http://www.ama-assn.org/go/cpt"
-          }, {
-            "code" : "00264180032",
-            "system" : "http://hl7.org/fhir/sid/ndc"
           } ]
         },
         "quantity" : {
-          "unit" : "ML",
           "value" : 3.93
         },
         "revenue" : {
@@ -13074,6 +13393,21 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             } ]
           }
         } ],
+        "detail" : [ {
+          "productOrService" : {
+            "coding" : [ {
+              "code" : "00264180032",
+              "system" : "http://hl7.org/fhir/sid/ndc"
+            } ]
+          },
+          "quantity" : {
+            "code" : "mL",
+            "system" : "http://unitsofmeasure.org",
+            "unit" : "ML",
+            "value" : 27.58
+          },
+          "sequence" : 1
+        } ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "22",
@@ -13096,13 +13430,9 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
           "coding" : [ {
             "code" : "99453",
             "system" : "http://www.ama-assn.org/go/cpt"
-          }, {
-            "code" : "00264180032",
-            "system" : "http://hl7.org/fhir/sid/ndc"
           } ]
         },
         "quantity" : {
-          "unit" : "ML",
           "value" : 1.29
         },
         "revenue" : {
@@ -13672,6 +14002,21 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             } ]
           }
         } ],
+        "detail" : [ {
+          "productOrService" : {
+            "coding" : [ {
+              "code" : "00264180031",
+              "system" : "http://hl7.org/fhir/sid/ndc"
+            } ]
+          },
+          "quantity" : {
+            "code" : "mL",
+            "system" : "http://unitsofmeasure.org",
+            "unit" : "ML",
+            "value" : 698.28
+          },
+          "sequence" : 1
+        } ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "PC",
@@ -13682,13 +14027,9 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
           "coding" : [ {
             "code" : "99213",
             "system" : "http://www.ama-assn.org/go/cpt"
-          }, {
-            "code" : "00264180031",
-            "system" : "http://hl7.org/fhir/sid/ndc"
           } ]
         },
         "quantity" : {
-          "unit" : "ML",
           "value" : 1.42
         },
         "revenue" : {
@@ -14346,17 +14687,28 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             } ]
           }
         } ],
+        "detail" : [ {
+          "productOrService" : {
+            "coding" : [ {
+              "code" : "00264180031",
+              "system" : "http://hl7.org/fhir/sid/ndc"
+            } ]
+          },
+          "quantity" : {
+            "code" : "mL",
+            "system" : "http://unitsofmeasure.org",
+            "unit" : "ML",
+            "value" : 9.0
+          },
+          "sequence" : 1
+        } ],
         "productOrService" : {
           "coding" : [ {
             "code" : "G0534",
             "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          }, {
-            "code" : "00264180031",
-            "system" : "http://hl7.org/fhir/sid/ndc"
           } ]
         },
         "quantity" : {
-          "unit" : "ML",
           "value" : 4.0
         },
         "revenue" : {
@@ -15504,6 +15856,21 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             } ]
           }
         } ],
+        "detail" : [ {
+          "productOrService" : {
+            "coding" : [ {
+              "code" : "00264780020",
+              "system" : "http://hl7.org/fhir/sid/ndc"
+            } ]
+          },
+          "quantity" : {
+            "code" : "mL",
+            "system" : "http://unitsofmeasure.org",
+            "unit" : "ML",
+            "value" : 542.38
+          },
+          "sequence" : 1
+        } ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "US",
@@ -15523,13 +15890,9 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           "coding" : [ {
             "code" : "J2270",
             "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          }, {
-            "code" : "00264780020",
-            "system" : "http://hl7.org/fhir/sid/ndc"
           } ]
         },
         "quantity" : {
-          "unit" : "ML",
           "value" : 4.35
         },
         "revenue" : {
@@ -15811,6 +16174,21 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             } ]
           }
         } ],
+        "detail" : [ {
+          "productOrService" : {
+            "coding" : [ {
+              "code" : "00264780020",
+              "system" : "http://hl7.org/fhir/sid/ndc"
+            } ]
+          },
+          "quantity" : {
+            "code" : "mL",
+            "system" : "http://unitsofmeasure.org",
+            "unit" : "ML",
+            "value" : 746.88
+          },
+          "sequence" : 1
+        } ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "1P",
@@ -15821,13 +16199,9 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           "coding" : [ {
             "code" : "J2270",
             "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          }, {
-            "code" : "00264780020",
-            "system" : "http://hl7.org/fhir/sid/ndc"
           } ]
         },
         "quantity" : {
-          "unit" : "ML",
           "value" : 3.03
         },
         "revenue" : {
@@ -16040,6 +16414,21 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             } ]
           }
         } ],
+        "detail" : [ {
+          "productOrService" : {
+            "coding" : [ {
+              "code" : "00264180031",
+              "system" : "http://hl7.org/fhir/sid/ndc"
+            } ]
+          },
+          "quantity" : {
+            "code" : "mL",
+            "system" : "http://unitsofmeasure.org",
+            "unit" : "ML",
+            "value" : 814.66
+          },
+          "sequence" : 1
+        } ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "23",
@@ -16059,13 +16448,9 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           "coding" : [ {
             "code" : "99213",
             "system" : "http://www.ama-assn.org/go/cpt"
-          }, {
-            "code" : "00264180031",
-            "system" : "http://hl7.org/fhir/sid/ndc"
           } ]
         },
         "quantity" : {
-          "unit" : "ML",
           "value" : 4.98
         },
         "revenue" : {
@@ -17453,6 +17838,21 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             } ]
           }
         } ],
+        "detail" : [ {
+          "productOrService" : {
+            "coding" : [ {
+              "code" : "00338011704",
+              "system" : "http://hl7.org/fhir/sid/ndc"
+            } ]
+          },
+          "quantity" : {
+            "code" : "mL",
+            "system" : "http://unitsofmeasure.org",
+            "unit" : "ML",
+            "value" : 824.9
+          },
+          "sequence" : 1
+        } ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "23",
@@ -17475,13 +17875,9 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           "coding" : [ {
             "code" : "99213",
             "system" : "http://www.ama-assn.org/go/cpt"
-          }, {
-            "code" : "00338011704",
-            "system" : "http://hl7.org/fhir/sid/ndc"
           } ]
         },
         "quantity" : {
-          "unit" : "ML",
           "value" : 0.2
         },
         "revenue" : {
@@ -17751,6 +18147,21 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             } ]
           }
         } ],
+        "detail" : [ {
+          "productOrService" : {
+            "coding" : [ {
+              "code" : "00338011704",
+              "system" : "http://hl7.org/fhir/sid/ndc"
+            } ]
+          },
+          "quantity" : {
+            "code" : "mL",
+            "system" : "http://unitsofmeasure.org",
+            "unit" : "ML",
+            "value" : 734.67
+          },
+          "sequence" : 1
+        } ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "1P",
@@ -17773,13 +18184,9 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           "coding" : [ {
             "code" : "J2270",
             "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          }, {
-            "code" : "00338011704",
-            "system" : "http://hl7.org/fhir/sid/ndc"
           } ]
         },
         "quantity" : {
-          "unit" : "ML",
           "value" : 2.76
         },
         "revenue" : {
@@ -17908,17 +18315,28 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             } ]
           }
         } ],
+        "detail" : [ {
+          "productOrService" : {
+            "coding" : [ {
+              "code" : "00338011704",
+              "system" : "http://hl7.org/fhir/sid/ndc"
+            } ]
+          },
+          "quantity" : {
+            "code" : "mL",
+            "system" : "http://unitsofmeasure.org",
+            "unit" : "ML",
+            "value" : 928.44
+          },
+          "sequence" : 1
+        } ],
         "productOrService" : {
           "coding" : [ {
             "code" : "99213",
             "system" : "http://www.ama-assn.org/go/cpt"
-          }, {
-            "code" : "00338011704",
-            "system" : "http://hl7.org/fhir/sid/ndc"
           } ]
         },
         "quantity" : {
-          "unit" : "ML",
           "value" : 4.74
         },
         "revenue" : {
@@ -18047,6 +18465,21 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             } ]
           }
         } ],
+        "detail" : [ {
+          "productOrService" : {
+            "coding" : [ {
+              "code" : "00338004904",
+              "system" : "http://hl7.org/fhir/sid/ndc"
+            } ]
+          },
+          "quantity" : {
+            "code" : "mL",
+            "system" : "http://unitsofmeasure.org",
+            "unit" : "ML",
+            "value" : 569.45
+          },
+          "sequence" : 1
+        } ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "PD",
@@ -18057,13 +18490,9 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           "coding" : [ {
             "code" : "99213",
             "system" : "http://www.ama-assn.org/go/cpt"
-          }, {
-            "code" : "00338004904",
-            "system" : "http://hl7.org/fhir/sid/ndc"
           } ]
         },
         "quantity" : {
-          "unit" : "ML",
           "value" : 4.79
         },
         "revenue" : {
@@ -18339,6 +18768,21 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             } ]
           }
         } ],
+        "detail" : [ {
+          "productOrService" : {
+            "coding" : [ {
+              "code" : "00264180031",
+              "system" : "http://hl7.org/fhir/sid/ndc"
+            } ]
+          },
+          "quantity" : {
+            "code" : "mL",
+            "system" : "http://unitsofmeasure.org",
+            "unit" : "ML",
+            "value" : 180.12
+          },
+          "sequence" : 1
+        } ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "U6",
@@ -18355,13 +18799,9 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           "coding" : [ {
             "code" : "99453",
             "system" : "http://www.ama-assn.org/go/cpt"
-          }, {
-            "code" : "00264180031",
-            "system" : "http://hl7.org/fhir/sid/ndc"
           } ]
         },
         "quantity" : {
-          "unit" : "ML",
           "value" : 4.97
         },
         "revenue" : {
@@ -18490,6 +18930,21 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             } ]
           }
         } ],
+        "detail" : [ {
+          "productOrService" : {
+            "coding" : [ {
+              "code" : "00338004904",
+              "system" : "http://hl7.org/fhir/sid/ndc"
+            } ]
+          },
+          "quantity" : {
+            "code" : "mL",
+            "system" : "http://unitsofmeasure.org",
+            "unit" : "ML",
+            "value" : 550.12
+          },
+          "sequence" : 1
+        } ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "23",
@@ -18506,13 +18961,9 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           "coding" : [ {
             "code" : "J2270",
             "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          }, {
-            "code" : "00338004904",
-            "system" : "http://hl7.org/fhir/sid/ndc"
           } ]
         },
         "quantity" : {
-          "unit" : "ML",
           "value" : 3.21
         },
         "revenue" : {
@@ -18641,17 +19092,28 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             } ]
           }
         } ],
+        "detail" : [ {
+          "productOrService" : {
+            "coding" : [ {
+              "code" : "00264180032",
+              "system" : "http://hl7.org/fhir/sid/ndc"
+            } ]
+          },
+          "quantity" : {
+            "code" : "mL",
+            "system" : "http://unitsofmeasure.org",
+            "unit" : "ML",
+            "value" : 618.73
+          },
+          "sequence" : 1
+        } ],
         "productOrService" : {
           "coding" : [ {
             "code" : "99453",
             "system" : "http://www.ama-assn.org/go/cpt"
-          }, {
-            "code" : "00264180032",
-            "system" : "http://hl7.org/fhir/sid/ndc"
           } ]
         },
         "quantity" : {
-          "unit" : "ML",
           "value" : 1.65
         },
         "revenue" : {
@@ -19893,18 +20355,29 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             } ]
           }
         } ],
+        "detail" : [ {
+          "productOrService" : {
+            "coding" : [ {
+              "code" : "00264180031",
+              "system" : "http://hl7.org/fhir/sid/ndc"
+            } ]
+          },
+          "quantity" : {
+            "code" : "mL",
+            "system" : "http://unitsofmeasure.org",
+            "unit" : "ML",
+            "value" : 256.94
+          },
+          "sequence" : 1
+        } ],
         "diagnosisSequence" : [ 3 ],
         "productOrService" : {
           "coding" : [ {
             "code" : "99213",
             "system" : "http://www.ama-assn.org/go/cpt"
-          }, {
-            "code" : "00264180031",
-            "system" : "http://hl7.org/fhir/sid/ndc"
           } ]
         },
         "quantity" : {
-          "unit" : "ML",
           "value" : 1.45
         },
         "revenue" : {
@@ -20113,18 +20586,29 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             } ]
           }
         } ],
+        "detail" : [ {
+          "productOrService" : {
+            "coding" : [ {
+              "code" : "00338011704",
+              "system" : "http://hl7.org/fhir/sid/ndc"
+            } ]
+          },
+          "quantity" : {
+            "code" : "mL",
+            "system" : "http://unitsofmeasure.org",
+            "unit" : "ML",
+            "value" : 573.12
+          },
+          "sequence" : 1
+        } ],
         "diagnosisSequence" : [ 4 ],
         "productOrService" : {
           "coding" : [ {
             "code" : "J2270",
             "system" : "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets"
-          }, {
-            "code" : "00338011704",
-            "system" : "http://hl7.org/fhir/sid/ndc"
           } ]
         },
         "quantity" : {
-          "unit" : "ML",
           "value" : 2.87
         },
         "revenue" : {

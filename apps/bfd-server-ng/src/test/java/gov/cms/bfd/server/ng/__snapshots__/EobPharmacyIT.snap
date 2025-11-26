@@ -403,7 +403,6 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
       } ]
     },
     "quantity" : {
-      "unit" : "ML",
       "value" : 2.0
     },
     "revenue" : {
@@ -1279,6 +1278,21 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
           "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus"
         } ]
       }
+    } ],
+    "detail" : [ {
+      "productOrService" : {
+        "coding" : [ {
+          "code" : "00338004904",
+          "system" : "http://hl7.org/fhir/sid/ndc"
+        } ]
+      },
+      "quantity" : {
+        "code" : "mL",
+        "system" : "http://unitsofmeasure.org",
+        "unit" : "ML",
+        "value" : 1.0
+      },
+      "sequence" : 1
     } ],
     "productOrService" : {
       "coding" : [ {

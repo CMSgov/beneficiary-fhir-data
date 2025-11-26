@@ -60,23 +60,24 @@ public class ClaimLine {
     claimLineInstitutional
         .flatMap(i -> i.getHippsCode().toFhir())
         .ifPresent(productOrService::addCoding);
+
+    var quantity = serviceUnitQuantity.toFhir();
+
     boolean isNDCCompound =
         claimLineRx
             .flatMap(c -> c.getClaimRxSupportingInfo().getCompoundCode())
             .filter(c -> c == ClaimLineCompoundCode._2)
             .isPresent();
     if (isNDCCompound) {
-      ndc.toDetail().ifPresent(line::addDetail);
       productOrService.addCoding(
           new Coding().setSystem(SystemUrls.CARIN_COMPOUND_LITERAL).setCode("compound"));
-    } else {
+    } else if (productOrService.isEmpty()) {
       ndc.toFhir().ifPresent(productOrService::addCoding);
+      ndc.getQualifier().ifPresent(quantity::setUnit);
     }
 
     line.setProductOrService(FhirUtil.checkDataAbsent(productOrService));
-
-    var quantity = serviceUnitQuantity.toFhir();
-    ndc.getQualifier().ifPresent(quantity::setUnit);
+    ndc.toDetail().ifPresent(line::addDetail);
     line.setQuantity(quantity);
 
     revenueCenterCode.ifPresent(

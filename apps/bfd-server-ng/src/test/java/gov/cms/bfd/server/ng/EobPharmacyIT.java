@@ -66,7 +66,9 @@ public class EobPharmacyIT extends IntegrationTestBase {
 
     var itemQuantity = eob.getItem().getFirst().getQuantity();
     assertFalse(itemQuantity.isEmpty());
-    assertFalse(itemQuantity.getUnit().isEmpty());
+    // This is due to compound meds being weird + patterning the qualifier to go in
+    // detail.
+    assertTrue(itemQuantity.getUnit() == null);
 
     var itemDetail = eob.getItem().getFirst().getDetailFirstRep();
     assertFalse(itemDetail.isEmpty());
