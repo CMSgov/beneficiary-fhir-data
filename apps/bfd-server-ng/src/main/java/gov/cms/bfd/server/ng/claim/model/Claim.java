@@ -315,17 +315,13 @@ public class Claim {
               eob.setProvider(new Reference(p));
             });
 
-    var providerContext = getServiceProviderHistory();
-    if (providerContext.isPresent()) {
-      var provider = providerContext.get();
-      var npiType = provider.getNpiType();
-      var resource = provider.toFhirNpiTypePartD(npiType, claimTypeCode);
-      resource.ifPresent(
-          p -> {
-            eob.addContained(p);
-            eob.setProvider(new Reference(p));
-          });
-    }
+    getServiceProviderHistory()
+        .flatMap(p -> p.toFhirNpiTypePartD(claimTypeCode))
+        .ifPresent(
+            p -> {
+              eob.addContained(p);
+              eob.setProvider(new Reference(p));
+            });
 
     claimSourceId.toFhirOutcome().ifPresent(eob::setOutcome);
     claimTypeCode.toFhirOutcome().ifPresent(eob::setOutcome);

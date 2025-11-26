@@ -98,11 +98,11 @@ public class ProviderHistory {
     return name;
   }
 
-  Optional<DomainResource> toFhirNpiTypePartD(NpiType npiType, ClaimTypeCode claimTypeCode) {
+  Optional<DomainResource> toFhirNpiTypePartD(ClaimTypeCode claimTypeCode) {
     if (!claimTypeCode.isBetween(1, 4)) {
       return Optional.empty();
     }
-    return (npiType == ProviderHistory.NpiType.ORGANIZATION
+    return (getNpiType() == ProviderHistory.NpiType.ORGANIZATION
             ? toFhirOrganization()
             : toFhirPractitioner())
         .map(r -> r);
