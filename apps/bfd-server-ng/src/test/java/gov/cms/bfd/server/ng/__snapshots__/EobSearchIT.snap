@@ -10469,7 +10469,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
         "code" : {
           "coding" : [ {
             "code" : "V",
-            "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA])."
+            "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA]).",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
           } ]
         },
         "sequence" : 5
@@ -10564,34 +10565,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
         },
         "sequence" : 12,
         "timingDate" : "2021-10-03"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_FROM_DT",
-            "display" : "Qualified Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 13,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_THRU_DT",
-            "display" : "Qualified Stay Thru Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 14,
-        "timingDate" : "9999-12-31"
       } ],
       "total" : [ {
         "amount" : {
@@ -14567,7 +14540,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
         "code" : {
           "coding" : [ {
             "code" : "V",
-            "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA])."
+            "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA]).",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
           } ]
         },
         "sequence" : 5
@@ -14662,34 +14636,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
         },
         "sequence" : 12,
         "timingDate" : "2021-10-03"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_FROM_DT",
-            "display" : "Qualified Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 13,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_THRU_DT",
-            "display" : "Qualified Stay Thru Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 14,
-        "timingDate" : "9999-12-31"
       } ],
       "total" : [ {
         "amount" : {
@@ -18665,7 +18611,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
         "code" : {
           "coding" : [ {
             "code" : "V",
-            "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA])."
+            "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA]).",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
           } ]
         },
         "sequence" : 5
@@ -18760,34 +18707,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
         },
         "sequence" : 12,
         "timingDate" : "2021-10-03"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_FROM_DT",
-            "display" : "Qualified Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 13,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_THRU_DT",
-            "display" : "Qualified Stay Thru Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 14,
-        "timingDate" : "9999-12-31"
       } ],
       "total" : [ {
         "amount" : {
@@ -21531,7 +21450,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WITH_SEARCH_WithSy
         "code" : {
           "coding" : [ {
             "code" : "V",
-            "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA])."
+            "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA]).",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
           } ]
         },
         "sequence" : 5
@@ -21626,34 +21546,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WITH_SEARCH_WithSy
         },
         "sequence" : 12,
         "timingDate" : "2021-10-03"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_FROM_DT",
-            "display" : "Qualified Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 13,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_THRU_DT",
-            "display" : "Qualified Stay Thru Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 14,
-        "timingDate" : "9999-12-31"
       } ],
       "total" : [ {
         "amount" : {
@@ -24397,7 +24289,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WithSystemTag_Adju
         "code" : {
           "coding" : [ {
             "code" : "V",
-            "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA])."
+            "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA]).",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
           } ]
         },
         "sequence" : 5
@@ -24492,34 +24385,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WithSystemTag_Adju
         },
         "sequence" : 12,
         "timingDate" : "2021-10-03"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_FROM_DT",
-            "display" : "Qualified Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 13,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_THRU_DT",
-            "display" : "Qualified Stay Thru Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 14,
-        "timingDate" : "9999-12-31"
       } ],
       "total" : [ {
         "amount" : {
@@ -27263,7 +27128,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[POST_WithSystemTag_Adj
         "code" : {
           "coding" : [ {
             "code" : "V",
-            "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA])."
+            "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA]).",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
           } ]
         },
         "sequence" : 5
@@ -27358,34 +27224,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[POST_WithSystemTag_Adj
         },
         "sequence" : 12,
         "timingDate" : "2021-10-03"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_FROM_DT",
-            "display" : "Qualified Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 13,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_THRU_DT",
-            "display" : "Qualified Stay Thru Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 14,
-        "timingDate" : "9999-12-31"
       } ],
       "total" : [ {
         "amount" : {
@@ -33876,7 +33714,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WITH_SEARCH_WithTag_Adjudic
         "code" : {
           "coding" : [ {
             "code" : "V",
-            "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA])."
+            "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA]).",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
           } ]
         },
         "sequence" : 5
@@ -33971,34 +33810,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WITH_SEARCH_WithTag_Adjudic
         },
         "sequence" : 12,
         "timingDate" : "2021-10-03"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_FROM_DT",
-            "display" : "Qualified Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 13,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_THRU_DT",
-            "display" : "Qualified Stay Thru Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 14,
-        "timingDate" : "9999-12-31"
       } ],
       "total" : [ {
         "amount" : {
@@ -36742,7 +36553,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WithTag_Adjudicated]=[
         "code" : {
           "coding" : [ {
             "code" : "V",
-            "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA])."
+            "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA]).",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
           } ]
         },
         "sequence" : 5
@@ -36837,34 +36649,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WithTag_Adjudicated]=[
         },
         "sequence" : 12,
         "timingDate" : "2021-10-03"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_FROM_DT",
-            "display" : "Qualified Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 13,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_THRU_DT",
-            "display" : "Qualified Stay Thru Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 14,
-        "timingDate" : "9999-12-31"
       } ],
       "total" : [ {
         "amount" : {
@@ -39608,7 +39392,8 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[POST_WithTag_Adjudicated]=[
         "code" : {
           "coding" : [ {
             "code" : "V",
-            "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA])."
+            "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA]).",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
           } ]
         },
         "sequence" : 5
@@ -39703,34 +39488,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[POST_WithTag_Adjudicated]=[
         },
         "sequence" : 12,
         "timingDate" : "2021-10-03"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_FROM_DT",
-            "display" : "Qualified Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 13,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_THRU_DT",
-            "display" : "Qualified Stay Thru Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 14,
-        "timingDate" : "9999-12-31"
       } ],
       "total" : [ {
         "amount" : {
