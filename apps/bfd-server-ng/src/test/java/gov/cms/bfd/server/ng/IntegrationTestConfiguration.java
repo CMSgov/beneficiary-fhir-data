@@ -98,6 +98,7 @@ public class IntegrationTestConfiguration {
     env.put("BFD_DB_NAME", container.getDatabaseName());
     // Makes the pipeline go slightly faster
     env.put("IDR_LOAD_TYPE", "initial");
+    env.put("IDR_ENABLE_PARTITIONS", "0");
 
     processBuilder
         .directory(new File(Paths.get(baseDir, "../bfd-pipeline/bfd-pipeline-idr").toString()))
