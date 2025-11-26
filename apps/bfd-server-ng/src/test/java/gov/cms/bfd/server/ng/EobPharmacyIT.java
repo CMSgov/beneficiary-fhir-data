@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.ng;
 
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -68,7 +69,7 @@ public class EobPharmacyIT extends IntegrationTestBase {
     assertFalse(itemQuantity.isEmpty());
     // This is due to compound meds being weird + patterning the qualifier to go in
     // detail.
-    assertTrue(itemQuantity.getUnit() == null);
+    assertNull(itemQuantity.getUnit());
 
     var itemDetail = eob.getItem().getFirst().getDetailFirstRep();
     assertFalse(itemDetail.isEmpty());
