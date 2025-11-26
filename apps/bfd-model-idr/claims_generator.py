@@ -284,12 +284,14 @@ def get_icd_10_dgns_codes() -> list[str]:
 
 def clean_int_columns(df, cols):
     for col in cols:
-        df[col] = (
-            df[col]
-            .astype("Int64")  # Handle floats like 1234.0 → 1234
-            .astype("string")  # Pandas nullable string type
-            .fillna("")  # Replace <NA> with empty string
-        )
+        if col in df:
+            df[col] = (
+                df[col]
+                .astype("Int64")  # Handle floats like 1234.0 → 1234
+                .astype("string")  # Pandas nullable string type
+                .fillna("")  # Replace <NA> with empty string
+            )
+    return df
 
 
 def export_df(data, out_path, normalize=NORMALIZE, line_num_cast=NO_CAST_LINE_NUM):
