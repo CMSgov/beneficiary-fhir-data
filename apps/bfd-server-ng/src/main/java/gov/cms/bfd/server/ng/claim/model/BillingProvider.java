@@ -42,7 +42,7 @@ class BillingProvider {
     }
 
     // --- 2. Professional claims: organization provider (NPI type 2) ---
-    if (providerHistory.getNpiType() == ProviderHistory.NPI_TYPE.ORGANIZATION
+    if (providerHistory.getNpiType() == ProviderHistory.NpiType.ORGANIZATION
         && (claimTypeCode.isBetween(71, 82)
             || claimTypeCode.isBetween(1700, 1899)
             || claimTypeCode.isBetween(2700, 2899))) {
@@ -50,7 +50,7 @@ class BillingProvider {
     }
 
     // --- 3. Professional claims: practitioner provider (NPI type 1) ---
-    if (providerHistory.getNpiType() == ProviderHistory.NPI_TYPE.INDIVIDUAL
+    if (providerHistory.getNpiType() == ProviderHistory.NpiType.INDIVIDUAL
         && (claimTypeCode.isBetween(71, 82)
             || claimTypeCode.isBetween(1700, 1899)
             || claimTypeCode.isBetween(2700, 2899))) {
@@ -76,10 +76,7 @@ class BillingProvider {
   private Practitioner createBillingPractitioner(ProviderHistory providerHistory) {
     var practitioner =
         ProviderFhirHelper.createPractitioner(
-            PRACTITIONER_BILLING,
-            billingNpiNumber,
-            providerHistory.getProviderFirstName(),
-            providerHistory.getProviderLastName());
+            PRACTITIONER_BILLING, billingNpiNumber, providerHistory.toFhirName());
     billingZip5Code.ifPresent(
         zipCode -> practitioner.addAddress(new Address().setPostalCode(zipCode)));
     return practitioner;

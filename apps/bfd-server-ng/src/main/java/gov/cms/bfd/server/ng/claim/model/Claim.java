@@ -1,8 +1,5 @@
 package gov.cms.bfd.server.ng.claim.model;
 
-import static gov.cms.bfd.server.ng.claim.model.ProviderHistory.NPI_TYPE.INDIVIDUAL;
-import static gov.cms.bfd.server.ng.claim.model.ProviderHistory.NPI_TYPE.ORGANIZATION;
-
 import gov.cms.bfd.server.ng.ClaimSecurityStatus;
 import gov.cms.bfd.server.ng.beneficiary.model.BeneficiarySimple;
 import gov.cms.bfd.server.ng.util.DateUtil;
@@ -123,7 +120,7 @@ public class Claim {
       insertable = false,
       updatable = false,
       referencedColumnName = "prvdr_npi_num")
-  private ProviderHistory providerHistory;
+  private ProviderHistory serviceProviderHistory;
 
   @Nullable
   @ManyToOne
@@ -232,8 +229,8 @@ public class Claim {
     return Optional.ofNullable(contract);
   }
 
-  private Optional<ProviderHistory> getProviderHistory() {
-    return Optional.ofNullable(providerHistory);
+  private Optional<ProviderHistory> getServiceProviderHistory() {
+    return Optional.ofNullable(serviceProviderHistory);
   }
 
   /**
@@ -294,7 +291,8 @@ public class Claim {
           item.getClaimLine().toFhir(item).ifPresent(eob::addItem);
           item.getClaimLine()
               .getClaimRenderingProvider()
-              .toFhirCareTeam(item.getClaimLine().getClaimLineNumber())
+              .toFhirCareTeam(
+                  item.getClaimLine().getClaimLineNumber(), getRenderingProviderHistory())
               .ifPresent(
                   c -> {
                     eob.addCareTeam(c.careTeam());
@@ -317,27 +315,16 @@ public class Claim {
               eob.setProvider(new Reference(p));
             });
 
-    var providerContext = getProviderHistory();
+    var providerContext = getServiceProviderHistory();
     if (providerContext.isPresent()) {
       var provider = providerContext.get();
       var npiType = provider.getNpiType();
-      if (npiType == INDIVIDUAL) {
-        provider
-            .toPractitionerFhir(claimTypeCode, serviceProviderNpiNumber)
-            .ifPresent(
-                p -> {
-                  eob.addContained(p);
-                  eob.setProvider(new Reference(p));
-                });
-      } else if (npiType == ORGANIZATION) {
-        provider
-            .toOrganizationFhir(claimTypeCode, serviceProviderNpiNumber)
-            .ifPresent(
-                p -> {
-                  eob.addContained(p);
-                  eob.setProvider(new Reference(p));
-                });
-      }
+      var resource = provider.toFhirNpiType(npiType);
+      resource.ifPresent(
+          p -> {
+            eob.addContained(p);
+            eob.setProvider(new Reference(p));
+          });
     }
 
     claimSourceId.toFhirOutcome().ifPresent(eob::setOutcome);

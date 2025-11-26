@@ -42,7 +42,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
     },
     "name" : [ {
       "family" : "Garcia",
-      "given" : [ "Indiana" ],
+      "given" : [ "Indiana", "Victor" ],
       "use" : "official"
     } ],
     "resourceType" : "Practitioner"
@@ -53,6 +53,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
       "type" : {
         "coding" : [ {
           "code" : "NPI",
+          "display" : "National provider identifier",
           "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
         } ]
       },
@@ -62,7 +63,9 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
       "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
     },
     "name" : [ {
-      "family" : "Rogers"
+      "family" : "Rogers",
+      "given" : [ "Gromit" ],
+      "use" : "official"
     } ],
     "resourceType" : "Practitioner"
   } ],
@@ -975,6 +978,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
       "type" : {
         "coding" : [ {
           "code" : "NPI",
+          "display" : "National provider identifier",
           "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
         } ]
       },
@@ -984,7 +988,9 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
       "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
     },
     "name" : [ {
-      "family" : "Stark"
+      "family" : "Stark",
+      "given" : [ "Tony" ],
+      "use" : "official"
     } ],
     "resourceType" : "Practitioner"
   } ],

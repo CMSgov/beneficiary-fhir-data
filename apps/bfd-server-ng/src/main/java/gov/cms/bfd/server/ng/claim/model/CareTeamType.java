@@ -5,14 +5,7 @@ import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.ExplanationOfBenefit;
-import org.hl7.fhir.r4.model.HumanName;
-import org.hl7.fhir.r4.model.Identifier;
-import org.hl7.fhir.r4.model.Meta;
-import org.hl7.fhir.r4.model.Practitioner;
-import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.*;
 
 @AllArgsConstructor
 @Getter
@@ -30,28 +23,15 @@ enum CareTeamType {
   CareTeamComponents toFhir(
       SequenceGenerator sequenceGenerator,
       String value,
-      Optional<String> familyName,
+      HumanName name,
       Optional<String> pinNumber) {
-    var practitioner = new Practitioner();
     var sequence = sequenceGenerator.next();
-    if (roleCode.equals(PRESCRIBING.roleCode)) {
-      practitioner.setId("careteam-prescriber-practitioner-" + sequence);
-    } else {
-      practitioner.setId("careteam-provider-" + sequence);
-    }
-    practitioner.setMeta(
-        new Meta()
-            .addProfile(SystemUrls.PROFILE_CARIN_BB_PRACTITIONER_2_1_0)
-            .addProfile(SystemUrls.PROFILE_US_CORE_PRACTITIONER_6_1_0));
-    practitioner.addIdentifier(
-        new Identifier()
-            .setType(
-                new CodeableConcept(
-                    new Coding().setSystem(SystemUrls.HL7_IDENTIFIER).setCode("NPI")))
-            .setSystem(SystemUrls.NPI)
-            .setValue(value));
-    // todo: modify based on BFD-4286
-    familyName.ifPresent(n -> practitioner.addName(new HumanName().setFamily(n)));
+    var id =
+        (roleCode.equals(PRESCRIBING.roleCode)
+                ? "careteam-prescriber-practitioner-"
+                : "careteam-provider-")
+            + sequence;
+    var practitioner = ProviderFhirHelper.createPractitioner(id, value, name);
 
     pinNumber.ifPresent(
         p ->

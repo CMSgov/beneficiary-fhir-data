@@ -716,7 +716,7 @@ public class SystemUrls {
 
   /**
    * <a href="https://terminology.hl7.org/NamingSystem-USEIN.html">United States Employee
-   * Identification Number</a>
+   * Identification Number.</a>
    */
   public static final String US_EIN = "urn:oid:2.16.840.1.113883.4.4";
 

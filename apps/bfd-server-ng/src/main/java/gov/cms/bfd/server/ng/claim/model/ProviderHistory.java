@@ -8,6 +8,8 @@ import jakarta.persistence.Transient;
 import java.time.LocalDate;
 import java.util.Optional;
 import lombok.Getter;
+import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Practitioner;
 
@@ -57,17 +59,11 @@ public class ProviderHistory {
   private Optional<String> employerIdNumber;
 
   /** Represents the enum NPI Type. */
-  public enum NPI_TYPE {
+  public enum NpiType {
     /** NPI belongs to an individual. */
-    INDIVIDUAL(1),
+    INDIVIDUAL,
     /** NPI belongs to an organization. */
-    ORGANIZATION(2);
-
-    private final int value;
-
-    NPI_TYPE(int value) {
-      this.value = value;
-    }
+    ORGANIZATION;
   }
 
   /**
@@ -78,37 +74,49 @@ public class ProviderHistory {
    * @return the NPI type
    */
   @Transient
-  public NPI_TYPE getNpiType() {
+  public NpiType getNpiType() {
     if (providerLegalName.isPresent() && !providerLegalName.get().isBlank()) {
-      return NPI_TYPE.ORGANIZATION;
+      return NpiType.ORGANIZATION;
     } else {
-      return NPI_TYPE.INDIVIDUAL;
+      return NpiType.INDIVIDUAL;
     }
   }
 
   private static final String PROVIDER_PRACTITIONER = "provider-practitioner";
   private static final String PROVIDER_ORG = "provider-org";
 
-  Optional<Practitioner> toPractitionerFhir(
-      ClaimTypeCode claimTypeCode, String serviceProviderNpiNumber) {
-    if (!claimTypeCode.isBetween(1, 4)) {
-      return Optional.empty();
-    }
+  HumanName toFhirName() {
+    return toFhirName(Optional.empty());
+  }
 
+  HumanName toFhirName(Optional<String> legacyLastName) {
+    var name = new HumanName();
+    providerFirstName.ifPresent(name::addGiven);
+    providerMiddleName.ifPresent(name::addGiven);
+    providerLastName.or(() -> legacyLastName).ifPresent(name::setFamily);
+
+    return name;
+  }
+
+  Optional<DomainResource> toFhirNpiType(NpiType npiType) {
+    return (npiType == ProviderHistory.NpiType.ORGANIZATION
+            ? toFhirOrganization()
+            : toFhirPractitioner())
+        .map(r -> r);
+  }
+
+  Optional<Practitioner> toFhirPractitioner() {
     var practitioner =
         ProviderFhirHelper.createPractitioner(
-            PROVIDER_PRACTITIONER, serviceProviderNpiNumber, providerFirstName, providerLastName);
+            PROVIDER_PRACTITIONER, providerNpiNumber, toFhirName());
+
     return Optional.of(practitioner);
   }
 
-  Optional<Organization> toOrganizationFhir(
-      ClaimTypeCode claimTypeCode, String serviceProviderNpiNumber) {
-    if (!claimTypeCode.isBetween(1, 4)) {
-      return Optional.empty();
-    }
+  Optional<Organization> toFhirOrganization() {
     var organization =
         ProviderFhirHelper.createOrganizationWithNpi(
-            PROVIDER_ORG, serviceProviderNpiNumber, providerLegalName);
+            PROVIDER_ORG, providerNpiNumber, providerLegalName);
     return Optional.of(organization);
   }
 }

@@ -8,10 +8,7 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
-import org.hl7.fhir.r4.model.Meta;
-import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Reference;
 
 /** Claim Rendering provider info. * */
@@ -21,35 +18,24 @@ public class ClaimRenderingProvider {
   @Column(name = "clm_rndrg_prvdr_tax_num")
   private Optional<String> taxNumber;
 
-  @Column(name = "clm_rndrg_prvdr_npi_num")
-  private Optional<String> npiNumber;
-
   @Column(name = "clm_rndrg_prvdr_prtcptg_cd")
   private Optional<String> participatingIndicatorCode;
 
   @Column(name = "clm_rndrg_prvdr_type_cd")
   private Optional<String> typeCode;
 
-  Optional<CareTeamType.CareTeamComponents> toFhirCareTeam(Optional<Integer> claimLineNum) {
-    if (claimLineNum.isEmpty() || npiNumber.isEmpty()) {
+  Optional<CareTeamType.CareTeamComponents> toFhirCareTeam(
+      Optional<Integer> claimLineNum, Optional<ProviderHistory> renderingProviderOpt) {
+    if (claimLineNum.isEmpty() || renderingProviderOpt.isEmpty()) {
       return Optional.empty();
     }
+    var renderingProvider = renderingProviderOpt.get();
+    var practitioner =
+        ProviderFhirHelper.createPractitioner(
+            "careteam-provider-line-" + claimLineNum.get(),
+            renderingProvider.getProviderNpiNumber(),
+            renderingProvider.toFhirName());
 
-    var practitioner = new Practitioner();
-    practitioner.setId("careteam-provider-line-" + claimLineNum.get());
-    practitioner.setMeta(
-        new Meta()
-            .addProfile(SystemUrls.PROFILE_CARIN_BB_PRACTITIONER_2_1_0)
-            .addProfile(SystemUrls.PROFILE_US_CORE_PRACTITIONER_6_1_0));
-    npiNumber.ifPresent(
-        s ->
-            practitioner.addIdentifier(
-                new Identifier()
-                    .setType(
-                        new CodeableConcept(
-                            new Coding().setSystem(SystemUrls.HL7_IDENTIFIER).setCode("NPI")))
-                    .setSystem(SystemUrls.NPI)
-                    .setValue(s)));
     taxNumber.ifPresent(
         s ->
             practitioner.addIdentifier(
@@ -59,7 +45,6 @@ public class ClaimRenderingProvider {
                             new Coding().setSystem(SystemUrls.HL7_IDENTIFIER).setCode("TAX")))
                     .setSystem(SystemUrls.US_EIN)
                     .setValue(s)));
-    practitioner.addName(new HumanName().setFamily("MOCK-FAMILY-NAME"));
     participatingIndicatorCode.ifPresent(
         s ->
             practitioner.addExtension(
