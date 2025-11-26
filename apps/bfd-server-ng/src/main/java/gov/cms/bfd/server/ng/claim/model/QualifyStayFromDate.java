@@ -4,6 +4,7 @@ import gov.cms.bfd.server.ng.util.DateUtil;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.time.LocalDate;
+import java.util.Optional;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
@@ -11,13 +12,19 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @Embeddable
 public class QualifyStayFromDate {
   @Column(name = "clm_qlfy_stay_from_dt")
-  private LocalDate qualifyStayFromDate;
+  private Optional<LocalDate> qualifyStayFromDate;
 
-  ExplanationOfBenefit.SupportingInformationComponent toFhir(
+  Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {
-    return supportingInfoFactory
-        .createSupportingInfo()
-        .setCategory(BlueButtonSupportingInfoCategory.CLM_QLFY_STAY_FROM_DT.toFhir())
-        .setTiming(new DateType().setValue(DateUtil.toDate(qualifyStayFromDate)));
+    if (qualifyStayFromDate.isEmpty()) {
+      return Optional.empty();
+    }
+
+    var component =
+        supportingInfoFactory
+            .createSupportingInfo()
+            .setCategory(BlueButtonSupportingInfoCategory.CLM_QLFY_STAY_FROM_DT.toFhir())
+            .setTiming(new DateType().setValue(DateUtil.toDate(qualifyStayFromDate.get())));
+    return Optional.of(component);
   }
 }

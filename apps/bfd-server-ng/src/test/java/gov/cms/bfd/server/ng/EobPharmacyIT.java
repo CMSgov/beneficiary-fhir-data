@@ -1,6 +1,5 @@
 package gov.cms.bfd.server.ng;
 
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -12,10 +11,7 @@ import gov.cms.bfd.server.ng.testUtil.ThreadSafeAppender;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
-import org.hl7.fhir.r4.model.ExplanationOfBenefit;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Organization;
-import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -74,6 +70,21 @@ public class EobPharmacyIT extends IntegrationTestBase {
     var itemDetail = eob.getItem().getFirst().getDetailFirstRep();
     assertFalse(itemDetail.isEmpty());
     assertEquals("00338004904", itemDetail.getProductOrService().getCoding().get(0).getCode());
+
+    var supportingInfo = eob.getSupportingInfo();
+    assertFalse(supportingInfo.isEmpty());
+    assertTrue(
+        supportingInfo.size()
+            >= 4); // C4BB profile requires at least 4 supporting info, good litmus test
+
+    var hasBadDateTime =
+        supportingInfo.stream()
+            .anyMatch(
+                s ->
+                    s.hasTiming()
+                        && s.getTiming() instanceof DateTimeType dt
+                        && dt.getValue().toString().startsWith("9999-12-31"));
+    assertFalse(hasBadDateTime);
 
     var careTeam = eob.getCareTeam();
     assertFalse(careTeam.isEmpty());
@@ -174,9 +185,5 @@ public class EobPharmacyIT extends IntegrationTestBase {
     var hasContractSystems =
         extensions.stream().allMatch(extension -> systems.contains(extension.getUrl()));
     assertTrue(hasContractSystems);
-
-    var productOrService = eob.getItem().getFirst().getProductOrService();
-    assertFalse(productOrService.isEmpty());
-    assertNotEquals("compound", productOrService.getCoding().get(0).getCode());
   }
 }

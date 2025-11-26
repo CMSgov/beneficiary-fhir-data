@@ -131,7 +131,7 @@ jobs:
           echo "Validating inputs to ensure they conform to expected formats..."
           echo "${{ inputs.versionTag }}" | grep -P '^\d+\.\d+\.\d+$|^\d+\.\d+\.\d+-[a-zA-Z0-9-]+$'
 
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
           ref: ${{ inputs.branch || github.ref_name }}
@@ -190,7 +190,7 @@ jobs:
     steps:
       - name: Configure AWS credentials
         if: ${{ !inputs.skipBasePull }}
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: ${{ secrets.NON_PROD_ACCOUNT_GHA_ROLE_ARN }}
           role-session-name: build-container-images-${{ github.run_id }}-${{ github.run_attempt }}
@@ -222,7 +222,7 @@ jobs:
 
       - name: Upload base image artifacts
         if: ${{ !inputs.skipBasePull }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: base-images
           path: ${{ runner.temp }}/*.tar
@@ -244,7 +244,7 @@ jobs:
       BASE_IMAGES_VERSION: ${{ needs.compute-matrix-and-version.outputs.base-images-version }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
           ref: ${{ inputs.branch || github.ref_name }}
@@ -256,7 +256,7 @@ jobs:
 
       - name: Download base image artifacts
         if: ${{ !inputs.skipBasePull }}
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           name: base-images
           path: ${{ runner.temp }}
@@ -319,7 +319,7 @@ jobs:
           DOCKER_BUILDKIT: 1
 
       - name: Upload image as artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: build-images.${{ matrix.image.name }}
           path: ${{ runner.temp }}/${{ matrix.image.name }}.tar
@@ -342,14 +342,14 @@ jobs:
           echo "role-arn=$role_arn" >> "$GITHUB_OUTPUT"
 
       - name: Download all built image artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           pattern: build-images.*
           path: ${{ runner.temp }}
           merge-multiple: true
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: ${{ steps.get-role-arn.outputs.role-arn }}
           role-session-name: build-container-images-${{ github.run_id }}-${{ github.run_attempt }}
