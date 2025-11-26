@@ -64,8 +64,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
     },
     "name" : [ {
       "family" : "Rogers",
-      "given" : [ "Gromit" ],
-      "use" : "official"
+      "given" : [ "Gromit" ]
     } ],
     "resourceType" : "Practitioner"
   } ],
@@ -989,8 +988,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
     },
     "name" : [ {
       "family" : "Stark",
-      "given" : [ "Tony" ],
-      "use" : "official"
+      "given" : [ "Tony" ]
     } ],
     "resourceType" : "Practitioner"
   } ],

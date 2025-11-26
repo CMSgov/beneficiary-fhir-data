@@ -98,7 +98,10 @@ public class ProviderHistory {
     return name;
   }
 
-  Optional<DomainResource> toFhirNpiType(NpiType npiType) {
+  Optional<DomainResource> toFhirNpiTypePartD(NpiType npiType, ClaimTypeCode claimTypeCode) {
+    if (!claimTypeCode.isBetween(1, 4)) {
+      return Optional.empty();
+    }
     return (npiType == ProviderHistory.NpiType.ORGANIZATION
             ? toFhirOrganization()
             : toFhirPractitioner())
@@ -109,7 +112,7 @@ public class ProviderHistory {
     var practitioner =
         ProviderFhirHelper.createPractitioner(
             PROVIDER_PRACTITIONER, providerNpiNumber, toFhirName());
-
+    practitioner.getName().forEach(n -> n.setUse(HumanName.NameUse.OFFICIAL));
     return Optional.of(practitioner);
   }
 

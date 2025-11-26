@@ -98,8 +98,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
     },
     "name" : [ {
       "family" : "Rogers",
-      "given" : [ "Gromit" ],
-      "use" : "official"
+      "given" : [ "Gromit" ]
     } ],
     "resourceType" : "Practitioner"
   }, {
@@ -120,8 +119,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
     },
     "name" : [ {
       "family" : "Stark",
-      "given" : [ "Tony" ],
-      "use" : "official"
+      "given" : [ "Tony" ]
     } ],
     "resourceType" : "Practitioner"
   }, {
@@ -142,8 +140,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
     },
     "name" : [ {
       "family" : "Garcia",
-      "given" : [ "Indiana", "Victor" ],
-      "use" : "official"
+      "given" : [ "Indiana", "Victor" ]
     } ],
     "resourceType" : "Practitioner"
   }, {
@@ -162,9 +159,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
     "meta" : {
       "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
     },
-    "name" : [ {
-      "use" : "official"
-    } ],
     "resourceType" : "Practitioner"
   }, {
     "id" : "careteam-provider-4",
@@ -184,8 +178,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
     },
     "name" : [ {
       "family" : "Rogers",
-      "given" : [ "Gromit" ],
-      "use" : "official"
+      "given" : [ "Gromit" ]
     } ],
     "resourceType" : "Practitioner"
   } ],
@@ -752,8 +745,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
     },
     "name" : [ {
       "family" : "Rogers",
-      "given" : [ "Gromit" ],
-      "use" : "official"
+      "given" : [ "Gromit" ]
     } ],
     "resourceType" : "Practitioner"
   }, {
@@ -774,8 +766,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
     },
     "name" : [ {
       "family" : "Stark",
-      "given" : [ "Tony" ],
-      "use" : "official"
+      "given" : [ "Tony" ]
     } ],
     "resourceType" : "Practitioner"
   }, {
@@ -796,8 +787,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
     },
     "name" : [ {
       "family" : "Garcia",
-      "given" : [ "Indiana", "Victor" ],
-      "use" : "official"
+      "given" : [ "Indiana", "Victor" ]
     } ],
     "resourceType" : "Practitioner"
   }, {
@@ -816,9 +806,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
     "meta" : {
       "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
     },
-    "name" : [ {
-      "use" : "official"
-    } ],
     "resourceType" : "Practitioner"
   }, {
     "id" : "careteam-provider-4",
@@ -838,8 +825,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
     },
     "name" : [ {
       "family" : "Rogers",
-      "given" : [ "Gromit" ],
-      "use" : "official"
+      "given" : [ "Gromit" ]
     } ],
     "resourceType" : "Practitioner"
   } ],
@@ -1462,8 +1448,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
     },
     "name" : [ {
       "family" : "Rogers",
-      "given" : [ "Gromit" ],
-      "use" : "official"
+      "given" : [ "Gromit" ]
     } ],
     "resourceType" : "Practitioner"
   }, {
@@ -1510,8 +1495,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
     },
     "name" : [ {
       "family" : "Potter",
-      "given" : [ "Harry" ],
-      "use" : "official"
+      "given" : [ "Harry" ]
     } ],
     "resourceType" : "Practitioner"
   }, {
@@ -1532,8 +1516,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
     },
     "name" : [ {
       "family" : "Garcia",
-      "given" : [ "Indiana", "Victor" ],
-      "use" : "official"
+      "given" : [ "Indiana", "Victor" ]
     } ],
     "resourceType" : "Practitioner"
   }, {
@@ -1554,8 +1537,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
     },
     "name" : [ {
       "family" : "Granger",
-      "given" : [ "Hermion" ],
-      "use" : "official"
+      "given" : [ "Hermion" ]
     } ],
     "resourceType" : "Practitioner"
   }, {
@@ -1576,8 +1558,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
     },
     "name" : [ {
       "family" : "Addams",
-      "given" : [ "Wednesday", "Wednesday" ],
-      "use" : "official"
+      "given" : [ "Wednesday", "Wednesday" ]
     } ],
     "resourceType" : "Practitioner"
   }, {
@@ -1598,8 +1579,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
     },
     "name" : [ {
       "family" : "Rogers",
-      "given" : [ "Gromit" ],
-      "use" : "official"
+      "given" : [ "Gromit" ]
     } ],
     "resourceType" : "Practitioner"
   }, {
@@ -1620,8 +1600,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
     },
     "name" : [ {
       "family" : "Stark",
-      "given" : [ "Tony" ],
-      "use" : "official"
+      "given" : [ "Tony" ]
     } ],
     "resourceType" : "Practitioner"
   } ],
@@ -2644,8 +2623,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
     },
     "name" : [ {
       "family" : "Rogers",
-      "given" : [ "Gromit" ],
-      "use" : "official"
+      "given" : [ "Gromit" ]
     } ],
     "resourceType" : "Practitioner"
   }, {
@@ -2666,8 +2644,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
     },
     "name" : [ {
       "family" : "Stark",
-      "given" : [ "Tony" ],
-      "use" : "official"
+      "given" : [ "Tony" ]
     } ],
     "resourceType" : "Practitioner"
   }, {
@@ -2688,8 +2665,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
     },
     "name" : [ {
       "family" : "Garcia",
-      "given" : [ "Indiana", "Victor" ],
-      "use" : "official"
+      "given" : [ "Indiana", "Victor" ]
     } ],
     "resourceType" : "Practitioner"
   }, {
@@ -2708,9 +2684,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
     "meta" : {
       "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
     },
-    "name" : [ {
-      "use" : "official"
-    } ],
     "resourceType" : "Practitioner"
   }, {
     "id" : "careteam-provider-4",
@@ -2730,8 +2703,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
     },
     "name" : [ {
       "family" : "Rogers",
-      "given" : [ "Gromit" ],
-      "use" : "official"
+      "given" : [ "Gromit" ]
     } ],
     "resourceType" : "Practitioner"
   } ],
@@ -3975,8 +3947,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
     },
     "name" : [ {
       "family" : "Rogers",
-      "given" : [ "Gromit" ],
-      "use" : "official"
+      "given" : [ "Gromit" ]
     } ],
     "resourceType" : "Practitioner"
   }, {
@@ -3997,8 +3968,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
     },
     "name" : [ {
       "family" : "Stark",
-      "given" : [ "Tony" ],
-      "use" : "official"
+      "given" : [ "Tony" ]
     } ],
     "resourceType" : "Practitioner"
   }, {
@@ -4019,8 +3989,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
     },
     "name" : [ {
       "family" : "Garcia",
-      "given" : [ "Indiana", "Victor" ],
-      "use" : "official"
+      "given" : [ "Indiana", "Victor" ]
     } ],
     "resourceType" : "Practitioner"
   }, {
@@ -4039,9 +4008,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
     "meta" : {
       "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
     },
-    "name" : [ {
-      "use" : "official"
-    } ],
     "resourceType" : "Practitioner"
   }, {
     "id" : "careteam-provider-4",
@@ -4061,8 +4027,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
     },
     "name" : [ {
       "family" : "Rogers",
-      "given" : [ "Gromit" ],
-      "use" : "official"
+      "given" : [ "Gromit" ]
     } ],
     "resourceType" : "Practitioner"
   } ],

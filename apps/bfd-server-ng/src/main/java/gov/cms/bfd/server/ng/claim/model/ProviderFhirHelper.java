@@ -74,7 +74,7 @@ class ProviderFhirHelper {
                             .setSystem(SystemUrls.HL7_IDENTIFIER)
                             .setCode("NPI")
                             .setDisplay("National provider identifier"))));
-    name.setUse(HumanName.NameUse.OFFICIAL);
+
     practitioner.setName(List.of(name));
     return practitioner;
   }

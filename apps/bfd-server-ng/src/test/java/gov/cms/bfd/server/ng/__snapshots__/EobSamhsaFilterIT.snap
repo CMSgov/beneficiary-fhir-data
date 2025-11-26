@@ -403,8 +403,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
         },
         "name" : [ {
           "family" : "Granger",
-          "given" : [ "Hermion" ],
-          "use" : "official"
+          "given" : [ "Hermion" ]
         } ],
         "resourceType" : "Practitioner"
       }, {
@@ -423,9 +422,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
         "meta" : {
           "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
         },
-        "name" : [ {
-          "use" : "official"
-        } ],
         "resourceType" : "Practitioner"
       }, {
         "id" : "careteam-provider-3",
@@ -445,8 +441,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
         },
         "name" : [ {
           "family" : "Addams",
-          "given" : [ "Wednesday", "Wednesday" ],
-          "use" : "official"
+          "given" : [ "Wednesday", "Wednesday" ]
         } ],
         "resourceType" : "Practitioner"
       }, {
@@ -465,9 +460,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
         "meta" : {
           "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
         },
-        "name" : [ {
-          "use" : "official"
-        } ],
         "resourceType" : "Practitioner"
       } ],
       "created" : "2025-08-26T00:00:00+00:00",
@@ -3292,8 +3284,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
         },
         "name" : [ {
           "family" : "Stark",
-          "given" : [ "Tony" ],
-          "use" : "official"
+          "given" : [ "Tony" ]
         } ],
         "resourceType" : "Practitioner"
       }, {
@@ -3314,8 +3305,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
         },
         "name" : [ {
           "family" : "Stark",
-          "given" : [ "Tony" ],
-          "use" : "official"
+          "given" : [ "Tony" ]
         } ],
         "resourceType" : "Practitioner"
       }, {
@@ -3336,8 +3326,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
         },
         "name" : [ {
           "family" : "Stark",
-          "given" : [ "Tony" ],
-          "use" : "official"
+          "given" : [ "Tony" ]
         } ],
         "resourceType" : "Practitioner"
       }, {
@@ -3358,8 +3347,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
         },
         "name" : [ {
           "family" : "Stark",
-          "given" : [ "Tony" ],
-          "use" : "official"
+          "given" : [ "Tony" ]
         } ],
         "resourceType" : "Practitioner"
       }, {
@@ -3380,8 +3368,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
         },
         "name" : [ {
           "family" : "Stark",
-          "given" : [ "Tony" ],
-          "use" : "official"
+          "given" : [ "Tony" ]
         } ],
         "resourceType" : "Practitioner"
       }, {
@@ -3402,8 +3389,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
         },
         "name" : [ {
           "family" : "Stark",
-          "given" : [ "Tony" ],
-          "use" : "official"
+          "given" : [ "Tony" ]
         } ],
         "resourceType" : "Practitioner"
       }, {
@@ -3424,8 +3410,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
         },
         "name" : [ {
           "family" : "Stark",
-          "given" : [ "Tony" ],
-          "use" : "official"
+          "given" : [ "Tony" ]
         } ],
         "resourceType" : "Practitioner"
       }, {
@@ -3446,8 +3431,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
         },
         "name" : [ {
           "family" : "Stark",
-          "given" : [ "Tony" ],
-          "use" : "official"
+          "given" : [ "Tony" ]
         } ],
         "resourceType" : "Practitioner"
       }, {
@@ -3468,8 +3452,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
         },
         "name" : [ {
           "family" : "Stark",
-          "given" : [ "Tony" ],
-          "use" : "official"
+          "given" : [ "Tony" ]
         } ],
         "resourceType" : "Practitioner"
       }, {
@@ -3490,8 +3473,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
         },
         "name" : [ {
           "family" : "Stark",
-          "given" : [ "Tony" ],
-          "use" : "official"
+          "given" : [ "Tony" ]
         } ],
         "resourceType" : "Practitioner"
       }, {
@@ -3512,8 +3494,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
         },
         "name" : [ {
           "family" : "Stark",
-          "given" : [ "Tony" ],
-          "use" : "official"
+          "given" : [ "Tony" ]
         } ],
         "resourceType" : "Practitioner"
       }, {
@@ -3534,8 +3515,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
         },
         "name" : [ {
           "family" : "Rogers",
-          "given" : [ "Gromit" ],
-          "use" : "official"
+          "given" : [ "Gromit" ]
         } ],
         "resourceType" : "Practitioner"
       }, {
@@ -3556,8 +3536,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
         },
         "name" : [ {
           "family" : "Addams",
-          "given" : [ "Wednesday", "Wednesday" ],
-          "use" : "official"
+          "given" : [ "Wednesday", "Wednesday" ]
         } ],
         "resourceType" : "Practitioner"
       }, {
@@ -3578,8 +3557,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
         },
         "name" : [ {
           "family" : "Rogers",
-          "given" : [ "Gromit" ],
-          "use" : "official"
+          "given" : [ "Gromit" ]
         } ],
         "resourceType" : "Practitioner"
       }, {
@@ -3600,8 +3578,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
         },
         "name" : [ {
           "family" : "Stark",
-          "given" : [ "Tony" ],
-          "use" : "official"
+          "given" : [ "Tony" ]
         } ],
         "resourceType" : "Practitioner"
       } ],
@@ -6774,8 +6751,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         },
         "name" : [ {
           "family" : "Rogers",
-          "given" : [ "Gromit" ],
-          "use" : "official"
+          "given" : [ "Gromit" ]
         } ],
         "resourceType" : "Practitioner"
       }, {
@@ -6796,8 +6772,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         },
         "name" : [ {
           "family" : "Rogers",
-          "given" : [ "Gromit" ],
-          "use" : "official"
+          "given" : [ "Gromit" ]
         } ],
         "resourceType" : "Practitioner"
       }, {
@@ -6818,8 +6793,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         },
         "name" : [ {
           "family" : "Rogers",
-          "given" : [ "Gromit" ],
-          "use" : "official"
+          "given" : [ "Gromit" ]
         } ],
         "resourceType" : "Practitioner"
       }, {
@@ -6838,9 +6812,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "meta" : {
           "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
         },
-        "name" : [ {
-          "use" : "official"
-        } ],
         "resourceType" : "Practitioner"
       }, {
         "id" : "careteam-provider-2",
@@ -6860,8 +6831,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         },
         "name" : [ {
           "family" : "Stark",
-          "given" : [ "Tony" ],
-          "use" : "official"
+          "given" : [ "Tony" ]
         } ],
         "resourceType" : "Practitioner"
       }, {
@@ -6882,8 +6852,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         },
         "name" : [ {
           "family" : "Granger",
-          "given" : [ "Hermion" ],
-          "use" : "official"
+          "given" : [ "Hermion" ]
         } ],
         "resourceType" : "Practitioner"
       }, {
@@ -6904,8 +6873,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         },
         "name" : [ {
           "family" : "Rogers",
-          "given" : [ "Gromit" ],
-          "use" : "official"
+          "given" : [ "Gromit" ]
         } ],
         "resourceType" : "Practitioner"
       } ],
@@ -8775,8 +8743,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         },
         "name" : [ {
           "family" : "Granger",
-          "given" : [ "Hermion" ],
-          "use" : "official"
+          "given" : [ "Hermion" ]
         } ],
         "resourceType" : "Practitioner"
       }, {
@@ -8795,9 +8762,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "meta" : {
           "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
         },
-        "name" : [ {
-          "use" : "official"
-        } ],
         "resourceType" : "Practitioner"
       }, {
         "id" : "careteam-provider-3",
@@ -8817,8 +8781,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         },
         "name" : [ {
           "family" : "Addams",
-          "given" : [ "Wednesday", "Wednesday" ],
-          "use" : "official"
+          "given" : [ "Wednesday", "Wednesday" ]
         } ],
         "resourceType" : "Practitioner"
       }, {
@@ -8837,9 +8800,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "meta" : {
           "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
         },
-        "name" : [ {
-          "use" : "official"
-        } ],
         "resourceType" : "Practitioner"
       } ],
       "created" : "2025-08-26T00:00:00+00:00",
@@ -11360,8 +11320,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         },
         "name" : [ {
           "family" : "Rogers",
-          "given" : [ "Gromit" ],
-          "use" : "official"
+          "given" : [ "Gromit" ]
         } ],
         "resourceType" : "Practitioner"
       } ],
@@ -13186,8 +13145,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
         },
         "name" : [ {
           "family" : "Stark",
-          "given" : [ "Tony" ],
-          "use" : "official"
+          "given" : [ "Tony" ]
         } ],
         "resourceType" : "Practitioner"
       }, {
@@ -13208,8 +13166,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
         },
         "name" : [ {
           "family" : "Stark",
-          "given" : [ "Tony" ],
-          "use" : "official"
+          "given" : [ "Tony" ]
         } ],
         "resourceType" : "Practitioner"
       }, {
@@ -13230,8 +13187,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
         },
         "name" : [ {
           "family" : "Stark",
-          "given" : [ "Tony" ],
-          "use" : "official"
+          "given" : [ "Tony" ]
         } ],
         "resourceType" : "Practitioner"
       }, {
@@ -13252,8 +13208,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
         },
         "name" : [ {
           "family" : "Stark",
-          "given" : [ "Tony" ],
-          "use" : "official"
+          "given" : [ "Tony" ]
         } ],
         "resourceType" : "Practitioner"
       }, {
@@ -13274,8 +13229,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
         },
         "name" : [ {
           "family" : "Stark",
-          "given" : [ "Tony" ],
-          "use" : "official"
+          "given" : [ "Tony" ]
         } ],
         "resourceType" : "Practitioner"
       }, {
@@ -13296,8 +13250,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
         },
         "name" : [ {
           "family" : "Stark",
-          "given" : [ "Tony" ],
-          "use" : "official"
+          "given" : [ "Tony" ]
         } ],
         "resourceType" : "Practitioner"
       }, {
@@ -13318,8 +13271,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
         },
         "name" : [ {
           "family" : "Stark",
-          "given" : [ "Tony" ],
-          "use" : "official"
+          "given" : [ "Tony" ]
         } ],
         "resourceType" : "Practitioner"
       }, {
@@ -13340,8 +13292,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
         },
         "name" : [ {
           "family" : "Stark",
-          "given" : [ "Tony" ],
-          "use" : "official"
+          "given" : [ "Tony" ]
         } ],
         "resourceType" : "Practitioner"
       }, {
@@ -13362,8 +13313,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
         },
         "name" : [ {
           "family" : "Stark",
-          "given" : [ "Tony" ],
-          "use" : "official"
+          "given" : [ "Tony" ]
         } ],
         "resourceType" : "Practitioner"
       }, {
@@ -13384,8 +13334,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
         },
         "name" : [ {
           "family" : "Stark",
-          "given" : [ "Tony" ],
-          "use" : "official"
+          "given" : [ "Tony" ]
         } ],
         "resourceType" : "Practitioner"
       }, {
@@ -13406,8 +13355,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
         },
         "name" : [ {
           "family" : "Stark",
-          "given" : [ "Tony" ],
-          "use" : "official"
+          "given" : [ "Tony" ]
         } ],
         "resourceType" : "Practitioner"
       }, {
@@ -13428,8 +13376,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
         },
         "name" : [ {
           "family" : "Rogers",
-          "given" : [ "Gromit" ],
-          "use" : "official"
+          "given" : [ "Gromit" ]
         } ],
         "resourceType" : "Practitioner"
       }, {
@@ -13450,8 +13397,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
         },
         "name" : [ {
           "family" : "Addams",
-          "given" : [ "Wednesday", "Wednesday" ],
-          "use" : "official"
+          "given" : [ "Wednesday", "Wednesday" ]
         } ],
         "resourceType" : "Practitioner"
       }, {
@@ -13472,8 +13418,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
         },
         "name" : [ {
           "family" : "Rogers",
-          "given" : [ "Gromit" ],
-          "use" : "official"
+          "given" : [ "Gromit" ]
         } ],
         "resourceType" : "Practitioner"
       }, {
@@ -13494,8 +13439,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
         },
         "name" : [ {
           "family" : "Stark",
-          "given" : [ "Tony" ],
-          "use" : "official"
+          "given" : [ "Tony" ]
         } ],
         "resourceType" : "Practitioner"
       } ],
@@ -16668,8 +16612,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         },
         "name" : [ {
           "family" : "Rogers",
-          "given" : [ "Gromit" ],
-          "use" : "official"
+          "given" : [ "Gromit" ]
         } ],
         "resourceType" : "Practitioner"
       }, {
@@ -16690,8 +16633,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         },
         "name" : [ {
           "family" : "Rogers",
-          "given" : [ "Gromit" ],
-          "use" : "official"
+          "given" : [ "Gromit" ]
         } ],
         "resourceType" : "Practitioner"
       }, {
@@ -16712,8 +16654,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         },
         "name" : [ {
           "family" : "Rogers",
-          "given" : [ "Gromit" ],
-          "use" : "official"
+          "given" : [ "Gromit" ]
         } ],
         "resourceType" : "Practitioner"
       }, {
@@ -16732,9 +16673,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "meta" : {
           "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
         },
-        "name" : [ {
-          "use" : "official"
-        } ],
         "resourceType" : "Practitioner"
       }, {
         "id" : "careteam-provider-2",
@@ -16754,8 +16692,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         },
         "name" : [ {
           "family" : "Stark",
-          "given" : [ "Tony" ],
-          "use" : "official"
+          "given" : [ "Tony" ]
         } ],
         "resourceType" : "Practitioner"
       }, {
@@ -16776,8 +16713,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         },
         "name" : [ {
           "family" : "Granger",
-          "given" : [ "Hermion" ],
-          "use" : "official"
+          "given" : [ "Hermion" ]
         } ],
         "resourceType" : "Practitioner"
       }, {
@@ -16798,8 +16734,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         },
         "name" : [ {
           "family" : "Rogers",
-          "given" : [ "Gromit" ],
-          "use" : "official"
+          "given" : [ "Gromit" ]
         } ],
         "resourceType" : "Practitioner"
       } ],
@@ -18669,8 +18604,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         },
         "name" : [ {
           "family" : "Granger",
-          "given" : [ "Hermion" ],
-          "use" : "official"
+          "given" : [ "Hermion" ]
         } ],
         "resourceType" : "Practitioner"
       }, {
@@ -18689,9 +18623,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "meta" : {
           "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
         },
-        "name" : [ {
-          "use" : "official"
-        } ],
         "resourceType" : "Practitioner"
       }, {
         "id" : "careteam-provider-3",
@@ -18711,8 +18642,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         },
         "name" : [ {
           "family" : "Addams",
-          "given" : [ "Wednesday", "Wednesday" ],
-          "use" : "official"
+          "given" : [ "Wednesday", "Wednesday" ]
         } ],
         "resourceType" : "Practitioner"
       }, {
@@ -18731,9 +18661,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "meta" : {
           "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
         },
-        "name" : [ {
-          "use" : "official"
-        } ],
         "resourceType" : "Practitioner"
       } ],
       "created" : "2025-08-26T00:00:00+00:00",
@@ -21254,8 +21181,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         },
         "name" : [ {
           "family" : "Rogers",
-          "given" : [ "Gromit" ],
-          "use" : "official"
+          "given" : [ "Gromit" ]
         } ],
         "resourceType" : "Practitioner"
       } ],

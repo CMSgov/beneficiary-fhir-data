@@ -319,7 +319,7 @@ public class Claim {
     if (providerContext.isPresent()) {
       var provider = providerContext.get();
       var npiType = provider.getNpiType();
-      var resource = provider.toFhirNpiType(npiType);
+      var resource = provider.toFhirNpiTypePartD(npiType, claimTypeCode);
       resource.ifPresent(
           p -> {
             eob.addContained(p);
