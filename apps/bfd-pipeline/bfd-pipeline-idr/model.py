@@ -8,6 +8,7 @@ from pydantic import BaseModel, BeforeValidator
 
 from constants import (
     ALL_CLAIM_PARTITIONS,
+    ALL_CLAIM_TYPE_CODES,
     ALTERNATE_DEFAULT_DATE,
     COMBINED_CLAIM_PARTITION,
     DEATH_DATE_CUTOFF_YEARS,
@@ -141,11 +142,17 @@ class IdrBaseModel(BaseModel, ABC):
 
     @staticmethod
     @abstractmethod
-    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+    def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
         """Partitions fetch queries of this model to allow for parallel fetching of data via ray.
 
-        None is returned for models that do not do any such partitioning.
+        [] is returned for models that do not do any such partitioning.
         """
+
+    @classmethod
+    def fetch_query_partitions(cls) -> Sequence[LoadPartitionGroup]:
+        if os.getenv("IDR_ENABLE_PARTITIONS", "1").lower() in ("0", "false"):
+            return []
+        return cls._fetch_query_partitions()
 
     @classmethod
     def _historical_fetch_query(cls, partition: LoadPartition, start_time: datetime) -> str:
@@ -383,7 +390,7 @@ class IdrBeneficiary(IdrBaseModel):
         """
 
     @staticmethod
-    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+    def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
         return [NON_CLAIM_PARTITION]
 
 
@@ -413,7 +420,7 @@ class IdrBeneficiaryMbiId(IdrBaseModel):
         """
 
     @staticmethod
-    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+    def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
         return [NON_CLAIM_PARTITION]
 
 
@@ -453,7 +460,7 @@ class IdrBeneficiaryOvershareMbi(IdrBaseModel):
         """
 
     @staticmethod
-    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+    def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
         return [NON_CLAIM_PARTITION]
 
 
@@ -490,7 +497,7 @@ class IdrBeneficiaryThirdParty(IdrBaseModel):
         """
 
     @staticmethod
-    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+    def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
         return [NON_CLAIM_PARTITION]
 
 
@@ -526,7 +533,7 @@ class IdrBeneficiaryStatus(IdrBaseModel):
         """
 
     @staticmethod
-    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+    def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
         return [NON_CLAIM_PARTITION]
 
 
@@ -564,7 +571,7 @@ class IdrBeneficiaryEntitlement(IdrBaseModel):
         """
 
     @staticmethod
-    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+    def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
         return [NON_CLAIM_PARTITION]
 
 
@@ -600,7 +607,7 @@ class IdrBeneficiaryEntitlementReason(IdrBaseModel):
         """
 
     @staticmethod
-    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+    def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
         return [NON_CLAIM_PARTITION]
 
 
@@ -638,7 +645,7 @@ class IdrBeneficiaryDualEligibility(IdrBaseModel):
         """
 
     @staticmethod
-    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+    def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
         return [NON_CLAIM_PARTITION]
 
 
@@ -680,7 +687,7 @@ class IdrElectionPeriodUsage(IdrBaseModel):
             """
 
     @staticmethod
-    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+    def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
         return [NON_CLAIM_PARTITION]
 
 
@@ -705,7 +712,7 @@ class IdrContractPbpNumber(IdrBaseModel):
         """
 
     @staticmethod
-    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+    def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
         return [NON_CLAIM_PARTITION]
 
 
@@ -758,9 +765,12 @@ def _claim_filter(start_time: datetime, partition: LoadPartition) -> str:
         else f" AND {clm}.clm_from_dt >= '{MIN_CLAIM_LOAD_DATE}'"
     )
 
+    claim_type_codes = (
+        partition.claim_type_codes if partition.claim_type_codes else ALL_CLAIM_TYPE_CODES
+    )
     return f"""
     (
-        {clm}.clm_type_cd IN ({",".join([str(c) for c in partition.claim_type_codes])})
+        {clm}.clm_type_cd IN ({",".join([str(c) for c in claim_type_codes])})
         {clm_from_filter}
         {latest_claim_ind}
         {pac_filter}
@@ -895,7 +905,7 @@ class IdrClaim(IdrBaseModel):
         """
 
     @staticmethod
-    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+    def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
         return ALL_CLAIM_PARTITIONS
 
 
@@ -948,7 +958,7 @@ class IdrClaimDateSignature(IdrBaseModel):
         """
 
     @staticmethod
-    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+    def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
         return [COMBINED_CLAIM_PARTITION]
 
 
@@ -987,7 +997,7 @@ class IdrClaimFiss(IdrBaseModel):
         """
 
     @staticmethod
-    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+    def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
         return INSTITUTIONAL_PAC_PARTITIONS
 
 
@@ -1058,7 +1068,7 @@ class IdrClaimInstitutional(IdrBaseModel):
         """
 
     @staticmethod
-    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+    def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
         return INSTITUTIONAL_ADJUDICATED_PARTITIONS + INSTITUTIONAL_PAC_PARTITIONS
 
 
@@ -1387,7 +1397,7 @@ class IdrClaimItem(IdrBaseModel):
         """
 
     @staticmethod
-    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+    def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
         return ALL_CLAIM_PARTITIONS
 
 
@@ -1447,7 +1457,7 @@ class IdrClaimLineInstitutional(IdrBaseModel):
         """
 
     @staticmethod
-    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+    def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
         return INSTITUTIONAL_ADJUDICATED_PARTITIONS + INSTITUTIONAL_PAC_PARTITIONS
 
 
@@ -1488,7 +1498,7 @@ class IdrClaimAnsiSignature(IdrBaseModel):
         """
 
     @staticmethod
-    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+    def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
         return [COMBINED_CLAIM_PARTITION]
 
 
@@ -1586,7 +1596,7 @@ class IdrClaimProfessional(IdrBaseModel):
         """
 
     @staticmethod
-    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+    def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
         return PROFESSIONAL_ADJUDICATED_PARTITIONS + PROFESSIONAL_PAC_PARTITIONS
 
 
@@ -1643,7 +1653,7 @@ class IdrClaimLineProfessional(IdrBaseModel):
         """
 
     @staticmethod
-    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+    def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
         return PROFESSIONAL_ADJUDICATED_PARTITIONS + PROFESSIONAL_PAC_PARTITIONS
 
 
@@ -1716,7 +1726,7 @@ class IdrClaimLineRx(IdrBaseModel):
         """
 
     @staticmethod
-    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+    def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
         return PART_D_PARTITIONS
 
 
@@ -1748,7 +1758,7 @@ class IdrProviderHistory(IdrBaseModel):
         """
 
     @staticmethod
-    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+    def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
         return []
 
 
@@ -1782,5 +1792,5 @@ class LoadProgress(IdrBaseModel):
         return self.last_ts <= datetime(2021, 4, 19, tzinfo=UTC)
 
     @staticmethod
-    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+    def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
         return []

@@ -181,6 +181,8 @@ ALL_CLAIM_PARTITIONS = [
     *PROFESSIONAL_PAC_PARTITIONS,
 ]
 
+ALL_CLAIM_TYPE_CODES = [code for c in ALL_CLAIM_PARTITIONS for code in c.claim_type_codes]
+
 COMBINED_CLAIM_PARTITION = LoadPartitionGroup(
     "all_claims",
     [code for partition in ALL_CLAIM_PARTITIONS for code in partition.claim_type_codes],
