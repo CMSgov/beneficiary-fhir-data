@@ -7,6 +7,9 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
+// Suppress warnings for duplicate string literals.
+// There's too many values here - creating constants for all of these adds too much noise.
+@SuppressWarnings("java:S1192")
 @Getter
 @AllArgsConstructor
 enum AdjudicationChargeType {
