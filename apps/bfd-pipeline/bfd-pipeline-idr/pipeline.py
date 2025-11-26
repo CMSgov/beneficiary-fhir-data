@@ -19,11 +19,6 @@ logging.basicConfig(level=logging.INFO, handlers=[console_handler])
 logger = logging.getLogger(__name__)
 
 
-def parse_bool(var: str) -> bool:
-    # bool(str) interprets anything non-empty as true so we gotta do it manually
-    return var.lower() == "true" or var == "1"
-
-
 def main() -> None:
     mode = sys.argv[1] if len(sys.argv) > 1 else ""
     run(mode)

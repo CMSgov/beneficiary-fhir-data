@@ -7,11 +7,11 @@ from dateutil.relativedelta import relativedelta
 
 
 class PartitionType(IntFlag):
-    DEFAULT = 0
     PART_D = auto()
     INSTITUTIONAL = auto()
     PROFESSIONAL = auto()
     PAC = auto()
+    ALL = auto()
 
 
 @dataclass

@@ -17,6 +17,7 @@ from constants import (
     INSTITUTIONAL_PAC_PARTITIONS,
     MIN_CLAIM_LOAD_DATE,
     NON_CLAIM_PARTITION,
+    PART_D_CLAIM_TYPE_CODES,
     PART_D_PARTITIONS,
     PROFESSIONAL_ADJUDICATED_PARTITIONS,
     PROFESSIONAL_PAC_PARTITIONS,
@@ -711,23 +712,39 @@ class IdrContractPbpNumber(IdrBaseModel):
 def _claim_filter(start_time: datetime, partition: LoadPartition) -> str:
     clm = ALIAS_CLM
     fetch_latest_claims = os.environ.get("IDR_LATEST_CLAIMS", "").lower() in ("1", "true")
-    latest_claim_ind = (
-        f" AND ({clm}.clm_ltst_clm_ind = 'Y') "
-        if fetch_latest_claims and PartitionType.PART_D not in partition.partition_type
-        else ""
-    )
+    if fetch_latest_claims and (
+        (PartitionType.PART_D | PartitionType.ALL) & partition.partition_type > 0
+    ):
+        codes = ",".join(str(code) for code in PART_D_CLAIM_TYPE_CODES)
+        latest_claim_ind = f" AND ({clm}.clm_ltst_clm_ind = 'Y' OR {clm}.clm_type_cd IN ({codes})) "
+    elif fetch_latest_claims:
+        latest_claim_ind = f" AND ({clm}.clm_ltst_clm_ind = 'Y') "
+    else:
+        latest_claim_ind = ""
 
     # PAC data older than 60 days should be filtered
     pac_cutoff_date = start_time - timedelta(days=60)
     start_time_sql = pac_cutoff_date.strftime("'%Y-%m-%d %H:%M:%S'")
     pac_filter = (
         f"""
-    AND (COALESCE(
-        {clm}.idr_updt_ts,
-        {clm}.idr_insrt_ts,
-        {clm}.clm_idr_ld_dt) >= {start_time_sql})
+        AND
+        (
+            (
+                {clm}.clm_src_id IN (
+                    '{FISS_CLM_SOURCE}',
+                    '{MCS_CLM_SOURCE}',
+                    '{VMS_CLM_SOURCE}'
+                )
+                AND
+                COALESCE(
+                    {clm}.idr_updt_ts,
+                    {clm}.idr_insrt_ts,
+                    {clm}.clm_idr_ld_dt) >= {start_time_sql}
+            )
+            OR {clm}.clm_src_id = '{NCH_CLM_SOURCE}'
+        )
     """
-        if PartitionType.PAC in partition.partition_type
+        if (PartitionType.PAC | PartitionType.ALL) & partition.partition_type != 0
         else ""
     )
 

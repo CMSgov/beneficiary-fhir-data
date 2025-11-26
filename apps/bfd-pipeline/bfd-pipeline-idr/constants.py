@@ -23,6 +23,7 @@ match partition_type:
     case _:
         raise ValueError("invalid partition type " + partition_type)
 
+PART_D_CLAIM_TYPE_CODES = [1, 2, 3, 4]
 
 PART_D_PARTITIONS = [
     LoadPartitionGroup("part_d_original", [1], PartitionType.PART_D, partition_range),
@@ -190,6 +191,6 @@ COMBINED_CLAIM_PARTITION = LoadPartitionGroup(
     None,
 )
 
-DEFAULT_PARTITION = LoadPartition("default", [], PartitionType.DEFAULT, None, None, 0)
+DEFAULT_PARTITION = LoadPartition("default", [], PartitionType.ALL, None, None, 0)
 
-NON_CLAIM_PARTITION = LoadPartitionGroup("default", [], PartitionType.DEFAULT, None, 1)
+NON_CLAIM_PARTITION = LoadPartitionGroup("default", [], PartitionType.ALL, None, 1)
