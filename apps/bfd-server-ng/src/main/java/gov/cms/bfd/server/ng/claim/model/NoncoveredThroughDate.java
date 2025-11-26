@@ -4,19 +4,26 @@ import gov.cms.bfd.server.ng.util.DateUtil;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.time.LocalDate;
+import java.util.Optional;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 @Embeddable
 class NoncoveredThroughDate {
   @Column(name = "clm_ncvrd_thru_dt")
-  private LocalDate noncoveredThroughDate;
+  private Optional<LocalDate> noncoveredThroughDate;
 
-  ExplanationOfBenefit.SupportingInformationComponent toFhir(
+  Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {
-    return supportingInfoFactory
-        .createSupportingInfo()
-        .setCategory(BlueButtonSupportingInfoCategory.CLM_NCVRD_THRU_DT.toFhir())
-        .setTiming(new DateType().setValue(DateUtil.toDate(noncoveredThroughDate)));
+    if (noncoveredThroughDate.isEmpty()) {
+      return Optional.empty();
+    }
+
+    var component =
+        supportingInfoFactory
+            .createSupportingInfo()
+            .setCategory(BlueButtonSupportingInfoCategory.CLM_NCVRD_THRU_DT.toFhir())
+            .setTiming(new DateType().setValue(DateUtil.toDate(noncoveredThroughDate.get())));
+    return Optional.of(component);
   }
 }
