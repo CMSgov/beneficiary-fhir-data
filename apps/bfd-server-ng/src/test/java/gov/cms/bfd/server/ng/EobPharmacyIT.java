@@ -158,5 +158,12 @@ public class EobPharmacyIT extends IntegrationTestBase {
     var hasContractSystems =
         extensions.stream().allMatch(extension -> systems.contains(extension.getUrl()));
     assertTrue(hasContractSystems);
+
+    var identifiers = eob.getIdentifier();
+    var identifierCount =
+        identifiers.stream()
+            .filter(identifier -> identifier.getValue().equals(CLM_CNTL_NUM_DUPE))
+            .count();
+    assertEquals(1, identifierCount);
   }
 }

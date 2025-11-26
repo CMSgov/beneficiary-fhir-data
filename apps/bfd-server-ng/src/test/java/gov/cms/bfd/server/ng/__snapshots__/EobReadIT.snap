@@ -2126,7 +2126,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
     "code" : {
       "coding" : [ {
         "code" : "V",
-        "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA])."
+        "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA]).",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
       } ]
     },
     "sequence" : 4
@@ -3381,7 +3382,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
     "code" : {
       "coding" : [ {
         "code" : "V",
-        "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA])."
+        "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA]).",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
       } ]
     },
     "sequence" : 4
