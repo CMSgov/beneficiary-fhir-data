@@ -7,6 +7,7 @@ from load_partition import LoadPartition, LoadPartitionGroup, PartitionType
 DEFAULT_MAX_DATE = "9999-12-31"
 DEFAULT_MIN_DATE = "0001-01-01"
 MIN_CLAIM_LOAD_DATE = "2014-06-30"
+ALTERNATE_DEFAULT_DATE = "1000-01-01"
 
 DEATH_DATE_CUTOFF_YEARS = 4
 

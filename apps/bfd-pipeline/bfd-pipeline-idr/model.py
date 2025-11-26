@@ -8,6 +8,7 @@ from pydantic import BaseModel, BeforeValidator
 
 from constants import (
     ALL_CLAIM_PARTITIONS,
+    ALTERNATE_DEFAULT_DATE,
     COMBINED_CLAIM_PARTITION,
     DEATH_DATE_CUTOFF_YEARS,
     DEFAULT_MAX_DATE,
@@ -19,9 +20,8 @@ from constants import (
     PART_D_PARTITIONS,
     PROFESSIONAL_ADJUDICATED_PARTITIONS,
     PROFESSIONAL_PAC_PARTITIONS,
-    PartitionType,
 )
-from load_partition import LoadPartition, LoadPartitionGroup
+from load_partition import LoadPartition, LoadPartitionGroup, PartitionType
 
 type DbType = str | float | int | bool | date | datetime
 
@@ -35,6 +35,15 @@ def transform_null_date_to_max(value: date | None) -> date:
 def transform_null_date_to_min(value: date | None) -> date:
     if value is None:
         return date.fromisoformat(DEFAULT_MIN_DATE)
+    return value
+
+
+def transform_null_or_default_date_to_max(value: date | None) -> date:
+    if value is None or value in (
+        date.fromisoformat(ALTERNATE_DEFAULT_DATE),
+        date.fromisoformat(DEFAULT_MIN_DATE),
+    ):
+        return date.fromisoformat(DEFAULT_MAX_DATE)
     return value
 
 
@@ -875,17 +884,17 @@ class IdrClaim(IdrBaseModel):
 
 class IdrClaimDateSignature(IdrBaseModel):
     clm_dt_sgntr_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, ALIAS: ALIAS_SGNTR}]
-    clm_cms_proc_dt: date
-    clm_actv_care_from_dt: Annotated[date, BeforeValidator(transform_null_date_to_max)]
-    clm_dschrg_dt: Annotated[date, BeforeValidator(transform_null_date_to_max)]
-    clm_submsn_dt: date
-    clm_ncvrd_from_dt: Annotated[date, BeforeValidator(transform_null_date_to_max)]
-    clm_ncvrd_thru_dt: Annotated[date, BeforeValidator(transform_null_date_to_max)]
-    clm_actv_care_thru_dt: Annotated[date, BeforeValidator(transform_null_date_to_max)]
-    clm_mdcr_exhstd_dt: Annotated[date, BeforeValidator(transform_null_date_to_max)]
-    clm_nch_wkly_proc_dt: Annotated[date, BeforeValidator(transform_null_date_to_max)]
-    clm_qlfy_stay_from_dt: Annotated[date, BeforeValidator(transform_null_date_to_max)]
-    clm_qlfy_stay_thru_dt: Annotated[date, BeforeValidator(transform_null_date_to_max)]
+    clm_cms_proc_dt: Annotated[date, BeforeValidator(transform_null_or_default_date_to_max)]
+    clm_actv_care_from_dt: Annotated[date, BeforeValidator(transform_null_or_default_date_to_max)]
+    clm_dschrg_dt: Annotated[date, BeforeValidator(transform_null_or_default_date_to_max)]
+    clm_submsn_dt: Annotated[date, BeforeValidator(transform_null_or_default_date_to_max)]
+    clm_ncvrd_from_dt: Annotated[date, BeforeValidator(transform_null_or_default_date_to_max)]
+    clm_ncvrd_thru_dt: Annotated[date, BeforeValidator(transform_null_or_default_date_to_max)]
+    clm_actv_care_thru_dt: Annotated[date, BeforeValidator(transform_null_or_default_date_to_max)]
+    clm_mdcr_exhstd_dt: Annotated[date, BeforeValidator(transform_null_or_default_date_to_max)]
+    clm_nch_wkly_proc_dt: Annotated[date, BeforeValidator(transform_null_or_default_date_to_max)]
+    clm_qlfy_stay_from_dt: Annotated[date, BeforeValidator(transform_null_or_default_date_to_max)]
+    clm_qlfy_stay_thru_dt: Annotated[date, BeforeValidator(transform_null_or_default_date_to_max)]
     clm_idr_ld_dt: Annotated[date, {INSERT_EXCLUDE: True, HISTORICAL_BATCH_TIMESTAMP: True}]
     idr_insrt_ts: Annotated[
         datetime,

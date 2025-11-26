@@ -10,10 +10,7 @@ import gov.cms.bfd.server.ng.testUtil.ThreadSafeAppender;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
-import org.hl7.fhir.r4.model.ExplanationOfBenefit;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Organization;
-import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -58,6 +55,21 @@ class EobPharmacyIT extends IntegrationTestBase {
     var familyName =
         practitioner.getName().stream().filter(p -> p.getFamily().equals("Garcia")).findFirst();
     assertTrue(familyName.isPresent());
+
+    var supportingInfo = eob.getSupportingInfo();
+    assertFalse(supportingInfo.isEmpty());
+    assertTrue(
+        supportingInfo.size()
+            >= 4); // C4BB profile requires at least 4 supporting info, good litmus test
+
+    var hasBadDateTime =
+        supportingInfo.stream()
+            .anyMatch(
+                s ->
+                    s.hasTiming()
+                        && s.getTiming() instanceof DateTimeType dt
+                        && dt.getValue().toString().startsWith("9999-12-31"));
+    assertFalse(hasBadDateTime);
 
     var careTeam = eob.getCareTeam();
     assertFalse(careTeam.isEmpty());
@@ -158,5 +170,12 @@ class EobPharmacyIT extends IntegrationTestBase {
     var hasContractSystems =
         extensions.stream().allMatch(extension -> systems.contains(extension.getUrl()));
     assertTrue(hasContractSystems);
+
+    var identifiers = eob.getIdentifier();
+    var identifierCount =
+        identifiers.stream()
+            .filter(identifier -> identifier.getValue().equals(CLM_CNTL_NUM_DUPE))
+            .count();
+    assertEquals(1, identifierCount);
   }
 }
