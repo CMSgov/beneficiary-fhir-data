@@ -15,6 +15,7 @@ from constants import (
     INSTITUTIONAL_ADJUDICATED_PARTITIONS,
     INSTITUTIONAL_PAC_PARTITIONS,
     MIN_CLAIM_LOAD_DATE,
+    NON_CLAIM_PARTITION,
     PART_D_PARTITIONS,
     PROFESSIONAL_ADJUDICATED_PARTITIONS,
     PROFESSIONAL_PAC_PARTITIONS,
@@ -128,6 +129,14 @@ class IdrBaseModel(BaseModel, ABC):
     def _current_fetch_query(partition: LoadPartition, start_time: datetime) -> str:
         """Query to populate the table for non-historical data."""
 
+    @staticmethod
+    @abstractmethod
+    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+        """Partitions fetch queries of this model to allow for parallel fetching of data via ray.
+
+        None is returned for models that do not do any such partitioning.
+        """
+
     @classmethod
     def _historical_fetch_query(cls, partition: LoadPartition, start_time: datetime) -> str:
         """Query to populate the table for historical data."""
@@ -140,14 +149,6 @@ class IdrBaseModel(BaseModel, ABC):
         if is_historical:
             return cls._historical_fetch_query(partition, start_time)
         return cls._current_fetch_query(partition, start_time)
-
-    @staticmethod
-    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
-        """Partitions fetch queries of this model to allow for parallel fetching of data via ray.
-
-        None is returned for models that do not do any such partitioning.
-        """
-        return []
 
     @staticmethod
     def computed_keys() -> list[str]:
@@ -371,6 +372,10 @@ class IdrBeneficiary(IdrBaseModel):
             {{ORDER_BY}}
         """
 
+    @staticmethod
+    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+        return [NON_CLAIM_PARTITION]
+
 
 class IdrBeneficiaryMbiId(IdrBaseModel):
     bene_mbi_id: Annotated[str, {PRIMARY_KEY: True}]
@@ -396,6 +401,10 @@ class IdrBeneficiaryMbiId(IdrBaseModel):
             {WHERE_CLAUSE}
             {ORDER_BY}
         """
+
+    @staticmethod
+    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+        return [NON_CLAIM_PARTITION]
 
 
 class IdrBeneficiaryOvershareMbi(IdrBaseModel):
@@ -433,6 +442,10 @@ class IdrBeneficiaryOvershareMbi(IdrBaseModel):
             HAVING COUNT(DISTINCT hstry.bene_sk) > 1
         """
 
+    @staticmethod
+    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+        return [NON_CLAIM_PARTITION]
+
 
 class IdrBeneficiaryThirdParty(IdrBaseModel):
     bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
@@ -466,6 +479,10 @@ class IdrBeneficiaryThirdParty(IdrBaseModel):
             {{ORDER_BY}}
         """
 
+    @staticmethod
+    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+        return [NON_CLAIM_PARTITION]
+
 
 class IdrBeneficiaryStatus(IdrBaseModel):
     bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
@@ -497,6 +514,10 @@ class IdrBeneficiaryStatus(IdrBaseModel):
             )
             {{ORDER_BY}}
         """
+
+    @staticmethod
+    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+        return [NON_CLAIM_PARTITION]
 
 
 class IdrBeneficiaryEntitlement(IdrBaseModel):
@@ -532,6 +553,10 @@ class IdrBeneficiaryEntitlement(IdrBaseModel):
             {{ORDER_BY}}
         """
 
+    @staticmethod
+    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+        return [NON_CLAIM_PARTITION]
+
 
 class IdrBeneficiaryEntitlementReason(IdrBaseModel):
     bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
@@ -563,6 +588,10 @@ class IdrBeneficiaryEntitlementReason(IdrBaseModel):
             )
             {{ORDER_BY}}
         """
+
+    @staticmethod
+    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+        return [NON_CLAIM_PARTITION]
 
 
 class IdrBeneficiaryDualEligibility(IdrBaseModel):
@@ -597,6 +626,10 @@ class IdrBeneficiaryDualEligibility(IdrBaseModel):
             )
             {{ORDER_BY}}
         """
+
+    @staticmethod
+    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+        return [NON_CLAIM_PARTITION]
 
 
 class IdrElectionPeriodUsage(IdrBaseModel):
@@ -636,6 +669,10 @@ class IdrElectionPeriodUsage(IdrBaseModel):
             SELECT {{COLUMNS}} FROM dupes WHERE row_order = 1
             """
 
+    @staticmethod
+    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+        return [NON_CLAIM_PARTITION]
+
 
 class IdrContractPbpNumber(IdrBaseModel):
     cntrct_pbp_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
@@ -656,6 +693,10 @@ class IdrContractPbpNumber(IdrBaseModel):
         FROM cms_vdm_view_mdcr_prd.v2_mdcr_cntrct_pbp_num
         WHERE cntrct_pbp_sk_obslt_dt >= '{DEFAULT_MAX_DATE}'
         """
+
+    @staticmethod
+    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+        return [NON_CLAIM_PARTITION]
 
 
 def _claim_filter(start_time: datetime, partition: LoadPartition) -> str:
@@ -1680,6 +1721,10 @@ class IdrProviderHistory(IdrBaseModel):
             WHERE prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
         """
 
+    @staticmethod
+    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+        return []
+
 
 class LoadProgress(IdrBaseModel):
     table_name: str
@@ -1709,3 +1754,7 @@ class LoadProgress(IdrBaseModel):
     def is_historical(self) -> bool:
         # 2021-4-18 is the most recent date where idr_insrt_ts could be null in claims data
         return self.last_ts <= datetime(2021, 4, 19, tzinfo=UTC)
+
+    @staticmethod
+    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+        return []

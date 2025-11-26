@@ -6,8 +6,9 @@ from snowflake.connector import ProgrammingError
 from snowflake.connector.errors import ForbiddenError
 from snowflake.connector.network import ReauthenticationRequest, RetryRequest
 
+from constants import DEFAULT_PARTITION
 from extractor import PostgresExtractor, SnowflakeExtractor
-from load_partition import DEFAULT_PARTITION, LoadPartition
+from load_partition import LoadPartition
 from loader import PostgresLoader
 from model import (
     LoadProgress,

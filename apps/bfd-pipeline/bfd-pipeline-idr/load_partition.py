@@ -21,6 +21,7 @@ class LoadPartition:
     partition_type: PartitionType
     start_date: date | None
     end_date: date | None
+    priority: int
 
 
 @dataclass
@@ -29,10 +30,13 @@ class LoadPartitionGroup:
     claim_type_codes: list[int]
     partition_type: PartitionType
     date_interval: relativedelta | None
+    priority: int = 0
 
     def generate_ranges(self, start_date: date) -> Generator[LoadPartition]:
         if self.date_interval is None:
-            yield LoadPartition(self.name, self.claim_type_codes, self.partition_type, None, None)
+            yield LoadPartition(
+                self.name, self.claim_type_codes, self.partition_type, None, None, self.priority
+            )
             return
 
         start = date(year=start_date.year, month=start_date.month, day=1)
@@ -47,8 +51,6 @@ class LoadPartitionGroup:
                 self.partition_type,
                 start,
                 end,
+                self.priority,
             )
             start += self.date_interval
-
-
-DEFAULT_PARTITION = LoadPartition("default", [], PartitionType.DEFAULT, None, None)

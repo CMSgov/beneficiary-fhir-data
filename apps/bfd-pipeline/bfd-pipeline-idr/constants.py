@@ -2,7 +2,7 @@ import os
 
 from dateutil.relativedelta import relativedelta
 
-from load_partition import LoadPartitionGroup, PartitionType
+from load_partition import LoadPartition, LoadPartitionGroup, PartitionType
 
 DEFAULT_MAX_DATE = "9999-12-31"
 DEFAULT_MIN_DATE = "0001-01-01"
@@ -188,3 +188,7 @@ COMBINED_CLAIM_PARTITION = LoadPartitionGroup(
     | PartitionType.PAC,
     None,
 )
+
+DEFAULT_PARTITION = LoadPartition("default", [], PartitionType.DEFAULT, None, None, 0)
+
+NON_CLAIM_PARTITION = LoadPartitionGroup("default", [], PartitionType.DEFAULT, None, 1)

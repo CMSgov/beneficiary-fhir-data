@@ -82,7 +82,7 @@ def _gen_partitioned_node_inputs(
     res = models_with_partitions + models_without_partitions
     # randomize to reduce contention on a single table
     random.shuffle(res)
-    return res
+    return sorted(res, key=lambda m: m[1].priority if m[1] else 0)
 
 
 def stage1(
