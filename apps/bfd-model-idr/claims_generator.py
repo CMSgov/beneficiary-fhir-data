@@ -1522,6 +1522,7 @@ def gen_contract_plan(amount):
                 "CNTRCT_PBP_NAME": random.choice(avail_contract_names),
                 "CNTRCT_PBP_TYPE_CD": random.choice(avail_pbp_type_codes),
                 "CNTRCT_DRUG_PLAN_IND_CD": random.choice(["Y", "N"]),
+                "CNTRCT_PBP_SK_OBSLT_DT": random.choice(["0001-01-01", "9999-12-31"]),
             }
         )
 
