@@ -327,6 +327,8 @@ def get_drg_dgns_codes() -> list[int]:
         weights=(1, 99),
         k=1,
     )[0]
+
+
 target_sequence_numbers = [0, 1, 2, 3, 4, 5, 6, 7]
 target_rlt_cond_codes = ["21", "39", "C5", "42", "64", "W2", "D9", "09", "R1"]
 
@@ -1475,6 +1477,7 @@ def gen_contract_plan(amount):
                 "CNTRCT_PBP_NAME": random.choice(avail_contract_names),
                 "CNTRCT_PBP_TYPE_CD": random.choice(avail_pbp_type_codes),
                 "CNTRCT_DRUG_PLAN_IND_CD": random.choice(["Y", "N"]),
+                "CNTRCT_PBP_SK_OBSLT_DT": random.choice(["0001-01-01", "9999-12-31"]),
             }
         )
 

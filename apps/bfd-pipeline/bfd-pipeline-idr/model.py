@@ -639,9 +639,7 @@ class IdrContractPbpNumber(IdrBaseModel):
 class IdrContractPbpContact(IdrBaseModel):
     cntrct_pbp_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
     cntrct_plan_cntct_obslt_dt: date
-    cntrct_plan_cntct_type_cd: Annotated[
-        str, {PRIMARY_KEY: True}, BeforeValidator(transform_default_string)
-    ]
+    cntrct_plan_cntct_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
     cntrct_plan_free_extnsn_num: Annotated[str, BeforeValidator(transform_default_string)]
     cntrct_plan_cntct_free_num: Annotated[str, BeforeValidator(transform_default_string)]
     cntrct_plan_cntct_extnsn_num: Annotated[str, BeforeValidator(transform_default_string)]
@@ -664,7 +662,12 @@ class IdrContractPbpContact(IdrBaseModel):
             WITH contract_contacts as (
                 SELECT {{COLUMNS}}, ROW_NUMBER() OVER (
                     PARTITION BY cntrct_pbp_sk, cntrct_plan_cntct_type_cd
-                ORDER BY cntrct_pbp_bgn_dt) as row_order
+                ORDER BY cntrct_pbp_bgn_dt,
+                CASE
+                    WHEN cntrct_plan_cntct_type_cd = '62' THEN 1
+                    WHEN cntrct_plan_cntct_type_cd = '30' THEN 2
+                    ELSE 3
+                END) as row_order
                 FROM cms_vdm_view_mdcr_prd.v2_mdcr_cntrct_pbp_cntct cntct
                 WHERE cntrct_plan_cntct_obslt_dt >= '{DEFAULT_MAX_DATE}'
                 AND cntrct_pbp_bgn_dt >= DATE_TRUNC('YEAR', CURRENT_DATE)

@@ -601,6 +601,5 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_cntrct_pbp_cntct (
     cntrct_plan_cntct_st_2_adr VARCHAR(55),
     cntrct_plan_cntct_city_name VARCHAR(30),
     cntrct_plan_cntct_state_cd VARCHAR(2),
-    cntrct_plan_cntct_zip_cd VARCHAR(9),
-    PRIMARY KEY(cntrct_pbp_sk, cntrct_pbp_bgn_dt, cntrct_plan_cntct_type_cd)
+    cntrct_plan_cntct_zip_cd VARCHAR(9)
 );
