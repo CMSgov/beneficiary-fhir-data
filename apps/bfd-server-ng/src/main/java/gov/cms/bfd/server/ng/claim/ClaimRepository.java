@@ -28,17 +28,21 @@ public class ClaimRepository {
         JOIN FETCH c.claimDateSignature AS cds
         JOIN FETCH c.claimItems AS cl
         LEFT JOIN FETCH c.claimInstitutional ci
+        LEFT JOIN FETCH c.claimProfessional cp
         LEFT JOIN FETCH cl.claimLineInstitutional cli
+        LEFT JOIN FETCH cl.claimLineProfessional clp
         LEFT JOIN FETCH c.claimFiss cf
         LEFT JOIN FETCH cli.ansiSignature a
         LEFT JOIN FETCH cl.claimLineRx clr
         LEFT JOIN FETCH c.contract ct
-        LEFT JOIN FETCH c.providerHistory p
+        LEFT JOIN FETCH c.serviceProviderHistory p
         LEFT JOIN FETCH c.attendingProviderHistory ap
         LEFT JOIN FETCH c.operatingProviderHistory orp
         LEFT JOIN FETCH c.otherProviderHistory otp
         LEFT JOIN FETCH c.renderingProviderHistory rp
         LEFT JOIN FETCH c.prescribingProviderHistory pp
+        LEFT JOIN FETCH c.billingProviderHistory bp
+        LEFT JOIN FETCH c.referringProviderHistory rph
       """;
 
   /**

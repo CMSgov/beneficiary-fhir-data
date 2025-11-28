@@ -1,0 +1,37 @@
+package gov.cms.bfd.server.ng.claim.model;
+
+import gov.cms.bfd.server.ng.util.SystemUrls;
+import java.util.Arrays;
+import java.util.Optional;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import org.hl7.fhir.r4.model.Coding;
+
+/** Diagnosis types. */
+@Getter
+@AllArgsConstructor
+public enum ClaimLineHCTHGBTestTypeCode {
+  /** Principal diagnosis. */
+  R1("R1", "718-7", "Hemoglobin [Mass/volume] in Blood", SystemUrls.CLIA),
+  /** Admitting diagnosis. */
+  R2("R2", "4544-3", "Hematocrit [Volume Fraction] of Blood by Automated count", SystemUrls.CLIA);
+
+  private final String code;
+  private final String loincCode;
+  private final String loincDisplay;
+  private final String system;
+
+  /**
+   * Converts from a database code.
+   *
+   * @param code database code
+   * @return diagnosis type
+   */
+  public static Optional<ClaimLineHCTHGBTestTypeCode> tryFromIdrCode(String code) {
+    return Arrays.stream(values()).filter(v -> v.code.equals(code)).findFirst();
+  }
+
+  Coding toFhirCoding() {
+    return new Coding(system, loincCode, loincDisplay);
+  }
+}
