@@ -4,7 +4,8 @@ uv run compile_resources.py \
     -m maps/patient.map \
     -i sample-data/Beneficiary-Sample.json \
     -o out/Patient.json \
-    -r https://bfd.cms.gov/MappingLanguage/Maps/Patient
+    -r https://bfd.cms.gov/MappingLanguage/Maps/Patient \
+    --sushi
 
 uv run compile_resources.py \
     -m maps/Coverage-Base.map \
