@@ -1169,7 +1169,7 @@ class IdrClaimItem(IdrBaseModel):
         not_materialized = "" if os.environ.get("IDR_USERNAME", "") else "NOT MATERIALIZED"
 
         return f"""
-                WITH claims AS {not_materialized} (
+                WITH claims AS (
                     SELECT 
                         {clm}.clm_uniq_id, 
                         {clm}.geo_bene_sk, 
@@ -1228,7 +1228,7 @@ class IdrClaimItem(IdrBaseModel):
                         AND {val}.clm_num_sk = {clm}.clm_num_sk 
                         AND {val}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
                 ),
-                claim_related_conditions AS (
+                claim_related_conditions AS {not_materialized} (
                     SELECT
                         {clm}.clm_uniq_id,
                         {rlt_cond}.*,

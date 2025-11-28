@@ -91,12 +91,12 @@ def save_output_files(
 ):
     Path("out").mkdir(exist_ok=True)
 
-    df = pd.json_normalize(clm)
-    df["CLM_BLOOD_PT_FRNSH_QTY"] = df["CLM_BLOOD_PT_FRNSH_QTY"].astype("Int64")
-    df["CLM_BLG_PRVDR_OSCAR_NUM"] = df["CLM_BLG_PRVDR_OSCAR_NUM"].astype("string")
+    clm = pd.json_normalize(clm)
+    clm["CLM_BLOOD_PT_FRNSH_QTY"] = clm["CLM_BLOOD_PT_FRNSH_QTY"].astype("Int64")
+    clm["CLM_BLG_PRVDR_OSCAR_NUM"] = clm["CLM_BLG_PRVDR_OSCAR_NUM"].astype("string")
 
     exports = [
-        (df, "out/SYNTHETIC_CLM.csv", NO_NORMALIZE, NO_CAST_LINE_NUM),
+        (clm, "out/SYNTHETIC_CLM.csv", NO_NORMALIZE, NO_CAST_LINE_NUM),
         (clm_line, "out/SYNTHETIC_CLM_LINE.csv", NORMALIZE, CAST_LINE_NUM),
         (clm_val, "out/SYNTHETIC_CLM_VAL.csv", NORMALIZE, NO_CAST_LINE_NUM),
         (clm_dt_sgntr, "out/SYNTHETIC_CLM_DT_SGNTR.csv", NORMALIZE, NO_CAST_LINE_NUM),
@@ -554,6 +554,10 @@ def gen_procedure_icd10pcs():
 now = date.today()
 
 
+def gen_claim_id():
+    return "-" + "".join(random.choices(string.digits, k=13))
+
+
 def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
     claim = {
         "CLM": {},
@@ -571,7 +575,7 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
     clm_dt_sgntr = {}
     clm_dt_sgntr["CLM_DT_SGNTR_SK"] = "".join(random.choices(string.digits, k=12))
     claim["CLM"]["CLM_DT_SGNTR_SK"] = clm_dt_sgntr["CLM_DT_SGNTR_SK"]
-    claim["CLM"]["CLM_UNIQ_ID"] = "-" + "".join(random.choices(string.digits, k=13))
+    claim["CLM"]["CLM_UNIQ_ID"] = gen_claim_id()
 
     clm_rlt_cond_sgntr_sk = random.randint(2, 999999999999)
     claim["CLM"]["CLM_RLT_COND_SGNTR_SK"] = clm_rlt_cond_sgntr_sk
@@ -1240,7 +1244,7 @@ def gen_pac_version_of_claim(claim, max_date):
     # via config files in the future.
 
     pac_claim = copy.deepcopy(claim)
-    pac_claim["CLM"]["CLM_UNIQ_ID"] = "".join(random.choices(string.digits, k=13))
+    pac_claim["CLM"]["CLM_UNIQ_ID"] = gen_claim_id()
     pac_clm_type_cd = int(pac_claim["CLM"]["CLM_TYPE_CD"])
 
     if pac_clm_type_cd in (60, 61, 62, 63, 64):
