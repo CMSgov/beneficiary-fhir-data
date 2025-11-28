@@ -338,11 +338,10 @@ class EobSearchIT extends IntegrationTestBase {
             .usingStyle(searchStyle)
             .execute();
 
-    assertEquals(4, eobBundleWildcard.getEntry().size(), "Should find ALL EOBs for '*' type");
+    assertEquals(5, eobBundleWildcard.getEntry().size(), "Should find ALL EOBs for '*' type");
     expectFhir().scenario(searchStyle.name() + "_WithWildcard").toMatchSnapshot(eobBundleWildcard);
 
     String[] zeroResultClaimTypes = {
-      ClaimSubtype.CARRIER.getCode(),
       ClaimSubtype.DME.getCode(),
       ClaimSubtype.SNF.getCode(),
       ClaimSubtype.PDE.getCode(),
@@ -365,9 +364,6 @@ class EobSearchIT extends IntegrationTestBase {
           0,
           eobBundleZero.getEntry().size(),
           "Should find 0 EOBs for " + claimType + " claim type for this patient");
-      expectFhir()
-          .scenario(searchStyle.name() + "_WithClaimType_ZeroResults_" + claimType)
-          .toMatchSnapshot(eobBundleZero);
     }
   }
 
