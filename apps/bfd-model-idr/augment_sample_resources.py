@@ -6,16 +6,18 @@ df = pd.read_csv(prvdr_info_file, dtype={"PRVDR_SK": str})
 df.head()
 
 cur_sample = sys.argv[1]
-print(cur_sample)
 cur_sample_data = {}
 with open(cur_sample, 'r') as file:
     cur_sample_data = json.load(file)
 
-header_columns = {"PRVDR_BLG_PRVDR_NPI_NUM":"","PRVDR_RFRG_PRVDR_NPI_NUM":"referring","PRVDR_OTHR_PRVDR_NPI_NUM":"otheroperating","PRVDR_ATNDG_PRVDR_NPI_NUM":"attending","PRVDR_OPRTG_PRVDR_NPI_NUM":"operating","PRVDR_RNDRNG_PRVDR_NPI_NUM":"rendering","PRVDR_PRSCRBG_PRVDR_NPI_NUM":"prescribing"}
+header_columns = {"PRVDR_BLG_PRVDR_NPI_NUM":"","PRVDR_RFRG_PRVDR_NPI_NUM":"referring","PRVDR_OTHR_PRVDR_NPI_NUM":"otheroperating","PRVDR_ATNDG_PRVDR_NPI_NUM":"attending","PRVDR_OPRTG_PRVDR_NPI_NUM":"operating","PRVDR_RNDRNG_PRVDR_NPI_NUM":"rendering","PRVDR_PRSCRBNG_PRVDR_NPI_NUM":"prescribing","PRVDR_SRVC_PRVDR_NPI_NUM":""}
 line_columns = {"PRVDR_RNDRNG_PRVDR_NPI_NUM":"rendering","CLM_LINE_ORDRG_PRVDR_NPI_NUM":"","CLM_FAC_PRVDR_NPI_NUM":""}
 npis_used = []
 cur_sample_data['providerList'] = []
 cur_careteam_sequence = 1
+#we only use PRVDR_SRVC_PRVDR_NPI_NUM for part D events.
+if(cur_sample_data['CLM_TYPE_CD'] not in (1,2,3,4)):
+    header_columns.pop('PRVDR_SRVC_PRVDR_NPI_NUM')
 
 populate_fields_except_na = ['PRVDR_LGL_NAME','PRVDR_OSCAR_NUM','PRVDR_LAST_NAME','PRVDR_1ST_NAME','PRVDR_MDL_NAME','PRVDR_TYPE_CD']
 provider_list = []
@@ -94,7 +96,7 @@ for line in range(0,len(cur_sample_data['lineItemComponents'])):
             careTeamSequence = [x['careTeamSequenceNumber'] for x in provider_list if 'careTeamSequenceNumber' in x and x['PRVDR_SK'] == npi and 'careTeamType' in x and x['careTeamType'] == line_columns[line_col]][0]
             cur_sample_data['lineItemComponents'][line]['careTeamSequence'] = [careTeamSequence]
             print(cur_sample_data['lineItemComponents'][line])
-print(provider_list)
+#print(provider_list)
 cur_sample_data['providerList'] = provider_list
 
 filename = "out/temporary-sample.json"

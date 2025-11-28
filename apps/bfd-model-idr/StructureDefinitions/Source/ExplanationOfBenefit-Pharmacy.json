@@ -158,8 +158,8 @@
                 ]
             },
             {
-                "id": "ExplanationOfBenefit-Pharmacy.CLM_SRVC_PRVDR_GNRC_ID_NUM",
-                "path": "ExplanationOfBenefit-Pharmacy.CLM_SRVC_PRVDR_GNRC_ID_NUM",
+                "id": "ExplanationOfBenefit-Pharmacy.PRVDR_SRVC_PRVDR_NPI_NUM",
+                "path": "ExplanationOfBenefit-Pharmacy.PRVDR_SRVC_PRVDR_NPI_NUM",
                 "label": "Service Provider Generic ID Number",
                 "definition": "The generic ID number of the service provider.",
                 "min": 0,
@@ -552,6 +552,21 @@
                         "code": "string"
                     }
                 ]  
+            },
+            {
+                "id": "ExplanationOfBenefit-Pharmacy.providerList",
+                "path": "ExplanationOfBenefit-Pharmacy.providerList",
+                "label": "Provider List",
+                "min": 0,
+                "max": "*",
+                "type": [
+                    {
+                        "code": "Provider",
+                        "targetProfile": [
+                            "http://hl7.org/fhir/StructureDefinition/Provider"
+                        ]
+                    }
+                ]
             }
         ]
     }
