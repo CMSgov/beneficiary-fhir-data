@@ -11,7 +11,7 @@ from hamilton.execution import executors  # type: ignore
 from hamilton.execution.grouping import TaskImplementation  # type: ignore
 
 import pipeline_nodes
-from loader import get_connection_string
+from model import LoadMode, LoadType
 
 telemetry.disable_telemetry()
 
@@ -56,8 +56,14 @@ class SingleProcessExecutor(executors.TaskExecutor, ABC):
 
 
 class MultiProcessingExecutor(executors.PoolExecutor):
+    def __init__(self, max_tasks: int, max_tasks_per_child: int | None) -> None:
+        self.max_tasks_per_child = max_tasks_per_child
+        super().__init__(max_tasks)
+
     def create_pool(self) -> ProcessPoolExecutor:
-        return ProcessPoolExecutor(max_workers=self.max_tasks, max_tasks_per_child=1)
+        return ProcessPoolExecutor(
+            max_workers=self.max_tasks, max_tasks_per_child=self.max_tasks_per_child
+        )
 
 
 def main() -> None:
@@ -65,25 +71,36 @@ def main() -> None:
     run(mode)
 
 
-def run(mode: str) -> None:
+def run(load_mode: str) -> None:
     logger.info("load start")
+    load_mode = LoadMode(load_mode)
 
     load_type = str(os.environ.get("IDR_LOAD_TYPE", "incremental"))
+    load_type = LoadType(load_type)
+
     logger.info("load_type %s", load_type)
+    # Per the docs (https://docs.python.org/3/library/multiprocessing.html#module-multiprocessing.pool)
+    # processes in the pool will be reused indefinitely if max_tasks_per_child is not specified.
+    # Setting this parameter will cause old processes to be recycled, allowing resources used by
+    # these processes to be freed.
+    # This will allow memory usage to remain constant over time.
+    max_tasks_per_child = 1 if load_mode == LoadMode.PRODUCTION else None
+
+    max_tasks = 32
     hamilton_driver = (
         driver.Builder()
         .enable_dynamic_execution(allow_experimental_mode=True)
         .with_modules(pipeline_nodes)
-        .with_local_executor(MultiProcessingExecutor(max_tasks=32))
-        .with_remote_executor(MultiProcessingExecutor(max_tasks=32))
+        .with_local_executor(
+            MultiProcessingExecutor(max_tasks=max_tasks, max_tasks_per_child=max_tasks_per_child)
+        )
+        .with_remote_executor(
+            MultiProcessingExecutor(max_tasks=max_tasks, max_tasks_per_child=max_tasks_per_child)
+        )
         .build()
     )
 
     batch_size = int(os.environ.get("IDR_BATCH_SIZE", "100_000"))
-    if mode == "local":
-        connection_string = "host=localhost dbname=fhirdb user=bfd password=InsecureLocalDev"
-    else:
-        connection_string = get_connection_string()
 
     start_time = datetime.now(UTC)
 
@@ -92,9 +109,8 @@ def run(mode: str) -> None:
         final_vars=["do_stage4"],
         inputs={
             "load_type": load_type,
-            "config_mode": mode,
-            "config_batch_size": batch_size,
-            "config_connection_string": connection_string,
+            "load_mode": load_mode,
+            "batch_size": batch_size,
             "start_time": start_time,
         },
     )

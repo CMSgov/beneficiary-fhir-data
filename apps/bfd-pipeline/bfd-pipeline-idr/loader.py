@@ -7,13 +7,15 @@ import psycopg
 
 from constants import DEFAULT_MIN_DATE
 from load_partition import LoadPartition
-from model import DbType, LoadProgress, T
+from model import DbType, LoadMode, LoadProgress, T
 from timer import Timer
 
 logger = logging.getLogger(__name__)
 
 
-def get_connection_string() -> str:
+def get_connection_string(load_mode: LoadMode) -> str:
+    if load_mode == LoadMode.LOCAL:
+        return "host=localhost dbname=fhirdb user=bfd password=InsecureLocalDev"
     port = os.environ.get("BFD_DB_PORT") or "5432"
     dbname = os.environ.get("BFD_DB_NAME") or "fhirdb"
     return f"host={os.environ['BFD_DB_ENDPOINT']} port={port} dbname={dbname} \
@@ -21,10 +23,8 @@ def get_connection_string() -> str:
 
 
 class PostgresLoader:
-    def __init__(
-        self,
-        connection_string: str,
-    ) -> None:
+    def __init__(self, load_mode: LoadMode) -> None:
+        connection_string = get_connection_string(load_mode)
         self.conn = psycopg.connect(connection_string)
 
     def run_sql(self, sql: str) -> None:
@@ -35,11 +35,11 @@ class PostgresLoader:
         self,
         fetch_results: Iterator[Sequence[T]],
         model: type[T],
-        batch_start: datetime,
+        job_start: datetime,
         partition: LoadPartition,
         progress: LoadProgress | None,
     ) -> bool:
-        return BatchLoader(self.conn, fetch_results, model, batch_start, partition, progress).load()
+        return BatchLoader(self.conn, fetch_results, model, job_start, partition, progress).load()
 
     def close(self) -> None:
         self.conn.close()
@@ -51,7 +51,7 @@ class BatchLoader:
         conn: psycopg.Connection,
         fetch_results: Iterator[Sequence[T]],
         model: type[T],
-        batch_start: datetime,
+        job_start: datetime,
         partition: LoadPartition,
         progress: LoadProgress | None,
     ) -> None:
@@ -60,7 +60,8 @@ class BatchLoader:
         self.model = model
         self.table = model.table()
         self.temp_table = model.table().split(".")[1] + "_temp"
-        self.batch_start = batch_start
+        self.job_start = job_start
+        self.batch_start = datetime.now(UTC)
         self.insert_cols = list(model.insert_keys())
         self.insert_cols.sort()
         self.cols_str = ", ".join(self.insert_cols)
@@ -139,23 +140,28 @@ class BatchLoader:
                 last_ts, 
                 last_id,
                 batch_partition,
-                batch_start_ts, 
+                job_start_ts, 
+                batch_start_ts,
                 batch_complete_ts)
             VALUES(
                 %(table)s,
                 '{DEFAULT_MIN_DATE}', 
                 0,
                 %(partition)s,
-                %(start_ts)s,
+                %(job_start_ts)s,
+                %(batch_start_ts)s,
                 '{DEFAULT_MIN_DATE}'
             )
             ON CONFLICT (table_name, batch_partition) DO UPDATE 
-            SET batch_start_ts = EXCLUDED.batch_start_ts
+            SET 
+                job_start_ts = EXCLUDED.job_start_ts,
+                batch_start_ts = EXCLUDED.batch_start_ts
             """,
             {
                 "table": self.table,
                 "partition": self.partition.name,
-                "start_ts": self.batch_start,
+                "job_start_ts": self.job_start,
+                "batch_start_ts": self.batch_start,
             },
         )
 
@@ -209,9 +215,11 @@ class BatchLoader:
             cur.execute(
                 """
             UPDATE idr.load_progress
-            SET last_ts = %(last_ts)s,
+            SET 
+                last_ts = %(last_ts)s,
                 last_id = %(last_id)s
-            WHERE table_name = %(table)s 
+            WHERE
+                table_name = %(table)s 
                 AND batch_partition = %(partition)s
             """,
                 {

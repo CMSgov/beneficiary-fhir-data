@@ -15,8 +15,10 @@ from snowflake.connector import DictCursor, SnowflakeConnection
 
 from constants import DEFAULT_MIN_DATE
 from load_partition import LoadPartition
+from loader import get_connection_string
 from model import (
     DbType,
+    LoadMode,
     LoadProgress,
     T,
     get_min_transaction_date,
@@ -98,7 +100,7 @@ class Extractor(ABC, Generic[T]):  # noqa: UP046
                 {},
             )
 
-        previous_batch_complete = progress.batch_complete_ts >= progress.batch_start_ts
+        previous_batch_complete = progress.batch_complete_ts >= progress.job_start_ts
         # If we've completed the last batch, there shouldn't be any additional records
         # with the same timestamp/id.
         # Additionally, if there's a batch_id column, records with the same timestamp will be
@@ -141,11 +143,11 @@ class Extractor(ABC, Generic[T]):  # noqa: UP046
 
 class PostgresExtractor(Extractor[T]):
     def __init__(
-        self, cls: type[T], partition: LoadPartition, connection_string: str, batch_size: int
+        self, cls: type[T], partition: LoadPartition, load_mode: LoadMode, batch_size: int
     ) -> None:
         super().__init__(cls, partition)
-        self.connection_string = connection_string
-        self.conn = psycopg.connect(connection_string)
+        self.connection_string = get_connection_string(load_mode)
+        self.conn = psycopg.connect(self.connection_string)
         self.batch_size = batch_size
 
     def reconnect(self) -> None:

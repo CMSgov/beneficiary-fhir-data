@@ -6,6 +6,7 @@ from pathlib import Path
 import psycopg
 
 from loader import get_connection_string
+from model import LoadMode
 
 tables = [
     {"csv_name": "SYNTHETIC_BENE_HSTRY.csv", "table": "v2_mdcr_bene_hstry"},
@@ -91,8 +92,8 @@ def _load_file(
 
 
 if __name__ == "__main__":
-    baseDir = sys.argv[1] if len(sys.argv) > 1 and sys.argv[1] != "" else "../../bfd-model-idr/out"
+    base_dir = sys.argv[1] if len(sys.argv) > 1 and sys.argv[1] != "" else "../../bfd-model-idr/out"
     load_from_csv(
-        psycopg.connect(get_connection_string()),
-        baseDir,
+        psycopg.connect(get_connection_string(LoadMode.SYNTHETIC)),
+        base_dir,
     )

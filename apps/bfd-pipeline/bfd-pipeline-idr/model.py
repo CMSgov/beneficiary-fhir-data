@@ -2,6 +2,7 @@ import os
 from abc import ABC, abstractmethod
 from collections.abc import Iterable, Sequence
 from datetime import UTC, date, datetime, timedelta
+from enum import StrEnum
 from typing import Annotated, TypeVar
 
 from pydantic import BaseModel, BeforeValidator
@@ -26,6 +27,17 @@ from constants import (
 from load_partition import LoadPartition, LoadPartitionGroup, PartitionType
 
 type DbType = str | float | int | bool | date | datetime
+
+
+class LoadMode(StrEnum):
+    LOCAL = "local"
+    SYNTHETIC = "synthetic"
+    PRODUCTION = ""
+
+
+class LoadType(StrEnum):
+    INITIAL = "initial"
+    INCREMENTAL = "incremental"
 
 
 def transform_null_date_to_max(value: date | None) -> date:
@@ -1767,7 +1779,7 @@ class LoadProgress(IdrBaseModel):
     last_ts: datetime
     last_id: int
     batch_partition: str
-    batch_start_ts: datetime
+    job_start_ts: datetime
     batch_complete_ts: datetime
 
     @staticmethod
@@ -1781,7 +1793,7 @@ class LoadProgress(IdrBaseModel):
     @staticmethod
     def _current_fetch_query(partition: LoadPartition, start_time: datetime) -> str:  # noqa: ARG004
         return f"""
-        SELECT table_name, last_ts, last_id, batch_partition, batch_start_ts, batch_complete_ts
+        SELECT table_name, last_ts, last_id, batch_partition, job_start_ts, batch_complete_ts
         FROM idr.load_progress
         WHERE table_name = %({LoadProgress.query_placeholder()})s 
         AND batch_partition = '{partition.name}'

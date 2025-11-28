@@ -11,6 +11,7 @@ from extractor import PostgresExtractor, SnowflakeExtractor
 from load_partition import LoadPartition
 from loader import PostgresLoader
 from model import (
+    LoadMode,
     LoadProgress,
     T,
 )
@@ -24,13 +25,13 @@ logger = logging.getLogger(__name__)
 
 
 def get_progress(
-    connection_string: str,
+    load_mode: LoadMode,
     table_name: str,
     start_time: datetime,
     partition: LoadPartition,
 ) -> LoadProgress | None:
     return PostgresExtractor(
-        connection_string=connection_string, batch_size=1, cls=LoadProgress, partition=partition
+        load_mode=load_mode, batch_size=1, cls=LoadProgress, partition=partition
     ).extract_single(
         LoadProgress.fetch_query(partition, False, start_time),
         {LoadProgress.query_placeholder(): table_name},
@@ -39,39 +40,38 @@ def get_progress(
 
 def extract_and_load(
     cls: type[T],
-    connection_string: str,
-    mode: str,
+    load_mode: LoadMode,
     batch_size: int,
-    batch_start: datetime,
+    job_start: datetime,
     partition: LoadPartition | None = None,
 ) -> bool:
     partition = partition or DEFAULT_PARTITION
-    if mode == "local" or mode == "synthetic":
+    if load_mode == LoadMode.LOCAL or load_mode == LoadMode.SYNTHETIC:
         data_extractor = PostgresExtractor(
-            connection_string=connection_string, batch_size=batch_size, cls=cls, partition=partition
+            load_mode=load_mode, batch_size=batch_size, cls=cls, partition=partition
         )
     else:
         data_extractor = SnowflakeExtractor(batch_size=batch_size, cls=cls, partition=partition)
 
     logger.info("loading %s", cls.table())
     last_error = datetime.min.replace(tzinfo=UTC)
-    loader = PostgresLoader(connection_string)
+    loader = PostgresLoader(load_mode)
     error_count = 0
     max_errors = 3
 
     while True:
         try:
-            progress = get_progress(connection_string, cls.table(), batch_start, partition)
+            progress = get_progress(load_mode, cls.table(), job_start, partition)
 
             logger.info(
-                "progress for %s - last_ts: %s batch_start_ts: %s batch_complete_ts: %s",
+                "progress for %s - last_ts: %s job_start_ts: %s batch_complete_ts: %s",
                 cls.table(),
                 progress.last_ts if progress else "none",
-                progress.batch_start_ts if progress else "none",
+                progress.job_start_ts if progress else "none",
                 progress.batch_complete_ts if progress else "none",
             )
-            data_iter = data_extractor.extract_idr_data(progress, batch_start)
-            res = loader.load(data_iter, cls, batch_start, partition, progress)
+            data_iter = data_extractor.extract_idr_data(progress, job_start)
+            res = loader.load(data_iter, cls, job_start, partition, progress)
             data_extractor.close()
             loader.close()
             return res

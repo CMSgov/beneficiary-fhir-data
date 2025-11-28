@@ -29,6 +29,8 @@ from model import (
     IdrClaimLineRx,
     IdrClaimProfessional,
     IdrProviderHistory,
+    LoadMode,
+    LoadType,
     get_min_transaction_date,
 )
 from pipeline_utils import extract_and_load
@@ -85,24 +87,21 @@ def _gen_partitioned_node_inputs(
     return sorted(res, key=lambda m: m[1].priority if m[1] else 0)
 
 
-def stage1(
-    config_connection_string: str, config_mode: str, config_batch_size: int, start_time: datetime
-) -> bool:
+def stage1(load_mode: LoadMode, batch_size: int, start_time: datetime) -> bool:
     return extract_and_load(
         cls=IdrBeneficiaryOvershareMbi,
         partition=None,
-        batch_start=start_time,
-        connection_string=config_connection_string,
-        mode=config_mode,
-        batch_size=config_batch_size,
+        job_start=start_time,
+        load_mode=load_mode,
+        batch_size=batch_size,
     )
 
 
 # INITIAL FLOW
 # Stage 1: Load ALL claim tables in parallel if load_type is set to initial
 # @config.when(load_type="initial")
-def stage2_inputs(load_type: str, stage1: bool) -> Parallelizable[NodePartitionedModelInput]:
-    if load_type == "initial":
+def stage2_inputs(load_type: LoadType, stage1: bool) -> Parallelizable[NodePartitionedModelInput]:
+    if load_type == LoadType.INITIAL:
         yield from _gen_partitioned_node_inputs(
             [*CLAIM_AUX_TABLES, *BENE_AUX_TABLES, IdrClaim, IdrBeneficiary]
         )
@@ -113,19 +112,17 @@ def stage2_inputs(load_type: str, stage1: bool) -> Parallelizable[NodePartitione
 # @config.when(load_type="initial")
 def do_stage2(
     stage2_inputs: NodePartitionedModelInput,
-    config_connection_string: str,
-    config_mode: str,
-    config_batch_size: int,
+    load_mode: LoadMode,
+    batch_size: int,
     start_time: datetime,
 ) -> bool:
     model_type, partition = stage2_inputs
     return extract_and_load(
         cls=model_type,
         partition=partition,
-        batch_start=start_time,
-        connection_string=config_connection_string,
-        mode=config_mode,
-        batch_size=config_batch_size,
+        job_start=start_time,
+        load_mode=load_mode,
+        batch_size=batch_size,
     )
 
 
@@ -146,19 +143,17 @@ def stage3_inputs(
 
 def do_stage3(
     stage3_inputs: NodePartitionedModelInput,
-    config_connection_string: str,
-    config_mode: str,
-    config_batch_size: int,
+    load_mode: LoadMode,
+    batch_size: int,
     start_time: datetime,
 ) -> bool:
     model_type, partition = stage3_inputs
     return extract_and_load(
         cls=model_type,
         partition=partition,
-        batch_start=start_time,
-        connection_string=config_connection_string,
-        mode=config_mode,
-        batch_size=config_batch_size,
+        job_start=start_time,
+        load_mode=load_mode,
+        batch_size=batch_size,
     )
 
 
@@ -170,19 +165,17 @@ def collect_stage3(
 
 def do_stage4(
     collect_stage3: bool,
-    load_type: str,
-    config_connection_string: str,
-    config_mode: str,
-    config_batch_size: int,
+    load_type: LoadType,
+    load_mode: LoadMode,
+    batch_size: int,
     start_time: datetime,
 ) -> bool:
     if load_type == "incremental":
         return extract_and_load(
             cls=IdrBeneficiary,
             partition=None,
-            batch_start=start_time,
-            connection_string=config_connection_string,
-            mode=config_mode,
-            batch_size=config_batch_size,
+            job_start=start_time,
+            load_mode=load_mode,
+            batch_size=batch_size,
         )
     return False
