@@ -55,6 +55,11 @@ class SingleProcessExecutor(executors.TaskExecutor, ABC):
         return len(self.active_futures) < self.max_tasks
 
 
+class MultiProcessingExecutor(executors.PoolExecutor):
+    def create_pool(self) -> ProcessPoolExecutor:
+        return ProcessPoolExecutor(max_workers=self.max_tasks, max_tasks_per_child=1)
+
+
 def main() -> None:
     mode = sys.argv[1] if len(sys.argv) > 1 else ""
     run(mode)
@@ -69,10 +74,8 @@ def run(mode: str) -> None:
         driver.Builder()
         .enable_dynamic_execution(allow_experimental_mode=True)
         .with_modules(pipeline_nodes)
-        .with_local_executor(SingleProcessExecutor(max_tasks=32))
-        .with_remote_executor(SingleProcessExecutor(max_tasks=32))
-        # .with_local_executor(executors.MultiProcessingExecutor(max_tasks=32))
-        # .with_remote_executor(executors.MultiProcessingExecutor(max_tasks=32))
+        .with_local_executor(MultiProcessingExecutor(max_tasks=32))
+        .with_remote_executor(MultiProcessingExecutor(max_tasks=32))
         .build()
     )
 
