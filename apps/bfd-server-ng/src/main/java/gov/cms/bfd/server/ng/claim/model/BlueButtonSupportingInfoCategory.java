@@ -62,4 +62,18 @@ enum BlueButtonSupportingInfoCategory {
                 .setCode("info")
                 .setDisplay("Information"));
   }
+
+  CodeableConcept toFhirRelatedCondition() {
+    return new CodeableConcept()
+        .addCoding(
+            new Coding()
+                .setSystem(SystemUrls.HL7_CLAIM_INFORMATION)
+                .setCode("info")
+                .setDisplay("Information"))
+        .addCoding(
+            new Coding()
+                .setSystem(SystemUrls.BLUE_BUTTON_CODE_SYSTEM_SUPPORTING_INFORMATION)
+                .setCode(code)
+                .setDisplay(display));
+  }
 }
