@@ -21,6 +21,8 @@ from model import (
     IdrClaimLineProfessional,
     IdrClaimLineRx,
     IdrClaimProfessional,
+    IdrContractPbpContact,
+    IdrContractPbpNumber,
     IdrProviderHistory,
 )
 from pipeline_utils import extract_and_load
@@ -41,6 +43,8 @@ from pipeline_utils import extract_and_load
     idr_claim_line_rx=dict(cls=value(IdrClaimLineRx)),
     idr_provider_history=dict(cls=value(IdrProviderHistory)),
     idr_claim_initial=dict(cls=value(IdrClaim)),
+    idr_contract_pbp_number=dict(cls=value(IdrContractPbpNumber)),
+    idr_contract_pbp_contact=dict(cls=value(IdrContractPbpContact)),
 )
 def idr_claims(
     cls: type, config_connection_string: str, config_mode: str, config_batch_size: int
@@ -67,6 +71,8 @@ def idr_beneficiary_overshare_mbi_initial(
     idr_claim_line_rx: bool,
     idr_provider_history: bool,
     idr_claim_initial: bool,
+    idr_contract_pbp_number: bool,
+    idr_contract_pbp_contact: bool,
     config_mode: str,
     config_batch_size: int,
     config_connection_string: str,
@@ -118,6 +124,8 @@ def idr_beneficiary_aux_table_initial(
     idr_claim_line_professional=dict(cls=value(IdrClaimLineProfessional)),
     idr_claim_line_rx=dict(cls=value(IdrClaimLineRx)),
     idr_provider_history=dict(cls=value(IdrProviderHistory)),
+    idr_contract_pbp_number=dict(cls=value(IdrContractPbpNumber)),
+    idr_contract_pbp_contact=dict(cls=value(IdrContractPbpContact)),
 )
 def idr_claim_aux_table(
     cls: type, config_connection_string: str, config_mode: str, config_batch_size: int
@@ -143,6 +151,8 @@ def idr_claim(
     idr_claim_line_professional: bool,
     idr_claim_line_rx: bool,
     idr_provider_history: bool,
+    idr_contract_pbp_number: bool,
+    idr_contract_pbp_contact: bool,
     config_mode: str,
     config_batch_size: int,
     config_connection_string: str,
