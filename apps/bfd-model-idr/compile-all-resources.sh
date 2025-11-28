@@ -39,56 +39,56 @@ uv run compile_resources.py \
     -r https://bfd.cms.gov/MappingLanguage/Maps/Coverage-Base 
 
 uv run compile_resources.py \
-    -m maps/EOB-Base.map \
+    -m maps/ExplanationOfBenefit-Base.map \
     -i sample-data/EOB-Base-Sample.json \
     -o out/ExplanationOfBenefit.json \
     -r https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Base 
 
 uv run compile_resources.py \
-    -m maps/EOB-Base.map \
+    -m maps/ExplanationOfBenefit-Base.map \
     -i sample-data/EOB-SNF-Sample.json \
     -o out/ExplanationOfBenefit-SNF.json \
     -r https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Base 
 
 uv run compile_resources.py \
-    -m maps/EOB-Base.map \
+    -m maps/ExplanationOfBenefit-Base.map \
     -i sample-data/EOB-HHA-Sample.json \
     -o out/ExplanationOfBenefit-HHA.json \
     -r https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Base 
 
 uv run compile_resources.py \
-    -m maps/EOB-Base.map \
+    -m maps/ExplanationOfBenefit-Base.map \
     -i sample-data/EOB-Hospice-Sample.json \
     -o out/ExplanationOfBenefit-Hospice.json \
     -r https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Base 
 
 uv run compile_resources.py \
-    -m maps/EOB-Base.map \
+    -m maps/ExplanationOfBenefit-Base.map \
     -i sample-data/EOB-Institutional-Outpatient-Sample.json \
     -o out/ExplanationOfBenefit-Outpatient.json \
     -r https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Base 
 
 uv run compile_resources.py \
-    -m maps/EOB-Base.map \
+    -m maps/ExplanationOfBenefit-Base.map \
     -i sample-data/EOB-Carrier-MCS-Sample.json \
     -o out/ExplanationOfBenefit-MCS.json \
     -r https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Base \
     --test
 
 uv run compile_resources.py \
-    -m maps/EOB-Base.map \
+    -m maps/ExplanationOfBenefit-Base.map \
     -i sample-data/EOB-Carrier-Sample.json \
     -o out/ExplanationOfBenefit-Carrier.json \
     -r https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Base 
 
 uv run compile_resources.py \
-    -m maps/EOB-Base.map \
+    -m maps/ExplanationOfBenefit-Base.map \
     -i sample-data/EOB-DME-Sample.json \
     -o out/ExplanationOfBenefit-DME.json \
     -r https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Base 
 
 uv run compile_resources.py \
-    -m maps/EOB-Pharmacy.map \
+    -m maps/ExplanationOfBenefit-Pharmacy.map \
     -i sample-data/EOB-Pharmacy-Sample.json \
     -o out/ExplanationOfBenefit-Pharmacy.json \
     -r https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Pharmacy 

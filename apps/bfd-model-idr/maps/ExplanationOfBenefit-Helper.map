@@ -1,4 +1,4 @@
-map "https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper" = "eob-support-map"
+map "https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper" = "eob-support-map"
 
 conceptmap "FinalActionIndicator" {
   prefix s = "https://hl7.org/fhir/string"

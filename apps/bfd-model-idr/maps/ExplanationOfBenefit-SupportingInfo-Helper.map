@@ -1,5 +1,5 @@
-map "https://bfd.cms.gov/MappingLanguage/Maps/EOB-SupportingInfo-Helper" = "BFD-ExplanationOfBenefit-SupportingInfo-Helper-Map"
-imports "https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper" 
+map "https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-SupportingInfo-Helper" = "BFD-ExplanationOfBenefit-SupportingInfo-Helper-Map"
+imports "https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper" 
 
 group addSupportingInfo(source src: SupportingInfoComponent, target tgt: BackboneElement){
     src.ROW_NUM as seqNum -> tgt.sequence = seqNum "set sequence number";
@@ -72,20 +72,20 @@ group addAdmissionPeriod(source src: SupportingInfoComponent, target tgt: Backbo
     } "Add admission period";
 
     src -> tgt.category = create('CodeableConcept') as tgtCC then {
-        src -> tgtCC.coding = translate("CLM_ACTV_CARE_FROM_DT",'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#C4BB-SupportingInfo-Categories','coding') "set coding";
+        src -> tgtCC.coding = translate("CLM_ACTV_CARE_FROM_DT",'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#C4BB-SupportingInfo-Categories','coding') "set coding";
     } "set category";
 }
 //timingDate
 group addClaimReceivedDate(source src: SupportingInfoComponent, target tgt: BackboneElement){
     src.CLM_SUBMSN_DT as dateReceived -> tgt.timing = cast(dateReceived, "date") "set date";
     src -> tgt.category = create('CodeableConcept') as tgtCC then {
-        src -> tgtCC.coding = translate("CLM_SUBMSN_DT",'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#C4BB-SupportingInfo-Categories','coding') "set coding";
+        src -> tgtCC.coding = translate("CLM_SUBMSN_DT",'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#C4BB-SupportingInfo-Categories','coding') "set coding";
     } "set category";
 }
 //code
 group addPointOfOrigin(source src: SupportingInfoComponent, target tgt: BackboneElement){
     src -> tgt.category = create('CodeableConcept') as tgtCC then {
-        src -> tgtCC.coding = translate("CLM_ADMSN_SRC_CD",'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#C4BB-SupportingInfo-Categories','coding') "set coding";
+        src -> tgtCC.coding = translate("CLM_ADMSN_SRC_CD",'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#C4BB-SupportingInfo-Categories','coding') "set coding";
     } "set category";
 
     //https://www.nubc.org/CodeSystem/PointOfOrigin
@@ -97,7 +97,7 @@ group addPointOfOrigin(source src: SupportingInfoComponent, target tgt: Backbone
 //code
 group addMSDRG(source src: SupportingInfoComponent, target tgt: BackboneElement){
     src -> tgt.category = create('CodeableConcept') as tgtCC then {
-        src -> tgtCC.coding = translate("DGNS_DRG_CD",'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#C4BB-SupportingInfo-Categories','coding') "set coding";
+        src -> tgtCC.coding = translate("DGNS_DRG_CD",'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#C4BB-SupportingInfo-Categories','coding') "set coding";
     } "set category";
     src -> tgt.code = create('CodeableConcept') as tgtCC then {
         src.DGNS_DRG_CD as val -> tgtCC.coding = c("https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software", val) "Add coding";
@@ -106,7 +106,7 @@ group addMSDRG(source src: SupportingInfoComponent, target tgt: BackboneElement)
 //code
 group addDischargeStatus(source src: SupportingInfoComponent, target tgt: BackboneElement){
     src -> tgt.category = create('CodeableConcept') as tgtCC then {
-        src -> tgtCC.coding = translate("BENE_PTNT_STUS_CD",'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#C4BB-SupportingInfo-Categories','coding') "set coding";
+        src -> tgtCC.coding = translate("BENE_PTNT_STUS_CD",'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#C4BB-SupportingInfo-Categories','coding') "set coding";
     } "set category";
     src -> tgt.code = create('CodeableConcept') as tgtCC then {
         src.BENE_PTNT_STUS_CD as val -> tgtCC.coding = c("https://www.nubc.org/CodeSystem/PatDischargeStatus",val) "Add coding";
@@ -116,7 +116,7 @@ group addDischargeStatus(source src: SupportingInfoComponent, target tgt: Backbo
 //code
 group addAdmitType(source src: SupportingInfoComponent, target tgt: BackboneElement){
     src -> tgt.category = create('CodeableConcept') as tgtCC then {
-        src -> tgtCC.coding = translate("CLM_ADMSN_TYPE_CD",'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#C4BB-SupportingInfo-Categories','coding') "set coding";
+        src -> tgtCC.coding = translate("CLM_ADMSN_TYPE_CD",'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#C4BB-SupportingInfo-Categories','coding') "set coding";
     } "set category";
 
     src -> tgt.code = create('CodeableConcept') as tgtCC then {
@@ -278,7 +278,7 @@ group addBenefitsExhaustedDate(source src: SupportingInfoComponent, target tgt: 
 //code. It will be interesting to see the response here on how these are represented.
 group addTypeOfBill(source src: SupportingInfoComponent, target tgt: BackboneElement){
     src -> tgt.category = create('CodeableConcept') as tgtCC then {
-        src -> tgtCC.coding = translate("TYPE_OF_BILL_CD",'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#C4BB-SupportingInfo-Categories','coding') "set coding";
+        src -> tgtCC.coding = translate("TYPE_OF_BILL_CD",'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#C4BB-SupportingInfo-Categories','coding') "set coding";
     } "set category";
 
     src.TYPE_OF_BILL_CD as val -> tgt.code = cc("https://www.nubc.org/CodeSystem/TypeOfBill",val) "Add CC";

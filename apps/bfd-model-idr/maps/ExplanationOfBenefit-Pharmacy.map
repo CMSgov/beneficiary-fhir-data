@@ -10,7 +10,8 @@ uses "http://hl7.org/fhir/StructureDefinition/SupportingInfoComponent" alias Sup
 //The first specified target is what the default output will output as the ResourceType
 uses "http://hl7.org/fhir/StructureDefinition/ExplanationOfBenefit" alias BFDEOB as target
 
-imports "https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper" 
+imports "https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper" 
+imports "https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Base" 
 
 group createEOBPharmacy(source src: ExplanationOfBenefitPharmacy, target tgt: BFDEOB){
     
@@ -20,7 +21,7 @@ group createEOBPharmacy(source src: ExplanationOfBenefitPharmacy, target tgt: BF
     src -> tgt.outcome = "complete" "Set outcome";
     
     src -> tgt.type = create('CodeableConcept') as tgtCC then {
-      src.CLM_TYPE_CD as typeCd -> tgtCC.coding = translate(typeCd,'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#CLM_TYPE_CD','coding') "translate code";
+      src.CLM_TYPE_CD as typeCd -> tgtCC.coding = translate(typeCd,'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#CLM_TYPE_CD','coding') "translate code";
       src.CLM_TYPE_CD as typeCd -> tgtCC.coding = c('https://bluebutton.cms.gov/fhir/CodeSystem/CLM-TYPE-CD', typeCd) "Add claim type code";
     } "Create type";
 
@@ -30,9 +31,9 @@ group createEOBPharmacy(source src: ExplanationOfBenefitPharmacy, target tgt: BF
 
     src -> tgt.meta = create('Meta') as tgtMeta then {
       src.lastUpdated as lastUpdated -> tgtMeta.lastUpdated = lastUpdated "set lastUpdated";
-      src.CLM_TYPE_CD as typeCd -> tgtMeta.profile = translate(typeCd,'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#profile_metadata','code') "set profile";
-      src.CLM_SRC_ID as sourceSk -> tgtMeta.source = translate(sourceSk, 'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#CLM_SRC_ID','code') "set source";
-      src.CLM_SRC_ID as sourceSk -> tgtMeta.tag = translate(sourceSk, 'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#ADJUDICATION-STATUS','coding') "set source";
+      src.CLM_TYPE_CD as typeCd -> tgtMeta.profile = translate(typeCd,'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#profile_metadata','code') "set profile";
+      src.CLM_SRC_ID as sourceSk -> tgtMeta.source = translate(sourceSk, 'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#CLM_SRC_ID','code') "set source";
+      src.CLM_SRC_ID as sourceSk -> tgtMeta.tag = translate(sourceSk, 'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#ADJUDICATION-STATUS','coding') "set source";
     } "Create metadata";
 
     src -> tgt.identifier = create('Identifier') as tgtIdentifier then {
@@ -82,13 +83,32 @@ group createEOBPharmacy(source src: ExplanationOfBenefitPharmacy, target tgt: BF
     } "CLM_SBMT_FRMT_CD";
 
     // Provider organization for pharmacy - only create when needed based on NPI_TYPE
-    src.CLM_TYPE_CD as typeCd where(typeCd >= 1 and typeCd <= 4) and src.clm_srvc_prvdr_gnrc_id_type = '1' -> tgt.contained = create('Practitioner') as tgtPract then createPharmacyPractitioner(src,tgtPract) "Create contained practitioner."; 
-    src.CLM_TYPE_CD as typeCd where(typeCd >= 1 and typeCd <= 4) and src.clm_srvc_prvdr_gnrc_id_type = '1' -> tgt.provider = create('Reference') as tgtRef, 
-    tgtRef.reference = "#provider-practitioner" "Set reference to contained provider practitioner";
-    src.CLM_TYPE_CD as typeCd where(typeCd >= 1 and typeCd <= 4) and src.clm_srvc_prvdr_gnrc_id_type = '2' -> tgt.contained = create('Organization') as tgtOrg then createPharmacyOrg(src,tgtOrg) "Create contained org."; 
-    src.CLM_TYPE_CD as typeCd where(typeCd >= 1 and typeCd <= 4) and src.clm_srvc_prvdr_gnrc_id_type = '2' -> tgt.provider = create('Reference') as tgtRef, 
-    tgtRef.reference = "#provider-org" "Set reference to contained provider org";
-   
+
+    src.PRVDR_SRVC_PRVDR_NPI_NUM as blgNPI -> tgt then{
+      //We don't populate careTeamType when it's the provider, so we can uniquely identify it as billing.
+        src -> tgt.provider = create('Reference') as tgtRef, tgtRef.reference = append("#", blgNPI) "Add reference to NPI";
+        src.providerList as provider where provider.isDuplicate.exists().not() and provider.careTeamType.exists().not() and provider.NPI_TYPE = 1 -> tgt.contained = create('Practitioner') as tgtPract then createPractitioner(provider, tgtPract) "Add Practitioner";
+        src.providerList as provider where provider.isDuplicate.exists().not() and provider.careTeamType.exists().not() and provider.NPI_TYPE = 2 -> tgt.contained = create('Organization') as tgtOrg then createOrg(provider, tgtOrg) "Add Organization";
+    } "Add billing provider";
+
+    src.providerList as pList where pList.careTeamType.exists() -> tgt then {
+      pList where pList.NPI_TYPE = 1 and pList.isDuplicate.exists().not() -> tgt.contained = create('Practitioner') as tgtPract then createPractitioner(pList, tgtPract) "Add Practitioner";
+      pList where pList.NPI_TYPE = 2 and pList.isDuplicate.exists().not() -> tgt.contained = create('Organization') as tgtOrg then createOrg(pList, tgtOrg) "Add Organization";
+
+      src -> tgt.careTeam = create('BackboneElement') as tgtBBElement then {
+        pList.careTeamType as careTeamType -> tgtBBElement.role = cc("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole", careTeamType) "Add role";
+        pList.careTeamSequenceNumber as seqNum -> tgtBBElement.sequence = seqNum "Set sequence";
+        src -> tgtBBElement.provider = create('Reference') as tgtReference then {
+          pList.PRVDR_SK as npi -> tgtReference.reference = append("#", npi) "Add reference";
+        } "Add reference to EOB";
+        
+        pList.taxonomyCodes as taxonomyCodes -> tgtBBElement.qualification = create('CodeableConcept') as qualCC then{
+          taxonomyCodes -> qualCC.coding = c("http://nucc.org/provider-taxonomy", taxonomyCodes) "add taxonomy";
+        } "Add taxonomy/qualifications";
+      } "Add CareTeam Element";
+
+    } "Add CareTeam providers";
+
     src.supportingInfoComponents as infoComponent -> tgt.supportingInfo = create('BackboneElement') as tgtSupportingInfo then addPharmacySupportingInfo(infoComponent,tgtSupportingInfo) "add pharmacy supportingInfo";
 
     src.lineItemComponents as itemComponent -> tgt.item = create('BackboneElement') as tgtItem then addPharmacyItem(itemComponent,tgtItem) "add pharmacy items";
@@ -103,9 +123,7 @@ group createEOBPharmacy(source src: ExplanationOfBenefitPharmacy, target tgt: BF
         pricingCode where pricingCode = "M" -> tgtCC.coding = c("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus", "other") "Set other";
       } "Set reason";
     } "Add benefit payment status";
-
-    src.PRVDR_PRSCRBNG_PRVDR_NPI_NUM as prvdrNPI where prvdrNPI != '0' -> tgt then addPrescriberPractitionerCareTeamMember(src,tgt) "Add prescriber practitioner";
-
+    
     // Insurance coverage
     src.CLM_TYPE_CD as claimType -> tgt.insurance = create('BackboneElement') as tgtBBElement then {
       src -> tgtBBElement.focal = true "Add focal";
@@ -220,7 +238,7 @@ group addPharmacyServiceType(source src: SupportingInfoComponent, target tgt: Ba
 
 group addPrescriptionOrigin(source src: SupportingInfoComponent, target tgt: BackboneElement){
     src -> tgt.category = create('CodeableConcept') as tgtCC then {
-        src -> tgtCC.coding = translate("CLM_LINE_RX_ORGN_CD",'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#C4BB-SupportingInfo-Categories','coding') "set coding";
+        src -> tgtCC.coding = translate("CLM_LINE_RX_ORGN_CD",'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#C4BB-SupportingInfo-Categories','coding') "set coding";
     } "set category";
     src -> tgt.code = create('CodeableConcept') as tgtCC then{
         src.CLM_LINE_RX_ORGN_CD as val -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/NCPDPPrescriptionOriginCode", val) "Add coding";
@@ -230,7 +248,7 @@ group addPrescriptionOrigin(source src: SupportingInfoComponent, target tgt: Bac
 
 group addBrandGenericIndicator(source src: SupportingInfoComponent, target tgt: BackboneElement){
     src -> tgt.category = create('CodeableConcept') as tgtCC then {
-        src -> tgtCC.coding = translate("CLM_BRND_GNRC_CD",'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#C4BB-SupportingInfo-Categories','coding') "set coding";
+        src -> tgtCC.coding = translate("CLM_BRND_GNRC_CD",'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#C4BB-SupportingInfo-Categories','coding') "set coding";
     } "set category";
     src -> tgt.code = create('CodeableConcept') as tgtCC then{
         src.CLM_BRND_GNRC_CD as val -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/NCPDPBrandGenericIndicator", val) "Add coding";
@@ -260,7 +278,7 @@ group addSubmissionClarification(source src: SupportingInfoComponent, target tgt
 
 group addCompoundCode(source src: SupportingInfoComponent, target tgt: BackboneElement){
     src -> tgt.category = create('CodeableConcept') as tgtCC then {
-        src -> tgtCC.coding = translate("CLM_CMPND_CD",'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#C4BB-SupportingInfo-Categories','coding') "set coding";
+        src -> tgtCC.coding = translate("CLM_CMPND_CD",'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#C4BB-SupportingInfo-Categories','coding') "set coding";
     } "set category";
     src -> tgt.code = create('CodeableConcept') as tgtCC then{
         src.CLM_CMPND_CD as val -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/NCPDPCompoundCode", val) "Add coding";
@@ -270,7 +288,7 @@ group addCompoundCode(source src: SupportingInfoComponent, target tgt: BackboneE
 
 group addDaysSupply(source src: SupportingInfoComponent, target tgt: BackboneElement){
     src -> tgt.category = create('CodeableConcept') as tgtCC then {
-        src -> tgtCC.coding = translate("CLM_LINE_DAYS_SUPLY_QTY",'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#C4BB-SupportingInfo-Categories','coding') "set coding";
+        src -> tgtCC.coding = translate("CLM_LINE_DAYS_SUPLY_QTY",'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#C4BB-SupportingInfo-Categories','coding') "set coding";
     } "set category";
     src.CLM_LINE_DAYS_SUPLY_QTY as daysSupply -> tgt.value = create('Quantity') as tgtQuantity then {
         daysSupply -> tgtQuantity.value = cast(daysSupply, 'integer') "Set days supply value";
@@ -280,7 +298,7 @@ group addDaysSupply(source src: SupportingInfoComponent, target tgt: BackboneEle
 
 group addFillNumber(source src: SupportingInfoComponent, target tgt: BackboneElement){
     src -> tgt.category = create('CodeableConcept') as tgtCC then {
-        src -> tgtCC.coding = translate("CLM_LINE_RX_FILL_NUM",'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#C4BB-SupportingInfo-Categories','coding') "set coding";
+        src -> tgtCC.coding = translate("CLM_LINE_RX_FILL_NUM",'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#C4BB-SupportingInfo-Categories','coding') "set coding";
     } "set category";
     src.CLM_LINE_RX_FILL_NUM as fillNum -> tgt.value = create('Quantity') as tgtQuantity then {
         fillNum -> tgtQuantity.value = cast(fillNum, 'integer') "Set fill number value";
@@ -290,7 +308,7 @@ group addFillNumber(source src: SupportingInfoComponent, target tgt: BackboneEle
 
 group addDispenseAsWritten(source src: SupportingInfoComponent, target tgt: BackboneElement){
     src -> tgt.category = create('CodeableConcept') as tgtCC then {
-        src -> tgtCC.coding = translate("CLM_DAW_PROD_SLCTN_CD",'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#C4BB-SupportingInfo-Categories','coding') "set coding";
+        src -> tgtCC.coding = translate("CLM_DAW_PROD_SLCTN_CD",'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#C4BB-SupportingInfo-Categories','coding') "set coding";
     } "set category";
     src -> tgt.code = create('CodeableConcept') as tgtCC then{
         src.CLM_DAW_PROD_SLCTN_CD as val -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/NCPDPDispensedAsWrittenOrProductSelectionCode", val) "Add coding";
@@ -329,7 +347,7 @@ group addDispCd(source src: SupportingInfoComponent, target tgt: BackboneElement
 
 group addRefillsAuthorized(source src: SupportingInfoComponent, target tgt: BackboneElement){
     src -> tgt.category = create('CodeableConcept') as tgtCC then {
-        src -> tgtCC.coding = translate("CLM_LINE_AUTHRZD_FILL_NUM",'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#C4BB-SupportingInfo-Categories','coding') "set coding";
+        src -> tgtCC.coding = translate("CLM_LINE_AUTHRZD_FILL_NUM",'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#C4BB-SupportingInfo-Categories','coding') "set coding";
     } "set category";
     src.CLM_LINE_AUTHRZD_FILL_NUM as refills -> tgt.value = create('Quantity') as tgtQuantity then {
         refills -> tgtQuantity.value = cast(refills, 'integer') "Set refills authorized value";
@@ -475,32 +493,6 @@ group addPharmacyItem(source src: LineItemComponent, target tgt: BackboneElement
         phrmcyPriceDscntAtPosAmt -> tgtAdj.amount = create('Money') as tgtMoney then addMoney(phrmcyPriceDscntAtPosAmt, tgtMoney) "Add pharmacy price discount at POS amount";
     } "Add Pharmacy Price Discount At POS Amount";
 }
-//Name 
-group addPrescriberPractitionerCareTeamMember(source src: ExplanationOfBenefitPharmacy, target tgt: BFDEOB){
-  src -> tgt.contained = create('Practitioner') as tgtPract then {
-    src -> tgtPract.id = "careteam-prescriber-practitioner" "Set practitioner id";
-    src -> tgtPract.meta = create('Meta') as tgtMeta then {
-      src -> tgtMeta.profile = "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0" "Add profile";
-      src -> tgtMeta.profile = "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" "Add profile";
-    } "Add practitioner meta";
-    src -> tgtPract.identifier = create('Identifier') as tgtId then {
-      src -> tgtId.type = cc("http://terminology.hl7.org/CodeSystem/v2-0203","NPI") "Add ID Type";
-          src -> tgtId.system = "http://hl7.org/fhir/sid/us-npi" "set NPI system url";
-    src.PRVDR_PRSCRBNG_PRVDR_NPI_NUM as npi -> tgtId.value = npi "set NPI";
-    } "Create NPI identifier";
-    src as family_name -> tgtPract.name = create('HumanName') as tgtName then {
-      src -> tgtName.family = "LAST NAME HERE" "set family name";
-      src -> tgtName.use = "official" "set name use";
-    } "add family name";
-  } "Add prescriber practitioner";
-  src -> tgt.careTeam = create('BackboneElement') as tgtBBElement then {
-    src -> tgtBBElement.role = cc("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole","prescribing") "Add role";
-    src -> tgtBBElement.sequence = "1" "Set sequence";
-    src -> tgtBBElement.provider = create('Reference') as tgtReference then {
-      src -> tgtReference.reference = "#careteam-prescriber-practitioner" "Add practitioner";
-    } "Add practitioner reference to EOB";
-  } "Add CareTeam Element";
-}
 
 //To get this info, join CLM with V2_MDCR_CNTRCT_PBP_NUM on the claim's CLM.CLM_SBMTR_CNTRCT_NUM + CLM.CLM_SBMTR_CNTRCT_PBP_NUM. 
 group createInsurerOrgPartD(source src: ExplanationOfBenefitPharmacy, target tgtOrg: Organization){
@@ -512,36 +504,3 @@ group createInsurerOrgPartD(source src: ExplanationOfBenefitPharmacy, target tgt
   src -> tgtOrg.active = "true" "set org status";
   src.CNTRCT_PBP_NAME as pbpName -> tgtOrg.name = pbpName "set org name";
 }
-
-group createPharmacyOrg(source src: ExplanationOfBenefitPharmacy, target tgt: Organization){
-  src -> tgt.id = "provider-org" "Set org id";
-  src -> tgt.meta = create('Meta') as tgtMeta then {
-          src -> tgtMeta.profile = "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0" "Set org profile";
-          src -> tgtMeta.profile = "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|6.1.0" "Set org profile";
-        } "Set organization metadata";
-        src -> tgt.active = "true" "set org status";
-        src -> tgt.identifier = create('Identifier') as tgtId then {
-          src -> tgtId.type = cc("http://terminology.hl7.org/CodeSystem/v2-0203","NPI") "Add ID Type";
-          src -> tgtId.system = "http://hl7.org/fhir/sid/us-npi" "set NPI system url";
-          src.CLM_SRVC_PRVDR_GNRC_ID_NUM as npi -> tgtId.value = npi "set NPI";
-      } "Create NPI identifier";
-  src -> tgt.name = "PHARMACY ORG SOURCED FROM NPPES" "Add pharmacy org";
-}
-
-group createPharmacyPractitioner(source src: ExplanationOfBenefitPharmacy, target tgt: Practitioner){
-  src -> tgt.id = "provider-practitioner" "Set practitioner id";
-  src -> tgt.meta = create('Meta') as tgtMeta then {
-    src -> tgtMeta.profile = "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0" "Add profile";
-    src -> tgtMeta.profile = "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" "Add profile";
-  } "Add practitioner meta";
-  src -> tgt.identifier = create('Identifier') as tgtId then {
-    src -> tgtId.type = cc("http://terminology.hl7.org/CodeSystem/v2-0203","NPI") "Add ID Type";
-    src -> tgtId.system = "http://hl7.org/fhir/sid/us-npi" "set NPI system url";
-    src.CLM_SRVC_PRVDR_GNRC_ID_NUM as npi -> tgtId.value = npi "set NPI";
-  } "Create NPI identifier";
-
-  src -> tgt.name = create('HumanName') as tgtName then {
-    src -> tgtName.family = "LAST NAME HERE" "set family name";
-    src -> tgtName.use = "official" "set name use";
-  } "add family name";
-} 

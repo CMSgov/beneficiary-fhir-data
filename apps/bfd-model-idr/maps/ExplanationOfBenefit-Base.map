@@ -16,9 +16,9 @@ uses "http://hl7.org/fhir/StructureDefinition/Provider" alias ProviderComponent 
 //The first specified target is what the default output will output as the ResourceType
 uses "http://hl7.org/fhir/StructureDefinition/ExplanationOfBenefit" alias BFDEOB as target
 
-imports "https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper" 
-imports "https://bfd.cms.gov/MappingLanguage/Maps/EOB-SupportingInfo-Helper" 
-imports "https://bfd.cms.gov/MappingLanguage/Maps/EOB-Item-Institutional-Helper" 
+imports "https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper" 
+imports "https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-SupportingInfo-Helper" 
+imports "https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Item-Institutional-Helper" 
 
 group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
     
@@ -31,12 +31,12 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
     src -> tgt.use = "claim" "Set use code";
     src -> tgt.type = create('CodeableConcept') as tgtCC then {
       //CodeSystem -> CLM_TYPE_CD
-      src.CLM_TYPE_CD as typeCd -> tgtCC.coding = translate(typeCd,'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#CLM_TYPE_CD','coding') "translate code";
+      src.CLM_TYPE_CD as typeCd -> tgtCC.coding = translate(typeCd,'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#CLM_TYPE_CD','coding') "translate code";
       src.CLM_TYPE_CD as typeCd -> tgtCC.coding = c('https://bluebutton.cms.gov/fhir/CodeSystem/CLM-TYPE-CD', typeCd) "Add claim type code";
     } "Create type";
 
     src -> tgt.subType = create('CodeableConcept') as tgtCC then {
-      src.CLM_TYPE_CD as typeCd -> tgtCC.coding = translate(typeCd,'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#subtype','coding') "translate code";
+      src.CLM_TYPE_CD as typeCd -> tgtCC.coding = translate(typeCd,'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#subtype','coding') "translate code";
     } "Create type";
 
     src -> tgt.patient = create('Reference') as tgtReference then {
@@ -45,10 +45,10 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
 
     src -> tgt.meta = create('Meta') as tgtMeta then {
       src.lastUpdated as lastUpdated -> tgtMeta.lastUpdated = lastUpdated "set lastUpdated";
-      src.CLM_TYPE_CD as typeCd -> tgtMeta.profile = translate(typeCd,'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#profile_metadata','code') "set profile";
+      src.CLM_TYPE_CD as typeCd -> tgtMeta.profile = translate(typeCd,'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#profile_metadata','code') "set profile";
       //CodeSystem -> CLM_SRC_ID
-      src.CLM_SRC_ID as sourceSk -> tgtMeta.source = translate(sourceSk, 'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#CLM_SRC_ID','code') "set source";
-      src.CLM_SRC_ID as sourceSk -> tgtMeta.tag = translate(sourceSk, 'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#ADJUDICATION-STATUS','coding') "set source";
+      src.CLM_SRC_ID as sourceSk -> tgtMeta.source = translate(sourceSk, 'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#CLM_SRC_ID','code') "set source";
+      src.CLM_SRC_ID as sourceSk -> tgtMeta.tag = translate(sourceSk, 'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#ADJUDICATION-STATUS','coding') "set source";
     } "Create metadata";
 
     //add unique claim ID as one identifier. We will add multiple.
@@ -134,33 +134,11 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
         procDt -> tgtExtension.value = procDt "set process date";
       } "CLM_CMS_PROC_DT";
 
-    //For institutional claims, the provider will be an institution. For others, it will generally be a practitioner.
-    /*
-    src.CLM_TYPE_CD as typeCd where((typeCd > 4 and typeCd < 70) or (typeCd >= 2000 and typeCd < 2700) or (typeCd >= 1000 and typeCd < 1700)) -> tgt.contained = create('Organization') as tgtOrg then createProviderOrg(src,tgtOrg) "Create contained org."; 
-    src.CLM_TYPE_CD as typeCd where((typeCd > 4 and typeCd < 70) or (typeCd >= 2000 and typeCd < 2700) or (typeCd >= 1000 and typeCd < 1700)) -> tgt.provider = create('Reference') as tgtRef, 
-    tgtRef.reference = "#provider-org" "Set reference to contained provider org";
-
-    //NPIType is a derived field. In practice, if the NPI is type 1, the provider will be a practitioner resource.
-    //If NPI type is type 2, then it'll be an organization
-
-    src.clm_blg_prvdr_npi_type as npiType where npiType = 2 -> tgt then {
-      src.CLM_TYPE_CD as typeCd where((typeCd > 70 and typeCd <= 82) or (typeCd >= 2700 and typeCd < 2900) or (typeCd >= 1700 and typeCd < 1900)) -> tgt.contained = create('Organization') as tgtOrg then createProviderOrg(src,tgtOrg) "Create contained org."; 
-      src.CLM_TYPE_CD as typeCd where((typeCd > 70 and typeCd <= 82) or (typeCd >= 2700 and typeCd < 2900) or (typeCd >= 1700 and typeCd < 1900)) -> tgt.provider = create('Reference') as tgtRef, 
-      tgtRef.reference = "#provider-org" "Set reference to contained provider org";
-    } "Add Professional Organization Billing Providers";
-
-    src.clm_blg_prvdr_npi_type as npiType where npiType = 1 -> tgt then {
-      src.CLM_TYPE_CD as typeCd where((typeCd > 70 and typeCd <= 82) or (typeCd >= 2700 and typeCd < 2900) or (typeCd >= 1700 and typeCd < 1900)) -> tgt.contained = create('Practitioner') as tgtOrg then createBillingPractitioner(src,tgtOrg) "Create contained org."; 
-      src.CLM_TYPE_CD as typeCd where((typeCd > 70 and typeCd <= 82) or (typeCd >= 2700 and typeCd < 2900) or (typeCd >= 1700 and typeCd < 1900)) -> tgt.provider = create('Reference') as tgtRef, 
-      tgtRef.reference = "#practitioner-billing" "Set reference to contained provider org";
-    } "Add Billing Practitioner";
-    */
-
     src.PRVDR_BLG_PRVDR_NPI_NUM as blgNPI -> tgt then{
       //We don't populate careTeamType when it's the provider, so we can uniquely identify it as billing.
         src -> tgt.provider = create('Reference') as tgtRef, tgtRef.reference = append("#", blgNPI) "Add reference to NPI";
-        src.providerList as provider where provider.careTeamType.exists().not() and provider.NPI_TYPE = 1 -> tgt.contained = create('Practitioner') as tgtPract then createPractitioner(provider, tgtPract) "Add Practitioner";
-        src.providerList as provider where provider.careTeamType.exists().not() and provider.NPI_TYPE = 2 -> tgt.contained = create('Organization') as tgtOrg then createOrg(provider, tgtOrg) "Add Organization";
+        src.providerList as provider where provider.isDuplicate.exists().not() and provider.careTeamType.exists().not() and provider.NPI_TYPE = 1 -> tgt.contained = create('Practitioner') as tgtPract then createPractitioner(provider, tgtPract) "Add Practitioner";
+        src.providerList as provider where provider.isDuplicate.exists().not() and provider.careTeamType.exists().not() and provider.NPI_TYPE = 2 -> tgt.contained = create('Organization') as tgtOrg then createOrg(provider, tgtOrg) "Add Organization";
     } "Add billing provider";
 
    
@@ -171,11 +149,11 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
     src.CLM_TYPE_CD as typeCd where(typeCd >= 2000 and typeCd < 3000) -> tgt then {
       //Bifurcate by if it's institutional or professional. 
       src.institutionalComponents as instComponents -> tgt then {
-        instComponents.CLM_CRNT_STUS_CD as curStatusCode -> tgt.outcome = translate(curStatusCode, 'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#CLM-CRNT-STUS-CD','code') "Set outcome for phase 2/3 FISS";
+        instComponents.CLM_CRNT_STUS_CD as curStatusCode -> tgt.outcome = translate(curStatusCode, 'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#CLM-CRNT-STUS-CD','code') "Set outcome for phase 2/3 FISS";
       } "Set institutional outcome";
 
       src.profComponents as profComponents -> tgt then {
-        profComponents.CLM_AUDT_TRL_STUS_CD as auditTrailStatusCode -> tgt.outcome = translate(auditTrailStatusCode, 'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#CLM_AUDT_TRL_STUS_CD','code') "Set outcome for phase 2/3 MCS";
+        profComponents.CLM_AUDT_TRL_STUS_CD as auditTrailStatusCode -> tgt.outcome = translate(auditTrailStatusCode, 'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#CLM_AUDT_TRL_STUS_CD','code') "Set outcome for phase 2/3 MCS";
       } "Set professional outcome";
     } "Complete additional outcomes";
     //When we get to carrier/DME, we'll do the same with MCS/VMS status. 
@@ -250,8 +228,8 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
       src -> tgtBBElement.focal = true "Add focal";
       src -> tgtBBElement.coverage = create('Reference') as tgtReference then {
         src.supportingInfoComponents as suppInfo where suppInfo.CLM_NRLN_RIC_CD.exists() or suppInfo.CLM_RIC_CD.exists() -> tgt then{
-          suppInfo.CLM_NRLN_RIC_CD as nearLineAdjudicated -> tgtReference.display = translate(nearLineAdjudicated,"https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#RIC_CD",'code') "Add coverage type";
-          suppInfo.CLM_RIC_CD as nearLinePartiallyAdjudicated -> tgtReference.display = translate(nearLinePartiallyAdjudicated,"https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#RIC_CD",'code') "Add coverage type";
+          suppInfo.CLM_NRLN_RIC_CD as nearLineAdjudicated -> tgtReference.display = translate(nearLineAdjudicated,"https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#RIC_CD",'code') "Add coverage type";
+          suppInfo.CLM_RIC_CD as nearLinePartiallyAdjudicated -> tgtReference.display = translate(nearLinePartiallyAdjudicated,"https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#RIC_CD",'code') "Add coverage type";
         } "add insurance";
         //CLM_RIC_CD not in MCS/VMS :shrug:
         claimType where claimType = '1700' or claimType = '1800' or claimType = '2700' or claimType = '2800' -> tgtReference.display = "Part B" "Set part B for PAC Carrier/DME";
@@ -640,10 +618,10 @@ group addDiagnoses(source src: DiagnosisComponent, target tgt: BackboneElement){
   src.ROW_NUM as rowNum -> tgt.sequence = rowNum "set sequence number";
 
   src.CLM_PROD_TYPE_CD as dTypeCode where (dTypeCode = "A" or dTypeCode = "P") -> tgt.type = create('CodeableConcept') as tgtCC then {
-    src -> tgtCC.coding = translate(dTypeCode,'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#HL7_DIAGTYPE','coding') "set coding";
+    src -> tgtCC.coding = translate(dTypeCode,'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#HL7_DIAGTYPE','coding') "set coding";
   } "Set type";
   src.CLM_PROD_TYPE_CD as dTypeCode where (dTypeCode = "1" or dTypeCode = "D" or dTypeCode = "E" or dTypeCode = "R") -> tgt.type = create('CodeableConcept') as tgtCC then {
-    src -> tgtCC.coding = translate(dTypeCode,'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#C4BB_DIAGTYPE','coding') "set coding";
+    src -> tgtCC.coding = translate(dTypeCode,'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#C4BB_DIAGTYPE','coding') "set coding";
   } "Set type";
 
   src.CLM_POA_IND as poaInd where (poaInd != ' ' and poaInd != '~' ) -> tgt.onAdmission = create('CodeableConcept') as tgtPOA,
@@ -654,7 +632,7 @@ group addDiagnoses(source src: DiagnosisComponent, target tgt: BackboneElement){
   src -> tgt.diagnosis = create('CodeableConcept') as tgtDiagnosis then {
     src -> tgtDiagnosis.coding = create('Coding') as tgtCoding then {
       //From CLM_PROD
-      src.CLM_DGNS_PRCDR_ICD_IND as indicator -> tgtCoding.system = translate(indicator,'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#CLM_DGNS_PRCDR_ICD_IND_DIAGNOSIS','code') "set system";
+      src.CLM_DGNS_PRCDR_ICD_IND as indicator -> tgtCoding.system = translate(indicator,'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#CLM_DGNS_PRCDR_ICD_IND_DIAGNOSIS','code') "set system";
       src.CLM_DGNS_CD as diagnosisCode -> tgtCoding.code = diagnosisCode "set diagnosis code";
     } "set coding";
   } "Set diagnosis, including code";
@@ -665,16 +643,16 @@ group addDiagnosesProfessional(source src: DiagnosisComponent, target tgt: Backb
   src.ROW_NUM as rowNum -> tgt.sequence = rowNum "set sequence number";
 
   src.CLM_PROD_TYPE_CD as dTypeCode where (dTypeCode = "A" or dTypeCode = "P") -> tgt.type = create('CodeableConcept') as tgtCC then {
-    src -> tgtCC.coding = translate(dTypeCode,'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#HL7_DIAGTYPE','coding') "set coding";
+    src -> tgtCC.coding = translate(dTypeCode,'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#HL7_DIAGTYPE','coding') "set coding";
   } "Set type";
   src.CLM_PROD_TYPE_CD as dTypeCode where (dTypeCode = "1" or dTypeCode = "D" or dTypeCode = "E" or dTypeCode = "R") -> tgt.type = create('CodeableConcept') as tgtCC then {
-    src -> tgtCC.coding = translate(dTypeCode,'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#C4BB_DIAGTYPE_PROF','coding') "set coding";
+    src -> tgtCC.coding = translate(dTypeCode,'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#C4BB_DIAGTYPE_PROF','coding') "set coding";
   } "Set type";
 
   src -> tgt.diagnosis = create('CodeableConcept') as tgtDiagnosis then {
     src -> tgtDiagnosis.coding = create('Coding') as tgtCoding then {
       //From CLM_PROD
-      src.CLM_DGNS_PRCDR_ICD_IND as indicator -> tgtCoding.system = translate(indicator,'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#CLM_DGNS_PRCDR_ICD_IND_DIAGNOSIS','code') "set system";
+      src.CLM_DGNS_PRCDR_ICD_IND as indicator -> tgtCoding.system = translate(indicator,'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#CLM_DGNS_PRCDR_ICD_IND_DIAGNOSIS','code') "set system";
       src.CLM_DGNS_CD as diagnosisCode -> tgtCoding.code = diagnosisCode "set diagnosis code";
     } "set coding";
   } "Set diagnosis, including code";
@@ -689,7 +667,7 @@ group addProcedures(source src: ProcedureComponent, target tgt: BackboneElement)
 
   src -> tgt.procedure = create('CodeableConcept') as tgtProcedure then {
     src -> tgtProcedure.coding = create('Coding') as tgtCoding then {
-      src.CLM_DGNS_PRCDR_ICD_IND as indicator -> tgtCoding.system = translate(indicator,'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#CLM_DGNS_PRCDR_ICD_IND_PROCEDURE','code') "set system";
+      src.CLM_DGNS_PRCDR_ICD_IND as indicator -> tgtCoding.system = translate(indicator,'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#CLM_DGNS_PRCDR_ICD_IND_PROCEDURE','code') "set system";
       src.CLM_PRCDR_CD as procedureCode -> tgtCoding.code = procedureCode "set procedure code";
     } "set coding";
   } "Set procedure, including code";
