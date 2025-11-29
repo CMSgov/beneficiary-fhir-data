@@ -1,10 +1,7 @@
-# ruff: noqa: ARG001
-# type: ignore [reportUntypedFunctionDecorator]
-
 import random
 from datetime import datetime
 
-from hamilton.htypes import Collect, Parallelizable
+from hamilton.htypes import Collect, Parallelizable  # type: ignore
 
 from constants import MIN_CLAIM_LOAD_DATE
 from load_partition import LoadPartition
@@ -96,9 +93,6 @@ def stage1(load_mode: LoadMode, start_time: datetime) -> bool:
     )
 
 
-# INITIAL FLOW
-# Stage 1: Load ALL claim tables in parallel if load_type is set to initial
-# @config.when(load_type="initial")
 def stage2_inputs(load_type: LoadType, stage1: bool) -> Parallelizable[NodePartitionedModelInput]:
     if load_type == LoadType.INITIAL:
         yield from _gen_partitioned_node_inputs(
@@ -108,7 +102,11 @@ def stage2_inputs(load_type: LoadType, stage1: bool) -> Parallelizable[NodeParti
         yield from _gen_partitioned_node_inputs([*CLAIM_AUX_TABLES, *BENE_AUX_TABLES])
 
 
-# @config.when(load_type="initial")
+# NOTE: it would be good to use @parameterize here, but the multiprocessing executor doesn't handle
+# serialization properly which is required. See notes about multiprocessing
+# here https://hamilton.apache.org/concepts/parallel-task/
+
+
 def do_stage2(
     stage2_inputs: NodePartitionedModelInput,
     load_mode: LoadMode,
