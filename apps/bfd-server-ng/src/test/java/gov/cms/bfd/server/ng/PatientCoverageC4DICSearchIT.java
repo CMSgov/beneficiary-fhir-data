@@ -16,7 +16,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Resource;
 import org.junit.jupiter.api.Test;
 
-public class PatientCoverageC4DICSearchIT extends IntegrationTestBase {
+class PatientCoverageC4DICSearchIT extends IntegrationTestBase {
   private Bundle searchBundle(String beneSK) {
     return getFhirClient()
         .operation()

@@ -25,7 +25,7 @@ import org.springframework.core.env.Environment;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
-public class AuthenticationFilterTest {
+class AuthenticationFilterTest {
   @Mock Environment environment;
   @Mock Configuration configuration;
   @Mock HttpServletRequest request;

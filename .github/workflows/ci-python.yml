@@ -42,7 +42,7 @@ jobs:
               projectRoot: "apps/bfd-pipeline/bfd-pipeline-idr",
               testsRoot: "apps/bfd-pipeline/bfd-pipeline-idr",
               uvCommand: "uv sync",
-              pytestCommand: "uv run pytest",
+              pytestCommand: "IDR_LOAD_TYPE=initial uv run pytest && IDR_LOAD_TYPE=incremental uv run pytest",
               pythonVersion: "3.13",
             },
           ]
