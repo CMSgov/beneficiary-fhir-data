@@ -8,15 +8,29 @@ LOAD_TYPE = getenv("IDR_LOAD_TYPE", "incremental")
 BATCH_SIZE = int(getenv("IDR_BATCH_SIZE", "100_000"))
 MIN_BATCH_COMPLETION_DATE = getenv("IDR_MIN_COMPLETION_DATE")
 
-BFD_DB_PORT = getenv("BFD_DB_PORT", "5432")
-BFD_DB_NAME = getenv("BFD_DB_NAME", "fhirdb")
-BFD_DB_ENDPOINT = getenv("BFD_DB_ENDPOINT")
-BFD_DB_USERNAME = getenv("BFD_DB_USERNAME")
-BFD_DB_PASSWORD = getenv("BFD_DB_PASSWORD")
-
 IDR_PRIVATE_KEY = getenv("IDR_PRIVATE_KEY", "")
-IDR_USERNAME = getenv("IDR_USERNAME")
-IDR_ACCOUNT = getenv("IDR_ACCOUNT")
-IDR_WAREHOUSE = getenv("IDR_WAREHOUSE")
-IDR_DATABASE = getenv("IDR_DATABASE")
-IDR_SCHEMA = getenv("IDR_SCHEMA")
+IDR_USERNAME = getenv("IDR_USERNAME", "")
+IDR_ACCOUNT = getenv("IDR_ACCOUNT", "")
+IDR_WAREHOUSE = getenv("IDR_WAREHOUSE", "")
+IDR_DATABASE = getenv("IDR_DATABASE", "")
+IDR_SCHEMA = getenv("IDR_SCHEMA", "")
+
+
+def bfd_db_port() -> str:
+    return getenv("BFD_DB_PORT", "5432")
+
+
+def bfd_db_name() -> str:
+    return getenv("BFD_DB_NAME", "fhirdb")
+
+
+def bfd_db_endpoint() -> str:
+    return getenv("BFD_DB_ENDPOINT", "")
+
+
+def bfd_db_username() -> str:
+    return getenv("BFD_DB_USERNAME", "")
+
+
+def bfd_db_password() -> str:
+    return getenv("BFD_DB_PASSWORD", "")
