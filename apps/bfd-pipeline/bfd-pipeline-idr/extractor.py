@@ -1,5 +1,4 @@
 import logging
-import os
 from abc import ABC, abstractmethod
 from collections.abc import Iterator, Mapping, Sequence
 from datetime import datetime
@@ -24,7 +23,16 @@ from model import (
     format_date_opt,
     get_min_transaction_date,
 )
-from settings import BATCH_SIZE, MIN_BATCH_COMPLETION_DATE
+from settings import (
+    BATCH_SIZE,
+    IDR_ACCOUNT,
+    IDR_DATABASE,
+    IDR_PRIVATE_KEY,
+    IDR_SCHEMA,
+    IDR_USERNAME,
+    IDR_WAREHOUSE,
+    MIN_BATCH_COMPLETION_DATE,
+)
 from timer import Timer
 
 logger = logging.getLogger(__name__)
@@ -193,7 +201,7 @@ class SnowflakeExtractor(Extractor[T]):
     @staticmethod
     def _connect() -> SnowflakeConnection:
         private_key = serialization.load_pem_private_key(
-            os.environ["IDR_PRIVATE_KEY"].encode(),
+            IDR_PRIVATE_KEY.encode(),
             password=None,
             backend=default_backend(),
         )
@@ -203,12 +211,12 @@ class SnowflakeExtractor(Extractor[T]):
             encryption_algorithm=serialization.NoEncryption(),
         )
         return snowflake.connector.connect(  # type: ignore
-            user=os.environ["IDR_USERNAME"],
+            user=IDR_USERNAME,
             private_key=private_key_bytes,
-            account=os.environ["IDR_ACCOUNT"],
-            warehouse=os.environ["IDR_WAREHOUSE"],
-            database=os.environ["IDR_DATABASE"],
-            schema=os.environ["IDR_SCHEMA"],
+            account=IDR_ACCOUNT,
+            warehouse=IDR_WAREHOUSE,
+            database=IDR_DATABASE,
+            schema=IDR_SCHEMA,
         )
 
     def extract_many(
