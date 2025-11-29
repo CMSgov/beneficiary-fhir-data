@@ -93,7 +93,7 @@ def stage1(load_mode: LoadMode, start_time: datetime) -> bool:
     )
 
 
-def stage2_inputs(load_type: LoadType, stage1: bool) -> Parallelizable[NodePartitionedModelInput]:
+def stage2_inputs(load_type: LoadType, stage1: bool) -> Parallelizable[NodePartitionedModelInput]:  # noqa: ARG001
     if load_type == LoadType.INITIAL:
         yield from _gen_partitioned_node_inputs(
             [*CLAIM_AUX_TABLES, *BENE_AUX_TABLES, IdrClaim, IdrBeneficiary]
@@ -128,7 +128,8 @@ def collect_stage2(
 
 
 def stage3_inputs(
-    load_type: str, collect_stage2: bool
+    load_type: str,
+    collect_stage2: bool,  # noqa: ARG001
 ) -> Parallelizable[NodePartitionedModelInput]:
     if load_type == "incremental":
         yield from _gen_partitioned_node_inputs([IdrClaim])
@@ -157,7 +158,7 @@ def collect_stage3(
 
 
 def do_stage4(
-    collect_stage3: bool,
+    collect_stage3: bool,  # noqa: ARG001
     load_type: LoadType,
     load_mode: LoadMode,
     start_time: datetime,
