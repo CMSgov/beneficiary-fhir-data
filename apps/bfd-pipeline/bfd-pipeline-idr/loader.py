@@ -1,5 +1,4 @@
 import logging
-import os
 from collections.abc import Iterator, Sequence
 from datetime import UTC, date, datetime
 
@@ -8,6 +7,7 @@ import psycopg
 from constants import DEFAULT_MIN_DATE
 from load_partition import LoadPartition
 from model import DbType, LoadMode, LoadProgress, T
+from settings import BFD_DB_ENDPOINT, BFD_DB_NAME, BFD_DB_PASSWORD, BFD_DB_PORT, BFD_DB_USERNAME
 from timer import Timer
 
 logger = logging.getLogger(__name__)
@@ -16,10 +16,8 @@ logger = logging.getLogger(__name__)
 def get_connection_string(load_mode: LoadMode) -> str:
     if load_mode == LoadMode.LOCAL:
         return "host=localhost dbname=fhirdb user=bfd password=InsecureLocalDev"
-    port = os.environ.get("BFD_DB_PORT") or "5432"
-    dbname = os.environ.get("BFD_DB_NAME") or "fhirdb"
-    return f"host={os.environ['BFD_DB_ENDPOINT']} port={port} dbname={dbname} \
-        user={os.environ['BFD_DB_USERNAME']} password={os.environ['BFD_DB_PASSWORD']}"
+    return f"host={BFD_DB_ENDPOINT} port={BFD_DB_PORT} dbname={BFD_DB_NAME} \
+        user={BFD_DB_USERNAME} password={BFD_DB_PASSWORD}"
 
 
 class PostgresLoader:
