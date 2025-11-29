@@ -1,8 +1,7 @@
-import os
-
 from dateutil.relativedelta import relativedelta
 
 from load_partition import LoadPartition, LoadPartitionGroup, PartitionType
+from settings import PARTITION_TYPE
 
 DEFAULT_MAX_DATE = "9999-12-31"
 DEFAULT_MIN_DATE = "0001-01-01"
@@ -11,9 +10,7 @@ ALTERNATE_DEFAULT_DATE = "1000-01-01"
 
 DEATH_DATE_CUTOFF_YEARS = 4
 
-partition_type = os.environ.get("IDR_PARTITION_TYPE", "year").lower()
-
-match partition_type:
+match PARTITION_TYPE:
     case "year" | "years":
         partition_range = relativedelta(years=1)
     case "month" | "months":
@@ -21,7 +18,7 @@ match partition_type:
     case "day" | "days":
         partition_range = relativedelta(days=1)
     case _:
-        raise ValueError("invalid partition type " + partition_type)
+        raise ValueError("invalid partition type " + PARTITION_TYPE)
 
 PART_D_CLAIM_TYPE_CODES = [1, 2, 3, 4]
 

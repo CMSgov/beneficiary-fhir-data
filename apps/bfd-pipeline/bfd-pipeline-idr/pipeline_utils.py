@@ -31,9 +31,9 @@ def get_progress(
     partition: LoadPartition,
 ) -> LoadProgress | None:
     return PostgresExtractor(
-        load_mode=load_mode, batch_size=1, cls=LoadProgress, partition=partition
+        load_mode=load_mode, cls=LoadProgress, partition=partition
     ).extract_single(
-        LoadProgress.fetch_query(partition, False, start_time),
+        LoadProgress.fetch_query(partition, start_time, load_mode),
         {LoadProgress.query_placeholder(): table_name},
     )
 
@@ -41,17 +41,14 @@ def get_progress(
 def extract_and_load(
     cls: type[T],
     load_mode: LoadMode,
-    batch_size: int,
     job_start: datetime,
     partition: LoadPartition | None = None,
 ) -> bool:
     partition = partition or DEFAULT_PARTITION
     if load_mode == LoadMode.LOCAL or load_mode == LoadMode.SYNTHETIC:
-        data_extractor = PostgresExtractor(
-            load_mode=load_mode, batch_size=batch_size, cls=cls, partition=partition
-        )
+        data_extractor = PostgresExtractor(load_mode=load_mode, cls=cls, partition=partition)
     else:
-        data_extractor = SnowflakeExtractor(batch_size=batch_size, cls=cls, partition=partition)
+        data_extractor = SnowflakeExtractor(cls=cls, partition=partition)
 
     logger.info("loading %s", cls.table())
     last_error = datetime.min.replace(tzinfo=UTC)
@@ -63,14 +60,19 @@ def extract_and_load(
         try:
             progress = get_progress(load_mode, cls.table(), job_start, partition)
 
-            logger.info(
-                "progress for %s - last_ts: %s job_start_ts: %s batch_complete_ts: %s",
-                cls.table(),
-                progress.last_ts if progress else "none",
-                progress.job_start_ts if progress else "none",
-                progress.batch_complete_ts if progress else "none",
-            )
-            data_iter = data_extractor.extract_idr_data(progress, job_start)
+            if progress:
+                logger.info(
+                    "progress for %s %s - last_ts: %s job_start_ts: %s batch_complete_ts: %s",
+                    cls.table(),
+                    progress.batch_partition,
+                    progress.last_ts,
+                    progress.job_start_ts,
+                    progress.batch_complete_ts,
+                )
+            else:
+                logger.info("no previous progress for %s", cls.table())
+
+            data_iter = data_extractor.extract_idr_data(progress, job_start, load_mode)
             res = loader.load(data_iter, cls, job_start, partition, progress)
             data_extractor.close()
             loader.close()

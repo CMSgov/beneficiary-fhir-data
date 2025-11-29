@@ -87,13 +87,12 @@ def _gen_partitioned_node_inputs(
     return sorted(res, key=lambda m: m[1].priority if m[1] else 0)
 
 
-def stage1(load_mode: LoadMode, batch_size: int, start_time: datetime) -> bool:
+def stage1(load_mode: LoadMode, start_time: datetime) -> bool:
     return extract_and_load(
         cls=IdrBeneficiaryOvershareMbi,
         partition=None,
         job_start=start_time,
         load_mode=load_mode,
-        batch_size=batch_size,
     )
 
 
@@ -113,7 +112,6 @@ def stage2_inputs(load_type: LoadType, stage1: bool) -> Parallelizable[NodeParti
 def do_stage2(
     stage2_inputs: NodePartitionedModelInput,
     load_mode: LoadMode,
-    batch_size: int,
     start_time: datetime,
 ) -> bool:
     model_type, partition = stage2_inputs
@@ -122,7 +120,6 @@ def do_stage2(
         partition=partition,
         job_start=start_time,
         load_mode=load_mode,
-        batch_size=batch_size,
     )
 
 
@@ -144,7 +141,6 @@ def stage3_inputs(
 def do_stage3(
     stage3_inputs: NodePartitionedModelInput,
     load_mode: LoadMode,
-    batch_size: int,
     start_time: datetime,
 ) -> bool:
     model_type, partition = stage3_inputs
@@ -153,7 +149,6 @@ def do_stage3(
         partition=partition,
         job_start=start_time,
         load_mode=load_mode,
-        batch_size=batch_size,
     )
 
 
@@ -167,7 +162,6 @@ def do_stage4(
     collect_stage3: bool,
     load_type: LoadType,
     load_mode: LoadMode,
-    batch_size: int,
     start_time: datetime,
 ) -> bool:
     if load_type == "incremental":
@@ -176,6 +170,5 @@ def do_stage4(
             partition=None,
             job_start=start_time,
             load_mode=load_mode,
-            batch_size=batch_size,
         )
     return False

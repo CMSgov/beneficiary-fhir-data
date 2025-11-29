@@ -21,8 +21,10 @@ from model import (
     LoadMode,
     LoadProgress,
     T,
+    format_date_opt,
     get_min_transaction_date,
 )
+from settings import BATCH_SIZE, MIN_BATCH_COMPLETION_DATE
 from timer import Timer
 
 logger = logging.getLogger(__name__)
@@ -56,23 +58,17 @@ class Extractor(ABC, Generic[T]):  # noqa: UP046
     def _greatest_col(self, cols: list[str]) -> str:
         return f"GREATEST({','.join(cols)})"
 
-    def get_query(
-        self,
-        is_historical: bool,
-        start_time: datetime,
-    ) -> str:
-        query = self.cls.fetch_query(self.partition, is_historical, start_time)
+    def get_query(self, start_time: datetime, load_mode: LoadMode) -> str:
+        query = self.cls.fetch_query(self.partition, start_time, load_mode)
         columns = ",".join(self.cls.column_aliases())
         columns_raw = ",".join(self.cls.columns_raw())
         return query.replace("{COLUMNS}", columns).replace("{COLUMNS_NO_ALIAS}", columns_raw)
 
     def extract_idr_data(
-        self,
-        progress: LoadProgress | None,
-        start_time: datetime,
+        self, progress: LoadProgress | None, start_time: datetime, load_mode: LoadMode
     ) -> Iterator[Sequence[T]]:
         is_historical = progress is None or progress.is_historical()
-        fetch_query = self.get_query(is_historical, start_time)
+        fetch_query = self.get_query(start_time, load_mode)
         # GREATEST doesn't work with nulls so we need to coalesce here
         batch_timestamp_cols = self._coalesce_dates(
             self.cls.batch_timestamp_col_alias(is_historical)
@@ -101,6 +97,17 @@ class Extractor(ABC, Generic[T]):  # noqa: UP046
             )
 
         previous_batch_complete = progress.batch_complete_ts >= progress.job_start_ts
+        min_batch_completion_date = format_date_opt(MIN_BATCH_COMPLETION_DATE)
+        if (
+            previous_batch_complete
+            and min_batch_completion_date
+            and progress.batch_complete_ts > min_batch_completion_date
+        ):
+            # If we've set a min completion date, we don't need to reprocess any batches that have
+            # already completed within the given timeframe.
+            # This helps for large loads that may have been interrupted recently.
+            return iter([])
+
         # If we've completed the last batch, there shouldn't be any additional records
         # with the same timestamp/id.
         # Additionally, if there's a batch_id column, records with the same timestamp will be
@@ -142,13 +149,10 @@ class Extractor(ABC, Generic[T]):  # noqa: UP046
 
 
 class PostgresExtractor(Extractor[T]):
-    def __init__(
-        self, cls: type[T], partition: LoadPartition, load_mode: LoadMode, batch_size: int
-    ) -> None:
+    def __init__(self, cls: type[T], partition: LoadPartition, load_mode: LoadMode) -> None:
         super().__init__(cls, partition)
         self.connection_string = get_connection_string(load_mode)
         self.conn = psycopg.connect(self.connection_string)
-        self.batch_size = batch_size
 
     def reconnect(self) -> None:
         self.conn = psycopg.connect(self.connection_string)
@@ -161,10 +165,10 @@ class PostgresExtractor(Extractor[T]):
         logger.debug(sql)
         with self.conn.cursor(row_factory=dict_row) as cur:
             cur.execute(sql, params)  # type: ignore
-            batch = cur.fetchmany(self.batch_size)
+            batch = cur.fetchmany(BATCH_SIZE)
             while len(batch) > 0:
                 yield self._transform(batch)
-                batch = cur.fetchmany(self.batch_size)
+                batch = cur.fetchmany(BATCH_SIZE)
 
     def extract_single(self, sql: str, params: dict[str, DbType]) -> T | None:
         with self.conn.cursor(row_factory=dict_row) as cur:
@@ -179,10 +183,9 @@ class PostgresExtractor(Extractor[T]):
 
 
 class SnowflakeExtractor(Extractor[T]):
-    def __init__(self, batch_size: int, cls: type[T], partition: LoadPartition) -> None:
+    def __init__(self, cls: type[T], partition: LoadPartition) -> None:
         super().__init__(cls, partition)
         self.conn = SnowflakeExtractor._connect()
-        self.batch_size = batch_size
 
     def reconnect(self) -> None:
         self.conn = SnowflakeExtractor._connect()
@@ -224,14 +227,14 @@ class SnowflakeExtractor(Extractor[T]):
             self.cursor_fetch_timer.start()
             # fetchmany can return list[dict] or list[tuple] but we'll only use
             # queries that return dicts
-            batch: list[dict[str, DbType]] = cur.fetchmany(self.batch_size)  # type: ignore[assignment]
+            batch: list[dict[str, DbType]] = cur.fetchmany(BATCH_SIZE)
             self.cursor_fetch_timer.stop()
 
             while len(batch) > 0:  # type: ignore
                 yield self._transform(batch)
 
                 self.cursor_fetch_timer.start()
-                batch = cur.fetchmany(self.batch_size)  # type: ignore[assignment]
+                batch = cur.fetchmany(BATCH_SIZE)
                 self.cursor_fetch_timer.stop()
             return
 
