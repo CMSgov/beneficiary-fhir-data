@@ -13,11 +13,10 @@ CREATE TABLE idr.contract_pbp_contact (
     cntrct_plan_cntct_city_name VARCHAR(30) NOT NULL,
     cntrct_plan_cntct_state_cd VARCHAR(2) NOT NULL,
     cntrct_plan_cntct_zip_cd VARCHAR(9) NOT NULL,
-    bfd_created_ts TIMESTAMPTZ,
+    bfd_created_ts TIMESTAMPTZ NOT NULL,
     bfd_updated_ts TIMESTAMPTZ,
     PRIMARY KEY(cntrct_pbp_sk, cntrct_pbp_bgn_dt)
 );
 
 ALTER TABLE idr.contract_pbp_number
-ALTER COLUMN bfd_created_ts DROP NOT NULL,
 ALTER COLUMN bfd_updated_ts DROP NOT NULL;
