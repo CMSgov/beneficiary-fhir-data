@@ -71,7 +71,6 @@
                 processor. -->
             <groupId>org.hibernate.orm</groupId>
             <artifactId>hibernate-jpamodelgen</artifactId>
-            <version>${hibernate.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.jboss.logging</groupId>
