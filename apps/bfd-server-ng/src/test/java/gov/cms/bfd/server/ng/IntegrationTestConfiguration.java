@@ -96,8 +96,10 @@ public class IntegrationTestConfiguration {
     env.put("BFD_DB_USERNAME", container.getUsername());
     env.put("BFD_DB_PASSWORD", container.getPassword());
     env.put("BFD_DB_NAME", container.getDatabaseName());
-    // Makes the pipeline go slightly faster
+    // Makes the pipeline go slightly faster by increasing the number of tasks that run in parallel.
     env.put("IDR_LOAD_TYPE", "initial");
+    // Partitions are necessary for massive amounts of prod data, but will cause our modestly-sized
+    // test data to load significantly slower.
     env.put("IDR_ENABLE_PARTITIONS", "0");
 
     processBuilder
