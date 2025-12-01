@@ -8522,7 +8522,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
         "code" : {
           "coding" : [ {
             "code" : "42",
-            "display" : "CONTINUING CARE NOT RELATED TO INPATIENTADMISSION - CONTINUING CARE NOT RELATEDTO THE CONDITION OR DIAGNOSIS FOR WHICHTHE BENEFICIARY RECEIVED INPATIENTHOSPITAL SERVICES. (EFF. 10/01)",
+            "display" : "CONTINUING CARE NOT RELATED TO INPATIENT ADMISSION - CONTINUING CARE NOT RELATED TO THE CONDITION OR DIAGNOSIS FOR WHICH THE BENEFICIARY RECEIVED INPATIENT HOSPITAL SERVICES. (EFF. 10/01)",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
           } ]
         },
@@ -11491,7 +11491,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
         "code" : {
           "coding" : [ {
             "code" : "42",
-            "display" : "CONTINUING CARE NOT RELATED TO INPATIENTADMISSION - CONTINUING CARE NOT RELATEDTO THE CONDITION OR DIAGNOSIS FOR WHICHTHE BENEFICIARY RECEIVED INPATIENTHOSPITAL SERVICES. (EFF. 10/01)",
+            "display" : "CONTINUING CARE NOT RELATED TO INPATIENT ADMISSION - CONTINUING CARE NOT RELATED TO THE CONDITION OR DIAGNOSIS FOR WHICH THE BENEFICIARY RECEIVED INPATIENT HOSPITAL SERVICES. (EFF. 10/01)",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
           } ]
         },
@@ -14460,7 +14460,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
         "code" : {
           "coding" : [ {
             "code" : "42",
-            "display" : "CONTINUING CARE NOT RELATED TO INPATIENTADMISSION - CONTINUING CARE NOT RELATEDTO THE CONDITION OR DIAGNOSIS FOR WHICHTHE BENEFICIARY RECEIVED INPATIENTHOSPITAL SERVICES. (EFF. 10/01)",
+            "display" : "CONTINUING CARE NOT RELATED TO INPATIENT ADMISSION - CONTINUING CARE NOT RELATED TO THE CONDITION OR DIAGNOSIS FOR WHICH THE BENEFICIARY RECEIVED INPATIENT HOSPITAL SERVICES. (EFF. 10/01)",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
           } ]
         },
@@ -21116,7 +21116,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[GET_WITH_SEARCH_WithTag_Em
         "code" : {
           "coding" : [ {
             "code" : "42",
-            "display" : "CONTINUING CARE NOT RELATED TO INPATIENTADMISSION - CONTINUING CARE NOT RELATEDTO THE CONDITION OR DIAGNOSIS FOR WHICHTHE BENEFICIARY RECEIVED INPATIENTHOSPITAL SERVICES. (EFF. 10/01)",
+            "display" : "CONTINUING CARE NOT RELATED TO INPATIENT ADMISSION - CONTINUING CARE NOT RELATED TO THE CONDITION OR DIAGNOSIS FOR WHICH THE BENEFICIARY RECEIVED INPATIENT HOSPITAL SERVICES. (EFF. 10/01)",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
           } ]
         },
@@ -22267,7 +22267,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[GET_WithTag_EmptyResult]=[
         "code" : {
           "coding" : [ {
             "code" : "42",
-            "display" : "CONTINUING CARE NOT RELATED TO INPATIENTADMISSION - CONTINUING CARE NOT RELATEDTO THE CONDITION OR DIAGNOSIS FOR WHICHTHE BENEFICIARY RECEIVED INPATIENTHOSPITAL SERVICES. (EFF. 10/01)",
+            "display" : "CONTINUING CARE NOT RELATED TO INPATIENT ADMISSION - CONTINUING CARE NOT RELATED TO THE CONDITION OR DIAGNOSIS FOR WHICH THE BENEFICIARY RECEIVED INPATIENT HOSPITAL SERVICES. (EFF. 10/01)",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
           } ]
         },
@@ -23418,7 +23418,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[POST_WithTag_EmptyResult]=
         "code" : {
           "coding" : [ {
             "code" : "42",
-            "display" : "CONTINUING CARE NOT RELATED TO INPATIENTADMISSION - CONTINUING CARE NOT RELATEDTO THE CONDITION OR DIAGNOSIS FOR WHICHTHE BENEFICIARY RECEIVED INPATIENTHOSPITAL SERVICES. (EFF. 10/01)",
+            "display" : "CONTINUING CARE NOT RELATED TO INPATIENT ADMISSION - CONTINUING CARE NOT RELATED TO THE CONDITION OR DIAGNOSIS FOR WHICH THE BENEFICIARY RECEIVED INPATIENT HOSPITAL SERVICES. (EFF. 10/01)",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
           } ]
         },
@@ -30763,7 +30763,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
         "code" : {
           "coding" : [ {
             "code" : "42",
-            "display" : "CONTINUING CARE NOT RELATED TO INPATIENTADMISSION - CONTINUING CARE NOT RELATEDTO THE CONDITION OR DIAGNOSIS FOR WHICHTHE BENEFICIARY RECEIVED INPATIENTHOSPITAL SERVICES. (EFF. 10/01)",
+            "display" : "CONTINUING CARE NOT RELATED TO INPATIENT ADMISSION - CONTINUING CARE NOT RELATED TO THE CONDITION OR DIAGNOSIS FOR WHICH THE BENEFICIARY RECEIVED INPATIENT HOSPITAL SERVICES. (EFF. 10/01)",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
           } ]
         },
@@ -33732,7 +33732,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
         "code" : {
           "coding" : [ {
             "code" : "42",
-            "display" : "CONTINUING CARE NOT RELATED TO INPATIENTADMISSION - CONTINUING CARE NOT RELATEDTO THE CONDITION OR DIAGNOSIS FOR WHICHTHE BENEFICIARY RECEIVED INPATIENTHOSPITAL SERVICES. (EFF. 10/01)",
+            "display" : "CONTINUING CARE NOT RELATED TO INPATIENT ADMISSION - CONTINUING CARE NOT RELATED TO THE CONDITION OR DIAGNOSIS FOR WHICH THE BENEFICIARY RECEIVED INPATIENT HOSPITAL SERVICES. (EFF. 10/01)",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
           } ]
         },
@@ -36701,7 +36701,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
         "code" : {
           "coding" : [ {
             "code" : "42",
-            "display" : "CONTINUING CARE NOT RELATED TO INPATIENTADMISSION - CONTINUING CARE NOT RELATEDTO THE CONDITION OR DIAGNOSIS FOR WHICHTHE BENEFICIARY RECEIVED INPATIENTHOSPITAL SERVICES. (EFF. 10/01)",
+            "display" : "CONTINUING CARE NOT RELATED TO INPATIENT ADMISSION - CONTINUING CARE NOT RELATED TO THE CONDITION OR DIAGNOSIS FOR WHICH THE BENEFICIARY RECEIVED INPATIENT HOSPITAL SERVICES. (EFF. 10/01)",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
           } ]
         },
@@ -38541,7 +38541,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
         "code" : {
           "coding" : [ {
             "code" : "42",
-            "display" : "CONTINUING CARE NOT RELATED TO INPATIENTADMISSION - CONTINUING CARE NOT RELATEDTO THE CONDITION OR DIAGNOSIS FOR WHICHTHE BENEFICIARY RECEIVED INPATIENTHOSPITAL SERVICES. (EFF. 10/01)",
+            "display" : "CONTINUING CARE NOT RELATED TO INPATIENT ADMISSION - CONTINUING CARE NOT RELATED TO THE CONDITION OR DIAGNOSIS FOR WHICH THE BENEFICIARY RECEIVED INPATIENT HOSPITAL SERVICES. (EFF. 10/01)",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
           } ]
         },
@@ -41510,7 +41510,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
         "code" : {
           "coding" : [ {
             "code" : "42",
-            "display" : "CONTINUING CARE NOT RELATED TO INPATIENTADMISSION - CONTINUING CARE NOT RELATEDTO THE CONDITION OR DIAGNOSIS FOR WHICHTHE BENEFICIARY RECEIVED INPATIENTHOSPITAL SERVICES. (EFF. 10/01)",
+            "display" : "CONTINUING CARE NOT RELATED TO INPATIENT ADMISSION - CONTINUING CARE NOT RELATED TO THE CONDITION OR DIAGNOSIS FOR WHICH THE BENEFICIARY RECEIVED INPATIENT HOSPITAL SERVICES. (EFF. 10/01)",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
           } ]
         },
@@ -44479,7 +44479,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
         "code" : {
           "coding" : [ {
             "code" : "42",
-            "display" : "CONTINUING CARE NOT RELATED TO INPATIENTADMISSION - CONTINUING CARE NOT RELATEDTO THE CONDITION OR DIAGNOSIS FOR WHICHTHE BENEFICIARY RECEIVED INPATIENTHOSPITAL SERVICES. (EFF. 10/01)",
+            "display" : "CONTINUING CARE NOT RELATED TO INPATIENT ADMISSION - CONTINUING CARE NOT RELATED TO THE CONDITION OR DIAGNOSIS FOR WHICH THE BENEFICIARY RECEIVED INPATIENT HOSPITAL SERVICES. (EFF. 10/01)",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
           } ]
         },
@@ -46319,7 +46319,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
         "code" : {
           "coding" : [ {
             "code" : "42",
-            "display" : "CONTINUING CARE NOT RELATED TO INPATIENTADMISSION - CONTINUING CARE NOT RELATEDTO THE CONDITION OR DIAGNOSIS FOR WHICHTHE BENEFICIARY RECEIVED INPATIENTHOSPITAL SERVICES. (EFF. 10/01)",
+            "display" : "CONTINUING CARE NOT RELATED TO INPATIENT ADMISSION - CONTINUING CARE NOT RELATED TO THE CONDITION OR DIAGNOSIS FOR WHICH THE BENEFICIARY RECEIVED INPATIENT HOSPITAL SERVICES. (EFF. 10/01)",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
           } ]
         },
@@ -49288,7 +49288,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
         "code" : {
           "coding" : [ {
             "code" : "42",
-            "display" : "CONTINUING CARE NOT RELATED TO INPATIENTADMISSION - CONTINUING CARE NOT RELATEDTO THE CONDITION OR DIAGNOSIS FOR WHICHTHE BENEFICIARY RECEIVED INPATIENTHOSPITAL SERVICES. (EFF. 10/01)",
+            "display" : "CONTINUING CARE NOT RELATED TO INPATIENT ADMISSION - CONTINUING CARE NOT RELATED TO THE CONDITION OR DIAGNOSIS FOR WHICH THE BENEFICIARY RECEIVED INPATIENT HOSPITAL SERVICES. (EFF. 10/01)",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
           } ]
         },
@@ -52257,7 +52257,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
         "code" : {
           "coding" : [ {
             "code" : "42",
-            "display" : "CONTINUING CARE NOT RELATED TO INPATIENTADMISSION - CONTINUING CARE NOT RELATEDTO THE CONDITION OR DIAGNOSIS FOR WHICHTHE BENEFICIARY RECEIVED INPATIENTHOSPITAL SERVICES. (EFF. 10/01)",
+            "display" : "CONTINUING CARE NOT RELATED TO INPATIENT ADMISSION - CONTINUING CARE NOT RELATED TO THE CONDITION OR DIAGNOSIS FOR WHICH THE BENEFICIARY RECEIVED INPATIENT HOSPITAL SERVICES. (EFF. 10/01)",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
           } ]
         },
