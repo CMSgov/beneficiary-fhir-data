@@ -8,7 +8,7 @@ from hamilton.execution import executors  # type: ignore
 
 import pipeline_nodes
 from model import LoadMode, LoadType
-from settings import LOAD_TYPE
+from settings import LOAD_TYPE, MAX_TASKS
 
 telemetry.disable_telemetry()
 
@@ -50,16 +50,15 @@ def run(load_mode: str) -> None:
     # This will allow memory usage to remain constant over time.
     max_tasks_per_child = 1 if load_mode == LoadMode.PRODUCTION else None
 
-    max_tasks = 32
     hamilton_driver = (
         driver.Builder()
         .enable_dynamic_execution(allow_experimental_mode=True)
         .with_modules(pipeline_nodes)
         .with_local_executor(
-            MultiProcessingExecutor(max_tasks=max_tasks, max_tasks_per_child=max_tasks_per_child)
+            MultiProcessingExecutor(max_tasks=MAX_TASKS, max_tasks_per_child=max_tasks_per_child)
         )
         .with_remote_executor(
-            MultiProcessingExecutor(max_tasks=max_tasks, max_tasks_per_child=max_tasks_per_child)
+            MultiProcessingExecutor(max_tasks=MAX_TASKS, max_tasks_per_child=max_tasks_per_child)
         )
         .build()
     )
