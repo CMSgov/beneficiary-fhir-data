@@ -606,7 +606,7 @@
                 <!-- The Hibernate JPA Model Generator, which will produce MetaModel
                     classes for JPA entities. This happens automagically via javac's
                     annotation processor. -->
-                <groupId>org.hibernate</groupId>
+                <groupId>org.hibernate.orgm</groupId>
                 <artifactId>hibernate-jpamodelgen</artifactId>
                 <version>${hibernate.version}</version>
             </dependency>
