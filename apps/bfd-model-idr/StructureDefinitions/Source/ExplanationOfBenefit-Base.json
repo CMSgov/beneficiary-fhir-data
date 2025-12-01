@@ -655,7 +655,7 @@
             {
                 "id": "ExplanationOfBenefit-Base.CLM_BLG_PRVDR_ZIP5_CD",
                 "path": "ExplanationOfBenefit-Base.CLM_BLG_PRVDR_ZIP5_CD",
-                "label": "Billing Provider State Code",
+                "label": "Billing Provider Zip Code",
                 "min": 0,
                 "max": "1",
                 "type": [
