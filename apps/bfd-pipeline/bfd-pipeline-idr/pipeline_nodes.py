@@ -128,10 +128,10 @@ def collect_stage2(
 
 
 def stage3_inputs(
-    load_type: str,
+    load_type: LoadType,
     collect_stage2: bool,  # noqa: ARG001
 ) -> Parallelizable[NodePartitionedModelInput]:
-    if load_type == "incremental":
+    if load_type == LoadType.INCREMENTAL:
         yield from _gen_partitioned_node_inputs([IdrClaim])
     else:
         yield from _gen_partitioned_node_inputs([])
@@ -163,7 +163,7 @@ def do_stage4(
     load_mode: LoadMode,
     start_time: datetime,
 ) -> bool:
-    if load_type == "incremental":
+    if load_type == LoadType.INCREMENTAL:
         return extract_and_load(
             cls=IdrBeneficiary,
             partition=None,
