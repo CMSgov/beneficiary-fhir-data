@@ -107,6 +107,8 @@ def save_output_files(
         (clm_line_rx,        "out/SYNTHETIC_CLM_LINE_RX.csv",     NORMALIZE,    NO_CAST_LINE_NUM),
         (prvdr_hstry,        "out/SYNTHETIC_PRVDR_HSTRY.csv",     NORMALIZE,    NO_CAST_LINE_NUM),
     ]
+    for data, path, normalize_flag, line_flag in exports:
+        export_df(data, path, normalize_flag, line_flag)
 
     # these are mostly static
     shutil.copy("sample-data/SYNTHETIC_CLM_ANSI_SGNTR.csv", "out/SYNTHETIC_CLM_ANSI_SGNTR.csv")
@@ -283,6 +285,18 @@ def export_df(data, out_path, normalize=NORMALIZE, line_num_cast=NO_CAST_LINE_NU
     if line_num_cast == CAST_LINE_NUM and "CLM_LINE_NUM" in df.columns:
         df["CLM_LINE_NUM"] = df["CLM_LINE_NUM"].astype("str")
     df.to_csv(out_path, index=False)
+
+def clean_int_columns(df, cols):
+    for col in cols:
+        if col in df.columns:
+            df[col] = (
+                pd.to_numeric(df[col], errors="coerce")
+                .round(0)
+                .astype("Int64")
+                .astype("string")
+                .fillna("")
+            )
+    return df
 
 
 

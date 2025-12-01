@@ -768,6 +768,6 @@ public class SystemUrls {
   /** CLIA. */
   public static final String CLIA = "http://terminology.hl7.org/NamingSystem/CLIA";
 
-    /** TAX OID. */
-    public static final String TAX_OID = "urn:oid:2.16.840.1.113883.4.4";
+  /** TAX OID. */
+  public static final String TAX_OID = "urn:oid:2.16.840.1.113883.4.4";
 }
