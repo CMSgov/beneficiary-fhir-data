@@ -15,6 +15,8 @@ IDR_WAREHOUSE = getenv("IDR_WAREHOUSE", "")
 IDR_DATABASE = getenv("IDR_DATABASE", "")
 IDR_SCHEMA = getenv("IDR_SCHEMA", "")
 
+# These need to be lazy-loaded since we override them in the tests
+
 
 def bfd_db_port() -> str:
     return getenv("BFD_DB_PORT", "5432")
