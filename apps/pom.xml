@@ -76,7 +76,7 @@
         <maven.jacoco.skip>true</maven.jacoco.skip>
         <sonar.coverageReportPaths>coverage.xml</sonar.coverageReportPaths>
         <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
-        <sonar.junit.reportPaths>**/TEST-*.xml</sonar.junit.reportPaths>
+		<sonar.junit.reportPaths>target/surefire-reports,target/failsafe-reports</sonar.junit.reportPaths>
         <sonar.issue.ignore.multicriteria>e1,e2,e3,e4,e5</sonar.issue.ignore.multicriteria>
         <!-- rule for "JUnit5 test classes and methods should have default package visibility" -->
         <sonar.issue.ignore.multicriteria.e1.ruleKey>java:S5786</sonar.issue.ignore.multicriteria.e1.ruleKey>
