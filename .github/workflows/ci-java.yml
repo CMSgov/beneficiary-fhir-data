@@ -63,10 +63,6 @@ jobs:
         with:
           java-version: '25'
           distribution: 'corretto'
-      - name: Node installation ISO sonarqube template analysis
-        uses: actions/setup-node@v6
-        with:
-          node-version: "22"
       - name: 'Run maven ${{ matrix.mvn_commmand }}'
         run: mvn com.spotify.fmt:fmt-maven-plugin:check
         working-directory: ./apps
@@ -81,6 +77,10 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ inputs.branch }}
+      - name: Node installation ISO sonarqube template analysis
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
       - name: 'Setup JDK'
         uses: actions/setup-java@v5
         with:
