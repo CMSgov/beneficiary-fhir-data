@@ -22,6 +22,11 @@ public class ClaimLineRx {
   @OneToOne(mappedBy = "claimLineRx")
   private ClaimItem claimLine;
 
+  /**
+   * If this is a compound code, then we mark it as such in productOrService, per C4BB.
+   *
+   * @param productOrService productOrService
+   */
   public void resolveCompoundCode(CodeableConcept productOrService) {
     claimRxSupportingInfo
         .getCompoundCode()
