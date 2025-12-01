@@ -38,16 +38,11 @@ public class ClaimLine {
   @Column(name = "clm_line_from_dt")
   private Optional<LocalDate> fromDate;
 
-  @Embedded
-  private ClaimLineHcpcsCode hcpcsCode;
-  @Embedded
-  private ClaimLineNdc ndc;
-  @Embedded
-  private ClaimLineServiceUnitQuantity serviceUnitQuantity;
-  @Embedded
-  private ClaimLineHcpcsModifierCode hcpcsModifierCode;
-  @Embedded
-  private ClaimLineAdjudicationCharge adjudicationCharge;
+  @Embedded private ClaimLineHcpcsCode hcpcsCode;
+  @Embedded private ClaimLineNdc ndc;
+  @Embedded private ClaimLineServiceUnitQuantity serviceUnitQuantity;
+  @Embedded private ClaimLineHcpcsModifierCode hcpcsModifierCode;
+  @Embedded private ClaimLineAdjudicationCharge adjudicationCharge;
 
   Optional<ExplanationOfBenefit.ItemComponent> toFhir(ClaimItem claimItem) {
     if (claimLineNumber.isEmpty()) {
@@ -79,9 +74,10 @@ public class ClaimLine {
 
     revenueCenterCode.ifPresent(
         c -> {
-          var revenueCoding = c.toFhir(
-              claimLineInstitutional.flatMap(
-                  ClaimLineInstitutional::getDeductibleCoinsuranceCode));
+          var revenueCoding =
+              c.toFhir(
+                  claimLineInstitutional.flatMap(
+                      ClaimLineInstitutional::getDeductibleCoinsuranceCode));
           line.setRevenue(revenueCoding);
         });
 
@@ -92,12 +88,13 @@ public class ClaimLine {
 
     fromDate.map(d -> line.setServiced(new DateType(DateUtil.toDate(d))));
 
-    var adjudicationLines = Stream.of(
-        claimLineInstitutional.flatMap(
-            c -> c.getAnsiSignature().map(ClaimAnsiSignature::toFhir)),
-        Optional.of(adjudicationCharge.toFhir()),
-        claimLineInstitutional.map(c -> c.getAdjudicationCharge().toFhir()),
-        claimLineRx.map(c -> c.getAdjudicationCharge().toFhir()));
+    var adjudicationLines =
+        Stream.of(
+            claimLineInstitutional.flatMap(
+                c -> c.getAnsiSignature().map(ClaimAnsiSignature::toFhir)),
+            Optional.of(adjudicationCharge.toFhir()),
+            claimLineInstitutional.map(c -> c.getAdjudicationCharge().toFhir()),
+            claimLineRx.map(c -> c.getAdjudicationCharge().toFhir()));
     adjudicationLines
         .flatMap(Optional::stream)
         .flatMap(Collection::stream)
@@ -113,8 +110,7 @@ public class ClaimLine {
   }
 
   /**
-   * Finds the line numbers of a claim procedure that matches the diagnosis code
-   * from this claim
+   * Finds the line numbers of a claim procedure that matches the diagnosis code from this claim
    * line.
    *
    * @param claim The parent claim entity containing all claim procedures.
@@ -128,7 +124,8 @@ public class ClaimLine {
 
     return claim.getClaimItems().stream()
         .filter(
-            item -> item.getClaimProcedure().getDiagnosisCode().orElse("").equals(currentDiagnosisCode))
+            item ->
+                item.getClaimProcedure().getDiagnosisCode().orElse("").equals(currentDiagnosisCode))
         .map(item -> item.getClaimItemId().getBfdRowId())
         .map(PositiveIntType::new)
         .collect(Collectors.toList());
