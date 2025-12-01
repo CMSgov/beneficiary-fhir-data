@@ -2,6 +2,7 @@ import logging
 import os
 from collections.abc import Iterator
 from datetime import UTC, date, datetime
+import pprint
 
 import psycopg
 
@@ -238,50 +239,60 @@ class BatchLoader:
             """,  # type: ignore
             {"timestamp": timestamp},
         )
-        # ---- NEW: Update beneficiary-level last-updated rollup ----
-        # If this model contains a bene_sk column (the chosen beneficiary key),
-        # insert/update idr.beneficiary_updates for every bene_sk in this batch.
-        # Use DISTINCT to avoid extra work for many rows per beneficiary.
+        print("----TABLE----")
+        print(self.table)
+        print("----COLS----")
+        print(self.insert_cols)
+        print("----META----")
+        print(self.meta_keys)
 
-        if "bene_sk" in self.insert_cols:
-            self._upsert_beneficiary_updates_from_temp(cur, timestamp)
+        tracked_columns = [
+            ("bene_sk", "idr.beneficiary_updates"),
+            ("clm_uniq_id", "idr.claim_updates"),
+        ]
 
-    def _upsert_beneficiary_updates_from_temp(self, cur: psycopg.Cursor, timestamp: datetime) -> None:
+        # Find the first column that exists in self.insert_cols
+        match_pair = next(
+            ((col, table) for col, table in tracked_columns if col in self.insert_cols),
+            None
+        )
+
+        print("----MATCH PAIR----", match_pair)
+
+        if match_pair:
+            col, target_table = match_pair
+            print("----COL----", col)
+            print("----TARGET TABLE----", target_table)
+
+            self._upsert_updates_from_temp(cur,target_table,col)
+
+    def _upsert_updates_from_temp(
+            self,
+            cur: psycopg.Cursor,
+            target_table: str,
+            key_col: str,
+    ) -> None:
         """
-        Upsert idr.beneficiary_updates per bene_sk using the max source update timestamp
-        present in the temp table (e.g., idr_updt_ts, idr_updt_ts_line, etc).
-        Falls back to the loader 'timestamp' when no source timestamp exists.
+        Upsert the last updated timestamp from temp table into the target updates table.
+        Falls back to the loader timestamp when no source timestamp exists.
         """
-        # Replace 'idr_updt_ts' with the appropriate update timestamp column(s) present in this temp table.
-        # If the temp table contains multiple update-timestamp columns (e.g. idr_updt_ts_line, idr_updt_ts_prod),
-        # use GREATEST(...) across them in the SELECT below.
-        # Example shown here assumes a single 'idr_updt_ts' column exists in the temp table:
-        print("----COLUMNS----",self.insert_cols)
-        if "idr_updt_ts" in self.insert_cols:
+        print("----COLUMNS----", self.insert_cols)
+        # Find the first column that contains "idr_updt_ts"
+        match = next((col for col in self.insert_cols if "idr_updt_ts" in col), None)
+        print("----MATCH----", match)
+
+        if match:
             cur.execute(
                 f"""
-                INSERT INTO idr.beneficiary_updates(bene_sk, last_updated)
-                SELECT bene_sk, MAX(idr_updt_ts)
+                INSERT INTO {target_table}({key_col}, last_updated)
+                SELECT {key_col}, MAX({match})
                 FROM {self.temp_table}
-                WHERE bene_sk IS NOT NULL AND idr_updt_ts IS NOT NULL
-                GROUP BY bene_sk
-                ON CONFLICT (bene_sk) DO UPDATE
-                SET last_updated = GREATEST(idr.beneficiary_updates.last_updated, EXCLUDED.last_updated)
-                """,  # type: ignore
+                WHERE {key_col} IS NOT NULL AND {match} IS NOT NULL
+                GROUP BY {key_col}
+                ON CONFLICT ({key_col}) DO UPDATE
+                SET last_updated = GREATEST({target_table}.last_updated, EXCLUDED.last_updated)
+                """,
                 {},
-            )
-        else:
-            # fallback to per-batch timestamp
-            cur.execute(
-                f"""
-                INSERT INTO idr.beneficiary_updates(bene_sk, last_updated)
-                SELECT DISTINCT bene_sk, %(timestamp)s
-                FROM {self.temp_table}
-                WHERE bene_sk IS NOT NULL
-                ON CONFLICT (bene_sk) DO UPDATE
-                SET last_updated = EXCLUDED.last_updated
-                """,  # type: ignore
-                {"timestamp": timestamp},
             )
 
     def _copy_data(self, cur: psycopg.Cursor, results: list[T]) -> None:
