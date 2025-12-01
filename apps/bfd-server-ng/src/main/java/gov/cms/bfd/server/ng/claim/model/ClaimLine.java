@@ -11,7 +11,6 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -120,6 +119,6 @@ public class ClaimLine {
                 item.getClaimProcedure().getDiagnosisCode().orElse("").equals(currentDiagnosisCode))
         .map(item -> item.getClaimItemId().getBfdRowId())
         .map(PositiveIntType::new)
-        .collect(Collectors.toList());
+        .toList();
   }
 }

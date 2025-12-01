@@ -13,6 +13,18 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
   },
   "careTeam" : [ {
     "provider" : {
+      "reference" : "#careteam-provider-line-1"
+    },
+    "role" : {
+      "coding" : [ {
+        "code" : "rendering",
+        "display" : "Rendering provider",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
+      } ]
+    },
+    "sequence" : 1
+  }, {
+    "provider" : {
       "reference" : "#careteam-provider-1"
     },
     "role" : {
@@ -69,12 +81,34 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
     "name" : "Centers for Medicare and Medicaid Services",
     "resourceType" : "Organization"
   }, {
+    "id" : "careteam-provider-line-1",
+    "identifier" : [ {
+      "system" : "http://hl7.org/fhir/sid/us-npi",
+      "type" : {
+        "coding" : [ {
+          "code" : "NPI",
+          "display" : "National provider identifier",
+          "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+        } ]
+      },
+      "value" : "1558719914"
+    } ],
+    "meta" : {
+      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
+    },
+    "name" : [ {
+      "family" : "Rogers",
+      "given" : [ "Gromit" ]
+    } ],
+    "resourceType" : "Practitioner"
+  }, {
     "id" : "careteam-provider-1",
     "identifier" : [ {
       "system" : "http://hl7.org/fhir/sid/us-npi",
       "type" : {
         "coding" : [ {
           "code" : "NPI",
+          "display" : "National provider identifier",
           "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
         } ]
       },
@@ -84,7 +118,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
       "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
     },
     "name" : [ {
-      "family" : "Stark"
+      "family" : "Stark",
+      "given" : [ "Tony" ]
     } ],
     "resourceType" : "Practitioner"
   }, {
@@ -94,6 +129,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
       "type" : {
         "coding" : [ {
           "code" : "NPI",
+          "display" : "National provider identifier",
           "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
         } ]
       },
@@ -103,7 +139,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
       "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
     },
     "name" : [ {
-      "family" : "Garcia"
+      "family" : "Garcia",
+      "given" : [ "Indiana", "Victor" ]
     } ],
     "resourceType" : "Practitioner"
   }, {
@@ -113,6 +150,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
       "type" : {
         "coding" : [ {
           "code" : "NPI",
+          "display" : "National provider identifier",
           "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
         } ]
       },
@@ -129,6 +167,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
       "type" : {
         "coding" : [ {
           "code" : "NPI",
+          "display" : "National provider identifier",
           "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
         } ]
       },
@@ -138,7 +177,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
       "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
     },
     "name" : [ {
-      "family" : "Rogers"
+      "family" : "Rogers",
+      "given" : [ "Gromit" ]
     } ],
     "resourceType" : "Practitioner"
   } ],
@@ -499,34 +539,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
     },
     "sequence" : 10,
     "timingDate" : "2021-10-03"
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_QLFY_STAY_FROM_DT",
-        "display" : "Qualified Stay From Date",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "sequence" : 11,
-    "timingDate" : "9999-12-31"
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_QLFY_STAY_THRU_DT",
-        "display" : "Qualified Stay Thru Date",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "sequence" : 12,
-    "timingDate" : "9999-12-31"
   } ],
   "total" : [ {
     "amount" : {
@@ -620,6 +632,18 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
   },
   "careTeam" : [ {
     "provider" : {
+      "reference" : "#careteam-provider-line-1"
+    },
+    "role" : {
+      "coding" : [ {
+        "code" : "rendering",
+        "display" : "Rendering provider",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
+      } ]
+    },
+    "sequence" : 1
+  }, {
+    "provider" : {
       "reference" : "#careteam-provider-1"
     },
     "role" : {
@@ -676,12 +700,34 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
     "name" : "Centers for Medicare and Medicaid Services",
     "resourceType" : "Organization"
   }, {
+    "id" : "careteam-provider-line-1",
+    "identifier" : [ {
+      "system" : "http://hl7.org/fhir/sid/us-npi",
+      "type" : {
+        "coding" : [ {
+          "code" : "NPI",
+          "display" : "National provider identifier",
+          "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+        } ]
+      },
+      "value" : "1558719914"
+    } ],
+    "meta" : {
+      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
+    },
+    "name" : [ {
+      "family" : "Rogers",
+      "given" : [ "Gromit" ]
+    } ],
+    "resourceType" : "Practitioner"
+  }, {
     "id" : "careteam-provider-1",
     "identifier" : [ {
       "system" : "http://hl7.org/fhir/sid/us-npi",
       "type" : {
         "coding" : [ {
           "code" : "NPI",
+          "display" : "National provider identifier",
           "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
         } ]
       },
@@ -691,7 +737,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
       "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
     },
     "name" : [ {
-      "family" : "Stark"
+      "family" : "Stark",
+      "given" : [ "Tony" ]
     } ],
     "resourceType" : "Practitioner"
   }, {
@@ -701,6 +748,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
       "type" : {
         "coding" : [ {
           "code" : "NPI",
+          "display" : "National provider identifier",
           "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
         } ]
       },
@@ -710,7 +758,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
       "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
     },
     "name" : [ {
-      "family" : "Garcia"
+      "family" : "Garcia",
+      "given" : [ "Indiana", "Victor" ]
     } ],
     "resourceType" : "Practitioner"
   }, {
@@ -720,6 +769,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
       "type" : {
         "coding" : [ {
           "code" : "NPI",
+          "display" : "National provider identifier",
           "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
         } ]
       },
@@ -736,6 +786,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
       "type" : {
         "coding" : [ {
           "code" : "NPI",
+          "display" : "National provider identifier",
           "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
         } ]
       },
@@ -745,7 +796,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
       "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
     },
     "name" : [ {
-      "family" : "Rogers"
+      "family" : "Rogers",
+      "given" : [ "Gromit" ]
     } ],
     "resourceType" : "Practitioner"
   } ],
@@ -1106,34 +1158,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
     },
     "sequence" : 10,
     "timingDate" : "2021-10-03"
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_QLFY_STAY_FROM_DT",
-        "display" : "Qualified Stay From Date",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "sequence" : 11,
-    "timingDate" : "9999-12-31"
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_QLFY_STAY_THRU_DT",
-        "display" : "Qualified Stay Thru Date",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "sequence" : 12,
-    "timingDate" : "9999-12-31"
   } ],
   "total" : [ {
     "amount" : {
@@ -1348,6 +1372,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
       "type" : {
         "coding" : [ {
           "code" : "NPI",
+          "display" : "National provider identifier",
           "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
         } ]
       },
@@ -1366,7 +1391,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
       "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
     },
     "name" : [ {
-      "family" : "MOCK-FAMILY-NAME"
+      "family" : "Rogers",
+      "given" : [ "Gromit" ]
     } ],
     "resourceType" : "Practitioner"
   }, {
@@ -1413,8 +1439,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
     },
     "name" : [ {
       "family" : "Potter",
-      "given" : [ "Harry" ],
-      "use" : "official"
+      "given" : [ "Harry" ]
     } ],
     "resourceType" : "Practitioner"
   }, {
@@ -1424,6 +1449,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
       "type" : {
         "coding" : [ {
           "code" : "NPI",
+          "display" : "National provider identifier",
           "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
         } ]
       },
@@ -1433,7 +1459,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
       "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
     },
     "name" : [ {
-      "family" : "Garcia"
+      "family" : "Garcia",
+      "given" : [ "Indiana", "Victor" ]
     } ],
     "resourceType" : "Practitioner"
   }, {
@@ -1443,6 +1470,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
       "type" : {
         "coding" : [ {
           "code" : "NPI",
+          "display" : "National provider identifier",
           "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
         } ]
       },
@@ -1452,7 +1480,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
       "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
     },
     "name" : [ {
-      "family" : "Granger"
+      "family" : "Granger",
+      "given" : [ "Hermion" ]
     } ],
     "resourceType" : "Practitioner"
   }, {
@@ -1462,6 +1491,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
       "type" : {
         "coding" : [ {
           "code" : "NPI",
+          "display" : "National provider identifier",
           "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
         } ]
       },
@@ -1471,7 +1501,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
       "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
     },
     "name" : [ {
-      "family" : "Addams"
+      "family" : "Addams",
+      "given" : [ "Wednesday", "Wednesday" ]
     } ],
     "resourceType" : "Practitioner"
   }, {
@@ -1481,6 +1512,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
       "type" : {
         "coding" : [ {
           "code" : "NPI",
+          "display" : "National provider identifier",
           "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
         } ]
       },
@@ -1490,7 +1522,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
       "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
     },
     "name" : [ {
-      "family" : "Rogers"
+      "family" : "Rogers",
+      "given" : [ "Gromit" ]
     } ],
     "resourceType" : "Practitioner"
   }, {
@@ -1500,6 +1533,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
       "type" : {
         "coding" : [ {
           "code" : "NPI",
+          "display" : "National provider identifier",
           "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
         } ]
       },
@@ -1509,7 +1543,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
       "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
     },
     "name" : [ {
-      "family" : "Stark"
+      "family" : "Stark",
+      "given" : [ "Tony" ]
     } ],
     "resourceType" : "Practitioner"
   } ],
@@ -1897,7 +1932,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
     "code" : {
       "coding" : [ {
         "code" : "V",
-        "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA])."
+        "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA]).",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
       } ]
     },
     "sequence" : 5
@@ -1992,34 +2028,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
     },
     "sequence" : 12,
     "timingDate" : "2021-10-03"
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_QLFY_STAY_FROM_DT",
-        "display" : "Qualified Stay From Date",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "sequence" : 13,
-    "timingDate" : "9999-12-31"
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_QLFY_STAY_THRU_DT",
-        "display" : "Qualified Stay Thru Date",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "sequence" : 14,
-    "timingDate" : "9999-12-31"
   } ],
   "total" : [ {
     "amount" : {
@@ -2447,6 +2455,18 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
   },
   "careTeam" : [ {
     "provider" : {
+      "reference" : "#careteam-provider-line-1"
+    },
+    "role" : {
+      "coding" : [ {
+        "code" : "rendering",
+        "display" : "Rendering provider",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
+      } ]
+    },
+    "sequence" : 1
+  }, {
+    "provider" : {
       "reference" : "#careteam-provider-1"
     },
     "role" : {
@@ -2503,12 +2523,34 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
     "name" : "Centers for Medicare and Medicaid Services",
     "resourceType" : "Organization"
   }, {
+    "id" : "careteam-provider-line-1",
+    "identifier" : [ {
+      "system" : "http://hl7.org/fhir/sid/us-npi",
+      "type" : {
+        "coding" : [ {
+          "code" : "NPI",
+          "display" : "National provider identifier",
+          "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+        } ]
+      },
+      "value" : "1558719914"
+    } ],
+    "meta" : {
+      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
+    },
+    "name" : [ {
+      "family" : "Rogers",
+      "given" : [ "Gromit" ]
+    } ],
+    "resourceType" : "Practitioner"
+  }, {
     "id" : "careteam-provider-1",
     "identifier" : [ {
       "system" : "http://hl7.org/fhir/sid/us-npi",
       "type" : {
         "coding" : [ {
           "code" : "NPI",
+          "display" : "National provider identifier",
           "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
         } ]
       },
@@ -2518,7 +2560,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
       "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
     },
     "name" : [ {
-      "family" : "Stark"
+      "family" : "Stark",
+      "given" : [ "Tony" ]
     } ],
     "resourceType" : "Practitioner"
   }, {
@@ -2528,6 +2571,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
       "type" : {
         "coding" : [ {
           "code" : "NPI",
+          "display" : "National provider identifier",
           "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
         } ]
       },
@@ -2537,7 +2581,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
       "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
     },
     "name" : [ {
-      "family" : "Garcia"
+      "family" : "Garcia",
+      "given" : [ "Indiana", "Victor" ]
     } ],
     "resourceType" : "Practitioner"
   }, {
@@ -2547,6 +2592,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
       "type" : {
         "coding" : [ {
           "code" : "NPI",
+          "display" : "National provider identifier",
           "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
         } ]
       },
@@ -2563,6 +2609,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
       "type" : {
         "coding" : [ {
           "code" : "NPI",
+          "display" : "National provider identifier",
           "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
         } ]
       },
@@ -2572,7 +2619,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
       "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
     },
     "name" : [ {
-      "family" : "Rogers"
+      "family" : "Rogers",
+      "given" : [ "Gromit" ]
     } ],
     "resourceType" : "Practitioner"
   } ],
@@ -3070,7 +3118,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
     "code" : {
       "coding" : [ {
         "code" : "V",
-        "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA])."
+        "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA]).",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
       } ]
     },
     "sequence" : 4
@@ -3168,34 +3217,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
   }, {
     "category" : {
       "coding" : [ {
-        "code" : "CLM_QLFY_STAY_FROM_DT",
-        "display" : "Qualified Stay From Date",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "sequence" : 12,
-    "timingDate" : "9999-12-31"
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_QLFY_STAY_THRU_DT",
-        "display" : "Qualified Stay Thru Date",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "sequence" : 13,
-    "timingDate" : "9999-12-31"
-  }, {
-    "category" : {
-      "coding" : [ {
         "code" : "pointoforigin",
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
       } ]
@@ -3210,7 +3231,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
       } ]
     },
-    "sequence" : 14
+    "sequence" : 12
   }, {
     "category" : {
       "coding" : [ {
@@ -3228,7 +3249,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
       } ]
     },
-    "sequence" : 15
+    "sequence" : 13
   }, {
     "category" : {
       "coding" : [ {
@@ -3245,7 +3266,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
       } ]
     },
-    "sequence" : 16
+    "sequence" : 14
   }, {
     "category" : {
       "coding" : [ {
@@ -3265,7 +3286,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
       } ]
     },
-    "sequence" : 17
+    "sequence" : 15
   }, {
     "category" : {
       "coding" : [ {
@@ -3279,7 +3300,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
         "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
       } ]
     },
-    "sequence" : 18
+    "sequence" : 16
   }, {
     "category" : {
       "coding" : [ {
@@ -3299,7 +3320,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
       } ]
     },
-    "sequence" : 19
+    "sequence" : 17
   }, {
     "category" : {
       "coding" : [ {
@@ -3319,7 +3340,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
       } ]
     },
-    "sequence" : 20
+    "sequence" : 18
   } ],
   "total" : [ {
     "amount" : {
@@ -3731,6 +3752,18 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
   },
   "careTeam" : [ {
     "provider" : {
+      "reference" : "#careteam-provider-line-1"
+    },
+    "role" : {
+      "coding" : [ {
+        "code" : "rendering",
+        "display" : "Rendering provider",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
+      } ]
+    },
+    "sequence" : 1
+  }, {
+    "provider" : {
       "reference" : "#careteam-provider-1"
     },
     "role" : {
@@ -3787,12 +3820,34 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
     "name" : "Centers for Medicare and Medicaid Services",
     "resourceType" : "Organization"
   }, {
+    "id" : "careteam-provider-line-1",
+    "identifier" : [ {
+      "system" : "http://hl7.org/fhir/sid/us-npi",
+      "type" : {
+        "coding" : [ {
+          "code" : "NPI",
+          "display" : "National provider identifier",
+          "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+        } ]
+      },
+      "value" : "1558719914"
+    } ],
+    "meta" : {
+      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
+    },
+    "name" : [ {
+      "family" : "Rogers",
+      "given" : [ "Gromit" ]
+    } ],
+    "resourceType" : "Practitioner"
+  }, {
     "id" : "careteam-provider-1",
     "identifier" : [ {
       "system" : "http://hl7.org/fhir/sid/us-npi",
       "type" : {
         "coding" : [ {
           "code" : "NPI",
+          "display" : "National provider identifier",
           "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
         } ]
       },
@@ -3802,7 +3857,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
       "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
     },
     "name" : [ {
-      "family" : "Stark"
+      "family" : "Stark",
+      "given" : [ "Tony" ]
     } ],
     "resourceType" : "Practitioner"
   }, {
@@ -3812,6 +3868,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
       "type" : {
         "coding" : [ {
           "code" : "NPI",
+          "display" : "National provider identifier",
           "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
         } ]
       },
@@ -3821,7 +3878,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
       "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
     },
     "name" : [ {
-      "family" : "Garcia"
+      "family" : "Garcia",
+      "given" : [ "Indiana", "Victor" ]
     } ],
     "resourceType" : "Practitioner"
   }, {
@@ -3831,6 +3889,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
       "type" : {
         "coding" : [ {
           "code" : "NPI",
+          "display" : "National provider identifier",
           "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
         } ]
       },
@@ -3847,6 +3906,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
       "type" : {
         "coding" : [ {
           "code" : "NPI",
+          "display" : "National provider identifier",
           "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
         } ]
       },
@@ -3856,7 +3916,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
       "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
     },
     "name" : [ {
-      "family" : "Rogers"
+      "family" : "Rogers",
+      "given" : [ "Gromit" ]
     } ],
     "resourceType" : "Practitioner"
   } ],
@@ -4354,7 +4415,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
     "code" : {
       "coding" : [ {
         "code" : "V",
-        "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA])."
+        "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA]).",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
       } ]
     },
     "sequence" : 4
@@ -4452,34 +4514,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
   }, {
     "category" : {
       "coding" : [ {
-        "code" : "CLM_QLFY_STAY_FROM_DT",
-        "display" : "Qualified Stay From Date",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "sequence" : 12,
-    "timingDate" : "9999-12-31"
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_QLFY_STAY_THRU_DT",
-        "display" : "Qualified Stay Thru Date",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "sequence" : 13,
-    "timingDate" : "9999-12-31"
-  }, {
-    "category" : {
-      "coding" : [ {
         "code" : "pointoforigin",
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
       } ]
@@ -4494,7 +4528,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
       } ]
     },
-    "sequence" : 14
+    "sequence" : 12
   }, {
     "category" : {
       "coding" : [ {
@@ -4512,7 +4546,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
       } ]
     },
-    "sequence" : 15
+    "sequence" : 13
   }, {
     "category" : {
       "coding" : [ {
@@ -4529,7 +4563,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
       } ]
     },
-    "sequence" : 16
+    "sequence" : 14
   }, {
     "category" : {
       "coding" : [ {
@@ -4549,7 +4583,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
       } ]
     },
-    "sequence" : 17
+    "sequence" : 15
   }, {
     "category" : {
       "coding" : [ {
@@ -4563,7 +4597,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
         "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
       } ]
     },
-    "sequence" : 18
+    "sequence" : 16
   }, {
     "category" : {
       "coding" : [ {
@@ -4583,7 +4617,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
       } ]
     },
-    "sequence" : 19
+    "sequence" : 17
   }, {
     "category" : {
       "coding" : [ {
@@ -4603,7 +4637,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
       } ]
     },
-    "sequence" : 20
+    "sequence" : 18
   } ],
   "total" : [ {
     "amount" : {

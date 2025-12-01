@@ -60,7 +60,7 @@ conceptmap "profile_metadata" {
   s:2 == t:"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Pharmacy|2.1.0"
   s:3 == t:"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Pharmacy|2.1.0"
   s:4 == t:"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Pharmacy|2.1.0"
-  s:10 == t:"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Outpatient-Institutional|2.1.0"
+  s:10 == t:"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional|2.1.0"
   s:20 == t:"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional|2.1.0"
   s:30 == t:"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional|2.1.0"
   s:40 == t:"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Outpatient-Institutional|2.1.0"
@@ -81,7 +81,7 @@ conceptmap "subtype" {
   prefix s = "https://hl7.org/fhir/string"
   prefix t = "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBInstitutionalClaimSubType"
 
-  s:10 == t:"outpatient"
+  s:10 == t:"inpatient"
   s:20 == t:"inpatient"
   s:30 == t:"inpatient"
   s:40 == t:"outpatient"

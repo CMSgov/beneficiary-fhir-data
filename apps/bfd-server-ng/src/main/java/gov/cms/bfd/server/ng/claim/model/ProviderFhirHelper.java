@@ -52,12 +52,10 @@ class ProviderFhirHelper {
    *
    * @param id the logical ID to assign to the Practitioner
    * @param npiNumber the practitioner's NPI identifier value
-   * @param firstName optional first/given name
-   * @param lastName optional last/family name
+   * @param name provider name
    * @return a fully populated FHIR {@link Practitioner} instance
    */
-  public static Practitioner createPractitioner(
-      String id, String npiNumber, Optional<String> firstName, Optional<String> lastName) {
+  public static Practitioner createPractitioner(String id, String npiNumber, HumanName name) {
     var practitioner = new Practitioner();
     practitioner.setId(id);
     practitioner.setMeta(
@@ -76,10 +74,7 @@ class ProviderFhirHelper {
                             .setSystem(SystemUrls.HL7_IDENTIFIER)
                             .setCode("NPI")
                             .setDisplay("National provider identifier"))));
-    var name = new HumanName();
-    firstName.ifPresent(name::addGiven);
-    lastName.ifPresent(name::setFamily);
-    name.setUse(HumanName.NameUse.OFFICIAL);
+
     practitioner.setName(List.of(name));
     return practitioner;
   }

@@ -54,6 +54,8 @@ NO_CAST_LINE_NUM = "no_cast_line_num"
 INT_TO_STRING_COLS = [
     "CLM_TYPE_CD",
     "CLM_NUM_SK",
+    "CLM_TYPE_CD",
+    "CLM_NUM_SK",
     "PRVDR_PRSCRBNG_PRVDR_NPI_NUM",
     "PRVDR_RFRG_PRVDR_NPI_NUM",
     "PRVDR_BLG_PRVDR_NPI_NUM",
@@ -63,6 +65,7 @@ INT_TO_STRING_COLS = [
     "CLM_RNDRG_PRVDR_NPI_NUM",
     "CLM_BLG_PRVDR_NPI_NUM",
     "CLM_RFRG_PRVDR_PIN_NUM",
+    "PRVDR_ATNDG_PRVDR_NPI_NUM",
 ]
 
 generator = GeneratorUtil()
@@ -83,32 +86,37 @@ def save_output_files(
     clm_prfnl,
     clm_line_prfnl,
     clm_line_rx,
+    clm_rlt_cond_sgntr_mbr,
     prvdr_hstry,
 ):
     Path("out").mkdir(exist_ok=True)
 
-    df = pd.json_normalize(clm)
-    df["CLM_BLOOD_PT_FRNSH_QTY"] = df["CLM_BLOOD_PT_FRNSH_QTY"].astype("Int64")
-    df["CLM_BLG_PRVDR_OSCAR_NUM"] = df["CLM_BLG_PRVDR_OSCAR_NUM"].astype("string")
+    clm = pd.json_normalize(clm)
+    clm["CLM_BLOOD_PT_FRNSH_QTY"] = clm["CLM_BLOOD_PT_FRNSH_QTY"].astype("Int64")
+    clm["CLM_BLG_PRVDR_OSCAR_NUM"] = clm["CLM_BLG_PRVDR_OSCAR_NUM"].astype("string")
 
     exports = [
-        (df,                 "out/SYNTHETIC_CLM.csv",             NO_NORMALIZE, NO_CAST_LINE_NUM),
-        (clm_line,           "out/SYNTHETIC_CLM_LINE.csv",        NORMALIZE,    CAST_LINE_NUM),
-        (clm_val,            "out/SYNTHETIC_CLM_VAL.csv",         NORMALIZE,    NO_CAST_LINE_NUM),
-        (clm_dt_sgntr,       "out/SYNTHETIC_CLM_DT_SGNTR.csv",    NORMALIZE,    NO_CAST_LINE_NUM),
-        (clm_prod,           "out/SYNTHETIC_CLM_PROD.csv",        NORMALIZE,    NO_CAST_LINE_NUM),
-        (clm_instnl,         "out/SYNTHETIC_CLM_INSTNL.csv",      NORMALIZE,    NO_CAST_LINE_NUM),
-        (clm_line_instnl,    "out/SYNTHETIC_CLM_LINE_INSTNL.csv", NO_NORMALIZE, CAST_LINE_NUM),
-        (clm_dcmtn,          "out/SYNTHETIC_CLM_DCMTN.csv",       NORMALIZE,    NO_CAST_LINE_NUM),
-        (clm_lctn_hstry,     "out/SYNTHETIC_CLM_LCTN_HSTRY.csv",  NORMALIZE,    NO_CAST_LINE_NUM),
-        (clm_fiss,           "out/SYNTHETIC_CLM_FISS.csv",        NORMALIZE,    NO_CAST_LINE_NUM),
-        (clm_prfnl,          "out/SYNTHETIC_CLM_PRFNL.csv",       NORMALIZE,    NO_CAST_LINE_NUM),
-        (clm_line_prfnl,     "out/SYNTHETIC_CLM_LINE_PRFNL.csv",  NORMALIZE,    CAST_LINE_NUM),
-        (clm_line_rx,        "out/SYNTHETIC_CLM_LINE_RX.csv",     NORMALIZE,    NO_CAST_LINE_NUM),
-        (prvdr_hstry,        "out/SYNTHETIC_PRVDR_HSTRY.csv",     NORMALIZE,    NO_CAST_LINE_NUM),
+        (clm, "out/SYNTHETIC_CLM.csv", NO_NORMALIZE, NO_CAST_LINE_NUM),
+        (clm_line, "out/SYNTHETIC_CLM_LINE.csv", NORMALIZE, CAST_LINE_NUM),
+        (clm_val, "out/SYNTHETIC_CLM_VAL.csv", NORMALIZE, NO_CAST_LINE_NUM),
+        (clm_dt_sgntr, "out/SYNTHETIC_CLM_DT_SGNTR.csv", NORMALIZE, NO_CAST_LINE_NUM),
+        (clm_prod, "out/SYNTHETIC_CLM_PROD.csv", NORMALIZE, NO_CAST_LINE_NUM),
+        (clm_instnl, "out/SYNTHETIC_CLM_INSTNL.csv", NORMALIZE, NO_CAST_LINE_NUM),
+        (clm_line_instnl, "out/SYNTHETIC_CLM_LINE_INSTNL.csv", NO_NORMALIZE, CAST_LINE_NUM),
+        (clm_dcmtn, "out/SYNTHETIC_CLM_DCMTN.csv", NORMALIZE, NO_CAST_LINE_NUM),
+        (clm_lctn_hstry, "out/SYNTHETIC_CLM_LCTN_HSTRY.csv", NORMALIZE, NO_CAST_LINE_NUM),
+        (clm_fiss, "out/SYNTHETIC_CLM_FISS.csv", NORMALIZE, NO_CAST_LINE_NUM),
+        (clm_prfnl, "out/SYNTHETIC_CLM_PRFNL.csv", NORMALIZE, NO_CAST_LINE_NUM),
+        (clm_line_prfnl, "out/SYNTHETIC_CLM_LINE_PRFNL.csv", NORMALIZE, CAST_LINE_NUM),
+        (clm_line_rx, "out/SYNTHETIC_CLM_LINE_RX.csv", NORMALIZE, NO_CAST_LINE_NUM),
+        (clm_rlt_cond_sgntr_mbr, "out/SYNTHETIC_PRVDR_HSTRY.csv", NORMALIZE, NO_CAST_LINE_NUM),
+        (prvdr_hstry, "out/SYNTHETIC_PRVDR_HSTRY.csv", NORMALIZE, NO_CAST_LINE_NUM),
     ]
     for data, path, normalize_flag, line_flag in exports:
         export_df(data, path, normalize_flag, line_flag)
+
+    for [df, out_file, normalize, line_num_cast] in exports:
+        export_df(df, out_file, normalize, line_num_cast)
 
     # these are mostly static
     shutil.copy("sample-data/SYNTHETIC_CLM_ANSI_SGNTR.csv", "out/SYNTHETIC_CLM_ANSI_SGNTR.csv")
@@ -278,6 +286,19 @@ def get_icd_10_dgns_codes() -> list[str]:
         k=1,
     )[0]
 
+
+def clean_int_columns(df, cols):
+    for col in cols:
+        if col in df:
+            df[col] = (
+                df[col]
+                .astype("Int64")  # Handle floats like 1234.0 → 1234
+                .astype("string")  # Pandas nullable string type
+                .fillna("")  # Replace <NA> with empty string
+            )
+    return df
+
+
 def export_df(data, out_path, normalize=NORMALIZE, line_num_cast=NO_CAST_LINE_NUM):
     df = pd.json_normalize(data) if normalize == NORMALIZE else pd.DataFrame(data)
     df = clean_int_columns(df, INT_TO_STRING_COLS)
@@ -297,7 +318,6 @@ def clean_int_columns(df, cols):
                 .fillna("")
             )
     return df
-
 
 
 def get_icd_10_prcdr_codes() -> list[str]:
@@ -322,6 +342,10 @@ def get_drg_dgns_codes() -> list[int]:
         weights=(1, 99),
         k=1,
     )[0]
+
+
+target_sequence_numbers = [0, 1, 2, 3, 4, 5, 6, 7]
+target_rlt_cond_codes = ["21", "39", "C5", "42", "64", "W2", "D9", "09", "R1"]
 
 
 available_given_names = [
@@ -544,6 +568,10 @@ def gen_procedure_icd10pcs():
 now = date.today()
 
 
+def gen_claim_id():
+    return "-" + "".join(random.choices(string.digits, k=13))
+
+
 def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
     claim = {
         "CLM": {},
@@ -554,12 +582,25 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
         "CLM_PRFNL": {},
         "CLM_LINE_PRFNL": [],
         "CLM_LINE_RX": [],
+        "CLM_RLT_COND_SGNTR_MBR": {},
+        "RLT_COND_MBR_RECORD": {},
         "PRVDR_HSTRY": [],
     }
     clm_dt_sgntr = {}
     clm_dt_sgntr["CLM_DT_SGNTR_SK"] = "".join(random.choices(string.digits, k=12))
     claim["CLM"]["CLM_DT_SGNTR_SK"] = clm_dt_sgntr["CLM_DT_SGNTR_SK"]
-    claim["CLM"]["CLM_UNIQ_ID"] = "-" + "".join(random.choices(string.digits, k=13))
+    claim["CLM"]["CLM_UNIQ_ID"] = gen_claim_id()
+
+    clm_rlt_cond_sgntr_sk = random.randint(2, 999999999999)
+    claim["CLM"]["CLM_RLT_COND_SGNTR_SK"] = clm_rlt_cond_sgntr_sk
+
+    rlt_cond_mbr_record = {}
+    rlt_cond_mbr_record["CLM_RLT_COND_SGNTR_SK"] = clm_rlt_cond_sgntr_sk
+    rlt_cond_mbr_record["CLM_RLT_COND_SGNTR_SQNC_NUM"] = random.choice(target_sequence_numbers)
+    rlt_cond_mbr_record["CLM_RLT_COND_CD"] = random.choice(target_rlt_cond_codes)
+
+    claim["CLM_RLT_COND_SGNTR_MBR"] = rlt_cond_mbr_record
+
     # clm_type_cd = 60
     clm_type_cd = random.choice([1, 2, 3, 4, 10, 20, 30, 40, 50, 60, 71, 72, 81, 82])
     claim["CLM"]["CLM_TYPE_CD"] = clm_type_cd
@@ -718,6 +759,7 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
 
     add_meta_timestamps(claim["CLM"], claim["CLM"], max_date)
     add_meta_timestamps(clm_dt_sgntr, claim["CLM"], max_date)
+    add_meta_timestamps(rlt_cond_mbr_record, claim["CLM"], max_date)
 
     clm_finl_actn_ind = "N"
     if clm_type_cd in (1, 2, 3, 4, 10, 20, 30, 40, 50, 60, 61, 62, 63, 71, 72, 81, 82):
@@ -756,9 +798,13 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
     if (clm_type_cd < 65 and clm_type_cd >= 10) or clm_type_cd in fiss_clm_type_cds:
         claim["CLM"]["PRVDR_BLG_PRVDR_NPI_NUM"] = random.choice(type_2_npis)
         claim["CLM"]["CLM_ATNDG_PRVDR_NPI_NUM"] = random.choice(type_1_npis)
+        claim["CLM"]["PRVDR_ATNDG_PRVDR_NPI_NUM"] = claim["CLM"]["CLM_ATNDG_PRVDR_NPI_NUM"]
         claim["CLM"]["CLM_OPRTG_PRVDR_NPI_NUM"] = random.choice(type_1_npis)
+        claim["CLM"]["PRVDR_OPRTG_PRVDR_NPI_NUM"] = claim["CLM"]["CLM_OPRTG_PRVDR_NPI_NUM"]
         claim["CLM"]["CLM_OTHR_PRVDR_NPI_NUM"] = random.choice(type_1_npis)
+        claim["CLM"]["PRVDR_OTHR_PRVDR_NPI_NUM"] = claim["CLM"]["CLM_OTHR_PRVDR_NPI_NUM"]
         claim["CLM"]["CLM_RNDRG_PRVDR_NPI_NUM"] = random.choice(type_1_npis)
+        claim["CLM"]["PRVDR_RNDRG_PRVDR_NPI_NUM"] = claim["CLM"]["CLM_RNDRG_PRVDR_NPI_NUM"]
         claim["CLM"]["CLM_BLG_PRVDR_OSCAR_NUM"] = random.choice(avail_oscar_codes_institutional)
         claim["CLM"]["CLM_MDCR_COINSRNC_AMT"] = round(random.uniform(0, 25), 2)
         claim["CLM"]["CLM_BLG_PRVDR_ZIP5_CD"] = random.choice(["75205", "77550", "77005"])
@@ -771,6 +817,7 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
         claim["CLM"]["CLM_RLT_COND_SGNTR_SK"] = "0"
         if random.choice([0, 1]):
             claim["CLM"]["CLM_BLG_PRVDR_NPI_NUM"] = random.choice(type_2_npis)
+            claim["CLM"]["PRVDR_BLG_PRVDR_NPI_NUM"] = claim["CLM"]["CLM_BLG_PRVDR_NPI_NUM"]
 
     # generate claim header financial elements here
     claim["CLM"]["CLM_SBMT_CHRG_AMT"] = round(random.uniform(1, 1000000), 2)
@@ -1091,7 +1138,8 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
         if clm_type_cd >= 71 and clm_type_cd <= 72:
             claim_line["CLM_RNDRG_PRVDR_TAX_NUM"] = random.choice(["1928347912", "912834729"])
             claim_line["CLM_RNDRG_PRVDR_PIN_NUM"] = random.choice(["29364819", "19238747"])
-            claim_line["CLM_RNDRG_PRVDR_NPI_NUM"] = random.choice(type_1_npis)
+            claim_line["PRVDR_RNDRNG_PRVDR_NPI_NUM"] = random.choice(type_1_npis)
+            claim_line["CLM_RNDRG_PRVDR_NPI_NUM"] = claim_line["PRVDR_RNDRNG_PRVDR_NPI_NUM"]
             if random.choice([0, 10]) == 7:
                 claim_line["CLM_LINE_ANSTHSA_UNIT_CNT"] = random.uniform(0, 10)
             if random.choice([0, 15]) == 7:
@@ -1103,7 +1151,8 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
                 generator.code_systems["CLM_SUPLR_TYPE_CD"]
             )
             claim_line_prfnl["CLM_LINE_PRFNL_DME_PRICE_AMT"] = round(random.uniform(0, 10000), 2)
-            claim_line["CLM_RNDRG_PRVDR_NPI_NUM"] = random.choice(type_1_npis)
+            claim_line["PRVDR_RNDRNG_PRVDR_NPI_NUM"] = random.choice(type_1_npis)
+            claim_line["CLM_RNDRG_PRVDR_NPI_NUM"] = claim_line["PRVDR_RNDRNG_PRVDR_NPI_NUM"]
 
         add_meta_timestamps(claim_line_prfnl, claim["CLM"], max_date)
 
@@ -1209,7 +1258,7 @@ def gen_pac_version_of_claim(claim, max_date):
     # via config files in the future.
 
     pac_claim = copy.deepcopy(claim)
-    pac_claim["CLM"]["CLM_UNIQ_ID"] = "".join(random.choices(string.digits, k=13))
+    pac_claim["CLM"]["CLM_UNIQ_ID"] = gen_claim_id()
     pac_clm_type_cd = int(pac_claim["CLM"]["CLM_TYPE_CD"])
 
     if pac_clm_type_cd in (60, 61, 62, 63, 64):
@@ -1416,6 +1465,17 @@ def gen_pac_version_of_claim(claim, max_date):
     if "CLM_DCMTN" in pac_claim:
         pac_claim.pop("CLM_DCMTN")
 
+    pac_clm_rlt_cond_sgntr_sk = random.randint(2, 999999999999)
+    pac_claim["CLM"]["CLM_RLT_COND_SGNTR_SK"] = pac_clm_rlt_cond_sgntr_sk
+
+    pac_rlt_cond_mbr_record = {}
+    pac_rlt_cond_mbr_record["CLM_RLT_COND_SGNTR_SK"] = pac_clm_rlt_cond_sgntr_sk
+    pac_rlt_cond_mbr_record["CLM_RLT_COND_SGNTR_SQNC_NUM"] = random.choice(target_sequence_numbers)
+    pac_rlt_cond_mbr_record["CLM_RLT_COND_CD"] = random.choice(target_rlt_cond_codes)
+
+    add_meta_timestamps(pac_rlt_cond_mbr_record, pac_claim["CLM"], max_date)
+    pac_claim["CLM_RLT_COND_SGNTR_MBR"] = pac_rlt_cond_mbr_record
+
     return pac_claim
 
 
@@ -1490,6 +1550,7 @@ def main():
     CLM_PRFNL = []
     CLM_LINE_PRFNL = []
     CLM_LINE_RX = []
+    CLM_RLT_COND_SGNTR_MBR = []
     PRVDR_HSTRY = []
     pt_complete = 0
     min_claims = args.min_claims
@@ -1515,6 +1576,7 @@ def main():
             CLM_VAL.extend(claim["CLM_VAL"])
             CLM_DT_SGNTR.append(claim["CLM_DT_SGNTR"])
             CLM_PROD.extend(claim["CLM_PROD"])
+            CLM_RLT_COND_SGNTR_MBR.append(claim["CLM_RLT_COND_SGNTR_MBR"])
 
             if "CLM_INSTNL" in claim:
                 CLM_INSTNL.append(claim["CLM_INSTNL"])
@@ -1540,6 +1602,7 @@ def main():
                 CLM_VAL.extend(pac_claim["CLM_VAL"])
                 CLM_DT_SGNTR.append(pac_claim["CLM_DT_SGNTR"])
                 CLM_PROD.extend(pac_claim["CLM_PROD"])
+                CLM_RLT_COND_SGNTR_MBR.append(pac_claim["CLM_RLT_COND_SGNTR_MBR"])
 
                 if pac_claim.get("CLM_INSTNL"):
                     CLM_INSTNL.append(pac_claim["CLM_INSTNL"])
@@ -1562,6 +1625,7 @@ def main():
         CLM_PRFNL,
         CLM_LINE_PRFNL,
         CLM_LINE_RX,
+        CLM_RLT_COND_SGNTR_MBR,
         PRVDR_HSTRY,
     )
 

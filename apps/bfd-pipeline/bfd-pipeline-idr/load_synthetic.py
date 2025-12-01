@@ -33,6 +33,7 @@ tables = [
     {"csv_name": "SYNTHETIC_CLM_FISS.csv", "table": "v2_mdcr_clm_fiss"},
     {"csv_name": "SYNTHETIC_CLM_LINE_RX.csv", "table": "v2_mdcr_clm_line_rx"},
     {"csv_name": "SYNTHETIC_CLM_LCTN_HSTRY.csv", "table": "v2_mdcr_clm_lctn_hstry"},
+    {"csv_name": "SYNTHETIC_CLM_RLT_COND_SGNTR_MBR.csv", "table": "v2_mdcr_clm_rlt_cond_sgntr_mbr"},
     {"csv_name": "SYNTHETIC_PRVDR_HSTRY.csv", "table": "v2_mdcr_prvdr_hstry"},
 ]
 
@@ -75,12 +76,13 @@ def _load_file(
                 for col in typing.cast(typing.Iterable[str], reader.fieldnames)
                 if col.lower().strip() in db_columns
             ]
-            cols_str = ",".join(cols)
-            with cur.copy(
-                f"COPY {full_table} ({cols_str}) FROM STDIN"  # type: ignore
-            ) as copy:
-                for row in reader:
-                    copy.write_row([row[c] if row[c] else None for c in cols])
+            if cols:
+                cols_str = ",".join(cols)
+                with cur.copy(
+                    f"COPY {full_table} ({cols_str}) FROM STDIN"  # type: ignore
+                ) as copy:
+                    for row in reader:
+                        copy.write_row([row[c] if row[c] else None for c in cols])
 
 
 if __name__ == "__main__":
