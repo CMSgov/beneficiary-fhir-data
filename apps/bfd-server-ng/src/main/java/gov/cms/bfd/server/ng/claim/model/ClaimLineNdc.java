@@ -19,7 +19,7 @@ class ClaimLineNdc {
   @Column(name = "clm_line_ndc_qty_qlfyr_cd")
   private Optional<IdrUnit> ndcQuantityQualifierCode;
 
-  Optional<ExplanationOfBenefit.DetailComponent> toDetail() {
+  Optional<ExplanationOfBenefit.DetailComponent> toFhirDetail() {
     if (ndcCode.isEmpty()) {
       return Optional.empty();
     }
