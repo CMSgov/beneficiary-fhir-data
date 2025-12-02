@@ -13,6 +13,8 @@ CREATE TABLE idr.contract_pbp_contact (
     cntrct_plan_cntct_city_name VARCHAR(30) NOT NULL,
     cntrct_plan_cntct_state_cd VARCHAR(2) NOT NULL,
     cntrct_plan_cntct_zip_cd VARCHAR(9) NOT NULL,
-    bfd_created_ts TIMESTAMPTZ NOT NULL,
-    bfd_updated_ts TIMESTAMPTZ NOT NULL
+    bfd_created_ts TIMESTAMPTZ NOT NULL
 );
+
+ALTER TABLE contract_pbp_number
+DROP COLUMN bfd_updated_ts;
