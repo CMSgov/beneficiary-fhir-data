@@ -121,7 +121,7 @@
          -->
         <sonar.issue.ignore.multicriteria.e6.ruleKey>java:S1192</sonar.issue.ignore.multicriteria.e6.ruleKey>
         <sonar.issue.ignore.multicriteria.e6.resourceKey>
-            **/*.java
+            **/bfd-server-ng/src/main/java/gov/cms/bfd/server/ng/claim/model/ClaimRelatedConditionCode.java
         </sonar.issue.ignore.multicriteria.e6.resourceKey>
         <sonar.version>5.3.0.6276</sonar.version>
         <jacoco.version>0.8.14</jacoco.version>
