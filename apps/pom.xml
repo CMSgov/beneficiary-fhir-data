@@ -77,7 +77,7 @@
         <sonar.coverageReportPaths>coverage.xml</sonar.coverageReportPaths>
         <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
         <sonar.junit.reportPaths>**/TEST-*.xml</sonar.junit.reportPaths>
-        <sonar.issue.ignore.multicriteria>e1,e2,e3,e4,e5</sonar.issue.ignore.multicriteria>
+        <sonar.issue.ignore.multicriteria>e1,e2,e3,e4,e5,e6</sonar.issue.ignore.multicriteria>
         <!-- rule for "JUnit5 test classes and methods should have default package visibility" -->
         <sonar.issue.ignore.multicriteria.e1.ruleKey>java:S5786</sonar.issue.ignore.multicriteria.e1.ruleKey>
         <sonar.issue.ignore.multicriteria.e1.resourceKey>
@@ -116,6 +116,13 @@
         <sonar.issue.ignore.multicriteria.e5.resourceKey>
             **/*.java
         </sonar.issue.ignore.multicriteria.e5.resourceKey>
+        <!-- Rule for "Define a constant instead of duplicating this literal "
+            Suppressing this for auto-generated enums that have duplicate literals.
+         -->
+        <sonar.issue.ignore.multicriteria.e6.ruleKey>java:S1192</sonar.issue.ignore.multicriteria.e6.ruleKey>
+        <sonar.issue.ignore.multicriteria.e6.resourceKey>
+            **/*.java
+        </sonar.issue.ignore.multicriteria.e6.resourceKey>
         <sonar.version>5.3.0.6276</sonar.version>
         <jacoco.version>0.8.14</jacoco.version>
         <micrometer.version>1.12.1</micrometer.version>

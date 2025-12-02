@@ -16,6 +16,7 @@ import org.hl7.fhir.r4.model.Coding;
 @Getter
 @AllArgsConstructor
 @SuppressWarnings("java:S115")
+@SuppressWarnings("java:S1192")
 public enum ClaimRelatedConditionCode {
 
   /** 01 - MILITARY SERVICE RELATED. */
