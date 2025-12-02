@@ -7,6 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import gov.cms.bfd.server.ng.beneficiary.BeneficiaryRepository;
 import gov.cms.bfd.server.ng.claim.ClaimRepository;
+import gov.cms.bfd.server.ng.coverage.CoverageRepository;
+import gov.cms.bfd.server.ng.input.CoverageCompositeId;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.loadprogress.LoadProgressRepository;
 import gov.cms.bfd.server.ng.model.ProfileType;
@@ -29,12 +31,13 @@ import org.springframework.beans.factory.annotation.Autowired;
  * reflected in the API responses, without mutating the test data.
  */
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-public class BfdUpdatedTimestampIT extends IntegrationTestBase {
+class BfdUpdatedTimestampIT extends IntegrationTestBase {
 
   private static final String EOB_META_LAST_UPDATED_MSG = "EOB meta.lastUpdated should be set";
   private final LoadProgressRepository loadProgressRepository;
   private final ClaimRepository claimRepository;
   private final BeneficiaryRepository beneficiaryRepository;
+  private final CoverageRepository coverageRepository;
 
   @Test
   void eobMetaLastUpdatedMatchesClaimBfdUpdatedTs() {
@@ -85,7 +88,8 @@ public class BfdUpdatedTimestampIT extends IntegrationTestBase {
   @Test
   void coverageMetaLastUpdatedMatchesBeneficiaryBfdUpdatedTs() {
     var beneTimestamp =
-        getBeneficiaryBfdUpdatedTs(BENE_ID_PART_A_ONLY)
+        getCoverageBfdUpdatedTs(
+                BENE_ID_PART_A_ONLY, CoverageCompositeId.parse("part-a-" + BENE_ID_PART_A_ONLY))
             .orElseThrow(
                 () ->
                     new AssertionError("Beneficiary should have a bfd_updated_ts in the database"));
@@ -177,6 +181,17 @@ public class BfdUpdatedTimestampIT extends IntegrationTestBase {
         bene -> {
           var patient = bene.toFhir(ProfileType.C4BB);
           return patient.getMeta().getLastUpdated().toInstant().atZone(ZoneId.of("UTC"));
+        });
+  }
+
+  private java.util.Optional<ZonedDateTime> getCoverageBfdUpdatedTs(
+      String beneSk, CoverageCompositeId coverageCompositeId) {
+    var beneId = Long.parseLong(beneSk);
+    var beneOpt = coverageRepository.searchBeneficiaryWithCoverage(beneId, new DateTimeRange());
+    return beneOpt.map(
+        bene -> {
+          var coverage = bene.toFhirCoverageIfPresent(coverageCompositeId).get();
+          return coverage.getMeta().getLastUpdated().toInstant().atZone(ZoneId.of("UTC"));
         });
   }
 

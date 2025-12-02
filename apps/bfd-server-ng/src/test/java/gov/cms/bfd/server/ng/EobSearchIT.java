@@ -93,7 +93,7 @@ class EobSearchIT extends IntegrationTestBase {
                     .identifier(BENE_ID_ALL_PARTS_WITH_XREF))
             .usingStyle(searchStyle)
             .execute();
-    assertEquals(4, eobBundle.getEntry().size());
+    assertEquals(5, eobBundle.getEntry().size());
     expectFhir().scenario(searchStyle.name()).toMatchSnapshot(eobBundle);
   }
 
@@ -149,7 +149,7 @@ class EobSearchIT extends IntegrationTestBase {
                     .afterOrEquals()
                     .day(DateUtil.toDate(lastUpdated)))
             .execute();
-    assertEquals(4, eobBundle.getEntry().size());
+    assertEquals(5, eobBundle.getEntry().size());
 
     eobBundle =
         searchBundle()
@@ -229,7 +229,7 @@ class EobSearchIT extends IntegrationTestBase {
             .execute();
 
     assertEquals(
-        2, eobBundle.getEntry().size(), "Should find EOBs with the specified adjudication status");
+        3, eobBundle.getEntry().size(), "Should find EOBs with the specified adjudication status");
 
     expectFhir().scenario(searchStyle.name() + "_WithTag_" + validTag).toMatchSnapshot(eobBundle);
   }
@@ -254,7 +254,7 @@ class EobSearchIT extends IntegrationTestBase {
             .execute();
 
     assertEquals(
-        2, eobBundle.getEntry().size(), "Should find EOBs with the specified adjudication status");
+        3, eobBundle.getEntry().size(), "Should find EOBs with the specified adjudication status");
 
     expectFhir()
         .scenario(searchStyle.name() + "_WithSystemTag_Adjudicated")
@@ -338,11 +338,10 @@ class EobSearchIT extends IntegrationTestBase {
             .usingStyle(searchStyle)
             .execute();
 
-    assertEquals(4, eobBundleWildcard.getEntry().size(), "Should find ALL EOBs for '*' type");
+    assertEquals(5, eobBundleWildcard.getEntry().size(), "Should find ALL EOBs for '*' type");
     expectFhir().scenario(searchStyle.name() + "_WithWildcard").toMatchSnapshot(eobBundleWildcard);
 
     String[] zeroResultClaimTypes = {
-      ClaimSubtype.CARRIER.getCode(),
       ClaimSubtype.DME.getCode(),
       ClaimSubtype.SNF.getCode(),
       ClaimSubtype.PDE.getCode(),
@@ -365,9 +364,6 @@ class EobSearchIT extends IntegrationTestBase {
           0,
           eobBundleZero.getEntry().size(),
           "Should find 0 EOBs for " + claimType + " claim type for this patient");
-      expectFhir()
-          .scenario(searchStyle.name() + "_WithClaimType_ZeroResults_" + claimType)
-          .toMatchSnapshot(eobBundleZero);
     }
   }
 

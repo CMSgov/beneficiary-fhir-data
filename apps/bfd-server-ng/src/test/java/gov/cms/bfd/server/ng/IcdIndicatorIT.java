@@ -11,7 +11,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.junit.jupiter.api.Test;
 
 // Integration test for ICD code formatting.
-public class IcdIndicatorIT extends IntegrationTestBase {
+class IcdIndicatorIT extends IntegrationTestBase {
   private static final String FORMATTED_ICD_9_CODE_25000 = "250.00";
   private static final String FORMATTED_ICD_9_CODE_E8889 = "E888.9";
   private static final String FORMATTED_ICD_9_CODE_V1005 = "V10.05";

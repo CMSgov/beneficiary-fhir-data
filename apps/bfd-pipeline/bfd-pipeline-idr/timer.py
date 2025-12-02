@@ -1,25 +1,24 @@
 import logging
-import sys
 import time
 
+from load_partition import LoadPartition
+from model import T
+
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-if not logger.handlers:
-    console_handler = logging.StreamHandler(sys.stdout)
-    formatter = logging.Formatter("[%(levelname)s] %(asctime)s %(message)s")
-    console_handler.setFormatter(formatter)
-    logger.addHandler(console_handler)
 
 
 class Timer:
-    def __init__(self, name: str) -> None:
+    def __init__(self, name: str, model: type[T], partition: LoadPartition) -> None:
         self.perf_start = 0.0
         self.name = name
+        self.model = model
+        self.partition = partition
 
     def start(self) -> None:
         self.perf_start = time.perf_counter()
 
-    def stop(self, table: type | str) -> None:
+    def stop(self) -> None:
         segment = time.perf_counter() - self.perf_start
-        table_name = table
-        logger.info("%s %s: %.6f seconds", table_name, self.name, segment)
+        logger.info(
+            "%s-%s %s: %.6f seconds", self.model.table(), self.partition.name, self.name, segment
+        )

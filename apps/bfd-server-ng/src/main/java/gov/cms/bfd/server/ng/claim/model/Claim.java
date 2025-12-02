@@ -1,8 +1,5 @@
 package gov.cms.bfd.server.ng.claim.model;
 
-import static gov.cms.bfd.server.ng.claim.model.ProviderHistory.NPI_TYPE.INDIVIDUAL;
-import static gov.cms.bfd.server.ng.claim.model.ProviderHistory.NPI_TYPE.ORGANIZATION;
-
 import gov.cms.bfd.server.ng.ClaimSecurityStatus;
 import gov.cms.bfd.server.ng.beneficiary.model.BeneficiarySimple;
 import gov.cms.bfd.server.ng.util.DateUtil;
@@ -52,12 +49,6 @@ public class Claim {
   @Column(name = "clm_efctv_dt")
   private LocalDate claimEffectiveDate;
 
-  @Column(name = "clm_nrln_ric_cd")
-  private Optional<ClaimNearLineRecordTypeCode> claimNearLineRecordTypeCode;
-
-  @Column(name = "clm_ric_cd")
-  private Optional<ClaimRecordTypeCode> claimRecordTypeCode;
-
   @Column(name = "clm_srvc_prvdr_gnrc_id_num")
   private String serviceProviderNpiNumber;
 
@@ -73,6 +64,7 @@ public class Claim {
   @Embedded private BenefitBalance benefitBalance;
   @Embedded private AdjudicationCharge adjudicationCharge;
   @Embedded private ClaimPaymentAmount claimPaymentAmount;
+  @Embedded private ClaimRecordType claimRecordType;
 
   @OneToOne
   @JoinColumn(name = "bene_sk")
@@ -91,6 +83,11 @@ public class Claim {
   @OneToOne
   @JoinColumn(name = "clm_uniq_id")
   private ClaimInstitutional claimInstitutional;
+
+  @Nullable
+  @OneToOne
+  @JoinColumn(name = "clm_uniq_id")
+  private ClaimProfessional claimProfessional;
 
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "clm_uniq_id")
@@ -123,7 +120,7 @@ public class Claim {
       insertable = false,
       updatable = false,
       referencedColumnName = "prvdr_npi_num")
-  private ProviderHistory providerHistory;
+  private ProviderHistory serviceProviderHistory;
 
   @Nullable
   @ManyToOne
@@ -149,6 +146,19 @@ public class Claim {
 
   private Optional<ProviderHistory> getOperatingProviderHistory() {
     return Optional.ofNullable(operatingProviderHistory);
+  }
+
+  @Nullable
+  @ManyToOne
+  @JoinColumn(
+      name = "prvdr_blg_prvdr_npi_num",
+      insertable = false,
+      updatable = false,
+      referencedColumnName = "prvdr_npi_num")
+  private ProviderHistory billingProviderHistory;
+
+  private Optional<ProviderHistory> getBillingProviderHistory() {
+    return Optional.ofNullable(billingProviderHistory);
   }
 
   @Nullable
@@ -190,8 +200,25 @@ public class Claim {
     return Optional.ofNullable(prescribingProviderHistory);
   }
 
+  @Nullable
+  @ManyToOne
+  @JoinColumn(
+      name = "prvdr_rfrg_prvdr_npi_num",
+      insertable = false,
+      updatable = false,
+      referencedColumnName = "prvdr_npi_num")
+  private ProviderHistory referringProviderHistory;
+
+  private Optional<ProviderHistory> getReferringProviderHistory() {
+    return Optional.ofNullable(referringProviderHistory);
+  }
+
   Optional<ClaimInstitutional> getClaimInstitutional() {
     return Optional.ofNullable(claimInstitutional);
+  }
+
+  Optional<ClaimProfessional> getClaimProfessional() {
+    return Optional.ofNullable(claimProfessional);
   }
 
   Optional<ClaimFiss> getClaimFiss() {
@@ -202,8 +229,8 @@ public class Claim {
     return Optional.ofNullable(contract);
   }
 
-  private Optional<ProviderHistory> getProviderHistory() {
-    return Optional.ofNullable(providerHistory);
+  private Optional<ProviderHistory> getServiceProviderHistory() {
+    return Optional.ofNullable(serviceProviderHistory);
   }
 
   /**
@@ -262,54 +289,47 @@ public class Claim {
     claimItems.forEach(
         item -> {
           item.getClaimLine().toFhir(item).ifPresent(eob::addItem);
+          item.getClaimLine()
+              .getClaimRenderingProvider()
+              .toFhirCareTeam(
+                  item.getClaimLine().getClaimLineNumber(), getRenderingProviderHistory())
+              .ifPresent(
+                  c -> {
+                    eob.addCareTeam(c.careTeam());
+                    eob.addContained(c.practitioner());
+                  });
           item.getClaimProcedure().toFhirProcedure().ifPresent(eob::addProcedure);
           item.getClaimProcedure()
-              .toFhirDiagnosis(item.getClaimItemId().getBfdRowId())
+              .toFhirDiagnosis(item.getClaimItemId().getBfdRowId(), claimTypeCode)
               .ifPresent(eob::addDiagnosis);
+          item.getClaimLineProfessional()
+              .flatMap(i -> i.toFhirObservation(item.getClaimItemId().getBfdRowId()))
+              .ifPresent(eob::addContained);
         });
-    billingProvider
-        .toFhir(claimTypeCode)
+
+    getBillingProviderHistory()
+        .flatMap(ph -> billingProvider.toFhir(claimTypeCode, ph))
         .ifPresent(
             p -> {
               eob.addContained(p);
               eob.setProvider(new Reference(p));
             });
-    var providerContext = getProviderHistory();
-    if (providerContext.isPresent()) {
-      var provider = providerContext.get();
-      var npiType = provider.getNpiType();
-      if (npiType == INDIVIDUAL) {
-        provider
-            .toPractitionerFhir(claimTypeCode, serviceProviderNpiNumber)
-            .ifPresent(
-                p -> {
-                  eob.addContained(p);
-                  eob.setProvider(new Reference(p));
-                });
-      } else if (npiType == ORGANIZATION) {
-        provider
-            .toOrganizationFhir(claimTypeCode, serviceProviderNpiNumber)
-            .ifPresent(
-                p -> {
-                  eob.addContained(p);
-                  eob.setProvider(new Reference(p));
-                });
-      }
-    }
+
+    getServiceProviderHistory()
+        .flatMap(p -> p.toFhirNpiTypePartD(claimTypeCode))
+        .ifPresent(
+            p -> {
+              eob.addContained(p);
+              eob.setProvider(new Reference(p));
+            });
 
     claimSourceId.toFhirOutcome().ifPresent(eob::setOutcome);
     claimTypeCode.toFhirOutcome().ifPresent(eob::setOutcome);
     getClaimFiss().flatMap(f -> f.toFhirOutcome(claimTypeCode)).ifPresent(eob::setOutcome);
 
     var supportingInfoFactory = new SupportingInfoFactory();
-    var recordTypeCodes =
-        Stream.concat(
-            claimRecordTypeCode.stream()
-                .map(recordTypeCode -> recordTypeCode.toFhir(supportingInfoFactory)),
-            claimNearLineRecordTypeCode.stream()
-                .map(
-                    nearLineRecordTypeCode ->
-                        nearLineRecordTypeCode.toFhir(supportingInfoFactory)));
+    var recordTypeCodes = claimRecordType.toFhir(supportingInfoFactory);
+
     var initialSupportingInfo =
         Stream.concat(
                 Stream.of(
@@ -356,7 +376,8 @@ public class Claim {
             getOperatingProviderHistory(),
             getOtherProviderHistory(),
             getRenderingProviderHistory(),
-            getPrescribingProviderHistory())
+            getPrescribingProviderHistory(),
+            getReferringProviderHistory())
         .forEach(
             c -> {
               eob.addCareTeam(c.careTeam());
@@ -370,12 +391,24 @@ public class Claim {
               benefitBalance.toFhir(i.getBenefitBalanceInstitutional(), getClaimValues()));
         });
 
+    var insurance = new ExplanationOfBenefit.InsuranceComponent();
+    insurance.setFocal(true);
+    claimRecordType.toFhirReference(claimTypeCode).ifPresent(insurance::setCoverage);
+
     claimTypeCode.toFhirInsurance().ifPresent(eob::addInsurance);
     claimTypeCode
         .toFhirPartDInsurance(contractNumber, contractPbpNumber)
         .ifPresent(eob::addInsurance);
-    eob.addTotal(adjudicationCharge.toFhir());
+    adjudicationCharge.toFhir().forEach(eob::addTotal);
     eob.setPayment(claimPaymentAmount.toFhir());
+
+    getClaimProfessional()
+        .ifPresent(
+            professional -> {
+              eob.getExtension().addAll(professional.toFhirExtension());
+              eob.addTotal(professional.toFhirTotal());
+              eob.addBenefitBalance(benefitBalance.toFhir());
+            });
 
     return sortedEob(eob);
   }

@@ -29,7 +29,6 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -43,9 +42,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * test database seeded by the integration test pipeline, and then asserts that requesting that
  * claim via the FHIR EOB endpoint returns no results (i.e. it was filtered).
  */
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class EobSamhsaFilterIT extends IntegrationTestBase {
-
   private final FhirContext context = FhirContext.forR4();
 
   private static final Map<String, List<SecurityLabel>> SECURITY_LABELS =
