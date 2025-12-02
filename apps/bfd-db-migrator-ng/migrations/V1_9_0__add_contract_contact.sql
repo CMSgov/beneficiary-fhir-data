@@ -1,5 +1,5 @@
 CREATE TABLE idr.contract_pbp_contact (
-    cntrct_pbp_sk BIGINT NOT NULL,
+    cntrct_pbp_sk BIGINT NOT NULL PRIMARY KEY,
     cntrct_plan_cntct_obslt_dt DATE NOT NULL,
     cntrct_plan_cntct_type_cd VARCHAR(3) NOT NULL,
     cntrct_plan_free_extnsn_num VARCHAR(7) NOT NULL,
@@ -14,9 +14,5 @@ CREATE TABLE idr.contract_pbp_contact (
     cntrct_plan_cntct_state_cd VARCHAR(2) NOT NULL,
     cntrct_plan_cntct_zip_cd VARCHAR(9) NOT NULL,
     bfd_created_ts TIMESTAMPTZ NOT NULL,
-    bfd_updated_ts TIMESTAMPTZ,
-    PRIMARY KEY(cntrct_pbp_sk, cntrct_pbp_bgn_dt)
+    bfd_updated_ts TIMESTAMPTZ NOT NULL
 );
-
-ALTER TABLE idr.contract_pbp_number
-ALTER COLUMN bfd_updated_ts DROP NOT NULL;
