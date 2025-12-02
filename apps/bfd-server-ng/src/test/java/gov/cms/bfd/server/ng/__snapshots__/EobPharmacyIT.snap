@@ -42,7 +42,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
     },
     "name" : [ {
       "family" : "Garcia",
-      "given" : [ "Indiana" ],
+      "given" : [ "Indiana", "Victor" ],
       "use" : "official"
     } ],
     "resourceType" : "Practitioner"
@@ -53,6 +53,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
       "type" : {
         "coding" : [ {
           "code" : "NPI",
+          "display" : "National provider identifier",
           "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
         } ]
       },
@@ -62,7 +63,8 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
       "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
     },
     "name" : [ {
-      "family" : "Rogers"
+      "family" : "Rogers",
+      "given" : [ "Gromit" ]
     } ],
     "resourceType" : "Practitioner"
   } ],
@@ -793,6 +795,22 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
   "total" : [ {
     "amount" : {
       "currency" : "USD",
+      "value" : 0.0
+    },
+    "category" : {
+      "coding" : [ {
+        "code" : "eligible",
+        "display" : "Allowed Amount",
+        "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+      }, {
+        "code" : "CLM_ALOWD_CHRG_AMT",
+        "display" : "Total Allowed Charge Amount",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+      } ]
+    }
+  }, {
+    "amount" : {
+      "currency" : "USD",
       "value" : 320262.8125
     },
     "category" : {
@@ -802,7 +820,39 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
         "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
       }, {
         "code" : "CLM_SBMT_CHRG_AMT",
-        "display" : "Total Charge Amount",
+        "display" : "Total Submitted Charge Amount",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+      } ]
+    }
+  }, {
+    "amount" : {
+      "currency" : "USD",
+      "value" : 0.0
+    },
+    "category" : {
+      "coding" : [ {
+        "code" : "paidbypatient",
+        "display" : "Paid by patient",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+      }, {
+        "code" : "CLM_BENE_PMT_AMT",
+        "display" : "Revenue Center Patient Responsibility Payment Amount",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+      } ]
+    }
+  }, {
+    "amount" : {
+      "currency" : "USD",
+      "value" : 0.0
+    },
+    "category" : {
+      "coding" : [ {
+        "code" : "paidtoprovider",
+        "display" : "Paid to provider",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+      }, {
+        "code" : "CLM_PRVDR_PMT_AMT",
+        "display" : "Provider Payment Amount",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
       } ]
     }
@@ -874,6 +924,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
       "type" : {
         "coding" : [ {
           "code" : "NPI",
+          "display" : "National provider identifier",
           "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
         } ]
       },
@@ -883,7 +934,8 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
       "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
     },
     "name" : [ {
-      "family" : "Stark"
+      "family" : "Stark",
+      "given" : [ "Tony" ]
     } ],
     "resourceType" : "Practitioner"
   } ],
@@ -1554,6 +1606,22 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
   "total" : [ {
     "amount" : {
       "currency" : "USD",
+      "value" : 0.0
+    },
+    "category" : {
+      "coding" : [ {
+        "code" : "eligible",
+        "display" : "Allowed Amount",
+        "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+      }, {
+        "code" : "CLM_ALOWD_CHRG_AMT",
+        "display" : "Total Allowed Charge Amount",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+      } ]
+    }
+  }, {
+    "amount" : {
+      "currency" : "USD",
       "value" : 99813.9375
     },
     "category" : {
@@ -1563,7 +1631,39 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
         "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
       }, {
         "code" : "CLM_SBMT_CHRG_AMT",
-        "display" : "Total Charge Amount",
+        "display" : "Total Submitted Charge Amount",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+      } ]
+    }
+  }, {
+    "amount" : {
+      "currency" : "USD",
+      "value" : 0.0
+    },
+    "category" : {
+      "coding" : [ {
+        "code" : "paidbypatient",
+        "display" : "Paid by patient",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+      }, {
+        "code" : "CLM_BENE_PMT_AMT",
+        "display" : "Revenue Center Patient Responsibility Payment Amount",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+      } ]
+    }
+  }, {
+    "amount" : {
+      "currency" : "USD",
+      "value" : 0.0
+    },
+    "category" : {
+      "coding" : [ {
+        "code" : "paidtoprovider",
+        "display" : "Paid to provider",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+      }, {
+        "code" : "CLM_PRVDR_PMT_AMT",
+        "display" : "Provider Payment Amount",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
       } ]
     }

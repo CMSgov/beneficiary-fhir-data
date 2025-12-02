@@ -2,7 +2,11 @@ package gov.cms.bfd.server.ng.claim.model;
 
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -293,6 +297,8 @@ public enum ClaimTypeCode {
   _2900(2900, "HOSPICE NOTICE OF ELECTION");
   ;
 
+  private static final Set<Integer> PART_B_CODES =
+      Set.of(_1700.code, _1800.code, _2700.code, _2800.code);
   private final int code;
   private final String display;
   private static final String INSURER_ORG = "insurer-org";
@@ -375,6 +381,10 @@ public enum ClaimTypeCode {
             .setCoverage(new Reference().setDisplay("Part A")));
   }
 
+  Optional<String> toDisplay() {
+    return PART_B_CODES.contains(code) ? Optional.of("Part B") : Optional.empty();
+  }
+
   Optional<ExplanationOfBenefit.RemittanceOutcome> toFhirOutcome() {
     if (isPacStage1()) {
       return Optional.of(ExplanationOfBenefit.RemittanceOutcome.PARTIAL);
@@ -421,5 +431,82 @@ public enum ClaimTypeCode {
       case 71, 72, 81, 82 -> Optional.of(ClaimType.PROFESSIONAL);
       default -> Optional.empty();
     };
+  }
+
+  private static final Map<ClaimSubtype, List<ClaimTypeCode>> CLAIM_TYPE_CODE_MAP =
+      Map.of(
+          ClaimSubtype.CARRIER,
+          mapCarrierToClaimTypeCodes(),
+          ClaimSubtype.DME,
+          mapDmeToClaimTypeCodes(),
+          ClaimSubtype.HHA,
+          mapHhaToClaimTypeCodes(),
+          ClaimSubtype.HOSPICE,
+          mapHospiceToClaimTypeCodes(),
+          ClaimSubtype.INPATIENT,
+          mapInpatientToClaimTypeCodes(),
+          ClaimSubtype.OUTPATIENT,
+          mapOutpatientToClaimTypeCodes(),
+          ClaimSubtype.PDE,
+          mapPDEToClaimTypeCodes(),
+          ClaimSubtype.SNF,
+          mapSnfToClaimTypeCodes());
+
+  /**
+   * Gets claim type codes mapped to type params.
+   *
+   * @param normalizedType The normalized claim type.
+   * @return A list of matching ClaimTypeCode
+   */
+  public static List<ClaimTypeCode> getClaimTypeCodesByType(String normalizedType) {
+
+    if ("*".equals(normalizedType)) {
+      return Collections.emptyList();
+    }
+    var claimType = ClaimSubtype.fromCode(normalizedType);
+    var codesForThisType = CLAIM_TYPE_CODE_MAP.getOrDefault(claimType, List.of());
+    if (codesForThisType.isEmpty()) {
+      throw new IllegalStateException("Not a valid claim type code");
+    }
+    return codesForThisType;
+  }
+
+  private static List<ClaimTypeCode> mapCarrierToClaimTypeCodes() {
+    return List.of(_71, _72, _1700, _2700);
+  }
+
+  private static List<ClaimTypeCode> mapDmeToClaimTypeCodes() {
+    return List.of(_81, _82, _1800, _2800);
+  }
+
+  private static List<ClaimTypeCode> mapHhaToClaimTypeCodes() {
+    return List.of(
+        _10, _1032, _1033, _1039, _1042, _1066, _1092, _2032, _2033, _2039, _2042, _2066, _2092);
+  }
+
+  private static List<ClaimTypeCode> mapHospiceToClaimTypeCodes() {
+    return List.of(_50, _1081, _1082, _1900, _1091, _1098, _2081, _2082, _2091, _2900, _2098);
+  }
+
+  private static List<ClaimTypeCode> mapInpatientToClaimTypeCodes() {
+    return List.of(_60, _61, _62, _63, _64, _1011, _1041, _1069, _2011, _2041, _2069);
+  }
+
+  private static List<ClaimTypeCode> mapOutpatientToClaimTypeCodes() {
+    return List.of(
+        _40, _1000, _1012, _1013, _1014, _1022, _1023, _1028, _1034, _1043, _1049, _1065, _1071,
+        _1072, _1073, _1074, _1075, _1076, _1077, _1078, _1079, _1083, _1084, _1085, _1086, _1087,
+        _1088, _1089, _1093, _1094, _1095, _1096, _1097, _1099, _2000, _2012, _2013, _2014, _2022,
+        _2023, _2028, _2034, _2043, _2049, _2065, _2071, _2072, _2073, _2074, _2075, _2076, _2077,
+        _2078, _2079, _2083, _2084, _2085, _2086, _2087, _2088, _2089, _2093, _2094, _2095, _2096,
+        _2097, _2099);
+  }
+
+  private static List<ClaimTypeCode> mapPDEToClaimTypeCodes() {
+    return List.of(_1, _2, _3, _4);
+  }
+
+  private static List<ClaimTypeCode> mapSnfToClaimTypeCodes() {
+    return List.of(_20, _30, _1018, _1021, _2018, _2021);
   }
 }

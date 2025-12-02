@@ -90,21 +90,28 @@ public class IntegrationTestConfiguration {
   private void runPython(PostgreSQLContainer<?> container, String... args)
       throws IOException, InterruptedException {
     ProcessBuilder processBuilder = new ProcessBuilder(args);
-    processBuilder.redirectErrorStream(true);
     var env = processBuilder.environment();
     env.put("BFD_DB_ENDPOINT", container.getHost());
     env.put("BFD_DB_PORT", container.getMappedPort(5432).toString());
     env.put("BFD_DB_USERNAME", container.getUsername());
     env.put("BFD_DB_PASSWORD", container.getPassword());
     env.put("BFD_DB_NAME", container.getDatabaseName());
+    // Makes the pipeline go slightly faster by increasing the number of tasks that run in parallel.
+    env.put("IDR_LOAD_TYPE", "initial");
+    // Partitions are necessary for massive amounts of prod data, but will cause our modestly-sized
+    // test data to load significantly slower.
+    env.put("IDR_ENABLE_PARTITIONS", "0");
 
-    processBuilder.directory(
-        new File(Paths.get(baseDir, "../bfd-pipeline/bfd-pipeline-idr").toString()));
+    processBuilder
+        .directory(new File(Paths.get(baseDir, "../bfd-pipeline/bfd-pipeline-idr").toString()))
+        // Redirect streams to prevent excessive logs from filling up the internal buffer and
+        // causing the process to hang
+        .redirectOutput(ProcessBuilder.Redirect.INHERIT)
+        .redirectError(ProcessBuilder.Redirect.INHERIT);
     var process = processBuilder.start();
     var code = process.waitFor();
     if (code > 0) {
-      var out = new String(process.getInputStream().readAllBytes());
-      throw new RuntimeException(out);
+      throw new RuntimeException("Command failed. See logs for details.");
     }
   }
 }

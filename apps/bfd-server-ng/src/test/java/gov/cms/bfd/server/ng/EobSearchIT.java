@@ -12,6 +12,7 @@ import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import gov.cms.bfd.server.ng.claim.model.ClaimSubtype;
 import gov.cms.bfd.server.ng.eob.EobResourceProvider;
 import gov.cms.bfd.server.ng.testUtil.ThreadSafeAppender;
 import gov.cms.bfd.server.ng.util.DateUtil;
@@ -64,7 +65,7 @@ class EobSearchIT extends IntegrationTestBase {
     var events = ThreadSafeAppender.startRecord();
     var bundle =
         eobResourceProvider.searchByPatient(
-            new ReferenceParam("178083966"), null, null, null, null, null, request);
+            new ReferenceParam("178083966"), null, null, null, null, null, null, request);
     assertFalse(bundle.getEntry().isEmpty());
     assertEquals(3, queryCount(events));
   }
@@ -92,7 +93,7 @@ class EobSearchIT extends IntegrationTestBase {
                     .identifier(BENE_ID_ALL_PARTS_WITH_XREF))
             .usingStyle(searchStyle)
             .execute();
-    assertEquals(4, eobBundle.getEntry().size());
+    assertEquals(5, eobBundle.getEntry().size());
     expectFhir().scenario(searchStyle.name()).toMatchSnapshot(eobBundle);
   }
 
@@ -148,7 +149,7 @@ class EobSearchIT extends IntegrationTestBase {
                     .afterOrEquals()
                     .day(DateUtil.toDate(lastUpdated)))
             .execute();
-    assertEquals(4, eobBundle.getEntry().size());
+    assertEquals(5, eobBundle.getEntry().size());
 
     eobBundle =
         searchBundle()
@@ -228,7 +229,7 @@ class EobSearchIT extends IntegrationTestBase {
             .execute();
 
     assertEquals(
-        2, eobBundle.getEntry().size(), "Should find EOBs with the specified adjudication status");
+        3, eobBundle.getEntry().size(), "Should find EOBs with the specified adjudication status");
 
     expectFhir().scenario(searchStyle.name() + "_WithTag_" + validTag).toMatchSnapshot(eobBundle);
   }
@@ -253,7 +254,7 @@ class EobSearchIT extends IntegrationTestBase {
             .execute();
 
     assertEquals(
-        2, eobBundle.getEntry().size(), "Should find EOBs with the specified adjudication status");
+        3, eobBundle.getEntry().size(), "Should find EOBs with the specified adjudication status");
 
     expectFhir()
         .scenario(searchStyle.name() + "_WithSystemTag_Adjudicated")
@@ -279,6 +280,91 @@ class EobSearchIT extends IntegrationTestBase {
             .execute();
 
     expectFhir().scenario(searchStyle.name() + "_WithTag_EmptyResult").toMatchSnapshot(eobBundle);
+  }
+
+  @ParameterizedTest
+  @EnumSource(SearchStyleEnum.class)
+  void eobSearchByType(SearchStyleEnum searchStyle) {
+    var outpatientType = ClaimSubtype.OUTPATIENT.getCode();
+
+    var eobBundleOutpatient =
+        searchBundle()
+            .where(
+                new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
+                    .exactly()
+                    .identifier(BENE_ID_ALL_PARTS_WITH_XREF))
+            .and(new TokenClientParam("type").exactly().identifier(outpatientType))
+            .usingStyle(searchStyle)
+            .execute();
+
+    assertEquals(
+        3,
+        eobBundleOutpatient.getEntry().size(),
+        "Should find EOBs with the outpatient claim type");
+
+    expectFhir()
+        .scenario(searchStyle.name() + "_WithClaimType_" + outpatientType)
+        .toMatchSnapshot(eobBundleOutpatient);
+
+    var hhaType = ClaimSubtype.HHA.getCode();
+
+    var eobBundleMultipleTypes =
+        searchBundle()
+            .where(
+                new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
+                    .exactly()
+                    .identifier(BENE_ID_ALL_PARTS_WITH_XREF))
+            .and(new TokenClientParam("type").exactly().identifier(hhaType))
+            .and(new TokenClientParam("type").exactly().identifier(outpatientType))
+            .usingStyle(searchStyle)
+            .execute();
+    assertEquals(
+        4,
+        eobBundleMultipleTypes.getEntry().size(),
+        "Should find EOBs with both HHA and Outpatient claim types");
+
+    expectFhir()
+        .scenario(searchStyle.name() + "_WithMultipleClaimTypes_" + hhaType + "," + outpatientType)
+        .toMatchSnapshot(eobBundleMultipleTypes);
+
+    var wildcardType = "*";
+    var eobBundleWildcard =
+        searchBundle()
+            .where(
+                new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
+                    .exactly()
+                    .identifier(BENE_ID_ALL_PARTS_WITH_XREF))
+            .and(new TokenClientParam("type").exactly().identifier(wildcardType))
+            .usingStyle(searchStyle)
+            .execute();
+
+    assertEquals(5, eobBundleWildcard.getEntry().size(), "Should find ALL EOBs for '*' type");
+    expectFhir().scenario(searchStyle.name() + "_WithWildcard").toMatchSnapshot(eobBundleWildcard);
+
+    String[] zeroResultClaimTypes = {
+      ClaimSubtype.DME.getCode(),
+      ClaimSubtype.SNF.getCode(),
+      ClaimSubtype.PDE.getCode(),
+      ClaimSubtype.HOSPICE.getCode(),
+      ClaimSubtype.INPATIENT.getCode()
+    };
+
+    for (var claimType : zeroResultClaimTypes) {
+      var eobBundleZero =
+          searchBundle()
+              .where(
+                  new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
+                      .exactly()
+                      .identifier(BENE_ID_ALL_PARTS_WITH_XREF))
+              .and(new TokenClientParam("type").exactly().identifier(claimType))
+              .usingStyle(searchStyle)
+              .execute();
+
+      assertEquals(
+          0,
+          eobBundleZero.getEntry().size(),
+          "Should find 0 EOBs for " + claimType + " claim type for this patient");
+    }
   }
 
   @ParameterizedTest
