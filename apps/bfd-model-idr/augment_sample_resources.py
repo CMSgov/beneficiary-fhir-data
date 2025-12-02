@@ -96,7 +96,6 @@ for line in range(0,len(cur_sample_data['lineItemComponents'])):
             careTeamSequence = [x['careTeamSequenceNumber'] for x in provider_list if 'careTeamSequenceNumber' in x and x['PRVDR_SK'] == npi and 'careTeamType' in x and x['careTeamType'] == line_columns[line_col]][0]
             cur_sample_data['lineItemComponents'][line]['careTeamSequence'] = [careTeamSequence]
             print(cur_sample_data['lineItemComponents'][line])
-#print(provider_list)
 cur_sample_data['providerList'] = provider_list
 
 filename = "out/temporary-sample.json"
