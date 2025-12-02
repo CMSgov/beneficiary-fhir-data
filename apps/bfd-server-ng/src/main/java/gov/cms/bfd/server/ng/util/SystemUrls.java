@@ -411,6 +411,19 @@ public class SystemUrls {
   public static final String BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION =
       "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication";
 
+  /** Blue Button structure definition = claim payment denial code. */
+  public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_CLAIM_PAYMENT_DENIAL_CODE =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CARR-PMT-DNL-CD";
+
+  /** Blue Button structure definition - claim provider assignment indicator switch. */
+  public static final String
+      BLUE_BUTTON_STRUCTURE_DEFINITION_CLAIM_PROVIDER_ASSIGNMENT_INDICATOR_SWITCH =
+          "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MDCR-PRFNL-PRVDR-ASGNMT-SW";
+
+  /** Blue Button structure definition - claim clinical trial number. */
+  public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_CLAIM_CLINICAL_TRIAL_NUMBER =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CLNCL-TRIL-NUM";
+
   /** Blue Button identifier - claim control number. */
   public static final String BLUE_BUTTON_CLAIM_CONTROL_NUMBER =
       "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM";
@@ -639,6 +652,25 @@ public class SystemUrls {
   public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_MEDICAID_STATE_CODE =
       "https://bluebutton.cms.gov/fhir/StructureDefinition/MEDICAID-STATE-CD";
 
+  /** Blue Button structure definition - provider participating code. */
+  public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_PROVIDER_PARTICIPATING_CODE =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-RNDRG-PRVDR-PRTCPTG-CD";
+
+  /** Blue Button code system - provider participating code. */
+  public static final String BLUE_BUTTON_CODE_SYSTEM_PROVIDER_PARTICIPATING_CODE =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RNDRG-PRVDR-PRTCPTG-CD";
+
+  /** Blue Button structure definition - provider type code. */
+  public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_PROVIDER_TYPE_CODE =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRVDR-TYPE-CD";
+
+  /** Blue Button code system - provider type code. */
+  public static final String BLUE_BUTTON_CODE_SYSTEM_PROVIDER_TYPE_CODE =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRVDR-TYPE-CD";
+
+  /** Blue Button code system - pin number. */
+  public static final String BLUE_BUTTON_PIN_NUM = "https://bluebutton.cms.gov/identifiers/PIN-NUM";
+
   /** CMS ICD - ICD-9. */
   public static final String CMS_ICD_9_PROCEDURE = "http://www.cms.gov/Medicare/Coding/ICD9";
 
@@ -681,6 +713,12 @@ public class SystemUrls {
    * <a href="https://terminology.hl7.org/3.1.0/CodeSystem-CDCREC.html">CDC Race and Ethnicity.</a>
    */
   public static final String CDC_RACE_ETHNICITY = "urn:oid:2.16.840.1.113883.6.238";
+
+  /**
+   * <a href="https://terminology.hl7.org/NamingSystem-USEIN.html">United States Employee
+   * Identification Number.</a>
+   */
+  public static final String US_EIN = "urn:oid:2.16.840.1.113883.4.4";
 
   /**
    * <a href="https://build.fhir.org/ig/HL7/US-Core/ValueSet-omb-race-category.html">OMB Race
@@ -729,4 +767,13 @@ public class SystemUrls {
 
   /** <a href="https://www.usps.com">USPS</a>. */
   public static final String USPS = "https://www.usps.com";
+
+  /** LOINC. */
+  public static final String LOINC = "http://loinc.org";
+
+  /** CLIA. */
+  public static final String CLIA = "http://terminology.hl7.org/NamingSystem/CLIA";
+
+  /** TAX OID. */
+  public static final String TAX_OID = "urn:oid:2.16.840.1.113883.4.4";
 }

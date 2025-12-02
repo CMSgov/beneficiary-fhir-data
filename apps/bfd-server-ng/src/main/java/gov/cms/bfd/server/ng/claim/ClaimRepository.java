@@ -2,6 +2,7 @@ package gov.cms.bfd.server.ng.claim;
 
 import gov.cms.bfd.server.ng.claim.model.Claim;
 import gov.cms.bfd.server.ng.claim.model.ClaimSourceId;
+import gov.cms.bfd.server.ng.claim.model.ClaimTypeCode;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.util.LogUtil;
 import jakarta.persistence.EntityManager;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 @AllArgsConstructor
 public class ClaimRepository {
+
   private final EntityManager entityManager;
 
   private static final String CLAIM_TABLES_BASE =
@@ -26,11 +28,21 @@ public class ClaimRepository {
         JOIN FETCH c.claimDateSignature AS cds
         JOIN FETCH c.claimItems AS cl
         LEFT JOIN FETCH c.claimInstitutional ci
+        LEFT JOIN FETCH c.claimProfessional cp
         LEFT JOIN FETCH cl.claimLineInstitutional cli
+        LEFT JOIN FETCH cl.claimLineProfessional clp
         LEFT JOIN FETCH c.claimFiss cf
         LEFT JOIN FETCH cli.ansiSignature a
         LEFT JOIN FETCH cl.claimLineRx clr
         LEFT JOIN FETCH c.contract ct
+        LEFT JOIN FETCH c.serviceProviderHistory p
+        LEFT JOIN FETCH c.attendingProviderHistory ap
+        LEFT JOIN FETCH c.operatingProviderHistory orp
+        LEFT JOIN FETCH c.otherProviderHistory otp
+        LEFT JOIN FETCH c.renderingProviderHistory rp
+        LEFT JOIN FETCH c.prescribingProviderHistory pp
+        LEFT JOIN FETCH c.billingProviderHistory bp
+        LEFT JOIN FETCH c.referringProviderHistory rph
       """;
 
   /**
@@ -56,6 +68,7 @@ public class ClaimRepository {
                 entityManager.createQuery(jpql, Claim.class),
                 claimThroughDate,
                 lastUpdated,
+                new ArrayList<>(),
                 new ArrayList<>())
             .setParameter("claimUniqueId", claimUniqueId)
             .getResultList();
@@ -74,6 +87,7 @@ public class ClaimRepository {
    * @param limit limit
    * @param offset offset
    * @param sourceIds claim sourceIds
+   * @param claimTypeCodes claimTypeCodes
    * @return claims
    */
   public List<Claim> findByBeneXrefSk(
@@ -82,7 +96,8 @@ public class ClaimRepository {
       DateTimeRange lastUpdated,
       Optional<Integer> limit,
       Optional<Integer> offset,
-      List<ClaimSourceId> sourceIds) {
+      List<ClaimSourceId> sourceIds,
+      List<ClaimTypeCode> claimTypeCodes) {
     // JPQL doesn't support LIMIT/OFFSET unfortunately, so we have to load this separately.
     // setMaxResults will only limit the results in memory rather than at the database level.
 
@@ -122,7 +137,8 @@ public class ClaimRepository {
                 entityManager.createQuery(jpql, Claim.class),
                 claimThroughDate,
                 lastUpdated,
-                sourceIds)
+                sourceIds,
+                claimTypeCodes)
             .setParameter("claimIds", claimIds)
             .getResultList();
 
@@ -140,6 +156,7 @@ public class ClaimRepository {
         AND ((cast(:lastUpdatedLowerBound AS ZonedDateTime)) IS NULL OR c.meta.updatedTimestamp %s :lastUpdatedLowerBound)
         AND ((cast(:lastUpdatedUpperBound AS ZonedDateTime)) IS NULL OR c.meta.updatedTimestamp %s :lastUpdatedUpperBound)
         AND (:hasSourceIds = false OR c.claimSourceId IN :sourceIds)
+        AND (:hasClaimTypeCodes = false OR c.claimTypeCode IN :claimTypeCodes)
         """,
         claimThroughDate.getLowerBoundSqlOperator(),
         claimThroughDate.getUpperBoundSqlOperator(),
@@ -151,13 +168,16 @@ public class ClaimRepository {
       TypedQuery<T> query,
       DateTimeRange claimThroughDate,
       DateTimeRange lastUpdated,
-      List<ClaimSourceId> sourceIds) {
+      List<ClaimSourceId> sourceIds,
+      List<ClaimTypeCode> claimTypeCodes) {
     return query
         .setParameter("claimThroughDateLowerBound", claimThroughDate.getLowerBoundDate())
         .setParameter("claimThroughDateUpperBound", claimThroughDate.getUpperBoundDate())
         .setParameter("lastUpdatedLowerBound", lastUpdated.getLowerBoundDateTime().orElse(null))
         .setParameter("lastUpdatedUpperBound", lastUpdated.getUpperBoundDateTime().orElse(null))
         .setParameter("hasSourceIds", !sourceIds.isEmpty())
-        .setParameter("sourceIds", sourceIds);
+        .setParameter("sourceIds", sourceIds)
+        .setParameter("hasClaimTypeCodes", !claimTypeCodes.isEmpty())
+        .setParameter("claimTypeCodes", claimTypeCodes);
   }
 }

@@ -45,7 +45,7 @@ docker exec -u postgres bfd-idr-db psql fhirdb bfd -f docker-entrypoint-initdb.d
 uv sync
 BFD_DB_ENDPOINT=localhost BFD_DB_USERNAME=bfd BFD_DB_PASSWORD=InsecureLocalDev uv run load_synthetic.py "$1" 
 docker exec -u postgres bfd-idr-db psql fhirdb bfd -c "VACUUM FULL ANALYZE"
-BFD_DB_ENDPOINT=localhost BFD_DB_USERNAME=bfd BFD_DB_PASSWORD=InsecureLocalDev uv run pipeline.py local
+BFD_DB_ENDPOINT=localhost BFD_DB_USERNAME=bfd BFD_DB_PASSWORD=InsecureLocalDev IDR_LOAD_TYPE=initial IDR_ENABLE_PARTITIONS=0 uv run pipeline.py local
 
 echo
 echo Schema created successfully.

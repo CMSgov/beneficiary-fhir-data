@@ -358,8 +358,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
         },
         "role" : {
           "coding" : [ {
-            "code" : "rendering",
-            "display" : "Rendering provider",
+            "code" : "otheroperating",
+            "display" : "Other Operating",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
           } ]
         },
@@ -386,8 +386,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
         "name" : "Centers for Medicare and Medicaid Services",
         "resourceType" : "Organization"
       }, {
-        "active" : true,
-        "id" : "provider-org",
+        "id" : "careteam-provider-1",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
           "type" : {
@@ -397,31 +396,15 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
               "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
             } ]
           },
-          "value" : "1477643690"
-        }, {
-          "system" : "http://terminology.hl7.org/NamingSystem/CCN",
-          "value" : "001505"
-        } ],
-        "meta" : {
-          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|6.1.0" ]
-        },
-        "name" : "PROVIDER ORG SOURCED FROM NPPES",
-        "resourceType" : "Organization"
-      }, {
-        "id" : "careteam-provider-1",
-        "identifier" : [ {
-          "system" : "http://hl7.org/fhir/sid/us-npi",
-          "type" : {
-            "coding" : [ {
-              "code" : "NPI",
-              "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-            } ]
-          },
           "value" : "1023051596"
         } ],
         "meta" : {
           "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
         },
+        "name" : [ {
+          "family" : "Granger",
+          "given" : [ "Hermion" ]
+        } ],
         "resourceType" : "Practitioner"
       }, {
         "id" : "careteam-provider-2",
@@ -430,6 +413,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
           "type" : {
             "coding" : [ {
               "code" : "NPI",
+              "display" : "National provider identifier",
               "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
             } ]
           },
@@ -446,6 +430,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
           "type" : {
             "coding" : [ {
               "code" : "NPI",
+              "display" : "National provider identifier",
               "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
             } ]
           },
@@ -454,6 +439,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
         "meta" : {
           "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
         },
+        "name" : [ {
+          "family" : "Addams",
+          "given" : [ "Wednesday", "Wednesday" ]
+        } ],
         "resourceType" : "Practitioner"
       }, {
         "id" : "careteam-provider-4",
@@ -462,6 +451,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
           "type" : {
             "coding" : [ {
               "code" : "NPI",
+              "display" : "National provider identifier",
               "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
             } ]
           },
@@ -2408,9 +2398,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
           } ]
         } ]
       } ],
-      "provider" : {
-        "reference" : "#provider-org"
-      },
       "resourceType" : "ExplanationOfBenefit",
       "status" : "active",
       "supportingInfo" : [ {
@@ -2498,104 +2485,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "CLM_NCH_WKLY_PROC_DT",
-            "display" : "Weekly Process Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 6,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_ACTV_CARE_THRU_DT",
-            "display" : "Covered Care Through Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 7,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_NCVRD_FROM_DT",
-            "display" : "Noncovered Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 8,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_NCVRD_THRU_DT",
-            "display" : "Noncovered Stay Through Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 9,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_MDCR_EXHSTD_DT",
-            "display" : "Medicare Benefits Exhausted Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 10,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_FROM_DT",
-            "display" : "Qualified Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 11,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_THRU_DT",
-            "display" : "Qualified Stay Thru Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 12,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
             "code" : "discharge-status",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -2610,7 +2499,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 6
       }, {
         "category" : {
           "coding" : [ {
@@ -2627,7 +2516,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 7
       }, {
         "category" : {
           "coding" : [ {
@@ -2647,7 +2536,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 8
       }, {
         "category" : {
           "coding" : [ {
@@ -2661,9 +2550,25 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 9
       } ],
       "total" : [ {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 0.0
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "eligible",
+            "display" : "Allowed Amount",
+            "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+          }, {
+            "code" : "CLM_ALOWD_CHRG_AMT",
+            "display" : "Total Allowed Charge Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
         "amount" : {
           "currency" : "USD",
           "value" : 622674.5625
@@ -2675,7 +2580,39 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
           }, {
             "code" : "CLM_SBMT_CHRG_AMT",
-            "display" : "Total Charge Amount",
+            "display" : "Total Submitted Charge Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 0.0
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Paid by patient",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_BENE_PMT_AMT",
+            "display" : "Revenue Center Patient Responsibility Payment Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 0.0
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidtoprovider",
+            "display" : "Paid to provider",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_PRVDR_PMT_AMT",
+            "display" : "Provider Payment Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -3044,6 +2981,18 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
       },
       "careTeam" : [ {
         "provider" : {
+          "reference" : "#careteam-provider-line-1"
+        },
+        "role" : {
+          "coding" : [ {
+            "code" : "rendering",
+            "display" : "Rendering provider",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
+          } ]
+        },
+        "sequence" : 1
+      }, {
+        "provider" : {
           "reference" : "#careteam-provider-1"
         },
         "role" : {
@@ -3054,6 +3003,18 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
           } ]
         },
         "sequence" : 1
+      }, {
+        "provider" : {
+          "reference" : "#careteam-provider-line-2"
+        },
+        "role" : {
+          "coding" : [ {
+            "code" : "rendering",
+            "display" : "Rendering provider",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
+          } ]
+        },
+        "sequence" : 2
       }, {
         "provider" : {
           "reference" : "#careteam-provider-2"
@@ -3068,7 +3029,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
         "sequence" : 2
       }, {
         "provider" : {
-          "reference" : "#careteam-provider-3"
+          "reference" : "#careteam-provider-line-3"
         },
         "role" : {
           "coding" : [ {
@@ -3078,6 +3039,30 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
           } ]
         },
         "sequence" : 3
+      }, {
+        "provider" : {
+          "reference" : "#careteam-provider-3"
+        },
+        "role" : {
+          "coding" : [ {
+            "code" : "otheroperating",
+            "display" : "Other Operating",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
+          } ]
+        },
+        "sequence" : 3
+      }, {
+        "provider" : {
+          "reference" : "#careteam-provider-line-4"
+        },
+        "role" : {
+          "coding" : [ {
+            "code" : "rendering",
+            "display" : "Rendering provider",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
+          } ]
+        },
+        "sequence" : 4
       }, {
         "provider" : {
           "reference" : "#careteam-provider-4"
@@ -3090,6 +3075,90 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
           } ]
         },
         "sequence" : 4
+      }, {
+        "provider" : {
+          "reference" : "#careteam-provider-line-5"
+        },
+        "role" : {
+          "coding" : [ {
+            "code" : "rendering",
+            "display" : "Rendering provider",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
+          } ]
+        },
+        "sequence" : 5
+      }, {
+        "provider" : {
+          "reference" : "#careteam-provider-line-6"
+        },
+        "role" : {
+          "coding" : [ {
+            "code" : "rendering",
+            "display" : "Rendering provider",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
+          } ]
+        },
+        "sequence" : 6
+      }, {
+        "provider" : {
+          "reference" : "#careteam-provider-line-7"
+        },
+        "role" : {
+          "coding" : [ {
+            "code" : "rendering",
+            "display" : "Rendering provider",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
+          } ]
+        },
+        "sequence" : 7
+      }, {
+        "provider" : {
+          "reference" : "#careteam-provider-line-8"
+        },
+        "role" : {
+          "coding" : [ {
+            "code" : "rendering",
+            "display" : "Rendering provider",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
+          } ]
+        },
+        "sequence" : 8
+      }, {
+        "provider" : {
+          "reference" : "#careteam-provider-line-9"
+        },
+        "role" : {
+          "coding" : [ {
+            "code" : "rendering",
+            "display" : "Rendering provider",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
+          } ]
+        },
+        "sequence" : 9
+      }, {
+        "provider" : {
+          "reference" : "#careteam-provider-line-10"
+        },
+        "role" : {
+          "coding" : [ {
+            "code" : "rendering",
+            "display" : "Rendering provider",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
+          } ]
+        },
+        "sequence" : 10
+      }, {
+        "provider" : {
+          "reference" : "#careteam-provider-line-11"
+        },
+        "role" : {
+          "coding" : [ {
+            "code" : "rendering",
+            "display" : "Rendering provider",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
+          } ]
+        },
+        "sequence" : 11
       } ],
       "contained" : [ {
         "active" : true,
@@ -3100,8 +3169,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
         "name" : "Centers for Medicare and Medicaid Services",
         "resourceType" : "Organization"
       }, {
-        "active" : true,
-        "id" : "provider-org",
+        "id" : "careteam-provider-line-1",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
           "type" : {
@@ -3111,71 +3179,24 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
               "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
             } ]
           },
-          "value" : "1669572467"
-        }, {
-          "system" : "http://terminology.hl7.org/NamingSystem/CCN",
-          "value" : "001509"
-        } ],
-        "meta" : {
-          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|6.1.0" ]
-        },
-        "name" : "PROVIDER ORG SOURCED FROM NPPES",
-        "resourceType" : "Organization"
-      }, {
-        "id" : "careteam-provider-1",
-        "identifier" : [ {
-          "system" : "http://hl7.org/fhir/sid/us-npi",
-          "type" : {
-            "coding" : [ {
-              "code" : "NPI",
-              "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-            } ]
-          },
-          "value" : "1730548868"
+          "value" : "1720749690"
         } ],
         "meta" : {
           "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
         },
-        "resourceType" : "Practitioner"
-      }, {
-        "id" : "careteam-provider-2",
-        "identifier" : [ {
-          "system" : "http://hl7.org/fhir/sid/us-npi",
-          "type" : {
-            "coding" : [ {
-              "code" : "NPI",
-              "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-            } ]
-          },
-          "value" : "1003488552"
+        "name" : [ {
+          "family" : "Stark",
+          "given" : [ "Tony" ]
         } ],
-        "meta" : {
-          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
-        },
         "resourceType" : "Practitioner"
       }, {
-        "id" : "careteam-provider-3",
+        "id" : "careteam-provider-line-2",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
           "type" : {
             "coding" : [ {
               "code" : "NPI",
-              "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-            } ]
-          },
-          "value" : "1730548868"
-        } ],
-        "meta" : {
-          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
-        },
-        "resourceType" : "Practitioner"
-      }, {
-        "id" : "careteam-provider-4",
-        "identifier" : [ {
-          "system" : "http://hl7.org/fhir/sid/us-npi",
-          "type" : {
-            "coding" : [ {
-              "code" : "NPI",
+              "display" : "National provider identifier",
               "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
             } ]
           },
@@ -3184,6 +3205,283 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
         "meta" : {
           "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
         },
+        "name" : [ {
+          "family" : "Stark",
+          "given" : [ "Tony" ]
+        } ],
+        "resourceType" : "Practitioner"
+      }, {
+        "id" : "careteam-provider-line-3",
+        "identifier" : [ {
+          "system" : "http://hl7.org/fhir/sid/us-npi",
+          "type" : {
+            "coding" : [ {
+              "code" : "NPI",
+              "display" : "National provider identifier",
+              "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+            } ]
+          },
+          "value" : "1720749690"
+        } ],
+        "meta" : {
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
+        },
+        "name" : [ {
+          "family" : "Stark",
+          "given" : [ "Tony" ]
+        } ],
+        "resourceType" : "Practitioner"
+      }, {
+        "id" : "careteam-provider-line-4",
+        "identifier" : [ {
+          "system" : "http://hl7.org/fhir/sid/us-npi",
+          "type" : {
+            "coding" : [ {
+              "code" : "NPI",
+              "display" : "National provider identifier",
+              "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+            } ]
+          },
+          "value" : "1720749690"
+        } ],
+        "meta" : {
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
+        },
+        "name" : [ {
+          "family" : "Stark",
+          "given" : [ "Tony" ]
+        } ],
+        "resourceType" : "Practitioner"
+      }, {
+        "id" : "careteam-provider-line-5",
+        "identifier" : [ {
+          "system" : "http://hl7.org/fhir/sid/us-npi",
+          "type" : {
+            "coding" : [ {
+              "code" : "NPI",
+              "display" : "National provider identifier",
+              "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+            } ]
+          },
+          "value" : "1720749690"
+        } ],
+        "meta" : {
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
+        },
+        "name" : [ {
+          "family" : "Stark",
+          "given" : [ "Tony" ]
+        } ],
+        "resourceType" : "Practitioner"
+      }, {
+        "id" : "careteam-provider-line-6",
+        "identifier" : [ {
+          "system" : "http://hl7.org/fhir/sid/us-npi",
+          "type" : {
+            "coding" : [ {
+              "code" : "NPI",
+              "display" : "National provider identifier",
+              "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+            } ]
+          },
+          "value" : "1720749690"
+        } ],
+        "meta" : {
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
+        },
+        "name" : [ {
+          "family" : "Stark",
+          "given" : [ "Tony" ]
+        } ],
+        "resourceType" : "Practitioner"
+      }, {
+        "id" : "careteam-provider-line-7",
+        "identifier" : [ {
+          "system" : "http://hl7.org/fhir/sid/us-npi",
+          "type" : {
+            "coding" : [ {
+              "code" : "NPI",
+              "display" : "National provider identifier",
+              "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+            } ]
+          },
+          "value" : "1720749690"
+        } ],
+        "meta" : {
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
+        },
+        "name" : [ {
+          "family" : "Stark",
+          "given" : [ "Tony" ]
+        } ],
+        "resourceType" : "Practitioner"
+      }, {
+        "id" : "careteam-provider-line-8",
+        "identifier" : [ {
+          "system" : "http://hl7.org/fhir/sid/us-npi",
+          "type" : {
+            "coding" : [ {
+              "code" : "NPI",
+              "display" : "National provider identifier",
+              "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+            } ]
+          },
+          "value" : "1720749690"
+        } ],
+        "meta" : {
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
+        },
+        "name" : [ {
+          "family" : "Stark",
+          "given" : [ "Tony" ]
+        } ],
+        "resourceType" : "Practitioner"
+      }, {
+        "id" : "careteam-provider-line-9",
+        "identifier" : [ {
+          "system" : "http://hl7.org/fhir/sid/us-npi",
+          "type" : {
+            "coding" : [ {
+              "code" : "NPI",
+              "display" : "National provider identifier",
+              "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+            } ]
+          },
+          "value" : "1720749690"
+        } ],
+        "meta" : {
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
+        },
+        "name" : [ {
+          "family" : "Stark",
+          "given" : [ "Tony" ]
+        } ],
+        "resourceType" : "Practitioner"
+      }, {
+        "id" : "careteam-provider-line-10",
+        "identifier" : [ {
+          "system" : "http://hl7.org/fhir/sid/us-npi",
+          "type" : {
+            "coding" : [ {
+              "code" : "NPI",
+              "display" : "National provider identifier",
+              "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+            } ]
+          },
+          "value" : "1720749690"
+        } ],
+        "meta" : {
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
+        },
+        "name" : [ {
+          "family" : "Stark",
+          "given" : [ "Tony" ]
+        } ],
+        "resourceType" : "Practitioner"
+      }, {
+        "id" : "careteam-provider-line-11",
+        "identifier" : [ {
+          "system" : "http://hl7.org/fhir/sid/us-npi",
+          "type" : {
+            "coding" : [ {
+              "code" : "NPI",
+              "display" : "National provider identifier",
+              "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+            } ]
+          },
+          "value" : "1720749690"
+        } ],
+        "meta" : {
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
+        },
+        "name" : [ {
+          "family" : "Stark",
+          "given" : [ "Tony" ]
+        } ],
+        "resourceType" : "Practitioner"
+      }, {
+        "id" : "careteam-provider-1",
+        "identifier" : [ {
+          "system" : "http://hl7.org/fhir/sid/us-npi",
+          "type" : {
+            "coding" : [ {
+              "code" : "NPI",
+              "display" : "National provider identifier",
+              "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+            } ]
+          },
+          "value" : "1730548868"
+        } ],
+        "meta" : {
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
+        },
+        "name" : [ {
+          "family" : "Rogers",
+          "given" : [ "Gromit" ]
+        } ],
+        "resourceType" : "Practitioner"
+      }, {
+        "id" : "careteam-provider-2",
+        "identifier" : [ {
+          "system" : "http://hl7.org/fhir/sid/us-npi",
+          "type" : {
+            "coding" : [ {
+              "code" : "NPI",
+              "display" : "National provider identifier",
+              "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+            } ]
+          },
+          "value" : "1003488552"
+        } ],
+        "meta" : {
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
+        },
+        "name" : [ {
+          "family" : "Addams",
+          "given" : [ "Wednesday", "Wednesday" ]
+        } ],
+        "resourceType" : "Practitioner"
+      }, {
+        "id" : "careteam-provider-3",
+        "identifier" : [ {
+          "system" : "http://hl7.org/fhir/sid/us-npi",
+          "type" : {
+            "coding" : [ {
+              "code" : "NPI",
+              "display" : "National provider identifier",
+              "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+            } ]
+          },
+          "value" : "1730548868"
+        } ],
+        "meta" : {
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
+        },
+        "name" : [ {
+          "family" : "Rogers",
+          "given" : [ "Gromit" ]
+        } ],
+        "resourceType" : "Practitioner"
+      }, {
+        "id" : "careteam-provider-4",
+        "identifier" : [ {
+          "system" : "http://hl7.org/fhir/sid/us-npi",
+          "type" : {
+            "coding" : [ {
+              "code" : "NPI",
+              "display" : "National provider identifier",
+              "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+            } ]
+          },
+          "value" : "1720749690"
+        } ],
+        "meta" : {
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
+        },
+        "name" : [ {
+          "family" : "Stark",
+          "given" : [ "Tony" ]
+        } ],
         "resourceType" : "Practitioner"
       } ],
       "created" : "2025-08-26T00:00:00+00:00",
@@ -5059,9 +5357,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
           } ]
         } ]
       } ],
-      "provider" : {
-        "reference" : "#provider-org"
-      },
       "resourceType" : "ExplanationOfBenefit",
       "status" : "active",
       "supportingInfo" : [ {
@@ -5140,22 +5435,11 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
         "code" : {
           "coding" : [ {
             "code" : "V",
-            "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA])."
+            "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA]).",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
           } ]
         },
         "sequence" : 4
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "admissionperiod",
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
-          } ]
-        },
-        "sequence" : 5,
-        "timingPeriod" : {
-          "end" : "9999-12-31",
-          "start" : "9999-12-31"
-        }
       }, {
         "category" : {
           "coding" : [ {
@@ -5163,106 +5447,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 5,
         "timingDate" : "2020-09-11"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_NCH_WKLY_PROC_DT",
-            "display" : "Weekly Process Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 7,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_ACTV_CARE_THRU_DT",
-            "display" : "Covered Care Through Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 8,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_NCVRD_FROM_DT",
-            "display" : "Noncovered Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 9,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_NCVRD_THRU_DT",
-            "display" : "Noncovered Stay Through Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 10,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_MDCR_EXHSTD_DT",
-            "display" : "Medicare Benefits Exhausted Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 11,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_FROM_DT",
-            "display" : "Qualified Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 12,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_THRU_DT",
-            "display" : "Qualified Stay Thru Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 13,
-        "timingDate" : "9999-12-31"
       }, {
         "category" : {
           "coding" : [ {
@@ -5280,7 +5466,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 6
       }, {
         "category" : {
           "coding" : [ {
@@ -5297,7 +5483,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 7
       }, {
         "category" : {
           "coding" : [ {
@@ -5317,7 +5503,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 8
       }, {
         "category" : {
           "coding" : [ {
@@ -5331,9 +5517,25 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 9
       } ],
       "total" : [ {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 0.0
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "eligible",
+            "display" : "Allowed Amount",
+            "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+          }, {
+            "code" : "CLM_ALOWD_CHRG_AMT",
+            "display" : "Total Allowed Charge Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
         "amount" : {
           "currency" : "USD",
           "value" : 485618.5625
@@ -5345,7 +5547,39 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
           }, {
             "code" : "CLM_SBMT_CHRG_AMT",
-            "display" : "Total Charge Amount",
+            "display" : "Total Submitted Charge Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 0.0
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Paid by patient",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_BENE_PMT_AMT",
+            "display" : "Revenue Center Patient Responsibility Payment Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 0.0
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidtoprovider",
+            "display" : "Paid to provider",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_PRVDR_PMT_AMT",
+            "display" : "Provider Payment Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -5644,23 +5878,11 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "admissionperiod",
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
-          } ]
-        },
-        "sequence" : 4,
-        "timingPeriod" : {
-          "end" : "9999-12-31",
-          "start" : "9999-12-31"
-        }
-      }, {
-        "category" : {
-          "coding" : [ {
             "code" : "clmrecvddate",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 4,
         "timingDate" : "2020-09-11"
       }, {
         "category" : {
@@ -5674,94 +5896,26 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 5,
         "timingDate" : "2020-09-11"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_ACTV_CARE_THRU_DT",
-            "display" : "Covered Care Through Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 7,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_NCVRD_FROM_DT",
-            "display" : "Noncovered Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 8,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_NCVRD_THRU_DT",
-            "display" : "Noncovered Stay Through Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 9,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_MDCR_EXHSTD_DT",
-            "display" : "Medicare Benefits Exhausted Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 10,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_FROM_DT",
-            "display" : "Qualified Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 11,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_THRU_DT",
-            "display" : "Qualified Stay Thru Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 12,
-        "timingDate" : "9999-12-31"
       } ],
       "total" : [ {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 0.0
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "eligible",
+            "display" : "Allowed Amount",
+            "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+          }, {
+            "code" : "CLM_ALOWD_CHRG_AMT",
+            "display" : "Total Allowed Charge Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
         "amount" : {
           "currency" : "USD",
           "value" : 766500.0
@@ -5773,7 +5927,39 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
           }, {
             "code" : "CLM_SBMT_CHRG_AMT",
-            "display" : "Total Charge Amount",
+            "display" : "Total Submitted Charge Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 0.0
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Paid by patient",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_BENE_PMT_AMT",
+            "display" : "Revenue Center Patient Responsibility Payment Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 0.0
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidtoprovider",
+            "display" : "Paid to provider",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_PRVDR_PMT_AMT",
+            "display" : "Provider Payment Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -6153,6 +6339,18 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
       },
       "careTeam" : [ {
         "provider" : {
+          "reference" : "#careteam-provider-line-1"
+        },
+        "role" : {
+          "coding" : [ {
+            "code" : "rendering",
+            "display" : "Rendering provider",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
+          } ]
+        },
+        "sequence" : 1
+      }, {
+        "provider" : {
           "reference" : "#careteam-provider-1"
         },
         "role" : {
@@ -6163,6 +6361,18 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           } ]
         },
         "sequence" : 1
+      }, {
+        "provider" : {
+          "reference" : "#careteam-provider-line-2"
+        },
+        "role" : {
+          "coding" : [ {
+            "code" : "rendering",
+            "display" : "Rendering provider",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
+          } ]
+        },
+        "sequence" : 2
       }, {
         "provider" : {
           "reference" : "#careteam-provider-2"
@@ -6177,12 +6387,24 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "sequence" : 2
       }, {
         "provider" : {
-          "reference" : "#careteam-provider-3"
+          "reference" : "#careteam-provider-line-3"
         },
         "role" : {
           "coding" : [ {
             "code" : "rendering",
             "display" : "Rendering provider",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
+          } ]
+        },
+        "sequence" : 3
+      }, {
+        "provider" : {
+          "reference" : "#careteam-provider-3"
+        },
+        "role" : {
+          "coding" : [ {
+            "code" : "otheroperating",
+            "display" : "Other Operating",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
           } ]
         },
@@ -6209,8 +6431,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "name" : "Centers for Medicare and Medicaid Services",
         "resourceType" : "Organization"
       }, {
-        "active" : true,
-        "id" : "provider-org",
+        "id" : "careteam-provider-line-1",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
           "type" : {
@@ -6220,16 +6441,58 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
               "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
             } ]
           },
-          "value" : "1104867175"
-        }, {
-          "system" : "http://terminology.hl7.org/NamingSystem/CCN",
-          "value" : "001505"
+          "value" : "1558719914"
         } ],
         "meta" : {
-          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|6.1.0" ]
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
         },
-        "name" : "PROVIDER ORG SOURCED FROM NPPES",
-        "resourceType" : "Organization"
+        "name" : [ {
+          "family" : "Rogers",
+          "given" : [ "Gromit" ]
+        } ],
+        "resourceType" : "Practitioner"
+      }, {
+        "id" : "careteam-provider-line-2",
+        "identifier" : [ {
+          "system" : "http://hl7.org/fhir/sid/us-npi",
+          "type" : {
+            "coding" : [ {
+              "code" : "NPI",
+              "display" : "National provider identifier",
+              "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+            } ]
+          },
+          "value" : "1558719914"
+        } ],
+        "meta" : {
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
+        },
+        "name" : [ {
+          "family" : "Rogers",
+          "given" : [ "Gromit" ]
+        } ],
+        "resourceType" : "Practitioner"
+      }, {
+        "id" : "careteam-provider-line-3",
+        "identifier" : [ {
+          "system" : "http://hl7.org/fhir/sid/us-npi",
+          "type" : {
+            "coding" : [ {
+              "code" : "NPI",
+              "display" : "National provider identifier",
+              "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+            } ]
+          },
+          "value" : "1558719914"
+        } ],
+        "meta" : {
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
+        },
+        "name" : [ {
+          "family" : "Rogers",
+          "given" : [ "Gromit" ]
+        } ],
+        "resourceType" : "Practitioner"
       }, {
         "id" : "careteam-provider-1",
         "identifier" : [ {
@@ -6237,6 +6500,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           "type" : {
             "coding" : [ {
               "code" : "NPI",
+              "display" : "National provider identifier",
               "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
             } ]
           },
@@ -6253,6 +6517,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           "type" : {
             "coding" : [ {
               "code" : "NPI",
+              "display" : "National provider identifier",
               "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
             } ]
           },
@@ -6261,6 +6526,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "meta" : {
           "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
         },
+        "name" : [ {
+          "family" : "Stark",
+          "given" : [ "Tony" ]
+        } ],
         "resourceType" : "Practitioner"
       }, {
         "id" : "careteam-provider-3",
@@ -6269,6 +6538,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           "type" : {
             "coding" : [ {
               "code" : "NPI",
+              "display" : "National provider identifier",
               "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
             } ]
           },
@@ -6277,6 +6547,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "meta" : {
           "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
         },
+        "name" : [ {
+          "family" : "Granger",
+          "given" : [ "Hermion" ]
+        } ],
         "resourceType" : "Practitioner"
       }, {
         "id" : "careteam-provider-4",
@@ -6285,6 +6559,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           "type" : {
             "coding" : [ {
               "code" : "NPI",
+              "display" : "National provider identifier",
               "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
             } ]
           },
@@ -6293,6 +6568,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "meta" : {
           "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
         },
+        "name" : [ {
+          "family" : "Rogers",
+          "given" : [ "Gromit" ]
+        } ],
         "resourceType" : "Practitioner"
       } ],
       "created" : "2025-08-26T00:00:00+00:00",
@@ -7386,9 +7665,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           } ]
         } ]
       } ],
-      "provider" : {
-        "reference" : "#provider-org"
-      },
       "resourceType" : "ExplanationOfBenefit",
       "status" : "active",
       "subType" : {
@@ -7473,7 +7749,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "code" : {
           "coding" : [ {
             "code" : "V",
-            "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA])."
+            "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA]).",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
           } ]
         },
         "sequence" : 4
@@ -7515,90 +7792,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "CLM_ACTV_CARE_THRU_DT",
-            "display" : "Covered Care Through Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 8,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_NCVRD_FROM_DT",
-            "display" : "Noncovered Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 9,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_NCVRD_THRU_DT",
-            "display" : "Noncovered Stay Through Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 10,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_MDCR_EXHSTD_DT",
-            "display" : "Medicare Benefits Exhausted Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 11,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_FROM_DT",
-            "display" : "Qualified Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 12,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_THRU_DT",
-            "display" : "Qualified Stay Thru Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 13,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
             "code" : "pointoforigin",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -7613,7 +7806,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 8
       }, {
         "category" : {
           "coding" : [ {
@@ -7631,7 +7824,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 9
       }, {
         "category" : {
           "coding" : [ {
@@ -7648,7 +7841,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 10
       }, {
         "category" : {
           "coding" : [ {
@@ -7668,7 +7861,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 11
       }, {
         "category" : {
           "coding" : [ {
@@ -7682,9 +7875,25 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 18
+        "sequence" : 12
       } ],
       "total" : [ {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 0.0
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "eligible",
+            "display" : "Allowed Amount",
+            "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+          }, {
+            "code" : "CLM_ALOWD_CHRG_AMT",
+            "display" : "Total Allowed Charge Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
         "amount" : {
           "currency" : "USD",
           "value" : 164176.8125
@@ -7696,7 +7905,39 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
           }, {
             "code" : "CLM_SBMT_CHRG_AMT",
-            "display" : "Total Charge Amount",
+            "display" : "Total Submitted Charge Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 0.0
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Paid by patient",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_BENE_PMT_AMT",
+            "display" : "Revenue Center Patient Responsibility Payment Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 0.0
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidtoprovider",
+            "display" : "Paid to provider",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_PRVDR_PMT_AMT",
+            "display" : "Provider Payment Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -8071,8 +8312,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         },
         "role" : {
           "coding" : [ {
-            "code" : "rendering",
-            "display" : "Rendering provider",
+            "code" : "otheroperating",
+            "display" : "Other Operating",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
           } ]
         },
@@ -8099,8 +8340,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "name" : "Centers for Medicare and Medicaid Services",
         "resourceType" : "Organization"
       }, {
-        "active" : true,
-        "id" : "provider-org",
+        "id" : "careteam-provider-1",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
           "type" : {
@@ -8110,31 +8350,15 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
               "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
             } ]
           },
-          "value" : "1477643690"
-        }, {
-          "system" : "http://terminology.hl7.org/NamingSystem/CCN",
-          "value" : "001505"
-        } ],
-        "meta" : {
-          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|6.1.0" ]
-        },
-        "name" : "PROVIDER ORG SOURCED FROM NPPES",
-        "resourceType" : "Organization"
-      }, {
-        "id" : "careteam-provider-1",
-        "identifier" : [ {
-          "system" : "http://hl7.org/fhir/sid/us-npi",
-          "type" : {
-            "coding" : [ {
-              "code" : "NPI",
-              "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-            } ]
-          },
           "value" : "1023051596"
         } ],
         "meta" : {
           "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
         },
+        "name" : [ {
+          "family" : "Granger",
+          "given" : [ "Hermion" ]
+        } ],
         "resourceType" : "Practitioner"
       }, {
         "id" : "careteam-provider-2",
@@ -8143,6 +8367,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           "type" : {
             "coding" : [ {
               "code" : "NPI",
+              "display" : "National provider identifier",
               "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
             } ]
           },
@@ -8159,6 +8384,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           "type" : {
             "coding" : [ {
               "code" : "NPI",
+              "display" : "National provider identifier",
               "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
             } ]
           },
@@ -8167,6 +8393,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "meta" : {
           "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
         },
+        "name" : [ {
+          "family" : "Addams",
+          "given" : [ "Wednesday", "Wednesday" ]
+        } ],
         "resourceType" : "Practitioner"
       }, {
         "id" : "careteam-provider-4",
@@ -8175,6 +8405,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           "type" : {
             "coding" : [ {
               "code" : "NPI",
+              "display" : "National provider identifier",
               "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
             } ]
           },
@@ -9984,9 +10215,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           "value" : 254072.03
         }
       },
-      "provider" : {
-        "reference" : "#provider-org"
-      },
       "resourceType" : "ExplanationOfBenefit",
       "status" : "active",
       "subType" : {
@@ -10094,90 +10322,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "CLM_ACTV_CARE_THRU_DT",
-            "display" : "Covered Care Through Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 7,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_NCVRD_FROM_DT",
-            "display" : "Noncovered Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 8,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_NCVRD_THRU_DT",
-            "display" : "Noncovered Stay Through Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 9,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_MDCR_EXHSTD_DT",
-            "display" : "Medicare Benefits Exhausted Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 10,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_FROM_DT",
-            "display" : "Qualified Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 11,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_THRU_DT",
-            "display" : "Qualified Stay Thru Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 12,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
             "code" : "pointoforigin",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -10192,7 +10336,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 7
       }, {
         "category" : {
           "coding" : [ {
@@ -10210,7 +10354,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 8
       }, {
         "category" : {
           "coding" : [ {
@@ -10227,7 +10371,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 9
       }, {
         "category" : {
           "coding" : [ {
@@ -10247,7 +10391,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 10
       }, {
         "category" : {
           "coding" : [ {
@@ -10261,9 +10405,25 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 11
       } ],
       "total" : [ {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 0.0
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "eligible",
+            "display" : "Allowed Amount",
+            "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+          }, {
+            "code" : "CLM_ALOWD_CHRG_AMT",
+            "display" : "Total Allowed Charge Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
         "amount" : {
           "currency" : "USD",
           "value" : 622674.5625
@@ -10275,7 +10435,39 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
           }, {
             "code" : "CLM_SBMT_CHRG_AMT",
-            "display" : "Total Charge Amount",
+            "display" : "Total Submitted Charge Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 0.0
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Paid by patient",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_BENE_PMT_AMT",
+            "display" : "Revenue Center Patient Responsibility Payment Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 0.0
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidtoprovider",
+            "display" : "Paid to provider",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_PRVDR_PMT_AMT",
+            "display" : "Provider Payment Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -10619,6 +10811,19 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         } ],
         "start" : "2020-09-01"
       },
+      "careTeam" : [ {
+        "provider" : {
+          "reference" : "#careteam-provider-1"
+        },
+        "role" : {
+          "coding" : [ {
+            "code" : "referring",
+            "display" : "Referring provider",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
+          } ]
+        },
+        "sequence" : 1
+      } ],
       "contained" : [ {
         "active" : true,
         "id" : "insurer-org",
@@ -10627,6 +10832,27 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         },
         "name" : "Centers for Medicare and Medicaid Services",
         "resourceType" : "Organization"
+      }, {
+        "id" : "careteam-provider-1",
+        "identifier" : [ {
+          "system" : "http://hl7.org/fhir/sid/us-npi",
+          "type" : {
+            "coding" : [ {
+              "code" : "NPI",
+              "display" : "National provider identifier",
+              "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+            } ]
+          },
+          "value" : "1730548868"
+        } ],
+        "meta" : {
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
+        },
+        "name" : [ {
+          "family" : "Rogers",
+          "given" : [ "Gromit" ]
+        } ],
+        "resourceType" : "Practitioner"
       } ],
       "created" : "2025-08-26T00:00:00+00:00",
       "diagnosis" : [ {
@@ -11466,7 +11692,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
-        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Professional-NonClinician|2.1.0" ],
         "source" : "NationalClaimsHistory",
         "tag" : [ {
           "code" : "Adjudicated",
@@ -11561,22 +11786,11 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "code" : {
           "coding" : [ {
             "code" : "V",
-            "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA])."
+            "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA]).",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
           } ]
         },
         "sequence" : 4
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "admissionperiod",
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
-          } ]
-        },
-        "sequence" : 5,
-        "timingPeriod" : {
-          "end" : "9999-12-31",
-          "start" : "9999-12-31"
-        }
       }, {
         "category" : {
           "coding" : [ {
@@ -11584,106 +11798,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 5,
         "timingDate" : "2020-09-11"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_NCH_WKLY_PROC_DT",
-            "display" : "Weekly Process Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 7,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_ACTV_CARE_THRU_DT",
-            "display" : "Covered Care Through Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 8,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_NCVRD_FROM_DT",
-            "display" : "Noncovered Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 9,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_NCVRD_THRU_DT",
-            "display" : "Noncovered Stay Through Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 10,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_MDCR_EXHSTD_DT",
-            "display" : "Medicare Benefits Exhausted Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 11,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_FROM_DT",
-            "display" : "Qualified Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 12,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_THRU_DT",
-            "display" : "Qualified Stay Thru Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 13,
-        "timingDate" : "9999-12-31"
       }, {
         "category" : {
           "coding" : [ {
@@ -11701,7 +11817,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 6
       }, {
         "category" : {
           "coding" : [ {
@@ -11719,7 +11835,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 7
       }, {
         "category" : {
           "coding" : [ {
@@ -11736,7 +11852,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 8
       }, {
         "category" : {
           "coding" : [ {
@@ -11756,7 +11872,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 9
       }, {
         "category" : {
           "coding" : [ {
@@ -11770,9 +11886,25 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 18
+        "sequence" : 10
       } ],
       "total" : [ {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 559626.4375
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "eligible",
+            "display" : "Allowed Amount",
+            "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+          }, {
+            "code" : "CLM_ALOWD_CHRG_AMT",
+            "display" : "Total Allowed Charge Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
         "amount" : {
           "currency" : "USD",
           "value" : 11335.2998046875
@@ -11784,19 +11916,48 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
           }, {
             "code" : "CLM_SBMT_CHRG_AMT",
-            "display" : "Total Charge Amount",
+            "display" : "Total Submitted Charge Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 117377.93
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Paid by patient",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_BENE_PMT_AMT",
+            "display" : "Revenue Center Patient Responsibility Payment Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 0.0
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidtoprovider",
+            "display" : "Paid to provider",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_PRVDR_PMT_AMT",
+            "display" : "Provider Payment Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
       } ],
       "type" : {
         "coding" : [ {
-          "code" : "71",
-          "display" : "MEDICARE PART B PROFESSIONAL PHYSICIAN/SUPPLIER CLAIM (NON-DMEPOS)",
+          "code" : "64",
+          "display" : "MEDICARE ADVANTAGE (PAID AS FFS) CLAIMS",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-TYPE-CD"
-        }, {
-          "code" : "professional",
-          "system" : "http://terminology.hl7.org/CodeSystem/claim-type"
         } ]
       },
       "use" : "claim"
@@ -12196,6 +12357,18 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
       },
       "careTeam" : [ {
         "provider" : {
+          "reference" : "#careteam-provider-line-1"
+        },
+        "role" : {
+          "coding" : [ {
+            "code" : "rendering",
+            "display" : "Rendering provider",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
+          } ]
+        },
+        "sequence" : 1
+      }, {
+        "provider" : {
           "reference" : "#careteam-provider-1"
         },
         "role" : {
@@ -12206,6 +12379,18 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
           } ]
         },
         "sequence" : 1
+      }, {
+        "provider" : {
+          "reference" : "#careteam-provider-line-2"
+        },
+        "role" : {
+          "coding" : [ {
+            "code" : "rendering",
+            "display" : "Rendering provider",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
+          } ]
+        },
+        "sequence" : 2
       }, {
         "provider" : {
           "reference" : "#careteam-provider-2"
@@ -12220,7 +12405,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
         "sequence" : 2
       }, {
         "provider" : {
-          "reference" : "#careteam-provider-3"
+          "reference" : "#careteam-provider-line-3"
         },
         "role" : {
           "coding" : [ {
@@ -12230,6 +12415,30 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
           } ]
         },
         "sequence" : 3
+      }, {
+        "provider" : {
+          "reference" : "#careteam-provider-3"
+        },
+        "role" : {
+          "coding" : [ {
+            "code" : "otheroperating",
+            "display" : "Other Operating",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
+          } ]
+        },
+        "sequence" : 3
+      }, {
+        "provider" : {
+          "reference" : "#careteam-provider-line-4"
+        },
+        "role" : {
+          "coding" : [ {
+            "code" : "rendering",
+            "display" : "Rendering provider",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
+          } ]
+        },
+        "sequence" : 4
       }, {
         "provider" : {
           "reference" : "#careteam-provider-4"
@@ -12242,6 +12451,90 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
           } ]
         },
         "sequence" : 4
+      }, {
+        "provider" : {
+          "reference" : "#careteam-provider-line-5"
+        },
+        "role" : {
+          "coding" : [ {
+            "code" : "rendering",
+            "display" : "Rendering provider",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
+          } ]
+        },
+        "sequence" : 5
+      }, {
+        "provider" : {
+          "reference" : "#careteam-provider-line-6"
+        },
+        "role" : {
+          "coding" : [ {
+            "code" : "rendering",
+            "display" : "Rendering provider",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
+          } ]
+        },
+        "sequence" : 6
+      }, {
+        "provider" : {
+          "reference" : "#careteam-provider-line-7"
+        },
+        "role" : {
+          "coding" : [ {
+            "code" : "rendering",
+            "display" : "Rendering provider",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
+          } ]
+        },
+        "sequence" : 7
+      }, {
+        "provider" : {
+          "reference" : "#careteam-provider-line-8"
+        },
+        "role" : {
+          "coding" : [ {
+            "code" : "rendering",
+            "display" : "Rendering provider",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
+          } ]
+        },
+        "sequence" : 8
+      }, {
+        "provider" : {
+          "reference" : "#careteam-provider-line-9"
+        },
+        "role" : {
+          "coding" : [ {
+            "code" : "rendering",
+            "display" : "Rendering provider",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
+          } ]
+        },
+        "sequence" : 9
+      }, {
+        "provider" : {
+          "reference" : "#careteam-provider-line-10"
+        },
+        "role" : {
+          "coding" : [ {
+            "code" : "rendering",
+            "display" : "Rendering provider",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
+          } ]
+        },
+        "sequence" : 10
+      }, {
+        "provider" : {
+          "reference" : "#careteam-provider-line-11"
+        },
+        "role" : {
+          "coding" : [ {
+            "code" : "rendering",
+            "display" : "Rendering provider",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
+          } ]
+        },
+        "sequence" : 11
       } ],
       "contained" : [ {
         "active" : true,
@@ -12252,8 +12545,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
         "name" : "Centers for Medicare and Medicaid Services",
         "resourceType" : "Organization"
       }, {
-        "active" : true,
-        "id" : "provider-org",
+        "id" : "careteam-provider-line-1",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
           "type" : {
@@ -12263,71 +12555,24 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
               "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
             } ]
           },
-          "value" : "1669572467"
-        }, {
-          "system" : "http://terminology.hl7.org/NamingSystem/CCN",
-          "value" : "001509"
-        } ],
-        "meta" : {
-          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|6.1.0" ]
-        },
-        "name" : "PROVIDER ORG SOURCED FROM NPPES",
-        "resourceType" : "Organization"
-      }, {
-        "id" : "careteam-provider-1",
-        "identifier" : [ {
-          "system" : "http://hl7.org/fhir/sid/us-npi",
-          "type" : {
-            "coding" : [ {
-              "code" : "NPI",
-              "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-            } ]
-          },
-          "value" : "1730548868"
+          "value" : "1720749690"
         } ],
         "meta" : {
           "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
         },
-        "resourceType" : "Practitioner"
-      }, {
-        "id" : "careteam-provider-2",
-        "identifier" : [ {
-          "system" : "http://hl7.org/fhir/sid/us-npi",
-          "type" : {
-            "coding" : [ {
-              "code" : "NPI",
-              "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-            } ]
-          },
-          "value" : "1003488552"
+        "name" : [ {
+          "family" : "Stark",
+          "given" : [ "Tony" ]
         } ],
-        "meta" : {
-          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
-        },
         "resourceType" : "Practitioner"
       }, {
-        "id" : "careteam-provider-3",
+        "id" : "careteam-provider-line-2",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
           "type" : {
             "coding" : [ {
               "code" : "NPI",
-              "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-            } ]
-          },
-          "value" : "1730548868"
-        } ],
-        "meta" : {
-          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
-        },
-        "resourceType" : "Practitioner"
-      }, {
-        "id" : "careteam-provider-4",
-        "identifier" : [ {
-          "system" : "http://hl7.org/fhir/sid/us-npi",
-          "type" : {
-            "coding" : [ {
-              "code" : "NPI",
+              "display" : "National provider identifier",
               "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
             } ]
           },
@@ -12336,6 +12581,283 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
         "meta" : {
           "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
         },
+        "name" : [ {
+          "family" : "Stark",
+          "given" : [ "Tony" ]
+        } ],
+        "resourceType" : "Practitioner"
+      }, {
+        "id" : "careteam-provider-line-3",
+        "identifier" : [ {
+          "system" : "http://hl7.org/fhir/sid/us-npi",
+          "type" : {
+            "coding" : [ {
+              "code" : "NPI",
+              "display" : "National provider identifier",
+              "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+            } ]
+          },
+          "value" : "1720749690"
+        } ],
+        "meta" : {
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
+        },
+        "name" : [ {
+          "family" : "Stark",
+          "given" : [ "Tony" ]
+        } ],
+        "resourceType" : "Practitioner"
+      }, {
+        "id" : "careteam-provider-line-4",
+        "identifier" : [ {
+          "system" : "http://hl7.org/fhir/sid/us-npi",
+          "type" : {
+            "coding" : [ {
+              "code" : "NPI",
+              "display" : "National provider identifier",
+              "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+            } ]
+          },
+          "value" : "1720749690"
+        } ],
+        "meta" : {
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
+        },
+        "name" : [ {
+          "family" : "Stark",
+          "given" : [ "Tony" ]
+        } ],
+        "resourceType" : "Practitioner"
+      }, {
+        "id" : "careteam-provider-line-5",
+        "identifier" : [ {
+          "system" : "http://hl7.org/fhir/sid/us-npi",
+          "type" : {
+            "coding" : [ {
+              "code" : "NPI",
+              "display" : "National provider identifier",
+              "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+            } ]
+          },
+          "value" : "1720749690"
+        } ],
+        "meta" : {
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
+        },
+        "name" : [ {
+          "family" : "Stark",
+          "given" : [ "Tony" ]
+        } ],
+        "resourceType" : "Practitioner"
+      }, {
+        "id" : "careteam-provider-line-6",
+        "identifier" : [ {
+          "system" : "http://hl7.org/fhir/sid/us-npi",
+          "type" : {
+            "coding" : [ {
+              "code" : "NPI",
+              "display" : "National provider identifier",
+              "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+            } ]
+          },
+          "value" : "1720749690"
+        } ],
+        "meta" : {
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
+        },
+        "name" : [ {
+          "family" : "Stark",
+          "given" : [ "Tony" ]
+        } ],
+        "resourceType" : "Practitioner"
+      }, {
+        "id" : "careteam-provider-line-7",
+        "identifier" : [ {
+          "system" : "http://hl7.org/fhir/sid/us-npi",
+          "type" : {
+            "coding" : [ {
+              "code" : "NPI",
+              "display" : "National provider identifier",
+              "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+            } ]
+          },
+          "value" : "1720749690"
+        } ],
+        "meta" : {
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
+        },
+        "name" : [ {
+          "family" : "Stark",
+          "given" : [ "Tony" ]
+        } ],
+        "resourceType" : "Practitioner"
+      }, {
+        "id" : "careteam-provider-line-8",
+        "identifier" : [ {
+          "system" : "http://hl7.org/fhir/sid/us-npi",
+          "type" : {
+            "coding" : [ {
+              "code" : "NPI",
+              "display" : "National provider identifier",
+              "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+            } ]
+          },
+          "value" : "1720749690"
+        } ],
+        "meta" : {
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
+        },
+        "name" : [ {
+          "family" : "Stark",
+          "given" : [ "Tony" ]
+        } ],
+        "resourceType" : "Practitioner"
+      }, {
+        "id" : "careteam-provider-line-9",
+        "identifier" : [ {
+          "system" : "http://hl7.org/fhir/sid/us-npi",
+          "type" : {
+            "coding" : [ {
+              "code" : "NPI",
+              "display" : "National provider identifier",
+              "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+            } ]
+          },
+          "value" : "1720749690"
+        } ],
+        "meta" : {
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
+        },
+        "name" : [ {
+          "family" : "Stark",
+          "given" : [ "Tony" ]
+        } ],
+        "resourceType" : "Practitioner"
+      }, {
+        "id" : "careteam-provider-line-10",
+        "identifier" : [ {
+          "system" : "http://hl7.org/fhir/sid/us-npi",
+          "type" : {
+            "coding" : [ {
+              "code" : "NPI",
+              "display" : "National provider identifier",
+              "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+            } ]
+          },
+          "value" : "1720749690"
+        } ],
+        "meta" : {
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
+        },
+        "name" : [ {
+          "family" : "Stark",
+          "given" : [ "Tony" ]
+        } ],
+        "resourceType" : "Practitioner"
+      }, {
+        "id" : "careteam-provider-line-11",
+        "identifier" : [ {
+          "system" : "http://hl7.org/fhir/sid/us-npi",
+          "type" : {
+            "coding" : [ {
+              "code" : "NPI",
+              "display" : "National provider identifier",
+              "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+            } ]
+          },
+          "value" : "1720749690"
+        } ],
+        "meta" : {
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
+        },
+        "name" : [ {
+          "family" : "Stark",
+          "given" : [ "Tony" ]
+        } ],
+        "resourceType" : "Practitioner"
+      }, {
+        "id" : "careteam-provider-1",
+        "identifier" : [ {
+          "system" : "http://hl7.org/fhir/sid/us-npi",
+          "type" : {
+            "coding" : [ {
+              "code" : "NPI",
+              "display" : "National provider identifier",
+              "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+            } ]
+          },
+          "value" : "1730548868"
+        } ],
+        "meta" : {
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
+        },
+        "name" : [ {
+          "family" : "Rogers",
+          "given" : [ "Gromit" ]
+        } ],
+        "resourceType" : "Practitioner"
+      }, {
+        "id" : "careteam-provider-2",
+        "identifier" : [ {
+          "system" : "http://hl7.org/fhir/sid/us-npi",
+          "type" : {
+            "coding" : [ {
+              "code" : "NPI",
+              "display" : "National provider identifier",
+              "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+            } ]
+          },
+          "value" : "1003488552"
+        } ],
+        "meta" : {
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
+        },
+        "name" : [ {
+          "family" : "Addams",
+          "given" : [ "Wednesday", "Wednesday" ]
+        } ],
+        "resourceType" : "Practitioner"
+      }, {
+        "id" : "careteam-provider-3",
+        "identifier" : [ {
+          "system" : "http://hl7.org/fhir/sid/us-npi",
+          "type" : {
+            "coding" : [ {
+              "code" : "NPI",
+              "display" : "National provider identifier",
+              "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+            } ]
+          },
+          "value" : "1730548868"
+        } ],
+        "meta" : {
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
+        },
+        "name" : [ {
+          "family" : "Rogers",
+          "given" : [ "Gromit" ]
+        } ],
+        "resourceType" : "Practitioner"
+      }, {
+        "id" : "careteam-provider-4",
+        "identifier" : [ {
+          "system" : "http://hl7.org/fhir/sid/us-npi",
+          "type" : {
+            "coding" : [ {
+              "code" : "NPI",
+              "display" : "National provider identifier",
+              "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+            } ]
+          },
+          "value" : "1720749690"
+        } ],
+        "meta" : {
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
+        },
+        "name" : [ {
+          "family" : "Stark",
+          "given" : [ "Tony" ]
+        } ],
         "resourceType" : "Practitioner"
       } ],
       "created" : "2025-08-26T00:00:00+00:00",
@@ -14211,9 +14733,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
           } ]
         } ]
       } ],
-      "provider" : {
-        "reference" : "#provider-org"
-      },
       "resourceType" : "ExplanationOfBenefit",
       "status" : "active",
       "supportingInfo" : [ {
@@ -14292,22 +14811,11 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
         "code" : {
           "coding" : [ {
             "code" : "V",
-            "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA])."
+            "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA]).",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
           } ]
         },
         "sequence" : 4
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "admissionperiod",
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
-          } ]
-        },
-        "sequence" : 5,
-        "timingPeriod" : {
-          "end" : "9999-12-31",
-          "start" : "9999-12-31"
-        }
       }, {
         "category" : {
           "coding" : [ {
@@ -14315,106 +14823,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 5,
         "timingDate" : "2020-09-11"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_NCH_WKLY_PROC_DT",
-            "display" : "Weekly Process Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 7,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_ACTV_CARE_THRU_DT",
-            "display" : "Covered Care Through Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 8,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_NCVRD_FROM_DT",
-            "display" : "Noncovered Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 9,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_NCVRD_THRU_DT",
-            "display" : "Noncovered Stay Through Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 10,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_MDCR_EXHSTD_DT",
-            "display" : "Medicare Benefits Exhausted Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 11,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_FROM_DT",
-            "display" : "Qualified Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 12,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_THRU_DT",
-            "display" : "Qualified Stay Thru Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 13,
-        "timingDate" : "9999-12-31"
       }, {
         "category" : {
           "coding" : [ {
@@ -14432,7 +14842,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 6
       }, {
         "category" : {
           "coding" : [ {
@@ -14449,7 +14859,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 7
       }, {
         "category" : {
           "coding" : [ {
@@ -14469,7 +14879,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 8
       }, {
         "category" : {
           "coding" : [ {
@@ -14483,9 +14893,25 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 9
       } ],
       "total" : [ {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 0.0
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "eligible",
+            "display" : "Allowed Amount",
+            "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+          }, {
+            "code" : "CLM_ALOWD_CHRG_AMT",
+            "display" : "Total Allowed Charge Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
         "amount" : {
           "currency" : "USD",
           "value" : 485618.5625
@@ -14497,7 +14923,39 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
           }, {
             "code" : "CLM_SBMT_CHRG_AMT",
-            "display" : "Total Charge Amount",
+            "display" : "Total Submitted Charge Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 0.0
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Paid by patient",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_BENE_PMT_AMT",
+            "display" : "Revenue Center Patient Responsibility Payment Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 0.0
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidtoprovider",
+            "display" : "Paid to provider",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_PRVDR_PMT_AMT",
+            "display" : "Provider Payment Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -14796,23 +15254,11 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "admissionperiod",
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
-          } ]
-        },
-        "sequence" : 4,
-        "timingPeriod" : {
-          "end" : "9999-12-31",
-          "start" : "9999-12-31"
-        }
-      }, {
-        "category" : {
-          "coding" : [ {
             "code" : "clmrecvddate",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 4,
         "timingDate" : "2020-09-11"
       }, {
         "category" : {
@@ -14826,94 +15272,26 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 5,
         "timingDate" : "2020-09-11"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_ACTV_CARE_THRU_DT",
-            "display" : "Covered Care Through Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 7,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_NCVRD_FROM_DT",
-            "display" : "Noncovered Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 8,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_NCVRD_THRU_DT",
-            "display" : "Noncovered Stay Through Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 9,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_MDCR_EXHSTD_DT",
-            "display" : "Medicare Benefits Exhausted Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 10,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_FROM_DT",
-            "display" : "Qualified Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 11,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_THRU_DT",
-            "display" : "Qualified Stay Thru Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 12,
-        "timingDate" : "9999-12-31"
       } ],
       "total" : [ {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 0.0
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "eligible",
+            "display" : "Allowed Amount",
+            "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+          }, {
+            "code" : "CLM_ALOWD_CHRG_AMT",
+            "display" : "Total Allowed Charge Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
         "amount" : {
           "currency" : "USD",
           "value" : 766500.0
@@ -14925,7 +15303,39 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
           }, {
             "code" : "CLM_SBMT_CHRG_AMT",
-            "display" : "Total Charge Amount",
+            "display" : "Total Submitted Charge Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 0.0
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Paid by patient",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_BENE_PMT_AMT",
+            "display" : "Revenue Center Patient Responsibility Payment Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 0.0
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidtoprovider",
+            "display" : "Paid to provider",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_PRVDR_PMT_AMT",
+            "display" : "Provider Payment Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -15305,6 +15715,18 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
       },
       "careTeam" : [ {
         "provider" : {
+          "reference" : "#careteam-provider-line-1"
+        },
+        "role" : {
+          "coding" : [ {
+            "code" : "rendering",
+            "display" : "Rendering provider",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
+          } ]
+        },
+        "sequence" : 1
+      }, {
+        "provider" : {
           "reference" : "#careteam-provider-1"
         },
         "role" : {
@@ -15315,6 +15737,18 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           } ]
         },
         "sequence" : 1
+      }, {
+        "provider" : {
+          "reference" : "#careteam-provider-line-2"
+        },
+        "role" : {
+          "coding" : [ {
+            "code" : "rendering",
+            "display" : "Rendering provider",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
+          } ]
+        },
+        "sequence" : 2
       }, {
         "provider" : {
           "reference" : "#careteam-provider-2"
@@ -15329,12 +15763,24 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "sequence" : 2
       }, {
         "provider" : {
-          "reference" : "#careteam-provider-3"
+          "reference" : "#careteam-provider-line-3"
         },
         "role" : {
           "coding" : [ {
             "code" : "rendering",
             "display" : "Rendering provider",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
+          } ]
+        },
+        "sequence" : 3
+      }, {
+        "provider" : {
+          "reference" : "#careteam-provider-3"
+        },
+        "role" : {
+          "coding" : [ {
+            "code" : "otheroperating",
+            "display" : "Other Operating",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
           } ]
         },
@@ -15361,8 +15807,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "name" : "Centers for Medicare and Medicaid Services",
         "resourceType" : "Organization"
       }, {
-        "active" : true,
-        "id" : "provider-org",
+        "id" : "careteam-provider-line-1",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
           "type" : {
@@ -15372,16 +15817,58 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
               "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
             } ]
           },
-          "value" : "1104867175"
-        }, {
-          "system" : "http://terminology.hl7.org/NamingSystem/CCN",
-          "value" : "001505"
+          "value" : "1558719914"
         } ],
         "meta" : {
-          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|6.1.0" ]
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
         },
-        "name" : "PROVIDER ORG SOURCED FROM NPPES",
-        "resourceType" : "Organization"
+        "name" : [ {
+          "family" : "Rogers",
+          "given" : [ "Gromit" ]
+        } ],
+        "resourceType" : "Practitioner"
+      }, {
+        "id" : "careteam-provider-line-2",
+        "identifier" : [ {
+          "system" : "http://hl7.org/fhir/sid/us-npi",
+          "type" : {
+            "coding" : [ {
+              "code" : "NPI",
+              "display" : "National provider identifier",
+              "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+            } ]
+          },
+          "value" : "1558719914"
+        } ],
+        "meta" : {
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
+        },
+        "name" : [ {
+          "family" : "Rogers",
+          "given" : [ "Gromit" ]
+        } ],
+        "resourceType" : "Practitioner"
+      }, {
+        "id" : "careteam-provider-line-3",
+        "identifier" : [ {
+          "system" : "http://hl7.org/fhir/sid/us-npi",
+          "type" : {
+            "coding" : [ {
+              "code" : "NPI",
+              "display" : "National provider identifier",
+              "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+            } ]
+          },
+          "value" : "1558719914"
+        } ],
+        "meta" : {
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
+        },
+        "name" : [ {
+          "family" : "Rogers",
+          "given" : [ "Gromit" ]
+        } ],
+        "resourceType" : "Practitioner"
       }, {
         "id" : "careteam-provider-1",
         "identifier" : [ {
@@ -15389,6 +15876,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           "type" : {
             "coding" : [ {
               "code" : "NPI",
+              "display" : "National provider identifier",
               "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
             } ]
           },
@@ -15405,6 +15893,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           "type" : {
             "coding" : [ {
               "code" : "NPI",
+              "display" : "National provider identifier",
               "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
             } ]
           },
@@ -15413,6 +15902,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "meta" : {
           "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
         },
+        "name" : [ {
+          "family" : "Stark",
+          "given" : [ "Tony" ]
+        } ],
         "resourceType" : "Practitioner"
       }, {
         "id" : "careteam-provider-3",
@@ -15421,6 +15914,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           "type" : {
             "coding" : [ {
               "code" : "NPI",
+              "display" : "National provider identifier",
               "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
             } ]
           },
@@ -15429,6 +15923,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "meta" : {
           "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
         },
+        "name" : [ {
+          "family" : "Granger",
+          "given" : [ "Hermion" ]
+        } ],
         "resourceType" : "Practitioner"
       }, {
         "id" : "careteam-provider-4",
@@ -15437,6 +15935,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           "type" : {
             "coding" : [ {
               "code" : "NPI",
+              "display" : "National provider identifier",
               "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
             } ]
           },
@@ -15445,6 +15944,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "meta" : {
           "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
         },
+        "name" : [ {
+          "family" : "Rogers",
+          "given" : [ "Gromit" ]
+        } ],
         "resourceType" : "Practitioner"
       } ],
       "created" : "2025-08-26T00:00:00+00:00",
@@ -16538,9 +17041,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           } ]
         } ]
       } ],
-      "provider" : {
-        "reference" : "#provider-org"
-      },
       "resourceType" : "ExplanationOfBenefit",
       "status" : "active",
       "subType" : {
@@ -16625,7 +17125,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "code" : {
           "coding" : [ {
             "code" : "V",
-            "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA])."
+            "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA]).",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
           } ]
         },
         "sequence" : 4
@@ -16667,90 +17168,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "CLM_ACTV_CARE_THRU_DT",
-            "display" : "Covered Care Through Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 8,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_NCVRD_FROM_DT",
-            "display" : "Noncovered Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 9,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_NCVRD_THRU_DT",
-            "display" : "Noncovered Stay Through Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 10,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_MDCR_EXHSTD_DT",
-            "display" : "Medicare Benefits Exhausted Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 11,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_FROM_DT",
-            "display" : "Qualified Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 12,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_THRU_DT",
-            "display" : "Qualified Stay Thru Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 13,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
             "code" : "pointoforigin",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -16765,7 +17182,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 8
       }, {
         "category" : {
           "coding" : [ {
@@ -16783,7 +17200,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 9
       }, {
         "category" : {
           "coding" : [ {
@@ -16800,7 +17217,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 10
       }, {
         "category" : {
           "coding" : [ {
@@ -16820,7 +17237,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 11
       }, {
         "category" : {
           "coding" : [ {
@@ -16834,9 +17251,25 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 18
+        "sequence" : 12
       } ],
       "total" : [ {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 0.0
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "eligible",
+            "display" : "Allowed Amount",
+            "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+          }, {
+            "code" : "CLM_ALOWD_CHRG_AMT",
+            "display" : "Total Allowed Charge Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
         "amount" : {
           "currency" : "USD",
           "value" : 164176.8125
@@ -16848,7 +17281,39 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
           }, {
             "code" : "CLM_SBMT_CHRG_AMT",
-            "display" : "Total Charge Amount",
+            "display" : "Total Submitted Charge Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 0.0
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Paid by patient",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_BENE_PMT_AMT",
+            "display" : "Revenue Center Patient Responsibility Payment Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 0.0
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidtoprovider",
+            "display" : "Paid to provider",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_PRVDR_PMT_AMT",
+            "display" : "Provider Payment Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -17223,8 +17688,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         },
         "role" : {
           "coding" : [ {
-            "code" : "rendering",
-            "display" : "Rendering provider",
+            "code" : "otheroperating",
+            "display" : "Other Operating",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
           } ]
         },
@@ -17251,8 +17716,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "name" : "Centers for Medicare and Medicaid Services",
         "resourceType" : "Organization"
       }, {
-        "active" : true,
-        "id" : "provider-org",
+        "id" : "careteam-provider-1",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
           "type" : {
@@ -17262,31 +17726,15 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
               "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
             } ]
           },
-          "value" : "1477643690"
-        }, {
-          "system" : "http://terminology.hl7.org/NamingSystem/CCN",
-          "value" : "001505"
-        } ],
-        "meta" : {
-          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|6.1.0" ]
-        },
-        "name" : "PROVIDER ORG SOURCED FROM NPPES",
-        "resourceType" : "Organization"
-      }, {
-        "id" : "careteam-provider-1",
-        "identifier" : [ {
-          "system" : "http://hl7.org/fhir/sid/us-npi",
-          "type" : {
-            "coding" : [ {
-              "code" : "NPI",
-              "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-            } ]
-          },
           "value" : "1023051596"
         } ],
         "meta" : {
           "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
         },
+        "name" : [ {
+          "family" : "Granger",
+          "given" : [ "Hermion" ]
+        } ],
         "resourceType" : "Practitioner"
       }, {
         "id" : "careteam-provider-2",
@@ -17295,6 +17743,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           "type" : {
             "coding" : [ {
               "code" : "NPI",
+              "display" : "National provider identifier",
               "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
             } ]
           },
@@ -17311,6 +17760,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           "type" : {
             "coding" : [ {
               "code" : "NPI",
+              "display" : "National provider identifier",
               "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
             } ]
           },
@@ -17319,6 +17769,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "meta" : {
           "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
         },
+        "name" : [ {
+          "family" : "Addams",
+          "given" : [ "Wednesday", "Wednesday" ]
+        } ],
         "resourceType" : "Practitioner"
       }, {
         "id" : "careteam-provider-4",
@@ -17327,6 +17781,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           "type" : {
             "coding" : [ {
               "code" : "NPI",
+              "display" : "National provider identifier",
               "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
             } ]
           },
@@ -19136,9 +19591,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           "value" : 254072.03
         }
       },
-      "provider" : {
-        "reference" : "#provider-org"
-      },
       "resourceType" : "ExplanationOfBenefit",
       "status" : "active",
       "subType" : {
@@ -19246,90 +19698,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "CLM_ACTV_CARE_THRU_DT",
-            "display" : "Covered Care Through Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 7,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_NCVRD_FROM_DT",
-            "display" : "Noncovered Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 8,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_NCVRD_THRU_DT",
-            "display" : "Noncovered Stay Through Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 9,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_MDCR_EXHSTD_DT",
-            "display" : "Medicare Benefits Exhausted Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 10,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_FROM_DT",
-            "display" : "Qualified Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 11,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_THRU_DT",
-            "display" : "Qualified Stay Thru Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 12,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
             "code" : "pointoforigin",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -19344,7 +19712,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 7
       }, {
         "category" : {
           "coding" : [ {
@@ -19362,7 +19730,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 8
       }, {
         "category" : {
           "coding" : [ {
@@ -19379,7 +19747,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 9
       }, {
         "category" : {
           "coding" : [ {
@@ -19399,7 +19767,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 10
       }, {
         "category" : {
           "coding" : [ {
@@ -19413,9 +19781,25 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 11
       } ],
       "total" : [ {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 0.0
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "eligible",
+            "display" : "Allowed Amount",
+            "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+          }, {
+            "code" : "CLM_ALOWD_CHRG_AMT",
+            "display" : "Total Allowed Charge Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
         "amount" : {
           "currency" : "USD",
           "value" : 622674.5625
@@ -19427,7 +19811,39 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
           }, {
             "code" : "CLM_SBMT_CHRG_AMT",
-            "display" : "Total Charge Amount",
+            "display" : "Total Submitted Charge Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 0.0
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Paid by patient",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_BENE_PMT_AMT",
+            "display" : "Revenue Center Patient Responsibility Payment Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 0.0
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidtoprovider",
+            "display" : "Paid to provider",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_PRVDR_PMT_AMT",
+            "display" : "Provider Payment Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -19771,6 +20187,19 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         } ],
         "start" : "2020-09-01"
       },
+      "careTeam" : [ {
+        "provider" : {
+          "reference" : "#careteam-provider-1"
+        },
+        "role" : {
+          "coding" : [ {
+            "code" : "referring",
+            "display" : "Referring provider",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
+          } ]
+        },
+        "sequence" : 1
+      } ],
       "contained" : [ {
         "active" : true,
         "id" : "insurer-org",
@@ -19779,6 +20208,27 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         },
         "name" : "Centers for Medicare and Medicaid Services",
         "resourceType" : "Organization"
+      }, {
+        "id" : "careteam-provider-1",
+        "identifier" : [ {
+          "system" : "http://hl7.org/fhir/sid/us-npi",
+          "type" : {
+            "coding" : [ {
+              "code" : "NPI",
+              "display" : "National provider identifier",
+              "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+            } ]
+          },
+          "value" : "1730548868"
+        } ],
+        "meta" : {
+          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
+        },
+        "name" : [ {
+          "family" : "Rogers",
+          "given" : [ "Gromit" ]
+        } ],
+        "resourceType" : "Practitioner"
       } ],
       "created" : "2025-08-26T00:00:00+00:00",
       "diagnosis" : [ {
@@ -20618,7 +21068,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
-        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Professional-NonClinician|2.1.0" ],
         "source" : "NationalClaimsHistory",
         "tag" : [ {
           "code" : "Adjudicated",
@@ -20713,22 +21162,11 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "code" : {
           "coding" : [ {
             "code" : "V",
-            "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA])."
+            "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA]).",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
           } ]
         },
         "sequence" : 4
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "admissionperiod",
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
-          } ]
-        },
-        "sequence" : 5,
-        "timingPeriod" : {
-          "end" : "9999-12-31",
-          "start" : "9999-12-31"
-        }
       }, {
         "category" : {
           "coding" : [ {
@@ -20736,106 +21174,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 5,
         "timingDate" : "2020-09-11"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_NCH_WKLY_PROC_DT",
-            "display" : "Weekly Process Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 7,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_ACTV_CARE_THRU_DT",
-            "display" : "Covered Care Through Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 8,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_NCVRD_FROM_DT",
-            "display" : "Noncovered Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 9,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_NCVRD_THRU_DT",
-            "display" : "Noncovered Stay Through Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 10,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_MDCR_EXHSTD_DT",
-            "display" : "Medicare Benefits Exhausted Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 11,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_FROM_DT",
-            "display" : "Qualified Stay From Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 12,
-        "timingDate" : "9999-12-31"
-      }, {
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_QLFY_STAY_THRU_DT",
-            "display" : "Qualified Stay Thru Date",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 13,
-        "timingDate" : "9999-12-31"
       }, {
         "category" : {
           "coding" : [ {
@@ -20853,7 +21193,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 6
       }, {
         "category" : {
           "coding" : [ {
@@ -20871,7 +21211,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 7
       }, {
         "category" : {
           "coding" : [ {
@@ -20888,7 +21228,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 8
       }, {
         "category" : {
           "coding" : [ {
@@ -20908,7 +21248,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 9
       }, {
         "category" : {
           "coding" : [ {
@@ -20922,9 +21262,25 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 18
+        "sequence" : 10
       } ],
       "total" : [ {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 559626.4375
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "eligible",
+            "display" : "Allowed Amount",
+            "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+          }, {
+            "code" : "CLM_ALOWD_CHRG_AMT",
+            "display" : "Total Allowed Charge Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
         "amount" : {
           "currency" : "USD",
           "value" : 11335.2998046875
@@ -20936,19 +21292,48 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
           }, {
             "code" : "CLM_SBMT_CHRG_AMT",
-            "display" : "Total Charge Amount",
+            "display" : "Total Submitted Charge Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 117377.93
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidbypatient",
+            "display" : "Paid by patient",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_BENE_PMT_AMT",
+            "display" : "Revenue Center Patient Responsibility Payment Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 0.0
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "paidtoprovider",
+            "display" : "Paid to provider",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_PRVDR_PMT_AMT",
+            "display" : "Provider Payment Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
       } ],
       "type" : {
         "coding" : [ {
-          "code" : "71",
-          "display" : "MEDICARE PART B PROFESSIONAL PHYSICIAN/SUPPLIER CLAIM (NON-DMEPOS)",
+          "code" : "64",
+          "display" : "MEDICARE ADVANTAGE (PAID AS FFS) CLAIMS",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-TYPE-CD"
-        }, {
-          "code" : "professional",
-          "system" : "http://terminology.hl7.org/CodeSystem/claim-type"
         } ]
       },
       "use" : "claim"

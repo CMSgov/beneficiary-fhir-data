@@ -4,7 +4,7 @@ Description: "Code identifying the type of provider furnishing the service for t
 Id: CLM-PRVDR-PRTCPTG-CD
 * ^url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRVDR-TYPE-CD" 
 * ^context[+].type = #element
-* ^context[=].expression = "Practitioner"
+* ^context[=].expression = "ExplanationOfBenefit.item"
 * value[x] only Coding
 * value[x] 1..1
 * value[x].system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRVDR-TYPE-CD"

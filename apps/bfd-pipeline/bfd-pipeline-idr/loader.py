@@ -1,36 +1,36 @@
 import logging
-import os
-from collections.abc import Iterator
+from collections.abc import Iterator, Sequence
 from datetime import UTC, date, datetime
 import pprint
 
 import psycopg
 
 from constants import DEFAULT_MIN_DATE
-from model import DbType, LoadProgress, T
+from load_partition import LoadPartition
+from model import DbType, LoadMode, LoadProgress, T
+from settings import (
+    bfd_db_endpoint,
+    bfd_db_name,
+    bfd_db_password,
+    bfd_db_port,
+    bfd_db_username,
+)
 from timer import Timer
-
-idr_query_timer = Timer("idr_query")
-temp_table_timer = Timer("temp_table")
-copy_timer = Timer("copy")
-insert_timer = Timer("insert")
-commit_timer = Timer("commit")
 
 logger = logging.getLogger(__name__)
 
 
-def get_connection_string() -> str:
-    port = os.environ.get("BFD_DB_PORT") or "5432"
-    dbname = os.environ.get("BFD_DB_NAME") or "fhirdb"
-    return f"host={os.environ['BFD_DB_ENDPOINT']} port={port} dbname={dbname} \
-        user={os.environ['BFD_DB_USERNAME']} password={os.environ['BFD_DB_PASSWORD']}"
+def get_connection_string(load_mode: LoadMode) -> str:
+    if load_mode == LoadMode.LOCAL:
+        return "host=localhost dbname=fhirdb user=bfd password=InsecureLocalDev"
+
+    return f"host={bfd_db_endpoint()} port={bfd_db_port()} dbname={bfd_db_name()} \
+        user={bfd_db_username()} password={bfd_db_password()}"
 
 
 class PostgresLoader:
-    def __init__(
-        self,
-        connection_string: str,
-    ) -> None:
+    def __init__(self, load_mode: LoadMode) -> None:
+        connection_string = get_connection_string(load_mode)
         self.conn = psycopg.connect(connection_string)
 
     def run_sql(self, sql: str) -> None:
@@ -39,21 +39,26 @@ class PostgresLoader:
 
     def load(
         self,
-        fetch_results: Iterator[list[T]],
+        fetch_results: Iterator[Sequence[T]],
         model: type[T],
-        batch_start: datetime,
+        job_start: datetime,
+        partition: LoadPartition,
         progress: LoadProgress | None,
     ) -> bool:
-        return BatchLoader(self.conn, fetch_results, model, batch_start, progress).load()
+        return BatchLoader(self.conn, fetch_results, model, job_start, partition, progress).load()
+
+    def close(self) -> None:
+        self.conn.close()
 
 
 class BatchLoader:
     def __init__(
         self,
         conn: psycopg.Connection,
-        fetch_results: Iterator[list[T]],
+        fetch_results: Iterator[Sequence[T]],
         model: type[T],
-        batch_start: datetime,
+        job_start: datetime,
+        partition: LoadPartition,
         progress: LoadProgress | None,
     ) -> None:
         self.conn = conn
@@ -61,18 +66,25 @@ class BatchLoader:
         self.model = model
         self.table = model.table()
         self.temp_table = model.table().split(".")[1] + "_temp"
-        self.batch_start = batch_start
+        self.job_start = job_start
+        self.batch_start = datetime.now(UTC)
         self.insert_cols = list(model.insert_keys())
         self.insert_cols.sort()
         self.cols_str = ", ".join(self.insert_cols)
         self.batch_timestamp_cols = model.batch_timestamp_col(
             progress is None or progress.is_historical()
         )
+        self.partition = partition
         self.progress = progress
         self.immutable = not model.update_timestamp_col()
         self.meta_keys = (
             ["bfd_created_ts"] if self.immutable else ["bfd_created_ts", "bfd_updated_ts"]
         )
+        self.idr_query_timer = Timer("idr_query", model, partition)
+        self.temp_table_timer = Timer("temp_table", model, partition)
+        self.copy_timer = Timer("copy", model, partition)
+        self.insert_timer = Timer("insert", model, partition)
+        self.commit_timer = Timer("commit", model, partition)
 
     def load(
         self,
@@ -89,11 +101,11 @@ class BatchLoader:
 
             # load each batch in a separate transaction
             while True:
-                idr_query_timer.start()
+                self.idr_query_timer.start()
                 # We unfortunately need to use a while true loop here since we need to wrap the
                 # iterator with the timer calls.
                 results = next(self.fetch_results, None)
-                idr_query_timer.stop(self.table)
+                self.idr_query_timer.stop()
                 if results is None:
                     break
 
@@ -101,25 +113,25 @@ class BatchLoader:
                 logger.info("loading next %s results", len(results))
                 num_rows += len(results)
 
-                temp_table_timer.start()
+                self.temp_table_timer.start()
                 self._setup_temp_table(cur)
-                temp_table_timer.stop(self.table)
+                self.temp_table_timer.stop()
 
-                copy_timer.start()
+                self.copy_timer.start()
                 self._copy_data(cur, results)
-                copy_timer.stop(self.table)
+                self.copy_timer.stop()
 
                 if results:
                     # Upsert into the main table
-                    insert_timer.start()
+                    self.insert_timer.start()
                     self._merge(cur, timestamp)
-                    insert_timer.stop(self.table)
+                    self.insert_timer.stop()
 
                     self._calculate_load_progress(cur, results)
 
-                commit_timer.start()
+                self.commit_timer.start()
                 self.conn.commit()
-                commit_timer.stop(self.table)
+                self.commit_timer.stop()
 
             self._mark_batch_complete(cur)
             self.conn.commit()
@@ -133,15 +145,29 @@ class BatchLoader:
                 table_name, 
                 last_ts, 
                 last_id,
-                batch_start_ts, 
+                batch_partition,
+                job_start_ts, 
+                batch_start_ts,
                 batch_complete_ts)
-            VALUES(%(table)s, '{DEFAULT_MIN_DATE}', 0, %(start_ts)s, '{DEFAULT_MIN_DATE}')
-            ON CONFLICT (table_name) DO UPDATE 
-            SET batch_start_ts = EXCLUDED.batch_start_ts
+            VALUES(
+                %(table)s,
+                '{DEFAULT_MIN_DATE}', 
+                0,
+                %(partition)s,
+                %(job_start_ts)s,
+                %(batch_start_ts)s,
+                '{DEFAULT_MIN_DATE}'
+            )
+            ON CONFLICT (table_name, batch_partition) DO UPDATE 
+            SET 
+                job_start_ts = EXCLUDED.job_start_ts,
+                batch_start_ts = EXCLUDED.batch_start_ts
             """,
             {
                 "table": self.table,
-                "start_ts": self.batch_start,
+                "partition": self.partition.name,
+                "job_start_ts": self.job_start,
+                "batch_start_ts": self.batch_start,
             },
         )
 
@@ -150,9 +176,9 @@ class BatchLoader:
             """
             UPDATE idr.load_progress
             SET batch_complete_ts = NOW()
-            WHERE table_name = %(table)s
+            WHERE table_name = %(table)s AND batch_partition = %(batch_partition)s
             """,
-            {"table": self.table},
+            {"table": self.table, "batch_partition": self.partition.name},
         )
 
     def _setup_temp_table(self, cur: psycopg.Cursor) -> None:
@@ -173,7 +199,7 @@ class BatchLoader:
         for col in exclude_cols:
             cur.execute(f"ALTER TABLE {self.temp_table} DROP COLUMN {col}")  # type: ignore
 
-    def _calculate_load_progress(self, cur: psycopg.Cursor, results: list[T]) -> None:
+    def _calculate_load_progress(self, cur: psycopg.Cursor, results: Sequence[T]) -> None:
         last = results[len(results) - 1].model_dump()
         # Some tables that contain reference data (like contract info) may not have the
         # normal IDR timestamps.
@@ -195,12 +221,16 @@ class BatchLoader:
             cur.execute(
                 """
             UPDATE idr.load_progress
-            SET last_ts = %(last_ts)s,
+            SET 
+                last_ts = %(last_ts)s,
                 last_id = %(last_id)s
-            WHERE table_name = %(table)s
+            WHERE
+                table_name = %(table)s 
+                AND batch_partition = %(partition)s
             """,
                 {
                     "table": self.table,
+                    "partition": self.partition.name,
                     "last_ts": max_timestamp,
                     "last_id": batch_id,
                 },
@@ -295,7 +325,7 @@ class BatchLoader:
                 {},
             )
 
-    def _copy_data(self, cur: psycopg.Cursor, results: list[T]) -> None:
+    def _copy_data(self, cur: psycopg.Cursor, results: Sequence[T]) -> None:
         # Use COPY to load the batch into Postgres.
         # COPY has a number of optimizations that make bulk loading more efficient
         # than a bunch of INSERTs.

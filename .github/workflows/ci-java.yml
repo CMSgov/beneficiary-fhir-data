@@ -29,8 +29,6 @@ env:
   # https://stackoverflow.com/questions/6268391/is-there-a-way-to-represent-a-long-string-that-doesnt-have-any-whitespace-on-mul
   workflow_files_re: "^apps/(?!bfd-model/bfd-model-idr|utils).+$|^.github/workflows/ci-java.yml$"
   AWS_REGION: us-east-1
-  SONAR_PROJECT_KEY: bfd-parent
-  SONAR_HOST_URL: https://sonarqube.cloud.cms.gov
 
 jobs:
   workflow:
@@ -40,7 +38,7 @@ jobs:
       files: ${{ steps.workflow_files.outputs.files }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 2
           ref: ${{ inputs.branch }}
@@ -56,7 +54,7 @@ jobs:
     needs: workflow
     if: needs.workflow.outputs.files
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 2
           ref: ${{ inputs.branch }}
@@ -75,10 +73,14 @@ jobs:
     if: ${{ needs.workflow.outputs.files || (github.actor != 'actions-user' && github.ref_name == 'master') }}
     steps:
       - name: 'Checkout repo'
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
           ref: ${{ inputs.branch }}
+      - name: Node installation ISO sonarqube template analysis
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
       - name: 'Setup JDK'
         uses: actions/setup-java@v5
         with:
@@ -86,15 +88,7 @@ jobs:
           distribution: 'corretto'
           cache: 'maven'
       - name: Install uv
-        uses: astral-sh/setup-uv@v6
-
-      - name: Configure AWS credentials
-        id: config-aws-creds
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.NON_PROD_ACCOUNT_GHA_ROLE_ARN }}
-          role-session-name: ci-java
-          aws-region: us-east-1
+        uses: astral-sh/setup-uv@v7
 
       - name: Mask sensitive AWS data
         id: mask-sensitive-aws-data
@@ -124,24 +118,31 @@ jobs:
           -Dmaven.jacoco.skip=false
         working-directory: ./apps
 
-      - name: 'Generate, Upload Build Reports'
+      - name: 'Convert JaCoCo to Generic Coverage'
+        if: ${{ github.event_name != 'merge_group' }}
+        run: |
+          python utils/scripts/jacoco-to-generic.py \
+          --src-root $(pwd) \
+          --in report-aggregate/target/site/jacoco-aggregate/jacoco.xml \
+          --out coverage.xml
+        working-directory: ./apps
+
+      - name: 'Upload Analysis'
         if: ${{ github.event_name != 'merge_group' }}
         env:
           BFD_BRANCH: ${{ inputs.branch }}
         run: |
-          mvn sonar:sonar \
-          -DskipITs \
-          -DskipTests \
-          --no-transfer-progress \
-          -Dmaven.build.cache.enabled=false \
-          ${{ inputs.branch != null && '-Dsonar.branch.name=$BFD_BRANCH' || null }} -Dsonar.ci.autoconfig.disabled=true \
-          -Dsonar.coverage.jacoco.xmlReportPaths=target/coverage-reports/jacoco-it/jacoco.xml,target/coverage-reports/jacoco-ut/jacoco.xml \
-          -Dsonar.exclusions='*.java' \
-          -Dsonar.host.url="$SONAR_HOST_URL" \
-          -Dsonar.projectKey="$SONAR_PROJECT_KEY" \
-          -Dsonar.projectVersion="$(git log -1 --format=%H)" \
-          -Dsonar.qualitygate.wait=true \
-          -Dsonar.token="$SONAR_TOKEN"
+          mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+            -DskipITs \
+            -DskipTests \
+            --no-transfer-progress \
+            ${{ inputs.branch != null && '-Dsonar.branch.name=$BFD_BRANCH' || null }} -Dsonar.ci.autoconfig.disabled=true \
+            -Dsonar.host.url="https://sonarqube.cloud.cms.gov" \
+            -Dsonar.projectKey="bfd-parent" \
+            -Dsonar.projectVersion="$(git log -1 --format=%H)" \
+            -Dsonar.qualitygate.wait=true \
+            -Dsonar.coverageReportPaths=coverage.xml
         working-directory: ./apps
+
 
 # TODO: Conformance testing is currently missing from mvn-verify. BFD-3245 will re-examine conformance regression testing in BFD.

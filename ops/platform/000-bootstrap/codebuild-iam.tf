@@ -79,6 +79,27 @@ resource "aws_iam_policy" "codebuild_ecr" {
   policy = data.aws_iam_policy_document.codebuild_ecr.json
 }
 
+
+data "aws_iam_policy_document" "codebuild_ssm" {
+  statement {
+    sid = "AllowSSMGetParamter"
+    actions = [
+      "ssm:GetParameter",
+      "ssm:GetParameters"
+    ]
+    resources = ["arn:aws:ssm:${local.region}:${local.account_id}:parameter/bfd/platform/sonar/sensitive/service_account_access_key"]
+  }
+}
+
+resource "aws_iam_policy" "codebuild_ssm" {
+  for_each = local.codebuild_runner_config
+
+  name        = "${each.value.name}-ssm"
+  path        = local.iam_path
+  description = "Grants permissions for the ${each.value.name} CodeBuild Runner fetch SSM Parameter Store values"
+  policy      = data.aws_iam_policy_document.codebuild_ssm.json
+}
+
 data "aws_iam_policy_document" "codebuild_kms" {
   statement {
     sid = "AllowEncryptionAndDecryptionOfMasterKeys"
@@ -178,6 +199,7 @@ resource "aws_iam_role_policy_attachment" "codebuild" {
     "${runner}-ecr"    = { role = aws_iam_role.codebuild[runner].name, policy = aws_iam_policy.codebuild_ecr[runner].arn }
     "${runner}-kms"    = { role = aws_iam_role.codebuild[runner].name, policy = aws_iam_policy.codebuild_kms[runner].arn }
     "${runner}-vpc"    = { role = aws_iam_role.codebuild[runner].name, policy = aws_iam_policy.codebuild_vpc[runner].arn }
+    "${runner}-ssm"    = { role = aws_iam_role.codebuild[runner].name, policy = aws_iam_policy.codebuild_ssm[runner].arn }
   }]...)
 
   role       = each.value.role

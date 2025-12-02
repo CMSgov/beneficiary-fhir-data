@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model;
 
+import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.util.Arrays;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
@@ -55,6 +56,11 @@ public enum ClaimNearLineRecordTypeCode {
     return supportingInfoFactory
         .createSupportingInfo()
         .setCategory(BlueButtonSupportingInfoCategory.CLM_NRLN_RIC_CD.toFhir())
-        .setCode(new CodeableConcept(new Coding().setDisplay(display).setCode(code)));
+        .setCode(
+            new CodeableConcept(
+                new Coding()
+                    .setSystem(SystemUrls.BLUE_BUTTON_CODE_SYSTEM_CLAIM_RECORD_TYPE)
+                    .setDisplay(display)
+                    .setCode(code)));
   }
 }

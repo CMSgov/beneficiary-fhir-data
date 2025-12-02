@@ -173,7 +173,7 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_cntrct_pbp_num (
 );
 
 CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm (
-    clm_uniq_id BIGINT NOT NULL PRIMARY KEY,
+    clm_uniq_id BIGINT NOT NULL,
     geo_bene_sk BIGINT,
     clm_dt_sgntr_sk BIGINT,
     clm_type_cd INT,
@@ -228,7 +228,18 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm (
     clm_blg_prvdr_zip5_cd VARCHAR(5),
     clm_sbmt_frmt_cd VARCHAR(1),
     clm_sbmtr_cntrct_num VARCHAR(5),
-    clm_sbmtr_cntrct_pbp_num VARCHAR(3)
+    clm_sbmtr_cntrct_pbp_num VARCHAR(3),
+    clm_rlt_cond_sgntr_sk BIGINT,
+    PRIMARY KEY (geo_bene_sk, clm_dt_sgntr_sk, clm_type_cd, clm_num_sk)
+);
+
+CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_rlt_cond_sgntr_mbr (
+      clm_rlt_cond_sgntr_sk BIGINT NOT NULL,
+      clm_rlt_cond_sgntr_sqnc_num INT NOT NULL,
+      clm_rlt_cond_cd VARCHAR(20) NOT NULL,
+      idr_insrt_ts TIMESTAMPTZ,
+      idr_updt_ts TIMESTAMPTZ,
+      PRIMARY KEY(clm_rlt_cond_sgntr_sk, clm_rlt_cond_sgntr_sqnc_num, clm_rlt_cond_cd)
 );
 
 CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_dcmtn (
@@ -395,6 +406,7 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_line (
     clm_line_thru_dt DATE,
     clm_rndrg_prvdr_prtcptg_cd VARCHAR(1),
     clm_rndrg_prvdr_tax_num VARCHAR(10),
+    clm_rndrg_prvdr_npi_num VARCHAR(10),
     clm_pos_cd VARCHAR(2),
     -- SAMHSA (HCPCS/CPT)
     clm_line_hcpcs_cd VARCHAR(5),
@@ -552,11 +564,25 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_dcmtn (
     PRIMARY KEY(geo_bene_sk, clm_dt_sgntr_sk, clm_type_cd, clm_num_sk, clm_line_num)
 );
 
+
 CREATE INDEX
-	ON cms_vdm_view_mdcr_prd.v2_mdcr_clm (geo_bene_sk, clm_type_cd, clm_num_sk, clm_dt_sgntr_sk);
+	ON cms_vdm_view_mdcr_prd.v2_mdcr_clm (clm_from_dt);
+
 CREATE INDEX
-	ON cms_vdm_view_mdcr_prd.v2_mdcr_clm_line (geo_bene_sk, clm_type_cd, clm_num_sk, clm_dt_sgntr_sk);
-CREATE INDEX
-	ON cms_vdm_view_mdcr_prd.v2_mdcr_clm_prod (geo_bene_sk, clm_type_cd, clm_num_sk, clm_dt_sgntr_sk);
-CREATE INDEX
-	ON cms_vdm_view_mdcr_prd.v2_mdcr_clm_val (geo_bene_sk, clm_type_cd, clm_num_sk, clm_dt_sgntr_sk);
+    ON cms_vdm_view_mdcr_prd.v2_mdcr_clm(idr_insrt_ts, idr_updt_ts, clm_idr_ld_dt);
+
+CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_prvdr_hstry (
+    prvdr_npi_num VARCHAR(10) PRIMARY KEY,
+    prvdr_sk BIGINT NOT NULL,
+    prvdr_hstry_efctv_dt DATE NOT NULL,
+    prvdr_mdl_name VARCHAR(25),
+    prvdr_type_cd VARCHAR(2) NOT NULL,
+    prvdr_txnmy_cmpst_cd VARCHAR(150),
+    prvdr_oscar_num VARCHAR(13) NOT NULL,
+    prvdr_1st_name VARCHAR(35),
+    prvdr_name VARCHAR(70),
+    prvdr_hstry_obslt_dt DATE NOT NULL,
+    prvdr_lgl_name VARCHAR(100),
+    prvdr_emplr_id_num VARCHAR(10),
+    prvdr_last_name VARCHAR(35)
+);

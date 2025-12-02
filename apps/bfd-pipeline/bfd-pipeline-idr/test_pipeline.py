@@ -1,7 +1,6 @@
 import os
 import shutil
 import subprocess
-import sys
 import time
 from collections.abc import Generator
 from datetime import UTC, datetime, timedelta
@@ -10,15 +9,15 @@ from typing import cast
 
 import psycopg
 import pytest
-import ray
 from psycopg.rows import DictRow, dict_row
 from testcontainers.core.config import testcontainers_config  # type: ignore
 
 # https://github.com/testcontainers/testcontainers-python/issues/305
 from testcontainers.postgres import PostgresContainer  # type: ignore
 
+from constants import DEFAULT_MAX_DATE
 from load_synthetic import load_from_csv
-from pipeline import main
+from pipeline import run
 
 # ryuk throws a 500 or 404 error for some reason
 # seems to have issues with podman https://github.com/testcontainers/testcontainers-python/issues/753
@@ -63,10 +62,7 @@ def setup_db() -> Generator[PostgresContainer]:
             os.environ["BFD_DB_NAME"] = info.dbname
             os.environ["BFD_DB_USERNAME"] = info.user
             os.environ["BFD_DB_PASSWORD"] = info.password
-            os.environ["PARALLELISM"] = "2"
             os.environ["IDR_BATCH_SIZE"] = "100000"
-            os.environ["IDR_LOAD_BENES"] = "true"
-            os.environ["IDR_LOAD_CLAIMS"] = "true"
         yield postgres
 
 
@@ -134,8 +130,7 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
 
     conn.commit()
 
-    sys.argv = ["pipeline.py", "synthetic"]
-    main()
+    run("synthetic")
 
     cur = conn.execute("select * from idr.beneficiary order by bene_sk")
     assert cur.rowcount == 25
@@ -162,8 +157,8 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
         {"timestamp": datetime.now(UTC)},
     )
     conn.commit()
-    ray.shutdown()  # type: ignore
-    main()
+
+    run("synthetic")
 
     cur = conn.execute("select * from idr.beneficiary order by bene_sk")
     rows = cur.fetchmany(2)
@@ -224,13 +219,15 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
 
     cur = conn.execute("select * from idr.claim_date_signature order by clm_dt_sgntr_sk")
     assert cur.rowcount == 142
-    rows = cur.fetchmany(1)
+    rows = cur.fetchmany(2)
     assert rows[0]["clm_dt_sgntr_sk"] == 2334117069
+    assert rows[0]["clm_cms_proc_dt"] == datetime.strptime(DEFAULT_MAX_DATE, "%Y-%m-%d").date()
+    assert rows[1]["clm_cms_proc_dt"] == datetime.strptime(DEFAULT_MAX_DATE, "%Y-%m-%d").date()
 
     cur = conn.execute("select * from idr.claim_professional order by clm_uniq_id")
-    assert cur.rowcount == 86
+    assert cur.rowcount == 33
     rows = cur.fetchmany(1)
-    assert rows[0]["clm_uniq_id"] == 113370100080
+    assert rows[0]["clm_uniq_id"] == 797757725380
 
     cur = conn.execute("select * from idr.claim_item order by clm_uniq_id")
     assert cur.rowcount == 1590
