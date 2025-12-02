@@ -14,6 +14,9 @@ from faker import Faker
 
 
 class GeneratorUtil:
+    USE_COLS = "use_cols"
+    NO_COLS = "no_cols"
+
     def __init__(self):
         self.fake = Faker()
         self.used_bene_sk = []
@@ -455,82 +458,68 @@ class GeneratorUtil:
     def save_output_files(self):
         Path("out").mkdir(exist_ok=True)
 
-        df = pd.json_normalize(self.bene_hstry_table)
-        df = df[
-            [
-                "BENE_SK",
-                "BENE_XREF_EFCTV_SK",
-                "BENE_XREF_SK",
-                "BENE_MBI_ID",
-                "BENE_LAST_NAME",
-                "BENE_1ST_NAME",
-                "BENE_MIDL_NAME",
-                "BENE_BRTH_DT",
-                "BENE_DEATH_DT",
-                "BENE_VRFY_DEATH_DAY_SW",
-                "BENE_SEX_CD",
-                "BENE_RACE_CD",
-                "BENE_LINE_1_ADR",
-                "BENE_LINE_2_ADR",
-                "BENE_LINE_3_ADR",
-                "BENE_LINE_4_ADR",
-                "BENE_LINE_5_ADR",
-                "BENE_LINE_6_ADR",
-                "GEO_ZIP_PLC_NAME",
-                "GEO_ZIP5_CD",
-                "GEO_USPS_STATE_CD",
-                "CNTCT_LANG_CD",
-                "IDR_LTST_TRANS_FLG",
-                "IDR_TRANS_EFCTV_TS",
-                "IDR_INSRT_TS",
-                "IDR_UPDT_TS",
-                "IDR_TRANS_OBSLT_TS",
-            ]
-        ]
-        df.to_csv("out/SYNTHETIC_BENE_HSTRY.csv", index=False)
-
-        arr = [{"BENE_MBI_ID": mbi, **self.mbi_table[mbi]} for mbi in self.mbi_table]
-        df = pd.json_normalize(arr)
-        df = df[
-            [
-                "BENE_MBI_ID",
-                "BENE_MBI_EFCTV_DT",
-                "BENE_MBI_OBSLT_DT",
-                "IDR_LTST_TRANS_FLG",
-                "IDR_TRANS_EFCTV_TS",
-                "IDR_INSRT_TS",
-                "IDR_UPDT_TS",
-                "IDR_TRANS_OBSLT_TS",
-            ]
+        BENE_HSTRY_COLS = [
+            "BENE_SK",
+            "BENE_XREF_EFCTV_SK",
+            "BENE_XREF_SK",
+            "BENE_MBI_ID",
+            "BENE_LAST_NAME",
+            "BENE_1ST_NAME",
+            "BENE_MIDL_NAME",
+            "BENE_BRTH_DT",
+            "BENE_DEATH_DT",
+            "BENE_VRFY_DEATH_DAY_SW",
+            "BENE_SEX_CD",
+            "BENE_RACE_CD",
+            "BENE_LINE_1_ADR",
+            "BENE_LINE_2_ADR",
+            "BENE_LINE_3_ADR",
+            "BENE_LINE_4_ADR",
+            "BENE_LINE_5_ADR",
+            "BENE_LINE_6_ADR",
+            "GEO_ZIP_PLC_NAME",
+            "GEO_ZIP5_CD",
+            "GEO_USPS_STATE_CD",
+            "CNTCT_LANG_CD",
+            "IDR_LTST_TRANS_FLG",
+            "IDR_TRANS_EFCTV_TS",
+            "IDR_INSRT_TS",
+            "IDR_UPDT_TS",
+            "IDR_TRANS_OBSLT_TS",
         ]
 
-        df.to_csv("out/SYNTHETIC_BENE_MBI_ID.csv", index=False)
+        mbi_arr = [{"BENE_MBI_ID": mbi, **self.mbi_table[mbi]} for mbi in self.mbi_table]
+        BENE_MBI_COLS = [
+            "BENE_MBI_ID",
+            "BENE_MBI_EFCTV_DT",
+            "BENE_MBI_OBSLT_DT",
+            "IDR_LTST_TRANS_FLG",
+            "IDR_TRANS_EFCTV_TS",
+            "IDR_INSRT_TS",
+            "IDR_UPDT_TS",
+            "IDR_TRANS_OBSLT_TS",
+        ]
 
-        df = pd.json_normalize(self.mdcr_stus)
-        df.to_csv("out/SYNTHETIC_BENE_MDCR_STUS.csv", index=False)
-        df = pd.json_normalize(self.mdcr_entlmt)
-        df.to_csv("out/SYNTHETIC_BENE_MDCR_ENTLMT.csv", index=False)
-        df = pd.json_normalize(self.mdcr_tp)
-        df.to_csv("out/SYNTHETIC_BENE_TP.csv", index=False)
+        beneficiary_exports = [
+            (self.bene_hstry_table, "out/SYNTHETIC_BENE_HSTRY.csv", BENE_HSTRY_COLS),
+            (mbi_arr, "out/SYNTHETIC_BENE_MBI_ID.csv", BENE_MBI_COLS),
+            (self.mdcr_stus, "out/SYNTHETIC_BENE_MDCR_STUS.csv", GeneratorUtil.NO_COLS),
+            (self.mdcr_entlmt, "out/SYNTHETIC_BENE_MDCR_ENTLMT.csv", GeneratorUtil.NO_COLS),
+            (self.mdcr_tp, "out/SYNTHETIC_BENE_TP.csv", GeneratorUtil.NO_COLS),
+            (self.mdcr_rsn, "out/SYNTHETIC_BENE_MDCR_ENTLMT_RSN.csv", GeneratorUtil.NO_COLS),
+            (self.bene_xref_table, "out/SYNTHETIC_BENE_XREF.csv", GeneratorUtil.NO_COLS),
+            (self.bene_cmbnd_dual_mdcr, "out/SYNTHETIC_BENE_CMBND_DUAL_MDCR.csv", GeneratorUtil.NO_COLS),
+            (self.bene_lis, "out/SYNTHETIC_BENE_LIS.csv", GeneratorUtil.NO_COLS),
+            (self.bene_mapd_enrlmt_rx, "out/SYNTHETIC_BENE_MAPD_ENRLMT_RX.csv", GeneratorUtil.NO_COLS),
+            (self.bene_mapd_enrlmt, "out/SYNTHETIC_BENE_MAPD_ENRLMT.csv", GeneratorUtil.NO_COLS),
+        ]
 
-        df = pd.json_normalize(self.mdcr_rsn)
-        df.to_csv("out/SYNTHETIC_BENE_MDCR_ENTLMT_RSN.csv", index=False)
+        for data, path, cols in beneficiary_exports:
+            self.export_df(data, path, cols)
 
-        df = pd.json_normalize(self.bene_xref_table)
-        df.to_csv("out/SYNTHETIC_BENE_XREF.csv", index=False)
-
-        df = pd.json_normalize(self.bene_cmbnd_dual_mdcr)
-        df.to_csv("out/SYNTHETIC_BENE_CMBND_DUAL_MDCR.csv", index=False)
-
-        df = pd.json_normalize(self.bene_xref_table)
-        df.to_csv("out/SYNTHETIC_BENE_XREF.csv", index=False)
-
-        # Save new synthetic data tables
-        df = pd.json_normalize(self.bene_lis)
-        df.to_csv("out/SYNTHETIC_BENE_LIS.csv", index=False)
-
-        df = pd.json_normalize(self.bene_mapd_enrlmt_rx)
-        df.to_csv("out/SYNTHETIC_BENE_MAPD_ENRLMT_RX.csv", index=False)
-
-        df = pd.json_normalize(self.bene_mapd_enrlmt)
-        df.to_csv("out/SYNTHETIC_BENE_MAPD_ENRLMT.csv", index=False)
+    @staticmethod
+    def export_df(data, out_path, cols=NO_COLS):
+        df = pd.json_normalize(data)
+        if cols != GeneratorUtil.NO_COLS:
+            df = df[cols]
+        df.to_csv(out_path, index=False)

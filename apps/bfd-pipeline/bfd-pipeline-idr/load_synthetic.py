@@ -76,12 +76,13 @@ def _load_file(
                 for col in typing.cast(typing.Iterable[str], reader.fieldnames)
                 if col.lower().strip() in db_columns
             ]
-            cols_str = ",".join(cols)
-            with cur.copy(
-                f"COPY {full_table} ({cols_str}) FROM STDIN"  # type: ignore
-            ) as copy:
-                for row in reader:
-                    copy.write_row([row[c] if row[c] else None for c in cols])
+            if cols:
+                cols_str = ",".join(cols)
+                with cur.copy(
+                    f"COPY {full_table} ({cols_str}) FROM STDIN"  # type: ignore
+                ) as copy:
+                    for row in reader:
+                        copy.write_row([row[c] if row[c] else None for c in cols])
 
 
 if __name__ == "__main__":
