@@ -6,9 +6,12 @@ from snowflake.connector import ProgrammingError
 from snowflake.connector.errors import ForbiddenError
 from snowflake.connector.network import ReauthenticationRequest, RetryRequest
 
+from constants import DEFAULT_PARTITION
 from extractor import PostgresExtractor, SnowflakeExtractor
+from load_partition import LoadPartition
 from loader import PostgresLoader
 from model import (
+    LoadMode,
     LoadProgress,
     T,
 )
@@ -22,43 +25,58 @@ logger = logging.getLogger(__name__)
 
 
 def get_progress(
-    connection_string: str, table_name: str, start_time: datetime
+    load_mode: LoadMode,
+    table_name: str,
+    start_time: datetime,
+    partition: LoadPartition,
 ) -> LoadProgress | None:
-    return PostgresExtractor(connection_string, batch_size=1).extract_single(
-        LoadProgress,
-        LoadProgress.fetch_query(False, start_time),
+    return PostgresExtractor(
+        load_mode=load_mode, cls=LoadProgress, partition=partition
+    ).extract_single(
+        LoadProgress.fetch_query(partition, start_time, load_mode),
         {LoadProgress.query_placeholder(): table_name},
     )
 
 
-def extract_and_load(cls: type[T], connection_string: str, mode: str, batch_size: int) -> bool:
-    if mode == "local" or mode == "synthetic":
-        data_extractor = PostgresExtractor(
-            connection_string=connection_string, batch_size=batch_size
-        )
+def extract_and_load(
+    cls: type[T],
+    load_mode: LoadMode,
+    job_start: datetime,
+    partition: LoadPartition | None = None,
+) -> bool:
+    partition = partition or DEFAULT_PARTITION
+    if load_mode == LoadMode.LOCAL or load_mode == LoadMode.SYNTHETIC:
+        data_extractor = PostgresExtractor(load_mode=load_mode, cls=cls, partition=partition)
     else:
-        data_extractor = SnowflakeExtractor(batch_size=batch_size)
+        data_extractor = SnowflakeExtractor(cls=cls, partition=partition)
 
     logger.info("loading %s", cls.table())
-    batch_start = datetime.now()
     last_error = datetime.min.replace(tzinfo=UTC)
-    loader = PostgresLoader(connection_string)
+    loader = PostgresLoader(load_mode)
     error_count = 0
     max_errors = 3
 
     while True:
         try:
-            progress = get_progress(connection_string, cls.table(), batch_start)
+            progress = get_progress(load_mode, cls.table(), job_start, partition)
 
-            logger.info(
-                "progress for %s - last_ts: %s batch_start_ts: %s batch_complete_ts: %s",
-                cls.table(),
-                progress.last_ts if progress else "none",
-                progress.batch_start_ts if progress else "none",
-                progress.batch_complete_ts if progress else "none",
-            )
-            data_iter = data_extractor.extract_idr_data(cls, progress, batch_start)
-            return loader.load(data_iter, cls, batch_start, progress)
+            if progress:
+                logger.info(
+                    "progress for %s %s - last_ts: %s job_start_ts: %s batch_complete_ts: %s",
+                    cls.table(),
+                    progress.batch_partition,
+                    progress.last_ts,
+                    progress.job_start_ts,
+                    progress.batch_complete_ts,
+                )
+            else:
+                logger.info("no previous progress for %s", cls.table())
+
+            data_iter = data_extractor.extract_idr_data(progress, job_start, load_mode)
+            res = loader.load(data_iter, cls, job_start, partition, progress)
+            data_extractor.close()
+            loader.close()
+            return res
         # Snowflake will throw a reauth error if the pipeline has been running for several hours
         # but it seems to be wrapped in a ProgrammingError.
         # Unclear the best way to handle this, it will require a bit more trial and error

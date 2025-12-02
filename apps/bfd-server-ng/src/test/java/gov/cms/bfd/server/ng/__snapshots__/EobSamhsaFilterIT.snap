@@ -10865,7 +10865,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "sequence" : 1,
         "type" : [ {
           "coding" : [ {
-            "code" : "secondary",
+            "code" : "other",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
           } ]
         } ]
@@ -10879,7 +10879,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "sequence" : 2,
         "type" : [ {
           "coding" : [ {
-            "code" : "secondary",
+            "code" : "other",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
           } ]
         } ]
@@ -10893,7 +10893,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "sequence" : 3,
         "type" : [ {
           "coding" : [ {
-            "code" : "secondary",
+            "code" : "other",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
           } ]
         } ]
@@ -10907,7 +10907,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "sequence" : 4,
         "type" : [ {
           "coding" : [ {
-            "code" : "secondary",
+            "code" : "other",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
           } ]
         } ]
@@ -10921,7 +10921,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "sequence" : 5,
         "type" : [ {
           "coding" : [ {
-            "code" : "secondary",
+            "code" : "other",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
           } ]
         } ]
@@ -11692,7 +11692,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
-        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Professional-NonClinician|2.1.0" ],
         "source" : "NationalClaimsHistory",
         "tag" : [ {
           "code" : "Adjudicated",
@@ -11956,12 +11955,9 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
       } ],
       "type" : {
         "coding" : [ {
-          "code" : "71",
-          "display" : "MEDICARE PART B PROFESSIONAL PHYSICIAN/SUPPLIER CLAIM (NON-DMEPOS)",
+          "code" : "64",
+          "display" : "MEDICARE ADVANTAGE (PAID AS FFS) CLAIMS",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-TYPE-CD"
-        }, {
-          "code" : "professional",
-          "system" : "http://terminology.hl7.org/CodeSystem/claim-type"
         } ]
       },
       "use" : "claim"
@@ -20245,7 +20241,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "sequence" : 1,
         "type" : [ {
           "coding" : [ {
-            "code" : "secondary",
+            "code" : "other",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
           } ]
         } ]
@@ -20259,7 +20255,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "sequence" : 2,
         "type" : [ {
           "coding" : [ {
-            "code" : "secondary",
+            "code" : "other",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
           } ]
         } ]
@@ -20273,7 +20269,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "sequence" : 3,
         "type" : [ {
           "coding" : [ {
-            "code" : "secondary",
+            "code" : "other",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
           } ]
         } ]
@@ -20287,7 +20283,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "sequence" : 4,
         "type" : [ {
           "coding" : [ {
-            "code" : "secondary",
+            "code" : "other",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
           } ]
         } ]
@@ -20301,7 +20297,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "sequence" : 5,
         "type" : [ {
           "coding" : [ {
-            "code" : "secondary",
+            "code" : "other",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
           } ]
         } ]
@@ -21072,7 +21068,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
-        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Professional-NonClinician|2.1.0" ],
         "source" : "NationalClaimsHistory",
         "tag" : [ {
           "code" : "Adjudicated",
@@ -21336,12 +21331,9 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
       } ],
       "type" : {
         "coding" : [ {
-          "code" : "71",
-          "display" : "MEDICARE PART B PROFESSIONAL PHYSICIAN/SUPPLIER CLAIM (NON-DMEPOS)",
+          "code" : "64",
+          "display" : "MEDICARE ADVANTAGE (PAID AS FFS) CLAIMS",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-TYPE-CD"
-        }, {
-          "code" : "professional",
-          "system" : "http://terminology.hl7.org/CodeSystem/claim-type"
         } ]
       },
       "use" : "claim"

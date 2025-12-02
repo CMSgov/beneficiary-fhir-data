@@ -565,6 +565,12 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_dcmtn (
 );
 
 
+CREATE INDEX
+	ON cms_vdm_view_mdcr_prd.v2_mdcr_clm (clm_from_dt);
+
+CREATE INDEX
+    ON cms_vdm_view_mdcr_prd.v2_mdcr_clm(idr_insrt_ts, idr_updt_ts, clm_idr_ld_dt);
+
 CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_prvdr_hstry (
     prvdr_npi_num VARCHAR(10) PRIMARY KEY,
     prvdr_sk BIGINT NOT NULL,

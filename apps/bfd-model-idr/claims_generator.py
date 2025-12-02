@@ -179,6 +179,14 @@ vms_cds = [1800, 2800]
 
 institutional_claim_types = [10, 20, 30, 40, 50, 60, 61, 62, 63, 64, *fiss_clm_type_cds]
 
+adjudicated_professional_claim_types = [71, 72, 81, 82]
+
+professional_claim_types = [
+    *adjudicated_professional_claim_types,
+    *mcs_clm_type_cds,
+    *vms_cds,
+]
+
 type_1_npis = [
     1942945159,
     1437702123,
@@ -281,7 +289,10 @@ samhsa_dgns_drg_cds = [
 # Choose SAMHSA codes 1% of the time
 def get_icd_10_dgns_codes() -> list[str]:
     return random.choices(
-        population=[available_samhsa_icd_10_dgns_codes, available_non_samhsa_icd_10_dgns_codes],
+        population=[
+            available_samhsa_icd_10_dgns_codes,
+            available_non_samhsa_icd_10_dgns_codes,
+        ],
         weights=(1, 99),
         k=1,
     )[0]
@@ -307,6 +318,7 @@ def export_df(data, out_path, normalize=NORMALIZE, line_num_cast=NO_CAST_LINE_NU
         df["CLM_LINE_NUM"] = df["CLM_LINE_NUM"].astype("str")
     df.to_csv(out_path, index=False)
 
+
 def clean_int_columns(df, cols):
     for col in cols:
         if col in df.columns:
@@ -322,7 +334,10 @@ def clean_int_columns(df, cols):
 
 def get_icd_10_prcdr_codes() -> list[str]:
     return random.choices(
-        population=[available_samhsa_icd_10_prcdr_codes, available_non_samhsa_icd_10_prcdr_codes],
+        population=[
+            available_samhsa_icd_10_prcdr_codes,
+            available_non_samhsa_icd_10_prcdr_codes,
+        ],
         weights=(1, 99),
         k=1,
     )[0]
@@ -504,7 +519,7 @@ def add_diagnoses(clm_type_cd=-1):
         diagnosis_list.append(first_diagnosis)
         diagnosis_list.append(rfv_diag)
         num_diagnoses = random.randint(2, 15)
-    elif clm_type_cd in (71, 72, 81, 82):
+    elif clm_type_cd in adjudicated_professional_claim_types:
         # professional claims use principal diagnosis and other diagnoses
         principal_diagnosis = {
             "CLM_DGNS_CD": random.choice(get_icd_10_dgns_codes()),
@@ -543,7 +558,7 @@ def add_diagnoses(clm_type_cd=-1):
                 "CLM_PROD_TYPE_CD": "D",
             }
             diagnosis_list.append(diagnosis)
-    elif clm_type_cd in (71, 72, 81, 82):
+    elif clm_type_cd in adjudicated_professional_claim_types:
         for diagnosis_sqnc in range(2, num_diagnoses):
             diagnosis = {
                 "CLM_DGNS_CD": random.choice(get_icd_10_dgns_codes()),
@@ -1518,10 +1533,16 @@ def main():
         "SYNTHETIC_BENE_HSTRY.csv",
     )
     parser.add_argument(
-        "--min-claims", type=int, default=5, help="Minimum number of claims to generate per person"
+        "--min-claims",
+        type=int,
+        default=5,
+        help="Minimum number of claims to generate per person",
     )
     parser.add_argument(
-        "--max-claims", type=int, default=5, help="Maximum number of claims to generate per person"
+        "--max-claims",
+        type=int,
+        default=5,
+        help="Maximum number of claims to generate per person",
     )
 
     args = parser.parse_args()
@@ -1585,10 +1606,11 @@ def main():
             if claim["CLM"]["CLM_TYPE_CD"] in (1, 2, 3, 4):
                 CLM_LINE_RX.extend(claim["CLM_LINE_RX"])
                 PRVDR_HSTRY.extend(claim["PRVDR_HSTRY"])
-            else:
+            elif claim["CLM"]["CLM_TYPE_CD"] in professional_claim_types:
                 # Only add professional data for non-Part D claims
                 CLM_PRFNL.append(claim["CLM_PRFNL"])
                 CLM_LINE_PRFNL.extend(claim["CLM_LINE_PRFNL"])
+
             # obviously we don't have pac claims for PD claims
             if random.choice([0, 1]) and claim["CLM"]["CLM_TYPE_CD"] not in (
                 1,

@@ -6,6 +6,7 @@ from pathlib import Path
 import psycopg
 
 from loader import get_connection_string
+from model import LoadMode
 
 tables = [
     {"csv_name": "SYNTHETIC_BENE_HSTRY.csv", "table": "v2_mdcr_bene_hstry"},
@@ -39,15 +40,18 @@ tables = [
 
 
 def load_from_csv(conn: psycopg.Connection, src_folder: str) -> None:
-    for table in tables:
-        with conn.cursor() as cur:
+    with conn.cursor() as cur:
+        # timestamps will be all over the place for synthetic data,
+        # so we need to make sure that the progress tracking doesn't mess with it.
+        cur.execute("DELETE FROM idr.load_progress")
+        for table in tables:
             # Clear out any previous data
             sql_table = table["table"]
             full_table = f"cms_vdm_view_mdcr_prd.{sql_table}"
             cur.execute(f"TRUNCATE TABLE {full_table}")  # type: ignore
             file = table["csv_name"]
             _load_file(cur, src_folder, file, sql_table, full_table)
-        conn.commit()
+            conn.commit()
 
 
 def _load_file(
@@ -76,6 +80,8 @@ def _load_file(
                 for col in typing.cast(typing.Iterable[str], reader.fieldnames)
                 if col.lower().strip() in db_columns
             ]
+            # skip empty files since we won't have any valid columns
+            # which causes the COPY command below to fail
             if cols:
                 cols_str = ",".join(cols)
                 with cur.copy(
@@ -86,8 +92,8 @@ def _load_file(
 
 
 if __name__ == "__main__":
-    baseDir = sys.argv[1] if len(sys.argv) > 1 and sys.argv[1] != "" else "../../bfd-model-idr/out"
+    base_dir = sys.argv[1] if len(sys.argv) > 1 and sys.argv[1] != "" else "../../bfd-model-idr/out"
     load_from_csv(
-        psycopg.connect(get_connection_string()),
-        baseDir,
+        psycopg.connect(get_connection_string(LoadMode.SYNTHETIC)),
+        base_dir,
     )
