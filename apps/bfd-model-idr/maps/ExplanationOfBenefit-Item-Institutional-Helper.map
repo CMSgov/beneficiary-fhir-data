@@ -1,5 +1,5 @@
-map "https://bfd.cms.gov/MappingLanguage/Maps/EOB-Item-Institutional-Helper" = "BFD-ExplanationOfBenefit-Item-Institutional-Helper-Map"
-imports "https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper" 
+map "https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Item-Institutional-Helper" = "BFD-ExplanationOfBenefit-Item-Institutional-Helper-Map"
+imports "https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper" 
 
 group addItem(source src: LineItemComponent, target tgt: BackboneElement){
     src.CLM_LINE_NUM as seqNum -> tgt.sequence = seqNum "set sequence number";
@@ -544,7 +544,7 @@ group addNDCToInstitutional(source src: LineItemComponent, target tgt: BackboneE
     src -> tgt.quantity = create('SimpleQuantity') as tgtQuantity then {
         src.CLM_LINE_NDC_QTY as ndcQty -> tgtQuantity.value=cast(ndcQty,"decimal") "set quantity";
         src.CLM_LINE_NDC_QTY_QLFYR_CD as ndcUnit where ndcUnit.length()>0 -> tgtQuantity.system = "http://unitsofmeasure.org" "Set system";
-        src.CLM_LINE_NDC_QTY_QLFYR_CD as ndcUnit where ndcUnit.length()>0 -> tgtQuantity.code = translate(ndcUnit,'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#UnitTransform','code') "Set code";
+        src.CLM_LINE_NDC_QTY_QLFYR_CD as ndcUnit where ndcUnit.length()>0 -> tgtQuantity.code = translate(ndcUnit,'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#UnitTransform','code') "Set code";
         src.CLM_LINE_NDC_QTY_QLFYR_CD as ndcUnit where ndcUnit.length()>0 -> tgtQuantity.unit = ndcUnit "Set system";
     } "Set quantity of NDC utilized";
 }
