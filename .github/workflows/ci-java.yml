@@ -29,8 +29,6 @@ env:
   # https://stackoverflow.com/questions/6268391/is-there-a-way-to-represent-a-long-string-that-doesnt-have-any-whitespace-on-mul
   workflow_files_re: "^apps/(?!bfd-model/bfd-model-idr|utils).+$|^.github/workflows/ci-java.yml$"
   AWS_REGION: us-east-1
-  SONAR_PROJECT_KEY: bfd-parent
-  SONAR_HOST_URL: https://sonarqube.cloud.cms.gov
 
 jobs:
   workflow:
@@ -79,6 +77,10 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ inputs.branch }}
+      - name: Node installation ISO sonarqube template analysis
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
       - name: 'Setup JDK'
         uses: actions/setup-java@v5
         with:
@@ -135,14 +137,11 @@ jobs:
             -DskipTests \
             --no-transfer-progress \
             ${{ inputs.branch != null && '-Dsonar.branch.name=$BFD_BRANCH' || null }} -Dsonar.ci.autoconfig.disabled=true \
-            -Dsonar.host.url="$SONAR_HOST_URL" \
-            -Dsonar.projectKey="$SONAR_PROJECT_KEY" \
+            -Dsonar.host.url="https://sonarqube.cloud.cms.gov" \
+            -Dsonar.projectKey="bfd-parent" \
             -Dsonar.projectVersion="$(git log -1 --format=%H)" \
             -Dsonar.qualitygate.wait=true \
-            -Dsonar.token="$SONAR_TOKEN" \
-            -Dsonar.java.jdkHome="${JAVA_HOME}" \
-            -Dsonar.coverageReportPaths=coverage.xml \
-            -Dsonar.junit.reportPaths="**/TEST-*.xml"
+            -Dsonar.coverageReportPaths=coverage.xml
         working-directory: ./apps
 
 
