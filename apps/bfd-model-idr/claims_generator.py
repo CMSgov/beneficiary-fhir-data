@@ -654,6 +654,7 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
 
     if clm_type_cd in (1, 2, 3, 4):
         claim["CLM"]["CLM_SRVC_PRVDR_GNRC_ID_NUM"] = random.choice(type_2_npis)
+        claim["CLM"]["PRVDR_SRVC_PRVDR_NPI_NUM"] = claim["CLM"]["CLM_SRVC_PRVDR_GNRC_ID_NUM"]
         claim["CLM"]["CLM_PD_DT"] = random_date(
             claim["CLM"]["CLM_FROM_DT"], claim["CLM"]["CLM_THRU_DT"]
         )
