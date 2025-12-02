@@ -6,8 +6,8 @@ import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import java.util.Optional;
 import lombok.Getter;
-import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 
 /** Pharmacy claim line table. */
@@ -23,17 +23,14 @@ public class ClaimLineRx {
   private ClaimItem claimLine;
 
   /**
-   * If this is a compound code, then we mark it as such in productOrService, per C4BB.
+   * Per C4BB, if compound code = 2 -> populate productOrService with "compound".
    *
-   * @param productOrService productOrService
+   * @return Optional containing the coding if applicable, otherwise empty
    */
-  public void resolveCompoundCode(CodeableConcept productOrService) {
-    claimRxSupportingInfo
+  public Optional<Coding> toFhirNdcCompound() {
+    return claimRxSupportingInfo
         .getCompoundCode()
         .filter(c -> c == ClaimLineCompoundCode._2)
-        .ifPresent(
-            c ->
-                productOrService.addCoding(
-                    new Coding().setSystem(SystemUrls.CARIN_COMPOUND_LITERAL).setCode("compound")));
+        .map(c -> new Coding().setSystem(SystemUrls.CARIN_COMPOUND_LITERAL).setCode("compound"));
   }
 }

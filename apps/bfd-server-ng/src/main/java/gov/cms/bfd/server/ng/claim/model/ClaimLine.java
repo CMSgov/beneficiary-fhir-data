@@ -61,7 +61,7 @@ public class ClaimLine {
 
     var quantity = serviceUnitQuantity.toFhir();
 
-    claimLineRx.ifPresent(c -> c.resolveCompoundCode(productOrService));
+    claimLineRx.flatMap(ClaimLineRx::toFhirNdcCompound).ifPresent(productOrService::addCoding);
 
     if (productOrService.isEmpty()) {
       ndc.toFhir().ifPresent(productOrService::addCoding);
