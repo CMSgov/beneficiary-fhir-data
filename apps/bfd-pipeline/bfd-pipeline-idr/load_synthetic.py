@@ -77,6 +77,9 @@ def _load_file(
                 if col.lower().strip() in db_columns
             ]
             cols_str = ",".join(cols)
+            if not cols_str:
+                continue
+
             with cur.copy(
                 f"COPY {full_table} ({cols_str}) FROM STDIN"  # type: ignore
             ) as copy:
