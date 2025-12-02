@@ -36,16 +36,4 @@ public class IdrConstants {
 
   /** The description for claim related PAYER_CODE_EFFECTIVE_8_11_2020. */
   public static final String PAYER_CODE_EFFECTIVE_8_11_2020 = "PAYER CODE (EFFECTIVE 8/11/2020)";
-
-  /** The description for claim related RESERVED_FOR_NATIONAL_ASSIGNMENT_DESC. */
-  public static final String RESERVED_FOR_NATIONAL_ASSIGNMENT_DESC =
-      "RESERVED FOR NATIONAL ASSIGNMENT";
-
-  /** The description for claim related NOT_CURRENTLY_USED_BY_MEDICARE_DESC. */
-  public static final String NOT_CURRENTLY_USED_BY_MEDICARE_DESC =
-      "PAYER CODE - NOT CURRENTLY USED BY MEDICARE";
-
-  /** The description for claim related NOT_CURRENTLY_USED_BY_MEDICARE_DESC. */
-  public static final String RESERVED_FOR_PUBLIC_HEALTH_DATA_REPORTING_DESC =
-      "RESERVED FOR PUBLIC HEALTH DATA REPORTING";
 }
