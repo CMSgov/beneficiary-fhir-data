@@ -12,21 +12,16 @@ class ClaimRelatedCondition {
   private long claimRelatedConditionSgnrNumber;
 
   @Column(name = "clm_rlt_cond_cd")
-  private String claimRelatedConditionCd;
+  private Optional<ClaimRelatedConditionCode> claimRelatedConditionCode;
 
   Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {
 
-    if (claimRelatedConditionCd.isBlank()) {
-      return Optional.empty();
-    }
-
-    ExplanationOfBenefit.SupportingInformationComponent component =
-        supportingInfoFactory
-            .createSupportingInfo()
-            .setCategory(BlueButtonSupportingInfoCategory.CLM_RLT_COND_CD.toFhirRelatedCondition())
-            .setCode(ClaimRelatedConditionCode.toFhir(claimRelatedConditionCd));
-
-    return Optional.of(component);
+    return claimRelatedConditionCode.map(
+        codeEnum ->
+            supportingInfoFactory
+                .createSupportingInfo()
+                .setCategory(BlueButtonSupportingInfoCategory.CLM_RLT_COND_CD.toFhir())
+                .setCode(codeEnum.toFhir()));
   }
 }

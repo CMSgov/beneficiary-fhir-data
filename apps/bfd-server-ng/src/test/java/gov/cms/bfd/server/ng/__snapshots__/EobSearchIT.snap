@@ -7940,13 +7940,13 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          }, {
             "code" : "CLM_RLT_COND_CD",
             "display" : "Claim Related Condition Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
         "code" : {
@@ -8510,13 +8510,13 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          }, {
             "code" : "CLM_RLT_COND_CD",
             "display" : "Claim Related Condition Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
         "code" : {
@@ -9077,13 +9077,13 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          }, {
             "code" : "CLM_RLT_COND_CD",
             "display" : "Claim Related Condition Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
         "code" : {
@@ -10909,13 +10909,13 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          }, {
             "code" : "CLM_RLT_COND_CD",
             "display" : "Claim Related Condition Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
         "code" : {
@@ -11479,13 +11479,13 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          }, {
             "code" : "CLM_RLT_COND_CD",
             "display" : "Claim Related Condition Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
         "code" : {
@@ -12046,13 +12046,13 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          }, {
             "code" : "CLM_RLT_COND_CD",
             "display" : "Claim Related Condition Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
         "code" : {
@@ -13878,13 +13878,13 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          }, {
             "code" : "CLM_RLT_COND_CD",
             "display" : "Claim Related Condition Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
         "code" : {
@@ -14448,13 +14448,13 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          }, {
             "code" : "CLM_RLT_COND_CD",
             "display" : "Claim Related Condition Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
         "code" : {
@@ -15015,13 +15015,13 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          }, {
             "code" : "CLM_RLT_COND_CD",
             "display" : "Claim Related Condition Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
         "code" : {
@@ -16847,13 +16847,13 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WITH_SEARCH_WithSy
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          }, {
             "code" : "CLM_RLT_COND_CD",
             "display" : "Claim Related Condition Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
         "code" : {
@@ -18682,13 +18682,13 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WithSystemTag_Adju
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          }, {
             "code" : "CLM_RLT_COND_CD",
             "display" : "Claim Related Condition Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
         "code" : {
@@ -20517,13 +20517,13 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[POST_WithSystemTag_Adj
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          }, {
             "code" : "CLM_RLT_COND_CD",
             "display" : "Claim Related Condition Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
         "code" : {
@@ -21104,13 +21104,13 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[GET_WITH_SEARCH_WithTag_Em
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          }, {
             "code" : "CLM_RLT_COND_CD",
             "display" : "Claim Related Condition Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
         "code" : {
@@ -21671,13 +21671,13 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[GET_WITH_SEARCH_WithTag_Em
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          }, {
             "code" : "CLM_RLT_COND_CD",
             "display" : "Claim Related Condition Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
         "code" : {
@@ -22255,13 +22255,13 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[GET_WithTag_EmptyResult]=[
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          }, {
             "code" : "CLM_RLT_COND_CD",
             "display" : "Claim Related Condition Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
         "code" : {
@@ -22822,13 +22822,13 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[GET_WithTag_EmptyResult]=[
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          }, {
             "code" : "CLM_RLT_COND_CD",
             "display" : "Claim Related Condition Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
         "code" : {
@@ -23406,13 +23406,13 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[POST_WithTag_EmptyResult]=
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          }, {
             "code" : "CLM_RLT_COND_CD",
             "display" : "Claim Related Condition Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
         "code" : {
@@ -23973,13 +23973,13 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[POST_WithTag_EmptyResult]=
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          }, {
             "code" : "CLM_RLT_COND_CD",
             "display" : "Claim Related Condition Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
         "code" : {
@@ -25805,13 +25805,13 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WITH_SEARCH_WithTag_Adjudic
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          }, {
             "code" : "CLM_RLT_COND_CD",
             "display" : "Claim Related Condition Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
         "code" : {
@@ -27640,13 +27640,13 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WithTag_Adjudicated]=[
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          }, {
             "code" : "CLM_RLT_COND_CD",
             "display" : "Claim Related Condition Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
         "code" : {
@@ -29475,13 +29475,13 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[POST_WithTag_Adjudicated]=[
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          }, {
             "code" : "CLM_RLT_COND_CD",
             "display" : "Claim Related Condition Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
         "code" : {
@@ -30181,13 +30181,13 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          }, {
             "code" : "CLM_RLT_COND_CD",
             "display" : "Claim Related Condition Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
         "code" : {
@@ -30751,13 +30751,13 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          }, {
             "code" : "CLM_RLT_COND_CD",
             "display" : "Claim Related Condition Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
         "code" : {
@@ -31318,13 +31318,13 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          }, {
             "code" : "CLM_RLT_COND_CD",
             "display" : "Claim Related Condition Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
         "code" : {
@@ -33150,13 +33150,13 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          }, {
             "code" : "CLM_RLT_COND_CD",
             "display" : "Claim Related Condition Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
         "code" : {
@@ -33720,13 +33720,13 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          }, {
             "code" : "CLM_RLT_COND_CD",
             "display" : "Claim Related Condition Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
         "code" : {
@@ -34287,13 +34287,13 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          }, {
             "code" : "CLM_RLT_COND_CD",
             "display" : "Claim Related Condition Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
         "code" : {
@@ -36119,13 +36119,13 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          }, {
             "code" : "CLM_RLT_COND_CD",
             "display" : "Claim Related Condition Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
         "code" : {
@@ -36689,13 +36689,13 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          }, {
             "code" : "CLM_RLT_COND_CD",
             "display" : "Claim Related Condition Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
         "code" : {
@@ -37256,13 +37256,13 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          }, {
             "code" : "CLM_RLT_COND_CD",
             "display" : "Claim Related Condition Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
         "code" : {
@@ -37959,13 +37959,13 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          }, {
             "code" : "CLM_RLT_COND_CD",
             "display" : "Claim Related Condition Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
         "code" : {
@@ -38529,13 +38529,13 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          }, {
             "code" : "CLM_RLT_COND_CD",
             "display" : "Claim Related Condition Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
         "code" : {
@@ -39096,13 +39096,13 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          }, {
             "code" : "CLM_RLT_COND_CD",
             "display" : "Claim Related Condition Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
         "code" : {
@@ -40928,13 +40928,13 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          }, {
             "code" : "CLM_RLT_COND_CD",
             "display" : "Claim Related Condition Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
         "code" : {
@@ -41498,13 +41498,13 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          }, {
             "code" : "CLM_RLT_COND_CD",
             "display" : "Claim Related Condition Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
         "code" : {
@@ -42065,13 +42065,13 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          }, {
             "code" : "CLM_RLT_COND_CD",
             "display" : "Claim Related Condition Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
         "code" : {
@@ -43897,13 +43897,13 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          }, {
             "code" : "CLM_RLT_COND_CD",
             "display" : "Claim Related Condition Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
         "code" : {
@@ -44467,13 +44467,13 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          }, {
             "code" : "CLM_RLT_COND_CD",
             "display" : "Claim Related Condition Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
         "code" : {
@@ -45034,13 +45034,13 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          }, {
             "code" : "CLM_RLT_COND_CD",
             "display" : "Claim Related Condition Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
         "code" : {
@@ -45737,13 +45737,13 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          }, {
             "code" : "CLM_RLT_COND_CD",
             "display" : "Claim Related Condition Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
         "code" : {
@@ -46307,13 +46307,13 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          }, {
             "code" : "CLM_RLT_COND_CD",
             "display" : "Claim Related Condition Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
         "code" : {
@@ -46874,13 +46874,13 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          }, {
             "code" : "CLM_RLT_COND_CD",
             "display" : "Claim Related Condition Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
         "code" : {
@@ -48706,13 +48706,13 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          }, {
             "code" : "CLM_RLT_COND_CD",
             "display" : "Claim Related Condition Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
         "code" : {
@@ -49276,13 +49276,13 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          }, {
             "code" : "CLM_RLT_COND_CD",
             "display" : "Claim Related Condition Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
         "code" : {
@@ -49843,13 +49843,13 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          }, {
             "code" : "CLM_RLT_COND_CD",
             "display" : "Claim Related Condition Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
         "code" : {
@@ -51675,13 +51675,13 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          }, {
             "code" : "CLM_RLT_COND_CD",
             "display" : "Claim Related Condition Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
         "code" : {
@@ -52245,13 +52245,13 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          }, {
             "code" : "CLM_RLT_COND_CD",
             "display" : "Claim Related Condition Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
         "code" : {
@@ -52812,13 +52812,13 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          }, {
             "code" : "CLM_RLT_COND_CD",
             "display" : "Claim Related Condition Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
         "code" : {

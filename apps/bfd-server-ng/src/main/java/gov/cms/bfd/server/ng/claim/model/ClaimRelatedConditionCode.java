@@ -3,6 +3,7 @@ package gov.cms.bfd.server.ng.claim.model;
 import gov.cms.bfd.server.ng.util.IdrConstants;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.util.Arrays;
+import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -2338,17 +2339,16 @@ public enum ClaimRelatedConditionCode {
    * @param code database code
    * @return claim type code
    */
-  public static ClaimRelatedConditionCode fromCode(String code) {
-    return Arrays.stream(values()).filter(c -> c.code.equals(code)).findFirst().orElse(null);
+  public static Optional<ClaimRelatedConditionCode> fromCode(String code) {
+    return Arrays.stream(values()).filter(c -> c.code.equals(code)).findFirst();
   }
 
-  static CodeableConcept toFhir(String claimRelatedConditionCd) {
+  CodeableConcept toFhir() {
     return new CodeableConcept()
         .addCoding(
             new Coding()
                 .setSystem(SystemUrls.SYS_CLM_RLT_COND_CD)
-                .setCode(claimRelatedConditionCd)
-                .setDisplay(
-                    ClaimRelatedConditionCode.fromCode(claimRelatedConditionCd).getDisplay()));
+                .setCode(code)
+                .setDisplay(display));
   }
 }
