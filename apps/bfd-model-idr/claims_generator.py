@@ -37,10 +37,36 @@ SECURITY_LABELS_CPT_SYSTEMS = ["http://www.ama-assn.org/go/cpt"]
 SECURITY_LABELS_DRG_SYSTEMS = [
     "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
 ]
+
+
 SECURITY_LABELS_YML = Path(os.path.realpath(__file__)).parent.joinpath("security_labels.yml")
 SECURITY_LABELS = TypeAdapter(list[SecurityLabelModel]).validate_python(
     yaml.safe_load(SECURITY_LABELS_YML.read_text()), by_alias=True
 )
+
+NORMALIZE = "normalize"
+NO_NORMALIZE = "no_normalize"
+
+CAST_LINE_NUM = "cast_line_num"
+NO_CAST_LINE_NUM = "no_cast_line_num"
+
+# Columns you want as string without decimal/nan
+INT_TO_STRING_COLS = [
+    "CLM_TYPE_CD",
+    "CLM_NUM_SK",
+    "CLM_TYPE_CD",
+    "CLM_NUM_SK",
+    "PRVDR_PRSCRBNG_PRVDR_NPI_NUM",
+    "PRVDR_RFRG_PRVDR_NPI_NUM",
+    "PRVDR_BLG_PRVDR_NPI_NUM",
+    "CLM_ATNDG_PRVDR_NPI_NUM",
+    "CLM_OPRTG_PRVDR_NPI_NUM",
+    "CLM_OTHR_PRVDR_NPI_NUM",
+    "CLM_RNDRG_PRVDR_NPI_NUM",
+    "CLM_BLG_PRVDR_NPI_NUM",
+    "CLM_RFRG_PRVDR_PIN_NUM",
+    "PRVDR_ATNDG_PRVDR_NPI_NUM",
+]
 
 generator = GeneratorUtil()
 faker = Faker()
@@ -65,63 +91,33 @@ def save_output_files(
 ):
     Path("out").mkdir(exist_ok=True)
 
-    df = pd.json_normalize(clm)
-    df["CLM_BLOOD_PT_FRNSH_QTY"] = df["CLM_BLOOD_PT_FRNSH_QTY"].astype("Int64")
-    df["CLM_BLG_PRVDR_OSCAR_NUM"] = df["CLM_BLG_PRVDR_OSCAR_NUM"].astype("string")
-    # Columns you want as string without decimal/nan
-    int_to_string_cols = [
-        "CLM_TYPE_CD",
-        "CLM_NUM_SK",
-        "PRVDR_PRSCRBNG_PRVDR_NPI_NUM",
-        "PRVDR_RFRG_PRVDR_NPI_NUM",
-        "PRVDR_BLG_PRVDR_NPI_NUM",
-        "CLM_ATNDG_PRVDR_NPI_NUM",
-        "PRVDR_ATNDG_PRVDR_NPI_NUM",
-        "CLM_OPRTG_PRVDR_NPI_NUM",
-        "CLM_OTHR_PRVDR_NPI_NUM",
-        "CLM_RNDRG_PRVDR_NPI_NUM",
+    clm = pd.json_normalize(clm)
+    clm["CLM_BLOOD_PT_FRNSH_QTY"] = clm["CLM_BLOOD_PT_FRNSH_QTY"].astype("Int64")
+    clm["CLM_BLG_PRVDR_OSCAR_NUM"] = clm["CLM_BLG_PRVDR_OSCAR_NUM"].astype("string")
+
+    exports = [
+        (clm, "out/SYNTHETIC_CLM.csv", NO_NORMALIZE, NO_CAST_LINE_NUM),
+        (clm_line, "out/SYNTHETIC_CLM_LINE.csv", NORMALIZE, CAST_LINE_NUM),
+        (clm_val, "out/SYNTHETIC_CLM_VAL.csv", NORMALIZE, NO_CAST_LINE_NUM),
+        (clm_dt_sgntr, "out/SYNTHETIC_CLM_DT_SGNTR.csv", NORMALIZE, NO_CAST_LINE_NUM),
+        (clm_prod, "out/SYNTHETIC_CLM_PROD.csv", NORMALIZE, NO_CAST_LINE_NUM),
+        (clm_instnl, "out/SYNTHETIC_CLM_INSTNL.csv", NORMALIZE, NO_CAST_LINE_NUM),
+        (clm_line_instnl, "out/SYNTHETIC_CLM_LINE_INSTNL.csv", NO_NORMALIZE, CAST_LINE_NUM),
+        (clm_dcmtn, "out/SYNTHETIC_CLM_DCMTN.csv", NORMALIZE, NO_CAST_LINE_NUM),
+        (clm_lctn_hstry, "out/SYNTHETIC_CLM_LCTN_HSTRY.csv", NORMALIZE, NO_CAST_LINE_NUM),
+        (clm_fiss, "out/SYNTHETIC_CLM_FISS.csv", NORMALIZE, NO_CAST_LINE_NUM),
+        (clm_prfnl, "out/SYNTHETIC_CLM_PRFNL.csv", NORMALIZE, NO_CAST_LINE_NUM),
+        (clm_line_prfnl, "out/SYNTHETIC_CLM_LINE_PRFNL.csv", NORMALIZE, CAST_LINE_NUM),
+        (clm_line_rx, "out/SYNTHETIC_CLM_LINE_RX.csv", NORMALIZE, NO_CAST_LINE_NUM),
+        (clm_rlt_cond_sgntr_mbr, "out/SYNTHETIC_PRVDR_HSTRY.csv", NORMALIZE, NO_CAST_LINE_NUM),
+        (prvdr_hstry, "out/SYNTHETIC_PRVDR_HSTRY.csv", NORMALIZE, NO_CAST_LINE_NUM),
     ]
+    for data, path, normalize_flag, line_flag in exports:
+        export_df(data, path, normalize_flag, line_flag)
 
-    for col in int_to_string_cols:
-        df[col] = (
-            df[col]
-            .astype("Int64")  # Handle floats like 1234.0 → 1234
-            .astype("string")  # Pandas nullable string type
-            .fillna("")  # Replace <NA> with empty string
-        )
-    df.to_csv("out/SYNTHETIC_CLM.csv", index=False)
+    for [df, out_file, normalize, line_num_cast] in exports:
+        export_df(df, out_file, normalize, line_num_cast)
 
-    df = pd.json_normalize(clm_line)
-    df["CLM_LINE_NUM"] = df["CLM_LINE_NUM"].astype("str")
-    df.to_csv("out/SYNTHETIC_CLM_LINE.csv", index=False)
-    df = pd.json_normalize(clm_val)
-    df.to_csv("out/SYNTHETIC_CLM_VAL.csv", index=False)
-    df = pd.json_normalize(clm_dt_sgntr)
-    df.to_csv("out/SYNTHETIC_CLM_DT_SGNTR.csv", index=False)
-    df = pd.json_normalize(clm_prod)
-    df.to_csv("out/SYNTHETIC_CLM_PROD.csv", index=False)
-    df = pd.json_normalize(clm_instnl)
-    df.to_csv("out/SYNTHETIC_CLM_INSTNL.csv", index=False)
-    df = pd.DataFrame(clm_line_instnl)
-    df["CLM_LINE_NUM"] = df["CLM_LINE_NUM"].astype("str")
-    df.to_csv("out/SYNTHETIC_CLM_LINE_INSTNL.csv", index=False)
-    df = pd.json_normalize(clm_dcmtn)
-    df.to_csv("out/SYNTHETIC_CLM_DCMTN.csv", index=False)
-    df = pd.json_normalize(clm_lctn_hstry)
-    df.to_csv("out/SYNTHETIC_CLM_LCTN_HSTRY.csv", index=False)
-    df = pd.json_normalize(clm_fiss)
-    df.to_csv("out/SYNTHETIC_CLM_FISS.csv", index=False)
-    df = pd.json_normalize(clm_prfnl)
-    df.to_csv("out/SYNTHETIC_CLM_PRFNL.csv", index=False)
-    df = pd.json_normalize(clm_line_prfnl)
-    df["CLM_LINE_NUM"] = df["CLM_LINE_NUM"].astype("str")
-    df.to_csv("out/SYNTHETIC_CLM_LINE_PRFNL.csv", index=False)
-    df = pd.json_normalize(clm_line_rx)
-    df.to_csv("out/SYNTHETIC_CLM_LINE_RX.csv", index=False)
-    df = pd.json_normalize(clm_rlt_cond_sgntr_mbr)
-    df.to_csv("out/SYNTHETIC_CLM_RLT_COND_SGNTR_MBR.csv", index=False)
-    df = pd.json_normalize(prvdr_hstry)
-    df.to_csv("out/SYNTHETIC_PRVDR_HSTRY.csv", index=False)
     # these are mostly static
     shutil.copy("sample-data/SYNTHETIC_CLM_ANSI_SGNTR.csv", "out/SYNTHETIC_CLM_ANSI_SGNTR.csv")
 
@@ -291,6 +287,39 @@ def get_icd_10_dgns_codes() -> list[str]:
     )[0]
 
 
+def clean_int_columns(df, cols):
+    for col in cols:
+        if col in df:
+            df[col] = (
+                df[col]
+                .astype("Int64")  # Handle floats like 1234.0 → 1234
+                .astype("string")  # Pandas nullable string type
+                .fillna("")  # Replace <NA> with empty string
+            )
+    return df
+
+
+def export_df(data, out_path, normalize=NORMALIZE, line_num_cast=NO_CAST_LINE_NUM):
+    df = pd.json_normalize(data) if normalize == NORMALIZE else pd.DataFrame(data)
+    df = clean_int_columns(df, INT_TO_STRING_COLS)
+
+    if line_num_cast == CAST_LINE_NUM and "CLM_LINE_NUM" in df.columns:
+        df["CLM_LINE_NUM"] = df["CLM_LINE_NUM"].astype("str")
+    df.to_csv(out_path, index=False)
+
+def clean_int_columns(df, cols):
+    for col in cols:
+        if col in df.columns:
+            df[col] = (
+                pd.to_numeric(df[col], errors="coerce")
+                .round(0)
+                .astype("Int64")
+                .astype("string")
+                .fillna("")
+            )
+    return df
+
+
 def get_icd_10_prcdr_codes() -> list[str]:
     return random.choices(
         population=[available_samhsa_icd_10_prcdr_codes, available_non_samhsa_icd_10_prcdr_codes],
@@ -313,6 +342,8 @@ def get_drg_dgns_codes() -> list[int]:
         weights=(1, 99),
         k=1,
     )[0]
+
+
 target_sequence_numbers = [0, 1, 2, 3, 4, 5, 6, 7]
 target_rlt_cond_codes = ["21", "39", "C5", "42", "64", "W2", "D9", "09", "R1"]
 
@@ -537,6 +568,10 @@ def gen_procedure_icd10pcs():
 now = date.today()
 
 
+def gen_claim_id():
+    return "-" + "".join(random.choices(string.digits, k=13))
+
+
 def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
     claim = {
         "CLM": {},
@@ -554,7 +589,7 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
     clm_dt_sgntr = {}
     clm_dt_sgntr["CLM_DT_SGNTR_SK"] = "".join(random.choices(string.digits, k=12))
     claim["CLM"]["CLM_DT_SGNTR_SK"] = clm_dt_sgntr["CLM_DT_SGNTR_SK"]
-    claim["CLM"]["CLM_UNIQ_ID"] = "-" + "".join(random.choices(string.digits, k=13))
+    claim["CLM"]["CLM_UNIQ_ID"] = gen_claim_id()
 
     clm_rlt_cond_sgntr_sk = random.randint(2, 999999999999)
     claim["CLM"]["CLM_RLT_COND_SGNTR_SK"] = clm_rlt_cond_sgntr_sk
@@ -1223,7 +1258,7 @@ def gen_pac_version_of_claim(claim, max_date):
     # via config files in the future.
 
     pac_claim = copy.deepcopy(claim)
-    pac_claim["CLM"]["CLM_UNIQ_ID"] = "".join(random.choices(string.digits, k=13))
+    pac_claim["CLM"]["CLM_UNIQ_ID"] = gen_claim_id()
     pac_clm_type_cd = int(pac_claim["CLM"]["CLM_TYPE_CD"])
 
     if pac_clm_type_cd in (60, 61, 62, 63, 64):

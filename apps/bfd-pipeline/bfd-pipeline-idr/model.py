@@ -995,6 +995,8 @@ class IdrClaimItem(IdrBaseModel):
     clm_pos_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_rndrg_prvdr_prtcptg_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_rndrg_prvdr_tax_num: Annotated[str, BeforeValidator(transform_default_string)]
+    clm_rndrg_prvdr_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
+    clm_rndrg_prvdr_npi_num: Annotated[str, BeforeValidator(transform_default_string)]
     hcpcs_1_mdfr_cd: Annotated[str, BeforeValidator(transform_default_string)]
     hcpcs_2_mdfr_cd: Annotated[str, BeforeValidator(transform_default_string)]
     hcpcs_3_mdfr_cd: Annotated[str, BeforeValidator(transform_default_string)]
@@ -1167,7 +1169,7 @@ class IdrClaimItem(IdrBaseModel):
         not_materialized = "" if os.environ.get("IDR_USERNAME", "") else "NOT MATERIALIZED"
 
         return f"""
-                WITH claims AS {not_materialized} (
+                WITH claims AS (
                     SELECT 
                         {clm}.clm_uniq_id, 
                         {clm}.geo_bene_sk, 
@@ -1226,7 +1228,7 @@ class IdrClaimItem(IdrBaseModel):
                         AND {val}.clm_num_sk = {clm}.clm_num_sk 
                         AND {val}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
                 ),
-                claim_related_conditions AS (
+                claim_related_conditions AS {not_materialized} (
                     SELECT
                         {clm}.clm_uniq_id,
                         {rlt_cond}.*,

@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -296,6 +297,8 @@ public enum ClaimTypeCode {
   _2900(2900, "HOSPICE NOTICE OF ELECTION");
   ;
 
+  private static final Set<Integer> PART_B_CODES =
+      Set.of(_1700.code, _1800.code, _2700.code, _2800.code);
   private final int code;
   private final String display;
   private static final String INSURER_ORG = "insurer-org";
@@ -376,6 +379,10 @@ public enum ClaimTypeCode {
         new ExplanationOfBenefit.InsuranceComponent()
             .setFocal(true)
             .setCoverage(new Reference().setDisplay("Part A")));
+  }
+
+  Optional<String> toDisplay() {
+    return PART_B_CODES.contains(code) ? Optional.of("Part B") : Optional.empty();
   }
 
   Optional<ExplanationOfBenefit.RemittanceOutcome> toFhirOutcome() {

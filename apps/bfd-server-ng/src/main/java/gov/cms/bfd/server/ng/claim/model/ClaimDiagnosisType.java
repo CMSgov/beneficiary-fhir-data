@@ -36,4 +36,18 @@ public enum ClaimDiagnosisType {
   public static Optional<ClaimDiagnosisType> tryFromIdrCode(String idrCode) {
     return Arrays.stream(values()).filter(v -> v.idrCode.equals(idrCode)).findFirst();
   }
+
+  /**
+   * Returns FHIR code based on claim context. Professional context overrides only one case (idrCode
+   * "D").
+   *
+   * @param claimContext context enum
+   * @return override value for professional PRESENT_ON_ADMISSION value
+   */
+  public String getFhirCode(ClaimContext claimContext) {
+    if (claimContext == ClaimContext.PROFESSIONAL && this == PRESENT_ON_ADMISSION) {
+      return "secondary"; // override
+    }
+    return fhirCode;
+  }
 }

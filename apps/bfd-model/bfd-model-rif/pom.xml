@@ -69,7 +69,7 @@
             <!-- The Hibernate JPA Model Generator, which will produce MetaModel classes
                 for JPA entities. This happens automagically via javac's annotation
                 processor. -->
-            <groupId>org.hibernate</groupId>
+            <groupId>org.hibernate.orm</groupId>
             <artifactId>hibernate-jpamodelgen</artifactId>
             <exclusions>
                 <exclusion>
@@ -190,7 +190,7 @@
                             <version>${lombok.version}</version>
                         </path>
                         <path>
-                            <groupId>org.hibernate</groupId>
+                            <groupId>org.hibernate.orm</groupId>
                             <artifactId>hibernate-jpamodelgen</artifactId>
                             <version>${hibernate.version}</version>
                         </path>
