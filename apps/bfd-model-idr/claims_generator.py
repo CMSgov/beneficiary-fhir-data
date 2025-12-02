@@ -318,6 +318,7 @@ def export_df(data, out_path, normalize=NORMALIZE, line_num_cast=NO_CAST_LINE_NU
         df["CLM_LINE_NUM"] = df["CLM_LINE_NUM"].astype("str")
     df.to_csv(out_path, index=False)
 
+
 def clean_int_columns(df, cols):
     for col in cols:
         if col in df.columns:
