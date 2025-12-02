@@ -259,6 +259,10 @@
     - Pharmacy
   sources:
     - NCH
+  ccwMapping:
+    - PTNT_PAY_AMT
+  cclfMapping:
+    - CCLF7.CLM_LINE_BENE_PMT_AMT
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_LINE_BENE_PMT_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication' and code='paidbypatient').exists() and category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_LINE_BENE_PMT_AMT').exists()).amount.value
@@ -267,10 +271,6 @@
     - Pharmacy
   sources:
     - NCH
-  ccwMapping:
-    - PTNT_PAY_AMT
-  cclfMapping:
-    - CCLF7.CLM_LINE_BENE_PMT_AMT
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_LINE_BENE_PD_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication' and code='paidtopatient').exists() and category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_LINE_BENE_PD_AMT').exists()).amount.value
