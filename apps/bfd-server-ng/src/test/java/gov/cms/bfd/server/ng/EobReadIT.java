@@ -89,6 +89,13 @@ class EobReadIT extends IntegrationTestBase {
     expectFhir().toMatchSnapshot(eob);
   }
 
+  @Test
+  void eobReadProfessionalClaimBillingOrg() {
+    var eob = eobRead().withId(Long.parseLong(CLAIM_ID_PROFESSIONAL_ORG)).execute();
+    assertFalse(eob.isEmpty());
+    expectFhir().toMatchSnapshot(eob);
+  }
+
   @ParameterizedTest
   @EmptySource
   void eobReadNoIdBadRequest(String id) {
