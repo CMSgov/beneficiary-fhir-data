@@ -102,6 +102,27 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
     } ],
     "resourceType" : "Practitioner"
   }, {
+    "id" : "practitioner-billing",
+    "identifier" : [ {
+      "system" : "http://hl7.org/fhir/sid/us-npi",
+      "type" : {
+        "coding" : [ {
+          "code" : "NPI",
+          "display" : "National provider identifier",
+          "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+        } ]
+      },
+      "value" : "1104867175"
+    } ],
+    "meta" : {
+      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
+    },
+    "name" : [ {
+      "family" : "Garcia",
+      "given" : [ "Indiana", "Victor" ]
+    } ],
+    "resourceType" : "Practitioner"
+  }, {
     "id" : "careteam-provider-1",
     "identifier" : [ {
       "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -384,6 +405,9 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
       "currency" : "USD",
       "value" : 625244.33
     }
+  },
+  "provider" : {
+    "reference" : "#practitioner-billing"
   },
   "resourceType" : "ExplanationOfBenefit",
   "status" : "active",
@@ -721,6 +745,27 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
     } ],
     "resourceType" : "Practitioner"
   }, {
+    "id" : "practitioner-billing",
+    "identifier" : [ {
+      "system" : "http://hl7.org/fhir/sid/us-npi",
+      "type" : {
+        "coding" : [ {
+          "code" : "NPI",
+          "display" : "National provider identifier",
+          "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+        } ]
+      },
+      "value" : "1104867175"
+    } ],
+    "meta" : {
+      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
+    },
+    "name" : [ {
+      "family" : "Garcia",
+      "given" : [ "Indiana", "Victor" ]
+    } ],
+    "resourceType" : "Practitioner"
+  }, {
     "id" : "careteam-provider-1",
     "identifier" : [ {
       "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -1003,6 +1048,9 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
       "currency" : "USD",
       "value" : 625244.33
     }
+  },
+  "provider" : {
+    "reference" : "#practitioner-billing"
   },
   "resourceType" : "ExplanationOfBenefit",
   "status" : "active",
@@ -2544,6 +2592,27 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
     } ],
     "resourceType" : "Practitioner"
   }, {
+    "id" : "practitioner-billing",
+    "identifier" : [ {
+      "system" : "http://hl7.org/fhir/sid/us-npi",
+      "type" : {
+        "coding" : [ {
+          "code" : "NPI",
+          "display" : "National provider identifier",
+          "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+        } ]
+      },
+      "value" : "1104867175"
+    } ],
+    "meta" : {
+      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
+    },
+    "name" : [ {
+      "family" : "Garcia",
+      "given" : [ "Indiana", "Victor" ]
+    } ],
+    "resourceType" : "Practitioner"
+  }, {
     "id" : "careteam-provider-1",
     "identifier" : [ {
       "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -3034,6 +3103,9 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
       } ]
     } ]
   } ],
+  "provider" : {
+    "reference" : "#practitioner-billing"
+  },
   "resourceType" : "ExplanationOfBenefit",
   "status" : "active",
   "subType" : {
@@ -3841,6 +3913,27 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
     } ],
     "resourceType" : "Practitioner"
   }, {
+    "id" : "practitioner-billing",
+    "identifier" : [ {
+      "system" : "http://hl7.org/fhir/sid/us-npi",
+      "type" : {
+        "coding" : [ {
+          "code" : "NPI",
+          "display" : "National provider identifier",
+          "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+        } ]
+      },
+      "value" : "1104867175"
+    } ],
+    "meta" : {
+      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
+    },
+    "name" : [ {
+      "family" : "Garcia",
+      "given" : [ "Indiana", "Victor" ]
+    } ],
+    "resourceType" : "Practitioner"
+  }, {
     "id" : "careteam-provider-1",
     "identifier" : [ {
       "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -4331,6 +4424,9 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
       } ]
     } ]
   } ],
+  "provider" : {
+    "reference" : "#practitioner-billing"
+  },
   "resourceType" : "ExplanationOfBenefit",
   "status" : "active",
   "subType" : {
