@@ -257,7 +257,7 @@ class GeneratorUtil:
             future=future,
         )
 
-    def _generate_coverages(self, patient, coverage_parts, include_tp, expired, future):
+    def _generate_coverages(self, patient, coverage_parts, include_tp, expired, future):  # here
         now = datetime.date.today()
         if expired:
             medicare_start_date = now - datetime.timedelta(days=730)
@@ -403,6 +403,10 @@ class GeneratorUtil:
             self.bene_lis.append(lis_row)
 
     def generate_bene_mapd_enrlmt_rx(self, patient, contract_info):
+        enrollment_start_date = self.fake.date_between_dates(
+            datetime.date(year=2017, month=5, day=20),
+            datetime.date(year=2021, month=1, day=1),
+        )
         rx_start_date = self.fake.date_between_dates(
             datetime.date(year=2017, month=5, day=20),
             datetime.date(year=2021, month=1, day=1),
@@ -414,6 +418,9 @@ class GeneratorUtil:
 
         rx_row = {
             "BENE_SK": patient["BENE_SK"],
+            "CNTRCT_PBP_SK": "".join(random.choices(string.digits, k=12)),
+            "BENE_ENRLMT_BGN_DT": str(enrollment_start_date),
+            "BENE_ENRLMT_PDP_RX_INFO_BGN_DT": str(rx_start_date),
             "IDR_LTST_TRANS_FLG": "Y",
             "BENE_PDP_ENRLMT_MMBR_ID_NUM": member_id_num,
             "BENE_PDP_ENRLMT_GRP_NUM": group_num,
@@ -438,13 +445,18 @@ class GeneratorUtil:
         cntrct_num = "S0001" if pdp_only else random.choice(["H1234", "G1234"])
         pbp_num = "001"
         cvrg_type_cd = "11" if pdp_only else "3"
+        bene_enrlmt_pgm_type_cd = random.choice(["1", "2", "3"])
+        bene_enrlmt_emplr_sbsdy_sw = random.choice(["Y", "~", "1"])
 
         enrollment_row = {
             "BENE_SK": patient["BENE_SK"],
+            "CNTRCT_PBP_SK": "".join(random.choices(string.digits, k=12)),
             "IDR_LTST_TRANS_FLG": "Y",
             "BENE_CNTRCT_NUM": cntrct_num,
             "BENE_PBP_NUM": pbp_num,
             "BENE_CVRG_TYPE_CD": cvrg_type_cd,
+            "BENE_ENRLMT_PGM_TYPE_CD": bene_enrlmt_pgm_type_cd,
+            "BENE_ENRLMT_EMPLR_SBSDY_SW": bene_enrlmt_emplr_sbsdy_sw,
             "BENE_ENRLMT_BGN_DT": str(enrollment_start_date),
             "BENE_ENRLMT_END_DT": enrollment_end_date,
             "IDR_TRANS_EFCTV_TS": str(enrollment_start_date) + "T00:00:00.000000+0000",
@@ -508,9 +520,17 @@ class GeneratorUtil:
             (self.mdcr_tp, "out/SYNTHETIC_BENE_TP.csv", GeneratorUtil.NO_COLS),
             (self.mdcr_rsn, "out/SYNTHETIC_BENE_MDCR_ENTLMT_RSN.csv", GeneratorUtil.NO_COLS),
             (self.bene_xref_table, "out/SYNTHETIC_BENE_XREF.csv", GeneratorUtil.NO_COLS),
-            (self.bene_cmbnd_dual_mdcr, "out/SYNTHETIC_BENE_CMBND_DUAL_MDCR.csv", GeneratorUtil.NO_COLS),
+            (
+                self.bene_cmbnd_dual_mdcr,
+                "out/SYNTHETIC_BENE_CMBND_DUAL_MDCR.csv",
+                GeneratorUtil.NO_COLS,
+            ),
             (self.bene_lis, "out/SYNTHETIC_BENE_LIS.csv", GeneratorUtil.NO_COLS),
-            (self.bene_mapd_enrlmt_rx, "out/SYNTHETIC_BENE_MAPD_ENRLMT_RX.csv", GeneratorUtil.NO_COLS),
+            (
+                self.bene_mapd_enrlmt_rx,
+                "out/SYNTHETIC_BENE_MAPD_ENRLMT_RX.csv",
+                GeneratorUtil.NO_COLS,
+            ),
             (self.bene_mapd_enrlmt, "out/SYNTHETIC_BENE_MAPD_ENRLMT.csv", GeneratorUtil.NO_COLS),
         ]
 

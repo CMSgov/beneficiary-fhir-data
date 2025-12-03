@@ -56,6 +56,48 @@ public final class OrganizationFactory {
   }
 
   /**
+   * Creates a FHIR {@link Organization} resource representing part c/d.
+   *
+   * @param id the resource ID to assign to the Organization
+   * @param profile the FHIR profile URL to set in the Organization's Meta
+   * @return A fully populated FHIR {@link Organization} resource for part c/d.
+   */
+  public static Organization createInsurerOrganization(String id, String profile) {
+    Organization insurerOrg = new Organization();
+    insurerOrg.setId(id);
+
+    // Set the Meta information, including the C4BB Organization profile.
+    Meta orgMeta = new Meta();
+    orgMeta.addProfile(profile);
+    insurerOrg.setMeta(orgMeta);
+    insurerOrg.setActive(true);
+    // todo: flip to use V2_MDCR_CNTRCT_PBP_NUM.CNTRCT_PBP_NAME
+    insurerOrg.setName("Centers for Medicare and Medicaid Services");
+
+    Organization.OrganizationContactComponent contact =
+        new Organization.OrganizationContactComponent();
+
+    // Set the purpose of the contact.
+    CodeableConcept contactPurpose = new CodeableConcept();
+    contactPurpose.addCoding(new Coding(SystemUrls.SYS_CONTACT_ENTITY_TYPE, "PATINF", "Patient"));
+    contact.setPurpose(contactPurpose);
+    // todo: flip to use tele nums from contract_pbp_contact:
+    // cntrct_plan_free_extnsn_num,cntrct_plan_cntct_free_num, cntrct_plan_cntct_extnsn_num,
+    // cntrct_plan_cntct_tel_num,
+    contact.addTelecom(
+        new ContactPoint()
+            .setSystem(ContactPoint.ContactPointSystem.PHONE)
+            .setValue("1-800-633-4227"));
+    contact.addTelecom(
+        new ContactPoint()
+            .setSystem(ContactPoint.ContactPointSystem.PHONE)
+            .setValue("TTY: 1-877-486-2048"));
+    insurerOrg.addContact(contact);
+
+    return insurerOrg;
+  }
+
+  /**
    * Creates a FHIR {@link Organization} resource representing CMS with default ID and default
    * profile.
    *
@@ -63,5 +105,15 @@ public final class OrganizationFactory {
    */
   public static Organization createCmsOrganization() {
     return createCmsOrganization("cms-org", SystemUrls.PROFILE_C4BB_ORGANIZATION_2_1_0);
+  }
+
+  /**
+   * Creates a FHIR {@link Organization} resource representing part c/d with default ID and default
+   * profile.
+   *
+   * @return a fully populated FHIR {@link Organization} resource for part c/d
+   */
+  public static Organization createInsurerOrganization() {
+    return createInsurerOrganization("insurer-org", SystemUrls.PROFILE_C4BB_ORGANIZATION_2_1_0);
   }
 }
