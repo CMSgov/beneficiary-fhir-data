@@ -48,11 +48,11 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
   @JoinColumn(name = "bene_sk")
   private BeneficiaryDualEligibility beneficiaryDualEligibility;
 
-    @OneToMany(fetch = FetchType.EAGER)
-    @JoinColumn(name = "bene_sk")
-    private SortedSet<BeneficiaryMappedEnrollment> beneficiaryMappedEnrollments;
+  @OneToMany(fetch = FetchType.EAGER)
+  @JoinColumn(name = "bene_sk")
+  private SortedSet<BeneficiaryMappedEnrollment> beneficiaryMappedEnrollments;
 
-    /**
+  /**
    * Value for C4DIC Additional Insurance Card Information Extension <a
    * href="http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-AdditionalCardInformation-extension">
    * C4DIC Additional Insurance Card Information </a>.
@@ -102,24 +102,29 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
         .findFirst();
   }
 
-    /**
-     * Finds the enrollment record for a given coverage part.
-     * @return Optional containing the matching enrollment, or empty if not found.
-     */
-    private Optional<BeneficiaryMappedEnrollment> findEnrollment(CoveragePart coveragePart) {
-        //todo: tweak, if there is currently an active coverage + a future coverage, don't show the future one
-        final String standardCode = coveragePart.getStandardCode();
-        return beneficiaryMappedEnrollments.stream()
-                .filter(e -> {
-                    var programTypeCode = e.getId().getEnrollmentProgramTypeCode();
-                    return switch (standardCode) {
-                        case "C" -> Objects.equals(programTypeCode, "1") || Objects.equals(programTypeCode, "3");
-                        case "D" -> Objects.equals(programTypeCode, "2") || Objects.equals(programTypeCode, "3");
-                        default -> false;
-                    };
-                })
-                .findFirst();
-    }
+  /**
+   * Finds the enrollment record for a given coverage part.
+   *
+   * @return Optional containing the matching enrollment, or empty if not found.
+   */
+  private Optional<BeneficiaryMappedEnrollment> findEnrollment(CoveragePart coveragePart) {
+    // todo: tweak, if there is currently an active coverage + a future coverage, don't show the
+    // future one
+    final String standardCode = coveragePart.getStandardCode();
+    return beneficiaryMappedEnrollments.stream()
+        .filter(
+            e -> {
+              var programTypeCode = e.getId().getEnrollmentProgramTypeCode();
+              return switch (standardCode) {
+                case "C" ->
+                    Objects.equals(programTypeCode, "1") || Objects.equals(programTypeCode, "3");
+                case "D" ->
+                    Objects.equals(programTypeCode, "2") || Objects.equals(programTypeCode, "3");
+                default -> false;
+              };
+            })
+        .findFirst();
+  }
 
   /**
    * Sets up the base coverage resource with common fields.
