@@ -98,10 +98,7 @@ public class ProviderHistory {
     return name;
   }
 
-  Optional<DomainResource> toFhirNpiTypePartD(ClaimTypeCode claimTypeCode) {
-    if (!claimTypeCode.isBetween(1, 4)) {
-      return Optional.empty();
-    }
+  Optional<DomainResource> toFhirNpiTypePartD() {
     return (getNpiType() == ProviderHistory.NpiType.ORGANIZATION
             ? toFhirOrganization()
             : toFhirPractitioner())
@@ -117,6 +114,7 @@ public class ProviderHistory {
   }
 
   Optional<Organization> toFhirOrganization() {
+
     var organization =
         ProviderFhirHelper.createOrganizationWithNpi(
             PROVIDER_ORG, providerNpiNumber, providerLegalName);

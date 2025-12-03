@@ -34,10 +34,10 @@ class BillingProvider {
    */
   Optional<Resource> toFhir(ProviderHistory providerHistory) {
 
-      return (providerHistory.getNpiType() == ProviderHistory.NpiType.ORGANIZATION
-              ? createOrganization(providerHistory)
-              : createBillingPractitioner(providerHistory))
-              .map(r -> r);
+    return (providerHistory.getNpiType() == ProviderHistory.NpiType.ORGANIZATION
+            ? createOrganization(providerHistory)
+            : createBillingPractitioner(providerHistory))
+        .map(r -> r);
   }
 
   private Optional<Organization> createOrganization(ProviderHistory providerHistory) {
