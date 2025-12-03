@@ -64,7 +64,7 @@ public class ClaimLine {
     claimLineRx.flatMap(ClaimLineRx::toFhirNdcCompound).ifPresent(productOrService::addCoding);
 
     if (productOrService.isEmpty()) {
-      ndc.toFhir().ifPresent(productOrService::addCoding);
+      ndc.toFhirCoding().ifPresent(productOrService::addCoding);
       ndc.getQualifier().ifPresent(quantity::setUnit);
     }
 

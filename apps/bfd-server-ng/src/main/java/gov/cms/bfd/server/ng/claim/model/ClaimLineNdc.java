@@ -31,17 +31,11 @@ class ClaimLineNdc {
     return Optional.of(detail);
   }
 
-  Optional<Coding> toFhir() {
-    if (ndcCode.isEmpty()) {
-      return Optional.empty();
-    }
-    return Optional.of(new Coding().setSystem(SystemUrls.NDC).setCode(ndcCode.get()));
+  Optional<Coding> toFhirCoding() {
+    return ndcCode.map(c -> new Coding().setSystem(SystemUrls.NDC).setCode(c));
   }
 
   Optional<String> getQualifier() {
-    if (ndcQuantityQualifierCode.isEmpty()) {
-      return Optional.empty();
-    }
-    return Optional.of(ndcQuantityQualifierCode.get().toString());
+    return ndcQuantityQualifierCode.map(Object::toString);
   }
 }
