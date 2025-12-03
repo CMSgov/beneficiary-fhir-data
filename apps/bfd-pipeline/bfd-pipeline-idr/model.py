@@ -152,6 +152,11 @@ class IdrBaseModel(BaseModel, ABC):
         """BFD table name populated by this model."""
 
     @staticmethod
+    def last_updated_date_table() -> str:
+        """BFD table that keeps track of last updated date for this model."""
+        return ""
+
+    @staticmethod
     def should_replace() -> bool:
         """Whether to merge or replace data when loading this table."""
         return False
@@ -495,6 +500,10 @@ class IdrBeneficiaryThirdParty(IdrBaseModel):
         return "idr.beneficiary_third_party"
 
     @staticmethod
+    def last_updated_date_table() -> str:
+        return "idr.beneficiary"
+
+    @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
         hstry = ALIAS_HSTRY
         return f"""
@@ -529,6 +538,10 @@ class IdrBeneficiaryStatus(IdrBaseModel):
     @staticmethod
     def table() -> str:
         return "idr.beneficiary_status"
+
+    @staticmethod
+    def last_updated_date_table() -> str:
+        return "idr.beneficiary"
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
@@ -569,6 +582,10 @@ class IdrBeneficiaryEntitlement(IdrBaseModel):
         return "idr.beneficiary_entitlement"
 
     @staticmethod
+    def last_updated_date_table() -> str:
+        return "idr.beneficiary"
+
+    @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
         hstry = ALIAS_HSTRY
         return f"""
@@ -603,6 +620,10 @@ class IdrBeneficiaryEntitlementReason(IdrBaseModel):
     @staticmethod
     def table() -> str:
         return "idr.beneficiary_entitlement_reason"
+
+    @staticmethod
+    def last_updated_date_table() -> str:
+        return "idr.beneficiary"
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
@@ -643,6 +664,10 @@ class IdrBeneficiaryDualEligibility(IdrBaseModel):
         return "idr.beneficiary_dual_eligibility"
 
     @staticmethod
+    def last_updated_date_table() -> str:
+        return "idr.beneficiary"
+
+    @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
         hstry = ALIAS_HSTRY
         return f"""
@@ -676,6 +701,10 @@ class IdrElectionPeriodUsage(IdrBaseModel):
     @staticmethod
     def table() -> str:
         return "idr.election_period_usage"
+
+    @staticmethod
+    def last_updated_date_table() -> str:
+        return "idr.beneficiary"
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
@@ -948,6 +977,10 @@ class IdrClaimDateSignature(IdrBaseModel):
     @staticmethod
     def table() -> str:
         return "idr.claim_date_signature"
+    
+    @staticmethod
+    def last_updated_date_table() -> str:
+        return "idr.claim"
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
@@ -990,6 +1023,10 @@ class IdrClaimFiss(IdrBaseModel):
     @staticmethod
     def table() -> str:
         return "idr.claim_fiss"
+    
+    @staticmethod
+    def last_updated_date_table() -> str:
+        return "idr.claim"
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
@@ -1061,6 +1098,10 @@ class IdrClaimInstitutional(IdrBaseModel):
     @staticmethod
     def table() -> str:
         return "idr.claim_institutional"
+    
+    @staticmethod
+    def last_updated_date_table() -> str:
+        return "idr.claim"
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
@@ -1245,6 +1286,10 @@ class IdrClaimItem(IdrBaseModel):
     @staticmethod
     def table() -> str:
         return "idr.claim_item"
+    
+    @staticmethod
+    def last_updated_date_table() -> str:
+        return "idr.claim"
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:
@@ -1450,6 +1495,10 @@ class IdrClaimLineInstitutional(IdrBaseModel):
     ]
 
     @staticmethod
+    def last_updated_date_table() -> str:
+        return "idr.claim"
+
+    @staticmethod
     def table() -> str:
         return "idr.claim_line_institutional"
 
@@ -1542,6 +1591,10 @@ class IdrClaimProfessional(IdrBaseModel):
     @staticmethod
     def table() -> str:
         return "idr.claim_professional"
+    
+    @staticmethod
+    def last_updated_date_table() -> str:
+        return "idr.claim"
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
@@ -1641,6 +1694,10 @@ class IdrClaimLineProfessional(IdrBaseModel):
     @staticmethod
     def table() -> str:
         return "idr.claim_line_professional"
+    
+    @staticmethod
+    def last_updated_date_table() -> str:
+        return "idr.claim"
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004

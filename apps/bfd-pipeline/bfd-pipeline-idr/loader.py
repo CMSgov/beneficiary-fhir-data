@@ -237,7 +237,6 @@ class BatchLoader:
             )
 
     def _merge(self, cur: psycopg.Cursor, timestamp: datetime) -> None:
-        print("---MERGE---")
         unique_key = self.model.unique_key()
         update_set = ", ".join(
             [f"{v}=EXCLUDED.{v}" for v in self.insert_cols if v not in unique_key]
@@ -269,32 +268,64 @@ class BatchLoader:
             """,  # type: ignore
             {"timestamp": timestamp},
         )
-        print("----TABLE----")
-        print(self.table)
-        print("----COLS----")
-        print(self.insert_cols)
-        print("----META----")
-        print(self.meta_keys)
+        # print("----TABLE----")
+        # print(self.table)
+        # print("----COLS----")
+        # print(self.insert_cols)
+        # print("----META----")
+        # print(self.meta_keys)
 
-        tracked_columns = [
-            ("bene_sk", "idr.beneficiary_updates"),
-            ("clm_uniq_id", "idr.claim_updates"),
-        ]
+        # self.model.
 
-        # Find the first column that exists in self.insert_cols
-        match_pair = next(
-            ((col, table) for col, table in tracked_columns if col in self.insert_cols),
-            None
-        )
+        # tracked_columns = [
+        #     ("bene_sk", "idr.beneficiary_updates"),
+        #     ("clm_uniq_id", "idr.claim_updates"),
+        # ]
+        print("SELF.MODEL")
+        print(self.model.last_updated_date_table())
+        print(self.model.batch_id_col())
+        print(self.temp_table)
 
-        print("----MATCH PAIR----", match_pair)
+        if self.model.last_updated_date_table():
 
-        if match_pair:
-            col, target_table = match_pair
-            print("----COL----", col)
-            print("----TARGET TABLE----", target_table)
+            cur.execute(
+                f"""
+                UPDATE {self.model.last_updated_date_table()}
+                SET bfd_updated_ts=%(timestamp)s
+                WHERE {self.model.batch_id_col()} 
+                IN ( SELECT {self.model.batch_id_col()} FROM {self.temp_table} )
+                """,
+                {"timestamp": timestamp},
+            )
 
-            self._upsert_updates_from_temp(cur,target_table,col)
+    def _upsert_updates_from_temp(
+            self,
+            cur: psycopg.Cursor,
+            target_table: str,
+            key_col: str,
+    ) -> None:
+        """
+        Upsert the last updated timestamp from temp table into the target updates table.
+        Falls back to the loader timestamp when no source timestamp exists.
+        """
+        print("----COLUMNS----", self.insert_cols)
+        # Find the first column that contains "idr_updt_ts"
+        match = next((col for col in self.insert_cols if "idr_updt_ts" in col), None)
+        print("----MATCH----", match)
+
+        if match:
+            cur.execute(
+                f"""
+                INSERT INTO {target_table}({key_col}, last_updated)
+                SELECT {key_col}, MAX({match})
+                FROM {self.temp_table}
+                WHERE {key_col} IS NOT NULL AND {match} IS NOT NULL
+                GROUP BY {key_col}
+                ON CONFLICT ({key_col}) DO UPDATE
+                SET last_updated = GREATEST({target_table}.last_updated, EXCLUDED.last_updated)
+                """,
+                {},
+            )
 
     def _upsert_updates_from_temp(
             self,
