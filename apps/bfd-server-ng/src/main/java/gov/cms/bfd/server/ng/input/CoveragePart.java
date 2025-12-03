@@ -21,6 +21,11 @@ public enum CoveragePart {
 
   /** Medicare Part B. */
   PART_B("B", "Part B", "part-b", "121", "MEDICARE FFS"),
+  /** Medicare Part C. */
+  PART_C(
+      "C", "Part C", "part-c", "11", "MEDICARE MANAGED CARE (Includes Medicare Advantage Plans)"),
+  /** Medicare Part D. */
+  PART_D("D", "Part D", "part-d", "122", "Medicare Drug Benefit"),
   /** Dual enrollment. */
   DUAL(
       "DUAL",
