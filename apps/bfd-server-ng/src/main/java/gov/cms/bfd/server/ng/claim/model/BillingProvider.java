@@ -49,6 +49,7 @@ class BillingProvider {
         n ->
             org.addIdentifier(
                 new Identifier().setSystem(SystemUrls.CMS_CERTIFICATION_NUMBERS).setValue(n)));
+    billingZip5Code.ifPresent(zipCode -> org.addAddress(new Address().setPostalCode(zipCode)));
 
     return Optional.of(org);
   }
