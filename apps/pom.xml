@@ -3,7 +3,7 @@
 
     <groupId>gov.cms.bfd</groupId>
     <artifactId>bfd-parent</artifactId>
-    <version>2.227.0-SNAPSHOT</version>
+    <version>2.227.0</version>
     <packaging>pom</packaging>
 
     <name>bfd-parent</name>
@@ -40,7 +40,7 @@
         <connection>scm:git:https://github.com/CMSgov/beneficiary-fhir-data.git</connection>
         <developerConnection>scm:git:https://github.com/CMSgov/beneficiary-fhir-data.git</developerConnection>
         <url>https://github.com/CMSgov/beneficiary-fhir-data</url>
-        <tag>HEAD</tag>
+        <tag>2.227.0</tag>
     </scm>
 
     <modules>
@@ -58,8 +58,8 @@
     </modules>
 
     <properties>
-        <surefire.jvm.args/>
-        <failsafe.jvm.args/>
+        <surefire.jvm.args />
+        <failsafe.jvm.args />
         <!-- As specified in
         http://docs.codehaus.org/display/MAVENUSER/POM+Element+for+Source+File+Encoding,
             this property is used by many different plugins to specify the source file
@@ -71,7 +71,7 @@
         <javaSourceVersion>25</javaSourceVersion>
         <maven.compiler.release>25</maven.compiler.release>
 
-        <project.build.outputTimestamp>2025-11-24T18:24:46Z</project.build.outputTimestamp>
+        <project.build.outputTimestamp>2025-12-03T15:16:54Z</project.build.outputTimestamp>
         <!-- Disable jacoco until automated coverage generation is desired -->
         <maven.jacoco.skip>true</maven.jacoco.skip>
         <sonar.coverageReportPaths>coverage.xml</sonar.coverageReportPaths>
@@ -221,8 +221,8 @@
         <!-- Note: See gov.cms.bfd.model.rif.schema.DatabaseTestHelper for details
             on the default 'jdbc:bfd-test:' URL here. -->
         <its.db.url>jdbc:bfd-test:tc</its.db.url>
-        <its.db.username/>
-        <its.db.password/>
+        <its.db.username />
+        <its.db.password />
         <!-- Docker image used with testcontainers to provide a working database for testing. -->
         <!-- This has a default value in gov.cms.bfd.DatabaseTestUtils that must also be changed
         when changing this property. -->
@@ -263,7 +263,7 @@
         <!-- Additional image tag for images built by jib.  (e.g. release number or commit hash)-->
         <jib.tag>${project.version}</jib.tag>
         <!-- Optional image namespace. -->
-        <jib.namespace/>
+        <jib.namespace />
         <!-- Skip by default.  Override to allow images to be built. -->
         <jib.skip>true</jib.skip>
 
