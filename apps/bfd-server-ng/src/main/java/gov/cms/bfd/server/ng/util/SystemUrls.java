@@ -146,6 +146,33 @@ public class SystemUrls {
   public static final String EXT_BENE_ENRLMT_RSN_CD_URL =
       "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-ENRLMT-RSN-CD";
 
+    /**
+     * Extension URL for BFD Contract Number. Source:
+     * V2_MDCR_BENE_MAPD_ENRLMT.BENE_CNTRCT_NUM (from v2_mdcr_bene_mapd_enrlmt) <a
+     * href="https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-CNTRCT-NUM">BENE-CNTRCT-NUM
+     * Extension</a>
+     */
+    public static final String EXT_BENE_CNTRCT_NUM_URL =
+            "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-CNTRCT-NUM";
+
+    /**
+     * Extension URL for BFD Plan Beneficiary Package Number. Source:
+     * V2_MDCR_BENE_MAPD_ENRLMT.BENE_PBP_NUM (from v2_mdcr_bene_mapd_enrlmt) <a
+     * href="https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-PBP-NUM">BENE-PBP-NUM
+     * Extension</a>
+     */
+    public static final String EXT_BENE_PBP_NUM_URL =
+            "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-PBP-NUM";
+
+    /**
+     * Extension URL for BFD Medicare Coverage Type Code. Source:
+     * V2_MDCR_BENE_MAPD_ENRLMT.BENE_CVRG_TYPE_CD (from v2_mdcr_bene_mapd_enrlmt) <a
+     * href="https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-CVRG-TYPE-CD">BENE-CVRG-TYPE-CD
+     * Extension</a>
+     */
+    public static final String EXT_BENE_CVRG_TYPE_CD_URL =
+            "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-CVRG-TYPE-CD";
+
   /**
    * Extension URL for BFD Medicare Current Entitlement Reason Code. Source:
    * V2_BENE_MDCR_ENTLMT_RSN.BENE_MDCR_ENTLMT_RSN_CD (from v2_mdcr_bene_mdcr_entlmt_rsn) <a
@@ -197,6 +224,15 @@ public class SystemUrls {
    */
   public static final String SYS_BENE_MDCR_ENTLMT_STUS_CD =
       "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-STUS-CD";
+
+    /**
+     * System URL for the BFD/BlueButton Coverage Type Code system. Used for the coding
+     * in the BENE-CVRG-TYPE-CD extension. <a
+     * href="https://bluebutton.cms.gov/fhir/CodeSystem/BENE-CVRG-TYPE-CD">BENE-CVRG-TYPE-CD
+     * CodeSystem</a>
+     */
+    public static final String SYS_CVRG_TYPE_CD =
+            "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-CVRG-TYPE-CD";
 
   /**
    * System URL for the BFD/BlueButton Beneficiary Enrollment Reason Code system. Used for the
