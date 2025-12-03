@@ -727,18 +727,17 @@ class IdrContractPbpNumber(IdrBaseModel):
     def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
         return [NON_CLAIM_PARTITION]
 
+
 class IdrContractPbpContact(IdrBaseModel):
     cntrct_pbp_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
     cntrct_plan_cntct_obslt_dt: date
-    cntrct_plan_cntct_type_cd: Annotated[
-        str, {PRIMARY_KEY: True}, BeforeValidator(transform_default_string)
-    ]
+    cntrct_plan_cntct_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
     cntrct_plan_free_extnsn_num: Annotated[str, BeforeValidator(transform_default_string)]
     cntrct_plan_cntct_free_num: Annotated[str, BeforeValidator(transform_default_string)]
     cntrct_plan_cntct_extnsn_num: Annotated[str, BeforeValidator(transform_default_string)]
     cntrct_plan_cntct_tel_num: Annotated[str, BeforeValidator(transform_null_string)]
     cntrct_pbp_end_dt: date
-    cntrct_pbp_bgn_dt: Annotated[date, {PRIMARY_KEY: True}]
+    cntrct_pbp_bgn_dt: date
     cntrct_plan_cntct_st_1_adr: Annotated[str, BeforeValidator(transform_null_string)]
     cntrct_plan_cntct_st_2_adr: Annotated[str, BeforeValidator(transform_null_string)]
     cntrct_plan_cntct_city_name: Annotated[str, BeforeValidator(transform_default_string)]
@@ -772,6 +771,7 @@ class IdrContractPbpContact(IdrBaseModel):
     @staticmethod
     def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
         return [NON_CLAIM_PARTITION]
+
 
 def _claim_filter(start_time: datetime, partition: LoadPartition) -> str:
     clm = ALIAS_CLM

@@ -111,7 +111,12 @@ def save_output_files(
         (clm_prfnl, "out/SYNTHETIC_CLM_PRFNL.csv", NORMALIZE, NO_CAST_LINE_NUM),
         (clm_line_prfnl, "out/SYNTHETIC_CLM_LINE_PRFNL.csv", NORMALIZE, CAST_LINE_NUM),
         (clm_line_rx, "out/SYNTHETIC_CLM_LINE_RX.csv", NORMALIZE, NO_CAST_LINE_NUM),
-        (clm_rlt_cond_sgntr_mbr, "out/SYNTHETIC_CLM_RLT_COND_SGNTR_MBR.csv", NORMALIZE, NO_CAST_LINE_NUM),
+        (
+            clm_rlt_cond_sgntr_mbr,
+            "out/SYNTHETIC_CLM_RLT_COND_SGNTR_MBR.csv",
+            NORMALIZE,
+            NO_CAST_LINE_NUM,
+        ),
         (prvdr_hstry, "out/SYNTHETIC_PRVDR_HSTRY.csv", NORMALIZE, NO_CAST_LINE_NUM),
         (cntrct_pbp_num, "out/SYNTHETIC_CNTRCT_PBP_NUM.csv", NORMALIZE, NO_CAST_LINE_NUM),
         (cntrct_pbp_cntct, "out/SYNTHETIC_CNTRCT_PBP_CNTCT.csv", NORMALIZE, NO_CAST_LINE_NUM),
@@ -612,7 +617,6 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
         "CLM_LINE_RX": [],
         "CLM_RLT_COND_SGNTR_MBR": {},
         "RLT_COND_MBR_RECORD": {},
-        "PRVDR_HSTRY": [],
     }
     clm_dt_sgntr = {}
     clm_dt_sgntr["CLM_DT_SGNTR_SK"] = "".join(random.choices(string.digits, k=12))
@@ -757,24 +761,8 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
         claim_line_rx["CLM_LINE_REBT_PASSTHRU_POS_AMT"] = round(random.uniform(0, 1000), 2)
         claim_line_rx["CLM_PHRMCY_PRICE_DSCNT_AT_POS_AMT"] = round(random.uniform(0, 1000), 2)
 
-        provider_history = {}
-        provider_history["PRVDR_SK"] = "".join(random.choices(string.digits, k=10))
-        provider_history["PRVDR_HSTRY_EFCTV_DT"] = str(date.today())
-        provider_history["PRVDR_HSTRY_OBSLT_DT"] = "9999-12-31"
-        provider_history["PRVDR_1ST_NAME"] = random.choice(available_given_names)
-        provider_history["PRVDR_MDL_NAME"] = random.choice(available_given_names)
-        provider_history["PRVDR_LAST_NAME"] = random.choice(available_family_names)
-        provider_history["PRVDR_NAME"] = random.choice(available_provider_names)
-        provider_history["PRVDR_LGL_NAME"] = random.choice(available_provider_legal_names)
-        provider_history["PRVDR_NPI_NUM"] = provider_history["PRVDR_SK"]
-        provider_history["PRVDR_EMPLR_ID_NUM"] = "".join(random.choices(string.digits, k=10))
-        provider_history["PRVDR_OSCAR_NUM"] = "".join(random.choices(string.digits, k=6))
-        provider_history["PRVDR_TXNMY_CMPST_CD"] = random.choice(available_provider_tx_codes)
-        provider_history["PRVDR_TYPE_CD"] = random.choice(available_provider_type_codes)
-
         claim["CLM_LINE"].append(claim_line)
         claim["CLM_LINE_RX"].append(claim_line_rx)
-        claim["PRVDR_HSTRY"].append(provider_history)
 
     tob_code = random.choice(generator.code_systems["CLM_BILL_FREQ_CD"])
     claim["CLM"]["CLM_BILL_FAC_TYPE_CD"] = tob_code[0]
@@ -1508,10 +1496,39 @@ def gen_pac_version_of_claim(claim, max_date):
     return pac_claim
 
 
+def gen_provider_history(amount):
+    names = random.sample(available_given_names, amount)
+    provider_history = []
+
+    for name in names:
+        prvdr_sk = "".join(random.choices(string.digits, k=10))
+        provider_history.append(
+            {
+                "PRVDR_SK": prvdr_sk,
+                "PRVDR_HSTRY_EFCTV_DT": str(date.today()),
+                "PRVDR_HSTRY_OBSLT_DT": "9999-12-31",
+                "PRVDR_1ST_NAME": name,
+                "PRVDR_MDL_NAME": random.choice(available_given_names),
+                "PRVDR_LAST_NAME": random.choice(available_family_names),
+                "PRVDR_NAME": random.choice(available_provider_names),
+                "PRVDR_LGL_NAME": random.choice(available_provider_legal_names),
+                "PRVDR_NPI_NUM": prvdr_sk,
+                "PRVDR_EMPLR_ID_NUM": "".join(random.choices(string.digits, k=10)),
+                "PRVDR_OSCAR_NUM": "".join(random.choices(string.digits, k=6)),
+                "PRVDR_TXNMY_CMPST_CD": random.choice(available_provider_tx_codes),
+                "PRVDR_TYPE_CD": random.choice(available_provider_type_codes),
+            }
+        )
+
+    return provider_history
+
+
 def gen_contract_plan(amount):
     pbp_nums = random.sample(avail_pbp_nums, amount)
     contract_pbp_num = []
     contract_pbp_contact = []
+    today = date.today()
+    last_day = today.replace(month=12, day=31)
 
     for pbp_num in pbp_nums:
         contract_pbp_num.append(
@@ -1535,8 +1552,8 @@ def gen_contract_plan(amount):
                 "CNTRCT_PLAN_CNTCT_FREE_NUM": "".join(random.choices(string.digits, k=10)),
                 "CNTRCT_PLAN_CNTCT_EXTNSN_NUM": "".join(random.choices(string.digits, k=7)),
                 "CNTRCT_PLAN_CNTCT_TEL_NUM": "".join(random.choices(string.digits, k=10)),
-                "CNTRCT_PBP_END_DT": "2025-12-31",
-                "CNTRCT_PBP_BGN_DT": "2025-01-01",
+                "CNTRCT_PBP_END_DT": last_day.isoformat(),
+                "CNTRCT_PBP_BGN_DT": today.isoformat(),
                 "CNTRCT_PLAN_CNTCT_ST_1_ADR": random.choice(
                     ["319 E. Street", "North Street", "West Street"]
                 ),
@@ -1630,9 +1647,9 @@ def main():
     CLM_LINE_PRFNL = []
     CLM_LINE_RX = []
     CLM_RLT_COND_SGNTR_MBR = []
-    PRVDR_HSTRY = []
     pt_complete = 0
     CNTRCT_PBP_NUM, CNTRCT_PBP_CNTCT = gen_contract_plan(amount=10)
+    PRVDR_HSTRY = gen_provider_history(amount=14)
     min_claims = args.min_claims
     max_claims = args.max_claims
     if min_claims > max_claims:
@@ -1664,7 +1681,6 @@ def main():
             CLM_DCMTN.append(claim["CLM_DCMTN"])
             if claim["CLM"]["CLM_TYPE_CD"] in (1, 2, 3, 4):
                 CLM_LINE_RX.extend(claim["CLM_LINE_RX"])
-                PRVDR_HSTRY.extend(claim["PRVDR_HSTRY"])
             elif claim["CLM"]["CLM_TYPE_CD"] in professional_claim_types:
                 # Only add professional data for non-Part D claims
                 CLM_PRFNL.append(claim["CLM_PRFNL"])
