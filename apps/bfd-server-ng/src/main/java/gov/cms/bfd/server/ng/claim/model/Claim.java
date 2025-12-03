@@ -308,7 +308,7 @@ public class Claim {
         });
 
     getBillingProviderHistory()
-        .flatMap(ph -> billingProvider.toFhir(claimTypeCode, ph))
+        .flatMap(ph -> billingProvider.toFhir(ph))
         .ifPresent(
             p -> {
               eob.addContained(p);
@@ -316,7 +316,7 @@ public class Claim {
             });
 
     getServiceProviderHistory()
-        .flatMap(p -> p.toFhirNpiTypePartD(claimTypeCode))
+        .flatMap(ProviderHistory::toFhirNpiTypePartD)
         .ifPresent(
             p -> {
               eob.addContained(p);
