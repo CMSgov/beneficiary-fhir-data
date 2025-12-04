@@ -1297,12 +1297,18 @@ def gen_pac_version_of_claim(claim, max_date):
         pac_claim["CLM"]["CLM_TYPE_CD"] = random.choice([1021, 2021])
 
     if pac_clm_type_cd == 30:
-        pac_claim["CLM"]["CLM_TYPE_CD"] = random.choices([1018, 2018])[0]
+        pac_claim["CLM"]["CLM_TYPE_CD"] = random.choice([1018, 2018])
 
     if pac_clm_type_cd == 50:
         pac_claim["CLM"]["CLM_TYPE_CD"] = random.choices(
             [1081, 2081, 1082, 2082], weights=[0.48, 0.48, 0.02, 0.02]
         )[0]
+
+    if pac_clm_type_cd in (71,72):
+        pac_claim["CLM"]["CLM_TYPE_CD"] = random.choice([1700, 2700])
+    
+    if pac_clm_type_cd in (81,82):
+        pac_claim["CLM"]["CLM_TYPE_CD"] = random.choice([1800, 2800])
 
     if "CLM_BLOOD_PT_FRNSH_QTY" in pac_claim["CLM"]:
         pac_claim["CLM"].pop("CLM_BLOOD_PT_FRNSH_QTY")
@@ -1480,6 +1486,8 @@ def gen_pac_version_of_claim(claim, max_date):
         pac_claim["CLM"]["CLM_SRC_ID"] = 23000  # VMS
 
     if "CLM_DCMTN" in pac_claim:
+        if pac_claim["CLM"]["CLM_TYPE_CD"] in fiss_clm_type_cds:
+            pac_claim["CLM"]["CLM_RIC_CD"] = pac_claim["CLM_DCMTN"]["CLM_NRLN_RIC_CD"]
         pac_claim.pop("CLM_DCMTN")
 
     pac_clm_rlt_cond_sgntr_sk = random.randint(2, 999999999999)
