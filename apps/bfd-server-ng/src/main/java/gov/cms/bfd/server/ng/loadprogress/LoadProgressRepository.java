@@ -2,6 +2,7 @@ package gov.cms.bfd.server.ng.loadprogress;
 
 import gov.cms.bfd.server.ng.util.DateUtil;
 import jakarta.persistence.EntityManager;
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -22,16 +23,18 @@ public class LoadProgressRepository {
    * @return latest timestamp
    */
   public ZonedDateTime lastUpdated() {
+    // COALESCE is needed here in case no batches have been loaded.
     return entityManager
         .createQuery(
             """
-            SELECT MAX(p.batchCompletionTimestamp)
+            SELECT COALESCE(MAX(p.batchCompletionTimestamp), :defaultDate)
             FROM LoadProgress p
             """,
             ZonedDateTime.class)
+        .setParameter("defaultDate", LocalDate.EPOCH)
         .getResultList()
         .stream()
         .findFirst()
-        .orElse(DateUtil.MIN_DATETIME);
+        .get();
   }
 }
