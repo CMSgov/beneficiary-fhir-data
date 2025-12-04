@@ -98,26 +98,22 @@ public class ProviderHistory {
     return name;
   }
 
-  Optional<DomainResource> toFhirNpiTypePartD() {
+  DomainResource toFhirNpiType() {
     return (getNpiType() == ProviderHistory.NpiType.ORGANIZATION
-            ? toFhirOrganization()
-            : toFhirPractitioner())
-        .map(r -> r);
+        ? toFhirOrganization()
+        : toFhirPractitioner());
   }
 
-  Optional<Practitioner> toFhirPractitioner() {
+  Practitioner toFhirPractitioner() {
     var practitioner =
         ProviderFhirHelper.createPractitioner(
             PROVIDER_PRACTITIONER, providerNpiNumber, toFhirName());
     practitioner.getName().forEach(n -> n.setUse(HumanName.NameUse.OFFICIAL));
-    return Optional.of(practitioner);
+    return practitioner;
   }
 
-  Optional<Organization> toFhirOrganization() {
-
-    var organization =
-        ProviderFhirHelper.createOrganizationWithNpi(
-            PROVIDER_ORG, providerNpiNumber, providerLegalName);
-    return Optional.of(organization);
+  Organization toFhirOrganization() {
+    return ProviderFhirHelper.createOrganizationWithNpi(
+        PROVIDER_ORG, providerNpiNumber, providerLegalName);
   }
 }

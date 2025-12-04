@@ -32,15 +32,13 @@ class BillingProvider {
    * @param providerHistory - Provider History
    * @return a bundle resource containing either the Organization or Practitioner.
    */
-  Optional<Resource> toFhir(ProviderHistory providerHistory) {
-
+  Resource toFhir(ProviderHistory providerHistory) {
     return (providerHistory.getNpiType() == ProviderHistory.NpiType.ORGANIZATION
-            ? createOrganization(providerHistory)
-            : createBillingPractitioner(providerHistory))
-        .map(r -> r);
+        ? createOrganization(providerHistory)
+        : createBillingPractitioner(providerHistory));
   }
 
-  private Optional<Organization> createOrganization(ProviderHistory providerHistory) {
+  private Organization createOrganization(ProviderHistory providerHistory) {
     var org =
         ProviderFhirHelper.createOrganizationWithNpi(
             PROVIDER_ORG, billingNpiNumber, providerHistory.getProviderLegalName());
@@ -51,15 +49,15 @@ class BillingProvider {
                 new Identifier().setSystem(SystemUrls.CMS_CERTIFICATION_NUMBERS).setValue(n)));
     billingZip5Code.ifPresent(zipCode -> org.addAddress(new Address().setPostalCode(zipCode)));
 
-    return Optional.of(org);
+    return org;
   }
 
-  private Optional<Practitioner> createBillingPractitioner(ProviderHistory providerHistory) {
+  private Practitioner createBillingPractitioner(ProviderHistory providerHistory) {
     var practitioner =
         ProviderFhirHelper.createPractitioner(
             PRACTITIONER_BILLING, billingNpiNumber, providerHistory.toFhirName());
     billingZip5Code.ifPresent(
         zipCode -> practitioner.addAddress(new Address().setPostalCode(zipCode)));
-    return Optional.of(practitioner);
+    return practitioner;
   }
 }
