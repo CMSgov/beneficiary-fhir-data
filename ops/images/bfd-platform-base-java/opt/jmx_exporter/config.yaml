@@ -1,0 +1,5 @@
+startDelaySeconds: 0 # default
+includeObjectNames:
+  - "java.lang:*"
+rules:
+  - pattern: ".*"
