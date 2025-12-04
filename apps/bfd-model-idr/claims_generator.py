@@ -186,6 +186,8 @@ fiss_clm_type_cds = [
 mcs_clm_type_cds = [1700, 2700]
 vms_cds = [1800, 2800]
 
+pharmacy_clm_type_cds = [1, 2, 3, 4]
+
 institutional_claim_types = [10, 20, 30, 40, 50, 60, 61, 62, 63, 64, *fiss_clm_type_cds]
 
 adjudicated_professional_claim_types = [71, 72, 81, 82]
@@ -648,7 +650,7 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
         random.choices(string.ascii_uppercase, k=3)
     )
     # PDE -> diff Claim control number process.
-    if clm_type_cd in (1, 2, 3, 4):
+    if clm_type_cd in pharmacy_clm_type_cds:
         claim["CLM"]["CLM_ORIG_CNTL_NUM"] = "".join(random.choices(string.digits, k=14)) + "".join(
             random.choices(string.ascii_uppercase, k=3)
         )
@@ -669,7 +671,8 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
         generator.code_systems["CLM_ADJSTMT_TYPE_CD"]
     )
 
-    if clm_type_cd in (1, 2, 3, 4):
+    if clm_type_cd in pharmacy_clm_type_cds:
+        claim["CLM"].pop("CLM_QUERY_CD")
         claim["CLM"]["CLM_SRVC_PRVDR_GNRC_ID_NUM"] = random.choice(type_2_npis)
         claim["CLM"]["PRVDR_SRVC_PRVDR_NPI_NUM"] = claim["CLM"]["CLM_SRVC_PRVDR_GNRC_ID_NUM"]
         claim["CLM"]["CLM_PD_DT"] = random_date(
@@ -1082,7 +1085,7 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
 
     num_clm_lines = random.randint(1, 15)
     for line_num in range(1, num_clm_lines + 1):
-        if clm_type_cd in (1, 2, 3, 4):
+        if clm_type_cd in pharmacy_clm_type_cds:
             # handled above
             continue
         claim_line = {}
@@ -1692,7 +1695,7 @@ def main():
                 CLM_INSTNL.append(claim["CLM_INSTNL"])
             CLM_LINE_INSTNL.extend(claim["CLM_LINE_INSTNL"])
             CLM_DCMTN.append(claim["CLM_DCMTN"])
-            if claim["CLM"]["CLM_TYPE_CD"] in (1, 2, 3, 4):
+            if claim["CLM"]["CLM_TYPE_CD"] in pharmacy_clm_type_cds:
                 CLM_LINE_RX.extend(claim["CLM_LINE_RX"])
             elif claim["CLM"]["CLM_TYPE_CD"] in professional_claim_types:
                 # Only add professional data for non-Part D claims

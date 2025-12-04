@@ -1,5 +1,7 @@
 package gov.cms.bfd.server.ng;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import au.com.origin.snapshots.Expect;
 import au.com.origin.snapshots.junit5.SnapshotExtension;
 import ca.uhn.fhir.context.FhirContext;
@@ -8,6 +10,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import jakarta.persistence.EntityManager;
 import java.util.List;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
@@ -112,5 +115,15 @@ public class IntegrationTestBase {
   protected long queryCount(List<ILoggingEvent> events) {
     // SQL queries are logged under the org.hibernate.SQL logger
     return events.stream().filter(l -> l.getLoggerName().equals("org.hibernate.SQL")).count();
+  }
+
+  protected void validateCodings(org.hl7.fhir.instance.model.api.IBaseResource resource) {
+    FhirContext ctx = FhirContext.forR4Cached();
+    List<Coding> codings =
+        ctx.newTerser().getAllPopulatedChildElementsOfType(resource, Coding.class);
+    for (Coding coding : codings) {
+      assertTrue(coding.hasSystem());
+      assertTrue(coding.hasCode());
+    }
   }
 }
