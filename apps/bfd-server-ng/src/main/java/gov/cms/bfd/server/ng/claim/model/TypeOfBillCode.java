@@ -19,11 +19,19 @@ class TypeOfBillCode {
   @Column(name = "clm_bill_freq_cd")
   private Optional<String> billFrequencyCode;
 
-  ExplanationOfBenefit.SupportingInformationComponent toFhir(
+  Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {
     var billClassificationCodeNormalized = billClassificationCode.orElse("");
     var facilityTypeCodeNormalized = facilityTypeCode.orElse("");
     var billFrequencyCodeNormalized = billFrequencyCode.orElse("");
+
+    // If all codes are empty, don't create the supporting info
+    if (facilityTypeCodeNormalized.isEmpty()
+        && billClassificationCodeNormalized.isEmpty()
+        && billFrequencyCodeNormalized.isEmpty()) {
+      return Optional.empty();
+    }
+
     var codeableConcept =
         new CodeableConcept()
             .addCoding(
@@ -55,9 +63,10 @@ class TypeOfBillCode {
               .setSystem(SystemUrls.BLUE_BUTTON_CODE_SYSTEM_BILL_FREQUENCY_CODE)
               .setCode(frequencyCode));
     }
-    return supportingInfoFactory
-        .createSupportingInfo()
-        .setCategory(CarinSupportingInfoCategory.TYPE_OF_BILL_CODE.toFhir())
-        .setCode(codeableConcept);
+    return Optional.of(
+        supportingInfoFactory
+            .createSupportingInfo()
+            .setCategory(CarinSupportingInfoCategory.TYPE_OF_BILL_CODE.toFhir())
+            .setCode(codeableConcept));
   }
 }
