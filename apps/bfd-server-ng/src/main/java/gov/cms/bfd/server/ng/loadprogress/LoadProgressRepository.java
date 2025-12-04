@@ -32,9 +32,6 @@ public class LoadProgressRepository {
             """,
             ZonedDateTime.class)
         .setParameter("defaultDate", LocalDate.EPOCH)
-        .getResultList()
-        .stream()
-        .findFirst()
-        .get();
+        .getSingleResult();
   }
 }
