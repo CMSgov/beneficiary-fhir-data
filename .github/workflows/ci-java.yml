@@ -131,8 +131,9 @@ jobs:
         if: ${{ github.event_name != 'merge_group' }}
         env:
           BFD_BRANCH: ${{ inputs.branch }}
+          SONAR_SCANNER_JAVA_OPTS: -Xmx4096m
         run: |
-          mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+          mvn -X org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
             -DskipITs \
             -DskipTests \
             --no-transfer-progress \

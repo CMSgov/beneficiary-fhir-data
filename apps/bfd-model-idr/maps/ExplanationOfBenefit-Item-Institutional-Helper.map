@@ -1,5 +1,5 @@
-map "https://bfd.cms.gov/MappingLanguage/Maps/EOB-Item-Institutional-Helper" = "BFD-ExplanationOfBenefit-Item-Institutional-Helper-Map"
-imports "https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper" 
+map "https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Item-Institutional-Helper" = "BFD-ExplanationOfBenefit-Item-Institutional-Helper-Map"
+imports "https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper" 
 
 group addItem(source src: LineItemComponent, target tgt: BackboneElement){
     src.CLM_LINE_NUM as seqNum -> tgt.sequence = seqNum "set sequence number";
@@ -41,7 +41,7 @@ group addItem(source src: LineItemComponent, target tgt: BackboneElement){
     src.CLM_LINE_DMERC_SCRN_SVGS_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addLineDMESvgs(amt, tgtAdjudication) "Add amount";
     src.CLM_LINE_ADD_ON_PYMT_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addLineAddOnPayment(amt, tgtAdjudication) "Add amount";
     src.CLM_LINE_NON_EHR_RDCTN_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addLineNonEHRReduction(amt, tgtAdjudication) "Add amount";
-    src.CLM_REV_CTR_TDAPA_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addLineTransitionalDrugAddOnPaymentAdjustment(amt, tgtAdjudication) "Add amount";
+    src.CLM_REV_CNTR_TDAPA_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addLineTransitionalDrugAddOnPaymentAdjustment(amt, tgtAdjudication) "Add amount";
     src.CLM_LINE_CARR_CLNCL_CHRG_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addLineCarrierClinicalCharge(amt, tgtAdjudication) "Add amount";
     src.CLM_LINE_CARR_PSYCH_OT_LMT_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addLineTherapyAmountAppliedToLimit(amt, tgtAdjudication) "Add amount";
     src.CLM_LINE_PRFNL_INTRST_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addLineProfessionalInterest(amt, tgtAdjudication) "Add amount";
@@ -480,7 +480,7 @@ group addLineNonEHRReduction(source src: String, target tgt: BackboneElement){
 }
 
 group addLineTransitionalDrugAddOnPaymentAdjustment(source src: String, target tgt: BackboneElement){
-    src -> tgt.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_REV_CTR_TDAPA_AMT") "Add coding 2";
+    src -> tgt.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_REV_CNTR_TDAPA_AMT") "Add coding 2";
     src -> tgt.amount = create('Money') as tgtMoney then addMoney(src, tgtMoney) "Add Money";
 }
 
@@ -544,7 +544,7 @@ group addNDCToInstitutional(source src: LineItemComponent, target tgt: BackboneE
     src -> tgt.quantity = create('SimpleQuantity') as tgtQuantity then {
         src.CLM_LINE_NDC_QTY as ndcQty -> tgtQuantity.value=cast(ndcQty,"decimal") "set quantity";
         src.CLM_LINE_NDC_QTY_QLFYR_CD as ndcUnit where ndcUnit.length()>0 -> tgtQuantity.system = "http://unitsofmeasure.org" "Set system";
-        src.CLM_LINE_NDC_QTY_QLFYR_CD as ndcUnit where ndcUnit.length()>0 -> tgtQuantity.code = translate(ndcUnit,'https://bfd.cms.gov/MappingLanguage/Maps/EOB-Helper#UnitTransform','code') "Set code";
+        src.CLM_LINE_NDC_QTY_QLFYR_CD as ndcUnit where ndcUnit.length()>0 -> tgtQuantity.code = translate(ndcUnit,'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#UnitTransform','code') "Set code";
         src.CLM_LINE_NDC_QTY_QLFYR_CD as ndcUnit where ndcUnit.length()>0 -> tgtQuantity.unit = ndcUnit "Set system";
     } "Set quantity of NDC utilized";
 }

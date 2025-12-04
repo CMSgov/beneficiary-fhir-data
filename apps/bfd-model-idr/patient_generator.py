@@ -210,13 +210,12 @@ for i in range(patients_to_generate):
 
     if random.random() < 0.05:
         prior_patient = copy.deepcopy(patient)
-        old_bene_sk = prior_patient["BENE_SK"]
         pt_bene_sk = generator.gen_bene_sk()
         prior_patient["BENE_SK"] = str(pt_bene_sk)
         prior_patient["IDR_LTST_TRANS_FLG"] = "N"
         generator.used_bene_sk.append(pt_bene_sk)
 
-        generator.generate_bene_xref(pt_bene_sk, old_bene_sk)
+        generator.generate_bene_xref(patient["BENE_SK"], pt_bene_sk)
 
         generator.set_timestamps(prior_patient, datetime.date(year=2017, month=5, day=20))
 

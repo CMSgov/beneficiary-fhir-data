@@ -3238,3 +3238,88 @@
   bfdDerived: true
   notes: The actual values are not derived, but this variable as marked as derived to call attention to the flattened structure compared to the upstream source.
   fhirPath: ExplanationOfBenefit.supportingInfo.where(code.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD').code.coding.code
+- inputPath: LineItemComponent.CLM_LINE_ADD_ON_PYMT_AMT
+  appliesTo:
+    - Inpatient
+    - Outpatient
+    - HHA
+    - Hospice
+    - SNF
+  sources:
+    - FISS
+    - NCH
+  sourceView: V2_MDCR_CLM_LINE_INSTNL
+  sourceColumn: CLM_LINE_ADD_ON_PYMT_AMT
+  fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_ADD_ON_PYMT_AMT')).amount.value
+- inputPath: LineItemComponent.CLM_LINE_NON_EHR_RDCTN_AMT
+  appliesTo:
+    - Inpatient
+  sources:
+    - FISS
+  sourceView: V2_MDCR_CLM_LINE
+  sourceColumn: CLM_LINE_NON_EHR_RDCTN_AMT
+  fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_NON_EHR_RDCTN_AMT')).amount.value
+- inputPath: LineItemComponent.CLM_REV_CNTR_TDAPA_AMT
+  appliesTo:
+    - Outpatient
+    - Inpatient
+    - SNF
+    - HHA
+    - Hospice
+  sources:
+    - FISS
+    - NCH
+  sourceView: V2_MDCR_CLM_LINE_INSTNL
+  sourceColumn: CLM_REV_CNTR_TDAPA_AMT
+  fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_REV_CNTR_TDAPA_AMT')).amount.value
+- inputPath: LineItemComponent.CLM_LINE_CARR_CLNCL_CHRG_AMT
+  appliesTo:
+    - Carrier
+  sources:
+    - MCS
+    - NCH
+  sourceView: V2_MDCR_CLM_LINE_PRFNL
+  sourceColumn: CLM_LINE_CARR_CLNCL_CHRG_AMT
+  fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_CARR_CLNCL_CHRG_AMT')).amount.value
+- inputPath: LineItemComponent.CLM_LINE_CARR_PSYCH_OT_LMT_AMT
+  appliesTo:
+    - Carrier
+  sources:
+    - MCS
+    - NCH
+  sourceView: V2_MDCR_CLM_LINE_PRFNL
+  sourceColumn: CLM_LINE_CARR_PSYCH_OT_LMT_AMT
+  fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_CARR_PSYCH_OT_LMT_AMT')).amount.value
+- inputPath: LineItemComponent.CLM_LINE_PRFNL_INTRST_AMT
+  appliesTo:
+    - Carrier
+    - DME
+  sources:
+    - MCS
+    - VMS
+    - NCH
+  sourceView: V2_MDCR_CLM_LINE_PRFNL
+  sourceColumn: CLM_LINE_PRFNL_INTRST_AMT
+  fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_PRFNL_INTRST_AMT')).amount.value
+- inputPath: LineItemComponent.CLM_MDCR_PRMRY_PYR_ALOWD_AMT
+  appliesTo:
+    - Carrier
+    - DME
+  sources:
+    - MCS
+    - VMS
+    - NCH
+  sourceView: V2_MDCR_CLM_LINE_PRFNL
+  sourceColumn: CLM_MDCR_PRMRY_PYR_ALOWD_AMT
+  fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_MDCR_PRMRY_PYR_ALOWD_AMT')).amount.value
+- inputPath: SupportingInfoComponent.CLM_MDCR_NCH_PTNT_STUS_IND_CD
+  appliesTo:
+    - Inpatient
+    - Hospice
+  sources:
+    - FISS
+    - NCH
+  sourceView: V2_MDCR_CLM_INSTNL
+  sourceColumn: CLM_MDCR_NCH_PTNT_STUS_IND_CD
+  referenceTable: CLM_MDCR_NCH_PTNT_STUS_IND_CD
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(code.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-NCH-PTNT-STUS-IND-CD').code.coding.code
