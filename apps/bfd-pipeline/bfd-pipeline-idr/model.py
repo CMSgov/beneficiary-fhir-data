@@ -790,9 +790,7 @@ class IdrBeneficiaryMaPartDEnrollment(IdrBaseModel):
     bene_enrlmt_end_dt: Annotated[date, BeforeValidator(transform_null_date_to_max)]
     bene_cntrct_num: str
     bene_cvrg_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    bene_enrlmt_pgm_type_cd: Annotated[
-        str, {PRIMARY_KEY: True}, BeforeValidator(transform_default_string)
-    ]
+    bene_enrlmt_pgm_type_cd: Annotated[str, {PRIMARY_KEY: True}]
     bene_enrlmt_emplr_sbsdy_sw: Annotated[str, BeforeValidator(transform_default_string)]
     idr_ltst_trans_flg: str
     idr_trans_efctv_ts: datetime
@@ -808,6 +806,9 @@ class IdrBeneficiaryMaPartDEnrollment(IdrBaseModel):
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
+        # There are only a very few instances where non-obsolete records have a
+        # bene_enrlmt_pgm_type_cd set to '~' and these are all from the 80s,
+        # so it should be safe to filter these.
         hstry = ALIAS_HSTRY
         return f"""
             SELECT {{COLUMNS}}
@@ -818,6 +819,7 @@ class IdrBeneficiaryMaPartDEnrollment(IdrBaseModel):
                 AND {hstry}.bene_sk = enrlmt.bene_sk
             )
             AND idr_trans_obslt_ts >= '{DEFAULT_MAX_DATE}'
+            AND bene_enrlmt_pgm_type_cd != '~'
             {{ORDER_BY}}
         """
 
