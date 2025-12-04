@@ -782,7 +782,7 @@ class IdrContractPbpContact(IdrBaseModel):
         return [NON_CLAIM_PARTITION]
 
 
-class IdrBeneficiaryMappedEnrollment(IdrBaseModel):
+class IdrBeneficiaryMaPartDEnrollment(IdrBaseModel):
     bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
     cntrct_pbp_sk: int
     bene_pbp_num: Annotated[str, BeforeValidator(transform_default_string)]
@@ -804,7 +804,7 @@ class IdrBeneficiaryMappedEnrollment(IdrBaseModel):
 
     @staticmethod
     def table() -> str:
-        return "idr.beneficiary_mapped_enrollment"
+        return "idr.beneficiary_ma_part_d_enrollment"
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
@@ -826,7 +826,7 @@ class IdrBeneficiaryMappedEnrollment(IdrBaseModel):
         return [NON_CLAIM_PARTITION]
 
 
-class IdrBeneficiaryMappedEnrollmentRx(IdrBaseModel):
+class IdrBeneficiaryMaPartDEnrollmentRx(IdrBaseModel):
     bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
     cntrct_pbp_sk: int
     bene_cntrct_num: str
@@ -847,7 +847,7 @@ class IdrBeneficiaryMappedEnrollmentRx(IdrBaseModel):
 
     @staticmethod
     def table() -> str:
-        return "idr.beneficiary_mapped_enrollment_rx"
+        return "idr.beneficiary_ma_part_d_enrollment_rx"
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
