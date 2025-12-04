@@ -147,8 +147,7 @@ class EobReadIT extends IntegrationTestBase {
   @ParameterizedTest
   @EmptySource
   void eobReadNoIdBadRequest(String id) {
-    // Using RestAssured here because HAPI FHIR doesn't let us send a request with a
-    // blank ID
+    // Using RestAssured here because HAPI FHIR doesn't let us send a request with a blank ID
     RestAssured.get(getServerUrl() + "/ExplanationOfBenefit" + id).then().statusCode(400);
   }
 }
