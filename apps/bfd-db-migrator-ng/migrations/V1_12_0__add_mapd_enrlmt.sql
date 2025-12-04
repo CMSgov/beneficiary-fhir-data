@@ -1,7 +1,7 @@
 ALTER TABLE idr.contract_pbp_number
 ADD COLUMN cntrct_pbp_sgmt_num VARCHAR(3) NOT NULL;
 
-CREATE TABLE idr.beneficiary_mapped_enrollment(
+CREATE TABLE idr.beneficiary_ma_part_d_enrollment(
     bene_sk BIGINT NOT NULL,
     cntrct_pbp_sk BIGINT NOT NULL,
     bene_pbp_num VARCHAR(3) NOT NULL,
@@ -21,7 +21,7 @@ CREATE TABLE idr.beneficiary_mapped_enrollment(
     PRIMARY KEY(bene_sk, bene_enrlmt_bgn_dt, bene_enrlmt_pgm_type_cd)
 );
 
-CREATE TABLE idr.beneficiary_mapped_enrollment_rx(
+CREATE TABLE idr.beneficiary_ma_part_d_enrollment_rx(
     bene_sk BIGINT NOT NULL,
     cntrct_pbp_sk BIGINT NOT NULL,
     bene_cntrct_num VARCHAR(5) NOT NULL,
