@@ -12,8 +12,8 @@ from model import (
     IdrBeneficiaryEntitlement,
     IdrBeneficiaryEntitlementReason,
     IdrBeneficiaryLowIncomeSubsidy,
-    IdrBeneficiaryMappedEnrollment,
-    IdrBeneficiaryMappedEnrollmentRx,
+    IdrBeneficiaryMaPartDEnrollment,
+    IdrBeneficiaryMaPartDEnrollmentRx,
     IdrBeneficiaryMbiId,
     IdrBeneficiaryOvershareMbi,
     IdrBeneficiaryStatus,
@@ -60,8 +60,8 @@ BENE_AUX_TABLES = [
     IdrBeneficiaryMbiId,
     IdrContractPbpContact,
     IdrContractPbpNumber,
-    IdrBeneficiaryMappedEnrollment,
-    IdrBeneficiaryMappedEnrollmentRx,
+    IdrBeneficiaryMaPartDEnrollment,
+    IdrBeneficiaryMaPartDEnrollmentRx,
     IdrBeneficiaryLowIncomeSubsidy,
 ]
 
