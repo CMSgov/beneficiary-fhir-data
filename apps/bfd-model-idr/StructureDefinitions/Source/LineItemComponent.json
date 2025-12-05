@@ -1064,8 +1064,8 @@
                 ]
             },
             {
-                "id": "LineItemComponent.CLM_REV_CTR_TDAPA_AMT",
-                "path": "LineItemComponent.CLM_REV_CTR_TDAPA_AMT",
+                "id": "LineItemComponent.CLM_REV_CNTR_TDAPA_AMT",
+                "path": "LineItemComponent.CLM_REV_CNTR_TDAPA_AMT",
                 "label": "Transitional Drug Add-On Payment Adjustment",
                 "min": 0,
                 "max": "1",
