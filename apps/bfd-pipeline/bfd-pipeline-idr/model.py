@@ -902,8 +902,6 @@ class IdrBeneficiaryLowIncomeSubsidy(IdrBaseModel):
                     AND {hstry}.bene_sk = bene_lis.bene_sk
                 )
                 AND idr_trans_obslt_ts >= '{DEFAULT_MAX_DATE}'
-                AND bene_lis_efctv_cd = 'Y'
-                AND CURRENT_TIMESTAMP BETWEEN bene_rng_bgn_dt AND bene_rng_end_dt
                 {{ORDER_BY}}
             """
 
