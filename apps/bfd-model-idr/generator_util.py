@@ -257,7 +257,7 @@ class GeneratorUtil:
             future=future,
         )
 
-    def _generate_coverages(self, patient, coverage_parts, include_tp, expired, future):  # here
+    def _generate_coverages(self, patient, coverage_parts, include_tp, expired, future):
         now = datetime.date.today()
         if expired:
             medicare_start_date = now - datetime.timedelta(days=730)

@@ -1,11 +1,10 @@
 package gov.cms.bfd.server.ng.claim.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import gov.cms.bfd.server.ng.coverage.model.ContractPlanContactInfo;
+import gov.cms.bfd.server.ng.coverage.model.ContractPlanSegment;
+import jakarta.persistence.*;
 import java.util.Optional;
+import java.util.SortedSet;
 import lombok.Getter;
 
 /** Contract PBP Number table. */
@@ -34,4 +33,12 @@ public class Contract {
 
   @OneToOne(mappedBy = "contract")
   private Claim claim;
+
+  @OneToMany(fetch = FetchType.EAGER)
+  @JoinColumn(name = "cntrct_pbp_sk")
+  private SortedSet<ContractPlanSegment> contractPlanSegment;
+
+  @OneToOne(fetch = FetchType.EAGER)
+  @JoinColumn(name = "cntrct_pbp_sk")
+  private ContractPlanContactInfo contractPlanContactInfo;
 }
