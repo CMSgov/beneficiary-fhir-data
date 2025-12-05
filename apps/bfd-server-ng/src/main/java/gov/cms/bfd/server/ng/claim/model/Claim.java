@@ -308,17 +308,17 @@ public class Claim {
         });
 
     getBillingProviderHistory()
-        .flatMap(ph -> billingProvider.toFhir(claimTypeCode, ph))
         .ifPresent(
-            p -> {
+            ph -> {
+              var p = billingProvider.toFhir(ph);
               eob.addContained(p);
               eob.setProvider(new Reference(p));
             });
 
     getServiceProviderHistory()
-        .flatMap(p -> p.toFhirNpiTypePartD(claimTypeCode))
         .ifPresent(
-            p -> {
+            ph -> {
+              var p = ph.toFhirNpiType();
               eob.addContained(p);
               eob.setProvider(new Reference(p));
             });
