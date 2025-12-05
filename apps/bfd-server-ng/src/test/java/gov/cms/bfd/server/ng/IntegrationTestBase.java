@@ -9,6 +9,8 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import jakarta.persistence.EntityManager;
 import java.util.List;
+
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Coverage;
@@ -117,7 +119,7 @@ public class IntegrationTestBase {
     return events.stream().filter(l -> l.getLoggerName().equals("org.hibernate.SQL")).count();
   }
 
-  protected void validateCodings(org.hl7.fhir.instance.model.api.IBaseResource resource) {
+  protected void validateCodings(IBaseResource resource) {
     FhirContext ctx = FhirContext.forR4Cached();
     List<Coding> codings =
         ctx.newTerser().getAllPopulatedChildElementsOfType(resource, Coding.class);
