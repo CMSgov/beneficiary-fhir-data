@@ -693,6 +693,10 @@ public class SystemUrls {
   /** CMS - HCPCS Code Sets. */
   public static final String CMS_HCPCS = "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets";
 
+  /** CARIN compound literal. */
+  public static final String CARIN_COMPOUND_LITERAL =
+      "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBCompoundLiteral";
+
   /** CMS - HIPPS Code Sets. */
   public static final String CMS_HIPPS =
       "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/ProspMedicareFeeSvcPmtGen/HIPPSCodes";

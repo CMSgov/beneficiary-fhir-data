@@ -1172,6 +1172,18 @@
                 ]
             },
             {
+                "id": "LineItemComponent.isCompound",
+                "path": "LineItemComponent.isCompound",
+                "label": "Is Compound - derived",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
                 "id": "LineItemComponent.careTeamSequence",
                 "path": "LineItemComponent.careTeamSequence",
                 "label": "Derived Care Team Sequence Number",
