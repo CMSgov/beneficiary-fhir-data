@@ -351,6 +351,13 @@ public class Claim {
             .flatMap(Optional::stream)
             .toList();
 
+    var claimRelatedConditionCds =
+        claimItems.stream()
+            .map(ClaimItem::getClaimRelatedCondition)
+            .map(crc -> crc.toFhir(supportingInfoFactory))
+            .flatMap(Optional::stream)
+            .toList();
+
     Stream.of(
             initialSupportingInfo,
             claimDateSignature.getSupportingInfo().toFhir(supportingInfoFactory),
@@ -358,7 +365,8 @@ public class Claim {
                 .map(i -> i.getSupportingInfo().toFhir(supportingInfoFactory))
                 .orElse(List.of()),
             claimRxSupportingInfo,
-            claimLineRxNumbers)
+            claimLineRxNumbers,
+            claimRelatedConditionCds)
         .flatMap(Collection::stream)
         .forEach(eob::addSupportingInfo);
 

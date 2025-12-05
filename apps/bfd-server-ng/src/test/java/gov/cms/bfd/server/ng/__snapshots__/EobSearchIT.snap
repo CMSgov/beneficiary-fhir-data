@@ -8375,11 +8375,31 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_RLT_COND_CD",
+            "display" : "Claim Related Condition Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "R1",
+            "display" : "REQUEST FOR REOPENING REASON CODE - MATHEMATICAL OR COMPUTATIONAL MISTAKES (EFFECTIVE 1/1/16)",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "admissionperiod",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-27"
@@ -8391,7 +8411,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -8405,7 +8425,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -8419,7 +8439,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -8433,7 +8453,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -8447,7 +8467,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -8461,7 +8481,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       } ],
       "total" : [ {
@@ -8994,11 +9014,31 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_RLT_COND_CD",
+            "display" : "Claim Related Condition Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "42",
+            "display" : "CONTINUING CARE NOT RELATED TO INPATIENT ADMISSION - CONTINUING CARE NOT RELATED TO THE CONDITION OR DIAGNOSIS FOR WHICH THE BENEFICIARY RECEIVED INPATIENT HOSPITAL SERVICES. (EFF. 10/01)",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "admissionperiod",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-27"
@@ -9010,7 +9050,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -9024,7 +9064,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -9038,7 +9078,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -9052,7 +9092,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -9066,7 +9106,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -9080,7 +9120,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       } ],
       "total" : [ {
@@ -9610,11 +9650,31 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_RLT_COND_CD",
+            "display" : "Claim Related Condition Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "21",
+            "display" : "BILLING FOR DENIAL NOTICE",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "admissionperiod",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-27"
@@ -9626,7 +9686,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -9640,7 +9700,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -9654,7 +9714,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -9668,7 +9728,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -9682,7 +9742,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -9696,7 +9756,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       } ],
       "total" : [ {
@@ -12446,11 +12506,31 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_RLT_COND_CD",
+            "display" : "Claim Related Condition Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "R1",
+            "display" : "REQUEST FOR REOPENING REASON CODE - MATHEMATICAL OR COMPUTATIONAL MISTAKES (EFFECTIVE 1/1/16)",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "admissionperiod",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-27"
@@ -12462,7 +12542,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -12476,7 +12556,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -12490,7 +12570,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -12504,7 +12584,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -12518,7 +12598,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -12532,7 +12612,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       } ],
       "total" : [ {
@@ -13065,11 +13145,31 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_RLT_COND_CD",
+            "display" : "Claim Related Condition Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "42",
+            "display" : "CONTINUING CARE NOT RELATED TO INPATIENT ADMISSION - CONTINUING CARE NOT RELATED TO THE CONDITION OR DIAGNOSIS FOR WHICH THE BENEFICIARY RECEIVED INPATIENT HOSPITAL SERVICES. (EFF. 10/01)",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "admissionperiod",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-27"
@@ -13081,7 +13181,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -13095,7 +13195,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -13109,7 +13209,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -13123,7 +13223,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -13137,7 +13237,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -13151,7 +13251,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       } ],
       "total" : [ {
@@ -13681,11 +13781,31 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_RLT_COND_CD",
+            "display" : "Claim Related Condition Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "21",
+            "display" : "BILLING FOR DENIAL NOTICE",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "admissionperiod",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-27"
@@ -13697,7 +13817,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -13711,7 +13831,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -13725,7 +13845,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -13739,7 +13859,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -13753,7 +13873,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -13767,7 +13887,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       } ],
       "total" : [ {
@@ -16517,11 +16637,31 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_RLT_COND_CD",
+            "display" : "Claim Related Condition Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "R1",
+            "display" : "REQUEST FOR REOPENING REASON CODE - MATHEMATICAL OR COMPUTATIONAL MISTAKES (EFFECTIVE 1/1/16)",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "admissionperiod",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-27"
@@ -16533,7 +16673,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -16547,7 +16687,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -16561,7 +16701,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -16575,7 +16715,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -16589,7 +16729,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -16603,7 +16743,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       } ],
       "total" : [ {
@@ -17136,11 +17276,31 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_RLT_COND_CD",
+            "display" : "Claim Related Condition Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "42",
+            "display" : "CONTINUING CARE NOT RELATED TO INPATIENT ADMISSION - CONTINUING CARE NOT RELATED TO THE CONDITION OR DIAGNOSIS FOR WHICH THE BENEFICIARY RECEIVED INPATIENT HOSPITAL SERVICES. (EFF. 10/01)",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "admissionperiod",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-27"
@@ -17152,7 +17312,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -17166,7 +17326,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -17180,7 +17340,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -17194,7 +17354,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -17208,7 +17368,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -17222,7 +17382,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       } ],
       "total" : [ {
@@ -17752,11 +17912,31 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_RLT_COND_CD",
+            "display" : "Claim Related Condition Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "21",
+            "display" : "BILLING FOR DENIAL NOTICE",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "admissionperiod",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-27"
@@ -17768,7 +17948,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -17782,7 +17962,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -17796,7 +17976,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -17810,7 +17990,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -17824,7 +18004,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -17838,7 +18018,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       } ],
       "total" : [ {
@@ -20588,11 +20768,31 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WITH_SEARCH_WithSy
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_RLT_COND_CD",
+            "display" : "Claim Related Condition Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "R1",
+            "display" : "REQUEST FOR REOPENING REASON CODE - MATHEMATICAL OR COMPUTATIONAL MISTAKES (EFFECTIVE 1/1/16)",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "admissionperiod",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-27"
@@ -20604,7 +20804,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WITH_SEARCH_WithSy
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -20618,7 +20818,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WITH_SEARCH_WithSy
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -20632,7 +20832,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WITH_SEARCH_WithSy
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -20646,7 +20846,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WITH_SEARCH_WithSy
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -20660,7 +20860,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WITH_SEARCH_WithSy
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -20674,7 +20874,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WITH_SEARCH_WithSy
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       } ],
       "total" : [ {
@@ -23427,11 +23627,31 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WithSystemTag_Adju
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_RLT_COND_CD",
+            "display" : "Claim Related Condition Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "R1",
+            "display" : "REQUEST FOR REOPENING REASON CODE - MATHEMATICAL OR COMPUTATIONAL MISTAKES (EFFECTIVE 1/1/16)",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "admissionperiod",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-27"
@@ -23443,7 +23663,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WithSystemTag_Adju
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -23457,7 +23677,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WithSystemTag_Adju
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -23471,7 +23691,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WithSystemTag_Adju
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -23485,7 +23705,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WithSystemTag_Adju
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -23499,7 +23719,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WithSystemTag_Adju
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -23513,7 +23733,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WithSystemTag_Adju
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       } ],
       "total" : [ {
@@ -26266,11 +26486,31 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[POST_WithSystemTag_Adj
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_RLT_COND_CD",
+            "display" : "Claim Related Condition Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "R1",
+            "display" : "REQUEST FOR REOPENING REASON CODE - MATHEMATICAL OR COMPUTATIONAL MISTAKES (EFFECTIVE 1/1/16)",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "admissionperiod",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-27"
@@ -26282,7 +26522,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[POST_WithSystemTag_Adj
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -26296,7 +26536,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[POST_WithSystemTag_Adj
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -26310,7 +26550,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[POST_WithSystemTag_Adj
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -26324,7 +26564,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[POST_WithSystemTag_Adj
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -26338,7 +26578,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[POST_WithSystemTag_Adj
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -26352,7 +26592,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[POST_WithSystemTag_Adj
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       } ],
       "total" : [ {
@@ -27788,11 +28028,31 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[GET_WITH_SEARCH_WithTag_Em
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_RLT_COND_CD",
+            "display" : "Claim Related Condition Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "42",
+            "display" : "CONTINUING CARE NOT RELATED TO INPATIENT ADMISSION - CONTINUING CARE NOT RELATED TO THE CONDITION OR DIAGNOSIS FOR WHICH THE BENEFICIARY RECEIVED INPATIENT HOSPITAL SERVICES. (EFF. 10/01)",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "admissionperiod",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-27"
@@ -27804,7 +28064,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[GET_WITH_SEARCH_WithTag_Em
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -27818,7 +28078,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[GET_WITH_SEARCH_WithTag_Em
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -27832,7 +28092,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[GET_WITH_SEARCH_WithTag_Em
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -27846,7 +28106,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[GET_WITH_SEARCH_WithTag_Em
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -27860,7 +28120,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[GET_WITH_SEARCH_WithTag_Em
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -27874,7 +28134,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[GET_WITH_SEARCH_WithTag_Em
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       } ],
       "total" : [ {
@@ -28404,11 +28664,31 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[GET_WITH_SEARCH_WithTag_Em
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_RLT_COND_CD",
+            "display" : "Claim Related Condition Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "21",
+            "display" : "BILLING FOR DENIAL NOTICE",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "admissionperiod",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-27"
@@ -28420,7 +28700,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[GET_WITH_SEARCH_WithTag_Em
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -28434,7 +28714,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[GET_WITH_SEARCH_WithTag_Em
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -28448,7 +28728,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[GET_WITH_SEARCH_WithTag_Em
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -28462,7 +28742,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[GET_WITH_SEARCH_WithTag_Em
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -28476,7 +28756,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[GET_WITH_SEARCH_WithTag_Em
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -28490,7 +28770,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[GET_WITH_SEARCH_WithTag_Em
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       } ],
       "total" : [ {
@@ -29037,11 +29317,31 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[GET_WithTag_EmptyResult]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_RLT_COND_CD",
+            "display" : "Claim Related Condition Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "42",
+            "display" : "CONTINUING CARE NOT RELATED TO INPATIENT ADMISSION - CONTINUING CARE NOT RELATED TO THE CONDITION OR DIAGNOSIS FOR WHICH THE BENEFICIARY RECEIVED INPATIENT HOSPITAL SERVICES. (EFF. 10/01)",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "admissionperiod",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-27"
@@ -29053,7 +29353,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[GET_WithTag_EmptyResult]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -29067,7 +29367,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[GET_WithTag_EmptyResult]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -29081,7 +29381,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[GET_WithTag_EmptyResult]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -29095,7 +29395,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[GET_WithTag_EmptyResult]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -29109,7 +29409,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[GET_WithTag_EmptyResult]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -29123,7 +29423,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[GET_WithTag_EmptyResult]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       } ],
       "total" : [ {
@@ -29653,11 +29953,31 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[GET_WithTag_EmptyResult]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_RLT_COND_CD",
+            "display" : "Claim Related Condition Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "21",
+            "display" : "BILLING FOR DENIAL NOTICE",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "admissionperiod",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-27"
@@ -29669,7 +29989,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[GET_WithTag_EmptyResult]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -29683,7 +30003,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[GET_WithTag_EmptyResult]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -29697,7 +30017,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[GET_WithTag_EmptyResult]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -29711,7 +30031,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[GET_WithTag_EmptyResult]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -29725,7 +30045,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[GET_WithTag_EmptyResult]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -29739,7 +30059,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[GET_WithTag_EmptyResult]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       } ],
       "total" : [ {
@@ -30286,11 +30606,31 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[POST_WithTag_EmptyResult]=
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_RLT_COND_CD",
+            "display" : "Claim Related Condition Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "42",
+            "display" : "CONTINUING CARE NOT RELATED TO INPATIENT ADMISSION - CONTINUING CARE NOT RELATED TO THE CONDITION OR DIAGNOSIS FOR WHICH THE BENEFICIARY RECEIVED INPATIENT HOSPITAL SERVICES. (EFF. 10/01)",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "admissionperiod",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-27"
@@ -30302,7 +30642,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[POST_WithTag_EmptyResult]=
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -30316,7 +30656,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[POST_WithTag_EmptyResult]=
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -30330,7 +30670,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[POST_WithTag_EmptyResult]=
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -30344,7 +30684,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[POST_WithTag_EmptyResult]=
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -30358,7 +30698,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[POST_WithTag_EmptyResult]=
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -30372,7 +30712,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[POST_WithTag_EmptyResult]=
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       } ],
       "total" : [ {
@@ -30902,11 +31242,31 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[POST_WithTag_EmptyResult]=
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_RLT_COND_CD",
+            "display" : "Claim Related Condition Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "21",
+            "display" : "BILLING FOR DENIAL NOTICE",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "admissionperiod",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-27"
@@ -30918,7 +31278,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[POST_WithTag_EmptyResult]=
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -30932,7 +31292,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[POST_WithTag_EmptyResult]=
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -30946,7 +31306,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[POST_WithTag_EmptyResult]=
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -30960,7 +31320,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[POST_WithTag_EmptyResult]=
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -30974,7 +31334,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[POST_WithTag_EmptyResult]=
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -30988,7 +31348,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[POST_WithTag_EmptyResult]=
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       } ],
       "total" : [ {
@@ -32852,11 +33212,31 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WITH_SEARCH_WithTag_Adjudic
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_RLT_COND_CD",
+            "display" : "Claim Related Condition Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "R1",
+            "display" : "REQUEST FOR REOPENING REASON CODE - MATHEMATICAL OR COMPUTATIONAL MISTAKES (EFFECTIVE 1/1/16)",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "admissionperiod",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-27"
@@ -32868,7 +33248,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WITH_SEARCH_WithTag_Adjudic
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -32882,7 +33262,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WITH_SEARCH_WithTag_Adjudic
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -32896,7 +33276,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WITH_SEARCH_WithTag_Adjudic
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -32910,7 +33290,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WITH_SEARCH_WithTag_Adjudic
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -32924,7 +33304,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WITH_SEARCH_WithTag_Adjudic
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -32938,7 +33318,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WITH_SEARCH_WithTag_Adjudic
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       } ],
       "total" : [ {
@@ -35691,11 +36071,31 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WithTag_Adjudicated]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_RLT_COND_CD",
+            "display" : "Claim Related Condition Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "R1",
+            "display" : "REQUEST FOR REOPENING REASON CODE - MATHEMATICAL OR COMPUTATIONAL MISTAKES (EFFECTIVE 1/1/16)",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "admissionperiod",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-27"
@@ -35707,7 +36107,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WithTag_Adjudicated]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -35721,7 +36121,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WithTag_Adjudicated]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -35735,7 +36135,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WithTag_Adjudicated]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -35749,7 +36149,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WithTag_Adjudicated]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -35763,7 +36163,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WithTag_Adjudicated]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -35777,7 +36177,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WithTag_Adjudicated]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       } ],
       "total" : [ {
@@ -38530,11 +38930,31 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[POST_WithTag_Adjudicated]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_RLT_COND_CD",
+            "display" : "Claim Related Condition Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "R1",
+            "display" : "REQUEST FOR REOPENING REASON CODE - MATHEMATICAL OR COMPUTATIONAL MISTAKES (EFFECTIVE 1/1/16)",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "admissionperiod",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-27"
@@ -38546,7 +38966,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[POST_WithTag_Adjudicated]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -38560,7 +38980,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[POST_WithTag_Adjudicated]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -38574,7 +38994,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[POST_WithTag_Adjudicated]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -38588,7 +39008,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[POST_WithTag_Adjudicated]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -38602,7 +39022,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[POST_WithTag_Adjudicated]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -38616,7 +39036,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[POST_WithTag_Adjudicated]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       } ],
       "total" : [ {
@@ -40075,11 +40495,31 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_RLT_COND_CD",
+            "display" : "Claim Related Condition Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "R1",
+            "display" : "REQUEST FOR REOPENING REASON CODE - MATHEMATICAL OR COMPUTATIONAL MISTAKES (EFFECTIVE 1/1/16)",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "admissionperiod",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-27"
@@ -40091,7 +40531,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -40105,7 +40545,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -40119,7 +40559,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -40133,7 +40573,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -40147,7 +40587,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -40161,7 +40601,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       } ],
       "total" : [ {
@@ -40694,11 +41134,31 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_RLT_COND_CD",
+            "display" : "Claim Related Condition Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "42",
+            "display" : "CONTINUING CARE NOT RELATED TO INPATIENT ADMISSION - CONTINUING CARE NOT RELATED TO THE CONDITION OR DIAGNOSIS FOR WHICH THE BENEFICIARY RECEIVED INPATIENT HOSPITAL SERVICES. (EFF. 10/01)",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "admissionperiod",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-27"
@@ -40710,7 +41170,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -40724,7 +41184,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -40738,7 +41198,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -40752,7 +41212,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -40766,7 +41226,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -40780,7 +41240,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       } ],
       "total" : [ {
@@ -41310,11 +41770,31 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_RLT_COND_CD",
+            "display" : "Claim Related Condition Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "21",
+            "display" : "BILLING FOR DENIAL NOTICE",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "admissionperiod",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-27"
@@ -41326,7 +41806,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -41340,7 +41820,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -41354,7 +41834,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -41368,7 +41848,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -41382,7 +41862,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -41396,7 +41876,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       } ],
       "total" : [ {
@@ -43260,11 +43740,31 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_RLT_COND_CD",
+            "display" : "Claim Related Condition Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "R1",
+            "display" : "REQUEST FOR REOPENING REASON CODE - MATHEMATICAL OR COMPUTATIONAL MISTAKES (EFFECTIVE 1/1/16)",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "admissionperiod",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-27"
@@ -43276,7 +43776,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -43290,7 +43790,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -43304,7 +43804,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -43318,7 +43818,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -43332,7 +43832,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -43346,7 +43846,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       } ],
       "total" : [ {
@@ -43879,11 +44379,31 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_RLT_COND_CD",
+            "display" : "Claim Related Condition Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "42",
+            "display" : "CONTINUING CARE NOT RELATED TO INPATIENT ADMISSION - CONTINUING CARE NOT RELATED TO THE CONDITION OR DIAGNOSIS FOR WHICH THE BENEFICIARY RECEIVED INPATIENT HOSPITAL SERVICES. (EFF. 10/01)",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "admissionperiod",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-27"
@@ -43895,7 +44415,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -43909,7 +44429,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -43923,7 +44443,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -43937,7 +44457,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -43951,7 +44471,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -43965,7 +44485,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       } ],
       "total" : [ {
@@ -44495,11 +45015,31 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_RLT_COND_CD",
+            "display" : "Claim Related Condition Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "21",
+            "display" : "BILLING FOR DENIAL NOTICE",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "admissionperiod",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-27"
@@ -44511,7 +45051,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -44525,7 +45065,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -44539,7 +45079,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -44553,7 +45093,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -44567,7 +45107,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -44581,7 +45121,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       } ],
       "total" : [ {
@@ -46445,11 +46985,31 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_RLT_COND_CD",
+            "display" : "Claim Related Condition Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "R1",
+            "display" : "REQUEST FOR REOPENING REASON CODE - MATHEMATICAL OR COMPUTATIONAL MISTAKES (EFFECTIVE 1/1/16)",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "admissionperiod",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-27"
@@ -46461,7 +47021,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -46475,7 +47035,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -46489,7 +47049,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -46503,7 +47063,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -46517,7 +47077,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -46531,7 +47091,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       } ],
       "total" : [ {
@@ -47064,11 +47624,31 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_RLT_COND_CD",
+            "display" : "Claim Related Condition Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "42",
+            "display" : "CONTINUING CARE NOT RELATED TO INPATIENT ADMISSION - CONTINUING CARE NOT RELATED TO THE CONDITION OR DIAGNOSIS FOR WHICH THE BENEFICIARY RECEIVED INPATIENT HOSPITAL SERVICES. (EFF. 10/01)",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "admissionperiod",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-27"
@@ -47080,7 +47660,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -47094,7 +47674,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -47108,7 +47688,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -47122,7 +47702,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -47136,7 +47716,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -47150,7 +47730,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       } ],
       "total" : [ {
@@ -47680,11 +48260,31 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_RLT_COND_CD",
+            "display" : "Claim Related Condition Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "21",
+            "display" : "BILLING FOR DENIAL NOTICE",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "admissionperiod",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-27"
@@ -47696,7 +48296,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -47710,7 +48310,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -47724,7 +48324,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -47738,7 +48338,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -47752,7 +48352,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -47766,7 +48366,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       } ],
       "total" : [ {
@@ -49222,11 +49822,31 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_RLT_COND_CD",
+            "display" : "Claim Related Condition Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "R1",
+            "display" : "REQUEST FOR REOPENING REASON CODE - MATHEMATICAL OR COMPUTATIONAL MISTAKES (EFFECTIVE 1/1/16)",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "admissionperiod",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-27"
@@ -49238,7 +49858,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -49252,7 +49872,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -49266,7 +49886,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -49280,7 +49900,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -49294,7 +49914,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -49308,7 +49928,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       } ],
       "total" : [ {
@@ -49841,11 +50461,31 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_RLT_COND_CD",
+            "display" : "Claim Related Condition Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "42",
+            "display" : "CONTINUING CARE NOT RELATED TO INPATIENT ADMISSION - CONTINUING CARE NOT RELATED TO THE CONDITION OR DIAGNOSIS FOR WHICH THE BENEFICIARY RECEIVED INPATIENT HOSPITAL SERVICES. (EFF. 10/01)",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "admissionperiod",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-27"
@@ -49857,7 +50497,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -49871,7 +50511,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -49885,7 +50525,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -49899,7 +50539,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -49913,7 +50553,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -49927,7 +50567,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       } ],
       "total" : [ {
@@ -50457,11 +51097,31 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_RLT_COND_CD",
+            "display" : "Claim Related Condition Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "21",
+            "display" : "BILLING FOR DENIAL NOTICE",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "admissionperiod",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-27"
@@ -50473,7 +51133,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -50487,7 +51147,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -50501,7 +51161,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -50515,7 +51175,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -50529,7 +51189,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -50543,7 +51203,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       } ],
       "total" : [ {
@@ -52407,11 +53067,31 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_RLT_COND_CD",
+            "display" : "Claim Related Condition Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "R1",
+            "display" : "REQUEST FOR REOPENING REASON CODE - MATHEMATICAL OR COMPUTATIONAL MISTAKES (EFFECTIVE 1/1/16)",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "admissionperiod",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-27"
@@ -52423,7 +53103,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -52437,7 +53117,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -52451,7 +53131,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -52465,7 +53145,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -52479,7 +53159,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -52493,7 +53173,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       } ],
       "total" : [ {
@@ -53026,11 +53706,31 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_RLT_COND_CD",
+            "display" : "Claim Related Condition Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "42",
+            "display" : "CONTINUING CARE NOT RELATED TO INPATIENT ADMISSION - CONTINUING CARE NOT RELATED TO THE CONDITION OR DIAGNOSIS FOR WHICH THE BENEFICIARY RECEIVED INPATIENT HOSPITAL SERVICES. (EFF. 10/01)",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "admissionperiod",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-27"
@@ -53042,7 +53742,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -53056,7 +53756,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -53070,7 +53770,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -53084,7 +53784,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -53098,7 +53798,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -53112,7 +53812,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       } ],
       "total" : [ {
@@ -53642,11 +54342,31 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_RLT_COND_CD",
+            "display" : "Claim Related Condition Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "21",
+            "display" : "BILLING FOR DENIAL NOTICE",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "admissionperiod",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-27"
@@ -53658,7 +54378,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -53672,7 +54392,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -53686,7 +54406,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -53700,7 +54420,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -53714,7 +54434,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -53728,7 +54448,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       } ],
       "total" : [ {
@@ -55592,11 +56312,31 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_RLT_COND_CD",
+            "display" : "Claim Related Condition Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "R1",
+            "display" : "REQUEST FOR REOPENING REASON CODE - MATHEMATICAL OR COMPUTATIONAL MISTAKES (EFFECTIVE 1/1/16)",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "admissionperiod",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-27"
@@ -55608,7 +56348,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -55622,7 +56362,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -55636,7 +56376,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -55650,7 +56390,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -55664,7 +56404,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -55678,7 +56418,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       } ],
       "total" : [ {
@@ -56211,11 +56951,31 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_RLT_COND_CD",
+            "display" : "Claim Related Condition Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "42",
+            "display" : "CONTINUING CARE NOT RELATED TO INPATIENT ADMISSION - CONTINUING CARE NOT RELATED TO THE CONDITION OR DIAGNOSIS FOR WHICH THE BENEFICIARY RECEIVED INPATIENT HOSPITAL SERVICES. (EFF. 10/01)",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "admissionperiod",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-27"
@@ -56227,7 +56987,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -56241,7 +57001,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -56255,7 +57015,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -56269,7 +57029,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -56283,7 +57043,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -56297,7 +57057,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       } ],
       "total" : [ {
@@ -56827,11 +57587,31 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_RLT_COND_CD",
+            "display" : "Claim Related Condition Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "21",
+            "display" : "BILLING FOR DENIAL NOTICE",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "admissionperiod",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-27"
@@ -56843,7 +57623,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -56857,7 +57637,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -56871,7 +57651,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -56885,7 +57665,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -56899,7 +57679,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -56913,7 +57693,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       } ],
       "total" : [ {
@@ -58369,11 +59149,31 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_RLT_COND_CD",
+            "display" : "Claim Related Condition Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "R1",
+            "display" : "REQUEST FOR REOPENING REASON CODE - MATHEMATICAL OR COMPUTATIONAL MISTAKES (EFFECTIVE 1/1/16)",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "admissionperiod",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-27"
@@ -58385,7 +59185,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -58399,7 +59199,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -58413,7 +59213,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -58427,7 +59227,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -58441,7 +59241,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -58455,7 +59255,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       } ],
       "total" : [ {
@@ -58988,11 +59788,31 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_RLT_COND_CD",
+            "display" : "Claim Related Condition Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "42",
+            "display" : "CONTINUING CARE NOT RELATED TO INPATIENT ADMISSION - CONTINUING CARE NOT RELATED TO THE CONDITION OR DIAGNOSIS FOR WHICH THE BENEFICIARY RECEIVED INPATIENT HOSPITAL SERVICES. (EFF. 10/01)",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "admissionperiod",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-27"
@@ -59004,7 +59824,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -59018,7 +59838,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -59032,7 +59852,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -59046,7 +59866,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -59060,7 +59880,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -59074,7 +59894,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       } ],
       "total" : [ {
@@ -59604,11 +60424,31 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_RLT_COND_CD",
+            "display" : "Claim Related Condition Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "21",
+            "display" : "BILLING FOR DENIAL NOTICE",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "admissionperiod",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-27"
@@ -59620,7 +60460,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -59634,7 +60474,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -59648,7 +60488,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -59662,7 +60502,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -59676,7 +60516,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -59690,7 +60530,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       } ],
       "total" : [ {
@@ -61554,11 +62394,31 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_RLT_COND_CD",
+            "display" : "Claim Related Condition Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "R1",
+            "display" : "REQUEST FOR REOPENING REASON CODE - MATHEMATICAL OR COMPUTATIONAL MISTAKES (EFFECTIVE 1/1/16)",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "admissionperiod",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-27"
@@ -61570,7 +62430,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -61584,7 +62444,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -61598,7 +62458,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -61612,7 +62472,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -61626,7 +62486,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -61640,7 +62500,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       } ],
       "total" : [ {
@@ -62173,11 +63033,31 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_RLT_COND_CD",
+            "display" : "Claim Related Condition Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "42",
+            "display" : "CONTINUING CARE NOT RELATED TO INPATIENT ADMISSION - CONTINUING CARE NOT RELATED TO THE CONDITION OR DIAGNOSIS FOR WHICH THE BENEFICIARY RECEIVED INPATIENT HOSPITAL SERVICES. (EFF. 10/01)",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "admissionperiod",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-27"
@@ -62189,7 +63069,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -62203,7 +63083,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -62217,7 +63097,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -62231,7 +63111,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -62245,7 +63125,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -62259,7 +63139,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       } ],
       "total" : [ {
@@ -62789,11 +63669,31 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_RLT_COND_CD",
+            "display" : "Claim Related Condition Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "21",
+            "display" : "BILLING FOR DENIAL NOTICE",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "admissionperiod",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-27"
@@ -62805,7 +63705,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -62819,7 +63719,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -62833,7 +63733,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -62847,7 +63747,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -62861,7 +63761,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -62875,7 +63775,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       } ],
       "total" : [ {
@@ -64739,11 +65639,31 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_RLT_COND_CD",
+            "display" : "Claim Related Condition Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "R1",
+            "display" : "REQUEST FOR REOPENING REASON CODE - MATHEMATICAL OR COMPUTATIONAL MISTAKES (EFFECTIVE 1/1/16)",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "admissionperiod",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-27"
@@ -64755,7 +65675,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -64769,7 +65689,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -64783,7 +65703,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -64797,7 +65717,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -64811,7 +65731,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -64825,7 +65745,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       } ],
       "total" : [ {
@@ -65358,11 +66278,31 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_RLT_COND_CD",
+            "display" : "Claim Related Condition Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "42",
+            "display" : "CONTINUING CARE NOT RELATED TO INPATIENT ADMISSION - CONTINUING CARE NOT RELATED TO THE CONDITION OR DIAGNOSIS FOR WHICH THE BENEFICIARY RECEIVED INPATIENT HOSPITAL SERVICES. (EFF. 10/01)",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "admissionperiod",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-27"
@@ -65374,7 +66314,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -65388,7 +66328,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -65402,7 +66342,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -65416,7 +66356,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -65430,7 +66370,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -65444,7 +66384,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       } ],
       "total" : [ {
@@ -65974,11 +66914,31 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_RLT_COND_CD",
+            "display" : "Claim Related Condition Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "21",
+            "display" : "BILLING FOR DENIAL NOTICE",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "admissionperiod",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-27"
@@ -65990,7 +66950,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -66004,7 +66964,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -66018,7 +66978,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -66032,7 +66992,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -66046,7 +67006,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -66060,7 +67020,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       } ],
       "total" : [ {
