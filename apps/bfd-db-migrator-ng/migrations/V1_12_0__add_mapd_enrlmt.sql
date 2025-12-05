@@ -56,5 +56,5 @@ CREATE TABLE idr.beneficiary_low_income_subsidy(
     idr_updt_ts TIMESTAMPTZ NOT NULL,
     bfd_created_ts TIMESTAMPTZ NOT NULL,
     bfd_updated_ts TIMESTAMPTZ NOT NULL,
-    PRIMARY KEY(bene_sk, idr_trans_efctv_ts, bene_rng_bgn_dt, bene_lis_efctv_cd)
+    PRIMARY KEY(bene_sk, bene_rng_bgn_dt)
 );
