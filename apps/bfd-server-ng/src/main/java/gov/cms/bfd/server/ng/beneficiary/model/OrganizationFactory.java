@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.ng.beneficiary.model;
 
+import gov.cms.bfd.server.ng.claim.model.Contract;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -62,7 +63,8 @@ public final class OrganizationFactory {
    * @param profile the FHIR profile URL to set in the Organization's Meta
    * @return A fully populated FHIR {@link Organization} resource for part c/d.
    */
-  public static Organization createInsurerOrganization(String id, String profile) {
+  public static Organization createInsurerOrganization(
+      String id, String profile, Contract contract) {
     Organization insurerOrg = new Organization();
     insurerOrg.setId(id);
 
@@ -71,8 +73,7 @@ public final class OrganizationFactory {
     orgMeta.addProfile(profile);
     insurerOrg.setMeta(orgMeta);
     insurerOrg.setActive(true);
-    // todo: flip to use V2_MDCR_CNTRCT_PBP_NUM.CNTRCT_PBP_NAME
-    insurerOrg.setName("Centers for Medicare and Medicaid Services");
+    contract.getContractName().map(insurerOrg::setName);
 
     Organization.OrganizationContactComponent contact =
         new Organization.OrganizationContactComponent();
@@ -81,17 +82,34 @@ public final class OrganizationFactory {
     CodeableConcept contactPurpose = new CodeableConcept();
     contactPurpose.addCoding(new Coding(SystemUrls.SYS_CONTACT_ENTITY_TYPE, "PATINF", "Patient"));
     contact.setPurpose(contactPurpose);
-    // todo: flip to use tele nums from contract_pbp_contact:
-    // cntrct_plan_free_extnsn_num,cntrct_plan_cntct_free_num, cntrct_plan_cntct_extnsn_num,
-    // cntrct_plan_cntct_tel_num,
-    contact.addTelecom(
-        new ContactPoint()
-            .setSystem(ContactPoint.ContactPointSystem.PHONE)
-            .setValue("1-800-633-4227"));
-    contact.addTelecom(
-        new ContactPoint()
-            .setSystem(ContactPoint.ContactPointSystem.PHONE)
-            .setValue("TTY: 1-877-486-2048"));
+    var contactInfo = contract.getContractPlanContactInfo();
+    contactInfo
+        .getContractPlanContactFreeNumber()
+        .ifPresent(
+            teleNum -> {
+              String fullTeleNumber =
+                  contactInfo.getContractPlanFreeExtensionNumber().map(ext -> ext + "-").orElse("")
+                      + teleNum;
+              contact.addTelecom(
+                  new ContactPoint()
+                      .setSystem(ContactPoint.ContactPointSystem.PHONE)
+                      .setValue(fullTeleNumber));
+            });
+    contactInfo
+        .getContractPlanContactNumber()
+        .ifPresent(
+            teleNum -> {
+              String fullTeleNumber =
+                  contactInfo
+                          .getContractPlanContactExtensionNumber()
+                          .map(ext -> ext + "-")
+                          .orElse("")
+                      + teleNum;
+              contact.addTelecom(
+                  new ContactPoint()
+                      .setSystem(ContactPoint.ContactPointSystem.PHONE)
+                      .setValue(fullTeleNumber));
+            });
     insurerOrg.addContact(contact);
 
     return insurerOrg;
@@ -113,7 +131,8 @@ public final class OrganizationFactory {
    *
    * @return a fully populated FHIR {@link Organization} resource for part c/d
    */
-  public static Organization createInsurerOrganization() {
-    return createInsurerOrganization("insurer-org", SystemUrls.PROFILE_C4BB_ORGANIZATION_2_1_0);
+  public static Organization createInsurerOrganization(Contract contract) {
+    return createInsurerOrganization(
+        "insurer-org", SystemUrls.PROFILE_C4BB_ORGANIZATION_2_1_0, contract);
   }
 }

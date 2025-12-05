@@ -1,5 +1,7 @@
-ALTER TABLE idr.contract_pbp_number
-ADD COLUMN cntrct_pbp_sgmt_num VARCHAR(3) NOT NULL;
+CREATE TABLE idr.contract_pbp_segment(
+    cntrct_pbp_sk BIGINT NOT NULL PRIMARY KEY,
+    cntrct_pbp_sgmt_num VARCHAR(3) NOT NULL
+);
 
 CREATE TABLE idr.beneficiary_ma_part_d_enrollment(
     bene_sk BIGINT NOT NULL,
@@ -46,7 +48,6 @@ CREATE TABLE idr.beneficiary_low_income_subsidy(
     bene_sk BIGINT NOT NULL,
     bene_rng_bgn_dt DATE NOT NULL,
     bene_rng_end_dt DATE NOT NULL,
-    bene_lis_efctv_cd VARCHAR(1) NOT NULL,
     bene_lis_copmt_lvl_cd VARCHAR(1) NOT NULL,
     bene_lis_ptd_prm_pct VARCHAR(3),
     idr_ltst_trans_flg VARCHAR(1) NOT NULL,
