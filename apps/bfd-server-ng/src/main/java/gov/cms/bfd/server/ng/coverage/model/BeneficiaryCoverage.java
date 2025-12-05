@@ -13,6 +13,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Stream;
@@ -50,7 +51,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
 
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "bene_sk")
-  private SortedSet<BeneficiaryMappedEnrollment> beneficiaryMappedEnrollments;
+  private SortedSet<BeneficiaryMAPartDEnrollment> beneficiaryMappedEnrollments;
 
   /**
    * Value for C4DIC Additional Insurance Card Information Extension <a
@@ -107,22 +108,39 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
    *
    * @return Optional containing the matching enrollment, or empty if not found.
    */
-  private Optional<BeneficiaryMappedEnrollment> findEnrollment(CoveragePart coveragePart) {
-    // todo: tweak, if there is currently an active coverage + a future coverage, don't show the
-    // future one
+  private Optional<BeneficiaryMAPartDEnrollment> findEnrollment(CoveragePart coveragePart) {
     final String standardCode = coveragePart.getStandardCode();
-    return beneficiaryMappedEnrollments.stream()
-        .filter(
-            e -> {
-              var programTypeCode = e.getId().getEnrollmentProgramTypeCode();
-              return switch (standardCode) {
-                case "C" ->
-                    Objects.equals(programTypeCode, "1") || Objects.equals(programTypeCode, "3");
-                case "D" ->
-                    Objects.equals(programTypeCode, "2") || Objects.equals(programTypeCode, "3");
-                default -> false;
-              };
-            })
+    final LocalDate today = LocalDate.now();
+    var matchedCoverage =
+        beneficiaryMappedEnrollments.stream()
+            .filter(
+                e -> {
+                  var programTypeCode = e.getId().getEnrollmentProgramTypeCode();
+                  return switch (standardCode) {
+                    case "C" ->
+                        Objects.equals(programTypeCode, "1")
+                            || Objects.equals(programTypeCode, "3");
+                    case "D" ->
+                        Objects.equals(programTypeCode, "2")
+                            || Objects.equals(programTypeCode, "3");
+                    default -> false;
+                  };
+                })
+            .toList();
+
+    Optional<BeneficiaryMAPartDEnrollment> latestActiveEnrollment =
+        matchedCoverage.stream()
+            .filter(
+                e -> !e.getBeneficiaryEnrollmentPeriod().getEnrollmentBeginDate().isAfter(today))
+            .findFirst();
+
+    if (latestActiveEnrollment.isPresent()) {
+      return latestActiveEnrollment;
+    }
+
+    // only future coverage exists
+    return matchedCoverage.stream()
+        .filter(e -> e.getBeneficiaryEnrollmentPeriod().getEnrollmentBeginDate().isAfter(today))
         .findFirst();
   }
 
@@ -351,7 +369,8 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
           new Extension(SystemUrls.C4DIC_ADD_INFO_EXT_URL)
               .setValue(new Annotation(new MarkdownType(C4DIC_ADD_INFO))));
     } else {
-      var cmsOrg = OrganizationFactory.createInsurerOrganization();
+      var contract = enrollment.getContract();
+      var cmsOrg = OrganizationFactory.createInsurerOrganization(contract);
       coverage.addContained(cmsOrg);
       coverage.addPayor(new Reference().setReference("#" + cmsOrg.getIdElement().getIdPart()));
       enrollment.toFhirExtensions().forEach(coverage::addExtension);
