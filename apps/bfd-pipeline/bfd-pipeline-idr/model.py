@@ -155,12 +155,12 @@ class IdrBaseModel(BaseModel, ABC):
 
     @staticmethod
     def last_updated_date_table() -> str:
-        """BFD table that keeps track of last updated date for this model."""
+        """BFD table to keep track of last updated date for this model."""
         return ""
 
     @staticmethod
     def last_updated_date_column() -> str:
-        """BFD column that keeps track of last updated date for this model."""
+        """BFD column to keep track of last updated date for this model."""
         return ""
 
     @staticmethod
@@ -1079,7 +1079,7 @@ class IdrClaimDateSignature(IdrBaseModel):
     @staticmethod
     def table() -> str:
         return "idr.claim_date_signature"
-    
+
     @staticmethod
     def last_updated_date_table() -> str:
         return CLAIM_TABLE
@@ -1130,7 +1130,7 @@ class IdrClaimFiss(IdrBaseModel):
     @staticmethod
     def table() -> str:
         return "idr.claim_fiss"
-    
+
     @staticmethod
     def last_updated_date_table() -> str:
         return CLAIM_TABLE
@@ -1210,7 +1210,7 @@ class IdrClaimInstitutional(IdrBaseModel):
     @staticmethod
     def table() -> str:
         return "idr.claim_institutional"
-    
+
     @staticmethod
     def last_updated_date_table() -> str:
         return CLAIM_TABLE
@@ -1403,7 +1403,7 @@ class IdrClaimItem(IdrBaseModel):
     @staticmethod
     def table() -> str:
         return "idr.claim_item"
-    
+
     @staticmethod
     def last_updated_date_table() -> str:
         return CLAIM_TABLE
@@ -1718,7 +1718,7 @@ class IdrClaimProfessional(IdrBaseModel):
     @staticmethod
     def table() -> str:
         return "idr.claim_professional"
-    
+
     @staticmethod
     def last_updated_date_table() -> str:
         return CLAIM_TABLE
@@ -1826,7 +1826,7 @@ class IdrClaimLineProfessional(IdrBaseModel):
     @staticmethod
     def table() -> str:
         return "idr.claim_line_professional"
-    
+
     @staticmethod
     def last_updated_date_table() -> str:
         return CLAIM_TABLE
