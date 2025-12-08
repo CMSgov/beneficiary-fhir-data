@@ -210,7 +210,7 @@
     - CCLF7.CLM_LINE_NDC_CD
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_LINE_NDC_CD
-  fhirPath: ExplanationOfBenefit.item.productOrService.coding.where(system='http://hl7.org/fhir/sid/ndc').code
+  fhirPath: (ExplanationOfBenefit.item.productOrService.coding|ExplanationOfBenefit.item.detail.productOrService.coding).where(system = 'http://hl7.org/fhir/sid/ndc').code
 - inputPath: LineItemComponent.CLM_LINE_NDC_QTY
   appliesTo:
     - Pharmacy
@@ -220,7 +220,7 @@
     - QTY_DSPNSD_NUM
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_LINE_NDC_QTY
-  fhirPath: ExplanationOfBenefit.item.quantity.value
+  fhirPath: (ExplanationOfBenefit.item.quantity|ExplanationOfBenefit.item.detail.quantity).value
 - inputPath: LineItemComponent.CLM_LINE_NDC_QTY_QLFYR_CD
   appliesTo:
     - Pharmacy
@@ -228,7 +228,7 @@
     - NCH
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_LINE_NDC_QTY_QLFYR_CD
-  fhirPath: ExplanationOfBenefit.item.quantity.unit
+  fhirPath: (ExplanationOfBenefit.item.quantity|ExplanationOfBenefit.item.detail.quantity).unit
 - inputPath: LineItemComponent.CLM_LINE_CVRD_PD_AMT
   appliesTo:
     - Pharmacy

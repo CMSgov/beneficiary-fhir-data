@@ -36,6 +36,8 @@ tables = [
     {"csv_name": "SYNTHETIC_CLM_LCTN_HSTRY.csv", "table": "v2_mdcr_clm_lctn_hstry"},
     {"csv_name": "SYNTHETIC_CLM_RLT_COND_SGNTR_MBR.csv", "table": "v2_mdcr_clm_rlt_cond_sgntr_mbr"},
     {"csv_name": "SYNTHETIC_PRVDR_HSTRY.csv", "table": "v2_mdcr_prvdr_hstry"},
+    {"csv_name": "SYNTHETIC_CNTRCT_PBP_NUM.csv", "table": "v2_mdcr_cntrct_pbp_num"},
+    {"csv_name": "SYNTHETIC_CNTRCT_PBP_CNTCT.csv", "table": "v2_mdcr_cntrct_pbp_cntct"},
 ]
 
 

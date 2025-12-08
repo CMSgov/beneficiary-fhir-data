@@ -25,6 +25,8 @@ from model import (
     IdrClaimLineProfessional,
     IdrClaimLineRx,
     IdrClaimProfessional,
+    IdrContractPbpContact,
+    IdrContractPbpNumber,
     IdrProviderHistory,
     LoadMode,
     LoadType,
@@ -53,6 +55,8 @@ BENE_AUX_TABLES = [
     IdrBeneficiaryEntitlementReason,
     IdrBeneficiaryDualEligibility,
     IdrBeneficiaryMbiId,
+    IdrContractPbpContact,
+    IdrContractPbpNumber,
 ]
 
 

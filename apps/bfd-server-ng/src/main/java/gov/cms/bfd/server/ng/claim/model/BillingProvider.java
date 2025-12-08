@@ -29,35 +29,13 @@ class BillingProvider {
    * Builds the correct FHIR provider resource (Organization or Practitioner) according to FHIR
    * mapping rules.
    *
-   * @param claimTypeCode - Claim Type code
    * @param providerHistory - Provider History
    * @return a bundle resource containing either the Organization or Practitioner.
    */
-  Optional<Resource> toFhir(ClaimTypeCode claimTypeCode, ProviderHistory providerHistory) {
-    // --- 1. Institutional claims ---
-    if (claimTypeCode.isBetween(5, 69)
-        || claimTypeCode.isBetween(1000, 1699)
-        || claimTypeCode.isBetween(2000, 2699)) {
-      return Optional.of(createOrganization(providerHistory));
-    }
-
-    // --- 2. Professional claims: organization provider (NPI type 2) ---
-    if (providerHistory.getNpiType() == ProviderHistory.NpiType.ORGANIZATION
-        && (claimTypeCode.isBetween(71, 82)
-            || claimTypeCode.isBetween(1700, 1899)
-            || claimTypeCode.isBetween(2700, 2899))) {
-      return Optional.of(createOrganization(providerHistory));
-    }
-
-    // --- 3. Professional claims: practitioner provider (NPI type 1) ---
-    if (providerHistory.getNpiType() == ProviderHistory.NpiType.INDIVIDUAL
-        && (claimTypeCode.isBetween(71, 82)
-            || claimTypeCode.isBetween(1700, 1899)
-            || claimTypeCode.isBetween(2700, 2899))) {
-      return Optional.of(createBillingPractitioner(providerHistory));
-    }
-
-    return Optional.empty();
+  Resource toFhir(ProviderHistory providerHistory) {
+    return (providerHistory.getNpiType() == ProviderHistory.NpiType.ORGANIZATION
+        ? createOrganization(providerHistory)
+        : createBillingPractitioner(providerHistory));
   }
 
   private Organization createOrganization(ProviderHistory providerHistory) {
@@ -69,6 +47,7 @@ class BillingProvider {
         n ->
             org.addIdentifier(
                 new Identifier().setSystem(SystemUrls.CMS_CERTIFICATION_NUMBERS).setValue(n)));
+    billingZip5Code.ifPresent(zipCode -> org.addAddress(new Address().setPostalCode(zipCode)));
 
     return org;
   }

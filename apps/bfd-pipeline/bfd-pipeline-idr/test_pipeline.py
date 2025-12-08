@@ -249,6 +249,24 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
     rows = cur.fetchmany(1)
     assert rows[0]["clm_ansi_sgntr_sk"] == 0
 
+    cur = conn.execute("select * from idr.provider_history order by prvdr_sk")
+    assert cur.rowcount == 14
+    rows = cur.fetchmany(1)
+    assert rows[0]["prvdr_sk"] == 829307599
+
+    cur = conn.execute("select * from idr.contract_pbp_number order by cntrct_pbp_sk")
+    assert cur.rowcount == 4
+    rows = cur.fetchmany(1)
+    assert rows[0]["cntrct_pbp_sk"] == 408933975817
+
+    cur = conn.execute("select * from idr.contract_pbp_contact order by cntrct_pbp_sk")
+    assert cur.rowcount == 6
+    rows = cur.fetchmany(4)
+    assert rows[0]["cntrct_pbp_sk"] == 168239554424
+    assert rows[2]["cntrct_pbp_sk"] == 518317433750
+    # only a future record exists for this contract
+    assert rows[2]["cntrct_pbp_bgn_dt"].strftime("%Y-%m-%d") == "2026-01-01"
+
     # TODO: add these back when contract data is added
     # cur = conn.execute("select * from idr.beneficiary_election_period_usage")
     # rows = cur.fetchall()

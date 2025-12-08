@@ -234,6 +234,15 @@ public class SystemUrls {
   public static final String SYS_BENE_DSBLD_STUS_ID =
       "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-DSBLD-STUS-ID";
 
+  /**
+   * System URL for Claim Related Condition Code system. Used for the coding in the
+   * SYS_CLM_RLT_COND_CD extension. <a
+   * href="https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD">CLM-RLT-COND-CD"
+   * CodeSystem</a>
+   */
+  public static final String SYS_CLM_RLT_COND_CD =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD";
+
   // Hl7
 
   /** HL7 - US Core Organization Profile. */
@@ -683,6 +692,10 @@ public class SystemUrls {
 
   /** CMS - HCPCS Code Sets. */
   public static final String CMS_HCPCS = "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets";
+
+  /** CARIN compound literal. */
+  public static final String CARIN_COMPOUND_LITERAL =
+      "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBCompoundLiteral";
 
   /** CMS - HIPPS Code Sets. */
   public static final String CMS_HIPPS =

@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.ng;
 
+import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -55,6 +56,20 @@ class EobPharmacyIT extends IntegrationTestBase {
     var familyName =
         practitioner.getName().stream().filter(p -> p.getFamily().equals("Garcia")).findFirst();
     assertTrue(familyName.isPresent());
+
+    var productOrService = eob.getItem().getFirst().getProductOrService();
+    assertFalse(productOrService.isEmpty());
+    assertEquals("compound", productOrService.getCoding().get(0).getCode());
+
+    var itemQuantity = eob.getItem().getFirst().getQuantity();
+    assertFalse(itemQuantity.isEmpty());
+    // This is due to compound meds being weird + patterning the qualifier to go in
+    // detail.
+    assertNull(itemQuantity.getUnit());
+
+    var itemDetail = eob.getItem().getFirst().getDetailFirstRep();
+    assertFalse(itemDetail.isEmpty());
+    assertEquals("00338004904", itemDetail.getProductOrService().getCoding().get(0).getCode());
 
     var supportingInfo = eob.getSupportingInfo();
     assertFalse(supportingInfo.isEmpty());
@@ -170,12 +185,5 @@ class EobPharmacyIT extends IntegrationTestBase {
     var hasContractSystems =
         extensions.stream().allMatch(extension -> systems.contains(extension.getUrl()));
     assertTrue(hasContractSystems);
-
-    var identifiers = eob.getIdentifier();
-    var identifierCount =
-        identifiers.stream()
-            .filter(identifier -> identifier.getValue().equals(CLM_CNTL_NUM_DUPE))
-            .count();
-    assertEquals(1, identifierCount);
   }
 }

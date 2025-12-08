@@ -59,9 +59,18 @@ public class ClaimLine {
         .flatMap(i -> i.getHippsCode().toFhir())
         .ifPresent(productOrService::addCoding);
 
+    var quantity = serviceUnitQuantity.toFhir();
+
+    claimLineRx.flatMap(ClaimLineRx::toFhirNdcCompound).ifPresent(productOrService::addCoding);
+
+    if (productOrService.isEmpty()) {
+      ndc.toFhirCoding().ifPresent(productOrService::addCoding);
+      ndc.getQualifier().ifPresent(quantity::setUnit);
+    }
+
     line.setProductOrService(FhirUtil.checkDataAbsent(productOrService));
-    ndc.toFhir().ifPresent(line::addDetail);
-    line.setQuantity(serviceUnitQuantity.toFhir());
+    ndc.toFhirDetail().ifPresent(line::addDetail);
+    line.setQuantity(quantity);
 
     revenueCenterCode.ifPresent(
         c -> {
