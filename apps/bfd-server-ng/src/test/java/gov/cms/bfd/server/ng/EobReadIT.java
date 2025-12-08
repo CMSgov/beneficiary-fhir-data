@@ -44,7 +44,8 @@ class EobReadIT extends IntegrationTestBase {
           CLAIM_ID_PHASE_2,
           CLAIM_ID_PROFESSIONAL,
           CLAIM_ID_RX,
-          CLAIM_ID_RX_ORGANIZATION
+          CLAIM_ID_RX_ORGANIZATION,
+          CLAIM_ID_PROFESSIONAL_MCS
         };
     // The following represent the minimum conditions for an EOB to be valid
     for (var claimId : claimIds) {
@@ -52,7 +53,10 @@ class EobReadIT extends IntegrationTestBase {
       assertFalse(eob.isEmpty(), "EOB should not be empty.");
       assertTrue(eob.hasInsurance(), "All EOBs should have insurance");
       assertTrue(eob.hasMeta(), "EOB should have meta.");
-      assertTrue(eob.hasOutcome(), "EOB should have outcome");
+      // #TODO: REMOVE THIS EXCEPTION IN BFD-4439.
+      if (!claimId.contentEquals(CLAIM_ID_PROFESSIONAL_MCS)) {
+        assertTrue(eob.hasOutcome(), "EOB should have outcome");
+      }
       assertTrue(eob.hasPatient(), "EOB should have patient");
       assertTrue(eob.hasType(), "EOB should have type");
       assertTrue(eob.hasStatus(), "EOB should have status");
