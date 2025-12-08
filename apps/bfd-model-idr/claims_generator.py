@@ -767,7 +767,7 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
         claim["CLM_LINE"].append(claim_line)
         claim["CLM_LINE_RX"].append(claim_line_rx)
 
-    if(clm_type_cd in (10,20,30,40,50,60,61,62,63,64)):
+    if(clm_type_cd in institutional_claim_types):
         tob_code = random.choice(generator.code_systems["CLM_BILL_FREQ_CD"])
         claim["CLM"]["CLM_BILL_FAC_TYPE_CD"] = tob_code[0]
         claim["CLM"]["CLM_BILL_CLSFCTN_CD"] = tob_code[1]
