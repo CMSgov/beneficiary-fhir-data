@@ -132,7 +132,7 @@ class EobReadIT extends IntegrationTestBase {
             .findFirst();
     if (insurance.isPresent()) {
       var display = insurance.get().getCoverage().getDisplay();
-      assertTrue(display.equals("Part B"));
+      assertEquals("Part B", display);
     }
     expectFhir().toMatchSnapshot(eob);
   }
