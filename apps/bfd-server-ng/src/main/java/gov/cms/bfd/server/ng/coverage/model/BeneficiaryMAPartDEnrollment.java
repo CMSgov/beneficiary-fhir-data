@@ -55,7 +55,7 @@ public class BeneficiaryMAPartDEnrollment {
   }
 
   /**
-   * Create contract, plan, and coverage type extension.
+   * Create contract, plan, coverage type, contract segment, and employer subsidy switch extensions.
    *
    * @return optional extension
    */
@@ -63,22 +63,40 @@ public class BeneficiaryMAPartDEnrollment {
 
     var extContractNumber =
         contractNumber.map(
-            validCode ->
-                new Extension(SystemUrls.EXT_BENE_CNTRCT_NUM_URL)
-                    .setValue(new StringType(validCode)));
+            number ->
+                new Extension(SystemUrls.EXT_BENE_CNTRCT_NUM_URL).setValue(new StringType(number)));
 
     var extDrugPlanNumber =
         drugPlanNumber.map(
-            validCode ->
-                new Extension(SystemUrls.EXT_BENE_PBP_NUM_URL).setValue(new StringType(validCode)));
+            number ->
+                new Extension(SystemUrls.EXT_BENE_PBP_NUM_URL).setValue(new StringType(number)));
 
     var extCoverageTypeCode =
         coverageTypeCode.map(
-            validCode ->
+            code ->
                 new Extension(SystemUrls.EXT_BENE_CVRG_TYPE_CD_URL)
-                    .setValue(new Coding(SystemUrls.SYS_CVRG_TYPE_CD, validCode, null)));
+                    .setValue(new Coding(SystemUrls.SYS_CVRG_TYPE_CD, code, null)));
 
-    return Stream.of(extContractNumber, extDrugPlanNumber, extCoverageTypeCode)
+    var extSegmentNumber =
+        contract
+            .getContractPbpSegmentNumber()
+            .map(
+                number ->
+                    new Extension(SystemUrls.EXT_CNTRCT_PBP_SGMT_NUM_URL)
+                        .setValue(new StringType(number)));
+
+    var extEmployerSubsidySwitch =
+        employerSubsidySwitch.map(
+            number ->
+                new Extension(SystemUrls.EXT_BENE_ENRLMT_EMPLR_SBSDY_SW_URL)
+                    .setValue(new StringType(number)));
+
+    return Stream.of(
+            extContractNumber,
+            extDrugPlanNumber,
+            extCoverageTypeCode,
+            extSegmentNumber,
+            extEmployerSubsidySwitch)
         .flatMap(Optional::stream)
         .toList();
   }

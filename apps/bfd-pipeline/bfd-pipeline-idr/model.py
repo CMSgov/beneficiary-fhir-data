@@ -712,6 +712,9 @@ class IdrContractPbpNumber(IdrBaseModel):
     cntrct_pbp_name: Annotated[str, BeforeValidator(transform_null_string)]
     cntrct_num: Annotated[str, BeforeValidator(transform_default_string)]
     cntrct_pbp_num: Annotated[str, BeforeValidator(transform_default_string)]
+    cntrct_pbp_sgmt_num: Annotated[
+        str, ALIAS:ALIAS_CNTRCT_SGMT, BeforeValidator(transform_default_string)
+    ]
 
     @staticmethod
     def table() -> str:
@@ -719,30 +722,22 @@ class IdrContractPbpNumber(IdrBaseModel):
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
+        pbp_num = ALIAS_PBP_NUM
         return f"""
+            WITH sgmt as (
+                SELECT
+                    cntrct_pbp_sk,
+                    cntrct_pbp_sgmt_num,
+                    COUNT(*)
+                FROM cms_vdm_view_mdcr_prd.v2_mdcr_cntrct_pbp_sgmt
+                GROUP BY cntrct_pbp_sk, cntrct_pbp_sgmt_num
+                HAVING COUNT(*) = 1
+            )
             SELECT {{COLUMNS}}
-            FROM cms_vdm_view_mdcr_prd.v2_mdcr_cntrct_pbp_num
+            FROM cms_vdm_view_mdcr_prd.v2_mdcr_cntrct_pbp_num {pbp_num}
+            LEFT JOIN sgmt
+                    ON {pbp_num}.cntrct_pbp_sk = sgmt.cntrct_pbp_sk 
             WHERE cntrct_pbp_sk_obslt_dt >= '{DEFAULT_MAX_DATE}'
-            """
-
-    @staticmethod
-    def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
-        return [NON_CLAIM_PARTITION]
-
-
-class IdrContractPbpSegment(IdrBaseModel):
-    cntrct_pbp_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
-    cntrct_pbp_sgmt_num: Annotated[str, BeforeValidator(transform_default_string)]
-
-    @staticmethod
-    def table() -> str:
-        return "idr.contract_pbp_segment"
-
-    @staticmethod
-    def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
-        return """
-            SELECT {{COLUMNS}}
-            FROM cms_vdm_view_mdcr_prd.v2_mdcr_cntrct_pbp_sgmt
             """
 
     @staticmethod

@@ -18,11 +18,7 @@ import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Stream;
 import lombok.Getter;
-import org.hl7.fhir.r4.model.Annotation;
-import org.hl7.fhir.r4.model.Coverage;
-import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.MarkdownType;
-import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.*;
 
 /** Entity representing the beneficiary table with coverage info. */
 @Entity
@@ -51,7 +47,15 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
 
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "bene_sk")
-  private SortedSet<BeneficiaryMAPartDEnrollment> beneficiaryMappedEnrollments;
+  private SortedSet<BeneficiaryMAPartDEnrollment> beneficiaryMAPartDEnrollments;
+
+  @OneToMany(fetch = FetchType.EAGER)
+  @JoinColumn(name = "bene_sk")
+  private SortedSet<BeneficiaryMAPartDEnrollmentRx> beneficiaryMAPartDEnrollmentsRx;
+
+  @OneToMany(fetch = FetchType.EAGER)
+  @JoinColumn(name = "bene_sk")
+  private SortedSet<BeneficiaryLowIncomeSubsidy> beneficiaryLowIncomeSubsidies;
 
   /**
    * Value for C4DIC Additional Insurance Card Information Extension <a
@@ -112,7 +116,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
     final String standardCode = coveragePart.getStandardCode();
     final LocalDate today = LocalDate.now();
     var matchedCoverage =
-        beneficiaryMappedEnrollments.stream()
+        beneficiaryMAPartDEnrollments.stream()
             .filter(
                 e -> {
                   var programTypeCode = e.getId().getEnrollmentProgramTypeCode();
@@ -141,6 +145,50 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
     // only future coverage exists
     return matchedCoverage.stream()
         .filter(e -> e.getBeneficiaryEnrollmentPeriod().getEnrollmentBeginDate().isAfter(today))
+        .findFirst();
+  }
+
+  /**
+   * Finds the rx enrollment record for a given coverage part.
+   *
+   * @return Optional containing the matching entitlement, or empty if not found.
+   */
+  private Optional<BeneficiaryMAPartDEnrollmentRx> findRxEnrollment() {
+    final LocalDate today = LocalDate.now();
+    Optional<BeneficiaryMAPartDEnrollmentRx> latestActiveEnrollment =
+        beneficiaryMAPartDEnrollmentsRx.stream()
+            .filter(e -> !e.getId().getEnrollmentPdpRxInfoBeginDate().isAfter(today))
+            .findFirst();
+
+    if (latestActiveEnrollment.isPresent()) {
+      return latestActiveEnrollment;
+    }
+
+    // only future coverage exists
+    return beneficiaryMAPartDEnrollmentsRx.stream()
+        .filter(e -> e.getId().getEnrollmentPdpRxInfoBeginDate().isAfter(today))
+        .findFirst();
+  }
+
+  /**
+   * Finds the rx enrollment record for a given coverage part.
+   *
+   * @return Optional containing the matching entitlement, or empty if not found.
+   */
+  private Optional<BeneficiaryLowIncomeSubsidy> findLowIncomeSubsidy() {
+    final LocalDate today = LocalDate.now();
+    Optional<BeneficiaryLowIncomeSubsidy> latestActiveEnrollment =
+        beneficiaryLowIncomeSubsidies.stream()
+            .filter(e -> !e.getId().getBenefitRangeBeginDate().isAfter(today))
+            .findFirst();
+
+    if (latestActiveEnrollment.isPresent()) {
+      return latestActiveEnrollment;
+    }
+
+    // only future coverage exists
+    return beneficiaryLowIncomeSubsidies.stream()
+        .filter(e -> e.getId().getBenefitRangeBeginDate().isAfter(today))
         .findFirst();
   }
 
@@ -360,6 +408,25 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
 
     var enrollment = enrollmentOpt.get();
     // todo: handle if enrollment has program type code 3 --> return part c & d resources
+    var programTypeCode = enrollment.getId().getEnrollmentProgramTypeCode();
+    if (List.of("2", "3").contains(programTypeCode)) {
+      var rxInfo = findRxEnrollment();
+      rxInfo
+          .flatMap(BeneficiaryMAPartDEnrollmentRx::getMemberId)
+          .ifPresent(
+              memberId -> {
+                Identifier memberIdentifier = new Identifier();
+                memberIdentifier.setType(
+                    new CodeableConcept()
+                        .addCoding(new Coding(SystemUrls.HL7_IDENTIFIER, "MB", null)));
+                memberIdentifier.setValue(memberId);
+                coverage.addIdentifier(memberIdentifier);
+              });
+      rxInfo.ifPresent(rx -> rx.toFhirClassComponents().forEach(coverage::addClass_));
+
+      var lowIncomeSubsidy = findLowIncomeSubsidy();
+      lowIncomeSubsidy.ifPresent(lis -> lis.toFhirExtensions().forEach(coverage::addExtension));
+    }
     coverage.setPeriod(enrollment.toFhirPeriod());
     coverage.setStatus(enrollment.toFhirStatus());
 

@@ -656,6 +656,7 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_bene_lis(
 );
 
 CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_cntrct_pbp_sgmt(
-    cntrct_pbp_sk BIGINT NOT NULL PRIMARY KEY,
-    cntrct_pbp_sgmt_num VARCHAR(3) NOT NULL
+    cntrct_pbp_sk BIGINT NOT NULL,
+    cntrct_pbp_sgmt_num VARCHAR(3) NOT NULL,
+    PRIMARY KEY(cntrct_pbp_sk, cntrct_pbp_sgmt_num)
 );
