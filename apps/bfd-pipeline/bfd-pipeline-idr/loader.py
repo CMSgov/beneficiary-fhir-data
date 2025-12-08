@@ -285,7 +285,7 @@ class BatchLoader:
                 SET {self.model.last_updated_date_column()} = %(timestamp)s
                 FROM locked l
                 WHERE u.{self.model.batch_id_col()} = l.{self.model.batch_id_col()};
-                """,
+                """,  # type: ignore
                 {"timestamp": timestamp},
             )
 
