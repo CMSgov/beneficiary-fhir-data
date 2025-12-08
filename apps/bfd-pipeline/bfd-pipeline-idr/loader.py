@@ -269,7 +269,7 @@ class BatchLoader:
         )
 
         if self.model.last_updated_date_table():
-            #Locking rows to prevent Deadlocks
+            # Locking rows to prevent Deadlocks
             cur.execute(
                 f"""
                 WITH locked AS (
