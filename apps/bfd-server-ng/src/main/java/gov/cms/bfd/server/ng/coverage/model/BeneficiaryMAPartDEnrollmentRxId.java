@@ -17,22 +17,19 @@ import org.jetbrains.annotations.NotNull;
 @Getter
 @AllArgsConstructor
 @Embeddable
-public class BeneficiaryEnrollmentId implements Serializable, Comparable<BeneficiaryEnrollmentId> {
+public class BeneficiaryMAPartDEnrollmentRxId
+    implements Serializable, Comparable<BeneficiaryMAPartDEnrollmentRxId> {
 
   @Column(name = "bene_sk")
   private Long beneSk;
 
-  @Column(name = "bene_enrlmt_bgn_dt")
-  private LocalDate enrollmentBeginDate;
-
-  @Column(name = "bene_enrlmt_pgm_type_cd")
-  private String enrollmentProgramTypeCode;
+  @Column(name = "bene_enrlmt_pdp_rx_info_bgn_dt")
+  private LocalDate enrollmentPdpRxInfoBeginDate;
 
   @Override
-  public int compareTo(@NotNull BeneficiaryEnrollmentId o) {
-    return Comparator.comparing((BeneficiaryEnrollmentId id) -> id.beneSk)
-        .thenComparing(id -> id.enrollmentBeginDate, Comparator.reverseOrder())
-        .thenComparing(id -> id.enrollmentProgramTypeCode)
+  public int compareTo(@NotNull BeneficiaryMAPartDEnrollmentRxId o) {
+    return Comparator.comparing((BeneficiaryMAPartDEnrollmentRxId id) -> id.beneSk)
+        .thenComparing(id -> id.enrollmentPdpRxInfoBeginDate, Comparator.reverseOrder())
         .compare(this, o);
   }
 }
