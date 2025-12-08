@@ -47,7 +47,7 @@ public class Claim {
   private ClaimSourceId claimSourceId;
 
   @Column(name = "clm_efctv_dt")
-  private Optional<LocalDate> claimEffectiveDate;
+  private LocalDate claimEffectiveDate;
 
   @Column(name = "clm_srvc_prvdr_gnrc_id_num")
   private String serviceProviderNpiNumber;
@@ -262,7 +262,7 @@ public class Claim {
     eob.setMeta(meta.toFhir(claimTypeCode, claimSourceId, securityStatus, latestTs));
     eob.setIdentifier(identifiers.toFhir());
     eob.setBillablePeriod(billablePeriod.toFhir());
-    claimEffectiveDate.ifPresent(date -> eob.setCreated(DateUtil.toDate(date)));
+    eob.setCreated(DateUtil.toDate(claimEffectiveDate));
     claimTypeCode
         .toFhirInsurerPartAB()
         .ifPresent(

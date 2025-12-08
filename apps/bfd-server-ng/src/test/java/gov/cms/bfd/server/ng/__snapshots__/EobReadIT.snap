@@ -476,31 +476,11 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
   }, {
     "category" : {
       "coding" : [ {
-        "code" : "CLM_RLT_COND_CD",
-        "display" : "Claim Related Condition Code",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "code" : {
-      "coding" : [ {
-        "code" : "42",
-        "display" : "CONTINUING CARE NOT RELATED TO INPATIENT ADMISSION - CONTINUING CARE NOT RELATED TO THE CONDITION OR DIAGNOSIS FOR WHICH THE BENEFICIARY RECEIVED INPATIENT HOSPITAL SERVICES. (EFF. 10/01)",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
-      } ]
-    },
-    "sequence" : 4
-  }, {
-    "category" : {
-      "coding" : [ {
         "code" : "admissionperiod",
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
       } ]
     },
-    "sequence" : 5,
+    "sequence" : 4,
     "timingPeriod" : {
       "end" : "2021-10-03",
       "start" : "2021-09-27"
@@ -512,7 +492,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
       } ]
     },
-    "sequence" : 6,
+    "sequence" : 5,
     "timingDate" : "2021-10-03"
   }, {
     "category" : {
@@ -526,7 +506,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 7,
+    "sequence" : 6,
     "timingDate" : "2021-10-03"
   }, {
     "category" : {
@@ -540,7 +520,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 8,
+    "sequence" : 7,
     "timingDate" : "2021-10-03"
   }, {
     "category" : {
@@ -554,7 +534,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 9,
+    "sequence" : 8,
     "timingDate" : "2021-10-03"
   }, {
     "category" : {
@@ -568,7 +548,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 10,
+    "sequence" : 9,
     "timingDate" : "2021-10-03"
   }, {
     "category" : {
@@ -582,7 +562,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 11,
+    "sequence" : 10,
     "timingDate" : "2021-10-03"
   } ],
   "total" : [ {
@@ -1140,31 +1120,11 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
   }, {
     "category" : {
       "coding" : [ {
-        "code" : "CLM_RLT_COND_CD",
-        "display" : "Claim Related Condition Code",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "code" : {
-      "coding" : [ {
-        "code" : "21",
-        "display" : "BILLING FOR DENIAL NOTICE",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
-      } ]
-    },
-    "sequence" : 4
-  }, {
-    "category" : {
-      "coding" : [ {
         "code" : "admissionperiod",
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
       } ]
     },
-    "sequence" : 5,
+    "sequence" : 4,
     "timingPeriod" : {
       "end" : "2021-10-03",
       "start" : "2021-09-27"
@@ -1176,7 +1136,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
       } ]
     },
-    "sequence" : 6,
+    "sequence" : 5,
     "timingDate" : "2021-10-03"
   }, {
     "category" : {
@@ -1190,7 +1150,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 7,
+    "sequence" : 6,
     "timingDate" : "2021-10-03"
   }, {
     "category" : {
@@ -1204,7 +1164,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 8,
+    "sequence" : 7,
     "timingDate" : "2021-10-03"
   }, {
     "category" : {
@@ -1218,7 +1178,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 9,
+    "sequence" : 8,
     "timingDate" : "2021-10-03"
   }, {
     "category" : {
@@ -1232,7 +1192,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 10,
+    "sequence" : 9,
     "timingDate" : "2021-10-03"
   }, {
     "category" : {
@@ -1246,7 +1206,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 11,
+    "sequence" : 10,
     "timingDate" : "2021-10-03"
   } ],
   "total" : [ {
@@ -2603,7 +2563,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
   } ],
   "insurance" : [ {
     "coverage" : {
-      "display" : "Part A"
+      "display" : "Part B"
     },
     "focal" : true
   } ],
@@ -2782,25 +2742,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
   "supportingInfo" : [ {
     "category" : {
       "coding" : [ {
-        "code" : "CLM_BLOOD_PT_FRNSH_QTY",
-        "display" : "Blood Pints Furnished Quantity",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "sequence" : 1,
-    "valueQuantity" : {
-      "code" : "[pt_us]",
-      "system" : "http://unitsofmeasure.org",
-      "unit" : "pint",
-      "value" : 0
-    }
-  }, {
-    "category" : {
-      "coding" : [ {
         "code" : "CLM_NCH_PRMRY_PYR_CD",
         "display" : "NCH Primary Payer Code",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -2816,7 +2757,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NCH-PRMRY-PYR-CD"
       } ]
     },
-    "sequence" : 2
+    "sequence" : 1
   }, {
     "category" : {
       "coding" : [ {
@@ -2839,7 +2780,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD"
       } ]
     },
-    "sequence" : 3
+    "sequence" : 2
   }, {
     "category" : {
       "coding" : [ {
@@ -2855,30 +2796,11 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
     "code" : {
       "coding" : [ {
         "code" : "M",
-        "display" : "Part B DMEPOS claim record (processed by DME Regional Carrier)"
-      } ]
-    },
-    "sequence" : 4
-  }, {
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_NRLN_RIC_CD",
-        "display" : "Near Line Record Identification Code",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-      }, {
-        "code" : "info",
-        "display" : "Information",
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-      } ]
-    },
-    "code" : {
-      "coding" : [ {
-        "code" : "V",
-        "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA]).",
+        "display" : "Part B DMEPOS claim record (processed by DME Regional Carrier)",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
       } ]
     },
-    "sequence" : 5
+    "sequence" : 3
   }, {
     "category" : {
       "coding" : [ {
@@ -2886,7 +2808,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
       } ]
     },
-    "sequence" : 6,
+    "sequence" : 4,
     "timingPeriod" : {
       "end" : "2021-10-03",
       "start" : "2021-09-27"
@@ -2898,7 +2820,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
       } ]
     },
-    "sequence" : 7,
+    "sequence" : 5,
     "timingDate" : "2021-10-03"
   }, {
     "category" : {
@@ -2912,7 +2834,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 8,
+    "sequence" : 6,
     "timingDate" : "2021-10-03"
   }, {
     "category" : {
@@ -2926,7 +2848,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 9,
+    "sequence" : 7,
     "timingDate" : "2021-10-03"
   }, {
     "category" : {
@@ -2940,7 +2862,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 10,
+    "sequence" : 8,
     "timingDate" : "2021-10-03"
   }, {
     "category" : {
@@ -2954,7 +2876,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 11,
+    "sequence" : 9,
     "timingDate" : "2021-10-03"
   }, {
     "category" : {
@@ -2968,7 +2890,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 12,
+    "sequence" : 10,
     "timingDate" : "2021-10-03"
   } ],
   "total" : [ {
