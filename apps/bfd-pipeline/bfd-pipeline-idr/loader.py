@@ -1,7 +1,6 @@
 import logging
 from collections.abc import Iterator, Sequence
 from datetime import UTC, date, datetime
-import pprint
 
 import psycopg
 
@@ -268,92 +267,26 @@ class BatchLoader:
             """,  # type: ignore
             {"timestamp": timestamp},
         )
-        # print("----TABLE----")
-        # print(self.table)
-        # print("----COLS----")
-        # print(self.insert_cols)
-        # print("----META----")
-        # print(self.meta_keys)
-
-        # self.model.
-
-        # tracked_columns = [
-        #     ("bene_sk", "idr.beneficiary_updates"),
-        #     ("clm_uniq_id", "idr.claim_updates"),
-        # ]
-        print("SELF.MODEL")
-        print(self.model.last_updated_date_table())
-        print(self.model.batch_id_col())
-        print(self.temp_table)
 
         if self.model.last_updated_date_table():
-
+            #Locking rows to prevent Deadlocks
             cur.execute(
                 f"""
-                UPDATE {self.model.last_updated_date_table()}
-                SET bfd_updated_ts=%(timestamp)s
-                WHERE {self.model.batch_id_col()} 
-                IN ( SELECT {self.model.batch_id_col()} FROM {self.temp_table} )
+                WITH locked AS (
+                    SELECT {self.model.batch_id_col()}
+                    FROM {self.model.last_updated_date_table()}
+                    WHERE {self.model.batch_id_col()} IN (
+                        SELECT {self.model.batch_id_col()} FROM {self.temp_table}
+                    )
+                    ORDER BY {self.model.batch_id_col()}
+                    FOR UPDATE
+                )
+                UPDATE {self.model.last_updated_date_table()} u
+                SET {self.model.last_updated_date_column()} = %(timestamp)s
+                FROM locked l
+                WHERE u.{self.model.batch_id_col()} = l.{self.model.batch_id_col()};
                 """,
                 {"timestamp": timestamp},
-            )
-
-    def _upsert_updates_from_temp(
-            self,
-            cur: psycopg.Cursor,
-            target_table: str,
-            key_col: str,
-    ) -> None:
-        """
-        Upsert the last updated timestamp from temp table into the target updates table.
-        Falls back to the loader timestamp when no source timestamp exists.
-        """
-        print("----COLUMNS----", self.insert_cols)
-        # Find the first column that contains "idr_updt_ts"
-        match = next((col for col in self.insert_cols if "idr_updt_ts" in col), None)
-        print("----MATCH----", match)
-
-        if match:
-            cur.execute(
-                f"""
-                INSERT INTO {target_table}({key_col}, last_updated)
-                SELECT {key_col}, MAX({match})
-                FROM {self.temp_table}
-                WHERE {key_col} IS NOT NULL AND {match} IS NOT NULL
-                GROUP BY {key_col}
-                ON CONFLICT ({key_col}) DO UPDATE
-                SET last_updated = GREATEST({target_table}.last_updated, EXCLUDED.last_updated)
-                """,
-                {},
-            )
-
-    def _upsert_updates_from_temp(
-            self,
-            cur: psycopg.Cursor,
-            target_table: str,
-            key_col: str,
-    ) -> None:
-        """
-        Upsert the last updated timestamp from temp table into the target updates table.
-        Falls back to the loader timestamp when no source timestamp exists.
-        """
-        print("----COLUMNS----", self.insert_cols)
-        # Find the first column that contains "idr_updt_ts"
-        match = next((col for col in self.insert_cols if "idr_updt_ts" in col), None)
-        print("----MATCH----", match)
-
-        if match:
-            cur.execute(
-                f"""
-                INSERT INTO {target_table}({key_col}, last_updated)
-                SELECT {key_col}, MAX({match})
-                FROM {self.temp_table}
-                WHERE {key_col} IS NOT NULL AND {match} IS NOT NULL
-                GROUP BY {key_col}
-                ON CONFLICT ({key_col}) DO UPDATE
-                SET last_updated = GREATEST({target_table}.last_updated, EXCLUDED.last_updated)
-                """,
-                {},
             )
 
     def _copy_data(self, cur: psycopg.Cursor, results: Sequence[T]) -> None:

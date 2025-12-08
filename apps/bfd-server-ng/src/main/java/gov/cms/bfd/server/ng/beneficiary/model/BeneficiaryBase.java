@@ -46,7 +46,6 @@ public abstract class BeneficiaryBase {
 
   @Embedded protected Name beneficiaryName;
   @Embedded protected Address address;
-  @Embedded protected Meta meta;
   @Embedded protected DeathDate deathDate;
   @Embedded protected CurrentIdentifier identifier;
   @Transient protected String id = UUID.randomUUID().toString();
@@ -64,9 +63,10 @@ public abstract class BeneficiaryBase {
    * Convenience method to convert to FHIR Patient with a specific profile.
    *
    * @param profileType the FHIR profile type
+   * @param meta the Meta data
    * @return patient record
    */
-  public Patient toFhir(ProfileType profileType) {
+  public Patient toFhir(ProfileType profileType, Meta meta) {
     var patient = new Patient();
 
     if (profileType == ProfileType.C4DIC) {

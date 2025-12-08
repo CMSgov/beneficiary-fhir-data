@@ -90,7 +90,7 @@ public class PatientHandler {
     }
     var beneficiary = beneficiaryOpt.get();
 
-    var patient = beneficiary.toFhir(ProfileType.C4DIC);
+    var patient = beneficiary.toFhir(ProfileType.C4DIC, beneficiary.getMeta());
     // Two more organization may be needed, once mappings for Part C and D are added.
     var cmsOrg =
         OrganizationFactory.createCmsOrganization(

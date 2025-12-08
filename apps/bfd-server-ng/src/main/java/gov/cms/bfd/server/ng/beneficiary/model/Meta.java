@@ -12,7 +12,7 @@ import lombok.Getter;
 @Embeddable
 @Getter
 public class Meta {
-  @Column(name = "bfd_updated_ts", nullable = false)
+  @Column(name = "ignored_by_overrides", nullable = false)
   private ZonedDateTime updatedTimestamp;
 
   /**
@@ -22,25 +22,21 @@ public class Meta {
    * @return meta
    */
   public org.hl7.fhir.r4.model.Meta toFhirPatient(ProfileType profileType) {
-    return toFhirProfile(updatedTimestamp, profileType.getPatientProfiles());
+    return toFhirProfile(profileType.getPatientProfiles());
   }
 
   /**
    * Builds Coverage meta using a supplied lastUpdated.
    *
    * @param profileType FHIR profile URL to add
-   * @param overrideLastUpdated last updated value
    * @return meta
    */
-  public org.hl7.fhir.r4.model.Meta toFhirCoverage(
-      ProfileType profileType, ZonedDateTime overrideLastUpdated) {
-    return toFhirProfile(overrideLastUpdated, profileType.getCoverageProfiles());
+  public org.hl7.fhir.r4.model.Meta toFhirCoverage(ProfileType profileType) {
+    return toFhirProfile(profileType.getCoverageProfiles());
   }
 
-  private org.hl7.fhir.r4.model.Meta toFhirProfile(
-      ZonedDateTime overrideLastUpdated, List<String> profiles) {
-    var meta =
-        new org.hl7.fhir.r4.model.Meta().setLastUpdated(DateUtil.toDate(overrideLastUpdated));
+  private org.hl7.fhir.r4.model.Meta toFhirProfile(List<String> profiles) {
+    var meta = new org.hl7.fhir.r4.model.Meta().setLastUpdated(DateUtil.toDate(updatedTimestamp));
 
     profiles.forEach(meta::addProfile);
 

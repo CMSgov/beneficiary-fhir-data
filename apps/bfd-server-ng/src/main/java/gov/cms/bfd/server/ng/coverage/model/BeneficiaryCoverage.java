@@ -1,25 +1,26 @@
 package gov.cms.bfd.server.ng.coverage.model;
 
 import gov.cms.bfd.server.ng.beneficiary.model.BeneficiaryBase;
+import gov.cms.bfd.server.ng.beneficiary.model.Meta;
 import gov.cms.bfd.server.ng.beneficiary.model.OrganizationFactory;
 import gov.cms.bfd.server.ng.beneficiary.model.RelationshipFactory;
 import gov.cms.bfd.server.ng.input.CoverageCompositeId;
 import gov.cms.bfd.server.ng.input.CoveragePart;
 import gov.cms.bfd.server.ng.model.ProfileType;
 import gov.cms.bfd.server.ng.util.SystemUrls;
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import java.time.ZonedDateTime;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.SortedSet;
 import java.util.UUID;
-import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.Annotation;
 import org.hl7.fhir.r4.model.Coverage;
@@ -51,6 +52,10 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
   @OneToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "bene_sk")
   private BeneficiaryDualEligibility beneficiaryDualEligibility;
+
+  @Embedded
+  @AttributeOverride(name = "updatedTimestamp", column = @Column(name = "bfd_coverage_updated_ts"))
+  private Meta meta;
 
   /**
    * Value for C4DIC Additional Insurance Card Information Extension <a
@@ -120,13 +125,13 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
     coverage.addClass_(coveragePart.toFhirClassComponent());
 
     if (profileType == ProfileType.C4DIC) {
-      coverage.setMeta(meta.toFhirCoverage(profileType, getMostRecentUpdated()));
+      coverage.setMeta(meta.toFhirCoverage(profileType));
       coverage.setId(UUID.randomUUID().toString());
       coverage.setBeneficiary(new Reference(PATIENT_REF + id));
       coverage.setSubscriber(new Reference(PATIENT_REF + id));
     } else {
       coverage.setId(coverageCompositeId.fullId());
-      coverage.setMeta(meta.toFhirCoverage(profileType, getMostRecentUpdated()));
+      coverage.setMeta(meta.toFhirCoverage(profileType));
       coverage.setBeneficiary(new Reference(PATIENT_REF + beneSk));
     }
 
@@ -143,7 +148,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
     var coverage = setupBaseCoverage(coverageCompositeId, ProfileType.C4BB);
     coverage.setId(coverageCompositeId.fullId());
 
-    coverage.setMeta(meta.toFhirCoverage(ProfileType.C4BB, getMostRecentUpdated()));
+    coverage.setMeta(meta.toFhirCoverage(ProfileType.C4BB));
 
     coverage.setBeneficiary(new Reference(PATIENT_REF + beneSk));
     coverage.setRelationship(RelationshipFactory.createSelfSubscriberRelationship());
@@ -293,24 +298,5 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
     }
 
     return coverage;
-  }
-
-  private ZonedDateTime getMostRecentUpdated() {
-    // Collect timestamps from beneficiary and all related child entities
-    var allTimestamps =
-        Stream.of(
-            Stream.of(meta.getUpdatedTimestamp()),
-            getStatus().map(BeneficiaryStatus::getBfdUpdatedTimestamp).stream(),
-            getEntitlementReason()
-                .map(BeneficiaryEntitlementReason::getBfdUpdatedTimestamp)
-                .stream(),
-            getDualEligibility().map(BeneficiaryDualEligibility::getBfdUpdatedTimestamp).stream(),
-            beneficiaryEntitlements.stream().map(BeneficiaryEntitlement::getBfdUpdatedTimestamp),
-            beneficiaryThirdParties.stream().map(BeneficiaryThirdParty::getBfdUpdatedTimestamp));
-
-    return allTimestamps
-        .flatMap(s -> s)
-        .max(Comparator.naturalOrder())
-        .orElse(meta.getUpdatedTimestamp());
   }
 }

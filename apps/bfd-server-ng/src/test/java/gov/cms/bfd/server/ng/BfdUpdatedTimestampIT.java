@@ -179,7 +179,7 @@ class BfdUpdatedTimestampIT extends IntegrationTestBase {
     var beneOpt = beneficiaryRepository.findById(beneId, new DateTimeRange());
     return beneOpt.map(
         bene -> {
-          var patient = bene.toFhir(ProfileType.C4BB);
+          var patient = bene.toFhir(ProfileType.C4BB, bene.getMeta());
           return patient.getMeta().getLastUpdated().toInstant().atZone(ZoneId.of("UTC"));
         });
   }

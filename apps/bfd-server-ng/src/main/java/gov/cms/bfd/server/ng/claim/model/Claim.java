@@ -3,6 +3,7 @@ package gov.cms.bfd.server.ng.claim.model;
 import gov.cms.bfd.server.ng.ClaimSecurityStatus;
 import gov.cms.bfd.server.ng.beneficiary.model.BeneficiarySimple;
 import gov.cms.bfd.server.ng.util.DateUtil;
+import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -52,7 +53,10 @@ public class Claim {
   @Column(name = "clm_srvc_prvdr_gnrc_id_num")
   private String serviceProviderNpiNumber;
 
-  @Embedded private Meta meta;
+  @Embedded
+  @AttributeOverride(name = "updatedTimestamp", column = @Column(name = "bfd_claim_updated_ts"))
+  private Meta meta;
+
   @Embedded private Identifiers identifiers;
   @Embedded private BillablePeriod billablePeriod;
   @Embedded private ClaimExtensions claimExtensions;

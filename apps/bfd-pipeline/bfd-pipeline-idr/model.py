@@ -22,6 +22,8 @@ from constants import (
     PART_D_PARTITIONS,
     PROFESSIONAL_ADJUDICATED_PARTITIONS,
     PROFESSIONAL_PAC_PARTITIONS,
+    CLAIM_TABLE,
+    BENEFICIARY_TABLE,
 )
 from load_partition import LoadPartition, LoadPartitionGroup, PartitionType
 from settings import ENABLE_PARTITIONS, LATEST_CLAIMS, MIN_TRANSACTION_DATE
@@ -154,6 +156,11 @@ class IdrBaseModel(BaseModel, ABC):
     @staticmethod
     def last_updated_date_table() -> str:
         """BFD table that keeps track of last updated date for this model."""
+        return ""
+
+    @staticmethod
+    def last_updated_date_column() -> str:
+        """BFD column that keeps track of last updated date for this model."""
         return ""
 
     @staticmethod
@@ -343,11 +350,21 @@ class IdrBeneficiary(IdrBaseModel):
 
     @staticmethod
     def table() -> str:
-        return "idr.beneficiary"
+        return BENEFICIARY_TABLE
 
     @staticmethod
     def computed_keys() -> list[str]:
         return ["bene_xref_efctv_sk_computed"]
+
+    @staticmethod
+    def last_updated_date_table() -> str:
+        """BFD table that keeps track of last updated date for this model."""
+        return BENEFICIARY_TABLE
+
+    @staticmethod
+    def last_updated_date_column() -> str:
+        """BFD column that keeps track of last updated date for this model."""
+        return "bfd_patient_updated_ts"
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
@@ -500,8 +517,13 @@ class IdrBeneficiaryThirdParty(IdrBaseModel):
         return "idr.beneficiary_third_party"
 
     @staticmethod
+    def last_updated_date_column() -> str:
+        """BFD table that keeps track of last updated date for this model."""
+        return "bfd_coverage_updated_ts"
+
+    @staticmethod
     def last_updated_date_table() -> str:
-        return "idr.beneficiary"
+        return BENEFICIARY_TABLE
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
@@ -541,7 +563,12 @@ class IdrBeneficiaryStatus(IdrBaseModel):
 
     @staticmethod
     def last_updated_date_table() -> str:
-        return "idr.beneficiary"
+        return BENEFICIARY_TABLE
+
+    @staticmethod
+    def last_updated_date_column() -> str:
+        """BFD table that keeps track of last updated date for this model."""
+        return "bfd_coverage_updated_ts"
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
@@ -583,7 +610,12 @@ class IdrBeneficiaryEntitlement(IdrBaseModel):
 
     @staticmethod
     def last_updated_date_table() -> str:
-        return "idr.beneficiary"
+        return BENEFICIARY_TABLE
+
+    @staticmethod
+    def last_updated_date_column() -> str:
+        """BFD table that keeps track of last updated date for this model."""
+        return "bfd_coverage_updated_ts"
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
@@ -623,7 +655,12 @@ class IdrBeneficiaryEntitlementReason(IdrBaseModel):
 
     @staticmethod
     def last_updated_date_table() -> str:
-        return "idr.beneficiary"
+        return BENEFICIARY_TABLE
+
+    @staticmethod
+    def last_updated_date_column() -> str:
+        """BFD table that keeps track of last updated date for this model."""
+        return "bfd_coverage_updated_ts"
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
@@ -665,7 +702,12 @@ class IdrBeneficiaryDualEligibility(IdrBaseModel):
 
     @staticmethod
     def last_updated_date_table() -> str:
-        return "idr.beneficiary"
+        return BENEFICIARY_TABLE
+
+    @staticmethod
+    def last_updated_date_column() -> str:
+        """BFD table that keeps track of last updated date for this model."""
+        return "bfd_coverage_updated_ts"
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
@@ -704,7 +746,12 @@ class IdrElectionPeriodUsage(IdrBaseModel):
 
     @staticmethod
     def last_updated_date_table() -> str:
-        return "idr.beneficiary"
+        return BENEFICIARY_TABLE
+
+    @staticmethod
+    def last_updated_date_column() -> str:
+        """BFD table that keeps track of last updated date for this model."""
+        return "bfd_coverage_updated_ts"
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
@@ -926,7 +973,17 @@ class IdrClaim(IdrBaseModel):
 
     @staticmethod
     def table() -> str:
-        return "idr.claim"
+        return CLAIM_TABLE
+
+    @staticmethod
+    def last_updated_date_table() -> str:
+        """BFD table that keeps track of last updated date for this model."""
+        return CLAIM_TABLE
+
+    @staticmethod
+    def last_updated_date_column() -> str:
+        """BFD column that keeps track of last updated date for this model."""
+        return "bfd_claim_updated_ts"
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
@@ -980,7 +1037,12 @@ class IdrClaimDateSignature(IdrBaseModel):
     
     @staticmethod
     def last_updated_date_table() -> str:
-        return "idr.claim"
+        return CLAIM_TABLE
+
+    @staticmethod
+    def last_updated_date_column() -> str:
+        """BFD column that keeps track of last updated date for this model."""
+        return "bfd_claim_updated_ts"
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
@@ -1026,7 +1088,12 @@ class IdrClaimFiss(IdrBaseModel):
     
     @staticmethod
     def last_updated_date_table() -> str:
-        return "idr.claim"
+        return CLAIM_TABLE
+
+    @staticmethod
+    def last_updated_date_column() -> str:
+        """BFD column that keeps track of last updated date for this model."""
+        return "bfd_claim_updated_ts"
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
@@ -1101,7 +1168,12 @@ class IdrClaimInstitutional(IdrBaseModel):
     
     @staticmethod
     def last_updated_date_table() -> str:
-        return "idr.claim"
+        return CLAIM_TABLE
+
+    @staticmethod
+    def last_updated_date_column() -> str:
+        """BFD column that keeps track of last updated date for this model."""
+        return "bfd_claim_updated_ts"
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
@@ -1289,7 +1361,12 @@ class IdrClaimItem(IdrBaseModel):
     
     @staticmethod
     def last_updated_date_table() -> str:
-        return "idr.claim"
+        return CLAIM_TABLE
+
+    @staticmethod
+    def last_updated_date_column() -> str:
+        """BFD column that keeps track of last updated date for this model."""
+        return "bfd_claim_updated_ts"
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:
@@ -1496,11 +1573,16 @@ class IdrClaimLineInstitutional(IdrBaseModel):
 
     @staticmethod
     def last_updated_date_table() -> str:
-        return "idr.claim"
+        return CLAIM_TABLE
 
     @staticmethod
     def table() -> str:
         return "idr.claim_line_institutional"
+
+    @staticmethod
+    def last_updated_date_column() -> str:
+        """BFD column that keeps track of last updated date for this model."""
+        return "bfd_claim_updated_ts"
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
@@ -1594,7 +1676,12 @@ class IdrClaimProfessional(IdrBaseModel):
     
     @staticmethod
     def last_updated_date_table() -> str:
-        return "idr.claim"
+        return CLAIM_TABLE
+
+    @staticmethod
+    def last_updated_date_column() -> str:
+        """BFD column that keeps track of last updated date for this model."""
+        return "bfd_claim_updated_ts"
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
@@ -1697,7 +1784,12 @@ class IdrClaimLineProfessional(IdrBaseModel):
     
     @staticmethod
     def last_updated_date_table() -> str:
-        return "idr.claim"
+        return CLAIM_TABLE
+
+    @staticmethod
+    def last_updated_date_column() -> str:
+        """BFD column that keeps track of last updated date for this model."""
+        return "bfd_claim_updated_ts"
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
@@ -1762,6 +1854,16 @@ class IdrClaimLineRx(IdrBaseModel):
     @staticmethod
     def table() -> str:
         return "idr.claim_line_rx"
+
+    @staticmethod
+    def last_updated_date_column() -> str:
+        """BFD column that keeps track of last updated date for this model."""
+        return "bfd_claim_updated_ts"
+
+    @staticmethod
+    def last_updated_date_table() -> str:
+        """BFD column that keeps track of last updated date for this model."""
+        return CLAIM_TABLE
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
