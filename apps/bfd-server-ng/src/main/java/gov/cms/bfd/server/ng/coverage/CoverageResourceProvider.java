@@ -39,9 +39,12 @@ public class CoverageResourceProvider implements IResourceProvider {
    */
   @Read
   public Coverage read(@IdParam final IdType coverageId) {
+    // todo: this would need to be a bundle, check if fine
     var compositeId = FhirInputConverter.toCoverageCompositeId(coverageId);
-    var coverage = coverageHandler.readCoverage(compositeId);
-    return coverage.orElseThrow(() -> new ResourceNotFoundException(coverageId));
+    var coverages = coverageHandler.readCoverage(compositeId);
+    return coverages.stream()
+        .findFirst()
+        .orElseThrow(() -> new ResourceNotFoundException(coverageId));
   }
 
   /**

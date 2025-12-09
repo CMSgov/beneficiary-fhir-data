@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model;
 
+import gov.cms.bfd.server.ng.coverage.model.BeneficiaryMAPartDEnrollment;
 import gov.cms.bfd.server.ng.coverage.model.ContractPlanContactInfo;
 import jakarta.persistence.*;
 import java.util.Optional;
@@ -34,6 +35,9 @@ public class Contract {
 
   @OneToOne(mappedBy = "contract")
   private Claim claim;
+
+  @OneToOne(mappedBy = "contract")
+  private BeneficiaryMAPartDEnrollment beneficiaryMAPartDEnrollment;
 
   @OneToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "cntrct_pbp_sk")

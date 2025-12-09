@@ -8,7 +8,6 @@ import gov.cms.bfd.server.ng.loadprogress.LoadProgressRepository;
 import gov.cms.bfd.server.ng.util.FhirUtil;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coverage;
@@ -30,15 +29,17 @@ public class CoverageHandler {
    *
    * @param coverageCompositeId The parsed and validated composite ID containing the CoveragePart
    *     and beneSk.
-   * @return An {@link Optional} containing the {@link Coverage} resource if found, otherwise empty.
+   * @return A list containing the {@link Coverage} resources if found, otherwise empty.
    * @throws InvalidRequestException if the compositeId format is invalid.
    */
-  public Optional<Coverage> readCoverage(final CoverageCompositeId coverageCompositeId) {
+  public List<Coverage> readCoverage(final CoverageCompositeId coverageCompositeId) {
     var beneficiaryOpt =
         coverageRepository.searchBeneficiaryWithCoverage(
             coverageCompositeId.beneSk(), new DateTimeRange());
 
-    return beneficiaryOpt.map(beneficiary -> beneficiary.toFhir(coverageCompositeId));
+    return beneficiaryOpt
+        .map(beneficiary -> beneficiary.toFhirCoverages(coverageCompositeId, ""))
+        .orElse(List.of());
   }
 
   /**
@@ -56,9 +57,9 @@ public class CoverageHandler {
       return FhirUtil.defaultBundle(loadProgressRepository::lastUpdated);
     }
     var beneficiary = beneficiaryOpt.get();
-    var coverage = beneficiary.toFhirCoverageIfPresent(parsedCoverageId);
+    var coverages = beneficiary.toFhirCoverageIfPresent(parsedCoverageId).stream();
 
-    return FhirUtil.bundleOrDefault(coverage.map(c -> c), loadProgressRepository::lastUpdated);
+    return FhirUtil.bundleOrDefault(coverages.map(r -> r), loadProgressRepository::lastUpdated);
   }
 
   /**
@@ -84,7 +85,7 @@ public class CoverageHandler {
                 c ->
                     beneficiary.toFhirCoverageIfPresent(
                         new CoverageCompositeId(c, beneficiary.getBeneSk())))
-            .flatMap(Optional::stream);
+            .flatMap(List::stream);
 
     return FhirUtil.bundleOrDefault(coverages.map(r -> r), loadProgressRepository::lastUpdated);
   }
