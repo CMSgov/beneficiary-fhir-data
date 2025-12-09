@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.ng.coverage.model;
 
-import gov.cms.bfd.server.ng.converter.StringToIntConverter;
+import gov.cms.bfd.server.ng.coverage.converter.StringToDoubleConverter;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.*;
 import java.time.LocalDate;
@@ -28,7 +28,7 @@ public class BeneficiaryLowIncomeSubsidy {
   private Optional<BeneficiaryLISCopaymentLevelCode> copayLevelCode;
 
   @Column(name = "bene_lis_ptd_prm_pct")
-  @Convert(converter = StringToIntConverter.class)
+  @Convert(converter = StringToDoubleConverter.class)
   private double partDPremiumPercentage;
 
   /**

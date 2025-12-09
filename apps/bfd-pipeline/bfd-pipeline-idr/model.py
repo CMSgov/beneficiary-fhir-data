@@ -886,7 +886,7 @@ class IdrBeneficiaryLowIncomeSubsidy(IdrBaseModel):
     bene_lis_copmt_lvl_cd: str
     bene_lis_ptd_prm_pct: str
     idr_ltst_trans_flg: str
-    idr_trans_efctv_ts: Annotated[datetime, {PRIMARY_KEY: True}]
+    idr_trans_efctv_ts: datetime
     idr_trans_obslt_ts: datetime
     idr_insrt_ts: Annotated[datetime, {BATCH_TIMESTAMP: True}]
     idr_updt_ts: Annotated[

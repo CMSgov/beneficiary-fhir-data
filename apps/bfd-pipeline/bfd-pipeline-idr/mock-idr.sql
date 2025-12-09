@@ -652,7 +652,7 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_bene_lis(
     idr_trans_obslt_ts TIMESTAMPTZ NOT NULL,
     idr_insrt_ts TIMESTAMPTZ NOT NULL,
     idr_updt_ts TIMESTAMPTZ,
-    PRIMARY KEY(bene_sk, idr_trans_efctv_ts, bene_rng_bgn_dt)
+    PRIMARY KEY(bene_sk, bene_rng_bgn_dt)
 );
 
 CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_cntrct_pbp_sgmt(

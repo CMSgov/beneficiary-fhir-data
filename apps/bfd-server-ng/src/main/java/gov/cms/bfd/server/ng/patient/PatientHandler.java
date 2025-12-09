@@ -102,9 +102,9 @@ public class PatientHandler {
                 c ->
                     beneficiary.toFhirCoverageIfPresentC4DIC(
                         new CoverageCompositeId(c, beneficiary.getBeneSk()), cmsOrg.getId()))
-            .flatMap(Optional::stream);
+            .flatMap(List::stream);
 
-    var resources = Stream.concat(Stream.of(patient, cmsOrg), coverages);
+    var resources = Stream.concat(Stream.of(patient, cmsOrg), coverages).distinct();
     return FhirUtil.bundleWithFullUrls(resources, loadProgressRepository::lastUpdated);
   }
 
