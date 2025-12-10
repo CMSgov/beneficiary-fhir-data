@@ -3,19 +3,21 @@ package gov.cms.bfd.server.ng.coverage.model;
 import gov.cms.bfd.server.ng.claim.model.Contract;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.*;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.*;
+import org.jetbrains.annotations.NotNull;
 
 /** Entity representing BeneficiaryMAPartDEnrollment. */
 @Entity
 @Getter
 @EqualsAndHashCode
 @Table(name = "beneficiary_ma_part_d_enrollment", schema = "idr")
-public class BeneficiaryMAPartDEnrollment {
+public class BeneficiaryMAPartDEnrollment implements Comparable<BeneficiaryMAPartDEnrollment> {
 
   @EmbeddedId private BeneficiaryEnrollmentId id;
 
@@ -28,12 +30,12 @@ public class BeneficiaryMAPartDEnrollment {
   private Optional<String> employerSubsidySwitch;
 
   @Column(name = "bene_cntrct_num")
-  private Optional<String> contractNumber;
+  private String contractNumber;
 
   @Column(name = "bene_pbp_num")
-  private Optional<String> drugPlanNumber;
+  private String drugPlanNumber;
 
-  @OneToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(
       name = "bene_cntrct_num",
       insertable = false,
@@ -44,7 +46,10 @@ public class BeneficiaryMAPartDEnrollment {
       insertable = false,
       updatable = false,
       referencedColumnName = "cntrct_pbp_num")
-  private Contract contract;
+  private Contract enrollmentContract;
+
+  @Column(name = "bfd_updated_ts")
+  private ZonedDateTime bfdUpdatedTimestamp;
 
   Period toFhirPeriod() {
     return beneficiaryEnrollmentPeriod.toFhirPeriod();
@@ -62,14 +67,10 @@ public class BeneficiaryMAPartDEnrollment {
   public List<Extension> toFhirExtensions() {
 
     var extContractNumber =
-        contractNumber.map(
-            number ->
-                new Extension(SystemUrls.EXT_BENE_CNTRCT_NUM_URL).setValue(new StringType(number)));
+        new Extension(SystemUrls.EXT_BENE_CNTRCT_NUM_URL).setValue(new StringType(contractNumber));
 
     var extDrugPlanNumber =
-        drugPlanNumber.map(
-            number ->
-                new Extension(SystemUrls.EXT_BENE_PBP_NUM_URL).setValue(new StringType(number)));
+        new Extension(SystemUrls.EXT_BENE_PBP_NUM_URL).setValue(new StringType(drugPlanNumber));
 
     var extCoverageTypeCode =
         coverageTypeCode.map(
@@ -78,7 +79,7 @@ public class BeneficiaryMAPartDEnrollment {
                     .setValue(new Coding(SystemUrls.SYS_CVRG_TYPE_CD, code, null)));
 
     var extSegmentNumber =
-        contract
+        enrollmentContract
             .getContractPbpSegmentNumber()
             .map(
                 number ->
@@ -92,12 +93,17 @@ public class BeneficiaryMAPartDEnrollment {
                     .setValue(new StringType(number)));
 
     return Stream.of(
-            extContractNumber,
-            extDrugPlanNumber,
+            Optional.of(extContractNumber),
+            Optional.of(extDrugPlanNumber),
             extCoverageTypeCode,
             extSegmentNumber,
             extEmployerSubsidySwitch)
         .flatMap(Optional::stream)
         .toList();
+  }
+
+  @Override
+  public int compareTo(@NotNull BeneficiaryMAPartDEnrollment o) {
+    return this.id.compareTo(o.id);
   }
 }

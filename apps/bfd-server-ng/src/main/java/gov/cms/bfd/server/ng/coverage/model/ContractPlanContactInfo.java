@@ -1,9 +1,7 @@
 package gov.cms.bfd.server.ng.coverage.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import gov.cms.bfd.server.ng.claim.model.Contract;
+import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.Optional;
 import lombok.Getter;
@@ -29,7 +27,7 @@ public class ContractPlanContactInfo {
 
   @Column(name = "cntrct_plan_cntct_type_cd")
   private Optional<String>
-      contractPlanContactTypeCode; // TODO: check if i even need it to be an optional
+      contractPlanContactTypeCode;
 
   @Column(name = "cntrct_plan_free_extnsn_num")
   private Optional<String> contractPlanFreeExtensionNumber;
@@ -57,4 +55,7 @@ public class ContractPlanContactInfo {
 
   @Column(name = "cntrct_plan_cntct_zip_cd")
   private Optional<String> contractPlanZipCode;
+
+  @OneToOne(mappedBy = "contractPlanContactInfo")
+  private Contract contract;
 }

@@ -39,7 +39,7 @@ public class CoverageResourceProvider implements IResourceProvider {
    */
   @Read
   public Coverage read(@IdParam final IdType coverageId) {
-    // todo: this would need to be a bundle, check if fine
+    // todo: check this. only the first will be returned when program type code is 3 not both
     var compositeId = FhirInputConverter.toCoverageCompositeId(coverageId);
     var coverages = coverageHandler.readCoverage(compositeId);
     return coverages.stream()

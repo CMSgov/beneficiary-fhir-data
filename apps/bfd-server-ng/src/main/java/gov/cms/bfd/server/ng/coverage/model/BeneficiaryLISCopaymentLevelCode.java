@@ -15,9 +15,9 @@ import org.hl7.fhir.r4.model.Extension;
 public enum BeneficiaryLISCopaymentLevelCode {
 
   /** 1 - High. */
-  _1("0", "High"),
+  _1("1", "High"),
   /** 4 - 15% Copayment. */
-  _4("00", "15% Copayment");
+  _4("4", "15% Copayment");
 
   private final String code;
   private final String display;

@@ -840,7 +840,7 @@ class IdrBeneficiaryMaPartDEnrollmentRx(IdrBaseModel):
     bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
     cntrct_pbp_sk: int
     bene_cntrct_num: str
-    bene_pbp_num: Annotated[str, BeforeValidator(transform_default_string)]
+    bene_pbp_num: str
     bene_enrlmt_bgn_dt: date
     bene_pdp_enrlmt_mmbr_id_num: Annotated[str, BeforeValidator(transform_default_string)]
     bene_pdp_enrlmt_grp_num: Annotated[str, BeforeValidator(transform_default_string)]
