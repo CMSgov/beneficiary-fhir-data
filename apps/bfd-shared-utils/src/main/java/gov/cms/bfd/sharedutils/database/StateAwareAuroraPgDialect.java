@@ -25,11 +25,13 @@ public class StateAwareAuroraPgDialect extends AuroraPgDialect {
    * that is being queried. Taken directly from {@link AuroraPgDialect}.
    */
   private static final String TOPOLOGY_QUERY =
-      "SELECT SERVER_ID, CASE WHEN SESSION_ID = 'MASTER_SESSION_ID' THEN TRUE ELSE FALSE END, "
+      "SELECT SERVER_ID, CASE WHEN SESSION_ID OPERATOR(pg_catalog.=) 'MASTER_SESSION_ID' THEN TRUE ELSE FALSE END, "
           + "CPU, COALESCE(REPLICA_LAG_IN_MSEC, 0), LAST_UPDATE_TIMESTAMP "
-          + "FROM aurora_replica_status() "
+          + "FROM pg_catalog.aurora_replica_status() "
           // filter out nodes that haven't been updated in the last 5 minutes
-          + "WHERE EXTRACT(EPOCH FROM(NOW() - LAST_UPDATE_TIMESTAMP)) <= 300 OR SESSION_ID = 'MASTER_SESSION_ID' "
+          + "WHERE EXTRACT("
+          + "EPOCH FROM(pg_catalog.NOW() OPERATOR(pg_catalog.-) LAST_UPDATE_TIMESTAMP)) OPERATOR(pg_catalog.<=) 300 "
+          + "OR SESSION_ID OPERATOR(pg_catalog.=) 'MASTER_SESSION_ID' "
           + "OR LAST_UPDATE_TIMESTAMP IS NULL";
 
   /**
@@ -37,20 +39,21 @@ public class StateAwareAuroraPgDialect extends AuroraPgDialect {
    * directly from {@link AuroraPgDialect}.
    */
   private static final String IS_WRITER_QUERY =
-      "SELECT SERVER_ID FROM aurora_replica_status() "
-          + "WHERE SESSION_ID = 'MASTER_SESSION_ID' AND SERVER_ID = aurora_db_instance_identifier()";
+      "SELECT SERVER_ID FROM pg_catalog.aurora_replica_status() "
+          + "WHERE SESSION_ID OPERATOR(pg_catalog.=) 'MASTER_SESSION_ID' "
+          + "AND SERVER_ID OPERATOR(pg_catalog.=) pg_catalog.aurora_db_instance_identifier()";
 
   /**
    * Query that returns the instance identifier (name of instance) of the database instance that is
    * being queried. Taken directly from {@link AuroraPgDialect}.
    */
-  private static final String NODE_ID_QUERY = "SELECT aurora_db_instance_identifier()";
+  private static final String NODE_ID_QUERY = "SELECT pg_catalog.aurora_db_instance_identifier()";
 
   /**
    * Query that returns whether the database instance that is being queried is a reader node. Taken
    * directly from {@link AuroraPgDialect}.
    */
-  private static final String IS_READER_QUERY = "SELECT pg_is_in_recovery()";
+  private static final String IS_READER_QUERY = "SELECT pg_catalog.pg_is_in_recovery()";
 
   /** Used for RDS API calls by the {@link StateAwareMonitoringRdsHostListProvider}. */
   private final RdsClient rdsClient;
