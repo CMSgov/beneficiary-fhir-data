@@ -1,6 +1,7 @@
 package gov.cms.bfd.sharedutils.database;
 
 import com.google.common.annotations.VisibleForTesting;
+import java.io.Closeable;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
@@ -29,7 +30,8 @@ import software.amazon.jdbc.util.RdsUtils;
  * ClusterTopologyMonitorImpl} modifying {@link #queryForTopology(Connection)} to return a list of
  * hosts filtered by their API status.
  */
-public class StateAwareClusterTopologyMonitor extends ClusterTopologyMonitorImpl {
+public class StateAwareClusterTopologyMonitor extends ClusterTopologyMonitorImpl
+    implements Closeable {
   /**
    * Map {@link #clusterId}s to immutable map of instance ID to the status of the instance returned
    * by the RDS API. Periodically updated by the {@link InstanceStateMonitor} every {@link
