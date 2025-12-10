@@ -466,7 +466,39 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadBeneWithAllCoverage[allCoverage
         "system" : "http://terminology.hl7.org/CodeSystem/coverage-class"
       } ]
     },
-    "value" : "Part C"
+    "value" : "Part D"
+  }, {
+    "type" : {
+      "coding" : [ {
+        "code" : "rxid",
+        "system" : "http://terminology.hl7.org/CodeSystem/coverage-class"
+      } ]
+    },
+    "value" : "435808396"
+  }, {
+    "type" : {
+      "coding" : [ {
+        "code" : "rxgroup",
+        "system" : "http://terminology.hl7.org/CodeSystem/coverage-class"
+      } ]
+    },
+    "value" : "354"
+  }, {
+    "type" : {
+      "coding" : [ {
+        "code" : "rxpcn",
+        "system" : "http://terminology.hl7.org/CodeSystem/coverage-class"
+      } ]
+    },
+    "value" : "609279"
+  }, {
+    "type" : {
+      "coding" : [ {
+        "code" : "rxbin",
+        "system" : "http://terminology.hl7.org/CodeSystem/coverage-class"
+      } ]
+    },
+    "value" : "289653"
   } ],
   "contained" : [ {
     "active" : true,
@@ -494,6 +526,15 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadBeneWithAllCoverage[allCoverage
     "resourceType" : "Organization"
   } ],
   "extension" : [ {
+    "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-LIS-PTD-PRM-PCT",
+    "valueDecimal" : 0.25
+  }, {
+    "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-LIS-COPMT-LVL-CD",
+    "valueCoding" : {
+      "code" : "4",
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-LIS-COPMT-LVL-CD"
+    }
+  }, {
     "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-CNTRCT-NUM",
     "valueString" : "H1234"
   }, {
@@ -509,7 +550,7 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadBeneWithAllCoverage[allCoverage
     "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-ENRLMT-EMPLR-SBSDY-SW",
     "valueString" : "Y"
   } ],
-  "id" : "405764107CH1234003",
+  "id" : "405764107DH1234003",
   "identifier" : [ {
     "system" : "http://hl7.org/fhir/sid/us-mbi",
     "type" : {
@@ -519,6 +560,14 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadBeneWithAllCoverage[allCoverage
       } ]
     },
     "value" : "8Z73WV0QC20"
+  }, {
+    "type" : {
+      "coding" : [ {
+        "code" : "MB",
+        "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+      } ]
+    },
+    "value" : "435808396"
   } ],
   "meta" : {
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00",

@@ -261,6 +261,32 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
   }
 
   /**
+   * Creates a FHIR Coverage resource.
+   *
+   * @param coverageCompositeId The full ID for the Coverage resource.
+   * @return A FHIR Coverage object.
+   */
+  public Coverage toFhir(CoverageCompositeId coverageCompositeId) {
+    var coverage = setupBaseCoverage(coverageCompositeId, ProfileType.C4BB);
+    coverage.setId(coverageCompositeId.fullId());
+
+    coverage.setMeta(meta.toFhirCoverage(ProfileType.C4BB, getMostRecentUpdated()));
+
+    coverage.setBeneficiary(new Reference(PATIENT_REF + beneSk));
+    coverage.setRelationship(RelationshipFactory.createSelfSubscriberRelationship());
+
+    coverage.setSubscriberId(identifier.getMbi());
+    var coveragePart = coverageCompositeId.coveragePart();
+
+    return switch (coveragePart) {
+      case PART_A, PART_B -> mapCoverageAB(coverage, coveragePart, ProfileType.C4BB, "");
+      case PART_C -> mapCoverageC(coverage, coveragePart, ProfileType.C4BB, "");
+      case PART_D -> mapCoverageD(coverage, coveragePart, ProfileType.C4BB, "");
+      case DUAL -> mapCoverageDual(coverage, coveragePart, ProfileType.C4BB, "");
+    };
+  }
+
+  /**
    * Creates multiple FHIR Coverage resource.
    *
    * @param coverageCompositeId The full ID for the Coverage resource.
@@ -477,6 +503,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
 
     identifier.toFhir(orgId).ifPresent(coverage::addIdentifier);
     coverage.addClass_(coveragePart.toFhirClassComponent());
+    coverage.setType(coveragePart.toFhirTypeCode());
 
     var enrollment = enrollmentOpt.get();
     coverage.setId(createCoverageId(coveragePart, enrollment));

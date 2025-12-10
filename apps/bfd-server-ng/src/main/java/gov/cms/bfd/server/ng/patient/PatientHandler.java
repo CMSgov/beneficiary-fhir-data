@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.springframework.stereotype.Component;
@@ -31,6 +32,9 @@ public class PatientHandler {
   private final LoadProgressRepository loadProgressRepository;
 
   private final CoverageRepository coverageRepository;
+
+  private static final List<String> COVERAGE_SORT_ORDER =
+      List.of("Part A", "Part B", "Part C", "Part D", "Dual Medicare/Medicaid");
 
   /**
    * Returns a {@link Patient} by their {@link IdType}.
@@ -109,7 +113,8 @@ public class PatientHandler {
                     cov -> cov,
                     (existing, duplicate) -> existing))
             .values()
-            .stream();
+            .stream()
+            .sorted(Comparator.comparingInt(this::getCoverageSortOrder));
 
     var resources = Stream.concat(Stream.of(patient, cmsOrg), coverages);
     return FhirUtil.bundleWithFullUrls(resources, loadProgressRepository::lastUpdated);
@@ -144,5 +149,14 @@ public class PatientHandler {
                         .getOther()
                         .getReference()
                         .equals(newLink.getOther().getReference()));
+  }
+
+  private int getCoverageSortOrder(Coverage coverage) {
+    return coverage.getClass_().stream()
+        .map(Coverage.ClassComponent::getValue)
+        .filter(COVERAGE_SORT_ORDER::contains)
+        .map(COVERAGE_SORT_ORDER::indexOf)
+        .findFirst()
+        .orElse(COVERAGE_SORT_ORDER.size());
   }
 }

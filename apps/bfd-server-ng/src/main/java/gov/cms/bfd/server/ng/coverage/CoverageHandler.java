@@ -8,6 +8,7 @@ import gov.cms.bfd.server.ng.loadprogress.LoadProgressRepository;
 import gov.cms.bfd.server.ng.util.FhirUtil;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
@@ -33,14 +34,12 @@ public class CoverageHandler {
    * @return A list containing the {@link Coverage} resources if found, otherwise empty.
    * @throws InvalidRequestException if the compositeId format is invalid.
    */
-  public List<Coverage> readCoverage(final CoverageCompositeId coverageCompositeId) {
+  public Optional<Coverage> readCoverage(final CoverageCompositeId coverageCompositeId) {
     var beneficiaryOpt =
         coverageRepository.searchBeneficiaryWithCoverage(
             coverageCompositeId.beneSk(), new DateTimeRange());
 
-    return beneficiaryOpt
-        .map(beneficiary -> beneficiary.toFhirCoverages(coverageCompositeId, ""))
-        .orElse(List.of());
+    return beneficiaryOpt.map(beneficiary -> beneficiary.toFhir(coverageCompositeId));
   }
 
   /**
