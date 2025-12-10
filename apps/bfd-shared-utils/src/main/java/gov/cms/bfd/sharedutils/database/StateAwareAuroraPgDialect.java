@@ -57,16 +57,15 @@ public class StateAwareAuroraPgDialect extends AuroraPgDialect {
 
   @Override
   public HostListProviderSupplier getHostListProvider() {
-    return (properties, initialUrl, hostListProviderService, pluginService) ->
+    return (properties, initialUrl, servicesContainer) ->
         new StateAwareMonitoringRdsHostListProvider(
             properties,
             initialUrl,
-            hostListProviderService,
+            servicesContainer,
             TOPOLOGY_QUERY,
             NODE_ID_QUERY,
             IS_READER_QUERY,
             IS_WRITER_QUERY,
-            pluginService,
             rdsClient);
   }
 
