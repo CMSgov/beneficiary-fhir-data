@@ -40,14 +40,12 @@ import software.amazon.awssdk.services.rds.RdsClient;
 import software.amazon.awssdk.services.rds.model.DBInstance;
 import software.amazon.awssdk.services.rds.model.DescribeDbInstancesResponse;
 import software.amazon.awssdk.services.rds.model.Filter;
-import software.amazon.jdbc.HostListProviderService;
 import software.amazon.jdbc.HostSpec;
 import software.amazon.jdbc.HostSpecBuilder;
-import software.amazon.jdbc.PluginService;
 import software.amazon.jdbc.hostavailability.HostAvailability;
 import software.amazon.jdbc.hostavailability.HostAvailabilityStrategy;
+import software.amazon.jdbc.util.FullServicesContainer;
 import software.amazon.jdbc.util.RdsUrlType;
-import software.amazon.jdbc.util.storage.CacheMap;
 
 /** Unit tests for {@link StateAwareClusterTopologyMonitor}. */
 class StateAwareClusterTopologyMonitorTest {
@@ -328,15 +326,12 @@ class StateAwareClusterTopologyMonitorTest {
       long instanceStateRefreshRateMs,
       RdsClient mockRdsClient) {
     return new StateAwareClusterTopologyMonitor(
+        mock(FullServicesContainer.class),
         DEFAULT_MOCK_CLUSTER_ID,
-        new CacheMap<>(),
         instanceStateMap,
         mock(HostSpec.class),
         mock(Properties.class),
-        mock(PluginService.class),
-        mock(HostListProviderService.class),
         mock(HostSpec.class),
-        0L,
         0L,
         0L,
         "",
