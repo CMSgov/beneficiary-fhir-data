@@ -10,6 +10,7 @@ import software.amazon.jdbc.AwsWrapperProperty;
 import software.amazon.jdbc.dialect.Dialect;
 import software.amazon.jdbc.ds.AwsWrapperDataSource;
 import software.amazon.jdbc.hostlistprovider.monitoring.ClusterTopologyMonitor;
+import software.amazon.jdbc.hostlistprovider.monitoring.ClusterTopologyMonitorImpl;
 import software.amazon.jdbc.hostlistprovider.monitoring.MonitoringRdsHostListProvider;
 import software.amazon.jdbc.util.FullServicesContainer;
 
@@ -88,7 +89,13 @@ public class StateAwareMonitoringRdsHostListProvider extends MonitoringRdsHostLi
     return this.servicesContainer
         .getMonitorService()
         .runIfAbsent(
-            StateAwareClusterTopologyMonitor.class,
+            // We provide the parent class of our custom Monitor as the suppliers map within
+            // MonitorServiceImpl is unmodifiable and protected, so unless we replace
+            // MonitorServiceImpl we cannot add the custom Monitor to the list of registered
+            // Monitors. Fortunately, the MonitorService does not need to know what the concrete
+            // type of the Monitor is for everything to work. The default settings provided for
+            // ClusterTopologyMonitorImpl are perfectly fine for our Monitor, as well.
+            ClusterTopologyMonitorImpl.class,
             this.clusterId,
             this.servicesContainer,
             this.properties,
