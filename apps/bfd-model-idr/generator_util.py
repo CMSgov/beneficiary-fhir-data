@@ -441,9 +441,10 @@ class GeneratorUtil:
             datetime.date(year=2021, month=1, day=1),
         )
         enrollment_end_date = "9999-12-31"
+        avail_pbp_nums = ["001", "002", "003"]
 
         cntrct_num = "S0001" if pdp_only else random.choice(["H1234", "G1234"])
-        pbp_num = "001"
+        pbp_num = random.choice(avail_pbp_nums)
         cvrg_type_cd = "11" if pdp_only else "3"
         bene_enrlmt_pgm_type_cd = random.choice(["1", "2", "3"])
         bene_enrlmt_emplr_sbsdy_sw = random.choice(["Y", "~", "1"])

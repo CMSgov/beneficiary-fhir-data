@@ -61,6 +61,7 @@ public final class OrganizationFactory {
    *
    * @param id the resource ID to assign to the Organization
    * @param profile the FHIR profile URL to set in the Organization's Meta
+   * @param contract the contract to set in the Organization's name and contact information
    * @return A fully populated FHIR {@link Organization} resource for part c/d.
    */
   public static Organization createInsurerOrganization(
@@ -129,6 +130,7 @@ public final class OrganizationFactory {
    * Creates a FHIR {@link Organization} resource representing part c/d with default ID and default
    * profile.
    *
+   * @param contract the contract to set in the Organization's name and contact information
    * @return a fully populated FHIR {@link Organization} resource for part c/d
    */
   public static Organization createInsurerOrganization(Contract contract) {

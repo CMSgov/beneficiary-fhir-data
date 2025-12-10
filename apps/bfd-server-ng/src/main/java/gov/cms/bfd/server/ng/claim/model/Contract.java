@@ -1,6 +1,5 @@
 package gov.cms.bfd.server.ng.claim.model;
 
-import gov.cms.bfd.server.ng.coverage.model.BeneficiaryMAPartDEnrollment;
 import gov.cms.bfd.server.ng.coverage.model.ContractPlanContactInfo;
 import jakarta.persistence.*;
 import java.util.Optional;
@@ -33,13 +32,7 @@ public class Contract {
   @Column(name = "cntrct_pbp_sgmt_num")
   private Optional<String> contractPbpSegmentNumber;
 
-  @OneToOne(mappedBy = "contract")
-  private Claim claim;
-
-  @OneToOne(mappedBy = "contract")
-  private BeneficiaryMAPartDEnrollment beneficiaryMAPartDEnrollment;
-
-  @OneToOne(fetch = FetchType.EAGER)
+  @OneToOne
   @JoinColumn(name = "cntrct_pbp_sk")
   private ContractPlanContactInfo contractPlanContactInfo;
 }

@@ -82,8 +82,13 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
   /** Organization reference. */
   public static final String ORGANIZATION_REF = "Organization/";
 
+  /** Beneficiary enrollment program type code 1 denotes Part C. */
   public static final String PART_C_PROGRAM_TYPE_CODE = "1";
+
+  /** Beneficiary enrollment program type code 2 denotes Part D. */
   public static final String PART_D_PROGRAM_TYPE_CODE = "2";
+
+  /** Beneficiary enrollment program type code 3 denotes Parts C and D. */
   public static final String PART_C_AND_D_PROGRAM_TYPE_CODE = "3";
 
   private Optional<BeneficiaryEntitlementReason> getEntitlementReason() {
@@ -114,6 +119,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
   /**
    * Finds the enrollment record for a given coverage part.
    *
+   * @param coveragePart The coverage part to find.
    * @return Optional containing the matching enrollment, or empty if not found.
    */
   private Optional<BeneficiaryMAPartDEnrollment> findEnrollment(CoveragePart coveragePart) {
@@ -175,7 +181,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
   }
 
   /**
-   * Finds the active beneficiary low income subsidy record
+   * Finds the active beneficiary low income subsidy record.
    *
    * @return Optional containing the matching LIS, or empty if not found.
    */
@@ -211,7 +217,6 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
 
     var coveragePart = coverageCompositeId.coveragePart();
     coverage.setType(coveragePart.toFhirTypeCode());
-    coverage.addClass_(coveragePart.toFhirClassComponent());
 
     if (profileType == ProfileType.C4DIC) {
       coverage.setMeta(meta.toFhirCoverage(profileType, getMostRecentUpdated()));
@@ -283,7 +288,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
     }
 
     if (coveragePart == CoveragePart.DUAL) {
-      return List.of(mapCoverageDual(baseCoverage, profileType, orgId));
+      return List.of(mapCoverageDual(baseCoverage, coveragePart, profileType, orgId));
     }
 
     if (coveragePart == CoveragePart.PART_C || coveragePart == CoveragePart.PART_D) {
@@ -331,6 +336,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
     }
 
     identifier.toFhir(orgId).ifPresent(coverage::addIdentifier);
+    coverage.addClass_(coveragePart.toFhirClassComponent());
 
     var entitlement = entitlementOpt.get();
     coverage.setPeriod(entitlement.toFhirPeriod());
@@ -378,11 +384,13 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
    * Maps Dual eligibility coverage for both standard and C4DIC formats.
    *
    * @param coverage The base coverage object.
+   * @param coveragePart The coverage part Dual.
    * @param profileType The profile type.
    * @param orgId The organization reference ID (only used if isC4DIC is true).
    * @return The populated Coverage object.
    */
-  private Coverage mapCoverageDual(Coverage coverage, ProfileType profileType, String orgId) {
+  private Coverage mapCoverageDual(
+      Coverage coverage, CoveragePart coveragePart, ProfileType profileType, String orgId) {
     var dualEligibilityOpt = getDualEligibility();
     if (dualEligibilityOpt.isEmpty()) {
       return toEmptyResource(coverage);
@@ -394,6 +402,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
     identifier
         .toFhir(profileType == ProfileType.C4DIC ? orgId : "")
         .ifPresent(coverage::addIdentifier);
+    coverage.addClass_(coveragePart.toFhirClassComponent());
 
     if (profileType == ProfileType.C4DIC) {
       coverage.addPayor(new Reference().setReference(ORGANIZATION_REF + orgId));
@@ -414,6 +423,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
    * Maps Part C coverage for both standard and C4DIC formats.
    *
    * @param coverage The base coverage object.
+   * @param coveragePart The coverage part C.
    * @param profileType Profile type.
    * @param orgId The organization reference ID (only used if isC4DIC is true).
    * @return The populated Coverage object.
@@ -426,8 +436,10 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
     }
 
     identifier.toFhir(orgId).ifPresent(coverage::addIdentifier);
+    coverage.addClass_(coveragePart.toFhirClassComponent());
 
     var enrollment = enrollmentOpt.get();
+    coverage.setId(createCoverageId(coveragePart, enrollment));
     coverage.setPeriod(enrollment.toFhirPeriod());
     coverage.setStatus(enrollment.toFhirStatus());
 
@@ -437,12 +449,11 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
           new Extension(SystemUrls.C4DIC_ADD_INFO_EXT_URL)
               .setValue(new Annotation(new MarkdownType(C4DIC_ADD_INFO))));
     } else {
-      var contract = enrollment.getContract();
+      var contract = enrollment.getEnrollmentContract();
       var cmsOrg = OrganizationFactory.createInsurerOrganization(contract);
       coverage.addContained(cmsOrg);
       coverage.addPayor(new Reference().setReference("#" + cmsOrg.getIdElement().getIdPart()));
       enrollment.toFhirExtensions().forEach(coverage::addExtension);
-      getStatus().map(BeneficiaryStatus::toFhir).orElse(List.of()).forEach(coverage::addExtension);
     }
 
     return coverage;
@@ -452,6 +463,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
    * Maps Part D coverage for both standard and C4DIC formats.
    *
    * @param coverage The base coverage object.
+   * @param coveragePart The coverage part C.
    * @param profileType Profile type.
    * @param orgId The organization reference ID (only used if isC4DIC is true).
    * @return The populated Coverage object.
@@ -464,8 +476,10 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
     }
 
     identifier.toFhir(orgId).ifPresent(coverage::addIdentifier);
+    coverage.addClass_(coveragePart.toFhirClassComponent());
 
     var enrollment = enrollmentOpt.get();
+    coverage.setId(createCoverageId(coveragePart, enrollment));
     var rxInfo = findRxEnrollment();
     rxInfo
         .flatMap(BeneficiaryMAPartDEnrollmentRx::getMemberId)
@@ -492,12 +506,11 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
           new Extension(SystemUrls.C4DIC_ADD_INFO_EXT_URL)
               .setValue(new Annotation(new MarkdownType(C4DIC_ADD_INFO))));
     } else {
-      var contract = enrollment.getContract();
+      var contract = enrollment.getEnrollmentContract();
       var cmsOrg = OrganizationFactory.createInsurerOrganization(contract);
       coverage.addContained(cmsOrg);
       coverage.addPayor(new Reference().setReference("#" + cmsOrg.getIdElement().getIdPart()));
       enrollment.toFhirExtensions().forEach(coverage::addExtension);
-      getStatus().map(BeneficiaryStatus::toFhir).orElse(List.of()).forEach(coverage::addExtension);
     }
 
     return coverage;
@@ -514,11 +527,26 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
                 .stream(),
             getDualEligibility().map(BeneficiaryDualEligibility::getBfdUpdatedTimestamp).stream(),
             beneficiaryEntitlements.stream().map(BeneficiaryEntitlement::getBfdUpdatedTimestamp),
-            beneficiaryThirdParties.stream().map(BeneficiaryThirdParty::getBfdUpdatedTimestamp));
+            beneficiaryThirdParties.stream().map(BeneficiaryThirdParty::getBfdUpdatedTimestamp),
+            beneficiaryMAPartDEnrollments.stream()
+                .map(BeneficiaryMAPartDEnrollment::getBfdUpdatedTimestamp),
+            beneficiaryMAPartDEnrollmentsRx.stream()
+                .map(BeneficiaryMAPartDEnrollmentRx::getBfdUpdatedTimestamp),
+            beneficiaryLowIncomeSubsidies.stream()
+                .map(BeneficiaryLowIncomeSubsidy::getBfdUpdatedTimestamp));
 
     return allTimestamps
         .flatMap(s -> s)
         .max(Comparator.naturalOrder())
         .orElse(meta.getUpdatedTimestamp());
+  }
+
+  private String createCoverageId(
+      CoveragePart coveragePart, BeneficiaryMAPartDEnrollment enrollment) {
+    Long beneSk = enrollment.getId().getBeneSk();
+    String part = coveragePart.getStandardCode();
+    String contractNum = enrollment.getContractNumber();
+    String contractPbpNum = enrollment.getDrugPlanNumber();
+    return beneSk + part + contractNum + contractPbpNum;
   }
 }

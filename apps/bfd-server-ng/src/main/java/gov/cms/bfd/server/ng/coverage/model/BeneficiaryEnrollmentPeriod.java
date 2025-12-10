@@ -12,7 +12,7 @@ import org.hl7.fhir.r4.model.Period;
 @Getter
 @Embeddable
 public class BeneficiaryEnrollmentPeriod {
-  @Column(name = "bene_enrlmt_bgn_dt")
+  @Column(name = "bene_enrlmt_bgn_dt", insertable = false, updatable = false)
   private LocalDate enrollmentBeginDate;
 
   @Column(name = "bene_enrlmt_end_dt")

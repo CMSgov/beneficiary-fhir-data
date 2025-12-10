@@ -5,6 +5,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -13,17 +15,19 @@ import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Coverage;
+import org.jetbrains.annotations.NotNull;
 
 /** Entity representing BeneficiaryMAPartDEnrollmentRx. */
 @Entity
 @Getter
 @EqualsAndHashCode
 @Table(name = "beneficiary_ma_part_d_enrollment_rx", schema = "idr")
-public class BeneficiaryMAPartDEnrollmentRx {
+public class BeneficiaryMAPartDEnrollmentRx implements Comparable<BeneficiaryMAPartDEnrollmentRx> {
 
   @EmbeddedId private BeneficiaryMAPartDEnrollmentRxId id;
 
-  private BeneficiaryEnrollmentPeriod beneficiaryEnrollmentPeriod;
+  @Column(name = "bene_enrlmt_bgn_dt")
+  private LocalDate enrollmentBeginDate;
 
   @Column(name = "bene_cntrct_num")
   private String contractNumber;
@@ -45,6 +49,9 @@ public class BeneficiaryMAPartDEnrollmentRx {
 
   @Column(name = "cntrct_pbp_sk")
   private long contractPbpSk;
+
+  @Column(name = "bfd_updated_ts")
+  private ZonedDateTime bfdUpdatedTimestamp;
 
   /**
    * Creates ClassComponents.
@@ -91,5 +98,10 @@ public class BeneficiaryMAPartDEnrollmentRx {
     return Stream.of(memberIdClass, groupNumberClass, processorNumberClass, bankIdClass)
         .flatMap(Optional::stream)
         .toList();
+  }
+
+  @Override
+  public int compareTo(@NotNull BeneficiaryMAPartDEnrollmentRx o) {
+    return this.id.compareTo(o.id);
   }
 }

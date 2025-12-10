@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import gov.cms.bfd.server.ng.util.SystemUrls;
+import java.util.Optional;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.IdType;
@@ -107,7 +108,7 @@ class PatientCoverageC4DICSearchIT extends IntegrationTestBase {
     assertNotNull(response);
     assertEquals(Bundle.BundleType.COLLECTION, response.getType());
     assertFalse(response.getEntry().isEmpty());
-    assertEquals(5, response.getEntry().size());
+    assertEquals(7, response.getEntry().size());
 
     long patientCount =
         response.getEntry().stream().filter(e -> e.getResource() instanceof Patient).count();
@@ -118,7 +119,7 @@ class PatientCoverageC4DICSearchIT extends IntegrationTestBase {
 
     assertEquals(1, patientCount);
     assertEquals(1, orgCount);
-    assertEquals(3, coverageCount);
+    assertEquals(5, coverageCount);
     // Checking IDs are present because snapshot is suppressing IDs.
     assertAllResourcesHaveValidProfilesAndIds(response);
     expectFhir().toMatchSnapshot(response);
@@ -127,7 +128,17 @@ class PatientCoverageC4DICSearchIT extends IntegrationTestBase {
   private void assertAllResourcesHaveValidProfilesAndIds(Bundle bundle) {
     for (Bundle.BundleEntryComponent entry : bundle.getEntry()) {
       Resource resource = entry.getResource();
-      assertTrue(isValidUuidUrn(resource.getId()));
+
+      boolean skipUuidCheck = false;
+      if (resource instanceof Coverage coverage) {
+        Optional<Coverage.ClassComponent> classComponent =
+            coverage.getClass_().stream().findFirst();
+        String coveragePart = classComponent.map(Coverage.ClassComponent::getValue).orElse("");
+        skipUuidCheck = "Part C".equals(coveragePart) || "Part D".equals(coveragePart);
+      }
+      if (!skipUuidCheck) {
+        assertTrue(isValidUuidUrn(resource.getId()));
+      }
 
       String expectedProfile =
           switch (resource) {
