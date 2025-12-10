@@ -14,6 +14,7 @@ import gov.cms.bfd.server.ng.coverage.CoverageResourceProvider;
 import gov.cms.bfd.server.ng.testUtil.ThreadSafeAppender;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import io.restassured.RestAssured;
+import java.util.List;
 import java.util.Optional;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Coverage;
@@ -187,11 +188,13 @@ class CoverageReadIT extends IntegrationTestBase {
   }
 
   @ParameterizedTest
-  @ValueSource(strings = {"part-A", "part-B", "dual"}) // update, might break?
+  @ValueSource(strings = {"part-A", "part-B", "dual", "part-C", "part-D"})
   void coverageReadBeneWithAllCoverage(String part) {
     final var partId = createCoverageId(part, BENE_ID_ALL_PARTS_WITH_XREF);
     var coverage = coverageRead().withId(partId).execute();
-    assertEquals(partId.toLowerCase(), coverage.getIdPart());
+    if (List.of("part-A", "part-B", "dual").contains(part)) {
+      assertEquals(partId.toLowerCase(), coverage.getIdPart());
+    }
     expectFhir().scenario("allCoverage" + part).toMatchSnapshot(coverage);
   }
 

@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
@@ -96,15 +97,24 @@ public class PatientHandler {
         OrganizationFactory.createCmsOrganization(
             UUID.randomUUID().toString(), SystemUrls.PROFILE_C4DIC_ORGANIZATION);
 
+    // for part C/D, if the program type code in the enrollment is 3, we'd return both resources.
+    // This check happens in both part C/D branches so that's why we need to dedupe here
     var coverages =
         Arrays.stream(CoveragePart.values())
             .map(
                 c ->
                     beneficiary.toFhirCoverageIfPresentC4DIC(
                         new CoverageCompositeId(c, beneficiary.getBeneSk()), cmsOrg.getId()))
-            .flatMap(List::stream);
+            .flatMap(List::stream)
+            .collect(
+                Collectors.toMap(
+                    cov -> cov.getIdElement().getIdPart(),
+                    cov -> cov,
+                    (existing, duplicate) -> existing))
+            .values()
+            .stream();
 
-    var resources = Stream.concat(Stream.of(patient, cmsOrg), coverages).distinct();
+    var resources = Stream.concat(Stream.of(patient, cmsOrg), coverages);
     return FhirUtil.bundleWithFullUrls(resources, loadProgressRepository::lastUpdated);
   }
 
