@@ -629,8 +629,8 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchByBeneficiary[GET]=[
       "subscriberId" : "8Z73WV0QC20",
       "type" : {
         "coding" : [ {
-          "code" : "11",
-          "display" : "MEDICARE MANAGED CARE (Includes Medicare Advantage Plans)",
+          "code" : "122",
+          "display" : "Medicare Drug Benefit",
           "system" : "https://nahdo.org/sopt"
         } ]
       }
@@ -1233,8 +1233,8 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchByBeneficiary[GET_WITH_SEAR
       "subscriberId" : "8Z73WV0QC20",
       "type" : {
         "coding" : [ {
-          "code" : "11",
-          "display" : "MEDICARE MANAGED CARE (Includes Medicare Advantage Plans)",
+          "code" : "122",
+          "display" : "Medicare Drug Benefit",
           "system" : "https://nahdo.org/sopt"
         } ]
       }
@@ -1837,8 +1837,8 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchByBeneficiary[POST]=[
       "subscriberId" : "8Z73WV0QC20",
       "type" : {
         "coding" : [ {
-          "code" : "11",
-          "display" : "MEDICARE MANAGED CARE (Includes Medicare Advantage Plans)",
+          "code" : "122",
+          "display" : "Medicare Drug Benefit",
           "system" : "https://nahdo.org/sopt"
         } ]
       }
@@ -3164,8 +3164,8 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithFutureCoverageSh
       "subscriberId" : "5OK1QQ8NJ30",
       "type" : {
         "coding" : [ {
-          "code" : "11",
-          "display" : "MEDICARE MANAGED CARE (Includes Medicare Advantage Plans)",
+          "code" : "122",
+          "display" : "Medicare Drug Benefit",
           "system" : "https://nahdo.org/sopt"
         } ]
       }
@@ -3418,8 +3418,8 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithFutureCoverageSh
       "subscriberId" : "5OK1QQ8NJ30",
       "type" : {
         "coding" : [ {
-          "code" : "11",
-          "display" : "MEDICARE MANAGED CARE (Includes Medicare Advantage Plans)",
+          "code" : "122",
+          "display" : "Medicare Drug Benefit",
           "system" : "https://nahdo.org/sopt"
         } ]
       }
@@ -3672,8 +3672,8 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithFutureCoverageSh
       "subscriberId" : "5OK1QQ8NJ30",
       "type" : {
         "coding" : [ {
-          "code" : "11",
-          "display" : "MEDICARE MANAGED CARE (Includes Medicare Advantage Plans)",
+          "code" : "122",
+          "display" : "Medicare Drug Benefit",
           "system" : "https://nahdo.org/sopt"
         } ]
       }
@@ -5282,8 +5282,8 @@ gov.cms.bfd.server.ng.CoverageSearchIT.partCAndDCoverageSearchById[GET]=[
       "subscriberId" : "2BX5YT4FD58",
       "type" : {
         "coding" : [ {
-          "code" : "11",
-          "display" : "MEDICARE MANAGED CARE (Includes Medicare Advantage Plans)",
+          "code" : "122",
+          "display" : "Medicare Drug Benefit",
           "system" : "https://nahdo.org/sopt"
         } ]
       }
@@ -5536,8 +5536,8 @@ gov.cms.bfd.server.ng.CoverageSearchIT.partCAndDCoverageSearchById[GET_WITH_SEAR
       "subscriberId" : "2BX5YT4FD58",
       "type" : {
         "coding" : [ {
-          "code" : "11",
-          "display" : "MEDICARE MANAGED CARE (Includes Medicare Advantage Plans)",
+          "code" : "122",
+          "display" : "Medicare Drug Benefit",
           "system" : "https://nahdo.org/sopt"
         } ]
       }
@@ -5790,8 +5790,8 @@ gov.cms.bfd.server.ng.CoverageSearchIT.partCAndDCoverageSearchById[POST]=[
       "subscriberId" : "2BX5YT4FD58",
       "type" : {
         "coding" : [ {
-          "code" : "11",
-          "display" : "MEDICARE MANAGED CARE (Includes Medicare Advantage Plans)",
+          "code" : "122",
+          "display" : "Medicare Drug Benefit",
           "system" : "https://nahdo.org/sopt"
         } ]
       }
