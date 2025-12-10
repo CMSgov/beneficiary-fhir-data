@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -295,7 +296,6 @@ public enum ClaimTypeCode {
   _2800(2800, "DME MEDICARE SS DME"),
   /** 2900 - HOSPICE NOTICE OF ELECTION. */
   _2900(2900, "HOSPICE NOTICE OF ELECTION");
-  ;
 
   private static final Set<Integer> PART_B_CODES =
       Set.of(_1700.code, _1800.code, _2700.code, _2800.code);
@@ -310,7 +310,9 @@ public enum ClaimTypeCode {
    * @return claim type code
    */
   public static ClaimTypeCode fromCode(int code) {
-    return Arrays.stream(values()).filter(c -> c.code == code).findFirst().get();
+    return Arrays.stream(values())
+        .collect(Collectors.toMap(ClaimTypeCode::getCode, e -> e))
+        .get(code);
   }
 
   CodeableConcept toFhirType() {
@@ -405,32 +407,46 @@ public enum ClaimTypeCode {
   }
 
   Optional<String> toFhirStructureDefinition() {
-    return switch (code) {
-      case 1, 2, 3, 4 -> Optional.of(SystemUrls.CARIN_STRUCTURE_DEFINITION_PHARMACY);
-      case 10, 20, 30, 50, 60, 61, 62, 63, 1011, 2011 ->
-          Optional.of(SystemUrls.CARIN_STRUCTURE_DEFINITION_INPATIENT_INSTITUTIONAL);
-      case 40 -> Optional.of(SystemUrls.CARIN_STRUCTURE_DEFINITION_OUTPATIENT_INSTITUTIONAL);
-      case 71, 72, 81, 82 -> Optional.of(SystemUrls.CARIN_STRUCTURE_DEFINITION_PROFESSIONAL);
-      default -> Optional.empty();
-    };
+    return subtypeFor(code)
+        .map(
+            subtype ->
+                switch (subtype) {
+                  case INPATIENT, HHA, HOSPICE, SNF ->
+                      SystemUrls.CARIN_STRUCTURE_DEFINITION_INPATIENT_INSTITUTIONAL;
+                  case OUTPATIENT -> SystemUrls.CARIN_STRUCTURE_DEFINITION_OUTPATIENT_INSTITUTIONAL;
+                  case CARRIER, DME -> SystemUrls.CARIN_STRUCTURE_DEFINITION_PROFESSIONAL;
+                  case PDE -> SystemUrls.CARIN_STRUCTURE_DEFINITION_PHARMACY;
+                });
   }
 
   private Optional<ClaimSubtype> getClaimSubtype() {
-    return switch (code) {
-      case 10, 20, 30, 50, 60, 61, 62, 63, 1011, 1041, 2011, 2041 ->
-          Optional.of(ClaimSubtype.INPATIENT);
-      case 40 -> Optional.of(ClaimSubtype.OUTPATIENT);
-      default -> Optional.empty();
-    };
+    return subtypeFor(code)
+        .map(
+            subtype ->
+                switch (subtype) {
+                  case INPATIENT, HHA, HOSPICE, SNF -> ClaimSubtype.INPATIENT;
+                  case OUTPATIENT -> ClaimSubtype.OUTPATIENT;
+                  case CARRIER, DME, PDE -> null;
+                });
   }
 
   private Optional<ClaimType> getClaimType() {
-    return switch (code) {
-      case 1, 2, 3, 4 -> Optional.of(ClaimType.PHARMACY);
-      case 10, 20, 30, 40, 50, 60, 61, 62, 63, 1011, 2011 -> Optional.of(ClaimType.INSTITUTIONAL);
-      case 71, 72, 81, 82 -> Optional.of(ClaimType.PROFESSIONAL);
-      default -> Optional.empty();
-    };
+    return subtypeFor(code)
+        .map(
+            subtype ->
+                switch (subtype) {
+                  case INPATIENT, HHA, HOSPICE, SNF, OUTPATIENT -> ClaimType.INSTITUTIONAL;
+                  case CARRIER, DME -> ClaimType.PROFESSIONAL;
+                  case PDE -> ClaimType.PHARMACY;
+                });
+  }
+
+  private Optional<ClaimSubtype> subtypeFor(int code) {
+    var claimTypeCode = ClaimTypeCode.fromCode(code);
+    return CLAIM_TYPE_CODE_MAP.entrySet().stream()
+        .filter(e -> e.getValue().contains(claimTypeCode))
+        .map(Map.Entry::getKey)
+        .findFirst();
   }
 
   private static final Map<ClaimSubtype, List<ClaimTypeCode>> CLAIM_TYPE_CODE_MAP =

@@ -390,6 +390,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
   } ],
   "meta" : {
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
+    "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Outpatient-Institutional|2.1.0" ],
     "source" : "FISS",
     "tag" : [ {
       "code" : "PartiallyAdjudicated",
@@ -411,6 +412,12 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
   },
   "resourceType" : "ExplanationOfBenefit",
   "status" : "active",
+  "subType" : {
+    "coding" : [ {
+      "code" : "outpatient",
+      "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBInstitutionalClaimSubType"
+    } ]
+  },
   "supportingInfo" : [ {
     "category" : {
       "coding" : [ {
@@ -654,6 +661,9 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
       "code" : "1013",
       "display" : "013X MEDICARE SS HOSPITAL OUTPATIENT - PHASE 1",
       "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-TYPE-CD"
+    }, {
+      "code" : "institutional",
+      "system" : "http://terminology.hl7.org/CodeSystem/claim-type"
     } ]
   },
   "use" : "claim"
@@ -1053,6 +1063,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
   } ],
   "meta" : {
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
+    "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Outpatient-Institutional|2.1.0" ],
     "source" : "FISS",
     "tag" : [ {
       "code" : "PartiallyAdjudicated",
@@ -1074,6 +1085,12 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
   },
   "resourceType" : "ExplanationOfBenefit",
   "status" : "active",
+  "subType" : {
+    "coding" : [ {
+      "code" : "outpatient",
+      "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBInstitutionalClaimSubType"
+    } ]
+  },
   "supportingInfo" : [ {
     "category" : {
       "coding" : [ {
@@ -1317,6 +1334,9 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
       "code" : "2013",
       "display" : "013X MEDICARE SS HOSPITAL OUTPATIENT",
       "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-TYPE-CD"
+    }, {
+      "code" : "institutional",
+      "system" : "http://terminology.hl7.org/CodeSystem/claim-type"
     } ]
   },
   "use" : "claim"
@@ -1910,9 +1930,9 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
       "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication-Status"
     } ]
   },
-  "outcome" : "complete",
+  "outcome" : "queued",
   "patient" : {
-    "reference" : "Patient/405764107"
+    "reference" : "Patient/178083966"
   },
   "payment" : {
     "amount" : {
@@ -2200,8 +2220,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
   } ],
   "type" : {
     "coding" : [ {
-      "code" : "71",
-      "display" : "MEDICARE PART B PROFESSIONAL PHYSICIAN/SUPPLIER CLAIM (NON-DMEPOS)",
+      "code" : "2800",
+      "display" : "DME MEDICARE SS DME",
       "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-TYPE-CD"
     }, {
       "code" : "professional",
@@ -2802,7 +2822,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
   },
   "outcome" : "complete",
   "patient" : {
-    "reference" : "Patient/405764107"
+    "reference" : "Patient/178083966"
   },
   "payment" : {
     "amount" : {
