@@ -26,8 +26,7 @@ public class ContractPlanContactInfo {
   private LocalDate contractPlanContactObsoleteDate;
 
   @Column(name = "cntrct_plan_cntct_type_cd")
-  private Optional<String>
-      contractPlanContactTypeCode;
+  private Optional<String> contractPlanContactTypeCode;
 
   @Column(name = "cntrct_plan_free_extnsn_num")
   private Optional<String> contractPlanFreeExtensionNumber;
