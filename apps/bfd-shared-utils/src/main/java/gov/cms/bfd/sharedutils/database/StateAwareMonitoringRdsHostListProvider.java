@@ -99,7 +99,7 @@ public class StateAwareMonitoringRdsHostListProvider extends MonitoringRdsHostLi
             this.clusterId,
             this.servicesContainer,
             this.properties,
-            (servicesContainer) ->
+            servicesContainer ->
                 new StateAwareClusterTopologyMonitor(
                     servicesContainer,
                     clusterId,
