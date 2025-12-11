@@ -111,11 +111,11 @@ public class StateAwareClusterTopologyMonitor extends ClusterTopologyMonitorImpl
   public void close() {
     try {
       shutdownInstanceMonitorExecutor();
+      super.close();
     } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
       throw new RuntimeException(e);
     }
-
-    super.close();
   }
 
   @Override
