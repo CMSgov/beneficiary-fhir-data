@@ -1,7 +1,7 @@
 CodeSystem: CLM_SRC_ID
-Title: "Clm Src Id"
+Title: "Claim Source ID"
 Id: CLM-SRC-ID
-Description: "Code system for clm src id"
+Description: "AN IDENTIFIER INDICATING WHERE THE SOURCE OF THE CLAIM DATA IN THE INTEGRATED DATA REPOSITORY (IDR) ORIGINATED FROM."
 * ^url = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-SRC-ID"
 * ^status = #active
 * ^content = #complete

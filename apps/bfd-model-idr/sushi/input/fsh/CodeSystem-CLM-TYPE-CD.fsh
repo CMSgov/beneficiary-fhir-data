@@ -1,7 +1,7 @@
 CodeSystem: CLM_TYPE_CD
-Title: "Clm Type Cd"
+Title: "Claim Type Code"
 Id: CLM-TYPE-CD
-Description: "Code system for clm type cd"
+Description: "CA CODE IDENTIFYING THE SOURCE AND TYPE OF CLAIM SUBMITTED THROUGH THE MEDICARE OR MEDICAID PROGRAM."
 * ^url = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-TYPE-CD"
 * ^status = #active
 * ^content = #complete
