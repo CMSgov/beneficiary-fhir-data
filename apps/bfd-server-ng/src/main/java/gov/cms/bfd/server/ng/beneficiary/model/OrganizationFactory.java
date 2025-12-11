@@ -66,11 +66,11 @@ public final class OrganizationFactory {
    */
   public static Organization createInsurerOrganization(
       String id, String profile, Contract contract) {
-    Organization insurerOrg = new Organization();
+    var insurerOrg = new Organization();
     insurerOrg.setId(id);
 
     // Set the Meta information, including the C4BB Organization profile.
-    Meta orgMeta = new Meta();
+    var orgMeta = new Meta();
     orgMeta.addProfile(profile);
     insurerOrg.setMeta(orgMeta);
     insurerOrg.setActive(true);

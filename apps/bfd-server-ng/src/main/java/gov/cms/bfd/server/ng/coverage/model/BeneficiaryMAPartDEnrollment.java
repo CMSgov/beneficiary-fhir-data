@@ -2,14 +2,24 @@ package gov.cms.bfd.server.ng.coverage.model;
 
 import gov.cms.bfd.server.ng.claim.model.Contract;
 import gov.cms.bfd.server.ng.util.SystemUrls;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Coverage;
+import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.Period;
+import org.hl7.fhir.r4.model.StringType;
 import org.jetbrains.annotations.NotNull;
 
 /** Entity representing BeneficiaryMAPartDEnrollment. */
@@ -35,7 +45,7 @@ public class BeneficiaryMAPartDEnrollment implements Comparable<BeneficiaryMAPar
   @Column(name = "bene_pbp_num")
   private String drugPlanNumber;
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(
       name = "bene_cntrct_num",
       insertable = false,

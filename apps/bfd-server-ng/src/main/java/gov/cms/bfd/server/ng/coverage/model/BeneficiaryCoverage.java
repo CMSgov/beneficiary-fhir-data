@@ -13,12 +13,22 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import java.time.LocalDate;
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+import java.util.SortedSet;
+import java.util.UUID;
 import java.util.stream.Stream;
 import lombok.Getter;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.Annotation;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Coverage;
+import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.MarkdownType;
+import org.hl7.fhir.r4.model.Reference;
 
 /** Entity representing the beneficiary table with coverage info. */
 @Entity
@@ -103,6 +113,18 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
     return Optional.ofNullable(beneficiaryDualEligibility);
   }
 
+  public Optional<BeneficiaryMAPartDEnrollment> getEnrollment() {
+    return beneficiaryMAPartDEnrollments.stream().findFirst();
+  }
+
+  public Optional<BeneficiaryMAPartDEnrollmentRx> getRxEnrollment() {
+    return beneficiaryMAPartDEnrollmentsRx.stream().findFirst();
+  }
+
+  public Optional<BeneficiaryLowIncomeSubsidy> getLowIncomeSubsidy() {
+    return beneficiaryLowIncomeSubsidies.stream().findFirst();
+  }
+
   /**
    * Finds the entitlement record for a given coverage part.
    *
@@ -122,7 +144,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
    * @param coveragePart The coverage part to find.
    * @return Optional containing the matching enrollment, or empty if not found.
    */
-  private Optional<BeneficiaryMAPartDEnrollment> findEnrollment(CoveragePart coveragePart) {
+  /*private Optional<BeneficiaryMAPartDEnrollment> findEnrollment(CoveragePart coveragePart) {
     final String standardCode = coveragePart.getStandardCode();
     final LocalDate today = LocalDate.now();
     var matchedCoverage =
@@ -158,11 +180,13 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
         .findFirst();
   }
 
+  */
   /**
    * Finds the recent or future rx enrollment record.
    *
    * @return Optional containing the matching enrollment, or empty if not found.
    */
+  /*
   private Optional<BeneficiaryMAPartDEnrollmentRx> findRxEnrollment() {
     final LocalDate today = LocalDate.now();
     Optional<BeneficiaryMAPartDEnrollmentRx> latestActiveEnrollment =
@@ -180,11 +204,13 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
         .findFirst();
   }
 
+  */
   /**
    * Finds the active beneficiary low income subsidy record.
    *
    * @return Optional containing the matching LIS, or empty if not found.
    */
+  /*
   private Optional<BeneficiaryLowIncomeSubsidy> findLowIncomeSubsidy() {
     final LocalDate today = LocalDate.now();
     Optional<BeneficiaryLowIncomeSubsidy> latestActiveEnrollment =
@@ -200,7 +226,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
     return beneficiaryLowIncomeSubsidies.stream()
         .filter(e -> e.getId().getBenefitRangeBeginDate().isAfter(today))
         .findFirst();
-  }
+  }*/
 
   /**
    * Sets up the base coverage resource with common fields.
@@ -318,7 +344,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
     }
 
     if (coveragePart == CoveragePart.PART_C || coveragePart == CoveragePart.PART_D) {
-      var enrollmentOpt = findEnrollment(coveragePart);
+      var enrollmentOpt = getEnrollment();
 
       if (enrollmentOpt.isEmpty()) {
         return List.of(toEmptyResource(baseCoverage));
@@ -456,7 +482,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
    */
   private Coverage mapCoverageC(
       Coverage coverage, CoveragePart coveragePart, ProfileType profileType, String orgId) {
-    var enrollmentOpt = findEnrollment(coveragePart);
+    var enrollmentOpt = getEnrollment();
     if (enrollmentOpt.isEmpty()) {
       return toEmptyResource(coverage);
     }
@@ -496,7 +522,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
    */
   private Coverage mapCoverageD(
       Coverage coverage, CoveragePart coveragePart, ProfileType profileType, String orgId) {
-    var enrollmentOpt = findEnrollment(coveragePart);
+    var enrollmentOpt = getEnrollment();
     if (enrollmentOpt.isEmpty()) {
       return toEmptyResource(coverage);
     }
@@ -507,7 +533,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
 
     var enrollment = enrollmentOpt.get();
     coverage.setId(createCoverageId(coveragePart, enrollment));
-    var rxInfo = findRxEnrollment();
+    var rxInfo = getRxEnrollment();
     rxInfo
         .flatMap(BeneficiaryMAPartDEnrollmentRx::getMemberId)
         .ifPresent(
@@ -521,7 +547,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
             });
     rxInfo.ifPresent(rx -> rx.toFhirClassComponents().forEach(coverage::addClass_));
 
-    var lowIncomeSubsidy = findLowIncomeSubsidy();
+    var lowIncomeSubsidy = getLowIncomeSubsidy();
     lowIncomeSubsidy.ifPresent(lis -> lis.toFhirExtensions().forEach(coverage::addExtension));
 
     coverage.setPeriod(enrollment.toFhirPeriod());

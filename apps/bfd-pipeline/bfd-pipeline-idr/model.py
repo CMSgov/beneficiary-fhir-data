@@ -727,8 +727,7 @@ class IdrContractPbpNumber(IdrBaseModel):
             WITH sgmt as (
                 SELECT
                     cntrct_pbp_sk,
-                    cntrct_pbp_sgmt_num,
-                    COUNT(*)
+                    cntrct_pbp_sgmt_num
                 FROM cms_vdm_view_mdcr_prd.v2_mdcr_cntrct_pbp_sgmt
                 GROUP BY cntrct_pbp_sk, cntrct_pbp_sgmt_num
                 HAVING COUNT(*) = 1
