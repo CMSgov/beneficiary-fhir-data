@@ -100,7 +100,7 @@ public class Claim {
   private String contractPbpNumber;
 
   @Nullable
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(
       name = "clm_sbmtr_cntrct_num",
       insertable = false,

@@ -2,7 +2,11 @@ package gov.cms.bfd.server.ng.coverage.model;
 
 import gov.cms.bfd.server.ng.coverage.converter.StringToDoubleConverter;
 import gov.cms.bfd.server.ng.util.SystemUrls;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.List;

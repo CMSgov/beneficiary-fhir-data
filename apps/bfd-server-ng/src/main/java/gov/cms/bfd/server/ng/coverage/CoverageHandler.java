@@ -31,7 +31,7 @@ public class CoverageHandler {
    *
    * @param coverageCompositeId The parsed and validated composite ID containing the CoveragePart
    *     and beneSk.
-   * @return A list containing the {@link Coverage} resources if found, otherwise empty.
+   * @return An {@link Optional} containing the {@link Coverage} resource if found, otherwise empty.
    * @throws InvalidRequestException if the compositeId format is invalid.
    */
   public Optional<Coverage> readCoverage(final CoverageCompositeId coverageCompositeId) {
