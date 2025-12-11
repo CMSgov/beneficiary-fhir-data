@@ -4,6 +4,7 @@ import gov.cms.bfd.server.ng.util.DateUtil;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.time.LocalDate;
+import java.util.Optional;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.Period;
@@ -16,20 +17,18 @@ public class BeneficiaryEnrollmentPeriod {
   private LocalDate enrollmentBeginDate;
 
   @Column(name = "bene_enrlmt_end_dt")
-  private LocalDate enrollmentEndDate;
+  private Optional<LocalDate> enrollmentEndDate;
 
   Period toFhirPeriod() {
     var period = new Period().setStartElement(DateUtil.toFhirDate(enrollmentBeginDate));
-    final LocalDate defaultMaxDate = LocalDate.of(9999, 12, 31);
-    if (enrollmentEndDate != null && enrollmentEndDate.isBefore(defaultMaxDate)) {
-      period.setEndElement(DateUtil.toFhirDate(enrollmentEndDate));
-    }
+    enrollmentEndDate.ifPresent(endDate -> period.setEndElement(DateUtil.toFhirDate(endDate)));
     return period;
   }
 
   Coverage.CoverageStatus toFhirStatus() {
     LocalDate today = LocalDate.now();
-    if (today.isBefore(enrollmentBeginDate) || today.isAfter(enrollmentEndDate)) {
+
+    if (enrollmentEndDate.isPresent() && today.isAfter(enrollmentEndDate.get())) {
       return Coverage.CoverageStatus.CANCELLED;
     }
 

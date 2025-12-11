@@ -3160,7 +3160,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithFutureCoverageSh
         } ]
       },
       "resourceType" : "Coverage",
-      "status" : "cancelled",
+      "status" : "active",
       "subscriberId" : "5OK1QQ8NJ30",
       "type" : {
         "coding" : [ {
@@ -3254,7 +3254,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithFutureCoverageSh
         } ]
       },
       "resourceType" : "Coverage",
-      "status" : "cancelled",
+      "status" : "active",
       "subscriberId" : "5OK1QQ8NJ30",
       "type" : {
         "coding" : [ {
@@ -3414,7 +3414,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithFutureCoverageSh
         } ]
       },
       "resourceType" : "Coverage",
-      "status" : "cancelled",
+      "status" : "active",
       "subscriberId" : "5OK1QQ8NJ30",
       "type" : {
         "coding" : [ {
@@ -3508,7 +3508,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithFutureCoverageSh
         } ]
       },
       "resourceType" : "Coverage",
-      "status" : "cancelled",
+      "status" : "active",
       "subscriberId" : "5OK1QQ8NJ30",
       "type" : {
         "coding" : [ {
@@ -3668,7 +3668,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithFutureCoverageSh
         } ]
       },
       "resourceType" : "Coverage",
-      "status" : "cancelled",
+      "status" : "active",
       "subscriberId" : "5OK1QQ8NJ30",
       "type" : {
         "coding" : [ {
@@ -3762,7 +3762,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithFutureCoverageSh
         } ]
       },
       "resourceType" : "Coverage",
-      "status" : "cancelled",
+      "status" : "active",
       "subscriberId" : "5OK1QQ8NJ30",
       "type" : {
         "coding" : [ {

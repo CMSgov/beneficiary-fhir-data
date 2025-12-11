@@ -76,11 +76,10 @@ public final class OrganizationFactory {
     insurerOrg.setActive(true);
     contract.getContractName().map(insurerOrg::setName);
 
-    Organization.OrganizationContactComponent contact =
-        new Organization.OrganizationContactComponent();
+    var contact = new Organization.OrganizationContactComponent();
 
     // Set the purpose of the contact.
-    CodeableConcept contactPurpose = new CodeableConcept();
+    var contactPurpose = new CodeableConcept();
     contactPurpose.addCoding(new Coding(SystemUrls.SYS_CONTACT_ENTITY_TYPE, "PATINF", "Patient"));
     contact.setPurpose(contactPurpose);
     var contactInfo = contract.getContractPlanContactInfo();

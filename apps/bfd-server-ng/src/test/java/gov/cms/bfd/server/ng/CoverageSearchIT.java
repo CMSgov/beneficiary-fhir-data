@@ -65,7 +65,7 @@ class CoverageSearchIT extends IntegrationTestBase {
   @ParameterizedTest
   @EnumSource(SearchStyleEnum.class)
   void partCAndDCoverageSearchById(SearchStyleEnum searchStyle) {
-    String validId = String.format("part-c-%s", BENE_ID_PART_C_AND_D_ONLY);
+    var validId = String.format("part-c-%s", BENE_ID_PART_C_AND_D_ONLY);
 
     var coverageBundle =
         searchBundle()

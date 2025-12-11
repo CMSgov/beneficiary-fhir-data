@@ -15,7 +15,6 @@ import gov.cms.bfd.server.ng.testUtil.ThreadSafeAppender;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import io.restassured.RestAssured;
 import java.util.List;
-import java.util.Optional;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.IdType;
@@ -263,8 +262,8 @@ class CoverageReadIT extends IntegrationTestBase {
     var coverage = coverageRead().withId(partCId).execute();
 
     // only part c coverage is read
-    Optional<Coverage.ClassComponent> classComponent = coverage.getClass_().stream().findFirst();
-    String coveragePart = classComponent.map(Coverage.ClassComponent::getValue).orElse("");
+    var classComponent = coverage.getClass_().stream().findFirst();
+    var coveragePart = classComponent.map(Coverage.ClassComponent::getValue).orElse("");
     assertTrue("Part C".equals(coveragePart));
 
     expectFhir().toMatchSnapshot(coverage);
