@@ -11,11 +11,7 @@ import gov.cms.bfd.server.ng.loadprogress.LoadProgressRepository;
 import gov.cms.bfd.server.ng.model.ProfileType;
 import gov.cms.bfd.server.ng.util.FhirUtil;
 import gov.cms.bfd.server.ng.util.SystemUrls;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
@@ -36,9 +32,6 @@ public class PatientHandler {
   private final LoadProgressRepository loadProgressRepository;
 
   private final CoverageRepository coverageRepository;
-
-  private static final List<String> COVERAGE_SORT_ORDER =
-      List.of("Part A", "Part B", "Part C", "Part D", "Dual Medicare/Medicaid");
 
   /**
    * Returns a {@link Patient} by their {@link IdType}.
@@ -109,7 +102,9 @@ public class PatientHandler {
             .map(
                 c ->
                     beneficiary.toFhirCoverageIfPresentC4DIC(
-                        new CoverageCompositeId(c, beneficiary.getBeneSk()), cmsOrg.getId()))
+                        new CoverageCompositeId(c, beneficiary.getBeneSk()),
+                        ProfileType.C4DIC,
+                        cmsOrg.getId()))
             .flatMap(List::stream)
             .collect(
                 Collectors.toMap(
@@ -118,7 +113,7 @@ public class PatientHandler {
                     (existing, duplicate) -> existing))
             .values()
             .stream()
-            .sorted(Comparator.comparingInt(this::getCoverageSortOrder));
+            .sorted(Comparator.comparing(this::getCoverageType));
 
     var resources = Stream.concat(Stream.of(patient, cmsOrg), coverages);
     return FhirUtil.bundleWithFullUrls(resources, loadProgressRepository::lastUpdated);
@@ -155,12 +150,11 @@ public class PatientHandler {
                         .equals(newLink.getOther().getReference()));
   }
 
-  private int getCoverageSortOrder(Coverage coverage) {
+  private String getCoverageType(Coverage coverage) {
     return coverage.getClass_().stream()
         .map(Coverage.ClassComponent::getValue)
-        .filter(COVERAGE_SORT_ORDER::contains)
-        .map(COVERAGE_SORT_ORDER::indexOf)
+        .filter(Objects::nonNull)
         .findFirst()
-        .orElse(COVERAGE_SORT_ORDER.size());
+        .orElse("");
   }
 }

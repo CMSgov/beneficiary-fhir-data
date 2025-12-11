@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import gov.cms.bfd.server.ng.util.SystemUrls;
-import java.util.Optional;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.IdType;
@@ -131,9 +130,8 @@ class PatientCoverageC4DICSearchIT extends IntegrationTestBase {
 
       boolean skipUuidCheck = false;
       if (resource instanceof Coverage coverage) {
-        Optional<Coverage.ClassComponent> classComponent =
-            coverage.getClass_().stream().findFirst();
-        String coveragePart = classComponent.map(Coverage.ClassComponent::getValue).orElse("");
+        var classComponent = coverage.getClass_().stream().findFirst();
+        var coveragePart = classComponent.map(Coverage.ClassComponent::getValue).orElse("");
         skipUuidCheck = "Part C".equals(coveragePart) || "Part D".equals(coveragePart);
       }
       if (!skipUuidCheck) {
@@ -166,7 +164,7 @@ class PatientCoverageC4DICSearchIT extends IntegrationTestBase {
     if (!id.startsWith("urn:uuid:")) {
       return false;
     }
-    String uuid = id.substring("urn:uuid:".length());
+    var uuid = id.substring("urn:uuid:".length());
     return uuid.matches("[A-Za-z0-9]+");
   }
 

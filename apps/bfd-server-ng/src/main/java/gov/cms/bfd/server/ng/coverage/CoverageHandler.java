@@ -5,6 +5,7 @@ import gov.cms.bfd.server.ng.input.CoverageCompositeId;
 import gov.cms.bfd.server.ng.input.CoveragePart;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.loadprogress.LoadProgressRepository;
+import gov.cms.bfd.server.ng.model.ProfileType;
 import gov.cms.bfd.server.ng.util.FhirUtil;
 import java.util.Arrays;
 import java.util.List;
@@ -57,7 +58,8 @@ public class CoverageHandler {
       return FhirUtil.defaultBundle(loadProgressRepository::lastUpdated);
     }
     var beneficiary = beneficiaryOpt.get();
-    var coverages = beneficiary.toFhirCoverageIfPresent(parsedCoverageId).stream();
+    var coverages =
+        beneficiary.toFhirCoverageIfPresent(parsedCoverageId, ProfileType.C4BB).stream();
 
     return FhirUtil.bundleOrDefault(coverages.map(r -> r), loadProgressRepository::lastUpdated);
   }
@@ -86,7 +88,7 @@ public class CoverageHandler {
             .map(
                 c ->
                     beneficiary.toFhirCoverageIfPresent(
-                        new CoverageCompositeId(c, beneficiary.getBeneSk())))
+                        new CoverageCompositeId(c, beneficiary.getBeneSk()), ProfileType.C4BB))
             .flatMap(List::stream)
             .collect(
                 Collectors.toMap(

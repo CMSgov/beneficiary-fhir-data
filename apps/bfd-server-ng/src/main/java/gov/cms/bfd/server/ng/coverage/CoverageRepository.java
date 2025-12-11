@@ -1,6 +1,6 @@
 package gov.cms.bfd.server.ng.coverage;
 
-import gov.cms.bfd.server.ng.coverage.model.*;
+import gov.cms.bfd.server.ng.coverage.model.BeneficiaryCoverage;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.util.LogUtil;
 import jakarta.persistence.EntityManager;
@@ -32,43 +32,43 @@ public class CoverageRepository {
                 String.format(
                     """
                       WITH latestEnrollments AS (
-                                      SELECT e.id AS id,
-                                          row_number() over (
-                                              ORDER BY
-                                                  CASE
-                                                      WHEN e.beneficiaryEnrollmentPeriod.enrollmentBeginDate <= :today THEN 1
-                                                      ELSE 2
-                                                  END ASC,
-                                                  e.beneficiaryEnrollmentPeriod.enrollmentBeginDate desc
-                                          ) AS rn
-                                      FROM BeneficiaryMAPartDEnrollment e
-                                      WHERE e.id.beneSk = :beneSk
+                          SELECT e.id AS id,
+                              row_number() over (
+                                  ORDER BY
+                                      CASE
+                                          WHEN e.beneficiaryEnrollmentPeriod.enrollmentBeginDate <= :today THEN 1
+                                          ELSE 2
+                                      END ASC,
+                                      e.beneficiaryEnrollmentPeriod.enrollmentBeginDate desc
+                              ) AS row_num
+                          FROM BeneficiaryMAPartDEnrollment e
+                          WHERE e.id.beneSk = :beneSk
                       ),
                       latestEnrollmentsRx AS (
-                                      SELECT rx.id AS id,
-                                          row_number() over (
-                                              ORDER BY
-                                                  CASE
-                                                      WHEN rx.enrollmentBeginDate <= :today THEN 1
-                                                      ELSE 2
-                                                  END ASC,
-                                                  rx.enrollmentBeginDate desc
-                                          ) AS rn
-                                      FROM BeneficiaryMAPartDEnrollmentRx rx
-                                      WHERE rx.id.beneSk = :beneSk
+                          SELECT rx.id AS id,
+                              row_number() over (
+                                  ORDER BY
+                                      CASE
+                                          WHEN rx.enrollmentBeginDate <= :today THEN 1
+                                          ELSE 2
+                                      END ASC,
+                                      rx.enrollmentBeginDate desc
+                              ) AS row_num
+                          FROM BeneficiaryMAPartDEnrollmentRx rx
+                          WHERE rx.id.beneSk = :beneSk
                       ),
                       latestLis AS (
-                                      SELECT lis.id AS id,
-                                          row_number() over (
-                                              ORDER BY
-                                                  CASE
-                                                      WHEN lis.id.benefitRangeBeginDate <= :today THEN 1
-                                                      ELSE 2
-                                                  END ASC,
-                                                  lis.id.benefitRangeBeginDate desc
-                                          ) AS rn
-                                      FROM BeneficiaryLowIncomeSubsidy lis
-                                      WHERE lis.id.beneSk = :beneSk
+                          SELECT lis.id AS id,
+                              row_number() over (
+                                  ORDER BY
+                                      CASE
+                                          WHEN lis.id.benefitRangeBeginDate <= :today THEN 1
+                                          ELSE 2
+                                      END ASC,
+                                      lis.id.benefitRangeBeginDate desc
+                              ) AS row_num
+                          FROM BeneficiaryLowIncomeSubsidy lis
+                          WHERE lis.id.beneSk = :beneSk
                       )
                       SELECT b
                       FROM BeneficiaryCoverage b
@@ -88,20 +88,20 @@ public class CoverageRepository {
                         AND b.beneSk = b.xrefSk
                         AND (ben IS NULL OR EXISTS (
                             select 1 from latestEnrollments e
-                            where e.rn = 1
+                            where e.row_num = 1
                                 and e.id.beneSk = ben.id.beneSk
                                 and e.id.enrollmentBeginDate = ben.id.enrollmentBeginDate
                                 and e.id.enrollmentProgramTypeCode = ben.id.enrollmentProgramTypeCode
                         ))
                         AND (berx IS NULL OR EXISTS (
                             select 1 from latestEnrollmentsRx e
-                            where e.rn = 1
+                            where e.row_num = 1
                                 and e.id.beneSk = berx.id.beneSk
                                 and e.id.enrollmentPdpRxInfoBeginDate = berx.id.enrollmentPdpRxInfoBeginDate
                         ))
                         AND (blis IS NULL OR EXISTS (
                             select 1 from latestLis e
-                            where e.rn = 1
+                            where e.row_num = 1
                                 and e.id.beneSk = blis.id.beneSk
                                 and e.id.benefitRangeBeginDate = blis.id.benefitRangeBeginDate
                         ))
