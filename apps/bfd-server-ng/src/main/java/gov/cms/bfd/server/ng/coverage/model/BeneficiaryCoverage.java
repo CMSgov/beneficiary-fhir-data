@@ -139,96 +139,6 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
   }
 
   /**
-   * Finds the enrollment record for a given coverage part.
-   *
-   * @param coveragePart The coverage part to find.
-   * @return Optional containing the matching enrollment, or empty if not found.
-   */
-  /*private Optional<BeneficiaryMAPartDEnrollment> findEnrollment(CoveragePart coveragePart) {
-    final String standardCode = coveragePart.getStandardCode();
-    final LocalDate today = LocalDate.now();
-    var matchedCoverage =
-        beneficiaryMAPartDEnrollments.stream()
-            .filter(
-                e -> {
-                  var programTypeCode = e.getId().getEnrollmentProgramTypeCode();
-                  return switch (standardCode) {
-                    case "C" ->
-                        Objects.equals(programTypeCode, "1")
-                            || Objects.equals(programTypeCode, "3");
-                    case "D" ->
-                        Objects.equals(programTypeCode, "2")
-                            || Objects.equals(programTypeCode, "3");
-                    default -> false;
-                  };
-                })
-            .toList();
-
-    Optional<BeneficiaryMAPartDEnrollment> latestActiveEnrollment =
-        matchedCoverage.stream()
-            .filter(
-                e -> !e.getBeneficiaryEnrollmentPeriod().getEnrollmentBeginDate().isAfter(today))
-            .findFirst();
-
-    if (latestActiveEnrollment.isPresent()) {
-      return latestActiveEnrollment;
-    }
-
-    // only future coverage exists
-    return matchedCoverage.stream()
-        .filter(e -> e.getBeneficiaryEnrollmentPeriod().getEnrollmentBeginDate().isAfter(today))
-        .findFirst();
-  }
-
-  */
-  /**
-   * Finds the recent or future rx enrollment record.
-   *
-   * @return Optional containing the matching enrollment, or empty if not found.
-   */
-  /*
-  private Optional<BeneficiaryMAPartDEnrollmentRx> findRxEnrollment() {
-    final LocalDate today = LocalDate.now();
-    Optional<BeneficiaryMAPartDEnrollmentRx> latestActiveEnrollment =
-        beneficiaryMAPartDEnrollmentsRx.stream()
-            .filter(e -> !e.getId().getEnrollmentPdpRxInfoBeginDate().isAfter(today))
-            .findFirst();
-
-    if (latestActiveEnrollment.isPresent()) {
-      return latestActiveEnrollment;
-    }
-
-    // only future coverage exists
-    return beneficiaryMAPartDEnrollmentsRx.stream()
-        .filter(e -> e.getId().getEnrollmentPdpRxInfoBeginDate().isAfter(today))
-        .findFirst();
-  }
-
-  */
-  /**
-   * Finds the active beneficiary low income subsidy record.
-   *
-   * @return Optional containing the matching LIS, or empty if not found.
-   */
-  /*
-  private Optional<BeneficiaryLowIncomeSubsidy> findLowIncomeSubsidy() {
-    final LocalDate today = LocalDate.now();
-    Optional<BeneficiaryLowIncomeSubsidy> latestActiveEnrollment =
-        beneficiaryLowIncomeSubsidies.stream()
-            .filter(e -> !e.getId().getBenefitRangeBeginDate().isAfter(today))
-            .findFirst();
-
-    if (latestActiveEnrollment.isPresent()) {
-      return latestActiveEnrollment;
-    }
-
-    // only future coverage exists
-    return beneficiaryLowIncomeSubsidies.stream()
-        .filter(e -> e.getId().getBenefitRangeBeginDate().isAfter(today))
-        .findFirst();
-  }*/
-
-  /**
    * Sets up the base coverage resource with common fields.
    *
    * @param coverageCompositeId The full ID for the Coverage resource.
@@ -326,12 +236,9 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
 
     if (profileType.equals(ProfileType.C4BB)) {
       baseCoverage.setId(coverageCompositeId.fullId());
-
       baseCoverage.setMeta(meta.toFhirCoverage(ProfileType.C4BB, getMostRecentUpdated()));
-
       baseCoverage.setBeneficiary(new Reference(PATIENT_REF + beneSk));
       baseCoverage.setRelationship(RelationshipFactory.createSelfSubscriberRelationship());
-
       baseCoverage.setSubscriberId(identifier.getMbi());
     }
 
