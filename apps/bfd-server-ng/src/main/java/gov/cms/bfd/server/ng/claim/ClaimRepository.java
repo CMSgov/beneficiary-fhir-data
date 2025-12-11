@@ -99,6 +99,9 @@ public class ClaimRepository {
       List<ClaimSourceId> sourceIds,
       List<ClaimTypeCode> claimTypeCodes) {
     // NOTE: JPQL doesn't support joining on a CTE, so we have to use WHERE IN
+
+    // We need to get a distinct list of bene_sk values here because there will be duplicates
+    // since this is a history table.
     var jpql =
         String.format(
             """
