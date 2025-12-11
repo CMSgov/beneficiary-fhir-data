@@ -105,7 +105,7 @@ public class ClaimRepository {
     var jpql =
         String.format(
             """
-            WITH bene AS (
+            WITH benes AS (
                 SELECT DISTINCT b.beneSk beneSk
                 FROM Beneficiary b
                 WHERE b.xrefSk = :beneSk
@@ -113,7 +113,7 @@ public class ClaimRepository {
             claims AS (
                 SELECT c.claimUniqueId claimUniqueId
                 FROM Claim c
-                WHERE c.beneficiary.beneSk IN (SELECT beneSk FROM bene)
+                WHERE c.beneficiary.beneSk IN (SELECT beneSk FROM benes)
                 ORDER BY c.claimUniqueId
                 OFFSET :offset ROWS
                 FETCH NEXT :limit ROWS ONLY
