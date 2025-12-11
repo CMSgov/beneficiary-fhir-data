@@ -327,7 +327,7 @@ public enum ClaimTypeCode {
   }
 
   Optional<CodeableConcept> toFhirSubtype() {
-    return getClaimSubtype().map(subtype -> new CodeableConcept(subtype.toFhir()));
+    return ClaimSubtype.getGroupedClaimSubtype(code).map(ClaimSubtype::toFhir);
   }
 
   Optional<Organization> toFhirInsurerPartAB() {
@@ -407,49 +407,15 @@ public enum ClaimTypeCode {
   }
 
   Optional<String> toFhirStructureDefinition() {
-    return subtypeFor(code)
-        .map(
-            subtype ->
-                switch (subtype) {
-                  case INPATIENT, HHA, HOSPICE, SNF ->
-                      SystemUrls.CARIN_STRUCTURE_DEFINITION_INPATIENT_INSTITUTIONAL;
-                  case OUTPATIENT -> SystemUrls.CARIN_STRUCTURE_DEFINITION_OUTPATIENT_INSTITUTIONAL;
-                  case CARRIER, DME -> SystemUrls.CARIN_STRUCTURE_DEFINITION_PROFESSIONAL;
-                  case PDE -> SystemUrls.CARIN_STRUCTURE_DEFINITION_PHARMACY;
-                });
-  }
-
-  private Optional<ClaimSubtype> getClaimSubtype() {
-    return subtypeFor(code)
-        .map(
-            subtype ->
-                switch (subtype) {
-                  case INPATIENT, HHA, HOSPICE, SNF -> ClaimSubtype.INPATIENT;
-                  case OUTPATIENT -> ClaimSubtype.OUTPATIENT;
-                  case CARRIER, DME, PDE -> null;
-                });
+    return ClaimSubtype.subtypeFor(code).map(ClaimSubtype::getSystemUrl);
   }
 
   private Optional<ClaimType> getClaimType() {
-    return subtypeFor(code)
-        .map(
-            subtype ->
-                switch (subtype) {
-                  case INPATIENT, HHA, HOSPICE, SNF, OUTPATIENT -> ClaimType.INSTITUTIONAL;
-                  case CARRIER, DME -> ClaimType.PROFESSIONAL;
-                  case PDE -> ClaimType.PHARMACY;
-                });
+    return ClaimSubtype.subtypeFor(code).map(ClaimSubtype::getClaimType);
   }
 
-  private Optional<ClaimSubtype> subtypeFor(int code) {
-    var claimTypeCode = ClaimTypeCode.fromCode(code);
-    return CLAIM_TYPE_CODE_MAP.entrySet().stream()
-        .filter(e -> e.getValue().contains(claimTypeCode))
-        .map(Map.Entry::getKey)
-        .findFirst();
-  }
-
-  private static final Map<ClaimSubtype, List<ClaimTypeCode>> CLAIM_TYPE_CODE_MAP =
+  /** Claim Type codes grouped by claim sub types. * */
+  public static final Map<ClaimSubtype, List<ClaimTypeCode>> CLAIM_TYPE_CODE_MAP =
       Map.of(
           ClaimSubtype.CARRIER,
           mapCarrierToClaimTypeCodes(),
@@ -479,10 +445,13 @@ public enum ClaimTypeCode {
     if ("*".equals(normalizedType)) {
       return Collections.emptyList();
     }
-    var claimType = ClaimSubtype.fromCode(normalizedType);
+    var claimType =
+        ClaimSubtype.fromCode(normalizedType)
+            .orElseThrow(
+                () -> new IllegalStateException("Not a valid claim type code " + normalizedType));
     var codesForThisType = CLAIM_TYPE_CODE_MAP.getOrDefault(claimType, List.of());
     if (codesForThisType.isEmpty()) {
-      throw new IllegalStateException("Not a valid claim type code");
+      throw new IllegalStateException("Not a valid claim type code " + normalizedType);
     }
     return codesForThisType;
   }
