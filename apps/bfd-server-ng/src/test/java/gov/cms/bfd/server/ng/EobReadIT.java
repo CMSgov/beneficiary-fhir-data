@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
@@ -34,41 +35,39 @@ class EobReadIT extends IntegrationTestBase {
     return getFhirClient().read().resource(ExplanationOfBenefit.class);
   }
 
-  @Test
-  void eobEnforceInvariants() {
-    var claimIds =
-        new String[] {
-          CLAIM_ID_ADJUDICATED,
-          CLAIM_ID_ADJUDICATED_ICD_9,
-          CLAIM_ID_PHASE_1,
-          CLAIM_ID_PHASE_2,
-          CLAIM_ID_PROFESSIONAL,
-          CLAIM_ID_RX,
-          CLAIM_ID_RX_ORGANIZATION,
-          CLAIM_ID_PROFESSIONAL_MCS
-        };
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        CLAIM_ID_ADJUDICATED,
+        CLAIM_ID_ADJUDICATED_ICD_9,
+        CLAIM_ID_PHASE_1,
+        CLAIM_ID_PHASE_2,
+        CLAIM_ID_PROFESSIONAL,
+        CLAIM_ID_RX,
+        CLAIM_ID_RX_ORGANIZATION,
+        CLAIM_ID_PROFESSIONAL_MCS
+      })
+  void eobEnforceInvariants(String claimId) {
     // The following represent the minimum conditions for an EOB to be valid
-    for (var claimId : claimIds) {
-      var eob = eobRead().withId(claimId).execute();
-      assertFalse(eob.isEmpty(), "EOB should not be empty.");
-      assertTrue(eob.hasInsurance(), "All EOBs should have insurance");
-      assertTrue(eob.hasMeta(), "EOB should have meta.");
-      // #TODO: REMOVE THIS EXCEPTION IN BFD-4439.
-      if (!claimId.contentEquals(CLAIM_ID_PROFESSIONAL_MCS)) {
-        assertTrue(eob.hasOutcome(), "EOB should have outcome");
-      }
-      assertTrue(eob.hasPatient(), "EOB should have patient");
-      assertTrue(eob.hasType(), "EOB should have type");
-      assertTrue(eob.hasStatus(), "EOB should have status");
-      assertTrue(eob.hasCreated(), "EOB should have created");
-      assertTrue(eob.hasUse(), "EOB should have use");
-      if (eob.getMeta().hasProfile()
-          && eob.getMeta().getProfile().stream().anyMatch(p -> p.getValue().contains("Pharmacy"))) {
-        // TODO: REMOVE IN BFD-4419 -> Pharmacy EOBs should pass after 4419, removing
-        // the need for this exception.
-      } else {
-        validateCodings(eob);
-      }
+    var eob = eobRead().withId(claimId).execute();
+    assertFalse(eob.isEmpty(), "EOB should not be empty.");
+    assertTrue(eob.hasInsurance(), "All EOBs should have insurance");
+    assertTrue(eob.hasMeta(), "EOB should have meta.");
+    // #TODO: REMOVE THIS EXCEPTION IN BFD-4439.
+    if (!claimId.contentEquals(CLAIM_ID_PROFESSIONAL_MCS)) {
+      assertTrue(eob.hasOutcome(), "EOB should have outcome");
+    }
+    assertTrue(eob.hasPatient(), "EOB should have patient");
+    assertTrue(eob.hasType(), "EOB should have type");
+    assertTrue(eob.hasStatus(), "EOB should have status");
+    assertTrue(eob.hasCreated(), "EOB should have created");
+    assertTrue(eob.hasUse(), "EOB should have use");
+    if (eob.getMeta().hasProfile()
+        && eob.getMeta().getProfile().stream().anyMatch(p -> p.getValue().contains("Pharmacy"))) {
+      // TODO: REMOVE IN BFD-4419 -> Pharmacy EOBs should pass after 4419, removing
+      // the need for this exception.
+    } else {
+      validateCodings(eob);
     }
   }
 

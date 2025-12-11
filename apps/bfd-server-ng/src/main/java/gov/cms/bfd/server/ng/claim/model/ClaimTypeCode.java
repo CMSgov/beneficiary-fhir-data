@@ -384,16 +384,7 @@ public enum ClaimTypeCode {
                 () ->
                     claimRecordType
                         .getClaimNearLineRecordTypeCode()
-                        .map(
-                            c -> {
-                              return switch (c) {
-                                case M -> ClaimRecordTypeCode.M;
-                                case O -> ClaimRecordTypeCode.O;
-                                case U -> ClaimRecordTypeCode.U;
-                                case V -> ClaimRecordTypeCode.V;
-                                case W -> ClaimRecordTypeCode.W;
-                              };
-                            }));
+                        .map(ClaimNearLineRecordTypeCode::toClaimRecordTypeCode));
 
     if (recordTypeCode.isPresent()) {
       partDisplay =

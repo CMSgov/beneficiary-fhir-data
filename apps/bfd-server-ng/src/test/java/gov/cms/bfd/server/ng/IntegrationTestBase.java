@@ -120,9 +120,8 @@ public class IntegrationTestBase {
   }
 
   protected void validateCodings(IBaseResource resource) {
-    FhirContext ctx = FhirContext.forR4Cached();
-    List<Coding> codings =
-        ctx.newTerser().getAllPopulatedChildElementsOfType(resource, Coding.class);
+    var ctx = FhirContext.forR4Cached();
+    var codings = ctx.newTerser().getAllPopulatedChildElementsOfType(resource, Coding.class);
     for (Coding coding : codings) {
       assertTrue(coding.hasSystem());
       assertTrue(coding.hasCode());

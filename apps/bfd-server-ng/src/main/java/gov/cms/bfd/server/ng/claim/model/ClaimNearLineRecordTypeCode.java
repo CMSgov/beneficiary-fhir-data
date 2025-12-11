@@ -63,4 +63,13 @@ public enum ClaimNearLineRecordTypeCode {
                     .setDisplay(display)
                     .setCode(code)));
   }
+
+  /**
+   * helper function to convert this to a claim record type code.
+   *
+   * @return claim record type code
+   */
+  public ClaimRecordTypeCode toClaimRecordTypeCode() {
+    return ClaimRecordTypeCode.valueOf(this.name());
+  }
 }

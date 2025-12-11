@@ -359,6 +359,8 @@ public class Claim {
 
     Stream.of(
             initialSupportingInfo,
+            // In real data, this should only ever have one value, but we're explicitly
+            // limiting it to be defensive.
             recordTypeCodes.limit(1).toList(),
             claimDateSignature.getSupportingInfo().toFhir(supportingInfoFactory),
             institutional
