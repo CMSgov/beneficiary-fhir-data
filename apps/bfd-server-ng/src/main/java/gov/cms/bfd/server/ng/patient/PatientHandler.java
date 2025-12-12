@@ -11,12 +11,13 @@ import gov.cms.bfd.server.ng.loadprogress.LoadProgressRepository;
 import gov.cms.bfd.server.ng.model.ProfileType;
 import gov.cms.bfd.server.ng.util.FhirUtil;
 import gov.cms.bfd.server.ng.util.SystemUrls;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.springframework.stereotype.Component;
@@ -95,25 +96,13 @@ public class PatientHandler {
         OrganizationFactory.createCmsOrganization(
             UUID.randomUUID().toString(), SystemUrls.PROFILE_C4DIC_ORGANIZATION);
 
-    // for part C/D, if the program type code in the enrollment is 3, we'd return both resources.
-    // This check happens in both part C/D branches so that's why we need to dedupe here
     var coverages =
         Arrays.stream(CoveragePart.values())
             .map(
                 c ->
                     beneficiary.toFhirCoverageIfPresentC4DIC(
-                        new CoverageCompositeId(c, beneficiary.getBeneSk()),
-                        ProfileType.C4DIC,
-                        cmsOrg.getId()))
-            .flatMap(List::stream)
-            .collect(
-                Collectors.toMap(
-                    cov -> cov.getIdElement().getIdPart(),
-                    cov -> cov,
-                    (existing, duplicate) -> existing))
-            .values()
-            .stream()
-            .sorted(Comparator.comparing(this::getCoverageType));
+                        new CoverageCompositeId(c, beneficiary.getBeneSk()), cmsOrg.getId()))
+            .flatMap(Optional::stream);
 
     var resources = Stream.concat(Stream.of(patient, cmsOrg), coverages);
     return FhirUtil.bundleWithFullUrls(resources, loadProgressRepository::lastUpdated);
@@ -148,13 +137,5 @@ public class PatientHandler {
                         .getOther()
                         .getReference()
                         .equals(newLink.getOther().getReference()));
-  }
-
-  private String getCoverageType(Coverage coverage) {
-    return coverage.getClass_().stream()
-        .map(Coverage.ClassComponent::getValue)
-        .filter(Objects::nonNull)
-        .findFirst()
-        .orElse("");
   }
 }

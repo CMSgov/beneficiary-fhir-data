@@ -93,15 +93,6 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
   /** Organization reference. */
   public static final String ORGANIZATION_REF = "Organization/";
 
-  /** Beneficiary enrollment program type code 1 denotes Part C. */
-  public static final String PART_C_PROGRAM_TYPE_CODE = "1";
-
-  /** Beneficiary enrollment program type code 2 denotes Part D. */
-  public static final String PART_D_PROGRAM_TYPE_CODE = "2";
-
-  /** Beneficiary enrollment program type code 3 denotes Parts C and D. */
-  public static final String PART_C_AND_D_PROGRAM_TYPE_CODE = "3";
-
   private Optional<BeneficiaryEntitlementReason> getEntitlementReason() {
     return Optional.ofNullable(beneficiaryEntitlementReason);
   }
@@ -137,6 +128,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
         .findFirst();
   }
 
+  // when we support multiple coverages these two will have to be changed to return multiple rows.
   private Optional<BeneficiaryMAPartDEnrollmentRx> getRxEnrollment() {
     return beneficiaryMAPartDEnrollmentsRx.stream().findFirst();
   }
@@ -173,6 +165,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
 
     var coveragePart = coverageCompositeId.coveragePart();
     coverage.setType(coveragePart.toFhirTypeCode());
+    coverage.addClass_(coveragePart.toFhirClassComponent());
 
     if (profileType == ProfileType.C4DIC) {
       coverage.setMeta(meta.toFhirCoverage(profileType, getMostRecentUpdated()));
@@ -192,15 +185,11 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
    * Creates a FHIR Coverage resource or None if the beneficiary does not have the matching coverage
    * type.
    *
-   * @param profileType The profile type (C4BB/C4DIC).
    * @param coverageCompositeId The full ID for the Coverage resource.
    * @return A FHIR Coverage object.
    */
-  public List<Coverage> toFhirCoverageIfPresent(
-      CoverageCompositeId coverageCompositeId, ProfileType profileType) {
-    return toFhirCoverages(coverageCompositeId, profileType, "").stream()
-        .filter(c -> !c.getIdentifier().isEmpty())
-        .toList();
+  public Optional<Coverage> toFhirCoverageIfPresent(CoverageCompositeId coverageCompositeId) {
+    return Optional.of(toFhir(coverageCompositeId)).filter(c -> !c.getIdentifier().isEmpty());
   }
 
   /**
@@ -208,15 +197,13 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
    * type.
    *
    * @param coverageCompositeId The full ID for the Coverage resource.
-   * @param profileType The profile type C4DIC.
    * @param orgId The organization reference ID (only used if isC4DIC is true).
    * @return A FHIR Coverage object.
    */
-  public List<Coverage> toFhirCoverageIfPresentC4DIC(
-      CoverageCompositeId coverageCompositeId, ProfileType profileType, String orgId) {
-    return toFhirCoverages(coverageCompositeId, profileType, orgId).stream()
-        .filter(c -> !c.getIdentifier().isEmpty())
-        .toList();
+  public Optional<Coverage> toFhirCoverageIfPresentC4DIC(
+      CoverageCompositeId coverageCompositeId, String orgId) {
+    return Optional.of(toFhirC4DIC(coverageCompositeId, orgId))
+        .filter(c -> !c.getIdentifier().isEmpty());
   }
 
   /**
@@ -241,62 +228,27 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
       case PART_A, PART_B -> mapCoverageAB(coverage, coveragePart, ProfileType.C4BB, "");
       case PART_C -> mapCoverageC(coverage, coveragePart, ProfileType.C4BB, "");
       case PART_D -> mapCoverageD(coverage, coveragePart, ProfileType.C4BB, "");
-      case DUAL -> mapCoverageDual(coverage, coveragePart, ProfileType.C4BB, "");
+      case DUAL -> mapCoverageDual(coverage, ProfileType.C4BB, "");
     };
   }
 
   /**
-   * Creates multiple FHIR Coverage resource.
+   * Creates a FHIR Coverage resource.
    *
    * @param coverageCompositeId The full ID for the Coverage resource.
-   * @param profileType The profile type (C4BB/C4DIC).
    * @param orgId The organization reference ID.
-   * @return A list of FHIR Coverage objects.
+   * @return A FHIR Coverage object.
    */
-  public List<Coverage> toFhirCoverages(
-      CoverageCompositeId coverageCompositeId, ProfileType profileType, String orgId) {
-    var baseCoverage = setupBaseCoverage(coverageCompositeId, profileType);
+  public Coverage toFhirC4DIC(CoverageCompositeId coverageCompositeId, String orgId) {
+    var coverage = setupBaseCoverage(coverageCompositeId, ProfileType.C4DIC);
     var coveragePart = coverageCompositeId.coveragePart();
 
-    if (profileType == ProfileType.C4BB) {
-      baseCoverage.setId(coverageCompositeId.fullId());
-      baseCoverage.setMeta(meta.toFhirCoverage(ProfileType.C4BB, getMostRecentUpdated()));
-      baseCoverage.setBeneficiary(new Reference(PATIENT_REF + beneSk));
-      baseCoverage.setRelationship(RelationshipFactory.createSelfSubscriberRelationship());
-      baseCoverage.setSubscriberId(identifier.getMbi());
-    }
-
-    switch (coveragePart) {
-      case PART_A, PART_B:
-        return List.of(mapCoverageAB(baseCoverage, coveragePart, profileType, orgId));
-      case DUAL:
-        return List.of(mapCoverageDual(baseCoverage, coveragePart, profileType, orgId));
-      case PART_C, PART_D:
-        var enrollmentOpt = getEnrollment(coveragePart);
-
-        if (enrollmentOpt.isEmpty()) {
-          return List.of(toEmptyResource(baseCoverage));
-        }
-
-        var programTypeCode = enrollmentOpt.get().getId().getEnrollmentProgramTypeCode();
-
-        return switch (programTypeCode) {
-          case PART_C_PROGRAM_TYPE_CODE ->
-              List.of(mapCoverageC(baseCoverage, coveragePart, profileType, orgId));
-          case PART_D_PROGRAM_TYPE_CODE ->
-              List.of(mapCoverageD(baseCoverage, coveragePart, profileType, orgId));
-          case PART_C_AND_D_PROGRAM_TYPE_CODE -> {
-            Coverage coverageC =
-                mapCoverageC(baseCoverage.copy(), CoveragePart.PART_C, profileType, orgId);
-            Coverage coverageD =
-                mapCoverageD(baseCoverage.copy(), CoveragePart.PART_D, profileType, orgId);
-            yield List.of(coverageC, coverageD);
-          }
-          default -> List.of(toEmptyResource(baseCoverage));
-        };
-    }
-
-    return List.of(toEmptyResource(baseCoverage));
+    return switch (coveragePart) {
+      case PART_A, PART_B -> mapCoverageAB(coverage, coveragePart, ProfileType.C4DIC, orgId);
+      case PART_C -> mapCoverageC(coverage, coveragePart, ProfileType.C4DIC, orgId);
+      case PART_D -> mapCoverageD(coverage, coveragePart, ProfileType.C4DIC, orgId);
+      case DUAL -> mapCoverageDual(coverage, ProfileType.C4DIC, orgId);
+    };
   }
 
   private Coverage mapCoverageAB(
@@ -307,7 +259,6 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
     }
 
     identifier.toFhir(orgId).ifPresent(coverage::addIdentifier);
-    coverage.addClass_(coveragePart.toFhirClassComponent());
 
     var entitlement = entitlementOpt.get();
     coverage.setPeriod(entitlement.toFhirPeriod());
@@ -351,8 +302,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
     return emptyCoverage;
   }
 
-  private Coverage mapCoverageDual(
-      Coverage coverage, CoveragePart coveragePart, ProfileType profileType, String orgId) {
+  private Coverage mapCoverageDual(Coverage coverage, ProfileType profileType, String orgId) {
     var dualEligibilityOpt = getDualEligibility();
     if (dualEligibilityOpt.isEmpty()) {
       return toEmptyResource(coverage);
@@ -364,7 +314,6 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
     identifier
         .toFhir(profileType == ProfileType.C4DIC ? orgId : "")
         .ifPresent(coverage::addIdentifier);
-    coverage.addClass_(coveragePart.toFhirClassComponent());
 
     if (profileType == ProfileType.C4DIC) {
       coverage.addPayor(new Reference().setReference(ORGANIZATION_REF + orgId));
@@ -389,7 +338,6 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
     }
 
     identifier.toFhir(orgId).ifPresent(coverage::addIdentifier);
-    coverage.addClass_(coveragePart.toFhirClassComponent());
 
     var enrollment = enrollmentOpt.get();
     coverage.setId(createCoverageId(coveragePart, enrollment));
@@ -420,7 +368,6 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
     }
 
     identifier.toFhir(orgId).ifPresent(coverage::addIdentifier);
-    coverage.addClass_(coveragePart.toFhirClassComponent());
     coverage.setType(coveragePart.toFhirTypeCode());
 
     var enrollment = enrollmentOpt.get();
@@ -488,10 +435,10 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
 
   private String createCoverageId(
       CoveragePart coveragePart, BeneficiaryMAPartDEnrollment enrollment) {
+    var coverageType = coveragePart.getStandardSystem();
     var beneSk = enrollment.getId().getBeneSk();
-    var coverageType = coveragePart.getStandardCode();
     var contractNum = enrollment.getContractNumber();
     var contractPbpNum = enrollment.getDrugPlanNumber();
-    return beneSk + coverageType + contractNum + contractPbpNum;
+    return String.format("%s-%s-%s-%s", coverageType, beneSk, contractNum, contractPbpNum);
   }
 }

@@ -137,7 +137,7 @@ class PatientCoverageC4DICSearchIT extends IntegrationTestBase {
       if (!skipUuidCheck) {
         assertTrue(isValidUuidUrn(resource.getId()));
       } else {
-        assertTrue(hasCoverageId(resource.getId()));
+        assertTrue(isValidPartCAndDCoverageId(resource.getId()));
       }
 
       String expectedProfile =
@@ -160,12 +160,12 @@ class PatientCoverageC4DICSearchIT extends IntegrationTestBase {
     return uuid.matches("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}");
   }
 
-  private boolean hasCoverageId(String id) {
+  private boolean isValidPartCAndDCoverageId(String id) {
     if (!id.startsWith("urn:uuid:")) {
       return false;
     }
-    var uuid = id.substring("urn:uuid:".length());
-    return uuid.matches("[A-Za-z0-9]+");
+    String uuid = id.substring("urn:uuid:".length());
+    return uuid.matches("(?:[A-Za-z0-9]+-)?part-[cd]-\\d+-\\p{Alnum}{5}-\\d{3}");
   }
 
   @Test
