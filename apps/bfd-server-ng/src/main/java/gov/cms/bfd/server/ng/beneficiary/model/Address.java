@@ -11,10 +11,10 @@ public class Address {
   private Optional<String> stateCode;
 
   @Column(name = "geo_zip5_cd")
-  private String zipCode;
+  private Optional<String> zipCode;
 
   @Column(name = "geo_zip_plc_name")
-  private String city;
+  private Optional<String> city;
 
   @Column(name = "bene_line_1_adr")
   private Optional<String> addressLine1;
