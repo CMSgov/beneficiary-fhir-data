@@ -19,8 +19,19 @@ public record CoverageCompositeId(CoveragePart coveragePart, long beneSk) {
   private static final Pattern STANDARD_COVERAGE_ID_PATTERN =
       Pattern.compile("(\\p{Alnum}+-?\\p{Alnum})-(-?\\d+)", Pattern.CASE_INSENSITIVE);
 
+  // Group 1: optional prefix + coverage part (e.g., "part-c", "c4dic-part-c")
+  // Group 2: The bene_sk
+  // Group 3: The contract number (H1234)
+  // Group 4: The pbp number (001)
+  // Example: "part-c-12345-H1234-001", "c4dic-part-c-12345-H1234-001"
+  private static final Pattern PART_C_AND_D_COVERAGE_ID_PATTERN =
+      Pattern.compile(
+          "((?:\\p{Alnum}+\\-)?part-[cd])-(\\d+)-(\\p{Alnum}{5})-(\\d{3})",
+          Pattern.CASE_INSENSITIVE);
+
   /**
-   * Parses a raw composite ID string (e.g., "part-a-12345") into a {@link CoverageCompositeId}.
+   * Parses a raw composite ID string (e.g., "part-a-12345", "{type}-{bene_sk}-{contract}-{pbp}" for
+   * part C/D so "part-c-12345-H1234-001") into a {@link CoverageCompositeId}.
    *
    * @param rawCompositeId The raw composite ID string.
    * @return A {@link CoverageCompositeId} instance.
@@ -44,8 +55,23 @@ public record CoverageCompositeId(CoveragePart coveragePart, long beneSk) {
       }
     }
 
+    Matcher partCAndDMatcher = PART_C_AND_D_COVERAGE_ID_PATTERN.matcher(rawCompositeId.trim());
+    if (partCAndDMatcher.matches()) {
+      String rawPartPrefix = partCAndDMatcher.group(1); // "part-c", "c4dic-part-c"
+      String beneSkStr = partCAndDMatcher.group(2);
+
+      // CoveragePart will find a match if rawPartPrefix is "part-c", "part-d", etc.
+      // (case-insensitive)
+      CoveragePart part = CoveragePart.fromExactRawPrefixOrThrow(rawPartPrefix);
+      try {
+        return new CoverageCompositeId(part, Long.parseLong(beneSkStr));
+      } catch (NumberFormatException e) {
+        throw new InvalidRequestException("Invalid beneficiary SK format in Coverage ID");
+      }
+    }
+
     throw new InvalidRequestException(
-        "Invalid Coverage ID format. Expected pattern like 'part-a-123'.");
+        "Invalid Coverage ID format. Expected pattern like 'part-c-12345-H1234-001'.");
   }
 
   /**

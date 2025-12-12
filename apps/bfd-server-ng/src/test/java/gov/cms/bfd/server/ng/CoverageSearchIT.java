@@ -74,9 +74,9 @@ class CoverageSearchIT extends IntegrationTestBase {
             .execute();
 
     assertEquals(
-        2,
+        1,
         coverageBundle.getEntry().size(),
-        "Should find Part C & D Coverages for this composite ID");
+        "Should find exactly one Coverage for this composite ID");
     expectFhir().scenario(searchStyle.name()).toMatchSnapshot(coverageBundle);
   }
 
@@ -278,7 +278,7 @@ class CoverageSearchIT extends IntegrationTestBase {
     assertEquals(
         1,
         coverageBundle.getEntry().size(),
-        "Should find exactly one Coverage resource for a Part A-only beneficiary");
+        "Should find exactly one Coverage resource for one part only beneficiary");
     expectFhir().scenario("singleCoverage" + part).toMatchSnapshot(coverageBundle);
   }
 
@@ -325,7 +325,7 @@ class CoverageSearchIT extends IntegrationTestBase {
     assertEquals(
         2,
         coverageBundle.getEntry().size(),
-        "Should only find Coverage for a beneficiary whose enrollment periods all start in the future.");
+        "Should only find Coverages for a beneficiary whose enrollment period start in the future.");
     expectFhir().scenario(searchStyle.name()).toMatchSnapshot(coverageBundle);
   }
 

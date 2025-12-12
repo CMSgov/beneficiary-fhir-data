@@ -261,7 +261,6 @@ class CoverageReadIT extends IntegrationTestBase {
     var partCId = createCoverageId("part-c", BENE_ID_PART_C_AND_D_ONLY_SAME_PROGRAM_TYPE_CODE);
     var coverage = coverageRead().withId(partCId).execute();
 
-    // only part c coverage is read
     var classComponent = coverage.getClass_().stream().findFirst();
     var coveragePart = classComponent.map(Coverage.ClassComponent::getValue).orElse("");
     assertEquals("Part C", coveragePart);

@@ -5,12 +5,10 @@ import gov.cms.bfd.server.ng.input.CoverageCompositeId;
 import gov.cms.bfd.server.ng.input.CoveragePart;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.loadprogress.LoadProgressRepository;
-import gov.cms.bfd.server.ng.model.ProfileType;
 import gov.cms.bfd.server.ng.util.FhirUtil;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coverage;
@@ -58,10 +56,9 @@ public class CoverageHandler {
       return FhirUtil.defaultBundle(loadProgressRepository::lastUpdated);
     }
     var beneficiary = beneficiaryOpt.get();
-    var coverages =
-        beneficiary.toFhirCoverageIfPresent(parsedCoverageId, ProfileType.C4BB).stream();
+    var coverage = beneficiary.toFhirCoverageIfPresent(parsedCoverageId);
 
-    return FhirUtil.bundleOrDefault(coverages.map(r -> r), loadProgressRepository::lastUpdated);
+    return FhirUtil.bundleOrDefault(coverage.map(r -> r), loadProgressRepository::lastUpdated);
   }
 
   /**
@@ -81,22 +78,13 @@ public class CoverageHandler {
       return FhirUtil.bundleOrDefault(List.of(), loadProgressRepository::lastUpdated);
     }
     var beneficiary = beneficiaryOpt.get();
-    // for part C/D, if the program type code in the enrollment is 3, we'd return both resources.
-    // This check happens in both part C/D branches so that's why we need to dedupe here
     var coverages =
         Arrays.stream(CoveragePart.values())
             .map(
                 c ->
                     beneficiary.toFhirCoverageIfPresent(
-                        new CoverageCompositeId(c, beneficiary.getBeneSk()), ProfileType.C4BB))
-            .flatMap(List::stream)
-            .collect(
-                Collectors.toMap(
-                    cov -> cov.getIdElement().getIdPart(),
-                    cov -> cov,
-                    (existing, duplicate) -> existing))
-            .values()
-            .stream();
+                        new CoverageCompositeId(c, beneficiary.getBeneSk())))
+            .flatMap(Optional::stream);
 
     return FhirUtil.bundleOrDefault(coverages.map(r -> r), loadProgressRepository::lastUpdated);
   }
