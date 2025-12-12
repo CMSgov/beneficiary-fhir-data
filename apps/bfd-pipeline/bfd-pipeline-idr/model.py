@@ -35,11 +35,6 @@ class LoadMode(StrEnum):
     PRODUCTION = ""
 
 
-class LoadType(StrEnum):
-    INITIAL = "initial"
-    INCREMENTAL = "incremental"
-
-
 def transform_null_date_to_max(value: date | None) -> date:
     if value is None:
         return date.fromisoformat(DEFAULT_MAX_DATE)
