@@ -64,8 +64,8 @@ class CoverageSearchIT extends IntegrationTestBase {
 
   @ParameterizedTest
   @EnumSource(SearchStyleEnum.class)
-  void partCAndDCoverageSearchById(SearchStyleEnum searchStyle) {
-    var validId = String.format("part-c-%s", BENE_ID_PART_C_AND_D_ONLY);
+  void partCAndDSameProgramTypeCodeCoverageSearchById(SearchStyleEnum searchStyle) {
+    var validId = String.format("part-c-%s", BENE_ID_PART_C_AND_D_ONLY_SAME_PROGRAM_TYPE_CODE);
 
     var coverageBundle =
         searchBundle()
@@ -75,6 +75,24 @@ class CoverageSearchIT extends IntegrationTestBase {
 
     assertEquals(
         2,
+        coverageBundle.getEntry().size(),
+        "Should find Part C & D Coverages for this composite ID");
+    expectFhir().scenario(searchStyle.name()).toMatchSnapshot(coverageBundle);
+  }
+
+  @ParameterizedTest
+  @EnumSource(SearchStyleEnum.class)
+  void partCAndDCoverageSearchById(SearchStyleEnum searchStyle) {
+    var validId = String.format("part-c-%s", BENE_ID_PART_C_AND_D_ONLY_DIFFERENT_PROGRAM_TYPE_CODE);
+
+    var coverageBundle =
+        searchBundle()
+            .where(new TokenClientParam(Coverage.SP_RES_ID).exactly().identifier(validId))
+            .usingStyle(searchStyle)
+            .execute();
+
+    assertEquals(
+        1,
         coverageBundle.getEntry().size(),
         "Should find exactly one Coverage for this composite ID");
     expectFhir().scenario(searchStyle.name()).toMatchSnapshot(coverageBundle);

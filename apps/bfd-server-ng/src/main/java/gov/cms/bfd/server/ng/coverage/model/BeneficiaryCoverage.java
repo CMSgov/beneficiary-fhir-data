@@ -123,7 +123,6 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
   private Optional<BeneficiaryMAPartDEnrollment> getEnrollment(CoveragePart coveragePart) {
     var coverageType = coveragePart.getStandardCode();
     return beneficiaryMAPartDEnrollments.stream()
-        .findFirst()
         .filter(
             e -> {
               var programTypeCode = e.getId().getEnrollmentProgramTypeCode();
@@ -134,7 +133,8 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
                     Objects.equals(programTypeCode, "2") || Objects.equals(programTypeCode, "3");
                 default -> false;
               };
-            });
+            })
+        .findFirst();
   }
 
   private Optional<BeneficiaryMAPartDEnrollmentRx> getRxEnrollment() {
