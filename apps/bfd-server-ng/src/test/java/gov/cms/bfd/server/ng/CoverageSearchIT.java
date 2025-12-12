@@ -83,7 +83,7 @@ class CoverageSearchIT extends IntegrationTestBase {
   @ParameterizedTest
   @EnumSource(SearchStyleEnum.class)
   void partCAndDCoverageSearchById(SearchStyleEnum searchStyle) {
-    var validId = String.format("part-c-%s", BENE_ID_PART_C_AND_D_ONLY_DIFFERENT_PROGRAM_TYPE_CODE);
+    var validId = String.format("part-c-%s", BENE_ID_PART_C_AND_D_ONLY_DIFF_PROGRAM_TYPE_CODE);
 
     var coverageBundle =
         searchBundle()
@@ -280,6 +280,19 @@ class CoverageSearchIT extends IntegrationTestBase {
         coverageBundle.getEntry().size(),
         "Should find exactly one Coverage resource for one part only beneficiary");
     expectFhir().scenario("singleCoverage" + part).toMatchSnapshot(coverageBundle);
+  }
+
+  @Test
+  void partCAndDCoverageSearchForBeneWithDifferentActiveDatesShouldReturnOneEntry() {
+    var coverageBundle =
+        searchByBeneficiary(
+            BENE_ID_PART_C_AND_D_ONLY_DIFF_PROGRAM_TYPE_CODE_DIFF_ACTIVE_DATES,
+            SearchStyleEnum.GET);
+    assertEquals(
+        2,
+        coverageBundle.getEntry().size(),
+        "Should find exactly two Coverage resources with different but active enrollment dates for beneficiary");
+    expectFhir().scenario("multipleActiveEnrollments").toMatchSnapshot(coverageBundle);
   }
 
   @ParameterizedTest

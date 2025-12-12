@@ -26,7 +26,7 @@ public class BeneficiaryEnrollmentPeriod {
   }
 
   Coverage.CoverageStatus toFhirStatus() {
-    LocalDate today = LocalDate.now();
+    var today = LocalDate.now();
 
     if (enrollmentEndDate.isPresent() && today.isAfter(enrollmentEndDate.get())) {
       return Coverage.CoverageStatus.CANCELLED;

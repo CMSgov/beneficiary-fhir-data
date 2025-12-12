@@ -281,14 +281,3 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
     assert cur.rowcount == 2
     rows = cur.fetchmany(1)
     assert rows[0]["bene_sk"] == 353816020
-
-    # TODO: add these back when contract data is added
-    # cur = conn.execute("select * from idr.beneficiary_election_period_usage")
-    # rows = cur.fetchall()
-    # assert len(rows) == 1
-    # assert rows[0]["cntrct_pbp_sk"] == 1
-
-    # cur = conn.execute("select * from idr.contract_pbp_number")
-    # rows = cur.fetchall()
-    # assert len(rows) == 1
-    # assert rows[0]["cntrct_pbp_sk"] == 1

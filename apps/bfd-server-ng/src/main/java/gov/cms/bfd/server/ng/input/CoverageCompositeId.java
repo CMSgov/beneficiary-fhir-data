@@ -42,12 +42,12 @@ public record CoverageCompositeId(CoveragePart coveragePart, long beneSk) {
 
     Matcher standardMatcher = STANDARD_COVERAGE_ID_PATTERN.matcher(rawCompositeId.trim());
     if (standardMatcher.matches()) {
-      String rawPartPrefix = standardMatcher.group(1);
-      String beneSkStr = standardMatcher.group(2);
+      var rawPartPrefix = standardMatcher.group(1);
+      var beneSkStr = standardMatcher.group(2);
 
       // CoveragePart will find a match if rawPartPrefix is "part-a", "part-b", etc.
       // (case-insensitive)
-      CoveragePart part = CoveragePart.fromExactRawPrefixOrThrow(rawPartPrefix);
+      var part = CoveragePart.fromExactRawPrefixOrThrow(rawPartPrefix);
       try {
         return new CoverageCompositeId(part, Long.parseLong(beneSkStr));
       } catch (NumberFormatException _) {
@@ -57,12 +57,12 @@ public record CoverageCompositeId(CoveragePart coveragePart, long beneSk) {
 
     Matcher partCAndDMatcher = PART_C_AND_D_COVERAGE_ID_PATTERN.matcher(rawCompositeId.trim());
     if (partCAndDMatcher.matches()) {
-      String rawPartPrefix = partCAndDMatcher.group(1); // "part-c", "c4dic-part-c"
-      String beneSkStr = partCAndDMatcher.group(2);
+      var rawPartPrefix = partCAndDMatcher.group(1); // "part-c", "c4dic-part-c"
+      var beneSkStr = partCAndDMatcher.group(2);
 
       // CoveragePart will find a match if rawPartPrefix is "part-c", "part-d", etc.
       // (case-insensitive)
-      CoveragePart part = CoveragePart.fromExactRawPrefixOrThrow(rawPartPrefix);
+      var part = CoveragePart.fromExactRawPrefixOrThrow(rawPartPrefix);
       try {
         return new CoverageCompositeId(part, Long.parseLong(beneSkStr));
       } catch (NumberFormatException _) {

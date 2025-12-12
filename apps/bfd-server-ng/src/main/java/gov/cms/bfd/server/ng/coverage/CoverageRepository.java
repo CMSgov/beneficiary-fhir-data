@@ -24,7 +24,7 @@ public class CoverageRepository {
    */
   public Optional<BeneficiaryCoverage> searchBeneficiaryWithCoverage(
       long beneSk, DateTimeRange lastUpdatedRange) {
-    LocalDate today = LocalDate.now();
+    var today = LocalDate.now();
 
     var beneficiaryCoverage =
         entityManager
@@ -33,39 +33,42 @@ public class CoverageRepository {
                     """
                       WITH latestEnrollments AS (
                           SELECT e.id AS id,
-                              dense_rank() over (
+                              DENSE_RANK() OVER (
+                                  PARTITION BY e.id.enrollmentProgramTypeCode
                                   ORDER BY
                                       CASE
-                                          WHEN e.beneficiaryEnrollmentPeriod.enrollmentBeginDate <= :today THEN 1
+                                          WHEN e.beneficiaryEnrollmentPeriod.enrollmentBeginDate <= :today
+                                               AND :today <= e.beneficiaryEnrollmentPeriod.enrollmentEndDate THEN 1
                                           ELSE 2
                                       END ASC,
-                                      e.beneficiaryEnrollmentPeriod.enrollmentBeginDate desc
+                                      e.beneficiaryEnrollmentPeriod.enrollmentBeginDate DESC
                               ) AS row_num
                           FROM BeneficiaryMAPartDEnrollment e
                           WHERE e.id.beneSk = :beneSk
                       ),
                       latestEnrollmentsRx AS (
                           SELECT rx.id AS id,
-                              row_number() over (
+                              ROW_NUMBER() OVER (
                                   ORDER BY
                                       CASE
                                           WHEN rx.enrollmentBeginDate <= :today THEN 1
                                           ELSE 2
                                       END ASC,
-                                      rx.enrollmentBeginDate desc
+                                      rx.enrollmentBeginDate DESC
                               ) AS row_num
                           FROM BeneficiaryMAPartDEnrollmentRx rx
                           WHERE rx.id.beneSk = :beneSk
                       ),
                       latestLis AS (
                           SELECT lis.id AS id,
-                              row_number() over (
+                              ROW_NUMBER() OVER (
                                   ORDER BY
                                       CASE
-                                          WHEN lis.id.benefitRangeBeginDate <= :today THEN 1
+                                          WHEN lis.id.benefitRangeBeginDate <= :today
+                                               AND :today <= lis.benefitRangeEndDate THEN 1
                                           ELSE 2
                                       END ASC,
-                                      lis.id.benefitRangeBeginDate desc
+                                      lis.id.benefitRangeBeginDate DESC
                               ) AS row_num
                           FROM BeneficiaryLowIncomeSubsidy lis
                           WHERE lis.id.beneSk = :beneSk
@@ -87,23 +90,23 @@ public class CoverageRepository {
                         AND ((cast(:upperBound AS ZonedDateTime)) IS NULL OR b.meta.updatedTimestamp %s :upperBound)
                         AND b.beneSk = b.xrefSk
                         AND (ben IS NULL OR EXISTS (
-                            select 1 from latestEnrollments e
-                            where e.row_num = 1
-                                and e.id.beneSk = ben.id.beneSk
-                                and e.id.enrollmentBeginDate = ben.id.enrollmentBeginDate
-                                and e.id.enrollmentProgramTypeCode = ben.id.enrollmentProgramTypeCode
+                            SELECT 1 FROM latestEnrollments e
+                            WHERE e.row_num = 1
+                                AND e.id.beneSk = ben.id.beneSk
+                                AND e.id.enrollmentBeginDate = ben.id.enrollmentBeginDate
+                                AND e.id.enrollmentProgramTypeCode = ben.id.enrollmentProgramTypeCode
                         ))
                         AND (berx IS NULL OR EXISTS (
-                            select 1 from latestEnrollmentsRx e
-                            where e.row_num = 1
-                                and e.id.beneSk = berx.id.beneSk
-                                and e.id.enrollmentPdpRxInfoBeginDate = berx.id.enrollmentPdpRxInfoBeginDate
+                            SELECT 1 FROM latestEnrollmentsRx e
+                            WHERE e.row_num = 1
+                                AND e.id.beneSk = berx.id.beneSk
+                                AND e.id.enrollmentPdpRxInfoBeginDate = berx.id.enrollmentPdpRxInfoBeginDate
                         ))
                         AND (blis IS NULL OR EXISTS (
-                            select 1 from latestLis e
-                            where e.row_num = 1
-                                and e.id.beneSk = blis.id.beneSk
-                                and e.id.benefitRangeBeginDate = blis.id.benefitRangeBeginDate
+                            SELECT 1 FROM latestLis e
+                            WHERE e.row_num = 1
+                                AND e.id.beneSk = blis.id.beneSk
+                                AND e.id.benefitRangeBeginDate = blis.id.benefitRangeBeginDate
                         ))
                       ORDER BY b.obsoleteTimestamp DESC
                     """,
