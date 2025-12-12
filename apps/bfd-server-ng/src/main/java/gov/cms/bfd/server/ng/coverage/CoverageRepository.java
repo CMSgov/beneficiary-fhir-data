@@ -40,7 +40,7 @@ public class CoverageRepository {
                   AND ((cast(:lowerBound AS ZonedDateTime)) IS NULL
                   OR GREATEST(b.meta.partACoverageUpdatedTs,b.meta.partBCoverageUpdatedTs,b.meta.partCCoverageUpdatedTs,b.meta.partDCoverageUpdatedTs,b.meta.partDualCoverageUpdatedTs) %s :lowerBound)
                   AND ((cast(:upperBound AS ZonedDateTime)) IS NULL
-                  OR GREATEST(b.meta.partACoverageUpdatedTs,b.meta.partBCoverageUpdatedTs,b.meta.partCCoverageUpdatedTs,b.meta.partDCoverageUpdatedTs,b.meta.partDualCoverageUpdatedTs) %s :upperBound)
+                  OR LEAST(b.meta.partACoverageUpdatedTs,b.meta.partBCoverageUpdatedTs,b.meta.partCCoverageUpdatedTs,b.meta.partDCoverageUpdatedTs,b.meta.partDualCoverageUpdatedTs) %s :upperBound)
                   AND b.beneSk = b.xrefSk
                 ORDER BY b.obsoleteTimestamp DESC
                 """,
