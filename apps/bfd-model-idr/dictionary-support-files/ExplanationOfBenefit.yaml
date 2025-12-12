@@ -455,6 +455,7 @@
     - AT_PHYSN_NPI
   cclfMapping:
     - CCLF1.ATNDG_PRVDR_NPI_NUM
+    - CCLF1.CLM_ATNDG_PRVDR_NPI_NUM
   sourceView: V2_MDCR_CLM
   sourceColumn: PRVDR_ATNDG_PRVDR_NPI_NUM
   fhirPath: ExplanationOfBenefit.contained.where(id = %root.careTeam.where(role.coding.code='attending').provider.reference.substring(1)).identifier.where(system='http://hl7.org/fhir/sid/us-npi').value
@@ -475,6 +476,7 @@
     - OP_PHYSN_NPI
   cclfMapping:
     - CCLF1.OPRTG_PRVDR_NPI_NUM
+    - CCLF1.CLM_OPRTG_PRVDR_NPI_NUM
   sourceView: V2_MDCR_CLM
   sourceColumn: PRVDR_OPRTG_PRVDR_NPI_NUM
   fhirPath: ExplanationOfBenefit.contained.where(id = %root.careTeam.where(role.coding.code='operating').provider.reference.substring(1)).identifier.where(system='http://hl7.org/fhir/sid/us-npi').value
@@ -2221,6 +2223,7 @@
     - OT_PHYSN_NPI
   cclfMapping:
     - CCLF1.OTHR_PRVDR_NPI_NUM
+    - CCLF1.CLM_OTHR_PRVDR_NPI_NUM
   sourceView: V2_MDCR_CLM
   sourceColumn: PRVDR_OTHR_PRVDR_NPI_NUM
   fhirPath: ExplanationOfBenefit.contained.where(id = %root.careTeam.where(role.coding.code='otheroperating').provider.reference.substring(1)).identifier.where(system='http://hl7.org/fhir/sid/us-npi').value
