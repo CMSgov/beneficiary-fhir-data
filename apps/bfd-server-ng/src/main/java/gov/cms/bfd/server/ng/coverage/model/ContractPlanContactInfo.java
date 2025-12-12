@@ -1,10 +1,8 @@
 package gov.cms.bfd.server.ng.coverage.model;
 
-import gov.cms.bfd.server.ng.claim.model.Contract;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.util.Optional;
@@ -58,7 +56,4 @@ public class ContractPlanContactInfo {
 
   @Column(name = "cntrct_plan_cntct_zip_cd")
   private Optional<String> contractPlanZipCode;
-
-  @OneToOne(mappedBy = "contractPlanContactInfo")
-  private Contract contract;
 }
