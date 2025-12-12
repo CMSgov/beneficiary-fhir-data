@@ -16,7 +16,7 @@ class ClaimPaymentAmount {
   ExplanationOfBenefit.PaymentComponent toFhir() {
     var payment =
         new ExplanationOfBenefit.PaymentComponent().setAmount(USD.toFhir(claimPaymentAmount));
-    claimPaymentDate.ifPresent(d -> payment.setDate(DateUtil.toDateAndSanitize(d)));
+    claimPaymentDate.ifPresent(d -> payment.setDate(DateUtil.toDate(d)));
     return payment;
   }
 }

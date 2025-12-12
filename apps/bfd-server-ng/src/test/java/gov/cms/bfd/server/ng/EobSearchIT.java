@@ -147,7 +147,7 @@ class EobSearchIT extends IntegrationTestBase {
             .and(
                 new DateClientParam(Constants.PARAM_LASTUPDATED)
                     .afterOrEquals()
-                    .day(DateUtil.toDateAndSanitize(lastUpdated)))
+                    .day(DateUtil.toDate(lastUpdated)))
             .execute();
     assertEquals(6, eobBundle.getEntry().size());
 
@@ -160,7 +160,7 @@ class EobSearchIT extends IntegrationTestBase {
             .and(
                 new DateClientParam(Constants.PARAM_LASTUPDATED)
                     .before()
-                    .day(DateUtil.toDateAndSanitize(lastUpdated.minusDays(1))))
+                    .day(DateUtil.toDate(lastUpdated.minusDays(1))))
             .execute();
     assertEquals(0, eobBundle.getEntry().size());
   }
@@ -186,7 +186,7 @@ class EobSearchIT extends IntegrationTestBase {
             .and(
                 new DateClientParam("service-date")
                     .afterOrEquals()
-                    .day(DateUtil.toDateAndSanitize(serviceDate)))
+                    .day(DateUtil.toDate(serviceDate)))
             .execute();
     assertEquals(1, eobBundle.getEntry().size());
 
@@ -197,7 +197,7 @@ class EobSearchIT extends IntegrationTestBase {
             .and(
                 new DateClientParam("service-date")
                     .before()
-                    .day(DateUtil.toDateAndSanitize(serviceDate.minusDays(1))))
+                    .day(DateUtil.toDate(serviceDate.minusDays(1))))
             .execute();
     assertEquals(0, eobBundle.getEntry().size());
   }

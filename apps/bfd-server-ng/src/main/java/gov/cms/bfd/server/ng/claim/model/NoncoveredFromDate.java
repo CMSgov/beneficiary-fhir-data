@@ -23,8 +23,7 @@ class NoncoveredFromDate {
         supportingInfoFactory
             .createSupportingInfo()
             .setCategory(BlueButtonSupportingInfoCategory.CLM_NCVRD_FROM_DT.toFhir())
-            .setTiming(
-                new DateType().setValue(DateUtil.toDateAndSanitize(noncoveredFromDate.get())));
+            .setTiming(new DateType().setValue(DateUtil.toDate(noncoveredFromDate.get())));
     return Optional.of(component);
   }
 }

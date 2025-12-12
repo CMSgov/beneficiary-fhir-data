@@ -23,8 +23,7 @@ class NoncoveredThroughDate {
         supportingInfoFactory
             .createSupportingInfo()
             .setCategory(BlueButtonSupportingInfoCategory.CLM_NCVRD_THRU_DT.toFhir())
-            .setTiming(
-                new DateType().setValue(DateUtil.toDateAndSanitize(noncoveredThroughDate.get())));
+            .setTiming(new DateType().setValue(DateUtil.toDate(noncoveredThroughDate.get())));
     return Optional.of(component);
   }
 }

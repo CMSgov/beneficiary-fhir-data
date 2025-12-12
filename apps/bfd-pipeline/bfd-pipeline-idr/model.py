@@ -667,7 +667,7 @@ class IdrElectionPeriodUsage(IdrBaseModel):
     bene_cntrct_num: str
     bene_pbp_num: Annotated[str, BeforeValidator(transform_default_string)]
     bene_elctn_enrlmt_disenrlmt_cd: str
-    bene_elctn_aplctn_dt: date
+    bene_elctn_aplctn_dt: Annotated[date, BeforeValidator(transform_null_or_default_date_to_max)]
     bene_enrlmt_efctv_dt: Annotated[date, {PRIMARY_KEY: True}]
     idr_insrt_ts: Annotated[datetime, {BATCH_TIMESTAMP: True}]
     idr_trans_efctv_ts: datetime

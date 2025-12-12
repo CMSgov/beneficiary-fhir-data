@@ -40,8 +40,7 @@ public class Meta {
   private org.hl7.fhir.r4.model.Meta toFhirProfile(
       ZonedDateTime overrideLastUpdated, List<String> profiles) {
     var meta =
-        new org.hl7.fhir.r4.model.Meta()
-            .setLastUpdated(DateUtil.toDateAndSanitize(overrideLastUpdated));
+        new org.hl7.fhir.r4.model.Meta().setLastUpdated(DateUtil.toDate(overrideLastUpdated));
 
     profiles.forEach(meta::addProfile);
 

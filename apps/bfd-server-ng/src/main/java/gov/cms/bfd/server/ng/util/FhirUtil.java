@@ -119,7 +119,7 @@ public class FhirUtil {
                                 .setResource(r)
                                 .setFullUrl("urn:uuid:" + r.getIdElement().getIdPart()))
                     .toList());
-    bundle.setMeta(new Meta().setLastUpdated(DateUtil.toDateAndSanitize(batchLastUpdated.get())));
+    bundle.setMeta(new Meta().setLastUpdated(DateUtil.toDate(batchLastUpdated.get())));
 
     return bundle;
   }
@@ -137,7 +137,7 @@ public class FhirUtil {
    */
   public static Bundle defaultBundle(Supplier<ZonedDateTime> batchLastUpdated) {
     var bundle = new Bundle();
-    bundle.setMeta(new Meta().setLastUpdated(DateUtil.toDateAndSanitize(batchLastUpdated.get())));
+    bundle.setMeta(new Meta().setLastUpdated(DateUtil.toDate(batchLastUpdated.get())));
     return bundle;
   }
 }

@@ -24,8 +24,7 @@ public class QualifyStayFromDate {
         supportingInfoFactory
             .createSupportingInfo()
             .setCategory(BlueButtonSupportingInfoCategory.CLM_QLFY_STAY_FROM_DT.toFhir())
-            .setTiming(
-                new DateType().setValue(DateUtil.toDateAndSanitize(qualifyStayFromDate.get())));
+            .setTiming(new DateType().setValue(DateUtil.toDate(qualifyStayFromDate.get())));
     return Optional.of(component);
   }
 }
