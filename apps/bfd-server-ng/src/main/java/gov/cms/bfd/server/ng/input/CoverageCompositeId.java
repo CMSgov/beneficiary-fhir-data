@@ -50,7 +50,7 @@ public record CoverageCompositeId(CoveragePart coveragePart, long beneSk) {
       CoveragePart part = CoveragePart.fromExactRawPrefixOrThrow(rawPartPrefix);
       try {
         return new CoverageCompositeId(part, Long.parseLong(beneSkStr));
-      } catch (NumberFormatException e) {
+      } catch (NumberFormatException _) {
         throw new InvalidRequestException("Invalid beneficiary SK format in Coverage ID");
       }
     }
@@ -65,7 +65,7 @@ public record CoverageCompositeId(CoveragePart coveragePart, long beneSk) {
       CoveragePart part = CoveragePart.fromExactRawPrefixOrThrow(rawPartPrefix);
       try {
         return new CoverageCompositeId(part, Long.parseLong(beneSkStr));
-      } catch (NumberFormatException e) {
+      } catch (NumberFormatException _) {
         throw new InvalidRequestException("Invalid beneficiary SK format in Coverage ID");
       }
     }

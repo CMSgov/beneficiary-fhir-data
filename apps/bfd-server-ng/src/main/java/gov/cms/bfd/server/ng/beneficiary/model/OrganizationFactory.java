@@ -2,6 +2,7 @@ package gov.cms.bfd.server.ng.beneficiary.model;
 
 import gov.cms.bfd.server.ng.claim.model.Contract;
 import gov.cms.bfd.server.ng.util.SystemUrls;
+import java.util.Optional;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ContactPoint;
@@ -74,7 +75,7 @@ public final class OrganizationFactory {
     orgMeta.addProfile(profile);
     insurerOrg.setMeta(orgMeta);
     insurerOrg.setActive(true);
-    contract.getContractName().map(insurerOrg::setName);
+    contract.getContractName().ifPresent(insurerOrg::setName);
 
     var contact = new Organization.OrganizationContactComponent();
 
@@ -86,33 +87,28 @@ public final class OrganizationFactory {
     contactInfo
         .getContractPlanContactFreeNumber()
         .ifPresent(
-            teleNum -> {
-              String fullTeleNumber =
-                  contactInfo.getContractPlanFreeExtensionNumber().map(ext -> ext + "-").orElse("")
-                      + teleNum;
-              contact.addTelecom(
-                  new ContactPoint()
-                      .setSystem(ContactPoint.ContactPointSystem.PHONE)
-                      .setValue(fullTeleNumber));
-            });
+            phoneNumber ->
+                addPhone(contact, contactInfo.getContractPlanFreeExtensionNumber(), phoneNumber));
     contactInfo
         .getContractPlanContactNumber()
         .ifPresent(
-            teleNum -> {
-              String fullTeleNumber =
-                  contactInfo
-                          .getContractPlanContactExtensionNumber()
-                          .map(ext -> ext + "-")
-                          .orElse("")
-                      + teleNum;
-              contact.addTelecom(
-                  new ContactPoint()
-                      .setSystem(ContactPoint.ContactPointSystem.PHONE)
-                      .setValue(fullTeleNumber));
-            });
+            phoneNumber ->
+                addPhone(
+                    contact, contactInfo.getContractPlanContactExtensionNumber(), phoneNumber));
     insurerOrg.addContact(contact);
 
     return insurerOrg;
+  }
+
+  private static void addPhone(
+      Organization.OrganizationContactComponent contact,
+      Optional<String> extensionNumber,
+      String phoneNumber) {
+    var fullTeleNumber = extensionNumber.map(ext -> ext + "-").orElse("") + phoneNumber;
+    contact.addTelecom(
+        new ContactPoint()
+            .setSystem(ContactPoint.ContactPointSystem.PHONE)
+            .setValue(fullTeleNumber));
   }
 
   /**

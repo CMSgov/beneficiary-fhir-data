@@ -412,7 +412,7 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadBeneWithAllCoverage[allCoverage
     "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-ENRLMT-EMPLR-SBSDY-SW",
     "valueString" : "Y"
   } ],
-  "id" : "{coverage-id}",
+  "id" : "part-c-405764107-H1234-003",
   "identifier" : [ {
     "system" : "http://hl7.org/fhir/sid/us-mbi",
     "type" : {
@@ -550,7 +550,7 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadBeneWithAllCoverage[allCoverage
     "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-ENRLMT-EMPLR-SBSDY-SW",
     "valueString" : "Y"
   } ],
-  "id" : "{coverage-id}",
+  "id" : "part-d-405764107-H1234-003",
   "identifier" : [ {
     "system" : "http://hl7.org/fhir/sid/us-mbi",
     "type" : {
@@ -1142,7 +1142,7 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadPartCAndDOnly=[
     "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-ENRLMT-EMPLR-SBSDY-SW",
     "valueString" : "Y"
   } ],
-  "id" : "{coverage-id}",
+  "id" : "part-c-353816020-H1234-003",
   "identifier" : [ {
     "system" : "http://hl7.org/fhir/sid/us-mbi",
     "type" : {
@@ -1505,7 +1505,7 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadValidPartCCompositeId[validPart
       "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-CVRG-TYPE-CD"
     }
   } ],
-  "id" : "{coverage-id}",
+  "id" : "part-c-441149422-G1234-002",
   "identifier" : [ {
     "system" : "http://hl7.org/fhir/sid/us-mbi",
     "type" : {
@@ -1643,7 +1643,7 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadValidPartDCompositeId[validPart
     "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-ENRLMT-EMPLR-SBSDY-SW",
     "valueString" : "1"
   } ],
-  "id" : "{coverage-id}",
+  "id" : "part-d-547437476-S0001-003",
   "identifier" : [ {
     "system" : "http://hl7.org/fhir/sid/us-mbi",
     "type" : {

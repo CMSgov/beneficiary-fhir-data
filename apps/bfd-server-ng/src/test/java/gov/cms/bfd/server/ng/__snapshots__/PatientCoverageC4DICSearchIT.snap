@@ -214,7 +214,7 @@ gov.cms.bfd.server.ng.PatientCoverageC4DICSearchIT.patientCoverageSearchAllParts
       }
     }
   }, {
-    "fullUrl" : "{coverage-id}",
+    "fullUrl" : "urn:uuid:part-c-405764107-H1234-003",
     "resource" : {
       "beneficiary" : {
         "reference" : "Patient/{uuid}"
@@ -279,7 +279,7 @@ gov.cms.bfd.server.ng.PatientCoverageC4DICSearchIT.patientCoverageSearchAllParts
       }
     }
   }, {
-    "fullUrl" : "{coverage-id}",
+    "fullUrl" : "urn:uuid:part-d-405764107-H1234-003",
     "resource" : {
       "beneficiary" : {
         "reference" : "Patient/{uuid}"

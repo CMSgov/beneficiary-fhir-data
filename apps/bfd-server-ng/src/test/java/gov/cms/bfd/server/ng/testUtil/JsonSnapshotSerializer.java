@@ -25,11 +25,6 @@ public class JsonSnapshotSerializer extends ToStringSnapshotSerializer {
       Pattern.compile(
           "\"reference\"\\s*:\\s*\"([A-Za-z]+)/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\"",
           Pattern.MULTILINE | Pattern.DOTALL);
-  private static final Pattern PART_C_AND_D_ID_REGEX =
-      Pattern.compile("\"id\"\\s*:\\s*\"(?:[A-Za-z0-9]+-)?part-[cd]-\\d+-\\p{Alnum}{5}-\\d{3}\"");
-  private static final Pattern PART_C_AND_D_FULLURL_REGEX =
-      Pattern.compile(
-          "\"fullUrl\"\\s*:\\s*\"urn:uuid:(?:[A-Za-z0-9]+-)?part-[cd]-\\d+-\\p{Alnum}{5}-\\d{3}\"");
 
   @Override
   public String getOutputFormat() {
@@ -70,8 +65,6 @@ public class JsonSnapshotSerializer extends ToStringSnapshotSerializer {
         LAST_UPDATED_REGEX
             .matcher(json)
             .replaceAll("\"lastUpdated\": \"9999-12-31T00:00:00.000+00:00\"");
-    json = PART_C_AND_D_ID_REGEX.matcher(json).replaceAll("\"id\" : \"{coverage-id}\"");
-    json = PART_C_AND_D_FULLURL_REGEX.matcher(json).replaceAll("\"fullUrl\" : \"{coverage-id}\"");
 
     // Take the HAPI FHIR output and serialize it using a serialization format that will sort keys
     // in order.
