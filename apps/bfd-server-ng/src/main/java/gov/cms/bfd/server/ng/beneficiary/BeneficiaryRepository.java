@@ -53,8 +53,8 @@ public class BeneficiaryRepository {
               SELECT bene
               FROM Beneficiary bene
               WHERE bene.beneSk = :beneSk
-                AND ((cast(:lowerBound AS ZonedDateTime)) IS NULL OR bene.meta.updatedTimestamp %s :lowerBound)
-                AND ((cast(:upperBound AS ZonedDateTime)) IS NULL OR bene.meta.updatedTimestamp %s :upperBound)
+                AND ((cast(:lowerBound AS ZonedDateTime)) IS NULL OR bene.patientMeta.updatedTimestamp %s :lowerBound)
+                AND ((cast(:upperBound AS ZonedDateTime)) IS NULL OR bene.patientMeta.updatedTimestamp %s :upperBound)
               ORDER BY bene.obsoleteTimestamp DESC
               """,
                     lastUpdatedRange.getLowerBoundSqlOperator(),

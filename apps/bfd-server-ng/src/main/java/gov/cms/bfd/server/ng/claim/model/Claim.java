@@ -53,6 +53,7 @@ public class Claim {
   private String serviceProviderNpiNumber;
 
   @Embedded private Meta meta;
+
   @Embedded private Identifiers identifiers;
   @Embedded private BillablePeriod billablePeriod;
   @Embedded private ClaimExtensions claimExtensions;
