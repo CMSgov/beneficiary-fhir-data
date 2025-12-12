@@ -51,4 +51,15 @@ public class ClaimRecordType {
         claimRecordTypeCode.stream().map(code -> code.toFhir(supportingInfoFactory)),
         claimNearLineRecordTypeCode.stream().map(code -> code.toFhir(supportingInfoFactory)));
   }
+
+  /**
+   * Gets the part display string.
+   *
+   * @return the part display string
+   */
+  public Optional<String> getPartDisplay() {
+    return claimRecordTypeCode
+        .map(ClaimRecordTypeCode::getPartDisplay)
+        .or(() -> claimNearLineRecordTypeCode.map(ClaimNearLineRecordTypeCode::getPartDisplay));
+  }
 }

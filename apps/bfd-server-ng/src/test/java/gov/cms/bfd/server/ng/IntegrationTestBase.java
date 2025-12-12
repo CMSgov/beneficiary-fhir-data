@@ -1,5 +1,7 @@
 package gov.cms.bfd.server.ng;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import au.com.origin.snapshots.Expect;
 import au.com.origin.snapshots.junit5.SnapshotExtension;
 import ca.uhn.fhir.context.FhirContext;
@@ -7,7 +9,9 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import jakarta.persistence.EntityManager;
 import java.util.List;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
@@ -59,6 +63,7 @@ public class IntegrationTestBase {
   protected static final String CLAIM_ID_RX = "5213363418309";
   protected static final String CLAIM_ID_PROFESSIONAL = "3351266481401";
   protected static final String CLAIM_ID_PROFESSIONAL_ORG = "3351266481402";
+  protected static final String CLAIM_ID_PROFESSIONAL_MCS = "3351266481403";
   protected static final String CLAIM_ID_RX_ORGANIZATION = "1409088853940";
   protected static final String CLM_CNTL_NUM_DUPE = "31646182683546TDF";
 
@@ -112,5 +117,14 @@ public class IntegrationTestBase {
   protected long queryCount(List<ILoggingEvent> events) {
     // SQL queries are logged under the org.hibernate.SQL logger
     return events.stream().filter(l -> l.getLoggerName().equals("org.hibernate.SQL")).count();
+  }
+
+  protected void validateCodings(IBaseResource resource) {
+    var ctx = FhirContext.forR4Cached();
+    var codings = ctx.newTerser().getAllPopulatedChildElementsOfType(resource, Coding.class);
+    for (Coding coding : codings) {
+      assertTrue(coding.hasSystem());
+      assertTrue(coding.hasCode());
+    }
   }
 }

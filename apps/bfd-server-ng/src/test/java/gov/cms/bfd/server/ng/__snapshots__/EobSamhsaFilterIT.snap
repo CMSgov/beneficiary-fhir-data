@@ -2403,25 +2403,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
       "supportingInfo" : [ {
         "category" : {
           "coding" : [ {
-            "code" : "CLM_BLOOD_PT_FRNSH_QTY",
-            "display" : "Blood Pints Furnished Quantity",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 1,
-        "valueQuantity" : {
-          "code" : "[pt_us]",
-          "system" : "http://unitsofmeasure.org",
-          "unit" : "pint",
-          "value" : 0
-        }
-      }, {
-        "category" : {
-          "coding" : [ {
             "code" : "CLM_NCH_PRMRY_PYR_CD",
             "display" : "NCH Primary Payer Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -2437,7 +2418,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NCH-PRMRY-PYR-CD"
           } ]
         },
-        "sequence" : 2
+        "sequence" : 1
       }, {
         "category" : {
           "coding" : [ {
@@ -2460,7 +2441,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD"
           } ]
         },
-        "sequence" : 3
+        "sequence" : 2
       }, {
         "category" : {
           "coding" : [ {
@@ -2468,7 +2449,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 3,
         "timingPeriod" : {
           "end" : "2019-09-30",
           "start" : "2019-09-23"
@@ -2480,7 +2461,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 4,
         "timingDate" : "2019-09-30"
       }, {
         "category" : {
@@ -2499,7 +2480,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 6
+        "sequence" : 5
       }, {
         "category" : {
           "coding" : [ {
@@ -2516,7 +2497,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 7
+        "sequence" : 6
       }, {
         "category" : {
           "coding" : [ {
@@ -2536,7 +2517,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 8
+        "sequence" : 7
       }, {
         "category" : {
           "coding" : [ {
@@ -2550,7 +2531,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 9
+        "sequence" : 8
       } ],
       "total" : [ {
         "amount" : {
@@ -5362,25 +5343,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
       "supportingInfo" : [ {
         "category" : {
           "coding" : [ {
-            "code" : "CLM_BLOOD_PT_FRNSH_QTY",
-            "display" : "Blood Pints Furnished Quantity",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 1,
-        "valueQuantity" : {
-          "code" : "[pt_us]",
-          "system" : "http://unitsofmeasure.org",
-          "unit" : "pint",
-          "value" : 0
-        }
-      }, {
-        "category" : {
-          "coding" : [ {
             "code" : "CLM_NCH_PRMRY_PYR_CD",
             "display" : "NCH Primary Payer Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -5396,7 +5358,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NCH-PRMRY-PYR-CD"
           } ]
         },
-        "sequence" : 2
+        "sequence" : 1
       }, {
         "category" : {
           "coding" : [ {
@@ -5419,7 +5381,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD"
           } ]
         },
-        "sequence" : 3
+        "sequence" : 2
       }, {
         "category" : {
           "coding" : [ {
@@ -5439,7 +5401,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
           } ]
         },
-        "sequence" : 4
+        "sequence" : 3
       }, {
         "category" : {
           "coding" : [ {
@@ -5447,7 +5409,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 4,
         "timingDate" : "2020-09-11"
       }, {
         "category" : {
@@ -5466,7 +5428,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 6
+        "sequence" : 5
       }, {
         "category" : {
           "coding" : [ {
@@ -5483,7 +5445,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 7
+        "sequence" : 6
       }, {
         "category" : {
           "coding" : [ {
@@ -5503,7 +5465,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 8
+        "sequence" : 7
       }, {
         "category" : {
           "coding" : [ {
@@ -5517,7 +5479,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 9
+        "sequence" : 8
       } ],
       "total" : [ {
         "amount" : {
@@ -5817,25 +5779,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
       "supportingInfo" : [ {
         "category" : {
           "coding" : [ {
-            "code" : "CLM_BLOOD_PT_FRNSH_QTY",
-            "display" : "Blood Pints Furnished Quantity",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 1,
-        "valueQuantity" : {
-          "code" : "[pt_us]",
-          "system" : "http://unitsofmeasure.org",
-          "unit" : "pint",
-          "value" : 0
-        }
-      }, {
-        "category" : {
-          "coding" : [ {
             "code" : "CLM_NCH_PRMRY_PYR_CD",
             "display" : "NCH Primary Payer Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -5851,7 +5794,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NCH-PRMRY-PYR-CD"
           } ]
         },
-        "sequence" : 2
+        "sequence" : 1
       }, {
         "category" : {
           "coding" : [ {
@@ -5874,7 +5817,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD"
           } ]
         },
-        "sequence" : 3
+        "sequence" : 2
       }, {
         "category" : {
           "coding" : [ {
@@ -5882,7 +5825,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 3,
         "timingDate" : "2020-09-11"
       }, {
         "category" : {
@@ -5896,7 +5839,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 4,
         "timingDate" : "2020-09-11"
       } ],
       "total" : [ {
@@ -10827,12 +10770,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
       } ],
       "billablePeriod" : {
         "end" : "2020-09-11",
-        "extension" : [ {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-QUERY-CD",
-          "valueCoding" : {
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD"
-          }
-        } ],
         "start" : "2020-09-01"
       },
       "careTeam" : [ {
@@ -11737,25 +11674,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
       "supportingInfo" : [ {
         "category" : {
           "coding" : [ {
-            "code" : "CLM_BLOOD_PT_FRNSH_QTY",
-            "display" : "Blood Pints Furnished Quantity",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 1,
-        "valueQuantity" : {
-          "code" : "[pt_us]",
-          "system" : "http://unitsofmeasure.org",
-          "unit" : "pint",
-          "value" : 0
-        }
-      }, {
-        "category" : {
-          "coding" : [ {
             "code" : "CLM_NCH_PRMRY_PYR_CD",
             "display" : "NCH Primary Payer Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -11771,7 +11689,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NCH-PRMRY-PYR-CD"
           } ]
         },
-        "sequence" : 2
+        "sequence" : 1
       }, {
         "category" : {
           "coding" : [ {
@@ -11794,7 +11712,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD"
           } ]
         },
-        "sequence" : 3
+        "sequence" : 2
       }, {
         "category" : {
           "coding" : [ {
@@ -11814,7 +11732,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
           } ]
         },
-        "sequence" : 4
+        "sequence" : 3
       }, {
         "category" : {
           "coding" : [ {
@@ -11822,7 +11740,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 4,
         "timingDate" : "2020-09-11"
       }, {
         "category" : {
@@ -11841,7 +11759,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 6
+        "sequence" : 5
       }, {
         "category" : {
           "coding" : [ {
@@ -11859,7 +11777,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 7
+        "sequence" : 6
       }, {
         "category" : {
           "coding" : [ {
@@ -11876,7 +11794,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 8
+        "sequence" : 7
       }, {
         "category" : {
           "coding" : [ {
@@ -11896,7 +11814,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 9
+        "sequence" : 8
       }, {
         "category" : {
           "coding" : [ {
@@ -11910,7 +11828,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 10
+        "sequence" : 9
       } ],
       "total" : [ {
         "amount" : {
@@ -14762,25 +14680,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
       "supportingInfo" : [ {
         "category" : {
           "coding" : [ {
-            "code" : "CLM_BLOOD_PT_FRNSH_QTY",
-            "display" : "Blood Pints Furnished Quantity",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 1,
-        "valueQuantity" : {
-          "code" : "[pt_us]",
-          "system" : "http://unitsofmeasure.org",
-          "unit" : "pint",
-          "value" : 0
-        }
-      }, {
-        "category" : {
-          "coding" : [ {
             "code" : "CLM_NCH_PRMRY_PYR_CD",
             "display" : "NCH Primary Payer Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -14796,7 +14695,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NCH-PRMRY-PYR-CD"
           } ]
         },
-        "sequence" : 2
+        "sequence" : 1
       }, {
         "category" : {
           "coding" : [ {
@@ -14819,7 +14718,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD"
           } ]
         },
-        "sequence" : 3
+        "sequence" : 2
       }, {
         "category" : {
           "coding" : [ {
@@ -14839,7 +14738,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
           } ]
         },
-        "sequence" : 4
+        "sequence" : 3
       }, {
         "category" : {
           "coding" : [ {
@@ -14847,7 +14746,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 4,
         "timingDate" : "2020-09-11"
       }, {
         "category" : {
@@ -14866,7 +14765,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 6
+        "sequence" : 5
       }, {
         "category" : {
           "coding" : [ {
@@ -14883,7 +14782,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 7
+        "sequence" : 6
       }, {
         "category" : {
           "coding" : [ {
@@ -14903,7 +14802,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 8
+        "sequence" : 7
       }, {
         "category" : {
           "coding" : [ {
@@ -14917,7 +14816,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 9
+        "sequence" : 8
       } ],
       "total" : [ {
         "amount" : {
@@ -15217,25 +15116,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
       "supportingInfo" : [ {
         "category" : {
           "coding" : [ {
-            "code" : "CLM_BLOOD_PT_FRNSH_QTY",
-            "display" : "Blood Pints Furnished Quantity",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 1,
-        "valueQuantity" : {
-          "code" : "[pt_us]",
-          "system" : "http://unitsofmeasure.org",
-          "unit" : "pint",
-          "value" : 0
-        }
-      }, {
-        "category" : {
-          "coding" : [ {
             "code" : "CLM_NCH_PRMRY_PYR_CD",
             "display" : "NCH Primary Payer Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -15251,7 +15131,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NCH-PRMRY-PYR-CD"
           } ]
         },
-        "sequence" : 2
+        "sequence" : 1
       }, {
         "category" : {
           "coding" : [ {
@@ -15274,7 +15154,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD"
           } ]
         },
-        "sequence" : 3
+        "sequence" : 2
       }, {
         "category" : {
           "coding" : [ {
@@ -15282,7 +15162,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 3,
         "timingDate" : "2020-09-11"
       }, {
         "category" : {
@@ -15296,7 +15176,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 4,
         "timingDate" : "2020-09-11"
       } ],
       "total" : [ {
@@ -20227,12 +20107,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
       } ],
       "billablePeriod" : {
         "end" : "2020-09-11",
-        "extension" : [ {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-QUERY-CD",
-          "valueCoding" : {
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD"
-          }
-        } ],
         "start" : "2020-09-01"
       },
       "careTeam" : [ {
@@ -21137,25 +21011,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
       "supportingInfo" : [ {
         "category" : {
           "coding" : [ {
-            "code" : "CLM_BLOOD_PT_FRNSH_QTY",
-            "display" : "Blood Pints Furnished Quantity",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
-          }, {
-            "code" : "info",
-            "display" : "Information",
-            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
-          } ]
-        },
-        "sequence" : 1,
-        "valueQuantity" : {
-          "code" : "[pt_us]",
-          "system" : "http://unitsofmeasure.org",
-          "unit" : "pint",
-          "value" : 0
-        }
-      }, {
-        "category" : {
-          "coding" : [ {
             "code" : "CLM_NCH_PRMRY_PYR_CD",
             "display" : "NCH Primary Payer Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -21171,7 +21026,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NCH-PRMRY-PYR-CD"
           } ]
         },
-        "sequence" : 2
+        "sequence" : 1
       }, {
         "category" : {
           "coding" : [ {
@@ -21194,7 +21049,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD"
           } ]
         },
-        "sequence" : 3
+        "sequence" : 2
       }, {
         "category" : {
           "coding" : [ {
@@ -21214,7 +21069,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
           } ]
         },
-        "sequence" : 4
+        "sequence" : 3
       }, {
         "category" : {
           "coding" : [ {
@@ -21222,7 +21077,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 4,
         "timingDate" : "2020-09-11"
       }, {
         "category" : {
@@ -21241,7 +21096,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 6
+        "sequence" : 5
       }, {
         "category" : {
           "coding" : [ {
@@ -21259,7 +21114,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 7
+        "sequence" : 6
       }, {
         "category" : {
           "coding" : [ {
@@ -21276,7 +21131,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 8
+        "sequence" : 7
       }, {
         "category" : {
           "coding" : [ {
@@ -21296,7 +21151,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 9
+        "sequence" : 8
       }, {
         "category" : {
           "coding" : [ {
@@ -21310,7 +21165,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 10
+        "sequence" : 9
       } ],
       "total" : [ {
         "amount" : {

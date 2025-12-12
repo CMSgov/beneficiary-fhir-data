@@ -24,7 +24,7 @@ public class ClaimLineInstitutional {
   private Optional<ClaimLineDeductibleCoinsuranceCode> deductibleCoinsuranceCode;
 
   @Column(name = "clm_line_instnl_rev_ctr_dt")
-  private LocalDate revenueCenterDate;
+  private Optional<LocalDate> revenueCenterDate;
 
   @Embedded private ClaimLineHippsCode hippsCode;
   @Embedded private ClaimLineInstitutionalExtensions extensions;
