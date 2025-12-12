@@ -274,25 +274,25 @@ class BatchLoader:
         )
 
         if self.load_type == LoadType.INCREMENTAL and self.model.last_updated_date_table():
+            key = self.model.last_updated_timestamp_key_col()
             last_updated_cols = self.model.last_updated_date_column()
             set_clause = ", ".join(f"{col} = %(timestamp)s" for col in last_updated_cols)
             # Locking rows to prevent Deadlocks when multiple nodes update this table
             cur.execute(
                 f"""
                 WITH locked AS (
-                    SELECT {self.model.last_updated_timestamp_key_col()}
+                    SELECT {key}
                     FROM {self.model.last_updated_date_table()}
-                    WHERE {self.model.last_updated_timestamp_key_col()} IN (
-                        SELECT {self.model.last_updated_timestamp_key_col()} FROM {self.temp_table}
+                    WHERE {key} IN (
+                        SELECT {key} FROM {self.temp_table}
                     )
-                    ORDER BY {self.model.last_updated_timestamp_key_col()}
+                    ORDER BY {key}
                     FOR UPDATE
                 )
                 UPDATE {self.model.last_updated_date_table()} u
                 SET {set_clause}
                 FROM locked l
-                WHERE 
-                u.{self.model.last_updated_timestamp_key_col()} = l.{self.model.last_updated_timestamp_key_col()};
+                WHERE u.{key} = l.{key};
                 """,  # type: ignore
                 {"timestamp": timestamp},
             )
