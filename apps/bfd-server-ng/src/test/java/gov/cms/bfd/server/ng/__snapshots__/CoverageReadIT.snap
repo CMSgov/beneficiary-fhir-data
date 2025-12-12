@@ -383,10 +383,10 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadBeneWithAllCoverage[allCoverage
       },
       "telecom" : [ {
         "system" : "phone",
-        "value" : "173-4633090285"
+        "value" : "5734500-6326096612"
       }, {
         "system" : "phone",
-        "value" : "173-1910447971"
+        "value" : "1192515-2754998586"
       } ]
     } ],
     "id" : "insurer-org",
@@ -512,10 +512,10 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadBeneWithAllCoverage[allCoverage
       },
       "telecom" : [ {
         "system" : "phone",
-        "value" : "173-4633090285"
+        "value" : "5734500-6326096612"
       }, {
         "system" : "phone",
-        "value" : "173-1910447971"
+        "value" : "1192515-2754998586"
       } ]
     } ],
     "id" : "insurer-org",
@@ -1113,10 +1113,10 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadPartCAndDOnly=[
       },
       "telecom" : [ {
         "system" : "phone",
-        "value" : "173-4633090285"
+        "value" : "5734500-6326096612"
       }, {
         "system" : "phone",
-        "value" : "173-1910447971"
+        "value" : "1192515-2754998586"
       } ]
     } ],
     "id" : "insurer-org",

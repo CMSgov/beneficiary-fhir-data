@@ -33,7 +33,7 @@ public class CoverageRepository {
                     """
                       WITH latestEnrollments AS (
                           SELECT e.id AS id,
-                              row_number() over (
+                              dense_rank() over (
                                   ORDER BY
                                       CASE
                                           WHEN e.beneficiaryEnrollmentPeriod.enrollmentBeginDate <= :today THEN 1

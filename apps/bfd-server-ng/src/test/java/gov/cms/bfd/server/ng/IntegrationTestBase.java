@@ -49,7 +49,8 @@ public class IntegrationTestBase {
   protected static final String BENE_ID_PART_B_ONLY = "365359727";
   protected static final String BENE_ID_PART_C_ONLY = "441149422";
   protected static final String BENE_ID_PART_D_ONLY = "547437476";
-  protected static final String BENE_ID_PART_C_AND_D_ONLY = "353816020";
+  protected static final String BENE_ID_PART_C_AND_D_ONLY_SAME_PROGRAM_TYPE_CODE = "353816020";
+  protected static final String BENE_ID_PART_C_AND_D_ONLY_DIFFERENT_PROGRAM_TYPE_CODE = "319785798";
   protected static final String BENE_ID_DUAL_ONLY = "184043356";
   protected static final String BENE_ID_DUAL_ONLY_EXPIRED = "184043357";
   protected static final String BENE_ID_ALL_PARTS_WITH_XREF = "405764107";

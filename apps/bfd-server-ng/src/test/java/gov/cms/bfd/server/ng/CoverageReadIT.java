@@ -258,7 +258,7 @@ class CoverageReadIT extends IntegrationTestBase {
 
   @Test
   void coverageReadPartCAndDOnly() {
-    var partCId = createCoverageId("part-c", BENE_ID_PART_C_AND_D_ONLY);
+    var partCId = createCoverageId("part-c", BENE_ID_PART_C_AND_D_ONLY_SAME_PROGRAM_TYPE_CODE);
     var coverage = coverageRead().withId(partCId).execute();
 
     // only part c coverage is read
