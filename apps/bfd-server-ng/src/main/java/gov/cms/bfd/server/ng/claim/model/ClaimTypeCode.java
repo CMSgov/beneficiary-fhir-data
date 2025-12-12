@@ -375,24 +375,8 @@ public enum ClaimTypeCode {
     if (!isBetween(5, 3999)) {
       return Optional.empty();
     }
-    String partDisplay = "Part A";
 
-    var recordTypeCode =
-        claimRecordType
-            .getClaimRecordTypeCode()
-            .or(
-                () ->
-                    claimRecordType
-                        .getClaimNearLineRecordTypeCode()
-                        .map(ClaimNearLineRecordTypeCode::toClaimRecordTypeCode));
-
-    if (recordTypeCode.isPresent()) {
-      partDisplay =
-          switch (recordTypeCode.get()) {
-            case M, O, W -> "Part B";
-            case U, V -> "Part A";
-          };
-    }
+    var partDisplay = claimRecordType.getPartDisplay().orElse("Part A");
 
     return Optional.of(
         new ExplanationOfBenefit.InsuranceComponent()

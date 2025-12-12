@@ -18,28 +18,31 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @SuppressWarnings("java:S115")
 public enum ClaimRecordTypeCode {
   /** M - Part B DMEPOS claim record (processed by DME Regional Carrier). */
-  M("M", "Part B DMEPOS claim record (processed by DME Regional Carrier)"),
+  M("M", "Part B DMEPOS claim record (processed by DME Regional Carrier)", "Part B"),
   /**
    * O - Part B physician/supplier claim record (processed by local carriers; can include DMEPOS
    * services).
    */
   O(
       "O",
-      "Part B physician/supplier claim record (processed by local carriers; can include DMEPOS services)"),
+      "Part B physician/supplier claim record (processed by local carriers; can include DMEPOS services)",
+      "Part B"),
   /** U - Both Part A and B institutional home health agency (HHA) claim records. */
-  U("U", "Both Part A and B institutional home health agency (HHA) claim records"),
+  U("U", "Both Part A and B institutional home health agency (HHA) claim records", "Part A"),
   /**
    * V - Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice
    * [HOS], or home health agency [HHA]).
    */
   V(
       "V",
-      "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA])."),
+      "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA]).",
+      "Part A"),
   /** W - Part B institutional claim record (outpatient [HOP], HHA). */
-  W("W", "Part B institutional claim record (outpatient [HOP], HHA)");
+  W("W", "Part B institutional claim record (outpatient [HOP], HHA)", "Part B");
 
   private final String code;
   private final String display;
+  private final String partDisplay;
 
   /**
    * Convert from a database code.
