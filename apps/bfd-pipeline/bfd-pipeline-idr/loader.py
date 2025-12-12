@@ -46,7 +46,9 @@ class PostgresLoader:
         progress: LoadProgress | None,
         load_type: LoadType,
     ) -> bool:
-        return BatchLoader(self.conn, fetch_results, model, job_start, partition, progress, load_type).load()
+        return BatchLoader(
+            self.conn, fetch_results, model, job_start, partition, progress, load_type
+        ).load()
 
     def close(self) -> None:
         self.conn.close()

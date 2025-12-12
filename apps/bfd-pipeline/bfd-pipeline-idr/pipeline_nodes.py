@@ -88,7 +88,7 @@ def _gen_partitioned_node_inputs(
     return sorted(res, key=lambda m: m[1].priority if m[1] else 0)
 
 
-def stage1(load_mode: LoadMode, start_time: datetime,load_type: LoadType) -> bool:
+def stage1(load_mode: LoadMode, start_time: datetime, load_type: LoadType) -> bool:
     return extract_and_load(
         cls=IdrBeneficiaryOvershareMbi,
         partition=None,
@@ -148,7 +148,7 @@ def do_stage3(
     stage3_inputs: NodePartitionedModelInput,
     load_mode: LoadMode,
     start_time: datetime,
-    load_type: LoadType
+    load_type: LoadType,
 ) -> bool:
     model_type, partition = stage3_inputs
     return extract_and_load(
