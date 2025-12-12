@@ -3,7 +3,6 @@ from collections.abc import Iterator, Sequence
 from datetime import UTC, date, datetime
 
 import psycopg
-import pprint
 
 from constants import DEFAULT_MIN_DATE
 from load_partition import LoadPartition
@@ -292,7 +291,8 @@ class BatchLoader:
                 UPDATE {self.model.last_updated_date_table()} u
                 SET {set_clause}
                 FROM locked l
-                WHERE u.{self.model.last_updated_timestamp_key_col()} = l.{self.model.last_updated_timestamp_key_col()};
+                WHERE 
+                u.{self.model.last_updated_timestamp_key_col()} = l.{self.model.last_updated_timestamp_key_col()};
                 """,  # type: ignore
                 {"timestamp": timestamp},
             )

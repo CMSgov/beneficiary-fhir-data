@@ -1837,11 +1837,6 @@ class IdrClaimProfessional(IdrBaseModel):
         return ["bfd_claim_updated_ts"]
 
     @staticmethod
-    def last_updated_date_column() -> list[str]:
-        """BFD column that keeps track of last updated date for this model."""
-        return ["bfd_claim_updated_ts"]
-
-    @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
         clm = ALIAS_CLM
         prfnl = ALIAS_PRFNL
