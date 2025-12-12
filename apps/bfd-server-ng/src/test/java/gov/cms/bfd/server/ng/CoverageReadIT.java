@@ -264,7 +264,7 @@ class CoverageReadIT extends IntegrationTestBase {
     // only part c coverage is read
     var classComponent = coverage.getClass_().stream().findFirst();
     var coveragePart = classComponent.map(Coverage.ClassComponent::getValue).orElse("");
-    assertTrue("Part C".equals(coveragePart));
+    assertEquals("Part C", coveragePart);
 
     expectFhir().toMatchSnapshot(coverage);
   }
