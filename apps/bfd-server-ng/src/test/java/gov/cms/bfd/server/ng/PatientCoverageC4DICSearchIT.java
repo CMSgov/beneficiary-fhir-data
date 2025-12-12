@@ -107,7 +107,7 @@ class PatientCoverageC4DICSearchIT extends IntegrationTestBase {
     assertNotNull(response);
     assertEquals(Bundle.BundleType.COLLECTION, response.getType());
     assertFalse(response.getEntry().isEmpty());
-    assertEquals(5, response.getEntry().size());
+    assertEquals(7, response.getEntry().size());
 
     long patientCount =
         response.getEntry().stream().filter(e -> e.getResource() instanceof Patient).count();
@@ -118,7 +118,7 @@ class PatientCoverageC4DICSearchIT extends IntegrationTestBase {
 
     assertEquals(1, patientCount);
     assertEquals(1, orgCount);
-    assertEquals(3, coverageCount);
+    assertEquals(5, coverageCount);
     // Checking IDs are present because snapshot is suppressing IDs.
     assertAllResourcesHaveValidProfilesAndIds(response);
     expectFhir().toMatchSnapshot(response);
@@ -127,7 +127,18 @@ class PatientCoverageC4DICSearchIT extends IntegrationTestBase {
   private void assertAllResourcesHaveValidProfilesAndIds(Bundle bundle) {
     for (Bundle.BundleEntryComponent entry : bundle.getEntry()) {
       Resource resource = entry.getResource();
-      assertTrue(isValidUuidUrn(resource.getId()));
+
+      boolean skipUuidCheck = false;
+      if (resource instanceof Coverage coverage) {
+        var classComponent = coverage.getClass_().stream().findFirst();
+        var coveragePart = classComponent.map(Coverage.ClassComponent::getValue).orElse("");
+        skipUuidCheck = "Part C".equals(coveragePart) || "Part D".equals(coveragePart);
+      }
+      if (!skipUuidCheck) {
+        assertTrue(isValidUuidUrn(resource.getId()));
+      } else {
+        assertTrue(isValidPartCAndDCoverageId(resource.getId()));
+      }
 
       String expectedProfile =
           switch (resource) {
@@ -147,6 +158,14 @@ class PatientCoverageC4DICSearchIT extends IntegrationTestBase {
     }
     String uuid = id.substring("urn:uuid:".length());
     return uuid.matches("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}");
+  }
+
+  private boolean isValidPartCAndDCoverageId(String id) {
+    if (!id.startsWith("urn:uuid:")) {
+      return false;
+    }
+    String uuid = id.substring("urn:uuid:".length());
+    return uuid.matches("(?:[A-Za-z0-9]+-)?part-[cd]-\\d+-\\p{Alnum}{5}-\\d{3}");
   }
 
   @Test

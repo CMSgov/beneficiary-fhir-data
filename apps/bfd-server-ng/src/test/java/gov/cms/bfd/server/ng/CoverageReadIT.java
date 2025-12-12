@@ -14,6 +14,7 @@ import gov.cms.bfd.server.ng.coverage.CoverageResourceProvider;
 import gov.cms.bfd.server.ng.testUtil.ThreadSafeAppender;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import io.restassured.RestAssured;
+import java.util.List;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.IdType;
@@ -78,6 +79,26 @@ class CoverageReadIT extends IntegrationTestBase {
     assertNotNull(missingCoverage, "Coverage resource should not be null for a valid ID");
     assertFalse(missingCoverage.isEmpty(), "Coverage resource should not be empty for a valid ID");
     expectFhir().scenario("missingPartA").toMatchSnapshot(missingCoverage);
+  }
+
+  @Test
+  void coverageReadValidPartCCompositeId() {
+    var validCoverageId = createCoverageId("part-c", BENE_ID_PART_C_ONLY);
+
+    var coverage = coverageRead().withId(validCoverageId).execute();
+    assertNotNull(coverage, "Coverage resource should not be null for a valid ID");
+    assertFalse(coverage.isEmpty(), "Coverage resource should not be empty for a valid ID");
+    expectFhir().scenario("validPartC").toMatchSnapshot(coverage);
+  }
+
+  @Test
+  void coverageReadValidPartDCompositeId() {
+    var validCoverageId = createCoverageId("part-d", BENE_ID_PART_D_ONLY);
+
+    var coverage = coverageRead().withId(validCoverageId).execute();
+    assertNotNull(coverage, "Coverage resource should not be null for a valid ID");
+    assertFalse(coverage.isEmpty(), "Coverage resource should not be empty for a valid ID");
+    expectFhir().scenario("validPartD").toMatchSnapshot(coverage);
   }
 
   @Test
@@ -156,7 +177,7 @@ class CoverageReadIT extends IntegrationTestBase {
   }
 
   @ParameterizedTest
-  @ValueSource(strings = {"part-A", "part-B", "dual"})
+  @ValueSource(strings = {"part-A", "part-B", "dual", "part-C", "part-D"})
   void coverageReadBeneWithNoCoverageReturnsEmpty(String part) {
     final var partId = createCoverageId(part, BENE_ID_NO_COVERAGE);
     var coverage = coverageRead().withId(partId).execute();
@@ -166,11 +187,13 @@ class CoverageReadIT extends IntegrationTestBase {
   }
 
   @ParameterizedTest
-  @ValueSource(strings = {"part-A", "part-B", "dual"})
+  @ValueSource(strings = {"part-A", "part-B", "dual", "part-C", "part-D"})
   void coverageReadBeneWithAllCoverage(String part) {
     final var partId = createCoverageId(part, BENE_ID_ALL_PARTS_WITH_XREF);
     var coverage = coverageRead().withId(partId).execute();
-    assertEquals(partId.toLowerCase(), coverage.getIdPart());
+    if (List.of("part-A", "part-B", "dual").contains(part)) {
+      assertEquals(partId.toLowerCase(), coverage.getIdPart());
+    }
     expectFhir().scenario("allCoverage" + part).toMatchSnapshot(coverage);
   }
 
@@ -229,6 +252,18 @@ class CoverageReadIT extends IntegrationTestBase {
 
     assertEquals(dualId, coverage.getIdPart());
     assertEquals(Coverage.CoverageStatus.CANCELLED, coverage.getStatus());
+
+    expectFhir().toMatchSnapshot(coverage);
+  }
+
+  @Test
+  void coverageReadPartCAndDOnly() {
+    var partCId = createCoverageId("part-c", BENE_ID_PART_C_AND_D_ONLY_SAME_PROGRAM_TYPE_CODE);
+    var coverage = coverageRead().withId(partCId).execute();
+
+    var classComponent = coverage.getClass_().stream().findFirst();
+    var coveragePart = classComponent.map(Coverage.ClassComponent::getValue).orElse("");
+    assertEquals("Part C", coveragePart);
 
     expectFhir().toMatchSnapshot(coverage);
   }

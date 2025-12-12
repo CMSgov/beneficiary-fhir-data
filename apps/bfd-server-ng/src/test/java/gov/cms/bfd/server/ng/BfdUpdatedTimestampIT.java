@@ -190,7 +190,8 @@ class BfdUpdatedTimestampIT extends IntegrationTestBase {
     var beneOpt = coverageRepository.searchBeneficiaryWithCoverage(beneId, new DateTimeRange());
     return beneOpt.map(
         bene -> {
-          var coverage = bene.toFhirCoverageIfPresent(coverageCompositeId).get();
+          var coverage =
+              bene.toFhirCoverageIfPresent(coverageCompositeId).stream().findFirst().get();
           return coverage.getMeta().getLastUpdated().toInstant().atZone(ZoneId.of("UTC"));
         });
   }

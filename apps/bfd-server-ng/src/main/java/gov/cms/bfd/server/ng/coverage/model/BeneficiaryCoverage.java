@@ -22,8 +22,11 @@ import java.util.UUID;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.Annotation;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.MarkdownType;
 import org.hl7.fhir.r4.model.Reference;
 
@@ -51,6 +54,18 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
   @OneToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "bene_sk")
   private BeneficiaryDualEligibility beneficiaryDualEligibility;
+
+  @OneToMany(fetch = FetchType.EAGER)
+  @JoinColumn(name = "bene_sk")
+  private SortedSet<BeneficiaryMAPartDEnrollment> beneficiaryMAPartDEnrollments;
+
+  @OneToMany(fetch = FetchType.EAGER)
+  @JoinColumn(name = "bene_sk")
+  private SortedSet<BeneficiaryMAPartDEnrollmentRx> beneficiaryMAPartDEnrollmentsRx;
+
+  @OneToMany(fetch = FetchType.EAGER)
+  @JoinColumn(name = "bene_sk")
+  private SortedSet<BeneficiaryLowIncomeSubsidy> beneficiaryLowIncomeSubsidies;
 
   /**
    * Value for C4DIC Additional Insurance Card Information Extension <a
@@ -87,6 +102,36 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
 
   private Optional<BeneficiaryDualEligibility> getDualEligibility() {
     return Optional.ofNullable(beneficiaryDualEligibility);
+  }
+
+  /**
+   * Finds the enrollment record for a given coverage part.
+   *
+   * @param coveragePart The coverage part
+   * @return Optional containing the matching enrollment, or empty if not found.
+   */
+  private Optional<BeneficiaryMAPartDEnrollment> getEnrollment(CoveragePart coveragePart) {
+    var coverageType = coveragePart.getStandardCode();
+    return beneficiaryMAPartDEnrollments.stream()
+        .filter(
+            e -> {
+              var programTypeCode = e.getId().getEnrollmentProgramTypeCode();
+              return switch (coverageType) {
+                case "C" -> programTypeCode.equals("1") || programTypeCode.equals("3");
+                case "D" -> programTypeCode.equals("2") || programTypeCode.equals("3");
+                default -> false;
+              };
+            })
+        .findFirst();
+  }
+
+  // when we support multiple coverages these two will have to be changed to return multiple rows.
+  private Optional<BeneficiaryMAPartDEnrollmentRx> getRxEnrollment() {
+    return beneficiaryMAPartDEnrollmentsRx.stream().findFirst();
+  }
+
+  private Optional<BeneficiaryLowIncomeSubsidy> getLowIncomeSubsidy() {
+    return beneficiaryLowIncomeSubsidies.stream().findFirst();
   }
 
   /**
@@ -134,6 +179,31 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
   }
 
   /**
+   * Creates a FHIR Coverage resource or None if the beneficiary does not have the matching coverage
+   * type.
+   *
+   * @param coverageCompositeId The full ID for the Coverage resource.
+   * @return A FHIR Coverage object.
+   */
+  public Optional<Coverage> toFhirCoverageIfPresent(CoverageCompositeId coverageCompositeId) {
+    return Optional.of(toFhir(coverageCompositeId)).filter(c -> !c.getIdentifier().isEmpty());
+  }
+
+  /**
+   * Creates a FHIR Coverage resource or None if the beneficiary does not have the matching coverage
+   * type.
+   *
+   * @param coverageCompositeId The full ID for the Coverage resource.
+   * @param orgId The organization reference ID (only used if isC4DIC is true).
+   * @return A FHIR Coverage object.
+   */
+  public Optional<Coverage> toFhirCoverageIfPresentC4DIC(
+      CoverageCompositeId coverageCompositeId, String orgId) {
+    return Optional.of(toFhirC4DIC(coverageCompositeId, orgId))
+        .filter(c -> !c.getIdentifier().isEmpty());
+  }
+
+  /**
    * Creates a FHIR Coverage resource.
    *
    * @param coverageCompositeId The full ID for the Coverage resource.
@@ -153,6 +223,8 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
 
     return switch (coveragePart) {
       case PART_A, PART_B -> mapCoverageAB(coverage, coveragePart, ProfileType.C4BB, "");
+      case PART_C -> mapCoverageC(coverage, coveragePart, ProfileType.C4BB, "");
+      case PART_D -> mapCoverageD(coverage, coveragePart, ProfileType.C4BB, "");
       case DUAL -> mapCoverageDual(coverage, ProfileType.C4BB, "");
     };
   }
@@ -170,44 +242,12 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
 
     return switch (coveragePart) {
       case PART_A, PART_B -> mapCoverageAB(coverage, coveragePart, ProfileType.C4DIC, orgId);
+      case PART_C -> mapCoverageC(coverage, coveragePart, ProfileType.C4DIC, orgId);
+      case PART_D -> mapCoverageD(coverage, coveragePart, ProfileType.C4DIC, orgId);
       case DUAL -> mapCoverageDual(coverage, ProfileType.C4DIC, orgId);
     };
   }
 
-  /**
-   * Creates a FHIR Coverage resource or None if the beneficiary does not have the matching coverage
-   * type.
-   *
-   * @param coverageCompositeId The full ID for the Coverage resource.
-   * @return A FHIR Coverage object.
-   */
-  public Optional<Coverage> toFhirCoverageIfPresent(CoverageCompositeId coverageCompositeId) {
-    return Optional.of(toFhir(coverageCompositeId)).filter(c -> !c.getIdentifier().isEmpty());
-  }
-
-  /**
-   * Creates a FHIR Coverage resource or None if the beneficiary does not have the matching coverage
-   * type.
-   *
-   * @param orgId The organization reference ID (only used if isC4DIC is true).
-   * @param coverageCompositeId The full ID for the Coverage resource.
-   * @return A FHIR Coverage object.
-   */
-  public Optional<Coverage> toFhirCoverageIfPresentC4DIC(
-      CoverageCompositeId coverageCompositeId, String orgId) {
-    return Optional.of(toFhirC4DIC(coverageCompositeId, orgId))
-        .filter(c -> !c.getIdentifier().isEmpty());
-  }
-
-  /**
-   * Maps Part A and B coverage for both standard and C4DIC formats.
-   *
-   * @param coverage The base coverage object.
-   * @param coveragePart The coverage part (A or B).
-   * @param profileType Profile type.
-   * @param orgId The organization reference ID (only used if isC4DIC is true).
-   * @return The populated Coverage object.
-   */
   private Coverage mapCoverageAB(
       Coverage coverage, CoveragePart coveragePart, ProfileType profileType, String orgId) {
     var entitlementOpt = findEntitlement(coveragePart);
@@ -259,14 +299,6 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
     return emptyCoverage;
   }
 
-  /**
-   * Maps Dual eligibility coverage for both standard and C4DIC formats.
-   *
-   * @param coverage The base coverage object.
-   * @param profileType The profile type.
-   * @param orgId The organization reference ID (only used if isC4DIC is true).
-   * @return The populated Coverage object.
-   */
   private Coverage mapCoverageDual(Coverage coverage, ProfileType profileType, String orgId) {
     var dualEligibilityOpt = getDualEligibility();
     if (dualEligibilityOpt.isEmpty()) {
@@ -295,6 +327,84 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
     return coverage;
   }
 
+  private Coverage mapCoverageC(
+      Coverage coverage, CoveragePart coveragePart, ProfileType profileType, String orgId) {
+    var enrollmentOpt = getEnrollment(coveragePart);
+    if (enrollmentOpt.isEmpty()) {
+      return toEmptyResource(coverage);
+    }
+
+    identifier.toFhir(orgId).ifPresent(coverage::addIdentifier);
+
+    var enrollment = enrollmentOpt.get();
+    coverage.setId(createCoverageIdPartCD(coveragePart, enrollment));
+    coverage.setPeriod(enrollment.toFhirPeriod());
+    coverage.setStatus(enrollment.toFhirStatus());
+
+    if (profileType == ProfileType.C4DIC) {
+      coverage.addPayor(new Reference().setReference(ORGANIZATION_REF + orgId));
+      coverage.addExtension(
+          new Extension(SystemUrls.C4DIC_ADD_INFO_EXT_URL)
+              .setValue(new Annotation(new MarkdownType(C4DIC_ADD_INFO))));
+    } else {
+      var contract = enrollment.getEnrollmentContract();
+      var cmsOrg = OrganizationFactory.createInsurerOrganization(contract);
+      coverage.addContained(cmsOrg);
+      coverage.addPayor(new Reference().setReference("#" + cmsOrg.getIdElement().getIdPart()));
+      enrollment.toFhirExtensions().forEach(coverage::addExtension);
+    }
+
+    return coverage;
+  }
+
+  private Coverage mapCoverageD(
+      Coverage coverage, CoveragePart coveragePart, ProfileType profileType, String orgId) {
+    var enrollmentOpt = getEnrollment(coveragePart);
+    if (enrollmentOpt.isEmpty()) {
+      return toEmptyResource(coverage);
+    }
+
+    identifier.toFhir(orgId).ifPresent(coverage::addIdentifier);
+    coverage.setType(coveragePart.toFhirTypeCode());
+
+    var enrollment = enrollmentOpt.get();
+    coverage.setId(createCoverageIdPartCD(coveragePart, enrollment));
+    var rxInfo = getRxEnrollment();
+    rxInfo
+        .flatMap(BeneficiaryMAPartDEnrollmentRx::getMemberId)
+        .ifPresent(
+            memberId -> {
+              Identifier memberIdentifier = new Identifier();
+              memberIdentifier.setType(
+                  new CodeableConcept()
+                      .addCoding(new Coding(SystemUrls.HL7_IDENTIFIER, "MB", null)));
+              memberIdentifier.setValue(memberId);
+              coverage.addIdentifier(memberIdentifier);
+            });
+    rxInfo.ifPresent(rx -> rx.toFhirClassComponents().forEach(coverage::addClass_));
+
+    var lowIncomeSubsidy = getLowIncomeSubsidy();
+    lowIncomeSubsidy.ifPresent(lis -> lis.toFhirExtensions().forEach(coverage::addExtension));
+
+    coverage.setPeriod(enrollment.toFhirPeriod());
+    coverage.setStatus(enrollment.toFhirStatus());
+
+    if (profileType == ProfileType.C4DIC) {
+      coverage.addPayor(new Reference().setReference(ORGANIZATION_REF + orgId));
+      coverage.addExtension(
+          new Extension(SystemUrls.C4DIC_ADD_INFO_EXT_URL)
+              .setValue(new Annotation(new MarkdownType(C4DIC_ADD_INFO))));
+    } else {
+      var contract = enrollment.getEnrollmentContract();
+      var cmsOrg = OrganizationFactory.createInsurerOrganization(contract);
+      coverage.addContained(cmsOrg);
+      coverage.addPayor(new Reference().setReference("#" + cmsOrg.getIdElement().getIdPart()));
+      enrollment.toFhirExtensions().forEach(coverage::addExtension);
+    }
+
+    return coverage;
+  }
+
   private ZonedDateTime getMostRecentUpdated() {
     // Collect timestamps from beneficiary and all related child entities
     var allTimestamps =
@@ -306,11 +416,26 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
                 .stream(),
             getDualEligibility().map(BeneficiaryDualEligibility::getBfdUpdatedTimestamp).stream(),
             beneficiaryEntitlements.stream().map(BeneficiaryEntitlement::getBfdUpdatedTimestamp),
-            beneficiaryThirdParties.stream().map(BeneficiaryThirdParty::getBfdUpdatedTimestamp));
+            beneficiaryThirdParties.stream().map(BeneficiaryThirdParty::getBfdUpdatedTimestamp),
+            beneficiaryMAPartDEnrollments.stream()
+                .map(BeneficiaryMAPartDEnrollment::getBfdUpdatedTimestamp),
+            beneficiaryMAPartDEnrollmentsRx.stream()
+                .map(BeneficiaryMAPartDEnrollmentRx::getBfdUpdatedTimestamp),
+            beneficiaryLowIncomeSubsidies.stream()
+                .map(BeneficiaryLowIncomeSubsidy::getBfdUpdatedTimestamp));
 
     return allTimestamps
         .flatMap(s -> s)
         .max(Comparator.naturalOrder())
         .orElse(meta.getUpdatedTimestamp());
+  }
+
+  private String createCoverageIdPartCD(
+      CoveragePart coveragePart, BeneficiaryMAPartDEnrollment enrollment) {
+    var coverageType = coveragePart.getStandardSystem();
+    var beneSk = enrollment.getId().getBeneSk();
+    var contractNum = enrollment.getContractNumber();
+    var contractPbpNum = enrollment.getDrugPlanNumber();
+    return String.format("%s-%s-%s-%s", coverageType, beneSk, contractNum, contractPbpNum);
   }
 }

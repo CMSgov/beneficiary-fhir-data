@@ -147,6 +147,78 @@ public class SystemUrls {
       "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-ENRLMT-RSN-CD";
 
   /**
+   * Extension URL for BFD Contract Number. Source: V2_MDCR_BENE_MAPD_ENRLMT.BENE_CNTRCT_NUM (from
+   * v2_mdcr_bene_mapd_enrlmt) <a
+   * href="https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-CNTRCT-NUM">BENE-CNTRCT-NUM
+   * Extension</a>
+   */
+  public static final String EXT_BENE_CNTRCT_NUM_URL =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-CNTRCT-NUM";
+
+  /**
+   * Extension URL for BFD Plan Beneficiary Package Number. Source:
+   * V2_MDCR_BENE_MAPD_ENRLMT.BENE_PBP_NUM (from v2_mdcr_bene_mapd_enrlmt) <a
+   * href="https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-PBP-NUM">BENE-PBP-NUM
+   * Extension</a>
+   */
+  public static final String EXT_BENE_PBP_NUM_URL =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-PBP-NUM";
+
+  /**
+   * Extension URL for BFD Contract Plan Beneficiary Package Segment Number. Source:
+   * V2_MDCR_CNTRCT_PBP_SGMT.CNTRCT_PBP_SGMT_NUM (from v2_mdcr_cntrct_pbp_sgmt) <a
+   * href="https://bluebutton.cms.gov/fhir/StructureDefinition/CNTRCT-PBP-SGMT-NUM">CNTRCT-PBP-SGMT-NUM
+   * Extension</a>
+   */
+  public static final String EXT_CNTRCT_PBP_SGMT_NUM_URL =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/CNTRCT-PBP-SGMT-NUM";
+
+  /**
+   * Extension URL for BFD Beneficiary Enrollment Employer Subsidy Switch Indication. Source:
+   * V2_MDCR_BENE_MAPD_ENRLMT.BENE_ENRLMT_EMPLR_SBSDY_SW (from v2_mdcr_bene_mapd_enrlmt) <a
+   * href="https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-ENRLMT-EMPLR-SBSDY-SW">BENE-ENRLMT-EMPLR-SBSDY-SW
+   * Extension</a>
+   */
+  public static final String EXT_BENE_ENRLMT_EMPLR_SBSDY_SW_URL =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-ENRLMT-EMPLR-SBSDY-SW";
+
+  /**
+   * Extension URL for BFD Medicare Coverage Type Code. Source:
+   * V2_MDCR_BENE_MAPD_ENRLMT.BENE_CVRG_TYPE_CD (from v2_mdcr_bene_mapd_enrlmt) <a
+   * href="https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-CVRG-TYPE-CD">BENE-CVRG-TYPE-CD
+   * Extension</a>
+   */
+  public static final String EXT_BENE_CVRG_TYPE_CD_URL =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-CVRG-TYPE-CD";
+
+  /**
+   * Extension URL for BFD Low Income Subsidy Copayment Level Code. Source:
+   * V2_MDCR_BENE_LIS.BENE-LIS-COPMT-LVL-CD (from v2_mdcr_bene_lis) <a
+   * href="https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-LIS-COPMT-LVL-CD">BENE-LIS-COPMT-LVL-CD
+   * Extension</a>
+   */
+  public static final String EXT_BENE_LIS_COPMT_LVL_CD_URL =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-LIS-COPMT-LVL-CD";
+
+  /**
+   * System URL for the BFD/BlueButton Low Income Subsidy Copayment Level Code system. Used for the
+   * coding in the BENE-LIS-COPMT-LVL-CD extension. <a
+   * href="https://bluebutton.cms.gov/fhir/CodeSystem/BENE-LIS-COPMT-LVL-CD">BENE-LIS-COPMT-LVL-CD
+   * CodeSystem</a>
+   */
+  public static final String SYS_BENE_LIS_COPMT_LVL_CD_CD =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-LIS-COPMT-LVL-CD";
+
+  /**
+   * Extension URL for BFD Low Income Subsidy Part D Premium Percentage. Source:
+   * V2_MDCR_BENE_LIS.BENE-LIS-PTD-PRM-PCT (from v2_mdcr_bene_lis) <a
+   * href="https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-LIS-PTD-PRM-PCT">BENE-LIS-PTD-PRM-PCT
+   * Extension</a>
+   */
+  public static final String EXT_BENE_LIS_PTD_PRM_PCT_URL =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-LIS-PTD-PRM-PCT";
+
+  /**
    * Extension URL for BFD Medicare Current Entitlement Reason Code. Source:
    * V2_BENE_MDCR_ENTLMT_RSN.BENE_MDCR_ENTLMT_RSN_CD (from v2_mdcr_bene_mdcr_entlmt_rsn) <a
    * href="https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-ENTLMT-RSN-CD">BENE-MDCR-ENTLMT-RSN-CD
@@ -197,6 +269,15 @@ public class SystemUrls {
    */
   public static final String SYS_BENE_MDCR_ENTLMT_STUS_CD =
       "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-STUS-CD";
+
+  /**
+   * System URL for the BFD/BlueButton Coverage Type Code system. Used for the coding in the
+   * BENE-CVRG-TYPE-CD extension. <a
+   * href="https://bluebutton.cms.gov/fhir/CodeSystem/BENE-CVRG-TYPE-CD">BENE-CVRG-TYPE-CD
+   * CodeSystem</a>
+   */
+  public static final String SYS_CVRG_TYPE_CD =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-CVRG-TYPE-CD";
 
   /**
    * System URL for the BFD/BlueButton Beneficiary Enrollment Reason Code system. Used for the
