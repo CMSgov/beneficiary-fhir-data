@@ -1,7 +1,7 @@
 CodeSystem: CLM_MDCR_INSTNL_MCO_PD_SW
-Title: "Clm Mdcr Instnl Mco Pd Sw"
+Title: "Medicare MCO Paid Switch"
 Id: CLM-MDCR-INSTNL-MCO-PD-SW
-Description: "Code system for clm mdcr instnl mco pd sw"
+Description: "A SWITCH INDICATING WHETHER OR NOT A MANAGED CARE ORGANIZATION (MCO) HAS PAID THE PROVIDER FOR AN INSTITUTIONAL CLAIM."
 * ^url = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
 * ^status = #active
 * ^content = #complete

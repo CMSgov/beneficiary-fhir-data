@@ -1,7 +1,7 @@
 CodeSystem: CLM_FI_ACTN_CD
-Title: "Clm Fi Actn Cd"
+Title: "Claim Fiscal Intermediary Action Code"
 Id: CLM-FI-ACTN-CD
-Description: "Code system for clm fi actn cd"
+Description: "The type of action requested by the intermediary to be taken on an institutional claim."
 * ^url = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
 * ^status = #active
 * ^content = #complete

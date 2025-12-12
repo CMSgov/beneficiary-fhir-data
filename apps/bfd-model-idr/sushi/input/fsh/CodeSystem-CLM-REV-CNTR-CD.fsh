@@ -1,7 +1,7 @@
 CodeSystem: CLM_REV_CNTR_CD
-Title: "Clm Rev Cntr Cd"
+Title: "Claim Revenue Center Code"
 Id: CLM-REV-CNTR-CD
-Description: "Code system for clm rev cntr cd"
+Description: "Domain of Revenue Center Codes"
 * ^url = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD"
 * ^status = #active
 * ^content = #complete

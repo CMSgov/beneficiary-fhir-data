@@ -1,7 +1,7 @@
 CodeSystem: CLM_QUERY_CD
-Title: "Clm Query Cd"
+Title: "Claim Query Code"
 Id: CLM-QUERY-CD
-Description: "Code system for clm query cd"
+Description: "Code indicating the type of claim record being processed with respect to payment (debit/credit indicator; interim/final indicator)."
 * ^url = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD"
 * ^status = #active
 * ^content = #complete
