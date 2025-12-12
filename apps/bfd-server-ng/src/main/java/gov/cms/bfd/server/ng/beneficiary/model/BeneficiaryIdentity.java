@@ -31,8 +31,8 @@ public class BeneficiaryIdentity {
   public Identifier toFhirIdentifier() {
     var identifier = new Identifier().setSystem(SystemUrls.CMS_MBI).setValue(id.getMbi());
     var period = new Period();
-    id.getMbiEffectiveDate().ifPresent(e -> period.setStart(DateUtil.toDate(e)));
-    id.getMbiObsoleteDate().ifPresent(o -> period.setEnd(DateUtil.toDate(o)));
+    id.getMbiEffectiveDate().ifPresent(e -> period.setStart(DateUtil.toDateAndSanitize(e)));
+    id.getMbiObsoleteDate().ifPresent(o -> period.setEnd(DateUtil.toDateAndSanitize(o)));
     identifier.setPeriod(period);
 
     final var memberNumber = "MB";

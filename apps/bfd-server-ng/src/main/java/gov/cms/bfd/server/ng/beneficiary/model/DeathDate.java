@@ -27,7 +27,7 @@ public class DeathDate {
       return deathDate.map(
           d ->
               new DateTimeType(
-                  DateUtil.toDate(d),
+                  DateUtil.toDateAndSanitize(d),
                   TemporalPrecisionEnum.DAY,
                   TimeZone.getTimeZone(DateUtil.ZONE_ID_UTC)));
     } else {

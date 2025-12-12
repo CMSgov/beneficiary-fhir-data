@@ -25,7 +25,8 @@ public class QualifyStayThruDate {
         supportingInfoFactory
             .createSupportingInfo()
             .setCategory(BlueButtonSupportingInfoCategory.CLM_QLFY_STAY_THRU_DT.toFhir())
-            .setTiming(new DateType().setValue(DateUtil.toDate(qualifyStayThruDate.get())));
+            .setTiming(
+                new DateType().setValue(DateUtil.toDateAndSanitize(qualifyStayThruDate.get())));
     return Optional.of(component);
   }
 }

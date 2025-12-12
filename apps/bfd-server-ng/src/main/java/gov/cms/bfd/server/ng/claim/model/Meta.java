@@ -20,7 +20,7 @@ class Meta {
       ZonedDateTime overrideLastUpdated) {
     var meta =
         new org.hl7.fhir.r4.model.Meta()
-            .setLastUpdated(DateUtil.toDate(overrideLastUpdated))
+            .setLastUpdated(DateUtil.toDateAndSanitize(overrideLastUpdated))
             .setSource(claimSourceId.getSource());
     claimTypeCode.toFhirStructureDefinition().ifPresent(meta::addProfile);
     claimSourceId.toFhirAdjudicationStatus().ifPresent(meta::addTag);

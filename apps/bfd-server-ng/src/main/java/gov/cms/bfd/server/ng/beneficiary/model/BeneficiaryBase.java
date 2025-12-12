@@ -83,7 +83,7 @@ public abstract class BeneficiaryBase {
     patient.setCommunication(List.of(languageCode.toFhir()));
     deathDate.toFhir().ifPresent(patient::setDeceased);
     patient.setName(List.of(beneficiaryName.toFhir()));
-    patient.setBirthDate(DateUtil.toDate(birthDate));
+    patient.setBirthDate(DateUtil.toDateAndSanitize(birthDate));
     address.toFhir().ifPresent(a -> patient.setAddress(List.of(a)));
     sexCode.ifPresent(
         s -> {

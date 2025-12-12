@@ -274,7 +274,7 @@ class PatientSearchIT extends IntegrationTestBase {
               .and(
                   new DateClientParam(Constants.PARAM_LASTUPDATED)
                       .exactly()
-                      .day(DateUtil.toDate(lastUpdated)))
+                      .day(DateUtil.toDateAndSanitize(lastUpdated)))
               .usingStyle(searchStyle)
               .execute();
       assertEquals(1, patientBundle.getEntry().size());
@@ -286,7 +286,7 @@ class PatientSearchIT extends IntegrationTestBase {
               .and(
                   new DateClientParam(Constants.PARAM_LASTUPDATED)
                       .after()
-                      .day(DateUtil.toDate(lastUpdated.plusDays(1))))
+                      .day(DateUtil.toDateAndSanitize(lastUpdated.plusDays(1))))
               .usingStyle(searchStyle)
               .execute();
       assertEquals(0, patientBundle.getEntry().size());
@@ -298,7 +298,7 @@ class PatientSearchIT extends IntegrationTestBase {
               .and(
                   new DateClientParam(Constants.PARAM_LASTUPDATED)
                       .before()
-                      .millis(DateUtil.toDate(lastUpdated)))
+                      .millis(DateUtil.toDateAndSanitize(lastUpdated)))
               .usingStyle(searchStyle)
               .execute();
       assertEquals(0, patientBundle.getEntry().size());
@@ -310,7 +310,7 @@ class PatientSearchIT extends IntegrationTestBase {
               .and(
                   new DateClientParam(Constants.PARAM_LASTUPDATED)
                       .afterOrEquals()
-                      .millis(DateUtil.toDate(lastUpdated)))
+                      .millis(DateUtil.toDateAndSanitize(lastUpdated)))
               .usingStyle(searchStyle)
               .execute();
       assertEquals(1, patientBundle.getEntry().size());
@@ -322,7 +322,7 @@ class PatientSearchIT extends IntegrationTestBase {
               .and(
                   new DateClientParam(Constants.PARAM_LASTUPDATED)
                       .beforeOrEquals()
-                      .millis(DateUtil.toDate(lastUpdated.plusDays(1))))
+                      .millis(DateUtil.toDateAndSanitize(lastUpdated.plusDays(1))))
               .usingStyle(searchStyle)
               .execute();
       assertEquals(1, patientBundle.getEntry().size());
@@ -376,7 +376,7 @@ class PatientSearchIT extends IntegrationTestBase {
             .where(
                 new DateClientParam(Constants.PARAM_LASTUPDATED)
                     .afterOrEquals()
-                    .day(DateUtil.toDate(ZonedDateTime.parse("2024-01-01T00:00:00Z"))));
+                    .day(DateUtil.toDateAndSanitize(ZonedDateTime.parse("2024-01-01T00:00:00Z"))));
     assertThrows(InvalidRequestException.class, searchWithDate::execute);
   }
 }

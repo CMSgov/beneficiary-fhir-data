@@ -23,7 +23,8 @@ class BenefitsExhaustedDate {
         supportingInfoFactory
             .createSupportingInfo()
             .setCategory(BlueButtonSupportingInfoCategory.CLM_MDCR_EXHSTD_DT.toFhir())
-            .setTiming(new DateType().setValue(DateUtil.toDate(benefitsExhaustedDate.get())));
+            .setTiming(
+                new DateType().setValue(DateUtil.toDateAndSanitize(benefitsExhaustedDate.get())));
     return Optional.of(component);
   }
 }

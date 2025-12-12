@@ -29,6 +29,20 @@ public class DateUtil {
    * @param localDate local date instance
    * @return date instance
    */
+  public static Date toDateAndSanitize(LocalDate localDate) {
+    localDate = MappingSanitizer.sanitizeDate(localDate);
+    if (localDate != null) {
+      return Date.from(localDate.atStartOfDay(ZONE_ID_UTC).toInstant());
+    }
+    return null;
+  }
+
+  /**
+   * Converts the {@link LocalDate} to a {@link Date} set to midnight UTC.
+   *
+   * @param localDate local date instance
+   * @return date instance
+   */
   public static Date toDate(LocalDate localDate) {
     return Date.from(localDate.atStartOfDay(ZONE_ID_UTC).toInstant());
   }
@@ -43,7 +57,7 @@ public class DateUtil {
    * @return A FHIR DateTimeType with DAY precision, or null if input is null.
    */
   public static DateTimeType toFhirDate(LocalDate localDate) {
-    Date utilDate = toDate(localDate);
+    Date utilDate = toDateAndSanitize(localDate);
     DateTimeType fhirDate = new DateTimeType(utilDate);
     fhirDate.setPrecision(TemporalPrecisionEnum.DAY);
     return fhirDate;
@@ -55,7 +69,7 @@ public class DateUtil {
    * @param zonedDateTime local datetime instance
    * @return date instance
    */
-  public static Date toDate(ZonedDateTime zonedDateTime) {
+  public static Date toDateAndSanitize(ZonedDateTime zonedDateTime) {
     return Date.from(zonedDateTime.toInstant());
   }
 

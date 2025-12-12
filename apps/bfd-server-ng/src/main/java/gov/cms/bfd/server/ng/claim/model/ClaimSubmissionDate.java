@@ -20,7 +20,8 @@ class ClaimSubmissionDate {
     }
 
     var component = supportingInfoFactory.createSupportingInfo();
-    component.setTiming(new DateType().setValue(DateUtil.toDate(claimSubmissionDate.get())));
+    component.setTiming(
+        new DateType().setValue(DateUtil.toDateAndSanitize(claimSubmissionDate.get())));
     component.setCategory(CarinSupportingInfoCategory.SUBMISSION_DATE.toFhir());
     return Optional.of(component);
   }

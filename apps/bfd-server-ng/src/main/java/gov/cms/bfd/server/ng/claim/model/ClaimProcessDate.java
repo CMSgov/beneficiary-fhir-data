@@ -14,6 +14,6 @@ class ClaimProcessDate {
   Extension toFhir() {
     return new Extension()
         .setUrl(SystemUrls.BLUE_BUTTON_STRUCTURE_DEFINITION_CLAIM_PROCESS_DATE)
-        .setValue(new DateType().setValue(DateUtil.toDate(claimProcessDate)));
+        .setValue(new DateType().setValue(DateUtil.toDateAndSanitize(claimProcessDate)));
   }
 }

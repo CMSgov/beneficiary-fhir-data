@@ -23,7 +23,8 @@ class ActiveCareThroughDate {
         supportingInfoFactory
             .createSupportingInfo()
             .setCategory(BlueButtonSupportingInfoCategory.CLM_ACTV_CARE_THRU_DT.toFhir())
-            .setTiming(new DateType().setValue(DateUtil.toDate(activeCareThroughDate.get())));
+            .setTiming(
+                new DateType().setValue(DateUtil.toDateAndSanitize(activeCareThroughDate.get())));
     return Optional.of(component);
   }
 }

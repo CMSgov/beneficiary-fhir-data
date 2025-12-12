@@ -23,7 +23,8 @@ class NchWeeklyProcessingDate {
         supportingInfoFactory
             .createSupportingInfo()
             .setCategory(BlueButtonSupportingInfoCategory.CLM_NCH_WKLY_PROC_DT.toFhir())
-            .setTiming(new DateType().setValue(DateUtil.toDate(weeklyProcessingDate.get())));
+            .setTiming(
+                new DateType().setValue(DateUtil.toDateAndSanitize(weeklyProcessingDate.get())));
     return Optional.of(component);
   }
 }

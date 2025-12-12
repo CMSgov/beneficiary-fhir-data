@@ -163,11 +163,11 @@ class CoverageSearchIT extends IntegrationTestBase {
             .and(
                 new DateClientParam(Constants.PARAM_LASTUPDATED)
                     .afterOrEquals()
-                    .millis(DateUtil.toDate(lowerBound))) // 'ge' one millisecond before
+                    .millis(DateUtil.toDateAndSanitize(lowerBound))) // 'ge' one millisecond before
             .and(
                 new DateClientParam(Constants.PARAM_LASTUPDATED)
                     .beforeOrEquals()
-                    .millis(DateUtil.toDate(upperBound))) // 'le' one millisecond after
+                    .millis(DateUtil.toDateAndSanitize(upperBound))) // 'le' one millisecond after
             .execute();
     assertFalse(
         coverageBundle.getEntry().isEmpty(),
@@ -180,7 +180,7 @@ class CoverageSearchIT extends IntegrationTestBase {
             .and(
                 new DateClientParam(Constants.PARAM_LASTUPDATED)
                     .after()
-                    .millis(DateUtil.toDate(lastUpdated)))
+                    .millis(DateUtil.toDateAndSanitize(lastUpdated)))
             .execute();
     assertEquals(
         0,
@@ -193,7 +193,7 @@ class CoverageSearchIT extends IntegrationTestBase {
             .and(
                 new DateClientParam(Constants.PARAM_LASTUPDATED)
                     .before()
-                    .millis(DateUtil.toDate(lastUpdated)))
+                    .millis(DateUtil.toDateAndSanitize(lastUpdated)))
             .execute();
     assertEquals(
         0,

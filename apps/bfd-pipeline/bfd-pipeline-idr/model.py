@@ -301,9 +301,9 @@ class IdrBeneficiary(IdrBaseModel):
     bene_vrfy_death_day_sw: Annotated[str, BeforeValidator(transform_default_string)]
     bene_sex_cd: str
     bene_race_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    geo_usps_state_cd: str
-    geo_zip5_cd: str
-    geo_zip_plc_name: str
+    geo_usps_state_cd: Annotated[str, BeforeValidator(transform_default_string)]
+    geo_zip5_cd: Annotated[str, BeforeValidator(transform_default_string)]
+    geo_zip_plc_name: Annotated[str, BeforeValidator(transform_default_string)]
     bene_line_1_adr: Annotated[str, BeforeValidator(transform_null_string)]
     bene_line_2_adr: Annotated[str, BeforeValidator(transform_null_string)]
     bene_line_3_adr: Annotated[str, BeforeValidator(transform_null_string)]
@@ -478,7 +478,7 @@ class IdrBeneficiaryOvershareMbi(IdrBaseModel):
 
 class IdrBeneficiaryThirdParty(IdrBaseModel):
     bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
-    bene_buyin_cd: str
+    bene_buyin_cd: Annotated[str, BeforeValidator(transform_default_string)]
     bene_tp_type_cd: Annotated[str, {PRIMARY_KEY: True}]
     bene_rng_bgn_dt: Annotated[date, {PRIMARY_KEY: True}]
     bene_rng_end_dt: Annotated[date, {PRIMARY_KEY: True}]
@@ -555,7 +555,7 @@ class IdrBeneficiaryEntitlement(IdrBaseModel):
     bene_rng_end_dt: Annotated[date, {PRIMARY_KEY: True}]
     bene_mdcr_entlmt_type_cd: Annotated[str, {PRIMARY_KEY: True}]
     bene_mdcr_entlmt_stus_cd: str
-    bene_mdcr_enrlmt_rsn_cd: str
+    bene_mdcr_enrlmt_rsn_cd: Annotated[str, BeforeValidator(transform_default_string)]
     idr_ltst_trans_flg: Annotated[str, BeforeValidator(transform_null_string)]
     idr_insrt_ts: Annotated[datetime, {BATCH_TIMESTAMP: True}]
     idr_trans_efctv_ts: Annotated[datetime, {PRIMARY_KEY: True}]
@@ -665,7 +665,7 @@ class IdrElectionPeriodUsage(IdrBaseModel):
     bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
     cntrct_pbp_sk: Annotated[int, {PRIMARY_KEY: True}]
     bene_cntrct_num: str
-    bene_pbp_num: str
+    bene_pbp_num: Annotated[str, BeforeValidator(transform_default_string)]
     bene_elctn_enrlmt_disenrlmt_cd: str
     bene_elctn_aplctn_dt: date
     bene_enrlmt_efctv_dt: Annotated[date, {PRIMARY_KEY: True}]
@@ -705,8 +705,8 @@ class IdrElectionPeriodUsage(IdrBaseModel):
 
 class IdrContractPbpNumber(IdrBaseModel):
     cntrct_pbp_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
-    cntrct_drug_plan_ind_cd: str
-    cntrct_pbp_type_cd: str
+    cntrct_drug_plan_ind_cd: Annotated[str, BeforeValidator(transform_default_string)]
+    cntrct_pbp_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
     cntrct_pbp_name: Annotated[str, BeforeValidator(transform_null_string)]
     cntrct_num: Annotated[str, BeforeValidator(transform_default_string)]
     cntrct_pbp_num: Annotated[str, BeforeValidator(transform_default_string)]
