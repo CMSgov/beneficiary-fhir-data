@@ -12,8 +12,7 @@ import org.hl7.fhir.r4.model.Patient;
 @Getter
 @Table(name = "valid_beneficiary", schema = "idr")
 public class Beneficiary extends BeneficiaryBase {
-  @Embedded
-  Meta meta;
+  @Embedded Meta meta;
 
   /**
    * Convenience method to convert to FHIR Patient with a specific profile.

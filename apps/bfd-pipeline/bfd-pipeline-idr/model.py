@@ -2078,6 +2078,16 @@ class LoadProgress(IdrBaseModel):
     @staticmethod
     def table() -> str:
         return "idr.load_progress"
+    
+    @staticmethod
+    def last_updated_date_column() -> list[str]:
+        """BFD column that keeps track of last updated date for this model."""
+        return []
+
+    @staticmethod
+    def last_updated_date_table() -> str:
+        """BFD column that keeps track of last updated date for this model."""
+        return ""
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004

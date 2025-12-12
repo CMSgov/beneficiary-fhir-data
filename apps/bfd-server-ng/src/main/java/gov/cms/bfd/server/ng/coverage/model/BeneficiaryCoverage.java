@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.ng.coverage.model;
 
 import gov.cms.bfd.server.ng.beneficiary.model.BeneficiaryBase;
+import gov.cms.bfd.server.ng.beneficiary.model.Meta;
 import gov.cms.bfd.server.ng.beneficiary.model.OrganizationFactory;
 import gov.cms.bfd.server.ng.beneficiary.model.RelationshipFactory;
 import gov.cms.bfd.server.ng.input.CoverageCompositeId;
@@ -50,8 +51,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
   @JoinColumn(name = "bene_sk")
   private BeneficiaryDualEligibility beneficiaryDualEligibility;
 
-  @Embedded
-  private Meta meta;
+  @Embedded private Meta meta;
 
   /**
    * Value for C4DIC Additional Insurance Card Information Extension <a
@@ -121,13 +121,13 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
     coverage.addClass_(coveragePart.toFhirClassComponent());
 
     if (profileType == ProfileType.C4DIC) {
-      coverage.setMeta(meta.toFhir(profileType,coveragePart));
+      coverage.setMeta(meta.toFhir(profileType, coveragePart));
       coverage.setId(UUID.randomUUID().toString());
       coverage.setBeneficiary(new Reference(PATIENT_REF + id));
       coverage.setSubscriber(new Reference(PATIENT_REF + id));
     } else {
       coverage.setId(coverageCompositeId.fullId());
-      coverage.setMeta(meta.toFhir(profileType,coveragePart));
+      coverage.setMeta(meta.toFhir(profileType, coveragePart));
       coverage.setBeneficiary(new Reference(PATIENT_REF + beneSk));
     }
 

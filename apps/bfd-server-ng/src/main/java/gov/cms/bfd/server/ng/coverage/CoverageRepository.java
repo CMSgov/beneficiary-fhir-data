@@ -37,9 +37,9 @@ public class CoverageRepository {
                 LEFT JOIN FETCH b.beneficiaryEntitlements be
                 LEFT JOIN FETCH b.beneficiaryDualEligibility de
                 WHERE b.beneSk = :id
-                  AND ((cast(:lowerBound AS ZonedDateTime)) IS NULL 
+                  AND ((cast(:lowerBound AS ZonedDateTime)) IS NULL
                   OR GREATEST(b.meta.partACoverageUpdatedTs,b.meta.partBCoverageUpdatedTs,b.meta.partCCoverageUpdatedTs,b.meta.partDCoverageUpdatedTs,b.meta.partDualCoverageUpdatedTs) %s :lowerBound)
-                  AND ((cast(:upperBound AS ZonedDateTime)) IS NULL 
+                  AND ((cast(:upperBound AS ZonedDateTime)) IS NULL
                   OR GREATEST(b.meta.partACoverageUpdatedTs,b.meta.partBCoverageUpdatedTs,b.meta.partCCoverageUpdatedTs,b.meta.partDCoverageUpdatedTs,b.meta.partDualCoverageUpdatedTs) %s :upperBound)
                   AND b.beneSk = b.xrefSk
                 ORDER BY b.obsoleteTimestamp DESC
