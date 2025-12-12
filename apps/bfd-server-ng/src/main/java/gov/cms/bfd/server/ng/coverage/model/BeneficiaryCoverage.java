@@ -16,7 +16,6 @@ import jakarta.persistence.Table;
 import java.time.ZonedDateTime;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.SortedSet;
 import java.util.UUID;
@@ -118,10 +117,8 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
             e -> {
               var programTypeCode = e.getId().getEnrollmentProgramTypeCode();
               return switch (coverageType) {
-                case "C" ->
-                    Objects.equals(programTypeCode, "1") || Objects.equals(programTypeCode, "3");
-                case "D" ->
-                    Objects.equals(programTypeCode, "2") || Objects.equals(programTypeCode, "3");
+                case "C" -> programTypeCode.equals("1") || programTypeCode.equals("3");
+                case "D" -> programTypeCode.equals("2") || programTypeCode.equals("3");
                 default -> false;
               };
             })
@@ -340,7 +337,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
     identifier.toFhir(orgId).ifPresent(coverage::addIdentifier);
 
     var enrollment = enrollmentOpt.get();
-    coverage.setId(createCoverageId(coveragePart, enrollment));
+    coverage.setId(createCoverageIdPartCD(coveragePart, enrollment));
     coverage.setPeriod(enrollment.toFhirPeriod());
     coverage.setStatus(enrollment.toFhirStatus());
 
@@ -371,7 +368,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
     coverage.setType(coveragePart.toFhirTypeCode());
 
     var enrollment = enrollmentOpt.get();
-    coverage.setId(createCoverageId(coveragePart, enrollment));
+    coverage.setId(createCoverageIdPartCD(coveragePart, enrollment));
     var rxInfo = getRxEnrollment();
     rxInfo
         .flatMap(BeneficiaryMAPartDEnrollmentRx::getMemberId)
@@ -433,7 +430,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
         .orElse(meta.getUpdatedTimestamp());
   }
 
-  private String createCoverageId(
+  private String createCoverageIdPartCD(
       CoveragePart coveragePart, BeneficiaryMAPartDEnrollment enrollment) {
     var coverageType = coveragePart.getStandardSystem();
     var beneSk = enrollment.getId().getBeneSk();
