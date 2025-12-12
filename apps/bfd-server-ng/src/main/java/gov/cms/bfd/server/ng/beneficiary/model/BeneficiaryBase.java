@@ -91,7 +91,7 @@ public abstract class BeneficiaryBase {
           patient.addExtension(s.toFhirSexExtension());
         });
     patient.addExtension(raceCode.toFhir());
-    patient.setMeta(meta.toFhirPatient(profileType));
+    patient.setMeta(meta.toFhir(profileType));
 
     return patient;
   }

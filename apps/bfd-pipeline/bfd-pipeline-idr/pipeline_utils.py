@@ -13,6 +13,7 @@ from loader import PostgresLoader
 from model import (
     LoadMode,
     LoadProgress,
+    LoadType,
     T,
 )
 
@@ -42,6 +43,7 @@ def extract_and_load(
     cls: type[T],
     load_mode: LoadMode,
     job_start: datetime,
+    load_type: LoadType,
     partition: LoadPartition | None = None,
 ) -> bool:
     partition = partition or DEFAULT_PARTITION
@@ -73,7 +75,7 @@ def extract_and_load(
                 logger.info("no previous progress for %s", cls.table())
 
             data_iter = data_extractor.extract_idr_data(progress, job_start, load_mode)
-            res = loader.load(data_iter, cls, job_start, partition, progress)
+            res = loader.load(data_iter, cls, job_start, partition, progress, load_type)
             data_extractor.close()
             loader.close()
             return res

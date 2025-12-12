@@ -3,10 +3,11 @@ from collections.abc import Iterator, Sequence
 from datetime import UTC, date, datetime
 
 import psycopg
+import pprint
 
 from constants import DEFAULT_MIN_DATE
 from load_partition import LoadPartition
-from model import DbType, LoadMode, LoadProgress, T
+from model import DbType, LoadMode, LoadProgress, LoadType, T
 from settings import (
     bfd_db_endpoint,
     bfd_db_name,
@@ -43,8 +44,9 @@ class PostgresLoader:
         job_start: datetime,
         partition: LoadPartition,
         progress: LoadProgress | None,
+        load_type: LoadType,
     ) -> bool:
-        return BatchLoader(self.conn, fetch_results, model, job_start, partition, progress).load()
+        return BatchLoader(self.conn, fetch_results, model, job_start, partition, progress, load_type).load()
 
     def close(self) -> None:
         self.conn.close()
@@ -59,6 +61,7 @@ class BatchLoader:
         job_start: datetime,
         partition: LoadPartition,
         progress: LoadProgress | None,
+        load_type: LoadType,
     ) -> None:
         self.conn = conn
         self.fetch_results = fetch_results
@@ -84,6 +87,7 @@ class BatchLoader:
         self.copy_timer = Timer("copy", model, partition)
         self.insert_timer = Timer("insert", model, partition)
         self.commit_timer = Timer("commit", model, partition)
+        self.load_type = load_type
 
     def load(
         self,
@@ -267,24 +271,27 @@ class BatchLoader:
             """,  # type: ignore
             {"timestamp": timestamp},
         )
-
-        if self.model.last_updated_date_table():
+        print("self.load_type ", self.load_type)
+        if self.load_type == LoadType.INCREMENTAL and self.model.last_updated_date_table():
+            print("UPDATING")
+            last_updated_cols = self.model.last_updated_date_column()
+            set_clause = ", ".join(f"{col} = %(timestamp)s" for col in last_updated_cols)
             # Locking rows to prevent Deadlocks when multiple nodes update this table
             cur.execute(
                 f"""
                 WITH locked AS (
-                    SELECT {self.model.batch_id_col()}
+                    SELECT {self.model.last_updated_timestamp_key_col()}
                     FROM {self.model.last_updated_date_table()}
-                    WHERE {self.model.batch_id_col()} IN (
-                        SELECT {self.model.batch_id_col()} FROM {self.temp_table}
+                    WHERE {self.model.last_updated_timestamp_key_col()} IN (
+                        SELECT {self.model.last_updated_timestamp_key_col()} FROM {self.temp_table}
                     )
-                    ORDER BY {self.model.batch_id_col()}
+                    ORDER BY {self.model.last_updated_timestamp_key_col()}
                     FOR UPDATE
                 )
                 UPDATE {self.model.last_updated_date_table()} u
-                SET {self.model.last_updated_date_column()} = %(timestamp)s
+                SET {set_clause}
                 FROM locked l
-                WHERE u.{self.model.batch_id_col()} = l.{self.model.batch_id_col()};
+                WHERE u.{self.model.last_updated_timestamp_key_col()} = l.{self.model.last_updated_timestamp_key_col()};
                 """,  # type: ignore
                 {"timestamp": timestamp},
             )

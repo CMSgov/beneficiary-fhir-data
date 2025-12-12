@@ -128,6 +128,7 @@ FISS_CLM_SOURCE = "21000"
 MCS_CLM_SOURCE = "22000"
 VMS_CLM_SOURCE = "23000"
 NCH_CLM_SOURCE = "20000"
+LAST_UPDATED_TIMESTAMP_KEY = "last_updated_timestamp_key"
 
 ALIAS_CLM = "clm"
 ALIAS_DCMTN = "dcmtn"
@@ -154,14 +155,14 @@ class IdrBaseModel(BaseModel, ABC):
         """BFD table name populated by this model."""
 
     @staticmethod
+    @abstractmethod
     def last_updated_date_table() -> str:
         """BFD table to keep track of last updated date for this model."""
-        return ""
 
     @staticmethod
-    def last_updated_date_column() -> str:
+    @abstractmethod
+    def last_updated_date_column() -> list[str]:
         """BFD column to keep track of last updated date for this model."""
-        return ""
 
     @staticmethod
     def should_replace() -> bool:
@@ -225,6 +226,10 @@ class IdrBaseModel(BaseModel, ABC):
     @classmethod
     def batch_id_col(cls) -> str | None:
         return cls._single_or_default(BATCH_ID)
+    
+    @classmethod
+    def last_updated_timestamp_key_col(cls) -> str | None:
+        return cls._single_or_default(LAST_UPDATED_TIMESTAMP_KEY)
 
     @classmethod
     def update_timestamp_col_alias(cls) -> list[str]:
@@ -302,7 +307,7 @@ def _deceased_bene_filter(alias: str) -> str:
 
 class IdrBeneficiary(IdrBaseModel):
     # columns from V2_MDCR_BENE_HSTRY
-    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, ALIAS: ALIAS_HSTRY}]
+    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, ALIAS: ALIAS_HSTRY, LAST_UPDATED_TIMESTAMP_KEY: True}]
     bene_xref_efctv_sk: int
     bene_mbi_id: str
     bene_1st_name: str
@@ -362,9 +367,9 @@ class IdrBeneficiary(IdrBaseModel):
         return BENEFICIARY_TABLE
 
     @staticmethod
-    def last_updated_date_column() -> str:
+    def last_updated_date_column() -> list[str]:
         """BFD column that keeps track of last updated date for this model."""
-        return "bfd_patient_updated_ts"
+        return ["bfd_patient_updated_ts"]
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
@@ -429,7 +434,7 @@ class IdrBeneficiary(IdrBaseModel):
 
 
 class IdrBeneficiaryMbiId(IdrBaseModel):
-    bene_mbi_id: Annotated[str, {PRIMARY_KEY: True}]
+    bene_mbi_id: Annotated[str, {PRIMARY_KEY: True, LAST_UPDATED_TIMESTAMP_KEY: True}]
     bene_mbi_efctv_dt: date
     bene_mbi_obslt_dt: Annotated[date, BeforeValidator(transform_null_date_to_max)]
     idr_ltst_trans_flg: Annotated[str, BeforeValidator(transform_null_string)]
@@ -443,6 +448,16 @@ class IdrBeneficiaryMbiId(IdrBaseModel):
     @staticmethod
     def table() -> str:
         return "idr.beneficiary_mbi_id"
+    
+    @staticmethod
+    def last_updated_date_table() -> str:
+        """BFD table that keeps track of last updated date for this model."""
+        return BENEFICIARY_TABLE
+
+    @staticmethod
+    def last_updated_date_column() -> list[str]:
+        """BFD column that keeps track of last updated date for this model."""
+        return ["bfd_patient_updated_ts"]
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
@@ -459,7 +474,7 @@ class IdrBeneficiaryMbiId(IdrBaseModel):
 
 
 class IdrBeneficiaryOvershareMbi(IdrBaseModel):
-    bene_mbi_id: Annotated[str, {PRIMARY_KEY: True}]
+    bene_mbi_id: Annotated[str, {PRIMARY_KEY: True, LAST_UPDATED_TIMESTAMP_KEY: True}]
 
     @staticmethod
     def table() -> str:
@@ -468,6 +483,16 @@ class IdrBeneficiaryOvershareMbi(IdrBaseModel):
     @staticmethod
     def should_replace() -> bool:
         return True
+    
+    @staticmethod
+    def last_updated_date_table() -> str:
+        """BFD table that keeps track of last updated date for this model."""
+        return BENEFICIARY_TABLE
+
+    @staticmethod
+    def last_updated_date_column() -> list[str]:
+        """BFD column that keeps track of last updated date for this model."""
+        return ["bfd_patient_updated_ts"]
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
@@ -499,7 +524,7 @@ class IdrBeneficiaryOvershareMbi(IdrBaseModel):
 
 
 class IdrBeneficiaryThirdParty(IdrBaseModel):
-    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
+    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, LAST_UPDATED_TIMESTAMP_KEY: True}]
     bene_buyin_cd: str
     bene_tp_type_cd: Annotated[str, {PRIMARY_KEY: True}]
     bene_rng_bgn_dt: Annotated[date, {PRIMARY_KEY: True}]
@@ -517,9 +542,13 @@ class IdrBeneficiaryThirdParty(IdrBaseModel):
         return "idr.beneficiary_third_party"
 
     @staticmethod
-    def last_updated_date_column() -> str:
+    def last_updated_date_column() -> list[str]:
         """BFD table that keeps track of last updated date for this model."""
-        return "bfd_coverage_updated_ts"
+        return ["bfd_part_a_coverage_updated_ts", 
+                "bfd_part_b_coverage_updated_ts", 
+                "bfd_part_c_coverage_updated_ts", 
+                "bfd_part_d_coverage_updated_ts", 
+                "bfd_part_dual_coverage_updated_ts"]
 
     @staticmethod
     def last_updated_date_table() -> str:
@@ -545,7 +574,7 @@ class IdrBeneficiaryThirdParty(IdrBaseModel):
 
 
 class IdrBeneficiaryStatus(IdrBaseModel):
-    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
+    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, LAST_UPDATED_TIMESTAMP_KEY: True}]
     bene_mdcr_stus_cd: str
     mdcr_stus_bgn_dt: Annotated[date, {PRIMARY_KEY: True}]
     mdcr_stus_end_dt: Annotated[date, {PRIMARY_KEY: True}]
@@ -566,9 +595,13 @@ class IdrBeneficiaryStatus(IdrBaseModel):
         return BENEFICIARY_TABLE
 
     @staticmethod
-    def last_updated_date_column() -> str:
+    def last_updated_date_column() -> list[str]:
         """BFD table that keeps track of last updated date for this model."""
-        return "bfd_coverage_updated_ts"
+        return ["bfd_part_a_coverage_updated_ts", 
+                "bfd_part_b_coverage_updated_ts", 
+                "bfd_part_c_coverage_updated_ts", 
+                "bfd_part_d_coverage_updated_ts", 
+                "bfd_part_dual_coverage_updated_ts"]
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
@@ -590,7 +623,7 @@ class IdrBeneficiaryStatus(IdrBaseModel):
 
 
 class IdrBeneficiaryEntitlement(IdrBaseModel):
-    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
+    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, LAST_UPDATED_TIMESTAMP_KEY: True}]
     bene_rng_bgn_dt: Annotated[date, {PRIMARY_KEY: True}]
     bene_rng_end_dt: Annotated[date, {PRIMARY_KEY: True}]
     bene_mdcr_entlmt_type_cd: Annotated[str, {PRIMARY_KEY: True}]
@@ -613,9 +646,13 @@ class IdrBeneficiaryEntitlement(IdrBaseModel):
         return BENEFICIARY_TABLE
 
     @staticmethod
-    def last_updated_date_column() -> str:
+    def last_updated_date_column() -> list[str]:
         """BFD table that keeps track of last updated date for this model."""
-        return "bfd_coverage_updated_ts"
+        return ["bfd_part_a_coverage_updated_ts", 
+                "bfd_part_b_coverage_updated_ts", 
+                "bfd_part_c_coverage_updated_ts", 
+                "bfd_part_d_coverage_updated_ts", 
+                "bfd_part_dual_coverage_updated_ts"]
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
@@ -637,7 +674,7 @@ class IdrBeneficiaryEntitlement(IdrBaseModel):
 
 
 class IdrBeneficiaryEntitlementReason(IdrBaseModel):
-    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
+    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, LAST_UPDATED_TIMESTAMP_KEY: True}]
     bene_rng_bgn_dt: Annotated[date, {PRIMARY_KEY: True}]
     bene_rng_end_dt: Annotated[date, {PRIMARY_KEY: True}]
     bene_mdcr_entlmt_rsn_cd: str
@@ -658,9 +695,13 @@ class IdrBeneficiaryEntitlementReason(IdrBaseModel):
         return BENEFICIARY_TABLE
 
     @staticmethod
-    def last_updated_date_column() -> str:
+    def last_updated_date_column() -> list[str]:
         """BFD table that keeps track of last updated date for this model."""
-        return "bfd_coverage_updated_ts"
+        return ["bfd_part_a_coverage_updated_ts", 
+                "bfd_part_b_coverage_updated_ts", 
+                "bfd_part_c_coverage_updated_ts", 
+                "bfd_part_d_coverage_updated_ts", 
+                "bfd_part_dual_coverage_updated_ts"]
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
@@ -682,7 +723,7 @@ class IdrBeneficiaryEntitlementReason(IdrBaseModel):
 
 
 class IdrBeneficiaryDualEligibility(IdrBaseModel):
-    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
+    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, LAST_UPDATED_TIMESTAMP_KEY: True}]
     bene_mdcd_elgblty_bgn_dt: Annotated[date, {PRIMARY_KEY: True}]
     bene_mdcd_elgblty_end_dt: date
     bene_dual_stus_cd: str
@@ -705,9 +746,13 @@ class IdrBeneficiaryDualEligibility(IdrBaseModel):
         return BENEFICIARY_TABLE
 
     @staticmethod
-    def last_updated_date_column() -> str:
+    def last_updated_date_column() -> list[str]:
         """BFD table that keeps track of last updated date for this model."""
-        return "bfd_coverage_updated_ts"
+        return ["bfd_part_a_coverage_updated_ts", 
+                "bfd_part_b_coverage_updated_ts", 
+                "bfd_part_c_coverage_updated_ts", 
+                "bfd_part_d_coverage_updated_ts", 
+                "bfd_part_dual_coverage_updated_ts"]
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
@@ -729,7 +774,7 @@ class IdrBeneficiaryDualEligibility(IdrBaseModel):
 
 
 class IdrElectionPeriodUsage(IdrBaseModel):
-    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
+    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, LAST_UPDATED_TIMESTAMP_KEY: True}]
     cntrct_pbp_sk: Annotated[int, {PRIMARY_KEY: True}]
     bene_cntrct_num: str
     bene_pbp_num: str
@@ -749,9 +794,13 @@ class IdrElectionPeriodUsage(IdrBaseModel):
         return BENEFICIARY_TABLE
 
     @staticmethod
-    def last_updated_date_column() -> str:
+    def last_updated_date_column() -> list[str]:
         """BFD table that keeps track of last updated date for this model."""
-        return "bfd_coverage_updated_ts"
+        return ["bfd_part_a_coverage_updated_ts", 
+                "bfd_part_b_coverage_updated_ts", 
+                "bfd_part_c_coverage_updated_ts", 
+                "bfd_part_d_coverage_updated_ts", 
+                "bfd_part_dual_coverage_updated_ts"]
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
@@ -790,6 +839,15 @@ class IdrContractPbpNumber(IdrBaseModel):
     @staticmethod
     def table() -> str:
         return "idr.contract_pbp_number"
+    
+    @staticmethod
+    def last_updated_date_table() -> str:
+        return ""
+
+    @staticmethod
+    def last_updated_date_column() -> list[str]:
+        """BFD table that keeps track of last updated date for this model."""
+        return []
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
@@ -823,6 +881,15 @@ class IdrContractPbpContact(IdrBaseModel):
     @staticmethod
     def table() -> str:
         return "idr.contract_pbp_contact"
+    
+    @staticmethod
+    def last_updated_date_table() -> str:
+        return ""
+
+    @staticmethod
+    def last_updated_date_column() -> list[str]:
+        """BFD table that keeps track of last updated date for this model."""
+        return []
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
@@ -912,7 +979,7 @@ def _claim_filter(start_time: datetime, partition: LoadPartition) -> str:
 
 
 class IdrClaim(IdrBaseModel):
-    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
+    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, LAST_UPDATED_TIMESTAMP_KEY: True}]
     geo_bene_sk: Annotated[int, {ALIAS: ALIAS_CLM}]
     clm_dt_sgntr_sk: Annotated[int, {ALIAS: ALIAS_CLM}]
     clm_type_cd: Annotated[int, {ALIAS: ALIAS_CLM}]
@@ -1026,9 +1093,9 @@ class IdrClaim(IdrBaseModel):
         return CLAIM_TABLE
 
     @staticmethod
-    def last_updated_date_column() -> str:
+    def last_updated_date_column() -> list[str]:
         """BFD column that keeps track of last updated date for this model."""
-        return "bfd_claim_updated_ts"
+        return ["bfd_claim_updated_ts"]
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
@@ -1052,7 +1119,7 @@ class IdrClaim(IdrBaseModel):
 
 
 class IdrClaimDateSignature(IdrBaseModel):
-    clm_dt_sgntr_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, ALIAS: ALIAS_SGNTR}]
+    clm_dt_sgntr_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, ALIAS: ALIAS_SGNTR, LAST_UPDATED_TIMESTAMP_KEY: True}]
     clm_cms_proc_dt: Annotated[date, BeforeValidator(transform_null_or_default_date_to_max)]
     clm_actv_care_from_dt: Annotated[date, BeforeValidator(transform_null_or_default_date_to_max)]
     clm_dschrg_dt: Annotated[date, BeforeValidator(transform_null_or_default_date_to_max)]
@@ -1085,9 +1152,9 @@ class IdrClaimDateSignature(IdrBaseModel):
         return CLAIM_TABLE
 
     @staticmethod
-    def last_updated_date_column() -> str:
+    def last_updated_date_column() -> list[str]:
         """BFD column that keeps track of last updated date for this model."""
-        return "bfd_claim_updated_ts"
+        return ["bfd_claim_updated_ts"]
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
@@ -1114,7 +1181,7 @@ class IdrClaimDateSignature(IdrBaseModel):
 
 
 class IdrClaimFiss(IdrBaseModel):
-    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
+    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, LAST_UPDATED_TIMESTAMP_KEY: True}]
     clm_crnt_stus_cd: Annotated[str, BeforeValidator(transform_null_string)]
     idr_insrt_ts: Annotated[
         datetime,
@@ -1136,9 +1203,9 @@ class IdrClaimFiss(IdrBaseModel):
         return CLAIM_TABLE
 
     @staticmethod
-    def last_updated_date_column() -> str:
+    def last_updated_date_column() -> list[str]:
         """BFD column that keeps track of last updated date for this model."""
-        return "bfd_claim_updated_ts"
+        return ["bfd_claim_updated_ts"]
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
@@ -1162,7 +1229,7 @@ class IdrClaimFiss(IdrBaseModel):
 
 
 class IdrClaimInstitutional(IdrBaseModel):
-    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
+    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, LAST_UPDATED_TIMESTAMP_KEY: True}]
     clm_admsn_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
     bene_ptnt_stus_cd: Annotated[str, BeforeValidator(transform_default_string)]
     dgns_drg_cd: int
@@ -1216,9 +1283,9 @@ class IdrClaimInstitutional(IdrBaseModel):
         return CLAIM_TABLE
 
     @staticmethod
-    def last_updated_date_column() -> str:
+    def last_updated_date_column() -> list[str]:
         """BFD column that keeps track of last updated date for this model."""
-        return "bfd_claim_updated_ts"
+        return ["bfd_claim_updated_ts"]
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
@@ -1242,7 +1309,7 @@ class IdrClaimInstitutional(IdrBaseModel):
 
 
 class IdrClaimItem(IdrBaseModel):
-    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, ALIAS: ALIAS_CLM}]
+    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, ALIAS: ALIAS_CLM, LAST_UPDATED_TIMESTAMP_KEY: True}]
     bfd_row_id: Annotated[int, {PRIMARY_KEY: True, ALIAS: ALIAS_CLM_GRP}]
     # columns from V2_MDCR_CLM_LINE
     clm_line_num: Annotated[int, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_null_int)]
@@ -1409,9 +1476,9 @@ class IdrClaimItem(IdrBaseModel):
         return CLAIM_TABLE
 
     @staticmethod
-    def last_updated_date_column() -> str:
+    def last_updated_date_column() -> list[str]:
         """BFD column that keeps track of last updated date for this model."""
-        return "bfd_claim_updated_ts"
+        return ["bfd_claim_updated_ts"]
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:
@@ -1588,7 +1655,7 @@ def transform_default_hipps_code(value: str | None) -> str:
 
 
 class IdrClaimLineInstitutional(IdrBaseModel):
-    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
+    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, LAST_UPDATED_TIMESTAMP_KEY: True}]
     clm_line_num: Annotated[int, {PRIMARY_KEY: True}]
     clm_rev_apc_hipps_cd: Annotated[str, BeforeValidator(transform_default_hipps_code)]
     clm_otaf_one_ind_cd: Annotated[str, BeforeValidator(transform_default_string)]
@@ -1625,9 +1692,9 @@ class IdrClaimLineInstitutional(IdrBaseModel):
         return "idr.claim_line_institutional"
 
     @staticmethod
-    def last_updated_date_column() -> str:
+    def last_updated_date_column() -> list[str]:
         """BFD column that keeps track of last updated date for this model."""
-        return "bfd_claim_updated_ts"
+        return ["bfd_claim_updated_ts"]
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
@@ -1651,7 +1718,7 @@ class IdrClaimLineInstitutional(IdrBaseModel):
 
 
 class IdrClaimAnsiSignature(IdrBaseModel):
-    clm_ansi_sgntr_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
+    clm_ansi_sgntr_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, LAST_UPDATED_TIMESTAMP_KEY: True}]
     clm_1_rev_cntr_ansi_grp_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_2_rev_cntr_ansi_grp_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_3_rev_cntr_ansi_grp_cd: Annotated[str, BeforeValidator(transform_default_string)]
@@ -1670,6 +1737,15 @@ class IdrClaimAnsiSignature(IdrBaseModel):
     @staticmethod
     def table() -> str:
         return "idr.claim_ansi_signature"
+    
+    @staticmethod
+    def last_updated_date_table() -> str:
+        return ""
+
+    @staticmethod
+    def last_updated_date_column() -> list[str]:
+        """BFD column that keeps track of last updated date for this model."""
+        return []
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
@@ -1685,7 +1761,7 @@ class IdrClaimAnsiSignature(IdrBaseModel):
 
 
 class IdrClaimProfessional(IdrBaseModel):
-    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
+    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, LAST_UPDATED_TIMESTAMP_KEY: True}]
     clm_carr_pmt_dnl_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_clncl_tril_num: Annotated[str, BeforeValidator(transform_default_string)]
     clm_mdcr_prfnl_prmry_pyr_amt: Annotated[float, BeforeValidator(transform_null_float)]
@@ -1724,9 +1800,14 @@ class IdrClaimProfessional(IdrBaseModel):
         return CLAIM_TABLE
 
     @staticmethod
-    def last_updated_date_column() -> str:
+    def last_updated_date_column() -> list[str]:
         """BFD column that keeps track of last updated date for this model."""
-        return "bfd_claim_updated_ts"
+        return ["bfd_claim_updated_ts"]
+
+    @staticmethod
+    def last_updated_date_column() -> list[str]:
+        """BFD column that keeps track of last updated date for this model."""
+        return ["bfd_claim_updated_ts"]
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
@@ -1792,7 +1873,7 @@ class IdrClaimProfessional(IdrBaseModel):
 
 
 class IdrClaimLineProfessional(IdrBaseModel):
-    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
+    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, LAST_UPDATED_TIMESTAMP_KEY: True}]
     clm_line_num: Annotated[int, {PRIMARY_KEY: True}]
     clm_bene_prmry_pyr_pd_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_fed_type_srvc_cd: Annotated[str, BeforeValidator(transform_default_string)]
@@ -1832,9 +1913,9 @@ class IdrClaimLineProfessional(IdrBaseModel):
         return CLAIM_TABLE
 
     @staticmethod
-    def last_updated_date_column() -> str:
+    def last_updated_date_column() -> list[str]:
         """BFD column that keeps track of last updated date for this model."""
-        return "bfd_claim_updated_ts"
+        return ["bfd_claim_updated_ts"]
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
@@ -1858,7 +1939,7 @@ class IdrClaimLineProfessional(IdrBaseModel):
 
 
 class IdrClaimLineRx(IdrBaseModel):
-    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, ALIAS: ALIAS_CLM}]
+    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, ALIAS: ALIAS_CLM, LAST_UPDATED_TIMESTAMP_KEY: True}]
     clm_line_num: Annotated[int, {PRIMARY_KEY: True, ALIAS: ALIAS_RX_LINE}]
     clm_brnd_gnrc_cd: Annotated[str, BeforeValidator(transform_null_string)]
     clm_cmpnd_cd: Annotated[str, BeforeValidator(transform_null_string)]
@@ -1901,9 +1982,9 @@ class IdrClaimLineRx(IdrBaseModel):
         return "idr.claim_line_rx"
 
     @staticmethod
-    def last_updated_date_column() -> str:
+    def last_updated_date_column() -> list[str]:
         """BFD column that keeps track of last updated date for this model."""
-        return "bfd_claim_updated_ts"
+        return ["bfd_claim_updated_ts"]
 
     @staticmethod
     def last_updated_date_table() -> str:
@@ -1958,6 +2039,16 @@ class IdrProviderHistory(IdrBaseModel):
     @staticmethod
     def table() -> str:
         return "idr.provider_history"
+    
+    @staticmethod
+    def last_updated_date_column() -> list[str]:
+        """BFD column that keeps track of last updated date for this model."""
+        return []
+
+    @staticmethod
+    def last_updated_date_table() -> str:
+        """BFD column that keeps track of last updated date for this model."""
+        return ""
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004

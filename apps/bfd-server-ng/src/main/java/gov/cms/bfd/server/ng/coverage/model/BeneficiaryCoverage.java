@@ -1,15 +1,12 @@
 package gov.cms.bfd.server.ng.coverage.model;
 
 import gov.cms.bfd.server.ng.beneficiary.model.BeneficiaryBase;
-import gov.cms.bfd.server.ng.beneficiary.model.Meta;
 import gov.cms.bfd.server.ng.beneficiary.model.OrganizationFactory;
 import gov.cms.bfd.server.ng.beneficiary.model.RelationshipFactory;
 import gov.cms.bfd.server.ng.input.CoverageCompositeId;
 import gov.cms.bfd.server.ng.input.CoveragePart;
 import gov.cms.bfd.server.ng.model.ProfileType;
 import gov.cms.bfd.server.ng.util.SystemUrls;
-import jakarta.persistence.AttributeOverride;
-import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -54,7 +51,6 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
   private BeneficiaryDualEligibility beneficiaryDualEligibility;
 
   @Embedded
-  @AttributeOverride(name = "updatedTimestamp", column = @Column(name = "bfd_coverage_updated_ts"))
   private Meta meta;
 
   /**
@@ -125,13 +121,13 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
     coverage.addClass_(coveragePart.toFhirClassComponent());
 
     if (profileType == ProfileType.C4DIC) {
-      coverage.setMeta(meta.toFhirCoverage(profileType));
+      coverage.setMeta(meta.toFhir(profileType,coveragePart));
       coverage.setId(UUID.randomUUID().toString());
       coverage.setBeneficiary(new Reference(PATIENT_REF + id));
       coverage.setSubscriber(new Reference(PATIENT_REF + id));
     } else {
       coverage.setId(coverageCompositeId.fullId());
-      coverage.setMeta(meta.toFhirCoverage(profileType));
+      coverage.setMeta(meta.toFhir(profileType,coveragePart));
       coverage.setBeneficiary(new Reference(PATIENT_REF + beneSk));
     }
 
@@ -147,8 +143,6 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
   public Coverage toFhir(CoverageCompositeId coverageCompositeId) {
     var coverage = setupBaseCoverage(coverageCompositeId, ProfileType.C4BB);
     coverage.setId(coverageCompositeId.fullId());
-
-    coverage.setMeta(meta.toFhirCoverage(ProfileType.C4BB));
 
     coverage.setBeneficiary(new Reference(PATIENT_REF + beneSk));
     coverage.setRelationship(RelationshipFactory.createSelfSubscriberRelationship());

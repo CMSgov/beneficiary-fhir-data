@@ -1,8 +1,6 @@
 package gov.cms.bfd.server.ng.beneficiary.model;
 
 import gov.cms.bfd.server.ng.model.ProfileType;
-import jakarta.persistence.AttributeOverride;
-import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -15,7 +13,6 @@ import org.hl7.fhir.r4.model.Patient;
 @Table(name = "valid_beneficiary", schema = "idr")
 public class Beneficiary extends BeneficiaryBase {
   @Embedded
-  @AttributeOverride(name = "updatedTimestamp", column = @Column(name = "bfd_patient_updated_ts"))
   Meta meta;
 
   /**
@@ -25,6 +22,6 @@ public class Beneficiary extends BeneficiaryBase {
    * @return patient record
    */
   public Patient toFhir(ProfileType profileType) {
-    return super.toFhir(profileType, meta);
+    return super.toFhir(profileType, this.meta);
   }
 }
