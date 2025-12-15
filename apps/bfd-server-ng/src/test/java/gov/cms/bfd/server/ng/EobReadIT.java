@@ -53,10 +53,7 @@ class EobReadIT extends IntegrationTestBase {
     assertFalse(eob.isEmpty(), "EOB should not be empty.");
     assertTrue(eob.hasInsurance(), "All EOBs should have insurance");
     assertTrue(eob.hasMeta(), "EOB should have meta.");
-    // #TODO: REMOVE THIS EXCEPTION IN BFD-4439.
-    if (!claimId.contentEquals(CLAIM_ID_PROFESSIONAL_MCS)) {
-      assertTrue(eob.hasOutcome(), "EOB should have outcome");
-    }
+    assertTrue(eob.hasOutcome(), "EOB should have outcome");
     assertTrue(eob.hasPatient(), "EOB should have patient");
     assertTrue(eob.hasType(), "EOB should have type");
     assertTrue(eob.hasStatus(), "EOB should have status");

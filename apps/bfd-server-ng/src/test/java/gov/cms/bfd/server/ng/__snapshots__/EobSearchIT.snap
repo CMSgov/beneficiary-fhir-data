@@ -10416,6 +10416,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication-Status"
         } ]
       },
+      "outcome" : "queued",
       "patient" : {
         "reference" : "Patient/405764107"
       },
@@ -14457,6 +14458,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication-Status"
         } ]
       },
+      "outcome" : "queued",
       "patient" : {
         "reference" : "Patient/405764107"
       },
@@ -18498,6 +18500,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication-Status"
         } ]
       },
+      "outcome" : "queued",
       "patient" : {
         "reference" : "Patient/405764107"
       },
@@ -26522,6 +26525,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[GET_WITH_SEARCH_WithTag_Em
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication-Status"
         } ]
       },
+      "outcome" : "queued",
       "patient" : {
         "reference" : "Patient/405764107"
       },
@@ -28597,6 +28601,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[GET_WithTag_EmptyResult]=[
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication-Status"
         } ]
       },
+      "outcome" : "queued",
       "patient" : {
         "reference" : "Patient/405764107"
       },
@@ -30672,6 +30677,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[POST_WithTag_EmptyResult]=
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication-Status"
         } ]
       },
+      "outcome" : "queued",
       "patient" : {
         "reference" : "Patient/405764107"
       },
@@ -45933,6 +45939,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication-Status"
         } ]
       },
+      "outcome" : "queued",
       "patient" : {
         "reference" : "Patient/405764107"
       },
@@ -55245,6 +55252,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication-Status"
         } ]
       },
+      "outcome" : "queued",
       "patient" : {
         "reference" : "Patient/405764107"
       },
@@ -64557,6 +64565,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication-Status"
         } ]
       },
+      "outcome" : "queued",
       "patient" : {
         "reference" : "Patient/405764107"
       },
