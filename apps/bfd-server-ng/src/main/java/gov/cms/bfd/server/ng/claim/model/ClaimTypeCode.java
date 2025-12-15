@@ -372,15 +372,18 @@ public enum ClaimTypeCode {
     return Optional.of(insurance);
   }
 
-  Optional<ExplanationOfBenefit.InsuranceComponent> toFhirInsurance() {
+  Optional<ExplanationOfBenefit.InsuranceComponent> toFhirInsurance(
+      ClaimRecordType claimRecordType) {
     if (!isBetween(5, 3999)) {
       return Optional.empty();
     }
 
+    var partDisplay = claimRecordType.getPartDisplay().orElse("Part A");
+
     return Optional.of(
         new ExplanationOfBenefit.InsuranceComponent()
             .setFocal(true)
-            .setCoverage(new Reference().setDisplay("Part A")));
+            .setCoverage(new Reference().setDisplay(partDisplay)));
   }
 
   Optional<String> toDisplay() {

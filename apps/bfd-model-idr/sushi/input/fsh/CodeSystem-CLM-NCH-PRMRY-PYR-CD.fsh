@@ -1,7 +1,7 @@
 CodeSystem: CLM_NCH_PRMRY_PYR_CD
 Title: "NCH Primary Payer Code"
 Id: CLM-NCH-PRMRY-PYR-CD
-Description: "Code system for NCH primary payer code"
+Description: "A CODE IDENTIFYING THE COVERAGE TYPE OF THE PRIMARY PAYER WHEN MEDICARE IS THE SECONDARY PAYER AS DEFINED BY THE COMMON WORKING FILE (CWF)."
 * ^url = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NCH-PRMRY-PYR-CD"
 * ^status = #active
 * ^content = #complete

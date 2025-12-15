@@ -1,7 +1,7 @@
 CodeSystem: CLM_NRLN_RIC_CD
-Title: "Clm Nrln Ric Cd"
+Title: "Claim Near Line Record Identification Code"
 Id: CLM-NRLN-RIC-CD
-Description: "Code system for clm nrln ric cd"
+Description: "A CODE IDENTIFYING THE CLAIM RECORD TYPE BEING PROCESSED."
 * ^url = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
 * ^status = #active
 * ^content = #complete
