@@ -34,19 +34,21 @@ public class BillablePeriod {
   private Optional<LocalDate> claimThroughDate;
 
   @Column(name = "clm_query_cd")
-  private String claimQueryCode;
+  private Optional<String> claimQueryCode;
 
   Period toFhir() {
     var period = new Period();
     period.setStartElement(DateUtil.toFhirDate(claimFromDate));
     claimThroughDate.ifPresent(d -> period.setEndElement(DateUtil.toFhirDate(d)));
-    period.addExtension(
-        new Extension()
-            .setUrl(SystemUrls.BLUE_BUTTON_STRUCTURE_DEFINITION_CLAIM_QUERY_CODE)
-            .setValue(
-                new Coding()
-                    .setSystem(SystemUrls.BLUE_BUTTON_CODE_SYSTEM_CLAIM_QUERY_CODE)
-                    .setCode(claimQueryCode)));
+    claimQueryCode.ifPresent(
+        code ->
+            period.addExtension(
+                new Extension()
+                    .setUrl(SystemUrls.BLUE_BUTTON_STRUCTURE_DEFINITION_CLAIM_QUERY_CODE)
+                    .setValue(
+                        new Coding()
+                            .setSystem(SystemUrls.BLUE_BUTTON_CODE_SYSTEM_CLAIM_QUERY_CODE)
+                            .setCode(code))));
     return period;
   }
 }

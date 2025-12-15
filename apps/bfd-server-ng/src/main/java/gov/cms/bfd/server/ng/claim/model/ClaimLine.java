@@ -83,7 +83,7 @@ public class ClaimLine {
 
     line.addModifier(hcpcsModifierCode.toFhir());
     claimLineInstitutional
-        .map(ClaimLineInstitutional::getRevenueCenterDate)
+        .flatMap(ClaimLineInstitutional::getRevenueCenterDate)
         .ifPresent(d -> line.setServiced(new DateType(DateUtil.toDate(d))));
 
     fromDate.map(d -> line.setServiced(new DateType(DateUtil.toDate(d))));

@@ -185,6 +185,8 @@ fiss_clm_type_cds = [
 mcs_clm_type_cds = [1700, 2700]
 vms_cds = [1800, 2800]
 
+pharmacy_clm_type_cds = [1, 2, 3, 4]
+
 institutional_claim_types = [10, 20, 30, 40, 50, 60, 61, 62, 63, 64, *fiss_clm_type_cds]
 
 adjudicated_professional_claim_types = [71, 72, 81, 82]
@@ -647,7 +649,7 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
         random.choices(string.ascii_uppercase, k=3)
     )
     # PDE -> diff Claim control number process.
-    if clm_type_cd in (1, 2, 3, 4):
+    if clm_type_cd in pharmacy_clm_type_cds:
         claim["CLM"]["CLM_ORIG_CNTL_NUM"] = "".join(random.choices(string.digits, k=14)) + "".join(
             random.choices(string.ascii_uppercase, k=3)
         )
@@ -668,7 +670,8 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
         generator.code_systems["CLM_ADJSTMT_TYPE_CD"]
     )
 
-    if clm_type_cd in (1, 2, 3, 4):
+    if clm_type_cd in pharmacy_clm_type_cds:
+        claim["CLM"].pop("CLM_QUERY_CD")
         claim["CLM"]["CLM_SRVC_PRVDR_GNRC_ID_NUM"] = random.choice(type_2_npis)
         claim["CLM"]["PRVDR_SRVC_PRVDR_NPI_NUM"] = claim["CLM"]["CLM_SRVC_PRVDR_GNRC_ID_NUM"]
         claim["CLM"]["CLM_PD_DT"] = random_date(
@@ -763,10 +766,11 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
         claim["CLM_LINE"].append(claim_line)
         claim["CLM_LINE_RX"].append(claim_line_rx)
 
-    tob_code = random.choice(generator.code_systems["CLM_BILL_FREQ_CD"])
-    claim["CLM"]["CLM_BILL_FAC_TYPE_CD"] = tob_code[0]
-    claim["CLM"]["CLM_BILL_CLSFCTN_CD"] = tob_code[1]
-    claim["CLM"]["CLM_BILL_FREQ_CD"] = tob_code[2]
+    if(clm_type_cd in institutional_claim_types):
+        tob_code = random.choice(generator.code_systems["CLM_BILL_FREQ_CD"])
+        claim["CLM"]["CLM_BILL_FAC_TYPE_CD"] = tob_code[0]
+        claim["CLM"]["CLM_BILL_CLSFCTN_CD"] = tob_code[1]
+        claim["CLM"]["CLM_BILL_FREQ_CD"] = tob_code[2]
 
     claim["CLM"]["CLM_CNTRCTR_NUM"] = random.choice(generator.code_systems["CLM_CNTRCTR_NUM"])
     claim["CLM"]["CLM_NCH_PRMRY_PYR_CD"] = random.choice(
@@ -1080,7 +1084,7 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
 
     num_clm_lines = random.randint(1, 15)
     for line_num in range(1, num_clm_lines + 1):
-        if clm_type_cd in (1, 2, 3, 4):
+        if clm_type_cd in pharmacy_clm_type_cds:
             # handled above
             continue
         claim_line = {}
@@ -1189,7 +1193,8 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
             claim_line["CLM_LINE_NDC_QTY"] = round(random.uniform(1, 1000), 2)
             claim_line["CLM_LINE_NDC_QTY_QLFYR_CD"] = "ML"
         claim_line["CLM_LINE_SRVC_UNIT_QTY"] = round(random.uniform(0, 5), 2)
-        claim_line["CLM_LINE_REV_CTR_CD"] = random.choice(generator.code_systems["CLM_REV_CNTR_CD"])
+        if(clm_type_cd in institutional_claim_types):
+            claim_line["CLM_LINE_REV_CTR_CD"] = random.choice(generator.code_systems["CLM_REV_CNTR_CD"])
         claim_line["CLM_LINE_BENE_PMT_AMT"] = round(random.uniform(0, 5), 2)
         claim_line["CLM_LINE_BENE_PD_AMT"] = round(random.uniform(0, 5), 2)
         claim_line["CLM_LINE_ALOWD_CHRG_AMT"] = round(random.uniform(0, 5), 2)
@@ -1296,15 +1301,24 @@ def gen_pac_version_of_claim(claim, max_date):
         pac_claim["CLM"]["CLM_TYPE_CD"] = random.choice([1021, 2021])
 
     if pac_clm_type_cd == 30:
-        pac_claim["CLM"]["CLM_TYPE_CD"] = random.choices([1018, 2018])[0]
+        pac_claim["CLM"]["CLM_TYPE_CD"] = random.choice([1018, 2018])
 
     if pac_clm_type_cd == 50:
         pac_claim["CLM"]["CLM_TYPE_CD"] = random.choices(
             [1081, 2081, 1082, 2082], weights=[0.48, 0.48, 0.02, 0.02]
         )[0]
 
+    if pac_clm_type_cd in (71,72):
+        pac_claim["CLM"]["CLM_TYPE_CD"] = random.choice([1700, 2700])
+    
+    if pac_clm_type_cd in (81,82):
+        pac_claim["CLM"]["CLM_TYPE_CD"] = random.choice([1800, 2800])
+
     if "CLM_BLOOD_PT_FRNSH_QTY" in pac_claim["CLM"]:
         pac_claim["CLM"].pop("CLM_BLOOD_PT_FRNSH_QTY")
+    if "CLM_NCH_PRMRY_PYR_CD" in pac_claim["CLM"]:
+        pac_claim["CLM"].pop("CLM_NCH_PRMRY_PYR_CD")
+    
     pac_claim["CLM"]["CLM_DT_SGNTR_SK"] = "".join(random.choices(string.digits, k=12))
     pac_claim["CLM_DT_SGNTR"]["CLM_DT_SGNTR_SK"] = pac_claim["CLM"]["CLM_DT_SGNTR_SK"]
     pac_claim["CLM"]["GEO_BENE_SK"] = "".join(random.choices(string.digits, k=5))
@@ -1479,6 +1493,8 @@ def gen_pac_version_of_claim(claim, max_date):
         pac_claim["CLM"]["CLM_SRC_ID"] = 23000  # VMS
 
     if "CLM_DCMTN" in pac_claim:
+        if pac_claim["CLM"]["CLM_TYPE_CD"] in fiss_clm_type_cds:
+            pac_claim["CLM"]["CLM_RIC_CD"] = pac_claim["CLM_DCMTN"]["CLM_NRLN_RIC_CD"]
         pac_claim.pop("CLM_DCMTN")
 
     pac_clm_rlt_cond_sgntr_sk = random.randint(2, 999999999999)
@@ -1678,7 +1694,7 @@ def main():
                 CLM_INSTNL.append(claim["CLM_INSTNL"])
             CLM_LINE_INSTNL.extend(claim["CLM_LINE_INSTNL"])
             CLM_DCMTN.append(claim["CLM_DCMTN"])
-            if claim["CLM"]["CLM_TYPE_CD"] in (1, 2, 3, 4):
+            if claim["CLM"]["CLM_TYPE_CD"] in pharmacy_clm_type_cds:
                 CLM_LINE_RX.extend(claim["CLM_LINE_RX"])
             elif claim["CLM"]["CLM_TYPE_CD"] in professional_claim_types:
                 # Only add professional data for non-Part D claims

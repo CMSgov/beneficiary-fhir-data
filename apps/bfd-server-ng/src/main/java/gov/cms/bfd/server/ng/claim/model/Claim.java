@@ -283,7 +283,7 @@ public class Claim {
     Stream.of(
             claimExtensions.toFhir(),
             institutional.map(i -> i.getExtensions().toFhir()).orElse(List.of()),
-            List.of(claimDateSignature.getClaimProcessDate().toFhir()))
+            claimDateSignature.getClaimProcessDate().toFhir().stream().toList())
         .flatMap(Collection::stream)
         .forEach(eob::addExtension);
 
@@ -332,12 +332,11 @@ public class Claim {
     var recordTypeCodes = claimRecordType.toFhir(supportingInfoFactory);
 
     var initialSupportingInfo =
-        Stream.concat(
-                Stream.of(
-                    bloodPints.toFhir(supportingInfoFactory),
-                    nchPrimaryPayorCode.toFhir(supportingInfoFactory),
-                    typeOfBillCode.toFhir(supportingInfoFactory)),
-                recordTypeCodes)
+        Stream.of(
+                bloodPints.toFhir(supportingInfoFactory),
+                nchPrimaryPayorCode.toFhir(supportingInfoFactory),
+                typeOfBillCode.toFhir(supportingInfoFactory))
+            .flatMap(Optional::stream)
             .toList();
 
     var claimRxSupportingInfo =
@@ -361,6 +360,9 @@ public class Claim {
 
     Stream.of(
             initialSupportingInfo,
+            // In real data, this should only ever have one value, but we're explicitly
+            // limiting it to be defensive.
+            recordTypeCodes.limit(1).toList(),
             claimDateSignature.getSupportingInfo().toFhir(supportingInfoFactory),
             institutional
                 .map(i -> i.getSupportingInfo().toFhir(supportingInfoFactory))
@@ -396,7 +398,7 @@ public class Claim {
     insurance.setFocal(true);
     claimRecordType.toFhirReference(claimTypeCode).ifPresent(insurance::setCoverage);
 
-    claimTypeCode.toFhirInsurance().ifPresent(eob::addInsurance);
+    claimTypeCode.toFhirInsurance(claimRecordType).ifPresent(eob::addInsurance);
     claimTypeCode
         .toFhirPartDInsurance(contractNumber, contractPbpNumber)
         .ifPresent(eob::addInsurance);

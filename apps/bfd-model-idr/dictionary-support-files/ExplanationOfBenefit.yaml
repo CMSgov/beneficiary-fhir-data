@@ -2426,9 +2426,9 @@
   appliesTo:
     - Carrier
     - DME
-    - VMS
   sources:
     - MCS
+    - VMS
   sourceView: V2_MDCR_CLM_LCTN_HSTRY
   sourceColumn: CLM_AUDT_TRL_STUS_CD
   fhirPath: ExplanationOfBenefit.outcome

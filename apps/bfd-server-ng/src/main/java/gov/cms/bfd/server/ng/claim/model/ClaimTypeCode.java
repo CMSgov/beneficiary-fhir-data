@@ -370,15 +370,18 @@ public enum ClaimTypeCode {
     return Optional.of(insurance);
   }
 
-  Optional<ExplanationOfBenefit.InsuranceComponent> toFhirInsurance() {
+  Optional<ExplanationOfBenefit.InsuranceComponent> toFhirInsurance(
+      ClaimRecordType claimRecordType) {
     if (!isBetween(5, 3999)) {
       return Optional.empty();
     }
 
+    var partDisplay = claimRecordType.getPartDisplay().orElse("Part A");
+
     return Optional.of(
         new ExplanationOfBenefit.InsuranceComponent()
             .setFocal(true)
-            .setCoverage(new Reference().setDisplay("Part A")));
+            .setCoverage(new Reference().setDisplay(partDisplay)));
   }
 
   Optional<String> toDisplay() {
@@ -410,7 +413,8 @@ public enum ClaimTypeCode {
       case 10, 20, 30, 50, 60, 61, 62, 63, 1011, 2011 ->
           Optional.of(SystemUrls.CARIN_STRUCTURE_DEFINITION_INPATIENT_INSTITUTIONAL);
       case 40 -> Optional.of(SystemUrls.CARIN_STRUCTURE_DEFINITION_OUTPATIENT_INSTITUTIONAL);
-      case 71, 72, 81, 82 -> Optional.of(SystemUrls.CARIN_STRUCTURE_DEFINITION_PROFESSIONAL);
+      case 71, 72, 81, 82, 1700, 2700, 1800, 2800 ->
+          Optional.of(SystemUrls.CARIN_STRUCTURE_DEFINITION_PROFESSIONAL);
       default -> Optional.empty();
     };
   }
