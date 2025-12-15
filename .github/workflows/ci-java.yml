@@ -37,6 +37,7 @@ jobs:
     outputs:
       files: ${{ steps.workflow_files.outputs.files }}
     steps:
+      - uses: GitHubSecurityLab/actions-permissions/monitor@v1
       - name: Checkout repository
         uses: actions/checkout@v6
         with:
@@ -54,6 +55,7 @@ jobs:
     needs: workflow
     if: needs.workflow.outputs.files
     steps:
+      - uses: GitHubSecurityLab/actions-permissions/monitor@v1
       - uses: actions/checkout@v6
         with:
           fetch-depth: 2
@@ -72,6 +74,7 @@ jobs:
     needs: workflow
     if: ${{ needs.workflow.outputs.files || (github.actor != 'actions-user' && github.ref_name == 'master') }}
     steps:
+      - uses: GitHubSecurityLab/actions-permissions/monitor@v1
       - name: 'Checkout repo'
         uses: actions/checkout@v6
         with:
