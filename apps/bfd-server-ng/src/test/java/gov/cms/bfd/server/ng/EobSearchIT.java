@@ -93,7 +93,7 @@ class EobSearchIT extends IntegrationTestBase {
                     .identifier(BENE_ID_ALL_PARTS_WITH_XREF))
             .usingStyle(searchStyle)
             .execute();
-    assertEquals(6, eobBundle.getEntry().size());
+    assertEquals(7, eobBundle.getEntry().size());
     expectFhir().scenario(searchStyle.name()).toMatchSnapshot(eobBundle);
   }
 
@@ -149,7 +149,7 @@ class EobSearchIT extends IntegrationTestBase {
                     .afterOrEquals()
                     .day(DateUtil.toDate(lastUpdated)))
             .execute();
-    assertEquals(6, eobBundle.getEntry().size());
+    assertEquals(7, eobBundle.getEntry().size());
 
     eobBundle =
         searchBundle()
@@ -338,7 +338,7 @@ class EobSearchIT extends IntegrationTestBase {
             .usingStyle(searchStyle)
             .execute();
 
-    assertEquals(6, eobBundleWildcard.getEntry().size(), "Should find ALL EOBs for '*' type");
+    assertEquals(7, eobBundleWildcard.getEntry().size(), "Should find ALL EOBs for '*' type");
     expectFhir().scenario(searchStyle.name() + "_WithWildcard").toMatchSnapshot(eobBundleWildcard);
 
     String[] zeroResultClaimTypes = {
