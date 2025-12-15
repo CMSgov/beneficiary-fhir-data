@@ -122,13 +122,14 @@ BATCH_ID = "batch_id"
 UPDATE_TIMESTAMP = "update_timestamp"
 ALIAS = "alias"
 INSERT_EXCLUDE = "insert_exclude"
+LAST_UPDATED_TIMESTAMP = "last_updated_timestamp"
 DERIVED = "derived"
 COLUMN_MAP = "column_map"
 FISS_CLM_SOURCE = "21000"
 MCS_CLM_SOURCE = "22000"
 VMS_CLM_SOURCE = "23000"
 NCH_CLM_SOURCE = "20000"
-LAST_UPDATED_TIMESTAMP_KEY = "last_updated_timestamp_key"
+
 
 ALIAS_CLM = "clm"
 ALIAS_DCMTN = "dcmtn"
@@ -228,8 +229,8 @@ class IdrBaseModel(BaseModel, ABC):
         return cls._single_or_default(BATCH_ID)
 
     @classmethod
-    def last_updated_timestamp_key_col(cls) -> str | None:
-        return cls._single_or_default(LAST_UPDATED_TIMESTAMP_KEY)
+    def last_updated_timestamp_col(cls) -> str | None:
+        return cls._single_or_default(LAST_UPDATED_TIMESTAMP)
 
     @classmethod
     def update_timestamp_col_alias(cls) -> list[str]:
@@ -309,7 +310,7 @@ class IdrBeneficiary(IdrBaseModel):
     # columns from V2_MDCR_BENE_HSTRY
     bene_sk: Annotated[
         int,
-        {PRIMARY_KEY: True, BATCH_ID: True, ALIAS: ALIAS_HSTRY, LAST_UPDATED_TIMESTAMP_KEY: True},
+        {PRIMARY_KEY: True, BATCH_ID: True, ALIAS: ALIAS_HSTRY, LAST_UPDATED_TIMESTAMP: True},
     ]
     bene_xref_efctv_sk: int
     bene_mbi_id: str
@@ -437,7 +438,7 @@ class IdrBeneficiary(IdrBaseModel):
 
 
 class IdrBeneficiaryMbiId(IdrBaseModel):
-    bene_mbi_id: Annotated[str, {PRIMARY_KEY: True, LAST_UPDATED_TIMESTAMP_KEY: True}]
+    bene_mbi_id: Annotated[str, {PRIMARY_KEY: True, LAST_UPDATED_TIMESTAMP: True}]
     bene_mbi_efctv_dt: date
     bene_mbi_obslt_dt: Annotated[date, BeforeValidator(transform_null_date_to_max)]
     idr_ltst_trans_flg: Annotated[str, BeforeValidator(transform_null_string)]
@@ -477,7 +478,7 @@ class IdrBeneficiaryMbiId(IdrBaseModel):
 
 
 class IdrBeneficiaryOvershareMbi(IdrBaseModel):
-    bene_mbi_id: Annotated[str, {PRIMARY_KEY: True, LAST_UPDATED_TIMESTAMP_KEY: True}]
+    bene_mbi_id: Annotated[str, {PRIMARY_KEY: True}]
 
     @staticmethod
     def table() -> str:
@@ -490,12 +491,12 @@ class IdrBeneficiaryOvershareMbi(IdrBaseModel):
     @staticmethod
     def last_updated_date_table() -> str:
         """BFD table that keeps track of last updated date for this model."""
-        return BENEFICIARY_TABLE
+        return ""
 
     @staticmethod
     def last_updated_date_column() -> list[str]:
         """BFD column that keeps track of last updated date for this model."""
-        return ["bfd_patient_updated_ts"]
+        return []
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
@@ -527,7 +528,7 @@ class IdrBeneficiaryOvershareMbi(IdrBaseModel):
 
 
 class IdrBeneficiaryThirdParty(IdrBaseModel):
-    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, LAST_UPDATED_TIMESTAMP_KEY: True}]
+    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, LAST_UPDATED_TIMESTAMP: True}]
     bene_buyin_cd: Annotated[str, BeforeValidator(transform_default_string)]
     bene_tp_type_cd: Annotated[str, {PRIMARY_KEY: True}]
     bene_rng_bgn_dt: Annotated[date, {PRIMARY_KEY: True}]
@@ -550,9 +551,6 @@ class IdrBeneficiaryThirdParty(IdrBaseModel):
         return [
             "bfd_part_a_coverage_updated_ts",
             "bfd_part_b_coverage_updated_ts",
-            "bfd_part_c_coverage_updated_ts",
-            "bfd_part_d_coverage_updated_ts",
-            "bfd_part_dual_coverage_updated_ts",
         ]
 
     @staticmethod
@@ -579,7 +577,7 @@ class IdrBeneficiaryThirdParty(IdrBaseModel):
 
 
 class IdrBeneficiaryStatus(IdrBaseModel):
-    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, LAST_UPDATED_TIMESTAMP_KEY: True}]
+    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, LAST_UPDATED_TIMESTAMP: True}]
     bene_mdcr_stus_cd: str
     mdcr_stus_bgn_dt: Annotated[date, {PRIMARY_KEY: True}]
     mdcr_stus_end_dt: Annotated[date, {PRIMARY_KEY: True}]
@@ -605,9 +603,6 @@ class IdrBeneficiaryStatus(IdrBaseModel):
         return [
             "bfd_part_a_coverage_updated_ts",
             "bfd_part_b_coverage_updated_ts",
-            "bfd_part_c_coverage_updated_ts",
-            "bfd_part_d_coverage_updated_ts",
-            "bfd_part_dual_coverage_updated_ts",
         ]
 
     @staticmethod
@@ -630,7 +625,7 @@ class IdrBeneficiaryStatus(IdrBaseModel):
 
 
 class IdrBeneficiaryEntitlement(IdrBaseModel):
-    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, LAST_UPDATED_TIMESTAMP_KEY: True}]
+    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, LAST_UPDATED_TIMESTAMP: True}]
     bene_rng_bgn_dt: Annotated[date, {PRIMARY_KEY: True}]
     bene_rng_end_dt: Annotated[date, {PRIMARY_KEY: True}]
     bene_mdcr_entlmt_type_cd: Annotated[str, {PRIMARY_KEY: True}]
@@ -658,9 +653,6 @@ class IdrBeneficiaryEntitlement(IdrBaseModel):
         return [
             "bfd_part_a_coverage_updated_ts",
             "bfd_part_b_coverage_updated_ts",
-            "bfd_part_c_coverage_updated_ts",
-            "bfd_part_d_coverage_updated_ts",
-            "bfd_part_dual_coverage_updated_ts",
         ]
 
     @staticmethod
@@ -683,7 +675,7 @@ class IdrBeneficiaryEntitlement(IdrBaseModel):
 
 
 class IdrBeneficiaryEntitlementReason(IdrBaseModel):
-    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, LAST_UPDATED_TIMESTAMP_KEY: True}]
+    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, LAST_UPDATED_TIMESTAMP: True}]
     bene_rng_bgn_dt: Annotated[date, {PRIMARY_KEY: True}]
     bene_rng_end_dt: Annotated[date, {PRIMARY_KEY: True}]
     bene_mdcr_entlmt_rsn_cd: str
@@ -709,9 +701,6 @@ class IdrBeneficiaryEntitlementReason(IdrBaseModel):
         return [
             "bfd_part_a_coverage_updated_ts",
             "bfd_part_b_coverage_updated_ts",
-            "bfd_part_c_coverage_updated_ts",
-            "bfd_part_d_coverage_updated_ts",
-            "bfd_part_dual_coverage_updated_ts",
         ]
 
     @staticmethod
@@ -734,7 +723,7 @@ class IdrBeneficiaryEntitlementReason(IdrBaseModel):
 
 
 class IdrBeneficiaryDualEligibility(IdrBaseModel):
-    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, LAST_UPDATED_TIMESTAMP_KEY: True}]
+    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, LAST_UPDATED_TIMESTAMP: True}]
     bene_mdcd_elgblty_bgn_dt: Annotated[date, {PRIMARY_KEY: True}]
     bene_mdcd_elgblty_end_dt: date
     bene_dual_stus_cd: str
@@ -760,10 +749,6 @@ class IdrBeneficiaryDualEligibility(IdrBaseModel):
     def last_updated_date_column() -> list[str]:
         """BFD table that keeps track of last updated date for this model."""
         return [
-            "bfd_part_a_coverage_updated_ts",
-            "bfd_part_b_coverage_updated_ts",
-            "bfd_part_c_coverage_updated_ts",
-            "bfd_part_d_coverage_updated_ts",
             "bfd_part_dual_coverage_updated_ts",
         ]
 
@@ -787,7 +772,7 @@ class IdrBeneficiaryDualEligibility(IdrBaseModel):
 
 
 class IdrElectionPeriodUsage(IdrBaseModel):
-    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, LAST_UPDATED_TIMESTAMP_KEY: True}]
+    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
     cntrct_pbp_sk: Annotated[int, {PRIMARY_KEY: True}]
     bene_cntrct_num: str
     bene_pbp_num: Annotated[str, BeforeValidator(transform_default_string)]
@@ -804,18 +789,12 @@ class IdrElectionPeriodUsage(IdrBaseModel):
 
     @staticmethod
     def last_updated_date_table() -> str:
-        return BENEFICIARY_TABLE
+        return ""
 
     @staticmethod
     def last_updated_date_column() -> list[str]:
         """BFD table that keeps track of last updated date for this model."""
-        return [
-            "bfd_part_a_coverage_updated_ts",
-            "bfd_part_b_coverage_updated_ts",
-            "bfd_part_c_coverage_updated_ts",
-            "bfd_part_d_coverage_updated_ts",
-            "bfd_part_dual_coverage_updated_ts",
-        ]
+        return []
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
@@ -995,7 +974,7 @@ def _claim_filter(start_time: datetime, partition: LoadPartition) -> str:
 
 class IdrClaim(IdrBaseModel):
     clm_uniq_id: Annotated[
-        int, {PRIMARY_KEY: True, BATCH_ID: True, LAST_UPDATED_TIMESTAMP_KEY: True}
+        int, {PRIMARY_KEY: True, BATCH_ID: True, LAST_UPDATED_TIMESTAMP: True}
     ]
     geo_bene_sk: Annotated[int, {ALIAS: ALIAS_CLM}]
     clm_dt_sgntr_sk: Annotated[int, {ALIAS: ALIAS_CLM}]
@@ -1138,7 +1117,7 @@ class IdrClaim(IdrBaseModel):
 class IdrClaimDateSignature(IdrBaseModel):
     clm_dt_sgntr_sk: Annotated[
         int,
-        {PRIMARY_KEY: True, BATCH_ID: True, ALIAS: ALIAS_SGNTR, LAST_UPDATED_TIMESTAMP_KEY: True},
+        {PRIMARY_KEY: True, BATCH_ID: True, ALIAS: ALIAS_SGNTR, LAST_UPDATED_TIMESTAMP: True},
     ]
     clm_cms_proc_dt: Annotated[date, BeforeValidator(transform_null_or_default_date_to_max)]
     clm_actv_care_from_dt: Annotated[date, BeforeValidator(transform_null_or_default_date_to_max)]
@@ -1202,7 +1181,7 @@ class IdrClaimDateSignature(IdrBaseModel):
 
 class IdrClaimFiss(IdrBaseModel):
     clm_uniq_id: Annotated[
-        int, {PRIMARY_KEY: True, BATCH_ID: True, LAST_UPDATED_TIMESTAMP_KEY: True}
+        int, {PRIMARY_KEY: True, BATCH_ID: True, LAST_UPDATED_TIMESTAMP: True}
     ]
     clm_crnt_stus_cd: Annotated[str, BeforeValidator(transform_null_string)]
     idr_insrt_ts: Annotated[
@@ -1252,7 +1231,7 @@ class IdrClaimFiss(IdrBaseModel):
 
 class IdrClaimInstitutional(IdrBaseModel):
     clm_uniq_id: Annotated[
-        int, {PRIMARY_KEY: True, BATCH_ID: True, LAST_UPDATED_TIMESTAMP_KEY: True}
+        int, {PRIMARY_KEY: True, BATCH_ID: True, LAST_UPDATED_TIMESTAMP: True}
     ]
     clm_admsn_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
     bene_ptnt_stus_cd: Annotated[str, BeforeValidator(transform_default_string)]
@@ -1334,7 +1313,7 @@ class IdrClaimInstitutional(IdrBaseModel):
 
 class IdrClaimItem(IdrBaseModel):
     clm_uniq_id: Annotated[
-        int, {PRIMARY_KEY: True, BATCH_ID: True, ALIAS: ALIAS_CLM, LAST_UPDATED_TIMESTAMP_KEY: True}
+        int, {PRIMARY_KEY: True, BATCH_ID: True, ALIAS: ALIAS_CLM, LAST_UPDATED_TIMESTAMP: True}
     ]
     bfd_row_id: Annotated[int, {PRIMARY_KEY: True, ALIAS: ALIAS_CLM_GRP}]
     # columns from V2_MDCR_CLM_LINE
@@ -1682,7 +1661,7 @@ def transform_default_hipps_code(value: str | None) -> str:
 
 class IdrClaimLineInstitutional(IdrBaseModel):
     clm_uniq_id: Annotated[
-        int, {PRIMARY_KEY: True, BATCH_ID: True, LAST_UPDATED_TIMESTAMP_KEY: True}
+        int, {PRIMARY_KEY: True, BATCH_ID: True, LAST_UPDATED_TIMESTAMP: True}
     ]
     clm_line_num: Annotated[int, {PRIMARY_KEY: True}]
     clm_rev_apc_hipps_cd: Annotated[str, BeforeValidator(transform_default_hipps_code)]
@@ -1747,7 +1726,7 @@ class IdrClaimLineInstitutional(IdrBaseModel):
 
 class IdrClaimAnsiSignature(IdrBaseModel):
     clm_ansi_sgntr_sk: Annotated[
-        int, {PRIMARY_KEY: True, BATCH_ID: True, LAST_UPDATED_TIMESTAMP_KEY: True}
+        int, {PRIMARY_KEY: True, BATCH_ID: True, LAST_UPDATED_TIMESTAMP: True}
     ]
     clm_1_rev_cntr_ansi_grp_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_2_rev_cntr_ansi_grp_cd: Annotated[str, BeforeValidator(transform_default_string)]
@@ -1792,7 +1771,7 @@ class IdrClaimAnsiSignature(IdrBaseModel):
 
 class IdrClaimProfessional(IdrBaseModel):
     clm_uniq_id: Annotated[
-        int, {PRIMARY_KEY: True, BATCH_ID: True, LAST_UPDATED_TIMESTAMP_KEY: True}
+        int, {PRIMARY_KEY: True, BATCH_ID: True, LAST_UPDATED_TIMESTAMP: True}
     ]
     clm_carr_pmt_dnl_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_clncl_tril_num: Annotated[str, BeforeValidator(transform_default_string)]
@@ -1901,7 +1880,7 @@ class IdrClaimProfessional(IdrBaseModel):
 
 class IdrClaimLineProfessional(IdrBaseModel):
     clm_uniq_id: Annotated[
-        int, {PRIMARY_KEY: True, BATCH_ID: True, LAST_UPDATED_TIMESTAMP_KEY: True}
+        int, {PRIMARY_KEY: True, BATCH_ID: True, LAST_UPDATED_TIMESTAMP: True}
     ]
     clm_line_num: Annotated[int, {PRIMARY_KEY: True}]
     clm_bene_prmry_pyr_pd_amt: Annotated[float, BeforeValidator(transform_null_float)]
@@ -1969,7 +1948,7 @@ class IdrClaimLineProfessional(IdrBaseModel):
 
 class IdrClaimLineRx(IdrBaseModel):
     clm_uniq_id: Annotated[
-        int, {PRIMARY_KEY: True, BATCH_ID: True, ALIAS: ALIAS_CLM, LAST_UPDATED_TIMESTAMP_KEY: True}
+        int, {PRIMARY_KEY: True, BATCH_ID: True, ALIAS: ALIAS_CLM, LAST_UPDATED_TIMESTAMP: True}
     ]
     clm_line_num: Annotated[int, {PRIMARY_KEY: True, ALIAS: ALIAS_RX_LINE}]
     clm_brnd_gnrc_cd: Annotated[str, BeforeValidator(transform_null_string)]

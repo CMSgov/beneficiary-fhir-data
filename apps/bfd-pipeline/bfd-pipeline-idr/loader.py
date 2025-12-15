@@ -274,7 +274,7 @@ class BatchLoader:
         )
 
         if self.load_type == LoadType.INCREMENTAL and self.model.last_updated_date_table():
-            key = self.model.last_updated_timestamp_key_col()
+            key = self.model.last_updated_timestamp_col()
             last_updated_cols = self.model.last_updated_date_column()
             set_clause = ", ".join(f"{col} = %(timestamp)s" for col in last_updated_cols)
             # Locking rows to prevent Deadlocks when multiple nodes update this table

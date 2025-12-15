@@ -29,20 +29,36 @@ public class CoverageRepository {
             .createQuery(
                 String.format(
                     """
-                SELECT b
-                FROM BeneficiaryCoverage b
-                LEFT JOIN FETCH b.beneficiaryStatus bs
-                LEFT JOIN FETCH b.beneficiaryEntitlementReason ber
-                LEFT JOIN FETCH b.beneficiaryThirdParties tp
-                LEFT JOIN FETCH b.beneficiaryEntitlements be
-                LEFT JOIN FETCH b.beneficiaryDualEligibility de
-                WHERE b.beneSk = :id
-                  AND ((cast(:lowerBound AS ZonedDateTime)) IS NULL
-                  OR GREATEST(b.meta.partACoverageUpdatedTs,b.meta.partBCoverageUpdatedTs,b.meta.partCCoverageUpdatedTs,b.meta.partDCoverageUpdatedTs,b.meta.partDualCoverageUpdatedTs) %s :lowerBound)
-                  AND ((cast(:upperBound AS ZonedDateTime)) IS NULL
-                  OR LEAST(b.meta.partACoverageUpdatedTs,b.meta.partBCoverageUpdatedTs,b.meta.partCCoverageUpdatedTs,b.meta.partDCoverageUpdatedTs,b.meta.partDualCoverageUpdatedTs) %s :upperBound)
-                  AND b.beneSk = b.xrefSk
-                ORDER BY b.obsoleteTimestamp DESC
+                    SELECT b
+                    FROM BeneficiaryCoverage b
+                    LEFT JOIN FETCH b.beneficiaryStatus bs
+                    LEFT JOIN FETCH b.beneficiaryEntitlementReason ber
+                    LEFT JOIN FETCH b.beneficiaryThirdParties tp
+                    LEFT JOIN FETCH b.beneficiaryEntitlements be
+                    LEFT JOIN FETCH b.beneficiaryDualEligibility de
+                    WHERE b.beneSk = :id
+                      AND (
+                            CAST(:lowerBound AS ZonedDateTime) IS NULL
+                            OR GREATEST(
+                                  b.meta.partACoverageUpdatedTs,
+                                  b.meta.partBCoverageUpdatedTs,
+                                  b.meta.partCCoverageUpdatedTs,
+                                  b.meta.partDCoverageUpdatedTs,
+                                  b.meta.partDualCoverageUpdatedTs
+                              ) %s :lowerBound
+                          )
+                      AND (
+                            CAST(:upperBound AS ZonedDateTime) IS NULL
+                            OR LEAST(
+                                  b.meta.partACoverageUpdatedTs,
+                                  b.meta.partBCoverageUpdatedTs,
+                                  b.meta.partCCoverageUpdatedTs,
+                                  b.meta.partDCoverageUpdatedTs,
+                                  b.meta.partDualCoverageUpdatedTs
+                              ) %s :upperBound
+                          )
+                      AND b.beneSk = b.xrefSk
+                    ORDER BY b.obsoleteTimestamp DESC
                 """,
                     lastUpdatedRange.getLowerBoundSqlOperator(),
                     lastUpdatedRange.getUpperBoundSqlOperator()),
