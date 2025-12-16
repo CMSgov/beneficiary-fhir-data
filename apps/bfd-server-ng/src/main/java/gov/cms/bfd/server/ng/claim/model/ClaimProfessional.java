@@ -34,6 +34,9 @@ public class ClaimProfessional {
   @Column(name = "clm_mdcr_prfnl_prmry_pyr_amt")
   private double primaryProviderPaidAmount;
 
+  @Column(name = "clm_audt_trl_stus_cd")
+  private Optional<ClaimAuditTrailStatusCode> claimAuditTrailStatusCode;
+
   @Embedded ClinicalTrialNumber clinicalTrialNumber;
 
   List<Extension> toFhirExtension() {
@@ -47,5 +50,12 @@ public class ClaimProfessional {
 
   ExplanationOfBenefit.TotalComponent toFhirTotal() {
     return AdjudicationChargeType.PAYER_PAID_AMOUNT.toFhirTotal(primaryProviderPaidAmount);
+  }
+
+  Optional<ExplanationOfBenefit.RemittanceOutcome> toFhirOutcome(ClaimTypeCode claimTypecode) {
+    if (claimTypecode.isPacStage2()) {
+      return claimAuditTrailStatusCode.map(ClaimAuditTrailStatusCode::getOutcome);
+    }
+    return Optional.empty();
   }
 }

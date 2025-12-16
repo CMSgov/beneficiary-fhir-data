@@ -410,6 +410,7 @@ public class Claim {
               eob.getExtension().addAll(professional.toFhirExtension());
               eob.addTotal(professional.toFhirTotal());
               eob.addBenefitBalance(benefitBalance.toFhir());
+              professional.toFhirOutcome(claimTypeCode).ifPresent(eob::setOutcome);
             });
 
     return sortedEob(eob);
