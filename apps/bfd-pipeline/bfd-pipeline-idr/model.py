@@ -879,6 +879,7 @@ class IdrClaim(IdrBaseModel):
     prvdr_atndg_prvdr_npi_num: Annotated[str, BeforeValidator(transform_default_string)]
     prvdr_othr_prvdr_npi_num: Annotated[str, BeforeValidator(transform_default_string)]
     prvdr_rndrng_prvdr_npi_num: Annotated[str, BeforeValidator(transform_default_string)]
+    prvdr_oprtg_prvdr_npi_num: Annotated[str, BeforeValidator(transform_default_string)]
     clm_ric_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_disp_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_sbmt_chrg_amt: Annotated[float, BeforeValidator(transform_null_float)]
