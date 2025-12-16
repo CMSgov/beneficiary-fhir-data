@@ -18,7 +18,7 @@ public class StringToDoubleConverter implements AttributeConverter<Double, Strin
     }
 
     try {
-      return (double) Integer.parseInt(value.trim());
+      return Double.parseDouble(value.trim());
     } catch (NumberFormatException e) {
       throw new RuntimeException("Numeric input was not in a valid format: " + value, e);
     }

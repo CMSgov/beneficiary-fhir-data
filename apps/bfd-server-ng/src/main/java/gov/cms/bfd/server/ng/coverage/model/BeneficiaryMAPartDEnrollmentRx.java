@@ -33,7 +33,7 @@ public class BeneficiaryMAPartDEnrollmentRx implements Comparable<BeneficiaryMAP
   private String contractNumber;
 
   @Column(name = "bene_pbp_num")
-  private Optional<String> drugPlanNumber;
+  private String planNumber;
 
   @Column(name = "bene_pdp_enrlmt_mmbr_id_num")
   private Optional<String> memberId;

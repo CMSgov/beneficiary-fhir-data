@@ -330,31 +330,10 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
   private Coverage mapCoverageC(
       Coverage coverage, CoveragePart coveragePart, ProfileType profileType, String orgId) {
     var enrollmentOpt = getEnrollment(coveragePart);
-    if (enrollmentOpt.isEmpty()) {
-      return toEmptyResource(coverage);
-    }
-
-    identifier.toFhir(orgId).ifPresent(coverage::addIdentifier);
-
-    var enrollment = enrollmentOpt.get();
-    coverage.setId(createCoverageIdPartCD(coveragePart, enrollment));
-    coverage.setPeriod(enrollment.toFhirPeriod());
-    coverage.setStatus(enrollment.toFhirStatus());
-
-    if (profileType == ProfileType.C4DIC) {
-      coverage.addPayor(new Reference().setReference(ORGANIZATION_REF + orgId));
-      coverage.addExtension(
-          new Extension(SystemUrls.C4DIC_ADD_INFO_EXT_URL)
-              .setValue(new Annotation(new MarkdownType(C4DIC_ADD_INFO))));
-    } else {
-      var contract = enrollment.getEnrollmentContract();
-      var cmsOrg = OrganizationFactory.createInsurerOrganization(contract);
-      coverage.addContained(cmsOrg);
-      coverage.addPayor(new Reference().setReference("#" + cmsOrg.getIdElement().getIdPart()));
-      enrollment.toFhirExtensions().forEach(coverage::addExtension);
-    }
-
-    return coverage;
+    return enrollmentOpt
+        .map(
+            enrollment -> mapBaseCoverageCD(coverage, coveragePart, enrollment, profileType, orgId))
+        .orElseGet(() -> toEmptyResource(coverage));
   }
 
   private Coverage mapCoverageD(
@@ -364,11 +343,8 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
       return toEmptyResource(coverage);
     }
 
-    identifier.toFhir(orgId).ifPresent(coverage::addIdentifier);
-    coverage.setType(coveragePart.toFhirTypeCode());
+    mapBaseCoverageCD(coverage, coveragePart, enrollmentOpt.get(), profileType, orgId);
 
-    var enrollment = enrollmentOpt.get();
-    coverage.setId(createCoverageIdPartCD(coveragePart, enrollment));
     var rxInfo = getRxEnrollment();
     rxInfo
         .flatMap(BeneficiaryMAPartDEnrollmentRx::getMemberId)
@@ -386,6 +362,19 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
     var lowIncomeSubsidy = getLowIncomeSubsidy();
     lowIncomeSubsidy.ifPresent(lis -> lis.toFhirExtensions().forEach(coverage::addExtension));
 
+    return coverage;
+  }
+
+  private Coverage mapBaseCoverageCD(
+      Coverage coverage,
+      CoveragePart coveragePart,
+      BeneficiaryMAPartDEnrollment enrollment,
+      ProfileType profileType,
+      String orgId) {
+
+    identifier.toFhir(orgId).ifPresent(coverage::addIdentifier);
+
+    coverage.setId(createCoverageIdPartCD(coveragePart, enrollment));
     coverage.setPeriod(enrollment.toFhirPeriod());
     coverage.setStatus(enrollment.toFhirStatus());
 
@@ -435,7 +424,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
     var coverageType = coveragePart.getStandardSystem();
     var beneSk = enrollment.getId().getBeneSk();
     var contractNum = enrollment.getContractNumber();
-    var contractPbpNum = enrollment.getDrugPlanNumber();
+    var contractPbpNum = enrollment.getPlanNumber();
     return String.format("%s-%s-%s-%s", coverageType, beneSk, contractNum, contractPbpNum);
   }
 }

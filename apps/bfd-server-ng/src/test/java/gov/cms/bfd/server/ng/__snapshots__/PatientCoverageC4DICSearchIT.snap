@@ -299,7 +299,7 @@ gov.cms.bfd.server.ng.PatientCoverageC4DICSearchIT.patientCoverageSearchAllParts
             "system" : "http://terminology.hl7.org/CodeSystem/coverage-class"
           } ]
         },
-        "value" : "435808396"
+        "value" : "194710044"
       }, {
         "type" : {
           "coding" : [ {
@@ -326,6 +326,11 @@ gov.cms.bfd.server.ng.PatientCoverageC4DICSearchIT.patientCoverageSearchAllParts
         "value" : "289653"
       } ],
       "extension" : [ {
+        "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-AdditionalCardInformation-extension",
+        "valueAnnotation" : {
+          "text" : "You may be asked to show this card when you get health care services. Only give your personal Medicare information to health care providers, or people you trust who work with Medicare on your behalf. WARNING: Intentionally misusing this card may be considered fraud and/or other violation of federal law and is punishable by law.\n\nEs posible que le pidan que muestre esta tarjeta cuando reciba servicios de cuidado médico. Solamente dé su información personal de Medicare a los proveedores de salud, sus aseguradores o personas de su confianza que trabajan con Medicare en su nombre. ¡ADVERTENCIA! El mal uso intencional de esta tarjeta puede ser considerado como fraude y/u otra violación de la ley federal y es sancionada por la ley."
+        }
+      }, {
         "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-LIS-PTD-PRM-PCT",
         "valueDecimal" : 0.25
       }, {
@@ -333,11 +338,6 @@ gov.cms.bfd.server.ng.PatientCoverageC4DICSearchIT.patientCoverageSearchAllParts
         "valueCoding" : {
           "code" : "4",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-LIS-COPMT-LVL-CD"
-        }
-      }, {
-        "url" : "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-AdditionalCardInformation-extension",
-        "valueAnnotation" : {
-          "text" : "You may be asked to show this card when you get health care services. Only give your personal Medicare information to health care providers, or people you trust who work with Medicare on your behalf. WARNING: Intentionally misusing this card may be considered fraud and/or other violation of federal law and is punishable by law.\n\nEs posible que le pidan que muestre esta tarjeta cuando reciba servicios de cuidado médico. Solamente dé su información personal de Medicare a los proveedores de salud, sus aseguradores o personas de su confianza que trabajan con Medicare en su nombre. ¡ADVERTENCIA! El mal uso intencional de esta tarjeta puede ser considerado como fraude y/u otra violación de la ley federal y es sancionada por la ley."
         }
       } ],
       "identifier" : [ {
@@ -359,7 +359,7 @@ gov.cms.bfd.server.ng.PatientCoverageC4DICSearchIT.patientCoverageSearchAllParts
             "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
           } ]
         },
-        "value" : "435808396"
+        "value" : "194710044"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",

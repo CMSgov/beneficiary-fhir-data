@@ -663,48 +663,6 @@ class IdrBeneficiaryDualEligibility(IdrBaseModel):
         return [NON_CLAIM_PARTITION]
 
 
-class IdrElectionPeriodUsage(IdrBaseModel):
-    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
-    cntrct_pbp_sk: Annotated[int, {PRIMARY_KEY: True}]
-    bene_cntrct_num: str
-    bene_pbp_num: Annotated[str, BeforeValidator(transform_default_string)]
-    bene_elctn_enrlmt_disenrlmt_cd: str
-    bene_elctn_aplctn_dt: Annotated[date, BeforeValidator(transform_null_or_default_date_to_max)]
-    bene_enrlmt_efctv_dt: Annotated[date, {PRIMARY_KEY: True}]
-    idr_insrt_ts: Annotated[datetime, {BATCH_TIMESTAMP: True}]
-    idr_trans_efctv_ts: datetime
-    idr_trans_obslt_ts: datetime
-
-    @staticmethod
-    def table() -> str:
-        return "idr.election_period_usage"
-
-    @staticmethod
-    def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
-        # equivalent to "select distinct on", but Snowflake has different syntax for that,
-        # so it's unfortunately not portable
-        hstry = ALIAS_HSTRY
-        return f"""
-            WITH dupes as (
-                SELECT {{COLUMNS}}, ROW_NUMBER() OVER (
-                    PARTITION BY bene_sk, cntrct_pbp_sk, bene_enrlmt_efctv_dt
-                {{ORDER_BY}} DESC) as row_order
-                FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_elctn_prd_usg usg
-                {{WHERE_CLAUSE}}
-                AND NOT EXISTS (
-                    {_deceased_bene_filter(hstry)}
-                    AND {hstry}.bene_sk = usg.bene_sk
-                )
-                {{ORDER_BY}}
-            )
-            SELECT {{COLUMNS}} FROM dupes WHERE row_order = 1
-            """
-
-    @staticmethod
-    def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
-        return [NON_CLAIM_PARTITION]
-
-
 class IdrContractPbpNumber(IdrBaseModel):
     cntrct_pbp_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, ALIAS: ALIAS_PBP_NUM}]
     cntrct_drug_plan_ind_cd: Annotated[str, BeforeValidator(transform_default_string)]

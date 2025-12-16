@@ -474,7 +474,7 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadBeneWithAllCoverage[allCoverage
         "system" : "http://terminology.hl7.org/CodeSystem/coverage-class"
       } ]
     },
-    "value" : "435808396"
+    "value" : "194710044"
   }, {
     "type" : {
       "coding" : [ {
@@ -526,15 +526,6 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadBeneWithAllCoverage[allCoverage
     "resourceType" : "Organization"
   } ],
   "extension" : [ {
-    "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-LIS-PTD-PRM-PCT",
-    "valueDecimal" : 0.25
-  }, {
-    "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-LIS-COPMT-LVL-CD",
-    "valueCoding" : {
-      "code" : "4",
-      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-LIS-COPMT-LVL-CD"
-    }
-  }, {
     "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-CNTRCT-NUM",
     "valueString" : "H1234"
   }, {
@@ -549,6 +540,15 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadBeneWithAllCoverage[allCoverage
   }, {
     "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-ENRLMT-EMPLR-SBSDY-SW",
     "valueString" : "Y"
+  }, {
+    "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-LIS-PTD-PRM-PCT",
+    "valueDecimal" : 0.25
+  }, {
+    "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-LIS-COPMT-LVL-CD",
+    "valueCoding" : {
+      "code" : "4",
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-LIS-COPMT-LVL-CD"
+    }
   } ],
   "id" : "part-d-405764107-H1234-003",
   "identifier" : [ {
@@ -567,7 +567,7 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadBeneWithAllCoverage[allCoverage
         "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
       } ]
     },
-    "value" : "435808396"
+    "value" : "194710044"
   } ],
   "meta" : {
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -1619,15 +1619,6 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadValidPartDCompositeId[validPart
     "resourceType" : "Organization"
   } ],
   "extension" : [ {
-    "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-LIS-PTD-PRM-PCT",
-    "valueDecimal" : 0.25
-  }, {
-    "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-LIS-COPMT-LVL-CD",
-    "valueCoding" : {
-      "code" : "4",
-      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-LIS-COPMT-LVL-CD"
-    }
-  }, {
     "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-CNTRCT-NUM",
     "valueString" : "S0001"
   }, {
@@ -1642,6 +1633,15 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadValidPartDCompositeId[validPart
   }, {
     "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-ENRLMT-EMPLR-SBSDY-SW",
     "valueString" : "1"
+  }, {
+    "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-LIS-PTD-PRM-PCT",
+    "valueDecimal" : 0.25
+  }, {
+    "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-LIS-COPMT-LVL-CD",
+    "valueCoding" : {
+      "code" : "4",
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-LIS-COPMT-LVL-CD"
+    }
   } ],
   "id" : "part-d-547437476-S0001-003",
   "identifier" : [ {

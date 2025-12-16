@@ -282,17 +282,26 @@ class CoverageSearchIT extends IntegrationTestBase {
     expectFhir().scenario("singleCoverage" + part).toMatchSnapshot(coverageBundle);
   }
 
-  @Test
-  void partCAndDCoverageSearchForBeneWithDifferentActiveDatesShouldReturnOneEntry() {
+  @ParameterizedTest
+  @EnumSource(SearchStyleEnum.class)
+  void partCAndDCoverageSearchByBeneficiaryWithDifferentActiveDates(SearchStyleEnum searchStyle) {
+
     var coverageBundle =
-        searchByBeneficiary(
-            BENE_ID_PART_C_AND_D_ONLY_DIFF_PROGRAM_TYPE_CODE_DIFF_ACTIVE_DATES,
-            SearchStyleEnum.GET);
+        searchBundle()
+            .where(
+                new ReferenceClientParam(Coverage.SP_BENEFICIARY)
+                    .hasId(
+                        "Patient/"
+                            + BENE_ID_PART_C_AND_D_ONLY_DIFF_PROGRAM_TYPE_CODE_DIFF_ACTIVE_DATES))
+            .usingStyle(searchStyle)
+            .execute();
+
     assertEquals(
         2,
         coverageBundle.getEntry().size(),
-        "Should find exactly two Coverage resources with different but active enrollment dates for beneficiary");
-    expectFhir().scenario("multipleActiveEnrollments").toMatchSnapshot(coverageBundle);
+        "Should find Part C & D Coverage resources for the given beneficiary");
+
+    expectFhir().scenario(searchStyle.name()).toMatchSnapshot(coverageBundle);
   }
 
   @ParameterizedTest
