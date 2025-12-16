@@ -48,7 +48,6 @@ jobs:
           ]
       fail-fast: false
     steps:
-      - uses: GitHubSecurityLab/actions-permissions/monitor@v1
       - name: Checkout code
         id: code-checkout
         uses: actions/checkout@v6
