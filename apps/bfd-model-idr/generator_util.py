@@ -7,6 +7,7 @@ import string
 import subprocess
 import sys
 from pathlib import Path
+from typing import Any
 
 import pandas as pd
 from dateutil.parser import parse
@@ -18,13 +19,14 @@ BENE_STUS = "SYNTHETIC_BENE_MDCR_STUS"
 BENE_ENTLMT_RSN = "SYNTHETIC_BENE_MDCR_ENTLMT_RSN"
 BENE_ENTLMT = "SYNTHETIC_BENE_MDCR_ENTLMT"
 BENE_TP = "SYNTHETIC_BENE_TP"
+BENE_XREF = "SYNTHETIC_BENE_XREF"
 BENE_DUAL = "SYNTHETIC_BENE_CMBND_DUAL_MDCR"
 BENE_MAPD_ENRLMT = "SYNTHETIC_BENE_MAPD_ENRLMT"
 BENE_MAPD_ENRLMT_RX = "SYNTHETIC_BENE_MAPD_ENRLMT_RX"
 BENE_LIS = "SYNTHETIC_BENE_LIS"
 
 
-def probability(frac):
+def probability(frac: float) -> bool:
     return random.random() < (frac)
 
 
@@ -38,14 +40,14 @@ def find_bene_sk(file, bene_sk):
 
 
 class RowAdapter:
-    def __init__(self, kv, loaded_from_file=False):
+    def __init__(self, kv: dict[str, Any], loaded_from_file: bool = False):
         self.kv = kv
         self.loaded_from_file = loaded_from_file
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: str):
         return self.kv[key]
 
-    def __setitem__(self, key, new_value):
+    def __setitem__(self, key: str, new_value: Any):
         if key not in self.kv or not self.kv[key]:
             self.kv[key] = new_value
 
@@ -56,11 +58,11 @@ class GeneratorUtil:
 
     def __init__(self):
         self.fake = Faker()
-        self.used_bene_sk = []
+        self.used_bene_sk: list[int] = []
         self.used_mbi = []
         self.bene_hstry_table = []
         self.bene_xref_table = []
-        self.mbi_table = {}
+        self.mbi_table: dict[str, dict[str, Any]] = {}
         self.address_options = []
         self.mdcr_stus = []
         self.mdcr_entlmt = []
@@ -148,7 +150,7 @@ class GeneratorUtil:
             return self.gen_mbi()
         return mbi
 
-    def gen_bene_sk(self):
+    def gen_bene_sk(self) -> int:
         bene_sk = random.randint(-1000000000, -1000)
         if bene_sk in self.used_bene_sk:
             return self.gen_bene_sk()
@@ -205,7 +207,7 @@ class GeneratorUtil:
         patient["IDR_UPDT_TS"] = str(updt_ts)
         patient["IDR_TRANS_OBSLT_TS"] = "9999-12-31T00:00:00.000000+0000"
 
-    def create_base_patient(self, patient):
+    def create_base_patient(self, patient: RowAdapter):
         self.set_timestamps(patient, datetime.date(year=2017, month=5, day=20))
         patient["CNTCT_LANG_CD"] = random.choice(["~", "ENG", "SPA"])
         patient["IDR_LTST_TRANS_FLG"] = "Y"
@@ -543,7 +545,7 @@ class GeneratorUtil:
             (self.mdcr_entlmt, f"out/{BENE_ENTLMT}.csv", GeneratorUtil.NO_COLS),
             (self.mdcr_tp, f"out/{BENE_TP}.csv", GeneratorUtil.NO_COLS),
             (self.mdcr_rsn, f"out/{BENE_ENTLMT_RSN}.csv", GeneratorUtil.NO_COLS),
-            (self.bene_xref_table, "out/SYNTHETIC_BENE_XREF.csv", GeneratorUtil.NO_COLS),
+            (self.bene_xref_table, f"out/{BENE_XREF}.csv", GeneratorUtil.NO_COLS),
             (
                 self.bene_cmbnd_dual_mdcr,
                 f"out/{BENE_DUAL}.csv",
