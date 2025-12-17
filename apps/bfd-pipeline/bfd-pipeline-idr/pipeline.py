@@ -7,7 +7,8 @@ from hamilton import driver, telemetry  # type: ignore
 from hamilton.execution import executors  # type: ignore
 
 import pipeline_nodes
-from model import LoadMode, LoadType
+from load_partition import LoadType
+from model import LoadMode
 from settings import LOAD_TYPE, MAX_TASKS
 
 telemetry.disable_telemetry()
