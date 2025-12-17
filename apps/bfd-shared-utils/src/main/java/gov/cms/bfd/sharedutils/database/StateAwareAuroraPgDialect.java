@@ -22,7 +22,11 @@ import software.amazon.jdbc.dialect.HostListProviderSupplier;
 public class StateAwareAuroraPgDialect extends AuroraPgDialect {
   /**
    * Query that returns the cluster topology, or the instances in the cluster, from the database
-   * that is being queried. Taken directly from {@link AuroraPgDialect}.
+   * that is being queried.
+   *
+   * @implNote Taken directly from {@link AuroraPgDialect}.
+   *     <p>See <a
+   *     href="https://github.com/aws/aws-advanced-jdbc-wrapper/blob/0385fecbc9edd097a79c5a3edd066062281a47a0/wrapper/src/main/java/software/amazon/jdbc/dialect/AuroraPgDialect.java#L44-L52">...</a>
    */
   private static final String TOPOLOGY_QUERY =
       "SELECT SERVER_ID, CASE WHEN SESSION_ID OPERATOR(pg_catalog.=) 'MASTER_SESSION_ID' THEN TRUE ELSE FALSE END, "
@@ -37,6 +41,10 @@ public class StateAwareAuroraPgDialect extends AuroraPgDialect {
   /**
    * Query that returns whether the database instances that is being queried is a writer node. Taken
    * directly from {@link AuroraPgDialect}.
+   *
+   * @implNote Taken directly from {@link AuroraPgDialect}.
+   *     <p>See <a
+   *     href="https://github.com/aws/aws-advanced-jdbc-wrapper/blob/0385fecbc9edd097a79c5a3edd066062281a47a0/wrapper/src/main/java/software/amazon/jdbc/dialect/AuroraPgDialect.java#L54-L57">...</a>
    */
   private static final String IS_WRITER_QUERY =
       "SELECT SERVER_ID FROM pg_catalog.aurora_replica_status() "
@@ -46,12 +54,20 @@ public class StateAwareAuroraPgDialect extends AuroraPgDialect {
   /**
    * Query that returns the instance identifier (name of instance) of the database instance that is
    * being queried. Taken directly from {@link AuroraPgDialect}.
+   *
+   * @implNote Taken directly from {@link AuroraPgDialect}.
+   *     <p>See <a
+   *     href="https://github.com/aws/aws-advanced-jdbc-wrapper/blob/0385fecbc9edd097a79c5a3edd066062281a47a0/wrapper/src/main/java/software/amazon/jdbc/dialect/AuroraPgDialect.java#L59">...</a>
    */
   private static final String NODE_ID_QUERY = "SELECT pg_catalog.aurora_db_instance_identifier()";
 
   /**
    * Query that returns whether the database instance that is being queried is a reader node. Taken
    * directly from {@link AuroraPgDialect}.
+   *
+   * @implNote Taken directly from {@link AuroraPgDialect}.
+   *     <p>See <a
+   *     href="https://github.com/aws/aws-advanced-jdbc-wrapper/blob/0385fecbc9edd097a79c5a3edd066062281a47a0/wrapper/src/main/java/software/amazon/jdbc/dialect/AuroraPgDialect.java#L60">...</a>
    */
   private static final String IS_READER_QUERY = "SELECT pg_catalog.pg_is_in_recovery()";
 
