@@ -5,7 +5,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -25,15 +24,6 @@ import org.jetbrains.annotations.NotNull;
 public class BeneficiaryMAPartDEnrollmentRx implements Comparable<BeneficiaryMAPartDEnrollmentRx> {
 
   @EmbeddedId private BeneficiaryMAPartDEnrollmentRxId id;
-
-  @Column(name = "bene_enrlmt_bgn_dt")
-  private LocalDate enrollmentBeginDate;
-
-  @Column(name = "bene_cntrct_num")
-  private String contractNumber;
-
-  @Column(name = "bene_pbp_num")
-  private String planNumber;
 
   @Column(name = "bene_pdp_enrlmt_mmbr_id_num")
   private Optional<String> memberId;

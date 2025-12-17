@@ -92,15 +92,6 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
   /** Organization reference. */
   public static final String ORGANIZATION_REF = "Organization/";
 
-  /** Beneficiary enrollment program type code 1 denotes Part C. */
-  public static final String PART_C_PROGRAM_TYPE_CODE = "1";
-
-  /** Beneficiary enrollment program type code 2 denotes Part D. */
-  public static final String PART_D_PROGRAM_TYPE_CODE = "2";
-
-  /** Beneficiary enrollment program type code 3 denotes Parts C and D. */
-  public static final String PART_C_AND_D_PROGRAM_TYPE_CODE = "3";
-
   private Optional<BeneficiaryEntitlementReason> getEntitlementReason() {
     return Optional.ofNullable(beneficiaryEntitlementReason);
   }
@@ -122,18 +113,11 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
   private Optional<BeneficiaryMAPartDEnrollment> getEnrollment(CoveragePart coveragePart) {
     return beneficiaryMAPartDEnrollments.stream()
         .filter(
-            e -> {
-              var programTypeCode = e.getId().getEnrollmentProgramTypeCode();
-              return switch (coveragePart) {
-                case CoveragePart.PART_C ->
-                    programTypeCode.equals(PART_C_PROGRAM_TYPE_CODE)
-                        || programTypeCode.equals(PART_C_AND_D_PROGRAM_TYPE_CODE);
-                case CoveragePart.PART_D ->
-                    programTypeCode.equals(PART_D_PROGRAM_TYPE_CODE)
-                        || programTypeCode.equals(PART_C_AND_D_PROGRAM_TYPE_CODE);
-                default -> false;
-              };
-            })
+            e ->
+                e.getId()
+                    .getEnrollmentProgramTypeCode()
+                    .map(type -> type.supports(coveragePart))
+                    .orElse(false))
         .findFirst();
   }
 
@@ -358,7 +342,8 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
       return toEmptyResource(coverage);
     }
 
-    mapBaseCoverageCD(coverage, coveragePart, enrollmentOpt.get(), profileType, orgId);
+    var enrichedCoverage =
+        mapBaseCoverageCD(coverage, coveragePart, enrollmentOpt.get(), profileType, orgId);
 
     var rxInfo = getRxEnrollment();
     rxInfo
@@ -370,14 +355,15 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
                   new CodeableConcept()
                       .addCoding(new Coding(SystemUrls.HL7_IDENTIFIER, "MB", null)));
               memberIdentifier.setValue(memberId);
-              coverage.addIdentifier(memberIdentifier);
+              enrichedCoverage.addIdentifier(memberIdentifier);
             });
-    rxInfo.ifPresent(rx -> rx.toFhirClassComponents().forEach(coverage::addClass_));
+    rxInfo.ifPresent(rx -> rx.toFhirClassComponents().forEach(enrichedCoverage::addClass_));
 
     var lowIncomeSubsidy = getLowIncomeSubsidy();
-    lowIncomeSubsidy.ifPresent(lis -> lis.toFhirExtensions().forEach(coverage::addExtension));
+    lowIncomeSubsidy.ifPresent(
+        lis -> lis.toFhirExtensions().forEach(enrichedCoverage::addExtension));
 
-    return coverage;
+    return enrichedCoverage;
   }
 
   private Coverage mapBaseCoverageCD(
@@ -437,7 +423,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
     var coverageType = coveragePart.getStandardSystem();
     var beneSk = enrollment.getId().getBeneSk();
     var contractNum = enrollment.getContractNumber();
-    var contractPbpNum = enrollment.getPlanNumber().orElse("UNKNOWN");
+    var contractPbpNum = enrollment.getPlanNumber();
     return String.format("%s-%s-%s-%s", coverageType, beneSk, contractNum, contractPbpNum);
   }
 }

@@ -750,7 +750,7 @@ class IdrContractPbpContact(IdrBaseModel):
 class IdrBeneficiaryMaPartDEnrollment(IdrBaseModel):
     bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
     cntrct_pbp_sk: int
-    bene_pbp_num: Annotated[str, BeforeValidator(transform_default_string)]
+    bene_pbp_num: str
     bene_enrlmt_bgn_dt: Annotated[date, {PRIMARY_KEY: True}]
     bene_enrlmt_end_dt: Annotated[date, BeforeValidator(transform_null_date_to_max)]
     bene_cntrct_num: str
@@ -796,9 +796,9 @@ class IdrBeneficiaryMaPartDEnrollment(IdrBaseModel):
 class IdrBeneficiaryMaPartDEnrollmentRx(IdrBaseModel):
     bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
     cntrct_pbp_sk: int
-    bene_cntrct_num: str
-    bene_pbp_num: str
-    bene_enrlmt_bgn_dt: date
+    bene_cntrct_num: Annotated[str, {PRIMARY_KEY: True}]
+    bene_pbp_num: Annotated[str, {PRIMARY_KEY: True}]
+    bene_enrlmt_bgn_dt: Annotated[date, {PRIMARY_KEY: True}]
     bene_pdp_enrlmt_mmbr_id_num: Annotated[str, BeforeValidator(transform_default_string)]
     bene_pdp_enrlmt_grp_num: Annotated[str, BeforeValidator(transform_default_string)]
     bene_pdp_enrlmt_prcsr_num: Annotated[str, BeforeValidator(transform_default_string)]

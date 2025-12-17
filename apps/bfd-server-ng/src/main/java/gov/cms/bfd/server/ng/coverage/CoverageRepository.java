@@ -51,7 +51,7 @@ public class CoverageRepository {
                                           WHEN e.beneficiaryEnrollmentPeriod.enrollmentBeginDate <= :today
                                                AND :today <= e.beneficiaryEnrollmentPeriod.enrollmentEndDate
                                           THEN e.beneficiaryEnrollmentPeriod.enrollmentBeginDate
-                                      END DESC,
+                                      END DESC NULLS LAST,
                                       CASE
                                           WHEN e.beneficiaryEnrollmentPeriod.enrollmentBeginDate > :today
                                           THEN e.beneficiaryEnrollmentPeriod.enrollmentEndDate
@@ -62,24 +62,21 @@ public class CoverageRepository {
                       ),
                       latestEnrollmentsRx AS (
                           SELECT rx.id AS id,
-                                 rx.enrollmentBeginDate AS enrollmentBeginDate,
-                                 rx.contractNumber AS beneContractNumber,
-                                 rx.planNumber AS benePbpNumber,
                               ROW_NUMBER() OVER (
-                                  PARTITION BY rx.id.beneSk, rx.enrollmentBeginDate, rx.contractNumber, rx.planNumber
+                                  PARTITION BY rx.id.beneSk, rx.id.enrollmentBeginDate, rx.id.contractNumber, rx.id.planNumber
                                   ORDER BY
                                       CASE
-                                          WHEN rx.enrollmentBeginDate <= :today
+                                          WHEN rx.id.enrollmentBeginDate <= :today
                                           THEN 1
                                           ELSE 2
                                       END ASC,
                                       CASE
-                                          WHEN rx.enrollmentBeginDate <= :today
-                                          THEN rx.enrollmentBeginDate
-                                      END DESC,
+                                          WHEN rx.id.enrollmentBeginDate <= :today
+                                          THEN rx.id.enrollmentBeginDate
+                                      END DESC NULLS LAST,
                                       CASE
-                                          WHEN rx.enrollmentBeginDate > :today
-                                          THEN rx.enrollmentBeginDate
+                                          WHEN rx.id.enrollmentBeginDate > :today
+                                          THEN rx.id.enrollmentBeginDate
                                       END ASC,
                                       rx.id.enrollmentPdpRxInfoBeginDate DESC
                               ) AS row_num
@@ -100,7 +97,7 @@ public class CoverageRepository {
                                           WHEN lis.id.benefitRangeBeginDate <= :today
                                                AND :today <= lis.benefitRangeEndDate
                                           THEN lis.id.benefitRangeBeginDate
-                                      END DESC,
+                                      END DESC NULLS LAST,
                                       CASE
                                           WHEN lis.id.benefitRangeBeginDate > :today
                                             THEN lis.id.benefitRangeBeginDate
@@ -139,9 +136,9 @@ public class CoverageRepository {
                             SELECT 1 FROM latestEnrollmentsRx e
                             WHERE e.row_num = 1
                                 AND e.id.beneSk = ben.id.beneSk
-                                AND e.enrollmentBeginDate = ben.id.enrollmentBeginDate
-                                AND e.beneContractNumber = ben.contractNumber
-                                AND e.benePbpNumber = ben.planNumber
+                                AND e.id.enrollmentBeginDate = ben.id.enrollmentBeginDate
+                                AND e.id.contractNumber = ben.contractNumber
+                                AND e.id.planNumber = ben.planNumber
                                 AND e.id.enrollmentPdpRxInfoBeginDate = berx.id.enrollmentPdpRxInfoBeginDate
                         ))
                         AND (blis IS NULL

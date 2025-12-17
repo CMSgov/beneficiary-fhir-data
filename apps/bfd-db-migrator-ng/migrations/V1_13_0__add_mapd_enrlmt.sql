@@ -39,7 +39,7 @@ CREATE TABLE idr.beneficiary_ma_part_d_enrollment_rx(
     idr_updt_ts TIMESTAMPTZ NOT NULL,
     bfd_created_ts TIMESTAMPTZ NOT NULL,
     bfd_updated_ts TIMESTAMPTZ NOT NULL,
-    PRIMARY KEY(bene_sk, bene_enrlmt_pdp_rx_info_bgn_dt)
+    PRIMARY KEY(bene_sk, bene_cntrct_num, bene_pbp_num, bene_enrlmt_bgn_dt, bene_enrlmt_pdp_rx_info_bgn_dt)
 );
 
 CREATE TABLE idr.beneficiary_low_income_subsidy(
@@ -57,3 +57,5 @@ CREATE TABLE idr.beneficiary_low_income_subsidy(
     bfd_updated_ts TIMESTAMPTZ NOT NULL,
     PRIMARY KEY(bene_sk, bene_rng_bgn_dt)
 );
+
+DROP TABLE idr.beneficiary_election_period_usage;

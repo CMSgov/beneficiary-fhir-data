@@ -5,6 +5,7 @@ import jakarta.persistence.Embeddable;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Comparator;
+import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -27,6 +28,15 @@ public class BeneficiaryEnrollmentId implements Serializable, Comparable<Benefic
 
   @Column(name = "bene_enrlmt_pgm_type_cd")
   private String enrollmentProgramTypeCode;
+
+  /**
+   * Gets the EnrollmentProgramTypeCode enum for the code.
+   *
+   * @return optional EnrollmentProgramTypeCode
+   */
+  public Optional<EnrollmentProgramTypeCode> getEnrollmentProgramTypeCode() {
+    return EnrollmentProgramTypeCode.tryFromCode(enrollmentProgramTypeCode);
+  }
 
   @Override
   public int compareTo(@NotNull BeneficiaryEnrollmentId o) {

@@ -119,20 +119,6 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_bene_mdcr_entlmt_rsn (
     PRIMARY KEY(bene_sk, bene_rng_bgn_dt, bene_rng_end_dt, idr_trans_efctv_ts)
 );
 
-CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_bene_elctn_prd_usg (
-    bene_sk BIGINT NOT NULL,
-    cntrct_pbp_sk BIGINT NOT NULL,
-    bene_cntrct_num VARCHAR(5),
-    bene_pbp_num VARCHAR(3),
-    bene_elctn_enrlmt_disenrlmt_cd VARCHAR(1),
-    bene_elctn_aplctn_dt DATE,
-    bene_enrlmt_efctv_dt DATE,
-    idr_trans_efctv_ts TIMESTAMPTZ NOT NULL,
-    idr_trans_obslt_ts TIMESTAMPTZ NOT NULL,
-    idr_insrt_ts TIMESTAMPTZ NOT NULL,
-    idr_updt_ts TIMESTAMPTZ
-);
-
 CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_bene_xref (
     bene_hicn_num VARCHAR(11) NOT NULL,
     bene_sk BIGINT NOT NULL,

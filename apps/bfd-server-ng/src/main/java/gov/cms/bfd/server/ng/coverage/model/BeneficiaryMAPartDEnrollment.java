@@ -43,7 +43,7 @@ public class BeneficiaryMAPartDEnrollment implements Comparable<BeneficiaryMAPar
   private String contractNumber;
 
   @Column(name = "bene_pbp_num")
-  private Optional<String> planNumber;
+  private String planNumber;
 
   @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(
@@ -80,9 +80,7 @@ public class BeneficiaryMAPartDEnrollment implements Comparable<BeneficiaryMAPar
         new Extension(SystemUrls.EXT_BENE_CNTRCT_NUM_URL).setValue(new StringType(contractNumber));
 
     var extPlanNumber =
-        planNumber.map(
-            number ->
-                new Extension(SystemUrls.EXT_BENE_PBP_NUM_URL).setValue(new StringType(number)));
+        new Extension(SystemUrls.EXT_BENE_PBP_NUM_URL).setValue(new StringType(planNumber));
 
     var extCoverageTypeCode =
         coverageTypeCode.map(
@@ -106,7 +104,7 @@ public class BeneficiaryMAPartDEnrollment implements Comparable<BeneficiaryMAPar
 
     return Stream.of(
             Optional.of(extContractNumber),
-            extPlanNumber,
+            Optional.of(extPlanNumber),
             extCoverageTypeCode,
             extSegmentNumber,
             extEmployerSubsidySwitch)
