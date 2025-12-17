@@ -222,7 +222,7 @@ jobs:
 
       - name: Upload base image artifacts
         if: ${{ !inputs.skipBasePull }}
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: base-images
           path: ${{ runner.temp }}/*.tar
@@ -256,7 +256,7 @@ jobs:
 
       - name: Download base image artifacts
         if: ${{ !inputs.skipBasePull }}
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: base-images
           path: ${{ runner.temp }}
@@ -319,7 +319,7 @@ jobs:
           DOCKER_BUILDKIT: 1
 
       - name: Upload image as artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: build-images.${{ matrix.image.name }}
           path: ${{ runner.temp }}/${{ matrix.image.name }}.tar
@@ -342,7 +342,7 @@ jobs:
           echo "role-arn=$role_arn" >> "$GITHUB_OUTPUT"
 
       - name: Download all built image artifacts
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           pattern: build-images.*
           path: ${{ runner.temp }}
