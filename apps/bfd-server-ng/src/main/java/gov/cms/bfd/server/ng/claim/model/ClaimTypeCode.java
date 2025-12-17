@@ -410,11 +410,21 @@ public enum ClaimTypeCode {
   }
 
   Optional<String> toFhirStructureDefinition() {
-    return ClaimSubtype.subtypeFor(code).map(ClaimSubtype::getSystemUrl);
+    //    return ClaimSubtype.subtypeFor(code).map(ClaimSubtype::getSystemUrl);
+    return CLAIM_TYPE_CODE_MAP.entrySet().stream()
+        .filter(entry -> entry.getValue().contains(this))
+        .map(Map.Entry::getKey)
+        .map(ClaimSubtype::getSystemUrl)
+        .findFirst();
   }
 
   private Optional<ClaimType> getClaimType() {
-    return ClaimSubtype.subtypeFor(code).map(ClaimSubtype::getClaimType);
+    //    return ClaimSubtype.subtypeFor(code).map(ClaimSubtype::getClaimType);
+    return CLAIM_TYPE_CODE_MAP.entrySet().stream()
+        .filter(entry -> entry.getValue().contains(this))
+        .map(Map.Entry::getKey)
+        .map(ClaimSubtype::getClaimType)
+        .findFirst();
   }
 
   /** Claim Type codes grouped by claim sub types. * */
