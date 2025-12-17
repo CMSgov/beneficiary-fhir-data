@@ -92,6 +92,15 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
   /** Organization reference. */
   public static final String ORGANIZATION_REF = "Organization/";
 
+  /** Beneficiary enrollment program type code 1 denotes Part C. */
+  public static final String PART_C_PROGRAM_TYPE_CODE = "1";
+
+  /** Beneficiary enrollment program type code 2 denotes Part D. */
+  public static final String PART_D_PROGRAM_TYPE_CODE = "2";
+
+  /** Beneficiary enrollment program type code 3 denotes Parts C and D. */
+  public static final String PART_C_AND_D_PROGRAM_TYPE_CODE = "3";
+
   private Optional<BeneficiaryEntitlementReason> getEntitlementReason() {
     return Optional.ofNullable(beneficiaryEntitlementReason);
   }
@@ -111,14 +120,17 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
    * @return Optional containing the matching enrollment, or empty if not found.
    */
   private Optional<BeneficiaryMAPartDEnrollment> getEnrollment(CoveragePart coveragePart) {
-    var coverageType = coveragePart.getStandardCode();
     return beneficiaryMAPartDEnrollments.stream()
         .filter(
             e -> {
               var programTypeCode = e.getId().getEnrollmentProgramTypeCode();
-              return switch (coverageType) {
-                case "C" -> programTypeCode.equals("1") || programTypeCode.equals("3");
-                case "D" -> programTypeCode.equals("2") || programTypeCode.equals("3");
+              return switch (coveragePart) {
+                case CoveragePart.PART_C ->
+                    programTypeCode.equals(PART_C_PROGRAM_TYPE_CODE)
+                        || programTypeCode.equals(PART_C_AND_D_PROGRAM_TYPE_CODE);
+                case CoveragePart.PART_D ->
+                    programTypeCode.equals(PART_D_PROGRAM_TYPE_CODE)
+                        || programTypeCode.equals(PART_C_AND_D_PROGRAM_TYPE_CODE);
                 default -> false;
               };
             })
@@ -330,6 +342,9 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
   private Coverage mapCoverageC(
       Coverage coverage, CoveragePart coveragePart, ProfileType profileType, String orgId) {
     var enrollmentOpt = getEnrollment(coveragePart);
+
+    identifier.toFhir(orgId).ifPresent(coverage::addIdentifier);
+
     return enrollmentOpt
         .map(
             enrollment -> mapBaseCoverageCD(coverage, coveragePart, enrollment, profileType, orgId))
@@ -371,8 +386,6 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
       BeneficiaryMAPartDEnrollment enrollment,
       ProfileType profileType,
       String orgId) {
-
-    identifier.toFhir(orgId).ifPresent(coverage::addIdentifier);
 
     coverage.setId(createCoverageIdPartCD(coveragePart, enrollment));
     coverage.setPeriod(enrollment.toFhirPeriod());
@@ -424,7 +437,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
     var coverageType = coveragePart.getStandardSystem();
     var beneSk = enrollment.getId().getBeneSk();
     var contractNum = enrollment.getContractNumber();
-    var contractPbpNum = enrollment.getPlanNumber();
+    var contractPbpNum = enrollment.getPlanNumber().orElse("UNKNOWN");
     return String.format("%s-%s-%s-%s", coverageType, beneSk, contractNum, contractPbpNum);
   }
 }

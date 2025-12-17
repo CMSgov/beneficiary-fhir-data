@@ -104,7 +104,8 @@ public final class OrganizationFactory {
       Organization.OrganizationContactComponent contact,
       Optional<String> extensionNumber,
       String phoneNumber) {
-    var fullTeleNumber = extensionNumber.map(ext -> ext + "-").orElse("") + phoneNumber;
+    phoneNumber = phoneNumber.replaceFirst("(\\d{3})(\\d{3})(\\d+)", "$1-$2-$3");
+    var fullTeleNumber = phoneNumber + extensionNumber.map(ext -> " ext. " + ext).orElse("");
     contact.addTelecom(
         new ContactPoint()
             .setSystem(ContactPoint.ContactPointSystem.PHONE)

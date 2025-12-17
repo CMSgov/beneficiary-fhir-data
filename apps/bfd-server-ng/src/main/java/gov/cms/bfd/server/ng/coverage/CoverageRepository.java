@@ -28,7 +28,7 @@ public class CoverageRepository {
 
     // Note on sorting here. We sort first by active coverage records. Among active records sort by
     // latest begin date. Among future coverage records, sort by nearest begin date. In the case of
-    // rx enrollments ,if multiple records have matching begin dates then we sort by latest pdp rx
+    // rx enrollments, if multiple records have matching begin dates then we sort by latest pdp rx
     // info begin date.
 
     var beneficiaryCoverage =
@@ -133,8 +133,7 @@ public class CoverageRepository {
                                 AND e.id.enrollmentBeginDate = ben.id.enrollmentBeginDate
                                 AND e.id.enrollmentProgramTypeCode = ben.id.enrollmentProgramTypeCode
                         ))
-                        AND ((ben.id.enrollmentProgramTypeCode <> '2'
-                            AND ben.id.enrollmentProgramTypeCode <> '3')
+                        AND (ben.id.enrollmentProgramTypeCode NOT IN ('2', '3')
                             OR berx IS NULL
                             OR EXISTS (
                             SELECT 1 FROM latestEnrollmentsRx e

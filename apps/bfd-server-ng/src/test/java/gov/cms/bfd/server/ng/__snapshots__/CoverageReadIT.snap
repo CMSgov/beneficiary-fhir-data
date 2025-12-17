@@ -383,10 +383,10 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadBeneWithAllCoverage[allCoverage
       },
       "telecom" : [ {
         "system" : "phone",
-        "value" : "5734500-6326096612"
+        "value" : "632-609-6612 ext. 1"
       }, {
         "system" : "phone",
-        "value" : "1192515-2754998586"
+        "value" : "275-499-8586 ext. 3"
       } ]
     } ],
     "id" : "insurer-org",
@@ -512,10 +512,10 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadBeneWithAllCoverage[allCoverage
       },
       "telecom" : [ {
         "system" : "phone",
-        "value" : "5734500-6326096612"
+        "value" : "632-609-6612 ext. 1"
       }, {
         "system" : "phone",
-        "value" : "1192515-2754998586"
+        "value" : "275-499-8586 ext. 3"
       } ]
     } ],
     "id" : "insurer-org",
@@ -542,7 +542,7 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadBeneWithAllCoverage[allCoverage
     "valueString" : "Y"
   }, {
     "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-LIS-PTD-PRM-PCT",
-    "valueDecimal" : 0.25
+    "valueDecimal" : 25.0
   }, {
     "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-LIS-COPMT-LVL-CD",
     "valueCoding" : {
@@ -552,15 +552,6 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadBeneWithAllCoverage[allCoverage
   } ],
   "id" : "part-d-405764107-H1234-003",
   "identifier" : [ {
-    "system" : "http://hl7.org/fhir/sid/us-mbi",
-    "type" : {
-      "coding" : [ {
-        "code" : "MB",
-        "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-      } ]
-    },
-    "value" : "8Z73WV0QC20"
-  }, {
     "type" : {
       "coding" : [ {
         "code" : "MB",
@@ -1113,10 +1104,10 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadPartCAndDOnly=[
       },
       "telecom" : [ {
         "system" : "phone",
-        "value" : "5734500-6326096612"
+        "value" : "632-609-6612 ext. 1"
       }, {
         "system" : "phone",
-        "value" : "1192515-2754998586"
+        "value" : "275-499-8586 ext. 3"
       } ]
     } ],
     "id" : "insurer-org",
@@ -1482,7 +1473,7 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadValidPartCCompositeId[validPart
       },
       "telecom" : [ {
         "system" : "phone",
-        "value" : "88-1821085917"
+        "value" : "182-108-5917 ext. 88"
       } ]
     } ],
     "id" : "insurer-org",
@@ -1605,10 +1596,10 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadValidPartDCompositeId[validPart
       },
       "telecom" : [ {
         "system" : "phone",
-        "value" : "70-0807517370"
+        "value" : "080-751-7370 ext. 70"
       }, {
         "system" : "phone",
-        "value" : "70-0807517370"
+        "value" : "080-751-7370 ext. 70"
       } ]
     } ],
     "id" : "insurer-org",
@@ -1635,7 +1626,7 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadValidPartDCompositeId[validPart
     "valueString" : "1"
   }, {
     "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-LIS-PTD-PRM-PCT",
-    "valueDecimal" : 0.25
+    "valueDecimal" : 25.0
   }, {
     "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-LIS-COPMT-LVL-CD",
     "valueCoding" : {
@@ -1645,15 +1636,6 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadValidPartDCompositeId[validPart
   } ],
   "id" : "part-d-547437476-S0001-003",
   "identifier" : [ {
-    "system" : "http://hl7.org/fhir/sid/us-mbi",
-    "type" : {
-      "coding" : [ {
-        "code" : "MB",
-        "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-      } ]
-    },
-    "value" : "4IX2V57GT15"
-  }, {
     "type" : {
       "coding" : [ {
         "code" : "MB",

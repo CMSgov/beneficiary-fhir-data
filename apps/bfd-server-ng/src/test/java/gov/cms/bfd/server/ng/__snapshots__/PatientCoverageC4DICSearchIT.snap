@@ -332,7 +332,7 @@ gov.cms.bfd.server.ng.PatientCoverageC4DICSearchIT.patientCoverageSearchAllParts
         }
       }, {
         "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-LIS-PTD-PRM-PCT",
-        "valueDecimal" : 0.25
+        "valueDecimal" : 25.0
       }, {
         "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-LIS-COPMT-LVL-CD",
         "valueCoding" : {
@@ -341,18 +341,6 @@ gov.cms.bfd.server.ng.PatientCoverageC4DICSearchIT.patientCoverageSearchAllParts
         }
       } ],
       "identifier" : [ {
-        "assigner" : {
-          "reference" : "Organization/{uuid}"
-        },
-        "system" : "http://hl7.org/fhir/sid/us-mbi",
-        "type" : {
-          "coding" : [ {
-            "code" : "MB",
-            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-          } ]
-        },
-        "value" : "8Z73WV0QC20"
-      }, {
         "type" : {
           "coding" : [ {
             "code" : "MB",

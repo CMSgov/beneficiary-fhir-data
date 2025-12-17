@@ -86,6 +86,6 @@ public class CoverageHandler {
                         new CoverageCompositeId(c, beneficiary.getBeneSk())))
             .flatMap(Optional::stream);
 
-    return FhirUtil.bundleOrDefault(coverages.map(r -> r), loadProgressRepository::lastUpdated);
+    return FhirUtil.bundleOrDefault(coverages.map(c -> c), loadProgressRepository::lastUpdated);
   }
 }

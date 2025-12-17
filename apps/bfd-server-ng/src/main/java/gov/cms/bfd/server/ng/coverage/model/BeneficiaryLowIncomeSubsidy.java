@@ -47,7 +47,7 @@ public class BeneficiaryLowIncomeSubsidy implements Comparable<BeneficiaryLowInc
    */
   public List<Extension> toFhirExtensions() {
 
-    var premiumPercentage = partDPremiumPercentage / 100.0;
+    var premiumPercentage = partDPremiumPercentage;
     var extPartDPremiumPercentage =
         new Extension(SystemUrls.EXT_BENE_LIS_PTD_PRM_PCT_URL)
             .setValue(new DecimalType(premiumPercentage));
