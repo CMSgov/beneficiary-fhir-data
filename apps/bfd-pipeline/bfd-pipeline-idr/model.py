@@ -1730,7 +1730,9 @@ class IdrClaimLineInstitutional(IdrBaseModel):
 
 
 class IdrClaimAnsiSignature(IdrBaseModel):
-    clm_ansi_sgntr_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
+    clm_ansi_sgntr_sk: Annotated[
+        int, {PRIMARY_KEY: True, BATCH_ID: True}
+    ]
     clm_1_rev_cntr_ansi_grp_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_2_rev_cntr_ansi_grp_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_3_rev_cntr_ansi_grp_cd: Annotated[str, BeforeValidator(transform_default_string)]
