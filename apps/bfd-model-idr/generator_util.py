@@ -30,11 +30,11 @@ def probability(frac: float) -> bool:
     return random.random() < (frac)
 
 
-def contains_bene_sk(file, bene_sk):
+def contains_bene_sk(file: list["RowAdapter"], bene_sk: str):
     return len([row for row in file if row["BENE_SK"] == bene_sk]) > 0
 
 
-def find_bene_sk(file, bene_sk):
+def find_bene_sk(file: list["RowAdapter"], bene_sk: str):
     res = [row for row in file if row["BENE_SK"] == bene_sk]
     return res[0] if res else RowAdapter({"BENE_SK": bene_sk})
 
@@ -59,19 +59,19 @@ class GeneratorUtil:
     def __init__(self):
         self.fake = Faker()
         self.used_bene_sk: list[int] = []
-        self.used_mbi = []
-        self.bene_hstry_table = []
-        self.bene_xref_table = []
+        self.used_mbi: list[str] = []
+        self.bene_hstry_table: list[dict[str, Any]] = []
+        self.bene_xref_table: list[dict[str, Any]] = []
         self.mbi_table: dict[str, dict[str, Any]] = {}
-        self.address_options = []
-        self.mdcr_stus = []
-        self.mdcr_entlmt = []
-        self.mdcr_tp = []
-        self.mdcr_rsn = []
-        self.bene_cmbnd_dual_mdcr = []
-        self.bene_lis = []
-        self.bene_mapd_enrlmt_rx = []
-        self.bene_mapd_enrlmt = []
+        self.address_options: list[dict[str, Any]] = []
+        self.mdcr_stus: list[dict[str, Any]] = []
+        self.mdcr_entlmt: list[dict[str, Any]] = []
+        self.mdcr_tp: list[dict[str, Any]] = []
+        self.mdcr_rsn: list[dict[str, Any]] = []
+        self.bene_cmbnd_dual_mdcr: list[dict[str, Any]] = []
+        self.bene_lis: list[dict[str, Any]] = []
+        self.bene_mapd_enrlmt_rx: list[dict[str, Any]] = []
+        self.bene_mapd_enrlmt: list[dict[str, Any]] = []
         self.code_systems = {}
 
         self.load_addresses()
@@ -118,20 +118,20 @@ class GeneratorUtil:
             print(f"Error: Resources directory not found at path: {relative_path}")
             sys.exit(1)
 
-        self.code_systems = code_systems
+        self.code_systems: dict[str, list[str]] = code_systems
 
     def load_addresses(self):
         with Path("beneficiary-components/addresses.csv").open() as file:
             csvreader = csv.reader(file)
             header = next(csvreader)
             for row in csvreader:
-                cur_row = {}
+                cur_row: dict[str, Any] = {}
                 for col in range(len(row)):
                     cur_row[header[col]] = row[col]
                 self.address_options.append(cur_row)
 
-    def gen_mbi(self):
-        mbi = []
+    def gen_mbi(self) -> str:
+        mbi: list[str] = []
         set_1 = set(string.ascii_uppercase) - set(["S", "L", "O", "I", "B", "Z"])
         set_2 = set(list(set_1) + list(string.digits))
         mbi.append(random.choice(["1", "2", "3", "4", "5", "6", "7", "8", "9"]))
@@ -145,10 +145,11 @@ class GeneratorUtil:
         mbi.append(random.choice(list(set_1)))
         mbi.append(random.choice(string.digits))
         mbi.append(random.choice(string.digits))
-        mbi = "".join(mbi)
-        if mbi in self.mbi_table:
+
+        full_mbi = "".join(mbi)
+        if full_mbi in self.mbi_table:
             return self.gen_mbi()
-        return mbi
+        return full_mbi
 
     def gen_bene_sk(self) -> int:
         bene_sk = random.randint(-1000000000, -1000)
@@ -156,7 +157,7 @@ class GeneratorUtil:
             return self.gen_bene_sk()
         return bene_sk
 
-    def generate_bene_xref(self, new_bene_sk, old_bene_sk):
+    def generate_bene_xref(self, new_bene_sk: str, old_bene_sk: int):
         bene_hicn_num = str(random.randint(1000, 100000000)) + random.choice(string.ascii_letters)
 
         # 10% chance for invalid xref.
@@ -197,7 +198,7 @@ class GeneratorUtil:
     def gen_address(self):
         return self.address_options[random.randint(0, len(self.address_options) - 1)]
 
-    def set_timestamps(self, patient, min_date):
+    def set_timestamps(self, patient: RowAdapter, min_date: datetime.date):
         max_date = datetime.datetime.now() - datetime.timedelta(days=1)
         efctv_ts = self.fake.date_time_between_dates(min_date, max_date)
         insrt_ts = self.fake.date_time_between_dates(efctv_ts, max_date)
@@ -215,12 +216,12 @@ class GeneratorUtil:
         for component in address:
             patient[component] = address[component]
 
-    def gen_mbis_for_patient(self, patient, num_mbis):
+    def gen_mbis_for_patient(self, patient: RowAdapter, num_mbis: int):
         previous_obslt_dt = None
         previous_mbi = None
 
         for mbi_idx in range(num_mbis):
-            mbi_obj = {}
+            mbi_obj = RowAdapter({})
 
             if mbi_idx == 0:
                 efctv_dt = self.fake.date_between_dates(
@@ -256,7 +257,7 @@ class GeneratorUtil:
                 mbi_obj["BENE_MBI_OBSLT_DT"] = obslt_dt.strftime("%Y-%m-%d")
 
                 if previous_mbi and previous_mbi != current_mbi:
-                    historical_patient = copy.deepcopy(patient).kv
+                    historical_patient = copy.deepcopy(patient)
                     historical_patient["BENE_MBI_ID"] = previous_mbi
                     historical_patient["IDR_LTST_TRANS_FLG"] = "N"
 
@@ -264,7 +265,7 @@ class GeneratorUtil:
                     historical_patient["IDR_TRANS_OBSLT_TS"] = (
                         str(obslt_dt) + "T00:00:00.000000+0000"
                     )
-                    self.bene_hstry_table.append(historical_patient)
+                    self.bene_hstry_table.append(historical_patient.kv)
 
                 previous_obslt_dt = obslt_dt  # Store for next iteration
             else:
@@ -272,13 +273,13 @@ class GeneratorUtil:
                 mbi_obj["BENE_MBI_OBSLT_DT"] = None
 
             self.set_timestamps(mbi_obj, efctv_dt)
-            self.mbi_table[current_mbi] = mbi_obj
+            self.mbi_table[current_mbi] = mbi_obj.kv
 
             # Update patient with current MBI and store previous for next iteration
             previous_mbi = patient["BENE_MBI_ID"]
             patient.kv["BENE_MBI_ID"] = current_mbi
 
-    def generate_coverages(self, patient, files):
+    def generate_coverages(self, patient: RowAdapter, files: dict[str, list[RowAdapter]]):
         parts = random.choices([["A"], ["B"], ["A", "B"], []], weights=[0.2, 0.2, 0.5, 0.1])[0]
         include_tp = random.random() > 0.2
         expired = random.random() < 0.2
@@ -292,7 +293,15 @@ class GeneratorUtil:
             future=future,
         )
 
-    def _generate_coverages(self, patient, files, coverage_parts, include_tp, expired, future):
+    def _generate_coverages(
+        self,
+        patient: RowAdapter,
+        files: dict[str, list[RowAdapter]],
+        coverage_parts: list[str],
+        include_tp: bool,
+        expired: bool,
+        future: bool,
+    ):
         now = datetime.date.today()
         if expired:
             medicare_start_date = now - datetime.timedelta(days=730)
@@ -404,7 +413,7 @@ class GeneratorUtil:
             dual_row["IDR_TRANS_OBSLT_TS"] = "9999-12-31T00:00:00.000000+0000"
             self.bene_cmbnd_dual_mdcr.append(dual_row.kv)
 
-    def generate_bene_lis(self, patient, files):
+    def generate_bene_lis(self, patient: RowAdapter, files: dict[str, list[RowAdapter]]):
         if probability(0.5) or contains_bene_sk(files[BENE_LIS], patient["BENE_SK"]):
             lis_start_date = self.fake.date_between_dates(
                 datetime.date(year=2017, month=5, day=20),
@@ -429,7 +438,9 @@ class GeneratorUtil:
 
             self.bene_lis.append(lis_row.kv)
 
-    def generate_bene_mapd_enrlmt_rx(self, patient, files, contract_info):
+    def generate_bene_mapd_enrlmt_rx(
+        self, patient: RowAdapter, files: dict[str, list[RowAdapter]], contract_info: dict[str, Any]
+    ):
         enrollment_start_date = self.fake.date_between_dates(
             datetime.date(year=2017, month=5, day=20),
             datetime.date(year=2021, month=1, day=1),
@@ -461,7 +472,9 @@ class GeneratorUtil:
 
         self.bene_mapd_enrlmt_rx.append(rx_row.kv)
 
-    def generate_bene_mapd_enrlmt(self, patient, files, pdp_only=False):
+    def generate_bene_mapd_enrlmt(
+        self, patient: RowAdapter, files: dict[str, list[RowAdapter]], pdp_only: bool = False
+    ):
         enrollment_start_date = self.fake.date_between_dates(
             datetime.date(year=2017, month=5, day=20),
             datetime.date(year=2021, month=1, day=1),
@@ -490,7 +503,7 @@ class GeneratorUtil:
         enrollment_row["IDR_UPDT_TS"] = str(enrollment_start_date) + "T00:00:00.000000+0000"
         enrollment_row["IDR_TRANS_OBSLT_TS"] = "9999-12-31T00:00:00.000000+0000"
 
-        self.bene_mapd_enrlmt.append(enrollment_row)
+        self.bene_mapd_enrlmt.append(enrollment_row.kv)
         return {"contract_num": cntrct_num, "pbp_num": pbp_num}
 
     def save_output_files(self):
@@ -564,8 +577,8 @@ class GeneratorUtil:
             self.export_df(data, path, cols)
 
     @staticmethod
-    def export_df(data, out_path, cols=NO_COLS):
-        df = pd.json_normalize(data)
+    def export_df(data: list[dict[str, Any]], out_path: str, cols: list[str] | str = NO_COLS):
+        df = pd.json_normalize(data)  # type: ignore
         if cols != GeneratorUtil.NO_COLS:
             df = df[cols]
         df.to_csv(out_path, index=False)

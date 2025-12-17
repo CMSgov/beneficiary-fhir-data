@@ -166,7 +166,7 @@ def load_inputs():
             for xref_row in xref_rows:
                 generator.bene_xref_table.append(xref_row.kv)
         elif probability(0.05):
-            prior_patient = copy.deepcopy(patient).kv
+            prior_patient = copy.deepcopy(patient)
             pt_bene_sk = generator.gen_bene_sk()
             prior_patient["BENE_SK"] = str(pt_bene_sk)
             prior_patient["IDR_LTST_TRANS_FLG"] = "N"
@@ -182,7 +182,7 @@ def load_inputs():
             )
             prior_patient["IDR_TRANS_OBSLT_TS"] = f"{past_year_date}T00:00:00.000000+0000"
 
-            generator.bene_hstry_table.append(prior_patient)
+            generator.bene_hstry_table.append(prior_patient.kv)
 
         generator.bene_hstry_table.append(patient.kv)
     generator.save_output_files()
