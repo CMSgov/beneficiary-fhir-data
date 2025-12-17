@@ -17,6 +17,7 @@ from generator_util import (
     BENE_LIS,
     BENE_MAPD_ENRLMT,
     BENE_MAPD_ENRLMT_RX,
+    BENE_MBI_ID,
     BENE_STUS,
     BENE_TP,
     GeneratorUtil,
@@ -40,7 +41,7 @@ args = parser.parse_args()
 
 
 def load_file(file):
-    return [RowAdapter(row) for row in file]
+    return [RowAdapter(kv=row, loaded_from_file=True) for row in file]
 
 
 available_given_names = [
@@ -64,6 +65,7 @@ available_family_names = ["Erdapfel", "Heeler", "Coffee", "Jones", "Smith", "She
 def load_inputs():
     files = {
         BENE_HSTRY: [],
+        BENE_MBI_ID: [],
         BENE_STUS: [],
         BENE_ENTLMT_RSN: [],
         BENE_ENTLMT: [],
@@ -89,9 +91,8 @@ def load_inputs():
         for filename in files:
             if file_path.name == filename + ".csv":
                 files[filename] = load_file(csv_data.to_dict(orient="records"))
-    patients = files[BENE_HSTRY]
-    if not patients:
-        patients = [RowAdapter({})] * args.patients
+    patients: list[RowAdapter] = files[BENE_HSTRY] or [RowAdapter({})] * args.patients
+    patient_mbi_ids: list[RowAdapter] = files[BENE_MBI_ID] or [RowAdapter({})] * args.patients
 
     for i, patient in enumerate(patients):
         if i > 0 and i % 10000 == 0:
@@ -118,8 +119,28 @@ def load_inputs():
         patient["BENE_XREF_EFCTV_SK"] = str(pt_bene_sk)
         patient["BENE_XREF_SK"] = patient["BENE_XREF_EFCTV_SK"]
         generator.used_bene_sk.append(pt_bene_sk)
-        num_mbis = random.choices([1, 2, 3, 4], weights=[0.8, 0.14, 0.05, 0.01])[0]
-        generator.handle_mbis(patient, num_mbis)
+
+        patient_static_mbis = [
+            row
+            for row in patient_mbi_ids
+            if row["BENE_MBI_ID"] == patient["BENE_MBI_ID"] and row.loaded_from_file
+        ]
+        if patient_static_mbis:
+            # If the operator has provided static MBIs for a given synthetic patient we need to add
+            # those MBIs to the composite BENE_MBI_ID table:
+            for static_mbi_row in patient_static_mbis:
+                generator.mbi_table[static_mbi_row["BENE_MBI_ID"]] = static_mbi_row.kv
+        else:
+            # If the patient has no corresponding static MBIs and is loaded from a file (static) we
+            # generate a single MBI ID to ensure a static table size, otherwise (if the patient is
+            # totally generated) we generate upto 4 MBIs (n - 1 being obsolete)
+            num_mbis = (
+                1
+                if patient.loaded_from_file
+                else random.choices([1, 2, 3, 4], weights=[0.8, 0.14, 0.05, 0.01])[0]
+            )
+            generator.gen_mbis_for_patient(patient, num_mbis)
+
         generator.generate_coverages(patient, files)
 
         # pt c / d data

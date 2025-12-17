@@ -13,6 +13,7 @@ from dateutil.parser import parse
 from faker import Faker
 
 BENE_HSTRY = "SYNTHETIC_BENE_HSTRY"
+BENE_MBI_ID = "SYNTHETIC_BENE_MBI_ID"
 BENE_STUS = "SYNTHETIC_BENE_MDCR_STUS"
 BENE_ENTLMT_RSN = "SYNTHETIC_BENE_MDCR_ENTLMT_RSN"
 BENE_ENTLMT = "SYNTHETIC_BENE_MDCR_ENTLMT"
@@ -37,8 +38,9 @@ def find_bene_sk(file, bene_sk):
 
 
 class RowAdapter:
-    def __init__(self, kv):
+    def __init__(self, kv, loaded_from_file=False):
         self.kv = kv
+        self.loaded_from_file = loaded_from_file
 
     def __getitem__(self, key):
         return self.kv[key]
@@ -211,7 +213,7 @@ class GeneratorUtil:
         for component in address:
             patient[component] = address[component]
 
-    def handle_mbis(self, patient, num_mbis):
+    def gen_mbis_for_patient(self, patient, num_mbis):
         previous_obslt_dt = None
         previous_mbi = None
 
@@ -536,7 +538,7 @@ class GeneratorUtil:
 
         beneficiary_exports = [
             (self.bene_hstry_table, f"out/{BENE_HSTRY}.csv", BENE_HSTRY_COLS),
-            (mbi_arr, "out/SYNTHETIC_BENE_MBI_ID.csv", BENE_MBI_COLS),
+            (mbi_arr, f"out/{BENE_MBI_ID}.csv", BENE_MBI_COLS),
             (self.mdcr_stus, f"out/{BENE_STUS}.csv", GeneratorUtil.NO_COLS),
             (self.mdcr_entlmt, f"out/{BENE_ENTLMT}.csv", GeneratorUtil.NO_COLS),
             (self.mdcr_tp, f"out/{BENE_TP}.csv", GeneratorUtil.NO_COLS),
