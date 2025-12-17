@@ -2,9 +2,9 @@ import argparse
 import copy
 import datetime
 import random
-import subprocess
-import sys
+from collections.abc import Iterable
 from pathlib import Path
+from typing import Any
 
 import pandas as pd
 from faker import Faker
@@ -20,6 +20,7 @@ from generator_util import (
     BENE_MBI_ID,
     BENE_STUS,
     BENE_TP,
+    BENE_XREF,
     GeneratorUtil,
     RowAdapter,
     probability,
@@ -40,7 +41,7 @@ parser.add_argument(
 args = parser.parse_args()
 
 
-def load_file(file):
+def load_file(file: Iterable[dict[str, Any]]):
     return [RowAdapter(kv=row, loaded_from_file=True) for row in file]
 
 
@@ -63,13 +64,14 @@ available_family_names = ["Erdapfel", "Heeler", "Coffee", "Jones", "Smith", "She
 
 
 def load_inputs():
-    files = {
+    files: dict[str, list[RowAdapter]] = {
         BENE_HSTRY: [],
         BENE_MBI_ID: [],
         BENE_STUS: [],
         BENE_ENTLMT_RSN: [],
         BENE_ENTLMT: [],
         BENE_TP: [],
+        BENE_XREF: [],
         BENE_DUAL: [],
         BENE_MAPD_ENRLMT: [],
         BENE_MAPD_ENRLMT_RX: [],
@@ -78,7 +80,7 @@ def load_inputs():
     generator = GeneratorUtil()
     for file in args.files:
         file_path = Path(file)
-        csv_data = pd.read_csv(
+        csv_data = pd.read_csv(  # type: ignore
             file_path,
             dtype={
                 "BENE_SK": "Int64",
@@ -90,9 +92,10 @@ def load_inputs():
         )
         for filename in files:
             if file_path.name == filename + ".csv":
-                files[filename] = load_file(csv_data.to_dict(orient="records"))
+                files[filename] = load_file(csv_data.to_dict(orient="records"))  # type: ignore
     patients: list[RowAdapter] = files[BENE_HSTRY] or [RowAdapter({})] * args.patients
     patient_mbi_ids: list[RowAdapter] = files[BENE_MBI_ID] or [RowAdapter({})] * args.patients
+    patient_xrefs: list[RowAdapter] = files[BENE_XREF] or [RowAdapter({})] * args.patients
 
     for i, patient in enumerate(patients):
         if i > 0 and i % 10000 == 0:
@@ -154,7 +157,15 @@ def load_inputs():
             generator.generate_bene_mapd_enrlmt_rx(patient, files, contract_info)
             generator.generate_bene_lis(patient, files)
 
-        if probability(0.05):
+        xref_rows = [
+            row
+            for row in patient_xrefs
+            if row["BENE_SK"] == patient["BENE_SK"] and row.loaded_from_file
+        ]
+        if xref_rows:
+            for xref_row in xref_rows:
+                generator.bene_xref_table.append(xref_row.kv)
+        elif probability(0.05):
             prior_patient = copy.deepcopy(patient).kv
             pt_bene_sk = generator.gen_bene_sk()
             prior_patient["BENE_SK"] = str(pt_bene_sk)
