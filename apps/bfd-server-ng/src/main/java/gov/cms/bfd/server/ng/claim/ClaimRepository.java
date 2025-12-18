@@ -98,28 +98,37 @@ public class ClaimRepository {
       Optional<Integer> offset,
       List<ClaimSourceId> sourceIds,
       List<ClaimTypeCode> claimTypeCodes) {
-    // NOTE: JPQL doesn't support joining on a CTE, so we have to use WHERE IN
+    // JPQL doesn't support LIMIT/OFFSET unfortunately, so we have to load this separately.
+    // setMaxResults will only limit the results in memory rather than at the database level.
 
     // We need to get a distinct list of bene_sk values here because there will be duplicates
     // since this is a history table.
+    var claimIds =
+        entityManager
+            .createNativeQuery(
+                """
+                WITH benes AS (
+                    SELECT DISTINCT b.bene_sk
+                    FROM idr.beneficiary b
+                    WHERE b.bene_xref_efctv_sk_computed = :beneSk
+                )
+                SELECT c.clm_uniq_id
+                FROM idr.claim c
+                JOIN benes b ON b.bene_sk = c.bene_sk
+                ORDER BY c.clm_uniq_id
+                LIMIT :limit
+                OFFSET :offset
+                """,
+                Long.class)
+            .setParameter("beneSk", beneSk)
+            .setParameter("limit", limit.orElse(5000))
+            .setParameter("offset", offset.orElse(0))
+            .getResultList();
     var jpql =
         String.format(
             """
-            WITH benes AS (
-                SELECT DISTINCT b.beneSk beneSk
-                FROM Beneficiary b
-                WHERE b.xrefSk = :beneSk
-            ),
-            claims AS (
-                SELECT c.claimUniqueId claimUniqueId
-                FROM Claim c
-                WHERE c.beneficiary.beneSk IN (SELECT beneSk FROM benes)
-                ORDER BY c.claimUniqueId
-                OFFSET :offset ROWS
-                FETCH NEXT :limit ROWS ONLY
-            )
             %s
-            WHERE c.claimUniqueId IN (SELECT claimUniqueId FROM claims)
+            WHERE c.claimUniqueId IN (:claimIds)
             %s
             """,
             CLAIM_TABLES_BASE, getFilters(claimThroughDate, lastUpdated));
@@ -130,9 +139,7 @@ public class ClaimRepository {
                 lastUpdated,
                 sourceIds,
                 claimTypeCodes)
-            .setParameter("beneSk", beneSk)
-            .setParameter("limit", limit.orElse(5000))
-            .setParameter("offset", offset.orElse(0))
+            .setParameter("claimIds", claimIds)
             .getResultList();
 
     claims.stream()
