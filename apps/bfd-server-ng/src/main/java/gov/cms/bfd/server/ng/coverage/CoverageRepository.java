@@ -25,6 +25,7 @@ public class CoverageRepository {
   public Optional<BeneficiaryCoverage> searchBeneficiaryWithCoverage(
       long beneSk, DateTimeRange lastUpdatedRange) {
     var today = LocalDate.now();
+    var farFuture = LocalDate.of(9999, 12, 31);
 
     // Note on sorting here. We sort first by active coverage records. Among active records sort by
     // latest begin date. Among future coverage records, sort by nearest begin date. In the case of
@@ -51,7 +52,8 @@ public class CoverageRepository {
                                           WHEN e.beneficiaryEnrollmentPeriod.enrollmentBeginDate <= :today
                                                AND :today <= e.beneficiaryEnrollmentPeriod.enrollmentEndDate
                                           THEN e.beneficiaryEnrollmentPeriod.enrollmentBeginDate
-                                      END DESC NULLS LAST,
+                                          ELSE :farFuture
+                                      END DESC,
                                       CASE
                                           WHEN e.beneficiaryEnrollmentPeriod.enrollmentBeginDate > :today
                                           THEN e.beneficiaryEnrollmentPeriod.enrollmentEndDate
@@ -73,7 +75,8 @@ public class CoverageRepository {
                                       CASE
                                           WHEN rx.id.enrollmentBeginDate <= :today
                                           THEN rx.id.enrollmentBeginDate
-                                      END DESC NULLS LAST,
+                                          ELSE :farFuture
+                                      END DESC,
                                       CASE
                                           WHEN rx.id.enrollmentBeginDate > :today
                                           THEN rx.id.enrollmentBeginDate
@@ -97,7 +100,8 @@ public class CoverageRepository {
                                           WHEN lis.id.benefitRangeBeginDate <= :today
                                                AND :today <= lis.benefitRangeEndDate
                                           THEN lis.id.benefitRangeBeginDate
-                                      END DESC NULLS LAST,
+                                          ELSE :farFuture
+                                      END DESC,
                                       CASE
                                           WHEN lis.id.benefitRangeBeginDate > :today
                                             THEN lis.id.benefitRangeBeginDate
@@ -158,6 +162,7 @@ public class CoverageRepository {
             .setParameter("upperBound", lastUpdatedRange.getUpperBoundDateTime().orElse(null))
             .setParameter("today", today)
             .setParameter("beneSk", beneSk)
+            .setParameter("farFuture", farFuture)
             .getResultList()
             .stream()
             .findFirst();

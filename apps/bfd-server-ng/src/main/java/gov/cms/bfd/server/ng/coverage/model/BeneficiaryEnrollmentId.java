@@ -18,6 +18,7 @@ import org.jetbrains.annotations.NotNull;
 @Getter
 @AllArgsConstructor
 @Embeddable
+@SuppressWarnings("java:S1948")
 public class BeneficiaryEnrollmentId implements Serializable, Comparable<BeneficiaryEnrollmentId> {
 
   @Column(name = "bene_sk")
@@ -27,22 +28,15 @@ public class BeneficiaryEnrollmentId implements Serializable, Comparable<Benefic
   private LocalDate enrollmentBeginDate;
 
   @Column(name = "bene_enrlmt_pgm_type_cd")
-  private String enrollmentProgramTypeCode;
-
-  /**
-   * Gets the EnrollmentProgramTypeCode enum for the code.
-   *
-   * @return optional EnrollmentProgramTypeCode
-   */
-  public Optional<EnrollmentProgramTypeCode> getEnrollmentProgramTypeCode() {
-    return EnrollmentProgramTypeCode.tryFromCode(enrollmentProgramTypeCode);
-  }
+  private Optional<EnrollmentProgramTypeCode> enrollmentProgramTypeCode;
 
   @Override
   public int compareTo(@NotNull BeneficiaryEnrollmentId o) {
     return Comparator.comparing((BeneficiaryEnrollmentId id) -> id.beneSk)
         .thenComparing(id -> id.enrollmentBeginDate, Comparator.reverseOrder())
-        .thenComparing(id -> id.enrollmentProgramTypeCode)
+        .thenComparing(
+            id -> id.enrollmentProgramTypeCode.orElse(null),
+            Comparator.nullsLast(Comparator.naturalOrder()))
         .compare(this, o);
   }
 }
