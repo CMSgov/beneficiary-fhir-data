@@ -767,6 +767,7 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
         claim_line_rx["CLM_CMS_CALCD_MFTR_DSCNT_AMT"] = round(random.uniform(0, 1000), 2)
         claim_line_rx["CLM_LINE_REBT_PASSTHRU_POS_AMT"] = round(random.uniform(0, 1000), 2)
         claim_line_rx["CLM_PHRMCY_PRICE_DSCNT_AT_POS_AMT"] = round(random.uniform(0, 1000), 2)
+        add_meta_timestamps(claim_line_rx, claim["CLM"], max_date)
 
         claim["CLM_LINE"].append(claim_line)
         claim["CLM_LINE_RX"].append(claim_line_rx)
@@ -1522,23 +1523,24 @@ def gen_provider_history(amount):
 
     for name in names:
         prvdr_sk = "".join(random.choices(string.digits, k=10))
-        provider_history.append(
-            {
-                "PRVDR_SK": prvdr_sk,
-                "PRVDR_HSTRY_EFCTV_DT": str(date.today()),
-                "PRVDR_HSTRY_OBSLT_DT": "9999-12-31",
-                "PRVDR_1ST_NAME": name,
-                "PRVDR_MDL_NAME": random.choice(available_given_names),
-                "PRVDR_LAST_NAME": random.choice(available_family_names),
-                "PRVDR_NAME": random.choice(available_provider_names),
-                "PRVDR_LGL_NAME": random.choice(available_provider_legal_names),
-                "PRVDR_NPI_NUM": prvdr_sk,
-                "PRVDR_EMPLR_ID_NUM": "".join(random.choices(string.digits, k=10)),
-                "PRVDR_OSCAR_NUM": "".join(random.choices(string.digits, k=6)),
-                "PRVDR_TXNMY_CMPST_CD": random.choice(available_provider_tx_codes),
-                "PRVDR_TYPE_CD": random.choice(available_provider_type_codes),
-            }
-        )
+        obj = {
+            "PRVDR_SK": prvdr_sk,
+            "PRVDR_HSTRY_EFCTV_DT": str(date.today()),
+            "PRVDR_HSTRY_OBSLT_DT": "9999-12-31",
+            "PRVDR_1ST_NAME": name,
+            "PRVDR_MDL_NAME": random.choice(available_given_names),
+            "PRVDR_LAST_NAME": random.choice(available_family_names),
+            "PRVDR_NAME": random.choice(available_provider_names),
+            "PRVDR_LGL_NAME": random.choice(available_provider_legal_names),
+            "PRVDR_NPI_NUM": prvdr_sk,
+            "PRVDR_EMPLR_ID_NUM": "".join(random.choices(string.digits, k=10)),
+            "PRVDR_OSCAR_NUM": "".join(random.choices(string.digits, k=6)),
+            "PRVDR_TXNMY_CMPST_CD": random.choice(available_provider_tx_codes),
+            "PRVDR_TYPE_CD": random.choice(available_provider_type_codes),
+        }
+        generate_meta_sk_pair(obj)
+        provider_history.append(obj)
+        
 
     return provider_history
 
@@ -1607,6 +1609,39 @@ def add_meta_timestamps(obj, clm, max_date):
         if has_insrt_ts and random.random() > 0.8
         else None
     )
+
+
+def generate_meta_sk_pair(obj):
+
+    def encode(d):
+        d = d.date() if isinstance(d, datetime) else d
+        yyyymmdd = d.year * 10000 + d.month * 100 + d.day
+        base = (yyyymmdd - 19000000) * 1000
+        seq = random.randint(1, 999)
+        return base + seq
+
+    max_dt = datetime.fromisoformat(str(now))
+    min_dt = datetime(2010, 1, 1)
+
+
+    if random.random() < 0.05:
+        update_dt = faker.date_time_between_dates(min_dt, max_dt)
+        obj["META_SK"] = 501
+        obj["META_LST_UPDT_SK"] = encode(update_dt)
+        return
+
+    insert_dt = faker.date_time_between_dates(min_dt, max_dt)
+    obj["META_SK"] = encode(insert_dt)
+
+    roll = random.random()
+    if roll > 0.8:
+        update_dt = faker.date_time_between_dates(insert_dt, max_dt)
+        obj["META_LST_UPDT_SK"] = encode(update_dt)
+    elif roll > 0.6:
+        obj["META_LST_UPDT_SK"] = obj["META_SK"]
+    else:
+        obj["META_LST_UPDT_SK"] = 0
+
 
 
 def main():

@@ -283,6 +283,44 @@ def _deceased_bene_filter(alias: str) -> str:
     """
 
 
+def _idr_dates_from_meta_sk() -> str:
+    # Logic for computing INSRT/UPDT timestamp on tables that don't have it based on META_SK
+    return """
+            META_SK,
+            META_LST_UPDT_SK,
+            CASE
+                WHEN META_SK = 501 THEN
+                    to_timestamp(
+                            to_date(
+                                    trunc((META_LST_UPDT_SK / 1000) + 19000000)::text,
+                                    'YYYYMMDD'
+                            )::text || ' 00:00:00',
+                            'YYYY-MM-DD HH24:MI:SS'
+                    )
+                ELSE
+                    to_timestamp(
+                            to_date(
+                                    trunc((META_SK / 1000) + 19000000)::text,
+                                    'YYYYMMDD'
+                            )::text || ' 00:00:00',
+                            'YYYY-MM-DD HH24:MI:SS'
+                    )
+                END AS idr_insrt_ts,
+        
+            CASE
+                WHEN META_SK <> 501 AND META_LST_UPDT_SK > 0 THEN
+                    to_timestamp(
+                            to_date(
+                                    trunc((META_LST_UPDT_SK / 1000) + 19000000)::text,
+                                    'YYYYMMDD'
+                            )::text || ' 00:00:00',
+                            'YYYY-MM-DD HH24:MI:SS'
+                    )
+                ELSE NULL
+                END AS idr_updt_ts
+    """
+
+
 class IdrBeneficiary(IdrBaseModel):
     # columns from V2_MDCR_BENE_HSTRY
     bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, ALIAS: ALIAS_HSTRY}]
@@ -1739,12 +1777,12 @@ class IdrClaimLineRx(IdrBaseModel):
     clm_idr_ld_dt: Annotated[date, {INSERT_EXCLUDE: True, HISTORICAL_BATCH_TIMESTAMP: True}]
     idr_insrt_ts: Annotated[
         datetime,
-        {BATCH_TIMESTAMP: True, ALIAS: ALIAS_LINE},
+        {BATCH_TIMESTAMP: True, ALIAS: ALIAS_RX_LINE},
         BeforeValidator(transform_null_date_to_min),
     ]
     idr_updt_ts: Annotated[
         datetime,
-        {UPDATE_TIMESTAMP: True, ALIAS: ALIAS_LINE},
+        {UPDATE_TIMESTAMP: True, ALIAS: ALIAS_RX_LINE},
         BeforeValidator(transform_null_date_to_min),
     ]
 
@@ -1796,6 +1834,16 @@ class IdrProviderHistory(IdrBaseModel):
     prvdr_lgl_name: Annotated[str, BeforeValidator(transform_null_string)]
     prvdr_emplr_id_num: Annotated[str, BeforeValidator(transform_null_string)]
     prvdr_last_name: Annotated[str, BeforeValidator(transform_null_string)]
+    idr_insrt_ts: Annotated[
+        datetime,
+        {BATCH_TIMESTAMP: True, DERIVED: True},
+        BeforeValidator(transform_null_date_to_min),
+    ]
+    idr_updt_ts: Annotated[
+        datetime,
+        {UPDATE_TIMESTAMP: True, DERIVED: True},
+        BeforeValidator(transform_null_date_to_min),
+    ]
 
     @staticmethod
     def table() -> str:
@@ -1804,7 +1852,9 @@ class IdrProviderHistory(IdrBaseModel):
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
         return f"""
-            SELECT {{COLUMNS}}
+            SELECT
+            {_idr_dates_from_meta_sk()},
+            {{COLUMNS}}
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_prvdr_hstry
             WHERE prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
         """
