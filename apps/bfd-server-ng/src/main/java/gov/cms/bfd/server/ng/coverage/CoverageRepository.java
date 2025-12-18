@@ -25,12 +25,11 @@ public class CoverageRepository {
   public Optional<BeneficiaryCoverage> searchBeneficiaryWithCoverage(
       long beneSk, DateTimeRange lastUpdatedRange) {
     var today = LocalDate.now();
-    var farFuture = LocalDate.of(9999, 12, 31);
 
-    // Note on sorting here. We sort first by active coverage records. Among active records sort by
-    // latest begin date. Among future coverage records, sort by nearest begin date. In the case of
-    // rx enrollments, if multiple records have matching begin dates then we sort by latest pdp rx
-    // info begin date.
+    // Note on sorting here. Although we filter out inactive enrollments we need to handle both
+    // active and future coverages. We sort first by active coverage records by latest begin date.
+    // In the case of rx enrollments, if multiple records have matching begin dates then we sort by
+    // latest pdp rx info begin date.
 
     var beneficiaryCoverage =
         entityManager
@@ -48,16 +47,7 @@ public class CoverageRepository {
                                           THEN 1
                                           ELSE 2
                                       END ASC,
-                                      CASE
-                                          WHEN e.beneficiaryEnrollmentPeriod.enrollmentBeginDate <= :today
-                                               AND :today <= e.beneficiaryEnrollmentPeriod.enrollmentEndDate
-                                          THEN e.beneficiaryEnrollmentPeriod.enrollmentBeginDate
-                                          ELSE :farFuture
-                                      END DESC,
-                                      CASE
-                                          WHEN e.beneficiaryEnrollmentPeriod.enrollmentBeginDate > :today
-                                          THEN e.beneficiaryEnrollmentPeriod.enrollmentEndDate
-                                      END ASC
+                                      e.beneficiaryEnrollmentPeriod.enrollmentBeginDate DESC
                               ) AS row_num
                           FROM BeneficiaryMAPartDEnrollment e
                           WHERE e.id.beneSk = :beneSk
@@ -72,15 +62,6 @@ public class CoverageRepository {
                                           THEN 1
                                           ELSE 2
                                       END ASC,
-                                      CASE
-                                          WHEN rx.id.enrollmentBeginDate <= :today
-                                          THEN rx.id.enrollmentBeginDate
-                                          ELSE :farFuture
-                                      END DESC,
-                                      CASE
-                                          WHEN rx.id.enrollmentBeginDate > :today
-                                          THEN rx.id.enrollmentBeginDate
-                                      END ASC,
                                       rx.id.enrollmentPdpRxInfoBeginDate DESC
                               ) AS row_num
                           FROM BeneficiaryMAPartDEnrollmentRx rx
@@ -89,26 +70,11 @@ public class CoverageRepository {
                       latestLis AS (
                           SELECT lis.id AS id,
                               ROW_NUMBER() OVER (
-                                  ORDER BY
-                                      CASE
-                                          WHEN lis.id.benefitRangeBeginDate <= :today
-                                               AND :today <= lis.benefitRangeEndDate
-                                          THEN 1
-                                          ELSE 2
-                                      END ASC,
-                                      CASE
-                                          WHEN lis.id.benefitRangeBeginDate <= :today
-                                               AND :today <= lis.benefitRangeEndDate
-                                          THEN lis.id.benefitRangeBeginDate
-                                          ELSE :farFuture
-                                      END DESC,
-                                      CASE
-                                          WHEN lis.id.benefitRangeBeginDate > :today
-                                            THEN lis.id.benefitRangeBeginDate
-                                      END ASC
+                                  ORDER BY lis.id.benefitRangeBeginDate DESC
                               ) AS row_num
                           FROM BeneficiaryLowIncomeSubsidy lis
                           WHERE lis.id.beneSk = :beneSk
+                          AND lis.benefitRangeEndDate >= :today
                       )
                       SELECT b
                       FROM BeneficiaryCoverage b
@@ -134,8 +100,8 @@ public class CoverageRepository {
                                 AND e.id.enrollmentBeginDate = ben.id.enrollmentBeginDate
                                 AND e.id.enrollmentProgramTypeCode = ben.id.enrollmentProgramTypeCode
                         ))
-                        AND (ben.id.enrollmentProgramTypeCode NOT IN ('2', '3')
-                            OR berx IS NULL
+                        AND (berx IS NULL
+                            OR ben.id.enrollmentProgramTypeCode = '1'
                             OR EXISTS (
                             SELECT 1 FROM latestEnrollmentsRx e
                             WHERE e.row_num = 1
@@ -162,7 +128,6 @@ public class CoverageRepository {
             .setParameter("upperBound", lastUpdatedRange.getUpperBoundDateTime().orElse(null))
             .setParameter("today", today)
             .setParameter("beneSk", beneSk)
-            .setParameter("farFuture", farFuture)
             .getResultList()
             .stream()
             .findFirst();
