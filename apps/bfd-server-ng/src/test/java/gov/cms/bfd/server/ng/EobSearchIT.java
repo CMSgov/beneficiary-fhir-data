@@ -431,7 +431,7 @@ class EobSearchIT extends IntegrationTestBase {
             .where(
                 new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
                     .exactly()
-                    .identifier(BENE_ID_ALL_PARTS_WITH_XREF))
+                    .identifier(BENE_ID_PART_A_ONLY))
             .execute();
 
     assertFalse(

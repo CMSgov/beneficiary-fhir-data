@@ -331,7 +331,7 @@ public enum ClaimTypeCode {
   }
 
   Optional<Organization> toFhirInsurerPartAB() {
-    if (!isBetween(5, 3999)) {
+    if (isClaimSubtype(ClaimSubtype.PDE)) {
       return Optional.empty();
     }
 
@@ -342,7 +342,7 @@ public enum ClaimTypeCode {
   }
 
   Optional<Organization> toFhirInsurerPartD(String pbpName) {
-    if (!isBetween(1, 4)) {
+    if (!isClaimSubtype(ClaimSubtype.PDE)) {
       return Optional.empty();
     }
 
@@ -354,7 +354,7 @@ public enum ClaimTypeCode {
 
   Optional<ExplanationOfBenefit.InsuranceComponent> toFhirPartDInsurance(
       String contractNum, String contractPbpNum) {
-    if (!isBetween(1, 4)) {
+    if (!isClaimSubtype(ClaimSubtype.PDE)) {
       return Optional.empty();
     }
 
@@ -374,7 +374,7 @@ public enum ClaimTypeCode {
 
   Optional<ExplanationOfBenefit.InsuranceComponent> toFhirInsurance(
       ClaimRecordType claimRecordType) {
-    if (!isBetween(5, 3999)) {
+    if (isClaimSubtype(ClaimSubtype.PDE)) {
       return Optional.empty();
     }
 
@@ -409,25 +409,19 @@ public enum ClaimTypeCode {
     return (code >= lower) && (code <= upper);
   }
 
+  boolean isClaimSubtype(ClaimSubtype subtype) {
+    return CLAIM_TYPE_CODE_MAP.getOrDefault(subtype, List.of()).contains(this);
+  }
+
   Optional<String> toFhirStructureDefinition() {
-    //    return ClaimSubtype.subtypeFor(code).map(ClaimSubtype::getSystemUrl);
-    return CLAIM_TYPE_CODE_MAP.entrySet().stream()
-        .filter(entry -> entry.getValue().contains(this))
-        .map(Map.Entry::getKey)
-        .map(ClaimSubtype::getSystemUrl)
-        .findFirst();
+    return ClaimSubtype.subtypeFor(code).map(ClaimSubtype::getSystemUrl);
   }
 
   private Optional<ClaimType> getClaimType() {
-    //    return ClaimSubtype.subtypeFor(code).map(ClaimSubtype::getClaimType);
-    return CLAIM_TYPE_CODE_MAP.entrySet().stream()
-        .filter(entry -> entry.getValue().contains(this))
-        .map(Map.Entry::getKey)
-        .map(ClaimSubtype::getClaimType)
-        .findFirst();
+    return ClaimSubtype.subtypeFor(code).map(ClaimSubtype::getClaimType);
   }
 
-  /** Claim Type codes grouped by claim sub types. * */
+  /** Claim Type codes grouped by claim subtypes. * */
   public static final Map<ClaimSubtype, List<ClaimTypeCode>> CLAIM_TYPE_CODE_MAP =
       Map.of(
           ClaimSubtype.CARRIER,
@@ -506,5 +500,34 @@ public enum ClaimTypeCode {
 
   private static List<ClaimTypeCode> mapSnfToClaimTypeCodes() {
     return List.of(_20, _30, _1018, _1021, _2018, _2021);
+  }
+
+  /**
+   * Checks if isInstitutional (Inpatient, Outpatient, SNF, HHA, Hospice).
+   *
+   * @return Returns true if this code maps to an Institutional claim type
+   */
+  public boolean isInstitutional() {
+    return getClaimSubtype()
+        .map(subtype -> subtype.getClaimType() == ClaimType.INSTITUTIONAL)
+        .orElse(false);
+  }
+
+  /**
+   * Checks if Professional claim type (Carrier, DME).
+   *
+   * @return true if this code maps to a Professional
+   */
+  public boolean isProfessional() {
+    return getClaimSubtype()
+        .map(subtype -> subtype.getClaimType() == ClaimType.PROFESSIONAL)
+        .orElse(false);
+  }
+
+  private Optional<ClaimSubtype> getClaimSubtype() {
+    return CLAIM_TYPE_CODE_MAP.entrySet().stream()
+        .filter(entry -> entry.getValue().contains(this))
+        .map(Map.Entry::getKey)
+        .findFirst();
   }
 }
