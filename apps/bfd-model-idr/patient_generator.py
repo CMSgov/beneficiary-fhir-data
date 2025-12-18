@@ -4,9 +4,7 @@ import datetime
 import random
 import subprocess
 import sys
-from collections.abc import Iterable
 from pathlib import Path
-from typing import Any
 
 import pandas as pd
 from faker import Faker
@@ -25,6 +23,7 @@ from generator_util import (
     BENE_XREF,
     GeneratorUtil,
     RowAdapter,
+    load_file,
     probability,
 )
 
@@ -41,10 +40,6 @@ parser.add_argument(
     "SYNTHETIC_BENE_HSTRY.csv file",
 )
 args = parser.parse_args()
-
-
-def load_file(file: Iterable[dict[str, Any]]):
-    return [RowAdapter(kv=row, loaded_from_file=True) for row in file]
 
 
 available_given_names = [
