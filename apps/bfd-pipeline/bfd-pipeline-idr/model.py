@@ -308,7 +308,7 @@ def _idr_dates_from_meta_sk() -> str:
                 END AS idr_insrt_ts,
         
             CASE
-                WHEN META_SK <> 501 AND META_LST_UPDT_SK > 0 THEN
+                WHEN META_SK != 501 AND META_LST_UPDT_SK > 0 THEN
                     to_timestamp(
                             to_date(
                                     trunc((META_LST_UPDT_SK / 1000) + 19000000)::text,
