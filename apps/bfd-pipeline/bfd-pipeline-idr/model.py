@@ -362,12 +362,10 @@ class IdrBeneficiary(IdrBaseModel):
 
     @staticmethod
     def last_updated_date_table() -> str:
-        """BFD table that keeps track of last updated date for this model."""
         return BENEFICIARY_TABLE
 
     @staticmethod
     def last_updated_date_column() -> list[str]:
-        """BFD column that keeps track of last updated date for this model."""
         return ["bfd_patient_updated_ts"]
 
     @staticmethod
@@ -450,12 +448,10 @@ class IdrBeneficiaryMbiId(IdrBaseModel):
 
     @staticmethod
     def last_updated_date_table() -> str:
-        """BFD table that keeps track of last updated date for this model."""
         return BENEFICIARY_TABLE
 
     @staticmethod
     def last_updated_date_column() -> list[str]:
-        """BFD column that keeps track of last updated date for this model."""
         return ["bfd_patient_updated_ts"]
 
     @staticmethod
@@ -485,12 +481,10 @@ class IdrBeneficiaryOvershareMbi(IdrBaseModel):
 
     @staticmethod
     def last_updated_date_table() -> str:
-        """BFD table that keeps track of last updated date for this model."""
         return ""
 
     @staticmethod
     def last_updated_date_column() -> list[str]:
-        """BFD column that keeps track of last updated date for this model."""
         return []
 
     @staticmethod
@@ -542,7 +536,6 @@ class IdrBeneficiaryThirdParty(IdrBaseModel):
 
     @staticmethod
     def last_updated_date_column() -> list[str]:
-        """BFD column that keeps track of last updated date for this model."""
         return [
             "bfd_part_a_coverage_updated_ts",
             "bfd_part_b_coverage_updated_ts",
@@ -550,7 +543,6 @@ class IdrBeneficiaryThirdParty(IdrBaseModel):
 
     @staticmethod
     def last_updated_date_table() -> str:
-        """BFD table that keeps track of last updated date for this model."""
         return BENEFICIARY_TABLE
 
     @staticmethod
@@ -591,12 +583,10 @@ class IdrBeneficiaryStatus(IdrBaseModel):
 
     @staticmethod
     def last_updated_date_table() -> str:
-        """BFD table that keeps track of last updated date for this model."""
         return BENEFICIARY_TABLE
 
     @staticmethod
     def last_updated_date_column() -> list[str]:
-        """BFD column that keeps track of last updated date for this model."""
         return [
             "bfd_part_a_coverage_updated_ts",
             "bfd_part_b_coverage_updated_ts",
@@ -642,12 +632,10 @@ class IdrBeneficiaryEntitlement(IdrBaseModel):
 
     @staticmethod
     def last_updated_date_table() -> str:
-        """BFD table that keeps track of last updated date for this model."""
         return BENEFICIARY_TABLE
 
     @staticmethod
     def last_updated_date_column() -> list[str]:
-        """BFD column that keeps track of last updated date for this model."""
         return [
             "bfd_part_a_coverage_updated_ts",
             "bfd_part_b_coverage_updated_ts",
@@ -691,12 +679,10 @@ class IdrBeneficiaryEntitlementReason(IdrBaseModel):
 
     @staticmethod
     def last_updated_date_table() -> str:
-        """BFD table that keeps track of last updated date for this model."""
         return BENEFICIARY_TABLE
 
     @staticmethod
     def last_updated_date_column() -> list[str]:
-        """BFD column that keeps track of last updated date for this model."""
         return [
             "bfd_part_a_coverage_updated_ts",
             "bfd_part_b_coverage_updated_ts",
@@ -742,12 +728,10 @@ class IdrBeneficiaryDualEligibility(IdrBaseModel):
 
     @staticmethod
     def last_updated_date_table() -> str:
-        """BFD table that keeps track of last updated date for this model."""
         return BENEFICIARY_TABLE
 
     @staticmethod
     def last_updated_date_column() -> list[str]:
-        """BFD column that keeps track of last updated date for this model."""
         return [
             "bfd_part_dual_coverage_updated_ts",
         ]
@@ -789,12 +773,10 @@ class IdrElectionPeriodUsage(IdrBaseModel):
 
     @staticmethod
     def last_updated_date_table() -> str:
-        """BFD table that keeps track of last updated date for this model."""
         return ""
 
     @staticmethod
     def last_updated_date_column() -> list[str]:
-        """BFD column that keeps track of last updated date for this model."""
         return []
 
     @staticmethod
@@ -837,12 +819,10 @@ class IdrContractPbpNumber(IdrBaseModel):
 
     @staticmethod
     def last_updated_date_table() -> str:
-        """BFD table that keeps track of last updated date for this model."""
         return ""
 
     @staticmethod
     def last_updated_date_column() -> list[str]:
-        """BFD column that keeps track of last updated date for this model."""
         return []
 
     @staticmethod
@@ -880,12 +860,10 @@ class IdrContractPbpContact(IdrBaseModel):
 
     @staticmethod
     def last_updated_date_table() -> str:
-        """BFD table that keeps track of last updated date for this model."""
         return ""
 
     @staticmethod
     def last_updated_date_column() -> list[str]:
-        """BFD column that keeps track of last updated date for this model."""
         return []
 
     @staticmethod
@@ -1091,12 +1069,10 @@ class IdrClaim(IdrBaseModel):
 
     @staticmethod
     def last_updated_date_table() -> str:
-        """BFD table that keeps track of last updated date for this model."""
         return CLAIM_TABLE
 
     @staticmethod
     def last_updated_date_column() -> list[str]:
-        """BFD column that keeps track of last updated date for this model."""
         return ["bfd_claim_updated_ts"]
 
     @staticmethod
@@ -1154,12 +1130,10 @@ class IdrClaimDateSignature(IdrBaseModel):
 
     @staticmethod
     def last_updated_date_table() -> str:
-        """BFD table that keeps track of last updated date for this model."""
         return CLAIM_TABLE
 
     @staticmethod
     def last_updated_date_column() -> list[str]:
-        """BFD column that keeps track of last updated date for this model."""
         return ["bfd_claim_updated_ts"]
 
     @staticmethod
@@ -1206,12 +1180,10 @@ class IdrClaimFiss(IdrBaseModel):
 
     @staticmethod
     def last_updated_date_table() -> str:
-        """BFD table that keeps track of last updated date for this model."""
         return CLAIM_TABLE
 
     @staticmethod
     def last_updated_date_column() -> list[str]:
-        """BFD column that keeps track of last updated date for this model."""
         return ["bfd_claim_updated_ts"]
 
     @staticmethod
@@ -1287,12 +1259,10 @@ class IdrClaimInstitutional(IdrBaseModel):
 
     @staticmethod
     def last_updated_date_table() -> str:
-        """BFD table that keeps track of last updated date for this model."""
         return CLAIM_TABLE
 
     @staticmethod
     def last_updated_date_column() -> list[str]:
-        """BFD column that keeps track of last updated date for this model."""
         return ["bfd_claim_updated_ts"]
 
     @staticmethod
@@ -1484,12 +1454,10 @@ class IdrClaimItem(IdrBaseModel):
 
     @staticmethod
     def last_updated_date_table() -> str:
-        """BFD table that keeps track of last updated date for this model."""
         return CLAIM_TABLE
 
     @staticmethod
     def last_updated_date_column() -> list[str]:
-        """BFD column that keeps track of last updated date for this model."""
         return ["bfd_claim_updated_ts"]
 
     @staticmethod
@@ -1697,7 +1665,6 @@ class IdrClaimLineInstitutional(IdrBaseModel):
 
     @staticmethod
     def last_updated_date_table() -> str:
-        """BFD table that keeps track of last updated date for this model."""
         return CLAIM_TABLE
 
     @staticmethod
@@ -1706,7 +1673,6 @@ class IdrClaimLineInstitutional(IdrBaseModel):
 
     @staticmethod
     def last_updated_date_column() -> list[str]:
-        """BFD column that keeps track of last updated date for this model."""
         return ["bfd_claim_updated_ts"]
 
     @staticmethod
@@ -1731,9 +1697,7 @@ class IdrClaimLineInstitutional(IdrBaseModel):
 
 
 class IdrClaimAnsiSignature(IdrBaseModel):
-    clm_ansi_sgntr_sk: Annotated[
-        int, {PRIMARY_KEY: True, BATCH_ID: True}
-    ]
+    clm_ansi_sgntr_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
     clm_1_rev_cntr_ansi_grp_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_2_rev_cntr_ansi_grp_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_3_rev_cntr_ansi_grp_cd: Annotated[str, BeforeValidator(transform_default_string)]
@@ -1755,12 +1719,10 @@ class IdrClaimAnsiSignature(IdrBaseModel):
 
     @staticmethod
     def last_updated_date_table() -> str:
-        """BFD table that keeps track of last updated date for this model."""
         return ""
 
     @staticmethod
     def last_updated_date_column() -> list[str]:
-        """BFD column that keeps track of last updated date for this model."""
         return []
 
     @staticmethod
@@ -1813,12 +1775,10 @@ class IdrClaimProfessional(IdrBaseModel):
 
     @staticmethod
     def last_updated_date_table() -> str:
-        """BFD table that keeps track of last updated date for this model."""
         return CLAIM_TABLE
 
     @staticmethod
     def last_updated_date_column() -> list[str]:
-        """BFD column that keeps track of last updated date for this model."""
         return ["bfd_claim_updated_ts"]
 
     @staticmethod
@@ -1922,12 +1882,10 @@ class IdrClaimLineProfessional(IdrBaseModel):
 
     @staticmethod
     def last_updated_date_table() -> str:
-        """BFD table that keeps track of last updated date for this model."""
         return CLAIM_TABLE
 
     @staticmethod
     def last_updated_date_column() -> list[str]:
-        """BFD column that keeps track of last updated date for this model."""
         return ["bfd_claim_updated_ts"]
 
     @staticmethod
@@ -1998,12 +1956,10 @@ class IdrClaimLineRx(IdrBaseModel):
 
     @staticmethod
     def last_updated_date_column() -> list[str]:
-        """BFD column that keeps track of last updated date for this model."""
         return ["bfd_claim_updated_ts"]
 
     @staticmethod
     def last_updated_date_table() -> str:
-        """BFD table that keeps track of last updated date for this model."""
         return CLAIM_TABLE
 
     @staticmethod
@@ -2057,12 +2013,10 @@ class IdrProviderHistory(IdrBaseModel):
 
     @staticmethod
     def last_updated_date_column() -> list[str]:
-        """BFD column that keeps track of last updated date for this model."""
         return []
 
     @staticmethod
     def last_updated_date_table() -> str:
-        """BFD table that keeps track of last updated date for this model."""
         return ""
 
     @staticmethod
@@ -2096,12 +2050,10 @@ class LoadProgress(IdrBaseModel):
 
     @staticmethod
     def last_updated_date_column() -> list[str]:
-        """BFD column that keeps track of last updated date for this model."""
         return []
 
     @staticmethod
     def last_updated_date_table() -> str:
-        """BFD table that keeps track of last updated date for this model."""
         return ""
 
     @staticmethod

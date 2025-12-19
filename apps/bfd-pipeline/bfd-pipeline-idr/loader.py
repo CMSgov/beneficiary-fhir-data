@@ -5,8 +5,8 @@ from datetime import UTC, date, datetime
 import psycopg
 
 from constants import DEFAULT_MIN_DATE
-from load_partition import LoadPartition
-from model import DbType, LoadMode, LoadProgress, LoadType, T
+from load_partition import LoadPartition, LoadType
+from model import DbType, LoadMode, LoadProgress, T
 from settings import (
     bfd_db_endpoint,
     bfd_db_name,
