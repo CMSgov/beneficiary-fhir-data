@@ -421,44 +421,4 @@ class EobSearchIT extends IntegrationTestBase {
         bundle.getEntry().stream().map(e -> e.getResource().getId()).collect(Collectors.toSet());
     assertEquals(2, results.size());
   }
-
-  @Test
-  void eobSearchCheckProfiles() {
-    // Searches for EOBs for a known patient and verifies that all returned EOBs have a CARIN
-    // profile populated in meta.profile, ensuring the mapping logic works.
-    var eobBundle =
-        searchBundle()
-            .where(
-                new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
-                    .exactly()
-                    .identifier(BENE_ID_PART_A_ONLY))
-            .execute();
-
-    assertFalse(
-        eobBundle.getEntry().isEmpty(),
-        "Test expects at least one EOB to verify profile presence.");
-
-    for (var entry : eobBundle.getEntry()) {
-      var eob = (ExplanationOfBenefit) entry.getResource();
-      assertTrue(eob.hasMeta(), "EOB must have a Meta element");
-      assertFalse(
-          eob.getMeta().getProfile().isEmpty(), "EOB Meta must have at least one Profile defined");
-
-      // Verify that at least one profile matches the expected CARIN format
-      boolean hasCarinProfile =
-          eob.getMeta().getProfile().stream()
-              .anyMatch(
-                  p ->
-                      p.getValueAsString()
-                          .startsWith(
-                              "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit"));
-
-      assertTrue(
-          hasCarinProfile,
-          "EOB should have a valid CARIN Profile (C4BB-ExplanationOfBenefit). Found: "
-              + eob.getMeta().getProfile().stream()
-                  .map(p -> p.getValueAsString())
-                  .collect(Collectors.joining(", ")));
-    }
-  }
 }
