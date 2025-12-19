@@ -52,6 +52,10 @@ def probability(frac: float) -> bool:
     return random.random() < (frac)
 
 
+def adapters_to_dicts(adapters: list["RowAdapter"]) -> list[dict[str, Any]]:
+    return [x.kv for x in adapters]
+
+
 def contains_bene_sk(file: list["RowAdapter"], bene_sk: str):
     return len([row for row in file if row["BENE_SK"] == bene_sk]) > 0
 
