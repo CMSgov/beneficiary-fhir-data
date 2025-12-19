@@ -204,7 +204,6 @@ if __name__ == "__main__":
                 args=[
                     sys.executable,
                     "claims_generator.py",
-                    "--files",
                     f"out/{BENE_HSTRY}.csv",
                     *[file for file in args.files if BENE_HSTRY not in file],
                 ],
