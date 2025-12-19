@@ -36,6 +36,9 @@ public class BeneficiaryPartCDEnrollmentId
   @Column(name = "bene_pbp_num")
   private String planNumber;
 
+  @Column(name = "bene_enrlmt_pdp_rx_info_bgn_dt")
+  private LocalDate enrollmentPdpRxInfoBeginDate;
+
   @Override
   public int compareTo(@NotNull BeneficiaryPartCDEnrollmentId o) {
     return Comparator.comparing((BeneficiaryPartCDEnrollmentId id) -> id.beneSk)
@@ -45,6 +48,7 @@ public class BeneficiaryPartCDEnrollmentId
             Comparator.nullsLast(Comparator.naturalOrder()))
         .thenComparing(id -> id.contractNumber)
         .thenComparing(id -> id.planNumber)
+        .thenComparing(id -> id.enrollmentPdpRxInfoBeginDate, Comparator.reverseOrder())
         .compare(this, o);
   }
 }

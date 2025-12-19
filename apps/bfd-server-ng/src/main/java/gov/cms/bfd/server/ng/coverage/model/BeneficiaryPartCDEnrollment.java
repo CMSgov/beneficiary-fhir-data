@@ -9,7 +9,6 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -29,9 +28,6 @@ public class BeneficiaryPartCDEnrollment implements Comparable<BeneficiaryPartCD
   @EmbeddedId private BeneficiaryPartCDEnrollmentId id;
 
   private BeneficiaryEnrollmentPeriod beneficiaryEnrollmentPeriod;
-
-  @Column(name = "bene_enrlmt_pdp_rx_info_bgn_dt")
-  private LocalDate enrollmentPdpRxInfoBeginDate;
 
   @Column(name = "bene_cvrg_type_cd")
   private String coverageTypeCode;

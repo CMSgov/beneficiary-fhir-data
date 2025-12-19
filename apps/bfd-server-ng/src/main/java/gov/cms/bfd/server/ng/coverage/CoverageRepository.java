@@ -1,7 +1,5 @@
 package gov.cms.bfd.server.ng.coverage;
 
-import static gov.cms.bfd.server.ng.util.IdrConstants.DEFAULT_DATE;
-
 import gov.cms.bfd.server.ng.coverage.model.BeneficiaryCoverage;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.util.LogUtil;
@@ -39,12 +37,7 @@ public class CoverageRepository {
                 String.format(
                     """
                       WITH latestPartCDEnrollments AS (
-                          SELECT e.id.beneSk AS beneSk,
-                              e.id.enrollmentBeginDate AS enrollmentBeginDate,
-                              e.id.enrollmentProgramTypeCode AS enrollmentProgramTypeCode,
-                              e.id.contractNumber AS contractNumber,
-                              e.id.planNumber AS planNumber,
-                              e.enrollmentPdpRxInfoBeginDate AS enrollmentPdpRxInfoBeginDate,
+                          SELECT e.id AS id,
                               ROW_NUMBER() OVER (
                                   PARTITION BY
                                     e.id.beneSk,
@@ -58,7 +51,7 @@ public class CoverageRepository {
                                           ELSE 2
                                       END,
                                       e.beneficiaryEnrollmentPeriod.enrollmentBeginDate DESC,
-                                      COALESCE(e.enrollmentPdpRxInfoBeginDate, :farFuture) DESC
+                                      e.id.enrollmentPdpRxInfoBeginDate DESC
                               ) AS row_num
                           FROM BeneficiaryPartCDEnrollment e
                           WHERE e.id.beneSk = :beneSk
@@ -91,9 +84,9 @@ public class CoverageRepository {
                             OR EXISTS (
                             SELECT 1 FROM latestPartCDEnrollments e
                             WHERE e.row_num = 1
-                                AND e.beneSk = ben.id.beneSk
-                                AND e.enrollmentBeginDate = ben.id.enrollmentBeginDate
-                                AND e.enrollmentProgramTypeCode = ben.id.enrollmentProgramTypeCode
+                                AND e.id.beneSk = ben.id.beneSk
+                                AND e.id.enrollmentBeginDate = ben.id.enrollmentBeginDate
+                                AND e.id.enrollmentProgramTypeCode = ben.id.enrollmentProgramTypeCode
                         ))
                         AND (blis IS NULL
                             OR EXISTS (
@@ -112,7 +105,6 @@ public class CoverageRepository {
             .setParameter("upperBound", lastUpdatedRange.getUpperBoundDateTime().orElse(null))
             .setParameter("today", today)
             .setParameter("beneSk", beneSk)
-            .setParameter("farFuture", DEFAULT_DATE)
             .getResultList()
             .stream()
             .findFirst();
