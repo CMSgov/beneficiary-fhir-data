@@ -1745,7 +1745,7 @@ def main():
                 files[filename] = load_file(csv_data.to_dict(orient="records"))  # type: ignore
 
     bene_sks = {-1}
-    if BENE_HSTRY in args.files:
+    if any(BENE_HSTRY in file for file in args.files):
         bene_sks: set[int] = {row["BENE_SK"] for row in files[BENE_HSTRY]}
 
     clm = adapters_to_dicts(files[CLM])
