@@ -1689,6 +1689,14 @@ def main():
         default=5,
         help="Maximum number of claims to generate per person",
     )
+    parser.add_argument(
+        "--force-gen-claims",
+        action=argparse.BooleanOptionalAction,
+        help=(
+            "Generate _new_ claims when an existing bene has claims provided via --files; respects"
+            " --max-claims"
+        ),
+    )
     parser.add_argument("files", nargs="*")
 
     args = parser.parse_args()
@@ -1773,11 +1781,11 @@ def main():
                 f"Completed {pt_complete} patients with between {min_claims} and {max_claims} "
                 "claims per patient."
             )
-        has_static_claims = any(
-            claim.loaded_from_file and claim["BENE_SK"] in bene_sks for claim in files[CLM]
-        )
-        if not has_static_claims:
-            for _ in range(random.randint(min_claims, max_claims)):
+        claims_from_file = [
+            claim for claim in files[CLM] if claim.loaded_from_file and claim["BENE_SK"] in bene_sks
+        ]
+        if not claims_from_file or args.force_gen_claims:
+            for _ in range(random.randint(min_claims, max_claims - len(claims_from_file))):
                 clm_from_dt_min = "2018-01-01"
                 claim = gen_claim(
                     bene_sk=str(pt_bene_sk), min_date=clm_from_dt_min, max_date=max_date
