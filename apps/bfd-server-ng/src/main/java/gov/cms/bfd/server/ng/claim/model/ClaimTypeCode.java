@@ -405,7 +405,7 @@ public enum ClaimTypeCode {
     return isBetween(2000, 2999);
   }
 
-  boolean isBetween(int lower, int upper) {
+  private boolean isBetween(int lower, int upper) {
     return (code >= lower) && (code <= upper);
   }
 
