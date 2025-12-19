@@ -77,6 +77,9 @@ class RowAdapter:
         if key not in self.kv or not self.kv[key]:
             self.kv[key] = new_value
 
+    def __contains__(self, key: str) -> bool:
+        return key in self.kv
+
 
 class GeneratorUtil:
     USE_COLS = "use_cols"

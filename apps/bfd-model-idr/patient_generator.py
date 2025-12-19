@@ -123,7 +123,10 @@ def load_inputs():
         patient_static_mbis = [
             row
             for row in patient_mbi_ids
-            if row["BENE_MBI_ID"] == patient["BENE_MBI_ID"] and row.loaded_from_file
+            if "BENE_MBI_ID" in row
+            and "BENE_MBI_ID" in patient
+            and row["BENE_MBI_ID"] == patient["BENE_MBI_ID"]
+            and row.loaded_from_file
         ]
         if patient_static_mbis:
             # If the operator has provided static MBIs for a given synthetic patient we need to add
@@ -157,7 +160,10 @@ def load_inputs():
         xref_rows = [
             row
             for row in patient_xrefs
-            if row["BENE_SK"] == patient["BENE_SK"] and row.loaded_from_file
+            if "BENE_SK" in row
+            and "BENE_SK" in patient
+            and row["BENE_SK"] == patient["BENE_SK"]
+            and row.loaded_from_file
         ]
         if xref_rows:
             for xref_row in xref_rows:
