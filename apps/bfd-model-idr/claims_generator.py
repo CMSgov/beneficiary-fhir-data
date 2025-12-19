@@ -37,6 +37,7 @@ from generator_util import (
     PRVDR_HSTRY,
     GeneratorUtil,
     RowAdapter,
+    adapters_to_dicts,
     load_file,
 )
 
@@ -1747,25 +1748,28 @@ def main():
     if BENE_HSTRY in args.files:
         bene_sks: set[int] = {row["BENE_SK"] for row in files[BENE_HSTRY]}
 
-    clm: list[dict[str, Any]] = []
-    clm_line: list[dict[str, Any]] = []
-    clm_val: list[dict[str, Any]] = []
-    clm_instnl: list[dict[str, Any]] = []
-    clm_line_instnl: list[dict[str, Any]] = []
-    clm_dt_sgntr: list[dict[str, Any]] = []
-    clm_prod: list[dict[str, Any]] = []
-    clm_dcmtn: list[dict[str, Any]] = []
-    clm_fiss: list[dict[str, Any]] = []
-    clm_lctn_hstry: list[dict[str, Any]] = []
-    clm_prfnl: list[dict[str, Any]] = []
-    clm_line_prfnl: list[dict[str, Any]] = []
-    clm_line_rx: list[dict[str, Any]] = []
-    clm_rlt_cond_sgntr_mbr: list[dict[str, Any]] = []
+    clm = adapters_to_dicts(files[CLM])
+    clm_line = adapters_to_dicts(files[CLM_LINE])
+    clm_val = adapters_to_dicts(files[CLM_VAL])
+    clm_instnl = adapters_to_dicts(files[CLM_INSTNL])
+    clm_line_instnl = adapters_to_dicts(files[CLM_LINE_INSTNL])
+    clm_dt_sgntr = adapters_to_dicts(files[CLM_DT_SGNTR])
+    clm_prod = adapters_to_dicts(files[CLM_PROD])
+    clm_dcmtn = adapters_to_dicts(files[CLM_DCMTN])
+    clm_fiss = adapters_to_dicts(files[CLM_FISS])
+    clm_lctn_hstry = adapters_to_dicts(files[CLM_LCTN_HSTRY])
+    clm_prfnl = adapters_to_dicts(files[CLM_PRFNL])
+    clm_line_prfnl = adapters_to_dicts(files[CLM_LINE_PRFNL])
+    clm_line_rx = adapters_to_dicts(files[CLM_LINE_RX])
+    clm_rlt_cond_sgntr_mbr = adapters_to_dicts(files[CLM_RLT_COND_SGNTR_MBR])
+    cntrct_pbp_num = adapters_to_dicts(files[CNTRCT_PBP_NUM])
+    cntrct_pbp_cntct = adapters_to_dicts(files[CNTRCT_PBP_CNTCT])
+    if not cntrct_pbp_num or cntrct_pbp_cntct:
+        cntrct_pbp_num, cntrct_pbp_cntct = gen_contract_plan(amount=10)
+    prvdr_hstry = adapters_to_dicts(files[PRVDR_HSTRY])
+    if not prvdr_hstry:
+        prvdr_hstry = gen_provider_history(amount=14)
     pt_complete = 0
-    cntrct_pbp_num: list[dict[str, Any]]
-    cntrct_pbp_cntct: list[dict[str, Any]]
-    cntrct_pbp_num, cntrct_pbp_cntct = gen_contract_plan(amount=10)
-    prvdr_hstry: list[dict[str, Any]] = gen_provider_history(amount=14)
     min_claims: int = args.min_claims
     max_claims: int = args.max_claims
     if min_claims > max_claims:
