@@ -59,3 +59,27 @@ CREATE TABLE idr.beneficiary_low_income_subsidy(
 );
 
 DROP TABLE idr.beneficiary_election_period_usage;
+
+CREATE VIEW idr.beneficiary_part_c_and_d_enrollment AS
+SELECT
+    e.bene_sk,
+    e.bene_enrlmt_pgm_type_cd,
+    e.bene_enrlmt_bgn_dt,
+    e.bene_enrlmt_end_dt,
+    e.bene_cntrct_num,
+    e.bene_pbp_num,
+    e.bene_cvrg_type_cd,
+    e.bene_enrlmt_emplr_sbsdy_sw,
+    e.bfd_updated_ts AS enr_bfd_updated_ts,
+    rx.bene_enrlmt_pdp_rx_info_bgn_dt,
+    rx.bene_pdp_enrlmt_mmbr_id_num,
+    rx.bene_pdp_enrlmt_grp_num,
+    rx.bene_pdp_enrlmt_prcsr_num,
+    rx.bene_pdp_enrlmt_bank_id_num,
+    rx.bfd_updated_ts AS enr_rx_bfd_updated_ts
+FROM idr.beneficiary_ma_part_d_enrollment e
+LEFT JOIN idr.beneficiary_ma_part_d_enrollment_rx rx
+    ON e.bene_sk = rx.bene_sk
+    AND e.bene_enrlmt_bgn_dt = rx.bene_enrlmt_bgn_dt
+    AND e.bene_cntrct_num = rx.bene_cntrct_num
+    AND e.bene_pbp_num = rx.bene_pbp_num;

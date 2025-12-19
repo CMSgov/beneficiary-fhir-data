@@ -1,5 +1,7 @@
 package gov.cms.bfd.server.ng.coverage;
 
+import static gov.cms.bfd.server.ng.util.IdrConstants.DEFAULT_DATE;
+
 import gov.cms.bfd.server.ng.coverage.model.BeneficiaryCoverage;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.util.LogUtil;
@@ -36,36 +38,30 @@ public class CoverageRepository {
             .createQuery(
                 String.format(
                     """
-                      WITH latestEnrollments AS (
-                          SELECT e.id AS id,
-                              DENSE_RANK() OVER (
-                                  PARTITION BY e.id.enrollmentProgramTypeCode
+                      WITH latestPartCDEnrollments AS (
+                          SELECT e.id.beneSk AS beneSk,
+                              e.id.enrollmentBeginDate AS enrollmentBeginDate,
+                              e.id.enrollmentProgramTypeCode AS enrollmentProgramTypeCode,
+                              e.id.contractNumber AS contractNumber,
+                              e.id.planNumber AS planNumber,
+                              e.enrollmentPdpRxInfoBeginDate AS enrollmentPdpRxInfoBeginDate,
+                              ROW_NUMBER() OVER (
+                                  PARTITION BY
+                                    e.id.beneSk,
+                                    e.id.enrollmentProgramTypeCode
                                   ORDER BY
                                       CASE
                                           WHEN e.beneficiaryEnrollmentPeriod.enrollmentBeginDate <= :today
-                                               AND :today <= e.beneficiaryEnrollmentPeriod.enrollmentEndDate
+                                               AND (e.beneficiaryEnrollmentPeriod.enrollmentEndDate IS NULL
+                                                    OR :today <= e.beneficiaryEnrollmentPeriod.enrollmentEndDate)
                                           THEN 1
                                           ELSE 2
-                                      END ASC,
-                                      e.beneficiaryEnrollmentPeriod.enrollmentBeginDate DESC
+                                      END,
+                                      e.beneficiaryEnrollmentPeriod.enrollmentBeginDate DESC,
+                                      COALESCE(e.enrollmentPdpRxInfoBeginDate, :farFuture) DESC
                               ) AS row_num
-                          FROM BeneficiaryMAPartDEnrollment e
+                          FROM BeneficiaryPartCDEnrollment e
                           WHERE e.id.beneSk = :beneSk
-                      ),
-                      latestEnrollmentsRx AS (
-                          SELECT rx.id AS id,
-                              ROW_NUMBER() OVER (
-                                  PARTITION BY rx.id.beneSk, rx.id.enrollmentBeginDate, rx.id.contractNumber, rx.id.planNumber
-                                  ORDER BY
-                                      CASE
-                                          WHEN rx.id.enrollmentBeginDate <= :today
-                                          THEN 1
-                                          ELSE 2
-                                      END ASC,
-                                      rx.id.enrollmentPdpRxInfoBeginDate DESC
-                              ) AS row_num
-                          FROM BeneficiaryMAPartDEnrollmentRx rx
-                          WHERE rx.id.beneSk = :beneSk
                       ),
                       latestLis AS (
                           SELECT lis.id AS id,
@@ -83,10 +79,9 @@ public class CoverageRepository {
                       LEFT JOIN FETCH b.beneficiaryThirdParties tp
                       LEFT JOIN FETCH b.beneficiaryEntitlements be
                       LEFT JOIN FETCH b.beneficiaryDualEligibility de
-                      LEFT JOIN FETCH b.beneficiaryMAPartDEnrollments ben
+                      LEFT JOIN FETCH b.beneficiaryPartCDEnrollments ben
                       LEFT JOIN FETCH ben.enrollmentContract c
                       LEFT JOIN FETCH c.contractPlanContactInfo cc
-                      LEFT JOIN FETCH b.beneficiaryMAPartDEnrollmentsRx berx
                       LEFT JOIN FETCH b.beneficiaryLowIncomeSubsidies blis
                       WHERE b.beneSk = :id
                         AND ((cast(:lowerBound AS ZonedDateTime)) IS NULL OR b.meta.updatedTimestamp %s :lowerBound)
@@ -94,22 +89,11 @@ public class CoverageRepository {
                         AND b.beneSk = b.xrefSk
                         AND (ben IS NULL
                             OR EXISTS (
-                            SELECT 1 FROM latestEnrollments e
+                            SELECT 1 FROM latestPartCDEnrollments e
                             WHERE e.row_num = 1
-                                AND e.id.beneSk = ben.id.beneSk
-                                AND e.id.enrollmentBeginDate = ben.id.enrollmentBeginDate
-                                AND e.id.enrollmentProgramTypeCode = ben.id.enrollmentProgramTypeCode
-                        ))
-                        AND (berx IS NULL
-                            OR ben.id.enrollmentProgramTypeCode = '1'
-                            OR EXISTS (
-                            SELECT 1 FROM latestEnrollmentsRx e
-                            WHERE e.row_num = 1
-                                AND e.id.beneSk = ben.id.beneSk
-                                AND e.id.enrollmentBeginDate = ben.id.enrollmentBeginDate
-                                AND e.id.contractNumber = ben.contractNumber
-                                AND e.id.planNumber = ben.planNumber
-                                AND e.id.enrollmentPdpRxInfoBeginDate = berx.id.enrollmentPdpRxInfoBeginDate
+                                AND e.beneSk = ben.id.beneSk
+                                AND e.enrollmentBeginDate = ben.id.enrollmentBeginDate
+                                AND e.enrollmentProgramTypeCode = ben.id.enrollmentProgramTypeCode
                         ))
                         AND (blis IS NULL
                             OR EXISTS (
@@ -128,6 +112,7 @@ public class CoverageRepository {
             .setParameter("upperBound", lastUpdatedRange.getUpperBoundDateTime().orElse(null))
             .setParameter("today", today)
             .setParameter("beneSk", beneSk)
+            .setParameter("farFuture", DEFAULT_DATE)
             .getResultList()
             .stream()
             .findFirst();

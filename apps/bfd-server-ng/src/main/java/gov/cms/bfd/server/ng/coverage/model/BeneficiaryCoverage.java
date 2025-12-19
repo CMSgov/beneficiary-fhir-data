@@ -57,11 +57,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
 
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "bene_sk")
-  private SortedSet<BeneficiaryMAPartDEnrollment> beneficiaryMAPartDEnrollments;
-
-  @OneToMany(fetch = FetchType.EAGER)
-  @JoinColumn(name = "bene_sk")
-  private SortedSet<BeneficiaryMAPartDEnrollmentRx> beneficiaryMAPartDEnrollmentsRx;
+  private SortedSet<BeneficiaryPartCDEnrollment> beneficiaryPartCDEnrollments;
 
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "bene_sk")
@@ -110,8 +106,8 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
    * @param coveragePart The coverage part
    * @return Optional containing the matching enrollment, or empty if not found.
    */
-  private Optional<BeneficiaryMAPartDEnrollment> getEnrollment(CoveragePart coveragePart) {
-    return beneficiaryMAPartDEnrollments.stream()
+  private Optional<BeneficiaryPartCDEnrollment> getEnrollment(CoveragePart coveragePart) {
+    return beneficiaryPartCDEnrollments.stream()
         .filter(
             e ->
                 e.getId()
@@ -121,11 +117,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
         .findFirst();
   }
 
-  // when we support multiple coverages these two will have to be changed to return multiple rows.
-  private Optional<BeneficiaryMAPartDEnrollmentRx> getRxEnrollment() {
-    return beneficiaryMAPartDEnrollmentsRx.stream().findFirst();
-  }
-
+  // when we support multiple coverages this will have to be changed to return multiple rows.
   private Optional<BeneficiaryLowIncomeSubsidy> getLowIncomeSubsidy() {
     return beneficiaryLowIncomeSubsidies.stream().findFirst();
   }
@@ -342,12 +334,12 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
       return toEmptyResource(coverage);
     }
 
+    var enrollment = enrollmentOpt.get();
     var enrichedCoverage =
-        mapBaseCoverageCD(coverage, coveragePart, enrollmentOpt.get(), profileType, orgId);
+        mapBaseCoverageCD(coverage, coveragePart, enrollment, profileType, orgId);
 
-    var rxInfo = getRxEnrollment();
-    rxInfo
-        .flatMap(BeneficiaryMAPartDEnrollmentRx::getMemberId)
+    enrollment
+        .getMemberId()
         .ifPresent(
             memberId -> {
               Identifier memberIdentifier = new Identifier();
@@ -357,7 +349,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
               memberIdentifier.setValue(memberId);
               enrichedCoverage.addIdentifier(memberIdentifier);
             });
-    rxInfo.ifPresent(rx -> rx.toFhirClassComponents().forEach(enrichedCoverage::addClass_));
+    enrollment.toFhirClassComponents().forEach(enrichedCoverage::addClass_);
 
     var lowIncomeSubsidy = getLowIncomeSubsidy();
     lowIncomeSubsidy.ifPresent(
@@ -369,7 +361,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
   private Coverage mapBaseCoverageCD(
       Coverage coverage,
       CoveragePart coveragePart,
-      BeneficiaryMAPartDEnrollment enrollment,
+      BeneficiaryPartCDEnrollment enrollment,
       ProfileType profileType,
       String orgId) {
 
@@ -395,6 +387,15 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
 
   private ZonedDateTime getMostRecentUpdated() {
     // Collect timestamps from beneficiary and all related child entities
+    var mostRecentEnrollmentTimestamp =
+        beneficiaryPartCDEnrollments.stream()
+            .flatMap(
+                enrollment ->
+                    Stream.concat(
+                        Stream.of(enrollment.getEnrollmentBfdUpdatedTimestamp()),
+                        enrollment.getEnrollmentRxBfdUpdatedTimestamp().stream()))
+            .max(Comparator.naturalOrder());
+
     var allTimestamps =
         Stream.of(
             Stream.of(meta.getUpdatedTimestamp()),
@@ -405,10 +406,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
             getDualEligibility().map(BeneficiaryDualEligibility::getBfdUpdatedTimestamp).stream(),
             beneficiaryEntitlements.stream().map(BeneficiaryEntitlement::getBfdUpdatedTimestamp),
             beneficiaryThirdParties.stream().map(BeneficiaryThirdParty::getBfdUpdatedTimestamp),
-            beneficiaryMAPartDEnrollments.stream()
-                .map(BeneficiaryMAPartDEnrollment::getBfdUpdatedTimestamp),
-            beneficiaryMAPartDEnrollmentsRx.stream()
-                .map(BeneficiaryMAPartDEnrollmentRx::getBfdUpdatedTimestamp),
+            mostRecentEnrollmentTimestamp.stream(),
             beneficiaryLowIncomeSubsidies.stream()
                 .map(BeneficiaryLowIncomeSubsidy::getBfdUpdatedTimestamp));
 
@@ -419,11 +417,11 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
   }
 
   private String createCoverageIdPartCD(
-      CoveragePart coveragePart, BeneficiaryMAPartDEnrollment enrollment) {
+      CoveragePart coveragePart, BeneficiaryPartCDEnrollment enrollment) {
     var coverageType = coveragePart.getStandardSystem();
     var beneSk = enrollment.getId().getBeneSk();
-    var contractNum = enrollment.getContractNumber();
-    var contractPbpNum = enrollment.getPlanNumber();
+    var contractNum = enrollment.getId().getContractNumber();
+    var contractPbpNum = enrollment.getId().getPlanNumber();
     return String.format("%s-%s-%s-%s", coverageType, beneSk, contractNum, contractPbpNum);
   }
 }
