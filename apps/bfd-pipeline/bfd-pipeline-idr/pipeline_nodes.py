@@ -4,7 +4,7 @@ from datetime import datetime
 from hamilton.htypes import Collect, Parallelizable  # type: ignore
 
 from constants import MIN_CLAIM_LOAD_DATE
-from load_partition import LoadPartition
+from load_partition import LoadPartition, LoadType
 from model import (
     IdrBaseModel,
     IdrBeneficiary,
@@ -29,7 +29,6 @@ from model import (
     IdrContractPbpNumber,
     IdrProviderHistory,
     LoadMode,
-    LoadType,
     get_min_transaction_date,
 )
 from pipeline_utils import extract_and_load
@@ -61,7 +60,7 @@ BENE_AUX_TABLES = [
 
 
 def _gen_partitioned_node_inputs(
-    model_types: list[type[IdrBaseModel]],
+    model_types: list[type[IdrBaseModel]], load_type: LoadType
 ) -> list[NodePartitionedModelInput]:
     start_date = get_min_transaction_date(MIN_CLAIM_LOAD_DATE)
 
@@ -71,7 +70,9 @@ def _gen_partitioned_node_inputs(
             [
                 partition
                 for partition_group in m.fetch_query_partitions()
-                for partition in partition_group.generate_ranges(datetime.date(start_date))
+                for partition in partition_group.generate_ranges(
+                    load_type, datetime.date(start_date)
+                )
             ],
         )
         for m in model_types
@@ -101,10 +102,10 @@ def stage1(load_mode: LoadMode, start_time: datetime, load_type: LoadType) -> bo
 def stage2_inputs(load_type: LoadType, stage1: bool) -> Parallelizable[NodePartitionedModelInput]:  # noqa: ARG001
     if load_type == LoadType.INITIAL:
         yield from _gen_partitioned_node_inputs(
-            [*CLAIM_AUX_TABLES, *BENE_AUX_TABLES, IdrClaim, IdrBeneficiary]
+            [*CLAIM_AUX_TABLES, *BENE_AUX_TABLES, IdrClaim, IdrBeneficiary], load_type
         )
     else:
-        yield from _gen_partitioned_node_inputs([*CLAIM_AUX_TABLES, *BENE_AUX_TABLES])
+        yield from _gen_partitioned_node_inputs([*CLAIM_AUX_TABLES, *BENE_AUX_TABLES], load_type)
 
 
 # NOTE: it would be good to use @parameterize here, but the multiprocessing executor doesn't handle
@@ -139,9 +140,9 @@ def stage3_inputs(
     collect_stage2: bool,  # noqa: ARG001
 ) -> Parallelizable[NodePartitionedModelInput]:
     if load_type == LoadType.INCREMENTAL:
-        yield from _gen_partitioned_node_inputs([IdrClaim])
+        yield from _gen_partitioned_node_inputs([IdrClaim], load_type)
     else:
-        yield from _gen_partitioned_node_inputs([])
+        yield from _gen_partitioned_node_inputs([], load_type)
 
 
 def do_stage3(

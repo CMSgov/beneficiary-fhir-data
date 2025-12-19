@@ -37,11 +37,6 @@ class LoadMode(StrEnum):
     PRODUCTION = ""
 
 
-class LoadType(StrEnum):
-    INITIAL = "initial"
-    INCREMENTAL = "incremental"
-
-
 def transform_null_date_to_max(value: date | None) -> date:
     if value is None:
         return date.fromisoformat(DEFAULT_MAX_DATE)
@@ -1020,6 +1015,11 @@ class IdrClaim(IdrBaseModel):
     clm_rndrg_prvdr_last_name: Annotated[str, BeforeValidator(transform_default_string)]
     prvdr_blg_prvdr_npi_num: Annotated[str, BeforeValidator(transform_default_string)]
     prvdr_rfrg_prvdr_npi_num: Annotated[str, BeforeValidator(transform_default_string)]
+    prvdr_srvc_prvdr_npi_num: Annotated[str, BeforeValidator(transform_default_string)]
+    prvdr_atndg_prvdr_npi_num: Annotated[str, BeforeValidator(transform_default_string)]
+    prvdr_othr_prvdr_npi_num: Annotated[str, BeforeValidator(transform_default_string)]
+    prvdr_rndrng_prvdr_npi_num: Annotated[str, BeforeValidator(transform_default_string)]
+    prvdr_oprtg_prvdr_npi_num: Annotated[str, BeforeValidator(transform_default_string)]
     clm_ric_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_disp_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_sbmt_chrg_amt: Annotated[float, BeforeValidator(transform_null_float)]
@@ -1349,6 +1349,7 @@ class IdrClaimItem(IdrBaseModel):
     clm_rndrg_prvdr_tax_num: Annotated[str, BeforeValidator(transform_default_string)]
     clm_rndrg_prvdr_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_rndrg_prvdr_npi_num: Annotated[str, BeforeValidator(transform_default_string)]
+    prvdr_rndrng_prvdr_npi_num: Annotated[str, BeforeValidator(transform_default_string)]
     hcpcs_1_mdfr_cd: Annotated[str, BeforeValidator(transform_default_string)]
     hcpcs_2_mdfr_cd: Annotated[str, BeforeValidator(transform_default_string)]
     hcpcs_3_mdfr_cd: Annotated[str, BeforeValidator(transform_default_string)]

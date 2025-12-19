@@ -67,6 +67,10 @@ INT_TO_STRING_COLS = [
     "CLM_BLG_PRVDR_NPI_NUM",
     "CLM_RFRG_PRVDR_PIN_NUM",
     "PRVDR_ATNDG_PRVDR_NPI_NUM",
+    "PRVDR_SRVC_PRVDR_NPI_NUM",
+    "PRVDR_OTHR_PRVDR_NPI_NUM",
+    "PRVDR_RNDRNG_PRVDR_NPI_NUM",
+    "PRVDR_OPRTG_PRVDR_NPI_NUM",
 ]
 
 generator = GeneratorUtil()
@@ -824,7 +828,7 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
         claim["CLM"]["CLM_OTHR_PRVDR_NPI_NUM"] = random.choice(type_1_npis)
         claim["CLM"]["PRVDR_OTHR_PRVDR_NPI_NUM"] = claim["CLM"]["CLM_OTHR_PRVDR_NPI_NUM"]
         claim["CLM"]["CLM_RNDRG_PRVDR_NPI_NUM"] = random.choice(type_1_npis)
-        claim["CLM"]["PRVDR_RNDRG_PRVDR_NPI_NUM"] = claim["CLM"]["CLM_RNDRG_PRVDR_NPI_NUM"]
+        claim["CLM"]["PRVDR_RNDRNG_PRVDR_NPI_NUM"] = claim["CLM"]["CLM_RNDRG_PRVDR_NPI_NUM"]
         claim["CLM"]["CLM_BLG_PRVDR_OSCAR_NUM"] = random.choice(avail_oscar_codes_institutional)
         claim["CLM"]["CLM_MDCR_COINSRNC_AMT"] = round(random.uniform(0, 25), 2)
         claim["CLM"]["CLM_BLG_PRVDR_ZIP5_CD"] = random.choice(["75205", "77550", "77005"])
@@ -1172,7 +1176,7 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
             )
             claim_line_prfnl["CLM_LINE_PRFNL_DME_PRICE_AMT"] = round(random.uniform(0, 10000), 2)
             claim_line["PRVDR_RNDRNG_PRVDR_NPI_NUM"] = random.choice(type_1_npis)
-            claim_line["CLM_RNDRG_PRVDR_NPI_NUM"] = claim_line["PRVDR_RNDRNG_PRVDR_NPI_NUM"]
+            claim_line["CLM_RNDRNG_PRVDR_NPI_NUM"] = claim_line["PRVDR_RNDRNG_PRVDR_NPI_NUM"]
 
         add_meta_timestamps(claim_line_prfnl, claim["CLM"], max_date)
 
