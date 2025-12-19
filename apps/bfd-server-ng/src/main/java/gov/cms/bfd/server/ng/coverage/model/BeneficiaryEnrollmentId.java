@@ -12,7 +12,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 
-/** Represents the composite primary key for the {@link BeneficiaryMAPartDEnrollment} entity. */
+/** Represents the composite primary key for the {@link BeneficiaryPartCDEnrollment} entity. */
 @EqualsAndHashCode
 @NoArgsConstructor
 @Getter
