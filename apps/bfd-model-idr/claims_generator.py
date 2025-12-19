@@ -38,7 +38,7 @@ from generator_util import (
     GeneratorUtil,
     RowAdapter,
     adapters_to_dicts,
-    load_file,
+    load_file_dict,
 )
 
 
@@ -1728,21 +1728,7 @@ def main():
         CNTRCT_PBP_NUM: [],
         CNTRCT_PBP_CNTCT: [],
     }
-    for file in args.files:
-        file_path = Path(file)
-        csv_data = pd.read_csv(  # type: ignore
-            file_path,
-            dtype={
-                "BENE_SK": "Int64",
-                "BENE_XREF_SK": "Int64",
-                "BENE_XREF_EFCTV_SK": "Int64",
-                "BENE_SEX_CD": "Int64",
-                "BENE_RACE_CD": "Int64",
-            },
-        )
-        for filename in files:
-            if file_path.name == filename + ".csv":
-                files[filename] = load_file(csv_data.to_dict(orient="records"))  # type: ignore
+    load_file_dict(files=files, file_paths=args.files)
 
     bene_sks = {-1}
     if any(BENE_HSTRY in file for file in args.files):

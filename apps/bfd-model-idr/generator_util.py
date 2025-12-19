@@ -44,6 +44,26 @@ CNTRCT_PBP_NUM = "SYNTHETIC_CNTRCT_PBP_NUM"
 CNTRCT_PBP_CNTCT = "SYNTHETIC_CNTRCT_PBP_CNTCT"
 
 
+def load_file_dict(files: dict[str, list["RowAdapter"]], file_paths: list[str]):
+    for file_path, file_name in (
+        (Path(file_path), file_name)
+        for file_path in file_paths
+        for file_name in files
+        if f"{file_name}.csv" in file_path
+    ):
+        csv_data = pd.read_csv(  # type: ignore
+            file_path,
+            converters={
+                "BENE_SK": convert_tilde_str,
+                "BENE_XREF_SK": convert_tilde_str,
+                "BENE_XREF_EFCTV_SK": convert_tilde_str,
+                "BENE_SEX_CD": convert_tilde_str,
+                "BENE_RACE_CD": convert_tilde_str,
+            },
+        )
+        files[file_name] = load_file(csv_data.to_dict(orient="records"))  # type: ignore
+
+
 def load_file(file: Iterable[dict[str, Any]]):
     return [RowAdapter(kv=row, loaded_from_file=True) for row in file]
 
@@ -63,6 +83,12 @@ def contains_bene_sk(file: list["RowAdapter"], bene_sk: str):
 def find_bene_sk(file: list["RowAdapter"], bene_sk: str):
     res = [row for row in file if row["BENE_SK"] == bene_sk]
     return res[0] if res else RowAdapter({"BENE_SK": bene_sk})
+
+
+def convert_tilde_str(val: str) -> str:
+    if val == "~":
+        return ""
+    return val
 
 
 class RowAdapter:

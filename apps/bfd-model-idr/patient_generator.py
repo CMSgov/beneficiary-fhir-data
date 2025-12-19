@@ -4,9 +4,7 @@ import datetime
 import random
 import subprocess
 import sys
-from pathlib import Path
 
-import pandas as pd
 from faker import Faker
 
 from generator_util import (
@@ -23,7 +21,7 @@ from generator_util import (
     BENE_XREF,
     GeneratorUtil,
     RowAdapter,
-    load_file,
+    load_file_dict,
     probability,
 )
 
@@ -61,6 +59,8 @@ available_family_names = ["Erdapfel", "Heeler", "Coffee", "Jones", "Smith", "She
 
 
 def load_inputs():
+    generator = GeneratorUtil()
+
     files: dict[str, list[RowAdapter]] = {
         BENE_HSTRY: [],
         BENE_MBI_ID: [],
@@ -74,22 +74,8 @@ def load_inputs():
         BENE_MAPD_ENRLMT_RX: [],
         BENE_LIS: [],
     }
-    generator = GeneratorUtil()
-    for file in args.files:
-        file_path = Path(file)
-        csv_data = pd.read_csv(  # type: ignore
-            file_path,
-            dtype={
-                "BENE_SK": "Int64",
-                "BENE_XREF_SK": "Int64",
-                "BENE_XREF_EFCTV_SK": "Int64",
-                "BENE_SEX_CD": "Int64",
-                "BENE_RACE_CD": "Int64",
-            },
-        )
-        for filename in files:
-            if file_path.name == filename + ".csv":
-                files[filename] = load_file(csv_data.to_dict(orient="records"))  # type: ignore
+    load_file_dict(files=files, file_paths=args.files)
+
     patients: list[RowAdapter] = files[BENE_HSTRY] or [RowAdapter({})] * args.patients
     patient_mbi_ids: list[RowAdapter] = files[BENE_MBI_ID] or [RowAdapter({})] * args.patients
     patient_xrefs: list[RowAdapter] = files[BENE_XREF] or [RowAdapter({})] * args.patients
