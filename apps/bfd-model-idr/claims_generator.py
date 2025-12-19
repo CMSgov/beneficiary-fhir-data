@@ -57,21 +57,21 @@ class SecurityLabelModel(BaseModel):
 
 @dataclass
 class _GeneratedClaim:
-    CLM: dict[str, Any] = field(default={})
-    CLM_VAL: list[dict[str, Any]] = field(default=[])
-    CLM_PROD: list[dict[str, Any]] = field(default=[])
-    CLM_LINE: list[dict[str, Any]] = field(default=[])
-    CLM_DT_SGNTR: dict[str, Any] = field(default={})
-    CLM_INSTNL: dict[str, Any] = field(default={})
-    CLM_LINE_INSTNL: list[dict[str, Any]] = field(default=[])
-    CLM_DCMTN: dict[str, Any] = field(default={})
-    CLM_PRFNL: dict[str, Any] = field(default={})
-    CLM_LINE_PRFNL: list[dict[str, Any]] = field(default=[])
-    CLM_LINE_RX: list[dict[str, Any]] = field(default=[])
-    CLM_RLT_COND_SGNTR_MBR: dict[str, Any] = field(default={})
-    RLT_COND_MBR_RECORD: dict[str, Any] = field(default={})
-    CLM_FISS: dict[str, Any] = field(default={})
-    CLM_LCTN_HSTRY: dict[str, Any] = field(default={})
+    CLM: dict[str, Any] = field(default_factory=dict[str, Any])
+    CLM_VAL: list[dict[str, Any]] = field(default_factory=list[dict[str, Any]])
+    CLM_PROD: list[dict[str, Any]] = field(default_factory=list[dict[str, Any]])
+    CLM_LINE: list[dict[str, Any]] = field(default_factory=list[dict[str, Any]])
+    CLM_DT_SGNTR: dict[str, Any] = field(default_factory=dict[str, Any])
+    CLM_INSTNL: dict[str, Any] = field(default_factory=dict[str, Any])
+    CLM_LINE_INSTNL: list[dict[str, Any]] = field(default_factory=list[dict[str, Any]])
+    CLM_DCMTN: dict[str, Any] = field(default_factory=dict[str, Any])
+    CLM_PRFNL: dict[str, Any] = field(default_factory=dict[str, Any])
+    CLM_LINE_PRFNL: list[dict[str, Any]] = field(default_factory=list[dict[str, Any]])
+    CLM_LINE_RX: list[dict[str, Any]] = field(default_factory=list[dict[str, Any]])
+    CLM_RLT_COND_SGNTR_MBR: dict[str, Any] = field(default_factory=dict[str, Any])
+    RLT_COND_MBR_RECORD: dict[str, Any] = field(default_factory=dict[str, Any])
+    CLM_FISS: dict[str, Any] = field(default_factory=dict[str, Any])
+    CLM_LCTN_HSTRY: dict[str, Any] = field(default_factory=dict[str, Any])
 
 
 SECURITY_LABELS_ICD10_PROCEDURE_SYSTEMS = ["http://www.cms.gov/Medicare/Coding/ICD10"]
