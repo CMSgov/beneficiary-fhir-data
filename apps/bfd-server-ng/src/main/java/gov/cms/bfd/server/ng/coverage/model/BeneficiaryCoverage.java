@@ -387,14 +387,6 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
 
   private ZonedDateTime getMostRecentUpdated() {
     // Collect timestamps from beneficiary and all related child entities
-    var mostRecentEnrollmentTimestamp =
-        beneficiaryPartCDEnrollments.stream()
-            .flatMap(
-                enrollment ->
-                    Stream.concat(
-                        Stream.of(enrollment.getEnrollmentBfdUpdatedTimestamp()),
-                        enrollment.getEnrollmentRxBfdUpdatedTimestamp().stream()))
-            .max(Comparator.naturalOrder());
 
     var allTimestamps =
         Stream.of(
@@ -406,7 +398,6 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
             getDualEligibility().map(BeneficiaryDualEligibility::getBfdUpdatedTimestamp).stream(),
             beneficiaryEntitlements.stream().map(BeneficiaryEntitlement::getBfdUpdatedTimestamp),
             beneficiaryThirdParties.stream().map(BeneficiaryThirdParty::getBfdUpdatedTimestamp),
-            mostRecentEnrollmentTimestamp.stream(),
             beneficiaryLowIncomeSubsidies.stream()
                 .map(BeneficiaryLowIncomeSubsidy::getBfdUpdatedTimestamp));
 

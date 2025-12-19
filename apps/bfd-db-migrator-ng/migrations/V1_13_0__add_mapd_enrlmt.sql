@@ -70,13 +70,11 @@ SELECT
     e.bene_pbp_num,
     e.bene_cvrg_type_cd,
     e.bene_enrlmt_emplr_sbsdy_sw,
-    e.bfd_updated_ts AS enr_bfd_updated_ts,
     COALESCE(rx.bene_enrlmt_pdp_rx_info_bgn_dt, DATE '9999-12-31') AS bene_enrlmt_pdp_rx_info_bgn_dt,
     rx.bene_pdp_enrlmt_mmbr_id_num,
     rx.bene_pdp_enrlmt_grp_num,
     rx.bene_pdp_enrlmt_prcsr_num,
-    rx.bene_pdp_enrlmt_bank_id_num,
-    rx.bfd_updated_ts AS enr_rx_bfd_updated_ts
+    rx.bene_pdp_enrlmt_bank_id_num
 FROM idr.beneficiary_ma_part_d_enrollment e
 LEFT JOIN idr.beneficiary_ma_part_d_enrollment_rx rx
     ON e.bene_sk = rx.bene_sk
@@ -84,3 +82,6 @@ LEFT JOIN idr.beneficiary_ma_part_d_enrollment_rx rx
     AND e.bene_cntrct_num = rx.bene_cntrct_num
     AND e.bene_pbp_num = rx.bene_pbp_num
     AND e.bene_enrlmt_pgm_type_cd in ('2', '3');
+
+CREATE UNIQUE INDEX
+    ON idr.contract_pbp_number(cntrct_pbp_num, cntrct_num);

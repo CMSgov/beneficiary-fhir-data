@@ -9,7 +9,6 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -30,10 +29,10 @@ public class BeneficiaryPartCDEnrollment implements Comparable<BeneficiaryPartCD
   private BeneficiaryEnrollmentPeriod beneficiaryEnrollmentPeriod;
 
   @Column(name = "bene_cvrg_type_cd")
-  private String coverageTypeCode;
+  private Optional<String> coverageTypeCode;
 
   @Column(name = "bene_enrlmt_emplr_sbsdy_sw")
-  private String employerSubsidySwitch;
+  private Optional<String> employerSubsidySwitch;
 
   @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(
@@ -48,86 +47,17 @@ public class BeneficiaryPartCDEnrollment implements Comparable<BeneficiaryPartCD
       referencedColumnName = "cntrct_pbp_num")
   private Contract enrollmentContract;
 
-  @Column(name = "enr_bfd_updated_ts")
-  private ZonedDateTime enrollmentBfdUpdatedTimestamp;
-
   @Column(name = "bene_pdp_enrlmt_mmbr_id_num")
-  private String memberId;
+  private Optional<String> memberId;
 
   @Column(name = "bene_pdp_enrlmt_grp_num")
-  private String groupNumber;
+  private Optional<String> groupNumber;
 
   @Column(name = "bene_pdp_enrlmt_prcsr_num")
-  private String processorNumber;
+  private Optional<String> processorNumber;
 
   @Column(name = "bene_pdp_enrlmt_bank_id_num")
-  private String bankId;
-
-  @Column(name = "enr_rx_bfd_updated_ts")
-  private ZonedDateTime enrollmentRxBfdUpdatedTimestamp;
-
-  /**
-   * Gets the coverage type code.
-   *
-   * @return the coverage type code.
-   */
-  public Optional<String> getCoverageTypeCode() {
-    return Optional.ofNullable(coverageTypeCode);
-  }
-
-  /**
-   * Gets the employer subsidy switch.
-   *
-   * @return the employer subsidy switch.
-   */
-  public Optional<String> getEmployerSubsidySwitch() {
-    return Optional.ofNullable(employerSubsidySwitch);
-  }
-
-  /**
-   * Gets the member id.
-   *
-   * @return the member id.
-   */
-  public Optional<String> getMemberId() {
-    return Optional.ofNullable(memberId);
-  }
-
-  /**
-   * Gets the group number.
-   *
-   * @return the group number.
-   */
-  public Optional<String> getGroupNumber() {
-    return Optional.ofNullable(groupNumber);
-  }
-
-  /**
-   * Gets the processor number.
-   *
-   * @return the processor number.
-   */
-  public Optional<String> getProcessorNumber() {
-    return Optional.ofNullable(processorNumber);
-  }
-
-  /**
-   * Gets the bank id.
-   *
-   * @return the bank id.
-   */
-  public Optional<String> getBankId() {
-    return Optional.ofNullable(bankId);
-  }
-
-  /**
-   * Gets the enrollment rx bfd updated timestamp.
-   *
-   * @return the enrollment rx bfd updated timestamp.
-   */
-  public Optional<ZonedDateTime> getEnrollmentRxBfdUpdatedTimestamp() {
-    return Optional.ofNullable(enrollmentRxBfdUpdatedTimestamp);
-  }
+  private Optional<String> bankId;
 
   Period toFhirPeriod() {
     return beneficiaryEnrollmentPeriod.toFhirPeriod();
@@ -144,47 +74,40 @@ public class BeneficiaryPartCDEnrollment implements Comparable<BeneficiaryPartCD
    */
   public List<Coverage.ClassComponent> toFhirClassComponents() {
     var memberIdClass =
-        getMemberId()
-            .map(
-                pdpEnrlmtMbrIdNum ->
-                    new Coverage.ClassComponent()
-                        .setType(
-                            new CodeableConcept()
-                                .addCoding(new Coding(SystemUrls.SYS_COVERAGE_CLASS, "rxid", null)))
-                        .setValue(pdpEnrlmtMbrIdNum));
+        memberId.map(
+            pdpEnrlmtMbrIdNum ->
+                new Coverage.ClassComponent()
+                    .setType(
+                        new CodeableConcept()
+                            .addCoding(new Coding(SystemUrls.SYS_COVERAGE_CLASS, "rxid", null)))
+                    .setValue(pdpEnrlmtMbrIdNum));
 
     var groupNumberClass =
-        getGroupNumber()
-            .map(
-                pdpEnrlmtGrpNum ->
-                    new Coverage.ClassComponent()
-                        .setType(
-                            new CodeableConcept()
-                                .addCoding(
-                                    new Coding(SystemUrls.SYS_COVERAGE_CLASS, "rxgroup", null)))
-                        .setValue(pdpEnrlmtGrpNum));
+        groupNumber.map(
+            pdpEnrlmtGrpNum ->
+                new Coverage.ClassComponent()
+                    .setType(
+                        new CodeableConcept()
+                            .addCoding(new Coding(SystemUrls.SYS_COVERAGE_CLASS, "rxgroup", null)))
+                    .setValue(pdpEnrlmtGrpNum));
 
     var processorNumberClass =
-        getProcessorNumber()
-            .map(
-                pdpEnrlmtPrcsrNum ->
-                    new Coverage.ClassComponent()
-                        .setType(
-                            new CodeableConcept()
-                                .addCoding(
-                                    new Coding(SystemUrls.SYS_COVERAGE_CLASS, "rxpcn", null)))
-                        .setValue(pdpEnrlmtPrcsrNum));
+        processorNumber.map(
+            pdpEnrlmtPrcsrNum ->
+                new Coverage.ClassComponent()
+                    .setType(
+                        new CodeableConcept()
+                            .addCoding(new Coding(SystemUrls.SYS_COVERAGE_CLASS, "rxpcn", null)))
+                    .setValue(pdpEnrlmtPrcsrNum));
 
     var bankIdClass =
-        getBankId()
-            .map(
-                pdpEnrlmtBankIdNum ->
-                    new Coverage.ClassComponent()
-                        .setType(
-                            new CodeableConcept()
-                                .addCoding(
-                                    new Coding(SystemUrls.SYS_COVERAGE_CLASS, "rxbin", null)))
-                        .setValue(pdpEnrlmtBankIdNum));
+        bankId.map(
+            pdpEnrlmtBankIdNum ->
+                new Coverage.ClassComponent()
+                    .setType(
+                        new CodeableConcept()
+                            .addCoding(new Coding(SystemUrls.SYS_COVERAGE_CLASS, "rxbin", null)))
+                    .setValue(pdpEnrlmtBankIdNum));
 
     return Stream.of(memberIdClass, groupNumberClass, processorNumberClass, bankIdClass)
         .flatMap(Optional::stream)
@@ -206,11 +129,10 @@ public class BeneficiaryPartCDEnrollment implements Comparable<BeneficiaryPartCD
         new Extension(SystemUrls.EXT_BENE_PBP_NUM_URL).setValue(new StringType(id.getPlanNumber()));
 
     var extCoverageTypeCode =
-        getCoverageTypeCode()
-            .map(
-                code ->
-                    new Extension(SystemUrls.EXT_BENE_CVRG_TYPE_CD_URL)
-                        .setValue(new Coding(SystemUrls.SYS_CVRG_TYPE_CD, code, null)));
+        coverageTypeCode.map(
+            code ->
+                new Extension(SystemUrls.EXT_BENE_CVRG_TYPE_CD_URL)
+                    .setValue(new Coding(SystemUrls.SYS_CVRG_TYPE_CD, code, null)));
 
     var extSegmentNumber =
         enrollmentContract
@@ -221,11 +143,10 @@ public class BeneficiaryPartCDEnrollment implements Comparable<BeneficiaryPartCD
                         .setValue(new StringType(number)));
 
     var extEmployerSubsidySwitch =
-        getEmployerSubsidySwitch()
-            .map(
-                number ->
-                    new Extension(SystemUrls.EXT_BENE_ENRLMT_EMPLR_SBSDY_SW_URL)
-                        .setValue(new StringType(number)));
+        employerSubsidySwitch.map(
+            number ->
+                new Extension(SystemUrls.EXT_BENE_ENRLMT_EMPLR_SBSDY_SW_URL)
+                    .setValue(new StringType(number)));
 
     return Stream.of(
             Optional.of(extContractNumber),
