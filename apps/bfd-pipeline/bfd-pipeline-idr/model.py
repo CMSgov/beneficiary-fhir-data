@@ -285,21 +285,21 @@ def _deceased_bene_filter(alias: str) -> str:
 
 def _idr_dates_from_meta_sk() -> str:
     """
-    Generate SQL expressions to derive insert and update timestamps
-    from META keys.
+    Generate SQL expressions to derive insert and update timestamps from META keys.
 
     Assumptions about META_SK / META_LST_UPDT_SK format:
       - The key encodes a date as: (YYYYMMDD - DATE_BASE_OFFSET) * DATE_SEQUENCE_DIVISOR + sequence
       - The last 3 digits represent a sequence and are discarded
       - Adding DATE_BASE_OFFSET restores a YYYYMMDD-formatted date
     """
-
     # Base offset added to reconstruct a YYYYMMDD date (e.g., 12501023 + 19000000 = 20250123)
     date_base_offset = 19000000
     # Divisor used to strip the sequence portion from the key
     date_sequence_divisor = 1000
     date_from_meta_sk = f"""(meta_sk / {date_sequence_divisor}) + {date_base_offset}"""
-    date_from_meta_updt_sk = f"""(meta_lst_updt_sk / {date_sequence_divisor}) + {date_base_offset}"""
+    date_from_meta_updt_sk = (
+        f"""(meta_lst_updt_sk / {date_sequence_divisor}) + {date_base_offset}"""
+    )
 
     # Logic for computing INSRT/UPDT timestamp on tables that don't have it based on META_SK
     return f"""
@@ -318,7 +318,7 @@ def _idr_dates_from_meta_sk() -> str:
                 ELSE
                     TO_TIMESTAMP(
                             TO_DATE(
-                                    TRUNC({date_from_meta_sk })::text,
+                                    TRUNC({date_from_meta_sk})::text,
                                     'YYYYMMDD'
                             )::text || ' 00:00:00',
                             'YYYY-MM-DD HH24:MI:SS'
