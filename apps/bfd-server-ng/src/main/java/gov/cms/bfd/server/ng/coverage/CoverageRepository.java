@@ -2,9 +2,9 @@ package gov.cms.bfd.server.ng.coverage;
 
 import gov.cms.bfd.server.ng.coverage.model.BeneficiaryCoverage;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
+import gov.cms.bfd.server.ng.util.DateUtil;
 import gov.cms.bfd.server.ng.util.LogUtil;
 import jakarta.persistence.EntityManager;
-import java.time.LocalDate;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -24,7 +24,7 @@ public class CoverageRepository {
    */
   public Optional<BeneficiaryCoverage> searchBeneficiaryWithCoverage(
       long beneSk, DateTimeRange lastUpdatedRange) {
-    var today = LocalDate.now();
+    var today = DateUtil.nowAoe();
 
     // Note on sorting here. Although we filter out inactive enrollments we need to handle both
     // active and future coverages. We sort first by active coverage records by latest begin date.
@@ -77,7 +77,7 @@ public class CoverageRepository {
                       LEFT JOIN FETCH ben.enrollmentContract c
                       LEFT JOIN FETCH c.contractPlanContactInfo cc
                       LEFT JOIN FETCH b.beneficiaryLowIncomeSubsidies blis
-                      WHERE b.beneSk = :id
+                      WHERE b.beneSk = :beneSk
                         AND ((cast(:lowerBound AS ZonedDateTime)) IS NULL OR b.meta.updatedTimestamp %s :lowerBound)
                         AND ((cast(:upperBound AS ZonedDateTime)) IS NULL OR b.meta.updatedTimestamp %s :upperBound)
                         AND b.beneSk = b.xrefSk
@@ -101,7 +101,6 @@ public class CoverageRepository {
                     lastUpdatedRange.getLowerBoundSqlOperator(),
                     lastUpdatedRange.getUpperBoundSqlOperator()),
                 BeneficiaryCoverage.class)
-            .setParameter("id", beneSk)
             .setParameter("lowerBound", lastUpdatedRange.getLowerBoundDateTime().orElse(null))
             .setParameter("upperBound", lastUpdatedRange.getUpperBoundDateTime().orElse(null))
             .setParameter("today", today)
