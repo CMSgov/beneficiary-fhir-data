@@ -55,6 +55,7 @@ public class CoverageRepository {
                               ) AS row_num
                           FROM BeneficiaryPartCDEnrollment e
                           WHERE e.id.beneSk = :beneSk
+                          AND e.beneficiaryEnrollmentPeriod.enrollmentEndDate >= :today
                       ),
                       latestLis AS (
                           SELECT lis.id AS id,
