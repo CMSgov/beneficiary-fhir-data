@@ -5,7 +5,6 @@ import static gov.cms.bfd.server.war.SpringConfiguration.SSM_PATH_SAMHSA_V2_ENAB
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.base.Strings;
-import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
 import gov.cms.bfd.server.war.commons.BBCodingSystems;
 import gov.cms.bfd.server.war.commons.SecurityTagManager;
@@ -112,7 +111,6 @@ public class McsClaimResponseTransformerV2 extends AbstractTransformerV2
    * @param includeTaxNumbers Indicates if tax numbers should be included in the results
    * @return a FHIR {@link ClaimResponse} resource that represents the specified claim
    */
-  @Trace
   public ClaimResponse transform(ClaimWithSecurityTags<?> claimEntity, boolean includeTaxNumbers) {
 
     Object claim = claimEntity.getClaimEntity();

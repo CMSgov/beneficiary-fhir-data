@@ -6,7 +6,6 @@ import static java.util.Objects.requireNonNull;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.SNFClaim;
 import gov.cms.bfd.model.rif.entities.SNFClaimLine;
@@ -74,7 +73,6 @@ public class SNFClaimTransformer implements ClaimTransformerInterface {
    * @param includeTaxNumber exists to satisfy {@link ClaimTransformerInterface}; ignored
    * @return a FHIR {@link ExplanationOfBenefit} resource.
    */
-  @Trace
   @Override
   public ExplanationOfBenefit transform(
       ClaimWithSecurityTags<?> claimEntity, boolean includeTaxNumber) {

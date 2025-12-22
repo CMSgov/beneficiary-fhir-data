@@ -6,7 +6,6 @@ import static java.util.Objects.requireNonNull;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.base.Strings;
-import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.CarrierClaim;
 import gov.cms.bfd.model.rif.entities.CarrierClaimLine;
@@ -74,7 +73,6 @@ final class CarrierClaimTransformer implements ClaimTransformerInterface {
    * @param includeTaxNumber boolean denoting whether to include tax numbers in the response
    * @return a FHIR {@link ExplanationOfBenefit} resource.
    */
-  @Trace
   @Override
   public ExplanationOfBenefit transform(
       ClaimWithSecurityTags<?> claimEntity, boolean includeTaxNumber) {
