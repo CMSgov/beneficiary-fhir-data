@@ -88,6 +88,7 @@ public class CoverageRepository {
                                 AND e.id.beneSk = ben.id.beneSk
                                 AND e.id.enrollmentBeginDate = ben.id.enrollmentBeginDate
                                 AND e.id.enrollmentProgramTypeCode = ben.id.enrollmentProgramTypeCode
+                                AND e.id.enrollmentPdpRxInfoBeginDate = ben.id.enrollmentPdpRxInfoBeginDate
                         ))
                         AND (blis IS NULL
                             OR EXISTS (
