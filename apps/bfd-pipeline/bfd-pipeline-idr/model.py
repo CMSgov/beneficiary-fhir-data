@@ -138,6 +138,8 @@ ALIAS_XREF = "xref"
 ALIAS_LCTN_HSTRY = "lctn_hstry"
 ALIAS_CLM_GRP = "clm_grp"
 ALIAS_RLT_COND = "rltcond"
+ALIAS_PBP_NUM = "pbp_num"
+ALIAS_CNTRCT_SGMT = "sgmt"
 
 
 class IdrBaseModel(BaseModel, ABC):
@@ -656,55 +658,16 @@ class IdrBeneficiaryDualEligibility(IdrBaseModel):
         return [NON_CLAIM_PARTITION]
 
 
-class IdrElectionPeriodUsage(IdrBaseModel):
-    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
-    cntrct_pbp_sk: Annotated[int, {PRIMARY_KEY: True}]
-    bene_cntrct_num: str
-    bene_pbp_num: Annotated[str, BeforeValidator(transform_default_string)]
-    bene_elctn_enrlmt_disenrlmt_cd: str
-    bene_elctn_aplctn_dt: Annotated[date, BeforeValidator(transform_null_or_default_date_to_max)]
-    bene_enrlmt_efctv_dt: Annotated[date, {PRIMARY_KEY: True}]
-    idr_insrt_ts: Annotated[datetime, {BATCH_TIMESTAMP: True}]
-    idr_trans_efctv_ts: datetime
-    idr_trans_obslt_ts: datetime
-
-    @staticmethod
-    def table() -> str:
-        return "idr.election_period_usage"
-
-    @staticmethod
-    def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
-        # equivalent to "select distinct on", but Snowflake has different syntax for that,
-        # so it's unfortunately not portable
-        hstry = ALIAS_HSTRY
-        return f"""
-            WITH dupes as (
-                SELECT {{COLUMNS}}, ROW_NUMBER() OVER (
-                    PARTITION BY bene_sk, cntrct_pbp_sk, bene_enrlmt_efctv_dt
-                {{ORDER_BY}} DESC) as row_order
-                FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_elctn_prd_usg usg
-                {{WHERE_CLAUSE}}
-                AND NOT EXISTS (
-                    {_deceased_bene_filter(hstry)}
-                    AND {hstry}.bene_sk = usg.bene_sk
-                )
-                {{ORDER_BY}}
-            )
-            SELECT {{COLUMNS}} FROM dupes WHERE row_order = 1
-            """
-
-    @staticmethod
-    def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
-        return [NON_CLAIM_PARTITION]
-
-
 class IdrContractPbpNumber(IdrBaseModel):
-    cntrct_pbp_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
+    cntrct_pbp_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, ALIAS: ALIAS_PBP_NUM}]
     cntrct_drug_plan_ind_cd: Annotated[str, BeforeValidator(transform_default_string)]
     cntrct_pbp_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
     cntrct_pbp_name: Annotated[str, BeforeValidator(transform_null_string)]
     cntrct_num: Annotated[str, BeforeValidator(transform_default_string)]
     cntrct_pbp_num: Annotated[str, BeforeValidator(transform_default_string)]
+    cntrct_pbp_sgmt_num: Annotated[
+        str, ALIAS:ALIAS_CNTRCT_SGMT, BeforeValidator(transform_default_string)
+    ]
 
     @staticmethod
     def table() -> str:
@@ -712,11 +675,22 @@ class IdrContractPbpNumber(IdrBaseModel):
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
+        pbp_num = ALIAS_PBP_NUM
         return f"""
-        SELECT {{COLUMNS}}
-        FROM cms_vdm_view_mdcr_prd.v2_mdcr_cntrct_pbp_num
-        WHERE cntrct_pbp_sk_obslt_dt >= '{DEFAULT_MAX_DATE}'
-        """
+            WITH sgmt as (
+                SELECT
+                    cntrct_pbp_sk,
+                    cntrct_pbp_sgmt_num
+                FROM cms_vdm_view_mdcr_prd.v2_mdcr_cntrct_pbp_sgmt
+                GROUP BY cntrct_pbp_sk, cntrct_pbp_sgmt_num
+                HAVING COUNT(*) = 1
+            )
+            SELECT {{COLUMNS}}
+            FROM cms_vdm_view_mdcr_prd.v2_mdcr_cntrct_pbp_num {pbp_num}
+            LEFT JOIN sgmt
+                    ON {pbp_num}.cntrct_pbp_sk = sgmt.cntrct_pbp_sk 
+            WHERE cntrct_pbp_sk_obslt_dt >= '{DEFAULT_MAX_DATE}'
+            """
 
     @staticmethod
     def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
@@ -762,6 +736,133 @@ class IdrContractPbpContact(IdrBaseModel):
             )
             SELECT {{COLUMNS}} FROM contract_contacts WHERE row_order = 1
         """
+
+    @staticmethod
+    def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+        return [NON_CLAIM_PARTITION]
+
+
+class IdrBeneficiaryMaPartDEnrollment(IdrBaseModel):
+    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
+    cntrct_pbp_sk: int
+    bene_pbp_num: str
+    bene_enrlmt_bgn_dt: Annotated[date, {PRIMARY_KEY: True}]
+    bene_enrlmt_end_dt: Annotated[date, BeforeValidator(transform_null_date_to_max)]
+    bene_cntrct_num: str
+    bene_cvrg_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
+    bene_enrlmt_pgm_type_cd: Annotated[str, {PRIMARY_KEY: True}]
+    bene_enrlmt_emplr_sbsdy_sw: Annotated[str, BeforeValidator(transform_default_string)]
+    idr_ltst_trans_flg: str
+    idr_trans_efctv_ts: datetime
+    idr_trans_obslt_ts: datetime
+    idr_insrt_ts: Annotated[datetime, {BATCH_TIMESTAMP: True}]
+    idr_updt_ts: Annotated[
+        datetime, {UPDATE_TIMESTAMP: True}, BeforeValidator(transform_null_date_to_min)
+    ]
+
+    @staticmethod
+    def table() -> str:
+        return "idr.beneficiary_ma_part_d_enrollment"
+
+    @staticmethod
+    def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
+        # There are only a very few instances where non-obsolete records have a
+        # bene_enrlmt_pgm_type_cd set to '~' and these are all from the 80s,
+        # so it should be safe to filter these.
+        hstry = ALIAS_HSTRY
+        return f"""
+            SELECT {{COLUMNS}}
+            FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_mapd_enrlmt enrlmt
+            {{WHERE_CLAUSE}}
+            AND NOT EXISTS (
+                {_deceased_bene_filter(hstry)}
+                AND {hstry}.bene_sk = enrlmt.bene_sk
+            )
+            AND idr_trans_obslt_ts >= '{DEFAULT_MAX_DATE}'
+            AND bene_enrlmt_pgm_type_cd != '~'
+            {{ORDER_BY}}
+        """
+
+    @staticmethod
+    def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+        return [NON_CLAIM_PARTITION]
+
+
+class IdrBeneficiaryMaPartDEnrollmentRx(IdrBaseModel):
+    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
+    cntrct_pbp_sk: int
+    bene_cntrct_num: Annotated[str, {PRIMARY_KEY: True}]
+    bene_pbp_num: Annotated[str, {PRIMARY_KEY: True}]
+    bene_enrlmt_bgn_dt: Annotated[date, {PRIMARY_KEY: True}]
+    bene_pdp_enrlmt_mmbr_id_num: Annotated[str, BeforeValidator(transform_default_string)]
+    bene_pdp_enrlmt_grp_num: Annotated[str, BeforeValidator(transform_default_string)]
+    bene_pdp_enrlmt_prcsr_num: Annotated[str, BeforeValidator(transform_default_string)]
+    bene_pdp_enrlmt_bank_id_num: Annotated[str, BeforeValidator(transform_default_string)]
+    bene_enrlmt_pdp_rx_info_bgn_dt: Annotated[date, {PRIMARY_KEY: True}]
+    idr_ltst_trans_flg: str
+    idr_trans_efctv_ts: datetime
+    idr_trans_obslt_ts: datetime
+    idr_insrt_ts: Annotated[datetime, {BATCH_TIMESTAMP: True}]
+    idr_updt_ts: Annotated[
+        datetime, {UPDATE_TIMESTAMP: True}, BeforeValidator(transform_null_date_to_min)
+    ]
+
+    @staticmethod
+    def table() -> str:
+        return "idr.beneficiary_ma_part_d_enrollment_rx"
+
+    @staticmethod
+    def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
+        hstry = ALIAS_HSTRY
+        return f"""
+                SELECT {{COLUMNS}}
+                FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_mapd_enrlmt_rx enrlmt_rx
+                {{WHERE_CLAUSE}}
+                AND NOT EXISTS (
+                    {_deceased_bene_filter(hstry)}
+                    AND {hstry}.bene_sk = enrlmt_rx.bene_sk
+                )
+                AND idr_trans_obslt_ts >= '{DEFAULT_MAX_DATE}'
+                {{ORDER_BY}}
+            """
+
+    @staticmethod
+    def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+        return [NON_CLAIM_PARTITION]
+
+
+class IdrBeneficiaryLowIncomeSubsidy(IdrBaseModel):
+    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
+    bene_rng_bgn_dt: Annotated[datetime, {PRIMARY_KEY: True}]
+    bene_rng_end_dt: date
+    bene_lis_copmt_lvl_cd: str
+    bene_lis_ptd_prm_pct: str
+    idr_ltst_trans_flg: str
+    idr_trans_efctv_ts: datetime
+    idr_trans_obslt_ts: datetime
+    idr_insrt_ts: Annotated[datetime, {BATCH_TIMESTAMP: True}]
+    idr_updt_ts: Annotated[
+        datetime, {UPDATE_TIMESTAMP: True}, BeforeValidator(transform_null_date_to_min)
+    ]
+
+    @staticmethod
+    def table() -> str:
+        return "idr.beneficiary_low_income_subsidy"
+
+    @staticmethod
+    def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
+        hstry = ALIAS_HSTRY
+        return f"""
+                SELECT {{COLUMNS}}
+                FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_lis bene_lis
+                {{WHERE_CLAUSE}}
+                AND NOT EXISTS (
+                    {_deceased_bene_filter(hstry)}
+                    AND {hstry}.bene_sk = bene_lis.bene_sk
+                )
+                AND idr_trans_obslt_ts >= '{DEFAULT_MAX_DATE}'
+                {{ORDER_BY}}
+            """
 
     @staticmethod
     def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
