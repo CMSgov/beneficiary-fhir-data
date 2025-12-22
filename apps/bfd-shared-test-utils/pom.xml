@@ -55,10 +55,6 @@
             <artifactId>HikariCP</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.newrelic.telemetry</groupId>
-            <artifactId>dropwizard-metrics-newrelic</artifactId>
-        </dependency>
-        <dependency>
             <!-- Used to run our unit and integration tests. -->
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>

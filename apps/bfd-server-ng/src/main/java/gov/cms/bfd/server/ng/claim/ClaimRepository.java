@@ -35,6 +35,7 @@ public class ClaimRepository {
         LEFT JOIN FETCH cli.ansiSignature a
         LEFT JOIN FETCH cl.claimLineRx clr
         LEFT JOIN FETCH c.contract ct
+        LEFT JOIN FETCH ct.contractPlanContactInfo cc
         LEFT JOIN FETCH c.serviceProviderHistory p
         LEFT JOIN FETCH c.attendingProviderHistory ap
         LEFT JOIN FETCH c.operatingProviderHistory orp

@@ -4,7 +4,6 @@ import gov.cms.bfd.sharedutils.config.AwsClientConfig;
 import gov.cms.bfd.sharedutils.config.BaseAppConfiguration;
 import gov.cms.bfd.sharedutils.config.ConfigException;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
-import gov.cms.bfd.sharedutils.config.MetricOptions;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
 import jakarta.annotation.Nullable;
 import lombok.Getter;
@@ -45,7 +44,6 @@ public class AppConfiguration extends BaseAppConfiguration {
   /**
    * Constructs a new {@link AppConfiguration} instance.
    *
-   * @param metricOptions the value to use for {@link #getMetricOptions()}
    * @param databaseOptions the value to use for {@link #getDatabaseOptions()}
    * @param awsClientConfig used to configure AWS services
    * @param flywayScriptLocationOverride if non-empty, will override the default location that
@@ -54,13 +52,12 @@ public class AppConfiguration extends BaseAppConfiguration {
    * @param sqsQueueName name of queue to post progress to (empty if none)
    */
   private AppConfiguration(
-      MetricOptions metricOptions,
       DatabaseOptions databaseOptions,
       AwsClientConfig awsClientConfig,
       String flywayScriptLocationOverride,
       @Nullable SqsClient sqsClient,
       String sqsQueueName) {
-    super(metricOptions, databaseOptions, awsClientConfig);
+    super(databaseOptions, awsClientConfig);
     this.flywayScriptLocationOverride = flywayScriptLocationOverride;
     this.sqsClient = sqsClient;
     this.sqsQueueName = sqsQueueName;
@@ -88,7 +85,6 @@ public class AppConfiguration extends BaseAppConfiguration {
    * @throws ConfigException if the configuration passed to the application is invalid
    */
   public static AppConfiguration loadConfig(ConfigLoader configLoader) {
-    MetricOptions metricOptions = loadMetricOptions(configLoader);
     DatabaseOptions databaseOptions = loadDatabaseOptions(configLoader);
 
     String flywayScriptLocation =
@@ -99,11 +95,6 @@ public class AppConfiguration extends BaseAppConfiguration {
     final SqsClient sqsClient = sqsQueueName.isEmpty() ? null : createSqsClient(awsClientConfig);
 
     return new AppConfiguration(
-        metricOptions,
-        databaseOptions,
-        awsClientConfig,
-        flywayScriptLocation,
-        sqsClient,
-        sqsQueueName);
+        databaseOptions, awsClientConfig, flywayScriptLocation, sqsClient, sqsQueueName);
   }
 }

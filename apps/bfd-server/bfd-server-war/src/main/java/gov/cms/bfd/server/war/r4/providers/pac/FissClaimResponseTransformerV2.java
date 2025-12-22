@@ -5,7 +5,6 @@ import static java.util.Objects.requireNonNull;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.rda.entities.RdaFissClaim;
 import gov.cms.bfd.model.rda.entities.RdaFissRevenueLine;
 import gov.cms.bfd.server.war.commons.BBCodingSystems;
@@ -96,7 +95,6 @@ public class FissClaimResponseTransformerV2 extends AbstractTransformerV2
    * @param includeTaxNumbers Indicates if tax numbers should be included in the results
    * @return a FHIR {@link ClaimResponse} resource that represents the specified claim
    */
-  @Trace
   public ClaimResponse transform(ClaimWithSecurityTags<?> claimEntity, boolean includeTaxNumbers) {
 
     Object claim = claimEntity.getClaimEntity();

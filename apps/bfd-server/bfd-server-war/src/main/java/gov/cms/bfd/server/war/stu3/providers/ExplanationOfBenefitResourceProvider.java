@@ -21,7 +21,6 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
-import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.server.war.CanonicalOperation;
 import gov.cms.bfd.server.war.FDADrugCodeDisplayLookup;
 import gov.cms.bfd.server.war.NPIOrgLookup;
@@ -204,7 +203,6 @@ public class ExplanationOfBenefitResourceProvider extends AbstractResourceProvid
    */
   @SuppressWarnings({"rawtypes", "unchecked"})
   @Read(version = false)
-  @Trace
   @RetryOnFailoverOrConnectionException
   public ExplanationOfBenefit read(@IdParam IdType eobId, RequestDetails requestDetails) {
 
@@ -297,7 +295,6 @@ public class ExplanationOfBenefitResourceProvider extends AbstractResourceProvid
    *     matching resources, or may also be empty.
    */
   @Search
-  @Trace
   @RetryOnFailoverOrConnectionException
   public Bundle findByPatient(
       @RequiredParam(name = ExplanationOfBenefit.SP_PATIENT)

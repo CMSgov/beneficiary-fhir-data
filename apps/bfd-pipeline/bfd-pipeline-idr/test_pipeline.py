@@ -133,7 +133,7 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
     run("synthetic")
 
     cur = conn.execute("select * from idr.beneficiary order by bene_sk")
-    assert cur.rowcount == 25
+    assert cur.rowcount == 28
     rows = cur.fetchmany(2)
 
     assert rows[0]["bene_sk"] == 10464258
@@ -142,7 +142,7 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
     assert rows[1]["bene_mbi_id"] == "5B88XK5JN88"
 
     cur = conn.execute("select * from idr.beneficiary_mbi_id order by bene_mbi_id")
-    assert cur.rowcount == 21
+    assert cur.rowcount == 24
     rows = cur.fetchmany(1)
     assert rows[0]["bene_mbi_id"] == "1BC3JG0FM51"
 
@@ -271,13 +271,17 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
     # only a future record exists for this contract
     assert rows[2]["cntrct_pbp_bgn_dt"].strftime("%Y-%m-%d") == "2026-01-01"
 
-    # TODO: add these back when contract data is added
-    # cur = conn.execute("select * from idr.beneficiary_election_period_usage")
-    # rows = cur.fetchall()
-    # assert len(rows) == 1
-    # assert rows[0]["cntrct_pbp_sk"] == 1
+    cur = conn.execute("select * from idr.beneficiary_ma_part_d_enrollment order by bene_sk")
+    assert cur.rowcount == 3
+    rows = cur.fetchmany(1)
+    assert rows[0]["bene_sk"] == 353816020
 
-    # cur = conn.execute("select * from idr.contract_pbp_number")
-    # rows = cur.fetchall()
-    # assert len(rows) == 1
-    # assert rows[0]["cntrct_pbp_sk"] == 1
+    cur = conn.execute("select * from idr.beneficiary_ma_part_d_enrollment_rx order by bene_sk")
+    assert cur.rowcount == 2
+    rows = cur.fetchmany(1)
+    assert rows[0]["bene_sk"] == 353816020
+
+    cur = conn.execute("select * from idr.beneficiary_low_income_subsidy order by bene_sk")
+    assert cur.rowcount == 2
+    rows = cur.fetchmany(1)
+    assert rows[0]["bene_sk"] == 353816020
