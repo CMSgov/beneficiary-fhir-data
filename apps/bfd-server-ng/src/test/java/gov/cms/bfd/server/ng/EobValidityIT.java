@@ -30,7 +30,7 @@ class EobValidityIT extends IntegrationTestBase {
     assertFalse(
         eob.getMeta().getProfile().isEmpty(), "EOB Meta must have at least one Profile defined");
 
-    boolean hasCarinProfile =
+    var hasCarinProfile =
         eob.getMeta().getProfile().stream()
             .anyMatch(
                 p ->
