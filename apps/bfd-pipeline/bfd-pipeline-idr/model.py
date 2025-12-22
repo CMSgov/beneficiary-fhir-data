@@ -919,6 +919,16 @@ class IdrClaim(IdrBaseModel):
     clm_ngaco_tlhlth_sw: Annotated[
         str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_null_string)
     ]
+    clm_blood_chrg_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_tot_cntrctl_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_bene_intrst_pd_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_bene_pmt_coinsrnc_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_cob_ptnt_resp_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_prvdr_otaf_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_othr_tp_pd_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_prvdr_rmng_due_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_blood_ncvrd_chrg_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_prvdr_intrst_pd_amt: Annotated[float, BeforeValidator(transform_null_float)]
     idr_insrt_ts_clm: Annotated[
         datetime,
         {BATCH_TIMESTAMP: True, ALIAS: ALIAS_CLM, COLUMN_MAP: "idr_insrt_ts"},
@@ -1092,6 +1102,17 @@ class IdrClaimInstitutional(IdrBaseModel):
     clm_instnl_drg_outlier_amt: Annotated[float, BeforeValidator(transform_null_float)]
     dgns_drg_outlier_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_idr_ld_dt: Annotated[date, {INSERT_EXCLUDE: True, HISTORICAL_BATCH_TIMESTAMP: True}]
+    clm_mdcr_ip_scnd_yr_rate_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_instnl_low_vol_pmt_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_hipps_readmsn_rdctn_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_hipps_model_bndld_pmt_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_hipps_vbp_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_site_ntrl_ip_pps_pymt_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_finl_stdzd_pymt_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_pps_md_wvr_stdzd_val_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_hac_rdctn_pymt_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_mdcr_ip_1st_yr_rate_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_site_ntrl_cst_bsd_pymt_amt: Annotated[float, BeforeValidator(transform_null_float)]
     idr_insrt_ts: Annotated[
         datetime,
         {BATCH_TIMESTAMP: True, ALIAS: ALIAS_INSTNL},
@@ -1167,6 +1188,9 @@ class IdrClaimItem(IdrBaseModel):
     hcpcs_5_mdfr_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_idr_ld_dt: Annotated[date, {INSERT_EXCLUDE: True, HISTORICAL_BATCH_TIMESTAMP: True}]
     clm_line_pmd_uniq_trkng_num: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_line_othr_tp_pd_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_line_ncvrd_pd_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_line_otaf_amt: Annotated[float, BeforeValidator(transform_null_float)]
     idr_insrt_ts_line: Annotated[
         datetime,
         {BATCH_TIMESTAMP: True, ALIAS: ALIAS_LINE, COLUMN_MAP: "idr_insrt_ts"},
@@ -1484,6 +1508,9 @@ class IdrClaimLineInstitutional(IdrBaseModel):
     clm_line_instnl_msp2_pd_amt: float
     clm_line_instnl_rev_ctr_dt: date
     clm_idr_ld_dt: Annotated[date, {INSERT_EXCLUDE: True, HISTORICAL_BATCH_TIMESTAMP: True}]
+    clm_rev_cntr_tdapa_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_line_non_ehr_rdctn_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_line_add_on_pymt_amt: Annotated[float, BeforeValidator(transform_null_float)]
     idr_insrt_ts: Annotated[
         datetime,
         {BATCH_TIMESTAMP: True, ALIAS: ALIAS_LINE},
@@ -1560,6 +1587,7 @@ class IdrClaimProfessional(IdrBaseModel):
     clm_clncl_tril_num: Annotated[str, BeforeValidator(transform_default_string)]
     clm_mdcr_prfnl_prmry_pyr_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_mdcr_prfnl_prvdr_asgnmt_sw: Annotated[str, BeforeValidator(transform_default_string)]
+    clm_prvdr_acnt_rcvbl_ofst_amt: Annotated[float, BeforeValidator(transform_null_float)]
     idr_insrt_ts_clm_prfnl: Annotated[
         datetime,
         {BATCH_TIMESTAMP: True, ALIAS: ALIAS_PRFNL, COLUMN_MAP: "idr_insrt_ts"},
@@ -1673,6 +1701,9 @@ class IdrClaimLineProfessional(IdrBaseModel):
     clm_prvdr_spclty_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_srvc_ddctbl_sw: Annotated[str, BeforeValidator(transform_default_string)]
     clm_suplr_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
+    clm_line_prfnl_intrst_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_line_carr_psych_ot_lmt_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_line_carr_clncl_chrg_amt: Annotated[float, BeforeValidator(transform_null_float)]
     idr_insrt_ts: Annotated[
         datetime,
         {BATCH_TIMESTAMP: True, ALIAS: ALIAS_PRFNL},
@@ -1737,6 +1768,10 @@ class IdrClaimLineRx(IdrBaseModel):
     clm_ptnt_rsdnc_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_rptd_mftr_dscnt_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_idr_ld_dt: Annotated[date, {INSERT_EXCLUDE: True, HISTORICAL_BATCH_TIMESTAMP: True}]
+    clm_line_rebt_passthru_pos_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_cms_calcd_mftr_dscnt_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_line_grs_cvrd_cst_tot_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_phrmcy_price_dscnt_at_pos_amt: Annotated[float, BeforeValidator(transform_null_float)]
     idr_insrt_ts: Annotated[
         datetime,
         {BATCH_TIMESTAMP: True, ALIAS: ALIAS_LINE},
