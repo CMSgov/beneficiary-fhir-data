@@ -690,6 +690,7 @@ class IdrContractPbpNumber(IdrBaseModel):
             LEFT JOIN sgmt
                     ON {pbp_num}.cntrct_pbp_sk = sgmt.cntrct_pbp_sk 
             WHERE cntrct_pbp_sk_obslt_dt >= '{DEFAULT_MAX_DATE}'
+            AND {pbp_num}.cntrct_pbp_sk != 0
             """
 
     @staticmethod
@@ -922,7 +923,8 @@ def _claim_filter(start_time: datetime, partition: LoadPartition) -> str:
     )
     return f"""
     (
-        {clm}.clm_type_cd IN ({",".join([str(c) for c in claim_type_codes])})
+        {clm}.bene_sk != 0
+        AND {clm}.clm_type_cd IN ({",".join([str(c) for c in claim_type_codes])})
         {clm_from_filter}
         {latest_claim_ind}
         {pac_filter}
