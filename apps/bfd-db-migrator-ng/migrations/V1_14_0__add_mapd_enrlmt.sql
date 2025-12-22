@@ -1,5 +1,5 @@
 ALTER TABLE idr.contract_pbp_number
-ADD COLUMN cntrct_pbp_sgmt_num VARCHAR(3) NOT NULL;
+ADD COLUMN cntrct_pbp_sgmt_num VARCHAR(3);
 
 CREATE TABLE idr.beneficiary_ma_part_d_enrollment(
     bene_sk BIGINT NOT NULL,
