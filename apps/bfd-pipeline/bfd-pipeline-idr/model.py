@@ -142,6 +142,8 @@ ALIAS_XREF = "xref"
 ALIAS_LCTN_HSTRY = "lctn_hstry"
 ALIAS_CLM_GRP = "clm_grp"
 ALIAS_RLT_COND = "rltcond"
+ALIAS_PBP_NUM = "pbp_num"
+ALIAS_CNTRCT_SGMT = "sgmt"
 
 
 class IdrBaseModel(BaseModel, ABC):
@@ -755,63 +757,16 @@ class IdrBeneficiaryDualEligibility(IdrBaseModel):
         return [NON_CLAIM_PARTITION]
 
 
-class IdrElectionPeriodUsage(IdrBaseModel):
-    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
-    cntrct_pbp_sk: Annotated[int, {PRIMARY_KEY: True}]
-    bene_cntrct_num: str
-    bene_pbp_num: Annotated[str, BeforeValidator(transform_default_string)]
-    bene_elctn_enrlmt_disenrlmt_cd: str
-    bene_elctn_aplctn_dt: Annotated[date, BeforeValidator(transform_null_or_default_date_to_max)]
-    bene_enrlmt_efctv_dt: Annotated[date, {PRIMARY_KEY: True}]
-    idr_insrt_ts: Annotated[datetime, {BATCH_TIMESTAMP: True}]
-    idr_trans_efctv_ts: datetime
-    idr_trans_obslt_ts: datetime
-
-    @staticmethod
-    def table() -> str:
-        return "idr.election_period_usage"
-
-    @staticmethod
-    def last_updated_date_table() -> str:
-        return ""
-
-    @staticmethod
-    def last_updated_date_column() -> list[str]:
-        return []
-
-    @staticmethod
-    def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
-        # equivalent to "select distinct on", but Snowflake has different syntax for that,
-        # so it's unfortunately not portable
-        hstry = ALIAS_HSTRY
-        return f"""
-            WITH dupes as (
-                SELECT {{COLUMNS}}, ROW_NUMBER() OVER (
-                    PARTITION BY bene_sk, cntrct_pbp_sk, bene_enrlmt_efctv_dt
-                {{ORDER_BY}} DESC) as row_order
-                FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_elctn_prd_usg usg
-                {{WHERE_CLAUSE}}
-                AND NOT EXISTS (
-                    {_deceased_bene_filter(hstry)}
-                    AND {hstry}.bene_sk = usg.bene_sk
-                )
-                {{ORDER_BY}}
-            )
-            SELECT {{COLUMNS}} FROM dupes WHERE row_order = 1
-            """
-
-    @staticmethod
-    def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
-        return [NON_CLAIM_PARTITION]
-
-
 class IdrContractPbpNumber(IdrBaseModel):
-    cntrct_pbp_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
+    cntrct_pbp_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, ALIAS: ALIAS_PBP_NUM}]
     cntrct_drug_plan_ind_cd: Annotated[str, BeforeValidator(transform_default_string)]
     cntrct_pbp_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
     cntrct_pbp_name: Annotated[str, BeforeValidator(transform_null_string)]
     cntrct_num: Annotated[str, BeforeValidator(transform_default_string)]
     cntrct_pbp_num: Annotated[str, BeforeValidator(transform_default_string)]
+    cntrct_pbp_sgmt_num: Annotated[
+        str, ALIAS:ALIAS_CNTRCT_SGMT, BeforeValidator(transform_default_string)
+    ]
 
     @staticmethod
     def table() -> str:
@@ -827,11 +782,22 @@ class IdrContractPbpNumber(IdrBaseModel):
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
+        pbp_num = ALIAS_PBP_NUM
         return f"""
-        SELECT {{COLUMNS}}
-        FROM cms_vdm_view_mdcr_prd.v2_mdcr_cntrct_pbp_num
-        WHERE cntrct_pbp_sk_obslt_dt >= '{DEFAULT_MAX_DATE}'
-        """
+            WITH sgmt as (
+                SELECT
+                    cntrct_pbp_sk,
+                    cntrct_pbp_sgmt_num
+                FROM cms_vdm_view_mdcr_prd.v2_mdcr_cntrct_pbp_sgmt
+                GROUP BY cntrct_pbp_sk, cntrct_pbp_sgmt_num
+                HAVING COUNT(*) = 1
+            )
+            SELECT {{COLUMNS}}
+            FROM cms_vdm_view_mdcr_prd.v2_mdcr_cntrct_pbp_num {pbp_num}
+            LEFT JOIN sgmt
+                    ON {pbp_num}.cntrct_pbp_sk = sgmt.cntrct_pbp_sk 
+            WHERE cntrct_pbp_sk_obslt_dt >= '{DEFAULT_MAX_DATE}'
+            """
 
     @staticmethod
     def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
@@ -885,6 +851,133 @@ class IdrContractPbpContact(IdrBaseModel):
             )
             SELECT {{COLUMNS}} FROM contract_contacts WHERE row_order = 1
         """
+
+    @staticmethod
+    def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+        return [NON_CLAIM_PARTITION]
+
+
+class IdrBeneficiaryMaPartDEnrollment(IdrBaseModel):
+    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
+    cntrct_pbp_sk: int
+    bene_pbp_num: str
+    bene_enrlmt_bgn_dt: Annotated[date, {PRIMARY_KEY: True}]
+    bene_enrlmt_end_dt: Annotated[date, BeforeValidator(transform_null_date_to_max)]
+    bene_cntrct_num: str
+    bene_cvrg_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
+    bene_enrlmt_pgm_type_cd: Annotated[str, {PRIMARY_KEY: True}]
+    bene_enrlmt_emplr_sbsdy_sw: Annotated[str, BeforeValidator(transform_default_string)]
+    idr_ltst_trans_flg: str
+    idr_trans_efctv_ts: datetime
+    idr_trans_obslt_ts: datetime
+    idr_insrt_ts: Annotated[datetime, {BATCH_TIMESTAMP: True}]
+    idr_updt_ts: Annotated[
+        datetime, {UPDATE_TIMESTAMP: True}, BeforeValidator(transform_null_date_to_min)
+    ]
+
+    @staticmethod
+    def table() -> str:
+        return "idr.beneficiary_ma_part_d_enrollment"
+
+    @staticmethod
+    def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
+        # There are only a very few instances where non-obsolete records have a
+        # bene_enrlmt_pgm_type_cd set to '~' and these are all from the 80s,
+        # so it should be safe to filter these.
+        hstry = ALIAS_HSTRY
+        return f"""
+            SELECT {{COLUMNS}}
+            FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_mapd_enrlmt enrlmt
+            {{WHERE_CLAUSE}}
+            AND NOT EXISTS (
+                {_deceased_bene_filter(hstry)}
+                AND {hstry}.bene_sk = enrlmt.bene_sk
+            )
+            AND idr_trans_obslt_ts >= '{DEFAULT_MAX_DATE}'
+            AND bene_enrlmt_pgm_type_cd != '~'
+            {{ORDER_BY}}
+        """
+
+    @staticmethod
+    def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+        return [NON_CLAIM_PARTITION]
+
+
+class IdrBeneficiaryMaPartDEnrollmentRx(IdrBaseModel):
+    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
+    cntrct_pbp_sk: int
+    bene_cntrct_num: Annotated[str, {PRIMARY_KEY: True}]
+    bene_pbp_num: Annotated[str, {PRIMARY_KEY: True}]
+    bene_enrlmt_bgn_dt: Annotated[date, {PRIMARY_KEY: True}]
+    bene_pdp_enrlmt_mmbr_id_num: Annotated[str, BeforeValidator(transform_default_string)]
+    bene_pdp_enrlmt_grp_num: Annotated[str, BeforeValidator(transform_default_string)]
+    bene_pdp_enrlmt_prcsr_num: Annotated[str, BeforeValidator(transform_default_string)]
+    bene_pdp_enrlmt_bank_id_num: Annotated[str, BeforeValidator(transform_default_string)]
+    bene_enrlmt_pdp_rx_info_bgn_dt: Annotated[date, {PRIMARY_KEY: True}]
+    idr_ltst_trans_flg: str
+    idr_trans_efctv_ts: datetime
+    idr_trans_obslt_ts: datetime
+    idr_insrt_ts: Annotated[datetime, {BATCH_TIMESTAMP: True}]
+    idr_updt_ts: Annotated[
+        datetime, {UPDATE_TIMESTAMP: True}, BeforeValidator(transform_null_date_to_min)
+    ]
+
+    @staticmethod
+    def table() -> str:
+        return "idr.beneficiary_ma_part_d_enrollment_rx"
+
+    @staticmethod
+    def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
+        hstry = ALIAS_HSTRY
+        return f"""
+                SELECT {{COLUMNS}}
+                FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_mapd_enrlmt_rx enrlmt_rx
+                {{WHERE_CLAUSE}}
+                AND NOT EXISTS (
+                    {_deceased_bene_filter(hstry)}
+                    AND {hstry}.bene_sk = enrlmt_rx.bene_sk
+                )
+                AND idr_trans_obslt_ts >= '{DEFAULT_MAX_DATE}'
+                {{ORDER_BY}}
+            """
+
+    @staticmethod
+    def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+        return [NON_CLAIM_PARTITION]
+
+
+class IdrBeneficiaryLowIncomeSubsidy(IdrBaseModel):
+    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
+    bene_rng_bgn_dt: Annotated[datetime, {PRIMARY_KEY: True}]
+    bene_rng_end_dt: date
+    bene_lis_copmt_lvl_cd: str
+    bene_lis_ptd_prm_pct: str
+    idr_ltst_trans_flg: str
+    idr_trans_efctv_ts: datetime
+    idr_trans_obslt_ts: datetime
+    idr_insrt_ts: Annotated[datetime, {BATCH_TIMESTAMP: True}]
+    idr_updt_ts: Annotated[
+        datetime, {UPDATE_TIMESTAMP: True}, BeforeValidator(transform_null_date_to_min)
+    ]
+
+    @staticmethod
+    def table() -> str:
+        return "idr.beneficiary_low_income_subsidy"
+
+    @staticmethod
+    def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
+        hstry = ALIAS_HSTRY
+        return f"""
+                SELECT {{COLUMNS}}
+                FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_lis bene_lis
+                {{WHERE_CLAUSE}}
+                AND NOT EXISTS (
+                    {_deceased_bene_filter(hstry)}
+                    AND {hstry}.bene_sk = bene_lis.bene_sk
+                )
+                AND idr_trans_obslt_ts >= '{DEFAULT_MAX_DATE}'
+                {{ORDER_BY}}
+            """
 
     @staticmethod
     def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
@@ -1042,6 +1135,16 @@ class IdrClaim(IdrBaseModel):
     clm_ngaco_tlhlth_sw: Annotated[
         str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_null_string)
     ]
+    clm_blood_chrg_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_tot_cntrctl_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_bene_intrst_pd_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_bene_pmt_coinsrnc_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_cob_ptnt_resp_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_prvdr_otaf_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_othr_tp_pd_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_prvdr_rmng_due_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_blood_ncvrd_chrg_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_prvdr_intrst_pd_amt: Annotated[float, BeforeValidator(transform_null_float)]
     idr_insrt_ts_clm: Annotated[
         datetime,
         {BATCH_TIMESTAMP: True, ALIAS: ALIAS_CLM, COLUMN_MAP: "idr_insrt_ts"},
@@ -1242,6 +1345,17 @@ class IdrClaimInstitutional(IdrBaseModel):
     clm_instnl_drg_outlier_amt: Annotated[float, BeforeValidator(transform_null_float)]
     dgns_drg_outlier_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_idr_ld_dt: Annotated[date, {INSERT_EXCLUDE: True, HISTORICAL_BATCH_TIMESTAMP: True}]
+    clm_mdcr_ip_scnd_yr_rate_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_instnl_low_vol_pmt_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_hipps_readmsn_rdctn_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_hipps_model_bndld_pmt_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_hipps_vbp_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_site_ntrl_ip_pps_pymt_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_finl_stdzd_pymt_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_pps_md_wvr_stdzd_val_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_hac_rdctn_pymt_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_mdcr_ip_1st_yr_rate_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_site_ntrl_cst_bsd_pymt_amt: Annotated[float, BeforeValidator(transform_null_float)]
     idr_insrt_ts: Annotated[
         datetime,
         {BATCH_TIMESTAMP: True, ALIAS: ALIAS_INSTNL},
@@ -1327,6 +1441,9 @@ class IdrClaimItem(IdrBaseModel):
     hcpcs_5_mdfr_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_idr_ld_dt: Annotated[date, {INSERT_EXCLUDE: True, HISTORICAL_BATCH_TIMESTAMP: True}]
     clm_line_pmd_uniq_trkng_num: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_line_othr_tp_pd_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_line_ncvrd_pd_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_line_otaf_amt: Annotated[float, BeforeValidator(transform_null_float)]
     idr_insrt_ts_line: Annotated[
         datetime,
         {BATCH_TIMESTAMP: True, ALIAS: ALIAS_LINE, COLUMN_MAP: "idr_insrt_ts"},
@@ -1652,6 +1769,9 @@ class IdrClaimLineInstitutional(IdrBaseModel):
     clm_line_instnl_msp2_pd_amt: float
     clm_line_instnl_rev_ctr_dt: date
     clm_idr_ld_dt: Annotated[date, {INSERT_EXCLUDE: True, HISTORICAL_BATCH_TIMESTAMP: True}]
+    clm_rev_cntr_tdapa_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_line_non_ehr_rdctn_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_line_add_on_pymt_amt: Annotated[float, BeforeValidator(transform_null_float)]
     idr_insrt_ts: Annotated[
         datetime,
         {BATCH_TIMESTAMP: True, ALIAS: ALIAS_LINE},
@@ -1744,6 +1864,7 @@ class IdrClaimProfessional(IdrBaseModel):
     clm_clncl_tril_num: Annotated[str, BeforeValidator(transform_default_string)]
     clm_mdcr_prfnl_prmry_pyr_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_mdcr_prfnl_prvdr_asgnmt_sw: Annotated[str, BeforeValidator(transform_default_string)]
+    clm_prvdr_acnt_rcvbl_ofst_amt: Annotated[float, BeforeValidator(transform_null_float)]
     idr_insrt_ts_clm_prfnl: Annotated[
         datetime,
         {BATCH_TIMESTAMP: True, ALIAS: ALIAS_PRFNL, COLUMN_MAP: "idr_insrt_ts"},
@@ -1865,6 +1986,9 @@ class IdrClaimLineProfessional(IdrBaseModel):
     clm_prvdr_spclty_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_srvc_ddctbl_sw: Annotated[str, BeforeValidator(transform_default_string)]
     clm_suplr_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
+    clm_line_prfnl_intrst_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_line_carr_psych_ot_lmt_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_line_carr_clncl_chrg_amt: Annotated[float, BeforeValidator(transform_null_float)]
     idr_insrt_ts: Annotated[
         datetime,
         {BATCH_TIMESTAMP: True, ALIAS: ALIAS_PRFNL},
@@ -1939,6 +2063,10 @@ class IdrClaimLineRx(IdrBaseModel):
     clm_ptnt_rsdnc_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_rptd_mftr_dscnt_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_idr_ld_dt: Annotated[date, {INSERT_EXCLUDE: True, HISTORICAL_BATCH_TIMESTAMP: True}]
+    clm_line_rebt_passthru_pos_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_cms_calcd_mftr_dscnt_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_line_grs_cvrd_cst_tot_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_phrmcy_price_dscnt_at_pos_amt: Annotated[float, BeforeValidator(transform_null_float)]
     idr_insrt_ts: Annotated[
         datetime,
         {BATCH_TIMESTAMP: True, ALIAS: ALIAS_LINE},
