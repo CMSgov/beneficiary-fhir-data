@@ -304,6 +304,7 @@ def _idr_dates_from_meta_sk() -> str:
     )
 
     # Logic for computing INSRT/UPDT timestamp on tables that don't have it based on META_SK
+    # META_SK is an IDR-derived field and the calculations here have no significance outside of IDR's internal encoding logic.
     return f"""
             meta_sk,
             meta_lst_updt_sk,
