@@ -4,19 +4,13 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Slf4jReporter;
 import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
 import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
-import com.codahale.metrics.newrelic.NewRelicReporter;
 import com.google.common.annotations.VisibleForTesting;
-import com.newrelic.telemetry.Attributes;
-import com.newrelic.telemetry.OkHttpPoster;
-import com.newrelic.telemetry.SenderConfiguration;
-import com.newrelic.telemetry.metrics.MetricBatchSender;
 import com.zaxxer.hikari.HikariDataSource;
 import gov.cms.bfd.sharedutils.config.AppConfigurationException;
 import gov.cms.bfd.sharedutils.config.ConfigException;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import gov.cms.bfd.sharedutils.config.ConfigLoaderSource;
 import gov.cms.bfd.sharedutils.config.LayeredConfiguration;
-import gov.cms.bfd.sharedutils.config.MetricOptions;
 import gov.cms.bfd.sharedutils.database.DatabaseSchemaManager;
 import gov.cms.bfd.sharedutils.database.HikariDataSourceFactory;
 import gov.cms.bfd.sharedutils.exceptions.FatalAppException;
@@ -259,31 +253,6 @@ public final class MigratorApp {
     appMetrics.registerAll(new GarbageCollectorMetricSet());
     Slf4jReporter appMetricsReporter =
         Slf4jReporter.forRegistry(appMetrics).outputTo(LOGGER).build();
-
-    MetricOptions metricOptions = appConfig.getMetricOptions();
-    if (metricOptions.getNewRelicMetricKey().isPresent()) {
-      SenderConfiguration configuration =
-          SenderConfiguration.builder(
-                  metricOptions.getNewRelicMetricHost().orElse(null),
-                  metricOptions.getNewRelicMetricPath().orElse(null))
-              .httpPoster(new OkHttpPoster())
-              .apiKey(metricOptions.getNewRelicMetricKey().orElse(null))
-              .build();
-
-      MetricBatchSender metricBatchSender = MetricBatchSender.create(configuration);
-
-      Attributes commonAttributes =
-          new Attributes()
-              .put("host", metricOptions.getHostname().orElse("unknown"))
-              .put("appName", metricOptions.getNewRelicAppName().orElse(null));
-
-      NewRelicReporter newRelicReporter =
-          NewRelicReporter.build(appMetrics, metricBatchSender)
-              .commonAttributes(commonAttributes)
-              .build();
-
-      newRelicReporter.start(metricOptions.getNewRelicMetricPeriod().orElse(15), TimeUnit.SECONDS);
-    }
 
     appMetricsReporter.start(1, TimeUnit.HOURS);
     return appMetrics;

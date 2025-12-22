@@ -7,7 +7,6 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.annotations.VisibleForTesting;
-import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.server.war.SamhsaV2InterceptorShadow;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
@@ -233,7 +232,6 @@ public class PatientClaimsEobTaskTransformerV2 implements Callable {
    * @param <T> type of claims
    * @return the {@link ExplanationOfBenefit} instances, one per claim/event
    */
-  @Trace
   private <T> List<ExplanationOfBenefit> transformToEobs(List<ClaimWithSecurityTags<T>> claims) {
     return claims.stream()
         .map(
@@ -332,7 +330,6 @@ public class PatientClaimsEobTaskTransformerV2 implements Callable {
    * @return the matching claim/event entities
    */
   @SuppressWarnings({"rawtypes", "unchecked"})
-  @Trace
   private <T> List<ClaimWithSecurityTags<T>> findClaimTypeByPatient() {
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
     CriteriaQuery criteria = builder.createQuery((Class) claimType.getEntityClass());

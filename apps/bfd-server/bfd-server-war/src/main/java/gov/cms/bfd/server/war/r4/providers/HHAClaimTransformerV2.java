@@ -5,7 +5,6 @@ import static java.util.Objects.requireNonNull;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.HHAClaim;
 import gov.cms.bfd.model.rif.entities.HHAClaimLine;
@@ -75,7 +74,6 @@ final class HHAClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
    * @param includeTaxNumber exists to satisfy {@link ClaimTransformerInterfaceV2}; ignored.
    * @return a FHIR {@link ExplanationOfBenefit} resource.
    */
-  @Trace
   @Override
   public ExplanationOfBenefit transform(
       ClaimWithSecurityTags<?> claimEntity, boolean includeTaxNumber) {

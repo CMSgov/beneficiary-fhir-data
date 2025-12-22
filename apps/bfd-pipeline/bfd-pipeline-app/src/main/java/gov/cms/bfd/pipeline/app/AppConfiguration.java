@@ -29,7 +29,6 @@ import gov.cms.bfd.sharedutils.config.ConfigException;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import gov.cms.bfd.sharedutils.config.ConfigLoaderSource;
 import gov.cms.bfd.sharedutils.config.LayeredConfiguration;
-import gov.cms.bfd.sharedutils.config.MetricOptions;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
 import io.micrometer.cloudwatch2.CloudWatchConfig;
 import jakarta.annotation.Nullable;
@@ -387,9 +386,9 @@ public final class AppConfiguration extends BaseAppConfiguration {
 
   /**
    * List of metric names that are allowed to be published to Cloudwatch by Micrometer. Using an
-   * allowed list avoids increasing AWS charges as new metrics are defined for use in NewRelic that
-   * are not necessary in Cloudwatch. These need to be the base metric names, not one of the several
-   * auto-generated aggregate metric names with suffixes like {@code .avg}.
+   * allowed list avoids increasing AWS charges as new metrics may not be necessary to send to
+   * Cloudwatch. These need to be the base metric names, not one of the several auto-generated
+   * aggregate metric names with suffixes like {@code .avg}.
    */
   public static final Set<String> MICROMETER_CW_ALLOWED_METRIC_NAMES =
       Set.of(
@@ -464,23 +463,21 @@ public final class AppConfiguration extends BaseAppConfiguration {
   /**
    * Constructs a new {@link AppConfiguration} instance.
    *
-   * @param metricOptions the value to use for {@link #getMetricOptions()}
    * @param databaseOptions the value to use for {@link #getDatabaseOptions()}
    * @param awsClientConfig used to configure AWS services
    * @param ccwRifLoadOptions the value to use for {@link #getCcwRifLoadOptions()}
    * @param rdaLoadOptions the value to use for {@link #getRdaLoadOptions()}
-   * @param npiFdaLoadConfig the value to use for {@link #getNpiFdaLoadConfigOptions}
    * @param backFillConfigOptions the value to use fo {@link #getBackfillConfigOptions()}
+   * @param npiFdaLoadConfig the value to use for {@link #getNpiFdaLoadConfigOptions}
    */
   private AppConfiguration(
-      MetricOptions metricOptions,
       DatabaseOptions databaseOptions,
       AwsClientConfig awsClientConfig,
       @Nullable CcwRifLoadOptions ccwRifLoadOptions,
       @Nullable RdaLoadOptions rdaLoadOptions,
       @Nullable BackfillConfigOptions backFillConfigOptions,
       @Nullable NpiFdaLoadJobConfig npiFdaLoadConfig) {
-    super(metricOptions, databaseOptions, awsClientConfig);
+    super(databaseOptions, awsClientConfig);
     this.ccwRifLoadOptions = ccwRifLoadOptions;
     this.rdaLoadOptions = rdaLoadOptions;
     this.backfillConfigOptions = backFillConfigOptions;
@@ -636,7 +633,6 @@ public final class AppConfiguration extends BaseAppConfiguration {
         Math.max(
             benePerformanceSettings.getLoaderThreads(),
             claimPerformanceSettings.getLoaderThreads());
-    MetricOptions metricOptions = loadMetricOptions(config);
     DatabaseOptions databaseOptions = loadDatabaseOptions(config, maxLoaderThreads);
 
     LoadAppOptions loadOptions =
@@ -657,7 +653,6 @@ public final class AppConfiguration extends BaseAppConfiguration {
     AwsClientConfig awsClientConfig = BaseAppConfiguration.loadAwsClientConfig(config);
     NpiFdaLoadJobConfig npiFdaConfig = loadNpiFdaLoadConfig(config, ccwRifLoadOptions != null);
     return new AppConfiguration(
-        metricOptions,
         databaseOptions,
         awsClientConfig,
         ccwRifLoadOptions,

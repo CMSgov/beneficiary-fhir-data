@@ -9,7 +9,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.google.common.collect.Lists;
-import com.newrelic.relocated.JsonArray;
 import gov.cms.bfd.model.rif.entities.Beneficiary;
 import gov.cms.bfd.model.rif.samples.StaticRifResourceGroup;
 import gov.cms.bfd.server.war.EndpointJsonComparatorBase;
@@ -150,7 +149,7 @@ public class EndpointJsonResponseComparatorV2E2E extends EndpointJsonComparatorB
 
   /**
    * FIXME: Additional workaround due to HAPI not always returning array elements in the same order
-   * for a specific searchParam {@link JsonArray} in the capability statement. This method is only
+   * for a specific searchParam JSON array in the capability statement. This method is only
    * necessary until the following issue has been resolved with HAPI:
    * https://github.com/jamesagnew/hapi-fhir/issues/1183
    *
@@ -228,7 +227,7 @@ public class EndpointJsonResponseComparatorV2E2E extends EndpointJsonComparatorB
 
   /**
    * FIXME: Additional workaround due to HAPI not always returning array elements in the same order
-   * for a specific searchParam {@link JsonArray} in the capability statement. This method is only
+   * for a specific searchParam JSON array in the capability statement. This method is only
    * necessary until the following issue has been resolved with HAPI:
    * https://github.com/jamesagnew/hapi-fhir/issues/1183
    *

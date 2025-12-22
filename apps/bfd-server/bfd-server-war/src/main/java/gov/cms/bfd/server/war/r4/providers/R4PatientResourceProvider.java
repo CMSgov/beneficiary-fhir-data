@@ -24,7 +24,6 @@ import ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.google.common.base.Strings;
-import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.Beneficiary;
 import gov.cms.bfd.model.rif.entities.BeneficiaryHistory;
@@ -171,7 +170,6 @@ public class R4PatientResourceProvider implements IResourceProvider, CommonHeade
    *     exists.
    */
   @Read(version = false)
-  @Trace
   @RetryOnFailoverOrConnectionException
   public Patient read(@IdParam IdType patientId, RequestDetails requestDetails) {
     if (patientId == null || patientId.getIdPart() == null) {
@@ -238,7 +236,6 @@ public class R4PatientResourceProvider implements IResourceProvider, CommonHeade
    *     resources, or may also be empty.
    */
   @Search
-  @Trace
   @RetryOnFailoverOrConnectionException
   public Bundle searchByLogicalId(
       @RequiredParam(name = Patient.SP_RES_ID)
@@ -364,7 +361,6 @@ public class R4PatientResourceProvider implements IResourceProvider, CommonHeade
    * @return the bundle representing the results
    */
   @Search
-  @Trace
   @RetryOnFailoverOrConnectionException
   public Bundle searchByCoverageContract(
       // This is very explicit as a placeholder until this kind
@@ -696,7 +692,6 @@ public class R4PatientResourceProvider implements IResourceProvider, CommonHeade
    *     resources, or may also be empty.
    */
   @Search
-  @Trace
   @RetryOnFailoverOrConnectionException
   public Bundle searchByIdentifier(
       @RequiredParam(name = Patient.SP_IDENTIFIER)
@@ -846,7 +841,6 @@ public class R4PatientResourceProvider implements IResourceProvider, CommonHeade
    * @throws NoResultException A {@link NoResultException} will be thrown if no matching {@link
    *     Beneficiary} can be found
    */
-  @Trace
   private Patient queryDatabaseByHashOrMbi(
       String lookupValue,
       String lookupType,
@@ -931,7 +925,6 @@ public class R4PatientResourceProvider implements IResourceProvider, CommonHeade
    * @param ids the {@link Beneficiary#getBeneficiaryId()} values to match against
    * @return the matching {@link Beneficiary}s
    */
-  @Trace
   private List<Beneficiary> queryBeneficiariesByIdsWithBeneficiaryMonthlys(List<Long> ids) {
 
     // Create the query to run.
@@ -1009,7 +1002,6 @@ public class R4PatientResourceProvider implements IResourceProvider, CommonHeade
    * @param requestDetails the request details
    * @return the search results
    */
-  @Trace
   private Bundle searchByCoverageContractAndYearMonth(
       // This is very explicit as a placeholder until this kind
       // of relational search is more common.
@@ -1056,7 +1048,6 @@ public class R4PatientResourceProvider implements IResourceProvider, CommonHeade
    * @return the {@link Beneficiary}s that match the specified PartD contract ID for the specified
    *     year and month
    */
-  @Trace
   private List<Beneficiary> fetchBeneficiariesByContractAndYearMonth(
       TokenParam coverageId, LocalDate yearMonth, PatientLinkBuilder paging) {
     String contractCode = coverageId.getValueNotNull();
@@ -1113,7 +1104,6 @@ public class R4PatientResourceProvider implements IResourceProvider, CommonHeade
    *     against
    * @return true if the {@link BeneficiaryMonthly} exists
    */
-  @Trace
   private boolean queryBeneExistsByPartDContractCodeAndYearMonth(
       LocalDate yearMonth, String contractId) {
     // Create the query to run.
@@ -1171,7 +1161,6 @@ public class R4PatientResourceProvider implements IResourceProvider, CommonHeade
    * @param paging the {@link PatientLinkBuilder} being used for paging
    * @return the {@link List} of matching {@link Beneficiary#getBeneficiaryId()} values
    */
-  @Trace
   private List<Long> queryBeneficiaryIdsByPartDContractCodeAndYearMonth(
       LocalDate yearMonth, String contractId, PatientLinkBuilder paging) {
     // Create the query to run.

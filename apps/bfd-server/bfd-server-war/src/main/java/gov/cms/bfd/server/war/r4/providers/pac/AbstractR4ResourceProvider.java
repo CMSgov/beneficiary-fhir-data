@@ -20,7 +20,6 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.annotations.VisibleForTesting;
-import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.rda.Mbi;
 import gov.cms.bfd.model.rda.entities.RdaFissClaim;
 import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
@@ -222,7 +221,6 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
    *     exists.
    */
   @Read
-  @Trace
   @RetryOnFailoverOrConnectionException
   public T read(@IdParam IdType claimId, RequestDetails requestDetails) {
     if (claimId == null) {
@@ -419,7 +417,6 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
    * @return the bundle
    */
   @Search
-  @Trace
   @RetryOnFailoverOrConnectionException
   public Bundle findByPatient(
       @RequiredParam(name = "mbi")
