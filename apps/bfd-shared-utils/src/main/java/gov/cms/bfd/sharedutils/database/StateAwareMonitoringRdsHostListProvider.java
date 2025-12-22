@@ -1,17 +1,18 @@
 package gov.cms.bfd.sharedutils.database;
 
+import java.sql.SQLException;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import software.amazon.awssdk.services.rds.RdsClient;
 import software.amazon.jdbc.AwsWrapperProperty;
-import software.amazon.jdbc.HostListProviderService;
-import software.amazon.jdbc.PluginService;
 import software.amazon.jdbc.dialect.Dialect;
 import software.amazon.jdbc.ds.AwsWrapperDataSource;
 import software.amazon.jdbc.hostlistprovider.monitoring.ClusterTopologyMonitor;
+import software.amazon.jdbc.hostlistprovider.monitoring.ClusterTopologyMonitorImpl;
 import software.amazon.jdbc.hostlistprovider.monitoring.MonitoringRdsHostListProvider;
+import software.amazon.jdbc.util.FullServicesContainer;
 
 /**
  * "State aware" {@link MonitoringRdsHostListProvider}. This variant creates the {@link
@@ -53,62 +54,65 @@ public class StateAwareMonitoringRdsHostListProvider extends MonitoringRdsHostLi
    *
    * @param properties the {@link AwsWrapperDataSource} properties
    * @param originalUrl the original JDBC URL
-   * @param hostListProviderService the {@link HostListProviderService} as determined by the {@link
-   *     Dialect}
+   * @param servicesContainer the {@link FullServicesContainer} as determined by the {@link Dialect}
    * @param topologyQuery the SQL query that returns the cluster topology
    * @param nodeIdQuery the SQL query that returns the instance identifier of the database that is
    *     queried
    * @param isReaderQuery the SQL query that returns whether the current database is a reader
    * @param writerTopologyQuery the SQL query that returns whether the current database is a writer
-   * @param pluginService the {@link PluginService} as provided by the {@link Dialect}
    * @param rdsClient {@link RdsClient} used to check instance status
    */
   public StateAwareMonitoringRdsHostListProvider(
       Properties properties,
       String originalUrl,
-      HostListProviderService hostListProviderService,
+      FullServicesContainer servicesContainer,
       String topologyQuery,
       String nodeIdQuery,
       String isReaderQuery,
       String writerTopologyQuery,
-      PluginService pluginService,
       RdsClient rdsClient) {
     super(
         properties,
         originalUrl,
-        hostListProviderService,
+        servicesContainer,
         topologyQuery,
         nodeIdQuery,
         isReaderQuery,
-        writerTopologyQuery,
-        pluginService);
+        writerTopologyQuery);
     this.rdsClient = rdsClient;
     this.instanceStateMonitorRefreshRateMs =
         INSTANCE_STATE_MONITOR_REFRESH_RATE_MS.getLong(properties);
   }
 
   @Override
-  protected ClusterTopologyMonitor initMonitor() {
-    return monitors.computeIfAbsent(
-        this.clusterId,
-        key ->
-            new StateAwareClusterTopologyMonitor(
-                key,
-                topologyCache,
-                clusterToHostsStateMap,
-                initialHostSpec,
-                properties,
-                pluginService,
-                hostListProviderService,
-                clusterInstanceTemplate,
-                refreshRateNano,
-                highRefreshRateNano,
-                TOPOLOGY_CACHE_EXPIRATION_NANO,
-                topologyQuery,
-                writerTopologyQuery,
-                nodeIdQuery,
-                instanceStateMonitorRefreshRateMs,
-                rdsClient),
-        MONITOR_EXPIRATION_NANO);
+  protected ClusterTopologyMonitor initMonitor() throws SQLException {
+    return this.servicesContainer
+        .getMonitorService()
+        .runIfAbsent(
+            // We provide the parent class of our custom Monitor as the suppliers map within
+            // MonitorServiceImpl is unmodifiable and protected, so unless we replace
+            // MonitorServiceImpl we cannot add the custom Monitor to the list of registered
+            // Monitors. Fortunately, the MonitorService does not need to know what the concrete
+            // type of the Monitor is for everything to work. The default settings provided for
+            // ClusterTopologyMonitorImpl are perfectly fine for our Monitor, as well.
+            ClusterTopologyMonitorImpl.class,
+            this.clusterId,
+            this.servicesContainer,
+            this.properties,
+            servicesContainer ->
+                new StateAwareClusterTopologyMonitor(
+                    servicesContainer,
+                    clusterId,
+                    clusterToHostsStateMap,
+                    initialHostSpec,
+                    properties,
+                    clusterInstanceTemplate,
+                    refreshRateNano,
+                    highRefreshRateNano,
+                    topologyQuery,
+                    writerTopologyQuery,
+                    nodeIdQuery,
+                    instanceStateMonitorRefreshRateMs,
+                    rdsClient));
   }
 }

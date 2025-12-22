@@ -1,9 +1,14 @@
 from collections.abc import Generator
 from dataclasses import dataclass
 from datetime import UTC, date, datetime
-from enum import IntFlag, auto
+from enum import IntFlag, StrEnum, auto
 
 from dateutil.relativedelta import relativedelta
+
+
+class LoadType(StrEnum):
+    INITIAL = "initial"
+    INCREMENTAL = "incremental"
 
 
 class PartitionType(IntFlag):
@@ -32,8 +37,8 @@ class LoadPartitionGroup:
     date_interval: relativedelta | None
     priority: int = 0
 
-    def generate_ranges(self, start_date: date) -> Generator[LoadPartition]:
-        if self.date_interval is None:
+    def generate_ranges(self, load_type: LoadType, start_date: date) -> Generator[LoadPartition]:
+        if self.date_interval is None or load_type == LoadType.INCREMENTAL:
             yield LoadPartition(
                 self.name, self.claim_type_codes, self.partition_type, None, None, self.priority
             )
