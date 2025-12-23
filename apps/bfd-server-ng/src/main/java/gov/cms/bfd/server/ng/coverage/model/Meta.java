@@ -1,5 +1,11 @@
 package gov.cms.bfd.server.ng.coverage.model;
 
+import static gov.cms.bfd.server.ng.input.CoveragePart.DUAL;
+import static gov.cms.bfd.server.ng.input.CoveragePart.PART_A;
+import static gov.cms.bfd.server.ng.input.CoveragePart.PART_B;
+import static gov.cms.bfd.server.ng.input.CoveragePart.PART_C;
+import static gov.cms.bfd.server.ng.input.CoveragePart.PART_D;
+
 import gov.cms.bfd.server.ng.input.CoveragePart;
 import gov.cms.bfd.server.ng.model.ProfileType;
 import gov.cms.bfd.server.ng.util.DateUtil;
@@ -7,8 +13,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Transient;
 import java.time.ZonedDateTime;
-import java.util.EnumMap;
-import java.util.Map;
 import lombok.Getter;
 
 /** FHIR metadata information. */
@@ -31,19 +35,20 @@ public class Meta {
   private ZonedDateTime partDualCoverageUpdatedTs;
 
   /**
-   * Map holding all coverage updated timestamps.
+   * Retrieves the updated timestamp for a given coverage part.
    *
-   * @return a CoveragePart updated timestamps map
+   * @param coveragePart coverage Part
+   * @return the updated timestamp
    */
   @Transient
-  public Map<CoveragePart, ZonedDateTime> getCoverageUpdateTimestamps() {
-    var map = new EnumMap<CoveragePart, ZonedDateTime>(CoveragePart.class);
-    map.put(CoveragePart.PART_A, partACoverageUpdatedTs);
-    map.put(CoveragePart.PART_B, partBCoverageUpdatedTs);
-    map.put(CoveragePart.PART_C, partCCoverageUpdatedTs);
-    map.put(CoveragePart.PART_D, partDCoverageUpdatedTs);
-    map.put(CoveragePart.DUAL, partDualCoverageUpdatedTs);
-    return map;
+  public ZonedDateTime getCoverageUpdateTimestamps(CoveragePart coveragePart) {
+    return switch (coveragePart) {
+      case PART_A -> partACoverageUpdatedTs;
+      case PART_B -> partBCoverageUpdatedTs;
+      case PART_C -> partCCoverageUpdatedTs;
+      case PART_D -> partDCoverageUpdatedTs;
+      case DUAL -> partDualCoverageUpdatedTs;
+    };
   }
 
   /**
@@ -54,7 +59,7 @@ public class Meta {
    * @return meta
    */
   public org.hl7.fhir.r4.model.Meta toFhir(ProfileType profileType, CoveragePart coveragePart) {
-    var lastUpdated = getCoverageUpdateTimestamps().get(coveragePart);
+    var lastUpdated = getCoverageUpdateTimestamps(coveragePart);
     var meta = new org.hl7.fhir.r4.model.Meta().setLastUpdated(DateUtil.toDate(lastUpdated));
     profileType.getCoverageProfiles().forEach(meta::addProfile);
     return meta;

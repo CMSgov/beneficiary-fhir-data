@@ -8,7 +8,6 @@ import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
-import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -36,9 +35,6 @@ public class BeneficiaryLowIncomeSubsidy implements Comparable<BeneficiaryLowInc
   @Column(name = "bene_lis_ptd_prm_pct")
   @Convert(converter = StringToDoubleConverter.class)
   private double partDPremiumPercentage;
-
-  @Column(name = "bfd_updated_ts")
-  private ZonedDateTime bfdUpdatedTimestamp;
 
   /**
    * Create copay level code and part D premium percentage extensions.
