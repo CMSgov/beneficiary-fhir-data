@@ -2,7 +2,6 @@ package gov.cms.bfd.server.ng.coverage.model;
 
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.*;
-import java.time.ZonedDateTime;
 import java.util.Optional;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.Coding;
@@ -20,9 +19,6 @@ public class BeneficiaryEntitlementReason {
 
   @Column(name = "bene_mdcr_entlmt_rsn_cd")
   private Optional<String> medicareEntitlementReasonCode;
-
-  @Column(name = "bfd_updated_ts")
-  private ZonedDateTime bfdUpdatedTimestamp;
 
   /**
    * create entitlement Status Extension.

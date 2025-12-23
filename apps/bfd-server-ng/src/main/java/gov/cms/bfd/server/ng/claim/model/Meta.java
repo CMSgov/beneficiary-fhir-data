@@ -10,17 +10,16 @@ import lombok.Getter;
 @Embeddable
 @Getter
 class Meta {
-  @Column(name = "bfd_updated_ts", nullable = false)
+  @Column(name = "bfd_claim_updated_ts", nullable = false)
   private ZonedDateTime updatedTimestamp;
 
   org.hl7.fhir.r4.model.Meta toFhir(
       ClaimTypeCode claimTypeCode,
       ClaimSourceId claimSourceId,
-      ClaimSecurityStatus securityStatus,
-      ZonedDateTime overrideLastUpdated) {
+      ClaimSecurityStatus securityStatus) {
     var meta =
         new org.hl7.fhir.r4.model.Meta()
-            .setLastUpdated(DateUtil.toDate(overrideLastUpdated))
+            .setLastUpdated(DateUtil.toDate(updatedTimestamp))
             .setSource(claimSourceId.getSource());
     claimTypeCode.toFhirStructureDefinition().ifPresent(meta::addProfile);
     claimSourceId.toFhirAdjudicationStatus().ifPresent(meta::addTag);

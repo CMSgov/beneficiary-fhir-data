@@ -14,7 +14,6 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
-import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -53,6 +52,7 @@ public class Claim {
   private String serviceProviderNpiNumber;
 
   @Embedded private Meta meta;
+
   @Embedded private Identifiers identifiers;
   @Embedded private BillablePeriod billablePeriod;
   @Embedded private ClaimExtensions claimExtensions;
@@ -258,8 +258,7 @@ public class Claim {
     eob.setType(claimTypeCode.toFhirType());
     claimTypeCode.toFhirSubtype().ifPresent(eob::setSubType);
 
-    var latestTs = getMostRecentUpdated();
-    eob.setMeta(meta.toFhir(claimTypeCode, claimSourceId, securityStatus, latestTs));
+    eob.setMeta(meta.toFhir(claimTypeCode, claimSourceId, securityStatus));
     eob.setIdentifier(identifiers.toFhir());
     eob.setBillablePeriod(billablePeriod.toFhir());
     eob.setCreated(DateUtil.toDate(claimEffectiveDate));
@@ -426,20 +425,6 @@ public class Claim {
         .flatMap(Optional::stream)
         .map(ClaimLineRx::getClaimRxSupportingInfo)
         .toList();
-  }
-
-  private ZonedDateTime getMostRecentUpdated() {
-    // Collect timestamps (claim + child entities) then pick the max.
-    var ciStream = getClaimInstitutional().map(ClaimInstitutional::getBfdUpdatedTimestamp).stream();
-    var cfStream = getClaimFiss().map(ClaimFiss::getBfdUpdatedTimestamp).stream();
-    var cdsStream = Stream.of(claimDateSignature.getBfdUpdatedTimestamp());
-    var itemsStream = claimItems.stream().flatMap(ClaimItem::streamTimestamps);
-
-    return Stream.of(
-            Stream.of(meta.getUpdatedTimestamp()), ciStream, cfStream, cdsStream, itemsStream)
-        .flatMap(s -> s)
-        .max(Comparator.naturalOrder())
-        .orElse(meta.getUpdatedTimestamp());
   }
 
   private ExplanationOfBenefit sortedEob(ExplanationOfBenefit eob) {

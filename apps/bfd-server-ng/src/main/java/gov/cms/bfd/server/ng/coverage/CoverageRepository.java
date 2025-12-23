@@ -78,8 +78,26 @@ public class CoverageRepository {
                       LEFT JOIN FETCH c.contractPlanContactInfo cc
                       LEFT JOIN FETCH b.beneficiaryLowIncomeSubsidies blis
                       WHERE b.beneSk = :beneSk
-                        AND ((cast(:lowerBound AS ZonedDateTime)) IS NULL OR b.meta.updatedTimestamp %s :lowerBound)
-                        AND ((cast(:upperBound AS ZonedDateTime)) IS NULL OR b.meta.updatedTimestamp %s :upperBound)
+                        AND (
+                            CAST(:lowerBound AS ZonedDateTime) IS NULL
+                            OR GREATEST(
+                                  b.meta.partACoverageUpdatedTs,
+                                  b.meta.partBCoverageUpdatedTs,
+                                  b.meta.partCCoverageUpdatedTs,
+                                  b.meta.partDCoverageUpdatedTs,
+                                  b.meta.partDualCoverageUpdatedTs
+                              ) %s :lowerBound
+                          )
+                        AND (
+                            CAST(:upperBound AS ZonedDateTime) IS NULL
+                            OR LEAST(
+                                  b.meta.partACoverageUpdatedTs,
+                                  b.meta.partBCoverageUpdatedTs,
+                                  b.meta.partCCoverageUpdatedTs,
+                                  b.meta.partDCoverageUpdatedTs,
+                                  b.meta.partDualCoverageUpdatedTs
+                              ) %s :upperBound
+                          )
                         AND b.beneSk = b.xrefSk
                         AND (ben IS NULL
                             OR EXISTS (

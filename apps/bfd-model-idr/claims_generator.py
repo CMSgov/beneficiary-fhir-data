@@ -52,6 +52,7 @@ NO_CAST_LINE_NUM = "no_cast_line_num"
 
 # Columns you want as string without decimal/nan
 INT_TO_STRING_COLS = [
+    "BENE_SK",
     "CLM_TYPE_CD",
     "CLM_NUM_SK",
     "CLM_TYPE_CD",
@@ -125,8 +126,6 @@ def save_output_files(
         (cntrct_pbp_num, "out/SYNTHETIC_CNTRCT_PBP_NUM.csv", NORMALIZE, NO_CAST_LINE_NUM),
         (cntrct_pbp_cntct, "out/SYNTHETIC_CNTRCT_PBP_CNTCT.csv", NORMALIZE, NO_CAST_LINE_NUM),
     ]
-    for data, path, normalize_flag, line_flag in exports:
-        export_df(data, path, normalize_flag, line_flag)
 
     for [df, out_file, normalize, line_num_cast] in exports:
         export_df(df, out_file, normalize, line_num_cast)

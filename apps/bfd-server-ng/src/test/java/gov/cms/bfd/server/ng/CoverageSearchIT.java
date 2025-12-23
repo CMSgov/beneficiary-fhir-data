@@ -183,7 +183,15 @@ class CoverageSearchIT extends IntegrationTestBase {
     var lastUpdated =
         entityManager
             .createQuery(
-                "SELECT b.meta.updatedTimestamp FROM Beneficiary b WHERE b.beneSk = :beneSk",
+                """
+                SELECT GREATEST(
+                    b.meta.partACoverageUpdatedTs,
+                    b.meta.partBCoverageUpdatedTs,
+                    b.meta.partCCoverageUpdatedTs,
+                    b.meta.partDCoverageUpdatedTs,
+                    b.meta.partDualCoverageUpdatedTs)
+                FROM BeneficiaryCoverage b
+                WHERE b.beneSk = :beneSk""",
                 ZonedDateTime.class)
             .setParameter("beneSk", beneSk)
             .getSingleResult();

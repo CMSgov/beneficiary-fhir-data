@@ -46,10 +46,10 @@ public abstract class BeneficiaryBase {
 
   @Embedded protected Name beneficiaryName;
   @Embedded protected Address address;
-  @Embedded protected Meta meta;
   @Embedded protected DeathDate deathDate;
   @Embedded protected CurrentIdentifier identifier;
   @Transient protected String id = UUID.randomUUID().toString();
+  @Embedded Meta patientMeta;
 
   /**
    * Determines if this beneficiary has been merged into another.
@@ -66,7 +66,7 @@ public abstract class BeneficiaryBase {
    * @param profileType the FHIR profile type
    * @return patient record
    */
-  public Patient toFhir(ProfileType profileType) {
+  public Patient toFhirPatient(ProfileType profileType) {
     var patient = new Patient();
 
     if (profileType == ProfileType.C4DIC) {
@@ -91,7 +91,7 @@ public abstract class BeneficiaryBase {
           patient.addExtension(s.toFhirSexExtension());
         });
     patient.addExtension(raceCode.toFhir());
-    patient.setMeta(meta.toFhirPatient(profileType));
+    patient.setMeta(patientMeta.toFhir(profileType));
 
     return patient;
   }
