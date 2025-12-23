@@ -565,6 +565,8 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_rx (
     clm_cms_calcd_mftr_dscnt_amt NUMERIC,
     clm_line_grs_cvrd_cst_tot_amt NUMERIC,
     clm_phrmcy_price_dscnt_at_pos_amt NUMERIC,
+    idr_insrt_ts TIMESTAMPTZ,
+    idr_updt_ts TIMESTAMPTZ,
     PRIMARY KEY(clm_uniq_id, clm_line_num)
 );
 
@@ -611,7 +613,9 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_prvdr_hstry (
     prvdr_hstry_obslt_dt DATE NOT NULL,
     prvdr_lgl_name VARCHAR(100),
     prvdr_emplr_id_num VARCHAR(10),
-    prvdr_last_name VARCHAR(35)
+    prvdr_last_name VARCHAR(35),
+    meta_sk BIGINT NOT NULL,
+    meta_lst_updt_sk BIGINT NOT NULL
 );
 
 CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_cntrct_pbp_cntct (

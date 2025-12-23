@@ -253,6 +253,10 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
     assert cur.rowcount == 14
     rows = cur.fetchmany(1)
     assert rows[0]["prvdr_sk"] == 829307599
+    rows = cur.fetchall()
+    for row in rows:
+        assert row["idr_insrt_ts"] is not None
+        assert row["idr_updt_ts"] is not None
 
     cur = conn.execute("select * from idr.contract_pbp_number order by cntrct_pbp_sk")
     assert cur.rowcount == 4
