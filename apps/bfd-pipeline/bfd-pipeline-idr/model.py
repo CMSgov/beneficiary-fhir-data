@@ -858,7 +858,7 @@ class IdrContractPbpContact(IdrBaseModel):
 
 
 class IdrBeneficiaryMaPartDEnrollment(IdrBaseModel):
-    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
+    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, LAST_UPDATED_TIMESTAMP: True}]
     cntrct_pbp_sk: int
     bene_pbp_num: str
     bene_enrlmt_bgn_dt: Annotated[date, {PRIMARY_KEY: True}]
@@ -878,6 +878,17 @@ class IdrBeneficiaryMaPartDEnrollment(IdrBaseModel):
     @staticmethod
     def table() -> str:
         return "idr.beneficiary_ma_part_d_enrollment"
+
+    @staticmethod
+    def last_updated_date_table() -> str:
+        return BENEFICIARY_TABLE
+
+    @staticmethod
+    def last_updated_date_column() -> list[str]:
+        return [
+            "bfd_part_c_coverage_updated_ts",
+            "bfd_part_d_coverage_updated_ts",
+        ]
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
@@ -904,7 +915,7 @@ class IdrBeneficiaryMaPartDEnrollment(IdrBaseModel):
 
 
 class IdrBeneficiaryMaPartDEnrollmentRx(IdrBaseModel):
-    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
+    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, LAST_UPDATED_TIMESTAMP: True}]
     cntrct_pbp_sk: int
     bene_cntrct_num: Annotated[str, {PRIMARY_KEY: True}]
     bene_pbp_num: Annotated[str, {PRIMARY_KEY: True}]
@@ -927,6 +938,16 @@ class IdrBeneficiaryMaPartDEnrollmentRx(IdrBaseModel):
         return "idr.beneficiary_ma_part_d_enrollment_rx"
 
     @staticmethod
+    def last_updated_date_table() -> str:
+        return BENEFICIARY_TABLE
+
+    @staticmethod
+    def last_updated_date_column() -> list[str]:
+        return [
+            "bfd_part_d_coverage_updated_ts"
+        ]
+
+    @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
         hstry = ALIAS_HSTRY
         return f"""
@@ -947,7 +968,7 @@ class IdrBeneficiaryMaPartDEnrollmentRx(IdrBaseModel):
 
 
 class IdrBeneficiaryLowIncomeSubsidy(IdrBaseModel):
-    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
+    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, LAST_UPDATED_TIMESTAMP: True}]
     bene_rng_bgn_dt: Annotated[datetime, {PRIMARY_KEY: True}]
     bene_rng_end_dt: date
     bene_lis_copmt_lvl_cd: str
@@ -963,6 +984,16 @@ class IdrBeneficiaryLowIncomeSubsidy(IdrBaseModel):
     @staticmethod
     def table() -> str:
         return "idr.beneficiary_low_income_subsidy"
+
+    @staticmethod
+    def last_updated_date_table() -> str:
+        return BENEFICIARY_TABLE
+
+    @staticmethod
+    def last_updated_date_column() -> list[str]:
+        return [
+            "bfd_part_d_coverage_updated_ts"
+        ]
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004

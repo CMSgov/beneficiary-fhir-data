@@ -40,6 +40,8 @@ public class Meta {
     var map = new EnumMap<CoveragePart, ZonedDateTime>(CoveragePart.class);
     map.put(CoveragePart.PART_A, partACoverageUpdatedTs);
     map.put(CoveragePart.PART_B, partBCoverageUpdatedTs);
+    map.put(CoveragePart.PART_C, partCCoverageUpdatedTs);
+    map.put(CoveragePart.PART_D, partDCoverageUpdatedTs);
     map.put(CoveragePart.DUAL, partDualCoverageUpdatedTs);
     return map;
   }
