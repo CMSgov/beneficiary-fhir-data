@@ -136,8 +136,8 @@
             <artifactId>HikariCP</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.newrelic.telemetry</groupId>
-            <artifactId>dropwizard-metrics-newrelic</artifactId>
+            <groupId>io.dropwizard.metrics</groupId>
+            <artifactId>metrics-core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.awaitility</groupId>

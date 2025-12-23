@@ -75,14 +75,6 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.newrelic.telemetry</groupId>
-            <artifactId>dropwizard-metrics-newrelic</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.newrelic.telemetry</groupId>
-            <artifactId>telemetry-http-okhttp</artifactId>
-        </dependency>
-        <dependency>
             <!-- Used to monitor the JVM's memory usage, garbage collection, etc.
                 at runtime. -->
             <groupId>io.dropwizard.metrics</groupId>

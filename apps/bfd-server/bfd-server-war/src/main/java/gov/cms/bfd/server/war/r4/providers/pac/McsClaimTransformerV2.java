@@ -5,7 +5,6 @@ import static java.util.Objects.requireNonNull;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
 import gov.cms.bfd.model.rda.entities.RdaMcsDetail;
 import gov.cms.bfd.model.rda.entities.RdaMcsDiagnosisCode;
@@ -103,7 +102,6 @@ public class McsClaimTransformerV2 extends AbstractTransformerV2
    * @param includeTaxNumbers Indicates if tax numbers should be included in the results
    * @return a FHIR {@link Claim} resource that represents the specified claim
    */
-  @Trace
   public Claim transform(ClaimWithSecurityTags<?> claimEntity, boolean includeTaxNumbers) {
 
     Object claim = claimEntity.getClaimEntity();

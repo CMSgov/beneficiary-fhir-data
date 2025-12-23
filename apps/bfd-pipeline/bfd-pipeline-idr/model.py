@@ -303,6 +303,64 @@ def _deceased_bene_filter(alias: str) -> str:
     """
 
 
+def _idr_dates_from_meta_sk() -> str:
+    """
+    Generate SQL expressions to derive insert and update timestamps from META keys.
+
+    Assumptions about META_SK / META_LST_UPDT_SK format:
+      - The key encodes a date as: (YYYYMMDD - DATE_BASE_OFFSET) * DATE_SEQUENCE_DIVISOR + sequence
+      - The last 3 digits represent a sequence and are discarded
+      - Adding DATE_BASE_OFFSET restores a YYYYMMDD-formatted date
+    """
+    # Base offset added to reconstruct a YYYYMMDD date (e.g., 12501023 + 19000000 = 20250123)
+    date_base_offset = 19000000
+    # Divisor used to strip the sequence portion from the key
+    date_sequence_divisor = 1000
+    date_from_meta_sk = f"""(meta_sk / {date_sequence_divisor}) + {date_base_offset}"""
+    date_from_meta_updt_sk = (
+        f"""(meta_lst_updt_sk / {date_sequence_divisor}) + {date_base_offset}"""
+    )
+
+    # Logic for computing INSRT/UPDT timestamp on tables that don't have it based on META_SK
+    # META_SK is an IDR-derived field and the calculations here have no significance outside of
+    # IDR's internal encoding logic.
+    return f"""
+            meta_sk,
+            meta_lst_updt_sk,
+            -- When (META_SK = 501), fall back to META_LST_UPDT_SK.
+            CASE
+                WHEN meta_sk = 501 THEN
+                    TO_TIMESTAMP(
+                            TO_DATE(
+                                    TRUNC({date_from_meta_updt_sk})::text,
+                                    'YYYYMMDD'
+                            )::text || ' 00:00:00',
+                            'YYYY-MM-DD HH24:MI:SS'
+                    )
+                ELSE
+                    TO_TIMESTAMP(
+                            TO_DATE(
+                                    TRUNC({date_from_meta_sk})::text,
+                                    'YYYYMMDD'
+                            )::text || ' 00:00:00',
+                            'YYYY-MM-DD HH24:MI:SS'
+                    )
+                END AS idr_insrt_ts,
+        
+            CASE
+                WHEN meta_sk != 501 AND meta_lst_updt_sk > 0 THEN
+                    TO_TIMESTAMP(
+                            TO_DATE(
+                                    TRUNC({date_from_meta_updt_sk})::text,
+                                    'YYYYMMDD'
+                            )::text || ' 00:00:00',
+                            'YYYY-MM-DD HH24:MI:SS'
+                    )
+                ELSE NULL
+                END AS idr_updt_ts
+    """
+
+
 class IdrBeneficiary(IdrBaseModel):
     # columns from V2_MDCR_BENE_HSTRY
     bene_sk: Annotated[
@@ -797,6 +855,7 @@ class IdrContractPbpNumber(IdrBaseModel):
             LEFT JOIN sgmt
                     ON {pbp_num}.cntrct_pbp_sk = sgmt.cntrct_pbp_sk 
             WHERE cntrct_pbp_sk_obslt_dt >= '{DEFAULT_MAX_DATE}'
+            AND {pbp_num}.cntrct_pbp_sk != 0
             """
 
     @staticmethod
@@ -1064,7 +1123,8 @@ def _claim_filter(start_time: datetime, partition: LoadPartition) -> str:
     )
     return f"""
     (
-        {clm}.clm_type_cd IN ({",".join([str(c) for c in claim_type_codes])})
+        {clm}.bene_sk != 0
+        AND {clm}.clm_type_cd IN ({",".join([str(c) for c in claim_type_codes])})
         {clm_from_filter}
         {latest_claim_ind}
         {pac_filter}
@@ -2096,12 +2156,12 @@ class IdrClaimLineRx(IdrBaseModel):
     clm_phrmcy_price_dscnt_at_pos_amt: Annotated[float, BeforeValidator(transform_null_float)]
     idr_insrt_ts: Annotated[
         datetime,
-        {BATCH_TIMESTAMP: True, ALIAS: ALIAS_LINE},
+        {BATCH_TIMESTAMP: True, ALIAS: ALIAS_RX_LINE},
         BeforeValidator(transform_null_date_to_min),
     ]
     idr_updt_ts: Annotated[
         datetime,
-        {UPDATE_TIMESTAMP: True, ALIAS: ALIAS_LINE},
+        {UPDATE_TIMESTAMP: True, ALIAS: ALIAS_RX_LINE},
         BeforeValidator(transform_null_date_to_min),
     ]
 
@@ -2161,6 +2221,16 @@ class IdrProviderHistory(IdrBaseModel):
     prvdr_lgl_name: Annotated[str, BeforeValidator(transform_null_string)]
     prvdr_emplr_id_num: Annotated[str, BeforeValidator(transform_null_string)]
     prvdr_last_name: Annotated[str, BeforeValidator(transform_null_string)]
+    idr_insrt_ts: Annotated[
+        datetime,
+        {BATCH_TIMESTAMP: True, DERIVED: True},
+        BeforeValidator(transform_null_date_to_min),
+    ]
+    idr_updt_ts: Annotated[
+        datetime,
+        {UPDATE_TIMESTAMP: True, DERIVED: True},
+        BeforeValidator(transform_null_date_to_min),
+    ]
 
     @staticmethod
     def table() -> str:
@@ -2177,7 +2247,9 @@ class IdrProviderHistory(IdrBaseModel):
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
         return f"""
-            SELECT {{COLUMNS}}
+            SELECT
+            {_idr_dates_from_meta_sk()},
+            {{COLUMNS}}
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_prvdr_hstry
             WHERE prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
         """

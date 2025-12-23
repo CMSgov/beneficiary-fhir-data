@@ -6,7 +6,6 @@ import static java.util.Objects.requireNonNull;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.Beneficiary;
 import gov.cms.bfd.model.rif.entities.BeneficiaryHistory;
@@ -88,7 +87,6 @@ public class BeneficiaryTransformerV2 {
    * @param addHistoricalMbiExtensions the add historical mbi extensions
    * @return a FHIR {@link Patient} resource that represents the specified {@link Beneficiary}
    */
-  @Trace
   public Patient transform(
       Beneficiary beneficiary, RequestHeaders requestHeader, boolean addHistoricalMbiExtensions) {
     try (Timer.Context timer =

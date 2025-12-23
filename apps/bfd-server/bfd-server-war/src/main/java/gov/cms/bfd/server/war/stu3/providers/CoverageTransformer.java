@@ -2,7 +2,6 @@ package gov.cms.bfd.server.war.stu3.providers;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.Beneficiary;
 import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
@@ -47,7 +46,6 @@ final class CoverageTransformer {
    * @param beneficiary the {@link Beneficiary} to generate a {@link Coverage} resource for
    * @return the {@link Coverage} resource that was generated
    */
-  @Trace
   public Coverage transform(MedicareSegment medicareSegment, Beneficiary beneficiary) {
     Objects.requireNonNull(medicareSegment);
     Objects.requireNonNull(beneficiary);
@@ -68,7 +66,6 @@ final class CoverageTransformer {
    * @return the FHIR {@link Coverage} resources that can be generated from the specified {@link
    *     Beneficiary}
    */
-  @Trace
   public List<IBaseResource> transform(Beneficiary beneficiary) {
     return Arrays.stream(MedicareSegment.values())
         .map(s -> transform(s, beneficiary))
