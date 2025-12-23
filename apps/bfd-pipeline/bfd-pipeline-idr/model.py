@@ -943,9 +943,7 @@ class IdrBeneficiaryMaPartDEnrollmentRx(IdrBaseModel):
 
     @staticmethod
     def last_updated_date_column() -> list[str]:
-        return [
-            "bfd_part_d_coverage_updated_ts"
-        ]
+        return ["bfd_part_d_coverage_updated_ts"]
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
@@ -991,9 +989,7 @@ class IdrBeneficiaryLowIncomeSubsidy(IdrBaseModel):
 
     @staticmethod
     def last_updated_date_column() -> list[str]:
-        return [
-            "bfd_part_d_coverage_updated_ts"
-        ]
+        return ["bfd_part_d_coverage_updated_ts"]
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
