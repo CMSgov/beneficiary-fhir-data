@@ -520,7 +520,11 @@
                 <artifactId>logback-json-classic</artifactId>
                 <version>${logback.json.classic.version}</version>
             </dependency>
-
+            <dependency>
+                <groupId>org.hibernate.validator</groupId>
+                <artifactId>hibernate-validator</artifactId>
+                <version>${hibernate.validator.version}</version>
+            </dependency>
 
             <!-- We lock down the versions of all the various Spring components that
                 child projects use, as incompatibility problems with Spring are common. -->
