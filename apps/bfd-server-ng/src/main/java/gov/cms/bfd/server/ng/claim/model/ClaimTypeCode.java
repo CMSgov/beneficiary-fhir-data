@@ -409,6 +409,10 @@ public enum ClaimTypeCode {
     return (code >= lower) && (code <= upper);
   }
 
+  boolean is(int code) {
+    return this.code == code;
+  }
+
   Optional<String> toFhirStructureDefinition() {
     return ClaimSubtype.subtypeFor(code).map(ClaimSubtype::getSystemUrl);
   }
