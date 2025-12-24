@@ -206,12 +206,6 @@
             <artifactId>rest-assured</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.hibernate.validator</groupId>
-            <artifactId>hibernate-validator</artifactId>
-            <version>${hibernate.validator.version}</version>
-            <scope>test</scope>
-        </dependency>
 
         <dependency>
             <!-- The test framework used for unit and integration tests. -->
