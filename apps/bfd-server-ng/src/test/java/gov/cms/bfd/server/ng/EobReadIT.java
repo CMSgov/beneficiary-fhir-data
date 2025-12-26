@@ -66,6 +66,10 @@ class EobReadIT extends IntegrationTestBase {
     } else {
       validateCodings(eob);
     }
+    // EOB do not require diagnoses (for example, pharmacy).
+    if (eob.hasDiagnosis()) {
+      validateDiagnosis(eob);
+    }
   }
 
   @Test

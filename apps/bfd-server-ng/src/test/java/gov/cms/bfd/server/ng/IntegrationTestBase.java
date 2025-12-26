@@ -8,7 +8,9 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import jakarta.persistence.EntityManager;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
@@ -131,6 +133,26 @@ public class IntegrationTestBase {
     for (Coding coding : codings) {
       assertTrue(coding.hasSystem());
       assertTrue(coding.hasCode());
+    }
+  }
+
+  protected void validateDiagnosis(ExplanationOfBenefit eob) {
+    // Get all diagnoses, ensure there are not multiple instances of the same
+    // diagnosis
+    var diagnoses = eob.getDiagnosis();
+    var seenDiagnoses = new HashSet<String>();
+    for (var diagnosis : diagnoses) {
+      var diagnosisCode = diagnosis.getDiagnosisCodeableConcept().getCodingFirstRep().getCode();
+      assertTrue(seenDiagnoses.add(diagnosisCode), "Duplicate diagnosis: " + diagnosisCode);
+      assertTrue(diagnosis.hasSequence(), "Diagnosis must have sequence (BFD rule)");
+      assertTrue(diagnosis.hasType(), "Diagnosis must have type (BFD rule)");
+      var specialCodes = Set.of("other", "secondary");
+      if (diagnosis.getType().get(0).getCoding().stream()
+          .anyMatch(c -> specialCodes.contains(c.getCode()))) {
+        assertTrue(
+            diagnosis.getType().get(0).getCoding().size() == 1,
+            "Other/secondary diagnosis must be the only diagnosis when present");
+      }
     }
   }
 }
