@@ -152,8 +152,8 @@ public class IntegrationTestBase {
           .anyMatch(c -> specialCodes.contains(c.getCode()))) {
         assertEquals(
             "Other/secondary diagnosis must be the only diagnosis when present",
-            diagnosis.getType().get(0).getCoding().size(),
-            1);
+            1,
+            diagnosis.getType().get(0).getCoding().size());
       }
     }
   }
