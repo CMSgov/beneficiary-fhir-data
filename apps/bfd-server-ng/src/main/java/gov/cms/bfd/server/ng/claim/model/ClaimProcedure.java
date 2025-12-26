@@ -80,7 +80,8 @@ public class ClaimProcedure {
     ClaimContext claimContext;
     if (claimTypeCode.isBetween(5, 69)
         || claimTypeCode.isBetween(2000, 2699)
-        || claimTypeCode.isBetween(1000, 1699)) {
+        || claimTypeCode.isBetween(1000, 1699)
+        || claimTypeCode.is(2900)) {
       claimContext = ClaimContext.INSTITUTIONAL;
     } else if (claimTypeCode.isBetween(71, 82)
         || claimTypeCode.isBetween(2700, 2899)
