@@ -144,8 +144,8 @@ public class IntegrationTestBase {
     for (var diagnosis : diagnoses) {
       var diagnosisCode = diagnosis.getDiagnosisCodeableConcept().getCodingFirstRep().getCode();
       assertTrue(seenDiagnoses.add(diagnosisCode), "Duplicate diagnosis: " + diagnosisCode);
-      assertTrue(diagnosis.hasSequence(), "Diagnosis must have sequence (BFD rule)");
-      assertTrue(diagnosis.hasType(), "Diagnosis must have type (BFD rule)");
+      assertTrue(diagnosis.hasSequence(), "Diagnosis must have sequence (R4 rule)");
+      assertTrue(diagnosis.hasType(), "Diagnosis must have type (C4BB rule)");
       var specialCodes = Set.of("other", "secondary");
       if (diagnosis.getType().get(0).getCoding().stream()
           .anyMatch(c -> specialCodes.contains(c.getCode()))) {
