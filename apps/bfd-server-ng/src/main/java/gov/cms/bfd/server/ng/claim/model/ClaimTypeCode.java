@@ -3,6 +3,7 @@ package gov.cms.bfd.server.ng.claim.model;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -327,7 +328,7 @@ public enum ClaimTypeCode {
   }
 
   Optional<CodeableConcept> toFhirSubtype() {
-    return ClaimSubtype.getGroupedClaimSubtype(code).map(ClaimSubtype::toFhir);
+    return getGroupedClaimSubtype().map(ClaimSubtype::toFhir);
   }
 
   Optional<Organization> toFhirInsurerPartAB() {
@@ -414,11 +415,11 @@ public enum ClaimTypeCode {
   }
 
   Optional<String> toFhirStructureDefinition() {
-    return ClaimSubtype.subtypeFor(code).map(ClaimSubtype::getSystemUrl);
+    return getClaimSubtype().map(ClaimSubtype::getSystemUrl);
   }
 
   private Optional<ClaimType> getClaimType() {
-    return ClaimSubtype.subtypeFor(code).map(ClaimSubtype::getClaimType);
+    return getClaimSubtype().map(ClaimSubtype::getClaimType);
   }
 
   /** Claim Type codes grouped by claim subtypes. * */
@@ -524,10 +525,19 @@ public enum ClaimTypeCode {
         .orElse(false);
   }
 
+  private static final Map<ClaimTypeCode, ClaimSubtype> CODE_TO_SUBTYPE = createInvertedMap();
+
+  private static Map<ClaimTypeCode, ClaimSubtype> createInvertedMap() {
+    var map = new EnumMap<ClaimTypeCode, ClaimSubtype>(ClaimTypeCode.class);
+    CLAIM_TYPE_CODE_MAP.forEach((subtype, codes) -> codes.forEach(code -> map.put(code, subtype)));
+    return Collections.unmodifiableMap(map);
+  }
+
+  private Optional<ClaimSubtype> getGroupedClaimSubtype() {
+    return getClaimSubtype().flatMap(ClaimSubtype::grouped);
+  }
+
   private Optional<ClaimSubtype> getClaimSubtype() {
-    return CLAIM_TYPE_CODE_MAP.entrySet().stream()
-        .filter(entry -> entry.getValue().contains(this))
-        .map(Map.Entry::getKey)
-        .findFirst();
+    return Optional.ofNullable(CODE_TO_SUBTYPE.get(this));
   }
 }
