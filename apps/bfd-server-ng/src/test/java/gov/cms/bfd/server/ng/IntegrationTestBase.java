@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.ng;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import au.com.origin.snapshots.Expect;
@@ -149,9 +150,10 @@ public class IntegrationTestBase {
       var specialCodes = Set.of("other", "secondary");
       if (diagnosis.getType().get(0).getCoding().stream()
           .anyMatch(c -> specialCodes.contains(c.getCode()))) {
-        assertTrue(
-            diagnosis.getType().get(0).getCoding().size() == 1,
-            "Other/secondary diagnosis must be the only diagnosis when present");
+        assertEquals(
+            "Other/secondary diagnosis must be the only diagnosis when present",
+            diagnosis.getType().get(0).getCoding().size(),
+            1);
       }
     }
   }

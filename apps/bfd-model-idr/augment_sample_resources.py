@@ -99,37 +99,69 @@ for line in range(0,len(cur_sample_data['lineItemComponents'])):
 cur_sample_data['providerList'] = provider_list
 
 # diagnoses section
-# of note, 1 and E appear to always be the same, so we only care about the E code.
 diagnosis_codes = [
     dict(x, ROW_NUM=x["CLM_VAL_SQNC_NUM"], clm_prod_type_cd_map=[x["CLM_PROD_TYPE_CD"]])
     for x in cur_sample_data["diagnoses"]
     if x["CLM_PROD_TYPE_CD"] == "D"
 ]
+p_code = [
+    x["CLM_DGNS_CD"]
+    for x in cur_sample_data["diagnoses"]
+    if x["CLM_PROD_TYPE_CD"] == "P"
+]
+a_code = [
+    x["CLM_DGNS_CD"]
+    for x in cur_sample_data["diagnoses"]
+    if x["CLM_PROD_TYPE_CD"] == "A"
+]
+r_code = [
+    x["CLM_DGNS_CD"]
+    for x in cur_sample_data["diagnoses"]
+    if x["CLM_PROD_TYPE_CD"] == "R"
+]
 # of note, 1 and E appear to always be the same, so we only care about the E code.
-e_code = [x["CLM_DGNS_CD"] for x in cur_sample_data["diagnoses"] if x["CLM_PROD_TYPE_CD"] == "E"]
-if e_code:
-    diagnosis_codes.append(
-        {
-            "ROW_NUM": len(diagnosis_codes) + 1,
-            "CLM_DGNS_CD": e_code[0],
-            "CLM_DGNS_PRCDR_ICD_IND": diagnosis_codes[0]["CLM_DGNS_PRCDR_ICD_IND"],
-            "clm_prod_type_cd_map": ["E"],
-            "CLM_POA_IND": "~",
-        }
-    )
-
-# now, replace the D with P or A
-p_code = [x["CLM_DGNS_CD"] for x in cur_sample_data["diagnoses"] if x["CLM_PROD_TYPE_CD"] == "P"]
-a_code = [x["CLM_DGNS_CD"] for x in cur_sample_data["diagnoses"] if x["CLM_PROD_TYPE_CD"] == "A"]
-r_code = [x["CLM_DGNS_CD"] for x in cur_sample_data["diagnoses"] if x["CLM_PROD_TYPE_CD"] == "R"]
+e_code = [
+    x["CLM_DGNS_CD"]
+    for x in cur_sample_data["diagnoses"]
+    if x["CLM_PROD_TYPE_CD"] == "E"
+]
+for code in [p_code, a_code, r_code, e_code]:
+    if code and code[0] not in [x["CLM_DGNS_CD"] for x in diagnosis_codes]:
+        diagnosis_codes.append(
+            {
+                "ROW_NUM": len(diagnosis_codes) + 1,
+                "CLM_DGNS_CD": code[0],
+                "CLM_DGNS_PRCDR_ICD_IND": diagnosis_codes[0]["CLM_DGNS_PRCDR_ICD_IND"],
+                "clm_prod_type_cd_map": [],
+                "CLM_POA_IND": "~",
+            }
+        )
 
 for i in range(len(diagnosis_codes)):
-    if p_code and p_code[0] == diagnosis_codes[i]["CLM_DGNS_CD"]:
+    if (
+        p_code
+        and p_code[0] == diagnosis_codes[i]["CLM_DGNS_CD"]
+        and "P" not in diagnosis_codes[i]["clm_prod_type_cd_map"]
+    ):
         diagnosis_codes[i]["clm_prod_type_cd_map"].append("P")
-    if a_code and a_code[0] == diagnosis_codes[i]["CLM_DGNS_CD"]:
+    if (
+        a_code
+        and a_code[0] == diagnosis_codes[i]["CLM_DGNS_CD"]
+        and "A" not in diagnosis_codes[i]["clm_prod_type_cd_map"]
+    ):
         diagnosis_codes[i]["clm_prod_type_cd_map"].append("A")
-    if r_code and p_code[0] == diagnosis_codes[i]["CLM_DGNS_CD"]:
+    if (
+        r_code
+        and r_code[0] == diagnosis_codes[i]["CLM_DGNS_CD"]
+        and "R" not in diagnosis_codes[i]["clm_prod_type_cd_map"]
+    ):
         diagnosis_codes[i]["clm_prod_type_cd_map"].append("R")
+    if (
+        e_code
+        and e_code[0] == diagnosis_codes[i]["CLM_DGNS_CD"]
+        and "E" not in diagnosis_codes[i]["clm_prod_type_cd_map"]
+    ):
+        diagnosis_codes[i]["clm_prod_type_cd_map"].append("E")
     if len(diagnosis_codes[i]["clm_prod_type_cd_map"]) > 1:
         diagnosis_codes[i]["clm_prod_type_cd_map"].remove("D")
 
