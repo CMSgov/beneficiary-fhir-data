@@ -129,13 +129,11 @@ for clm_prod_type_cd in clm_prod_type_cds:
         diagnosis_codes.append(diagnosis)
 
 for diagnosis_code in diagnosis_codes:
-    add_d = True
     for clm_prod_type_cd in clm_prod_type_cds:
         cur_code = [x['CLM_DGNS_CD'] for x in cur_sample_data['diagnoses'] if x['CLM_PROD_TYPE_CD'] == clm_prod_type_cd]
         if cur_code and cur_code[0] == diagnosis_code.CLM_DGNS_CD:
             diagnosis_code.clm_prod_type_cd_map.append(clm_prod_type_cd)
-            add_d = False
-    if add_d:
+    if len(diagnosis_code.clm_prod_type_cd_map) == 0:
         diagnosis_code.clm_prod_type_cd_map.append('D')
 
 cur_sample_data['diagnoses']=[asdict(d) for d in diagnosis_codes]
