@@ -467,14 +467,14 @@ public class Claim {
     Map<String, ExplanationOfBenefit.DiagnosisComponent> diagnosisMap = new LinkedHashMap<>();
 
     claimItems.forEach(
-        item -> {
-          item.getClaimProcedure()
-              .toFhirDiagnosis(item.getClaimItemId().getBfdRowId(), claimTypeCode)
-              .ifPresent(
-                  diag ->
-                      getDiagnosisKey(diag)
-                          .ifPresent(key -> diagnosisMap.merge(key, diag, this::mergeDiagnoses)));
-        });
+        item ->
+            item.getClaimProcedure()
+                .toFhirDiagnosis(item.getClaimItemId().getBfdRowId(), claimTypeCode)
+                .ifPresent(
+                    diag ->
+                        getDiagnosisKey(diag)
+                            .ifPresent(
+                                key -> diagnosisMap.merge(key, diag, this::mergeDiagnoses))));
 
     var sequence = 1;
     for (var diag : diagnosisMap.values()) {
