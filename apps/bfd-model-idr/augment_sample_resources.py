@@ -1,6 +1,8 @@
 import pandas as pd
 import json
 import sys
+from dataclasses import dataclass, field, asdict
+
 prvdr_info_file = 'sample-data/PRVDR_HSTRY_POC.csv'
 df = pd.read_csv(prvdr_info_file, dtype={"PRVDR_SK": str})
 df.head()
@@ -36,9 +38,9 @@ for column in header_columns:
     prvdr_hstry_for_npi = json.loads(df[df["PRVDR_SK"] == str(provider_object['PRVDR_SK'])].iloc[0].to_json())
     provider_object['NPI_TYPE'] = '2' if prvdr_hstry_for_npi['PRVDR_LGL_NAME'] is not None else '1'
 
-    for field in populate_fields_except_na:
-        if(prvdr_hstry_for_npi[field] is not None):
-            provider_object[field] = prvdr_hstry_for_npi[field]
+    for fld in populate_fields_except_na:
+        if(prvdr_hstry_for_npi[fld] is not None):
+            provider_object[fld] = prvdr_hstry_for_npi[fld]
 
     if(prvdr_hstry_for_npi['PRVDR_TXNMY_CMPST_CD'] is not None ):
         taxonomy_codes = [prvdr_hstry_for_npi['PRVDR_TXNMY_CMPST_CD'][i:i+10] for i in range(0, len(prvdr_hstry_for_npi['PRVDR_TXNMY_CMPST_CD']), 10)]
@@ -78,9 +80,9 @@ for line in range(0,len(cur_sample_data['lineItemComponents'])):
             npis_used.append(provider_object['PRVDR_SK'])
             prvdr_hstry_for_npi = json.loads(df[df["PRVDR_SK"] == str(provider_object['PRVDR_SK'])].iloc[0].to_json())
             provider_object['NPI_TYPE'] = '2' if prvdr_hstry_for_npi['PRVDR_LGL_NAME'] is not None else '1'
-            for field in populate_fields_except_na:
-                if(prvdr_hstry_for_npi[field] is not None):
-                    provider_object[field] = prvdr_hstry_for_npi[field]
+            for fld in populate_fields_except_na:
+                if(prvdr_hstry_for_npi[fld] is not None):
+                    provider_object[fld] = prvdr_hstry_for_npi[fld]
             if(prvdr_hstry_for_npi['PRVDR_TXNMY_CMPST_CD'] is not None):
                 taxonomy_codes = [prvdr_hstry_for_npi['PRVDR_TXNMY_CMPST_CD'][i:i+10] for i in range(0, len(prvdr_hstry_for_npi['PRVDR_TXNMY_CMPST_CD']), 10)]
                 provider_object['taxonomyCodes'] = taxonomy_codes
@@ -98,74 +100,45 @@ for line in range(0,len(cur_sample_data['lineItemComponents'])):
             print(cur_sample_data['lineItemComponents'][line])
 cur_sample_data['providerList'] = provider_list
 
-# diagnoses section
+#diagnoses section
+@dataclass
+class Diagnosis:
+    CLM_DGNS_CD: str
+    CLM_PROD_TYPE_CD: str = 'D'
+    CLM_POA_IND: str = '~'
+    CLM_DGNS_PRCDR_ICD_IND: str = '0'
+    ROW_NUM: str = '1'
+    clm_prod_type_cd_map: list[str] = field(default_factory=list)
+
 diagnosis_codes = [
-    dict(x, ROW_NUM=x["CLM_VAL_SQNC_NUM"], clm_prod_type_cd_map=[x["CLM_PROD_TYPE_CD"]])
+    Diagnosis(CLM_DGNS_CD = x['CLM_DGNS_CD'], CLM_POA_IND = x['CLM_POA_IND'], 
+              CLM_DGNS_PRCDR_ICD_IND = x['CLM_DGNS_PRCDR_ICD_IND'],
+             ROW_NUM = x['CLM_VAL_SQNC_NUM'])
     for x in cur_sample_data["diagnoses"]
     if x["CLM_PROD_TYPE_CD"] == "D"
 ]
-p_code = [
-    x["CLM_DGNS_CD"]
-    for x in cur_sample_data["diagnoses"]
-    if x["CLM_PROD_TYPE_CD"] == "P"
-]
-a_code = [
-    x["CLM_DGNS_CD"]
-    for x in cur_sample_data["diagnoses"]
-    if x["CLM_PROD_TYPE_CD"] == "A"
-]
-r_code = [
-    x["CLM_DGNS_CD"]
-    for x in cur_sample_data["diagnoses"]
-    if x["CLM_PROD_TYPE_CD"] == "R"
-]
-# of note, 1 and E appear to always be the same, so we only care about the E code.
-e_code = [
-    x["CLM_DGNS_CD"]
-    for x in cur_sample_data["diagnoses"]
-    if x["CLM_PROD_TYPE_CD"] == "E"
-]
-for code in [p_code, a_code, r_code, e_code]:
-    if code and code[0] not in [x["CLM_DGNS_CD"] for x in diagnosis_codes]:
-        diagnosis_codes.append(
-            {
-                "ROW_NUM": len(diagnosis_codes) + 1,
-                "CLM_DGNS_CD": code[0],
-                "CLM_DGNS_PRCDR_ICD_IND": diagnosis_codes[0]["CLM_DGNS_PRCDR_ICD_IND"],
-                "clm_prod_type_cd_map": [],
-                "CLM_POA_IND": "~",
-            }
-        )
+#of note, 1 and E appear to always be the same, so we only care about the E code. 
+clm_prod_type_cds = ['P','A','R','E']
+#this loop ensures that 'rogue' (eg principal not present in main list) diagnoses are not missed.
+for clm_prod_type_cd in clm_prod_type_cds:
+    code = [x['CLM_DGNS_CD'] for x in cur_sample_data['diagnoses'] if x['CLM_PROD_TYPE_CD'] == clm_prod_type_cd]
+    if code and code[0] not in [x.CLM_DGNS_CD for x in diagnosis_codes]:
+        diagnosis = Diagnosis(CLM_DGNS_CD = code, CLM_PROD_TYPE_CD = clm_prod_type_cd,
+                              CLM_DGNS_PRCDR_ICD_IND = diagnosis_codes[0].CLM_DGNS_PRCDR_ICD_IND,
+                             ROW_NUM = str(len(diagnosis_codes)+1))
+        diagnosis_codes.append(diagnosis)
 
-for i in range(len(diagnosis_codes)):
-    if (
-        p_code
-        and p_code[0] == diagnosis_codes[i]["CLM_DGNS_CD"]
-        and "P" not in diagnosis_codes[i]["clm_prod_type_cd_map"]
-    ):
-        diagnosis_codes[i]["clm_prod_type_cd_map"].append("P")
-    if (
-        a_code
-        and a_code[0] == diagnosis_codes[i]["CLM_DGNS_CD"]
-        and "A" not in diagnosis_codes[i]["clm_prod_type_cd_map"]
-    ):
-        diagnosis_codes[i]["clm_prod_type_cd_map"].append("A")
-    if (
-        r_code
-        and r_code[0] == diagnosis_codes[i]["CLM_DGNS_CD"]
-        and "R" not in diagnosis_codes[i]["clm_prod_type_cd_map"]
-    ):
-        diagnosis_codes[i]["clm_prod_type_cd_map"].append("R")
-    if (
-        e_code
-        and e_code[0] == diagnosis_codes[i]["CLM_DGNS_CD"]
-        and "E" not in diagnosis_codes[i]["clm_prod_type_cd_map"]
-    ):
-        diagnosis_codes[i]["clm_prod_type_cd_map"].append("E")
-    if len(diagnosis_codes[i]["clm_prod_type_cd_map"]) > 1:
-        diagnosis_codes[i]["clm_prod_type_cd_map"].remove("D")
+for diagnosis_code in diagnosis_codes:
+    add_d = True
+    for clm_prod_type_cd in clm_prod_type_cds:
+        cur_code = [x['CLM_DGNS_CD'] for x in cur_sample_data['diagnoses'] if x['CLM_PROD_TYPE_CD'] == clm_prod_type_cd]
+        if cur_code and cur_code[0] == diagnosis_code.CLM_DGNS_CD:
+            diagnosis_code.clm_prod_type_cd_map.append(clm_prod_type_cd)
+            add_d = False
+    if add_d:
+        diagnosis_code.clm_prod_type_cd_map.append('D')
 
-cur_sample_data["diagnoses"] = diagnosis_codes
+cur_sample_data['diagnoses']=[asdict(d) for d in diagnosis_codes]
 
 filename = "out/temporary-sample.json"
 
