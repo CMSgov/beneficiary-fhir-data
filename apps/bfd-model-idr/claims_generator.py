@@ -52,6 +52,7 @@ NO_CAST_LINE_NUM = "no_cast_line_num"
 
 # Columns you want as string without decimal/nan
 INT_TO_STRING_COLS = [
+    "BENE_SK",
     "CLM_TYPE_CD",
     "CLM_NUM_SK",
     "CLM_TYPE_CD",
@@ -125,8 +126,6 @@ def save_output_files(
         (cntrct_pbp_num, "out/SYNTHETIC_CNTRCT_PBP_NUM.csv", NORMALIZE, NO_CAST_LINE_NUM),
         (cntrct_pbp_cntct, "out/SYNTHETIC_CNTRCT_PBP_CNTCT.csv", NORMALIZE, NO_CAST_LINE_NUM),
     ]
-    for data, path, normalize_flag, line_flag in exports:
-        export_df(data, path, normalize_flag, line_flag)
 
     for [df, out_file, normalize, line_num_cast] in exports:
         export_df(df, out_file, normalize, line_num_cast)
@@ -685,7 +684,7 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
         claim["CLM"]["PRVDR_PRSCRBNG_PRVDR_NPI_NUM"] = random.choice(type_1_npis)
         claim["CLM"]["CLM_SBMT_CHRG_AMT"] = round(random.uniform(1, 1000000), 2)
         claim["CLM"]["CLM_SBMT_FRMT_CD"] = random.choice(generator.code_systems["CLM_SBMT_FRMT_CD"])
-        claim["CLM"]["CLM_SBMTR_CNTRCT_NUM"] = "Z0001"
+        claim["CLM"]["CLM_SBMTR_CNTRCT_NUM"] = random.choice(["S0001", "H1234", "G1234"])
         claim["CLM"]["CLM_SBMTR_CNTRCT_PBP_NUM"] = random.choice(avail_pbp_nums)
         claim["CLM"]["CLM_BENE_PMT_AMT"] = round(random.uniform(0, 1000), 2)
         claim["CLM"]["CLM_OTHR_TP_PD_AMT"] = round(random.uniform(0, 1000), 2)
@@ -767,6 +766,7 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
         claim_line_rx["CLM_CMS_CALCD_MFTR_DSCNT_AMT"] = round(random.uniform(0, 1000), 2)
         claim_line_rx["CLM_LINE_REBT_PASSTHRU_POS_AMT"] = round(random.uniform(0, 1000), 2)
         claim_line_rx["CLM_PHRMCY_PRICE_DSCNT_AT_POS_AMT"] = round(random.uniform(0, 1000), 2)
+        add_meta_timestamps(claim_line_rx, claim["CLM"], max_date)
 
         claim["CLM_LINE"].append(claim_line)
         claim["CLM_LINE_RX"].append(claim_line_rx)
@@ -1531,23 +1531,24 @@ def gen_provider_history(amount):
 
     for name in names:
         prvdr_sk = "".join(random.choices(string.digits, k=10))
-        provider_history.append(
-            {
-                "PRVDR_SK": prvdr_sk,
-                "PRVDR_HSTRY_EFCTV_DT": str(date.today()),
-                "PRVDR_HSTRY_OBSLT_DT": "9999-12-31",
-                "PRVDR_1ST_NAME": name,
-                "PRVDR_MDL_NAME": random.choice(available_given_names),
-                "PRVDR_LAST_NAME": random.choice(available_family_names),
-                "PRVDR_NAME": random.choice(available_provider_names),
-                "PRVDR_LGL_NAME": random.choice(available_provider_legal_names),
-                "PRVDR_NPI_NUM": prvdr_sk,
-                "PRVDR_EMPLR_ID_NUM": "".join(random.choices(string.digits, k=10)),
-                "PRVDR_OSCAR_NUM": "".join(random.choices(string.digits, k=6)),
-                "PRVDR_TXNMY_CMPST_CD": random.choice(available_provider_tx_codes),
-                "PRVDR_TYPE_CD": random.choice(available_provider_type_codes),
-            }
-        )
+        obj = {
+            "PRVDR_SK": prvdr_sk,
+            "PRVDR_HSTRY_EFCTV_DT": str(date.today()),
+            "PRVDR_HSTRY_OBSLT_DT": "9999-12-31",
+            "PRVDR_1ST_NAME": name,
+            "PRVDR_MDL_NAME": random.choice(available_given_names),
+            "PRVDR_LAST_NAME": random.choice(available_family_names),
+            "PRVDR_NAME": random.choice(available_provider_names),
+            "PRVDR_LGL_NAME": random.choice(available_provider_legal_names),
+            "PRVDR_NPI_NUM": prvdr_sk,
+            "PRVDR_EMPLR_ID_NUM": "".join(random.choices(string.digits, k=10)),
+            "PRVDR_OSCAR_NUM": "".join(random.choices(string.digits, k=6)),
+            "PRVDR_TXNMY_CMPST_CD": random.choice(available_provider_tx_codes),
+            "PRVDR_TYPE_CD": random.choice(available_provider_type_codes),
+        }
+        generate_meta_sk_pair(obj)
+        provider_history.append(obj)
+        
 
     return provider_history
 
@@ -1616,6 +1617,39 @@ def add_meta_timestamps(obj, clm, max_date):
         if has_insrt_ts and random.random() > 0.8
         else None
     )
+
+
+def generate_meta_sk_pair(obj):
+
+    def encode(d):
+        d = d.date() if isinstance(d, datetime) else d
+        yyyymmdd = d.year * 10000 + d.month * 100 + d.day
+        base = (yyyymmdd - 19000000) * 1000
+        seq = random.randint(1, 999)
+        return base + seq
+
+    max_dt = datetime.fromisoformat(str(now))
+    min_dt = datetime(2010, 1, 1)
+
+
+    if random.random() < 0.05:
+        update_dt = faker.date_time_between_dates(min_dt, max_dt)
+        obj["META_SK"] = 501
+        obj["META_LST_UPDT_SK"] = encode(update_dt)
+        return
+
+    insert_dt = faker.date_time_between_dates(min_dt, max_dt)
+    obj["META_SK"] = encode(insert_dt)
+
+    roll = random.random()
+    if roll > 0.8:
+        update_dt = faker.date_time_between_dates(insert_dt, max_dt)
+        obj["META_LST_UPDT_SK"] = encode(update_dt)
+    elif roll > 0.6:
+        obj["META_LST_UPDT_SK"] = obj["META_SK"]
+    else:
+        obj["META_LST_UPDT_SK"] = 0
+
 
 
 def main():

@@ -10,6 +10,8 @@ from constants import (
     ALL_CLAIM_PARTITIONS,
     ALL_CLAIM_TYPE_CODES,
     ALTERNATE_DEFAULT_DATE,
+    BENEFICIARY_TABLE,
+    CLAIM_TABLE,
     COMBINED_CLAIM_PARTITION,
     DEATH_DATE_CUTOFF_YEARS,
     DEFAULT_MAX_DATE,
@@ -115,12 +117,14 @@ BATCH_ID = "batch_id"
 UPDATE_TIMESTAMP = "update_timestamp"
 ALIAS = "alias"
 INSERT_EXCLUDE = "insert_exclude"
+LAST_UPDATED_TIMESTAMP = "last_updated_timestamp"
 DERIVED = "derived"
 COLUMN_MAP = "column_map"
 FISS_CLM_SOURCE = "21000"
 MCS_CLM_SOURCE = "22000"
 VMS_CLM_SOURCE = "23000"
 NCH_CLM_SOURCE = "20000"
+
 
 ALIAS_CLM = "clm"
 ALIAS_DCMTN = "dcmtn"
@@ -138,6 +142,8 @@ ALIAS_XREF = "xref"
 ALIAS_LCTN_HSTRY = "lctn_hstry"
 ALIAS_CLM_GRP = "clm_grp"
 ALIAS_RLT_COND = "rltcond"
+ALIAS_PBP_NUM = "pbp_num"
+ALIAS_CNTRCT_SGMT = "sgmt"
 
 
 class IdrBaseModel(BaseModel, ABC):
@@ -145,6 +151,16 @@ class IdrBaseModel(BaseModel, ABC):
     @abstractmethod
     def table() -> str:
         """BFD table name populated by this model."""
+
+    @staticmethod
+    @abstractmethod
+    def last_updated_date_table() -> str:
+        """BFD table to keep track of last updated date for this model."""
+
+    @staticmethod
+    @abstractmethod
+    def last_updated_date_column() -> list[str]:
+        """BFD column to keep track of last updated date for this model."""
 
     @staticmethod
     def should_replace() -> bool:
@@ -208,6 +224,10 @@ class IdrBaseModel(BaseModel, ABC):
     @classmethod
     def batch_id_col(cls) -> str | None:
         return cls._single_or_default(BATCH_ID)
+
+    @classmethod
+    def last_updated_timestamp_col(cls) -> str | None:
+        return cls._single_or_default(LAST_UPDATED_TIMESTAMP)
 
     @classmethod
     def update_timestamp_col_alias(cls) -> list[str]:
@@ -283,9 +303,70 @@ def _deceased_bene_filter(alias: str) -> str:
     """
 
 
+def _idr_dates_from_meta_sk() -> str:
+    """
+    Generate SQL expressions to derive insert and update timestamps from META keys.
+
+    Assumptions about META_SK / META_LST_UPDT_SK format:
+      - The key encodes a date as: (YYYYMMDD - DATE_BASE_OFFSET) * DATE_SEQUENCE_DIVISOR + sequence
+      - The last 3 digits represent a sequence and are discarded
+      - Adding DATE_BASE_OFFSET restores a YYYYMMDD-formatted date
+    """
+    # Base offset added to reconstruct a YYYYMMDD date (e.g., 12501023 + 19000000 = 20250123)
+    date_base_offset = 19000000
+    # Divisor used to strip the sequence portion from the key
+    date_sequence_divisor = 1000
+    date_from_meta_sk = f"""(meta_sk / {date_sequence_divisor}) + {date_base_offset}"""
+    date_from_meta_updt_sk = (
+        f"""(meta_lst_updt_sk / {date_sequence_divisor}) + {date_base_offset}"""
+    )
+
+    # Logic for computing INSRT/UPDT timestamp on tables that don't have it based on META_SK
+    # META_SK is an IDR-derived field and the calculations here have no significance outside of
+    # IDR's internal encoding logic.
+    return f"""
+            meta_sk,
+            meta_lst_updt_sk,
+            -- When (META_SK = 501), fall back to META_LST_UPDT_SK.
+            CASE
+                WHEN meta_sk = 501 THEN
+                    TO_TIMESTAMP(
+                            TO_DATE(
+                                    TRUNC({date_from_meta_updt_sk})::text,
+                                    'YYYYMMDD'
+                            )::text || ' 00:00:00',
+                            'YYYY-MM-DD HH24:MI:SS'
+                    )
+                ELSE
+                    TO_TIMESTAMP(
+                            TO_DATE(
+                                    TRUNC({date_from_meta_sk})::text,
+                                    'YYYYMMDD'
+                            )::text || ' 00:00:00',
+                            'YYYY-MM-DD HH24:MI:SS'
+                    )
+                END AS idr_insrt_ts,
+        
+            CASE
+                WHEN meta_sk != 501 AND meta_lst_updt_sk > 0 THEN
+                    TO_TIMESTAMP(
+                            TO_DATE(
+                                    TRUNC({date_from_meta_updt_sk})::text,
+                                    'YYYYMMDD'
+                            )::text || ' 00:00:00',
+                            'YYYY-MM-DD HH24:MI:SS'
+                    )
+                ELSE NULL
+                END AS idr_updt_ts
+    """
+
+
 class IdrBeneficiary(IdrBaseModel):
     # columns from V2_MDCR_BENE_HSTRY
-    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, ALIAS: ALIAS_HSTRY}]
+    bene_sk: Annotated[
+        int,
+        {PRIMARY_KEY: True, BATCH_ID: True, ALIAS: ALIAS_HSTRY, LAST_UPDATED_TIMESTAMP: True},
+    ]
     bene_xref_efctv_sk: int
     bene_mbi_id: str
     bene_1st_name: str
@@ -333,11 +414,19 @@ class IdrBeneficiary(IdrBaseModel):
 
     @staticmethod
     def table() -> str:
-        return "idr.beneficiary"
+        return BENEFICIARY_TABLE
 
     @staticmethod
     def computed_keys() -> list[str]:
         return ["bene_xref_efctv_sk_computed"]
+
+    @staticmethod
+    def last_updated_date_table() -> str:
+        return BENEFICIARY_TABLE
+
+    @staticmethod
+    def last_updated_date_column() -> list[str]:
+        return ["bfd_patient_updated_ts"]
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
@@ -402,7 +491,7 @@ class IdrBeneficiary(IdrBaseModel):
 
 
 class IdrBeneficiaryMbiId(IdrBaseModel):
-    bene_mbi_id: Annotated[str, {PRIMARY_KEY: True}]
+    bene_mbi_id: Annotated[str, {PRIMARY_KEY: True, LAST_UPDATED_TIMESTAMP: True}]
     bene_mbi_efctv_dt: date
     bene_mbi_obslt_dt: Annotated[date, BeforeValidator(transform_null_date_to_max)]
     idr_ltst_trans_flg: Annotated[str, BeforeValidator(transform_null_string)]
@@ -416,6 +505,14 @@ class IdrBeneficiaryMbiId(IdrBaseModel):
     @staticmethod
     def table() -> str:
         return "idr.beneficiary_mbi_id"
+
+    @staticmethod
+    def last_updated_date_table() -> str:
+        return BENEFICIARY_TABLE
+
+    @staticmethod
+    def last_updated_date_column() -> list[str]:
+        return ["bfd_patient_updated_ts"]
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
@@ -441,6 +538,14 @@ class IdrBeneficiaryOvershareMbi(IdrBaseModel):
     @staticmethod
     def should_replace() -> bool:
         return True
+
+    @staticmethod
+    def last_updated_date_table() -> str:
+        return ""
+
+    @staticmethod
+    def last_updated_date_column() -> list[str]:
+        return []
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
@@ -472,7 +577,7 @@ class IdrBeneficiaryOvershareMbi(IdrBaseModel):
 
 
 class IdrBeneficiaryThirdParty(IdrBaseModel):
-    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
+    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, LAST_UPDATED_TIMESTAMP: True}]
     bene_buyin_cd: Annotated[str, BeforeValidator(transform_default_string)]
     bene_tp_type_cd: Annotated[str, {PRIMARY_KEY: True}]
     bene_rng_bgn_dt: Annotated[date, {PRIMARY_KEY: True}]
@@ -488,6 +593,17 @@ class IdrBeneficiaryThirdParty(IdrBaseModel):
     @staticmethod
     def table() -> str:
         return "idr.beneficiary_third_party"
+
+    @staticmethod
+    def last_updated_date_column() -> list[str]:
+        return [
+            "bfd_part_a_coverage_updated_ts",
+            "bfd_part_b_coverage_updated_ts",
+        ]
+
+    @staticmethod
+    def last_updated_date_table() -> str:
+        return BENEFICIARY_TABLE
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
@@ -509,7 +625,7 @@ class IdrBeneficiaryThirdParty(IdrBaseModel):
 
 
 class IdrBeneficiaryStatus(IdrBaseModel):
-    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
+    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, LAST_UPDATED_TIMESTAMP: True}]
     bene_mdcr_stus_cd: str
     mdcr_stus_bgn_dt: Annotated[date, {PRIMARY_KEY: True}]
     mdcr_stus_end_dt: Annotated[date, {PRIMARY_KEY: True}]
@@ -524,6 +640,17 @@ class IdrBeneficiaryStatus(IdrBaseModel):
     @staticmethod
     def table() -> str:
         return "idr.beneficiary_status"
+
+    @staticmethod
+    def last_updated_date_table() -> str:
+        return BENEFICIARY_TABLE
+
+    @staticmethod
+    def last_updated_date_column() -> list[str]:
+        return [
+            "bfd_part_a_coverage_updated_ts",
+            "bfd_part_b_coverage_updated_ts",
+        ]
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
@@ -545,7 +672,7 @@ class IdrBeneficiaryStatus(IdrBaseModel):
 
 
 class IdrBeneficiaryEntitlement(IdrBaseModel):
-    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
+    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, LAST_UPDATED_TIMESTAMP: True}]
     bene_rng_bgn_dt: Annotated[date, {PRIMARY_KEY: True}]
     bene_rng_end_dt: Annotated[date, {PRIMARY_KEY: True}]
     bene_mdcr_entlmt_type_cd: Annotated[str, {PRIMARY_KEY: True}]
@@ -562,6 +689,17 @@ class IdrBeneficiaryEntitlement(IdrBaseModel):
     @staticmethod
     def table() -> str:
         return "idr.beneficiary_entitlement"
+
+    @staticmethod
+    def last_updated_date_table() -> str:
+        return BENEFICIARY_TABLE
+
+    @staticmethod
+    def last_updated_date_column() -> list[str]:
+        return [
+            "bfd_part_a_coverage_updated_ts",
+            "bfd_part_b_coverage_updated_ts",
+        ]
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
@@ -583,7 +721,7 @@ class IdrBeneficiaryEntitlement(IdrBaseModel):
 
 
 class IdrBeneficiaryEntitlementReason(IdrBaseModel):
-    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
+    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, LAST_UPDATED_TIMESTAMP: True}]
     bene_rng_bgn_dt: Annotated[date, {PRIMARY_KEY: True}]
     bene_rng_end_dt: Annotated[date, {PRIMARY_KEY: True}]
     bene_mdcr_entlmt_rsn_cd: str
@@ -598,6 +736,17 @@ class IdrBeneficiaryEntitlementReason(IdrBaseModel):
     @staticmethod
     def table() -> str:
         return "idr.beneficiary_entitlement_reason"
+
+    @staticmethod
+    def last_updated_date_table() -> str:
+        return BENEFICIARY_TABLE
+
+    @staticmethod
+    def last_updated_date_column() -> list[str]:
+        return [
+            "bfd_part_a_coverage_updated_ts",
+            "bfd_part_b_coverage_updated_ts",
+        ]
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
@@ -619,7 +768,7 @@ class IdrBeneficiaryEntitlementReason(IdrBaseModel):
 
 
 class IdrBeneficiaryDualEligibility(IdrBaseModel):
-    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
+    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, LAST_UPDATED_TIMESTAMP: True}]
     bene_mdcd_elgblty_bgn_dt: Annotated[date, {PRIMARY_KEY: True}]
     bene_mdcd_elgblty_end_dt: date
     bene_dual_stus_cd: str
@@ -636,6 +785,16 @@ class IdrBeneficiaryDualEligibility(IdrBaseModel):
     @staticmethod
     def table() -> str:
         return "idr.beneficiary_dual_eligibility"
+
+    @staticmethod
+    def last_updated_date_table() -> str:
+        return BENEFICIARY_TABLE
+
+    @staticmethod
+    def last_updated_date_column() -> list[str]:
+        return [
+            "bfd_part_dual_coverage_updated_ts",
+        ]
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
@@ -656,67 +815,48 @@ class IdrBeneficiaryDualEligibility(IdrBaseModel):
         return [NON_CLAIM_PARTITION]
 
 
-class IdrElectionPeriodUsage(IdrBaseModel):
-    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
-    cntrct_pbp_sk: Annotated[int, {PRIMARY_KEY: True}]
-    bene_cntrct_num: str
-    bene_pbp_num: Annotated[str, BeforeValidator(transform_default_string)]
-    bene_elctn_enrlmt_disenrlmt_cd: str
-    bene_elctn_aplctn_dt: Annotated[date, BeforeValidator(transform_null_or_default_date_to_max)]
-    bene_enrlmt_efctv_dt: Annotated[date, {PRIMARY_KEY: True}]
-    idr_insrt_ts: Annotated[datetime, {BATCH_TIMESTAMP: True}]
-    idr_trans_efctv_ts: datetime
-    idr_trans_obslt_ts: datetime
-
-    @staticmethod
-    def table() -> str:
-        return "idr.election_period_usage"
-
-    @staticmethod
-    def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
-        # equivalent to "select distinct on", but Snowflake has different syntax for that,
-        # so it's unfortunately not portable
-        hstry = ALIAS_HSTRY
-        return f"""
-            WITH dupes as (
-                SELECT {{COLUMNS}}, ROW_NUMBER() OVER (
-                    PARTITION BY bene_sk, cntrct_pbp_sk, bene_enrlmt_efctv_dt
-                {{ORDER_BY}} DESC) as row_order
-                FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_elctn_prd_usg usg
-                {{WHERE_CLAUSE}}
-                AND NOT EXISTS (
-                    {_deceased_bene_filter(hstry)}
-                    AND {hstry}.bene_sk = usg.bene_sk
-                )
-                {{ORDER_BY}}
-            )
-            SELECT {{COLUMNS}} FROM dupes WHERE row_order = 1
-            """
-
-    @staticmethod
-    def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
-        return [NON_CLAIM_PARTITION]
-
-
 class IdrContractPbpNumber(IdrBaseModel):
-    cntrct_pbp_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
+    cntrct_pbp_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, ALIAS: ALIAS_PBP_NUM}]
     cntrct_drug_plan_ind_cd: Annotated[str, BeforeValidator(transform_default_string)]
     cntrct_pbp_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
     cntrct_pbp_name: Annotated[str, BeforeValidator(transform_null_string)]
     cntrct_num: Annotated[str, BeforeValidator(transform_default_string)]
     cntrct_pbp_num: Annotated[str, BeforeValidator(transform_default_string)]
+    cntrct_pbp_sgmt_num: Annotated[
+        str, ALIAS:ALIAS_CNTRCT_SGMT, BeforeValidator(transform_default_string)
+    ]
 
     @staticmethod
     def table() -> str:
         return "idr.contract_pbp_number"
 
     @staticmethod
+    def last_updated_date_table() -> str:
+        return ""
+
+    @staticmethod
+    def last_updated_date_column() -> list[str]:
+        return []
+
+    @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
+        pbp_num = ALIAS_PBP_NUM
         return f"""
-        SELECT {{COLUMNS}}
-        FROM cms_vdm_view_mdcr_prd.v2_mdcr_cntrct_pbp_num
-        WHERE cntrct_pbp_sk_obslt_dt >= '{DEFAULT_MAX_DATE}'
-        """
+            WITH sgmt as (
+                SELECT
+                    cntrct_pbp_sk,
+                    cntrct_pbp_sgmt_num
+                FROM cms_vdm_view_mdcr_prd.v2_mdcr_cntrct_pbp_sgmt
+                GROUP BY cntrct_pbp_sk, cntrct_pbp_sgmt_num
+                HAVING COUNT(*) = 1
+            )
+            SELECT {{COLUMNS}}
+            FROM cms_vdm_view_mdcr_prd.v2_mdcr_cntrct_pbp_num {pbp_num}
+            LEFT JOIN sgmt
+                    ON {pbp_num}.cntrct_pbp_sk = sgmt.cntrct_pbp_sk 
+            WHERE cntrct_pbp_sk_obslt_dt >= '{DEFAULT_MAX_DATE}'
+            AND {pbp_num}.cntrct_pbp_sk != 0
+            """
 
     @staticmethod
     def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
@@ -744,6 +884,14 @@ class IdrContractPbpContact(IdrBaseModel):
         return "idr.contract_pbp_contact"
 
     @staticmethod
+    def last_updated_date_table() -> str:
+        return ""
+
+    @staticmethod
+    def last_updated_date_column() -> list[str]:
+        return []
+
+    @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
         return f"""
             WITH contract_contacts as (
@@ -762,6 +910,160 @@ class IdrContractPbpContact(IdrBaseModel):
             )
             SELECT {{COLUMNS}} FROM contract_contacts WHERE row_order = 1
         """
+
+    @staticmethod
+    def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+        return [NON_CLAIM_PARTITION]
+
+
+class IdrBeneficiaryMaPartDEnrollment(IdrBaseModel):
+    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, LAST_UPDATED_TIMESTAMP: True}]
+    cntrct_pbp_sk: int
+    bene_pbp_num: str
+    bene_enrlmt_bgn_dt: Annotated[date, {PRIMARY_KEY: True}]
+    bene_enrlmt_end_dt: Annotated[date, BeforeValidator(transform_null_date_to_max)]
+    bene_cntrct_num: str
+    bene_cvrg_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
+    bene_enrlmt_pgm_type_cd: Annotated[str, {PRIMARY_KEY: True}]
+    bene_enrlmt_emplr_sbsdy_sw: Annotated[str, BeforeValidator(transform_default_string)]
+    idr_ltst_trans_flg: str
+    idr_trans_efctv_ts: datetime
+    idr_trans_obslt_ts: datetime
+    idr_insrt_ts: Annotated[datetime, {BATCH_TIMESTAMP: True}]
+    idr_updt_ts: Annotated[
+        datetime, {UPDATE_TIMESTAMP: True}, BeforeValidator(transform_null_date_to_min)
+    ]
+
+    @staticmethod
+    def table() -> str:
+        return "idr.beneficiary_ma_part_d_enrollment"
+
+    @staticmethod
+    def last_updated_date_table() -> str:
+        return BENEFICIARY_TABLE
+
+    @staticmethod
+    def last_updated_date_column() -> list[str]:
+        return [
+            "bfd_part_c_coverage_updated_ts",
+            "bfd_part_d_coverage_updated_ts",
+        ]
+
+    @staticmethod
+    def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
+        # There are only a very few instances where non-obsolete records have a
+        # bene_enrlmt_pgm_type_cd set to '~' and these are all from the 80s,
+        # so it should be safe to filter these.
+        hstry = ALIAS_HSTRY
+        return f"""
+            SELECT {{COLUMNS}}
+            FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_mapd_enrlmt enrlmt
+            {{WHERE_CLAUSE}}
+            AND NOT EXISTS (
+                {_deceased_bene_filter(hstry)}
+                AND {hstry}.bene_sk = enrlmt.bene_sk
+            )
+            AND idr_trans_obslt_ts >= '{DEFAULT_MAX_DATE}'
+            AND bene_enrlmt_pgm_type_cd != '~'
+            {{ORDER_BY}}
+        """
+
+    @staticmethod
+    def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+        return [NON_CLAIM_PARTITION]
+
+
+class IdrBeneficiaryMaPartDEnrollmentRx(IdrBaseModel):
+    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, LAST_UPDATED_TIMESTAMP: True}]
+    cntrct_pbp_sk: int
+    bene_cntrct_num: Annotated[str, {PRIMARY_KEY: True}]
+    bene_pbp_num: Annotated[str, {PRIMARY_KEY: True}]
+    bene_enrlmt_bgn_dt: Annotated[date, {PRIMARY_KEY: True}]
+    bene_pdp_enrlmt_mmbr_id_num: Annotated[str, BeforeValidator(transform_default_string)]
+    bene_pdp_enrlmt_grp_num: Annotated[str, BeforeValidator(transform_default_string)]
+    bene_pdp_enrlmt_prcsr_num: Annotated[str, BeforeValidator(transform_default_string)]
+    bene_pdp_enrlmt_bank_id_num: Annotated[str, BeforeValidator(transform_default_string)]
+    bene_enrlmt_pdp_rx_info_bgn_dt: Annotated[date, {PRIMARY_KEY: True}]
+    idr_ltst_trans_flg: str
+    idr_trans_efctv_ts: datetime
+    idr_trans_obslt_ts: datetime
+    idr_insrt_ts: Annotated[datetime, {BATCH_TIMESTAMP: True}]
+    idr_updt_ts: Annotated[
+        datetime, {UPDATE_TIMESTAMP: True}, BeforeValidator(transform_null_date_to_min)
+    ]
+
+    @staticmethod
+    def table() -> str:
+        return "idr.beneficiary_ma_part_d_enrollment_rx"
+
+    @staticmethod
+    def last_updated_date_table() -> str:
+        return BENEFICIARY_TABLE
+
+    @staticmethod
+    def last_updated_date_column() -> list[str]:
+        return ["bfd_part_d_coverage_updated_ts"]
+
+    @staticmethod
+    def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
+        hstry = ALIAS_HSTRY
+        return f"""
+                SELECT {{COLUMNS}}
+                FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_mapd_enrlmt_rx enrlmt_rx
+                {{WHERE_CLAUSE}}
+                AND NOT EXISTS (
+                    {_deceased_bene_filter(hstry)}
+                    AND {hstry}.bene_sk = enrlmt_rx.bene_sk
+                )
+                AND idr_trans_obslt_ts >= '{DEFAULT_MAX_DATE}'
+                {{ORDER_BY}}
+            """
+
+    @staticmethod
+    def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+        return [NON_CLAIM_PARTITION]
+
+
+class IdrBeneficiaryLowIncomeSubsidy(IdrBaseModel):
+    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, LAST_UPDATED_TIMESTAMP: True}]
+    bene_rng_bgn_dt: Annotated[datetime, {PRIMARY_KEY: True}]
+    bene_rng_end_dt: date
+    bene_lis_copmt_lvl_cd: str
+    bene_lis_ptd_prm_pct: str
+    idr_ltst_trans_flg: str
+    idr_trans_efctv_ts: datetime
+    idr_trans_obslt_ts: datetime
+    idr_insrt_ts: Annotated[datetime, {BATCH_TIMESTAMP: True}]
+    idr_updt_ts: Annotated[
+        datetime, {UPDATE_TIMESTAMP: True}, BeforeValidator(transform_null_date_to_min)
+    ]
+
+    @staticmethod
+    def table() -> str:
+        return "idr.beneficiary_low_income_subsidy"
+
+    @staticmethod
+    def last_updated_date_table() -> str:
+        return BENEFICIARY_TABLE
+
+    @staticmethod
+    def last_updated_date_column() -> list[str]:
+        return ["bfd_part_d_coverage_updated_ts"]
+
+    @staticmethod
+    def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
+        hstry = ALIAS_HSTRY
+        return f"""
+                SELECT {{COLUMNS}}
+                FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_lis bene_lis
+                {{WHERE_CLAUSE}}
+                AND NOT EXISTS (
+                    {_deceased_bene_filter(hstry)}
+                    AND {hstry}.bene_sk = bene_lis.bene_sk
+                )
+                AND idr_trans_obslt_ts >= '{DEFAULT_MAX_DATE}'
+                {{ORDER_BY}}
+            """
 
     @staticmethod
     def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
@@ -821,7 +1123,8 @@ def _claim_filter(start_time: datetime, partition: LoadPartition) -> str:
     )
     return f"""
     (
-        {clm}.clm_type_cd IN ({",".join([str(c) for c in claim_type_codes])})
+        {clm}.bene_sk != 0
+        AND {clm}.clm_type_cd IN ({",".join([str(c) for c in claim_type_codes])})
         {clm_from_filter}
         {latest_claim_ind}
         {pac_filter}
@@ -831,7 +1134,7 @@ def _claim_filter(start_time: datetime, partition: LoadPartition) -> str:
 
 
 class IdrClaim(IdrBaseModel):
-    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
+    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, LAST_UPDATED_TIMESTAMP: True}]
     geo_bene_sk: Annotated[int, {ALIAS: ALIAS_CLM}]
     clm_dt_sgntr_sk: Annotated[int, {ALIAS: ALIAS_CLM}]
     clm_type_cd: Annotated[int, {ALIAS: ALIAS_CLM}]
@@ -952,7 +1255,15 @@ class IdrClaim(IdrBaseModel):
 
     @staticmethod
     def table() -> str:
-        return "idr.claim"
+        return CLAIM_TABLE
+
+    @staticmethod
+    def last_updated_date_table() -> str:
+        return CLAIM_TABLE
+
+    @staticmethod
+    def last_updated_date_column() -> list[str]:
+        return ["bfd_claim_updated_ts"]
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
@@ -976,7 +1287,10 @@ class IdrClaim(IdrBaseModel):
 
 
 class IdrClaimDateSignature(IdrBaseModel):
-    clm_dt_sgntr_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, ALIAS: ALIAS_SGNTR}]
+    clm_dt_sgntr_sk: Annotated[
+        int,
+        {PRIMARY_KEY: True, BATCH_ID: True, ALIAS: ALIAS_SGNTR, LAST_UPDATED_TIMESTAMP: True},
+    ]
     clm_cms_proc_dt: Annotated[date, BeforeValidator(transform_null_or_default_date_to_max)]
     clm_actv_care_from_dt: Annotated[date, BeforeValidator(transform_null_or_default_date_to_max)]
     clm_dschrg_dt: Annotated[date, BeforeValidator(transform_null_or_default_date_to_max)]
@@ -1005,6 +1319,14 @@ class IdrClaimDateSignature(IdrBaseModel):
         return "idr.claim_date_signature"
 
     @staticmethod
+    def last_updated_date_table() -> str:
+        return CLAIM_TABLE
+
+    @staticmethod
+    def last_updated_date_column() -> list[str]:
+        return ["bfd_claim_updated_ts"]
+
+    @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
         clm = ALIAS_CLM
         sgntr = ALIAS_SGNTR
@@ -1029,7 +1351,7 @@ class IdrClaimDateSignature(IdrBaseModel):
 
 
 class IdrClaimFiss(IdrBaseModel):
-    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
+    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, LAST_UPDATED_TIMESTAMP: True}]
     clm_crnt_stus_cd: Annotated[str, BeforeValidator(transform_null_string)]
     idr_insrt_ts: Annotated[
         datetime,
@@ -1045,6 +1367,14 @@ class IdrClaimFiss(IdrBaseModel):
     @staticmethod
     def table() -> str:
         return "idr.claim_fiss"
+
+    @staticmethod
+    def last_updated_date_table() -> str:
+        return CLAIM_TABLE
+
+    @staticmethod
+    def last_updated_date_column() -> list[str]:
+        return ["bfd_claim_updated_ts"]
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
@@ -1068,7 +1398,7 @@ class IdrClaimFiss(IdrBaseModel):
 
 
 class IdrClaimInstitutional(IdrBaseModel):
-    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
+    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, LAST_UPDATED_TIMESTAMP: True}]
     clm_admsn_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
     bene_ptnt_stus_cd: Annotated[str, BeforeValidator(transform_default_string)]
     dgns_drg_cd: int
@@ -1130,6 +1460,14 @@ class IdrClaimInstitutional(IdrBaseModel):
         return "idr.claim_institutional"
 
     @staticmethod
+    def last_updated_date_table() -> str:
+        return CLAIM_TABLE
+
+    @staticmethod
+    def last_updated_date_column() -> list[str]:
+        return ["bfd_claim_updated_ts"]
+
+    @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
         clm = ALIAS_CLM
         instnl = ALIAS_INSTNL
@@ -1151,7 +1489,9 @@ class IdrClaimInstitutional(IdrBaseModel):
 
 
 class IdrClaimItem(IdrBaseModel):
-    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, ALIAS: ALIAS_CLM}]
+    clm_uniq_id: Annotated[
+        int, {PRIMARY_KEY: True, BATCH_ID: True, ALIAS: ALIAS_CLM, LAST_UPDATED_TIMESTAMP: True}
+    ]
     bfd_row_id: Annotated[int, {PRIMARY_KEY: True, ALIAS: ALIAS_CLM_GRP}]
     # columns from V2_MDCR_CLM_LINE
     clm_line_num: Annotated[int, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_null_int)]
@@ -1316,6 +1656,14 @@ class IdrClaimItem(IdrBaseModel):
     @staticmethod
     def table() -> str:
         return "idr.claim_item"
+
+    @staticmethod
+    def last_updated_date_table() -> str:
+        return CLAIM_TABLE
+
+    @staticmethod
+    def last_updated_date_column() -> list[str]:
+        return ["bfd_claim_updated_ts"]
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:
@@ -1492,7 +1840,7 @@ def transform_default_hipps_code(value: str | None) -> str:
 
 
 class IdrClaimLineInstitutional(IdrBaseModel):
-    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
+    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, LAST_UPDATED_TIMESTAMP: True}]
     clm_line_num: Annotated[int, {PRIMARY_KEY: True}]
     clm_rev_apc_hipps_cd: Annotated[str, BeforeValidator(transform_default_hipps_code)]
     clm_otaf_one_ind_cd: Annotated[str, BeforeValidator(transform_default_string)]
@@ -1524,8 +1872,16 @@ class IdrClaimLineInstitutional(IdrBaseModel):
     ]
 
     @staticmethod
+    def last_updated_date_table() -> str:
+        return CLAIM_TABLE
+
+    @staticmethod
     def table() -> str:
         return "idr.claim_line_institutional"
+
+    @staticmethod
+    def last_updated_date_column() -> list[str]:
+        return ["bfd_claim_updated_ts"]
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
@@ -1570,6 +1926,14 @@ class IdrClaimAnsiSignature(IdrBaseModel):
         return "idr.claim_ansi_signature"
 
     @staticmethod
+    def last_updated_date_table() -> str:
+        return ""
+
+    @staticmethod
+    def last_updated_date_column() -> list[str]:
+        return []
+
+    @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
         return """
             SELECT {COLUMNS_NO_ALIAS}
@@ -1583,7 +1947,7 @@ class IdrClaimAnsiSignature(IdrBaseModel):
 
 
 class IdrClaimProfessional(IdrBaseModel):
-    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
+    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, LAST_UPDATED_TIMESTAMP: True}]
     clm_carr_pmt_dnl_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_clncl_tril_num: Annotated[str, BeforeValidator(transform_default_string)]
     clm_mdcr_prfnl_prmry_pyr_amt: Annotated[float, BeforeValidator(transform_null_float)]
@@ -1617,6 +1981,14 @@ class IdrClaimProfessional(IdrBaseModel):
     @staticmethod
     def table() -> str:
         return "idr.claim_professional"
+
+    @staticmethod
+    def last_updated_date_table() -> str:
+        return CLAIM_TABLE
+
+    @staticmethod
+    def last_updated_date_column() -> list[str]:
+        return ["bfd_claim_updated_ts"]
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
@@ -1682,7 +2054,7 @@ class IdrClaimProfessional(IdrBaseModel):
 
 
 class IdrClaimLineProfessional(IdrBaseModel):
-    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
+    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, LAST_UPDATED_TIMESTAMP: True}]
     clm_line_num: Annotated[int, {PRIMARY_KEY: True}]
     clm_bene_prmry_pyr_pd_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_fed_type_srvc_cd: Annotated[str, BeforeValidator(transform_default_string)]
@@ -1722,6 +2094,14 @@ class IdrClaimLineProfessional(IdrBaseModel):
         return "idr.claim_line_professional"
 
     @staticmethod
+    def last_updated_date_table() -> str:
+        return CLAIM_TABLE
+
+    @staticmethod
+    def last_updated_date_column() -> list[str]:
+        return ["bfd_claim_updated_ts"]
+
+    @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
         clm = ALIAS_CLM
         prfnl = ALIAS_PRFNL
@@ -1743,7 +2123,9 @@ class IdrClaimLineProfessional(IdrBaseModel):
 
 
 class IdrClaimLineRx(IdrBaseModel):
-    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, ALIAS: ALIAS_CLM}]
+    clm_uniq_id: Annotated[
+        int, {PRIMARY_KEY: True, BATCH_ID: True, ALIAS: ALIAS_CLM, LAST_UPDATED_TIMESTAMP: True}
+    ]
     clm_line_num: Annotated[int, {PRIMARY_KEY: True, ALIAS: ALIAS_RX_LINE}]
     clm_brnd_gnrc_cd: Annotated[str, BeforeValidator(transform_null_string)]
     clm_cmpnd_cd: Annotated[str, BeforeValidator(transform_null_string)]
@@ -1776,18 +2158,26 @@ class IdrClaimLineRx(IdrBaseModel):
     clm_phrmcy_price_dscnt_at_pos_amt: Annotated[float, BeforeValidator(transform_null_float)]
     idr_insrt_ts: Annotated[
         datetime,
-        {BATCH_TIMESTAMP: True, ALIAS: ALIAS_LINE},
+        {BATCH_TIMESTAMP: True, ALIAS: ALIAS_RX_LINE},
         BeforeValidator(transform_null_date_to_min),
     ]
     idr_updt_ts: Annotated[
         datetime,
-        {UPDATE_TIMESTAMP: True, ALIAS: ALIAS_LINE},
+        {UPDATE_TIMESTAMP: True, ALIAS: ALIAS_RX_LINE},
         BeforeValidator(transform_null_date_to_min),
     ]
 
     @staticmethod
     def table() -> str:
         return "idr.claim_line_rx"
+
+    @staticmethod
+    def last_updated_date_column() -> list[str]:
+        return ["bfd_claim_updated_ts"]
+
+    @staticmethod
+    def last_updated_date_table() -> str:
+        return CLAIM_TABLE
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
@@ -1833,15 +2223,35 @@ class IdrProviderHistory(IdrBaseModel):
     prvdr_lgl_name: Annotated[str, BeforeValidator(transform_null_string)]
     prvdr_emplr_id_num: Annotated[str, BeforeValidator(transform_null_string)]
     prvdr_last_name: Annotated[str, BeforeValidator(transform_null_string)]
+    idr_insrt_ts: Annotated[
+        datetime,
+        {BATCH_TIMESTAMP: True, DERIVED: True},
+        BeforeValidator(transform_null_date_to_min),
+    ]
+    idr_updt_ts: Annotated[
+        datetime,
+        {UPDATE_TIMESTAMP: True, DERIVED: True},
+        BeforeValidator(transform_null_date_to_min),
+    ]
 
     @staticmethod
     def table() -> str:
         return "idr.provider_history"
 
     @staticmethod
+    def last_updated_date_column() -> list[str]:
+        return []
+
+    @staticmethod
+    def last_updated_date_table() -> str:
+        return ""
+
+    @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
         return f"""
-            SELECT {{COLUMNS}}
+            SELECT
+            {_idr_dates_from_meta_sk()},
+            {{COLUMNS}}
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_prvdr_hstry
             WHERE prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
         """
@@ -1866,6 +2276,14 @@ class LoadProgress(IdrBaseModel):
     @staticmethod
     def table() -> str:
         return "idr.load_progress"
+
+    @staticmethod
+    def last_updated_date_column() -> list[str]:
+        return []
+
+    @staticmethod
+    def last_updated_date_table() -> str:
+        return ""
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004

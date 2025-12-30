@@ -7,12 +7,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Slf4jReporter;
 import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
 import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
-import com.codahale.metrics.newrelic.NewRelicReporter;
 import com.google.common.annotations.VisibleForTesting;
-import com.newrelic.telemetry.Attributes;
-import com.newrelic.telemetry.OkHttpPoster;
-import com.newrelic.telemetry.SenderConfiguration;
-import com.newrelic.telemetry.metrics.MetricBatchSender;
 import com.zaxxer.hikari.HikariDataSource;
 import com.zaxxer.hikari.pool.HikariProxyConnection;
 import gov.cms.bfd.pipeline.ccw.rif.CcwRifLoadJob;
@@ -40,7 +35,6 @@ import gov.cms.bfd.sharedutils.config.AwsClientConfig;
 import gov.cms.bfd.sharedutils.config.ConfigException;
 import gov.cms.bfd.sharedutils.config.ConfigLoader;
 import gov.cms.bfd.sharedutils.config.ConfigLoaderSource;
-import gov.cms.bfd.sharedutils.config.MetricOptions;
 import gov.cms.bfd.sharedutils.database.HikariDataSourceFactory;
 import gov.cms.bfd.sharedutils.events.DoNothingEventPublisher;
 import gov.cms.bfd.sharedutils.events.EventPublisher;
@@ -198,10 +192,9 @@ public final class PipelineApplication {
       LOGGER.warn("Invalid app configuration.", e);
       throw new FatalAppException("Invalid app configuration", e, EXIT_CODE_BAD_CONFIG);
     }
-    final MetricOptions metricOptions = appConfig.getMetricOptions();
     final var appMeters = new CompositeMeterRegistry();
     final var appMetrics = new MetricRegistry();
-    configureMetrics(metricOptions, configLoader, appMeters, appMetrics);
+    configureMetrics(configLoader, appMeters, appMetrics);
 
     // Create a pooled data source for use by any registered jobs.
     final HikariDataSourceFactory dataSourceFactory = appConfig.createHikariDataSourceFactory();
@@ -213,23 +206,15 @@ public final class PipelineApplication {
   }
 
   /**
-   * Configures all of our metrics. This can include NewRelic, CloudWatch, JMX, and Slf4j.
+   * Configures all of our metrics. This can include CloudWatch, JMX, and Slf4j.
    *
-   * @param metricOptions metric related configuration
    * @param configLoader used to obtain additional settings
    * @param appMeters micrometer registry
    * @param appMetrics drop wizard registry
    */
   private void configureMetrics(
-      MetricOptions metricOptions,
-      ConfigLoader configLoader,
-      CompositeMeterRegistry appMeters,
-      MetricRegistry appMetrics) {
+      ConfigLoader configLoader, CompositeMeterRegistry appMeters, MetricRegistry appMetrics) {
     final var micrometerClock = io.micrometer.core.instrument.Clock.SYSTEM;
-    final var commonTags =
-        List.of(
-            Tag.of("host", metricOptions.getHostname().orElse("unknown")),
-            Tag.of("appName", metricOptions.getNewRelicAppName().orElse("unknown")));
 
     final var cloudwatchRegistryConfig =
         AppConfiguration.loadCloudWatchRegistryConfig(configLoader);
@@ -256,32 +241,7 @@ public final class PipelineApplication {
     Slf4jReporter appMetricsReporter =
         Slf4jReporter.forRegistry(appMetrics).outputTo(LOGGER).build();
 
-    if (metricOptions.getNewRelicMetricKey().isPresent()) {
-      SenderConfiguration configuration =
-          SenderConfiguration.builder(
-                  metricOptions.getNewRelicMetricHost().orElse(null),
-                  metricOptions.getNewRelicMetricPath().orElse(null))
-              .httpPoster(new OkHttpPoster())
-              .apiKey(metricOptions.getNewRelicMetricKey().orElse(null))
-              .build();
-
-      MetricBatchSender metricBatchSender = MetricBatchSender.create(configuration);
-
-      Attributes commonAttributes =
-          new Attributes()
-              .put("host", metricOptions.getHostname().orElse("unknown"))
-              .put("appName", metricOptions.getNewRelicAppName().orElse(null));
-
-      NewRelicReporter newRelicReporter =
-          NewRelicReporter.build(appMetrics, metricBatchSender)
-              .commonAttributes(commonAttributes)
-              .build();
-
-      newRelicReporter.start(metricOptions.getNewRelicMetricPeriod().orElse(15), TimeUnit.SECONDS);
-      LOGGER.info("Added NewRelicReporter.");
-    }
-
-    appMeters.add(getDropWizardMeterRegistry(appMetrics, commonTags, micrometerClock));
+    appMeters.add(getDropWizardMeterRegistry(appMetrics, List.of(), micrometerClock));
     LOGGER.info("Added DropwizardMeterRegistry.");
 
     new JvmMemoryMetrics().bindTo(appMeters);

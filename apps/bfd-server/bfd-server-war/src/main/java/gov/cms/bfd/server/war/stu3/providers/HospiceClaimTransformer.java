@@ -5,7 +5,6 @@ import static java.util.Objects.requireNonNull;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.HospiceClaim;
 import gov.cms.bfd.model.rif.entities.HospiceClaimLine;
@@ -71,7 +70,6 @@ final class HospiceClaimTransformer implements ClaimTransformerInterface {
    * @param includeTaxNumber exists to satisfy {@link ClaimTransformerInterface}
    * @return a FHIR {@link ExplanationOfBenefit} resource.
    */
-  @Trace
   @Override
   public ExplanationOfBenefit transform(
       ClaimWithSecurityTags<?> claimEntity, boolean includeTaxNumber) {

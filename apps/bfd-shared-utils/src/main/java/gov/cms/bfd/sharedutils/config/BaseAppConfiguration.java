@@ -12,9 +12,6 @@ import lombok.Getter;
  */
 public abstract class BaseAppConfiguration extends BaseConfiguration {
 
-  /** Object for capturing the metrics data. */
-  @Getter private final MetricOptions metricOptions;
-
   /** Holds the configured options for the database connection. */
   @Getter private final DatabaseOptions databaseOptions;
 
@@ -24,16 +21,11 @@ public abstract class BaseAppConfiguration extends BaseConfiguration {
   /**
    * Initializes an instance.
    *
-   * @param metricOptions the value to use for {@link #metricOptions}
    * @param databaseOptions the value to use for {@link #databaseOptions} flyway looks for migration
    *     scripts
    * @param awsClientConfig common configuration settings for all AWS clients
    */
-  protected BaseAppConfiguration(
-      MetricOptions metricOptions,
-      DatabaseOptions databaseOptions,
-      AwsClientConfig awsClientConfig) {
-    this.metricOptions = Preconditions.checkNotNull(metricOptions);
+  protected BaseAppConfiguration(DatabaseOptions databaseOptions, AwsClientConfig awsClientConfig) {
     this.databaseOptions = Preconditions.checkNotNull(databaseOptions);
     this.awsClientConfig = Preconditions.checkNotNull(awsClientConfig);
   }
@@ -64,8 +56,6 @@ public abstract class BaseAppConfiguration extends BaseConfiguration {
     StringBuilder builder = new StringBuilder();
     builder.append(", databaseOptions=");
     builder.append(databaseOptions);
-    builder.append(", metricsOptions=");
-    builder.append(metricOptions);
     builder.append(", awsClientConfig=");
     builder.append(awsClientConfig);
     return builder.toString();

@@ -4,7 +4,7 @@
     <parent>
         <groupId>gov.cms.bfd</groupId>
         <artifactId>bfd-parent</artifactId>
-        <version>2.229.0-SNAPSHOT</version>
+        <version>2.230.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>bfd-shared-test-utils</artifactId>
@@ -53,10 +53,6 @@
                     for details. -->
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.newrelic.telemetry</groupId>
-            <artifactId>dropwizard-metrics-newrelic</artifactId>
         </dependency>
         <dependency>
             <!-- Used to run our unit and integration tests. -->

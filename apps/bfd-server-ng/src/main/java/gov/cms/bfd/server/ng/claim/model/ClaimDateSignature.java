@@ -6,7 +6,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import java.time.ZonedDateTime;
 import lombok.Getter;
 
 /** Claim date signature table. */
@@ -23,7 +22,4 @@ public class ClaimDateSignature {
 
   @OneToOne(mappedBy = "claimDateSignature")
   private Claim claim;
-
-  @Column(name = "bfd_updated_ts", nullable = false)
-  private ZonedDateTime bfdUpdatedTimestamp;
 }

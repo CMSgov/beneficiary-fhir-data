@@ -514,7 +514,7 @@
 /bfd/${env}/server/nonsensitive/ecs/capacity/min: 6
 /bfd/${env}/server/nonsensitive/ecs/capacity/max: 24
 /bfd/${env}/server/nonsensitive/ecs/resources/cpu: 4096
-/bfd/${env}/server/nonsensitive/ecs/resources/memory: 8192
+/bfd/${env}/server/nonsensitive/ecs/resources/memory: 16384
 /bfd/${env}/server/nonsensitive/ecs/capacity_provider/FARGATE/base: 3
 /bfd/${env}/server/nonsensitive/ecs/capacity_provider/FARGATE/weight: 0
 /bfd/${env}/server/nonsensitive/ecs/capacity_provider/FARGATE_SPOT/base: 0

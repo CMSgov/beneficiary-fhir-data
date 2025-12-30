@@ -8,7 +8,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
-import java.time.ZonedDateTime;
 import java.util.Optional;
 import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
@@ -39,9 +38,6 @@ public class ClaimLineInstitutional {
 
   @OneToOne(mappedBy = "claimLineInstitutional")
   private ClaimItem claimLine;
-
-  @Column(name = "bfd_updated_ts")
-  private ZonedDateTime bfdUpdatedTimestamp;
 
   /**
    * Return claim ANSI signature data if available.
