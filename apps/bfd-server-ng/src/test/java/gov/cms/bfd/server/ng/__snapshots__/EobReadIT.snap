@@ -2496,6 +2496,54 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
+    }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 4517.0
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "priorpayerpaid",
+          "display" : "Prior payer paid",
+          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+        }, {
+          "code" : "CLM_BENE_PRMRY_PYR_PD_AMT",
+          "display" : "Line Primary Payer Paid Amount",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 0.0
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "discount",
+          "display" : "Discount",
+          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+        }, {
+          "code" : "CLM_LINE_DMERC_SCRN_SVGS_AMT",
+          "display" : "Screen Savings Amount",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 0.0
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "eligible",
+          "display" : "Eligible Amount",
+          "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+        }, {
+          "code" : "CLM_LINE_PRFNL_DME_PRICE_AMT",
+          "display" : "Purchase Price Amount",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
     } ],
     "modifier" : [ {
       "coding" : [ {
@@ -3604,6 +3652,54 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
         "coding" : [ {
           "code" : "CLM_MDCR_PRMRY_PYR_ALOWD_AMT",
           "display" : "Line Primary Payer Allowed Amount",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 4517.0
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "priorpayerpaid",
+          "display" : "Prior payer paid",
+          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+        }, {
+          "code" : "CLM_BENE_PRMRY_PYR_PD_AMT",
+          "display" : "Line Primary Payer Paid Amount",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 0.0
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "discount",
+          "display" : "Discount",
+          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+        }, {
+          "code" : "CLM_LINE_DMERC_SCRN_SVGS_AMT",
+          "display" : "Screen Savings Amount",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 0.0
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "eligible",
+          "display" : "Eligible Amount",
+          "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+        }, {
+          "code" : "CLM_LINE_PRFNL_DME_PRICE_AMT",
+          "display" : "Purchase Price Amount",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }

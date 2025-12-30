@@ -2,9 +2,14 @@ package gov.cms.bfd.server.ng.claim.model;
 
 import gov.cms.bfd.server.ng.converter.NonZeroDoubleConverter;
 import gov.cms.bfd.server.ng.util.SystemUrls;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.Optional;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.*;
@@ -30,17 +35,7 @@ public class ClaimLineProfessional {
   @OneToOne(mappedBy = "claimLineProfessional")
   private ClaimItem claimLine;
 
-  @Column(name = "clm_line_carr_clncl_chrg_amt")
-  private double carrierClinicalChargeAmount;
-
-  @Column(name = "clm_line_carr_psych_ot_lmt_amt")
-  private double therapyAmountAppliedToLimit;
-
-  @Column(name = "clm_line_prfnl_intrst_amt")
-  private double professionalInterestAmount;
-
-  @Column(name = "clm_mdcr_prmry_pyr_alowd_amt")
-  private double primaryPayerAllowedAmount;
+  @Embedded private ClaimLineAdjudicationChargeProfessional claimLineAdjudicationChargeProfessional;
 
   /**
    * Return claim observation data if available.
@@ -77,17 +72,5 @@ public class ClaimLineProfessional {
         });
 
     return Optional.of(observation);
-  }
-
-  List<ExplanationOfBenefit.AdjudicationComponent> toFhirAdjudication() {
-    return List.of(
-        AdjudicationChargeType.LINE_PROFESSIONAL_CARRIER_CLINICAL_CHARGE_AMOUNT.toFhirAdjudication(
-            carrierClinicalChargeAmount),
-        AdjudicationChargeType.LINE_PROFESSIONAL_THERAPY_LMT_AMOUNT.toFhirAdjudication(
-            therapyAmountAppliedToLimit),
-        AdjudicationChargeType.LINE_PROFESSIONAL_INTEREST_AMOUNT.toFhirAdjudication(
-            professionalInterestAmount),
-        AdjudicationChargeType.LINE_PROFESSIONAL_PRIMARY_PAYER_ALLOWED_AMOUNT.toFhirAdjudication(
-            primaryPayerAllowedAmount));
   }
 }

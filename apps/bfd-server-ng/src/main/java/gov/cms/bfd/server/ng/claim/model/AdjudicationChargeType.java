@@ -406,7 +406,25 @@ enum AdjudicationChargeType {
   LINE_PROVIDER_OBLIGATION_FULL_AMOUNT(
       SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
       "CLM_LINE_OTAF_AMT",
-      "Provider Obligation To Accept as Full Amount");
+      "Provider Obligation To Accept as Full Amount"),
+  LINE_PROFESSIONAL_PRIMARY_PAYER_PAID_AMOUNT(
+      SystemUrls.CARIN_CODE_SYSTEM_ADJUDICATION,
+      "priorpayerpaid",
+      "Prior payer paid",
+      "CLM_BENE_PRMRY_PYR_PD_AMT",
+      "Line Primary Payer Paid Amount"),
+  LINE_PROFESSIONAL_SCREEN_SAVINGS_AMOUNT(
+      SystemUrls.CARIN_CODE_SYSTEM_ADJUDICATION,
+      "discount",
+      "Discount",
+      "CLM_LINE_DMERC_SCRN_SVGS_AMT",
+      "Screen Savings Amount"),
+  LINE_PROFESSIONAL_PURCHASE_PRICE_AMOUNT(
+      SystemUrls.HL7_ADJUDICATION,
+      "eligible",
+      "Eligible Amount",
+      "CLM_LINE_PRFNL_DME_PRICE_AMT",
+      "Purchase Price Amount");
 
   private final String coding1System;
   private final String coding1Code;

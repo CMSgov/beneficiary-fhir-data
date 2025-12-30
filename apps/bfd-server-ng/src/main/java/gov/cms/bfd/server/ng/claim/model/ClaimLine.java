@@ -97,7 +97,8 @@ public class ClaimLine {
             claimLineInstitutional.map(
                 c -> c.getClaimLineAdjudicationChargeInstitutional().toFhir()),
             claimLineRx.map(c -> c.getClaimLineAdjudicationChargeRx().toFhir()),
-            claimLineProfessional.map(ClaimLineProfessional::toFhirAdjudication));
+            claimLineProfessional.map(
+                c -> c.getClaimLineAdjudicationChargeProfessional().toFhir()));
     adjudicationLines
         .flatMap(Optional::stream)
         .flatMap(Collection::stream)
