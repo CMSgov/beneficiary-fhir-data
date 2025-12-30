@@ -65,6 +65,7 @@ class EobReadIT extends IntegrationTestBase {
       // the need for this exception.
     } else {
       validateCodings(eob);
+      validateFinancialPrecision(eob);
     }
   }
 
