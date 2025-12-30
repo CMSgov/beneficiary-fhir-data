@@ -91,6 +91,18 @@
                         "code": "string"
                     }
                 ]
+            },
+            {
+                "id": "DiagnosisComponent.clm_prod_type_cd_map",
+                "path": "DiagnosisComponent.clm_prod_type_cd_map",
+                "label": "Augmented Diagnosis Prod Type Code Map",
+                "min": 0,
+                "max": "*",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
             }
             
         ]

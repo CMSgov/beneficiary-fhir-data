@@ -500,7 +500,7 @@ def add_diagnoses(clm_type_cd=-1):
             "CLM_VAL_SQNC_NUM": "1",
             "CLM_DGNS_PRCDR_ICD_IND": "0",
             "CLM_PROD_TYPE_CD": "E",
-            "CLM_POA_IND": random.choice(clm_poa_ind_choices),
+            "CLM_POA_IND": "0", #ALWAYS for ICD-10 codes. not always for icd-9.
         }
         first_external = {
             "CLM_DGNS_CD": external_1["CLM_DGNS_CD"],
@@ -535,7 +535,7 @@ def add_diagnoses(clm_type_cd=-1):
             "CLM_DGNS_CD": principal_diagnosis["CLM_DGNS_CD"],
             "CLM_VAL_SQNC_NUM": "1",
             "CLM_DGNS_PRCDR_ICD_IND": "0",
-            "CLM_PROD_TYPE_CD": "1",
+            "CLM_PROD_TYPE_CD": "R",
             "CLM_POA_IND": "~",
         }
         diagnosis_list.append(principal_diagnosis)

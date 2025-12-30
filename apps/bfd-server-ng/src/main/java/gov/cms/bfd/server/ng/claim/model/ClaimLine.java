@@ -9,14 +9,12 @@ import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
-import org.hl7.fhir.r4.model.PositiveIntType;
 
 /** Claim line info. */
 @Embeddable
@@ -100,34 +98,10 @@ public class ClaimLine {
         .flatMap(Collection::stream)
         .forEach(line::addAdjudication);
 
-    line.setDiagnosisSequence(diagnosisRelatedLines(claimItem.getClaim()));
-
     claimLineInstitutional
         .map(ClaimLineInstitutional::getExtensions)
         .ifPresent(e -> line.setExtension(e.toFhir()));
 
     return Optional.of(line);
-  }
-
-  /**
-   * Finds the line numbers of a claim procedure that matches the diagnosis code from this claim
-   * line.
-   *
-   * @param claim The parent claim entity containing all claim procedures.
-   * @return The row ids of the matching claim procedure
-   */
-  public List<PositiveIntType> diagnosisRelatedLines(Claim claim) {
-    if (diagnosisCode.isEmpty()) {
-      return List.of();
-    }
-    var currentDiagnosisCode = diagnosisCode.get();
-
-    return claim.getClaimItems().stream()
-        .filter(
-            item ->
-                item.getClaimProcedure().getDiagnosisCode().orElse("").equals(currentDiagnosisCode))
-        .map(item -> item.getClaimItemId().getBfdRowId())
-        .map(PositiveIntType::new)
-        .toList();
   }
 }
