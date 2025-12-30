@@ -338,6 +338,7 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_instnl (
     clm_hac_rdctn_pymt_amt NUMERIC,
     clm_mdcr_ip_1st_yr_rate_amt NUMERIC,
     clm_site_ntrl_cst_bsd_pymt_amt NUMERIC,
+    clm_ss_outlier_std_pymt_amt NUMERIC,
     idr_insrt_ts TIMESTAMPTZ,
     idr_updt_ts TIMESTAMPTZ,
     PRIMARY KEY(geo_bene_sk, clm_dt_sgntr_sk, clm_type_cd, clm_num_sk)
@@ -513,6 +514,7 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_prfnl (
     clm_line_prfnl_intrst_amt NUMERIC,
     clm_line_carr_psych_ot_lmt_amt NUMERIC,
     clm_line_carr_clncl_chrg_amt NUMERIC,
+    clm_mdcr_prmry_pyr_alowd_amt NUMERIC,
     idr_insrt_ts TIMESTAMPTZ,
     idr_updt_ts TIMESTAMPTZ,
     PRIMARY KEY (geo_bene_sk, clm_dt_sgntr_sk, clm_type_cd, clm_num_sk, clm_line_num)

@@ -28,7 +28,9 @@ public class ClaimLineInstitutional {
 
   @Embedded private ClaimLineHippsCode hippsCode;
   @Embedded private ClaimLineInstitutionalExtensions extensions;
-  @Embedded private AdjudicationChargeInstitutional adjudicationCharge;
+
+  @Embedded
+  private ClaimLineAdjudicationChargeInstitutional claimLineAdjudicationChargeInstitutional;
 
   @Nullable
   @OneToOne

@@ -5,17 +5,19 @@ import java.util.Optional;
 import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
-class BenefitBalanceClaimValue {
-  private BenefitBalanceClaimValue() {}
+class AdjudicationChargeClaimValue {
+  private AdjudicationChargeClaimValue() {}
 
-  static List<ExplanationOfBenefit.BenefitComponent> toFhir(List<ClaimValue> claimValues) {
+  static List<ExplanationOfBenefit.AdjudicationComponent> toFhir(List<ClaimValue> claimValues) {
     var disproportionateAmount =
         mapSum(claimValues.stream().map(ClaimValue::getDisproportionateAmount));
     var imeAmount = mapSum(claimValues.stream().map(ClaimValue::getImeAmount));
 
     return List.of(
-        BenefitBalanceInstitutionalType.CLM_OPRTNL_DSPRTNT_AMT.toFhirMoney(disproportionateAmount),
-        BenefitBalanceInstitutionalType.CLM_OPRTNL_IME_AMT.toFhirMoney(imeAmount));
+        AdjudicationChargeType.OPERATING_DISPROPORTIONATE_SHARE_AMOUNT.toFhirAdjudication(
+            disproportionateAmount),
+        AdjudicationChargeType.OPERATING_INDIRECT_MEDICAL_EDUCATION_AMOUNT.toFhirAdjudication(
+            imeAmount));
   }
 
   private static double mapSum(Stream<Optional<Double>> inputStream) {
