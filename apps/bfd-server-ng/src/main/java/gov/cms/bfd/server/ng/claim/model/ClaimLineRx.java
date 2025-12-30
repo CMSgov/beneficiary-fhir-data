@@ -16,7 +16,7 @@ import org.hl7.fhir.r4.model.Coding;
 @Table(name = "claim_line_rx", schema = "idr")
 public class ClaimLineRx {
   @EmbeddedId ClaimLineRxId claimLineInstitutionalId;
-  @Embedded private AdjudicationChargeRx adjudicationCharge;
+  @Embedded private ClaimLineAdjudicationChargeRx claimLineAdjudicationChargeRx;
   @Embedded private ClaimRxSupportingInfo claimRxSupportingInfo;
 
   @OneToOne(mappedBy = "claimLineRx")

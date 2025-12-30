@@ -21,7 +21,6 @@ public class ClaimInstitutional {
   private Claim claim;
 
   @Embedded private ClaimInstitutionalSupportingInfo supportingInfo;
-  @Embedded private PpsDrgWeight ppsDrgWeight;
   @Embedded private ClaimInstitutionalExtensions extensions;
-  @Embedded private BenefitBalanceInstitutional benefitBalanceInstitutional;
+  @Embedded private AdjudicationChargeInstitutional adjudicationChargeInstitutional;
 }

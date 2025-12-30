@@ -606,10 +606,6 @@ public class SystemUrls {
   public static final String BLUE_BUTTON_CODE_SYSTEM_CLAIM_DEDUCTIBLE_COINSURANCE_CODE =
       "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DDCTBL-COINSRNC-CD";
 
-  /** Blue Button structure definition - PPS DRG weight number. */
-  public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_PPS_DRG_WEIGHT_NUMBER =
-      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MDCR-IP-PPS-DRG-WT-NUM";
-
   /** Blue Button structure definition - Submitter contract number. */
   public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_SUBMITTER_CONTRACT_NUMBER =
       "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-SBMTR-CNTRCT-NUM";
@@ -717,10 +713,6 @@ public class SystemUrls {
   /** Blue Button code system - ANSI Reason Code - Claim Adjustment Reason Code. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_ANSI_RSN_CODE =
       "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CODE";
-
-  /** Blue Button code system - Benefit Balance. */
-  public static final String BLUE_BUTTON_CODE_SYSTEM_BENEFIT_BALANCE =
-      "https://bluebutton.cms.gov/fhir/CodeSystem/Benefit-Balance";
 
   /** Blue Button code system - dual status code. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_DUAL_STATUS_CODE =
