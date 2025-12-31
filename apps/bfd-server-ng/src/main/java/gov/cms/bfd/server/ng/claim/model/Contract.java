@@ -40,4 +40,13 @@ public class Contract {
   @OneToOne
   @JoinColumn(name = "cntrct_pbp_sk")
   private ContractPlanContactInfo contractPlanContactInfo;
+
+  /**
+   * Gets the {@link ContractPlanContactInfo}.
+   *
+   * @return contact info
+   */
+  public Optional<ContractPlanContactInfo> getContractPlanContactInfo() {
+    return Optional.ofNullable(contractPlanContactInfo);
+  }
 }
