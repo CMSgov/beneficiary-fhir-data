@@ -1,10 +1,7 @@
 package gov.cms.bfd.server.ng.claim.model;
 
-import static gov.cms.bfd.server.ng.claim.model.ClaimTypeCode.CLAIM_TYPE_CODE_MAP;
-
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.util.Arrays;
-import java.util.Map;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -86,29 +83,5 @@ public enum ClaimSubtype {
    */
   public static Optional<ClaimSubtype> fromCode(String code) {
     return Arrays.stream(values()).filter(v -> v.code.equalsIgnoreCase(code)).findFirst();
-  }
-
-  /**
-   * Gets Grouped ClaimSubtype from a Claim Type Code.
-   *
-   * @param claimTypeCode code
-   * @return ClaimSubtype
-   */
-  public static Optional<ClaimSubtype> getGroupedClaimSubtype(int claimTypeCode) {
-    return subtypeFor(claimTypeCode).flatMap(ClaimSubtype::grouped);
-  }
-
-  /**
-   * Gets the ClaimSubType for a ClaimTypeCode.
-   *
-   * @param claimTypeCode code
-   * @return ClaimSubtype
-   */
-  public static Optional<ClaimSubtype> subtypeFor(int claimTypeCode) {
-    var claimCode = ClaimTypeCode.fromCode(claimTypeCode);
-    return CLAIM_TYPE_CODE_MAP.entrySet().stream()
-        .filter(e -> e.getValue().contains(claimCode))
-        .map(Map.Entry::getKey)
-        .findFirst();
   }
 }
