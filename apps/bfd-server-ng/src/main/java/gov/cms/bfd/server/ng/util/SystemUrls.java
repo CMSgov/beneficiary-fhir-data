@@ -676,15 +676,15 @@ public class SystemUrls {
 
   /** Blue Button code system - Claim LUPA Indicator Code. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_HHA_LUPA_INDICATOR_CODE =
-      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD";
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-LUP-IND-CD";
 
   /** Blue Button code system - Claim Referral Code. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_HHA_REFERAL_CODE =
-      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD";
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-RFRL-CD";
 
   /** Blue Button code system - Catastrophic Coverage Indicator Code. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_CATASTROPHIC_COVERAGE_CODE =
-      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_CTSTRPHC_CVRG_IND_CD";
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CTSTRPHC-CVRG-IND-CD";
 
   /** Blue Button code system - Drug Coverage Status Code. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_DRUG_COVERAGE_STATUS_CODE =
@@ -696,15 +696,15 @@ public class SystemUrls {
 
   /** Blue Button code system - Submission Clarification Code. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_CLAIM_SUBMISSION_CLARIFICATION_CODE =
-      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_LTC_DSPNSNG_MTHD_CD";
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-LTC-DSPNSNG-MTHD-CD";
 
   /** Blue Button code system - Pharmacy Service Type Code. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_PHARMACY_SRVC_TYPE_CODE =
-      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_PHRMCY_SRVC_TYPE_CD";
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PHRMCY-SRVC-TYPE-CD";
 
   /** Blue Button code system - Patient Residence Code. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_PATIENT_RESIDENCE_CODE =
-      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_PTNT_RSDNC_CD";
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PTNT-RSDNC-CD";
 
   /** Blue Button code system - Prescription Origination Code. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_CLAIM_PRESCRIPTION_ORIGIN_CODE =
