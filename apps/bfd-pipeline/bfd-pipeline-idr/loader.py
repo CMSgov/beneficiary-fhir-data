@@ -5,7 +5,7 @@ from datetime import UTC, date, datetime
 import psycopg
 
 from constants import DEFAULT_MIN_DATE
-from load_partition import LoadPartition
+from load_partition import LoadPartition, LoadType
 from model import DbType, LoadMode, LoadProgress, T
 from settings import (
     bfd_db_endpoint,
@@ -43,8 +43,11 @@ class PostgresLoader:
         job_start: datetime,
         partition: LoadPartition,
         progress: LoadProgress | None,
+        load_type: LoadType,
     ) -> bool:
-        return BatchLoader(self.conn, fetch_results, model, job_start, partition, progress).load()
+        return BatchLoader(
+            self.conn, fetch_results, model, job_start, partition, progress, load_type
+        ).load()
 
     def close(self) -> None:
         self.conn.close()
@@ -59,6 +62,7 @@ class BatchLoader:
         job_start: datetime,
         partition: LoadPartition,
         progress: LoadProgress | None,
+        load_type: LoadType,
     ) -> None:
         self.conn = conn
         self.fetch_results = fetch_results
@@ -84,6 +88,7 @@ class BatchLoader:
         self.copy_timer = Timer("copy", model, partition)
         self.insert_timer = Timer("insert", model, partition)
         self.commit_timer = Timer("commit", model, partition)
+        self.load_type = load_type
 
     def load(
         self,
@@ -267,6 +272,30 @@ class BatchLoader:
             """,  # type: ignore
             {"timestamp": timestamp},
         )
+
+        if self.load_type == LoadType.INCREMENTAL and self.model.last_updated_date_table():
+            key = self.model.last_updated_timestamp_col()
+            last_updated_cols = self.model.last_updated_date_column()
+            set_clause = ", ".join(f"{col} = %(timestamp)s" for col in last_updated_cols)
+            # Locking rows to prevent Deadlocks when multiple nodes update this table
+            cur.execute(
+                f"""
+                WITH locked AS (
+                    SELECT {key}
+                    FROM {self.model.last_updated_date_table()}
+                    WHERE {key} IN (
+                        SELECT {key} FROM {self.temp_table}
+                    )
+                    ORDER BY {key}
+                    FOR UPDATE
+                )
+                UPDATE {self.model.last_updated_date_table()} u
+                SET {set_clause}
+                FROM locked l
+                WHERE u.{key} = l.{key};
+                """,  # type: ignore
+                {"timestamp": timestamp},
+            )
 
     def _copy_data(self, cur: psycopg.Cursor, results: Sequence[T]) -> None:
         # Use COPY to load the batch into Postgres.

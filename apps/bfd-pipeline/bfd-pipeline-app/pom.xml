@@ -4,7 +4,7 @@
     <parent>
         <groupId>gov.cms.bfd</groupId>
         <artifactId>bfd-pipeline-parent</artifactId>
-        <version>2.229.0-SNAPSHOT</version>
+        <version>2.230.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>bfd-pipeline-app</artifactId>
@@ -96,16 +96,6 @@
                 at runtime. -->
             <groupId>io.dropwizard.metrics</groupId>
             <artifactId>metrics-jvm</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.newrelic.telemetry</groupId>
-            <artifactId>dropwizard-metrics-newrelic</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.newrelic.telemetry</groupId>
-            <artifactId>telemetry-http-okhttp</artifactId>
         </dependency>
 
         <dependency>

@@ -9,10 +9,7 @@ import gov.cms.bfd.sharedutils.database.DatabaseOptions.AuthenticationType;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions.DataSourceType;
 import gov.cms.bfd.sharedutils.database.HikariDataSourceFactory;
 import gov.cms.bfd.sharedutils.database.RdsHikariDataSourceFactory;
-import java.net.InetAddress;
 import java.net.URI;
-import java.net.UnknownHostException;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.sqs.SqsClient;
@@ -156,36 +153,6 @@ public abstract class BaseConfiguration {
   public static final String SSM_PATH_DB_WRAPPER_INSTANCE_STATE_MONITOR_REFRESH_RATE_MS =
       "db/wrapper/instance_state_monitor_refresh_rate_ms";
 
-  /**
-   * The path of the SSM parameter that should be used to provide the {@link MetricOptions} {@link
-   * MetricOptions#getNewRelicMetricKey()} value.
-   */
-  public static final String SSM_PATH_NEW_RELIC_METRIC_KEY = "new_relic/metrics/insights_key";
-
-  /**
-   * The path of the SSM parameter that should be used to provide the {@link MetricOptions} {@link
-   * MetricOptions#getNewRelicAppName()} value.
-   */
-  public static final String SSM_PATH_NEW_RELIC_APP_NAME = "new_relic/app_name";
-
-  /**
-   * The path of the SSM parameter that should be used to provide the {@link MetricOptions} {@link
-   * MetricOptions#getNewRelicMetricHost()} value.
-   */
-  public static final String SSM_PATH_NEW_RELIC_METRIC_HOST = "new_relic/metrics/host";
-
-  /**
-   * The path of the SSM parameter that should be used to provide the {@link MetricOptions} {@link
-   * MetricOptions#getNewRelicMetricPath()} value.
-   */
-  public static final String SSM_PATH_NEW_RELIC_METRIC_PATH = "new_relic/metrics/path";
-
-  /**
-   * The path of the SSM parameter that should be used to provide the {@link MetricOptions} {@link
-   * MetricOptions#getNewRelicMetricPeriod()} value.
-   */
-  public static final String SSM_PATH_NEW_RELIC_METRIC_PERIOD = "new_relic/metrics/period";
-
   /** Name of setting containing alternative endpoint URL for AWS services. */
   public static final String ENV_VAR_AWS_ENDPOINT = "AWS_ENDPOINT";
 
@@ -255,37 +222,6 @@ public abstract class BaseConfiguration {
     } else {
       return new HikariDataSourceFactory(databaseOptions);
     }
-  }
-
-  /**
-   * Reads metric options from a {@link ConfigLoader}.
-   *
-   * @param config used to read and parse configuration values
-   * @return the metric options
-   */
-  protected static MetricOptions loadMetricOptions(ConfigLoader config) {
-    Optional<String> newRelicMetricKey = config.stringOptionEmptyOK(SSM_PATH_NEW_RELIC_METRIC_KEY);
-    Optional<String> newRelicAppName = config.stringOptionEmptyOK(SSM_PATH_NEW_RELIC_APP_NAME);
-    Optional<String> newRelicMetricHost =
-        config.stringOptionEmptyOK(SSM_PATH_NEW_RELIC_METRIC_HOST);
-    Optional<String> newRelicMetricPath =
-        config.stringOptionEmptyOK(SSM_PATH_NEW_RELIC_METRIC_PATH);
-    Optional<Integer> newRelicMetricPeriod = config.intOption(SSM_PATH_NEW_RELIC_METRIC_PERIOD);
-
-    Optional<String> hostname;
-    try {
-      hostname = Optional.of(InetAddress.getLocalHost().getHostName());
-    } catch (UnknownHostException e) {
-      hostname = Optional.empty();
-    }
-
-    return new MetricOptions(
-        newRelicMetricKey,
-        newRelicAppName,
-        newRelicMetricHost,
-        newRelicMetricPath,
-        newRelicMetricPeriod,
-        hostname);
   }
 
   /**

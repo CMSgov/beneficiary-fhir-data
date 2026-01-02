@@ -117,7 +117,7 @@ public class FhirInputConverter {
   /**
    * Converts a FHIR {@link IdType} for a Coverage resource into a validated {@link
    * CoverageCompositeId} object. It parses the ID string, validates its format, and ensures the
-   * part is supported (currently Part A or Part B for detailed FFS mapping).
+   * part is supported (currently Part A or Part B for detailed FFS mapping and Part C and D).
    *
    * @param coverageId The FHIR ID for the Coverage resource.
    * @return A {@link CoverageCompositeId} containing the parsed part and beneSk.

@@ -1,6 +1,5 @@
 package gov.cms.bfd.server.war;
 
-import com.newrelic.api.agent.NewRelic;
 import gov.cms.bfd.server.sharedutils.BfdMDC;
 import gov.cms.bfd.server.war.r4.providers.R4CoverageResourceProvider;
 import gov.cms.bfd.server.war.r4.providers.R4ExplanationOfBenefitResourceProvider;
@@ -73,18 +72,14 @@ public final class CanonicalOperation {
   }
 
   /**
-   * Publish the {@link #getCanonicalName()} value to the logging {@link BfdMDC} and to {@link
-   * NewRelic} as the transaction name.
+   * Publish the {@link #getCanonicalName()} value to the logging {@link BfdMDC} as the transaction
+   * name.
    */
   public void publishOperationName() {
     String canonicalName = getCanonicalName();
 
     // Ensure that the operation name lands in our access logs.
     BfdMDC.put(BfdMDC.computeMDCKey("http_access", "request", "operation"), canonicalName);
-
-    // If we got a known operation name, publish it to New Relic as the "transaction name",
-    // otherwise stick with New Relic's default transaction name.
-    if (endpoint != Endpoint.OTHER) NewRelic.setTransactionName(null, canonicalName);
   }
 
   /** Enumerates the known HTTP endpoints/handlers, for use in logging and monitoring. */

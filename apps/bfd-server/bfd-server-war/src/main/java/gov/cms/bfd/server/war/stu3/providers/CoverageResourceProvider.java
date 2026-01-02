@@ -18,7 +18,6 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.rif.entities.Beneficiary;
 import gov.cms.bfd.model.rif.entities.Beneficiary_;
 import gov.cms.bfd.server.war.CanonicalOperation;
@@ -127,7 +126,6 @@ public class CoverageResourceProvider implements IResourceProvider {
    *     exists.
    */
   @Read(version = false)
-  @Trace
   @RetryOnFailoverOrConnectionException
   public Coverage read(@IdParam IdType coverageId) {
     if (coverageId == null) {
@@ -203,7 +201,6 @@ public class CoverageResourceProvider implements IResourceProvider {
    *     resources, or may also be empty.
    */
   @Search
-  @Trace
   @RetryOnFailoverOrConnectionException
   public Bundle searchByBeneficiary(
       @RequiredParam(name = Coverage.SP_BENEFICIARY)
@@ -264,7 +261,6 @@ public class CoverageResourceProvider implements IResourceProvider {
    * @throws NoResultException A {@link NoResultException} will be thrown if no matching {@link
    *     Beneficiary} can be found in the database.
    */
-  @Trace
   private Beneficiary findBeneficiaryById(Long beneId, DateRangeParam lastUpdatedRange)
       throws NoResultException {
     // Optimize when the lastUpdated parameter is specified and result set is empty

@@ -188,7 +188,7 @@ jobs:
           token: ${{ steps.generate_token.outputs.token }}
 
       - name: Retrieve base java image
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           pattern: '*bfd-platform-base-java*'
           merge-multiple: true
@@ -271,7 +271,7 @@ jobs:
         working-directory: ${{ runner.temp }}
 
       - name: Upload jib image artifacts
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: jib-images
           path: ${{ runner.temp }}/*.tar
@@ -286,7 +286,7 @@ jobs:
           echo "server-war-dir=$server_war_dir" >> "$GITHUB_OUTPUT"
 
       - name: Upload data dictionary and OpenApi artifacts
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: release-artifacts
           path: |
@@ -318,7 +318,7 @@ jobs:
           echo "role-arn=$role_arn" >> "$GITHUB_OUTPUT"
 
       - name: Download jib image artifacts
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: jib-images
           path: ${{ runner.temp }}
@@ -400,7 +400,7 @@ jobs:
     steps:
       - name: Pull release artifacts
         id: pull-release-artifacts
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: release-artifacts
 

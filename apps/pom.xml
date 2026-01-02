@@ -3,7 +3,7 @@
 
     <groupId>gov.cms.bfd</groupId>
     <artifactId>bfd-parent</artifactId>
-    <version>2.229.0-SNAPSHOT</version>
+    <version>2.230.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>bfd-parent</name>
@@ -71,7 +71,7 @@
         <javaSourceVersion>25</javaSourceVersion>
         <maven.compiler.release>25</maven.compiler.release>
 
-        <project.build.outputTimestamp>2025-12-09T20:18:50Z</project.build.outputTimestamp>
+        <project.build.outputTimestamp>2025-12-24T17:53:29Z</project.build.outputTimestamp>
         <!-- Disable jacoco until automated coverage generation is desired -->
         <maven.jacoco.skip>true</maven.jacoco.skip>
         <sonar.coverageReportPaths>coverage.xml</sonar.coverageReportPaths>
@@ -121,11 +121,9 @@
         <micrometer.version>1.12.1</micrometer.version>
         <metrics.version>4.2.30</metrics.version>
         <git-build-hook-maven-plugin.version>3.5.0</git-build-hook-maven-plugin.version>
-        <dropwizard-metrics-newrelic.version>1.0.0</dropwizard-metrics-newrelic.version>
-        <telemetry-http-okhttp.version>0.16.0</telemetry-http-okhttp.version>
         <aws-java-sdk-bom.version>2.33.4</aws-java-sdk-bom.version>
         <aws.crt.version>0.35.0</aws.crt.version>
-        <aws-advanced-jdbc-wrapper.version>2.5.4</aws-advanced-jdbc-wrapper.version>
+        <aws-advanced-jdbc-wrapper.version>2.6.5</aws-advanced-jdbc-wrapper.version>
         <spring-data-jpa.version>3.4.10</spring-data-jpa.version>
         <spring-framework.version>6.2.11</spring-framework.version>
         <spring-retry.version>2.0.8</spring-retry.version>
@@ -165,7 +163,6 @@
         <log4j.version>2.24.3</log4j.version>
         <hikari.version>6.2.1</hikari.version>
         <flyway.version>11.13.2</flyway.version>
-        <newrelic.agent.version>8.18.0</newrelic.agent.version>
         <checkstyle.version>10.21.4</checkstyle.version>
         <guava.version>32.1.2-jre</guava.version>
         <!--
@@ -325,12 +322,6 @@
                 <artifactId>reactor-test</artifactId>
                 <version>${reactor.version}</version>
                 <scope>test</scope>
-            </dependency>
-            <dependency>
-                <!-- The newrelic.jar javaagent dependency -->
-                <groupId>com.newrelic.agent.java</groupId>
-                <artifactId>newrelic-agent</artifactId>
-                <version>${newrelic.agent.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.thymeleaf</groupId>
@@ -530,12 +521,10 @@
                 <version>${logback.json.classic.version}</version>
             </dependency>
             <dependency>
-                <!-- Used to transmit metrics to NewRelic for alerts and dashboards. -->
-                <groupId>io.micrometer</groupId>
-                <artifactId>micrometer-registry-newrelic</artifactId>
-                <version>${micrometer.version}</version>
+                <groupId>org.hibernate.validator</groupId>
+                <artifactId>hibernate-validator</artifactId>
+                <version>${hibernate.validator.version}</version>
             </dependency>
-
 
             <!-- We lock down the versions of all the various Spring components that
                 child projects use, as incompatibility problems with Spring are common. -->
@@ -756,17 +745,6 @@
                 <artifactId>mockito-junit-jupiter</artifactId>
                 <version>${mockito.version}</version>
                 <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>com.newrelic.telemetry</groupId>
-                <artifactId>dropwizard-metrics-newrelic</artifactId>
-                <version>${dropwizard-metrics-newrelic.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.newrelic.telemetry</groupId>
-                <artifactId>telemetry-http-okhttp</artifactId>
-                <version>${telemetry-http-okhttp.version}</version>
             </dependency>
 
             <!-- These dependencies are necessary to build stubs from proto file and to call a gRPC server. -->

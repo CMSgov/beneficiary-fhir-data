@@ -46,12 +46,9 @@
 				<exclude>jakarta.validation:jakarta.validation-api:*</exclude>
 				<exclude>com.squareup.okio:okio:jar:*</exclude>
 				<exclude>com.squareup.okhttp3:okhttp:jar:*</exclude>
-				<exclude>com.newrelic.telemetry:telemetry-http-okhttp:*</exclude>
 				<exclude>org.jetbrains.kotlin:kotlin-stdlib:jar:*</exclude>
 				<exclude>org.jetbrains.kotlin:kotlin-stdlib-common:jar:*</exclude>
 				<exclude>io.dropwizard:dropwizard-metrics:jar:*</exclude>
-				<exclude>com.newrelic.telemetry:dropwizard-metrics-newrelic:jar:*</exclude>
-				<exclude>com.newrelic.telemetry:telemetry-core:jar:*</exclude>
 			</excludes>
 		</dependencySet>
 	</dependencySets>

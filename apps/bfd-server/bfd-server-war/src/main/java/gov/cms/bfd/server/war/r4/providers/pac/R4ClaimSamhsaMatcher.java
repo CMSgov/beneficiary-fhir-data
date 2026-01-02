@@ -2,7 +2,6 @@ package gov.cms.bfd.server.war.r4.providers.pac;
 
 import static gov.cms.bfd.server.war.SpringConfiguration.SSM_PATH_SAMHSA_V2_ENABLED;
 
-import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rda.entities.RdaFissClaim;
 import gov.cms.bfd.model.rda.entities.RdaMcsClaim;
@@ -66,7 +65,6 @@ public final class R4ClaimSamhsaMatcher extends AbstractSamhsaMatcher<Claim> {
    * @param entity the claim to check
    * @return {@code true} if there are no samhsa entries in the claim
    */
-  @Trace
   public boolean hasNoSamhsaData(ClaimWithSecurityTags<?> entity) {
     Claim claim;
 

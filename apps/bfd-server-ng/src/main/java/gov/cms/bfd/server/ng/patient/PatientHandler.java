@@ -90,7 +90,7 @@ public class PatientHandler {
     }
     var beneficiary = beneficiaryOpt.get();
 
-    var patient = beneficiary.toFhir(ProfileType.C4DIC);
+    var patient = beneficiary.toFhirPatient(ProfileType.C4DIC);
     // Two more organization may be needed, once mappings for Part C and D are added.
     var cmsOrg =
         OrganizationFactory.createCmsOrganization(
@@ -110,7 +110,7 @@ public class PatientHandler {
 
   private Patient toFhir(Beneficiary beneficiary) {
     var identities = beneficiaryRepository.getValidBeneficiaryIdentities(beneficiary.getXrefSk());
-    var patient = beneficiary.toFhir(ProfileType.C4BB);
+    var patient = beneficiary.toFhirPatient(ProfileType.C4BB);
 
     for (var id : identities) {
       // check for merged bene and if mbi identifier has already been added to the patient

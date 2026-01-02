@@ -4,7 +4,6 @@ import static java.util.Objects.requireNonNull;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import com.newrelic.api.agent.Trace;
 import gov.cms.bfd.model.codebook.data.CcwCodebookVariable;
 import gov.cms.bfd.model.rif.entities.PartDEvent;
 import gov.cms.bfd.model.rif.parse.InvalidRifValueException;
@@ -64,7 +63,6 @@ final class PartDEventTransformerV2 implements ClaimTransformerInterfaceV2 {
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     PartDEvent}
    */
-  @Trace
   @Override
   public ExplanationOfBenefit transform(
       ClaimWithSecurityTags<?> claimEntity, boolean includeTaxNumber) {

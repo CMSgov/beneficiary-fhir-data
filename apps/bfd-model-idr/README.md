@@ -120,7 +120,7 @@ To utilize it:
 ```sh
 uv run claims_generator.py \
     --sushi \
-    --benes <bene_filename.csv>
+    --benes out/SYNTHETIC_BENE_HSTRY.csv
 ```
 
 --sushi is not strictly needed, if you have a local copy of the compiled shorthand files, but recommended to reduce drift. To specify a list of benes, pass in a .csv file containing a column named BENE_SK. 

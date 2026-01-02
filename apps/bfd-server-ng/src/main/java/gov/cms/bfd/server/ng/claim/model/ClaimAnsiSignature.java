@@ -5,7 +5,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -22,9 +21,6 @@ public class ClaimAnsiSignature {
   @Id
   @Column(name = "clm_ansi_sgntr_sk", insertable = false, updatable = false)
   private long ansiSignatureSk;
-
-  @Column(name = "bfd_updated_ts")
-  private ZonedDateTime bfdUpdatedTimestamp;
 
   @Column(name = "clm_1_rev_cntr_ansi_grp_cd")
   private Optional<RevenueCenterAnsiGroupCode> revenueCenterAnsiGroupCode1;

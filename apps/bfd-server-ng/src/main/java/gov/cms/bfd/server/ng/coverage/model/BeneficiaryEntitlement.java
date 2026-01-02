@@ -38,9 +38,6 @@ public class BeneficiaryEntitlement implements Comparable<BeneficiaryEntitlement
   @Column(name = "bfd_created_ts")
   private ZonedDateTime bfdCreatedTimestamp;
 
-  @Column(name = "bfd_updated_ts")
-  private ZonedDateTime bfdUpdatedTimestamp;
-
   private BeneficiaryEntitlementPeriod entitlementPeriod;
 
   /**

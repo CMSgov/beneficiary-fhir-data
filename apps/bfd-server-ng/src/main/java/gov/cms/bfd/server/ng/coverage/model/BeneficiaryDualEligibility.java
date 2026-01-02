@@ -7,7 +7,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
-import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.Getter;
@@ -39,9 +38,6 @@ public class BeneficiaryDualEligibility {
 
   @Column(name = "geo_usps_state_cd")
   private String stateCode;
-
-  @Column(name = "bfd_updated_ts")
-  private ZonedDateTime bfdUpdatedTimestamp;
 
   Period toFhirPeriod() {
     var period = new Period().setStartElement(DateUtil.toFhirDate(eligibilityBeginDate));

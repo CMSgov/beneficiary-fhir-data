@@ -261,7 +261,7 @@ class PatientSearchIT extends IntegrationTestBase {
     var lastUpdated =
         entityManager
             .createQuery(
-                "SELECT b.meta.updatedTimestamp FROM Beneficiary b WHERE b.beneSk=:beneSk",
+                "SELECT b.patientMeta.updatedTimestamp FROM Beneficiary b WHERE b.beneSk=:beneSk",
                 ZonedDateTime.class)
             .setParameter("beneSk", beneSk)
             .getResultList()

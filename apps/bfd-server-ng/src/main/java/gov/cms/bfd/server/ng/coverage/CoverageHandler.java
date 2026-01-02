@@ -58,7 +58,7 @@ public class CoverageHandler {
     var beneficiary = beneficiaryOpt.get();
     var coverage = beneficiary.toFhirCoverageIfPresent(parsedCoverageId);
 
-    return FhirUtil.bundleOrDefault(coverage.map(c -> c), loadProgressRepository::lastUpdated);
+    return FhirUtil.bundleOrDefault(coverage.map(r -> r), loadProgressRepository::lastUpdated);
   }
 
   /**
@@ -86,6 +86,6 @@ public class CoverageHandler {
                         new CoverageCompositeId(c, beneficiary.getBeneSk())))
             .flatMap(Optional::stream);
 
-    return FhirUtil.bundleOrDefault(coverages.map(r -> r), loadProgressRepository::lastUpdated);
+    return FhirUtil.bundleOrDefault(coverages.map(c -> c), loadProgressRepository::lastUpdated);
   }
 }
