@@ -3,6 +3,7 @@ package gov.cms.bfd.server.ng.claim.model;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -327,11 +328,11 @@ public enum ClaimTypeCode {
   }
 
   Optional<CodeableConcept> toFhirSubtype() {
-    return ClaimSubtype.getGroupedClaimSubtype(code).map(ClaimSubtype::toFhir);
+    return getGroupedClaimSubtype().map(ClaimSubtype::toFhir);
   }
 
   Optional<Organization> toFhirInsurerPartAB() {
-    if (!isBetween(5, 3999)) {
+    if (isClaimSubtype(ClaimSubtype.PDE)) {
       return Optional.empty();
     }
 
@@ -342,7 +343,7 @@ public enum ClaimTypeCode {
   }
 
   Optional<Organization> toFhirInsurerPartD(String pbpName) {
-    if (!isBetween(1, 4)) {
+    if (!isClaimSubtype(ClaimSubtype.PDE)) {
       return Optional.empty();
     }
 
@@ -354,7 +355,7 @@ public enum ClaimTypeCode {
 
   Optional<ExplanationOfBenefit.InsuranceComponent> toFhirPartDInsurance(
       String contractNum, String contractPbpNum) {
-    if (!isBetween(1, 4)) {
+    if (!isClaimSubtype(ClaimSubtype.PDE)) {
       return Optional.empty();
     }
 
@@ -374,7 +375,7 @@ public enum ClaimTypeCode {
 
   Optional<ExplanationOfBenefit.InsuranceComponent> toFhirInsurance(
       ClaimRecordType claimRecordType) {
-    if (!isBetween(5, 3999)) {
+    if (isClaimSubtype(ClaimSubtype.PDE)) {
       return Optional.empty();
     }
 
@@ -405,19 +406,23 @@ public enum ClaimTypeCode {
     return isBetween(2000, 2999);
   }
 
-  boolean isBetween(int lower, int upper) {
+  private boolean isBetween(int lower, int upper) {
     return (code >= lower) && (code <= upper);
   }
 
+  boolean isClaimSubtype(ClaimSubtype subtype) {
+    return CLAIM_TYPE_CODE_MAP.getOrDefault(subtype, List.of()).contains(this);
+  }
+
   Optional<String> toFhirStructureDefinition() {
-    return ClaimSubtype.subtypeFor(code).map(ClaimSubtype::getSystemUrl);
+    return getClaimSubtype().map(ClaimSubtype::getSystemUrl);
   }
 
   private Optional<ClaimType> getClaimType() {
-    return ClaimSubtype.subtypeFor(code).map(ClaimSubtype::getClaimType);
+    return getClaimSubtype().map(ClaimSubtype::getClaimType);
   }
 
-  /** Claim Type codes grouped by claim sub types. * */
+  /** Claim Type codes grouped by claim subtypes. * */
   public static final Map<ClaimSubtype, List<ClaimTypeCode>> CLAIM_TYPE_CODE_MAP =
       Map.of(
           ClaimSubtype.CARRIER,
@@ -496,5 +501,43 @@ public enum ClaimTypeCode {
 
   private static List<ClaimTypeCode> mapSnfToClaimTypeCodes() {
     return List.of(_20, _30, _1018, _1021, _2018, _2021);
+  }
+
+  /**
+   * Checks if isInstitutional (Inpatient, Outpatient, SNF, HHA, Hospice).
+   *
+   * @return Returns true if this code maps to an Institutional claim type
+   */
+  public boolean isInstitutional() {
+    return getClaimSubtype()
+        .map(subtype -> subtype.getClaimType() == ClaimType.INSTITUTIONAL)
+        .orElse(false);
+  }
+
+  /**
+   * Checks if Professional claim type (Carrier, DME).
+   *
+   * @return true if this code maps to a Professional
+   */
+  public boolean isProfessional() {
+    return getClaimSubtype()
+        .map(subtype -> subtype.getClaimType() == ClaimType.PROFESSIONAL)
+        .orElse(false);
+  }
+
+  private static final Map<ClaimTypeCode, ClaimSubtype> CODE_TO_SUBTYPE = createInvertedMap();
+
+  private static Map<ClaimTypeCode, ClaimSubtype> createInvertedMap() {
+    var map = new EnumMap<ClaimTypeCode, ClaimSubtype>(ClaimTypeCode.class);
+    CLAIM_TYPE_CODE_MAP.forEach((subtype, codes) -> codes.forEach(code -> map.put(code, subtype)));
+    return Collections.unmodifiableMap(map);
+  }
+
+  private Optional<ClaimSubtype> getGroupedClaimSubtype() {
+    return getClaimSubtype().flatMap(ClaimSubtype::grouped);
+  }
+
+  private Optional<ClaimSubtype> getClaimSubtype() {
+    return Optional.ofNullable(CODE_TO_SUBTYPE.get(this));
   }
 }
