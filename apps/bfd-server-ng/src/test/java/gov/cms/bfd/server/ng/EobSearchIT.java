@@ -287,8 +287,7 @@ class EobSearchIT extends IntegrationTestBase {
                 new TokenClientParam(Constants.PARAM_TAG)
                     .exactly()
                     .codings(tags.toArray(new Coding[0])));
-      }
-      System.out.println(scenarioName + ":" + query);
+    }
     }
 
     var eobBundle = query.usingStyle(searchStyle).execute();
