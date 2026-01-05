@@ -51,6 +51,9 @@ public class Claim {
   @Column(name = "clm_srvc_prvdr_gnrc_id_num")
   private String serviceProviderNpiNumber;
 
+  @Column(name = "clm_finl_actn_ind")
+  private ClaimFinalAction finalAction;
+
   @Embedded private Meta meta;
 
   @Embedded private Identifiers identifiers;
@@ -258,7 +261,7 @@ public class Claim {
     eob.setType(claimTypeCode.toFhirType());
     claimTypeCode.toFhirSubtype().ifPresent(eob::setSubType);
 
-    eob.setMeta(meta.toFhir(claimTypeCode, claimSourceId, securityStatus));
+    eob.setMeta(meta.toFhir(claimTypeCode, claimSourceId, securityStatus, finalAction));
     eob.setIdentifier(identifiers.toFhir());
     eob.setBillablePeriod(billablePeriod.toFhir());
     eob.setCreated(DateUtil.toDate(claimEffectiveDate));

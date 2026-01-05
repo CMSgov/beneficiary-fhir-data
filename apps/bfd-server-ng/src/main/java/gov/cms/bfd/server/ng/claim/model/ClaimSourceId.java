@@ -15,13 +15,13 @@ public enum ClaimSourceId {
   /** Medicaid Claims. */
   MEDICAID("N/A", "Medicaid", Optional.empty()),
   /** NCH Claims. */
-  NATIONAL_CLAIMS_HISTORY("20000", "NationalClaimsHistory", Optional.of("Adjudicated")),
+  NATIONAL_CLAIMS_HISTORY("20000", "NCH", Optional.of("NationalClaimsHistory")),
   /** FISS Claims. */
-  FISS("21000", "FISS", Optional.of("PartiallyAdjudicated")),
+  FISS("21000", "FISS", Optional.of("SharedSystem")),
   /** MCS Claims. */
-  MCS("22000", "MCS", Optional.of("PartiallyAdjudicated")),
-  /** VIPS Claims. */
-  VIPS("23000", "VIPS", Optional.of("PartiallyAdjudicated")),
+  MCS("22000", "MCS", Optional.of("SharedSystem")),
+  /** VMS Claims. */
+  VIPS("23000", "VMS", Optional.of("SharedSystem")),
   /** EDPS Claims. */
   EDPS("24000", "EDPS", Optional.empty()),
   /** Dual claims. */
@@ -29,7 +29,7 @@ public enum ClaimSourceId {
 
   private final String id;
   private final String source;
-  private final Optional<String> adjudicationStatus;
+  private final Optional<String> systemType;
 
   /**
    * Converts from a database identifier.
@@ -41,9 +41,9 @@ public enum ClaimSourceId {
     return Arrays.stream(values()).filter(c -> c.id.equals(id)).findFirst().get();
   }
 
-  Optional<Coding> toFhirAdjudicationStatus() {
-    return adjudicationStatus.map(
-        s -> new Coding().setSystem(SystemUrls.BLUE_BUTTON_ADJUDICATION_STATUS).setCode(s));
+  Optional<Coding> toFhirSystemType() {
+    return systemType.map(
+        s -> new Coding().setSystem(SystemUrls.BLUE_BUTTON_SYSTEM_TYPE).setCode(s));
   }
 
   Optional<ExplanationOfBenefit.RemittanceOutcome> toFhirOutcome() {

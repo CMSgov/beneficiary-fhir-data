@@ -255,7 +255,7 @@ gov.cms.bfd.server.ng.PatientCoverageC4DICSearchIT.patientCoverageSearchAllParts
         "reference" : "Organization/{uuid}"
       } ],
       "period" : {
-        "start" : "2020-09-03"
+        "start" : "2026-01-01"
       },
       "relationship" : {
         "coding" : [ {
@@ -299,7 +299,7 @@ gov.cms.bfd.server.ng.PatientCoverageC4DICSearchIT.patientCoverageSearchAllParts
             "system" : "http://terminology.hl7.org/CodeSystem/coverage-class"
           } ]
         },
-        "value" : "194710044"
+        "value" : "201698004"
       }, {
         "type" : {
           "coding" : [ {
@@ -347,7 +347,7 @@ gov.cms.bfd.server.ng.PatientCoverageC4DICSearchIT.patientCoverageSearchAllParts
             "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
           } ]
         },
-        "value" : "194710044"
+        "value" : "201698004"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -357,7 +357,7 @@ gov.cms.bfd.server.ng.PatientCoverageC4DICSearchIT.patientCoverageSearchAllParts
         "reference" : "Organization/{uuid}"
       } ],
       "period" : {
-        "start" : "2020-09-03"
+        "start" : "2026-01-01"
       },
       "relationship" : {
         "coding" : [ {

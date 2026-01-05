@@ -4,16 +4,20 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import gov.cms.bfd.server.ng.claim.model.ClaimFinalAction;
 import gov.cms.bfd.server.ng.claim.model.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.ClaimTypeCode;
 import gov.cms.bfd.server.ng.util.IdrConstants;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.IdType;
@@ -24,6 +28,25 @@ import org.jetbrains.annotations.Nullable;
  * the API.
  */
 public class FhirInputConverter {
+  private static final Set<String> SUPPORTED_SYSTEM_TYPES =
+      Set.of(
+          IdrConstants.SYSTEM_TYPE_NCH.toUpperCase(),
+          IdrConstants.SYSTEM_TYPE_SHARED.toUpperCase());
+
+  private static final Map<String, List<ClaimSourceId>> SOURCE_ID_MAP =
+      Stream.of(ClaimSourceId.values())
+          .filter(s -> s.getSystemType().isPresent())
+          .collect(Collectors.groupingBy(s -> s.getSystemType().get().toUpperCase()));
+
+  private static final Set<String> SUPPORTED_FINAL_ACTION_STATUSES =
+      Stream.of(ClaimFinalAction.values())
+          .map(ClaimFinalAction::getFinalAction)
+          .collect(Collectors.toSet());
+
+  private static final Map<String, ClaimFinalAction> FINAL_ACTION_MAP =
+      Stream.of(ClaimFinalAction.values())
+          .collect(Collectors.toMap(a -> a.getFinalAction().toUpperCase(), a -> a));
+
   private FhirInputConverter() {}
 
   /**
@@ -136,47 +159,76 @@ public class FhirInputConverter {
   }
 
   /**
-   * Maps a tag code ("Adjudicated" or "PartiallyAdjudicated") to the corresponding ClaimSourceId
-   * enum values.
+   * Parses the tag query parameter into a list of list of criteria.
    *
-   * @param tag The code from the _tag parameter.
-   * @return A list of matching ClaimSourceId enums.
+   * <p>Outer list is AND conditions, inner list is OR conditions.
+   *
+   * @param tagParam _tag param from request
+   * @return list of tag criteria
    */
-  public static List<ClaimSourceId> getSourceIdsForTagCode(@Nullable TokenParam tag) {
-    if (tag == null || tag.getValue() == null) {
+  public static List<List<TagCriterion>> parseTagParameter(@Nullable TokenAndListParam tagParam) {
+    if (tagParam == null || tagParam.getValuesAsQueryTokens().isEmpty()) {
       return Collections.emptyList();
     }
 
-    var supportedAdjudicationStatuses =
-        Set.of(
-            IdrConstants.ADJUDICATION_STATUS_PARTIAL.toUpperCase(),
-            IdrConstants.ADJUDICATION_STATUS_FINAL.toUpperCase());
+    return tagParam.getValuesAsQueryTokens().stream()
+        .map(FhirInputConverter::parseTagQueryToken)
+        .filter(list -> !list.isEmpty())
+        .collect(Collectors.toList());
+  }
 
-    var systemFromTag = tag.getSystem();
-
-    if (systemFromTag != null && !systemFromTag.equals(SystemUrls.SYS_ADJUDICATION_STATUS)) {
-      throw new InvalidRequestException(
-          String.format(
-              "Unsupported system for _tag adjudication status. Expected system '%s'.",
-              SystemUrls.SYS_ADJUDICATION_STATUS));
+  private static List<TagCriterion> parseTagQueryToken(TokenOrListParam tokenOrListParam) {
+    if (tokenOrListParam == null || tokenOrListParam.getValuesAsQueryTokens().isEmpty()) {
+      return Collections.emptyList();
     }
 
-    var statusValue = tag.getValue();
+    return tokenOrListParam.getValuesAsQueryTokens().stream()
+        .flatMap(token -> FhirInputConverter.parseTagToken(token).stream())
+        .collect(Collectors.toList());
+  }
 
-    if (!supportedAdjudicationStatuses.contains(statusValue.toUpperCase())) {
+  private static List<TagCriterion> parseTagToken(TokenParam token) {
+    if (token.getSystem() == null) {
+      throw new InvalidRequestException(
+          "Searching by tag requires a token (system|code) to be specified.");
+    }
+
+    var system = token.getSystem();
+    var code = token.getValue().trim();
+
+    if (SystemUrls.BLUE_BUTTON_SYSTEM_TYPE.equals(system)) {
+      if (!SUPPORTED_SYSTEM_TYPES.contains(code.toUpperCase())) {
+        throw new InvalidRequestException(
+            String.format(
+                "Unsupported _tag value for system type. Supported values are '%s', '%s'.",
+                IdrConstants.SYSTEM_TYPE_NCH, IdrConstants.SYSTEM_TYPE_SHARED));
+      }
+      var sourceIds = SOURCE_ID_MAP.get(code.toUpperCase());
+      if (sourceIds == null || sourceIds.isEmpty()) {
+        throw new InvalidRequestException("Unknown claim source id: " + code);
+      }
+      return sourceIds.stream()
+          .map(TagCriterion.SourceIdCriterion::new)
+          .collect(Collectors.toList());
+
+    } else if (SystemUrls.BLUE_BUTTON_FINAL_ACTION_STATUS.equals(system)) {
+      if (!FINAL_ACTION_MAP.containsKey(code.toUpperCase())) {
+        throw new InvalidRequestException(
+            String.format(
+                "Unsupported _tag value for Final Action Status. Supported values are %s.",
+                SUPPORTED_FINAL_ACTION_STATUSES.stream()
+                    .map(s -> String.format("'%s'", s))
+                    .collect(Collectors.joining(", "))));
+      }
+      return List.of(
+          new TagCriterion.FinalActionCriterion(FINAL_ACTION_MAP.get(code.toUpperCase())));
+
+    } else {
       throw new InvalidRequestException(
           String.format(
-              "Unsupported _tag value for adjudication status. Supported values are '%s' and '%s'.",
-              IdrConstants.ADJUDICATION_STATUS_PARTIAL, IdrConstants.ADJUDICATION_STATUS_FINAL));
+              "Invalid tag system specified. Supported systems are '%s', %s'.",
+              SystemUrls.BLUE_BUTTON_SYSTEM_TYPE, SystemUrls.BLUE_BUTTON_FINAL_ACTION_STATUS));
     }
-    return Stream.of(ClaimSourceId.values())
-        .filter(
-            sourceId -> {
-              var adjudicationStatus = sourceId.getAdjudicationStatus();
-              return adjudicationStatus.isPresent()
-                  && adjudicationStatus.get().equalsIgnoreCase(statusValue);
-            })
-        .toList();
   }
 
   /**

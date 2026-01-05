@@ -10,10 +10,10 @@ import org.hl7.fhir.r4.model.Extension;
 @Embeddable
 class ClaimInstitutionalExtensions {
   @Embedded private ClaimNonpaymentReasonCode claimNonpaymentReasonCode;
-  @Embedded private ClaimFinalActionCode claimFinalActionCode;
+  @Embedded private ClaimFIActionCode claimFIActionCode;
 
   List<Extension> toFhir() {
-    return Stream.of(claimNonpaymentReasonCode.toFhir(), claimFinalActionCode.toFhir())
+    return Stream.of(claimNonpaymentReasonCode.toFhir(), claimFIActionCode.toFhir())
         .flatMap(Optional::stream)
         .toList();
   }

@@ -6,18 +6,20 @@ import java.util.Optional;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Extension;
 
-class ClaimFinalActionCode {
+// This is the fiscal intermediary action code, not final action!
+class ClaimFIActionCode {
   @Column(name = "clm_fi_actn_cd")
-  private Optional<String> finalActionCode;
+  private Optional<String> fiActionCode;
 
   Optional<Extension> toFhir() {
-    return finalActionCode.map(
+    return fiActionCode.map(
         s ->
             new Extension()
-                .setUrl(SystemUrls.BLUE_BUTTON_STRUCTURE_DEFINITION_FINAL_ACTION_CODE)
+                .setUrl(SystemUrls.BLUE_BUTTON_STRUCTURE_DEFINITION_FISCAL_INTERMEDIARY_ACTION_CODE)
                 .setValue(
                     new Coding()
-                        .setSystem(SystemUrls.BLUE_BUTTON_CODE_SYSTEM_FINAL_ACTION_CODE)
+                        .setSystem(
+                            SystemUrls.BLUE_BUTTON_CODE_SYSTEM_FISCAL_INTERMEDIARY_ACTION_CODE)
                         .setCode(s)));
   }
 }

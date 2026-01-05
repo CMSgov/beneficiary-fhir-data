@@ -17,6 +17,7 @@ import gov.cms.bfd.server.ng.util.DateUtil;
 import gov.cms.bfd.server.ng.util.IdrConstants;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -153,7 +154,7 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
             new DateTimeRange(),
             new DateTimeRange(),
             Optional.empty(),
-            List.of(),
+            Collections.emptyList(),
             List.of(),
             samhsaFilterMode);
     return getEobFromBundle(claims);
@@ -221,7 +222,8 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
       List<Long> nonSamhsaClaimIds,
       List<Long> skipBundleVerification) {
     var bundle = searchBundle(beneSk, samhsaCertType).execute();
-    // Before checking for SAMHSA codes, filter any cases that won't pass verification due to
+    // Before checking for SAMHSA codes, filter any cases that won't pass
+    // verification due to
     // system/code mismatches.
     var bundleClaimsToCheck =
         getEobFromBundle(bundle).stream()
@@ -293,7 +295,8 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
   @ParameterizedTest
   void shouldNotFilterSamhsaIfAllowedCert(long beneSk) {
     var bundle = searchBundle(beneSk, SamhsaCertType.SAMHSA_ALLOWED_CERT).execute();
-    // Bundle from endpoint _should_ contain sensitive codes because the "cert" provided is allowed
+    // Bundle from endpoint _should_ contain sensitive codes because the "cert"
+    // provided is allowed
     // to get SAMHSA data
     assertTrue(anyClaimsContainSamhsaCode(getEobFromBundle(bundle), true));
   }
@@ -336,7 +339,8 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
 
   // The following group of tests is used to ensure the validity of the test data.
   // Since the tests above are largely checking for the absence of some codes,
-  // the only way to ensure the data is set up correctly is to make sure the relevant codes
+  // the only way to ensure the data is set up correctly is to make sure the
+  // relevant codes
   // do appear in the responses when filtering is not enabled.
   private static Stream<Arguments> ensureDiagnosis() {
     return Stream.of(
@@ -506,7 +510,8 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
       }
 
       var target = normalize(entry.getCode());
-      // This can produce false positives, but it will be safer to set up the test data to avoid
+      // This can produce false positives, but it will be safer to set up the test
+      // data to avoid
       // this than to try to limit the fields we check against
       if (json.contains("\"code\":" + target)
           || json.contains(String.format("\"code\":\"%s\"", target))) {

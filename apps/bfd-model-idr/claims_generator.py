@@ -786,12 +786,9 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
     add_meta_timestamps(clm_dt_sgntr, claim["CLM"], max_date)
     add_meta_timestamps(rlt_cond_mbr_record, claim["CLM"], max_date)
 
-    clm_finl_actn_ind = "N"
-    if clm_type_cd in (1, 2, 3, 4, 10, 20, 30, 40, 50, 60, 61, 62, 63, 71, 72, 81, 82):
-        clm_finl_actn_ind = "Y"
-    elif clm_type_cd >= 2000 and clm_type_cd < 2800:
-        clm_finl_actn_ind = random.choice(["Y", "N"])
-    claim["CLM"]["CLM_FINL_ACTN_IND"] = clm_finl_actn_ind
+    claim["CLM"]["CLM_FINL_ACTN_IND"] = "Y"
+    if claim["CLM"]["CLM_TYPE_CD"] == 3 or claim["CLM"]["CLM_ADJSTMT_TYPE_CD"] == '1':
+        claim["CLM"]["CLM_FINL_ACTN_IND"] = "N"
 
     clm_ltst_clm_ind = "N"
     if clm_type_cd in (1, 2, 3, 4, 10, 20, 30, 40, 50, 60, 61, 62, 63, 71, 72, 81, 82):
@@ -1332,6 +1329,9 @@ def gen_pac_version_of_claim(claim, max_date):
         pac_claim["CLM"].pop("CLM_BLOOD_PT_FRNSH_QTY")
     if "CLM_NCH_PRMRY_PYR_CD" in pac_claim["CLM"]:
         pac_claim["CLM"].pop("CLM_NCH_PRMRY_PYR_CD")
+    
+    if pac_claim["CLM"]["CLM_TYPE_CD"] < 2000:
+        pac_claim["CLM"]["CLM_FINL_ACTN_IND"] = "N"
 
     pac_claim["CLM"]["CLM_DT_SGNTR_SK"] = "".join(random.choices(string.digits, k=12))
     pac_claim["CLM_DT_SGNTR"]["CLM_DT_SGNTR_SK"] = pac_claim["CLM"]["CLM_DT_SGNTR_SK"]

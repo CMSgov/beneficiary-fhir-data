@@ -1,13 +1,16 @@
 package gov.cms.bfd.server.ng.claim;
 
 import gov.cms.bfd.server.ng.claim.model.Claim;
-import gov.cms.bfd.server.ng.claim.model.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.ClaimTypeCode;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
+import gov.cms.bfd.server.ng.input.TagCriterion;
+import gov.cms.bfd.server.ng.input.TagCriterion.FinalActionCriterion;
+import gov.cms.bfd.server.ng.input.TagCriterion.SourceIdCriterion;
 import gov.cms.bfd.server.ng.util.LogUtil;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
@@ -63,7 +66,7 @@ public class ClaimRepository {
               WHERE c.claimUniqueId = :claimUniqueId
               %s
             """,
-            CLAIM_TABLES_BASE, getFilters(claimThroughDate, lastUpdated));
+            CLAIM_TABLES_BASE, getFilters(claimThroughDate, lastUpdated, Collections.emptyList()));
     var results =
         withParams(
                 entityManager.createQuery(jpql, Claim.class),
@@ -87,7 +90,7 @@ public class ClaimRepository {
    * @param lastUpdated last updated
    * @param limit limit
    * @param offset offset
-   * @param sourceIds claim sourceIds
+   * @param tagCriteria tag criteria
    * @param claimTypeCodes claimTypeCodes
    * @return claims
    */
@@ -97,12 +100,15 @@ public class ClaimRepository {
       DateTimeRange lastUpdated,
       Optional<Integer> limit,
       Optional<Integer> offset,
-      List<ClaimSourceId> sourceIds,
+      List<List<TagCriterion>> tagCriteria,
       List<ClaimTypeCode> claimTypeCodes) {
-    // JPQL doesn't support LIMIT/OFFSET unfortunately, so we have to load this separately.
-    // setMaxResults will only limit the results in memory rather than at the database level.
+    // JPQL doesn't support LIMIT/OFFSET unfortunately, so we have to load this
+    // separately.
+    // setMaxResults will only limit the results in memory rather than at the
+    // database level.
 
-    // We need to get a distinct list of bene_sk values here because there will be duplicates
+    // We need to get a distinct list of bene_sk values here because there will be
+    // duplicates
     // since this is a history table.
     var claimIds =
         entityManager
@@ -132,16 +138,17 @@ public class ClaimRepository {
             WHERE c.claimUniqueId IN (:claimIds)
             %s
             """,
-            CLAIM_TABLES_BASE, getFilters(claimThroughDate, lastUpdated));
-    var claims =
+            CLAIM_TABLES_BASE, getFilters(claimThroughDate, lastUpdated, tagCriteria));
+    var query =
         withParams(
                 entityManager.createQuery(jpql, Claim.class),
                 claimThroughDate,
                 lastUpdated,
-                sourceIds,
+                tagCriteria,
                 claimTypeCodes)
-            .setParameter("claimIds", claimIds)
-            .getResultList();
+            .setParameter("claimIds", claimIds);
+
+    var claims = query.getResultList();
 
     claims.stream()
         .findFirst()
@@ -149,36 +156,80 @@ public class ClaimRepository {
     return claims;
   }
 
-  private String getFilters(DateTimeRange claimThroughDate, DateTimeRange lastUpdated) {
-    return String.format(
-        """
-        AND ((cast(:claimThroughDateLowerBound AS LocalDate)) IS NULL OR c.billablePeriod.claimThroughDate %s :claimThroughDateLowerBound)
-        AND ((cast(:claimThroughDateUpperBound AS LocalDate)) IS NULL OR c.billablePeriod.claimThroughDate %s :claimThroughDateUpperBound)
-        AND ((cast(:lastUpdatedLowerBound AS ZonedDateTime)) IS NULL OR c.meta.updatedTimestamp %s :lastUpdatedLowerBound)
-        AND ((cast(:lastUpdatedUpperBound AS ZonedDateTime)) IS NULL OR c.meta.updatedTimestamp %s :lastUpdatedUpperBound)
-        AND (:hasSourceIds = false OR c.claimSourceId IN :sourceIds)
-        AND (:hasClaimTypeCodes = false OR c.claimTypeCode IN :claimTypeCodes)
-        """,
-        claimThroughDate.getLowerBoundSqlOperator(),
-        claimThroughDate.getUpperBoundSqlOperator(),
-        lastUpdated.getLowerBoundSqlOperator(),
-        lastUpdated.getUpperBoundSqlOperator());
+  private String getFilters(
+      DateTimeRange claimThroughDate,
+      DateTimeRange lastUpdated,
+      List<List<TagCriterion>> tagCriteria) {
+    var sb = new StringBuilder();
+    sb.append(
+        String.format(
+            """
+                AND ((cast(:claimThroughDateLowerBound AS LocalDate)) IS NULL OR c.billablePeriod.claimThroughDate %s :claimThroughDateLowerBound)
+                AND ((cast(:claimThroughDateUpperBound AS LocalDate)) IS NULL OR c.billablePeriod.claimThroughDate %s :claimThroughDateUpperBound)
+                AND ((cast(:lastUpdatedLowerBound AS ZonedDateTime)) IS NULL OR c.meta.updatedTimestamp %s :lastUpdatedLowerBound)
+                                                    AND ((cast(:lastUpdatedUpperBound AS ZonedDateTime)) IS NULL OR c.meta.updatedTimestamp %s :lastUpdatedUpperBound)
+                AND (:hasClaimTypeCodes = false OR c.claimTypeCode IN :claimTypeCodes)
+                    """,
+            claimThroughDate.getLowerBoundSqlOperator(),
+            claimThroughDate.getUpperBoundSqlOperator(),
+            lastUpdated.getLowerBoundSqlOperator(),
+            lastUpdated.getUpperBoundSqlOperator()));
+
+    for (var i = 0; i < tagCriteria.size(); i++) {
+      var orList = tagCriteria.get(i);
+      if (orList.isEmpty()) {
+        continue;
+      }
+      sb.append(" AND (");
+      for (var j = 0; j < orList.size(); j++) {
+        if (j > 0) {
+          sb.append(" OR ");
+        }
+        var criterion = orList.get(j);
+        switch (criterion) {
+          case SourceIdCriterion _ -> {
+            sb.append("c.claimSourceId = :tag_").append(i).append("_").append(j);
+          }
+          case FinalActionCriterion _ -> {
+            sb.append("c.finalAction = :tag_").append(i).append("_").append(j);
+          }
+        }
+      }
+      sb.append(")");
+    }
+
+    return sb.toString();
   }
 
   private <T> TypedQuery<T> withParams(
       TypedQuery<T> query,
       DateTimeRange claimThroughDate,
       DateTimeRange lastUpdated,
-      List<ClaimSourceId> sourceIds,
+      List<List<TagCriterion>> tagCriteria,
       List<ClaimTypeCode> claimTypeCodes) {
-    return query
+    query
         .setParameter("claimThroughDateLowerBound", claimThroughDate.getLowerBoundDate())
         .setParameter("claimThroughDateUpperBound", claimThroughDate.getUpperBoundDate())
         .setParameter("lastUpdatedLowerBound", lastUpdated.getLowerBoundDateTime().orElse(null))
         .setParameter("lastUpdatedUpperBound", lastUpdated.getUpperBoundDateTime().orElse(null))
-        .setParameter("hasSourceIds", !sourceIds.isEmpty())
-        .setParameter("sourceIds", sourceIds)
         .setParameter("hasClaimTypeCodes", !claimTypeCodes.isEmpty())
         .setParameter("claimTypeCodes", claimTypeCodes);
+
+    for (var i = 0; i < tagCriteria.size(); i++) {
+      var orList = tagCriteria.get(i);
+      for (var j = 0; j < orList.size(); j++) {
+        var criterion = orList.get(j);
+        var paramName = "tag_" + i + "_" + j;
+        switch (criterion) {
+          case SourceIdCriterion c -> {
+            query.setParameter(paramName, c.sourceId());
+          }
+          case FinalActionCriterion c -> {
+            query.setParameter(paramName, c.finalAction());
+          }
+        }
+      }
+    }
+    return query;
   }
 }

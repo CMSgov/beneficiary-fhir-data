@@ -393,8 +393,11 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
     "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Outpatient-Institutional|2.1.0" ],
     "source" : "FISS",
     "tag" : [ {
-      "code" : "PartiallyAdjudicated",
-      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication-Status"
+      "code" : "SharedSystem",
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type"
+    }, {
+      "code" : "NotFinalAction",
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Final-Action"
     } ]
   },
   "outcome" : "partial",
@@ -1047,8 +1050,11 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
     "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Outpatient-Institutional|2.1.0" ],
     "source" : "FISS",
     "tag" : [ {
-      "code" : "PartiallyAdjudicated",
-      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication-Status"
+      "code" : "SharedSystem",
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type"
+    }, {
+      "code" : "FinalAction",
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Final-Action"
     } ]
   },
   "outcome" : "queued",
@@ -1886,10 +1892,13 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
   "meta" : {
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
     "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Professional-NonClinician|2.1.0" ],
-    "source" : "NationalClaimsHistory",
+    "source" : "NCH",
     "tag" : [ {
-      "code" : "Adjudicated",
-      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication-Status"
+      "code" : "NationalClaimsHistory",
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type"
+    }, {
+      "code" : "FinalAction",
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Final-Action"
     } ]
   },
   "outcome" : "queued",
@@ -2738,10 +2747,13 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
   "meta" : {
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
     "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Professional-NonClinician|2.1.0" ],
-    "source" : "NationalClaimsHistory",
+    "source" : "NCH",
     "tag" : [ {
-      "code" : "Adjudicated",
-      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication-Status"
+      "code" : "NationalClaimsHistory",
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type"
+    }, {
+      "code" : "FinalAction",
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Final-Action"
     } ]
   },
   "outcome" : "complete",
@@ -3907,10 +3919,13 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
   "meta" : {
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
     "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional|2.1.0" ],
-    "source" : "NationalClaimsHistory",
+    "source" : "NCH",
     "tag" : [ {
-      "code" : "Adjudicated",
-      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication-Status"
+      "code" : "NationalClaimsHistory",
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type"
+    }, {
+      "code" : "FinalAction",
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Final-Action"
     } ]
   },
   "outcome" : "complete",
@@ -5209,10 +5224,13 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
   "meta" : {
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
     "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional|2.1.0" ],
-    "source" : "NationalClaimsHistory",
+    "source" : "NCH",
     "tag" : [ {
-      "code" : "Adjudicated",
-      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication-Status"
+      "code" : "NationalClaimsHistory",
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type"
+    }, {
+      "code" : "FinalAction",
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Final-Action"
     } ]
   },
   "outcome" : "complete",
