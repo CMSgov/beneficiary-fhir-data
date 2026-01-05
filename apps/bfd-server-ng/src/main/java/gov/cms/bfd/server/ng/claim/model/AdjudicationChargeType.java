@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.ng.claim.model;
 
 import gov.cms.bfd.server.ng.util.SystemUrls;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -9,6 +10,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 // Suppress warnings for duplicate string literals.
 // There's too many values here - creating constants for all of these adds too much noise.
 @SuppressWarnings("java:S1192")
+@AllArgsConstructor
 @Getter
 enum AdjudicationChargeType {
   LINE_NONCOVERED_CHARGE_AMOUNT(
@@ -432,21 +434,8 @@ enum AdjudicationChargeType {
   private final String coding2Code;
   private final String coding2Display;
 
-  AdjudicationChargeType(
-      String coding1System,
-      String coding1Code,
-      String coding1Display,
-      String coding2Code,
-      String coding2Display) {
-    this.coding1System = coding1System;
-    this.coding1Code = coding1Code;
-    this.coding1Display = coding1Display;
-    this.coding2Code = coding2Code;
-    this.coding2Display = coding2Display;
-  }
-
   AdjudicationChargeType(String coding1System, String coding1Code, String coding1Display) {
-    this(coding1System, coding1Code, coding1Display, null, null);
+    this(coding1System, coding1Code, coding1Display, "", "");
   }
 
   private CodeableConcept buildCategory() {
@@ -457,7 +446,7 @@ enum AdjudicationChargeType {
                     .setSystem(coding1System)
                     .setCode(coding1Code)
                     .setDisplay(coding1Display));
-    if (coding2Code != null) {
+    if (!coding2Code.isBlank()) {
       category.addCoding(
           new Coding()
               .setSystem(SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION)
