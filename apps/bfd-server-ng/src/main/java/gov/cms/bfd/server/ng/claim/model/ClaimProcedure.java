@@ -78,16 +78,12 @@ public class ClaimProcedure {
       return Optional.empty();
     }
     ClaimContext claimContext;
-    if (claimTypeCode.isBetween(5, 69)
-        || claimTypeCode.isBetween(2000, 2699)
-        || claimTypeCode.isBetween(1000, 1699)
-        || claimTypeCode.is(2900)) {
+    if (claimTypeCode.isInstitutional()) {
       claimContext = ClaimContext.INSTITUTIONAL;
-    } else if (claimTypeCode.isBetween(71, 82)
-        || claimTypeCode.isBetween(2700, 2899)
-        || claimTypeCode.isBetween(1700, 1899)) {
+    } else if (claimTypeCode.isProfessional()) {
       claimContext = ClaimContext.PROFESSIONAL;
     } else {
+      // Handles PDE (Part D) and any other unmapped types
       return Optional.empty();
     }
     var diagnosis = new ExplanationOfBenefit.DiagnosisComponent();
