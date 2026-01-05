@@ -17,7 +17,7 @@ public sealed interface TagCriterion
   /**
    * Criterion filtering by {@link ClaimFinalAction}.
    *
-   * @param finalAction tfinal action enum value
+   * @param finalAction final action enum value
    */
   record FinalActionCriterion(ClaimFinalAction finalAction) implements TagCriterion {}
 }

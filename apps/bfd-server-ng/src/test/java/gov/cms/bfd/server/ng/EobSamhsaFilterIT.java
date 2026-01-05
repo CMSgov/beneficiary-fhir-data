@@ -39,17 +39,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 /**
  * Integration test that verifies SAMHSA-coded claims are filtered end-to-end.
  *
- * <p>
- * This test loads the security labels YAML from the classpath, finds a matching
- * claim in the
- * test database seeded by the integration test pipeline, and then asserts that
- * requesting that
+ * <p>This test loads the security labels YAML from the classpath, finds a matching claim in the
+ * test database seeded by the integration test pipeline, and then asserts that requesting that
  * claim via the FHIR EOB endpoint returns no results (i.e. it was filtered).
  */
 class EobSamhsaFilterIT extends IntegrationTestBase {
   private final FhirContext context = FhirContext.forR4();
 
-  private static final Map<String, List<SecurityLabel>> SECURITY_LABELS = SecurityLabel.getSecurityLabels();
+  private static final Map<String, List<SecurityLabel>> SECURITY_LABELS =
+      SecurityLabel.getSecurityLabels();
 
   private static final long CLAIM_UNIQUE_ID_FOR_ICD_10_DIAGNOSIS = 4146709784142L;
   private static final long CLAIM_UNIQUE_ID_FOR_ICD_10_PROCEDURE = 6647624169509L;
@@ -104,27 +102,27 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
   private static final String CPT = "99408";
   private static final String CPT2 = "0078U";
 
-  protected final List<List<String>> samhsaCodesToCheck = List.of(
-      List.of(SystemUrls.CMS_MS_DRG, DRG),
-      List.of(SystemUrls.CMS_MS_DRG, DRG2),
-      List.of(SystemUrls.CMS_MS_DRG, DRG_EXPIRED1),
-      List.of(SystemUrls.CMS_MS_DRG, DRG_EXPIRED2),
-      List.of(SystemUrls.CMS_HCPCS, HCPCS),
-      List.of(SystemUrls.CMS_HCPCS, HCPCS2),
-      List.of(SystemUrls.CMS_HCPCS, FUTURE_HCPCS),
-      List.of(SystemUrls.AMA_CPT, CPT),
-      List.of(SystemUrls.AMA_CPT, CPT2),
-      List.of(SystemUrls.ICD_9_CM_DIAGNOSIS, ICD9_DIAGNOSIS),
-      List.of(SystemUrls.ICD_9_CM_DIAGNOSIS, ICD9_DIAGNOSIS2),
-      List.of(SystemUrls.ICD_10_CM_DIAGNOSIS, ICD10_DIAGNOSIS),
-      List.of(SystemUrls.ICD_10_CM_DIAGNOSIS, ICD10_DIAGNOSIS2),
-      List.of(SystemUrls.CMS_ICD_9_PROCEDURE, ICD9_PROCEDURE),
-      List.of(SystemUrls.CMS_ICD_9_PROCEDURE, ICD9_PROCEDURE2),
-      List.of(SystemUrls.CMS_ICD_10_PROCEDURE, ICD10_PROCEDURE),
-      List.of(SystemUrls.CMS_ICD_10_PROCEDURE, ICD10_PROCEDURE2));
+  protected final List<List<String>> samhsaCodesToCheck =
+      List.of(
+          List.of(SystemUrls.CMS_MS_DRG, DRG),
+          List.of(SystemUrls.CMS_MS_DRG, DRG2),
+          List.of(SystemUrls.CMS_MS_DRG, DRG_EXPIRED1),
+          List.of(SystemUrls.CMS_MS_DRG, DRG_EXPIRED2),
+          List.of(SystemUrls.CMS_HCPCS, HCPCS),
+          List.of(SystemUrls.CMS_HCPCS, HCPCS2),
+          List.of(SystemUrls.CMS_HCPCS, FUTURE_HCPCS),
+          List.of(SystemUrls.AMA_CPT, CPT),
+          List.of(SystemUrls.AMA_CPT, CPT2),
+          List.of(SystemUrls.ICD_9_CM_DIAGNOSIS, ICD9_DIAGNOSIS),
+          List.of(SystemUrls.ICD_9_CM_DIAGNOSIS, ICD9_DIAGNOSIS2),
+          List.of(SystemUrls.ICD_10_CM_DIAGNOSIS, ICD10_DIAGNOSIS),
+          List.of(SystemUrls.ICD_10_CM_DIAGNOSIS, ICD10_DIAGNOSIS2),
+          List.of(SystemUrls.CMS_ICD_9_PROCEDURE, ICD9_PROCEDURE),
+          List.of(SystemUrls.CMS_ICD_9_PROCEDURE, ICD9_PROCEDURE2),
+          List.of(SystemUrls.CMS_ICD_10_PROCEDURE, ICD10_PROCEDURE),
+          List.of(SystemUrls.CMS_ICD_10_PROCEDURE, ICD10_PROCEDURE2));
 
-  @Autowired
-  private EobHandler eobHandler;
+  @Autowired private EobHandler eobHandler;
 
   private IQuery<Bundle> searchBundle(long patient, SamhsaCertType samhsaCertType) {
     return searchBundle(String.valueOf(patient), samhsaCertType);
@@ -149,15 +147,16 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
 
   private List<ExplanationOfBenefit> getClaimsByBene(
       long beneSk, SamhsaFilterMode samhsaFilterMode) {
-    var claims = eobHandler.searchByBene(
-        beneSk,
-        Optional.empty(),
-        new DateTimeRange(),
-        new DateTimeRange(),
-        Optional.empty(),
-        Collections.emptyList(),
-        List.of(),
-        samhsaFilterMode);
+    var claims =
+        eobHandler.searchByBene(
+            beneSk,
+            Optional.empty(),
+            new DateTimeRange(),
+            new DateTimeRange(),
+            Optional.empty(),
+            Collections.emptyList(),
+            List.of(),
+            samhsaFilterMode);
     return getEobFromBundle(claims);
   }
 
@@ -173,10 +172,11 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
     var codeToCheck = "H00.34";
     assertTrue(isSensitiveCode(SystemUrls.CMS_HCPCS, normalize(codeToCheck)));
     var fetched = eobRead().withId(CLAIM_WITH_HCPCS_IN_ICD).execute();
-    var diagnosis = fetched.getDiagnosis().stream()
-        .flatMap(d -> d.getDiagnosisCodeableConcept().getCoding().stream())
-        .filter(d -> d.getCode().equals(codeToCheck))
-        .findFirst();
+    var diagnosis =
+        fetched.getDiagnosis().stream()
+            .flatMap(d -> d.getDiagnosisCodeableConcept().getCoding().stream())
+            .filter(d -> d.getCode().equals(codeToCheck))
+            .findFirst();
     assertTrue(diagnosis.isPresent());
     assertEquals(codeToCheck, diagnosis.get().getCode());
     assertEquals(SystemUrls.ICD_10_CM_DIAGNOSIS, diagnosis.get().getSystem());
@@ -225,21 +225,24 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
     // Before checking for SAMHSA codes, filter any cases that won't pass
     // verification due to
     // system/code mismatches.
-    var bundleClaimsToCheck = getEobFromBundle(bundle).stream()
-        .filter(c -> !skipBundleVerification.contains(Long.parseLong(c.getIdPart())))
-        .toList();
+    var bundleClaimsToCheck =
+        getEobFromBundle(bundle).stream()
+            .filter(c -> !skipBundleVerification.contains(Long.parseLong(c.getIdPart())))
+            .toList();
     // Bundle from endpoint should not contain any sensitive codes
     assertFalse(anyClaimsContainSamhsaCode(bundleClaimsToCheck, true));
 
     // Ensure listed claims are valid
     var foundClaimIds = getClaimIdsByBene(beneSk, SamhsaFilterMode.INCLUDE);
-    for (var claimId : Stream.concat(samhsaClaimIds.stream(), nonSamhsaClaimIds.stream()).toList()) {
+    for (var claimId :
+        Stream.concat(samhsaClaimIds.stream(), nonSamhsaClaimIds.stream()).toList()) {
       assertTrue(foundClaimIds.contains(claimId));
     }
 
-    var foundSamhsaClaims = getClaimsByBene(beneSk, SamhsaFilterMode.INCLUDE).stream()
-        .filter(c -> samhsaClaimIds.contains(Long.parseLong(c.getIdPart())))
-        .toList();
+    var foundSamhsaClaims =
+        getClaimsByBene(beneSk, SamhsaFilterMode.INCLUDE).stream()
+            .filter(c -> samhsaClaimIds.contains(Long.parseLong(c.getIdPart())))
+            .toList();
     assertFalse(foundSamhsaClaims.isEmpty());
     // All claims marked as SAMHSA should contain at least one valid code.
     assertTrue(allClaimsContainSamhsaCode(foundSamhsaClaims, false));
@@ -262,7 +265,7 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
     expectFhir().scenario(String.valueOf(beneSk)).toMatchSnapshot(bundle);
   }
 
-  @MethodSource({ "shouldFilterSamhsa" })
+  @MethodSource({"shouldFilterSamhsa"})
   @ParameterizedTest
   void shouldFilterSamhsaNoCert(
       long beneSk,
@@ -273,7 +276,7 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
         SamhsaCertType.NO_CERT, beneSk, samhsaClaimIds, nonSamhsaClaimIds, skipBundleVerification);
   }
 
-  @MethodSource({ "shouldFilterSamhsa" })
+  @MethodSource({"shouldFilterSamhsa"})
   @ParameterizedTest
   void shouldFilterSamhsaSamhsaNotAllowedCert(
       long beneSk,
@@ -288,7 +291,7 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
         skipBundleVerification);
   }
 
-  @ValueSource(longs = { BENE_SK, BENE_SK2, BENE_SK3, BENE_SK4, BENE_SK5, BENE_SK6 })
+  @ValueSource(longs = {BENE_SK, BENE_SK2, BENE_SK3, BENE_SK4, BENE_SK5, BENE_SK6})
   @ParameterizedTest
   void shouldNotFilterSamhsaIfAllowedCert(long beneSk) {
     var bundle = searchBundle(beneSk, SamhsaCertType.SAMHSA_ALLOWED_CERT).execute();
@@ -303,24 +306,29 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
     var beneSk = BENE_SK;
     var bundle = searchBundle(beneSk, SamhsaCertType.SAMHSA_ALLOWED_CERT).execute();
 
-    var samhsaEob = getEobFromBundle(bundle).stream()
-        .filter(
-            eob -> eob.getIdPart()
-                .equals(String.valueOf(CLAIM_UNIQUE_ID_WITH_MULTIPLE_SAMHSA_CODES)))
-        .findFirst();
+    var samhsaEob =
+        getEobFromBundle(bundle).stream()
+            .filter(
+                eob ->
+                    eob.getIdPart()
+                        .equals(String.valueOf(CLAIM_UNIQUE_ID_WITH_MULTIPLE_SAMHSA_CODES)))
+            .findFirst();
 
     assertTrue(samhsaEob.isPresent(), "Expected SAMHSA EOB found in bundle.");
 
-    Predicate<Coding> isSamhsaSecurityTag = tag -> SystemUrls.SAMHSA_ACT_CODE_SYSTEM_URL.equals(tag.getSystem())
-        && IdrConstants.SAMHSA_SECURITY_CODE.equals(tag.getCode());
+    Predicate<Coding> isSamhsaSecurityTag =
+        tag ->
+            SystemUrls.SAMHSA_ACT_CODE_SYSTEM_URL.equals(tag.getSystem())
+                && IdrConstants.SAMHSA_SECURITY_CODE.equals(tag.getCode());
 
     samhsaEob.get().getMeta().getSecurity().stream()
         .filter(isSamhsaSecurityTag)
         .findFirst()
         .ifPresentOrElse(
             tag -> assertEquals(IdrConstants.SAMHSA_SECURITY_DISPLAY, tag.getDisplay()),
-            () -> Assertions.fail(
-                "Expected SAMHSA security tag not found in EOB meta or had incorrect code/system."));
+            () ->
+                Assertions.fail(
+                    "Expected SAMHSA security tag not found in EOB meta or had incorrect code/system."));
 
     // Snapshot only the SAMHSA EOB to avoid storing irrelevant objects.
     var snapshotBundle = new Bundle();
@@ -354,11 +362,12 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
   @ParameterizedTest
   void ensureDiagnosis(long claimId, String code, String system) {
     var eob = eobHandler.find(claimId, SamhsaFilterMode.INCLUDE).get();
-    var icdDiagnosis = eob.getDiagnosis().stream()
-        .flatMap(d -> d.getDiagnosisCodeableConcept().getCoding().stream())
-        .filter(
-            d -> normalize(d.getCode()).equals(normalize(code)) && d.getSystem().equals(system))
-        .findFirst();
+    var icdDiagnosis =
+        eob.getDiagnosis().stream()
+            .flatMap(d -> d.getDiagnosisCodeableConcept().getCoding().stream())
+            .filter(
+                d -> normalize(d.getCode()).equals(normalize(code)) && d.getSystem().equals(system))
+            .findFirst();
     assertTrue(icdDiagnosis.isPresent());
   }
 
@@ -382,11 +391,12 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
   @ParameterizedTest
   void ensureProcedure(long claimId, String code, String system) {
     var eob = eobHandler.find(claimId, SamhsaFilterMode.INCLUDE).get();
-    var icdProcedure = eob.getProcedure().stream()
-        .flatMap(p -> p.getProcedureCodeableConcept().getCoding().stream())
-        .filter(
-            p -> normalize(p.getCode()).equals(normalize(code)) && p.getSystem().equals(system))
-        .findFirst();
+    var icdProcedure =
+        eob.getProcedure().stream()
+            .flatMap(p -> p.getProcedureCodeableConcept().getCoding().stream())
+            .filter(
+                p -> normalize(p.getCode()).equals(normalize(code)) && p.getSystem().equals(system))
+            .findFirst();
     assertTrue(icdProcedure.isPresent());
   }
 
@@ -405,10 +415,11 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
   @ParameterizedTest
   void ensureHcpcs(long claimId, String code, String system) {
     var eob = eobHandler.find(claimId, SamhsaFilterMode.INCLUDE).get();
-    var hcpcs = eob.getItem().stream()
-        .flatMap(i -> i.getProductOrService().getCoding().stream())
-        .filter(c -> c.getCode().equals(code) && c.getSystem().equals(system))
-        .findFirst();
+    var hcpcs =
+        eob.getItem().stream()
+            .flatMap(i -> i.getProductOrService().getCoding().stream())
+            .filter(c -> c.getCode().equals(code) && c.getSystem().equals(system))
+            .findFirst();
     assertTrue(hcpcs.isPresent());
   }
 
@@ -426,18 +437,17 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
   @ParameterizedTest
   void ensureDrg(long claimId, String code, String system) {
     var eob = eobHandler.find(claimId, SamhsaFilterMode.INCLUDE).get();
-    var drg = eob.getSupportingInfo().stream()
-        .flatMap(i -> i.getCode().getCoding().stream())
-        .filter(c -> c.getCode().equals(code) && c.getSystem().equals(system))
-        .findFirst();
+    var drg =
+        eob.getSupportingInfo().stream()
+            .flatMap(i -> i.getCode().getCoding().stream())
+            .filter(c -> c.getCode().equals(code) && c.getSystem().equals(system))
+            .findFirst();
     assertTrue(drg.isPresent());
   }
 
   /**
-   * Verifies that the security_labels.yml file loads, serializes, and contains
-   * expected SAMHSA
-   * codes. Ensures the file has the correct number of items and key codes are
-   * present.
+   * Verifies that the security_labels.yml file loads, serializes, and contains expected SAMHSA
+   * codes. Ensures the file has the correct number of items and key codes are present.
    */
   @Test
   void securityLabelsYamlSerializationTest() {
@@ -457,14 +467,15 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
     }
 
     // Ensure the security labels file doesn't contain any unexpected systems
-    var allowedSystems = Set.of(
-        SystemUrls.ICD_9_CM_DIAGNOSIS,
-        SystemUrls.CMS_ICD_9_PROCEDURE,
-        SystemUrls.ICD_10_CM_DIAGNOSIS,
-        SystemUrls.CMS_ICD_10_PROCEDURE,
-        SystemUrls.AMA_CPT,
-        SystemUrls.CMS_HCPCS,
-        SystemUrls.CMS_MS_DRG);
+    var allowedSystems =
+        Set.of(
+            SystemUrls.ICD_9_CM_DIAGNOSIS,
+            SystemUrls.CMS_ICD_9_PROCEDURE,
+            SystemUrls.ICD_10_CM_DIAGNOSIS,
+            SystemUrls.CMS_ICD_10_PROCEDURE,
+            SystemUrls.AMA_CPT,
+            SystemUrls.CMS_HCPCS,
+            SystemUrls.CMS_MS_DRG);
     var samhsaSystems = SECURITY_LABELS.keySet();
 
     assertEquals(allowedSystems, samhsaSystems);
