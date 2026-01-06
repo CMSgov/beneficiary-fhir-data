@@ -18,6 +18,7 @@ from pydantic import BaseModel, ConfigDict, Field, TypeAdapter
 
 from generator_util import (
     BENE_HSTRY,
+    BENE_XREF,
     CLM,
     CLM_DCMTN,
     CLM_DT_SGNTR,
@@ -1734,6 +1735,23 @@ def main():
     if any(BENE_HSTRY in file for file in args.files):
         bene_sks: set[int] = {row["BENE_SK"] for row in files[BENE_HSTRY]}
 
+    # Naively check if the tables that make up CLAIM_ITEM, CLAIM_DATE_SIGNATURE, and BENEFICIARY
+    # have been provided if CLAIM was provided. A thorough check would take too long due to the
+    # volume of data
+    clm_required_tables = [
+        CLM_PROD,
+        CLM_LINE,
+        CLM_VAL,
+        CLM_RLT_COND_SGNTR_MBR,
+        BENE_HSTRY,
+        BENE_XREF,
+    ]
+    if any(CLM in file for file in args.files) and any(
+        file not in clm_required_tables for file in args.files
+    ):
+        print(f"{', '.join(clm_required_tables)} must be provided if {CLM} is provided")
+        return
+
     clm = adapters_to_dicts(files[CLM])
     clm_line = adapters_to_dicts(files[CLM_LINE])
     clm_val = adapters_to_dicts(files[CLM_VAL])
@@ -1765,6 +1783,7 @@ def main():
         )
         sys.exit(1)
     max_date = str(date.today())
+
     bene_sks_with_claims: dict[int, list[RowAdapter]] = {}
     for claim in files[CLM]:
         clm_bene_sk: int = claim["BENE_SK"]
