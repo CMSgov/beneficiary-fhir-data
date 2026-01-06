@@ -121,15 +121,6 @@ public class SystemUrls {
       "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-STUS-CD";
 
   /**
-   * Extension URL for BFD Claim Rendering Provider Tax Number. Source:
-   * V2_MDCR_CLM_LINE.CLM_RNDRG_PRVDR_TAX_NUM <a
-   * href="https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRVDR-TAX-NUM">CLM-PRVDR-TAX-NUM
-   * Extension</a>
-   */
-  public static final String EXT_CLM_PRVDR_TAX_NUM_URL =
-      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRVDR-TAX-NUM";
-
-  /**
    * Extension URL for BFD Entitlement Buy-In Indicator Code. Source: V2_MDCR_BENE_TP.BENE_BUYIN_CD
    * <a href="https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-BUYIN-CD">BENE-BUYIN-CD
    * Extension</a>

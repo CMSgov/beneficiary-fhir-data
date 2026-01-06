@@ -12824,18 +12824,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
         "resourceType" : "Organization"
       }, {
         "extension" : [ {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRVDR-TAX-NUM",
-          "valueIdentifier" : {
-            "system" : "urn:oid:2.16.840.1.113883.4.4",
-            "type" : {
-              "coding" : [ {
-                "code" : "TAX",
-                "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-              } ]
-            },
-            "value" : "1928347912"
-          }
-        }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-RNDRG-PRVDR-PRTCPTG-CD",
           "valueCoding" : {
             "code" : "1",
@@ -12859,6 +12847,15 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             } ]
           },
           "value" : "1558719914"
+        }, {
+          "system" : "urn:oid:2.16.840.1.113883.4.4",
+          "type" : {
+            "coding" : [ {
+              "code" : "TAX",
+              "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+            } ]
+          },
+          "value" : "1928347912"
         } ],
         "meta" : {
           "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
@@ -18188,18 +18185,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
         "resourceType" : "Organization"
       }, {
         "extension" : [ {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRVDR-TAX-NUM",
-          "valueIdentifier" : {
-            "system" : "urn:oid:2.16.840.1.113883.4.4",
-            "type" : {
-              "coding" : [ {
-                "code" : "TAX",
-                "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-              } ]
-            },
-            "value" : "1928347912"
-          }
-        }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-RNDRG-PRVDR-PRTCPTG-CD",
           "valueCoding" : {
             "code" : "1",
@@ -18223,6 +18208,15 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             } ]
           },
           "value" : "1558719914"
+        }, {
+          "system" : "urn:oid:2.16.840.1.113883.4.4",
+          "type" : {
+            "coding" : [ {
+              "code" : "TAX",
+              "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+            } ]
+          },
+          "value" : "1928347912"
         } ],
         "meta" : {
           "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
@@ -23552,18 +23546,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
         "resourceType" : "Organization"
       }, {
         "extension" : [ {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRVDR-TAX-NUM",
-          "valueIdentifier" : {
-            "system" : "urn:oid:2.16.840.1.113883.4.4",
-            "type" : {
-              "coding" : [ {
-                "code" : "TAX",
-                "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-              } ]
-            },
-            "value" : "1928347912"
-          }
-        }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-RNDRG-PRVDR-PRTCPTG-CD",
           "valueCoding" : {
             "code" : "1",
@@ -23587,6 +23569,15 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             } ]
           },
           "value" : "1558719914"
+        }, {
+          "system" : "urn:oid:2.16.840.1.113883.4.4",
+          "type" : {
+            "coding" : [ {
+              "code" : "TAX",
+              "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+            } ]
+          },
+          "value" : "1928347912"
         } ],
         "meta" : {
           "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
@@ -34023,18 +34014,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[GET_WITH_SEARCH_WithTag_Em
         "resourceType" : "Organization"
       }, {
         "extension" : [ {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRVDR-TAX-NUM",
-          "valueIdentifier" : {
-            "system" : "urn:oid:2.16.840.1.113883.4.4",
-            "type" : {
-              "coding" : [ {
-                "code" : "TAX",
-                "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-              } ]
-            },
-            "value" : "1928347912"
-          }
-        }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-RNDRG-PRVDR-PRTCPTG-CD",
           "valueCoding" : {
             "code" : "1",
@@ -34058,6 +34037,15 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[GET_WITH_SEARCH_WithTag_Em
             } ]
           },
           "value" : "1558719914"
+        }, {
+          "system" : "urn:oid:2.16.840.1.113883.4.4",
+          "type" : {
+            "coding" : [ {
+              "code" : "TAX",
+              "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+            } ]
+          },
+          "value" : "1928347912"
         } ],
         "meta" : {
           "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
@@ -36859,18 +36847,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[GET_WithTag_EmptyResult]=[
         "resourceType" : "Organization"
       }, {
         "extension" : [ {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRVDR-TAX-NUM",
-          "valueIdentifier" : {
-            "system" : "urn:oid:2.16.840.1.113883.4.4",
-            "type" : {
-              "coding" : [ {
-                "code" : "TAX",
-                "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-              } ]
-            },
-            "value" : "1928347912"
-          }
-        }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-RNDRG-PRVDR-PRTCPTG-CD",
           "valueCoding" : {
             "code" : "1",
@@ -36894,6 +36870,15 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[GET_WithTag_EmptyResult]=[
             } ]
           },
           "value" : "1558719914"
+        }, {
+          "system" : "urn:oid:2.16.840.1.113883.4.4",
+          "type" : {
+            "coding" : [ {
+              "code" : "TAX",
+              "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+            } ]
+          },
+          "value" : "1928347912"
         } ],
         "meta" : {
           "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
@@ -39695,18 +39680,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[POST_WithTag_EmptyResult]=
         "resourceType" : "Organization"
       }, {
         "extension" : [ {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRVDR-TAX-NUM",
-          "valueIdentifier" : {
-            "system" : "urn:oid:2.16.840.1.113883.4.4",
-            "type" : {
-              "coding" : [ {
-                "code" : "TAX",
-                "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-              } ]
-            },
-            "value" : "1928347912"
-          }
-        }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-RNDRG-PRVDR-PRTCPTG-CD",
           "valueCoding" : {
             "code" : "1",
@@ -39730,6 +39703,15 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTagEmpty[POST_WithTag_EmptyResult]=
             } ]
           },
           "value" : "1558719914"
+        }, {
+          "system" : "urn:oid:2.16.840.1.113883.4.4",
+          "type" : {
+            "coding" : [ {
+              "code" : "TAX",
+              "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+            } ]
+          },
+          "value" : "1928347912"
         } ],
         "meta" : {
           "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
@@ -59652,18 +59634,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
         "resourceType" : "Organization"
       }, {
         "extension" : [ {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRVDR-TAX-NUM",
-          "valueIdentifier" : {
-            "system" : "urn:oid:2.16.840.1.113883.4.4",
-            "type" : {
-              "coding" : [ {
-                "code" : "TAX",
-                "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-              } ]
-            },
-            "value" : "1928347912"
-          }
-        }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-RNDRG-PRVDR-PRTCPTG-CD",
           "valueCoding" : {
             "code" : "1",
@@ -59687,6 +59657,15 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             } ]
           },
           "value" : "1558719914"
+        }, {
+          "system" : "urn:oid:2.16.840.1.113883.4.4",
+          "type" : {
+            "coding" : [ {
+              "code" : "TAX",
+              "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+            } ]
+          },
+          "value" : "1928347912"
         } ],
         "meta" : {
           "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
@@ -71974,18 +71953,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
         "resourceType" : "Organization"
       }, {
         "extension" : [ {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRVDR-TAX-NUM",
-          "valueIdentifier" : {
-            "system" : "urn:oid:2.16.840.1.113883.4.4",
-            "type" : {
-              "coding" : [ {
-                "code" : "TAX",
-                "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-              } ]
-            },
-            "value" : "1928347912"
-          }
-        }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-RNDRG-PRVDR-PRTCPTG-CD",
           "valueCoding" : {
             "code" : "1",
@@ -72009,6 +71976,15 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             } ]
           },
           "value" : "1558719914"
+        }, {
+          "system" : "urn:oid:2.16.840.1.113883.4.4",
+          "type" : {
+            "coding" : [ {
+              "code" : "TAX",
+              "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+            } ]
+          },
+          "value" : "1928347912"
         } ],
         "meta" : {
           "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
@@ -84296,18 +84272,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
         "resourceType" : "Organization"
       }, {
         "extension" : [ {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRVDR-TAX-NUM",
-          "valueIdentifier" : {
-            "system" : "urn:oid:2.16.840.1.113883.4.4",
-            "type" : {
-              "coding" : [ {
-                "code" : "TAX",
-                "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-              } ]
-            },
-            "value" : "1928347912"
-          }
-        }, {
           "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-RNDRG-PRVDR-PRTCPTG-CD",
           "valueCoding" : {
             "code" : "1",
@@ -84331,6 +84295,15 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             } ]
           },
           "value" : "1558719914"
+        }, {
+          "system" : "urn:oid:2.16.840.1.113883.4.4",
+          "type" : {
+            "coding" : [ {
+              "code" : "TAX",
+              "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+            } ]
+          },
+          "value" : "1928347912"
         } ],
         "meta" : {
           "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]

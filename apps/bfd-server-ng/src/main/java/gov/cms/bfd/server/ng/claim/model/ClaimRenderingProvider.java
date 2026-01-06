@@ -37,19 +37,14 @@ public class ClaimRenderingProvider {
             renderingProvider.toFhirName());
 
     taxNumber.ifPresent(
-        taxNum ->
-            practitioner.addExtension(
-                new Extension()
-                    .setUrl(SystemUrls.EXT_CLM_PRVDR_TAX_NUM_URL)
-                    .setValue(
-                        new Identifier()
-                            .setType(
-                                new CodeableConcept(
-                                    new Coding()
-                                        .setSystem(SystemUrls.HL7_IDENTIFIER)
-                                        .setCode("TAX")))
-                            .setSystem(SystemUrls.US_EIN)
-                            .setValue(taxNum))));
+        s ->
+            practitioner.addIdentifier(
+                new Identifier()
+                    .setType(
+                        new CodeableConcept(
+                            new Coding().setSystem(SystemUrls.HL7_IDENTIFIER).setCode("TAX")))
+                    .setSystem(SystemUrls.US_EIN)
+                    .setValue(s)));
     participatingIndicatorCode.ifPresent(
         s ->
             practitioner.addExtension(
