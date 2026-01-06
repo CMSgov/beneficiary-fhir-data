@@ -581,16 +581,6 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
     "quantity" : {
       "value" : 2.0
     },
-    "revenue" : {
-      "coding" : [ {
-        "code" : "0929",
-        "display" : "OTHER DIAGNOSTIC SERVICES - OTHER DIAGNOSTIC SERVICE",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD"
-      }, {
-        "code" : "0929",
-        "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
-      } ]
-    },
     "sequence" : 1,
     "servicedDate" : "2018-08-12"
   } ],
@@ -1692,16 +1682,6 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
     "quantity" : {
       "unit" : "ML",
       "value" : 10.0
-    },
-    "revenue" : {
-      "coding" : [ {
-        "code" : "0929",
-        "display" : "OTHER DIAGNOSTIC SERVICES - OTHER DIAGNOSTIC SERVICE",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD"
-      }, {
-        "code" : "0929",
-        "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
-      } ]
     },
     "sequence" : 1,
     "servicedDate" : "2025-08-10"
