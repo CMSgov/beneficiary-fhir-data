@@ -2,6 +2,7 @@ package gov.cms.bfd.server.ng.claim.model;
 
 import gov.cms.bfd.server.ng.converter.NonZeroIntConverter;
 import gov.cms.bfd.server.ng.util.DateUtil;
+import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
@@ -42,6 +43,14 @@ public class ClaimProcedure {
 
   private static final LocalDate DEFAULT_PROCEDURE_DATE = LocalDate.of(2000, 1, 1);
 
+  Optional<String> getDiagnosisKey() {
+    return diagnosisCode.map(s -> s + "|" + icdIndicator.map(IcdIndicator::getCode).orElse(""));
+  }
+
+  Optional<Integer> getDiagnosisPriority(ClaimContext claimContext) {
+    return diagnosisType.map(d -> d.getPriority(claimContext));
+  }
+
   Optional<ExplanationOfBenefit.ProcedureComponent> toFhirProcedure() {
     if (procedureCode.isEmpty() || sequenceNumber.isEmpty() || icdIndicator.isEmpty()) {
       return Optional.empty();
@@ -73,21 +82,13 @@ public class ClaimProcedure {
   }
 
   Optional<ExplanationOfBenefit.DiagnosisComponent> toFhirDiagnosis(
-      int bfdRowId, ClaimTypeCode claimTypeCode) {
+      SequenceGenerator sequenceGenerator, ClaimContext claimContext) {
     if (diagnosisCode.isEmpty()) {
       return Optional.empty();
     }
-    ClaimContext claimContext;
-    if (claimTypeCode.isInstitutional()) {
-      claimContext = ClaimContext.INSTITUTIONAL;
-    } else if (claimTypeCode.isProfessional()) {
-      claimContext = ClaimContext.PROFESSIONAL;
-    } else {
-      // Handles PDE (Part D) and any other unmapped types
-      return Optional.empty();
-    }
+
     var diagnosis = new ExplanationOfBenefit.DiagnosisComponent();
-    diagnosis.setSequence(bfdRowId);
+    diagnosis.setSequence(sequenceGenerator.next());
 
     diagnosisType.ifPresent(
         d ->
@@ -95,7 +96,7 @@ public class ClaimProcedure {
                 new CodeableConcept(
                     new Coding().setSystem(d.getSystem()).setCode(d.getFhirCode(claimContext)))));
 
-    String formattedCode = icdIndicator.get().formatDiagnosisCode(diagnosisCode.get());
+    var formattedCode = icdIndicator.get().formatDiagnosisCode(diagnosisCode.get());
     diagnosis.setDiagnosis(
         new CodeableConcept(
             new Coding()
@@ -110,5 +111,9 @@ public class ClaimProcedure {
         });
 
     return Optional.of(diagnosis);
+  }
+
+  void setClaimPoaIndicator(String poaIndicator) {
+    this.claimPoaIndicator = Optional.of(poaIndicator);
   }
 }

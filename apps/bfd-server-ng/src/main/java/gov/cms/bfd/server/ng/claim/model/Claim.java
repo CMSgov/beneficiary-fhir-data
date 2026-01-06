@@ -3,7 +3,7 @@ package gov.cms.bfd.server.ng.claim.model;
 import gov.cms.bfd.server.ng.ClaimSecurityStatus;
 import gov.cms.bfd.server.ng.beneficiary.model.BeneficiarySimple;
 import gov.cms.bfd.server.ng.util.DateUtil;
-import gov.cms.bfd.server.ng.util.SystemUrls;
+import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -15,20 +15,19 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
+import java.util.PriorityQueue;
 import java.util.SortedSet;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.PositiveIntType;
 import org.hl7.fhir.r4.model.Reference;
 import org.jetbrains.annotations.Nullable;
 
@@ -292,22 +291,10 @@ public class Claim {
         .forEach(eob::addExtension);
 
     var consolidatedDiagnoses = computeConsolidatedDiagnoses();
-    var diagnosisLookup = buildDiagnosisCodeMap(consolidatedDiagnoses);
 
     claimItems.forEach(
         item -> {
-          item.getClaimLine()
-              .toFhir(item)
-              .ifPresent(
-                  lineItem -> {
-                    item.getClaimLine()
-                        .getDiagnosisCode()
-                        .ifPresent(
-                            code ->
-                                lineItem.setDiagnosisSequence(
-                                    diagnosisLookup.getOrDefault(code, List.of())));
-                    eob.addItem(lineItem);
-                  });
+          item.getClaimLine().toFhir(item, consolidatedDiagnoses).ifPresent(eob::addItem);
 
           item.getClaimLine()
               .getClaimRenderingProvider()
@@ -323,7 +310,15 @@ public class Claim {
               .flatMap(i -> i.toFhirObservation(item.getClaimItemId().getBfdRowId()))
               .ifPresent(eob::addContained);
         });
-    consolidatedDiagnoses.forEach(eob::addDiagnosis);
+    var diagnosisSequenceGenerator = new SequenceGenerator();
+    claimTypeCode
+        .toContext()
+        .ifPresent(
+            ctx ->
+                consolidatedDiagnoses.forEach(
+                    d ->
+                        d.toFhirDiagnosis(diagnosisSequenceGenerator, ctx)
+                            .ifPresent(eob::addDiagnosis)));
 
     getBillingProviderHistory()
         .ifPresent(
@@ -463,93 +458,49 @@ public class Claim {
     return eob;
   }
 
-  private List<ExplanationOfBenefit.DiagnosisComponent> computeConsolidatedDiagnoses() {
-    Map<String, ExplanationOfBenefit.DiagnosisComponent> diagnosisMap = new LinkedHashMap<>();
-
-    claimItems.forEach(
-        item ->
-            item.getClaimProcedure()
-                .toFhirDiagnosis(item.getClaimItemId().getBfdRowId(), claimTypeCode)
-                .ifPresent(
-                    diag ->
-                        getDiagnosisKey(diag)
-                            .ifPresent(
-                                key -> diagnosisMap.merge(key, diag, this::mergeDiagnoses))));
-
-    var sequence = 1;
-    for (var diag : diagnosisMap.values()) {
-      diag.setSequence(sequence++);
+  private List<ClaimProcedure> computeConsolidatedDiagnoses() {
+    var claimContextOpt = claimTypeCode.toContext();
+    if (claimContextOpt.isEmpty()) {
+      return Collections.emptyList();
     }
-    return diagnosisMap.values().stream().toList();
-  }
+    var claimContext = claimContextOpt.get();
 
-  private Map<String, List<PositiveIntType>> buildDiagnosisCodeMap(
-      List<ExplanationOfBenefit.DiagnosisComponent> diagnoses) {
-    Map<String, List<PositiveIntType>> map = new HashMap<>();
-    for (var diag : diagnoses) {
-      if (diag.hasDiagnosisCodeableConcept()
-          && !diag.getDiagnosisCodeableConcept().getCoding().isEmpty()) {
-        var code =
-            diag.getDiagnosisCodeableConcept().getCodingFirstRep().getCode().replace(".", "");
-        map.computeIfAbsent(code, k -> new ArrayList<>())
-            .add(new PositiveIntType(diag.getSequence()));
+    // Group the diagnoses by code + ICD indicator and sort them by rank.
+    // We'll pick the first diagnosis from each group and discard the rest.
+    var diagnosisMap = new LinkedHashMap<String, PriorityQueue<ClaimProcedure>>();
+    var poaDiagnoses = new HashMap<String, String>();
+    for (var item : claimItems) {
+      var procedure = item.getClaimProcedure();
+      var keyOpt = procedure.getDiagnosisKey();
+      if (keyOpt.isEmpty()) {
+        continue;
       }
-    }
-    return map;
-  }
+      var key = keyOpt.get();
+      procedure.getClaimPoaIndicator().ifPresent(p -> poaDiagnoses.put(key, p));
 
-  private ExplanationOfBenefit.DiagnosisComponent mergeDiagnoses(
-      ExplanationOfBenefit.DiagnosisComponent existing,
-      ExplanationOfBenefit.DiagnosisComponent replacement) {
-    for (var type : replacement.getType()) {
-      var exists =
-          existing.getType().stream()
-              .flatMap(t -> t.getCoding().stream())
-              .anyMatch(
-                  c ->
-                      type.getCoding().stream()
-                          .anyMatch(
-                              tc ->
-                                  tc.getSystem().equals(c.getSystem())
-                                      && tc.getCode().equals(c.getCode())));
+      var queue =
+          diagnosisMap.computeIfAbsent(
+              key,
+              _ ->
+                  new PriorityQueue<ClaimProcedure>(
+                      Comparator.comparing(a -> a.getDiagnosisPriority(claimContext).orElse(0))));
 
-      if (!exists) {
-        existing.getType().add(type);
-      }
+      queue.add(item.getClaimProcedure());
     }
 
-    if (replacement.hasOnAdmission() && isPresentOnAdmissionEligible(replacement)) {
-      existing.setOnAdmission(replacement.getOnAdmission());
-    }
-    if (existing.getType().size() > 1) {
-      existing
-          .getType()
-          .removeIf(
-              t ->
-                  t.getCoding().stream()
-                      .anyMatch(
-                          c -> "secondary".equals(c.getCode()) || "other".equals(c.getCode())));
-    }
-
-    return existing;
-  }
-
-  // only other/secondary will potentially contain POA indicators.
-  private boolean isPresentOnAdmissionEligible(ExplanationOfBenefit.DiagnosisComponent diag) {
-    return diag.getType().stream()
-        .flatMap(c -> c.getCoding().stream())
-        .anyMatch(
-            c ->
-                SystemUrls.CARIN_CODE_SYSTEM_DIAGNOSIS_TYPE.equals(c.getSystem())
-                    && ("other".equals(c.getCode()) || "secondary".equals(c.getCode())));
-  }
-
-  private Optional<String> getDiagnosisKey(ExplanationOfBenefit.DiagnosisComponent diag) {
-    if (!diag.hasDiagnosisCodeableConcept()
-        || diag.getDiagnosisCodeableConcept().getCoding().isEmpty()) {
-      return Optional.empty();
-    }
-    var coding = diag.getDiagnosisCodeableConcept().getCodingFirstRep();
-    return Optional.of(coding.getSystem() + "|" + coding.getCode());
+    return diagnosisMap.values().stream()
+        .map(
+            d -> {
+              var procedure = d.peek();
+              // POA may not be set on the diagnosis we pick, but it may be present on one of the
+              // duplicates.
+              // Check these and set the POA indicator where applicable.
+              var poaIndicator = poaDiagnoses.getOrDefault(procedure.getDiagnosisKey().get(), "");
+              if (procedure.getClaimPoaIndicator().isEmpty() && !poaIndicator.isEmpty()) {
+                procedure.setClaimPoaIndicator(poaIndicator);
+              }
+              return procedure;
+            })
+        .toList();
   }
 }

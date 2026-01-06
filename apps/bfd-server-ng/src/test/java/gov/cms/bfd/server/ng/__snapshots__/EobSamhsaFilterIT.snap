@@ -472,7 +472,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
         },
         "onAdmission" : {
           "coding" : [ {
-            "code" : "N",
+            "code" : "Y",
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding"
           } ]
         },
@@ -3415,16 +3415,17 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "http://hl7.org/fhir/sid/icd-10-cm"
           } ]
         },
+        "onAdmission" : {
+          "coding" : [ {
+            "code" : "0",
+            "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding"
+          } ]
+        },
         "sequence" : 1,
         "type" : [ {
           "coding" : [ {
             "code" : "externalcauseofinjury",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
-          } ]
-        }, {
-          "coding" : [ {
-            "code" : "admitting",
-            "system" : "http://terminology.hl7.org/CodeSystem/ex-diagnosistype"
           } ]
         } ]
       }, {
@@ -8234,7 +8235,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         },
         "onAdmission" : {
           "coding" : [ {
-            "code" : "N",
+            "code" : "Y",
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding"
           } ]
         },
@@ -8314,7 +8315,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         },
         "onAdmission" : {
           "coding" : [ {
-            "code" : "X",
+            "code" : "Z",
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding"
           } ]
         },
@@ -12525,16 +12526,17 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "http://hl7.org/fhir/sid/icd-10-cm"
           } ]
         },
+        "onAdmission" : {
+          "coding" : [ {
+            "code" : "0",
+            "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding"
+          } ]
+        },
         "sequence" : 1,
         "type" : [ {
           "coding" : [ {
             "code" : "externalcauseofinjury",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
-          } ]
-        }, {
-          "coding" : [ {
-            "code" : "admitting",
-            "system" : "http://terminology.hl7.org/CodeSystem/ex-diagnosistype"
           } ]
         } ]
       }, {
@@ -17344,7 +17346,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         },
         "onAdmission" : {
           "coding" : [ {
-            "code" : "N",
+            "code" : "Y",
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding"
           } ]
         },
@@ -17424,7 +17426,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         },
         "onAdmission" : {
           "coding" : [ {
-            "code" : "X",
+            "code" : "Z",
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding"
           } ]
         },
