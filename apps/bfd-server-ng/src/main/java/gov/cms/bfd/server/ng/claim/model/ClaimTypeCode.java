@@ -420,10 +420,6 @@ public enum ClaimTypeCode {
     return (code >= lower) && (code <= upper);
   }
 
-  boolean is(int code) {
-    return this.code == code;
-  }
-
   boolean isClaimSubtype(ClaimSubtype subtype) {
     return CLAIM_TYPE_CODE_MAP.getOrDefault(subtype, List.of()).contains(this);
   }
