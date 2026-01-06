@@ -36,6 +36,7 @@ group addItem(source src: LineItemComponent, target tgt: BackboneElement){
     src.CLM_LINE_INSTNL_RATE_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addAdjudicationRateAmt(amt, tgtAdjudication) "Add amount";
     src.CLM_LINE_MDCR_COINSRNC_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addLineCoinsuranceAmt(amt, tgtAdjudication) "Add amount";
     src.CLM_BENE_PRMRY_PYR_PD_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addBenePrmyAmt(amt, tgtAdjudication) "Add amount";
+    src.CLM_LINE_OTAF_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addLineOTAFAmt(amt, tgtAdjudication) "Add amount";
 
     src.CLM_LINE_PRFNL_DME_PRICE_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addLineDMEPrice(amt, tgtAdjudication) "Add amount";
     src.CLM_LINE_DMERC_SCRN_SVGS_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addLineDMESvgs(amt, tgtAdjudication) "Add amount";
@@ -466,6 +467,12 @@ group addBenePrmyAmt(source src: String, target tgt: BackboneElement){
     src -> tgt.category = create('CodeableConcept') as tgtCC then {
         src -> tgtCC.coding = c("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication", "priorpayerpaid") "Add coding 1";
         src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_BENE_PRMRY_PYR_PD_AMT") "Add coding 2";
+    } "add category";
+    src -> tgt.amount = create('Money') as tgtMoney then addMoney(src, tgtMoney) "Add Money";
+}
+group addLineOTAFAmt(source src: String, target tgt: BackboneElement){
+    src -> tgt.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_OTAF_AMT") "Add coding 2";
     } "add category";
     src -> tgt.amount = create('Money') as tgtMoney then addMoney(src, tgtMoney) "Add Money";
 }
