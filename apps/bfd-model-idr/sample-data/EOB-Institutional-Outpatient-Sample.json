@@ -241,7 +241,6 @@
     "CLM_NCVRD_CHRG_AMT": "11.50",
     "CLM_BLOOD_LBLTY_AMT": "121.10",
     "institutionalComponents": {
-        "CLM_MDCR_OP_DDCTBL_AMT": "3333.1",
         "CLM_OP_SRVC_TYPE_CD": "3",
         "CLM_MDCR_INSTNL_BENE_PD_AMT": "44.44",
         "CLM_MDCR_INSTNL_PRMRY_PYR_AMT": "50.50",

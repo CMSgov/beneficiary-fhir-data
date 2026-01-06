@@ -149,6 +149,9 @@ public class IntegrationTestBase {
             1,
             diagnosis.getType().get(0).getCoding().size());
       }
+    }
+  }
+
   protected void validateFinancialPrecision(IBaseResource resource) {
     var ctx = FhirContext.forR4Cached();
     var monies = ctx.newTerser().getAllPopulatedChildElementsOfType(resource, Money.class);
