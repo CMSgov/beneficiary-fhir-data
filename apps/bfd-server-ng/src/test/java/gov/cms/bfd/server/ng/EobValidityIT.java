@@ -48,13 +48,23 @@ class EobValidityIT extends IntegrationTestBase {
                 .collect(Collectors.joining(", "))));
 
     validateCodingsAndSystemUrls(eob);
+    validateFinancialPrecision(eob);
   }
 
   @ParameterizedTest
-  @ValueSource(strings = {CLAIM_ID_RX, CLAIM_ID_RX_ORGANIZATION})
+  @ValueSource(
+      strings = {
+        CLAIM_ID_ADJUDICATED,
+        CLAIM_ID_ADJUDICATED_ICD_9,
+        CLAIM_ID_PHASE_1,
+        CLAIM_ID_PHASE_2,
+        CLAIM_ID_PROFESSIONAL,
+        CLAIM_ID_RX,
+        CLAIM_ID_RX_ORGANIZATION,
+        CLAIM_ID_PROFESSIONAL_MCS
+      })
   void testEobReadValidity(String claimId) {
     var eob = getFhirClient().read().resource(ExplanationOfBenefit.class).withId(claimId).execute();
-
     validateEob(eob);
   }
 

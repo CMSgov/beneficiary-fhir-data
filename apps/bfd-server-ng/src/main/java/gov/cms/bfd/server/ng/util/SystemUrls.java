@@ -121,6 +121,15 @@ public class SystemUrls {
       "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-STUS-CD";
 
   /**
+   * Extension URL for BFD Claim Rendering Provider Tax Number. Source:
+   * V2_MDCR_CLM_LINE.CLM_RNDRG_PRVDR_TAX_NUM <a
+   * href="https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRVDR-TAX-NUM">CLM-PRVDR-TAX-NUM
+   * Extension</a>
+   */
+  public static final String EXT_CLM_PRVDR_TAX_NUM_URL =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRVDR-TAX-NUM";
+
+  /**
    * Extension URL for BFD Entitlement Buy-In Indicator Code. Source: V2_MDCR_BENE_TP.BENE_BUYIN_CD
    * <a href="https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-BUYIN-CD">BENE-BUYIN-CD
    * Extension</a>
@@ -368,10 +377,6 @@ public class SystemUrls {
   public static final String HL7_ADJUDICATION =
       "http://terminology.hl7.org/CodeSystem/adjudication";
 
-  /** HL7 - Benefit Category Codes. */
-  public static final String HL7_BENEFIT_CATEGORY =
-      "http://terminology.hl7.org/CodeSystem/ex-benefitcategory";
-
   /** HL7 - code system for a kind of act. */
   public static final String SAMHSA_ACT_CODE_SYSTEM_URL =
       "http://terminology.hl7.org/CodeSystem/v3-ActCode";
@@ -534,10 +539,6 @@ public class SystemUrls {
   public static final String BLUE_BUTTON_CODE_SYSTEM_CLAIM_CONTRACTOR_NUMBER =
       "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CNTRCTR-NUM";
 
-  /** Blue Button structure definition - claim record type. */
-  public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_CLAIM_RECORD_TYPE =
-      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-NRLN-RIC-CD";
-
   /** Blue Button code system - claim record type. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_CLAIM_RECORD_TYPE =
       "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD";
@@ -605,10 +606,6 @@ public class SystemUrls {
   /** Blue Button code system - claim deductible coinsurance code. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_CLAIM_DEDUCTIBLE_COINSURANCE_CODE =
       "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DDCTBL-COINSRNC-CD";
-
-  /** Blue Button structure definition - PPS DRG weight number. */
-  public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_PPS_DRG_WEIGHT_NUMBER =
-      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MDCR-IP-PPS-DRG-WT-NUM";
 
   /** Blue Button structure definition - Submitter contract number. */
   public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_SUBMITTER_CONTRACT_NUMBER =
@@ -717,10 +714,6 @@ public class SystemUrls {
   /** Blue Button code system - ANSI Reason Code - Claim Adjustment Reason Code. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_ANSI_RSN_CODE =
       "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CODE";
-
-  /** Blue Button code system - Benefit Balance. */
-  public static final String BLUE_BUTTON_CODE_SYSTEM_BENEFIT_BALANCE =
-      "https://bluebutton.cms.gov/fhir/CodeSystem/Benefit-Balance";
 
   /** Blue Button code system - dual status code. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_DUAL_STATUS_CODE =
@@ -867,7 +860,4 @@ public class SystemUrls {
 
   /** CLIA. */
   public static final String CLIA = "http://terminology.hl7.org/NamingSystem/CLIA";
-
-  /** TAX OID. */
-  public static final String TAX_OID = "urn:oid:2.16.840.1.113883.4.4";
 }
