@@ -10,6 +10,9 @@ class ClaimLineAdjudicationCharge {
   @Column(name = "clm_line_ncvrd_chrg_amt")
   private double noncoveredChargeAmount;
 
+  @Column(name = "clm_line_ncvrd_pd_amt")
+  private double noncoveredProductPaidAmount;
+
   @Column(name = "clm_line_alowd_chrg_amt")
   private double allowedChargeAmount;
 
@@ -31,17 +34,28 @@ class ClaimLineAdjudicationCharge {
   @Column(name = "clm_line_mdcr_ddctbl_amt")
   private double deductibleAmount;
 
+  @Column(name = "clm_line_otaf_amt")
+  private double providerObligationToAcceptFullAmount;
+
+  @Column(name = "clm_line_othr_tp_pd_amt")
+  private double otherThirdPartyPaidAmount;
+
   List<ExplanationOfBenefit.AdjudicationComponent> toFhir() {
     return List.of(
+        AdjudicationChargeType.LINE_ALLOWED_CHARGE_AMOUNT.toFhirAdjudication(allowedChargeAmount),
+        AdjudicationChargeType.LINE_MEDICARE_DEDUCTIBLE_AMOUNT.toFhirAdjudication(deductibleAmount),
+        AdjudicationChargeType.LINE_PROVIDER_OBLIGATION_FULL_AMOUNT.toFhirAdjudication(
+            providerObligationToAcceptFullAmount),
+        AdjudicationChargeType.LINE_BENE_PAID_AMOUNT.toFhirAdjudication(benePaidAmount),
+        AdjudicationChargeType.LINE_BENE_PAYMENT_AMOUNT.toFhirAdjudication(benePaymentAmount),
         AdjudicationChargeType.LINE_NONCOVERED_CHARGE_AMOUNT.toFhirAdjudication(
             noncoveredChargeAmount),
-        AdjudicationChargeType.LINE_ALLOWED_CHARGE_AMOUNT.toFhirAdjudication(allowedChargeAmount),
         AdjudicationChargeType.LINE_PROVIDER_PAYMENT_AMOUNT.toFhirAdjudication(
             providerPaymentAmount),
-        AdjudicationChargeType.LINE_BENE_PAYMENT_AMOUNT.toFhirAdjudication(benePaymentAmount),
-        AdjudicationChargeType.LINE_BENE_PAID_AMOUNT.toFhirAdjudication(benePaidAmount),
         AdjudicationChargeType.LINE_COVERED_PAID_AMOUNT.toFhirAdjudication(coveredPaidAmount),
-        AdjudicationChargeType.LINE_MEDICARE_DEDUCTIBLE_AMOUNT.toFhirAdjudication(
-            deductibleAmount));
+        AdjudicationChargeType.LINE_NONCOVERED_PRODUCT_PAID_AMOUNT.toFhirAdjudication(
+            noncoveredProductPaidAmount),
+        AdjudicationChargeType.LINE_OTHER_THIRD_PARTY_PAID_AMOUNT.toFhirAdjudication(
+            otherThirdPartyPaidAmount));
   }
 }
