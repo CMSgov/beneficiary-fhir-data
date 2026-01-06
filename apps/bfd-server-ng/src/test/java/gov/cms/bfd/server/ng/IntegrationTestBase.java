@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.ng;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import au.com.origin.snapshots.Expect;
@@ -125,12 +126,16 @@ public class IntegrationTestBase {
     return events.stream().filter(l -> l.getLoggerName().equals("org.hibernate.SQL")).count();
   }
 
-  protected void validateCodings(IBaseResource resource) {
+  protected void validateCodingsAndSystemUrls(IBaseResource resource) {
     var ctx = FhirContext.forR4Cached();
     var codings = ctx.newTerser().getAllPopulatedChildElementsOfType(resource, Coding.class);
     for (Coding coding : codings) {
       assertTrue(coding.hasSystem());
       assertTrue(coding.hasCode());
+      var system = coding.getSystem();
+      assertFalse(
+          system.contains("_"),
+          String.format("Coding System URL contains underscore: system='%s'", system));
     }
   }
 }

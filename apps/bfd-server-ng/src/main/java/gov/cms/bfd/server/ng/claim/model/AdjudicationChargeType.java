@@ -92,9 +92,7 @@ enum AdjudicationChargeType {
       "CLM_LINE_INSTNL_MSP2_PD_AMT",
       "Revenue Center 2nd MSP Paid Amount"),
   LINE_INSTITUTIONAL_RATE_AMOUNT(
-      SystemUrls.HL7_ADJUDICATION,
-      "submitted",
-      "Submitted Amount",
+      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
       "CLM_LINE_INSTNL_RATE_AMT",
       "Revenue Center Rate Amount"),
   ALLOWED_CHARGE_AMOUNT(
@@ -128,7 +126,9 @@ enum AdjudicationChargeType {
       "CLM_MDCR_PRFNL_PRMRY_PYR_AMT",
       "Primary Payer Paid Amount"),
   GAP_DISCOUNT_AMOUNT(
-      SystemUrls.HL7_ADJUDICATION, "CLM_RPTD_MFTR_DSCNT_AMT", "Gap Discount Amount"),
+      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
+      "CLM_RPTD_MFTR_DSCNT_AMT",
+      "Gap Discount Amount"),
   VACCINATION_ADMIN_FEE(
       SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
       "CLM_LINE_VCCN_ADMIN_FEE_AMT",
@@ -137,7 +137,8 @@ enum AdjudicationChargeType {
       SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
       "CLM_LINE_TROOP_TOT_AMT",
       "Other True Out Of Pocket Paid Amount"),
-  DISPENSING_FEE(SystemUrls.HL7_ADJUDICATION, "CLM_LINE_SRVC_CST_AMT", "Dispensing Fee"),
+  DISPENSING_FEE(
+      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION, "CLM_LINE_SRVC_CST_AMT", "Dispensing Fee"),
   SALES_TAX_AMOUNT(
       SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION, "CLM_LINE_SLS_TAX_AMT", "Sales Tax Amount"),
   PATIENT_LIABILITY_REDUCT_AMOUNT(
@@ -169,37 +170,33 @@ enum AdjudicationChargeType {
     this(coding1System, coding1Code, coding1Display, "", "");
   }
 
+  private CodeableConcept buildCategory() {
+    var category =
+        new CodeableConcept()
+            .addCoding(
+                new Coding()
+                    .setSystem(coding1System)
+                    .setCode(coding1Code)
+                    .setDisplay(coding1Display));
+    if (!coding2Code.isBlank()) {
+      category.addCoding(
+          new Coding()
+              .setSystem(SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION)
+              .setCode(coding2Code)
+              .setDisplay(coding2Display));
+    }
+    return category;
+  }
+
   ExplanationOfBenefit.AdjudicationComponent toFhirAdjudication(double value) {
     return new ExplanationOfBenefit.AdjudicationComponent()
-        .setCategory(
-            new CodeableConcept()
-                .addCoding(
-                    new Coding()
-                        .setSystem(coding1System)
-                        .setCode(coding1Code)
-                        .setDisplay(coding1Display))
-                .addCoding(
-                    new Coding()
-                        .setSystem(SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION)
-                        .setCode(coding2Code)
-                        .setDisplay(coding2Display)))
+        .setCategory(buildCategory())
         .setAmount(USD.toFhir(value));
   }
 
   ExplanationOfBenefit.TotalComponent toFhirTotal(double value) {
     return new ExplanationOfBenefit.TotalComponent()
-        .setCategory(
-            new CodeableConcept()
-                .addCoding(
-                    new Coding()
-                        .setSystem(coding1System)
-                        .setCode(coding1Code)
-                        .setDisplay(coding1Display))
-                .addCoding(
-                    new Coding()
-                        .setSystem(SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION)
-                        .setCode(coding2Code)
-                        .setDisplay(coding2Display)))
+        .setCategory(buildCategory())
         .setAmount(USD.toFhir(value));
   }
 }

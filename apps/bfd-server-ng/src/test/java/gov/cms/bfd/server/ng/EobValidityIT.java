@@ -47,25 +47,11 @@ class EobValidityIT extends IntegrationTestBase {
                 .map(p -> p.getValueAsString())
                 .collect(Collectors.joining(", "))));
 
-    if (eob.getMeta().getProfile().stream().anyMatch(p -> p.getValue().contains("Pharmacy"))) {
-      // TODO: REMOVE IN BFD-4419 -> Pharmacy EOBs should pass after 4419
-    } else {
-      validateCodings(eob);
-    }
+    validateCodingsAndSystemUrls(eob);
   }
 
   @ParameterizedTest
-  @ValueSource(
-      strings = {
-        CLAIM_ID_ADJUDICATED,
-        CLAIM_ID_ADJUDICATED_ICD_9,
-        CLAIM_ID_PHASE_1,
-        CLAIM_ID_PHASE_2,
-        CLAIM_ID_PROFESSIONAL,
-        CLAIM_ID_RX,
-        CLAIM_ID_RX_ORGANIZATION,
-        CLAIM_ID_PROFESSIONAL_MCS
-      })
+  @ValueSource(strings = {CLAIM_ID_RX, CLAIM_ID_RX_ORGANIZATION})
   void testEobReadValidity(String claimId) {
     var eob = getFhirClient().read().resource(ExplanationOfBenefit.class).withId(claimId).execute();
 

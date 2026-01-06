@@ -6945,10 +6945,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           },
           "category" : {
             "coding" : [ {
-              "code" : "submitted",
-              "display" : "Submitted Amount",
-              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-            }, {
               "code" : "CLM_LINE_INSTNL_RATE_AMT",
               "display" : "Revenue Center Rate Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
@@ -7263,10 +7259,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           },
           "category" : {
             "coding" : [ {
-              "code" : "submitted",
-              "display" : "Submitted Amount",
-              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-            }, {
               "code" : "CLM_LINE_INSTNL_RATE_AMT",
               "display" : "Revenue Center Rate Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
@@ -7503,10 +7495,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           },
           "category" : {
             "coding" : [ {
-              "code" : "submitted",
-              "display" : "Submitted Amount",
-              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-            }, {
               "code" : "CLM_LINE_INSTNL_RATE_AMT",
               "display" : "Revenue Center Rate Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
@@ -11156,10 +11144,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           },
           "category" : {
             "coding" : [ {
-              "code" : "submitted",
-              "display" : "Submitted Amount",
-              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-            }, {
               "code" : "CLM_LINE_INSTNL_RATE_AMT",
               "display" : "Revenue Center Rate Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
@@ -11388,10 +11372,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           },
           "category" : {
             "coding" : [ {
-              "code" : "submitted",
-              "display" : "Submitted Amount",
-              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-            }, {
               "code" : "CLM_LINE_INSTNL_RATE_AMT",
               "display" : "Revenue Center Rate Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
@@ -11619,10 +11599,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           },
           "category" : {
             "coding" : [ {
-              "code" : "submitted",
-              "display" : "Submitted Amount",
-              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-            }, {
               "code" : "CLM_LINE_INSTNL_RATE_AMT",
               "display" : "Revenue Center Rate Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
@@ -16302,10 +16278,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           },
           "category" : {
             "coding" : [ {
-              "code" : "submitted",
-              "display" : "Submitted Amount",
-              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-            }, {
               "code" : "CLM_LINE_INSTNL_RATE_AMT",
               "display" : "Revenue Center Rate Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
@@ -16620,10 +16592,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           },
           "category" : {
             "coding" : [ {
-              "code" : "submitted",
-              "display" : "Submitted Amount",
-              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-            }, {
               "code" : "CLM_LINE_INSTNL_RATE_AMT",
               "display" : "Revenue Center Rate Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
@@ -16860,10 +16828,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           },
           "category" : {
             "coding" : [ {
-              "code" : "submitted",
-              "display" : "Submitted Amount",
-              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-            }, {
               "code" : "CLM_LINE_INSTNL_RATE_AMT",
               "display" : "Revenue Center Rate Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
@@ -20513,10 +20477,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           },
           "category" : {
             "coding" : [ {
-              "code" : "submitted",
-              "display" : "Submitted Amount",
-              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-            }, {
               "code" : "CLM_LINE_INSTNL_RATE_AMT",
               "display" : "Revenue Center Rate Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
@@ -20745,10 +20705,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           },
           "category" : {
             "coding" : [ {
-              "code" : "submitted",
-              "display" : "Submitted Amount",
-              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-            }, {
               "code" : "CLM_LINE_INSTNL_RATE_AMT",
               "display" : "Revenue Center Rate Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
@@ -20976,10 +20932,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           },
           "category" : {
             "coding" : [ {
-              "code" : "submitted",
-              "display" : "Submitted Amount",
-              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-            }, {
               "code" : "CLM_LINE_INSTNL_RATE_AMT",
               "display" : "Revenue Center Rate Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"

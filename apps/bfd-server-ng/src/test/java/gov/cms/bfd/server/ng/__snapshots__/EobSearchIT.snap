@@ -867,10 +867,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET]=[
           },
           "category" : {
             "coding" : [ {
-              "code" : "submitted",
-              "display" : "Submitted Amount",
-              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-            }, {
               "code" : "CLM_LINE_INSTNL_RATE_AMT",
               "display" : "Revenue Center Rate Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
@@ -1245,7 +1241,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET]=[
           "coding" : [ {
             "code" : "L",
             "display" : "Low utilization payment adjustment (LUPA) claim",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-LUP-IND-CD"
           } ]
         },
         "sequence" : 16
@@ -1265,7 +1261,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET]=[
           "coding" : [ {
             "code" : "1",
             "display" : "PHYSICIAN REFERRAL - THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF A PERSONAL PHYSICIAN.",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-RFRL-CD"
           } ]
         },
         "sequence" : 17
@@ -2183,10 +2179,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET_WITH_SEARCH]=[
           },
           "category" : {
             "coding" : [ {
-              "code" : "submitted",
-              "display" : "Submitted Amount",
-              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-            }, {
               "code" : "CLM_LINE_INSTNL_RATE_AMT",
               "display" : "Revenue Center Rate Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
@@ -2561,7 +2553,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET_WITH_SEARCH]=[
           "coding" : [ {
             "code" : "L",
             "display" : "Low utilization payment adjustment (LUPA) claim",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-LUP-IND-CD"
           } ]
         },
         "sequence" : 16
@@ -2581,7 +2573,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET_WITH_SEARCH]=[
           "coding" : [ {
             "code" : "1",
             "display" : "PHYSICIAN REFERRAL - THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF A PERSONAL PHYSICIAN.",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-RFRL-CD"
           } ]
         },
         "sequence" : 17
@@ -3499,10 +3491,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[POST]=[
           },
           "category" : {
             "coding" : [ {
-              "code" : "submitted",
-              "display" : "Submitted Amount",
-              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-            }, {
               "code" : "CLM_LINE_INSTNL_RATE_AMT",
               "display" : "Revenue Center Rate Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
@@ -3877,7 +3865,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[POST]=[
           "coding" : [ {
             "code" : "L",
             "display" : "Low utilization payment adjustment (LUPA) claim",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-LUP-IND-CD"
           } ]
         },
         "sequence" : 16
@@ -3897,7 +3885,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[POST]=[
           "coding" : [ {
             "code" : "1",
             "display" : "PHYSICIAN REFERRAL - THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF A PERSONAL PHYSICIAN.",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-RFRL-CD"
           } ]
         },
         "sequence" : 17
@@ -4815,10 +4803,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset0]=[
           },
           "category" : {
             "coding" : [ {
-              "code" : "submitted",
-              "display" : "Submitted Amount",
-              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-            }, {
               "code" : "CLM_LINE_INSTNL_RATE_AMT",
               "display" : "Revenue Center Rate Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
@@ -5193,7 +5177,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset0]=[
           "coding" : [ {
             "code" : "L",
             "display" : "Low utilization payment adjustment (LUPA) claim",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-LUP-IND-CD"
           } ]
         },
         "sequence" : 16
@@ -5213,7 +5197,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset0]=[
           "coding" : [ {
             "code" : "1",
             "display" : "PHYSICIAN REFERRAL - THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF A PERSONAL PHYSICIAN.",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-RFRL-CD"
           } ]
         },
         "sequence" : 17
@@ -6132,10 +6116,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset1]=[
           },
           "category" : {
             "coding" : [ {
-              "code" : "submitted",
-              "display" : "Submitted Amount",
-              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-            }, {
               "code" : "CLM_LINE_INSTNL_RATE_AMT",
               "display" : "Revenue Center Rate Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
@@ -6510,7 +6490,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset1]=[
           "coding" : [ {
             "code" : "L",
             "display" : "Low utilization payment adjustment (LUPA) claim",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-LUP-IND-CD"
           } ]
         },
         "sequence" : 16
@@ -6530,7 +6510,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset1]=[
           "coding" : [ {
             "code" : "1",
             "display" : "PHYSICIAN REFERRAL - THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF A PERSONAL PHYSICIAN.",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-RFRL-CD"
           } ]
         },
         "sequence" : 17
@@ -7449,10 +7429,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
           },
           "category" : {
             "coding" : [ {
-              "code" : "submitted",
-              "display" : "Submitted Amount",
-              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-            }, {
               "code" : "CLM_LINE_INSTNL_RATE_AMT",
               "display" : "Revenue Center Rate Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
@@ -7827,7 +7803,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
           "coding" : [ {
             "code" : "L",
             "display" : "Low utilization payment adjustment (LUPA) claim",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-LUP-IND-CD"
           } ]
         },
         "sequence" : 16
@@ -7847,7 +7823,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
           "coding" : [ {
             "code" : "1",
             "display" : "PHYSICIAN REFERRAL - THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF A PERSONAL PHYSICIAN.",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-RFRL-CD"
           } ]
         },
         "sequence" : 17
@@ -11491,10 +11467,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
           },
           "category" : {
             "coding" : [ {
-              "code" : "submitted",
-              "display" : "Submitted Amount",
-              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-            }, {
               "code" : "CLM_LINE_INSTNL_RATE_AMT",
               "display" : "Revenue Center Rate Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
@@ -11869,7 +11841,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
           "coding" : [ {
             "code" : "L",
             "display" : "Low utilization payment adjustment (LUPA) claim",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-LUP-IND-CD"
           } ]
         },
         "sequence" : 16
@@ -11889,7 +11861,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
           "coding" : [ {
             "code" : "1",
             "display" : "PHYSICIAN REFERRAL - THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF A PERSONAL PHYSICIAN.",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-RFRL-CD"
           } ]
         },
         "sequence" : 17
@@ -15533,10 +15505,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
           },
           "category" : {
             "coding" : [ {
-              "code" : "submitted",
-              "display" : "Submitted Amount",
-              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-            }, {
               "code" : "CLM_LINE_INSTNL_RATE_AMT",
               "display" : "Revenue Center Rate Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
@@ -15911,7 +15879,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
           "coding" : [ {
             "code" : "L",
             "display" : "Low utilization payment adjustment (LUPA) claim",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-LUP-IND-CD"
           } ]
         },
         "sequence" : 16
@@ -15931,7 +15899,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
           "coding" : [ {
             "code" : "1",
             "display" : "PHYSICIAN REFERRAL - THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF A PERSONAL PHYSICIAN.",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-RFRL-CD"
           } ]
         },
         "sequence" : 17
@@ -19575,10 +19543,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WITH_SEARCH_WithSy
           },
           "category" : {
             "coding" : [ {
-              "code" : "submitted",
-              "display" : "Submitted Amount",
-              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-            }, {
               "code" : "CLM_LINE_INSTNL_RATE_AMT",
               "display" : "Revenue Center Rate Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
@@ -19953,7 +19917,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WITH_SEARCH_WithSy
           "coding" : [ {
             "code" : "L",
             "display" : "Low utilization payment adjustment (LUPA) claim",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-LUP-IND-CD"
           } ]
         },
         "sequence" : 16
@@ -19973,7 +19937,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WITH_SEARCH_WithSy
           "coding" : [ {
             "code" : "1",
             "display" : "PHYSICIAN REFERRAL - THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF A PERSONAL PHYSICIAN.",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-RFRL-CD"
           } ]
         },
         "sequence" : 17
@@ -21558,10 +21522,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WithSystemTag_Adju
           },
           "category" : {
             "coding" : [ {
-              "code" : "submitted",
-              "display" : "Submitted Amount",
-              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-            }, {
               "code" : "CLM_LINE_INSTNL_RATE_AMT",
               "display" : "Revenue Center Rate Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
@@ -21936,7 +21896,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WithSystemTag_Adju
           "coding" : [ {
             "code" : "L",
             "display" : "Low utilization payment adjustment (LUPA) claim",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-LUP-IND-CD"
           } ]
         },
         "sequence" : 16
@@ -21956,7 +21916,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WithSystemTag_Adju
           "coding" : [ {
             "code" : "1",
             "display" : "PHYSICIAN REFERRAL - THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF A PERSONAL PHYSICIAN.",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-RFRL-CD"
           } ]
         },
         "sequence" : 17
@@ -23541,10 +23501,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[POST_WithSystemTag_Adj
           },
           "category" : {
             "coding" : [ {
-              "code" : "submitted",
-              "display" : "Submitted Amount",
-              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-            }, {
               "code" : "CLM_LINE_INSTNL_RATE_AMT",
               "display" : "Revenue Center Rate Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
@@ -23919,7 +23875,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[POST_WithSystemTag_Adj
           "coding" : [ {
             "code" : "L",
             "display" : "Low utilization payment adjustment (LUPA) claim",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-LUP-IND-CD"
           } ]
         },
         "sequence" : 16
@@ -23939,7 +23895,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[POST_WithSystemTag_Adj
           "coding" : [ {
             "code" : "1",
             "display" : "PHYSICIAN REFERRAL - THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF A PERSONAL PHYSICIAN.",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-RFRL-CD"
           } ]
         },
         "sequence" : 17
@@ -31752,10 +31708,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WITH_SEARCH_WithTag_Adjudic
           },
           "category" : {
             "coding" : [ {
-              "code" : "submitted",
-              "display" : "Submitted Amount",
-              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-            }, {
               "code" : "CLM_LINE_INSTNL_RATE_AMT",
               "display" : "Revenue Center Rate Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
@@ -32130,7 +32082,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WITH_SEARCH_WithTag_Adjudic
           "coding" : [ {
             "code" : "L",
             "display" : "Low utilization payment adjustment (LUPA) claim",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-LUP-IND-CD"
           } ]
         },
         "sequence" : 16
@@ -32150,7 +32102,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WITH_SEARCH_WithTag_Adjudic
           "coding" : [ {
             "code" : "1",
             "display" : "PHYSICIAN REFERRAL - THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF A PERSONAL PHYSICIAN.",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-RFRL-CD"
           } ]
         },
         "sequence" : 17
@@ -33735,10 +33687,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WithTag_Adjudicated]=[
           },
           "category" : {
             "coding" : [ {
-              "code" : "submitted",
-              "display" : "Submitted Amount",
-              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-            }, {
               "code" : "CLM_LINE_INSTNL_RATE_AMT",
               "display" : "Revenue Center Rate Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
@@ -34113,7 +34061,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WithTag_Adjudicated]=[
           "coding" : [ {
             "code" : "L",
             "display" : "Low utilization payment adjustment (LUPA) claim",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-LUP-IND-CD"
           } ]
         },
         "sequence" : 16
@@ -34133,7 +34081,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WithTag_Adjudicated]=[
           "coding" : [ {
             "code" : "1",
             "display" : "PHYSICIAN REFERRAL - THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF A PERSONAL PHYSICIAN.",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-RFRL-CD"
           } ]
         },
         "sequence" : 17
@@ -35718,10 +35666,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[POST_WithTag_Adjudicated]=[
           },
           "category" : {
             "coding" : [ {
-              "code" : "submitted",
-              "display" : "Submitted Amount",
-              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-            }, {
               "code" : "CLM_LINE_INSTNL_RATE_AMT",
               "display" : "Revenue Center Rate Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
@@ -36096,7 +36040,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[POST_WithTag_Adjudicated]=[
           "coding" : [ {
             "code" : "L",
             "display" : "Low utilization payment adjustment (LUPA) claim",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-LUP-IND-CD"
           } ]
         },
         "sequence" : 16
@@ -36116,7 +36060,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[POST_WithTag_Adjudicated]=[
           "coding" : [ {
             "code" : "1",
             "display" : "PHYSICIAN REFERRAL - THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF A PERSONAL PHYSICIAN.",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-RFRL-CD"
           } ]
         },
         "sequence" : 17
@@ -39687,10 +39631,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
           },
           "category" : {
             "coding" : [ {
-              "code" : "submitted",
-              "display" : "Submitted Amount",
-              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-            }, {
               "code" : "CLM_LINE_INSTNL_RATE_AMT",
               "display" : "Revenue Center Rate Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
@@ -40065,7 +40005,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
           "coding" : [ {
             "code" : "L",
             "display" : "Low utilization payment adjustment (LUPA) claim",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-LUP-IND-CD"
           } ]
         },
         "sequence" : 16
@@ -40085,7 +40025,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
           "coding" : [ {
             "code" : "1",
             "display" : "PHYSICIAN REFERRAL - THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF A PERSONAL PHYSICIAN.",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-RFRL-CD"
           } ]
         },
         "sequence" : 17
@@ -42972,10 +42912,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
           },
           "category" : {
             "coding" : [ {
-              "code" : "submitted",
-              "display" : "Submitted Amount",
-              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-            }, {
               "code" : "CLM_LINE_INSTNL_RATE_AMT",
               "display" : "Revenue Center Rate Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
@@ -43350,7 +43286,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
           "coding" : [ {
             "code" : "L",
             "display" : "Low utilization payment adjustment (LUPA) claim",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-LUP-IND-CD"
           } ]
         },
         "sequence" : 16
@@ -43370,7 +43306,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
           "coding" : [ {
             "code" : "1",
             "display" : "PHYSICIAN REFERRAL - THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF A PERSONAL PHYSICIAN.",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-RFRL-CD"
           } ]
         },
         "sequence" : 17
@@ -49000,10 +48936,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
           },
           "category" : {
             "coding" : [ {
-              "code" : "submitted",
-              "display" : "Submitted Amount",
-              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-            }, {
               "code" : "CLM_LINE_INSTNL_RATE_AMT",
               "display" : "Revenue Center Rate Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
@@ -49378,7 +49310,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
           "coding" : [ {
             "code" : "L",
             "display" : "Low utilization payment adjustment (LUPA) claim",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-LUP-IND-CD"
           } ]
         },
         "sequence" : 16
@@ -49398,7 +49330,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
           "coding" : [ {
             "code" : "1",
             "display" : "PHYSICIAN REFERRAL - THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF A PERSONAL PHYSICIAN.",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-RFRL-CD"
           } ]
         },
         "sequence" : 17
@@ -52285,10 +52217,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
           },
           "category" : {
             "coding" : [ {
-              "code" : "submitted",
-              "display" : "Submitted Amount",
-              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-            }, {
               "code" : "CLM_LINE_INSTNL_RATE_AMT",
               "display" : "Revenue Center Rate Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
@@ -52663,7 +52591,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
           "coding" : [ {
             "code" : "L",
             "display" : "Low utilization payment adjustment (LUPA) claim",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-LUP-IND-CD"
           } ]
         },
         "sequence" : 16
@@ -52683,7 +52611,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
           "coding" : [ {
             "code" : "1",
             "display" : "PHYSICIAN REFERRAL - THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF A PERSONAL PHYSICIAN.",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-RFRL-CD"
           } ]
         },
         "sequence" : 17
@@ -58313,10 +58241,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
           },
           "category" : {
             "coding" : [ {
-              "code" : "submitted",
-              "display" : "Submitted Amount",
-              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-            }, {
               "code" : "CLM_LINE_INSTNL_RATE_AMT",
               "display" : "Revenue Center Rate Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
@@ -58691,7 +58615,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
           "coding" : [ {
             "code" : "L",
             "display" : "Low utilization payment adjustment (LUPA) claim",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-LUP-IND-CD"
           } ]
         },
         "sequence" : 16
@@ -58711,7 +58635,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
           "coding" : [ {
             "code" : "1",
             "display" : "PHYSICIAN REFERRAL - THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF A PERSONAL PHYSICIAN.",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-RFRL-CD"
           } ]
         },
         "sequence" : 17
@@ -61598,10 +61522,6 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
           },
           "category" : {
             "coding" : [ {
-              "code" : "submitted",
-              "display" : "Submitted Amount",
-              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-            }, {
               "code" : "CLM_LINE_INSTNL_RATE_AMT",
               "display" : "Revenue Center Rate Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
@@ -61976,7 +61896,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
           "coding" : [ {
             "code" : "L",
             "display" : "Low utilization payment adjustment (LUPA) claim",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-LUP-IND-CD"
           } ]
         },
         "sequence" : 16
@@ -61996,7 +61916,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
           "coding" : [ {
             "code" : "1",
             "display" : "PHYSICIAN REFERRAL - THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF A PERSONAL PHYSICIAN.",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-RFRL-CD"
           } ]
         },
         "sequence" : 17
