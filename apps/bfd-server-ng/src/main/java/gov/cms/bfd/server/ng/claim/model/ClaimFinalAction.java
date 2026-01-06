@@ -26,7 +26,10 @@ public enum ClaimFinalAction {
    * @return Claim final action
    */
   public static ClaimFinalAction fromCode(Character code) {
-    return Arrays.stream(values()).filter(c -> c.code.equals(code)).findFirst().get();
+    return Arrays.stream(values())
+        .filter(c -> c.code.equals(code))
+        .findFirst()
+        .orElseThrow(() -> new IllegalArgumentException("Unknown ClaimFinalAction code: " + code));
   }
 
   /**

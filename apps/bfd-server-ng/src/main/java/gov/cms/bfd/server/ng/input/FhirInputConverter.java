@@ -174,7 +174,7 @@ public class FhirInputConverter {
     return tagParam.getValuesAsQueryTokens().stream()
         .map(FhirInputConverter::parseTagQueryToken)
         .filter(list -> !list.isEmpty())
-        .collect(Collectors.toList());
+        .toList();
   }
 
   private static List<TagCriterion> parseTagQueryToken(TokenOrListParam tokenOrListParam) {
@@ -184,7 +184,7 @@ public class FhirInputConverter {
 
     return tokenOrListParam.getValuesAsQueryTokens().stream()
         .flatMap(token -> FhirInputConverter.parseTagToken(token).stream())
-        .collect(Collectors.toList());
+        .toList();
   }
 
   private static List<TagCriterion> parseTagToken(TokenParam token) {
@@ -208,8 +208,8 @@ public class FhirInputConverter {
         throw new InvalidRequestException("Unknown claim source id: " + code);
       }
       return sourceIds.stream()
-          .map(TagCriterion.SourceIdCriterion::new)
-          .collect(Collectors.toList());
+          .map(id -> (TagCriterion) new TagCriterion.SourceIdCriterion(id))
+          .toList();
 
     } else if (SystemUrls.BLUE_BUTTON_FINAL_ACTION_STATUS.equals(system)) {
       if (!FINAL_ACTION_MAP.containsKey(code.toUpperCase())) {

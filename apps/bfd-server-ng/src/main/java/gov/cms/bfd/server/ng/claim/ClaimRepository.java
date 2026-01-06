@@ -187,12 +187,10 @@ public class ClaimRepository {
         }
         var criterion = orList.get(j);
         switch (criterion) {
-          case SourceIdCriterion _ -> {
-            sb.append("c.claimSourceId = :tag_").append(i).append("_").append(j);
-          }
-          case FinalActionCriterion _ -> {
-            sb.append("c.finalAction = :tag_").append(i).append("_").append(j);
-          }
+          case SourceIdCriterion _ ->
+              sb.append("c.claimSourceId = :tag_").append(i).append("_").append(j);
+          case FinalActionCriterion _ ->
+              sb.append("c.finalAction = :tag_").append(i).append("_").append(j);
         }
       }
       sb.append(")");
@@ -221,12 +219,8 @@ public class ClaimRepository {
         var criterion = orList.get(j);
         var paramName = "tag_" + i + "_" + j;
         switch (criterion) {
-          case SourceIdCriterion c -> {
-            query.setParameter(paramName, c.sourceId());
-          }
-          case FinalActionCriterion c -> {
-            query.setParameter(paramName, c.finalAction());
-          }
+          case SourceIdCriterion c -> query.setParameter(paramName, c.sourceId());
+          case FinalActionCriterion c -> query.setParameter(paramName, c.finalAction());
         }
       }
     }

@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model;
 
+import gov.cms.bfd.server.ng.util.IdrConstants;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.util.Arrays;
 import java.util.Optional;
@@ -15,13 +16,13 @@ public enum ClaimSourceId {
   /** Medicaid Claims. */
   MEDICAID("N/A", "Medicaid", Optional.empty()),
   /** NCH Claims. */
-  NATIONAL_CLAIMS_HISTORY("20000", "NCH", Optional.of("NationalClaimsHistory")),
+  NATIONAL_CLAIMS_HISTORY("20000", "NCH", Optional.of(IdrConstants.SYSTEM_TYPE_NCH)),
   /** FISS Claims. */
-  FISS("21000", "FISS", Optional.of("SharedSystem")),
+  FISS("21000", "FISS", Optional.of(IdrConstants.SYSTEM_TYPE_SHARED)),
   /** MCS Claims. */
-  MCS("22000", "MCS", Optional.of("SharedSystem")),
+  MCS("22000", "MCS", Optional.of(IdrConstants.SYSTEM_TYPE_SHARED)),
   /** VMS Claims. */
-  VIPS("23000", "VMS", Optional.of("SharedSystem")),
+  VMS("23000", "VMS", Optional.of(IdrConstants.SYSTEM_TYPE_SHARED)),
   /** EDPS Claims. */
   EDPS("24000", "EDPS", Optional.empty()),
   /** Dual claims. */
@@ -38,7 +39,10 @@ public enum ClaimSourceId {
    * @return Claim source id
    */
   public static ClaimSourceId fromId(String id) {
-    return Arrays.stream(values()).filter(c -> c.id.equals(id)).findFirst().get();
+    return Arrays.stream(values())
+        .filter(c -> c.id.equals(id))
+        .findFirst()
+        .orElseThrow(() -> new IllegalArgumentException("Unknown ClaimSourceId: " + id));
   }
 
   Optional<Coding> toFhirSystemType() {
