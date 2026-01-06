@@ -154,7 +154,7 @@ def load_inputs():
         if xref_rows:
             for xref_row in xref_rows:
                 generator.bene_xref_table.append(xref_row.kv)
-        elif probability(0.05):
+        elif not patient.loaded_from_file and probability(0.05):
             prior_patient = copy.deepcopy(patient)
             pt_bene_sk = generator.gen_bene_sk()
             prior_patient["BENE_SK"] = str(pt_bene_sk)
