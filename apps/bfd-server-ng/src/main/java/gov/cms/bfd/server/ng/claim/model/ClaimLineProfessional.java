@@ -2,15 +2,17 @@ package gov.cms.bfd.server.ng.claim.model;
 
 import gov.cms.bfd.server.ng.converter.NonZeroDoubleConverter;
 import gov.cms.bfd.server.ng.util.SystemUrls;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.util.Optional;
 import lombok.Getter;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Identifier;
-import org.hl7.fhir.r4.model.Observation;
-import org.hl7.fhir.r4.model.Quantity;
-import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.*;
 
 /** Professional claim line table. */
 @Entity
@@ -32,6 +34,8 @@ public class ClaimLineProfessional {
 
   @OneToOne(mappedBy = "claimLineProfessional")
   private ClaimItem claimLine;
+
+  @Embedded private ClaimLineAdjudicationChargeProfessional claimLineAdjudicationChargeProfessional;
 
   /**
    * Return claim observation data if available.

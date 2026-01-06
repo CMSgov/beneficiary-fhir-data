@@ -11,7 +11,7 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 @Embeddable
-class AdjudicationChargeRx {
+class ClaimLineAdjudicationChargeRx {
   @Column(name = "clm_rptd_mftr_dscnt_amt")
   private double gapDiscountAmount;
 
@@ -45,6 +45,18 @@ class AdjudicationChargeRx {
   @Column(name = "clm_prcng_excptn_cd")
   private Optional<ClaimPricingReasonCode> pricingCode;
 
+  @Column(name = "clm_line_grs_cvrd_cst_tot_amt")
+  private double grossCoveredCostAmount;
+
+  @Column(name = "clm_cms_calcd_mftr_dscnt_amt")
+  private double manufacturerDiscountAmount;
+
+  @Column(name = "clm_line_rebt_passthru_pos_amt")
+  private double rebatePassthroughPOSAmount;
+
+  @Column(name = "clm_phrmcy_price_dscnt_at_pos_amt")
+  private double priceAmount;
+
   ArrayList<ExplanationOfBenefit.AdjudicationComponent> toFhir() {
     var adjudicationComponent =
         new ArrayList<>(
@@ -65,7 +77,14 @@ class AdjudicationChargeRx {
                 AdjudicationChargeType.GROSS_DRUG_COST_BLW_THRESHOLD_AMOUNT.toFhirAdjudication(
                     grossCostBelowThresholdAmount),
                 AdjudicationChargeType.GROSS_DRUG_COST_ABOVE_THRESHOLD_AMOUNT.toFhirAdjudication(
-                    grossCostAboveThresholdAmount)));
+                    grossCostAboveThresholdAmount),
+                AdjudicationChargeType.LINE_RX_GROSS_COVERED_COST_AMOUNT.toFhirAdjudication(
+                    grossCoveredCostAmount),
+                AdjudicationChargeType.LINE_RX_MANUFACTURER_DISCOUNT_AMOUNT.toFhirAdjudication(
+                    manufacturerDiscountAmount),
+                AdjudicationChargeType.LINE_RX_REBATE_PASSTHROUGH_POS_AMOUNT.toFhirAdjudication(
+                    rebatePassthroughPOSAmount),
+                AdjudicationChargeType.LINE_RX_PRICE_AMOUNT.toFhirAdjudication(priceAmount)));
     toAdjudicationComponent().ifPresent(adjudicationComponent::add);
 
     return adjudicationComponent;

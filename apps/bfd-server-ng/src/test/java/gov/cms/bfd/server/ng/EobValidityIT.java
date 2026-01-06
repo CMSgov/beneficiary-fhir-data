@@ -51,6 +51,7 @@ class EobValidityIT extends IntegrationTestBase {
       // TODO: REMOVE IN BFD-4419 -> Pharmacy EOBs should pass after 4419
     } else {
       validateCodings(eob);
+      validateFinancialPrecision(eob);
     }
     // EOB do not require diagnoses (for example, pharmacy).
     if (eob.hasDiagnosis()) {

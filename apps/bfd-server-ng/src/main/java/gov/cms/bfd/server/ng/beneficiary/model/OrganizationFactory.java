@@ -83,18 +83,21 @@ public final class OrganizationFactory {
     var contactPurpose = new CodeableConcept();
     contactPurpose.addCoding(new Coding(SystemUrls.SYS_CONTACT_ENTITY_TYPE, "PATINF", "Patient"));
     contact.setPurpose(contactPurpose);
-    var contactInfo = contract.getContractPlanContactInfo();
-    contactInfo
-        .getContractPlanContactFreeNumber()
+    contract
+        .getContractPlanContactInfo()
         .ifPresent(
-            phoneNumber ->
-                addPhone(contact, contactInfo.getContractPlanFreeExtensionNumber(), phoneNumber));
-    contactInfo
-        .getContractPlanContactNumber()
-        .ifPresent(
-            phoneNumber ->
-                addPhone(
-                    contact, contactInfo.getContractPlanContactExtensionNumber(), phoneNumber));
+            c -> {
+              c.getContractPlanContactFreeNumber()
+                  .ifPresent(
+                      phoneNumber ->
+                          addPhone(contact, c.getContractPlanFreeExtensionNumber(), phoneNumber));
+              c.getContractPlanContactNumber()
+                  .ifPresent(
+                      phoneNumber ->
+                          addPhone(
+                              contact, c.getContractPlanContactExtensionNumber(), phoneNumber));
+            });
+
     insurerOrg.addContact(contact);
 
     return insurerOrg;

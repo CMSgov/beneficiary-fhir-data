@@ -13,13 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.Coverage;
-import org.hl7.fhir.r4.model.DomainResource;
-import org.hl7.fhir.r4.model.ExplanationOfBenefit;
-import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -155,6 +149,14 @@ public class IntegrationTestBase {
             1,
             diagnosis.getType().get(0).getCoding().size());
       }
+  protected void validateFinancialPrecision(IBaseResource resource) {
+    var ctx = FhirContext.forR4Cached();
+    var monies = ctx.newTerser().getAllPopulatedChildElementsOfType(resource, Money.class);
+    for (Money money : monies) {
+      assertTrue(money.hasValue());
+      var value = money.getValue();
+      var scale = value.scale();
+      assertTrue(scale <= 2);
     }
   }
 }
