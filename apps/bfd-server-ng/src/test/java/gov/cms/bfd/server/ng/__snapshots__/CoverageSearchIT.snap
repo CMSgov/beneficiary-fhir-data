@@ -372,7 +372,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchByBeneficiary[GET]=[
         "reference" : "#insurer-org"
       } ],
       "period" : {
-        "start" : "2026-01-01"
+        "start" : "2020-09-03"
       },
       "relationship" : {
         "coding" : [ {
@@ -412,7 +412,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchByBeneficiary[GET]=[
             "system" : "http://terminology.hl7.org/CodeSystem/coverage-class"
           } ]
         },
-        "value" : "201698004"
+        "value" : "194710044"
       }, {
         "type" : {
           "coding" : [ {
@@ -496,7 +496,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchByBeneficiary[GET]=[
             "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
           } ]
         },
-        "value" : "201698004"
+        "value" : "194710044"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -506,7 +506,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchByBeneficiary[GET]=[
         "reference" : "#insurer-org"
       } ],
       "period" : {
-        "start" : "2026-01-01"
+        "start" : "2020-09-03"
       },
       "relationship" : {
         "coding" : [ {
@@ -967,7 +967,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchByBeneficiary[GET_WITH_SEAR
         "reference" : "#insurer-org"
       } ],
       "period" : {
-        "start" : "2026-01-01"
+        "start" : "2020-09-03"
       },
       "relationship" : {
         "coding" : [ {
@@ -1007,7 +1007,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchByBeneficiary[GET_WITH_SEAR
             "system" : "http://terminology.hl7.org/CodeSystem/coverage-class"
           } ]
         },
-        "value" : "201698004"
+        "value" : "194710044"
       }, {
         "type" : {
           "coding" : [ {
@@ -1091,7 +1091,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchByBeneficiary[GET_WITH_SEAR
             "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
           } ]
         },
-        "value" : "201698004"
+        "value" : "194710044"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -1101,7 +1101,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchByBeneficiary[GET_WITH_SEAR
         "reference" : "#insurer-org"
       } ],
       "period" : {
-        "start" : "2026-01-01"
+        "start" : "2020-09-03"
       },
       "relationship" : {
         "coding" : [ {
@@ -1562,7 +1562,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchByBeneficiary[POST]=[
         "reference" : "#insurer-org"
       } ],
       "period" : {
-        "start" : "2026-01-01"
+        "start" : "2020-09-03"
       },
       "relationship" : {
         "coding" : [ {
@@ -1602,7 +1602,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchByBeneficiary[POST]=[
             "system" : "http://terminology.hl7.org/CodeSystem/coverage-class"
           } ]
         },
-        "value" : "201698004"
+        "value" : "194710044"
       }, {
         "type" : {
           "coding" : [ {
@@ -1686,7 +1686,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchByBeneficiary[POST]=[
             "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
           } ]
         },
-        "value" : "201698004"
+        "value" : "194710044"
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -1696,7 +1696,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchByBeneficiary[POST]=[
         "reference" : "#insurer-org"
       } ],
       "period" : {
-        "start" : "2026-01-01"
+        "start" : "2020-09-03"
       },
       "relationship" : {
         "coding" : [ {

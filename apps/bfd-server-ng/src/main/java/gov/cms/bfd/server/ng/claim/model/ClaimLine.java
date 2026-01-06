@@ -53,6 +53,7 @@ public class ClaimLine {
 
     var claimLineInstitutional = claimItem.getClaimLineInstitutional();
     var claimLineRx = claimItem.getClaimLineRx();
+    var claimLineProfessional = claimItem.getClaimLineProfessional();
     var productOrService = new CodeableConcept();
     hcpcsCode.toFhir().ifPresent(productOrService::addCoding);
     claimLineInstitutional
@@ -93,8 +94,11 @@ public class ClaimLine {
             claimLineInstitutional.flatMap(
                 c -> c.getAnsiSignature().map(ClaimAnsiSignature::toFhir)),
             Optional.of(adjudicationCharge.toFhir()),
-            claimLineInstitutional.map(c -> c.getAdjudicationCharge().toFhir()),
-            claimLineRx.map(c -> c.getAdjudicationCharge().toFhir()));
+            claimLineInstitutional.map(
+                c -> c.getClaimLineAdjudicationChargeInstitutional().toFhir()),
+            claimLineRx.map(c -> c.getClaimLineAdjudicationChargeRx().toFhir()),
+            claimLineProfessional.map(
+                c -> c.getClaimLineAdjudicationChargeProfessional().toFhir()));
     adjudicationLines
         .flatMap(Optional::stream)
         .flatMap(Collection::stream)
