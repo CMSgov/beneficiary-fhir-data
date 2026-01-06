@@ -476,7 +476,9 @@ public class Claim {
         continue;
       }
       var key = keyOpt.get();
-      procedure.getClaimPoaIndicator().ifPresent(p -> poaDiagnoses.put(key, p));
+      procedure
+          .getClaimPoaIndicator()
+          .ifPresent(p -> poaDiagnoses.merge(key, p, (oldVal, newVal) -> oldVal + newVal));
 
       var queue =
           diagnosisMap.computeIfAbsent(

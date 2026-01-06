@@ -106,7 +106,15 @@ public class ClaimProcedure {
     this.claimPoaIndicator.ifPresent(
         poaCode -> {
           var onAdmissionConcept = new CodeableConcept();
-          onAdmissionConcept.addCoding().setSystem(SystemUrls.POA_CODING).setCode(poaCode);
+          poaCode
+              .chars()
+              .forEach(
+                  c -> {
+                    onAdmissionConcept
+                        .addCoding()
+                        .setSystem(SystemUrls.POA_CODING)
+                        .setCode(Character.toString(c));
+                  });
           diagnosis.setOnAdmission(onAdmissionConcept);
         });
 
