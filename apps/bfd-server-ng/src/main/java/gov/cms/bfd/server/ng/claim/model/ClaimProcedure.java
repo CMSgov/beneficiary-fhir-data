@@ -109,12 +109,11 @@ public class ClaimProcedure {
           poaCode
               .chars()
               .forEach(
-                  c -> {
-                    onAdmissionConcept
-                        .addCoding()
-                        .setSystem(SystemUrls.POA_CODING)
-                        .setCode(Character.toString(c));
-                  });
+                  c ->
+                      onAdmissionConcept
+                          .addCoding()
+                          .setSystem(SystemUrls.POA_CODING)
+                          .setCode(Character.toString(c)));
           diagnosis.setOnAdmission(onAdmissionConcept);
         });
 
