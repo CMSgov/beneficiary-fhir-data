@@ -1765,15 +1765,18 @@ def main():
         )
         sys.exit(1)
     max_date = str(date.today())
+    bene_sks_with_claims: dict[int, list[RowAdapter]] = {}
+    for claim in files[CLM]:
+        clm_bene_sk: int = claim["BENE_SK"]
+        bene_sks_with_claims[clm_bene_sk] = [*bene_sks_with_claims.get(clm_bene_sk, []), claim]
+
     for pt_complete, pt_bene_sk in enumerate(bene_sks):
         if (pt_complete) % 1000 == 0 and pt_complete > 0:
             print(
                 f"Completed {pt_complete} patients with between {min_claims} and {max_claims} "
                 "claims per patient."
             )
-        claims_from_file = [
-            claim for claim in files[CLM] if claim.loaded_from_file and claim["BENE_SK"] in bene_sks
-        ]
+        claims_from_file = bene_sks_with_claims.get(pt_bene_sk, [])
         if not claims_from_file or args.force_gen_claims:
             for _ in range(random.randint(min_claims, max_claims - len(claims_from_file))):
                 clm_from_dt_min = "2018-01-01"
