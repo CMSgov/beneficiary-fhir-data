@@ -80,6 +80,13 @@ def regenerate_static_tables(generator: GeneratorUtil, files: dict[str, list[Row
             mdcr_stus_cd=bene_stus_row["BENE_MDCR_STUS_CD"],
         )
 
+    for bene_entlmt_rsn_row in files[BENE_ENTLMT_RSN]:
+        generator.generate_bene_entlmnt_rsn(
+            rsn_row=bene_entlmt_rsn_row,
+            medicare_start_date=bene_entlmt_rsn_row["BENE_RNG_BGN_DT"],
+            medicare_end_date=bene_entlmt_rsn_row["BENE_RNG_END_DT"],
+        )
+
     for patient_xref_row in files[BENE_XREF]:
         generator.generate_bene_xref(
             bene_xref=patient_xref_row,

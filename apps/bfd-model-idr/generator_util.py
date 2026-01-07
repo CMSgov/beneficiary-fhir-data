@@ -414,17 +414,14 @@ class GeneratorUtil:
 
         buy_in_cd = random.choice(self.code_systems["BENE_BUYIN_CD"])
 
-        entitlement_reason = random.choice(self.code_systems["BENE_MDCR_ENTLMT_RSN_CD"])
-        rsn_row = find_bene_sk(files=files, file_name=BENE_ENTLMT_RSN, bene_sk=patient["BENE_SK"])
-        rsn_row["IDR_LTST_TRANS_FLG"] = "Y"
-        rsn_row["IDR_TRANS_EFCTV_TS"] = str(medicare_start_date) + "T00:00:00.000000+0000"
-        rsn_row["IDR_INSRT_TS"] = (str(medicare_start_date) + "T00:00:00.000000+0000",)
-        rsn_row["IDR_UPDT_TS"] = str(medicare_start_date) + "T00:00:00.000000+0000"
-        rsn_row["IDR_TRANS_OBSLT_TS"] = "9999-12-31T00:00:00.000000+0000"
-        rsn_row["BENE_MDCR_ENTLMT_RSN_CD"] = entitlement_reason
-        rsn_row["BENE_RNG_BGN_DT"] = medicare_start_date
-        rsn_row["BENE_RNG_END_DT"] = medicare_end_date
-        self.mdcr_rsn.append(rsn_row.kv)
+        if not output_table_contains_by_bene_sk(
+            table=self.mdcr_rsn, for_file=BENE_ENTLMT_RSN, bene_sk=patient["BENE_SK"]
+        ):
+            self.generate_bene_entlmnt_rsn(
+                rsn_row=RowAdapter({}),
+                medicare_start_date=medicare_start_date,
+                medicare_end_date=medicare_end_date,
+            )
 
         for coverage_type in coverage_parts:
             # ENTLMT
@@ -499,6 +496,23 @@ class GeneratorUtil:
             dual_row["IDR_UPDT_TS"] = str(dual_start_date) + "T00:00:00.000000+0000"
             dual_row["IDR_TRANS_OBSLT_TS"] = "9999-12-31T00:00:00.000000+0000"
             self.bene_cmbnd_dual_mdcr.append(dual_row.kv)
+
+    def generate_bene_entlmnt_rsn(
+        self,
+        rsn_row: RowAdapter,
+        medicare_start_date: datetime.date,
+        medicare_end_date: datetime.date,
+    ):
+        entitlement_reason = random.choice(self.code_systems["BENE_MDCR_ENTLMT_RSN_CD"])
+        rsn_row["IDR_LTST_TRANS_FLG"] = "Y"
+        rsn_row["IDR_TRANS_EFCTV_TS"] = str(medicare_start_date) + "T00:00:00.000000+0000"
+        rsn_row["IDR_INSRT_TS"] = (str(medicare_start_date) + "T00:00:00.000000+0000",)
+        rsn_row["IDR_UPDT_TS"] = str(medicare_start_date) + "T00:00:00.000000+0000"
+        rsn_row["IDR_TRANS_OBSLT_TS"] = "9999-12-31T00:00:00.000000+0000"
+        rsn_row["BENE_MDCR_ENTLMT_RSN_CD"] = entitlement_reason
+        rsn_row["BENE_RNG_BGN_DT"] = medicare_start_date
+        rsn_row["BENE_RNG_END_DT"] = medicare_end_date
+        self.mdcr_rsn.append(rsn_row.kv)
 
     def generate_bene_stus(
         self,
