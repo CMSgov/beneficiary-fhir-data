@@ -43,11 +43,10 @@ PRVDR_HSTRY = "SYNTHETIC_PRVDR_HSTRY"
 CNTRCT_PBP_NUM = "SYNTHETIC_CNTRCT_PBP_NUM"
 CNTRCT_PBP_CNTCT = "SYNTHETIC_CNTRCT_PBP_CNTCT"
 
-# Lazily computed filename (see above constants) to mappings of the file's rows by BENE_SK.
-# Dramatically speeds up generation with large static inputs
-_files_by_bene_sk: dict[str, dict[str, "RowAdapter"]] = {}
-# Outermost dict is keyed by original filename, inner dict is keyed by the patient's bene_sk, and
-# innermost dict is the full row itself
+# Lazily computed output table by filename (see above constants) to mappings of the file's rows by
+# BENE_SK. Dramatically speeds up generation with large static inputs versus just doing typical list
+# scanning via list comprehensions. Outermost dict is keyed by original filename, inner dict is
+# keyed by the patient's bene_sk, and innermost dict is the full row itself
 _tables_by_bene_sk: dict[str, dict[str, dict[str, Any]]] = {}
 
 
@@ -76,23 +75,6 @@ def probability(frac: float) -> bool:
 
 def adapters_to_dicts(adapters: list["RowAdapter"]) -> list[dict[str, Any]]:
     return [x.kv for x in adapters]
-
-
-def lazy_compute_bene_sk_map(files: dict[str, list["RowAdapter"]], file_name: str):
-    # Lazily compute the bene_sk -> row mapping for each file on first usage. Dramatically speeds up
-    # generation time versus a traditional list comprehension (~100 it/s to 8000 it/s)
-    if file_name not in _files_by_bene_sk:
-        _files_by_bene_sk[file_name] = {row["BENE_SK"]: row for row in files[file_name]}
-
-
-def find_bene_sk(files: dict[str, list["RowAdapter"]], file_name: str, bene_sk: str):
-    lazy_compute_bene_sk_map(files=files, file_name=file_name)
-    return _files_by_bene_sk[file_name].get(bene_sk, RowAdapter({}))
-
-
-def contains_bene_sk(files: dict[str, list["RowAdapter"]], file_name: str, bene_sk: str):
-    lazy_compute_bene_sk_map(files=files, file_name=file_name)
-    return bene_sk in _files_by_bene_sk[file_name]
 
 
 def output_table_contains_by_bene_sk(
