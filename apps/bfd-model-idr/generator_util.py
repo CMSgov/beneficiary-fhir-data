@@ -58,8 +58,8 @@ def load_file_dict(files: dict[str, list["RowAdapter"]], file_paths: list[str]):
                 "BENE_XREF_SK": convert_tilde_str,
                 "BENE_XREF_EFCTV_SK": convert_tilde_str,
                 "BENE_SEX_CD": convert_tilde_str,
-                "BENE_RACE_CD": convert_tilde_str,
             },
+            na_filter=False,
         )
         files[file_name] = load_file(csv_data.to_dict(orient="records"))  # type: ignore
 
@@ -100,7 +100,7 @@ class RowAdapter:
         return self.kv[key]
 
     def __setitem__(self, key: str, new_value: Any):
-        if key not in self.kv or not self.kv[key]:
+        if key not in self.kv:
             self.kv[key] = new_value
 
     def __contains__(self, key: str) -> bool:
