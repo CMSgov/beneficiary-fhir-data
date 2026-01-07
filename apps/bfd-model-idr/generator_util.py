@@ -445,7 +445,13 @@ class GeneratorUtil:
                     coverage_type=coverage_type,
                 )
 
-            if include_tp and (not patient.loaded_from_file or force_ztm):
+            if (
+                include_tp
+                and (not patient.loaded_from_file or force_ztm)
+                and not output_table_contains_by_bene_sk(
+                    table=self.mdcr_tp, for_file=BENE_TP, bene_sk=patient["BENE_SK"]
+                )
+            ):
                 self.generate_bene_tp(
                     tp_row=RowAdapter(initial_kv),
                     medicare_start_date=medicare_start_date,
@@ -455,7 +461,13 @@ class GeneratorUtil:
                 )
 
         # Generate dual coverage data 50% of the time
-        if (not patient.loaded_from_file or force_ztm) and probability(0.5):
+        if (
+            (not patient.loaded_from_file or force_ztm)
+            and not output_table_contains_by_bene_sk(
+                table=self.bene_cmbnd_dual_mdcr, for_file=BENE_DUAL, bene_sk=patient["BENE_SK"]
+            )
+            and probability(0.5)
+        ):
             # Generate dual eligibility dates
             dual_start_date = str(
                 self.fake.date_between_dates(
@@ -650,9 +662,7 @@ class GeneratorUtil:
 
         self.bene_mapd_enrlmt_rx.append(rx_row.kv)
 
-    def generate_bene_mapd_enrlmt(
-        self, patient: RowAdapter, files: dict[str, list[RowAdapter]], pdp_only: bool = False
-    ):
+    def generate_bene_mapd_enrlmt(self, enrollment_row: RowAdapter, pdp_only: bool = False):
         enrollment_start_date = self.fake.date_between_dates(
             datetime.date(year=2017, month=5, day=20),
             datetime.date(year=2021, month=1, day=1),
@@ -666,9 +676,6 @@ class GeneratorUtil:
         bene_enrlmt_pgm_type_cd = random.choice(["1", "2", "3"])
         bene_enrlmt_emplr_sbsdy_sw = random.choice(["Y", "~", "1"])
 
-        enrollment_row = find_bene_sk(
-            files=files, file_name=BENE_MAPD_ENRLMT, bene_sk=patient["BENE_SK"]
-        )
         enrollment_row["CNTRCT_PBP_SK"]= "".join(random.choices(string.digits, k=12))
         enrollment_row["IDR_LTST_TRANS_FLG"] = "Y"
         enrollment_row["BENE_CNTRCT_NUM"] = cntrct_num
