@@ -23,18 +23,33 @@ This aligns with the overarching mission to enable the CMS Enterprise to drive i
 The high-level purpose and location of each piece of the project is listed below.
 
 * [apps](apps) - contains the source code for each of the deployed BFD applications
-  * [bfd-data-fda](apps/bfd-data-fda) - downloads FDA Drug code names into a resource used during BFD drug code name lookups
-  * [bfd-data-npi](apps/bfd-data-npi) - downloads CMS NPI (National Provider Identification) names into a resource used during BFD NPI lookups
-  * [bfd-db-migrator](apps/bfd-db-migrator) - application for safely applying schema updates and data migrations to the BFD database
-  * [bfd-model](apps/bfd-model) - contains data models used throughout the BFD project
-  * [bfd-pipeline](apps/bfd-pipeline) - application for loading claim data from the provider into the BFD database
-  * [bfd-server](apps/bfd-server) - application for serving the BFD database data in FHIR format to users via the BFD API
-  * [bfd-shared-test-utils](apps/bfd-shared-test-utils) - utilities shared across BFD projects used in testing
-  * [bfd-shared-utils](apps/bfd-shared-utils) - utilities shared across BFD projects used in the application code
-  * [utils](apps/utils) - non-application scripts used for testing, development, and database management
+  * Legacy (V1/V2) App
+    * [bfd-data-fda](apps/bfd-data-fda) - downloads FDA Drug code names into a resource used during BFD drug code name lookups
+    * [bfd-data-npi](apps/bfd-data-npi) - downloads CMS NPI (National Provider Identification) names into a resource used during BFD NPI lookups
+    * [bfd-db-migrator](apps/bfd-db-migrator) - application for safely applying schema updates and data migrations to the BFD database
+    * [bfd-model](apps/bfd-model) - contains data models used throughout the BFD project
+    * [bfd-pipeline](apps/bfd-pipeline) - application for loading claim data from the provider into the BFD database
+    * [bfd-server](apps/bfd-server) - application for serving the BFD database data in FHIR format to users via the BFD API
+    * [bfd-shared-test-utils](apps/bfd-shared-test-utils) - utilities shared across BFD projects used in testing
+    * [bfd-shared-utils](apps/bfd-shared-utils) - utilities shared across BFD projects used in the application code
+    * [utils](apps/utils) - non-application scripts used for testing, development, and database management
+  * V3 App
+    * [bfd-model-idr](apps/bfd-model-idr) - data models and synthetic data generation used for mapping IDR data
+    * [bfd-pipeline-idr](apps/bfd-pipeline-idr) - ETL pipeline for transforming and loading IDR data
+    * [bfd-server-ng](apps/bfd-server-ng) - New version of the BFD REST API, serving FHIR data
+    * [bfd-db-migrator-ng](apps/bfd-db-migrator-ng) - simple facade for running flyway migrations using maven
 * [insights](insights) - contains documentation and resources for maintaining BFD Insights, a platform using AWS Cloudwatch to provide analytics and metrics for BFD applications
 * [ops](ops) - contains the scripts and resources required for packaging and deploying BFD applications
 * [rfcs](docs/rfcs) - holds the archived and active RFC (Request for Comment) documents for BFD
+
+### V3 App Setup
+
+The V3 app should be set up in the following order since they are dependent on each other
+(follow the READMEs listed in each directory):
+
+1. [bfd-model-idr](apps/bfd-model-idr)
+2. [bfd-pipeline-idr](apps/bfd-pipeline-idr)
+3. [bfd-server-ng](apps/bfd-server-ng)
 
 ## Contributing
 

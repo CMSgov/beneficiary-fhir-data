@@ -12,6 +12,9 @@ uv sync
 
 Initialize the database with test data. Test data must be generated first (see details in `bfd-model-idr`).
 
+> [!IMPORTANT]  
+> Make sure you do not have Postgres running locally on your computer as this starts Postgres in a container.
+
 ```sh
 ./run-db.sh
 ```
