@@ -5,6 +5,7 @@ import random
 import subprocess
 import sys
 
+import tqdm
 from faker import Faker
 
 from generator_util import (
@@ -80,9 +81,7 @@ def load_inputs():
     patient_mbi_ids: list[RowAdapter] = files[BENE_MBI_ID] or [RowAdapter({})] * args.patients
     patient_xrefs: list[RowAdapter] = files[BENE_XREF] or [RowAdapter({})] * args.patients
 
-    for i, patient in enumerate(patients):
-        if i > 0 and i % 10000 == 0:
-            print("10000 done")
+    for patient in tqdm.tqdm(patients):
         generator.create_base_patient(patient)
         patient["BENE_1ST_NAME"] = random.choice(available_given_names)
         if probability(0.5):

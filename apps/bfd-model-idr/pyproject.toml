@@ -10,6 +10,7 @@ dependencies = [
     "xlsxwriter>=3.2.5",
     "pyyaml>=6.0.2",
     "pydantic>=2.12.3",
+    "tqdm>=4.67.1",
 ]
 
 [dependency-groups]
