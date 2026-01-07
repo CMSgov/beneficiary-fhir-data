@@ -303,7 +303,7 @@ class GeneratorUtil:
                 )
                 self.set_timestamps(patient, efctv_dt)
 
-                current_mbi = str(mbi_obj.get("BENE_MBI_ID")) or self.gen_mbi()
+                current_mbi: str = mbi_obj.get("BENE_MBI_ID") or self.gen_mbi()
                 patient["BENE_MBI_ID"] = current_mbi
 
             else:
