@@ -49,6 +49,11 @@ class EobValidityIT extends IntegrationTestBase {
 
     validateCodingsAndSystemUrls(eob);
     validateFinancialPrecision(eob);
+
+    // EOB do not require diagnoses (for example, pharmacy).
+    if (eob.hasDiagnosis()) {
+      validateDiagnosis(eob);
+    }
   }
 
   @ParameterizedTest

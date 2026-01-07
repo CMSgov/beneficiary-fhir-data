@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.ng;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -9,7 +10,9 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import jakarta.persistence.EntityManager;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -130,6 +133,27 @@ public class IntegrationTestBase {
       assertFalse(
           system.contains("_"),
           String.format("Coding System URL contains underscore: system='%s'", system));
+    }
+  }
+
+  protected void validateDiagnosis(ExplanationOfBenefit eob) {
+    // Get all diagnoses, ensure there are not multiple instances of the same
+    // diagnosis
+    var diagnoses = eob.getDiagnosis();
+    var seenDiagnoses = new HashSet<String>();
+    for (var diagnosis : diagnoses) {
+      var diagnosisCode = diagnosis.getDiagnosisCodeableConcept().getCodingFirstRep().getCode();
+      assertTrue(seenDiagnoses.add(diagnosisCode), "Duplicate diagnosis: " + diagnosisCode);
+      assertTrue(diagnosis.hasSequence(), "Diagnosis must have sequence (R4 rule)");
+      assertTrue(diagnosis.hasType(), "Diagnosis must have type (C4BB rule)");
+      var specialCodes = Set.of("other", "secondary");
+      if (diagnosis.getType().get(0).getCoding().stream()
+          .anyMatch(c -> specialCodes.contains(c.getCode()))) {
+        assertEquals(
+            "Other/secondary diagnosis must be the only diagnosis when present",
+            1,
+            diagnosis.getType().get(0).getCoding().size());
+      }
     }
   }
 
