@@ -213,8 +213,8 @@ public class ClaimRepository {
         var criterion = orList.get(j);
         var paramName = "tag_" + i + "_" + j;
         switch (criterion) {
-          case SourceIdCriterion c -> query.setParameter(paramName, c.sourceId());
-          case FinalActionCriterion c -> query.setParameter(paramName, c.finalAction());
+          case SourceIdCriterion(var sourceId) -> query.setParameter(paramName, sourceId);
+          case FinalActionCriterion(var finalAction) -> query.setParameter(paramName, finalAction);
         }
       }
     }
