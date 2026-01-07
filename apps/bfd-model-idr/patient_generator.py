@@ -59,6 +59,27 @@ available_given_names = [
 available_family_names = ["Erdapfel", "Heeler", "Coffee", "Jones", "Smith", "Sheep"]
 
 
+def regenerate_static_tables(generator: GeneratorUtil, files: dict[str, list[RowAdapter]]):
+    # "Generate" (extend, really) existing rows in all but the "root" table for patient (BENE_HSTRY)
+    # to ensure existing rows remain idempotent in the output whilst allowing new fields to be added
+    for bene_mbi_id_row in files[BENE_MBI_ID]:
+        # BENE_MBI_ID is a special case in that its generation function mutates both its own output
+        # table and the BENE_HSTRY table. The function has special case logic (a hack) to handle the
+        # regeneration case so that only the BENE_MBI_ID table is mutated here. This is also why the
+        # "patient" is an empty RowAdapter. A proper implementation would do something different
+        # here.
+        generator.gen_mbis_for_patient(
+            patient=RowAdapter({}), num_mbis=1, initial_mbi_obj=bene_mbi_id_row
+        )
+
+    for patient_xref_row in files[BENE_XREF]:
+        generator.generate_bene_xref(
+            bene_xref=patient_xref_row,
+            new_bene_sk=patient_xref_row["BENE_SK"],
+            old_bene_sk=int(patient_xref_row["BENE_XREF_SK"]),
+        )
+
+
 def load_inputs():
     generator = GeneratorUtil()
 
@@ -77,18 +98,10 @@ def load_inputs():
     }
     load_file_dict(files=files, file_paths=args.files)
 
+    regenerate_static_tables(generator, files)
+
     patients: list[RowAdapter] = files[BENE_HSTRY] or [RowAdapter({})] * args.patients
     patient_mbi_id_rows = {row["BENE_MBI_ID"]: row.kv for row in files[BENE_MBI_ID]}
-
-    # "Generate" (extend, really) existing BENE_XREF rows to ensure existing rows remain idempotent
-    # in the output whilst allowing new fields to be added
-    for patient_xref_row in files[BENE_XREF]:
-        generator.generate_bene_xref(
-            patient_xref_row,
-            new_bene_sk=patient_xref_row["BENE_SK"],
-            old_bene_sk=int(patient_xref_row["BENE_XREF_SK"]),
-        )
-        generator.bene_xref_table.append(patient_xref_row.kv)
 
     for patient in tqdm.tqdm(patients):
         generator.create_base_patient(patient)

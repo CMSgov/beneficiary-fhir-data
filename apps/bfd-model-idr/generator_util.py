@@ -246,6 +246,8 @@ class GeneratorUtil:
         bene_xref["IDR_UPDT_TS"] = str(updt_ts)
         bene_xref["IDR_TRANS_OBSLT_TS"] = "9999-12-31T00:00:00.000000+0000"
 
+        self.bene_xref_table.append(bene_xref.kv)
+
     def gen_address(self):
         return self.address_options[random.randint(0, len(self.address_options) - 1)]
 
@@ -267,12 +269,19 @@ class GeneratorUtil:
         for component in address:
             patient[component] = address[component]
 
-    def gen_mbis_for_patient(self, patient: RowAdapter, num_mbis: int):
+    def gen_mbis_for_patient(
+        self, patient: RowAdapter, num_mbis: int, initial_mbi_obj: RowAdapter | None = None
+    ):
         previous_obslt_dt = None
         previous_mbi = None
 
         for mbi_idx in range(num_mbis):
-            mbi_obj = RowAdapter({})
+            # This is a bit of a hack to support regeneration of existing BENE_MBI_ID rows without
+            # touching too much of the remaining generation code here. Basically, we know that
+            # regeneration will only ever call this function with "num_mbis" set to 1, so we can set
+            # the mbi_obj here immediately knowing that the mbi_idx = 0 and num_mbis = 1 case does
+            # not mutate the output BENE_HSTRY table
+            mbi_obj = RowAdapter({}) if num_mbis > 1 or not initial_mbi_obj else initial_mbi_obj
 
             if mbi_idx == 0:
                 efctv_dt = self.fake.date_between_dates(
