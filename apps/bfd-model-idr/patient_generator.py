@@ -78,8 +78,17 @@ def load_inputs():
     load_file_dict(files=files, file_paths=args.files)
 
     patients: list[RowAdapter] = files[BENE_HSTRY] or [RowAdapter({})] * args.patients
-    patient_mbi_ids: list[RowAdapter] = files[BENE_MBI_ID] or [RowAdapter({})] * args.patients
-    patient_xrefs: list[RowAdapter] = files[BENE_XREF] or [RowAdapter({})] * args.patients
+    patient_mbi_id_rows = {row["BENE_MBI_ID"]: row.kv for row in files[BENE_MBI_ID]}
+
+    # "Generate" (extend, really) existing BENE_XREF rows to ensure existing rows remain idempotent
+    # in the output whilst allowing new fields to be added
+    for patient_xref_row in files[BENE_XREF]:
+        generator.generate_bene_xref(
+            patient_xref_row,
+            new_bene_sk=patient_xref_row["BENE_SK"],
+            old_bene_sk=int(patient_xref_row["BENE_XREF_SK"]),
+        )
+        generator.bene_xref_table.append(patient_xref_row.kv)
 
     for patient in tqdm.tqdm(patients):
         generator.create_base_patient(patient)
@@ -105,19 +114,11 @@ def load_inputs():
         patient["BENE_XREF_SK"] = patient["BENE_XREF_EFCTV_SK"]
         generator.used_bene_sk.append(pt_bene_sk)
 
-        patient_static_mbis = [
-            row
-            for row in patient_mbi_ids
-            if "BENE_MBI_ID" in row
-            and "BENE_MBI_ID" in patient
-            and row["BENE_MBI_ID"] == patient["BENE_MBI_ID"]
-            and row.loaded_from_file
-        ]
-        if patient_static_mbis:
+        patient_static_mbi_row = patient_mbi_id_rows.get(patient["BENE_MBI_ID"])
+        if patient_static_mbi_row:
             # If the operator has provided static MBIs for a given synthetic patient we need to add
-            # those MBIs to the composite BENE_MBI_ID table:
-            for static_mbi_row in patient_static_mbis:
-                generator.mbi_table[static_mbi_row["BENE_MBI_ID"]] = static_mbi_row.kv
+            # the row to the composite BENE_MBI_ID table:
+            generator.mbi_table[patient["BENE_MBI_ID"]] = patient_static_mbi_row
         else:
             # If the patient has no corresponding static MBIs and is loaded from a file (static) we
             # generate a single MBI ID to ensure a static table size, otherwise (if the patient is
@@ -135,32 +136,25 @@ def load_inputs():
         # 50% of the time, generate part C
         # 25% of time, PDP only
         # 25% of time, no part C or D.
-        if probability(0.5):
+        if not patient.loaded_from_file and probability(0.5):
             contract_info = generator.generate_bene_mapd_enrlmt(
                 patient, files, pdp_only=probability(0.5)
             )
             generator.generate_bene_mapd_enrlmt_rx(patient, files, contract_info)
             generator.generate_bene_lis(patient, files)
 
-        xref_rows = [
-            row
-            for row in patient_xrefs
-            if "BENE_SK" in row
-            and "BENE_SK" in patient
-            and row["BENE_SK"] == patient["BENE_SK"]
-            and row.loaded_from_file
-        ]
-        if xref_rows:
-            for xref_row in xref_rows:
-                generator.bene_xref_table.append(xref_row.kv)
-        elif not patient.loaded_from_file and probability(0.05):
+        if not patient.loaded_from_file and probability(0.05):
             prior_patient = copy.deepcopy(patient)
             pt_bene_sk = generator.gen_bene_sk()
             prior_patient["BENE_SK"] = str(pt_bene_sk)
             prior_patient["IDR_LTST_TRANS_FLG"] = "N"
             generator.used_bene_sk.append(pt_bene_sk)
 
-            generator.generate_bene_xref(patient["BENE_SK"], pt_bene_sk)
+            bene_xref = RowAdapter({})
+            generator.generate_bene_xref(
+                bene_xref=bene_xref, new_bene_sk=patient["BENE_SK"], old_bene_sk=pt_bene_sk
+            )
+            generator.bene_xref_table.append(bene_xref.kv)
 
             generator.set_timestamps(prior_patient, datetime.date(year=2017, month=5, day=20))
 
