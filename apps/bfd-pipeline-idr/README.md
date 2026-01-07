@@ -56,7 +56,7 @@ PIPELINE_MIN_TRANSACTION_DATE=2024-01-01 uv run ./pipeline.py
 
 ## Loading synthetic data
 
-First, ensure you've generated some synthetic data - see directions in `bfd-model/bfd-model-idr/sample-data/generator`
+First, ensure you've generated some synthetic data - see directions in `bfd-model-idr`
 
 Load it into the IDR mock database and run the pipeline in synthetic data mode.
 
