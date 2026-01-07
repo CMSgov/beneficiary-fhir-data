@@ -705,19 +705,17 @@ def gen_claim(bene_sk: str = "-1", min_date: str = "2018-01-01", max_date: str =
     claim.CLM["CLM_ADJSTMT_TYPE_CD"] = random.choice(generator.code_systems["CLM_ADJSTMT_TYPE_CD"])
 
     if clm_type_cd in pharmacy_clm_type_cds:
-        claim["CLM"].pop("CLM_QUERY_CD")
-        claim["CLM"]["CLM_SRVC_PRVDR_GNRC_ID_NUM"] = random.choice(type_2_npis)
-        claim["CLM"]["PRVDR_SRVC_PRVDR_NPI_NUM"] = claim["CLM"]["CLM_SRVC_PRVDR_GNRC_ID_NUM"]
-        claim["CLM"]["CLM_PD_DT"] = random_date(
-            claim["CLM"]["CLM_FROM_DT"], claim["CLM"]["CLM_THRU_DT"]
-        )
-        claim["CLM"]["PRVDR_PRSCRBNG_PRVDR_NPI_NUM"] = random.choice(type_1_npis)
-        claim["CLM"]["CLM_SBMT_CHRG_AMT"] = round(random.uniform(1, 1000000), 2)
-        claim["CLM"]["CLM_SBMT_FRMT_CD"] = random.choice(generator.code_systems["CLM_SBMT_FRMT_CD"])
-        claim["CLM"]["CLM_SBMTR_CNTRCT_NUM"] = random.choice(["S0001", "H1234", "G1234"])
-        claim["CLM"]["CLM_SBMTR_CNTRCT_PBP_NUM"] = random.choice(avail_pbp_nums)
-        claim["CLM"]["CLM_BENE_PMT_AMT"] = round(random.uniform(0, 1000), 2)
-        claim["CLM"]["CLM_OTHR_TP_PD_AMT"] = round(random.uniform(0, 1000), 2)
+        claim.CLM.pop("CLM_QUERY_CD")
+        claim.CLM["CLM_SRVC_PRVDR_GNRC_ID_NUM"] = random.choice(type_2_npis)
+        claim.CLM["PRVDR_SRVC_PRVDR_NPI_NUM"] = claim.CLM["CLM_SRVC_PRVDR_GNRC_ID_NUM"]
+        claim.CLM["CLM_PD_DT"] = random_date(claim.CLM["CLM_FROM_DT"], claim.CLM["CLM_THRU_DT"])
+        claim.CLM["PRVDR_PRSCRBNG_PRVDR_NPI_NUM"] = random.choice(type_1_npis)
+        claim.CLM["CLM_SBMT_CHRG_AMT"] = round(random.uniform(1, 1000000), 2)
+        claim.CLM["CLM_SBMT_FRMT_CD"] = random.choice(generator.code_systems["CLM_SBMT_FRMT_CD"])
+        claim.CLM["CLM_SBMTR_CNTRCT_NUM"] = random.choice(["S0001", "H1234", "G1234"])
+        claim.CLM["CLM_SBMTR_CNTRCT_PBP_NUM"] = random.choice(avail_pbp_nums)
+        claim.CLM["CLM_BENE_PMT_AMT"] = round(random.uniform(0, 1000), 2)
+        claim.CLM["CLM_OTHR_TP_PD_AMT"] = round(random.uniform(0, 1000), 2)
         claim_line = {}
         claim_line["CLM_UNIQ_ID"] = claim.CLM["CLM_UNIQ_ID"]
         claim_line["CLM_NUM_SK"] = claim.CLM["CLM_NUM_SK"]
@@ -796,7 +794,7 @@ def gen_claim(bene_sk: str = "-1", min_date: str = "2018-01-01", max_date: str =
         claim_line_rx["CLM_CMS_CALCD_MFTR_DSCNT_AMT"] = round(random.uniform(0, 1000), 2)
         claim_line_rx["CLM_LINE_REBT_PASSTHRU_POS_AMT"] = round(random.uniform(0, 1000), 2)
         claim_line_rx["CLM_PHRMCY_PRICE_DSCNT_AT_POS_AMT"] = round(random.uniform(0, 1000), 2)
-        add_meta_timestamps(claim_line_rx, claim["CLM"], max_date)
+        add_meta_timestamps(claim_line_rx, claim.CLM, max_date)
 
         claim.CLM_LINE.append(claim_line)
         claim.CLM_LINE_RX.append(claim_line_rx)
@@ -1552,7 +1550,7 @@ def gen_provider_history(amount: int):
 
     for name in names:
         prvdr_sk = "".join(random.choices(string.digits, k=10))
-        provider_history.append({
+        provider_history_row = {
             "PRVDR_SK": prvdr_sk,
             "PRVDR_HSTRY_EFCTV_DT": str(date.today()),
             "PRVDR_HSTRY_OBSLT_DT": "9999-12-31",
@@ -1566,8 +1564,10 @@ def gen_provider_history(amount: int):
             "PRVDR_OSCAR_NUM": "".join(random.choices(string.digits, k=6)),
             "PRVDR_TXNMY_CMPST_CD": random.choice(available_provider_tx_codes),
             "PRVDR_TYPE_CD": random.choice(available_provider_type_codes),
-        })
-        generate_meta_sk_pair(provider_history)
+        }
+        generate_meta_sk_pair(provider_history_row)
+
+        provider_history.append(provider_history_row)
 
     return provider_history
 
@@ -1638,8 +1638,8 @@ def add_meta_timestamps(obj: dict[str, Any], clm: dict[str, Any], max_date: str)
     )
 
 
-def generate_meta_sk_pair(obj):
-    def encode(d):
+def generate_meta_sk_pair(obj: dict[str, Any]):
+    def encode(d: datetime | date):
         d = d.date() if isinstance(d, datetime) else d
         yyyymmdd = d.year * 10000 + d.month * 100 + d.day
         base = (yyyymmdd - 19000000) * 1000
