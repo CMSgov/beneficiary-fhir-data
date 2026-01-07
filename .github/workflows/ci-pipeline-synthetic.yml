@@ -47,5 +47,5 @@ jobs:
           cd ${{ github.workspace }}/apps/bfd-model-idr
           uv run patient_generator.py --benes ./Benes-Sandbox.csv
           uv run claims_generator.py --benes ./out/SYNTHETIC_BENE_HSTRY.csv
-          cd ../bfd-pipeline/bfd-pipeline-idr
+          cd ../bfd-pipeline-idr
           ./run-db.sh
