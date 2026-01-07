@@ -23,7 +23,7 @@ This aligns with the overarching mission to enable the CMS Enterprise to drive i
 The high-level purpose and location of each piece of the project is listed below.
 
 * [apps](apps) - contains the source code for each of the deployed BFD applications
-  * Legacy (V1/V2) App
+  * Legacy (v1/v2) App
     * [bfd-data-fda](apps/bfd-data-fda) - downloads FDA Drug code names into a resource used during BFD drug code name lookups
     * [bfd-data-npi](apps/bfd-data-npi) - downloads CMS NPI (National Provider Identification) names into a resource used during BFD NPI lookups
     * [bfd-db-migrator](apps/bfd-db-migrator) - application for safely applying schema updates and data migrations to the BFD database
@@ -42,9 +42,9 @@ The high-level purpose and location of each piece of the project is listed below
 * [ops](ops) - contains the scripts and resources required for packaging and deploying BFD applications
 * [rfcs](docs/rfcs) - holds the archived and active RFC (Request for Comment) documents for BFD
 
-### V3 App Setup
+### v3 App Setup
 
-The V3 app should be set up in the following order since they are dependent on each other
+The v3 app should be set up in the following order since they are dependent on each other
 (follow the READMEs listed in each directory):
 
 1. [bfd-model-idr](apps/bfd-model-idr)
