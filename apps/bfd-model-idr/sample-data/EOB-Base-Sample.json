@@ -17,11 +17,62 @@
     "PRVDR_BLG_PRVDR_NPI_NUM":"1548226988",
     "CLM_BLG_PRVDR_ZIP5_CD":"77550",
     "diagnoses":[
-        {"CLM_VAL_SQNC_NUM":"1","ROW_NUM":"1","CLM_DGNS_CD":"M48.062","CLM_DGNS_PRCDR_ICD_IND":"0","CLM_PROD_TYPE_CD":"A","CLM_POA_IND":"~"},
-        {"CLM_VAL_SQNC_NUM":"1","ROW_NUM":"2","CLM_DGNS_CD":"M48.062","CLM_DGNS_PRCDR_ICD_IND":"0","CLM_PROD_TYPE_CD":"D","CLM_POA_IND":"Y"},
-        {"CLM_VAL_SQNC_NUM":"1","ROW_NUM":"3","CLM_DGNS_CD":"M48.062","CLM_DGNS_PRCDR_ICD_IND":"0","CLM_PROD_TYPE_CD":"P","CLM_POA_IND":"~"},
-        {"CLM_VAL_SQNC_NUM":"2","ROW_NUM":"4","CLM_DGNS_CD":"M47.817","CLM_DGNS_PRCDR_ICD_IND":"0","CLM_PROD_TYPE_CD":"D","CLM_POA_IND":"Y"},
-        {"CLM_VAL_SQNC_NUM":"3","ROW_NUM":"5","CLM_DGNS_CD":"E78.00","CLM_DGNS_PRCDR_ICD_IND":"0","CLM_PROD_TYPE_CD":"D","CLM_POA_IND":"Y"}
+        {
+            "CLM_VAL_SQNC_NUM": "1",
+            "CLM_DGNS_CD": "M48.062",
+            "CLM_DGNS_PRCDR_ICD_IND": "0",
+            "CLM_PROD_TYPE_CD": "A",
+            "CLM_POA_IND": "~"
+        },
+        {
+            "CLM_VAL_SQNC_NUM": "1",
+            "CLM_DGNS_CD": "M48.062",
+            "CLM_DGNS_PRCDR_ICD_IND": "0",
+            "CLM_PROD_TYPE_CD": "D",
+            "CLM_POA_IND": "Y"
+        },
+        {
+            "CLM_VAL_SQNC_NUM": "1",
+            "CLM_DGNS_CD": "M48.062",
+            "CLM_DGNS_PRCDR_ICD_IND": "0",
+            "CLM_PROD_TYPE_CD": "P",
+            "CLM_POA_IND": "~"
+        },
+        {
+            "CLM_VAL_SQNC_NUM": "2",
+            "CLM_DGNS_CD": "M47.817",
+            "CLM_DGNS_PRCDR_ICD_IND": "0",
+            "CLM_PROD_TYPE_CD": "D",
+            "CLM_POA_IND": "Y"
+        },
+        {
+            "CLM_VAL_SQNC_NUM": "3",
+            "CLM_DGNS_CD": "E78.00",
+            "CLM_DGNS_PRCDR_ICD_IND": "0",
+            "CLM_PROD_TYPE_CD": "D",
+            "CLM_POA_IND": "Y"
+        },
+        {
+            "CLM_VAL_SQNC_NUM": "4",
+            "CLM_DGNS_CD": "K11.21",
+            "CLM_DGNS_PRCDR_ICD_IND": "0",
+            "CLM_PROD_TYPE_CD": "D",
+            "CLM_POA_IND": "N"
+        },
+        {
+            "CLM_VAL_SQNC_NUM": "1",
+            "CLM_DGNS_CD": "Z66",
+            "CLM_DGNS_PRCDR_ICD_IND": "0",
+            "CLM_PROD_TYPE_CD": "E",
+            "CLM_POA_IND": "~"
+        },
+        {
+            "CLM_VAL_SQNC_NUM": "1",
+            "CLM_DGNS_CD": "Z66",
+            "CLM_DGNS_PRCDR_ICD_IND": "0",
+            "CLM_PROD_TYPE_CD": "1",
+            "CLM_POA_IND": "~"
+        }
     ],
     "procedures":[
         {"CLM_VAL_SQNC_NUM":"1","CLM_PRCDR_PRFRM_DT":"2024-01-01","CLM_PRCDR_CD":"0SG30AJ","CLM_DGNS_PRCDR_ICD_IND":"0"},
