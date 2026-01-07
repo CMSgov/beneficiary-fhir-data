@@ -60,12 +60,7 @@ def load_file_dict(files: dict[str, list["RowAdapter"]], file_paths: list[str]):
     ):
         csv_data = pd.read_csv(  # type: ignore
             file_path,
-            converters={
-                "BENE_SK": convert_tilde_str,
-                "BENE_XREF_SK": convert_tilde_str,
-                "BENE_XREF_EFCTV_SK": convert_tilde_str,
-                "BENE_SEX_CD": convert_tilde_str,
-            },
+            dtype=str,
             na_filter=False,
         )
         files[file_name] = load_file(csv_data.to_dict(orient="records"))  # type: ignore
