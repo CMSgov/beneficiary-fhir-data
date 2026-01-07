@@ -215,7 +215,7 @@ def load_inputs():
 
             generator.generate_bene_lis(patient, files)
 
-        if not patient.loaded_from_file and probability(0.05):
+        if (not patient.loaded_from_file or args.force_ztm) and probability(0.05):
             prior_patient = copy.deepcopy(patient)
             pt_bene_sk = generator.gen_bene_sk()
             prior_patient["BENE_SK"] = str(pt_bene_sk)
