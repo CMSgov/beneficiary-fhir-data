@@ -11,24 +11,25 @@ import org.hl7.fhir.r4.model.Coding;
 @Getter
 @AllArgsConstructor
 public enum ClaimPricingReasonCode {
-  /** "" - innetwork. */
-  IN_NETWORK("", "innetwork"),
-  /** 2 - outofnetwork. */
-  O("O", "outofnetwork"),
-  /** 3 - other. */
-  M("M", "other");
+  /** "" - innetwork - In Network. */
+  IN_NETWORK("", "innetwork", "In Network"),
+  /** 2 - outofnetwork - Out Of Network. */
+  O("O", "outofnetwork", "Out Of Network"),
+  /** 3 - other - Other. */
+  M("M", "other", "Other");
 
+  private final String idrCode;
   private final String code;
   private final String display;
 
   /**
    * Convert from a database code.
    *
-   * @param code database code
+   * @param idrCode database code
    * @return claim pricing reason code
    */
-  public static Optional<ClaimPricingReasonCode> tryFromCode(String code) {
-    return Arrays.stream(values()).filter(v -> v.code.equals(code)).findFirst();
+  public static Optional<ClaimPricingReasonCode> tryFromCode(String idrCode) {
+    return Arrays.stream(values()).filter(v -> v.idrCode.equals(idrCode)).findFirst();
   }
 
   /**

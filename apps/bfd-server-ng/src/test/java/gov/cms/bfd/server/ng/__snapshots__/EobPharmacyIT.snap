@@ -551,8 +551,8 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
       },
       "reason" : {
         "coding" : [ {
-          "code" : "O",
-          "display" : "outofnetwork",
+          "code" : "outofnetwork",
+          "display" : "Out Of Network",
           "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus"
         } ]
       }
@@ -1652,8 +1652,8 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
       },
       "reason" : {
         "coding" : [ {
-          "code" : "O",
-          "display" : "outofnetwork",
+          "code" : "outofnetwork",
+          "display" : "Out Of Network",
           "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus"
         } ]
       }
