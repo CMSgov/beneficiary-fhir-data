@@ -50,7 +50,9 @@ CNTRCT_PBP_CNTCT = "SYNTHETIC_CNTRCT_PBP_CNTCT"
 _tables_by_bene_sk: dict[str, dict[str, dict[str, Any]]] = {}
 
 
-def load_file_dict(files: dict[str, list["RowAdapter"]], file_paths: list[str]):
+def load_file_dict(
+    files: dict[str, list["RowAdapter"]], file_paths: list[str], exclude_empty: bool = False
+):
     for file_path, file_name in (
         (Path(file_path), file_name)
         for file_path in file_paths
@@ -60,9 +62,16 @@ def load_file_dict(files: dict[str, list["RowAdapter"]], file_paths: list[str]):
         csv_data = pd.read_csv(  # type: ignore
             file_path,
             dtype=str,
-            na_filter=False,
+            na_filter=exclude_empty,
         )
-        files[file_name] = load_file(csv_data.to_dict(orient="records"))  # type: ignore
+        file_as_dictlist = csv_data.to_dict(orient="records")  # type: ignore
+        if not exclude_empty:
+            files[file_name] = load_file(file_as_dictlist)  # type: ignore
+            continue
+
+        files[file_name] = load_file([
+            {str(k): v for k, v in x.items() if pd.notna(v)} for x in file_as_dictlist
+        ])
 
 
 def load_file(file: Iterable[dict[str, Any]]):

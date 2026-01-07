@@ -40,6 +40,13 @@ parser.add_argument(
     "SYNTHETIC_BENE_HSTRY.csv file",
 )
 parser.add_argument(
+    "--exclude-empty",
+    action=argparse.BooleanOptionalAction,
+    help=(
+        "Treat empty column values as non-existant and allow the generator to generate new values"
+    ),
+)
+parser.add_argument(
     "--force-ztm-static-rows",
     action=argparse.BooleanOptionalAction,
     help=(
@@ -162,7 +169,7 @@ def load_inputs():
         BENE_MAPD_ENRLMT_RX: [],
         BENE_LIS: [],
     }
-    load_file_dict(files=files, file_paths=args.files)
+    load_file_dict(files=files, file_paths=args.files, exclude_empty=args.exclude_empty)
 
     regenerate_static_tables(generator, files)
 
