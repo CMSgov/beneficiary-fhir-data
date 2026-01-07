@@ -125,6 +125,9 @@ class RowAdapter:
     def __contains__(self, key: str) -> bool:
         return key in self.kv
 
+    def get(self, key: str, default: Any | None = None) -> Any:
+        return self.kv.get(key, default)
+
 
 class GeneratorUtil:
     USE_COLS = "use_cols"
@@ -309,7 +312,7 @@ class GeneratorUtil:
                 )
                 self.set_timestamps(patient, efctv_dt)
 
-                current_mbi = str(mbi_obj["BENE_MBI_ID"]) or self.gen_mbi()
+                current_mbi = str(mbi_obj.get("BENE_MBI_ID")) or self.gen_mbi()
                 patient["BENE_MBI_ID"] = current_mbi
 
             else:
@@ -397,13 +400,17 @@ class GeneratorUtil:
         while mdcr_stus_cd in ("0", "~", "00"):
             mdcr_stus_cd = random.choice(self.code_systems["BENE_MDCR_STUS_CD"])
 
-        initial_kv = {"BENE_SK": patient["BENE_SK"]}
+        # Gross, but Python will pass this by reference to everything that uses it. We want
+        # RowAdapters for empty rows to include the patient's BENE_SK as a foreign key, so
+        # everywhere this is used we copy it first to ensure the same inner RowAdapter dict isn't
+        # being mutated across different tables
+        initial_kv_template = {"BENE_SK": patient["BENE_SK"]}
 
         if not output_table_contains_by_bene_sk(
             table=self.mdcr_stus, for_file=BENE_STUS, bene_sk=patient["BENE_SK"]
         ):
             self.generate_bene_stus(
-                stus_row=RowAdapter(initial_kv),
+                stus_row=RowAdapter(initial_kv_template.copy()),
                 medicare_start_date=medicare_start_date,
                 medicare_end_date=medicare_end_date,
                 mdcr_stus_cd=mdcr_stus_cd,
@@ -415,7 +422,7 @@ class GeneratorUtil:
             table=self.mdcr_rsn, for_file=BENE_ENTLMT_RSN, bene_sk=patient["BENE_SK"]
         ):
             self.generate_bene_entlmnt_rsn(
-                rsn_row=RowAdapter(initial_kv),
+                rsn_row=RowAdapter(initial_kv_template.copy()),
                 medicare_start_date=medicare_start_date,
                 medicare_end_date=medicare_end_date,
             )
@@ -430,7 +437,7 @@ class GeneratorUtil:
                 table=self.mdcr_entlmt, for_file=BENE_ENTLMT, bene_sk=patient["BENE_SK"]
             ):
                 self.generate_bene_entlmt(
-                    entlmt_row=RowAdapter(initial_kv),
+                    entlmt_row=RowAdapter(initial_kv_template.copy()),
                     medicare_start_date=medicare_start_date,
                     medicare_end_date=medicare_end_date,
                     coverage_type=coverage_type,
@@ -444,7 +451,7 @@ class GeneratorUtil:
                 )
             ):
                 self.generate_bene_tp(
-                    tp_row=RowAdapter(initial_kv),
+                    tp_row=RowAdapter(initial_kv_template.copy()),
                     medicare_start_date=medicare_start_date,
                     medicare_end_date=medicare_end_date,
                     buy_in_cd=buy_in_cd,
@@ -487,7 +494,7 @@ class GeneratorUtil:
 
             if not patient.loaded_from_file or force_ztm:
                 self.generate_bene_dual(
-                    dual_row=RowAdapter(initial_kv),
+                    dual_row=RowAdapter(initial_kv_template.copy()),
                     dual_start_date=dual_start_date,
                     dual_end_date=dual_end_date,
                     dual_status_cd=dual_status_cd,
@@ -617,9 +624,7 @@ class GeneratorUtil:
 
             self.bene_lis.append(lis_row.kv)
 
-    def generate_bene_mapd_enrlmt_rx(
-        self, patient: RowAdapter, files: dict[str, list[RowAdapter]], contract_info: dict[str, Any]
-    ):
+    def generate_bene_mapd_enrlmt_rx(self, rx_row: RowAdapter, contract_num: str, pbp_num: str):
         enrollment_start_date = self.fake.date_between_dates(
             datetime.date(year=2017, month=5, day=20),
             datetime.date(year=2021, month=1, day=1),
@@ -633,9 +638,6 @@ class GeneratorUtil:
         prcsr_num = str(random.randint(100000, 999999))
         bank_id_num = str(random.randint(100000, 999999))
 
-        rx_row = find_bene_sk(
-            files=files, file_name=BENE_MAPD_ENRLMT_RX, bene_sk=patient["BENE_SK"]
-        )
         rx_row["CNTRCT_PBP_SK"] = "".join(random.choices(string.digits, k=12))
         rx_row["BENE_ENRLMT_BGN_DT"] = str(enrollment_start_date)
         rx_row["BENE_ENRLMT_PDP_RX_INFO_BGN_DT"] = str(rx_start_date)
@@ -644,8 +646,8 @@ class GeneratorUtil:
         rx_row["BENE_PDP_ENRLMT_GRP_NUM"] = group_num
         rx_row["BENE_PDP_ENRLMT_PRCSR_NUM"] = prcsr_num
         rx_row["BENE_PDP_ENRLMT_BANK_ID_NUM"] = bank_id_num
-        rx_row["BENE_CNTRCT_NUM"] = contract_info["contract_num"]
-        rx_row["BENE_PBP_NUM"] = contract_info["pbp_num"]
+        rx_row["BENE_CNTRCT_NUM"] = contract_num
+        rx_row["BENE_PBP_NUM"] = pbp_num
         rx_row["IDR_TRANS_EFCTV_TS"] = str(rx_start_date) + "T00:00:00.000000+0000"
         rx_row["IDR_INSRT_TS"] = str(rx_start_date) + "T00:00:00.000000+0000"
         rx_row["IDR_UPDT_TS"] = str(rx_start_date) + "T00:00:00.000000+0000"
@@ -682,7 +684,7 @@ class GeneratorUtil:
         enrollment_row["IDR_TRANS_OBSLT_TS"] = "9999-12-31T00:00:00.000000+0000"
 
         self.bene_mapd_enrlmt.append(enrollment_row.kv)
-        return {"contract_num": cntrct_num, "pbp_num": pbp_num}
+        return (cntrct_num, pbp_num)
 
     def save_output_files(self):
         Path("out").mkdir(exist_ok=True)

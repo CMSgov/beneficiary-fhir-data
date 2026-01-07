@@ -128,6 +128,13 @@ def regenerate_static_tables(generator: GeneratorUtil, files: dict[str, list[Row
     for bene_mapd_enrlmt_row in files[BENE_MAPD_ENRLMT]:
         generator.generate_bene_mapd_enrlmt(enrollment_row=bene_mapd_enrlmt_row)
 
+    for bene_mapd_enrlmt_rx_row in files[BENE_MAPD_ENRLMT_RX]:
+        generator.generate_bene_mapd_enrlmt_rx(
+            rx_row=bene_mapd_enrlmt_rx_row,
+            contract_num=bene_mapd_enrlmt_rx_row["BENE_CNTRCT_NUM"],
+            pbp_num=bene_mapd_enrlmt_rx_row["BENE_PBP_NUM"],
+        )
+
     for patient_xref_row in files[BENE_XREF]:
         generator.generate_bene_xref(
             bene_xref=patient_xref_row,
@@ -202,16 +209,21 @@ def load_inputs():
         # 25% of time, PDP only
         # 25% of time, no part C or D.
         if (not patient.loaded_from_file or args.force_ztm) and probability(0.5):
-            initial_kv = {"BENE_SK": patient["BENE_SK"]}
+            initial_kv_template = {"BENE_SK": patient["BENE_SK"]}
+
             if not output_table_contains_by_bene_sk(
                 table=generator.bene_mapd_enrlmt,
                 for_file=BENE_MAPD_ENRLMT,
                 bene_sk=patient["BENE_SK"],
             ):
-                contract_info = generator.generate_bene_mapd_enrlmt(
-                    enrollment_row=RowAdapter(initial_kv), pdp_only=probability(0.5)
+                contract_num, pbp_num = generator.generate_bene_mapd_enrlmt(
+                    enrollment_row=RowAdapter(initial_kv_template.copy()), pdp_only=probability(0.5)
                 )
-                generator.generate_bene_mapd_enrlmt_rx(patient, files, contract_info)
+                generator.generate_bene_mapd_enrlmt_rx(
+                    rx_row=RowAdapter(initial_kv_template.copy()),
+                    contract_num=contract_num,
+                    pbp_num=pbp_num,
+                )
 
             generator.generate_bene_lis(patient, files)
 
