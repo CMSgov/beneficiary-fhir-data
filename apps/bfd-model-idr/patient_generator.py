@@ -32,7 +32,7 @@ fake = Faker()
 # Command line argument parsing
 parser = argparse.ArgumentParser(description="Generate synthetic patient data")
 parser.add_argument("files", nargs="*")
-parser.add_argument("--patients", default=15, help="Number of patients to generate")
+parser.add_argument("--patients", default=15, type=int, help="Number of patients to generate")
 parser.add_argument(
     "--claims",
     action="store_true",
@@ -200,7 +200,7 @@ def load_inputs():
         patient["BENE_XREF_SK"] = patient["BENE_XREF_EFCTV_SK"]
         generator.used_bene_sk.append(pt_bene_sk)
 
-        patient_static_mbi_row = patient_mbi_id_rows.get(patient["BENE_MBI_ID"])
+        patient_static_mbi_row = patient_mbi_id_rows.get(patient.get("BENE_MBI_ID"))
         if not patient_static_mbi_row:
             # If the patient has no corresponding static MBIs and is loaded from a file (static) we
             # generate a single MBI ID to ensure a static table size, otherwise (if the patient is
