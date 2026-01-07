@@ -363,7 +363,9 @@ class GeneratorUtil:
             previous_mbi = patient["BENE_MBI_ID"]
             patient.kv["BENE_MBI_ID"] = current_mbi
 
-    def generate_coverages(self, patient: RowAdapter, files: dict[str, list[RowAdapter]]):
+    def generate_coverages(
+        self, patient: RowAdapter, files: dict[str, list[RowAdapter]], force_ztm: bool = False
+    ):
         parts = random.choices([["A"], ["B"], ["A", "B"], []], weights=[0.2, 0.2, 0.5, 0.1])[0]
         include_tp = random.random() > 0.2
         expired = random.random() < 0.2
@@ -375,6 +377,7 @@ class GeneratorUtil:
             include_tp=include_tp,
             expired=expired,
             future=future,
+            force_ztm=force_ztm,
         )
 
     def _generate_coverages(
@@ -385,6 +388,7 @@ class GeneratorUtil:
         include_tp: bool,
         expired: bool,
         future: bool,
+        force_ztm: bool,
     ):
         now = datetime.date.today()
         if expired:
@@ -402,11 +406,13 @@ class GeneratorUtil:
         while mdcr_stus_cd in ("0", "~", "00"):
             mdcr_stus_cd = random.choice(self.code_systems["BENE_MDCR_STUS_CD"])
 
+        initial_kv = {"BENE_SK": patient["BENE_SK"]}
+
         if not output_table_contains_by_bene_sk(
             table=self.mdcr_stus, for_file=BENE_STUS, bene_sk=patient["BENE_SK"]
         ):
             self.generate_bene_stus(
-                stus_row=RowAdapter({}),
+                stus_row=RowAdapter(initial_kv),
                 medicare_start_date=medicare_start_date,
                 medicare_end_date=medicare_end_date,
                 mdcr_stus_cd=mdcr_stus_cd,
@@ -418,30 +424,28 @@ class GeneratorUtil:
             table=self.mdcr_rsn, for_file=BENE_ENTLMT_RSN, bene_sk=patient["BENE_SK"]
         ):
             self.generate_bene_entlmnt_rsn(
-                rsn_row=RowAdapter({}),
+                rsn_row=RowAdapter(initial_kv),
                 medicare_start_date=medicare_start_date,
                 medicare_end_date=medicare_end_date,
             )
 
         for coverage_type in coverage_parts:
-            # ENTLMT
-            entlmt_row = find_bene_sk(
-                files=files, file_name=BENE_ENTLMT, bene_sk=patient["BENE_SK"]
-            )
-            entlmt_row["IDR_LTST_TRANS_FLG"] = "Y"
-            entlmt_row["BENE_MDCR_ENTLMT_TYPE_CD"] = coverage_type
-            entlmt_row["BENE_MDCR_ENRLMT_RSN_CD"] = random.choice(
-                self.code_systems["BENE_ENRLMT_RSN_CD"]
-            )
-            entlmt_row["BENE_MDCR_ENTLMT_STUS_CD"] = "Y"
-            entlmt_row["IDR_TRANS_EFCTV_TS"] = str(medicare_start_date) + "T00:00:00.000000+0000"
-            entlmt_row["IDR_INSRT_TS"] = str(medicare_start_date) + "T00:00:00.000000+0000"
-            entlmt_row["IDR_UPDT_TS"] = str(medicare_start_date) + "T00:00:00.000000+0000"
-            entlmt_row["IDR_TRANS_OBSLT_TS"] = "9999-12-31T00:00:00.000000+0000"
-            entlmt_row["BENE_RNG_BGN_DT"] = medicare_start_date
-            entlmt_row["BENE_RNG_END_DT"] = medicare_end_date
+            # We need to check if the patient was loaded from file because there's a 10%
+            # chance for any given patient to not have a BENE_ENTLMT row generated for them so
+            # subsequent generations can introduce more data for patients that previously had none.
+            # "force_ztm" overrides this check so that those patients may have new rows generated if
+            # "coverage_parts" is not empty when it was in a previous run
+            if (not patient.loaded_from_file or force_ztm) and not output_table_contains_by_bene_sk(
+                table=self.mdcr_entlmt, for_file=BENE_ENTLMT, bene_sk=patient["BENE_SK"]
+            ):
+                # print(f"{patient['BENE_SK']}")
+                self.generate_bene_entlmt(
+                    entlmt_row=RowAdapter(initial_kv),
+                    medicare_start_date=medicare_start_date,
+                    medicare_end_date=medicare_end_date,
+                    coverage_type=coverage_type,
+                )
 
-            self.mdcr_entlmt.append(entlmt_row.kv)
             # TP
             if include_tp or contains_bene_sk(
                 files=files, file_name=BENE_TP, bene_sk=patient["BENE_SK"]
@@ -496,6 +500,27 @@ class GeneratorUtil:
             dual_row["IDR_UPDT_TS"] = str(dual_start_date) + "T00:00:00.000000+0000"
             dual_row["IDR_TRANS_OBSLT_TS"] = "9999-12-31T00:00:00.000000+0000"
             self.bene_cmbnd_dual_mdcr.append(dual_row.kv)
+
+    def generate_bene_entlmt(
+        self,
+        entlmt_row: RowAdapter,
+        medicare_start_date: datetime.date,
+        medicare_end_date: datetime.date,
+        coverage_type: str,
+    ):
+        entlmt_row["IDR_LTST_TRANS_FLG"] = "Y"
+        entlmt_row["BENE_MDCR_ENTLMT_TYPE_CD"] = coverage_type
+        entlmt_row["BENE_MDCR_ENRLMT_RSN_CD"] = random.choice(
+            self.code_systems["BENE_ENRLMT_RSN_CD"]
+        )
+        entlmt_row["BENE_MDCR_ENTLMT_STUS_CD"] = "Y"
+        entlmt_row["IDR_TRANS_EFCTV_TS"] = str(medicare_start_date) + "T00:00:00.000000+0000"
+        entlmt_row["IDR_INSRT_TS"] = str(medicare_start_date) + "T00:00:00.000000+0000"
+        entlmt_row["IDR_UPDT_TS"] = str(medicare_start_date) + "T00:00:00.000000+0000"
+        entlmt_row["IDR_TRANS_OBSLT_TS"] = "9999-12-31T00:00:00.000000+0000"
+        entlmt_row["BENE_RNG_BGN_DT"] = medicare_start_date
+        entlmt_row["BENE_RNG_END_DT"] = medicare_end_date
+        self.mdcr_entlmt.append(entlmt_row.kv)
 
     def generate_bene_entlmnt_rsn(
         self,

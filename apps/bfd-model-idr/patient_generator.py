@@ -38,6 +38,16 @@ parser.add_argument(
     help="Automatically generate claims after patient generation using the generated "
     "SYNTHETIC_BENE_HSTRY.csv file",
 )
+parser.add_argument(
+    "--force-ztm-static-rows",
+    action=argparse.BooleanOptionalAction,
+    help=(
+        'Allow "zero-to-many" rows (e.g. BENE_ENTLMT, c/d data, etc.) for a patient loaded from '
+        "a file to be generated. This will introduce new rows for patients that previously had "
+        "none. Useful if not all tables for a patient have been generated yet."
+    ),
+    dest="force_ztm",
+)
 args = parser.parse_args()
 
 
@@ -85,6 +95,14 @@ def regenerate_static_tables(generator: GeneratorUtil, files: dict[str, list[Row
             rsn_row=bene_entlmt_rsn_row,
             medicare_start_date=bene_entlmt_rsn_row["BENE_RNG_BGN_DT"],
             medicare_end_date=bene_entlmt_rsn_row["BENE_RNG_END_DT"],
+        )
+
+    for bene_entlmt_row in files[BENE_ENTLMT]:
+        generator.generate_bene_entlmt(
+            entlmt_row=bene_entlmt_row,
+            medicare_start_date=bene_entlmt_row["BENE_RNG_BGN_DT"],
+            medicare_end_date=bene_entlmt_row["BENE_RNG_END_DT"],
+            coverage_type=bene_entlmt_row["BENE_MDCR_ENTLMT_TYPE_CD"],
         )
 
     for patient_xref_row in files[BENE_XREF]:
@@ -154,7 +172,7 @@ def load_inputs():
             )
             generator.gen_mbis_for_patient(patient, num_mbis)
 
-        generator.generate_coverages(patient, files)
+        generator.generate_coverages(patient=patient, files=files, force_ztm=args.force_ztm)
 
         # pt c / d data
         # 50% of the time, generate part C
