@@ -122,7 +122,7 @@ class RowAdapter:
 
 class GeneratorUtil:
     USE_COLS = "use_cols"
-    NO_COLS = "no_cols"
+    ALL_KEYS = "all_keys"
 
     def __init__(self):
         self.fake = Faker()
@@ -296,6 +296,7 @@ class GeneratorUtil:
             # not mutate the output BENE_HSTRY table
             mbi_obj = RowAdapter({}) if num_mbis > 1 or not initial_mbi_obj else initial_mbi_obj
 
+            current_mbi: str
             if mbi_idx == 0:
                 efctv_dt = self.fake.date_between_dates(
                     datetime.date(year=2017, month=5, day=20),
@@ -303,7 +304,15 @@ class GeneratorUtil:
                 )
                 self.set_timestamps(patient, efctv_dt)
 
-                current_mbi: str = mbi_obj.get("BENE_MBI_ID") or self.gen_mbi()
+                # Terrible hack, but this ensures that this function is idempotent for the case
+                # where we are regenerating/updating an existing patient or BENE_MBI_ID row
+                if patient.loaded_from_file and num_mbis == 1:
+                    current_mbi = mbi_obj.get("BENE_MBI_ID") or patient.get(
+                        "BENE_MBI_ID", self.gen_mbi()
+                    )
+                else:
+                    current_mbi = self.gen_mbi()
+
                 patient["BENE_MBI_ID"] = current_mbi
 
             else:
@@ -676,76 +685,36 @@ class GeneratorUtil:
     def save_output_files(self):
         Path("out").mkdir(exist_ok=True)
 
-        BENE_HSTRY_COLS = [
-            "BENE_SK",
-            "BENE_XREF_EFCTV_SK",
-            "BENE_XREF_SK",
-            "BENE_MBI_ID",
-            "BENE_LAST_NAME",
-            "BENE_1ST_NAME",
-            "BENE_MIDL_NAME",
-            "BENE_BRTH_DT",
-            "BENE_DEATH_DT",
-            "BENE_VRFY_DEATH_DAY_SW",
-            "BENE_SEX_CD",
-            "BENE_RACE_CD",
-            "BENE_LINE_1_ADR",
-            "BENE_LINE_2_ADR",
-            "BENE_LINE_3_ADR",
-            "BENE_LINE_4_ADR",
-            "BENE_LINE_5_ADR",
-            "BENE_LINE_6_ADR",
-            "GEO_ZIP_PLC_NAME",
-            "GEO_ZIP5_CD",
-            "GEO_USPS_STATE_CD",
-            "CNTCT_LANG_CD",
-            "IDR_LTST_TRANS_FLG",
-            "IDR_TRANS_EFCTV_TS",
-            "IDR_INSRT_TS",
-            "IDR_UPDT_TS",
-            "IDR_TRANS_OBSLT_TS",
-        ]
-
         mbi_arr = [{"BENE_MBI_ID": mbi, **self.mbi_table[mbi]} for mbi in self.mbi_table]
-        BENE_MBI_COLS = [
-            "BENE_MBI_ID",
-            "BENE_MBI_EFCTV_DT",
-            "BENE_MBI_OBSLT_DT",
-            "IDR_LTST_TRANS_FLG",
-            "IDR_TRANS_EFCTV_TS",
-            "IDR_INSRT_TS",
-            "IDR_UPDT_TS",
-            "IDR_TRANS_OBSLT_TS",
-        ]
 
         beneficiary_exports = [
-            (self.bene_hstry_table, f"out/{BENE_HSTRY}.csv", BENE_HSTRY_COLS),
-            (mbi_arr, f"out/{BENE_MBI_ID}.csv", BENE_MBI_COLS),
-            (self.mdcr_stus, f"out/{BENE_STUS}.csv", GeneratorUtil.NO_COLS),
-            (self.mdcr_entlmt, f"out/{BENE_ENTLMT}.csv", GeneratorUtil.NO_COLS),
-            (self.mdcr_tp, f"out/{BENE_TP}.csv", GeneratorUtil.NO_COLS),
-            (self.mdcr_rsn, f"out/{BENE_ENTLMT_RSN}.csv", GeneratorUtil.NO_COLS),
-            (self.bene_xref_table, f"out/{BENE_XREF}.csv", GeneratorUtil.NO_COLS),
+            (self.bene_hstry_table, f"out/{BENE_HSTRY}.csv", GeneratorUtil.ALL_KEYS),
+            (mbi_arr, f"out/{BENE_MBI_ID}.csv", GeneratorUtil.ALL_KEYS),
+            (self.mdcr_stus, f"out/{BENE_STUS}.csv", GeneratorUtil.ALL_KEYS),
+            (self.mdcr_entlmt, f"out/{BENE_ENTLMT}.csv", GeneratorUtil.ALL_KEYS),
+            (self.mdcr_tp, f"out/{BENE_TP}.csv", GeneratorUtil.ALL_KEYS),
+            (self.mdcr_rsn, f"out/{BENE_ENTLMT_RSN}.csv", GeneratorUtil.ALL_KEYS),
+            (self.bene_xref_table, f"out/{BENE_XREF}.csv", GeneratorUtil.ALL_KEYS),
             (
                 self.bene_cmbnd_dual_mdcr,
                 f"out/{BENE_DUAL}.csv",
-                GeneratorUtil.NO_COLS,
+                GeneratorUtil.ALL_KEYS,
             ),
-            (self.bene_lis, f"out/{BENE_LIS}.csv", GeneratorUtil.NO_COLS),
+            (self.bene_lis, f"out/{BENE_LIS}.csv", GeneratorUtil.ALL_KEYS),
             (
                 self.bene_mapd_enrlmt_rx,
                 f"out/{BENE_MAPD_ENRLMT_RX}.csv",
-                GeneratorUtil.NO_COLS,
+                GeneratorUtil.ALL_KEYS,
             ),
-            (self.bene_mapd_enrlmt, f"out/{BENE_MAPD_ENRLMT}.csv", GeneratorUtil.NO_COLS),
+            (self.bene_mapd_enrlmt, f"out/{BENE_MAPD_ENRLMT}.csv", GeneratorUtil.ALL_KEYS),
         ]
 
         for data, path, cols in beneficiary_exports:
             self.export_df(data, path, cols)
 
     @staticmethod
-    def export_df(data: list[dict[str, Any]], out_path: str, cols: list[str] | str = NO_COLS):
+    def export_df(data: list[dict[str, Any]], out_path: str, cols: list[str] | str = ALL_KEYS):
         df = pd.json_normalize(data)  # type: ignore
-        if cols != GeneratorUtil.NO_COLS:
+        if cols != GeneratorUtil.ALL_KEYS:
             df = df[cols]
         df.to_csv(out_path, index=False)
