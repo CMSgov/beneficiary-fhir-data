@@ -195,7 +195,7 @@ def load_inputs():
             )
             generator.gen_mbis_for_patient(patient, num_mbis)
 
-        generator.generate_coverages(patient=patient, files=files, force_ztm=args.force_ztm)
+        generator.generate_coverages(patient=patient, force_ztm=args.force_ztm)
 
         # pt c / d data
         # 50% of the time, generate part C

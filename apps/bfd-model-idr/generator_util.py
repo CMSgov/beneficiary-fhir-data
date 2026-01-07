@@ -363,16 +363,13 @@ class GeneratorUtil:
             previous_mbi = patient["BENE_MBI_ID"]
             patient.kv["BENE_MBI_ID"] = current_mbi
 
-    def generate_coverages(
-        self, patient: RowAdapter, files: dict[str, list[RowAdapter]], force_ztm: bool = False
-    ):
+    def generate_coverages(self, patient: RowAdapter, force_ztm: bool = False):
         parts = random.choices([["A"], ["B"], ["A", "B"], []], weights=[0.2, 0.2, 0.5, 0.1])[0]
         include_tp = random.random() > 0.2
         expired = random.random() < 0.2
         future = random.random() < 0.2
         self._generate_coverages(
-            patient,
-            files,
+            patient=patient,
             coverage_parts=parts,
             include_tp=include_tp,
             expired=expired,
@@ -383,7 +380,6 @@ class GeneratorUtil:
     def _generate_coverages(
         self,
         patient: RowAdapter,
-        files: dict[str, list[RowAdapter]],
         coverage_parts: list[str],
         include_tp: bool,
         expired: bool,
@@ -645,9 +641,9 @@ class GeneratorUtil:
         rx_row = find_bene_sk(
             files=files, file_name=BENE_MAPD_ENRLMT_RX, bene_sk=patient["BENE_SK"]
         )
-        rx_row["CNTRCT_PBP_SK"]= "".join(random.choices(string.digits, k=12))
-        rx_row["BENE_ENRLMT_BGN_DT"]= str(enrollment_start_date)
-        rx_row["BENE_ENRLMT_PDP_RX_INFO_BGN_DT"]=str(rx_start_date)
+        rx_row["CNTRCT_PBP_SK"] = "".join(random.choices(string.digits, k=12))
+        rx_row["BENE_ENRLMT_BGN_DT"] = str(enrollment_start_date)
+        rx_row["BENE_ENRLMT_PDP_RX_INFO_BGN_DT"] = str(rx_start_date)
         rx_row["IDR_LTST_TRANS_FLG"] = "Y"
         rx_row["BENE_PDP_ENRLMT_MMBR_ID_NUM"] = member_id_num
         rx_row["BENE_PDP_ENRLMT_GRP_NUM"] = group_num
@@ -676,13 +672,13 @@ class GeneratorUtil:
         bene_enrlmt_pgm_type_cd = random.choice(["1", "2", "3"])
         bene_enrlmt_emplr_sbsdy_sw = random.choice(["Y", "~", "1"])
 
-        enrollment_row["CNTRCT_PBP_SK"]= "".join(random.choices(string.digits, k=12))
+        enrollment_row["CNTRCT_PBP_SK"] = "".join(random.choices(string.digits, k=12))
         enrollment_row["IDR_LTST_TRANS_FLG"] = "Y"
         enrollment_row["BENE_CNTRCT_NUM"] = cntrct_num
         enrollment_row["BENE_PBP_NUM"] = pbp_num
         enrollment_row["BENE_CVRG_TYPE_CD"] = cvrg_type_cd
-        enrollment_row["BENE_ENRLMT_PGM_TYPE_CD"]= bene_enrlmt_pgm_type_cd
-        enrollment_row["BENE_ENRLMT_EMPLR_SBSDY_SW"]= bene_enrlmt_emplr_sbsdy_sw
+        enrollment_row["BENE_ENRLMT_PGM_TYPE_CD"] = bene_enrlmt_pgm_type_cd
+        enrollment_row["BENE_ENRLMT_EMPLR_SBSDY_SW"] = bene_enrlmt_emplr_sbsdy_sw
         enrollment_row["BENE_ENRLMT_BGN_DT"] = str(enrollment_start_date)
         enrollment_row["BENE_ENRLMT_END_DT"] = enrollment_end_date
         enrollment_row["IDR_TRANS_EFCTV_TS"] = str(enrollment_start_date) + "T00:00:00.000000+0000"
