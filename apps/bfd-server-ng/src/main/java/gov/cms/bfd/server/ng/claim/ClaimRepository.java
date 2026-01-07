@@ -164,12 +164,12 @@ public class ClaimRepository {
     sb.append(
         String.format(
             """
-                AND ((cast(:claimThroughDateLowerBound AS LocalDate)) IS NULL OR c.billablePeriod.claimThroughDate %s :claimThroughDateLowerBound)
-                AND ((cast(:claimThroughDateUpperBound AS LocalDate)) IS NULL OR c.billablePeriod.claimThroughDate %s :claimThroughDateUpperBound)
-                AND ((cast(:lastUpdatedLowerBound AS ZonedDateTime)) IS NULL OR c.meta.updatedTimestamp %s :lastUpdatedLowerBound)
-                                                    AND ((cast(:lastUpdatedUpperBound AS ZonedDateTime)) IS NULL OR c.meta.updatedTimestamp %s :lastUpdatedUpperBound)
-                AND (:hasClaimTypeCodes = false OR c.claimTypeCode IN :claimTypeCodes)
-                    """,
+            AND ((cast(:claimThroughDateLowerBound AS LocalDate)) IS NULL OR c.billablePeriod.claimThroughDate %s :claimThroughDateLowerBound)
+            AND ((cast(:claimThroughDateUpperBound AS LocalDate)) IS NULL OR c.billablePeriod.claimThroughDate %s :claimThroughDateUpperBound)
+            AND ((cast(:lastUpdatedLowerBound AS ZonedDateTime)) IS NULL OR c.meta.updatedTimestamp %s :lastUpdatedLowerBound)
+            AND ((cast(:lastUpdatedUpperBound AS ZonedDateTime)) IS NULL OR c.meta.updatedTimestamp %s :lastUpdatedUpperBound)
+            AND (:hasClaimTypeCodes = false OR c.claimTypeCode IN :claimTypeCodes)
+            """,
             claimThroughDate.getLowerBoundSqlOperator(),
             claimThroughDate.getUpperBoundSqlOperator(),
             lastUpdated.getLowerBoundSqlOperator(),
@@ -180,22 +180,16 @@ public class ClaimRepository {
       if (orList.isEmpty()) {
         continue;
       }
-      sb.append(" AND (");
+      var clauses = new ArrayList<String>();
       for (var j = 0; j < orList.size(); j++) {
-        if (j > 0) {
-          sb.append(" OR ");
-        }
         var criterion = orList.get(j);
         switch (criterion) {
-          case SourceIdCriterion _ ->
-              sb.append("c.claimSourceId = :tag_").append(i).append("_").append(j);
-          case FinalActionCriterion _ ->
-              sb.append("c.finalAction = :tag_").append(i).append("_").append(j);
+          case SourceIdCriterion _ -> clauses.add("c.claimSourceId = :tag_" + i + "_" + j);
+          case FinalActionCriterion _ -> clauses.add("c.finalAction = :tag_" + i + "_" + j);
         }
       }
-      sb.append(")");
+      sb.append(" AND (").append(String.join(" OR ", clauses)).append(")");
     }
-
     return sb.toString();
   }
 
