@@ -105,6 +105,15 @@ def regenerate_static_tables(generator: GeneratorUtil, files: dict[str, list[Row
             coverage_type=bene_entlmt_row["BENE_MDCR_ENTLMT_TYPE_CD"],
         )
 
+    for bene_tp_row in files[BENE_TP]:
+        generator.generate_bene_tp(
+            tp_row=bene_tp_row,
+            medicare_start_date=bene_tp_row["BENE_RNG_BGN_DT"],
+            medicare_end_date=bene_tp_row["BENE_RNG_END_DT"],
+            buy_in_cd=bene_tp_row["BENE_BUYIN_CD"],
+            coverage_type=bene_tp_row["BENE_TP_TYPE_CD"],
+        )
+
     for patient_xref_row in files[BENE_XREF]:
         generator.generate_bene_xref(
             bene_xref=patient_xref_row,

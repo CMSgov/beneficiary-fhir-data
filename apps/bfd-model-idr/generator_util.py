@@ -438,7 +438,6 @@ class GeneratorUtil:
             if (not patient.loaded_from_file or force_ztm) and not output_table_contains_by_bene_sk(
                 table=self.mdcr_entlmt, for_file=BENE_ENTLMT, bene_sk=patient["BENE_SK"]
             ):
-                # print(f"{patient['BENE_SK']}")
                 self.generate_bene_entlmt(
                     entlmt_row=RowAdapter(initial_kv),
                     medicare_start_date=medicare_start_date,
@@ -446,21 +445,14 @@ class GeneratorUtil:
                     coverage_type=coverage_type,
                 )
 
-            # TP
-            if include_tp or contains_bene_sk(
-                files=files, file_name=BENE_TP, bene_sk=patient["BENE_SK"]
-            ):
-                tp_row = find_bene_sk(files=files, file_name=BENE_TP, bene_sk=patient["BENE_SK"])
-                tp_row["IDR_LTST_TRANS_FLG"] = "Y"
-                tp_row["BENE_TP_TYPE_CD"] = coverage_type
-                tp_row["IDR_TRANS_EFCTV_TS"] = str(medicare_start_date) + "T00:00:00.000000+0000"
-                tp_row["IDR_INSRT_TS"] = str(medicare_start_date) + "T00:00:00.000000+0000"
-                tp_row["IDR_UPDT_TS"] = str(medicare_start_date) + "T00:00:00.000000+0000"
-                tp_row["IDR_TRANS_OBSLT_TS"] = "9999-12-31T00:00:00.000000+0000"
-                tp_row["BENE_RNG_BGN_DT"] = medicare_start_date
-                tp_row["BENE_RNG_END_DT"] = medicare_end_date
-                tp_row["BENE_BUYIN_CD"] = buy_in_cd
-                self.mdcr_tp.append(tp_row.kv)
+            if include_tp and (not patient.loaded_from_file or force_ztm):
+                self.generate_bene_tp(
+                    tp_row=RowAdapter(initial_kv),
+                    medicare_start_date=medicare_start_date,
+                    medicare_end_date=medicare_end_date,
+                    buy_in_cd=buy_in_cd,
+                    coverage_type=coverage_type,
+                )
 
         # Generate dual coverage data 50% of the time
         if probability(0.5):
@@ -500,6 +492,25 @@ class GeneratorUtil:
             dual_row["IDR_UPDT_TS"] = str(dual_start_date) + "T00:00:00.000000+0000"
             dual_row["IDR_TRANS_OBSLT_TS"] = "9999-12-31T00:00:00.000000+0000"
             self.bene_cmbnd_dual_mdcr.append(dual_row.kv)
+
+    def generate_bene_tp(
+        self,
+        tp_row: RowAdapter,
+        medicare_start_date: datetime.date,
+        medicare_end_date: datetime.date,
+        buy_in_cd: str,
+        coverage_type: str,
+    ):
+        tp_row["IDR_LTST_TRANS_FLG"] = "Y"
+        tp_row["BENE_TP_TYPE_CD"] = coverage_type
+        tp_row["IDR_TRANS_EFCTV_TS"] = str(medicare_start_date) + "T00:00:00.000000+0000"
+        tp_row["IDR_INSRT_TS"] = str(medicare_start_date) + "T00:00:00.000000+0000"
+        tp_row["IDR_UPDT_TS"] = str(medicare_start_date) + "T00:00:00.000000+0000"
+        tp_row["IDR_TRANS_OBSLT_TS"] = "9999-12-31T00:00:00.000000+0000"
+        tp_row["BENE_RNG_BGN_DT"] = medicare_start_date
+        tp_row["BENE_RNG_END_DT"] = medicare_end_date
+        tp_row["BENE_BUYIN_CD"] = buy_in_cd
+        self.mdcr_tp.append(tp_row.kv)
 
     def generate_bene_entlmt(
         self,
