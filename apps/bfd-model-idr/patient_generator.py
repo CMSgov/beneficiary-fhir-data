@@ -135,6 +135,9 @@ def regenerate_static_tables(generator: GeneratorUtil, files: dict[str, list[Row
             pbp_num=bene_mapd_enrlmt_rx_row["BENE_PBP_NUM"],
         )
 
+    for bene_lis_row in files[BENE_LIS]:
+        generator.generate_bene_lis(lis_row=bene_lis_row)
+
     for patient_xref_row in files[BENE_XREF]:
         generator.generate_bene_xref(
             bene_xref=patient_xref_row,
@@ -225,7 +228,14 @@ def load_inputs():
                     pbp_num=pbp_num,
                 )
 
-            generator.generate_bene_lis(patient, files)
+            # We don't need to check !force_ztm or loaded_from_file because this is unreachable if
+            # any of those are true
+            if probability(0.5) and not output_table_contains_by_bene_sk(
+                table=generator.bene_lis,
+                for_file=BENE_LIS,
+                bene_sk=patient["BENE_SK"],
+            ):
+                generator.generate_bene_lis(RowAdapter(initial_kv_template.copy()))
 
         if (not patient.loaded_from_file or args.force_ztm) and probability(0.05):
             prior_patient = copy.deepcopy(patient)
