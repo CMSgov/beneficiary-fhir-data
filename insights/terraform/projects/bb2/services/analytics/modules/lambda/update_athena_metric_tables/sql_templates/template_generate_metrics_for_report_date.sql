@@ -652,7 +652,7 @@ v1_fhir_events AS (
   select
     time_of_event,
     path,
-    fhir_id,
+    fhir_id_v2 AS fhir_id,
     req_qparam_lastupdated
   from
     perf_mon_events
@@ -673,7 +673,7 @@ v2_fhir_events AS (
   select
     time_of_event,
     path,
-    fhir_id,
+    fhir_id_v2 AS fhir_id,
     req_qparam_lastupdated
   from
     perf_mon_events

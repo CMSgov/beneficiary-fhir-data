@@ -608,10 +608,6 @@ group addInstitutionalAdjudicationElements(source src: ExplanationOfBenefitBase,
     src -> tgtBBElement.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication","CLM_MDCR_IP_BENE_DDCTBL_AMT") "Add codeable concept";
     src -> tgtBBElement.amount = create('Money') as tgtMoney then addMoney(amtUsed, tgtMoney) "Add Money";
   } "Add CLM_MDCR_IP_BENE_DDCTBL_AMT";
-  institutionalComponents.CLM_MDCR_OP_DDCTBL_AMT as amtUsed -> tgt.adjudication = create('BackboneElement') as tgtBBElement then {
-    src -> tgtBBElement.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication","CLM_MDCR_OP_DDCTBL_AMT") "Add codeable concept";
-    src -> tgtBBElement.amount = create('Money') as tgtMoney then addMoney(amtUsed, tgtMoney) "Add Money";
-  } "Add CLM_MDCR_OP_DDCTBL_AMT";
   } "Add wrapper for institutional components";
 }
 

@@ -1,5 +1,114 @@
 gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
 {
+  "adjudication" : [ {
+    "amount" : {
+      "currency" : "USD",
+      "value" : 0.0
+    },
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_BENE_INTRST_PD_AMT",
+        "display" : "Beneficiary Interest Paid Amount",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+      } ]
+    }
+  }, {
+    "amount" : {
+      "currency" : "USD",
+      "value" : 0.0
+    },
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_BLOOD_CHRG_AMT",
+        "display" : "Blood Charge Amount",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+      } ]
+    }
+  }, {
+    "amount" : {
+      "currency" : "USD",
+      "value" : 22.73
+    },
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_BLOOD_LBLTY_AMT",
+        "display" : "Beneficiary Blood Deductible Liability Amount",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+      } ]
+    }
+  }, {
+    "amount" : {
+      "currency" : "USD",
+      "value" : 0.0
+    },
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_BLOOD_NCVRD_CHRG_AMT",
+        "display" : "Blood Noncovered Charge Amount",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+      } ]
+    }
+  }, {
+    "amount" : {
+      "currency" : "USD",
+      "value" : 0.0
+    },
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_COB_PTNT_RESP_AMT",
+        "display" : "Coordination of Benefits Patient Responsibility Amount",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+      } ]
+    }
+  }, {
+    "amount" : {
+      "currency" : "USD",
+      "value" : 0.0
+    },
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_PRVDR_INTRST_PD_AMT",
+        "display" : "Provider Interest Paid Amount",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+      } ]
+    }
+  }, {
+    "amount" : {
+      "currency" : "USD",
+      "value" : 0.0
+    },
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_PRVDR_OTAF_AMT",
+        "display" : "Provider Obligation To Accept as Full Amount",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+      } ]
+    }
+  }, {
+    "amount" : {
+      "currency" : "USD",
+      "value" : 0.0
+    },
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_PRVDR_RMNG_DUE_AMT",
+        "display" : "Remaining Amount to Provider",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+      } ]
+    }
+  }, {
+    "amount" : {
+      "currency" : "USD",
+      "value" : 0.0
+    },
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_TOT_CNTRCTL_AMT",
+        "display" : "Total Contractual Amount Discrepancy",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+      } ]
+    }
+  } ],
   "billablePeriod" : {
     "end" : "2018-08-21",
     "extension" : [ {
@@ -119,22 +228,6 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
     "adjudication" : [ {
       "amount" : {
         "currency" : "USD",
-        "value" : 1360.05
-      },
-      "category" : {
-        "coding" : [ {
-          "code" : "noncovered",
-          "display" : "Noncovered",
-          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
-        }, {
-          "code" : "CLM_LINE_NCVRD_CHRG_AMT",
-          "display" : "Revenue Center Non-Covered Charge Amount",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-        } ]
-      }
-    }, {
-      "amount" : {
-        "currency" : "USD",
         "value" : 0.0
       },
       "category" : {
@@ -145,70 +238,6 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
         }, {
           "code" : "CLM_LINE_ALOWD_CHRG_AMT",
           "display" : "Line Allowed Charge Amount",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-        } ]
-      }
-    }, {
-      "amount" : {
-        "currency" : "USD",
-        "value" : 459402.17
-      },
-      "category" : {
-        "coding" : [ {
-          "code" : "paidtoprovider",
-          "display" : "Paid to provider",
-          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
-        }, {
-          "code" : "CLM_LINE_PRVDR_PMT_AMT",
-          "display" : "Line Provider Payment Amount",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-        } ]
-      }
-    }, {
-      "amount" : {
-        "currency" : "USD",
-        "value" : 1.1
-      },
-      "category" : {
-        "coding" : [ {
-          "code" : "paidbypatient",
-          "display" : "Paid by patient",
-          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
-        }, {
-          "code" : "CLM_LINE_BENE_PMT_AMT",
-          "display" : "Revenue Center Patient Responsibility Payment Amount",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-        } ]
-      }
-    }, {
-      "amount" : {
-        "currency" : "USD",
-        "value" : 395103.12
-      },
-      "category" : {
-        "coding" : [ {
-          "code" : "paidtopatient",
-          "display" : "Paid to patient",
-          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
-        }, {
-          "code" : "CLM_LINE_BENE_PD_AMT",
-          "display" : "Revenue Center Payment Amount to Beneficiary",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-        } ]
-      }
-    }, {
-      "amount" : {
-        "currency" : "USD",
-        "value" : 547927.2
-      },
-      "category" : {
-        "coding" : [ {
-          "code" : "benefit",
-          "display" : "Benefit Amount",
-          "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-        }, {
-          "code" : "CLM_LINE_CVRD_PD_AMT",
-          "display" : "Revenue Center Payment Amount",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
@@ -231,6 +260,122 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
     }, {
       "amount" : {
         "currency" : "USD",
+        "value" : 0.0
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "CLM_LINE_OTAF_AMT",
+          "display" : "Provider Obligation To Accept as Full Amount",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 395103.12
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "paidtopatient",
+          "display" : "Paid to patient",
+          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+        }, {
+          "code" : "CLM_LINE_BENE_PD_AMT",
+          "display" : "Revenue Center Payment Amount to Beneficiary",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 1.1
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "paidbypatient",
+          "display" : "Paid by patient",
+          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+        }, {
+          "code" : "CLM_LINE_BENE_PMT_AMT",
+          "display" : "Revenue Center Patient Responsibility Payment Amount",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 1360.05
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "noncovered",
+          "display" : "Noncovered",
+          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+        }, {
+          "code" : "CLM_LINE_NCVRD_CHRG_AMT",
+          "display" : "Revenue Center Non-Covered Charge Amount",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 459402.17
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "paidtoprovider",
+          "display" : "Paid to provider",
+          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+        }, {
+          "code" : "CLM_LINE_PRVDR_PMT_AMT",
+          "display" : "Line Provider Payment Amount",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 547927.2
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "benefit",
+          "display" : "Benefit Amount",
+          "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+        }, {
+          "code" : "CLM_LINE_CVRD_PD_AMT",
+          "display" : "Revenue Center Payment Amount",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 0.0
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "CLM_LINE_NCVRD_PD_AMT",
+          "display" : "Amount Paid for Noncovered Product or Service",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 0.0
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "CLM_LINE_OTHR_TP_PD_AMT",
+          "display" : "Other Third Party Paid Amount",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
         "value" : 11248.18
       },
       "category" : {
@@ -238,8 +383,6 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
           "code" : "CLM_RPTD_MFTR_DSCNT_AMT",
           "display" : "Gap Discount Amount",
           "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-        }, {
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
     }, {
@@ -252,8 +395,6 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
           "code" : "CLM_LINE_VCCN_ADMIN_FEE_AMT",
           "display" : "Vaccination Administration Fee",
           "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-        }, {
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
     }, {
@@ -266,8 +407,6 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
           "code" : "CLM_LINE_TROOP_TOT_AMT",
           "display" : "Other True Out Of Pocket Paid Amount",
           "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-        }, {
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
     }, {
@@ -280,8 +419,6 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
           "code" : "CLM_LINE_SRVC_CST_AMT",
           "display" : "Dispensing Fee",
           "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-        }, {
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
     }, {
@@ -294,8 +431,6 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
           "code" : "CLM_LINE_SLS_TAX_AMT",
           "display" : "Sales Tax Amount",
           "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-        }, {
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
     }, {
@@ -308,8 +443,6 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
           "code" : "CLM_LINE_PLRO_AMT",
           "display" : "Sales Tax Amount",
           "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-        }, {
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
     }, {
@@ -322,8 +455,6 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
           "code" : "CLM_LINE_LIS_AMT",
           "display" : "Low Income Cost Sharing Subsidy Amount",
           "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-        }, {
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
     }, {
@@ -336,8 +467,6 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
           "code" : "CLM_LINE_INGRDNT_CST_AMT",
           "display" : "Ingredient Cost Amount",
           "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-        }, {
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
     }, {
@@ -350,8 +479,6 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
           "code" : "CLM_LINE_GRS_BLW_THRSHLD_AMT",
           "display" : "Gross Drug Cost Below Out Of Pocket Threshold",
           "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-        }, {
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
     }, {
@@ -364,7 +491,53 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
           "code" : "CLM_LINE_GRS_ABOVE_THRSHLD_AMT",
           "display" : "Gross Drug Cost Above Out Of Pocket Threshold",
           "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-        }, {
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 0.0
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "CLM_LINE_GRS_CVRD_CST_TOT_AMT",
+          "display" : "Claim Line Gross Covered Cost Amount",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 0.0
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "CLM_CMS_CALCD_MFTR_DSCNT_AMT",
+          "display" : "CMS Calculated Manufacturer Discount Amount",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 0.0
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "CLM_LINE_REBT_PASSTHRU_POS_AMT",
+          "display" : "Rebate Passthrough POS Amount",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 0.0
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "CLM_PHRMCY_PRICE_DSCNT_AT_POS_AMT",
+          "display" : "Pharmacy price discount",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
@@ -795,7 +968,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
   }, {
     "amount" : {
       "currency" : "USD",
-      "value" : 320262.8125
+      "value" : 320262.8
     },
     "category" : {
       "coding" : [ {
@@ -840,6 +1013,86 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
       } ]
     }
+  }, {
+    "amount" : {
+      "currency" : "USD",
+      "value" : 153.06
+    },
+    "category" : {
+      "coding" : [ {
+        "code" : "deductible",
+        "display" : "Deductible",
+        "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+      }, {
+        "code" : "CLM_MDCR_DDCTBL_AMT",
+        "display" : "Beneficiary Part B Deductible Amount",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+      } ]
+    }
+  }, {
+    "amount" : {
+      "currency" : "USD",
+      "value" : 0.0
+    },
+    "category" : {
+      "coding" : [ {
+        "code" : "deductible",
+        "display" : "Deductible",
+        "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+      }, {
+        "code" : "CLM_MDCR_COINSRNC_AMT",
+        "display" : "Beneficiary Part A Coinsurance Liability Amount",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+      } ]
+    }
+  }, {
+    "amount" : {
+      "currency" : "USD",
+      "value" : 78747.61
+    },
+    "category" : {
+      "coding" : [ {
+        "code" : "noncovered",
+        "display" : "Noncovered",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+      }, {
+        "code" : "CLM_NCVRD_CHRG_AMT",
+        "display" : "Inpatient(or other Part A) Non-covered Charge Amount",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+      } ]
+    }
+  }, {
+    "amount" : {
+      "currency" : "USD",
+      "value" : 0.0
+    },
+    "category" : {
+      "coding" : [ {
+        "code" : "priorpayerpaid",
+        "display" : "Prior payer paid",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+      }, {
+        "code" : "CLM_OTHR_TP_PD_AMT",
+        "display" : "Other Third Party Payer Paid Amount",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+      } ]
+    }
+  }, {
+    "amount" : {
+      "currency" : "USD",
+      "value" : 0.0
+    },
+    "category" : {
+      "coding" : [ {
+        "code" : "coinsurance",
+        "display" : "Co-insurance",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+      }, {
+        "code" : "CLM_BENE_PMT_COINSRNC_AMT",
+        "display" : "Beneficiary Coinsurance Amount",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+      } ]
+    }
   } ],
   "type" : {
     "coding" : [ {
@@ -858,6 +1111,115 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
 
 gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
 {
+  "adjudication" : [ {
+    "amount" : {
+      "currency" : "USD",
+      "value" : 0.0
+    },
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_BENE_INTRST_PD_AMT",
+        "display" : "Beneficiary Interest Paid Amount",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+      } ]
+    }
+  }, {
+    "amount" : {
+      "currency" : "USD",
+      "value" : 0.0
+    },
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_BLOOD_CHRG_AMT",
+        "display" : "Blood Charge Amount",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+      } ]
+    }
+  }, {
+    "amount" : {
+      "currency" : "USD",
+      "value" : 6.96
+    },
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_BLOOD_LBLTY_AMT",
+        "display" : "Beneficiary Blood Deductible Liability Amount",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+      } ]
+    }
+  }, {
+    "amount" : {
+      "currency" : "USD",
+      "value" : 0.0
+    },
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_BLOOD_NCVRD_CHRG_AMT",
+        "display" : "Blood Noncovered Charge Amount",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+      } ]
+    }
+  }, {
+    "amount" : {
+      "currency" : "USD",
+      "value" : 0.0
+    },
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_COB_PTNT_RESP_AMT",
+        "display" : "Coordination of Benefits Patient Responsibility Amount",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+      } ]
+    }
+  }, {
+    "amount" : {
+      "currency" : "USD",
+      "value" : 0.0
+    },
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_PRVDR_INTRST_PD_AMT",
+        "display" : "Provider Interest Paid Amount",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+      } ]
+    }
+  }, {
+    "amount" : {
+      "currency" : "USD",
+      "value" : 0.0
+    },
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_PRVDR_OTAF_AMT",
+        "display" : "Provider Obligation To Accept as Full Amount",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+      } ]
+    }
+  }, {
+    "amount" : {
+      "currency" : "USD",
+      "value" : 0.0
+    },
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_PRVDR_RMNG_DUE_AMT",
+        "display" : "Remaining Amount to Provider",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+      } ]
+    }
+  }, {
+    "amount" : {
+      "currency" : "USD",
+      "value" : 0.0
+    },
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_TOT_CNTRCTL_AMT",
+        "display" : "Total Contractual Amount Discrepancy",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+      } ]
+    }
+  } ],
   "billablePeriod" : {
     "end" : "2025-08-12",
     "extension" : [ {
@@ -977,22 +1339,6 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
     "adjudication" : [ {
       "amount" : {
         "currency" : "USD",
-        "value" : 395.45
-      },
-      "category" : {
-        "coding" : [ {
-          "code" : "noncovered",
-          "display" : "Noncovered",
-          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
-        }, {
-          "code" : "CLM_LINE_NCVRD_CHRG_AMT",
-          "display" : "Revenue Center Non-Covered Charge Amount",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-        } ]
-      }
-    }, {
-      "amount" : {
-        "currency" : "USD",
         "value" : 0.0
       },
       "category" : {
@@ -1003,70 +1349,6 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
         }, {
           "code" : "CLM_LINE_ALOWD_CHRG_AMT",
           "display" : "Line Allowed Charge Amount",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-        } ]
-      }
-    }, {
-      "amount" : {
-        "currency" : "USD",
-        "value" : 299764.34
-      },
-      "category" : {
-        "coding" : [ {
-          "code" : "paidtoprovider",
-          "display" : "Paid to provider",
-          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
-        }, {
-          "code" : "CLM_LINE_PRVDR_PMT_AMT",
-          "display" : "Line Provider Payment Amount",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-        } ]
-      }
-    }, {
-      "amount" : {
-        "currency" : "USD",
-        "value" : 0.44
-      },
-      "category" : {
-        "coding" : [ {
-          "code" : "paidbypatient",
-          "display" : "Paid by patient",
-          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
-        }, {
-          "code" : "CLM_LINE_BENE_PMT_AMT",
-          "display" : "Revenue Center Patient Responsibility Payment Amount",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-        } ]
-      }
-    }, {
-      "amount" : {
-        "currency" : "USD",
-        "value" : 700865.05
-      },
-      "category" : {
-        "coding" : [ {
-          "code" : "paidtopatient",
-          "display" : "Paid to patient",
-          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
-        }, {
-          "code" : "CLM_LINE_BENE_PD_AMT",
-          "display" : "Revenue Center Payment Amount to Beneficiary",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-        } ]
-      }
-    }, {
-      "amount" : {
-        "currency" : "USD",
-        "value" : 148391.6
-      },
-      "category" : {
-        "coding" : [ {
-          "code" : "benefit",
-          "display" : "Benefit Amount",
-          "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-        }, {
-          "code" : "CLM_LINE_CVRD_PD_AMT",
-          "display" : "Revenue Center Payment Amount",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
@@ -1089,6 +1371,122 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
     }, {
       "amount" : {
         "currency" : "USD",
+        "value" : 0.0
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "CLM_LINE_OTAF_AMT",
+          "display" : "Provider Obligation To Accept as Full Amount",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 700865.05
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "paidtopatient",
+          "display" : "Paid to patient",
+          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+        }, {
+          "code" : "CLM_LINE_BENE_PD_AMT",
+          "display" : "Revenue Center Payment Amount to Beneficiary",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 0.44
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "paidbypatient",
+          "display" : "Paid by patient",
+          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+        }, {
+          "code" : "CLM_LINE_BENE_PMT_AMT",
+          "display" : "Revenue Center Patient Responsibility Payment Amount",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 395.45
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "noncovered",
+          "display" : "Noncovered",
+          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+        }, {
+          "code" : "CLM_LINE_NCVRD_CHRG_AMT",
+          "display" : "Revenue Center Non-Covered Charge Amount",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 299764.34
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "paidtoprovider",
+          "display" : "Paid to provider",
+          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+        }, {
+          "code" : "CLM_LINE_PRVDR_PMT_AMT",
+          "display" : "Line Provider Payment Amount",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 148391.6
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "benefit",
+          "display" : "Benefit Amount",
+          "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+        }, {
+          "code" : "CLM_LINE_CVRD_PD_AMT",
+          "display" : "Revenue Center Payment Amount",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 0.0
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "CLM_LINE_NCVRD_PD_AMT",
+          "display" : "Amount Paid for Noncovered Product or Service",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 0.0
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "CLM_LINE_OTHR_TP_PD_AMT",
+          "display" : "Other Third Party Paid Amount",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
         "value" : 481537.64
       },
       "category" : {
@@ -1096,8 +1494,6 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
           "code" : "CLM_RPTD_MFTR_DSCNT_AMT",
           "display" : "Gap Discount Amount",
           "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-        }, {
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
     }, {
@@ -1110,8 +1506,6 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
           "code" : "CLM_LINE_VCCN_ADMIN_FEE_AMT",
           "display" : "Vaccination Administration Fee",
           "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-        }, {
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
     }, {
@@ -1124,8 +1518,6 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
           "code" : "CLM_LINE_TROOP_TOT_AMT",
           "display" : "Other True Out Of Pocket Paid Amount",
           "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-        }, {
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
     }, {
@@ -1138,8 +1530,6 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
           "code" : "CLM_LINE_SRVC_CST_AMT",
           "display" : "Dispensing Fee",
           "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-        }, {
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
     }, {
@@ -1152,8 +1542,6 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
           "code" : "CLM_LINE_SLS_TAX_AMT",
           "display" : "Sales Tax Amount",
           "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-        }, {
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
     }, {
@@ -1166,8 +1554,6 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
           "code" : "CLM_LINE_PLRO_AMT",
           "display" : "Sales Tax Amount",
           "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-        }, {
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
     }, {
@@ -1180,8 +1566,6 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
           "code" : "CLM_LINE_LIS_AMT",
           "display" : "Low Income Cost Sharing Subsidy Amount",
           "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-        }, {
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
     }, {
@@ -1194,8 +1578,6 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
           "code" : "CLM_LINE_INGRDNT_CST_AMT",
           "display" : "Ingredient Cost Amount",
           "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-        }, {
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
     }, {
@@ -1208,8 +1590,6 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
           "code" : "CLM_LINE_GRS_BLW_THRSHLD_AMT",
           "display" : "Gross Drug Cost Below Out Of Pocket Threshold",
           "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-        }, {
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
     }, {
@@ -1222,7 +1602,53 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
           "code" : "CLM_LINE_GRS_ABOVE_THRSHLD_AMT",
           "display" : "Gross Drug Cost Above Out Of Pocket Threshold",
           "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-        }, {
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 0.0
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "CLM_LINE_GRS_CVRD_CST_TOT_AMT",
+          "display" : "Claim Line Gross Covered Cost Amount",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 0.0
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "CLM_CMS_CALCD_MFTR_DSCNT_AMT",
+          "display" : "CMS Calculated Manufacturer Discount Amount",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 0.0
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "CLM_LINE_REBT_PASSTHRU_POS_AMT",
+          "display" : "Rebate Passthrough POS Amount",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 0.0
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "CLM_PHRMCY_PRICE_DSCNT_AT_POS_AMT",
+          "display" : "Pharmacy price discount",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
@@ -1590,7 +2016,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
   }, {
     "amount" : {
       "currency" : "USD",
-      "value" : 99813.9375
+      "value" : 99813.94
     },
     "category" : {
       "coding" : [ {
@@ -1632,6 +2058,86 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
       }, {
         "code" : "CLM_PRVDR_PMT_AMT",
         "display" : "Provider Payment Amount",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+      } ]
+    }
+  }, {
+    "amount" : {
+      "currency" : "USD",
+      "value" : 1397.69
+    },
+    "category" : {
+      "coding" : [ {
+        "code" : "deductible",
+        "display" : "Deductible",
+        "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+      }, {
+        "code" : "CLM_MDCR_DDCTBL_AMT",
+        "display" : "Beneficiary Part B Deductible Amount",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+      } ]
+    }
+  }, {
+    "amount" : {
+      "currency" : "USD",
+      "value" : 0.0
+    },
+    "category" : {
+      "coding" : [ {
+        "code" : "deductible",
+        "display" : "Deductible",
+        "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+      }, {
+        "code" : "CLM_MDCR_COINSRNC_AMT",
+        "display" : "Beneficiary Part A Coinsurance Liability Amount",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+      } ]
+    }
+  }, {
+    "amount" : {
+      "currency" : "USD",
+      "value" : 61157.67
+    },
+    "category" : {
+      "coding" : [ {
+        "code" : "noncovered",
+        "display" : "Noncovered",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+      }, {
+        "code" : "CLM_NCVRD_CHRG_AMT",
+        "display" : "Inpatient(or other Part A) Non-covered Charge Amount",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+      } ]
+    }
+  }, {
+    "amount" : {
+      "currency" : "USD",
+      "value" : 0.0
+    },
+    "category" : {
+      "coding" : [ {
+        "code" : "priorpayerpaid",
+        "display" : "Prior payer paid",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+      }, {
+        "code" : "CLM_OTHR_TP_PD_AMT",
+        "display" : "Other Third Party Payer Paid Amount",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+      } ]
+    }
+  }, {
+    "amount" : {
+      "currency" : "USD",
+      "value" : 0.0
+    },
+    "category" : {
+      "coding" : [ {
+        "code" : "coinsurance",
+        "display" : "Co-insurance",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+      }, {
+        "code" : "CLM_BENE_PMT_COINSRNC_AMT",
+        "display" : "Beneficiary Coinsurance Amount",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
       } ]
     }

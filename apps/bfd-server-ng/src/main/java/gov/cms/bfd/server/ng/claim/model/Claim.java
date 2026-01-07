@@ -21,9 +21,7 @@ import java.util.Optional;
 import java.util.SortedSet;
 import java.util.stream.Stream;
 import lombok.Getter;
-import org.hl7.fhir.r4.model.ExplanationOfBenefit;
-import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.*;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -64,7 +62,6 @@ public class Claim {
   @Embedded private NchPrimaryPayorCode nchPrimaryPayorCode;
   @Embedded private TypeOfBillCode typeOfBillCode;
   @Embedded private CareTeam careTeam;
-  @Embedded private BenefitBalance benefitBalance;
   @Embedded private AdjudicationCharge adjudicationCharge;
   @Embedded private ClaimPaymentAmount claimPaymentAmount;
   @Embedded private ClaimRecordType claimRecordType;
@@ -247,6 +244,16 @@ public class Claim {
   }
 
   /**
+   * Accessor for institutional bene paid amount, if this is an institutional claim.
+   *
+   * @return optional institutional bene paid amount
+   */
+  public Optional<Double> getBenePaidAmount() {
+    return getClaimInstitutional()
+        .map(i -> i.getAdjudicationChargeInstitutional().getBenePaidAmount());
+  }
+
+  /**
    * Convert the claim info to a FHIR ExplanationOfBenefit.
    *
    * @param securityStatus securityStatus
@@ -390,9 +397,8 @@ public class Claim {
 
     institutional.ifPresent(
         i -> {
-          eob.addAdjudication(i.getPpsDrgWeight().toFhir());
-          eob.addBenefitBalance(
-              benefitBalance.toFhir(i.getBenefitBalanceInstitutional(), getClaimValues()));
+          var adjudicationChargeInstitutional = i.getAdjudicationChargeInstitutional();
+          adjudicationChargeInstitutional.toFhir(getClaimValues()).forEach(eob::addAdjudication);
         });
 
     var insurance = new ExplanationOfBenefit.InsuranceComponent();
@@ -403,15 +409,18 @@ public class Claim {
     claimTypeCode
         .toFhirPartDInsurance(contractNumber, contractPbpNumber)
         .ifPresent(eob::addInsurance);
-    adjudicationCharge.toFhir().forEach(eob::addTotal);
+    adjudicationCharge.toFhirTotal().forEach(eob::addTotal);
+    getBenePaidAmount()
+        .map(AdjudicationChargeType.BENE_PAID_AMOUNT::toFhirTotal)
+        .ifPresent(eob::addTotal);
+    adjudicationCharge.toFhirAdjudication().forEach(eob::addAdjudication);
     eob.setPayment(claimPaymentAmount.toFhir());
 
     getClaimProfessional()
         .ifPresent(
             professional -> {
               eob.getExtension().addAll(professional.toFhirExtension());
-              eob.addTotal(professional.toFhirTotal());
-              eob.addBenefitBalance(benefitBalance.toFhir());
+              professional.toFhirAdjudication().forEach(eob::addAdjudication);
               professional.toFhirOutcome(claimTypeCode).ifPresent(eob::setOutcome);
             });
 
