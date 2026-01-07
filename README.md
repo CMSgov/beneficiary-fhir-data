@@ -33,7 +33,7 @@ The high-level purpose and location of each piece of the project is listed below
     * [bfd-shared-test-utils](apps/bfd-shared-test-utils) - utilities shared across BFD projects used in testing
     * [bfd-shared-utils](apps/bfd-shared-utils) - utilities shared across BFD projects used in the application code
     * [utils](apps/utils) - non-application scripts used for testing, development, and database management
-  * V3 App
+  * v3 App
     * [bfd-model-idr](apps/bfd-model-idr) - data models and synthetic data generation used for mapping IDR data
     * [bfd-pipeline-idr](apps/bfd-pipeline-idr) - ETL pipeline for transforming and loading IDR data
     * [bfd-server-ng](apps/bfd-server-ng) - New version of the BFD REST API, serving FHIR data
