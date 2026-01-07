@@ -114,6 +114,16 @@ def regenerate_static_tables(generator: GeneratorUtil, files: dict[str, list[Row
             coverage_type=bene_tp_row["BENE_TP_TYPE_CD"],
         )
 
+    for bene_dual_row in files[BENE_DUAL]:
+        generator.generate_bene_dual(
+            dual_row=bene_dual_row,
+            dual_start_date=bene_dual_row["BENE_MDCD_ELGBLTY_BGN_DT"],
+            dual_end_date=bene_dual_row["BENE_MDCD_ELGBLTY_END_DT"],
+            dual_status_cd=bene_dual_row["BENE_DUAL_STUS_CD"],
+            dual_type_cd=bene_dual_row["BENE_DUAL_TYPE_CD"],
+            medicaid_state_cd=bene_dual_row["GEO_USPS_STATE_CD"],
+        )
+
     for patient_xref_row in files[BENE_XREF]:
         generator.generate_bene_xref(
             bene_xref=patient_xref_row,

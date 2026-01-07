@@ -455,11 +455,13 @@ class GeneratorUtil:
                 )
 
         # Generate dual coverage data 50% of the time
-        if probability(0.5):
+        if (not patient.loaded_from_file or force_ztm) and probability(0.5):
             # Generate dual eligibility dates
-            dual_start_date = self.fake.date_between_dates(
-                datetime.date(year=2017, month=5, day=20),
-                datetime.date(year=2021, month=1, day=1),
+            dual_start_date = str(
+                self.fake.date_between_dates(
+                    datetime.date(year=2017, month=5, day=20),
+                    datetime.date(year=2021, month=1, day=1),
+                )
             )
             dual_end_date = "9999-12-31"
             dual_status_cd = random.choice(self.code_systems["BENE_DUAL_STUS_CD"])
@@ -480,18 +482,36 @@ class GeneratorUtil:
             ]
             medicaid_state_cd = random.choice(state_codes)
 
-            dual_row = find_bene_sk(files=files, file_name=BENE_DUAL, bene_sk=patient["BENE_SK"])
-            dual_row["IDR_LTST_TRANS_FLG"] = "Y"
-            dual_row["BENE_DUAL_STUS_CD"] = dual_status_cd
-            dual_row["BENE_DUAL_TYPE_CD"] = dual_type_cd
-            dual_row["GEO_USPS_STATE_CD"] = medicaid_state_cd
-            dual_row["BENE_MDCD_ELGBLTY_BGN_DT"] = str(dual_start_date)
-            dual_row["BENE_MDCD_ELGBLTY_END_DT"] = dual_end_date
-            dual_row["IDR_TRANS_EFCTV_TS"] = str(dual_start_date) + "T00:00:00.000000+0000"
-            dual_row["IDR_INSRT_TS"] = str(dual_start_date) + "T00:00:00.000000+0000"
-            dual_row["IDR_UPDT_TS"] = str(dual_start_date) + "T00:00:00.000000+0000"
-            dual_row["IDR_TRANS_OBSLT_TS"] = "9999-12-31T00:00:00.000000+0000"
-            self.bene_cmbnd_dual_mdcr.append(dual_row.kv)
+            if not patient.loaded_from_file or force_ztm:
+                self.generate_bene_dual(
+                    dual_row=RowAdapter(initial_kv),
+                    dual_start_date=dual_start_date,
+                    dual_end_date=dual_end_date,
+                    dual_status_cd=dual_status_cd,
+                    dual_type_cd=dual_type_cd,
+                    medicaid_state_cd=medicaid_state_cd,
+                )
+
+    def generate_bene_dual(
+        self,
+        dual_row: RowAdapter,
+        dual_start_date: str,
+        dual_end_date: str,
+        dual_status_cd: str,
+        dual_type_cd: str,
+        medicaid_state_cd: str,
+    ):
+        dual_row["IDR_LTST_TRANS_FLG"] = "Y"
+        dual_row["BENE_DUAL_STUS_CD"] = dual_status_cd
+        dual_row["BENE_DUAL_TYPE_CD"] = dual_type_cd
+        dual_row["GEO_USPS_STATE_CD"] = medicaid_state_cd
+        dual_row["BENE_MDCD_ELGBLTY_BGN_DT"] = dual_start_date
+        dual_row["BENE_MDCD_ELGBLTY_END_DT"] = dual_end_date
+        dual_row["IDR_TRANS_EFCTV_TS"] = str(dual_start_date) + "T00:00:00.000000+0000"
+        dual_row["IDR_INSRT_TS"] = str(dual_start_date) + "T00:00:00.000000+0000"
+        dual_row["IDR_UPDT_TS"] = str(dual_start_date) + "T00:00:00.000000+0000"
+        dual_row["IDR_TRANS_OBSLT_TS"] = "9999-12-31T00:00:00.000000+0000"
+        self.bene_cmbnd_dual_mdcr.append(dual_row.kv)
 
     def generate_bene_tp(
         self,
