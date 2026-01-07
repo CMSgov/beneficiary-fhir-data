@@ -103,7 +103,7 @@ public class IntegrationTestConfiguration {
     env.put("IDR_ENABLE_PARTITIONS", "0");
 
     processBuilder
-        .directory(new File(Paths.get(baseDir, "../bfd-pipeline/bfd-pipeline-idr").toString()))
+        .directory(new File(Paths.get(baseDir, "../bfd-pipeline-idr").toString()))
         // Redirect streams to prevent excessive logs from filling up the internal buffer and
         // causing the process to hang
         .redirectOutput(ProcessBuilder.Redirect.INHERIT)
