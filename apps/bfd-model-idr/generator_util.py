@@ -43,6 +43,13 @@ PRVDR_HSTRY = "SYNTHETIC_PRVDR_HSTRY"
 CNTRCT_PBP_NUM = "SYNTHETIC_CNTRCT_PBP_NUM"
 CNTRCT_PBP_CNTCT = "SYNTHETIC_CNTRCT_PBP_CNTCT"
 
+# Lazily computed filename (see above constants) to mappings of the file's rows by BENE_SK.
+# Dramatically speeds up generation with large static inputs
+_files_by_bene_sk: dict[str, dict[str, "RowAdapter"]] = {}
+# Outermost dict is keyed by original filename, inner dict is keyed by the patient's bene_sk, and
+# innermost dict is the full row itself
+_tables_by_bene_sk: dict[str, dict[str, dict[str, Any]]] = {}
+
 
 def load_file_dict(files: dict[str, list["RowAdapter"]], file_paths: list[str]):
     for file_path, file_name in (
@@ -76,13 +83,30 @@ def adapters_to_dicts(adapters: list["RowAdapter"]) -> list[dict[str, Any]]:
     return [x.kv for x in adapters]
 
 
-def contains_bene_sk(file: list["RowAdapter"], bene_sk: str):
-    return len([row for row in file if row["BENE_SK"] == bene_sk]) > 0
+def lazy_compute_bene_sk_map(files: dict[str, list["RowAdapter"]], file_name: str):
+    # Lazily compute the bene_sk -> row mapping for each file on first usage. Dramatically speeds up
+    # generation time versus a traditional list comprehension (~100 it/s to 8000 it/s)
+    if file_name not in _files_by_bene_sk:
+        _files_by_bene_sk[file_name] = {row["BENE_SK"]: row for row in files[file_name]}
 
 
-def find_bene_sk(file: list["RowAdapter"], bene_sk: str):
-    res = [row for row in file if row["BENE_SK"] == bene_sk]
-    return res[0] if res else RowAdapter({"BENE_SK": bene_sk})
+def find_bene_sk(files: dict[str, list["RowAdapter"]], file_name: str, bene_sk: str):
+    lazy_compute_bene_sk_map(files=files, file_name=file_name)
+    return _files_by_bene_sk[file_name].get(bene_sk, RowAdapter({}))
+
+
+def contains_bene_sk(files: dict[str, list["RowAdapter"]], file_name: str, bene_sk: str):
+    lazy_compute_bene_sk_map(files=files, file_name=file_name)
+    return bene_sk in _files_by_bene_sk[file_name]
+
+
+def output_table_contains_by_bene_sk(
+    table: list[dict[str, Any]], for_file: str, bene_sk: str
+) -> bool:
+    if for_file not in _tables_by_bene_sk:
+        _tables_by_bene_sk[for_file] = {str(row["BENE_SK"]): row for row in table}
+
+    return bene_sk in _tables_by_bene_sk[for_file]
 
 
 def convert_tilde_str(val: str) -> str:
@@ -290,7 +314,7 @@ class GeneratorUtil:
                 )
                 self.set_timestamps(patient, efctv_dt)
 
-                current_mbi = self.gen_mbi()
+                current_mbi = str(mbi_obj["BENE_MBI_ID"]) or self.gen_mbi()
                 patient["BENE_MBI_ID"] = current_mbi
 
             else:
@@ -378,21 +402,20 @@ class GeneratorUtil:
         while mdcr_stus_cd in ("0", "~", "00"):
             mdcr_stus_cd = random.choice(self.code_systems["BENE_MDCR_STUS_CD"])
 
-        stus_row = find_bene_sk(files[BENE_STUS], patient["BENE_SK"])
-        stus_row["IDR_LTST_TRANS_FLG"] = "Y"
-        stus_row["BENE_MDCR_STUS_CD"] = mdcr_stus_cd
-        stus_row["MDCR_STUS_BGN_DT"] = medicare_start_date
-        stus_row["MDCR_STUS_END_DT"] = medicare_end_date
-        stus_row["IDR_TRANS_EFCTV_TS"] = str(medicare_start_date) + "T00:00:00.000000+0000"
-        stus_row["IDR_INSRT_TS"] = str(medicare_start_date) + "T00:00:00.000000+0000"
-        stus_row["IDR_UPDT_TS"] = str(medicare_start_date) + "T00:00:00.000000+0000"
-        stus_row["IDR_TRANS_OBSLT_TS"] = "9999-12-31T00:00:00.000000+0000"
-        self.mdcr_stus.append(stus_row.kv)
+        if not output_table_contains_by_bene_sk(
+            table=self.mdcr_stus, for_file=BENE_STUS, bene_sk=patient["BENE_SK"]
+        ):
+            self.generate_bene_stus(
+                stus_row=RowAdapter({}),
+                medicare_start_date=medicare_start_date,
+                medicare_end_date=medicare_end_date,
+                mdcr_stus_cd=mdcr_stus_cd,
+            )
 
         buy_in_cd = random.choice(self.code_systems["BENE_BUYIN_CD"])
 
         entitlement_reason = random.choice(self.code_systems["BENE_MDCR_ENTLMT_RSN_CD"])
-        rsn_row = find_bene_sk(files[BENE_ENTLMT_RSN], patient["BENE_SK"])
+        rsn_row = find_bene_sk(files=files, file_name=BENE_ENTLMT_RSN, bene_sk=patient["BENE_SK"])
         rsn_row["IDR_LTST_TRANS_FLG"] = "Y"
         rsn_row["IDR_TRANS_EFCTV_TS"] = str(medicare_start_date) + "T00:00:00.000000+0000"
         rsn_row["IDR_INSRT_TS"] = (str(medicare_start_date) + "T00:00:00.000000+0000",)
@@ -405,7 +428,9 @@ class GeneratorUtil:
 
         for coverage_type in coverage_parts:
             # ENTLMT
-            entlmt_row = find_bene_sk(files[BENE_ENTLMT], patient["BENE_SK"])
+            entlmt_row = find_bene_sk(
+                files=files, file_name=BENE_ENTLMT, bene_sk=patient["BENE_SK"]
+            )
             entlmt_row["IDR_LTST_TRANS_FLG"] = "Y"
             entlmt_row["BENE_MDCR_ENTLMT_TYPE_CD"] = coverage_type
             entlmt_row["BENE_MDCR_ENRLMT_RSN_CD"] = random.choice(
@@ -421,8 +446,10 @@ class GeneratorUtil:
 
             self.mdcr_entlmt.append(entlmt_row.kv)
             # TP
-            if include_tp or contains_bene_sk(files[BENE_TP], patient["BENE_SK"]):
-                tp_row = find_bene_sk(files[BENE_TP], patient["BENE_SK"])
+            if include_tp or contains_bene_sk(
+                files=files, file_name=BENE_TP, bene_sk=patient["BENE_SK"]
+            ):
+                tp_row = find_bene_sk(files=files, file_name=BENE_TP, bene_sk=patient["BENE_SK"])
                 tp_row["IDR_LTST_TRANS_FLG"] = "Y"
                 tp_row["BENE_TP_TYPE_CD"] = coverage_type
                 tp_row["IDR_TRANS_EFCTV_TS"] = str(medicare_start_date) + "T00:00:00.000000+0000"
@@ -460,7 +487,7 @@ class GeneratorUtil:
             ]
             medicaid_state_cd = random.choice(state_codes)
 
-            dual_row = find_bene_sk(files[BENE_DUAL], patient["BENE_SK"])
+            dual_row = find_bene_sk(files=files, file_name=BENE_DUAL, bene_sk=patient["BENE_SK"])
             dual_row["IDR_LTST_TRANS_FLG"] = "Y"
             dual_row["BENE_DUAL_STUS_CD"] = dual_status_cd
             dual_row["BENE_DUAL_TYPE_CD"] = dual_type_cd
@@ -473,8 +500,27 @@ class GeneratorUtil:
             dual_row["IDR_TRANS_OBSLT_TS"] = "9999-12-31T00:00:00.000000+0000"
             self.bene_cmbnd_dual_mdcr.append(dual_row.kv)
 
+    def generate_bene_stus(
+        self,
+        stus_row: RowAdapter,
+        medicare_start_date: datetime.date,
+        medicare_end_date: datetime.date,
+        mdcr_stus_cd: str,
+    ):
+        stus_row["IDR_LTST_TRANS_FLG"] = "Y"
+        stus_row["BENE_MDCR_STUS_CD"] = mdcr_stus_cd
+        stus_row["MDCR_STUS_BGN_DT"] = medicare_start_date
+        stus_row["MDCR_STUS_END_DT"] = medicare_end_date
+        stus_row["IDR_TRANS_EFCTV_TS"] = str(medicare_start_date) + "T00:00:00.000000+0000"
+        stus_row["IDR_INSRT_TS"] = str(medicare_start_date) + "T00:00:00.000000+0000"
+        stus_row["IDR_UPDT_TS"] = str(medicare_start_date) + "T00:00:00.000000+0000"
+        stus_row["IDR_TRANS_OBSLT_TS"] = "9999-12-31T00:00:00.000000+0000"
+        self.mdcr_stus.append(stus_row.kv)
+
     def generate_bene_lis(self, patient: RowAdapter, files: dict[str, list[RowAdapter]]):
-        if probability(0.5) or contains_bene_sk(files[BENE_LIS], patient["BENE_SK"]):
+        if probability(0.5) or contains_bene_sk(
+            files=files, file_name=BENE_LIS, bene_sk=patient["BENE_SK"]
+        ):
             lis_start_date = self.fake.date_between_dates(
                 datetime.date(year=2017, month=5, day=20),
                 datetime.date(year=2021, month=1, day=1),
@@ -484,7 +530,7 @@ class GeneratorUtil:
             copmt_lvl_cd = random.choice(self.code_systems["BENE_LIS_COPMT_LVL_CD"])
             ptd_prm_pct = random.choice(["025", "050", "075", "100"])
 
-            lis_row = find_bene_sk(files[BENE_LIS], patient["BENE_SK"])
+            lis_row = find_bene_sk(files=files, file_name=BENE_LIS, bene_sk=patient["BENE_SK"])
             lis_row["IDR_LTST_TRANS_FLG"] = "Y"
             lis_row["BENE_LIS_EFCTV_CD"] = lis_efctv_cd
             lis_row["BENE_LIS_COPMT_LVL_CD"] = copmt_lvl_cd
@@ -514,7 +560,9 @@ class GeneratorUtil:
         prcsr_num = str(random.randint(100000, 999999))
         bank_id_num = str(random.randint(100000, 999999))
 
-        rx_row = find_bene_sk(files[BENE_MAPD_ENRLMT_RX], patient["BENE_SK"])
+        rx_row = find_bene_sk(
+            files=files, file_name=BENE_MAPD_ENRLMT_RX, bene_sk=patient["BENE_SK"]
+        )
         rx_row["CNTRCT_PBP_SK"]= "".join(random.choices(string.digits, k=12))
         rx_row["BENE_ENRLMT_BGN_DT"]= str(enrollment_start_date)
         rx_row["BENE_ENRLMT_PDP_RX_INFO_BGN_DT"]=str(rx_start_date)
@@ -548,7 +596,9 @@ class GeneratorUtil:
         bene_enrlmt_pgm_type_cd = random.choice(["1", "2", "3"])
         bene_enrlmt_emplr_sbsdy_sw = random.choice(["Y", "~", "1"])
 
-        enrollment_row = find_bene_sk(files[BENE_MAPD_ENRLMT], patient["BENE_SK"])
+        enrollment_row = find_bene_sk(
+            files=files, file_name=BENE_MAPD_ENRLMT, bene_sk=patient["BENE_SK"]
+        )
         enrollment_row["CNTRCT_PBP_SK"]= "".join(random.choices(string.digits, k=12))
         enrollment_row["IDR_LTST_TRANS_FLG"] = "Y"
         enrollment_row["BENE_CNTRCT_NUM"] = cntrct_num

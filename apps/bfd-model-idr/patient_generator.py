@@ -72,6 +72,14 @@ def regenerate_static_tables(generator: GeneratorUtil, files: dict[str, list[Row
             patient=RowAdapter({}), num_mbis=1, initial_mbi_obj=bene_mbi_id_row
         )
 
+    for bene_stus_row in files[BENE_STUS]:
+        generator.generate_bene_stus(
+            stus_row=bene_stus_row,
+            medicare_start_date=bene_stus_row["MDCR_STUS_BGN_DT"],
+            medicare_end_date=bene_stus_row["MDCR_STUS_END_DT"],
+            mdcr_stus_cd=bene_stus_row["BENE_MDCR_STUS_CD"],
+        )
+
     for patient_xref_row in files[BENE_XREF]:
         generator.generate_bene_xref(
             bene_xref=patient_xref_row,
@@ -128,11 +136,7 @@ def load_inputs():
         generator.used_bene_sk.append(pt_bene_sk)
 
         patient_static_mbi_row = patient_mbi_id_rows.get(patient["BENE_MBI_ID"])
-        if patient_static_mbi_row:
-            # If the operator has provided static MBIs for a given synthetic patient we need to add
-            # the row to the composite BENE_MBI_ID table:
-            generator.mbi_table[patient["BENE_MBI_ID"]] = patient_static_mbi_row
-        else:
+        if not patient_static_mbi_row:
             # If the patient has no corresponding static MBIs and is loaded from a file (static) we
             # generate a single MBI ID to ensure a static table size, otherwise (if the patient is
             # totally generated) we generate upto 4 MBIs (n - 1 being obsolete)
@@ -149,7 +153,7 @@ def load_inputs():
         # 50% of the time, generate part C
         # 25% of time, PDP only
         # 25% of time, no part C or D.
-        if not patient.loaded_from_file and probability(0.5):
+        if probability(0.5):
             contract_info = generator.generate_bene_mapd_enrlmt(
                 patient, files, pdp_only=probability(0.5)
             )
