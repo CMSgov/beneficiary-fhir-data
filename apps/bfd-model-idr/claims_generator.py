@@ -500,7 +500,7 @@ def add_diagnoses(clm_type_cd=-1):
             "CLM_VAL_SQNC_NUM": "1",
             "CLM_DGNS_PRCDR_ICD_IND": "0",
             "CLM_PROD_TYPE_CD": "E",
-            "CLM_POA_IND": "0", #ALWAYS for ICD-10 codes. not always for icd-9.
+            "CLM_POA_IND": "0",  # ALWAYS for ICD-10 codes. not always for icd-9.
         }
         first_external = {
             "CLM_DGNS_CD": external_1["CLM_DGNS_CD"],
@@ -787,7 +787,7 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
     add_meta_timestamps(rlt_cond_mbr_record, claim["CLM"], max_date)
 
     claim["CLM"]["CLM_FINL_ACTN_IND"] = "Y"
-    if claim["CLM"]["CLM_TYPE_CD"] == 3 or claim["CLM"]["CLM_ADJSTMT_TYPE_CD"] == '1':
+    if claim["CLM"]["CLM_TYPE_CD"] == 3 or claim["CLM"]["CLM_ADJSTMT_TYPE_CD"] == "1":
         claim["CLM"]["CLM_FINL_ACTN_IND"] = "N"
 
     clm_ltst_clm_ind = "N"
@@ -1139,6 +1139,7 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
             claim_line_prfnl["CLM_LINE_CARR_CLNCL_CHRG_AMT"] = round(random.uniform(0, 10000), 2)
             claim_line_prfnl["CLM_LINE_CARR_PSYCH_OT_LMT_AMT"] = round(random.uniform(0, 10000), 2)
             claim_line_prfnl["CLM_LINE_PRFNL_INTRST_AMT"] = round(random.uniform(0, 10000), 2)
+            claim_line_prfnl["CLM_MDCR_PRMRY_PYR_ALOWD_AMT"] = round(random.uniform(0, 10000), 2)
 
             if random.randint(0, 10) == 6:
                 claim_line_prfnl["CLM_LINE_HCT_HGB_TYPE_CD"] = random.choice(["R1", "R2"])
@@ -1329,7 +1330,7 @@ def gen_pac_version_of_claim(claim, max_date):
         pac_claim["CLM"].pop("CLM_BLOOD_PT_FRNSH_QTY")
     if "CLM_NCH_PRMRY_PYR_CD" in pac_claim["CLM"]:
         pac_claim["CLM"].pop("CLM_NCH_PRMRY_PYR_CD")
-    
+
     if pac_claim["CLM"]["CLM_TYPE_CD"] < 2000:
         pac_claim["CLM"]["CLM_FINL_ACTN_IND"] = "N"
 
@@ -1548,7 +1549,6 @@ def gen_provider_history(amount):
         }
         generate_meta_sk_pair(obj)
         provider_history.append(obj)
-        
 
     return provider_history
 
@@ -1620,7 +1620,6 @@ def add_meta_timestamps(obj, clm, max_date):
 
 
 def generate_meta_sk_pair(obj):
-
     def encode(d):
         d = d.date() if isinstance(d, datetime) else d
         yyyymmdd = d.year * 10000 + d.month * 100 + d.day
@@ -1630,7 +1629,6 @@ def generate_meta_sk_pair(obj):
 
     max_dt = datetime.fromisoformat(str(now))
     min_dt = datetime(2010, 1, 1)
-
 
     if random.random() < 0.05:
         update_dt = faker.date_time_between_dates(min_dt, max_dt)
@@ -1649,7 +1647,6 @@ def generate_meta_sk_pair(obj):
         obj["META_LST_UPDT_SK"] = obj["META_SK"]
     else:
         obj["META_LST_UPDT_SK"] = 0
-
 
 
 def main():

@@ -272,7 +272,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
     }, {
       "amount" : {
         "currency" : "USD",
-        "value" : 395103.12
+        "value" : 395103.13
       },
       "category" : {
         "coding" : [ {
@@ -320,7 +320,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
     }, {
       "amount" : {
         "currency" : "USD",
-        "value" : 459402.17
+        "value" : 459402.16
       },
       "category" : {
         "coding" : [ {
@@ -336,7 +336,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
     }, {
       "amount" : {
         "currency" : "USD",
-        "value" : 547927.2
+        "value" : 547927.19
       },
       "category" : {
         "coding" : [ {
@@ -412,7 +412,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
     }, {
       "amount" : {
         "currency" : "USD",
-        "value" : 280044.07
+        "value" : 280044.06
       },
       "category" : {
         "coding" : [ {
@@ -424,7 +424,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
     }, {
       "amount" : {
         "currency" : "USD",
-        "value" : 839989.68
+        "value" : 839989.69
       },
       "category" : {
         "coding" : [ {
@@ -436,7 +436,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
     }, {
       "amount" : {
         "currency" : "USD",
-        "value" : 388684.08
+        "value" : 388684.09
       },
       "category" : {
         "coding" : [ {
@@ -448,7 +448,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
     }, {
       "amount" : {
         "currency" : "USD",
-        "value" : 564366.16
+        "value" : 564366.19
       },
       "category" : {
         "coding" : [ {
@@ -484,7 +484,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
     }, {
       "amount" : {
         "currency" : "USD",
-        "value" : 984753.58
+        "value" : 984753.56
       },
       "category" : {
         "coding" : [ {
@@ -961,7 +961,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
   }, {
     "amount" : {
       "currency" : "USD",
-      "value" : 320262.8
+      "value" : 320262.81
     },
     "category" : {
       "coding" : [ {
@@ -1376,7 +1376,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
     }, {
       "amount" : {
         "currency" : "USD",
-        "value" : 700865.05
+        "value" : 700865.06
       },
       "category" : {
         "coding" : [ {
@@ -1440,7 +1440,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
     }, {
       "amount" : {
         "currency" : "USD",
-        "value" : 148391.6
+        "value" : 148391.59
       },
       "category" : {
         "coding" : [ {
@@ -1480,7 +1480,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
     }, {
       "amount" : {
         "currency" : "USD",
-        "value" : 481537.64
+        "value" : 481537.63
       },
       "category" : {
         "coding" : [ {
@@ -1492,7 +1492,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
     }, {
       "amount" : {
         "currency" : "USD",
-        "value" : 734107.96
+        "value" : 734107.94
       },
       "category" : {
         "coding" : [ {
@@ -1504,7 +1504,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
     }, {
       "amount" : {
         "currency" : "USD",
-        "value" : 425733.04
+        "value" : 425733.03
       },
       "category" : {
         "coding" : [ {
@@ -1516,7 +1516,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
     }, {
       "amount" : {
         "currency" : "USD",
-        "value" : 781572.98
+        "value" : 781573.0
       },
       "category" : {
         "coding" : [ {
@@ -1528,7 +1528,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
     }, {
       "amount" : {
         "currency" : "USD",
-        "value" : 961456.57
+        "value" : 961456.56
       },
       "category" : {
         "coding" : [ {
@@ -1540,7 +1540,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
     }, {
       "amount" : {
         "currency" : "USD",
-        "value" : 585091.77
+        "value" : 585091.75
       },
       "category" : {
         "coding" : [ {
@@ -1552,7 +1552,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
     }, {
       "amount" : {
         "currency" : "USD",
-        "value" : 545553.12
+        "value" : 545553.13
       },
       "category" : {
         "coding" : [ {
