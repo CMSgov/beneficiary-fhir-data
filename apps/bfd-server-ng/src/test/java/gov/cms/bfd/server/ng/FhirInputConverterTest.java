@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import gov.cms.bfd.server.ng.input.FhirInputConverter;
@@ -22,8 +23,8 @@ class FhirInputConverterTest {
     assertEquals(Optional.empty(), FhirInputConverter.toIntOptional(null));
     assertEquals(Optional.empty(), FhirInputConverter.toIntOptional(new NumberParam()));
 
-    assertEquals(List.of(), FhirInputConverter.getSourceIdsForTagCode(null));
-    assertEquals(List.of(), FhirInputConverter.getSourceIdsForTagCode(new TokenParam()));
+    assertEquals(List.of(), FhirInputConverter.parseTagParameter(null));
+    assertEquals(List.of(), FhirInputConverter.parseTagParameter(new TokenAndListParam()));
 
     var emptyId = new IdType();
     var blankId = new IdType("");

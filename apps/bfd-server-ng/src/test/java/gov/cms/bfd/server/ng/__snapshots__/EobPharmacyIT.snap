@@ -587,10 +587,13 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
   "meta" : {
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
     "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Pharmacy|2.1.0" ],
-    "source" : "NationalClaimsHistory",
+    "source" : "NCH",
     "tag" : [ {
-      "code" : "Adjudicated",
-      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication-Status"
+      "code" : "NationalClaimsHistory",
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type"
+    }, {
+      "code" : "FinalAction",
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Final-Action"
     } ]
   },
   "outcome" : "complete",
@@ -1689,10 +1692,13 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
   "meta" : {
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
     "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Pharmacy|2.1.0" ],
-    "source" : "NationalClaimsHistory",
+    "source" : "NCH",
     "tag" : [ {
-      "code" : "Adjudicated",
-      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication-Status"
+      "code" : "NationalClaimsHistory",
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type"
+    }, {
+      "code" : "FinalAction",
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Final-Action"
     } ]
   },
   "outcome" : "complete",

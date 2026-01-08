@@ -40,7 +40,7 @@ echo
 echo Creating schema.
 
 docker exec -u postgres bfd-idr-db psql fhirdb bfd -f docker-entrypoint-initdb.d/mock-idr.sql
-"$script_dir/../../bfd-db-migrator-ng/migrate-local.sh"
+"$script_dir/../bfd-db-migrator-ng/migrate-local.sh"
 
 uv sync
 BFD_DB_ENDPOINT=localhost BFD_DB_USERNAME=bfd BFD_DB_PASSWORD=InsecureLocalDev uv run load_synthetic.py "$1" 

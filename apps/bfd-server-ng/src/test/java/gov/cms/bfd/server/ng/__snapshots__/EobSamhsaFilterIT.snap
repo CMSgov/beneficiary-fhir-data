@@ -2835,8 +2835,11 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
         } ],
         "source" : "FISS",
         "tag" : [ {
-          "code" : "PartiallyAdjudicated",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication-Status"
+          "code" : "SharedSystem",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type"
+        }, {
+          "code" : "FinalAction",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Final-Action"
         } ]
       },
       "patient" : {
@@ -6429,8 +6432,11 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
         "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional|2.1.0" ],
         "source" : "FISS",
         "tag" : [ {
-          "code" : "PartiallyAdjudicated",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication-Status"
+          "code" : "SharedSystem",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type"
+        }, {
+          "code" : "FinalAction",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Final-Action"
         } ]
       },
       "outcome" : "partial",
@@ -7120,10 +7126,13 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
         "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Pharmacy|2.1.0" ],
-        "source" : "NationalClaimsHistory",
+        "source" : "NCH",
         "tag" : [ {
-          "code" : "Adjudicated",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication-Status"
+          "code" : "NationalClaimsHistory",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type"
+        }, {
+          "code" : "FinalAction",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Final-Action"
         } ]
       },
       "outcome" : "complete",
@@ -9294,10 +9303,13 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
         "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional|2.1.0" ],
-        "source" : "NationalClaimsHistory",
+        "source" : "NCH",
         "tag" : [ {
-          "code" : "Adjudicated",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication-Status"
+          "code" : "NationalClaimsHistory",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type"
+        }, {
+          "code" : "FinalAction",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Final-Action"
         } ]
       },
       "outcome" : "complete",
@@ -12410,10 +12422,13 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
         "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional|2.1.0" ],
-        "source" : "NationalClaimsHistory",
+        "source" : "NCH",
         "tag" : [ {
-          "code" : "Adjudicated",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication-Status"
+          "code" : "NationalClaimsHistory",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type"
+        }, {
+          "code" : "FinalAction",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Final-Action"
         } ]
       },
       "outcome" : "complete",
@@ -14327,10 +14342,13 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
         "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional|2.1.0" ],
-        "source" : "NationalClaimsHistory",
+        "source" : "NCH",
         "tag" : [ {
-          "code" : "Adjudicated",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication-Status"
+          "code" : "NationalClaimsHistory",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type"
+        }, {
+          "code" : "FinalAction",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Final-Action"
         } ]
       },
       "outcome" : "complete",
@@ -17960,8 +17978,11 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
         "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional|2.1.0" ],
         "source" : "FISS",
         "tag" : [ {
-          "code" : "PartiallyAdjudicated",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication-Status"
+          "code" : "SharedSystem",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type"
+        }, {
+          "code" : "FinalAction",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Final-Action"
         } ]
       },
       "outcome" : "partial",
@@ -18651,10 +18672,13 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
         "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Pharmacy|2.1.0" ],
-        "source" : "NationalClaimsHistory",
+        "source" : "NCH",
         "tag" : [ {
-          "code" : "Adjudicated",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication-Status"
+          "code" : "NationalClaimsHistory",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type"
+        }, {
+          "code" : "FinalAction",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Final-Action"
         } ]
       },
       "outcome" : "complete",
@@ -20825,10 +20849,13 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
         "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional|2.1.0" ],
-        "source" : "NationalClaimsHistory",
+        "source" : "NCH",
         "tag" : [ {
-          "code" : "Adjudicated",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication-Status"
+          "code" : "NationalClaimsHistory",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type"
+        }, {
+          "code" : "FinalAction",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Final-Action"
         } ]
       },
       "outcome" : "complete",
@@ -23941,10 +23968,13 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
         "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional|2.1.0" ],
-        "source" : "NationalClaimsHistory",
+        "source" : "NCH",
         "tag" : [ {
-          "code" : "Adjudicated",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication-Status"
+          "code" : "NationalClaimsHistory",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type"
+        }, {
+          "code" : "FinalAction",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Final-Action"
         } ]
       },
       "outcome" : "complete",
@@ -25858,10 +25888,13 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
         "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional|2.1.0" ],
-        "source" : "NationalClaimsHistory",
+        "source" : "NCH",
         "tag" : [ {
-          "code" : "Adjudicated",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication-Status"
+          "code" : "NationalClaimsHistory",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type"
+        }, {
+          "code" : "FinalAction",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Final-Action"
         } ]
       },
       "outcome" : "complete",
