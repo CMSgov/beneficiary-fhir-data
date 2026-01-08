@@ -31,8 +31,23 @@ fake = Faker()
 
 # Command line argument parsing
 parser = argparse.ArgumentParser(description="Generate synthetic patient data")
-parser.add_argument("files", nargs="*")
-parser.add_argument("--patients", default=15, type=int, help="Number of patients to generate")
+parser.add_argument(
+    "files",
+    nargs="*",
+    help=(
+        "CSVs that will be regenerated/updated with new columns. Updates are idempotent, meaning "
+        "that passing in an existing table/CSV without any new columns being added to the "
+        "synthetic data generation will result in a byte-identical output file. Take care to "
+        "avoid providing a partial set of tables with foreign key constraints (e.g. BENE_SK) "
+        "without providing the root table as this could result in broken output data"
+    ),
+)
+parser.add_argument(
+    "--patients",
+    default=15,
+    type=int,
+    help="Number of patients to generate. Ignored if SYNTHETIC_BENE_HSTRY is provided via 'files'",
+)
 parser.add_argument(
     "--claims",
     action="store_true",
