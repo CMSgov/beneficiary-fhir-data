@@ -382,7 +382,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
         "coding" : [ {
           "code" : "CLM_RPTD_MFTR_DSCNT_AMT",
           "display" : "Gap Discount Amount",
-          "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
     }, {
@@ -394,7 +394,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
         "coding" : [ {
           "code" : "CLM_LINE_VCCN_ADMIN_FEE_AMT",
           "display" : "Vaccination Administration Fee",
-          "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
     }, {
@@ -406,7 +406,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
         "coding" : [ {
           "code" : "CLM_LINE_TROOP_TOT_AMT",
           "display" : "Other True Out Of Pocket Paid Amount",
-          "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
     }, {
@@ -418,7 +418,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
         "coding" : [ {
           "code" : "CLM_LINE_SRVC_CST_AMT",
           "display" : "Dispensing Fee",
-          "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
     }, {
@@ -430,7 +430,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
         "coding" : [ {
           "code" : "CLM_LINE_SLS_TAX_AMT",
           "display" : "Sales Tax Amount",
-          "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
     }, {
@@ -442,7 +442,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
         "coding" : [ {
           "code" : "CLM_LINE_PLRO_AMT",
           "display" : "Sales Tax Amount",
-          "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
     }, {
@@ -454,7 +454,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
         "coding" : [ {
           "code" : "CLM_LINE_LIS_AMT",
           "display" : "Low Income Cost Sharing Subsidy Amount",
-          "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
     }, {
@@ -466,7 +466,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
         "coding" : [ {
           "code" : "CLM_LINE_INGRDNT_CST_AMT",
           "display" : "Ingredient Cost Amount",
-          "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
     }, {
@@ -478,7 +478,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
         "coding" : [ {
           "code" : "CLM_LINE_GRS_BLW_THRSHLD_AMT",
           "display" : "Gross Drug Cost Below Out Of Pocket Threshold",
-          "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
     }, {
@@ -490,7 +490,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
         "coding" : [ {
           "code" : "CLM_LINE_GRS_ABOVE_THRSHLD_AMT",
           "display" : "Gross Drug Cost Above Out Of Pocket Threshold",
-          "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
     }, {
@@ -551,7 +551,8 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
       },
       "reason" : {
         "coding" : [ {
-          "display" : "innetwork",
+          "code" : "outofnetwork",
+          "display" : "Out Of Network",
           "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus"
         } ]
       }
@@ -579,14 +580,6 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
     },
     "quantity" : {
       "value" : 2.0
-    },
-    "revenue" : {
-      "coding" : [ {
-        "display" : "NO DESCRIPTION AVAILABLE",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD"
-      }, {
-        "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
-      } ]
     },
     "sequence" : 1,
     "servicedDate" : "2018-08-12"
@@ -689,7 +682,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
       "coding" : [ {
         "code" : "04",
         "display" : "Institutional pharmacy",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_PHRMCY_SRVC_TYPE_CD"
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PHRMCY-SRVC-TYPE-CD"
       } ]
     },
     "sequence" : 4
@@ -745,7 +738,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
       "coding" : [ {
         "code" : "00",
         "display" : "Not specified, other patient residence not identified below",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_PTNT_RSDNC_CD"
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PTNT-RSDNC-CD"
       } ]
     },
     "sequence" : 7
@@ -765,7 +758,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
       "coding" : [ {
         "code" : "22",
         "display" : "LTC dispensing, 7-day supply",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_LTC_DSPNSNG_MTHD_CD"
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-LTC-DSPNSNG-MTHD-CD"
       } ]
     },
     "sequence" : 8
@@ -779,11 +772,11 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
     "code" : {
       "coding" : [ {
         "code" : "2",
-        "display" : "Not a compound",
+        "display" : "Compound",
         "system" : "http://terminology.hl7.org/CodeSystem/NCPDPCompoundCode"
       }, {
         "code" : "2",
-        "display" : "Not a compound",
+        "display" : "Compound",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CMPND-CD"
       } ]
     },
@@ -862,7 +855,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
       "coding" : [ {
         "code" : "C",
         "display" : "Above attachment point",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_CTSTRPHC_CVRG_IND_CD"
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CTSTRPHC-CVRG-IND-CD"
       } ]
     },
     "sequence" : 14
@@ -1036,9 +1029,9 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
     },
     "category" : {
       "coding" : [ {
-        "code" : "deductible",
-        "display" : "Deductible",
-        "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+        "code" : "coinsurance",
+        "display" : "Co-insurance",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
       }, {
         "code" : "CLM_MDCR_COINSRNC_AMT",
         "display" : "Beneficiary Part A Coinsurance Liability Amount",
@@ -1493,7 +1486,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
         "coding" : [ {
           "code" : "CLM_RPTD_MFTR_DSCNT_AMT",
           "display" : "Gap Discount Amount",
-          "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
     }, {
@@ -1505,7 +1498,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
         "coding" : [ {
           "code" : "CLM_LINE_VCCN_ADMIN_FEE_AMT",
           "display" : "Vaccination Administration Fee",
-          "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
     }, {
@@ -1517,7 +1510,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
         "coding" : [ {
           "code" : "CLM_LINE_TROOP_TOT_AMT",
           "display" : "Other True Out Of Pocket Paid Amount",
-          "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
     }, {
@@ -1529,7 +1522,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
         "coding" : [ {
           "code" : "CLM_LINE_SRVC_CST_AMT",
           "display" : "Dispensing Fee",
-          "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
     }, {
@@ -1541,7 +1534,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
         "coding" : [ {
           "code" : "CLM_LINE_SLS_TAX_AMT",
           "display" : "Sales Tax Amount",
-          "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
     }, {
@@ -1553,7 +1546,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
         "coding" : [ {
           "code" : "CLM_LINE_PLRO_AMT",
           "display" : "Sales Tax Amount",
-          "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
     }, {
@@ -1565,7 +1558,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
         "coding" : [ {
           "code" : "CLM_LINE_LIS_AMT",
           "display" : "Low Income Cost Sharing Subsidy Amount",
-          "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
     }, {
@@ -1577,7 +1570,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
         "coding" : [ {
           "code" : "CLM_LINE_INGRDNT_CST_AMT",
           "display" : "Ingredient Cost Amount",
-          "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
     }, {
@@ -1589,7 +1582,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
         "coding" : [ {
           "code" : "CLM_LINE_GRS_BLW_THRSHLD_AMT",
           "display" : "Gross Drug Cost Below Out Of Pocket Threshold",
-          "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
     }, {
@@ -1601,7 +1594,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
         "coding" : [ {
           "code" : "CLM_LINE_GRS_ABOVE_THRSHLD_AMT",
           "display" : "Gross Drug Cost Above Out Of Pocket Threshold",
-          "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
     }, {
@@ -1662,7 +1655,8 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
       },
       "reason" : {
         "coding" : [ {
-          "display" : "innetwork",
+          "code" : "outofnetwork",
+          "display" : "Out Of Network",
           "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus"
         } ]
       }
@@ -1691,14 +1685,6 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
     "quantity" : {
       "unit" : "ML",
       "value" : 10.0
-    },
-    "revenue" : {
-      "coding" : [ {
-        "display" : "NO DESCRIPTION AVAILABLE",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD"
-      }, {
-        "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
-      } ]
     },
     "sequence" : 1,
     "servicedDate" : "2025-08-10"
@@ -1837,7 +1823,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
       "coding" : [ {
         "code" : "06",
         "display" : "Group home (e.g., congregate residential foster care)",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_PTNT_RSDNC_CD"
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PTNT-RSDNC-CD"
       } ]
     },
     "sequence" : 6
@@ -1857,10 +1843,29 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
       "coding" : [ {
         "code" : "35",
         "display" : "LTC dispensing, other 8-14 day dispensing not listed above",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_LTC_DSPNSNG_MTHD_CD"
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-LTC-DSPNSNG-MTHD-CD"
       } ]
     },
     "sequence" : 7
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "compoundcode",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "0",
+        "display" : "Not specified (missing values are also possible)",
+        "system" : "http://terminology.hl7.org/CodeSystem/NCPDPCompoundCode"
+      }, {
+        "code" : "0",
+        "display" : "Not specified (missing values are also possible)",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CMPND-CD"
+      } ]
+    },
+    "sequence" : 8
   }, {
     "category" : {
       "coding" : [ {
@@ -1868,7 +1873,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
       } ]
     },
-    "sequence" : 8,
+    "sequence" : 9,
     "valueQuantity" : {
       "unit" : "days",
       "value" : 2
@@ -1880,7 +1885,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
       } ]
     },
-    "sequence" : 9,
+    "sequence" : 10,
     "valueQuantity" : {
       "unit" : "fill",
       "value" : 1
@@ -1898,7 +1903,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
         "system" : "http://terminology.hl7.org/CodeSystem/NCPDPDispensedAsWrittenOrProductSelectionCode"
       } ]
     },
-    "sequence" : 10
+    "sequence" : 11
   }, {
     "category" : {
       "coding" : [ {
@@ -1918,7 +1923,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DRUG-CVRG-STUS-CD"
       } ]
     },
-    "sequence" : 11
+    "sequence" : 12
   }, {
     "category" : {
       "coding" : [ {
@@ -1935,10 +1940,10 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
       "coding" : [ {
         "code" : "A",
         "display" : "Attachment point met on this even",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_CTSTRPHC_CVRG_IND_CD"
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CTSTRPHC-CVRG-IND-CD"
       } ]
     },
-    "sequence" : 12
+    "sequence" : 13
   }, {
     "category" : {
       "coding" : [ {
@@ -1958,7 +1963,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DSPNSNG-STUS-CD"
       } ]
     },
-    "sequence" : 13
+    "sequence" : 14
   }, {
     "category" : {
       "coding" : [ {
@@ -1971,7 +1976,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 14,
+    "sequence" : 15,
     "valueString" : "15180.94"
   }, {
     "category" : {
@@ -1980,7 +1985,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
       } ]
     },
-    "sequence" : 15,
+    "sequence" : 16,
     "timingDate" : "2025-08-12"
   }, {
     "category" : {
@@ -1994,7 +1999,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 16,
+    "sequence" : 17,
     "timingDate" : "2025-08-12"
   } ],
   "total" : [ {
@@ -2084,9 +2089,9 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
     },
     "category" : {
       "coding" : [ {
-        "code" : "deductible",
-        "display" : "Deductible",
-        "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+        "code" : "coinsurance",
+        "display" : "Co-insurance",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
       }, {
         "code" : "CLM_MDCR_COINSRNC_AMT",
         "display" : "Beneficiary Part A Coinsurance Liability Amount",
