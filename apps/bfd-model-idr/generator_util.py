@@ -306,7 +306,10 @@ class GeneratorUtil:
 
                 # Terrible hack, but this ensures that this function is idempotent for the case
                 # where we are regenerating/updating an existing patient or BENE_MBI_ID row
-                if patient.loaded_from_file and num_mbis == 1:
+                if (
+                    patient.loaded_from_file
+                    or (initial_mbi_obj and initial_mbi_obj.loaded_from_file)
+                ) and num_mbis == 1:
                     current_mbi = mbi_obj.get("BENE_MBI_ID") or patient.get(
                         "BENE_MBI_ID", self.gen_mbi()
                     )
