@@ -12,23 +12,29 @@ import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import gov.cms.bfd.server.ng.claim.model.ClaimFinalAction;
+import gov.cms.bfd.server.ng.claim.model.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.ClaimSubtype;
 import gov.cms.bfd.server.ng.eob.EobResourceProvider;
 import gov.cms.bfd.server.ng.testUtil.ThreadSafeAppender;
 import gov.cms.bfd.server.ng.util.DateUtil;
-import gov.cms.bfd.server.ng.util.IdrConstants;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.EntityManager;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -213,73 +219,96 @@ class EobSearchIT extends IntegrationTestBase {
     assertThrows(InvalidRequestException.class, searchWithidentifier::execute);
   }
 
-  @ParameterizedTest
-  @EnumSource(SearchStyleEnum.class)
-  void eobSearchByTag(SearchStyleEnum searchStyle) {
-    String validTag = IdrConstants.ADJUDICATION_STATUS_FINAL;
-
-    var eobBundle =
-        searchBundle()
-            .where(
-                new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
-                    .exactly()
-                    .identifier(BENE_ID_ALL_PARTS_WITH_XREF))
-            .and(new TokenClientParam(Constants.PARAM_TAG).exactly().identifier(validTag))
-            .usingStyle(searchStyle)
-            .execute();
-
-    assertEquals(
-        2, eobBundle.getEntry().size(), "Should find EOBs with the specified adjudication status");
-
-    expectFhir().scenario(searchStyle.name() + "_WithTag_" + validTag).toMatchSnapshot(eobBundle);
+  static Stream<Arguments> provideTagScenarios() {
+    return Stream.of(SearchStyleEnum.values())
+        .flatMap(
+            style ->
+                Stream.of(
+                    Arguments.of(
+                        "WithTag_SharedSystem",
+                        List.of(List.of(tag(SystemUrls.BLUE_BUTTON_SYSTEM_TYPE, "SharedSystem"))),
+                        3,
+                        style),
+                    Arguments.of(
+                        "WithTagFinalActionAndSharedSystem",
+                        List.of(
+                            List.of(sourceId(ClaimSourceId.FISS)),
+                            List.of(finalAction(ClaimFinalAction.YES))),
+                        2,
+                        style),
+                    Arguments.of(
+                        "WithIncompatibleTags",
+                        List.of(
+                            List.of(sourceId(ClaimSourceId.FISS)),
+                            List.of(sourceId(ClaimSourceId.NATIONAL_CLAIMS_HISTORY))),
+                        0,
+                        style),
+                    Arguments.of(
+                        "WithCombinedTagOr",
+                        List.of(
+                            List.of(
+                                sourceId(ClaimSourceId.NATIONAL_CLAIMS_HISTORY),
+                                finalAction(ClaimFinalAction.YES))),
+                        4,
+                        style),
+                    Arguments.of(
+                        "WithSystemTag_FinalAction",
+                        List.of(
+                            List.of(
+                                tag(SystemUrls.BLUE_BUTTON_FINAL_ACTION_STATUS, "FinalAction"))),
+                        4,
+                        style)));
   }
 
   @ParameterizedTest
-  @EnumSource(SearchStyleEnum.class)
-  void eobSearchBySystemUrlTag(SearchStyleEnum searchStyle) {
-    String tagSystem = SystemUrls.SYS_ADJUDICATION_STATUS;
-    String tagCode = "Adjudicated";
-
-    var eobBundle =
+  @MethodSource("provideTagScenarios")
+  void eobSearchByTags(
+      String scenarioName,
+      List<List<Coding>> tagScenarios,
+      int expectedCount,
+      SearchStyleEnum searchStyle) {
+    var query =
         searchBundle()
             .where(
                 new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
                     .exactly()
-                    .identifier(BENE_ID_ALL_PARTS_WITH_XREF))
-            .and(
+                    .identifier(BENE_ID_ALL_PARTS_WITH_XREF));
+
+    for (List<Coding> tags : tagScenarios) {
+      if (tags.size() == 1) {
+        query =
+            query.and(
                 new TokenClientParam(Constants.PARAM_TAG)
                     .exactly()
-                    .systemAndCode(tagSystem, tagCode))
-            .usingStyle(searchStyle)
-            .execute();
+                    .systemAndCode(tags.get(0).getSystem(), tags.get(0).getCode()));
+      } else {
+        query =
+            query.and(
+                new TokenClientParam(Constants.PARAM_TAG)
+                    .exactly()
+                    .codings(tags.toArray(new Coding[0])));
+      }
+    }
+
+    var eobBundle = query.usingStyle(searchStyle).execute();
+    expectFhir().scenario(searchStyle.name() + "_" + scenarioName).toMatchSnapshot(eobBundle);
 
     assertEquals(
-        2, eobBundle.getEntry().size(), "Should find EOBs with the specified adjudication status");
-
-    expectFhir()
-        .scenario(searchStyle.name() + "_WithSystemTag_Adjudicated")
-        .toMatchSnapshot(eobBundle);
+        expectedCount,
+        eobBundle.getEntry().size(),
+        "Should find " + expectedCount + " EOBs for scenario " + scenarioName);
   }
 
-  @ParameterizedTest
-  @EnumSource(SearchStyleEnum.class)
-  void eobSearchByTagEmpty(SearchStyleEnum searchStyle) {
-    String validTagWithNoMatches = IdrConstants.ADJUDICATION_STATUS_PARTIAL;
+  private static Coding tag(String system, String code) {
+    return new Coding(system, code, null);
+  }
 
-    var eobBundle =
-        searchBundle()
-            .where(
-                new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
-                    .exactly()
-                    .identifier(BENE_ID_ALL_PARTS_WITH_XREF))
-            .and(
-                new TokenClientParam(Constants.PARAM_TAG)
-                    .exactly()
-                    .identifier(validTagWithNoMatches))
-            .usingStyle(searchStyle)
-            .execute();
+  private static Coding sourceId(ClaimSourceId sourceId) {
+    return tag(SystemUrls.BLUE_BUTTON_SYSTEM_TYPE, sourceId.getSystemType().get());
+  }
 
-    expectFhir().scenario(searchStyle.name() + "_WithTag_EmptyResult").toMatchSnapshot(eobBundle);
+  private static Coding finalAction(ClaimFinalAction finalAction) {
+    return tag(SystemUrls.BLUE_BUTTON_FINAL_ACTION_STATUS, finalAction.getFinalAction());
   }
 
   @ParameterizedTest
