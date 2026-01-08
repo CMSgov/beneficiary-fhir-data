@@ -493,9 +493,13 @@ public class SystemUrls {
   public static final String HL7_CLAIM_PRESCRIPTION_ORIGIN_CODE =
       "http://terminology.hl7.org/CodeSystem/NCPDPPrescriptionOriginCode";
 
-  /** Blue Button code system - Claim Adjudication Status. */
-  public static final String BLUE_BUTTON_ADJUDICATION_STATUS =
-      "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication-Status";
+  /** Blue Button code system - Final Action Status. */
+  public static final String BLUE_BUTTON_FINAL_ACTION_STATUS =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/Final-Action";
+
+  /** Blue Button code system - System Type. */
+  public static final String BLUE_BUTTON_SYSTEM_TYPE =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type";
 
   /** Blue Button code system - adjudication. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION =
@@ -622,12 +626,12 @@ public class SystemUrls {
   public static final String BLUE_BUTTON_CODE_SYSTEM_NONPAYMENT_REASON_CODE =
       "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MDCR-NPMT-RSN-CD";
 
-  /** Blue Button structure definition - final action code. */
-  public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_FINAL_ACTION_CODE =
+  /** Blue Button structure definition - fiscal intermediary action code. */
+  public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_FISCAL_INTERMEDIARY_ACTION_CODE =
       "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-FI-ACTN-CD";
 
-  /** Blue Button code system - final action code. */
-  public static final String BLUE_BUTTON_CODE_SYSTEM_FINAL_ACTION_CODE =
+  /** Blue Button code system - fiscal intermediary action code. */
+  public static final String BLUE_BUTTON_CODE_SYSTEM_FISCAL_INTERMEDIARY_ACTION_CODE =
       "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD";
 
   /** Blue Button structure definition - discount indicator code. */
