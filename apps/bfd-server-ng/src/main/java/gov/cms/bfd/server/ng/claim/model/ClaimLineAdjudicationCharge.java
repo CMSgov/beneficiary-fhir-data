@@ -2,43 +2,44 @@ package gov.cms.bfd.server.ng.claim.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import java.math.BigDecimal;
 import java.util.List;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 @Embeddable
 class ClaimLineAdjudicationCharge {
   @Column(name = "clm_line_ncvrd_chrg_amt")
-  private double noncoveredChargeAmount;
+  private BigDecimal noncoveredChargeAmount;
 
   @Column(name = "clm_line_ncvrd_pd_amt")
-  private double noncoveredProductPaidAmount;
+  private BigDecimal noncoveredProductPaidAmount;
 
   @Column(name = "clm_line_alowd_chrg_amt")
-  private double allowedChargeAmount;
+  private BigDecimal allowedChargeAmount;
 
   @Column(name = "clm_line_sbmt_chrg_amt")
-  private double submittedChargeAmount;
+  private BigDecimal submittedChargeAmount;
 
   @Column(name = "clm_line_prvdr_pmt_amt")
-  private double providerPaymentAmount;
+  private BigDecimal providerPaymentAmount;
 
   @Column(name = "clm_line_bene_pmt_amt")
-  private double benePaymentAmount;
+  private BigDecimal benePaymentAmount;
 
   @Column(name = "clm_line_bene_pd_amt")
-  private double benePaidAmount;
+  private BigDecimal benePaidAmount;
 
   @Column(name = "clm_line_cvrd_pd_amt")
-  private double coveredPaidAmount;
+  private BigDecimal coveredPaidAmount;
 
   @Column(name = "clm_line_mdcr_ddctbl_amt")
-  private double deductibleAmount;
+  private BigDecimal deductibleAmount;
 
   @Column(name = "clm_line_otaf_amt")
-  private double providerObligationToAcceptFullAmount;
+  private BigDecimal providerObligationToAcceptFullAmount;
 
   @Column(name = "clm_line_othr_tp_pd_amt")
-  private double otherThirdPartyPaidAmount;
+  private BigDecimal otherThirdPartyPaidAmount;
 
   List<ExplanationOfBenefit.AdjudicationComponent> toFhir() {
     return List.of(
