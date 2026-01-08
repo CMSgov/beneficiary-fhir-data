@@ -96,7 +96,7 @@ available_family_names = ["Erdapfel", "Heeler", "Coffee", "Jones", "Smith", "She
 def regenerate_static_tables(generator: GeneratorUtil, files: dict[str, list[RowAdapter]]):
     # "Generate" (extend, really) existing rows in all but the "root" table for patient (BENE_HSTRY)
     # to ensure existing rows remain idempotent in the output whilst allowing new fields to be added
-    print(f"Regenerating/updating {', '.join(files.keys())}...")
+    print(f"Regenerating/updating {', '.join((k for k, v in files.items() if v))}...")
 
     for bene_mbi_id_row in files[BENE_MBI_ID]:
         # BENE_MBI_ID is a special case in that its generation function mutates both its own output
