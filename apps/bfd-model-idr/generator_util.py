@@ -1,6 +1,7 @@
 import copy
 import csv
 import datetime
+import itertools
 import json
 import random
 import string
@@ -51,14 +52,22 @@ _tables_by_bene_sk: dict[str, dict[str, dict[str, Any]]] = {}
 
 
 def load_file_dict(
-    files: dict[str, list["RowAdapter"]], file_paths: list[str], exclude_empty: bool = False
+    files: dict[str, list["RowAdapter"]], paths: list[str], exclude_empty: bool = False
 ):
+    file_paths = set(
+        itertools.chain.from_iterable([
+            [as_path] if as_path.is_file() else list(as_path.glob("*.csv"))
+            for x in paths
+            if (as_path := Path(x))
+        ])
+    )
     for file_path, file_name in (
-        (Path(file_path), file_name)
+        (file_path, file_name)
         for file_path in file_paths
         for file_name in files
-        if f"{file_name}.csv" in file_path
+        if f"{file_name}.csv" in str(file_path)
     ):
+        print(f"Loading {file_path} as {file_name}...")
         csv_data = pd.read_csv(  # type: ignore
             file_path,
             dtype=str,
@@ -67,11 +76,13 @@ def load_file_dict(
         file_as_dictlist = csv_data.to_dict(orient="records")  # type: ignore
         if not exclude_empty:
             files[file_name] = load_file(file_as_dictlist)  # type: ignore
+            print(f"Loaded {file_name}, treating empty columns as meaningful")
             continue
 
         files[file_name] = load_file([
             {str(k): v for k, v in x.items() if pd.notna(v)} for x in file_as_dictlist
         ])
+        print(f"Loaded {file_name}, ignoring empty columns")
 
 
 def load_file(file: Iterable[dict[str, Any]]):

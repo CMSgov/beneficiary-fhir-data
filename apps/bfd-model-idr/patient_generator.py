@@ -32,14 +32,15 @@ fake = Faker()
 # Command line argument parsing
 parser = argparse.ArgumentParser(description="Generate synthetic patient data")
 parser.add_argument(
-    "files",
+    "paths",
     nargs="*",
     help=(
-        "CSVs that will be regenerated/updated with new columns. Updates are idempotent, meaning "
-        "that passing in an existing table/CSV without any new columns being added to the "
-        "synthetic data generation will result in a byte-identical output file. Take care to "
-        "avoid providing a partial set of tables with foreign key constraints (e.g. BENE_SK) "
-        "without providing the root table as this could result in broken output data"
+        "Paths to CSVs or directories including CSVs that will be regenerated/updated with new "
+        "columns. Updates are idempotent, meaning that passing in an existing table/CSV without "
+        "any new columns being added to the synthetic data generation will result in a "
+        "byte-identical output file. Take care to avoid providing a partial set of tables with "
+        "foreign key constraints (e.g. BENE_SK) without providing the root table as this could "
+        "result in broken output data"
     ),
 )
 parser.add_argument(
@@ -95,6 +96,8 @@ available_family_names = ["Erdapfel", "Heeler", "Coffee", "Jones", "Smith", "She
 def regenerate_static_tables(generator: GeneratorUtil, files: dict[str, list[RowAdapter]]):
     # "Generate" (extend, really) existing rows in all but the "root" table for patient (BENE_HSTRY)
     # to ensure existing rows remain idempotent in the output whilst allowing new fields to be added
+    print(f"Regenerating/updating {', '.join(files.keys())}...")
+
     for bene_mbi_id_row in files[BENE_MBI_ID]:
         # BENE_MBI_ID is a special case in that its generation function mutates both its own output
         # table and the BENE_HSTRY table. The function has special case logic (a hack) to handle the
@@ -167,6 +170,8 @@ def regenerate_static_tables(generator: GeneratorUtil, files: dict[str, list[Row
             old_bene_sk=int(patient_xref_row["BENE_XREF_SK"]),
         )
 
+    print("Finished regenerating/updating all files")
+
 
 def load_inputs():
     generator = GeneratorUtil()
@@ -184,13 +189,14 @@ def load_inputs():
         BENE_MAPD_ENRLMT_RX: [],
         BENE_LIS: [],
     }
-    load_file_dict(files=files, file_paths=args.files, exclude_empty=args.exclude_empty)
+    load_file_dict(files=files, paths=args.paths, exclude_empty=args.exclude_empty)
 
     regenerate_static_tables(generator, files)
 
     patients: list[RowAdapter] = files[BENE_HSTRY] or [RowAdapter({})] * args.patients
     patient_mbi_id_rows = {row["BENE_MBI_ID"]: row.kv for row in files[BENE_MBI_ID]}
 
+    print(f"Generating {len(patients)} patients...")
     for patient in tqdm.tqdm(patients):
         generator.create_base_patient(patient)
         patient["BENE_1ST_NAME"] = random.choice(available_given_names)
@@ -284,7 +290,10 @@ def load_inputs():
 
         generator.bene_hstry_table.append(patient.kv)
 
+    print(f"Done generating {len(patients)} patients")
+    print("Writing finished tables to out directory...")
     generator.save_output_files()
+    print("Patient data generation complete!")
 
 
 if __name__ == "__main__":
@@ -296,12 +305,7 @@ if __name__ == "__main__":
         try:
             # Call claims_generator.py with the generated SYNTHETIC_BENE_HSTRY.csv file
             result = subprocess.run(
-                args=[
-                    sys.executable,
-                    "claims_generator.py",
-                    f"out/{BENE_HSTRY}.csv",
-                    *[file for file in args.files if BENE_HSTRY not in file],
-                ],
+                args=[sys.executable, "claims_generator.py", f"out/{BENE_HSTRY}.csv"],
                 check=True,
                 capture_output=True,
                 text=True,

@@ -1729,7 +1729,7 @@ def main():
         CNTRCT_PBP_NUM: [],
         CNTRCT_PBP_CNTCT: [],
     }
-    load_file_dict(files=files, file_paths=args.files)
+    load_file_dict(files=files, paths=args.files)
 
     bene_sks = {-1}
     if any(BENE_HSTRY in file for file in args.files):
