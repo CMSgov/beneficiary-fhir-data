@@ -1,4 +1,3 @@
-import copy
 import csv
 import datetime
 import itertools
@@ -353,12 +352,26 @@ class GeneratorUtil:
                 mbi_obj["BENE_MBI_OBSLT_DT"] = obslt_dt.strftime("%Y-%m-%d")
 
                 if previous_mbi and previous_mbi != current_mbi:
-                    historical_patient = copy.deepcopy(patient)
+                    # Exclude rows from the original patient that will be modified so that
+                    # RowAdapter does not ignore those changes
+                    historical_patient = RowAdapter({
+                        k: v
+                        for k, v in patient.kv.items()
+                        if k
+                        not in {
+                            "BENE_MBI_ID",
+                            "IDR_LTST_TRANS_FLG",
+                            "IDR_TRANS_OBSLT_TS",
+                            "IDR_TRANS_EFCTV_TS",
+                            "IDR_INSRT_TS",
+                            "IDR_UPDT_TS",
+                        }
+                    })
                     historical_patient["BENE_MBI_ID"] = previous_mbi
                     historical_patient["IDR_LTST_TRANS_FLG"] = "N"
 
                     self.set_timestamps(historical_patient, obslt_dt)
-                    historical_patient["IDR_TRANS_OBSLT_TS"] = (
+                    historical_patient.kv["IDR_TRANS_OBSLT_TS"] = (
                         str(obslt_dt) + "T00:00:00.000000+0000"
                     )
                     self.bene_hstry_table.append(historical_patient.kv)

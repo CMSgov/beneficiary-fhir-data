@@ -227,7 +227,7 @@ def load_inputs():
             # totally generated) we generate upto 4 MBIs (n - 1 being obsolete)
             num_mbis = (
                 1
-                if patient.loaded_from_file
+                if (patient.loaded_from_file and not args.force_ztm)
                 else random.choices([1, 2, 3, 4], weights=[0.8, 0.14, 0.05, 0.01])[0]
             )
             generator.gen_mbis_for_patient(patient, num_mbis)
