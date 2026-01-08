@@ -1,5 +1,4 @@
 import argparse
-import copy
 import datetime
 import random
 import subprocess
@@ -266,10 +265,28 @@ def load_inputs():
                 generator.generate_bene_lis(RowAdapter(initial_kv_template.copy()))
 
         if (not patient.loaded_from_file or args.force_ztm) and probability(0.05):
-            prior_patient = copy.deepcopy(patient)
+            # Exclude rows from the original patient that will be modified so that RowAdapter does
+            # not ignore those changes
+            prior_patient = RowAdapter({
+                k: v
+                for k, v in patient.kv.items()
+                if k
+                not in {
+                    "BENE_SK",
+                    "IDR_LTST_TRANS_FLG",
+                    "IDR_TRANS_OBSLT_TS",
+                    "IDR_TRANS_EFCTV_TS",
+                    "IDR_INSRT_TS",
+                    "IDR_UPDT_TS",
+                }
+            })
             pt_bene_sk = generator.gen_bene_sk()
             prior_patient["BENE_SK"] = str(pt_bene_sk)
             prior_patient["IDR_LTST_TRANS_FLG"] = "N"
+            # 90% of the time we want the historical patient to have a different MBI than the
+            # current patient as this is by far the most common case in prod data
+            if probability(0.9):
+                prior_patient.kv["BENE_MBI_ID"] = generator.gen_mbi()
             generator.used_bene_sk.append(pt_bene_sk)
 
             bene_xref = RowAdapter({})
@@ -284,7 +301,8 @@ def load_inputs():
             past_year_date = datetime.date.today() - datetime.timedelta(
                 days=random.randint(30, 365)
             )
-            prior_patient["IDR_TRANS_OBSLT_TS"] = f"{past_year_date}T00:00:00.000000+0000"
+            # We update the underlying dict to avoid RowAdapter ignoring the change
+            prior_patient.kv["IDR_TRANS_OBSLT_TS"] = f"{past_year_date}T00:00:00.000000+0000"
 
             generator.bene_hstry_table.append(prior_patient.kv)
 
