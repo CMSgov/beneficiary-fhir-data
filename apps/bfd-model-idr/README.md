@@ -1,5 +1,13 @@
 # IDR Model
 
+## `synthetic-data`
+
+The `synthetic-data` directory contains the synthetic data loaded into each of our environment's databases.
+
+**When adding new fields, take care to pass _every_ CSV into the `patient_generator.py` (see below) or else the resulting data may be invalid.**
+
+## Generating data
+
 Downloading the FHIR validator is necessary to run the following scripts, along with installing sushi
 
 To download the FHIR Validator:
@@ -9,7 +17,7 @@ To download the FHIR Validator:
 curl -L https://github.com/hapifhir/org.hl7.fhir.core/releases/latest/download/validator_cli.jar > validator_cli.jar
 ```
 
-## Install sushi + fhirpath.js
+### Install sushi + fhirpath.js
 
 ```sh
 # Check if npm is installed
@@ -23,7 +31,7 @@ brew install npm
 npm install -g fsh-sushi fhirpath
 ```
 
-## Install packages  (via uv)
+### Install packages  (via uv)
 
 ```sh
 # Check if uv is installed
@@ -38,7 +46,7 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 uv sync
 ```
 
-## Create FHIR files with synthetic data
+### Create FHIR files with synthetic data
 
 To easily compile all resources:
 
@@ -64,8 +72,6 @@ uv run compile_resources.py \
     -r https://bfd.cms.gov/MappingLanguage/Maps/Patient \
     --test
 ```
-
-### Synthetic data generation
 
 #### Patient Data - `patient_generator.py`
 
@@ -116,10 +122,10 @@ To utilize it to generate an entirely _new_ set of data from nothing:
 uv run patient_generator.py
 ```
 
-Or, to load the specific MBIs used as the v3 synthetic data:
+Or, to load the v3 synthetic data (to add new fields):
 
 ```sh
-uv run patient_generator.py --force-ztm-static-rows SYNTHETIC_BENE_HSTRY.csv
+uv run patient_generator.py synthetic-data/*.csv
 ```
 
 _**NOTE**: the `bene_id` column in `SYNTHETIC_BENE_HSTRY.csv` is to reference the `bene_id` field used in V1/V2. It's not used for sample data generation here._
@@ -168,7 +174,7 @@ SYNTHETIC_CLM_ANSI_SGNTR.csv
 
 These files represent the schema of the tables the information is sourced from, although for tables other than CLM_DT_SGNTR, the CLM_UNIQ_ID is propagated instead of the 5 part unique key from the IDR.
 
-### Data Dictionary
+## Data Dictionary
 
 Generally, the data dictionary will source definitions from the IDR's table definitions. There are instances where this may not be the definition we wish to publish. To overwrite the definition from the IDR, or populate a definition not available from the IDR, populate the "definition" key for the relevant concept in the relevant StructureDefinition.
 
