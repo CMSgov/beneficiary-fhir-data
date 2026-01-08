@@ -7,21 +7,21 @@ import java.math.RoundingMode;
 
 /** Converts any null Float values to 0.0 Double. */
 @Converter(autoApply = true)
-public class NullFloatToZeroConverter implements AttributeConverter<Double, Float> {
+public class NullFloatToZeroConverter implements AttributeConverter<Double, BigDecimal> {
   @Override
-  public Float convertToDatabaseColumn(Double value) {
+  public BigDecimal convertToDatabaseColumn(Double value) {
     // This is a read-only API so this method will never actually persist anything to the database.
     if (value == null) {
       return null;
     }
-    return value.floatValue();
+    return BigDecimal.valueOf(value).setScale(2, RoundingMode.HALF_UP);
   }
 
   @Override
-  public Double convertToEntityAttribute(Float value) {
+  public Double convertToEntityAttribute(BigDecimal value) {
     if (value == null) {
       return 0.0;
     }
-    return BigDecimal.valueOf(value).setScale(2, RoundingMode.HALF_UP).doubleValue();
+    return value.doubleValue();
   }
 }

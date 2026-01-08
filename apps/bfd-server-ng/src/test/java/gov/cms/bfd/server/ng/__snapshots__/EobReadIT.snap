@@ -552,7 +552,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
   "payment" : {
     "amount" : {
       "currency" : "USD",
-      "value" : 625244.31
+      "value" : 625244.33
     }
   },
   "provider" : {
@@ -1434,7 +1434,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
   "payment" : {
     "amount" : {
       "currency" : "USD",
-      "value" : 625244.31
+      "value" : 625244.33
     }
   },
   "provider" : {
@@ -5240,7 +5240,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
   "payment" : {
     "amount" : {
       "currency" : "USD",
-      "value" : 625244.31
+      "value" : 625244.33
     }
   },
   "procedure" : [ {
@@ -5554,7 +5554,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
   "total" : [ {
     "amount" : {
       "currency" : "USD",
-      "value" : 916765.75
+      "value" : 916765.73
     },
     "category" : {
       "coding" : [ {
@@ -6882,7 +6882,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
   "payment" : {
     "amount" : {
       "currency" : "USD",
-      "value" : 625244.31
+      "value" : 625244.33
     }
   },
   "procedure" : [ {
@@ -7196,7 +7196,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
   "total" : [ {
     "amount" : {
       "currency" : "USD",
-      "value" : 916765.75
+      "value" : 916765.73
     },
     "category" : {
       "coding" : [ {

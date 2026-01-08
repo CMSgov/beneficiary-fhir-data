@@ -3041,7 +3041,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 622674.56
+          "value" : 622674.57
         },
         "category" : {
           "coding" : [ {
@@ -3121,7 +3121,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 368602.53
+          "value" : 368602.54
         },
         "category" : {
           "coding" : [ {
@@ -6633,7 +6633,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 485618.56
+          "value" : 485618.57
         },
         "category" : {
           "coding" : [ {
@@ -6994,7 +6994,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 563759.25
+            "value" : 563759.26
           },
           "category" : {
             "coding" : [ {
@@ -7058,7 +7058,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 922214.25
+            "value" : 922214.26
           },
           "category" : {
             "coding" : [ {
@@ -7233,7 +7233,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 766500.0
+          "value" : 766500.01
         },
         "category" : {
           "coding" : [ {
@@ -7313,7 +7313,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 278589.91
+          "value" : 278589.92
         },
         "category" : {
           "coding" : [ {
@@ -9617,7 +9617,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 164176.81
+          "value" : 164176.82
         },
         "category" : {
           "coding" : [ {
@@ -12652,7 +12652,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 622674.56
+          "value" : 622674.57
         },
         "category" : {
           "coding" : [ {
@@ -12732,7 +12732,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 368602.53
+          "value" : 368602.54
         },
         "category" : {
           "coding" : [ {
@@ -18179,7 +18179,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 485618.56
+          "value" : 485618.57
         },
         "category" : {
           "coding" : [ {
@@ -18540,7 +18540,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 563759.25
+            "value" : 563759.26
           },
           "category" : {
             "coding" : [ {
@@ -18604,7 +18604,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 922214.25
+            "value" : 922214.26
           },
           "category" : {
             "coding" : [ {
@@ -18779,7 +18779,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 766500.0
+          "value" : 766500.01
         },
         "category" : {
           "coding" : [ {
@@ -18859,7 +18859,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 278589.91
+          "value" : 278589.92
         },
         "category" : {
           "coding" : [ {
@@ -21163,7 +21163,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 164176.81
+          "value" : 164176.82
         },
         "category" : {
           "coding" : [ {
@@ -24198,7 +24198,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 622674.56
+          "value" : 622674.57
         },
         "category" : {
           "coding" : [ {
@@ -24278,7 +24278,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 368602.53
+          "value" : 368602.54
         },
         "category" : {
           "coding" : [ {
