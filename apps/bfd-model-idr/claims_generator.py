@@ -292,6 +292,7 @@ available_ndc = [
 ]
 clm_poa_ind_choices = ["N", "1", "U", "X", "W", "0", "~", "Z", "Y", ""]
 avail_pbp_nums = ["001", "002", "003", "004", "005", "006", "007", "008", "009", "010"]
+avail_contract_nums = ["Z0001", "Z0002", "Z0003", "Z0004", "Z0005", "Z0006", "Z0007", "Z0008", "Z0009", "Z0010"]
 avail_pbp_type_codes = ["01", "02", "48", "04", "09", "18", "10"]
 avail_contract_names = [
     "Health Plan",
@@ -684,7 +685,7 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
         claim["CLM"]["PRVDR_PRSCRBNG_PRVDR_NPI_NUM"] = random.choice(type_1_npis)
         claim["CLM"]["CLM_SBMT_CHRG_AMT"] = round(random.uniform(1, 1000000), 2)
         claim["CLM"]["CLM_SBMT_FRMT_CD"] = random.choice(generator.code_systems["CLM_SBMT_FRMT_CD"])
-        claim["CLM"]["CLM_SBMTR_CNTRCT_NUM"] = random.choice(["S0001", "H1234", "G1234"])
+        claim["CLM"]["CLM_SBMTR_CNTRCT_NUM"] = random.choice(avail_contract_nums)
         claim["CLM"]["CLM_SBMTR_CNTRCT_PBP_NUM"] = random.choice(avail_pbp_nums)
         claim["CLM"]["CLM_BENE_PMT_AMT"] = round(random.uniform(0, 1000), 2)
         claim["CLM"]["CLM_OTHR_TP_PD_AMT"] = round(random.uniform(0, 1000), 2)
@@ -1564,7 +1565,7 @@ def gen_contract_plan(amount):
         contract_pbp_num.append(
             {
                 "CNTRCT_PBP_SK": "".join(random.choices(string.digits, k=12)),
-                "CNTRCT_NUM": "Z0001",
+                "CNTRCT_NUM": random.choice(avail_contract_nums),
                 "CNTRCT_PBP_NUM": pbp_num,
                 "CNTRCT_PBP_NAME": random.choice(avail_contract_names),
                 "CNTRCT_PBP_TYPE_CD": random.choice(avail_pbp_type_codes),
