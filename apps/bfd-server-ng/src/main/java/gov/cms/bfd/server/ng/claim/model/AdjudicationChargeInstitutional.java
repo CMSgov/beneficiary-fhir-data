@@ -2,6 +2,7 @@ package gov.cms.bfd.server.ng.claim.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
@@ -28,88 +29,88 @@ class AdjudicationChargeInstitutional {
   private int totalHHAVisits;
 
   @Column(name = "clm_mdcr_ip_pps_drg_wt_num")
-  private double ppsDrgWeight;
+  private BigDecimal ppsDrgWeight;
 
   @Column(name = "clm_instnl_cvrd_day_cnt")
-  private double totalCoveredDays;
+  private BigDecimal totalCoveredDays;
 
   @Column(name = "clm_instnl_per_diem_amt")
-  private double perDiemAmount;
+  private BigDecimal perDiemAmount;
 
   @Column(name = "clm_mdcr_ip_pps_dsprprtnt_amt")
-  private double ppsDisproportionateAmount;
+  private BigDecimal ppsDisproportionateAmount;
 
   @Column(name = "clm_mdcr_ip_pps_excptn_amt")
-  private double ppsExceptionAmount;
+  private BigDecimal ppsExceptionAmount;
 
   @Column(name = "clm_mdcr_ip_pps_cptl_fsp_amt")
-  private double ppsCapitalFspAmount;
+  private BigDecimal ppsCapitalFspAmount;
 
   @Column(name = "clm_mdcr_ip_pps_cptl_ime_amt")
-  private double ppsCapitalImeAmount;
+  private BigDecimal ppsCapitalImeAmount;
 
   @Column(name = "clm_mdcr_ip_pps_outlier_amt")
-  private double ppsOutlierAmount;
+  private BigDecimal ppsOutlierAmount;
 
   @Column(name = "clm_mdcr_ip_pps_cptl_hrmls_amt")
-  private double ppsCapitalHarmlessAmount;
+  private BigDecimal ppsCapitalHarmlessAmount;
 
   @Column(name = "clm_mdcr_ip_pps_cptl_tot_amt")
-  private double ppsCapitalTotalAmount;
+  private BigDecimal ppsCapitalTotalAmount;
 
   @Column(name = "clm_mdcr_instnl_prmry_pyr_amt")
-  private double primaryPayerAmount;
+  private BigDecimal primaryPayerAmount;
 
   @Column(name = "clm_instnl_prfnl_amt")
-  private double professionalAmount;
+  private BigDecimal professionalAmount;
 
   @Column(name = "clm_instnl_drg_outlier_amt")
-  private double drgOutlierAmount;
+  private BigDecimal drgOutlierAmount;
 
   @Column(name = "clm_hipps_uncompd_care_amt")
-  private double hippsUncompensatedCareAmount;
+  private BigDecimal hippsUncompensatedCareAmount;
 
   @Column(name = "clm_mdcr_ip_bene_ddctbl_amt")
-  private double beneDeductibleAmount;
+  private BigDecimal beneDeductibleAmount;
 
   @Column(name = "clm_mdcr_instnl_bene_pd_amt")
-  private double benePaidAmount;
+  private BigDecimal benePaidAmount;
 
   @Column(name = "clm_finl_stdzd_pymt_amt")
-  private double standardizedPaymentAmount;
+  private BigDecimal standardizedPaymentAmount;
 
   @Column(name = "clm_hac_rdctn_pymt_amt")
-  private double hospitalAcquiredConditionReductionAmount;
+  private BigDecimal hospitalAcquiredConditionReductionAmount;
 
   @Column(name = "clm_hipps_model_bndld_pmt_amt")
-  private double blendedPaymentAmount;
+  private BigDecimal blendedPaymentAmount;
 
   @Column(name = "clm_hipps_readmsn_rdctn_amt")
-  private double readmissionReductionAmount;
+  private BigDecimal readmissionReductionAmount;
 
   @Column(name = "clm_hipps_vbp_amt")
-  private double hippsPurchasingAmount;
+  private BigDecimal hippsPurchasingAmount;
 
   @Column(name = "clm_instnl_low_vol_pmt_amt")
-  private double lowVolumePaymentAmount;
+  private BigDecimal lowVolumePaymentAmount;
 
   @Column(name = "clm_mdcr_ip_1st_yr_rate_amt")
-  private double firstYearRateAmount;
+  private BigDecimal firstYearRateAmount;
 
   @Column(name = "clm_mdcr_ip_scnd_yr_rate_amt")
-  private double secondYearRateAmount;
+  private BigDecimal secondYearRateAmount;
 
   @Column(name = "clm_pps_md_wvr_stdzd_val_amt")
-  private double marylandWaiverStandardizedAmount;
+  private BigDecimal marylandWaiverStandardizedAmount;
 
   @Column(name = "clm_site_ntrl_cst_bsd_pymt_amt")
-  private double siteNeutralCostBasedPaymentAmount;
+  private BigDecimal siteNeutralCostBasedPaymentAmount;
 
   @Column(name = "clm_site_ntrl_ip_pps_pymt_amt")
-  private double siteNeutralIPPSPaymentAmount;
+  private BigDecimal siteNeutralIPPSPaymentAmount;
 
   @Column(name = "clm_ss_outlier_std_pymt_amt")
-  private double shortStayOutlierPaymentAmount;
+  private BigDecimal shortStayOutlierPaymentAmount;
 
   List<ExplanationOfBenefit.AdjudicationComponent> toFhir(List<ClaimValue> claimValues) {
     return Stream.of(
@@ -129,7 +130,7 @@ class AdjudicationChargeInstitutional {
                     ppsDrgWeight),
                 AdjudicationChargeType.UTILIZATION_DAYS_COUNT.toFhirAdjudicationUnsignedType(
                     // These are always whole numbers, but IDR stores them as floats
-                    Math.round(totalCoveredDays)),
+                    totalCoveredDays.longValue()),
                 AdjudicationChargeType.PER_DIEM_AMOUNT.toFhirAdjudication(perDiemAmount),
                 AdjudicationChargeType.PPS_CAPITAL_DISPROPORTIONATE_SHARE_AMOUNT.toFhirAdjudication(
                     ppsDisproportionateAmount),
