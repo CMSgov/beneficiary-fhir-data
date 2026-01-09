@@ -296,7 +296,6 @@ class GeneratorUtil:
         self, patient: RowAdapter, num_mbis: int, initial_mbi_obj: RowAdapter | None = None
     ):
         previous_obslt_dt = None
-        previous_mbi = None
 
         for mbi_idx in range(num_mbis):
             # This is a bit of a hack to support regeneration of existing BENE_MBI_ID rows without
@@ -305,29 +304,37 @@ class GeneratorUtil:
             # the mbi_obj here immediately knowing that the mbi_idx = 0 and num_mbis = 1 case does
             # not mutate the output BENE_HSTRY table
             mbi_obj = RowAdapter({}) if num_mbis > 1 or not initial_mbi_obj else initial_mbi_obj
+            # Exclude rows from the original patient that will be modified so that RowAdapter does
+            # not ignore those changes when creating the historical patient if this is not the last
+            # iteration. If this is the last iteration, just use the current patient
+            historical_patient = (
+                RowAdapter({
+                    k: v
+                    for k, v in patient.kv.items()
+                    if k
+                    not in {
+                        "BENE_MBI_ID",
+                        "IDR_LTST_TRANS_FLG",
+                        "IDR_TRANS_OBSLT_TS",
+                        "IDR_TRANS_EFCTV_TS",
+                        "IDR_INSRT_TS",
+                        "IDR_UPDT_TS",
+                    }
+                })
+                if mbi_idx != num_mbis - 1
+                else patient
+            )
 
-            current_mbi: str
+            current_mbi = mbi_obj.get("BENE_MBI_ID") or historical_patient.get(
+                "BENE_MBI_ID", self.gen_mbi()
+            )
+            historical_patient["BENE_MBI_ID"] = current_mbi
             if mbi_idx == 0:
                 efctv_dt = self.fake.date_between_dates(
                     datetime.date(year=2017, month=5, day=20),
                     datetime.date(year=2021, month=1, day=1),
                 )
-                self.set_timestamps(patient, efctv_dt)
-
-                # Terrible hack, but this ensures that this function is idempotent for the case
-                # where we are regenerating/updating an existing patient or BENE_MBI_ID row
-                if (
-                    patient.loaded_from_file
-                    or (initial_mbi_obj and initial_mbi_obj.loaded_from_file)
-                ) and num_mbis == 1:
-                    current_mbi = mbi_obj.get("BENE_MBI_ID") or patient.get(
-                        "BENE_MBI_ID", self.gen_mbi()
-                    )
-                else:
-                    current_mbi = self.gen_mbi()
-
-                patient["BENE_MBI_ID"] = current_mbi
-
+                self.set_timestamps(historical_patient, efctv_dt)
             else:
                 # If we have a previous obsolescence date, start the new MBI the next day
                 if previous_obslt_dt:
@@ -338,7 +345,6 @@ class GeneratorUtil:
                         datetime.date(year=2021, month=1, day=2),
                         datetime.date(year=2025 - num_mbis + mbi_idx, month=1, day=1),
                     )
-                current_mbi = self.gen_mbi()
 
             # Create the MBI object with all required fields
             mbi_obj["BENE_MBI_EFCTV_DT"] = str(efctv_dt)
@@ -351,30 +357,14 @@ class GeneratorUtil:
                 )
                 mbi_obj["BENE_MBI_OBSLT_DT"] = obslt_dt.strftime("%Y-%m-%d")
 
-                if previous_mbi and previous_mbi != current_mbi:
-                    # Exclude rows from the original patient that will be modified so that
-                    # RowAdapter does not ignore those changes
-                    historical_patient = RowAdapter({
-                        k: v
-                        for k, v in patient.kv.items()
-                        if k
-                        not in {
-                            "BENE_MBI_ID",
-                            "IDR_LTST_TRANS_FLG",
-                            "IDR_TRANS_OBSLT_TS",
-                            "IDR_TRANS_EFCTV_TS",
-                            "IDR_INSRT_TS",
-                            "IDR_UPDT_TS",
-                        }
-                    })
-                    historical_patient["BENE_MBI_ID"] = previous_mbi
-                    historical_patient["IDR_LTST_TRANS_FLG"] = "N"
+                # if previous_mbi and previous_mbi != current_mbi:
+                historical_patient["IDR_LTST_TRANS_FLG"] = "N"
 
-                    self.set_timestamps(historical_patient, obslt_dt)
-                    historical_patient.kv["IDR_TRANS_OBSLT_TS"] = (
-                        str(obslt_dt) + "T00:00:00.000000+0000"
-                    )
-                    self.bene_hstry_table.append(historical_patient.kv)
+                self.set_timestamps(historical_patient, obslt_dt)
+                historical_patient.kv["IDR_TRANS_OBSLT_TS"] = (
+                    str(obslt_dt) + "T00:00:00.000000+0000"
+                )
+                self.bene_hstry_table.append(historical_patient.kv)
 
                 previous_obslt_dt = obslt_dt  # Store for next iteration
             else:
@@ -383,10 +373,6 @@ class GeneratorUtil:
 
             self.set_timestamps(mbi_obj, efctv_dt)
             self.mbi_table[current_mbi] = mbi_obj.kv
-
-            # Update patient with current MBI and store previous for next iteration
-            previous_mbi = patient["BENE_MBI_ID"]
-            patient.kv["BENE_MBI_ID"] = current_mbi
 
     def generate_coverages(self, patient: RowAdapter, force_ztm: bool = False):
         parts = random.choices([["A"], ["B"], ["A", "B"], []], weights=[0.2, 0.2, 0.5, 0.1])[0]
