@@ -293,7 +293,6 @@ def load_inputs():
             generator.generate_bene_xref(
                 bene_xref=bene_xref, new_bene_sk=patient["BENE_SK"], old_bene_sk=pt_bene_sk
             )
-            generator.bene_xref_table.append(bene_xref.kv)
 
             generator.set_timestamps(prior_patient, datetime.date(year=2017, month=5, day=20))
 
