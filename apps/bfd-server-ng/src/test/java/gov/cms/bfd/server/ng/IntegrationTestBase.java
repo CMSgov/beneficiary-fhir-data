@@ -120,7 +120,12 @@ public class IntegrationTestBase {
 
   protected long queryCount(List<ILoggingEvent> events) {
     // SQL queries are logged under the org.hibernate.SQL logger
-    return events.stream().filter(l -> l.getLoggerName().equals("org.hibernate.SQL")).count();
+    // Ignore session variables (queries like "SET xxx")
+    return events.stream()
+        .filter(
+            l ->
+                l.getLoggerName().equals("org.hibernate.SQL") && !l.getMessage().startsWith("SET "))
+        .count();
   }
 
   protected void validateCodingsAndSystemUrls(IBaseResource resource) {

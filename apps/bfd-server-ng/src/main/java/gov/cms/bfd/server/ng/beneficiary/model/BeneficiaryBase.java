@@ -1,8 +1,10 @@
 package gov.cms.bfd.server.ng.beneficiary.model;
 
+import gov.cms.bfd.server.ng.converter.DefaultFalseBooleanConverter;
 import gov.cms.bfd.server.ng.model.ProfileType;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
@@ -40,6 +42,13 @@ public abstract class BeneficiaryBase {
 
   @Column(name = "cntct_lang_cd")
   protected LanguageCode languageCode;
+
+  @Convert(converter = DefaultFalseBooleanConverter.class)
+  @Column(name = "idr_ltst_trans_flg")
+  protected Boolean latestTransactionFlag;
+
+  @Column(name = "idr_trans_efctv_ts")
+  protected ZonedDateTime effectiveTimestamp;
 
   @Column(name = "idr_trans_obslt_ts")
   protected ZonedDateTime obsoleteTimestamp;

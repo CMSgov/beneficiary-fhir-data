@@ -1,9 +1,12 @@
 package gov.cms.bfd.server.ng.beneficiary.model;
 
+import gov.cms.bfd.server.ng.converter.DefaultFalseBooleanConverter;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.time.ZonedDateTime;
 import lombok.Getter;
 
 /**
@@ -20,4 +23,11 @@ public class BeneficiarySimple {
 
   @Column(name = "bene_xref_efctv_sk_computed")
   private long xrefSk;
+
+  @Convert(converter = DefaultFalseBooleanConverter.class)
+  @Column(name = "idr_ltst_trans_flg")
+  protected Boolean latestTransactionFlag;
+
+  @Column(name = "idr_trans_efctv_ts")
+  protected ZonedDateTime effectiveTimestamp;
 }
