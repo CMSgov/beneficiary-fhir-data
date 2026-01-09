@@ -1442,9 +1442,7 @@ public enum ClaimLineRevenueCenterCode {
   /** 3105 - ADULT CARE - ADULT FOSTER CARE - DAILY. */
   _3105("3105", "ADULT CARE - ADULT FOSTER CARE - DAILY"),
   /** 3109 - ADULT CARE - OTHER ADULT CARE. */
-  _3109("3109", "ADULT CARE - OTHER ADULT CARE"),
-  /** NA. */
-  NA("", "NO DESCRIPTION AVAILABLE");
+  _3109("3109", "ADULT CARE - OTHER ADULT CARE");
 
   private final String code;
   private final String display;

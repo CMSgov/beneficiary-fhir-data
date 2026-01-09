@@ -368,10 +368,6 @@ public class SystemUrls {
   public static final String HL7_ADJUDICATION =
       "http://terminology.hl7.org/CodeSystem/adjudication";
 
-  /** HL7 - Benefit Category Codes. */
-  public static final String HL7_BENEFIT_CATEGORY =
-      "http://terminology.hl7.org/CodeSystem/ex-benefitcategory";
-
   /** HL7 - code system for a kind of act. */
   public static final String SAMHSA_ACT_CODE_SYSTEM_URL =
       "http://terminology.hl7.org/CodeSystem/v3-ActCode";
@@ -538,10 +534,6 @@ public class SystemUrls {
   public static final String BLUE_BUTTON_CODE_SYSTEM_CLAIM_CONTRACTOR_NUMBER =
       "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CNTRCTR-NUM";
 
-  /** Blue Button structure definition - claim record type. */
-  public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_CLAIM_RECORD_TYPE =
-      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-NRLN-RIC-CD";
-
   /** Blue Button code system - claim record type. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_CLAIM_RECORD_TYPE =
       "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD";
@@ -676,15 +668,15 @@ public class SystemUrls {
 
   /** Blue Button code system - Claim LUPA Indicator Code. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_HHA_LUPA_INDICATOR_CODE =
-      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD";
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-LUP-IND-CD";
 
   /** Blue Button code system - Claim Referral Code. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_HHA_REFERAL_CODE =
-      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD";
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-RFRL-CD";
 
   /** Blue Button code system - Catastrophic Coverage Indicator Code. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_CATASTROPHIC_COVERAGE_CODE =
-      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_CTSTRPHC_CVRG_IND_CD";
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CTSTRPHC-CVRG-IND-CD";
 
   /** Blue Button code system - Drug Coverage Status Code. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_DRUG_COVERAGE_STATUS_CODE =
@@ -696,15 +688,15 @@ public class SystemUrls {
 
   /** Blue Button code system - Submission Clarification Code. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_CLAIM_SUBMISSION_CLARIFICATION_CODE =
-      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_LTC_DSPNSNG_MTHD_CD";
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-LTC-DSPNSNG-MTHD-CD";
 
   /** Blue Button code system - Pharmacy Service Type Code. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_PHARMACY_SRVC_TYPE_CODE =
-      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_PHRMCY_SRVC_TYPE_CD";
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PHRMCY-SRVC-TYPE-CD";
 
   /** Blue Button code system - Patient Residence Code. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_PATIENT_RESIDENCE_CODE =
-      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_PTNT_RSDNC_CD";
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PTNT-RSDNC-CD";
 
   /** Blue Button code system - Prescription Origination Code. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_CLAIM_PRESCRIPTION_ORIGIN_CODE =
@@ -863,7 +855,4 @@ public class SystemUrls {
 
   /** CLIA. */
   public static final String CLIA = "http://terminology.hl7.org/NamingSystem/CLIA";
-
-  /** TAX OID. */
-  public static final String TAX_OID = "urn:oid:2.16.840.1.113883.4.4";
 }
