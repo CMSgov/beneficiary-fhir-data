@@ -192,7 +192,7 @@ def load_inputs():
 
     regenerate_static_tables(generator, files)
 
-    patients: list[RowAdapter] = files[BENE_HSTRY] or [RowAdapter({})] * args.patients
+    patients: list[RowAdapter] = files[BENE_HSTRY] or [RowAdapter({}) for _ in range(args.patients)]
     patient_mbi_id_rows = {row["BENE_MBI_ID"]: row.kv for row in files[BENE_MBI_ID]}
 
     print(f"Generating {len(patients)} patients...")
