@@ -250,6 +250,23 @@
   referenceTable: CLM_SRC_ID
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_SRC_ID
+  fhirPath: ExplanationOfBenefit.meta.tag.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/SYSTEM-TYPE').value
+- inputPath: ExplanationOfBenefit-Base.CLM_SRC_ID
+  appliesTo:
+    - Inpatient
+    - Outpatient
+    - HHA
+    - Hospice
+    - SNF
+    - Carrier
+    - DME
+  sources:
+    - FISS
+    - MCS
+    - NCH
+    - VMS
+  sourceView: V2_MDCR_CLM
+  sourceColumn: META_SRC_ID
   fhirPath: ExplanationOfBenefit.meta.source
 - inputPath: ExplanationOfBenefit-Base.PRVDR_BLG_PRVDR_NPI_NUM
   appliesTo:

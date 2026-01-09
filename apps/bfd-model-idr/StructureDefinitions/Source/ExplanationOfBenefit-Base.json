@@ -810,6 +810,18 @@
                         ]
                     }
                 ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Base.META_SRC_ID",
+                "path": "ExplanationOfBenefit-Base.META_SRC_ID",
+                "label": "Meta Source ID",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
             }
         ]
     }
