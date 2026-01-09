@@ -645,6 +645,7 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
     clm_src_id = -1
     clm_src_id = 20000
     claim["CLM"]["CLM_SRC_ID"] = clm_src_id
+    claim["CLM"]["META_SRC_ID"] = 7
     claim["CLM"]["CLM_FROM_DT"] = random_date(min_date, max_date)
     claim["CLM"]["CLM_THRU_DT"] = gen_thru_dt(claim["CLM"]["CLM_FROM_DT"])
 
@@ -658,6 +659,7 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
             random.choices(string.ascii_uppercase, k=3)
         )
         claim["CLM"]["CLM_RLT_COND_SGNTR_SK"] = "-1"
+        claim["CLM"]["META_SRC_ID"] = 1
 
     if clm_type_cd in (20, 30, 40, 60, 61, 62, 63, 71, 72):
         claim["CLM"]["CLM_BLOOD_PT_FRNSH_QTY"] = random.randint(0, 20)
@@ -1501,10 +1503,13 @@ def gen_pac_version_of_claim(claim, max_date):
 
     if pac_claim["CLM"]["CLM_TYPE_CD"] in fiss_clm_type_cds:
         pac_claim["CLM"]["CLM_SRC_ID"] = 21000  # FISS
+        pac_claim["CLM"]["META_SRC_ID"] = 1003  # FISS
     elif pac_claim["CLM"]["CLM_TYPE_CD"] in mcs_clm_type_cds:
         pac_claim["CLM"]["CLM_SRC_ID"] = 22000  # MCS
+        pac_claim["CLM"]["META_SRC_ID"] = 1001  # MCS
     elif pac_claim["CLM"]["CLM_TYPE_CD"] in vms_cds:
         pac_claim["CLM"]["CLM_SRC_ID"] = 23000  # VMS
+        pac_claim["CLM"]["META_SRC_ID"] = 1002  # VMS
 
     if "CLM_DCMTN" in pac_claim:
         if pac_claim["CLM"]["CLM_TYPE_CD"] in fiss_clm_type_cds:
