@@ -286,7 +286,7 @@ def load_inputs():
             # 90% of the time we want the historical patient to have a different MBI than the
             # current patient as this is by far the most common case in prod data
             if probability(0.9):
-                prior_patient.kv["BENE_MBI_ID"] = generator.gen_mbi()
+                generator.gen_mbis_for_patient(patient=prior_patient, num_mbis=1)
             generator.used_bene_sk.append(pt_bene_sk)
 
             bene_xref = RowAdapter({})
