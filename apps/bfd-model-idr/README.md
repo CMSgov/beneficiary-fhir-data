@@ -1,15 +1,23 @@
 # IDR Model
 
+## `synthetic-data`
+
+The `synthetic-data` directory contains the synthetic data loaded into each of our environment's databases.
+
+**When adding new fields, take care to pass _every_ CSV into the `patient_generator.py` (see below) or else the resulting data may be invalid.**
+
+## Generating data
+
 Downloading the FHIR validator is necessary to run the following scripts, along with installing sushi
 
 To download the FHIR Validator:
-https://github.com/hapifhir/org.hl7.fhir.core/releases/latest/download/validator_cli.jar
+<https://github.com/hapifhir/org.hl7.fhir.core/releases/latest/download/validator_cli.jar>
 
 ```sh
 curl -L https://github.com/hapifhir/org.hl7.fhir.core/releases/latest/download/validator_cli.jar > validator_cli.jar
 ```
 
-## Install sushi + fhirpath.js
+### Install sushi + fhirpath.js
 
 ```sh
 # Check if npm is installed
@@ -23,7 +31,8 @@ brew install npm
 npm install -g fsh-sushi fhirpath
 ```
 
-## Install packages  (via uv)
+### Install packages  (via uv)
+
 ```sh
 # Check if uv is installed
 uv --version
@@ -33,11 +42,11 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
 ```sh
-# Install dependencies 
+# Install dependencies
 uv sync
 ```
 
-## Create FHIR files with synthetic data
+### Create FHIR files with synthetic data
 
 To easily compile all resources:
 
@@ -64,66 +73,91 @@ uv run compile_resources.py \
     --test
 ```
 
-### Synthetic data generation
+#### Patient Data - `patient_generator.py`
 
-Quick start:
+##### Usage
 
-```sh
-uv run patient_generator.py
+```text
+usage: patient_generator.py [-h] [--patients PATIENTS] [--claims]
+                            [--exclude-empty | --no-exclude-empty]
+                            [--force-ztm-static-rows | --no-force-ztm-static-rows]
+                            [files ...]
 
-uv run claims_generator.py \
-    --sushi \
-    --benes out/SYNTHETIC_BENE_HSTRY.csv
+Generate synthetic patient data
+
+positional arguments:
+  files                 CSVs that will be regenerated/updated with new
+                        columns. Updates are idempotent, meaning that passing
+                        in an existing table/CSV without any new columns being
+                        added to the synthetic data generation will result in
+                        a byte-identical output file. Take care to avoid
+                        providing a partial set of tables with foreign key
+                        constraints (e.g. BENE_SK) without providing the root
+                        table as this could result in broken output data
+
+options:
+  -h, --help            show this help message and exit
+  --patients PATIENTS   Number of patients to generate. Ignored if
+                        SYNTHETIC_BENE_HSTRY is provided via 'files'
+  --claims              Automatically generate claims after patient generation
+                        using the generated SYNTHETIC_BENE_HSTRY.csv file
+  --exclude-empty, --no-exclude-empty
+                        Treat empty column values as non-existant and allow
+                        the generator to generate new values
+  --force-ztm-static-rows, --no-force-ztm-static-rows
+                        Allow "zero-to-many" rows (e.g. BENE_ENTLMT, c/d data,
+                        etc.) for a patient loaded from a file to be
+                        generated. This will introduce new rows for patients
+                        that previously had none. Useful if not all tables for
+                        a patient have been generated yet.
+
 ```
 
-#### Patient Data
+##### Generating Data
 
 To generate synthetic patient data, the patient_generator.py script is used.
-To utilize it:
+To utilize it to generate an entirely _new_ set of data from nothing:
 
 ```sh
 uv run patient_generator.py
 ```
 
-Or, to load the specific MBIs used in the sandbox env:
+Or, to load the v3 synthetic data (to add new fields):
 
 ```sh
-uv run patient_generator.py --benes Benes-Sandbox.csv
+uv run patient_generator.py synthetic-data/*.csv
 ```
 
-**NOTE**: the bene_id column in this file is to reference the bene_id field used in V1/V2.
-It's not used for sample data generation here.
+_**NOTE**: the `bene_id` column in `SYNTHETIC_BENE_HSTRY.csv` is to reference the `bene_id` field used in V1/V2. It's not used for sample data generation here._
 
-The script supports several options:
-- `--benes <csv_file>`: Use a CSV file containing beneficiary data to populate fields. Empty fields will be filled with random data.
-- `--claims`: Automatically generate claims after patient generation using the generated SYNTHETIC_BENE_HSTRY.csv file.
+The files output will be in the `out` folder:
 
-The files output will be in the out folder:
-SYNTHETIC_BENE_HSTRY.csv
-SYNTHETIC_BENE_MBI_ID.csv
-SYNTHETIC_BENE_MDCR_ENTLMT_RSN.csv
-SYNTHETIC_BENE_MDCR_ENTLMT.csv
-SYNTHETIC_BENE_MDCR_STUS.csv
-SYNTHETIC_BENE_TP.csv
-SYNTHETIC_BENE_XREF.csv
-SYNTHETIC_BENE_CMBND_DUAL_MDCR.csv
-SYNTHETIC_BENE_LIS.csv
-SYNTHETIC_BENE_MAPD_ENRLMT_RX.csv
-SYNTHETIC_BENE_MAPD_ENRLMT.csv
+- `SYNTHETIC_BENE_HSTRY.csv`
+- `SYNTHETIC_BENE_MBI_ID.csv`
+- `SYNTHETIC_BENE_MDCR_ENTLMT_RSN.csv`
+- `SYNTHETIC_BENE_MDCR_ENTLMT.csv`
+- `SYNTHETIC_BENE_MDCR_STUS.csv`
+- `SYNTHETIC_BENE_TP.csv`
+- `SYNTHETIC_BENE_XREF.csv`
+- `SYNTHETIC_BENE_CMBND_DUAL_MDCR.csv`
+- `SYNTHETIC_BENE_LIS.csv`
+- `SYNTHETIC_BENE_MAPD_ENRLMT_RX.csv`
+- `SYNTHETIC_BENE_MAPD_ENRLMT.csv`
 
-The patient generator creates synthetic beneficiary data with realistic but SYNTHETIC MBIs, coverage information, and historical records. It can generate multiple MBI versions per beneficiary and handles beneficiary cross-references with kill credit switches.
+The patient generator creates synthetic beneficiary data with realistic but _synthetic_ MBIs, coverage information, and historical records. It can generate multiple MBI versions per beneficiary and handles beneficiary cross-references with kill credit switches.
 
 #### Claims data
 
-To generate synthetic claims data, the claims_generator.py script is used. 
+To generate synthetic claims data, the claims_generator.py script is used.
 To utilize it:
+
 ```sh
 uv run claims_generator.py \
     --sushi \
-    --benes out/SYNTHETIC_BENE_HSTRY.csv
+    out/SYNTHETIC_BENE_HSTRY.csv
 ```
 
---sushi is not strictly needed, if you have a local copy of the compiled shorthand files, but recommended to reduce drift. To specify a list of benes, pass in a .csv file containing a column named BENE_SK. 
+--sushi is not strictly needed, if you have a local copy of the compiled shorthand files, but recommended to reduce drift. To specify a list of benes, pass in a .csv file containing a column named BENE_SK.
 The files output will be in the out folder, there are several files:
 SYNTHETIC_CLM.csv
 SYNTHETIC_CLM_LINE.csv
@@ -140,11 +174,11 @@ SYNTHETIC_CLM_ANSI_SGNTR.csv
 
 These files represent the schema of the tables the information is sourced from, although for tables other than CLM_DT_SGNTR, the CLM_UNIQ_ID is propagated instead of the 5 part unique key from the IDR.
 
-### Data Dictionary
+## Data Dictionary
 
-Generally, the data dictionary will source definitions from the IDR's table definitions. There are instances where this may not be the definition we wish to publish. To overwrite the definition from the IDR, or populate a definition not available from the IDR, populate the "definition" key for the relevant concept in the relevant StructureDefinition. 
+Generally, the data dictionary will source definitions from the IDR's table definitions. There are instances where this may not be the definition we wish to publish. To overwrite the definition from the IDR, or populate a definition not available from the IDR, populate the "definition" key for the relevant concept in the relevant StructureDefinition.
 
-Sometimes a field may be condensed at the IDR level, and fanned into multiple discrete components at the BFD / FHIR layer. An example is BENE_MDCR_STUS_CD. This code can indicate several interesting characteristics, such as ESRD status and disability status. A field, nameOverride, is available to directly populate names in the BFD DD for these fields that do not surface through a StructureDefinition. 
+Sometimes a field may be condensed at the IDR level, and fanned into multiple discrete components at the BFD / FHIR layer. An example is BENE_MDCR_STUS_CD. This code can indicate several interesting characteristics, such as ESRD status and disability status. A field, nameOverride, is available to directly populate names in the BFD DD for these fields that do not surface through a StructureDefinition.
 To generate the data dictionary:
 
 ```sh

@@ -1,29 +1,79 @@
 import argparse
-import copy
 import datetime
 import random
 import subprocess
 import sys
 
-import pandas as pd
+import tqdm
 from faker import Faker
 
-from generator_util import GeneratorUtil
+from generator_util import (
+    BENE_DUAL,
+    BENE_ENTLMT,
+    BENE_ENTLMT_RSN,
+    BENE_HSTRY,
+    BENE_LIS,
+    BENE_MAPD_ENRLMT,
+    BENE_MAPD_ENRLMT_RX,
+    BENE_MBI_ID,
+    BENE_STUS,
+    BENE_TP,
+    BENE_XREF,
+    GeneratorUtil,
+    RowAdapter,
+    load_file_dict,
+    output_table_contains_by_bene_sk,
+    probability,
+)
 
 fake = Faker()
 
 # Command line argument parsing
 parser = argparse.ArgumentParser(description="Generate synthetic patient data")
-parser.add_argument("--benes", type=str, help="Path to CSV file containing beneficiary data")
+parser.add_argument(
+    "paths",
+    nargs="*",
+    help=(
+        "Paths to CSVs or directories including CSVs that will be regenerated/updated with new "
+        "columns. Updates are idempotent, meaning that passing in an existing table/CSV without "
+        "any new columns being added to the synthetic data generation will result in a "
+        "byte-identical output file. Take care to avoid providing a partial set of tables with "
+        "foreign key constraints (e.g. BENE_SK) without providing the root table as this could "
+        "result in broken output data"
+    ),
+)
+parser.add_argument(
+    "--patients",
+    default=15,
+    type=int,
+    help="Number of patients to generate. Ignored if SYNTHETIC_BENE_HSTRY is provided via 'files'",
+)
 parser.add_argument(
     "--claims",
     action="store_true",
     help="Automatically generate claims after patient generation using the generated "
     "SYNTHETIC_BENE_HSTRY.csv file",
 )
+parser.add_argument(
+    "--exclude-empty",
+    action=argparse.BooleanOptionalAction,
+    help=(
+        "Treat empty column values as non-existant and allow the generator to generate new values"
+    ),
+)
+parser.add_argument(
+    "--force-ztm-static-rows",
+    action=argparse.BooleanOptionalAction,
+    help=(
+        'Allow "zero-to-many" rows (e.g. BENE_ENTLMT, c/d data, etc.) for a patient loaded from '
+        "a file to be generated. This will introduce new rows for patients that previously had "
+        "none. Useful if not all tables for a patient have been generated yet."
+    ),
+    dest="force_ztm",
+)
 args = parser.parse_args()
 
-patients_to_generate = 15
+
 available_given_names = [
     "Alex",
     "Frankie",
@@ -41,146 +91,126 @@ available_given_names = [
 ]
 available_family_names = ["Erdapfel", "Heeler", "Coffee", "Jones", "Smith", "Sheep"]
 
-generator = GeneratorUtil()
 
-# Load CSV data if provided
-csv_data = None
-if args.benes:
-    try:
-        csv_data = pd.read_csv(args.benes, dtype={"BENE_SEX_CD": "Int64", "BENE_RACE_CD": "Int64"})
-        print(f"Loaded {len(csv_data)} rows from CSV file: {args.benes}")
+def regenerate_static_tables(generator: GeneratorUtil, files: dict[str, list[RowAdapter]]):
+    # "Generate" (extend, really) existing rows in all but the "root" table for patient (BENE_HSTRY)
+    # to ensure existing rows remain idempotent in the output whilst allowing new fields to be added
+    print(f"Regenerating/updating {', '.join((k for k, v in files.items() if v))}...")
 
-        patients_to_generate = len(csv_data)
-    except Exception as e:
-        print(f"Error loading CSV file: {e}")
-        print("Falling back to random generation")
-        csv_data = None
-
-for i in range(patients_to_generate):
-    if i > 0 and i % 10000 == 0:
-        print("10000 done")
-
-    patient = generator.create_base_patient()
-
-    # Use CSV data if available, otherwise use random generation
-    if csv_data is not None and i < len(csv_data):
-        row = csv_data.iloc[i]
-
-        # Use CSV data for populated fields, random for empty ones
-        patient["BENE_1ST_NAME"] = (
-            row.get("BENE_1ST_NAME")
-            if pd.notna(row.get("BENE_1ST_NAME"))
-            else random.choice(available_given_names)
+    for bene_mbi_id_row in files[BENE_MBI_ID]:
+        # BENE_MBI_ID is a special case in that its generation function mutates both its own output
+        # table and the BENE_HSTRY table. The function has special case logic (a hack) to handle the
+        # regeneration case so that only the BENE_MBI_ID table is mutated here. This is also why the
+        # "patient" is an empty RowAdapter. A proper implementation would do something different
+        # here.
+        generator.gen_mbis_for_patient(
+            patient=RowAdapter({}), num_mbis=1, initial_mbi_obj=bene_mbi_id_row
         )
 
-        if pd.notna(row.get("BENE_MIDL_NAME")):
-            patient["BENE_MIDL_NAME"] = row["BENE_MIDL_NAME"]
-        elif random.randint(0, 1):
-            patient["BENE_MIDL_NAME"] = random.choice(available_given_names)
-
-        patient["BENE_LAST_NAME"] = (
-            row.get("BENE_LAST_NAME")
-            if pd.notna(row.get("BENE_LAST_NAME"))
-            else random.choice(available_family_names)
+    for bene_stus_row in files[BENE_STUS]:
+        generator.generate_bene_stus(
+            stus_row=bene_stus_row,
+            medicare_start_date=bene_stus_row["MDCR_STUS_BGN_DT"],
+            medicare_end_date=bene_stus_row["MDCR_STUS_END_DT"],
+            mdcr_stus_cd=bene_stus_row["BENE_MDCR_STUS_CD"],
         )
 
-        # Handle birth date
-        if pd.notna(row.get("BENE_BRTH_DT")):
-            patient["BENE_BRTH_DT"] = str(row["BENE_BRTH_DT"])
-        else:
-            dob = generator.fake.date_of_birth(minimum_age=45)
-            patient["BENE_BRTH_DT"] = str(dob)
+    for bene_entlmt_rsn_row in files[BENE_ENTLMT_RSN]:
+        generator.generate_bene_entlmnt_rsn(
+            rsn_row=bene_entlmt_rsn_row,
+            medicare_start_date=bene_entlmt_rsn_row["BENE_RNG_BGN_DT"],
+            medicare_end_date=bene_entlmt_rsn_row["BENE_RNG_END_DT"],
+        )
 
-        # Handle death date
-        if pd.notna(row.get("BENE_DEATH_DT")):
-            patient["BENE_DEATH_DT"] = str(row["BENE_DEATH_DT"])
-            if pd.notna(row.get("BENE_VRFY_DEATH_DAY_SW")):
-                patient["BENE_VRFY_DEATH_DAY_SW"] = str(row["BENE_VRFY_DEATH_DAY_SW"])
-            else:
-                patient["BENE_VRFY_DEATH_DAY_SW"] = "Y" if random.randint(0, 1) == 1 else "N"
-        else:
-            if random.randint(0, 10) < 2:
-                # death!
-                death_date = generator.fake.date_between_dates(
-                    datetime.date(year=2020, month=1, day=1), datetime.date.today()
-                )
-                patient["BENE_DEATH_DT"] = str(death_date)
-                if random.randint(0, 1) == 1:
-                    patient["BENE_VRFY_DEATH_DAY_SW"] = "Y"
-                else:
-                    patient["BENE_VRFY_DEATH_DAY_SW"] = "N"
-            else:
-                patient["BENE_DEATH_DT"] = None
-                patient["BENE_VRFY_DEATH_DAY_SW"] = "~"
+    for bene_entlmt_row in files[BENE_ENTLMT]:
+        generator.generate_bene_entlmt(
+            entlmt_row=bene_entlmt_row,
+            medicare_start_date=bene_entlmt_row["BENE_RNG_BGN_DT"],
+            medicare_end_date=bene_entlmt_row["BENE_RNG_END_DT"],
+            coverage_type=bene_entlmt_row["BENE_MDCR_ENTLMT_TYPE_CD"],
+        )
 
-        # Handle sex code
-        if pd.notna(row.get("BENE_SEX_CD")):
-            # Safely handle non-numeric sex codes
-            sex_code = str(row["BENE_SEX_CD"])
-            if sex_code.isdigit():
-                patient["BENE_SEX_CD"] = str(int(sex_code))
-            else:
-                patient["BENE_SEX_CD"] = sex_code
-        else:
-            patient["BENE_SEX_CD"] = str(random.randint(1, 2))
+    for bene_tp_row in files[BENE_TP]:
+        generator.generate_bene_tp(
+            tp_row=bene_tp_row,
+            medicare_start_date=bene_tp_row["BENE_RNG_BGN_DT"],
+            medicare_end_date=bene_tp_row["BENE_RNG_END_DT"],
+            buy_in_cd=bene_tp_row["BENE_BUYIN_CD"],
+            coverage_type=bene_tp_row["BENE_TP_TYPE_CD"],
+        )
 
-        # Handle race code
-        if pd.notna(row.get("BENE_RACE_CD")):
-            # Safely handle non-numeric race codes to prevent ValueError
-            race_code = str(row["BENE_RACE_CD"])
-            if race_code.isdigit():
-                patient["BENE_RACE_CD"] = str(int(race_code))
-            else:
-                patient["BENE_RACE_CD"] = race_code
-        else:
-            patient["BENE_RACE_CD"] = random.choice(
-                ["~", "0", "1", "2", "3", "4", "5", "6", "7", "8"]
-            )
+    for bene_dual_row in files[BENE_DUAL]:
+        generator.generate_bene_dual(
+            dual_row=bene_dual_row,
+            dual_start_date=bene_dual_row["BENE_MDCD_ELGBLTY_BGN_DT"],
+            dual_end_date=bene_dual_row["BENE_MDCD_ELGBLTY_END_DT"],
+            dual_status_cd=bene_dual_row["BENE_DUAL_STUS_CD"],
+            dual_type_cd=bene_dual_row["BENE_DUAL_TYPE_CD"],
+            medicaid_state_cd=bene_dual_row["GEO_USPS_STATE_CD"],
+        )
 
-        if pd.notna(row.get("BENE_SK")):
-            pt_bene_sk = int(row["BENE_SK"])
-            if pt_bene_sk in generator.used_bene_sk:
-                pt_bene_sk = generator.gen_bene_sk()
-        else:
-            pt_bene_sk = generator.gen_bene_sk()
+    for bene_mapd_enrlmt_row in files[BENE_MAPD_ENRLMT]:
+        generator.generate_bene_mapd_enrlmt(enrollment_row=bene_mapd_enrlmt_row)
 
-        patient["BENE_SK"] = str(pt_bene_sk)
-        patient["BENE_XREF_EFCTV_SK"] = str(pt_bene_sk)
-        patient["BENE_XREF_SK"] = patient["BENE_XREF_EFCTV_SK"]
-        generator.used_bene_sk.append(pt_bene_sk)
+    for bene_mapd_enrlmt_rx_row in files[BENE_MAPD_ENRLMT_RX]:
+        generator.generate_bene_mapd_enrlmt_rx(
+            rx_row=bene_mapd_enrlmt_rx_row,
+            contract_num=bene_mapd_enrlmt_rx_row["BENE_CNTRCT_NUM"],
+            pbp_num=bene_mapd_enrlmt_rx_row["BENE_PBP_NUM"],
+        )
 
-        if pd.notna(row.get("BENE_MBI_ID")):
-            custom_mbi = str(row["BENE_MBI_ID"])
-            num_mbis = random.choices([1, 2, 3, 4], weights=[0.8, 0.14, 0.05, 0.01])[0]
-            generator.handle_mbis(patient, num_mbis, custom_first_mbi=custom_mbi)
-        else:
-            num_mbis = random.choices([1, 2, 3, 4], weights=[0.8, 0.14, 0.05, 0.01])[0]
-            generator.handle_mbis(patient, num_mbis)
+    for bene_lis_row in files[BENE_LIS]:
+        generator.generate_bene_lis(lis_row=bene_lis_row)
 
-    else:
-        # Original random generation logic
+    for patient_xref_row in files[BENE_XREF]:
+        generator.generate_bene_xref(
+            bene_xref=patient_xref_row,
+            new_bene_sk=patient_xref_row["BENE_SK"],
+            old_bene_sk=int(patient_xref_row["BENE_XREF_SK"]),
+        )
+
+    print("Finished regenerating/updating all files")
+
+
+def load_inputs():
+    generator = GeneratorUtil()
+
+    files: dict[str, list[RowAdapter]] = {
+        BENE_HSTRY: [],
+        BENE_MBI_ID: [],
+        BENE_STUS: [],
+        BENE_ENTLMT_RSN: [],
+        BENE_ENTLMT: [],
+        BENE_TP: [],
+        BENE_XREF: [],
+        BENE_DUAL: [],
+        BENE_MAPD_ENRLMT: [],
+        BENE_MAPD_ENRLMT_RX: [],
+        BENE_LIS: [],
+    }
+    load_file_dict(files=files, paths=args.paths, exclude_empty=args.exclude_empty)
+
+    regenerate_static_tables(generator, files)
+
+    patients: list[RowAdapter] = files[BENE_HSTRY] or [RowAdapter({}) for _ in range(args.patients)]
+    patient_mbi_id_rows = {row["BENE_MBI_ID"]: row.kv for row in files[BENE_MBI_ID]}
+
+    print(f"Generating {len(patients)} patients...")
+    for patient in tqdm.tqdm(patients):
+        generator.create_base_patient(patient)
         patient["BENE_1ST_NAME"] = random.choice(available_given_names)
-        if random.randint(0, 1):
+        if probability(0.5):
             patient["BENE_MIDL_NAME"] = random.choice(available_given_names)
         patient["BENE_LAST_NAME"] = random.choice(available_family_names)
-
         dob = generator.fake.date_of_birth(minimum_age=45)
         patient["BENE_BRTH_DT"] = str(dob)
-
-        if random.randint(0, 10) < 2:
+        if probability(0.2):
             # death!
             death_date = generator.fake.date_between_dates(
                 datetime.date(year=2020, month=1, day=1), datetime.date.today()
             )
             patient["BENE_DEATH_DT"] = str(death_date)
-            if random.randint(0, 1) == 1:
-                patient["BENE_VRFY_DEATH_DAY_SW"] = "Y"
-            else:
-                patient["BENE_VRFY_DEATH_DAY_SW"] = "N"
-        else:
-            patient["BENE_DEATH_DT"] = None
-            patient["BENE_VRFY_DEATH_DAY_SW"] = "~"
-
+            patient["BENE_VRFY_DEATH_DAY_SW"] = "Y" if probability(0.5) else "N"
         patient["BENE_SEX_CD"] = str(random.randint(1, 2))
         patient["BENE_RACE_CD"] = random.choice(["~", "0", "1", "2", "3", "4", "5", "6", "7", "8"])
 
@@ -190,70 +220,122 @@ for i in range(patients_to_generate):
         patient["BENE_XREF_SK"] = patient["BENE_XREF_EFCTV_SK"]
         generator.used_bene_sk.append(pt_bene_sk)
 
-        num_mbis = random.choices([1, 2, 3, 4], weights=[0.8, 0.14, 0.05, 0.01])[0]
-        generator.handle_mbis(patient, num_mbis)
+        patient_static_mbi_row = patient_mbi_id_rows.get(patient.get("BENE_MBI_ID"))
+        if not patient_static_mbi_row:
+            # If the patient has no corresponding static MBIs and is loaded from a file (static) we
+            # generate a single MBI ID to ensure a static table size, otherwise (if the patient is
+            # totally generated) we generate upto 4 MBIs (n - 1 being obsolete)
+            num_mbis = (
+                1
+                if (patient.loaded_from_file and not args.force_ztm)
+                else random.choices([1, 2, 3, 4], weights=[0.8, 0.14, 0.05, 0.01])[0]
+            )
+            generator.gen_mbis_for_patient(patient, num_mbis)
 
-    generator.generate_coverages(patient)
+        generator.generate_coverages(patient=patient, force_ztm=args.force_ztm)
 
-    # pt c / d data
-    # 50% of the time, generate part C
-    # 25% of time, PDP only
-    # 25% of time, no part C or D.
-    if random.randint(0, 10) >= 5:
-        contract_info = generator.generate_bene_mapd_enrlmt(patient, pdp_only=False)
-        generator.generate_bene_mapd_enrlmt_rx(patient, contract_info)
-        generator.generate_bene_lis(patient)
-    elif random.choice([True, False]):
-        contract_info = generator.generate_bene_mapd_enrlmt(patient, pdp_only=True)
-        generator.generate_bene_mapd_enrlmt_rx(patient, contract_info)
-        generator.generate_bene_lis(patient)
+        # pt c / d data
+        # 50% of the time, generate part C
+        # 25% of time, PDP only
+        # 25% of time, no part C or D.
+        if (not patient.loaded_from_file or args.force_ztm) and probability(0.5):
+            initial_kv_template = {"BENE_SK": patient["BENE_SK"]}
 
-    if random.random() < 0.05:
-        prior_patient = copy.deepcopy(patient)
-        pt_bene_sk = generator.gen_bene_sk()
-        prior_patient["BENE_SK"] = str(pt_bene_sk)
-        prior_patient["IDR_LTST_TRANS_FLG"] = "N"
-        generator.used_bene_sk.append(pt_bene_sk)
+            if not output_table_contains_by_bene_sk(
+                table=generator.bene_mapd_enrlmt,
+                for_file=BENE_MAPD_ENRLMT,
+                bene_sk=patient["BENE_SK"],
+            ):
+                contract_num, pbp_num = generator.generate_bene_mapd_enrlmt(
+                    enrollment_row=RowAdapter(initial_kv_template.copy()), pdp_only=probability(0.5)
+                )
+                generator.generate_bene_mapd_enrlmt_rx(
+                    rx_row=RowAdapter(initial_kv_template.copy()),
+                    contract_num=contract_num,
+                    pbp_num=pbp_num,
+                )
 
-        generator.generate_bene_xref(patient["BENE_SK"], pt_bene_sk)
+            # We don't need to check !force_ztm or loaded_from_file because this is unreachable if
+            # any of those are true
+            if probability(0.5) and not output_table_contains_by_bene_sk(
+                table=generator.bene_lis,
+                for_file=BENE_LIS,
+                bene_sk=patient["BENE_SK"],
+            ):
+                generator.generate_bene_lis(RowAdapter(initial_kv_template.copy()))
 
-        generator.set_timestamps(prior_patient, datetime.date(year=2017, month=5, day=20))
+        if (not patient.loaded_from_file or args.force_ztm) and probability(0.05):
+            # Exclude rows from the original patient that will be modified so that RowAdapter does
+            # not ignore those changes
+            prior_patient = RowAdapter({
+                k: v
+                for k, v in patient.kv.items()
+                if k
+                not in {
+                    "BENE_SK",
+                    "IDR_LTST_TRANS_FLG",
+                    "IDR_TRANS_OBSLT_TS",
+                    "IDR_TRANS_EFCTV_TS",
+                    "IDR_INSRT_TS",
+                    "IDR_UPDT_TS",
+                }
+            })
+            pt_bene_sk = generator.gen_bene_sk()
+            prior_patient["BENE_SK"] = str(pt_bene_sk)
+            prior_patient["IDR_LTST_TRANS_FLG"] = "Y"
+            # 90% of the time we want the historical patient to have a different MBI than the
+            # current patient as this is by far the most common case in prod data
+            if probability(0.9):
+                generator.gen_mbis_for_patient(patient=prior_patient, num_mbis=1)
+            generator.used_bene_sk.append(pt_bene_sk)
 
-        # Override the obsolete timestamp to be in the past year instead of future
-        past_year_date = datetime.date.today() - datetime.timedelta(days=random.randint(30, 365))
-        prior_patient["IDR_TRANS_OBSLT_TS"] = f"{past_year_date}T00:00:00.000000+0000"
+            bene_xref = RowAdapter({})
+            generator.generate_bene_xref(
+                bene_xref=bene_xref, new_bene_sk=patient["BENE_SK"], old_bene_sk=pt_bene_sk
+            )
 
-        generator.bene_hstry_table.append(prior_patient)
+            generator.set_timestamps(prior_patient, datetime.date(year=2017, month=5, day=20))
 
-    generator.bene_hstry_table.append(patient)
+            # Override the obsolete timestamp to be in the past year instead of future
+            past_year_date = datetime.date.today() - datetime.timedelta(
+                days=random.randint(30, 365)
+            )
+            # We update the underlying dict to avoid RowAdapter ignoring the change
+            prior_patient.kv["IDR_TRANS_OBSLT_TS"] = f"{past_year_date}T00:00:00.000000+0000"
 
-generator.save_output_files()
+            generator.bene_hstry_table.append(prior_patient.kv)
 
-# If --claims flag is provided, automatically call claims_generator.py
-if args.claims:
-    print("Generating claims for generated benes")
-    try:
-        # Call claims_generator.py with the generated SYNTHETIC_BENE_HSTRY.csv file
-        result = subprocess.run(
-            [
-                sys.executable,
-                "claims_generator.py",
-                "--benes",
-                "out/SYNTHETIC_BENE_HSTRY.csv",
-            ],
-            check=True,
-            capture_output=True,
-            text=True,
-        )
+        generator.bene_hstry_table.append(patient.kv)
 
-        print("Claims generation completed successfully!")
-        if result.stdout:
-            print("Claims generator output:")
-            print(result.stdout)
+    print(f"Done generating {len(patients)} patients")
+    print("Writing finished tables to out directory...")
+    generator.save_output_files()
+    print("Patient data generation complete!")
 
-    except subprocess.CalledProcessError as e:
-        print(f"Error running claims generator: {e}")
-        if e.stderr:
-            print("Error output:")
-            print(e.stderr)
-        sys.exit(1)
+
+if __name__ == "__main__":
+    load_inputs()
+
+    # If --claims flag is provided, automatically call claims_generator.py
+    if args.claims:
+        print("Generating claims for generated benes")
+        try:
+            # Call claims_generator.py with the generated SYNTHETIC_BENE_HSTRY.csv file
+            result = subprocess.run(
+                args=[sys.executable, "claims_generator.py", f"out/{BENE_HSTRY}.csv"],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+
+            print("Claims generation completed successfully!")
+            if result.stdout:
+                print("Claims generator output:")
+                print(result.stdout)
+
+        except subprocess.CalledProcessError as e:
+            print(f"Error running claims generator: {e}")
+            if e.stderr:
+                print("Error output:")
+                print(e.stderr)
+            sys.exit(1)

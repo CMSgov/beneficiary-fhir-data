@@ -74,7 +74,7 @@ def _load_file(
             # so we don't get errors trying to insert extra columns
             db_columns = cur.execute(
                 f"""
-                    SELECT column_name FROM INFORMATION_SCHEMA.COLUMNS 
+                    SELECT column_name FROM INFORMATION_SCHEMA.COLUMNS
                     WHERE table_name = '{sql_table}'
                 """  # type: ignore
             )
@@ -97,7 +97,7 @@ def _load_file(
 
 
 if __name__ == "__main__":
-    base_dir = sys.argv[1] if len(sys.argv) > 1 and sys.argv[1] != "" else "../../bfd-model-idr/out"
+    base_dir = sys.argv[1] if len(sys.argv) > 1 and sys.argv[1] != "" else "../bfd-model-idr/out"
     load_from_csv(
         psycopg.connect(get_connection_string(LoadMode.SYNTHETIC)),
         base_dir,
