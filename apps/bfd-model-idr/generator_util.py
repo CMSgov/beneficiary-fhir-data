@@ -433,7 +433,7 @@ class GeneratorUtil:
         # being mutated across different tables
         initial_kv_template = {"BENE_SK": patient["BENE_SK"]}
 
-        if not output_table_contains_by_bene_sk(
+        if (not patient.loaded_from_file or force_ztm) and not output_table_contains_by_bene_sk(
             table=self.mdcr_stus, for_file=BENE_STUS, bene_sk=patient["BENE_SK"]
         ):
             self.generate_bene_stus(
@@ -445,7 +445,7 @@ class GeneratorUtil:
 
         buy_in_cd = random.choice(self.code_systems["BENE_BUYIN_CD"])
 
-        if not output_table_contains_by_bene_sk(
+        if (not patient.loaded_from_file or force_ztm) and not output_table_contains_by_bene_sk(
             table=self.mdcr_rsn, for_file=BENE_ENTLMT_RSN, bene_sk=patient["BENE_SK"]
         ):
             self.generate_bene_entlmnt_rsn(
