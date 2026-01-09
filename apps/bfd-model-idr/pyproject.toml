@@ -14,7 +14,12 @@ dependencies = [
 ]
 
 [dependency-groups]
-dev = ["ruff>=0.12.9", "uv>=0.8.10", "pyright>=1.1.403"]
+dev = [
+    "ruff>=0.12.9",
+    "uv>=0.8.10",
+    "pyright>=1.1.403",
+    "debugpy>=1.8.19",
+]
 
 [tool.ruff]
 # Set the maximum line length to 100.
