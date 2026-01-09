@@ -599,7 +599,7 @@ class GeneratorUtil:
         entitlement_reason = random.choice(self.code_systems["BENE_MDCR_ENTLMT_RSN_CD"])
         rsn_row["IDR_LTST_TRANS_FLG"] = "Y"
         rsn_row["IDR_TRANS_EFCTV_TS"] = str(medicare_start_date) + "T00:00:00.000000+0000"
-        rsn_row["IDR_INSRT_TS"] = (str(medicare_start_date) + "T00:00:00.000000+0000",)
+        rsn_row["IDR_INSRT_TS"] = str(medicare_start_date) + "T00:00:00.000000+0000"
         rsn_row["IDR_UPDT_TS"] = str(medicare_start_date) + "T00:00:00.000000+0000"
         rsn_row["IDR_TRANS_OBSLT_TS"] = "9999-12-31T00:00:00.000000+0000"
         rsn_row["BENE_MDCR_ENTLMT_RSN_CD"] = entitlement_reason
