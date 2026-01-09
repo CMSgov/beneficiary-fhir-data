@@ -12,7 +12,7 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
 @RequiredArgsConstructor
 public class DbTransactionManager extends JpaTransactionManager {
 
-  private final EntityManager entityManager;
+  private final transient EntityManager entityManager;
 
   @Override
   protected void prepareSynchronization(
