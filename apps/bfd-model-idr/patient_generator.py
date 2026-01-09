@@ -282,7 +282,7 @@ def load_inputs():
             })
             pt_bene_sk = generator.gen_bene_sk()
             prior_patient["BENE_SK"] = str(pt_bene_sk)
-            prior_patient["IDR_LTST_TRANS_FLG"] = "N"
+            prior_patient["IDR_LTST_TRANS_FLG"] = "Y"
             # 90% of the time we want the historical patient to have a different MBI than the
             # current patient as this is by far the most common case in prod data
             if probability(0.9):
