@@ -144,23 +144,21 @@ public class ClaimLine {
   Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {
 
-    if (adjudicatedTrackingNumber.isEmpty() && partiallyAdjudicatedTrackingNumber.isEmpty()) {
+    var trackingNumber = adjudicatedTrackingNumber.or(() -> partiallyAdjudicatedTrackingNumber);
+
+    if (trackingNumber.isEmpty()) {
       return Optional.empty();
     }
-    var trackingNumber = partiallyAdjudicatedTrackingNumber.get();
-    var category = BlueButtonSupportingInfoCategory.CLM_LINE_PA_UNIQ_TRKNG_NUM;
 
-    if (adjudicatedTrackingNumber.isPresent()) {
-      trackingNumber = adjudicatedTrackingNumber.get();
-      category = BlueButtonSupportingInfoCategory.CLM_LINE_PMD_UNIQ_TRKNG_NUM;
-    }
+    var category =
+        adjudicatedTrackingNumber.isPresent()
+            ? BlueButtonSupportingInfoCategory.CLM_LINE_PMD_UNIQ_TRKNG_NUM
+            : BlueButtonSupportingInfoCategory.CLM_LINE_PA_UNIQ_TRKNG_NUM;
 
-    ExplanationOfBenefit.SupportingInformationComponent component =
+    return Optional.of(
         supportingInfoFactory
             .createSupportingInfo()
             .setCategory(category.toFhir())
-            .setValue(new StringType(trackingNumber));
-
-    return Optional.of(component);
+            .setValue(new StringType(trackingNumber.get())));
   }
 }

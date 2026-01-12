@@ -80,6 +80,7 @@ faker = Faker()
 def save_output_files(
     clm,
     clm_line,
+    clm_line_dcmtn,
     clm_val,
     clm_dt_sgntr,
     clm_prod,
@@ -105,6 +106,7 @@ def save_output_files(
     exports = [
         (clm, "out/SYNTHETIC_CLM.csv", NO_NORMALIZE, NO_CAST_LINE_NUM),
         (clm_line, "out/SYNTHETIC_CLM_LINE.csv", NORMALIZE, CAST_LINE_NUM),
+        (clm_line_dcmtn, "out/SYNTHETIC_CLM_LINE_DCMTN.csv", NORMALIZE, CAST_LINE_NUM),
         (clm_val, "out/SYNTHETIC_CLM_VAL.csv", NORMALIZE, NO_CAST_LINE_NUM),
         (clm_dt_sgntr, "out/SYNTHETIC_CLM_DT_SGNTR.csv", NORMALIZE, NO_CAST_LINE_NUM),
         (clm_prod, "out/SYNTHETIC_CLM_PROD.csv", NORMALIZE, NO_CAST_LINE_NUM),
@@ -614,6 +616,7 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
     claim = {
         "CLM": {},
         "CLM_LINE": [],
+        "CLM_LINE_DCMTN": [],
         "CLM_DT_SGNTR": {},
         "CLM_LINE_INSTNL": [],
         "CLM_DCMTN": {},
@@ -714,6 +717,7 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
         claim_line["CLM_LINE_RX_NUM"] = round(random.uniform(0, 100000), 2)
         claim_line["CLM_LINE_GRS_CVRD_CST_TOT_AMT"] = round(random.uniform(0, 1000), 2)
         claim_line["CLM_LINE_OTHR_TP_PD_AMT"] = round(random.uniform(0, 1000), 2)
+        claim_line["CLM_LINE_PMD_UNIQ_TRKNG_NUM"] = "".join(random.choices(string.ascii_uppercase + string.digits, k=14))
 
         claim_line_rx = {}
         claim_line_rx["CLM_UNIQ_ID"] = claim["CLM"]["CLM_UNIQ_ID"]
@@ -1093,6 +1097,7 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
             # handled above
             continue
         claim_line = {}
+        claim_line_dcmtn = {}
         claim_line_inst = {}
         claim_line_prfnl = {}
         claim_line["GEO_BENE_SK"] = claim["CLM"]["GEO_BENE_SK"]
@@ -1102,6 +1107,15 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
         claim_line["CLM_FROM_DT"] = claim["CLM"]["CLM_FROM_DT"]
         claim_line["CLM_LINE_FROM_DT"] = claim["CLM"]["CLM_FROM_DT"]
         claim_line["CLM_LINE_THRU_DT"] = claim["CLM"]["CLM_THRU_DT"]
+
+        claim_line_dcmtn["GEO_BENE_SK"] = claim["CLM"]["GEO_BENE_SK"]
+        claim_line_dcmtn["CLM_DT_SGNTR_SK"] = claim["CLM"]["CLM_DT_SGNTR_SK"]
+        claim_line_dcmtn["CLM_TYPE_CD"] = claim["CLM"]["CLM_TYPE_CD"]
+        claim_line_dcmtn["CLM_NUM_SK"] = claim["CLM"]["CLM_NUM_SK"]
+
+        claim_line_dcmtn["CLM_LINE_PA_UNIQ_TRKNG_NUM"] = "".join(random.choices(string.ascii_uppercase + string.digits, k=14))
+
+
         if clm_type_cd >= 10 and clm_type_cd <= 64:
             claim_line_inst["GEO_BENE_SK"] = claim["CLM"]["GEO_BENE_SK"]
             claim_line_inst["CLM_DT_SGNTR_SK"] = claim["CLM"]["CLM_DT_SGNTR_SK"]
@@ -1267,11 +1281,15 @@ def gen_claim(bene_sk="-1", min_date="2018-01-01", max_date=str(now)):
         claim_line_inst["CLM_LINE_NON_EHR_RDCTN_AMT"] = round(random.uniform(0, 500), 2)
         claim_line_inst["CLM_REV_CNTR_TDAPA_AMT"] = round(random.uniform(0, 10000), 2)
         add_meta_timestamps(claim_line_inst, claim["CLM"], max_date)
+        add_meta_timestamps(claim_line_dcmtn, claim["CLM"], max_date)
 
         claim_line["CLM_UNIQ_ID"] = claim["CLM"]["CLM_UNIQ_ID"]
         claim_line["CLM_LINE_NUM"] = line_num
         claim_line_inst["CLM_LINE_NUM"] = line_num
         claim_line_prfnl["CLM_LINE_NUM"] = line_num
+        claim_line_dcmtn["CLM_LINE_NUM"] = line_num
+
+        claim["CLM_LINE_DCMTN"].append(claim_line_dcmtn)
         claim["CLM_LINE"].append(claim_line)
         if clm_type_cd >= 10 and clm_type_cd <= 65:
             claim["CLM_LINE_INSTNL"].append(claim_line_inst)
@@ -1698,6 +1716,7 @@ def main():
 
     CLM = []
     CLM_LINE = []
+    CLM_LINE_DCMTN = []
     CLM_VAL = []
     CLM_INSTNL = []
     CLM_LINE_INSTNL = []
@@ -1733,6 +1752,7 @@ def main():
             claim = gen_claim(bene_sk=pt_bene_sk, min_date=clm_from_dt_min, max_date=max_date)
             CLM.append(claim["CLM"])
             CLM_LINE.extend(claim["CLM_LINE"])
+            CLM_LINE_DCMTN.extend(claim["CLM_LINE_DCMTN"])
             CLM_VAL.extend(claim["CLM_VAL"])
             CLM_DT_SGNTR.append(claim["CLM_DT_SGNTR"])
             CLM_PROD.extend(claim["CLM_PROD"])
@@ -1774,6 +1794,7 @@ def main():
     save_output_files(
         CLM,
         CLM_LINE,
+        CLM_LINE_DCMTN,
         CLM_VAL,
         CLM_DT_SGNTR,
         CLM_PROD,
