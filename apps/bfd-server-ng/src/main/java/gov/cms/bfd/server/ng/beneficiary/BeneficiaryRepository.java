@@ -4,6 +4,8 @@ import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
 import gov.cms.bfd.server.ng.beneficiary.model.BeneficiaryIdentity;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.util.LogUtil;
+import io.micrometer.core.annotation.Timed;
+import io.micrometer.core.aop.MeterTag;
 import jakarta.persistence.EntityManager;
 import java.util.List;
 import java.util.Optional;
@@ -24,6 +26,7 @@ public class BeneficiaryRepository {
    * @return list of patient identities representing all active identities connected to the bene
    *     record
    */
+  @Timed(value = "application.beneficiary.search_identities")
   public List<BeneficiaryIdentity> getValidBeneficiaryIdentities(long beneXrefSk) {
     return entityManager
         .createQuery(
@@ -44,7 +47,13 @@ public class BeneficiaryRepository {
    * @param lastUpdatedRange last updated search range
    * @return beneficiary record
    */
-  public Optional<Beneficiary> findById(long beneSk, DateTimeRange lastUpdatedRange) {
+  @Timed(value = "application.beneficiary.search_by_id")
+  public Optional<Beneficiary> findById(
+      long beneSk,
+      @MeterTag(
+              key = "hasLastUpdated",
+              expression = "lowerBound.isPresent() || upperBound.isPresent()")
+          DateTimeRange lastUpdatedRange) {
     var optionalBeneficiary =
         entityManager
             .createQuery(
@@ -77,6 +86,7 @@ public class BeneficiaryRepository {
    * @param beneSk original beneSk
    * @return xrefSk for the bene
    */
+  @Timed(value = "application.beneficiary.search_xref_by_bene_sk")
   public Optional<Long> getXrefSkFromBeneSk(long beneSk) {
     return entityManager
         .createQuery(
@@ -98,6 +108,7 @@ public class BeneficiaryRepository {
    * @param mbi Medicare Beneficiary Identifier
    * @return xrefSk for the bene
    */
+  @Timed(value = "application.beneficiary.search_xref_by_mbi")
   public Optional<Long> getXrefSkFromMbi(String mbi) {
     return entityManager
         .createQuery(

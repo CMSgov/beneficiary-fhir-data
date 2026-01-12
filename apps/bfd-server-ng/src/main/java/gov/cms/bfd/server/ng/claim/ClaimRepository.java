@@ -7,6 +7,8 @@ import gov.cms.bfd.server.ng.input.TagCriterion;
 import gov.cms.bfd.server.ng.input.TagCriterion.FinalActionCriterion;
 import gov.cms.bfd.server.ng.input.TagCriterion.SourceIdCriterion;
 import gov.cms.bfd.server.ng.util.LogUtil;
+import io.micrometer.core.annotation.Timed;
+import io.micrometer.core.aop.MeterTag;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import java.util.ArrayList;
@@ -57,8 +59,17 @@ public class ClaimRepository {
    * @param lastUpdated last updated
    * @return claim
    */
+  @Timed(value = "application.claim.search_by_id")
   public Optional<Claim> findById(
-      long claimUniqueId, DateTimeRange claimThroughDate, DateTimeRange lastUpdated) {
+      long claimUniqueId,
+      @MeterTag(
+              key = "hasClaimThroughDate",
+              expression = "lowerBound.isPresent() || upperBound.isPresent()")
+          DateTimeRange claimThroughDate,
+      @MeterTag(
+              key = "hasLastUpdated",
+              expression = "lowerBound.isPresent() || upperBound.isPresent()")
+          DateTimeRange lastUpdated) {
     var jpql =
         String.format(
             """
@@ -94,14 +105,22 @@ public class ClaimRepository {
    * @param claimTypeCodes claimTypeCodes
    * @return claims
    */
+  @Timed(value = "application.claim.search_by_bene")
   public List<Claim> findByBeneXrefSk(
       long beneSk,
-      DateTimeRange claimThroughDate,
-      DateTimeRange lastUpdated,
-      Optional<Integer> limit,
-      Optional<Integer> offset,
-      List<List<TagCriterion>> tagCriteria,
-      List<ClaimTypeCode> claimTypeCodes) {
+      @MeterTag(
+              key = "hasClaimThroughDate",
+              expression = "lowerBound.isPresent() || upperBound.isPresent()")
+          DateTimeRange claimThroughDate,
+      @MeterTag(
+              key = "hasLastUpdated",
+              expression = "lowerBound.isPresent() || upperBound.isPresent()")
+          DateTimeRange lastUpdated,
+      @MeterTag(key = "hasLimit", expression = "isPresent()") Optional<Integer> limit,
+      @MeterTag(key = "hasOffset", expression = "isPresent()") Optional<Integer> offset,
+      @MeterTag(key = "hasTags", expression = "size() > 0") List<List<TagCriterion>> tagCriteria,
+      @MeterTag(key = "hasClaimTypeCodes", expression = "size() > 0")
+          List<ClaimTypeCode> claimTypeCodes) {
     // JPQL doesn't support LIMIT/OFFSET unfortunately, so we have to load this
     // separately.
     // setMaxResults will only limit the results in memory rather than at the

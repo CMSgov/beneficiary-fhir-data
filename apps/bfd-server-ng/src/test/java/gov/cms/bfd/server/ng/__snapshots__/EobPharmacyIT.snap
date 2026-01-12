@@ -1939,7 +1939,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
     "code" : {
       "coding" : [ {
         "code" : "A",
-        "display" : "Attachment point met on this even",
+        "display" : "Attachment point met on this event",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CTSTRPHC-CVRG-IND-CD"
       } ]
     },

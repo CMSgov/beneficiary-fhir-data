@@ -1,8 +1,8 @@
 package gov.cms.bfd.server.ng;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.test.util.AssertionErrors.assertEquals;
 
 import au.com.origin.snapshots.Expect;
 import au.com.origin.snapshots.junit5.SnapshotExtension;
