@@ -1149,6 +1149,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-STUS-CD"
           }
         } ],
+        "informationSequence" : [ 1 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "PC",
@@ -1233,6 +1234,20 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET]=[
       "supportingInfo" : [ {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_LINE_PA_UNIQ_TRKNG_NUM",
+            "display" : "Partially Adjudicated Unique Tracking Number",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 1,
+        "valueString" : "0LA00000109286"
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "CLM_NCH_PRMRY_PYR_CD",
             "display" : "NCH Primary Payer Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -1248,7 +1263,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NCH-PRMRY-PYR-CD"
           } ]
         },
-        "sequence" : 1
+        "sequence" : 2
       }, {
         "category" : {
           "coding" : [ {
@@ -1271,7 +1286,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD"
           } ]
         },
-        "sequence" : 2
+        "sequence" : 3
       }, {
         "category" : {
           "coding" : [ {
@@ -1291,7 +1306,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
           } ]
         },
-        "sequence" : 3
+        "sequence" : 4
       }, {
         "category" : {
           "coding" : [ {
@@ -1299,7 +1314,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-26"
@@ -1311,7 +1326,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -1325,7 +1340,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -1339,7 +1354,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -1353,7 +1368,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -1367,7 +1382,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -1381,7 +1396,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -1400,7 +1415,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -1418,7 +1433,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -1435,7 +1450,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -1455,7 +1470,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -1469,7 +1484,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -1489,7 +1504,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -1509,7 +1524,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
@@ -2802,6 +2817,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET_WITH_SEARCH]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-STUS-CD"
           }
         } ],
+        "informationSequence" : [ 1 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "PC",
@@ -2886,6 +2902,20 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET_WITH_SEARCH]=[
       "supportingInfo" : [ {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_LINE_PA_UNIQ_TRKNG_NUM",
+            "display" : "Partially Adjudicated Unique Tracking Number",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 1,
+        "valueString" : "0LA00000109286"
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "CLM_NCH_PRMRY_PYR_CD",
             "display" : "NCH Primary Payer Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -2901,7 +2931,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET_WITH_SEARCH]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NCH-PRMRY-PYR-CD"
           } ]
         },
-        "sequence" : 1
+        "sequence" : 2
       }, {
         "category" : {
           "coding" : [ {
@@ -2924,7 +2954,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET_WITH_SEARCH]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD"
           } ]
         },
-        "sequence" : 2
+        "sequence" : 3
       }, {
         "category" : {
           "coding" : [ {
@@ -2944,7 +2974,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET_WITH_SEARCH]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
           } ]
         },
-        "sequence" : 3
+        "sequence" : 4
       }, {
         "category" : {
           "coding" : [ {
@@ -2952,7 +2982,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET_WITH_SEARCH]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-26"
@@ -2964,7 +2994,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET_WITH_SEARCH]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -2978,7 +3008,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET_WITH_SEARCH]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -2992,7 +3022,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET_WITH_SEARCH]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -3006,7 +3036,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET_WITH_SEARCH]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -3020,7 +3050,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET_WITH_SEARCH]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -3034,7 +3064,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET_WITH_SEARCH]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -3053,7 +3083,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET_WITH_SEARCH]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -3071,7 +3101,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET_WITH_SEARCH]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -3088,7 +3118,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET_WITH_SEARCH]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -3108,7 +3138,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET_WITH_SEARCH]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -3122,7 +3152,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET_WITH_SEARCH]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -3142,7 +3172,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET_WITH_SEARCH]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -3162,7 +3192,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET_WITH_SEARCH]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
@@ -4455,6 +4485,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[POST]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-STUS-CD"
           }
         } ],
+        "informationSequence" : [ 1 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "PC",
@@ -4539,6 +4570,20 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[POST]=[
       "supportingInfo" : [ {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_LINE_PA_UNIQ_TRKNG_NUM",
+            "display" : "Partially Adjudicated Unique Tracking Number",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 1,
+        "valueString" : "0LA00000109286"
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "CLM_NCH_PRMRY_PYR_CD",
             "display" : "NCH Primary Payer Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -4554,7 +4599,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[POST]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NCH-PRMRY-PYR-CD"
           } ]
         },
-        "sequence" : 1
+        "sequence" : 2
       }, {
         "category" : {
           "coding" : [ {
@@ -4577,7 +4622,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[POST]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD"
           } ]
         },
-        "sequence" : 2
+        "sequence" : 3
       }, {
         "category" : {
           "coding" : [ {
@@ -4597,7 +4642,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[POST]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
           } ]
         },
-        "sequence" : 3
+        "sequence" : 4
       }, {
         "category" : {
           "coding" : [ {
@@ -4605,7 +4650,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[POST]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-26"
@@ -4617,7 +4662,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[POST]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -4631,7 +4676,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[POST]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -4645,7 +4690,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[POST]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -4659,7 +4704,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[POST]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -4673,7 +4718,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[POST]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -4687,7 +4732,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[POST]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -4706,7 +4751,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[POST]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -4724,7 +4769,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[POST]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -4741,7 +4786,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[POST]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -4761,7 +4806,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[POST]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -4775,7 +4820,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[POST]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -4795,7 +4840,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[POST]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -4815,7 +4860,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[POST]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
@@ -6108,6 +6153,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset0]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-STUS-CD"
           }
         } ],
+        "informationSequence" : [ 1 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "PC",
@@ -6192,6 +6238,20 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset0]=[
       "supportingInfo" : [ {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_LINE_PA_UNIQ_TRKNG_NUM",
+            "display" : "Partially Adjudicated Unique Tracking Number",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 1,
+        "valueString" : "0LA00000109286"
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "CLM_NCH_PRMRY_PYR_CD",
             "display" : "NCH Primary Payer Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -6207,7 +6267,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset0]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NCH-PRMRY-PYR-CD"
           } ]
         },
-        "sequence" : 1
+        "sequence" : 2
       }, {
         "category" : {
           "coding" : [ {
@@ -6230,7 +6290,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset0]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD"
           } ]
         },
-        "sequence" : 2
+        "sequence" : 3
       }, {
         "category" : {
           "coding" : [ {
@@ -6250,7 +6310,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset0]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
           } ]
         },
-        "sequence" : 3
+        "sequence" : 4
       }, {
         "category" : {
           "coding" : [ {
@@ -6258,7 +6318,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset0]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-26"
@@ -6270,7 +6330,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset0]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -6284,7 +6344,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset0]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -6298,7 +6358,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset0]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -6312,7 +6372,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset0]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -6326,7 +6386,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset0]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -6340,7 +6400,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset0]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -6359,7 +6419,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset0]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -6377,7 +6437,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset0]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -6394,7 +6454,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset0]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -6414,7 +6474,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset0]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -6428,7 +6488,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset0]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -6448,7 +6508,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset0]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -6468,7 +6528,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset0]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
@@ -7762,6 +7822,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset1]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-STUS-CD"
           }
         } ],
+        "informationSequence" : [ 1 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "PC",
@@ -7846,6 +7907,20 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset1]=[
       "supportingInfo" : [ {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_LINE_PA_UNIQ_TRKNG_NUM",
+            "display" : "Partially Adjudicated Unique Tracking Number",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 1,
+        "valueString" : "0LA00000109286"
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "CLM_NCH_PRMRY_PYR_CD",
             "display" : "NCH Primary Payer Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -7861,7 +7936,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset1]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NCH-PRMRY-PYR-CD"
           } ]
         },
-        "sequence" : 1
+        "sequence" : 2
       }, {
         "category" : {
           "coding" : [ {
@@ -7884,7 +7959,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset1]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD"
           } ]
         },
-        "sequence" : 2
+        "sequence" : 3
       }, {
         "category" : {
           "coding" : [ {
@@ -7904,7 +7979,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset1]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
           } ]
         },
-        "sequence" : 3
+        "sequence" : 4
       }, {
         "category" : {
           "coding" : [ {
@@ -7912,7 +7987,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset1]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-26"
@@ -7924,7 +7999,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset1]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -7938,7 +8013,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset1]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -7952,7 +8027,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset1]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -7966,7 +8041,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset1]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -7980,7 +8055,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset1]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -7994,7 +8069,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset1]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -8013,7 +8088,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset1]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -8031,7 +8106,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset1]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -8048,7 +8123,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset1]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -8068,7 +8143,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset1]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -8082,7 +8157,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset1]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -8102,7 +8177,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset1]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -8122,7 +8197,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset1]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
@@ -9416,6 +9491,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-STUS-CD"
           }
         } ],
+        "informationSequence" : [ 1 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "PC",
@@ -9500,6 +9576,20 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
       "supportingInfo" : [ {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_LINE_PA_UNIQ_TRKNG_NUM",
+            "display" : "Partially Adjudicated Unique Tracking Number",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 1,
+        "valueString" : "0LA00000109286"
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "CLM_NCH_PRMRY_PYR_CD",
             "display" : "NCH Primary Payer Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -9515,7 +9605,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NCH-PRMRY-PYR-CD"
           } ]
         },
-        "sequence" : 1
+        "sequence" : 2
       }, {
         "category" : {
           "coding" : [ {
@@ -9538,7 +9628,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD"
           } ]
         },
-        "sequence" : 2
+        "sequence" : 3
       }, {
         "category" : {
           "coding" : [ {
@@ -9558,7 +9648,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
           } ]
         },
-        "sequence" : 3
+        "sequence" : 4
       }, {
         "category" : {
           "coding" : [ {
@@ -9566,7 +9656,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-26"
@@ -9578,7 +9668,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -9592,7 +9682,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -9606,7 +9696,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -9620,7 +9710,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -9634,7 +9724,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -9648,7 +9738,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -9667,7 +9757,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -9685,7 +9775,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -9702,7 +9792,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -9722,7 +9812,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -9736,7 +9826,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -9756,7 +9846,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -9776,7 +9866,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
@@ -14777,6 +14867,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-STUS-CD"
           }
         } ],
+        "informationSequence" : [ 1 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "PC",
@@ -14861,6 +14952,20 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
       "supportingInfo" : [ {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_LINE_PA_UNIQ_TRKNG_NUM",
+            "display" : "Partially Adjudicated Unique Tracking Number",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 1,
+        "valueString" : "0LA00000109286"
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "CLM_NCH_PRMRY_PYR_CD",
             "display" : "NCH Primary Payer Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -14876,7 +14981,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NCH-PRMRY-PYR-CD"
           } ]
         },
-        "sequence" : 1
+        "sequence" : 2
       }, {
         "category" : {
           "coding" : [ {
@@ -14899,7 +15004,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD"
           } ]
         },
-        "sequence" : 2
+        "sequence" : 3
       }, {
         "category" : {
           "coding" : [ {
@@ -14919,7 +15024,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
           } ]
         },
-        "sequence" : 3
+        "sequence" : 4
       }, {
         "category" : {
           "coding" : [ {
@@ -14927,7 +15032,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-26"
@@ -14939,7 +15044,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -14953,7 +15058,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -14967,7 +15072,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -14981,7 +15086,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -14995,7 +15100,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -15009,7 +15114,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -15028,7 +15133,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -15046,7 +15151,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -15063,7 +15168,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -15083,7 +15188,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -15097,7 +15202,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -15117,7 +15222,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -15137,7 +15242,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
@@ -20138,6 +20243,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-STUS-CD"
           }
         } ],
+        "informationSequence" : [ 1 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "PC",
@@ -20222,6 +20328,20 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
       "supportingInfo" : [ {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_LINE_PA_UNIQ_TRKNG_NUM",
+            "display" : "Partially Adjudicated Unique Tracking Number",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 1,
+        "valueString" : "0LA00000109286"
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "CLM_NCH_PRMRY_PYR_CD",
             "display" : "NCH Primary Payer Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -20237,7 +20357,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NCH-PRMRY-PYR-CD"
           } ]
         },
-        "sequence" : 1
+        "sequence" : 2
       }, {
         "category" : {
           "coding" : [ {
@@ -20260,7 +20380,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD"
           } ]
         },
-        "sequence" : 2
+        "sequence" : 3
       }, {
         "category" : {
           "coding" : [ {
@@ -20280,7 +20400,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
           } ]
         },
-        "sequence" : 3
+        "sequence" : 4
       }, {
         "category" : {
           "coding" : [ {
@@ -20288,7 +20408,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-26"
@@ -20300,7 +20420,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -20314,7 +20434,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -20328,7 +20448,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -20342,7 +20462,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -20356,7 +20476,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -20370,7 +20490,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -20389,7 +20509,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -20407,7 +20527,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -20424,7 +20544,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -20444,7 +20564,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -20458,7 +20578,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -20478,7 +20598,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -20498,7 +20618,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
@@ -25499,6 +25619,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WITH_SEARCH_WithSy
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-STUS-CD"
           }
         } ],
+        "informationSequence" : [ 1 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "PC",
@@ -25583,6 +25704,20 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WITH_SEARCH_WithSy
       "supportingInfo" : [ {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_LINE_PA_UNIQ_TRKNG_NUM",
+            "display" : "Partially Adjudicated Unique Tracking Number",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 1,
+        "valueString" : "0LA00000109286"
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "CLM_NCH_PRMRY_PYR_CD",
             "display" : "NCH Primary Payer Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -25598,7 +25733,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WITH_SEARCH_WithSy
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NCH-PRMRY-PYR-CD"
           } ]
         },
-        "sequence" : 1
+        "sequence" : 2
       }, {
         "category" : {
           "coding" : [ {
@@ -25621,7 +25756,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WITH_SEARCH_WithSy
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD"
           } ]
         },
-        "sequence" : 2
+        "sequence" : 3
       }, {
         "category" : {
           "coding" : [ {
@@ -25641,7 +25776,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WITH_SEARCH_WithSy
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
           } ]
         },
-        "sequence" : 3
+        "sequence" : 4
       }, {
         "category" : {
           "coding" : [ {
@@ -25649,7 +25784,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WITH_SEARCH_WithSy
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-26"
@@ -25661,7 +25796,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WITH_SEARCH_WithSy
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -25675,7 +25810,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WITH_SEARCH_WithSy
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -25689,7 +25824,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WITH_SEARCH_WithSy
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -25703,7 +25838,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WITH_SEARCH_WithSy
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -25717,7 +25852,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WITH_SEARCH_WithSy
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -25731,7 +25866,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WITH_SEARCH_WithSy
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -25750,7 +25885,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WITH_SEARCH_WithSy
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -25768,7 +25903,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WITH_SEARCH_WithSy
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -25785,7 +25920,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WITH_SEARCH_WithSy
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -25805,7 +25940,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WITH_SEARCH_WithSy
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -25819,7 +25954,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WITH_SEARCH_WithSy
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -25839,7 +25974,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WITH_SEARCH_WithSy
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -25859,7 +25994,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WITH_SEARCH_WithSy
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
@@ -28044,6 +28179,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WithSystemTag_Adju
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-STUS-CD"
           }
         } ],
+        "informationSequence" : [ 1 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "PC",
@@ -28128,6 +28264,20 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WithSystemTag_Adju
       "supportingInfo" : [ {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_LINE_PA_UNIQ_TRKNG_NUM",
+            "display" : "Partially Adjudicated Unique Tracking Number",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 1,
+        "valueString" : "0LA00000109286"
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "CLM_NCH_PRMRY_PYR_CD",
             "display" : "NCH Primary Payer Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -28143,7 +28293,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WithSystemTag_Adju
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NCH-PRMRY-PYR-CD"
           } ]
         },
-        "sequence" : 1
+        "sequence" : 2
       }, {
         "category" : {
           "coding" : [ {
@@ -28166,7 +28316,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WithSystemTag_Adju
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD"
           } ]
         },
-        "sequence" : 2
+        "sequence" : 3
       }, {
         "category" : {
           "coding" : [ {
@@ -28186,7 +28336,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WithSystemTag_Adju
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
           } ]
         },
-        "sequence" : 3
+        "sequence" : 4
       }, {
         "category" : {
           "coding" : [ {
@@ -28194,7 +28344,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WithSystemTag_Adju
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-26"
@@ -28206,7 +28356,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WithSystemTag_Adju
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -28220,7 +28370,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WithSystemTag_Adju
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -28234,7 +28384,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WithSystemTag_Adju
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -28248,7 +28398,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WithSystemTag_Adju
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -28262,7 +28412,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WithSystemTag_Adju
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -28276,7 +28426,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WithSystemTag_Adju
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -28295,7 +28445,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WithSystemTag_Adju
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -28313,7 +28463,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WithSystemTag_Adju
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -28330,7 +28480,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WithSystemTag_Adju
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -28350,7 +28500,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WithSystemTag_Adju
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -28364,7 +28514,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WithSystemTag_Adju
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -28384,7 +28534,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WithSystemTag_Adju
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -28404,7 +28554,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[GET_WithSystemTag_Adju
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
@@ -30589,6 +30739,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[POST_WithSystemTag_Adj
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-STUS-CD"
           }
         } ],
+        "informationSequence" : [ 1 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "PC",
@@ -30673,6 +30824,20 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[POST_WithSystemTag_Adj
       "supportingInfo" : [ {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_LINE_PA_UNIQ_TRKNG_NUM",
+            "display" : "Partially Adjudicated Unique Tracking Number",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 1,
+        "valueString" : "0LA00000109286"
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "CLM_NCH_PRMRY_PYR_CD",
             "display" : "NCH Primary Payer Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -30688,7 +30853,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[POST_WithSystemTag_Adj
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NCH-PRMRY-PYR-CD"
           } ]
         },
-        "sequence" : 1
+        "sequence" : 2
       }, {
         "category" : {
           "coding" : [ {
@@ -30711,7 +30876,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[POST_WithSystemTag_Adj
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD"
           } ]
         },
-        "sequence" : 2
+        "sequence" : 3
       }, {
         "category" : {
           "coding" : [ {
@@ -30731,7 +30896,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[POST_WithSystemTag_Adj
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
           } ]
         },
-        "sequence" : 3
+        "sequence" : 4
       }, {
         "category" : {
           "coding" : [ {
@@ -30739,7 +30904,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[POST_WithSystemTag_Adj
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-26"
@@ -30751,7 +30916,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[POST_WithSystemTag_Adj
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -30765,7 +30930,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[POST_WithSystemTag_Adj
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -30779,7 +30944,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[POST_WithSystemTag_Adj
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -30793,7 +30958,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[POST_WithSystemTag_Adj
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -30807,7 +30972,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[POST_WithSystemTag_Adj
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -30821,7 +30986,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[POST_WithSystemTag_Adj
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -30840,7 +31005,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[POST_WithSystemTag_Adj
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -30858,7 +31023,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[POST_WithSystemTag_Adj
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -30875,7 +31040,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[POST_WithSystemTag_Adj
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -30895,7 +31060,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[POST_WithSystemTag_Adj
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -30909,7 +31074,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[POST_WithSystemTag_Adj
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -30929,7 +31094,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[POST_WithSystemTag_Adj
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -30949,7 +31114,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchBySystemUrlTag[POST_WithSystemTag_Adj
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
@@ -41633,6 +41798,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WITH_SEARCH_WithTag_Adjudic
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-STUS-CD"
           }
         } ],
+        "informationSequence" : [ 1 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "PC",
@@ -41717,6 +41883,20 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WITH_SEARCH_WithTag_Adjudic
       "supportingInfo" : [ {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_LINE_PA_UNIQ_TRKNG_NUM",
+            "display" : "Partially Adjudicated Unique Tracking Number",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 1,
+        "valueString" : "0LA00000109286"
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "CLM_NCH_PRMRY_PYR_CD",
             "display" : "NCH Primary Payer Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -41732,7 +41912,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WITH_SEARCH_WithTag_Adjudic
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NCH-PRMRY-PYR-CD"
           } ]
         },
-        "sequence" : 1
+        "sequence" : 2
       }, {
         "category" : {
           "coding" : [ {
@@ -41755,7 +41935,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WITH_SEARCH_WithTag_Adjudic
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD"
           } ]
         },
-        "sequence" : 2
+        "sequence" : 3
       }, {
         "category" : {
           "coding" : [ {
@@ -41775,7 +41955,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WITH_SEARCH_WithTag_Adjudic
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
           } ]
         },
-        "sequence" : 3
+        "sequence" : 4
       }, {
         "category" : {
           "coding" : [ {
@@ -41783,7 +41963,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WITH_SEARCH_WithTag_Adjudic
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-26"
@@ -41795,7 +41975,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WITH_SEARCH_WithTag_Adjudic
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -41809,7 +41989,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WITH_SEARCH_WithTag_Adjudic
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -41823,7 +42003,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WITH_SEARCH_WithTag_Adjudic
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -41837,7 +42017,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WITH_SEARCH_WithTag_Adjudic
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -41851,7 +42031,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WITH_SEARCH_WithTag_Adjudic
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -41865,7 +42045,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WITH_SEARCH_WithTag_Adjudic
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -41884,7 +42064,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WITH_SEARCH_WithTag_Adjudic
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -41902,7 +42082,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WITH_SEARCH_WithTag_Adjudic
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -41919,7 +42099,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WITH_SEARCH_WithTag_Adjudic
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -41939,7 +42119,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WITH_SEARCH_WithTag_Adjudic
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -41953,7 +42133,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WITH_SEARCH_WithTag_Adjudic
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -41973,7 +42153,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WITH_SEARCH_WithTag_Adjudic
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -41993,7 +42173,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WITH_SEARCH_WithTag_Adjudic
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
@@ -44178,6 +44358,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WithTag_Adjudicated]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-STUS-CD"
           }
         } ],
+        "informationSequence" : [ 1 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "PC",
@@ -44262,6 +44443,20 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WithTag_Adjudicated]=[
       "supportingInfo" : [ {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_LINE_PA_UNIQ_TRKNG_NUM",
+            "display" : "Partially Adjudicated Unique Tracking Number",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 1,
+        "valueString" : "0LA00000109286"
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "CLM_NCH_PRMRY_PYR_CD",
             "display" : "NCH Primary Payer Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -44277,7 +44472,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WithTag_Adjudicated]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NCH-PRMRY-PYR-CD"
           } ]
         },
-        "sequence" : 1
+        "sequence" : 2
       }, {
         "category" : {
           "coding" : [ {
@@ -44300,7 +44495,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WithTag_Adjudicated]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD"
           } ]
         },
-        "sequence" : 2
+        "sequence" : 3
       }, {
         "category" : {
           "coding" : [ {
@@ -44320,7 +44515,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WithTag_Adjudicated]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
           } ]
         },
-        "sequence" : 3
+        "sequence" : 4
       }, {
         "category" : {
           "coding" : [ {
@@ -44328,7 +44523,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WithTag_Adjudicated]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-26"
@@ -44340,7 +44535,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WithTag_Adjudicated]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -44354,7 +44549,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WithTag_Adjudicated]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -44368,7 +44563,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WithTag_Adjudicated]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -44382,7 +44577,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WithTag_Adjudicated]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -44396,7 +44591,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WithTag_Adjudicated]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -44410,7 +44605,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WithTag_Adjudicated]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -44429,7 +44624,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WithTag_Adjudicated]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -44447,7 +44642,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WithTag_Adjudicated]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -44464,7 +44659,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WithTag_Adjudicated]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -44484,7 +44679,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WithTag_Adjudicated]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -44498,7 +44693,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WithTag_Adjudicated]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -44518,7 +44713,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WithTag_Adjudicated]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -44538,7 +44733,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[GET_WithTag_Adjudicated]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
@@ -46723,6 +46918,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[POST_WithTag_Adjudicated]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-STUS-CD"
           }
         } ],
+        "informationSequence" : [ 1 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "PC",
@@ -46807,6 +47003,20 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[POST_WithTag_Adjudicated]=[
       "supportingInfo" : [ {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_LINE_PA_UNIQ_TRKNG_NUM",
+            "display" : "Partially Adjudicated Unique Tracking Number",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 1,
+        "valueString" : "0LA00000109286"
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "CLM_NCH_PRMRY_PYR_CD",
             "display" : "NCH Primary Payer Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -46822,7 +47032,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[POST_WithTag_Adjudicated]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NCH-PRMRY-PYR-CD"
           } ]
         },
-        "sequence" : 1
+        "sequence" : 2
       }, {
         "category" : {
           "coding" : [ {
@@ -46845,7 +47055,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[POST_WithTag_Adjudicated]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD"
           } ]
         },
-        "sequence" : 2
+        "sequence" : 3
       }, {
         "category" : {
           "coding" : [ {
@@ -46865,7 +47075,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[POST_WithTag_Adjudicated]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
           } ]
         },
-        "sequence" : 3
+        "sequence" : 4
       }, {
         "category" : {
           "coding" : [ {
@@ -46873,7 +47083,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[POST_WithTag_Adjudicated]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-26"
@@ -46885,7 +47095,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[POST_WithTag_Adjudicated]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -46899,7 +47109,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[POST_WithTag_Adjudicated]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -46913,7 +47123,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[POST_WithTag_Adjudicated]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -46927,7 +47137,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[POST_WithTag_Adjudicated]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -46941,7 +47151,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[POST_WithTag_Adjudicated]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -46955,7 +47165,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[POST_WithTag_Adjudicated]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -46974,7 +47184,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[POST_WithTag_Adjudicated]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -46992,7 +47202,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[POST_WithTag_Adjudicated]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -47009,7 +47219,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[POST_WithTag_Adjudicated]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -47029,7 +47239,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[POST_WithTag_Adjudicated]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -47043,7 +47253,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[POST_WithTag_Adjudicated]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -47063,7 +47273,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[POST_WithTag_Adjudicated]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -47083,7 +47293,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTag[POST_WithTag_Adjudicated]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
@@ -51929,6 +52139,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-STUS-CD"
           }
         } ],
+        "informationSequence" : [ 1 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "PC",
@@ -52013,6 +52224,20 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
       "supportingInfo" : [ {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_LINE_PA_UNIQ_TRKNG_NUM",
+            "display" : "Partially Adjudicated Unique Tracking Number",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 1,
+        "valueString" : "0LA00000109286"
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "CLM_NCH_PRMRY_PYR_CD",
             "display" : "NCH Primary Payer Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -52028,7 +52253,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NCH-PRMRY-PYR-CD"
           } ]
         },
-        "sequence" : 1
+        "sequence" : 2
       }, {
         "category" : {
           "coding" : [ {
@@ -52051,7 +52276,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD"
           } ]
         },
-        "sequence" : 2
+        "sequence" : 3
       }, {
         "category" : {
           "coding" : [ {
@@ -52071,7 +52296,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
           } ]
         },
-        "sequence" : 3
+        "sequence" : 4
       }, {
         "category" : {
           "coding" : [ {
@@ -52079,7 +52304,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-26"
@@ -52091,7 +52316,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -52105,7 +52330,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -52119,7 +52344,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -52133,7 +52358,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -52147,7 +52372,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -52161,7 +52386,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -52180,7 +52405,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -52198,7 +52423,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -52215,7 +52440,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -52235,7 +52460,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -52249,7 +52474,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -52269,7 +52494,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -52289,7 +52514,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
@@ -56226,6 +56451,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-STUS-CD"
           }
         } ],
+        "informationSequence" : [ 1 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "PC",
@@ -56310,6 +56536,20 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
       "supportingInfo" : [ {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_LINE_PA_UNIQ_TRKNG_NUM",
+            "display" : "Partially Adjudicated Unique Tracking Number",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 1,
+        "valueString" : "0LA00000109286"
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "CLM_NCH_PRMRY_PYR_CD",
             "display" : "NCH Primary Payer Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -56325,7 +56565,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NCH-PRMRY-PYR-CD"
           } ]
         },
-        "sequence" : 1
+        "sequence" : 2
       }, {
         "category" : {
           "coding" : [ {
@@ -56348,7 +56588,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD"
           } ]
         },
-        "sequence" : 2
+        "sequence" : 3
       }, {
         "category" : {
           "coding" : [ {
@@ -56368,7 +56608,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
           } ]
         },
-        "sequence" : 3
+        "sequence" : 4
       }, {
         "category" : {
           "coding" : [ {
@@ -56376,7 +56616,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-26"
@@ -56388,7 +56628,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -56402,7 +56642,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -56416,7 +56656,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -56430,7 +56670,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -56444,7 +56684,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -56458,7 +56698,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -56477,7 +56717,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -56495,7 +56735,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -56512,7 +56752,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -56532,7 +56772,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -56546,7 +56786,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -56566,7 +56806,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -56586,7 +56826,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
@@ -64248,6 +64488,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-STUS-CD"
           }
         } ],
+        "informationSequence" : [ 1 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "PC",
@@ -64332,6 +64573,20 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
       "supportingInfo" : [ {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_LINE_PA_UNIQ_TRKNG_NUM",
+            "display" : "Partially Adjudicated Unique Tracking Number",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 1,
+        "valueString" : "0LA00000109286"
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "CLM_NCH_PRMRY_PYR_CD",
             "display" : "NCH Primary Payer Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -64347,7 +64602,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NCH-PRMRY-PYR-CD"
           } ]
         },
-        "sequence" : 1
+        "sequence" : 2
       }, {
         "category" : {
           "coding" : [ {
@@ -64370,7 +64625,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD"
           } ]
         },
-        "sequence" : 2
+        "sequence" : 3
       }, {
         "category" : {
           "coding" : [ {
@@ -64390,7 +64645,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
           } ]
         },
-        "sequence" : 3
+        "sequence" : 4
       }, {
         "category" : {
           "coding" : [ {
@@ -64398,7 +64653,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-26"
@@ -64410,7 +64665,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -64424,7 +64679,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -64438,7 +64693,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -64452,7 +64707,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -64466,7 +64721,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -64480,7 +64735,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -64499,7 +64754,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -64517,7 +64772,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -64534,7 +64789,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -64554,7 +64809,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -64568,7 +64823,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -64588,7 +64843,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -64608,7 +64863,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
@@ -68545,6 +68800,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-STUS-CD"
           }
         } ],
+        "informationSequence" : [ 1 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "PC",
@@ -68629,6 +68885,20 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
       "supportingInfo" : [ {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_LINE_PA_UNIQ_TRKNG_NUM",
+            "display" : "Partially Adjudicated Unique Tracking Number",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 1,
+        "valueString" : "0LA00000109286"
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "CLM_NCH_PRMRY_PYR_CD",
             "display" : "NCH Primary Payer Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -68644,7 +68914,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NCH-PRMRY-PYR-CD"
           } ]
         },
-        "sequence" : 1
+        "sequence" : 2
       }, {
         "category" : {
           "coding" : [ {
@@ -68667,7 +68937,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD"
           } ]
         },
-        "sequence" : 2
+        "sequence" : 3
       }, {
         "category" : {
           "coding" : [ {
@@ -68687,7 +68957,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
           } ]
         },
-        "sequence" : 3
+        "sequence" : 4
       }, {
         "category" : {
           "coding" : [ {
@@ -68695,7 +68965,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-26"
@@ -68707,7 +68977,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -68721,7 +68991,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -68735,7 +69005,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -68749,7 +69019,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -68763,7 +69033,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -68777,7 +69047,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -68796,7 +69066,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -68814,7 +69084,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -68831,7 +69101,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -68851,7 +69121,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -68865,7 +69135,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -68885,7 +69155,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -68905,7 +69175,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
@@ -76567,6 +76837,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-STUS-CD"
           }
         } ],
+        "informationSequence" : [ 1 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "PC",
@@ -76651,6 +76922,20 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
       "supportingInfo" : [ {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_LINE_PA_UNIQ_TRKNG_NUM",
+            "display" : "Partially Adjudicated Unique Tracking Number",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 1,
+        "valueString" : "0LA00000109286"
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "CLM_NCH_PRMRY_PYR_CD",
             "display" : "NCH Primary Payer Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -76666,7 +76951,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NCH-PRMRY-PYR-CD"
           } ]
         },
-        "sequence" : 1
+        "sequence" : 2
       }, {
         "category" : {
           "coding" : [ {
@@ -76689,7 +76974,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD"
           } ]
         },
-        "sequence" : 2
+        "sequence" : 3
       }, {
         "category" : {
           "coding" : [ {
@@ -76709,7 +76994,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
           } ]
         },
-        "sequence" : 3
+        "sequence" : 4
       }, {
         "category" : {
           "coding" : [ {
@@ -76717,7 +77002,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-26"
@@ -76729,7 +77014,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -76743,7 +77028,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -76757,7 +77042,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -76771,7 +77056,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -76785,7 +77070,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -76799,7 +77084,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -76818,7 +77103,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -76836,7 +77121,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -76853,7 +77138,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -76873,7 +77158,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -76887,7 +77172,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -76907,7 +77192,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -76927,7 +77212,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
@@ -80864,6 +81149,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-STUS-CD"
           }
         } ],
+        "informationSequence" : [ 1 ],
         "modifier" : [ {
           "coding" : [ {
             "code" : "PC",
@@ -80948,6 +81234,20 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
       "supportingInfo" : [ {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_LINE_PA_UNIQ_TRKNG_NUM",
+            "display" : "Partially Adjudicated Unique Tracking Number",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 1,
+        "valueString" : "0LA00000109286"
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "CLM_NCH_PRMRY_PYR_CD",
             "display" : "NCH Primary Payer Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -80963,7 +81263,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NCH-PRMRY-PYR-CD"
           } ]
         },
-        "sequence" : 1
+        "sequence" : 2
       }, {
         "category" : {
           "coding" : [ {
@@ -80986,7 +81286,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD"
           } ]
         },
-        "sequence" : 2
+        "sequence" : 3
       }, {
         "category" : {
           "coding" : [ {
@@ -81006,7 +81306,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
           } ]
         },
-        "sequence" : 3
+        "sequence" : 4
       }, {
         "category" : {
           "coding" : [ {
@@ -81014,7 +81314,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 5,
         "timingPeriod" : {
           "end" : "2021-10-03",
           "start" : "2021-09-26"
@@ -81026,7 +81326,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 6,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -81040,7 +81340,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -81054,7 +81354,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -81068,7 +81368,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -81082,7 +81382,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 10,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -81096,7 +81396,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 11,
         "timingDate" : "2021-10-03"
       }, {
         "category" : {
@@ -81115,7 +81415,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -81133,7 +81433,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -81150,7 +81450,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -81170,7 +81470,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -81184,7 +81484,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -81204,7 +81504,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -81224,7 +81524,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {

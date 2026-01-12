@@ -298,10 +298,16 @@ public class Claim {
         .forEach(eob::addExtension);
 
     var consolidatedDiagnoses = computeConsolidatedDiagnoses();
+    var supportingInfoFactory = new SupportingInfoFactory();
 
     claimItems.forEach(
         item -> {
-          item.getClaimLine().toFhir(item, consolidatedDiagnoses).ifPresent(eob::addItem);
+          var claimLine = item.getClaimLine().toFhir(item, consolidatedDiagnoses);
+          claimLine.ifPresent(eob::addItem);
+          item.getClaimLine().toFhir(supportingInfoFactory).ifPresent(si -> {
+              eob.addSupportingInfo(si);
+              claimLine.ifPresent(cl -> cl.addInformationSequence(si.getSequence()));
+          });
 
           item.getClaimLine()
               .getClaimRenderingProvider()
@@ -316,6 +322,8 @@ public class Claim {
           item.getClaimLineProfessional()
               .flatMap(i -> i.toFhirObservation(item.getClaimItemId().getBfdRowId()))
               .ifPresent(eob::addContained);
+
+
         });
     var diagnosisSequenceGenerator = new SequenceGenerator();
     claimTypeCode
@@ -347,7 +355,7 @@ public class Claim {
     claimTypeCode.toFhirOutcome().ifPresent(eob::setOutcome);
     getClaimFiss().flatMap(f -> f.toFhirOutcome(claimTypeCode)).ifPresent(eob::setOutcome);
 
-    var supportingInfoFactory = new SupportingInfoFactory();
+
     var recordTypeCodes = claimRecordType.toFhir(supportingInfoFactory);
 
     var initialSupportingInfo =

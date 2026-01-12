@@ -18,6 +18,7 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.PositiveIntType;
+import org.hl7.fhir.r4.model.StringType;
 
 /** Claim line info. */
 @Embeddable
@@ -34,6 +35,12 @@ public class ClaimLine {
 
   @Column(name = "clm_line_dgns_cd")
   private Optional<String> diagnosisCode;
+
+  @Column(name = "clm_line_pmd_uniq_trkng_num")
+  private Optional<String> adjudicatedTrackingNumber;
+
+  @Column(name = "clm_line_pa_uniq_trkng_num")
+  private Optional<String> partiallyAdjudicatedTrackingNumber;
 
   @Column(name = "clm_line_from_dt")
   private Optional<LocalDate> fromDate;
@@ -133,4 +140,28 @@ public class ClaimLine {
         .mapToObj(i -> new PositiveIntType(i + 1))
         .toList();
   }
+
+
+    Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
+            SupportingInfoFactory supportingInfoFactory) {
+
+        if (adjudicatedTrackingNumber.isEmpty() && partiallyAdjudicatedTrackingNumber.isEmpty()) {
+            return Optional.empty();
+        }
+        var trackingNumber = partiallyAdjudicatedTrackingNumber.get();
+        var category = BlueButtonSupportingInfoCategory.CLM_LINE_PA_UNIQ_TRKNG_NUM;
+
+        if (adjudicatedTrackingNumber.isPresent()) {
+            trackingNumber = adjudicatedTrackingNumber.get();
+            category = BlueButtonSupportingInfoCategory.CLM_LINE_PMD_UNIQ_TRKNG_NUM;
+        }
+
+        ExplanationOfBenefit.SupportingInformationComponent component =
+                supportingInfoFactory
+                        .createSupportingInfo()
+                        .setCategory(category.toFhir())
+                        .setValue(new StringType(trackingNumber));
+
+        return Optional.of(component);
+    }
 }
