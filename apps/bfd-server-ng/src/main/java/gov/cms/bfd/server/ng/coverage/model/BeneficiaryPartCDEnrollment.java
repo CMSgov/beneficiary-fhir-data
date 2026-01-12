@@ -68,6 +68,15 @@ public class BeneficiaryPartCDEnrollment implements Comparable<BeneficiaryPartCD
   }
 
   /**
+   * Get the enrollment contract.
+   *
+   * @return contract
+   */
+  public Optional<Contract> getEnrollmentContract() {
+    return Optional.ofNullable(enrollmentContract);
+  }
+
+  /**
    * Creates ClassComponents.
    *
    * @return optional classComponents
