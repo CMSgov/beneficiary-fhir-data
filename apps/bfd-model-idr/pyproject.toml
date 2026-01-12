@@ -10,10 +10,16 @@ dependencies = [
     "xlsxwriter>=3.2.5",
     "pyyaml>=6.0.2",
     "pydantic>=2.12.3",
+    "tqdm>=4.67.1",
 ]
 
 [dependency-groups]
-dev = ["ruff>=0.12.9", "uv>=0.8.10", "pyright>=1.1.403"]
+dev = [
+    "ruff>=0.12.9",
+    "uv>=0.8.10",
+    "pyright>=1.1.403",
+    "debugpy>=1.8.19",
+]
 
 [tool.ruff]
 # Set the maximum line length to 100.
