@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.ng.claim.model;
 
 import gov.cms.bfd.server.ng.util.SystemUrls;
+import java.math.BigDecimal;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -466,7 +467,7 @@ enum AdjudicationChargeType {
     return category;
   }
 
-  ExplanationOfBenefit.AdjudicationComponent toFhirAdjudication(double value) {
+  ExplanationOfBenefit.AdjudicationComponent toFhirAdjudication(BigDecimal value) {
     return new ExplanationOfBenefit.AdjudicationComponent()
         .setCategory(buildCategory())
         .setAmount(USD.toFhir(value));
@@ -479,19 +480,18 @@ enum AdjudicationChargeType {
   }
 
   ExplanationOfBenefit.AdjudicationComponent toFhirAdjudicationUnsignedType(long value) {
-
     return new ExplanationOfBenefit.AdjudicationComponent()
         .setCategory(buildCategory())
         .setValue(value);
   }
 
-  ExplanationOfBenefit.AdjudicationComponent toFhirAdjudicationDecimalType(double value) {
+  ExplanationOfBenefit.AdjudicationComponent toFhirAdjudicationDecimalType(BigDecimal value) {
     return new ExplanationOfBenefit.AdjudicationComponent()
         .setCategory(buildCategory())
         .setValue(value);
   }
 
-  ExplanationOfBenefit.TotalComponent toFhirTotal(double value) {
+  ExplanationOfBenefit.TotalComponent toFhirTotal(BigDecimal value) {
     return new ExplanationOfBenefit.TotalComponent()
         .setCategory(buildCategory())
         .setAmount(USD.toFhir(value));
