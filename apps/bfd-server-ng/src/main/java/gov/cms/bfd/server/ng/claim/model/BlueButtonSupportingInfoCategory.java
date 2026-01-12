@@ -45,8 +45,10 @@ enum BlueButtonSupportingInfoCategory {
   CLM_PTNT_RSDNC_CD("CLM_PTNT_RSDNC_CD", "Patient Residence Code"),
   CLM_LINE_RX_NUM("CLM_LINE_RX_NUM", "Claim Line Prescription Service Reference Number"),
   CLM_RLT_COND_CD("CLM_RLT_COND_CD", "Claim Related Condition Code"),
-  CLM_LINE_PA_UNIQ_TRKNG_NUM("CLM_LINE_PA_UNIQ_TRKNG_NUM", "Partially Adjudicated Unique Tracking Number"),
-  CLM_LINE_PMD_UNIQ_TRKNG_NUM("CLM_LINE_PMD_UNIQ_TRKNG_NUM", "Adjudicated Unique Tracking Number"),;
+  CLM_LINE_PA_UNIQ_TRKNG_NUM(
+      "CLM_LINE_PA_UNIQ_TRKNG_NUM", "Partially Adjudicated Unique Tracking Number"),
+  CLM_LINE_PMD_UNIQ_TRKNG_NUM("CLM_LINE_PMD_UNIQ_TRKNG_NUM", "Adjudicated Unique Tracking Number"),
+  ;
 
   private final String code;
   private final String display;

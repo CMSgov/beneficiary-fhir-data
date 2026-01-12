@@ -141,27 +141,26 @@ public class ClaimLine {
         .toList();
   }
 
+  Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
+      SupportingInfoFactory supportingInfoFactory) {
 
-    Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
-            SupportingInfoFactory supportingInfoFactory) {
-
-        if (adjudicatedTrackingNumber.isEmpty() && partiallyAdjudicatedTrackingNumber.isEmpty()) {
-            return Optional.empty();
-        }
-        var trackingNumber = partiallyAdjudicatedTrackingNumber.get();
-        var category = BlueButtonSupportingInfoCategory.CLM_LINE_PA_UNIQ_TRKNG_NUM;
-
-        if (adjudicatedTrackingNumber.isPresent()) {
-            trackingNumber = adjudicatedTrackingNumber.get();
-            category = BlueButtonSupportingInfoCategory.CLM_LINE_PMD_UNIQ_TRKNG_NUM;
-        }
-
-        ExplanationOfBenefit.SupportingInformationComponent component =
-                supportingInfoFactory
-                        .createSupportingInfo()
-                        .setCategory(category.toFhir())
-                        .setValue(new StringType(trackingNumber));
-
-        return Optional.of(component);
+    if (adjudicatedTrackingNumber.isEmpty() && partiallyAdjudicatedTrackingNumber.isEmpty()) {
+      return Optional.empty();
     }
+    var trackingNumber = partiallyAdjudicatedTrackingNumber.get();
+    var category = BlueButtonSupportingInfoCategory.CLM_LINE_PA_UNIQ_TRKNG_NUM;
+
+    if (adjudicatedTrackingNumber.isPresent()) {
+      trackingNumber = adjudicatedTrackingNumber.get();
+      category = BlueButtonSupportingInfoCategory.CLM_LINE_PMD_UNIQ_TRKNG_NUM;
+    }
+
+    ExplanationOfBenefit.SupportingInformationComponent component =
+        supportingInfoFactory
+            .createSupportingInfo()
+            .setCategory(category.toFhir())
+            .setValue(new StringType(trackingNumber));
+
+    return Optional.of(component);
+  }
 }
