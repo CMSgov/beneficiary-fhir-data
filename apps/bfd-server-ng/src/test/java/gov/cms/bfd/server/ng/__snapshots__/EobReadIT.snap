@@ -539,8 +539,11 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
     "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Outpatient-Institutional|2.1.0" ],
     "source" : "FISS",
     "tag" : [ {
-      "code" : "PartiallyAdjudicated",
-      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication-Status"
+      "code" : "SharedSystem",
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type"
+    }, {
+      "code" : "NotFinalAction",
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Final-Action"
     } ]
   },
   "outcome" : "partial",
@@ -819,9 +822,9 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
     },
     "category" : {
       "coding" : [ {
-        "code" : "deductible",
-        "display" : "Deductible",
-        "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+        "code" : "coinsurance",
+        "display" : "Co-insurance",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
       }, {
         "code" : "CLM_MDCR_COINSRNC_AMT",
         "display" : "Beneficiary Part A Coinsurance Liability Amount",
@@ -1432,8 +1435,11 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
     "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Outpatient-Institutional|2.1.0" ],
     "source" : "FISS",
     "tag" : [ {
-      "code" : "PartiallyAdjudicated",
-      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication-Status"
+      "code" : "SharedSystem",
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type"
+    }, {
+      "code" : "FinalAction",
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Final-Action"
     } ]
   },
   "outcome" : "queued",
@@ -1698,9 +1704,9 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
     },
     "category" : {
       "coding" : [ {
-        "code" : "deductible",
-        "display" : "Deductible",
-        "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+        "code" : "coinsurance",
+        "display" : "Co-insurance",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
       }, {
         "code" : "CLM_MDCR_COINSRNC_AMT",
         "display" : "Beneficiary Part A Coinsurance Liability Amount",
@@ -2046,7 +2052,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
       "coding" : [ {
         "code" : "718-7",
         "display" : "Hemoglobin [Mass/volume] in Blood",
-        "system" : "http://terminology.hl7.org/NamingSystem/CLIA"
+        "system" : "http://loinc.org"
       } ]
     },
     "id" : "1",
@@ -2594,10 +2600,13 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
   "meta" : {
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
     "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Professional-NonClinician|2.1.0" ],
-    "source" : "NationalClaimsHistory",
+    "source" : "NCH",
     "tag" : [ {
-      "code" : "Adjudicated",
-      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication-Status"
+      "code" : "NationalClaimsHistory",
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type"
+    }, {
+      "code" : "FinalAction",
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Final-Action"
     } ]
   },
   "outcome" : "queued",
@@ -2856,9 +2865,9 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
     },
     "category" : {
       "coding" : [ {
-        "code" : "deductible",
-        "display" : "Deductible",
-        "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+        "code" : "coinsurance",
+        "display" : "Co-insurance",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
       }, {
         "code" : "CLM_MDCR_COINSRNC_AMT",
         "display" : "Beneficiary Part A Coinsurance Liability Amount",
@@ -3204,7 +3213,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
       "coding" : [ {
         "code" : "718-7",
         "display" : "Hemoglobin [Mass/volume] in Blood",
-        "system" : "http://terminology.hl7.org/NamingSystem/CLIA"
+        "system" : "http://loinc.org"
       } ]
     },
     "id" : "1",
@@ -3753,10 +3762,13 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
   "meta" : {
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
     "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Professional-NonClinician|2.1.0" ],
-    "source" : "NationalClaimsHistory",
+    "source" : "NCH",
     "tag" : [ {
-      "code" : "Adjudicated",
-      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication-Status"
+      "code" : "NationalClaimsHistory",
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type"
+    }, {
+      "code" : "FinalAction",
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Final-Action"
     } ]
   },
   "outcome" : "complete",
@@ -4015,9 +4027,9 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
     },
     "category" : {
       "coding" : [ {
-        "code" : "deductible",
-        "display" : "Deductible",
-        "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+        "code" : "coinsurance",
+        "display" : "Co-insurance",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
       }, {
         "code" : "CLM_MDCR_COINSRNC_AMT",
         "display" : "Beneficiary Part A Coinsurance Liability Amount",
@@ -5228,10 +5240,13 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
   "meta" : {
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
     "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional|2.1.0" ],
-    "source" : "NationalClaimsHistory",
+    "source" : "NCH",
     "tag" : [ {
-      "code" : "Adjudicated",
-      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication-Status"
+      "code" : "NationalClaimsHistory",
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type"
+    }, {
+      "code" : "FinalAction",
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Final-Action"
     } ]
   },
   "outcome" : "complete",
@@ -5541,7 +5556,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
       "coding" : [ {
         "code" : "L",
         "display" : "Low utilization payment adjustment (LUPA) claim",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-LUP-IND-CD"
       } ]
     },
     "sequence" : 17
@@ -5561,7 +5576,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
       "coding" : [ {
         "code" : "1",
         "display" : "PHYSICIAN REFERRAL - THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF A PERSONAL PHYSICIAN.",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-RFRL-CD"
       } ]
     },
     "sequence" : 18
@@ -5653,9 +5668,9 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
     },
     "category" : {
       "coding" : [ {
-        "code" : "deductible",
-        "display" : "Deductible",
-        "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+        "code" : "coinsurance",
+        "display" : "Co-insurance",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
       }, {
         "code" : "CLM_MDCR_COINSRNC_AMT",
         "display" : "Beneficiary Part A Coinsurance Liability Amount",
@@ -6882,10 +6897,13 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
   "meta" : {
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
     "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional|2.1.0" ],
-    "source" : "NationalClaimsHistory",
+    "source" : "NCH",
     "tag" : [ {
-      "code" : "Adjudicated",
-      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication-Status"
+      "code" : "NationalClaimsHistory",
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type"
+    }, {
+      "code" : "FinalAction",
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Final-Action"
     } ]
   },
   "outcome" : "complete",
@@ -7195,7 +7213,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
       "coding" : [ {
         "code" : "L",
         "display" : "Low utilization payment adjustment (LUPA) claim",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_LUP_IND_CD"
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-LUP-IND-CD"
       } ]
     },
     "sequence" : 17
@@ -7215,7 +7233,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
       "coding" : [ {
         "code" : "1",
         "display" : "PHYSICIAN REFERRAL - THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF A PERSONAL PHYSICIAN.",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_HHA_RFRL_CD"
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-RFRL-CD"
       } ]
     },
     "sequence" : 18
@@ -7307,9 +7325,9 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
     },
     "category" : {
       "coding" : [ {
-        "code" : "deductible",
-        "display" : "Deductible",
-        "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+        "code" : "coinsurance",
+        "display" : "Co-insurance",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
       }, {
         "code" : "CLM_MDCR_COINSRNC_AMT",
         "display" : "Beneficiary Part A Coinsurance Liability Amount",

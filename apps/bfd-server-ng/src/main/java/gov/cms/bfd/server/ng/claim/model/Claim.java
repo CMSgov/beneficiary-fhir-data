@@ -14,6 +14,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
@@ -53,6 +54,9 @@ public class Claim {
 
   @Column(name = "clm_srvc_prvdr_gnrc_id_num")
   private String serviceProviderNpiNumber;
+
+  @Column(name = "clm_finl_actn_ind")
+  private ClaimFinalAction finalAction;
 
   @Embedded private Meta meta;
 
@@ -250,7 +254,7 @@ public class Claim {
    *
    * @return optional institutional bene paid amount
    */
-  public Optional<Double> getBenePaidAmount() {
+  public Optional<BigDecimal> getBenePaidAmount() {
     return getClaimInstitutional()
         .map(i -> i.getAdjudicationChargeInstitutional().getBenePaidAmount());
   }
@@ -270,7 +274,7 @@ public class Claim {
     eob.setType(claimTypeCode.toFhirType());
     claimTypeCode.toFhirSubtype().ifPresent(eob::setSubType);
 
-    eob.setMeta(meta.toFhir(claimTypeCode, claimSourceId, securityStatus));
+    eob.setMeta(meta.toFhir(claimTypeCode, claimSourceId, securityStatus, finalAction));
     eob.setIdentifier(identifiers.toFhir());
     eob.setBillablePeriod(billablePeriod.toFhir());
     eob.setCreated(DateUtil.toDate(claimEffectiveDate));

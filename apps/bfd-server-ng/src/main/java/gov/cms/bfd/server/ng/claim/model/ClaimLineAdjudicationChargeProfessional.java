@@ -2,6 +2,7 @@ package gov.cms.bfd.server.ng.claim.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import java.math.BigDecimal;
 import java.util.List;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
@@ -11,25 +12,25 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 class ClaimLineAdjudicationChargeProfessional {
 
   @Column(name = "clm_line_carr_clncl_chrg_amt")
-  private double carrierClinicalChargeAmount;
+  private BigDecimal carrierClinicalChargeAmount;
 
   @Column(name = "clm_line_carr_psych_ot_lmt_amt")
-  private double therapyAmountAppliedToLimit;
+  private BigDecimal therapyAmountAppliedToLimit;
 
   @Column(name = "clm_line_prfnl_intrst_amt")
-  private double professionalInterestAmount;
+  private BigDecimal professionalInterestAmount;
 
   @Column(name = "clm_mdcr_prmry_pyr_alowd_amt")
-  private double primaryPayerAllowedAmount;
+  private BigDecimal primaryPayerAllowedAmount;
 
   @Column(name = "clm_bene_prmry_pyr_pd_amt")
-  private double primaryPayerPaidAmount;
+  private BigDecimal primaryPayerPaidAmount;
 
   @Column(name = "clm_line_dmerc_scrn_svgs_amt")
-  private double screenSavingsAmount;
+  private BigDecimal screenSavingsAmount;
 
   @Column(name = "clm_line_prfnl_dme_price_amt")
-  private double purchasePriceAmount;
+  private BigDecimal purchasePriceAmount;
 
   List<ExplanationOfBenefit.AdjudicationComponent> toFhir() {
     return List.of(

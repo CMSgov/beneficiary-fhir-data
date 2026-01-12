@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.ng.claim.model;
 
 import gov.cms.bfd.server.ng.util.SystemUrls;
+import java.math.BigDecimal;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -120,27 +121,37 @@ enum AdjudicationChargeType {
       "CLM_MDCR_PRFNL_PRMRY_PYR_AMT",
       "Primary Payer Paid Amount"),
   GAP_DISCOUNT_AMOUNT(
-      SystemUrls.HL7_ADJUDICATION, "CLM_RPTD_MFTR_DSCNT_AMT", "Gap Discount Amount"),
+      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
+      "CLM_RPTD_MFTR_DSCNT_AMT",
+      "Gap Discount Amount"),
   VACCINATION_ADMIN_FEE(
-      SystemUrls.HL7_ADJUDICATION, "CLM_LINE_VCCN_ADMIN_FEE_AMT", "Vaccination Administration Fee"),
+      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
+      "CLM_LINE_VCCN_ADMIN_FEE_AMT",
+      "Vaccination Administration Fee"),
   OTHER_AMOUNT(
-      SystemUrls.HL7_ADJUDICATION,
+      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
       "CLM_LINE_TROOP_TOT_AMT",
       "Other True Out Of Pocket Paid Amount"),
-  DISPENSING_FEE(SystemUrls.HL7_ADJUDICATION, "CLM_LINE_SRVC_CST_AMT", "Dispensing Fee"),
-  SALES_TAX_AMOUNT(SystemUrls.HL7_ADJUDICATION, "CLM_LINE_SLS_TAX_AMT", "Sales Tax Amount"),
+  DISPENSING_FEE(
+      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION, "CLM_LINE_SRVC_CST_AMT", "Dispensing Fee"),
+  SALES_TAX_AMOUNT(
+      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION, "CLM_LINE_SLS_TAX_AMT", "Sales Tax Amount"),
   PATIENT_LIABILITY_REDUCT_AMOUNT(
-      SystemUrls.HL7_ADJUDICATION, "CLM_LINE_PLRO_AMT", "Sales Tax Amount"),
+      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION, "CLM_LINE_PLRO_AMT", "Sales Tax Amount"),
   LOW_INCOME_COST_SHARE_SUB_AMOUNT(
-      SystemUrls.HL7_ADJUDICATION, "CLM_LINE_LIS_AMT", "Low Income Cost Sharing Subsidy Amount"),
+      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
+      "CLM_LINE_LIS_AMT",
+      "Low Income Cost Sharing Subsidy Amount"),
   INGREDIENT_COST_AMOUNT(
-      SystemUrls.HL7_ADJUDICATION, "CLM_LINE_INGRDNT_CST_AMT", "Ingredient Cost Amount"),
+      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
+      "CLM_LINE_INGRDNT_CST_AMT",
+      "Ingredient Cost Amount"),
   GROSS_DRUG_COST_BLW_THRESHOLD_AMOUNT(
-      SystemUrls.HL7_ADJUDICATION,
+      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
       "CLM_LINE_GRS_BLW_THRSHLD_AMT",
       "Gross Drug Cost Below Out Of Pocket Threshold"),
   GROSS_DRUG_COST_ABOVE_THRESHOLD_AMOUNT(
-      SystemUrls.HL7_ADJUDICATION,
+      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
       "CLM_LINE_GRS_ABOVE_THRSHLD_AMT",
       "Gross Drug Cost Above Out Of Pocket Threshold"),
   BENE_MEDICARE_LRD_USED_COUNT(
@@ -292,9 +303,9 @@ enum AdjudicationChargeType {
       "CLM_MDCR_DDCTBL_AMT",
       "Beneficiary Part B Deductible Amount"),
   BENE_PART_A_COINSURANCE_LIABILITY_AMOUNT(
-      SystemUrls.HL7_ADJUDICATION,
-      "deductible",
-      "Deductible",
+      SystemUrls.CARIN_CODE_SYSTEM_ADJUDICATION,
+      "coinsurance",
+      "Co-insurance",
       "CLM_MDCR_COINSRNC_AMT",
       "Beneficiary Part A Coinsurance Liability Amount"),
   BENE_BLOOD_DEDUCTIBLE_LIABILITY_AMOUNT(
@@ -456,7 +467,7 @@ enum AdjudicationChargeType {
     return category;
   }
 
-  ExplanationOfBenefit.AdjudicationComponent toFhirAdjudication(double value) {
+  ExplanationOfBenefit.AdjudicationComponent toFhirAdjudication(BigDecimal value) {
     return new ExplanationOfBenefit.AdjudicationComponent()
         .setCategory(buildCategory())
         .setAmount(USD.toFhir(value));
@@ -469,19 +480,18 @@ enum AdjudicationChargeType {
   }
 
   ExplanationOfBenefit.AdjudicationComponent toFhirAdjudicationUnsignedType(long value) {
-
     return new ExplanationOfBenefit.AdjudicationComponent()
         .setCategory(buildCategory())
         .setValue(value);
   }
 
-  ExplanationOfBenefit.AdjudicationComponent toFhirAdjudicationDecimalType(double value) {
+  ExplanationOfBenefit.AdjudicationComponent toFhirAdjudicationDecimalType(BigDecimal value) {
     return new ExplanationOfBenefit.AdjudicationComponent()
         .setCategory(buildCategory())
         .setValue(value);
   }
 
-  ExplanationOfBenefit.TotalComponent toFhirTotal(double value) {
+  ExplanationOfBenefit.TotalComponent toFhirTotal(BigDecimal value) {
     return new ExplanationOfBenefit.TotalComponent()
         .setCategory(buildCategory())
         .setAmount(USD.toFhir(value));

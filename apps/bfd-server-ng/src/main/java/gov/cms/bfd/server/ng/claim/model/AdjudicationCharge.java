@@ -2,6 +2,7 @@ package gov.cms.bfd.server.ng.claim.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import java.math.BigDecimal;
 import java.util.List;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
@@ -9,58 +10,58 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 class AdjudicationCharge {
 
   @Column(name = "clm_alowd_chrg_amt")
-  private double allowedChargeAmount;
+  private BigDecimal allowedChargeAmount;
 
   @Column(name = "clm_sbmt_chrg_amt")
-  private double submittedChargeAmount;
+  private BigDecimal submittedChargeAmount;
 
   @Column(name = "clm_bene_pmt_amt")
-  private double benePaymentAmount;
+  private BigDecimal benePaymentAmount;
 
   @Column(name = "clm_prvdr_pmt_amt")
-  private double providerPaymentAmount;
+  private BigDecimal providerPaymentAmount;
 
   @Column(name = "clm_bene_intrst_pd_amt")
-  private double beneInterestPaidAmount;
+  private BigDecimal beneInterestPaidAmount;
 
   @Column(name = "clm_bene_pmt_coinsrnc_amt")
-  private double beneCoinsuranceAmount;
+  private BigDecimal beneCoinsuranceAmount;
 
   @Column(name = "clm_mdcr_ddctbl_amt")
-  private double deductibleAmount;
+  private BigDecimal deductibleAmount;
 
   @Column(name = "clm_mdcr_coinsrnc_amt")
-  private double coinsuranceAmount;
+  private BigDecimal coinsuranceAmount;
 
   @Column(name = "clm_ncvrd_chrg_amt")
-  private double noncoveredChargeAmount;
+  private BigDecimal noncoveredChargeAmount;
 
   @Column(name = "clm_othr_tp_pd_amt")
-  private double otherThirdPartyPayerPaidAmount;
+  private BigDecimal otherThirdPartyPayerPaidAmount;
 
   @Column(name = "clm_blood_chrg_amt")
-  private double bloodChargeAmount;
+  private BigDecimal bloodChargeAmount;
 
   @Column(name = "clm_blood_lblty_amt")
-  private double bloodLiabilityAmount;
+  private BigDecimal bloodLiabilityAmount;
 
   @Column(name = "clm_tot_cntrctl_amt")
-  private double totalContractualAmountDiscrepancy;
+  private BigDecimal totalContractualAmountDiscrepancy;
 
   @Column(name = "clm_cob_ptnt_resp_amt")
-  private double cobPatientResponsibilityAmount;
+  private BigDecimal cobPatientResponsibilityAmount;
 
   @Column(name = "clm_prvdr_otaf_amt")
-  private double providerObligationToAcceptAmount;
+  private BigDecimal providerObligationToAcceptAmount;
 
   @Column(name = "clm_prvdr_rmng_due_amt")
-  private double remainingAmountToProvider;
+  private BigDecimal remainingAmountToProvider;
 
   @Column(name = "clm_blood_ncvrd_chrg_amt")
-  private double bloodNoncoveredChargeAmount;
+  private BigDecimal bloodNoncoveredChargeAmount;
 
   @Column(name = "clm_prvdr_intrst_pd_amt")
-  private double providerInterestPaidAmount;
+  private BigDecimal providerInterestPaidAmount;
 
   List<ExplanationOfBenefit.TotalComponent> toFhirTotal() {
     return List.of(

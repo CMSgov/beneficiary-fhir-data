@@ -12,6 +12,9 @@ uv sync
 
 Initialize the database with test data. Test data must be generated first (see details in `bfd-model-idr`).
 
+> [!IMPORTANT]  
+> Make sure you do not have Postgres running locally on your computer as this starts Postgres in a container.
+
 ```sh
 ./run-db.sh
 ```
@@ -56,7 +59,7 @@ PIPELINE_MIN_TRANSACTION_DATE=2024-01-01 uv run ./pipeline.py
 
 ## Loading synthetic data
 
-First, ensure you've generated some synthetic data - see directions in `bfd-model/bfd-model-idr/sample-data/generator`
+First, ensure you've generated some synthetic data - see directions in `bfd-model-idr`
 
 Load it into the IDR mock database and run the pipeline in synthetic data mode.
 
