@@ -374,9 +374,14 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
               .setValue(new Annotation(new MarkdownType(C4DIC_ADD_INFO))));
     } else {
       var contract = enrollment.getEnrollmentContract();
-      var cmsOrg = OrganizationFactory.createInsurerOrganization(contract);
-      coverage.addContained(cmsOrg);
-      coverage.addPayor(new Reference().setReference("#" + cmsOrg.getIdElement().getIdPart()));
+      contract.ifPresent(
+          c -> {
+            var cmsOrg = OrganizationFactory.createInsurerOrganization(c);
+            coverage.addContained(cmsOrg);
+            coverage.addPayor(
+                new Reference().setReference("#" + cmsOrg.getIdElement().getIdPart()));
+          });
+
       enrollment.toFhirExtensions().forEach(coverage::addExtension);
     }
 
