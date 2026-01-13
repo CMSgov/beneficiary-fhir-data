@@ -14,6 +14,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
@@ -253,7 +254,7 @@ public class Claim {
    *
    * @return optional institutional bene paid amount
    */
-  public Optional<Double> getBenePaidAmount() {
+  public Optional<BigDecimal> getBenePaidAmount() {
     return getClaimInstitutional()
         .map(i -> i.getAdjudicationChargeInstitutional().getBenePaidAmount());
   }

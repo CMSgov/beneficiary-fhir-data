@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -20,7 +21,9 @@ class AdjudicationChargeClaimValue {
             imeAmount));
   }
 
-  private static double mapSum(Stream<Optional<Double>> inputStream) {
-    return inputStream.flatMap(Optional::stream).mapToDouble(v -> v).sum();
+  private static BigDecimal mapSum(Stream<Optional<BigDecimal>> inputStream) {
+    return inputStream
+        .flatMap(Optional::stream)
+        .reduce(BigDecimal.ZERO.setScale(2), BigDecimal::add);
   }
 }

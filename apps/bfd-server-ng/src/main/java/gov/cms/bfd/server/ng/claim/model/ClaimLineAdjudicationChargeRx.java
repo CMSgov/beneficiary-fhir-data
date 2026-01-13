@@ -3,6 +3,7 @@ package gov.cms.bfd.server.ng.claim.model;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -13,49 +14,49 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @Embeddable
 class ClaimLineAdjudicationChargeRx {
   @Column(name = "clm_rptd_mftr_dscnt_amt")
-  private double gapDiscountAmount;
+  private BigDecimal gapDiscountAmount;
 
   @Column(name = "clm_line_vccn_admin_fee_amt")
-  private double vaccineAdminFeeAmount;
+  private BigDecimal vaccineAdminFeeAmount;
 
   @Column(name = "clm_line_troop_tot_amt")
-  private double otherTrueOutOfPockPaidAmount;
+  private BigDecimal otherTrueOutOfPockPaidAmount;
 
   @Column(name = "clm_line_srvc_cst_amt")
-  private double dispensingFeeAmount;
+  private BigDecimal dispensingFeeAmount;
 
   @Column(name = "clm_line_sls_tax_amt")
-  private double salesTaxAmount;
+  private BigDecimal salesTaxAmount;
 
   @Column(name = "clm_line_plro_amt")
-  private double patientLiabReductPaidAmount;
+  private BigDecimal patientLiabReductPaidAmount;
 
   @Column(name = "clm_line_lis_amt")
-  private double lowIncomeCostShareSubAmount;
+  private BigDecimal lowIncomeCostShareSubAmount;
 
   @Column(name = "clm_line_ingrdnt_cst_amt")
-  private double ingredientCostAmount;
+  private BigDecimal ingredientCostAmount;
 
   @Column(name = "clm_line_grs_blw_thrshld_amt")
-  private double grossCostBelowThresholdAmount;
+  private BigDecimal grossCostBelowThresholdAmount;
 
   @Column(name = "clm_line_grs_above_thrshld_amt")
-  private double grossCostAboveThresholdAmount;
+  private BigDecimal grossCostAboveThresholdAmount;
 
   @Column(name = "clm_prcng_excptn_cd")
   private Optional<ClaimPricingReasonCode> pricingCode;
 
   @Column(name = "clm_line_grs_cvrd_cst_tot_amt")
-  private double grossCoveredCostAmount;
+  private BigDecimal grossCoveredCostAmount;
 
   @Column(name = "clm_cms_calcd_mftr_dscnt_amt")
-  private double manufacturerDiscountAmount;
+  private BigDecimal manufacturerDiscountAmount;
 
   @Column(name = "clm_line_rebt_passthru_pos_amt")
-  private double rebatePassthroughPOSAmount;
+  private BigDecimal rebatePassthroughPOSAmount;
 
   @Column(name = "clm_phrmcy_price_dscnt_at_pos_amt")
-  private double priceAmount;
+  private BigDecimal priceAmount;
 
   ArrayList<ExplanationOfBenefit.AdjudicationComponent> toFhir() {
     var adjudicationComponent =
