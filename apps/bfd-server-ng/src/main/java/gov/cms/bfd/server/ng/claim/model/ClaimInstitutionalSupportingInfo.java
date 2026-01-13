@@ -36,6 +36,7 @@ class ClaimInstitutionalSupportingInfo {
   @Column(name = "clm_mdcr_npmt_rsn_cd")
   private Optional<ClaimNonpaymentReasonCode> nonpaymentReasonCode;
 
+  // This is the fiscal intermediary action code, not final action!
   @Column(name = "clm_fi_actn_cd")
   private Optional<ClaimFiscalIntermediaryActionCode> claimFiscalIntermediaryActionCode;
 

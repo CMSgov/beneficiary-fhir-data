@@ -12,9 +12,9 @@ import org.hl7.fhir.r4.model.Coding;
 @AllArgsConstructor
 public enum ClaimLineHCTHGBTestTypeCode {
   /** Principal diagnosis. */
-  R1("R1", "718-7", "Hemoglobin [Mass/volume] in Blood", SystemUrls.CLIA),
+  R1("R1", "718-7", "Hemoglobin [Mass/volume] in Blood", SystemUrls.LOINC),
   /** Admitting diagnosis. */
-  R2("R2", "4544-3", "Hematocrit [Volume Fraction] of Blood by Automated count", SystemUrls.CLIA);
+  R2("R2", "4544-3", "Hematocrit [Volume Fraction] of Blood by Automated count", SystemUrls.LOINC);
 
   private final String code;
   private final String loincCode;

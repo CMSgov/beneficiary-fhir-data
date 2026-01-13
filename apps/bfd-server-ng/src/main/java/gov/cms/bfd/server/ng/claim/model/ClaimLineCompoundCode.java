@@ -15,12 +15,12 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @SuppressWarnings("java:S115")
 public enum ClaimLineCompoundCode {
 
-  /** 1 - Not specified (missing values are also possible). */
-  _1("1", "Not specified (missing values are also possible)"),
-  /** 2 - Not a compound. */
-  _2("2", "Not a compound"),
-  /** 3 - Compound. */
-  _3("3", "Compound");
+  /** 0 - Not specified (missing values are also possible). */
+  _0("0", "Not specified (missing values are also possible)"),
+  /** 1 - Not a compound. */
+  _1("1", "Not a compound"),
+  /** 2 - Compound. */
+  _2("2", "Compound");
 
   private final String code;
   private final String display;

@@ -41,7 +41,7 @@ public enum ClaimFiscalIntermediaryActionCode {
     supportingInfo.setCode(
         new CodeableConcept(
             new Coding()
-                .setSystem(SystemUrls.BLUE_BUTTON_CODE_SYSTEM_FINAL_ACTION_CODE)
+                .setSystem(SystemUrls.BLUE_BUTTON_CODE_SYSTEM_FISCAL_INTERMEDIARY_ACTION_CODE)
                 .setCode(code)
                 .setDisplay(display)));
     return supportingInfo;

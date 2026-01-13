@@ -6,6 +6,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import lombok.Getter;
@@ -24,10 +25,10 @@ public class ClaimProfessional {
   private Claim claim;
 
   @Column(name = "clm_mdcr_prfnl_prmry_pyr_amt")
-  private double primaryProviderPaidAmount;
+  private BigDecimal primaryProviderPaidAmount;
 
   @Column(name = "clm_prvdr_acnt_rcvbl_ofst_amt")
-  private double providerOffsetAmount;
+  private BigDecimal providerOffsetAmount;
 
   @Column(name = "clm_audt_trl_stus_cd")
   private Optional<ClaimAuditTrailStatusCode> claimAuditTrailStatusCode;

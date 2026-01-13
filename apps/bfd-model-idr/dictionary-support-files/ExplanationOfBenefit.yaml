@@ -50,6 +50,7 @@
     - NCH
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_FINL_ACTN_IND
+  fhirPath: ExplanationOfBenefit.meta.tag.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Final-Action').code
 - inputPath: ExplanationOfBenefit-Base.CLM_CNTL_NUM
   appliesTo:
     - Inpatient

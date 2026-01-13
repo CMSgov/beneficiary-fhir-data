@@ -8,8 +8,10 @@ import jakarta.persistence.EntityManager;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 /** Repository for querying coverage information. */
+@Transactional(readOnly = true)
 @Repository
 @AllArgsConstructor
 public class CoverageRepository {
