@@ -678,7 +678,7 @@ def gen_claim(bene_sk: str = "-1", min_date: str = "2018-01-01", max_date: str =
     claim.CLM["CLM_SRC_ID"] = clm_src_id
     claim.CLM["META_SRC_SK"] = 7
     claim.CLM["CLM_FROM_DT"] = random_date(min_date, max_date)
-    claim.CLM["CLM_THRU_DT"] = gen_thru_dt(claim["CLM"]["CLM_FROM_DT"])
+    claim.CLM["CLM_THRU_DT"] = gen_thru_dt(claim.CLM["CLM_FROM_DT"])
 
     # NON-PDE
     claim.CLM["CLM_CNTL_NUM"] = "".join(random.choices(string.digits, k=14)) + "".join(
