@@ -68,6 +68,15 @@ public class BeneficiaryPartCDEnrollment implements Comparable<BeneficiaryPartCD
   }
 
   /**
+   * Get the enrollment contract.
+   *
+   * @return contract
+   */
+  public Optional<Contract> getEnrollmentContract() {
+    return Optional.ofNullable(enrollmentContract);
+  }
+
+  /**
    * Creates ClassComponents.
    *
    * @return optional classComponents
@@ -134,13 +143,12 @@ public class BeneficiaryPartCDEnrollment implements Comparable<BeneficiaryPartCD
                 new Extension(SystemUrls.EXT_BENE_CVRG_TYPE_CD_URL)
                     .setValue(new Coding(SystemUrls.SYS_CVRG_TYPE_CD, code, null)));
 
+    var segment = getEnrollmentContract().flatMap(Contract::getContractPbpSegmentNumber);
     var extSegmentNumber =
-        enrollmentContract
-            .getContractPbpSegmentNumber()
-            .map(
-                number ->
-                    new Extension(SystemUrls.EXT_CNTRCT_PBP_SGMT_NUM_URL)
-                        .setValue(new StringType(number)));
+        segment.map(
+            number ->
+                new Extension(SystemUrls.EXT_CNTRCT_PBP_SGMT_NUM_URL)
+                    .setValue(new StringType(number)));
 
     var extEmployerSubsidySwitch =
         employerSubsidySwitch.map(
