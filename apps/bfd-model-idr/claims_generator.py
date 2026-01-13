@@ -123,23 +123,23 @@ faker = Faker()
 
 
 def save_output_files(
-        clm: list[dict[str, Any]],
-        clm_line: list[dict[str, Any]],
-        clm_val: list[dict[str, Any]],
-        clm_dt_sgntr: list[dict[str, Any]],
-        clm_prod: list[dict[str, Any]],
-        clm_instnl: list[dict[str, Any]],
-        clm_line_instnl: list[dict[str, Any]],
-        clm_dcmtn: list[dict[str, Any]],
-        clm_fiss: list[dict[str, Any]],
-        clm_lctn_hstry: list[dict[str, Any]],
-        clm_prfnl: list[dict[str, Any]],
-        clm_line_prfnl: list[dict[str, Any]],
-        clm_line_rx: list[dict[str, Any]],
-        clm_rlt_cond_sgntr_mbr: list[dict[str, Any]],
-        prvdr_hstry: list[dict[str, Any]],
-        cntrct_pbp_num: list[dict[str, Any]],
-        cntrct_pbp_cntct: list[dict[str, Any]],
+    clm: list[dict[str, Any]],
+    clm_line: list[dict[str, Any]],
+    clm_val: list[dict[str, Any]],
+    clm_dt_sgntr: list[dict[str, Any]],
+    clm_prod: list[dict[str, Any]],
+    clm_instnl: list[dict[str, Any]],
+    clm_line_instnl: list[dict[str, Any]],
+    clm_dcmtn: list[dict[str, Any]],
+    clm_fiss: list[dict[str, Any]],
+    clm_lctn_hstry: list[dict[str, Any]],
+    clm_prfnl: list[dict[str, Any]],
+    clm_line_prfnl: list[dict[str, Any]],
+    clm_line_rx: list[dict[str, Any]],
+    clm_rlt_cond_sgntr_mbr: list[dict[str, Any]],
+    prvdr_hstry: list[dict[str, Any]],
+    cntrct_pbp_num: list[dict[str, Any]],
+    cntrct_pbp_cntct: list[dict[str, Any]],
 ):
     Path("out").mkdir(exist_ok=True)
 
@@ -341,7 +341,18 @@ available_ndc = [
 ]
 clm_poa_ind_choices = ["N", "1", "U", "X", "W", "0", "~", "Z", "Y", ""]
 avail_pbp_nums = ["001", "002", "003", "004", "005", "006", "007", "008", "009", "010"]
-avail_contract_nums = ["Z0001", "Z0002", "Z0003", "Z0004", "Z0005", "Z0006", "Z0007", "Z0008", "Z0009", "Z0010"]
+avail_contract_nums = [
+    "Z0001",
+    "Z0002",
+    "Z0003",
+    "Z0004",
+    "Z0005",
+    "Z0006",
+    "Z0007",
+    "Z0008",
+    "Z0009",
+    "Z0010",
+]
 avail_pbp_type_codes = ["01", "02", "48", "04", "09", "18", "10"]
 avail_contract_names = [
     "Health Plan",
@@ -372,10 +383,10 @@ def get_icd_10_dgns_codes() -> list[str]:
 
 
 def export_df(
-        data: list[dict[str, Any]] | dict[str, Any] | pd.DataFrame,
-        out_path: str,
-        normalize: str = NORMALIZE,
-        line_num_cast: str = NO_CAST_LINE_NUM,
+    data: list[dict[str, Any]] | dict[str, Any] | pd.DataFrame,
+    out_path: str,
+    normalize: str = NORMALIZE,
+    line_num_cast: str = NO_CAST_LINE_NUM,
 ):
     df = pd.json_normalize(data) if normalize == NORMALIZE else pd.DataFrame(data)  # type: ignore
     df = clean_int_columns(df, INT_TO_STRING_COLS)
@@ -873,11 +884,13 @@ def gen_claim(bene_sk: str = "-1", min_date: str = "2018-01-01", max_date: str =
     # generate claim header financial elements here
     claim.CLM["CLM_SBMT_CHRG_AMT"] = round(random.uniform(1, 1000000), 2)
     if clm_type_cd == 71 or clm_type_cd == 72:
-        claim.CLM["CLM_RFRG_PRVDR_PIN_NUM"] = random.choice([
-            9181272397,
-            9181272391,
-            918127239123,
-        ])
+        claim.CLM["CLM_RFRG_PRVDR_PIN_NUM"] = random.choice(
+            [
+                9181272397,
+                9181272391,
+                918127239123,
+            ]
+        )
     if clm_type_cd > 70 and clm_type_cd <= 82:
         claim.CLM["CLM_ALOWD_CHRG_AMT"] = round(random.uniform(1, 1000000), 2)
         claim.CLM["CLM_BENE_PD_AMT"] = round(random.uniform(1, 1000000), 2)
@@ -1170,10 +1183,12 @@ def gen_claim(bene_sk: str = "-1", min_date: str = "2018-01-01", max_date: str =
 
             if random.randint(0, 10) == 6:
                 claim_line_prfnl["CLM_LINE_HCT_HGB_TYPE_CD"] = random.choice(["R1", "R2"])
-                claim_line_prfnl["CLM_LINE_CARR_CLNCL_LAB_NUM"] = random.choice([
-                    "11D1111111",
-                    "22D2222222",
-                ])
+                claim_line_prfnl["CLM_LINE_CARR_CLNCL_LAB_NUM"] = random.choice(
+                    [
+                        "11D1111111",
+                        "22D2222222",
+                    ]
+                )
 
             # these don't have much variance in our synthetic data, but they are not strictly
             # the same in actual data!
@@ -1273,17 +1288,19 @@ def gen_claim(bene_sk: str = "-1", min_date: str = "2018-01-01", max_date: str =
         claim_line_inst["CLM_REV_CNTR_STUS_CD"] = random.choice(
             generator.code_systems["CLM_REV_CNTR_STUS_CD"]
         )
-        claim_line_inst["CLM_ANSI_SGNTR_SK"] = random.choice([
-            "8585",
-            "1",
-            "4365",
-            "1508",
-            "5555",
-            "9204",
-            "6857",
-            "5816",
-            "11978",
-        ])
+        claim_line_inst["CLM_ANSI_SGNTR_SK"] = random.choice(
+            [
+                "8585",
+                "1",
+                "4365",
+                "1508",
+                "5555",
+                "9204",
+                "6857",
+                "5816",
+                "11978",
+            ]
+        )
         claim_line_inst["CLM_LINE_ADD_ON_PYMT_AMT"] = round(random.uniform(0, 10000), 2)
         claim_line_inst["CLM_LINE_NON_EHR_RDCTN_AMT"] = round(random.uniform(0, 500), 2)
         claim_line_inst["CLM_REV_CNTR_TDAPA_AMT"] = round(random.uniform(0, 10000), 2)
@@ -1365,18 +1382,20 @@ def gen_pac_version_of_claim(claim: _GeneratedClaim, max_date: str):
     pac_claim.CLM_FISS["GEO_BENE_SK"] = pac_claim.CLM["GEO_BENE_SK"]
     pac_claim.CLM_FISS["CLM_NUM_SK"] = pac_claim.CLM["CLM_NUM_SK"]
     pac_claim.CLM_FISS["CLM_TYPE_CD"] = pac_claim.CLM["CLM_TYPE_CD"]
-    pac_claim.CLM_FISS["CLM_CRNT_STUS_CD"] = random.choice([
-        "A",
-        "F",
-        "I",
-        "S",
-        "M",
-        "P",
-        "R",
-        "D",
-        "T",
-        "U",
-    ])
+    pac_claim.CLM_FISS["CLM_CRNT_STUS_CD"] = random.choice(
+        [
+            "A",
+            "F",
+            "I",
+            "S",
+            "M",
+            "P",
+            "R",
+            "D",
+            "T",
+            "U",
+        ]
+    )
     add_meta_timestamps(pac_claim.CLM_FISS, claim.CLM, max_date)
 
     pac_claim.CLM_LCTN_HSTRY = {}
@@ -1385,22 +1404,24 @@ def gen_pac_version_of_claim(claim: _GeneratedClaim, max_date: str):
     pac_claim.CLM_LCTN_HSTRY["CLM_NUM_SK"] = pac_claim.CLM["CLM_NUM_SK"]
     pac_claim.CLM_LCTN_HSTRY["CLM_TYPE_CD"] = pac_claim.CLM["CLM_TYPE_CD"]
     pac_claim.CLM_LCTN_HSTRY["CLM_LCTN_CD_SQNC_NUM"] = "1"
-    pac_claim.CLM_LCTN_HSTRY["CLM_AUDT_TRL_STUS_CD"] = random.choice([
-        "A",
-        "F",
-        "I",
-        "S",
-        "M",
-        "P",
-        "R",
-        "D",
-        "T",
-        "U",
-        "1",
-        "2",
-        "4",
-        "8",
-    ])
+    pac_claim.CLM_LCTN_HSTRY["CLM_AUDT_TRL_STUS_CD"] = random.choice(
+        [
+            "A",
+            "F",
+            "I",
+            "S",
+            "M",
+            "P",
+            "R",
+            "D",
+            "T",
+            "U",
+            "1",
+            "2",
+            "4",
+            "8",
+        ]
+    )
     add_meta_timestamps(pac_claim.CLM_LCTN_HSTRY, claim.CLM, max_date)
 
     for i in range(len(pac_claim.CLM_LINE)):
@@ -1581,40 +1602,48 @@ def gen_contract_plan(amount: int):
     last_day = today.replace(month=12, day=31)
 
     for pbp_num in pbp_nums:
-        contract_pbp_num.append({
-            "CNTRCT_PBP_SK": "".join(random.choices(string.digits, k=12)),
-            "CNTRCT_NUM": random.choice(avail_contract_nums),
-            "CNTRCT_PBP_NUM": pbp_num,
-            "CNTRCT_PBP_NAME": random.choice(avail_contract_names),
-            "CNTRCT_PBP_TYPE_CD": random.choice(avail_pbp_type_codes),
-            "CNTRCT_DRUG_PLAN_IND_CD": random.choice(["Y", "N"]),
-            "CNTRCT_PBP_SK_OBSLT_DT": random.choice(["0001-01-01", "9999-12-31"]),
-        })
+        contract_pbp_num.append(
+            {
+                "CNTRCT_PBP_SK": "".join(random.choices(string.digits, k=12)),
+                "CNTRCT_NUM": random.choice(avail_contract_nums),
+                "CNTRCT_PBP_NUM": pbp_num,
+                "CNTRCT_PBP_NAME": random.choice(avail_contract_names),
+                "CNTRCT_PBP_TYPE_CD": random.choice(avail_pbp_type_codes),
+                "CNTRCT_DRUG_PLAN_IND_CD": random.choice(["Y", "N"]),
+                "CNTRCT_PBP_SK_OBSLT_DT": random.choice(["0001-01-01", "9999-12-31"]),
+            }
+        )
 
-        contract_pbp_contact.append({
-            "CNTRCT_PBP_SK": "".join(random.choices(string.digits, k=12)),
-            "CNTRCT_PLAN_CNTCT_OBSLT_DT": "9999-12-31",
-            "CNTRCT_PLAN_CNTCT_TYPE_CD": random.choice(["~", "30", "62"]),
-            "CNTRCT_PLAN_FREE_EXTNSN_NUM": "".join(random.choices(string.digits, k=7)),
-            "CNTRCT_PLAN_CNTCT_FREE_NUM": "".join(random.choices(string.digits, k=10)),
-            "CNTRCT_PLAN_CNTCT_EXTNSN_NUM": "".join(random.choices(string.digits, k=7)),
-            "CNTRCT_PLAN_CNTCT_TEL_NUM": "".join(random.choices(string.digits, k=10)),
-            "CNTRCT_PBP_END_DT": last_day.isoformat(),
-            "CNTRCT_PBP_BGN_DT": today.isoformat(),
-            "CNTRCT_PLAN_CNTCT_ST_1_ADR": random.choice([
-                "319 E. Street",
-                "North Street",
-                "West Street",
-            ]),
-            "CNTRCT_PLAN_CNTCT_ST_2_ADR": random.choice(["Avenue M", ""]),
-            "CNTRCT_PLAN_CNTCT_CITY_NAME": random.choice([
-                "Los Angeles",
-                "San Jose",
-                "San Francisco",
-            ]),
-            "CNTRCT_PLAN_CNTCT_STATE_CD": "CA",
-            "CNTRCT_PLAN_CNTCT_ZIP_CD": "".join(random.choices(string.digits, k=9)),
-        })
+        contract_pbp_contact.append(
+            {
+                "CNTRCT_PBP_SK": "".join(random.choices(string.digits, k=12)),
+                "CNTRCT_PLAN_CNTCT_OBSLT_DT": "9999-12-31",
+                "CNTRCT_PLAN_CNTCT_TYPE_CD": random.choice(["~", "30", "62"]),
+                "CNTRCT_PLAN_FREE_EXTNSN_NUM": "".join(random.choices(string.digits, k=7)),
+                "CNTRCT_PLAN_CNTCT_FREE_NUM": "".join(random.choices(string.digits, k=10)),
+                "CNTRCT_PLAN_CNTCT_EXTNSN_NUM": "".join(random.choices(string.digits, k=7)),
+                "CNTRCT_PLAN_CNTCT_TEL_NUM": "".join(random.choices(string.digits, k=10)),
+                "CNTRCT_PBP_END_DT": last_day.isoformat(),
+                "CNTRCT_PBP_BGN_DT": today.isoformat(),
+                "CNTRCT_PLAN_CNTCT_ST_1_ADR": random.choice(
+                    [
+                        "319 E. Street",
+                        "North Street",
+                        "West Street",
+                    ]
+                ),
+                "CNTRCT_PLAN_CNTCT_ST_2_ADR": random.choice(["Avenue M", ""]),
+                "CNTRCT_PLAN_CNTCT_CITY_NAME": random.choice(
+                    [
+                        "Los Angeles",
+                        "San Jose",
+                        "San Francisco",
+                    ]
+                ),
+                "CNTRCT_PLAN_CNTCT_STATE_CD": "CA",
+                "CNTRCT_PLAN_CNTCT_ZIP_CD": "".join(random.choices(string.digits, k=9)),
+            }
+        )
 
     return contract_pbp_num, contract_pbp_contact
 
@@ -1678,7 +1707,7 @@ def main():
         "-s",
         action="store_true",
         help="Generate new StructureDefinitions. Use when testing locally if new .fsh files "
-             "have been added.",
+        "have been added.",
     )
     parser.add_argument(
         "--min-claims",
@@ -1748,7 +1777,7 @@ def main():
         BENE_XREF,
     ]
     if any(CLM in file for file in args.files) and any(
-            file not in clm_required_tables for file in args.files
+        file not in clm_required_tables for file in args.files
     ):
         print(f"{', '.join(clm_required_tables)} must be provided if {CLM} is provided")
         return
@@ -1823,10 +1852,10 @@ def main():
 
                 # obviously we don't have pac claims for PD claims
                 if random.choice([0, 1]) and claim.CLM["CLM_TYPE_CD"] not in (
-                        1,
-                        2,
-                        3,
-                        4,
+                    1,
+                    2,
+                    3,
+                    4,
                 ):
                     pac_claim = gen_pac_version_of_claim(claim, max_date)
                     clm.append(pac_claim.CLM)
