@@ -699,7 +699,7 @@ auth_events AS (
     auth_status,
     share_demographic_scopes,
     allow,
-    json_extract(user, '$$.crosswalk.fhir_id') as fhir_id
+    json_extract(user, '$$.crosswalk.fhir_id_v2') as fhir_id
   from
     perf_mon_events
   WHERE
