@@ -266,7 +266,7 @@
     - NCH
     - VMS
   sourceView: V2_MDCR_CLM
-  sourceColumn: META_SRC_ID
+  sourceColumn: META_SRC_SK
   fhirPath: ExplanationOfBenefit.meta.source
 - inputPath: ExplanationOfBenefit-Base.PRVDR_BLG_PRVDR_NPI_NUM
   appliesTo:
