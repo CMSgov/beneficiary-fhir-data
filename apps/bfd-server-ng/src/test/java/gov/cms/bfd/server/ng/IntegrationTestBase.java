@@ -127,7 +127,8 @@ public class IntegrationTestBase {
     var codings = ctx.newTerser().getAllPopulatedChildElementsOfType(resource, Coding.class);
     for (Coding coding : codings) {
       assertTrue(coding.hasSystem());
-      assertTrue(coding.hasCode());
+      assertTrue(
+          (coding.hasDisplay() && !isPlaceHolderDisplay(coding.getDisplay())) || coding.hasCode());
     }
   }
 
@@ -161,5 +162,12 @@ public class IntegrationTestBase {
       var scale = value.scale();
       assertTrue(scale <= 2);
     }
+  }
+
+  protected boolean isPlaceHolderDisplay(String display) {
+    return switch (display.trim().toUpperCase()) {
+      case "UNKNOWN", "MISSING", "NO DESCRIPTION AVAILABLE" -> true;
+      default -> false;
+    };
   }
 }

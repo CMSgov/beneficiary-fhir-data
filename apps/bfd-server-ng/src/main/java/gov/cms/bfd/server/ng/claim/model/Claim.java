@@ -54,11 +54,24 @@ public class Claim {
   @Column(name = "clm_srvc_prvdr_gnrc_id_num")
   private String serviceProviderNpiNumber;
 
-  @Embedded private Meta meta;
+  @Column(name = "clm_sbmt_frmt_cd")
+  private Optional<ClaimSubmissionFormatCode> claimFormatCode;
 
+  @Column(name = "clm_cntrctr_num")
+  private Optional<ClaimContractorNumber> claimContractorNumber;
+
+  @Column(name = "clm_disp_cd")
+  private Optional<ClaimDispositionCode> claimDispositionCode;
+
+  @Column(name = "clm_query_cd")
+  private Optional<ClaimQueryCode> claimQueryCode;
+
+  @Column(name = "clm_adjstmt_type_cd")
+  private Optional<ClaimAdjustmentTypeCode> claimAdjustmentTypeCode;
+
+  @Embedded private Meta meta;
   @Embedded private Identifiers identifiers;
   @Embedded private BillablePeriod billablePeriod;
-  @Embedded private ClaimExtensions claimExtensions;
   @Embedded private BillingProvider billingProvider;
   @Embedded private BloodPints bloodPints;
   @Embedded private NchPrimaryPayorCode nchPrimaryPayorCode;
@@ -67,6 +80,9 @@ public class Claim {
   @Embedded private AdjudicationCharge adjudicationCharge;
   @Embedded private ClaimPaymentAmount claimPaymentAmount;
   @Embedded private ClaimRecordType claimRecordType;
+  @Embedded private ClaimIDRLoadDate claimIDRLoadDate;
+  @Embedded private SubmitterContractNumber submitterContractNumber;
+  @Embedded private SubmitterContractPBPNumber submitterContractPBPNumber;
 
   @OneToOne
   @JoinColumn(name = "bene_sk")
@@ -94,12 +110,6 @@ public class Claim {
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "clm_uniq_id")
   private SortedSet<ClaimItem> claimItems;
-
-  @Column(name = "clm_sbmtr_cntrct_num")
-  private String contractNumber;
-
-  @Column(name = "clm_sbmtr_cntrct_pbp_num")
-  private String contractPbpNumber;
 
   @Nullable
   @ManyToOne(fetch = FetchType.EAGER)
@@ -289,14 +299,8 @@ public class Claim {
               eob.addContained(i);
               eob.setInsurer(new Reference(i));
             });
-    var institutional = getClaimInstitutional();
-    Stream.of(
-            claimExtensions.toFhir(),
-            institutional.map(i -> i.getExtensions().toFhir()).orElse(List.of()),
-            claimDateSignature.getClaimProcessDate().toFhir().stream().toList())
-        .flatMap(Collection::stream)
-        .forEach(eob::addExtension);
 
+    var institutional = getClaimInstitutional();
     var consolidatedDiagnoses = computeConsolidatedDiagnoses();
 
     claimItems.forEach(
@@ -354,20 +358,29 @@ public class Claim {
         Stream.of(
                 bloodPints.toFhir(supportingInfoFactory),
                 nchPrimaryPayorCode.toFhir(supportingInfoFactory),
-                typeOfBillCode.toFhir(supportingInfoFactory))
+                typeOfBillCode.toFhir(supportingInfoFactory),
+                claimContractorNumber.map(c -> c.toFhir(supportingInfoFactory)),
+                claimDispositionCode.map(c -> c.toFhir(supportingInfoFactory)),
+                claimQueryCode.map(c -> c.toFhir(supportingInfoFactory)),
+                claimAdjustmentTypeCode.map(c -> c.toFhir(supportingInfoFactory)),
+                Optional.of(claimIDRLoadDate.toFhir(supportingInfoFactory)))
             .flatMap(Optional::stream)
             .toList();
 
     var claimRxSupportingInfo =
-        getAllClaimRxSupportingInfo().stream()
-            .flatMap(rxSupportingInfo -> rxSupportingInfo.toFhir(supportingInfoFactory).stream())
-            .toList();
-
-    var claimLineRxNumbers =
-        claimItems.stream()
-            .map(ClaimItem::getClaimLineRxNum)
-            .map(claimLineRxNumber -> claimLineRxNumber.toFhir(supportingInfoFactory))
-            .flatMap(Optional::stream)
+        Stream.of(
+                // claim rx header lvl
+                claimFormatCode.map(c -> c.toFhir(supportingInfoFactory)).stream(),
+                submitterContractNumber.toFhir(supportingInfoFactory).stream(),
+                submitterContractPBPNumber.toFhir(supportingInfoFactory).stream(),
+                // claim rx line lvl
+                getClaimLineRxSupportingInfo().stream()
+                    .flatMap(rx -> rx.toFhir(supportingInfoFactory).stream()),
+                // claim line rx num
+                claimItems.stream()
+                    .map(item -> item.getClaimLineRxNum().toFhir(supportingInfoFactory))
+                    .flatMap(Optional::stream))
+            .flatMap(s -> s)
             .toList();
 
     var claimRelatedConditionCds =
@@ -376,6 +389,8 @@ public class Claim {
             .map(crc -> crc.toFhir(supportingInfoFactory))
             .flatMap(Optional::stream)
             .toList();
+
+    var professional = getClaimProfessional();
 
     Stream.of(
             initialSupportingInfo,
@@ -386,8 +401,10 @@ public class Claim {
             institutional
                 .map(i -> i.getSupportingInfo().toFhir(supportingInfoFactory))
                 .orElse(List.of()),
+            professional
+                .map(p -> p.getSupportingInfo().toFhir(supportingInfoFactory))
+                .orElse(List.of()),
             claimRxSupportingInfo,
-            claimLineRxNumbers,
             claimRelatedConditionCds)
         .flatMap(Collection::stream)
         .forEach(eob::addSupportingInfo);
@@ -417,9 +434,7 @@ public class Claim {
     claimRecordType.toFhirReference(claimTypeCode).ifPresent(insurance::setCoverage);
 
     claimTypeCode.toFhirInsurance(claimRecordType).ifPresent(eob::addInsurance);
-    claimTypeCode
-        .toFhirPartDInsurance(contractNumber, contractPbpNumber)
-        .ifPresent(eob::addInsurance);
+    claimTypeCode.toFhirPartDInsurance().ifPresent(eob::addInsurance);
     adjudicationCharge.toFhirTotal().forEach(eob::addTotal);
     getBenePaidAmount()
         .map(AdjudicationChargeType.BENE_PAID_AMOUNT::toFhirTotal)
@@ -427,13 +442,11 @@ public class Claim {
     adjudicationCharge.toFhirAdjudication().forEach(eob::addAdjudication);
     eob.setPayment(claimPaymentAmount.toFhir());
 
-    getClaimProfessional()
-        .ifPresent(
-            professional -> {
-              eob.getExtension().addAll(professional.toFhirExtension());
-              professional.toFhirAdjudication().forEach(eob::addAdjudication);
-              professional.toFhirOutcome(claimTypeCode).ifPresent(eob::setOutcome);
-            });
+    professional.ifPresent(
+        p -> {
+          p.toFhirAdjudication().forEach(eob::addAdjudication);
+          p.toFhirOutcome(claimTypeCode).ifPresent(eob::setOutcome);
+        });
 
     return sortedEob(eob);
   }
@@ -442,7 +455,7 @@ public class Claim {
     return claimItems.stream().map(ClaimItem::getClaimValue).toList();
   }
 
-  private List<ClaimRxSupportingInfo> getAllClaimRxSupportingInfo() {
+  private List<ClaimLineRxSupportingInfo> getClaimLineRxSupportingInfo() {
     return claimItems.stream()
         .map(ClaimItem::getClaimLineRx)
         .flatMap(Optional::stream)

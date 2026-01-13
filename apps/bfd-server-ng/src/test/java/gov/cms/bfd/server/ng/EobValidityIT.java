@@ -29,6 +29,7 @@ class EobValidityIT extends IntegrationTestBase {
     assertTrue(eob.hasUse(), "EOB should have use");
     assertFalse(
         eob.getMeta().getProfile().isEmpty(), "EOB Meta must have at least one Profile defined");
+    assertFalse(eob.hasExtension());
 
     var hasCarinProfile =
         eob.getMeta().getProfile().stream()

@@ -111,13 +111,6 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
   } ],
   "billablePeriod" : {
     "end" : "2018-08-21",
-    "extension" : [ {
-      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-QUERY-CD",
-      "valueCoding" : {
-        "code" : "3",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD"
-      }
-    } ],
     "start" : "2018-08-12"
   },
   "careTeam" : [ {
@@ -178,22 +171,6 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
     "resourceType" : "Practitioner"
   } ],
   "created" : "2025-10-31T00:00:00+00:00",
-  "extension" : [ {
-    "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CMS-PROC-DT",
-    "valueDate" : "2018-08-21"
-  }, {
-    "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CNTRCTR-NUM",
-    "valueCoding" : {
-      "code" : "01001",
-      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CNTRCTR-NUM"
-    }
-  }, {
-    "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-DISP-CD",
-    "valueCoding" : {
-      "code" : "59",
-      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DISP-CD"
-    }
-  } ],
   "id" : "5213363418309",
   "identifier" : [ {
     "type" : {
@@ -215,13 +192,6 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
     "coverage" : {
       "display" : "Part D"
     },
-    "extension" : [ {
-      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-SBMTR-CNTRCT-NUM",
-      "valueString" : "Z0001"
-    }, {
-      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-SBMTR-CNTRCT-PBP-NUM",
-      "valueString" : "007"
-    } ],
     "focal" : true
   } ],
   "item" : [ {
@@ -661,11 +631,132 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
   }, {
     "category" : {
       "coding" : [ {
+        "code" : "CLM_DISP_CD",
+        "display" : "Claim Disposition Code",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "59",
+        "display" : "BENEFICIARY RECORD FROZEN FOR CLERICAL CORRECTION",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DISP-CD"
+      } ]
+    },
+    "sequence" : 3
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_QUERY_CD",
+        "display" : "Claim Query Code",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "3",
+        "display" : "FINAL BILL",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD"
+      } ]
+    },
+    "sequence" : 4
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_ADJSTMT_TYPE_CD",
+        "display" : "Claim Adjustment Type Code",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "4",
+        "display" : "DEBIT ADJUSTMENT (POSITIVE SUPPLEMENTAL)",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADJSTMT-TYPE-CD"
+      } ]
+    },
+    "sequence" : 5
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_IDR_LD_DT",
+        "display" : "Claim IDR Load Date",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "sequence" : 6,
+    "timingDate" : "2026-01-13"
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_SBMT_FRMT_CD",
+        "display" : "Claim Submission Format Code",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "display" : "NCPDP ELECTRONIC SUBMISSION",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-SBMT-FRMT-CD"
+      } ]
+    },
+    "sequence" : 7
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_SBMTR_CNTRCT_NUM",
+        "display" : "Submitter Contract Number",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "sequence" : 8,
+    "valueString" : "Z0001"
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_SBMTR_CNTRCT_PBP_NUM",
+        "display" : "Submitter Contract PBP Number",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "sequence" : 9,
+    "valueString" : "007"
+  }, {
+    "category" : {
+      "coding" : [ {
         "code" : "refillsauthorized",
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
       } ]
     },
-    "sequence" : 3,
+    "sequence" : 10,
     "valueQuantity" : {
       "unit" : "refills",
       "value" : 0
@@ -689,7 +780,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_PHRMCY_SRVC_TYPE_CD"
       } ]
     },
-    "sequence" : 4
+    "sequence" : 11
   }, {
     "category" : {
       "coding" : [ {
@@ -706,7 +797,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-LINE-RX-ORGN-CD"
       } ]
     },
-    "sequence" : 5
+    "sequence" : 12
   }, {
     "category" : {
       "coding" : [ {
@@ -725,7 +816,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BRND-GNRC-CD"
       } ]
     },
-    "sequence" : 6
+    "sequence" : 13
   }, {
     "category" : {
       "coding" : [ {
@@ -745,7 +836,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_PTNT_RSDNC_CD"
       } ]
     },
-    "sequence" : 7
+    "sequence" : 14
   }, {
     "category" : {
       "coding" : [ {
@@ -765,7 +856,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_LTC_DSPNSNG_MTHD_CD"
       } ]
     },
-    "sequence" : 8
+    "sequence" : 15
   }, {
     "category" : {
       "coding" : [ {
@@ -784,7 +875,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CMPND-CD"
       } ]
     },
-    "sequence" : 9
+    "sequence" : 16
   }, {
     "category" : {
       "coding" : [ {
@@ -792,7 +883,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
       } ]
     },
-    "sequence" : 10,
+    "sequence" : 17,
     "valueQuantity" : {
       "unit" : "days",
       "value" : 7
@@ -804,7 +895,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
       } ]
     },
-    "sequence" : 11,
+    "sequence" : 18,
     "valueQuantity" : {
       "unit" : "fill",
       "value" : 4
@@ -822,7 +913,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
         "system" : "http://terminology.hl7.org/CodeSystem/NCPDPDispensedAsWrittenOrProductSelectionCode"
       } ]
     },
-    "sequence" : 12
+    "sequence" : 19
   }, {
     "category" : {
       "coding" : [ {
@@ -842,7 +933,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DRUG-CVRG-STUS-CD"
       } ]
     },
-    "sequence" : 13
+    "sequence" : 20
   }, {
     "category" : {
       "coding" : [ {
@@ -862,7 +953,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_CTSTRPHC_CVRG_IND_CD"
       } ]
     },
-    "sequence" : 14
+    "sequence" : 21
   }, {
     "category" : {
       "coding" : [ {
@@ -882,7 +973,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DSPNSNG-STUS-CD"
       } ]
     },
-    "sequence" : 15
+    "sequence" : 22
   }, {
     "category" : {
       "coding" : [ {
@@ -895,7 +986,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 16,
+    "sequence" : 23,
     "valueString" : "54025.5"
   }, {
     "category" : {
@@ -904,7 +995,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
       } ]
     },
-    "sequence" : 17,
+    "sequence" : 24,
     "timingPeriod" : {
       "start" : "2023-11-30"
     }
@@ -915,7 +1006,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
       } ]
     },
-    "sequence" : 18,
+    "sequence" : 25,
     "timingDate" : "2023-12-06"
   }, {
     "category" : {
@@ -929,7 +1020,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 19,
+    "sequence" : 26,
     "timingDate" : "2018-08-21"
   }, {
     "category" : {
@@ -943,7 +1034,21 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 20,
+    "sequence" : 27,
+    "timingDate" : "2018-08-21"
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_CMS_PROC_DT",
+        "display" : "FI Claim Process Date",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "sequence" : 28,
     "timingDate" : "2018-08-21"
   } ],
   "total" : [ {
@@ -1219,13 +1324,6 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
   } ],
   "billablePeriod" : {
     "end" : "2025-08-12",
-    "extension" : [ {
-      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-QUERY-CD",
-      "valueCoding" : {
-        "code" : "2",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD"
-      }
-    } ],
     "start" : "2025-08-10"
   },
   "careTeam" : [ {
@@ -1283,28 +1381,6 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
     "resourceType" : "Practitioner"
   } ],
   "created" : "2025-11-12T00:00:00+00:00",
-  "extension" : [ {
-    "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CMS-PROC-DT",
-    "valueDate" : "2025-08-12"
-  }, {
-    "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CNTRCTR-NUM",
-    "valueCoding" : {
-      "code" : "12401",
-      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CNTRCTR-NUM"
-    }
-  }, {
-    "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-DISP-CD",
-    "valueCoding" : {
-      "code" : "54",
-      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DISP-CD"
-    }
-  }, {
-    "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-SBMT-FRMT-CD",
-    "valueCoding" : {
-      "code" : "S",
-      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-SBMT-FRMT-CD"
-    }
-  } ],
   "id" : "1409088853940",
   "identifier" : [ {
     "type" : {
@@ -1323,13 +1399,6 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
     "coverage" : {
       "display" : "Part D"
     },
-    "extension" : [ {
-      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-SBMTR-CNTRCT-NUM",
-      "valueString" : "Z0001"
-    }, {
-      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-SBMTR-CNTRCT-PBP-NUM",
-      "valueString" : "001"
-    } ],
     "focal" : true
   } ],
   "item" : [ {
@@ -1770,11 +1839,153 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
   }, {
     "category" : {
       "coding" : [ {
+        "code" : "CLM_CNTRCTR_NUM",
+        "display" : "Claim Contractor Number",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "12401",
+        "display" : "NEW JERSEY - NOVITAS SOLUTIONS, INC. (REPLACES # 00390)",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CNTRCTR-NUM"
+      } ]
+    },
+    "sequence" : 3
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_DISP_CD",
+        "display" : "Claim Disposition Code",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "54",
+        "display" : "CROSS-REFERENCE HIC",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DISP-CD"
+      } ]
+    },
+    "sequence" : 4
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_QUERY_CD",
+        "display" : "Claim Query Code",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "2",
+        "display" : "HOME HEALTH AGENCY (HHA) BENEFITS EXHAUSTED (OBSOLETE 7/98)",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD"
+      } ]
+    },
+    "sequence" : 5
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_ADJSTMT_TYPE_CD",
+        "display" : "Claim Adjustment Type Code",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "1",
+        "display" : "VOID",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADJSTMT-TYPE-CD"
+      } ]
+    },
+    "sequence" : 6
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_IDR_LD_DT",
+        "display" : "Claim IDR Load Date",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "sequence" : 7,
+    "timingDate" : "2026-01-13"
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_SBMT_FRMT_CD",
+        "display" : "Claim Submission Format Code",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "S",
+        "display" : "STATE-TO-PLAN PDES",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-SBMT-FRMT-CD"
+      } ]
+    },
+    "sequence" : 8
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_SBMTR_CNTRCT_NUM",
+        "display" : "Submitter Contract Number",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "sequence" : 9,
+    "valueString" : "Z0001"
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_SBMTR_CNTRCT_PBP_NUM",
+        "display" : "Submitter Contract PBP Number",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "sequence" : 10,
+    "valueString" : "001"
+  }, {
+    "category" : {
+      "coding" : [ {
         "code" : "refillsauthorized",
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
       } ]
     },
-    "sequence" : 3,
+    "sequence" : 11,
     "valueQuantity" : {
       "unit" : "refills",
       "value" : 0
@@ -1795,7 +2006,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-LINE-RX-ORGN-CD"
       } ]
     },
-    "sequence" : 4
+    "sequence" : 12
   }, {
     "category" : {
       "coding" : [ {
@@ -1814,7 +2025,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BRND-GNRC-CD"
       } ]
     },
-    "sequence" : 5
+    "sequence" : 13
   }, {
     "category" : {
       "coding" : [ {
@@ -1834,7 +2045,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_PTNT_RSDNC_CD"
       } ]
     },
-    "sequence" : 6
+    "sequence" : 14
   }, {
     "category" : {
       "coding" : [ {
@@ -1854,7 +2065,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_LTC_DSPNSNG_MTHD_CD"
       } ]
     },
-    "sequence" : 7
+    "sequence" : 15
   }, {
     "category" : {
       "coding" : [ {
@@ -1862,7 +2073,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
       } ]
     },
-    "sequence" : 8,
+    "sequence" : 16,
     "valueQuantity" : {
       "unit" : "days",
       "value" : 2
@@ -1874,7 +2085,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
       } ]
     },
-    "sequence" : 9,
+    "sequence" : 17,
     "valueQuantity" : {
       "unit" : "fill",
       "value" : 1
@@ -1892,7 +2103,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
         "system" : "http://terminology.hl7.org/CodeSystem/NCPDPDispensedAsWrittenOrProductSelectionCode"
       } ]
     },
-    "sequence" : 10
+    "sequence" : 18
   }, {
     "category" : {
       "coding" : [ {
@@ -1912,7 +2123,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DRUG-CVRG-STUS-CD"
       } ]
     },
-    "sequence" : 11
+    "sequence" : 19
   }, {
     "category" : {
       "coding" : [ {
@@ -1932,7 +2143,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM_CTSTRPHC_CVRG_IND_CD"
       } ]
     },
-    "sequence" : 12
+    "sequence" : 20
   }, {
     "category" : {
       "coding" : [ {
@@ -1952,7 +2163,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DSPNSNG-STUS-CD"
       } ]
     },
-    "sequence" : 13
+    "sequence" : 21
   }, {
     "category" : {
       "coding" : [ {
@@ -1965,7 +2176,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 14,
+    "sequence" : 22,
     "valueString" : "15180.94"
   }, {
     "category" : {
@@ -1974,7 +2185,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
       } ]
     },
-    "sequence" : 15,
+    "sequence" : 23,
     "timingDate" : "2025-08-12"
   }, {
     "category" : {
@@ -1988,7 +2199,21 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 16,
+    "sequence" : 24,
+    "timingDate" : "2025-08-12"
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "CLM_CMS_PROC_DT",
+        "display" : "FI Claim Process Date",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "sequence" : 25,
     "timingDate" : "2025-08-12"
   } ],
   "total" : [ {

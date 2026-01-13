@@ -1444,6 +1444,7 @@ class IdrClaimInstitutional(IdrBaseModel):
     clm_mdcr_ip_1st_yr_rate_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_site_ntrl_cst_bsd_pymt_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_ss_outlier_std_pymt_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_op_srvc_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
     idr_insrt_ts: Annotated[
         datetime,
         {BATCH_TIMESTAMP: True, ALIAS: ALIAS_INSTNL},

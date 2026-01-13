@@ -74,14 +74,6 @@ group createEOBPharmacy(source src: ExplanationOfBenefitPharmacy, target tgt: BF
       procDt -> tgtExtension.value = procDt "set process date";
     } "CLM_CMS_PROC_DT";
 
-    src.CLM_SBMT_FRMT_CD as fmtCd -> tgt.extension = create('Extension') as tgtExtension then {
-      src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-SBMT-FRMT-CD" "Add url";
-      fmtCd -> tgtExtension.value = create('Coding') as tgtCoding then {
-        src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-SBMT-FRMT-CD" "Set coding system";
-        fmtCd -> tgtCoding.code = fmtCd "Set coding code";
-      } "Create coding";
-    } "CLM_SBMT_FRMT_CD";
-
     // Provider organization for pharmacy - only create when needed based on NPI_TYPE
 
     src.PRVDR_SRVC_PRVDR_NPI_NUM as blgNPI -> tgt then{
@@ -130,18 +122,6 @@ group createEOBPharmacy(source src: ExplanationOfBenefitPharmacy, target tgt: BF
       src -> tgtBBElement.coverage = create('Reference') as tgtReference then {
         claimType -> tgtReference.display = "Part D" "Add coverage type";
       } "Add reference for coverage";
-      
-      // Submitter contract number
-      src.CLM_SBMTR_CNTRCT_NUM as contractNum -> tgtBBElement.extension = create('Extension') as tgtExtension then {
-        src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-SBMTR-CNTRCT-NUM" "Add url";
-        contractNum -> tgtExtension.value = contractNum "set contract number";
-      } "CLM_SBMTR_CNTRCT_NUM";
-
-      // Submitter contract PBP number
-      src.CLM_SBMTR_CNTRCT_PBP_NUM as pbpNum -> tgtBBElement.extension = create('Extension') as tgtExtension then {
-        src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-SBMTR-CNTRCT-PBP-NUM" "Add url";
-        pbpNum -> tgtExtension.value = pbpNum "set PBP number";
-      } "CLM_SBMTR_CNTRCT_PBP_NUM";
     } "Add insurance coverage";
 
     src.CLM_BENE_PMT_AMT as benePmtAmt -> tgt.total = create('BackboneElement') as tgtBBElement then {  
@@ -215,7 +195,14 @@ group addPharmacySupportingInfo(source src: SupportingInfoComponent, target tgt:
 
     src.CLM_DSPNSNG_STUS_CD as dispCd -> tgt then addDispCd(src, tgt) "Add dispensing status code";
 
-    
+    // Claim submission format code
+    src.CLM_SBMT_FRMT_CD as fmtCd -> tgt then addFmtCd(src, tgt) "Add claim submission format code";
+
+    // Submitter contract number
+    src.CLM_SBMTR_CNTRCT_NUM as sbmtrCntrctNum -> tgt then addSubmitterContractNumber(src, tgt) "Add submitter contract number";
+
+    // Submitter contract PBP number
+    src.CLM_SBMTR_CNTRCT_PBP_NUM as sbmtrCntrctPbpNum -> tgt then addSubmitterContractPbpNumber(src, tgt) "Add submitter contract pbp number";
 }
 
 group addRxNum(source src: SupportingInfoComponent, target tgt: BackboneElement){
@@ -343,6 +330,32 @@ group addDispCd(source src: SupportingInfoComponent, target tgt: BackboneElement
   src -> tgt.code = create('CodeableConcept') as tgtCC then{
       src.CLM_DSPNSNG_STUS_CD as val -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DSPNSNG-STUS-CD", val) "Add coding";
   } "Add CC";
+}
+
+group addFmtCd(source src: SupportingInfoComponent, target tgt: BackboneElement){
+  src -> tgt.category = create('CodeableConcept') as tgtCC then {
+      src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
+      src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","CLM_SBMT_FRMT_CD") "Add Coding";
+  } "Add category";
+  src -> tgt.code = create('CodeableConcept') as tgtCC then{
+      src.CLM_SBMT_FRMT_CD as val -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/CLM-SBMT-FRMT-CD", val) "Add coding";
+  } "Add CC";
+}
+
+group addSubmitterContractNumber(source src: SupportingInfoComponent, target tgt: BackboneElement){
+  src -> tgt.category = create('CodeableConcept') as tgtCC then {
+      src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
+      src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","CLM_SBMTR_CNTRCT_NUM") "Add Coding";
+  } "Add category";
+  src.CLM_SBMTR_CNTRCT_NUM as sbmtrCntrctNum -> tgt.value = sbmtrCntrctNum "Add submitter contract number";
+}
+
+group addSubmitterContractPbpNumber(source src: SupportingInfoComponent, target tgt: BackboneElement){
+  src -> tgt.category = create('CodeableConcept') as tgtCC then {
+      src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
+      src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","CLM_SBMTR_CNTRCT_PBP_NUM") "Add Coding";
+  } "Add category";
+  src.CLM_SBMTR_CNTRCT_PBP_NUM as sbmtrCntrctPbpNum -> tgt.value = sbmtrCntrctPbpNum "Add submitter contract PBP number";
 }
 
 group addRefillsAuthorized(source src: SupportingInfoComponent, target tgt: BackboneElement){

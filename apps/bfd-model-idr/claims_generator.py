@@ -500,7 +500,7 @@ def add_diagnoses(clm_type_cd=-1):
             "CLM_VAL_SQNC_NUM": "1",
             "CLM_DGNS_PRCDR_ICD_IND": "0",
             "CLM_PROD_TYPE_CD": "E",
-            "CLM_POA_IND": "0", #ALWAYS for ICD-10 codes. not always for icd-9.
+            "CLM_POA_IND": "0",  # ALWAYS for ICD-10 codes. not always for icd-9.
         }
         first_external = {
             "CLM_DGNS_CD": external_1["CLM_DGNS_CD"],
@@ -1548,7 +1548,6 @@ def gen_provider_history(amount):
         }
         generate_meta_sk_pair(obj)
         provider_history.append(obj)
-        
 
     return provider_history
 
@@ -1620,7 +1619,6 @@ def add_meta_timestamps(obj, clm, max_date):
 
 
 def generate_meta_sk_pair(obj):
-
     def encode(d):
         d = d.date() if isinstance(d, datetime) else d
         yyyymmdd = d.year * 10000 + d.month * 100 + d.day
@@ -1630,7 +1628,6 @@ def generate_meta_sk_pair(obj):
 
     max_dt = datetime.fromisoformat(str(now))
     min_dt = datetime(2010, 1, 1)
-
 
     if random.random() < 0.05:
         update_dt = faker.date_time_between_dates(min_dt, max_dt)
@@ -1649,7 +1646,6 @@ def generate_meta_sk_pair(obj):
         obj["META_LST_UPDT_SK"] = obj["META_SK"]
     else:
         obj["META_LST_UPDT_SK"] = 0
-
 
 
 def main():

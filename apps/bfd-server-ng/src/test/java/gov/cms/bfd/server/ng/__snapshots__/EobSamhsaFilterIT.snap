@@ -500,13 +500,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
       } ],
       "billablePeriod" : {
         "end" : "2019-09-30",
-        "extension" : [ {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-QUERY-CD",
-          "valueCoding" : {
-            "code" : "2",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD"
-          }
-        } ],
         "start" : "2019-09-23"
       },
       "careTeam" : [ {
@@ -864,28 +857,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "http://terminology.hl7.org/CodeSystem/ex-diagnosistype"
           } ]
         } ]
-      } ],
-      "extension" : [ {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CMS-PROC-DT",
-        "valueDate" : "2019-09-30"
-      }, {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CNTRCTR-NUM",
-        "valueCoding" : {
-          "code" : "02102",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CNTRCTR-NUM"
-        }
-      }, {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-DISP-CD",
-        "valueCoding" : {
-          "code" : "50",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DISP-CD"
-        }
-      }, {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-FI-ACTN-CD",
-        "valueCoding" : {
-          "code" : "1",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
-        }
       } ],
       "id" : "3233800161009",
       "identifier" : [ {
@@ -2931,11 +2902,124 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_CNTRCTR_NUM",
+            "display" : "Claim Contractor Number",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "02102",
+            "display" : "ALASKA - NORIDIAN ADMINISTRATIVE SERVICES, LLC (EFF. 2/27/2012)",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CNTRCTR-NUM"
+          } ]
+        },
+        "sequence" : 3
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_DISP_CD",
+            "display" : "Claim Disposition Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "50",
+            "display" : "BENEFICIARY NOT IN FILE",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DISP-CD"
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_QUERY_CD",
+            "display" : "Claim Query Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "2",
+            "display" : "HOME HEALTH AGENCY (HHA) BENEFITS EXHAUSTED (OBSOLETE 7/98)",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD"
+          } ]
+        },
+        "sequence" : 5
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_ADJSTMT_TYPE_CD",
+            "display" : "Claim Adjustment Type Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "0",
+            "display" : "ORIGINAL",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADJSTMT-TYPE-CD"
+          } ]
+        },
+        "sequence" : 6
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_IDR_LD_DT",
+            "display" : "Claim IDR Load Date",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 7,
+        "timingDate" : "2026-01-13"
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_SBMT_FRMT_CD",
+            "display" : "Claim Submission Format Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "display" : "NCPDP ELECTRONIC SUBMISSION",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-SBMT-FRMT-CD"
+          } ]
+        },
+        "sequence" : 8
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "admissionperiod",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 3,
+        "sequence" : 9,
         "timingPeriod" : {
           "end" : "2019-09-30",
           "start" : "2019-09-23"
@@ -2947,7 +3031,21 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 10,
+        "timingDate" : "2019-09-30"
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_CMS_PROC_DT",
+            "display" : "FI Claim Process Date",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 11,
         "timingDate" : "2019-09-30"
       }, {
         "category" : {
@@ -2966,7 +3064,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 5
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -2983,7 +3081,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 6
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -3003,7 +3101,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 7
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -3017,7 +3115,27 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 8
+        "sequence" : 15
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_FI_ACTN_CD",
+            "display" : "Claim Fiscal Intermediary Action Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "1",
+            "display" : "Original debit action (always a 1 for all regular bills)",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
+          } ]
+        },
+        "sequence" : 16
       } ],
       "total" : [ {
         "amount" : {
@@ -3717,13 +3835,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
       } ],
       "billablePeriod" : {
         "end" : "2025-03-31",
-        "extension" : [ {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-QUERY-CD",
-          "valueCoding" : {
-            "code" : "C",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD"
-          }
-        } ],
         "start" : "2025-03-30"
       },
       "careTeam" : [ {
@@ -4292,28 +4403,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
           } ]
         } ]
-      } ],
-      "extension" : [ {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CMS-PROC-DT",
-        "valueDate" : "2020-09-11"
-      }, {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CNTRCTR-NUM",
-        "valueCoding" : {
-          "code" : "01112",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CNTRCTR-NUM"
-        }
-      }, {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-DISP-CD",
-        "valueCoding" : {
-          "code" : "59",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DISP-CD"
-        }
-      }, {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-FI-ACTN-CD",
-        "valueCoding" : {
-          "code" : "1",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
-        }
       } ],
       "id" : "3159002171180",
       "identifier" : [ {
@@ -6512,6 +6601,119 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_CNTRCTR_NUM",
+            "display" : "Claim Contractor Number",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "01112",
+            "display" : "N. CALIFORNIA - NORIDIAN ADMINISTRATIVE SERVICES, LLC (EFF. 9/16/2013)",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CNTRCTR-NUM"
+          } ]
+        },
+        "sequence" : 3
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_DISP_CD",
+            "display" : "Claim Disposition Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "59",
+            "display" : "BENEFICIARY RECORD FROZEN FOR CLERICAL CORRECTION",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DISP-CD"
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_QUERY_CD",
+            "display" : "Claim Query Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "C",
+            "display" : "CREDIT",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD"
+          } ]
+        },
+        "sequence" : 5
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_ADJSTMT_TYPE_CD",
+            "display" : "Claim Adjustment Type Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "0",
+            "display" : "ORIGINAL",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADJSTMT-TYPE-CD"
+          } ]
+        },
+        "sequence" : 6
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_IDR_LD_DT",
+            "display" : "Claim IDR Load Date",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 7,
+        "timingDate" : "2026-01-13"
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_SBMT_FRMT_CD",
+            "display" : "Claim Submission Format Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "display" : "NCPDP ELECTRONIC SUBMISSION",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-SBMT-FRMT-CD"
+          } ]
+        },
+        "sequence" : 8
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "CLM_NRLN_RIC_CD",
             "display" : "Near Line Record Identification Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -6528,7 +6730,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
           } ]
         },
-        "sequence" : 3
+        "sequence" : 9
       }, {
         "category" : {
           "coding" : [ {
@@ -6536,7 +6738,21 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 10,
+        "timingDate" : "2020-09-11"
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_CMS_PROC_DT",
+            "display" : "FI Claim Process Date",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 11,
         "timingDate" : "2020-09-11"
       }, {
         "category" : {
@@ -6555,7 +6771,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 5
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -6572,7 +6788,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 6
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -6592,7 +6808,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 7
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -6606,7 +6822,27 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 8
+        "sequence" : 15
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_FI_ACTN_CD",
+            "display" : "Claim Fiscal Intermediary Action Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "1",
+            "display" : "Original debit action (always a 1 for all regular bills)",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
+          } ]
+        },
+        "sequence" : 16
       } ],
       "total" : [ {
         "amount" : {
@@ -6894,32 +7130,9 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
       } ],
       "billablePeriod" : {
         "end" : "2020-03-13",
-        "extension" : [ {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-QUERY-CD",
-          "valueCoding" : {
-            "code" : "2",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD"
-          }
-        } ],
         "start" : "2020-02-18"
       },
       "created" : "2025-08-26T00:00:00+00:00",
-      "extension" : [ {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CMS-PROC-DT",
-        "valueDate" : "2020-09-11"
-      }, {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CNTRCTR-NUM",
-        "valueCoding" : {
-          "code" : "04111",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CNTRCTR-NUM"
-        }
-      }, {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-DISP-CD",
-        "valueCoding" : {
-          "code" : "AB",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DISP-CD"
-        }
-      } ],
       "id" : "6871761612138",
       "identifier" : [ {
         "type" : {
@@ -7192,11 +7405,104 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_CNTRCTR_NUM",
+            "display" : "Claim Contractor Number",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "04111",
+            "display" : "COLORADO - NOVITAS SOLUTIONS, INC (EFF. 10/29/2012) (REPLACES FI #04101)",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CNTRCTR-NUM"
+          } ]
+        },
+        "sequence" : 3
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_DISP_CD",
+            "display" : "Claim Disposition Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "AB",
+            "display" : "TRANSACTION CAUSED CICS ABNORMAL END OF JOB",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DISP-CD"
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_QUERY_CD",
+            "display" : "Claim Query Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "2",
+            "display" : "HOME HEALTH AGENCY (HHA) BENEFITS EXHAUSTED (OBSOLETE 7/98)",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD"
+          } ]
+        },
+        "sequence" : 5
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_IDR_LD_DT",
+            "display" : "Claim IDR Load Date",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 6,
+        "timingDate" : "2026-01-13"
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_SBMT_FRMT_CD",
+            "display" : "Claim Submission Format Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "display" : "NCPDP ELECTRONIC SUBMISSION",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-SBMT-FRMT-CD"
+          } ]
+        },
+        "sequence" : 7
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "clmrecvddate",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 3,
+        "sequence" : 8,
         "timingDate" : "2020-09-11"
       }, {
         "category" : {
@@ -7210,7 +7516,21 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 9,
+        "timingDate" : "2020-09-11"
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_CMS_PROC_DT",
+            "display" : "FI Claim Process Date",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 10,
         "timingDate" : "2020-09-11"
       } ],
       "total" : [ {
@@ -7903,13 +8223,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
       } ],
       "billablePeriod" : {
         "end" : "2019-12-03",
-        "extension" : [ {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-QUERY-CD",
-          "valueCoding" : {
-            "code" : "D",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD"
-          }
-        } ],
         "start" : "2019-11-17"
       },
       "careTeam" : [ {
@@ -8259,34 +8572,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
           } ]
         } ]
-      } ],
-      "extension" : [ {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CMS-PROC-DT",
-        "valueDate" : "2019-12-03"
-      }, {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CNTRCTR-NUM",
-        "valueCoding" : {
-          "code" : "15202",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CNTRCTR-NUM"
-        }
-      }, {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-DISP-CD",
-        "valueCoding" : {
-          "code" : "2",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DISP-CD"
-        }
-      }, {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-FI-ACTN-CD",
-        "valueCoding" : {
-          "code" : "1",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
-        }
-      }, {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MDCR-NPMT-RSN-CD",
-        "valueCoding" : {
-          "code" : "U",
-          "system" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MDCR-NPMT-RSN-CD"
-        }
       } ],
       "id" : "566745788569",
       "identifier" : [ {
@@ -9454,6 +9739,99 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_CNTRCTR_NUM",
+            "display" : "Claim Contractor Number",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "15202",
+            "display" : "OHIO - CGS ADMINISTRATORS, LLC",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CNTRCTR-NUM"
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_DISP_CD",
+            "display" : "Claim Disposition Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "2",
+            "display" : "DEBIT ACCEPTED (AUTOMATIC ADJUSTMENT) APPLICABLE THROUGH 4/4/93",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DISP-CD"
+          } ]
+        },
+        "sequence" : 5
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_QUERY_CD",
+            "display" : "Claim Query Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "D",
+            "display" : "DEBIT",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD"
+          } ]
+        },
+        "sequence" : 6
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_IDR_LD_DT",
+            "display" : "Claim IDR Load Date",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 7,
+        "timingDate" : "2026-01-13"
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_SBMT_FRMT_CD",
+            "display" : "Claim Submission Format Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "display" : "NCPDP ELECTRONIC SUBMISSION",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-SBMT-FRMT-CD"
+          } ]
+        },
+        "sequence" : 8
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "CLM_NRLN_RIC_CD",
             "display" : "Near Line Record Identification Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -9470,7 +9848,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
           } ]
         },
-        "sequence" : 4
+        "sequence" : 9
       }, {
         "category" : {
           "coding" : [ {
@@ -9478,7 +9856,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 10,
         "timingPeriod" : {
           "end" : "2019-12-03",
           "start" : "2019-11-17"
@@ -9490,7 +9868,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 11,
         "timingDate" : "2019-12-03"
       }, {
         "category" : {
@@ -9504,7 +9882,21 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 12,
+        "timingDate" : "2019-12-03"
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_CMS_PROC_DT",
+            "display" : "FI Claim Process Date",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 13,
         "timingDate" : "2019-12-03"
       }, {
         "category" : {
@@ -9523,7 +9915,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 8
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -9541,7 +9933,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 9
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -9558,7 +9950,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 10
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -9578,7 +9970,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -9592,7 +9984,47 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 18
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_MDCR_NPMT_RSN_CD",
+            "display" : "Claim Non Payment Reason Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "U",
+            "display" : "MSP COST AVOIDED - HMO RATE CELL ADJUSTMENT (EFF. 9/76) (OBSOLETE 6/30/00)",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-NPMT-RSN-CD"
+          } ]
+        },
+        "sequence" : 19
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_FI_ACTN_CD",
+            "display" : "Claim Fiscal Intermediary Action Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "1",
+            "display" : "Original debit action (always a 1 for all regular bills)",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
+          } ]
+        },
+        "sequence" : 20
       } ],
       "total" : [ {
         "amount" : {
@@ -10267,13 +10699,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
       } ],
       "billablePeriod" : {
         "end" : "2019-09-30",
-        "extension" : [ {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-QUERY-CD",
-          "valueCoding" : {
-            "code" : "2",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD"
-          }
-        } ],
         "start" : "2019-09-23"
       },
       "careTeam" : [ {
@@ -10634,34 +11059,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "http://terminology.hl7.org/CodeSystem/ex-diagnosistype"
           } ]
         } ]
-      } ],
-      "extension" : [ {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CMS-PROC-DT",
-        "valueDate" : "2019-09-30"
-      }, {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CNTRCTR-NUM",
-        "valueCoding" : {
-          "code" : "02102",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CNTRCTR-NUM"
-        }
-      }, {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-DISP-CD",
-        "valueCoding" : {
-          "code" : "50",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DISP-CD"
-        }
-      }, {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-FI-ACTN-CD",
-        "valueCoding" : {
-          "code" : "1",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
-        }
-      }, {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MDCR-NPMT-RSN-CD",
-        "valueCoding" : {
-          "code" : "42",
-          "system" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MDCR-NPMT-RSN-CD"
-        }
       } ],
       "id" : "6288598524935",
       "identifier" : [ {
@@ -12506,11 +12903,104 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_CNTRCTR_NUM",
+            "display" : "Claim Contractor Number",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "02102",
+            "display" : "ALASKA - NORIDIAN ADMINISTRATIVE SERVICES, LLC (EFF. 2/27/2012)",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CNTRCTR-NUM"
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_DISP_CD",
+            "display" : "Claim Disposition Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "50",
+            "display" : "BENEFICIARY NOT IN FILE",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DISP-CD"
+          } ]
+        },
+        "sequence" : 5
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_QUERY_CD",
+            "display" : "Claim Query Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "2",
+            "display" : "HOME HEALTH AGENCY (HHA) BENEFITS EXHAUSTED (OBSOLETE 7/98)",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD"
+          } ]
+        },
+        "sequence" : 6
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_IDR_LD_DT",
+            "display" : "Claim IDR Load Date",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 7,
+        "timingDate" : "2026-01-13"
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_SBMT_FRMT_CD",
+            "display" : "Claim Submission Format Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "display" : "NCPDP ELECTRONIC SUBMISSION",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-SBMT-FRMT-CD"
+          } ]
+        },
+        "sequence" : 8
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "admissionperiod",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 9,
         "timingPeriod" : {
           "end" : "2019-09-30",
           "start" : "2019-09-23"
@@ -12522,7 +13012,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 10,
         "timingDate" : "2019-09-30"
       }, {
         "category" : {
@@ -12536,7 +13026,21 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 11,
+        "timingDate" : "2019-09-30"
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_CMS_PROC_DT",
+            "display" : "FI Claim Process Date",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 12,
         "timingDate" : "2019-09-30"
       }, {
         "category" : {
@@ -12555,7 +13059,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 7
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -12573,7 +13077,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 8
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -12590,7 +13094,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 9
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -12610,7 +13114,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 10
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -12624,7 +13128,67 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 17
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_PPS_IND_CD",
+            "display" : "Claim PPS Indicator Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "2",
+            "display" : "PPS bill; claim contains PPS indicator",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PPS-IND-CD"
+          } ]
+        },
+        "sequence" : 18
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_MDCR_NPMT_RSN_CD",
+            "display" : "Claim Non Payment Reason Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "42",
+            "display" : "MSP COST AVOIDED - NGHP ORM RECOVERY COB CONTRACTOR 11142",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-NPMT-RSN-CD"
+          } ]
+        },
+        "sequence" : 19
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_FI_ACTN_CD",
+            "display" : "Claim Fiscal Intermediary Action Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "1",
+            "display" : "Original debit action (always a 1 for all regular bills)",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
+          } ]
+        },
+        "sequence" : 20
       } ],
       "total" : [ {
         "amount" : {
@@ -13401,34 +13965,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
           } ]
         } ]
-      } ],
-      "extension" : [ {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CMS-PROC-DT",
-        "valueDate" : "2020-09-11"
-      }, {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CNTRCTR-NUM",
-        "valueCoding" : {
-          "code" : "01011",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CNTRCTR-NUM"
-        }
-      }, {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-DISP-CD",
-        "valueCoding" : {
-          "code" : "53",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DISP-CD"
-        }
-      }, {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-FI-ACTN-CD",
-        "valueCoding" : {
-          "code" : "7",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
-        }
-      }, {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MDCR-NPMT-RSN-CD",
-        "valueCoding" : {
-          "code" : "44",
-          "system" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MDCR-NPMT-RSN-CD"
-        }
       } ],
       "id" : "9688880648059",
       "identifier" : [ {
@@ -14404,6 +14940,99 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_CNTRCTR_NUM",
+            "display" : "Claim Contractor Number",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "01011",
+            "display" : "CALIFORNIA, HAWAII, AMERICAN SAMOA, GUAM, N. MARIANAS AND NEVADA (PART A ROLL UP NUMBER)",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CNTRCTR-NUM"
+          } ]
+        },
+        "sequence" : 3
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_DISP_CD",
+            "display" : "Claim Disposition Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "53",
+            "display" : "RECORD IN CMS ALPHA MATCH",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DISP-CD"
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_ADJSTMT_TYPE_CD",
+            "display" : "Claim Adjustment Type Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "0",
+            "display" : "ORIGINAL",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADJSTMT-TYPE-CD"
+          } ]
+        },
+        "sequence" : 5
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_IDR_LD_DT",
+            "display" : "Claim IDR Load Date",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 6,
+        "timingDate" : "2026-01-13"
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_SBMT_FRMT_CD",
+            "display" : "Claim Submission Format Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "display" : "NCPDP ELECTRONIC SUBMISSION",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-SBMT-FRMT-CD"
+          } ]
+        },
+        "sequence" : 7
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "CLM_NRLN_RIC_CD",
             "display" : "Near Line Record Identification Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -14420,7 +15049,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
           } ]
         },
-        "sequence" : 3
+        "sequence" : 8
       }, {
         "category" : {
           "coding" : [ {
@@ -14428,7 +15057,21 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 9,
+        "timingDate" : "2020-09-11"
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_CMS_PROC_DT",
+            "display" : "FI Claim Process Date",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 10,
         "timingDate" : "2020-09-11"
       }, {
         "category" : {
@@ -14447,7 +15090,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 5
+        "sequence" : 11
       }, {
         "category" : {
           "coding" : [ {
@@ -14465,7 +15108,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 6
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -14482,7 +15125,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 7
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -14502,7 +15145,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 8
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -14516,7 +15159,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 9
+        "sequence" : 15
       } ],
       "total" : [ {
         "amount" : {
@@ -15256,13 +15899,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
       } ],
       "billablePeriod" : {
         "end" : "2025-03-31",
-        "extension" : [ {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-QUERY-CD",
-          "valueCoding" : {
-            "code" : "C",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD"
-          }
-        } ],
         "start" : "2025-03-30"
       },
       "careTeam" : [ {
@@ -15831,28 +16467,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
           } ]
         } ]
-      } ],
-      "extension" : [ {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CMS-PROC-DT",
-        "valueDate" : "2020-09-11"
-      }, {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CNTRCTR-NUM",
-        "valueCoding" : {
-          "code" : "01112",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CNTRCTR-NUM"
-        }
-      }, {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-DISP-CD",
-        "valueCoding" : {
-          "code" : "59",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DISP-CD"
-        }
-      }, {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-FI-ACTN-CD",
-        "valueCoding" : {
-          "code" : "1",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
-        }
       } ],
       "id" : "3159002171180",
       "identifier" : [ {
@@ -18051,6 +18665,119 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_CNTRCTR_NUM",
+            "display" : "Claim Contractor Number",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "01112",
+            "display" : "N. CALIFORNIA - NORIDIAN ADMINISTRATIVE SERVICES, LLC (EFF. 9/16/2013)",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CNTRCTR-NUM"
+          } ]
+        },
+        "sequence" : 3
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_DISP_CD",
+            "display" : "Claim Disposition Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "59",
+            "display" : "BENEFICIARY RECORD FROZEN FOR CLERICAL CORRECTION",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DISP-CD"
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_QUERY_CD",
+            "display" : "Claim Query Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "C",
+            "display" : "CREDIT",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD"
+          } ]
+        },
+        "sequence" : 5
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_ADJSTMT_TYPE_CD",
+            "display" : "Claim Adjustment Type Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "0",
+            "display" : "ORIGINAL",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADJSTMT-TYPE-CD"
+          } ]
+        },
+        "sequence" : 6
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_IDR_LD_DT",
+            "display" : "Claim IDR Load Date",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 7,
+        "timingDate" : "2026-01-13"
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_SBMT_FRMT_CD",
+            "display" : "Claim Submission Format Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "display" : "NCPDP ELECTRONIC SUBMISSION",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-SBMT-FRMT-CD"
+          } ]
+        },
+        "sequence" : 8
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "CLM_NRLN_RIC_CD",
             "display" : "Near Line Record Identification Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -18067,7 +18794,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
           } ]
         },
-        "sequence" : 3
+        "sequence" : 9
       }, {
         "category" : {
           "coding" : [ {
@@ -18075,7 +18802,21 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 10,
+        "timingDate" : "2020-09-11"
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_CMS_PROC_DT",
+            "display" : "FI Claim Process Date",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 11,
         "timingDate" : "2020-09-11"
       }, {
         "category" : {
@@ -18094,7 +18835,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 5
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -18111,7 +18852,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 6
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -18131,7 +18872,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 7
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -18145,7 +18886,27 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 8
+        "sequence" : 15
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_FI_ACTN_CD",
+            "display" : "Claim Fiscal Intermediary Action Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "1",
+            "display" : "Original debit action (always a 1 for all regular bills)",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
+          } ]
+        },
+        "sequence" : 16
       } ],
       "total" : [ {
         "amount" : {
@@ -18433,32 +19194,9 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
       } ],
       "billablePeriod" : {
         "end" : "2020-03-13",
-        "extension" : [ {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-QUERY-CD",
-          "valueCoding" : {
-            "code" : "2",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD"
-          }
-        } ],
         "start" : "2020-02-18"
       },
       "created" : "2025-08-26T00:00:00+00:00",
-      "extension" : [ {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CMS-PROC-DT",
-        "valueDate" : "2020-09-11"
-      }, {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CNTRCTR-NUM",
-        "valueCoding" : {
-          "code" : "04111",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CNTRCTR-NUM"
-        }
-      }, {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-DISP-CD",
-        "valueCoding" : {
-          "code" : "AB",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DISP-CD"
-        }
-      } ],
       "id" : "6871761612138",
       "identifier" : [ {
         "type" : {
@@ -18731,11 +19469,104 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_CNTRCTR_NUM",
+            "display" : "Claim Contractor Number",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "04111",
+            "display" : "COLORADO - NOVITAS SOLUTIONS, INC (EFF. 10/29/2012) (REPLACES FI #04101)",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CNTRCTR-NUM"
+          } ]
+        },
+        "sequence" : 3
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_DISP_CD",
+            "display" : "Claim Disposition Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "AB",
+            "display" : "TRANSACTION CAUSED CICS ABNORMAL END OF JOB",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DISP-CD"
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_QUERY_CD",
+            "display" : "Claim Query Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "2",
+            "display" : "HOME HEALTH AGENCY (HHA) BENEFITS EXHAUSTED (OBSOLETE 7/98)",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD"
+          } ]
+        },
+        "sequence" : 5
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_IDR_LD_DT",
+            "display" : "Claim IDR Load Date",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 6,
+        "timingDate" : "2026-01-13"
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_SBMT_FRMT_CD",
+            "display" : "Claim Submission Format Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "display" : "NCPDP ELECTRONIC SUBMISSION",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-SBMT-FRMT-CD"
+          } ]
+        },
+        "sequence" : 7
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "clmrecvddate",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 3,
+        "sequence" : 8,
         "timingDate" : "2020-09-11"
       }, {
         "category" : {
@@ -18749,7 +19580,21 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 9,
+        "timingDate" : "2020-09-11"
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_CMS_PROC_DT",
+            "display" : "FI Claim Process Date",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 10,
         "timingDate" : "2020-09-11"
       } ],
       "total" : [ {
@@ -19442,13 +20287,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
       } ],
       "billablePeriod" : {
         "end" : "2019-12-03",
-        "extension" : [ {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-QUERY-CD",
-          "valueCoding" : {
-            "code" : "D",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD"
-          }
-        } ],
         "start" : "2019-11-17"
       },
       "careTeam" : [ {
@@ -19798,34 +20636,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
           } ]
         } ]
-      } ],
-      "extension" : [ {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CMS-PROC-DT",
-        "valueDate" : "2019-12-03"
-      }, {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CNTRCTR-NUM",
-        "valueCoding" : {
-          "code" : "15202",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CNTRCTR-NUM"
-        }
-      }, {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-DISP-CD",
-        "valueCoding" : {
-          "code" : "2",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DISP-CD"
-        }
-      }, {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-FI-ACTN-CD",
-        "valueCoding" : {
-          "code" : "1",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
-        }
-      }, {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MDCR-NPMT-RSN-CD",
-        "valueCoding" : {
-          "code" : "U",
-          "system" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MDCR-NPMT-RSN-CD"
-        }
       } ],
       "id" : "566745788569",
       "identifier" : [ {
@@ -20993,6 +21803,99 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_CNTRCTR_NUM",
+            "display" : "Claim Contractor Number",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "15202",
+            "display" : "OHIO - CGS ADMINISTRATORS, LLC",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CNTRCTR-NUM"
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_DISP_CD",
+            "display" : "Claim Disposition Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "2",
+            "display" : "DEBIT ACCEPTED (AUTOMATIC ADJUSTMENT) APPLICABLE THROUGH 4/4/93",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DISP-CD"
+          } ]
+        },
+        "sequence" : 5
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_QUERY_CD",
+            "display" : "Claim Query Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "D",
+            "display" : "DEBIT",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD"
+          } ]
+        },
+        "sequence" : 6
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_IDR_LD_DT",
+            "display" : "Claim IDR Load Date",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 7,
+        "timingDate" : "2026-01-13"
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_SBMT_FRMT_CD",
+            "display" : "Claim Submission Format Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "display" : "NCPDP ELECTRONIC SUBMISSION",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-SBMT-FRMT-CD"
+          } ]
+        },
+        "sequence" : 8
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "CLM_NRLN_RIC_CD",
             "display" : "Near Line Record Identification Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -21009,7 +21912,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
           } ]
         },
-        "sequence" : 4
+        "sequence" : 9
       }, {
         "category" : {
           "coding" : [ {
@@ -21017,7 +21920,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 10,
         "timingPeriod" : {
           "end" : "2019-12-03",
           "start" : "2019-11-17"
@@ -21029,7 +21932,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 11,
         "timingDate" : "2019-12-03"
       }, {
         "category" : {
@@ -21043,7 +21946,21 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 12,
+        "timingDate" : "2019-12-03"
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_CMS_PROC_DT",
+            "display" : "FI Claim Process Date",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 13,
         "timingDate" : "2019-12-03"
       }, {
         "category" : {
@@ -21062,7 +21979,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 8
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -21080,7 +21997,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 9
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -21097,7 +22014,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 10
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -21117,7 +22034,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -21131,7 +22048,47 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 18
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_MDCR_NPMT_RSN_CD",
+            "display" : "Claim Non Payment Reason Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "U",
+            "display" : "MSP COST AVOIDED - HMO RATE CELL ADJUSTMENT (EFF. 9/76) (OBSOLETE 6/30/00)",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-NPMT-RSN-CD"
+          } ]
+        },
+        "sequence" : 19
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_FI_ACTN_CD",
+            "display" : "Claim Fiscal Intermediary Action Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "1",
+            "display" : "Original debit action (always a 1 for all regular bills)",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
+          } ]
+        },
+        "sequence" : 20
       } ],
       "total" : [ {
         "amount" : {
@@ -21806,13 +22763,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
       } ],
       "billablePeriod" : {
         "end" : "2019-09-30",
-        "extension" : [ {
-          "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-QUERY-CD",
-          "valueCoding" : {
-            "code" : "2",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD"
-          }
-        } ],
         "start" : "2019-09-23"
       },
       "careTeam" : [ {
@@ -22173,34 +23123,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "http://terminology.hl7.org/CodeSystem/ex-diagnosistype"
           } ]
         } ]
-      } ],
-      "extension" : [ {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CMS-PROC-DT",
-        "valueDate" : "2019-09-30"
-      }, {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CNTRCTR-NUM",
-        "valueCoding" : {
-          "code" : "02102",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CNTRCTR-NUM"
-        }
-      }, {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-DISP-CD",
-        "valueCoding" : {
-          "code" : "50",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DISP-CD"
-        }
-      }, {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-FI-ACTN-CD",
-        "valueCoding" : {
-          "code" : "1",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
-        }
-      }, {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MDCR-NPMT-RSN-CD",
-        "valueCoding" : {
-          "code" : "42",
-          "system" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MDCR-NPMT-RSN-CD"
-        }
       } ],
       "id" : "6288598524935",
       "identifier" : [ {
@@ -24045,11 +24967,104 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_CNTRCTR_NUM",
+            "display" : "Claim Contractor Number",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "02102",
+            "display" : "ALASKA - NORIDIAN ADMINISTRATIVE SERVICES, LLC (EFF. 2/27/2012)",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CNTRCTR-NUM"
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_DISP_CD",
+            "display" : "Claim Disposition Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "50",
+            "display" : "BENEFICIARY NOT IN FILE",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DISP-CD"
+          } ]
+        },
+        "sequence" : 5
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_QUERY_CD",
+            "display" : "Claim Query Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "2",
+            "display" : "HOME HEALTH AGENCY (HHA) BENEFITS EXHAUSTED (OBSOLETE 7/98)",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD"
+          } ]
+        },
+        "sequence" : 6
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_IDR_LD_DT",
+            "display" : "Claim IDR Load Date",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 7,
+        "timingDate" : "2026-01-13"
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_SBMT_FRMT_CD",
+            "display" : "Claim Submission Format Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "display" : "NCPDP ELECTRONIC SUBMISSION",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-SBMT-FRMT-CD"
+          } ]
+        },
+        "sequence" : 8
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "admissionperiod",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 9,
         "timingPeriod" : {
           "end" : "2019-09-30",
           "start" : "2019-09-23"
@@ -24061,7 +25076,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 10,
         "timingDate" : "2019-09-30"
       }, {
         "category" : {
@@ -24075,7 +25090,21 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 11,
+        "timingDate" : "2019-09-30"
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_CMS_PROC_DT",
+            "display" : "FI Claim Process Date",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 12,
         "timingDate" : "2019-09-30"
       }, {
         "category" : {
@@ -24094,7 +25123,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 7
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -24112,7 +25141,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 8
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -24129,7 +25158,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 9
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -24149,7 +25178,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 10
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -24163,7 +25192,67 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 17
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_PPS_IND_CD",
+            "display" : "Claim PPS Indicator Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "2",
+            "display" : "PPS bill; claim contains PPS indicator",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PPS-IND-CD"
+          } ]
+        },
+        "sequence" : 18
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_MDCR_NPMT_RSN_CD",
+            "display" : "Claim Non Payment Reason Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "42",
+            "display" : "MSP COST AVOIDED - NGHP ORM RECOVERY COB CONTRACTOR 11142",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-NPMT-RSN-CD"
+          } ]
+        },
+        "sequence" : 19
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_FI_ACTN_CD",
+            "display" : "Claim Fiscal Intermediary Action Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "1",
+            "display" : "Original debit action (always a 1 for all regular bills)",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
+          } ]
+        },
+        "sequence" : 20
       } ],
       "total" : [ {
         "amount" : {
@@ -24940,34 +26029,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
           } ]
         } ]
-      } ],
-      "extension" : [ {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CMS-PROC-DT",
-        "valueDate" : "2020-09-11"
-      }, {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CNTRCTR-NUM",
-        "valueCoding" : {
-          "code" : "01011",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CNTRCTR-NUM"
-        }
-      }, {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-DISP-CD",
-        "valueCoding" : {
-          "code" : "53",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DISP-CD"
-        }
-      }, {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-FI-ACTN-CD",
-        "valueCoding" : {
-          "code" : "7",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
-        }
-      }, {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MDCR-NPMT-RSN-CD",
-        "valueCoding" : {
-          "code" : "44",
-          "system" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MDCR-NPMT-RSN-CD"
-        }
       } ],
       "id" : "9688880648059",
       "identifier" : [ {
@@ -25943,6 +27004,99 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_CNTRCTR_NUM",
+            "display" : "Claim Contractor Number",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "01011",
+            "display" : "CALIFORNIA, HAWAII, AMERICAN SAMOA, GUAM, N. MARIANAS AND NEVADA (PART A ROLL UP NUMBER)",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CNTRCTR-NUM"
+          } ]
+        },
+        "sequence" : 3
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_DISP_CD",
+            "display" : "Claim Disposition Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "53",
+            "display" : "RECORD IN CMS ALPHA MATCH",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DISP-CD"
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_ADJSTMT_TYPE_CD",
+            "display" : "Claim Adjustment Type Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "0",
+            "display" : "ORIGINAL",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADJSTMT-TYPE-CD"
+          } ]
+        },
+        "sequence" : 5
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_IDR_LD_DT",
+            "display" : "Claim IDR Load Date",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 6,
+        "timingDate" : "2026-01-13"
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_SBMT_FRMT_CD",
+            "display" : "Claim Submission Format Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "display" : "NCPDP ELECTRONIC SUBMISSION",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-SBMT-FRMT-CD"
+          } ]
+        },
+        "sequence" : 7
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "CLM_NRLN_RIC_CD",
             "display" : "Near Line Record Identification Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -25959,7 +27113,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
           } ]
         },
-        "sequence" : 3
+        "sequence" : 8
       }, {
         "category" : {
           "coding" : [ {
@@ -25967,7 +27121,21 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 4,
+        "sequence" : 9,
+        "timingDate" : "2020-09-11"
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_CMS_PROC_DT",
+            "display" : "FI Claim Process Date",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 10,
         "timingDate" : "2020-09-11"
       }, {
         "category" : {
@@ -25986,7 +27154,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 5
+        "sequence" : 11
       }, {
         "category" : {
           "coding" : [ {
@@ -26004,7 +27172,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 6
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -26021,7 +27189,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 7
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -26041,7 +27209,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 8
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -26055,7 +27223,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 9
+        "sequence" : 15
       } ],
       "total" : [ {
         "amount" : {

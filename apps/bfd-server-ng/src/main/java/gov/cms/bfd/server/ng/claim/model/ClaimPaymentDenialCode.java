@@ -5,8 +5,9 @@ import java.util.Arrays;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /** Claim Payment denial code enum. * */
 @AllArgsConstructor
@@ -195,9 +196,7 @@ public enum ClaimPaymentDenialCode {
   /** Y - MSP COST AVOIDED - IRS/SSA DATA MATCH PROJECT. */
   Y("Y", "MSP COST AVOIDED - IRS/SSA DATA MATCH PROJECT"),
   /** Z - ZERO PAYMENT , ALLOWED TEST. */
-  Z("Z", "ZERO PAYMENT , ALLOWED TEST"),
-  /** NA. */
-  NA("", "NO DESCRIPTION AVAILABLE");
+  Z("Z", "ZERO PAYMENT , ALLOWED TEST");
 
   private final String code;
   private final String display;
@@ -212,13 +211,16 @@ public enum ClaimPaymentDenialCode {
     return Arrays.stream(values()).filter(v -> v.code.equals(code)).findFirst();
   }
 
-  Extension toFhir() {
-    return new Extension()
-        .setUrl(SystemUrls.BLUE_BUTTON_STRUCTURE_DEFINITION_CLAIM_PAYMENT_DENIAL_CODE)
-        .setValue(
-            new Coding(
-                SystemUrls.BLUE_BUTTON_STRUCTURE_DEFINITION_CLAIM_PAYMENT_DENIAL_CODE,
-                code,
-                display));
+  ExplanationOfBenefit.SupportingInformationComponent toFhir(
+      SupportingInfoFactory supportingInfoFactory) {
+    return supportingInfoFactory
+        .createSupportingInfo()
+        .setCategory(BlueButtonSupportingInfoCategory.CLM_CARR_PMT_DNL_CD.toFhir())
+        .setCode(
+            new CodeableConcept(
+                new Coding()
+                    .setSystem(SystemUrls.BLUE_BUTTON_CODE_SYSTEM_CLAIM_PAYMENT_DENIAL_CODE)
+                    .setDisplay(display)
+                    .setCode(code)));
   }
 }

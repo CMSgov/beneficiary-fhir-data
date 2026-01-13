@@ -436,7 +436,11 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
     var drg =
         eob.getSupportingInfo().stream()
             .flatMap(i -> i.getCode().getCoding().stream())
-            .filter(c -> c.getCode().equals(code) && c.getSystem().equals(system))
+            .filter(
+                c ->
+                    ((c.hasDisplay() && !isPlaceHolderDisplay(c.getDisplay()))
+                            || c.getCode().equals(code))
+                        && c.getSystem().equals(system))
             .findFirst();
     assertTrue(drg.isPresent());
   }

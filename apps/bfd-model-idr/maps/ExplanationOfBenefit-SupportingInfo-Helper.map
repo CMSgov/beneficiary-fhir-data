@@ -27,6 +27,18 @@ group addSupportingInfo(source src: SupportingInfoComponent, target tgt: Backbon
     src.CLM_NRLN_RIC_CD as nrlnRicCode -> tgt then addNearLineRecordIdentificationCode(src, tgt) "Add near line record identification Code";
     src.CLM_RIC_CD as ricCode -> tgt then addRecordIdentificationCode(src, tgt) "Add record identification Code";
     src.CLM_RLT_COND_CD as condCd -> tgt then addRltCondCd(src, tgt) "Add Related Conditon Codes";
+    src.CLM_QUERY_CD as clmQueryCd -> tgt then addClaimQueryCode(src, tgt) "Add Claim Query Code";
+    src.CLM_IDR_LD_DT as idrLdDt -> tgt then addClaimIDRLoadDate(src, tgt) "Add Claim IDR Load Date";
+    src.CLM_CNTRCTR_NUM as fiNum -> tgt then addClaimContractorNumber(src, tgt) "Add Claim Contractor Number";
+    src.CLM_ADJSTMT_TYPE_CD as adjTypeCd -> tgt then addAdjustmentTypeCode(src, tgt) "Add Adjustment Type Code";
+    src.CLM_DISP_CD as dispCd -> tgt then addClaimDispositionCode(src, tgt) "Add Claim Disposition Code";
+    src.CLM_CMS_PROC_DT as procDt -> tgt then addFIClaimProcessDate(src, tgt) "Add FI Claim Process Date";
+    src.CLM_CARR_PMT_DNL_CD as dnlCode -> tgt then addClaimPaymentDenialCode(src, tgt) "Add Claim Payment Denial Code";
+    src.CLM_MDCR_PRFNL_PRVDR_ASGNMT_SW as switch -> tgt then addProviderAssignmentIndicatorSwitchInfo(src, tgt) "Add Provider Assignment Indicator";
+    src.CLM_CLNCL_TRIL_NUM as trialNum -> tgt then addClinicalTrialNumber(src, tgt) "Add Clinical Trial Number";
+    src.CLM_MDCR_NPMT_RSN_CD as nonPmtCode -> tgt then addNonpaymentReasonCode(src, tgt) "Add Claim Non Payment Reason Code";
+    src.CLM_FI_ACTN_CD as actnCd -> tgt then addFiscalIntermediaryActionCode(src, tgt) "Add Claim Fiscal Intermediary Action Code";
+    src.CLM_OP_SRVC_TYPE_CD as opSrvcTypeCd -> tgt then addOutpatientServiceTypeCode(src, tgt) "Add Claim Outpatient Service Type Code";
 
     src.CLM_LINE_HCT_HGB_TYPE_CD as typeCd where typeCd != '~' -> tgt.value = create('Reference') as tgtReference then{
         src.ROW_NUM as rowNum -> tgtReference.reference = append("#line-observation-",rowNum) "Add observation num";
@@ -306,5 +318,121 @@ group addTypeOfBill(source src: SupportingInfoComponent, target tgt: BackboneEle
             src.TYPE_OF_BILL_CD as val -> tgtCoding.code=evaluate(val,substring(1,3)), 
             tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD" "Set coding";
         } "Add coding #4";
+    } "Add CC";
+}
+
+group addClaimQueryCode(source src: SupportingInfoComponent, target tgt: BackboneElement){
+    src -> tgt.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","CLM_QUERY_CD") "Add Coding";
+    } "Add category";
+    src -> tgt.code = create('CodeableConcept') as tgtCC then{
+        src.CLM_QUERY_CD as val -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD", val) "Add coding";
+    } "Add CC";
+}
+
+//timingDate
+group addClaimIDRLoadDate(source src: SupportingInfoComponent, target tgt: BackboneElement){
+    src -> tgt.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","CLM_IDR_LD_DT") "Add Coding";
+    } "Add category";
+    src.CLM_IDR_LD_DT as val -> tgt.timing = cast(val, 'date') "add date";
+}
+
+group addClaimContractorNumber(source src: SupportingInfoComponent, target tgt: BackboneElement){
+    src -> tgt.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","CLM_CNTRCTR_NUM") "Add Coding";
+    } "Add category";
+    src -> tgt.code = create('CodeableConcept') as tgtCC then{
+        src.CLM_CNTRCTR_NUM as val -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CNTRCTR-NUM", val) "Add coding";
+    } "Add CC";
+}
+
+group addAdjustmentTypeCode(source src: SupportingInfoComponent, target tgt: BackboneElement){
+    src -> tgt.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","CLM_ADJSTMT_TYPE_CD") "Add Coding";
+    } "Add category";
+    src -> tgt.code = create('CodeableConcept') as tgtCC then{
+        src.CLM_ADJSTMT_TYPE_CD as val -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADJSTMT-TYPE-CD", val) "Add coding";
+    } "Add CC";
+}
+
+group addClaimDispositionCode(source src: SupportingInfoComponent, target tgt: BackboneElement){
+    src -> tgt.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","CLM_DISP_CD") "Add Coding";
+    } "Add category";
+    src -> tgt.code = create('CodeableConcept') as tgtCC then{
+        src.CLM_DISP_CD as val -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DISP-CD", val) "Add coding";
+    } "Add CC";
+}
+
+//timingDate
+group addFIClaimProcessDate(source src: SupportingInfoComponent, target tgt: BackboneElement){
+    src -> tgt.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","CLM_CMS_PROC_DT") "Add Coding";
+    } "Add category";
+    src.CLM_CMS_PROC_DT as val -> tgt.timing = cast(val, 'date') "add date";
+}
+
+group addClaimPaymentDenialCode(source src: SupportingInfoComponent, target tgt: BackboneElement){
+    src -> tgt.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","CLM_CARR_PMT_DNL_CD") "Add Coding";
+    } "Add category";
+    src -> tgt.code = create('CodeableConcept') as tgtCC then{
+        src.CLM_CARR_PMT_DNL_CD as val -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CARR-PMT-DNL-CD", val) "Add coding";
+    } "Add CC";
+}
+
+group addProviderAssignmentIndicatorSwitchInfo(source src: SupportingInfoComponent, target tgt: BackboneElement){
+    src -> tgt.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","CLM_MDCR_PRFNL_PRVDR_ASGNMT_SW") "Add Coding";
+    } "Add category";
+    src -> tgt.code = create('CodeableConcept') as tgtCC then{
+        src.CLM_MDCR_PRFNL_PRVDR_ASGNMT_SW as val -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-PRFNL-PRVDR-ASGNMT-SW", val) "Add coding";
+    } "Add CC";
+}
+
+group addClinicalTrialNumber(source src: SupportingInfoComponent, target tgt: BackboneElement){
+  src -> tgt.category = create('CodeableConcept') as tgtCC then {
+      src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
+      src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","CLM_CLNCL_TRIL_NUM") "Add Coding";
+  } "Add category";
+  src.CLM_CLNCL_TRIL_NUM as trialNum -> tgt.value = trialNum "Add clinical trial number";
+}
+
+group addNonpaymentReasonCode(source src: SupportingInfoComponent, target tgt: BackboneElement){
+    src -> tgt.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","CLM_MDCR_NPMT_RSN_CD") "Add Coding";
+    } "Add category";
+    src -> tgt.code = create('CodeableConcept') as tgtCC then{
+        src.CLM_MDCR_NPMT_RSN_CD as val -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-NPMT-RSN-CD", val) "Add coding";
+    } "Add CC";
+}
+
+group addFiscalIntermediaryActionCode(source src: SupportingInfoComponent, target tgt: BackboneElement){
+    src -> tgt.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","CLM_FI_ACTN_CD") "Add Coding";
+    } "Add category";
+    src -> tgt.code = create('CodeableConcept') as tgtCC then{
+        src.CLM_FI_ACTN_CD as val -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD", val) "Add coding";
+    } "Add CC";
+}
+
+group addOutpatientServiceTypeCode(source src: SupportingInfoComponent, target tgt: BackboneElement){
+    src -> tgt.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","CLM_OP_SRVC_TYPE_CD") "Add Coding";
+    } "Add category";
+    src -> tgt.code = create('CodeableConcept') as tgtCC then{
+        src.CLM_OP_SRVC_TYPE_CD as val -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/CLM-OP-SRVC-TYPE-CD", val) "Add coding";
     } "Add CC";
 }
