@@ -109,7 +109,7 @@ conceptmap "CLM_SRC_ID" {
   s:"25000" == t:"EncounterMedicaidDuals"
 }
 
-conceptmap "META_SRC_ID" {
+conceptmap "META_SRC_SK" {
   prefix s = "https://hl7.org/fhir/string"
   prefix t = "https://hl7.org/fhir/string"
 
