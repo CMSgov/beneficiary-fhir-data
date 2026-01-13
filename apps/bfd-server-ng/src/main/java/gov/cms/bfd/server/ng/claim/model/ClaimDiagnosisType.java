@@ -11,21 +11,22 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum ClaimDiagnosisType {
   /** Principal diagnosis. */
-  PRINCIPAL("P", "principal", SystemUrls.HL7_DIAGNOSIS_TYPE),
+  PRINCIPAL("P", "principal", SystemUrls.HL7_DIAGNOSIS_TYPE, 1),
   /** Admitting diagnosis. */
-  ADMITTING("A", "admitting", SystemUrls.HL7_DIAGNOSIS_TYPE),
+  ADMITTING("A", "admitting", SystemUrls.HL7_DIAGNOSIS_TYPE, 1),
   /** First diagnosis. */
-  FIRST("1", "externalcauseofinjury", SystemUrls.CARIN_CODE_SYSTEM_DIAGNOSIS_TYPE),
+  FIRST("1", "externalcauseofinjury", SystemUrls.CARIN_CODE_SYSTEM_DIAGNOSIS_TYPE, 1),
   /** Present on admission. */
-  PRESENT_ON_ADMISSION("D", "other", SystemUrls.CARIN_CODE_SYSTEM_DIAGNOSIS_TYPE),
+  PRESENT_ON_ADMISSION("D", "other", SystemUrls.CARIN_CODE_SYSTEM_DIAGNOSIS_TYPE, 2),
   /** E code. */
-  DIAGNOSIS_E_CODE("E", "externalcauseofinjury", SystemUrls.CARIN_CODE_SYSTEM_DIAGNOSIS_TYPE),
+  DIAGNOSIS_E_CODE("E", "externalcauseofinjury", SystemUrls.CARIN_CODE_SYSTEM_DIAGNOSIS_TYPE, 1),
   /** R code. */
-  DIAGNOSIS_R_CODE("R", "patientreasonforvisit", SystemUrls.CARIN_CODE_SYSTEM_DIAGNOSIS_TYPE);
+  DIAGNOSIS_R_CODE("R", "patientreasonforvisit", SystemUrls.CARIN_CODE_SYSTEM_DIAGNOSIS_TYPE, 1);
 
   private final String idrCode;
   private final String fhirCode;
   private final String system;
+  private final int priority;
 
   /**
    * Converts from a database code.
@@ -49,5 +50,18 @@ public enum ClaimDiagnosisType {
       return "secondary"; // override
     }
     return fhirCode;
+  }
+
+  /**
+   * Returns the priority of the diagnosis type.
+   *
+   * @param claimContext context
+   * @return priority
+   */
+  public int getPriority(ClaimContext claimContext) {
+    if (getFhirCode(claimContext).equals("secondary")) {
+      return 2;
+    }
+    return priority;
   }
 }

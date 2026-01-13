@@ -1,1 +1,1 @@
-../../../../bfd-pipeline/bfd-pipeline-idr/mock-idr.sql
+../../../../bfd-pipeline-idr/mock-idr.sql

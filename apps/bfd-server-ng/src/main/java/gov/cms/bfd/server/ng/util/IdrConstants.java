@@ -22,11 +22,17 @@ public class IdrConstants {
   /** The value used by IDR to indicate a missing or non-applicable value in a date column. */
   public static final LocalDate DEFAULT_DATE = LocalDate.of(9999, 12, 31);
 
+  /** The code for non-final action claims. */
+  public static final String NOT_FINAL_ACTION = "NotFinalAction";
+
+  /** The code for final action claims. */
+  public static final String FINAL_ACTION = "FinalAction";
+
   /** The code for partially adjudicated claims. */
-  public static final String ADJUDICATION_STATUS_PARTIAL = "PartiallyAdjudicated";
+  public static final String SYSTEM_TYPE_NCH = "NationalClaimsHistory";
 
   /** The code for fully adjudicated claims. */
-  public static final String ADJUDICATION_STATUS_FINAL = "Adjudicated";
+  public static final String SYSTEM_TYPE_SHARED = "SharedSystem";
 
   /** The Samhsa Security code. */
   public static final String SAMHSA_SECURITY_CODE = "42CFRPart2";

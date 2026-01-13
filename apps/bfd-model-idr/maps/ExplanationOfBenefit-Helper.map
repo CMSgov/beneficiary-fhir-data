@@ -101,7 +101,7 @@ conceptmap "CLM_SRC_ID" {
   prefix t = "https://hl7.org/fhir/string"
 
   s:"N/A" == t:"Medicaid"
-  s:"20000" == t:"NationalClaimsHistory"
+  s:"20000" == t:"NCH"
   s:"21000" == t:"FISS"
   s:"22000" == t:"MCS"
   s:"23000" == t:"VMS"
@@ -109,14 +109,22 @@ conceptmap "CLM_SRC_ID" {
   s:"25000" == t:"EncounterMedicaidDuals"
 }
 
-conceptmap "ADJUDICATION-STATUS" {
+conceptmap "SYSTEM_TYPE" {
   prefix s = "https://hl7.org/fhir/string"
-  prefix t = "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication-Status"
+  prefix t = "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type"
 
-  s:"20000" == t:"Adjudicated"
-  s:"21000" == t:"PartiallyAdjudicated"
-  s:"22000" == t:"PartiallyAdjudicated"
-  s:"23000" == t:"PartiallyAdjudicated"
+  s:"20000" == t:"NationalClaimsHistory"
+  s:"21000" == t:"SharedSystem"
+  s:"22000" == t:"SharedSystem"
+  s:"23000" == t:"SharedSystem"
+}
+
+conceptmap "FINAL_ACTION" {
+  prefix s = "https://hl7.org/fhir/string"
+  prefix t = "https://bluebutton.cms.gov/fhir/CodeSystem/Final-Action"
+
+  s:"Y" == t:"FinalAction"
+  s:"N" == t:"NotFinalAction"
 }
 
 conceptmap "CLM_AUDT_TRL_STUS_CD" {

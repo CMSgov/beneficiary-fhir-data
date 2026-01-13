@@ -39,13 +39,13 @@ jobs:
         run: |
           cd ${{ github.workspace }}/apps/bfd-model-idr
           uv run patient_generator.py
-          uv run claims_generator.py --benes ./out/SYNTHETIC_BENE_HSTRY.csv
-          cd ../bfd-pipeline/bfd-pipeline-idr
+          uv run claims_generator.py ./out/SYNTHETIC_BENE_HSTRY.csv
+          cd ../bfd-pipeline-idr
           ./run-db.sh
-      - name: Ensure synthetic data pipeline runs with sandbox benes
+      - name: Ensure synthetic data pipeline runs with existing synthetic data
         run: |
           cd ${{ github.workspace }}/apps/bfd-model-idr
-          uv run patient_generator.py --benes ./Benes-Sandbox.csv
-          uv run claims_generator.py --benes ./out/SYNTHETIC_BENE_HSTRY.csv
-          cd ../bfd-pipeline/bfd-pipeline-idr
+          uv run patient_generator.py ./synthetic-data
+          uv run claims_generator.py ./out/SYNTHETIC_BENE_HSTRY.csv
+          cd ../bfd-pipeline-idr
           ./run-db.sh

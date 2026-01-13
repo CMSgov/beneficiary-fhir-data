@@ -11,7 +11,6 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
-import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.bfd.server.ng.Configuration;
@@ -63,7 +62,7 @@ public class EobResourceProvider implements IResourceProvider {
    * @param serviceDate service date
    * @param lastUpdated last updated
    * @param startIndex start index
-   * @param tag tag to filter by (e.g., Adjudicated status)
+   * @param tag tags to filter by
    * @param type claim type to filter by
    * @param request HTTP request details
    * @return bundle
@@ -76,11 +75,11 @@ public class EobResourceProvider implements IResourceProvider {
       @OptionalParam(name = ExplanationOfBenefit.SP_RES_LAST_UPDATED)
           final DateRangeParam lastUpdated,
       @OptionalParam(name = START_INDEX) final NumberParam startIndex,
-      @OptionalParam(name = Constants.PARAM_TAG) final TokenParam tag,
+      @OptionalParam(name = Constants.PARAM_TAG) final TokenAndListParam tag,
       @OptionalParam(name = TYPE) final TokenAndListParam type,
       final HttpServletRequest request) {
 
-    var sourceIds = FhirInputConverter.getSourceIdsForTagCode(tag);
+    var tagCriteria = FhirInputConverter.parseTagParameter(tag);
     var claimTypeCodes = FhirInputConverter.getClaimTypeCodesForType(type);
 
     return eobHandler.searchByBene(
@@ -89,7 +88,7 @@ public class EobResourceProvider implements IResourceProvider {
         FhirInputConverter.toDateTimeRange(serviceDate),
         FhirInputConverter.toDateTimeRange(lastUpdated),
         FhirInputConverter.toIntOptional(startIndex),
-        sourceIds,
+        tagCriteria,
         claimTypeCodes,
         getFilterModeForRequest(request));
   }

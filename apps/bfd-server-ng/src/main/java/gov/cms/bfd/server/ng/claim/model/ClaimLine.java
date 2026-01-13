@@ -11,6 +11,7 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -44,7 +45,8 @@ public class ClaimLine {
   @Embedded private ClaimLineAdjudicationCharge adjudicationCharge;
   @Embedded private ClaimRenderingProvider claimRenderingProvider;
 
-  Optional<ExplanationOfBenefit.ItemComponent> toFhir(ClaimItem claimItem) {
+  Optional<ExplanationOfBenefit.ItemComponent> toFhir(
+      ClaimItem claimItem, List<ClaimProcedure> diagnoses) {
     if (claimLineNumber.isEmpty()) {
       return Optional.empty();
     }
@@ -53,6 +55,7 @@ public class ClaimLine {
 
     var claimLineInstitutional = claimItem.getClaimLineInstitutional();
     var claimLineRx = claimItem.getClaimLineRx();
+    var claimLineProfessional = claimItem.getClaimLineProfessional();
     var productOrService = new CodeableConcept();
     hcpcsCode.toFhir().ifPresent(productOrService::addCoding);
     claimLineInstitutional
@@ -93,14 +96,17 @@ public class ClaimLine {
             claimLineInstitutional.flatMap(
                 c -> c.getAnsiSignature().map(ClaimAnsiSignature::toFhir)),
             Optional.of(adjudicationCharge.toFhir()),
-            claimLineInstitutional.map(c -> c.getAdjudicationCharge().toFhir()),
-            claimLineRx.map(c -> c.getAdjudicationCharge().toFhir()));
+            claimLineInstitutional.map(
+                c -> c.getClaimLineAdjudicationChargeInstitutional().toFhir()),
+            claimLineRx.map(c -> c.getClaimLineAdjudicationChargeRx().toFhir()),
+            claimLineProfessional.map(
+                c -> c.getClaimLineAdjudicationChargeProfessional().toFhir()));
     adjudicationLines
         .flatMap(Optional::stream)
         .flatMap(Collection::stream)
         .forEach(line::addAdjudication);
 
-    line.setDiagnosisSequence(diagnosisRelatedLines(claimItem.getClaim()));
+    line.setDiagnosisSequence(diagnosisRelatedLines(diagnoses));
 
     claimLineInstitutional
         .map(ClaimLineInstitutional::getExtensions)
@@ -113,21 +119,18 @@ public class ClaimLine {
    * Finds the line numbers of a claim procedure that matches the diagnosis code from this claim
    * line.
    *
-   * @param claim The parent claim entity containing all claim procedures.
+   * @param diagnoses The parent claim entity containing all claim procedures.
    * @return The row ids of the matching claim procedure
    */
-  public List<PositiveIntType> diagnosisRelatedLines(Claim claim) {
+  public List<PositiveIntType> diagnosisRelatedLines(List<ClaimProcedure> diagnoses) {
     if (diagnosisCode.isEmpty()) {
       return List.of();
     }
     var currentDiagnosisCode = diagnosisCode.get();
 
-    return claim.getClaimItems().stream()
-        .filter(
-            item ->
-                item.getClaimProcedure().getDiagnosisCode().orElse("").equals(currentDiagnosisCode))
-        .map(item -> item.getClaimItemId().getBfdRowId())
-        .map(PositiveIntType::new)
+    return IntStream.range(0, diagnoses.size())
+        .filter(i -> diagnoses.get(i).getDiagnosisCode().orElse("").equals(currentDiagnosisCode))
+        .mapToObj(i -> new PositiveIntType(i + 1))
         .toList();
   }
 }

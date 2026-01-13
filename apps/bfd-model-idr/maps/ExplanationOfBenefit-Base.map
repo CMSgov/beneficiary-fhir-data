@@ -48,7 +48,8 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
       src.CLM_TYPE_CD as typeCd -> tgtMeta.profile = translate(typeCd,'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#profile_metadata','code') "set profile";
       //CodeSystem -> CLM_SRC_ID
       src.CLM_SRC_ID as sourceSk -> tgtMeta.source = translate(sourceSk, 'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#CLM_SRC_ID','code') "set source";
-      src.CLM_SRC_ID as sourceSk -> tgtMeta.tag = translate(sourceSk, 'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#ADJUDICATION-STATUS','coding') "set source";
+      src.CLM_SRC_ID as sourceSk -> tgtMeta.tag = translate(sourceSk, 'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#SYSTEM_TYPE','coding') "set source";
+      src.CLM_FINL_ACTN_IND as faInd -> tgtMeta.tag = translate(faInd, 'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#FINAL_ACTION','coding') "set source";
     } "Create metadata";
 
     //add unique claim ID as one identifier. We will add multiple.
@@ -164,7 +165,7 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
     src.procedures as procedures -> tgt.procedure = create('BackboneElement') as tgtProcedure then addProcedures(procedures, tgtProcedure) "Add procedures to inpatient institutional EOBs";
 
     //diagnosis
-    src.CLM_TYPE_CD as typeCd where((typeCd > 4 and typeCd < 70) or (typeCd >= 2000 and typeCd < 2700) or (typeCd >= 1000 and typeCd < 1700)) -> tgt then{
+    src.CLM_TYPE_CD as typeCd where((typeCd > 4 and typeCd < 70) or (typeCd >= 2000 and typeCd < 2700) or (typeCd >= 1000 and typeCd < 1700) or typeCd = 2900) -> tgt then{
       src.diagnoses as diagnoses -> tgt.diagnosis = create('BackboneElement') as tgtDiagnosis then addDiagnoses(diagnoses, tgtDiagnosis) "Add diagnoses";
     } "Add diagnoses for institutional claims.";
 
@@ -607,28 +608,19 @@ group addInstitutionalAdjudicationElements(source src: ExplanationOfBenefitBase,
     src -> tgtBBElement.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication","CLM_MDCR_IP_BENE_DDCTBL_AMT") "Add codeable concept";
     src -> tgtBBElement.amount = create('Money') as tgtMoney then addMoney(amtUsed, tgtMoney) "Add Money";
   } "Add CLM_MDCR_IP_BENE_DDCTBL_AMT";
-  institutionalComponents.CLM_MDCR_OP_DDCTBL_AMT as amtUsed -> tgt.adjudication = create('BackboneElement') as tgtBBElement then {
-    src -> tgtBBElement.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication","CLM_MDCR_OP_DDCTBL_AMT") "Add codeable concept";
-    src -> tgtBBElement.amount = create('Money') as tgtMoney then addMoney(amtUsed, tgtMoney) "Add Money";
-  } "Add CLM_MDCR_OP_DDCTBL_AMT";
   } "Add wrapper for institutional components";
 }
 
 group addDiagnoses(source src: DiagnosisComponent, target tgt: BackboneElement){
   src.ROW_NUM as rowNum -> tgt.sequence = rowNum "set sequence number";
-
-  src.CLM_PROD_TYPE_CD as dTypeCode where (dTypeCode = "A" or dTypeCode = "P") -> tgt.type = create('CodeableConcept') as tgtCC then {
-    src -> tgtCC.coding = translate(dTypeCode,'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#HL7_DIAGTYPE','coding') "set coding";
-  } "Set type";
-  src.CLM_PROD_TYPE_CD as dTypeCode where (dTypeCode = "1" or dTypeCode = "D" or dTypeCode = "E" or dTypeCode = "R") -> tgt.type = create('CodeableConcept') as tgtCC then {
-    src -> tgtCC.coding = translate(dTypeCode,'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#C4BB_DIAGTYPE','coding') "set coding";
-  } "Set type";
-
+  src -> tgt.type = create('CodeableConcept') as tgtCC then{
+    src.clm_prod_type_cd_map as typeCode where (typeCode = "A" or typeCode = "P") -> tgtCC.coding = translate(typeCode,'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#HL7_DIAGTYPE','coding') "Add coding";
+    src.clm_prod_type_cd_map as typeCode where (typeCode = "1" or typeCode = "D" or typeCode = "E" or typeCode = "R") -> tgtCC.coding = translate(typeCode,'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#C4BB_DIAGTYPE','coding') "set coding";
+  } "Add types";
   src.CLM_POA_IND as poaInd where (poaInd != ' ' and poaInd != '~' ) -> tgt.onAdmission = create('CodeableConcept') as tgtPOA,
     tgtPOA.coding = create('Coding') as tgtCoding,
     tgtCoding.system = "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding",
     tgtCoding.code = poaInd "Set POA indicator";
-
   src -> tgt.diagnosis = create('CodeableConcept') as tgtDiagnosis then {
     src -> tgtDiagnosis.coding = create('Coding') as tgtCoding then {
       //From CLM_PROD
@@ -636,19 +628,14 @@ group addDiagnoses(source src: DiagnosisComponent, target tgt: BackboneElement){
       src.CLM_DGNS_CD as diagnosisCode -> tgtCoding.code = diagnosisCode "set diagnosis code";
     } "set coding";
   } "Set diagnosis, including code";
-
 }
-
+//This is necessary due to clm_type_cd not being present in DiagnosisComponent (and C4BB_DIAGTYPE_PROF != C4BB_DIAGTYPE)
 group addDiagnosesProfessional(source src: DiagnosisComponent, target tgt: BackboneElement){
   src.ROW_NUM as rowNum -> tgt.sequence = rowNum "set sequence number";
-
-  src.CLM_PROD_TYPE_CD as dTypeCode where (dTypeCode = "A" or dTypeCode = "P") -> tgt.type = create('CodeableConcept') as tgtCC then {
-    src -> tgtCC.coding = translate(dTypeCode,'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#HL7_DIAGTYPE','coding') "set coding";
-  } "Set type";
-  src.CLM_PROD_TYPE_CD as dTypeCode where (dTypeCode = "1" or dTypeCode = "D" or dTypeCode = "E" or dTypeCode = "R") -> tgt.type = create('CodeableConcept') as tgtCC then {
-    src -> tgtCC.coding = translate(dTypeCode,'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#C4BB_DIAGTYPE_PROF','coding') "set coding";
-  } "Set type";
-
+  src -> tgt.type = create('CodeableConcept') as tgtCC then{
+    src.clm_prod_type_cd_map as typeCode where (typeCode = "A" or typeCode = "P") -> tgtCC.coding = translate(typeCode,'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#HL7_DIAGTYPE','coding') "Add coding";
+    src.clm_prod_type_cd_map as typeCode where (typeCode = "1" or typeCode = "D" or typeCode = "E" or typeCode = "R") -> tgtCC.coding = translate(typeCode,'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#C4BB_DIAGTYPE_PROF','coding') "set coding";
+  } "Add types";
   src -> tgt.diagnosis = create('CodeableConcept') as tgtDiagnosis then {
     src -> tgtDiagnosis.coding = create('Coding') as tgtCoding then {
       //From CLM_PROD
@@ -656,7 +643,6 @@ group addDiagnosesProfessional(source src: DiagnosisComponent, target tgt: Backb
       src.CLM_DGNS_CD as diagnosisCode -> tgtCoding.code = diagnosisCode "set diagnosis code";
     } "set coding";
   } "Set diagnosis, including code";
-
 }
 
 group addProcedures(source src: ProcedureComponent, target tgt: BackboneElement){

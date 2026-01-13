@@ -2,13 +2,14 @@ package gov.cms.bfd.server.ng.claim.model;
 
 import gov.cms.bfd.server.ng.util.DateUtil;
 import jakarta.persistence.Column;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Optional;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 class ClaimPaymentAmount {
   @Column(name = "clm_pmt_amt")
-  private double claimPaymentAmount;
+  private BigDecimal claimPaymentAmount;
 
   @Column(name = "clm_pd_dt")
   private Optional<LocalDate> claimPaymentDate;

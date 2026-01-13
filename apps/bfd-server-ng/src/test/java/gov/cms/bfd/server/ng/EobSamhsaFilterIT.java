@@ -17,6 +17,7 @@ import gov.cms.bfd.server.ng.util.DateUtil;
 import gov.cms.bfd.server.ng.util.IdrConstants;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -153,7 +154,7 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
             new DateTimeRange(),
             new DateTimeRange(),
             Optional.empty(),
-            List.of(),
+            Collections.emptyList(),
             List.of(),
             samhsaFilterMode);
     return getEobFromBundle(claims);
@@ -221,7 +222,8 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
       List<Long> nonSamhsaClaimIds,
       List<Long> skipBundleVerification) {
     var bundle = searchBundle(beneSk, samhsaCertType).execute();
-    // Before checking for SAMHSA codes, filter any cases that won't pass verification due to
+    // Before checking for SAMHSA codes, filter any cases that won't pass
+    // verification due to
     // system/code mismatches.
     var bundleClaimsToCheck =
         getEobFromBundle(bundle).stream()

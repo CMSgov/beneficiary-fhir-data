@@ -6,6 +6,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -32,7 +33,10 @@ public class ClaimProfessional {
   private Optional<ProviderAssignmentIndicatorSwitch> providerAssignmentIndicatorSwitch;
 
   @Column(name = "clm_mdcr_prfnl_prmry_pyr_amt")
-  private double primaryProviderPaidAmount;
+  private BigDecimal primaryProviderPaidAmount;
+
+  @Column(name = "clm_prvdr_acnt_rcvbl_ofst_amt")
+  private BigDecimal providerOffsetAmount;
 
   @Column(name = "clm_audt_trl_stus_cd")
   private Optional<ClaimAuditTrailStatusCode> claimAuditTrailStatusCode;
@@ -48,8 +52,10 @@ public class ClaimProfessional {
         .toList();
   }
 
-  ExplanationOfBenefit.TotalComponent toFhirTotal() {
-    return AdjudicationChargeType.PAYER_PAID_AMOUNT.toFhirTotal(primaryProviderPaidAmount);
+  List<ExplanationOfBenefit.AdjudicationComponent> toFhirAdjudication() {
+    return List.of(
+        AdjudicationChargeType.PAYER_PAID_AMOUNT.toFhirAdjudication(primaryProviderPaidAmount),
+        AdjudicationChargeType.PROVIDER_OFFSET_AMOUNT.toFhirAdjudication(providerOffsetAmount));
   }
 
   Optional<ExplanationOfBenefit.RemittanceOutcome> toFhirOutcome(ClaimTypeCode claimTypecode) {

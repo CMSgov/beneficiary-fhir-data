@@ -1,5 +1,7 @@
 package gov.cms.bfd.server.ng;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import au.com.origin.snapshots.Expect;
@@ -8,15 +10,11 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import jakarta.persistence.EntityManager;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.Coverage;
-import org.hl7.fhir.r4.model.DomainResource;
-import org.hl7.fhir.r4.model.ExplanationOfBenefit;
-import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -125,12 +123,48 @@ public class IntegrationTestBase {
     return events.stream().filter(l -> l.getLoggerName().equals("org.hibernate.SQL")).count();
   }
 
-  protected void validateCodings(IBaseResource resource) {
+  protected void validateCodingsAndSystemUrls(IBaseResource resource) {
     var ctx = FhirContext.forR4Cached();
     var codings = ctx.newTerser().getAllPopulatedChildElementsOfType(resource, Coding.class);
     for (Coding coding : codings) {
       assertTrue(coding.hasSystem());
       assertTrue(coding.hasCode());
+      var system = coding.getSystem();
+      assertFalse(
+          system.contains("_"),
+          String.format("Coding System URL contains underscore: system='%s'", system));
+    }
+  }
+
+  protected void validateDiagnosis(ExplanationOfBenefit eob) {
+    // Get all diagnoses, ensure there are not multiple instances of the same
+    // diagnosis
+    var diagnoses = eob.getDiagnosis();
+    var seenDiagnoses = new HashSet<String>();
+    for (var diagnosis : diagnoses) {
+      var diagnosisCode = diagnosis.getDiagnosisCodeableConcept().getCodingFirstRep().getCode();
+      assertTrue(seenDiagnoses.add(diagnosisCode), "Duplicate diagnosis: " + diagnosisCode);
+      assertTrue(diagnosis.hasSequence(), "Diagnosis must have sequence (R4 rule)");
+      assertTrue(diagnosis.hasType(), "Diagnosis must have type (C4BB rule)");
+      var specialCodes = Set.of("other", "secondary");
+      if (diagnosis.getType().get(0).getCoding().stream()
+          .anyMatch(c -> specialCodes.contains(c.getCode()))) {
+        assertEquals(
+            "Other/secondary diagnosis must be the only diagnosis when present",
+            1,
+            diagnosis.getType().get(0).getCoding().size());
+      }
+    }
+  }
+
+  protected void validateFinancialPrecision(IBaseResource resource) {
+    var ctx = FhirContext.forR4Cached();
+    var monies = ctx.newTerser().getAllPopulatedChildElementsOfType(resource, Money.class);
+    for (Money money : monies) {
+      assertTrue(money.hasValue());
+      var value = money.getValue();
+      var scale = value.scale();
+      assertTrue(scale <= 2);
     }
   }
 }

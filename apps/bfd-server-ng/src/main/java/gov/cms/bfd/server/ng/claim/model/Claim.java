@@ -3,6 +3,7 @@ package gov.cms.bfd.server.ng.claim.model;
 import gov.cms.bfd.server.ng.ClaimSecurityStatus;
 import gov.cms.bfd.server.ng.beneficiary.model.BeneficiarySimple;
 import gov.cms.bfd.server.ng.util.DateUtil;
+import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -13,17 +14,20 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.PriorityQueue;
 import java.util.SortedSet;
 import java.util.stream.Stream;
 import lombok.Getter;
-import org.hl7.fhir.r4.model.ExplanationOfBenefit;
-import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.*;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -51,6 +55,9 @@ public class Claim {
   @Column(name = "clm_srvc_prvdr_gnrc_id_num")
   private String serviceProviderNpiNumber;
 
+  @Column(name = "clm_finl_actn_ind")
+  private ClaimFinalAction finalAction;
+
   @Embedded private Meta meta;
 
   @Embedded private Identifiers identifiers;
@@ -61,7 +68,6 @@ public class Claim {
   @Embedded private NchPrimaryPayorCode nchPrimaryPayorCode;
   @Embedded private TypeOfBillCode typeOfBillCode;
   @Embedded private CareTeam careTeam;
-  @Embedded private BenefitBalance benefitBalance;
   @Embedded private AdjudicationCharge adjudicationCharge;
   @Embedded private ClaimPaymentAmount claimPaymentAmount;
   @Embedded private ClaimRecordType claimRecordType;
@@ -244,6 +250,16 @@ public class Claim {
   }
 
   /**
+   * Accessor for institutional bene paid amount, if this is an institutional claim.
+   *
+   * @return optional institutional bene paid amount
+   */
+  public Optional<BigDecimal> getBenePaidAmount() {
+    return getClaimInstitutional()
+        .map(i -> i.getAdjudicationChargeInstitutional().getBenePaidAmount());
+  }
+
+  /**
    * Convert the claim info to a FHIR ExplanationOfBenefit.
    *
    * @param securityStatus securityStatus
@@ -258,7 +274,7 @@ public class Claim {
     eob.setType(claimTypeCode.toFhirType());
     claimTypeCode.toFhirSubtype().ifPresent(eob::setSubType);
 
-    eob.setMeta(meta.toFhir(claimTypeCode, claimSourceId, securityStatus));
+    eob.setMeta(meta.toFhir(claimTypeCode, claimSourceId, securityStatus, finalAction));
     eob.setIdentifier(identifiers.toFhir());
     eob.setBillablePeriod(billablePeriod.toFhir());
     eob.setCreated(DateUtil.toDate(claimEffectiveDate));
@@ -285,9 +301,12 @@ public class Claim {
         .flatMap(Collection::stream)
         .forEach(eob::addExtension);
 
+    var consolidatedDiagnoses = computeConsolidatedDiagnoses();
+
     claimItems.forEach(
         item -> {
-          item.getClaimLine().toFhir(item).ifPresent(eob::addItem);
+          item.getClaimLine().toFhir(item, consolidatedDiagnoses).ifPresent(eob::addItem);
+
           item.getClaimLine()
               .getClaimRenderingProvider()
               .toFhirCareTeam(
@@ -298,13 +317,19 @@ public class Claim {
                     eob.addContained(c.practitioner());
                   });
           item.getClaimProcedure().toFhirProcedure().ifPresent(eob::addProcedure);
-          item.getClaimProcedure()
-              .toFhirDiagnosis(item.getClaimItemId().getBfdRowId(), claimTypeCode)
-              .ifPresent(eob::addDiagnosis);
           item.getClaimLineProfessional()
               .flatMap(i -> i.toFhirObservation(item.getClaimItemId().getBfdRowId()))
               .ifPresent(eob::addContained);
         });
+    var diagnosisSequenceGenerator = new SequenceGenerator();
+    claimTypeCode
+        .toContext()
+        .ifPresent(
+            ctx ->
+                consolidatedDiagnoses.forEach(
+                    d ->
+                        d.toFhirDiagnosis(diagnosisSequenceGenerator, ctx)
+                            .ifPresent(eob::addDiagnosis)));
 
     getBillingProviderHistory()
         .ifPresent(
@@ -387,9 +412,8 @@ public class Claim {
 
     institutional.ifPresent(
         i -> {
-          eob.addAdjudication(i.getPpsDrgWeight().toFhir());
-          eob.addBenefitBalance(
-              benefitBalance.toFhir(i.getBenefitBalanceInstitutional(), getClaimValues()));
+          var adjudicationChargeInstitutional = i.getAdjudicationChargeInstitutional();
+          adjudicationChargeInstitutional.toFhir(getClaimValues()).forEach(eob::addAdjudication);
         });
 
     var insurance = new ExplanationOfBenefit.InsuranceComponent();
@@ -400,15 +424,18 @@ public class Claim {
     claimTypeCode
         .toFhirPartDInsurance(contractNumber, contractPbpNumber)
         .ifPresent(eob::addInsurance);
-    adjudicationCharge.toFhir().forEach(eob::addTotal);
+    adjudicationCharge.toFhirTotal().forEach(eob::addTotal);
+    getBenePaidAmount()
+        .map(AdjudicationChargeType.BENE_PAID_AMOUNT::toFhirTotal)
+        .ifPresent(eob::addTotal);
+    adjudicationCharge.toFhirAdjudication().forEach(eob::addAdjudication);
     eob.setPayment(claimPaymentAmount.toFhir());
 
     getClaimProfessional()
         .ifPresent(
             professional -> {
               eob.getExtension().addAll(professional.toFhirExtension());
-              eob.addTotal(professional.toFhirTotal());
-              eob.addBenefitBalance(benefitBalance.toFhir());
+              professional.toFhirAdjudication().forEach(eob::addAdjudication);
               professional.toFhirOutcome(claimTypeCode).ifPresent(eob::setOutcome);
             });
 
@@ -442,5 +469,53 @@ public class Claim {
     // if the order changes.
     eob.getExtension().sort(Comparator.comparing(Extension::getUrl));
     return eob;
+  }
+
+  private List<ClaimProcedure> computeConsolidatedDiagnoses() {
+    var claimContextOpt = claimTypeCode.toContext();
+    if (claimContextOpt.isEmpty()) {
+      return Collections.emptyList();
+    }
+    var claimContext = claimContextOpt.get();
+
+    // Group the diagnoses by code + ICD indicator and sort them by rank.
+    // We'll pick the first diagnosis from each group and discard the rest.
+    var diagnosisMap = new LinkedHashMap<String, PriorityQueue<ClaimProcedure>>();
+    var poaDiagnoses = new HashMap<String, String>();
+    for (var item : claimItems) {
+      var procedure = item.getClaimProcedure();
+      var keyOpt = procedure.getDiagnosisKey();
+      if (keyOpt.isEmpty()) {
+        continue;
+      }
+      var key = keyOpt.get();
+      procedure
+          .getClaimPoaIndicator()
+          .ifPresent(p -> poaDiagnoses.merge(key, p, (oldVal, newVal) -> oldVal + newVal));
+
+      var queue =
+          diagnosisMap.computeIfAbsent(
+              key,
+              _ ->
+                  new PriorityQueue<ClaimProcedure>(
+                      Comparator.comparing(a -> a.getDiagnosisPriority(claimContext).orElse(0))));
+
+      queue.add(item.getClaimProcedure());
+    }
+
+    return diagnosisMap.values().stream()
+        .map(
+            d -> {
+              var procedure = d.peek();
+              // POA may not be set on the diagnosis we pick, but it may be present on one of the
+              // duplicates.
+              // Check these and set the POA indicator where applicable.
+              var poaIndicator = poaDiagnoses.getOrDefault(procedure.getDiagnosisKey().get(), "");
+              if (procedure.getClaimPoaIndicator().isEmpty() && !poaIndicator.isEmpty()) {
+                procedure.setClaimPoaIndicator(poaIndicator);
+              }
+              return procedure;
+            })
+        .toList();
   }
 }
