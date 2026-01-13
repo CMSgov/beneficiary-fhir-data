@@ -52,7 +52,7 @@ public class ClaimLine {
   @Embedded private ClaimLineAdjudicationCharge adjudicationCharge;
   @Embedded private ClaimRenderingProvider claimRenderingProvider;
 
-  Optional<ExplanationOfBenefit.ItemComponent> toFhir(
+  Optional<ExplanationOfBenefit.ItemComponent> toFhirItemComponent(
       ClaimItem claimItem, List<ClaimProcedure> diagnoses) {
     if (claimLineNumber.isEmpty()) {
       return Optional.empty();
@@ -141,7 +141,7 @@ public class ClaimLine {
         .toList();
   }
 
-  Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
+  Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhirSupportingInfo(
       SupportingInfoFactory supportingInfoFactory) {
 
     var trackingNumber = adjudicatedTrackingNumber.or(() -> partiallyAdjudicatedTrackingNumber);

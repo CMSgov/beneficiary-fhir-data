@@ -306,10 +306,10 @@ public class Claim {
 
     claimItems.forEach(
         item -> {
-          var claimLine = item.getClaimLine().toFhir(item, consolidatedDiagnoses);
+          var claimLine = item.getClaimLine().toFhirItemComponent(item, consolidatedDiagnoses);
           claimLine.ifPresent(eob::addItem);
           item.getClaimLine()
-              .toFhir(supportingInfoFactory)
+              .toFhirSupportingInfo(supportingInfoFactory)
               .ifPresent(
                   si -> {
                     eob.addSupportingInfo(si);
