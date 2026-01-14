@@ -2681,9 +2681,9 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
   "meta" : {
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
     "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Professional-NonClinician|2.1.0" ],
-    "source" : "NCH",
+    "source" : "VMS",
     "tag" : [ {
-      "code" : "NationalClaimsHistory",
+      "code" : "SharedSystem",
       "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type"
     }, {
       "code" : "FinalAction",

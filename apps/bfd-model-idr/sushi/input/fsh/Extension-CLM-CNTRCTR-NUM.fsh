@@ -1,6 +1,6 @@
 Extension: CLM_CNTRCTR_NUM
 Title: "Claim Contractor Number"
-Description: "The identification number assigned by CMS to a fiscal intermediary (FI) authorized to process claim records."
+Description: "Deprecated 2026-01-14. The identification number assigned by CMS to a fiscal intermediary (FI) authorized to process claim records."
 Id: CLM-CNTRCTR-NUM
 * ^url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CNTRCTR-NUM" 
 * ^context[+].type = #element

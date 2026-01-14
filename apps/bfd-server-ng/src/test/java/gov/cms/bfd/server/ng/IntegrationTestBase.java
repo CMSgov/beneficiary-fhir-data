@@ -74,6 +74,7 @@ public class IntegrationTestBase {
   protected static final String DUAL_ONLY_BENE_COVERAGE_STATUS_CODE = "XX";
 
   private static final String FHIR_JSON = "fhir+json";
+  private static final String CLAIM_FORMAT_CODE_NCPDP_DISPLAY = "NCPDP ELECTRONIC SUBMISSION";
 
   protected String getServerBaseUrl() {
     return "http://localhost:" + port;
@@ -133,7 +134,16 @@ public class IntegrationTestBase {
     var codings = ctx.newTerser().getAllPopulatedChildElementsOfType(resource, Coding.class);
     for (Coding coding : codings) {
       assertTrue(coding.hasSystem());
-      assertTrue(coding.hasCode());
+      // Claim submission format code has an empty string as a valid value that indicates NCPDP
+      // electronic submission
+      if (coding.hasCode() == false) {
+        var system = coding.getSystem();
+        var display = coding.getDisplay();
+      }
+      assertTrue(
+          coding.hasCode()
+              || (coding.hasDisplay()
+                  && coding.getDisplay().equals(CLAIM_FORMAT_CODE_NCPDP_DISPLAY)));
       var system = coding.getSystem();
       assertFalse(
           system.contains("_"),

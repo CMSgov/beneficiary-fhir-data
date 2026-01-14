@@ -38,9 +38,6 @@ public enum ClaimSubmissionFormatCode {
    * @return claim submission format code
    */
   public static Optional<ClaimSubmissionFormatCode> fromCode(String code) {
-    if (code.isBlank()) {
-      return Optional.empty();
-    }
     return Arrays.stream(values()).filter(v -> v.code.equals(code)).findFirst();
   }
 
