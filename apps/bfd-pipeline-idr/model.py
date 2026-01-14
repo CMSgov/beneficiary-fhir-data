@@ -123,7 +123,6 @@ COLUMN_MAP = "column_map"
 FISS_CLM_SOURCE = "21000"
 MCS_CLM_SOURCE = "22000"
 VMS_CLM_SOURCE = "23000"
-NCH_CLM_SOURCE = "20000"
 
 
 ALIAS_CLM = "clm"
@@ -1085,6 +1084,8 @@ def _claim_filter(start_time: datetime, partition: LoadPartition) -> str:
     # PAC data older than 60 days should be filtered
     pac_cutoff_date = start_time - timedelta(days=60)
     start_time_sql = pac_cutoff_date.strftime("'%Y-%m-%d %H:%M:%S'")
+    pac_phase_1_min = 1000
+    pac_phase_1_max = 1999
     pac_filter = (
         f"""
         AND
@@ -1101,7 +1102,7 @@ def _claim_filter(start_time: datetime, partition: LoadPartition) -> str:
                     {clm}.idr_insrt_ts,
                     {clm}.clm_idr_ld_dt) >= {start_time_sql}
             )
-            OR {clm}.clm_src_id = '{NCH_CLM_SOURCE}'
+            OR {clm}.clm_type_cd NOT BETWEEN {pac_phase_1_min} AND {pac_phase_1_max}
         )
     """
         if (PartitionType.PAC | PartitionType.ALL) & partition.partition_type != 0
