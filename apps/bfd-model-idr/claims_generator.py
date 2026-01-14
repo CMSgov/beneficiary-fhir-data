@@ -694,8 +694,6 @@ def gen_claim(bene_sk: str = "-1", min_date: str = "2018-01-01", max_date: str =
             random.choices(string.ascii_uppercase, k=3)
         )
         claim.CLM["CLM_RLT_COND_SGNTR_SK"] = "-1"
-    else:
-
 
     if clm_type_cd in (20, 30, 40, 60, 61, 62, 63, 71, 72):
         claim.CLM["CLM_BLOOD_PT_FRNSH_QTY"] = random.randint(0, 20)
@@ -1123,7 +1121,6 @@ def gen_claim(bene_sk: str = "-1", min_date: str = "2018-01-01", max_date: str =
             # handled above
             continue
         claim_line: dict[str, Any] = {}
-        claim_line_dcmtn: dict[str, Any] = {}
         claim_line_inst: dict[str, Any] = {}
         claim_line_prfnl: dict[str, Any] = {}
         claim_line["GEO_BENE_SK"] = claim.CLM["GEO_BENE_SK"]
@@ -1133,13 +1130,8 @@ def gen_claim(bene_sk: str = "-1", min_date: str = "2018-01-01", max_date: str =
         claim_line["CLM_FROM_DT"] = claim.CLM["CLM_FROM_DT"]
         claim_line["CLM_LINE_FROM_DT"] = claim.CLM["CLM_FROM_DT"]
         claim_line["CLM_LINE_THRU_DT"] = claim.CLM["CLM_THRU_DT"]
-        claim_line["CLM_LINE_PMD_UNIQ_TRKNG_NUM"] = "".join(random.choices(string.ascii_uppercase + string.digits, k=14))
-
-        claim_line_dcmtn["GEO_BENE_SK"] = claim.CLM["GEO_BENE_SK"]
-        claim_line_dcmtn["CLM_DT_SGNTR_SK"] = claim.CLM["CLM_DT_SGNTR_SK"]
-        claim_line_dcmtn["CLM_TYPE_CD"] = claim.CLM["CLM_TYPE_CD"]
-        claim_line_dcmtn["CLM_NUM_SK"] = claim.CLM["CLM_NUM_SK"]
-        claim_line_dcmtn["CLM_LINE_PA_UNIQ_TRKNG_NUM"] = "".join(random.choices(string.ascii_uppercase + string.digits, k=14))
+        if random.random() < 0.10:
+            claim_line["CLM_LINE_PMD_UNIQ_TRKNG_NUM"] = "".join(random.choices(string.ascii_uppercase + string.digits, k=14))
 
         if clm_type_cd >= 10 and clm_type_cd <= 64:
             claim_line_inst["GEO_BENE_SK"] = claim.CLM["GEO_BENE_SK"]
@@ -1303,14 +1295,11 @@ def gen_claim(bene_sk: str = "-1", min_date: str = "2018-01-01", max_date: str =
         claim_line_inst["CLM_LINE_NON_EHR_RDCTN_AMT"] = round(random.uniform(0, 500), 2)
         claim_line_inst["CLM_REV_CNTR_TDAPA_AMT"] = round(random.uniform(0, 10000), 2)
         add_meta_timestamps(claim_line_inst, claim.CLM, max_date)
-        add_meta_timestamps(claim_line_dcmtn, claim.CLM, max_date)
 
         claim_line["CLM_UNIQ_ID"] = claim.CLM["CLM_UNIQ_ID"]
         claim_line["CLM_LINE_NUM"] = line_num
         claim_line_inst["CLM_LINE_NUM"] = line_num
         claim_line_prfnl["CLM_LINE_NUM"] = line_num
-        claim_line_dcmtn["CLM_LINE_NUM"] = line_num
-        claim.CLM_LINE_DCMTN.append(claim_line_dcmtn)
         claim.CLM_LINE.append(claim_line)
         if clm_type_cd >= 10 and clm_type_cd <= 65:
             claim.CLM_LINE_INSTNL.append(claim_line_inst)
@@ -1320,7 +1309,6 @@ def gen_claim(bene_sk: str = "-1", min_date: str = "2018-01-01", max_date: str =
         # CLM_REV_APC_HIPPS_CD never populated for CLM_TYPE_CD 60 apart from null values (00000,0,~)
     return claim
 
-#Shared systems CLAIM
 def gen_pac_version_of_claim(claim: _GeneratedClaim, max_date: str):
     # note the fields to delete
 
@@ -1330,16 +1318,6 @@ def gen_pac_version_of_claim(claim: _GeneratedClaim, max_date: str):
     # 3. Update the relevant parts
     # 4. Delete information that's not accessible from that given source. This can probably be done
     # via config files in the future.
-
-    #Delete PMD
-    # if V2_MDCR_CLM_LINE.CLM_LINE_PMD_UNIQ_TRKNG_NUM is populated, pop it,
-    # and put the value in the relevant line under V2_MDCR_CLM_LINE_DCMTN.CLM_LINE_PA_UNIQ_TRKNG_NUM
-
-    # claim_line_dcmtn["GEO_BENE_SK"] = claim.CLM["GEO_BENE_SK"]
-    # claim_line_dcmtn["CLM_DT_SGNTR_SK"] = claim.CLM["CLM_DT_SGNTR_SK"]
-    # claim_line_dcmtn["CLM_TYPE_CD"] = claim.CLM["CLM_TYPE_CD"]
-    # claim_line_dcmtn["CLM_NUM_SK"] = claim.CLM["CLM_NUM_SK"]
-    # claim_line_dcmtn["CLM_LINE_PA_UNIQ_TRKNG_NUM"] = "".join(random.choices(string.ascii_uppercase + string.digits, k=14))
 
     pac_claim = copy.deepcopy(claim)
     pac_claim.CLM["CLM_UNIQ_ID"] = gen_claim_id()
@@ -1437,6 +1415,19 @@ def gen_pac_version_of_claim(claim: _GeneratedClaim, max_date: str):
         pac_claim.CLM_LINE[i]["GEO_BENE_SK"] = pac_claim.CLM["GEO_BENE_SK"]
         pac_claim.CLM_LINE[i]["CLM_DT_SGNTR_SK"] = pac_claim.CLM["CLM_DT_SGNTR_SK"]
         pac_claim.CLM_LINE[i]["CLM_TYPE_CD"] = pac_claim.CLM["CLM_TYPE_CD"]
+        tracking_num = pac_claim.CLM_LINE[i].get("CLM_LINE_PMD_UNIQ_TRKNG_NUM")
+        if tracking_num:
+            claim_line_dcmtn: dict[str, Any] = {}
+            claim_line_dcmtn["GEO_BENE_SK"] = pac_claim.CLM["GEO_BENE_SK"]
+            claim_line_dcmtn["CLM_DT_SGNTR_SK"] = pac_claim.CLM["CLM_DT_SGNTR_SK"]
+            claim_line_dcmtn["CLM_TYPE_CD"] = pac_claim.CLM["CLM_TYPE_CD"]
+            claim_line_dcmtn["CLM_NUM_SK"] = pac_claim.CLM["CLM_NUM_SK"]
+            claim_line_dcmtn["CLM_LINE_PA_UNIQ_TRKNG_NUM"] = tracking_num
+            pac_claim.CLM_LINE[i].pop("CLM_LINE_PMD_UNIQ_TRKNG_NUM")
+            add_meta_timestamps(claim_line_dcmtn, claim.CLM, max_date)
+            claim_line_dcmtn["CLM_LINE_NUM"] = i + 1
+            pac_claim.CLM_LINE_DCMTN.append(claim_line_dcmtn)
+
     # Update CLM_LINE_INSTNL for institutional claims only
     if len(pac_claim.CLM_LINE_INSTNL) > 0:
         for i in range(len(pac_claim.CLM_LINE_INSTNL)):
@@ -1771,7 +1762,6 @@ def main():
     clm_required_tables = [
         CLM_PROD,
         CLM_LINE,
-        CLM_LINE_DCMTN,
         CLM_VAL,
         CLM_RLT_COND_SGNTR_MBR,
         BENE_HSTRY,
@@ -1836,7 +1826,7 @@ def main():
                 )
                 clm.append(claim.CLM)
                 clm_line.extend(claim.CLM_LINE)
-                clm_line_dcmtn.extend(claim.CLM_LINE_DCMTN)
+                # clm_line_dcmtn.extend(claim.CLM_LINE_DCMTN)
                 clm_val.extend(claim.CLM_VAL)
                 clm_dt_sgntr.append(claim.CLM_DT_SGNTR)
                 clm_prod.extend(claim.CLM_PROD)
@@ -1874,6 +1864,7 @@ def main():
                         clm_line_instnl.extend(pac_claim.CLM_LINE_INSTNL)
                     clm_fiss.append(pac_claim.CLM_FISS)
                     clm_lctn_hstry.append(pac_claim.CLM_LCTN_HSTRY)
+                    clm_line_dcmtn.extend(pac_claim.CLM_LINE_DCMTN)
 
     save_output_files(
         clm,
