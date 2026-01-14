@@ -10,21 +10,15 @@ import org.hl7.fhir.r4.model.StringType;
 @Embeddable
 public class SubmitterContractNumber {
   @Column(name = "clm_sbmtr_cntrct_num")
-  private String contractNumber;
+  private Optional<String> contractNumber;
 
   Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {
-
-    if (contractNumber.isBlank()) {
-      return Optional.empty();
-    }
-
-    var component =
-        supportingInfoFactory
-            .createSupportingInfo()
-            .setCategory(BlueButtonSupportingInfoCategory.CLM_SBMTR_CNTRCT_NUM.toFhir())
-            .setValue(new StringType(contractNumber));
-
-    return Optional.of(component);
+    return contractNumber.map(
+        num ->
+            supportingInfoFactory
+                .createSupportingInfo()
+                .setCategory(BlueButtonSupportingInfoCategory.CLM_SBMTR_CNTRCT_NUM.toFhir())
+                .setValue(new StringType(num)));
   }
 }

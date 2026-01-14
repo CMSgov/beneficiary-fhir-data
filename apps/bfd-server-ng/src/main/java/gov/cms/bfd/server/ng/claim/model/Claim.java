@@ -1,5 +1,7 @@
 package gov.cms.bfd.server.ng.claim.model;
 
+import static gov.cms.bfd.server.ng.claim.model.ClaimSubtype.PDE;
+
 import gov.cms.bfd.server.ng.ClaimSecurityStatus;
 import gov.cms.bfd.server.ng.beneficiary.model.BeneficiarySimple;
 import gov.cms.bfd.server.ng.util.DateUtil;
@@ -374,7 +376,10 @@ public class Claim {
     var claimRxSupportingInfo =
         Stream.of(
                 // claim rx header lvl
-                claimFormatCode.map(c -> c.toFhir(supportingInfoFactory)).stream(),
+                claimFormatCode
+                    .filter(c -> claimTypeCode.isClaimSubtype(PDE))
+                    .map(c -> c.toFhir(supportingInfoFactory))
+                    .stream(),
                 submitterContractNumber.toFhir(supportingInfoFactory).stream(),
                 submitterContractPBPNumber.toFhir(supportingInfoFactory).stream(),
                 // claim rx line lvl
