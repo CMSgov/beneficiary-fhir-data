@@ -1086,10 +1086,14 @@ def _claim_filter(start_time: datetime, partition: LoadPartition) -> str:
     start_time_sql = pac_cutoff_date.strftime("'%Y-%m-%d %H:%M:%S'")
     pac_phase_1_min = 1000
     pac_phase_1_max = 1999
+    # Note: checking clm_type_cd as the first branch of the OR here might be more efficient
+    # Since it's more likely to return true
     pac_filter = (
         f"""
         AND
         (
+            {clm}.clm_type_cd NOT BETWEEN {pac_phase_1_min} AND {pac_phase_1_max}
+            OR 
             (
                 {clm}.clm_src_id IN (
                     '{FISS_CLM_SOURCE}',
@@ -1102,7 +1106,6 @@ def _claim_filter(start_time: datetime, partition: LoadPartition) -> str:
                     {clm}.idr_insrt_ts,
                     {clm}.clm_idr_ld_dt) >= {start_time_sql}
             )
-            OR {clm}.clm_type_cd NOT BETWEEN {pac_phase_1_min} AND {pac_phase_1_max}
         )
     """
         if (PartitionType.PAC | PartitionType.ALL) & partition.partition_type != 0
