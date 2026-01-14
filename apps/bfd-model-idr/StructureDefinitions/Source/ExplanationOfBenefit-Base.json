@@ -810,6 +810,18 @@
                         ]
                     }
                 ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Base.META_SRC_SK",
+                "path": "ExplanationOfBenefit-Base.META_SRC_SK",
+                "label": "Meta Source SK",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
             }
         ]
     }
