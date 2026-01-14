@@ -694,6 +694,8 @@ def gen_claim(bene_sk: str = "-1", min_date: str = "2018-01-01", max_date: str =
             random.choices(string.ascii_uppercase, k=3)
         )
         claim.CLM["CLM_RLT_COND_SGNTR_SK"] = "-1"
+    else:
+
 
     if clm_type_cd in (20, 30, 40, 60, 61, 62, 63, 71, 72):
         claim.CLM["CLM_BLOOD_PT_FRNSH_QTY"] = random.randint(0, 20)
@@ -746,7 +748,7 @@ def gen_claim(bene_sk: str = "-1", min_date: str = "2018-01-01", max_date: str =
         claim_line["CLM_LINE_RX_NUM"] = round(random.uniform(0, 100000), 2)
         claim_line["CLM_LINE_GRS_CVRD_CST_TOT_AMT"] = round(random.uniform(0, 1000), 2)
         claim_line["CLM_LINE_OTHR_TP_PD_AMT"] = round(random.uniform(0, 1000), 2)
-        claim_line["CLM_LINE_PMD_UNIQ_TRKNG_NUM"] = "".join(random.choices(string.ascii_uppercase + string.digits, k=14))
+
 
         claim_line_rx: dict[str, Any] = {}
         claim_line_rx["CLM_UNIQ_ID"] = claim.CLM["CLM_UNIQ_ID"]
@@ -1131,6 +1133,7 @@ def gen_claim(bene_sk: str = "-1", min_date: str = "2018-01-01", max_date: str =
         claim_line["CLM_FROM_DT"] = claim.CLM["CLM_FROM_DT"]
         claim_line["CLM_LINE_FROM_DT"] = claim.CLM["CLM_FROM_DT"]
         claim_line["CLM_LINE_THRU_DT"] = claim.CLM["CLM_THRU_DT"]
+        claim_line["CLM_LINE_PMD_UNIQ_TRKNG_NUM"] = "".join(random.choices(string.ascii_uppercase + string.digits, k=14))
 
         claim_line_dcmtn["GEO_BENE_SK"] = claim.CLM["GEO_BENE_SK"]
         claim_line_dcmtn["CLM_DT_SGNTR_SK"] = claim.CLM["CLM_DT_SGNTR_SK"]
@@ -1317,7 +1320,7 @@ def gen_claim(bene_sk: str = "-1", min_date: str = "2018-01-01", max_date: str =
         # CLM_REV_APC_HIPPS_CD never populated for CLM_TYPE_CD 60 apart from null values (00000,0,~)
     return claim
 
-
+#Shared systems CLAIM
 def gen_pac_version_of_claim(claim: _GeneratedClaim, max_date: str):
     # note the fields to delete
 
@@ -1327,6 +1330,16 @@ def gen_pac_version_of_claim(claim: _GeneratedClaim, max_date: str):
     # 3. Update the relevant parts
     # 4. Delete information that's not accessible from that given source. This can probably be done
     # via config files in the future.
+
+    #Delete PMD
+    # if V2_MDCR_CLM_LINE.CLM_LINE_PMD_UNIQ_TRKNG_NUM is populated, pop it,
+    # and put the value in the relevant line under V2_MDCR_CLM_LINE_DCMTN.CLM_LINE_PA_UNIQ_TRKNG_NUM
+
+    # claim_line_dcmtn["GEO_BENE_SK"] = claim.CLM["GEO_BENE_SK"]
+    # claim_line_dcmtn["CLM_DT_SGNTR_SK"] = claim.CLM["CLM_DT_SGNTR_SK"]
+    # claim_line_dcmtn["CLM_TYPE_CD"] = claim.CLM["CLM_TYPE_CD"]
+    # claim_line_dcmtn["CLM_NUM_SK"] = claim.CLM["CLM_NUM_SK"]
+    # claim_line_dcmtn["CLM_LINE_PA_UNIQ_TRKNG_NUM"] = "".join(random.choices(string.ascii_uppercase + string.digits, k=14))
 
     pac_claim = copy.deepcopy(claim)
     pac_claim.CLM["CLM_UNIQ_ID"] = gen_claim_id()
