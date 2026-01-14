@@ -4,7 +4,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.util.List;
@@ -22,9 +21,6 @@ public class ClaimProfessional {
   @Id
   @Column(name = "clm_uniq_id")
   private long claimUniqueId;
-
-  @OneToOne(mappedBy = "claimProfessional")
-  private Claim claim;
 
   @Column(name = "clm_carr_pmt_dnl_cd")
   private Optional<ClaimPaymentDenialCode> claimPaymentDenialCode;

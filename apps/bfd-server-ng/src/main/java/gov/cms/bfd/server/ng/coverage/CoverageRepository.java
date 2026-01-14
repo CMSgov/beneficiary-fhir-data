@@ -70,14 +70,14 @@ public class CoverageRepository {
                       )
                       SELECT b
                       FROM BeneficiaryCoverage b
-                      LEFT JOIN FETCH b.beneficiaryStatus bs
-                      LEFT JOIN FETCH b.beneficiaryEntitlementReason ber
+                      LEFT JOIN FETCH b.coverageOptional.beneficiaryStatus bs
+                      LEFT JOIN FETCH b.coverageOptional.beneficiaryEntitlementReason ber
                       LEFT JOIN FETCH b.beneficiaryThirdParties tp
                       LEFT JOIN FETCH b.beneficiaryEntitlements be
-                      LEFT JOIN FETCH b.beneficiaryDualEligibility de
+                      LEFT JOIN FETCH b.coverageOptional.beneficiaryDualEligibility de
                       LEFT JOIN FETCH b.beneficiaryPartCDEnrollments ben
-                      LEFT JOIN FETCH ben.enrollmentContract c
-                      LEFT JOIN FETCH c.contractPlanContactInfo cc
+                      LEFT JOIN FETCH ben.enrollmentOptional.enrollmentContract c
+                      LEFT JOIN FETCH c.contractOptional.contractPlanContactInfo cc
                       LEFT JOIN FETCH b.beneficiaryLowIncomeSubsidies blis
                       WHERE b.beneSk = :beneSk
                         AND (

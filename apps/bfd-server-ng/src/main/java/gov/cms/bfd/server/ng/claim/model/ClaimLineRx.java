@@ -4,7 +4,6 @@ import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.util.Optional;
 import lombok.Getter;
@@ -18,9 +17,6 @@ public class ClaimLineRx {
   @EmbeddedId ClaimLineRxId claimLineInstitutionalId;
   @Embedded private ClaimLineAdjudicationChargeRx claimLineAdjudicationChargeRx;
   @Embedded private ClaimRxSupportingInfo claimRxSupportingInfo;
-
-  @OneToOne(mappedBy = "claimLineRx")
-  private ClaimItem claimLine;
 
   /**
    * Per C4BB, if compound code = 2 -> populate productOrService with "compound".
