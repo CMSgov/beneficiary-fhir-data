@@ -1232,6 +1232,7 @@ class IdrClaim(IdrBaseModel):
     clm_prvdr_rmng_due_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_blood_ncvrd_chrg_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_prvdr_intrst_pd_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    meta_src_sk: int
     idr_insrt_ts_clm: Annotated[
         datetime,
         {BATCH_TIMESTAMP: True, ALIAS: ALIAS_CLM, COLUMN_MAP: "idr_insrt_ts"},

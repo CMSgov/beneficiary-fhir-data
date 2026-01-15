@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Map;
 import org.flywaydb.core.Flyway;
+import org.junit.platform.commons.util.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
@@ -25,6 +26,12 @@ public class IntegrationTestConfiguration {
   @Bean
   @ServiceConnection
   public PostgreSQLContainer<?> postgres() throws IOException, InterruptedException {
+    if (StringUtils.isNotBlank(System.getenv("PGPASSWORD"))
+        || StringUtils.isNotBlank(System.getenv("BFD_SENSITIVE_DB_PASSWORD"))) {
+      // Postgres environment variables can interfere with the database configuration and should
+      // not be used here.
+      throw new RuntimeException("Database variables should not be set while running tests");
+    }
     // Provides an implementation of JdbcConnectionDetails that will be injected into the Spring
     // context
     var databaseImage = System.getProperty("its.testcontainer.db.image");

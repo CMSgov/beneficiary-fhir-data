@@ -9,11 +9,13 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /** BFD Server startup class. */
 @ServletComponentScan(basePackageClasses = {RestfulServer.class})
 @SpringBootApplication(scanBasePackages = "gov.cms.bfd.server.ng")
 @EnableConfigurationProperties(Configuration.class)
+@EnableTransactionManagement
 public class Application {
   /**
    * Server entrypoint.

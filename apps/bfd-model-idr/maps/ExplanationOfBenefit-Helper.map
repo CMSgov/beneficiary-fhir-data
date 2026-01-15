@@ -109,6 +109,17 @@ conceptmap "CLM_SRC_ID" {
   s:"25000" == t:"EncounterMedicaidDuals"
 }
 
+conceptmap "META_SRC_SK" {
+  prefix s = "https://hl7.org/fhir/string"
+  prefix t = "https://hl7.org/fhir/string"
+
+  s:"1" == t:"DDPS"
+  s:"7" == t:"NCH"
+  s:"1001" == t:"MCS"
+  s:"1002" == t:"VMS"
+  s:"1003" == t:"FISS"
+}
+
 conceptmap "SYSTEM_TYPE" {
   prefix s = "https://hl7.org/fhir/string"
   prefix t = "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type"

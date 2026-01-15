@@ -1,22 +1,29 @@
 package gov.cms.bfd.server.ng.claim;
 
+import gov.cms.bfd.server.ng.DbFilter;
+import gov.cms.bfd.server.ng.DbFilterBuilder;
+import gov.cms.bfd.server.ng.DbFilterParam;
+import gov.cms.bfd.server.ng.claim.filter.BillablePeriodFilterParam;
+import gov.cms.bfd.server.ng.claim.filter.ClaimTypeCodeFilterParam;
+import gov.cms.bfd.server.ng.claim.filter.LastUpdatedFilterParam;
+import gov.cms.bfd.server.ng.claim.filter.TagCriteriaFilterParam;
 import gov.cms.bfd.server.ng.claim.model.Claim;
 import gov.cms.bfd.server.ng.claim.model.ClaimTypeCode;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.input.TagCriterion;
-import gov.cms.bfd.server.ng.input.TagCriterion.FinalActionCriterion;
-import gov.cms.bfd.server.ng.input.TagCriterion.SourceIdCriterion;
 import gov.cms.bfd.server.ng.util.LogUtil;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 /** Repository methods for claims. */
+// NOTE: @Transactional is needed to ensure our custom transaction manager is used
+@Transactional(readOnly = true)
 @Repository
 @AllArgsConstructor
 public class ClaimRepository {
@@ -59,6 +66,11 @@ public class ClaimRepository {
    */
   public Optional<Claim> findById(
       long claimUniqueId, DateTimeRange claimThroughDate, DateTimeRange lastUpdated) {
+    var paramBuilders =
+        List.of(
+            new BillablePeriodFilterParam(claimThroughDate),
+            new LastUpdatedFilterParam(lastUpdated));
+    var params = getFilters(paramBuilders);
     var jpql =
         String.format(
             """
@@ -66,14 +78,9 @@ public class ClaimRepository {
               WHERE c.claimUniqueId = :claimUniqueId
               %s
             """,
-            CLAIM_TABLES_BASE, getFilters(claimThroughDate, lastUpdated, Collections.emptyList()));
+            CLAIM_TABLES_BASE, params.filterClause());
     var results =
-        withParams(
-                entityManager.createQuery(jpql, Claim.class),
-                claimThroughDate,
-                lastUpdated,
-                new ArrayList<>(),
-                new ArrayList<>())
+        withParams(entityManager.createQuery(jpql, Claim.class), params.params())
             .setParameter("claimUniqueId", claimUniqueId)
             .getResultList();
 
@@ -102,53 +109,51 @@ public class ClaimRepository {
       Optional<Integer> offset,
       List<List<TagCriterion>> tagCriteria,
       List<ClaimTypeCode> claimTypeCodes) {
-    // JPQL doesn't support LIMIT/OFFSET unfortunately, so we have to load this
-    // separately.
-    // setMaxResults will only limit the results in memory rather than at the
-    // database level.
-
-    // We need to get a distinct list of bene_sk values here because there will be
-    // duplicates
-    // since this is a history table.
-    var claimIds =
-        entityManager
-            .createNativeQuery(
-                """
-                WITH benes AS (
-                    SELECT DISTINCT b.bene_sk
-                    FROM idr.beneficiary b
-                    WHERE b.bene_xref_efctv_sk_computed = :beneSk
-                )
-                SELECT c.clm_uniq_id
-                FROM idr.claim c
-                JOIN benes b ON b.bene_sk = c.bene_sk
-                ORDER BY c.clm_uniq_id
-                LIMIT :limit
-                OFFSET :offset
-                """,
-                Long.class)
-            .setParameter("beneSk", beneSk)
-            .setParameter("limit", limit.orElse(5000))
-            .setParameter("offset", offset.orElse(0))
-            .getResultList();
+    var filterBuilders =
+        List.of(
+            new BillablePeriodFilterParam(claimThroughDate),
+            new LastUpdatedFilterParam(lastUpdated),
+            new ClaimTypeCodeFilterParam(claimTypeCodes),
+            new TagCriteriaFilterParam(tagCriteria));
+    var filters = getFilters(filterBuilders);
+    // Some of the filters here appear redundant, but joining on the entire primary key for
+    // beneficiaries (bene_sk + effective timestamp) helps query performance significantly
     var jpql =
         String.format(
             """
+            WITH benes AS (
+                  SELECT b.beneSk beneSk, b.effectiveTimestamp effectiveTimestamp
+                  FROM Beneficiary b
+                  WHERE b.xrefSk = :beneSk AND b.latestTransactionFlag = 'Y'
+             ),
+             claims AS (
+                SELECT c.claimUniqueId claimUniqueId
+                FROM Claim c
+                WHERE EXISTS (
+                  SELECT 1 FROM benes b2
+                    WHERE b2.beneSk = c.beneficiary.beneSk
+                    AND b2.effectiveTimestamp = c.beneficiary.effectiveTimestamp
+                )
+                ORDER BY c.claimUniqueId
+                OFFSET :offset ROWS
+                FETCH NEXT :limit ROWS ONLY
+             )
             %s
-            WHERE c.claimUniqueId IN (:claimIds)
+            WHERE c.claimUniqueId IN (SELECT claimUniqueId FROM claims)
+            AND EXISTS (
+              SELECT 1 FROM benes b2
+              WHERE b2.beneSk = b.beneSk
+              AND b2.effectiveTimestamp = b.effectiveTimestamp
+            )
             %s
             """,
-            CLAIM_TABLES_BASE, getFilters(claimThroughDate, lastUpdated, tagCriteria));
-    var query =
-        withParams(
-                entityManager.createQuery(jpql, Claim.class),
-                claimThroughDate,
-                lastUpdated,
-                tagCriteria,
-                claimTypeCodes)
-            .setParameter("claimIds", claimIds);
-
-    var claims = query.getResultList();
+            CLAIM_TABLES_BASE, filters.filterClause());
+    var claims =
+        withParams(entityManager.createQuery(jpql, Claim.class), filters.params())
+            .setParameter("limit", limit.orElse(5000))
+            .setParameter("offset", offset.orElse(0))
+            .setParameter("beneSk", beneSk)
+            .getResultList();
 
     claims.stream()
         .findFirst()
@@ -156,67 +161,20 @@ public class ClaimRepository {
     return claims;
   }
 
-  private String getFilters(
-      DateTimeRange claimThroughDate,
-      DateTimeRange lastUpdated,
-      List<List<TagCriterion>> tagCriteria) {
+  private <T extends DbFilterBuilder> DbFilter getFilters(List<T> builders) {
     var sb = new StringBuilder();
-    sb.append(
-        String.format(
-            """
-            AND ((cast(:claimThroughDateLowerBound AS LocalDate)) IS NULL OR c.billablePeriod.claimThroughDate %s :claimThroughDateLowerBound)
-            AND ((cast(:claimThroughDateUpperBound AS LocalDate)) IS NULL OR c.billablePeriod.claimThroughDate %s :claimThroughDateUpperBound)
-            AND ((cast(:lastUpdatedLowerBound AS ZonedDateTime)) IS NULL OR c.meta.updatedTimestamp %s :lastUpdatedLowerBound)
-            AND ((cast(:lastUpdatedUpperBound AS ZonedDateTime)) IS NULL OR c.meta.updatedTimestamp %s :lastUpdatedUpperBound)
-            AND (:hasClaimTypeCodes = false OR c.claimTypeCode IN :claimTypeCodes)
-            """,
-            claimThroughDate.getLowerBoundSqlOperator(),
-            claimThroughDate.getUpperBoundSqlOperator(),
-            lastUpdated.getLowerBoundSqlOperator(),
-            lastUpdated.getUpperBoundSqlOperator()));
-
-    for (var i = 0; i < tagCriteria.size(); i++) {
-      var orList = tagCriteria.get(i);
-      if (orList.isEmpty()) {
-        continue;
-      }
-      var clauses = new ArrayList<String>();
-      for (var j = 0; j < orList.size(); j++) {
-        var criterion = orList.get(j);
-        switch (criterion) {
-          case SourceIdCriterion _ -> clauses.add("c.claimSourceId = :tag_" + i + "_" + j);
-          case FinalActionCriterion _ -> clauses.add("c.finalAction = :tag_" + i + "_" + j);
-        }
-      }
-      sb.append(" AND (").append(String.join(" OR ", clauses)).append(")");
+    var queryParams = new ArrayList<DbFilterParam>();
+    for (var builder : builders) {
+      var params = builder.getFilters("c");
+      sb.append(params.filterClause());
+      queryParams.addAll(params.params());
     }
-    return sb.toString();
+    return new DbFilter(sb.toString(), queryParams);
   }
 
-  private <T> TypedQuery<T> withParams(
-      TypedQuery<T> query,
-      DateTimeRange claimThroughDate,
-      DateTimeRange lastUpdated,
-      List<List<TagCriterion>> tagCriteria,
-      List<ClaimTypeCode> claimTypeCodes) {
-    query
-        .setParameter("claimThroughDateLowerBound", claimThroughDate.getLowerBoundDate())
-        .setParameter("claimThroughDateUpperBound", claimThroughDate.getUpperBoundDate())
-        .setParameter("lastUpdatedLowerBound", lastUpdated.getLowerBoundDateTime().orElse(null))
-        .setParameter("lastUpdatedUpperBound", lastUpdated.getUpperBoundDateTime().orElse(null))
-        .setParameter("hasClaimTypeCodes", !claimTypeCodes.isEmpty())
-        .setParameter("claimTypeCodes", claimTypeCodes);
-
-    for (var i = 0; i < tagCriteria.size(); i++) {
-      var orList = tagCriteria.get(i);
-      for (var j = 0; j < orList.size(); j++) {
-        var criterion = orList.get(j);
-        var paramName = "tag_" + i + "_" + j;
-        switch (criterion) {
-          case SourceIdCriterion(var sourceId) -> query.setParameter(paramName, sourceId);
-          case FinalActionCriterion(var finalAction) -> query.setParameter(paramName, finalAction);
-        }
-      }
+  private <T> TypedQuery<T> withParams(TypedQuery<T> query, List<DbFilterParam> params) {
+    for (var param : params) {
+      query.setParameter(param.name(), param.value());
     }
     return query;
   }
