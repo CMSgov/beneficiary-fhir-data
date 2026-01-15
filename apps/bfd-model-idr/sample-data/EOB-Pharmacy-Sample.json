@@ -27,6 +27,7 @@
     "CLM_ADJSTMT_TYPE_CD": "0",
     "CLM_BENE_PMT_AMT": "100.00",
     "CLM_OTHR_TP_PD_AMT": "100.00",
+    "META_SRC_SK": 1,
     "supportingInfoComponents": [
         {
             "ROW_NUM": 1,

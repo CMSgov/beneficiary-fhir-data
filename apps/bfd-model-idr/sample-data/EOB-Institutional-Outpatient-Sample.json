@@ -15,6 +15,7 @@
     "CLM_DISP_CD": "1",
     "CLM_ADJSTMT_TYPE_CD": "0",
     "PRVDR_BLG_PRVDR_NPI_NUM": "1548226988",
+    "META_SRC_SK": 7,
     "diagnoses": [
         {
             "CLM_VAL_SQNC_NUM": "1",
