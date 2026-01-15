@@ -1,4 +1,5 @@
 import argparse
+import html
 import json
 import re
 import sys
@@ -29,7 +30,7 @@ def get_enum_val(concept, int_codes):
     else:
         code_fmt = f'"{code}"'
     punct = "" if display.endswith(".") else "."
-    javadoc = f"/**\n{code} - {display}{punct}\n*/"
+    javadoc = html.escape(f"/**\n{code} - {display}{punct}\n*/", quote=False)
     return f'{javadoc}\n{prefix}{code}({code_fmt},"{display}")'
 
 
