@@ -12,7 +12,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 /** Claim outpatient service type codes. */
 @AllArgsConstructor
 @Getter
-@SuppressWarnings("java:S115")
+@SuppressWarnings({"java:S115", "java:S1192"})
 public enum ClaimOutpatientServiceTypeCode {
   /** 0 - Blank. */
   _0("0", "Blank"),

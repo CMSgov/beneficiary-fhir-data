@@ -134,16 +134,7 @@ public class IntegrationTestBase {
     var codings = ctx.newTerser().getAllPopulatedChildElementsOfType(resource, Coding.class);
     for (Coding coding : codings) {
       assertTrue(coding.hasSystem());
-      // Claim submission format code has an empty string as a valid value that indicates NCPDP
-      // electronic submission
-      if (coding.hasCode() == false) {
-        var system = coding.getSystem();
-        var display = coding.getDisplay();
-      }
-      assertTrue(
-          coding.hasCode()
-              || (coding.hasDisplay()
-                  && coding.getDisplay().equals(CLAIM_FORMAT_CODE_NCPDP_DISPLAY)));
+      assertTrue(coding.hasCode());
       var system = coding.getSystem();
       assertFalse(
           system.contains("_"),

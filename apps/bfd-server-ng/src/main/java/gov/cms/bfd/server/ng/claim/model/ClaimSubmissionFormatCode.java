@@ -14,31 +14,32 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @Getter
 public enum ClaimSubmissionFormatCode {
   /** S - STATE-TO-PLAN PDES. */
-  S("S", "STATE-TO-PLAN PDES"),
+  S("S", "S", "STATE-TO-PLAN PDES"),
   /** P - PAPER CLAIM FROM PROVIDER. */
-  P("P", "PAPER CLAIM FROM PROVIDER"),
+  P("P", "P", "PAPER CLAIM FROM PROVIDER"),
   /** X - X12 837. */
-  X("X", "X12 837"),
+  X("X", "X", "X12 837"),
   /** C - COB CLAIM. */
-  C("C", "COB CLAIM"),
+  C("C", "C", "COB CLAIM"),
   /** B - BENEFICIARY SUBMITTED. */
-  B("B", "BENEFICIARY SUBMITTED"),
+  B("B", "B", "BENEFICIARY SUBMITTED"),
   /** "" - NCPDP ELECTRONIC SUBMISSION. */
-  NCPDP("", "NCPDP ELECTRONIC SUBMISSION"),
+  N("", "N", "NCPDP ELECTRONIC SUBMISSION"),
   /** A - MEDICAID SUBROGATION CLAIM. */
-  A("A", "MEDICAID SUBROGATION CLAIM");
+  A("A", "A", "MEDICAID SUBROGATION CLAIM");
 
+  private final String idrCode;
   private final String code;
   private final String display;
 
   /**
    * Convert from a database code.
    *
-   * @param code database code
+   * @param idrCode database code
    * @return claim submission format code
    */
-  public static Optional<ClaimSubmissionFormatCode> fromCode(String code) {
-    return Arrays.stream(values()).filter(v -> v.code.equals(code)).findFirst();
+  public static Optional<ClaimSubmissionFormatCode> fromCode(String idrCode) {
+    return Arrays.stream(values()).filter(v -> v.idrCode.equals(idrCode)).findFirst();
   }
 
   ExplanationOfBenefit.SupportingInformationComponent toFhir(

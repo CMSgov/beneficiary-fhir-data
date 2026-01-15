@@ -15,7 +15,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
  */
 @AllArgsConstructor
 @Getter
-@SuppressWarnings("java:S115")
+@SuppressWarnings({"java:S115", "java:S1192"})
 public enum ClaimContractorNumber {
   /** 00234 - &quot;ARKANSAS, LOUISIANA, AND MISSISSIPPI (PART A ROLL UP NUMBER)&quot;. */
   _00234("00234", "ARKANSAS, LOUISIANA, AND MISSISSIPPI (PART A ROLL UP NUMBER)"),

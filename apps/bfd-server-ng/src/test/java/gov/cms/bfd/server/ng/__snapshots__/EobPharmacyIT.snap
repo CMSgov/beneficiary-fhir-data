@@ -717,7 +717,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
       } ]
     },
     "sequence" : 7,
-    "timingDate" : "2026-01-14"
+    "timingDate" : "2026-01-15"
   }, {
     "category" : {
       "coding" : [ {
@@ -732,6 +732,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
     },
     "code" : {
       "coding" : [ {
+        "code" : "N",
         "display" : "NCPDP ELECTRONIC SUBMISSION",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-SBMT-FRMT-CD"
       } ]
@@ -1941,7 +1942,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
       } ]
     },
     "sequence" : 7,
-    "timingDate" : "2026-01-14"
+    "timingDate" : "2026-01-15"
   }, {
     "category" : {
       "coding" : [ {
