@@ -99,9 +99,8 @@ public final class OutpatientClaimTransformerTest {
   }
 
   /**
-   * Verifies that {@link
-   * ClaimTransformerInterface#transform} works as expected
-   * when run against the {@link StaticRifResource#SAMPLE_A_OUTPATIENT} {@link OutpatientClaim}.
+   * Verifies that {@link ClaimTransformerInterface#transform} works as expected when run against
+   * the {@link StaticRifResource#SAMPLE_A_OUTPATIENT} {@link OutpatientClaim}.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -117,8 +116,7 @@ public final class OutpatientClaimTransformerTest {
             .get();
 
     ExplanationOfBenefit eob =
-        outpatientClaimTransformer.transform(
-            new ClaimWithSecurityTags<>(claim, securityTags));
+        outpatientClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags));
     assertMatches(claim, eob);
   }
 

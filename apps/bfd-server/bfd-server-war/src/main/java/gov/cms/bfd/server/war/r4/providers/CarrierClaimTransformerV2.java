@@ -75,13 +75,11 @@ final class CarrierClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
   /**
    * Transforms a {@link CarrierClaim} into an {@link ExplanationOfBenefit}.
    *
-   * @param includeTaxNumber boolean denoting whether to include tax numbers in the response
-   * @param claimEntity      the {@link Object} to use
+   * @param claimEntity the {@link Object} to use
    * @return a FHIR {@link ExplanationOfBenefit} resource.
    */
   @Override
-  public ExplanationOfBenefit transform(
-      ClaimWithSecurityTags<?> claimEntity) {
+  public ExplanationOfBenefit transform(ClaimWithSecurityTags<?> claimEntity) {
     Object claim = claimEntity.getClaimEntity();
     List<Coding> securityTags =
         securityTagManager.getClaimSecurityLevel(claimEntity.getSecurityTags());
@@ -100,13 +98,12 @@ final class CarrierClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
   /**
    * Transforms a claim into an {@link ExplanationOfBenefit}.
    *
-   * @param claimGroup   the CCW {@link CarrierClaim} to transform
+   * @param claimGroup the CCW {@link CarrierClaim} to transform
    * @param securityTags securityTags of the claim
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
-   * CarrierClaim}
+   *     CarrierClaim}
    */
-  private ExplanationOfBenefit transformClaim(
-          CarrierClaim claimGroup, List<Coding> securityTags) {
+  private ExplanationOfBenefit transformClaim(CarrierClaim claimGroup, List<Coding> securityTags) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Required values not directly mapped

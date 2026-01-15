@@ -68,13 +68,11 @@ final class CarrierClaimTransformer implements ClaimTransformerInterface {
   /**
    * Transforms a claim into an {@link ExplanationOfBenefit}.
    *
-   * @param includeTaxNumber boolean denoting whether to include tax numbers in the response
-   * @param claimEntity      the {@link CarrierClaim} to use
+   * @param claimEntity the {@link CarrierClaim} to use
    * @return a FHIR {@link ExplanationOfBenefit} resource.
    */
   @Override
-  public ExplanationOfBenefit transform(
-      ClaimWithSecurityTags<?> claimEntity) {
+  public ExplanationOfBenefit transform(ClaimWithSecurityTags<?> claimEntity) {
 
     Object claim = claimEntity.getClaimEntity();
     List<Coding> securityTags =

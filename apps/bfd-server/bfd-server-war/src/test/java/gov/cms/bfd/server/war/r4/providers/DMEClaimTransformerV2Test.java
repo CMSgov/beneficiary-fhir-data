@@ -303,8 +303,7 @@ public final class DMEClaimTransformerV2Test {
     }
 
     ExplanationOfBenefit genEob =
-        dmeClaimTransformer.transform(
-            new ClaimWithSecurityTags<>(loadedClaim, securityTags));
+        dmeClaimTransformer.transform(new ClaimWithSecurityTags<>(loadedClaim, securityTags));
 
     TransformerUtilsV2.enrichEob(
         genEob,

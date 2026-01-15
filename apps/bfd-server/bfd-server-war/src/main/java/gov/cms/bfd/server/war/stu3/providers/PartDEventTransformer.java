@@ -53,13 +53,11 @@ final class PartDEventTransformer implements ClaimTransformerInterface {
   /**
    * Transforms a claim into an {@link ExplanationOfBenefit}.
    *
-   * @param includeTaxNumber exists to satisfy {@link ClaimTransformerInterface}; ignored
-   * @param claimEntity      the {@link PartDEvent} to use
+   * @param claimEntity the {@link PartDEvent} to use
    * @return a FHIR {@link ExplanationOfBenefit} resource.
    */
   @Override
-  public ExplanationOfBenefit transform(
-      ClaimWithSecurityTags<?> claimEntity) {
+  public ExplanationOfBenefit transform(ClaimWithSecurityTags<?> claimEntity) {
 
     Object claim = claimEntity.getClaimEntity();
     if (!(claim instanceof PartDEvent)) {

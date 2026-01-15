@@ -1,7 +1,5 @@
 package gov.cms.bfd.server.war.stu3.providers;
 
-import static io.restassured.RestAssured.given;
-
 import gov.cms.bfd.server.war.ExplanationOfBenefitE2EBase;
 import org.junit.jupiter.api.BeforeEach;
 

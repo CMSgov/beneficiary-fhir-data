@@ -119,8 +119,7 @@ public final class InpatientClaimTransformerTest {
     claim.setLastUpdated(Instant.now());
 
     ExplanationOfBenefit eob =
-        inpatientClaimTransformer.transform(
-            new ClaimWithSecurityTags<>(claim, securityTags));
+        inpatientClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags));
     assertMatches(claim, eob);
   }
 

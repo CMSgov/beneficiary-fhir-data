@@ -95,8 +95,8 @@ public final class HospiceClaimTransformerTest {
   }
 
   /**
-   * Verifies that {@link ClaimTransformerInterface#transform} works as expected when run against the
-   * {@link StaticRifResource#SAMPLE_A_HOSPICE} {@link HospiceClaim}.
+   * Verifies that {@link ClaimTransformerInterface#transform} works as expected when run against
+   * the {@link StaticRifResource#SAMPLE_A_HOSPICE} {@link HospiceClaim}.
    *
    * @throws FHIRException (indicates test failure)
    */

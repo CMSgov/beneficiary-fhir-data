@@ -10,7 +10,6 @@ import gov.cms.bfd.model.rif.entities.DMEClaim;
 import gov.cms.bfd.model.rif.entities.DMEClaimLine;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
-import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
@@ -68,7 +67,6 @@ final class DMEClaimTransformer implements ClaimTransformerInterface {
   /**
    * Transforms a claim into an {@link ExplanationOfBenefit}.
    *
-   * @param includeTaxNumber boolean denoting whether to include tax numbers in the response
    * @param claimEntity the {@link DMEClaim} to use
    * @return a FHIR {@link ExplanationOfBenefit} resource.
    */

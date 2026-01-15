@@ -85,8 +85,8 @@ public final class PartDEventTransformerTest {
   }
 
   /**
-   * Verifies that {@link ClaimTransformerInterface#transform} works as expected when run against the
-   * {@link StaticRifResource#SAMPLE_A_PDE} {@link PartDEvent}.
+   * Verifies that {@link ClaimTransformerInterface#transform} works as expected when run against
+   * the {@link StaticRifResource#SAMPLE_A_PDE} {@link PartDEvent}.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -172,8 +172,8 @@ public final class PartDEventTransformerTest {
   }
 
   /**
-   * Verifies that {@link ClaimTransformerInterface#transform} works as expected when run against the
-   * {@link String serviceProviderIdQualiferCode} and {@link String serviceProviderCode}.
+   * Verifies that {@link ClaimTransformerInterface#transform} works as expected when run against
+   * the {@link String serviceProviderIdQualiferCode} and {@link String serviceProviderCode}.
    *
    * @param serviceProviderIdQualiferCode the service provider id qualifier code
    * @param serviceProviderCode the service provider code

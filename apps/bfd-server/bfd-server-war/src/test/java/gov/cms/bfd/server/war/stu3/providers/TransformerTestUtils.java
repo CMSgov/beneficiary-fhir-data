@@ -2257,15 +2257,13 @@ final class TransformerTestUtils {
   /**
    * Transform rif record to eob explanation of benefit.
    *
-   * @param rifRecord          the RIF record (e.g. a {@link CarrierClaim} instance) to transform
-   * @param metricRegistry     the {@link MetricRegistry} to use
+   * @param rifRecord the RIF record (e.g. a {@link CarrierClaim} instance) to transform
+   * @param metricRegistry the {@link MetricRegistry} to use
    * @param securityTagManager SamhsaSecurityTag lookup
    * @return the transformed {@link ExplanationOfBenefit} for the specified RIF record
    */
   static ExplanationOfBenefit transformRifRecordToEob(
-      Object rifRecord,
-      MetricRegistry metricRegistry,
-      SecurityTagManager securityTagManager) {
+      Object rifRecord, MetricRegistry metricRegistry, SecurityTagManager securityTagManager) {
 
     ClaimTransformerInterface claimTransformerInterface = null;
     if (rifRecord instanceof CarrierClaim) {

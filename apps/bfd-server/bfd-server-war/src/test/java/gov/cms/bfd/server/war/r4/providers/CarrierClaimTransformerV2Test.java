@@ -154,9 +154,8 @@ public class CarrierClaimTransformerV2Test {
   }
 
   /**
-   * Verifies that {@link ClaimTransformerInterfaceV2#transform}
-   * works as expected when run against the {@link StaticRifResource#SAMPLE_A_CARRIER} {@link
-   * CarrierClaim}.
+   * Verifies that {@link ClaimTransformerInterfaceV2#transform} works as expected when run against
+   * the {@link StaticRifResource#SAMPLE_A_CARRIER} {@link CarrierClaim}.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -165,8 +164,7 @@ public class CarrierClaimTransformerV2Test {
     CarrierClaim claim = generateClaim();
 
     assertMatches(
-        claim,
-        carrierClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags)));
+        claim, carrierClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags)));
   }
 
   /** Tests that the transformer sets the provider (CARR_CLM_BLG_NPI_NUM). */
@@ -739,8 +737,7 @@ public class CarrierClaimTransformerV2Test {
     loadedClaim.setLastUpdated(Instant.now());
 
     ExplanationOfBenefit genEob =
-        carrierClaimTransformer.transform(
-            new ClaimWithSecurityTags<>(loadedClaim, securityTags));
+        carrierClaimTransformer.transform(new ClaimWithSecurityTags<>(loadedClaim, securityTags));
 
     TransformerUtilsV2.enrichEob(
         genEob,
@@ -852,8 +849,7 @@ public class CarrierClaimTransformerV2Test {
     }
 
     ExplanationOfBenefit genEob =
-        carrierClaimTransformer.transform(
-            new ClaimWithSecurityTags<>(loadedClaim, securityTags));
+        carrierClaimTransformer.transform(new ClaimWithSecurityTags<>(loadedClaim, securityTags));
 
     TransformerUtilsV2.enrichEob(
         genEob,

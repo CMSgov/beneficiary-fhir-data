@@ -295,8 +295,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
    * @return the transformed claim
    */
   private T transformEntity(
-      ResourceTypeV2<T, ?> claimIdType,
-      ClaimWithSecurityTags<?> claimEntity) {
+      ResourceTypeV2<T, ?> claimIdType, ClaimWithSecurityTags<?> claimEntity) {
 
     if (claimIdType.getTypeLabel().equals("fiss")) {
       return fissTransformer.transform(claimEntity);
@@ -543,9 +542,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
 
                   return !bundleOptions.excludeSamhsa || hasNoSamhsaData;
                 })
-            .map(
-                pair ->
-                    transformEntity(pair.right, pair.getLeft()))
+            .map(pair -> transformEntity(pair.right, pair.getLeft()))
             // Enforces a specific sorting for pagination that parities the EOB resource sorting.
             .sorted(Comparator.comparing(r -> r.getIdElement().getIdPart()))
             .collect(Collectors.toList());

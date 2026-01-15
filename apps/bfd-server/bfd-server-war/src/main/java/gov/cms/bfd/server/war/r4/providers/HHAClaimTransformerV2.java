@@ -70,13 +70,11 @@ final class HHAClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
   /**
    * Transforms a {@link HHAClaim} into a FHIR {@link ExplanationOfBenefit}.
    *
-   * @param includeTaxNumber exists to satisfy {@link ClaimTransformerInterfaceV2}; ignored.
-   * @param claimEntity      the {@link Object} to use
+   * @param claimEntity the {@link Object} to use
    * @return a FHIR {@link ExplanationOfBenefit} resource.
    */
   @Override
-  public ExplanationOfBenefit transform(
-      ClaimWithSecurityTags<?> claimEntity) {
+  public ExplanationOfBenefit transform(ClaimWithSecurityTags<?> claimEntity) {
     Object claim = claimEntity.getClaimEntity();
     List<Coding> securityTags =
         securityTagManager.getClaimSecurityLevel(claimEntity.getSecurityTags());

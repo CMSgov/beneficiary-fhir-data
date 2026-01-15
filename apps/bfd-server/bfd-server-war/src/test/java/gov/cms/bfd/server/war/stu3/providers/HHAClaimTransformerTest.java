@@ -94,8 +94,8 @@ public final class HHAClaimTransformerTest {
   }
 
   /**
-   * Verifies that {@link ClaimTransformerInterface#transform} works as expected when run against the
-   * {@link StaticRifResource#SAMPLE_A_HHA} {@link HHAClaim}.
+   * Verifies that {@link ClaimTransformerInterface#transform} works as expected when run against
+   * the {@link StaticRifResource#SAMPLE_A_HHA} {@link HHAClaim}.
    *
    * @throws FHIRException (indicates test failure)
    */

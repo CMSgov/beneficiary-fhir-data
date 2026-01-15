@@ -131,8 +131,7 @@ public final class InpatientClaimTransformerV2Test {
         new InpatientClaimTransformerV2(metricRegistry, securityTagManager, false);
     claim = generateClaim();
     ExplanationOfBenefit genEob =
-        inpatientClaimTransformer.transform(
-            new ClaimWithSecurityTags<>(claim, securityTags));
+        inpatientClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags));
     TransformerUtilsV2.enrichEob(
         genEob,
         RDATestUtils.createTestNpiOrgLookup(),
@@ -476,8 +475,7 @@ public final class InpatientClaimTransformerV2Test {
     claim.setLastUpdated(Instant.now());
 
     ExplanationOfBenefit genEob =
-        inpatientClaimTransformer.transform(
-            new ClaimWithSecurityTags<>(claim, securityTags));
+        inpatientClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags));
     TransformerUtilsV2.enrichEob(
         genEob,
         RDATestUtils.createTestNpiOrgLookup(),

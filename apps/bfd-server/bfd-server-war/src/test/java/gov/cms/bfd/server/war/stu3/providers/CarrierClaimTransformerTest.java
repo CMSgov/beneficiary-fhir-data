@@ -2,7 +2,6 @@ package gov.cms.bfd.server.war.stu3.providers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -150,13 +149,13 @@ public final class CarrierClaimTransformerTest {
 
   /**
    * Verifies that {@link ClaimTransformerInterface#transform} works as expected when run against
-   * the {@link StaticRifResource#SAMPLE_A_CARRIER} {@link CarrierClaim}. has two care members under
-   * the care team component and doesnt duplicate its results
+   * the {@link StaticRifResource#SAMPLE_A_CARRIER} {@link CarrierClaim}. has a single care member
+   * under the care team component and doesn't duplicate its results
    *
    * @throws FHIRException (indicates test failure)
    */
   @Test
-  public void shouldHaveTwoCareTeamMembers() throws FHIRException, IOException {
+  public void shouldHaveOneCareTeamMember() throws FHIRException, IOException {
     List<Object> parsedRecords =
         ServerTestUtils.parseData(
             Arrays.asList(StaticRifResourceGroup.SAMPLE_A_MULTIPLE_CARRIER_LINES.getResources()));
@@ -172,7 +171,7 @@ public final class CarrierClaimTransformerTest {
     ExplanationOfBenefit eob =
         carrierClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags));
 
-    assertEquals(2, eob.getCareTeam().size());
+    assertEquals(1, eob.getCareTeam().size());
   }
 
   /**
@@ -317,7 +316,8 @@ public final class CarrierClaimTransformerTest {
     CareTeamComponent taxNumberCareTeamEntry =
         TransformerTestUtils.findCareTeamEntryForProviderTaxNumber(
             claimLine1.getProviderTaxNumber(), eob.getCareTeam());
-    // We assert that tax number entries are always null as of 01/26/BFD-4489 to ensure tax numbers are never
+    // We assert that tax number entries are always null as of 01/26/BFD-4489 to ensure tax numbers
+    // are never
     // included
     assertNull(taxNumberCareTeamEntry);
 

@@ -151,16 +151,15 @@ public final class HospiceClaimTransformerV2Test {
   }
 
   /**
-   * Verifies that {@link ClaimTransformerInterfaceV2#transform} works as expected when run against the
-   * {@link StaticRifResource#SAMPLE_A_SNF} {@link SNFClaim}.
+   * Verifies that {@link ClaimTransformerInterfaceV2#transform} works as expected when run against
+   * the {@link StaticRifResource#SAMPLE_A_SNF} {@link SNFClaim}.
    *
    * @throws FHIRException (indicates test failure)
    */
   @Test
   public void transformSampleARecord() throws FHIRException, IOException {
     assertMatches(
-        claim,
-        hospiceClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags)));
+        claim, hospiceClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags)));
   }
 
   /** Tests that the transformer sets the expected id. */

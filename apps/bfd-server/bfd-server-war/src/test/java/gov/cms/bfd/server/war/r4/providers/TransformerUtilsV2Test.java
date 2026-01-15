@@ -908,8 +908,7 @@ public class TransformerUtilsV2Test {
     ClaimTransformerInterfaceV2 claimTransformerInterface =
         new HHAClaimTransformerV2(new MetricRegistry(), securityTagManager, false);
     ExplanationOfBenefit genEob =
-        claimTransformerInterface.transform(
-            new ClaimWithSecurityTags<>(hhaClaim, securityTags));
+        claimTransformerInterface.transform(new ClaimWithSecurityTags<>(hhaClaim, securityTags));
     TransformerUtilsV2.enrichEob(
         genEob,
         RDATestUtils.createTestNpiOrgLookup(),
@@ -950,8 +949,7 @@ public class TransformerUtilsV2Test {
     claimTransformerInterface =
         new DMEClaimTransformerV2(new MetricRegistry(), securityTagManager, false);
     genEob =
-        claimTransformerInterface.transform(
-            new ClaimWithSecurityTags<>(dmeClaim, securityTags));
+        claimTransformerInterface.transform(new ClaimWithSecurityTags<>(dmeClaim, securityTags));
     TransformerUtilsV2.enrichEob(
         genEob,
         RDATestUtils.createTestNpiOrgLookup(),
@@ -1104,8 +1102,7 @@ public class TransformerUtilsV2Test {
     ClaimTransformerInterfaceV2 claimTransformerInterface =
         new HHAClaimTransformerV2(new MetricRegistry(), securityTagManager, false);
     ExplanationOfBenefit genEob =
-        claimTransformerInterface.transform(
-            new ClaimWithSecurityTags<>(hhaClaim, securityTags));
+        claimTransformerInterface.transform(new ClaimWithSecurityTags<>(hhaClaim, securityTags));
     TransformerUtilsV2.enrichEob(
         genEob,
         RDATestUtils.createTestNpiOrgLookup(),

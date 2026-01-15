@@ -678,9 +678,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
         .get(requestString);
   }
 
-  /**
-   * Test eob by patient id does not return tax numbers for applicable claim types
-   */
+  /** Test eob by patient id does not return tax numbers for applicable claim types */
   @Test
   public void testEobByPatientIdWithExpectNoTaxNumbers() {
 

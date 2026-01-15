@@ -154,8 +154,7 @@ public class SamhsaMatcherR4FromClaimTransformerV2Test {
         carrierClaimTransformerV2.transform(getClaim(CarrierClaim.class));
     String carrierClaimType = TransformerUtilsV2.getClaimType(carrierEob).toString();
 
-    ExplanationOfBenefit pdeEob =
-        partDEventTransformer.transform(getClaim(PartDEvent.class));
+    ExplanationOfBenefit pdeEob = partDEventTransformer.transform(getClaim(PartDEvent.class));
 
     String pdeClaimType = TransformerUtilsV2.getClaimType(pdeEob).toString();
 

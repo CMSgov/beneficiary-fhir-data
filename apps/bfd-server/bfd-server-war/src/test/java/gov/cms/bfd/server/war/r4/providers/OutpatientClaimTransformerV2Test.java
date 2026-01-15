@@ -125,8 +125,7 @@ public final class OutpatientClaimTransformerV2Test {
         new OutpatientClaimTransformerV2(metricRegistry, securityTagManager, false);
     claim = generateClaim();
     ExplanationOfBenefit genEob =
-        outpatientClaimTransformer.transform(
-            new ClaimWithSecurityTags<>(claim, securityTags));
+        outpatientClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags));
     TransformerUtilsV2.enrichEob(
         genEob,
         RDATestUtils.createTestNpiOrgLookup(),

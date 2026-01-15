@@ -120,14 +120,12 @@ public class SamhsaMatcherFromClaimTransformerTest {
 
     claimTransformerInterface =
         new DMEClaimTransformer(new MetricRegistry(), securityTagManager, false);
-    ExplanationOfBenefit dmeEob =
-        claimTransformerInterface.transform(getClaim(DMEClaim.class));
+    ExplanationOfBenefit dmeEob = claimTransformerInterface.transform(getClaim(DMEClaim.class));
     String dmeClaimType = TransformerUtils.getClaimType(dmeEob).toString();
 
     claimTransformerInterface =
         new HHAClaimTransformer(new MetricRegistry(), securityTagManager, false);
-    ExplanationOfBenefit hhaEob =
-        claimTransformerInterface.transform(getClaim(HHAClaim.class));
+    ExplanationOfBenefit hhaEob = claimTransformerInterface.transform(getClaim(HHAClaim.class));
     String hhaClaimType = TransformerUtils.getClaimType(hhaEob).toString();
 
     claimTransformerInterface =
@@ -138,8 +136,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
 
     claimTransformerInterface =
         new SNFClaimTransformer(new MetricRegistry(), securityTagManager, false);
-    ExplanationOfBenefit snfEob =
-        claimTransformerInterface.transform(getClaim(SNFClaim.class));
+    ExplanationOfBenefit snfEob = claimTransformerInterface.transform(getClaim(SNFClaim.class));
     String snfClaimType = TransformerUtils.getClaimType(snfEob).toString();
 
     claimTransformerInterface =
@@ -149,8 +146,7 @@ public class SamhsaMatcherFromClaimTransformerTest {
     String carrierClaimType = TransformerUtils.getClaimType(carrierEob).toString();
 
     claimTransformerInterface = new PartDEventTransformer(new MetricRegistry());
-    ExplanationOfBenefit pdeEob =
-        claimTransformerInterface.transform(getClaim(PartDEvent.class));
+    ExplanationOfBenefit pdeEob = claimTransformerInterface.transform(getClaim(PartDEvent.class));
     String pdeClaimType = TransformerUtils.getClaimType(pdeEob).toString();
 
     return Stream.of(
