@@ -3,7 +3,7 @@
 
     <groupId>gov.cms.bfd</groupId>
     <artifactId>bfd-parent</artifactId>
-    <version>2.231.0-SNAPSHOT</version>
+    <version>2.231.0</version>
     <packaging>pom</packaging>
 
     <name>bfd-parent</name>
@@ -40,7 +40,7 @@
         <connection>scm:git:https://github.com/CMSgov/beneficiary-fhir-data.git</connection>
         <developerConnection>scm:git:https://github.com/CMSgov/beneficiary-fhir-data.git</developerConnection>
         <url>https://github.com/CMSgov/beneficiary-fhir-data</url>
-        <tag>HEAD</tag>
+        <tag>2.231.0</tag>
     </scm>
 
     <modules>
@@ -71,7 +71,7 @@
         <javaSourceVersion>25</javaSourceVersion>
         <maven.compiler.release>25</maven.compiler.release>
 
-        <project.build.outputTimestamp>2026-01-08T18:12:21Z</project.build.outputTimestamp>
+        <project.build.outputTimestamp>2026-01-15T17:46:59Z</project.build.outputTimestamp>
         <!-- Disable jacoco until automated coverage generation is desired -->
         <maven.jacoco.skip>true</maven.jacoco.skip>
         <sonar.coverageReportPaths>coverage.xml</sonar.coverageReportPaths>
