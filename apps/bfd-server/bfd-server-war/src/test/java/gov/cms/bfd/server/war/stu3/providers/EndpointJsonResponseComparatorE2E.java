@@ -603,8 +603,7 @@ public final class EndpointJsonResponseComparatorE2E extends EndpointJsonCompara
 
     Headers headers =
         new Headers(
-            new Header("Content-Type", "application/json+fhir"),
-            new Header(R4PatientResourceProvider.HEADER_NAME_INCLUDE_TAX_NUMBERS, "true"));
+            new Header("Content-Type", "application/json+fhir"));
 
     return getJsonResponseFor(baseServerUrl + "/v1/fhir/ExplanationOfBenefit/" + eobId, headers);
   }
@@ -630,8 +629,7 @@ public final class EndpointJsonResponseComparatorE2E extends EndpointJsonCompara
 
     Headers headers =
         new Headers(
-            new Header("Content-Type", "application/json+fhir"),
-            new Header(R4PatientResourceProvider.HEADER_NAME_INCLUDE_TAX_NUMBERS, "false"));
+            new Header("Content-Type", "application/json+fhir"));
 
     return getJsonResponseFor(baseServerUrl + "/v1/fhir/ExplanationOfBenefit/" + eobId, headers);
   }
@@ -669,8 +667,7 @@ public final class EndpointJsonResponseComparatorE2E extends EndpointJsonCompara
 
     Headers headers =
         new Headers(
-            new Header("Content-Type", "application/json+fhir"),
-            new Header(R4PatientResourceProvider.HEADER_NAME_INCLUDE_TAX_NUMBERS, "true"));
+            new Header("Content-Type", "application/json+fhir"));
 
     return getJsonResponseFor(baseServerUrl + "/v1/fhir/ExplanationOfBenefit/" + eobId, headers);
   }

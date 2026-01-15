@@ -220,10 +220,8 @@ public class ExplanationOfBenefitResourceProvider extends AbstractResourceProvid
     }
     ClaimType claimType = eobIdType.get();
     String eobIdClaimIdText = eobIdMatcher.group(2);
-    boolean includeTaxNumbers = returnIncludeTaxNumbers(requestDetails);
     CommonTransformerUtils.publishMdcOperationName(
-        CanonicalOperation.Endpoint.V1_EOB,
-        Map.of("IncludeTaxNumbers", String.valueOf(includeTaxNumbers), "by", "id"));
+        CanonicalOperation.Endpoint.V1_EOB, Map.of("by", "id"));
 
     Class<?> entityClass = eobIdType.get().getEntityClass();
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
@@ -254,8 +252,7 @@ public class ExplanationOfBenefitResourceProvider extends AbstractResourceProvid
 
     ClaimTransformerInterface transformer = deriveTransformer(eobIdType.get());
     ExplanationOfBenefit eob =
-        transformer.transform(
-            new ClaimWithSecurityTags(claimEntity, securityTags), includeTaxNumbers);
+        transformer.transform(new ClaimWithSecurityTags(claimEntity, securityTags), false);
 
     // Add bene_id to MDC logs
     if (eob.getPatient() != null && !Strings.isNullOrEmpty(eob.getPatient().getReference())) {
@@ -288,7 +285,6 @@ public class ExplanationOfBenefitResourceProvider extends AbstractResourceProvid
    *     field.
    * @param serviceDate an {@link OptionalParam} that specifies a date range for {@link
    *     ExplanationOfBenefit}s that completed
-   * @param taxNumbers an {@link OptionalParam} for whether to include tax numbers in the response
    * @param requestDetails a {@link RequestDetails} containing the details of the request URL, used
    *     to parse out pagination values
    * @return Returns a {@link Bundle} of {@link ExplanationOfBenefit}s, which may contain multiple
@@ -332,11 +328,6 @@ public class ExplanationOfBenefitResourceProvider extends AbstractResourceProvid
               shortDefinition = OpenAPIContentProvider.EOB_SERVICE_DATE_SHORT,
               value = OpenAPIContentProvider.EOB_SERVICE_DATE_VALUE)
           DateRangeParam serviceDate,
-      @OptionalParam(name = "includeTaxNumbers")
-          @Description(
-              shortDefinition = OpenAPIContentProvider.EOB_INCLUDE_TAX_NUMBERS_SHORT,
-              value = OpenAPIContentProvider.EOB_INCLUDE_TAX_NUMBERS_VALUE)
-          String taxNumbers,
       RequestDetails requestDetails) {
     /*
      * startIndex is an optional parameter here because it must be declared in the
@@ -347,7 +338,6 @@ public class ExplanationOfBenefitResourceProvider extends AbstractResourceProvid
     OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/ExplanationOfBenefit?");
     Long beneficiaryId = StringUtils.parseLongOrBadRequest(patient.getIdPart(), "Patient ID");
     Set<ClaimType> claimTypesRequested = CommonTransformerUtils.parseTypeParam(type);
-    boolean includeTaxNumbers = returnIncludeTaxNumbers(requestDetails);
     boolean filterSamhsa = CommonTransformerUtils.shouldFilterSamhsa(excludeSamhsa, requestDetails);
     Map<String, String> operationOptions = new HashMap<>();
     operationOptions.put("by", "patient");
@@ -359,7 +349,6 @@ public class ExplanationOfBenefitResourceProvider extends AbstractResourceProvid
                 .sorted(Comparator.comparing(ClaimType::name))
                 .toList()
                 .toString());
-    operationOptions.put("IncludeTaxNumbers", "" + includeTaxNumbers);
     operationOptions.put("pageSize", paging.isPagingRequested() ? "" + paging.getPageSize() : "*");
     operationOptions.put(
         "_lastUpdated", Boolean.toString(lastUpdated != null && !lastUpdated.isEmpty()));
@@ -392,8 +381,7 @@ public class ExplanationOfBenefitResourceProvider extends AbstractResourceProvid
                 paging,
                 Optional.ofNullable(lastUpdated),
                 Optional.ofNullable(serviceDate),
-                filterSamhsa,
-                includeTaxNumbers);
+                filterSamhsa);
       } catch (InvalidRequestException e) {
         // If we're throwing a 400, pass it back up
         throw e;
@@ -424,8 +412,6 @@ public class ExplanationOfBenefitResourceProvider extends AbstractResourceProvid
    *     ExplanationOfBenefit}s that completed.
    * @param excludeSamhsa optional {@link Boolean} denoting use of {@link Stu3EobSamhsaMatcher} *
    *     filtering of all SAMHSA-related claims from the results.
-   * @param includeTaxNumbers an {@link Optional} boolean denoting includsio/exclusion of tax
-   *     numbers in the response,
    * @return Returns a {@link Bundle} of {@link ExplanationOfBenefit}s, which may contain multiple
    *     matching resources, or may also be empty.
    * @throws InterruptedException when thread processing task is interrupted.
@@ -440,8 +426,7 @@ public class ExplanationOfBenefitResourceProvider extends AbstractResourceProvid
       OffsetLinkBuilder paging,
       Optional<DateRangeParam> lastUpdated,
       Optional<DateRangeParam> serviceDate,
-      boolean excludeSamhsa,
-      boolean includeTaxNumbers)
+      boolean excludeSamhsa)
       throws InterruptedException, RuntimeException, ExecutionException {
 
     EnumSet<ClaimType> claimsToProcess =
@@ -482,7 +467,7 @@ public class ExplanationOfBenefitResourceProvider extends AbstractResourceProvid
               serviceDate,
               excludeSamhsa);
 
-          task.setIncludeTaxNumbers(includeTaxNumbers);
+          task.setIncludeTaxNumbers(false);
           callableTasks.add(task);
         });
 

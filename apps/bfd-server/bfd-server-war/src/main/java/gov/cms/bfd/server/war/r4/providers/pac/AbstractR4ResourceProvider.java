@@ -229,7 +229,6 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
     if (claimId.getVersionIdPartAsLong() != null) {
       throw new InvalidRequestException("Resource ID must not define a version");
     }
-    final boolean includeTaxNumbers = returnIncludeTaxNumbers(requestDetails);
 
     if (claimId.getVersionIdPartAsLong() != null)
       throw new IllegalArgumentException("Resource ID must not define a version.");
@@ -258,7 +257,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
     Mbi claimEntityMbi = getClaimEntityMbi(claimIdObj.getRight(), claimEntity.getClaimEntity());
     if (claimEntityMbi != null) logMbiIdentifiersToMdc(claimEntityMbi);
 
-    return transformEntity(claimIdObj.getRight(), claimEntity, includeTaxNumbers);
+    return transformEntity(claimIdObj.getRight(), claimEntity);
   }
 
   /**
@@ -293,18 +292,16 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
    *
    * @param claimIdType the claim type
    * @param claimEntity the claim entity to transform
-   * @param includeTaxNumbers whether to include tax numbers
    * @return the transformed claim
    */
   private T transformEntity(
       ResourceTypeV2<T, ?> claimIdType,
-      ClaimWithSecurityTags<?> claimEntity,
-      boolean includeTaxNumbers) {
+      ClaimWithSecurityTags<?> claimEntity) {
 
     if (claimIdType.getTypeLabel().equals("fiss")) {
-      return fissTransformer.transform(claimEntity, includeTaxNumbers);
+      return fissTransformer.transform(claimEntity, false);
     } else if (claimIdType.getTypeLabel().equals("mcs")) {
-      return mcsTransformer.transform(claimEntity, includeTaxNumbers);
+      return mcsTransformer.transform(claimEntity, false);
     } else {
       throw new InvalidRequestException("Invalid claim id type, cannot get claim data");
     }
@@ -412,7 +409,6 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
    * @param samhsa if {@code true}, exclude all SAMHSA-related resources
    * @param lastUpdated range which to include resources last updated within
    * @param serviceDate range which to include resources completed within
-   * @param taxNumbers whether to include tax numbers in the response
    * @param requestDetails the request details
    * @return the bundle
    */
@@ -459,11 +455,6 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
               shortDefinition = OpenAPIContentProvider.PAC_SERVICE_DATE_SHORT,
               value = OpenAPIContentProvider.PAC_SERVICE_DATE_VALUE)
           DateRangeParam serviceDate,
-      @OptionalParam(name = "includeTaxNumbers")
-          @Description(
-              shortDefinition = OpenAPIContentProvider.EOB_INCLUDE_TAX_NUMBERS_SHORT,
-              value = OpenAPIContentProvider.EOB_INCLUDE_TAX_NUMBERS_VALUE)
-          String taxNumbers,
       RequestDetails requestDetails) {
     if (mbi != null && !StringUtils.isBlank(mbi.getIdPart())) {
       String mbiString = mbi.getIdPart();
@@ -472,13 +463,12 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
 
       boolean isHashed = !Boolean.FALSE.toString().equalsIgnoreCase(hashed);
       boolean excludeSamhsa = CommonTransformerUtils.shouldFilterSamhsa(samhsa, requestDetails);
-      boolean includeTaxNumbers = returnIncludeTaxNumbers(requestDetails);
 
       OffsetLinkBuilder paging =
           new OffsetLinkBuilder(
               requestDetails, String.format("/%s?", resourceType.getSimpleName()));
 
-      BundleOptions bundleOptions = new BundleOptions(isHashed, excludeSamhsa, includeTaxNumbers);
+      BundleOptions bundleOptions = new BundleOptions(isHashed, excludeSamhsa);
 
       if (types != null) {
         bundleResource =
@@ -555,7 +545,7 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
                 })
             .map(
                 pair ->
-                    transformEntity(pair.right, pair.getLeft(), bundleOptions.includeTaxNumbers))
+                    transformEntity(pair.right, pair.getLeft()))
             // Enforces a specific sorting for pagination that parities the EOB resource sorting.
             .sorted(Comparator.comparing(r -> r.getIdElement().getIdPart()))
             .collect(Collectors.toList());
@@ -592,20 +582,15 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
     /** Indicates if SAMHSA data should be excluded from the bundle results. */
     private final boolean excludeSamhsa;
 
-    /** Indicates if the tax numbers should be included in the bundle results. */
-    private final boolean includeTaxNumbers;
-
     /**
      * Instantiates a new Bundle options.
      *
      * @param isHashed whether to hash the mbi
      * @param excludeSamhsa whether to exclude samhsa
-     * @param includeTaxNumbers whether to include tax numbers
      */
-    private BundleOptions(boolean isHashed, boolean excludeSamhsa, boolean includeTaxNumbers) {
+    private BundleOptions(boolean isHashed, boolean excludeSamhsa) {
       this.isHashed = isHashed;
       this.excludeSamhsa = excludeSamhsa;
-      this.includeTaxNumbers = includeTaxNumbers;
     }
   }
 }

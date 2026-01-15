@@ -179,8 +179,6 @@ public class R4PatientResourceProviderTest {
 
   /** Mocks the default header values. */
   private void mockHeaders() {
-    when(requestDetails.getHeader(CommonHeaders.HEADER_NAME_INCLUDE_TAX_NUMBERS))
-        .thenReturn("false");
     when(requestDetails.getHeader(CommonHeaders.HEADER_NAME_INCLUDE_ADDRESS_FIELDS))
         .thenReturn("false");
     // We dont use this anymore on v2, so set it to false since everything should work regardless of
@@ -255,8 +253,6 @@ public class R4PatientResourceProviderTest {
     // Set the headers to test, so we can tell they got passed down
     when(requestDetails.getHeader(CommonHeaders.HEADER_NAME_INCLUDE_ADDRESS_FIELDS))
         .thenReturn("true");
-    when(requestDetails.getHeader(CommonHeaders.HEADER_NAME_INCLUDE_TAX_NUMBERS))
-        .thenReturn("true");
     // We dont use includeIdentifiers for v2, so dont bother testing it
 
     patientProvider.read(patientId, requestDetails);
@@ -268,8 +264,6 @@ public class R4PatientResourceProviderTest {
     RequestHeaders passedHeader = captor.getValue();
     assertEquals(
         Boolean.TRUE, passedHeader.getValue(CommonHeaders.HEADER_NAME_INCLUDE_ADDRESS_FIELDS));
-    assertEquals(
-        Boolean.TRUE, passedHeader.getValue(CommonHeaders.HEADER_NAME_INCLUDE_TAX_NUMBERS));
   }
 
   /**

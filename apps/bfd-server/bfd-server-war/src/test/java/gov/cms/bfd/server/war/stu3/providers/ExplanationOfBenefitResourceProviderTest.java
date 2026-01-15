@@ -254,8 +254,6 @@ public class ExplanationOfBenefitResourceProviderTest {
 
   /** Mocks the default header values. */
   private void mockHeaders() {
-    when(requestDetails.getHeader(CommonHeaders.HEADER_NAME_INCLUDE_TAX_NUMBERS))
-        .thenReturn("false");
     when(requestDetails.getHeader(CommonHeaders.HEADER_NAME_INCLUDE_ADDRESS_FIELDS))
         .thenReturn("false");
     // We dont use this anymore; set to false since everything should work regardless of
@@ -265,7 +263,6 @@ public class ExplanationOfBenefitResourceProviderTest {
     when(requestDetails.getHeader("startIndex")).thenReturn("-1");
 
     Map<String, List<String>> headers = new HashMap<>();
-    headers.put(CommonHeaders.HEADER_NAME_INCLUDE_TAX_NUMBERS, List.of("false"));
     headers.put(CommonHeaders.HEADER_NAME_INCLUDE_ADDRESS_FIELDS, List.of("false"));
     headers.put(CommonHeaders.HEADER_NAME_INCLUDE_IDENTIFIERS, List.of("false"));
     when(requestDetails.getHeaders()).thenReturn(headers);
@@ -435,7 +432,7 @@ public class ExplanationOfBenefitResourceProviderTest {
         InvalidRequestException.class,
         () ->
             eobProvider.findByPatient(
-                patientParam, null, null, null, null, null, null, null, requestDetails));
+                patientParam, null, null, null, null, null, null, requestDetails));
   }
 
   /**
@@ -447,8 +444,7 @@ public class ExplanationOfBenefitResourceProviderTest {
     when(mockQuery.getResultList()).thenReturn(List.of(0));
 
     Bundle response =
-        eobProvider.findByPatient(
-            patientParam, null, null, null, null, null, null, null, requestDetails);
+        eobProvider.findByPatient(patientParam, null, null, null, null, null, null, requestDetails);
 
     assertNotNull(response);
     assertNull(response.getLink(Constants.LINK_NEXT));
@@ -473,7 +469,7 @@ public class ExplanationOfBenefitResourceProviderTest {
         InvalidRequestException.class,
         () ->
             eobProvider.findByPatient(
-                patientParam, null, null, null, null, null, null, null, requestDetails));
+                patientParam, null, null, null, null, null, null, requestDetails));
   }
 
   /**
@@ -487,8 +483,7 @@ public class ExplanationOfBenefitResourceProviderTest {
     when(mockQuery.getResultList()).thenReturn(List.of(0));
 
     Bundle response =
-        eobProvider.findByPatient(
-            patientParam, null, null, null, null, null, null, null, requestDetails);
+        eobProvider.findByPatient(patientParam, null, null, null, null, null, null, requestDetails);
 
     assertEquals(0, response.getTotal());
   }
@@ -504,7 +499,7 @@ public class ExplanationOfBenefitResourceProviderTest {
 
     Bundle response =
         eobProvider.findByPatient(
-            patientParam, listParam, null, null, null, null, null, null, requestDetails);
+            patientParam, listParam, null, null, null, null, null, requestDetails);
 
     assertNotNull(response);
     assertEquals(0, response.getTotal());
@@ -517,8 +512,7 @@ public class ExplanationOfBenefitResourceProviderTest {
   @Test
   void testFindByPatientSupportsNullClaimType() {
     Bundle response =
-        eobProvider.findByPatient(
-            patientParam, null, null, null, null, null, null, null, requestDetails);
+        eobProvider.findByPatient(patientParam, null, null, null, null, null, null, requestDetails);
 
     assertNotNull(response);
     assertEquals(0, response.getTotal());

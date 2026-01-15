@@ -230,7 +230,6 @@ public class EndpointJsonResponseComparatorClaimE2E extends EndpointJsonComparat
     return given()
         .spec(requestAuth)
         .formParams(formParams)
-        .header(CommonHeaders.HEADER_NAME_INCLUDE_TAX_NUMBERS, includeTaxNumbers)
         .expect()
         .statusCode(200)
         .when()
@@ -252,7 +251,6 @@ public class EndpointJsonResponseComparatorClaimE2E extends EndpointJsonComparat
 
     return given()
         .spec(requestAuth)
-        .header(CommonHeaders.HEADER_NAME_INCLUDE_TAX_NUMBERS, includeTaxNumbers)
         .expect()
         .statusCode(200)
         .when()

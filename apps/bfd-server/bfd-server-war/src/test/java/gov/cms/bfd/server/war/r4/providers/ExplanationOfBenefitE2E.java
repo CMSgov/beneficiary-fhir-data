@@ -53,7 +53,6 @@ public class ExplanationOfBenefitE2E extends ExplanationOfBenefitE2EBase {
     given()
         .spec(requestAuth)
         .given()
-        .header(CommonHeaders.HEADER_NAME_INCLUDE_TAX_NUMBERS, "true")
         .expect()
         .body("resourceType", equalTo("Bundle"))
         // we should have 8 claim type entries

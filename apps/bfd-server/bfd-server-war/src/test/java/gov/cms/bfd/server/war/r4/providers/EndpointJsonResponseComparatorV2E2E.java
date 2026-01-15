@@ -600,10 +600,7 @@ public class EndpointJsonResponseComparatorV2E2E extends EndpointJsonComparatorB
     String carrClaimId = ServerTestUtils.getClaimIdFor(loadedRecords, ClaimType.CARRIER);
     String eobId = CommonTransformerUtils.buildEobId(ClaimType.CARRIER, carrClaimId);
 
-    Headers headers =
-        new Headers(
-            new Header("Content-Type", "application/json+fhir"),
-            new Header(R4PatientResourceProvider.HEADER_NAME_INCLUDE_TAX_NUMBERS, "true"));
+    Headers headers = new Headers(new Header("Content-Type", "application/json+fhir"));
 
     return getJsonResponseFor(baseServerUrl + "/v2/fhir/ExplanationOfBenefit/" + eobId, headers);
   }
@@ -629,8 +626,7 @@ public class EndpointJsonResponseComparatorV2E2E extends EndpointJsonComparatorB
 
     Headers headers =
         new Headers(
-            new Header("Content-Type", "application/json+fhir"),
-            new Header(R4PatientResourceProvider.HEADER_NAME_INCLUDE_TAX_NUMBERS, "false"));
+            new Header("Content-Type", "application/json+fhir"));
 
     return getJsonResponseFor(baseServerUrl + "/v2/fhir/ExplanationOfBenefit/" + eobId, headers);
   }
@@ -668,8 +664,7 @@ public class EndpointJsonResponseComparatorV2E2E extends EndpointJsonComparatorB
 
     Headers headers =
         new Headers(
-            new Header("Content-Type", "application/json+fhir"),
-            new Header(R4PatientResourceProvider.HEADER_NAME_INCLUDE_TAX_NUMBERS, "true"));
+            new Header("Content-Type", "application/json+fhir"));
 
     return getJsonResponseFor(baseServerUrl + "/v2/fhir/ExplanationOfBenefit/" + eobId, headers);
   }

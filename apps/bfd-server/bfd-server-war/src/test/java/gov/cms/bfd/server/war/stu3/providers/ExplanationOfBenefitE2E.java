@@ -38,7 +38,7 @@ public class ExplanationOfBenefitE2E extends ExplanationOfBenefitE2EBase {
     List<Object> loadedData = testUtils.loadSampleAData();
     String patientId = testUtils.getPatientId(loadedData);
     // IncludeTaxNumbers is a header, so added below in restAssured API
-    String requestString = eobEndpoint + "?patient=" + patientId;
+    String requestString = eobEndpoint + "?patient=" + patientId + "&_IncludeTaxNumbers=true";
     CarrierClaim carrierClaim = ServerTestUtils.getClaim(loadedData, CarrierClaim.class);
     DMEClaim dmeClaim = ServerTestUtils.getClaim(loadedData, DMEClaim.class);
 
@@ -46,7 +46,6 @@ public class ExplanationOfBenefitE2E extends ExplanationOfBenefitE2EBase {
     given()
         .spec(requestAuth)
         .given()
-        .header(CommonHeaders.HEADER_NAME_INCLUDE_TAX_NUMBERS, "true")
         .expect()
         .log()
         .body()

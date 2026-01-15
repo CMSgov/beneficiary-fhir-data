@@ -229,10 +229,8 @@ public class R4ExplanationOfBenefitResourceProvider extends AbstractResourceProv
     }
     ClaimType claimType = eobIdType.get();
     String eobIdClaimIdText = eobIdMatcher.group(2);
-    boolean includeTaxNumbers = returnIncludeTaxNumbers(requestDetails);
     CommonTransformerUtils.publishMdcOperationName(
-        CanonicalOperation.Endpoint.V2_EOB,
-        Map.of("IncludeTaxNumbers", String.valueOf(includeTaxNumbers), "by", "id"));
+        CanonicalOperation.Endpoint.V2_EOB, Map.of("by", "id"));
 
     Class<?> entityClass = eobIdType.get().getEntityClass();
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
@@ -282,7 +280,7 @@ public class R4ExplanationOfBenefitResourceProvider extends AbstractResourceProv
     }
 
     ClaimTransformerInterfaceV2 transformer = deriveTransformer(claimType);
-    ExplanationOfBenefit eob = transformer.transform(claimEntitiesWithTag, includeTaxNumbers);
+    ExplanationOfBenefit eob = transformer.transform(claimEntitiesWithTag, false);
 
     // Add bene_id to MDC logs
     if (eob.getPatient() != null && !Strings.isNullOrEmpty(eob.getPatient().getReference())) {
@@ -318,7 +316,6 @@ public class R4ExplanationOfBenefitResourceProvider extends AbstractResourceProv
    *     field.
    * @param serviceDate an {@link OptionalParam} that specifies a date range for {@link
    *     ExplanationOfBenefit}s that completed
-   * @param taxNumbers an {@link OptionalParam} for whether to include tax numbers in the response
    * @param elements a {@link String} of client-specified FHIR elements to be included in each EOB.
    * @param requestDetails a {@link RequestDetails} containing the details of the request URL, used
    *     to parse out pagination values
@@ -363,11 +360,6 @@ public class R4ExplanationOfBenefitResourceProvider extends AbstractResourceProv
               shortDefinition = OpenAPIContentProvider.EOB_SERVICE_DATE_SHORT,
               value = OpenAPIContentProvider.EOB_SERVICE_DATE_VALUE)
           DateRangeParam serviceDate,
-      @OptionalParam(name = "includeTaxNumbers")
-          @Description(
-              shortDefinition = OpenAPIContentProvider.EOB_INCLUDE_TAX_NUMBERS_SHORT,
-              value = OpenAPIContentProvider.EOB_INCLUDE_TAX_NUMBERS_VALUE)
-          String taxNumbers,
       @Elements
           @OptionalParam(name = "_elements")
           @Description(
@@ -391,11 +383,9 @@ public class R4ExplanationOfBenefitResourceProvider extends AbstractResourceProv
     OffsetLinkBuilder paging = new OffsetLinkBuilder(requestDetails, "/ExplanationOfBenefit?");
     Long beneficiaryId = StringUtils.parseLongOrBadRequest(patient.getIdPart(), "Patient ID");
     Set<ClaimType> claimTypesRequested = CommonTransformerUtils.parseTypeParam(type);
-    boolean includeTaxNumbers = returnIncludeTaxNumbers(requestDetails);
     boolean filterSamhsa = CommonTransformerUtils.shouldFilterSamhsa(excludeSamhsa, requestDetails);
     Map<String, String> operationOptions = new HashMap<>();
     operationOptions.put("by", "patient");
-    operationOptions.put("IncludeTaxNumbers", String.valueOf(includeTaxNumbers));
     operationOptions.put(
         "types",
         (claimTypesRequested.size() == ClaimType.values().length)
@@ -437,8 +427,7 @@ public class R4ExplanationOfBenefitResourceProvider extends AbstractResourceProv
                 paging,
                 Optional.ofNullable(lastUpdated),
                 Optional.ofNullable(serviceDate),
-                filterSamhsa,
-                includeTaxNumbers);
+                filterSamhsa);
       } catch (InvalidRequestException e) {
         // If we're throwing a 400, pass it back up
         throw e;
@@ -469,8 +458,6 @@ public class R4ExplanationOfBenefitResourceProvider extends AbstractResourceProv
    *     ExplanationOfBenefit}s that completed.
    * @param excludeSamhsa optional {@link Boolean} denoting use of {@link R4EobSamhsaMatcher} *
    *     filtering of all SAMHSA-related claims from the results.
-   * @param includeTaxNumbers an {@link Optional} boolean denoting includsio/exclusion of tax
-   *     numbers in the response,
    * @return Returns a {@link Bundle} of {@link ExplanationOfBenefit}s, which may contain multiple
    *     matching resources, or may also be empty.
    * @throws InterruptedException when thread processing task is interrupted.
@@ -484,8 +471,7 @@ public class R4ExplanationOfBenefitResourceProvider extends AbstractResourceProv
       OffsetLinkBuilder paging,
       Optional<DateRangeParam> lastUpdated,
       Optional<DateRangeParam> serviceDate,
-      boolean excludeSamhsa,
-      boolean includeTaxNumbers)
+      boolean excludeSamhsa)
       throws InterruptedException, ExecutionException {
 
     EnumSet<ClaimType> claimsToProcess =
@@ -525,7 +511,7 @@ public class R4ExplanationOfBenefitResourceProvider extends AbstractResourceProv
               serviceDate,
               excludeSamhsa);
 
-          task.setIncludeTaxNumbers(includeTaxNumbers);
+          task.setIncludeTaxNumbers(false);
           callableTasks.add(task);
         });
 

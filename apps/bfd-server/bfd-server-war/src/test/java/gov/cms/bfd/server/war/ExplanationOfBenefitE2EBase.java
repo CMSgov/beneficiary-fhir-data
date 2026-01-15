@@ -695,7 +695,6 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
         given()
             .spec(requestAuth)
             .given()
-            .header(CommonHeaders.HEADER_NAME_INCLUDE_TAX_NUMBERS, "false")
             .expect()
             .body("resourceType", equalTo("Bundle"))
             // we should have 8 claim type entries
@@ -1029,7 +1028,6 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
     String requestString = eobEndpoint + eobId;
 
     Map<String, String> headers = new HashMap<>();
-    headers.put(CommonHeaders.HEADER_NAME_INCLUDE_TAX_NUMBERS, "true");
     headers.put(R4PatientResourceProvider.HEADER_NAME_INCLUDE_ADDRESS_FIELDS, "true");
     // Add extra check for accept-charset to make sure it passes through
     headers.put("Accept-Charset", "utf-8");
@@ -1056,7 +1054,6 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
     String requestString = eobEndpoint + "?patient=" + patientId;
 
     Map<String, String> headers = new HashMap<>();
-    headers.put(CommonHeaders.HEADER_NAME_INCLUDE_TAX_NUMBERS, "true");
     headers.put(R4PatientResourceProvider.HEADER_NAME_INCLUDE_ADDRESS_FIELDS, "true");
     List<String> additionalExpectedMdcKeys =
         List.of(

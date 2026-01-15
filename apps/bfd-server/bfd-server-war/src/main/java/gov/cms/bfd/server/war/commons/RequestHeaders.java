@@ -39,9 +39,6 @@ public class RequestHeaders {
           if (h.equals(CommonHeaders.HEADER_NAME_INCLUDE_IDENTIFIERS)) {
             this.headerNVs.put(h, returnIncludeIdentifiersValues(v));
           }
-          if (h.equals(CommonHeaders.HEADER_NAME_INCLUDE_TAX_NUMBERS)) {
-            this.headerNVs.put(h, returnIncludeTaxValue(v));
-          }
         });
   }
 
@@ -85,9 +82,6 @@ public class RequestHeaders {
           }
           if (h.equals(CommonHeaders.HEADER_NAME_INCLUDE_IDENTIFIERS)) {
             this.headerNVs.put(h, returnIncludeIdentifiersValues(v));
-          }
-          if (h.equals(CommonHeaders.HEADER_NAME_INCLUDE_TAX_NUMBERS)) {
-            this.headerNVs.put(h, returnIncludeTaxValue(v));
           }
         });
   }
@@ -179,17 +173,6 @@ public class RequestHeaders {
 
   /**
    * Check if request contains header includeIdentifiers {@link
-   * CommonHeaders#HEADER_NAME_INCLUDE_TAX_NUMBERS} and if the value is 'true'.
-   *
-   * @return {@code true} if the header is present and has value 'true', {@code false} otherwise
-   */
-  public boolean isTaxNumIncludeIdentifiers() {
-    List<String> v = this.getValue(CommonHeaders.HEADER_NAME_INCLUDE_TAX_NUMBERS);
-    return v.contains("true");
-  }
-
-  /**
-   * Check if request contains header includeIdentifiers {@link
    * CommonHeaders#HEADER_NAME_INCLUDE_IDENTIFIERS} and if the value is 'mbi' or 'true'.
    *
    * @return {@code true} if the header is present and has value 'mbi' or 'true', {@code false}
@@ -209,17 +192,6 @@ public class RequestHeaders {
    */
   public static Boolean returnIncludeAddressFieldsValue(String headerValue) {
     return "TRUE".equalsIgnoreCase(headerValue);
-  }
-
-  /**
-   * Return the value from the HEADER_NAME_INCLUDE_TAX_NUMBERS header translated into a {@link
-   * Boolean}.
-   *
-   * @param headerValue the header string value
-   * @return the header value, returns false unless the value is "TRUE" (case-insensitive)
-   */
-  public static Boolean returnIncludeTaxValue(String headerValue) {
-    return (headerValue != null && headerValue.equalsIgnoreCase("TRUE"));
   }
 
   /**

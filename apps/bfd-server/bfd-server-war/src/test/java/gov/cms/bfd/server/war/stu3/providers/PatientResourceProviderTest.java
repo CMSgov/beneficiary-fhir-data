@@ -140,8 +140,6 @@ public class PatientResourceProviderTest {
 
   /** Mocks the default header values. */
   private void mockHeaders() {
-    when(requestDetails.getHeader(CommonHeaders.HEADER_NAME_INCLUDE_TAX_NUMBERS))
-        .thenReturn("false");
     when(requestDetails.getHeader(CommonHeaders.HEADER_NAME_INCLUDE_ADDRESS_FIELDS))
         .thenReturn("false");
     // We dont use this anymore on v2, so set it to false since everything should work regardless of
