@@ -74,7 +74,6 @@ public class IntegrationTestBase {
   protected static final String DUAL_ONLY_BENE_COVERAGE_STATUS_CODE = "XX";
 
   private static final String FHIR_JSON = "fhir+json";
-  private static final String CLAIM_FORMAT_CODE_NCPDP_DISPLAY = "NCPDP ELECTRONIC SUBMISSION";
 
   protected String getServerBaseUrl() {
     return "http://localhost:" + port;
