@@ -98,10 +98,9 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2
    * Transforms a claim entity into a FHIR {@link Claim}.
    *
    * @param claimEntity the FISS {@link RdaFissClaim} to transform
-   * @param includeTaxNumbers Indicates if tax numbers should be included in the results
    * @return a FHIR {@link Claim} resource that represents the specified claim
    */
-  public Claim transform(ClaimWithSecurityTags<?> claimEntity, boolean includeTaxNumbers) {
+  public Claim transform(ClaimWithSecurityTags<?> claimEntity) {
 
     Object claim = claimEntity.getClaimEntity();
     List<Coding> securityTags =
@@ -113,7 +112,7 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2
 
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
       RdaFissClaim rdaFissClaim = (RdaFissClaim) claim;
-      return transformClaim(rdaFissClaim, includeTaxNumbers, securityTags);
+      return transformClaim(rdaFissClaim, securityTags);
     }
   }
 
@@ -121,12 +120,10 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2
    * Transforms a {@link RdaFissClaim} into a FHIR {@link Claim}.
    *
    * @param claimGroup the {@link RdaFissClaim} to transform
-   * @param includeTaxNumbers Indicates if tax numbers should be included in the results
    * @param securityTags securityTags of the claim
    * @return a FHIR {@link Claim} resource that represents the specified {@link RdaFissClaim}
    */
-  private Claim transformClaim(
-      RdaFissClaim claimGroup, boolean includeTaxNumbers, List<Coding> securityTags) {
+  private Claim transformClaim(RdaFissClaim claimGroup, List<Coding> securityTags) {
     Claim claim = new Claim();
 
     boolean isIcd9 =
@@ -136,8 +133,7 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2
     claim.setId("f-" + claimGroup.getClaimId());
     claim.setContained(
         List.of(
-            FissTransformerV2.getContainedPatient(claimGroup),
-            getContainedProvider(claimGroup, includeTaxNumbers)));
+            FissTransformerV2.getContainedPatient(claimGroup), getContainedProvider(claimGroup)));
     claim.getIdentifier().add(createClaimIdentifier(BBCodingSystems.FISS.DCN, claimGroup.getDcn()));
     addExtension(
         claim.getExtension(), BBCodingSystems.FISS.SERV_TYP_CD, claimGroup.getServTypeCd());
@@ -242,10 +238,9 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2
    * Parses data from the {@link RdaFissClaim} to create a provider {@link Resource}.
    *
    * @param claimGroup The {@link RdaFissClaim} object to parse data from.
-   * @param includeTaxNumbers Indicates if tax numbers should be included in the results
    * @return The provider {@link Resource} object created from the parsed data.
    */
-  private Resource getContainedProvider(RdaFissClaim claimGroup, boolean includeTaxNumbers) {
+  private Resource getContainedProvider(RdaFissClaim claimGroup) {
     Organization organization = new Organization();
 
     if (claimGroup.getMedaProv_6() != null) {
@@ -258,10 +253,6 @@ public class FissClaimTransformerV2 extends AbstractTransformerV2
                   .setValue(claimGroup.getMedaProv_6()));
     }
 
-    if (includeTaxNumbers) {
-      addFedTaxNumberIdentifier(
-          organization, BBCodingSystems.FISS.TAX_NUM, claimGroup.getFedTaxNumber());
-    }
     addNpiIdentifier(organization, claimGroup.getNpiNumber());
     organization.setId("provider-org");
 

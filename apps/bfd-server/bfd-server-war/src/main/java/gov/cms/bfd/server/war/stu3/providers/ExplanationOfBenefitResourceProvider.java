@@ -252,7 +252,7 @@ public class ExplanationOfBenefitResourceProvider extends AbstractResourceProvid
 
     ClaimTransformerInterface transformer = deriveTransformer(eobIdType.get());
     ExplanationOfBenefit eob =
-        transformer.transform(new ClaimWithSecurityTags(claimEntity, securityTags), false);
+        transformer.transform(new ClaimWithSecurityTags(claimEntity, securityTags));
 
     // Add bene_id to MDC logs
     if (eob.getPatient() != null && !Strings.isNullOrEmpty(eob.getPatient().getReference())) {
@@ -467,7 +467,6 @@ public class ExplanationOfBenefitResourceProvider extends AbstractResourceProvid
               serviceDate,
               excludeSamhsa);
 
-          task.setIncludeTaxNumbers(false);
           callableTasks.add(task);
         });
 

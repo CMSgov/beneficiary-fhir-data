@@ -15,8 +15,7 @@ public interface ResourceTransformer<T extends IBaseResource> {
    * Transforms the specified into a new FHIR {@link ClaimResponse} resource.
    *
    * @param claim the FISS/MCS record to be transformed
-   * @param includeTaxNumbers Indicates if tax numbers should be included in the results
    * @return a new FHIR resource
    */
-  T transform(ClaimWithSecurityTags<?> claim, boolean includeTaxNumbers);
+  T transform(ClaimWithSecurityTags<?> claim);
 }

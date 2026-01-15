@@ -12,7 +12,6 @@ import gov.cms.bfd.model.rif.entities.CarrierClaimLine;
 import gov.cms.bfd.model.rif.npi_fda.NPIData;
 import gov.cms.bfd.server.war.commons.ClaimType;
 import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
-import gov.cms.bfd.server.war.commons.IdentifierType;
 import gov.cms.bfd.server.war.commons.MedicareSegment;
 import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
@@ -69,13 +68,13 @@ final class CarrierClaimTransformer implements ClaimTransformerInterface {
   /**
    * Transforms a claim into an {@link ExplanationOfBenefit}.
    *
-   * @param claimEntity the {@link CarrierClaim} to use
    * @param includeTaxNumber boolean denoting whether to include tax numbers in the response
+   * @param claimEntity      the {@link CarrierClaim} to use
    * @return a FHIR {@link ExplanationOfBenefit} resource.
    */
   @Override
   public ExplanationOfBenefit transform(
-      ClaimWithSecurityTags<?> claimEntity, boolean includeTaxNumber) {
+      ClaimWithSecurityTags<?> claimEntity) {
 
     Object claim = claimEntity.getClaimEntity();
     List<Coding> securityTags =
@@ -87,7 +86,7 @@ final class CarrierClaimTransformer implements ClaimTransformerInterface {
     ExplanationOfBenefit eob;
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
       CarrierClaim carrierClaim = (CarrierClaim) claim;
-      eob = transformClaim(carrierClaim, includeTaxNumber, securityTags);
+      eob = transformClaim(carrierClaim, securityTags);
     }
 
     return eob;
@@ -97,13 +96,11 @@ final class CarrierClaimTransformer implements ClaimTransformerInterface {
    * Transforms a claim into an {@link ExplanationOfBenefit}.
    *
    * @param claimGroup the CCW {@link CarrierClaim} to transform
-   * @param includeTaxNumbers whether to include tax numbers in the response
    * @param securityTags securityTags of a claim
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     CarrierClaim}
    */
-  private ExplanationOfBenefit transformClaim(
-      CarrierClaim claimGroup, boolean includeTaxNumbers, List<Coding> securityTags) {
+  private ExplanationOfBenefit transformClaim(CarrierClaim claimGroup, List<Coding> securityTags) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Common group level fields between all claim types
@@ -218,22 +215,6 @@ final class CarrierClaimTransformer implements ClaimTransformerInterface {
                   .map(NPIData::getProviderOrganizationName),
               claimLine.getOrganizationNpi().get());
         }
-      }
-
-      /*
-       * FIXME This value seems to be just a "synonym" for the performing physician NPI and should
-       * probably be mapped as an extra identifier with it (if/when that lands in a contained
-       * Practitioner resource).
-       */
-      if (includeTaxNumbers) {
-        ExplanationOfBenefit.CareTeamComponent providerTaxNumber =
-            TransformerUtils.addCareTeamPractitioner(
-                eob,
-                item,
-                IdentifierType.TAX.getSystem(),
-                claimLine.getProviderTaxNumber(),
-                ClaimCareteamrole.OTHER);
-        providerTaxNumber.setResponsible(true);
       }
 
       item.addAdjudication(

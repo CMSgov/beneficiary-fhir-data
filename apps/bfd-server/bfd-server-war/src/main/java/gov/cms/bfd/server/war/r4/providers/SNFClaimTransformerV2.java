@@ -72,14 +72,14 @@ public class SNFClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
   /**
    * Transforms a {@link SNFClaim} into a FHIR {@link ExplanationOfBenefit}.
    *
-   * @param claimEntity the {@link Object} to use
    * @param includeTaxNumber exists to satisfy {@link ClaimTransformerInterfaceV2}; ignored.
+   * @param claimEntity      the {@link Object} to use
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
-   *     SNFClaim}
+   * SNFClaim}
    */
   @Override
   public ExplanationOfBenefit transform(
-      ClaimWithSecurityTags<?> claimEntity, boolean includeTaxNumber) {
+      ClaimWithSecurityTags<?> claimEntity) {
 
     Object claim = claimEntity.getClaimEntity();
     List<Coding> securityTags =

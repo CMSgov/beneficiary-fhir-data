@@ -32,7 +32,6 @@ import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.commons.carin.C4BBClaimProfessionalAndNonClinicianCareTeamRole;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
-import gov.cms.bfd.server.war.stu3.providers.ExplanationOfBenefitResourceProvider;
 import gov.cms.bfd.server.war.utils.RDATestUtils;
 import gov.cms.bfd.sharedutils.exceptions.BadCodeMonkeyException;
 import java.lang.reflect.InvocationTargetException;
@@ -1641,19 +1640,14 @@ public final class TransformerTestUtilsV2 {
   /**
    * Transform rif record to eob explanation of benefit.
    *
+   * @param rifRecord the RIF record (e.g. a {@link CarrierClaim} instance) to transform
    * @param metricRegistry the {@link MetricRegistry} to use
-   * @param rifRecord the RIF record (e.g. a {@link CarrierClaim} instance) to transform@param
-   *     includeTaxNumbers whether to include tax numbers in the result (see {@link
-   *     ExplanationOfBenefitResourceProvider#HEADER_NAME_INCLUDE_TAX_NUMBERS}, defaults to <code>
-   *          false</code> )
-   * @param includeTaxNumbers if tax numbers should be included in the response
    * @param securityTagManager SamhsaSecurityTags lookup
    * @return the transformed {@link ExplanationOfBenefit} for the specified RIF record
    */
   static ExplanationOfBenefit transformRifRecordToEob(
       ClaimWithSecurityTags<?> rifRecord,
       MetricRegistry metricRegistry,
-      boolean includeTaxNumbers,
       SecurityTagManager securityTagManager) {
 
     ClaimTransformerInterfaceV2 claimTransformerInterface = null;
@@ -1684,6 +1678,6 @@ public final class TransformerTestUtilsV2 {
     } else {
       throw new BadCodeMonkeyException("Unhandled RifRecord type!");
     }
-    return claimTransformerInterface.transform(rifRecord, includeTaxNumbers);
+    return claimTransformerInterface.transform(rifRecord);
   }
 }

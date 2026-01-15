@@ -68,13 +68,12 @@ final class DMEClaimTransformer implements ClaimTransformerInterface {
   /**
    * Transforms a claim into an {@link ExplanationOfBenefit}.
    *
-   * @param claimEntity the {@link DMEClaim} to use
    * @param includeTaxNumber boolean denoting whether to include tax numbers in the response
+   * @param claimEntity the {@link DMEClaim} to use
    * @return a FHIR {@link ExplanationOfBenefit} resource.
    */
   @Override
-  public ExplanationOfBenefit transform(
-      ClaimWithSecurityTags<?> claimEntity, boolean includeTaxNumber) {
+  public ExplanationOfBenefit transform(ClaimWithSecurityTags<?> claimEntity) {
 
     Object claim = claimEntity.getClaimEntity();
     List<Coding> securityTags =
@@ -86,7 +85,7 @@ final class DMEClaimTransformer implements ClaimTransformerInterface {
     ExplanationOfBenefit eob;
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
       DMEClaim dmeClaim = (DMEClaim) claim;
-      eob = transformClaim(dmeClaim, includeTaxNumber, securityTags);
+      eob = transformClaim(dmeClaim, securityTags);
     }
     return eob;
   }
@@ -95,13 +94,11 @@ final class DMEClaimTransformer implements ClaimTransformerInterface {
    * Transforms a specified {@link DMEClaim} into a FHIR {@link ExplanationOfBenefit}.
    *
    * @param claimGroup the {@link DMEClaim} to use
-   * @param includeTaxNumbers whether to include tax numbers in the transformed EOB
    * @param securityTags securityTags of a claim
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     DMEClaim}
    */
-  private ExplanationOfBenefit transformClaim(
-      DMEClaim claimGroup, boolean includeTaxNumbers, List<Coding> securityTags) {
+  private ExplanationOfBenefit transformClaim(DMEClaim claimGroup, List<Coding> securityTags) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Common group level fields between all claim types
@@ -219,22 +216,6 @@ final class DMEClaimTransformer implements ClaimTransformerInterface {
               claimLine.getHcpcsSecondModifierCode(),
               claimLine.getHcpcsThirdModifierCode(),
               claimLine.getHcpcsFourthModifierCode()));
-
-      /*
-       * FIXME This value seems to be just a "synonym" for the performing physician NPI and should
-       * probably be mapped as an extra identifier with it (if/when that lands in a contained
-       * Practitioner resource).
-       */
-      if (includeTaxNumbers) {
-        ExplanationOfBenefit.CareTeamComponent providerTaxNumber =
-            TransformerUtils.addCareTeamPractitioner(
-                eob,
-                item,
-                IdentifierType.TAX.getSystem(),
-                claimLine.getProviderTaxNumber(),
-                ClaimCareteamrole.OTHER);
-        providerTaxNumber.setResponsible(true);
-      }
 
       item.addAdjudication()
           .setCategory(

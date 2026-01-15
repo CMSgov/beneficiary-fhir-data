@@ -75,7 +75,7 @@ public final class PartDEventTransformerTest {
   @Test
   public void testTransformRunsMetricTimer() {
     PartDEvent claim = getPartDEventClaim();
-    partdEventTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
+    partdEventTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags));
 
     String expectedTimerName = partdEventTransformer.getClass().getSimpleName() + ".transform";
     verify(metricRegistry, times(1)).timer(expectedTimerName);
@@ -85,7 +85,7 @@ public final class PartDEventTransformerTest {
   }
 
   /**
-   * Verifies that {@link PartDEventTransformer#transform} works as expected when run against the
+   * Verifies that {@link ClaimTransformerInterface#transform} works as expected when run against the
    * {@link StaticRifResource#SAMPLE_A_PDE} {@link PartDEvent}.
    *
    * @throws FHIRException (indicates test failure)
@@ -94,7 +94,7 @@ public final class PartDEventTransformerTest {
   public void transformSampleARecord() throws FHIRException, IOException {
     PartDEvent claim = getPartDEventClaim();
     ExplanationOfBenefit eob =
-        partdEventTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
+        partdEventTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags));
 
     TransformerUtils.enrichEob(
         eob, RDATestUtils.createTestNpiOrgLookup(), RDATestUtils.createFdaDrugCodeDisplayLookup());
@@ -103,7 +103,7 @@ public final class PartDEventTransformerTest {
 
   /**
    * Verifies that {@link IdentifierType#NPI} values can be found after {@link
-   * PartDEventTransformer#transform} is run on the sample A part D claim.
+   * ClaimTransformerInterface#transform} is run on the sample A part D claim.
    *
    * @throws FHIRException (indicates test failure)
    * @throws IOException (indicates test failure)
@@ -117,7 +117,7 @@ public final class PartDEventTransformerTest {
 
   /**
    * Verifies that {@link IdentifierType#UPIN} values can be found after {@link
-   * PartDEventTransformer#transform} is run on the sample A part D claim.
+   * ClaimTransformerInterface#transform} is run on the sample A part D claim.
    *
    * @throws FHIRException (indicates test failure)
    * @throws IOException (indicates test failure)
@@ -131,7 +131,7 @@ public final class PartDEventTransformerTest {
 
   /**
    * Verifies that {@link IdentifierType#NCPDP} values can be found after {@link
-   * PartDEventTransformer#transform} is run on the sample A part D claim.
+   * ClaimTransformerInterface#transform} is run on the sample A part D claim.
    *
    * @throws FHIRException (indicates test failure)
    * @throws IOException (indicates test failure)
@@ -145,7 +145,7 @@ public final class PartDEventTransformerTest {
 
   /**
    * Verifies that {@link IdentifierType#SL} values can be found after {@link
-   * PartDEventTransformer#transform} is run on the sample A part D claim.
+   * ClaimTransformerInterface#transform} is run on the sample A part D claim.
    *
    * @throws FHIRException (indicates test failure)
    * @throws IOException (indicates test failure)
@@ -159,7 +159,7 @@ public final class PartDEventTransformerTest {
 
   /**
    * Verifies that {@link IdentifierType#TAX} values can be found after {@link
-   * PartDEventTransformer#transform} is run on the sample A part D claim.
+   * ClaimTransformerInterface#transform} is run on the sample A part D claim.
    *
    * @throws FHIRException (indicates test failure)
    * @throws IOException (indicates test failure)
@@ -172,7 +172,7 @@ public final class PartDEventTransformerTest {
   }
 
   /**
-   * Verifies that {@link PartDEventTransformer#transform} works as expected when run against the
+   * Verifies that {@link ClaimTransformerInterface#transform} works as expected when run against the
    * {@link String serviceProviderIdQualiferCode} and {@link String serviceProviderCode}.
    *
    * @param serviceProviderIdQualiferCode the service provider id qualifier code
@@ -184,7 +184,7 @@ public final class PartDEventTransformerTest {
     PartDEvent claim = getPartDEventClaim();
     claim.setServiceProviderIdQualiferCode(serviceProviderIdQualiferCode);
     ExplanationOfBenefit eob =
-        partdEventTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
+        partdEventTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags));
 
     TransformerUtils.enrichEob(
         eob, RDATestUtils.createTestNpiOrgLookup(), RDATestUtils.createFdaDrugCodeDisplayLookup());

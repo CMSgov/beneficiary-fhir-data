@@ -164,9 +164,9 @@ public class ExplanationOfBenefitResourceProviderTest {
     when(metricRegistry.timer(any())).thenReturn(metricsTimer);
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
 
-    when(mockCarrierClaimTransformer.transform(any(), anyBoolean())).thenReturn(testEob);
-    when(mockDmeClaimTransformer.transform(any(), anyBoolean())).thenReturn(testEob);
-    when(mockPdeTransformer.transform(any(), anyBoolean())).thenReturn(testEob);
+    when(mockCarrierClaimTransformer.transform(any())).thenReturn(testEob);
+    when(mockDmeClaimTransformer.transform(any())).thenReturn(testEob);
+    when(mockPdeTransformer.transform(any())).thenReturn(testEob);
 
     when(requestDetails.getAttribute(CommonTransformerUtils.SHOULD_FILTER_SAMHSA)).thenReturn(true);
 
@@ -306,7 +306,7 @@ public class ExplanationOfBenefitResourceProviderTest {
   void testReadWhenValidIdExpectMetrics() {
     when(eobId.getIdPart()).thenReturn("pde-123456789");
     when(mockQuery.getSingleResult()).thenReturn(testPdeClaim);
-    when(mockPdeTransformer.transform(any(), anyBoolean())).thenReturn(testEob);
+    when(mockPdeTransformer.transform(any())).thenReturn(testEob);
     eobProvider.read(eobId, requestDetails);
 
     String expectedTimerName = eobProvider.getClass().getSimpleName() + ".query.eob_by_id";
@@ -405,7 +405,7 @@ public class ExplanationOfBenefitResourceProviderTest {
   void testReadWhenNegativeIdExpectEobReturned() {
     when(eobId.getIdPart()).thenReturn("pde--123456789");
     when(mockQuery.getSingleResult()).thenReturn(testPdeClaim);
-    when(mockPdeTransformer.transform(any(), anyBoolean())).thenReturn(testEob);
+    when(mockPdeTransformer.transform(any())).thenReturn(testEob);
     ExplanationOfBenefit eob = eobProvider.read(eobId, requestDetails);
     assertNotNull(eob);
   }

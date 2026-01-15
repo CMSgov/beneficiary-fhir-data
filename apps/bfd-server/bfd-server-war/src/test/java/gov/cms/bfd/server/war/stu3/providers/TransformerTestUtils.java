@@ -2257,19 +2257,14 @@ final class TransformerTestUtils {
   /**
    * Transform rif record to eob explanation of benefit.
    *
-   * @param metricRegistry the {@link MetricRegistry} to use
-   * @param rifRecord the RIF record (e.g. a {@link CarrierClaim} instance) to transform@param
-   *     includeTaxNumbers whether to include tax numbers in the result (see {@link
-   *     ExplanationOfBenefitResourceProvider#HEADER_NAME_INCLUDE_TAX_NUMBERS}, defaults to <code>
-   *          false</code> )
-   * @param includeTaxNumbers if tax numbers should be included in the response
+   * @param rifRecord          the RIF record (e.g. a {@link CarrierClaim} instance) to transform
+   * @param metricRegistry     the {@link MetricRegistry} to use
    * @param securityTagManager SamhsaSecurityTag lookup
    * @return the transformed {@link ExplanationOfBenefit} for the specified RIF record
    */
   static ExplanationOfBenefit transformRifRecordToEob(
       Object rifRecord,
       MetricRegistry metricRegistry,
-      Boolean includeTaxNumbers,
       SecurityTagManager securityTagManager) {
 
     ClaimTransformerInterface claimTransformerInterface = null;
@@ -2301,6 +2296,6 @@ final class TransformerTestUtils {
     }
     Set<String> securityTags = new HashSet<>();
     return claimTransformerInterface.transform(
-        new ClaimWithSecurityTags<>(rifRecord, securityTags), includeTaxNumbers);
+        new ClaimWithSecurityTags<>(rifRecord, securityTags));
   }
 }

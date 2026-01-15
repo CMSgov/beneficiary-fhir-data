@@ -131,7 +131,7 @@ public class HHAClaimTransformerV2Test {
     hhaClaimTransformer = new HHAClaimTransformerV2(metricRegistry, securityTagManager, false);
     claim = generateClaim();
     ExplanationOfBenefit genEob =
-        hhaClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
+        hhaClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags));
     TransformerUtilsV2.enrichEob(
         genEob,
         RDATestUtils.createTestNpiOrgLookup(),
@@ -236,7 +236,7 @@ public class HHAClaimTransformerV2Test {
     claim.setLastUpdated(Instant.now());
 
     ExplanationOfBenefit genEob =
-        hhaClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
+        hhaClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags));
     TransformerUtilsV2.enrichEob(
         genEob,
         RDATestUtils.createTestNpiOrgLookup(),
@@ -266,7 +266,7 @@ public class HHAClaimTransformerV2Test {
     claim.setLastUpdated(Instant.now());
 
     ExplanationOfBenefit genEob =
-        hhaClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
+        hhaClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags));
     TransformerUtilsV2.enrichEob(
         genEob,
         RDATestUtils.createTestNpiOrgLookup(),

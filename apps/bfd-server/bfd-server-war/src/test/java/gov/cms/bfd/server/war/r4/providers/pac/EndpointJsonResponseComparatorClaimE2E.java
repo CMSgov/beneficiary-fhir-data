@@ -4,7 +4,6 @@ import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 import gov.cms.bfd.server.war.EndpointJsonComparatorBase;
-import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.utils.RDATestUtils;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -77,28 +76,13 @@ public class EndpointJsonResponseComparatorClaimE2E extends EndpointJsonComparat
             (Supplier<String>)
                 EndpointJsonResponseComparatorClaimE2E::shouldGetCorrectFissClaimResourceById),
         arguments(
-            "claimFissReadWithTaxNumbers",
-            (Supplier<String>)
-                EndpointJsonResponseComparatorClaimE2E
-                    ::shouldGetCorrectFissClaimResourceByIdWithTaxNumbers),
-        arguments(
             "claimMcsRead",
             (Supplier<String>)
                 EndpointJsonResponseComparatorClaimE2E::shouldGetCorrectMcsClaimResourceById),
         arguments(
-            "claimMcsReadWithTaxNumbers",
-            (Supplier<String>)
-                EndpointJsonResponseComparatorClaimE2E
-                    ::shouldGetCorrectMcsClaimResourceByIdWithTaxNumbers),
-        arguments(
             "claimSearch",
             (Supplier<String>)
                 EndpointJsonResponseComparatorClaimE2E::shouldGetCorrectClaimResourcesByMbiHash),
-        arguments(
-            "claimSearchWithTaxNumbers",
-            (Supplier<String>)
-                EndpointJsonResponseComparatorClaimE2E
-                    ::shouldGetCorrectClaimResourcesByMbiHashWithTaxNumbers),
         arguments(
             "claimSearchPaginated",
             (Supplier<String>)
@@ -117,17 +101,7 @@ public class EndpointJsonResponseComparatorClaimE2E extends EndpointJsonComparat
   private static String shouldGetCorrectFissClaimResourceById() {
     String requestString = claimEndpoint + "f-123456";
 
-    return getPacRequest(requestString, false);
-  }
-
-  /**
-   * Tests to see if the correct response is given when a FISS {@link Claim} is looked up by a
-   * specific ID with tax numbers included.
-   */
-  public static String shouldGetCorrectFissClaimResourceByIdWithTaxNumbers() {
-    String requestString = claimEndpoint + "f-123456";
-
-    return getPacRequest(requestString, true);
+    return getPacRequest(requestString);
   }
 
   /**
@@ -137,17 +111,7 @@ public class EndpointJsonResponseComparatorClaimE2E extends EndpointJsonComparat
   public static String shouldGetCorrectMcsClaimResourceById() {
     String requestString = claimEndpoint + "m-654321";
 
-    return getPacRequest(requestString, false);
-  }
-
-  /**
-   * Tests to see if the correct response is given when an MCS {@link Claim} is looked up by a
-   * specific ID with tax numbers included.
-   */
-  private static String shouldGetCorrectMcsClaimResourceByIdWithTaxNumbers() {
-    String requestString = claimEndpoint + "m-654321";
-
-    return getPacRequest(requestString, true);
+    return getPacRequest(requestString);
   }
 
   /**
@@ -162,23 +126,7 @@ public class EndpointJsonResponseComparatorClaimE2E extends EndpointJsonComparat
             + RDATestUtils.MBI_HASH
             + "&service-date=gt1970-07-18&service-date=lt1970-07-25";
 
-    return getPacRequest(requestString, false);
-  }
-
-  /**
-   * Tests to see if the correct response is given when a search is done for {@link Claim}s using
-   * given mbi and service-date range with tax numbers included. In this test case the query finds
-   * the matched claims because their to dates are within the date range even though their from
-   * dates are not.
-   */
-  private static String shouldGetCorrectClaimResourcesByMbiHashWithTaxNumbers() {
-    String requestString =
-        claimEndpoint
-            + "?mbi="
-            + RDATestUtils.MBI_HASH
-            + "&service-date=gt1970-07-18&service-date=lt1970-07-25";
-
-    return getPacRequest(requestString, true);
+    return getPacRequest(requestString);
   }
 
   /**
@@ -194,7 +142,7 @@ public class EndpointJsonResponseComparatorClaimE2E extends EndpointJsonComparat
             + "&service-date=ge1970-07-10&service-date=le1970-07-18"
             + "&_count=5&startIndex=1";
 
-    return getPacRequest(requestString, false);
+    return getPacRequest(requestString);
   }
 
   /** Tests the search response when using a POST request. */
@@ -212,8 +160,7 @@ public class EndpointJsonResponseComparatorClaimE2E extends EndpointJsonComparat
             "isHashed",
             List.of("false"),
             "service-date",
-            List.of("gt1970-07-18", "lt1970-07-25")),
-        false);
+            List.of("gt1970-07-18", "lt1970-07-25")));
   }
 
   /**
@@ -222,10 +169,8 @@ public class EndpointJsonResponseComparatorClaimE2E extends EndpointJsonComparat
    *
    * @param requestString the request string to search with
    * @param formParams form POST params
-   * @param includeTaxNumbers the value to use for IncludeTaxNumbers header
    */
-  private static String postPacRequest(
-      String requestString, Map<String, ?> formParams, boolean includeTaxNumbers) {
+  private static String postPacRequest(String requestString, Map<String, ?> formParams) {
 
     return given()
         .spec(requestAuth)
@@ -245,9 +190,8 @@ public class EndpointJsonResponseComparatorClaimE2E extends EndpointJsonComparat
    * matches the expected response file.
    *
    * @param requestString the request string to search with
-   * @param includeTaxNumbers the value to use for IncludeTaxNumbers header
    */
-  private static String getPacRequest(String requestString, boolean includeTaxNumbers) {
+  private static String getPacRequest(String requestString) {
 
     return given()
         .spec(requestAuth)

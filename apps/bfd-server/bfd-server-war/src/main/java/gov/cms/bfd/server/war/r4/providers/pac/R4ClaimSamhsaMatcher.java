@@ -69,9 +69,9 @@ public final class R4ClaimSamhsaMatcher extends AbstractSamhsaMatcher<Claim> {
     Claim claim;
 
     if (((ClaimWithSecurityTags<?>) entity).getClaimEntity() instanceof RdaFissClaim) {
-      claim = fissTransformer.transform(entity, false);
+      claim = fissTransformer.transform(entity);
     } else if (((ClaimWithSecurityTags<?>) entity).getClaimEntity() instanceof RdaMcsClaim) {
-      claim = mcsTransformer.transform(entity, false);
+      claim = mcsTransformer.transform(entity);
     } else {
       throw new IllegalArgumentException(
           "Unsupported entity " + entity.getClass().getCanonicalName() + " for samhsa filtering");

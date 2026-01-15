@@ -165,7 +165,7 @@ public class FissClaimTransformerV2Test {
         new FissClaimTransformerV2(new MetricRegistry(), securityTagManager, false);
 
     Claim claim =
-        fissClaimTransformerV2.transform(new ClaimWithSecurityTags<>(entity, securityTags), true);
+        fissClaimTransformerV2.transform(new ClaimWithSecurityTags<>(entity, securityTags));
 
     assertEquals(numberOfRecords, claim.getDiagnosis().size());
 

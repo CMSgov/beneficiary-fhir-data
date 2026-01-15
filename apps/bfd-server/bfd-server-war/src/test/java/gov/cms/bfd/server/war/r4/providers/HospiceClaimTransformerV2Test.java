@@ -126,7 +126,7 @@ public final class HospiceClaimTransformerV2Test {
   /** Creates an eob for the test. */
   private void createEOB() {
     ExplanationOfBenefit genEob =
-        hospiceClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
+        hospiceClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags));
     TransformerUtilsV2.enrichEob(
         genEob,
         RDATestUtils.createTestNpiOrgLookup(),
@@ -151,7 +151,7 @@ public final class HospiceClaimTransformerV2Test {
   }
 
   /**
-   * Verifies that {@link SNFClaimTransformerV2#transform} works as expected when run against the
+   * Verifies that {@link ClaimTransformerInterfaceV2#transform} works as expected when run against the
    * {@link StaticRifResource#SAMPLE_A_SNF} {@link SNFClaim}.
    *
    * @throws FHIRException (indicates test failure)
@@ -160,7 +160,7 @@ public final class HospiceClaimTransformerV2Test {
   public void transformSampleARecord() throws FHIRException, IOException {
     assertMatches(
         claim,
-        hospiceClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false));
+        hospiceClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags)));
   }
 
   /** Tests that the transformer sets the expected id. */
@@ -472,7 +472,7 @@ public final class HospiceClaimTransformerV2Test {
     claim.setLastUpdated(Instant.now());
 
     ExplanationOfBenefit genEob =
-        hospiceClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
+        hospiceClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags));
     TransformerUtilsV2.enrichEob(
         genEob,
         RDATestUtils.createTestNpiOrgLookup(),

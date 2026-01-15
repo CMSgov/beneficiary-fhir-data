@@ -129,7 +129,7 @@ public class CarrierClaimTransformerV2Test {
 
     claim = generateClaim();
     ExplanationOfBenefit genEob =
-        carrierClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
+        carrierClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags));
     TransformerUtilsV2.enrichEob(
         genEob,
         RDATestUtils.createTestNpiOrgLookup(),
@@ -154,7 +154,7 @@ public class CarrierClaimTransformerV2Test {
   }
 
   /**
-   * Verifies that {@link gov.cms.bfd.server.war.r4.providers.CarrierClaimTransformerV2#transform}
+   * Verifies that {@link ClaimTransformerInterfaceV2#transform}
    * works as expected when run against the {@link StaticRifResource#SAMPLE_A_CARRIER} {@link
    * CarrierClaim}.
    *
@@ -166,7 +166,7 @@ public class CarrierClaimTransformerV2Test {
 
     assertMatches(
         claim,
-        carrierClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false));
+        carrierClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags)));
   }
 
   /** Tests that the transformer sets the provider (CARR_CLM_BLG_NPI_NUM). */
@@ -194,7 +194,7 @@ public class CarrierClaimTransformerV2Test {
     claim = generateClaim();
     claim.setCarrierClaimBlgNpiNumber(Optional.empty());
     ExplanationOfBenefit genEob =
-        carrierClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
+        carrierClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags));
     TransformerUtilsV2.enrichEob(
         genEob,
         RDATestUtils.createTestNpiOrgLookup(),
@@ -740,7 +740,7 @@ public class CarrierClaimTransformerV2Test {
 
     ExplanationOfBenefit genEob =
         carrierClaimTransformer.transform(
-            new ClaimWithSecurityTags<>(loadedClaim, securityTags), false);
+            new ClaimWithSecurityTags<>(loadedClaim, securityTags));
 
     TransformerUtilsV2.enrichEob(
         genEob,
@@ -853,7 +853,7 @@ public class CarrierClaimTransformerV2Test {
 
     ExplanationOfBenefit genEob =
         carrierClaimTransformer.transform(
-            new ClaimWithSecurityTags<>(loadedClaim, securityTags), false);
+            new ClaimWithSecurityTags<>(loadedClaim, securityTags));
 
     TransformerUtilsV2.enrichEob(
         genEob,
@@ -888,7 +888,7 @@ public class CarrierClaimTransformerV2Test {
     claim.setLastUpdated(Instant.now());
 
     ExplanationOfBenefit genEob =
-        carrierClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
+        carrierClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags));
     TransformerUtilsV2.enrichEob(
         genEob,
         RDATestUtils.createTestNpiOrgLookup(),
@@ -1477,7 +1477,7 @@ public class CarrierClaimTransformerV2Test {
     claimWithoutNpi.getLines().get(0).setOrganizationNpi(Optional.empty());
     ExplanationOfBenefit genEob =
         carrierClaimTransformer.transform(
-            new ClaimWithSecurityTags<>(claimWithoutNpi, securityTags), false);
+            new ClaimWithSecurityTags<>(claimWithoutNpi, securityTags));
     TransformerUtilsV2.enrichEob(
         genEob,
         RDATestUtils.createTestNpiOrgLookup(),

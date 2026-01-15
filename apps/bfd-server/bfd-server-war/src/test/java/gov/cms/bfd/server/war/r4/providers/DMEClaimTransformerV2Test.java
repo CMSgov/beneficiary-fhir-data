@@ -132,7 +132,7 @@ public final class DMEClaimTransformerV2Test {
     dmeClaimTransformer = new DMEClaimTransformerV2(metricRegistry, securityTagManager, false);
     claim = generateClaim();
     ExplanationOfBenefit genEob =
-        dmeClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
+        dmeClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags));
     TransformerUtilsV2.enrichEob(
         genEob,
         RDATestUtils.createTestNpiOrgLookup(),
@@ -304,7 +304,7 @@ public final class DMEClaimTransformerV2Test {
 
     ExplanationOfBenefit genEob =
         dmeClaimTransformer.transform(
-            new ClaimWithSecurityTags<>(loadedClaim, securityTags), false);
+            new ClaimWithSecurityTags<>(loadedClaim, securityTags));
 
     TransformerUtilsV2.enrichEob(
         genEob,

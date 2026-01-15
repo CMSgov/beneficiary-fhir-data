@@ -166,7 +166,7 @@ public final class Stu3EobSamhsaMatcherTest {
                     if (r instanceof Beneficiary || r instanceof BeneficiaryHistory) return null;
 
                     return TransformerTestUtils.transformRifRecordToEob(
-                        r, new MetricRegistry(), false, securityTagManager);
+                        r, new MetricRegistry(), securityTagManager);
                   })
               .filter(ExplanationOfBenefit.class::isInstance)
               .collect(Collectors.toList());
@@ -843,7 +843,7 @@ public final class Stu3EobSamhsaMatcherTest {
               .get();
       ExplanationOfBenefit sampleEobForClaimType =
           TransformerTestUtils.transformRifRecordToEob(
-              sampleRifRecordForClaimType, new MetricRegistry(), false, securityTagManager);
+              sampleRifRecordForClaimType, new MetricRegistry(), securityTagManager);
 
       return sampleEobForClaimType;
     }

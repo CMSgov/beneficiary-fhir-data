@@ -68,13 +68,13 @@ final class HHAClaimTransformer implements ClaimTransformerInterface {
   /**
    * Transforms a {@link HHAClaim} into an {@link ExplanationOfBenefit}.
    *
-   * @param claimEntity the {@link OutpatientClaim} to use
    * @param includeTaxNumber exists to satisfy {@link ClaimTransformerInterface}; ignored
+   * @param claimEntity      the {@link OutpatientClaim} to use
    * @return a FHIR {@link ExplanationOfBenefit} resource.
    */
   @Override
   public ExplanationOfBenefit transform(
-      ClaimWithSecurityTags<?> claimEntity, boolean includeTaxNumber) {
+      ClaimWithSecurityTags<?> claimEntity) {
 
     Object claim = claimEntity.getClaimEntity();
     List<Coding> securityTags =

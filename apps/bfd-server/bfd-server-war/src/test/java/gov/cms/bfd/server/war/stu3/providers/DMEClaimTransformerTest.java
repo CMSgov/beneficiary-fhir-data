@@ -92,7 +92,7 @@ public final class DMEClaimTransformerTest {
             .findFirst()
             .orElseThrow();
 
-    dmeClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), true);
+    dmeClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags));
 
     String expectedTimerName = dmeClaimTransformer.getClass().getSimpleName() + ".transform";
     verify(metricRegistry, times(1)).timer(expectedTimerName);
@@ -102,8 +102,8 @@ public final class DMEClaimTransformerTest {
   }
 
   /**
-   * Verifies that {@link DMEClaimTransformer#transform} works as expected when run against the
-   * {@link StaticRifResource#SAMPLE_A_DME} {@link DMEClaim}.
+   * Verifies that {@link ClaimTransformerInterface#transform} works as expected when run against
+   * the {@link StaticRifResource#SAMPLE_A_DME} {@link DMEClaim}.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -119,8 +119,8 @@ public final class DMEClaimTransformerTest {
             .get();
 
     ExplanationOfBenefit eob =
-        dmeClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), true);
-    assertMatches(claim, eob, true);
+        dmeClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags));
+    assertMatches(claim, eob);
   }
 
   /**
@@ -148,8 +148,7 @@ public final class DMEClaimTransformerTest {
     }
 
     ExplanationOfBenefit genEob =
-        dmeClaimTransformer.transform(
-            new ClaimWithSecurityTags<>(loadedClaim, securityTags), false);
+        dmeClaimTransformer.transform(new ClaimWithSecurityTags<>(loadedClaim, securityTags));
     TransformerUtils.enrichEob(
         genEob,
         RDATestUtils.createTestNpiOrgLookup(),
@@ -171,16 +170,10 @@ public final class DMEClaimTransformerTest {
    *
    * @param claim the {@link DMEClaim} that the {@link ExplanationOfBenefit} was generated from
    * @param eob the {@link ExplanationOfBenefit} that was generated from the specified {@link
-   *     DMEClaim}@param includedTaxNumbers whether or not to include tax numbers are expected to be
-   *     included in the result (see {@link
-   *     ExplanationOfBenefitResourceProvider#HEADER_NAME_INCLUDE_TAX_NUMBERS}, defaults to <code>
-   * false</code> )
-   * @param includedTaxNumbers the value for IncludeTaxNumbers in the request to inform the expected
-   *     result
+   *     DMEClaim}
    * @throws FHIRException (indicates test failure)
    */
-  static void assertMatches(DMEClaim claim, ExplanationOfBenefit eob, boolean includedTaxNumbers)
-      throws FHIRException {
+  static void assertMatches(DMEClaim claim, ExplanationOfBenefit eob) throws FHIRException {
     // Test to ensure group level fields between all claim types match
     TransformerTestUtils.assertEobCommonClaimHeaderData(
         eob,
@@ -243,11 +236,9 @@ public final class DMEClaimTransformerTest {
     CareTeamComponent taxNumberCareTeamEntry =
         TransformerTestUtils.findCareTeamEntryForProviderTaxNumber(
             claimLine1.getProviderTaxNumber(), eob.getCareTeam());
-    if (includedTaxNumbers) {
-      assertNotNull(taxNumberCareTeamEntry);
-    } else {
-      assertNull(taxNumberCareTeamEntry);
-    }
+    // We assert that tax number entries are always null as of 01/26/BFD-4489 to ensure tax numbers
+    // are never included
+    assertNull(taxNumberCareTeamEntry);
 
     TransformerTestUtils.assertHcpcsCodes(
         eobItem0,

@@ -85,7 +85,7 @@ public final class HospiceClaimTransformerTest {
             .findFirst()
             .orElseThrow();
 
-    hospiceClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
+    hospiceClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags));
 
     String expectedTimerName = hospiceClaimTransformer.getClass().getSimpleName() + ".transform";
     verify(metricRegistry, times(1)).timer(expectedTimerName);
@@ -95,7 +95,7 @@ public final class HospiceClaimTransformerTest {
   }
 
   /**
-   * Verifies that {@link HospiceClaimTransformer#transform} works as expected when run against the
+   * Verifies that {@link ClaimTransformerInterface#transform} works as expected when run against the
    * {@link StaticRifResource#SAMPLE_A_HOSPICE} {@link HospiceClaim}.
    *
    * @throws FHIRException (indicates test failure)
@@ -112,7 +112,7 @@ public final class HospiceClaimTransformerTest {
             .get();
 
     ExplanationOfBenefit eob =
-        hospiceClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
+        hospiceClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags));
     assertMatches(claim, eob);
   }
 

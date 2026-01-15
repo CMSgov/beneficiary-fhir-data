@@ -75,13 +75,13 @@ final class CarrierClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
   /**
    * Transforms a {@link CarrierClaim} into an {@link ExplanationOfBenefit}.
    *
-   * @param claimEntity the {@link Object} to use
    * @param includeTaxNumber boolean denoting whether to include tax numbers in the response
+   * @param claimEntity      the {@link Object} to use
    * @return a FHIR {@link ExplanationOfBenefit} resource.
    */
   @Override
   public ExplanationOfBenefit transform(
-      ClaimWithSecurityTags<?> claimEntity, boolean includeTaxNumber) {
+      ClaimWithSecurityTags<?> claimEntity) {
     Object claim = claimEntity.getClaimEntity();
     List<Coding> securityTags =
         securityTagManager.getClaimSecurityLevel(claimEntity.getSecurityTags());
@@ -92,7 +92,7 @@ final class CarrierClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
     ExplanationOfBenefit eob;
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
       CarrierClaim carrierClaim = (CarrierClaim) claim;
-      eob = transformClaim(carrierClaim, includeTaxNumber, securityTags);
+      eob = transformClaim(carrierClaim, securityTags);
     }
     return eob;
   }
@@ -100,14 +100,13 @@ final class CarrierClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
   /**
    * Transforms a claim into an {@link ExplanationOfBenefit}.
    *
-   * @param claimGroup the CCW {@link CarrierClaim} to transform
-   * @param includeTaxNumbers whether to include tax numbers in the response
+   * @param claimGroup   the CCW {@link CarrierClaim} to transform
    * @param securityTags securityTags of the claim
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
-   *     CarrierClaim}
+   * CarrierClaim}
    */
   private ExplanationOfBenefit transformClaim(
-      CarrierClaim claimGroup, boolean includeTaxNumbers, List<Coding> securityTags) {
+          CarrierClaim claimGroup, List<Coding> securityTags) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Required values not directly mapped
@@ -313,13 +312,6 @@ final class CarrierClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
           line.getHcpcsCode(),
           claimGroup.getHcpcsYearCode(),
           Arrays.asList(line.getHcpcsInitialModifierCode(), line.getHcpcsSecondModifierCode()));
-
-      // tax num should be as a extension
-      if (includeTaxNumbers) {
-        item.addExtension(
-            TransformerUtilsV2.createExtensionCoding(
-                eob, CcwCodebookVariable.TAX_NUM, line.getProviderTaxNumber()));
-      }
 
       // CARR_LINE_ANSTHSA_UNIT_CNT => ExplanationOfBenefit.item.extension
       if (line.getAnesthesiaUnitCount().compareTo(BigDecimal.ZERO) > 0) {

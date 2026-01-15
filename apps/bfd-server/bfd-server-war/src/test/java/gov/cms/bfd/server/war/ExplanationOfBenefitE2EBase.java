@@ -18,7 +18,6 @@ import com.google.common.collect.ImmutableList;
 import gov.cms.bfd.model.rif.entities.OutpatientClaim;
 import gov.cms.bfd.server.sharedutils.BfdMDC;
 import gov.cms.bfd.server.war.commons.ClaimType;
-import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider;
@@ -680,14 +679,12 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
   }
 
   /**
-   * Test eob by patient id does not return tax numbers for applicable claim types when
-   * IncludeTaxNumbers = false.
+   * Test eob by patient id does not return tax numbers for applicable claim types
    */
   @Test
-  public void testEobByPatientIdWithIncludeTaxNumbersFalseExpectNoTaxNumbers() {
+  public void testEobByPatientIdWithExpectNoTaxNumbers() {
 
     String patientId = testUtils.getPatientId(testUtils.loadSampleAData());
-    // IncludeTaxNumbers is a header, so added below in restAssured API
     String requestString = eobEndpoint + "?patient=" + patientId;
 
     // make sure all 8 entries come back as expected and no 400/500/other errors
@@ -1035,7 +1032,6 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
         List.of(
             BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_PER_KB,
             BfdMDC.HTTP_ACCESS_RESPONSE_HEADER_CONTENT_LOCATION,
-            BfdMDC.HTTP_ACCESS_REQUEST_HEADER_TAX_NUMBERS,
             BfdMDC.HTTP_ACCESS_REQUEST_HEADER_ADDRESS_FIELDS,
             BfdMDC.HTTP_ACCESS_REQUEST_HEADER_ACCEPT_CHARSET);
 
@@ -1058,7 +1054,6 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
     List<String> additionalExpectedMdcKeys =
         List.of(
             BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_PER_KB,
-            BfdMDC.HTTP_ACCESS_REQUEST_HEADER_TAX_NUMBERS,
             BfdMDC.HTTP_ACCESS_REQUEST_HEADER_ADDRESS_FIELDS);
 
     ServerTestUtils.assertDefaultAndAdditionalMdcKeys(

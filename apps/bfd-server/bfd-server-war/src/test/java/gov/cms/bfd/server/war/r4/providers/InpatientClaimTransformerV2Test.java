@@ -132,7 +132,7 @@ public final class InpatientClaimTransformerV2Test {
     claim = generateClaim();
     ExplanationOfBenefit genEob =
         inpatientClaimTransformer.transform(
-            new ClaimWithSecurityTags<>(claim, securityTags), false);
+            new ClaimWithSecurityTags<>(claim, securityTags));
     TransformerUtilsV2.enrichEob(
         genEob,
         RDATestUtils.createTestNpiOrgLookup(),
@@ -477,7 +477,7 @@ public final class InpatientClaimTransformerV2Test {
 
     ExplanationOfBenefit genEob =
         inpatientClaimTransformer.transform(
-            new ClaimWithSecurityTags<>(claim, securityTags), false);
+            new ClaimWithSecurityTags<>(claim, securityTags));
     TransformerUtilsV2.enrichEob(
         genEob,
         RDATestUtils.createTestNpiOrgLookup(),

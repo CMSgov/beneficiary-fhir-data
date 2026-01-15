@@ -109,16 +109,10 @@ public class EndpointJsonResponseComparatorV2E2E extends EndpointJsonComparatorB
             "eobReadCarrier",
             (Supplier<String>) EndpointJsonResponseComparatorV2E2E::eobReadCarrier),
         arguments(
-            "eobReadCarrierWithTaxNumbers",
-            (Supplier<String>) EndpointJsonResponseComparatorV2E2E::eobReadCarrierWithTaxNumbers),
-        arguments(
             "eobReadCarrierWithMultipleLines",
             (Supplier<String>)
                 EndpointJsonResponseComparatorV2E2E::eobReadCarrierWithMultipleLines),
         arguments("eobReadDme", (Supplier<String>) EndpointJsonResponseComparatorV2E2E::eobReadDme),
-        arguments(
-            "eobReadDmeWithTaxNumbers",
-            (Supplier<String>) EndpointJsonResponseComparatorV2E2E::eobReadDmeWithTaxNumbers),
         arguments("eobReadHha", (Supplier<String>) EndpointJsonResponseComparatorV2E2E::eobReadHha),
         arguments(
             "eobReadHospice",
@@ -588,25 +582,6 @@ public class EndpointJsonResponseComparatorV2E2E extends EndpointJsonComparatorB
 
   /**
    * Executes a search against the EOB endpoint using a carrier claim id (based on the sample a
-   * data) and returns the sorted results with tax numbers included.
-   *
-   * @return the sorted results
-   */
-  public static String eobReadCarrierWithTaxNumbers() {
-    List<Object> loadedRecords =
-        ServerTestUtils.get()
-            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-
-    String carrClaimId = ServerTestUtils.getClaimIdFor(loadedRecords, ClaimType.CARRIER);
-    String eobId = CommonTransformerUtils.buildEobId(ClaimType.CARRIER, carrClaimId);
-
-    Headers headers = new Headers(new Header("Content-Type", "application/json+fhir"));
-
-    return getJsonResponseFor(baseServerUrl + "/v2/fhir/ExplanationOfBenefit/" + eobId, headers);
-  }
-
-  /**
-   * Executes a search against the EOB endpoint using a carrier claim id (based on the sample a
    * data) and returns the sorted results with tax numbers not included and multiple lines.
    *
    * <p>This is an integration test to make sure CareTeamComponent entries and their extensions are
@@ -624,9 +599,7 @@ public class EndpointJsonResponseComparatorV2E2E extends EndpointJsonComparatorB
     String carrClaimId = ServerTestUtils.getClaimIdFor(loadedRecords, ClaimType.CARRIER);
     String eobId = CommonTransformerUtils.buildEobId(ClaimType.CARRIER, carrClaimId);
 
-    Headers headers =
-        new Headers(
-            new Header("Content-Type", "application/json+fhir"));
+    Headers headers = new Headers(new Header("Content-Type", "application/json+fhir"));
 
     return getJsonResponseFor(baseServerUrl + "/v2/fhir/ExplanationOfBenefit/" + eobId, headers);
   }
@@ -646,27 +619,6 @@ public class EndpointJsonResponseComparatorV2E2E extends EndpointJsonComparatorB
     String eobId = CommonTransformerUtils.buildEobId(ClaimType.CARRIER, carrClaimId);
 
     return getJsonResponseFor(baseServerUrl + "/v2/fhir/ExplanationOfBenefit/" + eobId);
-  }
-
-  /**
-   * Executes a search against the EOB endpoint using a dme claim id (based on the sample a data)
-   * and returns the sorted results with tax numbers included.
-   *
-   * @return the sorted results
-   */
-  public static String eobReadDmeWithTaxNumbers() {
-    List<Object> loadedRecords =
-        ServerTestUtils.get()
-            .loadData(Arrays.asList(StaticRifResourceGroup.SAMPLE_A.getResources()));
-
-    String dmeClaimId = ServerTestUtils.getClaimIdFor(loadedRecords, ClaimType.DME);
-    String eobId = CommonTransformerUtils.buildEobId(ClaimType.DME, dmeClaimId);
-
-    Headers headers =
-        new Headers(
-            new Header("Content-Type", "application/json+fhir"));
-
-    return getJsonResponseFor(baseServerUrl + "/v2/fhir/ExplanationOfBenefit/" + eobId, headers);
   }
 
   /**

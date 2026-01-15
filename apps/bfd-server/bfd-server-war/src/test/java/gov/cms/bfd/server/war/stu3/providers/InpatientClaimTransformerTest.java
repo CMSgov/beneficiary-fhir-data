@@ -90,7 +90,7 @@ public final class InpatientClaimTransformerTest {
 
     claim.setLastUpdated(Instant.now());
 
-    inpatientClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
+    inpatientClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags));
 
     String expectedTimerName = inpatientClaimTransformer.getClass().getSimpleName() + ".transform";
     verify(metricRegistry, times(1)).timer(expectedTimerName);
@@ -100,7 +100,7 @@ public final class InpatientClaimTransformerTest {
   }
 
   /**
-   * Verifies that {@link InpatientClaimTransformer#transform} works as expected when run against
+   * Verifies that {@link ClaimTransformerInterface#transform} works as expected when run against
    * the {@link StaticRifResource#SAMPLE_A_INPATIENT} {@link InpatientClaim}.
    *
    * @throws FHIRException (indicates test failure)
@@ -120,7 +120,7 @@ public final class InpatientClaimTransformerTest {
 
     ExplanationOfBenefit eob =
         inpatientClaimTransformer.transform(
-            new ClaimWithSecurityTags<>(claim, securityTags), false);
+            new ClaimWithSecurityTags<>(claim, securityTags));
     assertMatches(claim, eob);
   }
 

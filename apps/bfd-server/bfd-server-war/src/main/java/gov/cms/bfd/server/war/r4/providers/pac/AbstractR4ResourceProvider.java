@@ -299,9 +299,9 @@ public abstract class AbstractR4ResourceProvider<T extends IBaseResource>
       ClaimWithSecurityTags<?> claimEntity) {
 
     if (claimIdType.getTypeLabel().equals("fiss")) {
-      return fissTransformer.transform(claimEntity, false);
+      return fissTransformer.transform(claimEntity);
     } else if (claimIdType.getTypeLabel().equals("mcs")) {
-      return mcsTransformer.transform(claimEntity, false);
+      return mcsTransformer.transform(claimEntity);
     } else {
       throw new InvalidRequestException("Invalid claim id type, cannot get claim data");
     }

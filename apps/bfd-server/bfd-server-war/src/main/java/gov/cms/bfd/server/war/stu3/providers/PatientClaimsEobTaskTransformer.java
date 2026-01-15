@@ -56,10 +56,7 @@ import org.springframework.stereotype.Component;
  * identifies its need have its own unique instance of the {@link EntityManager}.
  *
  * <p>Once Spring has created the class, the caller then sets up the task parameters that define the
- * operating constraints {@link PatientClaimsEobTaskTransformerV2#setupTaskParams}. In addition,
- * some claim tasks require an additional property denoting how NPI tax number is processed; this
- * property is set using the {@link PatientClaimsEobTaskTransformerV2#setIncludeTaxNumbers}; the
- * default property value for inclusion of NPI tax info is FALSE (do not include NPI tax info).
+ * operating constraints {@link PatientClaimsEobTaskTransformerV2#setupTaskParams}.
  */
 @Component
 @Scope("prototype")
@@ -101,9 +98,6 @@ public class PatientClaimsEobTaskTransformer implements Callable {
 
   /** date range that clm_thru_dt falls within. */
   private Optional<DateRangeParam> serviceDate;
-
-  /** whether to return tax numbers. */
-  private boolean includeTaxNumbers = false;
 
   /** whether to exclude SAMHSA claims. */
   private boolean excludeSamhsa;
@@ -193,15 +187,6 @@ public class PatientClaimsEobTaskTransformer implements Callable {
   }
 
   /**
-   * Sets the {@link #includeTaxNumbers} which will turn on processing of NPI tax number info.
-   *
-   * @param includeTaxNumbers {@code boolean} to enable/disable NPI tax number processing.
-   */
-  public void setIncludeTaxNumbers(boolean includeTaxNumbers) {
-    this.includeTaxNumbers = includeTaxNumbers;
-  }
-
-  /**
    * ExecutorService will invoke the task.
    *
    * @return the results for the task.
@@ -256,7 +241,7 @@ public class PatientClaimsEobTaskTransformer implements Callable {
    */
   @VisibleForTesting
   private ExplanationOfBenefit transformEobClaim(ClaimWithSecurityTags<?> claimEntity) {
-    return claimTransformer.transform(claimEntity, includeTaxNumbers);
+    return claimTransformer.transform(claimEntity);
   }
 
   /**

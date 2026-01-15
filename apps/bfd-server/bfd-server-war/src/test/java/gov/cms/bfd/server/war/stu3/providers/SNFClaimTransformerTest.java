@@ -86,7 +86,7 @@ public final class SNFClaimTransformerTest {
             .findFirst()
             .orElseThrow();
 
-    snfClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
+    snfClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags));
 
     String expectedTimerName = snfClaimTransformer.getClass().getSimpleName() + ".transform";
     verify(metricRegistry, times(1)).timer(expectedTimerName);
@@ -96,7 +96,7 @@ public final class SNFClaimTransformerTest {
   }
 
   /**
-   * Verifies that {@link SNFClaimTransformer#transform} works as expected when run against the
+   * Verifies that {@link ClaimTransformerInterface#transform} works as expected when run against the
    * {@link StaticRifResource#SAMPLE_A_SNF} {@link SNFClaim}.
    *
    * @throws FHIRException (indicates test failure)
@@ -113,7 +113,7 @@ public final class SNFClaimTransformerTest {
             .get();
 
     ExplanationOfBenefit eob =
-        snfClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
+        snfClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags));
     assertMatches(claim, eob);
   }
 

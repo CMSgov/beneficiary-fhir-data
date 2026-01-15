@@ -84,7 +84,7 @@ public final class HHAClaimTransformerTest {
             .findFirst()
             .orElseThrow();
 
-    hhaClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
+    hhaClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags));
 
     String expectedTimerName = hhaClaimTransformer.getClass().getSimpleName() + ".transform";
     verify(metricRegistry, times(1)).timer(expectedTimerName);
@@ -94,7 +94,7 @@ public final class HHAClaimTransformerTest {
   }
 
   /**
-   * Verifies that {@link HHAClaimTransformer#transform} works as expected when run against the
+   * Verifies that {@link ClaimTransformerInterface#transform} works as expected when run against the
    * {@link StaticRifResource#SAMPLE_A_HHA} {@link HHAClaim}.
    *
    * @throws FHIRException (indicates test failure)
@@ -111,7 +111,7 @@ public final class HHAClaimTransformerTest {
             .get();
 
     ExplanationOfBenefit eob =
-        hhaClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
+        hhaClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags));
     assertMatches(claim, eob);
   }
 

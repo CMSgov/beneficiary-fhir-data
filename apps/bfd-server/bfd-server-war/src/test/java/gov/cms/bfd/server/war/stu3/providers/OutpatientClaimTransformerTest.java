@@ -90,7 +90,7 @@ public final class OutpatientClaimTransformerTest {
             .findFirst()
             .orElseThrow();
 
-    outpatientClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
+    outpatientClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags));
 
     String expectedTimerName = outpatientClaimTransformer.getClass().getSimpleName() + ".transform";
     verify(metricRegistry, times(1)).timer(expectedTimerName);
@@ -100,7 +100,7 @@ public final class OutpatientClaimTransformerTest {
 
   /**
    * Verifies that {@link
-   * gov.cms.bfd.server.war.stu3.providers.OutpatientClaimTransformer#transform} works as expected
+   * ClaimTransformerInterface#transform} works as expected
    * when run against the {@link StaticRifResource#SAMPLE_A_OUTPATIENT} {@link OutpatientClaim}.
    *
    * @throws FHIRException (indicates test failure)
@@ -118,7 +118,7 @@ public final class OutpatientClaimTransformerTest {
 
     ExplanationOfBenefit eob =
         outpatientClaimTransformer.transform(
-            new ClaimWithSecurityTags<>(claim, securityTags), false);
+            new ClaimWithSecurityTags<>(claim, securityTags));
     assertMatches(claim, eob);
   }
 

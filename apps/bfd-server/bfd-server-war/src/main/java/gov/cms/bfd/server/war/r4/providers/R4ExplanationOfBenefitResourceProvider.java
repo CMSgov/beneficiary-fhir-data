@@ -39,7 +39,6 @@ import gov.cms.bfd.server.war.commons.RetryOnFailoverOrConnectionException;
 import gov.cms.bfd.server.war.commons.SecurityTagManager;
 import gov.cms.bfd.server.war.commons.SecurityTagsDao;
 import gov.cms.bfd.server.war.commons.StringUtils;
-import gov.cms.bfd.server.war.r4.providers.pac.common.*;
 import gov.cms.bfd.server.war.r4.providers.pac.common.ClaimWithSecurityTags;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
@@ -280,7 +279,7 @@ public class R4ExplanationOfBenefitResourceProvider extends AbstractResourceProv
     }
 
     ClaimTransformerInterfaceV2 transformer = deriveTransformer(claimType);
-    ExplanationOfBenefit eob = transformer.transform(claimEntitiesWithTag, false);
+    ExplanationOfBenefit eob = transformer.transform(claimEntitiesWithTag);
 
     // Add bene_id to MDC logs
     if (eob.getPatient() != null && !Strings.isNullOrEmpty(eob.getPatient().getReference())) {
@@ -511,7 +510,6 @@ public class R4ExplanationOfBenefitResourceProvider extends AbstractResourceProv
               serviceDate,
               excludeSamhsa);
 
-          task.setIncludeTaxNumbers(false);
           callableTasks.add(task);
         });
 
