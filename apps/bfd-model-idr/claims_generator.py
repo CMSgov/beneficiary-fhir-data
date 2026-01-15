@@ -1145,7 +1145,7 @@ def gen_claim(bene_sk: str = "-1", min_date: str = "2018-01-01", max_date: str =
         claim_line["CLM_FROM_DT"] = claim.CLM["CLM_FROM_DT"]
         claim_line["CLM_LINE_FROM_DT"] = claim.CLM["CLM_FROM_DT"]
         claim_line["CLM_LINE_THRU_DT"] = claim.CLM["CLM_THRU_DT"]
-        if random.random() < 0.10:
+        if probability(0.10):
             claim_line["CLM_LINE_PMD_UNIQ_TRKNG_NUM"] = "".join(random.choices(string.ascii_uppercase + string.digits, k=14))
 
         if clm_type_cd >= 10 and clm_type_cd <= 64:
