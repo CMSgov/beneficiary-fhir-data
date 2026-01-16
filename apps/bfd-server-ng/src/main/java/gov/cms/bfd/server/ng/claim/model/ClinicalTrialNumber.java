@@ -1,21 +1,23 @@
 package gov.cms.bfd.server.ng.claim.model;
 
-import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
 import java.util.Optional;
-import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.StringType;
 
-/** Clinical Trial number. * */
-public class ClinicalTrialNumber {
+@Embeddable
+class ClinicalTrialNumber {
   @Column(name = "clm_clncl_tril_num")
-  private Optional<String> clinicalTrailNum;
+  private Optional<String> clinicalTrialNum;
 
-  Optional<Extension> toFhir() {
-    return clinicalTrailNum.map(
-        s ->
-            new Extension()
-                .setUrl(SystemUrls.BLUE_BUTTON_STRUCTURE_DEFINITION_CLAIM_CLINICAL_TRIAL_NUMBER)
-                .setValue(new StringType(s)));
+  Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
+      SupportingInfoFactory supportingInfoFactory) {
+    return clinicalTrialNum.map(
+        trialNumber ->
+            supportingInfoFactory
+                .createSupportingInfo()
+                .setCategory(BlueButtonSupportingInfoCategory.CLM_CLNCL_TRIL_NUM.toFhir())
+                .setValue(new StringType(trialNumber)));
   }
 }

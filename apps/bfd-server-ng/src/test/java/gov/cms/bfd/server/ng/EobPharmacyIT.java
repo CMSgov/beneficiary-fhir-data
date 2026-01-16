@@ -8,9 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.rest.gclient.IReadTyped;
 import gov.cms.bfd.server.ng.eob.EobResourceProvider;
 import gov.cms.bfd.server.ng.testUtil.ThreadSafeAppender;
-import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.List;
 import org.hl7.fhir.r4.model.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -118,14 +116,8 @@ class EobPharmacyIT extends IntegrationTestBase {
             .filter(i -> i.getCoverage().getDisplay().equals("Part D"))
             .findFirst();
     assertTrue(partDInsurance.isPresent());
-    var extensions = partDInsurance.get().getExtension();
-    List<String> systems =
-        List.of(
-            SystemUrls.BLUE_BUTTON_STRUCTURE_DEFINITION_SUBMITTER_CONTRACT_NUMBER,
-            SystemUrls.BLUE_BUTTON_STRUCTURE_DEFINITION_SUBMITTER_CONTRACT_PBP_NUMBER);
-    var hasContractSystems =
-        extensions.stream().allMatch(extension -> systems.contains(extension.getUrl()));
-    assertTrue(hasContractSystems);
+    var insuranceExtensions = partDInsurance.get().getExtension();
+    assertTrue(insuranceExtensions.isEmpty());
   }
 
   @Test
@@ -177,13 +169,7 @@ class EobPharmacyIT extends IntegrationTestBase {
             .filter(i -> i.getCoverage().getDisplay().equals("Part D"))
             .findFirst();
     assertTrue(partDInsurance.isPresent());
-    var extensions = partDInsurance.get().getExtension();
-    List<String> systems =
-        List.of(
-            SystemUrls.BLUE_BUTTON_STRUCTURE_DEFINITION_SUBMITTER_CONTRACT_NUMBER,
-            SystemUrls.BLUE_BUTTON_STRUCTURE_DEFINITION_SUBMITTER_CONTRACT_PBP_NUMBER);
-    var hasContractSystems =
-        extensions.stream().allMatch(extension -> systems.contains(extension.getUrl()));
-    assertTrue(hasContractSystems);
+    var insuranceExtensions = partDInsurance.get().getExtension();
+    assertTrue(insuranceExtensions.isEmpty());
   }
 }

@@ -18,7 +18,6 @@ public class ClaimDateSignature {
   private long claimDateSignatureSk;
 
   @Embedded private ClaimDateSupportingInfo supportingInfo;
-  @Embedded private ClaimProcessDate claimProcessDate;
 
   @OneToOne(mappedBy = "claimDateSignature")
   private Claim claim;

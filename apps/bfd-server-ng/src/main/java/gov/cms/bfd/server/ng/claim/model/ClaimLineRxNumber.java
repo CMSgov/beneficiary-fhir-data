@@ -18,7 +18,7 @@ class ClaimLineRxNumber {
       return Optional.empty();
     }
 
-    ExplanationOfBenefit.SupportingInformationComponent component =
+    var component =
         supportingInfoFactory
             .createSupportingInfo()
             .setCategory(BlueButtonSupportingInfoCategory.CLM_LINE_RX_NUM.toFhir())
