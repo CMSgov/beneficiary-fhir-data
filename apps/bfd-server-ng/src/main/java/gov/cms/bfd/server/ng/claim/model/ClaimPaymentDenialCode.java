@@ -5,43 +5,41 @@ import java.util.Arrays;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /** Claim Payment denial code enum. * */
 @AllArgsConstructor
 @Getter
 @SuppressWarnings("java:S115")
 public enum ClaimPaymentDenialCode {
-  /** ! - MSP COST AVOIDED - COB CONTRACTOR (&#x27;00&#x27; 2-BYTE CODE). */
+  /** ! - MSP COST AVOIDED - COB CONTRACTOR ('00' 2-BYTE CODE). */
   EXCLAMATION("!", "MSP COST AVOIDED - COB CONTRACTOR ('00' 2-BYTE CODE)"),
-  /** # - MSP COST AVOIDED - OFFICE OF PERSONNEL MANAGEMENT (&#x27;13&#x27; 2-BYTE CODE). */
+  /** # - MSP COST AVOIDED - OFFICE OF PERSONNEL MANAGEMENT ('13' 2-BYTE CODE). */
   HASHTAG("#", "MSP COST AVOIDED - OFFICE OF PERSONNEL MANAGEMENT ('13' 2-BYTE CODE)"),
-  /**
-   * $ - MSP COST AVOIDED - WORKMAN&#x27;S COMPENSATION (WC) DATA MATCH (&#x27;14&#x27; 2-BYTE
-   * CODE).
-   */
+  /** $ - MSP COST AVOIDED - WORKMAN'S COMPENSATION (WC) DATA MATCH ('14' 2-BYTE CODE). */
   DOLLAR("$", "MSP COST AVOIDED - WORKMAN'S COMPENSATION (WC) DATA MATCH ('14' 2-BYTE CODE)"),
-  /** % - MSP COST AVOIDED - RAC - CALIFORNIA (&#x27;25&#x27; 2-BYTE CODE) (EFF. 10/2005). */
+  /** % - MSP COST AVOIDED - RAC - CALIFORNIA ('25' 2-BYTE CODE) (EFF. 10/2005). */
   PERCENT("%", "MSP COST AVOIDED - RAC - CALIFORNIA ('25' 2-BYTE CODE) (EFF. 10/2005)"),
-  /** &amp; - MSP COST AVOIDED - RAC - FLORIDA (&#x27;26&#x27; 2-BYTE CODE) (EFF. 10/2005). */
+  /** &amp; - MSP COST AVOIDED - RAC - FLORIDA ('26' 2-BYTE CODE) (EFF. 10/2005). */
   AMPERSAND("&", "MSP COST AVOIDED - RAC - FLORIDA ('26' 2-BYTE CODE) (EFF. 10/2005)"),
-  /** ( - MSP COST AVOIDED - LIABILITY INSURER VDSA (&#x27;16&#x27; 2-BYTE CODE) (EFF. 4/2006). */
+  /** ( - MSP COST AVOIDED - LIABILITY INSURER VDSA ('16' 2-BYTE CODE) (EFF. 4/2006). */
   LEFT_PARENTHESIS(
       "(", "MSP COST AVOIDED - LIABILITY INSURER VDSA ('16' 2-BYTE CODE) (EFF. 4/2006)"),
-  /** ) - MSP COST AVOIDED - NO-FAULT INSURER VDSA (&#x27;17&#x27; 2-BYTE CODE) (EFF. 4/2006). */
+  /** ) - MSP COST AVOIDED - NO-FAULT INSURER VDSA ('17' 2-BYTE CODE) (EFF. 4/2006). */
   RIGHT_PARENTHESIS(
       ")", "MSP COST AVOIDED - NO-FAULT INSURER VDSA ('17' 2-BYTE CODE) (EFF. 4/2006)"),
   /**
-   * - MSP COST AVOIDED - WORKMAN&#x27;S COMPENSATION INSURER VOLUNTARY DATA SHARING AGREEMENTS (WC
-   * VDSA) (&#x27;15&#x27; 2-BYTE CODE) (EFF. 4/2006).
+   * - MSP COST AVOIDED - WORKMAN'S COMPENSATION INSURER VOLUNTARY DATA SHARING AGREEMENTS (WC VDSA)
+   * ('15' 2-BYTE CODE) (EFF. 4/2006).
    */
   STAR(
       "*",
       "MSP COST AVOIDED - WORKMAN'S COMPENSATION INSURER VOLUNTARY DATA SHARING AGREEMENTS (WC VDSA)   ('15' 2-BYTE CODE) (EFF. 4/2006)"),
   /**
-   * + - MSP COST AVOIDED - PHARMACY BENEFIT MANAGER DATA SHARING AGREEMENT (&#x27;18&#x27; 2 -BYTE
-   * CODE) (EFF. 4/2006).
+   * + - MSP COST AVOIDED - PHARMACY BENEFIT MANAGER DATA SHARING AGREEMENT ('18' 2 -BYTE CODE)
+   * (EFF. 4/2006).
    */
   PLUS(
       "+",
@@ -66,11 +64,11 @@ public enum ClaimPaymentDenialCode {
       "MSP COST AVOIDED - BLUE CROSS (BC)/ BLUE SHIELD (BS) VOLUNTARY AGREEMENTS COB CONTRACTOR 11112"),
   /** 13 - MSP COST AVOIDED - OFFICE OF PERSONNEL MANAGEMENT COB CONTRACTOR 11113. */
   _13("13", "MSP COST AVOIDED - OFFICE OF PERSONNEL MANAGEMENT COB CONTRACTOR 11113"),
-  /** 14 - MSP COST AVOIDED - WORKMAN&#x27;S COMPENSATION (WC) DATA MATCH COB CONTRACTOR 11114. */
+  /** 14 - MSP COST AVOIDED - WORKMAN'S COMPENSATION (WC) DATA MATCH COB CONTRACTOR 11114. */
   _14("14", "MSP COST AVOIDED - WORKMAN'S COMPENSATION (WC) DATA MATCH COB CONTRACTOR 11114"),
   /**
-   * 15 - MSP COST AVOIDED - WORKMAN&#x27;S COMPENSATION INSURER VOLUNTARY DATA SHARING AGREEMENTS
-   * (WC VDSA) (EFF. 4/2006) COB CONTRACTOR 11115.
+   * 15 - MSP COST AVOIDED - WORKMAN'S COMPENSATION INSURER VOLUNTARY DATA SHARING AGREEMENTS (WC
+   * VDSA) (EFF. 4/2006) COB CONTRACTOR 11115.
    */
   _15(
       "15",
@@ -135,14 +133,12 @@ public enum ClaimPaymentDenialCode {
   _8("8", "FEDERALLY FUNDED"),
   /** 9 - PA SERVICE. */
   _9("9", "PA SERVICE"),
-  /** &lt; - MSP COST AVOIDED - MIR GROUP HEALTH PLAN (&#x27;21&#x27; 2-BYTE CODE) (EFF. 1/2009). */
+  /** &lt; - MSP COST AVOIDED - MIR GROUP HEALTH PLAN ('21' 2-BYTE CODE) (EFF. 1/2009). */
   LESS_THAN("<", "MSP COST AVOIDED - MIR GROUP HEALTH PLAN ('21' 2-BYTE CODE) (EFF. 1/2009)"),
-  /**
-   * &gt; - MSP COST AVOIDED - MIR NON-GROUP HEALTH PLAN (&#x27;22&#x27; 2-BYTE CODE) (EFF. 1/2009).
-   */
+  /** &gt; - MSP COST AVOIDED - MIR NON-GROUP HEALTH PLAN ('22' 2-BYTE CODE) (EFF. 1/2009). */
   GREATER_THAN(
       ">", "MSP COST AVOIDED - MIR NON-GROUP HEALTH PLAN ('22' 2-BYTE CODE) (EFF. 1/2009)"),
-  /** &#64; - MSP COST AVOIDED - BC/BS VOLUNTARY AGREEMENTS (&#x27;12&#x27; 2-BYTE CODE). */
+  /** AT - MSP COST AVOIDED - BC/BS VOLUNTARY AGREEMENTS ('12' 2-BYTE CODE). */
   AT("@", "MSP COST AVOIDED - BC/BS VOLUNTARY AGREEMENTS ('12' 2-BYTE CODE)"),
   /** A - ALLOWED. */
   A("A", "ALLOWED"),
@@ -195,9 +191,7 @@ public enum ClaimPaymentDenialCode {
   /** Y - MSP COST AVOIDED - IRS/SSA DATA MATCH PROJECT. */
   Y("Y", "MSP COST AVOIDED - IRS/SSA DATA MATCH PROJECT"),
   /** Z - ZERO PAYMENT , ALLOWED TEST. */
-  Z("Z", "ZERO PAYMENT , ALLOWED TEST"),
-  /** NA. */
-  NA("", "NO DESCRIPTION AVAILABLE");
+  Z("Z", "ZERO PAYMENT , ALLOWED TEST");
 
   private final String code;
   private final String display;
@@ -212,13 +206,16 @@ public enum ClaimPaymentDenialCode {
     return Arrays.stream(values()).filter(v -> v.code.equals(code)).findFirst();
   }
 
-  Extension toFhir() {
-    return new Extension()
-        .setUrl(SystemUrls.BLUE_BUTTON_STRUCTURE_DEFINITION_CLAIM_PAYMENT_DENIAL_CODE)
-        .setValue(
-            new Coding(
-                SystemUrls.BLUE_BUTTON_STRUCTURE_DEFINITION_CLAIM_PAYMENT_DENIAL_CODE,
-                code,
-                display));
+  ExplanationOfBenefit.SupportingInformationComponent toFhir(
+      SupportingInfoFactory supportingInfoFactory) {
+    return supportingInfoFactory
+        .createSupportingInfo()
+        .setCategory(BlueButtonSupportingInfoCategory.CLM_CARR_PMT_DNL_CD.toFhir())
+        .setCode(
+            new CodeableConcept(
+                new Coding()
+                    .setSystem(SystemUrls.BLUE_BUTTON_CODE_SYSTEM_CLAIM_PAYMENT_DENIAL_CODE)
+                    .setDisplay(display)
+                    .setCode(code)));
   }
 }

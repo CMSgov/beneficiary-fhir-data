@@ -1,6 +1,6 @@
 Extension: CLM_ADJSTMT_TYPE_CD
 Title: "Claim Adjustment Type Code"
-Description: "DOMAIN OF CLAIM ADJUSTMENT TYPES, INCLUDING DENOTING ORIGINAL CLAIMS"
+Description: "Deprecated 2026-01-14. DOMAIN OF CLAIM ADJUSTMENT TYPES, INCLUDING DENOTING ORIGINAL CLAIMS."
 Id: CLM-ADJSTMT-TYPE-CD
 * ^url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-ADJSTMT-TYPE-CD" 
 * ^context[+].type = #element

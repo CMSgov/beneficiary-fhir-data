@@ -1,6 +1,6 @@
 Extension: CLM_MDCR_NPMT_RSN_CD
 Title: "Claim Non Payment Reason Code"
-Description: "The reason that no Medicare payment is made for services on an institutional claim."
+Description: "Deprecated 2026-01-14. The reason that no Medicare payment is made for services on an institutional claim."
 Id: CLM-MDCR-NPMT-RSN-CD
 * ^url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MDCR-NPMT-RSN-CD" 
 * ^context[+].type = #element

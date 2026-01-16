@@ -30,6 +30,19 @@ class ClaimInstitutionalSupportingInfo {
   @Column(name = "clm_hha_rfrl_cd")
   private Optional<HhaReferralCode> hhaReferralCode;
 
+  @Column(name = "clm_pps_ind_cd")
+  private Optional<PpsIndicatorCode> ppsIndicatorCode;
+
+  @Column(name = "clm_mdcr_npmt_rsn_cd")
+  private Optional<ClaimNonpaymentReasonCode> nonpaymentReasonCode;
+
+  // This is the fiscal intermediary action code, not final action!
+  @Column(name = "clm_fi_actn_cd")
+  private Optional<ClaimFiscalIntermediaryActionCode> claimFiscalIntermediaryActionCode;
+
+  @Column(name = "clm_op_srvc_type_cd")
+  private Optional<ClaimOutpatientServiceTypeCode> claimOutpatientServiceTypeCode;
+
   @Embedded private DiagnosisDrgCode diagnosisDrgCode;
 
   List<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
@@ -41,7 +54,11 @@ class ClaimInstitutionalSupportingInfo {
             mcoPaidSwitch.map(s -> s.toFhir(supportingInfoFactory)),
             diagnosisDrgCode.toFhir(supportingInfoFactory),
             hhaLupaIndicatorCode.map(s -> s.toFhir(supportingInfoFactory)),
-            hhaReferralCode.map(s -> s.toFhir(supportingInfoFactory)))
+            hhaReferralCode.map(s -> s.toFhir(supportingInfoFactory)),
+            ppsIndicatorCode.map(c -> c.toFhir(supportingInfoFactory)),
+            nonpaymentReasonCode.map(c -> c.toFhir(supportingInfoFactory)),
+            claimFiscalIntermediaryActionCode.map(c -> c.toFhir(supportingInfoFactory)),
+            claimOutpatientServiceTypeCode.map(c -> c.toFhir(supportingInfoFactory)))
         .flatMap(Optional::stream)
         .toList();
   }

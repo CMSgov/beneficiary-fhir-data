@@ -134,10 +134,14 @@ public abstract class AbstractCleanupJob implements CleanupJob {
         entityManager -> {
           Map<String, String> params =
               Map.of(
-                  "parentTableName", parentTableName,
-                  "parentTableKey", getParentTableKey(),
-                  "interval", String.valueOf(OLDEST_CLAIM_AGE_IN_DAYS),
-                  "limit", Integer.toString(cleanupTransactionSize));
+                  "parentTableName",
+                  parentTableName,
+                  "parentTableKey",
+                  getParentTableKey(),
+                  "interval",
+                  String.valueOf(OLDEST_CLAIM_AGE_IN_DAYS),
+                  "limit",
+                  Integer.toString(cleanupTransactionSize));
           StringSubstitutor strSub = new StringSubstitutor(params);
           String queryStr = strSub.replace(DELETE_QUERY_TEMPLATE);
           atomicQuery.set(entityManager.createNativeQuery(queryStr));

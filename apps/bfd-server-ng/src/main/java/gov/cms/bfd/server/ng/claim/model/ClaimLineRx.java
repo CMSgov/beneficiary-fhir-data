@@ -17,7 +17,7 @@ import org.hl7.fhir.r4.model.Coding;
 public class ClaimLineRx {
   @EmbeddedId ClaimLineRxId claimLineInstitutionalId;
   @Embedded private ClaimLineAdjudicationChargeRx claimLineAdjudicationChargeRx;
-  @Embedded private ClaimRxSupportingInfo claimRxSupportingInfo;
+  @Embedded private ClaimLineRxSupportingInfo claimRxSupportingInfo;
 
   @OneToOne(mappedBy = "claimLineRx")
   private ClaimItem claimLine;

@@ -170,19 +170,6 @@
                 ]
             },
             {
-                "id": "ExplanationOfBenefit-Base.CLM_IDR_LD_DT",
-                "path": "ExplanationOfBenefit-Base.CLM_IDR_LD_DT",
-                "label": "Claim IDR Load Date",
-                "definition": "Date the claim was loaded into the IDR",
-                "min": 1,
-                "max": "1",
-                "type": [
-                    {
-                        "code": "date"
-                    }
-                ]
-            },
-            {
                 "id": "ExplanationOfBenefit-Base.CLM_SRC_ID",
                 "path": "ExplanationOfBenefit-Base.CLM_SRC_ID",
                 "label": "Claim Source ID",
@@ -271,18 +258,6 @@
                 ]
             },
             {
-                "id": "ExplanationOfBenefit-Base.CLM_QUERY_CD",
-                "path": "ExplanationOfBenefit-Base.CLM_QUERY_CD",
-                "label": "Claim Query Code",
-                "min": 1,
-                "max": "1",
-                "type": [
-                    {
-                        "code": "string"
-                    }
-                ]
-            },
-            {
                 "id": "ExplanationOfBenefit-Base.institutionalComponents",
                 "path": "ExplanationOfBenefit-Base.institutionalComponents",
                 "label": "Institutional Components",
@@ -361,30 +336,6 @@
                 "type": [
                     {
                         "code": "string"
-                    }
-                ]
-            },
-            {
-                "id": "ExplanationOfBenefit-Base.CLM_CNTRCTR_NUM",
-                "path": "ExplanationOfBenefit-Base.CLM_CNTRCTR_NUM",
-                "label": "FI Number",
-                "min": 0,
-                "max": "1",
-                "type": [
-                    {
-                        "code": "string"
-                    }
-                ]
-            },
-            {
-                "id": "ExplanationOfBenefit-Base.CLM_CMS_PROC_DT",
-                "path": "ExplanationOfBenefit-Base.CLM_CMS_PROC_DT",
-                "label": "FI Claim Process Date",
-                "min": 0,
-                "max": "1",
-                "type": [
-                    {
-                        "code": "date"
                     }
                 ]
             },
@@ -488,18 +439,6 @@
                 "id": "ExplanationOfBenefit-Base.PRVDR_RNDRNG_PRVDR_NPI_NUM",
                 "path": "ExplanationOfBenefit-Base.PRVDR_RNDRNG_PRVDR_NPI_NUM",
                 "label": "Rendering Physician NPI - Header Level",
-                "min": 0,
-                "max": "1",
-                "type": [
-                    {
-                        "code": "string"
-                    }
-                ]
-            },
-            {
-                "id": "ExplanationOfBenefit-Base.CLM_DISP_CD",
-                "path": "ExplanationOfBenefit-Base.CLM_DISP_CD",
-                "label": "Claim Disposition Code",
                 "min": 0,
                 "max": "1",
                 "type": [
@@ -632,18 +571,6 @@
                 "id": "ExplanationOfBenefit-Base.CLM_RIC_CD",
                 "path": "ExplanationOfBenefit-Base.CLM_RIC_CD",
                 "label": "Near Line Record Identification Code",
-                "min": 0,
-                "max": "1",
-                "type": [
-                    {
-                        "code": "string"
-                    }
-                ]
-            },
-            {
-                "id": "ExplanationOfBenefit-Base.CLM_ADJSTMT_TYPE_CD",
-                "path": "ExplanationOfBenefit-Base.CLM_ADJSTMT_TYPE_CD",
-                "label": "Claim Adjustment Type Code",
                 "min": 0,
                 "max": "1",
                 "type": [
