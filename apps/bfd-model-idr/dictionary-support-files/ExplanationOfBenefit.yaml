@@ -3344,7 +3344,7 @@
   sourceColumn: CLM_MDCR_NCH_PTNT_STUS_IND_CD
   referenceTable: CLM_MDCR_NCH_PTNT_STUS_IND_CD
   fhirPath: ExplanationOfBenefit.supportingInfo.where(code.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-NCH-PTNT-STUS-IND-CD').code.coding.code
-- inputPath: SupportingInfoComponent.CLM_LINE_PMD_UNIQ_TRKNG_NUM
+- inputPath: LineItemComponent.CLM_LINE_PMD_UNIQ_TRKNG_NUM
   appliesTo:
     - Inpatient
     - Carrier
@@ -3357,7 +3357,7 @@
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_LINE_PMD_UNIQ_TRKNG_NUM
   fhirPath: ExplanationOfBenefit.supportingInfo.where(code.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/CLM_LINE_PMD_UNIQ_TRKNG_NUM').code.coding.code
-- inputPath: SupportingInfoComponent.CLM_LINE_PA_UNIQ_TRKNG_NUM
+- inputPath: LineItemComponent.CLM_LINE_PA_UNIQ_TRKNG_NUM
   appliesTo:
     - Inpatient
     - Carrier
