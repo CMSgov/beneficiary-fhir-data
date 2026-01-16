@@ -118,7 +118,7 @@
         </sonar.issue.ignore.multicriteria.e5.resourceKey>
         <sonar.version>5.4.0.6343</sonar.version>
         <jacoco.version>0.8.14</jacoco.version>
-        <micrometer.version>1.12.1</micrometer.version>
+        <micrometer.version>1.14.14</micrometer.version>
         <metrics.version>4.2.30</metrics.version>
         <git-build-hook-maven-plugin.version>3.5.0</git-build-hook-maven-plugin.version>
         <aws-java-sdk-bom.version>2.33.4</aws-java-sdk-bom.version>

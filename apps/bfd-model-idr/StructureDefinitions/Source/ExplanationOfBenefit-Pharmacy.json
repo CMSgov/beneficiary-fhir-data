@@ -197,20 +197,6 @@
                 ]
             },
             {
-                "id": "ExplanationOfBenefit-Pharmacy.CLM_CMS_PROC_DT",
-                "path": "ExplanationOfBenefit-Pharmacy.CLM_CMS_PROC_DT",
-                "label": "CMS Process Date",
-                "definition": "The date when CMS processed the claim.",
-                "min": 0,
-                "max": "1",
-                "type": [
-                    {
-                        "code": "date"
-                    }
-                ]
-            },
-
-            {
                 "id": "ExplanationOfBenefit-Pharmacy.PRVDR_PRSCRBNG_PRVDR_NPI_NUM",
                 "path": "ExplanationOfBenefit-Pharmacy.PRVDR_PRSCRBNG_PRVDR_NPI_NUM",
                 "label": "Prescribing Provider NPI Number",
@@ -419,49 +405,10 @@
                 ]
             },
             {
-                "id": "ExplanationOfBenefit-Pharmacy.CLM_SBMTR_CNTRCT_NUM",
-                "path": "ExplanationOfBenefit-Pharmacy.CLM_SBMTR_CNTRCT_NUM",
-                "label": "Submitter Contract Number",
-                "definition": "The contract number of the submitter.",
-                "min": 0,
-                "max": "1",
-                "type": [
-                    {
-                        "code": "string"
-                    }
-                ]
-            },
-            {
-                "id": "ExplanationOfBenefit-Pharmacy.CLM_SBMTR_CNTRCT_PBP_NUM",
-                "path": "ExplanationOfBenefit-Pharmacy.CLM_SBMTR_CNTRCT_PBP_NUM",
-                "label": "Submitter Contract PBP Number",
-                "definition": "The PBP number of the submitter contract.",
-                "min": 0,
-                "max": "1",
-                "type": [
-                    {
-                        "code": "string"
-                    }
-                ]
-            },
-            {
                 "id": "ExplanationOfBenefit-Pharmacy.CNTRCT_PBP_NAME",
                 "path": "ExplanationOfBenefit-Pharmacy.CNTRCT_PBP_NAME",
                 "label": "Contract PBP Name",
                 "definition": "This field contains the name of the plan benefit package (PBP) for the beneficiary's Part D plan of record for the year.",
-                "min": 0,
-                "max": "1",
-                "type": [
-                    {
-                        "code": "string"
-                    }
-                ]
-            },
-            {
-                "id": "ExplanationOfBenefit-Pharmacy.CLM_SBMT_FRMT_CD",
-                "path": "ExplanationOfBenefit-Pharmacy.CLM_SBMT_FRMT_CD",
-                "label": "Claim Submission Format Code",
-                "definition": "A code indicating the method or format used to submit the claim.",
                 "min": 0,
                 "max": "1",
                 "type": [
@@ -499,31 +446,6 @@
                         "targetProfile": [
                             "https://bfd.cms.gov/fhir/StructureDefinition/LineItemComponent"
                         ]
-                    }
-                ]
-            },
-            {
-                "id": "ExplanationOfBenefit-Pharmacy.CLM_ADJSTMT_TYPE_CD",
-                "path": "ExplanationOfBenefit-Pharmacy.CLM_ADJSTMT_TYPE_CD",
-                "label": "Claim Adjustment Type Code",
-                "min": 0,
-                "max": "1",
-                "type": [
-                    {
-                        "code": "string"
-                    }
-                ]
-            },
-            {
-                "id": "ExplanationOfBenefit-Pharmacy.CLM_IDR_LD_DT",
-                "path": "ExplanationOfBenefit-Pharmacy.CLM_IDR_LD_DT",
-                "label": "Claim IDR Load Date",
-                "definition": "Date the claim was loaded into the IDR",
-                "min": 1,
-                "max": "1",
-                "type": [
-                    {
-                        "code": "date"
                     }
                 ]
             },

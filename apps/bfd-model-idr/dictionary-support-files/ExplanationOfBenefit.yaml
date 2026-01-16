@@ -232,7 +232,7 @@
     - CCLF6.CLM_IDR_LD_DT
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_IDR_LD_DT
-  fhirPath: ExplanationOfBenefit.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-IDR-LD-DT').value
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_IDR_LD_DT').exists()).code.coding.code
 - inputPath: ExplanationOfBenefit-Base.CLM_SRC_ID
   appliesTo:
     - Inpatient
@@ -332,7 +332,7 @@
   referenceTable: CLM_QUERY_CD
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_QUERY_CD
-  fhirPath: ExplanationOfBenefit.billablePeriod.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-QUERY-CD').value.code
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_QUERY_CD').exists()).code.coding.code
 - inputPath: ExplanationOfBenefit-Base.CLM_NCVRD_CHRG_AMT
   appliesTo:
     - Inpatient
@@ -396,7 +396,7 @@
   referenceTable: CLM_OP_SRVC_TYPE_CD
   sourceView: V2_MDCR_CLM_INSTNL
   sourceColumn: CLM_OP_SRVC_TYPE_CD
-  fhirPath: ExplanationOfBenefit.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-OP-SRVC-TYPE-CD').value.code
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(code.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/CLM-OP-SRVC-TYPE-CD').code.coding.code
 - inputPath: ExplanationOfBenefit-Base.CLM_OPRTNL_DSPRTNT_AMT
   appliesTo:
     - Inpatient
@@ -435,7 +435,7 @@
     - FI_CLM_PROC_DT
   sourceView: V2_MDCR_CLM_DT_SGNTR
   sourceColumn: CLM_CMS_PROC_DT
-  fhirPath: ExplanationOfBenefit.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CMS-PROC-DT').value
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_CMS_PROC_DT').exists()).code.coding.code
 - inputPath: ExplanationOfBenefit-Base.CLM_PMT_AMT
   appliesTo:
     - Inpatient
@@ -1831,7 +1831,7 @@
   sourceView: V2_MDCR_CLM_INSTNL
   sourceColumn: CLM_FI_ACTN_CD
   referenceTable: CLM_FI_ACTN_CD
-  fhirPath: ExplanationOfBenefit.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-FI-ACTN-CD').value.code
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_FI_ACTN_CD').exists()).code.coding.code
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_MDCR_IP_LRD_USE_CNT
   appliesTo:
     - Inpatient
@@ -1890,7 +1890,7 @@
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_DISP_CD
   referenceTable: CLM_DISP_CD
-  fhirPath: ExplanationOfBenefit.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-DISP-CD').value.code
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_DISP_CD').exists()).code.coding.code
 - inputPath: ExplanationOfBenefit-Base.CLM_SBMT_CHRG_AMT
   appliesTo:
     - Inpatient
@@ -1956,7 +1956,7 @@
   referenceTable: CLM_MDCR_NPMT_RSN_CD
   sourceView: V2_MDCR_CLM_INSTNL
   sourceColumn: CLM_MDCR_NPMT_RSN_CD
-  fhirPath: ExplanationOfBenefit.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MDCR-NPMT-RSN-CD').value.code
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_MDCR_NPMT_RSN_CD').exists()).code.coding.code
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_MDCR_IP_PPS_DRG_WT_NUM
   appliesTo:
     - Inpatient
@@ -2106,7 +2106,7 @@
   referenceTable: CLM_CNTRCTR_NUM
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_CNTRCTR_NUM
-  fhirPath: ExplanationOfBenefit.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CNTRCTR-NUM').value.code
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_CNTRCTR_NUM').exists()).code.coding.code
 - inputPath: SupportingInfoComponent.CLM_NCH_PRMRY_PYR_CD
   appliesTo:
     - Inpatient
@@ -2700,7 +2700,7 @@
   referenceTable: CLM_CARR_PMT_DNL_CD
   sourceView: V2_MDCR_CLM_PRFNL
   sourceColumn: CLM_CARR_PMT_DNL_CD
-  fhirPath: ExplanationOfBenefit.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CARR-PMT-DNL-CD').value.code
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_CARR_PMT_DNL_CD').exists()).code.coding.code
 - inputPath: ExplanationOfBenefit-Professional-Base.CLM_MDCR_PRFNL_PRMRY_PYR_AMT
   appliesTo:
     - Carrier
@@ -2726,7 +2726,7 @@
     - CARR_CLM_PRVDR_ASGNMT_IND_SW
   sourceView: V2_MDCR_CLM_PRFNL
   sourceColumn: CLM_MDCR_PRFNL_PRVDR_ASGNMT_SW
-  fhirPath: ExplanationOfBenefit.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MDCR-PRFNL-PRVDR-ASGNMT-SW').value.code
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_MDCR_PRFNL_PRVDR_ASGNMT_SW').exists()).code.coding.code
 - inputPath: ExplanationOfBenefit-Professional-Base.CLM_CLNCL_TRIL_NUM
   appliesTo:
     - Carrier
@@ -2739,7 +2739,7 @@
     - CLM_CLNCL_TRIL_NUM
   sourceView: V2_MDCR_CLM_PRFNL
   sourceColumn: CLM_CLNCL_TRIL_NUM
-  fhirPath: ExplanationOfBenefit.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CLNCL-TRIL-NUM').value
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_CLNCL_TRIL_NUM').exists()).code.coding.code
 - inputPath: SupportingInfoComponent.CLM_LINE_HCT_HGB_RSLT_NUM
   appliesTo:
     - Carrier
@@ -2991,7 +2991,7 @@
   referenceTable: CLM_ADJSTMT_TYPE_CD
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_ADJSTMT_TYPE_CD
-  fhirPath: ExplanationOfBenefit.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-ADJSTMT-TYPE-CD').value.code
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_ADJSTMT_TYPE_CD').exists()).code.coding.code
 - inputPath: ExplanationOfBenefit-Base.CLM_BENE_INTRST_PD_AMT
   appliesTo:
     - Carrier

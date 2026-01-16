@@ -5,8 +5,9 @@ import java.util.Arrays;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /** Provider Assignment Indicator Switch info. * */
 @AllArgsConstructor
@@ -31,15 +32,18 @@ public enum ProviderAssignmentIndicatorSwitch {
     return Arrays.stream(values()).filter(v -> v.code.equals(code)).findFirst();
   }
 
-  Extension toFhir() {
-    return new Extension()
-        .setUrl(
-            SystemUrls.BLUE_BUTTON_STRUCTURE_DEFINITION_CLAIM_PROVIDER_ASSIGNMENT_INDICATOR_SWITCH)
-        .setValue(
-            new Coding(
-                SystemUrls
-                    .BLUE_BUTTON_STRUCTURE_DEFINITION_CLAIM_PROVIDER_ASSIGNMENT_INDICATOR_SWITCH,
-                code,
-                display));
+  ExplanationOfBenefit.SupportingInformationComponent toFhir(
+      SupportingInfoFactory supportingInfoFactory) {
+    return supportingInfoFactory
+        .createSupportingInfo()
+        .setCategory(BlueButtonSupportingInfoCategory.CLM_MDCR_PRFNL_PRVDR_ASGNMT_SW.toFhir())
+        .setCode(
+            new CodeableConcept(
+                new Coding()
+                    .setSystem(
+                        SystemUrls
+                            .BLUE_BUTTON_CODE_SYSTEM_CLAIM_PROVIDER_ASSIGNMENT_INDICATOR_SWITCH)
+                    .setDisplay(display)
+                    .setCode(code)));
   }
 }
