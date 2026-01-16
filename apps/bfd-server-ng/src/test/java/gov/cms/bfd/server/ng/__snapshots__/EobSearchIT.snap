@@ -10558,7 +10558,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
         "category" : {
           "coding" : [ {
             "code" : "CLM_LINE_PMD_UNIQ_TRKNG_NUM",
-            "display" : "Adjudicated Unique Tracking Number",
+            "display" : "Prior Authorization Unique Tracking Number",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
           }, {
             "code" : "info",
@@ -11452,7 +11452,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
         "category" : {
           "coding" : [ {
             "code" : "CLM_LINE_PMD_UNIQ_TRKNG_NUM",
-            "display" : "Adjudicated Unique Tracking Number",
+            "display" : "Prior Authorization Unique Tracking Number",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
           }, {
             "code" : "info",
@@ -15964,7 +15964,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
         "category" : {
           "coding" : [ {
             "code" : "CLM_LINE_PMD_UNIQ_TRKNG_NUM",
-            "display" : "Adjudicated Unique Tracking Number",
+            "display" : "Prior Authorization Unique Tracking Number",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
           }, {
             "code" : "info",
@@ -16858,7 +16858,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
         "category" : {
           "coding" : [ {
             "code" : "CLM_LINE_PMD_UNIQ_TRKNG_NUM",
-            "display" : "Adjudicated Unique Tracking Number",
+            "display" : "Prior Authorization Unique Tracking Number",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
           }, {
             "code" : "info",
@@ -21370,7 +21370,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
         "category" : {
           "coding" : [ {
             "code" : "CLM_LINE_PMD_UNIQ_TRKNG_NUM",
-            "display" : "Adjudicated Unique Tracking Number",
+            "display" : "Prior Authorization Unique Tracking Number",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
           }, {
             "code" : "info",
@@ -22264,7 +22264,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
         "category" : {
           "coding" : [ {
             "code" : "CLM_LINE_PMD_UNIQ_TRKNG_NUM",
-            "display" : "Adjudicated Unique Tracking Number",
+            "display" : "Prior Authorization Unique Tracking Number",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
           }, {
             "code" : "info",
@@ -26776,7 +26776,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
         "category" : {
           "coding" : [ {
             "code" : "CLM_LINE_PMD_UNIQ_TRKNG_NUM",
-            "display" : "Adjudicated Unique Tracking Number",
+            "display" : "Prior Authorization Unique Tracking Number",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
           }, {
             "code" : "info",
@@ -31304,7 +31304,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
         "category" : {
           "coding" : [ {
             "code" : "CLM_LINE_PMD_UNIQ_TRKNG_NUM",
-            "display" : "Adjudicated Unique Tracking Number",
+            "display" : "Prior Authorization Unique Tracking Number",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
           }, {
             "code" : "info",
@@ -36124,7 +36124,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTag_Shared
         "category" : {
           "coding" : [ {
             "code" : "CLM_LINE_PMD_UNIQ_TRKNG_NUM",
-            "display" : "Adjudicated Unique Tracking Number",
+            "display" : "Prior Authorization Unique Tracking Number",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
           }, {
             "code" : "info",
@@ -40636,7 +40636,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
         "category" : {
           "coding" : [ {
             "code" : "CLM_LINE_PMD_UNIQ_TRKNG_NUM",
-            "display" : "Adjudicated Unique Tracking Number",
+            "display" : "Prior Authorization Unique Tracking Number",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
           }, {
             "code" : "info",
@@ -45164,7 +45164,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
         "category" : {
           "coding" : [ {
             "code" : "CLM_LINE_PMD_UNIQ_TRKNG_NUM",
-            "display" : "Adjudicated Unique Tracking Number",
+            "display" : "Prior Authorization Unique Tracking Number",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
           }, {
             "code" : "info",
@@ -49984,7 +49984,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTag_SharedSystem]=[
         "category" : {
           "coding" : [ {
             "code" : "CLM_LINE_PMD_UNIQ_TRKNG_NUM",
-            "display" : "Adjudicated Unique Tracking Number",
+            "display" : "Prior Authorization Unique Tracking Number",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
           }, {
             "code" : "info",
@@ -54496,7 +54496,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
         "category" : {
           "coding" : [ {
             "code" : "CLM_LINE_PMD_UNIQ_TRKNG_NUM",
-            "display" : "Adjudicated Unique Tracking Number",
+            "display" : "Prior Authorization Unique Tracking Number",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
           }, {
             "code" : "info",
@@ -59024,7 +59024,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
         "category" : {
           "coding" : [ {
             "code" : "CLM_LINE_PMD_UNIQ_TRKNG_NUM",
-            "display" : "Adjudicated Unique Tracking Number",
+            "display" : "Prior Authorization Unique Tracking Number",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
           }, {
             "code" : "info",
@@ -63844,7 +63844,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTag_SharedSystem]=[
         "category" : {
           "coding" : [ {
             "code" : "CLM_LINE_PMD_UNIQ_TRKNG_NUM",
-            "display" : "Adjudicated Unique Tracking Number",
+            "display" : "Prior Authorization Unique Tracking Number",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
           }, {
             "code" : "info",
@@ -66717,7 +66717,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
         "category" : {
           "coding" : [ {
             "code" : "CLM_LINE_PMD_UNIQ_TRKNG_NUM",
-            "display" : "Adjudicated Unique Tracking Number",
+            "display" : "Prior Authorization Unique Tracking Number",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
           }, {
             "code" : "info",
@@ -67611,7 +67611,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
         "category" : {
           "coding" : [ {
             "code" : "CLM_LINE_PMD_UNIQ_TRKNG_NUM",
-            "display" : "Adjudicated Unique Tracking Number",
+            "display" : "Prior Authorization Unique Tracking Number",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
           }, {
             "code" : "info",
@@ -71056,7 +71056,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
         "category" : {
           "coding" : [ {
             "code" : "CLM_LINE_PMD_UNIQ_TRKNG_NUM",
-            "display" : "Adjudicated Unique Tracking Number",
+            "display" : "Prior Authorization Unique Tracking Number",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
           }, {
             "code" : "info",
@@ -71950,7 +71950,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
         "category" : {
           "coding" : [ {
             "code" : "CLM_LINE_PMD_UNIQ_TRKNG_NUM",
-            "display" : "Adjudicated Unique Tracking Number",
+            "display" : "Prior Authorization Unique Tracking Number",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
           }, {
             "code" : "info",
@@ -75395,7 +75395,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
         "category" : {
           "coding" : [ {
             "code" : "CLM_LINE_PMD_UNIQ_TRKNG_NUM",
-            "display" : "Adjudicated Unique Tracking Number",
+            "display" : "Prior Authorization Unique Tracking Number",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
           }, {
             "code" : "info",
@@ -76289,7 +76289,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
         "category" : {
           "coding" : [ {
             "code" : "CLM_LINE_PMD_UNIQ_TRKNG_NUM",
-            "display" : "Adjudicated Unique Tracking Number",
+            "display" : "Prior Authorization Unique Tracking Number",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
           }, {
             "code" : "info",
@@ -79162,7 +79162,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
         "category" : {
           "coding" : [ {
             "code" : "CLM_LINE_PMD_UNIQ_TRKNG_NUM",
-            "display" : "Adjudicated Unique Tracking Number",
+            "display" : "Prior Authorization Unique Tracking Number",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
           }, {
             "code" : "info",
@@ -80056,7 +80056,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
         "category" : {
           "coding" : [ {
             "code" : "CLM_LINE_PMD_UNIQ_TRKNG_NUM",
-            "display" : "Adjudicated Unique Tracking Number",
+            "display" : "Prior Authorization Unique Tracking Number",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
           }, {
             "code" : "info",
@@ -83501,7 +83501,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
         "category" : {
           "coding" : [ {
             "code" : "CLM_LINE_PMD_UNIQ_TRKNG_NUM",
-            "display" : "Adjudicated Unique Tracking Number",
+            "display" : "Prior Authorization Unique Tracking Number",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
           }, {
             "code" : "info",
@@ -84395,7 +84395,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
         "category" : {
           "coding" : [ {
             "code" : "CLM_LINE_PMD_UNIQ_TRKNG_NUM",
-            "display" : "Adjudicated Unique Tracking Number",
+            "display" : "Prior Authorization Unique Tracking Number",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
           }, {
             "code" : "info",
@@ -87840,7 +87840,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
         "category" : {
           "coding" : [ {
             "code" : "CLM_LINE_PMD_UNIQ_TRKNG_NUM",
-            "display" : "Adjudicated Unique Tracking Number",
+            "display" : "Prior Authorization Unique Tracking Number",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
           }, {
             "code" : "info",
@@ -88734,7 +88734,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
         "category" : {
           "coding" : [ {
             "code" : "CLM_LINE_PMD_UNIQ_TRKNG_NUM",
-            "display" : "Adjudicated Unique Tracking Number",
+            "display" : "Prior Authorization Unique Tracking Number",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
           }, {
             "code" : "info",
@@ -91607,7 +91607,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
         "category" : {
           "coding" : [ {
             "code" : "CLM_LINE_PMD_UNIQ_TRKNG_NUM",
-            "display" : "Adjudicated Unique Tracking Number",
+            "display" : "Prior Authorization Unique Tracking Number",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
           }, {
             "code" : "info",
@@ -92501,7 +92501,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
         "category" : {
           "coding" : [ {
             "code" : "CLM_LINE_PMD_UNIQ_TRKNG_NUM",
-            "display" : "Adjudicated Unique Tracking Number",
+            "display" : "Prior Authorization Unique Tracking Number",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
           }, {
             "code" : "info",
@@ -95946,7 +95946,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
         "category" : {
           "coding" : [ {
             "code" : "CLM_LINE_PMD_UNIQ_TRKNG_NUM",
-            "display" : "Adjudicated Unique Tracking Number",
+            "display" : "Prior Authorization Unique Tracking Number",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
           }, {
             "code" : "info",
@@ -96840,7 +96840,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
         "category" : {
           "coding" : [ {
             "code" : "CLM_LINE_PMD_UNIQ_TRKNG_NUM",
-            "display" : "Adjudicated Unique Tracking Number",
+            "display" : "Prior Authorization Unique Tracking Number",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
           }, {
             "code" : "info",
@@ -100285,7 +100285,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
         "category" : {
           "coding" : [ {
             "code" : "CLM_LINE_PMD_UNIQ_TRKNG_NUM",
-            "display" : "Adjudicated Unique Tracking Number",
+            "display" : "Prior Authorization Unique Tracking Number",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
           }, {
             "code" : "info",
@@ -101179,7 +101179,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
         "category" : {
           "coding" : [ {
             "code" : "CLM_LINE_PMD_UNIQ_TRKNG_NUM",
-            "display" : "Adjudicated Unique Tracking Number",
+            "display" : "Prior Authorization Unique Tracking Number",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
           }, {
             "code" : "info",

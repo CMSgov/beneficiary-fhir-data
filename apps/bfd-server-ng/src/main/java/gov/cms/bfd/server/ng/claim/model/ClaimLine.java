@@ -150,10 +150,7 @@ public class ClaimLine {
       return Optional.empty();
     }
 
-    var category =
-        adjudicatedTrackingNumber.isPresent()
-            ? BlueButtonSupportingInfoCategory.CLM_LINE_PMD_UNIQ_TRKNG_NUM
-            : BlueButtonSupportingInfoCategory.CLM_LINE_PA_UNIQ_TRKNG_NUM;
+    var category = BlueButtonSupportingInfoCategory.CLM_LINE_PMD_UNIQ_TRKNG_NUM;
 
     return Optional.of(
         supportingInfoFactory

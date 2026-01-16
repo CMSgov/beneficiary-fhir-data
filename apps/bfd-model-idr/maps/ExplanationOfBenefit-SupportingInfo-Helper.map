@@ -320,13 +320,12 @@ group addPMDUTNSupportingInfo(source item : LineItemComponent,target tgtSI : Sup
   item.CLM_LINE_PMD_UNIQ_TRKNG_NUM as value -> tgtSI.valueString = value "Set Value";
 }
 
-// Reusable Helper Group
 group addPAUTNSupportingInfo(source item : LineItemComponent, target tgtSI : SupportingInfoComponent) {
   item.SEQUENCE_INFO as seqInfo -> tgtSI.sequence = seqInfo;
 
   item -> tgtSI.category = create('CodeableConcept') as tgtCC then {
     item -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory", "info") "Set Coding Info";
-    item -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information", "CLM_LINE_PA_UNIQ_TRKNG_NUM") "Set Coding Code";
+    item -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information", "CLM_LINE_PMD_UNIQ_TRKNG_NUM") "Set Coding Code";
   } "Set Category";
 
   item.CLM_LINE_PA_UNIQ_TRKNG_NUM as value -> tgtSI.valueString = value "Set Value";

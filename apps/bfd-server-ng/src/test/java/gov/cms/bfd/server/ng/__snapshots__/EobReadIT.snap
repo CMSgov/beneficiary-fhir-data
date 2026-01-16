@@ -571,7 +571,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
     "category" : {
       "coding" : [ {
         "code" : "CLM_LINE_PMD_UNIQ_TRKNG_NUM",
-        "display" : "Adjudicated Unique Tracking Number",
+        "display" : "Prior Authorization Unique Tracking Number",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
       }, {
         "code" : "info",

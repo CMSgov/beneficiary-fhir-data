@@ -30,4 +30,5 @@ Description: "A selection of codes that provide supporting information about the
 * #CLM_LINE_RX_NUM "Claim Line Prescription Service Reference Number" "Identifies a prescription dispensed by a particular service provider on a particular service date"
 * #DGNS_DRG_OUTLIER_CD "Claim Diagnosis Related Group Outlier Stay Code" "On an institutional claim, the code that indicates the beneficiary stay under the prospective payment system (PPS) which, although classified into a specific diagnosis related group, has an unusually long length (day outlier) or exceptionally high cost (cost outlier)."
 * #CLM_NRLN_RIC_CD "Near Line Record Identification Code" "A code defining the type of claim record being processed."
-* #CLM_RLT_COND_CD "Claim Related Condition Code" "A SET OF RELATED CONDITIONS THAT CO-OCCURRED WITHIN SOME SET OF CLAIMS."
+* #CLM_RLT_COND_CD "Claim Related Condition Code" "A UNIQUE TRACKING NUMBER (UTN) ASSIGNED TO EACH POWER MOBILITY DEVICE (PMD) PRIOR AUTHORIZATION (PA) REQUEST."
+* #CLM_LINE_PMD_UNIQ_TRKNG_NUM "Prior Authorization Unique Tracking Number" "A unique tracking number (UTN) assigned to each prior authorization (PA) request."
