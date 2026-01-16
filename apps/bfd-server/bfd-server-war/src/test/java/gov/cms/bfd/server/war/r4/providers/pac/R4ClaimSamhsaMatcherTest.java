@@ -2,7 +2,6 @@ package gov.cms.bfd.server.war.r4.providers.pac;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -43,8 +42,8 @@ public class R4ClaimSamhsaMatcherTest {
   @BeforeEach
   public void setup() {
     samhsaMatcher = new R4ClaimSamhsaMatcher(mockFissTransformer, mockMcsTransformer, false);
-    when(mockFissTransformer.transform(any(), anyBoolean())).thenReturn(mockClaim);
-    when(mockMcsTransformer.transform(any(), anyBoolean())).thenReturn(mockClaim);
+    when(mockFissTransformer.transform(any())).thenReturn(mockClaim);
+    when(mockMcsTransformer.transform(any())).thenReturn(mockClaim);
     List<Claim.ProcedureComponent> procedureComponentList = new ArrayList<>();
     when(mockClaim.getProcedure()).thenReturn(procedureComponentList);
   }

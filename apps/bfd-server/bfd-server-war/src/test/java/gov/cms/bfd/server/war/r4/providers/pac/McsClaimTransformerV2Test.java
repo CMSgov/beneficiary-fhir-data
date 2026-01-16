@@ -150,7 +150,7 @@ public class McsClaimTransformerV2Test {
     Set<String> securityTags = new HashSet<>();
 
     Claim claim =
-        mcsClaimTransformerV2.transform(new ClaimWithSecurityTags<>(entity, securityTags), true);
+        mcsClaimTransformerV2.transform(new ClaimWithSecurityTags<>(entity, securityTags));
     assertEquals(numberOfRecords, claim.getDiagnosis().size());
 
     for (int i = 0; i < claim.getDiagnosis().size(); i++) {

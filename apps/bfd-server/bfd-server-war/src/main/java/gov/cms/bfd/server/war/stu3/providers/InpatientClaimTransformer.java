@@ -66,12 +66,10 @@ final class InpatientClaimTransformer implements ClaimTransformerInterface {
    * Transforms a claim into an {@link ExplanationOfBenefit}.
    *
    * @param claimEntity the {@link InpatientClaim} to use
-   * @param includeTaxNumber exists to satisfy {@link ClaimTransformerInterface}
    * @return a FHIR {@link ExplanationOfBenefit} resource.
    */
   @Override
-  public ExplanationOfBenefit transform(
-      ClaimWithSecurityTags<?> claimEntity, boolean includeTaxNumber) {
+  public ExplanationOfBenefit transform(ClaimWithSecurityTags<?> claimEntity) {
 
     Object claim = claimEntity.getClaimEntity();
     List<Coding> securityTags =

@@ -135,7 +135,7 @@ public class SNFClaimTransformerV2Test {
     snfClaimTransformer = new SNFClaimTransformerV2(metricRegistry, securityTagManager, false);
     claim = generateClaim();
     ExplanationOfBenefit genEob =
-        snfClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
+        snfClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags));
     TransformerUtilsV2.enrichEob(
         genEob,
         RDATestUtils.createTestNpiOrgLookup(),
@@ -529,7 +529,7 @@ public class SNFClaimTransformerV2Test {
             .get();
     claim.setLastUpdated(Instant.now());
     ExplanationOfBenefit genEob =
-        snfClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), false);
+        snfClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags));
     TransformerUtilsV2.enrichEob(
         genEob,
         RDATestUtils.createTestNpiOrgLookup(),
