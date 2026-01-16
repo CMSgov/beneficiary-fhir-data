@@ -2,7 +2,7 @@ package gov.cms.bfd.server.ng.claim.model;
 
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.util.Arrays;
-//import java.util.Optional;
+// import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -31,9 +31,9 @@ public enum CatastrophicCoverageCode {
    */
   public static CatastrophicCoverageCode tryFromCode(String code) {
     return Arrays.stream(values())
-            .filter(v -> v.code.equals(code))
-            .findFirst()
-            .orElse(CatastrophicCoverageCode.INVALID);
+        .filter(v -> v.code.equals(code))
+        .findFirst()
+        .orElse(CatastrophicCoverageCode.INVALID);
   }
 
   ExplanationOfBenefit.SupportingInformationComponent toFhir(
