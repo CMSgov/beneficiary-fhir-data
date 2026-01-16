@@ -2,8 +2,6 @@ package gov.cms.bfd.pipeline.rda.grpc;
 
 import gov.cms.bfd.pipeline.sharedutils.TransactionManager;
 import jakarta.persistence.Query;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import lombok.AllArgsConstructor;
@@ -27,7 +25,8 @@ public abstract class AbstractCleanupJob implements CleanupJob {
       "delete from ${parentTableName} t where t.${parentTableKey} in ( "
           + "  select ${parentTableKey} "
           + "  from ${parentTableName} "
-          + "  where last_updated < :cutoff "
+          + "  where last_updated between "
+          + "  (select min(last_updated) from ${parentTableName}) and (Now() -Interval '${interval} days') "
           + "  and api_source not like 'S3%' "
           + "  limit ${limit})";
 
@@ -75,10 +74,9 @@ public abstract class AbstractCleanupJob implements CleanupJob {
 
     if (enabled) {
       final long startMillis = System.currentTimeMillis();
-      var cutoff = Instant.now().minus(OLDEST_CLAIM_AGE_IN_DAYS, ChronoUnit.DAYS);
 
       try {
-        Query query = buildDeleteQuery(transactionManager, cutoff);
+        Query query = buildDeleteQuery(transactionManager);
         var numberOfTransactions = Math.floorDiv(cleanupRunSize, cleanupTransactionSize);
 
         for (int i = 0; i < numberOfTransactions; i++) {
@@ -126,23 +124,27 @@ public abstract class AbstractCleanupJob implements CleanupJob {
   /**
    * Build a list of native sql delete queries to remove claims.
    *
-   * @param cutoff the 60 days cutoff.
    * @param tm the TransactionManager to use to create queries.
    * @return the list of queries.
    */
-  private Query buildDeleteQuery(TransactionManager tm, Instant cutoff) {
+  private Query buildDeleteQuery(TransactionManager tm) {
     String parentTableName = getParentTableName();
     AtomicReference<Query> atomicQuery = new AtomicReference<>();
     tm.executeProcedure(
         entityManager -> {
           Map<String, String> params =
               Map.of(
-                  "parentTableName", parentTableName,
-                  "parentTableKey", getParentTableKey(),
-                  "limit", Integer.toString(cleanupTransactionSize));
+                  "parentTableName",
+                  parentTableName,
+                  "parentTableKey",
+                  getParentTableKey(),
+                  "interval",
+                  String.valueOf(OLDEST_CLAIM_AGE_IN_DAYS),
+                  "limit",
+                  Integer.toString(cleanupTransactionSize));
           StringSubstitutor strSub = new StringSubstitutor(params);
           String queryStr = strSub.replace(DELETE_QUERY_TEMPLATE);
-          atomicQuery.set(entityManager.createNativeQuery(queryStr).setParameter("cutoff", cutoff));
+          atomicQuery.set(entityManager.createNativeQuery(queryStr));
         });
     return atomicQuery.get();
   }
