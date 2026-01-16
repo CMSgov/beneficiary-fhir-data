@@ -240,6 +240,10 @@ Setting this flag to _true_, modifies the request to filter out all SAMSHA-relat
 Examples:
    - `excludeSAMHSA=true`""";
 
+  /** Open API short description for /ExplanationOfBenefit's includeTaxNumbers parameter. */
+  public static final String EOB_INCLUDE_TAX_NUMBERS_SHORT =
+      "Ignored. Included for compatibility with existing requests.";
+
   /** Open API content short description for partially adjudicated claim MBI ID to be used. */
   public static final String PAC_MBI_SHORT =
       "The patient medicare beneficiary identifier (MBI) to search for.";

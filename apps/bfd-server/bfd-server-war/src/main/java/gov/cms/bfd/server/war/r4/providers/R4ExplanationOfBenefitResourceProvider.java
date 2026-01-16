@@ -315,6 +315,7 @@ public class R4ExplanationOfBenefitResourceProvider extends AbstractResourceProv
    *     field.
    * @param serviceDate an {@link OptionalParam} that specifies a date range for {@link
    *     ExplanationOfBenefit}s that completed
+   * @param taxNumbers ignored, included only for compatibility with existing requests
    * @param elements a {@link String} of client-specified FHIR elements to be included in each EOB.
    * @param requestDetails a {@link RequestDetails} containing the details of the request URL, used
    *     to parse out pagination values
@@ -359,6 +360,11 @@ public class R4ExplanationOfBenefitResourceProvider extends AbstractResourceProv
               shortDefinition = OpenAPIContentProvider.EOB_SERVICE_DATE_SHORT,
               value = OpenAPIContentProvider.EOB_SERVICE_DATE_VALUE)
           DateRangeParam serviceDate,
+      @OptionalParam(name = "includeTaxNumbers")
+          @Description(
+              shortDefinition = OpenAPIContentProvider.EOB_INCLUDE_TAX_NUMBERS_SHORT,
+              value = OpenAPIContentProvider.EOB_INCLUDE_TAX_NUMBERS_SHORT)
+          String taxNumbers,
       @Elements
           @OptionalParam(name = "_elements")
           @Description(
