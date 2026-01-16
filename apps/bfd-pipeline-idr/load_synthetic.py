@@ -27,6 +27,7 @@ tables = [
     {"csv_name": "SYNTHETIC_CLM_INSTNL.csv", "table": "v2_mdcr_clm_instnl"},
     {"csv_name": "SYNTHETIC_CLM_PRFNL.csv", "table": "v2_mdcr_clm_prfnl"},
     {"csv_name": "SYNTHETIC_CLM_DCMTN.csv", "table": "v2_mdcr_clm_dcmtn"},
+    {"csv_name": "SYNTHETIC_CLM_LINE_DCMTN.csv", "table": "v2_mdcr_clm_line_dcmtn"},
     {"csv_name": "SYNTHETIC_CLM_DT_SGNTR.csv", "table": "v2_mdcr_clm_dt_sgntr"},
     {"csv_name": "SYNTHETIC_CLM_VAL.csv", "table": "v2_mdcr_clm_val"},
     {"csv_name": "SYNTHETIC_CLM_LINE.csv", "table": "v2_mdcr_clm_line"},

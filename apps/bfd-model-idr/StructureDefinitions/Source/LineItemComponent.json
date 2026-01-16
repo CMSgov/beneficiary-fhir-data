@@ -1194,6 +1194,45 @@
                         "code": "string"
                     }
                 ]
+            },
+            {
+              "id": "LineItemComponent.CLM_LINE_PMD_UNIQ_TRKNG_NUM",
+              "path": "LineItemComponent.CLM_LINE_PMD_UNIQ_TRKNG_NUM",
+              "label": "Claim Line Prior Authorization Unique Tracking Number (Adjudicated)",
+              "definition": "The unique tracking number for the prior authorization associated with this claim line from fully adjudicated claims.",
+              "min": 0,
+              "max": "1",
+              "type": [
+                {
+                  "code": "string"
+                }
+              ]
+            },
+            {
+              "id": "LineItemComponent.CLM_LINE_PA_UNIQ_TRKNG_NUM",
+              "path": "LineItemComponent.CLM_LINE_PA_UNIQ_TRKNG_NUM",
+              "label": "Claim Line Prior Authorization Unique Tracking Number (Partially Adjudicated)",
+              "definition": "The unique tracking number for the prior authorization associated with this claim line from partially adjudicated claims.",
+              "min": 0,
+              "max": "1",
+              "type": [
+                {
+                  "code": "string"
+                }
+              ]
+            },
+            {
+              "id": "LineItemComponent.SEQUENCE_INFO",
+              "path": "LineItemComponent.SEQUENCE_INFO",
+              "label": "Supporting Info Sequence Number",
+              "definition": "Pre-calculated sequence number for supportingInfo reference.",
+              "min": 0,
+              "max": "1",
+              "type": [
+                {
+                  "code": "string"
+                }
+              ]
             }
         ]
     }
