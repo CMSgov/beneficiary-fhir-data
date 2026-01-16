@@ -18,6 +18,6 @@ public class NullFloatToZeroConverter implements AttributeConverter<BigDecimal, 
   public BigDecimal convertToEntityAttribute(Double value) {
     return (value == null)
         ? BigDecimal.ZERO
-        : BigDecimal.valueOf(value).setScale(2, RoundingMode.HALF_UP);
+        : BigDecimal.valueOf(value).setScale(2, RoundingMode.DOWN);
   }
 }

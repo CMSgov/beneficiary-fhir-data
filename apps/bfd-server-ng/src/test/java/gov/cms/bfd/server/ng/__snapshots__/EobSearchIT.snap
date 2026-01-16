@@ -296,7 +296,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 7271.9
         },
         "category" : {
           "coding" : [ {
@@ -452,7 +452,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 6.99
         },
         "category" : {
           "coding" : [ {
@@ -476,7 +476,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 77.3
         },
         "category" : {
           "coding" : [ {
@@ -488,7 +488,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 151.28
         },
         "category" : {
           "coding" : [ {
@@ -500,7 +500,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 377.93
         },
         "category" : {
           "coding" : [ {
@@ -512,7 +512,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 96.69
         },
         "category" : {
           "coding" : [ {
@@ -536,7 +536,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 207.08
         },
         "category" : {
           "coding" : [ {
@@ -1084,7 +1084,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 6970.12
           },
           "category" : {
             "coding" : [ {
@@ -1096,7 +1096,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 18.46
           },
           "category" : {
             "coding" : [ {
@@ -1108,7 +1108,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 8790.2
           },
           "category" : {
             "coding" : [ {
@@ -1952,7 +1952,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET_WITH_SEARCH]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 7271.9
         },
         "category" : {
           "coding" : [ {
@@ -2108,7 +2108,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET_WITH_SEARCH]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 6.99
         },
         "category" : {
           "coding" : [ {
@@ -2132,7 +2132,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET_WITH_SEARCH]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 77.3
         },
         "category" : {
           "coding" : [ {
@@ -2144,7 +2144,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET_WITH_SEARCH]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 151.28
         },
         "category" : {
           "coding" : [ {
@@ -2156,7 +2156,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET_WITH_SEARCH]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 377.93
         },
         "category" : {
           "coding" : [ {
@@ -2168,7 +2168,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET_WITH_SEARCH]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 96.69
         },
         "category" : {
           "coding" : [ {
@@ -2192,7 +2192,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET_WITH_SEARCH]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 207.08
         },
         "category" : {
           "coding" : [ {
@@ -2740,7 +2740,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET_WITH_SEARCH]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 6970.12
           },
           "category" : {
             "coding" : [ {
@@ -2752,7 +2752,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET_WITH_SEARCH]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 18.46
           },
           "category" : {
             "coding" : [ {
@@ -2764,7 +2764,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET_WITH_SEARCH]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 8790.2
           },
           "category" : {
             "coding" : [ {
@@ -3608,7 +3608,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[POST]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 7271.9
         },
         "category" : {
           "coding" : [ {
@@ -3764,7 +3764,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[POST]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 6.99
         },
         "category" : {
           "coding" : [ {
@@ -3788,7 +3788,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[POST]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 77.3
         },
         "category" : {
           "coding" : [ {
@@ -3800,7 +3800,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[POST]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 151.28
         },
         "category" : {
           "coding" : [ {
@@ -3812,7 +3812,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[POST]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 377.93
         },
         "category" : {
           "coding" : [ {
@@ -3824,7 +3824,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[POST]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 96.69
         },
         "category" : {
           "coding" : [ {
@@ -3848,7 +3848,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[POST]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 207.08
         },
         "category" : {
           "coding" : [ {
@@ -4396,7 +4396,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[POST]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 6970.12
           },
           "category" : {
             "coding" : [ {
@@ -4408,7 +4408,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[POST]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 18.46
           },
           "category" : {
             "coding" : [ {
@@ -4420,7 +4420,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[POST]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 8790.2
           },
           "category" : {
             "coding" : [ {
@@ -5264,7 +5264,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset0]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 7271.9
         },
         "category" : {
           "coding" : [ {
@@ -5420,7 +5420,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset0]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 6.99
         },
         "category" : {
           "coding" : [ {
@@ -5444,7 +5444,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset0]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 77.3
         },
         "category" : {
           "coding" : [ {
@@ -5456,7 +5456,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset0]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 151.28
         },
         "category" : {
           "coding" : [ {
@@ -5468,7 +5468,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset0]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 377.93
         },
         "category" : {
           "coding" : [ {
@@ -5480,7 +5480,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset0]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 96.69
         },
         "category" : {
           "coding" : [ {
@@ -5504,7 +5504,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset0]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 207.08
         },
         "category" : {
           "coding" : [ {
@@ -6052,7 +6052,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset0]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 6970.12
           },
           "category" : {
             "coding" : [ {
@@ -6064,7 +6064,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset0]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 18.46
           },
           "category" : {
             "coding" : [ {
@@ -6076,7 +6076,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset0]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 8790.2
           },
           "category" : {
             "coding" : [ {
@@ -6921,7 +6921,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset1]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 7271.9
         },
         "category" : {
           "coding" : [ {
@@ -7077,7 +7077,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset1]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 6.99
         },
         "category" : {
           "coding" : [ {
@@ -7101,7 +7101,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset1]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 77.3
         },
         "category" : {
           "coding" : [ {
@@ -7113,7 +7113,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset1]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 151.28
         },
         "category" : {
           "coding" : [ {
@@ -7125,7 +7125,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset1]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 377.93
         },
         "category" : {
           "coding" : [ {
@@ -7137,7 +7137,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset1]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 96.69
         },
         "category" : {
           "coding" : [ {
@@ -7161,7 +7161,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset1]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 207.08
         },
         "category" : {
           "coding" : [ {
@@ -7709,7 +7709,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset1]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 6970.12
           },
           "category" : {
             "coding" : [ {
@@ -7721,7 +7721,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset1]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 18.46
           },
           "category" : {
             "coding" : [ {
@@ -7733,7 +7733,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset1]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 8790.2
           },
           "category" : {
             "coding" : [ {
@@ -8578,7 +8578,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 7271.9
         },
         "category" : {
           "coding" : [ {
@@ -8734,7 +8734,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 6.99
         },
         "category" : {
           "coding" : [ {
@@ -8758,7 +8758,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 77.3
         },
         "category" : {
           "coding" : [ {
@@ -8770,7 +8770,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 151.28
         },
         "category" : {
           "coding" : [ {
@@ -8782,7 +8782,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 377.93
         },
         "category" : {
           "coding" : [ {
@@ -8794,7 +8794,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 96.69
         },
         "category" : {
           "coding" : [ {
@@ -8818,7 +8818,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 207.08
         },
         "category" : {
           "coding" : [ {
@@ -9366,7 +9366,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 6970.12
           },
           "category" : {
             "coding" : [ {
@@ -9378,7 +9378,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 18.46
           },
           "category" : {
             "coding" : [ {
@@ -9390,7 +9390,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 8790.2
           },
           "category" : {
             "coding" : [ {
@@ -10022,7 +10022,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 95.82
         },
         "category" : {
           "coding" : [ {
@@ -10034,7 +10034,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 180.88
         },
         "category" : {
           "coding" : [ {
@@ -10046,7 +10046,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 523.78
         },
         "category" : {
           "coding" : [ {
@@ -10058,7 +10058,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 393.05
         },
         "category" : {
           "coding" : [ {
@@ -10070,7 +10070,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 8569.4
         },
         "category" : {
           "coding" : [ {
@@ -10359,7 +10359,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 42.69
           },
           "category" : {
             "coding" : [ {
@@ -10838,7 +10838,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 694.26
         },
         "category" : {
           "coding" : [ {
@@ -13954,7 +13954,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 7271.9
         },
         "category" : {
           "coding" : [ {
@@ -14110,7 +14110,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 6.99
         },
         "category" : {
           "coding" : [ {
@@ -14134,7 +14134,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 77.3
         },
         "category" : {
           "coding" : [ {
@@ -14146,7 +14146,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 151.28
         },
         "category" : {
           "coding" : [ {
@@ -14158,7 +14158,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 377.93
         },
         "category" : {
           "coding" : [ {
@@ -14170,7 +14170,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 96.69
         },
         "category" : {
           "coding" : [ {
@@ -14194,7 +14194,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 207.08
         },
         "category" : {
           "coding" : [ {
@@ -14742,7 +14742,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 6970.12
           },
           "category" : {
             "coding" : [ {
@@ -14754,7 +14754,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 18.46
           },
           "category" : {
             "coding" : [ {
@@ -14766,7 +14766,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 8790.2
           },
           "category" : {
             "coding" : [ {
@@ -15398,7 +15398,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 95.82
         },
         "category" : {
           "coding" : [ {
@@ -15410,7 +15410,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 180.88
         },
         "category" : {
           "coding" : [ {
@@ -15422,7 +15422,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 523.78
         },
         "category" : {
           "coding" : [ {
@@ -15434,7 +15434,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 393.05
         },
         "category" : {
           "coding" : [ {
@@ -15446,7 +15446,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 8569.4
         },
         "category" : {
           "coding" : [ {
@@ -15735,7 +15735,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 42.69
           },
           "category" : {
             "coding" : [ {
@@ -16214,7 +16214,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 694.26
         },
         "category" : {
           "coding" : [ {
@@ -19330,7 +19330,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 7271.9
         },
         "category" : {
           "coding" : [ {
@@ -19486,7 +19486,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 6.99
         },
         "category" : {
           "coding" : [ {
@@ -19510,7 +19510,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 77.3
         },
         "category" : {
           "coding" : [ {
@@ -19522,7 +19522,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 151.28
         },
         "category" : {
           "coding" : [ {
@@ -19534,7 +19534,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 377.93
         },
         "category" : {
           "coding" : [ {
@@ -19546,7 +19546,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 96.69
         },
         "category" : {
           "coding" : [ {
@@ -19570,7 +19570,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 207.08
         },
         "category" : {
           "coding" : [ {
@@ -20118,7 +20118,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 6970.12
           },
           "category" : {
             "coding" : [ {
@@ -20130,7 +20130,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 18.46
           },
           "category" : {
             "coding" : [ {
@@ -20142,7 +20142,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 8790.2
           },
           "category" : {
             "coding" : [ {
@@ -20774,7 +20774,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 95.82
         },
         "category" : {
           "coding" : [ {
@@ -20786,7 +20786,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 180.88
         },
         "category" : {
           "coding" : [ {
@@ -20798,7 +20798,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 523.78
         },
         "category" : {
           "coding" : [ {
@@ -20810,7 +20810,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 393.05
         },
         "category" : {
           "coding" : [ {
@@ -20822,7 +20822,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 8569.4
         },
         "category" : {
           "coding" : [ {
@@ -21111,7 +21111,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 42.69
           },
           "category" : {
             "coding" : [ {
@@ -21590,7 +21590,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 694.26
         },
         "category" : {
           "coding" : [ {
@@ -24706,7 +24706,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 7271.9
         },
         "category" : {
           "coding" : [ {
@@ -24862,7 +24862,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 6.99
         },
         "category" : {
           "coding" : [ {
@@ -24886,7 +24886,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 77.3
         },
         "category" : {
           "coding" : [ {
@@ -24898,7 +24898,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 151.28
         },
         "category" : {
           "coding" : [ {
@@ -24910,7 +24910,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 377.93
         },
         "category" : {
           "coding" : [ {
@@ -24922,7 +24922,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 96.69
         },
         "category" : {
           "coding" : [ {
@@ -24946,7 +24946,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 207.08
         },
         "category" : {
           "coding" : [ {
@@ -25494,7 +25494,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 6970.12
           },
           "category" : {
             "coding" : [ {
@@ -25506,7 +25506,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 18.46
           },
           "category" : {
             "coding" : [ {
@@ -25518,7 +25518,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 8790.2
           },
           "category" : {
             "coding" : [ {
@@ -26150,7 +26150,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 95.82
         },
         "category" : {
           "coding" : [ {
@@ -26162,7 +26162,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 180.88
         },
         "category" : {
           "coding" : [ {
@@ -26174,7 +26174,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 523.78
         },
         "category" : {
           "coding" : [ {
@@ -26186,7 +26186,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 393.05
         },
         "category" : {
           "coding" : [ {
@@ -26198,7 +26198,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 8569.4
         },
         "category" : {
           "coding" : [ {
@@ -26487,7 +26487,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 42.69
           },
           "category" : {
             "coding" : [ {
@@ -26966,7 +26966,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 694.26
         },
         "category" : {
           "coding" : [ {
@@ -29219,7 +29219,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 7271.9
         },
         "category" : {
           "coding" : [ {
@@ -29375,7 +29375,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 6.99
         },
         "category" : {
           "coding" : [ {
@@ -29399,7 +29399,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 77.3
         },
         "category" : {
           "coding" : [ {
@@ -29411,7 +29411,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 151.28
         },
         "category" : {
           "coding" : [ {
@@ -29423,7 +29423,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 377.93
         },
         "category" : {
           "coding" : [ {
@@ -29435,7 +29435,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 96.69
         },
         "category" : {
           "coding" : [ {
@@ -29459,7 +29459,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 207.08
         },
         "category" : {
           "coding" : [ {
@@ -30007,7 +30007,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 6970.12
           },
           "category" : {
             "coding" : [ {
@@ -30019,7 +30019,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 18.46
           },
           "category" : {
             "coding" : [ {
@@ -30031,7 +30031,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 8790.2
           },
           "category" : {
             "coding" : [ {
@@ -30663,7 +30663,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 95.82
         },
         "category" : {
           "coding" : [ {
@@ -30675,7 +30675,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 180.88
         },
         "category" : {
           "coding" : [ {
@@ -30687,7 +30687,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 523.78
         },
         "category" : {
           "coding" : [ {
@@ -30699,7 +30699,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 393.05
         },
         "category" : {
           "coding" : [ {
@@ -30711,7 +30711,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 8569.4
         },
         "category" : {
           "coding" : [ {
@@ -31000,7 +31000,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 42.69
           },
           "category" : {
             "coding" : [ {
@@ -31479,7 +31479,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 694.26
         },
         "category" : {
           "coding" : [ {
@@ -38521,7 +38521,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 7271.9
         },
         "category" : {
           "coding" : [ {
@@ -38677,7 +38677,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 6.99
         },
         "category" : {
           "coding" : [ {
@@ -38701,7 +38701,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 77.3
         },
         "category" : {
           "coding" : [ {
@@ -38713,7 +38713,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 151.28
         },
         "category" : {
           "coding" : [ {
@@ -38725,7 +38725,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 377.93
         },
         "category" : {
           "coding" : [ {
@@ -38737,7 +38737,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 96.69
         },
         "category" : {
           "coding" : [ {
@@ -38761,7 +38761,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 207.08
         },
         "category" : {
           "coding" : [ {
@@ -39309,7 +39309,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 6970.12
           },
           "category" : {
             "coding" : [ {
@@ -39321,7 +39321,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 18.46
           },
           "category" : {
             "coding" : [ {
@@ -39333,7 +39333,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 8790.2
           },
           "category" : {
             "coding" : [ {
@@ -39965,7 +39965,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 95.82
         },
         "category" : {
           "coding" : [ {
@@ -39977,7 +39977,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 180.88
         },
         "category" : {
           "coding" : [ {
@@ -39989,7 +39989,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 523.78
         },
         "category" : {
           "coding" : [ {
@@ -40001,7 +40001,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 393.05
         },
         "category" : {
           "coding" : [ {
@@ -40013,7 +40013,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 8569.4
         },
         "category" : {
           "coding" : [ {
@@ -40302,7 +40302,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 42.69
           },
           "category" : {
             "coding" : [ {
@@ -40781,7 +40781,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 694.26
         },
         "category" : {
           "coding" : [ {
@@ -43034,7 +43034,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 7271.9
         },
         "category" : {
           "coding" : [ {
@@ -43190,7 +43190,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 6.99
         },
         "category" : {
           "coding" : [ {
@@ -43214,7 +43214,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 77.3
         },
         "category" : {
           "coding" : [ {
@@ -43226,7 +43226,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 151.28
         },
         "category" : {
           "coding" : [ {
@@ -43238,7 +43238,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 377.93
         },
         "category" : {
           "coding" : [ {
@@ -43250,7 +43250,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 96.69
         },
         "category" : {
           "coding" : [ {
@@ -43274,7 +43274,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 207.08
         },
         "category" : {
           "coding" : [ {
@@ -43822,7 +43822,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 6970.12
           },
           "category" : {
             "coding" : [ {
@@ -43834,7 +43834,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 18.46
           },
           "category" : {
             "coding" : [ {
@@ -43846,7 +43846,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 8790.2
           },
           "category" : {
             "coding" : [ {
@@ -44478,7 +44478,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 95.82
         },
         "category" : {
           "coding" : [ {
@@ -44490,7 +44490,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 180.88
         },
         "category" : {
           "coding" : [ {
@@ -44502,7 +44502,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 523.78
         },
         "category" : {
           "coding" : [ {
@@ -44514,7 +44514,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 393.05
         },
         "category" : {
           "coding" : [ {
@@ -44526,7 +44526,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 8569.4
         },
         "category" : {
           "coding" : [ {
@@ -44815,7 +44815,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 42.69
           },
           "category" : {
             "coding" : [ {
@@ -45294,7 +45294,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 694.26
         },
         "category" : {
           "coding" : [ {
@@ -52336,7 +52336,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 7271.9
         },
         "category" : {
           "coding" : [ {
@@ -52492,7 +52492,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 6.99
         },
         "category" : {
           "coding" : [ {
@@ -52516,7 +52516,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 77.3
         },
         "category" : {
           "coding" : [ {
@@ -52528,7 +52528,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 151.28
         },
         "category" : {
           "coding" : [ {
@@ -52540,7 +52540,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 377.93
         },
         "category" : {
           "coding" : [ {
@@ -52552,7 +52552,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 96.69
         },
         "category" : {
           "coding" : [ {
@@ -52576,7 +52576,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 207.08
         },
         "category" : {
           "coding" : [ {
@@ -53124,7 +53124,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 6970.12
           },
           "category" : {
             "coding" : [ {
@@ -53136,7 +53136,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 18.46
           },
           "category" : {
             "coding" : [ {
@@ -53148,7 +53148,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 8790.2
           },
           "category" : {
             "coding" : [ {
@@ -53780,7 +53780,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 95.82
         },
         "category" : {
           "coding" : [ {
@@ -53792,7 +53792,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 180.88
         },
         "category" : {
           "coding" : [ {
@@ -53804,7 +53804,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 523.78
         },
         "category" : {
           "coding" : [ {
@@ -53816,7 +53816,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 393.05
         },
         "category" : {
           "coding" : [ {
@@ -53828,7 +53828,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 8569.4
         },
         "category" : {
           "coding" : [ {
@@ -54117,7 +54117,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 42.69
           },
           "category" : {
             "coding" : [ {
@@ -54596,7 +54596,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 694.26
         },
         "category" : {
           "coding" : [ {
@@ -56849,7 +56849,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 7271.9
         },
         "category" : {
           "coding" : [ {
@@ -57005,7 +57005,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 6.99
         },
         "category" : {
           "coding" : [ {
@@ -57029,7 +57029,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 77.3
         },
         "category" : {
           "coding" : [ {
@@ -57041,7 +57041,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 151.28
         },
         "category" : {
           "coding" : [ {
@@ -57053,7 +57053,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 377.93
         },
         "category" : {
           "coding" : [ {
@@ -57065,7 +57065,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 96.69
         },
         "category" : {
           "coding" : [ {
@@ -57089,7 +57089,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 207.08
         },
         "category" : {
           "coding" : [ {
@@ -57637,7 +57637,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 6970.12
           },
           "category" : {
             "coding" : [ {
@@ -57649,7 +57649,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 18.46
           },
           "category" : {
             "coding" : [ {
@@ -57661,7 +57661,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 8790.2
           },
           "category" : {
             "coding" : [ {
@@ -58293,7 +58293,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 95.82
         },
         "category" : {
           "coding" : [ {
@@ -58305,7 +58305,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 180.88
         },
         "category" : {
           "coding" : [ {
@@ -58317,7 +58317,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 523.78
         },
         "category" : {
           "coding" : [ {
@@ -58329,7 +58329,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 393.05
         },
         "category" : {
           "coding" : [ {
@@ -58341,7 +58341,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 8569.4
         },
         "category" : {
           "coding" : [ {
@@ -58630,7 +58630,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 42.69
           },
           "category" : {
             "coding" : [ {
@@ -59109,7 +59109,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 694.26
         },
         "category" : {
           "coding" : [ {
@@ -65956,7 +65956,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 95.82
         },
         "category" : {
           "coding" : [ {
@@ -65968,7 +65968,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 180.88
         },
         "category" : {
           "coding" : [ {
@@ -65980,7 +65980,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 523.78
         },
         "category" : {
           "coding" : [ {
@@ -65992,7 +65992,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 393.05
         },
         "category" : {
           "coding" : [ {
@@ -66004,7 +66004,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 8569.4
         },
         "category" : {
           "coding" : [ {
@@ -66293,7 +66293,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 42.69
           },
           "category" : {
             "coding" : [ {
@@ -66772,7 +66772,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 694.26
         },
         "category" : {
           "coding" : [ {
@@ -68821,7 +68821,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 7271.9
         },
         "category" : {
           "coding" : [ {
@@ -68977,7 +68977,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 6.99
         },
         "category" : {
           "coding" : [ {
@@ -69001,7 +69001,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 77.3
         },
         "category" : {
           "coding" : [ {
@@ -69013,7 +69013,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 151.28
         },
         "category" : {
           "coding" : [ {
@@ -69025,7 +69025,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 377.93
         },
         "category" : {
           "coding" : [ {
@@ -69037,7 +69037,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 96.69
         },
         "category" : {
           "coding" : [ {
@@ -69061,7 +69061,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 207.08
         },
         "category" : {
           "coding" : [ {
@@ -69609,7 +69609,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 6970.12
           },
           "category" : {
             "coding" : [ {
@@ -69621,7 +69621,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 18.46
           },
           "category" : {
             "coding" : [ {
@@ -69633,7 +69633,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 8790.2
           },
           "category" : {
             "coding" : [ {
@@ -70265,7 +70265,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 95.82
         },
         "category" : {
           "coding" : [ {
@@ -70277,7 +70277,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 180.88
         },
         "category" : {
           "coding" : [ {
@@ -70289,7 +70289,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 523.78
         },
         "category" : {
           "coding" : [ {
@@ -70301,7 +70301,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 393.05
         },
         "category" : {
           "coding" : [ {
@@ -70313,7 +70313,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 8569.4
         },
         "category" : {
           "coding" : [ {
@@ -70602,7 +70602,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 42.69
           },
           "category" : {
             "coding" : [ {
@@ -71081,7 +71081,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 694.26
         },
         "category" : {
           "coding" : [ {
@@ -73130,7 +73130,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 7271.9
         },
         "category" : {
           "coding" : [ {
@@ -73286,7 +73286,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 6.99
         },
         "category" : {
           "coding" : [ {
@@ -73310,7 +73310,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 77.3
         },
         "category" : {
           "coding" : [ {
@@ -73322,7 +73322,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 151.28
         },
         "category" : {
           "coding" : [ {
@@ -73334,7 +73334,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 377.93
         },
         "category" : {
           "coding" : [ {
@@ -73346,7 +73346,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 96.69
         },
         "category" : {
           "coding" : [ {
@@ -73370,7 +73370,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 207.08
         },
         "category" : {
           "coding" : [ {
@@ -73918,7 +73918,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 6970.12
           },
           "category" : {
             "coding" : [ {
@@ -73930,7 +73930,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 18.46
           },
           "category" : {
             "coding" : [ {
@@ -73942,7 +73942,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 8790.2
           },
           "category" : {
             "coding" : [ {
@@ -74574,7 +74574,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 95.82
         },
         "category" : {
           "coding" : [ {
@@ -74586,7 +74586,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 180.88
         },
         "category" : {
           "coding" : [ {
@@ -74598,7 +74598,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 523.78
         },
         "category" : {
           "coding" : [ {
@@ -74610,7 +74610,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 393.05
         },
         "category" : {
           "coding" : [ {
@@ -74622,7 +74622,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 8569.4
         },
         "category" : {
           "coding" : [ {
@@ -74911,7 +74911,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 42.69
           },
           "category" : {
             "coding" : [ {
@@ -75390,7 +75390,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 694.26
         },
         "category" : {
           "coding" : [ {
@@ -78311,7 +78311,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 95.82
         },
         "category" : {
           "coding" : [ {
@@ -78323,7 +78323,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 180.88
         },
         "category" : {
           "coding" : [ {
@@ -78335,7 +78335,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 523.78
         },
         "category" : {
           "coding" : [ {
@@ -78347,7 +78347,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 393.05
         },
         "category" : {
           "coding" : [ {
@@ -78359,7 +78359,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 8569.4
         },
         "category" : {
           "coding" : [ {
@@ -78648,7 +78648,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 42.69
           },
           "category" : {
             "coding" : [ {
@@ -79127,7 +79127,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 694.26
         },
         "category" : {
           "coding" : [ {
@@ -81176,7 +81176,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 7271.9
         },
         "category" : {
           "coding" : [ {
@@ -81332,7 +81332,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 6.99
         },
         "category" : {
           "coding" : [ {
@@ -81356,7 +81356,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 77.3
         },
         "category" : {
           "coding" : [ {
@@ -81368,7 +81368,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 151.28
         },
         "category" : {
           "coding" : [ {
@@ -81380,7 +81380,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 377.93
         },
         "category" : {
           "coding" : [ {
@@ -81392,7 +81392,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 96.69
         },
         "category" : {
           "coding" : [ {
@@ -81416,7 +81416,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 207.08
         },
         "category" : {
           "coding" : [ {
@@ -81964,7 +81964,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 6970.12
           },
           "category" : {
             "coding" : [ {
@@ -81976,7 +81976,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 18.46
           },
           "category" : {
             "coding" : [ {
@@ -81988,7 +81988,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 8790.2
           },
           "category" : {
             "coding" : [ {
@@ -82620,7 +82620,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 95.82
         },
         "category" : {
           "coding" : [ {
@@ -82632,7 +82632,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 180.88
         },
         "category" : {
           "coding" : [ {
@@ -82644,7 +82644,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 523.78
         },
         "category" : {
           "coding" : [ {
@@ -82656,7 +82656,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 393.05
         },
         "category" : {
           "coding" : [ {
@@ -82668,7 +82668,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 8569.4
         },
         "category" : {
           "coding" : [ {
@@ -82957,7 +82957,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 42.69
           },
           "category" : {
             "coding" : [ {
@@ -83436,7 +83436,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 694.26
         },
         "category" : {
           "coding" : [ {
@@ -85485,7 +85485,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 7271.9
         },
         "category" : {
           "coding" : [ {
@@ -85641,7 +85641,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 6.99
         },
         "category" : {
           "coding" : [ {
@@ -85665,7 +85665,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 77.3
         },
         "category" : {
           "coding" : [ {
@@ -85677,7 +85677,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 151.28
         },
         "category" : {
           "coding" : [ {
@@ -85689,7 +85689,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 377.93
         },
         "category" : {
           "coding" : [ {
@@ -85701,7 +85701,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 96.69
         },
         "category" : {
           "coding" : [ {
@@ -85725,7 +85725,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 207.08
         },
         "category" : {
           "coding" : [ {
@@ -86273,7 +86273,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 6970.12
           },
           "category" : {
             "coding" : [ {
@@ -86285,7 +86285,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 18.46
           },
           "category" : {
             "coding" : [ {
@@ -86297,7 +86297,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 8790.2
           },
           "category" : {
             "coding" : [ {
@@ -86929,7 +86929,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 95.82
         },
         "category" : {
           "coding" : [ {
@@ -86941,7 +86941,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 180.88
         },
         "category" : {
           "coding" : [ {
@@ -86953,7 +86953,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 523.78
         },
         "category" : {
           "coding" : [ {
@@ -86965,7 +86965,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 393.05
         },
         "category" : {
           "coding" : [ {
@@ -86977,7 +86977,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 8569.4
         },
         "category" : {
           "coding" : [ {
@@ -87266,7 +87266,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 42.69
           },
           "category" : {
             "coding" : [ {
@@ -87745,7 +87745,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 694.26
         },
         "category" : {
           "coding" : [ {
@@ -90666,7 +90666,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 95.82
         },
         "category" : {
           "coding" : [ {
@@ -90678,7 +90678,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 180.88
         },
         "category" : {
           "coding" : [ {
@@ -90690,7 +90690,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 523.78
         },
         "category" : {
           "coding" : [ {
@@ -90702,7 +90702,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 393.05
         },
         "category" : {
           "coding" : [ {
@@ -90714,7 +90714,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 8569.4
         },
         "category" : {
           "coding" : [ {
@@ -91003,7 +91003,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 42.69
           },
           "category" : {
             "coding" : [ {
@@ -91482,7 +91482,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 694.26
         },
         "category" : {
           "coding" : [ {
@@ -93531,7 +93531,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 7271.9
         },
         "category" : {
           "coding" : [ {
@@ -93687,7 +93687,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 6.99
         },
         "category" : {
           "coding" : [ {
@@ -93711,7 +93711,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 77.3
         },
         "category" : {
           "coding" : [ {
@@ -93723,7 +93723,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 151.28
         },
         "category" : {
           "coding" : [ {
@@ -93735,7 +93735,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 377.93
         },
         "category" : {
           "coding" : [ {
@@ -93747,7 +93747,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 96.69
         },
         "category" : {
           "coding" : [ {
@@ -93771,7 +93771,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 207.08
         },
         "category" : {
           "coding" : [ {
@@ -94319,7 +94319,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 6970.12
           },
           "category" : {
             "coding" : [ {
@@ -94331,7 +94331,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 18.46
           },
           "category" : {
             "coding" : [ {
@@ -94343,7 +94343,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 8790.2
           },
           "category" : {
             "coding" : [ {
@@ -94975,7 +94975,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 95.82
         },
         "category" : {
           "coding" : [ {
@@ -94987,7 +94987,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 180.88
         },
         "category" : {
           "coding" : [ {
@@ -94999,7 +94999,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 523.78
         },
         "category" : {
           "coding" : [ {
@@ -95011,7 +95011,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 393.05
         },
         "category" : {
           "coding" : [ {
@@ -95023,7 +95023,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 8569.4
         },
         "category" : {
           "coding" : [ {
@@ -95312,7 +95312,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 42.69
           },
           "category" : {
             "coding" : [ {
@@ -95791,7 +95791,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 694.26
         },
         "category" : {
           "coding" : [ {
@@ -97840,7 +97840,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 7271.9
         },
         "category" : {
           "coding" : [ {
@@ -97996,7 +97996,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 6.99
         },
         "category" : {
           "coding" : [ {
@@ -98020,7 +98020,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 77.3
         },
         "category" : {
           "coding" : [ {
@@ -98032,7 +98032,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 151.28
         },
         "category" : {
           "coding" : [ {
@@ -98044,7 +98044,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 377.93
         },
         "category" : {
           "coding" : [ {
@@ -98056,7 +98056,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 96.69
         },
         "category" : {
           "coding" : [ {
@@ -98080,7 +98080,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 207.08
         },
         "category" : {
           "coding" : [ {
@@ -98628,7 +98628,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 6970.12
           },
           "category" : {
             "coding" : [ {
@@ -98640,7 +98640,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 18.46
           },
           "category" : {
             "coding" : [ {
@@ -98652,7 +98652,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 8790.2
           },
           "category" : {
             "coding" : [ {
@@ -99284,7 +99284,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 95.82
         },
         "category" : {
           "coding" : [ {
@@ -99296,7 +99296,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 180.88
         },
         "category" : {
           "coding" : [ {
@@ -99308,7 +99308,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 523.78
         },
         "category" : {
           "coding" : [ {
@@ -99320,7 +99320,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 393.05
         },
         "category" : {
           "coding" : [ {
@@ -99332,7 +99332,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 8569.4
         },
         "category" : {
           "coding" : [ {
@@ -99621,7 +99621,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
         }, {
           "amount" : {
             "currency" : "USD",
-            "value" : 0.0
+            "value" : 42.69
           },
           "category" : {
             "coding" : [ {
@@ -100100,7 +100100,7 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0.0
+          "value" : 694.26
         },
         "category" : {
           "coding" : [ {
