@@ -2,7 +2,7 @@ package gov.cms.bfd.server.ng.claim.model;
 
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.util.Arrays;
-import java.util.Optional;
+//import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -16,7 +16,9 @@ public enum CatastrophicCoverageCode {
   /** A - Attachment point met on this event. */
   A("A", "Attachment point met on this event"),
   /** C - Above attachment point. */
-  C("C", "Above attachment point");
+  C("C", "Above attachment point"),
+  /** INVALID - Catch-all for any other value. */
+  INVALID("", "");
 
   private final String code;
   private final String display;
@@ -27,8 +29,11 @@ public enum CatastrophicCoverageCode {
    * @param code database code
    * @return catastrophic coverage code
    */
-  public static Optional<CatastrophicCoverageCode> tryFromCode(String code) {
-    return Arrays.stream(values()).filter(v -> v.code.equals(code)).findFirst();
+  public static CatastrophicCoverageCode tryFromCode(String code) {
+    return Arrays.stream(values())
+            .filter(v -> v.code.equals(code))
+            .findFirst()
+            .orElse(CatastrophicCoverageCode.INVALID);
   }
 
   ExplanationOfBenefit.SupportingInformationComponent toFhir(
