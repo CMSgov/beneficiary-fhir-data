@@ -2995,7 +2995,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
           } ]
         },
         "sequence" : 7,
-        "timingDate" : "2026-01-16"
+        "timingDate" : "{date}"
       }, {
         "category" : {
           "coding" : [ {
@@ -6678,7 +6678,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
           } ]
         },
         "sequence" : 7,
-        "timingDate" : "2026-01-16"
+        "timingDate" : "{date}"
       }, {
         "category" : {
           "coding" : [ {
@@ -7438,7 +7438,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
           } ]
         },
         "sequence" : 6,
-        "timingDate" : "2026-01-16"
+        "timingDate" : "{date}"
       }, {
         "category" : {
           "coding" : [ {
@@ -9776,7 +9776,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           } ]
         },
         "sequence" : 7,
-        "timingDate" : "2026-01-16"
+        "timingDate" : "{date}"
       }, {
         "category" : {
           "coding" : [ {
@@ -12924,7 +12924,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           } ]
         },
         "sequence" : 7,
-        "timingDate" : "2026-01-16"
+        "timingDate" : "{date}"
       }, {
         "category" : {
           "coding" : [ {
@@ -14945,7 +14945,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           } ]
         },
         "sequence" : 6,
-        "timingDate" : "2026-01-16"
+        "timingDate" : "{date}"
       }, {
         "category" : {
           "coding" : [ {
@@ -18674,7 +18674,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
           } ]
         },
         "sequence" : 7,
-        "timingDate" : "2026-01-16"
+        "timingDate" : "{date}"
       }, {
         "category" : {
           "coding" : [ {
@@ -19434,7 +19434,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
           } ]
         },
         "sequence" : 6,
-        "timingDate" : "2026-01-16"
+        "timingDate" : "{date}"
       }, {
         "category" : {
           "coding" : [ {
@@ -21772,7 +21772,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           } ]
         },
         "sequence" : 7,
-        "timingDate" : "2026-01-16"
+        "timingDate" : "{date}"
       }, {
         "category" : {
           "coding" : [ {
@@ -24920,7 +24920,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           } ]
         },
         "sequence" : 7,
-        "timingDate" : "2026-01-16"
+        "timingDate" : "{date}"
       }, {
         "category" : {
           "coding" : [ {
@@ -26941,7 +26941,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           } ]
         },
         "sequence" : 6,
-        "timingDate" : "2026-01-16"
+        "timingDate" : "{date}"
       }, {
         "category" : {
           "coding" : [ {

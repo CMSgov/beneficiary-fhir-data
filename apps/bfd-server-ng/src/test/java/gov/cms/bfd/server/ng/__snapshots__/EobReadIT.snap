@@ -658,7 +658,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
       } ]
     },
     "sequence" : 6,
-    "timingDate" : "2026-01-16"
+    "timingDate" : "{date}"
   }, {
     "category" : {
       "coding" : [ {
@@ -1605,7 +1605,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
       } ]
     },
     "sequence" : 6,
-    "timingDate" : "2026-01-16"
+    "timingDate" : "{date}"
   }, {
     "category" : {
       "coding" : [ {
@@ -2800,7 +2800,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
       } ]
     },
     "sequence" : 5,
-    "timingDate" : "2026-01-16"
+    "timingDate" : "{date}"
   }, {
     "category" : {
       "coding" : [ {
@@ -4050,7 +4050,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
       } ]
     },
     "sequence" : 5,
-    "timingDate" : "2026-01-16"
+    "timingDate" : "{date}"
   }, {
     "category" : {
       "coding" : [ {
@@ -5682,7 +5682,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
       } ]
     },
     "sequence" : 7,
-    "timingDate" : "2026-01-16"
+    "timingDate" : "{date}"
   }, {
     "category" : {
       "coding" : [ {
@@ -7423,7 +7423,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
       } ]
     },
     "sequence" : 7,
-    "timingDate" : "2026-01-16"
+    "timingDate" : "{date}"
   }, {
     "category" : {
       "coding" : [ {
