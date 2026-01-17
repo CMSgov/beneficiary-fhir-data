@@ -69,7 +69,7 @@ public class JsonSnapshotSerializer extends ToStringSnapshotSerializer {
             .matcher(json)
             .replaceAll("\"lastUpdated\": \"9999-12-31T00:00:00.000+00:00\"");
 
-    json = CLAIM_IDR_LOAD_DATE_REGEX.matcher(json).replaceAll("$1{date}$2");
+    json = CLAIM_IDR_LOAD_DATE_REGEX.matcher(json).replaceAll("$19999-12-31$2");
 
     // Take the HAPI FHIR output and serialize it using a serialization format that will sort keys
     // in order.
