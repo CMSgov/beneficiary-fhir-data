@@ -15,7 +15,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
  */
 @AllArgsConstructor
 @Getter
-@SuppressWarnings("java:S115")
+@SuppressWarnings({"java:S115", "java:S1192"})
 public enum ClaimAdmissionSourceCode {
   /**
    * 1 - NON-HEALTH CARE FACILITY POINT OF ORIGIN (NON-NEWBORN)/RESERVED FOR NATIONAL ASSIGNMENT
@@ -119,9 +119,8 @@ public enum ClaimAdmissionSourceCode {
   /** Y - RESERVED FOR NATIONAL ASSIGNMENT (NON-NEWBORN). */
   Y("Y", "RESERVED FOR NATIONAL ASSIGNMENT (NON-NEWBORN)"),
   /** Z - RESERVED FOR NATIONAL ASSIGNMENT (NON-NEWBORN). */
-  Z("Z", "RESERVED FOR NATIONAL ASSIGNMENT (NON-NEWBORN)"),
-  /** NA. */
-  NA("", "NO DESCRIPTION AVAILABLE");
+  Z("Z", "RESERVED FOR NATIONAL ASSIGNMENT (NON-NEWBORN)");
+
   private final String code;
   private final String display;
 

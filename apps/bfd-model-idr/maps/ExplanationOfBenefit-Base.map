@@ -47,7 +47,7 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
       src.lastUpdated as lastUpdated -> tgtMeta.lastUpdated = lastUpdated "set lastUpdated";
       src.CLM_TYPE_CD as typeCd -> tgtMeta.profile = translate(typeCd,'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#profile_metadata','code') "set profile";
       //CodeSystem -> CLM_SRC_ID
-      src.CLM_SRC_ID as sourceSk -> tgtMeta.source = translate(sourceSk, 'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#CLM_SRC_ID','code') "set source";
+      src.META_SRC_SK as sourceSk -> tgtMeta.source = translate(sourceSk, 'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#META_SRC_SK','code') "set source";
       src.CLM_SRC_ID as sourceSk -> tgtMeta.tag = translate(sourceSk, 'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#SYSTEM_TYPE','coding') "set source";
       src.CLM_FINL_ACTN_IND as faInd -> tgtMeta.tag = translate(faInd, 'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#FINAL_ACTION','coding') "set source";
     } "Create metadata";
@@ -75,22 +75,7 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
     src -> tgt.billablePeriod = create('Period') as billablePeriod then {
       src.CLM_FROM_DT as fromDate -> billablePeriod.start = fromDate "Set from date";
       src.CLM_THRU_DT as toDate -> billablePeriod.end = toDate "Set to date";
-      src.CLM_QUERY_CD as clmQueryCd -> billablePeriod.extension = create('Extension') as billableExtension then {
-        //FSH Extension -> CLM_QUERY_CD
-        src -> billableExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-QUERY-CD" "Set extension url";
-        //for whatever reason, this one doesn't want to accept the macro. 
-        src -> billableExtension.value = create('Coding') as tgtCoding then {
-          //CodeSystem -> CLM_QUERY_CD
-          src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD",
-          tgtCoding.code=clmQueryCd "set claim query code";
-        } "Set coding";
-      } "Add claim query code";
     } "Set EOB period";
-
-    src.CLM_IDR_LD_DT as idrLdDt -> tgt.extension = create('Extension') as tgtExtension then{
-      src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-IDR-LD-DT" "Add url";
-      src -> tgtExtension.value = idrLdDt "add date";
-    } "add idr load date";
     
     src.CLM_EFCTV_DT as efctvDate -> tgt.created = efctvDate "Add created date for EOB";
 
@@ -99,41 +84,9 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
     src.CLM_TYPE_CD as typeCd where (typeCd > 4 and typeCd < 4000) -> tgt.insurer = create('Reference') as tgtOrgRef, 
     tgtOrgRef.reference = "#insurer-org" "Set reference to contained insurer org";
 
-    //FSH Extension + CodeSystem -> CLM_CNTRCTR_NUM
-    src.CLM_CNTRCTR_NUM as fiNum -> tgt.extension = create('Extension') as tgtExtension then {
-        src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CNTRCTR-NUM" "Add url";
-        src -> tgtExtension.value = create('Coding') as tgtCoding then{
-          src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CNTRCTR-NUM",
-          tgtCoding.code = fiNum "Add code";
-        } "Add coding";
-    } "CLM_CNTRCTR_NUM";
-
-
-    src.CLM_ADJSTMT_TYPE_CD as adjTypeCd -> tgt.extension = create('Extension') as tgtExtension then {
-      src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-ADJSTMT-TYPE-CD" "Add url";
-      src -> tgtExtension.value = create('Coding') as tgtCoding then{
-        src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADJSTMT-TYPE-CD",
-        tgtCoding.code = adjTypeCd "Add code";
-      } "Add coding";
-    } "CLM_ADJSTMT_TYPE_CD";
-
-    src.CLM_DISP_CD as dispCd -> tgt.extension = create('Extension') as tgtExtension then {
-        src -> tgtExtension.url =  "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-DISP-CD" "Add url";
-        src -> tgtExtension.value = create('Coding') as tgtCoding then{
-          src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DISP-CD",
-          tgtCoding.code = dispCd "Add code";
-        } "Add coding";
-      } "CLM_DISP_CD";
-
     src.CLM_PMT_AMT as amt -> tgt.payment = create('BackboneElement') as tgtBBElement then {
       src -> tgtBBElement.amount = create('Money') as tgtMoney then addMoney(amt, tgtMoney) "Add Money";
     } "CLM_PMT_AMT";
-
-    //CLM_CMS_PROC_DT - FI Claim Process Date
-      src.CLM_CMS_PROC_DT as procDt -> tgt.extension = create('Extension') as tgtExtension then {
-        src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CMS-PROC-DT" "Add url";
-        procDt -> tgtExtension.value = procDt "set process date";
-      } "CLM_CMS_PROC_DT";
 
     src.PRVDR_BLG_PRVDR_NPI_NUM as blgNPI -> tgt then{
       //We don't populate careTeamType when it's the provider, so we can uniquely identify it as billing.
@@ -219,7 +172,6 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
       src -> tgtAdjudication.category = cc("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator","benefitpaymentstatus") "Set adjudication category";
     } "Add header-level adjudication";
 
-    src.institutionalComponents as institutionalComponents -> tgt as instlTgt then addInstitutionalItems(src, instlTgt) "add institutional components";
     src.institutionalComponents as institutionalComponents -> tgt as instlTgt then addInstitutionalAdjudicationElements(src, instlTgt) "add institutional components to adjudication";
 
 
@@ -403,27 +355,6 @@ group addProfessionalItems(source src: ExplanationOfBenefitBase, target tgt: BFD
   
   //So we can source the components 
   src.profComponents as profComponents -> tgt then {
-    profComponents.CLM_CARR_PMT_DNL_CD as dnlCode -> tgt.extension = create('Extension') as tgtExtension then {
-      src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CARR-PMT-DNL-CD" "Add url";
-      src -> tgtExtension.value = create('Coding') as tgtCoding then {
-        src -> tgtCoding.code = dnlCode,
-        tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CARR-PMT-DNL-CD" "set system";
-      } "Add target coding";
-    } "Add denial code";
-
-    profComponents.CLM_MDCR_PRFNL_PRVDR_ASGNMT_SW as switch -> tgt.extension = create('Extension') as tgtExtension then {
-      src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MDCR-PRFNL-PRVDR-ASGNMT-SW" "Add url";
-      src -> tgtExtension.value = create('Coding') as tgtCoding then {
-        src -> tgtCoding.code = switch,
-        tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-PRFNL-PRVDR-ASGNMT-SW" "set system";
-      } "Add target coding";
-    } "Add switch code";
-
-    profComponents.CLM_CLNCL_TRIL_NUM as trialNum -> tgt.extension = create('Extension') as tgtExtension then {
-      src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CLNCL-TRIL-NUM" "Add url";
-      src -> tgtExtension.value = trialNum "Add clinical trial #";
-    } "Add clinical trial #";
-
     profComponents.CLM_MDCR_PRFNL_PRMRY_PYR_AMT as chgAmt -> tgt.adjudication = create('BackboneElement') as tgtBBElement then {
       src -> tgtBBElement.category = create('CodeableConcept') as tgtCC then {
         src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_MDCR_PRFNL_PRMRY_PYR_AMT") "Add second coding";
@@ -445,37 +376,6 @@ group addMoney(source src: String, target tgt: Money){
   src as amt -> tgt.value = cast(amt, "decimal") "Set amount";
 }
 
-group addInstitutionalItems(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
-  //This is a bit obtuse, but this allows us to cite the institutional + overall information from the same context.
-  src.institutionalComponents as institutionalComponents -> tgt then {
-
-    institutionalComponents.CLM_MDCR_NPMT_RSN_CD as nonPmtCode where nonPmtCode.length()>0 -> tgt.extension = create('Extension') as tgtExtension then {
-      src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MDCR-NPMT-RSN-CD" "Add url";
-      src -> tgtExtension.value = create('Coding') as tgtCoding then {
-        src -> tgtCoding.code = nonPmtCode,
-        tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-NPMT-RSN-CD" "set system";
-      } "Add target coding";
-    } "Add non payment reason";
-
-    institutionalComponents.CLM_FI_ACTN_CD as actnCd where actnCd != '~' -> tgt.extension = create('Extension') as tgtExtension then {
-      src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-FI-ACTN-CD" "Add url";
-      src -> tgtExtension.value = create('Coding') as tgtCoding then {
-        src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD" "Set system";
-        actnCd -> tgtCoding.code=actnCd "set code";
-      } "Set value";
-    } "CLM_FI_ACTN_CD";
-
-    institutionalComponents.CLM_OP_SRVC_TYPE_CD as opSrvcTypeCd -> tgt.extension = create('Extension') as tgtExtension then {
-      src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-OP-SRVC-TYPE-CD" "Add url";
-      src -> tgtExtension.value = create('Coding') as tgtCoding then{
-        src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-OP-SRVC-TYPE-CD",
-        tgtCoding.code = opSrvcTypeCd "Add code";
-      } "Add coding";
-    } "CLM_OP_SRVC_TYPE_CD";
-    
-  } "Add wrapper for institutional components";
-
-}
 //These were previously in benefitBalance. After evaluating standard components in C4BB adjudication vs. CMS-specific elements, they've been re-organized to header-level adjudication elements.
 group addInstitutionalAdjudicationElements(source src: ExplanationOfBenefitBase, target tgt: BackboneElement){
   src.institutionalComponents as institutionalComponents -> tgt then {

@@ -1232,6 +1232,7 @@ class IdrClaim(IdrBaseModel):
     clm_prvdr_rmng_due_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_blood_ncvrd_chrg_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_prvdr_intrst_pd_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    meta_src_sk: Annotated[int, {ALIAS: ALIAS_CLM}]
     idr_insrt_ts_clm: Annotated[
         datetime,
         {BATCH_TIMESTAMP: True, ALIAS: ALIAS_CLM, COLUMN_MAP: "idr_insrt_ts"},
@@ -1444,6 +1445,7 @@ class IdrClaimInstitutional(IdrBaseModel):
     clm_mdcr_ip_1st_yr_rate_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_site_ntrl_cst_bsd_pymt_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_ss_outlier_std_pymt_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_op_srvc_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
     idr_insrt_ts: Annotated[
         datetime,
         {BATCH_TIMESTAMP: True, ALIAS: ALIAS_INSTNL},

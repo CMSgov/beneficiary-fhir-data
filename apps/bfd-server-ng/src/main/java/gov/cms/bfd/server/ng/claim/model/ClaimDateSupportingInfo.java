@@ -18,6 +18,7 @@ class ClaimDateSupportingInfo {
   @Embedded private BenefitsExhaustedDate benefitsExhaustedDate;
   @Embedded private QualifyStayFromDate qualifyStayFromDate;
   @Embedded private QualifyStayThruDate qualifyStayThruDate;
+  @Embedded private ClaimProcessDate claimProcessDate;
 
   List<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {
@@ -30,7 +31,8 @@ class ClaimDateSupportingInfo {
             noncoveredThroughDate.toFhir(supportingInfoFactory),
             benefitsExhaustedDate.toFhir(supportingInfoFactory),
             qualifyStayFromDate.toFhir(supportingInfoFactory),
-            qualifyStayThruDate.toFhir(supportingInfoFactory))
+            qualifyStayThruDate.toFhir(supportingInfoFactory),
+            claimProcessDate.toFhir(supportingInfoFactory))
         .flatMap(Optional::stream)
         .toList();
   }

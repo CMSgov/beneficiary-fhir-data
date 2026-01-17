@@ -8,10 +8,8 @@ import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
-import org.hl7.fhir.r4.model.Extension;
 
 /** Professional claims table. */
 @Getter
@@ -22,12 +20,6 @@ public class ClaimProfessional {
   @Column(name = "clm_uniq_id")
   private long claimUniqueId;
 
-  @Column(name = "clm_carr_pmt_dnl_cd")
-  private Optional<ClaimPaymentDenialCode> claimPaymentDenialCode;
-
-  @Column(name = "clm_mdcr_prfnl_prvdr_asgnmt_sw")
-  private Optional<ProviderAssignmentIndicatorSwitch> providerAssignmentIndicatorSwitch;
-
   @Column(name = "clm_mdcr_prfnl_prmry_pyr_amt")
   private BigDecimal primaryProviderPaidAmount;
 
@@ -37,16 +29,7 @@ public class ClaimProfessional {
   @Column(name = "clm_audt_trl_stus_cd")
   private Optional<ClaimAuditTrailStatusCode> claimAuditTrailStatusCode;
 
-  @Embedded ClinicalTrialNumber clinicalTrialNumber;
-
-  List<Extension> toFhirExtension() {
-    return Stream.of(
-            claimPaymentDenialCode.map(ClaimPaymentDenialCode::toFhir),
-            providerAssignmentIndicatorSwitch.map(ProviderAssignmentIndicatorSwitch::toFhir),
-            clinicalTrialNumber.toFhir())
-        .flatMap(Optional::stream)
-        .toList();
-  }
+  @Embedded private ClaimProfessionalSupportingInfo supportingInfo;
 
   List<ExplanationOfBenefit.AdjudicationComponent> toFhirAdjudication() {
     return List.of(

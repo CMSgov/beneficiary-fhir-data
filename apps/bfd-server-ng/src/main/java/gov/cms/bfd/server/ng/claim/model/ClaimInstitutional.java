@@ -17,6 +17,5 @@ public class ClaimInstitutional {
   private long claimUniqueId;
 
   @Embedded private ClaimInstitutionalSupportingInfo supportingInfo;
-  @Embedded private ClaimInstitutionalExtensions extensions;
   @Embedded private AdjudicationChargeInstitutional adjudicationChargeInstitutional;
 }

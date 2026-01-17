@@ -1,7 +1,7 @@
 CodeSystem: Benefit_Balance
 Title: "Benefit Balance"
 Id: Benefit-Balance
-Description: "This code system includes a selection of codes which convey information about the claim balance by benefit category."
+Description: "Deprecated 2026-01-06. This code system includes a selection of codes which convey information about the claim balance by benefit category."
 * ^url = "https://bluebutton.cms.gov/fhir/CodeSystem/Benefit-Balance"
 * ^status = #active
 * ^content = #complete

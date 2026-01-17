@@ -16,7 +16,7 @@ import org.hl7.fhir.r4.model.Coding;
 public class ClaimLineRx {
   @EmbeddedId ClaimLineRxId claimLineInstitutionalId;
   @Embedded private ClaimLineAdjudicationChargeRx claimLineAdjudicationChargeRx;
-  @Embedded private ClaimRxSupportingInfo claimRxSupportingInfo;
+  @Embedded private ClaimLineRxSupportingInfo claimRxSupportingInfo;
 
   /**
    * Per C4BB, if compound code = 2 -> populate productOrService with "compound".
