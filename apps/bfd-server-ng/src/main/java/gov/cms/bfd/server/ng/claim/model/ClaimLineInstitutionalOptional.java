@@ -8,7 +8,8 @@ import java.util.Optional;
 import org.jetbrains.annotations.Nullable;
 
 @Embeddable
-public class ClaimLineInstitutionalOptional {
+class ClaimLineInstitutionalOptional {
+  // Hack to ensure this entity is not null. See DESIGN.md for explanation/rationale.
   @Column(name = "clm_uniq_id", insertable = false, updatable = false)
   private long claimUniqueId;
 

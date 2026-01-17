@@ -8,8 +8,8 @@ import jakarta.persistence.OneToOne;
 import java.util.Optional;
 
 @Embeddable
-public class BeneficiaryCoverageOptional {
-  // HORRIBLE HACK: this is required for this to be non-null
+class BeneficiaryCoverageOptional {
+  // Hack to ensure this entity is not null. See DESIGN.md for explanation/rationale.
   @Column(name = "bene_sk", insertable = false, updatable = false)
   private long beneSk;
 
@@ -25,15 +25,15 @@ public class BeneficiaryCoverageOptional {
   @JoinColumn(name = "bene_sk")
   private BeneficiaryEntitlementReason beneficiaryEntitlementReason;
 
-  public Optional<BeneficiaryStatus> getBeneficiaryStatus() {
+  Optional<BeneficiaryStatus> getBeneficiaryStatus() {
     return Optional.ofNullable(beneficiaryStatus);
   }
 
-  public Optional<BeneficiaryDualEligibility> getBeneficiaryDualEligibility() {
+  Optional<BeneficiaryDualEligibility> getBeneficiaryDualEligibility() {
     return Optional.ofNullable(beneficiaryDualEligibility);
   }
 
-  public Optional<BeneficiaryEntitlementReason> getBeneficiaryEntitlementReason() {
+  Optional<BeneficiaryEntitlementReason> getBeneficiaryEntitlementReason() {
     return Optional.ofNullable(beneficiaryEntitlementReason);
   }
 }

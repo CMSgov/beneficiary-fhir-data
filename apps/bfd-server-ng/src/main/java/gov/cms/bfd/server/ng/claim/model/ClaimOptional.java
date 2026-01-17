@@ -10,7 +10,8 @@ import java.util.Optional;
 import org.jetbrains.annotations.Nullable;
 
 @Embeddable
-public class ClaimOptional {
+class ClaimOptional {
+  // Hack to ensure this entity is not null. See DESIGN.md for explanation/rationale.
   @Column(name = "clm_uniq_id", insertable = false, updatable = false)
   private long claimUniqueId;
 
@@ -115,11 +116,11 @@ public class ClaimOptional {
       referencedColumnName = "prvdr_npi_num")
   private ProviderHistory otherProviderHistory;
 
-  public Optional<ClaimInstitutional> getClaimInstitutional() {
+  Optional<ClaimInstitutional> getClaimInstitutional() {
     return Optional.ofNullable(claimInstitutional);
   }
 
-  public Optional<ClaimProfessional> getClaimProfessional() {
+  Optional<ClaimProfessional> getClaimProfessional() {
     return Optional.ofNullable(claimProfessional);
   }
 
@@ -127,39 +128,39 @@ public class ClaimOptional {
     return Optional.ofNullable(contract);
   }
 
-  public Optional<ClaimFiss> getClaimFiss() {
+  Optional<ClaimFiss> getClaimFiss() {
     return Optional.ofNullable(claimFiss);
   }
 
-  public Optional<ProviderHistory> getBillingProviderHistory() {
+  Optional<ProviderHistory> getBillingProviderHistory() {
     return Optional.ofNullable(billingProviderHistory);
   }
 
-  public Optional<ProviderHistory> getOperatingProviderHistory() {
+  Optional<ProviderHistory> getOperatingProviderHistory() {
     return Optional.ofNullable(operatingProviderHistory);
   }
 
-  public Optional<ProviderHistory> getAttendingProviderHistory() {
+  Optional<ProviderHistory> getAttendingProviderHistory() {
     return Optional.ofNullable(attendingProviderHistory);
   }
 
-  public Optional<ProviderHistory> getPrescribingProviderHistory() {
+  Optional<ProviderHistory> getPrescribingProviderHistory() {
     return Optional.ofNullable(prescribingProviderHistory);
   }
 
-  public Optional<ProviderHistory> getOtherProviderHistory() {
+  Optional<ProviderHistory> getOtherProviderHistory() {
     return Optional.ofNullable(otherProviderHistory);
   }
 
-  public Optional<ProviderHistory> getRenderingProviderHistory() {
+  Optional<ProviderHistory> getRenderingProviderHistory() {
     return Optional.ofNullable(renderingProviderHistory);
   }
 
-  public Optional<ProviderHistory> getReferringProviderHistory() {
+  Optional<ProviderHistory> getReferringProviderHistory() {
     return Optional.ofNullable(referringProviderHistory);
   }
 
-  public Optional<ProviderHistory> getServiceProviderHistory() {
+  Optional<ProviderHistory> getServiceProviderHistory() {
     return Optional.ofNullable(serviceProviderHistory);
   }
 }

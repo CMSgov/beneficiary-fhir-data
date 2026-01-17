@@ -9,7 +9,8 @@ import jakarta.persistence.ManyToOne;
 import java.util.Optional;
 
 @Embeddable
-public class BeneficiaryPartCDEnrollmentOptional {
+class BeneficiaryPartCDEnrollmentOptional {
+  // Hack to ensure this entity is not null. See DESIGN.md for explanation/rationale.
   @Column(name = "bene_sk", insertable = false, updatable = false)
   private Long beneSk;
 
@@ -26,7 +27,7 @@ public class BeneficiaryPartCDEnrollmentOptional {
       referencedColumnName = "cntrct_pbp_num")
   private Contract enrollmentContract;
 
-  public Optional<Contract> getEnrollmentContract() {
+  Optional<Contract> getEnrollmentContract() {
     return Optional.ofNullable(enrollmentContract);
   }
 }

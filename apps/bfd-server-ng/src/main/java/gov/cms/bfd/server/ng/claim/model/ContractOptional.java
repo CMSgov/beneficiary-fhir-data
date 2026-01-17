@@ -8,8 +8,12 @@ import jakarta.persistence.OneToOne;
 import java.util.Optional;
 import org.jetbrains.annotations.Nullable;
 
+/***
+ * Optional child entities for {@link Contract}.
+ */
 @Embeddable
 public class ContractOptional {
+  // Hack to ensure this entity is not null. See DESIGN.md for explanation/rationale.
   @Column(name = "cntrct_pbp_sk", insertable = false, updatable = false)
   private long contractPbpSk;
 
