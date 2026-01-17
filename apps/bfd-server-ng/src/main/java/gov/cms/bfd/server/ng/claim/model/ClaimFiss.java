@@ -3,7 +3,6 @@ package gov.cms.bfd.server.ng.claim.model;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.util.Optional;
 import lombok.Getter;
@@ -17,9 +16,6 @@ public class ClaimFiss {
   @Id
   @Column(name = "clm_uniq_id")
   private long claimUniqueId;
-
-  @OneToOne(mappedBy = "claimFiss")
-  private Claim claim;
 
   @Column(name = "clm_crnt_stus_cd")
   private Optional<ClaimCurrentStatusCode> claimCurrentStatusCode;

@@ -12,7 +12,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.util.List;
 import java.util.Optional;
@@ -41,18 +40,6 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
   @JoinColumn(name = "bene_sk")
   private SortedSet<BeneficiaryThirdParty> beneficiaryThirdParties;
 
-  @OneToOne(fetch = FetchType.EAGER)
-  @JoinColumn(name = "bene_sk")
-  private BeneficiaryStatus beneficiaryStatus;
-
-  @OneToOne(fetch = FetchType.EAGER)
-  @JoinColumn(name = "bene_sk")
-  private BeneficiaryEntitlementReason beneficiaryEntitlementReason;
-
-  @OneToOne(fetch = FetchType.EAGER)
-  @JoinColumn(name = "bene_sk")
-  private BeneficiaryDualEligibility beneficiaryDualEligibility;
-
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "bene_sk")
   private SortedSet<BeneficiaryPartCDEnrollment> beneficiaryPartCDEnrollments;
@@ -60,6 +47,8 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "bene_sk")
   private SortedSet<BeneficiaryLowIncomeSubsidy> beneficiaryLowIncomeSubsidies;
+
+  @Embedded private BeneficiaryCoverageOptional coverageOptional;
 
   @Embedded private Meta meta;
 
@@ -87,18 +76,6 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
 
   /** Organization reference. */
   public static final String ORGANIZATION_REF = "Organization/";
-
-  private Optional<BeneficiaryEntitlementReason> getEntitlementReason() {
-    return Optional.ofNullable(beneficiaryEntitlementReason);
-  }
-
-  private Optional<BeneficiaryStatus> getStatus() {
-    return Optional.ofNullable(beneficiaryStatus);
-  }
-
-  private Optional<BeneficiaryDualEligibility> getDualEligibility() {
-    return Optional.ofNullable(beneficiaryDualEligibility);
-  }
 
   /**
    * Finds the enrollment record for a given coverage part.
@@ -263,10 +240,15 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
           .flatMap(BeneficiaryThirdParty::toFhir)
           .ifPresent(coverage::addExtension);
       entitlement.toFhirExtensions().forEach(coverage::addExtension);
-      getStatus().map(BeneficiaryStatus::toFhir).orElse(List.of()).forEach(coverage::addExtension);
+      coverageOptional
+          .getBeneficiaryStatus()
+          .map(BeneficiaryStatus::toFhir)
+          .orElse(List.of())
+          .forEach(coverage::addExtension);
     }
 
-    getEntitlementReason()
+    coverageOptional
+        .getBeneficiaryEntitlementReason()
         .flatMap(BeneficiaryEntitlementReason::toFhir)
         .ifPresent(coverage::addExtension);
 
@@ -286,7 +268,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
   }
 
   private Coverage mapCoverageDual(Coverage coverage, ProfileType profileType, String orgId) {
-    var dualEligibilityOpt = getDualEligibility();
+    var dualEligibilityOpt = coverageOptional.getBeneficiaryDualEligibility();
     if (dualEligibilityOpt.isEmpty()) {
       return toEmptyResource(coverage);
     }
@@ -373,7 +355,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
           new Extension(SystemUrls.C4DIC_ADD_INFO_EXT_URL)
               .setValue(new Annotation(new MarkdownType(C4DIC_ADD_INFO))));
     } else {
-      var contract = enrollment.getEnrollmentContract();
+      var contract = enrollment.getEnrollmentOptional().getEnrollmentContract();
       contract.ifPresent(
           c -> {
             var cmsOrg = OrganizationFactory.createInsurerOrganization(c);

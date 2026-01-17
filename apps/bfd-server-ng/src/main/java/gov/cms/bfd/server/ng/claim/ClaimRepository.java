@@ -39,23 +39,23 @@ public class ClaimRepository {
         JOIN FETCH c.beneficiary b
         JOIN FETCH c.claimDateSignature AS cds
         JOIN FETCH c.claimItems AS cl
-        LEFT JOIN FETCH c.claimInstitutional ci
-        LEFT JOIN FETCH c.claimProfessional cp
-        LEFT JOIN FETCH cl.claimLineInstitutional cli
-        LEFT JOIN FETCH cl.claimLineProfessional clp
-        LEFT JOIN FETCH c.claimFiss cf
-        LEFT JOIN FETCH cli.ansiSignature a
-        LEFT JOIN FETCH cl.claimLineRx clr
-        LEFT JOIN FETCH c.contract ct
-        LEFT JOIN FETCH ct.contractPlanContactInfo cc
-        LEFT JOIN FETCH c.serviceProviderHistory p
-        LEFT JOIN FETCH c.attendingProviderHistory ap
-        LEFT JOIN FETCH c.operatingProviderHistory orp
-        LEFT JOIN FETCH c.otherProviderHistory otp
-        LEFT JOIN FETCH c.renderingProviderHistory rp
-        LEFT JOIN FETCH c.prescribingProviderHistory pp
-        LEFT JOIN FETCH c.billingProviderHistory bp
-        LEFT JOIN FETCH c.referringProviderHistory rph
+        LEFT JOIN FETCH c.claimOptional.claimInstitutional ci
+        LEFT JOIN FETCH c.claimOptional.claimProfessional cp
+        LEFT JOIN FETCH cl.claimItemOptional.claimLineInstitutional cli
+        LEFT JOIN FETCH cl.claimItemOptional.claimLineProfessional clp
+        LEFT JOIN FETCH c.claimOptional.claimFiss cf
+        LEFT JOIN FETCH cli.claimLineInstitutionalOptional.ansiSignature a
+        LEFT JOIN FETCH cl.claimItemOptional.claimLineRx clr
+        LEFT JOIN FETCH c.claimOptional.contract ct
+        LEFT JOIN FETCH ct.contractOptional.contractPlanContactInfo cc
+        LEFT JOIN FETCH c.claimOptional.serviceProviderHistory p
+        LEFT JOIN FETCH c.claimOptional.attendingProviderHistory ap
+        LEFT JOIN FETCH c.claimOptional.operatingProviderHistory orp
+        LEFT JOIN FETCH c.claimOptional.otherProviderHistory otp
+        LEFT JOIN FETCH c.claimOptional.renderingProviderHistory rp
+        LEFT JOIN FETCH c.claimOptional.prescribingProviderHistory pp
+        LEFT JOIN FETCH c.claimOptional.billingProviderHistory bp
+        LEFT JOIN FETCH c.claimOptional.referringProviderHistory rph
       """;
 
   /**

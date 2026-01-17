@@ -25,7 +25,7 @@ import org.hl7.fhir.r4.model.Patient;
 @MappedSuperclass
 public abstract class BeneficiaryBase {
   @Id
-  @Column(name = "bene_sk")
+  @Column(name = "bene_sk", insertable = false, updatable = false)
   protected long beneSk;
 
   @Column(name = "bene_xref_efctv_sk_computed")
