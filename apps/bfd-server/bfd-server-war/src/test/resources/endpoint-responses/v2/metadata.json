@@ -45,6 +45,10 @@
         "type" : "string",
         "documentation" : "The _Substance Abuse and Mental Health Services Administration_ (SAMHSA)\nis the agency within the U.S. Department of HHS that leads public health efforts to advance the behavioral health of the nation.\nSetting this flag to _true_, modifies the request to filter out all SAMSHA-related claims from the response.\n_ClaimResponse_ doesn't contain any SAMHSA potential data. Due to the 1:1 relationship between _ClaimResponse_\nand _Claim_, any ClaimResponse resource will be excluded when the associated Claim resource contains SAMHSA data.\n\nExample:\n  - `excludeSAMHSA=true`"
       }, {
+        "name" : "includeTaxNumbers",
+        "type" : "string",
+        "documentation" : "Ignored. Included for compatibility with existing requests."
+      }, {
         "name" : "isHashed",
         "type" : "string",
         "documentation" : "Setting this flag to _true_, provides tax number in the EOB transformed data for the response.\n\nExample:\n  - `isHashed=true`"
@@ -87,6 +91,10 @@
         "name" : "excludeSAMHSA",
         "type" : "string",
         "documentation" : "The _Substance Abuse and Mental Health Services Administration_ (SAMHSA)\nis the agency within the U.S. Department of HHS that leads public health efforts to advance the behavioral health of the nation.\nSetting this flag to _true_, modifies the request to filter out all SAMSHA-related claims from the response.\n_ClaimResponse_ doesn't contain any SAMHSA potential data. Due to the 1:1 relationship between _ClaimResponse_\nand _Claim_, any ClaimResponse resource will be excluded when the associated Claim resource contains SAMHSA data.\n\nExample:\n  - `excludeSAMHSA=true`"
+      }, {
+        "name" : "includeTaxNumbers",
+        "type" : "string",
+        "documentation" : "Ignored. Included for compatibility with existing requests."
       }, {
         "name" : "isHashed",
         "type" : "string",
@@ -161,6 +169,10 @@
         "name" : "excludeSAMHSA",
         "type" : "string",
         "documentation" : "The _Substance Abuse and Mental Health Services Administration_ (SAMHSA)\nis the agency within the U.S. Department of HHS that leads public health efforts to advance the behavioral health of the nation.\nSetting this flag to _true_, modifies the request to filter out all SAMSHA-related claims from the response.\n\nExamples:\n   - `excludeSAMHSA=true`"
+      }, {
+        "name" : "includeTaxNumbers",
+        "type" : "string",
+        "documentation" : "Ignored. Included for compatibility with existing requests."
       }, {
         "name" : "patient",
         "type" : "reference",

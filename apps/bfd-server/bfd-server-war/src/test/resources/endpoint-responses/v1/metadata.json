@@ -71,6 +71,10 @@
         "type" : "string",
         "documentation" : "The _Substance Abuse and Mental Health Services Administration_ (SAMHSA)\nis the agency within the U.S. Department of HHS that leads public health efforts to advance the behavioral health of the nation.\nSetting this flag to _true_, modifies the request to filter out all SAMSHA-related claims from the response.\n\nExamples:\n   - `excludeSAMHSA=true`"
       }, {
+        "name" : "includeTaxNumbers",
+        "type" : "string",
+        "documentation" : "Ignored. Included for compatibility with existing requests."
+      }, {
         "name" : "service-date",
         "type" : "date",
         "documentation" : "Only satisfy the Search request if a claim's _billable period_\nfalls within a specified _DateRange_. A _DateRange_ can be\ndefined by providing less than `lt` and/or greater than `gt` values.\nThis parameter can be included in a request one or more times.\n\nExamples:\n  - `service-date=gt2023-01-02&service-date=lt2023-05-01` defines a range between two provided dates\n  - `service-date=gt2023-01-02` defines a range between the provided date and today\n  - `service-date=lt2023-05-01` defines a range from the earliest available records until the provided date"
