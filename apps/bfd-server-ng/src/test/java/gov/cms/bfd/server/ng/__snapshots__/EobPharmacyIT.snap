@@ -717,7 +717,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
       } ]
     },
     "sequence" : 7,
-    "timingDate" : "2026-01-16"
+    "timingDate" : "2026-01-20"
   }, {
     "category" : {
       "coding" : [ {
@@ -1942,7 +1942,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
       } ]
     },
     "sequence" : 7,
-    "timingDate" : "2026-01-16"
+    "timingDate" : "2026-01-20"
   }, {
     "category" : {
       "coding" : [ {
