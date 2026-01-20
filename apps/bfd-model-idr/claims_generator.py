@@ -555,7 +555,6 @@ def add_diagnoses(clm_type_cd: int = -1):
             "CLM_DGNS_PRCDR_ICD_IND": "0",
             "CLM_PROD_TYPE_CD": "E",
             "CLM_POA_IND": "0",  # ALWAYS for ICD-10 codes. not always for icd-9.
-            "CLM_POA_IND": "0",  # ALWAYS for ICD-10 codes. not always for icd-9.
         }
         first_external = {
             "CLM_DGNS_CD": external_1["CLM_DGNS_CD"],
@@ -1085,6 +1084,8 @@ def gen_claim(bene_sk: str = "-1", min_date: str = "2018-01-01", max_date: str =
             institutional_parts["CLM_MDCR_IP_1ST_YR_RATE_AMT"] = round(random.uniform(0, 10000), 2)
             institutional_parts["CLM_MDCR_IP_SCND_YR_RATE_AMT"] = round(random.uniform(0, 10000), 2)
             institutional_parts["CLM_PPS_MD_WVR_STDZD_VAL_AMT"] = round(random.uniform(0, 10000), 2)
+        if clm_type_cd in (40, 61, 64, 62, 20, 63, 30, 60):
+            institutional_parts["CLM_INSTNL_PRFNL_AMT"] = round(random.uniform(0, 10000), 2)
 
         add_meta_timestamps(institutional_parts, claim.CLM, max_date)
 
