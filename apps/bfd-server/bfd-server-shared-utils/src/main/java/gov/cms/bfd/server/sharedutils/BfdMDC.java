@@ -127,6 +127,10 @@ public class BfdMDC {
   public static final String HTTP_ACCESS_REQUEST_CLIENTSSL_DN =
       computeMDCKey(MDC_PREFIX, REQUEST_PREFIX, "clientSSL_DN");
 
+  /** MDC key for the http request header include tax numbers. */
+  public static final String HTTP_ACCESS_REQUEST_HEADER_TAX_NUMBERS =
+      computeMDCKey(MDC_PREFIX, REQUEST_PREFIX, HEADER_PREFIX, "IncludeTaxNumbers");
+
   /** MDC key for the http request header accept. */
   public static final String HTTP_ACCESS_REQUEST_HEADER_ACCEPT =
       computeMDCKey(MDC_PREFIX, REQUEST_PREFIX, HEADER_PREFIX, "Accept");

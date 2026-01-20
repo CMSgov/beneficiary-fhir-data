@@ -221,7 +221,12 @@ public class ExplanationOfBenefitResourceProvider extends AbstractResourceProvid
     ClaimType claimType = eobIdType.get();
     String eobIdClaimIdText = eobIdMatcher.group(2);
     CommonTransformerUtils.publishMdcOperationName(
-        CanonicalOperation.Endpoint.V1_EOB, Map.of("by", "id"));
+        CanonicalOperation.Endpoint.V1_EOB,
+        Map.of(
+            "IncludeTaxNumbers",
+            String.valueOf(returnIncludeTaxNumbers(requestDetails)),
+            "by",
+            "id"));
 
     Class<?> entityClass = eobIdType.get().getEntityClass();
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();

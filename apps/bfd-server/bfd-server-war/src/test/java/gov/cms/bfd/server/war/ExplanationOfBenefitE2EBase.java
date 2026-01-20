@@ -18,6 +18,7 @@ import com.google.common.collect.ImmutableList;
 import gov.cms.bfd.model.rif.entities.OutpatientClaim;
 import gov.cms.bfd.server.sharedutils.BfdMDC;
 import gov.cms.bfd.server.war.commons.ClaimType;
+import gov.cms.bfd.server.war.commons.CommonHeaders;
 import gov.cms.bfd.server.war.commons.CommonTransformerUtils;
 import gov.cms.bfd.server.war.commons.TransformerConstants;
 import gov.cms.bfd.server.war.r4.providers.R4PatientResourceProvider;
@@ -1023,6 +1024,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
     String requestString = eobEndpoint + eobId;
 
     Map<String, String> headers = new HashMap<>();
+    headers.put(CommonHeaders.HEADER_NAME_INCLUDE_TAX_NUMBERS, "true");
     headers.put(R4PatientResourceProvider.HEADER_NAME_INCLUDE_ADDRESS_FIELDS, "true");
     // Add extra check for accept-charset to make sure it passes through
     headers.put("Accept-Charset", "utf-8");
@@ -1030,6 +1032,7 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
         List.of(
             BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_PER_KB,
             BfdMDC.HTTP_ACCESS_RESPONSE_HEADER_CONTENT_LOCATION,
+            BfdMDC.HTTP_ACCESS_REQUEST_HEADER_TAX_NUMBERS,
             BfdMDC.HTTP_ACCESS_REQUEST_HEADER_ADDRESS_FIELDS,
             BfdMDC.HTTP_ACCESS_REQUEST_HEADER_ACCEPT_CHARSET);
 
@@ -1048,10 +1051,12 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
     String requestString = eobEndpoint + "?patient=" + patientId;
 
     Map<String, String> headers = new HashMap<>();
+    headers.put(CommonHeaders.HEADER_NAME_INCLUDE_TAX_NUMBERS, "true");
     headers.put(R4PatientResourceProvider.HEADER_NAME_INCLUDE_ADDRESS_FIELDS, "true");
     List<String> additionalExpectedMdcKeys =
         List.of(
             BfdMDC.HTTP_ACCESS_RESPONSE_DURATION_PER_KB,
+            BfdMDC.HTTP_ACCESS_REQUEST_HEADER_TAX_NUMBERS,
             BfdMDC.HTTP_ACCESS_REQUEST_HEADER_ADDRESS_FIELDS);
 
     ServerTestUtils.assertDefaultAndAdditionalMdcKeys(
