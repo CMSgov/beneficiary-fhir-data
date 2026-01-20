@@ -25,6 +25,10 @@ public class JsonSnapshotSerializer extends ToStringSnapshotSerializer {
       Pattern.compile(
           "\"reference\"\\s*:\\s*\"([A-Za-z]+)/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\"",
           Pattern.MULTILINE | Pattern.DOTALL);
+  private static final Pattern CLAIM_IDR_LOAD_DATE_REGEX =
+      Pattern.compile(
+          "(\"code\"\\s*:\\s*\"CLM_IDR_LD_DT\"[\\s\\S]*?\"timingDate\"\\s*:\\s*\")\\d{4}-\\d{2}-\\d{2}(\")?",
+          Pattern.MULTILINE | Pattern.DOTALL);
 
   @Override
   public String getOutputFormat() {
@@ -60,11 +64,12 @@ public class JsonSnapshotSerializer extends ToStringSnapshotSerializer {
     json = FULLURL_UUID_REGEX.matcher(json).replaceAll("\"fullUrl\" : \"{uuid}\"");
     json = REFERENCE_UUID_REGEX.matcher(json).replaceAll("\"reference\": \"$1/{uuid}\"");
     // lastUpdated gets reset whenever we recreate the test data
-
     json =
         LAST_UPDATED_REGEX
             .matcher(json)
             .replaceAll("\"lastUpdated\": \"9999-12-31T00:00:00.000+00:00\"");
+
+    json = CLAIM_IDR_LOAD_DATE_REGEX.matcher(json).replaceAll("$19999-12-31$2");
 
     // Take the HAPI FHIR output and serialize it using a serialization format that will sort keys
     // in order.
