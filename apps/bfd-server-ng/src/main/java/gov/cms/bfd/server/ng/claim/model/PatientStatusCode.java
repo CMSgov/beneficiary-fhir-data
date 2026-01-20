@@ -15,7 +15,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
  */
 @AllArgsConstructor
 @Getter
-@SuppressWarnings("java:S115")
+@SuppressWarnings({"java:S115", "java:S1192"})
 public enum PatientStatusCode {
   /** 01 - DISCHARGED TO HOME OR SELF CARE (ROUTINE DISCHARGE). */
   _01("01", "DISCHARGED TO HOME OR SELF CARE (ROUTINE DISCHARGE)"),
@@ -318,9 +318,7 @@ public enum PatientStatusCode {
   /** 98 - RESERVED FOR NATIONAL ASSIGNMENT. */
   _98("98", "RESERVED FOR NATIONAL ASSIGNMENT"),
   /** 99 - RESERVED FOR NATIONAL ASSIGNMENT. */
-  _99("99", "RESERVED FOR NATIONAL ASSIGNMENT"),
-  /** NA. */
-  NA("", "NO DESCRIPTION AVAILABLE");
+  _99("99", "RESERVED FOR NATIONAL ASSIGNMENT");
 
   private final String code;
   private final String display;

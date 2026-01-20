@@ -20,18 +20,6 @@
                 "max": "1"
             },
             {
-                "id": "ExplanationOfBenefit-Institutional-Base.CLM_MDCR_NPMT_RSN_CD",
-                "path": "ExplanationOfBenefit-Institutional-Base.CLM_MDCR_NPMT_RSN_CD",
-                "label": "Claim Non Payment Reason Code",
-                "min": 0,
-                "max": "1",
-                "type": [
-                    {
-                        "code": "string"
-                    }
-                ]
-            },
-            {
                 "id": "ExplanationOfBenefit-Institutional-Base.CLM_MDCR_IP_LRD_USE_CNT",
                 "path": "ExplanationOfBenefit-Institutional-Base.CLM_MDCR_IP_LRD_USE_CNT",
                 "label": "Lifetime Reserved Days Used Count",
@@ -248,18 +236,6 @@
                 ]
             },
             {
-                "id": "ExplanationOfBenefit-Institutional-Base.CLM_FI_ACTN_CD",
-                "path": "ExplanationOfBenefit-Institutional-Base.CLM_FI_ACTN_CD",
-                "label": "FI Claim Action Code",
-                "min": 0,
-                "max": "1",
-                "type": [
-                    {
-                        "code": "string"
-                    }
-                ]
-            },
-            {
                 "id": "ExplanationOfBenefit-Institutional-Base.CLM_MDCR_INSTNL_BENE_PD_AMT",
                 "path": "ExplanationOfBenefit-Institutional-Base.CLM_MDCR_INSTNL_BENE_PD_AMT",
                 "label": "Outpatient Beneficiary Payment Amount",
@@ -311,18 +287,6 @@
                 "id": "ExplanationOfBenefit-Institutional-Base.DGNS_DRG_OUTLIER_CD",
                 "path": "ExplanationOfBenefit-Institutional-Base.DGNS_DRG_OUTLIER_CD",
                 "label": "Claim Diagnosis Related Group Outlier Stay Code",
-                "min": 0,
-                "max": "1",
-                "type": [
-                    {
-                        "code": "string"
-                    }
-                ]
-            },
-            {
-                "id": "ExplanationOfBenefit-Institutional-Base.CLM_OP_SRVC_TYPE_CD",
-                "path": "ExplanationOfBenefit-Institutional-Base.CLM_OP_SRVC_TYPE_CD",
-                "label": "Claim Outpatient Service Type Code",
                 "min": 0,
                 "max": "1",
                 "type": [

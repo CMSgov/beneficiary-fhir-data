@@ -121,7 +121,7 @@
     - NCH
   sourceView: V2_MDCR_CLM_DT_SGNTR
   sourceColumn: CLM_CMS_PROC_DT
-  fhirPath: ExplanationOfBenefit.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CMS-PROC-DT').value
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_CMS_PROC_DT').exists()).code.coding.code
 - inputPath: ExplanationOfBenefit-Pharmacy.CLM_SBMT_FRMT_CD
   appliesTo:
     - Pharmacy
@@ -132,7 +132,7 @@
   referenceTable: CLM_SBMT_FRMT_CD
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_SBMT_FRMT_CD
-  fhirPath: ExplanationOfBenefit.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-SBMT-FRMT-CD').valueCoding.code
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_SBMT_FRMT_CD').exists()).code.coding.code
 - inputPath: ExplanationOfBenefit-Pharmacy.CLM_BENE_PMT_AMT
   appliesTo:
     - Pharmacy
@@ -160,7 +160,7 @@
     - PLAN_CNTRCT_REC_ID
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_SBMTR_CNTRCT_NUM
-  fhirPath: ExplanationOfBenefit.insurance.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-SBMTR-CNTRCT-NUM').value
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_SBMTR_CNTRCT_NUM').exists()).code.coding.code
 - inputPath: ExplanationOfBenefit-Pharmacy.CLM_SBMTR_CNTRCT_PBP_NUM
   appliesTo:
     - Pharmacy
@@ -170,7 +170,7 @@
     - PLAN_PBP_REC_NUM
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_SBMTR_CNTRCT_PBP_NUM
-  fhirPath: ExplanationOfBenefit.insurance.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-SBMTR-CNTRCT-PBP-NUM').value
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_SBMTR_CNTRCT_PBP_NUM').exists()).code.coding.code
 - inputPath: ExplanationOfBenefit-Pharmacy.CNTRCT_PBP_NAME
   appliesTo:
     - Pharmacy
@@ -533,7 +533,7 @@
   referenceTable: CLM_ADJSTMT_TYPE_CD
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_ADJSTMT_TYPE_CD
-  fhirPath: ExplanationOfBenefit.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-ADJSTMT-TYPE-CD').value.code
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_ADJSTMT_TYPE_CD').exists()).code.coding.code
 - inputPath: SupportingInfoComponent.CLM_DSPNSNG_STUS_CD
   appliesTo:
     - Pharmacy
@@ -556,7 +556,7 @@
     - CCLF7.CLM_IDR_LD_DT
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_IDR_LD_DT
-  fhirPath: ExplanationOfBenefit.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-IDR-LD-DT').value
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_IDR_LD_DT').exists()).code.coding.code
 - inputPath: SupportingInfoComponent.CLM_LINE_RX_NUM
   appliesTo:
     - Pharmacy

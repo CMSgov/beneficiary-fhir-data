@@ -501,34 +501,25 @@ public class SystemUrls {
   public static final String BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION =
       "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication";
 
-  /** Blue Button structure definition = claim payment denial code. */
-  public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_CLAIM_PAYMENT_DENIAL_CODE =
-      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CARR-PMT-DNL-CD";
+  /** Blue Button code system = claim payment denial code. */
+  public static final String BLUE_BUTTON_CODE_SYSTEM_CLAIM_PAYMENT_DENIAL_CODE =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CARR-PMT-DNL-CD";
 
-  /** Blue Button structure definition - claim provider assignment indicator switch. */
-  public static final String
-      BLUE_BUTTON_STRUCTURE_DEFINITION_CLAIM_PROVIDER_ASSIGNMENT_INDICATOR_SWITCH =
-          "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MDCR-PRFNL-PRVDR-ASGNMT-SW";
+  /** Blue Button code system - Carrier Claim Provider Assignment Indicator Switch. */
+  public static final String BLUE_BUTTON_CODE_SYSTEM_CLAIM_PROVIDER_ASSIGNMENT_INDICATOR_SWITCH =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-PRFNL-PRVDR-ASGNMT-SW";
 
-  /** Blue Button structure definition - claim clinical trial number. */
-  public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_CLAIM_CLINICAL_TRIAL_NUMBER =
-      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CLNCL-TRIL-NUM";
+  /** Blue Button code system = claim adjustment type code. */
+  public static final String BLUE_BUTTON_CODE_SYSTEM_CLAIM_ADJUSTMENT_TYPE_CODE =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADJSTMT-TYPE-CD";
 
   /** Blue Button identifier - claim control number. */
   public static final String BLUE_BUTTON_CLAIM_CONTROL_NUMBER =
       "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM";
 
-  /** Blue Button structure definition - claim query code. */
-  public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_CLAIM_QUERY_CODE =
-      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-QUERY-CD";
-
   /** Blue Button code system - claim query code. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_CLAIM_QUERY_CODE =
       "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD";
-
-  /** Blue Button structure definition - claim contractor number. */
-  public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_CLAIM_CONTRACTOR_NUMBER =
-      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CNTRCTR-NUM";
 
   /** Blue Button code system - claim contractor number. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_CLAIM_CONTRACTOR_NUMBER =
@@ -538,25 +529,13 @@ public class SystemUrls {
   public static final String BLUE_BUTTON_CODE_SYSTEM_CLAIM_RECORD_TYPE =
       "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD";
 
-  /** Blue Button structure definition - claim. */
-  public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_CLAIM_DISPOSITION_CODE =
-      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-DISP-CD";
-
   /** Blue Button code system - claim disposition code. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_CLAIM_DISPOSITION_CODE =
       "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DISP-CD";
 
-  /** Blue Button structure definition - part D claim format code. */
-  public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_CLAIM_FORMAT_CODE =
-      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-SBMT-FRMT-CD";
-
   /** Blue Button code system - part D claim format code. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_CLAIM_FORMAT_CODE =
       "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-SBMT-FRMT-CD";
-
-  /** Blue Button structure definition - claim process date. */
-  public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_CLAIM_PROCESS_DATE =
-      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CMS-PROC-DT";
 
   /** Blue Button code system - claim admission source code. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_CLAIM_ADMISSION_SOURCE_CODE =
@@ -602,29 +581,21 @@ public class SystemUrls {
   public static final String BLUE_BUTTON_CODE_SYSTEM_CLAIM_DEDUCTIBLE_COINSURANCE_CODE =
       "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DDCTBL-COINSRNC-CD";
 
-  /** Blue Button structure definition - Submitter contract number. */
-  public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_SUBMITTER_CONTRACT_NUMBER =
-      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-SBMTR-CNTRCT-NUM";
-
-  /** Blue Button structure definition - Submitter Contract PBP Number. */
-  public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_SUBMITTER_CONTRACT_PBP_NUMBER =
-      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-SBMTR-CNTRCT-PBP-NUM";
-
-  /** Blue Button structure definition - nonpayment reason code. */
-  public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_NONPAYMENT_REASON_CODE =
-      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MDCR-NPMT-RSN-CD";
-
   /** Blue Button code system - nonpayment reason code. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_NONPAYMENT_REASON_CODE =
-      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MDCR-NPMT-RSN-CD";
-
-  /** Blue Button structure definition - fiscal intermediary action code. */
-  public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_FISCAL_INTERMEDIARY_ACTION_CODE =
-      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-FI-ACTN-CD";
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-NPMT-RSN-CD";
 
   /** Blue Button code system - fiscal intermediary action code. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_FISCAL_INTERMEDIARY_ACTION_CODE =
       "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD";
+
+  /** Blue Button code system - claim outpatient service type code. */
+  public static final String BLUE_BUTTON_CODE_SYSTEM_OUTPATIENT_SERVICE_TYPE_CODE =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-OP-SRVC-TYPE-CD";
+
+  /** Blue Button code system - claim PPS indicator code. */
+  public static final String BLUE_BUTTON_CODE_SYSTEM_PPS_INDICATOR_CODE =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PPS-IND-CD";
 
   /** Blue Button structure definition - discount indicator code. */
   public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_REVENUE_DISCOUNT_INDICATOR_CODE =

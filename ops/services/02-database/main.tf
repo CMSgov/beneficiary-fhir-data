@@ -146,6 +146,7 @@ resource "aws_rds_cluster" "this" {
   apply_immediately           = false
 
   backtrack_window                    = 0
+  backup_retention_period             = 1
   cluster_identifier                  = local.rds_cluster_id
   copy_tags_to_snapshot               = true
   db_cluster_parameter_group_name     = aws_rds_cluster_parameter_group.this.name

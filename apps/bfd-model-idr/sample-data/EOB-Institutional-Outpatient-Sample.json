@@ -9,11 +9,7 @@
     "CLM_FROM_DT": "2025-01-03",
     "CLM_THRU_DT": "2025-01-11",
     "CLM_EFCTV_DT": "2025-01-18",
-    "CLM_IDR_LD_DT": "2025-01-18",
     "CLM_SRC_ID": "20000",
-    "CLM_CNTRCTR_NUM": "10312",
-    "CLM_DISP_CD": "1",
-    "CLM_ADJSTMT_TYPE_CD": "0",
     "PRVDR_BLG_PRVDR_NPI_NUM": "1548226988",
     "diagnoses": [
         {
@@ -154,6 +150,42 @@
         {
             "ROW_NUM": "17",
             "CLM_PPS_IND_CD": "2"
+        },
+        {
+          "ROW_NUM": "18",
+          "CLM_QUERY_CD": "3"
+        },
+        {
+          "ROW_NUM": "19",
+          "CLM_IDR_LD_DT": "2025-01-18"
+        },
+        {
+          "ROW_NUM": "20",
+          "CLM_CNTRCTR_NUM": "10312"
+        },
+        {
+          "ROW_NUM": "21",
+          "CLM_ADJSTMT_TYPE_CD": "0"
+        },
+        {
+          "ROW_NUM": "22",
+          "CLM_DISP_CD": "1"
+        },
+        {
+          "ROW_NUM": "23",
+          "CLM_CMS_PROC_DT": "2025-01-01"
+        },
+        {
+          "ROW_NUM": "24",
+          "CLM_MDCR_NPMT_RSN_CD": "P"
+        },
+        {
+          "ROW_NUM": "25",
+          "CLM_FI_ACTN_CD": "1"
+        },
+        {
+          "ROW_NUM": "26",
+          "CLM_OP_SRVC_TYPE_CD": "3"
         }
     ],
     "lineItemComponents": [
@@ -229,23 +261,18 @@
             "CLM_LINE_BLOOD_DDCTBL_AMT": "1234.0"
         }
     ],
-    "CLM_QUERY_CD": "3",
     "CLM_MDCR_DDCTBL_AMT": "17.85",
     "CLM_NRLN_RIC_CD": "V",
     "CLM_OPRTNL_DSPRTNT_AMT": "14.14",
     "CLM_OPRTNL_IME_AMT": "12342.14",
-    "CLM_CMS_PROC_DT": "2025-01-01",
     "CLM_PMT_AMT": "3.50",
     "CLM_SBMT_CHRG_AMT": "9001.55",
     "CLM_MDCR_COINSRNC_AMT": "9.82",
     "CLM_NCVRD_CHRG_AMT": "11.50",
     "CLM_BLOOD_LBLTY_AMT": "121.10",
     "institutionalComponents": {
-        "CLM_OP_SRVC_TYPE_CD": "3",
         "CLM_MDCR_INSTNL_BENE_PD_AMT": "44.44",
         "CLM_MDCR_INSTNL_PRMRY_PYR_AMT": "50.50",
-        "CLM_FI_ACTN_CD": "1",
-        "CLM_MDCR_NPMT_RSN_CD": "P",
         "CLM_MDCR_IP_LRD_USE_CNT": "7",
         "CLM_INSTNL_PER_DIEM_AMT": "5.00",
         "CLM_INSTNL_CVRD_DAY_CNT": "30",
