@@ -479,6 +479,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
         } ]
       }
     } ],
+    "informationSequence" : [ 1 ],
     "modifier" : [ {
       "coding" : [ {
         "code" : "PC",
@@ -546,6 +547,20 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
   "supportingInfo" : [ {
     "category" : {
       "coding" : [ {
+        "code" : "CLM_LINE_PMD_UNIQ_TRKNG_NUM",
+        "display" : "Prior Authorization Unique Tracking Number",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "sequence" : 1,
+    "valueString" : "0LA00000109287"
+  }, {
+    "category" : {
+      "coding" : [ {
         "code" : "CLM_NCH_PRMRY_PYR_CD",
         "display" : "NCH Primary Payer Code",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -561,7 +576,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NCH-PRMRY-PYR-CD"
       } ]
     },
-    "sequence" : 1
+    "sequence" : 2
   }, {
     "category" : {
       "coding" : [ {
@@ -584,7 +599,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD"
       } ]
     },
-    "sequence" : 2
+    "sequence" : 3
   }, {
     "category" : {
       "coding" : [ {
@@ -604,7 +619,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CNTRCTR-NUM"
       } ]
     },
-    "sequence" : 3
+    "sequence" : 4
   }, {
     "category" : {
       "coding" : [ {
@@ -624,7 +639,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DISP-CD"
       } ]
     },
-    "sequence" : 4
+    "sequence" : 5
   }, {
     "category" : {
       "coding" : [ {
@@ -644,7 +659,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD"
       } ]
     },
-    "sequence" : 5
+    "sequence" : 6
   }, {
     "category" : {
       "coding" : [ {
@@ -657,7 +672,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 6,
+    "sequence" : 7,
     "timingDate" : "9999-12-31"
   }, {
     "category" : {
@@ -678,7 +693,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD"
       } ]
     },
-    "sequence" : 7
+    "sequence" : 8
   }, {
     "category" : {
       "coding" : [ {
@@ -686,7 +701,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
       } ]
     },
-    "sequence" : 8,
+    "sequence" : 9,
     "timingPeriod" : {
       "end" : "2021-10-03",
       "start" : "2021-09-27"
@@ -698,7 +713,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
       } ]
     },
-    "sequence" : 9,
+    "sequence" : 10,
     "timingDate" : "2021-10-03"
   }, {
     "category" : {
@@ -712,7 +727,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 10,
+    "sequence" : 11,
     "timingDate" : "2021-10-03"
   }, {
     "category" : {
@@ -726,7 +741,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 11,
+    "sequence" : 12,
     "timingDate" : "2021-10-03"
   }, {
     "category" : {
@@ -740,7 +755,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 12,
+    "sequence" : 13,
     "timingDate" : "2021-10-03"
   }, {
     "category" : {
@@ -754,7 +769,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 13,
+    "sequence" : 14,
     "timingDate" : "2021-10-03"
   }, {
     "category" : {
@@ -768,7 +783,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 14,
+    "sequence" : 15,
     "timingDate" : "2021-10-03"
   }, {
     "category" : {
@@ -782,7 +797,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 15,
+    "sequence" : 16,
     "timingDate" : "2021-10-03"
   } ],
   "total" : [ {
