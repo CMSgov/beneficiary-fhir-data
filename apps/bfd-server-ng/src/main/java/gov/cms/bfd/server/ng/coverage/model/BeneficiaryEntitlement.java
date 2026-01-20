@@ -38,6 +38,9 @@ public class BeneficiaryEntitlement implements Comparable<BeneficiaryEntitlement
   @Column(name = "bfd_created_ts")
   private ZonedDateTime bfdCreatedTimestamp;
 
+  @Column(name = "idr_ltst_trans_flg")
+  private Optional<String> idrLatestTransactionFlag;
+
   private BeneficiaryEntitlementPeriod entitlementPeriod;
 
   /**
