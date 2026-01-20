@@ -3356,7 +3356,7 @@
     - NCH
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_LINE_PMD_UNIQ_TRKNG_NUM
-  fhirPath: ExplanationOfBenefit.supportingInfo.where(code.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/CLM_LINE_PMD_UNIQ_TRKNG_NUM').code.coding.code
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_LINE_PMD_UNIQ_TRKNG_NUM').exists()).value
 - inputPath: LineItemComponent.CLM_LINE_PA_UNIQ_TRKNG_NUM
   appliesTo:
     - Inpatient
