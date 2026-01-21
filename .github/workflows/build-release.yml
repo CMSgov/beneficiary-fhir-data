@@ -285,6 +285,57 @@ jobs:
 
           echo "server-war-dir=$server_war_dir" >> "$GITHUB_OUTPUT"
 
+      - name: Install NPM
+        run: |
+          if ! command -v npm > /dev/null; then
+            sudo apt-get update
+            sudo apt-get install -y npm nodejs
+          fi
+          npm --version
+
+      - name: Install Sushi
+        run: |
+          npm install -g fsh-sushi
+          echo "Installed global packages"
+
+      - name: Install fhirpath
+        working-directory: apps/bfd-model-idr
+        run: |
+          npm install fhirpath
+
+      - name: Install UV CLI
+        run: |
+          if ! command -v uv > /dev/null; then
+            curl -LsSf https://astral.sh/uv/install.sh | sh
+            export PATH="$HOME/.uv/bin:$PATH"
+          fi
+          uv --version
+
+      - name: Install UV dependencies
+        run: uv sync
+
+      - name: Compile all synthetic FHIR resources
+        run: ./compile-all-resources.sh
+        working-directory: apps/bfd-model-idr
+
+      - name: Compile all synthetic FHIR resources
+        run: ./compile-all-resources.sh
+        working-directory: apps/bfd-model-idr
+
+      - name: Generate v3 Data Dictionary
+        working-directory: apps/bfd-model-idr
+        run: |
+          uv run gen_dd.py
+
+      - name: Upload v3 Data Dictionary
+        uses: actions/upload-artifact@v6
+        with:
+          name: release-artifacts
+          path: |
+            apps/bfd-model-idr/out/bfd_data_dictionary.csv
+            apps/bfd-model-idr/out/bfd_data_dictionary.xlsx
+          retention-days: 1
+
       - name: Upload data dictionary and OpenApi artifacts
         uses: actions/upload-artifact@v6
         with:

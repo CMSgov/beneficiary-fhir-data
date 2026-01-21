@@ -3277,7 +3277,7 @@
     - Inpatient
   sources:
     - FISS
-  sourceView: V2_MDCR_CLM_LINE
+  sourceView: V2_MDCR_CLM_LINE_INSTNL
   sourceColumn: CLM_LINE_NON_EHR_RDCTN_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_NON_EHR_RDCTN_AMT')).amount.value
 - inputPath: LineItemComponent.CLM_REV_CNTR_TDAPA_AMT
