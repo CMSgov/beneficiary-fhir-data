@@ -391,7 +391,6 @@ class CoverageSearchIT extends IntegrationTestBase {
                        MIN(ent.entitlementPeriod.benefitRangeBeginDate) AS earliestBeginDate
                 FROM BeneficiaryEntitlement ent
                 WHERE ent.id.beneSk = :beneSk
-                  AND ent.idrLatestTransactionFlag = 'Y'
                 GROUP BY ent.id.beneSk, ent.id.medicareEntitlementTypeCode
                 """,
                 Tuple.class)

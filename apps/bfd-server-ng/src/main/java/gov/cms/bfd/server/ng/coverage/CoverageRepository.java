@@ -74,16 +74,7 @@ public class CoverageRepository {
                           FROM BeneficiaryLowIncomeSubsidy lis
                           WHERE lis.id.beneSk = :beneSk
                           AND lis.benefitRangeEndDate >= :today
-                      ),
-                      earliestEntitlements AS (
-                          SELECT ent.id.beneSk AS beneSk,
-                              ent.id.medicareEntitlementTypeCode AS medicareEntitlementTypeCode,
-                              MIN(ent.entitlementPeriod.benefitRangeBeginDate) AS earliestBeginDate
-                          FROM BeneficiaryEntitlement ent
-                          WHERE ent.id.beneSk = :beneSk
-                          AND ent.idrLatestTransactionFlag = 'Y'
-                          GROUP BY ent.id.beneSk, ent.id.medicareEntitlementTypeCode
-                       )
+                      )
                       SELECT b
                       FROM BeneficiaryCoverage b
                       LEFT JOIN FETCH b.beneficiaryStatus bs
@@ -133,13 +124,6 @@ public class CoverageRepository {
                                 AND e.id.beneSk = blis.id.beneSk
                                 AND e.id.benefitRangeBeginDate = blis.id.benefitRangeBeginDate
                         ))
-                        AND (be IS NULL
-                             OR EXISTS (
-                             SELECT 1 FROM earliestEntitlements e
-                             WHERE e.beneSk = be.id.beneSk
-                                 AND e.medicareEntitlementTypeCode = be.id.medicareEntitlementTypeCode
-                                 AND e.earliestBeginDate = be.entitlementPeriod.benefitRangeBeginDate
-                          ))
                       ORDER BY b.obsoleteTimestamp DESC
                     """,
                     lastUpdatedRange.getLowerBoundSqlOperator(),
