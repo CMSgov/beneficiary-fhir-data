@@ -22,7 +22,7 @@ Multiple one-to-many relationships should only be used when the volume of data r
 ## Handling Optional Fields
 
 In our entity classes, we use `Optional<T>` types to represent fields which could be null/empty in the database.
-This is somewhat unconventional, is it goes the generally recommended practice of only using `Optional` for return values.
+This is somewhat unconventional, as doing so contradicts the generally recommended practice of only using `Optional` for return values.
 However, we need a way to protect against null reference exceptions with the vast amount of potentially nullable fields we have.
 Without the type system to protect us, we would need to be very diligent in always checking for null before attempting to reference
 any of the hundreds of optional fields we store. 
