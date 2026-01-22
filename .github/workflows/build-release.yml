@@ -307,6 +307,7 @@ jobs:
 
       - name: Install UV dependencies
         run: uv sync
+        working-directory: apps/bfd-model-idr
 
       - name: Compile all synthetic FHIR resources
         run: ./compile-all-resources.sh
