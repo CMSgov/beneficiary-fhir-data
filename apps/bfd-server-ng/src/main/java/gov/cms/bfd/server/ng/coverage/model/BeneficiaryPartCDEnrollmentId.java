@@ -21,7 +21,7 @@ import org.jetbrains.annotations.NotNull;
 @SuppressWarnings("java:S1948")
 public class BeneficiaryPartCDEnrollmentId
     implements Serializable, Comparable<BeneficiaryPartCDEnrollmentId> {
-  @Column(name = "bene_sk")
+  @Column(name = "bene_sk", insertable = false, updatable = false)
   private Long beneSk;
 
   @Column(name = "bene_enrlmt_bgn_dt")

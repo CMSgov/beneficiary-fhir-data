@@ -5,9 +5,7 @@ import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import java.util.Optional;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
@@ -24,61 +22,11 @@ public class ClaimItem implements Comparable<ClaimItem> {
   @Embedded private ClaimValue claimValue;
   @Embedded private ClaimLineRxNumber claimLineRxNum;
   @Embedded private ClaimRelatedCondition claimRelatedCondition;
+  @Embedded private ClaimItemOptional claimItemOptional;
 
   @JoinColumn(name = "clm_uniq_id")
   @ManyToOne
   private Claim claim;
-
-  @JoinColumn(
-      name = "clm_uniq_id",
-      insertable = false,
-      updatable = false,
-      referencedColumnName = "clm_uniq_id")
-  @JoinColumn(
-      name = "clm_line_num",
-      insertable = false,
-      updatable = false,
-      referencedColumnName = "clm_line_num")
-  @OneToOne
-  private ClaimLineInstitutional claimLineInstitutional;
-
-  @JoinColumn(
-      name = "clm_uniq_id",
-      insertable = false,
-      updatable = false,
-      referencedColumnName = "clm_uniq_id")
-  @JoinColumn(
-      name = "clm_line_num",
-      insertable = false,
-      updatable = false,
-      referencedColumnName = "clm_line_num")
-  @OneToOne
-  private ClaimLineProfessional claimLineProfessional;
-
-  Optional<ClaimLineInstitutional> getClaimLineInstitutional() {
-    return Optional.ofNullable(claimLineInstitutional);
-  }
-
-  Optional<ClaimLineProfessional> getClaimLineProfessional() {
-    return Optional.ofNullable(claimLineProfessional);
-  }
-
-  @JoinColumn(
-      name = "clm_uniq_id",
-      insertable = false,
-      updatable = false,
-      referencedColumnName = "clm_uniq_id")
-  @JoinColumn(
-      name = "clm_line_num",
-      insertable = false,
-      updatable = false,
-      referencedColumnName = "clm_line_num")
-  @OneToOne
-  private ClaimLineRx claimLineRx;
-
-  Optional<ClaimLineRx> getClaimLineRx() {
-    return Optional.ofNullable(claimLineRx);
-  }
 
   @Override
   public int compareTo(@NotNull ClaimItem o) {
