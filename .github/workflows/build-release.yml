@@ -324,15 +324,50 @@ jobs:
         run: |
           uv run gen_dd.py
 
-      - name: Upload data dictionary and OpenApi artifacts
+      - name: Prepare artifacts
+        env:
+          BFD_RELEASE: ${{ needs.compute-version-strings.outputs.bfd_release }}
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+
+          mkdir -p assets
+
+          echo "Preparing server WAR artifacts..."
+
+          # 1) Handle bfd-server-war artifacts
+          for artifact_path in ${{ steps.get-server-war-dir.outputs.server-war-dir }}/*
+          do
+            filename="$(basename -- "$artifact_path")"
+
+            if [[ "$filename" =~ ^bfd-server-war-$BFD_RELEASE-(.+)$ ]]; then
+              artifact="${BASH_REMATCH[1]}"
+              artifact_ext="${artifact#*.}"
+              artifact_name="${artifact%%.*}"
+
+              cp "$artifact_path" "assets/${artifact_name}-${BFD_RELEASE}.${artifact_ext}"
+            fi
+          done
+
+          echo "Preparing data dictionary artifacts..."
+
+          # 2) Handle bfd_data_dictionary artifacts
+          for artifact_path in apps/bfd-model-idr/out/bfd_data_dictionary.*
+          do
+            filename="$(basename -- "$artifact_path")"
+            artifact_ext="${filename#*.}"
+
+            cp "$artifact_path" "assets/v3-data-dictionary-${BFD_RELEASE}.${artifact_ext}"
+          done
+
+          echo "Final staged artifacts:"
+          ls -l assets
+
+      - name: Upload release artifacts
         uses: actions/upload-artifact@v6
         with:
           name: release-artifacts
-          path: |
-            ${{ steps.get-server-war-dir.outputs.server-war-dir }}/*data-dictionary*
-            ${{ steps.get-server-war-dir.outputs.server-war-dir }}/*openapi*
-            apps/bfd-model-idr/out/bfd_data_dictionary.csv
-            apps/bfd-model-idr/out/bfd_data_dictionary.xlsx
+          path: assets/*
           retention-days: 1
 
       - name: "Perform Exceptional Rollback"
@@ -444,32 +479,6 @@ jobs:
         uses: actions/download-artifact@v7
         with:
           name: release-artifacts
-
-      - name: Prepare artifacts
-        env:
-          BFD_RELEASE: ${{ needs.compute-version-strings.outputs.bfd_release }}
-        run: |
-          # We want artifacts to be named consistently, specifically in the form of
-          # "<artifact_name>-<bfd_version>.<ext>". However, they are generated as
-          # "bfd-server-war-<bfd_version>-<artifact_name>.<ext>", so we need to do some filename
-          # manipulation here
-          for artifact_path in ./*
-          do
-            artifact="$(basename -- "$artifact_path" | sed -nE "s/bfd-server-war-$BFD_RELEASE-(.*)/\1/p")"
-            artifact_ext="${artifact#*.}"
-            artifact_name="${artifact%%.*}"
-            mv "$artifact_path" "./${artifact_name}-${BFD_RELEASE}.${artifact_ext}"
-          done
-          
-          ls ./beneficiary-fhir-data/*
-          
-          for artifact_path in ./beneficiary-fhir-data/apps/bfd-model-idr/out/bfd_data_dictionary.*
-          do
-            filename="$(basename -- "$artifact_path")"
-            artifact_ext="${filename#*.}"
-            
-            mv "$artifact_path" "./v3-data-dictionary-${BFD_RELEASE}.${artifact_ext}"
-          done
 
       - name: Release
         uses: ncipollo/release-action@v1
