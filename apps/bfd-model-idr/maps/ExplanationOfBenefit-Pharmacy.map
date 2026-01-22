@@ -116,7 +116,7 @@ group createEOBPharmacy(source src: ExplanationOfBenefitPharmacy, target tgt: BF
         pricingCode where pricingCode = "M" -> tgtCC.coding = c("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus", "other") "Set other";
       } "Set reason";
     } "Add benefit payment status";
-    
+
     // Insurance coverage
     src.CLM_TYPE_CD as claimType -> tgt.insurance = create('BackboneElement') as tgtBBElement then {
       src -> tgtBBElement.focal = true "Add focal";
@@ -125,16 +125,10 @@ group createEOBPharmacy(source src: ExplanationOfBenefitPharmacy, target tgt: BF
       } "Add reference for coverage";
 
       // Submitter contract number
-      src.CLM_SBMTR_CNTRCT_NUM as contractNum -> tgtBBElement.extension = create('Extension') as tgtExtension then {
-        src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-SBMTR-CNTRCT-NUM" "Add url";
-        contractNum -> tgtExtension.value = contractNum "set contract number";
-      } "CLM_SBMTR_CNTRCT_NUM";
+      src.CLM_SBMTR_CNTRCT_NUM as sbmtrCntrctNum -> tgt then addSubmitterContractNumber(src, tgt) "Add submitter contract number";
 
       // Submitter contract PBP number
-      src.CLM_SBMTR_CNTRCT_PBP_NUM as pbpNum -> tgtBBElement.extension = create('Extension') as tgtExtension then {
-        src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-SBMTR-CNTRCT-PBP-NUM" "Add url";
-        pbpNum -> tgtExtension.value = pbpNum "set PBP number";
-      } "CLM_SBMTR_CNTRCT_PBP_NUM";
+      src.CLM_SBMTR_CNTRCT_PBP_NUM as sbmtrCntrctPbpNum -> tgt then addSubmitterContractPbpNumber(src, tgt) "Add submitter contract pbp number";
     } "Add insurance coverage";
 
     src.CLM_BENE_PMT_AMT as benePmtAmt -> tgt.total = create('BackboneElement') as tgtBBElement then {
