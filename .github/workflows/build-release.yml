@@ -461,9 +461,9 @@ jobs:
             mv "$artifact_path" "./${artifact_name}-${BFD_RELEASE}.${artifact_ext}"
           done
           
-          ls ./*
+          ls ./beneficiary-fhir-data/*
           
-          for artifact_path in apps/bfd-model-idr/out/bfd_data_dictionary.*
+          for artifact_path in ./beneficiary-fhir-data/apps/bfd-model-idr/out/bfd_data_dictionary.*
           do
             filename="$(basename -- "$artifact_path")"
             artifact_ext="${filename#*.}"
