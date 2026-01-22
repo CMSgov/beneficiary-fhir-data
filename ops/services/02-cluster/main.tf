@@ -84,3 +84,18 @@ resource "aws_ecs_cluster_capacity_providers" "this" {
     capacity_provider = "FARGATE_SPOT"
   }
 }
+
+resource "aws_cloudwatch_event_rule" "ecs_events" {
+  name        = "ecs-cluster-events-${aws_ecs_cluster.this.name}"
+  description = "Monitor ECS cluster events for ${aws_ecs_cluster.this.name}"
+
+  event_pattern = jsonencode({
+    source = ["aws.ecs"]
+    "detail-type" = [
+      "ECS Task State Change",
+      "ECS Service Action",
+      "ECS Deployment State Change",
+      "ECS Container Instance State Change"
+    ]
+  })
+}
