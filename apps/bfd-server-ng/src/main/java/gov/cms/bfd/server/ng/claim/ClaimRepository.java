@@ -12,6 +12,8 @@ import gov.cms.bfd.server.ng.claim.model.ClaimTypeCode;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.input.TagCriterion;
 import gov.cms.bfd.server.ng.util.LogUtil;
+import io.micrometer.core.annotation.Timed;
+import io.micrometer.core.aop.MeterTag;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import java.util.ArrayList;
@@ -37,23 +39,23 @@ public class ClaimRepository {
         JOIN FETCH c.beneficiary b
         JOIN FETCH c.claimDateSignature AS cds
         JOIN FETCH c.claimItems AS cl
-        LEFT JOIN FETCH c.claimInstitutional ci
-        LEFT JOIN FETCH c.claimProfessional cp
-        LEFT JOIN FETCH cl.claimLineInstitutional cli
-        LEFT JOIN FETCH cl.claimLineProfessional clp
-        LEFT JOIN FETCH c.claimFiss cf
-        LEFT JOIN FETCH cli.ansiSignature a
-        LEFT JOIN FETCH cl.claimLineRx clr
-        LEFT JOIN FETCH c.contract ct
-        LEFT JOIN FETCH ct.contractPlanContactInfo cc
-        LEFT JOIN FETCH c.serviceProviderHistory p
-        LEFT JOIN FETCH c.attendingProviderHistory ap
-        LEFT JOIN FETCH c.operatingProviderHistory orp
-        LEFT JOIN FETCH c.otherProviderHistory otp
-        LEFT JOIN FETCH c.renderingProviderHistory rp
-        LEFT JOIN FETCH c.prescribingProviderHistory pp
-        LEFT JOIN FETCH c.billingProviderHistory bp
-        LEFT JOIN FETCH c.referringProviderHistory rph
+        LEFT JOIN FETCH c.claimOptional.claimInstitutional ci
+        LEFT JOIN FETCH c.claimOptional.claimProfessional cp
+        LEFT JOIN FETCH cl.claimItemOptional.claimLineInstitutional cli
+        LEFT JOIN FETCH cl.claimItemOptional.claimLineProfessional clp
+        LEFT JOIN FETCH c.claimOptional.claimFiss cf
+        LEFT JOIN FETCH cli.claimLineInstitutionalOptional.ansiSignature a
+        LEFT JOIN FETCH cl.claimItemOptional.claimLineRx clr
+        LEFT JOIN FETCH c.claimOptional.contract ct
+        LEFT JOIN FETCH ct.contractOptional.contractPlanContactInfo cc
+        LEFT JOIN FETCH c.claimOptional.serviceProviderHistory p
+        LEFT JOIN FETCH c.claimOptional.attendingProviderHistory ap
+        LEFT JOIN FETCH c.claimOptional.operatingProviderHistory orp
+        LEFT JOIN FETCH c.claimOptional.otherProviderHistory otp
+        LEFT JOIN FETCH c.claimOptional.renderingProviderHistory rp
+        LEFT JOIN FETCH c.claimOptional.prescribingProviderHistory pp
+        LEFT JOIN FETCH c.claimOptional.billingProviderHistory bp
+        LEFT JOIN FETCH c.claimOptional.referringProviderHistory rph
       """;
 
   /**
@@ -64,8 +66,17 @@ public class ClaimRepository {
    * @param lastUpdated last updated
    * @return claim
    */
+  @Timed(value = "application.claim.search_by_id")
   public Optional<Claim> findById(
-      long claimUniqueId, DateTimeRange claimThroughDate, DateTimeRange lastUpdated) {
+      long claimUniqueId,
+      @MeterTag(
+              key = "hasClaimThroughDate",
+              expression = "lowerBound.isPresent() || upperBound.isPresent()")
+          DateTimeRange claimThroughDate,
+      @MeterTag(
+              key = "hasLastUpdated",
+              expression = "lowerBound.isPresent() || upperBound.isPresent()")
+          DateTimeRange lastUpdated) {
     var paramBuilders =
         List.of(
             new BillablePeriodFilterParam(claimThroughDate),
@@ -101,14 +112,22 @@ public class ClaimRepository {
    * @param claimTypeCodes claimTypeCodes
    * @return claims
    */
+  @Timed(value = "application.claim.search_by_bene")
   public List<Claim> findByBeneXrefSk(
       long beneSk,
-      DateTimeRange claimThroughDate,
-      DateTimeRange lastUpdated,
-      Optional<Integer> limit,
-      Optional<Integer> offset,
-      List<List<TagCriterion>> tagCriteria,
-      List<ClaimTypeCode> claimTypeCodes) {
+      @MeterTag(
+              key = "hasClaimThroughDate",
+              expression = "lowerBound.isPresent() || upperBound.isPresent()")
+          DateTimeRange claimThroughDate,
+      @MeterTag(
+              key = "hasLastUpdated",
+              expression = "lowerBound.isPresent() || upperBound.isPresent()")
+          DateTimeRange lastUpdated,
+      @MeterTag(key = "hasLimit", expression = "isPresent()") Optional<Integer> limit,
+      @MeterTag(key = "hasOffset", expression = "isPresent()") Optional<Integer> offset,
+      @MeterTag(key = "hasTags", expression = "size() > 0") List<List<TagCriterion>> tagCriteria,
+      @MeterTag(key = "hasClaimTypeCodes", expression = "size() > 0")
+          List<ClaimTypeCode> claimTypeCodes) {
     var filterBuilders =
         List.of(
             new BillablePeriodFilterParam(claimThroughDate),

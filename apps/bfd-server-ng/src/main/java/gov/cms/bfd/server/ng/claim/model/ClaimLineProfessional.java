@@ -7,7 +7,6 @@ import jakarta.persistence.Convert;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -31,9 +30,6 @@ public class ClaimLineProfessional {
 
   @Column(name = "clm_line_carr_clncl_lab_num")
   private Optional<String> claimLineCarrierClinicalLabNumber;
-
-  @OneToOne(mappedBy = "claimLineProfessional")
-  private ClaimItem claimLine;
 
   @Embedded private ClaimLineAdjudicationChargeProfessional claimLineAdjudicationChargeProfessional;
 

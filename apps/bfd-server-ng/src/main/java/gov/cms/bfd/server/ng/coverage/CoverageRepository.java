@@ -4,6 +4,8 @@ import gov.cms.bfd.server.ng.coverage.model.BeneficiaryCoverage;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import gov.cms.bfd.server.ng.util.LogUtil;
+import io.micrometer.core.annotation.Timed;
+import io.micrometer.core.aop.MeterTag;
 import jakarta.persistence.EntityManager;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
@@ -24,8 +26,13 @@ public class CoverageRepository {
    * @param lastUpdatedRange last updated search range
    * @return beneficiary record
    */
+  @Timed(value = "application.coverage.search_by_bene")
   public Optional<BeneficiaryCoverage> searchBeneficiaryWithCoverage(
-      long beneSk, DateTimeRange lastUpdatedRange) {
+      long beneSk,
+      @MeterTag(
+              key = "hasLastUpdated",
+              expression = "lowerBound.isPresent() || upperBound.isPresent()")
+          DateTimeRange lastUpdatedRange) {
     var today = DateUtil.nowAoe();
 
     // Note on sorting here. Although we filter out inactive enrollments we need to handle both
@@ -70,14 +77,14 @@ public class CoverageRepository {
                       )
                       SELECT b
                       FROM BeneficiaryCoverage b
-                      LEFT JOIN FETCH b.beneficiaryStatus bs
-                      LEFT JOIN FETCH b.beneficiaryEntitlementReason ber
+                      LEFT JOIN FETCH b.coverageOptional.beneficiaryStatus bs
+                      LEFT JOIN FETCH b.coverageOptional.beneficiaryEntitlementReason ber
                       LEFT JOIN FETCH b.beneficiaryThirdParties tp
                       LEFT JOIN FETCH b.beneficiaryEntitlements be
-                      LEFT JOIN FETCH b.beneficiaryDualEligibility de
+                      LEFT JOIN FETCH b.coverageOptional.beneficiaryDualEligibility de
                       LEFT JOIN FETCH b.beneficiaryPartCDEnrollments ben
-                      LEFT JOIN FETCH ben.enrollmentContract c
-                      LEFT JOIN FETCH c.contractPlanContactInfo cc
+                      LEFT JOIN FETCH ben.enrollmentOptional.enrollmentContract c
+                      LEFT JOIN FETCH c.contractOptional.contractPlanContactInfo cc
                       LEFT JOIN FETCH b.beneficiaryLowIncomeSubsidies blis
                       WHERE b.beneSk = :beneSk
                         AND (

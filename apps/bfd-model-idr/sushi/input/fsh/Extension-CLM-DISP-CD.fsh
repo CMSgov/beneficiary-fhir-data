@@ -1,7 +1,7 @@
 Extension: CLM_DISP_CD 
 Title: "Claim Disposition Code"
 Id: CLM-DISP-CD
-Description: "Code indicating the disposition or outcome of the processing of the claim record."
+Description: "Deprecated 2026-01-14. Code indicating the disposition or outcome of the processing of the claim record."
 * ^url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-DISP-CD"
 * ^context[+].type = #element
 * ^context[=].expression = "ExplanationOfBenefit"

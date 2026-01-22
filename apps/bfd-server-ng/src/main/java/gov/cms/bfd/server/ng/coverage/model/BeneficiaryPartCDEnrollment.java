@@ -3,11 +3,9 @@ package gov.cms.bfd.server.ng.coverage.model;
 import gov.cms.bfd.server.ng.claim.model.Contract;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.util.List;
 import java.util.Optional;
@@ -26,26 +24,13 @@ public class BeneficiaryPartCDEnrollment implements Comparable<BeneficiaryPartCD
 
   @EmbeddedId private BeneficiaryPartCDEnrollmentId id;
 
-  private BeneficiaryEnrollmentPeriod beneficiaryEnrollmentPeriod;
+  @Embedded private BeneficiaryEnrollmentPeriod beneficiaryEnrollmentPeriod;
 
   @Column(name = "bene_cvrg_type_cd")
   private Optional<String> coverageTypeCode;
 
   @Column(name = "bene_enrlmt_emplr_sbsdy_sw")
   private Optional<String> employerSubsidySwitch;
-
-  @ManyToOne(fetch = FetchType.EAGER)
-  @JoinColumn(
-      name = "bene_cntrct_num",
-      insertable = false,
-      updatable = false,
-      referencedColumnName = "cntrct_num")
-  @JoinColumn(
-      name = "bene_pbp_num",
-      insertable = false,
-      updatable = false,
-      referencedColumnName = "cntrct_pbp_num")
-  private Contract enrollmentContract;
 
   @Column(name = "bene_pdp_enrlmt_mmbr_id_num")
   private Optional<String> memberId;
@@ -59,21 +44,14 @@ public class BeneficiaryPartCDEnrollment implements Comparable<BeneficiaryPartCD
   @Column(name = "bene_pdp_enrlmt_bank_id_num")
   private Optional<String> bankId;
 
+  @Embedded private BeneficiaryPartCDEnrollmentOptional enrollmentOptional;
+
   Period toFhirPeriod() {
     return beneficiaryEnrollmentPeriod.toFhirPeriod();
   }
 
   Coverage.CoverageStatus toFhirStatus() {
     return beneficiaryEnrollmentPeriod.toFhirStatus();
-  }
-
-  /**
-   * Get the enrollment contract.
-   *
-   * @return contract
-   */
-  public Optional<Contract> getEnrollmentContract() {
-    return Optional.ofNullable(enrollmentContract);
   }
 
   /**
@@ -143,7 +121,8 @@ public class BeneficiaryPartCDEnrollment implements Comparable<BeneficiaryPartCD
                 new Extension(SystemUrls.EXT_BENE_CVRG_TYPE_CD_URL)
                     .setValue(new Coding(SystemUrls.SYS_CVRG_TYPE_CD, code, null)));
 
-    var segment = getEnrollmentContract().flatMap(Contract::getContractPbpSegmentNumber);
+    var segment =
+        enrollmentOptional.getEnrollmentContract().flatMap(Contract::getContractPbpSegmentNumber);
     var extSegmentNumber =
         segment.map(
             number ->
