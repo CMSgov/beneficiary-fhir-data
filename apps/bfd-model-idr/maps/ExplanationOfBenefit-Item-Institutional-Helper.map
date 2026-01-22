@@ -12,6 +12,7 @@ group addItem(source src: LineItemComponent, target tgt: BackboneElement){
     } "Set quantity of service provided";
     src -> tgt.revenue = create('CodeableConcept') as tgtRevenue then addRevenue(src,tgtRevenue) "add revenue";
     src -> tgt.modifier = create('CodeableConcept') as tgtModifier then addModifier(src,tgtModifier) "add revenue";
+    src.SEQUENCE_INFO as sequenceInfo where sequenceInfo.length()>0 -> tgt.informationSequence = sequenceInfo;
 
     //Have to repeat this 4 times because of the flat format. 
     src.CLM_1_REV_CNTR_ANSI_GRP_CD as adjReason1 where adjReason1.length()=2 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addAdjudicationReason1(src, tgtAdjudication) "Add adjudication reasons";
