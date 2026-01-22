@@ -543,7 +543,7 @@ FROM
         AND path LIKE '/v1/fhir%'
         AND request_method = 'GET'
         AND response_code = 200
-        AND try_cast(fhir_id as BIGINT) < 0
+        AND try_cast(fhir_id_v2 as BIGINT) < 0
       )
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
@@ -865,7 +865,7 @@ FROM
         AND path LIKE '/v2/fhir%'
         AND request_method = 'GET'
         AND response_code = 200
-        AND try_cast(fhir_id as BIGINT) < 0
+        AND try_cast(fhir_id_v2 as BIGINT) < 0
       )
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
