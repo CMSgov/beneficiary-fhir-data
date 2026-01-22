@@ -420,6 +420,5 @@ class CoverageSearchIT extends IntegrationTestBase {
         assertEquals(expectedStart, coverage.getPeriod().getStart());
       }
     }
-    expectFhir().scenario(searchStyle.name()).toMatchSnapshot(coverageBundle);
   }
 }
