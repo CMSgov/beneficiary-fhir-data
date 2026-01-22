@@ -124,13 +124,6 @@ group createEOBPharmacy(source src: ExplanationOfBenefitPharmacy, target tgt: BF
         claimType -> tgtReference.display = "Part D" "Add coverage type";
       } "Add reference for coverage";
 
-      // Submitter contract number
-      src.CLM_SBMTR_CNTRCT_NUM as sbmtrCntrctNum -> tgt then addSubmitterContractNumber(src, tgt) "Add submitter contract number";
-
-      // Submitter contract PBP number
-      src.CLM_SBMTR_CNTRCT_PBP_NUM as sbmtrCntrctPbpNum -> tgt then addSubmitterContractPbpNumber(src, tgt) "Add submitter contract pbp number";
-    } "Add insurance coverage";
-
     src.CLM_BENE_PMT_AMT as benePmtAmt -> tgt.total = create('BackboneElement') as tgtBBElement then {
       src -> tgtBBElement.category = create('CodeableConcept') as tgtCC then {
         src -> tgtCC.coding = c("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication", "paidbypatient") "Add first coding";
