@@ -48,6 +48,7 @@
     - FISS
     - MCS
     - NCH
+  referenceTable: Final-Action
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_FINL_ACTN_IND
   fhirPath: ExplanationOfBenefit.meta.tag.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Final-Action').code
@@ -247,10 +248,10 @@
     - MCS
     - NCH
     - VMS
-  referenceTable: CLM_SRC_ID
+  referenceTable: System-Type
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_SRC_ID
-  fhirPath: ExplanationOfBenefit.meta.tag.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/SYSTEM-TYPE').value
+  fhirPath: ExplanationOfBenefit.meta.tag.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/System-Type').value
 - inputPath: ExplanationOfBenefit-Base.CLM_SRC_ID
   appliesTo:
     - Inpatient
