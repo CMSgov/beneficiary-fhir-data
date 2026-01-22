@@ -11,6 +11,8 @@ dependencies = [
     "pyyaml>=6.0.2",
     "pydantic>=2.12.3",
     "tqdm>=4.67.1",
+    "click>=8.3.1",
+    "pydanclick>=0.5.1",
     "requests>=2.32.5",
 ]
 

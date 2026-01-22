@@ -1,4 +1,3 @@
-import argparse
 import copy
 import os
 import random
@@ -8,13 +7,15 @@ import sys
 from dataclasses import dataclass, field
 from datetime import date, datetime, timedelta
 from pathlib import Path
-from typing import Any
+from typing import Annotated, Any
 
+import click
 import pandas as pd
 import tqdm
 import yaml
 from dateutil.relativedelta import relativedelta
 from faker import Faker
+from pydanclick import from_pydantic
 from pydantic import BaseModel, ConfigDict, Field, TypeAdapter
 
 from generator_util import (
@@ -60,6 +61,33 @@ class SecurityLabelModel(BaseModel):
     @property
     def normalized_code(self) -> str:
         return self.code.replace(".", "")
+
+
+class OptionsModel(BaseModel):
+    sushi: Annotated[
+        bool,
+        Field(
+            description=(
+                "Generate new StructureDefinitions. Use when testing locally if new .fsh files "
+                "have been added."
+            )
+        ),
+    ] = False
+    min_claims: Annotated[
+        int, Field(description="Minimum number of claims to generate per person")
+    ] = 5
+    max_claims: Annotated[
+        int, Field(description="Maximum number of claims to generate per person")
+    ] = 5
+    force_gen_claims: Annotated[
+        bool,
+        Field(
+            description=(
+                "Generate _new_ claims when an existing bene has claims provided via --files; "
+                " -respects -max-claims"
+            )
+        ),
+    ] = False
 
 
 @dataclass
@@ -1739,41 +1767,12 @@ def generate_meta_sk_pair(obj: dict[str, Any]):
         obj["META_LST_UPDT_SK"] = 0
 
 
-def main():
-    parser = argparse.ArgumentParser(
-        description="Generate Synthetic Data for Ingestion by the BFD v3 pipeline."
-    )
-    parser.add_argument(
-        "--sushi",
-        "-s",
-        action="store_true",
-        help="Generate new StructureDefinitions. Use when testing locally if new .fsh files "
-        "have been added.",
-    )
-    parser.add_argument(
-        "--min-claims",
-        type=int,
-        default=5,
-        help="Minimum number of claims to generate per person",
-    )
-    parser.add_argument(
-        "--max-claims",
-        type=int,
-        default=5,
-        help="Maximum number of claims to generate per person",
-    )
-    parser.add_argument(
-        "--force-gen-claims",
-        action=argparse.BooleanOptionalAction,
-        help=(
-            "Generate _new_ claims when an existing bene has claims provided via --files; respects"
-            " --max-claims"
-        ),
-    )
-    parser.add_argument("files", nargs="*")
-
-    args = parser.parse_args()
-    if args.sushi:
+@click.command
+@click.argument("paths", nargs=-1, type=click.Path(exists=True))
+@from_pydantic("opts", OptionsModel)
+def main(opts: OptionsModel, paths: tuple[Path, ...]):
+    """Generate synthetic claims data. Provided file PATHS will be updated with new fields."""
+    if opts.sushi:
         print("Running sushi build")
         _, stderr = run_command(["sushi", "build"], cwd="./sushi")
         if stderr:
@@ -1801,10 +1800,10 @@ def main():
         CNTRCT_PBP_NUM: [],
         CNTRCT_PBP_CNTCT: [],
     }
-    load_file_dict(files=files, paths=args.files)
+    load_file_dict(files=files, paths=list(paths))
 
     bene_sks = {-1}
-    if any(BENE_HSTRY in file for file in args.files):
+    if any(BENE_HSTRY in str(file) for file in paths):
         bene_sks: set[int] = {row["BENE_SK"] for row in files[BENE_HSTRY]}
 
     # Naively check if the tables that make up CLAIM_ITEM, CLAIM_DATE_SIGNATURE, and BENEFICIARY
@@ -1818,8 +1817,8 @@ def main():
         BENE_HSTRY,
         BENE_XREF,
     ]
-    if any(CLM in file for file in args.files) and any(
-        file not in clm_required_tables for file in args.files
+    if any(CLM in str(file) for file in paths) and any(
+        file not in clm_required_tables for file in paths
     ):
         print(f"{', '.join(clm_required_tables)} must be provided if {CLM} is provided")
         return
@@ -1847,8 +1846,8 @@ def main():
     if not prvdr_hstry:
         prvdr_hstry = gen_provider_history(amount=14)
     clm_ansi_sgntr = gen_synthetic_clm_ansi_sgntr()
-    min_claims: int = args.min_claims
-    max_claims: int = args.max_claims
+    min_claims: int = opts.min_claims
+    max_claims: int = opts.max_claims
     if min_claims > max_claims:
         print(
             f"error: min claims value of {min_claims} is greater than "
@@ -1865,7 +1864,7 @@ def main():
     print("Generating synthetic claims data for provided BENE_SKs...")
     for pt_bene_sk in tqdm.tqdm(bene_sks):
         claims_from_file = bene_sks_with_claims.get(pt_bene_sk, [])
-        if not claims_from_file or args.force_gen_claims:
+        if not claims_from_file or opts.force_gen_claims:
             for _ in range(random.randint(min_claims, max_claims - len(claims_from_file))):
                 clm_from_dt_min = "2018-01-01"
                 claim = gen_claim(
