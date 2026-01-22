@@ -309,9 +309,11 @@ jobs:
         run: uv sync
         working-directory: apps/bfd-model-idr
 
-      - name: Compile all synthetic FHIR resources
-        run: ./compile-all-resources.sh
+      - name: Download FHIR Validator CLI
         working-directory: apps/bfd-model-idr
+        run: |
+          curl -L https://github.com/hapifhir/org.hl7.fhir.core/releases/latest/download/validator_cli.jar \
+            -o validator_cli.jar
 
       - name: Compile all synthetic FHIR resources
         run: ./compile-all-resources.sh
