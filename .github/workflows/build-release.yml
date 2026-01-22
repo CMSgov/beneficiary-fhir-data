@@ -455,20 +455,18 @@ jobs:
           # manipulation here
           for artifact_path in ./*
           do
+            artifact="$(basename -- "$artifact_path" | sed -nE "s/bfd-server-war-$BFD_RELEASE-(.*)/\1/p")"
+            artifact_ext="${artifact#*.}"
+            artifact_name="${artifact%%.*}"
+            mv "$artifact_path" "./${artifact_name}-${BFD_RELEASE}.${artifact_ext}"
+          done
+          
+          for artifact_path in apps/bfd-model-idr/out/bfd_data_dictionary.*
+          do
             filename="$(basename -- "$artifact_path")"
-          
-            # Case 1: bfd-server-war artifacts
-            if [[ "$filename" =~ ^bfd-server-war-$BFD_RELEASE-(.+)$ ]]; then
-              artifact="${BASH_REMATCH[1]}"
-              artifact_ext="${artifact#*.}"
-              artifact_name="${artifact%%.*}"
-              mv "$artifact_path" "./${artifact_name}-${BFD_RELEASE}.${artifact_ext}"
-          
-            # Case 2: bfd_data_dictionary artifacts
-            elif [[ "$filename" =~ ^bfd_data_dictionary\.(.+)$ ]]; then
-              artifact_ext="${BASH_REMATCH[1]}"
-              mv "$artifact_path" "./v3-data-dictionary-${BFD_RELEASE}.${artifact_ext}"
-            fi
+            artifact_ext="${filename#*.}"
+            
+            mv "$artifact_path" "./v3-data-dictionary-${BFD_RELEASE}.${artifact_ext}"
           done
 
       - name: Release
