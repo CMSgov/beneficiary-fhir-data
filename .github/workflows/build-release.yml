@@ -312,7 +312,7 @@ jobs:
       - name: Download FHIR Validator CLI
         working-directory: apps/bfd-model-idr
         run: |
-          curl -L https://github.com/hapifhir/org.hl7.fhir.core/releases/latest/download/validator_cli.jar \
+          curl -L https://github.com/hapifhir/org.hl7.fhir.core/releases/download/6.7.10/validator_cli.jar \
             -o validator_cli.jar
 
       - name: Compile all synthetic FHIR resources
