@@ -114,3 +114,20 @@ mvn clean verify -DupdateSnapshot=
 
 Log messages from the server process will not be shown in the console output.
 To see detailed log info, look at the files created under `target/failsafe-reports/logs`.
+
+## Generating enum values
+
+We utilize enums frequently for representing discrete sets of values.
+The values are typically enumerated in the sushi files, which means we can utilize the output from the FSH transformations
+to generate these enums for us.
+
+To use the codegen script (replace `CodeSystem-CLM-ADJSTMT-TYPE-CD` with the corresponding FSH file that you want to generate values from):
+
+```bash
+python ./codegen/main.py --file CodeSystem-CLM-ADJSTMT-TYPE-CD
+```
+
+The output will be under `./codegen/out`
+
+The output will not be a complete java class, but just a fragment that you can copy inside of an `Enum` block.
+The output may require some modifications.
