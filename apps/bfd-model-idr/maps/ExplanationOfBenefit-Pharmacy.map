@@ -123,6 +123,7 @@ group createEOBPharmacy(source src: ExplanationOfBenefitPharmacy, target tgt: BF
       src -> tgtBBElement.coverage = create('Reference') as tgtReference then {
         claimType -> tgtReference.display = "Part D" "Add coverage type";
       } "Add reference for coverage";
+    } "Add insurance coverage";
 
     src.CLM_BENE_PMT_AMT as benePmtAmt -> tgt.total = create('BackboneElement') as tgtBBElement then {
       src -> tgtBBElement.category = create('CodeableConcept') as tgtCC then {
@@ -144,8 +145,6 @@ group createEOBPharmacy(source src: ExplanationOfBenefitPharmacy, target tgt: BF
         tgtCoding.code = adjTypeCd "Add code";
       } "Add coding";
     } "CLM_ADJSTMT_TYPE_CD";
-
-
 }
 
 group addMoney(source src: String, target tgt: Money){
