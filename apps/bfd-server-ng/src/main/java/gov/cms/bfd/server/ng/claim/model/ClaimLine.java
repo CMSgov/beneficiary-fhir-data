@@ -60,9 +60,9 @@ public class ClaimLine {
     var line = new ExplanationOfBenefit.ItemComponent();
     line.setSequence(claimLineNumber.get());
 
-    var claimLineInstitutional = claimItem.getClaimLineInstitutional();
-    var claimLineRx = claimItem.getClaimLineRx();
-    var claimLineProfessional = claimItem.getClaimLineProfessional();
+    var claimLineInstitutional = claimItem.getClaimItemOptional().getClaimLineInstitutional();
+    var claimLineRx = claimItem.getClaimItemOptional().getClaimLineRx();
+    var claimLineProfessional = claimItem.getClaimItemOptional().getClaimLineProfessional();
     var productOrService = new CodeableConcept();
     hcpcsCode.toFhir().ifPresent(productOrService::addCoding);
     claimLineInstitutional
@@ -101,7 +101,10 @@ public class ClaimLine {
     var adjudicationLines =
         Stream.of(
             claimLineInstitutional.flatMap(
-                c -> c.getAnsiSignature().map(ClaimAnsiSignature::toFhir)),
+                c ->
+                    c.getClaimLineInstitutionalOptional()
+                        .getAnsiSignature()
+                        .map(ClaimAnsiSignature::toFhir)),
             Optional.of(adjudicationCharge.toFhir()),
             claimLineInstitutional.map(
                 c -> c.getClaimLineAdjudicationChargeInstitutional().toFhir()),
