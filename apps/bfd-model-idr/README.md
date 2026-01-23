@@ -188,6 +188,9 @@ uv run gen_dd.py
 
 If the gen_dd.py script produces warnings about missing tables or columns, run the following query to retrieve the latest updates for the affected table from IDR.
 Run:
+
+```sql
 DESCRIBE VIEW CMS_VDM_VIEW_MDCR_PRD.{TABLE_NAME}
+```
 
 Export the results as a CSV named {TABLE_NAME}.csv and save it under ReferenceTables.
