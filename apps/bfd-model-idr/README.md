@@ -11,10 +11,10 @@ The `synthetic-data` directory contains the synthetic data loaded into each of o
 Downloading the FHIR validator is necessary to run the following scripts, along with installing sushi
 
 To download the FHIR Validator:
-<https://github.com/hapifhir/org.hl7.fhir.core/releases/latest/download/validator_cli.jar>
+<https://github.com/hapifhir/org.hl7.fhir.core/releases/download/6.7.10/validator_cli.jar>
 
 ```sh
-curl -L https://github.com/hapifhir/org.hl7.fhir.core/releases/latest/download/validator_cli.jar > validator_cli.jar
+curl -L https://github.com/hapifhir/org.hl7.fhir.core/releases/download/6.7.10/validator_cli.jar > validator_cli.jar
 ```
 
 ### Install sushi + fhirpath.js
@@ -185,3 +185,9 @@ To generate the data dictionary:
 ./compile-all-resources.sh
 uv run gen_dd.py
 ```
+
+If the gen_dd.py script produces warnings about missing tables or columns, run the following query to retrieve the latest updates for the affected table from IDR.
+Run:
+DESCRIBE VIEW CMS_VDM_VIEW_MDCR_PRD.{TABLE_NAME}
+
+Export the results as a CSV named {TABLE_NAME}.csv and save it under ReferenceTables.
