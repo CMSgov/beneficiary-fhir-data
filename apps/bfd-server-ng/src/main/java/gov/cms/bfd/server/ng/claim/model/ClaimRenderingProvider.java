@@ -8,15 +8,11 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Reference;
 
 /** Claim Rendering provider info. * */
 @Embeddable
 public class ClaimRenderingProvider {
-
-  @Column(name = "clm_rndrg_prvdr_tax_num")
-  private Optional<String> taxNumber;
 
   @Column(name = "clm_rndrg_prvdr_prtcptg_cd")
   private Optional<String> participatingIndicatorCode;
@@ -36,15 +32,6 @@ public class ClaimRenderingProvider {
             renderingProvider.getProviderNpiNumber(),
             renderingProvider.toFhirName());
 
-    taxNumber.ifPresent(
-        s ->
-            practitioner.addIdentifier(
-                new Identifier()
-                    .setType(
-                        new CodeableConcept(
-                            new Coding().setSystem(SystemUrls.HL7_IDENTIFIER).setCode("TAX")))
-                    .setSystem(SystemUrls.US_EIN)
-                    .setValue(s)));
     participatingIndicatorCode.ifPresent(
         s ->
             practitioner.addExtension(
