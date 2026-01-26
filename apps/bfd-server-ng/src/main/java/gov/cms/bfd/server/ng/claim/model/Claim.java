@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
@@ -394,6 +395,18 @@ public class Claim {
         .map(
             d -> {
               var procedure = d.peek();
+              var types = new HashSet<ClaimDiagnosisType>();
+              d.forEach(p -> p.getDiagnosisType().ifPresent(types::add));
+
+              if (types.size() > 1 && types.contains(ClaimDiagnosisType.PRESENT_ON_ADMISSION)) {
+                types.remove(ClaimDiagnosisType.PRESENT_ON_ADMISSION);
+              }
+              if (types.contains(ClaimDiagnosisType.FIRST)
+                  && types.contains(ClaimDiagnosisType.DIAGNOSIS_E_CODE)) {
+                types.remove(ClaimDiagnosisType.DIAGNOSIS_E_CODE);
+              }
+              procedure.setDiagnosisTypes(types);
+
               // POA may not be set on the diagnosis we pick, but it may be present on one of the
               // duplicates.
               // Check these and set the POA indicator where applicable.
