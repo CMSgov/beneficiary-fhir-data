@@ -523,11 +523,7 @@ group addInstitutionalAdjudicationElements(source src: ExplanationOfBenefitBase,
 
 group addDiagnoses(source src: DiagnosisComponent, target tgt: BackboneElement){
   src.ROW_NUM as rowNum -> tgt.sequence = rowNum "set sequence number";
-  /*src -> tgt.type = create('CodeableConcept') as tgtCC then{
-    src.clm_prod_type_cd_map as typeCode where (typeCode = "A" or typeCode = "P") -> tgtCC.coding = translate(typeCode,'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#HL7_DIAGTYPE','coding') "Add coding";
-    src.clm_prod_type_cd_map as typeCode where (typeCode = "1" or typeCode = "D" or typeCode = "E" or typeCode = "R") -> tgtCC.coding = translate(typeCode,'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#C4BB_DIAGTYPE','coding') "set coding";
-  } "Add types";
-  */
+
   src.clm_prod_type_cd_map as typeCode where (typeCode = "A" or typeCode = "P") -> tgt.type = create('CodeableConcept') as tgtCC then{
     typeCode -> tgtCC.coding = translate(typeCode,'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#HL7_DIAGTYPE','coding') "Add coding";
   } "Add type";
