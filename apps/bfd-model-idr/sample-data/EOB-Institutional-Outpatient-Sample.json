@@ -11,6 +11,7 @@
     "CLM_EFCTV_DT": "2025-01-18",
     "CLM_SRC_ID": "20000",
     "PRVDR_BLG_PRVDR_NPI_NUM": "1548226988",
+    "META_SRC_SK": 7,
     "diagnoses": [
         {
             "CLM_VAL_SQNC_NUM": "1",
