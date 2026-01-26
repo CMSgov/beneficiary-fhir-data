@@ -105,6 +105,7 @@ for walk_info in os.walk(dd_support_folder):
                             json.dumps(sample_resources_by_profile[entry['appliesTo'][0]]),
                             entry["fhirPath"],
                         ],
+                        cwd=os.path.dirname(__file__),
                         check=True,
                         stdout=subprocess.PIPE,
                     )
@@ -115,10 +116,22 @@ for walk_info in os.walk(dd_support_folder):
                         entry["example"] = entry["example"][0]
                     else:
                         entry["example"] = ""
-                    if "sourceView" in entry and entry["sourceView"] in idr_table_descriptors:
-                        entry["Description"] = idr_table_descriptors[entry["sourceView"]][
-                            entry["sourceColumn"]
-                        ]
+
+                    source_view = entry.get("sourceView")
+                    source_column = entry.get("sourceColumn")
+
+                    if source_view:
+                        table = idr_table_descriptors.get(source_view)
+                        if table:
+                            description = table.get(source_column)
+                            if description:
+                                entry["Description"] = description
+                            else:
+                                print(
+                                    f"[WARN] sourceColumn '{source_column}' not found in sourceView '{source_view}'"
+                                )
+                        else:
+                            print(f"[WARN] sourceView '{source_view}' not found in idr_table_descriptors")
 
                     # Populate the element names + missing descriptions
                     if entry["inputPath"] in structure_def_names_descriptions:
