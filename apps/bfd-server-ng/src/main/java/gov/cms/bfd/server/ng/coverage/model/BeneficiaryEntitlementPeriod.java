@@ -16,11 +16,14 @@ public class BeneficiaryEntitlementPeriod {
   @Column(name = "bene_rng_bgn_dt")
   private LocalDate benefitRangeBeginDate;
 
+  @Column(name = "original_bgn_dt")
+  private LocalDate originalBeginDate;
+
   @Column(name = "bene_rng_end_dt")
   private Optional<LocalDate> benefitRangeEndDate;
 
   Period toFhirPeriod() {
-    var period = new Period().setStartElement(DateUtil.toFhirDate(benefitRangeBeginDate));
+    var period = new Period().setStartElement(DateUtil.toFhirDate(originalBeginDate));
     benefitRangeEndDate.ifPresent(d -> period.setEndElement(DateUtil.toFhirDate(d)));
     return period;
   }
