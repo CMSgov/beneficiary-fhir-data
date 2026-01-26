@@ -85,17 +85,19 @@ resource "aws_ecs_cluster_capacity_providers" "this" {
   }
 }
 
-resource "aws_cloudwatch_event_rule" "ecs_events" {
-  name        = "ecs-cluster-events-${aws_ecs_cluster.this.name}"
-  description = "Monitor ECS cluster events for ${aws_ecs_cluster.this.name}"
+resource "aws_cloudwatch_event_rule" "bfd-cluster-ecs-events" {
+  name        = "${local.full_name}-ecs-cluster-events"
+  description = "Monitor ECS cluster events."
 
   event_pattern = jsonencode({
     source = ["aws.ecs"]
-    "detail-type" = [
-      "ECS Task State Change",
-      "ECS Service Action",
-      "ECS Deployment State Change",
-      "ECS Container Instance State Change"
-    ]
+    detail = {
+      clusterArn = ["${aws_ecs_cluster.this.arn}"]
+    }
   })
+}
+
+resource "aws_cloudwatch_event_target" "ecs_events_to_cloudwatch" {
+  rule = aws_cloudwatch_event_rule.bfd-cluster-ecs-events.name
+  arn = aws_cloudwatch_log_group.this.arn
 }
