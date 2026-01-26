@@ -69,8 +69,10 @@ def run_conformance_test(input_file, output_file):
         sushi_resources = get_sushi_resources()
 
         print("Running conformance testing")
-        test_cmd = f"java -jar validator_cli.jar {input_file} -output {output_file} -version 4.0.1 \
+        test_cmd = (
+            f"java -jar validator_cli.jar {input_file} -output {output_file} -tx n/a -version 4.0.1 \
             {structure_defs} -ig hl7.fhir.us.carin-bb#2.1.0 {sushi_resources}"
+        )
         stdout, stderr = run_command(test_cmd, cwd=script_dir)
 
         print("Conformance test output:")
@@ -170,9 +172,11 @@ def main():
         input_file = 'out/temporary-sample.json'
 
     print("Executing Transform")
-    execute_cmd = f"java -jar validator_cli.jar {input_file} -output {args.output} -transform \
+    execute_cmd = (
+        f"java -jar validator_cli.jar {input_file} -output {args.output} -tx n/a -transform \
         {args.resource} -version 4.0.1 -ig {compiled_map_path} {structure_defs} \
             -ig hl7.fhir.us.carin-bb#2.1.0 {map_imports} {sushi_resources}"
+    )
     stdout, stderr = run_command(execute_cmd, cwd=script_dir)
 
     print("Execution output:")
