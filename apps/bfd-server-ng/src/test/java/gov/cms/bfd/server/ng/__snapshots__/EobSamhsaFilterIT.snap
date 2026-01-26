@@ -4343,13 +4343,13 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
         "sequence" : 1,
         "type" : [ {
           "coding" : [ {
-            "code" : "externalcauseofinjury",
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
+            "code" : "admitting",
+            "system" : "http://terminology.hl7.org/CodeSystem/ex-diagnosistype"
           } ]
         }, {
           "coding" : [ {
-            "code" : "admitting",
-            "system" : "http://terminology.hl7.org/CodeSystem/ex-diagnosistype"
+            "code" : "externalcauseofinjury",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
           } ]
         } ]
       }, {
@@ -13856,12 +13856,12 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "sequence" : 1,
         "type" : [ {
           "coding" : [ {
-            "code" : "principal",
+            "code" : "admitting",
             "system" : "http://terminology.hl7.org/CodeSystem/ex-diagnosistype"
           } ]
         }, {
           "coding" : [ {
-            "code" : "admitting",
+            "code" : "principal",
             "system" : "http://terminology.hl7.org/CodeSystem/ex-diagnosistype"
           } ]
         } ]
@@ -16349,13 +16349,13 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
         "sequence" : 1,
         "type" : [ {
           "coding" : [ {
-            "code" : "externalcauseofinjury",
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
+            "code" : "admitting",
+            "system" : "http://terminology.hl7.org/CodeSystem/ex-diagnosistype"
           } ]
         }, {
           "coding" : [ {
-            "code" : "admitting",
-            "system" : "http://terminology.hl7.org/CodeSystem/ex-diagnosistype"
+            "code" : "externalcauseofinjury",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
           } ]
         } ]
       }, {
@@ -25862,12 +25862,12 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "sequence" : 1,
         "type" : [ {
           "coding" : [ {
-            "code" : "principal",
+            "code" : "admitting",
             "system" : "http://terminology.hl7.org/CodeSystem/ex-diagnosistype"
           } ]
         }, {
           "coding" : [ {
-            "code" : "admitting",
+            "code" : "principal",
             "system" : "http://terminology.hl7.org/CodeSystem/ex-diagnosistype"
           } ]
         } ]

@@ -101,11 +101,15 @@ public class ClaimProcedure {
 
     var types = Optional.ofNullable(diagnosisTypes).orElse(new HashSet<>());
     if (!types.isEmpty()) {
-      types.forEach(
-          d ->
-              diagnosis.addType(
-                  new CodeableConcept(
-                      new Coding().setSystem(d.getSystem()).setCode(d.getFhirCode(claimContext)))));
+      types.stream()
+          .sorted(java.util.Comparator.comparing(d -> d.getFhirCode(claimContext)))
+          .forEach(
+              d ->
+                  diagnosis.addType(
+                      new CodeableConcept(
+                          new Coding()
+                              .setSystem(d.getSystem())
+                              .setCode(d.getFhirCode(claimContext)))));
     } else {
       diagnosisType.ifPresent(
           d ->
