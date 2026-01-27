@@ -99,12 +99,12 @@ resource "aws_cloudwatch_event_rule" "ecs_events" {
 }
 
 resource "aws_cloudwatch_event_target" "ecs_events_to_cloudwatch" {
-  rule = aws_cloudwatch_event_rule.ecs_events.name
-  arn = aws_cloudwatch_log_group.ecs_events.arn
-
   depends_on = [
     aws_cloudwatch_log_resource_policy.eventbridge_to_logs
   ]
+
+  rule = aws_cloudwatch_event_rule.ecs_events.name
+  arn  = aws_cloudwatch_log_group.ecs_events.arn
 }
 
 resource "aws_cloudwatch_log_group" "ecs_events" {
@@ -113,6 +113,6 @@ resource "aws_cloudwatch_log_group" "ecs_events" {
 }
 
 resource "aws_cloudwatch_log_resource_policy" "eventbridge_to_logs" {
-  policy_name     = "i${local.full_name}-eventbridge-to-cloudwatch-logs"
+  policy_name     = "${local.full_name}-eventbridge-to-cloudwatch-logs"
   policy_document = data.aws_iam_policy_document.eventbridge_logs.json
 }
