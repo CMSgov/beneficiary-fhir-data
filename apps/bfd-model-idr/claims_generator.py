@@ -1642,7 +1642,7 @@ def gen_provider_history(amount: int):
     provider_history: list[dict[str, Any]] = []
 
     for name in names:
-        prvdr_sk = gen_basic_id(field="PRVDR_SK", num_digits=10)
+        prvdr_sk = gen_basic_id(field="PRVDR_SK", num_digits=9)
         provider_history_row = {
             "PRVDR_SK": prvdr_sk,
             "PRVDR_HSTRY_EFCTV_DT": str(date.today()),
@@ -1653,7 +1653,7 @@ def gen_provider_history(amount: int):
             "PRVDR_NAME": random.choice(available_provider_names),
             "PRVDR_LGL_NAME": random.choice(available_provider_legal_names),
             "PRVDR_NPI_NUM": prvdr_sk,
-            "PRVDR_EMPLR_ID_NUM": gen_basic_id(field="PRVDR_EMPLR_ID_NUM", num_digits=10),
+            "PRVDR_EMPLR_ID_NUM": gen_basic_id(field="PRVDR_EMPLR_ID_NUM", num_digits=9),
             "PRVDR_OSCAR_NUM": gen_basic_id(field="PRVDR_OSCAR_NUM", num_digits=6),
             "PRVDR_TXNMY_CMPST_CD": random.choice(available_provider_tx_codes),
             "PRVDR_TYPE_CD": random.choice(available_provider_type_codes),
