@@ -41,3 +41,4 @@ Description: "A selection of codes that provide supporting information about the
 * #CLM_MDCR_NPMT_RSN_CD "Claim Non Payment Reason Code" "The reason that no Medicare payment is made for services on an institutional claim."
 * #CLM_FI_ACTN_CD "FI or MAC Claim Action Code" "The type of action requested by the intermediary to be taken on an institutional claim."
 * #CLM_OP_SRVC_TYPE_CD "Claim Outpatient Service Type Code" "A code reported by the provider that indicates the specific type of claim."
+* #CLM_LINE_PMD_UNIQ_TRKNG_NUM "Prior Authorization Unique Tracking Number" "A unique tracking number (UTN) assigned to each prior authorization (PA) request."

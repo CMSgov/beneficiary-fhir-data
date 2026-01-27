@@ -206,7 +206,7 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadBeneWithAllCoverage[allCoverage
   } ],
   "period" : {
     "end" : "2099-12-31",
-    "start" : "2024-01-01"
+    "start" : "2021-01-01"
   },
   "relationship" : {
     "coding" : [ {
@@ -334,7 +334,7 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadBeneWithAllCoverage[allCoverage
   } ],
   "period" : {
     "end" : "2099-12-31",
-    "start" : "2022-01-01"
+    "start" : "2020-01-01"
   },
   "relationship" : {
     "coding" : [ {

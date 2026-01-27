@@ -4,7 +4,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
 
@@ -18,7 +17,4 @@ public class ClaimDateSignature {
   private long claimDateSignatureSk;
 
   @Embedded private ClaimDateSupportingInfo supportingInfo;
-
-  @OneToOne(mappedBy = "claimDateSignature")
-  private Claim claim;
 }
