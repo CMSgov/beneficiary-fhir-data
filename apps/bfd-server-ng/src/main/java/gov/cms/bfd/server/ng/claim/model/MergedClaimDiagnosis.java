@@ -15,7 +15,7 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
-/** Diagnosis record consolidates from multiple source records with the same ICD code. */
+/** Diagnosis record consolidated from multiple source records with the same ICD code. */
 @RequiredArgsConstructor
 @Getter
 public class MergedClaimDiagnosis {
