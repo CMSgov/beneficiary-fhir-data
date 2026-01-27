@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Any
 
 import pandas as pd
+import tqdm
 import yaml
 from faker import Faker
 from pydantic import BaseModel, ConfigDict, Field, TypeAdapter
@@ -181,11 +182,16 @@ def save_output_files(
         (cntrct_pbp_cntct, "out/SYNTHETIC_CNTRCT_PBP_CNTCT.csv", NORMALIZE, NO_CAST_LINE_NUM),
     ]
 
-    for [df, out_file, normalize, line_num_cast] in exports:
-        export_df(df, out_file, normalize, line_num_cast)
+    print("Exporting finished synthetic claims to ./out...")
+    with tqdm.tqdm(exports) as t:
+        for [df, out_file, normalize, line_num_cast] in t:
+            t.set_postfix(file=out_file)  # type: ignore
+            export_df(df, out_file, normalize, line_num_cast)
 
     # these are mostly static
     shutil.copy("sample-data/SYNTHETIC_CLM_ANSI_SGNTR.csv", "out/SYNTHETIC_CLM_ANSI_SGNTR.csv")
+
+    print("Finished exporting generated claims")
 
 
 fiss_clm_type_cds = [
@@ -1831,7 +1837,6 @@ def main():
     prvdr_hstry = adapters_to_dicts(files[PRVDR_HSTRY])
     if not prvdr_hstry:
         prvdr_hstry = gen_provider_history(amount=14)
-    pt_complete = 0
     min_claims: int = args.min_claims
     max_claims: int = args.max_claims
     if min_claims > max_claims:
@@ -1847,12 +1852,8 @@ def main():
         clm_bene_sk: int = claim["BENE_SK"]
         bene_sks_with_claims[clm_bene_sk] = [*bene_sks_with_claims.get(clm_bene_sk, []), claim]
 
-    for pt_complete, pt_bene_sk in enumerate(bene_sks):
-        if (pt_complete) % 1000 == 0 and pt_complete > 0:
-            print(
-                f"Completed {pt_complete} patients with between {min_claims} and {max_claims} "
-                "claims per patient."
-            )
+    print("Generating synthetic claims data for provided BENE_SKs...")
+    for pt_bene_sk in tqdm.tqdm(bene_sks):
         claims_from_file = bene_sks_with_claims.get(pt_bene_sk, [])
         if not claims_from_file or args.force_gen_claims:
             for _ in range(random.randint(min_claims, max_claims - len(claims_from_file))):
@@ -1901,6 +1902,8 @@ def main():
                     clm_fiss.append(pac_claim.CLM_FISS)
                     clm_lctn_hstry.append(pac_claim.CLM_LCTN_HSTRY)
                     clm_line_dcmtn.extend(pac_claim.CLM_LINE_DCMTN)
+
+    print("Done generating synthetic claims data for provided BENE_SKs")
 
     save_output_files(
         clm,
