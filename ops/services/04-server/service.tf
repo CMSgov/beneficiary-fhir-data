@@ -414,15 +414,6 @@ resource "aws_vpc_security_group_ingress_rule" "server_allow_db_access" {
   description                  = "Grants ${local.env} ${local.service} ECS service containers access to the ${local.env} database"
 }
 
-# We need to open up traffic for ADOT on port 9404 - not sure if this is the the place to do it or the right way to do it:
-resource "aws_vpc_security_group_ingress_rule" "server_allow_adot_access" {
-  security_group_id = local.service.security_group_id
-  description     = "ADOT JMX Telemetry"
-  from_port       = 9404
-  to_port         = 9404
-  ip_protocol        = "TCP"
-}
-
 resource "aws_ecs_service" "server" {
   depends_on = [aws_s3_object.keystore, aws_s3_object.truststore]
 
