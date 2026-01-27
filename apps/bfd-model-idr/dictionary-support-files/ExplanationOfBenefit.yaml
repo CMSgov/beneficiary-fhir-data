@@ -2441,7 +2441,7 @@
   sourceView: V2_MDCR_CLM_FISS
   sourceColumn: CLM_CRNT_STUS_CD
   fhirPath: ExplanationOfBenefit.outcome
-- inputPath: ExplanationOfBenefit-Professional-Base.CLM_AUDT_TRL_STUS_CD
+- inputPath: ExplanationOfBenefit-Base.CLM_AUDT_TRL_STUS_CD
   appliesTo:
     - Carrier
     - DME
@@ -2450,7 +2450,7 @@
     - VMS
   sourceView: V2_MDCR_CLM_LCTN_HSTRY
   sourceColumn: CLM_AUDT_TRL_STUS_CD
-  fhirPath: ExplanationOfBenefit.outcome
+  fhirPath: ExplanationOfBenefit.outcome and ExplanationOfBenefit.supportingInfo.where(code.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD-Augmented').code.coding.code
 - inputPath: ExplanationOfBenefit-Base.PRVDR_RFRG_PRVDR_NPI_NUM
   appliesTo:
     - Outpatient

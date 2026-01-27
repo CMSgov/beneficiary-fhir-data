@@ -348,9 +348,6 @@ public class Claim {
     // composite code is derived using source, audit trail status code, and for VMS's case, audit
     // trail location code since there exists some overlap in which descriptions and outcomes
     // differ.
-    var s = metaSourceId;
-    var a = claimAuditTrailStatusCode;
-    var l = claimAuditTrailLocationCode;
     return metaSourceId.flatMap(
         src ->
             claimAuditTrailStatusCode.flatMap(
