@@ -171,10 +171,6 @@ resource "aws_ecs_task_definition" "server" {
           {
             name  = "REGION"
             value = local.region
-          },
-                    {
-            name  = "JAVA_TOOL_OPTIONS"
-            value = "-javaagent:/opt/jmx_exporter/jmx_prometheus_javaagent.jar=${local.server_jmx_export_port}:${local.server_jmx_export_config_path}"
           }
         ]
         logConfiguration = {
@@ -286,6 +282,10 @@ resource "aws_ecs_task_definition" "server" {
             ])
           },
           {
+            name  = "JAVA_TOOL_OPTIONS"
+            value = "-javaagent:/opt/jmx_exporter/jmx_prometheus_javaagent.jar=${local.server_jmx_export_port}:${local.server_jmx_export_config_path}"
+          },
+          {
             name  = "BFD_DB_URL"
             value = "jdbc:postgresql://${data.aws_rds_cluster.main.reader_endpoint}:5432/fhirdb?logServerErrorDetail=false"
           },
@@ -353,6 +353,7 @@ resource "aws_ecs_task_definition" "server" {
           },
           {
             containerPort = local.server_jmx_export_port
+            name          = "prometheus-jmx"
             hostPort      = local.server_jmx_export_port
             protocol      = "tcp"
           }
