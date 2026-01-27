@@ -514,7 +514,7 @@
 /bfd/${env}/server/nonsensitive/ecs/capacity/min: 6
 /bfd/${env}/server/nonsensitive/ecs/capacity/max: 24
 /bfd/${env}/server/nonsensitive/ecs/resources/cpu: 4096
-/bfd/${env}/server/nonsensitive/ecs/resources/memory: 16384
+/bfd/${env}/server/nonsensitive/ecs/resources/memory: 8192
 /bfd/${env}/server/nonsensitive/ecs/capacity_provider/FARGATE/base: 3
 /bfd/${env}/server/nonsensitive/ecs/capacity_provider/FARGATE/weight: 0
 /bfd/${env}/server/nonsensitive/ecs/capacity_provider/FARGATE_SPOT/base: 0
@@ -644,6 +644,36 @@
   RrQrr5/9xl1w0EnCc1jZRra0Y0hZn2UoJnWvwB0+dthgJiBo+jHqhavSpe6Et8AH
   3ActSxzHxaPMrycL2bk49Ho4NHao+OUx6tWDuLEx3/IkxsjH68WhiMXk+eUNutM7
   9bL2XsyKHKI5yOd0n+b8cOQWTq8vt/ULP6sBFBpl/16MNt1Bvq+8xkDNT8r8
+  -----END CERTIFICATE-----
+/bfd/${env}/server-ng/nonsensitive/client_certificates/ab2d_cms_gov: |-
+  -----BEGIN CERTIFICATE-----
+  MIIFCzCCAvOgAwIBAgIJAL+QXKi5QY0uMA0GCSqGSIb3DQEBDAUAMB0xGzAZBgNV
+  BAMTEmFiMmQuY21zLmdvdi5sb2NhbDAeFw0yNjAxMTQxNTUwMzdaFw0yODAxMTQx
+  NTUwMzdaMB0xGzAZBgNVBAMTEmFiMmQuY21zLmdvdi5sb2NhbDCCAiIwDQYJKoZI
+  hvcNAQEBBQADggIPADCCAgoCggIBAKThRud/6uMCdCORi07rbxBnE3Z8QlhJOLGa
+  4S4qDg9DSnQI05ROQDVm02ELrdmdVRuj3nHbkZQkYceoSbanDef3LQy86Quz3Fs/
+  D7jShPTrKsMFd77Ly0krZVd4mIx2waXoQMaqE4X6ysMsEbe//AWCLjxf9uJefl1u
+  QyLhTwL4OtCJZLkcvw9NTexi5i16SKsnRkitprVvUFJyLDj2D11KALgCnC10C0oE
+  l49xiLW+mteRVcQhs+K+2VmJrD+iv+AhhbDNKkdfEec2GmOKsJrUK9A5r7FgpJ+M
+  iaEF0tsSYgvCcxppoN1JA/VPhH9uhcheSchHNmNqXmZ+TCIrhk+EvA0wL5YEs/HS
+  QO0TJmL2CCoQdQzL1FQj6JLAZOWd3gbcwuSrb09Z/9oqheDnrTj75GVXWLkzLTdM
+  lZaw/yr64qpixf5MB+HMizHvbKeR7vNgiAfQVwZkWxNPO1Wa9JbCyzNJoWCwpiLI
+  PbBLDsXcVTVADJTXk/icRZ07fSqD0+odCdlWF/7z4NdmwwCcWRWVFm3avwZyjd09
+  mdue/3oVmRUxv8Pz6ecpt2P94YMB/drQh0vO+ywp5KyWPDTPKdUVfVAgn6NrV+7Y
+  jD3R4p64UvCvJICe0S4VbCG8ew212iLeSbbTHJXnTsHMnleP1VfAPHiL2GQgEl6/
+  Oi4qc5HhAgMBAAGjTjBMMB0GA1UdDgQWBBRak4iqoMG4s0rPoxqRJs2WRoestjAr
+  BgNVHREEJDAighJhYjJkLmNtcy5nb3YubG9jYWyCDGFiMmQuY21zLmdvdjANBgkq
+  hkiG9w0BAQwFAAOCAgEARKT2ww+S7sPru3w3WhzJx3qRT62e2fVn4cDPJrf5RI/j
+  clIZSObgAl2ej4sor7nyEmZCnLQiO4AIR4ZdbFni0SPKFVVECXns1nSjYB4smhIQ
+  JQbBGlR6pHCMlZqYaD6nX2J3Sc96q3rXX7w/KQ9l1GDI9Nbq9UT/+kPSiv3rPuAh
+  sOO1UD/wyhAE2SKXIQdw0CNYLt9Pp3ud+C8sT8Plf1I8OR6WktqopohmIFE+MsE7
+  wrPrRHv3daAA7RqHdCYmJt+dtTJ/yUQDGVj8MjZs4k/eU+dv4K+PHsWy3WmuE77Z
+  Mpw7fGE944pUQXHimTvBZINnQA46IUEzgLUoZbf3mOysfprNypGgwaO1tJupUT9k
+  wMvj47cutLreHb59udF3X9jGDiBHynaDg+QW+bfXnjhhsKVK7t/2P9/nGYYy/NZ2
+  /+mVe0C1KoafJ94CKvHaHan/huZ43waDl+5Qv7y1CDheoyhxweA5MfU+zQfPVpkb
+  keBhqVLbKTps0Y9Obm/GZ8t6++HZ1OERHJXaduXsBSu7eRZ+UvV3gNBe8PnkyAs6
+  iT1YaFKAg9v4HmxePDWfGvlW1pie5cI8V3CtgGHtOcB27c0VmVwnWTZ8FldebMRl
+  SZRAgJ5tppbb9/meZq2iGL6duvsqeF/9YXbNBMwTEefTWk9j0+y2abkHdMHaPTc=
   -----END CERTIFICATE-----
 /bfd/${env}/server-ng/nonsensitive/samhsa_allowed_certificate_aliases_json: '["bluebutton_backend_test_samhsa", "bluebutton_root_ca", "regression_tests"]'
 /bfd/${env}/server-ng/nonsensitive/ecs/capacity/min: 3

@@ -153,7 +153,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchByBeneficiary[GET]=[
       } ],
       "period" : {
         "end" : "2099-12-31",
-        "start" : "2024-01-01"
+        "start" : "2021-01-01"
       },
       "relationship" : {
         "coding" : [ {
@@ -278,7 +278,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchByBeneficiary[GET]=[
       } ],
       "period" : {
         "end" : "2099-12-31",
-        "start" : "2022-01-01"
+        "start" : "2020-01-01"
       },
       "relationship" : {
         "coding" : [ {
@@ -748,7 +748,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchByBeneficiary[GET_WITH_SEAR
       } ],
       "period" : {
         "end" : "2099-12-31",
-        "start" : "2024-01-01"
+        "start" : "2021-01-01"
       },
       "relationship" : {
         "coding" : [ {
@@ -873,7 +873,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchByBeneficiary[GET_WITH_SEAR
       } ],
       "period" : {
         "end" : "2099-12-31",
-        "start" : "2022-01-01"
+        "start" : "2020-01-01"
       },
       "relationship" : {
         "coding" : [ {
@@ -1343,7 +1343,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchByBeneficiary[POST]=[
       } ],
       "period" : {
         "end" : "2099-12-31",
-        "start" : "2024-01-01"
+        "start" : "2021-01-01"
       },
       "relationship" : {
         "coding" : [ {
@@ -1468,7 +1468,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchByBeneficiary[POST]=[
       } ],
       "period" : {
         "end" : "2099-12-31",
-        "start" : "2022-01-01"
+        "start" : "2020-01-01"
       },
       "relationship" : {
         "coding" : [ {
@@ -1986,7 +1986,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchById[GET]=[
       } ],
       "period" : {
         "end" : "2099-12-31",
-        "start" : "2024-01-01"
+        "start" : "2021-01-01"
       },
       "relationship" : {
         "coding" : [ {
@@ -2128,7 +2128,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchById[GET_WITH_SEARCH]=[
       } ],
       "period" : {
         "end" : "2099-12-31",
-        "start" : "2024-01-01"
+        "start" : "2021-01-01"
       },
       "relationship" : {
         "coding" : [ {
@@ -2270,7 +2270,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchById[POST]=[
       } ],
       "period" : {
         "end" : "2099-12-31",
-        "start" : "2024-01-01"
+        "start" : "2021-01-01"
       },
       "relationship" : {
         "coding" : [ {

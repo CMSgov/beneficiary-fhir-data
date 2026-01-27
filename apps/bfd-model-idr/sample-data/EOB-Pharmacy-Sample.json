@@ -21,6 +21,7 @@
     "CNTRCT_PBP_NAME": "Super Saver Medicare Rx Saver Plus (PDP)",
     "CLM_BENE_PMT_AMT": "100.00",
     "CLM_OTHR_TP_PD_AMT": "100.00",
+    "META_SRC_SK": 1,
     "supportingInfoComponents": [
         {
             "ROW_NUM": 1,
