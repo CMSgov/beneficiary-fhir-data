@@ -2,16 +2,12 @@ package gov.cms.bfd.server.ng.claim.model;
 
 import gov.cms.bfd.server.ng.converter.NonZeroIntConverter;
 import gov.cms.bfd.server.ng.util.DateUtil;
-import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Embeddable;
-import jakarta.persistence.Transient;
 import java.time.LocalDate;
-import java.util.HashSet;
 import java.util.Optional;
-import java.util.Set;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -46,18 +42,8 @@ public class ClaimProcedure {
 
   private static final LocalDate DEFAULT_PROCEDURE_DATE = LocalDate.of(2000, 1, 1);
 
-  @Transient private Set<ClaimDiagnosisType> diagnosisTypes = new HashSet<>();
-
-  void setDiagnosisTypes(Set<ClaimDiagnosisType> diagnosisTypes) {
-    this.diagnosisTypes = Optional.ofNullable(diagnosisTypes).orElse(new HashSet<>());
-  }
-
   Optional<String> getDiagnosisKey() {
     return diagnosisCode.map(s -> s + "|" + icdIndicator.map(IcdIndicator::getCode).orElse(""));
-  }
-
-  Optional<Integer> getDiagnosisPriority(ClaimContext claimContext) {
-    return diagnosisType.map(d -> d.getPriority(claimContext));
   }
 
   Optional<ExplanationOfBenefit.ProcedureComponent> toFhirProcedure() {
@@ -88,61 +74,5 @@ public class ClaimProcedure {
                 .setCode(formattedProcedureCode)));
 
     return Optional.of(procedure);
-  }
-
-  Optional<ExplanationOfBenefit.DiagnosisComponent> toFhirDiagnosis(
-      SequenceGenerator sequenceGenerator, ClaimContext claimContext) {
-    if (diagnosisCode.isEmpty()) {
-      return Optional.empty();
-    }
-
-    var diagnosis = new ExplanationOfBenefit.DiagnosisComponent();
-    diagnosis.setSequence(sequenceGenerator.next());
-
-    var types = Optional.ofNullable(diagnosisTypes).orElse(new HashSet<>());
-    if (!types.isEmpty()) {
-      types.stream()
-          .sorted(java.util.Comparator.comparing(d -> d.getFhirCode(claimContext)))
-          .forEach(
-              d ->
-                  diagnosis.addType(
-                      new CodeableConcept(
-                          new Coding()
-                              .setSystem(d.getSystem())
-                              .setCode(d.getFhirCode(claimContext)))));
-    } else {
-      diagnosisType.ifPresent(
-          d ->
-              diagnosis.addType(
-                  new CodeableConcept(
-                      new Coding().setSystem(d.getSystem()).setCode(d.getFhirCode(claimContext)))));
-    }
-
-    var formattedCode = icdIndicator.get().formatDiagnosisCode(diagnosisCode.get());
-    diagnosis.setDiagnosis(
-        new CodeableConcept(
-            new Coding()
-                .setSystem(icdIndicator.get().getDiagnosisSystem())
-                .setCode(formattedCode)));
-
-    this.claimPoaIndicator.ifPresent(
-        poaCode -> {
-          var onAdmissionConcept = new CodeableConcept();
-          poaCode
-              .chars()
-              .forEach(
-                  c ->
-                      onAdmissionConcept
-                          .addCoding()
-                          .setSystem(SystemUrls.POA_CODING)
-                          .setCode(Character.toString(c)));
-          diagnosis.setOnAdmission(onAdmissionConcept);
-        });
-
-    return Optional.of(diagnosis);
-  }
-
-  void setClaimPoaIndicator(String poaIndicator) {
-    this.claimPoaIndicator = Optional.of(poaIndicator);
   }
 }

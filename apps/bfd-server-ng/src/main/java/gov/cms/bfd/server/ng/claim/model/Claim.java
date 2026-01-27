@@ -5,7 +5,6 @@ import static gov.cms.bfd.server.ng.claim.model.ClaimSubtype.PDE;
 import gov.cms.bfd.server.ng.ClaimSecurityStatus;
 import gov.cms.bfd.server.ng.beneficiary.model.BeneficiarySimple;
 import gov.cms.bfd.server.ng.util.DateUtil;
-import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -18,14 +17,9 @@ import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
-import java.util.PriorityQueue;
 import java.util.SortedSet;
 import java.util.stream.Stream;
 import lombok.Getter;
@@ -162,7 +156,9 @@ public class Claim {
             });
 
     var institutional = claimOptional.getClaimInstitutional();
-    var consolidatedDiagnoses = computeConsolidatedDiagnoses();
+    var consolidatedDiagnoses =
+        MergedClaimDiagnosis.fromProcedures(claimItems.stream().map(ClaimItem::getClaimProcedure));
+
     var supportingInfoFactory = new SupportingInfoFactory();
 
     claimItems.forEach(
@@ -193,15 +189,12 @@ public class Claim {
               .flatMap(i -> i.toFhirObservation(item.getClaimItemId().getBfdRowId()))
               .ifPresent(eob::addContained);
         });
-    var diagnosisSequenceGenerator = new SequenceGenerator();
     claimTypeCode
         .toContext()
         .ifPresent(
             ctx ->
                 consolidatedDiagnoses.forEach(
-                    d ->
-                        d.toFhirDiagnosis(diagnosisSequenceGenerator, ctx)
-                            .ifPresent(eob::addDiagnosis)));
+                    d -> d.toFhirDiagnosis(ctx).ifPresent(eob::addDiagnosis)));
 
     claimOptional
         .getBillingProviderHistory()
@@ -357,65 +350,5 @@ public class Claim {
     // if the order changes.
     eob.getExtension().sort(Comparator.comparing(Extension::getUrl));
     return eob;
-  }
-
-  private List<ClaimProcedure> computeConsolidatedDiagnoses() {
-    var claimContextOpt = claimTypeCode.toContext();
-    if (claimContextOpt.isEmpty()) {
-      return Collections.emptyList();
-    }
-    var claimContext = claimContextOpt.get();
-
-    // Group the diagnoses by code + ICD indicator and sort them by rank.
-    // We'll pick the first diagnosis from each group and discard the rest.
-    var diagnosisMap = new LinkedHashMap<String, PriorityQueue<ClaimProcedure>>();
-    var poaDiagnoses = new HashMap<String, String>();
-    for (var item : claimItems) {
-      var procedure = item.getClaimProcedure();
-      var keyOpt = procedure.getDiagnosisKey();
-      if (keyOpt.isEmpty()) {
-        continue;
-      }
-      var key = keyOpt.get();
-      procedure
-          .getClaimPoaIndicator()
-          .ifPresent(p -> poaDiagnoses.merge(key, p, (oldVal, newVal) -> oldVal + newVal));
-
-      var queue =
-          diagnosisMap.computeIfAbsent(
-              key,
-              _ ->
-                  new PriorityQueue<ClaimProcedure>(
-                      Comparator.comparing(a -> a.getDiagnosisPriority(claimContext).orElse(0))));
-
-      queue.add(item.getClaimProcedure());
-    }
-
-    return diagnosisMap.values().stream()
-        .map(
-            d -> {
-              var procedure = d.peek();
-              var types = new HashSet<ClaimDiagnosisType>();
-              d.forEach(p -> p.getDiagnosisType().ifPresent(types::add));
-
-              if (types.size() > 1 && types.contains(ClaimDiagnosisType.PRESENT_ON_ADMISSION)) {
-                types.remove(ClaimDiagnosisType.PRESENT_ON_ADMISSION);
-              }
-              if (types.contains(ClaimDiagnosisType.FIRST)
-                  && types.contains(ClaimDiagnosisType.DIAGNOSIS_E_CODE)) {
-                types.remove(ClaimDiagnosisType.DIAGNOSIS_E_CODE);
-              }
-              procedure.setDiagnosisTypes(types);
-
-              // POA may not be set on the diagnosis we pick, but it may be present on one of the
-              // duplicates.
-              // Check these and set the POA indicator where applicable.
-              var poaIndicator = poaDiagnoses.getOrDefault(procedure.getDiagnosisKey().get(), "");
-              if (procedure.getClaimPoaIndicator().isEmpty() && !poaIndicator.isEmpty()) {
-                procedure.setClaimPoaIndicator(poaIndicator);
-              }
-              return procedure;
-            })
-        .toList();
   }
 }

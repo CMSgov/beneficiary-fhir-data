@@ -3,6 +3,7 @@ package gov.cms.bfd.server.ng.claim.model;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -11,22 +12,21 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum ClaimDiagnosisType {
   /** Principal diagnosis. */
-  PRINCIPAL("P", "principal", SystemUrls.HL7_DIAGNOSIS_TYPE, 1),
+  PRINCIPAL("P", "principal", SystemUrls.HL7_DIAGNOSIS_TYPE),
   /** Admitting diagnosis. */
-  ADMITTING("A", "admitting", SystemUrls.HL7_DIAGNOSIS_TYPE, 1),
+  ADMITTING("A", "admitting", SystemUrls.HL7_DIAGNOSIS_TYPE),
   /** First diagnosis. */
-  FIRST("1", "externalcauseofinjury", SystemUrls.CARIN_CODE_SYSTEM_DIAGNOSIS_TYPE, 1),
-  /** Present on admission. */
-  PRESENT_ON_ADMISSION("D", "other", SystemUrls.CARIN_CODE_SYSTEM_DIAGNOSIS_TYPE, 2),
+  FIRST("1", "externalcauseofinjury", SystemUrls.CARIN_CODE_SYSTEM_DIAGNOSIS_TYPE),
   /** E code. */
-  DIAGNOSIS_E_CODE("E", "externalcauseofinjury", SystemUrls.CARIN_CODE_SYSTEM_DIAGNOSIS_TYPE, 1),
+  DIAGNOSIS_E_CODE("E", "externalcauseofinjury", SystemUrls.CARIN_CODE_SYSTEM_DIAGNOSIS_TYPE),
   /** R code. */
-  DIAGNOSIS_R_CODE("R", "patientreasonforvisit", SystemUrls.CARIN_CODE_SYSTEM_DIAGNOSIS_TYPE, 1);
+  DIAGNOSIS_R_CODE("R", "patientreasonforvisit", SystemUrls.CARIN_CODE_SYSTEM_DIAGNOSIS_TYPE),
+  /** Other. */
+  OTHER("D", "other", SystemUrls.CARIN_CODE_SYSTEM_DIAGNOSIS_TYPE);
 
   private final String idrCode;
   private final String fhirCode;
   private final String system;
-  private final int priority;
 
   /**
    * Converts from a database code.
@@ -46,22 +46,22 @@ public enum ClaimDiagnosisType {
    * @return override value for professional PRESENT_ON_ADMISSION value
    */
   public String getFhirCode(ClaimContext claimContext) {
-    if (claimContext == ClaimContext.PROFESSIONAL && this == PRESENT_ON_ADMISSION) {
+    if (claimContext == ClaimContext.PROFESSIONAL && this == OTHER) {
       return "secondary"; // override
     }
     return fhirCode;
   }
 
   /**
-   * Returns the priority of the diagnosis type.
+   * Determines if the current type is relevant for the diagnosis group. Irrelevant types should not
+   * be added to the final mapping.
    *
-   * @param claimContext context
-   * @return priority
+   * @param allDiagnosisTypes all diagnosis types present in the group
+   * @return boolean
    */
-  public int getPriority(ClaimContext claimContext) {
-    if (getFhirCode(claimContext).equals("secondary")) {
-      return 2;
-    }
-    return priority;
+  public boolean shouldAdd(Set<ClaimDiagnosisType> allDiagnosisTypes) {
+    var hasTypesNotOther = this == OTHER && allDiagnosisTypes.size() > 1;
+    var isECodeWithFirst = this == DIAGNOSIS_E_CODE && allDiagnosisTypes.contains(FIRST);
+    return !hasTypesNotOther && !isECodeWithFirst;
   }
 }
