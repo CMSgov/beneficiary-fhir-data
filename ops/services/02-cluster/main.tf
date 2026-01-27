@@ -99,5 +99,19 @@ resource "aws_cloudwatch_event_rule" "bfd-cluster-ecs-events" {
 
 resource "aws_cloudwatch_event_target" "ecs_events_to_cloudwatch" {
   rule = aws_cloudwatch_event_rule.bfd-cluster-ecs-events.name
-  arn = aws_cloudwatch_log_group.this.arn
+  arn = aws_cloudwatch_log_group.performance.arn
+
+  depends_on = [
+    aws_cloudwatch_log_resource_policy.eventbridge_to_logs
+  ]
+}
+
+resource "aws_cloudwatch_log_group" "performance" {
+  name              = "/aws/events/performance"
+  retention_in_days = 30
+}
+
+resource "aws_cloudwatch_log_resource_policy" "eventbridge_to_logs" {
+  policy_name     = "bfd-ecs-eventbridge-to-cloudwatch-logs"
+  policy_document = data.aws_iam_policy_document.eventbridge_to_cloudwatch_logs.json
 }
