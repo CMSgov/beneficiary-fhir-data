@@ -171,6 +171,10 @@ resource "aws_ecs_task_definition" "server" {
           {
             name  = "REGION"
             value = local.region
+          },
+                    {
+            name  = "JAVA_TOOL_OPTIONS"
+            value = "-javaagent:/opt/jmx_exporter/jmx_prometheus_javaagent.jar=${local.server_jmx_export_port}:${local.server_jmx_export_config_path}"
           }
         ]
         logConfiguration = {
@@ -347,6 +351,11 @@ resource "aws_ecs_task_definition" "server" {
             name          = "${local.service}-${local.server_port}-${local.server_protocol}"
             protocol      = "${local.server_protocol}"
           },
+          {
+            containerPort = 9404
+            hostPort      = 9404
+            protocol      = "tcp"
+          }
         ]
         stopTimeout = 120 # Allow enough time for server to gracefully stop on spot termination.
         # Empty declarations reduce Terraform diff noise
@@ -403,6 +412,15 @@ resource "aws_vpc_security_group_ingress_rule" "server_allow_db_access" {
   to_port                      = 5432
   ip_protocol                  = "TCP"
   description                  = "Grants ${local.env} ${local.service} ECS service containers access to the ${local.env} database"
+}
+
+# We need to open up traffic for ADOT on port 9404 - not sure if this is the the place to do it or the right way to do it:
+resource "aws_vpc_security_group_ingress_rule" "server_allow_adot_access" {
+  security_group_id = local.service.security_group_id
+  description     = "ADOT JMX Telemetry"
+  from_port       = 9404
+  to_port         = 9404
+  ip_protocol        = "TCP"
 }
 
 resource "aws_ecs_service" "server" {
