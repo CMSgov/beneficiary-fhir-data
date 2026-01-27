@@ -18,8 +18,13 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import gov.cms.bfd.server.ng.coverage.CoverageResourceProvider;
 import gov.cms.bfd.server.ng.testUtil.ThreadSafeAppender;
 import gov.cms.bfd.server.ng.util.DateUtil;
+import jakarta.persistence.Tuple;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coverage;
@@ -372,5 +377,48 @@ class CoverageSearchIT extends IntegrationTestBase {
         .getEntry()
         .sort(Comparator.comparing(entry -> entry.getResource().getIdElement().getIdPart()));
     expectFhir().scenario(searchStyle.name()).toMatchSnapshot(coverageBundle);
+  }
+
+  @ParameterizedTest
+  @EnumSource(SearchStyleEnum.class)
+  @SuppressWarnings("unchecked")
+  void coverageSearchOriginalDate(SearchStyleEnum searchStyle) {
+    var coverageBundle = searchByBeneficiary(BENE_ID_ALL_PARTS_WITH_XREF, SearchStyleEnum.GET);
+    var entitlementStartByType =
+        ((List<Tuple>)
+                entityManager
+                    .createNativeQuery(
+                        """
+                    SELECT bene_mdcr_entlmt_type_cd AS typeCode,
+                           MIN(bene_rng_bgn_dt) AS originalBeginDate
+                    FROM idr.beneficiary_entitlement
+                    WHERE bene_sk = :beneSk
+                      AND idr_ltst_trans_flg = 'Y'
+                      AND bene_rng_bgn_dt <= (NOW() - INTERVAL '12 hours')
+                    GROUP BY bene_sk, bene_mdcr_entlmt_type_cd
+                """,
+                        Tuple.class)
+                    .setParameter("beneSk", Long.valueOf(BENE_ID_ALL_PARTS_WITH_XREF))
+                    .getResultList())
+            .stream()
+                .collect(
+                    Collectors.toMap(
+                        t -> String.valueOf(t.get("typeCode")),
+                        t ->
+                            Date.from(
+                                ((java.sql.Date) t.get("originalBeginDate"))
+                                    .toLocalDate()
+                                    .atStartOfDay(ZoneId.systemDefault())
+                                    .toInstant())));
+
+    assertFalse(entitlementStartByType.isEmpty());
+
+    for (var coverage : getCoverageFromBundle(coverageBundle)) {
+      var typeCode = coverage.getClass_FirstRep().getValue().split(" ")[1];
+      var expectedStart = entitlementStartByType.get(typeCode);
+      if (expectedStart != null) {
+        assertEquals(expectedStart, coverage.getPeriod().getStart());
+      }
+    }
   }
 }

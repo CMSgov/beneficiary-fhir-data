@@ -84,6 +84,7 @@ public final class OrganizationFactory {
     contactPurpose.addCoding(new Coding(SystemUrls.SYS_CONTACT_ENTITY_TYPE, "PATINF", "Patient"));
     contact.setPurpose(contactPurpose);
     contract
+        .getContractOptional()
         .getContractPlanContactInfo()
         .ifPresent(
             c -> {

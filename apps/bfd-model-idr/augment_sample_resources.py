@@ -29,6 +29,11 @@ line_columns = {
     "CLM_LINE_ORDRG_PRVDR_NPI_NUM": "",
     "CLM_FAC_PRVDR_NPI_NUM": "",
 }
+
+line_supporting_info_columns = [
+    "CLM_LINE_PMD_UNIQ_TRKNG_NUM",
+    "CLM_LINE_PA_UNIQ_TRKNG_NUM",
+]
 npis_used = []
 cur_sample_data["providerList"] = []
 cur_careteam_sequence = 1
@@ -102,11 +107,24 @@ for column in header_columns:
 
     provider_list.append(provider_object)
 
+supporting_info_seq = 1
+supporting_info_components = cur_sample_data.get("supportingInfoComponents", [])
+
+for si_comp in supporting_info_components:
+    si_comp["ROW_NUM"] = supporting_info_seq
+    supporting_info_seq += 1
+
+
 
 # There can be line item NPIs that are not present at header level, but
 # need to be added to the CareTeam. This populates those.
 line_items = cur_sample_data.get("lineItemComponents", [])
 for item in line_items:
+    for line_supporting_info_col in line_supporting_info_columns:
+        if item.get(line_supporting_info_col):
+            item["SEQUENCE_INFO"] = supporting_info_seq
+            supporting_info_seq += 1
+
     for line_col in line_columns:
         if line_col in item and item.get(line_col) not in npis_used:
             npi = item.get(line_col)

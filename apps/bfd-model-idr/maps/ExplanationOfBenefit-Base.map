@@ -142,9 +142,19 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
     } "Added observation";
 
     //item
-    src.lineItemComponents as itemComponent -> tgt.item = create('BackboneElement') as tgtItem then addItem(itemComponent,tgtItem) "add items";
+    src.lineItemComponents as itemComp -> tgt.item = create('BackboneElement') as tgtItem then {
+      // Map the standard item fields
+      itemComp -> tgtItem then addItem(itemComp, tgtItem) "Add Item";
 
-    //There may be instances where, for example, the attending and the operating provider are the same (or some other permutation). 
+      itemComp.CLM_LINE_PA_UNIQ_TRKNG_NUM as val -> tgt.supportingInfo as tgtSI then
+        addPAUTNSupportingInfo(itemComp, tgtSI);
+
+      itemComp.CLM_LINE_PMD_UNIQ_TRKNG_NUM as val -> tgt.supportingInfo as tgtSI then
+        addPMDUTNSupportingInfo(itemComp, tgtSI);
+
+    } "Create Item and SupportingInfo";
+
+    //There may be instances where, for example, the attending and the operating provider are the same (or some other permutation).
     //In these instances, the FML will product duplicate contained resources. We do not actually want to populate dual identical resources, so they're filtered out by the compilation script.
     src.providerList as pList where pList.careTeamType.exists() -> tgt then {
       pList where pList.NPI_TYPE = 1 and pList.isDuplicate.exists().not() -> tgt.contained = create('Practitioner') as tgtPract then createPractitioner(pList, tgtPract) "Add Practitioner";
@@ -618,4 +628,5 @@ group createPractitioner(source src: Provider, target tgt: Practitioner){
     zip5-> tgtAddress.postalCode = zip5 "add zip code";
   } "Add zip code";
 }
+
 

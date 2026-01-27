@@ -26,6 +26,7 @@ from generator_util import (
     CLM_INSTNL,
     CLM_LCTN_HSTRY,
     CLM_LINE,
+    CLM_LINE_DCMTN,
     CLM_LINE_INSTNL,
     CLM_LINE_PRFNL,
     CLM_LINE_RX,
@@ -40,6 +41,7 @@ from generator_util import (
     RowAdapter,
     adapters_to_dicts,
     load_file_dict,
+    probability,
 )
 
 
@@ -62,6 +64,7 @@ class _GeneratedClaim:
     CLM_VAL: list[dict[str, Any]] = field(default_factory=list[dict[str, Any]])
     CLM_PROD: list[dict[str, Any]] = field(default_factory=list[dict[str, Any]])
     CLM_LINE: list[dict[str, Any]] = field(default_factory=list[dict[str, Any]])
+    CLM_LINE_DCMTN: list[dict[str, Any]] = field(default_factory=list[dict[str, Any]])
     CLM_DT_SGNTR: dict[str, Any] = field(default_factory=dict[str, Any])
     CLM_INSTNL: dict[str, Any] = field(default_factory=dict[str, Any])
     CLM_LINE_INSTNL: list[dict[str, Any]] = field(default_factory=list[dict[str, Any]])
@@ -125,6 +128,7 @@ faker = Faker()
 def save_output_files(
     clm: list[dict[str, Any]],
     clm_line: list[dict[str, Any]],
+    clm_line_dcmtn: list[dict[str, Any]],
     clm_val: list[dict[str, Any]],
     clm_dt_sgntr: list[dict[str, Any]],
     clm_prod: list[dict[str, Any]],
@@ -154,6 +158,7 @@ def save_output_files(
     exports = [
         (normalized_clms, "out/SYNTHETIC_CLM.csv", NO_NORMALIZE, NO_CAST_LINE_NUM),
         (clm_line, "out/SYNTHETIC_CLM_LINE.csv", NORMALIZE, CAST_LINE_NUM),
+        (clm_line_dcmtn, "out/SYNTHETIC_CLM_LINE_DCMTN.csv", NORMALIZE, CAST_LINE_NUM),
         (clm_val, "out/SYNTHETIC_CLM_VAL.csv", NORMALIZE, NO_CAST_LINE_NUM),
         (clm_dt_sgntr, "out/SYNTHETIC_CLM_DT_SGNTR.csv", NORMALIZE, NO_CAST_LINE_NUM),
         (clm_prod, "out/SYNTHETIC_CLM_PROD.csv", NORMALIZE, NO_CAST_LINE_NUM),
@@ -755,6 +760,7 @@ def gen_claim(bene_sk: str = "-1", min_date: str = "2018-01-01", max_date: str =
         claim_line["CLM_LINE_GRS_CVRD_CST_TOT_AMT"] = round(random.uniform(0, 1000), 2)
         claim_line["CLM_LINE_OTHR_TP_PD_AMT"] = round(random.uniform(0, 1000), 2)
 
+
         claim_line_rx: dict[str, Any] = {}
         claim_line_rx["CLM_UNIQ_ID"] = claim.CLM["CLM_UNIQ_ID"]
         claim_line_rx["CLM_DT_SGNTR_SK"] = claim.CLM["CLM_DT_SGNTR_SK"]
@@ -1141,6 +1147,9 @@ def gen_claim(bene_sk: str = "-1", min_date: str = "2018-01-01", max_date: str =
         claim_line["CLM_FROM_DT"] = claim.CLM["CLM_FROM_DT"]
         claim_line["CLM_LINE_FROM_DT"] = claim.CLM["CLM_FROM_DT"]
         claim_line["CLM_LINE_THRU_DT"] = claim.CLM["CLM_THRU_DT"]
+        if probability(0.10):
+            claim_line["CLM_LINE_PMD_UNIQ_TRKNG_NUM"] = "".join(random.choices(string.ascii_uppercase + string.digits, k=14))
+
         if clm_type_cd >= 10 and clm_type_cd <= 64:
             claim_line_inst["GEO_BENE_SK"] = claim.CLM["GEO_BENE_SK"]
             claim_line_inst["CLM_DT_SGNTR_SK"] = claim.CLM["CLM_DT_SGNTR_SK"]
@@ -1321,7 +1330,6 @@ def gen_claim(bene_sk: str = "-1", min_date: str = "2018-01-01", max_date: str =
         # CLM_REV_APC_HIPPS_CD never populated for CLM_TYPE_CD 60 apart from null values (00000,0,~)
     return claim
 
-
 def gen_pac_version_of_claim(claim: _GeneratedClaim, max_date: str):
     # note the fields to delete
 
@@ -1418,6 +1426,19 @@ def gen_pac_version_of_claim(claim: _GeneratedClaim, max_date: str):
         pac_claim.CLM_LINE[i]["GEO_BENE_SK"] = pac_claim.CLM["GEO_BENE_SK"]
         pac_claim.CLM_LINE[i]["CLM_DT_SGNTR_SK"] = pac_claim.CLM["CLM_DT_SGNTR_SK"]
         pac_claim.CLM_LINE[i]["CLM_TYPE_CD"] = pac_claim.CLM["CLM_TYPE_CD"]
+        tracking_num = pac_claim.CLM_LINE[i].get("CLM_LINE_PMD_UNIQ_TRKNG_NUM")
+        if tracking_num:
+            claim_line_dcmtn: dict[str, Any] = {}
+            claim_line_dcmtn["GEO_BENE_SK"] = pac_claim.CLM["GEO_BENE_SK"]
+            claim_line_dcmtn["CLM_DT_SGNTR_SK"] = pac_claim.CLM["CLM_DT_SGNTR_SK"]
+            claim_line_dcmtn["CLM_TYPE_CD"] = pac_claim.CLM["CLM_TYPE_CD"]
+            claim_line_dcmtn["CLM_NUM_SK"] = pac_claim.CLM["CLM_NUM_SK"]
+            claim_line_dcmtn["CLM_LINE_PA_UNIQ_TRKNG_NUM"] = tracking_num
+            pac_claim.CLM_LINE[i].pop("CLM_LINE_PMD_UNIQ_TRKNG_NUM")
+            add_meta_timestamps(claim_line_dcmtn, claim.CLM, max_date)
+            claim_line_dcmtn["CLM_LINE_NUM"] = i + 1
+            pac_claim.CLM_LINE_DCMTN.append(claim_line_dcmtn)
+
     # Update CLM_LINE_INSTNL for institutional claims only
     if len(pac_claim.CLM_LINE_INSTNL) > 0:
         for i in range(len(pac_claim.CLM_LINE_INSTNL)):
@@ -1734,6 +1755,7 @@ def main():
         BENE_HSTRY: [],
         CLM: [],
         CLM_LINE: [],
+        CLM_LINE_DCMTN: [],
         CLM_VAL: [],
         CLM_DT_SGNTR: [],
         CLM_PROD: [],
@@ -1775,6 +1797,7 @@ def main():
 
     clm = adapters_to_dicts(files[CLM])
     clm_line = adapters_to_dicts(files[CLM_LINE])
+    clm_line_dcmtn = adapters_to_dicts(files[CLM_LINE_DCMTN])
     clm_val = adapters_to_dicts(files[CLM_VAL])
     clm_instnl = adapters_to_dicts(files[CLM_INSTNL])
     clm_line_instnl = adapters_to_dicts(files[CLM_LINE_INSTNL])
@@ -1825,6 +1848,7 @@ def main():
                 )
                 clm.append(claim.CLM)
                 clm_line.extend(claim.CLM_LINE)
+                # clm_line_dcmtn.extend(claim.CLM_LINE_DCMTN)
                 clm_val.extend(claim.CLM_VAL)
                 clm_dt_sgntr.append(claim.CLM_DT_SGNTR)
                 clm_prod.extend(claim.CLM_PROD)
@@ -1862,10 +1886,12 @@ def main():
                         clm_line_instnl.extend(pac_claim.CLM_LINE_INSTNL)
                     clm_fiss.append(pac_claim.CLM_FISS)
                     clm_lctn_hstry.append(pac_claim.CLM_LCTN_HSTRY)
+                    clm_line_dcmtn.extend(pac_claim.CLM_LINE_DCMTN)
 
     save_output_files(
         clm,
         clm_line,
+        clm_line_dcmtn,
         clm_val,
         clm_dt_sgntr,
         clm_prod,

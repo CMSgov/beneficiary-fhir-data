@@ -48,6 +48,7 @@
     - FISS
     - MCS
     - NCH
+  referenceTable: Final-Action
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_FINL_ACTN_IND
   fhirPath: ExplanationOfBenefit.meta.tag.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Final-Action').code
@@ -212,7 +213,7 @@
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_EFCTV_DT
   fhirPath: ExplanationOfBenefit.created
-- inputPath: ExplanationOfBenefit-Base.CLM_IDR_LD_DT
+- inputPath: SupportingInfoComponent.CLM_IDR_LD_DT
   appliesTo:
     - Inpatient
     - Outpatient
@@ -247,10 +248,10 @@
     - MCS
     - NCH
     - VMS
-  referenceTable: CLM_SRC_ID
+  referenceTable: System-Type
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_SRC_ID
-  fhirPath: ExplanationOfBenefit.meta.tag.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/SYSTEM-TYPE').value
+  fhirPath: ExplanationOfBenefit.meta.tag.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/System-Type').value
 - inputPath: ExplanationOfBenefit-Base.CLM_SRC_ID
   appliesTo:
     - Inpatient
@@ -312,7 +313,7 @@
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_BLG_PRVDR_ZIP5_CD
   fhirPath: ExplanationOfBenefit.contained.where(id = %root.provider.reference.substring(1)).address.postalCode
-- inputPath: ExplanationOfBenefit-Base.CLM_QUERY_CD
+- inputPath: SupportingInfoComponent.CLM_QUERY_CD
   appliesTo:
     - Inpatient
     - Outpatient
@@ -386,7 +387,7 @@
   sourceView: V2_MDCR_CLM_DCMTN
   sourceColumn: CLM_NRLN_RIC_CD
   fhirPath: ExplanationOfBenefit.supportingInfo.where(code.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD').code.coding.code
-- inputPath: ExplanationOfBenefit-Institutional-Base.CLM_OP_SRVC_TYPE_CD
+- inputPath: SupportingInfoComponent.CLM_OP_SRVC_TYPE_CD
   appliesTo:
     - Outpatient
   sources:
@@ -421,7 +422,7 @@
     - CCLF1.CLM_OPRTNL_IME_AMT
   bfdDerived: True
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_OPRTNL_IME_AMT').exists()).amount.value
-- inputPath: ExplanationOfBenefit-Base.CLM_CMS_PROC_DT
+- inputPath: SupportingInfoComponent.CLM_CMS_PROC_DT
   appliesTo:
     - Inpatient
     - Outpatient
@@ -1816,7 +1817,7 @@
   sourceView: V2_MDCR_CLM_DT_SGNTR
   sourceColumn: CLM_MDCR_EXHSTD_DT
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_MDCR_EXHSTD_DT').exists()).timing
-- inputPath: ExplanationOfBenefit-Institutional-Base.CLM_FI_ACTN_CD
+- inputPath: SupportingInfoComponent.CLM_FI_ACTN_CD
   appliesTo:
     - Inpatient
     - SNF
@@ -1870,7 +1871,7 @@
   sourceView: V2_MDCR_CLM_INSTNL
   sourceColumn: CLM_INSTNL_MDCR_COINS_DAY_CNT
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_INSTNL_MDCR_COINS_DAY_CNT').exists()).value
-- inputPath: ExplanationOfBenefit-Base.CLM_DISP_CD
+- inputPath: SupportingInfoComponent.CLM_DISP_CD
   appliesTo:
     - Inpatient
     - SNF
@@ -1939,7 +1940,7 @@
   sourceView: V2_MDCR_CLM_INSTNL
   sourceColumn: CLM_INSTNL_PER_DIEM_AMT
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_INSTNL_PER_DIEM_AMT').exists()).amount.value
-- inputPath: ExplanationOfBenefit-Institutional-Base.CLM_MDCR_NPMT_RSN_CD
+- inputPath: SupportingInfoComponent.CLM_MDCR_NPMT_RSN_CD
   appliesTo:
     - Inpatient
     - HHA
@@ -2083,7 +2084,7 @@
   sourceView: V2_MDCR_CLM_INSTNL
   sourceColumn: CLM_INSTNL_CVRD_DAY_CNT
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_INSTNL_CVRD_DAY_CNT').exists()).value
-- inputPath: ExplanationOfBenefit-Base.CLM_CNTRCTR_NUM
+- inputPath: SupportingInfoComponent.CLM_CNTRCTR_NUM
   appliesTo:
     - Inpatient
     - HHA
@@ -2557,7 +2558,7 @@
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_RNDRG_PRVDR_TAX_NUM
   fhirPath: ExplanationOfBenefit.contained.where(id = %root.provider.reference.substring(1)).identifier.where(system='urn:oid:2.16.840.1.113883.4.4').value
-  notes: This variable comes in on a claim line, but we populate it on a practitioner resource. 
+  notes: Not populated. 
 - inputPath: LineItemComponent.CLM_LINE_RX_NUM
   appliesTo:
     - Carrier
@@ -2686,7 +2687,7 @@
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_RNDRG_PRVDR_TYPE_CD
   fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRVDR-TYPE-CD').value.code
-- inputPath: ExplanationOfBenefit-Professional-Base.CLM_CARR_PMT_DNL_CD
+- inputPath: SupportingInfoComponent.CLM_CARR_PMT_DNL_CD
   appliesTo:
     - Carrier
     - DME
@@ -2714,7 +2715,7 @@
   sourceView: V2_MDCR_CLM_PRFNL
   sourceColumn: CLM_MDCR_PRFNL_PRMRY_PYR_AMT
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication').exists() and category.coding.where(code='CLM_MDCR_PRFNL_PRMRY_PYR_AMT').exists()).amount.value
-- inputPath: ExplanationOfBenefit-Professional-Base.CLM_MDCR_PRFNL_PRVDR_ASGNMT_SW
+- inputPath: SupportingInfoComponent.CLM_MDCR_PRFNL_PRVDR_ASGNMT_SW
   appliesTo:
     - Carrier
     - DME
@@ -2727,7 +2728,7 @@
   sourceView: V2_MDCR_CLM_PRFNL
   sourceColumn: CLM_MDCR_PRFNL_PRVDR_ASGNMT_SW
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_MDCR_PRFNL_PRVDR_ASGNMT_SW').exists()).code.coding.code
-- inputPath: ExplanationOfBenefit-Professional-Base.CLM_CLNCL_TRIL_NUM
+- inputPath: SupportingInfoComponent.CLM_CLNCL_TRIL_NUM
   appliesTo:
     - Carrier
     - DME
@@ -2970,7 +2971,7 @@
   sourceView: V2_MDCR_CLM_LINE_PRFNL
   sourceColumn: CLM_LINE_PRFNL_DME_PRICE_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_PRFNL_DME_PRICE_AMT')).amount.value
-- inputPath: ExplanationOfBenefit-Base.CLM_ADJSTMT_TYPE_CD
+- inputPath: SupportingInfoComponent.CLM_ADJSTMT_TYPE_CD
   appliesTo:
     - Inpatient
     - Outpatient
@@ -3277,7 +3278,7 @@
     - Inpatient
   sources:
     - FISS
-  sourceView: V2_MDCR_CLM_LINE
+  sourceView: V2_MDCR_CLM_LINE_INSTNL
   sourceColumn: CLM_LINE_NON_EHR_RDCTN_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_NON_EHR_RDCTN_AMT')).amount.value
 - inputPath: LineItemComponent.CLM_REV_CNTR_TDAPA_AMT
@@ -3344,3 +3345,31 @@
   sourceColumn: CLM_MDCR_NCH_PTNT_STUS_IND_CD
   referenceTable: CLM_MDCR_NCH_PTNT_STUS_IND_CD
   fhirPath: ExplanationOfBenefit.supportingInfo.where(code.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-NCH-PTNT-STUS-IND-CD').code.coding.code
+- inputPath: LineItemComponent.CLM_LINE_PMD_UNIQ_TRKNG_NUM
+  appliesTo:
+    - Inpatient
+    - Carrier
+    - Outpatient
+    - Inpatient
+    - HHA
+    - DME
+  sources:
+    - NCH
+  sourceView: V2_MDCR_CLM_LINE
+  sourceColumn: CLM_LINE_PMD_UNIQ_TRKNG_NUM
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_LINE_PMD_UNIQ_TRKNG_NUM').exists()).value
+- inputPath: LineItemComponent.CLM_LINE_PA_UNIQ_TRKNG_NUM
+  appliesTo:
+    - Inpatient
+    - Carrier
+    - Outpatient
+    - Inpatient
+    - DME
+    - Hospice
+    - SNF
+  sources:
+    - FISS
+    - MCS
+  sourceView: V2_MDCR_CLM_LINE_DCMTN
+  sourceColumn: CLM_LINE_PA_UNIQ_TRKNG_NUM
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_LINE_PMD_UNIQ_TRKNG_NUM').exists()).value
