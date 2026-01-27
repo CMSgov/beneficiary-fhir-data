@@ -29,6 +29,7 @@ locals {
   env              = module.terraservice.env
   is_ephemeral_env = module.terraservice.is_ephemeral_env
   env_key_arn      = module.terraservice.env_key_arn
+  account_id       = module.terraservice.account_id
 
   # Local module definitions
   layer     = "data"
@@ -85,7 +86,7 @@ resource "aws_ecs_cluster_capacity_providers" "this" {
   }
 }
 
-resource "aws_cloudwatch_event_rule" "bfd-cluster-ecs-events" {
+resource "aws_cloudwatch_event_rule" "ecs_events" {
   name        = "${local.full_name}-ecs-cluster-events"
   description = "Monitor ECS cluster events."
 
@@ -98,20 +99,20 @@ resource "aws_cloudwatch_event_rule" "bfd-cluster-ecs-events" {
 }
 
 resource "aws_cloudwatch_event_target" "ecs_events_to_cloudwatch" {
-  rule = aws_cloudwatch_event_rule.bfd-cluster-ecs-events.name
-  arn = aws_cloudwatch_log_group.performance.arn
+  rule = aws_cloudwatch_event_rule.ecs_events.name
+  arn = aws_cloudwatch_log_group.ecs_events.arn
 
   depends_on = [
     aws_cloudwatch_log_resource_policy.eventbridge_to_logs
   ]
 }
 
-resource "aws_cloudwatch_log_group" "performance" {
-  name              = "/aws/events/performance"
+resource "aws_cloudwatch_log_group" "ecs_events" {
+  name              = "/aws/events/ecs/containerinsights/${aws_ecs_cluster.this.name}/performance"
   retention_in_days = 30
 }
 
 resource "aws_cloudwatch_log_resource_policy" "eventbridge_to_logs" {
-  policy_name     = "bfd-ecs-eventbridge-to-cloudwatch-logs"
-  policy_document = data.aws_iam_policy_document.eventbridge_to_cloudwatch_logs.json
+  policy_name     = "i${local.full_name}-eventbridge-to-cloudwatch-logs"
+  policy_document = data.aws_iam_policy_document.eventbridge_logs.json
 }
