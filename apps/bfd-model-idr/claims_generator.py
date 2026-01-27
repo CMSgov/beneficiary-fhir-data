@@ -381,6 +381,30 @@ samhsa_dgns_drg_cds = [
 ]
 
 
+__USED_IDS_BY_FIELD: dict[str, set[str]] = {}
+
+
+def gen_multipart_id(field: str, parts: list[tuple[str, int]]):
+    while True:
+        id = f"-{
+            ''.join(
+                ''.join(random.choices(population=allowed_chars, k=num_digits))
+                for (allowed_chars, num_digits) in parts
+            )
+        }"
+        if id not in __USED_IDS_BY_FIELD.get(field, {}):
+            if __USED_IDS_BY_FIELD.get(field):
+                __USED_IDS_BY_FIELD[field].add(id)
+            else:
+                __USED_IDS_BY_FIELD[field] = {id}
+
+            return id
+
+
+def gen_basic_id(field: str, num_digits: int, allowed_chars: str = string.digits):
+    return gen_multipart_id(field=field, parts=[(allowed_chars, num_digits)])
+
+
 # Choose SAMHSA codes 1% of the time
 def get_icd_10_dgns_codes() -> list[str]:
     return random.choices(
@@ -671,18 +695,14 @@ def gen_procedure_icd10pcs():
 now = date.today()
 
 
-def gen_claim_id():
-    return "-" + "".join(random.choices(string.digits, k=13))
-
-
 def gen_claim(bene_sk: str = "-1", min_date: str = "2018-01-01", max_date: str = str(now)):
     claim = _GeneratedClaim()
     clm_dt_sgntr: dict[str, Any] = {}
-    clm_dt_sgntr["CLM_DT_SGNTR_SK"] = "".join(random.choices(string.digits, k=12))
+    clm_dt_sgntr["CLM_DT_SGNTR_SK"] = gen_basic_id(field="CLM_DT_SGNTR_SK", num_digits=12)
     claim.CLM["CLM_DT_SGNTR_SK"] = clm_dt_sgntr["CLM_DT_SGNTR_SK"]
-    claim.CLM["CLM_UNIQ_ID"] = gen_claim_id()
+    claim.CLM["CLM_UNIQ_ID"] = gen_basic_id(field="CLM_UNIQ_ID", num_digits=13)
 
-    clm_rlt_cond_sgntr_sk = random.randint(2, 999999999999)
+    clm_rlt_cond_sgntr_sk = gen_basic_id(field="CLM_RLT_COND_SGNTR_SK", num_digits=12)
     claim.CLM["CLM_RLT_COND_SGNTR_SK"] = clm_rlt_cond_sgntr_sk
 
     rlt_cond_mbr_record: dict[str, Any] = {}
@@ -703,13 +723,13 @@ def gen_claim(bene_sk: str = "-1", min_date: str = "2018-01-01", max_date: str =
     claim.CLM["CLM_THRU_DT"] = gen_thru_dt(claim.CLM["CLM_FROM_DT"])
 
     # NON-PDE
-    claim.CLM["CLM_CNTL_NUM"] = "".join(random.choices(string.digits, k=14)) + "".join(
-        random.choices(string.ascii_uppercase, k=3)
+    claim.CLM["CLM_CNTL_NUM"] = gen_multipart_id(
+        field="CLM_CNTL_NUM", parts=[(string.digits, 14), (string.ascii_uppercase, 3)]
     )
     # PDE -> diff Claim control number process.
     if clm_type_cd in pharmacy_clm_type_cds:
-        claim.CLM["CLM_ORIG_CNTL_NUM"] = "".join(random.choices(string.digits, k=14)) + "".join(
-            random.choices(string.ascii_uppercase, k=3)
+        claim.CLM["CLM_ORIG_CNTL_NUM"] = gen_multipart_id(
+            field="CLM_ORIG_CNTL_NUM", parts=[(string.digits, 14), (string.ascii_uppercase, 3)]
         )
         claim.CLM["CLM_RLT_COND_SGNTR_SK"] = "-1"
         claim.CLM["META_SRC_SK"] = 1
@@ -721,7 +741,7 @@ def gen_claim(bene_sk: str = "-1", min_date: str = "2018-01-01", max_date: str =
     claim.CLM["CLM_EFCTV_DT"] = str(date.today())
     claim.CLM["CLM_IDR_LD_DT"] = random_date(claim.CLM["CLM_FROM_DT"], max_date)
     claim.CLM["CLM_OBSLT_DT"] = "9999-12-31"
-    claim.CLM["GEO_BENE_SK"] = "".join(random.choices(string.digits, k=5))
+    claim.CLM["GEO_BENE_SK"] = gen_basic_id(field="GEO_BENE_SK", num_digits=5)
     claim.CLM["BENE_SK"] = bene_sk
     claim.CLM["CLM_DISP_CD"] = random.choice(generator.code_systems["CLM_DISP_CD"])
     claim.CLM["CLM_QUERY_CD"] = random.choice(generator.code_systems["CLM_QUERY_CD"])
@@ -765,7 +785,6 @@ def gen_claim(bene_sk: str = "-1", min_date: str = "2018-01-01", max_date: str =
         claim_line["CLM_LINE_RX_NUM"] = round(random.uniform(0, 100000), 2)
         claim_line["CLM_LINE_GRS_CVRD_CST_TOT_AMT"] = round(random.uniform(0, 1000), 2)
         claim_line["CLM_LINE_OTHR_TP_PD_AMT"] = round(random.uniform(0, 1000), 2)
-
 
         claim_line_rx: dict[str, Any] = {}
         claim_line_rx["CLM_UNIQ_ID"] = claim.CLM["CLM_UNIQ_ID"]
@@ -1154,7 +1173,9 @@ def gen_claim(bene_sk: str = "-1", min_date: str = "2018-01-01", max_date: str =
         claim_line["CLM_LINE_FROM_DT"] = claim.CLM["CLM_FROM_DT"]
         claim_line["CLM_LINE_THRU_DT"] = claim.CLM["CLM_THRU_DT"]
         if probability(0.10):
-            claim_line["CLM_LINE_PMD_UNIQ_TRKNG_NUM"] = "".join(random.choices(string.ascii_uppercase + string.digits, k=14))
+            claim_line["CLM_LINE_PMD_UNIQ_TRKNG_NUM"] = "".join(
+                random.choices(string.ascii_uppercase + string.digits, k=14)
+            )
 
         if clm_type_cd >= 10 and clm_type_cd <= 64:
             claim_line_inst["GEO_BENE_SK"] = claim.CLM["GEO_BENE_SK"]
@@ -1336,6 +1357,7 @@ def gen_claim(bene_sk: str = "-1", min_date: str = "2018-01-01", max_date: str =
         # CLM_REV_APC_HIPPS_CD never populated for CLM_TYPE_CD 60 apart from null values (00000,0,~)
     return claim
 
+
 def gen_pac_version_of_claim(claim: _GeneratedClaim, max_date: str):
     # note the fields to delete
 
@@ -1347,7 +1369,7 @@ def gen_pac_version_of_claim(claim: _GeneratedClaim, max_date: str):
     # via config files in the future.
 
     pac_claim = copy.deepcopy(claim)
-    pac_claim.CLM["CLM_UNIQ_ID"] = gen_claim_id()
+    pac_claim.CLM["CLM_UNIQ_ID"] = gen_basic_id(field="CLM_UNIQ_ID", num_digits=13)
     pac_clm_type_cd = int(pac_claim.CLM["CLM_TYPE_CD"])
 
     if pac_clm_type_cd in (60, 61, 62, 63, 64):
@@ -1390,9 +1412,9 @@ def gen_pac_version_of_claim(claim: _GeneratedClaim, max_date: str):
     if pac_claim.CLM["CLM_TYPE_CD"] < 2000:
         pac_claim.CLM["CLM_FINL_ACTN_IND"] = "N"
 
-    pac_claim.CLM["CLM_DT_SGNTR_SK"] = "".join(random.choices(string.digits, k=12))
+    pac_claim.CLM["CLM_DT_SGNTR_SK"] = gen_basic_id(field="CLM_DT_SGNTR_SK", num_digits=12)
     pac_claim.CLM_DT_SGNTR["CLM_DT_SGNTR_SK"] = pac_claim.CLM["CLM_DT_SGNTR_SK"]
-    pac_claim.CLM["GEO_BENE_SK"] = "".join(random.choices(string.digits, k=5))
+    pac_claim.CLM["GEO_BENE_SK"] = gen_basic_id(field="GEO_BENE_SK", num_digits=5)
     pac_claim.CLM_FISS = {}
     pac_claim.CLM_FISS["CLM_DT_SGNTR_SK"] = pac_claim.CLM["CLM_DT_SGNTR_SK"]
     pac_claim.CLM_FISS["GEO_BENE_SK"] = pac_claim.CLM["GEO_BENE_SK"]
@@ -1603,7 +1625,7 @@ def gen_provider_history(amount: int):
     provider_history: list[dict[str, Any]] = []
 
     for name in names:
-        prvdr_sk = "".join(random.choices(string.digits, k=10))
+        prvdr_sk = gen_basic_id(field="PRVDR_SK", num_digits=10)
         provider_history_row = {
             "PRVDR_SK": prvdr_sk,
             "PRVDR_HSTRY_EFCTV_DT": str(date.today()),
@@ -1614,8 +1636,8 @@ def gen_provider_history(amount: int):
             "PRVDR_NAME": random.choice(available_provider_names),
             "PRVDR_LGL_NAME": random.choice(available_provider_legal_names),
             "PRVDR_NPI_NUM": prvdr_sk,
-            "PRVDR_EMPLR_ID_NUM": "".join(random.choices(string.digits, k=10)),
-            "PRVDR_OSCAR_NUM": "".join(random.choices(string.digits, k=6)),
+            "PRVDR_EMPLR_ID_NUM": gen_basic_id(field="PRVDR_EMPLR_ID_NUM", num_digits=10),
+            "PRVDR_OSCAR_NUM": gen_basic_id(field="PRVDR_OSCAR_NUM", num_digits=6),
             "PRVDR_TXNMY_CMPST_CD": random.choice(available_provider_tx_codes),
             "PRVDR_TYPE_CD": random.choice(available_provider_type_codes),
         }
@@ -1636,7 +1658,7 @@ def gen_contract_plan(amount: int):
     for pbp_num in pbp_nums:
         contract_pbp_num.append(
             {
-                "CNTRCT_PBP_SK": "".join(random.choices(string.digits, k=12)),
+                "CNTRCT_PBP_SK": gen_basic_id(field="CNTRCT_PBP_SK", num_digits=12),
                 "CNTRCT_NUM": random.choice(avail_contract_nums),
                 "CNTRCT_PBP_NUM": pbp_num,
                 "CNTRCT_PBP_NAME": random.choice(avail_contract_names),
@@ -1648,7 +1670,7 @@ def gen_contract_plan(amount: int):
 
         contract_pbp_contact.append(
             {
-                "CNTRCT_PBP_SK": "".join(random.choices(string.digits, k=12)),
+                "CNTRCT_PBP_SK": gen_basic_id(field="CNTRCT_PBP_SK", num_digits=12),
                 "CNTRCT_PLAN_CNTCT_OBSLT_DT": "9999-12-31",
                 "CNTRCT_PLAN_CNTCT_TYPE_CD": random.choice(["~", "30", "62"]),
                 "CNTRCT_PLAN_FREE_EXTNSN_NUM": "".join(random.choices(string.digits, k=7)),
