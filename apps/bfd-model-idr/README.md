@@ -174,6 +174,45 @@ SYNTHETIC_CLM_ANSI_SGNTR.csv
 
 These files represent the schema of the tables the information is sourced from, although for tables other than CLM_DT_SGNTR, the CLM_UNIQ_ID is propagated instead of the 5 part unique key from the IDR.
 
+## Testing Mapping Changes
+
+### Verifying FML Map Changes
+To test updates to your FML map files, run `compile_resources.py` to generate a resource in the `out/` directory and verify the output:
+
+```sh
+uv run compile_resources.py \
+    -m maps/ExplanationOfBenefit-Base.map \
+    -i sample-data/EOB-Carrier-MCS-Sample.json \
+    -o out/ExplanationOfBenefit-MCS.json \
+    -r https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Base \
+    --test
+```
+### Updating Structure Definitions
+If you add or move a field, you must update the input sample file and the corresponding Structure Definition file (e.g., defining CLM_AUDT_TRL_STUS_CD within the elements of ExplanationOfBenefit-Base.json).
+Example element definition:
+
+```text
+{
+  "id": "ExplanationOfBenefit-Base.CLM_AUDT_TRL_STUS_CD",
+  "path": "ExplanationOfBenefit-Base.CLM_AUDT_TRL_STUS_CD",
+  "label": "Claim Status Code",
+  "min": 0,
+  "max": "1",
+  "type": [{ "code": "string" }]
+}
+```
+
+### Resource Augmentation
+Due to FML limitations, some complex mappings that require more than simple lookups are handled via augment_sample_resources.py.
+For example, CLM_AUDT_TRL_STUS_CD on an EOB is derived by combining the status code, location code (CLM_AUDT_TRL_LCTN_CD), and source (META_SRC_SK). The augmentation script resolves these fields into the claim status code.
+To test augmentation logic independently:
+
+```sh
+python augment_sample_resources.py {your_sample_file}.json
+```
+
+*Note: The uv run compile_resources.py command mentioned above also executes this script. You can inspect the output at out/temporary-sample.json and the compiled resource.*
+
 ## Data Dictionary
 
 Generally, the data dictionary will source definitions from the IDR's table definitions. There are instances where this may not be the definition we wish to publish. To overwrite the definition from the IDR, or populate a definition not available from the IDR, populate the "definition" key for the relevant concept in the relevant StructureDefinition.

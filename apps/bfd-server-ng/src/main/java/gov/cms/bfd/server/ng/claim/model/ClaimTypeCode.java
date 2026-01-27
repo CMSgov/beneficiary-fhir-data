@@ -390,19 +390,8 @@ public enum ClaimTypeCode {
     return PART_B_CODES.contains(code) ? Optional.of("Part B") : Optional.empty();
   }
 
-  Optional<ExplanationOfBenefit.RemittanceOutcome> toFhirOutcome() {
-    if (isPacStage1()) {
-      return Optional.of(ExplanationOfBenefit.RemittanceOutcome.PARTIAL);
-    }
-    return Optional.empty();
-  }
-
-  boolean isPacStage1() {
-    return isBetween(1000, 1999);
-  }
-
-  boolean isPacStage2() {
-    return isBetween(2000, 2999);
+  boolean isPac() {
+    return isBetween(1000, 2999);
   }
 
   private boolean isBetween(int lower, int upper) {

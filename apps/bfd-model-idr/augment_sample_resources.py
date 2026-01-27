@@ -155,17 +155,19 @@ for item in line_items:
             careTeamSequence = matching_providers[0]
             item["careTeamSequence"] = [careTeamSequence]
 
-cur_sample_data['providerList'] = provider_list
+cur_sample_data["providerList"] = provider_list
+
 
 # diagnoses section
 @dataclass
 class Diagnosis:
     CLM_DGNS_CD: str
-    CLM_PROD_TYPE_CD: str = 'D'
-    CLM_POA_IND: str = '~'
-    CLM_DGNS_PRCDR_ICD_IND: str = '0'
-    ROW_NUM: str = '1'
+    CLM_PROD_TYPE_CD: str = "D"
+    CLM_POA_IND: str = "~"
+    CLM_DGNS_PRCDR_ICD_IND: str = "0"
+    ROW_NUM: str = "1"
     clm_prod_type_cd_map: list[str] = field(default_factory=list)
+
 
 diagnosis_codes = [
     Diagnosis(
@@ -206,9 +208,55 @@ for diagnosis_code in diagnosis_codes:
         if cur_code and cur_code[0] == diagnosis_code.CLM_DGNS_CD:
             diagnosis_code.clm_prod_type_cd_map.append(clm_prod_type_cd)
     if len(diagnosis_code.clm_prod_type_cd_map) == 0:
-        diagnosis_code.clm_prod_type_cd_map.append('D')
+        diagnosis_code.clm_prod_type_cd_map.append("D")
 
 cur_sample_data["diagnoses"] = [asdict(d) for d in diagnosis_codes]
+
+
+# Resolve claim status code section
+def meta_src_prefix(meta_src_sk: str | None) -> str:
+    return {
+        "1002": "V",
+        "1001": "M",
+        "1003": "F",
+    }.get(str(meta_src_sk), "")
+
+
+def build_claim_audit_trail_composite(sample: dict) -> str:
+    meta_src_sk = str(sample.get("META_SRC_SK", ""))
+    status = sample.get("CLM_AUDT_TRL_STUS_CD")
+
+    if not status:
+        return None
+
+    prefix = meta_src_prefix(meta_src_sk)
+
+    # VMS
+    if meta_src_sk == "1002":
+        location = sample.get("CLM_AUDT_TRL_LCTN_CD", "")
+        return f"{prefix}{status}{location}"
+    # MCS & FISS
+    return f"{prefix}{status}"
+
+
+def next_row_num(supporting_info):
+    row_nums = [
+        int(si["ROW_NUM"])
+        for si in supporting_info
+        if si.get("ROW_NUM") is not None and str(si["ROW_NUM"]).isdigit()
+    ]
+    return str(max(row_nums, default=0) + 1)
+
+
+composite_status_code = build_claim_audit_trail_composite(cur_sample_data)
+if composite_status_code:
+    supporting_info = cur_sample_data.get("supportingInfoComponents", [])
+    supporting_info.append(
+        {
+            "ROW_NUM": next_row_num(supporting_info),
+            "CLM_AUDT_TRL_STUS_CD": build_claim_audit_trail_composite(cur_sample_data),
+        }
+    )
 
 filename = "out/temporary-sample.json"
 

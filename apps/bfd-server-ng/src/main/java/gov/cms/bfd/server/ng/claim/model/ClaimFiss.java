@@ -5,9 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import java.util.Optional;
 import lombok.Getter;
-import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /** Fiscal Intermediary Standard System claims table. */
 @Getter
@@ -20,14 +18,4 @@ public class ClaimFiss {
 
   @OneToOne(mappedBy = "claimFiss")
   private Claim claim;
-
-  @Column(name = "clm_crnt_stus_cd")
-  private Optional<ClaimCurrentStatusCode> claimCurrentStatusCode;
-
-  Optional<ExplanationOfBenefit.RemittanceOutcome> toFhirOutcome(ClaimTypeCode claimTypecode) {
-    if (claimTypecode.isPacStage2()) {
-      return claimCurrentStatusCode.map(ClaimCurrentStatusCode::getOutcome);
-    }
-    return Optional.empty();
-  }
 }

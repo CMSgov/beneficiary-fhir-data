@@ -41,3 +41,7 @@ Description: "A selection of codes that provide supporting information about the
 * #CLM_MDCR_NPMT_RSN_CD "Claim Non Payment Reason Code" "The reason that no Medicare payment is made for services on an institutional claim."
 * #CLM_FI_ACTN_CD "FI or MAC Claim Action Code" "The type of action requested by the intermediary to be taken on an institutional claim."
 * #CLM_OP_SRVC_TYPE_CD "Claim Outpatient Service Type Code" "A code reported by the provider that indicates the specific type of claim."
+* #CLM_IDR_LD_DT "Claim IDR Load Date" "Claim IDR Load Date"
+* #CLM_CMS_PROC_DT "FI Claim Process Date" "FI Claim Process Date"
+* #CLM_CLNCL_TRIL_NUM "Clinical Trial Number" "Clinical Trial Number"
+* #CLM_AUDT_TRL_STUS_CD "Claim Status Code" "Claim Status Code"
