@@ -2448,9 +2448,11 @@
   sources:
     - MCS
     - VMS
+    - FISS
   sourceView: V2_MDCR_CLM_LCTN_HSTRY
   sourceColumn: CLM_AUDT_TRL_STUS_CD
-  fhirPath: ExplanationOfBenefit.outcome and ExplanationOfBenefit.supportingInfo.where(code.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD-Augmented').code.coding.code
+  fhirPath: ExplanationOfBenefit.outcome
+  notes: The status code can be retrieved via ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_AUDT_TRL_STUS_CD').exists()).code.coding.code
 - inputPath: ExplanationOfBenefit-Base.PRVDR_RFRG_PRVDR_NPI_NUM
   appliesTo:
     - Outpatient
