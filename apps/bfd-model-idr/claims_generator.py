@@ -6,6 +6,7 @@ import shutil
 import string
 import subprocess
 import sys
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import date, datetime, timedelta
 from pathlib import Path
@@ -384,14 +385,9 @@ samhsa_dgns_drg_cds = [
 __USED_IDS_BY_FIELD: dict[str, set[str]] = {}
 
 
-def gen_multipart_id(field: str, parts: list[tuple[str, int]]):
+def __gen_id(field: str, gen_func: Callable[[], str]):
     while True:
-        id = f"-{
-            ''.join(
-                ''.join(random.choices(population=allowed_chars, k=num_digits))
-                for (allowed_chars, num_digits) in parts
-            )
-        }"
+        id = gen_func()
         if id not in __USED_IDS_BY_FIELD.get(field, {}):
             if __USED_IDS_BY_FIELD.get(field):
                 __USED_IDS_BY_FIELD[field].add(id)
@@ -401,8 +397,29 @@ def gen_multipart_id(field: str, parts: list[tuple[str, int]]):
             return id
 
 
+def gen_multipart_id(field: str, parts: list[tuple[str, int]]):
+    return __gen_id(
+        field=field,
+        gen_func=lambda: f"-{
+            ''.join(
+                [
+                    ''.join(random.choices(population=allowed_chars, k=num_digits))
+                    for (allowed_chars, num_digits) in parts
+                ]
+            )
+        }",
+    )
+
+
 def gen_basic_id(field: str, num_digits: int, allowed_chars: str = string.digits):
     return gen_multipart_id(field=field, parts=[(allowed_chars, num_digits)])
+
+
+def gen_numeric_id(field: str, start: int = -1, end: int = -(sys.maxsize - 1)):
+    if start > 0 or end > 0 or end > start:
+        raise ValueError("'end' and 'start' must be negative and 'end' must be less than 'start'")
+
+    return __gen_id(field=field, gen_func=lambda: str(random.randint(end, start)))
 
 
 # Choose SAMHSA codes 1% of the time
@@ -702,7 +719,7 @@ def gen_claim(bene_sk: str = "-1", min_date: str = "2018-01-01", max_date: str =
     claim.CLM["CLM_DT_SGNTR_SK"] = clm_dt_sgntr["CLM_DT_SGNTR_SK"]
     claim.CLM["CLM_UNIQ_ID"] = gen_basic_id(field="CLM_UNIQ_ID", num_digits=13)
 
-    clm_rlt_cond_sgntr_sk = gen_basic_id(field="CLM_RLT_COND_SGNTR_SK", num_digits=12)
+    clm_rlt_cond_sgntr_sk = gen_numeric_id(field="CLM_RLT_COND_SGNTR_SK", start=-2)
     claim.CLM["CLM_RLT_COND_SGNTR_SK"] = clm_rlt_cond_sgntr_sk
 
     rlt_cond_mbr_record: dict[str, Any] = {}
@@ -737,11 +754,11 @@ def gen_claim(bene_sk: str = "-1", min_date: str = "2018-01-01", max_date: str =
     if clm_type_cd in (20, 30, 40, 60, 61, 62, 63, 71, 72):
         claim.CLM["CLM_BLOOD_PT_FRNSH_QTY"] = random.randint(0, 20)
 
-    claim.CLM["CLM_NUM_SK"] = 1
+    claim.CLM["CLM_NUM_SK"] = gen_numeric_id(field="CLM_NUM_SK")
     claim.CLM["CLM_EFCTV_DT"] = str(date.today())
     claim.CLM["CLM_IDR_LD_DT"] = random_date(claim.CLM["CLM_FROM_DT"], max_date)
     claim.CLM["CLM_OBSLT_DT"] = "9999-12-31"
-    claim.CLM["GEO_BENE_SK"] = gen_basic_id(field="GEO_BENE_SK", num_digits=5)
+    claim.CLM["GEO_BENE_SK"] = gen_numeric_id(field="GEO_BENE_SK")
     claim.CLM["BENE_SK"] = bene_sk
     claim.CLM["CLM_DISP_CD"] = random.choice(generator.code_systems["CLM_DISP_CD"])
     claim.CLM["CLM_QUERY_CD"] = random.choice(generator.code_systems["CLM_QUERY_CD"])
