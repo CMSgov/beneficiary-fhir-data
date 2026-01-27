@@ -352,8 +352,8 @@ resource "aws_ecs_task_definition" "server" {
             protocol      = "${local.server_protocol}"
           },
           {
-            containerPort = 9404
-            hostPort      = 9404
+            containerPort = local.server_jmx_export_port
+            hostPort      = local.server_jmx_export_port
             protocol      = "tcp"
           }
         ]
