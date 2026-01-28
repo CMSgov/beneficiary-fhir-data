@@ -10,16 +10,32 @@ uv sync
 
 ## Development
 
-Initialize the database with test data. Test data must be generated first (see details in `bfd-model-idr`).
+### Loading local synthetic data
 
-> [!IMPORTANT]  
-> Make sure you do not have Postgres running locally on your computer as this starts Postgres in a container.
+> [!IMPORTANT]
+>
+> - Make sure you do not have Postgres running locally on your computer as this starts Postgres in a container.
+> - Prior to loading data into your local database, you _may_ need to generate data using the synthetic data generators in `apps/bfd-model-idr`. If you just loading patient data, this synthetic data already exists in `apps/bfd-model-idr/synthetic-data`. Consult the `README.md` in that directory for further detail.
+
+To load from `apps/bfd-model-idr/out`, just run:
 
 ```sh
 ./run-db.sh
 ```
 
-Run tests
+Or, you can pass the directory to load from as the first positional argument to `run-db.sh`:
+
+```sh
+./run-db.sh <directory_path>
+```
+
+This is useful for loading our synthetic data stored in our repository, or the test data, e.g.:
+
+- `./run-db.sh ../bfd-model-idr/synthetic-data`
+- `./run-db.sh ./test_samples1`
+- `./run-db.sh ./test_samples2`
+
+### Run tests
 
 ```sh
 uv run pytest
