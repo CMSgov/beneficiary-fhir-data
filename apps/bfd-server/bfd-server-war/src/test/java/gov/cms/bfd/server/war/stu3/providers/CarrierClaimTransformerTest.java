@@ -2,7 +2,6 @@ package gov.cms.bfd.server.war.stu3.providers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -109,7 +108,7 @@ public final class CarrierClaimTransformerTest {
 
     claim.setLastUpdated(Instant.now());
 
-    carrierClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), true);
+    carrierClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags));
 
     String expectedTimerName = carrierClaimTransformer.getClass().getSimpleName() + ".transform";
     verify(metricRegistry, times(1)).timer(expectedTimerName);
@@ -119,9 +118,8 @@ public final class CarrierClaimTransformerTest {
   }
 
   /**
-   * Verifies that {@link gov.cms.bfd.server.war.stu3.providers.CarrierClaimTransformer#transform}
-   * works as expected when run against the {@link StaticRifResource#SAMPLE_A_CARRIER} {@link
-   * CarrierClaim}.
+   * Verifies that {@link ClaimTransformerInterface#transform} works as expected when run against
+   * the {@link StaticRifResource#SAMPLE_A_CARRIER} {@link CarrierClaim}.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -138,27 +136,26 @@ public final class CarrierClaimTransformerTest {
 
     claim.setLastUpdated(Instant.now());
     ExplanationOfBenefit eobWithLastUpdated =
-        carrierClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), true);
+        carrierClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags));
 
-    assertMatches(claim, eobWithLastUpdated, true);
+    assertMatches(claim, eobWithLastUpdated);
 
     claim.setLastUpdated(Optional.empty());
     ExplanationOfBenefit eobWithoutLastUpdated =
-        carrierClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), true);
+        carrierClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags));
 
-    assertMatches(claim, eobWithoutLastUpdated, true);
+    assertMatches(claim, eobWithoutLastUpdated);
   }
 
   /**
-   * Verifies that {@link gov.cms.bfd.server.war.stu3.providers.CarrierClaimTransformer#transform}
-   * works as expected when run against the {@link StaticRifResource#SAMPLE_A_CARRIER} {@link
-   * CarrierClaim}. has two care members under the care team component and doesnt duplicate its
-   * results
+   * Verifies that {@link ClaimTransformerInterface#transform} works as expected when run against
+   * the {@link StaticRifResource#SAMPLE_A_CARRIER} {@link CarrierClaim}. has a single care member
+   * under the care team component and doesn't duplicate its results
    *
    * @throws FHIRException (indicates test failure)
    */
   @Test
-  public void shouldHaveTwoCareTeamMembers() throws FHIRException, IOException {
+  public void shouldHaveOneCareTeamMember() throws FHIRException, IOException {
     List<Object> parsedRecords =
         ServerTestUtils.parseData(
             Arrays.asList(StaticRifResourceGroup.SAMPLE_A_MULTIPLE_CARRIER_LINES.getResources()));
@@ -172,9 +169,9 @@ public final class CarrierClaimTransformerTest {
     claim.setLastUpdated(Instant.now());
 
     ExplanationOfBenefit eob =
-        carrierClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), true);
+        carrierClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags));
 
-    assertEquals(2, eob.getCareTeam().size());
+    assertEquals(1, eob.getCareTeam().size());
   }
 
   /**
@@ -203,8 +200,7 @@ public final class CarrierClaimTransformerTest {
     }
 
     ExplanationOfBenefit genEob =
-        carrierClaimTransformer.transform(
-            new ClaimWithSecurityTags<>(loadedClaim, securityTags), false);
+        carrierClaimTransformer.transform(new ClaimWithSecurityTags<>(loadedClaim, securityTags));
     TransformerUtils.enrichEob(
         genEob,
         RDATestUtils.createTestNpiOrgLookup(),
@@ -225,9 +221,8 @@ public final class CarrierClaimTransformerTest {
   }
 
   /**
-   * Verifies that {@link gov.cms.bfd.server.war.stu3.providers.CarrierClaimTransformer#transform}
-   * works as expected when run against the {@link StaticRifResource#SAMPLE_U_CARRIER} {@link
-   * CarrierClaim}.
+   * Verifies that {@link ClaimTransformerInterface#transform} works as expected when run against
+   * the {@link StaticRifResource#SAMPLE_U_CARRIER} {@link CarrierClaim}.
    *
    * @throws FHIRException (indicates test failure)
    */
@@ -243,8 +238,8 @@ public final class CarrierClaimTransformerTest {
             .get();
 
     ExplanationOfBenefit eob =
-        carrierClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags), true);
-    assertMatches(claim, eob, true);
+        carrierClaimTransformer.transform(new ClaimWithSecurityTags<>(claim, securityTags));
+    assertMatches(claim, eob);
   }
 
   /**
@@ -254,15 +249,9 @@ public final class CarrierClaimTransformerTest {
    * @param claim the {@link CarrierClaim} that the {@link ExplanationOfBenefit} was generated from
    * @param eob the {@link ExplanationOfBenefit} that was generated from the specified {@link
    *     CarrierClaim}
-   * @param includedTaxNumbers whether or not to include tax numbers are expected to be included in
-   *     the result (see {@link
-   *     ExplanationOfBenefitResourceProvider#HEADER_NAME_INCLUDE_TAX_NUMBERS}, defaults to <code>
-   *     false</code> )
    * @throws FHIRException (indicates test failure)
    */
-  static void assertMatches(
-      CarrierClaim claim, ExplanationOfBenefit eob, boolean includedTaxNumbers)
-      throws FHIRException {
+  static void assertMatches(CarrierClaim claim, ExplanationOfBenefit eob) throws FHIRException {
     // Test to ensure group level fields between all claim types match
     TransformerTestUtils.assertEobCommonClaimHeaderData(
         eob,
@@ -327,11 +316,10 @@ public final class CarrierClaimTransformerTest {
     CareTeamComponent taxNumberCareTeamEntry =
         TransformerTestUtils.findCareTeamEntryForProviderTaxNumber(
             claimLine1.getProviderTaxNumber(), eob.getCareTeam());
-    if (includedTaxNumbers) {
-      assertNotNull(taxNumberCareTeamEntry);
-    } else {
-      assertNull(taxNumberCareTeamEntry);
-    }
+    // We assert that tax number entries are always null as of 01/26/BFD-4489 to ensure tax numbers
+    // are never
+    // included
+    assertNull(taxNumberCareTeamEntry);
 
     TransformerTestUtils.assertExtensionCodingEquals(
         CcwCodebookVariable.PRVDR_STATE_CD,

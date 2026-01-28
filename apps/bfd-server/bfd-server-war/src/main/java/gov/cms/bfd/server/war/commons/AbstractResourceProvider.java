@@ -8,12 +8,8 @@ import java.util.List;
 public class AbstractResourceProvider {
 
   /**
-   * The header key used to determine whether or not tax numbers should be included in responses.
-   *
-   * <p>Should be set to <code>"true"</code> if {@link
-   * gov.cms.bfd.model.rif.entities.CarrierClaimColumn#TAX_NUM} or {@link
-   * gov.cms.bfd.model.rif.entities.DMEClaimColumn#TAX_NUM} should be mapped and included in the
-   * results, <code>"false"</code> if not. Defaults to <code>"false"</code>.
+   * Ignored. Kept only to track usage of the {@code IncludeTaxNumbers} header/query parameter via
+   * MDC.
    */
   public static final String HEADER_NAME_INCLUDE_TAX_NUMBERS = "IncludeTaxNumbers";
 
@@ -21,13 +17,11 @@ public class AbstractResourceProvider {
   public static final String EXCLUDE_SAMHSA = "excludeSAMHSA";
 
   /**
-   * Returns if tax numbers should be included after examining the request details.
+   * Returns the boolean value of the "IncludeTaxNumbers" header or query parameter.
    *
    * @param requestDetails a {@link RequestDetails} containing the details of the request URL, used
    *     to parse out the HTTP header that controls this setting
-   * @return <code>true</code> if {@link gov.cms.bfd.model.rif.entities.CarrierClaimColumn#TAX_NUM}
-   *     and {@link gov.cms.bfd.model.rif.entities.DMEClaimColumn#TAX_NUM} should be mapped and
-   *     included in the results, <code>false</code> if not (defaults to <code>false</code>)
+   * @return {@code true} if {@code IncludeTaxNumbers} is {@code true}, else {@code false}
    */
   protected boolean returnIncludeTaxNumbers(RequestDetails requestDetails) {
     /*

@@ -160,9 +160,9 @@ public class R4ExplanationOfBenefitResourceProviderTest {
     when(metricRegistry.timer(any())).thenReturn(metricsTimer);
     when(metricsTimer.time()).thenReturn(metricsTimerContext);
 
-    when(mockCarrierClaimTransformer.transform(any(), anyBoolean())).thenReturn(testEob);
-    when(mockDmeClaimTransformer.transform(any(), anyBoolean())).thenReturn(testEob);
-    when(mockPdeTransformer.transform(any(), anyBoolean())).thenReturn(testEob);
+    when(mockCarrierClaimTransformer.transform(any())).thenReturn(testEob);
+    when(mockDmeClaimTransformer.transform(any())).thenReturn(testEob);
+    when(mockPdeTransformer.transform(any())).thenReturn(testEob);
 
     when(requestDetails.getAttribute(CommonTransformerUtils.SHOULD_FILTER_SAMHSA)).thenReturn(true);
 
@@ -253,8 +253,6 @@ public class R4ExplanationOfBenefitResourceProviderTest {
 
   /** Mocks the default header values. */
   private void mockHeaders() {
-    when(requestDetails.getHeader(CommonHeaders.HEADER_NAME_INCLUDE_TAX_NUMBERS))
-        .thenReturn("false");
     when(requestDetails.getHeader(CommonHeaders.HEADER_NAME_INCLUDE_ADDRESS_FIELDS))
         .thenReturn("false");
     // We dont use this anymore; set to false since everything should work regardless of
@@ -264,7 +262,6 @@ public class R4ExplanationOfBenefitResourceProviderTest {
     when(requestDetails.getHeader("startIndex")).thenReturn("-1");
 
     Map<String, List<String>> headers = new HashMap<>();
-    headers.put(CommonHeaders.HEADER_NAME_INCLUDE_TAX_NUMBERS, List.of("false"));
     headers.put(CommonHeaders.HEADER_NAME_INCLUDE_ADDRESS_FIELDS, List.of("false"));
     headers.put(CommonHeaders.HEADER_NAME_INCLUDE_IDENTIFIERS, List.of("false"));
     when(requestDetails.getHeaders()).thenReturn(headers);
@@ -390,7 +387,7 @@ public class R4ExplanationOfBenefitResourceProviderTest {
   void testReadWhenNegativeIdExpectEobReturned() {
     when(eobId.getIdPart()).thenReturn("pde--123456789");
     when(mockQuery.getSingleResult()).thenReturn(testPdeClaim);
-    when(mockPdeTransformer.transform(any(), anyBoolean())).thenReturn(testEob);
+    when(mockPdeTransformer.transform(any())).thenReturn(testEob);
     ExplanationOfBenefit eob = eobProvider.read(eobId, requestDetails);
     assertNotNull(eob);
   }
@@ -402,7 +399,7 @@ public class R4ExplanationOfBenefitResourceProviderTest {
   void testReadWhenValidIdExpectMetrics() {
     when(eobId.getIdPart()).thenReturn("pde-123456789");
     when(mockQuery.getSingleResult()).thenReturn(testPdeClaim);
-    when(mockPdeTransformer.transform(any(), anyBoolean())).thenReturn(testEob);
+    when(mockPdeTransformer.transform(any())).thenReturn(testEob);
     eobProvider.read(eobId, requestDetails);
 
     String expectedTimerName = eobProvider.getClass().getSimpleName() + ".query.eob_by_id";

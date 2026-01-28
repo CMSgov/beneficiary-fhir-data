@@ -73,7 +73,7 @@
       }, {
         "name" : "includeTaxNumbers",
         "type" : "string",
-        "documentation" : "Setting this flag to _true_, provides tax number in the EOB transformed data for the response.\n\nExample:\n   - `includeTaxNumbers=true`"
+        "documentation" : "Ignored. Included for compatibility with existing requests."
       }, {
         "name" : "service-date",
         "type" : "date",

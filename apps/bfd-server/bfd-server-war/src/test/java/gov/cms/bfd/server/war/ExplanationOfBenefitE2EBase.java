@@ -679,15 +679,11 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
         .get(requestString);
   }
 
-  /**
-   * Test eob by patient id does not return tax numbers for applicable claim types when
-   * IncludeTaxNumbers = false.
-   */
+  /** Test eob by patient id does not return tax numbers for applicable claim types */
   @Test
-  public void testEobByPatientIdWithIncludeTaxNumbersFalseExpectNoTaxNumbers() {
+  public void testEobByPatientIdWithExpectNoTaxNumbers() {
 
     String patientId = testUtils.getPatientId(testUtils.loadSampleAData());
-    // IncludeTaxNumbers is a header, so added below in restAssured API
     String requestString = eobEndpoint + "?patient=" + patientId;
 
     // make sure all 8 entries come back as expected and no 400/500/other errors
@@ -695,7 +691,6 @@ public abstract class ExplanationOfBenefitE2EBase extends ServerRequiredTest {
         given()
             .spec(requestAuth)
             .given()
-            .header(CommonHeaders.HEADER_NAME_INCLUDE_TAX_NUMBERS, "false")
             .expect()
             .body("resourceType", equalTo("Bundle"))
             // we should have 8 claim type entries

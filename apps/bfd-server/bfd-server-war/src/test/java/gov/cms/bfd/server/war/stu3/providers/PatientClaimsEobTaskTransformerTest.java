@@ -216,7 +216,6 @@ class PatientClaimsEobTaskTransformerTest {
         new PatientClaimsEobTaskTransformer(
             metricRegistry, mockSamhsaMatcher, samhsaV2InterceptorShadow, securityTagsDao, false);
 
-    taskTransformer.setIncludeTaxNumbers(true);
     taskTransformer.setupTaskParams(
         claimTransformer, ClaimType.CARRIER, 1234L, Optional.empty(), Optional.empty(), false);
     taskTransformer.setEntityManager(mockEntityManager);
@@ -250,7 +249,6 @@ class PatientClaimsEobTaskTransformerTest {
         new PatientClaimsEobTaskTransformer(
             metricRegistry, mockSamhsaMatcher, samhsaV2InterceptorShadow, securityTagsDao, false);
 
-    taskTransformer.setIncludeTaxNumbers(true);
     taskTransformer.setupTaskParams(
         claimTransformer, ClaimType.CARRIER, 1234L, Optional.empty(), Optional.empty(), true);
     taskTransformer.setEntityManager(mockEntityManager);
@@ -283,7 +281,6 @@ class PatientClaimsEobTaskTransformerTest {
         new PatientClaimsEobTaskTransformer(
             metricRegistry, mockSamhsaMatcher, samhsaV2InterceptorShadow, securityTagsDao, false);
 
-    taskTransformer.setIncludeTaxNumbers(true);
     taskTransformer.setupTaskParams(
         claimTransformer, ClaimType.DME, 1234L, Optional.empty(), Optional.empty(), false);
     taskTransformer.setEntityManager(mockEntityManager);
@@ -316,7 +313,6 @@ class PatientClaimsEobTaskTransformerTest {
         new PatientClaimsEobTaskTransformer(
             metricRegistry, mockSamhsaMatcher, samhsaV2InterceptorShadow, securityTagsDao, false);
 
-    taskTransformer.setIncludeTaxNumbers(true);
     taskTransformer.setupTaskParams(
         claimTransformer, ClaimType.DME, 1234L, Optional.empty(), Optional.empty(), true);
     taskTransformer.setEntityManager(mockEntityManager);
@@ -350,7 +346,6 @@ class PatientClaimsEobTaskTransformerTest {
             metricRegistry, mockSamhsaMatcher, samhsaV2InterceptorShadow, securityTagsDao, false);
 
     // should ignore processing of NPI tax numbers even though it is set
-    taskTransformer.setIncludeTaxNumbers(true);
     taskTransformer.setupTaskParams(
         claimTransformer, ClaimType.HHA, 1234L, Optional.empty(), Optional.empty(), true);
     taskTransformer.setEntityManager(mockEntityManager);
@@ -384,7 +379,6 @@ class PatientClaimsEobTaskTransformerTest {
             metricRegistry, mockSamhsaMatcher, samhsaV2InterceptorShadow, securityTagsDao, false);
 
     // should ignore processing of NPI tax numbers even though it is set
-    taskTransformer.setIncludeTaxNumbers(true);
     taskTransformer.setupTaskParams(
         claimTransformer, ClaimType.HOSPICE, 1234L, Optional.empty(), Optional.empty(), true);
     taskTransformer.setEntityManager(mockEntityManager);
@@ -418,7 +412,6 @@ class PatientClaimsEobTaskTransformerTest {
             metricRegistry, mockSamhsaMatcher, samhsaV2InterceptorShadow, securityTagsDao, false);
 
     // should ignore processing of NPI tax numbers even though it is set
-    taskTransformer.setIncludeTaxNumbers(true);
     taskTransformer.setupTaskParams(
         claimTransformer, ClaimType.INPATIENT, 1234L, Optional.empty(), Optional.empty(), true);
     taskTransformer.setEntityManager(mockEntityManager);
@@ -452,7 +445,6 @@ class PatientClaimsEobTaskTransformerTest {
             metricRegistry, mockSamhsaMatcher, samhsaV2InterceptorShadow, securityTagsDao, false);
 
     // should ignore processing of NPI tax numbers even though it is set
-    taskTransformer.setIncludeTaxNumbers(true);
     taskTransformer.setupTaskParams(
         claimTransformer, ClaimType.OUTPATIENT, 1234L, Optional.empty(), Optional.empty(), true);
     taskTransformer.setEntityManager(mockEntityManager);
@@ -485,7 +477,6 @@ class PatientClaimsEobTaskTransformerTest {
             metricRegistry, mockSamhsaMatcher, samhsaV2InterceptorShadow, securityTagsDao, false);
 
     // should ignore processing of NPI tax numbers even though it is set
-    taskTransformer.setIncludeTaxNumbers(true);
     taskTransformer.setupTaskParams(
         claimTransformer, ClaimType.PDE, 1234L, Optional.empty(), Optional.empty(), true);
     taskTransformer.setEntityManager(mockEntityManager);
@@ -519,7 +510,6 @@ class PatientClaimsEobTaskTransformerTest {
             metricRegistry, mockSamhsaMatcher, samhsaV2InterceptorShadow, securityTagsDao, false);
 
     // should ignore processing of NPI tax numbers even though it is set
-    taskTransformer.setIncludeTaxNumbers(true);
     taskTransformer.setupTaskParams(
         claimTransformer, ClaimType.SNF, 1234L, Optional.empty(), Optional.empty(), true);
     taskTransformer.setEntityManager(mockEntityManager);
@@ -555,7 +545,6 @@ class PatientClaimsEobTaskTransformerTest {
             metricRegistry, mockSamhsaMatcher, samhsaV2InterceptorShadow, securityTagsDao, false);
 
     // should ignore processing of NPI tax numbers even though it is set
-    taskTransformer.setIncludeTaxNumbers(true);
     taskTransformer.setupTaskParams(
         claimTransformer, ClaimType.DME, 1234L, Optional.empty(), Optional.empty(), true);
     taskTransformer.setEntityManager(mockEntityManager);
