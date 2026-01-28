@@ -11,7 +11,6 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -53,7 +52,7 @@ public class ClaimLine {
   @Embedded private ClaimRenderingProvider claimRenderingProvider;
 
   Optional<ExplanationOfBenefit.ItemComponent> toFhirItemComponent(
-      ClaimItem claimItem, List<ClaimProcedure> diagnoses) {
+      ClaimItem claimItem, List<MergedClaimDiagnosis> diagnoses) {
     if (claimLineNumber.isEmpty()) {
       return Optional.empty();
     }
@@ -132,15 +131,14 @@ public class ClaimLine {
    * @param diagnoses The parent claim entity containing all claim procedures.
    * @return The row ids of the matching claim procedure
    */
-  public List<PositiveIntType> diagnosisRelatedLines(List<ClaimProcedure> diagnoses) {
+  public List<PositiveIntType> diagnosisRelatedLines(List<MergedClaimDiagnosis> diagnoses) {
     if (diagnosisCode.isEmpty()) {
       return List.of();
     }
     var currentDiagnosisCode = diagnosisCode.get();
-
-    return IntStream.range(0, diagnoses.size())
-        .filter(i -> diagnoses.get(i).getDiagnosisCode().orElse("").equals(currentDiagnosisCode))
-        .mapToObj(i -> new PositiveIntType(i + 1))
+    return diagnoses.stream()
+        .filter(d -> d.getDiagnosisCode().equals(currentDiagnosisCode))
+        .map(d -> new PositiveIntType(d.getSequenceNumber()))
         .toList();
   }
 

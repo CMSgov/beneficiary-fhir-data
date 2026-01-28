@@ -2332,7 +2332,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
   }, {
     "diagnosisCodeableConcept" : {
       "coding" : [ {
-        "code" : "E888.9",
+        "code" : "304.95",
         "system" : "http://hl7.org/fhir/sid/icd-9-cm"
       } ]
     },
@@ -2345,14 +2345,14 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
     "sequence" : 2,
     "type" : [ {
       "coding" : [ {
-        "code" : "externalcauseofinjury",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
+        "code" : "principal",
+        "system" : "http://terminology.hl7.org/CodeSystem/ex-diagnosistype"
       } ]
     } ]
   }, {
     "diagnosisCodeableConcept" : {
       "coding" : [ {
-        "code" : "304.95",
+        "code" : "E888.9",
         "system" : "http://hl7.org/fhir/sid/icd-9-cm"
       } ]
     },
@@ -2365,8 +2365,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
     "sequence" : 3,
     "type" : [ {
       "coding" : [ {
-        "code" : "principal",
-        "system" : "http://terminology.hl7.org/CodeSystem/ex-diagnosistype"
+        "code" : "externalcauseofinjury",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
       } ]
     } ]
   }, {
@@ -3573,7 +3573,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
   }, {
     "diagnosisCodeableConcept" : {
       "coding" : [ {
-        "code" : "E888.9",
+        "code" : "304.95",
         "system" : "http://hl7.org/fhir/sid/icd-9-cm"
       } ]
     },
@@ -3586,14 +3586,14 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
     "sequence" : 2,
     "type" : [ {
       "coding" : [ {
-        "code" : "externalcauseofinjury",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
+        "code" : "principal",
+        "system" : "http://terminology.hl7.org/CodeSystem/ex-diagnosistype"
       } ]
     } ]
   }, {
     "diagnosisCodeableConcept" : {
       "coding" : [ {
-        "code" : "304.95",
+        "code" : "E888.9",
         "system" : "http://hl7.org/fhir/sid/icd-9-cm"
       } ]
     },
@@ -3606,8 +3606,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
     "sequence" : 3,
     "type" : [ {
       "coding" : [ {
-        "code" : "principal",
-        "system" : "http://terminology.hl7.org/CodeSystem/ex-diagnosistype"
+        "code" : "externalcauseofinjury",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
       } ]
     } ]
   }, {
