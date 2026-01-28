@@ -139,7 +139,7 @@
   sources:
     - NCH
   ccwMapping:
-    - TOT_RX_CST_AMT
+    - PTNT_PAY_AMT
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_BENE_PMT_AMT
   fhirPath: ExplanationOfBenefit.total.where(category.coding.where(system='http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication' and code='paidbypatient').exists() and category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_BENE_PMT_AMT').exists()).amount.value
@@ -237,16 +237,6 @@
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_LINE_CVRD_PD_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='http://terminology.hl7.org/CodeSystem/adjudication' and code='benefit').exists()).amount.value
-- inputPath: LineItemComponent.CLM_LINE_NCVRD_CHRG_AMT
-  appliesTo:
-    - Pharmacy
-  sources:
-    - NCH
-  ccwMapping:
-    - NCVRD_PLAN_PD_AMT
-  sourceView: V2_MDCR_CLM_LINE
-  sourceColumn: CLM_LINE_NCVRD_CHRG_AMT
-  fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication' and code='noncovered').exists()).amount.value
 - inputPath: LineItemComponent.CLM_LINE_BENE_PMT_AMT
   appliesTo:
     - Pharmacy
@@ -259,24 +249,6 @@
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_LINE_BENE_PMT_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication' and code='paidbypatient').exists() and category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_LINE_BENE_PMT_AMT').exists()).amount.value
-- inputPath: LineItemComponent.CLM_LINE_BENE_PD_AMT
-  appliesTo:
-    - Pharmacy
-  sources:
-    - NCH
-  sourceView: V2_MDCR_CLM_LINE
-  sourceColumn: CLM_LINE_BENE_PD_AMT
-  fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication' and code='paidtopatient').exists() and category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_LINE_BENE_PD_AMT').exists()).amount.value
-- inputPath: LineItemComponent.CLM_LINE_PRVDR_PMT_AMT
-  appliesTo:
-    - Pharmacy
-  sources:
-    - NCH
-  ccwMapping:
-    - CVRD_D_PLAN_PD_AMT
-  sourceView: V2_MDCR_CLM_LINE
-  sourceColumn: CLM_LINE_PRVDR_PMT_AMT
-  fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication' and code='paidtoprovider').exists()).amount.value
 - inputPath: LineItemComponent.CLM_LINE_GRS_ABOVE_THRSHLD_AMT
   appliesTo:
     - Pharmacy
@@ -377,6 +349,22 @@
   sourceView: V2_MDCR_CLM_LINE_RX
   sourceColumn: CLM_LINE_GRS_CVRD_CST_TOT_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and category.coding.code='CLM_LINE_GRS_CVRD_CST_TOT_AMT').amount.value
+- inputPath: LineItemComponent.CLM_LINE_RPTD_GAP_DSCNT_AMT
+  appliesTo:
+    - Pharmacy
+  sources:
+    - DDPS
+  sourceView: V2_MDCR_CLM_LINE_RX
+  sourceColumn: CLM_LINE_RPTD_GAP_DSCNT_AMT
+  fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and category.coding.code='CLM_LINE_RPTD_GAP_DSCNT_AMT').amount.value
+- inputPath: LineItemComponent.TOT_RX_CST_AMT
+  appliesTo:
+    - Pharmacy
+  sources:
+    - DDPS
+  bfdDerived: True
+  fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and category.coding.code='TOT_RX_CST_AMT').amount.value
+  notes: Derived using the sum of CLM_LINE_INGRDNT_CST_AMT, CLM_LINE_SRVC_CST_AMT, CLM_LINE_SLS_TAX_AMT, and CLM_LINE_VCCN_ADMIN_FEE_AMT
 - inputPath: LineItemComponent.CLM_PRCNG_EXCPTN_CD
   appliesTo:
     - Pharmacy
