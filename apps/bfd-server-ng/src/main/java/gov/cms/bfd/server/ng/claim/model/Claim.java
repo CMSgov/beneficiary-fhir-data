@@ -52,7 +52,7 @@ public class Claim {
   @Column(name = "clm_efctv_dt")
   private LocalDate claimEffectiveDate;
 
-  @Column(name = "clm_srvc_prvdr_gnrc_id_num")
+  @Column(name = "prvdr_srvc_prvdr_npi_num")
   private String serviceProviderNpiNumber;
 
   @Column(name = "clm_sbmt_frmt_cd")
