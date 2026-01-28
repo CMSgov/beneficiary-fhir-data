@@ -46,3 +46,5 @@ Description: "A selection of codes that provide supporting information about the
 * #CLM_CLNCL_TRIL_NUM "Clinical Trial Number" "The number used to identify all items and services provided to a beneficiary during their participation in a clinical trial. (from NCH Claim Clinical Trial Number)"
 * #CLM_AUDT_TRL_STUS_CD "Claim Status Code" "The current status information for the pending and paid claims currently in the system."
 * #CLM_LINE_PMD_UNIQ_TRKNG_NUM "Prior Authorization Unique Tracking Number" "A unique tracking number (UTN) assigned to each prior authorization (PA) request."
+* #CLM_SBMTR_CNTRCT_NUM "Submitter Contract Number" "The contract number of the submitter."
+* #CLM_SBMTR_CNTRCT_PBP_NUM "Submitter Contract PBP Number" "The PBP number of the submitter contract."
