@@ -7,7 +7,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Optional;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
@@ -26,21 +25,11 @@ public class ClaimProfessional {
   @Column(name = "clm_prvdr_acnt_rcvbl_ofst_amt")
   private BigDecimal providerOffsetAmount;
 
-  @Column(name = "clm_audt_trl_stus_cd")
-  private Optional<ClaimAuditTrailStatusCode> claimAuditTrailStatusCode;
-
   @Embedded private ClaimProfessionalSupportingInfo supportingInfo;
 
   List<ExplanationOfBenefit.AdjudicationComponent> toFhirAdjudication() {
     return List.of(
         AdjudicationChargeType.PAYER_PAID_AMOUNT.toFhirAdjudication(primaryProviderPaidAmount),
         AdjudicationChargeType.PROVIDER_OFFSET_AMOUNT.toFhirAdjudication(providerOffsetAmount));
-  }
-
-  Optional<ExplanationOfBenefit.RemittanceOutcome> toFhirOutcome(ClaimTypeCode claimTypecode) {
-    if (claimTypecode.isPacStage2()) {
-      return claimAuditTrailStatusCode.map(ClaimAuditTrailStatusCode::getOutcome);
-    }
-    return Optional.empty();
   }
 }

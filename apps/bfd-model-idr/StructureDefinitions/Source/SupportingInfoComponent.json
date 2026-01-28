@@ -785,6 +785,18 @@
                 "code": "string"
               }
             ]
+          },
+          {
+            "id": "SupportingInfoComponent.CLM_AUDT_TRL_STUS_CD",
+            "path": "SupportingInfoComponent.CLM_AUDT_TRL_STUS_CD",
+            "label": "Claim Status Code",
+            "min": 0,
+            "max": "1",
+            "type": [
+              {
+                "code": "string"
+              }
+            ]
           }
         ]
     }

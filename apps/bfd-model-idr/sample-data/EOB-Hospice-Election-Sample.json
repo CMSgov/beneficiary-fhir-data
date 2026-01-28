@@ -13,8 +13,9 @@
     "PRVDR_BLG_PRVDR_NPI_NUM":"1548226988",
     "CLM_BLG_PRVDR_ZIP5_CD":"77550",
     "META_SRC_SK": 1003,
+    "CLM_AUDT_TRL_STUS_CD": "F",
     "diagnoses":[
-        {"CLM_VAL_SQNC_NUM":"1","ROW_NUM":"1","CLM_DGNS_CD":"M48.062","CLM_DGNS_PRCDR_ICD_IND":"0","CLM_PROD_TYPE_CD":"A","CLM_POA_IND":"~"},
+        {"CLM_VAL_SQNC_NUM":"1","ROW_NUM":"1","CLM_DGNS_CD":"M48.062","CLM_DGNS_PRCDR_ICD_IND":"0","CLM_PROD_TYPE_CD":"A","CLM_POA_IND":"~"}
   ],
     "supportingInfoComponents":[
         {"ROW_NUM":"1","CLM_ACTV_CARE_FROM_DT":"2021-01-01","CLM_DSCHRG_DT":"2021-01-02"},
