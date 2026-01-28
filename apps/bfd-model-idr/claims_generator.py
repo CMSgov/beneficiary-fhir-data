@@ -1317,15 +1317,15 @@ def gen_claim(bene_sk: str = "-1", min_date: str = "2018-01-01", max_date: str =
         )
         claim_line_inst["CLM_ANSI_SGNTR_SK"] = random.choice(
             [
-                "8585",
-                "1",
-                "4365",
-                "1508",
-                "5555",
-                "9204",
-                "6857",
-                "5816",
-                "11978",
+                "-8585",
+                "-1",
+                "-4365",
+                "-1508",
+                "-5555",
+                "-9204",
+                "-6857",
+                "-5816",
+                "-11978",
             ]
         )
         claim_line_inst["CLM_LINE_ADD_ON_PYMT_AMT"] = round(random.uniform(0, 10000), 2)
