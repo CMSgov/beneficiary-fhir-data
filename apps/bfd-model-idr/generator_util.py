@@ -58,8 +58,9 @@ __used_ids_by_field: dict[str, set[str]] = {}
 def __gen_id(field: str, gen_func: Callable[[], str]) -> str:
     while True:
         id = gen_func()
-        if id not in __used_ids_by_field.get(field, {}):
-            if __used_ids_by_field.get(field):
+        id_set = __used_ids_by_field.get(field, set())
+        if id not in id_set:
+            if id_set:
                 __used_ids_by_field[field].add(id)
             else:
                 __used_ids_by_field[field] = {id}
