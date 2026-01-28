@@ -6,7 +6,6 @@ import shutil
 import string
 import subprocess
 import sys
-from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import date, datetime, timedelta
 from pathlib import Path
@@ -42,6 +41,9 @@ from generator_util import (
     GeneratorUtil,
     RowAdapter,
     adapters_to_dicts,
+    gen_basic_id,
+    gen_multipart_id,
+    gen_numeric_id,
     load_file_dict,
     probability,
 )
@@ -382,46 +384,6 @@ samhsa_dgns_drg_cds = [
 ]
 
 
-__USED_IDS_BY_FIELD: dict[str, set[str]] = {}
-
-
-def __gen_id(field: str, gen_func: Callable[[], str]):
-    while True:
-        id = gen_func()
-        if id not in __USED_IDS_BY_FIELD.get(field, {}):
-            if __USED_IDS_BY_FIELD.get(field):
-                __USED_IDS_BY_FIELD[field].add(id)
-            else:
-                __USED_IDS_BY_FIELD[field] = {id}
-
-            return id
-
-
-def gen_multipart_id(field: str, parts: list[tuple[str, int]]):
-    return __gen_id(
-        field=field,
-        gen_func=lambda: f"-{
-            ''.join(
-                [
-                    ''.join(random.choices(population=allowed_chars, k=num_digits))
-                    for (allowed_chars, num_digits) in parts
-                ]
-            )
-        }",
-    )
-
-
-def gen_basic_id(field: str, num_digits: int, allowed_chars: str = string.digits):
-    return gen_multipart_id(field=field, parts=[(allowed_chars, num_digits)])
-
-
-def gen_numeric_id(field: str, start: int = -1, end: int = -(sys.maxsize - 1)):
-    if start > 0 or end > 0 or end > start:
-        raise ValueError("'end' and 'start' must be negative and 'end' must be less than 'start'")
-
-    return __gen_id(field=field, gen_func=lambda: str(random.randint(end, start)))
-
-
 # Choose SAMHSA codes 1% of the time
 def get_icd_10_dgns_codes() -> list[str]:
     return random.choices(
@@ -715,9 +677,9 @@ now = date.today()
 def gen_claim(bene_sk: str = "-1", min_date: str = "2018-01-01", max_date: str = str(now)):
     claim = _GeneratedClaim()
     clm_dt_sgntr: dict[str, Any] = {}
-    clm_dt_sgntr["CLM_DT_SGNTR_SK"] = gen_basic_id(field="CLM_DT_SGNTR_SK", num_digits=12)
+    clm_dt_sgntr["CLM_DT_SGNTR_SK"] = gen_basic_id(field="CLM_DT_SGNTR_SK", length=12)
     claim.CLM["CLM_DT_SGNTR_SK"] = clm_dt_sgntr["CLM_DT_SGNTR_SK"]
-    claim.CLM["CLM_UNIQ_ID"] = gen_basic_id(field="CLM_UNIQ_ID", num_digits=13)
+    claim.CLM["CLM_UNIQ_ID"] = gen_basic_id(field="CLM_UNIQ_ID", length=13)
 
     clm_rlt_cond_sgntr_sk = gen_numeric_id(field="CLM_RLT_COND_SGNTR_SK", start=-2)
     claim.CLM["CLM_RLT_COND_SGNTR_SK"] = clm_rlt_cond_sgntr_sk
@@ -1386,7 +1348,7 @@ def gen_pac_version_of_claim(claim: _GeneratedClaim, max_date: str):
     # via config files in the future.
 
     pac_claim = copy.deepcopy(claim)
-    pac_claim.CLM["CLM_UNIQ_ID"] = gen_basic_id(field="CLM_UNIQ_ID", num_digits=13)
+    pac_claim.CLM["CLM_UNIQ_ID"] = gen_basic_id(field="CLM_UNIQ_ID", length=13)
     pac_clm_type_cd = int(pac_claim.CLM["CLM_TYPE_CD"])
 
     if pac_clm_type_cd in (60, 61, 62, 63, 64):
@@ -1429,9 +1391,9 @@ def gen_pac_version_of_claim(claim: _GeneratedClaim, max_date: str):
     if pac_claim.CLM["CLM_TYPE_CD"] < 2000:
         pac_claim.CLM["CLM_FINL_ACTN_IND"] = "N"
 
-    pac_claim.CLM["CLM_DT_SGNTR_SK"] = gen_basic_id(field="CLM_DT_SGNTR_SK", num_digits=12)
+    pac_claim.CLM["CLM_DT_SGNTR_SK"] = gen_basic_id(field="CLM_DT_SGNTR_SK", length=12)
     pac_claim.CLM_DT_SGNTR["CLM_DT_SGNTR_SK"] = pac_claim.CLM["CLM_DT_SGNTR_SK"]
-    pac_claim.CLM["GEO_BENE_SK"] = gen_basic_id(field="GEO_BENE_SK", num_digits=5)
+    pac_claim.CLM["GEO_BENE_SK"] = gen_basic_id(field="GEO_BENE_SK", length=5)
     pac_claim.CLM_FISS = {}
     pac_claim.CLM_FISS["CLM_DT_SGNTR_SK"] = pac_claim.CLM["CLM_DT_SGNTR_SK"]
     pac_claim.CLM_FISS["GEO_BENE_SK"] = pac_claim.CLM["GEO_BENE_SK"]
@@ -1642,7 +1604,7 @@ def gen_provider_history(amount: int):
     provider_history: list[dict[str, Any]] = []
 
     for name in names:
-        prvdr_sk = gen_basic_id(field="PRVDR_SK", num_digits=9)
+        prvdr_sk = gen_basic_id(field="PRVDR_SK", length=9)
         provider_history_row = {
             "PRVDR_SK": prvdr_sk,
             "PRVDR_HSTRY_EFCTV_DT": str(date.today()),
@@ -1653,8 +1615,8 @@ def gen_provider_history(amount: int):
             "PRVDR_NAME": random.choice(available_provider_names),
             "PRVDR_LGL_NAME": random.choice(available_provider_legal_names),
             "PRVDR_NPI_NUM": prvdr_sk,
-            "PRVDR_EMPLR_ID_NUM": gen_basic_id(field="PRVDR_EMPLR_ID_NUM", num_digits=9),
-            "PRVDR_OSCAR_NUM": gen_basic_id(field="PRVDR_OSCAR_NUM", num_digits=6),
+            "PRVDR_EMPLR_ID_NUM": gen_basic_id(field="PRVDR_EMPLR_ID_NUM", length=9),
+            "PRVDR_OSCAR_NUM": gen_basic_id(field="PRVDR_OSCAR_NUM", length=6),
             "PRVDR_TXNMY_CMPST_CD": random.choice(available_provider_tx_codes),
             "PRVDR_TYPE_CD": random.choice(available_provider_type_codes),
         }
@@ -1675,7 +1637,7 @@ def gen_contract_plan(amount: int):
     for pbp_num in pbp_nums:
         contract_pbp_num.append(
             {
-                "CNTRCT_PBP_SK": gen_basic_id(field="CNTRCT_PBP_SK", num_digits=12),
+                "CNTRCT_PBP_SK": gen_basic_id(field="CNTRCT_PBP_SK", length=12),
                 "CNTRCT_NUM": random.choice(avail_contract_nums),
                 "CNTRCT_PBP_NUM": pbp_num,
                 "CNTRCT_PBP_NAME": random.choice(avail_contract_names),
@@ -1687,7 +1649,7 @@ def gen_contract_plan(amount: int):
 
         contract_pbp_contact.append(
             {
-                "CNTRCT_PBP_SK": gen_basic_id(field="CNTRCT_PBP_SK", num_digits=12),
+                "CNTRCT_PBP_SK": gen_basic_id(field="CNTRCT_PBP_SK", length=12),
                 "CNTRCT_PLAN_CNTCT_OBSLT_DT": "9999-12-31",
                 "CNTRCT_PLAN_CNTCT_TYPE_CD": random.choice(["~", "30", "62"]),
                 "CNTRCT_PLAN_FREE_EXTNSN_NUM": "".join(random.choices(string.digits, k=7)),
