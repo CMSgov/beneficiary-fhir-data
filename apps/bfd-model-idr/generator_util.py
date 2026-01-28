@@ -688,10 +688,10 @@ class GeneratorUtil:
             datetime.date(year=2017, month=5, day=20),
             datetime.date(year=2021, month=1, day=1),
         )
-        member_id_num = str(random.randint(100000000, 999999999))
-        group_num = str(random.randint(100, 999))
-        prcsr_num = str(random.randint(100000, 999999))
-        bank_id_num = str(random.randint(100000, 999999))
+        member_id_num = gen_numeric_id(field="BENE_PDP_ENRLMT_MMBR_ID_NUM")
+        group_num = str(random.randint(-999, -100))
+        prcsr_num = str(random.randint(-999999, -100000))
+        bank_id_num = str(random.randint(-999999, -100000))
 
         rx_row["CNTRCT_PBP_SK"] = gen_basic_id(field="CNTRCT_PBP_SK", length=12)
         rx_row["BENE_ENRLMT_BGN_DT"] = str(enrollment_start_date)
@@ -716,7 +716,18 @@ class GeneratorUtil:
             datetime.date(year=2021, month=1, day=1),
         )
         enrollment_end_date = "9999-12-31"
-        avail_pbp_nums = ["001", "002", "003", "004", "005", "006", "007", "008", "009", "010"]
+        avail_pbp_nums = [
+            "-001",
+            "-002",
+            "-003",
+            "-004",
+            "-005",
+            "-006",
+            "-007",
+            "-008",
+            "-009",
+            "-010",
+        ]
         avail_contract_nums = [
             "Z0001",
             "Z0002",
