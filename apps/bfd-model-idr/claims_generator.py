@@ -2,7 +2,6 @@ import argparse
 import copy
 import os
 import random
-import shutil
 import string
 import subprocess
 import sys
@@ -148,6 +147,7 @@ def save_output_files(
     prvdr_hstry: list[dict[str, Any]],
     cntrct_pbp_num: list[dict[str, Any]],
     cntrct_pbp_cntct: list[dict[str, Any]],
+    clm_ansi_sgntr: list[dict[str, Any]],
 ):
     Path("out").mkdir(exist_ok=True)
 
@@ -183,6 +183,7 @@ def save_output_files(
         (prvdr_hstry, "out/SYNTHETIC_PRVDR_HSTRY.csv", NORMALIZE, NO_CAST_LINE_NUM),
         (cntrct_pbp_num, "out/SYNTHETIC_CNTRCT_PBP_NUM.csv", NORMALIZE, NO_CAST_LINE_NUM),
         (cntrct_pbp_cntct, "out/SYNTHETIC_CNTRCT_PBP_CNTCT.csv", NORMALIZE, NO_CAST_LINE_NUM),
+        (clm_ansi_sgntr, "out/SYNTHETIC_CLM_ANSI_SGNTR.csv", NORMALIZE, NO_CAST_LINE_NUM),
     ]
 
     print("Exporting finished synthetic claims to ./out...")
@@ -190,10 +191,6 @@ def save_output_files(
         for [df, out_file, normalize, line_num_cast] in t:
             t.set_postfix(file=out_file)  # type: ignore
             export_df(df, out_file, normalize, line_num_cast)
-
-    # these are mostly static
-    shutil.copy("sample-data/SYNTHETIC_CLM_ANSI_SGNTR.csv", "out/SYNTHETIC_CLM_ANSI_SGNTR.csv")
-
     print("Finished exporting generated claims")
 
 
@@ -672,6 +669,19 @@ def gen_procedure_icd10pcs():
 
 
 now = date.today()
+
+
+def gen_synthetic_clm_ansi_sgntr(src_path: str = "sample-data/SYNTHETIC_CLM_ANSI_SGNTR.csv"):
+    csv_df = pd.read_csv(  # type: ignore
+        src_path,
+        dtype=str,
+        na_filter=False,
+    )
+    clm_ansi_sgntr: list[dict[str, Any]] = csv_df.to_dict(orient="records")  # type: ignore
+
+    # Return the data from the source but with every CLM_ANSI_SGNTR_SK made negative to indicate
+    # it's synthetic
+    return [x | {"CLM_ANSI_SGNTR_SK": f"-{x['CLM_ANSI_SGNTR_SK']}"} for x in clm_ansi_sgntr]
 
 
 def gen_claim(bene_sk: str = "-1", min_date: str = "2018-01-01", max_date: str = str(now)):
@@ -1838,6 +1848,7 @@ def main():
     prvdr_hstry = adapters_to_dicts(files[PRVDR_HSTRY])
     if not prvdr_hstry:
         prvdr_hstry = gen_provider_history(amount=14)
+    clm_ansi_sgntr = gen_synthetic_clm_ansi_sgntr()
     min_claims: int = args.min_claims
     max_claims: int = args.max_claims
     if min_claims > max_claims:
@@ -1925,6 +1936,7 @@ def main():
         prvdr_hstry,
         cntrct_pbp_num,
         cntrct_pbp_cntct,
+        clm_ansi_sgntr,
     )
 
 
