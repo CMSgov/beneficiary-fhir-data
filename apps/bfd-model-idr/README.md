@@ -47,6 +47,13 @@ uv sync
 ```
 
 ### Get Matchbox up and running
+
+To compile the .fsh files from this folder
+```sh
+cd sushi && sushi build && cd ..
+```
+
+### Get Matchbox up and running
 To reduce dependencies on tx.fhir.org as well as improve the speed of validation, we use matchbox to run a local FHIR server. Read more about matchbox at https://ahdis.github.io/matchbox/
 To start matchbox, run 
 
