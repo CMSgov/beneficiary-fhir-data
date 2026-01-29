@@ -1165,7 +1165,7 @@ def gen_claim(bene_sk: str = "-1", min_date: str = "2018-01-01", max_date: str =
         if probability(0.10):
             claim_line["CLM_LINE_PMD_UNIQ_TRKNG_NUM"] = gen_basic_id(
                 field="CLM_LINE_PMD_UNIQ_TRKNG_NUM",
-                length=14,
+                length=13,  # varchar(14) so 13 + 1 for '-' prefix
                 allowed_chars=string.ascii_uppercase + string.digits,
             )
 
