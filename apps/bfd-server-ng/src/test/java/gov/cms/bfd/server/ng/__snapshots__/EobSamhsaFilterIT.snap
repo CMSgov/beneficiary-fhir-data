@@ -4346,11 +4346,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "code" : "externalcauseofinjury",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
           } ]
-        }, {
-          "coding" : [ {
-            "code" : "admitting",
-            "system" : "http://terminology.hl7.org/CodeSystem/ex-diagnosistype"
-          } ]
         } ]
       }, {
         "diagnosisCodeableConcept" : {
@@ -13859,11 +13854,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "code" : "principal",
             "system" : "http://terminology.hl7.org/CodeSystem/ex-diagnosistype"
           } ]
-        }, {
-          "coding" : [ {
-            "code" : "admitting",
-            "system" : "http://terminology.hl7.org/CodeSystem/ex-diagnosistype"
-          } ]
         } ]
       }, {
         "diagnosisCodeableConcept" : {
@@ -16351,11 +16341,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
           "coding" : [ {
             "code" : "externalcauseofinjury",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
-          } ]
-        }, {
-          "coding" : [ {
-            "code" : "admitting",
-            "system" : "http://terminology.hl7.org/CodeSystem/ex-diagnosistype"
           } ]
         } ]
       }, {
@@ -25863,11 +25848,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "type" : [ {
           "coding" : [ {
             "code" : "principal",
-            "system" : "http://terminology.hl7.org/CodeSystem/ex-diagnosistype"
-          } ]
-        }, {
-          "coding" : [ {
-            "code" : "admitting",
             "system" : "http://terminology.hl7.org/CodeSystem/ex-diagnosistype"
           } ]
         } ]

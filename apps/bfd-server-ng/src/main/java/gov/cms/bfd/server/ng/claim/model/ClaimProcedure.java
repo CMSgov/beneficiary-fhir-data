@@ -7,11 +7,8 @@ import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Embeddable;
-import jakarta.persistence.Transient;
 import java.time.LocalDate;
-import java.util.HashSet;
 import java.util.Optional;
-import java.util.Set;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -45,12 +42,6 @@ public class ClaimProcedure {
   private Optional<String> diagnosisCode;
 
   private static final LocalDate DEFAULT_PROCEDURE_DATE = LocalDate.of(2000, 1, 1);
-
-  @Transient private Set<ClaimDiagnosisType> diagnosisTypes = new HashSet<>();
-
-  void setDiagnosisTypes(Set<ClaimDiagnosisType> diagnosisTypes) {
-    this.diagnosisTypes = Optional.ofNullable(diagnosisTypes).orElse(new HashSet<>());
-  }
 
   Optional<String> getDiagnosisKey() {
     return diagnosisCode.map(s -> s + "|" + icdIndicator.map(IcdIndicator::getCode).orElse(""));
@@ -99,20 +90,11 @@ public class ClaimProcedure {
     var diagnosis = new ExplanationOfBenefit.DiagnosisComponent();
     diagnosis.setSequence(sequenceGenerator.next());
 
-    var types = Optional.ofNullable(diagnosisTypes).orElse(new HashSet<>());
-    if (!types.isEmpty()) {
-      types.forEach(
-          d ->
-              diagnosis.addType(
-                  new CodeableConcept(
-                      new Coding().setSystem(d.getSystem()).setCode(d.getFhirCode(claimContext)))));
-    } else {
-      diagnosisType.ifPresent(
-          d ->
-              diagnosis.addType(
-                  new CodeableConcept(
-                      new Coding().setSystem(d.getSystem()).setCode(d.getFhirCode(claimContext)))));
-    }
+    diagnosisType.ifPresent(
+        d ->
+            diagnosis.addType(
+                new CodeableConcept(
+                    new Coding().setSystem(d.getSystem()).setCode(d.getFhirCode(claimContext)))));
 
     var formattedCode = icdIndicator.get().formatDiagnosisCode(diagnosisCode.get());
     diagnosis.setDiagnosis(
