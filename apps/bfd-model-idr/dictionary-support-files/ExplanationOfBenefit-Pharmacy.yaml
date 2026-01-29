@@ -363,8 +363,8 @@
   sources:
     - NCH
   bfdDerived: True
-  fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and category.coding.code='TOT_RX_CST_AMT').amount.value
-  notes: Derived using the sum of CLM_LINE_INGRDNT_CST_AMT, CLM_LINE_SRVC_CST_AMT, CLM_LINE_SLS_TAX_AMT, and CLM_LINE_VCCN_ADMIN_FEE_AMT
+  fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='TOT_RX_CST_AMT')).amount.value
+  notes: Derived using the sum of CLM_LINE_INGRDNT_CST_AMT, CLM_LINE_SRVC_CST_AMT, CLM_LINE_SLS_TAX_AMT, and CLM_LINE_VCCN_ADMIN_FEE_AMT. TOT_RX_CST_AMT is also set on the EOB's total with fhirPath ExplanationOfBenefit.total.where(category.coding.where(system='http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication' and code='submitted').exists() and category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='TOT_RX_CST_AMT').exists()).amount.value
 - inputPath: LineItemComponent.CLM_PRCNG_EXCPTN_CD
   appliesTo:
     - Pharmacy

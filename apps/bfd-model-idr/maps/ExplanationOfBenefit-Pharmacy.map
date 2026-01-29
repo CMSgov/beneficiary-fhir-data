@@ -138,6 +138,16 @@ group createEOBPharmacy(source src: ExplanationOfBenefitPharmacy, target tgt: BF
      src -> tgtBBElement.amount = create('Money') as tgtMoney then addMoney(othrTpPdAmt, tgtMoney) "Add Money";
     } "Add other third party paid amount";
 
+    // Adds TOT_RX_CST_AMT to EOB.total. TOT_RX_CST_AMT is derived based on the sum of CLM_LINE_INGRDNT_CST_AMT,
+    // CLM_LINE_SRVC_CST_AMT, CLM_LINE_SLS_TAX_AMT, CLM_LINE_VCCN_ADMIN_FEE_AMT from line item
+    src.lineItemComponents as lineItem -> tgt.total = create('BackboneElement') as tgtBBElement then {
+      src -> tgtBBElement.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/adjudication", "submitted") "Add first coding";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "TOT_RX_CST_AMT") "Add second coding";
+      } "Set category";
+      lineItem.TOT_RX_CST_AMT as totRxCstAmt -> tgtBBElement.amount = create('Money') as tgtMoney then addMoney(totRxCstAmt, tgtMoney) "Add Money";
+    } "Add Total Drug Cost Amount";
+
     src.CLM_ADJSTMT_TYPE_CD as adjTypeCd -> tgt.extension = create('Extension') as tgtExtension then {
       src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-ADJSTMT-TYPE-CD" "Add url";
       src -> tgtExtension.value = create('Coding') as tgtCoding then{
@@ -438,7 +448,10 @@ group addPharmacyItem(source src: LineItemComponent, target tgt: BackboneElement
 
     // TOT_RX_CST_AMT resolved in augment_sample_resources script
     src.TOT_RX_CST_AMT as totRxCstAmt -> tgt.adjudication = create('BackboneElement') as tgtAdj then {
-        src -> tgtAdj.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "TOT_RX_CST_AMT") "Set category";
+        src -> tgtAdj.category = create('CodeableConcept') as tgtCC then {
+            src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/adjudication", "submitted") "Add coding 1";
+            src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "TOT_RX_CST_AMT") "Add coding 2";
+        } "add category";
         totRxCstAmt -> tgtAdj.amount = create('Money') as tgtMoney then addMoney(totRxCstAmt, tgtMoney) "Add total drug cost amount";
     } "Add Total Drug Cost Amount";
 
