@@ -1,6 +1,7 @@
 import json
 import sys
 from dataclasses import asdict, dataclass, field
+from decimal import Decimal
 from pathlib import Path
 
 import pandas as pd
@@ -59,9 +60,9 @@ rx_line_financial_fields = [
 ]
 
 
-def convert_to_float(val: str | None) -> float:
+def convert_to_decimal(val: str | None) -> Decimal:
     try:
-        return float(val)
+        return Decimal(val)
     except (TypeError, ValueError):
         return 0.0
 
@@ -82,7 +83,9 @@ for column in header_columns:
     prvdr_hstry_for_npi = json.loads(
         df[df["PRVDR_SK"] == str(provider_object.get("PRVDR_SK"))].iloc[0].to_json()
     )
-    provider_object["NPI_TYPE"] = "2" if prvdr_hstry_for_npi.get("PRVDR_LGL_NAME") else "1"
+    provider_object["NPI_TYPE"] = (
+        "2" if prvdr_hstry_for_npi.get("PRVDR_LGL_NAME") else "1"
+    )
 
     provider_object.update(
         {
@@ -94,7 +97,9 @@ for column in header_columns:
 
     if prvdr_hstry_for_npi.get("PRVDR_TXNMY_CMPST_CD"):
         taxonomy_val = prvdr_hstry_for_npi.get("PRVDR_TXNMY_CMPST_CD")
-        taxonomy_codes = [taxonomy_val[i : i + 10] for i in range(len(taxonomy_val), 10)]
+        taxonomy_codes = [
+            taxonomy_val[i : i + 10] for i in range(len(taxonomy_val), 10)
+        ]
         provider_object["taxonomyCodes"] = taxonomy_codes
 
     # assign care team type + sequence for header-level info
@@ -111,13 +116,20 @@ for column in header_columns:
             # we need to ensure those NPIs match.
             if column in item and item.get(column) == cur_sample_data.get(column):
                 if item.get("careTeamSequences"):
-                    item["careTeamSequence"].append(provider_object.get("careTeamSequenceNumber"))
+                    item["careTeamSequence"].append(
+                        provider_object.get("careTeamSequenceNumber")
+                    )
                 else:
-                    item["careTeamSequence"] = [provider_object.get("careTeamSequenceNumber")]
+                    item["careTeamSequence"] = [
+                        provider_object.get("careTeamSequenceNumber")
+                    ]
 
     # We may want to remove this in the future, depending on requirements
     # regarding address info.
-    if column == "PRVDR_BLG_PRVDR_NPI_NUM" and "CLM_BLG_PRVDR_ZIP5_CD" in cur_sample_data:
+    if (
+        column == "PRVDR_BLG_PRVDR_NPI_NUM"
+        and "CLM_BLG_PRVDR_ZIP5_CD" in cur_sample_data
+    ):
         provider_object["prvdr_zip"] = cur_sample_data.get("CLM_BLG_PRVDR_ZIP5_CD")
 
     provider_list.append(provider_object)
@@ -147,9 +159,13 @@ for item in line_items:
             npis_used.append(provider_object.get("PRVDR_SK"))
 
             prvdr_hstry_for_npi = json.loads(
-                df[df["PRVDR_SK"] == str(provider_object.get("PRVDR_SK"))].iloc[0].to_json()
+                df[df["PRVDR_SK"] == str(provider_object.get("PRVDR_SK"))]
+                .iloc[0]
+                .to_json()
             )
-            provider_object["NPI_TYPE"] = "2" if prvdr_hstry_for_npi.get("PRVDR_LGL_NAME") else "1"
+            provider_object["NPI_TYPE"] = (
+                "2" if prvdr_hstry_for_npi.get("PRVDR_LGL_NAME") else "1"
+            )
             provider_object.update(
                 {
                     fld: prvdr_hstry_for_npi[fld]
@@ -160,7 +176,9 @@ for item in line_items:
 
             if prvdr_hstry_for_npi.get("PRVDR_TXNMY_CMPST_CD"):
                 taxonomy_val = prvdr_hstry_for_npi.get("PRVDR_TXNMY_CMPST_CD")
-                taxonomy_codes = [taxonomy_val[i : i + 10] for i in range(len(taxonomy_val), 10)]
+                taxonomy_codes = [
+                    taxonomy_val[i : i + 10] for i in range(len(taxonomy_val), 10)
+                ]
                 provider_object["taxonomyCodes"] = taxonomy_codes
 
             if len(line_columns.get(line_col)) > 0:
@@ -172,7 +190,9 @@ for item in line_items:
             provider_list.append(provider_object)
 
         elif (
-            line_col in item and "careTeamSequence" not in item and item.get(line_col) in npis_used
+            line_col in item
+            and "careTeamSequence" not in item
+            and item.get(line_col) in npis_used
         ):
             npi = item.get(line_col)
 
@@ -190,7 +210,8 @@ for item in line_items:
     # for part D claims, sum CLM_LINE_INGRDNT_CST_AMT, CLM_LINE_SRVC_CST_AMT, CLM_LINE_SLS_TAX_AMT,
     # CLM_LINE_VCCN_ADMIN_FEE_AMT to set TOT_RX_CST_AMT
     tot_rx_amt = sum(
-        convert_to_float(item.get(financial_field)) for financial_field in rx_line_financial_fields
+        convert_to_decimal(item.get(financial_field))
+        for financial_field in rx_line_financial_fields
     )
     if tot_rx_amt > 0.0:
         item["TOT_RX_CST_AMT"] = str(tot_rx_amt)

@@ -353,7 +353,7 @@
   appliesTo:
     - Pharmacy
   sources:
-    - DDPS
+    - NCH
   sourceView: V2_MDCR_CLM_LINE_RX
   sourceColumn: CLM_LINE_RPTD_GAP_DSCNT_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and category.coding.code='CLM_LINE_RPTD_GAP_DSCNT_AMT').amount.value
@@ -361,7 +361,7 @@
   appliesTo:
     - Pharmacy
   sources:
-    - DDPS
+    - NCH
   bfdDerived: True
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and category.coding.code='TOT_RX_CST_AMT').amount.value
   notes: Derived using the sum of CLM_LINE_INGRDNT_CST_AMT, CLM_LINE_SRVC_CST_AMT, CLM_LINE_SLS_TAX_AMT, and CLM_LINE_VCCN_ADMIN_FEE_AMT
