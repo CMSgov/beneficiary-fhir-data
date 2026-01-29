@@ -46,7 +46,18 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 uv sync
 ```
 
+### Get Matchbox up and running
+To reduce dependencies on tx.fhir.org as well as improve the speed of validation, we use matchbox to run a local FHIR server. Read more about matchbox at https://ahdis.github.io/matchbox/
+To start matchbox, run 
+
+```sh
+docker compose up -d
+```
+Note, it takes several minutes and requires a good bit of RAM. It'll be ready once it says that packages have been loaded and some obviously untrue amount of RAM (generally half of what it actually used) was used. 
+
 ### Create FHIR files with synthetic data
+
+Requires Matchbox to be active.
 
 To easily compile all resources:
 

@@ -1,0 +1,132 @@
+{
+  "resourceType" : "Coverage",
+  "id" : "part-B-123456789",
+  "meta" : {
+    "lastUpdated" : "2020-01-07T03:02:28.000000Z",
+    "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage|2.1.0",
+    "http://hl7.org/fhir/us/core/StructureDefinition/us-core-coverage|6.1.0"]
+  },
+  "contained" : [{
+    "resourceType" : "Organization",
+    "id" : "cms-org",
+    "meta" : {
+      "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0"]
+    },
+    "active" : true,
+    "name" : "Centers for Medicare & Medicaid Services",
+    "contact" : [{
+      "purpose" : {
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/contactentity-type",
+          "code" : "PATINF",
+          "display" : "Patient"
+        }]
+      },
+      "telecom" : [{
+        "system" : "phone",
+        "value" : "1-800-633-4227"
+      },
+      {
+        "system" : "phone",
+        "value" : "TTY: 1-877-486-2048"
+      },
+      {
+        "system" : "url",
+        "value" : "www.medicare.gov"
+      }]
+    }]
+  }],
+  "extension" : [{
+    "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-STUS-CD",
+    "valueCoding" : {
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-STUS-CD",
+      "code" : "31"
+    }
+  },
+  {
+    "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-BUYIN-CD",
+    "valueCoding" : {
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-BUYIN-CD",
+      "code" : "A"
+    }
+  },
+  {
+    "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-ENTLMT-STUS-CD",
+    "valueCoding" : {
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-STUS-CD",
+      "code" : "E"
+    }
+  },
+  {
+    "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-ENRLMT-RSN-CD",
+    "valueCoding" : {
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ENRLMT-RSN-CD",
+      "code" : "I"
+    }
+  },
+  {
+    "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-ENTLMT-RSN-CD",
+    "valueCoding" : {
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-RSN-CD",
+      "code" : "2"
+    }
+  },
+  {
+    "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-ESRD-STUS-ID",
+    "valueCoding" : {
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ESRD-STUS-ID",
+      "code" : "Y"
+    }
+  },
+  {
+    "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-DSBLD-STUS-ID",
+    "valueCoding" : {
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-DSBLD-STUS-ID",
+      "code" : "N"
+    }
+  }],
+  "identifier" : [{
+    "type" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+        "code" : "MB"
+      }]
+    },
+    "system" : "http://hl7.org/fhir/sid/us-mbi",
+    "value" : "ABB2BB0BB22"
+  }],
+  "status" : "active",
+  "type" : {
+    "coding" : [{
+      "system" : "https://nahdo.org/sopt",
+      "code" : "121",
+      "display" : "MEDICARE FFS"
+    }]
+  },
+  "subscriberId" : "ABB2BB0BB22",
+  "beneficiary" : {
+    "reference" : "Patient/123456789"
+  },
+  "relationship" : {
+    "coding" : [{
+      "system" : "http://terminology.hl7.org/CodeSystem/subscriber-relationship",
+      "code" : "self",
+      "display" : "self"
+    }]
+  },
+  "period" : {
+    "start" : "2018-04-11"
+  },
+  "payor" : [{
+    "reference" : "#cms-org"
+  }],
+  "class" : [{
+    "type" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/coverage-class",
+        "code" : "plan"
+      }]
+    },
+    "value" : "Part B"
+  }]
+}
