@@ -259,9 +259,9 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
         assert row["idr_updt_ts"] is not None
 
     cur = conn.execute("select * from idr.contract_pbp_number order by cntrct_pbp_sk")
-    assert cur.rowcount == 4
+    assert cur.rowcount == 10
     rows = cur.fetchmany(1)
-    assert rows[0]["cntrct_pbp_sk"] == 408933975817
+    assert rows[0]["cntrct_pbp_sk"] == 16513335503
 
     cur = conn.execute("select * from idr.contract_pbp_contact order by cntrct_pbp_sk")
     assert cur.rowcount == 6
