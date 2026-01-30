@@ -293,12 +293,12 @@ class IdrBaseModel(BaseModel, ABC):
 T = TypeVar("T", bound=IdrBaseModel)
 
 
-def _deceased_bene_filter(alias: str) -> str:
+def _deceased_bene_filter(alias: str, start_time) -> str:
     return f"""
             SELECT bene_sk
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry {alias}
             WHERE {alias}.bene_vrfy_death_day_sw = 'Y'
-            AND {alias}.bene_death_dt < CURRENT_DATE - INTERVAL '{DEATH_DATE_CUTOFF_YEARS} years'
+            AND {alias}.bene_death_dt < TIMESTAMP '{start_time}' - INTERVAL '{DEATH_DATE_CUTOFF_YEARS} years'
     """
 
 
@@ -469,7 +469,7 @@ class IdrBeneficiary(IdrBaseModel):
                 WHERE ox.row_order = 1
             ),
             deceased_benes AS (
-                {_deceased_bene_filter(hstry)}
+                {_deceased_bene_filter(hstry, start_time)}
             )
             SELECT {{COLUMNS}}
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry {hstry}
@@ -612,7 +612,7 @@ class IdrBeneficiaryThirdParty(IdrBaseModel):
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_tp tp
             {{WHERE_CLAUSE}}
             AND NOT EXISTS (
-                {_deceased_bene_filter(hstry)}
+                {_deceased_bene_filter(hstry, start_time)}
                 AND {hstry}.bene_sk = tp.bene_sk
             )
             {{ORDER_BY}}
@@ -659,7 +659,7 @@ class IdrBeneficiaryStatus(IdrBaseModel):
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_mdcr_stus stus
             {{WHERE_CLAUSE}}
             AND NOT EXISTS (
-                {_deceased_bene_filter(hstry)}
+                {_deceased_bene_filter(hstry, start_time)}
                 AND {hstry}.bene_sk = stus.bene_sk
             )
             {{ORDER_BY}}
@@ -708,7 +708,7 @@ class IdrBeneficiaryEntitlement(IdrBaseModel):
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_mdcr_entlmt entlmt
             {{WHERE_CLAUSE}}
             AND NOT EXISTS (
-                {_deceased_bene_filter(hstry)}
+                {_deceased_bene_filter(hstry, start_time)}
                 AND {hstry}.bene_sk = entlmt.bene_sk
             )
             {{ORDER_BY}}
@@ -755,7 +755,7 @@ class IdrBeneficiaryEntitlementReason(IdrBaseModel):
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_mdcr_entlmt_rsn rsn
             {{WHERE_CLAUSE}}
             AND NOT EXISTS (
-                {_deceased_bene_filter(hstry)}
+                {_deceased_bene_filter(hstry, start_time)}
                 AND {hstry}.bene_sk = rsn.bene_sk
             )
             {{ORDER_BY}}
@@ -803,7 +803,7 @@ class IdrBeneficiaryDualEligibility(IdrBaseModel):
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_cmbnd_dual_mdcr dual
             {{WHERE_CLAUSE}}
             AND NOT EXISTS (
-                {_deceased_bene_filter(hstry)}
+                {_deceased_bene_filter(hstry, start_time)}
                 AND {hstry}.bene_sk = dual.bene_sk
             )
             {{ORDER_BY}}
@@ -904,7 +904,7 @@ class IdrContractPbpContact(IdrBaseModel):
                 END) as row_order
                 FROM cms_vdm_view_mdcr_prd.v2_mdcr_cntrct_pbp_cntct cntct
                 WHERE cntrct_plan_cntct_obslt_dt >= '{DEFAULT_MAX_DATE}'
-                AND cntrct_pbp_bgn_dt >= DATE_TRUNC('MONTH', CURRENT_DATE)
+                AND cntrct_pbp_bgn_dt >= DATE_TRUNC('MONTH', TIMESTAMP '{start_time}')
                 AND cntrct_pbp_bgn_dt < cntrct_pbp_end_dt
             )
             SELECT {{COLUMNS}} FROM contract_contacts WHERE row_order = 1
@@ -959,7 +959,7 @@ class IdrBeneficiaryMaPartDEnrollment(IdrBaseModel):
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_mapd_enrlmt enrlmt
             {{WHERE_CLAUSE}}
             AND NOT EXISTS (
-                {_deceased_bene_filter(hstry)}
+                {_deceased_bene_filter(hstry, start_time)}
                 AND {hstry}.bene_sk = enrlmt.bene_sk
             )
             AND idr_trans_obslt_ts >= '{DEFAULT_MAX_DATE}'
@@ -1011,7 +1011,7 @@ class IdrBeneficiaryMaPartDEnrollmentRx(IdrBaseModel):
                 FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_mapd_enrlmt_rx enrlmt_rx
                 {{WHERE_CLAUSE}}
                 AND NOT EXISTS (
-                    {_deceased_bene_filter(hstry)}
+                    {_deceased_bene_filter(hstry, start_time)}
                     AND {hstry}.bene_sk = enrlmt_rx.bene_sk
                 )
                 AND idr_trans_obslt_ts >= '{DEFAULT_MAX_DATE}'
@@ -1057,7 +1057,7 @@ class IdrBeneficiaryLowIncomeSubsidy(IdrBaseModel):
                 FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_lis bene_lis
                 {{WHERE_CLAUSE}}
                 AND NOT EXISTS (
-                    {_deceased_bene_filter(hstry)}
+                    {_deceased_bene_filter(hstry, start_time)}
                     AND {hstry}.bene_sk = bene_lis.bene_sk
                 )
                 AND idr_trans_obslt_ts >= '{DEFAULT_MAX_DATE}'

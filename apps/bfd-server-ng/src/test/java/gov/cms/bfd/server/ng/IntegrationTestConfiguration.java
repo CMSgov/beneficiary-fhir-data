@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Map;
+
+import org.apache.jena.atlas.lib.DateTimeUtils;
 import org.flywaydb.core.Flyway;
 import org.junit.platform.commons.util.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,6 +21,9 @@ import org.testcontainers.utility.DockerImageName;
 public class IntegrationTestConfiguration {
   @Value("${project.basedir}")
   private String baseDir;
+
+  @Value("bfd.test.date")
+  private String effectiveDate = DateTimeUtils.nowAsString();
 
   // Container lifecycle is managed by Spring,
   // so the resource closing warning is not applicable here
@@ -63,7 +68,7 @@ public class IntegrationTestConfiguration {
         "testdb",
         "-c",
         "UPDATE cms_vdm_view_mdcr_prd.v2_mdcr_clm "
-            + "SET \"clm_idr_ld_dt\" = CURRENT_DATE,"
+            + "SET \"clm_idr_ld_dt\" = " + effectiveDate + ","
             + "\"idr_insrt_ts\" = CURRENT_TIMESTAMP,"
             + "\"idr_updt_ts\" = CURRENT_TIMESTAMP;");
 
