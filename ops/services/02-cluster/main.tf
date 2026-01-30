@@ -34,6 +34,13 @@ locals {
   # Local module definitions
   layer     = "data"
   full_name = "bfd-${local.env}-${local.service}"
+
+  # Hashmap of EventBridge Names in the environments
+  eventbridge_name = {
+    prod = "EventsToLogs-bfd-pr-GkfqaQcy1BbcXQLjkTL6jeX8TnW71BHedM937r6P1Jap"
+    sandbox = "EventsToLogs-bfd-sa-BnbucgSa4TiWrRdgEehNDermpJov5j1yJTyjfH1eDXbv"
+    test = ""
+  }
 }
 
 resource "aws_cloudwatch_log_group" "this" {
@@ -87,6 +94,8 @@ resource "aws_ecs_cluster_capacity_providers" "this" {
 }
 
 resource "aws_cloudwatch_event_rule" "ecs_events" {
+  count = local.is_ephemeral_env ? 0 : 1
+
   name        = "${local.full_name}-ecs-cluster-events"
   description = "Monitor ECS cluster events."
 
@@ -99,20 +108,26 @@ resource "aws_cloudwatch_event_rule" "ecs_events" {
 }
 
 resource "aws_cloudwatch_event_target" "ecs_events_to_cloudwatch" {
+  count = local.is_ephemeral_env ? 0 : 1
+
   depends_on = [
     aws_cloudwatch_log_resource_policy.eventbridge_to_logs
   ]
 
-  rule = aws_cloudwatch_event_rule.ecs_events.name
-  arn  = aws_cloudwatch_log_group.ecs_events.arn
+  rule = aws_cloudwatch_event_rule.ecs_events[0].name
+  arn  = aws_cloudwatch_log_group.ecs_events[0].arn
 }
 
 resource "aws_cloudwatch_log_group" "ecs_events" {
-  name              = "/aws/events/ecs/containerinsights/${aws_ecs_cluster.this.name}/performance"
-  retention_in_days = 30
+  count = local.is_ephemeral_env ? 0 : 1
+
+  name              = "/aws/ecs/containerinsights/${aws_ecs_cluster.this.name}/performance"
+  retention_in_days = 7
 }
 
 resource "aws_cloudwatch_log_resource_policy" "eventbridge_to_logs" {
+  count = local.is_ephemeral_env ? 0 : 1
+
   policy_name     = "${local.full_name}-eventbridge-to-cloudwatch-logs"
-  policy_document = data.aws_iam_policy_document.eventbridge_logs.json
+  policy_document = data.aws_iam_policy_document.eventbridge_logs[0].json
 }

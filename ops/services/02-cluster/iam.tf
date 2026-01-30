@@ -1,4 +1,6 @@
 data "aws_iam_policy_document" "eventbridge_logs" {
+  count = local.is_ephemeral_env ? 0 : 1
+
   statement {
     sid    = "EventBridgeToCloudWatchLogs"
     effect = "Allow"
@@ -14,7 +16,7 @@ data "aws_iam_policy_document" "eventbridge_logs" {
     ]
 
     resources = [
-      "${aws_cloudwatch_log_group.ecs_events.arn}:*"
+      "${aws_cloudwatch_log_group.ecs_events[0].arn}:*"
     ]
 
     condition {
@@ -26,7 +28,7 @@ data "aws_iam_policy_document" "eventbridge_logs" {
     condition {
       test     = "ArnLike"
       variable = "aws:SourceArn"
-      values   = [aws_cloudwatch_event_rule.ecs_events.arn]
+      values   = [aws_cloudwatch_event_rule.ecs_events[0].arn]
     }
   }
 }
