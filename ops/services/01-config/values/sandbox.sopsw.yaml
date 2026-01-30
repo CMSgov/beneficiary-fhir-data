@@ -783,6 +783,37 @@
   VP4SODeRPHXzkzlyRm+cFWCI+GEGH8dy8W+tdKdP+5CTN+rFkvEmcbCcNzg2qyHC
   uasJ/R5hG+geJ+ydxt8EmVKpmA==
   -----END CERTIFICATE-----
+/bfd/${env}/server/nonsensitive/client_certificates/ab2d_cms_gov: |-
+  -----BEGIN CERTIFICATE-----
+  MIIFKjCCAxKgAwIBAgIICZyk/u/K/FkwDQYJKoZIhvcNAQEMBQAwJTEjMCEGA1UE
+  AxMac2FuZGJveC5hYjJkLmNtcy5nb3YubG9jYWwwHhcNMjYwMTE0MTU1ODQ0WhcN
+  MjgwMTE0MTU1ODQ0WjAlMSMwIQYDVQQDExpzYW5kYm94LmFiMmQuY21zLmdvdi5s
+  b2NhbDCCAiIwDQYJKoZIhvcNAQEBBQADggIPADCCAgoCggIBANnp8RQQeH+k7obr
+  MUF8Prw6HwLHxRVVx2HRdu8O2mEMrKwDouu/PqaTufZ5NKTNva/q5QXT1s4KQTDO
+  jvqIpwvSyXQa9Mao9CWZttoOyEEc6lBqXt2/3bEW6K/pEwtnYaHYgL6T2/3eLSDN
+  UC8v5k8ZrishQ5He3cseb7F70qQocqL7OIwin30edD5dtiN8itQqLJpe/0n09dcm
+  +uNhiBvzhyo+0aXeGFesk+v9RgSopIa5yN1yPgiMt6X3EdCyYKNkDWdQO4M5Gwq+
+  bnINfAn9lI5/dpnCXsrTL3zx7FW6Pe7f75Q56mS7WC4ZlYBVFRXx78uN7ssx9XWw
+  2t9ijU9HGMF5rFpfIsZElqZH4fsk3AgUp9zEm94XxpPmEctdx9jYcSeMWVwLsnXK
+  IKredebOXcv+EkH6+LlozJbf3AjSyEp6aTtd+o9nMhIqG06F0lv5ABkvywBhzykz
+  yWfghZQxGfDbMvAF4AHmG3pNe186sOJgm3qKsEXWOReHI0yrvfFOUSzNqgBs/zMk
+  Lqppp4oSjdIQWNzj/+Jw8yTiQrs3WNzEcRDmsPw7Fgp3sNuEkjoMlM96gZ3zm6Yp
+  2QTs/a8Eo0yp3FZAT/FWhNIJRtmRq/MkgH9Df4HLGjfAwNeKIfDaIPSOjUhtnyM2
+  BqZJ7wuc77yByJsUO55msPYx+cQ5AgMBAAGjXjBcMB0GA1UdDgQWBBRK1v+SUmUT
+  LADT4xSV0Sq08rt5ZDA7BgNVHREENDAyghpzYW5kYm94LmFiMmQuY21zLmdvdi5s
+  b2NhbIIUc2FuZGJveC5hYjJkLmNtcy5nb3YwDQYJKoZIhvcNAQEMBQADggIBABr0
+  gk2ZKUnh/s9AXLSJaP3MwWrGJoFNxaJ9zd6oN1n1GKoBlUfUrh+kGqIBPbya+bND
+  YRrDKRWADokokqzZKKmX8cc2ksVCoI2YLkYucKSs6T58+RNIZj7oR4uKGAnVi5ES
+  8Tsg+Ix5I66F7AwcX3TSijk/fzv4iQSTdIMoGY1quBqzblRa2HunhiijVVlczLVJ
+  ZvzSQiHWL3suxWi00DT7lDqaQer4Ac/zJHxVt5chsKdZ59ffxBdwjz7IAHjcOC1m
+  ZyWWNrRTmualIWO+mUwnvfWbiJrzGQx+9vnpDBJVn9Bmdc8v1raAT0pXwERO9Ai6
+  H8auULgrm7/mlj4YKDvFkwX2A6STCngOdiVSbszQ0vwP1IM/zu2krzzjSIeqrb/C
+  EqQqcM3hHhJdOzKBrP9mYC+I8fpUal7Rjv148mgXWkQkGo+9puSoIjtHJ/uQzkEw
+  7AkbVU29yflw9VTVkAQMr3H+cM6HECt2KCIGnC+IZsDVVJAXohjVNjPSnFk4PhiR
+  u8/+bqDcAuUTW8wsHOmgc2tHfIf+fXsEk8eSktPDpOUKyiwl751BaRzuJM8tMiP/
+  pkj2dnM46lZFmlRMdrOrHOjlA8l3ZWW4rJQ2H0AHvLRaxSSazM2Q+NT6q4+5QEwT
+  YxaVG/mYwhUKiz5I1u1+JZmBv6ioRPmRPNwM1gSg
+  -----END CERTIFICATE-----
 /bfd/${env}/server/nonsensitive/ecs/capacity/min: 3
 /bfd/${env}/server/nonsensitive/ecs/capacity/max: 12
 /bfd/${env}/server/nonsensitive/ecs/resources/cpu: 4096

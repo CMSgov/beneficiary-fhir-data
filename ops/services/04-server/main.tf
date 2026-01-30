@@ -41,4 +41,7 @@ locals {
 
   green_state = "green"
   blue_state  = "blue"
+
+  server_jmx_export_port        = 9404
+  server_jmx_export_config_path = "/opt/jmx_exporter/config.yaml"
 }
