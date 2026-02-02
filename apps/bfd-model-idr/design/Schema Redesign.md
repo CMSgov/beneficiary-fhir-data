@@ -44,12 +44,13 @@ Merge selected fields from **PROVIDER_HISTORY** into:
 - **CLAIM_INSTITUTIONAL_ADJ**
 
 Fields merged:
-- CLM_ATNDG_PRVDR_NPI_NUM
-- CLM_OPRTG_PRVDR_NPI_NUM
-- CLM_RNDRG_PRVDR_NPI_NUM
+- PRVDR_ATNDG_PRVDR_NPI_NUM
+- PRVDR_OPRTG_PRVDR_NPI_NUM
+- PRVDR_RNDRG_PRVDR_NPI_NUM
 - PRVDR_BLG_PRVDR_NPI_NUM
 - PRVDR_RFRG_PRVDR_NPI_NUM
-- CLM_OTHR_PRVDR_NPI_NUM
+- PRVDR_OTHR_PRVDR_NPI_NUM
+- PRVDR_SRVC_PRVDR_NPI_NUM
 
 ### Professional Claims
 
@@ -61,13 +62,15 @@ Merge selected fields from **PROVIDER_HISTORY** into:
 Fields merged:
 - PRVDR_BLG_PRVDR_NPI_NUM
 - PRVDR_RFRG_PRVDR_NPI_NUM
-- CLM_OTHR_PRVDR_NPI_NUM
+- PRVDR_OTHR_PRVDR_NPI_NUM
+- PRVDR_SRVC_PRVDR_NPI_NUM
 
 ### RX Claims
 
 Merge selected fields from **PROVIDER_HISTORY** into **CLAIM_RX**:
 
 - PRVDR_PRSCRBNG_PRVDR_NPI_NUM
+- PRVDR_SRVC_PRVDR_NPI_NUM
 
 ---
 
@@ -126,9 +129,7 @@ Fields moved:
 Move **CLM_AUDT_TRL_STUS_CD** from **CLM_LCTN_HSTRY** into:
 
 - **CLAIM_PROFESSIONAL_PAC**
-- **CLAIM_PROFESSIONAL_ADJ**
 - **CLAIM_INSTITUTIONAL_PAC**
-- **CLAIM_INSTITUTIONAL_ADJ**
 
 ---
 
@@ -202,7 +203,6 @@ https://lucid.app/lucidchart/563d087a-04f2-49a2-aa2c-4bd376fec893/edit?beaconFlo
 Source tables:
 - v2_mdcr_clm
 - v2_mdcr_clm_dt_sgntr
-- v2_mdcr_clm_rlt_cond_sgntr_mbr
 - v2_mdcr_clm_prfnl
 - v2_mdcr_prvdr_hstry
 - v2_mdcr_clm_lctn_hstry
@@ -214,7 +214,6 @@ Source tables:
 Source tables:
 - v2_mdcr_clm
 - v2_mdcr_clm_dt_sgntr
-- v2_mdcr_clm_rlt_cond_sgntr_mbr
 - v2_mdcr_clm_instnl
 - v2_mdcr_prvdr_hstry
 - v2_mdcr_clm_ansi_sgntr
@@ -225,7 +224,6 @@ Source tables:
 Source tables:
 - v2_mdcr_clm
 - v2_mdcr_clm_dt_sgntr
-- v2_mdcr_clm_rlt_cond_sgntr_mbr
 - v2_mdcr_clm_instnl
 - v2_mdcr_prvdr_hstry
 - v2_mdcr_clm_ansi_sgntr
@@ -237,7 +235,6 @@ Source tables:
 Source tables:
 - v2_mdcr_clm
 - v2_mdcr_clm_dt_sgntr
-- v2_mdcr_clm_rlt_cond_sgntr_mbr
 - v2_mdcr_prvdr_hstry
 
 ---
@@ -249,6 +246,9 @@ Source tables:
 - v2_mdcr_clm_line_dcmtn
 - v2_mdcr_clm_prod
 - v2_mdcr_prvdr_hstry
+- v2_mdcr_clm_rlt_cond_sgntr_mbr
+- v2_mdcr_clm_ocrnc_sgntr_mbr
+- v2_clm_rlt_ocrnc_sgntr_mbr
 
 ### CLAIM_LINE_PROFESSIONAL_PAC
 
@@ -258,13 +258,20 @@ Source tables:
 - v2_mdcr_clm_prod
 - v2_mdcr_prvdr_hstry
 - v2_mdcr_clm_line_mcs
+- v2_mdcr_clm_rlt_cond_sgntr_mbr
+- v2_mdcr_clm_ocrnc_sgntr_mbr
+- v2_clm_rlt_ocrnc_sgntr_mbr
 
 ### CLAIM_LINE_INSTITUTIONAL_ADJ
 
 - v2_mdcr_clm_line
 - v2_mdcr_clm_line_instnl
+- v2_mdcr_clm_val
 - v2_mdcr_clm_prod
 - v2_mdcr_prvdr_hstry
+- v2_mdcr_clm_rlt_cond_sgntr_mbr
+- v2_mdcr_clm_ocrnc_sgntr_mbr
+- v2_clm_rlt_ocrnc_sgntr_mbr
 
 ### CLAIM_LINE_INSTITUTIONAL_PAC
 
@@ -275,6 +282,9 @@ Source tables:
 - v2_mdcr_prvdr_hstry
 - v2_mdcr_clm_line_fiss
 - v2_mdcr_clm_line_fiss_bnft_svg
+- v2_mdcr_clm_rlt_cond_sgntr_mbr
+- v2_mdcr_clm_ocrnc_sgntr_mbr
+- v2_clm_rlt_ocrnc_sgntr_mbr
 
 ### CLAIM_LINE_RX
 
@@ -284,3 +294,96 @@ Source tables:
 - v2_mdcr_clm_line_rx
 - v2_mdcr_clm_prod
 - v2_mdcr_prvdr_hstry  
+- v2_mdcr_clm_rlt_cond_sgntr_mbr
+
+
+# Strategy for Identifying Claim Types by Table
+
+## 1. Identify claim types and distribution
+
+Use the following query to identify the claim service types present in a table, along with record counts and their percentage of the total population.
+
+```sql
+SELECT cd.clm_srvc_type,
+       cd.clm_srvc_ctgry,
+       COUNT(*) AS claim_count,
+       ROUND(
+         100.0 * COUNT(*) / SUM(COUNT(*)) OVER (),
+         2
+       ) AS pct_of_total
+FROM v2_mdcr_clm_instnl t
+JOIN v2_mdcr_clm_type_cd cd
+  ON t.clm_type_cd = cd.clm_type_cd
+-- Filter on PAC claims
+ AND t.clm_type_cd < 1000
+-- Filter on adjudicated claims
+ AND t.clm_type_cd >= 1000
+WHERE t.idr_insrt_ts >= DATE '2025-01-01'
+GROUP BY cd.clm_srvc_type,
+         cd.clm_srvc_ctgry
+ORDER BY cd.clm_srvc_ctgry DESC;
+```
+
+**Note**  
+In some cases, this query may return a Service Category of `OTHER`.  
+This category is treated as belonging to **Institutional** claims.
+## 2. Identify columns that are always null for a given Service Category
+
+To determine which fields are consistently null for a specific Service Category, first generate a query that evaluates every column in the table.
+
+The query below produces a `UNION ALL` of checks for each column, identifying columns where all values are null (or effectively null after trimming and normalization).
+
+```sql
+SELECT
+  'SELECT ''' || column_name || ''' AS column_name ' || CHR(10) ||
+  'FROM base ' || CHR(10) ||
+  -- Convert all values to VARCHAR to handle mixed data types uniformly
+  'HAVING COUNT(CASE WHEN NULLIF(NULLIF(TRIM(TO_VARCHAR(' || column_name || ')), ''''), ''~'') IS NOT NULL THEN 1 END) = 0'
+  || ' UNION ALL'
+  AS generated_sql
+FROM (
+  SELECT column_name
+  FROM information_schema.columns
+  WHERE table_name = {TABLE_NAME}
+    AND table_schema = 'CMS_VDM_VIEW_MDCR_PRD'
+    AND column_name NOT IN (
+      'IDR_INSRT_TS',
+      'IDR_UPDT_TS',
+      'CLM_TYPE_CD',
+      'GEO_BENE_SK',
+      'CLM_SRC_ID',
+      'CLM_DT_SGNTR_SK',
+      'CLM_LINE_NUM',
+      'CLM_NUM_SK'
+    )
+)
+ORDER BY column_name;
+
+```
+
+## 3. Execute the null checks against the filtered dataset
+
+Copy the generated SQL from the previous step and append it to the following CTE.  
+This CTE scopes the analysis to adjudicated PAC claims and limits the dataset to Institutional-related Service Categories.
+
+```sql
+WITH base AS (
+  SELECT t.*
+  FROM {TABLE_NAME} t
+  JOIN v2_mdcr_clm_type_cd cd
+    ON t.clm_type_cd = cd.clm_type_cd
+-- Filter on PAC claims
+ AND t.clm_type_cd < 1000
+-- Filter on adjudicated claims
+ --AND t.clm_type_cd >= 1000
+  WHERE t.idr_insrt_ts >= DATE '2025-01-01'
+    -- Filter on specific Service Categories
+    AND (
+      cd.clm_srvc_ctgry = 'INSTNL'
+      OR cd.clm_srvc_ctgry = 'OTHER'
+    )
+)
+
+```
+
+
