@@ -5020,7 +5020,14 @@ gov.cms.bfd.server.ng.CoverageSearchIT.partCAndDCoverageSearchByBeneficiaryWithD
               "display" : "Patient",
               "system" : "http://terminology.hl7.org/CodeSystem/contactentity-type"
             } ]
-          }
+          },
+          "telecom" : [ {
+            "system" : "phone",
+            "value" : "463-309-0285 ext. 173"
+          }, {
+            "system" : "phone",
+            "value" : "191-044-7971 ext. 173"
+          } ]
         } ],
         "id" : "insurer-org",
         "meta" : {
@@ -5139,7 +5146,14 @@ gov.cms.bfd.server.ng.CoverageSearchIT.partCAndDCoverageSearchByBeneficiaryWithD
               "display" : "Patient",
               "system" : "http://terminology.hl7.org/CodeSystem/contactentity-type"
             } ]
-          }
+          },
+          "telecom" : [ {
+            "system" : "phone",
+            "value" : "463-309-0285 ext. 173"
+          }, {
+            "system" : "phone",
+            "value" : "191-044-7971 ext. 173"
+          } ]
         } ],
         "id" : "insurer-org",
         "meta" : {
@@ -5242,7 +5256,14 @@ gov.cms.bfd.server.ng.CoverageSearchIT.partCAndDCoverageSearchByBeneficiaryWithD
               "display" : "Patient",
               "system" : "http://terminology.hl7.org/CodeSystem/contactentity-type"
             } ]
-          }
+          },
+          "telecom" : [ {
+            "system" : "phone",
+            "value" : "463-309-0285 ext. 173"
+          }, {
+            "system" : "phone",
+            "value" : "191-044-7971 ext. 173"
+          } ]
         } ],
         "id" : "insurer-org",
         "meta" : {
@@ -5361,7 +5382,14 @@ gov.cms.bfd.server.ng.CoverageSearchIT.partCAndDCoverageSearchByBeneficiaryWithD
               "display" : "Patient",
               "system" : "http://terminology.hl7.org/CodeSystem/contactentity-type"
             } ]
-          }
+          },
+          "telecom" : [ {
+            "system" : "phone",
+            "value" : "463-309-0285 ext. 173"
+          }, {
+            "system" : "phone",
+            "value" : "191-044-7971 ext. 173"
+          } ]
         } ],
         "id" : "insurer-org",
         "meta" : {
@@ -5464,7 +5492,14 @@ gov.cms.bfd.server.ng.CoverageSearchIT.partCAndDCoverageSearchByBeneficiaryWithD
               "display" : "Patient",
               "system" : "http://terminology.hl7.org/CodeSystem/contactentity-type"
             } ]
-          }
+          },
+          "telecom" : [ {
+            "system" : "phone",
+            "value" : "463-309-0285 ext. 173"
+          }, {
+            "system" : "phone",
+            "value" : "191-044-7971 ext. 173"
+          } ]
         } ],
         "id" : "insurer-org",
         "meta" : {
@@ -5583,7 +5618,14 @@ gov.cms.bfd.server.ng.CoverageSearchIT.partCAndDCoverageSearchByBeneficiaryWithD
               "display" : "Patient",
               "system" : "http://terminology.hl7.org/CodeSystem/contactentity-type"
             } ]
-          }
+          },
+          "telecom" : [ {
+            "system" : "phone",
+            "value" : "463-309-0285 ext. 173"
+          }, {
+            "system" : "phone",
+            "value" : "191-044-7971 ext. 173"
+          } ]
         } ],
         "id" : "insurer-org",
         "meta" : {
@@ -5686,7 +5728,14 @@ gov.cms.bfd.server.ng.CoverageSearchIT.partCAndDCoverageSearchById[GET]=[
               "display" : "Patient",
               "system" : "http://terminology.hl7.org/CodeSystem/contactentity-type"
             } ]
-          }
+          },
+          "telecom" : [ {
+            "system" : "phone",
+            "value" : "463-309-0285 ext. 173"
+          }, {
+            "system" : "phone",
+            "value" : "191-044-7971 ext. 173"
+          } ]
         } ],
         "id" : "insurer-org",
         "meta" : {
@@ -5790,7 +5839,14 @@ gov.cms.bfd.server.ng.CoverageSearchIT.partCAndDCoverageSearchById[GET_WITH_SEAR
               "display" : "Patient",
               "system" : "http://terminology.hl7.org/CodeSystem/contactentity-type"
             } ]
-          }
+          },
+          "telecom" : [ {
+            "system" : "phone",
+            "value" : "463-309-0285 ext. 173"
+          }, {
+            "system" : "phone",
+            "value" : "191-044-7971 ext. 173"
+          } ]
         } ],
         "id" : "insurer-org",
         "meta" : {
@@ -5894,7 +5950,14 @@ gov.cms.bfd.server.ng.CoverageSearchIT.partCAndDCoverageSearchById[POST]=[
               "display" : "Patient",
               "system" : "http://terminology.hl7.org/CodeSystem/contactentity-type"
             } ]
-          }
+          },
+          "telecom" : [ {
+            "system" : "phone",
+            "value" : "463-309-0285 ext. 173"
+          }, {
+            "system" : "phone",
+            "value" : "191-044-7971 ext. 173"
+          } ]
         } ],
         "id" : "insurer-org",
         "meta" : {
