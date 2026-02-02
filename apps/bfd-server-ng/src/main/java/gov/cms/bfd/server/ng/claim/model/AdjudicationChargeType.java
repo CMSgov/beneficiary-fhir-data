@@ -137,7 +137,9 @@ enum AdjudicationChargeType {
   SALES_TAX_AMOUNT(
       SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION, "CLM_LINE_SLS_TAX_AMT", "Sales Tax Amount"),
   PATIENT_LIABILITY_REDUCT_AMOUNT(
-      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION, "CLM_LINE_PLRO_AMT", "Patient Liability Reduction Other Paid Amount"),
+      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
+      "CLM_LINE_PLRO_AMT",
+      "Patient Liability Reduction Other Paid Amount"),
   LOW_INCOME_COST_SHARE_SUB_AMOUNT(
       SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
       "CLM_LINE_LIS_AMT",
