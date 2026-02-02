@@ -431,11 +431,6 @@ group addPharmacyItem(source src: LineItemComponent, target tgt: BackboneElement
         lisAmt -> tgtAdj.amount = create('Money') as tgtMoney then addMoney(lisAmt, tgtMoney) "Add LIS amount";
     } "Add Low Income Cost Sharing Subsidy Amount";
 
-    src.CLM_LINE_TROOP_TOT_AMT as troopAmt -> tgt.adjudication = create('BackboneElement') as tgtAdj then {
-        src -> tgtAdj.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_TROOP_TOT_AMT") "Set category";
-        troopAmt -> tgtAdj.amount = create('Money') as tgtMoney then addMoney(troopAmt, tgtMoney) "Add TROOP amount";
-    } "Add Other True Out Of Pocket Paid Amount";
-
     src.CLM_LINE_PLRO_AMT as plroAmt -> tgt.adjudication = create('BackboneElement') as tgtAdj then {
         src -> tgtAdj.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_PLRO_AMT") "Set category";
         plroAmt -> tgtAdj.amount = create('Money') as tgtMoney then addMoney(plroAmt, tgtMoney) "Add PLRO amount";
@@ -459,7 +454,17 @@ group addPharmacyItem(source src: LineItemComponent, target tgt: BackboneElement
         src -> tgtAdj.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_NCVRD_PD_AMT") "Set category";
         ncvrdPdAmt -> tgtAdj.amount = create('Money') as tgtMoney then addMoney(ncvrdPdAmt, tgtMoney) "Add noncovered paid amount";
     } "Add Noncovered Paid Amount";
+
+    src.CLM_LINE_OTHR_TP_PD_AMT as othrTpPdAmt -> tgt.adjudication = create('BackboneElement') as tgtAdj then {
+        src -> tgtAdj.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_OTHR_TP_PD_AMT") "Set category";
+        othrTpPdAmt -> tgtAdj.amount = create('Money') as tgtMoney then addMoney(othrTpPdAmt, tgtMoney) "Add other third party paid amount";
+    } "Add Other Third Party Paid Amount";
     /*
+    src.CLM_LINE_TROOP_TOT_AMT as troopAmt -> tgt.adjudication = create('BackboneElement') as tgtAdj then {
+        src -> tgtAdj.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_TROOP_TOT_AMT") "Set category";
+        troopAmt -> tgtAdj.amount = create('Money') as tgtMoney then addMoney(troopAmt, tgtMoney) "Add TROOP amount";
+    } "Add Other True Out Of Pocket Paid Amount";
+
     src.CLM_RPTD_MFTR_DSCNT_AMT as mftrDscntAmt -> tgt.adjudication = create('BackboneElement') as tgtAdj then {
         src -> tgtAdj.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_RPTD_MFTR_DSCNT_AMT") "Set category";
         mftrDscntAmt -> tgtAdj.amount = create('Money') as tgtMoney then addMoney(mftrDscntAmt, tgtMoney) "Add manufacturer discount amount";
@@ -484,11 +489,6 @@ group addPharmacyItem(source src: LineItemComponent, target tgt: BackboneElement
         src -> tgtAdj.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_VCCN_ADMIN_FEE_AMT") "Set category";
         vccnFeeAmt -> tgtAdj.amount = create('Money') as tgtMoney then addMoney(vccnFeeAmt, tgtMoney) "Add vaccination administration fee amount";
     } "Add Vaccination Administration Fee";
-
-    src.CLM_LINE_OTHR_TP_PD_AMT as othrTpPdAmt -> tgt.adjudication = create('BackboneElement') as tgtAdj then {
-        src -> tgtAdj.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_OTHR_TP_PD_AMT") "Set category";
-        othrTpPdAmt -> tgtAdj.amount = create('Money') as tgtMoney then addMoney(othrTpPdAmt, tgtMoney) "Add other third party paid amount";
-    } "Add Other Third Party Paid Amount";
 
     src.CLM_CMS_CALCD_MFTR_DSCNT_AMT as mftrDscntAmt -> tgt.adjudication = create('BackboneElement') as tgtAdj then {
         src -> tgtAdj.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_CMS_CALCD_MFTR_DSCNT_AMT") "Set category";

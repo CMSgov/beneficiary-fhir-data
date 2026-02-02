@@ -284,8 +284,6 @@
     - Pharmacy
   sources:
     - NCH
-  ccwMapping:
-    - OTHR_TROOP_AMT
   sourceView: V2_MDCR_CLM_LINE_RX
   sourceColumn: CLM_LINE_TROOP_TOT_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and category.coding.code='CLM_LINE_TROOP_TOT_AMT').amount.value
@@ -570,6 +568,8 @@
     - Pharmacy
   sources:
     - NCH
+  ccwMapping:
+    - OTHR_TROOP_AMT
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_LINE_OTHR_TP_PD_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_OTHR_TP_PD_AMT')).amount.value
