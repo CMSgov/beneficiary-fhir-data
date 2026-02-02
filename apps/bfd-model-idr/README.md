@@ -84,6 +84,7 @@ pass along the sample file with -i
 pass along the output file with -o
 pass along the resource url with -r
 pass along --test to run conformance tests
+pass along --skip-structure-map-generation to skip generating the structure map. Only use this in the context of sequential transformations that re-use a structure map.
 
 Example (Patient):
 
