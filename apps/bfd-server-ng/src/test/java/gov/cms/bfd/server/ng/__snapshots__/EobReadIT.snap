@@ -358,7 +358,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
           "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
         }, {
           "code" : "CLM_LINE_MDCR_DDCTBL_AMT",
-          "display" : "Revenue Center Cash Deductible Amount",
+          "display" : "Cash Deductible Amount",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
@@ -386,7 +386,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
           "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
         }, {
           "code" : "CLM_LINE_BENE_PD_AMT",
-          "display" : "Revenue Center Payment Amount to Beneficiary",
+          "display" : "Payment Amount to Beneficiary",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
@@ -402,7 +402,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
           "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
         }, {
           "code" : "CLM_LINE_BENE_PMT_AMT",
-          "display" : "Revenue Center Patient Responsibility Payment Amount",
+          "display" : "Beneficiary Paid Amount",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
@@ -418,7 +418,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
           "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
         }, {
           "code" : "CLM_LINE_NCVRD_CHRG_AMT",
-          "display" : "Revenue Center Non-Covered Charge Amount",
+          "display" : "Non-Covered Charge Amount",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
@@ -450,7 +450,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
           "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
         }, {
           "code" : "CLM_LINE_CVRD_PD_AMT",
-          "display" : "Revenue Center Payment Amount",
+          "display" : "Payment Amount",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
@@ -808,11 +808,11 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
     "category" : {
       "coding" : [ {
         "code" : "eligible",
-        "display" : "Allowed Amount",
+        "display" : "Eligible Amount",
         "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
       }, {
         "code" : "CLM_ALOWD_CHRG_AMT",
-        "display" : "Total Allowed Charge Amount",
+        "display" : "Allowed Charge Amount",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
       } ]
     }
@@ -828,7 +828,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
         "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
       }, {
         "code" : "CLM_SBMT_CHRG_AMT",
-        "display" : "Total Submitted Charge Amount",
+        "display" : "Total Charge Amount",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
       } ]
     }
@@ -844,7 +844,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
       }, {
         "code" : "CLM_BENE_PMT_AMT",
-        "display" : "Revenue Center Patient Responsibility Payment Amount",
+        "display" : "Patient Responsibility Payment Amount",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
       } ]
     }
@@ -876,7 +876,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
         "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
       }, {
         "code" : "CLM_MDCR_DDCTBL_AMT",
-        "display" : "Beneficiary Part B Deductible Amount",
+        "display" : "Beneficiary Deductible Amount",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
       } ]
     }
@@ -892,7 +892,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
       }, {
         "code" : "CLM_MDCR_COINSRNC_AMT",
-        "display" : "Beneficiary Part A Coinsurance Liability Amount",
+        "display" : "Beneficiary Coinsurance Liability Amount",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
       } ]
     }
@@ -1320,7 +1320,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
           "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
         }, {
           "code" : "CLM_LINE_MDCR_DDCTBL_AMT",
-          "display" : "Revenue Center Cash Deductible Amount",
+          "display" : "Cash Deductible Amount",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
@@ -1348,7 +1348,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
           "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
         }, {
           "code" : "CLM_LINE_BENE_PD_AMT",
-          "display" : "Revenue Center Payment Amount to Beneficiary",
+          "display" : "Payment Amount to Beneficiary",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
@@ -1364,7 +1364,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
           "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
         }, {
           "code" : "CLM_LINE_BENE_PMT_AMT",
-          "display" : "Revenue Center Patient Responsibility Payment Amount",
+          "display" : "Beneficiary Paid Amount",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
@@ -1380,7 +1380,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
           "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
         }, {
           "code" : "CLM_LINE_NCVRD_CHRG_AMT",
-          "display" : "Revenue Center Non-Covered Charge Amount",
+          "display" : "Non-Covered Charge Amount",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
@@ -1412,7 +1412,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
           "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
         }, {
           "code" : "CLM_LINE_CVRD_PD_AMT",
-          "display" : "Revenue Center Payment Amount",
+          "display" : "Payment Amount",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
@@ -1775,11 +1775,11 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
     "category" : {
       "coding" : [ {
         "code" : "eligible",
-        "display" : "Allowed Amount",
+        "display" : "Eligible Amount",
         "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
       }, {
         "code" : "CLM_ALOWD_CHRG_AMT",
-        "display" : "Total Allowed Charge Amount",
+        "display" : "Allowed Charge Amount",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
       } ]
     }
@@ -1795,7 +1795,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
         "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
       }, {
         "code" : "CLM_SBMT_CHRG_AMT",
-        "display" : "Total Submitted Charge Amount",
+        "display" : "Total Charge Amount",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
       } ]
     }
@@ -1811,7 +1811,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
       }, {
         "code" : "CLM_BENE_PMT_AMT",
-        "display" : "Revenue Center Patient Responsibility Payment Amount",
+        "display" : "Patient Responsibility Payment Amount",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
       } ]
     }
@@ -1843,7 +1843,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
         "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
       }, {
         "code" : "CLM_MDCR_DDCTBL_AMT",
-        "display" : "Beneficiary Part B Deductible Amount",
+        "display" : "Beneficiary Deductible Amount",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
       } ]
     }
@@ -1859,7 +1859,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
       }, {
         "code" : "CLM_MDCR_COINSRNC_AMT",
-        "display" : "Beneficiary Part A Coinsurance Liability Amount",
+        "display" : "Beneficiary Coinsurance Liability Amount",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
       } ]
     }
@@ -2133,7 +2133,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
     "role" : {
       "coding" : [ {
         "code" : "referring",
-        "display" : "Referring provider",
+        "display" : "Referring",
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
       } ]
     },
@@ -2456,7 +2456,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
           "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
         }, {
           "code" : "CLM_LINE_MDCR_DDCTBL_AMT",
-          "display" : "Revenue Center Cash Deductible Amount",
+          "display" : "Cash Deductible Amount",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
@@ -2484,7 +2484,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
           "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
         }, {
           "code" : "CLM_LINE_BENE_PD_AMT",
-          "display" : "Revenue Center Payment Amount to Beneficiary",
+          "display" : "Payment Amount to Beneficiary",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
@@ -2500,7 +2500,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
           "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
         }, {
           "code" : "CLM_LINE_BENE_PMT_AMT",
-          "display" : "Revenue Center Patient Responsibility Payment Amount",
+          "display" : "Beneficiary Paid Amount",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
@@ -2516,7 +2516,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
           "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
         }, {
           "code" : "CLM_LINE_NCVRD_CHRG_AMT",
-          "display" : "Revenue Center Non-Covered Charge Amount",
+          "display" : "Non-Covered Charge Amount",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
@@ -2548,7 +2548,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
           "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
         }, {
           "code" : "CLM_LINE_CVRD_PD_AMT",
-          "display" : "Revenue Center Payment Amount",
+          "display" : "Payment Amount",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
@@ -3035,11 +3035,11 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
     "category" : {
       "coding" : [ {
         "code" : "eligible",
-        "display" : "Allowed Amount",
+        "display" : "Eligible Amount",
         "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
       }, {
         "code" : "CLM_ALOWD_CHRG_AMT",
-        "display" : "Total Allowed Charge Amount",
+        "display" : "Allowed Charge Amount",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
       } ]
     }
@@ -3055,7 +3055,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
         "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
       }, {
         "code" : "CLM_SBMT_CHRG_AMT",
-        "display" : "Total Submitted Charge Amount",
+        "display" : "Total Charge Amount",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
       } ]
     }
@@ -3071,7 +3071,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
       }, {
         "code" : "CLM_BENE_PMT_AMT",
-        "display" : "Revenue Center Patient Responsibility Payment Amount",
+        "display" : "Patient Responsibility Payment Amount",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
       } ]
     }
@@ -3103,7 +3103,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
         "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
       }, {
         "code" : "CLM_MDCR_DDCTBL_AMT",
-        "display" : "Beneficiary Part B Deductible Amount",
+        "display" : "Beneficiary Deductible Amount",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
       } ]
     }
@@ -3119,7 +3119,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
       }, {
         "code" : "CLM_MDCR_COINSRNC_AMT",
-        "display" : "Beneficiary Part A Coinsurance Liability Amount",
+        "display" : "Beneficiary Coinsurance Liability Amount",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
       } ]
     }
@@ -3393,7 +3393,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
     "role" : {
       "coding" : [ {
         "code" : "referring",
-        "display" : "Referring provider",
+        "display" : "Referring",
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
       } ]
     },
@@ -3717,7 +3717,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
           "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
         }, {
           "code" : "CLM_LINE_MDCR_DDCTBL_AMT",
-          "display" : "Revenue Center Cash Deductible Amount",
+          "display" : "Cash Deductible Amount",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
@@ -3745,7 +3745,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
           "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
         }, {
           "code" : "CLM_LINE_BENE_PD_AMT",
-          "display" : "Revenue Center Payment Amount to Beneficiary",
+          "display" : "Payment Amount to Beneficiary",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
@@ -3761,7 +3761,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
           "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
         }, {
           "code" : "CLM_LINE_BENE_PMT_AMT",
-          "display" : "Revenue Center Patient Responsibility Payment Amount",
+          "display" : "Beneficiary Paid Amount",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
@@ -3777,7 +3777,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
           "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
         }, {
           "code" : "CLM_LINE_NCVRD_CHRG_AMT",
-          "display" : "Revenue Center Non-Covered Charge Amount",
+          "display" : "Non-Covered Charge Amount",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
@@ -3809,7 +3809,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
           "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
         }, {
           "code" : "CLM_LINE_CVRD_PD_AMT",
-          "display" : "Revenue Center Payment Amount",
+          "display" : "Payment Amount",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
@@ -4276,11 +4276,11 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
     "category" : {
       "coding" : [ {
         "code" : "eligible",
-        "display" : "Allowed Amount",
+        "display" : "Eligible Amount",
         "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
       }, {
         "code" : "CLM_ALOWD_CHRG_AMT",
-        "display" : "Total Allowed Charge Amount",
+        "display" : "Allowed Charge Amount",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
       } ]
     }
@@ -4296,7 +4296,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
         "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
       }, {
         "code" : "CLM_SBMT_CHRG_AMT",
-        "display" : "Total Submitted Charge Amount",
+        "display" : "Total Charge Amount",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
       } ]
     }
@@ -4312,7 +4312,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
       }, {
         "code" : "CLM_BENE_PMT_AMT",
-        "display" : "Revenue Center Patient Responsibility Payment Amount",
+        "display" : "Patient Responsibility Payment Amount",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
       } ]
     }
@@ -4344,7 +4344,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
         "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
       }, {
         "code" : "CLM_MDCR_DDCTBL_AMT",
-        "display" : "Beneficiary Part B Deductible Amount",
+        "display" : "Beneficiary Deductible Amount",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
       } ]
     }
@@ -4360,7 +4360,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
       }, {
         "code" : "CLM_MDCR_COINSRNC_AMT",
-        "display" : "Beneficiary Part A Coinsurance Liability Amount",
+        "display" : "Beneficiary Coinsurance Liability Amount",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
       } ]
     }
@@ -4485,7 +4485,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
     "category" : {
       "coding" : [ {
         "code" : "CLM_MDCR_HOSPC_PRD_CNT",
-        "display" : "Beneficiary's Hospice Period Count.",
+        "display" : "Hospice Period Count",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
       } ]
     },
@@ -4494,7 +4494,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
     "category" : {
       "coding" : [ {
         "code" : "CLM_MDCR_HHA_TOT_VISIT_CNT",
-        "display" : "Claim HHA Total Visit Count.",
+        "display" : "Claim HHA Visit Count",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
       } ]
     },
@@ -4503,7 +4503,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
     "category" : {
       "coding" : [ {
         "code" : "CLM_MDCR_IP_PPS_DRG_WT_NUM",
-        "display" : "Claim PPS Capital DRG Weight Number",
+        "display" : "PPS DRG Weight Number",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
       } ]
     },
@@ -5244,7 +5244,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
           "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
         }, {
           "code" : "CLM_LINE_MDCR_DDCTBL_AMT",
-          "display" : "Revenue Center Cash Deductible Amount",
+          "display" : "Cash Deductible Amount",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
@@ -5272,7 +5272,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
           "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
         }, {
           "code" : "CLM_LINE_BENE_PD_AMT",
-          "display" : "Revenue Center Payment Amount to Beneficiary",
+          "display" : "Payment Amount to Beneficiary",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
@@ -5288,7 +5288,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
           "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
         }, {
           "code" : "CLM_LINE_BENE_PMT_AMT",
-          "display" : "Revenue Center Patient Responsibility Payment Amount",
+          "display" : "Beneficiary Paid Amount",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
@@ -5304,7 +5304,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
           "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
         }, {
           "code" : "CLM_LINE_NCVRD_CHRG_AMT",
-          "display" : "Revenue Center Non-Covered Charge Amount",
+          "display" : "Non-Covered Charge Amount",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
@@ -5336,7 +5336,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
           "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
         }, {
           "code" : "CLM_LINE_CVRD_PD_AMT",
-          "display" : "Revenue Center Payment Amount",
+          "display" : "Payment Amount",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
@@ -5735,7 +5735,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
     "code" : {
       "coding" : [ {
         "code" : "V",
-        "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA]).",
+        "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA])",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
       } ]
     },
@@ -6001,11 +6001,11 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
     "category" : {
       "coding" : [ {
         "code" : "eligible",
-        "display" : "Allowed Amount",
+        "display" : "Eligible Amount",
         "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
       }, {
         "code" : "CLM_ALOWD_CHRG_AMT",
-        "display" : "Total Allowed Charge Amount",
+        "display" : "Allowed Charge Amount",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
       } ]
     }
@@ -6021,7 +6021,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
         "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
       }, {
         "code" : "CLM_SBMT_CHRG_AMT",
-        "display" : "Total Submitted Charge Amount",
+        "display" : "Total Charge Amount",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
       } ]
     }
@@ -6037,7 +6037,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
       }, {
         "code" : "CLM_BENE_PMT_AMT",
-        "display" : "Revenue Center Patient Responsibility Payment Amount",
+        "display" : "Patient Responsibility Payment Amount",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
       } ]
     }
@@ -6069,7 +6069,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
         "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
       }, {
         "code" : "CLM_MDCR_DDCTBL_AMT",
-        "display" : "Beneficiary Part B Deductible Amount",
+        "display" : "Beneficiary Deductible Amount",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
       } ]
     }
@@ -6085,7 +6085,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
       }, {
         "code" : "CLM_MDCR_COINSRNC_AMT",
-        "display" : "Beneficiary Part A Coinsurance Liability Amount",
+        "display" : "Beneficiary Coinsurance Liability Amount",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
       } ]
     }
@@ -6149,7 +6149,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
       }, {
         "code" : "CLM_MDCR_INSTNL_BENE_PD_AMT",
-        "display" : "The amount paid, from the Medicare trust fund, to the beneficiary for the services reported on the claim.",
+        "display" : "Institutional Beneficiary Paid Amount",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
       } ]
     }
@@ -6226,7 +6226,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
     "category" : {
       "coding" : [ {
         "code" : "CLM_MDCR_HOSPC_PRD_CNT",
-        "display" : "Beneficiary's Hospice Period Count.",
+        "display" : "Hospice Period Count",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
       } ]
     },
@@ -6235,7 +6235,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
     "category" : {
       "coding" : [ {
         "code" : "CLM_MDCR_HHA_TOT_VISIT_CNT",
-        "display" : "Claim HHA Total Visit Count.",
+        "display" : "Claim HHA Visit Count",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
       } ]
     },
@@ -6244,7 +6244,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
     "category" : {
       "coding" : [ {
         "code" : "CLM_MDCR_IP_PPS_DRG_WT_NUM",
-        "display" : "Claim PPS Capital DRG Weight Number",
+        "display" : "PPS DRG Weight Number",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
       } ]
     },
@@ -6985,7 +6985,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
           "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
         }, {
           "code" : "CLM_LINE_MDCR_DDCTBL_AMT",
-          "display" : "Revenue Center Cash Deductible Amount",
+          "display" : "Cash Deductible Amount",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
@@ -7013,7 +7013,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
           "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
         }, {
           "code" : "CLM_LINE_BENE_PD_AMT",
-          "display" : "Revenue Center Payment Amount to Beneficiary",
+          "display" : "Payment Amount to Beneficiary",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
@@ -7029,7 +7029,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
           "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
         }, {
           "code" : "CLM_LINE_BENE_PMT_AMT",
-          "display" : "Revenue Center Patient Responsibility Payment Amount",
+          "display" : "Beneficiary Paid Amount",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
@@ -7045,7 +7045,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
           "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
         }, {
           "code" : "CLM_LINE_NCVRD_CHRG_AMT",
-          "display" : "Revenue Center Non-Covered Charge Amount",
+          "display" : "Non-Covered Charge Amount",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
@@ -7077,7 +7077,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
           "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
         }, {
           "code" : "CLM_LINE_CVRD_PD_AMT",
-          "display" : "Revenue Center Payment Amount",
+          "display" : "Payment Amount",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
@@ -7476,7 +7476,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
     "code" : {
       "coding" : [ {
         "code" : "V",
-        "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA]).",
+        "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA])",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
       } ]
     },
@@ -7742,11 +7742,11 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
     "category" : {
       "coding" : [ {
         "code" : "eligible",
-        "display" : "Allowed Amount",
+        "display" : "Eligible Amount",
         "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
       }, {
         "code" : "CLM_ALOWD_CHRG_AMT",
-        "display" : "Total Allowed Charge Amount",
+        "display" : "Allowed Charge Amount",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
       } ]
     }
@@ -7762,7 +7762,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
         "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
       }, {
         "code" : "CLM_SBMT_CHRG_AMT",
-        "display" : "Total Submitted Charge Amount",
+        "display" : "Total Charge Amount",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
       } ]
     }
@@ -7778,7 +7778,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
       }, {
         "code" : "CLM_BENE_PMT_AMT",
-        "display" : "Revenue Center Patient Responsibility Payment Amount",
+        "display" : "Patient Responsibility Payment Amount",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
       } ]
     }
@@ -7810,7 +7810,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
         "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
       }, {
         "code" : "CLM_MDCR_DDCTBL_AMT",
-        "display" : "Beneficiary Part B Deductible Amount",
+        "display" : "Beneficiary Deductible Amount",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
       } ]
     }
@@ -7826,7 +7826,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
       }, {
         "code" : "CLM_MDCR_COINSRNC_AMT",
-        "display" : "Beneficiary Part A Coinsurance Liability Amount",
+        "display" : "Beneficiary Coinsurance Liability Amount",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
       } ]
     }
@@ -7890,7 +7890,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
       }, {
         "code" : "CLM_MDCR_INSTNL_BENE_PD_AMT",
-        "display" : "The amount paid, from the Medicare trust fund, to the beneficiary for the services reported on the claim.",
+        "display" : "Institutional Beneficiary Paid Amount",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
       } ]
     }

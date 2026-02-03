@@ -29,8 +29,8 @@ enum BlueButtonSupportingInfoCategory {
   CLM_NCH_PRMRY_PYR_CD("CLM_NCH_PRMRY_PYR_CD", "NCH Primary Payer Code"),
   /** CLM_QLFY_STAY_FROM_DT - Qualified Stay From Date. */
   CLM_QLFY_STAY_FROM_DT("CLM_QLFY_STAY_FROM_DT", "Qualified Stay From Date"),
-  /** CLM_QLFY_STAY_THRU_DT - Qualified Stay Thru Date. */
-  CLM_QLFY_STAY_THRU_DT("CLM_QLFY_STAY_THRU_DT", "Qualified Stay Thru Date"),
+  /** CLM_QLFY_STAY_THRU_DT - Qualified Stay Through Date. */
+  CLM_QLFY_STAY_THRU_DT("CLM_QLFY_STAY_THRU_DT", "Qualified Stay Through Date"),
   /** CLM_HHA_LUP_IND_CD - Claim Lupa Indicator Code. */
   CLM_HHA_LUP_IND_CD("CLM_HHA_LUP_IND_CD", "Claim Lupa Indicator Code"),
   /** CLM_HHA_RFRL_CD - Claim Referral Code. */

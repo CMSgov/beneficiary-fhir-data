@@ -285,44 +285,46 @@ jobs:
 
           echo "server-war-dir=$server_war_dir" >> "$GITHUB_OUTPUT"
 
-      - name: Install node
-        uses: actions/setup-node@v6
-        with:
-          node-version: "22"
+      # TODO: Re-enable the below once BFD v3 DD generation is fixed
 
-      - name: Install Sushi
-        run: |
-          npm install -g fsh-sushi
-          echo "Installed global packages"
+      # - name: Install node
+      #   uses: actions/setup-node@v6
+      #   with:
+      #     node-version: "22"
 
-      - name: Install fhirpath
-        working-directory: apps/bfd-model-idr
-        run: |
-          npm install fhirpath
+      # - name: Install Sushi
+      #   run: |
+      #     npm install -g fsh-sushi
+      #     echo "Installed global packages"
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v7
-        with:
-          version: "0.8.10"
+      # - name: Install fhirpath
+      #   working-directory: apps/bfd-model-idr
+      #   run: |
+      #     npm install fhirpath
 
-      - name: Install UV dependencies
-        run: uv sync
-        working-directory: apps/bfd-model-idr
+      # - name: Install uv
+      #   uses: astral-sh/setup-uv@v7
+      #   with:
+      #     version: "0.8.10"
 
-      - name: Download FHIR Validator CLI
-        working-directory: apps/bfd-model-idr
-        run: |
-          curl -L https://github.com/hapifhir/org.hl7.fhir.core/releases/download/6.7.10/validator_cli.jar \
-            -o validator_cli.jar
+      # - name: Install UV dependencies
+      #   run: uv sync
+      #   working-directory: apps/bfd-model-idr
 
-      - name: Compile all synthetic FHIR resources
-        run: ./compile-all-resources.sh
-        working-directory: apps/bfd-model-idr
+      # - name: Download FHIR Validator CLI
+      #   working-directory: apps/bfd-model-idr
+      #   run: |
+      #     curl -L https://github.com/hapifhir/org.hl7.fhir.core/releases/download/6.7.10/validator_cli.jar \
+      #       -o validator_cli.jar
 
-      - name: Generate v3 Data Dictionary
-        working-directory: apps/bfd-model-idr
-        run: |
-          uv run gen_dd.py
+      # - name: Compile all synthetic FHIR resources
+      #   run: ./compile-all-resources.sh
+      #   working-directory: apps/bfd-model-idr
+
+      # - name: Generate v3 Data Dictionary
+      #   working-directory: apps/bfd-model-idr
+      #   run: |
+      #     uv run gen_dd.py
 
       - name: Prepare artifacts
         env:
@@ -349,16 +351,17 @@ jobs:
             fi
           done
 
-          echo "Preparing data dictionary artifacts..."
+          # TODO: Re-enable this once BFD v3 DD generation is fixed
+          # echo "Preparing data dictionary artifacts..."
 
-          # 2) Handle v3 artifacts
-          for artifact_path in apps/bfd-model-idr/out/bfd_data_dictionary.*
-          do
-            filename="$(basename -- "$artifact_path")"
-            artifact_ext="${filename#*.}"
+          # # 2) Handle v3 artifacts
+          # for artifact_path in apps/bfd-model-idr/out/bfd_data_dictionary.*
+          # do
+          #   filename="$(basename -- "$artifact_path")"
+          #   artifact_ext="${filename#*.}"
 
-            cp "$artifact_path" "assets/v3-data-dictionary-${BFD_RELEASE}.${artifact_ext}"
-          done
+          #   cp "$artifact_path" "assets/v3-data-dictionary-${BFD_RELEASE}.${artifact_ext}"
+          # done
 
           echo "Final staged artifacts:"
           ls -l assets
