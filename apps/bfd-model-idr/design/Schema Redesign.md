@@ -242,6 +242,7 @@ Source tables:
 ### CLAIM_ITEM_PROFESSIONAL_ADJ
 
 - v2_mdcr_clm_line
+- v2_mdcr_clm_val
 - v2_mdcr_clm_line_prfnl
 - v2_mdcr_clm_line_dcmtn
 - v2_mdcr_clm_prod
@@ -253,6 +254,7 @@ Source tables:
 ### CLAIM_ITEM_PROFESSIONAL_PAC
 
 - v2_mdcr_clm_line
+- v2_mdcr_clm_val
 - v2_mdcr_clm_line_prfnl
 - v2_mdcr_clm_line_dcmtn
 - v2_mdcr_clm_prod
@@ -276,6 +278,7 @@ Source tables:
 ### CLAIM_ITEM_INSTITUTIONAL_PAC
 
 - v2_mdcr_clm_line
+- v2_mdcr_clm_line_dcmtn
 - v2_mdcr_clm_line_instnl
 - v2_mdcr_clm_prod
 - v2_mdcr_clm_val
@@ -286,14 +289,14 @@ Source tables:
 - v2_mdcr_clm_ocrnc_sgntr_mbr
 - v2_clm_rlt_ocrnc_sgntr_mbr
 
+
 ### CLAIM_ITEM_RX
 
 > Most Part D fields are null in `v2_mdcr_clm_line`; see diagram for details.
 
 - v2_mdcr_clm_line
 - v2_mdcr_clm_line_rx
-- v2_mdcr_prvdr_hstry  
-- v2_mdcr_clm_rlt_cond_sgntr_mbr
+- v2_mdcr_prvdr_hstry
 
 
 # Strategy for Identifying Claim Types by Table

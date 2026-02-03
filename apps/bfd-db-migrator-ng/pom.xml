@@ -27,7 +27,7 @@
     </dependencies>
 
     <properties>
-        <flyway.schemas>idr</flyway.schemas>
+        <flyway.schemas>idr, idr_new</flyway.schemas>
         <flyway.locations>filesystem:migrations</flyway.locations>
     </properties>
 
