@@ -524,7 +524,7 @@ public enum ClaimAuditTrailStatusCode {
       MetaSourceId.VMS,
       "05",
       ClaimAuditTrailLocationCode.EDIT,
-      ExplanationOfBenefit.RemittanceOutcome.ERROR,
+      ExplanationOfBenefit.RemittanceOutcome.NULL,
       "Line item error"),
 
   /** VMS - 05 - 06 - outcome determined by CLM_FINAL_ACTION - Line item error. */
@@ -532,7 +532,7 @@ public enum ClaimAuditTrailStatusCode {
       MetaSourceId.VMS,
       "05",
       ClaimAuditTrailLocationCode.REASONABLE_CHARGE,
-      ExplanationOfBenefit.RemittanceOutcome.ERROR,
+      ExplanationOfBenefit.RemittanceOutcome.NULL,
       "Line item error"),
 
   /** VMS - 05 - 09 - outcome determined by CLM_FINAL_ACTION - VMS Action Code review. */
@@ -540,7 +540,7 @@ public enum ClaimAuditTrailStatusCode {
       MetaSourceId.VMS,
       "05",
       ClaimAuditTrailLocationCode.REPLY,
-      ExplanationOfBenefit.RemittanceOutcome.ERROR,
+      ExplanationOfBenefit.RemittanceOutcome.NULL,
       """
         If the system cannot identify a VMS Action Code; the claim suspends to this location/status for review. You need to verify that the FPS Model Number on each claim line appears on the VMAP/4C/ACFPWALK table. If the FPS Model Number/Action Code combination is not on the table, update the table according to the TDL issued by CMS that introduced the FPS Model. After updating the table, deny the claim line or lines as follows:
         • Type the Action Code for the FPS Model Number on the claim line or lines.
@@ -554,7 +554,7 @@ public enum ClaimAuditTrailStatusCode {
       MetaSourceId.VMS,
       "06",
       ClaimAuditTrailLocationCode.REASONABLE_CHARGE,
-      ExplanationOfBenefit.RemittanceOutcome.ERROR,
+      ExplanationOfBenefit.RemittanceOutcome.NULL,
       "Provider problem"),
 
   /** VMS - 07 - 06 - outcome determined by CLM_FINAL_ACTION - Medical consultation. */
@@ -712,7 +712,7 @@ public enum ClaimAuditTrailStatusCode {
       MetaSourceId.VMS,
       "20",
       ClaimAuditTrailLocationCode.EDIT,
-      ExplanationOfBenefit.RemittanceOutcome.ERROR,
+      ExplanationOfBenefit.RemittanceOutcome.NULL,
       "Reject name/sex"),
 
   /** VMS - 21 - 04 - outcome determined by CLM_FINAL_ACTION - Adjustment. */
@@ -739,7 +739,7 @@ public enum ClaimAuditTrailStatusCode {
       MetaSourceId.VMS,
       "23",
       ClaimAuditTrailLocationCode.EDIT,
-      ExplanationOfBenefit.RemittanceOutcome.ERROR,
+      ExplanationOfBenefit.RemittanceOutcome.NULL,
       "No beneficiary address"),
 
   /** VMS - 24 - 04 - outcome determined by CLM_FINAL_ACTION - Beneficiary BUDS01 record closed. */
@@ -833,7 +833,7 @@ public enum ClaimAuditTrailStatusCode {
       MetaSourceId.VMS,
       "29",
       ClaimAuditTrailLocationCode.REASONABLE_CHARGE,
-      ExplanationOfBenefit.RemittanceOutcome.ERROR,
+      ExplanationOfBenefit.RemittanceOutcome.NULL,
       "Missing data"),
 
   /** VMS - 30 - 04 - outcome determined by CLM_FINAL_ACTION - Estimated interest errors. */
@@ -841,7 +841,7 @@ public enum ClaimAuditTrailStatusCode {
       MetaSourceId.VMS,
       "30",
       ClaimAuditTrailLocationCode.SYSTEM_REJECT,
-      ExplanationOfBenefit.RemittanceOutcome.ERROR,
+      ExplanationOfBenefit.RemittanceOutcome.NULL,
       "Location/status 04/30 is for estimated interest errors. Batch adjudication program VMSCW273 generates this location/status prior to sending the claim to CWF, based on the absence of valid data in certain fields on the claim. These fields include: the date of receipt, the estimated mail date, the amount paid to the provider, the amount paid to the beneficiary, the provider participation indicator, and the provider specialty."),
 
   /** VMS - 30 - 05 - outcome determined by CLM_FINAL_ACTION - Estimated interest errors. */
@@ -849,7 +849,7 @@ public enum ClaimAuditTrailStatusCode {
       MetaSourceId.VMS,
       "30",
       ClaimAuditTrailLocationCode.EDIT,
-      ExplanationOfBenefit.RemittanceOutcome.ERROR,
+      ExplanationOfBenefit.RemittanceOutcome.NULL,
       "Location/status 04/30 is for estimated interest errors. Batch adjudication program VMSCW273 generates this location/status prior to sending the claim to CWF, based on the absence of valid data in certain fields on the claim. These fields include: the date of receipt, the estimated mail date, the amount paid to the provider, the amount paid to the beneficiary, the provider participation indicator, and the provider specialty."),
 
   /** VMS - 31 - 05 - outcome determined by CLM_FINAL_ACTION - "". */
@@ -873,7 +873,7 @@ public enum ClaimAuditTrailStatusCode {
       MetaSourceId.VMS,
       "34",
       ClaimAuditTrailLocationCode.EDIT,
-      ExplanationOfBenefit.RemittanceOutcome.ERROR,
+      ExplanationOfBenefit.RemittanceOutcome.NULL,
       "Physician inactive/missing"),
 
   /** VMS - 35 - 05 - outcome determined by CLM_FINAL_ACTION - Physician utilization. */
@@ -897,7 +897,7 @@ public enum ClaimAuditTrailStatusCode {
       MetaSourceId.VMS,
       "37",
       ClaimAuditTrailLocationCode.UTILIZATION_DUPLICATION,
-      ExplanationOfBenefit.RemittanceOutcome.ERROR,
+      ExplanationOfBenefit.RemittanceOutcome.NULL,
       "Duplicate suspect"),
 
   /**
@@ -1019,7 +1019,7 @@ public enum ClaimAuditTrailStatusCode {
       MetaSourceId.VMS,
       "45",
       ClaimAuditTrailLocationCode.QUERY,
-      ExplanationOfBenefit.RemittanceOutcome.ERROR,
+      ExplanationOfBenefit.RemittanceOutcome.NULL,
       "Name error"),
 
   /** VMS - 45 - 09 - outcome determined by CLM_FINAL_ACTION - Name error. */
@@ -1027,7 +1027,7 @@ public enum ClaimAuditTrailStatusCode {
       MetaSourceId.VMS,
       "45",
       ClaimAuditTrailLocationCode.REPLY,
-      ExplanationOfBenefit.RemittanceOutcome.ERROR,
+      ExplanationOfBenefit.RemittanceOutcome.NULL,
       "Name error"),
 
   /** VMS - 46 - 03 - outcome determined by CLM_FINAL_ACTION - Normal DME record (Cert). */
@@ -1121,7 +1121,7 @@ public enum ClaimAuditTrailStatusCode {
       MetaSourceId.VMS,
       "52",
       ClaimAuditTrailLocationCode.EDIT,
-      ExplanationOfBenefit.RemittanceOutcome.ERROR,
+      ExplanationOfBenefit.RemittanceOutcome.NULL,
       "Reasonable charge error"),
 
   /** VMS - 52 - 06 - outcome determined by CLM_FINAL_ACTION - Reasonable charge error. */
@@ -1129,7 +1129,7 @@ public enum ClaimAuditTrailStatusCode {
       MetaSourceId.VMS,
       "52",
       ClaimAuditTrailLocationCode.REASONABLE_CHARGE,
-      ExplanationOfBenefit.RemittanceOutcome.ERROR,
+      ExplanationOfBenefit.RemittanceOutcome.NULL,
       "Reasonable charge error"),
 
   /** VMS - 53 - 05 - outcome determined by CLM_FINAL_ACTION - No cert on file – automated DME. */
@@ -1215,14 +1215,14 @@ public enum ClaimAuditTrailStatusCode {
       MetaSourceId.VMS,
       "58",
       ClaimAuditTrailLocationCode.UTILIZATION_DUPLICATION,
-      ExplanationOfBenefit.RemittanceOutcome.ERROR,
+      ExplanationOfBenefit.RemittanceOutcome.NULL,
       "LMRP/NCD denial by a non-MR edit that is missing LMRP/NCD numbers"),
   /** VMS - 58 - 02 - outcome determined by CLM_FINAL_ACTION - Generate the MSP letter. */
   _58_02(
       MetaSourceId.VMS,
       "58",
       ClaimAuditTrailLocationCode.DEVELOPMENT,
-      ExplanationOfBenefit.RemittanceOutcome.ERROR,
+      ExplanationOfBenefit.RemittanceOutcome.NULL,
       "Generate the MSP letter"),
   /** VMS - 59 - 02 - outcome determined by CLM_FINAL_ACTION - Eligible for denial for MSP. */
   _59_02(
@@ -1243,7 +1243,7 @@ public enum ClaimAuditTrailStatusCode {
       MetaSourceId.VMS,
       "60",
       ClaimAuditTrailLocationCode.SYSTEM_REJECT,
-      ExplanationOfBenefit.RemittanceOutcome.ERROR,
+      ExplanationOfBenefit.RemittanceOutcome.NULL,
       "Excess history"),
 
   /** VMS - 61 - 04 - outcome determined by CLM_FINAL_ACTION - Beneficiary paid. */
@@ -1259,14 +1259,14 @@ public enum ClaimAuditTrailStatusCode {
       MetaSourceId.VMS,
       "62",
       ClaimAuditTrailLocationCode.SYSTEM_REJECT,
-      ExplanationOfBenefit.RemittanceOutcome.ERROR,
+      ExplanationOfBenefit.RemittanceOutcome.NULL,
       "System error"),
   /** VMS - 62 - 09 - outcome determined by CLM_FINAL_ACTION - Address formatting error from CWF. */
   _62_09(
       MetaSourceId.VMS,
       "62",
       ClaimAuditTrailLocationCode.REPLY,
-      ExplanationOfBenefit.RemittanceOutcome.ERROR,
+      ExplanationOfBenefit.RemittanceOutcome.NULL,
       "When a claim/CMN has an address that CWF cannot format, CWF returns it with Trailer 12. If the claim/CMN has a 01 disposition, VMS suspends it to this location/status. VMS prints UNFORMATTED in the CITY field of the CW4101-SSA BENE ADDRESS ERROR LISTING REPORT. You must resolve the address problem on the BUDS01 record and type address flag AR in the AF field so that VMS does not update the record with subsequent address information from CWF. After you correct the address, VMS resends the claim/CMN to CWF with Entry Code 05. CWF returns the claim/CMN with an 01 disposition. If applicable, VMS updates the claim/CMN with the correct payment information and processes it to location 10."),
 
   /** VMS - 63 - 04 - outcome determined by CLM_FINAL_ACTION - Excess splits. */
@@ -1716,8 +1716,7 @@ public enum ClaimAuditTrailStatusCode {
    * @return the EOB outcome
    */
   public ExplanationOfBenefit.RemittanceOutcome getOutcome(ClaimFinalAction finalAction) {
-    if (source.equals(MetaSourceId.VMS)
-        && outcome.equals(ExplanationOfBenefit.RemittanceOutcome.NULL)) {
+    if (source.equals(MetaSourceId.VMS)) {
       if (finalAction.equals(ClaimFinalAction.YES)) {
         return ExplanationOfBenefit.RemittanceOutcome.COMPLETE;
       } else if (finalAction.equals(ClaimFinalAction.NO)) {

@@ -269,7 +269,7 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
     assert rows[0]["cntrct_pbp_sk"] == 168239554424
     assert rows[2]["cntrct_pbp_sk"] == 518317433750
     # only a future record exists for this contract
-    assert rows[2]["cntrct_pbp_bgn_dt"].strftime("%Y-%m-%d") == "2026-01-01"
+    assert rows[2]["cntrct_pbp_bgn_dt"].strftime("%Y-%m-%d") == "2026-12-01"
 
     cur = conn.execute("select * from idr.beneficiary_ma_part_d_enrollment order by bene_sk")
     assert cur.rowcount == 3

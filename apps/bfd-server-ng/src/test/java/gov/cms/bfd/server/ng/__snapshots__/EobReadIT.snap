@@ -1637,7 +1637,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
       "coding" : [ {
         "code" : "FA",
         "display" : "Accept",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD-Augmented"
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
       } ]
     },
     "sequence" : 7
@@ -2843,7 +2843,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
       "coding" : [ {
         "code" : "V0800",
         "display" : "Void/Entry Code 3 Claim",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD-Augmented"
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD"
       } ]
     },
     "sequence" : 6

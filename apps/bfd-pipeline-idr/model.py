@@ -1192,7 +1192,7 @@ class IdrClaim(IdrBaseModel):
     clm_idr_ld_dt: Annotated[date, {HISTORICAL_BATCH_TIMESTAMP: True}]
     clm_srvc_prvdr_gnrc_id_num: Annotated[str, BeforeValidator(transform_default_string)]
     prvdr_prscrbng_prvdr_npi_num: Annotated[str, BeforeValidator(transform_default_and_zero_string)]
-    clm_adjstmt_type_cd: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_adjstmt_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_bene_pd_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_blg_prvdr_zip5_cd: Annotated[str, BeforeValidator(transform_null_string)]
     clm_sbmt_frmt_cd: Annotated[str, BeforeValidator(transform_default_string)]
