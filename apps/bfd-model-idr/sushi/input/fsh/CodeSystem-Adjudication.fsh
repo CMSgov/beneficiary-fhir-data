@@ -35,7 +35,7 @@ Description: "This code system includes a selection of Adjudication Value Codes 
 * #CLM_BENE_PMT_AMT "Beneficiary Paid Amount" "An amount paid by a beneficiary for services rendered on a claim."
 * #CLM_ALOWD_CHRG_AMT "Allowed Charge Amount" "The total allowed charges on the claim (the sum of line item allowed charges)."
 * #CLM_LINE_MDCR_COINSRNC_AMT "Coinsurance Amount" "The beneficiary coinsurance liability amount for this line-item service on the claim."
-* #CLM_MDCR_PRFNL_PRMRY_PYR_AMT "Primary Payer Paid Amount "The amount of a payment made on behalf of a Medicare beneficiary by a primary payer other than Medicare, that the provider is applying to covered Medicare charges on a non-institutional claim."
+* #CLM_MDCR_PRFNL_PRMRY_PYR_AMT "Primary Payer Paid Amount" "The amount of a payment made on behalf of a Medicare beneficiary by a primary payer other than Medicare, that the provider is applying to covered Medicare charges on a non-institutional claim."
 * #CLM_BENE_PRMRY_PYR_PD_AMT "Line Primary Payer Paid Amount" "The amount of a payment made on behalf of a Medicare beneficiary by a primary payer other than Medicare, that the provider is applying to covered Medicare charges for to the line-item service on the non-institutional claim."
 * #CLM_LINE_PRFNL_DME_PRICE_AMT "Purchase Price Amount" "The amount representing the lower of fee schedule for purchase of new or used DME, or actual charge. In case of rental DME, this amount represents the purchase cap; rental payments can only be made until the cap is met."
 * #CLM_LINE_DMERC_SCRN_SVGS_AMT "Screen Savings Amount" "The amount of savings attributable to the coverage screen for this DMERC line item."
