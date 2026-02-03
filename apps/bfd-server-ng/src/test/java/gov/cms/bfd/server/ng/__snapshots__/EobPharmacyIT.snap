@@ -127,7 +127,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
     "sequence" : 1
   } ],
   "contained" : [ {
-    "id" : "provider-practitioner",
+    "id" : "1548226988",
     "identifier" : [ {
       "system" : "http://hl7.org/fhir/sid/us-npi",
       "type" : {
@@ -578,7 +578,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
     "date" : "2018-08-20"
   },
   "provider" : {
-    "reference" : "#provider-practitioner"
+    "reference" : "1548226988"
   },
   "resourceType" : "ExplanationOfBenefit",
   "status" : "active",
@@ -1358,7 +1358,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
   } ],
   "contained" : [ {
     "active" : true,
-    "id" : "provider-org",
+    "id" : "1649041195",
     "identifier" : [ {
       "system" : "http://hl7.org/fhir/sid/us-npi",
       "type" : {
@@ -1803,7 +1803,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
     "date" : "2025-08-11"
   },
   "provider" : {
-    "reference" : "#provider-org"
+    "reference" : "1649041195"
   },
   "resourceType" : "ExplanationOfBenefit",
   "status" : "active",

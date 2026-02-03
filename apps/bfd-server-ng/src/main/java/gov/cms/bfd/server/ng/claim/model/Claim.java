@@ -208,7 +208,7 @@ public class Claim {
             ph -> {
               var p = billingProvider.toFhir(ph);
               eob.addContained(p);
-              eob.setProvider(new Reference(p));
+              eob.setProvider(new Reference(ph.getProviderNpiNumber()));
             });
 
     claimOptional
@@ -217,7 +217,7 @@ public class Claim {
             ph -> {
               var p = ph.toFhirNpiType();
               eob.addContained(p);
-              eob.setProvider(new Reference(p));
+              eob.setProvider(new Reference(ph.getProviderNpiNumber()));
             });
 
     claimSourceId.toFhirOutcome().ifPresent(eob::setOutcome);

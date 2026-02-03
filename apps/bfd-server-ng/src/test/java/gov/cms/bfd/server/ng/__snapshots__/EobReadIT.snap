@@ -204,7 +204,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
     } ],
     "resourceType" : "Practitioner"
   }, {
-    "id" : "practitioner-billing",
+    "id" : "1104867175",
     "identifier" : [ {
       "system" : "http://hl7.org/fhir/sid/us-npi",
       "type" : {
@@ -534,7 +534,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
     }
   },
   "provider" : {
-    "reference" : "#practitioner-billing"
+    "reference" : "1104867175"
   },
   "resourceType" : "ExplanationOfBenefit",
   "status" : "active",
@@ -1166,7 +1166,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
     } ],
     "resourceType" : "Practitioner"
   }, {
-    "id" : "practitioner-billing",
+    "id" : "1104867175",
     "identifier" : [ {
       "system" : "http://hl7.org/fhir/sid/us-npi",
       "type" : {
@@ -1495,7 +1495,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
     }
   },
   "provider" : {
-    "reference" : "#practitioner-billing"
+    "reference" : "1104867175"
   },
   "resourceType" : "ExplanationOfBenefit",
   "status" : "active",
@@ -2188,7 +2188,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
     "address" : [ {
       "postalCode" : "79928"
     } ],
-    "id" : "practitioner-billing",
+    "id" : "1093792350",
     "identifier" : [ {
       "system" : "http://hl7.org/fhir/sid/us-npi",
       "type" : {
@@ -2707,7 +2707,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
     }
   },
   "provider" : {
-    "reference" : "#practitioner-billing"
+    "reference" : "1093792350"
   },
   "resourceType" : "ExplanationOfBenefit",
   "status" : "active",
@@ -3429,7 +3429,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
     "address" : [ {
       "postalCode" : "79928"
     } ],
-    "id" : "provider-org",
+    "id" : "1003488552",
     "identifier" : [ {
       "system" : "http://hl7.org/fhir/sid/us-npi",
       "type" : {
@@ -3948,7 +3948,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
     }
   },
   "provider" : {
-    "reference" : "#provider-org"
+    "reference" : "1003488552"
   },
   "resourceType" : "ExplanationOfBenefit",
   "status" : "active",
@@ -4981,7 +4981,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
     } ],
     "resourceType" : "Practitioner"
   }, {
-    "id" : "practitioner-billing",
+    "id" : "1104867175",
     "identifier" : [ {
       "system" : "http://hl7.org/fhir/sid/us-npi",
       "type" : {
@@ -5534,7 +5534,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
     } ]
   } ],
   "provider" : {
-    "reference" : "#practitioner-billing"
+    "reference" : "1104867175"
   },
   "resourceType" : "ExplanationOfBenefit",
   "status" : "active",
@@ -6722,7 +6722,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
     } ],
     "resourceType" : "Practitioner"
   }, {
-    "id" : "practitioner-billing",
+    "id" : "1104867175",
     "identifier" : [ {
       "system" : "http://hl7.org/fhir/sid/us-npi",
       "type" : {
@@ -7275,7 +7275,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
     } ]
   } ],
   "provider" : {
-    "reference" : "#practitioner-billing"
+    "reference" : "1104867175"
   },
   "resourceType" : "ExplanationOfBenefit",
   "status" : "active",

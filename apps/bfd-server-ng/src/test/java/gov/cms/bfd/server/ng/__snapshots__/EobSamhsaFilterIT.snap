@@ -7101,7 +7101,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
         "start" : "2020-02-18"
       },
       "contained" : [ {
-        "id" : "provider-practitioner",
+        "id" : "1093792350",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
           "type" : {
@@ -7345,7 +7345,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
         "date" : "2020-03-03"
       },
       "provider" : {
-        "reference" : "#provider-practitioner"
+        "reference" : "1093792350"
       },
       "resourceType" : "ExplanationOfBenefit",
       "status" : "active",
@@ -8372,7 +8372,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         } ],
         "resourceType" : "Practitioner"
       }, {
-        "id" : "practitioner-billing",
+        "id" : "1104867175",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
           "type" : {
@@ -9658,7 +9658,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         } ]
       } ],
       "provider" : {
-        "reference" : "#practitioner-billing"
+        "reference" : "1104867175"
       },
       "resourceType" : "ExplanationOfBenefit",
       "status" : "active",
@@ -19123,7 +19123,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
         "start" : "2020-02-18"
       },
       "contained" : [ {
-        "id" : "provider-practitioner",
+        "id" : "1093792350",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
           "type" : {
@@ -19367,7 +19367,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
         "date" : "2020-03-03"
       },
       "provider" : {
-        "reference" : "#provider-practitioner"
+        "reference" : "1093792350"
       },
       "resourceType" : "ExplanationOfBenefit",
       "status" : "active",
@@ -20394,7 +20394,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         } ],
         "resourceType" : "Practitioner"
       }, {
-        "id" : "practitioner-billing",
+        "id" : "1104867175",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
           "type" : {
@@ -21680,7 +21680,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         } ]
       } ],
       "provider" : {
-        "reference" : "#practitioner-billing"
+        "reference" : "1104867175"
       },
       "resourceType" : "ExplanationOfBenefit",
       "status" : "active",

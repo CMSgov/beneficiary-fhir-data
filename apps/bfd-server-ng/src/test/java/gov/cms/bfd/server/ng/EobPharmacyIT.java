@@ -43,12 +43,10 @@ class EobPharmacyIT extends IntegrationTestBase {
     assertFalse(eob.isEmpty());
     expectFhir().toMatchSnapshot(eob);
 
-    assertEquals("#provider-practitioner", eob.getProvider().getReference());
+    assertEquals("1548226988", eob.getProvider().getReference());
     var containedResources = eob.getContained();
     var hasPractitioner =
-        containedResources.stream()
-            .filter(r -> r.getId().equals("provider-practitioner"))
-            .findFirst();
+        containedResources.stream().filter(r -> r.getId().equals("1548226988")).findFirst();
     assertTrue(hasPractitioner.isPresent());
     Practitioner practitioner = (Practitioner) hasPractitioner.get();
     var familyName =
@@ -126,7 +124,7 @@ class EobPharmacyIT extends IntegrationTestBase {
     assertFalse(eob.isEmpty());
     expectFhir().toMatchSnapshot(eob);
 
-    assertEquals("#provider-org", eob.getProvider().getReference());
+    assertEquals("1649041195", eob.getProvider().getReference());
     var containedResources = eob.getContained();
     var hasOrganization =
         containedResources.stream()
@@ -134,7 +132,7 @@ class EobPharmacyIT extends IntegrationTestBase {
             .findFirst();
     assertTrue(hasOrganization.isPresent());
     Organization organization = (Organization) hasOrganization.get();
-    assertEquals("provider-org", organization.getId());
+    assertEquals("1649041195", organization.getId());
     assertEquals("CBS Health Corporation", organization.getName());
 
     var careTeam = eob.getCareTeam();
