@@ -11,5 +11,5 @@ Description: "Code system for claim submission format codes indicating the metho
 * #X "X12 837"
 * #C "COB CLAIM"
 * #B "BENEFICIARY SUBMITTED"
-* #"" "NCPDP ELECTRONIC SUBMISSION"
+* #"N" "NCPDP ELECTRONIC SUBMISSION"
 * #A "MEDICAID SUBROGATION CLAIM" 
