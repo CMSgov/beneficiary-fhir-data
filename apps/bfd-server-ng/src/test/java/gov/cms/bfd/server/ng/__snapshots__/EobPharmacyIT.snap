@@ -115,7 +115,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
   },
   "careTeam" : [ {
     "provider" : {
-      "reference" : "#careteam-prescriber-practitioner-1"
+      "reference" : "#1730548868"
     },
     "role" : {
       "coding" : [ {
@@ -149,7 +149,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
     } ],
     "resourceType" : "Practitioner"
   }, {
-    "id" : "careteam-prescriber-practitioner-1",
+    "id" : "1730548868",
     "identifier" : [ {
       "system" : "http://hl7.org/fhir/sid/us-npi",
       "type" : {
@@ -578,7 +578,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
     "date" : "2018-08-20"
   },
   "provider" : {
-    "reference" : "1548226988"
+    "reference" : "#1548226988"
   },
   "resourceType" : "ExplanationOfBenefit",
   "status" : "active",
@@ -1345,7 +1345,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
   },
   "careTeam" : [ {
     "provider" : {
-      "reference" : "#careteam-prescriber-practitioner-1"
+      "reference" : "#1437702123"
     },
     "role" : {
       "coding" : [ {
@@ -1376,7 +1376,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
     "name" : "CBS Health Corporation",
     "resourceType" : "Organization"
   }, {
-    "id" : "careteam-prescriber-practitioner-1",
+    "id" : "1437702123",
     "identifier" : [ {
       "system" : "http://hl7.org/fhir/sid/us-npi",
       "type" : {
@@ -1803,7 +1803,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
     "date" : "2025-08-11"
   },
   "provider" : {
-    "reference" : "1649041195"
+    "reference" : "#1649041195"
   },
   "resourceType" : "ExplanationOfBenefit",
   "status" : "active",

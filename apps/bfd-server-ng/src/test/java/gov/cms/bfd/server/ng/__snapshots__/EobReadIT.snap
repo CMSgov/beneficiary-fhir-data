@@ -127,7 +127,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
     "sequence" : 1
   }, {
     "provider" : {
-      "reference" : "#careteam-provider-1"
+      "reference" : "#1437702123"
     },
     "role" : {
       "coding" : [ {
@@ -139,7 +139,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
     "sequence" : 1
   }, {
     "provider" : {
-      "reference" : "#careteam-provider-2"
+      "reference" : "#1942945159"
     },
     "role" : {
       "coding" : [ {
@@ -151,7 +151,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
     "sequence" : 2
   }, {
     "provider" : {
-      "reference" : "#careteam-provider-3"
+      "reference" : "#1972944437"
     },
     "role" : {
       "coding" : [ {
@@ -163,7 +163,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
     "sequence" : 3
   }, {
     "provider" : {
-      "reference" : "#careteam-provider-4"
+      "reference" : "#1558719914"
     },
     "role" : {
       "coding" : [ {
@@ -225,7 +225,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
     } ],
     "resourceType" : "Practitioner"
   }, {
-    "id" : "careteam-provider-1",
+    "id" : "1437702123",
     "identifier" : [ {
       "system" : "http://hl7.org/fhir/sid/us-npi",
       "type" : {
@@ -246,7 +246,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
     } ],
     "resourceType" : "Practitioner"
   }, {
-    "id" : "careteam-provider-2",
+    "id" : "1942945159",
     "identifier" : [ {
       "system" : "http://hl7.org/fhir/sid/us-npi",
       "type" : {
@@ -267,7 +267,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
     } ],
     "resourceType" : "Practitioner"
   }, {
-    "id" : "careteam-provider-3",
+    "id" : "1972944437",
     "identifier" : [ {
       "system" : "http://hl7.org/fhir/sid/us-npi",
       "type" : {
@@ -284,7 +284,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
     },
     "resourceType" : "Practitioner"
   }, {
-    "id" : "careteam-provider-4",
+    "id" : "1558719914",
     "identifier" : [ {
       "system" : "http://hl7.org/fhir/sid/us-npi",
       "type" : {
@@ -534,7 +534,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
     }
   },
   "provider" : {
-    "reference" : "1104867175"
+    "reference" : "#1104867175"
   },
   "resourceType" : "ExplanationOfBenefit",
   "status" : "active",
@@ -1089,7 +1089,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
     "sequence" : 1
   }, {
     "provider" : {
-      "reference" : "#careteam-provider-1"
+      "reference" : "#1437702123"
     },
     "role" : {
       "coding" : [ {
@@ -1101,7 +1101,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
     "sequence" : 1
   }, {
     "provider" : {
-      "reference" : "#careteam-provider-2"
+      "reference" : "#1942945159"
     },
     "role" : {
       "coding" : [ {
@@ -1113,7 +1113,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
     "sequence" : 2
   }, {
     "provider" : {
-      "reference" : "#careteam-provider-3"
+      "reference" : "#1972944437"
     },
     "role" : {
       "coding" : [ {
@@ -1125,7 +1125,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
     "sequence" : 3
   }, {
     "provider" : {
-      "reference" : "#careteam-provider-4"
+      "reference" : "#1558719914"
     },
     "role" : {
       "coding" : [ {
@@ -1187,7 +1187,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
     } ],
     "resourceType" : "Practitioner"
   }, {
-    "id" : "careteam-provider-1",
+    "id" : "1437702123",
     "identifier" : [ {
       "system" : "http://hl7.org/fhir/sid/us-npi",
       "type" : {
@@ -1208,7 +1208,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
     } ],
     "resourceType" : "Practitioner"
   }, {
-    "id" : "careteam-provider-2",
+    "id" : "1942945159",
     "identifier" : [ {
       "system" : "http://hl7.org/fhir/sid/us-npi",
       "type" : {
@@ -1229,7 +1229,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
     } ],
     "resourceType" : "Practitioner"
   }, {
-    "id" : "careteam-provider-3",
+    "id" : "1972944437",
     "identifier" : [ {
       "system" : "http://hl7.org/fhir/sid/us-npi",
       "type" : {
@@ -1246,7 +1246,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
     },
     "resourceType" : "Practitioner"
   }, {
-    "id" : "careteam-provider-4",
+    "id" : "1558719914",
     "identifier" : [ {
       "system" : "http://hl7.org/fhir/sid/us-npi",
       "type" : {
@@ -1495,7 +1495,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
     }
   },
   "provider" : {
-    "reference" : "1104867175"
+    "reference" : "#1104867175"
   },
   "resourceType" : "ExplanationOfBenefit",
   "status" : "active",
@@ -2060,7 +2060,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
     "sequence" : 1
   }, {
     "provider" : {
-      "reference" : "#careteam-provider-1"
+      "reference" : "#1942945159"
     },
     "role" : {
       "coding" : [ {
@@ -2072,7 +2072,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
     "sequence" : 1
   }, {
     "provider" : {
-      "reference" : "#careteam-provider-2"
+      "reference" : "#1023051596"
     },
     "role" : {
       "coding" : [ {
@@ -2084,7 +2084,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
     "sequence" : 2
   }, {
     "provider" : {
-      "reference" : "#careteam-provider-3"
+      "reference" : "#1003488552"
     },
     "role" : {
       "coding" : [ {
@@ -2096,7 +2096,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
     "sequence" : 3
   }, {
     "provider" : {
-      "reference" : "#careteam-provider-4"
+      "reference" : "#1558719914"
     },
     "role" : {
       "coding" : [ {
@@ -2108,7 +2108,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
     "sequence" : 4
   }, {
     "provider" : {
-      "reference" : "#careteam-provider-5"
+      "reference" : "#1720749690"
     },
     "role" : {
       "coding" : [ {
@@ -2209,7 +2209,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
     } ],
     "resourceType" : "Practitioner"
   }, {
-    "id" : "careteam-provider-1",
+    "id" : "1942945159",
     "identifier" : [ {
       "system" : "http://hl7.org/fhir/sid/us-npi",
       "type" : {
@@ -2230,7 +2230,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
     } ],
     "resourceType" : "Practitioner"
   }, {
-    "id" : "careteam-provider-2",
+    "id" : "1023051596",
     "identifier" : [ {
       "system" : "http://hl7.org/fhir/sid/us-npi",
       "type" : {
@@ -2251,7 +2251,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
     } ],
     "resourceType" : "Practitioner"
   }, {
-    "id" : "careteam-provider-3",
+    "id" : "1003488552",
     "identifier" : [ {
       "system" : "http://hl7.org/fhir/sid/us-npi",
       "type" : {
@@ -2272,7 +2272,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
     } ],
     "resourceType" : "Practitioner"
   }, {
-    "id" : "careteam-provider-4",
+    "id" : "1558719914",
     "identifier" : [ {
       "system" : "http://hl7.org/fhir/sid/us-npi",
       "type" : {
@@ -2293,7 +2293,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
     } ],
     "resourceType" : "Practitioner"
   }, {
-    "id" : "careteam-provider-5",
+    "id" : "1720749690",
     "identifier" : [ {
       "system" : "http://hl7.org/fhir/sid/us-npi",
       "type" : {
@@ -2707,7 +2707,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
     }
   },
   "provider" : {
-    "reference" : "1093792350"
+    "reference" : "#1093792350"
   },
   "resourceType" : "ExplanationOfBenefit",
   "status" : "active",
@@ -3300,7 +3300,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
     "sequence" : 1
   }, {
     "provider" : {
-      "reference" : "#careteam-provider-1"
+      "reference" : "#1942945159"
     },
     "role" : {
       "coding" : [ {
@@ -3312,7 +3312,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
     "sequence" : 1
   }, {
     "provider" : {
-      "reference" : "#careteam-provider-2"
+      "reference" : "#1023051596"
     },
     "role" : {
       "coding" : [ {
@@ -3324,7 +3324,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
     "sequence" : 2
   }, {
     "provider" : {
-      "reference" : "#careteam-provider-3"
+      "reference" : "#1003488552"
     },
     "role" : {
       "coding" : [ {
@@ -3336,7 +3336,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
     "sequence" : 3
   }, {
     "provider" : {
-      "reference" : "#careteam-provider-4"
+      "reference" : "#1558719914"
     },
     "role" : {
       "coding" : [ {
@@ -3348,7 +3348,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
     "sequence" : 4
   }, {
     "provider" : {
-      "reference" : "#careteam-provider-5"
+      "reference" : "#1720749690"
     },
     "role" : {
       "coding" : [ {
@@ -3450,7 +3450,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
     "name" : "CBS Health Corporation",
     "resourceType" : "Organization"
   }, {
-    "id" : "careteam-provider-1",
+    "id" : "1942945159",
     "identifier" : [ {
       "system" : "http://hl7.org/fhir/sid/us-npi",
       "type" : {
@@ -3471,7 +3471,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
     } ],
     "resourceType" : "Practitioner"
   }, {
-    "id" : "careteam-provider-2",
+    "id" : "1023051596",
     "identifier" : [ {
       "system" : "http://hl7.org/fhir/sid/us-npi",
       "type" : {
@@ -3492,28 +3492,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
     } ],
     "resourceType" : "Practitioner"
   }, {
-    "id" : "careteam-provider-3",
-    "identifier" : [ {
-      "system" : "http://hl7.org/fhir/sid/us-npi",
-      "type" : {
-        "coding" : [ {
-          "code" : "NPI",
-          "display" : "National provider identifier",
-          "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-        } ]
-      },
-      "value" : "1003488552"
-    } ],
-    "meta" : {
-      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
-    },
-    "name" : [ {
-      "family" : "Addams",
-      "given" : [ "Wednesday", "Wednesday" ]
-    } ],
-    "resourceType" : "Practitioner"
-  }, {
-    "id" : "careteam-provider-4",
+    "id" : "1558719914",
     "identifier" : [ {
       "system" : "http://hl7.org/fhir/sid/us-npi",
       "type" : {
@@ -3534,7 +3513,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
     } ],
     "resourceType" : "Practitioner"
   }, {
-    "id" : "careteam-provider-5",
+    "id" : "1720749690",
     "identifier" : [ {
       "system" : "http://hl7.org/fhir/sid/us-npi",
       "type" : {
@@ -3948,7 +3927,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
     }
   },
   "provider" : {
-    "reference" : "1003488552"
+    "reference" : "#1003488552"
   },
   "resourceType" : "ExplanationOfBenefit",
   "status" : "active",
@@ -4904,7 +4883,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
     "sequence" : 1
   }, {
     "provider" : {
-      "reference" : "#careteam-provider-1"
+      "reference" : "#1437702123"
     },
     "role" : {
       "coding" : [ {
@@ -4916,7 +4895,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
     "sequence" : 1
   }, {
     "provider" : {
-      "reference" : "#careteam-provider-2"
+      "reference" : "#1942945159"
     },
     "role" : {
       "coding" : [ {
@@ -4928,7 +4907,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
     "sequence" : 2
   }, {
     "provider" : {
-      "reference" : "#careteam-provider-3"
+      "reference" : "#1972944437"
     },
     "role" : {
       "coding" : [ {
@@ -4940,7 +4919,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
     "sequence" : 3
   }, {
     "provider" : {
-      "reference" : "#careteam-provider-4"
+      "reference" : "#1558719914"
     },
     "role" : {
       "coding" : [ {
@@ -5002,7 +4981,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
     } ],
     "resourceType" : "Practitioner"
   }, {
-    "id" : "careteam-provider-1",
+    "id" : "1437702123",
     "identifier" : [ {
       "system" : "http://hl7.org/fhir/sid/us-npi",
       "type" : {
@@ -5023,7 +5002,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
     } ],
     "resourceType" : "Practitioner"
   }, {
-    "id" : "careteam-provider-2",
+    "id" : "1942945159",
     "identifier" : [ {
       "system" : "http://hl7.org/fhir/sid/us-npi",
       "type" : {
@@ -5044,7 +5023,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
     } ],
     "resourceType" : "Practitioner"
   }, {
-    "id" : "careteam-provider-3",
+    "id" : "1972944437",
     "identifier" : [ {
       "system" : "http://hl7.org/fhir/sid/us-npi",
       "type" : {
@@ -5061,7 +5040,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
     },
     "resourceType" : "Practitioner"
   }, {
-    "id" : "careteam-provider-4",
+    "id" : "1558719914",
     "identifier" : [ {
       "system" : "http://hl7.org/fhir/sid/us-npi",
       "type" : {
@@ -5534,7 +5513,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
     } ]
   } ],
   "provider" : {
-    "reference" : "1104867175"
+    "reference" : "#1104867175"
   },
   "resourceType" : "ExplanationOfBenefit",
   "status" : "active",
@@ -6645,7 +6624,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
     "sequence" : 1
   }, {
     "provider" : {
-      "reference" : "#careteam-provider-1"
+      "reference" : "#1437702123"
     },
     "role" : {
       "coding" : [ {
@@ -6657,7 +6636,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
     "sequence" : 1
   }, {
     "provider" : {
-      "reference" : "#careteam-provider-2"
+      "reference" : "#1942945159"
     },
     "role" : {
       "coding" : [ {
@@ -6669,7 +6648,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
     "sequence" : 2
   }, {
     "provider" : {
-      "reference" : "#careteam-provider-3"
+      "reference" : "#1972944437"
     },
     "role" : {
       "coding" : [ {
@@ -6681,7 +6660,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
     "sequence" : 3
   }, {
     "provider" : {
-      "reference" : "#careteam-provider-4"
+      "reference" : "#1558719914"
     },
     "role" : {
       "coding" : [ {
@@ -6743,7 +6722,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
     } ],
     "resourceType" : "Practitioner"
   }, {
-    "id" : "careteam-provider-1",
+    "id" : "1437702123",
     "identifier" : [ {
       "system" : "http://hl7.org/fhir/sid/us-npi",
       "type" : {
@@ -6764,7 +6743,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
     } ],
     "resourceType" : "Practitioner"
   }, {
-    "id" : "careteam-provider-2",
+    "id" : "1942945159",
     "identifier" : [ {
       "system" : "http://hl7.org/fhir/sid/us-npi",
       "type" : {
@@ -6785,7 +6764,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
     } ],
     "resourceType" : "Practitioner"
   }, {
-    "id" : "careteam-provider-3",
+    "id" : "1972944437",
     "identifier" : [ {
       "system" : "http://hl7.org/fhir/sid/us-npi",
       "type" : {
@@ -6802,7 +6781,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
     },
     "resourceType" : "Practitioner"
   }, {
-    "id" : "careteam-provider-4",
+    "id" : "1558719914",
     "identifier" : [ {
       "system" : "http://hl7.org/fhir/sid/us-npi",
       "type" : {
@@ -7275,7 +7254,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
     } ]
   } ],
   "provider" : {
-    "reference" : "1104867175"
+    "reference" : "#1104867175"
   },
   "resourceType" : "ExplanationOfBenefit",
   "status" : "active",

@@ -504,7 +504,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
       },
       "careTeam" : [ {
         "provider" : {
-          "reference" : "#careteam-provider-1"
+          "reference" : "#1023051596"
         },
         "role" : {
           "coding" : [ {
@@ -516,7 +516,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
         "sequence" : 1
       }, {
         "provider" : {
-          "reference" : "#careteam-provider-2"
+          "reference" : "#1972944437"
         },
         "role" : {
           "coding" : [ {
@@ -528,7 +528,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
         "sequence" : 2
       }, {
         "provider" : {
-          "reference" : "#careteam-provider-3"
+          "reference" : "#1003488552"
         },
         "role" : {
           "coding" : [ {
@@ -540,7 +540,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
         "sequence" : 3
       }, {
         "provider" : {
-          "reference" : "#careteam-provider-4"
+          "reference" : "#1447692959"
         },
         "role" : {
           "coding" : [ {
@@ -560,7 +560,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
         "name" : "Centers for Medicare and Medicaid Services",
         "resourceType" : "Organization"
       }, {
-        "id" : "careteam-provider-1",
+        "id" : "1023051596",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
           "type" : {
@@ -581,7 +581,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
         } ],
         "resourceType" : "Practitioner"
       }, {
-        "id" : "careteam-provider-2",
+        "id" : "1972944437",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
           "type" : {
@@ -598,7 +598,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
         },
         "resourceType" : "Practitioner"
       }, {
-        "id" : "careteam-provider-3",
+        "id" : "1003488552",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
           "type" : {
@@ -619,7 +619,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
         } ],
         "resourceType" : "Practitioner"
       }, {
-        "id" : "careteam-provider-4",
+        "id" : "1447692959",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
           "type" : {
@@ -3835,7 +3835,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
         "sequence" : 1
       }, {
         "provider" : {
-          "reference" : "#careteam-provider-1"
+          "reference" : "#1730548868"
         },
         "role" : {
           "coding" : [ {
@@ -3859,7 +3859,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
         "sequence" : 2
       }, {
         "provider" : {
-          "reference" : "#careteam-provider-2"
+          "reference" : "#1003488552"
         },
         "role" : {
           "coding" : [ {
@@ -3883,7 +3883,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
         "sequence" : 3
       }, {
         "provider" : {
-          "reference" : "#careteam-provider-3"
+          "reference" : "#1730548868"
         },
         "role" : {
           "coding" : [ {
@@ -3907,7 +3907,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
         "sequence" : 4
       }, {
         "provider" : {
-          "reference" : "#careteam-provider-4"
+          "reference" : "#1720749690"
         },
         "role" : {
           "coding" : [ {
@@ -4242,7 +4242,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
         } ],
         "resourceType" : "Practitioner"
       }, {
-        "id" : "careteam-provider-1",
+        "id" : "1730548868",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
           "type" : {
@@ -4263,7 +4263,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
         } ],
         "resourceType" : "Practitioner"
       }, {
-        "id" : "careteam-provider-2",
+        "id" : "1003488552",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
           "type" : {
@@ -4284,28 +4284,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
         } ],
         "resourceType" : "Practitioner"
       }, {
-        "id" : "careteam-provider-3",
-        "identifier" : [ {
-          "system" : "http://hl7.org/fhir/sid/us-npi",
-          "type" : {
-            "coding" : [ {
-              "code" : "NPI",
-              "display" : "National provider identifier",
-              "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-            } ]
-          },
-          "value" : "1730548868"
-        } ],
-        "meta" : {
-          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
-        },
-        "name" : [ {
-          "family" : "Rogers",
-          "given" : [ "Gromit" ]
-        } ],
-        "resourceType" : "Practitioner"
-      }, {
-        "id" : "careteam-provider-4",
+        "id" : "1720749690",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
           "type" : {
@@ -7345,7 +7324,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
         "date" : "2020-03-03"
       },
       "provider" : {
-        "reference" : "1093792350"
+        "reference" : "#1093792350"
       },
       "resourceType" : "ExplanationOfBenefit",
       "status" : "active",
@@ -8229,7 +8208,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "sequence" : 1
       }, {
         "provider" : {
-          "reference" : "#careteam-provider-1"
+          "reference" : "#1972944437"
         },
         "role" : {
           "coding" : [ {
@@ -8253,7 +8232,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "sequence" : 2
       }, {
         "provider" : {
-          "reference" : "#careteam-provider-2"
+          "reference" : "#1720749690"
         },
         "role" : {
           "coding" : [ {
@@ -8277,7 +8256,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "sequence" : 3
       }, {
         "provider" : {
-          "reference" : "#careteam-provider-3"
+          "reference" : "#1023051596"
         },
         "role" : {
           "coding" : [ {
@@ -8289,7 +8268,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "sequence" : 3
       }, {
         "provider" : {
-          "reference" : "#careteam-provider-4"
+          "reference" : "#1558719914"
         },
         "role" : {
           "coding" : [ {
@@ -8393,7 +8372,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         } ],
         "resourceType" : "Practitioner"
       }, {
-        "id" : "careteam-provider-1",
+        "id" : "1972944437",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
           "type" : {
@@ -8410,7 +8389,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         },
         "resourceType" : "Practitioner"
       }, {
-        "id" : "careteam-provider-2",
+        "id" : "1720749690",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
           "type" : {
@@ -8431,7 +8410,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         } ],
         "resourceType" : "Practitioner"
       }, {
-        "id" : "careteam-provider-3",
+        "id" : "1023051596",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
           "type" : {
@@ -8452,7 +8431,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         } ],
         "resourceType" : "Practitioner"
       }, {
-        "id" : "careteam-provider-4",
+        "id" : "1558719914",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
           "type" : {
@@ -9658,7 +9637,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         } ]
       } ],
       "provider" : {
-        "reference" : "1104867175"
+        "reference" : "#1104867175"
       },
       "resourceType" : "ExplanationOfBenefit",
       "status" : "active",
@@ -10677,7 +10656,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
       },
       "careTeam" : [ {
         "provider" : {
-          "reference" : "#careteam-provider-1"
+          "reference" : "#1023051596"
         },
         "role" : {
           "coding" : [ {
@@ -10689,7 +10668,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "sequence" : 1
       }, {
         "provider" : {
-          "reference" : "#careteam-provider-2"
+          "reference" : "#1972944437"
         },
         "role" : {
           "coding" : [ {
@@ -10701,7 +10680,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "sequence" : 2
       }, {
         "provider" : {
-          "reference" : "#careteam-provider-3"
+          "reference" : "#1003488552"
         },
         "role" : {
           "coding" : [ {
@@ -10713,7 +10692,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "sequence" : 3
       }, {
         "provider" : {
-          "reference" : "#careteam-provider-4"
+          "reference" : "#1447692959"
         },
         "role" : {
           "coding" : [ {
@@ -10733,7 +10712,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "name" : "Centers for Medicare and Medicaid Services",
         "resourceType" : "Organization"
       }, {
-        "id" : "careteam-provider-1",
+        "id" : "1023051596",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
           "type" : {
@@ -10754,7 +10733,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         } ],
         "resourceType" : "Practitioner"
       }, {
-        "id" : "careteam-provider-2",
+        "id" : "1972944437",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
           "type" : {
@@ -10771,7 +10750,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         },
         "resourceType" : "Practitioner"
       }, {
-        "id" : "careteam-provider-3",
+        "id" : "1003488552",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
           "type" : {
@@ -10792,7 +10771,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         } ],
         "resourceType" : "Practitioner"
       }, {
-        "id" : "careteam-provider-4",
+        "id" : "1447692959",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
           "type" : {
@@ -13825,7 +13804,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
       },
       "careTeam" : [ {
         "provider" : {
-          "reference" : "#careteam-provider-1"
+          "reference" : "#1730548868"
         },
         "role" : {
           "coding" : [ {
@@ -13845,7 +13824,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "name" : "Centers for Medicare and Medicaid Services",
         "resourceType" : "Organization"
       }, {
-        "id" : "careteam-provider-1",
+        "id" : "1730548868",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
           "type" : {
@@ -15857,7 +15836,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
         "sequence" : 1
       }, {
         "provider" : {
-          "reference" : "#careteam-provider-1"
+          "reference" : "#1730548868"
         },
         "role" : {
           "coding" : [ {
@@ -15881,7 +15860,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
         "sequence" : 2
       }, {
         "provider" : {
-          "reference" : "#careteam-provider-2"
+          "reference" : "#1003488552"
         },
         "role" : {
           "coding" : [ {
@@ -15905,7 +15884,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
         "sequence" : 3
       }, {
         "provider" : {
-          "reference" : "#careteam-provider-3"
+          "reference" : "#1730548868"
         },
         "role" : {
           "coding" : [ {
@@ -15929,7 +15908,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
         "sequence" : 4
       }, {
         "provider" : {
-          "reference" : "#careteam-provider-4"
+          "reference" : "#1720749690"
         },
         "role" : {
           "coding" : [ {
@@ -16264,7 +16243,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
         } ],
         "resourceType" : "Practitioner"
       }, {
-        "id" : "careteam-provider-1",
+        "id" : "1730548868",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
           "type" : {
@@ -16285,7 +16264,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
         } ],
         "resourceType" : "Practitioner"
       }, {
-        "id" : "careteam-provider-2",
+        "id" : "1003488552",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
           "type" : {
@@ -16306,28 +16285,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
         } ],
         "resourceType" : "Practitioner"
       }, {
-        "id" : "careteam-provider-3",
-        "identifier" : [ {
-          "system" : "http://hl7.org/fhir/sid/us-npi",
-          "type" : {
-            "coding" : [ {
-              "code" : "NPI",
-              "display" : "National provider identifier",
-              "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-            } ]
-          },
-          "value" : "1730548868"
-        } ],
-        "meta" : {
-          "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
-        },
-        "name" : [ {
-          "family" : "Rogers",
-          "given" : [ "Gromit" ]
-        } ],
-        "resourceType" : "Practitioner"
-      }, {
-        "id" : "careteam-provider-4",
+        "id" : "1720749690",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
           "type" : {
@@ -19367,7 +19325,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
         "date" : "2020-03-03"
       },
       "provider" : {
-        "reference" : "1093792350"
+        "reference" : "#1093792350"
       },
       "resourceType" : "ExplanationOfBenefit",
       "status" : "active",
@@ -20251,7 +20209,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "sequence" : 1
       }, {
         "provider" : {
-          "reference" : "#careteam-provider-1"
+          "reference" : "#1972944437"
         },
         "role" : {
           "coding" : [ {
@@ -20275,7 +20233,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "sequence" : 2
       }, {
         "provider" : {
-          "reference" : "#careteam-provider-2"
+          "reference" : "#1720749690"
         },
         "role" : {
           "coding" : [ {
@@ -20299,7 +20257,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "sequence" : 3
       }, {
         "provider" : {
-          "reference" : "#careteam-provider-3"
+          "reference" : "#1023051596"
         },
         "role" : {
           "coding" : [ {
@@ -20311,7 +20269,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "sequence" : 3
       }, {
         "provider" : {
-          "reference" : "#careteam-provider-4"
+          "reference" : "#1558719914"
         },
         "role" : {
           "coding" : [ {
@@ -20415,7 +20373,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         } ],
         "resourceType" : "Practitioner"
       }, {
-        "id" : "careteam-provider-1",
+        "id" : "1972944437",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
           "type" : {
@@ -20432,7 +20390,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         },
         "resourceType" : "Practitioner"
       }, {
-        "id" : "careteam-provider-2",
+        "id" : "1720749690",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
           "type" : {
@@ -20453,7 +20411,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         } ],
         "resourceType" : "Practitioner"
       }, {
-        "id" : "careteam-provider-3",
+        "id" : "1023051596",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
           "type" : {
@@ -20474,7 +20432,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         } ],
         "resourceType" : "Practitioner"
       }, {
-        "id" : "careteam-provider-4",
+        "id" : "1558719914",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
           "type" : {
@@ -21680,7 +21638,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         } ]
       } ],
       "provider" : {
-        "reference" : "1104867175"
+        "reference" : "#1104867175"
       },
       "resourceType" : "ExplanationOfBenefit",
       "status" : "active",
@@ -22699,7 +22657,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
       },
       "careTeam" : [ {
         "provider" : {
-          "reference" : "#careteam-provider-1"
+          "reference" : "#1023051596"
         },
         "role" : {
           "coding" : [ {
@@ -22711,7 +22669,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "sequence" : 1
       }, {
         "provider" : {
-          "reference" : "#careteam-provider-2"
+          "reference" : "#1972944437"
         },
         "role" : {
           "coding" : [ {
@@ -22723,7 +22681,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "sequence" : 2
       }, {
         "provider" : {
-          "reference" : "#careteam-provider-3"
+          "reference" : "#1003488552"
         },
         "role" : {
           "coding" : [ {
@@ -22735,7 +22693,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "sequence" : 3
       }, {
         "provider" : {
-          "reference" : "#careteam-provider-4"
+          "reference" : "#1447692959"
         },
         "role" : {
           "coding" : [ {
@@ -22755,7 +22713,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "name" : "Centers for Medicare and Medicaid Services",
         "resourceType" : "Organization"
       }, {
-        "id" : "careteam-provider-1",
+        "id" : "1023051596",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
           "type" : {
@@ -22776,7 +22734,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         } ],
         "resourceType" : "Practitioner"
       }, {
-        "id" : "careteam-provider-2",
+        "id" : "1972944437",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
           "type" : {
@@ -22793,7 +22751,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         },
         "resourceType" : "Practitioner"
       }, {
-        "id" : "careteam-provider-3",
+        "id" : "1003488552",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
           "type" : {
@@ -22814,7 +22772,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         } ],
         "resourceType" : "Practitioner"
       }, {
-        "id" : "careteam-provider-4",
+        "id" : "1447692959",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
           "type" : {
@@ -25847,7 +25805,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
       },
       "careTeam" : [ {
         "provider" : {
-          "reference" : "#careteam-provider-1"
+          "reference" : "#1730548868"
         },
         "role" : {
           "coding" : [ {
@@ -25867,7 +25825,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "name" : "Centers for Medicare and Medicaid Services",
         "resourceType" : "Organization"
       }, {
-        "id" : "careteam-provider-1",
+        "id" : "1730548868",
         "identifier" : [ {
           "system" : "http://hl7.org/fhir/sid/us-npi",
           "type" : {
