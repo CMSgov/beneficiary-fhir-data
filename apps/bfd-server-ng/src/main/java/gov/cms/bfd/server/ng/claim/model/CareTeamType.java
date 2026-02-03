@@ -14,8 +14,8 @@ enum CareTeamType {
   OPERATING("operating", "Operating"),
   RENDERING("rendering", "Rendering provider"),
   OTHER("otheroperating", "Other Operating"),
-  PRESCRIBING("prescribing", "Prescribing"),
-  REFERRING("referring", "Referring provider");
+  PRESCRIBING("prescribing", "Prescribing provider"),
+  REFERRING("referring", "Referring");
 
   private final String roleCode;
   private final String roleDisplay;
