@@ -63,6 +63,7 @@ def transform_default_date_to_null(value: date | None) -> date | None:
     if value in (
         date.fromisoformat(ALTERNATE_DEFAULT_DATE),
         date.fromisoformat(DEFAULT_MIN_DATE),
+        date.fromisoformat(DEFAULT_MAX_DATE),
     ):
         return None
     return value
@@ -70,6 +71,12 @@ def transform_default_date_to_null(value: date | None) -> date | None:
 
 def transform_null_string(value: str | None) -> str:
     if value is None:
+        return ""
+    return value
+
+
+def transform_provider_name(value: str | None) -> str:
+    if value is None or value == "<UNAVAIL>":
         return ""
     return value
 
@@ -101,6 +108,12 @@ def transform_null_float(value: float | None) -> float:
 def transform_null_int(value: int | None) -> int:
     if value is None:
         return 0
+    return value
+
+
+def transform_default_int_to_null(value: int | None) -> int | None:
+    if value == 0:
+        return None
     return value
 
 
@@ -2344,9 +2357,10 @@ class IdrClaimRx(IdrBaseModel):
     clm_from_dt: Annotated[date, {ALIAS: ALIAS_CLM}]
     clm_thru_dt: Annotated[date, {ALIAS: ALIAS_CLM}]
     clm_efctv_dt: Annotated[date, {ALIAS: ALIAS_CLM}]
-    clm_obslt_dt: Annotated[date, {ALIAS: ALIAS_CLM}]
+    clm_obslt_dt: Annotated[
+        date | None, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_date_to_null)
+    ]
     clm_finl_actn_ind: Annotated[str, {ALIAS: ALIAS_CLM}]
-    clm_src_id: Annotated[str, {ALIAS: ALIAS_CLM}]
     clm_bene_pmt_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
     clm_pd_dt: Annotated[date | None, {ALIAS: ALIAS_CLM}]
     clm_ltst_clm_ind: Annotated[str, {ALIAS: ALIAS_CLM}]
@@ -2361,7 +2375,6 @@ class IdrClaimRx(IdrBaseModel):
         str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)
     ]
     clm_othr_tp_pd_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
-    meta_src_sk: Annotated[int, {ALIAS: ALIAS_CLM}]
     idr_insrt_ts: Annotated[
         datetime,
         {BATCH_TIMESTAMP: True, INSERT_EXCLUDE: True, ALIAS: ALIAS_CLM, COLUMN_MAP: "idr_insrt_ts"},
@@ -2372,9 +2385,7 @@ class IdrClaimRx(IdrBaseModel):
         {UPDATE_TIMESTAMP: True, INSERT_EXCLUDE: True, ALIAS: ALIAS_CLM, COLUMN_MAP: "idr_updt_ts"},
         BeforeValidator(transform_null_date_to_min),
     ]
-    clm_idr_ld_dt: Annotated[
-        date, {INSERT_EXCLUDE: True, HISTORICAL_BATCH_TIMESTAMP: True, ALIAS: ALIAS_CLM}
-    ]
+    clm_idr_ld_dt: Annotated[date, {HISTORICAL_BATCH_TIMESTAMP: True, ALIAS: ALIAS_CLM}]
 
     # Columns from v2_mdcr_clm_line
     clm_line_ansthsa_unit_cnt: Annotated[float | None, {ALIAS: ALIAS_LINE}]
@@ -2411,7 +2422,7 @@ class IdrClaimRx(IdrBaseModel):
     ]
 
     # Columns from V2_MDCR_CLM_LINE_RX
-    clm_brnd_gnrc_cd: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_brnd_gnrc_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_cmpnd_cd: Annotated[str, BeforeValidator(transform_null_string)]
     clm_ctstrphc_cvrg_ind_cd: Annotated[str, BeforeValidator(transform_null_string)]
     clm_daw_prod_slctn_cd: Annotated[str, BeforeValidator(transform_null_string)]
@@ -2464,7 +2475,6 @@ class IdrClaimRx(IdrBaseModel):
     # Columns from v2_mdcr_clm_dt_sgntr
     clm_cms_proc_dt: Annotated[date | None, BeforeValidator(transform_default_date_to_null)]
     clm_submsn_dt: Annotated[date | None, BeforeValidator(transform_default_date_to_null)]
-    clm_nch_wkly_proc_dt: Annotated[date | None, BeforeValidator(transform_default_date_to_null)]
     idr_insrt_ts_sgntr: Annotated[
         datetime,
         {
@@ -2490,11 +2500,17 @@ class IdrClaimRx(IdrBaseModel):
     prvdr_prscrbng_prvdr_npi_num: Annotated[
         str,
         {COLUMN_MAP: "prvdr_npi_num", ALIAS: ALIAS_PRVDR_PRSCRBNG},
-        BeforeValidator(transform_null_string),
+        BeforeValidator(transform_default_string),
     ]
-    prvdr_prscrbng_sk: Annotated[int | None, {COLUMN_MAP: "prvdr_sk", ALIAS: ALIAS_PRVDR_PRSCRBNG}]
+    prvdr_prscrbng_sk: Annotated[
+        int | None,
+        {COLUMN_MAP: "prvdr_sk", ALIAS: ALIAS_PRVDR_PRSCRBNG},
+        BeforeValidator(transform_default_int_to_null),
+    ]
     prvdr_prscrbng_hstry_efctv_dt: Annotated[
-        date | None, {COLUMN_MAP: "prvdr_hstry_efctv_dt", ALIAS: ALIAS_PRVDR_PRSCRBNG}
+        date | None,
+        {COLUMN_MAP: "prvdr_hstry_efctv_dt", ALIAS: ALIAS_PRVDR_PRSCRBNG},
+        BeforeValidator(transform_default_date_to_null),
     ]
     prvdr_prscrbng_mdl_name: Annotated[
         str,
@@ -2504,7 +2520,7 @@ class IdrClaimRx(IdrBaseModel):
     prvdr_prscrbng_type_cd: Annotated[
         str,
         {COLUMN_MAP: "prvdr_type_cd", ALIAS: ALIAS_PRVDR_PRSCRBNG},
-        BeforeValidator(transform_null_string),
+        BeforeValidator(transform_default_string),
     ]
     prvdr_prscrbng_txnmy_cmpst_cd: Annotated[
         str,
@@ -2514,7 +2530,7 @@ class IdrClaimRx(IdrBaseModel):
     prvdr_prscrbng_oscar_num: Annotated[
         str,
         {COLUMN_MAP: "prvdr_oscar_num", ALIAS: ALIAS_PRVDR_PRSCRBNG},
-        BeforeValidator(transform_null_string),
+        BeforeValidator(transform_default_string),
     ]
     prvdr_prscrbng_1st_name: Annotated[
         str,
@@ -2524,7 +2540,7 @@ class IdrClaimRx(IdrBaseModel):
     prvdr_prscrbng_name: Annotated[
         str,
         {COLUMN_MAP: "prvdr_name", ALIAS: ALIAS_PRVDR_PRSCRBNG},
-        BeforeValidator(transform_null_string),
+        BeforeValidator(transform_provider_name),
     ]
     prvdr_prscrbng_hstry_obslt_dt: Annotated[
         date | None,
@@ -2552,7 +2568,11 @@ class IdrClaimRx(IdrBaseModel):
         {COLUMN_MAP: "prvdr_npi_num", ALIAS: ALIAS_PRVDR_SRVC},
         BeforeValidator(transform_null_string),
     ]
-    prvdr_srvc_sk: Annotated[int | None, {COLUMN_MAP: "prvdr_sk", ALIAS: ALIAS_PRVDR_PRSCRBNG}]
+    prvdr_srvc_sk: Annotated[
+        int | None,
+        {COLUMN_MAP: "prvdr_sk", ALIAS: ALIAS_PRVDR_PRSCRBNG},
+        BeforeValidator(transform_default_int_to_null),
+    ]
     prvdr_srvc_hstry_efctv_dt: Annotated[
         date | None, {COLUMN_MAP: "prvdr_hstry_efctv_dt", ALIAS: ALIAS_PRVDR_PRSCRBNG}
     ]
@@ -2564,7 +2584,7 @@ class IdrClaimRx(IdrBaseModel):
     prvdr_srvc_type_cd: Annotated[
         str,
         {COLUMN_MAP: "prvdr_type_cd", ALIAS: ALIAS_PRVDR_SRVC},
-        BeforeValidator(transform_null_string),
+        BeforeValidator(transform_default_string),
     ]
     prvdr_srvc_txnmy_cmpst_cd: Annotated[
         str,
@@ -2574,7 +2594,7 @@ class IdrClaimRx(IdrBaseModel):
     prvdr_srvc_oscar_num: Annotated[
         str,
         {COLUMN_MAP: "prvdr_oscar_num", ALIAS: ALIAS_PRVDR_SRVC},
-        BeforeValidator(transform_null_string),
+        BeforeValidator(transform_default_string),
     ]
     prvdr_srvc_1st_name: Annotated[
         str,
@@ -2584,7 +2604,7 @@ class IdrClaimRx(IdrBaseModel):
     prvdr_srvc_name: Annotated[
         str,
         {COLUMN_MAP: "prvdr_name", ALIAS: ALIAS_PRVDR_SRVC},
-        BeforeValidator(transform_null_string),
+        BeforeValidator(transform_provider_name),
     ]
     prvdr_srvc_hstry_obslt_dt: Annotated[
         date | None,

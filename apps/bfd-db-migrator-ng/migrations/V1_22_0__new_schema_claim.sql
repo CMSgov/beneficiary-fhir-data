@@ -1142,7 +1142,7 @@ CREATE TABLE idr_new.claim_rx
 --  NON_RX   clm_ncvrd_thru_dt     date                     ,
 --     clm_actv_care_thru_dt date                     ,
 --    clm_mdcr_exhstd_dt                date,
-    clm_nch_wkly_proc_dt              date,
+ --   clm_nch_wkly_proc_dt              date,
 --  NON_RX   clm_qlfy_stay_from_dt date                     NOT NULL,
 --  NON_RX   clm_qlfy_stay_thru_dt date                     NOT NULL,
     --CLAIM DATE SGNTR
@@ -1158,7 +1158,7 @@ CREATE TABLE idr_new.claim_rx
 --     INSTNL clm_bill_fac_type_cd       character varying(1)     NOT NULL,
 --     INSTNL clm_bill_freq_cd           character varying(1)     NOT NULL,
     clm_finl_actn_ind                 character varying(1)  NOT NULL,
-    clm_src_id                        character varying(5)  NOT NULL,
+ --   clm_src_id                        character varying(5)  NOT NULL,
 --  NON_RX clm_query_cd                 character varying(1)     NOT NULL,
 --  NON_RX   clm_mdcr_coinsrnc_amt      numeric                  NOT NULL,
 --  NON_RX   clm_blood_lblty_amt        numeric                  NOT NULL,
@@ -1277,7 +1277,6 @@ CREATE TABLE idr_new.claim_rx
 --  NON_RX   clm_blood_ncvrd_chrg_amt   numeric,
 --  NON_RX   clm_prvdr_intrst_pd_amt    numeric,
     bfd_claim_updated_ts              timestamp with time zone DEFAULT now(),
-    meta_src_sk                       integer,
 --- LINE_ITEM COLUMNS
     clm_line_ansthsa_unit_cnt         numeric,
 --  PRFNL   clm_line_dgns_cd               character varying(7)     NOT NULL,
