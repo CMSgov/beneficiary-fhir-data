@@ -259,17 +259,17 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
         assert row["idr_updt_ts"] is not None
 
     cur = conn.execute("select * from idr.contract_pbp_number order by cntrct_pbp_sk")
-    assert cur.rowcount == 4
+    assert cur.rowcount == 10
     rows = cur.fetchmany(1)
-    assert rows[0]["cntrct_pbp_sk"] == 408933975817
+    assert rows[0]["cntrct_pbp_sk"] == 16513335503
 
     cur = conn.execute("select * from idr.contract_pbp_contact order by cntrct_pbp_sk")
-    assert cur.rowcount == 6
+    assert cur.rowcount == 3
     rows = cur.fetchmany(4)
-    assert rows[0]["cntrct_pbp_sk"] == 168239554424
-    assert rows[2]["cntrct_pbp_sk"] == 518317433750
+    assert rows[0]["cntrct_pbp_sk"] == 307963392254
+    assert rows[2]["cntrct_pbp_sk"] == 940319838486
     # only a future record exists for this contract
-    assert rows[2]["cntrct_pbp_bgn_dt"].strftime("%Y-%m-%d") == "2026-01-01"
+    assert rows[2]["cntrct_pbp_bgn_dt"].strftime("%Y-%m-%d") == "2026-12-01"
 
     cur = conn.execute("select * from idr.beneficiary_ma_part_d_enrollment order by bene_sk")
     assert cur.rowcount == 3

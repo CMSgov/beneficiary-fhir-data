@@ -35,7 +35,7 @@ public enum ClaimNearLineRecordTypeCode {
    */
   V(
       "V",
-      "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA]).",
+      "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA])",
       "Part A"),
   /** W - Part B institutional claim record (outpatient [HOP], HHA). */
   W("W", "Part B institutional claim record (outpatient [HOP], HHA)", "Part B");
