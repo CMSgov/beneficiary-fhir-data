@@ -4,7 +4,6 @@ gov.cms.bfd.server.ng.PatientCoverageC4DICSearchIT.patientCoverageSearchAllParts
     "fullUrl" : "{uuid}",
     "resource" : {
       "address" : [ {
-        "city" : "Mobile",
         "postalCode" : "36609",
         "state" : "AL"
       } ],
@@ -466,7 +465,6 @@ gov.cms.bfd.server.ng.PatientCoverageC4DICSearchIT.patientCoverageSearchByIdDual
     "fullUrl" : "{uuid}",
     "resource" : {
       "address" : [ {
-        "city" : "Galveston",
         "postalCode" : "77551",
         "state" : "TX"
       } ],
@@ -617,7 +615,6 @@ gov.cms.bfd.server.ng.PatientCoverageC4DICSearchIT.patientCoverageSearchByIdPart
     "fullUrl" : "{uuid}",
     "resource" : {
       "address" : [ {
-        "city" : "Galveston",
         "postalCode" : "77551",
         "state" : "TX"
       } ],
@@ -775,7 +772,6 @@ gov.cms.bfd.server.ng.PatientCoverageC4DICSearchIT.patientCoverageSearchByIdPart
     "fullUrl" : "{uuid}",
     "resource" : {
       "address" : [ {
-        "city" : "Mobile",
         "postalCode" : "36609",
         "state" : "AL"
       } ],

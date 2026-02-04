@@ -16,7 +16,6 @@ gov.cms.bfd.server.ng.PatientReadIT.patientReadMergedBene=[
 gov.cms.bfd.server.ng.PatientReadIT.patientReadUnMergedWithHistoricBenes=[
 {
   "address" : [ {
-    "city" : "Lisbon",
     "postalCode" : "58054",
     "state" : "ND"
   } ],
@@ -103,7 +102,6 @@ gov.cms.bfd.server.ng.PatientReadIT.patientReadUnMergedWithHistoricBenes=[
 gov.cms.bfd.server.ng.PatientReadIT.patientReadUnMergedWithHistoricKillCredit=[
 {
   "address" : [ {
-    "city" : "Lisbon",
     "postalCode" : "58054",
     "state" : "ND"
   } ],
@@ -164,7 +162,6 @@ gov.cms.bfd.server.ng.PatientReadIT.patientReadUnMergedWithHistoricKillCredit=[
 gov.cms.bfd.server.ng.PatientReadIT.patientReadValidLong=[
 {
   "address" : [ {
-    "city" : "Galveston",
     "postalCode" : "77551",
     "state" : "TX"
   } ],
@@ -226,7 +223,6 @@ gov.cms.bfd.server.ng.PatientReadIT.patientReadValidLong=[
 gov.cms.bfd.server.ng.PatientReadIT.patientReadValidString=[
 {
   "address" : [ {
-    "city" : "Galveston",
     "postalCode" : "77551",
     "state" : "TX"
   } ],
