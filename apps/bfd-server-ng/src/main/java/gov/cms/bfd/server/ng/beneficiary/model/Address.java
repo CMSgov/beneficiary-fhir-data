@@ -41,17 +41,10 @@ public class Address {
    */
   public Optional<org.hl7.fhir.r4.model.Address> toFhir() {
     var fhirAddress = new org.hl7.fhir.r4.model.Address();
-    var hasContent = false;
 
-    if (stateCode.isPresent()) {
-      fhirAddress.setState(stateCode.get());
-      hasContent = true;
-    }
-    if (zipCode.isPresent()) {
-      fhirAddress.setPostalCode(zipCode.get());
-      hasContent = true;
-    }
+    stateCode.ifPresent(fhirAddress::setState);
+    zipCode.ifPresent(fhirAddress::setPostalCode);
 
-    return hasContent ? Optional.of(fhirAddress) : Optional.empty();
+    return fhirAddress.isEmpty() ? Optional.empty() : Optional.of(fhirAddress);
   }
 }
