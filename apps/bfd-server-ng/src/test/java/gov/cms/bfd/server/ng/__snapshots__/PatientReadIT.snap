@@ -15,6 +15,10 @@ gov.cms.bfd.server.ng.PatientReadIT.patientReadMergedBene=[
 
 gov.cms.bfd.server.ng.PatientReadIT.patientReadUnMergedWithHistoricBenes=[
 {
+  "address" : [ {
+    "postalCode" : "58054",
+    "state" : "ND"
+  } ],
   "birthDate" : "1959-03-14",
   "communication" : [ {
     "language" : {
@@ -97,6 +101,10 @@ gov.cms.bfd.server.ng.PatientReadIT.patientReadUnMergedWithHistoricBenes=[
 
 gov.cms.bfd.server.ng.PatientReadIT.patientReadUnMergedWithHistoricKillCredit=[
 {
+  "address" : [ {
+    "postalCode" : "58054",
+    "state" : "ND"
+  } ],
   "birthDate" : "1959-03-14",
   "communication" : [ {
     "language" : {
@@ -153,6 +161,10 @@ gov.cms.bfd.server.ng.PatientReadIT.patientReadUnMergedWithHistoricKillCredit=[
 
 gov.cms.bfd.server.ng.PatientReadIT.patientReadValidLong=[
 {
+  "address" : [ {
+    "postalCode" : "77551",
+    "state" : "TX"
+  } ],
   "birthDate" : "1922-04-01",
   "communication" : [ {
     "language" : {
@@ -210,6 +222,10 @@ gov.cms.bfd.server.ng.PatientReadIT.patientReadValidLong=[
 
 gov.cms.bfd.server.ng.PatientReadIT.patientReadValidString=[
 {
+  "address" : [ {
+    "postalCode" : "77551",
+    "state" : "TX"
+  } ],
   "birthDate" : "1922-04-01",
   "communication" : [ {
     "language" : {
