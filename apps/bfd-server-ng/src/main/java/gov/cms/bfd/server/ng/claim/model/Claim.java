@@ -138,7 +138,7 @@ public class Claim {
     eob.setUse(ExplanationOfBenefit.Use.CLAIM);
     eob.setType(claimTypeCode.toFhirType());
     claimTypeCode.toFhirSubtype().ifPresent(eob::setSubType);
-    claimTypeCode.toFhirAdjudication().forEach(eob::addAdjudication);
+    claimTypeCode.toFhirAdjudication().ifPresent(eob::addAdjudication);
 
     eob.setMeta(meta.toFhir(claimTypeCode, claimSourceId, securityStatus, finalAction));
     eob.setIdentifier(identifiers.toFhir());

@@ -397,7 +397,11 @@ public enum ClaimTypeCode {
     return Optional.empty();
   }
 
-  List<ExplanationOfBenefit.AdjudicationComponent> toFhirAdjudication() {
+  Optional<ExplanationOfBenefit.AdjudicationComponent> toFhirAdjudication() {
+    if (isClaimSubtype(ClaimSubtype.PDE)) {
+      return Optional.empty();
+    }
+
     var adjudication = new ExplanationOfBenefit.AdjudicationComponent();
     adjudication.setCategory(
         new CodeableConcept()
@@ -413,7 +417,7 @@ public enum ClaimTypeCode {
                     .setSystem(SystemUrls.CARIN_CODE_SYSTEM_PAYER_ADJUDICATION_STATUS)
                     .setCode("other")
                     .setDisplay("Other")));
-    return List.of(adjudication);
+    return Optional.of(adjudication);
   }
 
   boolean isPacStage1() {
