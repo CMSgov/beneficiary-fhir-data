@@ -83,7 +83,7 @@ CREATE TABLE idr_new.claim_professional_pac
 --  INSTNL   clm_blg_prvdr_oscar_num      character varying(20)    NOT NULL,
     clm_idr_ld_dt                  date,
 --  INSTNL   clm_nrln_ric_cd            character varying(1)     NOT NULL,
---  PRVDR   clm_srvc_prvdr_gnrc_id_num   character varying(20)    NOT NULL,
+    clm_srvc_prvdr_gnrc_id_num   character varying(20)    NOT NULL,
 --  DRUG   prvdr_prscrbng_prvdr_npi_num character varying(10)    NOT NULL,
 --     idr_insrt_ts_dcmtn         timestamp with time zone NOT NULL,
 --     idr_updt_ts_dcmtn          timestamp with time zone NOT NULL,
@@ -91,7 +91,7 @@ CREATE TABLE idr_new.claim_professional_pac
     bfd_updated_ts                 timestamp with time zone NOT NULL,
     clm_adjstmt_type_cd            character varying(2),
     clm_bene_pd_amt                numeric,
---  PRVDR   clm_blg_prvdr_zip5_cd        character varying(5),
+    clm_blg_prvdr_zip5_cd        character varying(5),
     clm_sbmt_frmt_cd               character varying(1),
 --  Part D   clm_sbmtr_cntrct_num         character varying(5),
 --  Part D   clm_sbmtr_cntrct_pbp_num     character varying(3),
@@ -105,8 +105,8 @@ CREATE TABLE idr_new.claim_professional_pac
 --  INSTNL   clm_bnft_enhncmt_3_cd      character varying(2),
 --  INSTNL   clm_bnft_enhncmt_4_cd      character varying(2),
 --  INSTNL   clm_bnft_enhncmt_5_cd      character varying(2),
---  PRVDR   clm_rfrg_prvdr_pin_num     character varying(10),
-    prvdr_srvc_prvdr_npi_num       character varying(10),
+    clm_rfrg_prvdr_pin_num     character varying(10),
+    prvdr_srvc_sk                  bigint,
     prvdr_srvc_hstry_efctv_dt      date,
     prvdr_srvc_mdl_name            character varying(25),
     prvdr_srvc_type_cd             character varying(2),
@@ -131,6 +131,7 @@ CREATE TABLE idr_new.claim_professional_pac
     clm_mdcr_prfnl_prvdr_asgnmt_sw character varying(2)     NOT NULL,
     clm_audt_trl_stus_cd           character varying(2),
     clm_prvdr_acnt_rcvbl_ofst_amt  numeric,
+    clm_clncl_tril_num        character varying(8),
     bfd_claim_updated_ts           timestamp with time zone DEFAULT now(),
     meta_src_sk                    integer
 );
@@ -270,16 +271,18 @@ CREATE TABLE idr_new.claim_professional_adj
 --  PAC   clm_prvdr_rmng_due_amt     numeric,
 --  PAC   clm_blood_ncvrd_chrg_amt   numeric,
 --  PAC   clm_prvdr_intrst_pd_amt    numeric,
+    clm_mdcr_prfnl_prmry_pyr_amt     numeric,
+    clm_prvdr_acnt_rcvbl_ofst_amt  numeric,
     bfd_claim_updated_ts      timestamp with time zone DEFAULT now(),
-    meta_src_sk               integer
+    meta_src_sk               integer,
+    clm_clncl_tril_num        character varying(8),
+    clm_carr_pmt_dnl_cd            character varying(2),
 );
 
 
-CREATE INDEX claim_professional_pac_bene_sk_idx ON idr_new.claim_professional_pac USING btree (bene_sk);
+CREATE INDEX ON idr_new.claim_professional_pac(bene_sk);
 
-CREATE INDEX claim_professional_adj_bene_sk_idx ON idr_new.claim_professional_adj USING btree (bene_sk);
-
-
+CREATE INDEX ON idr_new.claim_professional_adj(bene_sk);
 
 CREATE TABLE idr_new.claim_item_professional_pac
 (
@@ -370,7 +373,7 @@ CREATE TABLE idr_new.claim_item_professional_pac
 --  ADJ   clm_line_carr_clncl_lab_num    character varying(10)    NOT NULL,
 --  ADJ   clm_line_carr_hpsa_scrcty_cd   character varying(1)     NOT NULL,
 --  ADJ   clm_line_dmerc_scrn_svgs_amt   numeric                  NOT NULL,
-    clm_line_hct_hgb_rslt_num      numeric,
+--  ADJ   clm_line_hct_hgb_rslt_num      numeric,
 --  ADJ   clm_line_hct_hgb_type_cd       character varying(2)     NOT NULL,
     clm_line_prfnl_dme_price_amt   numeric,
 --  ADJ   clm_line_prfnl_mtus_cnt        numeric                  NOT NULL,
@@ -398,7 +401,6 @@ CREATE TABLE idr_new.claim_item_professional_pac
     clm_line_hgb_lvl_num           numeric,
     PRIMARY KEY (clm_uniq_id, bfd_row_id)
 );
-
 
 CREATE TABLE idr_new.claim_item_professional_adj
 (
@@ -733,7 +735,7 @@ CREATE TABLE idr_new.claim_institutional_adj
     clm_num_sk                 bigint                   NOT NULL,
     bene_sk                    bigint                   NOT NULL,
     clm_cntl_num               character varying(40)    NOT NULL,
---     clm_orig_cntl_num          character varying(40)    NOT NULL,
+    clm_orig_cntl_num          character varying(40)    NOT NULL,
     clm_from_dt                date                     NOT NULL,
     clm_thru_dt                date,
     clm_efctv_dt               date,
@@ -904,9 +906,9 @@ CREATE TABLE idr_new.claim_institutional_adj
 );
 
 
-CREATE INDEX claim_institutional_pac_bene_sk_idx ON idr_new.claim_institutional_pac USING btree (bene_sk);
+CREATE INDEX ON idr_new.claim_institutional_pac(bene_sk);
 
-CREATE INDEX claim_institutional_adj_bene_sk_idx ON idr_new.claim_institutional_adj USING btree (bene_sk);
+CREATE INDEX ON idr_new.claim_institutional_adj(bene_sk);
 
 
 CREATE TABLE idr_new.claim_item_institutional_pac
@@ -1141,7 +1143,7 @@ CREATE TABLE idr_new.claim_rx
 --  NON_RX   clm_ncvrd_from_dt     date                     ,
 --  NON_RX   clm_ncvrd_thru_dt     date                     ,
 --     clm_actv_care_thru_dt date                     ,
-    clm_mdcr_exhstd_dt                date,
+--  NON_RX   clm_mdcr_exhstd_dt                date,
     clm_nch_wkly_proc_dt              date,
 --  NON_RX   clm_qlfy_stay_from_dt date                     NOT NULL,
 --  NON_RX   clm_qlfy_stay_thru_dt date                     NOT NULL,
@@ -1360,7 +1362,7 @@ CREATE TABLE idr_new.claim_rx
     clm_line_days_suply_qty           integer,
     clm_line_grs_above_thrshld_amt    numeric,
     clm_line_grs_blw_thrshld_amt      numeric,
-    clm_prnt_cntrl_num                varchar(40),
+    clm_prnt_cntl_num                varchar(40),
     clm_line_ingrdnt_cst_amt          numeric,
     clm_line_lis_amt                  numeric,
     clm_line_plro_amt                 numeric,
@@ -1383,4 +1385,4 @@ CREATE TABLE idr_new.claim_rx
 );
 
 
-CREATE INDEX claim_rx_bene_sk_idx ON idr_new.claim_rx USING btree (bene_sk);
+CREATE INDEX ON idr_new.claim_rx(bene_sk);
