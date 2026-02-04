@@ -8,7 +8,7 @@ import subprocess
 import sys
 from collections.abc import Callable, Iterable
 from pathlib import Path
-from typing import Any
+from typing import Any, Self
 
 import pandas as pd
 from dateutil.parser import parse
@@ -174,6 +174,13 @@ class RowAdapter:
 
     def get(self, key: str, default: Any | None = None) -> Any:
         return self.kv.get(key, default)
+
+    def extend(self, other: dict[str, Any] | Self, overwrite: bool = False):
+        cur = self if not overwrite else self.kv
+        other_dict = other if isinstance(other, dict) else other.kv
+
+        for k, v in other_dict.items():
+            cur[k] = v
 
 
 class GeneratorUtil:
