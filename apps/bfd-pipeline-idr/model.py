@@ -2377,26 +2377,36 @@ class IdrClaimRx(IdrBaseModel):
     ]
 
     # Columns from v2_mdcr_clm_line
-    clm_line_ansthsa_unit_cnt: float | None
-    clm_line_bene_pmt_amt: float | None
-    clm_line_cvrd_pd_amt: float | None
-    clm_line_from_dt: date
-    clm_line_thru_dt: date
-    clm_line_ndc_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_line_ndc_qty: float | None
+    clm_line_ansthsa_unit_cnt: Annotated[float | None, {ALIAS: ALIAS_LINE}]
+    clm_line_bene_pmt_amt: Annotated[float | None, {ALIAS: ALIAS_LINE}]
+    clm_line_cvrd_pd_amt: Annotated[float | None, {ALIAS: ALIAS_LINE}]
+    clm_line_from_dt: Annotated[date, {ALIAS: ALIAS_LINE}]
+    clm_line_thru_dt: Annotated[date, {ALIAS: ALIAS_LINE}]
+    clm_line_ndc_cd: Annotated[str, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_default_string)]
+    clm_line_ndc_qty: Annotated[float | None, {ALIAS: ALIAS_LINE}]
     clm_line_ndc_qty_qlfyr_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_line_srvc_unit_qty: float | None
-    clm_line_rx_num: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_line_othr_tp_pd_amt: float | None
-    clm_line_ncvrd_pd_amt: float | None
+    clm_line_srvc_unit_qty: Annotated[float | None, {ALIAS: ALIAS_LINE}]
+    clm_line_rx_num: Annotated[str, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_default_string)]
+    clm_line_othr_tp_pd_amt: Annotated[float | None, {ALIAS: ALIAS_LINE}]
+    clm_line_ncvrd_pd_amt: Annotated[float | None, {ALIAS: ALIAS_LINE}]
     idr_insrt_ts_line: Annotated[
         datetime,
-        {BATCH_TIMESTAMP: True, INSERT_EXCLUDE: True, ALIAS: ALIAS_CLM, COLUMN_MAP: "idr_insrt_ts"},
+        {
+            BATCH_TIMESTAMP: True,
+            INSERT_EXCLUDE: True,
+            ALIAS: ALIAS_LINE,
+            COLUMN_MAP: "idr_insrt_ts",
+        },
         BeforeValidator(transform_null_date_to_min),
     ]
     idr_updt_ts_line: Annotated[
         datetime,
-        {UPDATE_TIMESTAMP: True, INSERT_EXCLUDE: True, ALIAS: ALIAS_CLM, COLUMN_MAP: "idr_updt_ts"},
+        {
+            UPDATE_TIMESTAMP: True,
+            INSERT_EXCLUDE: True,
+            ALIAS: ALIAS_LINE,
+            COLUMN_MAP: "idr_updt_ts",
+        },
         BeforeValidator(transform_null_date_to_min),
     ]
 
@@ -2452,9 +2462,9 @@ class IdrClaimRx(IdrBaseModel):
     ]
 
     # Columns from v2_mdcr_clm_dt_sgntr
-    clm_cms_proc_dt: Annotated[date, BeforeValidator(transform_default_date_to_null)]
-    clm_submsn_dt: Annotated[date, BeforeValidator(transform_default_date_to_null)]
-    clm_nch_wkly_proc_dt: Annotated[date, BeforeValidator(transform_default_date_to_null)]
+    clm_cms_proc_dt: Annotated[date | None, BeforeValidator(transform_default_date_to_null)]
+    clm_submsn_dt: Annotated[date | None, BeforeValidator(transform_default_date_to_null)]
+    clm_nch_wkly_proc_dt: Annotated[date | None, BeforeValidator(transform_default_date_to_null)]
     idr_insrt_ts_sgntr: Annotated[
         datetime,
         {
