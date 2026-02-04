@@ -1,8 +1,8 @@
-CREATE TABLE idr_new.claim_professional_pac
+CREATE TABLE idr_new.claim_professional_shared_systems
 (
     clm_uniq_id                    bigint                   NOT NULL PRIMARY KEY,
     --CLAIM DATE SGNTR
-    clm_cms_proc_dt                date                     NOT NULL,
+--  INSTNL   clm_cms_proc_dt                date                     NOT NULL,
     clm_actv_care_from_dt          date,
     clm_dschrg_dt                  date,
     clm_submsn_dt                  date,
@@ -40,38 +40,32 @@ CREATE TABLE idr_new.claim_professional_pac
     clm_pd_dt                      date,
     clm_ltst_clm_ind               character varying(1)     NOT NULL,
     prvdr_othr_prvdr_npi_num       character varying(10),
-    prvdr_othr_hstry_efctv_dt      date,
     prvdr_othr_mdl_name            character varying(25),
     prvdr_othr_type_cd             character varying(2),
     prvdr_othr_txnmy_cmpst_cd      character varying(150),
     prvdr_othr_oscar_num           character varying(13),
     prvdr_othr_1st_name            character varying(35),
     prvdr_othr_name                character varying(70),
-    prvdr_othr_hstry_obslt_dt      date,
     prvdr_othr_lgl_name            character varying(100),
     prvdr_othr_emplr_id_num        character varying(10),
     prvdr_othr_last_name           character varying(35),
     prvdr_blg_prvdr_npi_num        character varying(10),
-    prvdr_blg_hstry_efctv_dt       date,
     prvdr_blg_mdl_name             character varying(25),
     prvdr_blg_type_cd              character varying(2),
     prvdr_blg_txnmy_cmpst_cd       character varying(150),
     prvdr_blg_oscar_num            character varying(13),
     prvdr_blg_1st_name             character varying(35),
     prvdr_blg_name                 character varying(70),
-    prvdr_blg_hstry_obslt_dt       date,
     prvdr_blg_lgl_name             character varying(100),
     prvdr_blg_emplr_id_num         character varying(10),
     prvdr_blg_last_name            character varying(35),
     prvdr_rfrg_prvdr_npi_num       character varying(10),
-    prvdr_rfrg_hstry_efctv_dt      date,
     prvdr_rfrg_mdl_name            character varying(25),
     prvdr_rfrg_type_cd             character varying(2),
     prvdr_rfrg_txnmy_cmpst_cd      character varying(150),
     prvdr_rfrg_oscar_num           character varying(13),
     prvdr_rfrg_1st_name            character varying(35),
     prvdr_rfrg_name                character varying(70),
-    prvdr_rfrg_hstry_obslt_dt      date,
     prvdr_rfrg_lgl_name            character varying(100),
     prvdr_rfrg_emplr_id_num        character varying(10),
     prvdr_rfrg_last_name           character varying(35),
@@ -107,14 +101,12 @@ CREATE TABLE idr_new.claim_professional_pac
 --  INSTNL   clm_bnft_enhncmt_5_cd      character varying(2),
     clm_rfrg_prvdr_pin_num     character varying(10),
     prvdr_srvc_sk                  bigint,
-    prvdr_srvc_hstry_efctv_dt      date,
     prvdr_srvc_mdl_name            character varying(25),
     prvdr_srvc_type_cd             character varying(2),
     prvdr_srvc_txnmy_cmpst_cd      character varying(150),
     prvdr_srvc_oscar_num           character varying(13),
     prvdr_srvc_1st_name            character varying(35),
     prvdr_srvc_name                character varying(70),
-    prvdr_srvc_hstry_obslt_dt      date,
     prvdr_srvc_lgl_name            character varying(100),
     prvdr_srvc_emplr_id_num        character varying(10),
     prvdr_srvc_last_name           character varying(35),
@@ -136,11 +128,11 @@ CREATE TABLE idr_new.claim_professional_pac
     meta_src_sk                    integer
 );
 
-CREATE TABLE idr_new.claim_professional_adj
+CREATE TABLE idr_new.claim_professional_nch
 (
     clm_uniq_id               bigint                   NOT NULL PRIMARY KEY,
     --CLAIM DATE SGNTR
-    clm_cms_proc_dt           date,
+--  INSTNL   clm_cms_proc_dt           date,
     clm_actv_care_from_dt     date,
     clm_dschrg_dt             date,
     clm_submsn_dt             date,
@@ -192,27 +184,23 @@ CREATE TABLE idr_new.claim_professional_adj
 --   PAC  prvdr_othr_last_name       character varying(35)    NOT NULL,
     prvdr_blg_prvdr_npi_num   character varying(10),
     prvdr_blg_sk              bigint,
-    prvdr_blg_hstry_efctv_dt  date,
     prvdr_blg_mdl_name        character varying(25),
     prvdr_blg_type_cd         character varying(2),
     prvdr_blg_txnmy_cmpst_cd  character varying(150),
     prvdr_blg_oscar_num       character varying(13),
     prvdr_blg_1st_name        character varying(35),
     prvdr_blg_name            character varying(70),
-    prvdr_blg_hstry_obslt_dt  date,
     prvdr_blg_lgl_name        character varying(100),
     prvdr_blg_emplr_id_num    character varying(10),
     prvdr_blg_last_name       character varying(35),
     prvdr_rfrg_prvdr_npi_num  character varying(10),
     prvdr_rfrg_sk             bigint,
-    prvdr_rfrg_hstry_efctv_dt date,
     prvdr_rfrg_mdl_name       character varying(25),
     prvdr_rfrg_type_cd        character varying(2),
     prvdr_rfrg_txnmy_cmpst_cd character varying(150),
     prvdr_rfrg_oscar_num      character varying(13),
     prvdr_rfrg_1st_name       character varying(35),
     prvdr_rfrg_name           character varying(70),
-    prvdr_rfrg_hstry_obslt_dt date,
     prvdr_rfrg_lgl_name       character varying(100),
     prvdr_rfrg_emplr_id_num   character varying(10),
     prvdr_rfrg_last_name      character varying(35),
@@ -248,14 +236,12 @@ CREATE TABLE idr_new.claim_professional_adj
 --  INSTNL   clm_bnft_enhncmt_5_cd      character varying(2),
     clm_rfrg_prvdr_pin_num     character varying(10),
     prvdr_srvc_sk             bigint,
-    prvdr_srvc_hstry_efctv_dt date,
     prvdr_srvc_mdl_name       character varying(25),
     prvdr_srvc_type_cd        character varying(2),
     prvdr_srvc_txnmy_cmpst_cd character varying(150),
     prvdr_srvc_oscar_num      character varying(13),
     prvdr_srvc_1st_name       character varying(35),
     prvdr_srvc_name           character varying(70),
-    prvdr_srvc_hstry_obslt_dt date,
     prvdr_srvc_lgl_name       character varying(100),
     prvdr_srvc_emplr_id_num   character varying(10),
     prvdr_srvc_last_name      character varying(35),
@@ -274,14 +260,14 @@ CREATE TABLE idr_new.claim_professional_adj
     bfd_claim_updated_ts      timestamp with time zone DEFAULT now(),
     meta_src_sk               integer,
     clm_clncl_tril_num        character varying(8),
-    clm_carr_pmt_dnl_cd            character varying(2),
+    clm_carr_pmt_dnl_cd            character varying(2)
 );
 
-CREATE INDEX ON idr_new.claim_professional_pac(bene_sk);
+CREATE INDEX ON idr_new.claim_professional_shared_systems(bene_sk);
 
-CREATE INDEX ON idr_new.claim_professional_adj(bene_sk);
+CREATE INDEX ON idr_new.claim_professional_nch(bene_sk);
 
-CREATE TABLE idr_new.claim_item_professional_pac
+CREATE TABLE idr_new.claim_item_professional_shared_systems
 (
     clm_uniq_id                    bigint                   NOT NULL,
     bfd_row_id                     integer                  NOT NULL,
@@ -349,14 +335,12 @@ CREATE TABLE idr_new.claim_item_professional_pac
 
     prvdr_rndrng_prvdr_npi_num     character varying(10),
     prvdr_rndrng_sk                bigint,
-    prvdr_rndrng_hstry_efctv_dt    date,
     prvdr_rndrng_mdl_name          character varying(25),
     prvdr_rndrng_type_cd           character varying(2),
     prvdr_rndrng_txnmy_cmpst_cd    character varying(150),
     prvdr_rndrng_oscar_num         character varying(13),
     prvdr_rndrng_1st_name          character varying(35),
     prvdr_rndrng_name              character varying(70),
-    prvdr_rndrng_hstry_obslt_dt    date,
     prvdr_rndrng_lgl_name          character varying(100),
     prvdr_rndrng_emplr_id_num      character varying(10),
     prvdr_rndrng_last_name         character varying(35),
@@ -399,7 +383,7 @@ CREATE TABLE idr_new.claim_item_professional_pac
     PRIMARY KEY (clm_uniq_id, bfd_row_id)
 );
 
-CCREATE TABLE idr_new.claim_item_professional_adj
+CREATE TABLE idr_new.claim_item_professional_nch
 (
     clm_uniq_id                    bigint                   NOT NULL,
     bfd_row_id                     integer                  NOT NULL,
@@ -467,14 +451,12 @@ CCREATE TABLE idr_new.claim_item_professional_adj
 
     prvdr_rndrng_prvdr_npi_num     character varying(10),
     prvdr_rndrng_sk                bigint,
-    prvdr_rndrng_hstry_efctv_dt    date,
     prvdr_rndrng_mdl_name          character varying(25),
     prvdr_rndrng_type_cd           character varying(2),
     prvdr_rndrng_txnmy_cmpst_cd    character varying(150),
     prvdr_rndrng_oscar_num         character varying(13),
     prvdr_rndrng_1st_name          character varying(35),
     prvdr_rndrng_name              character varying(70),
-    prvdr_rndrng_hstry_obslt_dt    date,
     prvdr_rndrng_lgl_name          character varying(100),
     prvdr_rndrng_emplr_id_num      character varying(10),
     prvdr_rndrng_last_name         character varying(35),
@@ -517,7 +499,7 @@ CCREATE TABLE idr_new.claim_item_professional_adj
     PRIMARY KEY (clm_uniq_id, bfd_row_id)
 );
 
-CREATE TABLE idr_new.claim_institutional_pac
+CREATE TABLE idr_new.claim_institutional_shared_systems
 (
     clm_uniq_id                bigint                   NOT NULL PRIMARY KEY,
     --CLAIM DATE SGNTR
@@ -561,82 +543,70 @@ CREATE TABLE idr_new.claim_institutional_pac
     prvdr_atndg_prvdr_npi_num  character varying(10),
     prvdr_atndg_last_name      character varying(60),
     prvdr_atndg_sk             bigint,
-    prvdr_atndg_hstry_efctv_dt date,
     prvdr_atndg_mdl_name       character varying(25),
     prvdr_atndg_type_cd        character varying(2),
     prvdr_atndg_txnmy_cmpst_cd character varying(150),
     prvdr_atndg_oscar_num      character varying(13),
     prvdr_atndg_1st_name       character varying(35),
     prvdr_atndg_name           character varying(70),
-    prvdr_atndg_hstry_obslt_dt date,
     prvdr_atndg_lgl_name       character varying(100),
     prvdr_atndg_emplr_id_num   character varying(10),
     prvdr_oprtg_prvdr_npi_num  character varying(10),
     prvdr_oprtg_sk             bigint,
-    prvdr_oprtg_hstry_efctv_dt date,
     prvdr_oprtg_mdl_name       character varying(25),
     prvdr_oprtg_type_cd        character varying(2),
     prvdr_oprtg_txnmy_cmpst_cd character varying(150),
     prvdr_oprtg_oscar_num      character varying(13),
     prvdr_oprtg_1st_name       character varying(35),
     prvdr_oprtg_name           character varying(70),
-    prvdr_oprtg_hstry_obslt_dt date,
     prvdr_oprtg_lgl_name       character varying(100),
     prvdr_oprtg_emplr_id_num   character varying(10),
     prvdr_oprtg_last_name      character varying(35),
 
     prvdr_othr_prvdr_npi_num   character varying(10),
     prvdr_othr_sk              bigint,
-    prvdr_othr_hstry_efctv_dt  date,
     prvdr_othr_mdl_name        character varying(25),
     prvdr_othr_type_cd         character varying(2),
     prvdr_othr_txnmy_cmpst_cd  character varying(150),
     prvdr_othr_oscar_num       character varying(13),
     prvdr_othr_1st_name        character varying(35),
     prvdr_othr_name            character varying(70),
-    prvdr_othr_hstry_obslt_dt  date,
     prvdr_othr_lgl_name        character varying(100),
     prvdr_othr_emplr_id_num    character varying(10),
     prvdr_othr_last_name       character varying(35),
 
     prvdr_rndrng_prvdr_npi_num  character varying(10),
     prvdr_rndrng_sk             bigint,
-    prvdr_rndrng_hstry_efctv_dt date,
     prvdr_rndrng_mdl_name       character varying(25),
     prvdr_rndrng_type_cd        character varying(2),
     prvdr_rndrng_txnmy_cmpst_cd character varying(150),
     prvdr_rndrng_oscar_num      character varying(13),
     prvdr_rndrng_1st_name       character varying(35),
     prvdr_rndrng_name           character varying(70),
-    prvdr_rndrng_hstry_obslt_dt date,
     prvdr_rndrng_lgl_name       character varying(100),
     prvdr_rndrng_emplr_id_num   character varying(10),
     prvdr_rndrng_last_name      character varying(35),
 
     prvdr_blg_prvdr_npi_num    character varying(10),
     prvdr_blg_sk               bigint,
-    prvdr_blg_hstry_efctv_dt   date,
     prvdr_blg_mdl_name         character varying(25),
     prvdr_blg_type_cd          character varying(2),
     prvdr_blg_txnmy_cmpst_cd   character varying(150),
     prvdr_blg_oscar_num        character varying(13),
     prvdr_blg_1st_name         character varying(35),
     prvdr_blg_name             character varying(70),
-    prvdr_blg_hstry_obslt_dt   date,
     prvdr_blg_lgl_name         character varying(100),
     prvdr_blg_emplr_id_num     character varying(10),
     prvdr_blg_last_name        character varying(35),
 
     prvdr_rfrg_prvdr_npi_num   character varying(10),
     prvdr_rfrg_sk              bigint,
-    prvdr_rfrg_hstry_efctv_dt  date,
     prvdr_rfrg_mdl_name        character varying(25),
     prvdr_rfrg_type_cd         character varying(2),
     prvdr_rfrg_txnmy_cmpst_cd  character varying(150),
     prvdr_rfrg_oscar_num       character varying(13),
     prvdr_rfrg_1st_name        character varying(35),
     prvdr_rfrg_name            character varying(70),
-    prvdr_rfrg_hstry_obslt_dt  date,
     prvdr_rfrg_lgl_name        character varying(100),
     prvdr_rfrg_emplr_id_num    character varying(10),
     prvdr_rfrg_last_name       character varying(35),
@@ -671,14 +641,12 @@ CREATE TABLE idr_new.claim_institutional_pac
     clm_rfrg_prvdr_pin_num     character varying(10),
     prvdr_srvc_prvdr_npi_num   character varying(10),
     prvdr_srvc_sk              bigint,
-    prvdr_srvc_hstry_efctv_dt  date,
     prvdr_srvc_mdl_name        character varying(25),
     prvdr_srvc_type_cd         character varying(2),
     prvdr_srvc_txnmy_cmpst_cd  character varying(150),
     prvdr_srvc_oscar_num       character varying(13),
     prvdr_srvc_1st_name        character varying(35),
     prvdr_srvc_name            character varying(70),
-    prvdr_srvc_hstry_obslt_dt  date,
     prvdr_srvc_lgl_name        character varying(100),
     prvdr_srvc_emplr_id_num    character varying(10),
     prvdr_srvc_last_name       character varying(35),
@@ -747,7 +715,7 @@ CREATE TABLE idr_new.claim_institutional_pac
     clm_op_srvc_type_cd            varchar(1)
 );
 
-CREATE TABLE idr_new.claim_institutional_adj
+CREATE TABLE idr_new.claim_institutional_nch
 (
     clm_uniq_id                bigint                   NOT NULL PRIMARY KEY,
     --CLAIM DATE SGNTR
@@ -792,82 +760,70 @@ CREATE TABLE idr_new.claim_institutional_adj
     prvdr_atndg_prvdr_npi_num  character varying(10),
     prvdr_atndg_last_name      character varying(60),
     prvdr_atndg_sk             bigint,
-    prvdr_atndg_hstry_efctv_dt date,
     prvdr_atndg_mdl_name       character varying(25),
     prvdr_atndg_type_cd        character varying(2),
     prvdr_atndg_txnmy_cmpst_cd character varying(150),
     prvdr_atndg_oscar_num      character varying(13),
     prvdr_atndg_1st_name       character varying(35),
     prvdr_atndg_name           character varying(70),
-    prvdr_atndg_hstry_obslt_dt date,
     prvdr_atndg_lgl_name       character varying(100),
     prvdr_atndg_emplr_id_num   character varying(10),
     prvdr_oprtg_prvdr_npi_num  character varying(10),
     prvdr_oprtg_sk             bigint,
-    prvdr_oprtg_hstry_efctv_dt date,
     prvdr_oprtg_mdl_name       character varying(25),
     prvdr_oprtg_type_cd        character varying(2),
     prvdr_oprtg_txnmy_cmpst_cd character varying(150),
     prvdr_oprtg_oscar_num      character varying(13),
     prvdr_oprtg_1st_name       character varying(35),
     prvdr_oprtg_name           character varying(70),
-    prvdr_oprtg_hstry_obslt_dt date,
     prvdr_oprtg_lgl_name       character varying(100),
     prvdr_oprtg_emplr_id_num   character varying(10),
     prvdr_oprtg_last_name      character varying(35),
 
     prvdr_othr_prvdr_npi_num   character varying(10),
     prvdr_othr_sk              bigint,
-    prvdr_othr_hstry_efctv_dt  date,
     prvdr_othr_mdl_name        character varying(25),
     prvdr_othr_type_cd         character varying(2),
     prvdr_othr_txnmy_cmpst_cd  character varying(150),
     prvdr_othr_oscar_num       character varying(13),
     prvdr_othr_1st_name        character varying(35),
     prvdr_othr_name            character varying(70),
-    prvdr_othr_hstry_obslt_dt  date,
     prvdr_othr_lgl_name        character varying(100),
     prvdr_othr_emplr_id_num    character varying(10),
     prvdr_othr_last_name       character varying(35),
 
     prvdr_rndrg_prvdr_npi_num  character varying(10),
     prvdr_rndrg_sk             bigint,
-    prvdr_rndrg_hstry_efctv_dt date,
     prvdr_rndrg_mdl_name       character varying(25),
     prvdr_rndrg_type_cd        character varying(2),
     prvdr_rndrg_txnmy_cmpst_cd character varying(150),
     prvdr_rndrg_oscar_num      character varying(13),
     prvdr_rndrg_1st_name       character varying(35),
     prvdr_rndrg_name           character varying(70),
-    prvdr_rndrg_hstry_obslt_dt date,
     prvdr_rndrg_lgl_name       character varying(100),
     prvdr_rndrg_emplr_id_num   character varying(10),
     prvdr_rndrg_last_name      character varying(35),
 
     prvdr_blg_prvdr_npi_num    character varying(10),
     prvdr_blg_sk               bigint,
-    prvdr_blg_hstry_efctv_dt   date,
     prvdr_blg_mdl_name         character varying(25),
     prvdr_blg_type_cd          character varying(2),
     prvdr_blg_txnmy_cmpst_cd   character varying(150),
     prvdr_blg_oscar_num        character varying(13),
     prvdr_blg_1st_name         character varying(35),
     prvdr_blg_name             character varying(70),
-    prvdr_blg_hstry_obslt_dt   date,
     prvdr_blg_lgl_name         character varying(100),
     prvdr_blg_emplr_id_num     character varying(10),
     prvdr_blg_last_name        character varying(35),
 
     prvdr_rfrg_prvdr_npi_num   character varying(10),
     prvdr_rfrg_sk              bigint,
-    prvdr_rfrg_hstry_efctv_dt  date,
     prvdr_rfrg_mdl_name        character varying(25),
     prvdr_rfrg_type_cd         character varying(2),
     prvdr_rfrg_txnmy_cmpst_cd  character varying(150),
     prvdr_rfrg_oscar_num       character varying(13),
     prvdr_rfrg_1st_name        character varying(35),
     prvdr_rfrg_name            character varying(70),
-    prvdr_rfrg_hstry_obslt_dt  date,
     prvdr_rfrg_lgl_name        character varying(100),
     prvdr_rfrg_emplr_id_num    character varying(10),
     prvdr_rfrg_last_name       character varying(35),
@@ -903,14 +859,12 @@ CREATE TABLE idr_new.claim_institutional_adj
 --     clm_rfrg_prvdr_pin_num     character varying(10),
     clm_srvc_prvdr_gnrc_id_num   character varying(10),
     prvdr_srvc_sk              bigint,
-    prvdr_srvc_hstry_efctv_dt  date,
     prvdr_srvc_mdl_name        character varying(25),
     prvdr_srvc_type_cd         character varying(2),
     prvdr_srvc_txnmy_cmpst_cd  character varying(150),
     prvdr_srvc_oscar_num       character varying(13),
     prvdr_srvc_1st_name        character varying(35),
     prvdr_srvc_name            character varying(70),
-    prvdr_srvc_hstry_obslt_dt  date,
     prvdr_srvc_lgl_name        character varying(100),
     prvdr_srvc_emplr_id_num    character varying(10),
     prvdr_srvc_last_name       character varying(35),
@@ -929,12 +883,12 @@ CREATE TABLE idr_new.claim_institutional_adj
 );
 
 
-CREATE INDEX ON idr_new.claim_institutional_pac(bene_sk);
+CREATE INDEX ON idr_new.claim_institutional_shared_systems(bene_sk);
 
-CREATE INDEX ON idr_new.claim_institutional_adj(bene_sk);
+CREATE INDEX ON idr_new.claim_institutional_nch(bene_sk);
 
 
-CREATE TABLE idr_new.claim_item_institutional_pac
+CREATE TABLE idr_new.claim_item_institutional_shared_systems
 (
     clm_uniq_id                 bigint                   NOT NULL,
     bfd_row_id                  integer                  NOT NULL,
@@ -1004,14 +958,12 @@ CREATE TABLE idr_new.claim_item_institutional_pac
 
     prvdr_rndrg_prvdr_npi_num   character varying(10),
     prvdr_rndrg_sk              bigint,
-    prvdr_rndrg_hstry_efctv_dt  date,
     prvdr_rndrg_mdl_name        character varying(25),
     prvdr_rndrg_type_cd         character varying(2),
     prvdr_rndrg_txnmy_cmpst_cd  character varying(150),
     prvdr_rndrg_oscar_num       character varying(13),
     prvdr_rndrg_1st_name        character varying(35),
     prvdr_rndrg_name            character varying(70),
-    prvdr_rndrg_hstry_obslt_dt  date,
     prvdr_rndrg_lgl_name        character varying(100),
     prvdr_rndrg_emplr_id_num    character varying(10),
     prvdr_rndrg_last_name       character varying(35),
@@ -1055,7 +1007,7 @@ CREATE TABLE idr_new.claim_item_institutional_pac
     PRIMARY KEY (clm_uniq_id, bfd_row_id)
 );
 
-CREATE TABLE idr_new.claim_item_institutional_adj
+CREATE TABLE idr_new.claim_item_institutional_nch
 (
     clm_uniq_id                 bigint                   NOT NULL,
     bfd_row_id                  integer                  NOT NULL,
@@ -1125,14 +1077,12 @@ CREATE TABLE idr_new.claim_item_institutional_adj
 
     prvdr_rndrng_prvdr_npi_num  character varying(10),
     prvdr_rndrng_sk             bigint,
-    prvdr_rndrng_hstry_efctv_dt date,
     prvdr_rndrng_mdl_name       character varying(25),
     prvdr_rndrng_type_cd        character varying(2),
     prvdr_rndrng_txnmy_cmpst_cd character varying(150),
     prvdr_rndrng_oscar_num      character varying(13),
     prvdr_rndrng_1st_name       character varying(35),
     prvdr_rndrng_name           character varying(70),
-    prvdr_rndrng_hstry_obslt_dt date,
     prvdr_rndrng_lgl_name       character varying(100),
     prvdr_rndrng_emplr_id_num   character varying(10),
     prvdr_rndrng_last_name      character varying(35),
@@ -1254,14 +1204,12 @@ CREATE TABLE idr_new.claim_rx
 --  PRVDR   clm_srvc_prvdr_gnrc_id_num   character varying(20)    NOT NULL,
     prvdr_prscrbng_prvdr_npi_num      character varying(10),
     prvdr_prscrbng_sk                 bigint,
-    prvdr_prscrbng_hstry_efctv_dt     date,
     prvdr_prscrbng_mdl_name           character varying(25),
     prvdr_prscrbng_type_cd            character varying(2),
     prvdr_prscrbng_txnmy_cmpst_cd     character varying(150),
     prvdr_prscrbng_oscar_num          character varying(13),
     prvdr_prscrbng_1st_name           character varying(35),
     prvdr_prscrbng_name               character varying(70),
-    prvdr_prscrbng_hstry_obslt_dt     date,
     prvdr_prscrbng_lgl_name           character varying(100),
     prvdr_prscrbng_emplr_id_num       character varying(10),
     prvdr_prscrbng_last_name          character varying(35),
@@ -1288,14 +1236,12 @@ CREATE TABLE idr_new.claim_rx
 --  PRVDR   clm_rfrg_prvdr_pin_num     character varying(10),
     clm_srvc_prvdr_gnrc_id_num          character varying(10),
     prvdr_srvc_sk                     bigint,
-    prvdr_srvc_hstry_efctv_dt         date,
     prvdr_srvc_mdl_name               character varying(25),
     prvdr_srvc_type_cd                character varying(2),
     prvdr_srvc_txnmy_cmpst_cd         character varying(150),
     prvdr_srvc_oscar_num              character varying(13),
     prvdr_srvc_1st_name               character varying(35),
     prvdr_srvc_name                   character varying(70),
-    prvdr_srvc_hstry_obslt_dt         date,
     prvdr_srvc_lgl_name               character varying(100),
     prvdr_srvc_emplr_id_num           character varying(10),
     prvdr_srvc_last_name              character varying(35),
