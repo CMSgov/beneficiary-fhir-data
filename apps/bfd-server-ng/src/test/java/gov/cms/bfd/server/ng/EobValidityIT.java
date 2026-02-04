@@ -56,7 +56,7 @@ class EobValidityIT extends IntegrationTestBase {
       validateDiagnosis(eob);
     }
 
-    // TODO: REMOVE this exception in BFD-4544
+    // TODO: REMOVE this exception in BFD-4544 // NOSONAR
     var isPharmacy =
         eob.getType().getCoding().stream()
             .anyMatch(
