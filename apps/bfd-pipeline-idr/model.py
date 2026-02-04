@@ -141,6 +141,7 @@ UPDATE_TIMESTAMP = "update_timestamp"
 ALIAS = "alias"
 INSERT_EXCLUDE = "insert_exclude"
 LAST_UPDATED_TIMESTAMP = "last_updated_timestamp"
+EXPR = "expr"
 DERIVED = "derived"
 COLUMN_MAP = "column_map"
 FISS_CLM_SOURCE = "21000"
@@ -281,7 +282,12 @@ class IdrBaseModel(BaseModel, ABC):
     def _format_column_alias(cls, key: str) -> str:
         metadata = cls.model_fields[key].metadata
         alias = cls._extract_meta(key, ALIAS)
+        expr = cls._extract_meta(key, EXPR)
         col = cls._get_column_map(key)
+        if expr is not None:
+            for meta in metadata:
+                if EXPR in meta:
+                    return f"{meta[EXPR]}"
         if alias is not None:
             for meta in metadata:
                 if ALIAS in meta:
@@ -2352,8 +2358,30 @@ class IdrClaimRx(IdrBaseModel):
     clm_type_cd: Annotated[int, {ALIAS: ALIAS_CLM}]
     bene_sk: Annotated[int, ALIAS:ALIAS_CLM]
     clm_cntl_num: Annotated[str, {ALIAS: ALIAS_CLM}]
-    clm_prnt_cntl_num: Annotated[str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_null_string)]
-    clm_orig_cntl_num: Annotated[str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_null_string)]
+    clm_prnt_cntl_num: Annotated[
+        str,
+        {
+            ALIAS: ALIAS_CLM,
+            EXPR: f"""CASE 
+                WHEN {ALIAS_CLM}.clm_cntl_num = {ALIAS_CLM}.clm_prnt_cntl_num 
+                THEN '' 
+                ELSE {ALIAS_CLM}.clm_prnt_cntl_num
+                END""",
+        },
+        BeforeValidator(transform_null_string),
+    ]
+    clm_orig_cntl_num: Annotated[
+        str,
+        {
+            ALIAS: ALIAS_CLM,
+            EXPR: f"""CASE 
+                WHEN {ALIAS_CLM}.clm_cntl_num = {ALIAS_CLM}.clm_orig_cntl_num 
+                THEN '' 
+                ELSE {ALIAS_CLM}.clm_orig_cntl_num
+                END""",
+        },
+        BeforeValidator(transform_null_string),
+    ]
     clm_from_dt: Annotated[date, {ALIAS: ALIAS_CLM}]
     clm_thru_dt: Annotated[date, {ALIAS: ALIAS_CLM}]
     clm_efctv_dt: Annotated[date, {ALIAS: ALIAS_CLM}]
