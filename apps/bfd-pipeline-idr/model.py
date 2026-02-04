@@ -2509,11 +2509,6 @@ class IdrClaimRx(IdrBaseModel):
         {COLUMN_MAP: "prvdr_sk", ALIAS: ALIAS_PRVDR_PRSCRBNG},
         BeforeValidator(transform_default_int_to_null),
     ]
-    prvdr_prscrbng_hstry_efctv_dt: Annotated[
-        date | None,
-        {COLUMN_MAP: "prvdr_hstry_efctv_dt", ALIAS: ALIAS_PRVDR_PRSCRBNG},
-        BeforeValidator(transform_default_date_to_null),
-    ]
     prvdr_prscrbng_mdl_name: Annotated[
         str,
         {COLUMN_MAP: "prvdr_mdl_name", ALIAS: ALIAS_PRVDR_PRSCRBNG},
@@ -2544,11 +2539,6 @@ class IdrClaimRx(IdrBaseModel):
         {COLUMN_MAP: "prvdr_name", ALIAS: ALIAS_PRVDR_PRSCRBNG},
         BeforeValidator(transform_provider_name),
     ]
-    prvdr_prscrbng_hstry_obslt_dt: Annotated[
-        date | None,
-        {COLUMN_MAP: "prvdr_hstry_obslt_dt", ALIAS: ALIAS_PRVDR_PRSCRBNG},
-        BeforeValidator(transform_default_date_to_null),
-    ]
     prvdr_prscrbng_lgl_name: Annotated[
         str,
         {COLUMN_MAP: "prvdr_lgl_name", ALIAS: ALIAS_PRVDR_PRSCRBNG},
@@ -2574,11 +2564,6 @@ class IdrClaimRx(IdrBaseModel):
         int | None,
         {COLUMN_MAP: "prvdr_sk", ALIAS: ALIAS_PRVDR_PRSCRBNG},
         BeforeValidator(transform_default_int_to_null),
-    ]
-    prvdr_srvc_hstry_efctv_dt: Annotated[
-        date | None,
-        {COLUMN_MAP: "prvdr_hstry_efctv_dt", ALIAS: ALIAS_PRVDR_PRSCRBNG},
-        BeforeValidator(transform_default_date_to_null),
     ]
     prvdr_srvc_mdl_name: Annotated[
         str,
@@ -2609,11 +2594,6 @@ class IdrClaimRx(IdrBaseModel):
         str,
         {COLUMN_MAP: "prvdr_name", ALIAS: ALIAS_PRVDR_SRVC},
         BeforeValidator(transform_provider_name),
-    ]
-    prvdr_srvc_hstry_obslt_dt: Annotated[
-        date | None,
-        {COLUMN_MAP: "prvdr_hstry_obslt_dt", ALIAS: ALIAS_PRVDR_SRVC},
-        BeforeValidator(transform_default_date_to_null),
     ]
     prvdr_srvc_lgl_name: Annotated[
         str,
