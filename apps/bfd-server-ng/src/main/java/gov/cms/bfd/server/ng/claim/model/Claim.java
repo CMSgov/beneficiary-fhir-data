@@ -125,6 +125,19 @@ public class Claim {
   }
 
   /**
+   * Accessor for claim line rx total drug cost amount, if this is an PDE claim.
+   *
+   * @return optional total drug cost amount
+   */
+  public Optional<BigDecimal> getTotalDrugCostAmount() {
+    return claimItems.stream()
+        .map(ci -> ci.getClaimItemOptional().getClaimLineRx())
+        .flatMap(Optional::stream)
+        .map(claimLineRx -> claimLineRx.getClaimLineAdjudicationChargeRx().getTotalDrugCost())
+        .findFirst();
+  }
+
+  /**
    * Convert the claim info to a FHIR ExplanationOfBenefit.
    *
    * @param securityStatus securityStatus
@@ -317,6 +330,11 @@ public class Claim {
     getBenePaidAmount()
         .map(AdjudicationChargeType.BENE_PAID_AMOUNT::toFhirTotal)
         .ifPresent(eob::addTotal);
+    if (claimTypeCode.isClaimSubtype(PDE)) {
+      getTotalDrugCostAmount()
+          .map(AdjudicationChargeType.TOTAL_DRUG_COST_AMOUNT::toFhirTotal)
+          .ifPresent(eob::addTotal);
+    }
     adjudicationCharge.toFhirAdjudication().forEach(eob::addAdjudication);
     eob.setPayment(claimPaymentAmount.toFhir());
 
