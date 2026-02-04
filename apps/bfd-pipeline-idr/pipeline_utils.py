@@ -99,3 +99,6 @@ def extract_and_load(
                 logger.error("max attempts exceeded")
                 raise ex
             time.sleep(1)
+        except Exception as ex:
+            logger.error("error loading %s", cls.table(), exc_info=ex)
+            raise ex

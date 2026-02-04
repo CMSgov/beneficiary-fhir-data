@@ -30,3 +30,4 @@ export IDR_MIN_TRANSACTION_DATE=2024-07-01
 export IDR_LOAD_TYPE=initial
 export IDR_PARTITION_TYPE=day
 export IDR_LATEST_CLAIMS=1
+export IDR_CLAIM_TABLES="idr_new.claim_rx"

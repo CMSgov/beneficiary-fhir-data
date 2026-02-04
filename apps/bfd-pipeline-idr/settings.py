@@ -8,6 +8,7 @@ LOAD_TYPE = getenv("IDR_LOAD_TYPE", "incremental")
 BATCH_SIZE = int(getenv("IDR_BATCH_SIZE", "100_000"))
 MIN_BATCH_COMPLETION_DATE = getenv("IDR_MIN_COMPLETION_DATE")
 MAX_TASKS = int(getenv("IDR_MAX_TASKS", "32"))
+CLAIM_TABLES = [t for t in getenv("IDR_CLAIM_TABLES", "").split(",") if t]
 
 IDR_PRIVATE_KEY = getenv("IDR_PRIVATE_KEY", "")
 IDR_USERNAME = getenv("IDR_USERNAME", "")
