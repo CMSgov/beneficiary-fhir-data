@@ -37,7 +37,7 @@ gov.cms.bfd.server.ng.PatientReadIT.patientReadUnMergedWithHistoricBenes=[
       }
     }, {
       "url" : "text",
-      "valueCode" : "Asian"
+      "valueString" : "Asian"
     } ],
     "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
   } ],
@@ -119,7 +119,7 @@ gov.cms.bfd.server.ng.PatientReadIT.patientReadUnMergedWithHistoricKillCredit=[
       }
     }, {
       "url" : "text",
-      "valueCode" : "Asian"
+      "valueString" : "Asian"
     } ],
     "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
   } ],
@@ -175,7 +175,7 @@ gov.cms.bfd.server.ng.PatientReadIT.patientReadValidLong=[
       }
     }, {
       "url" : "text",
-      "valueCode" : "American Indian or Alaska Native"
+      "valueString" : "American Indian or Alaska Native"
     } ],
     "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
   } ],
@@ -232,7 +232,7 @@ gov.cms.bfd.server.ng.PatientReadIT.patientReadValidString=[
       }
     }, {
       "url" : "text",
-      "valueCode" : "American Indian or Alaska Native"
+      "valueString" : "American Indian or Alaska Native"
     } ],
     "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
   } ],
