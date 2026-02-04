@@ -18,7 +18,7 @@ uses "http://hl7.org/fhir/StructureDefinition/ExplanationOfBenefit" alias BFDEOB
 
 imports "https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper" 
 imports "https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-SupportingInfo-Helper" 
-imports "https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Item-Institutional-Helper" 
+imports "https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Item-Helper" 
 
 group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
     
