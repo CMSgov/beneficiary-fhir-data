@@ -3,6 +3,11 @@ gov.cms.bfd.server.ng.PatientCoverageC4DICSearchIT.patientCoverageSearchAllParts
   "entry" : [ {
     "fullUrl" : "{uuid}",
     "resource" : {
+      "address" : [ {
+        "city" : "Mobile",
+        "postalCode" : "36609",
+        "state" : "AL"
+      } ],
       "birthDate" : "1967-03-19",
       "communication" : [ {
         "language" : {
@@ -460,6 +465,11 @@ gov.cms.bfd.server.ng.PatientCoverageC4DICSearchIT.patientCoverageSearchByIdDual
   "entry" : [ {
     "fullUrl" : "{uuid}",
     "resource" : {
+      "address" : [ {
+        "city" : "Galveston",
+        "postalCode" : "77551",
+        "state" : "TX"
+      } ],
       "birthDate" : "1922-04-01",
       "communication" : [ {
         "language" : {
@@ -606,6 +616,11 @@ gov.cms.bfd.server.ng.PatientCoverageC4DICSearchIT.patientCoverageSearchByIdPart
   "entry" : [ {
     "fullUrl" : "{uuid}",
     "resource" : {
+      "address" : [ {
+        "city" : "Galveston",
+        "postalCode" : "77551",
+        "state" : "TX"
+      } ],
       "birthDate" : "1922-04-01",
       "communication" : [ {
         "language" : {
@@ -759,6 +774,11 @@ gov.cms.bfd.server.ng.PatientCoverageC4DICSearchIT.patientCoverageSearchByIdPart
   "entry" : [ {
     "fullUrl" : "{uuid}",
     "resource" : {
+      "address" : [ {
+        "city" : "Mobile",
+        "postalCode" : "36609",
+        "state" : "AL"
+      } ],
       "birthDate" : "1959-03-14",
       "communication" : [ {
         "language" : {
