@@ -4,9 +4,9 @@ import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.util.Arrays;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.StringType;
 
 /** Beneficiary race code. */
 @Getter
@@ -89,8 +89,7 @@ public enum RaceCode {
             .setUrl(SystemUrls.OMB_CATEGORY)
             .setValue(
                 new Coding().setSystem(ombSystem).setCode(uscdiCode).setDisplay(uscdiDisplay));
-    var displayExtension =
-        new Extension().setUrl("text").setValue(new CodeType().setValue(uscdiDisplay));
+    var displayExtension = new Extension().setUrl("text").setValue(new StringType(uscdiDisplay));
 
     var ethnicityExtension = new Extension().setUrl(extensionSystem);
     ethnicityExtension.addExtension(ombExtension).addExtension(displayExtension);

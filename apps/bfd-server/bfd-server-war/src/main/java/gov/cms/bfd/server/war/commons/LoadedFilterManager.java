@@ -29,6 +29,7 @@ import java.util.stream.StreamSupport;
 import javax.sql.DataSource;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.jetbrains.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -43,7 +44,8 @@ public class LoadedFilterManager {
   private static final Logger LOGGER = LoggerFactory.getLogger(LoadedFilterManager.class);
 
   /** A date before the lastUpdate feature was rolled out. */
-  private static final Instant BEFORE_LAST_UPDATED_FEATURE = Instant.parse("2020-01-01T00:00:00Z");
+  @VisibleForTesting // Confusingly, unit tests are in a different package, thus public visibility
+  public static final Instant BEFORE_LAST_UPDATED_FEATURE = Instant.parse("2020-01-01T00:00:00Z");
 
   /** The connection to the DB. */
   private EntityManager entityManager;
@@ -140,8 +142,13 @@ public class LoadedFilterManager {
   /** Called to finish initialization of the manager. */
   @PostConstruct
   public synchronized void init() {
-    // The transaction time will either the last LoadedBatch or some earlier time
-    transactionTime = fetchLastLoadedBatchCreated().orElse(BEFORE_LAST_UPDATED_FEATURE);
+    try {
+      // The transaction time will either the last LoadedBatch or some earlier time
+      this.transactionTime = fetchLastLoadedBatchCreated().orElse(BEFORE_LAST_UPDATED_FEATURE);
+    } catch (Exception ex) {
+      this.transactionTime = BEFORE_LAST_UPDATED_FEATURE;
+      LOGGER.warn("Unable to query for transactionTime on init. Will be set in refreshFilters", ex);
+    }
   }
 
   /**
@@ -221,6 +228,12 @@ public class LoadedFilterManager {
      * millisecond.
      */
     try {
+      // If transactionTime remains unset we should try to set it again in case requests are being
+      // made while the bloom filters are loading.
+      if (this.transactionTime.equals(BEFORE_LAST_UPDATED_FEATURE)) {
+        this.transactionTime = fetchLastLoadedBatchCreated().orElse(BEFORE_LAST_UPDATED_FEATURE);
+      }
+
       // If new batches are present, then build new filters for the affected files
       final Instant currentLastBatchCreated =
           fetchLastLoadedBatchCreated().orElse(BEFORE_LAST_UPDATED_FEATURE);
@@ -229,7 +242,7 @@ public class LoadedFilterManager {
           || this.lastBatchCreated.isBefore(currentLastBatchCreated)) {
         LOGGER.info(
             "Refreshing LoadedFile filters with new filters from {} to {}",
-            lastBatchCreated,
+            this.lastBatchCreated,
             currentLastBatchCreated);
 
         List<LoadedTuple> loadedTuples = fetchLoadedTuples(this.lastBatchCreated);

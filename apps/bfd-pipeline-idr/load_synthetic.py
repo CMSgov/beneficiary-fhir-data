@@ -63,7 +63,13 @@ def load_from_csv(conn: psycopg.Connection, src_folder: str) -> None:
 def _load_file(
     cur: psycopg.Cursor, src_folder: str, file: str, sql_table: str, full_table: str
 ) -> None:
-    for match in Path(src_folder).glob(f"./**/{file}"):
+    path = Path(src_folder)
+    # `glob` will return nothing for an invalid path so we'll explicitly make sure you supplied a
+    # valid path
+    if not path.exists():
+        raise OSError(f"path {src_folder} not found")
+
+    for match in path.glob(f"./**/{file}"):
         print(f"loading {match}")
         with match.open() as f:
             reader = csv.DictReader(f)

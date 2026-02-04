@@ -2,6 +2,10 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByHistoricalMbi[GET]=[
 {
   "entry" : [ {
     "resource" : {
+      "address" : [ {
+        "postalCode" : "58054",
+        "state" : "ND"
+      } ],
       "birthDate" : "1959-03-14",
       "communication" : [ {
         "language" : {
@@ -24,7 +28,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByHistoricalMbi[GET]=[
           }
         }, {
           "url" : "text",
-          "valueCode" : "Asian"
+          "valueString" : "Asian"
         } ],
         "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
       } ],
@@ -98,6 +102,10 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByHistoricalMbi[GET_WITH_SEAR
 {
   "entry" : [ {
     "resource" : {
+      "address" : [ {
+        "postalCode" : "58054",
+        "state" : "ND"
+      } ],
       "birthDate" : "1959-03-14",
       "communication" : [ {
         "language" : {
@@ -120,7 +128,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByHistoricalMbi[GET_WITH_SEAR
           }
         }, {
           "url" : "text",
-          "valueCode" : "Asian"
+          "valueString" : "Asian"
         } ],
         "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
       } ],
@@ -194,6 +202,10 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByHistoricalMbi[POST]=[
 {
   "entry" : [ {
     "resource" : {
+      "address" : [ {
+        "postalCode" : "58054",
+        "state" : "ND"
+      } ],
       "birthDate" : "1959-03-14",
       "communication" : [ {
         "language" : {
@@ -216,7 +228,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByHistoricalMbi[POST]=[
           }
         }, {
           "url" : "text",
-          "valueCode" : "Asian"
+          "valueString" : "Asian"
         } ],
         "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
       } ],
@@ -338,6 +350,10 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdMergedBeneMultipleLinks[G
 {
   "entry" : [ {
     "resource" : {
+      "address" : [ {
+        "postalCode" : "58054",
+        "state" : "ND"
+      } ],
       "birthDate" : "1959-03-14",
       "communication" : [ {
         "language" : {
@@ -360,7 +376,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdMergedBeneMultipleLinks[G
           }
         }, {
           "url" : "text",
-          "valueCode" : "Asian"
+          "valueString" : "Asian"
         } ],
         "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
       } ],
@@ -436,6 +452,10 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdMergedBeneMultipleLinks[G
 {
   "entry" : [ {
     "resource" : {
+      "address" : [ {
+        "postalCode" : "58054",
+        "state" : "ND"
+      } ],
       "birthDate" : "1959-03-14",
       "communication" : [ {
         "language" : {
@@ -458,7 +478,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdMergedBeneMultipleLinks[G
           }
         }, {
           "url" : "text",
-          "valueCode" : "Asian"
+          "valueString" : "Asian"
         } ],
         "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
       } ],
@@ -534,6 +554,10 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdMergedBeneMultipleLinks[P
 {
   "entry" : [ {
     "resource" : {
+      "address" : [ {
+        "postalCode" : "58054",
+        "state" : "ND"
+      } ],
       "birthDate" : "1959-03-14",
       "communication" : [ {
         "language" : {
@@ -556,7 +580,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdMergedBeneMultipleLinks[P
           }
         }, {
           "url" : "text",
-          "valueCode" : "Asian"
+          "valueString" : "Asian"
         } ],
         "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
       } ],
@@ -719,6 +743,10 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdUnMergedWithHistoricKillC
 {
   "entry" : [ {
     "resource" : {
+      "address" : [ {
+        "postalCode" : "58054",
+        "state" : "ND"
+      } ],
       "birthDate" : "1959-03-14",
       "communication" : [ {
         "language" : {
@@ -741,7 +769,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdUnMergedWithHistoricKillC
           }
         }, {
           "url" : "text",
-          "valueCode" : "Asian"
+          "valueString" : "Asian"
         } ],
         "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
       } ],
@@ -789,6 +817,10 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdUnMergedWithHistoricKillC
 {
   "entry" : [ {
     "resource" : {
+      "address" : [ {
+        "postalCode" : "58054",
+        "state" : "ND"
+      } ],
       "birthDate" : "1959-03-14",
       "communication" : [ {
         "language" : {
@@ -811,7 +843,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdUnMergedWithHistoricKillC
           }
         }, {
           "url" : "text",
-          "valueCode" : "Asian"
+          "valueString" : "Asian"
         } ],
         "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
       } ],
@@ -859,6 +891,10 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdUnMergedWithHistoricKillC
 {
   "entry" : [ {
     "resource" : {
+      "address" : [ {
+        "postalCode" : "58054",
+        "state" : "ND"
+      } ],
       "birthDate" : "1959-03-14",
       "communication" : [ {
         "language" : {
@@ -881,7 +917,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdUnMergedWithHistoricKillC
           }
         }, {
           "url" : "text",
-          "valueCode" : "Asian"
+          "valueString" : "Asian"
         } ],
         "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
       } ],
@@ -929,6 +965,10 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchById[GET]=[
 {
   "entry" : [ {
     "resource" : {
+      "address" : [ {
+        "postalCode" : "77551",
+        "state" : "TX"
+      } ],
       "birthDate" : "1922-04-01",
       "communication" : [ {
         "language" : {
@@ -951,7 +991,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchById[GET]=[
           }
         }, {
           "url" : "text",
-          "valueCode" : "American Indian or Alaska Native"
+          "valueString" : "American Indian or Alaska Native"
         } ],
         "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
       } ],
@@ -1000,6 +1040,10 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchById[GET_WITH_SEARCH]=[
 {
   "entry" : [ {
     "resource" : {
+      "address" : [ {
+        "postalCode" : "77551",
+        "state" : "TX"
+      } ],
       "birthDate" : "1922-04-01",
       "communication" : [ {
         "language" : {
@@ -1022,7 +1066,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchById[GET_WITH_SEARCH]=[
           }
         }, {
           "url" : "text",
-          "valueCode" : "American Indian or Alaska Native"
+          "valueString" : "American Indian or Alaska Native"
         } ],
         "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
       } ],
@@ -1071,6 +1115,10 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchById[POST]=[
 {
   "entry" : [ {
     "resource" : {
+      "address" : [ {
+        "postalCode" : "77551",
+        "state" : "TX"
+      } ],
       "birthDate" : "1922-04-01",
       "communication" : [ {
         "language" : {
@@ -1093,7 +1141,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchById[POST]=[
           }
         }, {
           "url" : "text",
-          "valueCode" : "American Indian or Alaska Native"
+          "valueString" : "American Indian or Alaska Native"
         } ],
         "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
       } ],
@@ -1190,6 +1238,10 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdentifier[GET]=[
 {
   "entry" : [ {
     "resource" : {
+      "address" : [ {
+        "postalCode" : "58054",
+        "state" : "ND"
+      } ],
       "birthDate" : "1959-03-14",
       "communication" : [ {
         "language" : {
@@ -1212,7 +1264,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdentifier[GET]=[
           }
         }, {
           "url" : "text",
-          "valueCode" : "Asian"
+          "valueString" : "Asian"
         } ],
         "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
       } ],
@@ -1286,6 +1338,10 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdentifier[GET_WITH_SEARCH]
 {
   "entry" : [ {
     "resource" : {
+      "address" : [ {
+        "postalCode" : "58054",
+        "state" : "ND"
+      } ],
       "birthDate" : "1959-03-14",
       "communication" : [ {
         "language" : {
@@ -1308,7 +1364,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdentifier[GET_WITH_SEARCH]
           }
         }, {
           "url" : "text",
-          "valueCode" : "Asian"
+          "valueString" : "Asian"
         } ],
         "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
       } ],
@@ -1382,6 +1438,10 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdentifier[POST]=[
 {
   "entry" : [ {
     "resource" : {
+      "address" : [ {
+        "postalCode" : "58054",
+        "state" : "ND"
+      } ],
       "birthDate" : "1959-03-14",
       "communication" : [ {
         "language" : {
@@ -1404,7 +1464,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdentifier[POST]=[
           }
         }, {
           "url" : "text",
-          "valueCode" : "Asian"
+          "valueString" : "Asian"
         } ],
         "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
       } ],
