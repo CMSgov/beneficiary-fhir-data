@@ -2337,25 +2337,31 @@ class IdrClaimRx(IdrBaseModel):
         int, {PRIMARY_KEY: True, BATCH_ID: True, ALIAS: ALIAS_CLM, LAST_UPDATED_TIMESTAMP: True}
     ]
     clm_type_cd: Annotated[int, {ALIAS: ALIAS_CLM}]
-    bene_sk: int
-    clm_cntl_num: str
-    clm_prnt_cntl_num: Annotated[str, BeforeValidator(transform_null_string)]
-    clm_orig_cntl_num: Annotated[str, BeforeValidator(transform_null_string)]
+    bene_sk: Annotated[int, ALIAS:ALIAS_CLM]
+    clm_cntl_num: Annotated[str, {ALIAS: ALIAS_CLM}]
+    clm_prnt_cntl_num: Annotated[str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_null_string)]
+    clm_orig_cntl_num: Annotated[str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_null_string)]
     clm_from_dt: Annotated[date, {ALIAS: ALIAS_CLM}]
-    clm_thru_dt: date
-    clm_efctv_dt: date
-    clm_obslt_dt: date
-    clm_finl_actn_ind: str
+    clm_thru_dt: Annotated[date, {ALIAS: ALIAS_CLM}]
+    clm_efctv_dt: Annotated[date, {ALIAS: ALIAS_CLM}]
+    clm_obslt_dt: Annotated[date, {ALIAS: ALIAS_CLM}]
+    clm_finl_actn_ind: Annotated[str, {ALIAS: ALIAS_CLM}]
     clm_src_id: Annotated[str, {ALIAS: ALIAS_CLM}]
-    clm_bene_pmt_amt: float | None
-    clm_pd_dt: Annotated[date, BeforeValidator(transform_null_date_to_max)]
-    clm_ltst_clm_ind: str
-    clm_adjstmt_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_sbmt_frmt_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_sbmtr_cntrct_num: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_sbmtr_cntrct_pbp_num: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_othr_tp_pd_amt: float | None
-    meta_src_sk: int
+    clm_bene_pmt_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
+    clm_pd_dt: Annotated[date | None, {ALIAS: ALIAS_CLM}]
+    clm_ltst_clm_ind: Annotated[str, {ALIAS: ALIAS_CLM}]
+    clm_adjstmt_type_cd: Annotated[
+        str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)
+    ]
+    clm_sbmt_frmt_cd: Annotated[str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)]
+    clm_sbmtr_cntrct_num: Annotated[
+        str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)
+    ]
+    clm_sbmtr_cntrct_pbp_num: Annotated[
+        str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)
+    ]
+    clm_othr_tp_pd_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
+    meta_src_sk: Annotated[int, {ALIAS: ALIAS_CLM}]
     idr_insrt_ts: Annotated[
         datetime,
         {BATCH_TIMESTAMP: True, INSERT_EXCLUDE: True, ALIAS: ALIAS_CLM, COLUMN_MAP: "idr_insrt_ts"},
@@ -2366,7 +2372,9 @@ class IdrClaimRx(IdrBaseModel):
         {UPDATE_TIMESTAMP: True, INSERT_EXCLUDE: True, ALIAS: ALIAS_CLM, COLUMN_MAP: "idr_updt_ts"},
         BeforeValidator(transform_null_date_to_min),
     ]
-    clm_idr_ld_dt: Annotated[date, {INSERT_EXCLUDE: True, HISTORICAL_BATCH_TIMESTAMP: True}]
+    clm_idr_ld_dt: Annotated[
+        date, {INSERT_EXCLUDE: True, HISTORICAL_BATCH_TIMESTAMP: True, ALIAS: ALIAS_CLM}
+    ]
 
     # Columns from v2_mdcr_clm_line
     clm_line_ansthsa_unit_cnt: float | None
