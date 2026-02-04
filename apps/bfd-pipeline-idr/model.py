@@ -2654,8 +2654,10 @@ class IdrClaimRx(IdrBaseModel):
                 {clm}.clm_num_sk = {rx_line}.clm_num_sk
             LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_prvdr_hstry {prvdr_srvc}
                 ON {prvdr_srvc}.prvdr_npi_num = {clm}.clm_srvc_prvdr_gnrc_id_num
+                AND {prvdr_srvc}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
             LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_prvdr_hstry {prvdr_prscrbng}
                 ON {prvdr_prscrbng}.prvdr_npi_num = {clm}.prvdr_prscrbng_prvdr_npi_num
+                AND {prvdr_prscrbng}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
             LEFT JOIN contracts {pbp_num}
                 ON {pbp_num}.cntrct_num = {clm}.clm_sbmtr_cntrct_num
                 AND {pbp_num}.cntrct_pbp_num = {clm}.clm_sbmtr_cntrct_pbp_num
