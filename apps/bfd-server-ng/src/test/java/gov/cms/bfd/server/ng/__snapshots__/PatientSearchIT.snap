@@ -24,7 +24,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByHistoricalMbi[GET]=[
           }
         }, {
           "url" : "text",
-          "valueCode" : "Asian"
+          "valueString" : "Asian"
         } ],
         "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
       } ],
@@ -120,7 +120,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByHistoricalMbi[GET_WITH_SEAR
           }
         }, {
           "url" : "text",
-          "valueCode" : "Asian"
+          "valueString" : "Asian"
         } ],
         "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
       } ],
@@ -216,7 +216,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByHistoricalMbi[POST]=[
           }
         }, {
           "url" : "text",
-          "valueCode" : "Asian"
+          "valueString" : "Asian"
         } ],
         "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
       } ],
@@ -360,7 +360,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdMergedBeneMultipleLinks[G
           }
         }, {
           "url" : "text",
-          "valueCode" : "Asian"
+          "valueString" : "Asian"
         } ],
         "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
       } ],
@@ -458,7 +458,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdMergedBeneMultipleLinks[G
           }
         }, {
           "url" : "text",
-          "valueCode" : "Asian"
+          "valueString" : "Asian"
         } ],
         "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
       } ],
@@ -556,7 +556,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdMergedBeneMultipleLinks[P
           }
         }, {
           "url" : "text",
-          "valueCode" : "Asian"
+          "valueString" : "Asian"
         } ],
         "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
       } ],
@@ -741,7 +741,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdUnMergedWithHistoricKillC
           }
         }, {
           "url" : "text",
-          "valueCode" : "Asian"
+          "valueString" : "Asian"
         } ],
         "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
       } ],
@@ -811,7 +811,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdUnMergedWithHistoricKillC
           }
         }, {
           "url" : "text",
-          "valueCode" : "Asian"
+          "valueString" : "Asian"
         } ],
         "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
       } ],
@@ -881,7 +881,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdUnMergedWithHistoricKillC
           }
         }, {
           "url" : "text",
-          "valueCode" : "Asian"
+          "valueString" : "Asian"
         } ],
         "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
       } ],
@@ -951,7 +951,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchById[GET]=[
           }
         }, {
           "url" : "text",
-          "valueCode" : "American Indian or Alaska Native"
+          "valueString" : "American Indian or Alaska Native"
         } ],
         "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
       } ],
@@ -1022,7 +1022,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchById[GET_WITH_SEARCH]=[
           }
         }, {
           "url" : "text",
-          "valueCode" : "American Indian or Alaska Native"
+          "valueString" : "American Indian or Alaska Native"
         } ],
         "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
       } ],
@@ -1093,7 +1093,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchById[POST]=[
           }
         }, {
           "url" : "text",
-          "valueCode" : "American Indian or Alaska Native"
+          "valueString" : "American Indian or Alaska Native"
         } ],
         "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
       } ],
@@ -1212,7 +1212,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdentifier[GET]=[
           }
         }, {
           "url" : "text",
-          "valueCode" : "Asian"
+          "valueString" : "Asian"
         } ],
         "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
       } ],
@@ -1308,7 +1308,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdentifier[GET_WITH_SEARCH]
           }
         }, {
           "url" : "text",
-          "valueCode" : "Asian"
+          "valueString" : "Asian"
         } ],
         "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
       } ],
@@ -1404,7 +1404,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdentifier[POST]=[
           }
         }, {
           "url" : "text",
-          "valueCode" : "Asian"
+          "valueString" : "Asian"
         } ],
         "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
       } ],

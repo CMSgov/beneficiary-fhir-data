@@ -25,7 +25,7 @@ gov.cms.bfd.server.ng.PatientCoverageC4DICSearchIT.patientCoverageSearchAllParts
           }
         }, {
           "url" : "text",
-          "valueCode" : "Black or African American"
+          "valueString" : "Black or African American"
         } ],
         "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
       } ],
@@ -482,7 +482,7 @@ gov.cms.bfd.server.ng.PatientCoverageC4DICSearchIT.patientCoverageSearchByIdDual
           }
         }, {
           "url" : "text",
-          "valueCode" : "American Indian or Alaska Native"
+          "valueString" : "American Indian or Alaska Native"
         } ],
         "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
       } ],
@@ -628,7 +628,7 @@ gov.cms.bfd.server.ng.PatientCoverageC4DICSearchIT.patientCoverageSearchByIdPart
           }
         }, {
           "url" : "text",
-          "valueCode" : "American Indian or Alaska Native"
+          "valueString" : "American Indian or Alaska Native"
         } ],
         "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
       } ],
@@ -781,7 +781,7 @@ gov.cms.bfd.server.ng.PatientCoverageC4DICSearchIT.patientCoverageSearchByIdPart
           }
         }, {
           "url" : "text",
-          "valueCode" : "Asian"
+          "valueString" : "Asian"
         } ],
         "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
       } ],
