@@ -236,7 +236,7 @@ Source tables:
 - v2_mdcr_clm
 - v2_mdcr_clm_dt_sgntr
 - v2_mdcr_prvdr_hstry
-
+- v2_mdcr_cntrct_pbp_num
 ---
 
 ### CLAIM_ITEM_PROFESSIONAL_ADJ

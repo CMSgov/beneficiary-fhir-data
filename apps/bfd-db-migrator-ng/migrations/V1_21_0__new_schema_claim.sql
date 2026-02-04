@@ -1379,7 +1379,8 @@ CREATE TABLE idr_new.claim_rx
     clm_line_rebt_passthru_pos_amt    numeric,
     clm_cms_calcd_mftr_dscnt_amt      numeric,
     clm_line_grs_cvrd_cst_tot_amt     numeric,
-    clm_phrmcy_price_dscnt_at_pos_amt numeric
+    clm_phrmcy_price_dscnt_at_pos_amt numeric,
+    cntrct_pbp_name character varying(75) NOT NULL
 );
 
 
