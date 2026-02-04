@@ -35,5 +35,8 @@ public class Contract {
   @Column(name = "cntrct_pbp_sgmt_num")
   private Optional<String> contractPbpSegmentNumber;
 
+  @Column(name = "bfd_contract_version_rank")
+  private Integer contractVersionRank;
+
   @Embedded private ContractOptional contractOptional;
 }
