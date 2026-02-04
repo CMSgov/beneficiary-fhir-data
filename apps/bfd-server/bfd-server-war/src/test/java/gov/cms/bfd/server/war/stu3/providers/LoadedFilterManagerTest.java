@@ -4,6 +4,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -11,6 +14,9 @@ import gov.cms.bfd.model.rif.LoadedBatch;
 import gov.cms.bfd.model.rif.LoadedFile;
 import gov.cms.bfd.server.war.commons.LoadedFileFilter;
 import gov.cms.bfd.server.war.commons.LoadedFilterManager;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.QueryTimeoutException;
+import jakarta.persistence.TypedQuery;
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -26,6 +32,7 @@ import java.util.stream.Stream;
 import javax.sql.DataSource;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 /** Unit tests for the {@link LoadedFilterManager}. */
 public final class LoadedFilterManagerTest {
@@ -346,6 +353,38 @@ public final class LoadedFilterManagerTest {
         LoadedFilterManager.buildTrimmedFilters(aFilters.stream(), files).toList();
     assertEquals(1, bFilters.size());
     assertSame(bFilters.get(0), aFilters.get(0));
+  }
+
+  @Test
+  void testSetTransactionTimeOnExceptionAndRefreshFilters() {
+    // Test that an exception in the query in init will default to a default Instant and yield to
+    // refreshFilters for actual update
+    var mockEntityManager = mock(EntityManager.class);
+    var mockDataSource = mock(DataSource.class);
+    var loadedFilterManager = new LoadedFilterManager(mockDataSource);
+    Mockito.doThrow(new QueryTimeoutException())
+        .when(mockEntityManager)
+        .createQuery(anyString(), any());
+    loadedFilterManager.setEntityManager(mockEntityManager);
+
+    loadedFilterManager.init();
+
+    assertEquals(
+        LoadedFilterManager.BEFORE_LAST_UPDATED_FEATURE, loadedFilterManager.getTransactionTime());
+
+    // Test that a failure to set transactionTime in init will be handled in a subsequent call to
+    // refreshFilters
+    var expectedInstant = Instant.parse("2026-01-01T00:00:00Z");
+    var mockTypedQuery = mock(TypedQuery.class);
+    Mockito.reset(mockEntityManager);
+    Mockito.doReturn(expectedInstant).when(mockTypedQuery).getSingleResult();
+    Mockito.doReturn(mockTypedQuery)
+        .when(mockEntityManager)
+        .createQuery(anyString(), eq(Instant.class));
+
+    loadedFilterManager.refreshFilters();
+
+    assertEquals(expectedInstant, loadedFilterManager.getTransactionTime());
   }
 
   /** Helper class that mocks a DB for LoadedFilterManager testing. */

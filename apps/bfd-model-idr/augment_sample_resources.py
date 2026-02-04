@@ -1,6 +1,7 @@
 import json
 import sys
 from dataclasses import asdict, dataclass, field
+from decimal import Decimal
 from pathlib import Path
 
 import pandas as pd
@@ -50,6 +51,21 @@ populate_fields_except_na = [
     "PRVDR_TYPE_CD",
 ]
 provider_list = []
+
+rx_line_financial_fields = [
+    "CLM_LINE_INGRDNT_CST_AMT",
+    "CLM_LINE_SRVC_CST_AMT",
+    "CLM_LINE_SLS_TAX_AMT",
+    "CLM_LINE_VCCN_ADMIN_FEE_AMT",
+]
+
+
+def convert_to_decimal(val: str | None) -> Decimal:
+    try:
+        return Decimal(val)
+    except (TypeError, ValueError):
+        return 0.0
+
 
 # There may be an opportunity to consolidate even the duplicate NPIs into a
 # single careTeam reference, but we should wait to get feedback on this
@@ -115,7 +131,6 @@ for si_comp in supporting_info_components:
     supporting_info_seq += 1
 
 
-
 # There can be line item NPIs that are not present at header level, but
 # need to be added to the CareTeam. This populates those.
 line_items = cur_sample_data.get("lineItemComponents", [])
@@ -172,6 +187,15 @@ for item in line_items:
             ]
             careTeamSequence = matching_providers[0]
             item["careTeamSequence"] = [careTeamSequence]
+
+    # for part D claims, sum CLM_LINE_INGRDNT_CST_AMT, CLM_LINE_SRVC_CST_AMT, CLM_LINE_SLS_TAX_AMT,
+    # CLM_LINE_VCCN_ADMIN_FEE_AMT to set TOT_RX_CST_AMT
+    tot_rx_amt = sum(
+        convert_to_decimal(item.get(financial_field))
+        for financial_field in rx_line_financial_fields
+    )
+    if tot_rx_amt > 0.0:
+        item["TOT_RX_CST_AMT"] = str(tot_rx_amt)
 
 cur_sample_data["providerList"] = provider_list
 

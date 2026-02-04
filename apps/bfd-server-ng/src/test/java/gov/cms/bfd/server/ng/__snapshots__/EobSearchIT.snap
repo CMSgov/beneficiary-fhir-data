@@ -987,6 +987,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET]=[
         }, {
           "amount" : {
             "currency" : "USD",
+            "value" : 0.36
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
             "value" : 1378.33
           },
           "category" : {
@@ -2736,6 +2752,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[GET_WITH_SEARCH]=[
             "coding" : [ {
               "code" : "CLM_LINE_OTHR_TP_PD_AMT",
               "display" : "Other Third Party Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.36
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -4497,6 +4529,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchById[POST]=[
         }, {
           "amount" : {
             "currency" : "USD",
+            "value" : 0.36
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
             "value" : 1378.33
           },
           "category" : {
@@ -6246,6 +6294,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset0]=[
             "coding" : [ {
               "code" : "CLM_LINE_OTHR_TP_PD_AMT",
               "display" : "Other Third Party Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.36
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -8008,6 +8072,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatientLimitOffset[offset1]=[
         }, {
           "amount" : {
             "currency" : "USD",
+            "value" : 0.36
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
             "value" : 1378.33
           },
           "category" : {
@@ -9764,6 +9844,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
         }, {
           "amount" : {
             "currency" : "USD",
+            "value" : 0.36
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
             "value" : 1378.33
           },
           "category" : {
@@ -11043,6 +11139,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
         } ],
         "informationSequence" : [ 1 ],
         "modifier" : [ {
@@ -12038,6 +12150,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
         } ],
         "informationSequence" : [ 1 ],
         "modifier" : [ {
@@ -12994,6 +13122,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "coding" : [ {
               "code" : "CLM_LINE_OTHR_TP_PD_AMT",
               "display" : "Other Third Party Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -14059,6 +14203,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET]=[
             "coding" : [ {
               "code" : "CLM_LINE_OTHR_TP_PD_AMT",
               "display" : "Other Third Party Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -15603,6 +15763,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
         }, {
           "amount" : {
             "currency" : "USD",
+            "value" : 0.36
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
             "value" : 1378.33
           },
           "category" : {
@@ -16882,6 +17058,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
         } ],
         "informationSequence" : [ 1 ],
         "modifier" : [ {
@@ -17877,6 +18069,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
         } ],
         "informationSequence" : [ 1 ],
         "modifier" : [ {
@@ -18833,6 +19041,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "coding" : [ {
               "code" : "CLM_LINE_OTHR_TP_PD_AMT",
               "display" : "Other Third Party Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -19898,6 +20122,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[GET_WITH_SEARCH]=[
             "coding" : [ {
               "code" : "CLM_LINE_OTHR_TP_PD_AMT",
               "display" : "Other Third Party Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -21442,6 +21682,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
         }, {
           "amount" : {
             "currency" : "USD",
+            "value" : 0.36
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
             "value" : 1378.33
           },
           "category" : {
@@ -22721,6 +22977,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
         } ],
         "informationSequence" : [ 1 ],
         "modifier" : [ {
@@ -23716,6 +23988,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
         } ],
         "informationSequence" : [ 1 ],
         "modifier" : [ {
@@ -24672,6 +24960,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "coding" : [ {
               "code" : "CLM_LINE_OTHR_TP_PD_AMT",
               "display" : "Other Third Party Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -25737,6 +26041,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByPatient[POST]=[
             "coding" : [ {
               "code" : "CLM_LINE_OTHR_TP_PD_AMT",
               "display" : "Other Third Party Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -27281,6 +27601,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
         }, {
           "amount" : {
             "currency" : "USD",
+            "value" : 0.36
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
             "value" : 1378.33
           },
           "category" : {
@@ -28560,6 +28896,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
         } ],
         "informationSequence" : [ 1 ],
         "modifier" : [ {
@@ -29552,6 +29904,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
             "coding" : [ {
               "code" : "CLM_LINE_OTHR_TP_PD_AMT",
               "display" : "Other Third Party Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -30617,6 +30985,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithCombinedTa
             "coding" : [ {
               "code" : "CLM_LINE_OTHR_TP_PD_AMT",
               "display" : "Other Third Party Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -32177,6 +32561,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
         }, {
           "amount" : {
             "currency" : "USD",
+            "value" : 0.36
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
             "value" : 1378.33
           },
           "category" : {
@@ -33456,6 +33856,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
         } ],
         "informationSequence" : [ 1 ],
         "modifier" : [ {
@@ -34448,6 +34864,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
             "coding" : [ {
               "code" : "CLM_LINE_OTHR_TP_PD_AMT",
               "display" : "Other Third Party Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -35513,6 +35945,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithSystemTag_
             "coding" : [ {
               "code" : "CLM_LINE_OTHR_TP_PD_AMT",
               "display" : "Other Third Party Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -36598,6 +37046,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTagFinalAc
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
         } ],
         "modifier" : [ {
           "coding" : [ {
@@ -37660,6 +38124,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTagFinalAc
             "coding" : [ {
               "code" : "CLM_LINE_OTHR_TP_PD_AMT",
               "display" : "Other Third Party Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -38745,6 +39225,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTag_Shared
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
         } ],
         "informationSequence" : [ 1 ],
         "modifier" : [ {
@@ -39701,6 +40197,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTag_Shared
             "coding" : [ {
               "code" : "CLM_LINE_OTHR_TP_PD_AMT",
               "display" : "Other Third Party Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -40766,6 +41278,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WITH_SEARCH_WithTag_Shared
             "coding" : [ {
               "code" : "CLM_LINE_OTHR_TP_PD_AMT",
               "display" : "Other Third Party Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -42310,6 +42838,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
         }, {
           "amount" : {
             "currency" : "USD",
+            "value" : 0.36
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
             "value" : 1378.33
           },
           "category" : {
@@ -43589,6 +44133,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
         } ],
         "informationSequence" : [ 1 ],
         "modifier" : [ {
@@ -44581,6 +45141,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
             "coding" : [ {
               "code" : "CLM_LINE_OTHR_TP_PD_AMT",
               "display" : "Other Third Party Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -45646,6 +46222,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithCombinedTagOr]=[
             "coding" : [ {
               "code" : "CLM_LINE_OTHR_TP_PD_AMT",
               "display" : "Other Third Party Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -47206,6 +47798,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
         }, {
           "amount" : {
             "currency" : "USD",
+            "value" : 0.36
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
             "value" : 1378.33
           },
           "category" : {
@@ -48485,6 +49093,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
         } ],
         "informationSequence" : [ 1 ],
         "modifier" : [ {
@@ -49477,6 +50101,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
             "coding" : [ {
               "code" : "CLM_LINE_OTHR_TP_PD_AMT",
               "display" : "Other Third Party Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -50542,6 +51182,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithSystemTag_FinalAction]
             "coding" : [ {
               "code" : "CLM_LINE_OTHR_TP_PD_AMT",
               "display" : "Other Third Party Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -51627,6 +52283,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTagFinalActionAndShare
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
         } ],
         "modifier" : [ {
           "coding" : [ {
@@ -52689,6 +53361,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTagFinalActionAndShare
             "coding" : [ {
               "code" : "CLM_LINE_OTHR_TP_PD_AMT",
               "display" : "Other Third Party Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -53774,6 +54462,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTag_SharedSystem]=[
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
         } ],
         "informationSequence" : [ 1 ],
         "modifier" : [ {
@@ -54730,6 +55434,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTag_SharedSystem]=[
             "coding" : [ {
               "code" : "CLM_LINE_OTHR_TP_PD_AMT",
               "display" : "Other Third Party Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -55795,6 +56515,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[GET_WithTag_SharedSystem]=[
             "coding" : [ {
               "code" : "CLM_LINE_OTHR_TP_PD_AMT",
               "display" : "Other Third Party Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -57339,6 +58075,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
         }, {
           "amount" : {
             "currency" : "USD",
+            "value" : 0.36
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
             "value" : 1378.33
           },
           "category" : {
@@ -58618,6 +59370,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
         } ],
         "informationSequence" : [ 1 ],
         "modifier" : [ {
@@ -59610,6 +60378,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
             "coding" : [ {
               "code" : "CLM_LINE_OTHR_TP_PD_AMT",
               "display" : "Other Third Party Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -60675,6 +61459,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithCombinedTagOr]=[
             "coding" : [ {
               "code" : "CLM_LINE_OTHR_TP_PD_AMT",
               "display" : "Other Third Party Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -62235,6 +63035,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
         }, {
           "amount" : {
             "currency" : "USD",
+            "value" : 0.36
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
             "value" : 1378.33
           },
           "category" : {
@@ -63514,6 +64330,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
         } ],
         "informationSequence" : [ 1 ],
         "modifier" : [ {
@@ -64506,6 +65338,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
             "coding" : [ {
               "code" : "CLM_LINE_OTHR_TP_PD_AMT",
               "display" : "Other Third Party Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -65571,6 +66419,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithSystemTag_FinalAction
             "coding" : [ {
               "code" : "CLM_LINE_OTHR_TP_PD_AMT",
               "display" : "Other Third Party Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -66656,6 +67520,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTagFinalActionAndShar
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
         } ],
         "modifier" : [ {
           "coding" : [ {
@@ -67718,6 +68598,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTagFinalActionAndShar
             "coding" : [ {
               "code" : "CLM_LINE_OTHR_TP_PD_AMT",
               "display" : "Other Third Party Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -68803,6 +69699,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTag_SharedSystem]=[
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
         } ],
         "informationSequence" : [ 1 ],
         "modifier" : [ {
@@ -69759,6 +70671,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTag_SharedSystem]=[
             "coding" : [ {
               "code" : "CLM_LINE_OTHR_TP_PD_AMT",
               "display" : "Other Third Party Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -70824,6 +71752,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByTags[POST_WithTag_SharedSystem]=[
             "coding" : [ {
               "code" : "CLM_LINE_OTHR_TP_PD_AMT",
               "display" : "Other Third Party Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -71909,6 +72853,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
         } ],
         "informationSequence" : [ 1 ],
         "modifier" : [ {
@@ -72904,6 +73864,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
         } ],
         "informationSequence" : [ 1 ],
         "modifier" : [ {
@@ -73860,6 +74836,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithClaimType_
             "coding" : [ {
               "code" : "CLM_LINE_OTHR_TP_PD_AMT",
               "display" : "Other Third Party Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -75303,6 +76295,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
         }, {
           "amount" : {
             "currency" : "USD",
+            "value" : 0.36
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
             "value" : 1378.33
           },
           "category" : {
@@ -76582,6 +77590,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
         } ],
         "informationSequence" : [ 1 ],
         "modifier" : [ {
@@ -77577,6 +78601,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
         } ],
         "informationSequence" : [ 1 ],
         "modifier" : [ {
@@ -78533,6 +79573,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithMultipleCl
             "coding" : [ {
               "code" : "CLM_LINE_OTHR_TP_PD_AMT",
               "display" : "Other Third Party Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -79976,6 +81032,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
         }, {
           "amount" : {
             "currency" : "USD",
+            "value" : 0.36
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
             "value" : 1378.33
           },
           "category" : {
@@ -81255,6 +82327,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
         } ],
         "informationSequence" : [ 1 ],
         "modifier" : [ {
@@ -82250,6 +83338,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
         } ],
         "informationSequence" : [ 1 ],
         "modifier" : [ {
@@ -83206,6 +84310,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             "coding" : [ {
               "code" : "CLM_LINE_OTHR_TP_PD_AMT",
               "display" : "Other Third Party Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -84271,6 +85391,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WITH_SEARCH_WithWildcard]=
             "coding" : [ {
               "code" : "CLM_LINE_OTHR_TP_PD_AMT",
               "display" : "Other Third Party Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -85356,6 +86492,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
         } ],
         "informationSequence" : [ 1 ],
         "modifier" : [ {
@@ -86351,6 +87503,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
         } ],
         "informationSequence" : [ 1 ],
         "modifier" : [ {
@@ -87307,6 +88475,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithClaimType_outpatient]=
             "coding" : [ {
               "code" : "CLM_LINE_OTHR_TP_PD_AMT",
               "display" : "Other Third Party Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -88750,6 +89934,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
         }, {
           "amount" : {
             "currency" : "USD",
+            "value" : 0.36
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
             "value" : 1378.33
           },
           "category" : {
@@ -90029,6 +91229,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
         } ],
         "informationSequence" : [ 1 ],
         "modifier" : [ {
@@ -91024,6 +92240,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
         } ],
         "informationSequence" : [ 1 ],
         "modifier" : [ {
@@ -91980,6 +93212,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithMultipleClaimTypes_hha
             "coding" : [ {
               "code" : "CLM_LINE_OTHR_TP_PD_AMT",
               "display" : "Other Third Party Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -93423,6 +94671,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
         }, {
           "amount" : {
             "currency" : "USD",
+            "value" : 0.36
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
             "value" : 1378.33
           },
           "category" : {
@@ -94702,6 +95966,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
         } ],
         "informationSequence" : [ 1 ],
         "modifier" : [ {
@@ -95697,6 +96977,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
         } ],
         "informationSequence" : [ 1 ],
         "modifier" : [ {
@@ -96653,6 +97949,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             "coding" : [ {
               "code" : "CLM_LINE_OTHR_TP_PD_AMT",
               "display" : "Other Third Party Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -97718,6 +99030,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[GET_WithWildcard]=[
             "coding" : [ {
               "code" : "CLM_LINE_OTHR_TP_PD_AMT",
               "display" : "Other Third Party Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -98803,6 +100131,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
         } ],
         "informationSequence" : [ 1 ],
         "modifier" : [ {
@@ -99798,6 +101142,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
         } ],
         "informationSequence" : [ 1 ],
         "modifier" : [ {
@@ -100754,6 +102114,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithClaimType_outpatient]
             "coding" : [ {
               "code" : "CLM_LINE_OTHR_TP_PD_AMT",
               "display" : "Other Third Party Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -102197,6 +103573,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
         }, {
           "amount" : {
             "currency" : "USD",
+            "value" : 0.36
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
             "value" : 1378.33
           },
           "category" : {
@@ -103476,6 +104868,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
         } ],
         "informationSequence" : [ 1 ],
         "modifier" : [ {
@@ -104471,6 +105879,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
         } ],
         "informationSequence" : [ 1 ],
         "modifier" : [ {
@@ -105427,6 +106851,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithMultipleClaimTypes_hh
             "coding" : [ {
               "code" : "CLM_LINE_OTHR_TP_PD_AMT",
               "display" : "Other Third Party Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -106870,6 +108310,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
         }, {
           "amount" : {
             "currency" : "USD",
+            "value" : 0.36
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
             "value" : 1378.33
           },
           "category" : {
@@ -108149,6 +109605,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
         } ],
         "informationSequence" : [ 1 ],
         "modifier" : [ {
@@ -109144,6 +110616,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
         } ],
         "informationSequence" : [ 1 ],
         "modifier" : [ {
@@ -110100,6 +111588,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             "coding" : [ {
               "code" : "CLM_LINE_OTHR_TP_PD_AMT",
               "display" : "Other Third Party Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -111165,6 +112669,22 @@ gov.cms.bfd.server.ng.EobSearchIT.eobSearchByType[POST_WithWildcard]=[
             "coding" : [ {
               "code" : "CLM_LINE_OTHR_TP_PD_AMT",
               "display" : "Other Third Party Paid Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.35
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "submitted",
+              "display" : "Submitted Amount",
+              "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+            }, {
+              "code" : "CLM_LINE_SBMT_CHRG_AMT",
+              "display" : "Line Submitted Charge Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }

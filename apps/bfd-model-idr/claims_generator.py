@@ -13,6 +13,7 @@ from typing import Any
 import pandas as pd
 import tqdm
 import yaml
+from dateutil.relativedelta import relativedelta
 from faker import Faker
 from pydantic import BaseModel, ConfigDict, Field, TypeAdapter
 
@@ -1634,6 +1635,11 @@ def gen_contract_plan(amount: int):
     last_day = today.replace(month=12, day=31)
 
     for pbp_num in pbp_nums:
+        effective_date = faker.date_between_dates(date.fromisoformat("2020-01-01"), now)
+        end_date = faker.date_between_dates(effective_date, now + relativedelta(years=3))
+        obsolete_date = random.choice(
+            [faker.date_between_dates(effective_date, now), date.fromisoformat("9999-12-31")]
+        )
         contract_pbp_num.append(
             {
                 "CNTRCT_PBP_SK": gen_basic_id(field="CNTRCT_PBP_SK", length=12),
@@ -1642,7 +1648,9 @@ def gen_contract_plan(amount: int):
                 "CNTRCT_PBP_NAME": random.choice(avail_contract_names),
                 "CNTRCT_PBP_TYPE_CD": random.choice(avail_pbp_type_codes),
                 "CNTRCT_DRUG_PLAN_IND_CD": random.choice(["Y", "N"]),
-                "CNTRCT_PBP_SK_OBSLT_DT": random.choice(["0001-01-01", "9999-12-31"]),
+                "CNTRCT_PBP_SK_EFCTV_DT": effective_date.isoformat(),
+                "CNTRCT_PBP_END_DT": end_date.isoformat(),
+                "CNTRCT_PBP_SK_OBSLT_DT": obsolete_date.isoformat(),
             }
         )
 
