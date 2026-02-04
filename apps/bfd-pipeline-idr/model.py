@@ -2362,7 +2362,9 @@ class IdrClaimRx(IdrBaseModel):
     ]
     clm_finl_actn_ind: Annotated[str, {ALIAS: ALIAS_CLM}]
     clm_bene_pmt_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
-    clm_pd_dt: Annotated[date | None, {ALIAS: ALIAS_CLM}]
+    clm_pd_dt: Annotated[
+        date | None, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_date_to_null)
+    ]
     clm_ltst_clm_ind: Annotated[str, {ALIAS: ALIAS_CLM}]
     clm_adjstmt_type_cd: Annotated[
         str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)
@@ -2574,7 +2576,9 @@ class IdrClaimRx(IdrBaseModel):
         BeforeValidator(transform_default_int_to_null),
     ]
     prvdr_srvc_hstry_efctv_dt: Annotated[
-        date | None, {COLUMN_MAP: "prvdr_hstry_efctv_dt", ALIAS: ALIAS_PRVDR_PRSCRBNG}
+        date | None,
+        {COLUMN_MAP: "prvdr_hstry_efctv_dt", ALIAS: ALIAS_PRVDR_PRSCRBNG},
+        BeforeValidator(transform_default_date_to_null),
     ]
     prvdr_srvc_mdl_name: Annotated[
         str,
