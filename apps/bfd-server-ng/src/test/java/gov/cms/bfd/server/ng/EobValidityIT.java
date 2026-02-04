@@ -55,6 +55,12 @@ class EobValidityIT extends IntegrationTestBase {
     if (eob.hasDiagnosis()) {
       validateDiagnosis(eob);
     }
+
+    assertTrue(
+        eob.getAdjudication().stream()
+            .flatMap(a -> a.getCategory().getCoding().stream())
+            .anyMatch(c -> "benefitpaymentstatus".equals(c.getCode())),
+        "EOB should have header-level adjudication benefitpaymentstatus");
   }
 
   @ParameterizedTest

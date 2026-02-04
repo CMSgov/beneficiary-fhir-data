@@ -1,6 +1,21 @@
 gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
 {
   "adjudication" : [ {
+    "category" : {
+      "coding" : [ {
+        "code" : "benefitpaymentstatus",
+        "display" : "Benefit Payment Status",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
+      } ]
+    },
+    "reason" : {
+      "coding" : [ {
+        "code" : "other",
+        "display" : "Other",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus"
+      } ]
+    }
+  }, {
     "amount" : {
       "currency" : "USD",
       "value" : 0.0
@@ -963,6 +978,21 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
 gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
 {
   "adjudication" : [ {
+    "category" : {
+      "coding" : [ {
+        "code" : "benefitpaymentstatus",
+        "display" : "Benefit Payment Status",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
+      } ]
+    },
+    "reason" : {
+      "coding" : [ {
+        "code" : "other",
+        "display" : "Other",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus"
+      } ]
+    }
+  }, {
     "amount" : {
       "currency" : "USD",
       "value" : 0.0
@@ -1910,6 +1940,21 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
 gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
 {
   "adjudication" : [ {
+    "category" : {
+      "coding" : [ {
+        "code" : "benefitpaymentstatus",
+        "display" : "Benefit Payment Status",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
+      } ]
+    },
+    "reason" : {
+      "coding" : [ {
+        "code" : "other",
+        "display" : "Other",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus"
+      } ]
+    }
+  }, {
     "amount" : {
       "currency" : "USD",
       "value" : 0.0
@@ -3150,6 +3195,21 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
 gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
 {
   "adjudication" : [ {
+    "category" : {
+      "coding" : [ {
+        "code" : "benefitpaymentstatus",
+        "display" : "Benefit Payment Status",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
+      } ]
+    },
+    "reason" : {
+      "coding" : [ {
+        "code" : "other",
+        "display" : "Other",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus"
+      } ]
+    }
+  }, {
     "amount" : {
       "currency" : "USD",
       "value" : 0.0
@@ -4391,6 +4451,21 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
 gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
 {
   "adjudication" : [ {
+    "category" : {
+      "coding" : [ {
+        "code" : "benefitpaymentstatus",
+        "display" : "Benefit Payment Status",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
+      } ]
+    },
+    "reason" : {
+      "coding" : [ {
+        "code" : "other",
+        "display" : "Other",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus"
+      } ]
+    }
+  }, {
     "amount" : {
       "currency" : "USD",
       "value" : 8101.52
@@ -6132,6 +6207,21 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
 gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
 {
   "adjudication" : [ {
+    "category" : {
+      "coding" : [ {
+        "code" : "benefitpaymentstatus",
+        "display" : "Benefit Payment Status",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
+      } ]
+    },
+    "reason" : {
+      "coding" : [ {
+        "code" : "other",
+        "display" : "Other",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus"
+      } ]
+    }
+  }, {
     "amount" : {
       "currency" : "USD",
       "value" : 8101.52

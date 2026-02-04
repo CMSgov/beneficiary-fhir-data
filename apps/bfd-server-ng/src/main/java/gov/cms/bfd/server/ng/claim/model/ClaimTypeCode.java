@@ -397,6 +397,25 @@ public enum ClaimTypeCode {
     return Optional.empty();
   }
 
+  List<ExplanationOfBenefit.AdjudicationComponent> toFhirAdjudication() {
+    var adjudication = new ExplanationOfBenefit.AdjudicationComponent();
+    adjudication.setCategory(
+        new CodeableConcept()
+            .addCoding(
+                new Coding()
+                    .setSystem(SystemUrls.CARIN_CODE_SYSTEM_ADJUDICATION_DISCRIMINATOR)
+                    .setCode("benefitpaymentstatus")
+                    .setDisplay("Benefit Payment Status")));
+    adjudication.setReason(
+        new CodeableConcept()
+            .addCoding(
+                new Coding()
+                    .setSystem(SystemUrls.CARIN_CODE_SYSTEM_PAYER_ADJUDICATION_STATUS)
+                    .setCode("other")
+                    .setDisplay("Other")));
+    return List.of(adjudication);
+  }
+
   boolean isPacStage1() {
     return isBetween(1000, 1999);
   }
