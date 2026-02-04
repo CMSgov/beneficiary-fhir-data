@@ -34,13 +34,6 @@ locals {
   # Local module definitions
   layer     = "data"
   full_name = "bfd-${local.env}-${local.service}"
-
-  # Hashmap of EventBridge Names in the environments
-  eventbridge_name = {
-    prod = "EventsToLogs-bfd-pr-GkfqaQcy1BbcXQLjkTL6jeX8TnW71BHedM937r6P1Jap"
-    sandbox = "EventsToLogs-bfd-sa-BnbucgSa4TiWrRdgEehNDermpJov5j1yJTyjfH1eDXbv"
-    test = ""
-  }
 }
 
 resource "aws_cloudwatch_log_group" "this" {
