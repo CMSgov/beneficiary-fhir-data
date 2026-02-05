@@ -134,6 +134,14 @@ def get_min_transaction_date(default_date: str = DEFAULT_MIN_DATE) -> datetime:
     return format_date(default_date)
 
 
+def provider_last_name_expr(alias: str, claim_field: str) -> str:
+    return f"""
+        CASE WHEN {alias}.prvdr_last_name IS NULL OR {alias}.prvdr_last_name IN ('', '~')
+        THEN {ALIAS_CLM}.{claim_field}
+        ELSE {alias}.prvdr_last_name
+        END"""
+
+
 PRIMARY_KEY = "primary_key"
 BATCH_TIMESTAMP = "batch_timestamp"
 HISTORICAL_BATCH_TIMESTAMP = "historical_batch_timestamp"
@@ -2591,7 +2599,7 @@ class IdrClaimRx(IdrBaseModel):
     ]
     prvdr_prscrbng_last_name: Annotated[
         str,
-        {COLUMN_MAP: "prvdr_last_name", ALIAS: ALIAS_PRVDR_PRSCRBNG},
+        {EXPR: provider_last_name_expr(ALIAS_PRVDR_PRSCRBNG, "clm_prscrbng_prvdr_last_name")},
         BeforeValidator(transform_default_string),
     ]
 
@@ -2645,6 +2653,7 @@ class IdrClaimRx(IdrBaseModel):
         {COLUMN_MAP: "prvdr_emplr_id_num", ALIAS: ALIAS_PRVDR_SRVC},
         BeforeValidator(transform_default_string),
     ]
+    # There doesn't seem to be an version of "clm_srvc_prvdr_last_name" in the claim table
     prvdr_srvc_last_name: Annotated[
         str,
         {COLUMN_MAP: "prvdr_last_name", ALIAS: ALIAS_PRVDR_SRVC},
@@ -2882,7 +2891,7 @@ class IdrClaimProfessionalNch(IdrBaseModel):
     ]
     prvdr_blg_last_name: Annotated[
         str,
-        {COLUMN_MAP: "prvdr_last_name", ALIAS: ALIAS_PRVDR_BLG},
+        {EXPR: provider_last_name_expr(ALIAS_PRVDR_BLG, "clm_blg_prvdr_last_name")},
         BeforeValidator(transform_default_string),
     ]
     prvdr_rfrg_prvdr_npi_num: Annotated[
@@ -2937,7 +2946,7 @@ class IdrClaimProfessionalNch(IdrBaseModel):
     ]
     prvdr_rfrg_last_name: Annotated[
         str,
-        {COLUMN_MAP: "prvdr_last_name", ALIAS: ALIAS_PRVDR_RFRG},
+        {EXPR: provider_last_name_expr(ALIAS_PRVDR_RFRG, "clm_rfrg_prvdr_last_name")},
         BeforeValidator(transform_default_string),
     ]
     prvdr_srvc_prvdr_npi_num: Annotated[
@@ -2990,6 +2999,7 @@ class IdrClaimProfessionalNch(IdrBaseModel):
         {COLUMN_MAP: "prvdr_emplr_id_num", ALIAS: ALIAS_PRVDR_SRVC},
         BeforeValidator(transform_default_string),
     ]
+    # There doesn't seem to be an version of "clm_srvc_prvdr_last_name" in the claim table
     prvdr_srvc_last_name: Annotated[
         str,
         {COLUMN_MAP: "prvdr_last_name", ALIAS: ALIAS_PRVDR_SRVC},
