@@ -1,0 +1,47 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+      http:
+
+prometheus:
+  config:
+    scrape_configs:
+      - job_name: "kubernetes-pods"
+        kubernetes_sd_configs:
+          - role: pod
+
+processors:
+  batch:
+    timeout: 5s
+    send_batch_size: 8192
+
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 400
+    spike_limit_mib: 100
+
+exporters:
+  awsxray:
+    region: us-east-1
+
+  awsemf:
+    region: us-east-1
+    log_group_name: "/aws/otel/metrics"
+    log_stream_name: "{instance_id}"
+
+service:
+  telemetry:
+    logs:
+      level: info
+
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [awsxray]
+
+    metrics:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [awsemf]
