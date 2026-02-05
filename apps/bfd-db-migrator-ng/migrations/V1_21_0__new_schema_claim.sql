@@ -641,7 +641,7 @@ CREATE TABLE idr_new.claim_institutional_shared_systems
     clm_bnft_enhncmt_3_cd      character varying(2),
     clm_bnft_enhncmt_4_cd      character varying(2),
     clm_bnft_enhncmt_5_cd      character varying(2),
-    clm_rfrg_prvdr_pin_num     character varying(14),
+--     clm_rfrg_prvdr_pin_num     character varying(14),
     prvdr_srvc_prvdr_npi_num   character varying(10),
     prvdr_srvc_sk              bigint,
     prvdr_srvc_mdl_name        character varying(25),
