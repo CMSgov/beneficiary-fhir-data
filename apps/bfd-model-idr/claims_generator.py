@@ -1604,24 +1604,34 @@ def gen_provider_history(amount: int):
     return provider_history
 
 
-def gen_contract_plan(amount: int):
-    pbp_nums = random.sample(AVAIL_PBP_NUMS, amount)
-    contract_pbp_num: list[dict[str, Any]] = []
-    contract_pbp_contact: list[dict[str, Any]] = []
+def gen_contract_plan(
+    amount: int,
+    init_contract_pbp_nums: list[RowAdapter] | None = None,
+    init_contract_pbp_contacts: list[RowAdapter] | None = None,
+):
+    init_contract_pbp_nums = init_contract_pbp_nums or []
+    init_contract_pbp_contacts = init_contract_pbp_contacts or []
+    additional_pbp_nums = [RowAdapter({}) for _ in range(amount - len(init_contract_pbp_nums))]
+    additional_pbp_contacts = [
+        RowAdapter({}) for _ in range(amount - len(init_contract_pbp_contacts))
+    ]
+    all_pbp_nums = init_contract_pbp_nums + additional_pbp_nums
+    all_pbp_contacts = init_contract_pbp_contacts + additional_pbp_contacts
     today = date.today()
     last_day = today.replace(month=12, day=31)
 
-    for pbp_num in pbp_nums:
-        effective_date = faker.date_between_dates(date.fromisoformat("2020-01-01"), now)
-        end_date = faker.date_between_dates(effective_date, now + relativedelta(years=3))
+    contract_pbp_nums: list[RowAdapter] = []
+    for pbp_num in all_pbp_nums:
+        effective_date = faker.date_between_dates(date.fromisoformat("2020-01-01"), NOW)
+        end_date = faker.date_between_dates(effective_date, NOW + relativedelta(years=3))
         obsolete_date = random.choice(
-            [faker.date_between_dates(effective_date, now), date.fromisoformat("9999-12-31")]
+            [faker.date_between_dates(effective_date, NOW), date.fromisoformat("9999-12-31")]
         )
-        contract_pbp_num.append(
+        pbp_num.extend(
             {
                 f.CNTRCT_PBP_SK: gen_basic_id(field=f.CNTRCT_PBP_SK, length=12),
                 f.CNTRCT_NUM: random.choice(AVAIL_CONTRACT_NUMS),
-                f.CNTRCT_PBP_NUM: pbp_num,
+                f.CNTRCT_PBP_NUM: random.choice(AVAIL_PBP_NUMS),
                 f.CNTRCT_PBP_NAME: random.choice(AVAIL_CONTRACT_NAMES),
                 f.CNTRCT_PBP_TYPE_CD: random.choice(AVAIL_PBP_TYPE_CODES),
                 f.CNTRCT_DRUG_PLAN_IND_CD: random.choice(["Y", "N"]),
@@ -1630,8 +1640,11 @@ def gen_contract_plan(amount: int):
                 f.CNTRCT_PBP_SK_OBSLT_DT: obsolete_date.isoformat(),
             }
         )
+        contract_pbp_nums.append(pbp_num)
 
-        contract_pbp_contact.append(
+    contract_pbp_contacts: list[RowAdapter] = []
+    for pbp_contact in all_pbp_contacts:
+        pbp_contact.extend(
             {
                 f.CNTRCT_PBP_SK: gen_basic_id(field=f.CNTRCT_PBP_SK, length=12),
                 f.CNTRCT_PLAN_CNTCT_OBSLT_DT: "9999-12-31",
@@ -1661,8 +1674,9 @@ def gen_contract_plan(amount: int):
                 f.CNTRCT_PLAN_CNTCT_ZIP_CD: "".join(random.choices(string.digits, k=9)),
             }
         )
+        contract_pbp_contacts.append(pbp_contact)
 
-    return contract_pbp_num, contract_pbp_contact
+    return contract_pbp_nums, contract_pbp_contacts
 
 
 def add_meta_timestamps(
@@ -1724,6 +1738,15 @@ def generate_meta_sk_pair(obj: dict[str, Any]):
 @from_pydantic("opts", OptionsModel)
 def main(opts: OptionsModel, paths: tuple[Path, ...]):
     """Generate synthetic claims data. Provided file PATHS will be updated with new fields."""
+    min_claims = opts.min_claims
+    max_claims = opts.max_claims
+    if min_claims > max_claims:
+        print(
+            f"error: min claims value of {min_claims} is greater than "
+            f"max claims value of {max_claims}"
+        )
+        sys.exit(1)
+
     if opts.sushi:
         print("Running sushi build")
         _, stderr = run_command(["sushi", "build"], cwd="./sushi")
@@ -1773,25 +1796,21 @@ def main(opts: OptionsModel, paths: tuple[Path, ...]):
         file not in clm_required_tables for file in paths
     ):
         print(f"{', '.join(clm_required_tables)} must be provided if {CLM} is provided")
-        return
+        sys.exit(1)
 
     out_tables: dict[str, list[RowAdapter]] = {k: [] for k in files}
-    cntrct_pbp_num = adapters_to_dicts(files[CNTRCT_PBP_NUM])
-    cntrct_pbp_cntct = adapters_to_dicts(files[CNTRCT_PBP_CNTCT])
-    if not cntrct_pbp_num or cntrct_pbp_cntct:
-        cntrct_pbp_num, cntrct_pbp_cntct = gen_contract_plan(amount=10)
+    cntrct_pbp_num, cntrct_pbp_cntct = gen_contract_plan(
+        amount=10,
+        init_contract_pbp_nums=files[CNTRCT_PBP_NUM],
+        init_contract_pbp_contacts=files[CNTRCT_PBP_CNTCT],
+    )
+    out_tables[CNTRCT_PBP_NUM].extend(cntrct_pbp_num)
+    out_tables[CNTRCT_PBP_CNTCT].extend(cntrct_pbp_cntct)
+
     prvdr_hstry = adapters_to_dicts(files[PRVDR_HSTRY])
     if not prvdr_hstry:
         prvdr_hstry = gen_provider_history(amount=14)
     clm_ansi_sgntr = gen_synthetic_clm_ansi_sgntr()
-    min_claims: int = opts.min_claims
-    max_claims: int = opts.max_claims
-    if min_claims > max_claims:
-        print(
-            f"error: min claims value of {min_claims} is greater than "
-            f"max claims value of {max_claims}"
-        )
-        sys.exit(1)
 
     bene_sks_with_claims: dict[int, list[RowAdapter]] = {}
     for claim in files[CLM]:
@@ -1977,8 +1996,8 @@ def main(opts: OptionsModel, paths: tuple[Path, ...]):
         dict_out_tbls[CLM_LINE_RX],
         dict_out_tbls[CLM_RLT_COND_SGNTR_MBR],
         prvdr_hstry,
-        cntrct_pbp_num,
-        cntrct_pbp_cntct,
+        dict_out_tbls[CNTRCT_PBP_NUM],
+        dict_out_tbls[CNTRCT_PBP_CNTCT],
         clm_ansi_sgntr,
     )
 
