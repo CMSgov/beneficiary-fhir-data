@@ -208,6 +208,7 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm (
     prvdr_atndg_prvdr_npi_num VARCHAR(10),
     prvdr_rndrng_prvdr_npi_num VARCHAR(10),
     prvdr_oprtg_prvdr_npi_num VARCHAR(10),
+    clm_rfrg_prvdr_pin_num VARCHAR(14),
     clm_disp_cd VARCHAR(2),
     clm_sbmt_chrg_amt NUMERIC,
     clm_srvc_prvdr_gnrc_id_num VARCHAR(20),

@@ -10,6 +10,7 @@ ALTERNATE_DEFAULT_DATE = "1000-01-01"
 CLAIM_TABLE = "idr.claim"
 BENEFICIARY_TABLE = "idr.beneficiary"
 CLAIM_RX_TABLE = "idr_new.claim_rx"
+CLAIM_PROFESSIONAL_NCH_TABLE = "idr_new.claim_professional_nch"
 
 DEATH_DATE_CUTOFF_YEARS = 4
 

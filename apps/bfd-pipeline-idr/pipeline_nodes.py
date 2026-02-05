@@ -28,6 +28,7 @@ from model import (
     IdrClaimLineProfessional,
     IdrClaimLineRx,
     IdrClaimProfessional,
+    IdrClaimProfessionalNch,
     IdrClaimRx,
     IdrContractPbpContact,
     IdrContractPbpNumber,
@@ -46,7 +47,7 @@ def filter_claim_tables(tables: list[type[IdrBaseModel]]) -> list[type[IdrBaseMo
 
 
 def claim_tables() -> list[type[IdrBaseModel]]:
-    return filter_claim_tables([IdrClaim])
+    return filter_claim_tables([IdrClaim, IdrClaimProfessionalNch])
 
 
 def claim_aux_tables() -> list[type[IdrBaseModel]]:
