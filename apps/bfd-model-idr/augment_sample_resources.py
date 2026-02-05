@@ -249,14 +249,8 @@ type_priority = {"P": 1, "A": 2, "R": 3, "E": 4}
 diagnosis_codes.sort(key=lambda d: type_priority.get(d.CLM_PROD_TYPE_CD, 99))
 
 # Assign sequential ROW_NUM
-for idx, diag in enumerate(diagnosis_codes):
-    diag.ROW_NUM = str(idx + 1)
-
-    # Map type directly based on the instance's CLM_PROD_TYPE_CD
-    if diag.CLM_PROD_TYPE_CD in ["P", "A", "R", "E"]:
-        diag.clm_prod_type_cd_map = [diag.CLM_PROD_TYPE_CD]
-    else:
-        diag.clm_prod_type_cd_map = ["D"]
+for idx, diag in enumerate(diagnosis_codes, start=1):
+    diag.ROW_NUM = str(idx)
 
 cur_sample_data["diagnoses"] = [asdict(d) for d in diagnosis_codes]
 
