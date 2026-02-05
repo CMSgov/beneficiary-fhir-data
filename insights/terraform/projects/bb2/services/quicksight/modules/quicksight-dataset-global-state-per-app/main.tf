@@ -427,6 +427,58 @@ resource "aws_quicksight_data_set" "quicksight_data_set_global_state_per_app" {
           type = "INTEGER"
       }
       input_columns {
+          name = "app_fhir_v3_call_real_count"
+          type = "INTEGER"
+      }
+      input_columns {
+          name = "app_fhir_v3_call_synthetic_count"
+          type = "INTEGER"
+      }
+      input_columns {
+          name = "app_fhir_v3_eob_call_real_count"
+          type = "INTEGER"
+      }
+      input_columns {
+          name = "app_fhir_v3_eob_call_synthetic_count"
+          type = "INTEGER"
+      }
+      input_columns {
+          name = "app_fhir_v3_coverage_call_real_count"
+          type = "INTEGER"
+      }
+      input_columns {
+          name = "app_fhir_v3_coverage_call_synthetic_count"
+          type = "INTEGER"
+      }
+      input_columns {
+          name = "app_fhir_v3_patient_call_real_count"
+          type = "INTEGER"
+      }
+      input_columns {
+          name = "app_fhir_v3_patient_call_synthetic_count"
+          type = "INTEGER"
+      }
+      input_columns {
+          name = "app_fhir_v3_metadata_call_count"
+          type = "INTEGER"
+      }
+      input_columns {
+          name = "app_fhir_v3_eob_since_call_real_count"
+          type = "INTEGER"
+      }
+      input_columns {
+          name = "app_fhir_v3_eob_since_call_synthetic_count"
+          type = "INTEGER"
+      }
+      input_columns {
+          name = "app_fhir_v3_coverage_since_call_real_count"
+          type = "INTEGER"
+      }
+      input_columns {
+          name = "app_fhir_v3_coverage_since_call_synthetic_count"
+          type = "INTEGER"
+      }
+      input_columns {
           name = "app_auth_ok_real_bene_count"
           type = "INTEGER"
       }

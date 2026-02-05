@@ -132,6 +132,26 @@ resource "aws_quicksight_analysis" "quicksight_analysis_dasg_metrics" {
     }
     calculated_fields {
       data_set_identifier = "prod_global_state"
+      expression          = "round(percentDifference(sum({fhir_v3_call_real_count}), [{report_date} ASC], -1), 3)"
+      name                = "fhir_v3_call_real_count_wow_percent"
+    }
+    calculated_fields {
+      data_set_identifier = "prod_global_state"
+      expression          = "round(percentDifference(sum({fhir_v3_coverage_call_real_count}), [{report_date} ASC], -1), 3)"
+      name                = "fhir_v3_coverage_call_real_count_wow_percent"
+    }
+    calculated_fields {
+      data_set_identifier = "prod_global_state"
+      expression          = "round(percentDifference(sum({fhir_v3_eob_call_real_count}), [{report_date} ASC], -1), 3)"
+      name                = "fhir_v3_eob_call_count_wow_percent"
+    }
+    calculated_fields {
+      data_set_identifier = "prod_global_state"
+      expression          = "round(percentDifference(sum({fhir_v3_patient_call_real_count}), [{report_date} ASC], -1), 3)"
+      name                = "fhir_v3_patient_call_count_wow_percent"
+    }
+    calculated_fields {
+      data_set_identifier = "prod_global_state"
       expression          = "round(percentDifference(sum({total_grant_and_archived_real_bene_deduped_count}), [{report_date} ASC], -1), 3)"
       name                = "bene_served_wow_percent"
     }
@@ -460,6 +480,46 @@ resource "aws_quicksight_analysis" "quicksight_analysis_dasg_metrics" {
                 field_id     = "94e747da-b933-4faf-9883-46d2c43caa87.17.1642013219568"
                 visibility   = "VISIBLE"
               }
+              selected_field_options {
+                custom_label = "TOTAL V3 FHIR Calls Made"
+                field_id     = "395e9e0d-ae34-480e-8f58-5fe90f34425e.fhir_v3_call_real_count.18.1770146014844"
+                visibility   = "VISIBLE"
+              }
+              selected_field_options {
+                custom_label = "TOTAL V3 FHIR Calls Made WoW %"
+                field_id     = "cd5cc33b-3cc1-4c3d-bf62-3ee0bb6bbec0.17.1641911037918"
+                visibility   = "VISIBLE"
+              }
+              selected_field_options {
+                custom_label = "TOTAL V3 EOB Calls Made"
+                field_id     = "395e9e0d-ae34-480e-8f58-5fe90f34425e.fhir_v3_eob_call_real_count.19.1770146626075"
+                visibility   = "VISIBLE"
+              }
+              selected_field_options {
+                custom_label = "TOTAL V3 EOB Calls Made WoW %"
+                field_id     = "850e0507-340a-444b-ba88-503db0a66613.19.1641911044118"
+                visibility   = "VISIBLE"
+              }
+              selected_field_options {
+                custom_label = "TOTAL V3 COVERAGE Calls Made"
+                field_id     = "395e9e0d-ae34-480e-8f58-5fe90f34425e.fhir_v3_coverage_call_real_count.20.1770146636223"
+                visibility   = "VISIBLE"
+              }
+              selected_field_options {
+                custom_label = "TOTAL V3 COVERAGE Calls Made WoW %"
+                field_id     = "ae06d4ea-be61-42d8-a6c1-95f63afaf228.14.1641912222931"
+                visibility   = "VISIBLE"
+              }
+              selected_field_options {
+                custom_label = "TOTAL V3 PATIENT Calls Made"
+                field_id     = "395e9e0d-ae34-480e-8f58-5fe90f34425e.fhir_v3_patient_call_real_count.21.1770146641503"
+                visibility   = "VISIBLE"
+              }
+              selected_field_options {
+                custom_label = "TOTAL V3 PATIENT Calls Made WoW %"
+                field_id     = "d410f8bf-842b-4885-aadf-05a365ea4353.16.1641912230066"
+                visibility   = "VISIBLE"
+              }
             }
             field_wells {
               pivot_table_aggregated_field_wells {
@@ -756,6 +816,142 @@ resource "aws_quicksight_analysis" "quicksight_analysis_dasg_metrics" {
 
                     column {
                       column_name         = "total_v1_v2_calls_using_since_param_percent"
+                      data_set_identifier = "prod_global_state"
+                    }
+
+                    format_configuration {
+                      numeric_format_configuration {
+                        percentage_display_format_configuration {
+                          null_value_format_configuration {
+                            null_string = "null"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+                values {
+                  numerical_measure_field {
+                    field_id = "395e9e0d-ae34-480e-8f58-5fe90f34425e.fhir_v3_call_real_count.18.1770146014844"
+
+                    aggregation_function {
+                      simple_numerical_aggregation = "SUM"
+                    }
+
+                    column {
+                      column_name         = "fhir_v3_call_real_count"
+                      data_set_identifier = "prod_global_state"
+                    }
+                  }
+                }
+                values {
+                  numerical_measure_field {
+                    field_id = "cd5cc33b-3cc1-4c3d-bf62-3ee0bb6bbec0.17.1641911037918"
+
+                    column {
+                      column_name         = "fhir_v3_call_real_count_wow_percent"
+                      data_set_identifier = "prod_global_state"
+                    }
+
+                    format_configuration {
+                      numeric_format_configuration {
+                        percentage_display_format_configuration {
+                          null_value_format_configuration {
+                            null_string = "null"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+                values {
+                  numerical_measure_field {
+                    field_id = "395e9e0d-ae34-480e-8f58-5fe90f34425e.fhir_v3_eob_call_real_count.19.1770146626075"
+
+                    aggregation_function {
+                      simple_numerical_aggregation = "SUM"
+                    }
+
+                    column {
+                      column_name         = "fhir_v3_eob_call_real_count"
+                      data_set_identifier = "prod_global_state"
+                    }
+                  }
+                }
+                values {
+                  numerical_measure_field {
+                    field_id = "850e0507-340a-444b-ba88-503db0a66613.19.1641911044118"
+
+                    column {
+                      column_name         = "fhir_v3_eob_call_count_wow_percent"
+                      data_set_identifier = "prod_global_state"
+                    }
+
+                    format_configuration {
+                      numeric_format_configuration {
+                        percentage_display_format_configuration {
+                          null_value_format_configuration {
+                            null_string = "null"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+                values {
+                  numerical_measure_field {
+                    field_id = "395e9e0d-ae34-480e-8f58-5fe90f34425e.fhir_v3_coverage_call_real_count.20.1770146636223"
+
+                    aggregation_function {
+                      simple_numerical_aggregation = "SUM"
+                    }
+
+                    column {
+                      column_name         = "fhir_v3_coverage_call_real_count"
+                      data_set_identifier = "prod_global_state"
+                    }
+                  }
+                }
+                values {
+                  numerical_measure_field {
+                    field_id = "ae06d4ea-be61-42d8-a6c1-95f63afaf228.14.1641912222931"
+
+                    column {
+                      column_name         = "fhir_v3_coverage_call_real_count_wow_percent"
+                      data_set_identifier = "prod_global_state"
+                    }
+
+                    format_configuration {
+                      numeric_format_configuration {
+                        percentage_display_format_configuration {
+                          null_value_format_configuration {
+                            null_string = "null"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+                values {
+                  numerical_measure_field {
+                    field_id = "395e9e0d-ae34-480e-8f58-5fe90f34425e.fhir_v3_patient_call_real_count.21.1770146641503"
+
+                    aggregation_function {
+                      simple_numerical_aggregation = "SUM"
+                    }
+
+                    column {
+                      column_name         = "fhir_v3_patient_call_real_count"
+                      data_set_identifier = "prod_global_state"
+                    }
+                  }
+                }
+                values {
+                  numerical_measure_field {
+                    field_id = "d410f8bf-842b-4885-aadf-05a365ea4353.16.1641912230066"
+
+                    column {
+                      column_name         = "fhir_v3_patient_call_count_wow_percent"
                       data_set_identifier = "prod_global_state"
                     }
 
@@ -1207,6 +1403,11 @@ resource "aws_quicksight_analysis" "quicksight_analysis_dasg_metrics" {
                 field_id     = "8ff7582f-723f-4213-8e76-325f06d8986d.app_all_fhir_v2_call_synthetic_count.3.1701908769910"
                 visibility   = "VISIBLE"
               }
+              selected_field_options {
+                custom_label = "Developers Total V3 FHIR Calls"
+                field_id     = "8ff7582f-723f-4213-8e76-325f06d8986d.app_all_fhir_v3_call_synthetic_count.5.1770145756562"
+                visibility   = "VISIBLE"
+              }
             }
             field_wells {
               pivot_table_aggregated_field_wells {
@@ -1275,6 +1476,20 @@ resource "aws_quicksight_analysis" "quicksight_analysis_dasg_metrics" {
 
                     column {
                       column_name         = "app_all_fhir_v2_call_synthetic_count"
+                      data_set_identifier = "impl_global_state"
+                    }
+                  }
+                }
+                values {
+                  numerical_measure_field {
+                    field_id = "8ff7582f-723f-4213-8e76-325f06d8986d.app_all_fhir_v3_call_synthetic_count.5.1770145756562"
+
+                    aggregation_function {
+                      simple_numerical_aggregation = "SUM"
+                    }
+
+                    column {
+                      column_name         = "app_all_fhir_v3_call_synthetic_count"
                       data_set_identifier = "impl_global_state"
                     }
                   }

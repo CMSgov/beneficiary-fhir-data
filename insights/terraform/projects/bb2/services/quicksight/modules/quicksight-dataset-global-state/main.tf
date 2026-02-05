@@ -326,6 +326,10 @@ resource "aws_quicksight_data_set" "quicksight_data_set_global_state" {
         type = "INTEGER"
       }
       input_columns {
+        name = "app_all_fhir_v3_call_synthetic_count"
+        type = "INTEGER"
+      }
+      input_columns {
         name = "app_all_fhir_v2_eob_call_real_count"
         type = "INTEGER"
       }
@@ -647,6 +651,42 @@ resource "aws_quicksight_data_set" "quicksight_data_set_global_state" {
       }
       input_columns {
         name = "fhir_v2_coverage_since_call_synthetic_count"
+        type = "INTEGER"
+      }
+      input_columns {
+        name = "fhir_v3_call_real_count"
+        type = "INTEGER"
+      }
+      input_columns {
+        name = "fhir_v3_call_synthetic_count"
+        type = "INTEGER"
+      }
+      input_columns {
+        name = "fhir_v3_eob_call_real_count"
+        type = "INTEGER"
+      }
+      input_columns {
+        name = "fhir_v3_eob_call_synthetic_count"
+        type = "INTEGER"
+      }
+      input_columns {
+        name = "fhir_v3_coverage_call_real_count"
+        type = "INTEGER"
+      }
+      input_columns {
+        name = "fhir_v3_coverage_call_synthetic_count"
+        type = "INTEGER"
+      }
+      input_columns {
+        name = "fhir_v3_patient_call_real_count"
+        type = "INTEGER"
+      }
+      input_columns {
+        name = "fhir_v3_patient_call_synthetic_count"
+        type = "INTEGER"
+      }
+      input_columns {
+        name = "fhir_v3_metadata_call_count"
         type = "INTEGER"
       }
       input_columns {
