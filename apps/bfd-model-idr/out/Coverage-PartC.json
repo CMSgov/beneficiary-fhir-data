@@ -1,0 +1,80 @@
+{
+  "resourceType" : "Coverage",
+  "id" : "part-C-123456789",
+  "meta" : {
+    "lastUpdated" : "2020-01-07T03:02:28.000000Z",
+    "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage|2.1.0",
+    "http://hl7.org/fhir/us/core/StructureDefinition/us-core-coverage|6.1.0"]
+  },
+  "contained" : [{
+    "resourceType" : "Organization",
+    "id" : "insurer-org",
+    "meta" : {
+      "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0"]
+    },
+    "active" : true,
+    "name" : "Sample Medicare Advantage Plan",
+    "contact" : [{
+      "purpose" : {
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/contactentity-type",
+          "code" : "PATINF",
+          "display" : "Patient"
+        }]
+      },
+      "telecom" : [{
+        "system" : "phone",
+        "value" : "1-800-555-1234"
+      }]
+    }]
+  }],
+  "extension" : [{
+    "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-CNTRCT-NUM",
+    "valueString" : "H1234"
+  },
+  {
+    "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-PBP-NUM",
+    "valueString" : "001"
+  },
+  {
+    "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-CVRG-TYPE-CD",
+    "valueCoding" : {
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-CVRG-TYPE-CD",
+      "code" : "3"
+    }
+  }],
+  "status" : "active",
+  "type" : {
+    "coding" : [{
+      "system" : "https://nahdo.org/sopt",
+      "code" : "11",
+      "display" : "MEDICARE MANAGED CARE (Includes Medicare Advantage Plans)"
+    }]
+  },
+  "subscriberId" : "ABB2BB0BB22",
+  "beneficiary" : {
+    "reference" : "Patient/123456789"
+  },
+  "relationship" : {
+    "coding" : [{
+      "system" : "http://terminology.hl7.org/CodeSystem/subscriber-relationship",
+      "code" : "self",
+      "display" : "self"
+    }]
+  },
+  "period" : {
+    "start" : "2018-04-11"
+  },
+  "payor" : [{
+    "reference" : "#insurer-org"
+  }],
+  "class" : [{
+    "type" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/coverage-class",
+        "code" : "plan"
+      }]
+    },
+    "value" : "Part C"
+  }]
+}

@@ -1,0 +1,24 @@
+services:
+  matchbox:
+    image: europe-west6-docker.pkg.dev/ahdis-ch/ahdis/matchbox:v4.0.16
+    container_name: matchbox
+    restart: on-failure
+    ports:
+      - "8080:8080"
+    depends_on:
+      - matchbox-db
+    entrypoint: ["java", "-Xms2G", "-Xmx10G", "-Dfhir.settings.path=/config/fhir-settings.json", "-Dspring.config.additional-location=optional:file:/config/application.yaml,optional:file:application.yaml", "-jar", "/matchbox.jar"]
+    volumes:
+      - ./:/config/
+  matchbox-db:
+    image: postgres:17.7
+    container_name: matchbox-db
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: 'matchbox'
+      POSTGRES_USER: 'matchbox'
+      POSTGRES_PASSWORD: 'matchbox'     
+    volumes:
+      - ./data:/var/lib/postgresql/data
