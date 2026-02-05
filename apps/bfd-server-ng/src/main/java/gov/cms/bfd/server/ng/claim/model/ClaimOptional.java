@@ -47,7 +47,7 @@ class ClaimOptional {
   @Nullable
   @ManyToOne
   @JoinColumn(
-      name = "clm_srvc_prvdr_gnrc_id_num",
+      name = "prvdr_srvc_prvdr_npi_num",
       insertable = false,
       updatable = false,
       referencedColumnName = "prvdr_npi_num")
@@ -56,7 +56,7 @@ class ClaimOptional {
   @Nullable
   @ManyToOne
   @JoinColumn(
-      name = "clm_atndg_prvdr_npi_num",
+      name = "prvdr_atndg_prvdr_npi_num",
       insertable = false,
       updatable = false,
       referencedColumnName = "prvdr_npi_num")
@@ -65,7 +65,7 @@ class ClaimOptional {
   @Nullable
   @ManyToOne
   @JoinColumn(
-      name = "clm_oprtg_prvdr_npi_num",
+      name = "prvdr_oprtg_prvdr_npi_num",
       insertable = false,
       updatable = false,
       referencedColumnName = "prvdr_npi_num")
@@ -83,7 +83,7 @@ class ClaimOptional {
   @Nullable
   @ManyToOne
   @JoinColumn(
-      name = "clm_rndrg_prvdr_npi_num",
+      name = "prvdr_rndrng_prvdr_npi_num",
       insertable = false,
       updatable = false,
       referencedColumnName = "prvdr_npi_num")
@@ -110,7 +110,7 @@ class ClaimOptional {
   @Nullable
   @ManyToOne
   @JoinColumn(
-      name = "clm_othr_prvdr_npi_num",
+      name = "prvdr_othr_prvdr_npi_num",
       insertable = false,
       updatable = false,
       referencedColumnName = "prvdr_npi_num")
