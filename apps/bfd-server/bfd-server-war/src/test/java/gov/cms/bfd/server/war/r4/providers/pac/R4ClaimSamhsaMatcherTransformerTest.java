@@ -410,7 +410,7 @@ public class R4ClaimSamhsaMatcherTransformerTest {
         new McsClaimTransformerV2(new MetricRegistry(), securityTagManager, false);
 
     Claim claim =
-        fissClaimTransformerV2.transform(new ClaimWithSecurityTags<>(entity, securityTags), true);
+        fissClaimTransformerV2.transform(new ClaimWithSecurityTags<>(entity, securityTags));
 
     R4ClaimSamhsaMatcher matcher =
         new R4ClaimSamhsaMatcher(fissClaimTransformerV2, mcsClaimTransformerV2, false);
@@ -550,7 +550,7 @@ public class R4ClaimSamhsaMatcherTransformerTest {
         new McsClaimTransformerV2(new MetricRegistry(), securityTagManager, false);
 
     Claim claim =
-        mcsClaimTransformerV2.transform(new ClaimWithSecurityTags<>(entity, securityTags), true);
+        mcsClaimTransformerV2.transform(new ClaimWithSecurityTags<>(entity, securityTags));
 
     R4ClaimSamhsaMatcher matcher =
         new R4ClaimSamhsaMatcher(fissClaimTransformerV2, mcsClaimTransformerV2, false);
