@@ -832,7 +832,7 @@ CREATE TABLE idr_new.claim_institutional_nch
     prvdr_rfrg_last_name       character varying(35),
 
     clm_disp_cd                character varying(2)     NOT NULL,
---     clm_ric_cd                 character varying(1)     NOT NULL,
+    clm_ric_cd                 character varying(1)     NOT NULL,
     clm_sbmt_chrg_amt          numeric,
     clm_blood_pt_frnsh_qty     integer,
 --     clm_nch_prmry_pyr_cd       character varying(1)     NOT NULL,
