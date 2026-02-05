@@ -333,8 +333,8 @@ CREATE TABLE idr_new.claim_item_professional_shared_systems
 --  ADJ  clm_line_pmd_uniq_trkng_num    character varying(14),
     clm_line_pa_uniq_trkng_num     character varying(50),
     clm_line_bnft_enhncmt_1_cd     character varying(2),
-    clm_rlt_cond_cd                character varying(20),
-    clm_rlt_cond_sgntr_sqnc_num    integer,
+--  INSTNL   clm_rlt_cond_cd                character varying(20),
+--  INSTNL   clm_rlt_cond_sgntr_sqnc_num    integer,
 
     prvdr_rndrng_prvdr_npi_num     character varying(10),
     prvdr_rndrng_sk                bigint,
@@ -376,6 +376,9 @@ CREATE TABLE idr_new.claim_item_professional_shared_systems
     clm_line_carr_psych_ot_lmt_amt numeric,
 --  ADJ   clm_line_carr_clncl_chrg_amt   numeric,
 --  ADJ   clm_mdcr_prmry_pyr_alowd_amt   numeric,
+
+    clm_ocrnc_sgntr_sk             numeric,
+    clm_rlt_ocrnc_sgntr_sk         numeric,
     -- v2_mdcr_clm_line_mcs COLUMNS
     clm_line_rbndlg_crtfctn_num    character varying(10),
     clm_line_hct_lvl_num           numeric,
@@ -446,8 +449,8 @@ CREATE TABLE idr_new.claim_item_professional_nch
     clm_line_pmd_uniq_trkng_num    character varying(14),
 --  PAC   clm_line_pa_uniq_trkng_num     character varying(50),
     clm_line_bnft_enhncmt_1_cd     character varying(2),
-    clm_rlt_cond_cd                character varying(20),
-    clm_rlt_cond_sgntr_sqnc_num    integer,
+--  INSTNL   clm_rlt_cond_cd                character varying(20),
+--  INSTNL   clm_rlt_cond_sgntr_sqnc_num    integer,
 
     prvdr_rndrng_prvdr_npi_num     character varying(10),
     prvdr_rndrng_sk                bigint,
@@ -489,6 +492,9 @@ CREATE TABLE idr_new.claim_item_professional_nch
     clm_line_carr_psych_ot_lmt_amt numeric,
     clm_line_carr_clncl_chrg_amt   numeric,
     clm_mdcr_prmry_pyr_alowd_amt   numeric,
+
+    clm_ocrnc_sgntr_sk             numeric,
+    clm_rlt_ocrnc_sgntr_sk         numeric,
     -- v2_mdcr_clm_line_mcs COLUMNS
     clm_line_rbndlg_crtfctn_num    character varying(10),
     clm_line_hct_lvl_num           numeric,
