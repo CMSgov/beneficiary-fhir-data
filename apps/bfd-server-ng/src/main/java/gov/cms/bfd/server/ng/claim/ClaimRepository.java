@@ -87,6 +87,7 @@ public class ClaimRepository {
             """
               %s
               WHERE c.claimUniqueId = :claimUniqueId
+              AND (ct.contractPbpSk IS NULL OR ct.contractVersionRank = 1)
               %s
             """,
             CLAIM_TABLES_BASE, params.filterClause());
@@ -164,6 +165,7 @@ public class ClaimRepository {
               WHERE b2.beneSk = b.beneSk
               AND b2.effectiveTimestamp = b.effectiveTimestamp
             )
+            AND (ct.contractPbpSk IS NULL OR ct.contractVersionRank = 1)
             %s
             """,
             CLAIM_TABLES_BASE, filters.filterClause());
