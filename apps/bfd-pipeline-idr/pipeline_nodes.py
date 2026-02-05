@@ -28,6 +28,8 @@ from model import (
     IdrClaimLineProfessional,
     IdrClaimLineRx,
     IdrClaimProfessional,
+    IdrClaimProfessionalNch,
+    IdrClaimRx,
     IdrContractPbpContact,
     IdrContractPbpNumber,
     IdrProviderHistory,
@@ -35,21 +37,38 @@ from model import (
     get_min_transaction_date,
 )
 from pipeline_utils import extract_and_load
+from settings import CLAIM_TABLES
 
 type NodePartitionedModelInput = tuple[type[IdrBaseModel], LoadPartition | None]
 
-CLAIM_AUX_TABLES = [
-    IdrClaimInstitutional,
-    IdrClaimDateSignature,
-    IdrClaimFiss,
-    IdrClaimItem,
-    IdrClaimLineInstitutional,
-    IdrClaimAnsiSignature,
-    IdrClaimProfessional,
-    IdrClaimLineProfessional,
-    IdrClaimLineRx,
-    IdrProviderHistory,
-]
+
+def filter_claim_tables(tables: list[type[IdrBaseModel]]) -> list[type[IdrBaseModel]]:
+    return [t for t in tables if CLAIM_TABLES == [] or t.table() in CLAIM_TABLES]
+
+
+def claim_tables() -> list[type[IdrBaseModel]]:
+    return filter_claim_tables([IdrClaim, IdrClaimProfessionalNch])
+
+
+def claim_aux_tables() -> list[type[IdrBaseModel]]:
+    return filter_claim_tables(
+        [
+            IdrClaimInstitutional,
+            IdrClaimDateSignature,
+            IdrClaimFiss,
+            IdrClaimItem,
+            IdrClaimLineInstitutional,
+            IdrClaimAnsiSignature,
+            IdrClaimProfessional,
+            IdrClaimLineProfessional,
+            IdrClaimLineRx,
+            IdrProviderHistory,
+            # RX/Part D is special because we combine claim + claim line
+            IdrClaimRx,
+        ]
+    )
+
+
 BENE_AUX_TABLES = [
     IdrBeneficiaryStatus,
     IdrBeneficiaryThirdParty,
@@ -108,10 +127,10 @@ def stage1(load_mode: LoadMode, start_time: datetime, load_type: LoadType) -> bo
 def stage2_inputs(load_type: LoadType, stage1: bool) -> Parallelizable[NodePartitionedModelInput]:  # noqa: ARG001
     if load_type == LoadType.INITIAL:
         yield from _gen_partitioned_node_inputs(
-            [*CLAIM_AUX_TABLES, *BENE_AUX_TABLES, IdrClaim, IdrBeneficiary], load_type
+            [*claim_aux_tables(), *BENE_AUX_TABLES, *claim_tables(), IdrBeneficiary], load_type
         )
     else:
-        yield from _gen_partitioned_node_inputs([*CLAIM_AUX_TABLES, *BENE_AUX_TABLES], load_type)
+        yield from _gen_partitioned_node_inputs([*claim_aux_tables(), *BENE_AUX_TABLES], load_type)
 
 
 # NOTE: it would be good to use @parameterize here, but the multiprocessing executor doesn't handle
@@ -146,7 +165,7 @@ def stage3_inputs(
     collect_stage2: bool,  # noqa: ARG001
 ) -> Parallelizable[NodePartitionedModelInput]:
     if load_type == LoadType.INCREMENTAL:
-        yield from _gen_partitioned_node_inputs([IdrClaim], load_type)
+        yield from _gen_partitioned_node_inputs(claim_tables(), load_type)
     else:
         yield from _gen_partitioned_node_inputs([], load_type)
 

@@ -16,15 +16,10 @@ class BeneficiaryPartCDEnrollmentOptional {
 
   @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(
-      name = "bene_cntrct_num",
+      name = "cntrct_pbp_sk",
       insertable = false,
       updatable = false,
-      referencedColumnName = "cntrct_num")
-  @JoinColumn(
-      name = "bene_pbp_num",
-      insertable = false,
-      updatable = false,
-      referencedColumnName = "cntrct_pbp_num")
+      referencedColumnName = "cntrct_pbp_sk")
   private Contract enrollmentContract;
 
   Optional<Contract> getEnrollmentContract() {

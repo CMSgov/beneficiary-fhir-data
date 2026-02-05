@@ -150,11 +150,13 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_bene_cmbnd_dual_mdcr (
 
 CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_cntrct_pbp_num (
     cntrct_pbp_sk BIGINT NOT NULL,
-    cntrct_drug_plan_ind_cd VARCHAR(1),
-    cntrct_pbp_type_cd VARCHAR(2),
-    cntrct_pbp_sk_obslt_dt DATE,
-    cntrct_pbp_name VARCHAR(75),
-    cntrct_num VARCHAR(5),
+    cntrct_drug_plan_ind_cd VARCHAR(1) NOT NULL,
+    cntrct_pbp_type_cd VARCHAR(2) NOT NULL,
+    cntrct_pbp_sk_efctv_dt DATE NOT NULL,
+    cntrct_pbp_end_dt DATE NOT NULL,
+    cntrct_pbp_sk_obslt_dt DATE NOT NULL,
+    cntrct_pbp_name VARCHAR(75) NOT NULL,
+    cntrct_num VARCHAR(5) NOT NULL,
     cntrct_pbp_num VARCHAR(3) NOT NULL
 );
 
@@ -168,6 +170,7 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm (
     clm_alowd_chrg_amt NUMERIC,
     clm_bene_pmt_amt NUMERIC,
     clm_cntl_num VARCHAR(40),
+    clm_prnt_cntl_num VARCHAR(40),
     clm_orig_cntl_num VARCHAR(40),
     clm_from_dt DATE,
     clm_thru_dt DATE,
@@ -192,6 +195,9 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm (
     clm_atndg_prvdr_last_name VARCHAR(60),
     clm_oprtg_prvdr_npi_num VARCHAR(10),
     clm_oprtg_prvdr_last_name VARCHAR(60),
+    clm_blg_prvdr_last_name VARCHAR(60),
+    clm_rfrg_prvdr_last_name VARCHAR(60),
+    clm_prscrbng_prvdr_last_name VARCHAR(60),
     clm_othr_prvdr_npi_num VARCHAR(10),
     clm_othr_prvdr_last_name VARCHAR(60),
     clm_ric_cd VARCHAR(1),
@@ -205,6 +211,7 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm (
     prvdr_atndg_prvdr_npi_num VARCHAR(10),
     prvdr_rndrng_prvdr_npi_num VARCHAR(10),
     prvdr_oprtg_prvdr_npi_num VARCHAR(10),
+    clm_rfrg_prvdr_pin_num VARCHAR(14),
     clm_disp_cd VARCHAR(2),
     clm_sbmt_chrg_amt NUMERIC,
     clm_srvc_prvdr_gnrc_id_num VARCHAR(20),
@@ -569,6 +576,7 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_rx (
     clm_cms_calcd_mftr_dscnt_amt NUMERIC,
     clm_line_grs_cvrd_cst_tot_amt NUMERIC,
     clm_phrmcy_price_dscnt_at_pos_amt NUMERIC,
+    clm_line_rptd_gap_dscnt_amt NUMERIC,
     idr_insrt_ts TIMESTAMPTZ,
     idr_updt_ts TIMESTAMPTZ,
     PRIMARY KEY(clm_uniq_id, clm_line_num)
