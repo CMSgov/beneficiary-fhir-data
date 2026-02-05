@@ -112,9 +112,6 @@
             "CLM_LINE_NDC_QTY": "60",
             "CLM_LINE_NDC_QTY_QLFYR_CD": "UN",
             "CLM_LINE_CVRD_PD_AMT": "45.50",
-            "CLM_LINE_NCVRD_CHRG_AMT": "0.00",
-            "CLM_LINE_BENE_PD_AMT": "5.00",
-            "CLM_LINE_PRVDR_PMT_AMT": "40.50",
             "CLM_LINE_GRS_ABOVE_THRSHLD_AMT": "25.00",
             "CLM_LINE_GRS_BLW_THRSHLD_AMT": "75.00",
             "CLM_LINE_LIS_AMT": "10.00",
@@ -133,7 +130,8 @@
             "CLM_PHRMCY_PRICE_DSCNT_AT_POS_AMT": "10.04",
             "CLM_LINE_OTHR_TP_PD_AMT": "10.05",
             "CLM_LINE_NCVRD_PD_AMT": "10.08",
-            "isCompound": "true"
+            "isCompound": "true",
+            "CLM_LINE_RPTD_GAP_DSCNT_AMT": "10.00"
         }
     ]
 }

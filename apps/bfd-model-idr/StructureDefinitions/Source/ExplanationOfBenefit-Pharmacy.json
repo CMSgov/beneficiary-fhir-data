@@ -489,6 +489,19 @@
                         ]
                     }
                 ]
+            },
+            {
+              "id": "ExplanationOfBenefit-Pharmacy.TOT_RX_CST_AMT",
+              "path": "ExplanationOfBenefit-Pharmacy.TOT_RX_CST_AMT",
+              "label": "Total drug cost (Part D)",
+              "definition": "This variable is the total cost of the prescription drug event and is taken directly from the original PDE. It is the sum of the following components: the ingredient cost (INGRDNT_CST_PD_AMT), the dispensing fee (DSPNSNG_FEE_PD_AMT), the sales tax, if any (TOT_AMT_ATTR_SLS_TAX_AMT), and the vaccine administration fee, if any (VCCN_ADMIN_FEE_AMT, included starting in 2010).",
+              "min": 0,
+              "max": "1",
+              "type": [
+                {
+                  "code": "string"
+                }
+              ]
             }
         ]
     }

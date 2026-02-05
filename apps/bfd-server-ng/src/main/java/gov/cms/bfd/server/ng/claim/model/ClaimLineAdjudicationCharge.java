@@ -57,6 +57,8 @@ class ClaimLineAdjudicationCharge {
         AdjudicationChargeType.LINE_NONCOVERED_PRODUCT_PAID_AMOUNT.toFhirAdjudication(
             noncoveredProductPaidAmount),
         AdjudicationChargeType.LINE_OTHER_THIRD_PARTY_PAID_AMOUNT.toFhirAdjudication(
-            otherThirdPartyPaidAmount));
+            otherThirdPartyPaidAmount),
+        AdjudicationChargeType.LINE_SUBMITTED_CHARGE_AMOUNT.toFhirAdjudication(
+            submittedChargeAmount));
   }
 }
