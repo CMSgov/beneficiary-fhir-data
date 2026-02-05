@@ -1242,6 +1242,7 @@ class IdrClaim(IdrBaseModel):
     clm_blg_prvdr_oscar_num: Annotated[str, BeforeValidator(transform_null_string)]
     clm_nrln_ric_cd: Annotated[str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_null_string)]
     clm_idr_ld_dt: Annotated[date, {HISTORICAL_BATCH_TIMESTAMP: True}]
+    # TODO: determine if we still need this
     clm_srvc_prvdr_gnrc_id_num: Annotated[str, BeforeValidator(transform_default_string)]
     prvdr_prscrbng_prvdr_npi_num: Annotated[str, BeforeValidator(transform_default_and_zero_string)]
     clm_adjstmt_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
@@ -2601,7 +2602,7 @@ class IdrClaimRx(IdrBaseModel):
     ]
     prvdr_srvc_sk: Annotated[
         int | None,
-        {COLUMN_MAP: "prvdr_sk", ALIAS: ALIAS_PRVDR_PRSCRBNG},
+        {COLUMN_MAP: "prvdr_sk", ALIAS: ALIAS_PRVDR_SRVC},
         BeforeValidator(transform_default_int_to_null),
     ]
     prvdr_srvc_mdl_name: Annotated[
@@ -2696,7 +2697,7 @@ class IdrClaimRx(IdrBaseModel):
                 {clm}.clm_type_cd = {rx_line}.clm_type_cd AND
                 {clm}.clm_num_sk = {rx_line}.clm_num_sk
             LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_prvdr_hstry {prvdr_srvc}
-                ON {prvdr_srvc}.prvdr_npi_num = {clm}.clm_srvc_prvdr_gnrc_id_num
+                ON {prvdr_srvc}.prvdr_npi_num = {clm}.prvdr_srvc_prvdr_npi_num
                 AND {prvdr_srvc}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
             LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_prvdr_hstry {prvdr_prscrbng}
                 ON {prvdr_prscrbng}.prvdr_npi_num = {clm}.prvdr_prscrbng_prvdr_npi_num
@@ -2939,6 +2940,61 @@ class IdrClaimProfessionalNch(IdrBaseModel):
         {COLUMN_MAP: "prvdr_last_name", ALIAS: ALIAS_PRVDR_RFRG},
         BeforeValidator(transform_default_string),
     ]
+    prvdr_srvc_prvdr_npi_num: Annotated[
+        str,
+        {COLUMN_MAP: "prvdr_npi_num", ALIAS: ALIAS_PRVDR_SRVC},
+        BeforeValidator(transform_default_string),
+    ]
+    prvdr_srvc_sk: Annotated[
+        int | None,
+        {COLUMN_MAP: "prvdr_sk", ALIAS: ALIAS_PRVDR_SRVC},
+        BeforeValidator(transform_default_int_to_null),
+    ]
+    prvdr_srvc_mdl_name: Annotated[
+        str,
+        {COLUMN_MAP: "prvdr_mdl_name", ALIAS: ALIAS_PRVDR_SRVC},
+        BeforeValidator(transform_default_string),
+    ]
+    prvdr_srvc_type_cd: Annotated[
+        str,
+        {COLUMN_MAP: "prvdr_type_cd", ALIAS: ALIAS_PRVDR_SRVC},
+        BeforeValidator(transform_default_string),
+    ]
+    prvdr_srvc_txnmy_cmpst_cd: Annotated[
+        str,
+        {COLUMN_MAP: "prvdr_txnmy_cmpst_cd", ALIAS: ALIAS_PRVDR_SRVC},
+        BeforeValidator(transform_default_string),
+    ]
+    prvdr_srvc_oscar_num: Annotated[
+        str,
+        {COLUMN_MAP: "prvdr_oscar_num", ALIAS: ALIAS_PRVDR_SRVC},
+        BeforeValidator(transform_default_string),
+    ]
+    prvdr_srvc_1st_name: Annotated[
+        str,
+        {COLUMN_MAP: "prvdr_1st_name", ALIAS: ALIAS_PRVDR_SRVC},
+        BeforeValidator(transform_default_string),
+    ]
+    prvdr_srvc_name: Annotated[
+        str,
+        {COLUMN_MAP: "prvdr_name", ALIAS: ALIAS_PRVDR_SRVC},
+        BeforeValidator(transform_provider_name),
+    ]
+    prvdr_srvc_lgl_name: Annotated[
+        str,
+        {COLUMN_MAP: "prvdr_lgl_name", ALIAS: ALIAS_PRVDR_SRVC},
+        BeforeValidator(transform_default_string),
+    ]
+    prvdr_srvc_emplr_id_num: Annotated[
+        str,
+        {COLUMN_MAP: "prvdr_emplr_id_num", ALIAS: ALIAS_PRVDR_SRVC},
+        BeforeValidator(transform_default_string),
+    ]
+    prvdr_srvc_last_name: Annotated[
+        str,
+        {COLUMN_MAP: "prvdr_last_name", ALIAS: ALIAS_PRVDR_SRVC},
+        BeforeValidator(transform_default_string),
+    ]
 
     @staticmethod
     def table() -> str:
@@ -2959,6 +3015,7 @@ class IdrClaimProfessionalNch(IdrBaseModel):
         prfnl = ALIAS_PRFNL
         prvdr_blg = ALIAS_PRVDR_BLG
         prvdr_rfrg = ALIAS_PRVDR_RFRG
+        prvdr_srvc = ALIAS_PRVDR_SRVC
         return f"""
             SELECT {{COLUMNS}}
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
@@ -2973,8 +3030,11 @@ class IdrClaimProfessionalNch(IdrBaseModel):
                 ON {prvdr_blg}.prvdr_npi_num = {clm}.prvdr_blg_prvdr_npi_num
                 AND {prvdr_blg}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
             LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_prvdr_hstry {prvdr_rfrg}
-                ON {prvdr_rfrg}.prvdr_npi_num = {clm}.prvdr_prscrbng_prvdr_npi_num
+                ON {prvdr_rfrg}.prvdr_npi_num = {clm}.prvdr_rfrg_prvdr_npi_num
                 AND {prvdr_rfrg}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
+            LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_prvdr_hstry {prvdr_srvc}
+                ON {prvdr_srvc}.prvdr_npi_num = {clm}.prvdr_srvc_prvdr_npi_num
+                AND {prvdr_srvc}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
             {{WHERE_CLAUSE}} AND {_claim_filter(start_time, partition)}
             {{ORDER_BY}}
         """
