@@ -1,6 +1,6 @@
 import os
 import random
-from datetime import datetime
+from datetime import date, datetime
 from pathlib import Path
 
 import yaml
@@ -33,6 +33,9 @@ SECURITY_LABELS_CPT_SYSTEMS = ["http://www.ama-assn.org/go/cpt"]
 SECURITY_LABELS_DRG_SYSTEMS = [
     "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
 ]
+
+NOW = date.today()
+
 FISS_CLM_TYPE_CDS = [
     1011,
     1041,
