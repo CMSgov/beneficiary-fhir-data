@@ -1,0 +1,219 @@
+import random
+import string
+from datetime import date, datetime
+from typing import Any
+
+import pandas as pd
+from dateutil.relativedelta import relativedelta
+from faker import Faker
+
+import field_constants as f
+from claims_static import (
+    AVAIL_CONTRACT_NAMES,
+    AVAIL_CONTRACT_NUMS,
+    AVAIL_PBP_NUMS,
+    AVAIL_PBP_TYPE_CODES,
+    AVAILABLE_FAMILY_NAMES,
+    AVAILABLE_GIVEN_NAMES,
+    AVAILABLE_PROVIDER_LEGAL_NAMES,
+    AVAILABLE_PROVIDER_NAMES,
+    AVAILABLE_PROVIDER_TX_CODES,
+    AVAILABLE_PROVIDER_TYPE_CODES,
+    NOW,
+)
+from claims_util import add_meta_timestamps
+from generator_util import CLM_ANSI_SGNTR, RowAdapter, gen_basic_id
+
+_faker = Faker()
+
+
+def _generate_meta_sk_pair(obj: RowAdapter):
+    def encode(d: datetime | date):
+        d = d.date() if isinstance(d, datetime) else d
+        yyyymmdd = d.year * 10000 + d.month * 100 + d.day
+        base = (yyyymmdd - 19000000) * 1000
+        seq = random.randint(1, 999)
+        return base + seq
+
+    max_dt = datetime.fromisoformat(str(NOW))
+    min_dt = datetime(2010, 1, 1)
+
+    if random.random() < 0.05:
+        update_dt = _faker.date_time_between_dates(min_dt, max_dt)
+        obj[f.META_SK] = 501
+        obj[f.META_LST_UPDT_SK] = encode(update_dt)
+        return
+
+    insert_dt = _faker.date_time_between_dates(min_dt, max_dt)
+    obj[f.META_SK] = encode(insert_dt)
+
+    roll = random.random()
+    if roll > 0.8:
+        update_dt = _faker.date_time_between_dates(insert_dt, max_dt)
+        obj[f.META_LST_UPDT_SK] = encode(update_dt)
+    elif roll > 0.6:
+        obj[f.META_LST_UPDT_SK] = obj[f.META_SK]
+    else:
+        obj[f.META_LST_UPDT_SK] = 0
+
+
+def gen_synthetic_clm_ansi_sgntr(src_path: str = f"sample-data/{CLM_ANSI_SGNTR}.csv"):
+    csv_df = pd.read_csv(  # type: ignore
+        src_path,
+        dtype=str,
+        na_filter=False,
+    )
+    clm_ansi_sgntr: list[dict[str, Any]] = csv_df.to_dict(orient="records")  # type: ignore
+
+    # Return the data from the source but with every CLM_ANSI_SGNTR_SK made negative to indicate
+    # it's synthetic
+    return [
+        RowAdapter(x | {f.CLM_ANSI_SGNTR_SK: f"-{x[f.CLM_ANSI_SGNTR_SK]}"}) for x in clm_ansi_sgntr
+    ]
+
+
+def gen_clm_dt_sgntr(clm: RowAdapter, init_clm_dt_sgntr: RowAdapter | None = None):
+    clm_dt_sgntr = init_clm_dt_sgntr or RowAdapter({})
+    clm_dt_sgntr[f.CLM_DT_SGNTR_SK] = clm[f.CLM_DT_SGNTR_SK]
+    clm_type_cd = int(clm[f.CLM_TYPE_CD])
+    if clm_type_cd in (10, 20, 30, 50, 60, 61, 62, 63, 64):
+        clm_dt_sgntr[f.CLM_ACTV_CARE_FROM_DT] = clm[f.CLM_FROM_DT]
+        clm_dt_sgntr[f.CLM_DSCHRG_DT] = clm[f.CLM_THRU_DT]
+        if clm_type_cd in (20, 30):
+            if random.choice([0, 1]):
+                clm_dt_sgntr[f.CLM_QLFY_STAY_FROM_DT] = clm[f.CLM_FROM_DT]
+                clm_dt_sgntr[f.CLM_QLFY_STAY_THRU_DT] = clm[f.CLM_THRU_DT]
+            else:
+                clm_dt_sgntr[f.CLM_QLFY_STAY_FROM_DT] = "1000-01-01"
+                clm_dt_sgntr[f.CLM_QLFY_STAY_THRU_DT] = "1000-01-01"
+
+        if clm_type_cd in (50, 60, 61, 62, 63, 64):
+            clm_dt_sgntr[f.CLM_MDCR_EXHSTD_DT] = clm[f.CLM_THRU_DT]
+            if random.choice([0, 1]):
+                clm_dt_sgntr[f.CLM_NCVRD_FROM_DT] = clm[f.CLM_THRU_DT]
+                clm_dt_sgntr[f.CLM_NCVRD_THRU_DT] = clm[f.CLM_THRU_DT]
+            else:
+                clm_dt_sgntr[f.CLM_NCVRD_FROM_DT] = "1000-01-01"
+                clm_dt_sgntr[f.CLM_NCVRD_THRU_DT] = "1000-01-01"
+            if clm_type_cd >= 60:
+                clm_dt_sgntr[f.CLM_ACTV_CARE_THRU_DT] = clm[f.CLM_THRU_DT]
+    clm_dt_sgntr[f.CLM_SUBMSN_DT] = clm[
+        f.CLM_THRU_DT
+    ]  # This synthetic hospital is really on top of it!
+    # clm_dt_sgntr[fc.CLM_MDCR_NCH_PTNT_STUS_IND_CD] =
+    # random.choice(code_systems[fc.CLM_MDCR_NCH_PTNT_STUS_IND_CD])
+    clm_dt_sgntr[f.CLM_CMS_PROC_DT] = clm[f.CLM_THRU_DT]
+    clm_dt_sgntr[f.CLM_NCH_WKLY_PROC_DT] = clm[f.CLM_THRU_DT]
+
+    add_meta_timestamps(clm_dt_sgntr, clm)
+
+    return clm_dt_sgntr
+
+
+def gen_provider_history(amount: int, init_provider_historys: list[RowAdapter] | None = None):
+    init_provider_historys = init_provider_historys or []
+    additional_provider_historys = [
+        RowAdapter({}) for _ in range(amount - len(init_provider_historys))
+    ]
+    all_provider_historys = init_provider_historys + additional_provider_historys
+
+    provider_historys: list[RowAdapter] = []
+    for provider_history in all_provider_historys:
+        prvdr_sk = gen_basic_id(field="PRVDR_SK", length=9)
+        provider_history.extend(
+            {
+                f.PRVDR_SK: prvdr_sk,
+                f.PRVDR_HSTRY_EFCTV_DT: str(date.today()),
+                f.PRVDR_HSTRY_OBSLT_DT: "9999-12-31",
+                f.PRVDR_1ST_NAME: random.choice(AVAILABLE_GIVEN_NAMES),
+                f.PRVDR_MDL_NAME: random.choice(AVAILABLE_GIVEN_NAMES),
+                f.PRVDR_LAST_NAME: random.choice(AVAILABLE_FAMILY_NAMES),
+                f.PRVDR_NAME: random.choice(AVAILABLE_PROVIDER_NAMES),
+                f.PRVDR_LGL_NAME: random.choice(AVAILABLE_PROVIDER_LEGAL_NAMES),
+                f.PRVDR_NPI_NUM: prvdr_sk,
+                f.PRVDR_EMPLR_ID_NUM: gen_basic_id(field=f.PRVDR_EMPLR_ID_NUM, length=9),
+                f.PRVDR_OSCAR_NUM: gen_basic_id(field=f.PRVDR_OSCAR_NUM, length=6),
+                f.PRVDR_TXNMY_CMPST_CD: random.choice(AVAILABLE_PROVIDER_TX_CODES),
+                f.PRVDR_TYPE_CD: random.choice(AVAILABLE_PROVIDER_TYPE_CODES),
+            }
+        )
+        _generate_meta_sk_pair(provider_history)
+
+        provider_historys.append(provider_history)
+
+    return provider_historys
+
+
+def gen_contract_plan(
+    amount: int,
+    init_contract_pbp_nums: list[RowAdapter] | None = None,
+    init_contract_pbp_contacts: list[RowAdapter] | None = None,
+):
+    init_contract_pbp_nums = init_contract_pbp_nums or []
+    init_contract_pbp_contacts = init_contract_pbp_contacts or []
+    additional_pbp_nums = [RowAdapter({}) for _ in range(amount - len(init_contract_pbp_nums))]
+    additional_pbp_contacts = [
+        RowAdapter({}) for _ in range(amount - len(init_contract_pbp_contacts))
+    ]
+    all_pbp_nums = init_contract_pbp_nums + additional_pbp_nums
+    all_pbp_contacts = init_contract_pbp_contacts + additional_pbp_contacts
+    today = date.today()
+    last_day = today.replace(month=12, day=31)
+
+    contract_pbp_nums: list[RowAdapter] = []
+    for pbp_num in all_pbp_nums:
+        effective_date = _faker.date_between_dates(date.fromisoformat("2020-01-01"), NOW)
+        end_date = _faker.date_between_dates(effective_date, NOW + relativedelta(years=3))
+        obsolete_date = random.choice(
+            [_faker.date_between_dates(effective_date, NOW), date.fromisoformat("9999-12-31")]
+        )
+        pbp_num.extend(
+            {
+                f.CNTRCT_PBP_SK: gen_basic_id(field=f.CNTRCT_PBP_SK, length=12),
+                f.CNTRCT_NUM: random.choice(AVAIL_CONTRACT_NUMS),
+                f.CNTRCT_PBP_NUM: random.choice(AVAIL_PBP_NUMS),
+                f.CNTRCT_PBP_NAME: random.choice(AVAIL_CONTRACT_NAMES),
+                f.CNTRCT_PBP_TYPE_CD: random.choice(AVAIL_PBP_TYPE_CODES),
+                f.CNTRCT_DRUG_PLAN_IND_CD: random.choice(["Y", "N"]),
+                f.CNTRCT_PBP_SK_EFCTV_DT: effective_date.isoformat(),
+                f.CNTRCT_PBP_END_DT: end_date.isoformat(),
+                f.CNTRCT_PBP_SK_OBSLT_DT: obsolete_date.isoformat(),
+            }
+        )
+        contract_pbp_nums.append(pbp_num)
+
+    contract_pbp_contacts: list[RowAdapter] = []
+    for pbp_contact in all_pbp_contacts:
+        pbp_contact.extend(
+            {
+                f.CNTRCT_PBP_SK: gen_basic_id(field=f.CNTRCT_PBP_SK, length=12),
+                f.CNTRCT_PLAN_CNTCT_OBSLT_DT: "9999-12-31",
+                f.CNTRCT_PLAN_CNTCT_TYPE_CD: random.choice(["~", "30", "62"]),
+                f.CNTRCT_PLAN_FREE_EXTNSN_NUM: "".join(random.choices(string.digits, k=7)),
+                f.CNTRCT_PLAN_CNTCT_FREE_NUM: "".join(random.choices(string.digits, k=10)),
+                f.CNTRCT_PLAN_CNTCT_EXTNSN_NUM: "".join(random.choices(string.digits, k=7)),
+                f.CNTRCT_PLAN_CNTCT_TEL_NUM: "".join(random.choices(string.digits, k=10)),
+                f.CNTRCT_PBP_END_DT: last_day.isoformat(),
+                f.CNTRCT_PBP_BGN_DT: today.isoformat(),
+                f.CNTRCT_PLAN_CNTCT_ST_1_ADR: random.choice(
+                    [
+                        "319 E. Street",
+                        "North Street",
+                        "West Street",
+                    ]
+                ),
+                f.CNTRCT_PLAN_CNTCT_ST_2_ADR: random.choice(["Avenue M", ""]),
+                f.CNTRCT_PLAN_CNTCT_CITY_NAME: random.choice(
+                    [
+                        "Los Angeles",
+                        "San Jose",
+                        "San Francisco",
+                    ]
+                ),
+                f.CNTRCT_PLAN_CNTCT_STATE_CD: "CA",
+                f.CNTRCT_PLAN_CNTCT_ZIP_CD: "".join(random.choices(string.digits, k=9)),
+            }
+        )
+        contract_pbp_contacts.append(pbp_contact)
+
+    return contract_pbp_nums, contract_pbp_contacts
