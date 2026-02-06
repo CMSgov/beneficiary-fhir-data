@@ -2390,8 +2390,10 @@ def main(opts: OptionsModel, paths: tuple[Path, ...]):
                     *norm_clm_lines_per_clm_uniq_id.get(file_pac_clm[f.CLM_UNIQ_ID], []),
                 ],
                 CLM_DCMTN: as_list(clm_dcmtn_per_fpk.get(four_part_key(file_pac_clm))),
-                CLM_VAL: as_list(ime_clm_val_per_fpk.get(four_part_key(file_pac_clm)))
-                + as_list(dsprtnt_clm_val_per_fpk.get(four_part_key(file_pac_clm))),
+                CLM_VAL: [
+                    *as_list(dsprtnt_clm_val_per_fpk.get(four_part_key(file_pac_clm))),
+                    *as_list(ime_clm_val_per_fpk.get(four_part_key(file_pac_clm))),
+                ],
                 CLM_LINE_DCMTN: clm_line_dcmtns_per_clk.get(four_part_key(file_pac_clm), []),
                 CLM_LINE_INSTNL: clm_line_instnls_per_fpk.get(four_part_key(file_pac_clm), []),
                 CLM_LINE_PRFNL: clm_line_prfnls_per_fpk.get(four_part_key(file_pac_clm), []),
