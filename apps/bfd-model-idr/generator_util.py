@@ -6,7 +6,9 @@ import random
 import string
 import subprocess
 import sys
+from collections import defaultdict
 from collections.abc import Callable, Iterable
+from datetime import date, timedelta
 from pathlib import Path
 from typing import Any, Self
 
@@ -55,6 +57,85 @@ _tables_by_bene_sk: dict[str, dict[str, dict[str, Any]]] = {}
 # Lazily computed table of field names to already used IDs so that their uniqueness is guaranteed.
 # Used with the gen_*_id functions below.
 __used_ids_by_field: dict[str, set[str]] = {}
+
+
+class RowAdapter:
+    def __init__(self, kv: dict[str, Any], loaded_from_file: bool = False):
+        self.kv = kv
+        self.loaded_from_file = loaded_from_file
+
+    def __getitem__(self, key: str):
+        return self.kv[key]
+
+    def __setitem__(self, key: str, new_value: Any):
+        if key not in self.kv:
+            self.kv[key] = new_value
+
+    def __contains__(self, key: str) -> bool:
+        return key in self.kv
+
+    def get(self, key: str, default: Any | None = None) -> Any:
+        return self.kv.get(key, default)
+
+    def extend(self, other: dict[str, Any] | Self, overwrite: bool = False):
+        cur = self if not overwrite else self.kv
+        other_dict = other if isinstance(other, dict) else other.kv
+
+        for k, v in other_dict.items():
+            cur[k] = v
+
+
+def as_list[T](obj: T | None) -> list[T]:
+    if not obj:
+        return []
+
+    return [obj]
+
+
+def partition_rows[T](
+    llist: list[RowAdapter],
+    part_by: Callable[[RowAdapter], T],
+    filter_by: Callable[[RowAdapter], bool] | None = None,
+) -> dict[T, list[RowAdapter]]:
+    bucketed_rows: dict[T, list[RowAdapter]] = defaultdict(list)
+    for row in llist:
+        part_key = part_by(row)
+        if not filter_by or filter_by(row):
+            bucketed_rows[part_key].append(row)
+
+    return bucketed_rows
+
+
+def run_command(cmd: list[str], cwd: str | None = None):
+    try:
+        result = subprocess.run(
+            cmd, cwd=cwd, shell=True, check=True, text=True, capture_output=True
+        )
+        return result.stdout, result.stderr
+    except subprocess.CalledProcessError as e:
+        print("Error running command:", cmd)
+        if e.stderr:
+            print("Error output:", e.stderr)
+        else:
+            print("Error info (not necessarily stderr):", e)
+        sys.exit(1)
+
+
+def add_days(input_dt: str, days_to_add: int = 0):
+    return (date.fromisoformat(input_dt) + timedelta(days=days_to_add)).isoformat()
+
+
+def random_date(start_date: str, end_date: str):
+    start_formatted = date.fromisoformat(start_date).toordinal()
+    end_formatted = date.fromisoformat(end_date).toordinal()
+    rand_date = random.randint(start_formatted, end_formatted)
+    return date.fromordinal(rand_date).isoformat()
+
+
+def gen_thru_dt(frm_dt: str, max_days: int = 30):
+    from_date = date.fromisoformat(frm_dt)
+    days_to_add = random.randint(0, max_days)
+    return (from_date + timedelta(days=days_to_add)).isoformat()
 
 
 def __gen_id(field: str, gen_func: Callable[[], str]) -> str:
@@ -165,32 +246,6 @@ def convert_tilde_str(val: str) -> str:
     if val == "~":
         return ""
     return val
-
-
-class RowAdapter:
-    def __init__(self, kv: dict[str, Any], loaded_from_file: bool = False):
-        self.kv = kv
-        self.loaded_from_file = loaded_from_file
-
-    def __getitem__(self, key: str):
-        return self.kv[key]
-
-    def __setitem__(self, key: str, new_value: Any):
-        if key not in self.kv:
-            self.kv[key] = new_value
-
-    def __contains__(self, key: str) -> bool:
-        return key in self.kv
-
-    def get(self, key: str, default: Any | None = None) -> Any:
-        return self.kv.get(key, default)
-
-    def extend(self, other: dict[str, Any] | Self, overwrite: bool = False):
-        cur = self if not overwrite else self.kv
-        other_dict = other if isinstance(other, dict) else other.kv
-
-        for k, v in other_dict.items():
-            cur[k] = v
 
 
 class GeneratorUtil:
