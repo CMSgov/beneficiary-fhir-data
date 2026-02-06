@@ -753,9 +753,9 @@ def generate(opts: OptionsModel, paths: tuple[Path, ...]):
     # whether a given BENE_SK has CLMs rows already and either regenerate them or generate new ones
     # correspondingly. Additionally, we need to preserve the order of the bene_sks from the source
     # files, else there will be drift in the order of generated rows
-    bene_hstry_bene_sks = [int(row[f.BENE_SK]) for row in files[BENE_HSTRY]]
     clm_bene_sks = [int(row[f.BENE_SK]) for row in files[CLM]]
-    all_bene_sks = bene_hstry_bene_sks + clm_bene_sks  # We take the order of BENE_HSTRY first
+    bene_hstry_bene_sks = [int(row[f.BENE_SK]) for row in files[BENE_HSTRY]]
+    all_bene_sks = clm_bene_sks + bene_hstry_bene_sks  # We take the order of CLM first
     ordered_bene_sks = list(OrderedDict.fromkeys(x for x in all_bene_sks))
 
     # Regenerating existing data implies that we need a way to uniquely address a single row/set of
