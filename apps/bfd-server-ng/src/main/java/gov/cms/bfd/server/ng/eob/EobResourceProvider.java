@@ -29,7 +29,8 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 @Component
 public class EobResourceProvider implements IResourceProvider {
-  private final EobHandler eobHandler;
+  private final EobNewHandler eobHandler;
+  //  private final EobNewHandler eobNewHandler;
   private final CertificateUtil certificateUtil;
   private final Configuration configuration;
   private static final String SERVICE_DATE = "service-date";
@@ -69,6 +70,45 @@ public class EobResourceProvider implements IResourceProvider {
    */
   @Search
   public Bundle searchByPatient(
+      @RequiredParam(name = ExplanationOfBenefit.SP_PATIENT) final ReferenceParam patient,
+      @Count final Integer count,
+      @OptionalParam(name = SERVICE_DATE) final DateRangeParam serviceDate,
+      @OptionalParam(name = ExplanationOfBenefit.SP_RES_LAST_UPDATED)
+          final DateRangeParam lastUpdated,
+      @OptionalParam(name = START_INDEX) final NumberParam startIndex,
+      @OptionalParam(name = Constants.PARAM_TAG) final TokenAndListParam tag,
+      @OptionalParam(name = TYPE) final TokenAndListParam type,
+      final HttpServletRequest request) {
+
+    var tagCriteria = FhirInputConverter.parseTagParameter(tag);
+    var claimTypeCodes = FhirInputConverter.getClaimTypeCodesForType(type);
+
+    return eobHandler.searchByBene(
+        FhirInputConverter.toLong(patient, "Patient"),
+        Optional.ofNullable(count),
+        FhirInputConverter.toDateTimeRange(serviceDate),
+        FhirInputConverter.toDateTimeRange(lastUpdated),
+        FhirInputConverter.toIntOptional(startIndex),
+        tagCriteria,
+        claimTypeCodes,
+        getFilterModeForRequest(request));
+  }
+
+  /**
+   * Search for claims data by bene.
+   *
+   * @param patient patient
+   * @param count record count
+   * @param serviceDate service date
+   * @param lastUpdated last updated
+   * @param startIndex start index
+   * @param tag tags to filter by
+   * @param type claim type to filter by
+   * @param request HTTP request details
+   * @return bundle
+   */
+  @Search
+  public Bundle searchByPatientNew(
       @RequiredParam(name = ExplanationOfBenefit.SP_PATIENT) final ReferenceParam patient,
       @Count final Integer count,
       @OptionalParam(name = SERVICE_DATE) final DateRangeParam serviceDate,

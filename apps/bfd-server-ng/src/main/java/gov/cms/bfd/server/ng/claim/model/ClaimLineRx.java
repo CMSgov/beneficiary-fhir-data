@@ -1,6 +1,5 @@
 package gov.cms.bfd.server.ng.claim.model;
 
-import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
@@ -24,9 +23,6 @@ public class ClaimLineRx {
    * @return Optional containing the coding if applicable, otherwise empty
    */
   public Optional<Coding> toFhirNdcCompound() {
-    return claimRxSupportingInfo
-        .getCompoundCode()
-        .filter(c -> c == ClaimLineCompoundCode._2)
-        .map(c -> new Coding().setSystem(SystemUrls.CARIN_COMPOUND_LITERAL).setCode("compound"));
+    return claimRxSupportingInfo.toFhirNdcCompound();
   }
 }

@@ -9,10 +9,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 @Embeddable
 @Getter
-class ClaimLineAdjudicationChargeProfessional {
-
-  @Column(name = "clm_line_carr_clncl_chrg_amt")
-  private BigDecimal carrierClinicalChargeAmount;
+class ClaimLineAdjudicationChargeProfessionalNch {
 
   @Column(name = "clm_line_carr_psych_ot_lmt_amt")
   private BigDecimal therapyAmountAppliedToLimit;
@@ -32,10 +29,26 @@ class ClaimLineAdjudicationChargeProfessional {
   @Column(name = "clm_line_prfnl_dme_price_amt")
   private BigDecimal purchasePriceAmount;
 
+  @Column(name = "clm_line_alowd_chrg_amt")
+  private BigDecimal allowedChargeAmount;
+
+  @Column(name = "clm_line_sbmt_chrg_amt")
+  private BigDecimal submittedChargeAmount;
+
+  @Column(name = "clm_line_prvdr_pmt_amt")
+  private BigDecimal providerPaymentAmount;
+
+  @Column(name = "clm_line_bene_pd_amt")
+  private BigDecimal benePaidAmount;
+
+  @Column(name = "clm_line_cvrd_pd_amt")
+  private BigDecimal coveredPaidAmount;
+
+  @Column(name = "clm_line_mdcr_ddctbl_amt")
+  private BigDecimal deductibleAmount;
+
   List<ExplanationOfBenefit.AdjudicationComponent> toFhir() {
     return List.of(
-        AdjudicationChargeType.LINE_PROFESSIONAL_CARRIER_CLINICAL_CHARGE_AMOUNT.toFhirAdjudication(
-            carrierClinicalChargeAmount),
         AdjudicationChargeType.LINE_PROFESSIONAL_THERAPY_LMT_AMOUNT.toFhirAdjudication(
             therapyAmountAppliedToLimit),
         AdjudicationChargeType.LINE_PROFESSIONAL_INTEREST_AMOUNT.toFhirAdjudication(
@@ -47,6 +60,12 @@ class ClaimLineAdjudicationChargeProfessional {
         AdjudicationChargeType.LINE_PROFESSIONAL_SCREEN_SAVINGS_AMOUNT.toFhirAdjudication(
             screenSavingsAmount),
         AdjudicationChargeType.LINE_PROFESSIONAL_PURCHASE_PRICE_AMOUNT.toFhirAdjudication(
-            purchasePriceAmount));
+            purchasePriceAmount),
+        AdjudicationChargeType.LINE_ALLOWED_CHARGE_AMOUNT.toFhirAdjudication(allowedChargeAmount),
+        AdjudicationChargeType.LINE_MEDICARE_DEDUCTIBLE_AMOUNT.toFhirAdjudication(deductibleAmount),
+        AdjudicationChargeType.LINE_BENE_PAID_AMOUNT.toFhirAdjudication(benePaidAmount),
+        AdjudicationChargeType.LINE_PROVIDER_PAYMENT_AMOUNT.toFhirAdjudication(
+            providerPaymentAmount),
+        AdjudicationChargeType.LINE_COVERED_PAID_AMOUNT.toFhirAdjudication(coveredPaidAmount));
   }
 }

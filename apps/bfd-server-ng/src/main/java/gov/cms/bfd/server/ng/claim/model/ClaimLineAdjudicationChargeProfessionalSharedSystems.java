@@ -7,12 +7,7 @@ import java.util.List;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 @Embeddable
-class ClaimLineAdjudicationCharge {
-  @Column(name = "clm_line_ncvrd_chrg_amt")
-  private BigDecimal noncoveredChargeAmount;
-
-  @Column(name = "clm_line_ncvrd_pd_amt")
-  private BigDecimal noncoveredProductPaidAmount;
+class ClaimLineAdjudicationChargeProfessionalSharedSystems {
 
   @Column(name = "clm_line_alowd_chrg_amt")
   private BigDecimal allowedChargeAmount;
@@ -22,9 +17,6 @@ class ClaimLineAdjudicationCharge {
 
   @Column(name = "clm_line_prvdr_pmt_amt")
   private BigDecimal providerPaymentAmount;
-
-  @Column(name = "clm_line_bene_pmt_amt")
-  private BigDecimal benePaymentAmount;
 
   @Column(name = "clm_line_bene_pd_amt")
   private BigDecimal benePaidAmount;
@@ -38,8 +30,11 @@ class ClaimLineAdjudicationCharge {
   @Column(name = "clm_line_otaf_amt")
   private BigDecimal providerObligationToAcceptFullAmount;
 
-  @Column(name = "clm_line_othr_tp_pd_amt")
-  private BigDecimal otherThirdPartyPaidAmount;
+  @Column(name = "clm_line_carr_psych_ot_lmt_amt")
+  private BigDecimal therapyAmountAppliedToLimit;
+
+  @Column(name = "clm_line_prfnl_dme_price_amt")
+  private BigDecimal purchasePriceAmount;
 
   List<ExplanationOfBenefit.AdjudicationComponent> toFhir() {
     return List.of(
@@ -48,16 +43,13 @@ class ClaimLineAdjudicationCharge {
         AdjudicationChargeType.LINE_PROVIDER_OBLIGATION_FULL_AMOUNT.toFhirAdjudication(
             providerObligationToAcceptFullAmount),
         AdjudicationChargeType.LINE_BENE_PAID_AMOUNT.toFhirAdjudication(benePaidAmount),
-        AdjudicationChargeType.LINE_BENE_PAYMENT_AMOUNT.toFhirAdjudication(benePaymentAmount),
-        AdjudicationChargeType.LINE_NONCOVERED_CHARGE_AMOUNT.toFhirAdjudication(
-            noncoveredChargeAmount),
         AdjudicationChargeType.LINE_PROVIDER_PAYMENT_AMOUNT.toFhirAdjudication(
             providerPaymentAmount),
         AdjudicationChargeType.LINE_COVERED_PAID_AMOUNT.toFhirAdjudication(coveredPaidAmount),
-        AdjudicationChargeType.LINE_NONCOVERED_PRODUCT_PAID_AMOUNT.toFhirAdjudication(
-            noncoveredProductPaidAmount),
-        AdjudicationChargeType.LINE_OTHER_THIRD_PARTY_PAID_AMOUNT.toFhirAdjudication(
-            otherThirdPartyPaidAmount),
+        AdjudicationChargeType.LINE_PROFESSIONAL_PURCHASE_PRICE_AMOUNT.toFhirAdjudication(
+            purchasePriceAmount),
+        AdjudicationChargeType.LINE_PROFESSIONAL_THERAPY_LMT_AMOUNT.toFhirAdjudication(
+            therapyAmountAppliedToLimit),
         AdjudicationChargeType.LINE_SUBMITTED_CHARGE_AMOUNT.toFhirAdjudication(
             submittedChargeAmount));
   }

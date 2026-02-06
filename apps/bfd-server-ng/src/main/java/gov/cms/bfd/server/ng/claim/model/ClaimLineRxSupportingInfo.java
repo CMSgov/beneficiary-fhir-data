@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model;
 
+import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
@@ -7,6 +8,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 import lombok.Getter;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 @Embeddable
@@ -64,5 +66,16 @@ class ClaimLineRxSupportingInfo {
             claimDispensingStatusCode.map(s -> s.toFhir(supportingInfoFactory)))
         .flatMap(Optional::stream)
         .toList();
+  }
+
+  /**
+   * Per C4BB, if compound code = 2 -> populate productOrService with "compound".
+   *
+   * @return Optional containing the coding if applicable, otherwise empty
+   */
+  public Optional<Coding> toFhirNdcCompound() {
+    return compoundCode
+        .filter(c -> c == ClaimLineCompoundCode._2)
+        .map(c -> new Coding().setSystem(SystemUrls.CARIN_COMPOUND_LITERAL).setCode("compound"));
   }
 }
