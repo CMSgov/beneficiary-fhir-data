@@ -1134,6 +1134,8 @@ class IdrBeneficiaryLowIncomeSubsidy(IdrBaseModel):
 
 def _claim_filter(start_time: datetime, partition: LoadPartition) -> str:
     clm = ALIAS_CLM
+    # For part D, we want ALL the claims
+    # For other claim types, we can filter only latest claims if LATEST_CLAIMS is enabled
     if LATEST_CLAIMS and (
         (PartitionType.PART_D | PartitionType.ALL) & partition.partition_type > 0
     ):
@@ -1188,9 +1190,11 @@ def _claim_filter(start_time: datetime, partition: LoadPartition) -> str:
     claim_type_codes = (
         partition.claim_type_codes if partition.claim_type_codes else ALL_CLAIM_TYPE_CODES
     )
+    hstry = ALIAS_HSTRY
     return f"""
     (
         {clm}.bene_sk != 0
+        AND NOT EXISTS ({_deceased_bene_filter(hstry)} AND {hstry}.bene_sk = {clm}.bene_sk)
         AND {clm}.clm_type_cd IN ({",".join([str(c) for c in claim_type_codes])})
         {clm_from_filter}
         {latest_claim_ind}
