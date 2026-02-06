@@ -176,6 +176,7 @@ ALIAS_PRVDR_PRSCRBNG = "prvdr_prscrbng"
 ALIAS_PRVDR_SRVC = "prvdr_srvc"
 ALIAS_PRVDR_BLG = "prvdr_blg"
 ALIAS_PRVDR_RFRG = "prvdr_rfrg"
+ALIAS_PRVDR_RNDRNG = "prvdr_rndrng"
 ALIAS_XREF = "xref"
 ALIAS_LCTN_HSTRY = "lctn_hstry"
 ALIAS_CLM_GRP = "clm_grp"
@@ -3056,7 +3057,7 @@ class IdrClaimProfessionalNch(IdrBaseModel):
         return PROFESSIONAL_ADJUDICATED_PARTITIONS
 
 
-class IdrClaimLineProfessionalNch(IdrBaseModel):
+class IdrClaimItemProfessionalNch(IdrBaseModel):
     clm_uniq_id: Annotated[
         int, {PRIMARY_KEY: True, BATCH_ID: True, ALIAS: ALIAS_CLM, LAST_UPDATED_TIMESTAMP: True}
     ]
@@ -3262,6 +3263,63 @@ class IdrClaimLineProfessionalNch(IdrBaseModel):
     clm_line_hct_lvl_num: int | None
     clm_line_hgb_lvl_num: int | None
 
+    # Columns from v2_mdcr_prvdr_hstry
+    prvdr_rndrng_prvdr_npi_num: Annotated[
+        str,
+        {COLUMN_MAP: "prvdr_npi_num", ALIAS: ALIAS_PRVDR_RNDRNG},
+        BeforeValidator(transform_default_string),
+    ]
+    prvdr_rndrng_sk: Annotated[
+        int | None,
+        {COLUMN_MAP: "prvdr_sk", ALIAS: ALIAS_PRVDR_RNDRNG},
+        BeforeValidator(transform_default_int_to_null),
+    ]
+    prvdr_rndrng_mdl_name: Annotated[
+        str,
+        {COLUMN_MAP: "prvdr_mdl_name", ALIAS: ALIAS_PRVDR_RNDRNG},
+        BeforeValidator(transform_default_string),
+    ]
+    prvdr_rndrng_type_cd: Annotated[
+        str,
+        {COLUMN_MAP: "prvdr_type_cd", ALIAS: ALIAS_PRVDR_RNDRNG},
+        BeforeValidator(transform_default_string),
+    ]
+    prvdr_rndrng_txnmy_cmpst_cd: Annotated[
+        str,
+        {COLUMN_MAP: "prvdr_txnmy_cmpst_cd", ALIAS: ALIAS_PRVDR_RNDRNG},
+        BeforeValidator(transform_default_string),
+    ]
+    prvdr_rndrng_oscar_num: Annotated[
+        str,
+        {COLUMN_MAP: "prvdr_oscar_num", ALIAS: ALIAS_PRVDR_RNDRNG},
+        BeforeValidator(transform_default_string),
+    ]
+    prvdr_rndrng_1st_name: Annotated[
+        str,
+        {COLUMN_MAP: "prvdr_1st_name", ALIAS: ALIAS_PRVDR_RNDRNG},
+        BeforeValidator(transform_default_string),
+    ]
+    prvdr_rndrng_name: Annotated[
+        str,
+        {COLUMN_MAP: "prvdr_name", ALIAS: ALIAS_PRVDR_RNDRNG},
+        BeforeValidator(transform_provider_name),
+    ]
+    prvdr_rndrng_lgl_name: Annotated[
+        str,
+        {COLUMN_MAP: "prvdr_lgl_name", ALIAS: ALIAS_PRVDR_RNDRNG},
+        BeforeValidator(transform_default_string),
+    ]
+    prvdr_rndrng_emplr_id_num: Annotated[
+        str,
+        {COLUMN_MAP: "prvdr_emplr_id_num", ALIAS: ALIAS_PRVDR_RNDRNG},
+        BeforeValidator(transform_default_string),
+    ]
+    prvdr_rndrng_last_name: Annotated[
+        str,
+        {COLUMN_MAP: "prvdr_last_name", ALIAS: ALIAS_PRVDR_RNDRNG},
+        BeforeValidator(transform_default_string),
+    ]
+
     @staticmethod
     def table() -> str:
         return "idr_new.claim_item_professional_nch"
@@ -3288,6 +3346,7 @@ class IdrClaimLineProfessionalNch(IdrBaseModel):
         line_dcmtn = ALIAS_LINE_DCMTN
         line_mcs = ALIAS_LINE_MCS
         line_prfnl = ALIAS_LINE_PRFNL
+        prvdr_rndrng = ALIAS_PRVDR_RNDRNG
         # This query is taking all the values for CLM_PROD, CLM_LINE, and CLM_VAL and storing
         # them in a unified table. This is necessary because each of these tables have a different
         # number of rows for each claim. If we don't combine these values, we would either have to
@@ -3428,6 +3487,9 @@ class IdrClaimLineProfessionalNch(IdrBaseModel):
                     AND {line_dcmtn}.clm_num_sk = {line}.clm_num_sk
                     AND {line_dcmtn}.clm_dt_sgntr_sk = {line}.clm_dt_sgntr_sk
                     AND {line_dcmtn}.clm_line_num = {line}.clm_line_num
+                LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_prvdr_hstry {prvdr_rndrng}
+                    ON {prvdr_rndrng}.prvdr_npi_num = {line}.prvdr_rndrng_prvdr_npi_num
+                    AND {prvdr_rndrng}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
                 {{WHERE_CLAUSE}}
                 {{ORDER_BY}}
         """

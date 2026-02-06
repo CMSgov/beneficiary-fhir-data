@@ -24,9 +24,9 @@ from model import (
     IdrClaimFiss,
     IdrClaimInstitutional,
     IdrClaimItem,
+    IdrClaimItemProfessionalNch,
     IdrClaimLineInstitutional,
     IdrClaimLineProfessional,
-    IdrClaimLineProfessionalNch,
     IdrClaimLineRx,
     IdrClaimProfessional,
     IdrClaimProfessionalNch,
@@ -66,7 +66,7 @@ def claim_aux_tables() -> list[type[IdrBaseModel]]:
             IdrProviderHistory,
             # RX/Part D is special because we combine claim + claim line
             IdrClaimRx,
-            IdrClaimLineProfessionalNch,
+            IdrClaimItemProfessionalNch,
         ]
     )
 
