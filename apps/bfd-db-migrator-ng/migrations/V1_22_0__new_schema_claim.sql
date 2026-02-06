@@ -377,7 +377,7 @@ CREATE TABLE idr_new.claim_item_professional_shared_systems
 --  ADJ   clm_line_carr_clncl_chrg_amt   numeric,
 --  ADJ   clm_mdcr_prmry_pyr_alowd_amt   numeric,
 
-    clm_ocrnc_sgntr_sk             numeric,
+--    clm_ocrnc_sgntr_sk             numeric,
 --    clm_rlt_ocrnc_sgntr_sk         numeric,
     -- v2_mdcr_clm_line_mcs COLUMNS
     clm_line_rbndlg_crtfctn_num    character varying(10),
@@ -493,7 +493,7 @@ CREATE TABLE idr_new.claim_item_professional_nch
     clm_line_carr_clncl_chrg_amt   numeric,
     clm_mdcr_prmry_pyr_alowd_amt   numeric,
 
-    clm_ocrnc_sgntr_sk             numeric,
+--    clm_ocrnc_sgntr_sk             numeric,
 --    clm_rlt_ocrnc_sgntr_sk         numeric,
     -- v2_mdcr_clm_line_mcs COLUMNS
     clm_line_rbndlg_crtfctn_num    character varying(10),
