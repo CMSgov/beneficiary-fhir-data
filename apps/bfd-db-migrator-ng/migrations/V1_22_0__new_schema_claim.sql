@@ -274,7 +274,7 @@ CREATE TABLE idr_new.claim_item_professional_shared_systems
 (
     clm_uniq_id                    bigint                   NOT NULL,
     bfd_row_id                     integer                  NOT NULL,
-    clm_line_num                   integer                  NOT NULL,
+    clm_line_num                   integer,
 --  ADJ    clm_line_ansthsa_unit_cnt      numeric                  NOT NULL,
     clm_line_dgns_cd               character varying(7)     NOT NULL,
     clm_line_sbmt_chrg_amt         numeric,
@@ -390,7 +390,7 @@ CREATE TABLE idr_new.claim_item_professional_nch
 (
     clm_uniq_id                    bigint                   NOT NULL,
     bfd_row_id                     integer                  NOT NULL,
-    clm_line_num                   integer                  NOT NULL,
+    clm_line_num                   integer,
     clm_line_ansthsa_unit_cnt      numeric,
     clm_line_dgns_cd               character varying(7)     NOT NULL,
     clm_line_sbmt_chrg_amt         numeric,
@@ -941,7 +941,7 @@ CREATE TABLE idr_new.claim_item_institutional_shared_systems
 (
     clm_uniq_id                 bigint                   NOT NULL,
     bfd_row_id                  integer                  NOT NULL,
-    clm_line_num                integer                  NOT NULL,
+    clm_line_num                integer,
     clm_line_ansthsa_unit_cnt   numeric,
 --  PRFNL   clm_line_dgns_cd               character varying(7)     NOT NULL,
     clm_line_sbmt_chrg_amt      numeric,
@@ -1060,7 +1060,7 @@ CREATE TABLE idr_new.claim_item_institutional_nch
 (
     clm_uniq_id                 bigint                   NOT NULL,
     bfd_row_id                  integer                  NOT NULL,
-    clm_line_num                integer                  NOT NULL,
+    clm_line_num                integer,
 --  PAC   clm_line_ansthsa_unit_cnt      numeric                  NOT NULL,
 --  PRFNL   clm_line_dgns_cd               character varying(7)     NOT NULL,
     clm_line_sbmt_chrg_amt      numeric,
