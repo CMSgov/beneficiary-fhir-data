@@ -2,6 +2,7 @@ import logging
 import sys
 from concurrent.futures import ProcessPoolExecutor
 from datetime import UTC, datetime
+from os import getenv
 
 from hamilton import driver, telemetry  # type: ignore
 from hamilton.execution import executors  # type: ignore
@@ -16,7 +17,7 @@ telemetry.disable_telemetry()
 console_handler = logging.StreamHandler()
 formatter = logging.Formatter("[%(levelname)s] %(asctime)s %(message)s")
 console_handler.setFormatter(formatter)
-logging.basicConfig(level=logging.INFO, handlers=[console_handler])
+logging.basicConfig(level=getenv("IDR_LOG_LEVEL", "DEBUG").upper(), handlers=[console_handler])
 
 logger = logging.getLogger(__name__)
 
