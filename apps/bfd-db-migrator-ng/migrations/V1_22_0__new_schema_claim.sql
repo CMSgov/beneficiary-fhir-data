@@ -735,7 +735,6 @@ CREATE TABLE idr_new.claim_institutional_nch
     clm_qlfy_stay_thru_dt      date,
     --CLAIM DATE SGNTR
     clm_type_cd                integer                  NOT NULL,
-    clm_num_sk                 bigint                   NOT NULL,
     bene_sk                    bigint                   NOT NULL,
     clm_cntl_num               character varying(40)    NOT NULL,
     clm_orig_cntl_num          character varying(40)    NOT NULL,
