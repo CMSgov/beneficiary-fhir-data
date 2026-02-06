@@ -65,7 +65,7 @@ def run(load_mode: str) -> None:
     )
 
     if any(char.isdigit() for char in BFD_TEST_DATE):
-        start_time = datetime.strptime(BFD_TEST_DATE, '%Y-%m-%d')
+        start_time = datetime.strptime(BFD_TEST_DATE, "%Y-%m-%dT%H:%M:%SZ")
     else:
         start_time = datetime.now()
 
