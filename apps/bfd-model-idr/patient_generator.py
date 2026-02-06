@@ -190,7 +190,8 @@ def load_inputs():
     }
     load_file_dict(files=files, paths=args.paths, exclude_empty=args.exclude_empty)
 
-    regenerate_static_tables(generator, files)
+    if any(file for file in files.values()):
+        regenerate_static_tables(generator, files)
 
     patients: list[RowAdapter] = files[BENE_HSTRY] or [RowAdapter({}) for _ in range(args.patients)]
     patient_mbi_id_rows = {row["BENE_MBI_ID"]: row.kv for row in files[BENE_MBI_ID]}
@@ -267,19 +268,21 @@ def load_inputs():
         if (not patient.loaded_from_file or args.force_ztm) and probability(0.05):
             # Exclude rows from the original patient that will be modified so that RowAdapter does
             # not ignore those changes
-            prior_patient = RowAdapter({
-                k: v
-                for k, v in patient.kv.items()
-                if k
-                not in {
-                    "BENE_SK",
-                    "IDR_LTST_TRANS_FLG",
-                    "IDR_TRANS_OBSLT_TS",
-                    "IDR_TRANS_EFCTV_TS",
-                    "IDR_INSRT_TS",
-                    "IDR_UPDT_TS",
+            prior_patient = RowAdapter(
+                {
+                    k: v
+                    for k, v in patient.kv.items()
+                    if k
+                    not in {
+                        "BENE_SK",
+                        "IDR_LTST_TRANS_FLG",
+                        "IDR_TRANS_OBSLT_TS",
+                        "IDR_TRANS_EFCTV_TS",
+                        "IDR_INSRT_TS",
+                        "IDR_UPDT_TS",
+                    }
                 }
-            })
+            )
             pt_bene_sk = generator.gen_bene_sk()
             prior_patient["BENE_SK"] = str(pt_bene_sk)
             prior_patient["IDR_LTST_TRANS_FLG"] = "Y"
