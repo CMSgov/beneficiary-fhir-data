@@ -2,6 +2,11 @@ import random
 from datetime import datetime
 
 from hamilton.htypes import Collect, Parallelizable  # type: ignore
+from model2.idr_claim import IdrClaim
+from model2.idr_claim_date_signature import IdrClaimDateSignature
+from model2.idr_claim_item import IdrClaimItem
+from model2.idr_claim_item_professional_nch import IdrClaimItemProfessionalNch
+from model2.idr_claim_professional_nch import IdrClaimProfessionalNch
 
 from constants import MIN_CLAIM_LOAD_DATE
 from load_partition import LoadPartition, LoadType
@@ -18,18 +23,13 @@ from model import (
     IdrBeneficiaryOvershareMbi,
     IdrBeneficiaryStatus,
     IdrBeneficiaryThirdParty,
-    IdrClaim,
     IdrClaimAnsiSignature,
-    IdrClaimDateSignature,
     IdrClaimFiss,
     IdrClaimInstitutional,
-    IdrClaimItem,
-    IdrClaimItemProfessionalNch,
     IdrClaimLineInstitutional,
     IdrClaimLineProfessional,
     IdrClaimLineRx,
     IdrClaimProfessional,
-    IdrClaimProfessionalNch,
     IdrClaimRx,
     IdrContractPbpContact,
     IdrContractPbpNumber,
