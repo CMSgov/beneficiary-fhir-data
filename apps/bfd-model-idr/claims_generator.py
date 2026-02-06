@@ -560,6 +560,59 @@ class _ClaimsFile(StrEnum):
             f.IDR_UPDT_TS,
         ],
     )
+    CNTRCT_PBP_CNTCT = (
+        CNTRCT_PBP_CNTCT,
+        [
+            f.CNTRCT_PBP_SK,
+            f.CNTRCT_PLAN_CNTCT_OBSLT_DT,
+            f.CNTRCT_PLAN_CNTCT_TYPE_CD,
+            f.CNTRCT_PLAN_FREE_EXTNSN_NUM,
+            f.CNTRCT_PLAN_CNTCT_FREE_NUM,
+            f.CNTRCT_PLAN_CNTCT_EXTNSN_NUM,
+            f.CNTRCT_PLAN_CNTCT_TEL_NUM,
+            f.CNTRCT_PBP_END_DT,
+            f.CNTRCT_PBP_BGN_DT,
+            f.CNTRCT_PLAN_CNTCT_ST_1_ADR,
+            f.CNTRCT_PLAN_CNTCT_ST_2_ADR,
+            f.CNTRCT_PLAN_CNTCT_CITY_NAME,
+            f.CNTRCT_PLAN_CNTCT_STATE_CD,
+            f.CNTRCT_PLAN_CNTCT_ZIP_CD,
+        ],
+    )
+    CNTRCT_PBP_NUM = (
+        CNTRCT_PBP_NUM,
+        [
+            f.CNTRCT_PBP_SK,
+            f.CNTRCT_NUM,
+            f.CNTRCT_PBP_NUM,
+            f.CNTRCT_PBP_NAME,
+            f.CNTRCT_PBP_TYPE_CD,
+            f.CNTRCT_DRUG_PLAN_IND_CD,
+            f.CNTRCT_PBP_SK_EFCTV_DT,
+            f.CNTRCT_PBP_END_DT,
+            f.CNTRCT_PBP_SK_OBSLT_DT,
+        ],
+    )
+    PRVDR_HSTRY = (
+        PRVDR_HSTRY,
+        [
+            f.PRVDR_SK,
+            f.PRVDR_HSTRY_EFCTV_DT,
+            f.PRVDR_HSTRY_OBSLT_DT,
+            f.PRVDR_1ST_NAME,
+            f.PRVDR_MDL_NAME,
+            f.PRVDR_LAST_NAME,
+            f.PRVDR_NAME,
+            f.PRVDR_LGL_NAME,
+            f.PRVDR_NPI_NUM,
+            f.PRVDR_EMPLR_ID_NUM,
+            f.PRVDR_OSCAR_NUM,
+            f.PRVDR_TXNMY_CMPST_CD,
+            f.PRVDR_TYPE_CD,
+            f.META_SK,
+            f.META_LST_UPDT_SK,
+        ],
+    )
 
     def __init__(
         self,
