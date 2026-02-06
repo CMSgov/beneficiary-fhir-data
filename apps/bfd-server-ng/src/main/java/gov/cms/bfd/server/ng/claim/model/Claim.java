@@ -49,6 +49,9 @@ public class Claim {
   @Column(name = "clm_src_id")
   private ClaimSourceId claimSourceId;
 
+  @Column(name = "meta_src_sk")
+  private MetaSourceSk metaSourceSk;
+
   @Column(name = "clm_efctv_dt")
   private LocalDate claimEffectiveDate;
 
@@ -124,6 +127,10 @@ public class Claim {
         .map(i -> i.getAdjudicationChargeInstitutional().getBenePaidAmount());
   }
 
+  private Optional<MetaSourceSk> getMetaSourceSk() {
+    return Optional.ofNullable(metaSourceSk);
+  }
+
   /**
    * Convert the claim info to a FHIR ExplanationOfBenefit.
    *
@@ -138,8 +145,8 @@ public class Claim {
     eob.setUse(ExplanationOfBenefit.Use.CLAIM);
     eob.setType(claimTypeCode.toFhirType());
     claimTypeCode.toFhirSubtype().ifPresent(eob::setSubType);
-
-    eob.setMeta(meta.toFhir(claimTypeCode, claimSourceId, securityStatus, finalAction));
+    eob.setMeta(
+        meta.toFhir(claimTypeCode, claimSourceId, securityStatus, finalAction, getMetaSourceSk()));
     eob.setIdentifier(identifiers.toFhir());
     eob.setBillablePeriod(billablePeriod.toFhir());
     eob.setCreated(DateUtil.toDate(claimEffectiveDate));
