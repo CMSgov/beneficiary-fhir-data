@@ -1,7 +1,7 @@
 import csv
 import random
 import sys
-from collections import defaultdict
+from collections import OrderedDict, defaultdict
 from enum import StrEnum
 from pathlib import Path
 from typing import Annotated, Any
@@ -751,10 +751,12 @@ def generate(opts: OptionsModel, paths: tuple[Path, ...]):
     # An operator could provide a BENE_HSTRY with new beneficiaries that have no corresponding CLMs,
     # so we need to resolve the unique union of BENE_SKs from both files here. Below we will check
     # whether a given BENE_SK has CLMs rows already and either regenerate them or generate new ones
-    # correspondingly.
-    bene_hstry_bene_sks = {int(row[f.BENE_SK]) for row in files[BENE_HSTRY]}
-    clm_bene_sks = {int(row[f.BENE_SK]) for row in files[CLM]}
-    all_bene_sks = bene_hstry_bene_sks.union(clm_bene_sks)
+    # correspondingly. Additionally, we need to preserve the order of the bene_sks from the source
+    # files, else there will be drift in the order of generated rows
+    bene_hstry_bene_sks = [int(row[f.BENE_SK]) for row in files[BENE_HSTRY]]
+    clm_bene_sks = [int(row[f.BENE_SK]) for row in files[CLM]]
+    all_bene_sks = bene_hstry_bene_sks + clm_bene_sks  # We take the order of BENE_HSTRY first
+    ordered_bene_sks = list(OrderedDict.fromkeys(x for x in all_bene_sks))
 
     # Regenerating existing data implies that we need a way to uniquely address a single row/set of
     # rows for each claims table per-CLM. We could do this via list comprehensions/scanning each
@@ -815,7 +817,7 @@ def generate(opts: OptionsModel, paths: tuple[Path, ...]):
     gen_pac_clms = not any_pac_clms or opts.force_pac_claims
 
     print("Generating synthetic claims data for provided BENE_SKs...")
-    for pt_bene_sk in tqdm.tqdm(all_bene_sks):
+    for pt_bene_sk in tqdm.tqdm(ordered_bene_sks):
         existing_clms = clms_per_bene_sk.get(pt_bene_sk, [])
         existing_adj_clms = [x for x in existing_clms if int(x[f.CLM_TYPE_CD]) < 1011]
         existing_pac_clms = [x for x in existing_clms if int(x[f.CLM_TYPE_CD]) >= 1011]
