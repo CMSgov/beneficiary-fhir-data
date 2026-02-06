@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any, Self
 
 import pandas as pd
+import tqdm
 from dateutil.parser import parse
 from faker import Faker
 
@@ -106,28 +107,37 @@ def load_file_dict(
             ]
         )
     )
-    for file_path, file_name in (
+    if not file_paths:
+        return
+
+    print(
+        f"Loading all provided files, {
+            'ignoring empty columns' if exclude_empty else 'treating empty columns as meaningful'
+        }..."
+    )
+    file_tupls = [
         (file_path, file_name)
         for file_path in file_paths
         for file_name in files
         if f"{file_name}.csv" in str(file_path)
-    ):
-        print(f"Loading {file_path} as {file_name}...")
-        csv_data = pd.read_csv(  # type: ignore
-            file_path,
-            dtype=str,
-            na_filter=exclude_empty,
-        )
-        file_as_dictlist = csv_data.to_dict(orient="records")  # type: ignore
-        if not exclude_empty:
-            files[file_name] = load_file(file_as_dictlist)  # type: ignore
-            print(f"Loaded {file_name}, treating empty columns as meaningful")
-            continue
+    ]
+    with tqdm.tqdm(file_tupls) as t:
+        for file_path, file_name in t:
+            t.set_postfix(file=file_path)  # type: ignore
+            csv_data = pd.read_csv(  # type: ignore
+                file_path,
+                dtype=str,
+                na_filter=exclude_empty,
+            )
+            file_as_dictlist = csv_data.to_dict(orient="records")  # type: ignore
+            if not exclude_empty:
+                files[file_name] = load_file(file_as_dictlist)  # type: ignore
+                continue
 
-        files[file_name] = load_file(
-            [{str(k): v for k, v in x.items() if pd.notna(v)} for x in file_as_dictlist]
-        )
-        print(f"Loaded {file_name}, ignoring empty columns")
+            files[file_name] = load_file(
+                [{str(k): v for k, v in x.items() if pd.notna(v)} for x in file_as_dictlist]
+            )
+    print("All files loaded")
 
 
 def load_file(file: Iterable[dict[str, Any]]):
@@ -799,8 +809,10 @@ class GeneratorUtil:
             (self.bene_mapd_enrlmt, f"out/{BENE_MAPD_ENRLMT}.csv", GeneratorUtil.ALL_KEYS),
         ]
 
-        for data, path, cols in beneficiary_exports:
-            self.export_df(data, path, cols)
+        with tqdm.tqdm(beneficiary_exports) as t:
+            for data, path, cols in t:
+                t.set_postfix(file=path)  # type: ignore
+                self.export_df(data, path, cols)
 
     @staticmethod
     def export_df(data: list[dict[str, Any]], out_path: str, cols: list[str] | str = ALL_KEYS):
