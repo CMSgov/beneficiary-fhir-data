@@ -120,22 +120,6 @@ enum AdjudicationChargeType {
       SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
       "CLM_MDCR_PRFNL_PRMRY_PYR_AMT",
       "Primary Payer Paid Amount"),
-  GAP_DISCOUNT_AMOUNT(
-      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
-      "CLM_RPTD_MFTR_DSCNT_AMT",
-      "Gap Discount Amount"),
-  VACCINATION_ADMIN_FEE(
-      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
-      "CLM_LINE_VCCN_ADMIN_FEE_AMT",
-      "Vaccination Administration Fee"),
-  OTHER_AMOUNT(
-      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
-      "CLM_LINE_TROOP_TOT_AMT",
-      "Other True Out Of Pocket Paid Amount"),
-  DISPENSING_FEE(
-      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION, "CLM_LINE_SRVC_CST_AMT", "Dispensing Fee"),
-  SALES_TAX_AMOUNT(
-      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION, "CLM_LINE_SLS_TAX_AMT", "Sales Tax Amount"),
   PATIENT_LIABILITY_REDUCT_AMOUNT(
       SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
       "CLM_LINE_PLRO_AMT",
@@ -144,10 +128,6 @@ enum AdjudicationChargeType {
       SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
       "CLM_LINE_LIS_AMT",
       "Low Income Cost Sharing Subsidy Amount"),
-  INGREDIENT_COST_AMOUNT(
-      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
-      "CLM_LINE_INGRDNT_CST_AMT",
-      "Ingredient Cost Amount"),
   GROSS_DRUG_COST_BLW_THRESHOLD_AMOUNT(
       SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
       "CLM_LINE_GRS_BLW_THRSHLD_AMT",
@@ -394,10 +374,6 @@ enum AdjudicationChargeType {
       SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
       "CLM_REV_CNTR_TDAPA_AMT",
       "Transitional Drug Add-On Payment Adjustment"),
-  LINE_RX_GROSS_COVERED_COST_AMOUNT(
-      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
-      "CLM_LINE_GRS_CVRD_CST_TOT_AMT",
-      "Claim Line Gross Covered Cost Amount"),
   LINE_NONCOVERED_PRODUCT_PAID_AMOUNT(
       SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
       "CLM_LINE_NCVRD_PD_AMT",
@@ -406,18 +382,6 @@ enum AdjudicationChargeType {
       SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
       "CLM_LINE_OTHR_TP_PD_AMT",
       "Other Third Party Paid Amount"),
-  LINE_RX_MANUFACTURER_DISCOUNT_AMOUNT(
-      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
-      "CLM_CMS_CALCD_MFTR_DSCNT_AMT",
-      "CMS Calculated Manufacturer Discount Amount"),
-  LINE_RX_REBATE_PASSTHROUGH_POS_AMOUNT(
-      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
-      "CLM_LINE_REBT_PASSTHRU_POS_AMT",
-      "Rebate Passthrough POS Amount"),
-  LINE_RX_PRICE_AMOUNT(
-      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
-      "CLM_PHRMCY_PRICE_DSCNT_AT_POS_AMT",
-      "Pharmacy price discount"),
   LINE_PROVIDER_OBLIGATION_FULL_AMOUNT(
       SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
       "CLM_LINE_OTAF_AMT",
@@ -439,7 +403,17 @@ enum AdjudicationChargeType {
       "eligible",
       "Eligible Amount",
       "CLM_LINE_PRFNL_DME_PRICE_AMT",
-      "Purchase Price Amount");
+      "Purchase Price Amount"),
+  LINE_RX_REPORTED_GAP_DISCOUNT_AMOUNT(
+      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
+      "CLM_LINE_RPTD_GAP_DSCNT_AMT",
+      "Claim Line Reported Gap Discount Amount"),
+  TOTAL_DRUG_COST_AMOUNT(
+      SystemUrls.HL7_ADJUDICATION,
+      "submitted",
+      "Submitted Amount",
+      "TOT_RX_CST_AMT",
+      "Total drug cost (Part D)");
 
   private final String coding1System;
   private final String coding1Code;
