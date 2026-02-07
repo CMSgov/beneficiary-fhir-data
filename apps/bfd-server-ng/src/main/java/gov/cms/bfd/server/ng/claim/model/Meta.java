@@ -5,6 +5,7 @@ import gov.cms.bfd.server.ng.util.DateUtil;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.time.ZonedDateTime;
+import java.util.Optional;
 import lombok.Getter;
 
 @Embeddable
@@ -17,15 +18,14 @@ class Meta {
       ClaimTypeCode claimTypeCode,
       ClaimSourceId claimSourceId,
       ClaimSecurityStatus securityStatus,
-      ClaimFinalAction finalAction) {
-    var meta =
-        new org.hl7.fhir.r4.model.Meta()
-            .setLastUpdated(DateUtil.toDate(updatedTimestamp))
-            .setSource(claimSourceId.getSource());
+      ClaimFinalAction finalAction,
+      Optional<MetaSourceSk> metaSourceId) {
+    var meta = new org.hl7.fhir.r4.model.Meta().setLastUpdated(DateUtil.toDate(updatedTimestamp));
     claimTypeCode.toFhirStructureDefinition().ifPresent(meta::addProfile);
     claimSourceId.toFhirSystemType().ifPresent(meta::addTag);
     finalAction.toFhirFinalAction().ifPresent(meta::addTag);
     meta.addSecurity(ClaimSecurityStatus.toFhir(securityStatus));
+    metaSourceId.ifPresent(s -> meta.setSource(s.getDisplay()));
     return meta;
   }
 }

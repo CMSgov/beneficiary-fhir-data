@@ -513,6 +513,10 @@ public class SystemUrls {
   public static final String BLUE_BUTTON_CODE_SYSTEM_CLAIM_ADJUSTMENT_TYPE_CODE =
       "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADJSTMT-TYPE-CD";
 
+  /** Blue Button code system = claim status code. */
+  public static final String BLUE_BUTTON_CODE_SYSTEM_CLAIM_AUDIT_TRAIL_STATUS_CODE =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD";
+
   /** Blue Button identifier - claim control number. */
   public static final String BLUE_BUTTON_CLAIM_CONTROL_NUMBER =
       "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM";
