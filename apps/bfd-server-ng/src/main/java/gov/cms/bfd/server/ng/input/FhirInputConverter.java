@@ -4,14 +4,15 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
-import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import gov.cms.bfd.server.ng.claim.model.ClaimFinalAction;
 import gov.cms.bfd.server.ng.claim.model.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.ClaimTypeCode;
+import gov.cms.bfd.server.ng.claim.model.MetaSourceSk;
 import gov.cms.bfd.server.ng.util.IdrConstants;
 import gov.cms.bfd.server.ng.util.SystemUrls;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -159,7 +160,7 @@ public class FhirInputConverter {
   }
 
   /**
-   * Parses the tag query parameter into a list of list of criteria.
+   * Parses the tag query parameter into a list of a list of criteria.
    *
    * <p>Outer list is AND conditions, inner list is OR conditions.
    *
@@ -167,24 +168,7 @@ public class FhirInputConverter {
    * @return list of tag criteria
    */
   public static List<List<TagCriterion>> parseTagParameter(@Nullable TokenAndListParam tagParam) {
-    if (tagParam == null || tagParam.getValuesAsQueryTokens().isEmpty()) {
-      return Collections.emptyList();
-    }
-
-    return tagParam.getValuesAsQueryTokens().stream()
-        .map(FhirInputConverter::parseTagQueryToken)
-        .filter(list -> !list.isEmpty())
-        .toList();
-  }
-
-  private static List<TagCriterion> parseTagQueryToken(TokenOrListParam tokenOrListParam) {
-    if (tokenOrListParam == null || tokenOrListParam.getValuesAsQueryTokens().isEmpty()) {
-      return Collections.emptyList();
-    }
-
-    return tokenOrListParam.getValuesAsQueryTokens().stream()
-        .flatMap(token -> FhirInputConverter.parseTagToken(token).stream())
-        .toList();
+    return FhirTokenParameterParser.parse(tagParam, FhirInputConverter::parseTagToken);
   }
 
   private static List<TagCriterion> parseTagToken(TokenParam token) {
@@ -254,5 +238,35 @@ public class FhirInputConverter {
         .map(token -> token.getValue().trim().toLowerCase())
         .flatMap(normalizedType -> ClaimTypeCode.getClaimTypeCodesByType(normalizedType).stream())
         .toList();
+  }
+
+  /**
+   * Parses the source query parameter into a list of a list of sources.
+   *
+   * <p>Outer list is AND conditions, inner list is OR conditions.
+   *
+   * @param sourceParam _source param from request
+   * @return list of sources
+   */
+  public static List<List<MetaSourceSk>> parseSourceParameter(
+      @Nullable TokenAndListParam sourceParam) {
+    return FhirTokenParameterParser.parse(sourceParam, token -> List.of(parseSourceToken(token)));
+  }
+
+  private static MetaSourceSk parseSourceToken(TokenParam token) {
+    var source = token.getValue().trim();
+
+    if (source.isEmpty()) {
+      throw new InvalidRequestException("Source cannot be empty.");
+    }
+
+    return MetaSourceSk.tryFromDisplay(source)
+        .orElseThrow(
+            () ->
+                new InvalidRequestException(
+                    "Unknown source: "
+                        + source
+                        + ". Supported sources are: "
+                        + Arrays.toString(MetaSourceSk.values())));
   }
 }
