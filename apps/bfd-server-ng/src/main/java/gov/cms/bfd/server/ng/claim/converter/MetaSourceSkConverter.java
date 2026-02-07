@@ -12,11 +12,11 @@ public class MetaSourceSkConverter implements AttributeConverter<MetaSourceSk, I
     if (metaSourceSk == null) {
       return null;
     }
-    return metaSourceSk.getSourceId();
+    return metaSourceSk.getSourceSk();
   }
 
   @Override
   public MetaSourceSk convertToEntityAttribute(Integer s) {
-    return MetaSourceSk.tryFromSourceId(s).orElse(null);
+    return MetaSourceSk.tryFromSourceSk(s);
   }
 }

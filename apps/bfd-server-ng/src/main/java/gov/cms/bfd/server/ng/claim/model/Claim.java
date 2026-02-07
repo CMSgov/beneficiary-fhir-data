@@ -127,10 +127,6 @@ public class Claim {
         .map(i -> i.getAdjudicationChargeInstitutional().getBenePaidAmount());
   }
 
-  private Optional<MetaSourceSk> getMetaSourceSk() {
-    return Optional.ofNullable(metaSourceSk);
-  }
-
   /**
    * Convert the claim info to a FHIR ExplanationOfBenefit.
    *
@@ -146,7 +142,7 @@ public class Claim {
     eob.setType(claimTypeCode.toFhirType());
     claimTypeCode.toFhirSubtype().ifPresent(eob::setSubType);
     eob.setMeta(
-        meta.toFhir(claimTypeCode, claimSourceId, securityStatus, finalAction, getMetaSourceSk()));
+        meta.toFhir(claimTypeCode, claimSourceId, securityStatus, finalAction, metaSourceSk));
     eob.setIdentifier(identifiers.toFhir());
     eob.setBillablePeriod(billablePeriod.toFhir());
     eob.setCreated(DateUtil.toDate(claimEffectiveDate));

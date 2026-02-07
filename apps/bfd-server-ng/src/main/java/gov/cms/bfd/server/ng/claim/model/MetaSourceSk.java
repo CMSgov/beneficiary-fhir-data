@@ -20,25 +20,28 @@ public enum MetaSourceSk {
   /** 1003 - FISS. */
   FISS(1003, "F", "FISS");
 
-  private final int sourceId;
+  private final int sourceSk;
   private final String prefix;
   private final String display;
 
   /**
    * Convert from a database code.
    *
-   * @param sourceId database code
+   * @param sourceSk database code
    * @return meta source id
    */
-  public static Optional<MetaSourceSk> tryFromSourceId(int sourceId) {
-    return Arrays.stream(values()).filter(v -> v.sourceId == sourceId).findFirst();
+  public static MetaSourceSk tryFromSourceSk(Integer sourceSk) {
+    return Arrays.stream(values())
+        .filter(v -> v.sourceSk == sourceSk)
+        .findFirst()
+        .orElseThrow(() -> new IllegalArgumentException("Unknown meta source: " + sourceSk));
   }
 
   /**
    * Convert from a source name.
    *
    * @param source source name
-   * @return meta source id
+   * @return meta source
    */
   public static Optional<MetaSourceSk> tryFromDisplay(String source) {
     return Arrays.stream(values()).filter(v -> v.display.equalsIgnoreCase(source)).findFirst();
