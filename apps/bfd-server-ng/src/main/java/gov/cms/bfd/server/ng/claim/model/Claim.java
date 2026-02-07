@@ -50,7 +50,7 @@ public class Claim {
   private ClaimSourceId claimSourceId;
 
   @Column(name = "meta_src_sk")
-  private Optional<MetaSourceId> metaSourceId;
+  private Optional<MetaSourceSk> metaSourceId;
 
   @Column(name = "clm_efctv_dt")
   private LocalDate claimEffectiveDate;

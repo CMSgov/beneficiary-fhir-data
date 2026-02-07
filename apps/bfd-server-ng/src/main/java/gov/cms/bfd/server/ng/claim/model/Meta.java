@@ -19,7 +19,7 @@ class Meta {
       ClaimSourceId claimSourceId,
       ClaimSecurityStatus securityStatus,
       ClaimFinalAction finalAction,
-      Optional<MetaSourceId> metaSourceId) {
+      Optional<MetaSourceSk> metaSourceId) {
     var meta = new org.hl7.fhir.r4.model.Meta().setLastUpdated(DateUtil.toDate(updatedTimestamp));
     claimTypeCode.toFhirStructureDefinition().ifPresent(meta::addProfile);
     claimSourceId.toFhirSystemType().ifPresent(meta::addTag);

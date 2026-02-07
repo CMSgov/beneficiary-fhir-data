@@ -26,7 +26,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** FISS - A - QUEUED - Accept. */
   FISS_A(
-      MetaSourceId.FISS,
+      MetaSourceSk.FISS,
       "A",
       ClaimAuditTrailLocationCode.NA,
       ExplanationOfBenefit.RemittanceOutcome.QUEUED,
@@ -36,14 +36,14 @@ public enum ClaimAuditTrailStatusCode {
    * errors.
    */
   FISS_F(
-      MetaSourceId.FISS,
+      MetaSourceSk.FISS,
       "F",
       ClaimAuditTrailLocationCode.NA,
       ExplanationOfBenefit.RemittanceOutcome.PARTIAL,
       "Suspended online; the system adds the claim record to the file with active errors."),
   /** FISS - S - QUEUED - A manual update is needed before the claim processing can continue. */
   S(
-      MetaSourceId.FISS,
+      MetaSourceSk.FISS,
       "S",
       ClaimAuditTrailLocationCode.NA,
       ExplanationOfBenefit.RemittanceOutcome.QUEUED,
@@ -54,7 +54,7 @@ public enum ClaimAuditTrailStatusCode {
    * status to an 'S' for suspense after the move.
    */
   FISS_M(
-      MetaSourceId.FISS,
+      MetaSourceSk.FISS,
       "M",
       ClaimAuditTrailLocationCode.NA,
       ExplanationOfBenefit.RemittanceOutcome.PARTIAL,
@@ -64,14 +64,14 @@ public enum ClaimAuditTrailStatusCode {
    * denial).
    */
   FISS_D(
-      MetaSourceId.FISS,
+      MetaSourceSk.FISS,
       "D",
       ClaimAuditTrailLocationCode.NA,
       ExplanationOfBenefit.RemittanceOutcome.COMPLETE,
       "Claim has reached final disposition with no reimbursement (medical denial)."),
   /** FISS - P - COMPLETE - Claim has reached final disposition with reimbursement. */
   FISS_P(
-      MetaSourceId.FISS,
+      MetaSourceSk.FISS,
       "P",
       ClaimAuditTrailLocationCode.NA,
       ExplanationOfBenefit.RemittanceOutcome.COMPLETE,
@@ -81,7 +81,7 @@ public enum ClaimAuditTrailStatusCode {
    * reject).
    */
   FISS_R(
-      MetaSourceId.FISS,
+      MetaSourceSk.FISS,
       "R",
       ClaimAuditTrailLocationCode.NA,
       ExplanationOfBenefit.RemittanceOutcome.COMPLETE,
@@ -91,14 +91,14 @@ public enum ClaimAuditTrailStatusCode {
    * returned to the provider with billing errors.
    */
   T(
-      MetaSourceId.FISS,
+      MetaSourceSk.FISS,
       "T",
       ClaimAuditTrailLocationCode.NA,
       ExplanationOfBenefit.RemittanceOutcome.PARTIAL,
       "Claim has reached final disposition with no reimbursement and has been returned to the provider with billing errors."),
   /** FISS - I - PARTIAL - Claim moves from the active processing file to the inactive file. */
   I(
-      MetaSourceId.FISS,
+      MetaSourceSk.FISS,
       "I",
       ClaimAuditTrailLocationCode.NA,
       ExplanationOfBenefit.RemittanceOutcome.PARTIAL,
@@ -108,7 +108,7 @@ public enum ClaimAuditTrailStatusCode {
    * Review Organization for corrections.
    */
   FISS_U(
-      MetaSourceId.FISS,
+      MetaSourceSk.FISS,
       "U",
       ClaimAuditTrailLocationCode.NA,
       ExplanationOfBenefit.RemittanceOutcome.COMPLETE,
@@ -118,7 +118,7 @@ public enum ClaimAuditTrailStatusCode {
    * display online in related history.
    */
   A(
-      MetaSourceId.MCS,
+      MetaSourceSk.MCS,
       "A",
       ClaimAuditTrailLocationCode.NA,
       ExplanationOfBenefit.RemittanceOutcome.QUEUED,
@@ -129,7 +129,7 @@ public enum ClaimAuditTrailStatusCode {
    * online. All other pending claim statuses are used internally by MCS MPAP only.
    */
   B(
-      MetaSourceId.MCS,
+      MetaSourceSk.MCS,
       "B",
       ClaimAuditTrailLocationCode.NA,
       ExplanationOfBenefit.RemittanceOutcome.QUEUED,
@@ -140,14 +140,14 @@ public enum ClaimAuditTrailStatusCode {
    * outstanding edits/audits through MPAP and queried.
    */
   C(
-      MetaSourceId.MCS,
+      MetaSourceSk.MCS,
       "C",
       ClaimAuditTrailLocationCode.NA,
       ExplanationOfBenefit.RemittanceOutcome.PARTIAL,
       "Approved awaiting CWF response through MPAP, claim processed with no outstanding edits/audits through MPAP and queried."),
   /** MCS - D - COMPLETE - Approved and paid; CAP physician no pay detail lines. */
   MCS_D(
-      MetaSourceId.MCS,
+      MetaSourceSk.MCS,
       "D",
       ClaimAuditTrailLocationCode.NA,
       ExplanationOfBenefit.RemittanceOutcome.COMPLETE,
@@ -158,7 +158,7 @@ public enum ClaimAuditTrailStatusCode {
    * denial edit or audit.
    */
   E(
-      MetaSourceId.MCS,
+      MetaSourceSk.MCS,
       "E",
       ClaimAuditTrailLocationCode.NA,
       ExplanationOfBenefit.RemittanceOutcome.COMPLETE,
@@ -170,7 +170,7 @@ public enum ClaimAuditTrailStatusCode {
    * status would be a ‘y’.
    */
   F(
-      MetaSourceId.MCS,
+      MetaSourceSk.MCS,
       "F",
       ClaimAuditTrailLocationCode.NA,
       ExplanationOfBenefit.RemittanceOutcome.COMPLETE,
@@ -181,7 +181,7 @@ public enum ClaimAuditTrailStatusCode {
    * was applied to something else outstanding, such as an AR.
    */
   G(
-      MetaSourceId.MCS,
+      MetaSourceSk.MCS,
       "G",
       ClaimAuditTrailLocationCode.NA,
       ExplanationOfBenefit.RemittanceOutcome.COMPLETE,
@@ -192,7 +192,7 @@ public enum ClaimAuditTrailStatusCode {
    * display online.
    */
   J(
-      MetaSourceId.MCS,
+      MetaSourceSk.MCS,
       "J",
       ClaimAuditTrailLocationCode.NA,
       ExplanationOfBenefit.RemittanceOutcome.QUEUED,
@@ -207,7 +207,7 @@ public enum ClaimAuditTrailStatusCode {
    * audit detail suspends with ‘f’ disposition audit that has a history usage of ‘3’.
    */
   K(
-      MetaSourceId.MCS,
+      MetaSourceSk.MCS,
       "K",
       ClaimAuditTrailLocationCode.NA,
       ExplanationOfBenefit.RemittanceOutcome.QUEUED,
@@ -220,7 +220,7 @@ public enum ClaimAuditTrailStatusCode {
    * ‘L’ status until the change is complete.
    */
   L(
-      MetaSourceId.MCS,
+      MetaSourceSk.MCS,
       "L",
       ClaimAuditTrailLocationCode.NA,
       ExplanationOfBenefit.RemittanceOutcome.PARTIAL,
@@ -228,7 +228,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** MCS - M - COMPLETE - Approved and paid (includes all deductible) - currently not used. */
   M(
-      MetaSourceId.MCS,
+      MetaSourceSk.MCS,
       "M",
       ClaimAuditTrailLocationCode.NA,
       ExplanationOfBenefit.RemittanceOutcome.COMPLETE,
@@ -239,7 +239,7 @@ public enum ClaimAuditTrailStatusCode {
    * (AA segment) indicator on a denial edit or audit.
    */
   N(
-      MetaSourceId.MCS,
+      MetaSourceSk.MCS,
       "N",
       ClaimAuditTrailLocationCode.NA,
       ExplanationOfBenefit.RemittanceOutcome.COMPLETE,
@@ -251,7 +251,7 @@ public enum ClaimAuditTrailStatusCode {
    * status would be a ‘g’.
    */
   MCS_P(
-      MetaSourceId.MCS,
+      MetaSourceSk.MCS,
       "P",
       ClaimAuditTrailLocationCode.NA,
       ExplanationOfBenefit.RemittanceOutcome.COMPLETE,
@@ -259,7 +259,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** MCS - Q - COMPLETE - Adjusted - claim has been replaced by a full claim adjustment. */
   Q(
-      MetaSourceId.MCS,
+      MetaSourceSk.MCS,
       "Q",
       ClaimAuditTrailLocationCode.NA,
       ExplanationOfBenefit.RemittanceOutcome.COMPLETE,
@@ -270,7 +270,7 @@ public enum ClaimAuditTrailStatusCode {
    * (transferred to location 090), the claim status and the detail status are both set to ‘R’.
    */
   MCS_R(
-      MetaSourceId.MCS,
+      MetaSourceSk.MCS,
       "R",
       ClaimAuditTrailLocationCode.NA,
       ExplanationOfBenefit.RemittanceOutcome.COMPLETE,
@@ -278,7 +278,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** MCS - U - COMPLETE - Paid but not for dup use - currently not used. */
   U(
-      MetaSourceId.MCS,
+      MetaSourceSk.MCS,
       "U",
       ClaimAuditTrailLocationCode.NA,
       ExplanationOfBenefit.RemittanceOutcome.COMPLETE,
@@ -289,7 +289,7 @@ public enum ClaimAuditTrailStatusCode {
    * the AA segment of a denial edit or audit.
    */
   V(
-      MetaSourceId.MCS,
+      MetaSourceSk.MCS,
       "V",
       ClaimAuditTrailLocationCode.NA,
       ExplanationOfBenefit.RemittanceOutcome.COMPLETE,
@@ -302,7 +302,7 @@ public enum ClaimAuditTrailStatusCode {
    * then the claim status is set to rejected (‘W’).
    */
   W(
-      MetaSourceId.MCS,
+      MetaSourceSk.MCS,
       "W",
       ClaimAuditTrailLocationCode.NA,
       ExplanationOfBenefit.RemittanceOutcome.COMPLETE,
@@ -310,7 +310,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** MCS - x - COMPLETE - Partial refund, claim that is a partial void and a split pay. */
   X(
-      MetaSourceId.MCS,
+      MetaSourceSk.MCS,
       "X",
       ClaimAuditTrailLocationCode.NA,
       ExplanationOfBenefit.RemittanceOutcome.COMPLETE,
@@ -318,7 +318,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** MCS - Y - COMPLETE - Full refund, full amount of claim payment was returned. */
   Y(
-      MetaSourceId.MCS,
+      MetaSourceSk.MCS,
       "Y",
       ClaimAuditTrailLocationCode.NA,
       ExplanationOfBenefit.RemittanceOutcome.COMPLETE,
@@ -326,7 +326,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** MCS - Z - COMPLETE - Voided, full void has been issued for the claim. */
   Z(
-      MetaSourceId.MCS,
+      MetaSourceSk.MCS,
       "Z",
       ClaimAuditTrailLocationCode.NA,
       ExplanationOfBenefit.RemittanceOutcome.COMPLETE,
@@ -339,7 +339,7 @@ public enum ClaimAuditTrailStatusCode {
    * table.
    */
   _1(
-      MetaSourceId.MCS,
+      MetaSourceSk.MCS,
       "1",
       ClaimAuditTrailLocationCode.NA,
       ExplanationOfBenefit.RemittanceOutcome.QUEUED,
@@ -352,7 +352,7 @@ public enum ClaimAuditTrailStatusCode {
    * flagged for separate history in the HXXTDEMO table.
    */
   _2(
-      MetaSourceId.MCS,
+      MetaSourceSk.MCS,
       "2",
       ClaimAuditTrailLocationCode.NA,
       ExplanationOfBenefit.RemittanceOutcome.QUEUED,
@@ -365,7 +365,7 @@ public enum ClaimAuditTrailStatusCode {
    * in the HXXTDEMO table.
    */
   _3(
-      MetaSourceId.MCS,
+      MetaSourceSk.MCS,
       "3",
       ClaimAuditTrailLocationCode.NA,
       ExplanationOfBenefit.RemittanceOutcome.PARTIAL,
@@ -377,7 +377,7 @@ public enum ClaimAuditTrailStatusCode {
    * HXXTDEMO table.
    */
   _4(
-      MetaSourceId.MCS,
+      MetaSourceSk.MCS,
       "4",
       ClaimAuditTrailLocationCode.NA,
       ExplanationOfBenefit.RemittanceOutcome.COMPLETE,
@@ -389,7 +389,7 @@ public enum ClaimAuditTrailStatusCode {
    * a demonstration number that has been flagged for separate history in the HXXTDEMO table.
    */
   _5(
-      MetaSourceId.MCS,
+      MetaSourceSk.MCS,
       "5",
       ClaimAuditTrailLocationCode.NA,
       ExplanationOfBenefit.RemittanceOutcome.COMPLETE,
@@ -397,7 +397,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** MCS - 6 - ERROR - Not Used. */
   _6(
-      MetaSourceId.MCS,
+      MetaSourceSk.MCS,
       "6",
       ClaimAuditTrailLocationCode.NA,
       ExplanationOfBenefit.RemittanceOutcome.ERROR,
@@ -409,7 +409,7 @@ public enum ClaimAuditTrailStatusCode {
    * online.)
    */
   _8(
-      MetaSourceId.MCS,
+      MetaSourceSk.MCS,
       "8",
       ClaimAuditTrailLocationCode.NA,
       ExplanationOfBenefit.RemittanceOutcome.COMPLETE,
@@ -421,7 +421,7 @@ public enum ClaimAuditTrailStatusCode {
    * display online.)
    */
   _9(
-      MetaSourceId.MCS,
+      MetaSourceSk.MCS,
       "9",
       ClaimAuditTrailLocationCode.NA,
       ExplanationOfBenefit.RemittanceOutcome.COMPLETE,
@@ -429,7 +429,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 00 - 08 - outcome determined by CLM_FINAL_ACTION - Void/Entry Code 3 Claim. */
   _00(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "00",
       ClaimAuditTrailLocationCode.QUERY,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -440,7 +440,7 @@ public enum ClaimAuditTrailStatusCode {
    * HMO claims suspend to 09/27).
    */
   _01_05(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "01",
       ClaimAuditTrailLocationCode.EDIT,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -451,7 +451,7 @@ public enum ClaimAuditTrailStatusCode {
    * HMO claims suspend to 09/27).
    */
   _01_09(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "01",
       ClaimAuditTrailLocationCode.REPLY,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -459,7 +459,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 01 - 07 - outcome determined by CLM_FINAL_ACTION - MSP Cost Avoid. */
   _01_07(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "01",
       ClaimAuditTrailLocationCode.UTILIZATION_DUPLICATION,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -467,7 +467,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 02 - 07 - outcome determined by CLM_FINAL_ACTION - MSP Denied Lines. */
   _02_07(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "02",
       ClaimAuditTrailLocationCode.UTILIZATION_DUPLICATION,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -478,7 +478,7 @@ public enum ClaimAuditTrailStatusCode {
    * and had non-GHP MSP prior to querying CWF.
    */
   _02_09(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "02",
       ClaimAuditTrailLocationCode.REPLY,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -486,7 +486,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 03 - 06 - outcome determined by CLM_FINAL_ACTION - Purged. */
   _03_06(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "03",
       ClaimAuditTrailLocationCode.REASONABLE_CHARGE,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -494,7 +494,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 03 - 07 - outcome determined by CLM_FINAL_ACTION - MSP Split Claims. */
   _03_07(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "03",
       ClaimAuditTrailLocationCode.UTILIZATION_DUPLICATION,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -505,7 +505,7 @@ public enum ClaimAuditTrailStatusCode {
    * and did not have non-GHP MSP prior to querying CWF.
    */
   _03_09(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "03",
       ClaimAuditTrailLocationCode.REPLY,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -513,7 +513,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 04 - 05 - outcome determined by CLM_FINAL_ACTION - Clean claim (ready to adjudicate). */
   _04_05(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "04",
       ClaimAuditTrailLocationCode.EDIT,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -521,7 +521,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 05 - 05 - outcome determined by CLM_FINAL_ACTION - Line item error. */
   _05_05(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "05",
       ClaimAuditTrailLocationCode.EDIT,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -529,7 +529,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 05 - 06 - outcome determined by CLM_FINAL_ACTION - Line item error. */
   _05_06(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "05",
       ClaimAuditTrailLocationCode.REASONABLE_CHARGE,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -537,7 +537,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 05 - 09 - outcome determined by CLM_FINAL_ACTION - VMS Action Code review. */
   _05_09(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "05",
       ClaimAuditTrailLocationCode.REPLY,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -551,7 +551,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 06 - 06 - outcome determined by CLM_FINAL_ACTION - Provider problem. */
   _06_06(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "06",
       ClaimAuditTrailLocationCode.REASONABLE_CHARGE,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -559,7 +559,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 07 - 06 - outcome determined by CLM_FINAL_ACTION - Medical consultation. */
   _07_06(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "07",
       ClaimAuditTrailLocationCode.REASONABLE_CHARGE,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -567,7 +567,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 08 - 05 - outcome determined by CLM_FINAL_ACTION - Edit error. */
   _08_05(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "08",
       ClaimAuditTrailLocationCode.EDIT,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -575,7 +575,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 08 - 06 - outcome determined by CLM_FINAL_ACTION - Edit error. */
   _08_06(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "08",
       ClaimAuditTrailLocationCode.REASONABLE_CHARGE,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -583,7 +583,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 09 - 05 - outcome determined by CLM_FINAL_ACTION - Specialty examination. */
   _09_05(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "09",
       ClaimAuditTrailLocationCode.EDIT,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -594,7 +594,7 @@ public enum ClaimAuditTrailStatusCode {
    * the primary payer.
    */
   _09_06(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "09",
       ClaimAuditTrailLocationCode.REASONABLE_CHARGE,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -602,7 +602,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 10 - 04 - outcome determined by CLM_FINAL_ACTION - Delete. */
   _10_04(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "10",
       ClaimAuditTrailLocationCode.SYSTEM_REJECT,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -610,7 +610,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 11 - 05 - outcome determined by CLM_FINAL_ACTION - Claim referred to supervisor. */
   _11_05(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "11",
       ClaimAuditTrailLocationCode.EDIT,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -618,7 +618,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 12 - 02 - outcome determined by CLM_FINAL_ACTION - MSP first letter initiated. */
   _12_02(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "12",
       ClaimAuditTrailLocationCode.DEVELOPMENT,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -626,7 +626,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 13 - 02 - outcome determined by CLM_FINAL_ACTION - Suspense – Other. */
   _13_02(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "13",
       ClaimAuditTrailLocationCode.DEVELOPMENT,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -634,7 +634,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 14 - 04 - outcome determined by CLM_FINAL_ACTION - Suspense – DME. */
   _14_04(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "14",
       ClaimAuditTrailLocationCode.SYSTEM_REJECT,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -642,7 +642,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 14 - 05 - outcome determined by CLM_FINAL_ACTION - Suspense – DME. */
   _14_05(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "14",
       ClaimAuditTrailLocationCode.EDIT,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -650,7 +650,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 15 - 05 - outcome determined by CLM_FINAL_ACTION - Chiropractor claim. */
   _15_05(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "15",
       ClaimAuditTrailLocationCode.EDIT,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -658,7 +658,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 16 - 02 - outcome determined by CLM_FINAL_ACTION - MSP first letter sent. */
   _16_02(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "16",
       ClaimAuditTrailLocationCode.DEVELOPMENT,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -666,7 +666,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 17 - 01 - outcome determined by CLM_FINAL_ACTION - Activated; not entered. */
   _17_01(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "17",
       ClaimAuditTrailLocationCode.PRE_COMPUTER,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -674,7 +674,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 18 - 02 - outcome determined by CLM_FINAL_ACTION - Utilization review. */
   _18_02(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "18",
       ClaimAuditTrailLocationCode.DEVELOPMENT,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -682,7 +682,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 18 - 07 - outcome determined by CLM_FINAL_ACTION - Utilization review. */
   _18_07(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "18",
       ClaimAuditTrailLocationCode.UTILIZATION_DUPLICATION,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -690,7 +690,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 18 - 09 - outcome determined by CLM_FINAL_ACTION - Utilization review. */
   _18_09(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "18",
       ClaimAuditTrailLocationCode.REPLY,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -701,7 +701,7 @@ public enum ClaimAuditTrailStatusCode {
    * review).
    */
   _19_07(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "19",
       ClaimAuditTrailLocationCode.UTILIZATION_DUPLICATION,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -709,7 +709,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 20 - 05 - outcome determined by CLM_FINAL_ACTION - Reject name/sex. */
   _20_05(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "20",
       ClaimAuditTrailLocationCode.EDIT,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -717,7 +717,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 21 - 04 - outcome determined by CLM_FINAL_ACTION - Adjustment. */
   _21_04(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "21",
       ClaimAuditTrailLocationCode.SYSTEM_REJECT,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -728,7 +728,7 @@ public enum ClaimAuditTrailStatusCode {
    * control.
    */
   _22_05(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "22",
       ClaimAuditTrailLocationCode.EDIT,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -736,7 +736,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 23 - 05 - outcome determined by CLM_FINAL_ACTION - No beneficiary address. */
   _23_05(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "23",
       ClaimAuditTrailLocationCode.EDIT,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -744,7 +744,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 24 - 04 - outcome determined by CLM_FINAL_ACTION - Beneficiary BUDS01 record closed. */
   _24_04(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "24",
       ClaimAuditTrailLocationCode.SYSTEM_REJECT,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -752,7 +752,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 24 - 05 - outcome determined by CLM_FINAL_ACTION - Beneficiary BUDS01 record closed. */
   _24_05(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "24",
       ClaimAuditTrailLocationCode.EDIT,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -760,7 +760,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 24 - 09 - outcome determined by CLM_FINAL_ACTION - Beneficiary BUDS01 record closed. */
   _24_09(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "24",
       ClaimAuditTrailLocationCode.REPLY,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -768,7 +768,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 25 - 08 - outcome determined by CLM_FINAL_ACTION - Representative payee. */
   _25_08(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "25",
       ClaimAuditTrailLocationCode.QUERY,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -776,7 +776,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 25 - 09 - outcome determined by CLM_FINAL_ACTION - Representative payee. */
   _25_09(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "25",
       ClaimAuditTrailLocationCode.REPLY,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -784,7 +784,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 26 - 08 - outcome determined by CLM_FINAL_ACTION - Welfare; Disposition Code 42. */
   _26_08(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "26",
       ClaimAuditTrailLocationCode.QUERY,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -792,7 +792,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 26 - 09 - outcome determined by CLM_FINAL_ACTION - Welfare; Disposition Code 42. */
   _26_09(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "26",
       ClaimAuditTrailLocationCode.REPLY,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -803,7 +803,7 @@ public enum ClaimAuditTrailStatusCode {
    * Jurisdiction D only).
    */
   _27_08(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "27",
       ClaimAuditTrailLocationCode.QUERY,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -814,7 +814,7 @@ public enum ClaimAuditTrailStatusCode {
    * Jurisdiction D only).
    */
   _27_09(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "27",
       ClaimAuditTrailLocationCode.REPLY,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -822,7 +822,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 28 - 04 - outcome determined by CLM_FINAL_ACTION - Mass adjustment suspensions. */
   _28_04(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "28",
       ClaimAuditTrailLocationCode.SYSTEM_REJECT,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -830,7 +830,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 29 - 06 - outcome determined by CLM_FINAL_ACTION - Missing data. */
   _29_06(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "29",
       ClaimAuditTrailLocationCode.REASONABLE_CHARGE,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -838,7 +838,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 30 - 04 - outcome determined by CLM_FINAL_ACTION - Estimated interest errors. */
   _30_04(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "30",
       ClaimAuditTrailLocationCode.SYSTEM_REJECT,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -846,7 +846,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 30 - 05 - outcome determined by CLM_FINAL_ACTION - Estimated interest errors. */
   _30_05(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "30",
       ClaimAuditTrailLocationCode.EDIT,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -854,7 +854,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 31 - 05 - outcome determined by CLM_FINAL_ACTION - "". */
   _31_05(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "31",
       ClaimAuditTrailLocationCode.EDIT,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -862,7 +862,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 33 - 05 - outcome determined by CLM_FINAL_ACTION - Reasonable charge. */
   _33_05(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "33",
       ClaimAuditTrailLocationCode.EDIT,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -870,7 +870,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 34 - 05 - outcome determined by CLM_FINAL_ACTION - Physician inactive/missing. */
   _34_05(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "34",
       ClaimAuditTrailLocationCode.EDIT,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -878,7 +878,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 35 - 05 - outcome determined by CLM_FINAL_ACTION - Physician utilization. */
   _35_05(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "35",
       ClaimAuditTrailLocationCode.EDIT,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -886,7 +886,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 36 - 02 - outcome determined by CLM_FINAL_ACTION - MSP first letter follow-up. */
   _36_02(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "36",
       ClaimAuditTrailLocationCode.DEVELOPMENT,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -894,7 +894,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 37 - 07 - outcome determined by CLM_FINAL_ACTION - Duplicate suspect. */
   _37_07(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "37",
       ClaimAuditTrailLocationCode.UTILIZATION_DUPLICATION,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -905,7 +905,7 @@ public enum ClaimAuditTrailStatusCode {
    * assignment for drugs/biologicals.
    */
   _38_07(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "38",
       ClaimAuditTrailLocationCode.UTILIZATION_DUPLICATION,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -913,7 +913,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 39 - 02 - outcome determined by CLM_FINAL_ACTION - Beneficiary information. */
   _39_02(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "39",
       ClaimAuditTrailLocationCode.DEVELOPMENT,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -924,7 +924,7 @@ public enum ClaimAuditTrailStatusCode {
    * &amp; C).
    */
   _39_07(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "39",
       ClaimAuditTrailLocationCode.UTILIZATION_DUPLICATION,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -932,7 +932,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 40 - 09 - outcome determined by CLM_FINAL_ACTION - Premium arrearage; V trailer. */
   _40_09(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "40",
       ClaimAuditTrailLocationCode.REPLY,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -943,7 +943,7 @@ public enum ClaimAuditTrailStatusCode {
    * Disposition Code 40.
    */
   _41_08(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "41",
       ClaimAuditTrailLocationCode.QUERY,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -954,7 +954,7 @@ public enum ClaimAuditTrailStatusCode {
    * Disposition Code 40.
    */
   _41_09(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "41",
       ClaimAuditTrailLocationCode.REPLY,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -965,7 +965,7 @@ public enum ClaimAuditTrailStatusCode {
    * 4 or 20 days, as appropriate.
    */
   _42_08(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "42",
       ClaimAuditTrailLocationCode.QUERY,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -976,7 +976,7 @@ public enum ClaimAuditTrailStatusCode {
    * 4 or 20 days, as appropriate.
    */
   _42_09(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "42",
       ClaimAuditTrailLocationCode.REPLY,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -984,7 +984,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 43 - 08 - outcome determined by CLM_FINAL_ACTION - Reply Disposition Code 43. */
   _43_08(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "43",
       ClaimAuditTrailLocationCode.QUERY,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -992,7 +992,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 43 - 09 - outcome determined by CLM_FINAL_ACTION - Reply Disposition Code 43. */
   _43_09(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "43",
       ClaimAuditTrailLocationCode.REPLY,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1000,7 +1000,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 44 - 02 - outcome determined by CLM_FINAL_ACTION - MSP automated development. */
   _44_02(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "44",
       ClaimAuditTrailLocationCode.DEVELOPMENT,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1008,7 +1008,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 44 - 08 - outcome determined by CLM_FINAL_ACTION - MSP automated development. */
   _44_08(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "44",
       ClaimAuditTrailLocationCode.QUERY,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1016,7 +1016,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 45 - 08 - outcome determined by CLM_FINAL_ACTION - Name error. */
   _45_08(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "45",
       ClaimAuditTrailLocationCode.QUERY,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1024,7 +1024,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 45 - 09 - outcome determined by CLM_FINAL_ACTION - Name error. */
   _45_09(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "45",
       ClaimAuditTrailLocationCode.REPLY,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1032,7 +1032,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 46 - 03 - outcome determined by CLM_FINAL_ACTION - Normal DME record (Cert). */
   _46_03(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "46",
       ClaimAuditTrailLocationCode.DME_OQC,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1043,7 +1043,7 @@ public enum ClaimAuditTrailStatusCode {
    * AC operator did not type review code U showing UR review is complete.
    */
   _47_07(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "47",
       ClaimAuditTrailLocationCode.UTILIZATION_DUPLICATION,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1051,7 +1051,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 47 - 09 - outcome determined by CLM_FINAL_ACTION - New HICN; C trailer. */
   _47_09(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "47",
       ClaimAuditTrailLocationCode.REPLY,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1062,7 +1062,7 @@ public enum ClaimAuditTrailStatusCode {
    * the PSC/ZPIC operator did not type review code U showing UR review is complete.
    */
   _48_07(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "48",
       ClaimAuditTrailLocationCode.UTILIZATION_DUPLICATION,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1070,7 +1070,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 48 - 09 - outcome determined by CLM_FINAL_ACTION - Worker’s Compensation; Y trailer. */
   _48_09(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "48",
       ClaimAuditTrailLocationCode.REPLY,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1078,7 +1078,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 49 - 07 - outcome determined by CLM_FINAL_ACTION - Rebundling (Jurisdiction D only). */
   _49_07(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "49",
       ClaimAuditTrailLocationCode.UTILIZATION_DUPLICATION,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1086,7 +1086,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 49 - 09 - outcome determined by CLM_FINAL_ACTION - Reject Travelers, RRB, or UMW. */
   _49_09(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "49",
       ClaimAuditTrailLocationCode.REPLY,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1094,7 +1094,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 50 - 03 - outcome determined by CLM_FINAL_ACTION - Stale cert – automated DME. */
   _50_03(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "50",
       ClaimAuditTrailLocationCode.DME_OQC,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1102,7 +1102,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 50 - 05 - outcome determined by CLM_FINAL_ACTION - Stale cert – automated DME. */
   _50_05(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "50",
       ClaimAuditTrailLocationCode.EDIT,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1110,7 +1110,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 51 - 03 - outcome determined by CLM_FINAL_ACTION - Stop cert – automated DME. */
   _51_03(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "51",
       ClaimAuditTrailLocationCode.DME_OQC,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1118,7 +1118,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 52 - 05 - outcome determined by CLM_FINAL_ACTION - Reasonable charge error. */
   _52_05(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "52",
       ClaimAuditTrailLocationCode.EDIT,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1126,7 +1126,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 52 - 06 - outcome determined by CLM_FINAL_ACTION - Reasonable charge error. */
   _52_06(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "52",
       ClaimAuditTrailLocationCode.REASONABLE_CHARGE,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1134,7 +1134,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 53 - 05 - outcome determined by CLM_FINAL_ACTION - No cert on file – automated DME. */
   _53_05(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "53",
       ClaimAuditTrailLocationCode.EDIT,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1142,7 +1142,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 54 - 08 - outcome determined by CLM_FINAL_ACTION - Alien no pay. */
   _54_08(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "54",
       ClaimAuditTrailLocationCode.QUERY,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1150,7 +1150,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 55 - 09 - outcome determined by CLM_FINAL_ACTION - Hospice involvement. */
   _55_09(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "55",
       ClaimAuditTrailLocationCode.REPLY,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1159,7 +1159,7 @@ public enum ClaimAuditTrailStatusCode {
    * VMS - 56 - 08 - outcome determined by CLM_FINAL_ACTION - Adjustment claim error/09 entry code.
    */
   _56_08(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "56",
       ClaimAuditTrailLocationCode.QUERY,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1168,21 +1168,21 @@ public enum ClaimAuditTrailStatusCode {
    * VMS - 56 - 09 - outcome determined by CLM_FINAL_ACTION - Adjustment claim error/09 entry code.
    */
   _56_09(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "56",
       ClaimAuditTrailLocationCode.REPLY,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
       "Adjustment claim error/09 entry code"),
   /** VMS - 57 - 02 - outcome determined by CLM_FINAL_ACTION - Initiate MSP development. */
   _57_02(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "57",
       ClaimAuditTrailLocationCode.DEVELOPMENT,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
       "Initiate MSP development"),
   /** VMS - 57 - 05 - outcome determined by CLM_FINAL_ACTION - Initiate MSP development. */
   _57_05(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "57",
       ClaimAuditTrailLocationCode.EDIT,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1192,7 +1192,7 @@ public enum ClaimAuditTrailStatusCode {
    * is missing LMRP/NCD numbers.
    */
   _57_07(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "57",
       ClaimAuditTrailLocationCode.UTILIZATION_DUPLICATION,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1202,7 +1202,7 @@ public enum ClaimAuditTrailStatusCode {
    * LMRP/NCD numbers.
    */
   _57_09(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "57",
       ClaimAuditTrailLocationCode.REPLY,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1212,35 +1212,35 @@ public enum ClaimAuditTrailStatusCode {
    * is missing LMRP/NCD numbers.
    */
   _58_07(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "58",
       ClaimAuditTrailLocationCode.UTILIZATION_DUPLICATION,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
       "LMRP/NCD denial by a non-MR edit that is missing LMRP/NCD numbers"),
   /** VMS - 58 - 02 - outcome determined by CLM_FINAL_ACTION - Generate the MSP letter. */
   _58_02(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "58",
       ClaimAuditTrailLocationCode.DEVELOPMENT,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
       "Generate the MSP letter"),
   /** VMS - 59 - 02 - outcome determined by CLM_FINAL_ACTION - Eligible for denial for MSP. */
   _59_02(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "59",
       ClaimAuditTrailLocationCode.DEVELOPMENT,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
       "Eligible for denial for MSP"),
   /** VMS - 59 - 05 - outcome determined by CLM_FINAL_ACTION - Eligible for denial for MSP. */
   _59_05(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "59",
       ClaimAuditTrailLocationCode.EDIT,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
       "Eligible for denial for MSP"),
   /** VMS - 60 - 04 - outcome determined by CLM_FINAL_ACTION - Excess history. */
   _60_04(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "60",
       ClaimAuditTrailLocationCode.SYSTEM_REJECT,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1248,7 +1248,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 61 - 04 - outcome determined by CLM_FINAL_ACTION - Beneficiary paid. */
   _61_04(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "61",
       ClaimAuditTrailLocationCode.SYSTEM_REJECT,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1256,14 +1256,14 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 62 - 04 - outcome determined by CLM_FINAL_ACTION - System error. */
   _62_04(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "62",
       ClaimAuditTrailLocationCode.SYSTEM_REJECT,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
       "System error"),
   /** VMS - 62 - 09 - outcome determined by CLM_FINAL_ACTION - Address formatting error from CWF. */
   _62_09(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "62",
       ClaimAuditTrailLocationCode.REPLY,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1271,7 +1271,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 63 - 04 - outcome determined by CLM_FINAL_ACTION - Excess splits. */
   _63_04(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "63",
       ClaimAuditTrailLocationCode.SYSTEM_REJECT,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1279,7 +1279,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 64 - 02 - outcome determined by CLM_FINAL_ACTION - Development non-response. */
   _64_02(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "64",
       ClaimAuditTrailLocationCode.DEVELOPMENT,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1287,7 +1287,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 65 - 02 - outcome determined by CLM_FINAL_ACTION - Development initiated. */
   _65_02(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "65",
       ClaimAuditTrailLocationCode.DEVELOPMENT,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1295,7 +1295,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 66 - 02 - outcome determined by CLM_FINAL_ACTION - Development sent. */
   _66_02(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "66",
       ClaimAuditTrailLocationCode.DEVELOPMENT,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1303,7 +1303,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 67 - 02 - outcome determined by CLM_FINAL_ACTION - Development follow-up sent. */
   _67_02(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "67",
       ClaimAuditTrailLocationCode.DEVELOPMENT,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1311,7 +1311,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 68 - 02 - outcome determined by CLM_FINAL_ACTION - Referral initiated. */
   _68_02(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "68",
       ClaimAuditTrailLocationCode.DEVELOPMENT,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1319,7 +1319,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 69 - 02 - outcome determined by CLM_FINAL_ACTION - Referral generated. */
   _69_02(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "69",
       ClaimAuditTrailLocationCode.DEVELOPMENT,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1327,7 +1327,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 70 - 02 - outcome determined by CLM_FINAL_ACTION - Referral sent. */
   _70_02(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "70",
       ClaimAuditTrailLocationCode.DEVELOPMENT,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1335,7 +1335,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 71 - 02 - outcome determined by CLM_FINAL_ACTION - Follow-up referral generated. */
   _71_02(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "71",
       ClaimAuditTrailLocationCode.DEVELOPMENT,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1343,7 +1343,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 72 - 02 - outcome determined by CLM_FINAL_ACTION - Follow-up referral sent. */
   _72_02(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "72",
       ClaimAuditTrailLocationCode.DEVELOPMENT,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1351,7 +1351,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 73 - 02 - outcome determined by CLM_FINAL_ACTION - Referral non-response. */
   _73_02(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "73",
       ClaimAuditTrailLocationCode.DEVELOPMENT,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1359,7 +1359,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 74 - 02 - outcome determined by CLM_FINAL_ACTION - ADS manual status. */
   _74_02(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "74",
       ClaimAuditTrailLocationCode.DEVELOPMENT,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1367,7 +1367,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 75 - 00 - outcome determined by CLM_FINAL_ACTION - Paid. */
   _75_00(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "75",
       ClaimAuditTrailLocationCode.COMPLETED,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1378,7 +1378,7 @@ public enum ClaimAuditTrailStatusCode {
    * validation program.
    */
   _75_08(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "75",
       ClaimAuditTrailLocationCode.QUERY,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1389,7 +1389,7 @@ public enum ClaimAuditTrailStatusCode {
    * deductible.
    */
   _76_00(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "76",
       ClaimAuditTrailLocationCode.COMPLETED,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1400,7 +1400,7 @@ public enum ClaimAuditTrailStatusCode {
    * validation program.
    */
   _76_08(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "76",
       ClaimAuditTrailLocationCode.QUERY,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1408,7 +1408,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 77 - 00 - outcome determined by CLM_FINAL_ACTION - Denied. */
   _77_00(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "77",
       ClaimAuditTrailLocationCode.COMPLETED,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1419,7 +1419,7 @@ public enum ClaimAuditTrailStatusCode {
    * validation program.
    */
   _77_08(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "77",
       ClaimAuditTrailLocationCode.QUERY,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1427,7 +1427,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 80 - 09 - outcome determined by CLM_FINAL_ACTION - A/B crossover edits. */
   _80_09(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "80",
       ClaimAuditTrailLocationCode.REPLY,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1437,7 +1437,7 @@ public enum ClaimAuditTrailStatusCode {
    * lens claims adjusted with Entry Code 3.
    */
   _81_09(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "81",
       ClaimAuditTrailLocationCode.REPLY,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1448,7 +1448,7 @@ public enum ClaimAuditTrailStatusCode {
    * reached.
    */
   _83_09(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "83",
       ClaimAuditTrailLocationCode.REPLY,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1461,7 +1461,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 84 - 07 - outcome determined by CLM_FINAL_ACTION - Global surgery. */
   _84_07(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "84",
       ClaimAuditTrailLocationCode.UTILIZATION_DUPLICATION,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1472,7 +1472,7 @@ public enum ClaimAuditTrailStatusCode {
    * check number.
    */
   _85_00(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "85",
       ClaimAuditTrailLocationCode.COMPLETED,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1483,7 +1483,7 @@ public enum ClaimAuditTrailStatusCode {
    * denial.
    */
   _85_07(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "85",
       ClaimAuditTrailLocationCode.UTILIZATION_DUPLICATION,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1491,7 +1491,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 85 - 09 - outcome determined by CLM_FINAL_ACTION - DOD/REP. */
   _85_09(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "85",
       ClaimAuditTrailLocationCode.REPLY,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1499,7 +1499,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 86 - 07 - outcome determined by CLM_FINAL_ACTION - E/M location. */
   _86_07(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "86",
       ClaimAuditTrailLocationCode.UTILIZATION_DUPLICATION,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1507,7 +1507,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 86 - 09 - outcome determined by CLM_FINAL_ACTION - UR 11 rejects. */
   _86_09(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "86",
       ClaimAuditTrailLocationCode.REPLY,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1518,7 +1518,7 @@ public enum ClaimAuditTrailStatusCode {
    * Interface file.
    */
   _87_00(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "87",
       ClaimAuditTrailLocationCode.COMPLETED,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1526,7 +1526,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 87 - 09 - outcome determined by CLM_FINAL_ACTION - UR 08 rejects. */
   _87_09(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "87",
       ClaimAuditTrailLocationCode.REPLY,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1534,7 +1534,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 88 - 09 - outcome determined by CLM_FINAL_ACTION - Name incorrect. */
   _88_09(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "88",
       ClaimAuditTrailLocationCode.REPLY,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1544,7 +1544,7 @@ public enum ClaimAuditTrailStatusCode {
    * VMS - 89 - 08 - outcome determined by CLM_FINAL_ACTION - Acknowledgment (Disposition Code 09).
    */
   _89_08(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "89",
       ClaimAuditTrailLocationCode.QUERY,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1552,7 +1552,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 90 - 03 - outcome determined by CLM_FINAL_ACTION - OQC. */
   _90_03(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "90",
       ClaimAuditTrailLocationCode.DME_OQC,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1560,7 +1560,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 90 - 07 - outcome determined by CLM_FINAL_ACTION - Batch repricing process. */
   _90_07(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "90",
       ClaimAuditTrailLocationCode.UTILIZATION_DUPLICATION,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1568,7 +1568,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 90 - 08 - outcome determined by CLM_FINAL_ACTION - Reply Disposition Code 90. */
   _90_08(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "90",
       ClaimAuditTrailLocationCode.QUERY,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1576,7 +1576,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 91 - 03 - outcome determined by CLM_FINAL_ACTION - OQC. */
   _91_03(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "91",
       ClaimAuditTrailLocationCode.DME_OQC,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1584,7 +1584,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 92 - 03 - outcome determined by CLM_FINAL_ACTION - OQC. */
   _92_03(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "92",
       ClaimAuditTrailLocationCode.DME_OQC,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1592,7 +1592,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 94 - 03 - outcome determined by CLM_FINAL_ACTION - OQC. */
   _94_03(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "94",
       ClaimAuditTrailLocationCode.DME_OQC,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1600,7 +1600,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 95 - 03 - outcome determined by CLM_FINAL_ACTION - OQC. */
   _95_03(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "95",
       ClaimAuditTrailLocationCode.DME_OQC,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1608,7 +1608,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 95 - 08 - outcome determined by CLM_FINAL_ACTION - S, M, G query. */
   _95_08(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "95",
       ClaimAuditTrailLocationCode.QUERY,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1616,7 +1616,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 96 - 03 - outcome determined by CLM_FINAL_ACTION - OQC. */
   _96_03(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "96",
       ClaimAuditTrailLocationCode.DME_OQC,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1624,7 +1624,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 96 - 08 - outcome determined by CLM_FINAL_ACTION - T, N, H query. */
   _96_08(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "96",
       ClaimAuditTrailLocationCode.QUERY,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1632,7 +1632,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 96 - 09 - outcome determined by CLM_FINAL_ACTION - CWF Error. */
   _96_09(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "96",
       ClaimAuditTrailLocationCode.REPLY,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1640,7 +1640,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 97 - 03 - outcome determined by CLM_FINAL_ACTION - OQC. */
   _97_03(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "97",
       ClaimAuditTrailLocationCode.DME_OQC,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1648,7 +1648,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 97 - 08 - outcome determined by CLM_FINAL_ACTION - R, L, I query. */
   _97_08(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "97",
       ClaimAuditTrailLocationCode.QUERY,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1656,7 +1656,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 98 - 03 - outcome determined by CLM_FINAL_ACTION - OQC. */
   _98_03(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "98",
       ClaimAuditTrailLocationCode.DME_OQC,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1664,7 +1664,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 98 - 08 - outcome determined by CLM_FINAL_ACTION - Resend to CWF. */
   _98_08(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "98",
       ClaimAuditTrailLocationCode.QUERY,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1672,7 +1672,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 99 - 03 - outcome determined by CLM_FINAL_ACTION - OQC. */
   _99_03(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "99",
       ClaimAuditTrailLocationCode.DME_OQC,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1680,7 +1680,7 @@ public enum ClaimAuditTrailStatusCode {
 
   /** VMS - 99 - 04 - outcome determined by CLM_FINAL_ACTION - Duplicate claim. */
   _99_04(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "99",
       ClaimAuditTrailLocationCode.SYSTEM_REJECT,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
@@ -1691,13 +1691,13 @@ public enum ClaimAuditTrailStatusCode {
    * claims to CWF.
    */
   _99_08(
-      MetaSourceId.VMS,
+      MetaSourceSk.VMS,
       "99",
       ClaimAuditTrailLocationCode.QUERY,
       ExplanationOfBenefit.RemittanceOutcome.NULL,
       "Regular – Entry Code 1 and follow-up claims to CWF");
 
-  private final MetaSourceId source;
+  private final MetaSourceSk source;
   private final String statusCode;
   private final ClaimAuditTrailLocationCode locationCode;
   private final ExplanationOfBenefit.RemittanceOutcome outcome;
@@ -1716,7 +1716,7 @@ public enum ClaimAuditTrailStatusCode {
    * @return the EOB outcome
    */
   public ExplanationOfBenefit.RemittanceOutcome getOutcome(ClaimFinalAction finalAction) {
-    if (source.equals(MetaSourceId.VMS)) {
+    if (source.equals(MetaSourceSk.VMS)) {
       if (finalAction.equals(ClaimFinalAction.YES)) {
         return ExplanationOfBenefit.RemittanceOutcome.COMPLETE;
       } else if (finalAction.equals(ClaimFinalAction.NO)) {
@@ -1733,7 +1733,7 @@ public enum ClaimAuditTrailStatusCode {
                   c -> new Key(c.source, c.statusCode, c.locationCode), Function.identity()));
 
   private record Key(
-      MetaSourceId source, String statusCode, ClaimAuditTrailLocationCode locationCode) {}
+      MetaSourceSk source, String statusCode, ClaimAuditTrailLocationCode locationCode) {}
 
   /**
    * Convert using the meta source id, the raw database status code, and the claim audit trail
@@ -1745,7 +1745,7 @@ public enum ClaimAuditTrailStatusCode {
    * @return matching enum constant (if any)
    */
   public static Optional<ClaimAuditTrailStatusCode> tryFromCode(
-      MetaSourceId source, String statusCode, ClaimAuditTrailLocationCode locationCode) {
+      MetaSourceSk source, String statusCode, ClaimAuditTrailLocationCode locationCode) {
     return Optional.ofNullable(CLAIM_STATUS_LOOKUP.get(new Key(source, statusCode, locationCode)));
   }
 
