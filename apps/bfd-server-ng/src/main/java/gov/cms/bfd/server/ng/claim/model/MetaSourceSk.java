@@ -35,12 +35,12 @@ public enum MetaSourceSk {
   }
 
   /**
-   * Convert from a shared system name.
+   * Convert from a source name.
    *
-   * @param display shared system name
+   * @param source source name
    * @return meta source id
    */
-  public static Optional<MetaSourceSk> tryFromDisplay(String display) {
-    return Arrays.stream(values()).filter(v -> v.display.equalsIgnoreCase(display)).findFirst();
+  public static Optional<MetaSourceSk> tryFromDisplay(String source) {
+    return Arrays.stream(values()).filter(v -> v.display.equalsIgnoreCase(source)).findFirst();
   }
 }
