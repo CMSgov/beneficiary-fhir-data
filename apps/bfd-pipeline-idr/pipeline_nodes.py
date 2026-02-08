@@ -2,11 +2,6 @@ import random
 from datetime import datetime
 
 from hamilton.htypes import Collect, Parallelizable  # type: ignore
-from model2.idr_claim import IdrClaim
-from model2.idr_claim_date_signature import IdrClaimDateSignature
-from model2.idr_claim_item import IdrClaimItem
-from model2.idr_claim_item_professional_nch import IdrClaimItemProfessionalNch
-from model2.idr_claim_professional_nch import IdrClaimProfessionalNch
 
 from constants import MIN_CLAIM_LOAD_DATE
 from load_partition import LoadPartition, LoadType
@@ -25,18 +20,24 @@ from model import (
     IdrBeneficiaryThirdParty,
     IdrClaimAnsiSignature,
     IdrClaimFiss,
-    IdrClaimInstitutional,
     IdrClaimLineInstitutional,
     IdrClaimLineProfessional,
     IdrClaimLineRx,
     IdrClaimProfessional,
-    IdrClaimRx,
     IdrContractPbpContact,
     IdrContractPbpNumber,
     IdrProviderHistory,
     LoadMode,
     get_min_transaction_date,
 )
+from model2.idr_claim import IdrClaim
+from model2.idr_claim_date_signature import IdrClaimDateSignature
+from model2.idr_claim_institutional import IdrClaimInstitutional
+from model2.idr_claim_institutional_nch import IdrClaimInstitutionalNch
+from model2.idr_claim_item import IdrClaimItem
+from model2.idr_claim_item_professional_nch import IdrClaimItemProfessionalNch
+from model2.idr_claim_professional_nch import IdrClaimProfessionalNch
+from model2.idr_claim_rx import IdrClaimRx
 from pipeline_utils import extract_and_load
 from settings import CLAIM_TABLES
 
@@ -48,7 +49,7 @@ def filter_claim_tables(tables: list[type[IdrBaseModel]]) -> list[type[IdrBaseMo
 
 
 def claim_tables() -> list[type[IdrBaseModel]]:
-    return filter_claim_tables([IdrClaim, IdrClaimProfessionalNch])
+    return filter_claim_tables([IdrClaim, IdrClaimProfessionalNch, IdrClaimInstitutionalNch])
 
 
 def claim_aux_tables() -> list[type[IdrBaseModel]]:
