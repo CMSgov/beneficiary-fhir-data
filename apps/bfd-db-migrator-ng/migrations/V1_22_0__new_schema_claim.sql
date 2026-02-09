@@ -1044,14 +1044,14 @@ CREATE TABLE idr_new.claim_item_institutional_shared_systems
     clm_bnft_svg_ansi_grp_cd    character varying(2),
     clm_bnft_svg_ansi_rsn_cd    character varying(3),
     --  CLM_ANSI_SGNTR
-    clm_1_rev_cntr_ansi_grp_cd character varying(2)     NOT NULL,
-    clm_2_rev_cntr_ansi_grp_cd character varying(2)     NOT NULL,
-    clm_3_rev_cntr_ansi_grp_cd character varying(2)     NOT NULL,
-    clm_4_rev_cntr_ansi_grp_cd character varying(2)     NOT NULL,
-    clm_1_rev_cntr_ansi_rsn_cd character varying(3)     NOT NULL,
-    clm_2_rev_cntr_ansi_rsn_cd character varying(3)     NOT NULL,
-    clm_3_rev_cntr_ansi_rsn_cd character varying(3)     NOT NULL,
-    clm_4_rev_cntr_ansi_rsn_cd character varying(3)     NOT NULL,
+--  NCH   clm_1_rev_cntr_ansi_grp_cd character varying(2)     NOT NULL,
+--  NOT USED   clm_2_rev_cntr_ansi_grp_cd character varying(2)     NOT NULL,
+--  NOT USED   clm_3_rev_cntr_ansi_grp_cd character varying(2)     NOT NULL,
+--  NOT USED   clm_4_rev_cntr_ansi_grp_cd character varying(2)     NOT NULL,
+--  NCH   clm_1_rev_cntr_ansi_rsn_cd character varying(3)     NOT NULL,
+--  NOT USED   clm_2_rev_cntr_ansi_rsn_cd character varying(3)     NOT NULL,
+--  NOT USED   clm_3_rev_cntr_ansi_rsn_cd character varying(3)     NOT NULL,
+--  NOT USED   clm_4_rev_cntr_ansi_rsn_cd character varying(3)     NOT NULL,
     PRIMARY KEY (clm_uniq_id, bfd_row_id)
 );
 
@@ -1157,6 +1157,15 @@ CREATE TABLE idr_new.claim_item_institutional_nch
     clm_line_add_on_pymt_amt    numeric,
     clm_ocrnc_sgntr_sk          numeric,
     clm_rlt_ocrnc_sgntr_sk      numeric,
+    --  CLM_ANSI_SGNTR
+    clm_1_rev_cntr_ansi_grp_cd character varying(2)     NOT NULL,
+--  NOT USED   clm_2_rev_cntr_ansi_grp_cd character varying(2)     NOT NULL,
+--  NOT USED   clm_3_rev_cntr_ansi_grp_cd character varying(2)     NOT NULL,
+--  NOT USED   clm_4_rev_cntr_ansi_grp_cd character varying(2)     NOT NULL,
+    clm_1_rev_cntr_ansi_rsn_cd character varying(3)     NOT NULL,
+--  NOT USED   clm_2_rev_cntr_ansi_rsn_cd character varying(3)     NOT NULL,
+--  NOT USED   clm_3_rev_cntr_ansi_rsn_cd character varying(3)     NOT NULL,
+--  NOT USED   clm_4_rev_cntr_ansi_rsn_cd character varying(3)     NOT NULL,
     PRIMARY KEY (clm_uniq_id, bfd_row_id)
 );
 
