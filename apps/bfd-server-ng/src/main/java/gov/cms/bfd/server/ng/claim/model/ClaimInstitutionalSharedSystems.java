@@ -48,7 +48,7 @@ public class ClaimInstitutionalSharedSystems extends ClaimBase {
   @Embedded private BloodPints bloodPints;
   @Embedded private NchPrimaryPayorCode nchPrimaryPayorCode;
   @Embedded private TypeOfBillCode typeOfBillCode;
-  @Embedded private ClaimDateSupportingInfo claimDateSupportingInfo;
+  @Embedded private ClaimDateInstitutionalSharedSystems claimDateSupportingInfo;
   @Embedded private ServiceProviderHistory serviceProviderHistory;
   @Embedded private BillingProviderHistory billingProviderHistory;
   @Embedded private OtherProviderHistory otherProviderHistory;
@@ -65,7 +65,8 @@ public class ClaimInstitutionalSharedSystems extends ClaimBase {
   @JoinColumn(name = "clm_uniq_id")
   private SortedSet<ClaimItemInstitutionalSharedSystems> claimItems;
 
-  @Embedded private ClaimInstitutionalInfo claimInstitutionalInfo;
+  @Embedded private ClaimInstitutionalSupportingInfoBase supportingInfo;
+  @Embedded private AdjudicationChargeInstitutional adjudicationChargeInstitutional;
   @Embedded private ClaimFissInstitutional claimFissInstitutional;
 
   /**
@@ -75,14 +76,7 @@ public class ClaimInstitutionalSharedSystems extends ClaimBase {
    */
   @Override
   public Optional<Integer> getDrgCode() {
-    return claimInstitutionalInfo.getSupportingInfo().getDiagnosisDrgCode().getDiagnosisDrgCode();
-  }
-
-  Optional<ExplanationOfBenefit.RemittanceOutcome> toFhirOutcome() {
-    if (getClaimTypeCode().isPacStage2()) {
-      return claimAuditTrailStatusCode.map(ClaimAuditTrailStatusCode::getOutcome);
-    }
-    return Optional.empty();
+    return supportingInfo.getDiagnosisDrgCode().getDiagnosisDrgCode();
   }
 
   /**
@@ -91,8 +85,7 @@ public class ClaimInstitutionalSharedSystems extends ClaimBase {
    * @return optional institutional bene paid amount
    */
   public Optional<BigDecimal> getBenePaidAmount() {
-    return Optional.of(
-        claimInstitutionalInfo.getAdjudicationChargeInstitutional().getBenePaidAmount());
+    return Optional.of(adjudicationChargeInstitutional.getBenePaidAmount());
   }
 
   /**
@@ -172,7 +165,7 @@ public class ClaimInstitutionalSharedSystems extends ClaimBase {
             // In real data, this should only ever have one value, but we're explicitly
             // limiting it to be defensive.
             recordTypeCodes.limit(1).toList(),
-            claimInstitutionalInfo.getSupportingInfo().toFhir(supportingInfoFactory),
+            supportingInfo.toFhir(supportingInfoFactory),
             claimRelatedConditionCds)
         .flatMap(Collection::stream)
         .forEach(eob::addSupportingInfo);
@@ -191,10 +184,7 @@ public class ClaimInstitutionalSharedSystems extends ClaimBase {
               eob.addContained(c.practitioner());
             });
 
-    claimInstitutionalInfo
-        .getAdjudicationChargeInstitutional()
-        .toFhir(getClaimValues())
-        .forEach(eob::addAdjudication);
+    adjudicationChargeInstitutional.toFhir(getClaimValues()).forEach(eob::addAdjudication);
 
     adjudicationCharge.toFhirTotal().forEach(eob::addTotal);
     getBenePaidAmount()

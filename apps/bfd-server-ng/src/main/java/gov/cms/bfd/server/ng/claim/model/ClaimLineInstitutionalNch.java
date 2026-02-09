@@ -35,10 +35,9 @@ public class ClaimLineInstitutionalNch extends ClaimLineInstitutionalBase {
   private Optional<LocalDate> fromDate;
 
   @Embedded private ClaimLineHcpcsCode hcpcsCode;
-  @Embedded private ClaimLineNdc ndc;
-  @Embedded private ClaimLineServiceUnitQuantity serviceUnitQuantity;
   @Embedded private ClaimLineHcpcsModifierCode hcpcsModifierCode;
   @Embedded private ClaimLineAdjudicationChargeInstitutionalNch adjudicationCharge;
+  @Embedded private ClaimAnsiSignatureInfo ansiSignature;
 
   Optional<ExplanationOfBenefit.ItemComponent> toFhirItemComponent() {
     if (claimLineNumber.isEmpty()) {
@@ -51,16 +50,7 @@ public class ClaimLineInstitutionalNch extends ClaimLineInstitutionalBase {
     hcpcsCode.toFhir().ifPresent(productOrService::addCoding);
     getHippsCode().toFhir().ifPresent(productOrService::addCoding);
 
-    var quantity = serviceUnitQuantity.toFhir();
-
-    if (productOrService.isEmpty()) {
-      ndc.toFhirCoding().ifPresent(productOrService::addCoding);
-      ndc.getQualifier().ifPresent(quantity::setUnit);
-    }
-
     line.setProductOrService(FhirUtil.checkDataAbsent(productOrService));
-    ndc.toFhirDetail().ifPresent(line::addDetail);
-    line.setQuantity(quantity);
 
     revenueCenterCode.ifPresent(
         c -> {
@@ -74,6 +64,8 @@ public class ClaimLineInstitutionalNch extends ClaimLineInstitutionalBase {
     fromDate.map(d -> line.setServiced(new DateType(DateUtil.toDate(d))));
 
     adjudicationCharge.toFhir().forEach(line::addAdjudication);
+
+    ansiSignature.toFhir().ifPresent(line::addAdjudication);
 
     line.setExtension(getExtensions().toFhir());
 

@@ -50,7 +50,8 @@ public class ClaimInstitutionalNch extends ClaimBase {
   @JoinColumn(name = "clm_uniq_id")
   private SortedSet<ClaimItemInstitutionalNch> claimItems;
 
-  @Embedded private ClaimInstitutionalInfo claimInstitutionalInfo;
+  @Embedded private ClaimInstitutionalNchSupportingInfo supportingInfo;
+  @Embedded private AdjudicationChargeInstitutional adjudicationChargeInstitutional;
   @Embedded private ServiceProviderHistory serviceProviderHistory;
   @Embedded private BillingProviderHistory billingProviderHistory;
   @Embedded private OtherProviderHistory otherProviderHistory;
@@ -66,7 +67,7 @@ public class ClaimInstitutionalNch extends ClaimBase {
    */
   @Override
   public Optional<Integer> getDrgCode() {
-    return claimInstitutionalInfo.getSupportingInfo().getDiagnosisDrgCode().getDiagnosisDrgCode();
+    return supportingInfo.getDiagnosisDrgCode().getDiagnosisDrgCode();
   }
 
   /**
@@ -75,8 +76,7 @@ public class ClaimInstitutionalNch extends ClaimBase {
    * @return optional institutional bene paid amount
    */
   public Optional<BigDecimal> getBenePaidAmount() {
-    return Optional.of(
-        claimInstitutionalInfo.getAdjudicationChargeInstitutional().getBenePaidAmount());
+    return Optional.of(adjudicationChargeInstitutional.getBenePaidAmount());
   }
 
   /**
@@ -154,7 +154,7 @@ public class ClaimInstitutionalNch extends ClaimBase {
             // In real data, this should only ever have one value, but we're explicitly
             // limiting it to be defensive.
             recordTypeCodes.limit(1).toList(),
-            claimInstitutionalInfo.getSupportingInfo().toFhir(supportingInfoFactory),
+            supportingInfo.toFhir(supportingInfoFactory),
             claimRelatedConditionCds)
         .flatMap(Collection::stream)
         .forEach(eob::addSupportingInfo);
@@ -173,10 +173,7 @@ public class ClaimInstitutionalNch extends ClaimBase {
               eob.addContained(c.practitioner());
             });
 
-    claimInstitutionalInfo
-        .getAdjudicationChargeInstitutional()
-        .toFhir(getClaimValues())
-        .forEach(eob::addAdjudication);
+    adjudicationChargeInstitutional.toFhir(getClaimValues()).forEach(eob::addAdjudication);
 
     adjudicationCharge.toFhirTotal().forEach(eob::addTotal);
     getBenePaidAmount()

@@ -49,6 +49,7 @@ public class ClaimProfessionalNch extends ClaimBase {
   @Embedded private AdjudicationChargeProfessionalNch adjudicationCharge;
   @Embedded private ClaimPaymentAmount claimPaymentAmount;
   @Embedded private NchWeeklyProcessingDate nchWeeklyProcessingDate;
+  @Embedded private ClaimSubmissionDate claimSubmissionDate;
 
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "clm_uniq_id")
@@ -155,6 +156,7 @@ public class ClaimProfessionalNch extends ClaimBase {
     var claimProfessionalSupportingInfo =
         Stream.of(
                 nchWeeklyProcessingDate.toFhir(supportingInfoFactory),
+                claimSubmissionDate.toFhir(supportingInfoFactory),
                 claimPaymentDenialCode.map(c -> c.toFhir(supportingInfoFactory)),
                 clinicalTrialNumber.toFhir(supportingInfoFactory))
             .flatMap(Optional::stream)

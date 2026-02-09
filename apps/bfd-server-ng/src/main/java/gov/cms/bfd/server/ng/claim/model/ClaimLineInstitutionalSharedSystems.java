@@ -8,9 +8,7 @@ import jakarta.persistence.Convert;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
 import java.time.LocalDate;
-import java.util.Collection;
 import java.util.Optional;
-import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.DateType;
@@ -21,7 +19,7 @@ import org.hl7.fhir.r4.model.StringType;
 @Embeddable
 @Getter
 @SuppressWarnings("java:S2201")
-public class ClaimLineInstitutionalSharedSystems {
+public class ClaimLineInstitutionalSharedSystems extends ClaimLineInstitutionalBase {
 
   @Convert(converter = NonZeroIntConverter.class)
   @Column(name = "clm_line_num", insertable = false, updatable = false)
@@ -41,7 +39,6 @@ public class ClaimLineInstitutionalSharedSystems {
   @Embedded private ClaimLineServiceUnitQuantity serviceUnitQuantity;
   @Embedded private ClaimLineHcpcsModifierCode hcpcsModifierCode;
   @Embedded private ClaimLineAdjudicationChargeInstitutionalSharedSystems adjudicationCharge;
-  @Embedded private ClaimLineInstitutionalInfo claimLineInstitutional;
 
   Optional<ExplanationOfBenefit.ItemComponent> toFhirItemComponent() {
     if (claimLineNumber.isEmpty()) {
@@ -52,7 +49,7 @@ public class ClaimLineInstitutionalSharedSystems {
 
     var productOrService = new CodeableConcept();
     hcpcsCode.toFhir().ifPresent(productOrService::addCoding);
-    claimLineInstitutional.getHippsCode().toFhir().ifPresent(productOrService::addCoding);
+    getHippsCode().toFhir().ifPresent(productOrService::addCoding);
 
     var quantity = serviceUnitQuantity.toFhir();
 
@@ -67,22 +64,18 @@ public class ClaimLineInstitutionalSharedSystems {
 
     revenueCenterCode.ifPresent(
         c -> {
-          var revenueCoding = c.toFhir(claimLineInstitutional.getDeductibleCoinsuranceCode());
+          var revenueCoding = c.toFhir(getDeductibleCoinsuranceCode());
           line.setRevenue(revenueCoding);
         });
 
     line.addModifier(hcpcsModifierCode.toFhir());
-    claimLineInstitutional
-        .getRevenueCenterDate()
-        .ifPresent(d -> line.setServiced(new DateType(DateUtil.toDate(d))));
+    getRevenueCenterDate().ifPresent(d -> line.setServiced(new DateType(DateUtil.toDate(d))));
 
     fromDate.map(d -> line.setServiced(new DateType(DateUtil.toDate(d))));
 
-    Stream.of(claimLineInstitutional.getAnsiSignature().toFhir(), adjudicationCharge.toFhir())
-        .flatMap(Collection::stream)
-        .forEach(line::addAdjudication);
+    adjudicationCharge.toFhir().forEach(line::addAdjudication);
 
-    line.setExtension(claimLineInstitutional.getExtensions().toFhir());
+    line.setExtension(getExtensions().toFhir());
 
     return Optional.of(line);
   }

@@ -391,6 +391,7 @@ CREATE TABLE idr_new.claim_item_professional_nch
     clm_uniq_id                    bigint                   NOT NULL,
     bfd_row_id                     integer                  NOT NULL,
     clm_line_num                   integer,
+--     MISSING IMPLEMENTATION
     clm_line_ansthsa_unit_cnt      numeric,
     clm_line_dgns_cd               character varying(7)     NOT NULL,
     clm_line_sbmt_chrg_amt         numeric,
@@ -406,9 +407,9 @@ CREATE TABLE idr_new.claim_item_professional_nch
     clm_line_hcpcs_cd              character varying(5)     NOT NULL,
     clm_line_from_dt               date,
     clm_line_ndc_cd                character varying(11)    NOT NULL,
-    clm_line_ndc_qty               numeric,
-    clm_line_ndc_qty_qlfyr_cd      character varying(2)     NOT NULL,
-    clm_line_srvc_unit_qty         numeric,
+--  Shared Systems   clm_line_ndc_qty               numeric,
+--  Shared Systems   clm_line_ndc_qty_qlfyr_cd      character varying(2)     NOT NULL,
+--  Shared Systems   clm_line_srvc_unit_qty         numeric,
 --  INSTNL   clm_line_rev_ctr_cd            character varying(4)     NOT NULL,
     clm_line_rx_num                character varying(30)    NOT NULL,
     clm_line_thru_dt               date,
@@ -678,8 +679,8 @@ CREATE TABLE idr_new.claim_institutional_shared_systems
     clm_admsn_src_cd               varchar(2)               not null,
     clm_fi_actn_cd                 varchar(1)               not null,
     clm_mdcr_ip_lrd_use_cnt        integer,
-    clm_hha_rfrl_cd                varchar(1)               not null,
-    clm_hha_lup_ind_cd             varchar(1)               not null,
+--   NCH  clm_hha_rfrl_cd                varchar(1)               not null,
+--   NCH  clm_hha_lup_ind_cd             varchar(1)               not null,
     clm_hipps_uncompd_care_amt     numeric,
     clm_instnl_mdcr_coins_day_cnt  integer,
     clm_instnl_ncvrd_day_cnt       numeric,
@@ -695,14 +696,14 @@ CREATE TABLE idr_new.claim_institutional_shared_systems
     clm_mdcr_ip_pps_cptl_hrmls_amt numeric,
     clm_mdcr_instnl_bene_pd_amt    numeric,
     clm_mdcr_hospc_prd_cnt         integer,
-    clm_pps_ind_cd                 varchar(1)               not null,
+--  NCH   clm_pps_ind_cd                 varchar(1)               not null,
     clm_mdcr_ip_pps_cptl_tot_amt   numeric,
     clm_instnl_cvrd_day_cnt        numeric,
     clm_mdcr_instnl_prmry_pyr_amt  numeric,
     clm_instnl_prfnl_amt           numeric,
     clm_mdcr_ip_bene_ddctbl_amt    numeric,
     clm_instnl_drg_outlier_amt     numeric,
-    dgns_drg_outlier_cd            varchar(1),
+--  NCH   dgns_drg_outlier_cd            varchar(1),
     clm_mdcr_ip_scnd_yr_rate_amt   numeric,
     clm_instnl_low_vol_pmt_amt     numeric,
     clm_hipps_readmsn_rdctn_amt    numeric,
@@ -715,7 +716,7 @@ CREATE TABLE idr_new.claim_institutional_shared_systems
     clm_mdcr_ip_1st_yr_rate_amt    numeric,
     clm_site_ntrl_cst_bsd_pymt_amt numeric,
     clm_ss_outlier_std_pymt_amt    numeric,
-    clm_op_srvc_type_cd            varchar(1)
+--  NCH   clm_op_srvc_type_cd            varchar(1)
 );
 
 CREATE TABLE idr_new.claim_institutional_nch
@@ -941,6 +942,7 @@ CREATE TABLE idr_new.claim_item_institutional_shared_systems
     clm_uniq_id                 bigint                   NOT NULL,
     bfd_row_id                  integer                  NOT NULL,
     clm_line_num                integer,
+--     MISSING IMPLEMENTATION
     clm_line_ansthsa_unit_cnt   numeric,
 --  PRFNL   clm_line_dgns_cd               character varying(7)     NOT NULL,
     clm_line_sbmt_chrg_amt      numeric,
@@ -1315,7 +1317,7 @@ CREATE TABLE idr_new.claim_rx
     bfd_claim_updated_ts              timestamp with time zone DEFAULT now(),
 --- LINE_ITEM COLUMNS
 --    clm_line_num                      integer               NOT NULL,
-    clm_line_ansthsa_unit_cnt         numeric,
+--     clm_line_ansthsa_unit_cnt         numeric,
 --  PRFNL   clm_line_dgns_cd               character varying(7)     NOT NULL,
 --  NON_RX   clm_line_sbmt_chrg_amt         numeric,
 --  NON_RX   clm_line_alowd_chrg_amt        numeric,

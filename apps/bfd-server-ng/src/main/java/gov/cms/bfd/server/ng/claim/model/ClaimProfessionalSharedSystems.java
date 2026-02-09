@@ -50,6 +50,7 @@ public class ClaimProfessionalSharedSystems extends ClaimBase {
   @Embedded private AdjudicationChargeProfessionalSharedSystems adjudicationCharge;
   @Embedded private ClaimPaymentAmount claimPaymentAmount;
   @Embedded private ClaimNearLineRecordType claimRecordType;
+  @Embedded private ClaimSubmissionDate claimSubmissionDate;
 
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "clm_uniq_id")
@@ -166,6 +167,7 @@ public class ClaimProfessionalSharedSystems extends ClaimBase {
 
     var claimProfessionalSupportingInfo =
         Stream.of(
+                claimSubmissionDate.toFhir(supportingInfoFactory),
                 providerAssignmentIndicatorSwitch.map(c -> c.toFhir(supportingInfoFactory)),
                 clinicalTrialNumber.toFhir(supportingInfoFactory))
             .flatMap(Optional::stream)
