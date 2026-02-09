@@ -444,6 +444,7 @@ class _ClaimsFile(StrEnum):
             f.CLM_CMS_CALCD_MFTR_DSCNT_AMT,
             f.CLM_LINE_REBT_PASSTHRU_POS_AMT,
             f.CLM_PHRMCY_PRICE_DSCNT_AT_POS_AMT,
+            f.CLM_LINE_RPTD_GAP_DSCNT_AMT,
             f.IDR_INSRT_TS,
             f.IDR_UPDT_TS,
         ],
