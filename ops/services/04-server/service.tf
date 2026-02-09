@@ -227,9 +227,8 @@ resource "aws_ecs_task_definition" "server" {
             value = templatefile(
               "${path.module}/adot/collector.yaml", {
                 log_group_name = aws_cloudwatch_log_group.adot_metrics.name
-                cluster_name   = data.aws_ecs_cluster.main.name
+                cluster_name   = data.aws_ecs_cluster.main.cluster_name
                 region         = local.region
-
             })
           }
         ]
