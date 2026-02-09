@@ -28,6 +28,10 @@ locals {
   server_healthcheck_pem_path = "/data/healthcheck.pem"
   server_healthcheck_bene_id  = nonsensitive(local.ssm_config["/bfd/${local.service}/heathcheck/testing_bene_id"])
   server_healthcheck_uri      = "https://localhost:${local.server_port}/v2/fhir/ExplanationOfBenefit/?_format=application%2Ffhir%2Bjson&patient=${local.server_healthcheck_bene_id}"
+
+  // variables for ADOT specifically - might need to distill these down and consolidate with what was already in here:
+  full_name = "bfd-${local.env}-${local.service}"
+  subnets   = module.terraservice.subnets_map["private"]
 }
 
 data "aws_rds_cluster" "main" {
@@ -202,13 +206,30 @@ resource "aws_ecs_task_definition" "server" {
         volumesFrom    = []
       },
       {
+        name      = "adot-collector"
+        image     = "public.ecr.aws/aws-observability/aws-otel-collector:latest"
+        essential = false
+        command = [
+          "--config=env:ADOT_CONFIG"
+        ]
+
+        logConfiguration = {
+          logDriver = "awslogs"
+          options = {
+            awslogs-group         = aws_cloudwatch_log_group.log_router_messages.name
+            awslogs-stream-prefix = "adot-collector"
+            awslogs-region        = local.region
+          }
+        }
+      },
+      {
         name              = "log_router"
         image             = data.aws_ecr_image.log_router.image_uri
         essential         = true
-        cpu               = max(min(1024, floor(0.05 * local.server_cpu)), 256) # Max 1 CPU, min 1/4
+        cpu               = max(min(1024, floor(0.05 * local.server_cpu)), 256)    # Max 1 CPU, min 1/4
         memoryReservation = max(min(1024, floor(0.08 * local.server_memory)), 256) # Max 1 GB, min 256 MiB
         memory            = max(min(1024, floor(0.10 * local.server_memory)), 312) # Max 1 GB, min 312 MiB
-        user              = "0" # Default; reduces unnecessary terraform diff output
+        user              = "0"                                                    # Default; reduces unnecessary terraform diff output
         environment = [
           {
             name  = "AWS_REGION"
@@ -362,7 +383,7 @@ resource "aws_ecs_task_definition" "server" {
         # Empty declarations reduce Terraform diff noise
         systemControls = []
         volumesFrom    = []
-      },
+      }
     ]
   )
 }

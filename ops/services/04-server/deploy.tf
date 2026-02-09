@@ -58,6 +58,9 @@ resource "aws_codedeploy_deployment_group" "server" {
   }
 }
 
+
+
+/*
 resource "null_resource" "codedeploy_server" {
   depends_on = [aws_iam_role.codedeploy, aws_iam_role_policy_attachment.codedeploy]
   triggers = {
@@ -82,3 +85,4 @@ resource "null_resource" "codedeploy_server" {
     command     = "${path.module}/scripts/deploy-server.sh"
   }
 }
+*/

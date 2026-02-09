@@ -1,0 +1,25 @@
+receivers:
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: 'bfd-jmx'
+          scrape_interval: 15s
+          static_configs:
+            - targets: ['localhost:9404']
+
+processors:
+  batch:
+
+exporters:
+  awsemf:
+    namespace: BFD
+    log_group_name: /aws/observability/bfd
+    log_stream_name: '{ecs_task_id}'
+    region: us-east-1
+
+service:
+  pipelines:
+    metrics:
+      receivers: [prometheus]
+      processors: [batch]
+      exporters: [awsemf]
