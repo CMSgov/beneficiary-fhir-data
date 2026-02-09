@@ -44,9 +44,12 @@ parser.add_argument(
 )
 parser.add_argument(
     "--patients",
-    default=15,
+    default=0,
     type=int,
-    help="Number of patients to generate. Ignored if SYNTHETIC_BENE_HSTRY is provided via 'files'",
+    help=(
+        "Number of NEW patients to generate. Does not affect patients regenerated when a "
+        f"{BENE_HSTRY} file is provided"
+    ),
 )
 parser.add_argument(
     "--claims",
@@ -193,10 +196,23 @@ def load_inputs():
     if any(file for file in files.values()):
         regenerate_static_tables(generator, files)
 
-    patients: list[RowAdapter] = files[BENE_HSTRY] or [RowAdapter({}) for _ in range(args.patients)]
+    num_existing = len(files[BENE_HSTRY])
+    num_new = int(args.patients)
+    patients: list[RowAdapter] = files[BENE_HSTRY] + [RowAdapter({}) for _ in range(num_new)]
     patient_mbi_id_rows = {row["BENE_MBI_ID"]: row.kv for row in files[BENE_MBI_ID]}
 
-    print(f"Generating {len(patients)} patients...")
+    print(
+        f"{
+            ', and '.join(
+                x
+                for x in [
+                    f'regenerating {num_existing} existing patients' if num_existing else None,
+                    f'generating {num_new} new patients' if num_new > 0 else None,
+                ]
+                if x
+            )
+        }...".capitalize()
+    )
     for patient in tqdm.tqdm(patients):
         generator.create_base_patient(patient)
         patient["BENE_1ST_NAME"] = random.choice(available_given_names)
