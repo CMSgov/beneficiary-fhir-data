@@ -326,21 +326,29 @@ def gen_pac_clm_prod(clm: RowAdapter, init_clm_prod: RowAdapter):
 def gen_pac_clm_rlt_cond_sgntr_mbr(clm: RowAdapter, init_clm_rlt_cond_sgntr_mbr: RowAdapter):
     clm_rlt_cond_sgntr_mbr = _prepare_pac_row(
         init_row=init_clm_rlt_cond_sgntr_mbr,
-        is_pac_predicate=lambda: init_clm_rlt_cond_sgntr_mbr[f.CLM_RLT_COND_SGNTR_SK]
-        == clm[f.CLM_RLT_COND_SGNTR_SK],
+        is_pac_predicate=lambda: f.CLM_UNIQ_ID in init_clm_rlt_cond_sgntr_mbr
+        and init_clm_rlt_cond_sgntr_mbr[f.CLM_UNIQ_ID] == clm[f.CLM_UNIQ_ID],
         exclude_fields_always=set(),
         exclude_fields_adj={
             f.CLM_RLT_COND_SGNTR_SK,
             f.CLM_RLT_COND_SGNTR_SQNC_NUM,
             f.CLM_RLT_COND_CD,
             f.CLM_IDR_LD_DT,
+            f.CLM_UNIQ_ID,
             f.IDR_INSRT_TS,
             f.IDR_UPDT_TS,
         },
     )
-    clm_rlt_cond_sgntr_mbr[f.CLM_RLT_COND_SGNTR_SK] = clm[f.CLM_RLT_COND_SGNTR_SK]
+    clm_rlt_cond_sgntr_mbr[f.CLM_RLT_COND_SGNTR_SK] = (
+        clm[f.CLM_RLT_COND_SGNTR_SK]
+        if int(clm[f.CLM_RLT_COND_SGNTR_SK]) < -1
+        else gen_numeric_id(field=f.CLM_RLT_COND_SGNTR_SK, start=-2)
+    )
     clm_rlt_cond_sgntr_mbr[f.CLM_RLT_COND_SGNTR_SQNC_NUM] = random.choice(TARGET_SEQUENCE_NUMBERS)
     clm_rlt_cond_sgntr_mbr[f.CLM_RLT_COND_CD] = random.choice(TARGET_RLT_COND_CODES)
+
+    # HACK: See corresponding adjudicated generation function for justification
+    clm_rlt_cond_sgntr_mbr[f.CLM_UNIQ_ID] = clm[f.CLM_UNIQ_ID]
 
     add_meta_timestamps(clm_rlt_cond_sgntr_mbr, clm)
 
