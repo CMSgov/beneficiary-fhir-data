@@ -434,8 +434,7 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
   @MethodSource
   @ParameterizedTest
   void ensureDrg(long claimId, String code, String system) {
-    var eob =
-        eobHandler.find(claimId, SamhsaFilterMode.INCLUDE).orElseGet(ExplanationOfBenefit::new);
+    var eob = eobHandler.find(claimId, SamhsaFilterMode.INCLUDE).get();
     var drg =
         eob.getSupportingInfo().stream()
             .flatMap(i -> i.getCode().getCoding().stream())
