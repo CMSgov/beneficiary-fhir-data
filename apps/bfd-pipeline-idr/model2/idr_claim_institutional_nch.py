@@ -231,6 +231,7 @@ class IdrClaimInstitutionalNch(IdrBaseModel):
     clm_mdcr_instnl_bene_pd_amt: float | None
     clm_mdcr_hospc_prd_cnt: int | None
     clm_mdcr_npmt_rsn_cd: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_mdcr_ddctbl_amt: float | None
     clm_mdcr_ip_pps_drg_wt_num: float | None
     clm_mdcr_ip_pps_dsprprtnt_amt: float | None
     clm_mdcr_ip_pps_excptn_amt: float | None
@@ -648,25 +649,6 @@ class IdrClaimInstitutionalNch(IdrBaseModel):
                     {clm}.clm_idr_ld_dt
                 FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
                 WHERE {_claim_filter(start_time, partition)}
-            ),
-            latest_clm_lctn_hstry AS (
-                SELECT
-                    claims.geo_bene_sk,
-                    claims.clm_type_cd,
-                    claims.clm_dt_sgntr_sk,
-                    claims.clm_num_sk,
-                    MAX({lctn_hstry}.clm_lctn_cd_sqnc_num) AS max_clm_lctn_cd_sqnc_num
-                FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_lctn_hstry {lctn_hstry}
-                JOIN claims ON
-                    {lctn_hstry}.geo_bene_sk = claims.geo_bene_sk AND
-                    {lctn_hstry}.clm_type_cd = claims.clm_type_cd AND
-                    {lctn_hstry}.clm_dt_sgntr_sk = claims.clm_dt_sgntr_sk AND
-                    {lctn_hstry}.clm_num_sk = claims.clm_num_sk
-                GROUP BY
-                    claims.geo_bene_sk,
-                    claims.clm_type_cd,
-                    claims.clm_dt_sgntr_sk,
-                    claims.clm_num_sk
             )
             SELECT {{COLUMNS}}
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
@@ -682,17 +664,6 @@ class IdrClaimInstitutionalNch(IdrBaseModel):
                 {clm}.clm_dt_sgntr_sk = {dcmtn}.clm_dt_sgntr_sk AND
                 {clm}.clm_type_cd = {dcmtn}.clm_type_cd AND
                 {clm}.clm_num_sk = {dcmtn}.clm_num_sk
-            LEFT JOIN latest_clm_lctn_hstry latest_lctn ON
-                {clm}.geo_bene_sk = latest_lctn.geo_bene_sk AND
-                {clm}.clm_type_cd = latest_lctn.clm_type_cd AND
-                {clm}.clm_dt_sgntr_sk = latest_lctn.clm_dt_sgntr_sk AND
-                {clm}.clm_num_sk = latest_lctn.clm_num_sk
-            LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_lctn_hstry {lctn_hstry} ON
-                {clm}.geo_bene_sk = {lctn_hstry}.geo_bene_sk AND
-                {clm}.clm_type_cd = {lctn_hstry}.clm_type_cd AND
-                {clm}.clm_dt_sgntr_sk = {lctn_hstry}.clm_dt_sgntr_sk AND
-                {clm}.clm_num_sk = {lctn_hstry}.clm_num_sk AND
-                {lctn_hstry}.clm_lctn_cd_sqnc_num = latest_lctn.max_clm_lctn_cd_sqnc_num
             LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_prvdr_hstry {prvdr_atng} ON 
                 {prvdr_atng}.prvdr_npi_num = {clm}.prvdr_atndg_prvdr_npi_num AND
                 {prvdr_atng}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
