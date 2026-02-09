@@ -30,7 +30,7 @@ class EobValidityIT extends IntegrationTestBase {
         eob.getMeta().getProfile().isEmpty(), "EOB Meta must have at least one Profile defined");
     assertFalse(eob.hasExtension());
 
-    final long uniqueResourceIds =
+    final var uniqueResourceIds =
         eob.getContained().stream().map(r -> r.fhirType() + r.getId()).distinct().count();
     assertEquals(
         uniqueResourceIds,
