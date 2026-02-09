@@ -343,15 +343,11 @@ if __name__ == "__main__":
             result = subprocess.run(
                 args=[sys.executable, "claims_generator.py", f"out/{BENE_HSTRY}.csv"],
                 check=True,
-                capture_output=True,
-                text=True,
+                stdout=sys.stdout,
+                stderr=sys.stderr,
             )
 
             print("Claims generation completed successfully!")
-            if result.stdout:
-                print("Claims generator output:")
-                print(result.stdout)
-
         except subprocess.CalledProcessError as e:
             print(f"Error running claims generator: {e}")
             if e.stderr:
