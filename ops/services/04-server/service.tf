@@ -221,6 +221,15 @@ resource "aws_ecs_task_definition" "server" {
         name      = "adot-collector"
         image     = "public.ecr.aws/aws-observability/aws-otel-collector:latest"
         essential = false
+        environment = [
+          {
+            name = "ADOT_CONFIG"
+            value = templatefile(
+              "${path.module}/adot/collector.yaml", {
+                log_group_name = aws_cloudwatch_log_group.adot_messages.name
+              })
+          }
+        ]
         command = [
           "--config=env:ADOT_CONFIG"
         ]

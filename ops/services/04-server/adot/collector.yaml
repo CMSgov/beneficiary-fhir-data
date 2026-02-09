@@ -13,8 +13,7 @@ processors:
 exporters:
   awsemf:
     namespace: BFD
-    log_group_name: /aws/observability/bfd
-    log_stream_name: '{ecs_task_id}'
+    log_group_name: ${log_group_name}
     region: us-east-1
 
 service:
