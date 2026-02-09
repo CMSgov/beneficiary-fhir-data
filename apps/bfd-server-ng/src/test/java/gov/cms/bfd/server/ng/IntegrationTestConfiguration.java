@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.time.Clock;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import org.flywaydb.core.Flyway;
@@ -25,7 +26,7 @@ public class IntegrationTestConfiguration {
 
   @Bean
   Instant clock() {
-    return Clock.systemUTC().instant().truncatedTo(ChronoUnit.DAYS);
+    return Clock.fixed(Instant.parse("2026-02-09T00:00:00Z"), ZoneId.of("UTC")).instant().truncatedTo(ChronoUnit.DAYS);
   }
 
   // Container lifecycle is managed by Spring,
