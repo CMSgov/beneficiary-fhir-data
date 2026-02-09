@@ -180,7 +180,9 @@ data "aws_iam_policy_document" "execution_logs" {
       "${aws_cloudwatch_log_group.certstores_messages.arn}:*",
       "${aws_cloudwatch_log_group.log_router_messages.arn}:*",
       "${aws_cloudwatch_log_group.server_messages.arn}:*",
-      "${aws_cloudwatch_log_group.server_access.arn}:*"
+      "${aws_cloudwatch_log_group.server_access.arn}:*",
+      "${aws_cloudwatch_log_group.adot_messages.arn}:*",
+      "${aws_cloudwatch_log_group.adot_metrics.arn}:*"
     ]
   }
 }

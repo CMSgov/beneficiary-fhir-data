@@ -101,6 +101,18 @@ resource "aws_cloudwatch_log_group" "server_access" {
   skip_destroy = true
 }
 
+resource "aws_cloudwatch_log_group" "adot_messages" {
+  name         = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/adot/messages"
+  kms_key_id   = local.env_key_arn
+  skip_destroy = true
+}
+
+resource "aws_cloudwatch_log_group" "adot_metrics" {
+  name         = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/adot/metrics"
+  kms_key_id   = local.env_key_arn
+  skip_destroy = true
+}
+
 resource "aws_ecs_task_definition" "server" {
   family                   = local.name_prefix
   requires_compatibilities = ["FARGATE"]
