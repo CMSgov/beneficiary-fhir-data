@@ -300,6 +300,7 @@ def gen_pharm_clm_line_rx(
     clm_line_rx[f.CLM_CMS_CALCD_MFTR_DSCNT_AMT] = round(random.uniform(0, 1000), 2)
     clm_line_rx[f.CLM_LINE_REBT_PASSTHRU_POS_AMT] = round(random.uniform(0, 1000), 2)
     clm_line_rx[f.CLM_PHRMCY_PRICE_DSCNT_AT_POS_AMT] = round(random.uniform(0, 1000), 2)
+    clm_line_rx[f.CLM_LINE_RPTD_GAP_DSCNT_AMT] = round(random.uniform(1, 1000000), 2)
 
     add_meta_timestamps(clm_line_rx, clm)
 
