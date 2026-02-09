@@ -20,7 +20,6 @@ from model import (
     IdrBeneficiaryThirdParty,
     IdrClaimAnsiSignature,
     IdrClaimFiss,
-    IdrClaimLineInstitutional,
     IdrClaimLineProfessional,
     IdrClaimLineRx,
     IdrClaimProfessional,
@@ -35,7 +34,9 @@ from model2.idr_claim_date_signature import IdrClaimDateSignature
 from model2.idr_claim_institutional import IdrClaimInstitutional
 from model2.idr_claim_institutional_nch import IdrClaimInstitutionalNch
 from model2.idr_claim_item import IdrClaimItem
+from model2.idr_claim_item_institutional_nch import IdrClaimItemInstitutionalNch
 from model2.idr_claim_item_professional_nch import IdrClaimItemProfessionalNch
+from model2.idr_claim_line_institutional import IdrClaimLineInstitutional
 from model2.idr_claim_professional_nch import IdrClaimProfessionalNch
 from model2.idr_claim_rx import IdrClaimRx
 from pipeline_utils import extract_and_load
@@ -68,6 +69,7 @@ def claim_aux_tables() -> list[type[IdrBaseModel]]:
             # RX/Part D is special because we combine claim + claim line
             IdrClaimRx,
             IdrClaimItemProfessionalNch,
+            IdrClaimItemInstitutionalNch,
         ]
     )
 
