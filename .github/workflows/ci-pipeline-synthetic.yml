@@ -38,7 +38,7 @@ jobs:
       - name: Ensure synthetic data pipeline runs
         run: |
           cd ${{ github.workspace }}/apps/bfd-model-idr
-          uv run patient_generator.py
+          uv run patient_generator.py --patients 100
           uv run claims_generator.py ./out/SYNTHETIC_BENE_HSTRY.csv
           cd ../bfd-pipeline-idr
           ./run-db.sh
