@@ -198,6 +198,10 @@ def load_inputs():
 
     num_existing = len(files[BENE_HSTRY])
     num_new = int(args.patients)
+    if num_existing == 0 and num_new == 0:
+        print(f"No {BENE_HSTRY}.csv provided or --patients arg specified")
+        sys.exit(1)
+
     patients: list[RowAdapter] = files[BENE_HSTRY] + [RowAdapter({}) for _ in range(num_new)]
     patient_mbi_id_rows = {row["BENE_MBI_ID"]: row.kv for row in files[BENE_MBI_ID]}
 
