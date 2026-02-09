@@ -290,7 +290,7 @@ resource "aws_ecs_task_definition" "server" {
       {
         dockerLabels = {
           Java_EMF_Metrics             = "true"
-          ECS_PROMETHEUS_EXPORTER_PORT = local.server_jmx_export_port
+          ECS_PROMETHEUS_EXPORTER_PORT = tostring(local.server_jmx_export_port)
         }
         name      = local.service
         image     = data.aws_ecr_image.server.image_uri
