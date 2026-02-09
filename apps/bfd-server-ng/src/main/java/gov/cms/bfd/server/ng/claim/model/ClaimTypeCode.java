@@ -394,6 +394,29 @@ public enum ClaimTypeCode {
     return isBetween(1000, 2999);
   }
 
+  Optional<ExplanationOfBenefit.AdjudicationComponent> toFhirAdjudication() {
+    if (isClaimSubtype(ClaimSubtype.PDE)) {
+      return Optional.empty();
+    }
+
+    var adjudication = new ExplanationOfBenefit.AdjudicationComponent();
+    adjudication.setCategory(
+        new CodeableConcept()
+            .addCoding(
+                new Coding()
+                    .setSystem(SystemUrls.CARIN_CODE_SYSTEM_ADJUDICATION_DISCRIMINATOR)
+                    .setCode("benefitpaymentstatus")
+                    .setDisplay("Benefit Payment Status")));
+    adjudication.setReason(
+        new CodeableConcept()
+            .addCoding(
+                new Coding()
+                    .setSystem(SystemUrls.CARIN_CODE_SYSTEM_PAYER_ADJUDICATION_STATUS)
+                    .setCode("other")
+                    .setDisplay("Other")));
+    return Optional.of(adjudication);
+  }
+
   private boolean isBetween(int lower, int upper) {
     return (code >= lower) && (code <= upper);
   }

@@ -3,6 +3,21 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
   "entry" : [ {
     "resource" : {
       "adjudication" : [ {
+        "category" : {
+          "coding" : [ {
+            "code" : "benefitpaymentstatus",
+            "display" : "Benefit Payment Status",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
+          } ]
+        },
+        "reason" : {
+          "coding" : [ {
+            "code" : "other",
+            "display" : "Other",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus"
+          } ]
+        }
+      }, {
         "amount" : {
           "currency" : "USD",
           "value" : 0.0
@@ -3503,6 +3518,21 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
   "entry" : [ {
     "resource" : {
       "adjudication" : [ {
+        "category" : {
+          "coding" : [ {
+            "code" : "benefitpaymentstatus",
+            "display" : "Benefit Payment Status",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
+          } ]
+        },
+        "reason" : {
+          "coding" : [ {
+            "code" : "other",
+            "display" : "Other",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus"
+          } ]
+        }
+      }, {
         "amount" : {
           "currency" : "USD",
           "value" : 0.0
@@ -8083,6 +8113,21 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
   "entry" : [ {
     "resource" : {
       "adjudication" : [ {
+        "category" : {
+          "coding" : [ {
+            "code" : "benefitpaymentstatus",
+            "display" : "Benefit Payment Status",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
+          } ]
+        },
+        "reason" : {
+          "coding" : [ {
+            "code" : "other",
+            "display" : "Other",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus"
+          } ]
+        }
+      }, {
         "amount" : {
           "currency" : "USD",
           "value" : 0.0
@@ -10591,6 +10636,21 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
   }, {
     "resource" : {
       "adjudication" : [ {
+        "category" : {
+          "coding" : [ {
+            "code" : "benefitpaymentstatus",
+            "display" : "Benefit Payment Status",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
+          } ]
+        },
+        "reason" : {
+          "coding" : [ {
+            "code" : "other",
+            "display" : "Other",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus"
+          } ]
+        }
+      }, {
         "amount" : {
           "currency" : "USD",
           "value" : 0.0
@@ -13883,6 +13943,21 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
   }, {
     "resource" : {
       "adjudication" : [ {
+        "category" : {
+          "coding" : [ {
+            "code" : "benefitpaymentstatus",
+            "display" : "Benefit Payment Status",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
+          } ]
+        },
+        "reason" : {
+          "coding" : [ {
+            "code" : "other",
+            "display" : "Other",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus"
+          } ]
+        }
+      }, {
         "amount" : {
           "currency" : "USD",
           "value" : 0.0
@@ -15951,6 +16026,21 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
   "entry" : [ {
     "resource" : {
       "adjudication" : [ {
+        "category" : {
+          "coding" : [ {
+            "code" : "benefitpaymentstatus",
+            "display" : "Benefit Payment Status",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
+          } ]
+        },
+        "reason" : {
+          "coding" : [ {
+            "code" : "other",
+            "display" : "Other",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus"
+          } ]
+        }
+      }, {
         "amount" : {
           "currency" : "USD",
           "value" : 0.0
@@ -20531,6 +20621,21 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
   "entry" : [ {
     "resource" : {
       "adjudication" : [ {
+        "category" : {
+          "coding" : [ {
+            "code" : "benefitpaymentstatus",
+            "display" : "Benefit Payment Status",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
+          } ]
+        },
+        "reason" : {
+          "coding" : [ {
+            "code" : "other",
+            "display" : "Other",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus"
+          } ]
+        }
+      }, {
         "amount" : {
           "currency" : "USD",
           "value" : 0.0
@@ -23039,6 +23144,21 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
   }, {
     "resource" : {
       "adjudication" : [ {
+        "category" : {
+          "coding" : [ {
+            "code" : "benefitpaymentstatus",
+            "display" : "Benefit Payment Status",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
+          } ]
+        },
+        "reason" : {
+          "coding" : [ {
+            "code" : "other",
+            "display" : "Other",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus"
+          } ]
+        }
+      }, {
         "amount" : {
           "currency" : "USD",
           "value" : 0.0
@@ -26331,6 +26451,21 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
   }, {
     "resource" : {
       "adjudication" : [ {
+        "category" : {
+          "coding" : [ {
+            "code" : "benefitpaymentstatus",
+            "display" : "Benefit Payment Status",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
+          } ]
+        },
+        "reason" : {
+          "coding" : [ {
+            "code" : "other",
+            "display" : "Other",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus"
+          } ]
+        }
+      }, {
         "amount" : {
           "currency" : "USD",
           "value" : 0.0

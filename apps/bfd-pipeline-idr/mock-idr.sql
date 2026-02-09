@@ -572,6 +572,7 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_rx (
     clm_cms_calcd_mftr_dscnt_amt NUMERIC,
     clm_line_grs_cvrd_cst_tot_amt NUMERIC,
     clm_phrmcy_price_dscnt_at_pos_amt NUMERIC,
+    clm_line_rptd_gap_dscnt_amt NUMERIC,
     idr_insrt_ts TIMESTAMPTZ,
     idr_updt_ts TIMESTAMPTZ,
     PRIMARY KEY(clm_uniq_id, clm_line_num)
