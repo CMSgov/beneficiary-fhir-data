@@ -544,6 +544,9 @@ class _ClaimsFile(StrEnum):
             f.CLM_RLT_COND_CD,
             f.IDR_INSRT_TS,
             f.IDR_UPDT_TS,
+            # HACK: See generation function for justification. This is not a real field of this
+            # table
+            f.CLM_UNIQ_ID,
         ],
     )
     CLM_VAL = (
@@ -764,8 +767,9 @@ def generate(opts: OptionsModel, paths: tuple[Path, ...]):
     # precomputed lookup tables for each claims table so that per-CLM regeneration of claims tables
     # does not take an exceedingly long time versus generation of entirely new data.
     clms_per_bene_sk = partition_rows(llist=files[CLM], part_by=lambda x: int(x[f.BENE_SK]))
-    sgntr_mbr_per_sgntr_sk = {
-        str(row[f.CLM_RLT_COND_SGNTR_SK]): row for row in files[CLM_RLT_COND_SGNTR_MBR]
+    # HACK: See generation function for justification. CLM_UNIQ_ID is not a field of this table
+    sgntr_mbr_per_clm_uniq_id = {
+        str(row[f.CLM_UNIQ_ID]): row for row in files[CLM_RLT_COND_SGNTR_MBR]
     }
     rx_clm_line_per_clm_uniq_id = {
         str(x[f.CLM_UNIQ_ID]): x for x in files[CLM_LINE] if x.get(f.CLM_LINE_RX_NUM)
@@ -846,9 +850,7 @@ def generate(opts: OptionsModel, paths: tuple[Path, ...]):
 
             clm_rlt_cond_sgntr_mbr = gen_clm_rlt_cond_sgntr_mbr(
                 clm=clm,
-                init_clm_rlt_cond_sgntr_mbr=sgntr_mbr_per_sgntr_sk.get(
-                    clm[f.CLM_RLT_COND_SGNTR_SK]
-                ),
+                init_clm_rlt_cond_sgntr_mbr=sgntr_mbr_per_clm_uniq_id.get(clm[f.CLM_UNIQ_ID]),
             )
             adj_clms_tbls[CLM_RLT_COND_SGNTR_MBR].append(clm_rlt_cond_sgntr_mbr)
 
@@ -977,7 +979,7 @@ def generate(opts: OptionsModel, paths: tuple[Path, ...]):
                 CLM_FISS: as_list(clm_fiss_per_fpk.get(four_part_key(file_pac_clm))),
                 CLM_LCTN_HSTRY: as_list(clm_lctn_hstry_per_fpk.get(four_part_key(file_pac_clm))),
                 CLM_RLT_COND_SGNTR_MBR: as_list(
-                    sgntr_mbr_per_sgntr_sk.get(file_pac_clm[f.CLM_RLT_COND_SGNTR_SK])
+                    sgntr_mbr_per_clm_uniq_id.get(file_pac_clm[f.CLM_UNIQ_ID])
                 ),
                 CLM_LINE: [
                     *as_list(rx_clm_line_per_clm_uniq_id.get(file_pac_clm[f.CLM_UNIQ_ID])),
@@ -1099,7 +1101,10 @@ def generate(opts: OptionsModel, paths: tuple[Path, ...]):
 
             out_tables[CLM_RLT_COND_SGNTR_MBR].append(
                 gen_pac_clm_rlt_cond_sgntr_mbr(
-                    clm=pac_clm, init_clm_rlt_cond_sgntr_mbr=claims_tbls[CLM_RLT_COND_SGNTR_MBR][0]
+                    clm=pac_clm,
+                    init_clm_rlt_cond_sgntr_mbr=next(
+                        iter(claims_tbls[CLM_RLT_COND_SGNTR_MBR]), RowAdapter({})
+                    ),
                 )
             )
 

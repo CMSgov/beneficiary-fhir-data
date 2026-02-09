@@ -198,9 +198,21 @@ def gen_clm_rlt_cond_sgntr_mbr(
     clm: RowAdapter, init_clm_rlt_cond_sgntr_mbr: RowAdapter | None = None
 ):
     clm_rlt_cond_sgntr_mbr = init_clm_rlt_cond_sgntr_mbr or RowAdapter({})
-    clm_rlt_cond_sgntr_mbr[f.CLM_RLT_COND_SGNTR_SK] = clm[f.CLM_RLT_COND_SGNTR_SK]
+    clm_rlt_cond_sgntr_mbr[f.CLM_RLT_COND_SGNTR_SK] = (
+        clm[f.CLM_RLT_COND_SGNTR_SK]
+        if int(clm[f.CLM_RLT_COND_SGNTR_SK]) < -1
+        else gen_numeric_id(field=f.CLM_RLT_COND_SGNTR_SK, start=-2)
+    )
     clm_rlt_cond_sgntr_mbr[f.CLM_RLT_COND_SGNTR_SQNC_NUM] = random.choice(TARGET_SEQUENCE_NUMBERS)
     clm_rlt_cond_sgntr_mbr[f.CLM_RLT_COND_CD] = random.choice(TARGET_RLT_COND_CODES)
+
+    # HACK: Of all claims tables that are derived from CLM, this particular table is the only one
+    # where rows can be orphaned from their root CLM row as some CLM rows may set their
+    # CLM_RLT_COND_SGNTR_SK to an invalid value. There are no other fields from which a foreign-key
+    # relationship can be derived, so we must store the CLM_UNIQ_ID of the parent CLM for each row
+    # of this table, otherwise we would have to special-case the logic for generating this table.
+    # CLM_UNIQ_ID will be ignored by the pipeline when loading, so this is OK
+    clm_rlt_cond_sgntr_mbr[f.CLM_UNIQ_ID] = clm[f.CLM_UNIQ_ID]
 
     add_meta_timestamps(clm_rlt_cond_sgntr_mbr, clm)
 
