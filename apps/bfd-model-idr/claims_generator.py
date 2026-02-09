@@ -816,9 +816,9 @@ def generate(opts: OptionsModel, paths: tuple[Path, ...]):
     # unstable regardless of whether we provide existing CLMs or not. We need a switch to ensure pac
     # claims data is not generated if it already exists, only regenerated, so this checks if there's
     # any pac CLMs in the provided FILEs or if the --force-pac-claims flag is disable and disables
-    # pac generation if so
+    # _new_ pac claim data generation if so
     any_pac_clms = any(int(x[f.CLM_TYPE_CD]) >= 1011 for x in files[CLM])
-    gen_pac_clms = not any_pac_clms or opts.force_pac_claims
+    gen_new_pac_clms = not any_pac_clms or opts.force_pac_claims
 
     print("Generating synthetic claims data for provided BENE_SKs...")
     for pt_bene_sk in tqdm.tqdm(ordered_bene_sks):
@@ -1012,7 +1012,7 @@ def generate(opts: OptionsModel, paths: tuple[Path, ...]):
                 and int(x[CLM][0][f.CLM_TYPE_CD])
                 not in (1, 2, 3, 4)  # obviously we don't have pac claims for PD claims
             ]
-            if gen_pac_clms
+            if gen_new_pac_clms
             else []
         )
         for claims_tbls in init_pac_clms_tbls:
