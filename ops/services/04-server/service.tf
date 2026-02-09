@@ -228,8 +228,8 @@ resource "aws_ecs_task_definition" "server" {
         logConfiguration = {
           logDriver = "awslogs"
           options = {
-            awslogs-group         = aws_cloudwatch_log_group.log_router_messages.name
-            awslogs-stream-prefix = "adot-collector"
+            awslogs-group         = aws_cloudwatch_log_group.adot_messages.name
+            awslogs-stream-prefix = "messages"
             awslogs-region        = local.region
           }
         }
