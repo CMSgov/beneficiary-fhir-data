@@ -79,7 +79,7 @@ CREATE TABLE idr_new.claim_professional_shared_systems
     clm_nch_prmry_pyr_cd           character varying(1)     NOT NULL,
 --  INSTNL   clm_blg_prvdr_oscar_num      character varying(20)    NOT NULL,
     clm_idr_ld_dt                  date,
---  NCH   clm_nrln_ric_cd            character varying(1)     NOT NULL,
+    clm_nrln_ric_cd            character varying(1)     NOT NULL,
     prvdr_srvc_prvdr_npi_num   character varying(20)    NOT NULL,
 --  DRUG   prvdr_prscrbng_prvdr_npi_num character varying(10)    NOT NULL,
 --     idr_insrt_ts_dcmtn         timestamp with time zone NOT NULL,

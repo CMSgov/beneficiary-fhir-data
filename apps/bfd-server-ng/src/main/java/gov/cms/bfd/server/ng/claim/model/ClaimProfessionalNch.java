@@ -43,6 +43,8 @@ public class ClaimProfessionalNch extends ClaimBase {
   @Column(name = "clm_query_cd")
   private Optional<ClaimQueryCode> claimQueryCode;
 
+  private ClaimNearLineRecordType claimRecordType;
+
   @Embedded private BloodPints bloodPints;
   @Embedded private AdjudicationChargeProfessionalNch adjudicationCharge;
   @Embedded private ClaimPaymentAmount claimPaymentAmount;
@@ -176,6 +178,12 @@ public class ClaimProfessionalNch extends ClaimBase {
     eob.setPayment(claimPaymentAmount.toFhir());
 
     toFhirAdjudication().forEach(eob::addAdjudication);
+
+    var insurance = new ExplanationOfBenefit.InsuranceComponent();
+    insurance.setFocal(true);
+    claimRecordType.toFhirReference(getClaimTypeCode()).ifPresent(insurance::setCoverage);
+
+    getClaimTypeCode().toFhirInsuranceNearLineRecord(claimRecordType).ifPresent(eob::addInsurance);
 
     return sortedEob(eob);
   }

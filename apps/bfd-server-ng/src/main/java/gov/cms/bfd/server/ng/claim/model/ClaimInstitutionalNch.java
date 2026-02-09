@@ -44,7 +44,7 @@ public class ClaimInstitutionalNch extends ClaimBase {
   @Embedded private TypeOfBillCode typeOfBillCode;
   @Embedded private AdjudicationChargeInstitutionalNch adjudicationCharge;
   @Embedded private ClaimPaymentAmount claimPaymentAmount;
-  @Embedded private ClaimRecordType claimRecordType;
+  @Embedded private ClaimNearLineRecordType claimRecordType;
 
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "clm_uniq_id")
@@ -183,6 +183,12 @@ public class ClaimInstitutionalNch extends ClaimBase {
         .map(AdjudicationChargeType.BENE_PAID_AMOUNT::toFhirTotal)
         .ifPresent(eob::addTotal);
     eob.setPayment(claimPaymentAmount.toFhir());
+
+    var insurance = new ExplanationOfBenefit.InsuranceComponent();
+    insurance.setFocal(true);
+    claimRecordType.toFhirReference(getClaimTypeCode()).ifPresent(insurance::setCoverage);
+
+    getClaimTypeCode().toFhirInsuranceNearLineRecord(claimRecordType).ifPresent(eob::addInsurance);
 
     return sortedEob(eob);
   }

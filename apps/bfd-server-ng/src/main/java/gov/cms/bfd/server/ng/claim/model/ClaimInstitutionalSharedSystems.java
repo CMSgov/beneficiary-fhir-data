@@ -59,7 +59,7 @@ public class ClaimInstitutionalSharedSystems extends ClaimBase {
 
   @Embedded private AdjudicationCharge adjudicationCharge;
   @Embedded private ClaimPaymentAmount claimPaymentAmount;
-  @Embedded private ClaimRecordType claimRecordType;
+  @Embedded private ClaimRecordTypeInstitutional claimRecordType;
 
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "clm_uniq_id")
@@ -202,6 +202,12 @@ public class ClaimInstitutionalSharedSystems extends ClaimBase {
         .ifPresent(eob::addTotal);
     adjudicationCharge.toFhirAdjudication().forEach(eob::addAdjudication);
     eob.setPayment(claimPaymentAmount.toFhir());
+
+    var insurance = new ExplanationOfBenefit.InsuranceComponent();
+    insurance.setFocal(true);
+    claimRecordType.toFhirReference(getClaimTypeCode()).ifPresent(insurance::setCoverage);
+
+    getClaimTypeCode().toFhirInsuranceInstitutional(claimRecordType).ifPresent(eob::addInsurance);
 
     return sortedEob(eob);
   }

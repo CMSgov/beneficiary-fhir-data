@@ -49,6 +49,7 @@ public class ClaimProfessionalSharedSystems extends ClaimBase {
   @Embedded private NchPrimaryPayorCode nchPrimaryPayorCode;
   @Embedded private AdjudicationChargeProfessionalSharedSystems adjudicationCharge;
   @Embedded private ClaimPaymentAmount claimPaymentAmount;
+  @Embedded private ClaimNearLineRecordType claimRecordType;
 
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "clm_uniq_id")
@@ -189,6 +190,12 @@ public class ClaimProfessionalSharedSystems extends ClaimBase {
 
     eob.addAdjudication(toFhirAdjudication());
     toFhirOutcome().ifPresent(eob::setOutcome);
+
+    var insurance = new ExplanationOfBenefit.InsuranceComponent();
+    insurance.setFocal(true);
+    claimRecordType.toFhirReference(getClaimTypeCode()).ifPresent(insurance::setCoverage);
+
+    getClaimTypeCode().toFhirInsuranceNearLineRecord(claimRecordType).ifPresent(eob::addInsurance);
 
     return sortedEob(eob);
   }

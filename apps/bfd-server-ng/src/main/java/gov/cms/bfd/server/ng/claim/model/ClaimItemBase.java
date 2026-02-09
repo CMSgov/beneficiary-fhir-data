@@ -4,7 +4,7 @@ import java.util.Optional;
 import org.jetbrains.annotations.NotNull;
 
 /** Common interface for all claim item types. */
-public interface ClaimItemBase extends Comparable<ClaimItem> {
+public interface ClaimItemBase extends Comparable<ClaimItemBase> {
 
   /**
    * Returns the unique identifier for this claim item.
@@ -28,7 +28,7 @@ public interface ClaimItemBase extends Comparable<ClaimItem> {
   Optional<ClaimLineHcpcsCode> getClaimLineHcpcsCode();
 
   @Override
-  default int compareTo(@NotNull ClaimItem o) {
+  default int compareTo(@NotNull ClaimItemBase o) {
     return getClaimItemId().compareTo(o.getClaimItemId());
   }
 }
