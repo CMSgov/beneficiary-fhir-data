@@ -1,4 +1,4 @@
-CREATE TABLE idr_new.claim_professional_shared_systems
+CREATE TABLE idr_new.claim_professional_ss
 (
     clm_uniq_id                    bigint                   NOT NULL PRIMARY KEY,
     --CLAIM DATE SGNTR
@@ -266,11 +266,11 @@ CREATE TABLE idr_new.claim_professional_nch
     clm_carr_pmt_dnl_cd            character varying(2)
 );
 
-CREATE INDEX ON idr_new.claim_professional_shared_systems(bene_sk);
+CREATE INDEX ON idr_new.claim_professional_ss(bene_sk);
 
 CREATE INDEX ON idr_new.claim_professional_nch(bene_sk);
 
-CREATE TABLE idr_new.claim_item_professional_shared_systems
+CREATE TABLE idr_new.claim_item_professional_ss
 (
     clm_uniq_id                    bigint                   NOT NULL,
     bfd_row_id                     integer                  NOT NULL,
@@ -503,7 +503,7 @@ CREATE TABLE idr_new.claim_item_professional_nch
     PRIMARY KEY (clm_uniq_id, bfd_row_id)
 );
 
-CREATE TABLE idr_new.claim_institutional_shared_systems
+CREATE TABLE idr_new.claim_institutional_ss
 (
     clm_uniq_id                bigint                   NOT NULL PRIMARY KEY,
     --CLAIM DATE SGNTR
@@ -932,12 +932,12 @@ CREATE TABLE idr_new.claim_institutional_nch
 );
 
 
-CREATE INDEX ON idr_new.claim_institutional_shared_systems(bene_sk);
+CREATE INDEX ON idr_new.claim_institutional_ss(bene_sk);
 
 CREATE INDEX ON idr_new.claim_institutional_nch(bene_sk);
 
 
-CREATE TABLE idr_new.claim_item_institutional_shared_systems
+CREATE TABLE idr_new.claim_item_institutional_ss
 (
     clm_uniq_id                 bigint                   NOT NULL,
     bfd_row_id                  integer                  NOT NULL,
