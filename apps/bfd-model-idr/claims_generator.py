@@ -58,7 +58,6 @@ from claims_util import (
 )
 from generator_util import (
     BENE_HSTRY,
-    BENE_XREF,
     CLM,
     CLM_ANSI_SGNTR,
     CLM_DCMTN,
@@ -719,21 +718,8 @@ def generate(opts: OptionsModel, paths: tuple[Path, ...]):
 
     out_tables: dict[str, list[RowAdapter]] = {k: [] for k in files}
 
-    # Naively check if the tables that make up CLAIM_ITEM, CLAIM_DATE_SIGNATURE, and BENEFICIARY
-    # have been provided if CLAIM was provided. A thorough check would take too long due to the
-    # volume of data
-    clm_required_tables = [
-        CLM_PROD,
-        CLM_LINE,
-        CLM_VAL,
-        CLM_RLT_COND_SGNTR_MBR,
-        BENE_HSTRY,
-        BENE_XREF,
-    ]
-    if any(CLM in str(file) for file in paths) and any(
-        file not in clm_required_tables for file in paths
-    ):
-        print(f"{', '.join(clm_required_tables)} must be provided if {CLM} is provided")
+    if not files[BENE_HSTRY] and not files[CLM]:
+        print(f"{BENE_HSTRY} and/or {CLM} must be provided for claims data generation to proceed")
         sys.exit(1)
 
     cntrct_pbp_num, cntrct_pbp_cntct = gen_contract_plan(
