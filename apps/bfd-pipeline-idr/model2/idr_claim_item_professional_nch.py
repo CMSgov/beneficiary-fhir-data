@@ -112,13 +112,11 @@ class IdrClaimItemProfessionalNch(IdrBaseModel):
         int | None, {ALIAS: ALIAS_PROCEDURE, COLUMN_MAP: "clm_val_sqnc_num"}
     ]
     clm_prod_type_cd: Annotated[str, BeforeValidator(transform_null_string)]
-    clm_prcdr_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_dgns_prcdr_icd_ind: Annotated[
         str, {ALIAS: ALIAS_PROCEDURE}, BeforeValidator(transform_default_string)
     ]
     clm_dgns_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_poa_ind: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_prcdr_prfrm_dt: Annotated[date | None, BeforeValidator(transform_default_date_to_null)]
     idr_insrt_ts_prod: Annotated[
         datetime,
         {
