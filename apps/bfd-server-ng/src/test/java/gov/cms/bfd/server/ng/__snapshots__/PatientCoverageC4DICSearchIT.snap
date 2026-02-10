@@ -3,6 +3,10 @@ gov.cms.bfd.server.ng.PatientCoverageC4DICSearchIT.patientCoverageSearchAllParts
   "entry" : [ {
     "fullUrl" : "{uuid}",
     "resource" : {
+      "address" : [ {
+        "postalCode" : "36609",
+        "state" : "AL"
+      } ],
       "birthDate" : "1967-03-19",
       "communication" : [ {
         "language" : {
@@ -25,7 +29,7 @@ gov.cms.bfd.server.ng.PatientCoverageC4DICSearchIT.patientCoverageSearchAllParts
           }
         }, {
           "url" : "text",
-          "valueCode" : "Black or African American"
+          "valueString" : "Black or African American"
         } ],
         "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
       } ],
@@ -460,6 +464,10 @@ gov.cms.bfd.server.ng.PatientCoverageC4DICSearchIT.patientCoverageSearchByIdDual
   "entry" : [ {
     "fullUrl" : "{uuid}",
     "resource" : {
+      "address" : [ {
+        "postalCode" : "77551",
+        "state" : "TX"
+      } ],
       "birthDate" : "1922-04-01",
       "communication" : [ {
         "language" : {
@@ -482,7 +490,7 @@ gov.cms.bfd.server.ng.PatientCoverageC4DICSearchIT.patientCoverageSearchByIdDual
           }
         }, {
           "url" : "text",
-          "valueCode" : "American Indian or Alaska Native"
+          "valueString" : "American Indian or Alaska Native"
         } ],
         "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
       } ],
@@ -606,6 +614,10 @@ gov.cms.bfd.server.ng.PatientCoverageC4DICSearchIT.patientCoverageSearchByIdPart
   "entry" : [ {
     "fullUrl" : "{uuid}",
     "resource" : {
+      "address" : [ {
+        "postalCode" : "77551",
+        "state" : "TX"
+      } ],
       "birthDate" : "1922-04-01",
       "communication" : [ {
         "language" : {
@@ -628,7 +640,7 @@ gov.cms.bfd.server.ng.PatientCoverageC4DICSearchIT.patientCoverageSearchByIdPart
           }
         }, {
           "url" : "text",
-          "valueCode" : "American Indian or Alaska Native"
+          "valueString" : "American Indian or Alaska Native"
         } ],
         "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
       } ],
@@ -759,6 +771,10 @@ gov.cms.bfd.server.ng.PatientCoverageC4DICSearchIT.patientCoverageSearchByIdPart
   "entry" : [ {
     "fullUrl" : "{uuid}",
     "resource" : {
+      "address" : [ {
+        "postalCode" : "36609",
+        "state" : "AL"
+      } ],
       "birthDate" : "1959-03-14",
       "communication" : [ {
         "language" : {
@@ -781,7 +797,7 @@ gov.cms.bfd.server.ng.PatientCoverageC4DICSearchIT.patientCoverageSearchByIdPart
           }
         }, {
           "url" : "text",
-          "valueCode" : "Asian"
+          "valueString" : "Asian"
         } ],
         "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
       } ],

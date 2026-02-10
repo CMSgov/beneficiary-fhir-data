@@ -242,7 +242,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
     }, {
       "amount" : {
         "currency" : "USD",
-        "value" : 395103.12
+        "value" : 0.0
       },
       "category" : {
         "coding" : [ {
@@ -274,7 +274,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
     }, {
       "amount" : {
         "currency" : "USD",
-        "value" : 1360.05
+        "value" : 0.0
       },
       "category" : {
         "coding" : [ {
@@ -290,7 +290,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
     }, {
       "amount" : {
         "currency" : "USD",
-        "value" : 459402.17
+        "value" : 0.0
       },
       "category" : {
         "coding" : [ {
@@ -346,60 +346,16 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
     }, {
       "amount" : {
         "currency" : "USD",
-        "value" : 11248.18
+        "value" : 2.0
       },
       "category" : {
         "coding" : [ {
-          "code" : "CLM_RPTD_MFTR_DSCNT_AMT",
-          "display" : "Gap Discount Amount",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-        } ]
-      }
-    }, {
-      "amount" : {
-        "currency" : "USD",
-        "value" : 953796.38
-      },
-      "category" : {
-        "coding" : [ {
-          "code" : "CLM_LINE_VCCN_ADMIN_FEE_AMT",
-          "display" : "Vaccination Administration Fee",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-        } ]
-      }
-    }, {
-      "amount" : {
-        "currency" : "USD",
-        "value" : 259902.16
-      },
-      "category" : {
-        "coding" : [ {
-          "code" : "CLM_LINE_TROOP_TOT_AMT",
-          "display" : "Other True Out Of Pocket Paid Amount",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-        } ]
-      }
-    }, {
-      "amount" : {
-        "currency" : "USD",
-        "value" : 280044.07
-      },
-      "category" : {
-        "coding" : [ {
-          "code" : "CLM_LINE_SRVC_CST_AMT",
-          "display" : "Dispensing Fee",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-        } ]
-      }
-    }, {
-      "amount" : {
-        "currency" : "USD",
-        "value" : 839989.68
-      },
-      "category" : {
-        "coding" : [ {
-          "code" : "CLM_LINE_SLS_TAX_AMT",
-          "display" : "Sales Tax Amount",
+          "code" : "submitted",
+          "display" : "Submitted Amount",
+          "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+        }, {
+          "code" : "CLM_LINE_SBMT_CHRG_AMT",
+          "display" : "Line Submitted Charge Amount",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
@@ -424,18 +380,6 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
         "coding" : [ {
           "code" : "CLM_LINE_LIS_AMT",
           "display" : "Low Income Cost Sharing Subsidy Amount",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-        } ]
-      }
-    }, {
-      "amount" : {
-        "currency" : "USD",
-        "value" : 182999.73
-      },
-      "category" : {
-        "coding" : [ {
-          "code" : "CLM_LINE_INGRDNT_CST_AMT",
-          "display" : "Ingredient Cost Amount",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
@@ -470,44 +414,24 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
       },
       "category" : {
         "coding" : [ {
-          "code" : "CLM_LINE_GRS_CVRD_CST_TOT_AMT",
-          "display" : "Claim Line Gross Covered Cost Amount",
+          "code" : "CLM_LINE_RPTD_GAP_DSCNT_AMT",
+          "display" : "Claim Line Reported Gap Discount Amount",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
     }, {
       "amount" : {
         "currency" : "USD",
-        "value" : 984.41
+        "value" : 2256829.86
       },
       "category" : {
         "coding" : [ {
-          "code" : "CLM_CMS_CALCD_MFTR_DSCNT_AMT",
-          "display" : "CMS Calculated Manufacturer Discount Amount",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-        } ]
-      }
-    }, {
-      "amount" : {
-        "currency" : "USD",
-        "value" : 38.99
-      },
-      "category" : {
-        "coding" : [ {
-          "code" : "CLM_LINE_REBT_PASSTHRU_POS_AMT",
-          "display" : "Rebate Passthrough POS Amount",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-        } ]
-      }
-    }, {
-      "amount" : {
-        "currency" : "USD",
-        "value" : 0.0
-      },
-      "category" : {
-        "coding" : [ {
-          "code" : "CLM_PHRMCY_PRICE_DSCNT_AT_POS_AMT",
-          "display" : "Pharmacy price discount",
+          "code" : "submitted",
+          "display" : "Submitted Amount",
+          "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+        }, {
+          "code" : "TOT_RX_CST_AMT",
+          "display" : "Total drug cost (Part D)",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
@@ -1212,6 +1136,22 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
       } ]
     }
+  }, {
+    "amount" : {
+      "currency" : "USD",
+      "value" : 2256829.86
+    },
+    "category" : {
+      "coding" : [ {
+        "code" : "submitted",
+        "display" : "Submitted Amount",
+        "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+      }, {
+        "code" : "TOT_RX_CST_AMT",
+        "display" : "Total drug cost (Part D)",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+      } ]
+    }
   } ],
   "type" : {
     "coding" : [ {
@@ -1466,7 +1406,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
     }, {
       "amount" : {
         "currency" : "USD",
-        "value" : 700865.05
+        "value" : 0.0
       },
       "category" : {
         "coding" : [ {
@@ -1498,7 +1438,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
     }, {
       "amount" : {
         "currency" : "USD",
-        "value" : 395.45
+        "value" : 0.0
       },
       "category" : {
         "coding" : [ {
@@ -1514,7 +1454,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
     }, {
       "amount" : {
         "currency" : "USD",
-        "value" : 299764.34
+        "value" : 0.0
       },
       "category" : {
         "coding" : [ {
@@ -1570,60 +1510,16 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
     }, {
       "amount" : {
         "currency" : "USD",
-        "value" : 481537.64
+        "value" : 1.55
       },
       "category" : {
         "coding" : [ {
-          "code" : "CLM_RPTD_MFTR_DSCNT_AMT",
-          "display" : "Gap Discount Amount",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-        } ]
-      }
-    }, {
-      "amount" : {
-        "currency" : "USD",
-        "value" : 734107.96
-      },
-      "category" : {
-        "coding" : [ {
-          "code" : "CLM_LINE_VCCN_ADMIN_FEE_AMT",
-          "display" : "Vaccination Administration Fee",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-        } ]
-      }
-    }, {
-      "amount" : {
-        "currency" : "USD",
-        "value" : 425733.04
-      },
-      "category" : {
-        "coding" : [ {
-          "code" : "CLM_LINE_TROOP_TOT_AMT",
-          "display" : "Other True Out Of Pocket Paid Amount",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-        } ]
-      }
-    }, {
-      "amount" : {
-        "currency" : "USD",
-        "value" : 781572.98
-      },
-      "category" : {
-        "coding" : [ {
-          "code" : "CLM_LINE_SRVC_CST_AMT",
-          "display" : "Dispensing Fee",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-        } ]
-      }
-    }, {
-      "amount" : {
-        "currency" : "USD",
-        "value" : 961456.57
-      },
-      "category" : {
-        "coding" : [ {
-          "code" : "CLM_LINE_SLS_TAX_AMT",
-          "display" : "Sales Tax Amount",
+          "code" : "submitted",
+          "display" : "Submitted Amount",
+          "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+        }, {
+          "code" : "CLM_LINE_SBMT_CHRG_AMT",
+          "display" : "Line Submitted Charge Amount",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
@@ -1654,18 +1550,6 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
     }, {
       "amount" : {
         "currency" : "USD",
-        "value" : 98470.06
-      },
-      "category" : {
-        "coding" : [ {
-          "code" : "CLM_LINE_INGRDNT_CST_AMT",
-          "display" : "Ingredient Cost Amount",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-        } ]
-      }
-    }, {
-      "amount" : {
-        "currency" : "USD",
         "value" : 9730.31
       },
       "category" : {
@@ -1690,48 +1574,28 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
     }, {
       "amount" : {
         "currency" : "USD",
-        "value" : 0.0
+        "value" : 897.55
       },
       "category" : {
         "coding" : [ {
-          "code" : "CLM_LINE_GRS_CVRD_CST_TOT_AMT",
-          "display" : "Claim Line Gross Covered Cost Amount",
+          "code" : "CLM_LINE_RPTD_GAP_DSCNT_AMT",
+          "display" : "Claim Line Reported Gap Discount Amount",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
     }, {
       "amount" : {
         "currency" : "USD",
-        "value" : 580.76
+        "value" : 2575607.57
       },
       "category" : {
         "coding" : [ {
-          "code" : "CLM_CMS_CALCD_MFTR_DSCNT_AMT",
-          "display" : "CMS Calculated Manufacturer Discount Amount",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-        } ]
-      }
-    }, {
-      "amount" : {
-        "currency" : "USD",
-        "value" : 0.0
-      },
-      "category" : {
-        "coding" : [ {
-          "code" : "CLM_LINE_REBT_PASSTHRU_POS_AMT",
-          "display" : "Rebate Passthrough POS Amount",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-        } ]
-      }
-    }, {
-      "amount" : {
-        "currency" : "USD",
-        "value" : 843.2
-      },
-      "category" : {
-        "coding" : [ {
-          "code" : "CLM_PHRMCY_PRICE_DSCNT_AT_POS_AMT",
-          "display" : "Pharmacy price discount",
+          "code" : "submitted",
+          "display" : "Submitted Amount",
+          "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+        }, {
+          "code" : "TOT_RX_CST_AMT",
+          "display" : "Total drug cost (Part D)",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
@@ -2389,6 +2253,22 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
       }, {
         "code" : "CLM_BENE_PMT_COINSRNC_AMT",
         "display" : "Beneficiary Coinsurance Amount",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+      } ]
+    }
+  }, {
+    "amount" : {
+      "currency" : "USD",
+      "value" : 2575607.57
+    },
+    "category" : {
+      "coding" : [ {
+        "code" : "submitted",
+        "display" : "Submitted Amount",
+        "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+      }, {
+        "code" : "TOT_RX_CST_AMT",
+        "display" : "Total drug cost (Part D)",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
       } ]
     }
