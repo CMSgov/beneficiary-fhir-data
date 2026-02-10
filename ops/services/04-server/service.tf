@@ -219,7 +219,7 @@ resource "aws_ecs_task_definition" "server" {
       },
       {
         name      = "adot-collector"
-        image     = "public.ecr.aws/aws-observability/aws-otel-collector:latest"
+        image     = "public.ecr.aws/aws-observability/aws-otel-collector:${local.adot_collector_image_tag}"
         essential = false
         environment = [
           {
