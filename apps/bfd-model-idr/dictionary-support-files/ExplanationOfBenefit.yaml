@@ -2510,6 +2510,7 @@
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_BENE_PD_AMT
   fhirPath: ExplanationOfBenefit.total.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication').exists() and category.coding.where(code='CLM_BENE_PD_AMT').exists() ).amount.value
+  notes: This refers to the processed field. This field may be populated for institutional processing claims, as it is the equivalent of CLM_MDCR_INSTNL_BENE_PD_AMT
 - inputPath: ExplanationOfBenefit-Base.CLM_RIC_CD
   appliesTo:
     - Inpatient
