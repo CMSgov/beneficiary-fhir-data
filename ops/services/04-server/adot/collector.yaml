@@ -3,10 +3,10 @@ extensions:
     cluster_name: ${cluster_name}
     refresh_interval: 60s
     cluster_region: ${region}
-    result_file: &resultFile /adot/ecs_sd_targets.yaml
+    result_file: &resultFile /home/aoc/ecs_sd_targets.yaml
     job_label_name: prometheus_job
     services:
-      - name_pattern: '^server$' #TODO consider templating with service?
+      - name_pattern: '^${service}$'
     docker_labels:
       - port_label: 'ECS_PROMETHEUS_EXPORTER_PORT'
 
@@ -140,8 +140,6 @@ exporters:
           - "^java_lang_OperatingSystem_(FreePhysicalMemorySize|TotalPhysicalMemorySize|FreeSwapSpaceSize|TotalSwapSpaceSize|SystemCpuLoad|ProcessCpuLoad|AvailableProcessors|OpenFileDescriptorCount)$"
           - "^java_lang_operatingsystem_(freephysicalmemorysize|totalphysicalmemorysize|freeswapspacesize|totalswapspacesize|systemcpuload|processcpuload|availableprocessors|openfiledescriptorcount)$"
           - "^jvm_gc_collection_seconds_(count|sum)$"
-    # sending_queue:
-    #   batch:
 
 service:
   extensions: [ ecs_observer ]
