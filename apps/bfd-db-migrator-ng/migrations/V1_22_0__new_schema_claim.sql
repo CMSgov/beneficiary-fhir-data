@@ -409,7 +409,7 @@ CREATE TABLE idr_new.claim_item_professional_nch
     clm_line_ndc_cd                character varying(11)    NOT NULL,
 --  Shared Systems   clm_line_ndc_qty               numeric,
 --  Shared Systems   clm_line_ndc_qty_qlfyr_cd      character varying(2)     NOT NULL,
---  Shared Systems   clm_line_srvc_unit_qty         numeric,
+    clm_line_srvc_unit_qty         numeric,
 --  INSTNL   clm_line_rev_ctr_cd            character varying(4)     NOT NULL,
     clm_line_rx_num                character varying(30)    NOT NULL,
     clm_line_thru_dt               date,

@@ -13,7 +13,7 @@ public class ClaimItemRx implements ClaimItemBase {
   @Embedded private ClaimLineRxNumber claimLineRxNum;
 
   @Override
-  public Optional<ClaimProcedure> getProcedure() {
+  public Optional<ClaimProcedureBase> getProcedure() {
     return Optional.empty();
   }
 

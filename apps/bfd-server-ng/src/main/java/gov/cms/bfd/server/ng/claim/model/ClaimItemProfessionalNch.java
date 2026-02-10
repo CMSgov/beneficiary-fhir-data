@@ -18,7 +18,7 @@ import lombok.Getter;
 public class ClaimItemProfessionalNch implements ClaimItemBase {
   @EmbeddedId private ClaimItemId claimItemId;
   @Embedded private ClaimLineProfessionalNch claimLine;
-  @Embedded private ClaimProcedure claimProcedure;
+  @Embedded private ClaimProcedureProfessional claimProcedure;
   @Embedded private ClaimLineRxNumber claimLineRxNum;
 
   @JoinColumn(name = "clm_uniq_id")
@@ -26,7 +26,7 @@ public class ClaimItemProfessionalNch implements ClaimItemBase {
   private ClaimProfessionalNch claim;
 
   @Override
-  public Optional<ClaimProcedure> getProcedure() {
+  public Optional<ClaimProcedureBase> getProcedure() {
     return Optional.of(claimProcedure);
   }
 

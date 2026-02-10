@@ -27,7 +27,7 @@ public class ClaimItemInstitutionalSharedSystems implements ClaimItemBase {
   private ClaimInstitutionalSharedSystems claim;
 
   @Override
-  public Optional<ClaimProcedure> getProcedure() {
+  public Optional<ClaimProcedureBase> getProcedure() {
     return Optional.of(claimProcedure);
   }
 

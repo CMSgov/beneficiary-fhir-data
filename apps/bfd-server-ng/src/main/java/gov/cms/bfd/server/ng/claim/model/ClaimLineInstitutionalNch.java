@@ -35,9 +35,11 @@ public class ClaimLineInstitutionalNch extends ClaimLineInstitutionalBase {
   private Optional<LocalDate> fromDate;
 
   @Embedded private ClaimLineHcpcsCode hcpcsCode;
+  @Embedded private ClaimLineServiceUnitQuantity serviceUnitQuantity;
   @Embedded private ClaimLineHcpcsModifierCode hcpcsModifierCode;
   @Embedded private ClaimLineAdjudicationChargeInstitutionalNch adjudicationCharge;
   @Embedded private ClaimAnsiSignatureInfo ansiSignature;
+  @Embedded private ClaimLineNdc ndc;
 
   Optional<ExplanationOfBenefit.ItemComponent> toFhirItemComponent() {
     if (claimLineNumber.isEmpty()) {
@@ -64,6 +66,17 @@ public class ClaimLineInstitutionalNch extends ClaimLineInstitutionalBase {
     fromDate.map(d -> line.setServiced(new DateType(DateUtil.toDate(d))));
 
     adjudicationCharge.toFhir().forEach(line::addAdjudication);
+
+    var quantity = serviceUnitQuantity.toFhir();
+
+    if (productOrService.isEmpty()) {
+      ndc.toFhirCoding().ifPresent(productOrService::addCoding);
+      ndc.getQualifier().ifPresent(quantity::setUnit);
+    }
+
+    line.setProductOrService(FhirUtil.checkDataAbsent(productOrService));
+    ndc.toFhirDetail().ifPresent(line::addDetail);
+    line.setQuantity(serviceUnitQuantity.toFhir());
 
     ansiSignature.toFhir().ifPresent(line::addAdjudication);
 

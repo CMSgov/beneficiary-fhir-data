@@ -60,7 +60,7 @@ public class ClaimLineInstitutionalSharedSystems extends ClaimLineInstitutionalB
 
     line.setProductOrService(FhirUtil.checkDataAbsent(productOrService));
     ndc.toFhirDetail().ifPresent(line::addDetail);
-    line.setQuantity(quantity);
+    line.setQuantity(serviceUnitQuantity.toFhir());
 
     revenueCenterCode.ifPresent(
         c -> {

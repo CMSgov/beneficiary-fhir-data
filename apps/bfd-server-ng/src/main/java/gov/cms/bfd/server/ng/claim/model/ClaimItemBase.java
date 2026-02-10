@@ -18,7 +18,7 @@ public interface ClaimItemBase extends Comparable<ClaimItemBase> {
    *
    * @return the claim procedure,
    */
-  Optional<ClaimProcedure> getProcedure();
+  Optional<ClaimProcedureBase> getProcedure();
 
   /**
    * Returns the HCPCS code for this claim line, if present.
