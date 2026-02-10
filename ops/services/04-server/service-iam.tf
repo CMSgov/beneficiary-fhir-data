@@ -65,7 +65,7 @@ data "aws_iam_policy_document" "logs" {
     resources = [
       "${aws_cloudwatch_log_group.server_access.arn}:log-stream:*",
       "${aws_cloudwatch_log_group.server_messages.arn}:log-stream:*",
-      "${aws_cloudwatch_log_group.adot_metrics.arn}:*"
+      "${aws_cloudwatch_log_group.adot_metrics.arn}:log-stream:*"
     ]
   }
 }
@@ -93,16 +93,79 @@ data "aws_iam_policy_document" "ssm_params" {
 }
 
 data "aws_iam_policy_document" "adot" {
+
+  #
+  # Cluster-level visibility
+  #
   statement {
+    sid = "EcsClusterRead"
+
     actions = [
       "ecs:ListTasks",
-      "ecs:DescribeTasks",
       "ecs:DescribeContainerInstances",
+    ]
+
+    resources = ["*"]
+
+    condition {
+      test     = "ArnEquals"
+      variable = "ecs:cluster"
+      values   = [data.aws_ecs_cluster.main.arn]
+    }
+  }
+
+  #
+  # Service-level visibility
+  #
+  statement {
+    sid = "EcsServiceRead"
+
+    actions = [
       "ecs:DescribeServices",
       "ecs:ListServices",
+    ]
+
+    resources = ["*"]
+
+    condition {
+      test     = "ArnEquals"
+      variable = "ecs:cluster"
+      values   = [data.aws_ecs_cluster.main.arn]
+    }
+  }
+
+  #
+  # Task-level visibility
+  #
+  statement {
+    sid = "EcsTaskRead"
+
+    actions = [
+      "ecs:DescribeTasks",
+    ]
+
+    resources = ["*"]
+
+    condition {
+      test     = "ArnEquals"
+      variable = "ecs:cluster"
+      values   = [data.aws_ecs_cluster.main.arn]
+    }
+  }
+
+  #
+  # Task definition visibility
+  #
+  statement {
+    sid = "EcsTaskDefinitionRead"
+
+    actions = [
       "ecs:DescribeTaskDefinition",
     ]
-    resources = ["*"]
+
+    resources = [
+      aws_ecs_task_definition.server.arn
+    ]
   }
 }
 

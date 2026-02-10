@@ -28,10 +28,6 @@ locals {
   server_healthcheck_pem_path = "/data/healthcheck.pem"
   server_healthcheck_bene_id  = nonsensitive(local.ssm_config["/bfd/${local.service}/heathcheck/testing_bene_id"])
   server_healthcheck_uri      = "https://localhost:${local.server_port}/v2/fhir/ExplanationOfBenefit/?_format=application%2Ffhir%2Bjson&patient=${local.server_healthcheck_bene_id}"
-
-  // variables for ADOT specifically - might need to distill these down and consolidate with what was already in here:
-  full_name = "bfd-${local.env}-${local.service}"
-  subnets   = module.terraservice.subnets_map["private"]
 }
 
 data "aws_rds_cluster" "main" {
@@ -221,6 +217,14 @@ resource "aws_ecs_task_definition" "server" {
         name      = "adot-collector"
         image     = "public.ecr.aws/aws-observability/aws-otel-collector:${local.adot_collector_image_tag}"
         essential = false
+
+        dependsOn = [
+          {
+            containerName = local.service
+            condition     = "HEALTHY"
+          }
+        ]
+
         environment = [
           {
             name = "ADOT_CONFIG"
@@ -235,6 +239,7 @@ resource "aws_ecs_task_definition" "server" {
             })
           }
         ]
+
         command                = ["--config=env:ADOT_CONFIG"]
         readonlyRootFilesystem = true
 
