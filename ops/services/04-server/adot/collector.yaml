@@ -3,7 +3,7 @@ extensions:
     cluster_name: ${cluster_name}
     refresh_interval: 60s
     cluster_region: ${region}
-    result_file: &resultFile /service-discovery/ecs_sd_targets.yaml
+    result_file: &resultFile /adot/ecs_sd_targets.yaml
     job_label_name: prometheus_job
     services:
       - name_pattern: '^server$' #TODO consider templating with service?

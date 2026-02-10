@@ -129,6 +129,11 @@ resource "aws_ecs_task_definition" "server" {
   }
 
   volume {
+    configure_at_launch = true
+    name                = "adot"
+  }
+
+  volume {
     configure_at_launch = false
     name                = "certstores"
   }
@@ -234,6 +239,14 @@ resource "aws_ecs_task_definition" "server" {
         ]
         command = [
           "--config=env:ADOT_CONFIG"
+        ]
+
+        mountPoints = [
+          {
+            containerPath = "/adot"
+            readOnly      = false
+            sourceVolume  = "adot"
+          }
         ]
 
         logConfiguration = {
