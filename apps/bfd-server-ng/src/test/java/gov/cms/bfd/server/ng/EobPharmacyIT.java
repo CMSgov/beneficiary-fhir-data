@@ -5,10 +5,12 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.gclient.IReadTyped;
 import gov.cms.bfd.server.ng.eob.EobResourceProvider;
 import gov.cms.bfd.server.ng.testUtil.ThreadSafeAsyncAppender;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.Set;
 import org.hl7.fhir.r4.model.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -123,6 +125,33 @@ class EobPharmacyIT extends IntegrationTestBase {
     assertTrue(partDInsurance.isPresent());
     var insuranceExtensions = partDInsurance.get().getExtension();
     assertTrue(insuranceExtensions.isEmpty());
+
+    // Check for removed financial fields
+    var ctx = FhirContext.forR4Cached();
+    var adjudicationElements =
+        ctx.newTerser()
+            .getAllPopulatedChildElementsOfType(
+                eob, ExplanationOfBenefit.AdjudicationComponent.class);
+    var tempRemovedFinancialFields =
+        Set.of(
+            "CLM_LINE_INGRDNT_CST_AMT",
+            "CLM_LINE_SRVC_CST_AMT",
+            "CLM_LINE_SLS_TAX_AMT",
+            "CLM_LINE_VCCN_ADMIN_FEE_AMT",
+            "CLM_LINE_GRS_CVRD_CST_TOT_AMT",
+            "CLM_LINE_REBT_PASSTHRU_POS_AMT",
+            "CLM_PHRMCY_PRICE_DSCNT_AT_POS_AMT",
+            "CLM_CMS_CALCD_MFTR_DSCNT_AMT",
+            "CLM_RPTD_MFTR_DSCNT_AMT",
+            "CLM_LINE_TROOP_TOT_AMT");
+
+    for (ExplanationOfBenefit.AdjudicationComponent adjudicationElement : adjudicationElements) {
+      for (var coding : adjudicationElement.getCategory().getCoding()) {
+        assertFalse(
+            tempRemovedFinancialFields.contains(coding.getCode()),
+            "Adjudication field " + coding.getCode() + " should not be present");
+      }
+    }
   }
 
   @Test

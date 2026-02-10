@@ -40,8 +40,11 @@ public class Address {
    * @return FHIR address
    */
   public Optional<org.hl7.fhir.r4.model.Address> toFhir() {
-    // This is a no-op currently since we don't have approval to share address data.
-    // We should either remove or add these mappings later when a final decision is made.
-    return Optional.empty();
+    var fhirAddress = new org.hl7.fhir.r4.model.Address();
+
+    stateCode.ifPresent(fhirAddress::setState);
+    zipCode.ifPresent(fhirAddress::setPostalCode);
+
+    return fhirAddress.isEmpty() ? Optional.empty() : Optional.of(fhirAddress);
   }
 }
