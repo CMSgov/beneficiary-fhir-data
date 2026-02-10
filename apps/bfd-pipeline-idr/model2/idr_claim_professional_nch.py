@@ -14,20 +14,12 @@ from loader import LoadMode
 from model import (
     ALIAS,
     ALIAS_CLM,
-    ALIAS_CLM_GRP,
     ALIAS_DCMTN,
-    ALIAS_LINE,
-    ALIAS_LINE_DCMTN,
-    ALIAS_LINE_MCS,
-    ALIAS_LINE_PRFNL,
     ALIAS_PRFNL,
-    ALIAS_PROCEDURE,
     ALIAS_PRVDR_BLG,
     ALIAS_PRVDR_RFRG,
-    ALIAS_PRVDR_RNDRNG,
     ALIAS_PRVDR_SRVC,
     ALIAS_SGNTR,
-    ALIAS_VAL,
     BATCH_ID,
     BATCH_TIMESTAMP,
     COLUMN_MAP,
@@ -38,8 +30,7 @@ from model import (
     PRIMARY_KEY,
     UPDATE_TIMESTAMP,
     IdrBaseModel,
-    _claim_filter,
-    get_min_transaction_date,
+    claim_filter,
     provider_last_name_expr,
     transform_default_date_to_null,
     transform_default_int_to_null,
@@ -379,7 +370,7 @@ class IdrClaimProfessionalNch(IdrBaseModel):
             LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_prvdr_hstry {prvdr_srvc}
                 ON {prvdr_srvc}.prvdr_npi_num = {clm}.prvdr_srvc_prvdr_npi_num
                 AND {prvdr_srvc}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
-            {{WHERE_CLAUSE}} AND {_claim_filter(start_time, partition)}
+            {{WHERE_CLAUSE}} AND {claim_filter(start_time, partition)}
             {{ORDER_BY}}
         """
 

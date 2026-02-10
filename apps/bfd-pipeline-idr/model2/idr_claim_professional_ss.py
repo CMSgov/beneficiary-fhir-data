@@ -5,10 +5,7 @@ from typing import Annotated
 from pydantic import BeforeValidator
 
 from constants import (
-    CLAIM_PROFESSIONAL_NCH_TABLE,
     CLAIM_PROFESSIONAL_SS_TABLE,
-    DEFAULT_MAX_DATE,
-    PROFESSIONAL_ADJUDICATED_PARTITIONS,
     PROFESSIONAL_PAC_PARTITIONS,
 )
 from load_partition import LoadPartition, LoadPartitionGroup
@@ -16,21 +13,10 @@ from loader import LoadMode
 from model import (
     ALIAS,
     ALIAS_CLM,
-    ALIAS_CLM_GRP,
     ALIAS_DCMTN,
     ALIAS_LCTN_HSTRY,
-    ALIAS_LINE,
-    ALIAS_LINE_DCMTN,
-    ALIAS_LINE_MCS,
-    ALIAS_LINE_PRFNL,
     ALIAS_PRFNL,
-    ALIAS_PROCEDURE,
-    ALIAS_PRVDR_BLG,
-    ALIAS_PRVDR_RFRG,
-    ALIAS_PRVDR_RNDRNG,
-    ALIAS_PRVDR_SRVC,
     ALIAS_SGNTR,
-    ALIAS_VAL,
     BATCH_ID,
     BATCH_TIMESTAMP,
     COLUMN_MAP,
@@ -41,15 +27,11 @@ from model import (
     PRIMARY_KEY,
     UPDATE_TIMESTAMP,
     IdrBaseModel,
-    _claim_filter,
-    get_min_transaction_date,
-    provider_last_name_expr,
+    claim_filter,
     transform_default_date_to_null,
-    transform_default_int_to_null,
     transform_default_string,
     transform_null_date_to_min,
     transform_null_string,
-    transform_provider_name,
 )
 
 
@@ -391,9 +373,6 @@ class IdrClaimProfessionalSs(IdrBaseModel):
         prfnl = ALIAS_PRFNL
         dcmtn = ALIAS_DCMTN
         lctn_hstry = ALIAS_LCTN_HSTRY
-        prvdr_blg = ALIAS_PRVDR_BLG
-        prvdr_rfrg = ALIAS_PRVDR_RFRG
-        prvdr_srvc = ALIAS_PRVDR_SRVC
         return f"""
             WITH claims AS (
                 SELECT
@@ -404,7 +383,7 @@ class IdrClaimProfessionalSs(IdrBaseModel):
                     {clm}.clm_dt_sgntr_sk,
                     {clm}.clm_idr_ld_dt
                 FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
-                WHERE {_claim_filter(start_time, partition)}
+                WHERE {claim_filter(start_time, partition)}
             ),
             latest_clm_lctn_hstry AS (
                 SELECT
@@ -450,7 +429,7 @@ class IdrClaimProfessionalSs(IdrBaseModel):
                 {clm}.clm_dt_sgntr_sk = {lctn_hstry}.clm_dt_sgntr_sk AND
                 {clm}.clm_num_sk = {lctn_hstry}.clm_num_sk AND
                 {lctn_hstry}.clm_lctn_cd_sqnc_num = latest_lctn.max_clm_lctn_cd_sqnc_num
-            {{WHERE_CLAUSE}} AND {_claim_filter(start_time, partition)}
+            {{WHERE_CLAUSE}} AND {claim_filter(start_time, partition)}
             {{ORDER_BY}}
         """
 

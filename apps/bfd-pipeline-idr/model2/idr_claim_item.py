@@ -6,10 +6,7 @@ from pydantic import BeforeValidator
 
 from constants import (
     ALL_CLAIM_PARTITIONS,
-    CLAIM_PROFESSIONAL_NCH_TABLE,
     CLAIM_TABLE,
-    DEFAULT_MAX_DATE,
-    PROFESSIONAL_ADJUDICATED_PARTITIONS,
 )
 from load_partition import LoadPartition, LoadPartitionGroup
 from loader import LoadMode
@@ -17,43 +14,28 @@ from model import (
     ALIAS,
     ALIAS_CLM,
     ALIAS_CLM_GRP,
-    ALIAS_DCMTN,
     ALIAS_LINE,
     ALIAS_LINE_DCMTN,
-    ALIAS_LINE_MCS,
-    ALIAS_LINE_PRFNL,
-    ALIAS_PRFNL,
     ALIAS_PROCEDURE,
-    ALIAS_PRVDR_BLG,
-    ALIAS_PRVDR_RFRG,
-    ALIAS_PRVDR_RNDRNG,
-    ALIAS_PRVDR_SRVC,
     ALIAS_RLT_COND,
-    ALIAS_SGNTR,
     ALIAS_VAL,
     BATCH_ID,
     BATCH_TIMESTAMP,
     COLUMN_MAP,
-    EXPR,
     HISTORICAL_BATCH_TIMESTAMP,
     INSERT_EXCLUDE,
     LAST_UPDATED_TIMESTAMP,
     PRIMARY_KEY,
     UPDATE_TIMESTAMP,
     IdrBaseModel,
-    _claim_filter,
+    claim_filter,
     get_min_transaction_date,
-    provider_last_name_expr,
-    transform_default_and_zero_string,
-    transform_default_date_to_null,
-    transform_default_int_to_null,
     transform_default_string,
     transform_null_date_to_max,
     transform_null_date_to_min,
     transform_null_float,
     transform_null_int,
     transform_null_string,
-    transform_provider_name,
 )
 
 
@@ -285,7 +267,7 @@ class IdrClaimItem(IdrBaseModel):
                         {clm}.clm_idr_ld_dt
                     FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
                     WHERE
-                        {_claim_filter(start_time, partition)} AND
+                        {claim_filter(start_time, partition)} AND
                         {clm}.clm_idr_ld_dt >= '{get_min_transaction_date()}'
                 ),
                 claim_lines AS {not_materialized} (

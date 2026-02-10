@@ -5,10 +5,8 @@ from typing import Annotated
 from pydantic import BeforeValidator
 
 from constants import (
-    CLAIM_PROFESSIONAL_NCH_TABLE,
     CLAIM_PROFESSIONAL_SS_TABLE,
     DEFAULT_MAX_DATE,
-    PROFESSIONAL_ADJUDICATED_PARTITIONS,
     PROFESSIONAL_PAC_PARTITIONS,
 )
 from load_partition import LoadPartition, LoadPartitionGroup
@@ -33,7 +31,7 @@ from model import (
     PRIMARY_KEY,
     UPDATE_TIMESTAMP,
     IdrBaseModel,
-    _claim_filter,
+    claim_filter,
     get_min_transaction_date,
     transform_default_date_to_null,
     transform_default_int_to_null,
@@ -381,7 +379,7 @@ class IdrClaimItemProfessionalSs(IdrBaseModel):
                         {clm}.clm_idr_ld_dt
                     FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
                     WHERE
-                        {_claim_filter(start_time, partition)} AND
+                        {claim_filter(start_time, partition)} AND
                         {clm}.clm_idr_ld_dt >= '{get_min_transaction_date()}'
                 ),
                 claim_lines AS {not_materialized} (

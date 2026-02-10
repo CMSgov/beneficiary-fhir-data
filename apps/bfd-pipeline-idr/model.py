@@ -10,23 +10,15 @@ from constants import (
     ALL_CLAIM_TYPE_CODES,
     ALTERNATE_DEFAULT_DATE,
     BENEFICIARY_TABLE,
-    CLAIM_RX_TABLE,
-    CLAIM_TABLE,
-    COMBINED_CLAIM_PARTITION,
     DEATH_DATE_CUTOFF_YEARS,
     DEFAULT_MAX_DATE,
     DEFAULT_MIN_DATE,
-    INSTITUTIONAL_ADJUDICATED_PARTITIONS,
-    INSTITUTIONAL_PAC_PARTITIONS,
     MIN_CLAIM_LOAD_DATE,
     NON_CLAIM_PARTITION,
     PART_D_CLAIM_TYPE_CODES,
-    PART_D_PARTITIONS,
-    PROFESSIONAL_ADJUDICATED_PARTITIONS,
-    PROFESSIONAL_PAC_PARTITIONS,
 )
 from load_partition import LoadPartition, LoadPartitionGroup, PartitionType
-from settings import ENABLE_PARTITIONS, LATEST_CLAIMS, MIN_TRANSACTION_DATE
+from settings import LATEST_CLAIMS, MIN_TRANSACTION_DATE
 
 type DbType = str | float | int | bool | date | datetime
 
@@ -1144,7 +1136,7 @@ class IdrBeneficiaryLowIncomeSubsidy(IdrBaseModel):
         return [NON_CLAIM_PARTITION]
 
 
-def _claim_filter(start_time: datetime, partition: LoadPartition) -> str:
+def claim_filter(start_time: datetime, partition: LoadPartition) -> str:
     clm = ALIAS_CLM
     # For part D, we want ALL the claims
     # For other claim types, we can filter only latest claims if LATEST_CLAIMS is enabled

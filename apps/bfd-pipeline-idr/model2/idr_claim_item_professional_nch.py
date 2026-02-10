@@ -17,7 +17,6 @@ from model import (
     ALIAS_CLM_GRP,
     ALIAS_LINE,
     ALIAS_LINE_DCMTN,
-    ALIAS_LINE_MCS,
     ALIAS_LINE_PRFNL,
     ALIAS_PROCEDURE,
     ALIAS_PRVDR_RNDRNG,
@@ -31,7 +30,7 @@ from model import (
     PRIMARY_KEY,
     UPDATE_TIMESTAMP,
     IdrBaseModel,
-    _claim_filter,
+    claim_filter,
     get_min_transaction_date,
     transform_default_date_to_null,
     transform_default_int_to_null,
@@ -329,7 +328,6 @@ class IdrClaimItemProfessionalNch(IdrBaseModel):
         line = ALIAS_LINE
         val = ALIAS_VAL
         line_dcmtn = ALIAS_LINE_DCMTN
-        line_mcs = ALIAS_LINE_MCS
         line_prfnl = ALIAS_LINE_PRFNL
         prvdr_rndrng = ALIAS_PRVDR_RNDRNG
         # This query is taking all the values for CLM_PROD, CLM_LINE, and CLM_VAL and storing
@@ -374,7 +372,7 @@ class IdrClaimItemProfessionalNch(IdrBaseModel):
                         {clm}.clm_idr_ld_dt
                     FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
                     WHERE
-                        {_claim_filter(start_time, partition)} AND
+                        {claim_filter(start_time, partition)} AND
                         {clm}.clm_idr_ld_dt >= '{get_min_transaction_date()}'
                 ),
                 claim_lines AS {not_materialized} (

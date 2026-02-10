@@ -5,39 +5,21 @@ from typing import Annotated
 from pydantic import BeforeValidator
 
 from constants import (
-    ALL_CLAIM_PARTITIONS,
-    CLAIM_PROFESSIONAL_NCH_TABLE,
     CLAIM_RX_TABLE,
-    CLAIM_TABLE,
     DEFAULT_MAX_DATE,
-    INSTITUTIONAL_ADJUDICATED_PARTITIONS,
-    INSTITUTIONAL_PAC_PARTITIONS,
     PART_D_PARTITIONS,
-    PROFESSIONAL_ADJUDICATED_PARTITIONS,
 )
 from load_partition import LoadPartition, LoadPartitionGroup
 from loader import LoadMode
 from model import (
     ALIAS,
     ALIAS_CLM,
-    ALIAS_CLM_GRP,
-    ALIAS_DCMTN,
-    ALIAS_INSTNL,
     ALIAS_LINE,
-    ALIAS_LINE_DCMTN,
-    ALIAS_LINE_MCS,
-    ALIAS_LINE_PRFNL,
     ALIAS_PBP_NUM,
-    ALIAS_PRFNL,
-    ALIAS_PROCEDURE,
-    ALIAS_PRVDR_BLG,
     ALIAS_PRVDR_PRSCRBNG,
-    ALIAS_PRVDR_RFRG,
-    ALIAS_PRVDR_RNDRNG,
     ALIAS_PRVDR_SRVC,
     ALIAS_RX_LINE,
     ALIAS_SGNTR,
-    ALIAS_VAL,
     BATCH_ID,
     BATCH_TIMESTAMP,
     COLUMN_MAP,
@@ -48,17 +30,12 @@ from model import (
     PRIMARY_KEY,
     UPDATE_TIMESTAMP,
     IdrBaseModel,
-    _claim_filter,
-    get_min_transaction_date,
+    claim_filter,
     provider_last_name_expr,
-    transform_default_and_zero_string,
     transform_default_date_to_null,
     transform_default_int_to_null,
     transform_default_string,
-    transform_null_date_to_max,
     transform_null_date_to_min,
-    transform_null_float,
-    transform_null_int,
     transform_null_string,
     transform_provider_name,
 )
@@ -408,7 +385,7 @@ class IdrClaimRx(IdrBaseModel):
                 ON {pbp_num}.cntrct_num = {clm}.clm_sbmtr_cntrct_num
                 AND {pbp_num}.cntrct_pbp_num = {clm}.clm_sbmtr_cntrct_pbp_num
                 AND {pbp_num}.contract_version_rank = 1
-            {{WHERE_CLAUSE}} AND {_claim_filter(start_time, partition)}
+            {{WHERE_CLAUSE}} AND {claim_filter(start_time, partition)}
             {{ORDER_BY}}
         """
 
