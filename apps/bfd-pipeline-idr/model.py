@@ -293,13 +293,13 @@ class IdrBaseModel(BaseModel, ABC):
 T = TypeVar("T", bound=IdrBaseModel)
 
 
-def _deceased_bene_filter(alias: str, start_time) -> str:
+def _deceased_bene_filter(alias: str, start_time: datetime) -> str:
     return f"""
             SELECT bene_sk
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry {alias}
             WHERE {alias}.bene_vrfy_death_day_sw = 'Y'
             AND {alias}.bene_death_dt < TIMESTAMP '{start_time}' - INTERVAL '{DEATH_DATE_CUTOFF_YEARS} years'
-    """
+    """  # noqa: E501
 
 
 def _idr_dates_from_meta_sk() -> str:

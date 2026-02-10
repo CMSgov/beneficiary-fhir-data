@@ -1,5 +1,5 @@
-from os import getenv
 import datetime
+from os import getenv
 
 ENABLE_PARTITIONS = getenv("IDR_ENABLE_PARTITIONS", "1").lower() not in ("0", "false")
 MIN_TRANSACTION_DATE = getenv("IDR_MIN_TRANSACTION_DATE")
