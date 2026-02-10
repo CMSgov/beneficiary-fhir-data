@@ -49,23 +49,27 @@ uv sync
 ### Compile FSH Resources
 
 To compile the .fsh files from this folder
+
 ```sh
 cd sushi && sushi build && cd ..
 ```
 
-This will generate the StructureDefinition and CodeSystem resources necessary for synthetic data generation. Running compile_resources.py is not necessary to generate synthetic data. 
+This will generate the StructureDefinition and CodeSystem resources necessary for synthetic data generation. Running compile_resources.py is not necessary to generate synthetic data.
 
 ### Get Matchbox up and running
-To reduce dependencies on tx.fhir.org as well as improve the speed of validation, we use matchbox to run a local FHIR server. Read more about matchbox at https://ahdis.github.io/matchbox/
+
+To reduce dependencies on tx.fhir.org as well as improve the speed of validation, we use matchbox to run a local FHIR server. Read more about matchbox at <https://ahdis.github.io/matchbox/>
 
 Note: Matchbox uses a significant amount of memory. Allocating at least 8GB of RAM is recommended, and more may be necessary in the future.
 
-To start matchbox, run 
+To start matchbox, run
 
 ```sh
 docker compose up -d
 ```
+
 Note, it takes several minutes and requires a good bit of RAM. It'll be ready once it says that packages have been loaded and some obviously untrue amount of RAM (generally half of what it actually used) was used. Additionally, one can check the logs for "Finished engines during startup" or running a health check using
+
 ```sh
 curl -X GET "http://localhost:8080/matchboxv3/actuator/health"
 ```
@@ -209,6 +213,29 @@ Options:
 
 To generate synthetic claims data, the `claims_generator.py` script is used.
 
+The synthetic claims data generated will be written to the `./out` folder in the form of CSVs, one per-table:
+
+- `SYNTHETIC_CLM.csv`
+- `SYNTHETIC_CLM_RLT_COND_SGNTR_MBR.csv`
+  - This file contains an extra column, `CLM_UNIQ_ID`, that is purely metadata used by the synthetic claims generator and is not consumed by the IDR Pipeline
+- `SYNTHETIC_CLM_LINE.csv`
+- `SYNTHETIC_CLM_LINE_RX.csv`
+- `SYNTHETIC_CLM_VAL.csv`
+- `SYNTHETIC_CLM_DT_SGNTR.csv`
+- `SYNTHETIC_CLM_PROD.csv`
+- `SYNTHETIC_CLM_INSTNL.csv`
+- `SYNTHETIC_CLM_LINE_INSTNL.csv`
+- `SYNTHETIC_CLM_DCMTN.csv`
+- `SYNTHETIC_CLM_FISS.csv`
+- `SYNTHETIC_CLM_PRFNL.csv`
+- `SYNTHETIC_CLM_LINE_PRFNL.csv`
+- `SYNTHETIC_CLM_ANSI_SGNTR.csv`
+- `SYNTHETIC_PRVDR_HSTRY.csv`
+- `SYNTHETIC_CNTRCT_PBP_NUM.csv`
+- `SYNTHETIC_CNTRCT_PBP_CNTCT.csv`
+
+These files represent the schema of the tables the information is sourced from, although for tables other than `CLM_DT_SGNTR`, the `CLM_UNIQ_ID` is propagated instead of the 5 part unique key from the IDR.
+
 ##### Using `SYNTHETIC_BENE_HSTRY.csv`
 
 The below will generate _entirely new claims_ for the given `BENE_SK`s in the provided file:
@@ -238,26 +265,10 @@ If _any_ claims-related tables have had columns added to their respective genera
 
 `--sushi` is not strictly needed, if you have a local copy of the compiled shorthand files, but recommended to reduce drift. To specify a list of benes, pass in a .csv file containing a column named `BENE_SK`.
 
-The files output will be in the `./out` folder, there are several files:
-
-- `SYNTHETIC_CLM.csv`
-- `SYNTHETIC_CLM_LINE.csv`
-- `SYNTHETIC_CLM_VAL.csv`
-- `SYNTHETIC_CLM_DT_SGNTR.csv`
-- `SYNTHETIC_CLM_PROD.csv`
-- `SYNTHETIC_CLM_INSTNL.csv`
-- `SYNTHETIC_CLM_LINE_INSTNL.csv`
-- `SYNTHETIC_CLM_DCMTN.csv`
-- `SYNTHETIC_CLM_FISS.csv`
-- `SYNTHETIC_CLM_PRFNL.csv`
-- `SYNTHETIC_CLM_LINE_PRFNL.csv`
-- `SYNTHETIC_CLM_ANSI_SGNTR.csv`
-
-These files represent the schema of the tables the information is sourced from, although for tables other than `CLM_DT_SGNTR`, the `CLM_UNIQ_ID` is propagated instead of the 5 part unique key from the IDR.
-
 ## Testing Mapping Changes
 
 ### Verifying FML Map Changes
+
 To test updates to your FML map files, run `compile_resources.py` to generate a resource in the `out/` directory and verify the output:
 
 ```sh
@@ -268,7 +279,9 @@ uv run compile_resources.py \
     -r https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Base \
     --test
 ```
+
 ### Updating Structure Definitions
+
 If you add or move a field, you must update the input sample file and the corresponding Structure Definition file (e.g., defining CLM_AUDT_TRL_STUS_CD within the elements of ExplanationOfBenefit-Base.json).
 Example element definition:
 
@@ -284,6 +297,7 @@ Example element definition:
 ```
 
 ### Resource Augmentation
+
 Due to FML limitations, some complex mappings that require more than simple lookups are handled via augment_sample_resources.py.
 For example, CLM_AUDT_TRL_STUS_CD on an EOB is derived by combining the status code, location code (CLM_AUDT_TRL_LCTN_CD), and source (META_SRC_SK). The augmentation script resolves these fields into the claim status code.
 To test augmentation logic independently:
@@ -292,7 +306,8 @@ To test augmentation logic independently:
 python augment_sample_resources.py {your_sample_file}.json
 ```
 
-*Note: The uv run compile_resources.py command mentioned above also executes this script. You can inspect the output at out/temporary-sample.json and the compiled resource.*
+> [!NOTE]
+> The `uv run compile_resources.py` command mentioned above also executes this script. You can inspect the output at out/temporary-sample.json and the compiled resource.
 
 ## Data Dictionary
 
