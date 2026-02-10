@@ -1,4 +1,3 @@
-import datetime
 from os import getenv
 
 ENABLE_PARTITIONS = getenv("IDR_ENABLE_PARTITIONS", "1").lower() not in ("0", "false")
@@ -41,5 +40,5 @@ def bfd_db_password() -> str:
     return getenv("BFD_DB_PASSWORD", "")
 
 
-def bfd_test_date() -> datetime:
+def bfd_test_date() -> str:
     return getenv("BFD_TEST_DATE")
