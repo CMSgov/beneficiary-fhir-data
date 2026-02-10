@@ -41,4 +41,4 @@ def bfd_db_password() -> str:
 
 
 def bfd_test_date() -> str:
-    return getenv("BFD_TEST_DATE")
+    return getenv("BFD_TEST_DATE", "")
