@@ -92,6 +92,27 @@ data "aws_iam_policy_document" "ssm_params" {
   }
 }
 
+data "aws_iam_policy_document" "adot" {
+  statement {
+    actions   = [
+      "ecs:ListTasks",
+      "ecs:DescribeTasks",
+      "ecs:DescribeContainerInstances",
+      "ecs:DescribeServices",
+      "ecs:ListServices",
+      "ecs:DescribeTaskDefinition",
+      ]
+    resources = ["*"]
+  }
+}
+
+resource "aws_iam_policy" "adot" {
+  name        = "${local.name_prefix}-adot-policy"
+  path        = local.iam_path
+  description = "Permissions for AWS ADOT to access ECS task information for telemetry"
+  policy      = data.aws_iam_policy_document.adot.json
+}
+
 resource "aws_iam_policy" "ssm_params" {
   name        = "${local.name_prefix}-ssm-params-policy"
   path        = local.iam_path
@@ -125,6 +146,7 @@ resource "aws_iam_role_policy_attachment" "service_role" {
     rds           = aws_iam_policy.rds.arn
     logs          = aws_iam_policy.logs.arn
     ssm_params    = aws_iam_policy.ssm_params.arn
+    adot          = aws_iam_policy.adot.arn
   }
 
   role       = aws_iam_role.service_role.name
