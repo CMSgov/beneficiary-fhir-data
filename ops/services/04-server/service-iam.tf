@@ -94,14 +94,14 @@ data "aws_iam_policy_document" "ssm_params" {
 
 data "aws_iam_policy_document" "adot" {
   statement {
-    actions   = [
+    actions = [
       "ecs:ListTasks",
       "ecs:DescribeTasks",
       "ecs:DescribeContainerInstances",
       "ecs:DescribeServices",
       "ecs:ListServices",
       "ecs:DescribeTaskDefinition",
-      ]
+    ]
     resources = ["*"]
   }
 }
