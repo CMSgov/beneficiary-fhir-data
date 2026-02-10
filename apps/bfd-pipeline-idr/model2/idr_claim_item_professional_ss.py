@@ -53,7 +53,6 @@ class IdrClaimItemProfessionalSs(IdrBaseModel):
     clm_line_num: Annotated[int | None, {ALIAS: ALIAS_LINE}]
     clm_line_sbmt_chrg_amt: Annotated[float | None, {ALIAS: ALIAS_LINE}]
     clm_line_alowd_chrg_amt: Annotated[float | None, {ALIAS: ALIAS_LINE}]
-    clm_line_ansthsa_unit_cnt: Annotated[float | None, {ALIAS: ALIAS_LINE}]
     clm_line_prvdr_pmt_amt: Annotated[float | None, {ALIAS: ALIAS_LINE}]
     clm_line_bene_pd_amt: Annotated[float | None, {ALIAS: ALIAS_LINE}]
     clm_line_cvrd_pd_amt: Annotated[float | None, {ALIAS: ALIAS_LINE}]
@@ -84,9 +83,6 @@ class IdrClaimItemProfessionalSs(IdrBaseModel):
     hcpcs_3_mdfr_cd: Annotated[str, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_default_string)]
     hcpcs_4_mdfr_cd: Annotated[str, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_default_string)]
     hcpcs_5_mdfr_cd: Annotated[str, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_default_string)]
-    clm_line_pmd_uniq_trkng_num: Annotated[
-        str, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_null_string)
-    ]
     clm_line_otaf_amt: float | None
     clm_idr_ld_dt: Annotated[
         date, {INSERT_EXCLUDE: True, ALIAS: ALIAS_CLM, HISTORICAL_BATCH_TIMESTAMP: True}
@@ -158,28 +154,13 @@ class IdrClaimItemProfessionalSs(IdrBaseModel):
     ]
 
     # Columns from v2_mdcr_clm_line_prfnl
-    clm_bene_prmry_pyr_pd_amt: float | None
     clm_fed_type_srvc_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_line_carr_clncl_lab_num: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_line_carr_hpsa_scrcty_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_line_dmerc_scrn_svgs_amt: float | None
-    clm_line_hct_hgb_rslt_num: float | None
-    clm_line_hct_hgb_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_line_prfnl_dme_price_amt: float | None
-    clm_line_prfnl_mtus_cnt: float | None
-    clm_mtus_ind_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_physn_astnt_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_pmt_80_100_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_prcng_lclty_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_prcsg_ind_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_prmry_pyr_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_prvdr_spclty_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_srvc_ddctbl_sw: Annotated[str, BeforeValidator(transform_default_string)]
     clm_suplr_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_line_prfnl_intrst_amt: float | None
     clm_line_carr_psych_ot_lmt_amt: float | None
-    clm_line_carr_clncl_chrg_amt: float | None
-    clm_mdcr_prmry_pyr_alowd_amt: float | None
     idr_insrt_ts_line_prfnl: Annotated[
         datetime,
         {

@@ -396,35 +396,35 @@ class IdrClaimProfessionalSs(IdrBaseModel):
         prvdr_srvc = ALIAS_PRVDR_SRVC
         return f"""
             WITH claims AS (
-                    SELECT
-                        {clm}.clm_uniq_id,
-                        {clm}.geo_bene_sk,
-                        {clm}.clm_type_cd,
-                        {clm}.clm_num_sk,
-                        {clm}.clm_dt_sgntr_sk,
-                        {clm}.clm_idr_ld_dt
-                    FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
-                    WHERE {_claim_filter(start_time, partition)}
-                ),
-                latest_clm_lctn_hstry AS (
-                    SELECT
-                        claims.geo_bene_sk,
-                        claims.clm_type_cd,
-                        claims.clm_dt_sgntr_sk,
-                        claims.clm_num_sk,
-                        MAX({lctn_hstry}.clm_lctn_cd_sqnc_num) AS max_clm_lctn_cd_sqnc_num
-                    FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_lctn_hstry {lctn_hstry}
-                    JOIN claims ON
-                        {lctn_hstry}.geo_bene_sk = claims.geo_bene_sk AND
-                        {lctn_hstry}.clm_type_cd = claims.clm_type_cd AND
-                        {lctn_hstry}.clm_dt_sgntr_sk = claims.clm_dt_sgntr_sk AND
-                        {lctn_hstry}.clm_num_sk = claims.clm_num_sk
-                    GROUP BY
-                        claims.geo_bene_sk,
-                        claims.clm_type_cd,
-                        claims.clm_dt_sgntr_sk,
-                        claims.clm_num_sk
-                )
+                SELECT
+                    {clm}.clm_uniq_id,
+                    {clm}.geo_bene_sk,
+                    {clm}.clm_type_cd,
+                    {clm}.clm_num_sk,
+                    {clm}.clm_dt_sgntr_sk,
+                    {clm}.clm_idr_ld_dt
+                FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
+                WHERE {_claim_filter(start_time, partition)}
+            ),
+            latest_clm_lctn_hstry AS (
+                SELECT
+                    claims.geo_bene_sk,
+                    claims.clm_type_cd,
+                    claims.clm_dt_sgntr_sk,
+                    claims.clm_num_sk,
+                    MAX({lctn_hstry}.clm_lctn_cd_sqnc_num) AS max_clm_lctn_cd_sqnc_num
+                FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_lctn_hstry {lctn_hstry}
+                JOIN claims ON
+                    {lctn_hstry}.geo_bene_sk = claims.geo_bene_sk AND
+                    {lctn_hstry}.clm_type_cd = claims.clm_type_cd AND
+                    {lctn_hstry}.clm_dt_sgntr_sk = claims.clm_dt_sgntr_sk AND
+                    {lctn_hstry}.clm_num_sk = claims.clm_num_sk
+                GROUP BY
+                    claims.geo_bene_sk,
+                    claims.clm_type_cd,
+                    claims.clm_dt_sgntr_sk,
+                    claims.clm_num_sk
+            )
             SELECT {{COLUMNS}}
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
             JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_dt_sgntr {sgntr} ON 

@@ -669,7 +669,7 @@ CREATE TABLE idr_new.claim_institutional_ss
     clm_audt_trl_stus_cd       character varying(2),
 --  FISS
     clm_crnt_stus_cd           character varying(1)     NOT NULL,
-    clm_pps_ind                character varying(1)     NOT NULL,
+-- SS    clm_pps_ind_cd                character varying(1)     NOT NULL,
     meta_src_sk                integer,
 --     CLM_INSTL Columns
     clm_admsn_type_cd              varchar(2)               not null,

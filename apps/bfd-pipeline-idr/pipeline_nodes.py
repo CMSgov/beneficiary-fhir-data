@@ -30,6 +30,7 @@ from model2.idr_claim_date_signature import IdrClaimDateSignature
 from model2.idr_claim_fiss import IdrClaimFiss
 from model2.idr_claim_institutional import IdrClaimInstitutional
 from model2.idr_claim_institutional_nch import IdrClaimInstitutionalNch
+from model2.idr_claim_institutional_ss import IdrClaimInstitutionalSs
 from model2.idr_claim_item import IdrClaimItem
 from model2.idr_claim_item_institutional_nch import IdrClaimItemInstitutionalNch
 from model2.idr_claim_item_professional_nch import IdrClaimItemProfessionalNch
@@ -53,7 +54,13 @@ def filter_tables(tables: list[type[IdrBaseModel]]) -> list[type[IdrBaseModel]]:
 
 def claim_tables() -> list[type[IdrBaseModel]]:
     return filter_tables(
-        [IdrClaim, IdrClaimProfessionalNch, IdrClaimInstitutionalNch, IdrClaimProfessionalSs]
+        [
+            IdrClaim,
+            IdrClaimProfessionalNch,
+            IdrClaimInstitutionalNch,
+            IdrClaimProfessionalSs,
+            IdrClaimInstitutionalSs,
+        ]
     )
 
 
