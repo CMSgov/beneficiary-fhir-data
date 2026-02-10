@@ -102,7 +102,7 @@ uv run compile_resources.py \
 
 #### Patient Data - `patient_generator.py`
 
-##### Usage
+##### `patient_generator.py` usage
 
 ```text
 usage: patient_generator.py [-h] [--patients PATIENTS] [--claims]
@@ -140,7 +140,7 @@ options:
 
 ```
 
-##### Generating Data
+##### Generating patient data
 
 To generate synthetic patient data, the patient_generator.py script is used.
 To utilize it to generate an entirely _new_ set of data from nothing:
@@ -173,10 +173,45 @@ The files output will be in the `out` folder:
 
 The patient generator creates synthetic beneficiary data with realistic but _synthetic_ MBIs, coverage information, and historical records. It can generate multiple MBI versions per beneficiary and handles beneficiary cross-references with kill credit switches.
 
-#### Claims data
+#### Claims data - `claims_generator.py`
 
-To generate synthetic claims data, the claims_generator.py script is used.
-To utilize it:
+<!-- TODO: Provide an official location for downloading synthetic claims data -->
+> [!IMPORTANT]
+> Synthetic claims data is _much_ larger in size relative to patient data, and so it is not stored in the repository under `./synthetic-data`. If you are looking to regnerate this data, please reach out in #bfd so that the existing dataset can be provided to you.
+
+#### `claims_generator.py` usage
+
+```text
+Usage: claims_generator.py [OPTIONS] [PATHS]...
+
+  Generate synthetic claims data. Provided file PATHS will be updated with new
+  fields.
+
+Options:
+  --sushi / --no-sushi            Generate new StructureDefinitions. Use when
+                                  testing locally if new .fsh files have been
+                                  added.
+  --min-claims INTEGER            Minimum number of claims to generate per
+                                  person
+  --max-claims INTEGER            Maximum number of claims to generate per
+                                  person
+  --force-pac-claims / --no-force-pac-claims
+                                  Generate _new_ partially-adjudicated claims
+                                  when existing pac claims tables exist in the
+                                  synthetic data provided
+  --help                          Show this message and exit.
+```
+
+#### Generating claims data
+
+> [!WARNING]
+> Either `SYNTHETIC_CLM.csv` or `SYNTHETIC_BENE_HSTRY.csv` **must** be provided as claims data generation requires an existing `BENE_SK` or `CLM` to generate/regenerate data.
+
+To generate synthetic claims data, the `claims_generator.py` script is used.
+
+##### Using `SYNTHETIC_BENE_HSTRY.csv`
+
+The below will generate _entirely new claims_ for the given `BENE_SK`s in the provided file:
 
 ```sh
 uv run claims_generator.py \
@@ -184,22 +219,41 @@ uv run claims_generator.py \
     out/SYNTHETIC_BENE_HSTRY.csv
 ```
 
---sushi is not strictly needed, if you have a local copy of the compiled shorthand files, but recommended to reduce drift. To specify a list of benes, pass in a .csv file containing a column named BENE_SK.
-The files output will be in the out folder, there are several files:
-SYNTHETIC_CLM.csv
-SYNTHETIC_CLM_LINE.csv
-SYNTHETIC_CLM_VAL.csv
-SYNTHETIC_CLM_DT_SGNTR.csv
-SYNTHETIC_CLM_PROD.csv
-SYNTHETIC_CLM_INSTNL.csv
-SYNTHETIC_CLM_LINE_INSTNL.csv
-SYNTHETIC_CLM_DCMTN.csv
-SYNTHETIC_CLM_FISS.csv
-SYNTHETIC_CLM_PRFNL.csv
-SYNTHETIC_CLM_LINE_PRFNL.csv
-SYNTHETIC_CLM_ANSI_SGNTR.csv
+##### Regenerating existing claims data
 
-These files represent the schema of the tables the information is sourced from, although for tables other than CLM_DT_SGNTR, the CLM_UNIQ_ID is propagated instead of the 5 part unique key from the IDR.
+The below will _re-generate_ **existing claims data** (assume `<PATH_TO_CLAIMS_DATA>` is a local directory containing synthetic claims data):
+
+```sh
+uv run claims_generator.py \
+    --sushi \
+    ./synthetic-data <PATH_TO_CLAIMS_DATA>
+```
+
+If _any_ claims-related tables have had columns added to their respective generation functions, those new columns will be populated with values without impacting existing values in other columns.
+
+> [!CAUTION]
+> If an **existing column value** must be updated, that column value **MUST BE DELETED** from the respective table CSV first so that the values can be regenerated.
+
+#### `--sushi`
+
+`--sushi` is not strictly needed, if you have a local copy of the compiled shorthand files, but recommended to reduce drift. To specify a list of benes, pass in a .csv file containing a column named `BENE_SK`.
+
+The files output will be in the `./out` folder, there are several files:
+
+- `SYNTHETIC_CLM.csv`
+- `SYNTHETIC_CLM_LINE.csv`
+- `SYNTHETIC_CLM_VAL.csv`
+- `SYNTHETIC_CLM_DT_SGNTR.csv`
+- `SYNTHETIC_CLM_PROD.csv`
+- `SYNTHETIC_CLM_INSTNL.csv`
+- `SYNTHETIC_CLM_LINE_INSTNL.csv`
+- `SYNTHETIC_CLM_DCMTN.csv`
+- `SYNTHETIC_CLM_FISS.csv`
+- `SYNTHETIC_CLM_PRFNL.csv`
+- `SYNTHETIC_CLM_LINE_PRFNL.csv`
+- `SYNTHETIC_CLM_ANSI_SGNTR.csv`
+
+These files represent the schema of the tables the information is sourced from, although for tables other than `CLM_DT_SGNTR`, the `CLM_UNIQ_ID` is propagated instead of the 5 part unique key from the IDR.
 
 ## Testing Mapping Changes
 
