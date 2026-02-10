@@ -94,7 +94,6 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
         src.providerList as provider where provider.isDuplicate.exists().not() and provider.careTeamType.exists().not() and provider.NPI_TYPE = 1 -> tgt.contained = create('Practitioner') as tgtPract then createPractitioner(provider, tgtPract) "Add Practitioner";
         src.providerList as provider where provider.isDuplicate.exists().not() and provider.careTeamType.exists().not() and provider.NPI_TYPE = 2 -> tgt.contained = create('Organization') as tgtOrg then createOrg(provider, tgtOrg) "Add Organization";
     } "Add billing provider";
-
    
     //Partial for PAC data, complete for adjudicated. Of note, we do this by source. So even if final action on PAC source, still "partial"
     src.CLM_SRC_ID as sourceSk where sourceSk = '20000' -> tgt.outcome = "complete" "Set NCH outcome to complete.";
@@ -592,13 +591,20 @@ group createOrg(source src: Provider, target tgt: Organization){
     src -> tgtId.system = "http://hl7.org/fhir/sid/us-npi" "set NPI system url";
     npi -> tgtId.value = npi "set NPI";
   } "Create NPI identifier";
-  src.PRVDR_LGL_NAME as orgName -> tgt.name = orgName;
+
+  src.PRVDR_LGL_SLASH_LAST_NAME as orgName -> tgt.name = orgName;
   src.PRVDR_OSCAR_NUM as ccn -> tgt.identifier = create('Identifier') as tgtId then{
     src -> tgtId.system = "http://terminology.hl7.org/NamingSystem/CCN" "set ccn system url";
     src -> tgtId.value = ccn "set ccn";
   } "Add OSCAR/CCN num";
 
-  src.prvdr_zip as zip5 -> tgt.address = create('Address') as tgtAddress then{
+  src.PRVDR_TAX_NUM as taxId -> tgt.identifier = create('Identifier') as tgtId then{
+    src -> tgtId.type = cc("http://terminology.hl7.org/CodeSystem/v2-0203","TAX") "set type";
+    src -> tgtId.system = "urn:oid:2.16.840.1.113883.4.4" "add system";
+    taxId -> tgtId.value = taxId "set tax Id";
+  } "Add tax Id";
+
+  src.CLM_BLG_PRVDR_ZIP5_CD as zip5 -> tgt.address = create('Address') as tgtAddress then{
     zip5-> tgtAddress.postalCode = zip5 "add zip code";
   } "Add zip code";
 }
@@ -616,17 +622,23 @@ group createPractitioner(source src: Provider, target tgt: Practitioner){
     src.PRVDR_SK as npi -> tgtId.value = npi "set NPI";
   } "Create NPI identifier";
 
-  src.PRVDR_LAST_NAME as familyName -> tgt.name = create('HumanName') as tgtName then {
+  src.PRVDR_OSCAR_NUM as ccn -> tgt.identifier = create('Identifier') as tgtId then{
+    src -> tgtId.system = "http://terminology.hl7.org/NamingSystem/CCN" "set ccn system url";
+    src -> tgtId.value = ccn "set ccn";
+  } "Add OSCAR/CCN num";
+
+  src.PRVDR_TAX_NUM as taxId -> tgt.identifier = create('Identifier') as tgtId then{
+    src -> tgtId.type = cc("http://terminology.hl7.org/CodeSystem/v2-0203","TAX") "set type";
+    src -> tgtId.system = "urn:oid:2.16.840.1.113883.4.4" "add system";
+    taxId -> tgtId.value = taxId "set tax Id";
+  } "Add tax Id";
+
+  src.PRVDR_LGL_SLASH_LAST_NAME as familyName -> tgt.name = create('HumanName') as tgtName then {
     familyName -> tgtName.family = familyName "set family name";
     src.PRVDR_1ST_NAME as firstName -> tgtName.given = firstName "set first name";
-    src.PRVDR_MDL_NAME as middleName -> tgtName.given = middleName "set middle name";
   } "Add name";
 
-  src.taxonomyCodes as taxonomyCodes -> tgt.qualification = create('BackboneElement') as tgtBBElement then{
-    taxonomyCodes as taxCode -> tgtBBElement.code = cc("http://nucc.org/provider-taxonomy", taxCode) "Add qualification";
-  } "Add taxonomy info to Practitioner resource.";
-
-  src.prvdr_zip as zip5 -> tgt.address = create('Address') as tgtAddress then{
+  src.CLM_BLG_PRVDR_ZIP5_CD as zip5 -> tgt.address = create('Address') as tgtAddress then{
     zip5-> tgtAddress.postalCode = zip5 "add zip code";
   } "Add zip code";
 }

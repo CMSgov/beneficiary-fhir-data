@@ -92,6 +92,18 @@
                 ]
             },
             {
+                "id": "Provider.PRVDR_LGL_SLASH_LAST_NAME",
+                "path": "Provider.PRVDR_LGL_SLASH_LAST_NAME",
+                "label": "Provider Legal Name Slash Last Name",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
                 "id": "Provider.PRVDR_MDL_NAME",
                 "path": "Provider.PRVDR_MDL_NAME",
                 "label": "Provider Middle Name",
@@ -189,9 +201,21 @@
                 ]
             },
             {
-                "id": "Provider.prvdr_zip",
-                "path": "Provider.prvdr_zip",
+                "id": "Provider.CLM_BLG_PRVDR_ZIP5_CD",
+                "path": "Provider.CLM_BLG_PRVDR_ZIP5_CD",
                 "label": "Billing Provider Zip 5",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "Provider.PRVDR_TAX_NUM",
+                "path": "Provider.PRVDR_TAX_NUM",
+                "label": "Provider Tax Number",
                 "min": 0,
                 "max": "1",
                 "type": [

@@ -8,7 +8,6 @@ import pandas as pd
 
 prvdr_info_file = "sample-data/PRVDR_HSTRY_POC.csv"
 df = pd.read_csv(prvdr_info_file, dtype={"PRVDR_SK": str})
-df.head()
 
 cur_sample = sys.argv[1]
 cur_sample_data = {}
@@ -35,7 +34,7 @@ line_supporting_info_columns = [
     "CLM_LINE_PMD_UNIQ_TRKNG_NUM",
     "CLM_LINE_PA_UNIQ_TRKNG_NUM",
 ]
-npis_used = []
+# npis_used = []
 cur_sample_data["providerList"] = []
 cur_careteam_sequence = 1
 # we only use PRVDR_SRVC_PRVDR_NPI_NUM for part D events.
@@ -44,11 +43,9 @@ if cur_sample_data.get("CLM_TYPE_CD") not in (1, 2, 3, 4):
 
 populate_fields_except_na = [
     "PRVDR_LGL_NAME",
-    "PRVDR_OSCAR_NUM",
+    # "PRVDR_OSCAR_NUM", No longer pulling this from PRVDR, rather based upon submission.
     "PRVDR_LAST_NAME",
     "PRVDR_1ST_NAME",
-    "PRVDR_MDL_NAME",
-    "PRVDR_TYPE_CD",
 ]
 provider_list = []
 
@@ -75,10 +72,11 @@ for column in header_columns:
         continue
     provider_object = {}
     provider_object["PRVDR_SK"] = cur_sample_data.get(column)
-    if provider_object.get("PRVDR_SK") in npis_used:
-        provider_object["isDuplicate"] = True
-    else:
-        npis_used.append(provider_object.get("PRVDR_SK"))
+    # Removing since we are not going to populate more than header-level providers using contained resources.
+    # if provider_object.get("PRVDR_SK") in npis_used:
+    #    provider_object["isDuplicate"] = True
+    # else:
+    #    npis_used.append(provider_object.get("PRVDR_SK"))
 
     prvdr_hstry_for_npi = json.loads(
         df[df["PRVDR_SK"] == str(provider_object.get("PRVDR_SK"))].iloc[0].to_json()
@@ -94,13 +92,14 @@ for column in header_columns:
             if prvdr_hstry_for_npi.get(fld)
         }
     )
-
+    """ we'll remove this...
     if prvdr_hstry_for_npi.get("PRVDR_TXNMY_CMPST_CD"):
         taxonomy_val = prvdr_hstry_for_npi.get("PRVDR_TXNMY_CMPST_CD")
         taxonomy_codes = [
             taxonomy_val[i : i + 10] for i in range(len(taxonomy_val), 10)
         ]
         provider_object["taxonomyCodes"] = taxonomy_codes
+    """
 
     # assign care team type + sequence for header-level info
     if len(header_columns.get(column)) > 0:
@@ -126,11 +125,18 @@ for column in header_columns:
 
     # We may want to remove this in the future, depending on requirements
     # regarding address info.
-    if (
-        column == "PRVDR_BLG_PRVDR_NPI_NUM"
-        and "CLM_BLG_PRVDR_ZIP5_CD" in cur_sample_data
-    ):
-        provider_object["prvdr_zip"] = cur_sample_data.get("CLM_BLG_PRVDR_ZIP5_CD")
+    if column == "PRVDR_BLG_PRVDR_NPI_NUM":
+        if "CLM_BLG_PRVDR_ZIP5_CD" in cur_sample_data:
+            provider_object["CLM_BLG_PRVDR_ZIP5_CD"] = cur_sample_data.get("CLM_BLG_PRVDR_ZIP5_CD")
+        if provider_object.get("NPI_TYPE") == 2:
+            provider_object["PRVDR_LGL_SLASH_LAST_NAME"] = provider_object.get("PRVDR_LGL_NAME")
+        else:
+            provider_object["PRVDR_LGL_SLASH_LAST_NAME"] = provider_object.get("PRVDR_LAST_NAME")
+            # don't worry about first name since we already pull it in above.
+        if "CLM_BLG_PRVDR_OSCAR_NUM" in cur_sample_data:
+            provider_object["PRVDR_OSCAR_NUM"] = cur_sample_data.get("CLM_BLG_PRVDR_OSCAR_NUM")
+        if "CLM_BLG_PRVDR_TAX_NUM" in cur_sample_data:
+            provider_object["PRVDR_TAX_NUM"] = cur_sample_data.get("CLM_BLG_PRVDR_TAX_NUM")
 
     provider_list.append(provider_object)
 
@@ -150,7 +156,7 @@ for item in line_items:
         if item.get(line_supporting_info_col):
             item["SEQUENCE_INFO"] = supporting_info_seq
             supporting_info_seq += 1
-
+    """
     for line_col in line_columns:
         if line_col in item and item.get(line_col) not in npis_used:
             npi = item.get(line_col)
@@ -206,7 +212,7 @@ for item in line_items:
             ]
             careTeamSequence = matching_providers[0]
             item["careTeamSequence"] = [careTeamSequence]
-
+    """
     # for part D claims, sum CLM_LINE_INGRDNT_CST_AMT, CLM_LINE_SRVC_CST_AMT, CLM_LINE_SLS_TAX_AMT,
     # CLM_LINE_VCCN_ADMIN_FEE_AMT to set TOT_RX_CST_AMT
     tot_rx_amt = sum(
