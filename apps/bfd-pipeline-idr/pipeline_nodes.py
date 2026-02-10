@@ -33,6 +33,7 @@ from model2.idr_claim_institutional_nch import IdrClaimInstitutionalNch
 from model2.idr_claim_item import IdrClaimItem
 from model2.idr_claim_item_institutional_nch import IdrClaimItemInstitutionalNch
 from model2.idr_claim_item_professional_nch import IdrClaimItemProfessionalNch
+from model2.idr_claim_item_professional_ss import IdrClaimItemProfessionalSs
 from model2.idr_claim_line_institutional import IdrClaimLineInstitutional
 from model2.idr_claim_line_professional import IdrClaimLineProfessional
 from model2.idr_claim_line_rx import IdrClaimLineRx
@@ -73,6 +74,7 @@ def claim_aux_tables() -> list[type[IdrBaseModel]]:
             IdrClaimRx,
             IdrClaimItemProfessionalNch,
             IdrClaimItemInstitutionalNch,
+            IdrClaimItemProfessionalSs,
         ]
     )
 

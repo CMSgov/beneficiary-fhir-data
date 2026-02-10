@@ -6,8 +6,10 @@ from pydantic import BeforeValidator
 
 from constants import (
     CLAIM_PROFESSIONAL_NCH_TABLE,
+    CLAIM_PROFESSIONAL_SS_TABLE,
     DEFAULT_MAX_DATE,
     PROFESSIONAL_ADJUDICATED_PARTITIONS,
+    PROFESSIONAL_PAC_PARTITIONS,
 )
 from load_partition import LoadPartition, LoadPartitionGroup
 from loader import LoadMode
@@ -42,7 +44,7 @@ from model import (
 )
 
 
-class IdrClaimItemProfessionalNch(IdrBaseModel):
+class IdrClaimItemProfessionalSs(IdrBaseModel):
     clm_uniq_id: Annotated[
         int, {PRIMARY_KEY: True, BATCH_ID: True, ALIAS: ALIAS_CLM, LAST_UPDATED_TIMESTAMP: True}
     ]
@@ -67,6 +69,7 @@ class IdrClaimItemProfessionalNch(IdrBaseModel):
         str, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_default_string)
     ]
     clm_line_ndc_cd: Annotated[str, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_default_string)]
+    clm_line_ndc_qty_qlfyr_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_line_srvc_unit_qty: float | None
     clm_line_rx_num: Annotated[str, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_default_string)]
     clm_pos_cd: Annotated[str, BeforeValidator(transform_default_string)]
@@ -84,6 +87,7 @@ class IdrClaimItemProfessionalNch(IdrBaseModel):
     clm_line_pmd_uniq_trkng_num: Annotated[
         str, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_null_string)
     ]
+    clm_line_otaf_amt: float | None
     clm_idr_ld_dt: Annotated[
         date, {INSERT_EXCLUDE: True, ALIAS: ALIAS_CLM, HISTORICAL_BATCH_TIMESTAMP: True}
     ]
@@ -232,6 +236,9 @@ class IdrClaimItemProfessionalNch(IdrBaseModel):
         str, {ALIAS: ALIAS_LINE_DCMTN}, BeforeValidator(transform_default_string)
     ]
     clm_rndrg_prvdr_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
+    clm_line_pa_uniq_trkng_num: Annotated[
+        str, {ALIAS: ALIAS_LINE_DCMTN}, BeforeValidator(transform_null_string)
+    ]
     idr_insrt_ts_line_dcmtn: Annotated[
         datetime,
         {ALIAS: ALIAS_LINE_DCMTN, INSERT_EXCLUDE: True, COLUMN_MAP: "idr_insrt_ts"},
@@ -242,6 +249,25 @@ class IdrClaimItemProfessionalNch(IdrBaseModel):
         {
             UPDATE_TIMESTAMP: True,
             ALIAS: ALIAS_LINE_DCMTN,
+            INSERT_EXCLUDE: True,
+            COLUMN_MAP: "idr_updt_ts",
+        },
+        BeforeValidator(transform_null_date_to_min),
+    ]
+    # Columns from v2_mdcr_clm_line_mcs
+    clm_line_rbndlg_crtfctn_num: Annotated[str, BeforeValidator(transform_default_string)]
+    clm_line_hct_lvl_num: int | None
+    clm_line_hgb_lvl_num: int | None
+    idr_insrt_ts_line_mcs: Annotated[
+        datetime,
+        {ALIAS: ALIAS_LINE_MCS, INSERT_EXCLUDE: True, COLUMN_MAP: "idr_insrt_ts"},
+        BeforeValidator(transform_null_date_to_min),
+    ]
+    idr_updt_ts_line_mcs: Annotated[
+        datetime,
+        {
+            UPDATE_TIMESTAMP: True,
+            ALIAS: ALIAS_LINE_MCS,
             INSERT_EXCLUDE: True,
             COLUMN_MAP: "idr_updt_ts",
         },
@@ -307,11 +333,11 @@ class IdrClaimItemProfessionalNch(IdrBaseModel):
 
     @staticmethod
     def table() -> str:
-        return "idr_new.claim_item_professional_nch"
+        return "idr_new.claim_item_professional_ss"
 
     @staticmethod
     def last_updated_date_table() -> str:
-        return CLAIM_PROFESSIONAL_NCH_TABLE
+        return CLAIM_PROFESSIONAL_SS_TABLE
 
     @staticmethod
     def last_updated_date_column() -> list[str]:
@@ -319,7 +345,7 @@ class IdrClaimItemProfessionalNch(IdrBaseModel):
 
     @staticmethod
     def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
-        return PROFESSIONAL_ADJUDICATED_PARTITIONS
+        return PROFESSIONAL_PAC_PARTITIONS
 
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:
@@ -460,6 +486,12 @@ class IdrClaimItemProfessionalNch(IdrBaseModel):
                     AND {line_prfnl}.clm_num_sk = {line}.clm_num_sk
                     AND {line_prfnl}.clm_dt_sgntr_sk = {line}.clm_dt_sgntr_sk
                     AND {line_prfnl}.clm_line_num = {line}.clm_line_num
+                LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_mcs {line_mcs}
+                    ON {line_mcs}.geo_bene_sk = {line}.geo_bene_sk
+                    AND {line_mcs}.clm_type_cd = {line}.clm_type_cd
+                    AND {line_mcs}.clm_num_sk = {line}.clm_num_sk
+                    AND {line_mcs}.clm_dt_sgntr_sk = {line}.clm_dt_sgntr_sk
+                    AND {line_mcs}.clm_line_num = {line}.clm_line_num
                 LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_dcmtn {line_dcmtn}
                     ON {line_dcmtn}.geo_bene_sk = {line}.geo_bene_sk
                     AND {line_dcmtn}.clm_type_cd = {line}.clm_type_cd

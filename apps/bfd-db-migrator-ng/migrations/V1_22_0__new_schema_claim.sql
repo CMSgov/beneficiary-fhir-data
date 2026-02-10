@@ -497,9 +497,9 @@ CREATE TABLE idr_new.claim_item_professional_nch
 --    clm_ocrnc_sgntr_sk             numeric,
 --    clm_rlt_ocrnc_sgntr_sk         numeric,
     -- v2_mdcr_clm_line_mcs COLUMNS
-    clm_line_rbndlg_crtfctn_num    character varying(10),
-    clm_line_hct_lvl_num           numeric,
-    clm_line_hgb_lvl_num           numeric,
+-- SS    clm_line_rbndlg_crtfctn_num    character varying(10),
+-- SS    clm_line_hct_lvl_num           numeric,
+-- SS    clm_line_hgb_lvl_num           numeric,
     PRIMARY KEY (clm_uniq_id, bfd_row_id)
 );
 
