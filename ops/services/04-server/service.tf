@@ -230,11 +230,13 @@ resource "aws_ecs_task_definition" "server" {
                 log_group_name = aws_cloudwatch_log_group.adot_metrics.name
                 region         = local.region
                 service        = local.service
+                name_prefix    = local.name_prefix
+                port           = local.server_jmx_export_port
             })
           }
         ]
         command                = ["--config=env:ADOT_CONFIG"]
-        readonlyRootFilesystem = false
+        readonlyRootFilesystem = true
 
         logConfiguration = {
           logDriver = "awslogs"
@@ -299,10 +301,6 @@ resource "aws_ecs_task_definition" "server" {
         volumesFrom    = []
       },
       {
-        dockerLabels = {
-          Java_EMF_Metrics             = "true"
-          ECS_PROMETHEUS_EXPORTER_PORT = tostring(local.server_jmx_export_port)
-        }
         name      = local.service
         image     = data.aws_ecr_image.server.image_uri
         essential = true

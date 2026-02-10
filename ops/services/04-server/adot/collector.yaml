@@ -1,42 +1,17 @@
-extensions:
-  ecs_observer:
-    cluster_name: ${cluster_name}
-    refresh_interval: 60s
-    cluster_region: ${region}
-    result_file: &resultFile /home/aoc/ecs_sd_targets.yaml
-    job_label_name: prometheus_job
-    services:
-      - name_pattern: '^${service}$'
-    docker_labels:
-      - port_label: 'ECS_PROMETHEUS_EXPORTER_PORT'
-
 receivers:
   prometheus:
     config:
       scrape_configs:
-        - job_name: "ecs-task"
-          file_sd_configs:
-            - files:
-                - *resultFile
-          relabel_configs: # Relabel here because label with __ prefix will be dropped by receiver.
-            - source_labels: [ __meta_ecs_cluster_name ] # ClusterName
-              action: replace
-              target_label: ClusterName
-            - source_labels: [ __meta_ecs_service_name ] # ServiceName
-              action: replace
-              target_label: ServiceName
-            - source_labels: [ __meta_ecs_task_definition_family ] # TaskDefinitionFamily
-              action: replace
-              target_label: TaskDefinitionFamily
-            - source_labels: [ __meta_ecs_task_launch_type ] # LaunchType
-              action: replace
-              target_label: LaunchType
-            - source_labels: [ __meta_ecs_container_name ] # container_name
-              action: replace
-              target_label: container_name
-            - action: labelmap # Convert docker labels on container to metric labels
-              regex: ^__meta_ecs_container_labels_(.+)$ # Capture the key using regex, e.g. __meta_ecs_container_labels_Java_EMF_Metrics -> Java_EMF_Metrics
-              replacement: '$$1'
+        - job_name: prometheus_job
+          static_configs:
+            - targets:
+                - localhost:${port}
+              labels:
+                Java_EMF_Metrics: true
+                ClusterName: ${cluster_name}
+                LaunchType: FARGATE
+                container_name: ${service}
+                TaskDefinitionFamily: ${name_prefix}
           metric_relabel_configs:
             - source_labels: [__name__]
               action: replace
@@ -88,7 +63,6 @@ receivers:
               regex: jvm_memory_pool_used_bytes
               replacement: jvm_memory_pool_bytes_used
               target_label: __name__
-
 processors:
   resource:
     attributes:
@@ -104,7 +78,6 @@ processors:
           - label: prometheus_job # must match the value configured in ecs_observer
             new_label: job
             action: update_label
-
 # Use awsemf for CloudWatch Container Insights Prometheus. The extension does not have requirement on exporter.
 exporters:
   awsemf:
@@ -140,9 +113,7 @@ exporters:
           - "^java_lang_OperatingSystem_(FreePhysicalMemorySize|TotalPhysicalMemorySize|FreeSwapSpaceSize|TotalSwapSpaceSize|SystemCpuLoad|ProcessCpuLoad|AvailableProcessors|OpenFileDescriptorCount)$"
           - "^java_lang_operatingsystem_(freephysicalmemorysize|totalphysicalmemorysize|freeswapspacesize|totalswapspacesize|systemcpuload|processcpuload|availableprocessors|openfiledescriptorcount)$"
           - "^jvm_gc_collection_seconds_(count|sum)$"
-
 service:
-  extensions: [ ecs_observer ]
   pipelines:
     metrics:
       receivers: [ prometheus ]
