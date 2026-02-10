@@ -18,9 +18,6 @@ from model import (
     IdrBeneficiaryOvershareMbi,
     IdrBeneficiaryStatus,
     IdrBeneficiaryThirdParty,
-    IdrClaimFiss,
-    IdrClaimLineProfessional,
-    IdrClaimLineRx,
     IdrContractPbpContact,
     IdrContractPbpNumber,
     IdrProviderHistory,
@@ -30,12 +27,15 @@ from model import (
 from model2.idr_claim import IdrClaim
 from model2.idr_claim_ansi_signature import IdrClaimAnsiSignature
 from model2.idr_claim_date_signature import IdrClaimDateSignature
+from model2.idr_claim_fiss import IdrClaimFiss
 from model2.idr_claim_institutional import IdrClaimInstitutional
 from model2.idr_claim_institutional_nch import IdrClaimInstitutionalNch
 from model2.idr_claim_item import IdrClaimItem
 from model2.idr_claim_item_institutional_nch import IdrClaimItemInstitutionalNch
 from model2.idr_claim_item_professional_nch import IdrClaimItemProfessionalNch
 from model2.idr_claim_line_institutional import IdrClaimLineInstitutional
+from model2.idr_claim_line_professional import IdrClaimLineProfessional
+from model2.idr_claim_line_rx import IdrClaimLineRx
 from model2.idr_claim_professional import IdrClaimProfessional
 from model2.idr_claim_professional_nch import IdrClaimProfessionalNch
 from model2.idr_claim_professional_ss import IdrClaimProfessionalSs
