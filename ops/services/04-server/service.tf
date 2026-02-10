@@ -129,7 +129,7 @@ resource "aws_ecs_task_definition" "server" {
   }
 
   volume {
-    configure_at_launch = true
+    configure_at_launch = false
     name                = "adot"
   }
 
