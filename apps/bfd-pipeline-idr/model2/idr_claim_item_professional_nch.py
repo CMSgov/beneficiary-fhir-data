@@ -112,13 +112,11 @@ class IdrClaimItemProfessionalNch(IdrBaseModel):
         int | None, {ALIAS: ALIAS_PROCEDURE, COLUMN_MAP: "clm_val_sqnc_num"}
     ]
     clm_prod_type_cd: Annotated[str, BeforeValidator(transform_null_string)]
-    clm_prcdr_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_dgns_prcdr_icd_ind: Annotated[
         str, {ALIAS: ALIAS_PROCEDURE}, BeforeValidator(transform_default_string)
     ]
     clm_dgns_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_poa_ind: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_prcdr_prfrm_dt: Annotated[date | None, BeforeValidator(transform_default_date_to_null)]
     idr_insrt_ts_prod: Annotated[
         datetime,
         {
@@ -249,10 +247,6 @@ class IdrClaimItemProfessionalNch(IdrBaseModel):
         },
         BeforeValidator(transform_null_date_to_min),
     ]
-    # Columns from v2_mdcr_clm_line_mcs
-    clm_line_rbndlg_crtfctn_num: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_line_hct_lvl_num: int | None
-    clm_line_hgb_lvl_num: int | None
 
     # Columns from v2_mdcr_prvdr_hstry
     prvdr_rndrng_prvdr_npi_num: Annotated[
@@ -324,7 +318,7 @@ class IdrClaimItemProfessionalNch(IdrBaseModel):
         return ["bfd_claim_updated_ts"]
 
     @staticmethod
-    def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
         return PROFESSIONAL_ADJUDICATED_PARTITIONS
 
     @staticmethod
@@ -466,12 +460,6 @@ class IdrClaimItemProfessionalNch(IdrBaseModel):
                     AND {line_prfnl}.clm_num_sk = {line}.clm_num_sk
                     AND {line_prfnl}.clm_dt_sgntr_sk = {line}.clm_dt_sgntr_sk
                     AND {line_prfnl}.clm_line_num = {line}.clm_line_num
-                LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_mcs {line_mcs}
-                    ON {line_mcs}.geo_bene_sk = {line}.geo_bene_sk
-                    AND {line_mcs}.clm_type_cd = {line}.clm_type_cd
-                    AND {line_mcs}.clm_num_sk = {line}.clm_num_sk
-                    AND {line_mcs}.clm_dt_sgntr_sk = {line}.clm_dt_sgntr_sk
-                    AND {line_mcs}.clm_line_num = {line}.clm_line_num
                 LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_dcmtn {line_dcmtn}
                     ON {line_dcmtn}.geo_bene_sk = {line}.geo_bene_sk
                     AND {line_dcmtn}.clm_type_cd = {line}.clm_type_cd

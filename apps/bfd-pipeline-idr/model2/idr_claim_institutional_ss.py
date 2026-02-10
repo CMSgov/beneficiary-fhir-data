@@ -6,9 +6,11 @@ from pydantic import BeforeValidator
 
 from constants import (
     CLAIM_INSTITUTIONAL_NCH_TABLE,
+    CLAIM_INSTITUTIONAL_SS_TABLE,
     CLAIM_PROFESSIONAL_NCH_TABLE,
     DEFAULT_MAX_DATE,
     INSTITUTIONAL_ADJUDICATED_PARTITIONS,
+    INSTITUTIONAL_PAC_PARTITIONS,
     PROFESSIONAL_ADJUDICATED_PARTITIONS,
 )
 from load_partition import LoadPartition, LoadPartitionGroup
@@ -18,6 +20,7 @@ from model import (
     ALIAS_CLM,
     ALIAS_CLM_GRP,
     ALIAS_DCMTN,
+    ALIAS_FISS,
     ALIAS_INSTNL,
     ALIAS_LCTN_HSTRY,
     ALIAS_LINE,
@@ -59,7 +62,7 @@ from model import (
 )
 
 
-class IdrClaimInstitutionalNch(IdrBaseModel):
+class IdrClaimInstitutionalSs(IdrBaseModel):
     # Columns from v2_mdcr_clm
     clm_uniq_id: Annotated[
         int, {PRIMARY_KEY: True, BATCH_ID: True, ALIAS: ALIAS_CLM, LAST_UPDATED_TIMESTAMP: True}
@@ -79,12 +82,16 @@ class IdrClaimInstitutionalNch(IdrBaseModel):
         },
         BeforeValidator(transform_null_string),
     ]
+    clm_src_id: Annotated[str, {ALIAS: ALIAS_CLM}]
     clm_from_dt: Annotated[date, {ALIAS: ALIAS_CLM}]
     clm_thru_dt: Annotated[date, {ALIAS: ALIAS_CLM}]
     clm_efctv_dt: Annotated[date, {ALIAS: ALIAS_CLM}]
     clm_obslt_dt: Annotated[
         date | None, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_date_to_null)
     ]
+    clm_mdcr_coinsrnc_amt: float | None
+    clm_blood_lblty_amt: float | None
+    clm_ncvrd_chrg_amt: float | None
     clm_finl_actn_ind: Annotated[str, {ALIAS: ALIAS_CLM}]
     clm_bill_clsfctn_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_bill_fac_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
@@ -93,7 +100,8 @@ class IdrClaimInstitutionalNch(IdrBaseModel):
         date | None, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_date_to_null)
     ]
     clm_ltst_clm_ind: Annotated[str, {ALIAS: ALIAS_CLM}]
-    clm_disp_cd: Annotated[str, BeforeValidator(transform_default_string)]
+    clm_ric_cd: Annotated[str, BeforeValidator(transform_default_string)]
+    clm_nch_prmry_pyr_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_prvdr_pmt_amt: float | None
     clm_adjstmt_type_cd: Annotated[
         str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)
@@ -118,9 +126,31 @@ class IdrClaimInstitutionalNch(IdrBaseModel):
         BeforeValidator(transform_null_date_to_min),
     ]
     clm_idr_ld_dt: Annotated[date, {HISTORICAL_BATCH_TIMESTAMP: True, ALIAS: ALIAS_CLM}]
-
+    # columns from v2_mdcr_clm_lctn_hstry
+    clm_audt_trl_stus_cd: Annotated[
+        str, {ALIAS: ALIAS_LCTN_HSTRY}, BeforeValidator(transform_null_string)
+    ]
+    idr_insrt_ts_lctn_hstry: Annotated[
+        datetime,
+        {
+            BATCH_TIMESTAMP: True,
+            ALIAS: ALIAS_LCTN_HSTRY,
+            INSERT_EXCLUDE: True,
+            COLUMN_MAP: "idr_insrt_ts",
+        },
+        BeforeValidator(transform_null_date_to_min),
+    ]
+    idr_updt_ts_lctn_hstry: Annotated[
+        datetime,
+        {
+            UPDATE_TIMESTAMP: True,
+            ALIAS: ALIAS_LCTN_HSTRY,
+            INSERT_EXCLUDE: True,
+            COLUMN_MAP: "idr_updt_ts",
+        },
+        BeforeValidator(transform_null_date_to_min),
+    ]
     # Columns from v2_mdcr_clm_dcmtn
-    clm_nrln_ric_cd: Annotated[str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_null_string)]
     clm_bnft_enhncmt_1_cd: Annotated[
         str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_default_string)
     ]
@@ -185,13 +215,6 @@ class IdrClaimInstitutionalNch(IdrBaseModel):
     clm_actv_care_from_dt: Annotated[date | None, BeforeValidator(transform_default_date_to_null)]
     clm_dschrg_dt: Annotated[date | None, BeforeValidator(transform_default_date_to_null)]
     clm_submsn_dt: Annotated[date | None, BeforeValidator(transform_default_date_to_null)]
-    clm_ncvrd_from_dt: Annotated[date | None, BeforeValidator(transform_default_date_to_null)]
-    clm_ncvrd_thru_dt: Annotated[date | None, BeforeValidator(transform_default_date_to_null)]
-    clm_actv_care_thru_dt: Annotated[date | None, BeforeValidator(transform_default_date_to_null)]
-    clm_mdcr_exhstd_dt: Annotated[date | None, BeforeValidator(transform_default_date_to_null)]
-    clm_nch_wkly_proc_dt: Annotated[date | None, BeforeValidator(transform_default_date_to_null)]
-    clm_qlfy_stay_from_dt: Annotated[date | None, BeforeValidator(transform_default_date_to_null)]
-    clm_qlfy_stay_thru_dt: Annotated[date | None, BeforeValidator(transform_default_date_to_null)]
     idr_insrt_ts_sgntr: Annotated[
         datetime,
         {
@@ -222,8 +245,6 @@ class IdrClaimInstitutionalNch(IdrBaseModel):
     clm_fi_actn_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_mdcr_ip_lrd_use_cnt: int | None
     clm_hipps_uncompd_care_amt: float | None
-    clm_hha_rfrl_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_hha_lup_ind_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_mdcr_hha_tot_visit_cnt: float | None
     clm_instnl_mdcr_coins_day_cnt: int | None
     clm_instnl_ncvrd_day_cnt: float | None
@@ -239,14 +260,12 @@ class IdrClaimInstitutionalNch(IdrBaseModel):
     clm_mdcr_ip_pps_cptl_ime_amt: float | None
     clm_mdcr_ip_pps_outlier_amt: float | None
     clm_mdcr_ip_pps_cptl_hrmls_amt: float | None
-    clm_pps_ind_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_mdcr_ip_pps_cptl_tot_amt: float | None
     clm_instnl_cvrd_day_cnt: float | None
     clm_mdcr_instnl_prmry_pyr_amt: float | None
     clm_instnl_prfnl_amt: float | None
     clm_mdcr_ip_bene_ddctbl_amt: float | None
     clm_instnl_drg_outlier_amt: float | None
-    dgns_drg_outlier_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_mdcr_ip_scnd_yr_rate_amt: float | None
     clm_instnl_low_vol_pmt_amt: float | None
     clm_hipps_readmsn_rdctn_amt: float | None
@@ -259,7 +278,6 @@ class IdrClaimInstitutionalNch(IdrBaseModel):
     clm_mdcr_ip_1st_yr_rate_amt: float | None
     clm_site_ntrl_cst_bsd_pymt_amt: float | None
     clm_ss_outlier_std_pymt_amt: float | None
-    clm_op_srvc_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
     idr_insrt_ts_instnl: Annotated[
         datetime,
         {
@@ -276,6 +294,29 @@ class IdrClaimInstitutionalNch(IdrBaseModel):
             UPDATE_TIMESTAMP: True,
             INSERT_EXCLUDE: True,
             ALIAS: ALIAS_INSTNL,
+            COLUMN_MAP: "idr_updt_ts",
+        },
+        BeforeValidator(transform_null_date_to_min),
+    ]
+
+    # Columns from v2_mdcr_clm_fiss
+    clm_crnt_stus_cd: Annotated[str, BeforeValidator(transform_null_string)]
+    idr_insrt_ts: Annotated[
+        datetime,
+        {
+            BATCH_TIMESTAMP: True,
+            INSERT_EXCLUDE: True,
+            ALIAS: ALIAS_FISS,
+            COLUMN_MAP: "idr_insrt_ts",
+        },
+        BeforeValidator(transform_null_date_to_min),
+    ]
+    idr_updt_ts: Annotated[
+        datetime,
+        {
+            UPDATE_TIMESTAMP: True,
+            INSERT_EXCLUDE: True,
+            ALIAS: ALIAS_FISS,
             COLUMN_MAP: "idr_updt_ts",
         },
         BeforeValidator(transform_null_date_to_min),
@@ -615,11 +656,11 @@ class IdrClaimInstitutionalNch(IdrBaseModel):
 
     @staticmethod
     def table() -> str:
-        return CLAIM_INSTITUTIONAL_NCH_TABLE
+        return CLAIM_INSTITUTIONAL_SS_TABLE
 
     @staticmethod
     def last_updated_date_table() -> str:
-        return CLAIM_INSTITUTIONAL_NCH_TABLE
+        return CLAIM_INSTITUTIONAL_SS_TABLE
 
     @staticmethod
     def last_updated_date_column() -> list[str]:
@@ -631,6 +672,7 @@ class IdrClaimInstitutionalNch(IdrBaseModel):
         dcmtn = ALIAS_DCMTN
         sgntr = ALIAS_SGNTR
         instnl = ALIAS_INSTNL
+        fiss = ALIAS_FISS
         lctn_hstry = ALIAS_LCTN_HSTRY
         prvdr_atng = ALIAS_PRVDR_ATNDG
         prvdr_oprtg = ALIAS_PRVDR_OPRTG
@@ -649,6 +691,25 @@ class IdrClaimInstitutionalNch(IdrBaseModel):
                     {clm}.clm_idr_ld_dt
                 FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
                 WHERE {_claim_filter(start_time, partition)}
+            ),
+            latest_clm_lctn_hstry AS (
+                SELECT
+                    claims.geo_bene_sk,
+                    claims.clm_type_cd,
+                    claims.clm_dt_sgntr_sk,
+                    claims.clm_num_sk,
+                    MAX({lctn_hstry}.clm_lctn_cd_sqnc_num) AS max_clm_lctn_cd_sqnc_num
+                FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_lctn_hstry {lctn_hstry}
+                JOIN claims ON
+                    {lctn_hstry}.geo_bene_sk = claims.geo_bene_sk AND
+                    {lctn_hstry}.clm_type_cd = claims.clm_type_cd AND
+                    {lctn_hstry}.clm_dt_sgntr_sk = claims.clm_dt_sgntr_sk AND
+                    {lctn_hstry}.clm_num_sk = claims.clm_num_sk
+                GROUP BY
+                    claims.geo_bene_sk,
+                    claims.clm_type_cd,
+                    claims.clm_dt_sgntr_sk,
+                    claims.clm_num_sk
             )
             SELECT {{COLUMNS}}
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
@@ -664,6 +725,22 @@ class IdrClaimInstitutionalNch(IdrBaseModel):
                 {clm}.clm_dt_sgntr_sk = {dcmtn}.clm_dt_sgntr_sk AND
                 {clm}.clm_type_cd = {dcmtn}.clm_type_cd AND
                 {clm}.clm_num_sk = {dcmtn}.clm_num_sk
+            LEFT JOIN latest_clm_lctn_hstry latest_lctn ON
+                {clm}.geo_bene_sk = latest_lctn.geo_bene_sk AND
+                {clm}.clm_type_cd = latest_lctn.clm_type_cd AND
+                {clm}.clm_dt_sgntr_sk = latest_lctn.clm_dt_sgntr_sk AND
+                {clm}.clm_num_sk = latest_lctn.clm_num_sk
+            LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_lctn_hstry {lctn_hstry} ON
+                {clm}.geo_bene_sk = {lctn_hstry}.geo_bene_sk AND
+                {clm}.clm_type_cd = {lctn_hstry}.clm_type_cd AND
+                {clm}.clm_dt_sgntr_sk = {lctn_hstry}.clm_dt_sgntr_sk AND
+                {clm}.clm_num_sk = {lctn_hstry}.clm_num_sk AND
+                {lctn_hstry}.clm_lctn_cd_sqnc_num = latest_lctn.max_clm_lctn_cd_sqnc_num
+            LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_fiss {fiss} ON
+                {clm}.geo_bene_sk = {fiss}.geo_bene_sk AND
+                {clm}.clm_dt_sgntr_sk = {fiss}.clm_dt_sgntr_sk AND
+                {clm}.clm_type_cd = {fiss}.clm_type_cd AND
+                {clm}.clm_num_sk = {fiss}.clm_num_sk
             LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_prvdr_hstry {prvdr_atng} ON 
                 {prvdr_atng}.prvdr_npi_num = {clm}.prvdr_atndg_prvdr_npi_num AND
                 {prvdr_atng}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
@@ -688,4 +765,4 @@ class IdrClaimInstitutionalNch(IdrBaseModel):
 
     @staticmethod
     def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
-        return INSTITUTIONAL_ADJUDICATED_PARTITIONS
+        return INSTITUTIONAL_PAC_PARTITIONS

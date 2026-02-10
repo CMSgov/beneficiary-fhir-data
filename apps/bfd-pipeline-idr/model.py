@@ -51,8 +51,8 @@ def transform_null_date_to_min(value: date | None) -> date:
 
 def transform_null_or_default_date_to_max(value: date | None) -> date:
     if value is None or value in (
-        date.fromisoformat(ALTERNATE_DEFAULT_DATE),
-        date.fromisoformat(DEFAULT_MIN_DATE),
+            date.fromisoformat(ALTERNATE_DEFAULT_DATE),
+            date.fromisoformat(DEFAULT_MIN_DATE),
     ):
         return date.fromisoformat(DEFAULT_MAX_DATE)
     return value
@@ -60,9 +60,9 @@ def transform_null_or_default_date_to_max(value: date | None) -> date:
 
 def transform_default_date_to_null(value: date | None) -> date | None:
     if value in (
-        date.fromisoformat(ALTERNATE_DEFAULT_DATE),
-        date.fromisoformat(DEFAULT_MIN_DATE),
-        date.fromisoformat(DEFAULT_MAX_DATE),
+            date.fromisoformat(ALTERNATE_DEFAULT_DATE),
+            date.fromisoformat(DEFAULT_MIN_DATE),
+            date.fromisoformat(DEFAULT_MAX_DATE),
     ):
         return None
     return value
@@ -137,7 +137,22 @@ def provider_last_name_expr(alias: str, claim_field: str) -> str:
         CASE WHEN {alias}.prvdr_last_name IS NULL OR {alias}.prvdr_last_name IN ('', '~')
         THEN {ALIAS_CLM}.{claim_field}
         ELSE {alias}.prvdr_last_name
-        END"""
+        END
+    """
+
+
+def provider_type_expr(alias: str) -> str:
+    provider_type_organization = "1"
+    provider_type_individual = "2"
+    return f"""
+        CASE 
+            WHEN {alias}.prvdr_npi_num IS NULL 
+            THEN NULL
+            WHEN {alias}.prvdr_lgl_name IS NULL OR {alias}.prvdr_lgl_name IN ('', '~')
+            THEN {provider_type_individual}
+            ELSE {provider_type_organization}
+        END
+    """
 
 
 PRIMARY_KEY = "primary_key"
@@ -212,25 +227,19 @@ class IdrBaseModel(BaseModel, ABC):
     @staticmethod
     @abstractmethod
     def fetch_query(
-        partition: LoadPartition,
-        start_time: datetime,
-        load_mode: LoadMode,
+            partition: LoadPartition,
+            start_time: datetime,
+            load_mode: LoadMode,
     ) -> str:
         """Query used to fetch the data."""
 
     @staticmethod
     @abstractmethod
-    def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
         """Partitions fetch queries of this model to allow for parallel fetching of data via ray.
 
         [] is returned for models that do not do any such partitioning.
         """
-
-    @classmethod
-    def fetch_query_partitions(cls) -> Sequence[LoadPartitionGroup]:
-        if not ENABLE_PARTITIONS:
-            return []
-        return cls._fetch_query_partitions()
 
     @staticmethod
     def computed_keys() -> list[str]:
@@ -297,7 +306,7 @@ class IdrBaseModel(BaseModel, ABC):
 
     @classmethod
     def _map_meta_if_present(
-        cls, key: str, meta_key: str, map_output: Callable[[Any], str]
+            cls, key: str, meta_key: str, map_output: Callable[[Any], str]
     ) -> str | None:
         metadata = cls.model_fields[key].metadata
         extracted = cls._extract_meta(key, meta_key)
@@ -541,7 +550,7 @@ class IdrBeneficiary(IdrBaseModel):
         """
 
     @staticmethod
-    def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
         return [NON_CLAIM_PARTITION]
 
 
@@ -572,14 +581,14 @@ class IdrBeneficiaryMbiId(IdrBaseModel):
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
         return """
-            SELECT {COLUMNS}
-            FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_mbi_id
-            {WHERE_CLAUSE}
-            {ORDER_BY}
-        """
+               SELECT {COLUMNS}
+               FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_mbi_id
+                   {WHERE_CLAUSE}
+                   {ORDER_BY} \
+               """
 
     @staticmethod
-    def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
         return [NON_CLAIM_PARTITION]
 
 
@@ -613,21 +622,21 @@ class IdrBeneficiaryOvershareMbi(IdrBaseModel):
         # one bene_sk that doesn't have a valid xref, we will prevent it from being
         # shown since it may be incorrectly linked to more than one person.
         return """
-            SELECT hstry.bene_mbi_id
-            FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry hstry
-            WHERE NOT EXISTS (
-                SELECT 1
-                FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_xref xref
-                WHERE hstry.bene_xref_efctv_sk = xref.bene_sk
-                AND hstry.bene_sk = xref.bene_xref_sk
-                AND xref.bene_kill_cred_cd = '2'
-            ) AND hstry.bene_mbi_id IS NOT NULL
-            GROUP BY hstry.bene_mbi_id
-            HAVING COUNT(DISTINCT hstry.bene_sk) > 1
-        """
+               SELECT hstry.bene_mbi_id
+               FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry hstry
+               WHERE NOT EXISTS (
+                   SELECT 1
+                   FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_xref xref
+                   WHERE hstry.bene_xref_efctv_sk = xref.bene_sk
+                     AND hstry.bene_sk = xref.bene_xref_sk
+                     AND xref.bene_kill_cred_cd = '2'
+               ) AND hstry.bene_mbi_id IS NOT NULL
+               GROUP BY hstry.bene_mbi_id
+               HAVING COUNT(DISTINCT hstry.bene_sk) > 1 \
+               """
 
     @staticmethod
-    def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
         return [NON_CLAIM_PARTITION]
 
 
@@ -675,7 +684,7 @@ class IdrBeneficiaryThirdParty(IdrBaseModel):
         """
 
     @staticmethod
-    def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
         return [NON_CLAIM_PARTITION]
 
 
@@ -722,7 +731,7 @@ class IdrBeneficiaryStatus(IdrBaseModel):
         """
 
     @staticmethod
-    def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
         return [NON_CLAIM_PARTITION]
 
 
@@ -771,7 +780,7 @@ class IdrBeneficiaryEntitlement(IdrBaseModel):
         """
 
     @staticmethod
-    def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
         return [NON_CLAIM_PARTITION]
 
 
@@ -818,7 +827,7 @@ class IdrBeneficiaryEntitlementReason(IdrBaseModel):
         """
 
     @staticmethod
-    def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
         return [NON_CLAIM_PARTITION]
 
 
@@ -866,7 +875,7 @@ class IdrBeneficiaryDualEligibility(IdrBaseModel):
         """
 
     @staticmethod
-    def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
         return [NON_CLAIM_PARTITION]
 
 
@@ -924,7 +933,7 @@ class IdrContractPbpNumber(IdrBaseModel):
             """
 
     @staticmethod
-    def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
         return [NON_CLAIM_PARTITION]
 
 
@@ -977,7 +986,7 @@ class IdrContractPbpContact(IdrBaseModel):
         """
 
     @staticmethod
-    def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
         return [NON_CLAIM_PARTITION]
 
 
@@ -1034,7 +1043,7 @@ class IdrBeneficiaryMaPartDEnrollment(IdrBaseModel):
         """
 
     @staticmethod
-    def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
         return [NON_CLAIM_PARTITION]
 
 
@@ -1085,7 +1094,7 @@ class IdrBeneficiaryMaPartDEnrollmentRx(IdrBaseModel):
             """
 
     @staticmethod
-    def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
         return [NON_CLAIM_PARTITION]
 
 
@@ -1131,7 +1140,7 @@ class IdrBeneficiaryLowIncomeSubsidy(IdrBaseModel):
             """
 
     @staticmethod
-    def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
         return [NON_CLAIM_PARTITION]
 
 
@@ -1140,7 +1149,7 @@ def _claim_filter(start_time: datetime, partition: LoadPartition) -> str:
     # For part D, we want ALL the claims
     # For other claim types, we can filter only latest claims if LATEST_CLAIMS is enabled
     if LATEST_CLAIMS and (
-        (PartitionType.PART_D | PartitionType.ALL) & partition.partition_type > 0
+            (PartitionType.PART_D | PartitionType.ALL) & partition.partition_type > 0
     ):
         codes = ",".join(str(code) for code in PART_D_CLAIM_TYPE_CODES)
         latest_claim_ind = f" AND ({clm}.clm_ltst_clm_ind = 'Y' OR {clm}.clm_type_cd IN ({codes})) "
@@ -1207,321 +1216,10 @@ def _claim_filter(start_time: datetime, partition: LoadPartition) -> str:
     """
 
 
-class IdrClaimFiss(IdrBaseModel):
-    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, LAST_UPDATED_TIMESTAMP: True}]
-    clm_crnt_stus_cd: Annotated[str, BeforeValidator(transform_null_string)]
-    idr_insrt_ts: Annotated[
-        datetime,
-        {BATCH_TIMESTAMP: True, ALIAS: ALIAS_FISS},
-        BeforeValidator(transform_null_date_to_min),
-    ]
-    idr_updt_ts: Annotated[
-        datetime,
-        {UPDATE_TIMESTAMP: True, ALIAS: ALIAS_FISS},
-        BeforeValidator(transform_null_date_to_min),
-    ]
-
-    @staticmethod
-    def table() -> str:
-        return "idr.claim_fiss"
-
-    @staticmethod
-    def last_updated_date_table() -> str:
-        return CLAIM_TABLE
-
-    @staticmethod
-    def last_updated_date_column() -> list[str]:
-        return ["bfd_claim_updated_ts"]
-
-    @staticmethod
-    def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
-        clm = ALIAS_CLM
-        fiss = ALIAS_FISS
-        return f"""
-            SELECT {{COLUMNS}}
-            FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
-            JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_fiss {fiss} ON
-                {clm}.geo_bene_sk = {fiss}.geo_bene_sk AND
-                {clm}.clm_dt_sgntr_sk = {fiss}.clm_dt_sgntr_sk AND
-                {clm}.clm_type_cd = {fiss}.clm_type_cd AND
-                {clm}.clm_num_sk = {fiss}.clm_num_sk
-            {{WHERE_CLAUSE}} AND {_claim_filter(start_time, partition)}
-            {{ORDER_BY}}
-        """
-
-    @staticmethod
-    def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
-        return INSTITUTIONAL_PAC_PARTITIONS
-
-
 def transform_default_hipps_code(value: str | None) -> str:
     if value is None or value == "00000":
         return ""
     return value
-
-
-class IdrClaimProfessional(IdrBaseModel):
-    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, LAST_UPDATED_TIMESTAMP: True}]
-    clm_carr_pmt_dnl_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_clncl_tril_num: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_mdcr_prfnl_prmry_pyr_amt: Annotated[float, BeforeValidator(transform_null_float)]
-    clm_mdcr_prfnl_prvdr_asgnmt_sw: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_prvdr_acnt_rcvbl_ofst_amt: Annotated[float, BeforeValidator(transform_null_float)]
-    idr_insrt_ts_clm_prfnl: Annotated[
-        datetime,
-        {BATCH_TIMESTAMP: True, ALIAS: ALIAS_PRFNL, COLUMN_MAP: "idr_insrt_ts"},
-        BeforeValidator(transform_null_date_to_min),
-    ]
-    idr_updt_ts_clm_prfnl: Annotated[
-        datetime,
-        {UPDATE_TIMESTAMP: True, ALIAS: ALIAS_PRFNL, COLUMN_MAP: "idr_insrt_ts"},
-        BeforeValidator(transform_null_date_to_min),
-    ]
-    # column from v2_mdcr_clm_lctn_hstry
-    clm_audt_trl_stus_cd: Annotated[
-        str, {ALIAS: ALIAS_LCTN_HSTRY}, BeforeValidator(transform_null_string)
-    ]
-    idr_insrt_ts_lctn_hstry: Annotated[
-        datetime,
-        {BATCH_TIMESTAMP: True, ALIAS: ALIAS_LCTN_HSTRY, COLUMN_MAP: "idr_insrt_ts"},
-        BeforeValidator(transform_null_date_to_min),
-    ]
-    idr_updt_ts_lctn_hstry: Annotated[
-        datetime,
-        {UPDATE_TIMESTAMP: True, ALIAS: ALIAS_LCTN_HSTRY, COLUMN_MAP: "idr_updt_ts"},
-        BeforeValidator(transform_null_date_to_min),
-    ]
-
-    @staticmethod
-    def table() -> str:
-        return "idr.claim_professional"
-
-    @staticmethod
-    def last_updated_date_table() -> str:
-        return CLAIM_TABLE
-
-    @staticmethod
-    def last_updated_date_column() -> list[str]:
-        return ["bfd_claim_updated_ts"]
-
-    @staticmethod
-    def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
-        clm = ALIAS_CLM
-        prfnl = ALIAS_PRFNL
-        lctn_hstry = ALIAS_LCTN_HSTRY
-        return f"""
-            WITH claims AS (
-                    SELECT
-                        {clm}.clm_uniq_id,
-                        {clm}.geo_bene_sk,
-                        {clm}.clm_type_cd,
-                        {clm}.clm_num_sk,
-                        {clm}.clm_dt_sgntr_sk,
-                        {clm}.clm_idr_ld_dt
-                    FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
-                    WHERE {_claim_filter(start_time, partition)}
-                ),
-                latest_clm_lctn_hstry AS (
-                    SELECT
-                        claims.geo_bene_sk,
-                        claims.clm_type_cd,
-                        claims.clm_dt_sgntr_sk,
-                        claims.clm_num_sk,
-                        MAX({lctn_hstry}.clm_lctn_cd_sqnc_num) AS max_clm_lctn_cd_sqnc_num
-                    FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_lctn_hstry {lctn_hstry}
-                    JOIN claims ON
-                        {lctn_hstry}.geo_bene_sk = claims.geo_bene_sk AND
-                        {lctn_hstry}.clm_type_cd = claims.clm_type_cd AND
-                        {lctn_hstry}.clm_dt_sgntr_sk = claims.clm_dt_sgntr_sk AND
-                        {lctn_hstry}.clm_num_sk = claims.clm_num_sk
-                    GROUP BY
-                        claims.geo_bene_sk,
-                        claims.clm_type_cd,
-                        claims.clm_dt_sgntr_sk,
-                        claims.clm_num_sk
-                )
-                SELECT {{COLUMNS}}
-                FROM claims {clm}
-                JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_prfnl {prfnl} ON
-                    {clm}.geo_bene_sk = {prfnl}.geo_bene_sk AND
-                    {clm}.clm_type_cd = {prfnl}.clm_type_cd AND
-                    {clm}.clm_dt_sgntr_sk = {prfnl}.clm_dt_sgntr_sk AND
-                    {clm}.clm_num_sk = {prfnl}.clm_num_sk
-                LEFT JOIN latest_clm_lctn_hstry latest_lctn ON
-                    {clm}.geo_bene_sk = latest_lctn.geo_bene_sk AND
-                    {clm}.clm_type_cd = latest_lctn.clm_type_cd AND
-                    {clm}.clm_dt_sgntr_sk = latest_lctn.clm_dt_sgntr_sk AND
-                    {clm}.clm_num_sk = latest_lctn.clm_num_sk
-                LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_lctn_hstry {lctn_hstry} ON
-                    {clm}.geo_bene_sk = {lctn_hstry}.geo_bene_sk AND
-                    {clm}.clm_type_cd = {lctn_hstry}.clm_type_cd AND
-                    {clm}.clm_dt_sgntr_sk = {lctn_hstry}.clm_dt_sgntr_sk AND
-                    {clm}.clm_num_sk = {lctn_hstry}.clm_num_sk AND
-                    {lctn_hstry}.clm_lctn_cd_sqnc_num = latest_lctn.max_clm_lctn_cd_sqnc_num
-                {{WHERE_CLAUSE}}
-                {{ORDER_BY}}
-        """
-
-    @staticmethod
-    def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
-        return PROFESSIONAL_ADJUDICATED_PARTITIONS + PROFESSIONAL_PAC_PARTITIONS
-
-
-class IdrClaimLineProfessional(IdrBaseModel):
-    clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, LAST_UPDATED_TIMESTAMP: True}]
-    clm_line_num: Annotated[int, {PRIMARY_KEY: True}]
-    clm_bene_prmry_pyr_pd_amt: Annotated[float, BeforeValidator(transform_null_float)]
-    clm_fed_type_srvc_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_line_carr_clncl_lab_num: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_line_carr_hpsa_scrcty_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_line_dmerc_scrn_svgs_amt: Annotated[float, BeforeValidator(transform_null_float)]
-    clm_line_hct_hgb_rslt_num: Annotated[float, BeforeValidator(transform_null_float)]
-    clm_line_hct_hgb_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_line_prfnl_dme_price_amt: Annotated[float, BeforeValidator(transform_null_float)]
-    clm_line_prfnl_mtus_cnt: Annotated[float, BeforeValidator(transform_null_float)]
-    clm_mtus_ind_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_physn_astnt_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_pmt_80_100_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_prcng_lclty_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_prcsg_ind_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_prmry_pyr_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_prvdr_spclty_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_srvc_ddctbl_sw: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_suplr_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_line_prfnl_intrst_amt: Annotated[float, BeforeValidator(transform_null_float)]
-    clm_line_carr_psych_ot_lmt_amt: Annotated[float, BeforeValidator(transform_null_float)]
-    clm_line_carr_clncl_chrg_amt: Annotated[float, BeforeValidator(transform_null_float)]
-    clm_mdcr_prmry_pyr_alowd_amt: Annotated[float, BeforeValidator(transform_null_float)]
-    idr_insrt_ts: Annotated[
-        datetime,
-        {BATCH_TIMESTAMP: True, ALIAS: ALIAS_PRFNL},
-        BeforeValidator(transform_null_date_to_min),
-    ]
-    idr_updt_ts: Annotated[
-        datetime,
-        {UPDATE_TIMESTAMP: True, ALIAS: ALIAS_PRFNL},
-        BeforeValidator(transform_null_date_to_min),
-    ]
-
-    @staticmethod
-    def table() -> str:
-        return "idr.claim_line_professional"
-
-    @staticmethod
-    def last_updated_date_table() -> str:
-        return CLAIM_TABLE
-
-    @staticmethod
-    def last_updated_date_column() -> list[str]:
-        return ["bfd_claim_updated_ts"]
-
-    @staticmethod
-    def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
-        clm = ALIAS_CLM
-        prfnl = ALIAS_PRFNL
-        return f"""
-            SELECT {{COLUMNS}}
-            FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
-            JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_prfnl {prfnl} ON
-                {clm}.geo_bene_sk = {prfnl}.geo_bene_sk AND
-                {clm}.clm_dt_sgntr_sk = {prfnl}.clm_dt_sgntr_sk AND
-                {clm}.clm_type_cd = {prfnl}.clm_type_cd AND
-                {clm}.clm_num_sk = {prfnl}.clm_num_sk
-            {{WHERE_CLAUSE}} AND {_claim_filter(start_time, partition)}
-            {{ORDER_BY}}
-        """
-
-    @staticmethod
-    def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
-        return PROFESSIONAL_ADJUDICATED_PARTITIONS + PROFESSIONAL_PAC_PARTITIONS
-
-
-class IdrClaimLineRx(IdrBaseModel):
-    clm_uniq_id: Annotated[
-        int, {PRIMARY_KEY: True, BATCH_ID: True, ALIAS: ALIAS_CLM, LAST_UPDATED_TIMESTAMP: True}
-    ]
-    clm_line_num: Annotated[int, {PRIMARY_KEY: True, ALIAS: ALIAS_RX_LINE}]
-    clm_brnd_gnrc_cd: Annotated[str, BeforeValidator(transform_null_string)]
-    clm_cmpnd_cd: Annotated[str, BeforeValidator(transform_null_string)]
-    clm_ctstrphc_cvrg_ind_cd: Annotated[str, BeforeValidator(transform_null_string)]
-    clm_daw_prod_slctn_cd: Annotated[str, BeforeValidator(transform_null_string)]
-    clm_drug_cvrg_stus_cd: Annotated[str, BeforeValidator(transform_null_string)]
-    clm_dspnsng_stus_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_line_authrzd_fill_num: Annotated[str, BeforeValidator(transform_null_string)]
-    clm_line_days_suply_qty: Annotated[int, BeforeValidator(transform_null_int)]
-    clm_line_grs_above_thrshld_amt: Annotated[float, BeforeValidator(transform_null_float)]
-    clm_line_grs_blw_thrshld_amt: Annotated[float, BeforeValidator(transform_null_float)]
-    clm_line_ingrdnt_cst_amt: Annotated[float, BeforeValidator(transform_null_float)]
-    clm_line_lis_amt: Annotated[float, BeforeValidator(transform_null_float)]
-    clm_line_plro_amt: Annotated[float, BeforeValidator(transform_null_float)]
-    clm_line_rx_fill_num: Annotated[int, BeforeValidator(transform_null_int)]
-    clm_line_rx_orgn_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_line_sls_tax_amt: Annotated[float, BeforeValidator(transform_null_float)]
-    clm_line_srvc_cst_amt: Annotated[float, BeforeValidator(transform_null_float)]
-    clm_line_troop_tot_amt: Annotated[float, BeforeValidator(transform_null_float)]
-    clm_line_vccn_admin_fee_amt: Annotated[float, BeforeValidator(transform_null_float)]
-    clm_ltc_dspnsng_mthd_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_phrmcy_srvc_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_prcng_excptn_cd: Annotated[str, BeforeValidator(transform_null_string)]
-    clm_ptnt_rsdnc_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_rptd_mftr_dscnt_amt: Annotated[float, BeforeValidator(transform_null_float)]
-    clm_idr_ld_dt: Annotated[date, {INSERT_EXCLUDE: True, HISTORICAL_BATCH_TIMESTAMP: True}]
-    clm_line_rebt_passthru_pos_amt: Annotated[float, BeforeValidator(transform_null_float)]
-    clm_cms_calcd_mftr_dscnt_amt: Annotated[float, BeforeValidator(transform_null_float)]
-    clm_line_grs_cvrd_cst_tot_amt: Annotated[float, BeforeValidator(transform_null_float)]
-    clm_phrmcy_price_dscnt_at_pos_amt: Annotated[float, BeforeValidator(transform_null_float)]
-    clm_line_rptd_gap_dscnt_amt: float
-    idr_insrt_ts: Annotated[
-        datetime,
-        {BATCH_TIMESTAMP: True, ALIAS: ALIAS_RX_LINE},
-        BeforeValidator(transform_null_date_to_min),
-    ]
-    idr_updt_ts: Annotated[
-        datetime,
-        {UPDATE_TIMESTAMP: True, ALIAS: ALIAS_RX_LINE},
-        BeforeValidator(transform_null_date_to_min),
-    ]
-
-    @staticmethod
-    def table() -> str:
-        return "idr.claim_line_rx"
-
-    @staticmethod
-    def last_updated_date_column() -> list[str]:
-        return ["bfd_claim_updated_ts"]
-
-    @staticmethod
-    def last_updated_date_table() -> str:
-        return CLAIM_TABLE
-
-    @staticmethod
-    def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
-        clm = ALIAS_CLM
-        rx_line = ALIAS_RX_LINE
-        line = ALIAS_LINE
-        return f"""
-            SELECT {{COLUMNS}}
-            FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
-            JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_rx {rx_line}
-                ON {rx_line}.geo_bene_sk = {clm}.geo_bene_sk
-                AND {rx_line}.clm_type_cd = {clm}.clm_type_cd
-                AND {rx_line}.clm_num_sk = {clm}.clm_num_sk
-                AND {rx_line}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
-                AND {rx_line}.clm_uniq_id = {clm}.clm_uniq_id
-            JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_line {line}
-                ON {line}.geo_bene_sk = {rx_line}.geo_bene_sk
-                AND {line}.clm_type_cd = {rx_line}.clm_type_cd
-                AND {line}.clm_num_sk = {rx_line}.clm_num_sk
-                AND {line}.clm_dt_sgntr_sk = {rx_line}.clm_dt_sgntr_sk
-                AND {line}.clm_uniq_id = {rx_line}.clm_uniq_id
-                AND {line}.clm_line_num = {rx_line}.clm_line_num
-            {{WHERE_CLAUSE}} AND {_claim_filter(start_time, partition)}
-            {{ORDER_BY}}
-        """
-
-    @staticmethod
-    def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
-        return PART_D_PARTITIONS
 
 
 class IdrProviderHistory(IdrBaseModel):
@@ -1572,7 +1270,7 @@ class IdrProviderHistory(IdrBaseModel):
         """
 
     @staticmethod
-    def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
         return []
 
 
@@ -1614,5 +1312,5 @@ class LoadProgress(IdrBaseModel):
         return self.last_ts <= datetime(2021, 4, 19, tzinfo=UTC)
 
     @staticmethod
-    def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
         return []

@@ -1,4 +1,4 @@
-CREATE TABLE idr_new.claim_professional_shared_systems
+CREATE TABLE idr_new.claim_professional_ss
 (
     clm_uniq_id                    bigint                   NOT NULL PRIMARY KEY,
     --CLAIM DATE SGNTR
@@ -80,7 +80,7 @@ CREATE TABLE idr_new.claim_professional_shared_systems
 --  INSTNL   clm_blg_prvdr_oscar_num      character varying(20)    NOT NULL,
     clm_idr_ld_dt                  date,
     clm_nrln_ric_cd            character varying(1)     NOT NULL,
-    prvdr_srvc_prvdr_npi_num   character varying(20)    NOT NULL,
+    prvdr_srvc_prvdr_npi_num   character varying(20),
 --  DRUG   prvdr_prscrbng_prvdr_npi_num character varying(10)    NOT NULL,
 --     idr_insrt_ts_dcmtn         timestamp with time zone NOT NULL,
 --     idr_updt_ts_dcmtn          timestamp with time zone NOT NULL,
@@ -266,11 +266,11 @@ CREATE TABLE idr_new.claim_professional_nch
     clm_carr_pmt_dnl_cd            character varying(2)
 );
 
-CREATE INDEX ON idr_new.claim_professional_shared_systems(bene_sk);
+CREATE INDEX ON idr_new.claim_professional_ss(bene_sk);
 
 CREATE INDEX ON idr_new.claim_professional_nch(bene_sk);
 
-CREATE TABLE idr_new.claim_item_professional_shared_systems
+CREATE TABLE idr_new.claim_item_professional_ss
 (
     clm_uniq_id                    bigint                   NOT NULL,
     bfd_row_id                     integer                  NOT NULL,
@@ -308,10 +308,10 @@ CREATE TABLE idr_new.claim_item_professional_shared_systems
     clm_val_sqnc_num_prod          integer,
     clm_dgns_prcdr_icd_ind         character varying(1)     NOT NULL,
     clm_dgns_cd                    character varying(7)     NOT NULL,
-    clm_prcdr_cd                   character varying(7)     NOT NULL,
+-- INSTNL    clm_prcdr_cd                   character varying(7)     NOT NULL,
     clm_prod_type_cd               character varying(1)     NOT NULL,
     clm_poa_ind                    character varying(1)     NOT NULL,
-    clm_prcdr_prfrm_dt             date,
+-- INSTNL    clm_prcdr_prfrm_dt             date,
 --     idr_insrt_ts_prod              timestamp with time zone NOT NULL,
 --     idr_updt_ts_prod               timestamp with time zone NOT NULL,
     clm_val_sqnc_num_val           integer,
@@ -425,10 +425,10 @@ CREATE TABLE idr_new.claim_item_professional_nch
     clm_val_sqnc_num_prod          integer,
     clm_dgns_prcdr_icd_ind         character varying(1)     NOT NULL,
     clm_dgns_cd                    character varying(7)     NOT NULL,
-    clm_prcdr_cd                   character varying(7)     NOT NULL,
+-- INSTNL    clm_prcdr_cd                   character varying(7)     NOT NULL,
     clm_prod_type_cd               character varying(1)     NOT NULL,
     clm_poa_ind                    character varying(1)     NOT NULL,
-    clm_prcdr_prfrm_dt             date,
+-- INSTNL    clm_prcdr_prfrm_dt             date,
 --     idr_insrt_ts_prod              timestamp with time zone NOT NULL,
 --     idr_updt_ts_prod               timestamp with time zone NOT NULL,
     clm_val_sqnc_num_val           integer,
@@ -497,13 +497,13 @@ CREATE TABLE idr_new.claim_item_professional_nch
 --    clm_ocrnc_sgntr_sk             numeric,
 --    clm_rlt_ocrnc_sgntr_sk         numeric,
     -- v2_mdcr_clm_line_mcs COLUMNS
-    clm_line_rbndlg_crtfctn_num    character varying(10),
-    clm_line_hct_lvl_num           numeric,
-    clm_line_hgb_lvl_num           numeric,
+-- SS    clm_line_rbndlg_crtfctn_num    character varying(10),
+-- SS    clm_line_hct_lvl_num           numeric,
+-- SS    clm_line_hgb_lvl_num           numeric,
     PRIMARY KEY (clm_uniq_id, bfd_row_id)
 );
 
-CREATE TABLE idr_new.claim_institutional_shared_systems
+CREATE TABLE idr_new.claim_institutional_ss
 (
     clm_uniq_id                bigint                   NOT NULL PRIMARY KEY,
     --CLAIM DATE SGNTR
@@ -669,7 +669,7 @@ CREATE TABLE idr_new.claim_institutional_shared_systems
     clm_audt_trl_stus_cd       character varying(2),
 --  FISS
     clm_crnt_stus_cd           character varying(1)     NOT NULL,
-    clm_pps_ind                character varying(1)     NOT NULL,
+-- SS    clm_pps_ind_cd                character varying(1)     NOT NULL,
     meta_src_sk                integer,
 --     CLM_INSTL Columns
     clm_admsn_type_cd              varchar(2)               not null,
@@ -882,7 +882,7 @@ CREATE TABLE idr_new.claim_institutional_nch
 --     clm_blood_ncvrd_chrg_amt   numeric,
 --     clm_prvdr_intrst_pd_amt    numeric,
     bfd_claim_updated_ts       timestamp with time zone DEFAULT now(),
-    meta_src_sk                integer,
+--    meta_src_sk                integer,
     --     CLM_INSTL Columns
     clm_admsn_type_cd              varchar(2)               not null,
     bene_ptnt_stus_cd              varchar(2)               not null,
@@ -932,12 +932,12 @@ CREATE TABLE idr_new.claim_institutional_nch
 );
 
 
-CREATE INDEX ON idr_new.claim_institutional_shared_systems(bene_sk);
+CREATE INDEX ON idr_new.claim_institutional_ss(bene_sk);
 
 CREATE INDEX ON idr_new.claim_institutional_nch(bene_sk);
 
 
-CREATE TABLE idr_new.claim_item_institutional_shared_systems
+CREATE TABLE idr_new.claim_item_institutional_ss
 (
     clm_uniq_id                 bigint                   NOT NULL,
     bfd_row_id                  integer                  NOT NULL,

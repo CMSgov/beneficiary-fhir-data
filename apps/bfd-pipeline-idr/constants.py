@@ -11,7 +11,9 @@ CLAIM_TABLE = "idr.claim"
 BENEFICIARY_TABLE = "idr.beneficiary"
 CLAIM_RX_TABLE = "idr_new.claim_rx"
 CLAIM_PROFESSIONAL_NCH_TABLE = "idr_new.claim_professional_nch"
+CLAIM_PROFESSIONAL_SS_TABLE = "idr_new.claim_professional_ss"
 CLAIM_INSTITUTIONAL_NCH_TABLE = "idr_new.claim_institutional_nch"
+CLAIM_INSTITUTIONAL_SS_TABLE = "idr_new.claim_institutional_ss"
 
 DEATH_DATE_CUTOFF_YEARS = 4
 
