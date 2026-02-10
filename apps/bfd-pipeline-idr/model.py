@@ -43,8 +43,8 @@ def transform_null_date_to_min(value: date | None) -> date:
 
 def transform_null_or_default_date_to_max(value: date | None) -> date:
     if value is None or value in (
-            date.fromisoformat(ALTERNATE_DEFAULT_DATE),
-            date.fromisoformat(DEFAULT_MIN_DATE),
+        date.fromisoformat(ALTERNATE_DEFAULT_DATE),
+        date.fromisoformat(DEFAULT_MIN_DATE),
     ):
         return date.fromisoformat(DEFAULT_MAX_DATE)
     return value
@@ -52,9 +52,9 @@ def transform_null_or_default_date_to_max(value: date | None) -> date:
 
 def transform_default_date_to_null(value: date | None) -> date | None:
     if value in (
-            date.fromisoformat(ALTERNATE_DEFAULT_DATE),
-            date.fromisoformat(DEFAULT_MIN_DATE),
-            date.fromisoformat(DEFAULT_MAX_DATE),
+        date.fromisoformat(ALTERNATE_DEFAULT_DATE),
+        date.fromisoformat(DEFAULT_MIN_DATE),
+        date.fromisoformat(DEFAULT_MAX_DATE),
     ):
         return None
     return value
@@ -219,9 +219,9 @@ class IdrBaseModel(BaseModel, ABC):
     @staticmethod
     @abstractmethod
     def fetch_query(
-            partition: LoadPartition,
-            start_time: datetime,
-            load_mode: LoadMode,
+        partition: LoadPartition,
+        start_time: datetime,
+        load_mode: LoadMode,
     ) -> str:
         """Query used to fetch the data."""
 
@@ -298,7 +298,7 @@ class IdrBaseModel(BaseModel, ABC):
 
     @classmethod
     def _map_meta_if_present(
-            cls, key: str, meta_key: str, map_output: Callable[[Any], str]
+        cls, key: str, meta_key: str, map_output: Callable[[Any], str]
     ) -> str | None:
         metadata = cls.model_fields[key].metadata
         extracted = cls._extract_meta(key, meta_key)
@@ -1141,7 +1141,7 @@ def claim_filter(start_time: datetime, partition: LoadPartition) -> str:
     # For part D, we want ALL the claims
     # For other claim types, we can filter only latest claims if LATEST_CLAIMS is enabled
     if LATEST_CLAIMS and (
-            (PartitionType.PART_D | PartitionType.ALL) & partition.partition_type > 0
+        (PartitionType.PART_D | PartitionType.ALL) & partition.partition_type > 0
     ):
         codes = ",".join(str(code) for code in PART_D_CLAIM_TYPE_CODES)
         latest_claim_ind = f" AND ({clm}.clm_ltst_clm_ind = 'Y' OR {clm}.clm_type_cd IN ({codes})) "
