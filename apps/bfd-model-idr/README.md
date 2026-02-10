@@ -65,7 +65,10 @@ To start matchbox, run
 ```sh
 docker compose up -d
 ```
-Note, it takes several minutes and requires a good bit of RAM. It'll be ready once it says that packages have been loaded and some obviously untrue amount of RAM (generally half of what it actually used) was used. 
+Note, it takes several minutes and requires a good bit of RAM. It'll be ready once it says that packages have been loaded and some obviously untrue amount of RAM (generally half of what it actually used) was used. Additionally, one can check the logs for "Finished engines during startup" or running a health check using
+```sh
+curl -X GET "http://localhost:8080/matchboxv3/actuator/health"
+```
 
 ### Create FHIR files with synthetic data
 
