@@ -5,6 +5,8 @@ from enum import IntFlag, StrEnum, auto
 
 from dateutil.relativedelta import relativedelta
 
+from settings import ENABLE_PARTITIONS
+
 
 class LoadType(StrEnum):
     INITIAL = "initial"
@@ -38,7 +40,7 @@ class LoadPartitionGroup:
     priority: int = 0
 
     def generate_ranges(self, load_type: LoadType, start_date: date) -> Generator[LoadPartition]:
-        if self.date_interval is None or load_type == LoadType.INCREMENTAL:
+        if self.date_interval is None or not ENABLE_PARTITIONS or load_type == LoadType.INCREMENTAL:
             yield LoadPartition(
                 self.name, self.claim_type_codes, self.partition_type, None, None, self.priority
             )

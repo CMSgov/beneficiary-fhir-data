@@ -80,7 +80,7 @@ CREATE TABLE idr_new.claim_professional_ss
 --  INSTNL   clm_blg_prvdr_oscar_num      character varying(20)    NOT NULL,
     clm_idr_ld_dt                  date,
     clm_nrln_ric_cd            character varying(1)     NOT NULL,
-    prvdr_srvc_prvdr_npi_num   character varying(20)    NOT NULL,
+    prvdr_srvc_prvdr_npi_num   character varying(20),
 --  DRUG   prvdr_prscrbng_prvdr_npi_num character varying(10)    NOT NULL,
 --     idr_insrt_ts_dcmtn         timestamp with time zone NOT NULL,
 --     idr_updt_ts_dcmtn          timestamp with time zone NOT NULL,
@@ -882,7 +882,7 @@ CREATE TABLE idr_new.claim_institutional_nch
 --     clm_blood_ncvrd_chrg_amt   numeric,
 --     clm_prvdr_intrst_pd_amt    numeric,
     bfd_claim_updated_ts       timestamp with time zone DEFAULT now(),
-    meta_src_sk                integer,
+--    meta_src_sk                integer,
     --     CLM_INSTL Columns
     clm_admsn_type_cd              varchar(2)               not null,
     bene_ptnt_stus_cd              varchar(2)               not null,

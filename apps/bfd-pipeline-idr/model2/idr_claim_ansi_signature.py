@@ -98,5 +98,5 @@ class IdrClaimAnsiSignature(IdrBaseModel):
         """
 
     @staticmethod
-    def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
         return [COMBINED_CLAIM_PARTITION]

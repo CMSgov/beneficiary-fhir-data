@@ -687,5 +687,5 @@ class IdrClaimInstitutionalNch(IdrBaseModel):
         """
 
     @staticmethod
-    def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
         return INSTITUTIONAL_ADJUDICATED_PARTITIONS

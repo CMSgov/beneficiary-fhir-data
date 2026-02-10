@@ -21,7 +21,6 @@ from model import (
     IdrClaimFiss,
     IdrClaimLineProfessional,
     IdrClaimLineRx,
-    IdrClaimProfessional,
     IdrContractPbpContact,
     IdrContractPbpNumber,
     IdrProviderHistory,
@@ -37,24 +36,28 @@ from model2.idr_claim_item import IdrClaimItem
 from model2.idr_claim_item_institutional_nch import IdrClaimItemInstitutionalNch
 from model2.idr_claim_item_professional_nch import IdrClaimItemProfessionalNch
 from model2.idr_claim_line_institutional import IdrClaimLineInstitutional
+from model2.idr_claim_professional import IdrClaimProfessional
 from model2.idr_claim_professional_nch import IdrClaimProfessionalNch
+from model2.idr_claim_professional_ss import IdrClaimProfessionalSs
 from model2.idr_claim_rx import IdrClaimRx
 from pipeline_utils import extract_and_load
-from settings import CLAIM_TABLES
+from settings import TABLES_TO_LOAD
 
 type NodePartitionedModelInput = tuple[type[IdrBaseModel], LoadPartition | None]
 
 
-def filter_claim_tables(tables: list[type[IdrBaseModel]]) -> list[type[IdrBaseModel]]:
-    return [t for t in tables if CLAIM_TABLES == [] or t.table() in CLAIM_TABLES]
+def filter_tables(tables: list[type[IdrBaseModel]]) -> list[type[IdrBaseModel]]:
+    return [t for t in tables if TABLES_TO_LOAD == [] or t.table() in TABLES_TO_LOAD]
 
 
 def claim_tables() -> list[type[IdrBaseModel]]:
-    return filter_claim_tables([IdrClaim, IdrClaimProfessionalNch, IdrClaimInstitutionalNch])
+    return filter_tables(
+        [IdrClaim, IdrClaimProfessionalNch, IdrClaimInstitutionalNch, IdrClaimProfessionalSs]
+    )
 
 
 def claim_aux_tables() -> list[type[IdrBaseModel]]:
-    return filter_claim_tables(
+    return filter_tables(
         [
             IdrClaimInstitutional,
             IdrClaimDateSignature,
@@ -74,19 +77,26 @@ def claim_aux_tables() -> list[type[IdrBaseModel]]:
     )
 
 
-BENE_AUX_TABLES = [
-    IdrBeneficiaryStatus,
-    IdrBeneficiaryThirdParty,
-    IdrBeneficiaryEntitlement,
-    IdrBeneficiaryEntitlementReason,
-    IdrBeneficiaryDualEligibility,
-    IdrBeneficiaryMbiId,
-    IdrContractPbpContact,
-    IdrContractPbpNumber,
-    IdrBeneficiaryMaPartDEnrollment,
-    IdrBeneficiaryMaPartDEnrollmentRx,
-    IdrBeneficiaryLowIncomeSubsidy,
-]
+def bene_aux_tables() -> list[type[IdrBaseModel]]:
+    return filter_tables(
+        [
+            IdrBeneficiaryStatus,
+            IdrBeneficiaryThirdParty,
+            IdrBeneficiaryEntitlement,
+            IdrBeneficiaryEntitlementReason,
+            IdrBeneficiaryDualEligibility,
+            IdrBeneficiaryMbiId,
+            IdrContractPbpContact,
+            IdrContractPbpNumber,
+            IdrBeneficiaryMaPartDEnrollment,
+            IdrBeneficiaryMaPartDEnrollmentRx,
+            IdrBeneficiaryLowIncomeSubsidy,
+        ]
+    )
+
+
+def bene_tables() -> list[type[IdrBaseModel]]:
+    return filter_tables([IdrBeneficiary])
 
 
 def _gen_partitioned_node_inputs(
@@ -132,10 +142,12 @@ def stage1(load_mode: LoadMode, start_time: datetime, load_type: LoadType) -> bo
 def stage2_inputs(load_type: LoadType, stage1: bool) -> Parallelizable[NodePartitionedModelInput]:  # noqa: ARG001
     if load_type == LoadType.INITIAL:
         yield from _gen_partitioned_node_inputs(
-            [*claim_aux_tables(), *BENE_AUX_TABLES, *claim_tables(), IdrBeneficiary], load_type
+            [*claim_aux_tables(), *bene_aux_tables(), *claim_tables(), *bene_tables()], load_type
         )
     else:
-        yield from _gen_partitioned_node_inputs([*claim_aux_tables(), *BENE_AUX_TABLES], load_type)
+        yield from _gen_partitioned_node_inputs(
+            [*claim_aux_tables(), *bene_aux_tables()], load_type
+        )
 
 
 # NOTE: it would be good to use @parameterize here, but the multiprocessing executor doesn't handle

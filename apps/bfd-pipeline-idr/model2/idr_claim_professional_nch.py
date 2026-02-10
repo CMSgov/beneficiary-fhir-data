@@ -384,5 +384,5 @@ class IdrClaimProfessionalNch(IdrBaseModel):
         """
 
     @staticmethod
-    def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
+    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
         return PROFESSIONAL_ADJUDICATED_PARTITIONS
