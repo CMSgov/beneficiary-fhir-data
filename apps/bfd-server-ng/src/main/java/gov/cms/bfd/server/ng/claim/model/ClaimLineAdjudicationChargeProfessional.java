@@ -47,6 +47,6 @@ class ClaimLineAdjudicationChargeProfessional {
         AdjudicationChargeType.LINE_PROFESSIONAL_SCREEN_SAVINGS_AMOUNT.toFhirAdjudication(
             screenSavingsAmount),
         AdjudicationChargeType.LINE_PROFESSIONAL_PURCHASE_PRICE_AMOUNT.toFhirAdjudication(
-            purchasePriceAmount));
+            primaryPayerAllowedAmount));
   }
 }

@@ -21,11 +21,9 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 /** Repository methods for claims. */
 // NOTE: @Transactional is needed to ensure our custom transaction manager is used
-@Transactional(readOnly = true)
 @Repository
 @AllArgsConstructor
 public class ClaimNewRepository {

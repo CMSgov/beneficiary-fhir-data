@@ -70,6 +70,7 @@ public abstract class ClaimBase {
     eob.setUse(ExplanationOfBenefit.Use.CLAIM);
     eob.setType(claimTypeCode.toFhirType());
     claimTypeCode.toFhirSubtype().ifPresent(eob::setSubType);
+    claimTypeCode.toFhirAdjudication().ifPresent(eob::addAdjudication);
 
     eob.setMeta(meta.toFhir(claimTypeCode, getClaimSourceId(), securityStatus, finalAction));
     eob.setIdentifier(identifiers.toFhir());

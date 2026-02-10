@@ -30,7 +30,7 @@ import org.hl7.fhir.r4.model.Reference;
  */
 @Getter
 @Entity
-@Table(name = "claim_institutional_shared_systems", schema = "idr_new")
+@Table(name = "claim_institutional_ss", schema = "idr_new")
 public class ClaimInstitutionalSharedSystems extends ClaimBase {
 
   @Column(name = "clm_sbmt_frmt_cd")

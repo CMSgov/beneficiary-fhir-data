@@ -8,30 +8,32 @@ import gov.cms.bfd.server.ng.claim.filter.ClaimTypeCodeFilterParam;
 import gov.cms.bfd.server.ng.claim.filter.LastUpdatedFilterParam;
 import gov.cms.bfd.server.ng.claim.filter.TagCriteriaFilterParam;
 import gov.cms.bfd.server.ng.claim.model.ClaimBase;
+import gov.cms.bfd.server.ng.claim.model.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.ClaimTypeCode;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.input.TagCriterion;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 /** Repository methods for claims. */
 // NOTE: @Transactional is needed to ensure our custom transaction manager is used
-@Transactional(readOnly = true)
 @Repository
 @AllArgsConstructor
 public class ClaimAsyncService {
 
-  private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(ClaimAsyncService.class);
-  private final EntityManager entityManager;
+  private static final Logger LOGGER = LoggerFactory.getLogger(ClaimAsyncService.class);
+  @PersistenceContext private final EntityManager entityManager;
 
   @Async
   protected <T extends ClaimBase> CompletableFuture<Optional<T>> findByIdInClaimType(
@@ -67,11 +69,30 @@ public class ClaimAsyncService {
       List<List<TagCriterion>> tagCriteria,
       List<ClaimTypeCode> claimTypeCodes) {
 
-    LOGGER
-        .atInfo()
-        .setMessage("VIRTUAL THREAD")
-        .addKeyValue("THREAD", Thread.currentThread())
-        .log();
+    boolean isNchOrRx = claimClass.getName().contains("Nch") || claimClass.getName().contains("Rx");
+
+    tagCriteria =
+        tagCriteria.stream().map(ArrayList::new).collect(Collectors.toCollection(ArrayList::new));
+
+    for (var orList : tagCriteria) {
+      for (var it = orList.iterator(); it.hasNext(); ) {
+        var criterion = it.next();
+
+        // if sourceId is used as criteria
+        if (criterion instanceof TagCriterion.SourceIdCriterion(var sourceId) && sourceId != null) {
+
+          boolean isNch = sourceId == ClaimSourceId.NATIONAL_CLAIMS_HISTORY;
+          // if searching by NCH and query is not NCH or RX don't call the query and return empty
+          // results
+          if (isNch != isNchOrRx) {
+            return CompletableFuture.completedFuture(List.of());
+          }
+          // If search by NCH and query is NCH or RX remove Criteria
+          it.remove();
+        }
+      }
+    }
+
     var filterBuilders =
         List.of(
             new BillablePeriodFilterParam(claimThroughDate),
@@ -99,13 +120,15 @@ public class ClaimAsyncService {
                     """,
             baseQuery, filters.filterClause());
 
-    return CompletableFuture.completedFuture(
+    var result =
         withParams(entityManager.createQuery(jpql, claimClass), filters.params())
             .setParameter("beneSk", beneSk)
-            .getResultList());
+            .getResultList();
+
+    return CompletableFuture.completedFuture(result);
   }
 
-  public <T extends DbFilterBuilder> DbFilter getFilters(List<T> builders) {
+  <T extends DbFilterBuilder> DbFilter getFilters(List<T> builders) {
     var sb = new StringBuilder();
     var queryParams = new ArrayList<DbFilterParam>();
     for (var builder : builders) {

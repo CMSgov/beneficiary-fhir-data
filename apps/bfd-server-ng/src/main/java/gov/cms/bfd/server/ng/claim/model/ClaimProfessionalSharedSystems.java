@@ -26,7 +26,7 @@ import org.hl7.fhir.r4.model.Reference;
  */
 @Getter
 @Entity
-@Table(name = "claim_professional_shared_systems", schema = "idr_new")
+@Table(name = "claim_professional_ss", schema = "idr_new")
 @SuppressWarnings("JpaAttributeTypeInspection")
 public class ClaimProfessionalSharedSystems extends ClaimBase {
 

@@ -11,7 +11,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 @Embeddable
 @Getter
-abstract class ClaimInstitutionalSupportingInfoBase {
+class ClaimInstitutionalSupportingInfoBase {
   @Column(name = "clm_admsn_src_cd")
   private Optional<ClaimAdmissionSourceCode> claimAdmissionSourceCode;
 

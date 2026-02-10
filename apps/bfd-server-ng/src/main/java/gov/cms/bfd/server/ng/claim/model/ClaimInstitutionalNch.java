@@ -67,7 +67,10 @@ public class ClaimInstitutionalNch extends ClaimBase {
    */
   @Override
   public Optional<Integer> getDrgCode() {
-    return supportingInfo.getDiagnosisDrgCode().getDiagnosisDrgCode();
+    return supportingInfo
+        .getClaimInstitutionalSupportingInfo()
+        .getDiagnosisDrgCode()
+        .getDiagnosisDrgCode();
   }
 
   /**

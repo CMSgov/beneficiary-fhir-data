@@ -11,7 +11,7 @@ import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.IReadTyped;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import gov.cms.bfd.server.ng.eob.EobHandler;
+import gov.cms.bfd.server.ng.eob.EobNewHandler;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import gov.cms.bfd.server.ng.util.IdrConstants;
@@ -122,7 +122,7 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
           List.of(SystemUrls.CMS_ICD_10_PROCEDURE, ICD10_PROCEDURE),
           List.of(SystemUrls.CMS_ICD_10_PROCEDURE, ICD10_PROCEDURE2));
 
-  @Autowired private EobHandler eobHandler;
+  @Autowired private EobNewHandler eobHandler;
 
   private IQuery<Bundle> searchBundle(long patient, SamhsaCertType samhsaCertType) {
     return searchBundle(String.valueOf(patient), samhsaCertType);

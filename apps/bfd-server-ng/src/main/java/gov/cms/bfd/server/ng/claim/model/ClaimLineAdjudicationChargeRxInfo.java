@@ -74,30 +74,14 @@ class ClaimLineAdjudicationChargeRxInfo {
     var adjudicationComponent =
         new ArrayList<>(
             List.of(
-                AdjudicationChargeType.GAP_DISCOUNT_AMOUNT.toFhirAdjudication(gapDiscountAmount),
-                AdjudicationChargeType.VACCINATION_ADMIN_FEE.toFhirAdjudication(
-                    vaccineAdminFeeAmount),
-                AdjudicationChargeType.OTHER_AMOUNT.toFhirAdjudication(
-                    otherTrueOutOfPockPaidAmount),
-                AdjudicationChargeType.DISPENSING_FEE.toFhirAdjudication(dispensingFeeAmount),
-                AdjudicationChargeType.SALES_TAX_AMOUNT.toFhirAdjudication(salesTaxAmount),
                 AdjudicationChargeType.PATIENT_LIABILITY_REDUCT_AMOUNT.toFhirAdjudication(
                     patientLiabReductPaidAmount),
                 AdjudicationChargeType.LOW_INCOME_COST_SHARE_SUB_AMOUNT.toFhirAdjudication(
                     lowIncomeCostShareSubAmount),
-                AdjudicationChargeType.INGREDIENT_COST_AMOUNT.toFhirAdjudication(
-                    ingredientCostAmount),
                 AdjudicationChargeType.GROSS_DRUG_COST_BLW_THRESHOLD_AMOUNT.toFhirAdjudication(
                     grossCostBelowThresholdAmount),
                 AdjudicationChargeType.GROSS_DRUG_COST_ABOVE_THRESHOLD_AMOUNT.toFhirAdjudication(
                     grossCostAboveThresholdAmount),
-                AdjudicationChargeType.LINE_RX_GROSS_COVERED_COST_AMOUNT.toFhirAdjudication(
-                    grossCoveredCostAmount),
-                AdjudicationChargeType.LINE_RX_MANUFACTURER_DISCOUNT_AMOUNT.toFhirAdjudication(
-                    manufacturerDiscountAmount),
-                AdjudicationChargeType.LINE_RX_REBATE_PASSTHROUGH_POS_AMOUNT.toFhirAdjudication(
-                    rebatePassthroughPOSAmount),
-                AdjudicationChargeType.LINE_RX_PRICE_AMOUNT.toFhirAdjudication(priceAmount),
                 AdjudicationChargeType.LINE_BENE_PAYMENT_AMOUNT.toFhirAdjudication(
                     benePaymentAmount),
                 AdjudicationChargeType.LINE_COVERED_PAID_AMOUNT.toFhirAdjudication(

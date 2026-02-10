@@ -2,6 +2,7 @@ package gov.cms.bfd.server.ng.claim.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import jakarta.persistence.Embedded;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -10,7 +11,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 @Embeddable
 @Getter
-class ClaimInstitutionalNchSupportingInfo extends ClaimInstitutionalSupportingInfoBase {
+class ClaimInstitutionalNchSupportingInfo {
 
   @Column(name = "clm_hha_lup_ind_cd")
   private Optional<HhaLupaIndicatorCode> hhaLupaIndicatorCode;
@@ -24,14 +25,19 @@ class ClaimInstitutionalNchSupportingInfo extends ClaimInstitutionalSupportingIn
   @Column(name = "clm_op_srvc_type_cd")
   private Optional<ClaimOutpatientServiceTypeCode> claimOutpatientServiceTypeCode;
 
+  @Embedded ClaimInstitutionalSupportingInfoBase claimInstitutionalSupportingInfo;
+
   List<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {
-    return Stream.of(
-            hhaLupaIndicatorCode.map(s -> s.toFhir(supportingInfoFactory)),
-            hhaReferralCode.map(s -> s.toFhir(supportingInfoFactory)),
-            ppsIndicatorCode.map(c -> c.toFhir(supportingInfoFactory)),
-            claimOutpatientServiceTypeCode.map(c -> c.toFhir(supportingInfoFactory)))
-        .flatMap(Optional::stream)
+
+    return Stream.concat(
+            claimInstitutionalSupportingInfo.toFhir(supportingInfoFactory).stream(),
+            Stream.of(
+                    hhaLupaIndicatorCode.map(s -> s.toFhir(supportingInfoFactory)),
+                    hhaReferralCode.map(s -> s.toFhir(supportingInfoFactory)),
+                    ppsIndicatorCode.map(c -> c.toFhir(supportingInfoFactory)),
+                    claimOutpatientServiceTypeCode.map(c -> c.toFhir(supportingInfoFactory)))
+                .flatMap(Optional::stream))
         .toList();
   }
 }
