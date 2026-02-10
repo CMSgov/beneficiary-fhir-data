@@ -715,7 +715,7 @@ CREATE TABLE idr_new.claim_institutional_shared_systems
     clm_hac_rdctn_pymt_amt         numeric,
     clm_mdcr_ip_1st_yr_rate_amt    numeric,
     clm_site_ntrl_cst_bsd_pymt_amt numeric,
-    clm_ss_outlier_std_pymt_amt    numeric,
+    clm_ss_outlier_std_pymt_amt    numeric
 --  NCH   clm_op_srvc_type_cd            varchar(1)
 );
 

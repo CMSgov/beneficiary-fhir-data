@@ -18,7 +18,6 @@ from model import (
     IdrBeneficiaryOvershareMbi,
     IdrBeneficiaryStatus,
     IdrBeneficiaryThirdParty,
-    IdrClaimAnsiSignature,
     IdrClaimFiss,
     IdrClaimLineProfessional,
     IdrClaimLineRx,
@@ -30,6 +29,7 @@ from model import (
     get_min_transaction_date,
 )
 from model2.idr_claim import IdrClaim
+from model2.idr_claim_ansi_signature import IdrClaimAnsiSignature
 from model2.idr_claim_date_signature import IdrClaimDateSignature
 from model2.idr_claim_institutional import IdrClaimInstitutional
 from model2.idr_claim_institutional_nch import IdrClaimInstitutionalNch

@@ -132,7 +132,6 @@ class IdrClaimRx(IdrBaseModel):
     clm_idr_ld_dt: Annotated[date, {HISTORICAL_BATCH_TIMESTAMP: True, ALIAS: ALIAS_CLM}]
 
     # Columns from v2_mdcr_clm_line
-    clm_line_ansthsa_unit_cnt: Annotated[float | None, {ALIAS: ALIAS_LINE}]
     clm_line_bene_pmt_amt: Annotated[float | None, {ALIAS: ALIAS_LINE}]
     clm_line_cvrd_pd_amt: Annotated[float | None, {ALIAS: ALIAS_LINE}]
     clm_line_from_dt: Annotated[date, {ALIAS: ALIAS_LINE}]

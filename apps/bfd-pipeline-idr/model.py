@@ -163,6 +163,7 @@ ALIAS_LINE_MCS = "line_mcs"
 ALIAS_LINE_PRFNL = "line_prfnl"
 ALIAS_LINE_INSTNL = "line_instnl"
 ALIAS_SGNTR = "sgntr"
+ALIAS_ANSI_SGNTR = "ansi_sgntr"
 ALIAS_LINE = "line"
 ALIAS_RX_LINE = "rx_line"
 ALIAS_FISS = "fiss"
@@ -1257,48 +1258,6 @@ def transform_default_hipps_code(value: str | None) -> str:
     if value is None or value == "00000":
         return ""
     return value
-
-
-class IdrClaimAnsiSignature(IdrBaseModel):
-    clm_ansi_sgntr_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
-    clm_1_rev_cntr_ansi_grp_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_2_rev_cntr_ansi_grp_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_3_rev_cntr_ansi_grp_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_4_rev_cntr_ansi_grp_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_1_rev_cntr_ansi_rsn_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_2_rev_cntr_ansi_rsn_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_3_rev_cntr_ansi_rsn_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_4_rev_cntr_ansi_rsn_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    idr_insrt_ts: Annotated[
-        datetime, {BATCH_TIMESTAMP: True}, BeforeValidator(transform_null_date_to_min)
-    ]
-    idr_updt_ts: Annotated[
-        datetime, {UPDATE_TIMESTAMP: True}, BeforeValidator(transform_null_date_to_min)
-    ]
-
-    @staticmethod
-    def table() -> str:
-        return "idr.claim_ansi_signature"
-
-    @staticmethod
-    def last_updated_date_table() -> str:
-        return ""
-
-    @staticmethod
-    def last_updated_date_column() -> list[str]:
-        return []
-
-    @staticmethod
-    def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
-        return """
-            SELECT {COLUMNS_NO_ALIAS}
-            FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_ansi_sgntr
-            {WHERE_CLAUSE}
-        """
-
-    @staticmethod
-    def _fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
-        return [COMBINED_CLAIM_PARTITION]
 
 
 class IdrClaimProfessional(IdrBaseModel):
