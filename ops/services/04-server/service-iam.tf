@@ -92,48 +92,6 @@ data "aws_iam_policy_document" "ssm_params" {
   }
 }
 
-data "aws_iam_policy_document" "adot" {
-  statement {
-    sid = "ReadAndListTasks"
-
-    actions = [
-      "ecs:ListTasks",
-      "ecs:DescribeContainerInstances",
-      "ecs:DescribeTasks"
-    ]
-
-    resources = [
-      "arn:aws:ecs:${local.region}:${local.account_id}:service/${data.aws_ecs_cluster.main.cluster_name}/${local.service}",
-      "arn:aws:ecs:${local.region}:${local.account_id}:task/${data.aws_ecs_cluster.main.cluster_name}/*",
-      "arn:aws:ecs:${local.region}:${local.account_id}:container-instance/${data.aws_ecs_cluster.main.cluster_name}/*"
-    ]
-  }
-
-  statement {
-    sid = "ListAndDescribeServices"
-
-    actions = [
-      "ecs:ListServices",
-      "ecs:DescribeServices"
-    ]
-    resources = ["arn:aws:ecs:${local.region}:${local.account_id}:service/${data.aws_ecs_cluster.main.cluster_name}/${local.service}"]
-  }
-
-  statement {
-    sid = "DescribeTaskDefinitions"
-
-    actions   = ["ecs:DescribeTaskDefinition", ]
-    resources = ["arn:aws:ecs:${local.region}:${local.account_id}:task-definition/${local.service}:*"]
-  }
-}
-
-resource "aws_iam_policy" "adot" {
-  name        = "${local.name_prefix}-adot-policy"
-  path        = local.iam_path
-  description = "Permissions for AWS ADOT to access ECS task information for telemetry"
-  policy      = data.aws_iam_policy_document.adot.json
-}
-
 resource "aws_iam_policy" "ssm_params" {
   name        = "${local.name_prefix}-ssm-params-policy"
   path        = local.iam_path
@@ -167,7 +125,6 @@ resource "aws_iam_role_policy_attachment" "service_role" {
     rds           = aws_iam_policy.rds.arn
     logs          = aws_iam_policy.logs.arn
     ssm_params    = aws_iam_policy.ssm_params.arn
-    adot          = aws_iam_policy.adot.arn
   }
 
   role       = aws_iam_role.service_role.name
