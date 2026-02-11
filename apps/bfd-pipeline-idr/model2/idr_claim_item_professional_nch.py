@@ -20,7 +20,6 @@ from model import (
     ALIAS_LINE_PRFNL,
     ALIAS_PROCEDURE,
     ALIAS_PRVDR_RNDRNG,
-    ALIAS_VAL,
     BATCH_ID,
     BATCH_TIMESTAMP,
     COLUMN_MAP,
@@ -139,21 +138,6 @@ class IdrClaimItemProfessionalNch(IdrBaseModel):
             INSERT_EXCLUDE: True,
             COLUMN_MAP: "idr_updt_ts",
         },
-        BeforeValidator(transform_null_date_to_min),
-    ]
-
-    # columns from V2_MDCR_CLM_VAL
-    clm_val_sqnc_num_val: Annotated[int | None, {ALIAS: ALIAS_VAL, COLUMN_MAP: "clm_val_sqnc_num"}]
-    clm_val_cd: Annotated[str, {ALIAS: ALIAS_VAL}, BeforeValidator(transform_default_string)]
-    clm_val_amt: Annotated[float | None, {ALIAS: ALIAS_VAL}]
-    idr_insrt_ts_val: Annotated[
-        datetime,
-        {BATCH_TIMESTAMP: True, ALIAS: ALIAS_VAL, INSERT_EXCLUDE: True, COLUMN_MAP: "idr_insrt_ts"},
-        BeforeValidator(transform_null_date_to_min),
-    ]
-    idr_updt_ts_val: Annotated[
-        datetime,
-        {UPDATE_TIMESTAMP: True, ALIAS: ALIAS_VAL, INSERT_EXCLUDE: True, COLUMN_MAP: "idr_updt_ts"},
         BeforeValidator(transform_null_date_to_min),
     ]
 
@@ -359,7 +343,6 @@ class IdrClaimItemProfessionalNch(IdrBaseModel):
         clm_grp = ALIAS_CLM_GRP
         prod = ALIAS_PROCEDURE
         line = ALIAS_LINE
-        val = ALIAS_VAL
         line_dcmtn = ALIAS_LINE_DCMTN
         line_prfnl = ALIAS_LINE_PRFNL
         prvdr_rndrng = ALIAS_PRVDR_RNDRNG
@@ -438,30 +421,12 @@ class IdrClaimItemProfessionalNch(IdrBaseModel):
                         AND {prod}.clm_num_sk = {clm}.clm_num_sk
                         AND {prod}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
                 ),
-                claim_vals AS {not_materialized} (
-                    SELECT
-                        {clm}.clm_uniq_id,
-                        {val}.*,
-                        ROW_NUMBER() OVER (
-                            PARTITION BY {clm}.clm_uniq_id
-                            ORDER BY {val}.clm_val_sqnc_num
-                        ) AS bfd_row_id
-                    FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_val {val}
-                    JOIN claims {clm}
-                        ON {val}.geo_bene_sk = {clm}.geo_bene_sk
-                        AND {val}.clm_type_cd = {clm}.clm_type_cd
-                        AND {val}.clm_num_sk = {clm}.clm_num_sk
-                        AND {val}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
-                ),
                 claim_groups AS (
                     SELECT clm_uniq_id, bfd_row_id
                     FROM claim_lines
                     UNION
                     SELECT clm_uniq_id, bfd_row_id
                     FROM claim_procedures
-                    UNION
-                    SELECT clm_uniq_id, bfd_row_id
-                    FROM claim_vals
                 )
                 SELECT {{COLUMNS}}
                 FROM claims {clm}
@@ -479,12 +444,6 @@ class IdrClaimItemProfessionalNch(IdrBaseModel):
                     AND {prod}.clm_num_sk = {clm}.clm_num_sk
                     AND {prod}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
                     AND {prod}.bfd_row_id = {clm_grp}.bfd_row_id
-                LEFT JOIN claim_vals {val}
-                    ON {val}.geo_bene_sk = {clm}.geo_bene_sk
-                    AND {val}.clm_type_cd = {clm}.clm_type_cd
-                    AND {val}.clm_num_sk = {clm}.clm_num_sk
-                    AND {val}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
-                    AND {val}.bfd_row_id = {clm_grp}.bfd_row_id
                 LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_prfnl {line_prfnl}
                     ON {line_prfnl}.geo_bene_sk = {line}.geo_bene_sk
                     AND {line_prfnl}.clm_type_cd = {line}.clm_type_cd
