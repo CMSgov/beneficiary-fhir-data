@@ -29,6 +29,7 @@ class EobValidityIT extends IntegrationTestBase {
     assertTrue(eob.hasUse(), "EOB should have use");
     assertFalse(
         eob.getMeta().getProfile().isEmpty(), "EOB Meta must have at least one Profile defined");
+    assertFalse(eob.hasExtension());
 
     var hasCarinProfile =
         eob.getMeta().getProfile().stream()
@@ -53,6 +54,22 @@ class EobValidityIT extends IntegrationTestBase {
     // EOB do not require diagnoses (for example, pharmacy).
     if (eob.hasDiagnosis()) {
       validateDiagnosis(eob);
+    }
+
+    // TODO: REMOVE this exception in BFD-4544 // NOSONAR
+    var isPharmacy =
+        eob.getType().getCoding().stream()
+            .anyMatch(
+                c ->
+                    "http://terminology.hl7.org/CodeSystem/claim-type".equals(c.getSystem())
+                        && "pharmacy".equals(c.getCode()));
+
+    if (!isPharmacy) {
+      assertTrue(
+          eob.getAdjudication().stream()
+              .flatMap(a -> a.getCategory().getCoding().stream())
+              .anyMatch(c -> "benefitpaymentstatus".equals(c.getCode())),
+          "EOB should have header-level adjudication benefitpaymentstatus");
     }
   }
 

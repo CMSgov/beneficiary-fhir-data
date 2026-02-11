@@ -39,6 +39,19 @@ WITH report_params AS (
       'app_fhir_v2_eob_since_call_synthetic_count',
       'app_fhir_v2_coverage_since_call_real_count',
       'app_fhir_v2_coverage_since_call_synthetic_count',
+      'app_fhir_v3_call_real_count',
+      'app_fhir_v3_call_synthetic_count',
+      'app_fhir_v3_eob_call_real_count',
+      'app_fhir_v3_eob_call_synthetic_count',
+      'app_fhir_v3_coverage_call_real_count',
+      'app_fhir_v3_coverage_call_synthetic_count',
+      'app_fhir_v3_patient_call_real_count',
+      'app_fhir_v3_patient_call_synthetic_count',
+      'app_fhir_v3_metadata_call_count',
+      'app_fhir_v3_eob_since_call_real_count',
+      'app_fhir_v3_eob_since_call_synthetic_count',
+      'app_fhir_v3_coverage_since_call_real_count',
+      'app_fhir_v3_coverage_since_call_synthetic_count',
       'app_auth_ok_real_bene_count',
       'app_auth_ok_synthetic_bene_count',
       'app_auth_ok_real_bene_distinct_count',
@@ -160,7 +173,7 @@ perf_mon_events AS (
 request_response_middleware_events AS (
   select
     *,
-    json_extract(user, '$$.crosswalk.fhir_id') as crosswalk_fhir_id
+    json_extract(user, '$$.crosswalk.fhir_id_v2') as crosswalk_fhir_id
   from
     perf_mon_events
   WHERE
@@ -172,6 +185,7 @@ request_response_middleware_events AS (
           OR path = '/mymedicare/sls-callback'
           OR path LIKE '/v1/fhir%'
           OR path LIKE '/v2/fhir%'
+          OR path LIKE '/v3/fhir%'
           OR path LIKE '/v%/o/token%/'
         )
     )
@@ -180,7 +194,7 @@ request_response_middleware_events AS (
 api_audit_events AS (
   select
     *,
-    json_extract(user, '$$.crosswalk.fhir_id') as crosswalk_fhir_id
+    json_extract(user, '$$.crosswalk.fhir_id_v2') as crosswalk_fhir_id
   from
     perf_mon_events
   WHERE
@@ -385,6 +399,34 @@ SELECT
   COALESCE(t33.app_fhir_v2_coverage_since_call_synthetic_count, 0)
     app_fhir_v2_coverage_since_call_synthetic_count,
 
+  /* FHIR V3 per application */
+  COALESCE(t34.app_fhir_v3_call_real_count, 0)
+    app_fhir_v3_call_real_count,
+  COALESCE(t35.app_fhir_v3_call_synthetic_count, 0)
+    app_fhir_v3_call_synthetic_count,
+  COALESCE(t36.app_fhir_v3_eob_call_real_count, 0)
+    app_fhir_v3_eob_call_real_count,
+  COALESCE(t37.app_fhir_v3_eob_call_synthetic_count, 0)
+    app_fhir_v3_eob_call_synthetic_count,
+  COALESCE(t38.app_fhir_v3_coverage_call_real_count, 0)
+    app_fhir_v3_coverage_call_real_count,
+  COALESCE(t39.app_fhir_v3_coverage_call_synthetic_count, 0)
+    app_fhir_v3_coverage_call_synthetic_count,
+  COALESCE(t40.app_fhir_v3_patient_call_real_count, 0)
+    app_fhir_v3_patient_call_real_count,
+  COALESCE(t41.app_fhir_v3_patient_call_synthetic_count, 0)
+    app_fhir_v3_patient_call_synthetic_count,
+  COALESCE(t42.app_fhir_v3_metadata_call_count, 0)
+    app_fhir_v3_metadata_call_count,
+  COALESCE(t43.app_fhir_v3_eob_since_call_real_count, 0)
+    app_fhir_v3_eob_since_call_real_count,
+  COALESCE(t44.app_fhir_v3_eob_since_call_synthetic_count, 0)
+    app_fhir_v3_eob_since_call_synthetic_count,
+  COALESCE(t45.app_fhir_v3_coverage_since_call_real_count, 0)
+    app_fhir_v3_coverage_since_call_real_count,
+  COALESCE(t46.app_fhir_v3_coverage_since_call_synthetic_count, 0)
+    app_fhir_v3_coverage_since_call_synthetic_count,
+
   /* AUTH per applicaiton */
   COALESCE(t101.app_auth_ok_real_bene_count, 0)
     app_auth_ok_real_bene_count,
@@ -519,7 +561,7 @@ FROM
         AND path LIKE '/v1/fhir%'
         AND request_method = 'GET'
         AND response_code = 200
-        AND try_cast(fhir_id as BIGINT) > 0
+        AND try_cast(fhir_id_v2 as BIGINT) > 0
       )
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
@@ -543,7 +585,7 @@ FROM
         AND path LIKE '/v1/fhir%'
         AND request_method = 'GET'
         AND response_code = 200
-        AND try_cast(fhir_id as BIGINT) < 0
+        AND try_cast(fhir_id_v2 as BIGINT) < 0
       )
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
@@ -568,7 +610,7 @@ FROM
         AND path LIKE '/v1/fhir/ExplanationOfBenefit%'
         AND request_method = 'GET'
         AND response_code = 200
-        AND try_cast(fhir_id as BIGINT) > 0
+        AND try_cast(fhir_id_v2 as BIGINT) > 0
       )
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
@@ -592,7 +634,7 @@ FROM
         AND path LIKE '/v1/fhir/ExplanationOfBenefit%'
         AND request_method = 'GET'
         AND response_code = 200
-        AND try_cast(fhir_id as BIGINT) < 0
+        AND try_cast(fhir_id_v2 as BIGINT) < 0
       )
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
@@ -616,7 +658,7 @@ FROM
         AND path LIKE '/v1/fhir/Coverage%'
         AND request_method = 'GET'
         AND response_code = 200
-        AND try_cast(fhir_id as BIGINT) > 0
+        AND try_cast(fhir_id_v2 as BIGINT) > 0
       )
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
@@ -640,7 +682,7 @@ FROM
         AND path LIKE '/v1/fhir/Coverage%'
         AND request_method = 'GET'
         AND response_code = 200
-        AND try_cast(fhir_id as BIGINT) < 0
+        AND try_cast(fhir_id_v2 as BIGINT) < 0
       )
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
@@ -664,7 +706,7 @@ FROM
         AND path LIKE '/v1/fhir/Patient%'
         AND request_method = 'GET'
         AND response_code = 200
-        AND try_cast(fhir_id as BIGINT) > 0
+        AND try_cast(fhir_id_v2 as BIGINT) > 0
       )
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
@@ -688,7 +730,7 @@ FROM
         AND path LIKE '/v1/fhir/Patient%'
         AND request_method = 'GET'
         AND response_code = 200
-        AND try_cast(fhir_id as BIGINT) < 0
+        AND try_cast(fhir_id_v2 as BIGINT) < 0
       )
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
@@ -737,7 +779,7 @@ FROM
 
         AND request_method = 'GET'
         AND response_code = 200
-        AND try_cast(fhir_id as BIGINT) > 0
+        AND try_cast(fhir_id_v2 as BIGINT) > 0
       )
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
@@ -763,7 +805,7 @@ FROM
 
         AND request_method = 'GET'
         AND response_code = 200
-        AND try_cast(fhir_id as BIGINT) < 0
+        AND try_cast(fhir_id_v2 as BIGINT) < 0
       )
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
@@ -789,7 +831,7 @@ FROM
 
         AND request_method = 'GET'
         AND response_code = 200
-        AND try_cast(fhir_id as BIGINT) > 0
+        AND try_cast(fhir_id_v2 as BIGINT) > 0
       )
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
@@ -815,7 +857,7 @@ FROM
 
         AND request_method = 'GET'
         AND response_code = 200
-        AND try_cast(fhir_id as BIGINT) < 0
+        AND try_cast(fhir_id_v2 as BIGINT) < 0
       )
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
@@ -841,7 +883,7 @@ FROM
         AND path LIKE '/v2/fhir%'
         AND request_method = 'GET'
         AND response_code = 200
-        AND try_cast(fhir_id as BIGINT) > 0
+        AND try_cast(fhir_id_v2 as BIGINT) > 0
       )
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
@@ -865,7 +907,7 @@ FROM
         AND path LIKE '/v2/fhir%'
         AND request_method = 'GET'
         AND response_code = 200
-        AND try_cast(fhir_id as BIGINT) < 0
+        AND try_cast(fhir_id_v2 as BIGINT) < 0
       )
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
@@ -889,7 +931,7 @@ FROM
         AND path LIKE '/v2/fhir/ExplanationOfBenefit%'
         AND request_method = 'GET'
         AND response_code = 200
-        AND try_cast(fhir_id as BIGINT) > 0
+        AND try_cast(fhir_id_v2 as BIGINT) > 0
       )
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
@@ -913,7 +955,7 @@ FROM
         AND path LIKE '/v2/fhir/ExplanationOfBenefit%'
         AND request_method = 'GET'
         AND response_code = 200
-        AND try_cast(fhir_id as BIGINT) < 0
+        AND try_cast(fhir_id_v2 as BIGINT) < 0
       )
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
@@ -937,7 +979,7 @@ FROM
         AND path LIKE '/v2/fhir/Coverage%'
         AND request_method = 'GET'
         AND response_code = 200
-        AND try_cast(fhir_id as BIGINT) > 0
+        AND try_cast(fhir_id_v2 as BIGINT) > 0
       )
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
@@ -961,7 +1003,7 @@ FROM
         AND path LIKE '/v2/fhir/Coverage%'
         AND request_method = 'GET'
         AND response_code = 200
-        AND try_cast(fhir_id as BIGINT) < 0
+        AND try_cast(fhir_id_v2 as BIGINT) < 0
       )
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
@@ -985,7 +1027,7 @@ FROM
         AND path LIKE '/v2/fhir/Patient%'
         AND request_method = 'GET'
         AND response_code = 200
-        AND try_cast(fhir_id as BIGINT) > 0
+        AND try_cast(fhir_id_v2 as BIGINT) > 0
       )
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
@@ -1009,7 +1051,7 @@ FROM
         AND path LIKE '/v2/fhir/Patient%'
         AND request_method = 'GET'
         AND response_code = 200
-        AND try_cast(fhir_id as BIGINT) < 0
+        AND try_cast(fhir_id_v2 as BIGINT) < 0
       )
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
@@ -1058,7 +1100,7 @@ FROM
 
         AND request_method = 'GET'
         AND response_code = 200
-        AND try_cast(fhir_id as BIGINT) > 0
+        AND try_cast(fhir_id_v2 as BIGINT) > 0
       )
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
@@ -1084,7 +1126,7 @@ FROM
 
         AND request_method = 'GET'
         AND response_code = 200
-        AND try_cast(fhir_id as BIGINT) < 0
+        AND try_cast(fhir_id_v2 as BIGINT) < 0
       )
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
@@ -1111,7 +1153,7 @@ FROM
 
         AND request_method = 'GET'
         AND response_code = 200
-        AND try_cast(fhir_id as BIGINT) > 0
+        AND try_cast(fhir_id_v2 as BIGINT) > 0
       )
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
@@ -1137,12 +1179,333 @@ FROM
 
         AND request_method = 'GET'
         AND response_code = 200
-        AND try_cast(fhir_id as BIGINT) < 0
+        AND try_cast(fhir_id_v2 as BIGINT) < 0
       )
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
   ) t33 ON t33.app_name = t0.name 
+
+  /* V3 FHIR resource stats per application */
+  LEFT JOIN
+  (
+    SELECT
+      COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
+        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
+        NULLIF(resp_app_name,'')) as app_name,
+      count(*) as app_fhir_v3_call_real_count
+    FROM
+      request_response_middleware_events
+    WHERE
+      (
+        CONTAINS((SELECT enabled_metrics_list FROM report_params),
+          'app_fhir_v3_call_real_count')
+
+        AND path LIKE '/v3/fhir%'
+        AND request_method = 'GET'
+        AND response_code = 200
+        AND try_cast(fhir_id_v2 as BIGINT) > 0
+      )
+    GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
+        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
+        NULLIF(resp_app_name,''))
+  ) t34 ON t34.app_name = t0.name 
+
+  LEFT JOIN
+  (
+    SELECT
+      COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
+        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
+        NULLIF(resp_app_name,'')) as app_name,
+      count(*) as app_fhir_v3_call_synthetic_count
+    FROM
+      request_response_middleware_events
+    WHERE
+      (
+        CONTAINS((SELECT enabled_metrics_list FROM report_params),
+          'app_fhir_v3_call_synthetic_count')
+
+        AND path LIKE '/v3/fhir%'
+        AND request_method = 'GET'
+        AND response_code = 200
+        AND try_cast(fhir_id_v2 as BIGINT) < 0
+      )
+    GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
+        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
+        NULLIF(resp_app_name,''))
+  ) t35 ON t35.app_name = t0.name 
+
+  LEFT JOIN
+  (
+    SELECT
+      COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
+        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
+        NULLIF(resp_app_name,'')) as app_name,
+      count(*) as app_fhir_v3_eob_call_real_count
+    FROM
+      request_response_middleware_events
+    WHERE
+      (
+        CONTAINS((SELECT enabled_metrics_list FROM report_params),
+          'app_fhir_v3_eob_call_real_count')
+
+        AND path LIKE '/v3/fhir/ExplanationOfBenefit%'
+        AND request_method = 'GET'
+        AND response_code = 200
+        AND try_cast(fhir_id_v2 as BIGINT) > 0
+      )
+    GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
+        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
+        NULLIF(resp_app_name,''))
+  ) t36 ON t36.app_name = t0.name 
+
+  LEFT JOIN
+  (
+    SELECT
+      COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
+        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
+        NULLIF(resp_app_name,'')) as app_name,
+      count(*) as app_fhir_v3_eob_call_synthetic_count
+    FROM
+      request_response_middleware_events
+    WHERE
+      (
+        CONTAINS((SELECT enabled_metrics_list FROM report_params),
+          'app_fhir_v3_eob_call_synthetic_count')
+
+        AND path LIKE '/v3/fhir/ExplanationOfBenefit%'
+        AND request_method = 'GET'
+        AND response_code = 200
+        AND try_cast(fhir_id_v2 as BIGINT) < 0
+      )
+    GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
+        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
+        NULLIF(resp_app_name,''))
+  ) t37 ON t37.app_name = t0.name 
+
+  LEFT JOIN
+  (
+    SELECT
+      COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
+        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
+        NULLIF(resp_app_name,'')) as app_name,
+      count(*) as app_fhir_v3_coverage_call_real_count
+    FROM
+      request_response_middleware_events
+    WHERE
+      (
+        CONTAINS((SELECT enabled_metrics_list FROM report_params),
+          'app_fhir_v3_coverage_call_real_count')
+
+        AND path LIKE '/v3/fhir/Coverage%'
+        AND request_method = 'GET'
+        AND response_code = 200
+        AND try_cast(fhir_id_v2 as BIGINT) > 0
+      )
+    GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
+        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
+        NULLIF(resp_app_name,''))
+  ) t38 ON t38.app_name = t0.name 
+
+  LEFT JOIN
+  (
+    SELECT
+      COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
+        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
+        NULLIF(resp_app_name,'')) as app_name,
+      count(*) as app_fhir_v3_coverage_call_synthetic_count
+    FROM
+      request_response_middleware_events
+    WHERE
+      (
+        CONTAINS((SELECT enabled_metrics_list FROM report_params),
+          'app_fhir_v3_coverage_call_synthetic_count')
+
+        AND path LIKE '/v3/fhir/Coverage%'
+        AND request_method = 'GET'
+        AND response_code = 200
+        AND try_cast(fhir_id_v2 as BIGINT) < 0
+      )
+    GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
+        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
+        NULLIF(resp_app_name,''))
+  ) t39 ON t39.app_name = t0.name 
+
+  LEFT JOIN
+  (
+    SELECT
+      COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
+        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
+        NULLIF(resp_app_name,'')) as app_name,
+      count(*) as app_fhir_v3_patient_call_real_count
+    FROM
+      request_response_middleware_events
+    WHERE
+      (
+        CONTAINS((SELECT enabled_metrics_list FROM report_params),
+          'app_fhir_v3_patient_call_real_count')
+
+        AND path LIKE '/v3/fhir/Patient%'
+        AND request_method = 'GET'
+        AND response_code = 200
+        AND try_cast(fhir_id_v2 as BIGINT) > 0
+      )
+    GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
+        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
+        NULLIF(resp_app_name,''))
+  ) t40 ON t40.app_name = t0.name 
+
+  LEFT JOIN
+  (
+    SELECT
+      COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
+        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
+        NULLIF(resp_app_name,'')) as app_name,
+      count(*) as app_fhir_v3_patient_call_synthetic_count
+    FROM
+      request_response_middleware_events
+    WHERE
+      (
+        CONTAINS((SELECT enabled_metrics_list FROM report_params),
+          'app_fhir_v3_patient_call_synthetic_count')
+
+        AND path LIKE '/v3/fhir/Patient%'
+        AND request_method = 'GET'
+        AND response_code = 200
+        AND try_cast(fhir_id_v2 as BIGINT) < 0
+      )
+    GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
+        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
+        NULLIF(resp_app_name,''))
+  ) t41 ON t41.app_name = t0.name 
+
+  LEFT JOIN
+  (
+    SELECT
+      COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
+        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
+        NULLIF(resp_app_name,'')) as app_name,
+      count(*) as app_fhir_v3_metadata_call_count
+    FROM
+      request_response_middleware_events
+    WHERE
+      (
+        CONTAINS((SELECT enabled_metrics_list FROM report_params),
+          'app_fhir_v3_metadata_call_count')
+
+        AND path LIKE '/v3/fhir/metadata%'
+        AND request_method = 'GET'
+        AND response_code = 200
+      )
+    GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
+        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
+        NULLIF(resp_app_name,''))
+  ) t42 ON t42.app_name = t0.name 
+
+  LEFT JOIN
+  (
+    SELECT
+      COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
+        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
+        NULLIF(resp_app_name,'')) as app_name,
+      count(*) as app_fhir_v3_eob_since_call_real_count
+    FROM
+      request_response_middleware_events
+    WHERE
+      (
+        CONTAINS((SELECT enabled_metrics_list FROM report_params),
+          'app_fhir_v3_eob_since_call_real_count')
+
+        AND path LIKE '/v3/fhir/ExplanationOfBenefit%'
+        AND req_qparam_lastupdated != ''
+
+        AND request_method = 'GET'
+        AND response_code = 200
+        AND try_cast(fhir_id_v2 as BIGINT) > 0
+      )
+    GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
+        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
+        NULLIF(resp_app_name,''))
+  ) t43 ON t43.app_name = t0.name 
+
+  LEFT JOIN
+  (
+    SELECT
+      COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
+        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
+        NULLIF(resp_app_name,'')) as app_name,
+      count(*) as app_fhir_v3_eob_since_call_synthetic_count
+    FROM
+      request_response_middleware_events
+    WHERE
+      (
+        CONTAINS((SELECT enabled_metrics_list FROM report_params),
+          'app_fhir_v3_eob_since_call_synthetic_count')
+
+        AND path LIKE '/v3/fhir/ExplanationOfBenefit%'
+        AND req_qparam_lastupdated != ''
+
+        AND request_method = 'GET'
+        AND response_code = 200
+        AND try_cast(fhir_id_v2 as BIGINT) < 0
+      )
+    GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
+        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
+        NULLIF(resp_app_name,''))
+  ) t44 ON t44.app_name = t0.name 
+
+
+  LEFT JOIN
+  (
+    SELECT
+      COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
+        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
+        NULLIF(resp_app_name,'')) as app_name,
+      count(*) as app_fhir_v3_coverage_since_call_real_count
+    FROM
+      request_response_middleware_events
+    WHERE
+      (
+        CONTAINS((SELECT enabled_metrics_list FROM report_params),
+          'app_fhir_v3_coverage_since_call_real_count')
+
+        AND path LIKE '/v3/fhir/Coverage%'
+        AND req_qparam_lastupdated != ''
+
+        AND request_method = 'GET'
+        AND response_code = 200
+        AND try_cast(fhir_id_v2 as BIGINT) > 0
+      )
+    GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
+        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
+        NULLIF(resp_app_name,''))
+  ) t45 ON t45.app_name = t0.name 
+
+  LEFT JOIN
+  (
+    SELECT
+      COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
+        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
+        NULLIF(resp_app_name,'')) as app_name,
+      count(*) as app_fhir_v3_coverage_since_call_synthetic_count
+    FROM
+      request_response_middleware_events
+    WHERE
+      (
+        CONTAINS((SELECT enabled_metrics_list FROM report_params),
+          'app_fhir_v3_coverage_since_call_synthetic_count')
+
+        AND path LIKE '/v3/fhir/Coverage%'
+        AND req_qparam_lastupdated != ''
+
+        AND request_method = 'GET'
+        AND response_code = 200
+        AND try_cast(fhir_id_v2 as BIGINT) < 0
+      )
+    GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
+        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
+        NULLIF(resp_app_name,''))
+  ) t46 ON t46.app_name = t0.name
 
   /* AUTH per application */
   LEFT JOIN
@@ -1595,7 +1958,7 @@ FROM
         AND type = 'AccessToken'
         AND action = 'authorized'
         AND auth_grant_type = 'refresh_token'
-        AND try_cast(crosswalk.fhir_id as BIGINT) > 0
+        AND try_cast(crosswalk.fhir_id_v2 as BIGINT) > 0
       )
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
@@ -1620,7 +1983,7 @@ FROM
         AND type = 'AccessToken'
         AND action = 'authorized'
         AND auth_grant_type = 'refresh_token'
-        AND try_cast(crosswalk.fhir_id as BIGINT) < 0
+        AND try_cast(crosswalk.fhir_id_v2 as BIGINT) < 0
       )
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
@@ -1643,7 +2006,7 @@ FROM
 
         AND type = 'AccessToken'
         AND auth_grant_type = 'authorization_code'
-        AND try_cast(crosswalk.fhir_id as BIGINT) > 0
+        AND try_cast(crosswalk.fhir_id_v2 as BIGINT) > 0
       )
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
@@ -1666,7 +2029,7 @@ FROM
 
         AND type = 'AccessToken'
         AND auth_grant_type = 'authorization_code'
-        AND try_cast(crosswalk.fhir_id as BIGINT) < 0
+        AND try_cast(crosswalk.fhir_id_v2 as BIGINT) < 0
       )
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
@@ -2041,7 +2404,7 @@ FROM
 
         AND path = '/mymedicare/sls-callback'
         AND response_code = 302
-        AND try_cast(fhir_id as BIGINT) > 0
+        AND try_cast(fhir_id_v2 as BIGINT) > 0
       )
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
@@ -2064,7 +2427,7 @@ FROM
 
         AND path = '/mymedicare/sls-callback'
         AND response_code = 302
-        AND try_cast(fhir_id as BIGINT) < 0
+        AND try_cast(fhir_id_v2 as BIGINT) < 0
       )
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
@@ -2110,7 +2473,7 @@ FROM
         AND path LIKE '/v%/o/authorize/%/'
         AND request_method = 'GET'
         AND response_code IN (200, 302)
-        AND try_cast(fhir_id as BIGINT) > 0
+        AND try_cast(fhir_id_v2 as BIGINT) > 0
       )
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
@@ -2134,7 +2497,7 @@ FROM
         AND path LIKE '/v%/o/authorize/%/'
         AND request_method = 'GET'
         AND response_code IN (200, 302)
-        AND try_cast(fhir_id as BIGINT) < 0
+        AND try_cast(fhir_id_v2 as BIGINT) < 0
       )
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
@@ -2182,7 +2545,7 @@ FROM
         AND path LIKE '/v%/o/authorize/%/'
         AND request_method = 'POST'
         AND response_code IN (200, 302)
-        AND try_cast(fhir_id as BIGINT) > 0
+        AND try_cast(fhir_id_v2 as BIGINT) > 0
       )
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
@@ -2206,7 +2569,7 @@ FROM
         AND path LIKE '/v%/o/authorize/%/'
         AND request_method = 'POST'
         AND response_code IN (200, 302)
-        AND try_cast(fhir_id as BIGINT) < 0
+        AND try_cast(fhir_id_v2 as BIGINT) < 0
       )
     GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),

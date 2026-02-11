@@ -1,6 +1,6 @@
 Extension: CLM_SBMT_FRMT_CD
 Title: "Claim Submission Format Code"
-Description: "A code indicating the method or format used to submit the claim."
+Description: "Deprecated 2026-01-14. A code indicating the method or format used to submit the claim."
 Id: CLM-SBMT-FRMT-CD
 * ^url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-SBMT-FRMT-CD"
 * ^context[+].type = #element

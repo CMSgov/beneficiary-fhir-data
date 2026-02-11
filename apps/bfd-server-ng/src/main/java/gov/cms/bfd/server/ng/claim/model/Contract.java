@@ -1,11 +1,9 @@
 package gov.cms.bfd.server.ng.claim.model;
 
-import gov.cms.bfd.server.ng.coverage.model.ContractPlanContactInfo;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.util.Optional;
 import lombok.Getter;
@@ -37,16 +35,8 @@ public class Contract {
   @Column(name = "cntrct_pbp_sgmt_num")
   private Optional<String> contractPbpSegmentNumber;
 
-  @OneToOne
-  @JoinColumn(name = "cntrct_pbp_sk")
-  private ContractPlanContactInfo contractPlanContactInfo;
+  @Column(name = "bfd_contract_version_rank")
+  private Integer contractVersionRank;
 
-  /**
-   * Gets the {@link ContractPlanContactInfo}.
-   *
-   * @return contact info
-   */
-  public Optional<ContractPlanContactInfo> getContractPlanContactInfo() {
-    return Optional.ofNullable(contractPlanContactInfo);
-  }
+  @Embedded private ContractOptional contractOptional;
 }

@@ -123,7 +123,6 @@ COLUMN_MAP = "column_map"
 FISS_CLM_SOURCE = "21000"
 MCS_CLM_SOURCE = "22000"
 VMS_CLM_SOURCE = "23000"
-NCH_CLM_SOURCE = "20000"
 
 
 ALIAS_CLM = "clm"
@@ -825,6 +824,7 @@ class IdrContractPbpNumber(IdrBaseModel):
     cntrct_pbp_sgmt_num: Annotated[
         str, ALIAS:ALIAS_CNTRCT_SGMT, BeforeValidator(transform_default_string)
     ]
+    bfd_contract_version_rank: Annotated[int, {DERIVED: True}]
 
     @staticmethod
     def table() -> str:
@@ -841,6 +841,12 @@ class IdrContractPbpNumber(IdrBaseModel):
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
         pbp_num = ALIAS_PBP_NUM
+        # We need to include obsolete records since some bene_mapd records are tied to
+        # obsolete pbp_sks.
+        # Additionally, some contracts are marked obsolete and no non-obsolete record
+        # is created, so we have to use RANK to get the latest version of each contract.
+        # Then, these can be queries by searching for rows where
+        # bfd_contract_version_rank = 1
         return f"""
             WITH sgmt as (
                 SELECT
@@ -850,12 +856,15 @@ class IdrContractPbpNumber(IdrBaseModel):
                 GROUP BY cntrct_pbp_sk, cntrct_pbp_sgmt_num
                 HAVING COUNT(*) = 1
             )
-            SELECT {{COLUMNS}}
+            SELECT 
+                {{COLUMNS}},
+                RANK() OVER (
+                    PARTITION BY cntrct_num, cntrct_pbp_num 
+                    ORDER BY cntrct_pbp_sk_obslt_dt DESC) AS bfd_contract_version_rank
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_cntrct_pbp_num {pbp_num}
             LEFT JOIN sgmt
-                    ON {pbp_num}.cntrct_pbp_sk = sgmt.cntrct_pbp_sk 
-            WHERE cntrct_pbp_sk_obslt_dt >= '{DEFAULT_MAX_DATE}'
-            AND {pbp_num}.cntrct_pbp_sk != 0
+                    ON {pbp_num}.cntrct_pbp_sk = sgmt.cntrct_pbp_sk
+            WHERE {pbp_num}.cntrct_pbp_sk != 0
             """
 
     @staticmethod
@@ -1085,10 +1094,16 @@ def _claim_filter(start_time: datetime, partition: LoadPartition) -> str:
     # PAC data older than 60 days should be filtered
     pac_cutoff_date = start_time - timedelta(days=60)
     start_time_sql = pac_cutoff_date.strftime("'%Y-%m-%d %H:%M:%S'")
+    pac_phase_1_min = 1000
+    pac_phase_1_max = 1999
+    # Note: checking clm_type_cd as the first branch of the OR here might be more efficient
+    # Since it's more likely to return true
     pac_filter = (
         f"""
         AND
         (
+            {clm}.clm_type_cd NOT BETWEEN {pac_phase_1_min} AND {pac_phase_1_max}
+            OR 
             (
                 {clm}.clm_src_id IN (
                     '{FISS_CLM_SOURCE}',
@@ -1101,7 +1116,6 @@ def _claim_filter(start_time: datetime, partition: LoadPartition) -> str:
                     {clm}.idr_insrt_ts,
                     {clm}.clm_idr_ld_dt) >= {start_time_sql}
             )
-            OR {clm}.clm_src_id = '{NCH_CLM_SOURCE}'
         )
     """
         if (PartitionType.PAC | PartitionType.ALL) & partition.partition_type != 0
@@ -1445,6 +1459,7 @@ class IdrClaimInstitutional(IdrBaseModel):
     clm_mdcr_ip_1st_yr_rate_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_site_ntrl_cst_bsd_pymt_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_ss_outlier_std_pymt_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_op_srvc_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
     idr_insrt_ts: Annotated[
         datetime,
         {BATCH_TIMESTAMP: True, ALIAS: ALIAS_INSTNL},
@@ -2157,6 +2172,7 @@ class IdrClaimLineRx(IdrBaseModel):
     clm_cms_calcd_mftr_dscnt_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_line_grs_cvrd_cst_tot_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_phrmcy_price_dscnt_at_pos_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_line_rptd_gap_dscnt_amt: float
     idr_insrt_ts: Annotated[
         datetime,
         {BATCH_TIMESTAMP: True, ALIAS: ALIAS_RX_LINE},

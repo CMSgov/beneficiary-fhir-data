@@ -601,7 +601,191 @@
                         "code": "string"
                     }
                 ]
-            }
+            },
+            {
+              "id": "SupportingInfoComponent.CLM_QUERY_CD",
+              "path": "SupportingInfoComponent.CLM_QUERY_CD",
+              "label": "Claim Query Code",
+              "min": 1,
+              "max": "1",
+              "type": [
+                {
+                  "code": "string"
+                }
+              ]
+            },
+          {
+            "id": "SupportingInfoComponent.CLM_IDR_LD_DT",
+            "path": "SupportingInfoComponent.CLM_IDR_LD_DT",
+            "label": "Claim IDR Load Date",
+            "definition": "Date the claim was loaded into the IDR",
+            "min": 1,
+            "max": "1",
+            "type": [
+              {
+                "code": "date"
+              }
+            ]
+          },
+          {
+            "id": "SupportingInfoComponent.CLM_CNTRCTR_NUM",
+            "path": "SupportingInfoComponent.CLM_CNTRCTR_NUM",
+            "label": "FI Number",
+            "min": 0,
+            "max": "1",
+            "type": [
+              {
+                "code": "string"
+              }
+            ]
+          },
+          {
+            "id": "SupportingInfoComponent.CLM_ADJSTMT_TYPE_CD",
+            "path": "SupportingInfoComponent.CLM_ADJSTMT_TYPE_CD",
+            "label": "Claim Adjustment Type Code",
+            "min": 0,
+            "max": "1",
+            "type": [
+              {
+                "code": "string"
+              }
+            ]
+          },
+          {
+            "id": "SupportingInfoComponent.CLM_DISP_CD",
+            "path": "SupportingInfoComponent.CLM_DISP_CD",
+            "label": "Claim Disposition Code",
+            "min": 0,
+            "max": "1",
+            "type": [
+              {
+                "code": "string"
+              }
+            ]
+          },
+          {
+            "id": "SupportingInfoComponent.CLM_CMS_PROC_DT",
+            "path": "SupportingInfoComponent.CLM_CMS_PROC_DT",
+            "label": "FI Claim Process Date",
+            "min": 0,
+            "max": "1",
+            "type": [
+              {
+                "code": "date"
+              }
+            ]
+          },
+          {
+            "id": "SupportingInfoComponent.CLM_SBMT_FRMT_CD",
+            "path": "SupportingInfoComponent.CLM_SBMT_FRMT_CD",
+            "label": "Claim Submission Format Code",
+            "definition": "A code indicating the method or format used to submit the claim.",
+            "min": 0,
+            "max": "1",
+            "type": [
+              {
+                "code": "string"
+              }
+            ]
+          },
+          {
+            "id": "SupportingInfoComponent.CLM_SBMTR_CNTRCT_NUM",
+            "path": "SupportingInfoComponent.CLM_SBMTR_CNTRCT_NUM",
+            "label": "Submitter Contract Number",
+            "definition": "The contract number of the submitter.",
+            "min": 0,
+            "max": "1",
+            "type": [
+              {
+                "code": "string"
+              }
+            ]
+          },
+          {
+            "id": "SupportingInfoComponent.CLM_SBMTR_CNTRCT_PBP_NUM",
+            "path": "SupportingInfoComponent.CLM_SBMTR_CNTRCT_PBP_NUM",
+            "label": "Submitter Contract PBP Number",
+            "definition": "The PBP number of the submitter contract.",
+            "min": 0,
+            "max": "1",
+            "type": [
+              {
+                "code": "string"
+              }
+            ]
+          },
+          {
+            "id": "SupportingInfoComponent.CLM_CARR_PMT_DNL_CD",
+            "path": "SupportingInfoComponent.CLM_CARR_PMT_DNL_CD",
+            "label": "Claim Payment Denial Code",
+            "min": 0,
+            "max": "1",
+            "type": [
+              {
+                "code": "string"
+              }
+            ]
+          },
+          {
+            "id": "SupportingInfoComponent.CLM_MDCR_PRFNL_PRVDR_ASGNMT_SW",
+            "path": "SupportingInfoComponent.CLM_MDCR_PRFNL_PRVDR_ASGNMT_SW",
+            "label": "Provider Assignement Indicator",
+            "min": 0,
+            "max": "1",
+            "type": [
+              {
+                "code": "string"
+              }
+            ]
+          },
+          {
+            "id": "SupportingInfoComponent.CLM_CLNCL_TRIL_NUM",
+            "path": "SupportingInfoComponent.CLM_CLNCL_TRIL_NUM",
+            "label": "Clinical Trial Number",
+            "min": 0,
+            "max": "1",
+            "type": [
+              {
+                "code": "string"
+              }
+            ]
+          },
+          {
+            "id": "SupportingInfoComponent.CLM_MDCR_NPMT_RSN_CD",
+            "path": "SupportingInfoComponent.CLM_MDCR_NPMT_RSN_CD",
+            "label": "Claim Non Payment Reason Code",
+            "min": 0,
+            "max": "1",
+            "type": [
+              {
+                "code": "string"
+              }
+            ]
+          },
+          {
+            "id": "SupportingInfoComponent.CLM_FI_ACTN_CD",
+            "path": "SupportingInfoComponent.CLM_FI_ACTN_CD",
+            "label": "FI Claim Action Code",
+            "min": 0,
+            "max": "1",
+            "type": [
+              {
+                "code": "string"
+              }
+            ]
+          },
+          {
+            "id": "SupportingInfoComponent.CLM_OP_SRVC_TYPE_CD",
+            "path": "SupportingInfoComponent.CLM_OP_SRVC_TYPE_CD",
+            "label": "Claim Outpatient Service Type Code",
+            "min": 0,
+            "max": "1",
+            "type": [
+              {
+                "code": "string"
+              }
+            ]
+          }
         ]
     }
 }

@@ -14,10 +14,8 @@ import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
-import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.StringType;
 
 /**
  * Claim type codes. Suppress SonarQube warning that constant names should comply with naming
@@ -363,8 +361,7 @@ public enum ClaimTypeCode {
     return Optional.of(organization);
   }
 
-  Optional<ExplanationOfBenefit.InsuranceComponent> toFhirPartDInsurance(
-      String contractNum, String contractPbpNum) {
+  Optional<ExplanationOfBenefit.InsuranceComponent> toFhirPartDInsurance() {
     if (!isClaimSubtype(ClaimSubtype.PDE)) {
       return Optional.empty();
     }
@@ -372,14 +369,6 @@ public enum ClaimTypeCode {
     var insurance = new ExplanationOfBenefit.InsuranceComponent();
     insurance.setFocal(true);
     insurance.setCoverage(new Reference().setDisplay("Part D"));
-    insurance.addExtension(
-        new Extension()
-            .setUrl(SystemUrls.BLUE_BUTTON_STRUCTURE_DEFINITION_SUBMITTER_CONTRACT_NUMBER)
-            .setValue(new StringType(contractNum)));
-    insurance.addExtension(
-        new Extension()
-            .setUrl(SystemUrls.BLUE_BUTTON_STRUCTURE_DEFINITION_SUBMITTER_CONTRACT_PBP_NUMBER)
-            .setValue(new StringType(contractPbpNum)));
     return Optional.of(insurance);
   }
 
@@ -406,6 +395,29 @@ public enum ClaimTypeCode {
       return Optional.of(ExplanationOfBenefit.RemittanceOutcome.PARTIAL);
     }
     return Optional.empty();
+  }
+
+  Optional<ExplanationOfBenefit.AdjudicationComponent> toFhirAdjudication() {
+    if (isClaimSubtype(ClaimSubtype.PDE)) {
+      return Optional.empty();
+    }
+
+    var adjudication = new ExplanationOfBenefit.AdjudicationComponent();
+    adjudication.setCategory(
+        new CodeableConcept()
+            .addCoding(
+                new Coding()
+                    .setSystem(SystemUrls.CARIN_CODE_SYSTEM_ADJUDICATION_DISCRIMINATOR)
+                    .setCode("benefitpaymentstatus")
+                    .setDisplay("Benefit Payment Status")));
+    adjudication.setReason(
+        new CodeableConcept()
+            .addCoding(
+                new Coding()
+                    .setSystem(SystemUrls.CARIN_CODE_SYSTEM_PAYER_ADJUDICATION_STATUS)
+                    .setCode("other")
+                    .setDisplay("Other")));
+    return Optional.of(adjudication);
   }
 
   boolean isPacStage1() {

@@ -5,7 +5,12 @@ import jakarta.persistence.Converter;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-/** Converts any null float values to 0.0. */
+/**
+ * Converts any null float values to 0.0. Note: This converter uses a scale of 2 with HALF_UP
+ * rounding to handle precision mismatches caused by conversion (e.g., preventing 320.0899963378906
+ * from being truncated incorrectly). If a future IDR field require more than 2 decimal places in
+ * the future, this logic may need to be changed or moved to individual field mappings.
+ */
 @Converter(autoApply = true)
 public class NullFloatToZeroConverter implements AttributeConverter<BigDecimal, Double> {
   @Override

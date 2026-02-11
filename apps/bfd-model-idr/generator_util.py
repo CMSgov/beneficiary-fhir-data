@@ -6,7 +6,7 @@ import random
 import string
 import subprocess
 import sys
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from pathlib import Path
 from typing import Any
 
@@ -27,6 +27,7 @@ BENE_MAPD_ENRLMT_RX = "SYNTHETIC_BENE_MAPD_ENRLMT_RX"
 BENE_LIS = "SYNTHETIC_BENE_LIS"
 CLM = "SYNTHETIC_CLM"
 CLM_LINE = "SYNTHETIC_CLM_LINE"
+CLM_LINE_DCMTN = "SYNTHETIC_CLM_LINE_DCMTN"
 CLM_VAL = "SYNTHETIC_CLM_VAL"
 CLM_DT_SGNTR = "SYNTHETIC_CLM_DT_SGNTR"
 CLM_PROD = "SYNTHETIC_CLM_PROD"
@@ -49,16 +50,60 @@ CNTRCT_PBP_CNTCT = "SYNTHETIC_CNTRCT_PBP_CNTCT"
 # keyed by the patient's bene_sk, and innermost dict is the full row itself
 _tables_by_bene_sk: dict[str, dict[str, dict[str, Any]]] = {}
 
+# Lazily computed table of field names to already used IDs so that their uniqueness is guaranteed.
+# Used with the gen_*_id functions below.
+__used_ids_by_field: dict[str, set[str]] = {}
+
+
+def __gen_id(field: str, gen_func: Callable[[], str]) -> str:
+    while True:
+        id = gen_func()
+        id_set = __used_ids_by_field.get(field, set())
+        if id not in id_set:
+            if id_set:
+                __used_ids_by_field[field].add(id)
+            else:
+                __used_ids_by_field[field] = {id}
+
+            return id
+
+
+def gen_multipart_id(field: str, parts: list[tuple[str, int]]) -> str:
+    return __gen_id(
+        field=field,
+        gen_func=lambda: f"-{
+            ''.join(
+                [
+                    ''.join(random.choices(population=allowed_chars, k=length))
+                    for (allowed_chars, length) in parts
+                ]
+            )
+        }",
+    )
+
+
+def gen_basic_id(field: str, length: int, allowed_chars: str = string.digits) -> str:
+    return gen_multipart_id(field=field, parts=[(allowed_chars, length)])
+
+
+def gen_numeric_id(field: str, start: int = -1, end: int = -(sys.maxsize - 1)) -> str:
+    if start > 0 or end > 0 or end > start:
+        raise ValueError("'end' and 'start' must be negative and 'end' must be less than 'start'")
+
+    return __gen_id(field=field, gen_func=lambda: str(random.randint(end, start)))
+
 
 def load_file_dict(
     files: dict[str, list["RowAdapter"]], paths: list[str], exclude_empty: bool = False
 ):
     file_paths = set(
-        itertools.chain.from_iterable([
-            [as_path] if as_path.is_file() else list(as_path.glob("*.csv"))
-            for x in paths
-            if (as_path := Path(x))
-        ])
+        itertools.chain.from_iterable(
+            [
+                [as_path] if as_path.is_file() else list(as_path.glob("*.csv"))
+                for x in paths
+                if (as_path := Path(x))
+            ]
+        )
     )
     for file_path, file_name in (
         (file_path, file_name)
@@ -78,9 +123,9 @@ def load_file_dict(
             print(f"Loaded {file_name}, treating empty columns as meaningful")
             continue
 
-        files[file_name] = load_file([
-            {str(k): v for k, v in x.items() if pd.notna(v)} for x in file_as_dictlist
-        ])
+        files[file_name] = load_file(
+            [{str(k): v for k, v in x.items() if pd.notna(v)} for x in file_as_dictlist]
+        )
         print(f"Loaded {file_name}, ignoring empty columns")
 
 
@@ -308,19 +353,21 @@ class GeneratorUtil:
             # not ignore those changes when creating the historical patient if this is not the last
             # iteration. If this is the last iteration, just use the current patient
             historical_patient = (
-                RowAdapter({
-                    k: v
-                    for k, v in patient.kv.items()
-                    if k
-                    not in {
-                        "BENE_MBI_ID",
-                        "IDR_LTST_TRANS_FLG",
-                        "IDR_TRANS_OBSLT_TS",
-                        "IDR_TRANS_EFCTV_TS",
-                        "IDR_INSRT_TS",
-                        "IDR_UPDT_TS",
+                RowAdapter(
+                    {
+                        k: v
+                        for k, v in patient.kv.items()
+                        if k
+                        not in {
+                            "BENE_MBI_ID",
+                            "IDR_LTST_TRANS_FLG",
+                            "IDR_TRANS_OBSLT_TS",
+                            "IDR_TRANS_EFCTV_TS",
+                            "IDR_INSRT_TS",
+                            "IDR_UPDT_TS",
+                        }
                     }
-                })
+                )
                 if mbi_idx != num_mbis - 1
                 else patient
             )
@@ -642,12 +689,12 @@ class GeneratorUtil:
             datetime.date(year=2017, month=5, day=20),
             datetime.date(year=2021, month=1, day=1),
         )
-        member_id_num = str(random.randint(100000000, 999999999))
-        group_num = str(random.randint(100, 999))
-        prcsr_num = str(random.randint(100000, 999999))
-        bank_id_num = str(random.randint(100000, 999999))
+        member_id_num = gen_numeric_id(field="BENE_PDP_ENRLMT_MMBR_ID_NUM")
+        group_num = str(random.randint(-999, -100))
+        prcsr_num = str(random.randint(-999999, -100000))
+        bank_id_num = str(random.randint(-99999, -10000))
 
-        rx_row["CNTRCT_PBP_SK"] = "".join(random.choices(string.digits, k=12))
+        rx_row["CNTRCT_PBP_SK"] = gen_basic_id(field="CNTRCT_PBP_SK", length=12)
         rx_row["BENE_ENRLMT_BGN_DT"] = str(enrollment_start_date)
         rx_row["BENE_ENRLMT_PDP_RX_INFO_BGN_DT"] = str(rx_start_date)
         rx_row["IDR_LTST_TRANS_FLG"] = "Y"
@@ -670,15 +717,37 @@ class GeneratorUtil:
             datetime.date(year=2021, month=1, day=1),
         )
         enrollment_end_date = "9999-12-31"
-        avail_pbp_nums = ["001", "002", "003", "004", "005", "006", "007", "008", "009", "010"]
-        avail_contract_nums = ["Z0001", "Z0002", "Z0003", "Z0004", "Z0005", "Z0006", "Z0007", "Z0008", "Z0009", "Z0010"]
+        avail_pbp_nums = [
+            "-01",
+            "-02",
+            "-03",
+            "-04",
+            "-05",
+            "-06",
+            "-07",
+            "-08",
+            "-09",
+            "-10",
+        ]
+        avail_contract_nums = [
+            "Z0001",
+            "Z0002",
+            "Z0003",
+            "Z0004",
+            "Z0005",
+            "Z0006",
+            "Z0007",
+            "Z0008",
+            "Z0009",
+            "Z0010",
+        ]
         cntrct_num = random.choice(avail_contract_nums)
         pbp_num = random.choice(avail_pbp_nums)
         cvrg_type_cd = "11" if pdp_only else "3"
         bene_enrlmt_pgm_type_cd = random.choice(["1", "2", "3"])
         bene_enrlmt_emplr_sbsdy_sw = random.choice(["Y", "~", "1"])
 
-        enrollment_row["CNTRCT_PBP_SK"] = "".join(random.choices(string.digits, k=12))
+        enrollment_row["CNTRCT_PBP_SK"] = gen_basic_id(field="CNTRCT_PBP_SK", length=12)
         enrollment_row["IDR_LTST_TRANS_FLG"] = "Y"
         enrollment_row["BENE_CNTRCT_NUM"] = cntrct_num
         enrollment_row["BENE_PBP_NUM"] = pbp_num

@@ -13,20 +13,15 @@
     "CLM_FROM_DT": "2024-01-15",
     "CLM_THRU_DT": "2024-01-15",
     "CLM_EFCTV_DT": "2024-01-15",
-    "CLM_IDR_LD_DT": "2025-01-18",
     "PRVDR_SRVC_PRVDR_NPI_NUM": "1942945159",
     "clm_srvc_prvdr_gnrc_id_type": "1",
     "CLM_PD_DT": "2024-01-20",
-    "CLM_CMS_PROC_DT": "2024-01-18",
     "PRVDR_PRSCRBNG_PRVDR_NPI_NUM": "1942945159",
     "PRVDR_LAST_NAME": "JOHNSON",
-    "CLM_SBMTR_CNTRCT_NUM": "H1234",
-    "CLM_SBMTR_CNTRCT_PBP_NUM": "001",
     "CNTRCT_PBP_NAME": "Super Saver Medicare Rx Saver Plus (PDP)",
-    "CLM_SBMT_FRMT_CD": "X",
-    "CLM_ADJSTMT_TYPE_CD": "0",
     "CLM_BENE_PMT_AMT": "100.00",
     "CLM_OTHR_TP_PD_AMT": "100.00",
+    "META_SRC_SK": 1,
     "supportingInfoComponents": [
         {
             "ROW_NUM": 1,
@@ -83,6 +78,30 @@
         {
             "ROW_NUM": 14,
             "CLM_DSPNSNG_STUS_CD": "P"
+        },
+        {
+          "ROW_NUM": 15,
+          "CLM_SBMT_FRMT_CD": "X"
+        },
+        {
+          "ROW_NUM": 16,
+          "CLM_SBMTR_CNTRCT_NUM": "H1234"
+        },
+        {
+          "ROW_NUM": 17,
+          "CLM_SBMTR_CNTRCT_PBP_NUM": "001"
+        },
+        {
+          "ROW_NUM": 18,
+          "CLM_IDR_LD_DT": "2025-01-18"
+        },
+        {
+          "ROW_NUM": 19,
+          "CLM_ADJSTMT_TYPE_CD": "0"
+        },
+        {
+          "ROW_NUM": 20,
+          "CLM_CMS_PROC_DT": "2024-01-18"
         }
     ],
     "lineItemComponents": [
@@ -93,9 +112,6 @@
             "CLM_LINE_NDC_QTY": "60",
             "CLM_LINE_NDC_QTY_QLFYR_CD": "UN",
             "CLM_LINE_CVRD_PD_AMT": "45.50",
-            "CLM_LINE_NCVRD_CHRG_AMT": "0.00",
-            "CLM_LINE_BENE_PD_AMT": "5.00",
-            "CLM_LINE_PRVDR_PMT_AMT": "40.50",
             "CLM_LINE_GRS_ABOVE_THRSHLD_AMT": "25.00",
             "CLM_LINE_GRS_BLW_THRSHLD_AMT": "75.00",
             "CLM_LINE_LIS_AMT": "10.00",
@@ -114,7 +130,8 @@
             "CLM_PHRMCY_PRICE_DSCNT_AT_POS_AMT": "10.04",
             "CLM_LINE_OTHR_TP_PD_AMT": "10.05",
             "CLM_LINE_NCVRD_PD_AMT": "10.08",
-            "isCompound": "true"
+            "isCompound": "true",
+            "CLM_LINE_RPTD_GAP_DSCNT_AMT": "10.00"
         }
     ]
 }

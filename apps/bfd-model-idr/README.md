@@ -11,10 +11,10 @@ The `synthetic-data` directory contains the synthetic data loaded into each of o
 Downloading the FHIR validator is necessary to run the following scripts, along with installing sushi
 
 To download the FHIR Validator:
-<https://github.com/hapifhir/org.hl7.fhir.core/releases/latest/download/validator_cli.jar>
+<https://github.com/hapifhir/org.hl7.fhir.core/releases/download/6.7.10/validator_cli.jar>
 
 ```sh
-curl -L https://github.com/hapifhir/org.hl7.fhir.core/releases/latest/download/validator_cli.jar > validator_cli.jar
+curl -L https://github.com/hapifhir/org.hl7.fhir.core/releases/download/6.7.10/validator_cli.jar > validator_cli.jar
 ```
 
 ### Install sushi + fhirpath.js
@@ -46,7 +46,33 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 uv sync
 ```
 
+### Compile FSH Resources
+
+To compile the .fsh files from this folder
+```sh
+cd sushi && sushi build && cd ..
+```
+
+This will generate the StructureDefinition and CodeSystem resources necessary for synthetic data generation. Running compile_resources.py is not necessary to generate synthetic data. 
+
+### Get Matchbox up and running
+To reduce dependencies on tx.fhir.org as well as improve the speed of validation, we use matchbox to run a local FHIR server. Read more about matchbox at https://ahdis.github.io/matchbox/
+
+Note: Matchbox uses a significant amount of memory. Allocating at least 8GB of RAM is recommended, and more may be necessary in the future.
+
+To start matchbox, run 
+
+```sh
+docker compose up -d
+```
+Note, it takes several minutes and requires a good bit of RAM. It'll be ready once it says that packages have been loaded and some obviously untrue amount of RAM (generally half of what it actually used) was used. Additionally, one can check the logs for "Finished engines during startup" or running a health check using
+```sh
+curl -X GET "http://localhost:8080/matchboxv3/actuator/health"
+```
+
 ### Create FHIR files with synthetic data
+
+Requires Matchbox to be active.
 
 To easily compile all resources:
 
@@ -61,6 +87,7 @@ pass along the sample file with -i
 pass along the output file with -o
 pass along the resource url with -r
 pass along --test to run conformance tests
+pass along --skip-structure-map-generation to skip generating the structure map. Only use this in the context of sequential transformations that re-use a structure map.
 
 Example (Patient):
 
@@ -185,3 +212,12 @@ To generate the data dictionary:
 ./compile-all-resources.sh
 uv run gen_dd.py
 ```
+
+If the gen_dd.py script produces warnings about missing tables or columns, run the following query to retrieve the latest updates for the affected table from IDR.
+Run:
+
+```sql
+DESCRIBE VIEW CMS_VDM_VIEW_MDCR_PRD.{TABLE_NAME}
+```
+
+Export the results as a CSV named {TABLE_NAME}.csv and save it under ReferenceTables.

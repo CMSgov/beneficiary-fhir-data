@@ -1,6 +1,6 @@
 Extension: CLM_FI_ACTN_CD
 Title: "FI or MAC Claim Action Code"
-Description: "The type of action requested by the intermediary to be taken on an institutional claim."
+Description: "Deprecated 2026-01-14. The type of action requested by the intermediary to be taken on an institutional claim."
 Id: CLM-FI-ACTN-CD
 * ^url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-FI-ACTN-CD" 
 * ^context[+].type = #element
