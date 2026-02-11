@@ -696,7 +696,7 @@ CREATE TABLE idr_new.claim_institutional_ss
     clm_mdcr_ip_pps_cptl_hrmls_amt numeric,
     clm_mdcr_instnl_bene_pd_amt    numeric,
     clm_mdcr_hospc_prd_cnt         integer,
---  NCH   clm_pps_ind_cd                 varchar(1)               not null,
+    clm_pps_ind                 varchar(1)               not null,
     clm_mdcr_ip_pps_cptl_tot_amt   numeric,
     clm_instnl_cvrd_day_cnt        numeric,
     clm_mdcr_instnl_prmry_pyr_amt  numeric,

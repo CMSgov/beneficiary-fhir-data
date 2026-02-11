@@ -322,7 +322,8 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
     ]
 
     # Columns from v2_mdcr_clm_fiss
-    clm_crnt_stus_cd: Annotated[str, {ALIAS: ALIAS_FISS}, BeforeValidator(transform_null_string)]
+    clm_crnt_stus_cd: Annotated[str, {ALIAS: ALIAS_FISS}, BeforeValidator(transform_default_string)]
+    clm_pps_ind: Annotated[str, {ALIAS: ALIAS_FISS}, BeforeValidator(transform_default_string)]
     idr_insrt_ts: Annotated[
         datetime,
         {

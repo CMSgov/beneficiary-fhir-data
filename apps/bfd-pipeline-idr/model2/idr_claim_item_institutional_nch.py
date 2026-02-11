@@ -35,7 +35,6 @@ from model import (
     transform_default_hipps_code,
     transform_default_string,
     transform_null_date_to_min,
-    transform_null_int,
     transform_null_string,
 )
 
@@ -106,9 +105,8 @@ class IdrClaimItemInstitutionalNch(IdrBaseModel):
     ]
     # columns from V2_MDCR_CLM_PROD
     clm_val_sqnc_num_prod: Annotated[
-        int,
+        int | None,
         {ALIAS: ALIAS_PROCEDURE, COLUMN_MAP: "clm_val_sqnc_num"},
-        BeforeValidator(transform_null_int),
     ]
     clm_prod_type_cd: Annotated[
         str, {ALIAS: ALIAS_PROCEDURE}, BeforeValidator(transform_null_string)

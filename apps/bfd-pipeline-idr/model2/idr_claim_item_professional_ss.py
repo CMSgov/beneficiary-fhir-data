@@ -69,7 +69,10 @@ class IdrClaimItemProfessionalSs(IdrBaseModel):
     clm_line_ndc_qty_qlfyr_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_line_srvc_unit_qty: float | None
     clm_line_rx_num: Annotated[str, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_default_string)]
-    clm_pos_cd: Annotated[str, BeforeValidator(transform_default_string)]
+    clm_pos_cd: Annotated[str, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_default_string)]
+    clm_rndrg_prvdr_type_cd: Annotated[
+        str, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_default_string)
+    ]
     clm_rndrg_prvdr_prtcptg_cd: Annotated[
         str, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_default_string)
     ]

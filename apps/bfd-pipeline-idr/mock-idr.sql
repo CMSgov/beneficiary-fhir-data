@@ -278,6 +278,7 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_fiss (
     clm_type_cd INT NOT NULL,
     clm_num_sk BIGINT NOT NULL,
     clm_crnt_stus_cd VARCHAR(1),
+    clm_pps_ind VARCHAR(1),
     idr_insrt_ts TIMESTAMPTZ,
     idr_updt_ts TIMESTAMPTZ,
     PRIMARY KEY(geo_bene_sk, clm_dt_sgntr_sk, clm_type_cd, clm_num_sk)
