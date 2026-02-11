@@ -73,42 +73,49 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
     clm_obslt_dt: Annotated[
         date | None, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_date_to_null)
     ]
-    clm_mdcr_coinsrnc_amt: float | None
-    clm_blood_lblty_amt: float | None
-    clm_ncvrd_chrg_amt: float | None
+    clm_mdcr_coinsrnc_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
+    clm_blood_lblty_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
+    clm_ncvrd_chrg_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
     clm_blood_chrg_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
     clm_finl_actn_ind: Annotated[str, {ALIAS: ALIAS_CLM}]
-    clm_bill_clsfctn_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_bill_fac_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_bill_freq_cd: Annotated[str, BeforeValidator(transform_default_string)]
+    clm_bill_clsfctn_cd: Annotated[
+        str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)
+    ]
+    clm_bill_fac_type_cd: Annotated[
+        str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)
+    ]
+    clm_bill_freq_cd: Annotated[str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)]
     clm_pd_dt: Annotated[
         date | None, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_date_to_null)
     ]
     clm_ltst_clm_ind: Annotated[str, {ALIAS: ALIAS_CLM}]
     meta_src_sk: Annotated[int, {ALIAS: ALIAS_CLM}]
-    clm_tot_cntrctl_amt: float | None
-    clm_ric_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_nch_prmry_pyr_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_prvdr_pmt_amt: float | None
+    clm_tot_cntrctl_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
+    clm_ric_cd: Annotated[str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)]
+    clm_nch_prmry_pyr_cd: Annotated[
+        str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)
+    ]
+    clm_prvdr_pmt_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
     clm_adjstmt_type_cd: Annotated[
         str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)
     ]
-    clm_prvdr_rmng_due_amt: float | None
-    clm_prvdr_otaf_amt: float | None
-    clm_prvdr_intrst_pd_amt: float | None
-    clm_cntrctr_num: Annotated[str, BeforeValidator(transform_default_string)]
+    clm_prvdr_rmng_due_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
+    clm_prvdr_otaf_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
+    clm_prvdr_intrst_pd_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
+    clm_cntrctr_num: Annotated[str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)]
     clm_pmt_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
-    clm_alowd_chrg_amt: float | None
+    clm_alowd_chrg_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
     clm_sbmt_chrg_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
     clm_blood_pt_frnsh_qty: Annotated[int | None, {ALIAS: ALIAS_CLM}]
-    clm_blood_ncvrd_chrg_amt: float | None
-    clm_bene_intrst_pd_amt: float | None
+    clm_blood_ncvrd_chrg_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
+    clm_bene_intrst_pd_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
     clm_bene_pd_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
     clm_bene_pmt_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
-    clm_bene_pmt_coinsrnc_amt: float | None
-    clm_othr_tp_pd_amt: float | None
-    clm_cob_ptnt_resp_amt: float | None
-    clm_sbmt_frmt_cd: Annotated[str, BeforeValidator(transform_default_string)]
+    clm_bene_pmt_coinsrnc_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
+    clm_othr_tp_pd_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
+    clm_cob_ptnt_resp_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
+    clm_mdcr_ddctbl_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
+    clm_sbmt_frmt_cd: Annotated[str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)]
     clm_blg_prvdr_zip5_cd: Annotated[
         str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_null_string)
     ]
@@ -208,11 +215,21 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
     ]
 
     # Columns from v2_mdcr_clm_dt_sngtr
-    clm_cms_proc_dt: Annotated[date | None, BeforeValidator(transform_default_date_to_null)]
-    clm_actv_care_from_dt: Annotated[date | None, BeforeValidator(transform_default_date_to_null)]
-    clm_qlfy_stay_from_dt: Annotated[date | None, BeforeValidator(transform_default_date_to_null)]
-    clm_dschrg_dt: Annotated[date | None, BeforeValidator(transform_default_date_to_null)]
-    clm_submsn_dt: Annotated[date | None, BeforeValidator(transform_default_date_to_null)]
+    clm_cms_proc_dt: Annotated[
+        date | None, {ALIAS: ALIAS_SGNTR}, BeforeValidator(transform_default_date_to_null)
+    ]
+    clm_actv_care_from_dt: Annotated[
+        date | None, {ALIAS: ALIAS_SGNTR}, BeforeValidator(transform_default_date_to_null)
+    ]
+    clm_qlfy_stay_from_dt: Annotated[
+        date | None, {ALIAS: ALIAS_SGNTR}, BeforeValidator(transform_default_date_to_null)
+    ]
+    clm_dschrg_dt: Annotated[
+        date | None, {ALIAS: ALIAS_SGNTR}, BeforeValidator(transform_default_date_to_null)
+    ]
+    clm_submsn_dt: Annotated[
+        date | None, {ALIAS: ALIAS_SGNTR}, BeforeValidator(transform_default_date_to_null)
+    ]
     idr_insrt_ts_sgntr: Annotated[
         datetime,
         {
@@ -235,47 +252,54 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
     ]
 
     # Columns from v2_mdcr_clm_instnl
-    clm_admsn_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    bene_ptnt_stus_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    dgns_drg_cd: int
-    clm_mdcr_instnl_mco_pd_sw: str
-    clm_admsn_src_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_fi_actn_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_mdcr_ip_lrd_use_cnt: int | None
-    clm_hipps_uncompd_care_amt: float | None
-    clm_mdcr_hha_tot_visit_cnt: float | None
-    clm_instnl_mdcr_coins_day_cnt: int | None
-    clm_instnl_ncvrd_day_cnt: float | None
-    clm_instnl_per_diem_amt: float | None
-    clm_mdcr_instnl_bene_pd_amt: float | None
-    clm_mdcr_hospc_prd_cnt: int | None
-    clm_mdcr_npmt_rsn_cd: Annotated[str, BeforeValidator(transform_null_string)]
-    clm_mdcr_ddctbl_amt: float | None
-    clm_mdcr_ip_pps_drg_wt_num: float | None
-    clm_mdcr_ip_pps_dsprprtnt_amt: float | None
-    clm_mdcr_ip_pps_excptn_amt: float | None
-    clm_mdcr_ip_pps_cptl_fsp_amt: float | None
-    clm_mdcr_ip_pps_cptl_ime_amt: float | None
-    clm_mdcr_ip_pps_outlier_amt: float | None
-    clm_mdcr_ip_pps_cptl_hrmls_amt: float | None
-    clm_mdcr_ip_pps_cptl_tot_amt: float | None
-    clm_instnl_cvrd_day_cnt: float | None
-    clm_mdcr_instnl_prmry_pyr_amt: float | None
-    clm_instnl_prfnl_amt: float | None
-    clm_mdcr_ip_bene_ddctbl_amt: float | None
-    clm_instnl_drg_outlier_amt: float | None
-    clm_mdcr_ip_scnd_yr_rate_amt: float | None
-    clm_instnl_low_vol_pmt_amt: float | None
-    clm_hipps_readmsn_rdctn_amt: float | None
-    clm_hipps_model_bndld_pmt_amt: float | None
-    clm_hipps_vbp_amt: float | None
-    clm_site_ntrl_ip_pps_pymt_amt: float | None
-    clm_finl_stdzd_pymt_amt: float | None
-    clm_pps_md_wvr_stdzd_val_amt: float | None
-    clm_hac_rdctn_pymt_amt: float | None
-    clm_mdcr_ip_1st_yr_rate_amt: float | None
-    clm_site_ntrl_cst_bsd_pymt_amt: float | None
-    clm_ss_outlier_std_pymt_amt: float | None
+    clm_admsn_type_cd: Annotated[
+        str, {ALIAS: ALIAS_INSTNL}, BeforeValidator(transform_default_string)
+    ]
+    bene_ptnt_stus_cd: Annotated[
+        str, {ALIAS: ALIAS_INSTNL}, BeforeValidator(transform_default_string)
+    ]
+    dgns_drg_cd: Annotated[int, {ALIAS: ALIAS_INSTNL}]
+    clm_mdcr_instnl_mco_pd_sw: Annotated[str, {ALIAS: ALIAS_INSTNL}]
+    clm_admsn_src_cd: Annotated[
+        str, {ALIAS: ALIAS_INSTNL}, BeforeValidator(transform_default_string)
+    ]
+    clm_fi_actn_cd: Annotated[str, {ALIAS: ALIAS_INSTNL}, BeforeValidator(transform_default_string)]
+    clm_mdcr_ip_lrd_use_cnt: Annotated[int | None, {ALIAS: ALIAS_INSTNL}]
+    clm_hipps_uncompd_care_amt: Annotated[float | None, {ALIAS: ALIAS_INSTNL}]
+    clm_mdcr_hha_tot_visit_cnt: Annotated[float | None, {ALIAS: ALIAS_INSTNL}]
+    clm_instnl_mdcr_coins_day_cnt: Annotated[int | None, {ALIAS: ALIAS_INSTNL}]
+    clm_instnl_ncvrd_day_cnt: Annotated[float | None, {ALIAS: ALIAS_INSTNL}]
+    clm_instnl_per_diem_amt: Annotated[float | None, {ALIAS: ALIAS_INSTNL}]
+    clm_mdcr_instnl_bene_pd_amt: Annotated[float | None, {ALIAS: ALIAS_INSTNL}]
+    clm_mdcr_hospc_prd_cnt: Annotated[int | None, {ALIAS: ALIAS_INSTNL}]
+    clm_mdcr_npmt_rsn_cd: Annotated[
+        str, {ALIAS: ALIAS_INSTNL}, BeforeValidator(transform_null_string)
+    ]
+    clm_mdcr_ip_pps_drg_wt_num: Annotated[float | None, {ALIAS: ALIAS_INSTNL}]
+    clm_mdcr_ip_pps_dsprprtnt_amt: Annotated[float | None, {ALIAS: ALIAS_INSTNL}]
+    clm_mdcr_ip_pps_excptn_amt: Annotated[float | None, {ALIAS: ALIAS_INSTNL}]
+    clm_mdcr_ip_pps_cptl_fsp_amt: Annotated[float | None, {ALIAS: ALIAS_INSTNL}]
+    clm_mdcr_ip_pps_cptl_ime_amt: Annotated[float | None, {ALIAS: ALIAS_INSTNL}]
+    clm_mdcr_ip_pps_outlier_amt: Annotated[float | None, {ALIAS: ALIAS_INSTNL}]
+    clm_mdcr_ip_pps_cptl_hrmls_amt: Annotated[float | None, {ALIAS: ALIAS_INSTNL}]
+    clm_mdcr_ip_pps_cptl_tot_amt: Annotated[float | None, {ALIAS: ALIAS_INSTNL}]
+    clm_instnl_cvrd_day_cnt: Annotated[float | None, {ALIAS: ALIAS_INSTNL}]
+    clm_mdcr_instnl_prmry_pyr_amt: Annotated[float | None, {ALIAS: ALIAS_INSTNL}]
+    clm_instnl_prfnl_amt: Annotated[float | None, {ALIAS: ALIAS_INSTNL}]
+    clm_mdcr_ip_bene_ddctbl_amt: Annotated[float | None, {ALIAS: ALIAS_INSTNL}]
+    clm_instnl_drg_outlier_amt: Annotated[float | None, {ALIAS: ALIAS_INSTNL}]
+    clm_mdcr_ip_scnd_yr_rate_amt: Annotated[float | None, {ALIAS: ALIAS_INSTNL}]
+    clm_instnl_low_vol_pmt_amt: Annotated[float | None, {ALIAS: ALIAS_INSTNL}]
+    clm_hipps_readmsn_rdctn_amt: Annotated[float | None, {ALIAS: ALIAS_INSTNL}]
+    clm_hipps_model_bndld_pmt_amt: Annotated[float | None, {ALIAS: ALIAS_INSTNL}]
+    clm_hipps_vbp_amt: Annotated[float | None, {ALIAS: ALIAS_INSTNL}]
+    clm_site_ntrl_ip_pps_pymt_amt: Annotated[float | None, {ALIAS: ALIAS_INSTNL}]
+    clm_finl_stdzd_pymt_amt: Annotated[float | None, {ALIAS: ALIAS_INSTNL}]
+    clm_pps_md_wvr_stdzd_val_amt: Annotated[float | None, {ALIAS: ALIAS_INSTNL}]
+    clm_hac_rdctn_pymt_amt: Annotated[float | None, {ALIAS: ALIAS_INSTNL}]
+    clm_mdcr_ip_1st_yr_rate_amt: Annotated[float | None, {ALIAS: ALIAS_INSTNL}]
+    clm_site_ntrl_cst_bsd_pymt_amt: Annotated[float | None, {ALIAS: ALIAS_INSTNL}]
+    clm_ss_outlier_std_pymt_amt: Annotated[float | None, {ALIAS: ALIAS_INSTNL}]
     idr_insrt_ts_instnl: Annotated[
         datetime,
         {
@@ -298,7 +322,7 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
     ]
 
     # Columns from v2_mdcr_clm_fiss
-    clm_crnt_stus_cd: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_crnt_stus_cd: Annotated[str, {ALIAS: ALIAS_FISS}, BeforeValidator(transform_null_string)]
     idr_insrt_ts: Annotated[
         datetime,
         {
