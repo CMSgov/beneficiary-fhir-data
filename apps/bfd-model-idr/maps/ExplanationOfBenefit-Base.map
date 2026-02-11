@@ -592,7 +592,7 @@ group createOrg(source src: Provider, target tgt: Organization){
     npi -> tgtId.value = npi "set NPI";
   } "Create NPI identifier";
 
-  src.PRVDR_LGL_SLASH_LAST_NAME as orgName -> tgt.name = orgName;
+  src.PRVDR_LAST_OR_LGL_NAME as orgName -> tgt.name = orgName;
   src.PRVDR_OSCAR_NUM as ccn -> tgt.identifier = create('Identifier') as tgtId then{
     src -> tgtId.system = "http://terminology.hl7.org/NamingSystem/CCN" "set ccn system url";
     src -> tgtId.value = ccn "set ccn";
@@ -633,7 +633,7 @@ group createPractitioner(source src: Provider, target tgt: Practitioner){
     taxId -> tgtId.value = taxId "set tax Id";
   } "Add tax Id";
 
-  src.PRVDR_LGL_SLASH_LAST_NAME as familyName -> tgt.name = create('HumanName') as tgtName then {
+  src.PRVDR_LAST_OR_LGL_NAME as familyName -> tgt.name = create('HumanName') as tgtName then {
     familyName -> tgtName.family = familyName "set family name";
     src.PRVDR_1ST_NAME as firstName -> tgtName.given = firstName "set first name";
   } "Add name";

@@ -125,13 +125,13 @@ for column in header_columns:
 
     # We may want to remove this in the future, depending on requirements
     # regarding address info.
-    if column == "PRVDR_BLG_PRVDR_NPI_NUM":
+    if column in ("PRVDR_BLG_PRVDR_NPI_NUM", "PRVDR_SRVC_PRVDR_NPI_NUM"):
         if "CLM_BLG_PRVDR_ZIP5_CD" in cur_sample_data:
             provider_object["CLM_BLG_PRVDR_ZIP5_CD"] = cur_sample_data.get("CLM_BLG_PRVDR_ZIP5_CD")
         if provider_object.get("NPI_TYPE") == 2:
-            provider_object["PRVDR_LGL_SLASH_LAST_NAME"] = provider_object.get("PRVDR_LGL_NAME")
+            provider_object["PRVDR_LAST_OR_LGL_NAME"] = provider_object.get("PRVDR_LGL_NAME")
         else:
-            provider_object["PRVDR_LGL_SLASH_LAST_NAME"] = provider_object.get("PRVDR_LAST_NAME")
+            provider_object["PRVDR_LAST_OR_LGL_NAME"] = provider_object.get("PRVDR_LAST_NAME")
             # don't worry about first name since we already pull it in above.
         if "CLM_BLG_PRVDR_OSCAR_NUM" in cur_sample_data:
             provider_object["PRVDR_OSCAR_NUM"] = cur_sample_data.get("CLM_BLG_PRVDR_OSCAR_NUM")

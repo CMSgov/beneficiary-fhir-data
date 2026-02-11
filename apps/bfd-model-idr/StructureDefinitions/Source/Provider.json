@@ -92,9 +92,9 @@
                 ]
             },
             {
-                "id": "Provider.PRVDR_LGL_SLASH_LAST_NAME",
-                "path": "Provider.PRVDR_LGL_SLASH_LAST_NAME",
-                "label": "Provider Legal Name Slash Last Name",
+                "id": "Provider.PRVDR_LAST_OR_LGL_NAME",
+                "path": "Provider.PRVDR_LAST_OR_LGL_NAME",
+                "label": "Provider Last or Legal Name",
                 "min": 0,
                 "max": "1",
                 "type": [

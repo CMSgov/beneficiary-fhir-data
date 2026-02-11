@@ -84,6 +84,9 @@ group createEOBPharmacy(source src: ExplanationOfBenefitPharmacy, target tgt: BF
         src.providerList as provider where provider.isDuplicate.exists().not() and provider.careTeamType.exists().not() and provider.NPI_TYPE = 2 -> tgt.contained = create('Organization') as tgtOrg then createOrg(provider, tgtOrg) "Add Organization";
     } "Add billing provider";
 
+    //QLFYR_TYPE_CD logic goes here pending CMS decision.
+    
+
     src.providerList as pList where pList.careTeamType.exists() -> tgt then {
       pList where pList.NPI_TYPE = 1 and pList.isDuplicate.exists().not() -> tgt.contained = create('Practitioner') as tgtPract then createPractitioner(pList, tgtPract) "Add Practitioner";
       pList where pList.NPI_TYPE = 2 and pList.isDuplicate.exists().not() -> tgt.contained = create('Organization') as tgtOrg then createOrg(pList, tgtOrg) "Add Organization";
