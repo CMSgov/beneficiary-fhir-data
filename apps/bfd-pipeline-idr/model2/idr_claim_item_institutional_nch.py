@@ -57,15 +57,19 @@ class IdrClaimItemInstitutionalNch(IdrBaseModel):
     clm_line_from_dt: Annotated[
         date | None, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_default_date_to_null)
     ]
-    clm_line_thru_dt: Annotated[date | None, BeforeValidator(transform_default_date_to_null)]
+    clm_line_thru_dt: Annotated[
+        date | None, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_default_date_to_null)
+    ]
     clm_line_mdcr_ddctbl_amt: Annotated[float | None, {ALIAS: ALIAS_LINE}]
-    clm_line_hcpcs_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_line_ndc_cd: Annotated[str, BeforeValidator(transform_default_string)]
+    clm_line_hcpcs_cd: Annotated[
+        str, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_default_string)
+    ]
+    clm_line_ndc_cd: Annotated[str, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_default_string)]
     clm_line_ndc_qty: Annotated[float | None, {ALIAS: ALIAS_LINE}]
     clm_line_ndc_qty_qlfyr_cd: Annotated[
         str, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_default_string)
     ]
-    clm_line_srvc_unit_qty: Annotated[float | None, {ALIAS: ALIAS_LINE}]
+    clm_line_srvc_unit_qty: Annotated[float | None, {ALIAS: ALIAS_LINE}, {ALIAS: ALIAS_LINE}]
     clm_line_rev_ctr_cd: Annotated[
         str, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_default_string)
     ]
