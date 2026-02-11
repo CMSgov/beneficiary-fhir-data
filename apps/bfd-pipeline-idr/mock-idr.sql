@@ -609,6 +609,19 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_fiss (
     PRIMARY KEY(geo_bene_sk, clm_dt_sgntr_sk, clm_type_cd, clm_num_sk, clm_line_num)
 );
 
+CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_fiss_bnft_svg (
+    geo_bene_sk BIGINT NOT NULL,
+    clm_dt_sgntr_sk BIGINT NOT NULL,
+    clm_type_cd INT NOT NULL,
+    clm_num_sk BIGINT NOT NULL,
+    clm_line_num INT NOT NULL,
+    clm_bnft_svg_ansi_grp_cd VARCHAR(2),
+    clm_bnft_svg_ansi_rsn_cd VARCHAR(3),
+    idr_insrt_ts TIMESTAMPTZ,
+    idr_updt_ts TIMESTAMPTZ,
+    PRIMARY KEY(geo_bene_sk, clm_dt_sgntr_sk, clm_type_cd, clm_num_sk, clm_line_num)
+);
+
 CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_dcmtn (
     geo_bene_sk BIGINT NOT NULL,
     clm_dt_sgntr_sk BIGINT NOT NULL,
