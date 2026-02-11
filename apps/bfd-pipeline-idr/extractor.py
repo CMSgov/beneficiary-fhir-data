@@ -24,7 +24,7 @@ from model import (
     get_min_transaction_date,
 )
 from settings import (
-    BATCH_SIZE,
+    BATCH_MULTIPLIER,
     IDR_ACCOUNT,
     IDR_DATABASE,
     IDR_PRIVATE_KEY,
@@ -65,6 +65,11 @@ class Extractor(ABC, Generic[T]):  # noqa: UP046
 
     def _greatest_col(self, cols: list[str]) -> str:
         return f"GREATEST({','.join(cols)})"
+
+    def _get_batch_size(self) -> int:
+        # Larger tables take up more memory, so we'll try to normalize
+        # the total memory used here based on the number of columns
+        return round(BATCH_MULTIPLIER / len(self.cls.columns_raw()))
 
     def get_query(self, start_time: datetime, load_mode: LoadMode) -> str:
         query = self.cls.fetch_query(self.partition, start_time, load_mode)
@@ -171,12 +176,13 @@ class PostgresExtractor(Extractor[T]):
         params: Mapping[str, DbType],
     ) -> Iterator[Sequence[T]]:
         logger.debug(sql)
+        batch_size = self._get_batch_size()
         with self.conn.cursor(row_factory=dict_row) as cur:
             cur.execute(sql, params)  # type: ignore
-            batch = cur.fetchmany(BATCH_SIZE)
+            batch = cur.fetchmany(batch_size)
             while len(batch) > 0:
                 yield self._transform(batch)
-                batch = cur.fetchmany(BATCH_SIZE)
+                batch = cur.fetchmany(batch_size)
 
     def extract_single(self, sql: str, params: dict[str, DbType]) -> T | None:
         with self.conn.cursor(row_factory=dict_row) as cur:
@@ -235,14 +241,15 @@ class SnowflakeExtractor(Extractor[T]):
             self.cursor_fetch_timer.start()
             # fetchmany can return list[dict] or list[tuple] but we'll only use
             # queries that return dicts
-            batch: list[dict[str, DbType]] = cur.fetchmany(BATCH_SIZE)
+            batch_size = self._get_batch_size()
+            batch: list[dict[str, DbType]] = cur.fetchmany(batch_size)
             self.cursor_fetch_timer.stop()
 
             while len(batch) > 0:  # type: ignore
                 yield self._transform(batch)
 
                 self.cursor_fetch_timer.start()
-                batch = cur.fetchmany(BATCH_SIZE)
+                batch = cur.fetchmany(batch_size)
                 self.cursor_fetch_timer.stop()
             return
 
