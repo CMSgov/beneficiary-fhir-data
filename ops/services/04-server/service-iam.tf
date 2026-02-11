@@ -93,79 +93,37 @@ data "aws_iam_policy_document" "ssm_params" {
 }
 
 data "aws_iam_policy_document" "adot" {
-
-  #
-  # Cluster-level visibility
-  #
   statement {
-    sid = "EcsClusterRead"
+    sid = "ReadAndListTasks"
 
     actions = [
       "ecs:ListTasks",
       "ecs:DescribeContainerInstances",
-    ]
-
-    resources = ["*"]
-
-    condition {
-      test     = "ArnEquals"
-      variable = "ecs:cluster"
-      values   = [data.aws_ecs_cluster.main.arn]
-    }
-  }
-
-  #
-  # Service-level visibility
-  #
-  statement {
-    sid = "EcsServiceRead"
-
-    actions = [
-      "ecs:DescribeServices",
-      "ecs:ListServices",
-    ]
-
-    resources = ["*"]
-
-    condition {
-      test     = "ArnEquals"
-      variable = "ecs:cluster"
-      values   = [data.aws_ecs_cluster.main.arn]
-    }
-  }
-
-  #
-  # Task-level visibility
-  #
-  statement {
-    sid = "EcsTaskRead"
-
-    actions = [
-      "ecs:DescribeTasks",
-    ]
-
-    resources = ["*"]
-
-    condition {
-      test     = "ArnEquals"
-      variable = "ecs:cluster"
-      values   = [data.aws_ecs_cluster.main.arn]
-    }
-  }
-
-  #
-  # Task definition visibility
-  #
-  statement {
-    sid = "EcsTaskDefinitionRead"
-
-    actions = [
-      "ecs:DescribeTaskDefinition",
+      "ecs:DescribeTasks"
     ]
 
     resources = [
-      aws_ecs_task_definition.server.arn
+      "arn:aws:ecs:${local.region}:${local.account_id}:service/${data.aws_ecs_cluster.main.cluster_name}/${local.service}",
+      "arn:aws:ecs:${local.region}:${local.account_id}:task/${data.aws_ecs_cluster.main.cluster_name}/*",
+      "arn:aws:ecs:${local.region}:${local.account_id}:container-instance/${data.aws_ecs_cluster.main.cluster_name}/*"
     ]
+  }
+
+  statement {
+    sid = "ListAndDescribeServices"
+
+    actions = [
+      "ecs:ListServices",
+      "ecs:DescribeServices"
+    ]
+    resources = ["arn:aws:ecs:${local.region}:${local.account_id}:service/${data.aws_ecs_cluster.main.cluster_name}/${local.service}"]
+  }
+
+  statement {
+    sid = "DescribeTaskDefinitions"
+
+    actions   = ["ecs:DescribeTaskDefinition", ]
+    resources = ["arn:aws:ecs:${local.region}:${local.account_id}:task-definition/${local.service}:*"]
   }
 }
 
