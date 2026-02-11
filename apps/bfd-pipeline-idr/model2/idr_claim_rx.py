@@ -370,7 +370,7 @@ class IdrClaimRx(IdrBaseModel):
                 {clm}.clm_dt_sgntr_sk = {line}.clm_dt_sgntr_sk AND
                 {clm}.clm_type_cd = {line}.clm_type_cd AND
                 {clm}.clm_num_sk = {line}.clm_num_sk
-            JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_rx {rx_line} ON 
+            LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_rx {rx_line} ON 
                 {clm}.geo_bene_sk = {rx_line}.geo_bene_sk AND
                 {clm}.clm_dt_sgntr_sk = {rx_line}.clm_dt_sgntr_sk AND
                 {clm}.clm_type_cd = {rx_line}.clm_type_cd AND
