@@ -26,7 +26,7 @@ type DbType = str | float | int | bool | date | datetime
 class LoadMode(StrEnum):
     LOCAL = "local"
     SYNTHETIC = "synthetic"
-    PRODUCTION = ""
+    IDR = ""
 
 
 def transform_null_date_to_max(value: date | None) -> date:

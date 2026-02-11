@@ -300,7 +300,7 @@ class IdrClaimItemInstitutionalSs(IdrBaseModel):
         # it will behave extremely poorly when trying to join against these large sets of
         # non-indexed data in memory. This is fine in Snowflake because it's fundamentally
         # different, but we need to force this behavior for local testing.
-        not_materialized = "" if load_mode == LoadMode.PRODUCTION else "NOT MATERIALIZED"
+        not_materialized = "" if load_mode == LoadMode.IDR else "NOT MATERIALIZED"
 
         return f"""
                 WITH claims AS {not_materialized} (

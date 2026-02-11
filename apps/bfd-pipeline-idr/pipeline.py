@@ -50,7 +50,7 @@ def run(load_mode: str) -> None:
     # Setting this parameter will cause old processes to be recycled, allowing resources used by
     # these processes to be freed.
     # This will allow memory usage to remain constant over time.
-    max_tasks_per_child = 1 if load_mode == LoadMode.PRODUCTION else None
+    max_tasks_per_child = 1 if load_mode == LoadMode.IDR else None
 
     hamilton_driver = (
         driver.Builder()
