@@ -46,6 +46,11 @@ module "data_strategies" {
   cluster_name = data.aws_ecs_cluster.main.cluster_name
 }
 
+data "aws_ssm_parameter" "adot_collector_image" {
+  name = "/bfd/platform/otel-collector/nonsensitive/image"
+}
+
+
 data "aws_ecr_repository" "certstores" {
   name = local.certstores_repository_name
 }
@@ -215,7 +220,7 @@ resource "aws_ecs_task_definition" "server" {
       },
       {
         name      = "adot-collector"
-        image     = "public.ecr.aws/aws-observability/aws-otel-collector:${local.adot_collector_image_tag}"
+        image     = nonsensitive(data.aws_ssm_parameter.adot_collector_image.value)
         essential = false
 
         dependsOn = [
