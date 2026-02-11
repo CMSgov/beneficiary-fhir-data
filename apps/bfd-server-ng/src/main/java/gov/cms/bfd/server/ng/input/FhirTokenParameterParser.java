@@ -14,7 +14,7 @@ public final class FhirTokenParameterParser {
   private FhirTokenParameterParser() {}
 
   /**
-   * Parses the query parameter into a list of a list of criteria.
+   * Parses the query parameter into a nested list of criteria.
    *
    * <p>Outer list is AND conditions, inner list is OR conditions.
    *

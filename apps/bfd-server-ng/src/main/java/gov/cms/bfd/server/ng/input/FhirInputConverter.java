@@ -160,7 +160,7 @@ public class FhirInputConverter {
   }
 
   /**
-   * Parses the tag query parameter into a list of a list of criteria.
+   * Parses the tag query parameter into a nested list of criteria.
    *
    * <p>Outer list is AND conditions, inner list is OR conditions.
    *
@@ -241,7 +241,7 @@ public class FhirInputConverter {
   }
 
   /**
-   * Parses the source query parameter into a list of a list of sources.
+   * Parses the source query parameter into a nested list of sources.
    *
    * <p>Outer list is AND conditions, inner list is OR conditions.
    *
