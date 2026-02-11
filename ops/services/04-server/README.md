@@ -165,6 +165,7 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 | [aws_rds_cluster.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/rds_cluster) | data source |
 | [aws_route53_zone.parent_env](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/route53_zone) | data source |
 | [aws_security_groups.aurora_cluster](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/security_groups) | data source |
+| [aws_ssm_parameter.adot_collector_image](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ssm_parameter) | data source |
 | [aws_ssm_parameter.zone_name](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ssm_parameter) | data source |
 | [external_external.keystore_object_size](https://registry.terraform.io/providers/hashicorp/external/latest/docs/data-sources/external) | data source |
 | [external_external.truststore_object_size](https://registry.terraform.io/providers/hashicorp/external/latest/docs/data-sources/external) | data source |
