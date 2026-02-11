@@ -1,7 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model;
 
 import java.util.Arrays;
-import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -30,7 +29,10 @@ public enum MetaSourceSk {
    * @param sourceSk database code
    * @return meta source id
    */
-  public static Optional<MetaSourceSk> tryFromSourceSk(Integer sourceSk) {
-    return Arrays.stream(values()).filter(v -> v.sourceSk == sourceSk).findFirst();
+  public static MetaSourceSk tryFromSourceSk(Integer sourceSk) {
+    return Arrays.stream(values())
+        .filter(v -> v.sourceSk == sourceSk)
+        .findFirst()
+        .orElseThrow(() -> new IllegalArgumentException("Unknown meta source: " + sourceSk));
   }
 }

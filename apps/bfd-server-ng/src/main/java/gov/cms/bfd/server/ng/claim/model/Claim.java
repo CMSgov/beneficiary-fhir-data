@@ -50,7 +50,7 @@ public class Claim {
   private ClaimSourceId claimSourceId;
 
   @Column(name = "meta_src_sk")
-  private Optional<MetaSourceSk> metaSourceId;
+  private MetaSourceSk metaSourceSk;
 
   @Column(name = "clm_efctv_dt")
   private LocalDate claimEffectiveDate;
@@ -76,12 +76,6 @@ public class Claim {
   @Column(name = "clm_adjstmt_type_cd")
   private Optional<ClaimAdjustmentTypeCode> claimAdjustmentTypeCode;
 
-  @Column(name = "clm_audt_trl_stus_cd")
-  private Optional<String> claimAuditTrailStatusCode;
-
-  @Column(name = "clm_audt_trl_lctn_cd")
-  private ClaimAuditTrailLocationCode claimAuditTrailLocationCode;
-
   @Embedded private Meta meta;
   @Embedded private Identifiers identifiers;
   @Embedded private BillablePeriod billablePeriod;
@@ -96,6 +90,7 @@ public class Claim {
   @Embedded private ClaimIDRLoadDate claimIDRLoadDate;
   @Embedded private SubmitterContractNumber submitterContractNumber;
   @Embedded private SubmitterContractPBPNumber submitterContractPBPNumber;
+  @Embedded private ClaimAuditTrailContext claimAuditTrailContext;
 
   @OneToOne
   @JoinColumn(name = "bene_sk")
@@ -163,7 +158,7 @@ public class Claim {
     claimTypeCode.toFhirAdjudication().ifPresent(eob::addAdjudication);
 
     eob.setMeta(
-        meta.toFhir(claimTypeCode, claimSourceId, securityStatus, finalAction, metaSourceId));
+        meta.toFhir(claimTypeCode, claimSourceId, securityStatus, finalAction, metaSourceSk));
     eob.setIdentifier(identifiers.toFhir());
     eob.setBillablePeriod(billablePeriod.toFhir());
     eob.setCreated(DateUtil.toDate(claimEffectiveDate));
@@ -246,7 +241,7 @@ public class Claim {
 
     var recordTypeCodes = claimRecordType.toFhir(supportingInfoFactory);
     // if pac, resolve the audit trail status code
-    var auditTrailStatusCode = getAuditTrailStatusCode();
+    var auditTrailStatusCode = claimAuditTrailContext.getAuditTrailStatusCode();
     setEobOutcome(eob, claimTypeCode, auditTrailStatusCode);
 
     var initialSupportingInfo =
@@ -361,18 +356,6 @@ public class Claim {
         .flatMap(Optional::stream)
         .map(ClaimLineRx::getClaimRxSupportingInfo)
         .toList();
-  }
-
-  private Optional<ClaimAuditTrailStatusCode> getAuditTrailStatusCode() {
-    // composite code is derived using source, audit trail status code, and for VMS's case, audit
-    // trail location code since there exists some overlap in which descriptions and outcomes
-    // differ.
-    return metaSourceId.flatMap(
-        src ->
-            claimAuditTrailStatusCode.flatMap(
-                status ->
-                    ClaimAuditTrailStatusCode.tryFromCode(
-                        src, status, claimAuditTrailLocationCode)));
   }
 
   private void setEobOutcome(
