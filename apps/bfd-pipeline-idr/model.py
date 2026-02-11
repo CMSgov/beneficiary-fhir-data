@@ -196,6 +196,9 @@ ALIAS_RLT_COND = "rltcond"
 ALIAS_PBP_NUM = "pbp_num"
 ALIAS_CNTRCT_SGMT = "sgmt"
 
+INSERT_FIELD = {BATCH_TIMESTAMP: True, INSERT_EXCLUDE: True, COLUMN_MAP: "idr_insrt_ts"}
+UPDATE_FIELD = {UPDATE_TIMESTAMP: True, INSERT_EXCLUDE: True, COLUMN_MAP: "idr_updt_ts"}
+
 
 class IdrBaseModel(BaseModel, ABC):
     @staticmethod

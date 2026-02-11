@@ -22,13 +22,13 @@ from model import (
     ALIAS_PROCEDURE,
     ALIAS_PRVDR_RNDRNG,
     BATCH_ID,
-    BATCH_TIMESTAMP,
     COLUMN_MAP,
     HISTORICAL_BATCH_TIMESTAMP,
     INSERT_EXCLUDE,
+    INSERT_FIELD,
     LAST_UPDATED_TIMESTAMP,
     PRIMARY_KEY,
-    UPDATE_TIMESTAMP,
+    UPDATE_FIELD,
     IdrBaseModel,
     claim_filter,
     get_min_transaction_date,
@@ -90,22 +90,12 @@ class IdrClaimItemProfessionalSs(IdrBaseModel):
     ]
     idr_insrt_ts_line: Annotated[
         datetime,
-        {
-            BATCH_TIMESTAMP: True,
-            ALIAS: ALIAS_LINE,
-            INSERT_EXCLUDE: True,
-            COLUMN_MAP: "idr_insrt_ts",
-        },
+        {ALIAS: ALIAS_LINE, **INSERT_FIELD},
         BeforeValidator(transform_null_date_to_min),
     ]
     idr_updt_ts_line: Annotated[
         datetime,
-        {
-            UPDATE_TIMESTAMP: True,
-            ALIAS: ALIAS_LINE,
-            INSERT_EXCLUDE: True,
-            COLUMN_MAP: "idr_updt_ts",
-        },
+        {ALIAS: ALIAS_LINE, **UPDATE_FIELD},
         BeforeValidator(transform_null_date_to_min),
     ]
     # columns from V2_MDCR_CLM_PROD
@@ -122,22 +112,12 @@ class IdrClaimItemProfessionalSs(IdrBaseModel):
     clm_poa_ind: Annotated[str, {ALIAS: ALIAS_PROCEDURE}, BeforeValidator(transform_default_string)]
     idr_insrt_ts_prod: Annotated[
         datetime,
-        {
-            BATCH_TIMESTAMP: True,
-            ALIAS: ALIAS_PROCEDURE,
-            INSERT_EXCLUDE: True,
-            COLUMN_MAP: "idr_insrt_ts",
-        },
+        {ALIAS: ALIAS_PROCEDURE, **INSERT_FIELD},
         BeforeValidator(transform_null_date_to_min),
     ]
     idr_updt_ts_prod: Annotated[
         datetime,
-        {
-            UPDATE_TIMESTAMP: True,
-            ALIAS: ALIAS_PROCEDURE,
-            INSERT_EXCLUDE: True,
-            COLUMN_MAP: "idr_updt_ts",
-        },
+        {ALIAS: ALIAS_PROCEDURE, **UPDATE_FIELD},
         BeforeValidator(transform_null_date_to_min),
     ]
 
@@ -161,22 +141,12 @@ class IdrClaimItemProfessionalSs(IdrBaseModel):
     clm_line_carr_psych_ot_lmt_amt: Annotated[float | None, {ALIAS: ALIAS_LINE_PRFNL}]
     idr_insrt_ts_line_prfnl: Annotated[
         datetime,
-        {
-            BATCH_TIMESTAMP: True,
-            INSERT_EXCLUDE: True,
-            ALIAS: ALIAS_LINE_PRFNL,
-            COLUMN_MAP: "idr_insrt_ts",
-        },
+        {ALIAS: ALIAS_LINE_PRFNL, **INSERT_FIELD},
         BeforeValidator(transform_null_date_to_min),
     ]
     idr_updt_ts_line_prfnl: Annotated[
         datetime,
-        {
-            UPDATE_TIMESTAMP: True,
-            INSERT_EXCLUDE: True,
-            ALIAS: ALIAS_LINE_PRFNL,
-            COLUMN_MAP: "idr_updt_ts",
-        },
+        {ALIAS: ALIAS_LINE_PRFNL, **UPDATE_FIELD},
         BeforeValidator(transform_null_date_to_min),
     ]
 
@@ -219,17 +189,12 @@ class IdrClaimItemProfessionalSs(IdrBaseModel):
     ]
     idr_insrt_ts_line_dcmtn: Annotated[
         datetime,
-        {ALIAS: ALIAS_LINE_DCMTN, INSERT_EXCLUDE: True, COLUMN_MAP: "idr_insrt_ts"},
+        {ALIAS: ALIAS_LINE_DCMTN, **INSERT_FIELD},
         BeforeValidator(transform_null_date_to_min),
     ]
     idr_updt_ts_line_dcmtn: Annotated[
         datetime,
-        {
-            UPDATE_TIMESTAMP: True,
-            ALIAS: ALIAS_LINE_DCMTN,
-            INSERT_EXCLUDE: True,
-            COLUMN_MAP: "idr_updt_ts",
-        },
+        {ALIAS: ALIAS_LINE_DCMTN, **UPDATE_FIELD},
         BeforeValidator(transform_null_date_to_min),
     ]
     # Columns from v2_mdcr_clm_line_mcs
@@ -240,17 +205,12 @@ class IdrClaimItemProfessionalSs(IdrBaseModel):
     clm_line_hgb_lvl_num: Annotated[int | None, {ALIAS: ALIAS_LINE_MCS}]
     idr_insrt_ts_line_mcs: Annotated[
         datetime,
-        {ALIAS: ALIAS_LINE_MCS, INSERT_EXCLUDE: True, COLUMN_MAP: "idr_insrt_ts"},
+        {ALIAS: ALIAS_LINE_MCS, **INSERT_FIELD},
         BeforeValidator(transform_null_date_to_min),
     ]
     idr_updt_ts_line_mcs: Annotated[
         datetime,
-        {
-            UPDATE_TIMESTAMP: True,
-            ALIAS: ALIAS_LINE_MCS,
-            INSERT_EXCLUDE: True,
-            COLUMN_MAP: "idr_updt_ts",
-        },
+        {ALIAS: ALIAS_LINE_MCS, **UPDATE_FIELD},
         BeforeValidator(transform_null_date_to_min),
     ]
 
