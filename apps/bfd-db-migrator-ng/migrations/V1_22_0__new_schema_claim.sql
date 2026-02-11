@@ -128,7 +128,7 @@ CREATE TABLE idr_new.claim_professional_ss
     clm_prvdr_acnt_rcvbl_ofst_amt  numeric,
     clm_clncl_tril_num        character varying(8),
     bfd_claim_updated_ts           timestamp with time zone DEFAULT now(),
-    meta_src_sk                    integer
+    meta_src_sk                    integer NOT NULL
 );
 
 CREATE TABLE idr_new.claim_professional_nch
@@ -670,7 +670,7 @@ CREATE TABLE idr_new.claim_institutional_ss
 --  FISS
     clm_crnt_stus_cd           character varying(1)     NOT NULL,
 -- SS    clm_pps_ind_cd                character varying(1)     NOT NULL,
-    meta_src_sk                integer,
+    meta_src_sk                integer NOT NULL,
 --     CLM_INSTL Columns
     clm_admsn_type_cd              varchar(2)               not null,
     bene_ptnt_stus_cd              varchar(2)               not null,

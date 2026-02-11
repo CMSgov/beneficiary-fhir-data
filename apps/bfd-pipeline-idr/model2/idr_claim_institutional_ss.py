@@ -76,6 +76,7 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
     clm_mdcr_coinsrnc_amt: float | None
     clm_blood_lblty_amt: float | None
     clm_ncvrd_chrg_amt: float | None
+    clm_blood_chrg_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
     clm_finl_actn_ind: Annotated[str, {ALIAS: ALIAS_CLM}]
     clm_bill_clsfctn_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_bill_fac_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
@@ -84,18 +85,30 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
         date | None, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_date_to_null)
     ]
     clm_ltst_clm_ind: Annotated[str, {ALIAS: ALIAS_CLM}]
+    meta_src_sk: Annotated[int, {ALIAS: ALIAS_CLM}]
+    clm_tot_cntrctl_amt: float | None
     clm_ric_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_nch_prmry_pyr_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_prvdr_pmt_amt: float | None
     clm_adjstmt_type_cd: Annotated[
         str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)
     ]
+    clm_prvdr_rmng_due_amt: float | None
+    clm_prvdr_otaf_amt: float | None
+    clm_prvdr_intrst_pd_amt: float | None
     clm_cntrctr_num: Annotated[str, BeforeValidator(transform_default_string)]
     clm_pmt_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
     clm_alowd_chrg_amt: float | None
     clm_sbmt_chrg_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
     clm_blood_pt_frnsh_qty: Annotated[int | None, {ALIAS: ALIAS_CLM}]
+    clm_blood_ncvrd_chrg_amt: float | None
+    clm_bene_intrst_pd_amt: float | None
     clm_bene_pd_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
+    clm_bene_pmt_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
+    clm_bene_pmt_coinsrnc_amt: float | None
+    clm_othr_tp_pd_amt: float | None
+    clm_cob_ptnt_resp_amt: float | None
+    clm_sbmt_frmt_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_blg_prvdr_zip5_cd: Annotated[
         str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_null_string)
     ]
@@ -197,6 +210,7 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
     # Columns from v2_mdcr_clm_dt_sngtr
     clm_cms_proc_dt: Annotated[date | None, BeforeValidator(transform_default_date_to_null)]
     clm_actv_care_from_dt: Annotated[date | None, BeforeValidator(transform_default_date_to_null)]
+    clm_qlfy_stay_from_dt: Annotated[date | None, BeforeValidator(transform_default_date_to_null)]
     clm_dschrg_dt: Annotated[date | None, BeforeValidator(transform_default_date_to_null)]
     clm_submsn_dt: Annotated[date | None, BeforeValidator(transform_default_date_to_null)]
     idr_insrt_ts_sgntr: Annotated[
