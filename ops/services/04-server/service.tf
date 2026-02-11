@@ -251,6 +251,13 @@ resource "aws_ecs_task_definition" "server" {
             awslogs-region        = local.region
           }
         }
+
+        dependsOn = [
+          {
+            condition     = "HEALTHY"
+            containerName = local.service
+          }
+        ]
       },
       {
         name              = "log_router"
