@@ -67,7 +67,7 @@ class IdrClaimItemProfessionalSs(IdrBaseModel):
     ]
     clm_line_ndc_cd: Annotated[str, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_default_string)]
     clm_line_ndc_qty_qlfyr_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_line_srvc_unit_qty: float | None
+    clm_line_srvc_unit_qty: Annotated[float | None, {ALIAS: ALIAS_LINE}]
     clm_line_rx_num: Annotated[str, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_default_string)]
     clm_pos_cd: Annotated[str, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_default_string)]
     clm_rndrg_prvdr_type_cd: Annotated[
@@ -112,12 +112,14 @@ class IdrClaimItemProfessionalSs(IdrBaseModel):
     clm_val_sqnc_num_prod: Annotated[
         int | None, {ALIAS: ALIAS_PROCEDURE, COLUMN_MAP: "clm_val_sqnc_num"}
     ]
-    clm_prod_type_cd: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_prod_type_cd: Annotated[
+        str, {ALIAS: ALIAS_PROCEDURE}, BeforeValidator(transform_null_string)
+    ]
     clm_dgns_prcdr_icd_ind: Annotated[
         str, {ALIAS: ALIAS_PROCEDURE}, BeforeValidator(transform_default_string)
     ]
-    clm_dgns_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_poa_ind: Annotated[str, BeforeValidator(transform_default_string)]
+    clm_dgns_cd: Annotated[str, {ALIAS: ALIAS_PROCEDURE}, BeforeValidator(transform_default_string)]
+    clm_poa_ind: Annotated[str, {ALIAS: ALIAS_PROCEDURE}, BeforeValidator(transform_default_string)]
     idr_insrt_ts_prod: Annotated[
         datetime,
         {
@@ -141,8 +143,8 @@ class IdrClaimItemProfessionalSs(IdrBaseModel):
 
     # columns from V2_MDCR_CLM_VAL
     clm_val_sqnc_num_val: Annotated[int | None, {ALIAS: ALIAS_VAL, COLUMN_MAP: "clm_val_sqnc_num"}]
-    clm_val_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_val_amt: float | None
+    clm_val_cd: Annotated[str, {ALIAS: ALIAS_VAL}, BeforeValidator(transform_default_string)]
+    clm_val_amt: Annotated[float | None, {ALIAS: ALIAS_VAL}]
     idr_insrt_ts_val: Annotated[
         datetime,
         {BATCH_TIMESTAMP: True, ALIAS: ALIAS_VAL, INSERT_EXCLUDE: True, COLUMN_MAP: "idr_insrt_ts"},
@@ -155,13 +157,23 @@ class IdrClaimItemProfessionalSs(IdrBaseModel):
     ]
 
     # Columns from v2_mdcr_clm_line_prfnl
-    clm_fed_type_srvc_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_line_prfnl_dme_price_amt: float | None
-    clm_pmt_80_100_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_prvdr_spclty_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_srvc_ddctbl_sw: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_suplr_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_line_carr_psych_ot_lmt_amt: float | None
+    clm_fed_type_srvc_cd: Annotated[
+        str, {ALIAS: ALIAS_LINE_PRFNL}, BeforeValidator(transform_default_string)
+    ]
+    clm_line_prfnl_dme_price_amt: Annotated[float | None, {ALIAS: ALIAS_LINE_PRFNL}]
+    clm_pmt_80_100_cd: Annotated[
+        str, {ALIAS: ALIAS_LINE_PRFNL}, BeforeValidator(transform_default_string)
+    ]
+    clm_prvdr_spclty_cd: Annotated[
+        str, {ALIAS: ALIAS_LINE_PRFNL}, BeforeValidator(transform_default_string)
+    ]
+    clm_srvc_ddctbl_sw: Annotated[
+        str, {ALIAS: ALIAS_LINE_PRFNL}, BeforeValidator(transform_default_string)
+    ]
+    clm_suplr_type_cd: Annotated[
+        str, {ALIAS: ALIAS_LINE_PRFNL}, BeforeValidator(transform_default_string)
+    ]
+    clm_line_carr_psych_ot_lmt_amt: Annotated[float | None, {ALIAS: ALIAS_LINE_PRFNL}]
     idr_insrt_ts_line_prfnl: Annotated[
         datetime,
         {
@@ -217,7 +229,6 @@ class IdrClaimItemProfessionalSs(IdrBaseModel):
     clm_line_ngaco_pbpmt_sw: Annotated[
         str, {ALIAS: ALIAS_LINE_DCMTN}, BeforeValidator(transform_default_string)
     ]
-    clm_rndrg_prvdr_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_line_pa_uniq_trkng_num: Annotated[
         str, {ALIAS: ALIAS_LINE_DCMTN}, BeforeValidator(transform_null_string)
     ]
@@ -237,9 +248,11 @@ class IdrClaimItemProfessionalSs(IdrBaseModel):
         BeforeValidator(transform_null_date_to_min),
     ]
     # Columns from v2_mdcr_clm_line_mcs
-    clm_line_rbndlg_crtfctn_num: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_line_hct_lvl_num: int | None
-    clm_line_hgb_lvl_num: int | None
+    clm_line_rbndlg_crtfctn_num: Annotated[
+        str, {ALIAS: ALIAS_LINE_MCS}, BeforeValidator(transform_default_string)
+    ]
+    clm_line_hct_lvl_num: Annotated[int | None, {ALIAS: ALIAS_LINE_MCS}]
+    clm_line_hgb_lvl_num: Annotated[int | None, {ALIAS: ALIAS_LINE_MCS}]
     idr_insrt_ts_line_mcs: Annotated[
         datetime,
         {ALIAS: ALIAS_LINE_MCS, INSERT_EXCLUDE: True, COLUMN_MAP: "idr_insrt_ts"},
