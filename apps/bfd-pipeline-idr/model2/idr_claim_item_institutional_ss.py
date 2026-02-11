@@ -16,6 +16,7 @@ from model import (
     ALIAS_CLM_GRP,
     ALIAS_LINE,
     ALIAS_LINE_DCMTN,
+    ALIAS_LINE_FISS,
     ALIAS_LINE_INSTNL,
     ALIAS_PROCEDURE,
     ALIAS_RLT_COND,
@@ -48,6 +49,7 @@ class IdrClaimItemInstitutionalSs(IdrBaseModel):
     clm_line_num: Annotated[int | None, {ALIAS: ALIAS_LINE}]
     clm_line_sbmt_chrg_amt: Annotated[float | None, {ALIAS: ALIAS_LINE}]
     clm_line_ncvrd_chrg_amt: Annotated[float | None, {ALIAS: ALIAS_LINE}]
+    clm_line_ncvrd_pd_amt: Annotated[float | None, {ALIAS: ALIAS_LINE}]
     clm_line_prvdr_pmt_amt: Annotated[float | None, {ALIAS: ALIAS_LINE}]
     clm_line_bene_pmt_amt: Annotated[float | None, {ALIAS: ALIAS_LINE}]
     clm_line_bene_pd_amt: Annotated[float | None, {ALIAS: ALIAS_LINE}]
@@ -74,6 +76,8 @@ class IdrClaimItemInstitutionalSs(IdrBaseModel):
     clm_line_rev_ctr_cd: Annotated[
         str, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_default_string)
     ]
+    clm_line_othr_tp_pd_amt: Annotated[float | None, {ALIAS: ALIAS_LINE}]
+    clm_line_otaf_amt: Annotated[float | None, {ALIAS: ALIAS_LINE}]
     hcpcs_1_mdfr_cd: Annotated[str, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_default_string)]
     hcpcs_2_mdfr_cd: Annotated[str, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_default_string)]
     hcpcs_3_mdfr_cd: Annotated[str, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_default_string)]
@@ -212,6 +216,7 @@ class IdrClaimItemInstitutionalSs(IdrBaseModel):
     clm_idr_ld_dt: Annotated[date, {INSERT_EXCLUDE: True, HISTORICAL_BATCH_TIMESTAMP: True}]
     clm_rev_cntr_tdapa_amt: Annotated[float | None, {ALIAS: ALIAS_LINE_INSTNL}]
     clm_line_add_on_pymt_amt: Annotated[float | None, {ALIAS: ALIAS_LINE_INSTNL}]
+    clm_line_non_ehr_rdctn_amt: Annotated[float | None, {ALIAS: ALIAS_LINE_INSTNL}]
     idr_insrt_ts_line_instnl: Annotated[
         datetime,
         {
@@ -251,6 +256,23 @@ class IdrClaimItemInstitutionalSs(IdrBaseModel):
         },
         BeforeValidator(transform_null_date_to_min),
     ]
+    # columns from v2_mdcr_clm_line_fiss
+    clm_line_msp_coinsrnc_amt: Annotated[float | None, {ALIAS: ALIAS_LINE_FISS}]
+    idr_insrt_ts_line_fiss: Annotated[
+        datetime,
+        {ALIAS: ALIAS_LINE_FISS, INSERT_EXCLUDE: True, COLUMN_MAP: "idr_insrt_ts"},
+        BeforeValidator(transform_null_date_to_min),
+    ]
+    idr_updt_ts_line_fiss: Annotated[
+        datetime,
+        {
+            UPDATE_TIMESTAMP: True,
+            ALIAS: ALIAS_LINE_FISS,
+            INSERT_EXCLUDE: True,
+            COLUMN_MAP: "idr_updt_ts",
+        },
+        BeforeValidator(transform_null_date_to_min),
+    ]
 
     @staticmethod
     def table() -> str:
@@ -274,6 +296,7 @@ class IdrClaimItemInstitutionalSs(IdrBaseModel):
         val = ALIAS_VAL
         rlt_cond = ALIAS_RLT_COND
         line_dcmtn = ALIAS_LINE_DCMTN
+        line_fiss = ALIAS_LINE_FISS
         # This query is taking all the values for CLM_PROD, CLM_LINE, and CLM_VAL and storing
         # them in a unified table. This is necessary because each of these tables have a different
         # number of rows for each claim. If we don't combine these values, we would either have to
@@ -430,6 +453,12 @@ class IdrClaimItemInstitutionalSs(IdrBaseModel):
                     AND {line_dcmtn}.clm_num_sk = {line}.clm_num_sk
                     AND {line_dcmtn}.clm_dt_sgntr_sk = {line}.clm_dt_sgntr_sk
                     AND {line_dcmtn}.clm_line_num = {line}.clm_line_num
+                LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_fiss {line_fiss}
+                    ON {line_fiss}.geo_bene_sk = {line}.geo_bene_sk
+                    AND {line_fiss}.clm_type_cd = {line}.clm_type_cd
+                    AND {line_fiss}.clm_num_sk = {line}.clm_num_sk
+                    AND {line_fiss}.clm_dt_sgntr_sk = {line}.clm_dt_sgntr_sk
+                    AND {line_fiss}.clm_line_num = {line}.clm_line_num
                 {{WHERE_CLAUSE}}
                 {{ORDER_BY}}
         """

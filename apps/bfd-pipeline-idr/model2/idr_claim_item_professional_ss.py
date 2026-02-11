@@ -84,7 +84,7 @@ class IdrClaimItemProfessionalSs(IdrBaseModel):
     hcpcs_3_mdfr_cd: Annotated[str, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_default_string)]
     hcpcs_4_mdfr_cd: Annotated[str, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_default_string)]
     hcpcs_5_mdfr_cd: Annotated[str, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_default_string)]
-    clm_line_otaf_amt: float | None
+    clm_line_otaf_amt: Annotated[float | None, {ALIAS: ALIAS_LINE}]
     clm_idr_ld_dt: Annotated[
         date, {INSERT_EXCLUDE: True, ALIAS: ALIAS_CLM, HISTORICAL_BATCH_TIMESTAMP: True}
     ]
