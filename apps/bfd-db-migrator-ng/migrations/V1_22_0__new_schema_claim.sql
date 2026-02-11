@@ -985,6 +985,8 @@ CREATE TABLE idr_new.claim_item_institutional_ss
     clm_val_sqnc_num_val        integer,
     clm_val_cd                  character varying(2)     NOT NULL,
     clm_val_amt                 numeric,
+    clm_val_ansi_grp_cd character varying(2) NOT NULL,
+    clm_val_ansi_rsn_cd character varying(3) NOT NULL,
 --     idr_insrt_ts_val               timestamp with time zone NOT NULL,
 --     idr_updt_ts_val                timestamp with time zone NOT NULL,
     bfd_created_ts              timestamp with time zone NOT NULL,

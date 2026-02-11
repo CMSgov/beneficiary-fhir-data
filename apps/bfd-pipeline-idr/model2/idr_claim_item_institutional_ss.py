@@ -148,7 +148,13 @@ class IdrClaimItemInstitutionalSs(IdrBaseModel):
     # columns from V2_MDCR_CLM_VAL
     clm_val_sqnc_num_val: Annotated[int | None, {ALIAS: ALIAS_VAL, COLUMN_MAP: "clm_val_sqnc_num"}]
     clm_val_cd: Annotated[str, {ALIAS: ALIAS_VAL}, BeforeValidator(transform_default_string)]
-    clm_val_amt: float | None
+    clm_val_amt: Annotated[float | None, {ALIAS: ALIAS_VAL}]
+    clm_val_ansi_grp_cd: Annotated[
+        str, {ALIAS: ALIAS_VAL}, BeforeValidator(transform_default_string)
+    ]
+    clm_val_ansi_rsn_cd: Annotated[
+        str, {ALIAS: ALIAS_VAL}, BeforeValidator(transform_default_string)
+    ]
     idr_insrt_ts_val: Annotated[
         datetime,
         {BATCH_TIMESTAMP: True, ALIAS: ALIAS_VAL, INSERT_EXCLUDE: True, COLUMN_MAP: "idr_insrt_ts"},

@@ -365,6 +365,8 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_val (
     clm_val_sqnc_num INT,
     clm_val_cd VARCHAR(2),
     clm_val_amt NUMERIC,
+    clm_val_ansi_grp_cd VARCHAR(2),
+    clm_val_ansi_rsn_cd VARCHAR(3),
     idr_insrt_ts TIMESTAMPTZ,
     idr_updt_ts TIMESTAMPTZ,
     PRIMARY KEY (geo_bene_sk, clm_dt_sgntr_sk, clm_type_cd, clm_num_sk, clm_val_sqnc_num)
