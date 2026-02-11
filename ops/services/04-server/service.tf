@@ -321,7 +321,7 @@ resource "aws_ecs_task_definition" "server" {
           {
             condition     = "COMPLETE"
             containerName = "certstores"
-          },
+          }
         ]
         environment = [
           {
