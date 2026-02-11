@@ -1,9 +1,18 @@
 from os import getenv
 
-ENABLE_PARTITIONS = getenv("IDR_ENABLE_PARTITIONS", "1").lower() not in ("0", "false")
+
+def _parse_bool_default_false(var_name: str) -> bool:
+    return getenv(var_name, "").lower() in ("1", "true")
+
+
+def _parse_bool_default_true(var_name: str) -> bool:
+    return getenv(var_name, "1").lower() not in ("0", "false")
+
+
+ENABLE_PARTITIONS = _parse_bool_default_true("IDR_ENABLE_PARTITIONS")
 MIN_TRANSACTION_DATE = getenv("IDR_MIN_TRANSACTION_DATE")
 PARTITION_TYPE = getenv("IDR_PARTITION_TYPE", "year").lower()
-LATEST_CLAIMS = getenv("IDR_LATEST_CLAIMS", "").lower() in ("1", "true")
+LATEST_CLAIMS = _parse_bool_default_false("IDR_LATEST_CLAIMS")
 LOAD_TYPE = getenv("IDR_LOAD_TYPE", "incremental")
 BATCH_MULTIPLIER = int(getenv("IDR_BATCH_MULTIPLIER", "2_000_000"))
 MIN_BATCH_COMPLETION_DATE = getenv("IDR_MIN_COMPLETION_DATE")
@@ -18,6 +27,12 @@ IDR_DATABASE = getenv("IDR_DATABASE", "")
 IDR_SCHEMA = getenv("IDR_SCHEMA", "")
 
 # These need to be lazy-loaded since we override them in the tests
+
+
+def force_load_progress() -> bool:
+    # We don't normally want to store the load progress info for synthetic data since the dates
+    # won't be in order like in prod. However, we need a way to override this for the tests.
+    return _parse_bool_default_false("IDR_FORCE_LOAD_PROGESS")
 
 
 def bfd_db_port() -> str:

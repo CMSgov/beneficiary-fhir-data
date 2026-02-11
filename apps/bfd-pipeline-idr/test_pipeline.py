@@ -63,6 +63,7 @@ def setup_db() -> Generator[PostgresContainer]:
             os.environ["BFD_DB_USERNAME"] = info.user
             os.environ["BFD_DB_PASSWORD"] = info.password
             os.environ["IDR_BATCH_SIZE"] = "100000"
+            os.environ["IDR_FORCE_LOAD_PROGRESS"] = "1"
         yield postgres
 
 

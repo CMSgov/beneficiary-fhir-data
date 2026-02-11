@@ -74,7 +74,7 @@ def extract_and_load(
                 logger.info("no previous progress for %s - %s", cls.table(), partition.name)
 
             data_iter = data_extractor.extract_idr_data(progress, job_start, load_mode)
-            res = loader.load(data_iter, cls, job_start, partition, progress, load_type)
+            res = loader.load(data_iter, cls, job_start, partition, progress, load_type, load_mode)
             data_extractor.close()
             loader.close()
             return res

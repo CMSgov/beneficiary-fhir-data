@@ -3,6 +3,7 @@ from collections.abc import Iterator, Sequence
 from datetime import UTC, date, datetime
 
 import psycopg
+from psycopg.abc import Params, Query
 
 from constants import DEFAULT_MIN_DATE
 from load_partition import LoadPartition, LoadType
@@ -13,6 +14,7 @@ from settings import (
     bfd_db_password,
     bfd_db_port,
     bfd_db_username,
+    force_load_progress,
 )
 from timer import Timer
 
@@ -44,9 +46,10 @@ class PostgresLoader:
         partition: LoadPartition,
         progress: LoadProgress | None,
         load_type: LoadType,
+        load_mode: LoadMode,
     ) -> bool:
         return BatchLoader(
-            self.conn, fetch_results, model, job_start, partition, progress, load_type
+            self.conn, fetch_results, model, job_start, partition, progress, load_type, load_mode
         ).load()
 
     def close(self) -> None:
@@ -63,6 +66,7 @@ class BatchLoader:
         partition: LoadPartition,
         progress: LoadProgress | None,
         load_type: LoadType,
+        load_mode: LoadMode,
     ) -> None:
         self.conn = conn
         self.fetch_results = fetch_results
@@ -89,6 +93,7 @@ class BatchLoader:
         self.insert_timer = Timer("insert", model, partition)
         self.commit_timer = Timer("commit", model, partition)
         self.load_type = load_type
+        self.enable_load_progress = load_mode == LoadMode.PRODUCTION or force_load_progress()
 
     def load(
         self,
@@ -143,7 +148,8 @@ class BatchLoader:
         return data_loaded
 
     def _insert_batch_start(self, cur: psycopg.Cursor) -> None:
-        cur.execute(
+        self._update_load_progress(
+            cur,
             f"""
             INSERT INTO idr.load_progress(
                 table_name, 
@@ -176,7 +182,8 @@ class BatchLoader:
         )
 
     def _mark_batch_complete(self, cur: psycopg.Cursor) -> None:
-        cur.execute(
+        self._update_load_progress(
+            cur,
             """
             UPDATE idr.load_progress
             SET batch_complete_ts = NOW()
@@ -222,16 +229,17 @@ class BatchLoader:
             )
             batch_id_col = self.model.batch_id_col()
             batch_id = last[batch_id_col] if batch_id_col else 0
-            cur.execute(
+            self._update_load_progress(
+                cur,
                 """
-            UPDATE idr.load_progress
-            SET 
-                last_ts = %(last_ts)s,
-                last_id = %(last_id)s
-            WHERE
-                table_name = %(table)s 
-                AND batch_partition = %(partition)s
-            """,
+                UPDATE idr.load_progress
+                SET 
+                    last_ts = %(last_ts)s,
+                    last_id = %(last_id)s
+                WHERE
+                    table_name = %(table)s 
+                    AND batch_partition = %(partition)s
+                """,
                 {
                     "table": self.table,
                     "partition": self.partition.name,
@@ -239,6 +247,12 @@ class BatchLoader:
                     "last_id": batch_id,
                 },
             )
+
+    def _update_load_progress(
+        self, cur: psycopg.Cursor, query: Query, params: Params | None
+    ) -> None:
+        if self.enable_load_progress:
+            cur.execute(query, params)
 
     def _merge(self, cur: psycopg.Cursor, timestamp: datetime) -> None:
         unique_key = self.model.unique_key()
