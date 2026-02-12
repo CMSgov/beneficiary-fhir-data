@@ -25,7 +25,7 @@ repos:
 - repo: local
   hooks:
     - id: pre-commit-script
-      name: Pre-commit-script
+      name: Pre-commit Script
       entry: ./.github/scripts/pre-commit.sh
       language: script
       stages: [ pre-commit ]
