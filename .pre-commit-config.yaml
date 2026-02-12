@@ -22,6 +22,7 @@ repos:
       entry: ./.github/scripts/pre-push.sh
       language: script
       stages: [ pre-push ]
+      verbose: true
 - repo: local
   hooks:
     - id: pre-commit-script
@@ -29,3 +30,4 @@ repos:
       entry: ./.github/scripts/pre-commit.sh
       language: script
       stages: [ pre-commit ]
+      verbose: true
