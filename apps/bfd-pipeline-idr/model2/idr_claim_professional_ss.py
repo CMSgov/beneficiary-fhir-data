@@ -419,10 +419,10 @@ class IdrClaimProfessionalSs(IdrBaseModel):
                 {clm}.clm_type_cd = {dcmtn}.clm_type_cd AND
                 {clm}.clm_num_sk = {dcmtn}.clm_num_sk
             LEFT JOIN latest_clm_lctn_hstry latest_lctn ON
-                    {clm}.geo_bene_sk = latest_lctn.geo_bene_sk AND
-                    {clm}.clm_type_cd = latest_lctn.clm_type_cd AND
-                    {clm}.clm_dt_sgntr_sk = latest_lctn.clm_dt_sgntr_sk AND
-                    {clm}.clm_num_sk = latest_lctn.clm_num_sk
+                {clm}.geo_bene_sk = latest_lctn.geo_bene_sk AND
+                {clm}.clm_type_cd = latest_lctn.clm_type_cd AND
+                {clm}.clm_dt_sgntr_sk = latest_lctn.clm_dt_sgntr_sk AND
+                {clm}.clm_num_sk = latest_lctn.clm_num_sk
             LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_lctn_hstry {lctn_hstry} ON
                 {clm}.geo_bene_sk = {lctn_hstry}.geo_bene_sk AND
                 {clm}.clm_type_cd = {lctn_hstry}.clm_type_cd AND

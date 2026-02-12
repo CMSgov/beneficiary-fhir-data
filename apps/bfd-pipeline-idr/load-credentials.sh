@@ -30,5 +30,5 @@ export IDR_MIN_TRANSACTION_DATE=2024-07-01
 export IDR_LOAD_TYPE=initial
 export IDR_PARTITION_TYPE=day
 export IDR_LATEST_CLAIMS=1
-export IDR_CLAIM_TABLES="idr_new.claim_item_professional_nch"
+export IDR_CLAIM_TABLES="idr_new.claim_professional_nch,idr_new.claim_professional_ss,idr_new.claim_institutional_nch,idr_new.claim_institutional_ss,idr_new.claim_item_professional_nch,idr_new.claim_item_professional_ss,idr_new.claim_item_institutional_nch,idr_new.claim_item_institutional_ss,idr_new.claim_rx"
 export IDR_MAX_TASKS=48
