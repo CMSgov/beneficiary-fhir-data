@@ -93,34 +93,48 @@ public class ClaimNewRepository {
             new BillablePeriodFilterParam(claimThroughDate),
             new LastUpdatedFilterParam(lastUpdated));
     var params = asyncService.getFilters(paramBuilders);
-    //    var allResults = new ArrayList<ClaimBase>();
-    var futures =
-        List.of(
-            asyncService.findByIdInClaimType(
-                CLAIM_PROFESSIONAL_SHARED_SYSTEMS,
-                ClaimProfessionalSharedSystems.class,
-                claimUniqueId,
-                params),
-            asyncService.findByIdInClaimType(
-                CLAIM_PROFESSIONAL_NCH, ClaimProfessionalNch.class, claimUniqueId, params),
-            asyncService.findByIdInClaimType(
-                CLAIM_INSTITUTIONAL_SHARED_SYSTEMS,
-                ClaimInstitutionalSharedSystems.class,
-                claimUniqueId,
-                params),
-            asyncService.findByIdInClaimType(
-                CLAIM_INSTITUTIONAL_NCH, ClaimInstitutionalNch.class, claimUniqueId, params),
-            asyncService.findByIdInClaimType(CLAIM_RX, ClaimRx.class, claimUniqueId, params));
+
+    var professionalSharedSystemsClaims =
+        asyncService.findByIdInClaimType(
+            CLAIM_PROFESSIONAL_SHARED_SYSTEMS,
+            ClaimProfessionalSharedSystems.class,
+            claimUniqueId,
+            params);
+
+    var professionalNchClaims =
+        asyncService.findByIdInClaimType(
+            CLAIM_PROFESSIONAL_NCH, ClaimProfessionalNch.class, claimUniqueId, params);
+
+    var institutionalSharedSystemsClaims =
+        asyncService.findByIdInClaimType(
+            CLAIM_INSTITUTIONAL_SHARED_SYSTEMS,
+            ClaimInstitutionalSharedSystems.class,
+            claimUniqueId,
+            params);
+
+    var institutionalNchClaims =
+        asyncService.findByIdInClaimType(
+            CLAIM_INSTITUTIONAL_NCH, ClaimInstitutionalNch.class, claimUniqueId, params);
+
+    var rxClaims = asyncService.findByIdInClaimType(CLAIM_RX, ClaimRx.class, claimUniqueId, params);
 
     // Wait for all queries
-    CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new)).join();
+    CompletableFuture.allOf(
+            professionalNchClaims,
+            professionalSharedSystemsClaims,
+            institutionalSharedSystemsClaims,
+            institutionalNchClaims,
+            rxClaims)
+        .join();
 
-    var result =
-        futures.stream()
-            .map(CompletableFuture::join)
-            .flatMap(Optional::stream)
-            .map(ClaimBase.class::cast)
-            .findFirst();
+    var allClaims = new ArrayList<ClaimBase>();
+    professionalNchClaims.join().ifPresent(allClaims::add);
+    professionalSharedSystemsClaims.join().ifPresent(allClaims::add);
+    institutionalSharedSystemsClaims.join().ifPresent(allClaims::add);
+    institutionalNchClaims.join().ifPresent(allClaims::add);
+    rxClaims.join().ifPresent(allClaims::add);
+
+    var result = allClaims.stream().findFirst();
 
     result.ifPresent(claim -> LogUtil.logBeneSk(claim.getBeneficiary().getBeneSk()));
 

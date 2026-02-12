@@ -76,8 +76,7 @@ public class ClaimProfessionalNch extends ClaimBase {
   @Override
   public ExplanationOfBenefit toFhir(ClaimSecurityStatus securityStatus) {
     var eob = super.toFhir(securityStatus);
-    //    var consolidatedDiagnoses = computeConsolidatedDiagnoses();
-
+    var diagnosisSequenceGenerator = new SequenceGenerator();
     claimItems.forEach(
         item -> {
           var claimLine = item.getClaimLine().toFhirItemComponent();
@@ -98,19 +97,16 @@ public class ClaimProfessionalNch extends ClaimBase {
                     eob.addCareTeam(c.careTeam());
                     eob.addContained(c.practitioner());
                   });
+          getClaimTypeCode()
+              .toContext()
+              .flatMap(
+                  ctx -> item.getClaimProcedure().toFhirDiagnosis(diagnosisSequenceGenerator, ctx))
+              .ifPresent(eob::addDiagnosis);
+
           item.getClaimLine()
               .toFhirObservation(item.getClaimItemId().getBfdRowId())
               .ifPresent(eob::addContained);
         });
-    //    var diagnosisSequenceGenerator = new SequenceGenerator();
-    //    getClaimTypeCode()
-    //        .toContext()
-    //        .ifPresent(
-    //            ctx ->
-    //                consolidatedDiagnoses.forEach(
-    //                    d ->
-    //                        d.toFhirDiagnosis(diagnosisSequenceGenerator, ctx)
-    //                            .ifPresent(eob::addDiagnosis)));
 
     billingProviderHistory
         .toFhirNpiType()

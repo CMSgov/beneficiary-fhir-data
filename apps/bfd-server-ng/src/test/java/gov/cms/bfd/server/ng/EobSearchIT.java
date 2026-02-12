@@ -16,12 +16,14 @@ import gov.cms.bfd.server.ng.claim.model.ClaimFinalAction;
 import gov.cms.bfd.server.ng.claim.model.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.ClaimSubtype;
 import gov.cms.bfd.server.ng.eob.EobResourceProvider;
-import gov.cms.bfd.server.ng.testUtil.ThreadSafeAppender;
+import gov.cms.bfd.server.ng.testUtil.ThreadSafeAsyncAppender;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.EntityManager;
 import jakarta.servlet.http.HttpServletRequest;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -68,12 +70,17 @@ class EobSearchIT extends IntegrationTestBase {
 
   @Test
   void eobSearchQueryCount() {
-    var events = ThreadSafeAppender.startRecord();
-    var bundle =
-        eobResourceProvider.searchByPatient(
-            new ReferenceParam("178083966"), null, null, null, null, null, null, request);
-    assertFalse(bundle.getEntry().isEmpty());
-    assertEquals(2, queryCount(events));
+    var events = ThreadSafeAsyncAppender.startRecord();
+    try {
+      var bundle =
+          eobResourceProvider.searchByPatient(
+              new ReferenceParam("178083966"), null, null, null, null, null, null, request);
+      assertFalse(bundle.getEntry().isEmpty());
+      assertEquals(3, bundle.getEntry().size());
+      assertEquals(8, queryCount(events));
+    } finally {
+      ThreadSafeAsyncAppender.stopRecord();
+    }
   }
 
   @ParameterizedTest
@@ -135,14 +142,27 @@ class EobSearchIT extends IntegrationTestBase {
 
   @Test
   void eobSearchByDate() {
-    var lastUpdated =
-        entityManager
-            .createQuery(
-                "SELECT c.meta.updatedTimestamp FROM Claim c WHERE c.beneficiary.xrefSk = :beneSk",
-                ZonedDateTime.class)
-            .setParameter("beneSk", BENE_ID_ALL_PARTS_WITH_XREF)
-            .getResultList()
-            .getFirst();
+    var instant =
+        (Instant)
+            entityManager
+                .createNativeQuery(
+                    """
+                      select max(bfd_claim_updated_ts)
+                      from (
+                          select bfd_claim_updated_ts from idr_new.claim_professional_nch where bene_sk = :beneSk
+                          union all
+                          select bfd_claim_updated_ts from idr_new.claim_professional_ss where bene_sk = :beneSk
+                          union all
+                          select bfd_claim_updated_ts from idr_new.claim_institutional_nch where bene_sk = :beneSk
+                          union all
+                          select bfd_claim_updated_ts from idr_new.claim_institutional_ss where bene_sk = :beneSk
+                          union all
+                          select bfd_claim_updated_ts from idr_new.claim_rx where bene_sk = :beneSk
+                      ) all_claims
+                   """)
+                .setParameter("beneSk", Long.valueOf(BENE_ID_NON_CURRENT))
+                .getSingleResult();
+    ZonedDateTime lastUpdated = instant == null ? null : instant.atZone(ZoneOffset.UTC);
 
     var eobBundle =
         searchBundle()

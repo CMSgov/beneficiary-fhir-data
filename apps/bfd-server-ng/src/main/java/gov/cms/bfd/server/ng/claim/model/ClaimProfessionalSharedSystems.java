@@ -86,7 +86,7 @@ public class ClaimProfessionalSharedSystems extends ClaimBase {
   @Override
   public ExplanationOfBenefit toFhir(ClaimSecurityStatus securityStatus) {
     var eob = super.toFhir(securityStatus);
-    //    var consolidatedDiagnoses = computeConsolidatedDiagnoses();
+    var diagnosisSequenceGenerator = new SequenceGenerator();
 
     claimItems.forEach(
         item -> {
@@ -108,6 +108,11 @@ public class ClaimProfessionalSharedSystems extends ClaimBase {
                     eob.addCareTeam(c.careTeam());
                     eob.addContained(c.practitioner());
                   });
+          getClaimTypeCode()
+              .toContext()
+              .flatMap(
+                  ctx -> item.getClaimProcedure().toFhirDiagnosis(diagnosisSequenceGenerator, ctx))
+              .ifPresent(eob::addDiagnosis);
           item.getClaimProcedure().toFhirProcedure().ifPresent(eob::addProcedure);
         });
 

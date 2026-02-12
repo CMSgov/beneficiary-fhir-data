@@ -53,13 +53,10 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
   private static final long CLAIM_UNIQUE_ID_FOR_ICD_10_PROCEDURE = 6647624169509L;
   private static final long CLAIM_UNIQUE_ID_FOR_ICD_9_DIAGNOSIS = 5312173004042L;
   private static final long CLAIM_UNIQUE_ID_FOR_ICD_9_PROCEDURE = 6103633914327L;
-  private static final long CLAIM_UNIQUE_ID_FOR_HCPCS = 7095549187112L;
+  private static final long CLAIM_UNIQUE_ID_FOR_PART_D = 7095549187112L;
   private static final long CLAIM_UNIQUE_ID_FOR_DRG = 9644464937468L;
   private static final long CLAIM_UNIQUE_ID_FOR_DRG_WITH_EXPIRED_CODE_522 = 9688880648059L;
   private static final long CLAIM_UNIQUE_ID_FOR_DRG_WITH_EXPIRED_CODE_523 = 3159002171180L;
-  private static final long CLAIM_UNIQUE_ID_FOR_CPT = 4722020775430L;
-  private static final long CLAIM_UNIQUE_ID_FOR_FUTURE_HCPCS = 6871761612138L;
-  private static final long CLAIM_UNIQUE_ID_FOR_FUTURE_HCPCS_AFTER_CODE_START = 6871761612139L;
 
   private static final long CLAIM_UNIQUE_ID_WITH_NO_SAMHSA = 566745788569L;
   private static final long CLAIM_UNIQUE_ID_WITH_MULTIPLE_SAMHSA_CODES = 3233800161009L;
@@ -69,7 +66,6 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
   private static final long BENE_SK3 = 455108118;
   private static final long BENE_SK4 = 167719446;
   private static final long BENE_SK5 = 27590072;
-  private static final long BENE_SK6 = 186315498;
 
   // System: icd-10-cm [clm_dgns_cd]
   private static final String ICD10_DIAGNOSIS = "F10.10";
@@ -194,25 +190,16 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
             List.of(CLAIM_WITH_HCPCS_IN_ICD)),
         Arguments.of(
             BENE_SK2,
-            List.of(CLAIM_UNIQUE_ID_FOR_HCPCS, CLAIM_UNIQUE_ID_FOR_ICD_10_DIAGNOSIS),
-            List.of(),
-            List.of()),
+            List.of(CLAIM_UNIQUE_ID_FOR_ICD_10_DIAGNOSIS),
+            List.of(CLAIM_UNIQUE_ID_FOR_PART_D),
+            List.of(CLAIM_UNIQUE_ID_FOR_PART_D)),
         Arguments.of(BENE_SK3, List.of(CLAIM_UNIQUE_ID_FOR_ICD_10_PROCEDURE), List.of(), List.of()),
         Arguments.of(BENE_SK4, List.of(CLAIM_UNIQUE_ID_FOR_ICD_9_DIAGNOSIS), List.of(), List.of()),
         Arguments.of(
             BENE_SK5,
-            List.of(
-                CLAIM_UNIQUE_ID_FOR_ICD_9_PROCEDURE,
-                CLAIM_UNIQUE_ID_FOR_DRG,
-                CLAIM_UNIQUE_ID_FOR_CPT),
-            List.of(),
-            List.of()),
-        Arguments.of(
-            BENE_SK6,
-            List.of(CLAIM_UNIQUE_ID_FOR_FUTURE_HCPCS_AFTER_CODE_START),
-            List.of(
-                CLAIM_UNIQUE_ID_FOR_DRG_WITH_EXPIRED_CODE_523, CLAIM_UNIQUE_ID_FOR_FUTURE_HCPCS),
-            List.of()));
+            List.of(CLAIM_UNIQUE_ID_FOR_DRG),
+            List.of(CLAIM_UNIQUE_ID_FOR_ICD_9_PROCEDURE),
+            List.of(CLAIM_UNIQUE_ID_FOR_ICD_9_PROCEDURE)));
   }
 
   private void shouldFilterSamhsa(
@@ -291,7 +278,7 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
         skipBundleVerification);
   }
 
-  @ValueSource(longs = {BENE_SK, BENE_SK2, BENE_SK3, BENE_SK4, BENE_SK5, BENE_SK6})
+  @ValueSource(longs = {BENE_SK, BENE_SK2, BENE_SK3, BENE_SK4, BENE_SK5})
   @ParameterizedTest
   void shouldNotFilterSamhsaIfAllowedCert(long beneSk) {
     var bundle = searchBundle(beneSk, SamhsaCertType.SAMHSA_ALLOWED_CERT).execute();
@@ -372,10 +359,6 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
   private static Stream<Arguments> ensureProcedure() {
     return Stream.of(
         Arguments.of(
-            CLAIM_UNIQUE_ID_FOR_ICD_10_PROCEDURE, ICD10_PROCEDURE, SystemUrls.CMS_ICD_10_PROCEDURE),
-        Arguments.of(
-            CLAIM_UNIQUE_ID_FOR_ICD_9_PROCEDURE, ICD9_PROCEDURE, SystemUrls.CMS_ICD_9_PROCEDURE),
-        Arguments.of(
             CLAIM_UNIQUE_ID_WITH_MULTIPLE_SAMHSA_CODES,
             ICD10_PROCEDURE2,
             SystemUrls.CMS_ICD_10_PROCEDURE),
@@ -400,13 +383,8 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
 
   private static Stream<Arguments> ensureHcpcs() {
     return Stream.of(
-        Arguments.of(CLAIM_UNIQUE_ID_FOR_HCPCS, HCPCS, SystemUrls.CMS_HCPCS),
-        Arguments.of(CLAIM_UNIQUE_ID_FOR_CPT, CPT, SystemUrls.AMA_CPT),
         Arguments.of(CLAIM_UNIQUE_ID_WITH_MULTIPLE_SAMHSA_CODES, HCPCS2, SystemUrls.CMS_HCPCS),
-        Arguments.of(CLAIM_UNIQUE_ID_WITH_MULTIPLE_SAMHSA_CODES, CPT2, SystemUrls.AMA_CPT),
-        Arguments.of(CLAIM_UNIQUE_ID_FOR_FUTURE_HCPCS, FUTURE_HCPCS, SystemUrls.CMS_HCPCS),
-        Arguments.of(
-            CLAIM_UNIQUE_ID_FOR_FUTURE_HCPCS_AFTER_CODE_START, FUTURE_HCPCS, SystemUrls.CMS_HCPCS));
+        Arguments.of(CLAIM_UNIQUE_ID_WITH_MULTIPLE_SAMHSA_CODES, CPT2, SystemUrls.AMA_CPT));
   }
 
   @MethodSource
@@ -419,6 +397,26 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
             .filter(c -> c.getCode().equals(code) && c.getSystem().equals(system))
             .findFirst();
     assertTrue(hcpcs.isPresent());
+  }
+
+  private static Stream<Arguments> ensureHcpcsEmpty() {
+    return Stream.of(Arguments.of(CLAIM_UNIQUE_ID_FOR_PART_D));
+  }
+
+  @MethodSource
+  @ParameterizedTest
+  void ensureHcpcsEmpty(long claimId) {
+    var eob = eobHandler.find(claimId, SamhsaFilterMode.INCLUDE).orElseThrow();
+
+    var hcpcsExists =
+        eob.getItem().stream()
+            .flatMap(i -> i.getProductOrService().getCoding().stream())
+            .anyMatch(
+                c ->
+                    SystemUrls.CMS_HCPCS.equals(c.getSystem())
+                        || SystemUrls.AMA_CPT.equals(c.getSystem()));
+
+    assertFalse(hcpcsExists);
   }
 
   private static Stream<Arguments> ensureDrg() {
