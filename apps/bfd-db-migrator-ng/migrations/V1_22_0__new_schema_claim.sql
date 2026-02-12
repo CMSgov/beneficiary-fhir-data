@@ -854,6 +854,7 @@ CREATE TABLE idr_new.claim_institutional_nch
     clm_bnft_enhncmt_1_cd      character varying(2),
     clm_ngaco_pbpmt_sw         character varying(1),
     clm_ngaco_cptatn_sw        character varying(1),
+    clm_aco_care_mgmt_hcbs_sw  character varying(1),
     clm_ngaco_pdschrg_hcbs_sw  character varying(1),
     clm_ngaco_snf_wvr_sw       character varying(1),
     clm_ngaco_tlhlth_sw        character varying(1),

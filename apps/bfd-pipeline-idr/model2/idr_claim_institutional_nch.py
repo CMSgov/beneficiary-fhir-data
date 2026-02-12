@@ -129,6 +129,9 @@ class IdrClaimInstitutionalNch(IdrBaseModel):
     clm_ngaco_cptatn_sw: Annotated[
         str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_null_string)
     ]
+    clm_aco_care_mgmt_hcbs_sw: Annotated[
+        str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_null_string)
+    ]
     clm_ngaco_pdschrg_hcbs_sw: Annotated[
         str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_null_string)
     ]

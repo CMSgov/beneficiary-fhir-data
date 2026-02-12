@@ -152,8 +152,8 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_cntrct_pbp_num (
     cntrct_pbp_sk BIGINT NOT NULL,
     cntrct_drug_plan_ind_cd VARCHAR(1) NOT NULL,
     cntrct_pbp_type_cd VARCHAR(2) NOT NULL,
-    cntrct_pbp_sk_efctv_dt DATE NOT NULL,
-    cntrct_pbp_end_dt DATE NOT NULL,
+    cntrct_pbp_sk_efctv_dt DATE,
+    cntrct_pbp_end_dt DATE,
     cntrct_pbp_sk_obslt_dt DATE NOT NULL,
     cntrct_pbp_name VARCHAR(75) NOT NULL,
     cntrct_num VARCHAR(5) NOT NULL,
@@ -269,6 +269,7 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_dcmtn (
     clm_ngaco_pdschrg_hcbs_sw VARCHAR(1),
     clm_ngaco_snf_wvr_sw VARCHAR(1),
     clm_ngaco_tlhlth_sw VARCHAR(1),
+    clm_aco_care_mgmt_hcbs_sw VARCHAR(1),
     PRIMARY KEY(geo_bene_sk, clm_dt_sgntr_sk, clm_type_cd, clm_num_sk)
 );
 
