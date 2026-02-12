@@ -231,22 +231,23 @@ class IdrClaimItemInstitutionalSs(IdrBaseModel):
         BeforeValidator(transform_null_date_to_min),
     ]
     # columns from v2_mdcr_clm_line_fiss_bnft_svg
-    clm_bnft_svg_ansi_grp_cd: Annotated[
-        str, {ALIAS: ALIAS_LINE_FISS_BFNT}, BeforeValidator(transform_default_string)
-    ]
-    clm_bnft_svg_ansi_rsn_cd: Annotated[
-        str, {ALIAS: ALIAS_LINE_FISS_BFNT}, BeforeValidator(transform_default_string)
-    ]
-    idr_insrt_ts_line_fiss_bnft: Annotated[
-        datetime,
-        {ALIAS: ALIAS_LINE_FISS_BFNT, **INSERT_FIELD},
-        BeforeValidator(transform_null_date_to_min),
-    ]
-    idr_updt_ts_line_fiss_bnft: Annotated[
-        datetime,
-        {ALIAS: ALIAS_LINE_FISS_BFNT, **UPDATE_FIELD},
-        BeforeValidator(transform_null_date_to_min),
-    ]
+    # TODO: this has more than one row per claim line, need to figure out how to join this
+    # clm_bnft_svg_ansi_grp_cd: Annotated[
+    #     str, {ALIAS: ALIAS_LINE_FISS_BFNT}, BeforeValidator(transform_default_string)
+    # ]
+    # clm_bnft_svg_ansi_rsn_cd: Annotated[
+    #     str, {ALIAS: ALIAS_LINE_FISS_BFNT}, BeforeValidator(transform_default_string)
+    # ]
+    # idr_insrt_ts_line_fiss_bnft: Annotated[
+    #     datetime,
+    #     {ALIAS: ALIAS_LINE_FISS_BFNT, **INSERT_FIELD},
+    #     BeforeValidator(transform_null_date_to_min),
+    # ]
+    # idr_updt_ts_line_fiss_bnft: Annotated[
+    #     datetime,
+    #     {ALIAS: ALIAS_LINE_FISS_BFNT, **UPDATE_FIELD},
+    #     BeforeValidator(transform_null_date_to_min),
+    # ]
 
     @staticmethod
     def table() -> str:
@@ -434,12 +435,12 @@ class IdrClaimItemInstitutionalSs(IdrBaseModel):
                     AND {line_fiss}.clm_num_sk = {line}.clm_num_sk
                     AND {line_fiss}.clm_dt_sgntr_sk = {line}.clm_dt_sgntr_sk
                     AND {line_fiss}.clm_line_num = {line}.clm_line_num
-                LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_fiss_bnft_svg {line_fiss_bnft}
-                    ON {line_fiss_bnft}.geo_bene_sk = {line}.geo_bene_sk
-                    AND {line_fiss_bnft}.clm_type_cd = {line}.clm_type_cd
-                    AND {line_fiss_bnft}.clm_num_sk = {line}.clm_num_sk
-                    AND {line_fiss_bnft}.clm_dt_sgntr_sk = {line}.clm_dt_sgntr_sk
-                    AND {line_fiss_bnft}.clm_line_num = {line}.clm_line_num
+                -- LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_fiss_bnft_svg {line_fiss_bnft}
+                --    ON {line_fiss_bnft}.geo_bene_sk = {line}.geo_bene_sk
+                --    AND {line_fiss_bnft}.clm_type_cd = {line}.clm_type_cd
+                --    AND {line_fiss_bnft}.clm_num_sk = {line}.clm_num_sk
+                --    AND {line_fiss_bnft}.clm_dt_sgntr_sk = {line}.clm_dt_sgntr_sk
+                --    AND {line_fiss_bnft}.clm_line_num = {line}.clm_line_num
                 {{WHERE_CLAUSE}}
                 {{ORDER_BY}}
         """
