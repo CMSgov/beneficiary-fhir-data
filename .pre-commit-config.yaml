@@ -1,0 +1,31 @@
+
+repos:
+- repo: https://github.com/astral-sh/ruff-pre-commit
+  # Ruff version.
+  rev: v0.15.0
+  hooks:
+    # Run the linter.
+    - id: ruff-check
+      stages: [ pre-push ]
+    # Run the formatter.
+    - id: ruff-format
+      stages: [ pre-push ]
+- repo: https://github.com/RobertCraigie/pyright-python
+  rev: v1.1.408
+  hooks:
+    - id: pyright
+      stages: [ pre-push ]
+- repo: local
+  hooks:
+    - id: pre-push-script
+      name: Pre-push Script
+      entry: ./.github/scripts/pre-push.sh
+      language: script
+      stages: [ pre-push ]
+- repo: local
+  hooks:
+    - id: pre-commit-script
+      name: Pre-commit-script
+      entry: ./.github/scripts/pre-commit.sh
+      language: script
+      stages: [ pre-commit ]
