@@ -8,6 +8,9 @@ import gov.cms.bfd.server.ng.claim.filter.ClaimTypeCodeFilterParam;
 import gov.cms.bfd.server.ng.claim.filter.LastUpdatedFilterParam;
 import gov.cms.bfd.server.ng.claim.filter.TagCriteriaFilterParam;
 import gov.cms.bfd.server.ng.claim.model.ClaimBase;
+import gov.cms.bfd.server.ng.claim.model.ClaimInstitutionalNch;
+import gov.cms.bfd.server.ng.claim.model.ClaimProfessionalNch;
+import gov.cms.bfd.server.ng.claim.model.ClaimRx;
 import gov.cms.bfd.server.ng.claim.model.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.ClaimTypeCode;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
@@ -69,26 +72,23 @@ public class ClaimAsyncService {
       List<List<TagCriterion>> tagCriteria,
       List<ClaimTypeCode> claimTypeCodes) {
 
-    boolean isNchOrRx = claimClass.getName().contains("Nch") || claimClass.getName().contains("Rx");
+    boolean isNchOrRx =
+        ClaimProfessionalNch.class.isAssignableFrom(claimClass)
+            || ClaimInstitutionalNch.class.isAssignableFrom(claimClass)
+            || ClaimRx.class.isAssignableFrom(claimClass);
 
+    // if searching by NCH and querying for NCH or RX claims remove filter
     tagCriteria =
         tagCriteria.stream().map(ArrayList::new).collect(Collectors.toCollection(ArrayList::new));
-
     for (var orList : tagCriteria) {
       for (var it = orList.iterator(); it.hasNext(); ) {
         var criterion = it.next();
-
         // if sourceId is used as criteria
         if (criterion instanceof TagCriterion.SourceIdCriterion(var sourceId) && sourceId != null) {
-
           boolean isNch = sourceId == ClaimSourceId.NATIONAL_CLAIMS_HISTORY;
-          // if searching by NCH and query is not NCH or RX don't call the query and return empty
-          // results
-          if (isNch != isNchOrRx) {
-            return CompletableFuture.completedFuture(List.of());
+          if (isNch && isNchOrRx) {
+            it.remove();
           }
-          // If search by NCH and query is NCH or RX remove Criteria
-          it.remove();
         }
       }
     }

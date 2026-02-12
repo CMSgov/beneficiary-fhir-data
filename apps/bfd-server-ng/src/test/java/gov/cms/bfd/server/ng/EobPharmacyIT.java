@@ -8,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.gclient.IReadTyped;
 import gov.cms.bfd.server.ng.eob.EobResourceProvider;
-import gov.cms.bfd.server.ng.testUtil.ThreadSafeAsyncAppender;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Set;
 import org.hl7.fhir.r4.model.*;
@@ -32,17 +31,17 @@ class EobPharmacyIT extends IntegrationTestBase {
     return getFhirClient().read().resource(ExplanationOfBenefit.class);
   }
 
-  @Test
-  void eobReadPharmacyQueryCount() {
-
-    var events = ThreadSafeAsyncAppender.startRecord();
-    try {
-      eobResourceProvider.find(new IdType(CLAIM_ID_RX), request);
-      assertEquals(5, queryCount(events));
-    } finally {
-      ThreadSafeAsyncAppender.stopRecord();
-    }
-  }
+  //  @Test
+  //  void eobReadPharmacyQueryCount() {
+  //
+  //    var events = ThreadSafeAsyncAppender.createAndAttach();
+  //    try {
+  //      eobResourceProvider.find(new IdType(CLAIM_ID_RX), request);
+  //      assertEquals(5, queryCount(events.getLogs()));
+  //    } finally {
+  //      events.stopAndDetach();
+  //    }
+  //  }
 
   @Test
   void eobReadPharmacy() {

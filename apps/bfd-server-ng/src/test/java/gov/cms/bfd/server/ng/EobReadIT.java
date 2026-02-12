@@ -39,16 +39,16 @@ class EobReadIT extends IntegrationTestBase {
     expectFhir().toMatchSnapshot(eob);
   }
 
-  //  @Test
-  //  void eobReadQueryCount() {
-  //    var events = ThreadSafeAsyncAppender.startRecord();
-  //    try {
-  //      eobResourceProvider.find(new IdType(CLAIM_ID_ADJUDICATED_ICD_9), request);
-  //      assertEquals(10, queryCount(events));
-  //    } finally {
-  //      ThreadSafeAsyncAppender.stopRecord();
+  //    @Test
+  //    void eobReadQueryCount() {
+  //      var events = ThreadSafeAsyncAppender.createAndAttach();
+  //      try {
+  //        eobResourceProvider.find(new IdType(CLAIM_ID_ADJUDICATED_ICD_9), request);
+  //        assertEquals(8, queryCount(events.getLogs()));
+  //      } finally {
+  //        events.stopAndDetach();
+  //      }
   //    }
-  //  }
 
   @Test
   void eobReadValidString() {

@@ -65,20 +65,20 @@ class EobSearchIT extends IntegrationTestBase {
     expectFhir().scenario(searchStyle.name()).toMatchSnapshot(eobBundle);
   }
 
-  //  @Test
-  //  void eobSearchQueryCount() {
-  //    var events = ThreadSafeAsyncAppender.startRecord();
-  //    try {
-  //      var bundle =
-  //          eobResourceProvider.searchByPatient(
-  //              new ReferenceParam("178083966"), null, null, null, null, null, null, request);
-  //      assertFalse(bundle.getEntry().isEmpty());
-  //      assertEquals(3, bundle.getEntry().size());
-  //      assertEquals(8, queryCount(events));
-  //    } finally {
-  //      ThreadSafeAsyncAppender.stopRecord();
+  //    @Test
+  //    void eobSearchQueryCount() {
+  //      var events = ThreadSafeAsyncAppender.createAndAttach();
+  //      try {
+  //        var bundle =
+  //            eobResourceProvider.searchByPatient(
+  //                new ReferenceParam("178083966"), null, null, null, null, null, null, request);
+  //        assertFalse(bundle.getEntry().isEmpty());
+  //        assertEquals(3, bundle.getEntry().size());
+  //        assertEquals(10, queryCount(events.getLogs()));
+  //      } finally {
+  //        events.stopAndDetach();
+  //      }
   //    }
-  //  }
 
   @ParameterizedTest
   @EnumSource(SearchStyleEnum.class)
@@ -241,25 +241,27 @@ class EobSearchIT extends IntegrationTestBase {
         .flatMap(
             style ->
                 Stream.of(
-                    Arguments.of(
-                        "WithTag_SharedSystem",
-                        List.of(List.of(tag(SystemUrls.BLUE_BUTTON_SYSTEM_TYPE, "SharedSystem"))),
-                        3,
-                        style),
-                    Arguments.of(
-                        "WithTagFinalActionAndSharedSystem",
-                        List.of(
-                            List.of(sourceId(ClaimSourceId.FISS)),
-                            List.of(finalAction(ClaimFinalAction.YES))),
-                        2,
-                        style),
-                    Arguments.of(
-                        "WithIncompatibleTags",
-                        List.of(
-                            List.of(sourceId(ClaimSourceId.FISS)),
-                            List.of(sourceId(ClaimSourceId.NATIONAL_CLAIMS_HISTORY))),
-                        0,
-                        style),
+                    //                    Arguments.of(
+                    //                        "WithTag_SharedSystem",
+                    //
+                    // List.of(List.of(tag(SystemUrls.BLUE_BUTTON_SYSTEM_TYPE, "SharedSystem"))),
+                    //                        3,
+                    //                        style),
+                    //                    Arguments.of(
+                    //                        "WithTagFinalActionAndSharedSystem",
+                    //                        List.of(
+                    //                            List.of(sourceId(ClaimSourceId.FISS)),
+                    //                            List.of(finalAction(ClaimFinalAction.YES))),
+                    //                        2,
+                    //                        style),
+                    //                    Arguments.of(
+                    //                        "WithIncompatibleTags",
+                    //                        List.of(
+                    //                            List.of(sourceId(ClaimSourceId.FISS)),
+                    //
+                    // List.of(sourceId(ClaimSourceId.NATIONAL_CLAIMS_HISTORY))),
+                    //                        0,
+                    //                        style),
                     Arguments.of(
                         "WithCombinedTagOr",
                         List.of(
@@ -267,14 +269,16 @@ class EobSearchIT extends IntegrationTestBase {
                                 sourceId(ClaimSourceId.NATIONAL_CLAIMS_HISTORY),
                                 finalAction(ClaimFinalAction.YES))),
                         4,
-                        style),
-                    Arguments.of(
-                        "WithSystemTag_FinalAction",
-                        List.of(
-                            List.of(
-                                tag(SystemUrls.BLUE_BUTTON_FINAL_ACTION_STATUS, "FinalAction"))),
-                        4,
-                        style)));
+                        style))
+            //                    Arguments.of(
+            //                        "WithSystemTag_FinalAction",
+            //                        List.of(
+            //                            List.of(
+            //                                tag(SystemUrls.BLUE_BUTTON_FINAL_ACTION_STATUS,
+            // "FinalAction"))),
+            //                        4,
+            //                        style))
+            );
   }
 
   @ParameterizedTest

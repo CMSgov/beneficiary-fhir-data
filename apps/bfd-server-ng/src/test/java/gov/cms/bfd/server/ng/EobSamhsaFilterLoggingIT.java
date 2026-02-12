@@ -23,7 +23,7 @@ class EobSamhsaFilterLoggingIT extends IntegrationTestBase {
   /** Test that filtering a SAMHSA claim generates appropriate logs. */
   @Test
   void testSamhsaClaimLogging() {
-    var events = ThreadSafeAsyncAppender.startRecord();
+    var events = ThreadSafeAsyncAppender.createAndAttach();
     try {
       eobHandler.searchById(
           CLAIM_ID_WITH_SAMHSA_DIAGNOSIS,
@@ -33,7 +33,7 @@ class EobSamhsaFilterLoggingIT extends IntegrationTestBase {
 
     } finally {
       var samhsaLogs =
-          events.stream()
+          events.getLogs().stream()
               .filter(e -> e.getLoggerName().equals("gov.cms.bfd.server.ng.eob.EobNewHandler"))
               .filter(e -> e.getMessage().contains(SAMHSA_FILTERED_LOG_MESSAGE))
               .toList();
