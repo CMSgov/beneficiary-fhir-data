@@ -159,19 +159,6 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
     clm_bnft_enhncmt_5_cd: Annotated[
         str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_default_string)
     ]
-    clm_ngaco_pbpmt_sw: Annotated[str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_null_string)]
-    clm_ngaco_cptatn_sw: Annotated[
-        str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_null_string)
-    ]
-    clm_ngaco_pdschrg_hcbs_sw: Annotated[
-        str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_null_string)
-    ]
-    clm_ngaco_snf_wvr_sw: Annotated[
-        str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_null_string)
-    ]
-    clm_ngaco_tlhlth_sw: Annotated[
-        str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_null_string)
-    ]
     idr_insrt_ts_dcmtn: Annotated[
         datetime,
         {ALIAS: ALIAS_DCMTN, **INSERT_FIELD},

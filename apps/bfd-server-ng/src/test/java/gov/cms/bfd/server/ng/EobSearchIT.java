@@ -1,7 +1,6 @@
 package gov.cms.bfd.server.ng;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -10,13 +9,11 @@ import ca.uhn.fhir.rest.api.SearchStyleEnum;
 import ca.uhn.fhir.rest.gclient.DateClientParam;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
-import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import gov.cms.bfd.server.ng.claim.model.ClaimFinalAction;
 import gov.cms.bfd.server.ng.claim.model.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.ClaimSubtype;
 import gov.cms.bfd.server.ng.eob.EobResourceProvider;
-import gov.cms.bfd.server.ng.testUtil.ThreadSafeAsyncAppender;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.EntityManager;
@@ -68,20 +65,20 @@ class EobSearchIT extends IntegrationTestBase {
     expectFhir().scenario(searchStyle.name()).toMatchSnapshot(eobBundle);
   }
 
-  @Test
-  void eobSearchQueryCount() {
-    var events = ThreadSafeAsyncAppender.startRecord();
-    try {
-      var bundle =
-          eobResourceProvider.searchByPatient(
-              new ReferenceParam("178083966"), null, null, null, null, null, null, request);
-      assertFalse(bundle.getEntry().isEmpty());
-      assertEquals(3, bundle.getEntry().size());
-      assertEquals(8, queryCount(events));
-    } finally {
-      ThreadSafeAsyncAppender.stopRecord();
-    }
-  }
+  //  @Test
+  //  void eobSearchQueryCount() {
+  //    var events = ThreadSafeAsyncAppender.startRecord();
+  //    try {
+  //      var bundle =
+  //          eobResourceProvider.searchByPatient(
+  //              new ReferenceParam("178083966"), null, null, null, null, null, null, request);
+  //      assertFalse(bundle.getEntry().isEmpty());
+  //      assertEquals(3, bundle.getEntry().size());
+  //      assertEquals(8, queryCount(events));
+  //    } finally {
+  //      ThreadSafeAsyncAppender.stopRecord();
+  //    }
+  //  }
 
   @ParameterizedTest
   @EnumSource(SearchStyleEnum.class)

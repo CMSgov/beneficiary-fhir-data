@@ -166,24 +166,6 @@ class IdrClaimItemProfessionalSs(IdrBaseModel):
     clm_line_bnft_enhncmt_5_cd: Annotated[
         str, {ALIAS: ALIAS_LINE_DCMTN}, BeforeValidator(transform_default_string)
     ]
-    clm_line_ngaco_cptatn_sw: Annotated[
-        str, {ALIAS: ALIAS_LINE_DCMTN}, BeforeValidator(transform_default_string)
-    ]
-    clm_line_ngaco_pdschrg_hcbs_sw: Annotated[
-        str, {ALIAS: ALIAS_LINE_DCMTN}, BeforeValidator(transform_default_string)
-    ]
-    clm_line_ngaco_snf_wvr_sw: Annotated[
-        str, {ALIAS: ALIAS_LINE_DCMTN}, BeforeValidator(transform_default_string)
-    ]
-    clm_line_ngaco_tlhlth_sw: Annotated[
-        str, {ALIAS: ALIAS_LINE_DCMTN}, BeforeValidator(transform_default_string)
-    ]
-    clm_line_aco_care_mgmt_hcbs_sw: Annotated[
-        str, {ALIAS: ALIAS_LINE_DCMTN}, BeforeValidator(transform_default_string)
-    ]
-    clm_line_ngaco_pbpmt_sw: Annotated[
-        str, {ALIAS: ALIAS_LINE_DCMTN}, BeforeValidator(transform_default_string)
-    ]
     clm_line_pa_uniq_trkng_num: Annotated[
         str, {ALIAS: ALIAS_LINE_DCMTN}, BeforeValidator(transform_null_string)
     ]
