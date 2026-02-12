@@ -71,6 +71,11 @@ public abstract class ClaimProcedureBase {
 
   void setClaimPoaIndicator(String poaIndicator) {}
 
+  /**
+   * Gets the procedure code.
+   *
+   * @return procedure code.
+   */
   public Optional<String> getProcedureCode() {
     return Optional.empty();
   }
