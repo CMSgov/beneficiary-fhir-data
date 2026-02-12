@@ -191,39 +191,61 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm (
     clm_cntrctr_num VARCHAR(5),
     clm_pmt_amt NUMERIC,
     clm_ltst_clm_ind VARCHAR(1),
-    clm_atndg_prvdr_npi_num VARCHAR(10),
-    clm_atndg_prvdr_last_name VARCHAR(60),
-    clm_oprtg_prvdr_npi_num VARCHAR(10),
-    clm_oprtg_prvdr_last_name VARCHAR(60),
-    clm_blg_prvdr_last_name VARCHAR(60),
-    clm_rfrg_prvdr_last_name VARCHAR(60),
-    clm_prscrbng_prvdr_last_name VARCHAR(60),
-    clm_othr_prvdr_npi_num VARCHAR(10),
-    clm_othr_prvdr_last_name VARCHAR(60),
-    clm_ric_cd VARCHAR(1),
-    clm_rndrg_prvdr_npi_num VARCHAR(10),
-    clm_rndrg_prvdr_last_name VARCHAR(60),
+
+    -- billing provider
     prvdr_blg_prvdr_npi_num VARCHAR(10),
-    prvdr_prscrbng_prvdr_npi_num VARCHAR(10),
+    clm_blg_prvdr_oscar_num VARCHAR(20),
+    --clm_blg_fed_prvdr_spclty_cd
+    --clm_blg_prvdr_name
+    clm_blg_prvdr_last_name VARCHAR(60),
+    clm_blg_prvdr_zip5_cd VARCHAR(5),
+    -- referring provider
     prvdr_rfrg_prvdr_npi_num VARCHAR(10),
-    prvdr_srvc_prvdr_npi_num VARCHAR(10),
-    prvdr_othr_prvdr_npi_num VARCHAR(10),
-    prvdr_atndg_prvdr_npi_num VARCHAR(10),
-    prvdr_rndrng_prvdr_npi_num VARCHAR(10),
-    prvdr_oprtg_prvdr_npi_num VARCHAR(10),
+    clm_rfrg_prvdr_last_name VARCHAR(60),
+    --clm_rfrg_fed_prvdr_spclty_cd
+    --clm_rfrg_prvdr_name
     clm_rfrg_prvdr_pin_num VARCHAR(14),
+    -- prescribing provider
+    prvdr_prscrbng_prvdr_npi_num VARCHAR(10),
+    clm_prscrbng_prvdr_last_name VARCHAR(60),
+    -- other provider
+    prvdr_othr_prvdr_npi_num VARCHAR(10),
+    clm_othr_prvdr_npi_num VARCHAR(10),
+    --clm_othr_prvdr_name
+    clm_othr_prvdr_last_name VARCHAR(60),
+    --clm_othr_fed_prvdr_spclty_cd
+    -- rendering provider
+    prvdr_rndrng_prvdr_npi_num VARCHAR(10),
+    clm_rndrg_prvdr_npi_num VARCHAR(10),
+    --clm_rndrg_fed_prvdr_spclty_cd
+    --clm_rndrg_prvdr_name
+    clm_rndrg_prvdr_last_name VARCHAR(60),
+    -- service provider
+    prvdr_srvc_prvdr_npi_num VARCHAR(10),
+    clm_srvc_prvdr_gnrc_id_num VARCHAR(20),
+    -- attending provider
+    prvdr_atndg_prvdr_npi_num VARCHAR(10),
+    clm_atndg_prvdr_npi_num VARCHAR(10),
+    clm_atndg_fed_prvdr_spclty_cd VARCHAR(2),
+    clm_atndg_prvdr_name VARCHAR(120),
+    clm_atndg_prvdr_last_name VARCHAR(60),
+    -- operating provider
+    prvdr_oprtg_prvdr_npi_num VARCHAR(10),
+    clm_oprtg_prvdr_npi_num VARCHAR(10),
+    --clm_rndrg_fed_prvdr_spclty_cd
+    --clm_oprtg_prvdr_name
+    clm_oprtg_prvdr_last_name VARCHAR(60),
+
+    clm_ric_cd VARCHAR(1),
     clm_disp_cd VARCHAR(2),
     clm_sbmt_chrg_amt NUMERIC,
-    clm_srvc_prvdr_gnrc_id_num VARCHAR(20),
     clm_blood_pt_frnsh_qty INT,
     clm_nch_prmry_pyr_cd VARCHAR(1),
-    clm_blg_prvdr_oscar_num VARCHAR(20),
     clm_idr_ld_dt DATE NOT NULL,
     idr_insrt_ts TIMESTAMPTZ,
     idr_updt_ts TIMESTAMPTZ,
     clm_adjstmt_type_cd VARCHAR(2),
     clm_bene_pd_amt NUMERIC,
-    clm_blg_prvdr_zip5_cd VARCHAR(5),
     clm_sbmt_frmt_cd VARCHAR(1),
     clm_sbmtr_cntrct_num VARCHAR(5),
     clm_sbmtr_cntrct_pbp_num VARCHAR(3),
