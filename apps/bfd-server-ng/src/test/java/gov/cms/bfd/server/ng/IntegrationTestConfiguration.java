@@ -3,6 +3,10 @@ package gov.cms.bfd.server.ng;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import org.flywaydb.core.Flyway;
 import org.junit.platform.commons.util.StringUtils;
@@ -20,12 +24,19 @@ public class IntegrationTestConfiguration {
   @Value("${project.basedir}")
   private String baseDir;
 
+  @Bean("clock")
+  Instant clock() {
+    return Clock.fixed(Instant.parse("2026-02-09T00:00:00Z"), ZoneId.of("UTC"))
+        .instant()
+        .truncatedTo(ChronoUnit.DAYS);
+  }
+
   // Container lifecycle is managed by Spring,
   // so the resource closing warning is not applicable here
   @SuppressWarnings("resource")
   @Bean
   @ServiceConnection
-  public PostgreSQLContainer<?> postgres() throws IOException, InterruptedException {
+  public PostgreSQLContainer<?> postgres(Instant date) throws IOException, InterruptedException {
     if (StringUtils.isNotBlank(System.getenv("PGPASSWORD"))
         || StringUtils.isNotBlank(System.getenv("BFD_SENSITIVE_DB_PASSWORD"))) {
       // Postgres environment variables can interfere with the database configuration and should
@@ -35,7 +46,6 @@ public class IntegrationTestConfiguration {
     // Provides an implementation of JdbcConnectionDetails that will be injected into the Spring
     // context
     var databaseImage = System.getProperty("its.testcontainer.db.image");
-
     var container =
         new PostgreSQLContainer<>(
                 DockerImageName.parse(databaseImage).asCompatibleSubstituteFor("postgres"))
@@ -47,14 +57,13 @@ public class IntegrationTestConfiguration {
     container.start();
     runMigrator(container);
 
-    runPython(container, "uv", "sync");
-    runPython(container, "uv", "run", "load_synthetic.py", "./test_samples2");
+    runPython(container, date, "uv", "sync");
+    runPython(container, date, "uv", "run", "load_synthetic.py", "./test_samples2");
 
     // Update CLM_IDR_LD_DT to CURRENT_DATE before pipeline.py
     // Reason: PAC data older than 60 days is filtered by coalescing
     // (idr_updt_ts, idr_insrt_ts, clm_idr_ld_dt). Synthetic data has
     // outdated clm_idr_ld_dt value and empty idr_updt_ts, idr_insrt_ts.
-
     container.execInContainer(
         "psql",
         "-U",
@@ -63,11 +72,17 @@ public class IntegrationTestConfiguration {
         "testdb",
         "-c",
         "UPDATE cms_vdm_view_mdcr_prd.v2_mdcr_clm "
-            + "SET \"clm_idr_ld_dt\" = CURRENT_DATE,"
-            + "\"idr_insrt_ts\" = CURRENT_TIMESTAMP,"
-            + "\"idr_updt_ts\" = CURRENT_TIMESTAMP;");
+            + "SET \"clm_idr_ld_dt\" = '"
+            + date
+            + "',"
+            + "\"idr_insrt_ts\" = '"
+            + date
+            + "',"
+            + "\"idr_updt_ts\" = '"
+            + date
+            + "';");
 
-    runPython(container, "uv", "run", "pipeline.py", "synthetic");
+    runPython(container, date, "uv", "run", "pipeline.py", "synthetic");
 
     return container;
   }
@@ -94,7 +109,7 @@ public class IntegrationTestConfiguration {
     }
   }
 
-  private void runPython(PostgreSQLContainer<?> container, String... args)
+  private void runPython(PostgreSQLContainer<?> container, Instant date, String... args)
       throws IOException, InterruptedException {
     ProcessBuilder processBuilder = new ProcessBuilder(args);
     var env = processBuilder.environment();
@@ -108,6 +123,7 @@ public class IntegrationTestConfiguration {
     // Partitions are necessary for massive amounts of prod data, but will cause our modestly-sized
     // test data to load significantly slower.
     env.put("IDR_ENABLE_PARTITIONS", "0");
+    env.put("BFD_TEST_DATE", date.toString());
 
     processBuilder
         .directory(new File(Paths.get(baseDir, "../bfd-pipeline-idr").toString()))

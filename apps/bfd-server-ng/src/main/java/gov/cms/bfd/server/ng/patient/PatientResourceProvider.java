@@ -18,10 +18,14 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
+
 /** FHIR endpoints for the Patient resource. */
 @RequiredArgsConstructor
 @Component
 public class PatientResourceProvider implements IResourceProvider {
+
+  private final Instant clock;
 
   @Override
   public Class<Patient> getResourceType() {
@@ -82,6 +86,6 @@ public class PatientResourceProvider implements IResourceProvider {
   @Operation(name = "generate-insurance-card", typeName = "Coverage", idempotent = true)
   public Bundle searchC4DICByBeneficiary(@IdParam final IdType beneSK) {
     var beneSk = FhirInputConverter.toLong(new IdType(beneSK.getValue()));
-    return patientHandler.searchByBeneficiaryC4DIC(beneSk);
+    return patientHandler.searchByBeneficiaryC4DIC(beneSk, clock);
   }
 }

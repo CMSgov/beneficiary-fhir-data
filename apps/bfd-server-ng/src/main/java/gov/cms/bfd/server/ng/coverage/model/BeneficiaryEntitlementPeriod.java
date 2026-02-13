@@ -3,6 +3,8 @@ package gov.cms.bfd.server.ng.coverage.model;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Optional;
 import lombok.Getter;
@@ -28,8 +30,8 @@ public class BeneficiaryEntitlementPeriod {
     return period;
   }
 
-  Coverage.CoverageStatus toFhirStatus() {
-    if (benefitRangeEndDate.isPresent() && benefitRangeEndDate.get().isBefore(DateUtil.nowAoe())) {
+  Coverage.CoverageStatus toFhirStatus(Instant clock) {
+    if (benefitRangeEndDate.isPresent() && benefitRangeEndDate.get().isBefore(DateUtil.nowAoe(clock))) {
       return Coverage.CoverageStatus.CANCELLED;
     }
 
