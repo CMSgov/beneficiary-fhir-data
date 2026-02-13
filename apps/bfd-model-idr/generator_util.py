@@ -6,11 +6,14 @@ import random
 import string
 import subprocess
 import sys
+from collections import defaultdict
 from collections.abc import Callable, Iterable
+from datetime import date, timedelta
 from pathlib import Path
-from typing import Any
+from typing import Any, Self
 
 import pandas as pd
+import tqdm
 from dateutil.parser import parse
 from faker import Faker
 
@@ -40,6 +43,7 @@ CLM_PRFNL = "SYNTHETIC_CLM_PRFNL"
 CLM_LINE_PRFNL = "SYNTHETIC_CLM_LINE_PRFNL"
 CLM_LINE_RX = "SYNTHETIC_CLM_LINE_RX"
 CLM_RLT_COND_SGNTR_MBR = "SYNTHETIC_CLM_RLT_COND_SGNTR_MBR"
+CLM_ANSI_SGNTR = "SYNTHETIC_CLM_ANSI_SGNTR"
 PRVDR_HSTRY = "SYNTHETIC_PRVDR_HSTRY"
 CNTRCT_PBP_NUM = "SYNTHETIC_CNTRCT_PBP_NUM"
 CNTRCT_PBP_CNTCT = "SYNTHETIC_CNTRCT_PBP_CNTCT"
@@ -53,6 +57,85 @@ _tables_by_bene_sk: dict[str, dict[str, dict[str, Any]]] = {}
 # Lazily computed table of field names to already used IDs so that their uniqueness is guaranteed.
 # Used with the gen_*_id functions below.
 __used_ids_by_field: dict[str, set[str]] = {}
+
+
+class RowAdapter:
+    def __init__(self, kv: dict[str, Any], loaded_from_file: bool = False):
+        self.kv = kv
+        self.loaded_from_file = loaded_from_file
+
+    def __getitem__(self, key: str):
+        return self.kv[key]
+
+    def __setitem__(self, key: str, new_value: Any):
+        if key not in self.kv:
+            self.kv[key] = new_value
+
+    def __contains__(self, key: str) -> bool:
+        return key in self.kv
+
+    def get(self, key: str, default: Any | None = None) -> Any:
+        return self.kv.get(key, default)
+
+    def extend(self, other: dict[str, Any] | Self, overwrite: bool = False):
+        cur = self if not overwrite else self.kv
+        other_dict = other if isinstance(other, dict) else other.kv
+
+        for k, v in other_dict.items():
+            cur[k] = v
+
+
+def as_list[T](obj: T | None) -> list[T]:
+    if not obj:
+        return []
+
+    return [obj]
+
+
+def partition_rows[T](
+    llist: list[RowAdapter],
+    part_by: Callable[[RowAdapter], T],
+    filter_by: Callable[[RowAdapter], bool] | None = None,
+) -> dict[T, list[RowAdapter]]:
+    bucketed_rows: dict[T, list[RowAdapter]] = defaultdict(list)
+    for row in llist:
+        part_key = part_by(row)
+        if not filter_by or filter_by(row):
+            bucketed_rows[part_key].append(row)
+
+    return bucketed_rows
+
+
+def run_command(cmd: list[str], cwd: str | None = None):
+    try:
+        result = subprocess.run(
+            cmd, cwd=cwd, shell=True, check=True, text=True, capture_output=True
+        )
+        return result.stdout, result.stderr
+    except subprocess.CalledProcessError as e:
+        print("Error running command:", cmd)
+        if e.stderr:
+            print("Error output:", e.stderr)
+        else:
+            print("Error info (not necessarily stderr):", e)
+        sys.exit(1)
+
+
+def add_days(input_dt: str, days_to_add: int = 0):
+    return (date.fromisoformat(input_dt) + timedelta(days=days_to_add)).isoformat()
+
+
+def random_date(start_date: str, end_date: str):
+    start_formatted = date.fromisoformat(start_date).toordinal()
+    end_formatted = date.fromisoformat(end_date).toordinal()
+    rand_date = random.randint(start_formatted, end_formatted)
+    return date.fromordinal(rand_date).isoformat()
+
+
+def gen_thru_dt(frm_dt: str, max_days: int = 30):
+    from_date = date.fromisoformat(frm_dt)
+    days_to_add = random.randint(0, max_days)
+    return (from_date + timedelta(days=days_to_add)).isoformat()
 
 
 def __gen_id(field: str, gen_func: Callable[[], str]) -> str:
@@ -94,7 +177,7 @@ def gen_numeric_id(field: str, start: int = -1, end: int = -(sys.maxsize - 1)) -
 
 
 def load_file_dict(
-    files: dict[str, list["RowAdapter"]], paths: list[str], exclude_empty: bool = False
+    files: dict[str, list["RowAdapter"]], paths: list[str] | list[Path], exclude_empty: bool = False
 ):
     file_paths = set(
         itertools.chain.from_iterable(
@@ -105,28 +188,37 @@ def load_file_dict(
             ]
         )
     )
-    for file_path, file_name in (
+    if not file_paths:
+        return
+
+    print(
+        f"Loading all provided files, {
+            'ignoring empty columns' if exclude_empty else 'treating empty columns as meaningful'
+        }..."
+    )
+    file_tupls = [
         (file_path, file_name)
         for file_path in file_paths
         for file_name in files
         if f"{file_name}.csv" in str(file_path)
-    ):
-        print(f"Loading {file_path} as {file_name}...")
-        csv_data = pd.read_csv(  # type: ignore
-            file_path,
-            dtype=str,
-            na_filter=exclude_empty,
-        )
-        file_as_dictlist = csv_data.to_dict(orient="records")  # type: ignore
-        if not exclude_empty:
-            files[file_name] = load_file(file_as_dictlist)  # type: ignore
-            print(f"Loaded {file_name}, treating empty columns as meaningful")
-            continue
+    ]
+    with tqdm.tqdm(file_tupls) as t:
+        for file_path, file_name in t:
+            t.set_postfix(file=file_path)  # type: ignore
+            csv_data = pd.read_csv(  # type: ignore
+                file_path,
+                dtype=str,
+                na_filter=exclude_empty,
+            )
+            file_as_dictlist = csv_data.to_dict(orient="records")  # type: ignore
+            if not exclude_empty:
+                files[file_name] = load_file(file_as_dictlist)  # type: ignore
+                continue
 
-        files[file_name] = load_file(
-            [{str(k): v for k, v in x.items() if pd.notna(v)} for x in file_as_dictlist]
-        )
-        print(f"Loaded {file_name}, ignoring empty columns")
+            files[file_name] = load_file(
+                [{str(k): v for k, v in x.items() if pd.notna(v)} for x in file_as_dictlist]
+            )
+    print("All files loaded")
 
 
 def load_file(file: Iterable[dict[str, Any]]):
@@ -154,25 +246,6 @@ def convert_tilde_str(val: str) -> str:
     if val == "~":
         return ""
     return val
-
-
-class RowAdapter:
-    def __init__(self, kv: dict[str, Any], loaded_from_file: bool = False):
-        self.kv = kv
-        self.loaded_from_file = loaded_from_file
-
-    def __getitem__(self, key: str):
-        return self.kv[key]
-
-    def __setitem__(self, key: str, new_value: Any):
-        if key not in self.kv:
-            self.kv[key] = new_value
-
-    def __contains__(self, key: str) -> bool:
-        return key in self.kv
-
-    def get(self, key: str, default: Any | None = None) -> Any:
-        return self.kv.get(key, default)
 
 
 class GeneratorUtil:
@@ -791,8 +864,10 @@ class GeneratorUtil:
             (self.bene_mapd_enrlmt, f"out/{BENE_MAPD_ENRLMT}.csv", GeneratorUtil.ALL_KEYS),
         ]
 
-        for data, path, cols in beneficiary_exports:
-            self.export_df(data, path, cols)
+        with tqdm.tqdm(beneficiary_exports) as t:
+            for data, path, cols in t:
+                t.set_postfix(file=path)  # type: ignore
+                self.export_df(data, path, cols)
 
     @staticmethod
     def export_df(data: list[dict[str, Any]], out_path: str, cols: list[str] | str = ALL_KEYS):
