@@ -49,6 +49,9 @@ public class Claim {
   @Column(name = "clm_src_id")
   private ClaimSourceId claimSourceId;
 
+  @Column(name = "meta_src_sk")
+  private MetaSourceSk metaSourceSk;
+
   @Column(name = "clm_efctv_dt")
   private LocalDate claimEffectiveDate;
 
@@ -152,8 +155,8 @@ public class Claim {
     eob.setType(claimTypeCode.toFhirType());
     claimTypeCode.toFhirSubtype().ifPresent(eob::setSubType);
     claimTypeCode.toFhirAdjudication().ifPresent(eob::addAdjudication);
-
-    eob.setMeta(meta.toFhir(claimTypeCode, claimSourceId, securityStatus, finalAction));
+    eob.setMeta(
+        meta.toFhir(claimTypeCode, claimSourceId, securityStatus, finalAction, metaSourceSk));
     eob.setIdentifier(identifiers.toFhir());
     eob.setBillablePeriod(billablePeriod.toFhir());
     eob.setCreated(DateUtil.toDate(claimEffectiveDate));
