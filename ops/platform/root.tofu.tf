@@ -19,6 +19,12 @@ variable "region" {
   type     = string
 }
 
+variable "secondary_region" {
+  default  = "us-west-2"
+  nullable = false
+  type     = string
+}
+
 variable "account_type" {
   description = <<-EOF
   The account type being targeted to create platform resources within. Will correspond with
@@ -37,6 +43,16 @@ variable "account_type" {
 # tflint-ignore: terraform_required_providers
 provider "aws" {
   region = var.region
+  default_tags {
+    tags = local.default_tags
+  }
+}
+
+# tflint-ignore: terraform_required_providers, terraform_unused_declarations
+provider "aws" {
+  alias = "secondary"
+
+  region = var.secondary_region
   default_tags {
     tags = local.default_tags
   }

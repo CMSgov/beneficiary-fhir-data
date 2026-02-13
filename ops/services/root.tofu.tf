@@ -20,6 +20,12 @@ variable "region" {
   type     = string
 }
 
+variable "secondary_region" {
+  default  = "us-west-2"
+  nullable = false
+  type     = string
+}
+
 variable "parent_env" {
   description = <<-EOF
   The parent environment of the current solution. Will correspond with `terraform.workspace`".
@@ -38,6 +44,16 @@ variable "parent_env" {
 # tflint-ignore: terraform_required_providers
 provider "aws" {
   region = var.region
+  default_tags {
+    tags = local.default_tags
+  }
+}
+
+# tflint-ignore: terraform_required_providers, terraform_unused_declarations
+provider "aws" {
+  alias = "secondary"
+
+  region = var.secondary_region
   default_tags {
     tags = local.default_tags
   }
