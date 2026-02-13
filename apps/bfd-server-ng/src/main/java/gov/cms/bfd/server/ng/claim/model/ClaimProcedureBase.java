@@ -29,8 +29,6 @@ public abstract class ClaimProcedureBase {
   @Column(name = "clm_dgns_cd") // SAMHSA
   private Optional<String> diagnosisCode;
 
-  //  private static final LocalDate DEFAULT_PROCEDURE_DATE = LocalDate.of(2000, 1, 1);
-
   Optional<String> getDiagnosisKey() {
     return diagnosisCode.map(
         s -> s + "|" + getIcdIndicator().map(IcdIndicator::getCode).orElse(""));
@@ -67,6 +65,10 @@ public abstract class ClaimProcedureBase {
                 .setCode(formattedCode)));
 
     return Optional.of(diagnosis);
+  }
+
+  Optional<String> getClaimPoaIndicator() {
+    return Optional.empty();
   }
 
   void setClaimPoaIndicator(String poaIndicator) {}

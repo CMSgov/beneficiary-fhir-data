@@ -2,7 +2,6 @@ package gov.cms.bfd.server.ng.claim.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
-import jakarta.persistence.Embedded;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -11,7 +10,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 @Embeddable
 @Getter
-class ClaimInstitutionalSupportingInfoBase {
+class ClaimInstitutionalSupportingInfoBase implements SupportingInfoComponentBase {
   @Column(name = "clm_admsn_src_cd")
   private Optional<ClaimAdmissionSourceCode> claimAdmissionSourceCode;
 
@@ -31,16 +30,14 @@ class ClaimInstitutionalSupportingInfoBase {
   @Column(name = "clm_fi_actn_cd")
   private Optional<ClaimFiscalIntermediaryActionCode> claimFiscalIntermediaryActionCode;
 
-  @Embedded private DiagnosisDrgCode diagnosisDrgCode;
-
-  List<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
+  @Override
+  public List<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {
     return Stream.of(
             claimAdmissionSourceCode.map(c -> c.toFhir(supportingInfoFactory)),
             patientStatusCode.map(c -> c.toFhir(supportingInfoFactory)),
             claimAdmissionTypeCode.map(c -> c.toFhir(supportingInfoFactory)),
             mcoPaidSwitch.map(s -> s.toFhir(supportingInfoFactory)),
-            diagnosisDrgCode.toFhir(supportingInfoFactory),
             nonpaymentReasonCode.map(c -> c.toFhir(supportingInfoFactory)),
             claimFiscalIntermediaryActionCode.map(c -> c.toFhir(supportingInfoFactory)))
         .flatMap(Optional::stream)

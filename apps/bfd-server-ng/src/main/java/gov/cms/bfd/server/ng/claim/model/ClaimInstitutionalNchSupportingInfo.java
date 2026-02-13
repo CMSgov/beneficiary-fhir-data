@@ -11,7 +11,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 @Embeddable
 @Getter
-class ClaimInstitutionalNchSupportingInfo {
+class ClaimInstitutionalNchSupportingInfo implements SupportingInfoComponentBase {
 
   @Column(name = "clm_hha_lup_ind_cd")
   private Optional<HhaLupaIndicatorCode> hhaLupaIndicatorCode;
@@ -27,7 +27,8 @@ class ClaimInstitutionalNchSupportingInfo {
 
   @Embedded ClaimInstitutionalSupportingInfoBase claimInstitutionalSupportingInfo;
 
-  List<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
+  @Override
+  public List<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {
 
     return Stream.concat(

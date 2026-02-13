@@ -7,7 +7,7 @@ import java.util.List;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 @Embeddable
-class AdjudicationChargeProfessionalNch {
+class AdjudicationChargeProfessionalNch implements AdjudicationChargeBase {
 
   @Column(name = "clm_alowd_chrg_amt")
   private BigDecimal allowedChargeAmount;
@@ -27,7 +27,8 @@ class AdjudicationChargeProfessionalNch {
   @Column(name = "clm_blood_chrg_amt")
   private BigDecimal bloodChargeAmount;
 
-  List<ExplanationOfBenefit.TotalComponent> toFhirTotal() {
+  @Override
+  public List<ExplanationOfBenefit.TotalComponent> toFhirTotal() {
     return List.of(
         AdjudicationChargeType.ALLOWED_CHARGE_AMOUNT.toFhirTotal(allowedChargeAmount),
         AdjudicationChargeType.SUBMITTED_CHARGE_AMOUNT.toFhirTotal(submittedChargeAmount),
@@ -36,7 +37,8 @@ class AdjudicationChargeProfessionalNch {
         AdjudicationChargeType.BENE_PART_B_DEDUCTIBLE_AMOUNT.toFhirTotal(deductibleAmount));
   }
 
-  List<ExplanationOfBenefit.AdjudicationComponent> toFhirAdjudication() {
+  @Override
+  public List<ExplanationOfBenefit.AdjudicationComponent> toFhirAdjudication() {
     return List.of(
         AdjudicationChargeType.BLOOD_CHARGE_AMOUNT.toFhirAdjudication(bloodChargeAmount));
   }

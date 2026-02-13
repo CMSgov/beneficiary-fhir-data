@@ -29,7 +29,7 @@ public class ClaimProcedure extends ClaimProcedureBase {
   private static final LocalDate DEFAULT_PROCEDURE_DATE = LocalDate.of(2000, 1, 1);
 
   @Override
-  Optional<ExplanationOfBenefit.ProcedureComponent> toFhirProcedure() {
+  public Optional<ExplanationOfBenefit.ProcedureComponent> toFhirProcedure() {
     if (procedureCode.isEmpty() || getSequenceNumber().isEmpty() || getIcdIndicator().isEmpty()) {
       return Optional.empty();
     }
@@ -61,7 +61,7 @@ public class ClaimProcedure extends ClaimProcedureBase {
   }
 
   @Override
-  Optional<ExplanationOfBenefit.DiagnosisComponent> toFhirDiagnosis(
+  public Optional<ExplanationOfBenefit.DiagnosisComponent> toFhirDiagnosis(
       SequenceGenerator sequenceGenerator, ClaimContext claimContext) {
     var diagnosis = super.toFhirDiagnosis(sequenceGenerator, claimContext);
 

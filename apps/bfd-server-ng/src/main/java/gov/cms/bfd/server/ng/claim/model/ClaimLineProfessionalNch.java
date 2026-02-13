@@ -26,7 +26,7 @@ import org.hl7.fhir.r4.model.StringType;
 @Embeddable
 @Getter
 @SuppressWarnings("java:S2201")
-public class ClaimLineProfessionalNch {
+public class ClaimLineProfessionalNch implements ClaimLineBase {
 
   @Convert(converter = NonZeroIntConverter.class)
   @Column(name = "clm_line_num", insertable = false, updatable = false)
@@ -57,7 +57,8 @@ public class ClaimLineProfessionalNch {
   @Column(name = "clm_line_carr_clncl_lab_num")
   private Optional<String> claimLineCarrierClinicalLabNumber;
 
-  Optional<ExplanationOfBenefit.ItemComponent> toFhirItemComponent() {
+  @Override
+  public Optional<ExplanationOfBenefit.ItemComponent> toFhirItemComponent() {
     if (claimLineNumber.isEmpty()) {
       return Optional.empty();
     }
@@ -77,8 +78,6 @@ public class ClaimLineProfessionalNch {
 
     adjudicationCharge.toFhir().forEach(line::addAdjudication);
 
-    //    line.setDiagnosisSequence(diagnosisRelatedLines(diagnoses));
-
     return Optional.of(line);
   }
 
@@ -88,6 +87,7 @@ public class ClaimLineProfessionalNch {
    * @param bfdRowId Observation ID
    * @return claim Observation
    */
+  @Override
   public Optional<Observation> toFhirObservation(int bfdRowId) {
     if (claimLineHCTHGBTestTypeCode.isEmpty() || claimLineHCTHGBTestResult.isEmpty()) {
       return Optional.empty();
@@ -119,28 +119,8 @@ public class ClaimLineProfessionalNch {
     return Optional.of(observation);
   }
 
-  //  /**
-  //   * Finds the line numbers of a claim procedure that matches the diagnosis code from this claim
-  //   * line.
-  //   *
-  //   * @param diagnoses The parent claim entity containing all claim procedures.
-  //   * @return The row ids of the matching claim procedure
-  //   */
-  //  public List<PositiveIntType> diagnosisRelatedLines(List<ClaimProcedureProfessional> diagnoses)
-  // {
-  //    if (diagnosisCode.isEmpty()) {
-  //      return List.of();
-  //    }
-  //    var currentDiagnosisCode = diagnosisCode.get();
-  //
-  //    return IntStream.range(0, diagnoses.size())
-  //        .filter(i ->
-  // diagnoses.get(i).getDiagnosisCode().orElse("").equals(currentDiagnosisCode))
-  //        .mapToObj(i -> new PositiveIntType(i + 1))
-  //        .toList();
-  //  }
-
-  Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhirSupportingInfo(
+  @Override
+  public Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhirSupportingInfo(
       SupportingInfoFactory supportingInfoFactory) {
 
     var trackingNumber = adjudicatedTrackingNumber;

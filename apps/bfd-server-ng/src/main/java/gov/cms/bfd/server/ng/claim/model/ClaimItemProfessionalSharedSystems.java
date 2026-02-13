@@ -34,4 +34,9 @@ public class ClaimItemProfessionalSharedSystems implements ClaimItemBase {
   public Optional<ClaimLineHcpcsCode> getClaimLineHcpcsCode() {
     return Optional.of(claimLine.getHcpcsCode());
   }
+
+  @Override
+  public Optional<ClaimRelatedCondition> getClaimRelatedCondition() {
+    return Optional.empty();
+  }
 }

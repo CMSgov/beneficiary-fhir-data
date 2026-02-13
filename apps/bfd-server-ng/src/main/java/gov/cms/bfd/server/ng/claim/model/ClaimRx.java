@@ -8,7 +8,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -41,18 +41,26 @@ public class ClaimRx extends ClaimBase {
   @Embedded private ClaimSubmissionDate claimSubmissionDate;
   @Embedded private ClaimProcessDate claimProcessDate;
 
+  /** Rx claims carry a single embedded line rather than a collection. */
   @Embedded private ClaimItemRx claimItems;
 
-  /**
-   * Convert the claim info to a FHIR ExplanationOfBenefit.
-   *
-   * @param securityStatus securityStatus
-   * @return ExplanationOfBenefit
-   */
+  /** {@inheritDoc} */
   @Override
   public ExplanationOfBenefit toFhir(ClaimSecurityStatus securityStatus) {
     var eob = super.toFhir(securityStatus);
 
+    addPartDInsurer(eob);
+    addClaimLineItem(eob);
+    addServiceProvider(eob);
+    addSupportingInfo(eob);
+    addPrescribingProviderCareTeam(eob);
+    addAdjudicationAndPayment(eob);
+    addInsurance(eob);
+
+    return sortedEob(eob);
+  }
+
+  private void addPartDInsurer(ExplanationOfBenefit eob) {
     contractName
         .flatMap(name -> getClaimTypeCode().toFhirInsurerPartD(name))
         .ifPresent(
@@ -60,11 +68,13 @@ public class ClaimRx extends ClaimBase {
               eob.addContained(i);
               eob.setInsurer(new Reference(i));
             });
+  }
 
-    var item = claimItems.getClaimLine().toFhirItemComponent();
+  private void addClaimLineItem(ExplanationOfBenefit eob) {
+    claimItems.getClaimLine().toFhirItemComponent().ifPresent(eob::addItem);
+  }
 
-    item.ifPresent(eob::addItem);
-
+  private void addServiceProvider(ExplanationOfBenefit eob) {
     serviceProviderHistory
         .toFhirNpiType()
         .ifPresent(
@@ -72,48 +82,56 @@ public class ClaimRx extends ClaimBase {
               eob.addContained(p);
               eob.setProvider(new Reference(p));
             });
+  }
 
-    var claimRxSupportingInfo =
-        Stream.of(
-                // claim rx header lvl
-                claimFormatCode
-                    .filter(c -> getClaimTypeCode().isClaimSubtype(PDE))
-                    .map(c -> c.toFhir(supportingInfoFactory))
-                    .stream(),
-                submitterContractNumber.toFhir(supportingInfoFactory).stream(),
-                submitterContractPBPNumber.toFhir(supportingInfoFactory).stream(),
-                claimSubmissionDate.toFhir(supportingInfoFactory).stream(),
-                claimProcessDate.toFhir(supportingInfoFactory).stream(),
-                // claim rx line lvl
-                claimItems
-                    .getClaimLine()
-                    .getClaimRxSupportingInfo()
-                    .toFhir(supportingInfoFactory)
-                    .stream(),
+  private void addSupportingInfo(ExplanationOfBenefit eob) {
+    buildHeaderSupportingInfo().forEach(eob::addSupportingInfo);
+    buildLineSupportingInfo().forEach(eob::addSupportingInfo);
+  }
 
-                // claim line rx num
-                claimItems.getClaimLineRxNum().toFhir(supportingInfoFactory).stream())
-            .flatMap(s -> s)
-            .toList();
+  private List<ExplanationOfBenefit.SupportingInformationComponent> buildHeaderSupportingInfo() {
+    return Stream.of(
+            claimFormatCode
+                .filter(c -> getClaimTypeCode().isClaimSubtype(PDE))
+                .map(c -> c.toFhir(supportingInfoFactory)),
+            submitterContractNumber.toFhir(supportingInfoFactory).stream().findFirst(),
+            submitterContractPBPNumber.toFhir(supportingInfoFactory).stream().findFirst(),
+            claimSubmissionDate.toFhir(supportingInfoFactory),
+            claimProcessDate.toFhir(supportingInfoFactory))
+        .flatMap(Optional::stream)
+        .toList();
+  }
 
-    Stream.of(claimRxSupportingInfo).flatMap(Collection::stream).forEach(eob::addSupportingInfo);
+  private List<ExplanationOfBenefit.SupportingInformationComponent> buildLineSupportingInfo() {
+    return Stream.concat(
+            claimItems
+                .getClaimLine()
+                .getClaimRxSupportingInfo()
+                .toFhir(supportingInfoFactory)
+                .stream(),
+            claimItems.getClaimLineRxNum().toFhir(supportingInfoFactory).stream())
+        .toList();
+  }
 
+  /** Adds the prescribing-provider care-team entry and registers the practitioner. */
+  private void addPrescribingProviderCareTeam(ExplanationOfBenefit eob) {
     var sequenceGenerator = new SequenceGenerator();
-    Stream.of(prescribingProviderHistory)
-        .flatMap(p -> p.toFhirCareTeamComponent(sequenceGenerator).stream())
-        .forEach(
+    prescribingProviderHistory
+        .toFhirCareTeamComponent(sequenceGenerator)
+        .ifPresent(
             c -> {
               eob.addCareTeam(c.careTeam());
               eob.addContained(c.practitioner());
             });
+  }
 
-    var insurance = new ExplanationOfBenefit.InsuranceComponent();
-    insurance.setFocal(true);
-    getClaimTypeCode().toFhirPartDInsurance().ifPresent(eob::addInsurance);
+  private void addAdjudicationAndPayment(ExplanationOfBenefit eob) {
     adjudicationCharge.toFhirTotal().forEach(eob::addTotal);
     eob.setPayment(claimPaymentDate.toFhir());
+  }
 
-    return sortedEob(eob);
+  private void addInsurance(ExplanationOfBenefit eob) {
+    getClaimTypeCode().toFhirPartDInsurance().ifPresent(eob::addInsurance);
   }
 
   @Override
@@ -126,8 +144,11 @@ public class ClaimRx extends ClaimBase {
     return ClaimSourceId.NATIONAL_CLAIMS_HISTORY;
   }
 
+  /** Rx claims have a single embedded rather than a collection. */
   @Override
   public SortedSet<ClaimItemRx> getClaimItems() {
-    return new TreeSet<>();
+    var items = new TreeSet<ClaimItemRx>();
+    items.add(claimItems);
+    return items;
   }
 }

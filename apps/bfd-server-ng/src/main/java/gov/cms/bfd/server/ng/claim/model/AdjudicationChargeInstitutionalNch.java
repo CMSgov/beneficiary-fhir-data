@@ -7,7 +7,7 @@ import java.util.List;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 @Embeddable
-class AdjudicationChargeInstitutionalNch {
+class AdjudicationChargeInstitutionalNch implements AdjudicationChargeBase {
 
   @Column(name = "clm_alowd_chrg_amt")
   private BigDecimal allowedChargeAmount;
@@ -21,11 +21,17 @@ class AdjudicationChargeInstitutionalNch {
   @Column(name = "clm_mdcr_ddctbl_amt")
   private BigDecimal deductibleAmount;
 
-  List<ExplanationOfBenefit.TotalComponent> toFhirTotal() {
+  @Override
+  public List<ExplanationOfBenefit.TotalComponent> toFhirTotal() {
     return List.of(
         AdjudicationChargeType.ALLOWED_CHARGE_AMOUNT.toFhirTotal(allowedChargeAmount),
         AdjudicationChargeType.SUBMITTED_CHARGE_AMOUNT.toFhirTotal(submittedChargeAmount),
         AdjudicationChargeType.PROVIDER_PAYMENT_AMOUNT.toFhirTotal(providerPaymentAmount),
         AdjudicationChargeType.BENE_PART_B_DEDUCTIBLE_AMOUNT.toFhirTotal(deductibleAmount));
+  }
+
+  @Override
+  public List<ExplanationOfBenefit.AdjudicationComponent> toFhirAdjudication() {
+    return List.of();
   }
 }

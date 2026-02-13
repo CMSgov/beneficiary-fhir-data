@@ -13,13 +13,15 @@ import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.StringType;
 
 /** Claim line info. */
 @Embeddable
 @Getter
 @SuppressWarnings("java:S2201")
-public class ClaimLineInstitutionalSharedSystems extends ClaimLineInstitutionalBase {
+public class ClaimLineInstitutionalSharedSystems extends ClaimLineInstitutionalBase
+    implements ClaimLineBase {
 
   @Convert(converter = NonZeroIntConverter.class)
   @Column(name = "clm_line_num", insertable = false, updatable = false)
@@ -40,7 +42,13 @@ public class ClaimLineInstitutionalSharedSystems extends ClaimLineInstitutionalB
   @Embedded private ClaimLineHcpcsModifierCode hcpcsModifierCode;
   @Embedded private ClaimLineAdjudicationChargeInstitutionalSharedSystems adjudicationCharge;
 
-  Optional<ExplanationOfBenefit.ItemComponent> toFhirItemComponent() {
+  @Override
+  public Optional<Observation> toFhirObservation(int bfdRowId) {
+    return Optional.empty();
+  }
+
+  @Override
+  public Optional<ExplanationOfBenefit.ItemComponent> toFhirItemComponent() {
     if (claimLineNumber.isEmpty()) {
       return Optional.empty();
     }
@@ -80,7 +88,8 @@ public class ClaimLineInstitutionalSharedSystems extends ClaimLineInstitutionalB
     return Optional.of(line);
   }
 
-  Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhirSupportingInfo(
+  @Override
+  public Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhirSupportingInfo(
       SupportingInfoFactory supportingInfoFactory) {
 
     var trackingNumber = partiallyAdjudicatedTrackingNumber;
@@ -96,5 +105,10 @@ public class ClaimLineInstitutionalSharedSystems extends ClaimLineInstitutionalB
             .createSupportingInfo()
             .setCategory(category.toFhir())
             .setValue(new StringType(trackingNumber.get())));
+  }
+
+  @Override
+  public RenderingProviderLineHistory getClaimLineRenderingProvider() {
+    return null;
   }
 }

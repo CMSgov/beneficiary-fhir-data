@@ -11,12 +11,13 @@ import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+import org.hl7.fhir.r4.model.Observation;
 
 /** Claim line info. */
 @Embeddable
 @Getter
 @SuppressWarnings("java:S2201")
-public class ClaimLineRxInfo {
+public class ClaimLineRxInfo implements ClaimLineBase {
 
   @Column(name = "clm_line_from_dt")
   private Optional<LocalDate> fromDate;
@@ -26,7 +27,13 @@ public class ClaimLineRxInfo {
   @Embedded private ClaimLineAdjudicationChargeRxInfo adjudicationCharge;
   @Embedded private ClaimLineRxSupportingInfo claimRxSupportingInfo;
 
-  Optional<ExplanationOfBenefit.ItemComponent> toFhirItemComponent() {
+  @Override
+  public Optional<Observation> toFhirObservation(int bfdRowId) {
+    return Optional.empty();
+  }
+
+  @Override
+  public Optional<ExplanationOfBenefit.ItemComponent> toFhirItemComponent() {
 
     var line = new ExplanationOfBenefit.ItemComponent();
     line.setSequence(1);
@@ -48,5 +55,21 @@ public class ClaimLineRxInfo {
     adjudicationCharge.toFhir().forEach(line::addAdjudication);
 
     return Optional.of(line);
+  }
+
+  @Override
+  public Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhirSupportingInfo(
+      SupportingInfoFactory supportingInfoFactory) {
+    return Optional.empty();
+  }
+
+  @Override
+  public RenderingProviderLineHistory getClaimLineRenderingProvider() {
+    return null;
+  }
+
+  @Override
+  public Optional<Integer> getClaimLineNumber() {
+    return Optional.empty();
   }
 }
