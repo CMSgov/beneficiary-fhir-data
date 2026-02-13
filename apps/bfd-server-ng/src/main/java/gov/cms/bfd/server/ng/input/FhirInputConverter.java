@@ -270,22 +270,8 @@ public class FhirInputConverter {
 
     for (var orList : securityParam.getValuesAsQueryTokens()) {
       for (var token : orList.getValuesAsQueryTokens()) {
+        validateSamhsaToken(token);
         var hasNotModifier = TokenParamModifier.NOT == token.getModifier();
-
-        if (!isSamhsaActCode(token)) {
-          var displayToken =
-              (token.getSystem() != null)
-                  ? token.getSystem() + "|" + token.getValue()
-                  : token.getValue();
-          throw new InvalidRequestException(
-              String.format(
-                  "Invalid security code: '%s'. Use '%s' or '%s|%s'.",
-                  displayToken,
-                  IdrConstants.SAMHSA_SECURITY_CODE,
-                  SystemUrls.SAMHSA_ACT_CODE_SYSTEM_URL,
-                  IdrConstants.SAMHSA_SECURITY_CODE));
-        }
-
         if (hasNotModifier) {
           excluded = true;
         } else {
@@ -295,6 +281,21 @@ public class FhirInputConverter {
     }
 
     return resolveSamhsaSearchIntent(requested, excluded);
+  }
+
+  private static void validateSamhsaToken(TokenParam token) {
+    if (isSamhsaActCode(token)) {
+      return;
+    }
+    var displayToken =
+        (token.getSystem() != null) ? token.getSystem() + "|" + token.getValue() : token.getValue();
+    throw new InvalidRequestException(
+        String.format(
+            "Invalid security code: '%s'. Use '%s' or '%s|%s'.",
+            displayToken,
+            IdrConstants.SAMHSA_SECURITY_CODE,
+            SystemUrls.SAMHSA_ACT_CODE_SYSTEM_URL,
+            IdrConstants.SAMHSA_SECURITY_CODE));
   }
 
   private static boolean isSamhsaActCode(TokenParam token) {
