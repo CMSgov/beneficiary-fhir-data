@@ -75,13 +75,11 @@ final class OutpatientClaimTransformerV2 implements ClaimTransformerInterfaceV2 
    * Transforms a {@link OutpatientClaim} into an {@link ExplanationOfBenefit}.
    *
    * @param claimEntity the {@link Object} to use
-   * @param includeTaxNumber exists to satisfy {@link ClaimTransformerInterfaceV2}; ignored
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     OutpatientClaim}
    */
   @Override
-  public ExplanationOfBenefit transform(
-      ClaimWithSecurityTags<?> claimEntity, boolean includeTaxNumber) {
+  public ExplanationOfBenefit transform(ClaimWithSecurityTags<?> claimEntity) {
 
     Object claim = claimEntity.getClaimEntity();
     List<Coding> securityTags =

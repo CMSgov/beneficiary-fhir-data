@@ -76,13 +76,10 @@ final class DMEClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
    * Transforms a {@link DMEClaim} into a FHIR {@link ExplanationOfBenefit}.
    *
    * @param claimEntity the {@link Object} to use
-   * @param includeTaxNumber optional Boolean denoting whether to include tax numbers in the
-   *     response
    * @return a FHIR {@link ExplanationOfBenefit} resource.
    */
   @Override
-  public ExplanationOfBenefit transform(
-      ClaimWithSecurityTags<?> claimEntity, boolean includeTaxNumber) {
+  public ExplanationOfBenefit transform(ClaimWithSecurityTags<?> claimEntity) {
 
     Object claim = claimEntity.getClaimEntity();
     List<Coding> securityTags =
@@ -94,7 +91,7 @@ final class DMEClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
     ExplanationOfBenefit eob;
     try (Timer.Context ignored = metricRegistry.timer(METRIC_NAME).time()) {
       DMEClaim dmeClaim = (DMEClaim) claim;
-      eob = transformClaim(dmeClaim, includeTaxNumber, securityTags);
+      eob = transformClaim(dmeClaim, securityTags);
     }
     return eob;
   }
@@ -102,14 +99,12 @@ final class DMEClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
   /**
    * Transforms a specified {@link DMEClaim} into a FHIR {@link ExplanationOfBenefit}.
    *
-   * @param includeTaxNumbers whether to include tax numbers in the transformed EOB
    * @param claimGroup the CCW {@link DMEClaim} to transform
    * @param securityTags securityTags of the claim
    * @return a FHIR {@link ExplanationOfBenefit} resource that represents the specified {@link
    *     DMEClaim}
    */
-  private ExplanationOfBenefit transformClaim(
-      DMEClaim claimGroup, boolean includeTaxNumbers, List<Coding> securityTags) {
+  private ExplanationOfBenefit transformClaim(DMEClaim claimGroup, List<Coding> securityTags) {
     ExplanationOfBenefit eob = new ExplanationOfBenefit();
 
     // Required values not directly mapped
@@ -229,7 +224,7 @@ final class DMEClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
         TransformerUtilsV2.createExtensionCoding(
             eob, CcwCodebookVariable.CARR_CLM_ENTRY_CD, claimGroup.getClaimEntryCode()));
 
-    handleClaimLines(claimGroup, eob, includeTaxNumbers);
+    handleClaimLines(claimGroup, eob);
     TransformerUtilsV2.setLastUpdated(eob, claimGroup.getLastUpdated());
     return eob;
   }
@@ -239,10 +234,8 @@ final class DMEClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
    *
    * @param claimGroup the claim group with the lines to get data from
    * @param eob the eob to add information to
-   * @param includeTaxNumbers whether to include tax numbers
    */
-  private void handleClaimLines(
-      DMEClaim claimGroup, ExplanationOfBenefit eob, boolean includeTaxNumbers) {
+  private void handleClaimLines(DMEClaim claimGroup, ExplanationOfBenefit eob) {
     for (DMEClaimLine line : claimGroup.getLines()) {
       ItemComponent item = TransformerUtilsV2.addItem(eob);
 
@@ -310,12 +303,6 @@ final class DMEClaimTransformerV2 implements ClaimTransformerInterfaceV2 {
               line.getHcpcsSecondModifierCode(),
               line.getHcpcsThirdModifierCode(),
               line.getHcpcsFourthModifierCode()));
-
-      if (includeTaxNumbers) {
-        item.addExtension(
-            TransformerUtilsV2.createExtensionCoding(
-                eob, CcwCodebookVariable.TAX_NUM, line.getProviderTaxNumber()));
-      }
 
       // REV_CNTR_PRVDR_PMT_AMT => ExplanationOfBenefit.item.adjudication
       TransformerUtilsV2.addAdjudication(

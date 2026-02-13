@@ -242,15 +242,7 @@ Examples:
 
   /** Open API short description for /ExplanationOfBenefit's includeTaxNumbers parameter. */
   public static final String EOB_INCLUDE_TAX_NUMBERS_SHORT =
-      "If `true`, tax numbers are included in the results.";
-
-  /** Open API content value for /ExplanationOfBenefit's includeTaxNumbers parameter. */
-  public static final String EOB_INCLUDE_TAX_NUMBERS_VALUE =
-"""
-Setting this flag to _true_, provides tax number in the EOB transformed data for the response.
-
-Example:
-   - `includeTaxNumbers=true`""";
+      "Ignored. Included for compatibility with existing requests.";
 
   /** Open API content short description for partially adjudicated claim MBI ID to be used. */
   public static final String PAC_MBI_SHORT =

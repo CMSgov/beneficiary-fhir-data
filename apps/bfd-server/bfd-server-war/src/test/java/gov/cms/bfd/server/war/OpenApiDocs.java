@@ -339,11 +339,6 @@ public class OpenApiDocs {
             headerRefs.add(createRef("#/components/parameters/IncludeAddressFields-header"));
           }
 
-          // add ref for IncludeTaxNumbers for ExplanationOfBenefit, Claim, ClaimResponse endpoints
-          if (path.contains("/ExplanationOfBenefit") || path.contains("/Claim")) {
-            headerRefs.add(createRef("#/components/parameters/IncludeTaxNumbers-header"));
-          }
-
           pathMap.put("parameters", headerRefs);
         }
       }
