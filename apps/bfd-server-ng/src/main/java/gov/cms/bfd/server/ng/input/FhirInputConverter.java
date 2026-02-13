@@ -1,15 +1,11 @@
 package gov.cms.bfd.server.ng.input;
 
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.NumberParam;
-import ca.uhn.fhir.rest.param.ReferenceParam;
-import ca.uhn.fhir.rest.param.TokenAndListParam;
-import ca.uhn.fhir.rest.param.TokenOrListParam;
-import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import gov.cms.bfd.server.ng.claim.model.ClaimFinalAction;
 import gov.cms.bfd.server.ng.claim.model.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.ClaimTypeCode;
+import gov.cms.bfd.server.ng.claim.model.SamhsaSearchIntent;
 import gov.cms.bfd.server.ng.util.IdrConstants;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.util.Collections;
@@ -254,5 +250,76 @@ public class FhirInputConverter {
         .map(token -> token.getValue().trim().toLowerCase())
         .flatMap(normalizedType -> ClaimTypeCode.getClaimTypeCodesByType(normalizedType).stream())
         .toList();
+  }
+
+  /**
+   * Parses the _security search parameter into a {@link SamhsaSearchIntent}.
+   *
+   * <p>Supports granular inclusion and exclusion of the SAMHSA claims.
+   *
+   * @param securityParam _source param from request
+   * @return {@link SamhsaSearchIntent}
+   */
+  public static SamhsaSearchIntent parseSecurityParameter(
+      @Nullable TokenAndListParam securityParam) {
+    if (securityParam == null || securityParam.getValuesAsQueryTokens().isEmpty()) {
+      return SamhsaSearchIntent.UNSPECIFIED;
+    }
+    var requested = false;
+    var excluded = false;
+
+    for (var orList : securityParam.getValuesAsQueryTokens()) {
+      for (var token : orList.getValuesAsQueryTokens()) {
+        var hasNotModifier = TokenParamModifier.NOT == token.getModifier();
+
+        if (!isSamhsaActCode(token)) {
+          var displayToken =
+              (token.getSystem() != null)
+                  ? token.getSystem() + "|" + token.getValue()
+                  : token.getValue();
+          throw new InvalidRequestException(
+              String.format(
+                  "Invalid security code: '%s'. Use '%s' or '%s|%s'.",
+                  displayToken,
+                  IdrConstants.SAMHSA_SECURITY_CODE,
+                  SystemUrls.SAMHSA_ACT_CODE_SYSTEM_URL,
+                  IdrConstants.SAMHSA_SECURITY_CODE));
+        }
+
+        if (hasNotModifier) {
+          excluded = true;
+        } else {
+          requested = true;
+        }
+      }
+    }
+
+    return resolveSamhsaSearchIntent(requested, excluded);
+  }
+
+  private static boolean isSamhsaActCode(TokenParam token) {
+    var code = token.getValue();
+    var system = token.getSystem();
+
+    return (IdrConstants.SAMHSA_SECURITY_CODE.equalsIgnoreCase(code)
+            && (system == null || system.isEmpty()))
+        || (SystemUrls.SAMHSA_ACT_CODE_SYSTEM_URL.equalsIgnoreCase(system)
+            && IdrConstants.SAMHSA_SECURITY_CODE.equalsIgnoreCase(code));
+  }
+
+  private static SamhsaSearchIntent resolveSamhsaSearchIntent(
+      boolean requestedSamhsa, boolean excludedSamhsa) {
+    if (requestedSamhsa && excludedSamhsa) {
+      throw new InvalidRequestException(
+          "Conflict in search filters: You have requested both to include and exclude the '42CFRPart2' (SAMHSA) security label. Please choose one to see results.");
+    }
+    if (requestedSamhsa) {
+      return SamhsaSearchIntent.ONLY_SAMHSA;
+    }
+    if (excludedSamhsa) {
+      return SamhsaSearchIntent.EXCLUDE_SAMHSA;
+    }
+
+    return SamhsaSearchIntent.UNSPECIFIED;
   }
 }

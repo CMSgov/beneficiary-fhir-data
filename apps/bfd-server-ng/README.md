@@ -115,6 +115,31 @@ mvn clean verify -DupdateSnapshot=
 Log messages from the server process will not be shown in the console output.
 To see detailed log info, look at the files created under `target/failsafe-reports/logs`.
 
+## mTLS and SAMHSA Authorization
+
+BFD utilizes mTLS for authentication, authorization (specifically for SAMHSA data), and transport security.
+
+### How it works
+1. **Infrastructure**: In V3, the Load Balancer does mTLS for us, passing the certificate body to the application via the `X-Amzn-Mtls-Clientcert` HTTP header.
+2. **Authentication**: The certificate is validated against our truststore.
+3. **Authorization**: The application hashes the certificate body and looks it up in the SSM hierarchy: `/bfd/<env>/server(-ng)/nonsensitive/client_certificates/*`.
+4. **SAMHSA Access**: If a match is found, the certificate's alias is checked against a SAMHSA-authorized alias list in SSM. If present, the request is authorized to retrieve SAMHSA data.
+
+### Development & Testing
+*   **Remote/Deployed v3 Servers**: Requests must include the client certificate (e.g., `curl --cert ...`) to pass the LB's mTLS handshake.
+*   **Local**: Local servers operate at the HTTP layer without active mTLS. To test SAMHSA logic locally:
+    *   The `local` profile uses `application-local.properties`.
+    *   A mock certificate with alias `samhsa_allowed` and body `samhsa_allowed` is pre-configured as authorized.
+    *   **Manual Testing**: Use `xh` or `curl` to manually set the header: `X-Amzn-Mtls-Clientcert: samhsa_allowed`.
+
+```bash
+xh \
+  'http://localhost:8080/v3/fhir/ExplanationOfBenefit' \
+  'X-Amzn-Mtls-Clientcert:samhsa_allowed' \
+  'patient==<bene>' \
+  'accept: application/fhir+json' | jq
+```
+
 ## Generating enum values
 
 We utilize enums frequently for representing discrete sets of values.
