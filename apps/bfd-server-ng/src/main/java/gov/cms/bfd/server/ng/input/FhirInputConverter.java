@@ -254,18 +254,18 @@ public class FhirInputConverter {
   }
 
   private static MetaSourceSk parseSourceToken(TokenParam token) {
-    var source = token.getValue().trim();
+    var source = token.getValue();
 
-    if (source.isEmpty()) {
+    if (source == null || source.trim().isEmpty()) {
       throw new InvalidRequestException("Source cannot be empty.");
     }
 
-    return MetaSourceSk.tryFromDisplay(source)
+    return MetaSourceSk.tryFromDisplay(source.trim())
         .orElseThrow(
             () ->
                 new InvalidRequestException(
                     "Unknown source: "
-                        + source
+                        + source.trim()
                         + ". Supported sources are: "
                         + Arrays.toString(MetaSourceSk.values())));
   }
