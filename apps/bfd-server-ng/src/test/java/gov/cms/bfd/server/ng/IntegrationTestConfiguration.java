@@ -24,7 +24,7 @@ public class IntegrationTestConfiguration {
   @Value("${project.basedir}")
   private String baseDir;
 
-  @Bean
+  @Bean("clock")
   Instant clock() {
     return Clock.fixed(Instant.parse("2026-02-09T00:00:00Z"), ZoneId.of("UTC"))
         .instant()

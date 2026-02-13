@@ -15,6 +15,11 @@ import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
+
 /** BFD Server startup class. */
 @ServletComponentScan(basePackageClasses = {RestfulServer.class})
 @SpringBootApplication(scanBasePackages = "gov.cms.bfd.server.ng")
@@ -75,5 +80,10 @@ public class Application {
     timedAspect.setMeterTagAnnotationHandler(
         new MeterTagAnnotationHandler(aClass -> valueResolver, aClass -> valueExpressionResolver));
     return timedAspect;
+  }
+
+  @Bean("clock")
+  public Instant clock() {
+    return Clock.systemUTC().instant().truncatedTo(ChronoUnit.DAYS);
   }
 }

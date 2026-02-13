@@ -6,6 +6,8 @@ import gov.cms.bfd.server.ng.input.CoveragePart;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.loadprogress.LoadProgressRepository;
 import gov.cms.bfd.server.ng.util.FhirUtil;
+
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -24,6 +26,7 @@ public class CoverageHandler {
 
   private final CoverageRepository coverageRepository;
   private final LoadProgressRepository loadProgressRepository;
+  private final Instant clock;
 
   /**
    * Reads a Coverage resource based on a composite ID ({part}-{bene_sk}).
@@ -38,7 +41,7 @@ public class CoverageHandler {
         coverageRepository.searchBeneficiaryWithCoverage(
             coverageCompositeId.beneSk(), new DateTimeRange());
 
-    return beneficiaryOpt.map(beneficiary -> beneficiary.toFhir(coverageCompositeId));
+    return beneficiaryOpt.map(beneficiary -> beneficiary.toFhir(coverageCompositeId, clock));
   }
 
   /**
@@ -56,7 +59,7 @@ public class CoverageHandler {
       return FhirUtil.defaultBundle(loadProgressRepository::lastUpdated);
     }
     var beneficiary = beneficiaryOpt.get();
-    var coverage = beneficiary.toFhirCoverageIfPresent(parsedCoverageId);
+    var coverage = beneficiary.toFhirCoverageIfPresent(parsedCoverageId, clock);
 
     return FhirUtil.bundleOrDefault(coverage.map(r -> r), loadProgressRepository::lastUpdated);
   }
@@ -83,7 +86,7 @@ public class CoverageHandler {
             .map(
                 c ->
                     beneficiary.toFhirCoverageIfPresent(
-                        new CoverageCompositeId(c, beneficiary.getBeneSk())))
+                        new CoverageCompositeId(c, beneficiary.getBeneSk()), clock))
             .flatMap(Optional::stream);
 
     return FhirUtil.bundleOrDefault(coverages.map(c -> c), loadProgressRepository::lastUpdated);
