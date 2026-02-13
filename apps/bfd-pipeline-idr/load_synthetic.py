@@ -47,9 +47,6 @@ tables = [
 
 def load_from_csv(conn: psycopg.Connection, src_folder: str) -> None:
     with conn.cursor() as cur:
-        # timestamps will be all over the place for synthetic data,
-        # so we need to make sure that the progress tracking doesn't mess with it.
-        cur.execute("DELETE FROM idr.load_progress")
         for table in tables:
             # Clear out any previous data
             sql_table = table["table"]

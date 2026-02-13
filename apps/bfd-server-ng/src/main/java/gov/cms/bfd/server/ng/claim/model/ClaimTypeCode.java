@@ -386,6 +386,34 @@ public enum ClaimTypeCode {
             .setCoverage(new Reference().setDisplay(partDisplay)));
   }
 
+  Optional<ExplanationOfBenefit.InsuranceComponent> toFhirInsuranceNearLineRecord(
+      ClaimNearLineRecordType claimRecordType) {
+    if (isClaimSubtype(ClaimSubtype.PDE)) {
+      return Optional.empty();
+    }
+
+    var partDisplay = claimRecordType.getPartDisplay().orElse("Part A");
+
+    return Optional.of(
+        new ExplanationOfBenefit.InsuranceComponent()
+            .setFocal(true)
+            .setCoverage(new Reference().setDisplay(partDisplay)));
+  }
+
+  Optional<ExplanationOfBenefit.InsuranceComponent> toFhirInsuranceInstitutional(
+      ClaimRecordTypeInstitutional claimRecordType) {
+    if (isClaimSubtype(ClaimSubtype.PDE)) {
+      return Optional.empty();
+    }
+
+    var partDisplay = claimRecordType.getPartDisplay().orElse("Part A");
+
+    return Optional.of(
+        new ExplanationOfBenefit.InsuranceComponent()
+            .setFocal(true)
+            .setCoverage(new Reference().setDisplay(partDisplay)));
+  }
+
   Optional<String> toDisplay() {
     return PART_B_CODES.contains(code) ? Optional.of("Part B") : Optional.empty();
   }

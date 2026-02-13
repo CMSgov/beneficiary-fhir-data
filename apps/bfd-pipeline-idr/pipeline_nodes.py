@@ -18,51 +18,96 @@ from model import (
     IdrBeneficiaryOvershareMbi,
     IdrBeneficiaryStatus,
     IdrBeneficiaryThirdParty,
-    IdrClaim,
-    IdrClaimAnsiSignature,
-    IdrClaimDateSignature,
-    IdrClaimFiss,
-    IdrClaimInstitutional,
-    IdrClaimItem,
-    IdrClaimLineInstitutional,
-    IdrClaimLineProfessional,
-    IdrClaimLineRx,
-    IdrClaimProfessional,
     IdrContractPbpContact,
     IdrContractPbpNumber,
     IdrProviderHistory,
     LoadMode,
     get_min_transaction_date,
 )
+from model2.idr_claim import IdrClaim
+from model2.idr_claim_ansi_signature import IdrClaimAnsiSignature
+from model2.idr_claim_date_signature import IdrClaimDateSignature
+from model2.idr_claim_fiss import IdrClaimFiss
+from model2.idr_claim_institutional import IdrClaimInstitutional
+from model2.idr_claim_institutional_nch import IdrClaimInstitutionalNch
+from model2.idr_claim_institutional_ss import IdrClaimInstitutionalSs
+from model2.idr_claim_item import IdrClaimItem
+from model2.idr_claim_item_institutional_nch import IdrClaimItemInstitutionalNch
+from model2.idr_claim_item_institutional_ss import IdrClaimItemInstitutionalSs
+from model2.idr_claim_item_professional_nch import IdrClaimItemProfessionalNch
+from model2.idr_claim_item_professional_ss import IdrClaimItemProfessionalSs
+from model2.idr_claim_line_institutional import IdrClaimLineInstitutional
+from model2.idr_claim_line_professional import IdrClaimLineProfessional
+from model2.idr_claim_line_rx import IdrClaimLineRx
+from model2.idr_claim_professional import IdrClaimProfessional
+from model2.idr_claim_professional_nch import IdrClaimProfessionalNch
+from model2.idr_claim_professional_ss import IdrClaimProfessionalSs
+from model2.idr_claim_rx import IdrClaimRx
 from pipeline_utils import extract_and_load
+from settings import TABLES_TO_LOAD
 
 type NodePartitionedModelInput = tuple[type[IdrBaseModel], LoadPartition | None]
 
-CLAIM_AUX_TABLES = [
-    IdrClaimInstitutional,
-    IdrClaimDateSignature,
-    IdrClaimFiss,
-    IdrClaimItem,
-    IdrClaimLineInstitutional,
-    IdrClaimAnsiSignature,
-    IdrClaimProfessional,
-    IdrClaimLineProfessional,
-    IdrClaimLineRx,
-    IdrProviderHistory,
-]
-BENE_AUX_TABLES = [
-    IdrBeneficiaryStatus,
-    IdrBeneficiaryThirdParty,
-    IdrBeneficiaryEntitlement,
-    IdrBeneficiaryEntitlementReason,
-    IdrBeneficiaryDualEligibility,
-    IdrBeneficiaryMbiId,
-    IdrContractPbpContact,
-    IdrContractPbpNumber,
-    IdrBeneficiaryMaPartDEnrollment,
-    IdrBeneficiaryMaPartDEnrollmentRx,
-    IdrBeneficiaryLowIncomeSubsidy,
-]
+
+def filter_tables(tables: list[type[IdrBaseModel]]) -> list[type[IdrBaseModel]]:
+    return [t for t in tables if TABLES_TO_LOAD == [] or t.table() in TABLES_TO_LOAD]
+
+
+def claim_tables() -> list[type[IdrBaseModel]]:
+    return filter_tables(
+        [
+            IdrClaim,
+            IdrClaimProfessionalNch,
+            IdrClaimInstitutionalNch,
+            IdrClaimProfessionalSs,
+            IdrClaimInstitutionalSs,
+        ]
+    )
+
+
+def claim_aux_tables() -> list[type[IdrBaseModel]]:
+    return filter_tables(
+        [
+            IdrClaimInstitutional,
+            IdrClaimDateSignature,
+            IdrClaimFiss,
+            IdrClaimItem,
+            IdrClaimLineInstitutional,
+            IdrClaimAnsiSignature,
+            IdrClaimProfessional,
+            IdrClaimLineProfessional,
+            IdrClaimLineRx,
+            IdrProviderHistory,
+            # RX/Part D is special because we combine claim + claim line
+            IdrClaimRx,
+            IdrClaimItemProfessionalNch,
+            IdrClaimItemInstitutionalNch,
+            IdrClaimItemProfessionalSs,
+            IdrClaimItemInstitutionalSs,
+        ]
+    )
+
+
+def bene_aux_tables() -> list[type[IdrBaseModel]]:
+    return filter_tables(
+        [
+            IdrBeneficiaryStatus,
+            IdrBeneficiaryThirdParty,
+            IdrBeneficiaryEntitlement,
+            IdrBeneficiaryEntitlementReason,
+            IdrBeneficiaryDualEligibility,
+            IdrBeneficiaryMbiId,
+            IdrContractPbpContact,
+            IdrContractPbpNumber,
+            IdrBeneficiaryMaPartDEnrollment,
+            IdrBeneficiaryMaPartDEnrollmentRx,
+            IdrBeneficiaryLowIncomeSubsidy,
+        ]
+    )
+
+
+def bene_tables() -> list[type[IdrBaseModel]]:
+    return filter_tables([IdrBeneficiary])
 
 
 def _gen_partitioned_node_inputs(
@@ -108,10 +153,12 @@ def stage1(load_mode: LoadMode, start_time: datetime, load_type: LoadType) -> bo
 def stage2_inputs(load_type: LoadType, stage1: bool) -> Parallelizable[NodePartitionedModelInput]:  # noqa: ARG001
     if load_type == LoadType.INITIAL:
         yield from _gen_partitioned_node_inputs(
-            [*CLAIM_AUX_TABLES, *BENE_AUX_TABLES, IdrClaim, IdrBeneficiary], load_type
+            [*claim_aux_tables(), *bene_aux_tables(), *claim_tables(), *bene_tables()], load_type
         )
     else:
-        yield from _gen_partitioned_node_inputs([*CLAIM_AUX_TABLES, *BENE_AUX_TABLES], load_type)
+        yield from _gen_partitioned_node_inputs(
+            [*claim_aux_tables(), *bene_aux_tables()], load_type
+        )
 
 
 # NOTE: it would be good to use @parameterize here, but the multiprocessing executor doesn't handle
@@ -146,7 +193,7 @@ def stage3_inputs(
     collect_stage2: bool,  # noqa: ARG001
 ) -> Parallelizable[NodePartitionedModelInput]:
     if load_type == LoadType.INCREMENTAL:
-        yield from _gen_partitioned_node_inputs([IdrClaim], load_type)
+        yield from _gen_partitioned_node_inputs(claim_tables(), load_type)
     else:
         yield from _gen_partitioned_node_inputs([], load_type)
 
