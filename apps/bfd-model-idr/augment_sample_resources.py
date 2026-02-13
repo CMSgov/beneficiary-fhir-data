@@ -233,45 +233,40 @@ class Diagnosis:
 diagnosis_codes = [
     Diagnosis(
         CLM_DGNS_CD=x.get("CLM_DGNS_CD"),
+        CLM_PROD_TYPE_CD=x.get("CLM_PROD_TYPE_CD"),
         CLM_POA_IND=x.get("CLM_POA_IND"),
         CLM_DGNS_PRCDR_ICD_IND=x.get("CLM_DGNS_PRCDR_ICD_IND"),
         ROW_NUM=x.get("CLM_VAL_SQNC_NUM"),
     )
     for x in cur_sample_data.get("diagnoses", [])
-    if x.get("CLM_PROD_TYPE_CD") == "D"
+    if x.get("CLM_PROD_TYPE_CD") in ["D", "P", "A", "R", "E"]
 ]
 
-# of note, 1 and E appear to always be the same, so we only care about the E code.
-clm_prod_type_cds = ["P", "A", "R", "E"]
-# this loop ensures that 'rogue' (eg principal not present in main list) diagnoses are not missed.
-for clm_prod_type_cd in clm_prod_type_cds:
-    code = [
-        x.get("CLM_DGNS_CD")
-        for x in cur_sample_data.get("diagnoses", [])
-        if x.get("CLM_PROD_TYPE_CD") == clm_prod_type_cd
-    ]
-    if code and code[0] not in [x.CLM_DGNS_CD for x in diagnosis_codes]:
-        diagnosis = Diagnosis(
-            CLM_DGNS_CD=code,
-            CLM_PROD_TYPE_CD=clm_prod_type_cd,
-            CLM_DGNS_PRCDR_ICD_IND=diagnosis_codes[0].CLM_DGNS_PRCDR_ICD_IND,
-            ROW_NUM=str(len(diagnosis_codes) + 1),
-        )
-        diagnosis_codes.append(diagnosis)
+# Sort diagnoses keys
+type_priority = {"P": 1, "A": 2, "R": 3, "E": 4}
 
-for diagnosis_code in diagnosis_codes:
-    for clm_prod_type_cd in clm_prod_type_cds:
-        cur_code = [
-            x.get("CLM_DGNS_CD")
-            for x in cur_sample_data.get("diagnoses", [])
-            if x.get("CLM_PROD_TYPE_CD") == clm_prod_type_cd
-        ]
-        if cur_code and cur_code[0] == diagnosis_code.CLM_DGNS_CD:
-            diagnosis_code.clm_prod_type_cd_map.append(clm_prod_type_cd)
-    if len(diagnosis_code.clm_prod_type_cd_map) == 0:
-        diagnosis_code.clm_prod_type_cd_map.append("D")
+# We need to preserve the list but sort it
+diagnosis_codes.sort(key=lambda d: type_priority.get(d.CLM_PROD_TYPE_CD, 99))
+
+# Assign sequential ROW_NUM
+for idx, diag in enumerate(diagnosis_codes, start=1):
+    diag.ROW_NUM = str(idx)
 
 cur_sample_data["diagnoses"] = [asdict(d) for d in diagnosis_codes]
+
+# add diagnosisSequence where necessary
+for item in cur_sample_data.get("lineItemComponents", []):
+    if "CLM_LINE_DGNS_CD" in item:
+        line_dgns_cd = item.get("CLM_LINE_DGNS_CD")
+        if match := next(
+            (
+                d
+                for d in diagnosis_codes
+                if line_dgns_cd == d.CLM_DGNS_CD and d.CLM_PROD_TYPE_CD == "D"
+            ),
+            None,
+        ):
+            item["diagnosisSequence"] = [int(match.ROW_NUM)]
 
 filename = "out/temporary-sample.json"
 
