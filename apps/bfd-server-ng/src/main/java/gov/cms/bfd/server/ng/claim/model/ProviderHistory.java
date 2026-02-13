@@ -106,14 +106,13 @@ public class ProviderHistory {
 
   Practitioner toFhirPractitioner() {
     var practitioner =
-        ProviderFhirHelper.createPractitioner(
-            PROVIDER_PRACTITIONER, providerNpiNumber, toFhirName());
+        ProviderFhirHelper.createPractitioner(providerNpiNumber, providerNpiNumber, toFhirName());
     practitioner.getName().forEach(n -> n.setUse(HumanName.NameUse.OFFICIAL));
     return practitioner;
   }
 
   Organization toFhirOrganization() {
     return ProviderFhirHelper.createOrganizationWithNpi(
-        PROVIDER_ORG, providerNpiNumber, providerLegalName);
+        providerNpiNumber, providerNpiNumber, providerLegalName);
   }
 }

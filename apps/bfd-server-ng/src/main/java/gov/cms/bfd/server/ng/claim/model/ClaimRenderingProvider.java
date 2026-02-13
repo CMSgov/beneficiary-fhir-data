@@ -28,7 +28,7 @@ public class ClaimRenderingProvider {
     var renderingProvider = renderingProviderOpt.get();
     var practitioner =
         ProviderFhirHelper.createPractitioner(
-            "careteam-provider-line-" + claimLineNum.get(),
+            renderingProvider.getProviderNpiNumber(),
             renderingProvider.getProviderNpiNumber(),
             renderingProvider.toFhirName());
 
@@ -61,7 +61,7 @@ public class ClaimRenderingProvider {
                         .setSystem(SystemUrls.CARIN_CODE_SYSTEM_CLAIM_CARE_TEAM_ROLE)
                         .setCode(CareTeamType.RENDERING.getRoleCode())
                         .setDisplay(CareTeamType.RENDERING.getRoleDisplay())))
-            .setProvider(new Reference("#careteam-provider-line-" + claimLineNum.get()));
+            .setProvider(new Reference(practitioner));
 
     return Optional.of(new CareTeamType.CareTeamComponents(practitioner, component));
   }

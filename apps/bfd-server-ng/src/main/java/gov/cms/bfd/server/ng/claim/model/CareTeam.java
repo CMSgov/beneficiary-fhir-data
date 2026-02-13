@@ -10,25 +10,25 @@ import org.hl7.fhir.r4.model.HumanName;
 
 @Embeddable
 class CareTeam {
-  @Column(name = "clm_atndg_prvdr_npi_num")
+  @Column(name = "prvdr_atndg_prvdr_npi_num")
   private Optional<String> attendingProviderNpiNumber;
 
   @Column(name = "clm_atndg_prvdr_last_name")
   private Optional<String> attendingProviderLastName;
 
-  @Column(name = "clm_oprtg_prvdr_npi_num")
+  @Column(name = "prvdr_oprtg_prvdr_npi_num")
   private Optional<String> operatingProviderNpiNumber;
 
   @Column(name = "clm_oprtg_prvdr_last_name")
   private Optional<String> operatingProviderLastName;
 
-  @Column(name = "clm_othr_prvdr_npi_num")
+  @Column(name = "prvdr_othr_prvdr_npi_num")
   private Optional<String> otherProviderNpiNumber;
 
   @Column(name = "clm_othr_prvdr_last_name")
   private Optional<String> otherProviderLastName;
 
-  @Column(name = "clm_rndrg_prvdr_npi_num")
+  @Column(name = "prvdr_rndrng_prvdr_npi_num")
   private Optional<String> renderingProviderNpiNumber;
 
   @Column(name = "clm_rndrg_prvdr_last_name")
