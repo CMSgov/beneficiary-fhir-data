@@ -1042,6 +1042,7 @@
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_LINE_SRVC_UNIT_QTY
   fhirPath: ExplanationOfBenefit.item.quantity.value
+  notes: For processing claims, this field is the unit quantity for a line item value. Eg for 54 minutes of anesthesia in a processing claim, this field will contain a value of 5.4, whereas in a claim from the National Claims History, the anesthesia units may appear in CLM_LINE_PRFNL_MTUS_CNT.
 - inputPath: LineItemComponent.CLM_LINE_REV_CTR_CD
   appliesTo:
     - Inpatient
@@ -2292,6 +2293,7 @@
   sourceView: V2_MDCR_CLM_INSTNL
   sourceColumn: CLM_MDCR_INSTNL_BENE_PD_AMT
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_BENE_PD_AMT').exists()).amount.value
+  notes: The processing-equivalent field is CLM_BENE_PD_AMT for institutional claims.
 - inputPath: ExplanationOfBenefit-Base.CLM_PRVDR_PMT_AMT
   appliesTo:
     - Outpatient
@@ -2386,6 +2388,7 @@
   sourceColumn: CLM_REV_CNTR_STUS_CD
   referenceTable: CLM_REV_CNTR_STUS_CD
   fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-CNTR-STUS-CD').value.code
+  notes: A condensed version of the data available in this field is available for both processed and processing claims in CLM_REV_PMT_MTHD_CD. 
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_MDCR_HOSPC_PRD_CNT
   appliesTo:
     - Hospice
@@ -2514,6 +2517,7 @@
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_BENE_PD_AMT
   fhirPath: ExplanationOfBenefit.total.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication').exists() and category.coding.where(code='CLM_BENE_PD_AMT').exists() ).amount.value
+  notes: This refers to the processed field. This field may be populated for institutional processing claims, as it is the equivalent of CLM_MDCR_INSTNL_BENE_PD_AMT
 - inputPath: ExplanationOfBenefit-Base.CLM_RIC_CD
   appliesTo:
     - Inpatient
@@ -2818,6 +2822,7 @@
   sourceView: V2_MDCR_CLM_LINE_PRFNL
   sourceColumn: CLM_LINE_PRFNL_MTUS_CNT
   fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-LINE-PRFNL-MTUS-CNT').value
+  notes: For processing claims, this is not populated. Refer to CLM_LINE.CLM_LINE_SRVC_UNIT_QTY for the line item service unit quantity.
 - inputPath: LineItemComponent.CLM_PRCNG_LCLTY_CD
   appliesTo:
     - Carrier
@@ -3033,6 +3038,7 @@
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_BLOOD_CHRG_AMT
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_BLOOD_CHRG_AMT')).amount.value
+  notes: This field is not populated as a discrete field in processing institutional claims. To calculate the total blood charge amount, sum the submitted charge amounts line items with revenue center codes 038X.
 - inputPath: ExplanationOfBenefit-Base.CLM_BLOOD_NCVRD_CHRG_AMT
   appliesTo:
     - Inpatient
@@ -3042,6 +3048,7 @@
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_BLOOD_NCVRD_CHRG_AMT
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_BLOOD_NCVRD_CHRG_AMT')).amount.value
+  notes: This field is not populated as a discrete field in processing institutional claims. To calculate the noncovered blood charge amount, sum the noncovered charge amounts line items with revenue center codes 038X.
 - inputPath: ExplanationOfBenefit-Base.CLM_COB_PTNT_RESP_AMT
   appliesTo:
     - Inpatient

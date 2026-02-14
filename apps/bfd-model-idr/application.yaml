@@ -1,0 +1,30 @@
+server:
+  servlet:
+    context-path: /matchboxv3
+spring:
+  datasource:
+    url: 'jdbc:postgresql://matchbox-db:5432/matchbox'
+    username: matchbox
+    password: matchbox
+    driverClassName: org.postgresql.Driver
+
+    # database connection pool size
+    hikari:
+      maximum-pool-size: 10
+  jpa:
+    properties:
+      hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
+matchbox:
+  fhir:
+    context:
+      displayIssuesAreWarnings: false
+      txServer: http://localhost:8080/matchboxv3/tx
+      onlyOneEngine: true
+      igsPreloaded: hl7.fhir.us.carin-bb#2.1.0
+hapi:
+  fhir:
+    implementationguides:
+      carin:
+        name: hl7.fhir.us.carin-bb
+        version: 2.1.0
+

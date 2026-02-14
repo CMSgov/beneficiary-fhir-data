@@ -18,7 +18,7 @@ uses "http://hl7.org/fhir/StructureDefinition/ExplanationOfBenefit" alias BFDEOB
 
 imports "https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper" 
 imports "https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-SupportingInfo-Helper" 
-imports "https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Item-Institutional-Helper" 
+imports "https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Item-Helper" 
 
 group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
     
@@ -522,8 +522,8 @@ group addInstitutionalAdjudicationElements(source src: ExplanationOfBenefitBase,
 group addDiagnoses(source src: DiagnosisComponent, target tgt: BackboneElement){
   src.ROW_NUM as rowNum -> tgt.sequence = rowNum "set sequence number";
   src -> tgt.type = create('CodeableConcept') as tgtCC then{
-    src.clm_prod_type_cd_map as typeCode where (typeCode = "A" or typeCode = "P") -> tgtCC.coding = translate(typeCode,'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#HL7_DIAGTYPE','coding') "Add coding";
-    src.clm_prod_type_cd_map as typeCode where (typeCode = "1" or typeCode = "D" or typeCode = "E" or typeCode = "R") -> tgtCC.coding = translate(typeCode,'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#C4BB_DIAGTYPE','coding') "set coding";
+    src.CLM_PROD_TYPE_CD as typeCode where (typeCode = "A" or typeCode = "P") -> tgtCC.coding = translate(typeCode,'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#HL7_DIAGTYPE','coding') "Add coding";
+    src.CLM_PROD_TYPE_CD as typeCode where (typeCode = "1" or typeCode = "D" or typeCode = "E" or typeCode = "R") -> tgtCC.coding = translate(typeCode,'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#C4BB_DIAGTYPE','coding') "set coding";
   } "Add types";
   src.CLM_POA_IND as poaInd where (poaInd != ' ' and poaInd != '~' ) -> tgt.onAdmission = create('CodeableConcept') as tgtPOA,
     tgtPOA.coding = create('Coding') as tgtCoding,
@@ -541,8 +541,8 @@ group addDiagnoses(source src: DiagnosisComponent, target tgt: BackboneElement){
 group addDiagnosesProfessional(source src: DiagnosisComponent, target tgt: BackboneElement){
   src.ROW_NUM as rowNum -> tgt.sequence = rowNum "set sequence number";
   src -> tgt.type = create('CodeableConcept') as tgtCC then{
-    src.clm_prod_type_cd_map as typeCode where (typeCode = "A" or typeCode = "P") -> tgtCC.coding = translate(typeCode,'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#HL7_DIAGTYPE','coding') "Add coding";
-    src.clm_prod_type_cd_map as typeCode where (typeCode = "1" or typeCode = "D" or typeCode = "E" or typeCode = "R") -> tgtCC.coding = translate(typeCode,'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#C4BB_DIAGTYPE_PROF','coding') "set coding";
+    src.CLM_PROD_TYPE_CD as typeCode where (typeCode = "A" or typeCode = "P") -> tgtCC.coding = translate(typeCode,'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#HL7_DIAGTYPE','coding') "Add coding";
+    src.CLM_PROD_TYPE_CD as typeCode where (typeCode = "1" or typeCode = "D" or typeCode = "E" or typeCode = "R") -> tgtCC.coding = translate(typeCode,'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#C4BB_DIAGTYPE_PROF','coding') "set coding";
   } "Add types";
   src -> tgt.diagnosis = create('CodeableConcept') as tgtDiagnosis then {
     src -> tgtDiagnosis.coding = create('Coding') as tgtCoding then {
