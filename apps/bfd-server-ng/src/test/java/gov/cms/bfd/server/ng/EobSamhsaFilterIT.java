@@ -6,10 +6,13 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.SearchStyleEnum;
 import ca.uhn.fhir.rest.client.interceptor.AdditionalRequestHeadersInterceptor;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.IReadTyped;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.bfd.server.ng.eob.EobHandler;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
@@ -535,5 +538,156 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
     SAMHSA_NOT_ALLOWED_CERT("samhsa_not_allowed");
 
     private final String certValue;
+  }
+
+  static Stream<Arguments> provideSecurityScenarios() {
+    return Stream.of(SearchStyleEnum.values())
+        .flatMap(
+            style ->
+                Stream.of(
+                    Arguments.of(
+                        "NoCert_SamhsaRequested_NoSamhsa",
+                        List.of(List.of(securityClause(SecurityModifier.NONE, samhsaCodeOnly()))),
+                        SamhsaCertType.NO_CERT,
+                        3,
+                        style),
+                    Arguments.of(
+                        "NotAllowedCert_SamhsaRequested_NoSamhsa",
+                        List.of(
+                            List.of(securityClause(SecurityModifier.NONE, samhsaCodeAndSystem()))),
+                        SamhsaCertType.SAMHSA_NOT_ALLOWED_CERT,
+                        3,
+                        style),
+                    Arguments.of(
+                        "AllowedCert_SamhsaCodeRequested_OnlySamhsa",
+                        List.of(List.of(securityClause(SecurityModifier.NONE, samhsaCodeOnly()))),
+                        SamhsaCertType.SAMHSA_ALLOWED_CERT,
+                        1,
+                        style),
+                    Arguments.of(
+                        "AllowedCert_SamhsaCodeAndSystemRequested_OnlySamhsa",
+                        List.of(
+                            List.of(securityClause(SecurityModifier.NONE, samhsaCodeAndSystem()))),
+                        SamhsaCertType.SAMHSA_ALLOWED_CERT,
+                        1,
+                        style),
+                    Arguments.of(
+                        "AllowedCert_InvalidCodeRequest_NoClaims",
+                        List.of(
+                            List.of(securityClause(SecurityModifier.NONE, invalidSamhsaCode()))),
+                        SamhsaCertType.SAMHSA_ALLOWED_CERT,
+                        0,
+                        style),
+                    Arguments.of(
+                        "AllowedCert_SamhsaAndNonSamhsa_NoClaims",
+                        List.of(
+                            List.of(securityClause(SecurityModifier.NONE, samhsaCodeOnly())),
+                            List.of(securityClause(SecurityModifier.NOT, samhsaCodeAndSystem()))),
+                        SamhsaCertType.SAMHSA_ALLOWED_CERT,
+                        0,
+                        style),
+                    Arguments.of(
+                        "AllowedCert_SamhsaOrNonSamhsa_AllClaims",
+                        List.of(
+                            List.of(
+                                securityClause(SecurityModifier.NOT, samhsaCodeAndSystem()),
+                                securityClause(SecurityModifier.NONE, samhsaCodeAndSystem()))),
+                        SamhsaCertType.SAMHSA_ALLOWED_CERT,
+                        3,
+                        style),
+                    Arguments.of(
+                        "AllowedCert_ExcludedSamhsaCodeRequested_NoSamhsa",
+                        List.of(List.of(securityClause(SecurityModifier.NOT, samhsaCodeOnly()))),
+                        SamhsaCertType.SAMHSA_ALLOWED_CERT,
+                        3,
+                        style),
+                    Arguments.of(
+                        "AllowedCert_ExcludedSamhsaCodeAndSystemRequested_NoSamhsa",
+                        List.of(
+                            List.of(securityClause(SecurityModifier.NOT, samhsaCodeAndSystem()))),
+                        SamhsaCertType.SAMHSA_ALLOWED_CERT,
+                        3,
+                        style),
+                    Arguments.of(
+                        "AllowedCert_ExcludedSamhsaCodeRequested_InvalidCode_NoClaims",
+                        List.of(List.of(securityClause(SecurityModifier.NOT, invalidSamhsaCode()))),
+                        SamhsaCertType.SAMHSA_ALLOWED_CERT,
+                        0,
+                        style)));
+  }
+
+  @MethodSource({"provideSecurityScenarios"})
+  @ParameterizedTest
+  void eobSearchBySecurity(
+      String scenarioName,
+      List<List<SecurityClause>> securityScenarios,
+      SamhsaCertType certType,
+      int expectedCount,
+      SearchStyleEnum searchStyle) {
+    var query = searchBundle(BENE_SK, certType);
+    var paramName = new StringBuilder(Constants.PARAM_SECURITY);
+
+    for (var securityScenario : securityScenarios) {
+      if (securityScenario.getFirst().modifier() == SecurityModifier.NOT) {
+        paramName.append(":not");
+      }
+      if (securityScenario.size() == 1) {
+        var clause = securityScenario.getFirst();
+        var coding = clause.coding();
+
+        query.and(
+            new TokenClientParam(paramName.toString())
+                .exactly()
+                .systemAndCode(coding.getSystem(), coding.getCode()));
+      } else {
+        var joinedOrValues = securityScenario.stream().map(SecurityClause::coding).toList();
+        query.and(
+            new TokenClientParam(paramName.toString())
+                .exactly()
+                .codings(joinedOrValues.toArray(new Coding[0])));
+      }
+    }
+
+    if (scenarioName.contains("InvalidCode") || scenarioName.contains("SamhsaAndNonSamhsa")) {
+      assertThrows(
+          InvalidRequestException.class,
+          query.usingStyle(searchStyle)::execute,
+          "Should throw InvalidRequestException: " + scenarioName);
+    } else {
+      var eobBundle = query.usingStyle(searchStyle).execute();
+      expectFhir().scenario(searchStyle.name() + "_" + scenarioName).toMatchSnapshot(eobBundle);
+
+      assertEquals(
+          expectedCount,
+          eobBundle.getEntry().size(),
+          "Should find " + expectedCount + " EOBs for scenario " + scenarioName);
+    }
+  }
+
+  private static Coding security(String system, String code) {
+    return new Coding(system, code, null);
+  }
+
+  private static Coding samhsaCodeOnly() {
+    return security(null, IdrConstants.SAMHSA_SECURITY_CODE);
+  }
+
+  private static Coding samhsaCodeAndSystem() {
+    return security(SystemUrls.SAMHSA_ACT_CODE_SYSTEM_URL, IdrConstants.SAMHSA_SECURITY_CODE);
+  }
+
+  private static Coding invalidSamhsaCode() {
+    return security(SystemUrls.SAMHSA_ACT_CODE_SYSTEM_URL, "42CFR");
+  }
+
+  private enum SecurityModifier {
+    NONE,
+    NOT
+  }
+
+  private record SecurityClause(SecurityModifier modifier, Coding coding) {}
+
+  private static SecurityClause securityClause(SecurityModifier modifier, Coding coding) {
+    return new SecurityClause(modifier, coding);
   }
 }

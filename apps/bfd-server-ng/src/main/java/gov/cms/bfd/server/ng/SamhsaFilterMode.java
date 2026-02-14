@@ -5,5 +5,7 @@ public enum SamhsaFilterMode {
   /** Include SAMHSA. */
   INCLUDE,
   /** Exclude SAMHSA. */
-  EXCLUDE
+  EXCLUDE,
+  /** Only SAMHSA. */
+  ONLY_SAMHSA
 }
