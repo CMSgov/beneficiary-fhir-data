@@ -7,7 +7,5 @@ public enum SamhsaFilterMode {
   /** Exclude SAMHSA. */
   EXCLUDE,
   /** Only SAMHSA. */
-  ONLY_SAMHSA,
-  /** Exclude all claims. */
-  RETURN_NONE
+  ONLY_SAMHSA
 }

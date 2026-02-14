@@ -121,7 +121,6 @@ public class EobHandler {
       case INCLUDE -> claimStream;
       case ONLY_SAMHSA -> claimStream.filter(this::claimHasSamhsa);
       case EXCLUDE -> claimStream.filter(claim -> !claimHasSamhsa(claim));
-      case RETURN_NONE -> Stream.empty();
     };
   }
 

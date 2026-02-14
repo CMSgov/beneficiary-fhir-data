@@ -2,13 +2,13 @@ package gov.cms.bfd.server.ng.input;
 
 import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import com.google.common.base.Strings;
 import gov.cms.bfd.server.ng.claim.model.ClaimFinalAction;
 import gov.cms.bfd.server.ng.claim.model.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.ClaimTypeCode;
 import gov.cms.bfd.server.ng.claim.model.SamhsaSearchIntent;
 import gov.cms.bfd.server.ng.util.IdrConstants;
 import gov.cms.bfd.server.ng.util.SystemUrls;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -155,7 +155,7 @@ public class FhirInputConverter {
   }
 
   /**
-   * Parses the tag query parameter into a list of list of criteria.
+   * Parses the tag query parameter into a nested list of criteria.
    *
    * <p>Outer list is AND conditions, inner list is OR conditions.
    *
@@ -163,24 +163,7 @@ public class FhirInputConverter {
    * @return list of tag criteria
    */
   public static List<List<TagCriterion>> parseTagParameter(@Nullable TokenAndListParam tagParam) {
-    if (tagParam == null || tagParam.getValuesAsQueryTokens().isEmpty()) {
-      return Collections.emptyList();
-    }
-
-    return tagParam.getValuesAsQueryTokens().stream()
-        .map(FhirInputConverter::parseTagQueryToken)
-        .filter(list -> !list.isEmpty())
-        .toList();
-  }
-
-  private static List<TagCriterion> parseTagQueryToken(TokenOrListParam tokenOrListParam) {
-    if (tokenOrListParam == null || tokenOrListParam.getValuesAsQueryTokens().isEmpty()) {
-      return Collections.emptyList();
-    }
-
-    return tokenOrListParam.getValuesAsQueryTokens().stream()
-        .flatMap(token -> FhirInputConverter.parseTagToken(token).stream())
-        .toList();
+    return FhirTokenParameterParser.parse(tagParam, FhirInputConverter::parseTagToken);
   }
 
   private static List<TagCriterion> parseTagToken(TokenParam token) {
@@ -236,17 +219,7 @@ public class FhirInputConverter {
   public static List<ClaimTypeCode> getClaimTypeCodesForType(
       @Nullable TokenAndListParam typeParam) {
 
-    if (typeParam == null || typeParam.getValuesAsQueryTokens().isEmpty()) {
-      return Collections.emptyList();
-    }
-    var typeParams = typeParam.getValuesAsQueryTokens();
-
-    return typeParams.stream()
-        .flatMap(
-            param ->
-                param.getValuesAsQueryTokens() == null
-                    ? Stream.empty()
-                    : param.getValuesAsQueryTokens().stream())
+    return FhirTokenParameterParser.flatten(typeParam)
         .map(token -> token.getValue().trim().toLowerCase())
         .flatMap(normalizedType -> ClaimTypeCode.getClaimTypeCodesByType(normalizedType).stream())
         .toList();
@@ -262,21 +235,22 @@ public class FhirInputConverter {
    */
   public static SamhsaSearchIntent parseSecurityParameter(
       @Nullable TokenAndListParam securityParam) {
-    if (securityParam == null || securityParam.getValuesAsQueryTokens().isEmpty()) {
+
+    var tokens = FhirTokenParameterParser.flatten(securityParam).toList();
+
+    if (tokens.isEmpty()) {
       return SamhsaSearchIntent.UNSPECIFIED;
     }
     var requested = false;
     var excluded = false;
 
-    for (var orList : securityParam.getValuesAsQueryTokens()) {
-      for (var token : orList.getValuesAsQueryTokens()) {
-        validateSamhsaToken(token);
-        var hasNotModifier = TokenParamModifier.NOT == token.getModifier();
-        if (hasNotModifier) {
-          excluded = true;
-        } else {
-          requested = true;
-        }
+    for (var token : tokens) {
+      validateSamhsaToken(token);
+      var hasNotModifier = TokenParamModifier.NOT == token.getModifier();
+      if (hasNotModifier) {
+        excluded = true;
+      } else {
+        requested = true;
       }
     }
 
@@ -287,12 +261,9 @@ public class FhirInputConverter {
     if (isSamhsaActCode(token)) {
       return;
     }
-    var displayToken =
-        (token.getSystem() != null) ? token.getSystem() + "|" + token.getValue() : token.getValue();
     throw new InvalidRequestException(
         String.format(
-            "Invalid security code: '%s'. Use '%s' or '%s|%s'.",
-            displayToken,
+            "Invalid security code: Use '%s' or '%s|%s'.",
             IdrConstants.SAMHSA_SECURITY_CODE,
             SystemUrls.SAMHSA_ACT_CODE_SYSTEM_URL,
             IdrConstants.SAMHSA_SECURITY_CODE));
@@ -303,7 +274,7 @@ public class FhirInputConverter {
     var system = token.getSystem();
 
     return (IdrConstants.SAMHSA_SECURITY_CODE.equalsIgnoreCase(code)
-            && (system == null || system.isEmpty()))
+            && (Strings.isNullOrEmpty(system)))
         || (SystemUrls.SAMHSA_ACT_CODE_SYSTEM_URL.equalsIgnoreCase(system)
             && IdrConstants.SAMHSA_SECURITY_CODE.equalsIgnoreCase(code));
   }
