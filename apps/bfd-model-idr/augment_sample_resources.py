@@ -83,9 +83,7 @@ for column in header_columns:
     prvdr_hstry_for_npi = json.loads(
         df[df["PRVDR_SK"] == str(provider_object.get("PRVDR_SK"))].iloc[0].to_json()
     )
-    provider_object["NPI_TYPE"] = (
-        "2" if prvdr_hstry_for_npi.get("PRVDR_LGL_NAME") else "1"
-    )
+    provider_object["NPI_TYPE"] = "2" if prvdr_hstry_for_npi.get("PRVDR_LGL_NAME") else "1"
 
     provider_object.update(
         {
@@ -97,9 +95,7 @@ for column in header_columns:
 
     if prvdr_hstry_for_npi.get("PRVDR_TXNMY_CMPST_CD"):
         taxonomy_val = prvdr_hstry_for_npi.get("PRVDR_TXNMY_CMPST_CD")
-        taxonomy_codes = [
-            taxonomy_val[i : i + 10] for i in range(len(taxonomy_val), 10)
-        ]
+        taxonomy_codes = [taxonomy_val[i : i + 10] for i in range(len(taxonomy_val), 10)]
         provider_object["taxonomyCodes"] = taxonomy_codes
 
     # assign care team type + sequence for header-level info
@@ -116,20 +112,13 @@ for column in header_columns:
             # we need to ensure those NPIs match.
             if column in item and item.get(column) == cur_sample_data.get(column):
                 if item.get("careTeamSequences"):
-                    item["careTeamSequence"].append(
-                        provider_object.get("careTeamSequenceNumber")
-                    )
+                    item["careTeamSequence"].append(provider_object.get("careTeamSequenceNumber"))
                 else:
-                    item["careTeamSequence"] = [
-                        provider_object.get("careTeamSequenceNumber")
-                    ]
+                    item["careTeamSequence"] = [provider_object.get("careTeamSequenceNumber")]
 
     # We may want to remove this in the future, depending on requirements
     # regarding address info.
-    if (
-        column == "PRVDR_BLG_PRVDR_NPI_NUM"
-        and "CLM_BLG_PRVDR_ZIP5_CD" in cur_sample_data
-    ):
+    if column == "PRVDR_BLG_PRVDR_NPI_NUM" and "CLM_BLG_PRVDR_ZIP5_CD" in cur_sample_data:
         provider_object["prvdr_zip"] = cur_sample_data.get("CLM_BLG_PRVDR_ZIP5_CD")
 
     provider_list.append(provider_object)
@@ -159,13 +148,9 @@ for item in line_items:
             npis_used.append(provider_object.get("PRVDR_SK"))
 
             prvdr_hstry_for_npi = json.loads(
-                df[df["PRVDR_SK"] == str(provider_object.get("PRVDR_SK"))]
-                .iloc[0]
-                .to_json()
+                df[df["PRVDR_SK"] == str(provider_object.get("PRVDR_SK"))].iloc[0].to_json()
             )
-            provider_object["NPI_TYPE"] = (
-                "2" if prvdr_hstry_for_npi.get("PRVDR_LGL_NAME") else "1"
-            )
+            provider_object["NPI_TYPE"] = "2" if prvdr_hstry_for_npi.get("PRVDR_LGL_NAME") else "1"
             provider_object.update(
                 {
                     fld: prvdr_hstry_for_npi[fld]
@@ -176,9 +161,7 @@ for item in line_items:
 
             if prvdr_hstry_for_npi.get("PRVDR_TXNMY_CMPST_CD"):
                 taxonomy_val = prvdr_hstry_for_npi.get("PRVDR_TXNMY_CMPST_CD")
-                taxonomy_codes = [
-                    taxonomy_val[i : i + 10] for i in range(len(taxonomy_val), 10)
-                ]
+                taxonomy_codes = [taxonomy_val[i : i + 10] for i in range(len(taxonomy_val), 10)]
                 provider_object["taxonomyCodes"] = taxonomy_codes
 
             if len(line_columns.get(line_col)) > 0:
@@ -190,9 +173,7 @@ for item in line_items:
             provider_list.append(provider_object)
 
         elif (
-            line_col in item
-            and "careTeamSequence" not in item
-            and item.get(line_col) in npis_used
+            line_col in item and "careTeamSequence" not in item and item.get(line_col) in npis_used
         ):
             npi = item.get(line_col)
 
@@ -253,6 +234,52 @@ for idx, diag in enumerate(diagnosis_codes, start=1):
     diag.ROW_NUM = str(idx)
 
 cur_sample_data["diagnoses"] = [asdict(d) for d in diagnosis_codes]
+
+
+# Resolve claim status code section
+def meta_src_prefix(meta_src_sk: str | None) -> str:
+    return {
+        "1002": "V",
+        "1001": "M",
+        "1003": "F",
+    }.get(str(meta_src_sk), "")
+
+
+def build_claim_audit_trail_composite(sample: dict) -> str:
+    meta_src_sk = str(sample.get("META_SRC_SK", ""))
+    status = sample.get("CLM_AUDT_TRL_STUS_CD")
+
+    if not status:
+        return None
+
+    prefix = meta_src_prefix(meta_src_sk)
+
+    # VMS
+    if meta_src_sk == "1002":
+        location = sample.get("CLM_AUDT_TRL_LCTN_CD", "")
+        return f"{prefix}{status}{location}"
+    # MCS & FISS
+    return f"{prefix}{status}"
+
+
+def next_row_num(supporting_info):
+    row_nums = [
+        int(si["ROW_NUM"])
+        for si in supporting_info
+        if si.get("ROW_NUM") is not None and str(si["ROW_NUM"]).isdigit()
+    ]
+    return str(max(row_nums, default=0) + 1)
+
+
+composite_status_code = build_claim_audit_trail_composite(cur_sample_data)
+if composite_status_code:
+    supporting_info = cur_sample_data.get("supportingInfoComponents", [])
+    supporting_info.append(
+        {
+            "ROW_NUM": next_row_num(supporting_info),
+            "CLM_AUDT_TRL_STUS_CD": build_claim_audit_trail_composite(cur_sample_data),
+        }
+    )
 
 # add diagnosisSequence where necessary
 for item in cur_sample_data.get("lineItemComponents", []):

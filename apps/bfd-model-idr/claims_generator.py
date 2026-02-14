@@ -1414,20 +1414,6 @@ def gen_pac_version_of_claim(claim: _GeneratedClaim, max_date: str):
     pac_claim.CLM_FISS["GEO_BENE_SK"] = pac_claim.CLM["GEO_BENE_SK"]
     pac_claim.CLM_FISS["CLM_NUM_SK"] = pac_claim.CLM["CLM_NUM_SK"]
     pac_claim.CLM_FISS["CLM_TYPE_CD"] = pac_claim.CLM["CLM_TYPE_CD"]
-    pac_claim.CLM_FISS["CLM_CRNT_STUS_CD"] = random.choice(
-        [
-            "A",
-            "F",
-            "I",
-            "S",
-            "M",
-            "P",
-            "R",
-            "D",
-            "T",
-            "U",
-        ]
-    )
     add_meta_timestamps(pac_claim.CLM_FISS, claim.CLM, max_date)
 
     pac_claim.CLM_LCTN_HSTRY = {}
