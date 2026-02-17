@@ -265,40 +265,56 @@ AVAILABLE_PROVIDER_TX_CODES = [
 AVAILABLE_PROVIDER_TYPE_CODES = ["BP", "D", "N2", "UI", "BG", "A", "~"]
 
 
-def get_icd_10_dgns_codes() -> list[str]:
+def get_icd_10_dgns_codes(enable_samhsa: bool) -> list[str]:
     # Choose SAMHSA codes 1% of the time
-    return random.choices(
-        population=[
-            AVAILABLE_SAMHSA_ICD_10_DGNS_CODES,
-            AVAILABLE_NON_SAMHSA_ICD_10_DGNS_CODES,
-        ],
-        weights=(1, 99),
-        k=1,
-    )[0]
+    return (
+        random.choices(
+            population=[
+                AVAILABLE_SAMHSA_ICD_10_DGNS_CODES,
+                AVAILABLE_NON_SAMHSA_ICD_10_DGNS_CODES,
+            ],
+            weights=(1, 99),
+            k=1,
+        )[0]
+        if enable_samhsa
+        else AVAILABLE_NON_SAMHSA_ICD_10_DGNS_CODES
+    )
 
 
-def get_icd_10_prcdr_codes() -> list[str]:
-    return random.choices(
-        population=[
-            AVAILABLE_SAMHSA_ICD_10_PRCDR_CODES,
-            AVAILABLE_NON_SAMHSA_ICD_10_PRCDR_CODES,
-        ],
-        weights=(1, 99),
-        k=1,
-    )[0]
+def get_icd_10_prcdr_codes(enable_samhsa: bool) -> list[str]:
+    return (
+        random.choices(
+            population=[
+                AVAILABLE_SAMHSA_ICD_10_PRCDR_CODES,
+                AVAILABLE_NON_SAMHSA_ICD_10_PRCDR_CODES,
+            ],
+            weights=(1, 99),
+            k=1,
+        )[0]
+        if enable_samhsa
+        else AVAILABLE_NON_SAMHSA_ICD_10_PRCDR_CODES
+    )
 
 
-def get_hcpcs_proc_codes() -> list[str]:
-    return random.choices(
-        population=[PROC_CODES_SAMHSA_CPT_HCPCS, PROC_CODES_NON_SAMHSA_CPT_HCPCS],
-        weights=(1, 99),
-        k=1,
-    )[0]
+def get_hcpcs_proc_codes(enable_samhsa: bool) -> list[str]:
+    return (
+        random.choices(
+            population=[PROC_CODES_SAMHSA_CPT_HCPCS, PROC_CODES_NON_SAMHSA_CPT_HCPCS],
+            weights=(1, 99),
+            k=1,
+        )[0]
+        if enable_samhsa
+        else PROC_CODES_NON_SAMHSA_CPT_HCPCS
+    )
 
 
-def get_drg_dgns_codes() -> list[int]:
-    return random.choices(
-        population=[SAMHSA_DGNS_DRG_CDS, NON_SAMHSA_DGNS_DRG_CDS],
-        weights=(1, 99),
-        k=1,
-    )[0]
+def get_drg_dgns_codes(enable_samhsa: bool) -> list[int]:
+    return (
+        random.choices(
+            population=[SAMHSA_DGNS_DRG_CDS, NON_SAMHSA_DGNS_DRG_CDS],
+            weights=(1, 99),
+            k=1,
+        )[0]
+        if enable_samhsa
+        else NON_SAMHSA_DGNS_DRG_CDS
+    )
