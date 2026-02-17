@@ -844,7 +844,7 @@ def generate(
         existing_pac_clms = [x for x in existing_clms if int(x[f.CLM_TYPE_CD]) >= 1011]
         init_adj_clms = (
             existing_adj_clms
-            if existing_adj_clms
+            if existing_adj_clms or existing_pac_clms
             else [RowAdapter({}) for _ in range(random.randint(min_claims, max_claims))]
         )
         # This is dumb, but fresh pac claims are derived/generated from adjudicated claims generated
