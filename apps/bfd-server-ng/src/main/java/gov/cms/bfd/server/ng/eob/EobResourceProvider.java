@@ -68,6 +68,7 @@ public class EobResourceProvider implements IResourceProvider {
    * @param startIndex start index
    * @param tag tags to filter by
    * @param type claim type to filter by
+   * @param source claim source to filter by
    * @param security security to filter SAMHSA by
    * @param request HTTP request details
    * @return bundle
@@ -82,6 +83,7 @@ public class EobResourceProvider implements IResourceProvider {
       @OptionalParam(name = START_INDEX) final NumberParam startIndex,
       @OptionalParam(name = Constants.PARAM_TAG) final TokenAndListParam tag,
       @OptionalParam(name = TYPE) final TokenAndListParam type,
+      @OptionalParam(name = Constants.PARAM_SOURCE) final TokenAndListParam source,
       @OptionalParam(name = Constants.PARAM_SECURITY) final TokenAndListParam security,
       final HttpServletRequest request) {
 
@@ -97,7 +99,8 @@ public class EobResourceProvider implements IResourceProvider {
         FhirInputConverter.toIntOptional(startIndex),
         tagCriteria,
         claimTypeCodes,
-        getFilterModeForRequest(request, samhsaSearchIntent));
+        getFilterModeForRequest(request, samhsaSearchIntent),
+        FhirInputConverter.parseSourceParameter(source));
   }
 
   /**

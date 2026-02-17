@@ -15,6 +15,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import gov.cms.bfd.server.ng.claim.model.ClaimFinalAction;
 import gov.cms.bfd.server.ng.claim.model.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.ClaimSubtype;
+import gov.cms.bfd.server.ng.claim.model.MetaSourceSk;
 import gov.cms.bfd.server.ng.eob.EobResourceProvider;
 import gov.cms.bfd.server.ng.testUtil.ThreadSafeAppender;
 import gov.cms.bfd.server.ng.util.DateUtil;
@@ -71,7 +72,16 @@ class EobSearchIT extends IntegrationTestBase {
     var events = ThreadSafeAppender.startRecord();
     var bundle =
         eobResourceProvider.searchByPatient(
-            new ReferenceParam("178083966"), null, null, null, null, null, null, null, request);
+            new ReferenceParam("178083966"),
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            request);
     assertFalse(bundle.getEntry().isEmpty());
     assertEquals(2, queryCount(events));
   }
@@ -449,5 +459,74 @@ class EobSearchIT extends IntegrationTestBase {
     var results =
         bundle.getEntry().stream().map(e -> e.getResource().getId()).collect(Collectors.toSet());
     assertEquals(2, results.size());
+  }
+
+  static Stream<Arguments> provideSourceParameterScenarios() {
+    return Stream.of(SearchStyleEnum.values())
+        .flatMap(
+            style ->
+                Stream.of(
+                    Arguments.of(
+                        "WithSource_FISS",
+                        List.of(List.of(MetaSourceSk.FISS.getDisplay())),
+                        2,
+                        style),
+                    Arguments.of(
+                        "WithCombinedSourceAnd",
+                        List.of(List.of("DDPS"), List.of("NCH")),
+                        0,
+                        style),
+                    Arguments.of(
+                        "WithInvalidSource",
+                        List.of(List.of(MetaSourceSk.DDPS.getDisplay(), "NCHH")),
+                        0,
+                        style),
+                    Arguments.of(
+                        "WithCombinedTagOr",
+                        List.of(
+                            List.of(
+                                MetaSourceSk.DDPS.getDisplay().toLowerCase(),
+                                MetaSourceSk.NCH.getDisplay())),
+                        2,
+                        style)));
+  }
+
+  @ParameterizedTest
+  @MethodSource("provideSourceParameterScenarios")
+  void eobSearchBySources(
+      String scenarioName,
+      List<List<String>> sourceScenarios,
+      int expectedCount,
+      SearchStyleEnum searchStyle) {
+    var query =
+        searchBundle()
+            .where(
+                new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
+                    .exactly()
+                    .identifier(BENE_ID_ALL_PARTS_WITH_XREF));
+
+    for (List<String> sources : sourceScenarios) {
+      if (sources.size() == 1) {
+        query =
+            query.and(
+                new TokenClientParam(Constants.PARAM_SOURCE).exactly().code(sources.getFirst()));
+      } else {
+        query = query.and(new TokenClientParam(Constants.PARAM_SOURCE).exactly().codes(sources));
+      }
+    }
+    if ("WithInvalidSource".equals(scenarioName)) {
+      assertThrows(
+          InvalidRequestException.class,
+          query.usingStyle(searchStyle)::execute,
+          "Should throw InvalidRequestException for unsupported _source value in: " + scenarioName);
+    } else {
+      var eobBundle = query.usingStyle(searchStyle).execute();
+      expectFhir().scenario(searchStyle.name() + "_" + scenarioName).toMatchSnapshot(eobBundle);
+
+      assertEquals(
+          expectedCount,
+          eobBundle.getEntry().size(),
+          "Should find " + expectedCount + " EOBs for scenario " + scenarioName);
+    }
   }
 }

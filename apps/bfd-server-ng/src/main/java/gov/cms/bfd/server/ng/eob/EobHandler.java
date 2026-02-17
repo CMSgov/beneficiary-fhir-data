@@ -11,6 +11,7 @@ import gov.cms.bfd.server.ng.claim.model.ClaimLine;
 import gov.cms.bfd.server.ng.claim.model.ClaimProcedure;
 import gov.cms.bfd.server.ng.claim.model.ClaimTypeCode;
 import gov.cms.bfd.server.ng.claim.model.IcdIndicator;
+import gov.cms.bfd.server.ng.claim.model.MetaSourceSk;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.input.TagCriterion;
 import gov.cms.bfd.server.ng.loadprogress.LoadProgressRepository;
@@ -69,6 +70,7 @@ public class EobHandler {
    * @param claimTypeCodes claimTypeCodes
    * @param tagCriteria tagCriteria
    * @param samhsaFilterMode SAMHSA filter mode
+   * @param source claim source
    * @return bundle
    */
   public Bundle searchByBene(
@@ -79,7 +81,8 @@ public class EobHandler {
       Optional<Integer> startIndex,
       List<List<TagCriterion>> tagCriteria,
       List<ClaimTypeCode> claimTypeCodes,
-      SamhsaFilterMode samhsaFilterMode) {
+      SamhsaFilterMode samhsaFilterMode,
+      List<List<MetaSourceSk>> source) {
     var beneXrefSk = beneficiaryRepository.getXrefSkFromBeneSk(beneSk);
     // Don't return data for historical beneSks
     if (beneXrefSk.isEmpty() || !beneXrefSk.get().equals(beneSk)) {
@@ -94,7 +97,8 @@ public class EobHandler {
             count,
             startIndex,
             tagCriteria,
-            claimTypeCodes);
+            claimTypeCodes,
+            source);
 
     var filteredClaims = filterSamhsaClaims(claims, samhsaFilterMode);
 

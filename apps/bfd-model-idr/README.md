@@ -46,7 +46,33 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 uv sync
 ```
 
+### Compile FSH Resources
+
+To compile the .fsh files from this folder
+```sh
+cd sushi && sushi build && cd ..
+```
+
+This will generate the StructureDefinition and CodeSystem resources necessary for synthetic data generation. Running compile_resources.py is not necessary to generate synthetic data. 
+
+### Get Matchbox up and running
+To reduce dependencies on tx.fhir.org as well as improve the speed of validation, we use matchbox to run a local FHIR server. Read more about matchbox at https://ahdis.github.io/matchbox/
+
+Note: Matchbox uses a significant amount of memory. Allocating at least 8GB of RAM is recommended, and more may be necessary in the future.
+
+To start matchbox, run 
+
+```sh
+docker compose up -d
+```
+Note, it takes several minutes and requires a good bit of RAM. It'll be ready once it says that packages have been loaded and some obviously untrue amount of RAM (generally half of what it actually used) was used. Additionally, one can check the logs for "Finished engines during startup" or running a health check using
+```sh
+curl -X GET "http://localhost:8080/matchboxv3/actuator/health"
+```
+
 ### Create FHIR files with synthetic data
+
+Requires Matchbox to be active.
 
 To easily compile all resources:
 
@@ -61,6 +87,7 @@ pass along the sample file with -i
 pass along the output file with -o
 pass along the resource url with -r
 pass along --test to run conformance tests
+pass along --skip-structure-map-generation to skip generating the structure map. Only use this in the context of sequential transformations that re-use a structure map.
 
 Example (Patient):
 
@@ -173,6 +200,45 @@ SYNTHETIC_CLM_LINE_PRFNL.csv
 SYNTHETIC_CLM_ANSI_SGNTR.csv
 
 These files represent the schema of the tables the information is sourced from, although for tables other than CLM_DT_SGNTR, the CLM_UNIQ_ID is propagated instead of the 5 part unique key from the IDR.
+
+## Testing Mapping Changes
+
+### Verifying FML Map Changes
+To test updates to your FML map files, run `compile_resources.py` to generate a resource in the `out/` directory and verify the output:
+
+```sh
+uv run compile_resources.py \
+    -m maps/ExplanationOfBenefit-Base.map \
+    -i sample-data/EOB-Carrier-MCS-Sample.json \
+    -o out/ExplanationOfBenefit-MCS.json \
+    -r https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Base \
+    --test
+```
+### Updating Structure Definitions
+If you add or move a field, you must update the input sample file and the corresponding Structure Definition file (e.g., defining CLM_AUDT_TRL_STUS_CD within the elements of ExplanationOfBenefit-Base.json).
+Example element definition:
+
+```text
+{
+  "id": "ExplanationOfBenefit-Base.CLM_AUDT_TRL_STUS_CD",
+  "path": "ExplanationOfBenefit-Base.CLM_AUDT_TRL_STUS_CD",
+  "label": "Claim Status Code",
+  "min": 0,
+  "max": "1",
+  "type": [{ "code": "string" }]
+}
+```
+
+### Resource Augmentation
+Due to FML limitations, some complex mappings that require more than simple lookups are handled via augment_sample_resources.py.
+For example, CLM_AUDT_TRL_STUS_CD on an EOB is derived by combining the status code, location code (CLM_AUDT_TRL_LCTN_CD), and source (META_SRC_SK). The augmentation script resolves these fields into the claim status code.
+To test augmentation logic independently:
+
+```sh
+python augment_sample_resources.py {your_sample_file}.json
+```
+
+*Note: The uv run compile_resources.py command mentioned above also executes this script. You can inspect the output at out/temporary-sample.json and the compiled resource.*
 
 ## Data Dictionary
 

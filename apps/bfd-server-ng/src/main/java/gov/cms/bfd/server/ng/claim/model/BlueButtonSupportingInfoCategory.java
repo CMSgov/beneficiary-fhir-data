@@ -83,10 +83,11 @@ enum BlueButtonSupportingInfoCategory {
   CLM_SBMTR_CNTRCT_NUM("CLM_SBMTR_CNTRCT_NUM", "Submitter Contract Number"),
   /** CLM_SBMTR_CNTRCT_PBP_NUM - Submitter Contract PBP Number. */
   CLM_SBMTR_CNTRCT_PBP_NUM("CLM_SBMTR_CNTRCT_PBP_NUM", "Submitter Contract PBP Number"),
+  /** CLM_AUDT_TRL_STUS_CD - Claim Audit Trail Status Code. */
+  CLM_AUDT_TRL_STUS_CD("CLM_AUDT_TRL_STUS_CD", "Claim Status Code"),
   /** CLM_LINE_PMD_UNIQ_TRKNG_NUM - Prior Authorization Unique Tracking Number. */
   CLM_LINE_PMD_UNIQ_TRKNG_NUM(
-      "CLM_LINE_PMD_UNIQ_TRKNG_NUM", "Prior Authorization Unique Tracking Number"),
-  ;
+      "CLM_LINE_PMD_UNIQ_TRKNG_NUM", "Prior Authorization Unique Tracking Number");
 
   private final String code;
   private final String display;
