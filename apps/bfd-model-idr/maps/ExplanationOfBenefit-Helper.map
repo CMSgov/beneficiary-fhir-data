@@ -8,6 +8,20 @@ conceptmap "FinalActionIndicator" {
   s:N == t:"cancelled"
 }
 
+conceptmap "PRVDR_ID_QLFYR_CD" {
+  prefix s = "https://hl7.org/fhir/string"
+  prefix t = "http://bluebutton.cms.gov/fhir/CodeSystem/PRVDR-ID-QLFYR-CD"
+  
+  s:"01" == t:"NPI Number"
+  s:"06" == t:"UPIN"
+  s:"07" == t:"NCPDP Number"
+  s:"08" == t:"State License Number"
+  s:"11" == t:"TIN"
+  s:"12" == t:"DEA"
+  s:"99" == t:"Other mandatory for Standard Data Format"
+
+}
+
 conceptmap "FED_PRVDR_SPCLTY_TO_TAXONOMY" {
   prefix s = "https://hl7.org/fhir/string"
   prefix t = "http://nucc.org/provider-taxonomy"

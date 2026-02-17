@@ -171,19 +171,6 @@
                 ]
             },
             {
-                "id": "ExplanationOfBenefit-Pharmacy.clm_srvc_prvdr_gnrc_id_type",
-                "path": "ExplanationOfBenefit-Pharmacy.clm_srvc_prvdr_gnrc_id_type",
-                "label": "Service Provider Generic ID Type",
-                "definition": "The type of service provider (1 for practitioner, 2 for organization).",
-                "min": 0,
-                "max": "1",
-                "type": [
-                    {
-                        "code": "string"
-                    }
-                ]
-            },
-            {
                 "id": "ExplanationOfBenefit-Pharmacy.CLM_PD_DT",
                 "path": "ExplanationOfBenefit-Pharmacy.CLM_PD_DT",
                 "label": "Payment Date",
@@ -495,6 +482,32 @@
               "path": "ExplanationOfBenefit-Pharmacy.TOT_RX_CST_AMT",
               "label": "Total drug cost (Part D)",
               "definition": "This variable is the total cost of the prescription drug event and is taken directly from the original PDE. It is the sum of the following components: the ingredient cost (INGRDNT_CST_PD_AMT), the dispensing fee (DSPNSNG_FEE_PD_AMT), the sales tax, if any (TOT_AMT_ATTR_SLS_TAX_AMT), and the vaccine administration fee, if any (VCCN_ADMIN_FEE_AMT, included starting in 2010).",
+              "min": 0,
+              "max": "1",
+              "type": [
+                {
+                  "code": "string"
+                }
+              ]
+            },
+            {
+              "id": "ExplanationOfBenefit-Pharmacy.PRVDR_SRVC_ID_QLFYR_CD",
+              "path": "ExplanationOfBenefit-Pharmacy.PRVDR_SRVC_ID_QLFYR_CD",
+              "label": "Provider Service Identifier Qualifier Code",
+              "definition": "Indicates the type of number used to identify the pharmacy providing the services.",
+              "min": 0,
+              "max": "1",
+              "type": [
+                {
+                  "code": "string"
+                }
+              ]
+            },
+            {
+              "id": "ExplanationOfBenefit-Pharmacy.CLM_SRVC_PRVDR_GNRC_ID_NUM",
+              "path": "ExplanationOfBenefit-Pharmacy.CLM_SRVC_PRVDR_GNRC_ID_NUM",
+              "label": "Service Provider Generic ID Number",
+              "definition": "Indicates the ID number submitted for the service provider on a claim. The type of the identifier is noted by PRVDR_SRVC_ID_QLFYR_CD.",
               "min": 0,
               "max": "1",
               "type": [

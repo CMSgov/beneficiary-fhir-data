@@ -77,30 +77,37 @@ group createEOBPharmacy(source src: ExplanationOfBenefitPharmacy, target tgt: BF
 
     // Provider organization for pharmacy - only create when needed based on NPI_TYPE
 
-    src.PRVDR_SRVC_PRVDR_NPI_NUM as blgNPI -> tgt then{
-      //We don't populate careTeamType when it's the provider, so we can uniquely identify it as billing.
-        src -> tgt.provider = create('Reference') as tgtRef, tgtRef.reference = append("#", blgNPI) "Add reference to NPI";
-        src.providerList as provider where provider.isDuplicate.exists().not() and provider.careTeamType.exists().not() and provider.NPI_TYPE = 1 -> tgt.contained = create('Practitioner') as tgtPract then createPractitioner(provider, tgtPract) "Add Practitioner";
-        src.providerList as provider where provider.isDuplicate.exists().not() and provider.careTeamType.exists().not() and provider.NPI_TYPE = 2 -> tgt.contained = create('Organization') as tgtOrg then createOrg(provider, tgtOrg) "Add Organization";
-    } "Add billing provider";
+    //src.PRVDR_SRVC_PRVDR_NPI_NUM as blgNPI -> tgt then{
+    //We don't populate careTeamType when it's the provider, so we can uniquely identify it as billing.
+    src.PRVDR_SRVC_PRVDR_NPI_NUM as blgNPI -> tgt.provider = create('Reference') as tgtRef, tgtRef.reference = append("#", blgNPI) "Add reference to NPI";
+    src.PRVDR_SRVC_PRVDR_NPI_NUM as blgNPI where blgNPI.exists().not() -> tgt.provider = create('Reference') as tgtRef, tgtRef.reference = "#BILLING_ID" "Add reference to non-NPI";
+    //src -> tgt.provider = create('Reference') as tgtRef, tgtRef.reference = append("#", blgNPI) "Add reference to NPI";
+    src.providerList as provider where provider.isDuplicate.exists().not() and provider.careTeamType.exists().not() and provider.NPI_TYPE = 1 -> tgt.contained = create('Practitioner') as tgtPract then createPractitioner(provider, tgtPract) "Add Practitioner";
+    src.providerList as provider where provider.isDuplicate.exists().not() and provider.careTeamType.exists().not() and provider.NPI_TYPE = 2 -> tgt.contained = create('Organization') as tgtOrg then createOrg(provider, tgtOrg) "Add Organization";
+    //The above handles instances where the id is type NPI. If there's no NPI, we're going to populate it as an org. 
+    src.providerList as provider where provider.isDuplicate.exists().not() and provider.careTeamType.exists().not() and provider.NPI_TYPE.exists().not() -> tgt.contained = create('Organization') as tgtOrg then createOrg(provider, tgtOrg) "Add Organization - Non NPI";
 
-    //QLFYR_TYPE_CD logic goes here pending CMS decision.
-    
 
     src.providerList as pList where pList.careTeamType.exists() -> tgt then {
-      pList where pList.NPI_TYPE = 1 and pList.isDuplicate.exists().not() -> tgt.contained = create('Practitioner') as tgtPract then createPractitioner(pList, tgtPract) "Add Practitioner";
-      pList where pList.NPI_TYPE = 2 and pList.isDuplicate.exists().not() -> tgt.contained = create('Organization') as tgtOrg then createOrg(pList, tgtOrg) "Add Organization";
-
       src -> tgt.careTeam = create('BackboneElement') as tgtBBElement then {
-        pList.careTeamType as careTeamType -> tgtBBElement.role = cc("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole", careTeamType) "Add role";
+        pList.careTeamType as careTeamType -> tgtCareTeam.role = create('CodeableConcept') as tgtCC then {
+            careTeamType -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claimcareteamrole", careTeamType) "Add THO coding";
+            pList.careTeamType as legacyType where legacyType != "supervisor" -> c("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole", legacyType) "Add C4BB system";
+        } "Add care team types";
         pList.careTeamSequenceNumber as seqNum -> tgtBBElement.sequence = seqNum "Set sequence";
         src -> tgtBBElement.provider = create('Reference') as tgtReference then {
-          pList.PRVDR_SK as npi -> tgtReference.reference = append("#", npi) "Add reference";
+           pList.PRVDR_ID_QLFYR_CD as qlfyrCd -> tgtReference.identifier = create('Identifier') as tgtId then {
+                qlfyrCd -> tgtId.type = create('CodeableConcept') as tgtCC then {
+                    qlfyrCd -> tgtCC.coding = c("http://bluebutton.cms.gov/fhir/CodeSystem/PRVDR-ID-QLFYR-CD",qlfyrCd) "Add coding for type";
+                    pList.PRVDR_ID_QLFYR_CD as npiType where npiType = "01" -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/v2-0203","NPI") "Add NPI type";
+                } "Add type";
+                qlfyrCd as notNPI where npi != "01" -> tgtId.system = "http://bluebutton.cms.gov/fhir/identifiers/GenericIdNum" "set id num system url";
+                qlfyrCd as npi where npi = "01" -> tgtId.system = "http://hl7.org/fhir/sid/us-npi" "set NPI system url";
+                pList.CLM_PRVDR_GNRC_ID_NUM as idNum -> tgtId.value = idNum "set id num";
+            } "Add qualifier code and id num";
+          pList.PRVDR_CARETEAM_NAME as name -> tgtReference.display = name "set name";
         } "Add reference to EOB";
         
-        pList.taxonomyCodes as taxonomyCodes -> tgtBBElement.qualification = create('CodeableConcept') as qualCC then{
-          taxonomyCodes -> qualCC.coding = c("http://nucc.org/provider-taxonomy", taxonomyCodes) "add taxonomy";
-        } "Add taxonomy/qualifications";
       } "Add CareTeam Element";
 
     } "Add CareTeam providers";
