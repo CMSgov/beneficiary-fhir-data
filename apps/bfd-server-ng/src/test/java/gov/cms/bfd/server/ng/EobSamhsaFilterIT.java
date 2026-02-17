@@ -156,7 +156,8 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
             Optional.empty(),
             Collections.emptyList(),
             List.of(),
-            samhsaFilterMode);
+            samhsaFilterMode,
+            Collections.emptyList());
     return getEobFromBundle(claims);
   }
 

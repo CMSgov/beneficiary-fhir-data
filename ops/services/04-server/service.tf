@@ -46,6 +46,10 @@ module "data_strategies" {
   cluster_name = data.aws_ecs_cluster.main.cluster_name
 }
 
+data "aws_ssm_parameter" "adot_collector_image" {
+  name = "/bfd/platform/otel-collector/nonsensitive/image"
+}
+
 data "aws_ecr_repository" "certstores" {
   name = local.certstores_repository_name
 }
@@ -93,6 +97,18 @@ resource "aws_cloudwatch_log_group" "server_messages" {
 
 resource "aws_cloudwatch_log_group" "server_access" {
   name         = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/${local.service}/access"
+  kms_key_id   = local.env_key_arn
+  skip_destroy = true
+}
+
+resource "aws_cloudwatch_log_group" "adot_messages" {
+  name         = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/adot/messages"
+  kms_key_id   = local.env_key_arn
+  skip_destroy = true
+}
+
+resource "aws_cloudwatch_log_group" "adot_metrics" {
+  name         = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/adot/metrics"
   kms_key_id   = local.env_key_arn
   skip_destroy = true
 }
@@ -202,13 +218,52 @@ resource "aws_ecs_task_definition" "server" {
         volumesFrom    = []
       },
       {
+        name      = "adot-collector"
+        image     = nonsensitive(data.aws_ssm_parameter.adot_collector_image.value)
+        essential = false
+
+        dependsOn = [
+          {
+            containerName = local.service
+            condition     = "HEALTHY"
+          }
+        ]
+
+        environment = [
+          {
+            name = "ADOT_CONFIG"
+            value = templatefile(
+              "${path.module}/adot/collector.yaml", {
+                cluster_name   = data.aws_ecs_cluster.main.cluster_name
+                log_group_name = aws_cloudwatch_log_group.adot_metrics.name
+                region         = local.region
+                service        = local.service
+                name_prefix    = local.name_prefix
+                port           = local.server_jmx_export_port
+            })
+          }
+        ]
+
+        command                = ["--config=env:ADOT_CONFIG"]
+        readonlyRootFilesystem = true
+
+        logConfiguration = {
+          logDriver = "awslogs"
+          options = {
+            awslogs-group         = aws_cloudwatch_log_group.adot_messages.name
+            awslogs-stream-prefix = "messages"
+            awslogs-region        = local.region
+          }
+        }
+      },
+      {
         name              = "log_router"
         image             = data.aws_ecr_image.log_router.image_uri
         essential         = true
-        cpu               = max(min(1024, floor(0.05 * local.server_cpu)), 256) # Max 1 CPU, min 1/4
+        cpu               = max(min(1024, floor(0.05 * local.server_cpu)), 256)    # Max 1 CPU, min 1/4
         memoryReservation = max(min(1024, floor(0.08 * local.server_memory)), 256) # Max 1 GB, min 256 MiB
         memory            = max(min(1024, floor(0.10 * local.server_memory)), 312) # Max 1 GB, min 312 MiB
-        user              = "0" # Default; reduces unnecessary terraform diff output
+        user              = "0"                                                    # Default; reduces unnecessary terraform diff output
         environment = [
           {
             name  = "AWS_REGION"
@@ -263,7 +318,7 @@ resource "aws_ecs_task_definition" "server" {
           {
             condition     = "COMPLETE"
             containerName = "certstores"
-          },
+          }
         ]
         environment = [
           {
@@ -362,7 +417,7 @@ resource "aws_ecs_task_definition" "server" {
         # Empty declarations reduce Terraform diff noise
         systemControls = []
         volumesFrom    = []
-      },
+      }
     ]
   )
 }

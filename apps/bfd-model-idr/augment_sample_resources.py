@@ -1,7 +1,6 @@
 import json
 import sys
 from dataclasses import asdict, dataclass, field
-from decimal import Decimal
 from pathlib import Path
 from typing import Optional
 
@@ -73,6 +72,17 @@ class Provider:
     CLM_PRVDR_GNRC_ID_NUM: Optional[str] = None
     CLM_BLG_PRVDR_TAX_NUM: Optional[str] = None
 
+provider_list = []
+    header_columns.pop("PRVDR_SRVC_PRVDR_NPI_NUM")
+
+populate_fields_except_na = [
+    "PRVDR_LGL_NAME",
+    "PRVDR_OSCAR_NUM",
+    "PRVDR_LAST_NAME",
+    "PRVDR_1ST_NAME",
+    "PRVDR_MDL_NAME",
+    "PRVDR_TYPE_CD",
+]
 provider_list = []
 
 # There may be an opportunity to consolidate even the duplicate NPIs into a
@@ -238,54 +248,95 @@ cur_sample_data["providerList"] = [
 @dataclass
 class Diagnosis:
     CLM_DGNS_CD: str
-    CLM_PROD_TYPE_CD: str = "D"
-    CLM_POA_IND: str = "~"
-    CLM_DGNS_PRCDR_ICD_IND: str = "0"
-    ROW_NUM: str = "1"
+    CLM_PROD_TYPE_CD: str = 'D'
+    CLM_POA_IND: str = '~'
+    CLM_DGNS_PRCDR_ICD_IND: str = '0'
+    ROW_NUM: str = '1'
     clm_prod_type_cd_map: list[str] = field(default_factory=list)
 
 diagnosis_codes = [
     Diagnosis(
         CLM_DGNS_CD=x.get("CLM_DGNS_CD"),
+        CLM_PROD_TYPE_CD=x.get("CLM_PROD_TYPE_CD"),
         CLM_POA_IND=x.get("CLM_POA_IND"),
         CLM_DGNS_PRCDR_ICD_IND=x.get("CLM_DGNS_PRCDR_ICD_IND"),
         ROW_NUM=x.get("CLM_VAL_SQNC_NUM"),
     )
     for x in cur_sample_data.get("diagnoses", [])
-    if x.get("CLM_PROD_TYPE_CD") == "D"
+    if x.get("CLM_PROD_TYPE_CD") in ["D", "P", "A", "R", "E"]
 ]
 
-# of note, 1 and E appear to always be the same, so we only care about the E code.
-clm_prod_type_cds = ["P", "A", "R", "E"]
-# this loop ensures that 'rogue' (eg principal not present in main list) diagnoses are not missed.
-for clm_prod_type_cd in clm_prod_type_cds:
-    code = [
-        x.get("CLM_DGNS_CD")
-        for x in cur_sample_data.get("diagnoses", [])
-        if x.get("CLM_PROD_TYPE_CD") == clm_prod_type_cd
-    ]
-    if code and code[0] not in [x.CLM_DGNS_CD for x in diagnosis_codes]:
-        diagnosis = Diagnosis(
-            CLM_DGNS_CD=code,
-            CLM_PROD_TYPE_CD=clm_prod_type_cd,
-            CLM_DGNS_PRCDR_ICD_IND=diagnosis_codes[0].CLM_DGNS_PRCDR_ICD_IND,
-            ROW_NUM=str(len(diagnosis_codes) + 1),
-        )
-        diagnosis_codes.append(diagnosis)
+# Sort diagnoses keys
+type_priority = {"P": 1, "A": 2, "R": 3, "E": 4}
 
-for diagnosis_code in diagnosis_codes:
-    for clm_prod_type_cd in clm_prod_type_cds:
-        cur_code = [
-            x.get("CLM_DGNS_CD")
-            for x in cur_sample_data.get("diagnoses", [])
-            if x.get("CLM_PROD_TYPE_CD") == clm_prod_type_cd
-        ]
-        if cur_code and cur_code[0] == diagnosis_code.CLM_DGNS_CD:
-            diagnosis_code.clm_prod_type_cd_map.append(clm_prod_type_cd)
-    if len(diagnosis_code.clm_prod_type_cd_map) == 0:
-        diagnosis_code.clm_prod_type_cd_map.append("D")
+# We need to preserve the list but sort it
+diagnosis_codes.sort(key=lambda d: type_priority.get(d.CLM_PROD_TYPE_CD, 99))
+
+# Assign sequential ROW_NUM
+for idx, diag in enumerate(diagnosis_codes, start=1):
+    diag.ROW_NUM = str(idx)
 
 cur_sample_data["diagnoses"] = [asdict(d) for d in diagnosis_codes]
+
+
+# Resolve claim status code section
+def meta_src_prefix(meta_src_sk: str | None) -> str:
+    return {
+        "1002": "V",
+        "1001": "M",
+        "1003": "F",
+    }.get(str(meta_src_sk), "")
+
+
+def build_claim_audit_trail_composite(sample: dict) -> str:
+    meta_src_sk = str(sample.get("META_SRC_SK", ""))
+    status = sample.get("CLM_AUDT_TRL_STUS_CD")
+
+    if not status:
+        return None
+
+    prefix = meta_src_prefix(meta_src_sk)
+
+    # VMS
+    if meta_src_sk == "1002":
+        location = sample.get("CLM_AUDT_TRL_LCTN_CD", "")
+        return f"{prefix}{status}{location}"
+    # MCS & FISS
+    return f"{prefix}{status}"
+
+
+def next_row_num(supporting_info):
+    row_nums = [
+        int(si["ROW_NUM"])
+        for si in supporting_info
+        if si.get("ROW_NUM") is not None and str(si["ROW_NUM"]).isdigit()
+    ]
+    return str(max(row_nums, default=0) + 1)
+
+
+composite_status_code = build_claim_audit_trail_composite(cur_sample_data)
+if composite_status_code:
+    supporting_info = cur_sample_data.get("supportingInfoComponents", [])
+    supporting_info.append(
+        {
+            "ROW_NUM": next_row_num(supporting_info),
+            "CLM_AUDT_TRL_STUS_CD": build_claim_audit_trail_composite(cur_sample_data),
+        }
+    )
+
+# add diagnosisSequence where necessary
+for item in cur_sample_data.get("lineItemComponents", []):
+    if "CLM_LINE_DGNS_CD" in item:
+        line_dgns_cd = item.get("CLM_LINE_DGNS_CD")
+        if match := next(
+            (
+                d
+                for d in diagnosis_codes
+                if line_dgns_cd == d.CLM_DGNS_CD and d.CLM_PROD_TYPE_CD == 'D'
+            ),
+            None,
+        ):
+            item["diagnosisSequence"] = [int(match.ROW_NUM)]
 
 filename = "out/temporary-sample.json"
 

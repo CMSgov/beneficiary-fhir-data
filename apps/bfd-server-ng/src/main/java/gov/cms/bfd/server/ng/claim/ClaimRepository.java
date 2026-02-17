@@ -3,12 +3,10 @@ package gov.cms.bfd.server.ng.claim;
 import gov.cms.bfd.server.ng.DbFilter;
 import gov.cms.bfd.server.ng.DbFilterBuilder;
 import gov.cms.bfd.server.ng.DbFilterParam;
-import gov.cms.bfd.server.ng.claim.filter.BillablePeriodFilterParam;
-import gov.cms.bfd.server.ng.claim.filter.ClaimTypeCodeFilterParam;
-import gov.cms.bfd.server.ng.claim.filter.LastUpdatedFilterParam;
-import gov.cms.bfd.server.ng.claim.filter.TagCriteriaFilterParam;
+import gov.cms.bfd.server.ng.claim.filter.*;
 import gov.cms.bfd.server.ng.claim.model.Claim;
 import gov.cms.bfd.server.ng.claim.model.ClaimTypeCode;
+import gov.cms.bfd.server.ng.claim.model.MetaSourceSk;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.input.TagCriterion;
 import gov.cms.bfd.server.ng.util.LogUtil;
@@ -111,6 +109,7 @@ public class ClaimRepository {
    * @param offset offset
    * @param tagCriteria tag criteria
    * @param claimTypeCodes claimTypeCodes
+   * @param source claim source
    * @return claims
    */
   @Timed(value = "application.claim.search_by_bene")
@@ -128,13 +127,15 @@ public class ClaimRepository {
       @MeterTag(key = "hasOffset", expression = "isPresent()") Optional<Integer> offset,
       @MeterTag(key = "hasTags", expression = "size() > 0") List<List<TagCriterion>> tagCriteria,
       @MeterTag(key = "hasClaimTypeCodes", expression = "size() > 0")
-          List<ClaimTypeCode> claimTypeCodes) {
+          List<ClaimTypeCode> claimTypeCodes,
+      @MeterTag(key = "hasSources", expression = "size() > 0") List<List<MetaSourceSk>> source) {
     var filterBuilders =
         List.of(
             new BillablePeriodFilterParam(claimThroughDate),
             new LastUpdatedFilterParam(lastUpdated),
             new ClaimTypeCodeFilterParam(claimTypeCodes),
-            new TagCriteriaFilterParam(tagCriteria));
+            new TagCriteriaFilterParam(tagCriteria),
+            new SourceFilterParam(source));
     var filters = getFilters(filterBuilders);
     // Some of the filters here appear redundant, but joining on the entire primary key for
     // beneficiaries (bene_sk + effective timestamp) helps query performance significantly
