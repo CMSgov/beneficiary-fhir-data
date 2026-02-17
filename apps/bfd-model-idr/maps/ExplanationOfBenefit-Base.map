@@ -166,7 +166,6 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
       pList.careTeamSequenceNumber as seqNum -> tgtCareTeam.sequence = seqNum "Set sequence";
       //In contrast to prior approaches, we'll populate both Organizations and Practitioners inline.
       src -> tgtCareTeam.provider = create('Reference') as tgtReference then {
-          //TODO: update yaml
           pList.PRVDR_SK as npi -> tgtReference.identifier = create('Identifier') as tgtId then {
             src -> tgtId.type = cc("http://terminology.hl7.org/CodeSystem/v2-0203", "NPI") "Set type";
             src -> tgtId.system = "http://hl7.org/fhir/sid/us-npi" "Set System";
@@ -176,7 +175,6 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
           pList.PRVDR_CARETEAM_NAME as name -> tgtReference.display = name "Set name";
 
         } "Add reference to EOB";
-      //TODO: update yaml 
       pList.specialtyCode as specialtyCode -> tgtCareTeam.qualification = create('CodeableConcept') as tgtCC then {
         specialtyCode -> tgtCC.coding = translate(specialtyCode,'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#FED_PRVDR_SPCLTY_TO_TAXONOMY','coding') "add taxonomy";
         specialtyCode -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRVDR-SPCLTY-CD",specialtyCode) "Add coding";

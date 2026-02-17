@@ -160,8 +160,8 @@
             {
                 "id": "ExplanationOfBenefit-Pharmacy.PRVDR_SRVC_PRVDR_NPI_NUM",
                 "path": "ExplanationOfBenefit-Pharmacy.PRVDR_SRVC_PRVDR_NPI_NUM",
-                "label": "Service Provider Generic ID Number",
-                "definition": "The generic ID number of the service provider.",
+                "label": "Service Provider NPI Number",
+                "definition": "The NPI number of the service provider.",
                 "min": 0,
                 "max": "1",
                 "type": [
@@ -515,6 +515,32 @@
                   "code": "string"
                 }
               ]
+            },
+            {
+              "id": "ExplanationOfBenefit-Pharmacy.CLM_PRSBNG_PRVDR_GNRC_ID_NUM",
+              "path": "ExplanationOfBenefit-Pharmacy.CLM_PRSBNG_PRVDR_GNRC_ID_NUM",
+              "label": "Prescribing Provider Generic ID Number",
+              "definition": "Indicates the ID number submitted for the prescribing provider on a claim. The type of the identifier is noted by PRVDR_PRSBNG_ID_QLFYR_CD.",
+              "min": 0,
+              "max": "1",
+              "type": [
+                {
+                  "code": "string"
+                }
+              ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Pharmacy.PRVDR_PRSBNG_ID_QLFYR_CD",
+                "path": "ExplanationOfBenefit-Pharmacy.PRVDR_PRSBNG_ID_QLFYR_CD",
+                "label": "Provider Prescribing Identifier Qualifier Code",
+                "definition": "Indicates the type of number used to identify the prescriber.",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
             }
         ]
     }

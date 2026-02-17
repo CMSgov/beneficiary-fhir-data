@@ -83,7 +83,8 @@ group addItem(source src: LineItemComponent, target tgt: BackboneElement){
     src.CLM_PMT_80_100_CD as inputCode where inputCode.length()>0 -> tgt.extension = create('Extension') as tgtExtension then add80100Cd(inputCode, tgtExtension) "Add  code";
     src.CLM_PRCSG_IND_CD as inputCode where inputCode.length()>0 -> tgt.extension = create('Extension') as tgtExtension then addPrcsgInd(inputCode, tgtExtension) "Add  code";
     src.CLM_SRVC_DDCTBL_SW as inputCode where inputCode.length()>0 -> tgt.extension = create('Extension') as tgtExtension then addDeductSwitch(inputCode, tgtExtension) "Add code";
-    //src.CLM_PRVDR_SPCLTY_CD as inputCode where inputCode.length()>0 -> tgt.extension = create('Extension') as tgtExtension then addPrvdrSpclty(inputCode, tgtExtension) "Add code";
+    //While we populate this in the careTeam, there can be multiple distinct specialties per NPI on line items. Thus, we populate the extension.
+    src.CLM_PRVDR_SPCLTY_CD as inputCode where inputCode.length()>0 -> tgt.extension = create('Extension') as tgtExtension then addPrvdrSpclty(inputCode, tgtExtension) "Add code";
 
     src.CLM_POS_CD as placeCode -> tgt.location = create('CodeableConcept') as tgtCC then{
         src -> tgtCC.coding = create('Coding') as tgtCoding then{
