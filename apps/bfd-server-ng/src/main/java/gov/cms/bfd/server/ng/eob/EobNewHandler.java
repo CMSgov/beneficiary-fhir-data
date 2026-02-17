@@ -88,30 +88,26 @@ public class EobNewHandler {
 
     var claims =
         claimRepository.findByBeneXrefSk(
-            beneXrefSk.get(),
-            serviceDate,
-            lastUpdated,
-            count,
-            startIndex,
-            tagCriteria,
-            claimTypeCodes);
+            beneXrefSk.get(), serviceDate, lastUpdated, tagCriteria, claimTypeCodes);
 
-    var filteredClaims = filterSamhsaClaims(claims, samhsaFilterMode);
+    var filteredClaims =
+        filterSamhsaClaims(claims, samhsaFilterMode)
+            .map(
+                claim -> {
+                  var hasSamhsaClaims =
+                      samhsaFilterMode == SamhsaFilterMode.INCLUDE && claimHasSamhsa(claim);
 
-    return FhirUtil.bundleOrDefault(
-        filteredClaims.map(
-            claim -> {
-              var hasSamhsaClaims =
-                  samhsaFilterMode == SamhsaFilterMode.INCLUDE && claimHasSamhsa(claim);
+                  var securityStatus =
+                      hasSamhsaClaims
+                          ? ClaimSecurityStatus.SAMHSA_APPLICABLE
+                          : ClaimSecurityStatus.NONE;
 
-              var securityStatus =
-                  hasSamhsaClaims
-                      ? ClaimSecurityStatus.SAMHSA_APPLICABLE
-                      : ClaimSecurityStatus.NONE;
+                  return claim.toFhir(securityStatus);
+                })
+            .skip(startIndex.orElse(0))
+            .limit(count.orElse(5000));
 
-              return claim.toFhir(securityStatus);
-            }),
-        loadProgressRepository::lastUpdated);
+    return FhirUtil.bundleOrDefault(filteredClaims.toList(), loadProgressRepository::lastUpdated);
   }
 
   private Stream<? extends ClaimBase> filterSamhsaClaims(

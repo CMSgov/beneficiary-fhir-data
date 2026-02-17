@@ -71,7 +71,7 @@ public class FhirUtil {
    * @return bundle
    */
   public static Bundle bundleOrDefault(
-      List<Resource> resources, Supplier<ZonedDateTime> batchLastUpdated) {
+      List<? extends Resource> resources, Supplier<ZonedDateTime> batchLastUpdated) {
     if (resources.isEmpty()) {
       return defaultBundle(batchLastUpdated);
     }
@@ -124,7 +124,7 @@ public class FhirUtil {
     return bundle;
   }
 
-  private static Bundle getBundle(Stream<Resource> resources) {
+  private static Bundle getBundle(Stream<? extends Resource> resources) {
     return new Bundle()
         .setEntry(resources.map(r -> new Bundle.BundleEntryComponent().setResource(r)).toList());
   }

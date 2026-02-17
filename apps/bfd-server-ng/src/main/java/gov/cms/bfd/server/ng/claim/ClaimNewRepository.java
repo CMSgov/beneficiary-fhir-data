@@ -147,8 +147,6 @@ public class ClaimNewRepository {
    * @param beneSk bene sk
    * @param claimThroughDate claim through date
    * @param lastUpdated last updated
-   * @param limit limit
-   * @param offset offset
    * @param tagCriteria tag criteria
    * @param claimTypeCodes claimTypeCodes
    * @return claims
@@ -164,8 +162,6 @@ public class ClaimNewRepository {
               key = "hasLastUpdated",
               expression = "lowerBound.isPresent() || upperBound.isPresent()")
           DateTimeRange lastUpdated,
-      @MeterTag(key = "hasLimit", expression = "isPresent()") Optional<Integer> limit,
-      @MeterTag(key = "hasOffset", expression = "isPresent()") Optional<Integer> offset,
       @MeterTag(key = "hasTags", expression = "size() > 0") List<List<TagCriterion>> tagCriteria,
       @MeterTag(key = "hasClaimTypeCodes", expression = "size() > 0")
           List<ClaimTypeCode> claimTypeCodes) {
@@ -237,10 +233,6 @@ public class ClaimNewRepository {
     allClaims.addAll(rxClaims.join());
 
     // Sort, apply offset/limit
-    return allClaims.stream()
-        .sorted(Comparator.comparing(ClaimBase::getClaimUniqueId))
-        .skip(offset.orElse(0))
-        .limit(limit.orElse(5000))
-        .toList();
+    return allClaims.stream().sorted(Comparator.comparing(ClaimBase::getClaimUniqueId)).toList();
   }
 }

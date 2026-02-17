@@ -30,7 +30,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Repository;
 
 /** Repository methods for claims. */
-// NOTE: @Transactional is needed to ensure our custom transaction manager is used
 @Repository
 @AllArgsConstructor
 public class ClaimAsyncService {
