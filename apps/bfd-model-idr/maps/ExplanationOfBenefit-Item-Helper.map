@@ -1,0 +1,535 @@
+map "https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Item-Helper" = "BFD-ExplanationOfBenefit-Item-Helper-Map"
+imports "https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper" 
+
+group addItem(source src: LineItemComponent, target tgt: BackboneElement){
+    src.CLM_LINE_NUM as seqNum -> tgt.sequence = seqNum "set sequence number";
+
+    src -> tgt.productOrService = create('CodeableConcept') as prodCC then addProductOrService(src,prodCC) "Add productOrService";
+    //We know we CAN get HCPCS + HIPPS code, and potentially NDC, we'll want to add it.
+    src.CLM_LINE_NDC_CD as ndcCd where(ndcCd.length()=11) -> tgt.detail = create('BackboneElement') as tgtDetail then addNDCToInstitutional(src, tgtDetail) "Add ndc info";
+    src -> tgt.quantity = create('SimpleQuantity') as tgtQuantity then {
+        src.CLM_LINE_SRVC_UNIT_QTY as unitQty -> tgtQuantity.value=cast(unitQty,"decimal") "set quantity";
+    } "Set quantity of service provided";
+    src -> tgt.revenue = create('CodeableConcept') as tgtRevenue then addRevenue(src,tgtRevenue) "add revenue";
+    src -> tgt.modifier = create('CodeableConcept') as tgtModifier then addModifier(src,tgtModifier) "add revenue";
+    src.SEQUENCE_INFO as sequenceInfo where sequenceInfo.length()>0 -> tgt.informationSequence = sequenceInfo;
+
+    //Have to repeat this 4 times because of the flat format. 
+    src.CLM_1_REV_CNTR_ANSI_GRP_CD as adjReason1 where adjReason1.length()=2 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addAdjudicationReason1(src, tgtAdjudication) "Add adjudication reasons";
+    src.CLM_2_REV_CNTR_ANSI_GRP_CD as adjReason1 where adjReason1.length()=2 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addAdjudicationReason2(src, tgtAdjudication) "Add adjudication reasons";
+    src.CLM_3_REV_CNTR_ANSI_GRP_CD as adjReason1 where adjReason1.length()=2 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addAdjudicationReason3(src, tgtAdjudication) "Add adjudication reasons";
+    src.CLM_4_REV_CNTR_ANSI_GRP_CD as adjReason1 where adjReason1.length()=2 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addAdjudicationReason4(src, tgtAdjudication) "Add adjudication reasons";
+    
+    //Line item adjudication charge amounts.
+    src.CLM_LINE_NCVRD_CHRG_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addAdjudicationNonCoveredAmount(amt, tgtAdjudication) "Add amount";
+    src.CLM_LINE_ALOWD_CHRG_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addAdjudicationEligibleAmount(amt, tgtAdjudication) "Add amount";
+    src.CLM_LINE_SBMT_CHRG_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addAdjudicationSubmittedAmount(amt, tgtAdjudication) "Add amount";
+    src.CLM_LINE_PRVDR_PMT_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addAdjudicationPaidToProvider(amt, tgtAdjudication) "Add amount";
+    src.CLM_LINE_BENE_PMT_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addAdjudicationPaidByBene(amt, tgtAdjudication) "Add amount";
+    src.CLM_LINE_BENE_PD_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addAdjudicationPaidToBene(amt, tgtAdjudication) "Add amount";
+    src.CLM_LINE_CVRD_PD_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addAdjudicationPaidByMedicare(amt, tgtAdjudication) "Add amount";
+    src.CLM_LINE_BLOOD_DDCTBL_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addAdjudicationBloodDeductible(amt, tgtAdjudication) "Add amount";
+    src.CLM_LINE_MDCR_DDCTBL_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addAdjudicationPartBDeductible(amt, tgtAdjudication) "Add amount";
+    src.CLM_LINE_INSTNL_ADJSTD_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addAdjustedInstitutionalAmt(amt, tgtAdjudication) "Add amount";
+    src.CLM_LINE_INSTNL_RDCD_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addAdjudicationReducedAmt(amt, tgtAdjudication) "Add amount";
+    src.CLM_LINE_INSTNL_MSP1_PD_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addAdjudicationMSP1(amt, tgtAdjudication) "Add amount";
+    src.CLM_LINE_INSTNL_MSP2_PD_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addAdjudicationMSP2(amt, tgtAdjudication) "Add amount";
+    src.CLM_LINE_INSTNL_RATE_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addAdjudicationRateAmt(amt, tgtAdjudication) "Add amount";
+    src.CLM_LINE_MDCR_COINSRNC_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addLineCoinsuranceAmt(amt, tgtAdjudication) "Add amount";
+    src.CLM_BENE_PRMRY_PYR_PD_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addBenePrmyAmt(amt, tgtAdjudication) "Add amount";
+    src.CLM_LINE_OTAF_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addLineOTAFAmt(amt, tgtAdjudication) "Add amount";
+
+    src.CLM_LINE_PRFNL_DME_PRICE_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addLineDMEPrice(amt, tgtAdjudication) "Add amount";
+    src.CLM_LINE_DMERC_SCRN_SVGS_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addLineDMESvgs(amt, tgtAdjudication) "Add amount";
+    src.CLM_LINE_ADD_ON_PYMT_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addLineAddOnPayment(amt, tgtAdjudication) "Add amount";
+    src.CLM_LINE_NON_EHR_RDCTN_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addLineNonEHRReduction(amt, tgtAdjudication) "Add amount";
+    src.CLM_REV_CNTR_TDAPA_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addLineTransitionalDrugAddOnPaymentAdjustment(amt, tgtAdjudication) "Add amount";
+    src.CLM_LINE_CARR_CLNCL_CHRG_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addLineCarrierClinicalCharge(amt, tgtAdjudication) "Add amount";
+    src.CLM_LINE_CARR_PSYCH_OT_LMT_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addLineTherapyAmountAppliedToLimit(amt, tgtAdjudication) "Add amount";
+    src.CLM_LINE_PRFNL_INTRST_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addLineProfessionalInterest(amt, tgtAdjudication) "Add amount";
+    src.CLM_MDCR_PRMRY_PYR_ALOWD_AMT as amt where amt.length()>0 -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then addLinePrimaryPayerAllowed(amt, tgtAdjudication) "Add amount";
+    src.CLM_LINE_INSTNL_REV_CTR_DT as revCtrDate -> tgt.servicedDate = revCtrDate "add revenue center date";
+
+    //These fields never ended up getting mapped in v2. We should actively seek feedback on their placement. They appeared to all show up in extension in v1, anyway.
+    src.CLM_REV_DSCNT_IND_CD as inputCode where inputCode.length()>0 -> tgt.extension = create('Extension') as tgtExtension then addAdjudicationRevCenterDiscountCode(inputCode, tgtExtension) "Add discount code";
+    src.CLM_OTAF_ONE_IND_CD as inputCode where inputCode.length()>0 -> tgt.extension = create('Extension') as tgtExtension then addOTAFCode(inputCode, tgtExtension) "Add  code";
+    src.CLM_REV_PACKG_IND_CD as inputCode where inputCode.length()>0 -> tgt.extension = create('Extension') as tgtExtension then addPackgCd(inputCode, tgtExtension) "Add  code";
+    src.CLM_REV_PMT_MTHD_CD as inputCode where inputCode.length()>0 -> tgt.extension = create('Extension') as tgtExtension then addMthdCd(inputCode, tgtExtension) "Add  code";
+    src.CLM_REV_CNTR_STUS_CD as inputCode where inputCode.length()>0 -> tgt.extension = create('Extension') as tgtExtension then addCntrStusCd(inputCode, tgtExtension) "Add  code";
+    src.CLM_SUPLR_TYPE_CD as inputCode where inputCode.length()>0 -> tgt.extension = create('Extension') as tgtExtension then addSuplrTypeCd(inputCode, tgtExtension) "Add  code";
+    //calling the same function is intentional. One is populated w/ Carrier, other DME. 
+    src.CLM_RNDRG_PRVDR_TYPE_CD as inputCode where inputCode.length()>0 -> tgt.extension = create('Extension') as tgtExtension then addSuplrTypeCd(inputCode, tgtExtension) "Add  code";
+
+    src.CLM_RNDRG_PRVDR_PRTCPTG_CD as inputCode where inputCode.length() > 0 -> tgt.extension = create('Extension') as tgtExtension then addParticipatingCode(inputCode, tgtExtension) "Add  code";
+
+    //generic extension + code system since the type codes can be applied to different types, not just rendering providers.
+
+    //These are generally on professional claims 
+    src.CLM_LINE_ANSTHSA_UNIT_CNT as anesthesiaCnt -> tgt.extension = create('Extension') as tgtExtension then addAnesthesia(anesthesiaCnt, tgtExtension) "Add anesthesia unit counts";
+    src.CLM_LINE_RX_NUM as rxNum -> tgt.extension = create('Extension') as tgtExtension then addClaimLineRxNum(rxNum, tgtExtension) "Add rx num";
+
+    //These are present on professional Claim lines
+    src.CLM_MTUS_IND_CD as inputCode where inputCode.length()>0 -> tgt.extension = create('Extension') as tgtExtension then addMTUIndCd(inputCode, tgtExtension) "Add  code";
+    //this one is an amount
+    src.CLM_LINE_PRFNL_MTUS_CNT as inputCode where inputCode.length()>0 -> tgt.extension = create('Extension') as tgtExtension then addMTUCnt(inputCode, tgtExtension) "Add  code";
+    
+    //Extensions with codes
+    src.CLM_PRCNG_LCLTY_CD as inputCode where inputCode.length()>0 -> tgt.extension = create('Extension') as tgtExtension then addLocalityCode(inputCode, tgtExtension) "Add  code";
+    src.CLM_PHYSN_ASTNT_CD as inputCode where inputCode.length()>0 -> tgt.extension = create('Extension') as tgtExtension then addPACode(inputCode, tgtExtension) "Add  code";
+    src.CLM_LINE_CARR_HPSA_SCRCTY_CD as inputCode where inputCode.length()>0 -> tgt.extension = create('Extension') as tgtExtension then addHPSACd(inputCode, tgtExtension) "Add  code";
+    src.CLM_PRMRY_PYR_CD as inputCode where inputCode.length()>0 -> tgt.extension = create('Extension') as tgtExtension then addPyrCd(inputCode, tgtExtension) "Add  code";
+    src.CLM_FED_TYPE_SRVC_CD as inputCode where inputCode.length()>0 -> tgt.extension = create('Extension') as tgtExtension then addFedSvcTypeCd(inputCode, tgtExtension) "Add  code";
+    src.CLM_PMT_80_100_CD as inputCode where inputCode.length()>0 -> tgt.extension = create('Extension') as tgtExtension then add80100Cd(inputCode, tgtExtension) "Add  code";
+    src.CLM_PRCSG_IND_CD as inputCode where inputCode.length()>0 -> tgt.extension = create('Extension') as tgtExtension then addPrcsgInd(inputCode, tgtExtension) "Add  code";
+    src.CLM_SRVC_DDCTBL_SW as inputCode where inputCode.length()>0 -> tgt.extension = create('Extension') as tgtExtension then addDeductSwitch(inputCode, tgtExtension) "Add  code";
+    src.CLM_PRVDR_SPCLTY_CD as inputCode where inputCode.length()>0 -> tgt.extension = create('Extension') as tgtExtension then addPrvdrSpclty(inputCode, tgtExtension) "Add  code";
+
+    src.CLM_POS_CD as placeCode -> tgt.location = create('CodeableConcept') as tgtCC then{
+        src -> tgtCC.coding = create('Coding') as tgtCoding then{
+            src -> tgtCoding.system="https://www.cms.gov/Medicare/Coding/place-of-service-codes/Place_of_Service_Code_Set",
+            tgtCoding.code=placeCode "Add system and code";
+        } "Add coding";
+    } "Add location codeable concept";
+    
+    //only pull in valid dates here.
+    src.CLM_LINE_FROM_DT as clmLineFromDt -> tgt.serviced = create('Period') as tgtPeriod then{
+        clmLineFromDt -> tgtPeriod.start = clmLineFromDt "add start";
+        src.CLM_LINE_THRU_DT as clmLineThruDt -> tgtPeriod.end = clmLineThruDt "add end";
+    } "Add serviced period";
+
+
+    //This is a proxy element (only for professional) for determining if a claim is a professional claim. On professional FFS claims, populate "other" for network (eg Medicare). 
+    src.CLM_SRVC_DDCTBL_SW as isProfessional -> tgt.adjudication = create('BackboneElement') as tgtAdjudication then {
+        src -> tgtAdjudication.category = create('CodeableConcept') as tgtCC then {
+            src -> tgtCC.coding = c("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator", "benefitpaymentstatus") "Add coding 1";
+        } "add category";
+        src -> tgtAdjudication.reason = cc("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus","other") "Add other";
+    } "Add benefitpaymentstatus";
+    
+
+    //In claims data, CLM_LINE_DGNS_CD refers to the diagnosis that supports the given claim line
+    //diagnosisRelatedLine is a computed value that is input "for FML purposes" to correspond to the sequence number
+    //present on the diagnosis in EoB.diagnosis that corresponds to the value in CLM_LINE_DGNS_CD.
+    src.diagnosisSequence as claimLineDiagnosis -> tgt.diagnosisSequence = cast(claimLineDiagnosis,"positiveInt") "Add diagnosis sequence number";
+    //Care team sequence is generated by the provider script.
+    src.careTeamSequence as careTeamSequence -> tgt.careTeamSequence = cast(careTeamSequence,"positiveInt") "Add reference to care team sequence.";
+}
+
+group addSuplrTypeCd(source src: String, target tgt: Extension){
+    //This is purposeful (use of PRVDR-TYPE-CD.) Suplr-type-cd is a subset of the overall set. We can combine the extensions + code systems.
+    src -> tgt.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRVDR-TYPE-CD" "Add extension url";
+    src as inputCode -> tgt.value = create('Coding') as tgtCoding then {
+        src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRVDR-TYPE-CD" "Set system";
+        inputCode -> tgtCoding.code = inputCode "set code";
+      } "Set value";
+}
+
+group addParticipatingCode(source src: String, target tgt: Extension){
+    src -> tgt.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-RNDRG-PRVDR-PRTCPTG-CD" "Add extension url";
+    src as inputCode -> tgt.value = create('Coding') as tgtCoding then {
+        src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RNDRG-PRVDR-PRTCPTG-CD" "Set system";
+        inputCode -> tgtCoding.code = inputCode "set code";
+      } "Set value";
+}
+
+group addMTUIndCd(source src: String, target tgt: Extension){
+    src -> tgt.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MTUS-IND-CD" "Add extension url";
+    src as inputCode -> tgt.value = create('Coding') as tgtCoding then {
+        src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MTUS-IND-CD" "Set system";
+        inputCode -> tgtCoding.code = inputCode "set code";
+      } "Set value";
+}
+group addMTUCnt(source src: String, target tgt: Extension){
+    src -> tgt.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-LINE-PRFNL-MTUS-CNT" "Add extension url";
+    src as inputValue -> tgt.value = cast(inputValue, "decimal") "set value";
+}
+group addLocalityCode(source src: String, target tgt: Extension){
+    src -> tgt.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRCNG-LCLTY-CD" "Add extension url";
+    src as inputCode -> tgt.value = create('Coding') as tgtCoding then {
+        src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRCNG-LCLTY-CD" "Set system";
+        inputCode -> tgtCoding.code = inputCode "set code";
+      } "Set value";
+}
+group addPACode(source src: String, target tgt: Extension){
+    src -> tgt.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PHYSN-ASTNT-CD" "Add extension url";
+    src as inputCode -> tgt.value = create('Coding') as tgtCoding then {
+        src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PHYSN-ASTNT-CD" "Set system";
+        inputCode -> tgtCoding.code = inputCode "set code";
+      } "Set value";
+}
+group addHPSACd(source src: String, target tgt: Extension){
+    src -> tgt.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-LINE-CARR-HPSA-SCRCTY-CD" "Add extension url";
+    src as inputCode -> tgt.value = create('Coding') as tgtCoding then {
+        src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-LINE-CARR-HPSA-SCRCTY-CD" "Set system";
+        inputCode -> tgtCoding.code = inputCode "set code";
+      } "Set value";
+}
+group addPyrCd(source src: String, target tgt: Extension){
+    src -> tgt.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRMRY-PYR-CD" "Add extension url";
+    src as inputCode -> tgt.value = create('Coding') as tgtCoding then {
+        src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRMRY-PYR-CD" "Set system";
+        inputCode -> tgtCoding.code = inputCode "set code";
+      } "Set value";
+}
+group addFedSvcTypeCd(source src: String, target tgt: Extension){
+    src -> tgt.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-FED-TYPE-SRVC-CD" "Add extension url";
+    src as inputCode -> tgt.value = create('Coding') as tgtCoding then {
+        src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FED-TYPE-SRVC-CD" "Set system";
+        inputCode -> tgtCoding.code = inputCode "set code";
+      } "Set value";
+}
+group add80100Cd(source src: String, target tgt: Extension){
+    src -> tgt.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PMT-80-100-CD" "Add extension url";
+    src as inputCode -> tgt.value = create('Coding') as tgtCoding then {
+        src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PMT-80-100-CD" "Set system";
+        inputCode -> tgtCoding.code = inputCode "set code";
+      } "Set value";
+}
+group addPrcsgInd(source src: String, target tgt: Extension){
+    src -> tgt.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRCSG-IND-CD" "Add extension url";
+    src as inputCode -> tgt.value = create('Coding') as tgtCoding then {
+        src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRCSG-IND-CD" "Set system";
+        inputCode -> tgtCoding.code = inputCode "set code";
+      } "Set value";
+}
+group addDeductSwitch(source src: String, target tgt: Extension){
+    src -> tgt.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-SRVC-DDCTBL-SW" "Add extension url";
+    src as inputCode -> tgt.value = create('Coding') as tgtCoding then {
+        src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-SRVC-DDCTBL-SW" "Set system";
+        inputCode -> tgtCoding.code = inputCode "set code";
+      } "Set value";
+}
+group addPrvdrSpclty(source src: String, target tgt: Extension){
+    src -> tgt.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRVDR-SPCLTY-CD" "Add extension url";
+    src as inputCode -> tgt.value = create('Coding') as tgtCoding then {
+        src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRVDR-SPCLTY-CD" "Set system";
+        inputCode -> tgtCoding.code = inputCode "set code";
+      } "Set value";
+}
+group addAnesthesia(source src: String, target tgt: Extension){
+    src -> tgt.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-LINE-ANSTHSA-UNIT-CNT" "Add extension url";
+    src as inputCount -> tgt.value = cast(inputCount, "decimal") "Set line anesthesia count";
+}
+group addClaimLineRxNum(source src: String, target tgt: Extension){
+    src -> tgt.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-LINE-RX-NUM" "Add extension url";
+    src as inputNum -> tgt.valueString = inputNum "Set claim line RX Num";
+}
+
+//This is new, seek feedback. 
+group addAdjudicationRevCenterDiscountCode(source src: String, target tgt: Extension){
+    src -> tgt.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-DSCNT-IND-CD" "Add extension url";
+    src as inputCode -> tgt.value = create('Coding') as tgtCoding then {
+        src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-DSCNT-IND-CD" "Set system";
+        inputCode -> tgtCoding.code = inputCode "set code";
+      } "Set value";
+}
+//"One" here in extension but not the CodeSystem is intentional. 
+group addOTAFCode(source src: String, target tgt: Extension){
+    src -> tgt.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-OTAF-ONE-IND-CD" "Add extension url";
+    src as inputCode -> tgt.value = create('Coding') as tgtCoding then {
+        src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-OTAF-IND-CD" "Set system";
+        inputCode -> tgtCoding.code = inputCode "set code";
+      } "Set value";
+}
+group addPackgCd(source src: String, target tgt: Extension){
+    src -> tgt.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD" "Add extension url";
+    src as inputCode -> tgt.value = create('Coding') as tgtCoding then {
+        src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD" "Set system";
+        inputCode -> tgtCoding.code = inputCode "set code";
+      } "Set value";
+}
+group addMthdCd(source src: String, target tgt: Extension){
+    src -> tgt.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PMT-MTHD-CD" "Add extension url";
+    src as inputCode -> tgt.value = create('Coding') as tgtCoding then {
+        src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PMT-MTHD-CD" "Set system";
+        inputCode -> tgtCoding.code = inputCode "set code";
+      } "Set value";
+}
+group addCntrStusCd(source src: String, target tgt: Extension){
+    src -> tgt.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-CNTR-STUS-CD" "Add extension url";
+    src as inputCode -> tgt.value = create('Coding') as tgtCoding then {
+        src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-STUS-CD" "Set system";
+        inputCode -> tgtCoding.code = inputCode "set code";
+      } "Set value";
+}
+
+group addMoney(source src: String, target tgt: Money){
+    src -> tgt.currency = "USD" "Set Currency";
+    src as amt -> tgt.value = cast(amt, "decimal") "Set amount";
+}
+
+
+//In the IDR, they use surrogate keys. We map them here. In sample data generation, this corresponds to CLM_ANSI_SGNTR_SK. 
+//We're only going to populate these with valid ANSI group codes. 
+group addAdjudicationReason1(source src: LineItemComponent, target tgt: BackboneElement){
+    src -> tgt.category = cc("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator", "adjustmentreason") "added rule";
+    src.CLM_1_REV_CNTR_ANSI_GRP_CD as grpCode -> tgt.reason = create('CodeableConcept') as tgtCC then {
+        grpCode -> tgtCC.coding = c("https://x12.org/codes/claim-adjustment-group-codes", grpCode) "Add x12 group code";
+        grpCode -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CODE", grpCode) "Add non-proprietary group code";
+        src.CLM_1_REV_CNTR_ANSI_RSN_CD as rsnCode -> tgt then {
+            rsnCode -> tgtCC.coding = c("https://x12.org/codes/claim-adjustment-reason-codes", rsnCode) "Add x12 group code";
+            rsnCode -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CODE", rsnCode) "Add non-proprietary group code";
+        } "Add reason code";
+    } "Add group and reason codes";
+}
+
+group addAdjudicationReason2(source src: LineItemComponent, target tgt: BackboneElement){
+    src -> tgt.category = cc("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator", "adjustmentreason") "added rule";
+    src.CLM_2_REV_CNTR_ANSI_GRP_CD as grpCode -> tgt.reason = create('CodeableConcept') as tgtCC then {
+        grpCode -> tgtCC.coding = c("https://x12.org/codes/claim-adjustment-group-codes", grpCode) "Add x12 group code";
+        grpCode -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CODE", grpCode) "Add non-proprietary group code";
+        src.CLM_2_REV_CNTR_ANSI_RSN_CD as rsnCode -> tgt then {
+            rsnCode -> tgtCC.coding = c("https://x12.org/codes/claim-adjustment-reason-codes", rsnCode) "Add x12 group code";
+            rsnCode -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CODE", rsnCode) "Add non-proprietary group code";
+        } "Add reason code";
+    } "Add group and reason codes";
+}
+
+group addAdjudicationReason3(source src: LineItemComponent, target tgt: BackboneElement){
+    src -> tgt.category = cc("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator", "adjustmentreason") "added rule";
+    src.CLM_3_REV_CNTR_ANSI_GRP_CD as grpCode -> tgt.reason = create('CodeableConcept') as tgtCC then {
+        grpCode -> tgtCC.coding = c("https://x12.org/codes/claim-adjustment-group-codes", grpCode) "Add x12 group code";
+        grpCode -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CODE", grpCode) "Add non-proprietary group code";
+        src.CLM_3_REV_CNTR_ANSI_RSN_CD as rsnCode -> tgt then {
+            rsnCode -> tgtCC.coding = c("https://x12.org/codes/claim-adjustment-reason-codes", rsnCode) "Add x12 group code";
+            rsnCode -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CODE", rsnCode) "Add non-proprietary group code";
+        } "Add reason code";
+    } "Add group and reason codes";
+}
+
+group addAdjudicationReason4(source src: LineItemComponent, target tgt: BackboneElement){
+    src -> tgt.category = cc("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator", "adjustmentreason") "added rule";
+    src.CLM_4_REV_CNTR_ANSI_GRP_CD as grpCode -> tgt.reason = create('CodeableConcept') as tgtCC then {
+        grpCode -> tgtCC.coding = c("https://x12.org/codes/claim-adjustment-group-codes", grpCode) "Add x12 group code";
+        grpCode -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CODE", grpCode) "Add non-proprietary group code";
+        src.CLM_4_REV_CNTR_ANSI_RSN_CD as rsnCode -> tgt then {
+            rsnCode -> tgtCC.coding = c("https://x12.org/codes/claim-adjustment-reason-codes", rsnCode) "Add x12 group code";
+            rsnCode -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CODE", rsnCode) "Add non-proprietary group code";
+        } "Add reason code";
+    } "Add group and reason codes";
+}
+
+//CLM_LINE_NCVRD_CHRG_AMT
+group addAdjudicationNonCoveredAmount(source src: String, target tgt: BackboneElement){
+    src -> tgt.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = c("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication", "noncovered") "Add coding 1";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_NCVRD_CHRG_AMT") "Add coding 2";
+    } "add category";
+    src -> tgt.amount = create('Money') as tgtMoney then addMoney(src, tgtMoney) "Add Money";
+}
+//CLM_LINE_ALOWD_CHRG_AMT
+group addAdjudicationEligibleAmount(source src: String, target tgt: BackboneElement){
+    src -> tgt.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/adjudication", "eligible") "Add coding 1";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_ALOWD_CHRG_AMT") "Add coding 2";
+    } "add category";
+    src -> tgt.amount = create('Money') as tgtMoney then addMoney(src, tgtMoney) "Add Money";
+}
+
+//CLM_LINE_SBMT_CHRG_AMT <--- submitted charge
+group addAdjudicationSubmittedAmount(source src: String, target tgt: BackboneElement){
+    src -> tgt.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/adjudication", "submitted") "Add coding 1";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_SBMT_CHRG_AMT") "Add coding 2";
+    } "add category";
+    src -> tgt.amount = create('Money') as tgtMoney then addMoney(src, tgtMoney) "Add Money";
+}
+//CLM_LINE_PRVDR_PMT_AMT <-- amt paid to provider
+group addAdjudicationPaidToProvider(source src: String, target tgt: BackboneElement){
+    src -> tgt.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = c("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication", "paidtoprovider") "Add coding 1";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_PRVDR_PMT_AMT") "Add coding 2";
+    } "add category";
+    src -> tgt.amount = create('Money') as tgtMoney then addMoney(src, tgtMoney) "Add Money";
+}
+//CLM_LINE_BENE_PMT_AMT
+group addAdjudicationPaidByBene(source src: String, target tgt: BackboneElement){
+    src -> tgt.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = c("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication", "paidbypatient") "Add coding 1";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_BENE_PMT_AMT") "Add coding 2";
+    } "add category";
+    src -> tgt.amount = create('Money') as tgtMoney then addMoney(src, tgtMoney) "Add Money";
+}
+
+//CLM_LINE_BENE_PD_AMT <-- paid to bene
+group addAdjudicationPaidToBene(source src: String, target tgt: BackboneElement){
+    src -> tgt.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = c("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication", "paidtopatient") "Add coding 1";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_BENE_PD_AMT") "Add coding 2";
+    } "add category";
+    src -> tgt.amount = create('Money') as tgtMoney then addMoney(src, tgtMoney) "Add Money";
+}
+
+//CLM_LINE_CVRD_PD_AMT <-- paid by medicare
+group addAdjudicationPaidByMedicare(source src: String, target tgt: BackboneElement){
+    src -> tgt.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/adjudication", "benefit") "Add coding 1";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_CVRD_PD_AMT") "Add coding 2";
+    } "add category";
+    src -> tgt.amount = create('Money') as tgtMoney then addMoney(src, tgtMoney) "Add Money";
+}
+
+//CLM_LINE_BLOOD_DDCTBL_AMT <-- blood deductible 
+group addAdjudicationBloodDeductible(source src: String, target tgt: BackboneElement){
+    src -> tgt.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/adjudication", "deductible") "Add coding 1";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_BLOOD_DDCTBL_AMT") "Add coding 2";
+    } "add category";
+    src -> tgt.amount = create('Money') as tgtMoney then addMoney(src, tgtMoney) "Add Money";
+}
+
+group addAdjudicationPartBDeductible(source src: String, target tgt: BackboneElement){
+    src -> tgt.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/adjudication", "deductible") "Add coding 1";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_MDCR_DDCTBL_AMT") "Add coding 2";
+    } "add category";
+    src -> tgt.amount = create('Money') as tgtMoney then addMoney(src, tgtMoney) "Add Money";
+}
+
+group addAdjustedInstitutionalAmt(source src: String, target tgt: BackboneElement){
+    src -> tgt.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_INSTNL_ADJSTD_AMT") "Add coding 2";
+    src -> tgt.amount = create('Money') as tgtMoney then addMoney(src, tgtMoney) "Add Money";
+}
+
+group addAdjudicationReducedAmt(source src: String, target tgt: BackboneElement){
+    src -> tgt.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_INSTNL_RDCD_AMT") "Add coding 2";
+    src -> tgt.amount = create('Money') as tgtMoney then addMoney(src, tgtMoney) "Add Money";
+}
+
+group addAdjudicationMSP1(source src: String, target tgt: BackboneElement){
+    src -> tgt.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = c("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication", "priorpayerpaid") "Add coding 1";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_INSTNL_MSP1_PD_AMT") "Add coding 2";
+    } "add category";
+    src -> tgt.amount = create('Money') as tgtMoney then addMoney(src, tgtMoney) "Add Money";
+}
+
+group addAdjudicationMSP2(source src: String, target tgt: BackboneElement){
+    src -> tgt.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = c("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication", "priorpayerpaid") "Add coding 1";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_INSTNL_MSP2_PD_AMT") "Add coding 2";
+    } "add category";
+    src -> tgt.amount = create('Money') as tgtMoney then addMoney(src, tgtMoney) "Add Money";
+}
+
+group addAdjudicationRateAmt(source src: String, target tgt: BackboneElement){
+    src -> tgt.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_INSTNL_RATE_AMT") "Add coding 2";
+    src -> tgt.amount = create('Money') as tgtMoney then addMoney(src, tgtMoney) "Add Money";
+}
+
+group addLineCoinsuranceAmt(source src: String, target tgt: BackboneElement){
+    src -> tgt.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = c("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication", "coinsurance") "Add coding 1";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_MDCR_COINSRNC_AMT") "Add coding 2";
+    } "add category";
+    src -> tgt.amount = create('Money') as tgtMoney then addMoney(src, tgtMoney) "Add Money";
+}
+
+group addLineDMEPrice(source src: String, target tgt: BackboneElement){
+    src -> tgt.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/adjudication", "eligible") "Add coding 1";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_PRFNL_DME_PRICE_AMT") "Add coding 2";
+    } "add category";
+    src -> tgt.amount = create('Money') as tgtMoney then addMoney(src, tgtMoney) "Add Money";
+}
+
+group addLineDMESvgs(source src: String, target tgt: BackboneElement){
+    src -> tgt.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = c("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication", "discount") "Add coding 1";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_DMERC_SCRN_SVGS_AMT") "Add coding 2";
+    } "add category";
+    src -> tgt.amount = create('Money') as tgtMoney then addMoney(src, tgtMoney) "Add Money";
+}
+
+group addBenePrmyAmt(source src: String, target tgt: BackboneElement){
+    src -> tgt.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = c("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication", "priorpayerpaid") "Add coding 1";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_BENE_PRMRY_PYR_PD_AMT") "Add coding 2";
+    } "add category";
+    src -> tgt.amount = create('Money') as tgtMoney then addMoney(src, tgtMoney) "Add Money";
+}
+group addLineOTAFAmt(source src: String, target tgt: BackboneElement){
+    src -> tgt.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_OTAF_AMT") "Add coding 2";
+    } "add category";
+    src -> tgt.amount = create('Money') as tgtMoney then addMoney(src, tgtMoney) "Add Money";
+}
+group addLineAddOnPayment(source src: String, target tgt: BackboneElement){
+    src -> tgt.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_ADD_ON_PYMT_AMT") "Add coding 2";
+    src -> tgt.amount = create('Money') as tgtMoney then addMoney(src, tgtMoney) "Add Money";
+}
+
+group addLineNonEHRReduction(source src: String, target tgt: BackboneElement){
+    src -> tgt.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_NON_EHR_RDCTN_AMT") "Add coding 2";
+    src -> tgt.amount = create('Money') as tgtMoney then addMoney(src, tgtMoney) "Add Money";
+}
+
+group addLineTransitionalDrugAddOnPaymentAdjustment(source src: String, target tgt: BackboneElement){
+    src -> tgt.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_REV_CNTR_TDAPA_AMT") "Add coding 2";
+    src -> tgt.amount = create('Money') as tgtMoney then addMoney(src, tgtMoney) "Add Money";
+}
+
+group addLineCarrierClinicalCharge(source src: String, target tgt: BackboneElement){
+    src -> tgt.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_CARR_CLNCL_CHRG_AMT") "Add coding 2";
+    src -> tgt.amount = create('Money') as tgtMoney then addMoney(src, tgtMoney) "Add Money";
+}
+
+group addLineTherapyAmountAppliedToLimit(source src: String, target tgt: BackboneElement){
+    src -> tgt.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_CARR_PSYCH_OT_LMT_AMT") "Add coding 2";
+    src -> tgt.amount = create('Money') as tgtMoney then addMoney(src, tgtMoney) "Add Money";
+}
+
+group addLineProfessionalInterest(source src: String, target tgt: BackboneElement){
+    src -> tgt.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_PRFNL_INTRST_AMT") "Add coding 2";
+    src -> tgt.amount = create('Money') as tgtMoney then addMoney(src, tgtMoney) "Add Money";
+}
+
+group addLinePrimaryPayerAllowed(source src: String, target tgt: BackboneElement){
+    src -> tgt.category = cc("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_MDCR_PRMRY_PYR_ALOWD_AMT") "Add coding 2";
+    src -> tgt.amount = create('Money') as tgtMoney then addMoney(src, tgtMoney) "Add Money";
+}
+group addRevenue(source src: LineItemComponent, target tgt: CodeableConcept){
+    src.CLM_LINE_REV_CTR_CD as revCtrCode -> tgt.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD",revCtrCode) "Add coding";
+    src.CLM_LINE_REV_CTR_CD as revCtrCode -> tgt.coding = create('Coding') as tgtCoding then {
+        src -> tgtCoding.system = "https://www.nubc.org/CodeSystem/RevenueCodes" "set system";
+        src -> tgtCoding.code = revCtrCode "set rev center code";
+    } "Add revenue center coding";
+
+    src.CLM_DDCTBL_COINSRNC_CD as ddctblCd -> tgt.coding = create('Coding') as tgtCoding then {
+        src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DDCTBL-COINSRNC-CD" "set system";
+        src -> tgtCoding.code = ddctblCd "set deductible/coinsurance code";
+    } "Add deductible code";
+}
+
+group addModifier(source src: LineItemComponent, target tgt: CodeableConcept){
+    //for each of these, the sytem can be determined on the basis of how the code is formed.
+    //If it is resolvable to an integer, it's a CPT modifier. Otherwise, it's an HCPCS modifier
+    src.HCPCS_1_MDFR_CD as modifierCode where (modifierCode.length()=2 and modifierCode.substring(0,2).convertsToInteger()) -> tgt.coding = c("http://www.ama-assn.org/go/cpt", modifierCode) "Add Modifier Code";
+    src.HCPCS_1_MDFR_CD as modifierCode where (modifierCode.length()=2 and modifierCode.substring(0,2).convertsToInteger().not()) -> tgt.coding = c("https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets", modifierCode) "Add Modifier Coding";
+    src.HCPCS_2_MDFR_CD as modifierCode where (modifierCode.length()=2 and modifierCode.substring(0,2).convertsToInteger()) -> tgt.coding = c("http://www.ama-assn.org/go/cpt", modifierCode) "Add Modifier Code";
+    src.HCPCS_2_MDFR_CD as modifierCode where (modifierCode.length()=2 and modifierCode.substring(0,2).convertsToInteger().not()) -> tgt.coding = c("https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets", modifierCode) "Add Modifier Coding";
+    src.HCPCS_3_MDFR_CD as modifierCode where (modifierCode.length()=2 and modifierCode.substring(0,2).convertsToInteger()) -> tgt.coding = c("http://www.ama-assn.org/go/cpt", modifierCode) "Add Modifier Code";
+    src.HCPCS_3_MDFR_CD as modifierCode where (modifierCode.length()=2 and modifierCode.substring(0,2).convertsToInteger().not()) -> tgt.coding = c("https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets", modifierCode) "Add Modifier Coding";
+    src.HCPCS_4_MDFR_CD as modifierCode where (modifierCode.length()=2 and modifierCode.substring(0,2).convertsToInteger()) -> tgt.coding = c("http://www.ama-assn.org/go/cpt", modifierCode) "Add Modifier Code";
+    src.HCPCS_4_MDFR_CD as modifierCode where (modifierCode.length()=2 and modifierCode.substring(0,2).convertsToInteger().not()) -> tgt.coding = c("https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets", modifierCode) "Add Modifier Coding";
+    src.HCPCS_5_MDFR_CD as modifierCode where (modifierCode.length()=2 and modifierCode.substring(0,2).convertsToInteger()) -> tgt.coding = c("http://www.ama-assn.org/go/cpt", modifierCode) "Add Modifier Code";
+    src.HCPCS_5_MDFR_CD as modifierCode where (modifierCode.length()=2 and modifierCode.substring(0,2).convertsToInteger().not()) -> tgt.coding = c("https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets", modifierCode) "Add Modifier Coding";
+}
+
+group addProductOrService(source src: LineItemComponent, target tgt: CodeableConcept){
+    src.CLM_LINE_HCPCS_CD as hcpcsCd where(hcpcsCd.length()=5 and hcpcsCd.substring(0,1).convertsToInteger()) -> tgt.coding = c("http://www.ama-assn.org/go/cpt", hcpcsCd) "Add coding";
+    src.CLM_LINE_HCPCS_CD as hcpcsCd where(hcpcsCd.length()=5 and hcpcsCd.substring(0,1).convertsToInteger().not()) -> tgt.coding = c("https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets", hcpcsCd) "Add coding";
+    src.CLM_LINE_HCPCS_CD as hcpcsCd where(hcpcsCd.length()!=5) -> tgt.coding = c("http://terminology.hl7.org/CodeSystem/data-absent-reason","not-applicable") "add DAR";
+    src.CLM_REV_APC_HIPPS_CD as hippsCd where(hippsCd.length()=5 and hippsCd!="00000") -> tgt.coding = c("https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/ProspMedicareFeeSvcPmtGen/HIPPSCodes", hippsCd) "Add coding";
+}
+
+group addNDCToInstitutional(source src: LineItemComponent, target tgt: BackboneElement){
+    src.CLM_LINE_NDC_CD as ndcCd -> tgt.productOrService = cc("http://hl7.org/fhir/sid/ndc",ndcCd) "Add NDC Code";
+    src -> tgt.sequence = 1 "Add sequence";
+    src -> tgt.quantity = create('SimpleQuantity') as tgtQuantity then {
+        src.CLM_LINE_NDC_QTY as ndcQty -> tgtQuantity.value=cast(ndcQty,"decimal") "set quantity";
+        src.CLM_LINE_NDC_QTY_QLFYR_CD as ndcUnit where ndcUnit.length()>0 -> tgtQuantity.system = "http://unitsofmeasure.org" "Set system";
+        src.CLM_LINE_NDC_QTY_QLFYR_CD as ndcUnit where ndcUnit.length()>0 -> tgtQuantity.code = translate(ndcUnit,'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#UnitTransform','code') "Set code";
+        src.CLM_LINE_NDC_QTY_QLFYR_CD as ndcUnit where ndcUnit.length()>0 -> tgtQuantity.unit = ndcUnit "Set system";
+    } "Set quantity of NDC utilized";
+}

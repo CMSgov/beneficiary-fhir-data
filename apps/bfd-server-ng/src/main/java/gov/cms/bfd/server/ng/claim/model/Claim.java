@@ -90,6 +90,7 @@ public class Claim {
   @Embedded private ClaimIDRLoadDate claimIDRLoadDate;
   @Embedded private SubmitterContractNumber submitterContractNumber;
   @Embedded private SubmitterContractPBPNumber submitterContractPBPNumber;
+  @Embedded private ClaimAuditTrailContext claimAuditTrailContext;
 
   @OneToOne
   @JoinColumn(name = "bene_sk")
@@ -237,14 +238,10 @@ public class Claim {
               eob.setProvider(new Reference(p));
             });
 
-    claimSourceId.toFhirOutcome().ifPresent(eob::setOutcome);
-    claimTypeCode.toFhirOutcome().ifPresent(eob::setOutcome);
-    claimOptional
-        .getClaimFiss()
-        .flatMap(f -> f.toFhirOutcome(claimTypeCode))
-        .ifPresent(eob::setOutcome);
-
     var recordTypeCodes = claimRecordType.toFhir(supportingInfoFactory);
+    // if pac, resolve the audit trail status code
+    var auditTrailStatusCode = claimAuditTrailContext.getAuditTrailStatusCode();
+    setEobOutcome(eob, claimTypeCode, auditTrailStatusCode);
 
     var initialSupportingInfo =
         Stream.of(
@@ -255,7 +252,8 @@ public class Claim {
                 claimDispositionCode.map(c -> c.toFhir(supportingInfoFactory)),
                 claimQueryCode.map(c -> c.toFhir(supportingInfoFactory)),
                 claimAdjustmentTypeCode.map(c -> c.toFhir(supportingInfoFactory)),
-                Optional.of(claimIDRLoadDate.toFhir(supportingInfoFactory)))
+                Optional.of(claimIDRLoadDate.toFhir(supportingInfoFactory)),
+                auditTrailStatusCode.map(c -> c.toFhir(supportingInfoFactory)))
             .flatMap(Optional::stream)
             .toList();
 
@@ -342,11 +340,7 @@ public class Claim {
     adjudicationCharge.toFhirAdjudication().forEach(eob::addAdjudication);
     eob.setPayment(claimPaymentAmount.toFhir());
 
-    professional.ifPresent(
-        p -> {
-          p.toFhirAdjudication().forEach(eob::addAdjudication);
-          p.toFhirOutcome(claimTypeCode).ifPresent(eob::setOutcome);
-        });
+    professional.ifPresent(p -> p.toFhirAdjudication().forEach(eob::addAdjudication));
 
     return sortedEob(eob);
   }
@@ -361,6 +355,23 @@ public class Claim {
         .flatMap(Optional::stream)
         .map(ClaimLineRx::getClaimRxSupportingInfo)
         .toList();
+  }
+
+  private void setEobOutcome(
+      ExplanationOfBenefit eob,
+      ClaimTypeCode claimTypeCode,
+      Optional<ClaimAuditTrailStatusCode> auditTrailStatus) {
+    // if claim source is NCH, mark complete
+    claimSourceId.toFhirOutcome().ifPresent(eob::setOutcome);
+
+    // if pac, set outcome based on audit trail status code
+    auditTrailStatus.ifPresentOrElse(
+        status -> eob.setOutcome(status.getOutcome(finalAction)),
+        () -> {
+          if (claimTypeCode.isPac()) {
+            eob.setOutcome(ExplanationOfBenefit.RemittanceOutcome.PARTIAL);
+          }
+        });
   }
 
   private ExplanationOfBenefit sortedEob(ExplanationOfBenefit eob) {

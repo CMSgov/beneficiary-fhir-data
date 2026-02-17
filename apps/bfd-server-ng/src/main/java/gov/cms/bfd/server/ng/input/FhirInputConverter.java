@@ -264,9 +264,7 @@ public class FhirInputConverter {
         .orElseThrow(
             () ->
                 new InvalidRequestException(
-                    "Unknown source: "
-                        + source.trim()
-                        + ". Supported sources are: "
+                    "Unknown source. Supported sources are: "
                         + Arrays.toString(MetaSourceSk.values())));
   }
 }

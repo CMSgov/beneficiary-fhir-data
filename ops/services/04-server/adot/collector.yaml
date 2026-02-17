@@ -1,0 +1,121 @@
+receivers:
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: prometheus_job
+          static_configs:
+            - targets:
+                - localhost:${port}
+              labels:
+                Java_EMF_Metrics: true
+                ClusterName: ${cluster_name}
+                LaunchType: FARGATE
+                container_name: ${service}
+                TaskDefinitionFamily: ${name_prefix}
+          metric_relabel_configs:
+            - source_labels: [__name__]
+              action: replace
+              regex: java_lang_OperatingSystem_FreePhysicalMemorySize
+              target_label: __name__
+              replacement: java_lang_operatingsystem_freephysicalmemorysize
+            - source_labels: [__name__]
+              action: replace
+              regex: java_lang_OperatingSystem_TotalPhysicalMemorySize
+              target_label: __name__
+              replacement: java_lang_operatingsystem_totalphysicalmemorysize
+            - source_labels: [__name__]
+              action: replace
+              regex: java_lang_OperatingSystem_FreeSwapSpaceSize
+              target_label: __name__
+              replacement: java_lang_operatingsystem_freeswapspacesize
+            - source_labels: [__name__]
+              action: replace
+              regex: java_lang_OperatingSystem_TotalSwapSpaceSize
+              target_label: __name__
+              replacement: java_lang_operatingsystem_totalswapspacesize
+            - source_labels: [__name__]
+              action: replace
+              regex: java_lang_OperatingSystem_SystemCpuLoad
+              target_label: __name__
+              replacement: java_lang_operatingsystem_systemcpuload
+            - source_labels: [__name__]
+              action: replace
+              regex: java_lang_OperatingSystem_ProcessCpuLoad
+              target_label: __name__
+              replacement: java_lang_operatingsystem_processcpuload
+            - source_labels: [__name__]
+              action: replace
+              regex: java_lang_OperatingSystem_AvailableProcessors
+              target_label: __name__
+              replacement: java_lang_operatingsystem_availableprocessors
+            - source_labels: [__name__]
+              action: replace
+              regex: java_lang_OperatingSystem_OpenFileDescriptorCount
+              target_label: __name__
+              replacement: java_lang_operatingsystem_openfiledescriptorcount
+            - source_labels: [__name__]
+              action: replace
+              regex: jvm_memory_used_bytes
+              replacement: jvm_memory_bytes_used
+              target_label: __name__
+            - source_labels: [__name__]
+              action: replace
+              regex: jvm_memory_pool_used_bytes
+              replacement: jvm_memory_pool_bytes_used
+              target_label: __name__
+processors:
+  resource:
+    attributes:
+      - key: receiver # Insert receiver: prometheus for CloudWatch EMF Exporter to add prom_metric_type
+        value: "prometheus"
+        action: insert
+  metricstransform:
+    transforms:
+      - include: ".*" # Rename customized job label back to job
+        match_type: regexp
+        action: update
+        operations:
+          - label: prometheus_job # must match the value configured in ecs_observer
+            new_label: job
+            action: update_label
+# Use awsemf for CloudWatch Container Insights Prometheus. The extension does not have requirement on exporter.
+exporters:
+  awsemf:
+    namespace: ECS/ContainerInsights/Prometheus # Use the exact namespace for builtin dashboard to work
+    log_group_name: ${log_group_name}
+    dimension_rollup_option: NoDimensionRollup
+    metric_declarations:
+      # JMX
+      - dimensions: [ [ ClusterName, TaskDefinitionFamily, area ] ]
+        label_matchers:
+          - label_names:
+              - Java_EMF_Metrics
+            regex: ^true$
+        metric_name_selectors:
+          - "^jvm_memory_bytes_used$"
+          - "^jvm_memory_used_bytes$"
+      - dimensions: [ [ ClusterName, TaskDefinitionFamily, pool ] ]
+        label_matchers:
+          - label_names:
+              - Java_EMF_Metrics
+            regex: ^true$
+        metric_name_selectors:
+          - "^jvm_memory_pool_bytes_used$"
+          - "^jvm_memory_pool_used_bytes$"
+      - dimensions: [ [ ClusterName, TaskDefinitionFamily ] ]
+        label_matchers:
+          - label_names:
+              - Java_EMF_Metrics
+            regex: ^true$
+        metric_name_selectors:
+          - "^jvm_threads_(current|daemon)$"
+          - "^jvm_classes_loaded_total$"
+          - "^java_lang_OperatingSystem_(FreePhysicalMemorySize|TotalPhysicalMemorySize|FreeSwapSpaceSize|TotalSwapSpaceSize|SystemCpuLoad|ProcessCpuLoad|AvailableProcessors|OpenFileDescriptorCount)$"
+          - "^java_lang_operatingsystem_(freephysicalmemorysize|totalphysicalmemorysize|freeswapspacesize|totalswapspacesize|systemcpuload|processcpuload|availableprocessors|openfiledescriptorcount)$"
+          - "^jvm_gc_collection_seconds_(count|sum)$"
+service:
+  pipelines:
+    metrics:
+      receivers: [ prometheus ]
+      processors: [ resource, metricstransform ]
+      exporters: [ awsemf ]
