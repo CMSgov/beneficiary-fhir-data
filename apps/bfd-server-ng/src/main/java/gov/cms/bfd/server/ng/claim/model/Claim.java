@@ -156,7 +156,6 @@ public class Claim {
     eob.setType(claimTypeCode.toFhirType());
     claimTypeCode.toFhirSubtype().ifPresent(eob::setSubType);
     claimTypeCode.toFhirAdjudication().ifPresent(eob::addAdjudication);
-
     eob.setMeta(
         meta.toFhir(claimTypeCode, claimSourceId, securityStatus, finalAction, metaSourceSk));
     eob.setIdentifier(identifiers.toFhir());
