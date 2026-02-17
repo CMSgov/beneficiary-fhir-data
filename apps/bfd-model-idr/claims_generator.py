@@ -787,7 +787,10 @@ def generate(
         filter_by=lambda x: not x.get(f.CLM_LINE_RX_NUM),
     )
     clm_line_rx_per_clm_uniq_id = {str(row[f.CLM_UNIQ_ID]): row for row in files[CLM_LINE_RX]}
-    clm_dcmtn_per_fpk = {four_part_key(row): row for row in files[CLM_DCMTN]}
+    clm_dcmtns_per_fpk = partition_rows(
+        llist=files[CLM_DCMTN],
+        part_by=lambda x: four_part_key(x),
+    )
     dsprtnt_clm_val_per_fpk = {
         four_part_key(x): x for x in files[CLM_VAL] if int(x[f.CLM_VAL_CD]) == 18
     }
@@ -806,7 +809,10 @@ def generate(
     )
     clm_dt_sgntr_per_sk = {str(row[f.CLM_DT_SGNTR_SK]): row for row in files[CLM_DT_SGNTR]}
     clm_instnl_per_fpk = {four_part_key(row): row for row in files[CLM_INSTNL]}
-    clm_prfnl_per_fpk = {four_part_key(row): row for row in files[CLM_PRFNL]}
+    clm_prfnls_per_fpk = partition_rows(
+        llist=files[CLM_PRFNL],
+        part_by=lambda x: four_part_key(x),
+    )
     clm_line_instnls_per_fpk = partition_rows(
         llist=files[CLM_LINE_INSTNL], part_by=lambda x: four_part_key(x)
     )
@@ -879,10 +885,11 @@ def generate(
                 adj_clms_tbls[CLM_LINE].append(pharm_clm_line)
                 adj_clms_tbls[CLM_LINE_RX].append(pharm_clm_line_rx)
 
-            clm_dcmtn = adj_util.gen_clm_dcmtn(
-                clm=clm, init_clm_dcmtn=clm_dcmtn_per_fpk.get(four_part_key(clm))
-            )
-            adj_clms_tbls[CLM_DCMTN].append(clm_dcmtn)
+            clm_dcmtns = [
+                adj_util.gen_clm_dcmtn(clm=clm, init_clm_dcmtn=x)
+                for x in clm_dcmtns_per_fpk.get(four_part_key(clm), [RowAdapter({})])
+            ]
+            adj_clms_tbls[CLM_DCMTN].extend(clm_dcmtns)
 
             if clm_type_cd in (20, 40, 60, 61, 62, 63, 64):
                 dsprtnt_clm_val = adj_util.gen_dsprtnt_clm_val(
@@ -927,12 +934,15 @@ def generate(
                 adj_clms_tbls[CLM_INSTNL].append(clm_instnl)
 
             if clm_type_cd in PROFESSIONAL_CLAIM_TYPES:
-                clm_prfnl = adj_util.gen_clm_prfnl(
-                    gen_utils=gen_utils,
-                    clm=clm,
-                    init_clm_prfnl=clm_prfnl_per_fpk.get(four_part_key(clm)),
-                )
-                adj_clms_tbls[CLM_PRFNL].append(clm_prfnl)
+                clm_prfnls = [
+                    adj_util.gen_clm_prfnl(
+                        gen_utils=gen_utils,
+                        clm=clm,
+                        init_clm_prfnl=x,
+                    )
+                    for x in clm_prfnls_per_fpk.get(four_part_key(clm), [RowAdapter({})])
+                ]
+                adj_clms_tbls[CLM_PRFNL].extend(clm_prfnls)
 
             init_clm_lines = norm_clm_lines_per_clm_uniq_id.get(clm[f.CLM_UNIQ_ID]) or [
                 RowAdapter({}) for _ in range(random.randint(1, 15))
@@ -996,7 +1006,8 @@ def generate(
                     *as_list(rx_clm_line_per_clm_uniq_id.get(file_pac_clm[f.CLM_UNIQ_ID])),
                     *norm_clm_lines_per_clm_uniq_id.get(file_pac_clm[f.CLM_UNIQ_ID], []),
                 ],
-                CLM_DCMTN: as_list(clm_dcmtn_per_fpk.get(four_part_key(file_pac_clm))),
+                CLM_DCMTN: clm_dcmtns_per_fpk.get(four_part_key(file_pac_clm), []),
+                CLM_PRFNL: clm_prfnls_per_fpk.get(four_part_key(file_pac_clm), []),
                 CLM_VAL: [
                     *as_list(dsprtnt_clm_val_per_fpk.get(four_part_key(file_pac_clm))),
                     *as_list(ime_clm_val_per_fpk.get(four_part_key(file_pac_clm))),
@@ -1125,6 +1136,25 @@ def generate(
                     ),
                 )
             )
+
+            out_tables[CLM_DCMTN].extend(
+                [
+                    adj_util.gen_clm_dcmtn(clm=pac_clm, init_clm_dcmtn=x)
+                    for x in claims_tbls[CLM_DCMTN]
+                ]
+            )
+
+            clm_type_cd = int(pac_clm[f.CLM_TYPE_CD])
+            if clm_type_cd in PROFESSIONAL_CLAIM_TYPES:
+                clm_prfnls = [
+                    adj_util.gen_clm_prfnl(
+                        gen_utils=gen_utils,
+                        clm=pac_clm,
+                        init_clm_prfnl=x,
+                    )
+                    for x in claims_tbls[CLM_PRFNL]
+                ]
+                out_tables[CLM_PRFNL].extend(clm_prfnls)
 
     print("Done generating synthetic claims data for provided BENE_SKs")
 
