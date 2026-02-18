@@ -117,6 +117,11 @@
         "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole",
         "code" : "otheroperating",
         "display" : "Other Operating"
+      },
+      {
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
+        "code" : "otheroperating",
+        "display" : "Other Operating"
       }]
     }
   },
@@ -139,6 +144,11 @@
     "role" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole",
+        "code" : "attending",
+        "display" : "Attending"
+      },
+      {
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
         "code" : "attending",
         "display" : "Attending"
       }]
@@ -165,6 +175,11 @@
         "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole",
         "code" : "operating",
         "display" : "Operating"
+      },
+      {
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
+        "code" : "operating",
+        "display" : "Operating"
       }]
     }
   },
@@ -187,6 +202,11 @@
     "role" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole",
+        "code" : "rendering",
+        "display" : "Rendering provider"
+      },
+      {
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
         "code" : "rendering",
         "display" : "Rendering provider"
       }]

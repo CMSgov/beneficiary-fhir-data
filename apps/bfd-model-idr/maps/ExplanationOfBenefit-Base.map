@@ -158,7 +158,7 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
       //These have been moved into THO, so we'll populate all where appropriate and drop the C4BB system eventually
       pList.careTeamType as careTeamType -> tgtCareTeam.role = create('CodeableConcept') as tgtCC then {
         careTeamType -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claimcareteamrole", careTeamType) "Add THO coding";
-        pList.careTeamType as legacyType where legacyType != "supervisor" -> c("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole", legacyType) "Add C4BB system";
+        pList.careTeamType as legacyType where legacyType != "supervisor" -> tgtCC.coding = c("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole", legacyType) "Add C4BB system";
       } "Add care team types";
 
       pList.careTeamSequenceNumber as seqNum -> tgtCareTeam.sequence = seqNum "Set sequence";

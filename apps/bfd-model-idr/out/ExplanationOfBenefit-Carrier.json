@@ -132,6 +132,11 @@
         "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole",
         "code" : "rendering",
         "display" : "Rendering provider"
+      },
+      {
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
+        "code" : "rendering",
+        "display" : "Rendering provider"
       }]
     }
   },
@@ -154,6 +159,11 @@
     "role" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole",
+        "code" : "rendering",
+        "display" : "Rendering provider"
+      },
+      {
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
         "code" : "rendering",
         "display" : "Rendering provider"
       }]
