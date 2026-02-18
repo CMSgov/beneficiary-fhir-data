@@ -948,19 +948,22 @@ def generate(
             init_clm_lines = norm_clm_lines_per_clm_uniq_id.get(clm[f.CLM_UNIQ_ID]) or [
                 RowAdapter({}) for _ in range(random.randint(1, 15))
             ]
-            for line_num, init_clm_line in enumerate(init_clm_lines, start=1):
+            for idx, init_clm_line in enumerate(init_clm_lines, start=1):
                 if clm_type_cd in PHARMACY_CLM_TYPE_CDS:
                     continue
 
                 clm_line = adj_util.gen_clm_line(
                     gen_utils=gen_utils,
                     clm=clm,
-                    clm_line_num=line_num,
+                    clm_line_num=int(init_clm_line[f.CLM_LINE_NUM])
+                    if init_clm_line.get(f.CLM_LINE_NUM)
+                    else idx,
                     diagnoses=diagnoses,
                     init_clm_line=init_clm_line,
                 )
                 adj_clms_tbls[CLM_LINE].append(clm_line)
 
+                line_num = int(clm_line[f.CLM_LINE_NUM])
                 fpk = four_part_key(clm)
                 if clm_type_cd >= 10 and clm_type_cd <= 65:
                     clm_line_instnl = adj_util.gen_clm_line_instnl(
@@ -969,7 +972,7 @@ def generate(
                         clm_line_num=line_num,
                         init_clm_line_instnl=match_line_num(
                             clm_lines=clm_line_instnls_per_fpk.get(fpk),
-                            clm_line_num=int(clm_line[f.CLM_LINE_NUM]),
+                            clm_line_num=line_num,
                         ),
                     )
                     adj_clms_tbls[CLM_LINE_INSTNL].append(clm_line_instnl)
@@ -980,7 +983,7 @@ def generate(
                         clm_line_num=line_num,
                         init_clm_line_prfnl=match_line_num(
                             clm_lines=clm_line_prfnls_per_fpk.get(fpk),
-                            clm_line_num=int(clm_line[f.CLM_LINE_NUM]),
+                            clm_line_num=line_num,
                         ),
                     )
                     adj_clms_tbls[CLM_LINE_PRFNL].append(clm_line_prfnl)
