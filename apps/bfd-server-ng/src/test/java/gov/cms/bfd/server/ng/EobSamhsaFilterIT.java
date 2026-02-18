@@ -15,6 +15,7 @@ import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.bfd.server.ng.eob.EobHandler;
+import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import gov.cms.bfd.server.ng.util.IdrConstants;
@@ -150,17 +151,17 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
 
   private List<ExplanationOfBenefit> getClaimsByBene(
       long beneSk, SamhsaFilterMode samhsaFilterMode) {
-    var claims =
-        eobHandler.searchByBene(
+    var criteria =
+        new ClaimSearchCriteria(
             beneSk,
+            new DateTimeRange(),
+            new DateTimeRange(),
             Optional.empty(),
-            new DateTimeRange(),
-            new DateTimeRange(),
             Optional.empty(),
             Collections.emptyList(),
             List.of(),
-            samhsaFilterMode,
             Collections.emptyList());
+    var claims = eobHandler.searchByBene(criteria, samhsaFilterMode);
     return getEobFromBundle(claims);
   }
 
@@ -550,34 +551,45 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
                         "NoCert_SamhsaRequested_NoSamhsa",
                         List.of(List.of(securityClause(SecurityModifier.NONE, samhsaCodeOnly()))),
                         SamhsaCertType.NO_CERT,
-                        3,
+                        List.of(
+                            CLAIM_UNIQUE_ID_FOR_DRG_WITH_EXPIRED_CODE_522,
+                            CLAIM_WITH_HCPCS_IN_ICD,
+                            CLAIM_UNIQUE_ID_WITH_NO_SAMHSA),
+                        false,
                         style),
                     Arguments.of(
                         "NotAllowedCert_SamhsaRequested_NoSamhsa",
                         List.of(
                             List.of(securityClause(SecurityModifier.NONE, samhsaCodeAndSystem()))),
                         SamhsaCertType.SAMHSA_NOT_ALLOWED_CERT,
-                        3,
+                        List.of(
+                            CLAIM_UNIQUE_ID_FOR_DRG_WITH_EXPIRED_CODE_522,
+                            CLAIM_WITH_HCPCS_IN_ICD,
+                            CLAIM_UNIQUE_ID_WITH_NO_SAMHSA),
+                        false,
                         style),
                     Arguments.of(
                         "AllowedCert_SamhsaCodeRequested_OnlySamhsa",
                         List.of(List.of(securityClause(SecurityModifier.NONE, samhsaCodeOnly()))),
                         SamhsaCertType.SAMHSA_ALLOWED_CERT,
-                        1,
+                        List.of(CLAIM_UNIQUE_ID_WITH_MULTIPLE_SAMHSA_CODES),
+                        false,
                         style),
                     Arguments.of(
                         "AllowedCert_SamhsaCodeAndSystemRequested_OnlySamhsa",
                         List.of(
                             List.of(securityClause(SecurityModifier.NONE, samhsaCodeAndSystem()))),
                         SamhsaCertType.SAMHSA_ALLOWED_CERT,
-                        1,
+                        List.of(CLAIM_UNIQUE_ID_WITH_MULTIPLE_SAMHSA_CODES),
+                        false,
                         style),
                     Arguments.of(
                         "AllowedCert_InvalidCodeRequest_NoClaims",
                         List.of(
                             List.of(securityClause(SecurityModifier.NONE, invalidSamhsaCode()))),
                         SamhsaCertType.SAMHSA_ALLOWED_CERT,
-                        0,
+                        List.of(),
+                        true,
                         style),
                     Arguments.of(
                         "AllowedCert_SamhsaAndNonSamhsa_NoClaims",
@@ -585,7 +597,8 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
                             List.of(securityClause(SecurityModifier.NONE, samhsaCodeOnly())),
                             List.of(securityClause(SecurityModifier.NOT, samhsaCodeAndSystem()))),
                         SamhsaCertType.SAMHSA_ALLOWED_CERT,
-                        0,
+                        List.of(),
+                        true,
                         style),
                     Arguments.of(
                         "AllowedCert_SamhsaOrNonSamhsa_AllClaims",
@@ -594,26 +607,39 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
                                 securityClause(SecurityModifier.NOT, samhsaCodeAndSystem()),
                                 securityClause(SecurityModifier.NONE, samhsaCodeAndSystem()))),
                         SamhsaCertType.SAMHSA_ALLOWED_CERT,
-                        3,
+                        List.of(
+                            CLAIM_UNIQUE_ID_FOR_DRG_WITH_EXPIRED_CODE_522,
+                            CLAIM_WITH_HCPCS_IN_ICD,
+                            CLAIM_UNIQUE_ID_WITH_NO_SAMHSA),
+                        false,
                         style),
                     Arguments.of(
                         "AllowedCert_ExcludedSamhsaCodeRequested_NoSamhsa",
                         List.of(List.of(securityClause(SecurityModifier.NOT, samhsaCodeOnly()))),
                         SamhsaCertType.SAMHSA_ALLOWED_CERT,
-                        3,
+                        List.of(
+                            CLAIM_UNIQUE_ID_FOR_DRG_WITH_EXPIRED_CODE_522,
+                            CLAIM_WITH_HCPCS_IN_ICD,
+                            CLAIM_UNIQUE_ID_WITH_NO_SAMHSA),
+                        false,
                         style),
                     Arguments.of(
                         "AllowedCert_ExcludedSamhsaCodeAndSystemRequested_NoSamhsa",
                         List.of(
                             List.of(securityClause(SecurityModifier.NOT, samhsaCodeAndSystem()))),
                         SamhsaCertType.SAMHSA_ALLOWED_CERT,
-                        3,
+                        List.of(
+                            CLAIM_UNIQUE_ID_FOR_DRG_WITH_EXPIRED_CODE_522,
+                            CLAIM_WITH_HCPCS_IN_ICD,
+                            CLAIM_UNIQUE_ID_WITH_NO_SAMHSA),
+                        false,
                         style),
                     Arguments.of(
                         "AllowedCert_ExcludedSamhsaCodeRequested_InvalidCode_NoClaims",
                         List.of(List.of(securityClause(SecurityModifier.NOT, invalidSamhsaCode()))),
                         SamhsaCertType.SAMHSA_ALLOWED_CERT,
-                        0,
+                        List.of(),
+                        true,
                         style)));
   }
 
@@ -623,7 +649,8 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
       String scenarioName,
       List<List<SecurityClause>> securityScenarios,
       SamhsaCertType certType,
-      int expectedCount,
+      List<Long> expectedClaimIds,
+      boolean expectException,
       SearchStyleEnum searchStyle) {
     var query = searchBundle(BENE_SK, certType);
     var paramName = new StringBuilder(Constants.PARAM_SECURITY);
@@ -649,19 +676,23 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
       }
     }
 
-    if (scenarioName.contains("InvalidCode") || scenarioName.contains("SamhsaAndNonSamhsa")) {
+    if (expectException) {
       assertThrows(
           InvalidRequestException.class,
           query.usingStyle(searchStyle)::execute,
           "Should throw InvalidRequestException: " + scenarioName);
     } else {
       var eobBundle = query.usingStyle(searchStyle).execute();
-      expectFhir().scenario(searchStyle.name() + "_" + scenarioName).toMatchSnapshot(eobBundle);
+      var actualClaimsIds =
+          getEobFromBundle(eobBundle).stream()
+              .map(ExplanationOfBenefit::getIdPart)
+              .map(Long::parseLong)
+              .toList();
 
-      assertEquals(
-          expectedCount,
-          eobBundle.getEntry().size(),
-          "Should find " + expectedCount + " EOBs for scenario " + scenarioName);
+      assertTrue(
+          expectedClaimIds.containsAll(actualClaimsIds)
+              && actualClaimsIds.containsAll(expectedClaimIds),
+          "Returned claim IDs did not match expected IDs for scenario " + scenarioName);
     }
   }
 

@@ -134,10 +134,8 @@ BFD utilizes mTLS for authentication, authorization (specifically for SAMHSA dat
 
 ```bash
 xh \
-  'http://localhost:8080/v3/fhir/ExplanationOfBenefit' \
-  'X-Amzn-Mtls-Clientcert:samhsa_allowed' \
-  'patient==<bene>' \
-  'accept: application/fhir+json' | jq
+  'http://localhost:8080/v3/fhir/ExplanationOfBenefit?patient=<bene>' \
+  'X-Amzn-Mtls-Clientcert:samhsa_allowed' | jq
 ```
 
 ## Generating enum values

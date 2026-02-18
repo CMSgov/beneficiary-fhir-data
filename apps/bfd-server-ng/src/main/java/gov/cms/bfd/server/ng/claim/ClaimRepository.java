@@ -5,10 +5,8 @@ import gov.cms.bfd.server.ng.DbFilterBuilder;
 import gov.cms.bfd.server.ng.DbFilterParam;
 import gov.cms.bfd.server.ng.claim.filter.*;
 import gov.cms.bfd.server.ng.claim.model.Claim;
-import gov.cms.bfd.server.ng.claim.model.ClaimTypeCode;
-import gov.cms.bfd.server.ng.claim.model.MetaSourceSk;
+import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
-import gov.cms.bfd.server.ng.input.TagCriterion;
 import gov.cms.bfd.server.ng.util.LogUtil;
 import io.micrometer.core.annotation.Timed;
 import io.micrometer.core.aop.MeterTag;
@@ -102,40 +100,26 @@ public class ClaimRepository {
   /**
    * Returns claims for the given beneficiary.
    *
-   * @param beneSk bene sk
-   * @param claimThroughDate claim through date
-   * @param lastUpdated last updated
-   * @param limit limit
-   * @param offset offset
-   * @param tagCriteria tag criteria
-   * @param claimTypeCodes claimTypeCodes
-   * @param source claim source
+   * @param criteria filter criteria
    * @return claims
    */
   @Timed(value = "application.claim.search_by_bene")
   public List<Claim> findByBeneXrefSk(
-      long beneSk,
-      @MeterTag(
-              key = "hasClaimThroughDate",
-              expression = "lowerBound.isPresent() || upperBound.isPresent()")
-          DateTimeRange claimThroughDate,
-      @MeterTag(
-              key = "hasLastUpdated",
-              expression = "lowerBound.isPresent() || upperBound.isPresent()")
-          DateTimeRange lastUpdated,
-      @MeterTag(key = "hasLimit", expression = "isPresent()") Optional<Integer> limit,
-      @MeterTag(key = "hasOffset", expression = "isPresent()") Optional<Integer> offset,
-      @MeterTag(key = "hasTags", expression = "size() > 0") List<List<TagCriterion>> tagCriteria,
-      @MeterTag(key = "hasClaimTypeCodes", expression = "size() > 0")
-          List<ClaimTypeCode> claimTypeCodes,
-      @MeterTag(key = "hasSources", expression = "size() > 0") List<List<MetaSourceSk>> source) {
+      @MeterTag(key = "hasClaimThroughDate", expression = "hasClaimThroughDate()")
+          @MeterTag(key = "hasLastUpdated", expression = "hasLasUpdated()")
+          @MeterTag(key = "hasLimit", expression = "hasLimit()")
+          @MeterTag(key = "hasOffset", expression = "hasOffset()")
+          @MeterTag(key = "hasTags", expression = "hasTags()")
+          @MeterTag(key = "hasClaimTypeCodes", expression = "hasClaimTypeCodes()")
+          @MeterTag(key = "hasSources", expression = "hasSources()")
+          ClaimSearchCriteria criteria) {
     var filterBuilders =
         List.of(
-            new BillablePeriodFilterParam(claimThroughDate),
-            new LastUpdatedFilterParam(lastUpdated),
-            new ClaimTypeCodeFilterParam(claimTypeCodes),
-            new TagCriteriaFilterParam(tagCriteria),
-            new SourceFilterParam(source));
+            new BillablePeriodFilterParam(criteria.claimThroughDate()),
+            new LastUpdatedFilterParam(criteria.lastUpdated()),
+            new ClaimTypeCodeFilterParam(criteria.claimTypeCodes()),
+            new TagCriteriaFilterParam(criteria.tagCriteria()),
+            new SourceFilterParam(criteria.sources()));
     var filters = getFilters(filterBuilders);
     // Some of the filters here appear redundant, but joining on the entire primary key for
     // beneficiaries (bene_sk + effective timestamp) helps query performance significantly
@@ -172,9 +156,9 @@ public class ClaimRepository {
             CLAIM_TABLES_BASE, filters.filterClause());
     var claims =
         withParams(entityManager.createQuery(jpql, Claim.class), filters.params())
-            .setParameter("limit", limit.orElse(5000))
-            .setParameter("offset", offset.orElse(0))
-            .setParameter("beneSk", beneSk)
+            .setParameter("limit", criteria.limit().orElse(5000))
+            .setParameter("offset", criteria.offset().orElse(0))
+            .setParameter("beneSk", criteria.beneSk())
             .getResultList();
 
     claims.stream()

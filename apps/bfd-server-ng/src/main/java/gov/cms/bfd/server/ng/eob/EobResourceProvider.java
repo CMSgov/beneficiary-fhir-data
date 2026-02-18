@@ -16,6 +16,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.bfd.server.ng.Configuration;
 import gov.cms.bfd.server.ng.SamhsaFilterMode;
 import gov.cms.bfd.server.ng.claim.model.SamhsaSearchIntent;
+import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
 import gov.cms.bfd.server.ng.input.FhirInputConverter;
 import gov.cms.bfd.server.ng.util.CertificateUtil;
 import jakarta.servlet.http.HttpServletRequest;
@@ -91,16 +92,18 @@ public class EobResourceProvider implements IResourceProvider {
     var claimTypeCodes = FhirInputConverter.getClaimTypeCodesForType(type);
     var samhsaSearchIntent = FhirInputConverter.parseSecurityParameter(security);
 
-    return eobHandler.searchByBene(
-        FhirInputConverter.toLong(patient, "Patient"),
-        Optional.ofNullable(count),
-        FhirInputConverter.toDateTimeRange(serviceDate),
-        FhirInputConverter.toDateTimeRange(lastUpdated),
-        FhirInputConverter.toIntOptional(startIndex),
-        tagCriteria,
-        claimTypeCodes,
-        getFilterModeForRequest(request, samhsaSearchIntent),
-        FhirInputConverter.parseSourceParameter(source));
+    var criteria =
+        new ClaimSearchCriteria(
+            FhirInputConverter.toLong(patient, "Patient"),
+            FhirInputConverter.toDateTimeRange(serviceDate),
+            FhirInputConverter.toDateTimeRange(lastUpdated),
+            Optional.ofNullable(count),
+            FhirInputConverter.toIntOptional(startIndex),
+            tagCriteria,
+            claimTypeCodes,
+            FhirInputConverter.parseSourceParameter(source));
+
+    return eobHandler.searchByBene(criteria, getFilterModeForRequest(request, samhsaSearchIntent));
   }
 
   /**
