@@ -530,6 +530,7 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_lctn_hstry (
     clm_num_sk BIGINT NOT NULL,
     clm_type_cd INT NOT NULL,
     clm_audt_trl_stus_cd VARCHAR(2),
+    clm_audt_trl_lctn_cd VARCHAR(5),
     clm_lctn_cd_sqnc_num BIGINT NOT NULL,
     idr_insrt_ts TIMESTAMPTZ,
     idr_updt_ts TIMESTAMPTZ,
@@ -571,6 +572,7 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_rx (
     clm_cms_calcd_mftr_dscnt_amt NUMERIC,
     clm_line_grs_cvrd_cst_tot_amt NUMERIC,
     clm_phrmcy_price_dscnt_at_pos_amt NUMERIC,
+    clm_line_rptd_gap_dscnt_amt NUMERIC,
     idr_insrt_ts TIMESTAMPTZ,
     idr_updt_ts TIMESTAMPTZ,
     PRIMARY KEY(clm_uniq_id, clm_line_num)

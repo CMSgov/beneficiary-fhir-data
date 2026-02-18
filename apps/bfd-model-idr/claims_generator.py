@@ -828,6 +828,7 @@ def gen_claim(bene_sk: str = "-1", min_date: str = "2018-01-01", max_date: str =
         claim_line_rx["CLM_CMS_CALCD_MFTR_DSCNT_AMT"] = round(random.uniform(0, 1000), 2)
         claim_line_rx["CLM_LINE_REBT_PASSTHRU_POS_AMT"] = round(random.uniform(0, 1000), 2)
         claim_line_rx["CLM_PHRMCY_PRICE_DSCNT_AT_POS_AMT"] = round(random.uniform(0, 1000), 2)
+        claim_line_rx["CLM_LINE_RPTD_GAP_DSCNT_AMT"] = round(random.uniform(1, 1000000), 2)
         add_meta_timestamps(claim_line_rx, claim.CLM, max_date)
 
         claim.CLM_LINE.append(claim_line)
@@ -1413,20 +1414,6 @@ def gen_pac_version_of_claim(claim: _GeneratedClaim, max_date: str):
     pac_claim.CLM_FISS["GEO_BENE_SK"] = pac_claim.CLM["GEO_BENE_SK"]
     pac_claim.CLM_FISS["CLM_NUM_SK"] = pac_claim.CLM["CLM_NUM_SK"]
     pac_claim.CLM_FISS["CLM_TYPE_CD"] = pac_claim.CLM["CLM_TYPE_CD"]
-    pac_claim.CLM_FISS["CLM_CRNT_STUS_CD"] = random.choice(
-        [
-            "A",
-            "F",
-            "I",
-            "S",
-            "M",
-            "P",
-            "R",
-            "D",
-            "T",
-            "U",
-        ]
-    )
     add_meta_timestamps(pac_claim.CLM_FISS, claim.CLM, max_date)
 
     pac_claim.CLM_LCTN_HSTRY = {}

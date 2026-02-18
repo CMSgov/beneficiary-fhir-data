@@ -60,9 +60,13 @@ resource "aws_iam_policy" "rds" {
 
 data "aws_iam_policy_document" "logs" {
   statement {
-    sid       = "AllowFireLensPutLogEventsAndCreateStream"
-    actions   = ["logs:PutLogEvents", "logs:CreateLogStream"]
-    resources = ["${aws_cloudwatch_log_group.server_access.arn}:log-stream:*", "${aws_cloudwatch_log_group.server_messages.arn}:log-stream:*"]
+    sid     = "AllowFireLensPutLogEventsAndCreateStream"
+    actions = ["logs:PutLogEvents", "logs:CreateLogStream"]
+    resources = [
+      "${aws_cloudwatch_log_group.server_access.arn}:log-stream:*",
+      "${aws_cloudwatch_log_group.server_messages.arn}:log-stream:*",
+      "${aws_cloudwatch_log_group.adot_metrics.arn}:log-stream:*"
+    ]
   }
 }
 
@@ -180,7 +184,8 @@ data "aws_iam_policy_document" "execution_logs" {
       "${aws_cloudwatch_log_group.certstores_messages.arn}:*",
       "${aws_cloudwatch_log_group.log_router_messages.arn}:*",
       "${aws_cloudwatch_log_group.server_messages.arn}:*",
-      "${aws_cloudwatch_log_group.server_access.arn}:*"
+      "${aws_cloudwatch_log_group.server_access.arn}:*",
+      "${aws_cloudwatch_log_group.adot_messages.arn}:*",
     ]
   }
 }
