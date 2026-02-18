@@ -88,9 +88,9 @@ create table idr_new.claim_professional_ss
 --  instnl   clm_bnft_enhncmt_4_cd      character varying(2),
 --  instnl   clm_bnft_enhncmt_5_cd      character varying(2),
 --     clm_rfrg_prvdr_pin_num         character varying(14),
-    prvdr_srvc_prvdr_npi_num       character varying(20),
-    prvdr_srvc_careteam_name       character varying(135),
-    bfd_srvc_npi_type              numeric,
+--    prvdr_srvc_prvdr_npi_num       character varying(20),
+--    prvdr_srvc_careteam_name       character varying(135),
+--    bfd_srvc_npi_type              numeric,
 
     clm_blood_chrg_amt             numeric,
 --  instnl   clm_tot_cntrctl_amt        numeric,
@@ -449,8 +449,8 @@ create table idr_new.claim_institutional_ss
     clm_bnft_enhncmt_4_cd          character varying(2),
     clm_bnft_enhncmt_5_cd          character varying(2),
 --     clm_rfrg_prvdr_pin_num     character varying(14),
-    prvdr_srvc_prvdr_npi_num       character varying(10),
-    prvdr_srvc_careteam_name       character varying(135),
+--    prvdr_srvc_prvdr_npi_num       character varying(10),
+--    prvdr_srvc_careteam_name       character varying(135),
     bfd_srvc_npi_type              numeric,
 
     clm_blood_chrg_amt             numeric,

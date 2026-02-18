@@ -24,7 +24,6 @@ from model import (
     ALIAS_PRVDR_OTHR,
     ALIAS_PRVDR_RFRG,
     ALIAS_PRVDR_RNDRNG,
-    ALIAS_PRVDR_SRVC,
     ALIAS_SGNTR,
     BATCH_ID,
     COLUMN_MAP,
@@ -346,17 +345,6 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
         BeforeValidator(transform_default_string),
     ]
 
-    prvdr_srvc_prvdr_npi_num: Annotated[
-        str,
-        {COLUMN_MAP: "prvdr_npi_num", ALIAS: ALIAS_PRVDR_SRVC},
-        BeforeValidator(transform_default_string),
-    ]
-    prvdr_srvc_careteam_name: Annotated[
-        str,
-        {EXPR: provider_careteam_name_expr(ALIAS_PRVDR_SRVC, None)},
-        BeforeValidator(transform_default_string),
-    ]
-
     prvdr_blg_prvdr_npi_num: Annotated[
         str,
         {COLUMN_MAP: "prvdr_npi_num", ALIAS: ALIAS_PRVDR_BLG},
@@ -400,7 +388,6 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
         prvdr_blg = ALIAS_PRVDR_BLG
         prvdr_rfrg = ALIAS_PRVDR_RFRG
         prvdr_rndrg = ALIAS_PRVDR_RNDRNG
-        prvdr_srvc = ALIAS_PRVDR_SRVC
         return f"""
             WITH claims AS (
                 SELECT
@@ -480,9 +467,6 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
             LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_prvdr_hstry {prvdr_othr} ON 
                 {prvdr_othr}.prvdr_npi_num = {clm}.prvdr_atndg_prvdr_npi_num AND
                 {prvdr_othr}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
-            LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_prvdr_hstry {prvdr_srvc} ON 
-                {prvdr_srvc}.prvdr_npi_num = {clm}.prvdr_srvc_prvdr_npi_num AND
-                {prvdr_srvc}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
             {{WHERE_CLAUSE}} AND {claim_filter(start_time, partition)}
             {{ORDER_BY}}
         """

@@ -18,8 +18,8 @@ from model import (
     ALIAS_LCTN_HSTRY,
     ALIAS_PRFNL,
     ALIAS_PRVDR_BLG,
+    ALIAS_PRVDR_OTHR,
     ALIAS_PRVDR_RFRG,
-    ALIAS_PRVDR_SRVC,
     ALIAS_SGNTR,
     BATCH_ID,
     BATCH_TIMESTAMP,
@@ -219,14 +219,14 @@ class IdrClaimProfessionalSs(IdrBaseModel):
         BeforeValidator(transform_default_string),
     ]
 
-    prvdr_srvc_prvdr_npi_num: Annotated[
+    prvdr_othr_prvdr_npi_num: Annotated[
         str,
-        {COLUMN_MAP: "prvdr_npi_num", ALIAS: ALIAS_PRVDR_SRVC},
+        {COLUMN_MAP: "prvdr_npi_num", ALIAS: ALIAS_PRVDR_OTHR},
         BeforeValidator(transform_default_string),
     ]
-    prvdr_srvc_careteam_name: Annotated[
+    prvdr_othr_careteam_name: Annotated[
         str,
-        {EXPR: provider_careteam_name_expr(ALIAS_PRVDR_SRVC, None)},
+        {EXPR: provider_careteam_name_expr(ALIAS_PRVDR_OTHR, "OTHR")},
         BeforeValidator(transform_default_string),
     ]
 
@@ -250,8 +250,8 @@ class IdrClaimProfessionalSs(IdrBaseModel):
         dcmtn = ALIAS_DCMTN
         lctn_hstry = ALIAS_LCTN_HSTRY
         prvdr_blg = ALIAS_PRVDR_BLG
-        prvdr_srvc = ALIAS_PRVDR_SRVC
         prvdr_rfrg = ALIAS_PRVDR_RFRG
+        prvdr_othr = ALIAS_PRVDR_OTHR
         return f"""
             WITH claims AS (
                 SELECT
@@ -314,9 +314,9 @@ class IdrClaimProfessionalSs(IdrBaseModel):
             LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_prvdr_hstry {prvdr_rfrg}
                 ON {prvdr_rfrg}.prvdr_npi_num = {clm}.prvdr_rfrg_prvdr_npi_num
                 AND {prvdr_rfrg}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
-            LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_prvdr_hstry {prvdr_srvc}
-                ON {prvdr_srvc}.prvdr_npi_num = {clm}.prvdr_srvc_prvdr_npi_num
-                AND {prvdr_srvc}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
+            LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_prvdr_hstry {prvdr_othr}
+                ON {prvdr_othr}.prvdr_npi_num = {clm}.prvdr_othr_prvdr_npi_num
+                AND {prvdr_othr}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
             {{WHERE_CLAUSE}} AND {claim_filter(start_time, partition)}
             {{ORDER_BY}}
         """
