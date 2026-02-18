@@ -68,7 +68,7 @@ group createEOBPharmacy(source src: ExplanationOfBenefitPharmacy, target tgt: BF
     // Provider organization for pharmacy - only create when needed based on NPI_TYPE
 
     //We don't populate careTeamType when it's the provider, so we can uniquely identify it as billing.
-    src -> tgt.provider = create('Reference') as tgtRef, tgtRef.reference = "#BILLING_ID" "Add reference to non-NPI";
+    src -> tgt.provider = create('Reference') as tgtRef, tgtRef.reference = "#BILLING-ID" "Add reference to non-NPI";
     src.PRVDR_SRVC_PRVDR_NPI_NUM as blgNPI -> tgt.provider = create('Reference') as tgtRef, tgtRef.reference = append("#", blgNPI) "Add reference to NPI";
 
     src.providerList as provider where provider.isDuplicate.exists().not() and provider.careTeamType.exists().not() and provider.NPI_TYPE = 1 -> tgt.contained = create('Practitioner') as tgtPract then createPractitioner(provider, tgtPract) "Add Practitioner";

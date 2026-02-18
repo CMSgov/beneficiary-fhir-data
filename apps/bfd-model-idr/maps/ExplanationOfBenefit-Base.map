@@ -584,12 +584,14 @@ group createInsurerOrgPartAB(source src: ExplanationOfBenefitBase, target tgtOrg
 }
 
 group createOrg(source src: Provider, target tgt: Organization){
-  src -> tgt.id = "BILLING_ID" "set id when no npi present";
+  src -> tgt.id = "BILLING-ID" "set id when no npi present";
   src.PRVDR_SK as npi -> tgt.id = npi "Set org id";
   
   //Only applies to PDE but this function is referenced from PDE, so we add it here.
   src.PRVDR_ID_QLFYR_CD as qlfyrCd -> tgt.identifier = create('Identifier') as tgtId then {
-    qlfyrCd -> tgtId.type = translate(qlfyrCd, "https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#PRVDR_ID_QLFYR_CD",'CodeableConcept') "set type";
+    src -> tgtId.type = create('CodeableConcept') as tgtCC then {
+      qlfyrCd -> tgtCC.coding = c("http://bluebutton.cms.gov/fhir/CodeSystem/PRVDR-ID-QLFYR-CD",qlfyrCd) "Add qualifier code";
+    } "Add type";
     src -> tgtId.system = "http://bluebutton.cms.gov/fhir/identifiers/GenericIdNum" "set id num system url";
     src.CLM_PRVDR_GNRC_ID_NUM as idNum -> tgtId.value = idNum "set id num";
   } "Add qualifier code and id num";
@@ -626,12 +628,14 @@ group createOrg(source src: Provider, target tgt: Organization){
 }
 
 group createPractitioner(source src: Provider, target tgt: Practitioner){
-  src -> tgt.id = "BILLING_ID" "set billing ID";
+  src -> tgt.id = "BILLING-ID" "set billing ID";
   src.PRVDR_SK as npi -> tgt.id = npi "Set id";
 
   //This will practically result in two NPIs, but that's okay, because we're going for ease and consistency.
   src.PRVDR_ID_QLFYR_CD as qlfyrCd -> tgt.identifier = create('Identifier') as tgtId then {
-    qlfyrCd -> tgtId.type = translate(qlfyrCd, "https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#PRVDR_ID_QLFYR_CD",'CodeableConcept') "set type";
+    src -> tgtId.type = create('CodeableConcept') as tgtCC then {
+      qlfyrCd -> tgtCC.coding = c("http://bluebutton.cms.gov/fhir/CodeSystem/PRVDR-ID-QLFYR-CD",qlfyrCd) "Add qualifier code";
+    } "Add type";
     src -> tgtId.system = "http://bluebutton.cms.gov/fhir/identifiers/GenericIdNum" "set id num system url";
     src.CLM_PRVDR_GNRC_ID_NUM as idNum -> tgtId.value = idNum "set id num";
   } "Add qualifier code and id num";

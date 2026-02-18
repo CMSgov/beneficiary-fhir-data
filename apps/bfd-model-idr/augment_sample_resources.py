@@ -1,6 +1,7 @@
 import json
 import sys
 from dataclasses import asdict, dataclass, field
+from decimal import Decimal
 from pathlib import Path
 from typing import Optional
 
@@ -73,7 +74,6 @@ class Provider:
     CLM_BLG_PRVDR_TAX_NUM: Optional[str] = None
 
 provider_list = []
-    header_columns.pop("PRVDR_SRVC_PRVDR_NPI_NUM")
 
 populate_fields_except_na = [
     "PRVDR_LGL_NAME",
