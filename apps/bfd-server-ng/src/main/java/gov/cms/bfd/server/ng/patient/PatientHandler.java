@@ -79,6 +79,7 @@ public class PatientHandler {
    * Searches for all Coverage resources associated with a given beneficiary SK.
    *
    * @param beneSk The beneficiary surrogate key.
+   * @param clock Date to be passed for queries.
    * @return A Bundle of Coverage resources.
    */
   public Bundle searchByBeneficiaryC4DIC(Long beneSk, Instant clock) {

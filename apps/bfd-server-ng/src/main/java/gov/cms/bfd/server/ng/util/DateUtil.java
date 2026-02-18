@@ -71,7 +71,7 @@ public class DateUtil {
   /**
    * <a href="https://en.wikipedia.org/wiki/Anywhere_on_Earth">"Anywhere on Earth"</a> time which
    * indicates a period that expires when the date passes everywhere on Earth.
-   *
+   * @param clock A date to check for AOE, defaults to now if null.
    * @return local date
    */
   public static LocalDate nowAoe(Instant clock) {

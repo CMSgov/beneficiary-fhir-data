@@ -149,6 +149,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
    * type.
    *
    * @param coverageCompositeId The full ID for the Coverage resource.
+   * @param clock Date to be passed for queries.
    * @return A FHIR Coverage object.
    */
   public Optional<Coverage> toFhirCoverageIfPresent(
@@ -163,6 +164,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
    *
    * @param coverageCompositeId The full ID for the Coverage resource.
    * @param orgId The organization reference ID (only used if isC4DIC is true).
+   * @param clock Date to be passed for queries.
    * @return A FHIR Coverage object.
    */
   public Optional<Coverage> toFhirCoverageIfPresentC4DIC(
@@ -175,6 +177,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
    * Creates a FHIR Coverage resource.
    *
    * @param coverageCompositeId The full ID for the Coverage resource.
+   * @param clock Date to be passed for queries.
    * @return A FHIR Coverage object.
    */
   public Coverage toFhir(CoverageCompositeId coverageCompositeId, Instant clock) {
@@ -200,6 +203,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
    *
    * @param coverageCompositeId The full ID for the Coverage resource.
    * @param orgId The organization reference ID.
+   * @param clock Date to be passed for queries.
    * @return A FHIR Coverage object.
    */
   public Coverage toFhirC4DIC(
