@@ -824,6 +824,7 @@ class IdrContractPbpNumber(IdrBaseModel):
     cntrct_pbp_sgmt_num: Annotated[
         str, ALIAS:ALIAS_CNTRCT_SGMT, BeforeValidator(transform_default_string)
     ]
+    bfd_contract_version_rank: Annotated[int, {DERIVED: True}]
 
     @staticmethod
     def table() -> str:
@@ -840,6 +841,12 @@ class IdrContractPbpNumber(IdrBaseModel):
     @staticmethod
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
         pbp_num = ALIAS_PBP_NUM
+        # We need to include obsolete records since some bene_mapd records are tied to
+        # obsolete pbp_sks.
+        # Additionally, some contracts are marked obsolete and no non-obsolete record
+        # is created, so we have to use RANK to get the latest version of each contract.
+        # Then, these can be queries by searching for rows where
+        # bfd_contract_version_rank = 1
         return f"""
             WITH sgmt as (
                 SELECT
@@ -849,12 +856,15 @@ class IdrContractPbpNumber(IdrBaseModel):
                 GROUP BY cntrct_pbp_sk, cntrct_pbp_sgmt_num
                 HAVING COUNT(*) = 1
             )
-            SELECT {{COLUMNS}}
+            SELECT 
+                {{COLUMNS}},
+                RANK() OVER (
+                    PARTITION BY cntrct_num, cntrct_pbp_num 
+                    ORDER BY cntrct_pbp_sk_obslt_dt DESC) AS bfd_contract_version_rank
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_cntrct_pbp_num {pbp_num}
             LEFT JOIN sgmt
-                    ON {pbp_num}.cntrct_pbp_sk = sgmt.cntrct_pbp_sk 
-            WHERE cntrct_pbp_sk_obslt_dt >= '{DEFAULT_MAX_DATE}'
-            AND {pbp_num}.cntrct_pbp_sk != 0
+                    ON {pbp_num}.cntrct_pbp_sk = sgmt.cntrct_pbp_sk
+            WHERE {pbp_num}.cntrct_pbp_sk != 0
             """
 
     @staticmethod
@@ -1192,7 +1202,7 @@ class IdrClaim(IdrBaseModel):
     clm_idr_ld_dt: Annotated[date, {HISTORICAL_BATCH_TIMESTAMP: True}]
     clm_srvc_prvdr_gnrc_id_num: Annotated[str, BeforeValidator(transform_default_string)]
     prvdr_prscrbng_prvdr_npi_num: Annotated[str, BeforeValidator(transform_default_and_zero_string)]
-    clm_adjstmt_type_cd: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_adjstmt_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_bene_pd_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_blg_prvdr_zip5_cd: Annotated[str, BeforeValidator(transform_null_string)]
     clm_sbmt_frmt_cd: Annotated[str, BeforeValidator(transform_default_string)]
@@ -1237,6 +1247,23 @@ class IdrClaim(IdrBaseModel):
     clm_blood_ncvrd_chrg_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_prvdr_intrst_pd_amt: Annotated[float, BeforeValidator(transform_null_float)]
     meta_src_sk: Annotated[int, {ALIAS: ALIAS_CLM}]
+    # column from v2_mdcr_clm_lctn_hstry
+    clm_audt_trl_stus_cd: Annotated[
+        str, {ALIAS: ALIAS_LCTN_HSTRY}, BeforeValidator(transform_null_string)
+    ]
+    clm_audt_trl_lctn_cd: Annotated[
+        str, {ALIAS: ALIAS_LCTN_HSTRY}, BeforeValidator(transform_null_string)
+    ]
+    idr_insrt_ts_lctn_hstry: Annotated[
+        datetime,
+        {BATCH_TIMESTAMP: True, ALIAS: ALIAS_LCTN_HSTRY, COLUMN_MAP: "idr_insrt_ts"},
+        BeforeValidator(transform_null_date_to_min),
+    ]
+    idr_updt_ts_lctn_hstry: Annotated[
+        datetime,
+        {UPDATE_TIMESTAMP: True, ALIAS: ALIAS_LCTN_HSTRY, COLUMN_MAP: "idr_updt_ts"},
+        BeforeValidator(transform_null_date_to_min),
+    ]
     idr_insrt_ts_clm: Annotated[
         datetime,
         {BATCH_TIMESTAMP: True, ALIAS: ALIAS_CLM, COLUMN_MAP: "idr_insrt_ts"},
@@ -1274,7 +1301,38 @@ class IdrClaim(IdrBaseModel):
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
         clm = ALIAS_CLM
         dcmtn = ALIAS_DCMTN
+        lctn_hstry = ALIAS_LCTN_HSTRY
         return f"""
+            WITH claims AS (
+                    SELECT
+                        {clm}.clm_uniq_id,
+                        {clm}.geo_bene_sk,
+                        {clm}.clm_type_cd,
+                        {clm}.clm_num_sk,
+                        {clm}.clm_dt_sgntr_sk,
+                        {clm}.clm_idr_ld_dt
+                    FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
+                    WHERE {_claim_filter(start_time, partition)}
+                ),
+                latest_clm_lctn_hstry AS (
+                    SELECT
+                        claims.geo_bene_sk,
+                        claims.clm_type_cd,
+                        claims.clm_dt_sgntr_sk,
+                        claims.clm_num_sk,
+                        MAX({lctn_hstry}.clm_lctn_cd_sqnc_num) AS max_clm_lctn_cd_sqnc_num
+                    FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_lctn_hstry {lctn_hstry}
+                    JOIN claims ON
+                        {lctn_hstry}.geo_bene_sk = claims.geo_bene_sk AND
+                        {lctn_hstry}.clm_type_cd = claims.clm_type_cd AND
+                        {lctn_hstry}.clm_dt_sgntr_sk = claims.clm_dt_sgntr_sk AND
+                        {lctn_hstry}.clm_num_sk = claims.clm_num_sk
+                    GROUP BY
+                        claims.geo_bene_sk,
+                        claims.clm_type_cd,
+                        claims.clm_dt_sgntr_sk,
+                        claims.clm_num_sk
+                )
             SELECT {{COLUMNS}}
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
             LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_dcmtn {dcmtn} ON
@@ -1282,6 +1340,17 @@ class IdrClaim(IdrBaseModel):
                 {clm}.clm_dt_sgntr_sk = {dcmtn}.clm_dt_sgntr_sk AND
                 {clm}.clm_type_cd = {dcmtn}.clm_type_cd AND
                 {clm}.clm_num_sk = {dcmtn}.clm_num_sk
+            LEFT JOIN latest_clm_lctn_hstry latest_lctn ON
+                    {clm}.geo_bene_sk = latest_lctn.geo_bene_sk AND
+                    {clm}.clm_type_cd = latest_lctn.clm_type_cd AND
+                    {clm}.clm_dt_sgntr_sk = latest_lctn.clm_dt_sgntr_sk AND
+                    {clm}.clm_num_sk = latest_lctn.clm_num_sk
+            LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_lctn_hstry {lctn_hstry} ON
+                    {clm}.geo_bene_sk = {lctn_hstry}.geo_bene_sk AND
+                    {clm}.clm_type_cd = {lctn_hstry}.clm_type_cd AND
+                    {clm}.clm_dt_sgntr_sk = {lctn_hstry}.clm_dt_sgntr_sk AND
+                    {clm}.clm_num_sk = {lctn_hstry}.clm_num_sk AND
+                    {lctn_hstry}.clm_lctn_cd_sqnc_num = latest_lctn.max_clm_lctn_cd_sqnc_num
             {{WHERE_CLAUSE}} AND {_claim_filter(start_time, partition)}
             {{ORDER_BY}}
         """
@@ -1969,20 +2038,6 @@ class IdrClaimProfessional(IdrBaseModel):
         {UPDATE_TIMESTAMP: True, ALIAS: ALIAS_PRFNL, COLUMN_MAP: "idr_insrt_ts"},
         BeforeValidator(transform_null_date_to_min),
     ]
-    # column from v2_mdcr_clm_lctn_hstry
-    clm_audt_trl_stus_cd: Annotated[
-        str, {ALIAS: ALIAS_LCTN_HSTRY}, BeforeValidator(transform_null_string)
-    ]
-    idr_insrt_ts_lctn_hstry: Annotated[
-        datetime,
-        {BATCH_TIMESTAMP: True, ALIAS: ALIAS_LCTN_HSTRY, COLUMN_MAP: "idr_insrt_ts"},
-        BeforeValidator(transform_null_date_to_min),
-    ]
-    idr_updt_ts_lctn_hstry: Annotated[
-        datetime,
-        {UPDATE_TIMESTAMP: True, ALIAS: ALIAS_LCTN_HSTRY, COLUMN_MAP: "idr_updt_ts"},
-        BeforeValidator(transform_null_date_to_min),
-    ]
 
     @staticmethod
     def table() -> str:
@@ -2000,58 +2055,16 @@ class IdrClaimProfessional(IdrBaseModel):
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
         clm = ALIAS_CLM
         prfnl = ALIAS_PRFNL
-        lctn_hstry = ALIAS_LCTN_HSTRY
         return f"""
-            WITH claims AS (
-                    SELECT
-                        {clm}.clm_uniq_id,
-                        {clm}.geo_bene_sk,
-                        {clm}.clm_type_cd,
-                        {clm}.clm_num_sk,
-                        {clm}.clm_dt_sgntr_sk,
-                        {clm}.clm_idr_ld_dt
-                    FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
-                    WHERE {_claim_filter(start_time, partition)}
-                ),
-                latest_clm_lctn_hstry AS (
-                    SELECT
-                        claims.geo_bene_sk,
-                        claims.clm_type_cd,
-                        claims.clm_dt_sgntr_sk,
-                        claims.clm_num_sk,
-                        MAX({lctn_hstry}.clm_lctn_cd_sqnc_num) AS max_clm_lctn_cd_sqnc_num
-                    FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_lctn_hstry {lctn_hstry}
-                    JOIN claims ON
-                        {lctn_hstry}.geo_bene_sk = claims.geo_bene_sk AND
-                        {lctn_hstry}.clm_type_cd = claims.clm_type_cd AND
-                        {lctn_hstry}.clm_dt_sgntr_sk = claims.clm_dt_sgntr_sk AND
-                        {lctn_hstry}.clm_num_sk = claims.clm_num_sk
-                    GROUP BY
-                        claims.geo_bene_sk,
-                        claims.clm_type_cd,
-                        claims.clm_dt_sgntr_sk,
-                        claims.clm_num_sk
-                )
-                SELECT {{COLUMNS}}
-                FROM claims {clm}
-                JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_prfnl {prfnl} ON
-                    {clm}.geo_bene_sk = {prfnl}.geo_bene_sk AND
-                    {clm}.clm_type_cd = {prfnl}.clm_type_cd AND
-                    {clm}.clm_dt_sgntr_sk = {prfnl}.clm_dt_sgntr_sk AND
-                    {clm}.clm_num_sk = {prfnl}.clm_num_sk
-                LEFT JOIN latest_clm_lctn_hstry latest_lctn ON
-                    {clm}.geo_bene_sk = latest_lctn.geo_bene_sk AND
-                    {clm}.clm_type_cd = latest_lctn.clm_type_cd AND
-                    {clm}.clm_dt_sgntr_sk = latest_lctn.clm_dt_sgntr_sk AND
-                    {clm}.clm_num_sk = latest_lctn.clm_num_sk
-                LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_lctn_hstry {lctn_hstry} ON
-                    {clm}.geo_bene_sk = {lctn_hstry}.geo_bene_sk AND
-                    {clm}.clm_type_cd = {lctn_hstry}.clm_type_cd AND
-                    {clm}.clm_dt_sgntr_sk = {lctn_hstry}.clm_dt_sgntr_sk AND
-                    {clm}.clm_num_sk = {lctn_hstry}.clm_num_sk AND
-                    {lctn_hstry}.clm_lctn_cd_sqnc_num = latest_lctn.max_clm_lctn_cd_sqnc_num
-                {{WHERE_CLAUSE}}
-                {{ORDER_BY}}
+            SELECT {{COLUMNS}}
+            FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
+            JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_prfnl {prfnl} ON
+                {clm}.geo_bene_sk = {prfnl}.geo_bene_sk AND
+                {clm}.clm_dt_sgntr_sk = {prfnl}.clm_dt_sgntr_sk AND
+                {clm}.clm_type_cd = {prfnl}.clm_type_cd AND
+                {clm}.clm_num_sk = {prfnl}.clm_num_sk
+            {{WHERE_CLAUSE}} AND {_claim_filter(start_time, partition)}
+            {{ORDER_BY}}
         """
 
     @staticmethod
@@ -2162,6 +2175,7 @@ class IdrClaimLineRx(IdrBaseModel):
     clm_cms_calcd_mftr_dscnt_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_line_grs_cvrd_cst_tot_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_phrmcy_price_dscnt_at_pos_amt: Annotated[float, BeforeValidator(transform_null_float)]
+    clm_line_rptd_gap_dscnt_amt: float
     idr_insrt_ts: Annotated[
         datetime,
         {BATCH_TIMESTAMP: True, ALIAS: ALIAS_RX_LINE},

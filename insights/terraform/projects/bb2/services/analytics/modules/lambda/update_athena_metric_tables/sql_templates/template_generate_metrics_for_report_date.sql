@@ -39,6 +39,19 @@ WITH report_params AS (
       'fhir_v2_eob_since_call_synthetic_count',
       'fhir_v2_coverage_since_call_real_count',
       'fhir_v2_coverage_since_call_synthetic_count',
+      'fhir_v3_call_real_count',
+      'fhir_v3_call_synthetic_count',
+      'fhir_v3_eob_call_real_count',
+      'fhir_v3_eob_call_synthetic_count',
+      'fhir_v3_coverage_call_real_count',
+      'fhir_v3_coverage_call_synthetic_count',
+      'fhir_v3_patient_call_real_count',
+      'fhir_v3_patient_call_synthetic_count',
+      'fhir_v3_metadata_call_count',
+      'fhir_v3_eob_since_call_real_count',
+      'fhir_v3_eob_since_call_synthetic_count',
+      'fhir_v3_coverage_since_call_real_count',
+      'fhir_v3_coverage_since_call_synthetic_count',
       'auth_ok_real_bene_count',
       'auth_ok_synthetic_bene_count',
       'auth_fail_or_deny_real_bene_count',
@@ -124,7 +137,7 @@ perf_mon_events AS (
 request_response_middleware_events AS (
   select
     *,
-    json_extract(user, '$$.crosswalk.fhir_id') as crosswalk_fhir_id
+    json_extract(user, '$$.crosswalk.fhir_id_v2') as crosswalk_fhir_id
   from
     perf_mon_events
   WHERE
@@ -136,6 +149,7 @@ request_response_middleware_events AS (
           OR path = '/mymedicare/sls-callback'
           OR path LIKE '/v1/fhir%'
           OR path LIKE '/v2/fhir%'
+          OR path LIKE '/v3/fhir%'
           OR path LIKE '/v%/o/token%/'
         )
     )
@@ -144,7 +158,7 @@ request_response_middleware_events AS (
 api_audit_events AS (
   select
     *,
-    json_extract(user, '$$.crosswalk.fhir_id') as crosswalk_fhir_id
+    json_extract(user, '$$.crosswalk.fhir_id_v2') as crosswalk_fhir_id
   from
     perf_mon_events
   WHERE
@@ -471,6 +485,45 @@ global_state_metrics_per_app_for_max_group_timestamp AS (
         app_fhir_v2_coverage_since_call_synthetic_count
       ) app_all_fhir_v2_coverage_since_call_synthetic_count,
       "sum"(
+        app_fhir_v3_call_real_count
+      ) app_all_fhir_v3_call_real_count,
+      "sum"(
+        app_fhir_v3_call_synthetic_count
+      ) app_all_fhir_v3_call_synthetic_count,
+      "sum"(
+        app_fhir_v3_eob_call_real_count
+      ) app_all_fhir_v3_eob_call_real_count,
+      "sum"(
+        app_fhir_v3_eob_call_synthetic_count
+      ) app_all_fhir_v3_eob_call_synthetic_count,
+      "sum"(
+        app_fhir_v3_coverage_call_real_count
+      ) app_all_fhir_v3_coverage_call_real_count,
+      "sum"(
+        app_fhir_v3_coverage_call_synthetic_count
+      ) app_all_fhir_v3_coverage_call_synthetic_count,
+      "sum"(
+        app_fhir_v3_patient_call_real_count
+      ) app_all_fhir_v3_patient_call_real_count,
+      "sum"(
+        app_fhir_v3_patient_call_synthetic_count
+      ) app_all_fhir_v3_patient_call_synthetic_count,
+      "sum"(
+        app_fhir_v3_metadata_call_count
+      ) app_all_fhir_v3_metadata_call_count,
+      "sum"(
+        app_fhir_v3_eob_since_call_real_count
+      ) app_all_fhir_v3_eob_since_call_real_count,
+      "sum"(
+        app_fhir_v3_eob_since_call_synthetic_count
+      ) app_all_fhir_v3_eob_since_call_synthetic_count,
+      "sum"(
+        app_fhir_v3_coverage_since_call_real_count
+      ) app_all_fhir_v3_coverage_since_call_real_count,
+      "sum"(
+        app_fhir_v3_coverage_since_call_synthetic_count
+      ) app_all_fhir_v3_coverage_since_call_synthetic_count,
+      "sum"(
         app_auth_ok_real_bene_count
       ) app_all_auth_ok_real_bene_count,
       "sum"(
@@ -683,6 +736,27 @@ v2_fhir_events AS (
       and vpc = '${ENV}'
       and request_method = 'GET'
       and path LIKE '/v2/fhir%'
+      and response_code = 200
+      AND
+        app_name NOT IN ('TestApp', 'BlueButton Client (Test - Internal Use Only)',
+                     'MyMedicare PROD', 'new-relic')
+    )
+),
+
+v3_fhir_events AS (
+  select
+    time_of_event,
+    path,
+    fhir_id_v2 AS fhir_id,
+    req_qparam_lastupdated
+  from
+    perf_mon_events
+  WHERE
+    (
+      type = 'request_response_middleware'
+      and vpc = '${ENV}'
+      and request_method = 'GET'
+      and path LIKE '/v3/fhir%'
       and response_code = 200
       AND
         app_name NOT IN ('TestApp', 'BlueButton Client (Test - Internal Use Only)',
@@ -1068,6 +1142,178 @@ SELECT
         and req_qparam_lastupdated != ''
       )
   ) as fhir_v2_coverage_since_call_synthetic_count,
+  /* V3 FHIR resource stats top level */
+  (
+    select
+      count(*)
+    from
+      v3_fhir_events
+    WHERE
+      (
+        CONTAINS((SELECT enabled_metrics_list FROM report_params),
+          'fhir_v3_call_real_count')
+        and try_cast(fhir_id as BIGINT) > 0
+      )
+  ) as fhir_v3_call_real_count,
+  (
+    select
+      count(*)
+    from
+      v3_fhir_events
+    WHERE
+      (
+        CONTAINS((SELECT enabled_metrics_list FROM report_params),
+          'fhir_v3_call_synthetic_count')
+        and try_cast(fhir_id as BIGINT) < 0
+      )
+  ) as fhir_v3_call_synthetic_count,
+  (
+    select
+      count(*)
+    from
+      v3_fhir_events
+    WHERE
+      (
+        CONTAINS((SELECT enabled_metrics_list FROM report_params),
+          'fhir_v3_eob_call_real_count')
+        and path LIKE '/v3/fhir/ExplanationOfBenefit%'
+        and try_cast(fhir_id as BIGINT) > 0
+      )
+  ) as fhir_v3_eob_call_real_count,
+  (
+    select
+      count(*)
+    from
+      v3_fhir_events
+    WHERE
+      (
+        CONTAINS((SELECT enabled_metrics_list FROM report_params),
+          'fhir_v3_eob_call_synthetic_count')
+        and path LIKE '/v3/fhir/ExplanationOfBenefit%'
+        and try_cast(fhir_id as BIGINT) < 0
+      )
+  ) as fhir_v3_eob_call_synthetic_count,
+  (
+    select
+      count(*)
+    from
+      v3_fhir_events
+    WHERE
+      (
+        CONTAINS((SELECT enabled_metrics_list FROM report_params),
+          'fhir_v3_coverage_call_real_count')
+        and path LIKE '/v3/fhir/Coverage%'
+        and try_cast(fhir_id as BIGINT) > 0
+      )
+  ) as fhir_v3_coverage_call_real_count,
+  (
+    select
+      count(*)
+    from
+      v3_fhir_events
+    WHERE
+      (
+        CONTAINS((SELECT enabled_metrics_list FROM report_params),
+          'fhir_v3_coverage_call_synthetic_count')
+        and path LIKE '/v3/fhir/Coverage%'
+        and try_cast(fhir_id as BIGINT) < 0
+      )
+  ) as fhir_v3_coverage_call_synthetic_count,
+  (
+    select
+      count(*)
+    from
+      v3_fhir_events
+    WHERE
+      (
+        CONTAINS((SELECT enabled_metrics_list FROM report_params),
+          'fhir_v3_patient_call_real_count')
+        and path LIKE '/v3/fhir/Patient%'
+        and try_cast(fhir_id as BIGINT) > 0
+      )
+  ) as fhir_v3_patient_call_real_count,
+  (
+    select
+      count(*)
+    from
+      v3_fhir_events
+    WHERE
+      (
+        CONTAINS((SELECT enabled_metrics_list FROM report_params),
+          'fhir_v3_patient_call_synthetic_count')
+        and path LIKE '/v3/fhir/Patient%'
+        and try_cast(fhir_id as BIGINT) < 0
+      )
+  ) as fhir_v3_patient_call_synthetic_count,
+  (
+    select
+      count(*)
+    from
+      v3_fhir_events
+    WHERE
+      (
+        CONTAINS((SELECT enabled_metrics_list FROM report_params),
+          'fhir_v3_metadata_call_count')
+        and path LIKE '/v3/fhir/metadata%'
+      )
+  ) as fhir_v3_metadata_call_count,
+  /* V3 since (lastUpdated) stats top level */
+  (
+    select
+      count(*)
+    from
+      v3_fhir_events
+    WHERE
+      (
+        CONTAINS((SELECT enabled_metrics_list FROM report_params),
+          'fhir_v3_eob_since_call_real_count')
+        and path LIKE '/v3/fhir/ExplanationOfBenefit%'
+        and try_cast(fhir_id as BIGINT) > 0
+        and req_qparam_lastupdated != ''
+      )
+  ) as fhir_v3_eob_since_call_real_count,
+  (
+    select
+      count(*)
+    from
+      v3_fhir_events
+    WHERE
+      (
+        CONTAINS((SELECT enabled_metrics_list FROM report_params),
+          'fhir_v3_eob_since_call_synthetic_count')
+        and path LIKE '/v3/fhir/ExplanationOfBenefit%'
+        and try_cast(fhir_id as BIGINT) < 0
+        and req_qparam_lastupdated != ''
+      )
+  ) as fhir_v3_eob_since_call_synthetic_count,
+  (
+    select
+      count(*)
+    from
+      v3_fhir_events
+    WHERE
+      (
+        CONTAINS((SELECT enabled_metrics_list FROM report_params),
+          'fhir_v3_coverage_since_call_real_count')
+        and path LIKE '/v3/fhir/Coverage%'
+        and try_cast(fhir_id as BIGINT) > 0
+        and req_qparam_lastupdated != ''
+      )
+  ) as fhir_v3_coverage_since_call_real_count,
+  (
+    select
+      count(*)
+    from
+      v3_fhir_events
+    WHERE
+      (
+        CONTAINS((SELECT enabled_metrics_list FROM report_params),
+          'fhir_v3_coverage_since_call_synthetic_count')
+        and path LIKE '/v3/fhir/Coverage%'
+        and try_cast(fhir_id as BIGINT) < 0
+        and req_qparam_lastupdated != ''
+      )
+  ) as fhir_v3_coverage_since_call_synthetic_count,
   /* AUTH and demographic scopes stats top level */
   (
     select

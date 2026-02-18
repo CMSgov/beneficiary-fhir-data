@@ -49,6 +49,9 @@ public class Claim {
   @Column(name = "clm_src_id")
   private ClaimSourceId claimSourceId;
 
+  @Column(name = "meta_src_sk")
+  private MetaSourceSk metaSourceSk;
+
   @Column(name = "clm_efctv_dt")
   private LocalDate claimEffectiveDate;
 
@@ -87,6 +90,7 @@ public class Claim {
   @Embedded private ClaimIDRLoadDate claimIDRLoadDate;
   @Embedded private SubmitterContractNumber submitterContractNumber;
   @Embedded private SubmitterContractPBPNumber submitterContractPBPNumber;
+  @Embedded private ClaimAuditTrailContext claimAuditTrailContext;
 
   @OneToOne
   @JoinColumn(name = "bene_sk")
@@ -125,6 +129,19 @@ public class Claim {
   }
 
   /**
+   * Accessor for claim line rx total drug cost amount, if this is an PDE claim.
+   *
+   * @return optional total drug cost amount
+   */
+  public Optional<BigDecimal> getTotalDrugCostAmount() {
+    return claimItems.stream()
+        .map(ci -> ci.getClaimItemOptional().getClaimLineRx())
+        .flatMap(Optional::stream)
+        .map(claimLineRx -> claimLineRx.getClaimLineAdjudicationChargeRx().getTotalDrugCost())
+        .findFirst();
+  }
+
+  /**
    * Convert the claim info to a FHIR ExplanationOfBenefit.
    *
    * @param securityStatus securityStatus
@@ -138,8 +155,9 @@ public class Claim {
     eob.setUse(ExplanationOfBenefit.Use.CLAIM);
     eob.setType(claimTypeCode.toFhirType());
     claimTypeCode.toFhirSubtype().ifPresent(eob::setSubType);
-
-    eob.setMeta(meta.toFhir(claimTypeCode, claimSourceId, securityStatus, finalAction));
+    claimTypeCode.toFhirAdjudication().ifPresent(eob::addAdjudication);
+    eob.setMeta(
+        meta.toFhir(claimTypeCode, claimSourceId, securityStatus, finalAction, metaSourceSk));
     eob.setIdentifier(identifiers.toFhir());
     eob.setBillablePeriod(billablePeriod.toFhir());
     eob.setCreated(DateUtil.toDate(claimEffectiveDate));
@@ -220,14 +238,10 @@ public class Claim {
               eob.setProvider(new Reference(p));
             });
 
-    claimSourceId.toFhirOutcome().ifPresent(eob::setOutcome);
-    claimTypeCode.toFhirOutcome().ifPresent(eob::setOutcome);
-    claimOptional
-        .getClaimFiss()
-        .flatMap(f -> f.toFhirOutcome(claimTypeCode))
-        .ifPresent(eob::setOutcome);
-
     var recordTypeCodes = claimRecordType.toFhir(supportingInfoFactory);
+    // if pac, resolve the audit trail status code
+    var auditTrailStatusCode = claimAuditTrailContext.getAuditTrailStatusCode();
+    setEobOutcome(eob, claimTypeCode, auditTrailStatusCode);
 
     var initialSupportingInfo =
         Stream.of(
@@ -238,7 +252,8 @@ public class Claim {
                 claimDispositionCode.map(c -> c.toFhir(supportingInfoFactory)),
                 claimQueryCode.map(c -> c.toFhir(supportingInfoFactory)),
                 claimAdjustmentTypeCode.map(c -> c.toFhir(supportingInfoFactory)),
-                Optional.of(claimIDRLoadDate.toFhir(supportingInfoFactory)))
+                Optional.of(claimIDRLoadDate.toFhir(supportingInfoFactory)),
+                auditTrailStatusCode.map(c -> c.toFhir(supportingInfoFactory)))
             .flatMap(Optional::stream)
             .toList();
 
@@ -317,14 +332,15 @@ public class Claim {
     getBenePaidAmount()
         .map(AdjudicationChargeType.BENE_PAID_AMOUNT::toFhirTotal)
         .ifPresent(eob::addTotal);
+    if (claimTypeCode.isClaimSubtype(PDE)) {
+      getTotalDrugCostAmount()
+          .map(AdjudicationChargeType.TOTAL_DRUG_COST_AMOUNT::toFhirTotal)
+          .ifPresent(eob::addTotal);
+    }
     adjudicationCharge.toFhirAdjudication().forEach(eob::addAdjudication);
     eob.setPayment(claimPaymentAmount.toFhir());
 
-    professional.ifPresent(
-        p -> {
-          p.toFhirAdjudication().forEach(eob::addAdjudication);
-          p.toFhirOutcome(claimTypeCode).ifPresent(eob::setOutcome);
-        });
+    professional.ifPresent(p -> p.toFhirAdjudication().forEach(eob::addAdjudication));
 
     return sortedEob(eob);
   }
@@ -339,6 +355,23 @@ public class Claim {
         .flatMap(Optional::stream)
         .map(ClaimLineRx::getClaimRxSupportingInfo)
         .toList();
+  }
+
+  private void setEobOutcome(
+      ExplanationOfBenefit eob,
+      ClaimTypeCode claimTypeCode,
+      Optional<ClaimAuditTrailStatusCode> auditTrailStatus) {
+    // if claim source is NCH, mark complete
+    claimSourceId.toFhirOutcome().ifPresent(eob::setOutcome);
+
+    // if pac, set outcome based on audit trail status code
+    auditTrailStatus.ifPresentOrElse(
+        status -> eob.setOutcome(status.getOutcome(finalAction)),
+        () -> {
+          if (claimTypeCode.isPac()) {
+            eob.setOutcome(ExplanationOfBenefit.RemittanceOutcome.PARTIAL);
+          }
+        });
   }
 
   private ExplanationOfBenefit sortedEob(ExplanationOfBenefit eob) {

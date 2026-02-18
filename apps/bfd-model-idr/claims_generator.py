@@ -13,6 +13,7 @@ from typing import Any
 import pandas as pd
 import tqdm
 import yaml
+from dateutil.relativedelta import relativedelta
 from faker import Faker
 from pydantic import BaseModel, ConfigDict, Field, TypeAdapter
 
@@ -827,6 +828,7 @@ def gen_claim(bene_sk: str = "-1", min_date: str = "2018-01-01", max_date: str =
         claim_line_rx["CLM_CMS_CALCD_MFTR_DSCNT_AMT"] = round(random.uniform(0, 1000), 2)
         claim_line_rx["CLM_LINE_REBT_PASSTHRU_POS_AMT"] = round(random.uniform(0, 1000), 2)
         claim_line_rx["CLM_PHRMCY_PRICE_DSCNT_AT_POS_AMT"] = round(random.uniform(0, 1000), 2)
+        claim_line_rx["CLM_LINE_RPTD_GAP_DSCNT_AMT"] = round(random.uniform(1, 1000000), 2)
         add_meta_timestamps(claim_line_rx, claim.CLM, max_date)
 
         claim.CLM_LINE.append(claim_line)
@@ -1412,20 +1414,6 @@ def gen_pac_version_of_claim(claim: _GeneratedClaim, max_date: str):
     pac_claim.CLM_FISS["GEO_BENE_SK"] = pac_claim.CLM["GEO_BENE_SK"]
     pac_claim.CLM_FISS["CLM_NUM_SK"] = pac_claim.CLM["CLM_NUM_SK"]
     pac_claim.CLM_FISS["CLM_TYPE_CD"] = pac_claim.CLM["CLM_TYPE_CD"]
-    pac_claim.CLM_FISS["CLM_CRNT_STUS_CD"] = random.choice(
-        [
-            "A",
-            "F",
-            "I",
-            "S",
-            "M",
-            "P",
-            "R",
-            "D",
-            "T",
-            "U",
-        ]
-    )
     add_meta_timestamps(pac_claim.CLM_FISS, claim.CLM, max_date)
 
     pac_claim.CLM_LCTN_HSTRY = {}
@@ -1648,6 +1636,11 @@ def gen_contract_plan(amount: int):
     last_day = today.replace(month=12, day=31)
 
     for pbp_num in pbp_nums:
+        effective_date = faker.date_between_dates(date.fromisoformat("2020-01-01"), now)
+        end_date = faker.date_between_dates(effective_date, now + relativedelta(years=3))
+        obsolete_date = random.choice(
+            [faker.date_between_dates(effective_date, now), date.fromisoformat("9999-12-31")]
+        )
         contract_pbp_num.append(
             {
                 "CNTRCT_PBP_SK": gen_basic_id(field="CNTRCT_PBP_SK", length=12),
@@ -1656,7 +1649,9 @@ def gen_contract_plan(amount: int):
                 "CNTRCT_PBP_NAME": random.choice(avail_contract_names),
                 "CNTRCT_PBP_TYPE_CD": random.choice(avail_pbp_type_codes),
                 "CNTRCT_DRUG_PLAN_IND_CD": random.choice(["Y", "N"]),
-                "CNTRCT_PBP_SK_OBSLT_DT": random.choice(["0001-01-01", "9999-12-31"]),
+                "CNTRCT_PBP_SK_EFCTV_DT": effective_date.isoformat(),
+                "CNTRCT_PBP_END_DT": end_date.isoformat(),
+                "CNTRCT_PBP_SK_OBSLT_DT": obsolete_date.isoformat(),
             }
         )
 
