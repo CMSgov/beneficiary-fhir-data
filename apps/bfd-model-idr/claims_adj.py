@@ -466,7 +466,7 @@ class AdjudicatedGeneratorUtil:
             external_1_static = {f.CLM_VAL_SQNC_NUM: "1", f.CLM_PROD_TYPE_CD: "E"}
             external_1_data = {
                 f.CLM_DGNS_CD: random.choice(get_icd_10_dgns_codes(self.enable_samhsa)),
-                f.CLM_DGNS_PRCDR_ICD_IND: principal[f.CLM_DGNS_CD],
+                f.CLM_DGNS_PRCDR_ICD_IND: principal[f.CLM_DGNS_PRCDR_ICD_IND],
                 f.CLM_POA_IND: "0",  # ALWAYS for ICD-10 codes. not always for icd-9.
             } | external_1_static
             external_1 = match_diag(external_1_static)
