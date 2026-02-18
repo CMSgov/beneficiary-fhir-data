@@ -10,5 +10,15 @@ db_endpoint="$(aws rds describe-db-clusters --db-cluster-identifier $db_cluster 
 script_dir=$(path=$(realpath "$0") && dirname "$path")
 (
     cd "$script_dir"
-    mvn flyway:migrate -Dflyway.url=jdbc:postgresql://$db_endpoint:5432/fhirdb "-Dflyway.user=$username" "-Dflyway.password=$password"
+    mvn flyway:migrate -Dflyway.url=jdbc:postgresql://$db_endpoint:5432/fhirdb "-Dflyway.user=$username" "-Dflyway.password=$password" "-Dflyway.outOfOrder=true"
+
+    echo "Applying grants to 'idr' schema..."
+    export PGPASSWORD="$password"
+    psql -h "$db_endpoint" -d fhirdb -U "$username" -c "GRANT SELECT ON ALL TABLES IN SCHEMA idr TO rds_iam;
+                        GRANT SELECT ON ALL TABLES IN SCHEMA idr TO svc_bfd_server_1;
+                        GRANT SELECT ON ALL TABLES IN SCHEMA idr TO svc_bfd_pipeline_1;
+                        GRANT INSERT ON ALL TABLES IN SCHEMA idr TO svc_bfd_pipeline_1;
+                        GRANT UPDATE ON ALL TABLES IN SCHEMA idr TO svc_bfd_pipeline_1;
+                        GRANT DELETE ON ALL TABLES IN SCHEMA idr TO svc_bfd_pipeline_1;"
+
 )
