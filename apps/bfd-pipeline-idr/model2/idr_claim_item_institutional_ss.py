@@ -6,6 +6,7 @@ from pydantic import BeforeValidator
 
 from constants import (
     CLAIM_INSTITUTIONAL_SS_TABLE,
+    DEFAULT_MAX_DATE,
     INSTITUTIONAL_PAC_PARTITIONS,
 )
 from load_partition import LoadPartition, LoadPartitionGroup
@@ -20,10 +21,12 @@ from model import (
     ALIAS_LINE_FISS_BFNT,
     ALIAS_LINE_INSTNL,
     ALIAS_PROCEDURE,
+    ALIAS_PRVDR_RNDRNG,
     ALIAS_RLT_COND,
     ALIAS_VAL,
     BATCH_ID,
     COLUMN_MAP,
+    EXPR,
     HISTORICAL_BATCH_TIMESTAMP,
     INSERT_EXCLUDE,
     INSERT_FIELD,
@@ -33,6 +36,7 @@ from model import (
     IdrBaseModel,
     claim_filter,
     get_min_transaction_date,
+    provider_careteam_name_expr,
     transform_default_date_to_null,
     transform_default_hipps_code,
     transform_default_string,
@@ -86,6 +90,9 @@ class IdrClaimItemInstitutionalSs(IdrBaseModel):
     hcpcs_5_mdfr_cd: Annotated[str, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_default_string)]
     clm_idr_ld_dt: Annotated[
         date, {INSERT_EXCLUDE: True, ALIAS: ALIAS_LINE, HISTORICAL_BATCH_TIMESTAMP: True}
+    ]
+    clm_rndrg_fed_prvdr_spclty_cd: Annotated[
+        str, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_default_string)
     ]
     idr_insrt_ts_line: Annotated[
         datetime,
@@ -230,6 +237,19 @@ class IdrClaimItemInstitutionalSs(IdrBaseModel):
         {ALIAS: ALIAS_LINE_FISS, **UPDATE_FIELD},
         BeforeValidator(transform_null_date_to_min),
     ]
+
+    # Columns from v2_mdcr_prvdr_hstry
+    prvdr_rndrg_prvdr_npi_num: Annotated[
+        str,
+        {COLUMN_MAP: "prvdr_npi_num", ALIAS: ALIAS_PRVDR_RNDRNG},
+        BeforeValidator(transform_default_string),
+    ]
+    prvdr_rndrg_careteam_name: Annotated[
+        str,
+        {EXPR: provider_careteam_name_expr(ALIAS_PRVDR_RNDRNG, None)},
+        BeforeValidator(transform_default_string),
+    ]
+
     # columns from v2_mdcr_clm_line_fiss_bnft_svg
     # TODO: this has more than one row per claim line, need to figure out how to join this
     # clm_bnft_svg_ansi_grp_cd: Annotated[
@@ -273,6 +293,7 @@ class IdrClaimItemInstitutionalSs(IdrBaseModel):
         line_dcmtn = ALIAS_LINE_DCMTN
         line_fiss = ALIAS_LINE_FISS
         line_fiss_bnft = ALIAS_LINE_FISS_BFNT
+        prvdr_rndrng = ALIAS_PRVDR_RNDRNG
         # This query is taking all the values for CLM_PROD, CLM_LINE, and CLM_VAL and storing
         # them in a unified table. This is necessary because each of these tables have a different
         # number of rows for each claim. If we don't combine these values, we would either have to
@@ -435,6 +456,9 @@ class IdrClaimItemInstitutionalSs(IdrBaseModel):
                     AND {line_fiss}.clm_num_sk = {line}.clm_num_sk
                     AND {line_fiss}.clm_dt_sgntr_sk = {line}.clm_dt_sgntr_sk
                     AND {line_fiss}.clm_line_num = {line}.clm_line_num
+                LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_prvdr_hstry {prvdr_rndrng}
+                    ON {prvdr_rndrng}.prvdr_npi_num = {line}.prvdr_rndrng_prvdr_npi_num
+                    AND {prvdr_rndrng}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
                 -- LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_fiss_bnft_svg {line_fiss_bnft}
                 --    ON {line_fiss_bnft}.geo_bene_sk = {line}.geo_bene_sk
                 --    AND {line_fiss_bnft}.clm_type_cd = {line}.clm_type_cd

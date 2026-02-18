@@ -196,14 +196,16 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm (
     prvdr_blg_prvdr_npi_num VARCHAR(10),
     clm_blg_prvdr_oscar_num VARCHAR(20),
     --clm_blg_fed_prvdr_spclty_cd
-    --clm_blg_prvdr_name
+    clm_blg_prvdr_name VARCHAR(120),
     clm_blg_prvdr_last_name VARCHAR(60),
     clm_blg_prvdr_zip5_cd VARCHAR(5),
+    geo_blg_ssa_state_cd VARCHAR(2),
+    clm_blg_prvdr_tax_num VARCHAR(10),
     -- referring provider
     prvdr_rfrg_prvdr_npi_num VARCHAR(10),
     clm_rfrg_prvdr_last_name VARCHAR(60),
-    --clm_rfrg_fed_prvdr_spclty_cd
-    --clm_rfrg_prvdr_name
+    clm_rfrg_fed_prvdr_spclty_cd VARCHAR(2),
+    clm_rfrg_prvdr_name VARCHAR(120),
     clm_rfrg_prvdr_pin_num VARCHAR(14),
     -- prescribing provider
     prvdr_prscrbng_prvdr_npi_num VARCHAR(10),
@@ -211,14 +213,16 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm (
     -- other provider
     prvdr_othr_prvdr_npi_num VARCHAR(10),
     clm_othr_prvdr_npi_num VARCHAR(10),
-    --clm_othr_prvdr_name
+    clm_othr_fed_prvdr_spclty_cd VARCHAR(2),
+    clm_othr_prvdr_name VARCHAR(120),
     clm_othr_prvdr_last_name VARCHAR(60),
     --clm_othr_fed_prvdr_spclty_cd
     -- rendering provider
     prvdr_rndrng_prvdr_npi_num VARCHAR(10),
     clm_rndrg_prvdr_npi_num VARCHAR(10),
-    --clm_rndrg_fed_prvdr_spclty_cd
-    --clm_rndrg_prvdr_name
+    clm_rndrg_fed_prvdr_spclty_cd VARCHAR(2),
+    geo_rndrg_ssa_state_cd VARCHAR(2),
+    clm_rndrg_prvdr_name VARCHAR(120),
     clm_rndrg_prvdr_last_name VARCHAR(60),
     -- service provider
     prvdr_srvc_prvdr_npi_num VARCHAR(10),
@@ -232,8 +236,9 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm (
     -- operating provider
     prvdr_oprtg_prvdr_npi_num VARCHAR(10),
     clm_oprtg_prvdr_npi_num VARCHAR(10),
+    clm_oprtg_fed_prvdr_spclty_cd VARCHAR(2),
     --clm_rndrg_fed_prvdr_spclty_cd
-    --clm_oprtg_prvdr_name
+    clm_oprtg_prvdr_name VARCHAR(120),
     clm_oprtg_prvdr_last_name VARCHAR(60),
 
     clm_ric_cd VARCHAR(1),
@@ -453,10 +458,12 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_line (
     clm_line_mdcr_ddctbl_amt NUMERIC,
     clm_line_rx_num VARCHAR(30),
     clm_line_thru_dt DATE,
+    clm_rndrg_fed_prvdr_spclty_cd VARCHAR(2),
     clm_rndrg_prvdr_prtcptg_cd VARCHAR(1),
     clm_rndrg_prvdr_tax_num VARCHAR(10),
     clm_rndrg_prvdr_npi_num VARCHAR(10),
     prvdr_rndrng_prvdr_npi_num VARCHAR(10),
+    geo_rndrg_ssa_state_cd VARCHAR(2),
     clm_pos_cd VARCHAR(2),
     -- SAMHSA (HCPCS/CPT)
     clm_line_hcpcs_cd VARCHAR(5),

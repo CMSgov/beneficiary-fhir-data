@@ -6,6 +6,7 @@ from pydantic import BeforeValidator
 
 from constants import (
     CLAIM_INSTITUTIONAL_NCH_TABLE,
+    DEFAULT_MAX_DATE,
     INSTITUTIONAL_ADJUDICATED_PARTITIONS,
 )
 from load_partition import LoadPartition, LoadPartitionGroup
@@ -18,10 +19,12 @@ from model import (
     ALIAS_LINE,
     ALIAS_LINE_INSTNL,
     ALIAS_PROCEDURE,
+    ALIAS_PRVDR_RNDRNG,
     ALIAS_RLT_COND,
     ALIAS_VAL,
     BATCH_ID,
     COLUMN_MAP,
+    EXPR,
     HISTORICAL_BATCH_TIMESTAMP,
     INSERT_EXCLUDE,
     INSERT_FIELD,
@@ -31,6 +34,7 @@ from model import (
     IdrBaseModel,
     claim_filter,
     get_min_transaction_date,
+    provider_careteam_name_expr,
     transform_default_date_to_null,
     transform_default_hipps_code,
     transform_default_string,
@@ -82,6 +86,9 @@ class IdrClaimItemInstitutionalNch(IdrBaseModel):
     ]
     clm_line_pmd_uniq_trkng_num: Annotated[
         str, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_null_string)
+    ]
+    clm_rndrg_fed_prvdr_spclty_cd: Annotated[
+        str, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_default_string)
     ]
     idr_insrt_ts_line: Annotated[
         datetime,
@@ -215,6 +222,18 @@ class IdrClaimItemInstitutionalNch(IdrBaseModel):
         BeforeValidator(transform_null_date_to_min),
     ]
 
+    # Columns from v2_mdcr_prvdr_hstry
+    prvdr_rndrng_prvdr_npi_num: Annotated[
+        str,
+        {COLUMN_MAP: "prvdr_npi_num", ALIAS: ALIAS_PRVDR_RNDRNG},
+        BeforeValidator(transform_default_string),
+    ]
+    prvdr_rndrng_careteam_name: Annotated[
+        str,
+        {EXPR: provider_careteam_name_expr(ALIAS_PRVDR_RNDRNG, None)},
+        BeforeValidator(transform_default_string),
+    ]
+
     @staticmethod
     def table() -> str:
         return "idr_new.claim_item_institutional_nch"
@@ -237,6 +256,7 @@ class IdrClaimItemInstitutionalNch(IdrBaseModel):
         val = ALIAS_VAL
         rlt_cond = ALIAS_RLT_COND
         ansi_sgntr = ALIAS_ANSI_SGNTR
+        prvdr_rndrng = ALIAS_PRVDR_RNDRNG
         # This query is taking all the values for CLM_PROD, CLM_LINE, and CLM_VAL and storing
         # them in a unified table. This is necessary because each of these tables have a different
         # number of rows for each claim. If we don't combine these values, we would either have to
@@ -389,6 +409,9 @@ class IdrClaimItemInstitutionalNch(IdrBaseModel):
                     AND {line_instnl}.clm_line_num = {line}.clm_line_num
                 LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_ansi_sgntr {ansi_sgntr}
                     ON {line_instnl}.clm_ansi_sgntr_sk = {ansi_sgntr}.clm_ansi_sgntr_sk
+                LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_prvdr_hstry {prvdr_rndrng}
+                    ON {prvdr_rndrng}.prvdr_npi_num = {line}.prvdr_rndrng_prvdr_npi_num
+                    AND {prvdr_rndrng}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
                 {{WHERE_CLAUSE}}
                 {{ORDER_BY}}
         """

@@ -23,6 +23,7 @@ from model import (
     ALIAS_PRVDR_RNDRNG,
     BATCH_ID,
     COLUMN_MAP,
+    EXPR,
     HISTORICAL_BATCH_TIMESTAMP,
     INSERT_EXCLUDE,
     INSERT_FIELD,
@@ -32,12 +33,11 @@ from model import (
     IdrBaseModel,
     claim_filter,
     get_min_transaction_date,
+    provider_careteam_name_expr,
     transform_default_date_to_null,
-    transform_default_int_to_null,
     transform_default_string,
     transform_null_date_to_min,
     transform_null_string,
-    transform_provider_name,
 )
 
 
@@ -73,9 +73,6 @@ class IdrClaimItemProfessionalSs(IdrBaseModel):
     clm_rndrg_prvdr_type_cd: Annotated[
         str, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_default_string)
     ]
-    clm_rndrg_prvdr_prtcptg_cd: Annotated[
-        str, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_default_string)
-    ]
     clm_rndrg_prvdr_tax_num: Annotated[
         str, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_default_string)
     ]
@@ -87,6 +84,12 @@ class IdrClaimItemProfessionalSs(IdrBaseModel):
     clm_line_otaf_amt: Annotated[float | None, {ALIAS: ALIAS_LINE}]
     clm_idr_ld_dt: Annotated[
         date, {INSERT_EXCLUDE: True, ALIAS: ALIAS_CLM, HISTORICAL_BATCH_TIMESTAMP: True}
+    ]
+    clm_rndrg_fed_prvdr_spclty_cd: Annotated[
+        str, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_default_string)
+    ]
+    geo_rndrg_ssa_state_cd: Annotated[
+        str, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_default_string)
     ]
     idr_insrt_ts_line: Annotated[
         datetime,
@@ -202,54 +205,9 @@ class IdrClaimItemProfessionalSs(IdrBaseModel):
         {COLUMN_MAP: "prvdr_npi_num", ALIAS: ALIAS_PRVDR_RNDRNG},
         BeforeValidator(transform_default_string),
     ]
-    prvdr_rndrng_sk: Annotated[
-        int | None,
-        {COLUMN_MAP: "prvdr_sk", ALIAS: ALIAS_PRVDR_RNDRNG},
-        BeforeValidator(transform_default_int_to_null),
-    ]
-    prvdr_rndrng_mdl_name: Annotated[
+    prvdr_rndrng_careteam_name: Annotated[
         str,
-        {COLUMN_MAP: "prvdr_mdl_name", ALIAS: ALIAS_PRVDR_RNDRNG},
-        BeforeValidator(transform_default_string),
-    ]
-    prvdr_rndrng_type_cd: Annotated[
-        str,
-        {COLUMN_MAP: "prvdr_type_cd", ALIAS: ALIAS_PRVDR_RNDRNG},
-        BeforeValidator(transform_default_string),
-    ]
-    prvdr_rndrng_txnmy_cmpst_cd: Annotated[
-        str,
-        {COLUMN_MAP: "prvdr_txnmy_cmpst_cd", ALIAS: ALIAS_PRVDR_RNDRNG},
-        BeforeValidator(transform_default_string),
-    ]
-    prvdr_rndrng_oscar_num: Annotated[
-        str,
-        {COLUMN_MAP: "prvdr_oscar_num", ALIAS: ALIAS_PRVDR_RNDRNG},
-        BeforeValidator(transform_default_string),
-    ]
-    prvdr_rndrng_1st_name: Annotated[
-        str,
-        {COLUMN_MAP: "prvdr_1st_name", ALIAS: ALIAS_PRVDR_RNDRNG},
-        BeforeValidator(transform_default_string),
-    ]
-    prvdr_rndrng_name: Annotated[
-        str,
-        {COLUMN_MAP: "prvdr_name", ALIAS: ALIAS_PRVDR_RNDRNG},
-        BeforeValidator(transform_provider_name),
-    ]
-    prvdr_rndrng_lgl_name: Annotated[
-        str,
-        {COLUMN_MAP: "prvdr_lgl_name", ALIAS: ALIAS_PRVDR_RNDRNG},
-        BeforeValidator(transform_default_string),
-    ]
-    prvdr_rndrng_emplr_id_num: Annotated[
-        str,
-        {COLUMN_MAP: "prvdr_emplr_id_num", ALIAS: ALIAS_PRVDR_RNDRNG},
-        BeforeValidator(transform_default_string),
-    ]
-    prvdr_rndrng_last_name: Annotated[
-        str,
-        {COLUMN_MAP: "prvdr_last_name", ALIAS: ALIAS_PRVDR_RNDRNG},
+        {EXPR: provider_careteam_name_expr(ALIAS_PRVDR_RNDRNG, None)},
         BeforeValidator(transform_default_string),
     ]
 

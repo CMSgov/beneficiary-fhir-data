@@ -133,6 +133,19 @@ def provider_last_name_expr(alias: str, claim_field: str) -> str:
     """
 
 
+def provider_last_or_legal_name_expr(alias: str) -> str:
+    return f"COALESCE({alias}.prvdr_lgl_name, {alias}.prvdr_last_name)"
+
+
+def provider_careteam_name_expr(alias: str, type: str | None) -> str:
+    return f"""
+        COALESCE(
+            {f"{ALIAS_CLM}.clm_{type}_prvdr_name," if type else ""}
+            {provider_last_or_legal_name_expr(alias)} || ',' || {alias}.prvdr_1st_name
+        )
+    """
+
+
 def provider_type_expr(alias: str) -> str:
     provider_type_organization = "1"
     provider_type_individual = "2"
