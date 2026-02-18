@@ -93,6 +93,11 @@ class IdrClaimRx(IdrBaseModel):
         str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)
     ]
     clm_othr_tp_pd_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
+    prvdr_srvc_id_qlfyr_cd: Annotated[
+        str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)
+    ]
+    clm_srvc_prvdr_gnrc_id_num: Annotated[str, BeforeValidator(transform_default_string)]
+    prvdr_prsbng_id_qlfyr_cd: Annotated[str, BeforeValidator(transform_default_string)]
     idr_insrt_ts_clm: Annotated[
         datetime,
         {ALIAS: ALIAS_CLM, **INSERT_FIELD},

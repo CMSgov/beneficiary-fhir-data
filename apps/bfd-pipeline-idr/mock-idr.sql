@@ -210,6 +210,7 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm (
     -- prescribing provider
     prvdr_prscrbng_prvdr_npi_num VARCHAR(10),
     clm_prscrbng_prvdr_last_name VARCHAR(60),
+    prvdr_prsbng_id_qlfyr_cd VARCHAR(2),
     -- other provider
     prvdr_othr_prvdr_npi_num VARCHAR(10),
     clm_othr_prvdr_npi_num VARCHAR(10),
@@ -227,6 +228,7 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm (
     -- service provider
     prvdr_srvc_prvdr_npi_num VARCHAR(10),
     clm_srvc_prvdr_gnrc_id_num VARCHAR(20),
+    prvdr_srvc_id_qlfyr_cd VARCHAR(2),
     -- attending provider
     prvdr_atndg_prvdr_npi_num VARCHAR(10),
     clm_atndg_prvdr_npi_num VARCHAR(10),

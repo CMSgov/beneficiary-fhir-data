@@ -1142,6 +1142,7 @@ create table idr_new.claim_rx
 
     prvdr_prscrbng_prvdr_npi_num      character varying(10),
     prvdr_prscrbng_careteam_name      character varying(135),
+    PRVDR_PRSBNG_ID_QLFYR_CD          character varying(2),
     bfd_prscrbng_npi_type             numeric,
 --     idr_insrt_ts_dcmtn         timestamp with time zone not null,
 --     idr_updt_ts_dcmtn          timestamp with time zone not null,
@@ -1167,6 +1168,8 @@ create table idr_new.claim_rx
     prvdr_srvc_prvdr_npi_num          character varying(10),
     prvdr_srvc_careteam_name          character varying(135),
     bfd_srvc_npi_type                 numeric,
+    prvdr_srvc_id_qlfyr_cd              character varying(2),
+    clm_srvc_prvdr_gnrc_id_num      character varying(20),
 --     clm_blood_chrg_amt         numeric,
 --  instnl   clm_tot_cntrctl_amt        numeric,
 --  non_rx   clm_bene_intrst_pd_amt     numeric,
