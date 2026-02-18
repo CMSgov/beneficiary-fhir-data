@@ -277,6 +277,7 @@ class _ClaimsFile(StrEnum):
             f.CLM_TYPE_CD,
             f.CLM_LCTN_CD_SQNC_NUM,
             f.CLM_AUDT_TRL_STUS_CD,
+            f.CLM_AUDT_TRL_LCTN_CD,  # TODO: Generate this; values in test-samples2 are static
             f.IDR_INSRT_TS,
             f.IDR_UPDT_TS,
         ],
