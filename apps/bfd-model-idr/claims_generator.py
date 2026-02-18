@@ -900,16 +900,19 @@ def gen_claim(bene_sk: str = "-1", min_date: str = "2018-01-01", max_date: str =
         claim.CLM["CLM_ATNDG_FED_PRVDR_SPCLTY_CD"] = random.choice(
             generator.code_systems["CLM_PRVDR_SPCLTY_CD"]
         )
+        claim.CLM["CLM_ATNDG_PRVDR_NAME"] = random.choice(["Random last, First", "~"])
         claim.CLM["CLM_OPRTG_PRVDR_NPI_NUM"] = random.choice(type_1_npis)
         claim.CLM["PRVDR_OPRTG_PRVDR_NPI_NUM"] = claim.CLM["CLM_OPRTG_PRVDR_NPI_NUM"]
         claim.CLM["CLM_OPRTG_FED_PRVDR_SPCLTY_CD"] = random.choice(
             generator.code_systems["CLM_PRVDR_SPCLTY_CD"]
         )
+        claim.CLM["CLM_OTHR_PRVDR_NAME"] = random.choice(["Random last, First", "~"])
         claim.CLM["CLM_OTHR_PRVDR_NPI_NUM"] = random.choice(type_1_npis)
         claim.CLM["PRVDR_OTHR_PRVDR_NPI_NUM"] = claim.CLM["CLM_OTHR_PRVDR_NPI_NUM"]
         claim.CLM["CLM_OTHR_FED_PRVDR_SPCLTY_CD"] = random.choice(
             generator.code_systems["CLM_PRVDR_SPCLTY_CD"]
         )
+        claim.CLM["CLM_RNDRG_PRVDR_NAME"] = random.choice(["Random last, First", "~"])
         claim.CLM["CLM_RNDRG_PRVDR_NPI_NUM"] = random.choice(type_1_npis)
         claim.CLM["PRVDR_RNDRNG_PRVDR_NPI_NUM"] = claim.CLM["CLM_RNDRG_PRVDR_NPI_NUM"]
         claim.CLM["CLM_RNDRG_FED_PRVDR_SPCLTY_CD"] = random.choice(
