@@ -407,6 +407,9 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdMergedBeneMultipleLinks[G
         },
         "value" : "2B19C89AA41"
       }, {
+        "period" : {
+          "start" : "2020-12-19T00:00:00+00:00"
+        },
         "system" : "http://hl7.org/fhir/sid/us-mbi",
         "type" : {
           "coding" : [ {
@@ -509,6 +512,9 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdMergedBeneMultipleLinks[G
         },
         "value" : "2B19C89AA41"
       }, {
+        "period" : {
+          "start" : "2020-12-19T00:00:00+00:00"
+        },
         "system" : "http://hl7.org/fhir/sid/us-mbi",
         "type" : {
           "coding" : [ {
@@ -611,6 +617,9 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdMergedBeneMultipleLinks[P
         },
         "value" : "2B19C89AA41"
       }, {
+        "period" : {
+          "start" : "2020-12-19T00:00:00+00:00"
+        },
         "system" : "http://hl7.org/fhir/sid/us-mbi",
         "type" : {
           "coding" : [ {
