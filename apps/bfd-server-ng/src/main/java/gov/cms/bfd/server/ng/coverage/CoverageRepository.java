@@ -7,7 +7,6 @@ import gov.cms.bfd.server.ng.util.LogUtil;
 import io.micrometer.core.annotation.Timed;
 import io.micrometer.core.aop.MeterTag;
 import jakarta.persistence.EntityManager;
-
 import java.time.Instant;
 import java.util.Optional;
 import lombok.AllArgsConstructor;

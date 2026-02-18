@@ -13,7 +13,6 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -152,8 +151,10 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
    * @param coverageCompositeId The full ID for the Coverage resource.
    * @return A FHIR Coverage object.
    */
-  public Optional<Coverage> toFhirCoverageIfPresent(CoverageCompositeId coverageCompositeId, Instant clock) {
-    return Optional.of(toFhir(coverageCompositeId, clock)).filter(c -> !c.getIdentifier().isEmpty());
+  public Optional<Coverage> toFhirCoverageIfPresent(
+      CoverageCompositeId coverageCompositeId, Instant clock) {
+    return Optional.of(toFhir(coverageCompositeId, clock))
+        .filter(c -> !c.getIdentifier().isEmpty());
   }
 
   /**
@@ -201,7 +202,8 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
    * @param orgId The organization reference ID.
    * @return A FHIR Coverage object.
    */
-  public Coverage toFhirC4DIC(CoverageCompositeId coverageCompositeId, String orgId, Instant clock) {
+  public Coverage toFhirC4DIC(
+      CoverageCompositeId coverageCompositeId, String orgId, Instant clock) {
     var coverage = setupBaseCoverage(coverageCompositeId, ProfileType.C4DIC);
     var coveragePart = coverageCompositeId.coveragePart();
 
@@ -214,7 +216,11 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
   }
 
   private Coverage mapCoverageAB(
-      Coverage coverage, CoveragePart coveragePart, ProfileType profileType, String orgId, Instant clock) {
+      Coverage coverage,
+      CoveragePart coveragePart,
+      ProfileType profileType,
+      String orgId,
+      Instant clock) {
     var entitlementOpt = findEntitlement(coveragePart);
     if (entitlementOpt.isEmpty()) {
       return toEmptyResource(coverage);
@@ -269,7 +275,8 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
     return emptyCoverage;
   }
 
-  private Coverage mapCoverageDual(Coverage coverage, ProfileType profileType, String orgId, Instant clock) {
+  private Coverage mapCoverageDual(
+      Coverage coverage, ProfileType profileType, String orgId, Instant clock) {
     var dualEligibilityOpt = coverageOptional.getBeneficiaryDualEligibility();
     if (dualEligibilityOpt.isEmpty()) {
       return toEmptyResource(coverage);

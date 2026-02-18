@@ -1,7 +1,6 @@
 package gov.cms.bfd.server.ng.util;
 
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
-
 import java.time.*;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
@@ -76,7 +75,8 @@ public class DateUtil {
    * @return local date
    */
   public static LocalDate nowAoe(Instant clock) {
-    Instant dateInstance = clock == null? Clock.systemUTC().instant().truncatedTo(ChronoUnit.DAYS) : clock;
+    Instant dateInstance =
+        clock == null ? Clock.systemUTC().instant().truncatedTo(ChronoUnit.DAYS) : clock;
     return dateInstance.atZone(ZoneId.of("-12:00")).toLocalDate();
   }
 }

@@ -6,7 +6,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
@@ -48,7 +47,8 @@ public class BeneficiaryDualEligibility {
   }
 
   Coverage.CoverageStatus toFhirStatus(Instant clock) {
-    if (eligibilityEndDate.isPresent() && eligibilityEndDate.get().isBefore(DateUtil.nowAoe(clock))) {
+    if (eligibilityEndDate.isPresent()
+        && eligibilityEndDate.get().isBefore(DateUtil.nowAoe(clock))) {
       return Coverage.CoverageStatus.CANCELLED;
     }
 

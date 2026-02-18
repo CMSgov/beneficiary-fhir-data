@@ -6,6 +6,10 @@ import io.micrometer.core.aop.MeterTagAnnotationHandler;
 import io.micrometer.core.aop.TimedAspect;
 import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.servlet.Servlet;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import javax.sql.DataSource;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -14,11 +18,6 @@ import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-
-import java.time.Clock;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.temporal.ChronoUnit;
 
 /** BFD Server startup class. */
 @ServletComponentScan(basePackageClasses = {RestfulServer.class})
@@ -82,8 +81,16 @@ public class Application {
     return timedAspect;
   }
 
-  @Bean("clock")
+  /**
+   * Configures a date that propagates throughout the application that is overridable in test
+   * configurations.
+   *
+   * @return clock instant
+   */
+  @Bean
   public Instant clock() {
-    return Clock.systemUTC().instant().truncatedTo(ChronoUnit.DAYS);
+    return Clock.fixed(Instant.parse("2026-02-09T00:00:00Z"), ZoneId.of("UTC"))
+        .instant()
+        .truncatedTo(ChronoUnit.DAYS);
   }
 }
