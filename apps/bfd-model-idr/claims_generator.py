@@ -1143,7 +1143,7 @@ def generate(
 
             out_tables[CLM_DCMTN].extend(
                 [
-                    adj_util.gen_clm_dcmtn(clm=pac_clm, init_clm_dcmtn=x)
+                    pac_util.gen_pac_clm_dcmtn(clm=pac_clm, init_clm_dcmtn=x)
                     for x in claims_tbls[CLM_DCMTN]
                 ]
             )
@@ -1151,7 +1151,7 @@ def generate(
             clm_type_cd = int(pac_clm[f.CLM_TYPE_CD])
             if clm_type_cd in PROFESSIONAL_CLAIM_TYPES:
                 clm_prfnls = [
-                    adj_util.gen_clm_prfnl(
+                    pac_util.gen_pac_clm_prfnl(
                         gen_utils=gen_utils,
                         clm=pac_clm,
                         init_clm_prfnl=x,

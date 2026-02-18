@@ -684,7 +684,7 @@ class AdjudicatedGeneratorUtil:
             gen_utils.code_systems[f.CLM_MDCR_PRFNL_PRVDR_ASGNMT_SW]
         )
         clm_prfnl[f.CLM_CLNCL_TRIL_NUM] = str(random.randint(0, 10000))
-        if clm[f.CLM_TYPE_CD] in (71, 72, 81, 82):
+        if int(clm[f.CLM_TYPE_CD]) in (71, 72, 81, 82):
             clm_prfnl[f.CLM_PRVDR_ACNT_RCVBL_OFST_AMT] = round(random.uniform(0, 1000), 2)
 
         add_meta_timestamps(clm_prfnl, clm)

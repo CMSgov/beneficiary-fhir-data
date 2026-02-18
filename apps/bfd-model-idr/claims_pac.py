@@ -9,8 +9,8 @@ from claims_static import (
     TARGET_SEQUENCE_NUMBERS,
     VMS_CDS,
 )
-from claims_util import add_meta_timestamps, get_ric_cd_for_clm_type_cd
-from generator_util import RowAdapter, gen_basic_id, gen_numeric_id
+from claims_util import add_meta_timestamps, four_part_key, get_ric_cd_for_clm_type_cd
+from generator_util import GeneratorUtil, RowAdapter, gen_basic_id, gen_numeric_id
 
 
 class PacGeneratorUtil:
@@ -306,6 +306,78 @@ class PacGeneratorUtil:
         clm_instnl[f.CLM_TYPE_CD] = clm[f.CLM_TYPE_CD]
 
         return clm_instnl
+
+    def gen_pac_clm_prfnl(
+        self, gen_utils: GeneratorUtil, clm: RowAdapter, init_clm_prfnl: RowAdapter
+    ):
+        clm_prfnl = self._prepare_pac_row(
+            init_row=init_clm_prfnl,
+            is_pac_predicate=lambda: four_part_key(init_clm_prfnl) == four_part_key(clm),
+            exclude_fields_always=set(),
+            exclude_fields_adj={
+                f.CLM_CARR_PMT_DNL_CD,
+                f.CLM_MDCR_PRFNL_PRMRY_PYR_AMT,
+                f.CLM_MDCR_PRFNL_PRVDR_ASGNMT_SW,
+                f.CLM_CLNCL_TRIL_NUM,
+                f.GEO_BENE_SK,
+                f.CLM_DT_SGNTR_SK,
+                f.CLM_TYPE_CD,
+                f.CLM_NUM_SK,
+                f.IDR_INSRT_TS,
+                f.IDR_UPDT_TS,
+            },
+        )
+
+        # HACK: This is a straight-up copy of the adjudicated generator, but we have some
+        # test-samples pac CLMs with CLM_PRFNL row(s) that we need to regenerate
+        clm_prfnl[f.CLM_DT_SGNTR_SK] = clm[f.CLM_DT_SGNTR_SK]
+        clm_prfnl[f.CLM_NUM_SK] = clm[f.CLM_NUM_SK]
+        clm_prfnl[f.GEO_BENE_SK] = clm[f.GEO_BENE_SK]
+        clm_prfnl[f.CLM_TYPE_CD] = clm[f.CLM_TYPE_CD]
+        clm_prfnl[f.CLM_CARR_PMT_DNL_CD] = random.choice(
+            gen_utils.code_systems[f.CLM_CARR_PMT_DNL_CD]
+        )
+        clm_prfnl[f.CLM_MDCR_PRFNL_PRMRY_PYR_AMT] = round(random.uniform(10, 1000), 2)
+        clm_prfnl[f.CLM_MDCR_PRFNL_PRVDR_ASGNMT_SW] = random.choice(
+            gen_utils.code_systems[f.CLM_MDCR_PRFNL_PRVDR_ASGNMT_SW]
+        )
+        clm_prfnl[f.CLM_CLNCL_TRIL_NUM] = str(random.randint(0, 10000))
+
+        add_meta_timestamps(clm_prfnl, clm)
+
+        return clm_prfnl
+
+    def gen_pac_clm_dcmtn(self, clm: RowAdapter, init_clm_dcmtn: RowAdapter | None = None):
+        if not init_clm_dcmtn:
+            init_clm_dcmtn = RowAdapter({})
+
+        clm_dcmtn = self._prepare_pac_row(
+            init_row=init_clm_dcmtn,
+            is_pac_predicate=lambda: four_part_key(init_clm_dcmtn) == four_part_key(clm),
+            exclude_fields_always=set(),
+            exclude_fields_adj={
+                f.CLM_NRLN_RIC_CD,
+                f.GEO_BENE_SK,
+                f.CLM_DT_SGNTR_SK,
+                f.CLM_TYPE_CD,
+                f.CLM_NUM_SK,
+                f.IDR_INSRT_TS,
+                f.IDR_UPDT_TS,
+            },
+        )
+        clm_dcmtn[f.CLM_DT_SGNTR_SK] = clm[f.CLM_DT_SGNTR_SK]
+        clm_dcmtn[f.CLM_NUM_SK] = clm[f.CLM_NUM_SK]
+        clm_dcmtn[f.GEO_BENE_SK] = clm[f.GEO_BENE_SK]
+        clm_dcmtn[f.CLM_TYPE_CD] = clm[f.CLM_TYPE_CD]
+
+        # CLM_RIC_CDs are generally tied to the claim type code.
+        ric_cd = get_ric_cd_for_clm_type_cd(clm[f.CLM_TYPE_CD])
+        if ric_cd:
+            clm_dcmtn[f.CLM_NRLN_RIC_CD] = ric_cd
+
+        add_meta_timestamps(clm_dcmtn, clm)
+
+        return clm_dcmtn
 
     def gen_pac_clm_prod(self, clm: RowAdapter, init_clm_prod: RowAdapter):
         clm_prod = self._prepare_pac_row(
