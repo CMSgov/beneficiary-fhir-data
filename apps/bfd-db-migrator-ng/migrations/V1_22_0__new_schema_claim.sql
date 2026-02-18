@@ -1142,7 +1142,7 @@ create table idr_new.claim_rx
 
     prvdr_prscrbng_prvdr_npi_num      character varying(10),
     prvdr_prscrbng_careteam_name      character varying(135),
-    PRVDR_PRSBNG_ID_QLFYR_CD          character varying(2),
+    prvdr_prsbng_id_qlfyr_cd          character varying(2),
     bfd_prscrbng_npi_type             numeric,
 --     idr_insrt_ts_dcmtn         timestamp with time zone not null,
 --     idr_updt_ts_dcmtn          timestamp with time zone not null,
