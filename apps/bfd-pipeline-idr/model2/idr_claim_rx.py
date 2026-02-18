@@ -196,7 +196,7 @@ class IdrClaimRx(IdrBaseModel):
         {COLUMN_MAP: "prvdr_npi_num", ALIAS: ALIAS_PRVDR_SRVC},
         BeforeValidator(transform_default_string),
     ]
-    prvdr_srvc_careteam_name: Annotated[
+    bfd_prvdr_srvc_careteam_name: Annotated[
         str,
         {EXPR: provider_careteam_name_expr(ALIAS_PRVDR_SRVC, None)},
         BeforeValidator(transform_default_string),
@@ -207,7 +207,7 @@ class IdrClaimRx(IdrBaseModel):
         {COLUMN_MAP: "prvdr_npi_num", ALIAS: ALIAS_PRVDR_PRSCRBNG},
         BeforeValidator(transform_default_string),
     ]
-    prvdr_prscrbng_careteam_name: Annotated[
+    bfd_prvdr_prscrbng_careteam_name: Annotated[
         str,
         {EXPR: provider_careteam_name_expr(ALIAS_PRVDR_PRSCRBNG, None)},
         BeforeValidator(transform_default_string),

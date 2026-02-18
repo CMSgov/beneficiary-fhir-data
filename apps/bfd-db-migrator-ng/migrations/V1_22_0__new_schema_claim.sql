@@ -41,22 +41,19 @@ create table idr_new.claim_professional_ss
     clm_ltst_clm_ind               character varying(1)     not null,
 
     prvdr_othr_prvdr_npi_num       character varying(10),
-    prvdr_othr_careteam_name       character varying(135),
+    bfd_prvdr_othr_careteam_name       character varying(135),
     clm_othr_fed_prvdr_spclty_cd   character varying(2),
-    bfd_othr_npi_type              numeric,
 
     prvdr_blg_prvdr_npi_num        character varying(10),
     clm_blg_prvdr_tax_num          character varying(10),
     clm_blg_prvdr_oscar_num        character varying(13),
     prvdr_blg_1st_name             character varying(35),
-    prvdr_blg_last_or_lgl_name     character varying(100),
-    bfd_blg_npi_type               numeric,
+    bfd_prvdr_blg_last_or_lgl_name     character varying(100),
 --     clm_blg_prvdr_zip5_cd          character varying(5),
 --     geo_blg_ssa_state_cd           character varying(2),
 
     prvdr_rfrg_prvdr_npi_num       character varying(10),
-    prvdr_rfrg_careteam_name       character varying(135),
-    bfd_rfrg_npi_type              numeric,
+    bfd_prvdr_rfrg_careteam_name       character varying(135),
 --     clm_rfrg_fed_prvdr_spclty_cd   character varying(2),
 
 --  adj   clm_disp_cd                  character varying(2)     not null,
@@ -90,7 +87,6 @@ create table idr_new.claim_professional_ss
 --     clm_rfrg_prvdr_pin_num         character varying(14),
 --    prvdr_srvc_prvdr_npi_num       character varying(20),
 --    prvdr_srvc_careteam_name       character varying(135),
---    bfd_srvc_npi_type              numeric,
 
     clm_blood_chrg_amt             numeric,
 --  instnl   clm_tot_cntrctl_amt        numeric,
@@ -167,12 +163,10 @@ create table idr_new.claim_professional_nch
     prvdr_blg_prvdr_npi_num        character varying(10),
     clm_blg_prvdr_tax_num          character varying(10),
     prvdr_blg_1st_name             character varying(35),
-    prvdr_blg_last_or_lgl_name     character varying(135),
-    bfd_blg_npi_type               numeric,
+    bfd_prvdr_blg_last_or_lgl_name     character varying(135),
 
     prvdr_rfrg_prvdr_npi_num       character varying(10),
-    prvdr_rfrg_careteam_name       character varying(135),
-    bfd_rfrg_npi_type              numeric,
+    bfd_prvdr_rfrg_careteam_name       character varying(135),
 
     clm_disp_cd                    character varying(2)     not null,
 --  instnl   clm_ric_cd                 character varying(1)     not null,
@@ -205,8 +199,7 @@ create table idr_new.claim_professional_nch
 --  instnl   clm_bnft_enhncmt_4_cd      character varying(2),
 --  instnl   clm_bnft_enhncmt_5_cd      character varying(2),
     prvdr_srvc_prvdr_npi_num       character varying(20),
-    prvdr_srvc_careteam_name       character varying(135),
-    bfd_srvc_npi_type              numeric,
+    bfd_prvdr_srvc_careteam_name       character varying(135),
 
     clm_blood_chrg_amt             numeric,
 --  instnl   clm_tot_cntrctl_amt        numeric,
@@ -301,11 +294,10 @@ create table idr_new.claim_item_professional_ss
 
     prvdr_rndrng_prvdr_npi_num     character varying(10),
     prvdr_rndrng_type_cd           character varying(2),
-    prvdr_rndrng_careteam_name     character varying(135),
+    bfd_prvdr_rndrng_careteam_name     character varying(135),
     clm_rndrg_fed_prvdr_spclty_cd  character varying(2),
     clm_rndrg_prvdr_tax_num        character varying(10)    not null,
     geo_rndrg_ssa_state_cd         character varying(2),
-    bfd_rndrng_npi_type            numeric,
     clm_rndrg_prvdr_type_cd        character varying(3),
 
 --  instnl, part d   clm_line_othr_tp_pd_amt        numeric,
@@ -389,37 +381,30 @@ create table idr_new.claim_institutional_ss
     clm_ltst_clm_ind               character varying(1)     not null,
 
     prvdr_atndg_prvdr_npi_num      character varying(10),
-    prvdr_atndg_careteam_name      character varying(135),
+    bfd_prvdr_atndg_careteam_name      character varying(135),
     clm_atndg_fed_prvdr_spclty_cd  character varying(2),
-    bfd_atndg_npi_type             numeric,
 
     prvdr_oprtg_prvdr_npi_num      character varying(10),
-    prvdr_oprtg_careteam_name      character varying(135),
+    bfd_prvdr_oprtg_careteam_name      character varying(135),
     clm_oprtg_fed_prvdr_spclty_cd  character varying(2),
-    bfd_oprtg_npi_type             numeric,
 
     prvdr_othr_prvdr_npi_num       character varying(10),
-    prvdr_othr_careteam_name       character varying(135),
+    bfd_prvdr_othr_careteam_name       character varying(135),
     clm_othr_fed_prvdr_spclty_cd   character varying(2),
-    bfd_othr_npi_type              numeric,
 
     prvdr_rndrg_prvdr_npi_num      character varying(10),
-    prvdr_rndrg_careteam_name      character varying(135),
+    bfd_prvdr_rndrg_careteam_name      character varying(135),
     clm_rndrg_fed_prvdr_spclty_cd  character varying(2),
-    bfd_rndrg_npi_type             numeric,
 
     prvdr_blg_prvdr_npi_num        character varying(10),
     clm_blg_prvdr_oscar_num        character varying(13),
     prvdr_blg_1st_name             character varying(35),
-    prvdr_blg_last_or_lgl_name     character varying(100),
+    bfd_prvdr_blg_last_or_lgl_name     character varying(100),
     clm_blg_prvdr_zip5_cd          character varying(5),
     geo_blg_ssa_state_cd           character varying(2),
-    bfd_blg_npi_type               numeric,
-
     prvdr_rfrg_prvdr_npi_num       character varying(10),
-    prvdr_rfrg_careteam_name       character varying(135),
+    bfd_prvdr_rfrg_careteam_name       character varying(135),
     clm_rfrg_fed_prvdr_spclty_cd   character varying(2),
-    bfd_rfrg_npi_type              numeric,
 
 --     clm_disp_cd                  character varying(2)     not null,
     clm_ric_cd                     character varying(1)     not null,
@@ -451,7 +436,6 @@ create table idr_new.claim_institutional_ss
 --     clm_rfrg_prvdr_pin_num     character varying(14),
 --    prvdr_srvc_prvdr_npi_num       character varying(10),
 --    prvdr_srvc_careteam_name       character varying(135),
-    bfd_srvc_npi_type              numeric,
 
     clm_blood_chrg_amt             numeric,
     clm_tot_cntrctl_amt            numeric,
@@ -586,11 +570,11 @@ create table idr_new.claim_item_professional_nch
 
     prvdr_rndrng_prvdr_npi_num     character varying(10),
     prvdr_rndrng_type_cd           character varying(2),
-    prvdr_rndrng_careteam_name     character varying(135),
+    bfd_prvdr_rndrng_careteam_name     character varying(135),
     clm_rndrg_fed_prvdr_spclty_cd  character varying(2),
     clm_rndrg_prvdr_tax_num        character varying(10),
     geo_rndrg_ssa_state_cd         character varying(2),
-    bfd_rndrg_npi_type             numeric,
+
     clm_rndrg_prvdr_type_cd         character varying(3),
 
 --  instnl, part d   clm_line_othr_tp_pd_amt        numeric,
@@ -674,37 +658,31 @@ create table idr_new.claim_institutional_nch
     clm_ltst_clm_ind               character varying(1)     not null,
 
     prvdr_atndg_prvdr_npi_num      character varying(10),
-    prvdr_atndg_careteam_name      character varying(135),
+    bfd_prvdr_atndg_careteam_name      character varying(135),
     clm_atndg_fed_prvdr_spclty_cd  character varying(2),
-    bfd_atndg_npi_type             numeric,
 
     prvdr_oprtg_prvdr_npi_num      character varying(10),
-    prvdr_oprtg_careteam_name      character varying(135),
+    bfd_prvdr_oprtg_careteam_name      character varying(135),
     clm_oprtg_fed_prvdr_spclty_cd  character varying(2),
-    bfd_oprtg_npi_type             numeric,
 
     prvdr_othr_prvdr_npi_num       character varying(10),
-    prvdr_othr_careteam_name       character varying(135),
+    bfd_prvdr_othr_careteam_name       character varying(135),
     clm_othr_fed_prvdr_spclty_cd   character varying(2),
-    bfd_othr_npi_type              numeric,
 
     prvdr_rndrg_prvdr_npi_num      character varying(10),
-    prvdr_rndrg_careteam_name      character varying(135),
+    bfd_prvdr_rndrg_careteam_name      character varying(135),
     clm_rndrg_fed_prvdr_spclty_cd  character varying(2),
-    bfd_rndrg_npi_type             numeric,
 
     prvdr_blg_prvdr_npi_num        character varying(10),
     clm_blg_prvdr_oscar_num        character varying(13),
     prvdr_blg_1st_name             character varying(35),
-    prvdr_blg_last_or_lgl_name     character varying(100),
+    bfd_prvdr_blg_last_or_lgl_name     character varying(100),
     clm_blg_prvdr_zip5_cd          character varying(5),
     geo_blg_ssa_state_cd           character varying(2),
-    bfd_blg_npi_type               numeric,
 
     prvdr_rfrg_prvdr_npi_num       character varying(10),
-    prvdr_rfrg_careteam_name       character varying(135),
+    bfd_prvdr_rfrg_careteam_name       character varying(135),
     clm_rfrg_fed_prvdr_spclty_cd   character varying(2),
-    bfd_rfrg_npi_type              numeric,
 
     clm_disp_cd                    character varying(2)     not null,
 -- pac    clm_ric_cd                 character varying(1)     not null,
@@ -737,8 +715,7 @@ create table idr_new.claim_institutional_nch
 --     clm_rfrg_prvdr_pin_num     character varying(10),
 
     prvdr_srvc_prvdr_npi_num       character varying(10),
-    prvdr_srvc_careteam_name       character varying(135),
-    bfd_srvc_npi_type              numeric,
+    bfd_prvdr_srvc_careteam_name       character varying(135),
 
 --     clm_blood_chrg_amt         numeric,
 --     clm_tot_cntrctl_amt        numeric,
@@ -877,7 +854,7 @@ create table idr_new.claim_item_institutional_ss
     clm_rlt_cond_cd             character varying(20),
     clm_rlt_cond_sgntr_sqnc_num integer,
     prvdr_rndrg_prvdr_npi_num      character varying(10),
-    prvdr_rndrg_careteam_name      character varying(135),
+    bfd_prvdr_rndrg_careteam_name      character varying(135),
     clm_rndrg_prvdr_type_cd        character varying(3),
     clm_rndrg_fed_prvdr_spclty_cd  character varying(2),
 
@@ -999,7 +976,7 @@ create table idr_new.claim_item_institutional_nch
 --  prfnl   clm_line_bnft_enhncmt_1_cd     character varying(2),
     clm_rlt_cond_cd             character varying(20),
     clm_rlt_cond_sgntr_sqnc_num integer,
-    prvdr_rndrng_careteam_name character varying(135),
+    bfd_prvdr_rndrng_careteam_name character varying(135),
     clm_rndrg_fed_prvdr_spclty_cd  character varying(2),
     clm_rndrg_prvdr_type_cd        character varying(3),
 
@@ -1141,9 +1118,8 @@ create table idr_new.claim_rx
 --  prvdr   prvdr_srvc_prvdr_npi_num   character varying(20)    not null,
 
     prvdr_prscrbng_prvdr_npi_num      character varying(10),
-    prvdr_prscrbng_careteam_name      character varying(135),
+    bfd_prvdr_prscrbng_careteam_name      character varying(135),
     prvdr_prsbng_id_qlfyr_cd          character varying(2),
-    bfd_prscrbng_npi_type             numeric,
 --     idr_insrt_ts_dcmtn         timestamp with time zone not null,
 --     idr_updt_ts_dcmtn          timestamp with time zone not null,
     bfd_created_ts                    timestamp with time zone,
@@ -1166,8 +1142,7 @@ create table idr_new.claim_rx
 --  instnl   clm_bnft_enhncmt_5_cd      character varying(2),
 --  prvdr   clm_rfrg_prvdr_pin_num     character varying(10),
     prvdr_srvc_prvdr_npi_num          character varying(10),
-    prvdr_srvc_careteam_name          character varying(135),
-    bfd_srvc_npi_type                 numeric,
+    bfd_prvdr_srvc_careteam_name          character varying(135),
     prvdr_srvc_id_qlfyr_cd              character varying(2),
     clm_srvc_prvdr_gnrc_id_num      character varying(20),
 --     clm_blood_chrg_amt         numeric,

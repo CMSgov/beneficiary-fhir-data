@@ -37,7 +37,6 @@ from model import (
     claim_filter,
     provider_careteam_name_expr,
     provider_last_or_legal_name_expr,
-    provider_type_expr,
     transform_default_date_to_null,
     transform_default_string,
     transform_null_date_to_min,
@@ -295,7 +294,7 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
         {COLUMN_MAP: "prvdr_npi_num", ALIAS: ALIAS_PRVDR_ATNDG},
         BeforeValidator(transform_default_string),
     ]
-    prvdr_atndg_careteam_name: Annotated[
+    bfd_prvdr_atndg_careteam_name: Annotated[
         str,
         {EXPR: provider_careteam_name_expr(ALIAS_PRVDR_ATNDG, "ATNDG")},
         BeforeValidator(transform_default_string),
@@ -306,7 +305,7 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
         {COLUMN_MAP: "prvdr_npi_num", ALIAS: ALIAS_PRVDR_RFRG},
         BeforeValidator(transform_default_string),
     ]
-    prvdr_rfrg_careteam_name: Annotated[
+    bfd_prvdr_rfrg_careteam_name: Annotated[
         str,
         {EXPR: provider_careteam_name_expr(ALIAS_PRVDR_RFRG, "RFRG")},
         BeforeValidator(transform_default_string),
@@ -317,7 +316,7 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
         {COLUMN_MAP: "prvdr_npi_num", ALIAS: ALIAS_PRVDR_OTHR},
         BeforeValidator(transform_default_string),
     ]
-    prvdr_othr_careteam_name: Annotated[
+    bfd_prvdr_othr_careteam_name: Annotated[
         str,
         {EXPR: provider_careteam_name_expr(ALIAS_PRVDR_OTHR, "OTHR")},
         BeforeValidator(transform_default_string),
@@ -328,7 +327,7 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
         {COLUMN_MAP: "prvdr_npi_num", ALIAS: ALIAS_PRVDR_OPRTG},
         BeforeValidator(transform_default_string),
     ]
-    prvdr_oprtg_careteam_name: Annotated[
+    bfd_prvdr_oprtg_careteam_name: Annotated[
         str,
         {EXPR: provider_careteam_name_expr(ALIAS_PRVDR_OPRTG, "OPRTG")},
         BeforeValidator(transform_default_string),
@@ -339,7 +338,7 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
         {COLUMN_MAP: "prvdr_npi_num", ALIAS: ALIAS_PRVDR_RNDRNG},
         BeforeValidator(transform_default_string),
     ]
-    prvdr_rndrg_careteam_name: Annotated[
+    bfd_prvdr_rndrg_careteam_name: Annotated[
         str,
         {EXPR: provider_careteam_name_expr(ALIAS_PRVDR_RNDRNG, "RNDRG")},
         BeforeValidator(transform_default_string),
@@ -355,12 +354,11 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
         {COLUMN_MAP: "prvdr_1st_name", ALIAS: ALIAS_PRVDR_BLG},
         BeforeValidator(transform_default_string),
     ]
-    prvdr_blg_last_or_lgl_name: Annotated[
+    bfd_prvdr_blg_last_or_lgl_name: Annotated[
         str,
         {EXPR: provider_last_or_legal_name_expr(ALIAS_PRVDR_BLG)},
         BeforeValidator(transform_default_string),
     ]
-    bfd_blg_npi_type: Annotated[int | None, {EXPR: provider_type_expr(ALIAS_PRVDR_BLG)}]
 
     @staticmethod
     def table() -> str:

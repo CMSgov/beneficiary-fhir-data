@@ -146,20 +146,6 @@ def provider_careteam_name_expr(alias: str, type: str | None) -> str:
     """
 
 
-def provider_type_expr(alias: str) -> str:
-    provider_type_organization = "1"
-    provider_type_individual = "2"
-    return f"""
-        CASE 
-            WHEN {alias}.prvdr_npi_num IS NULL 
-            THEN NULL
-            WHEN {alias}.prvdr_lgl_name IS NULL OR {alias}.prvdr_lgl_name IN ('', '~')
-            THEN {provider_type_individual}
-            ELSE {provider_type_organization}
-        END
-    """
-
-
 PRIMARY_KEY = "primary_key"
 BATCH_TIMESTAMP = "batch_timestamp"
 HISTORICAL_BATCH_TIMESTAMP = "historical_batch_timestamp"

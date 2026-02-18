@@ -205,7 +205,7 @@ class IdrClaimItemProfessionalSs(IdrBaseModel):
         {COLUMN_MAP: "prvdr_npi_num", ALIAS: ALIAS_PRVDR_RNDRNG},
         BeforeValidator(transform_default_string),
     ]
-    prvdr_rndrng_careteam_name: Annotated[
+    bfd_prvdr_rndrng_careteam_name: Annotated[
         str,
         {EXPR: provider_careteam_name_expr(ALIAS_PRVDR_RNDRNG, None)},
         BeforeValidator(transform_default_string),

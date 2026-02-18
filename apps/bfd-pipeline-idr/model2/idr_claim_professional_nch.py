@@ -33,7 +33,6 @@ from model import (
     claim_filter,
     provider_careteam_name_expr,
     provider_last_or_legal_name_expr,
-    provider_type_expr,
     transform_default_date_to_null,
     transform_default_string,
     transform_null_date_to_min,
@@ -165,19 +164,18 @@ class IdrClaimProfessionalNch(IdrBaseModel):
         {COLUMN_MAP: "prvdr_1st_name", ALIAS: ALIAS_PRVDR_BLG},
         BeforeValidator(transform_default_string),
     ]
-    prvdr_blg_last_or_lgl_name: Annotated[
+    bfd_prvdr_blg_last_or_lgl_name: Annotated[
         str,
         {EXPR: provider_last_or_legal_name_expr(ALIAS_PRVDR_BLG)},
         BeforeValidator(transform_default_string),
     ]
-    bfd_blg_npi_type: Annotated[int | None, {EXPR: provider_type_expr(ALIAS_PRVDR_BLG)}]
 
     prvdr_rfrg_prvdr_npi_num: Annotated[
         str,
         {COLUMN_MAP: "prvdr_npi_num", ALIAS: ALIAS_PRVDR_RFRG},
         BeforeValidator(transform_default_string),
     ]
-    prvdr_rfrg_careteam_name: Annotated[
+    bfd_prvdr_rfrg_careteam_name: Annotated[
         str,
         {EXPR: provider_careteam_name_expr(ALIAS_PRVDR_RFRG, None)},
         BeforeValidator(transform_default_string),
@@ -188,7 +186,7 @@ class IdrClaimProfessionalNch(IdrBaseModel):
         {COLUMN_MAP: "prvdr_npi_num", ALIAS: ALIAS_PRVDR_SRVC},
         BeforeValidator(transform_default_string),
     ]
-    prvdr_srvc_careteam_name: Annotated[
+    bfd_prvdr_srvc_careteam_name: Annotated[
         str,
         {EXPR: provider_careteam_name_expr(ALIAS_PRVDR_SRVC, None)},
         BeforeValidator(transform_default_string),
