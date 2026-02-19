@@ -331,32 +331,54 @@ In some cases, this query may return a Service Category of `OTHER`.
 This category is treated as belonging to **Institutional** claims.
 ## 2. Identify columns that are always null for a given Service Category
 
-To determine which fields are consistently null for a specific Service Category, first generate a query that evaluates every column in the table.
+To determine which fields are consistently null for a specific Service Category, first generate the list of columns you want to check by running this query on the BFD database:
+
+```sql
+SELECT string_agg(quote_literal(upper(column_name)), ', ' ORDER BY column_name) AS column_list
+FROM information_schema.columns
+WHERE table_name = {table_name};
+
+```
 
 The query below produces a `UNION ALL` of checks for each column, identifying columns where all values are null (or effectively null after trimming and normalization).
 
 ```sql
-SELECT
-  'SELECT ''' || column_name || ''' AS column_name ' || CHR(10) ||
-  'FROM base ' || CHR(10) ||
-  -- Convert all values to VARCHAR to handle mixed data types uniformly
-  'HAVING COUNT(CASE WHEN NULLIF(NULLIF(TRIM(TO_VARCHAR(' || column_name || ')), ''''), ''~'') IS NOT NULL THEN 1 END) = 0'
-  || ' UNION ALL'
-  AS generated_sql
-FROM (
-  SELECT column_name
-  FROM information_schema.columns
-  WHERE table_name = {TABLE_NAME}
+SELECT 'SELECT ''' || column_name || ''' AS column_name ' || CHR(10) ||
+       'FROM base ' || CHR(10) ||
+       'HAVING COUNT(CASE WHEN ' ||
+       CASE
+           -- Numeric columns: any non-null, non-zero value?
+           WHEN data_type IN ('NUMBER',
+                              'DECIMAL',
+                              'NUMERIC',
+                              'INT',
+                              'INTEGER',
+                              'BIGINT',
+                              'SMALLINT',
+                              'FLOAT',
+                              'DOUBLE'
+               )
+               THEN
+               column_name || ' = 0'
+           WHEN data_type IN (
+               'DATE'
+               )
+               THEN
+               'NULLIF(NULLIF(NULLIF(NULLIF(TRIM(TO_VARCHAR(' || column_name ||
+               ')), ''''), ''~''), ''1000-01-01''), ''9999-12-31'') IS NOT NULL'
+           ELSE
+               'NULLIF(NULLIF(TRIM(TO_VARCHAR(' || column_name || ')), ''''), ''~'') IS NOT NULL'
+           END
+           || ' THEN 1 END) = 0'
+           || CHR(10) ||
+       ' UNION ALL'
+           AS generated_sql
+FROM information_schema.columns
+WHERE table_name = {TABLE NAME}
+          AND table_schema = 'CMS_VDM_VIEW_MDCR_PRD'
     AND table_schema = 'CMS_VDM_VIEW_MDCR_PRD'
-    AND column_name NOT IN (
-      'IDR_INSRT_TS',
-      'IDR_UPDT_TS',
-      'CLM_TYPE_CD',
-      'GEO_BENE_SK',
-      'CLM_SRC_ID',
-      'CLM_DT_SGNTR_SK',
-      'CLM_LINE_NUM',
-      'CLM_NUM_SK'
+    AND  IN (
+      {PASTE OUTPUT FROM QUERY ABOVE}
     )
 )
 ORDER BY column_name;
