@@ -18,7 +18,7 @@ uses "http://hl7.org/fhir/StructureDefinition/ExplanationOfBenefit" alias BFDEOB
 
 imports "https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper" 
 imports "https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-SupportingInfo-Helper" 
-imports "https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Item-Institutional-Helper" 
+imports "https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Item-Helper" 
 
 group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
     
@@ -95,22 +95,20 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
         src.providerList as provider where provider.isDuplicate.exists().not() and provider.careTeamType.exists().not() and provider.NPI_TYPE = 2 -> tgt.contained = create('Organization') as tgtOrg then createOrg(provider, tgtOrg) "Add Organization";
     } "Add billing provider";
 
-   
-    //Partial for PAC data, complete for adjudicated. Of note, we do this by source. So even if final action on PAC source, still "partial"
     src.CLM_SRC_ID as sourceSk where sourceSk = '20000' -> tgt.outcome = "complete" "Set NCH outcome to complete.";
-    src.CLM_TYPE_CD as typeCd where(typeCd >= 1000 and typeCd < 2000) -> tgt.outcome = "partial" "Add phase 1 outcome";
-    //Check on 1000-2000 phases w/ the CLM_CRNT_STUS_CD. We can 
-    src.CLM_TYPE_CD as typeCd where(typeCd >= 2000 and typeCd < 3000) -> tgt then {
-      //Bifurcate by if it's institutional or professional. 
-      src.institutionalComponents as instComponents -> tgt then {
-        instComponents.CLM_CRNT_STUS_CD as curStatusCode -> tgt.outcome = translate(curStatusCode, 'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#CLM-CRNT-STUS-CD','code') "Set outcome for phase 2/3 FISS";
-      } "Set institutional outcome";
-
-      src.profComponents as profComponents -> tgt then {
-        profComponents.CLM_AUDT_TRL_STUS_CD as auditTrailStatusCode -> tgt.outcome = translate(auditTrailStatusCode, 'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#CLM_AUDT_TRL_STUS_CD','code') "Set outcome for phase 2/3 MCS";
-      } "Set professional outcome";
+    src.CLM_TYPE_CD as typeCd where(typeCd >= 1000 and typeCd < 3000) -> tgt then {
+      src -> tgt.outcome = "partial" "Default pac outcome to partial";
+      src.META_SRC_SK as srcSk where srcSk = '1001' -> tgt then {
+        src.CLM_AUDT_TRL_STUS_CD as auditTrailStatusCode -> tgt.outcome = translate(auditTrailStatusCode, 'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#CLM_AUDT_TRL_STUS_CD_MCS','code') "Set outcome for phase 2/3 MCS";
+      } "Set outcome for MCS";
+      src.META_SRC_SK as srcSk where srcSk = '1003' -> tgt then {
+        src.CLM_AUDT_TRL_STUS_CD as auditTrailStatusCode -> tgt.outcome = translate(auditTrailStatusCode, 'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#CLM_AUDT_TRL_STUS_CD_FISS','code') "Set outcome for phase 2/3 FISS";
+      } "Set outcome for FISS";
+      src.META_SRC_SK as srcSk where srcSk = '1002' -> tgt then {
+        src.CLM_FINAL_ACTION as finalAction where finalAction = Y -> tgt.outcome = "complete" "Set VMS outcome to complete.";
+        src.CLM_FINAL_ACTION as finalAction where finalAction = N -> tgt.outcome = "partial" "Set VMS outcome to partial.";
+      } "Set outcome for VMS";
     } "Complete additional outcomes";
-    //When we get to carrier/DME, we'll do the same with MCS/VMS status. 
 
     //Building out procedure, diagnosis, supportingInfo, item, and then careteam
 
@@ -524,8 +522,8 @@ group addInstitutionalAdjudicationElements(source src: ExplanationOfBenefitBase,
 group addDiagnoses(source src: DiagnosisComponent, target tgt: BackboneElement){
   src.ROW_NUM as rowNum -> tgt.sequence = rowNum "set sequence number";
   src -> tgt.type = create('CodeableConcept') as tgtCC then{
-    src.clm_prod_type_cd_map as typeCode where (typeCode = "A" or typeCode = "P") -> tgtCC.coding = translate(typeCode,'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#HL7_DIAGTYPE','coding') "Add coding";
-    src.clm_prod_type_cd_map as typeCode where (typeCode = "1" or typeCode = "D" or typeCode = "E" or typeCode = "R") -> tgtCC.coding = translate(typeCode,'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#C4BB_DIAGTYPE','coding') "set coding";
+    src.CLM_PROD_TYPE_CD as typeCode where (typeCode = "A" or typeCode = "P") -> tgtCC.coding = translate(typeCode,'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#HL7_DIAGTYPE','coding') "Add coding";
+    src.CLM_PROD_TYPE_CD as typeCode where (typeCode = "1" or typeCode = "D" or typeCode = "E" or typeCode = "R") -> tgtCC.coding = translate(typeCode,'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#C4BB_DIAGTYPE','coding') "set coding";
   } "Add types";
   src.CLM_POA_IND as poaInd where (poaInd != ' ' and poaInd != '~' ) -> tgt.onAdmission = create('CodeableConcept') as tgtPOA,
     tgtPOA.coding = create('Coding') as tgtCoding,
@@ -543,8 +541,8 @@ group addDiagnoses(source src: DiagnosisComponent, target tgt: BackboneElement){
 group addDiagnosesProfessional(source src: DiagnosisComponent, target tgt: BackboneElement){
   src.ROW_NUM as rowNum -> tgt.sequence = rowNum "set sequence number";
   src -> tgt.type = create('CodeableConcept') as tgtCC then{
-    src.clm_prod_type_cd_map as typeCode where (typeCode = "A" or typeCode = "P") -> tgtCC.coding = translate(typeCode,'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#HL7_DIAGTYPE','coding') "Add coding";
-    src.clm_prod_type_cd_map as typeCode where (typeCode = "1" or typeCode = "D" or typeCode = "E" or typeCode = "R") -> tgtCC.coding = translate(typeCode,'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#C4BB_DIAGTYPE_PROF','coding') "set coding";
+    src.CLM_PROD_TYPE_CD as typeCode where (typeCode = "A" or typeCode = "P") -> tgtCC.coding = translate(typeCode,'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#HL7_DIAGTYPE','coding') "Add coding";
+    src.CLM_PROD_TYPE_CD as typeCode where (typeCode = "1" or typeCode = "D" or typeCode = "E" or typeCode = "R") -> tgtCC.coding = translate(typeCode,'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#C4BB_DIAGTYPE_PROF','coding') "set coding";
   } "Add types";
   src -> tgt.diagnosis = create('CodeableConcept') as tgtDiagnosis then {
     src -> tgtDiagnosis.coding = create('Coding') as tgtCoding then {
