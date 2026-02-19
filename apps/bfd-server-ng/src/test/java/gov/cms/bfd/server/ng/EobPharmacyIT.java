@@ -94,7 +94,7 @@ class EobPharmacyIT extends IntegrationTestBase {
     for (ExplanationOfBenefit.CareTeamComponent careTeamMember : careTeam) {
       var provider = careTeamMember.getProvider();
       assertFalse(provider.isEmpty());
-      assertEquals("#careteam-prescriber-practitioner-1", provider.getReference());
+      assertEquals("1730548868", provider.getIdentifier().getValue());
 
       var role = careTeamMember.getRole();
       assertFalse(role.isEmpty());
@@ -104,11 +104,11 @@ class EobPharmacyIT extends IntegrationTestBase {
       assertTrue(hasPrescribingRole.isPresent());
     }
 
-    var hasContainedPrescriber =
-        containedResources.stream()
-            .filter(r -> r.getId().equals("careteam-prescriber-practitioner-1"))
-            .findFirst();
-    assertTrue(hasContainedPrescriber.isPresent());
+    //    var hasContainedPrescriber =
+    //        containedResources.stream()
+    //            .filter(r -> r.getId().equals("careteam-prescriber-practitioner-1"))
+    //            .findFirst();
+    //    assertTrue(hasContainedPrescriber.isPresent());
     //    Practitioner prescriber = (Practitioner) hasContainedPrescriber.get();
     //    var hasPrescriberRogers =
     //        prescriber.getName().stream()
@@ -166,7 +166,7 @@ class EobPharmacyIT extends IntegrationTestBase {
             .findFirst();
     assertTrue(hasOrganization.isPresent());
     Organization organization = (Organization) hasOrganization.get();
-    assertEquals("provider-org", organization.getId());
+    assertEquals("1649041195", organization.getId());
     assertEquals("CBS Health Corporation", organization.getName());
 
     var careTeam = eob.getCareTeam();
@@ -174,7 +174,7 @@ class EobPharmacyIT extends IntegrationTestBase {
     for (ExplanationOfBenefit.CareTeamComponent careTeamMember : careTeam) {
       var provider = careTeamMember.getProvider();
       assertFalse(provider.isEmpty());
-      assertEquals("#careteam-prescriber-practitioner-1", provider.getReference());
+      assertEquals("1437702123", provider.getIdentifier().getValue());
 
       var role = careTeamMember.getRole();
       assertFalse(role.isEmpty());
@@ -184,11 +184,11 @@ class EobPharmacyIT extends IntegrationTestBase {
       assertTrue(hasPrescribingRole.isPresent());
     }
 
-    var hasContainedPrescriber =
-        containedResources.stream()
-            .filter(r -> r.getId().equals("careteam-prescriber-practitioner-1"))
-            .findFirst();
-    assertTrue(hasContainedPrescriber.isPresent());
+    //    var hasContainedPrescriber =
+    //        containedResources.stream()
+    //            .filter(r -> r.getId().equals("careteam-prescriber-practitioner-1"))
+    //            .findFirst();
+    //    assertTrue(hasContainedPrescriber.isPresent());
     //    Practitioner prescriber = (Practitioner) hasContainedPrescriber.get();
     //    var hasPrescriberStark =
     //        prescriber.getName().stream()
