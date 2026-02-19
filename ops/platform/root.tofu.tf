@@ -58,8 +58,8 @@ provider "aws" {
   }
 }
 
-# tflint-ignore: terraform_required_version
 terraform {
+  required_version = "~> 1.10.0"
   backend "s3" {
     bucket       = "bfd-platform-${local.account_type}-tf-state"
     key          = "ops/platform/${local.service}/tofu.tfstate"
