@@ -32,8 +32,8 @@ public class ClaimRx extends ClaimBase {
   @Column(name = "cntrct_pbp_name")
   private Optional<String> contractName;
 
-  @Embedded private ServiceProviderHistory serviceProviderHistory;
-  @Embedded private PrescribingProviderHistory prescribingProviderHistory;
+  @Embedded private ServiceProviderPharmacy serviceProviderHistory;
+  @Embedded private PrescribingCareTeam prescribingProviderHistory;
   @Embedded private AdjudicationChargeRx adjudicationCharge;
   @Embedded private ClaimPaymentDate claimPaymentDate;
   @Embedded private SubmitterContractNumber submitterContractNumber;
@@ -80,7 +80,7 @@ public class ClaimRx extends ClaimBase {
         .ifPresent(
             p -> {
               eob.addContained(p);
-              eob.setProvider(new Reference(p));
+              eob.setProvider(new Reference("#" + p.getId()));
             });
   }
 
@@ -113,16 +113,11 @@ public class ClaimRx extends ClaimBase {
         .toList();
   }
 
-  /** Adds the prescribing-provider care-team entry and registers the practitioner. */
   private void addPrescribingProviderCareTeam(ExplanationOfBenefit eob) {
     var sequenceGenerator = new SequenceGenerator();
     prescribingProviderHistory
-        .toFhirCareTeamComponent(sequenceGenerator)
-        .ifPresent(
-            c -> {
-              eob.addCareTeam(c.careTeam());
-              eob.addContained(c.practitioner());
-            });
+        .toFhirCareTeamComponent(sequenceGenerator.next())
+        .ifPresent(eob::addCareTeam);
   }
 
   private void addAdjudicationAndPayment(ExplanationOfBenefit eob) {

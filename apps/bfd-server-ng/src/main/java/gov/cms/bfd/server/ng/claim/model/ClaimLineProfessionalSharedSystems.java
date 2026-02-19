@@ -40,7 +40,7 @@ public class ClaimLineProfessionalSharedSystems implements ClaimLineBase {
   @Embedded private ClaimLineServiceUnitQuantity serviceUnitQuantity;
   @Embedded private ClaimLineHcpcsModifierCode hcpcsModifierCode;
   @Embedded private ClaimLineAdjudicationChargeProfessionalSharedSystems adjudicationCharge;
-  @Embedded private RenderingProviderLineHistory claimLineRenderingProvider;
+  @Embedded private RenderingCareTeamLine claimLineRenderingProvider;
 
   @Override
   public Optional<Observation> toFhirObservation(int bfdRowId) {
@@ -73,6 +73,11 @@ public class ClaimLineProfessionalSharedSystems implements ClaimLineBase {
     adjudicationCharge.toFhir().forEach(line::addAdjudication);
 
     return Optional.of(line);
+  }
+
+  @Override
+  public Optional<RenderingCareTeamLine> getClaimLineRenderingProvider() {
+    return Optional.of(claimLineRenderingProvider);
   }
 
   @Override

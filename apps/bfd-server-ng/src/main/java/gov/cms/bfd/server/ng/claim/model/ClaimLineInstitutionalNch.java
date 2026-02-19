@@ -41,6 +41,7 @@ public class ClaimLineInstitutionalNch extends ClaimLineInstitutionalBase implem
   @Embedded private ClaimLineAdjudicationChargeInstitutionalNch adjudicationCharge;
   @Embedded private ClaimAnsiSignatureInfo ansiSignature;
   @Embedded private ClaimLineNdc ndc;
+  @Embedded private RenderingCareTeamLine claimLineRenderingProvider;
 
   @Override
   public Optional<Observation> toFhirObservation(int bfdRowId) {
@@ -112,7 +113,7 @@ public class ClaimLineInstitutionalNch extends ClaimLineInstitutionalBase implem
   }
 
   @Override
-  public RenderingProviderLineHistory getClaimLineRenderingProvider() {
-    return null;
+  public Optional<RenderingCareTeamLine> getClaimLineRenderingProvider() {
+    return Optional.of(claimLineRenderingProvider);
   }
 }

@@ -45,7 +45,7 @@ public class ClaimLineProfessionalNch implements ClaimLineBase {
   @Embedded private ClaimLineServiceUnitQuantity serviceUnitQuantity;
   @Embedded private ClaimLineHcpcsModifierCode hcpcsModifierCode;
   @Embedded private ClaimLineAdjudicationChargeProfessionalNch adjudicationCharge;
-  @Embedded private RenderingProviderLineHistory claimLineRenderingProvider;
+  @Embedded private RenderingCareTeamLine claimLineRenderingProvider;
 
   @Column(name = "clm_line_hct_hgb_type_cd")
   private Optional<ClaimLineHCTHGBTestTypeCode> claimLineHCTHGBTestTypeCode;
@@ -79,6 +79,11 @@ public class ClaimLineProfessionalNch implements ClaimLineBase {
     adjudicationCharge.toFhir().forEach(line::addAdjudication);
 
     return Optional.of(line);
+  }
+
+  @Override
+  public Optional<RenderingCareTeamLine> getClaimLineRenderingProvider() {
+    return Optional.of(claimLineRenderingProvider);
   }
 
   /**

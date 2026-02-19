@@ -13,7 +13,7 @@ interface ClaimLineBase {
   Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhirSupportingInfo(
       SupportingInfoFactory supportingInfoFactory);
 
-  RenderingProviderLineHistory getClaimLineRenderingProvider();
+  Optional<RenderingCareTeamLine> getClaimLineRenderingProvider();
 
   Optional<Integer> getClaimLineNumber();
 }

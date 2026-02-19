@@ -31,19 +31,17 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
 
   abstract ClaimPaymentAmount getClaimPaymentAmount();
 
-  abstract ServiceProviderHistory getServiceProviderHistory();
+  abstract BillingProviderInstitutional getBillingProviderHistory();
 
-  abstract BillingProviderHistory getBillingProviderHistory();
+  abstract OtherInstitutionalCareTeam getOtherProviderHistory();
 
-  abstract OtherProviderHistory getOtherProviderHistory();
+  abstract OperatingCareTeam getOperatingProviderHistory();
 
-  abstract OperatingProviderHistory getOperatingProviderHistory();
+  abstract AttendingCareTeam getAttendingProviderHistory();
 
-  abstract AttendingProviderHistory getAttendingProviderHistory();
+  abstract RenderingCareTeam getRenderingProviderHistory();
 
-  abstract RenderingProviderHistory getRenderingProviderHistory();
-
-  abstract ReferringInstitutionalProviderHistory getReferringProviderHistory();
+  abstract ReferringInstitutionalCareTeam getReferringProviderHistory();
 
   abstract DiagnosisDrgCode getDiagnosisDrgCode();
 
@@ -80,6 +78,14 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
   protected abstract List<ClaimValue> getClaimValues();
 
   /**
+   * Adds care-team members that are unique to the subclass.
+   *
+   * @param eob the EOB being built
+   * @param sequenceGenerator shared sequence generator for care-team entries
+   */
+  abstract void addSubclassCareTeam(ExplanationOfBenefit eob, SequenceGenerator sequenceGenerator);
+
+  /**
    * Optionally overrides the EOB outcome. NCH has no override
    *
    * @param eob the EOB being built
@@ -109,7 +115,16 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
         .forEach(
             item -> {
               var claimLine = item.getClaimLine().toFhirItemComponent();
+
               claimLine.ifPresent(eob::addItem);
+              item.getClaimLine()
+                  .getClaimLineRenderingProvider()
+                  .flatMap(
+                      provider ->
+                          item.getClaimLine()
+                              .getClaimLineNumber()
+                              .flatMap(provider::toFhirCareTeamComponent))
+                  .ifPresent(eob::addCareTeam);
               item.getClaimLine()
                   .toFhirSupportingInfo(supportingInfoFactory)
                   .ifPresent(
@@ -142,15 +157,7 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
         .ifPresent(
             p -> {
               eob.addContained(p);
-              eob.setProvider(new Reference(p));
-            });
-
-    getServiceProviderHistory()
-        .toFhirNpiType()
-        .ifPresent(
-            p -> {
-              eob.addContained(p);
-              eob.setProvider(new Reference(p));
+              eob.setProvider(new Reference("#" + p.getId()));
             });
   }
 
@@ -188,12 +195,10 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
             getOtherProviderHistory(),
             getRenderingProviderHistory(),
             getReferringProviderHistory())
-        .flatMap(p -> p.toFhirCareTeamComponent(sequenceGenerator).stream())
-        .forEach(
-            c -> {
-              eob.addCareTeam(c.careTeam());
-              eob.addContained(c.practitioner());
-            });
+        .flatMap(p -> p.toFhirCareTeamComponent(sequenceGenerator.next()).stream())
+        .forEach(eob::addCareTeam);
+
+    addSubclassCareTeam(eob, sequenceGenerator);
   }
 
   private void addAdjudicationAndPayment(ExplanationOfBenefit eob) {
