@@ -52,10 +52,9 @@ public class ClaimProfessionalSharedSystems extends ClaimProfessionalBase {
   @Embedded private ClaimPaymentAmount claimPaymentAmount;
   @Embedded private ClaimNearLineRecordType claimRecordType;
   @Embedded private ClaimSubmissionDate claimSubmissionDate;
-  @Embedded private ReferringProfessionalProviderHistory referringProviderHistory;
-  @Embedded private ServiceProviderHistory serviceProviderHistory;
-  @Embedded private BillingProviderHistory billingProviderHistory;
-  @Embedded private OtherProviderHistory otherProviderHistory;
+  @Embedded private ReferringProfessionalCareTeam referringProviderHistory;
+  @Embedded private BillingProviderProfessional billingProviderHistory;
+  @Embedded private OtherProfessionalCareTeam otherProviderHistory;
   @Embedded ClinicalTrialNumber clinicalTrialNumber;
 
   @OneToMany(fetch = FetchType.EAGER)
@@ -109,12 +108,8 @@ public class ClaimProfessionalSharedSystems extends ClaimProfessionalBase {
   protected void addSubclassCareTeam(
       ExplanationOfBenefit eob, SequenceGenerator sequenceGenerator) {
     otherProviderHistory
-        .toFhirCareTeamComponent(sequenceGenerator)
-        .ifPresent(
-            c -> {
-              eob.addCareTeam(c.careTeam());
-              eob.addContained(c.practitioner());
-            });
+        .toFhirCareTeamComponent(sequenceGenerator.next())
+        .ifPresent(eob::addCareTeam);
   }
 
   /**

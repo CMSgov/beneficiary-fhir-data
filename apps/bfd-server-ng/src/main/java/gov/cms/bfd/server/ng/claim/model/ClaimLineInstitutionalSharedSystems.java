@@ -41,6 +41,7 @@ public class ClaimLineInstitutionalSharedSystems extends ClaimLineInstitutionalB
   @Embedded private ClaimLineServiceUnitQuantity serviceUnitQuantity;
   @Embedded private ClaimLineHcpcsModifierCode hcpcsModifierCode;
   @Embedded private ClaimLineAdjudicationChargeInstitutionalSharedSystems adjudicationCharge;
+  @Embedded private RenderingCareTeamLine claimLineRenderingProvider;
 
   @Override
   public Optional<Observation> toFhirObservation(int bfdRowId) {
@@ -108,7 +109,7 @@ public class ClaimLineInstitutionalSharedSystems extends ClaimLineInstitutionalB
   }
 
   @Override
-  public RenderingProviderLineHistory getClaimLineRenderingProvider() {
-    return null;
+  public Optional<RenderingCareTeamLine> getClaimLineRenderingProvider() {
+    return Optional.of(claimLineRenderingProvider);
   }
 }

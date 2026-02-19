@@ -31,6 +31,7 @@ from model import (
     IdrBaseModel,
     claim_filter,
     provider_careteam_name_expr,
+    provider_last_or_legal_name_expr,
     transform_default_date_to_null,
     transform_default_string,
     transform_null_date_to_min,
@@ -98,6 +99,7 @@ class IdrClaimRx(IdrBaseModel):
     ]
     clm_srvc_prvdr_gnrc_id_num: Annotated[str, BeforeValidator(transform_default_string)]
     prvdr_prsbng_id_qlfyr_cd: Annotated[str, BeforeValidator(transform_default_string)]
+    clm_prsbng_prvdr_gnrc_id_num: Annotated[str, BeforeValidator(transform_default_string)]
     idr_insrt_ts_clm: Annotated[
         datetime,
         {ALIAS: ALIAS_CLM, **INSERT_FIELD},
@@ -196,9 +198,14 @@ class IdrClaimRx(IdrBaseModel):
         {COLUMN_MAP: "prvdr_npi_num", ALIAS: ALIAS_PRVDR_SRVC},
         BeforeValidator(transform_default_string),
     ]
-    bfd_prvdr_srvc_careteam_name: Annotated[
+    prvdr_srvc_1st_name: Annotated[
         str,
-        {EXPR: provider_careteam_name_expr(ALIAS_PRVDR_SRVC, None)},
+        {COLUMN_MAP: "prvdr_1st_name", ALIAS: ALIAS_PRVDR_SRVC},
+        BeforeValidator(transform_default_string),
+    ]
+    prvdr_srvc_last_or_lgl_name: Annotated[
+        str,
+        {EXPR: provider_last_or_legal_name_expr(ALIAS_PRVDR_SRVC)},
         BeforeValidator(transform_default_string),
     ]
 

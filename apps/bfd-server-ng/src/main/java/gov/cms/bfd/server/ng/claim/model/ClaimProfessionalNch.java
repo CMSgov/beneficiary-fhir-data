@@ -48,9 +48,8 @@ public class ClaimProfessionalNch extends ClaimProfessionalBase {
   @Embedded private ClaimPaymentAmount claimPaymentAmount;
   @Embedded private NchWeeklyProcessingDate nchWeeklyProcessingDate;
   @Embedded private ClaimSubmissionDate claimSubmissionDate;
-  @Embedded private ReferringProfessionalProviderHistory referringProviderHistory;
-  @Embedded private BillingProviderHistory billingProviderHistory;
-  @Embedded private ServiceProviderHistory serviceProviderHistory;
+  @Embedded private ReferringProfessionalCareTeam referringProviderHistory;
+  @Embedded private BillingProviderProfessional billingProviderHistory;
   @Embedded ClinicalTrialNumber clinicalTrialNumber;
 
   @OneToMany(fetch = FetchType.EAGER)

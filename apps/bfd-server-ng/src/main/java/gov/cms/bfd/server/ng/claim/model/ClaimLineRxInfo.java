@@ -64,8 +64,8 @@ public class ClaimLineRxInfo implements ClaimLineBase {
   }
 
   @Override
-  public RenderingProviderLineHistory getClaimLineRenderingProvider() {
-    return null;
+  public Optional<RenderingCareTeamLine> getClaimLineRenderingProvider() {
+    return Optional.empty();
   }
 
   @Override

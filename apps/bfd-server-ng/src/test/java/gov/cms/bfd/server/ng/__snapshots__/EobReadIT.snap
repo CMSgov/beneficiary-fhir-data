@@ -517,7 +517,18 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
   },
   "careTeam" : [ {
     "provider" : {
-      "reference" : "#careteam-provider-1"
+      "display" : "Stark,Tony",
+      "identifier" : {
+        "system" : "http://hl7.org/fhir/sid/us-npi",
+        "type" : {
+          "coding" : [ {
+            "code" : "NPI",
+            "display" : "National provider identifier",
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+          } ]
+        },
+        "value" : "1437702123"
+      }
     },
     "role" : {
       "coding" : [ {
@@ -529,7 +540,18 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
     "sequence" : 1
   }, {
     "provider" : {
-      "reference" : "#careteam-provider-2"
+      "display" : "Garcia,Indiana",
+      "identifier" : {
+        "system" : "http://hl7.org/fhir/sid/us-npi",
+        "type" : {
+          "coding" : [ {
+            "code" : "NPI",
+            "display" : "National provider identifier",
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+          } ]
+        },
+        "value" : "1942945159"
+      }
     },
     "role" : {
       "coding" : [ {
@@ -541,19 +563,18 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
     "sequence" : 2
   }, {
     "provider" : {
-      "reference" : "#careteam-provider-3"
-    },
-    "role" : {
-      "coding" : [ {
-        "code" : "otheroperating",
-        "display" : "Other Operating",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
-      } ]
-    },
-    "sequence" : 3
-  }, {
-    "provider" : {
-      "reference" : "#careteam-provider-4"
+      "display" : "Rogers,Gromit",
+      "identifier" : {
+        "system" : "http://hl7.org/fhir/sid/us-npi",
+        "type" : {
+          "coding" : [ {
+            "code" : "NPI",
+            "display" : "National provider identifier",
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+          } ]
+        },
+        "value" : "1558719914"
+      }
     },
     "role" : {
       "coding" : [ {
@@ -563,18 +584,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
       } ]
     },
     "sequence" : 4
-  }, {
-    "provider" : {
-      "reference" : "#careteam-provider-5"
-    },
-    "role" : {
-      "coding" : [ {
-        "code" : "referring",
-        "display" : "Referring provider",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
-      } ]
-    },
-    "sequence" : 5
   } ],
   "contained" : [ {
     "active" : true,
@@ -585,7 +594,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
     "name" : "Centers for Medicare and Medicaid Services",
     "resourceType" : "Organization"
   }, {
-    "id" : "practitioner-billing",
+    "id" : "1104867175",
     "identifier" : [ {
       "system" : "http://hl7.org/fhir/sid/us-npi",
       "type" : {
@@ -595,96 +604,15 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
           "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
         } ]
       },
-      "value" : "1437702123"
+      "value" : "1104867175"
     } ],
     "meta" : {
       "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
     },
-    "resourceType" : "Practitioner"
-  }, {
-    "id" : "careteam-provider-1",
-    "identifier" : [ {
-      "system" : "http://hl7.org/fhir/sid/us-npi",
-      "type" : {
-        "coding" : [ {
-          "code" : "NPI",
-          "display" : "National provider identifier",
-          "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-        } ]
-      },
-      "value" : "1437702123"
+    "name" : [ {
+      "family" : "Garcia",
+      "given" : [ "Indiana" ]
     } ],
-    "meta" : {
-      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
-    },
-    "resourceType" : "Practitioner"
-  }, {
-    "id" : "careteam-provider-2",
-    "identifier" : [ {
-      "system" : "http://hl7.org/fhir/sid/us-npi",
-      "type" : {
-        "coding" : [ {
-          "code" : "NPI",
-          "display" : "National provider identifier",
-          "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-        } ]
-      },
-      "value" : "1437702123"
-    } ],
-    "meta" : {
-      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
-    },
-    "resourceType" : "Practitioner"
-  }, {
-    "id" : "careteam-provider-3",
-    "identifier" : [ {
-      "system" : "http://hl7.org/fhir/sid/us-npi",
-      "type" : {
-        "coding" : [ {
-          "code" : "NPI",
-          "display" : "National provider identifier",
-          "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-        } ]
-      },
-      "value" : "1437702123"
-    } ],
-    "meta" : {
-      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
-    },
-    "resourceType" : "Practitioner"
-  }, {
-    "id" : "careteam-provider-4",
-    "identifier" : [ {
-      "system" : "http://hl7.org/fhir/sid/us-npi",
-      "type" : {
-        "coding" : [ {
-          "code" : "NPI",
-          "display" : "National provider identifier",
-          "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-        } ]
-      },
-      "value" : "1437702123"
-    } ],
-    "meta" : {
-      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
-    },
-    "resourceType" : "Practitioner"
-  }, {
-    "id" : "careteam-provider-5",
-    "identifier" : [ {
-      "system" : "http://hl7.org/fhir/sid/us-npi",
-      "type" : {
-        "coding" : [ {
-          "code" : "NPI",
-          "display" : "National provider identifier",
-          "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-        } ]
-      },
-      "value" : "1437702123"
-    } ],
-    "meta" : {
-      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
-    },
     "resourceType" : "Practitioner"
   } ],
   "created" : "2025-05-30T00:00:00+00:00",
@@ -1023,7 +951,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
     }
   },
   "provider" : {
-    "reference" : "#practitioner-billing"
+    "reference" : "#1104867175"
   },
   "resourceType" : "ExplanationOfBenefit",
   "status" : "active",
@@ -1955,7 +1883,18 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
   },
   "careTeam" : [ {
     "provider" : {
-      "reference" : "#careteam-provider-1"
+      "display" : "Stark,Tony",
+      "identifier" : {
+        "system" : "http://hl7.org/fhir/sid/us-npi",
+        "type" : {
+          "coding" : [ {
+            "code" : "NPI",
+            "display" : "National provider identifier",
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+          } ]
+        },
+        "value" : "1437702123"
+      }
     },
     "role" : {
       "coding" : [ {
@@ -1967,7 +1906,18 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
     "sequence" : 1
   }, {
     "provider" : {
-      "reference" : "#careteam-provider-2"
+      "display" : "Garcia,Indiana",
+      "identifier" : {
+        "system" : "http://hl7.org/fhir/sid/us-npi",
+        "type" : {
+          "coding" : [ {
+            "code" : "NPI",
+            "display" : "National provider identifier",
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+          } ]
+        },
+        "value" : "1942945159"
+      }
     },
     "role" : {
       "coding" : [ {
@@ -1979,19 +1929,18 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
     "sequence" : 2
   }, {
     "provider" : {
-      "reference" : "#careteam-provider-3"
-    },
-    "role" : {
-      "coding" : [ {
-        "code" : "otheroperating",
-        "display" : "Other Operating",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
-      } ]
-    },
-    "sequence" : 3
-  }, {
-    "provider" : {
-      "reference" : "#careteam-provider-4"
+      "display" : "Rogers,Gromit",
+      "identifier" : {
+        "system" : "http://hl7.org/fhir/sid/us-npi",
+        "type" : {
+          "coding" : [ {
+            "code" : "NPI",
+            "display" : "National provider identifier",
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+          } ]
+        },
+        "value" : "1558719914"
+      }
     },
     "role" : {
       "coding" : [ {
@@ -2001,18 +1950,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
       } ]
     },
     "sequence" : 4
-  }, {
-    "provider" : {
-      "reference" : "#careteam-provider-5"
-    },
-    "role" : {
-      "coding" : [ {
-        "code" : "referring",
-        "display" : "Referring provider",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
-      } ]
-    },
-    "sequence" : 5
   } ],
   "contained" : [ {
     "active" : true,
@@ -2023,7 +1960,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
     "name" : "Centers for Medicare and Medicaid Services",
     "resourceType" : "Organization"
   }, {
-    "id" : "practitioner-billing",
+    "id" : "1104867175",
     "identifier" : [ {
       "system" : "http://hl7.org/fhir/sid/us-npi",
       "type" : {
@@ -2033,96 +1970,15 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
           "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
         } ]
       },
-      "value" : "1437702123"
+      "value" : "1104867175"
     } ],
     "meta" : {
       "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
     },
-    "resourceType" : "Practitioner"
-  }, {
-    "id" : "careteam-provider-1",
-    "identifier" : [ {
-      "system" : "http://hl7.org/fhir/sid/us-npi",
-      "type" : {
-        "coding" : [ {
-          "code" : "NPI",
-          "display" : "National provider identifier",
-          "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-        } ]
-      },
-      "value" : "1437702123"
+    "name" : [ {
+      "family" : "Garcia",
+      "given" : [ "Indiana" ]
     } ],
-    "meta" : {
-      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
-    },
-    "resourceType" : "Practitioner"
-  }, {
-    "id" : "careteam-provider-2",
-    "identifier" : [ {
-      "system" : "http://hl7.org/fhir/sid/us-npi",
-      "type" : {
-        "coding" : [ {
-          "code" : "NPI",
-          "display" : "National provider identifier",
-          "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-        } ]
-      },
-      "value" : "1437702123"
-    } ],
-    "meta" : {
-      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
-    },
-    "resourceType" : "Practitioner"
-  }, {
-    "id" : "careteam-provider-3",
-    "identifier" : [ {
-      "system" : "http://hl7.org/fhir/sid/us-npi",
-      "type" : {
-        "coding" : [ {
-          "code" : "NPI",
-          "display" : "National provider identifier",
-          "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-        } ]
-      },
-      "value" : "1437702123"
-    } ],
-    "meta" : {
-      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
-    },
-    "resourceType" : "Practitioner"
-  }, {
-    "id" : "careteam-provider-4",
-    "identifier" : [ {
-      "system" : "http://hl7.org/fhir/sid/us-npi",
-      "type" : {
-        "coding" : [ {
-          "code" : "NPI",
-          "display" : "National provider identifier",
-          "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-        } ]
-      },
-      "value" : "1437702123"
-    } ],
-    "meta" : {
-      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
-    },
-    "resourceType" : "Practitioner"
-  }, {
-    "id" : "careteam-provider-5",
-    "identifier" : [ {
-      "system" : "http://hl7.org/fhir/sid/us-npi",
-      "type" : {
-        "coding" : [ {
-          "code" : "NPI",
-          "display" : "National provider identifier",
-          "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-        } ]
-      },
-      "value" : "1437702123"
-    } ],
-    "meta" : {
-      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
-    },
     "resourceType" : "Practitioner"
   } ],
   "created" : "2025-05-30T00:00:00+00:00",
@@ -2461,7 +2317,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
     }
   },
   "provider" : {
-    "reference" : "#practitioner-billing"
+    "reference" : "#1104867175"
   },
   "resourceType" : "ExplanationOfBenefit",
   "status" : "active",
@@ -3006,12 +2862,46 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
   },
   "careTeam" : [ {
     "provider" : {
-      "reference" : "#careteam-provider-line-1"
+      "display" : "Rogers,Gromit",
+      "identifier" : {
+        "system" : "http://hl7.org/fhir/sid/us-npi",
+        "type" : {
+          "coding" : [ {
+            "code" : "NPI",
+            "display" : "National provider identifier",
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+          } ]
+        },
+        "value" : "1558719914"
+      }
     },
     "role" : {
       "coding" : [ {
         "code" : "rendering",
         "display" : "Rendering provider",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
+      } ]
+    },
+    "sequence" : 1
+  }, {
+    "provider" : {
+      "display" : "Stark,Tony",
+      "identifier" : {
+        "system" : "http://hl7.org/fhir/sid/us-npi",
+        "type" : {
+          "coding" : [ {
+            "code" : "NPI",
+            "display" : "National provider identifier",
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+          } ]
+        },
+        "value" : "1720749690"
+      }
+    },
+    "role" : {
+      "coding" : [ {
+        "code" : "referring",
+        "display" : "Referring provider",
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
       } ]
     },
@@ -3026,20 +2916,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
     "name" : "Centers for Medicare and Medicaid Services",
     "resourceType" : "Organization"
   }, {
-    "extension" : [ {
-      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-RNDRG-PRVDR-PRTCPTG-CD",
-      "valueCoding" : {
-        "code" : "1",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RNDRG-PRVDR-PRTCPTG-CD"
-      }
-    }, {
-      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRVDR-TYPE-CD",
-      "valueCoding" : {
-        "code" : "5",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRVDR-TYPE-CD"
-      }
-    } ],
-    "id" : "careteam-provider-line-1",
+    "id" : "1093792350",
     "identifier" : [ {
       "system" : "http://hl7.org/fhir/sid/us-npi",
       "type" : {
@@ -3049,14 +2926,14 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
           "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
         } ]
       },
-      "value" : "1558719914"
+      "value" : "1093792350"
     } ],
     "meta" : {
       "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
     },
     "name" : [ {
-      "family" : "Rogers",
-      "given" : [ "Gromit" ]
+      "family" : "Potter",
+      "given" : [ "Harry" ]
     } ],
     "resourceType" : "Practitioner"
   } ],
@@ -3321,6 +3198,9 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
       "currency" : "USD",
       "value" : 448471.81
     }
+  },
+  "provider" : {
+    "reference" : "#1093792350"
   },
   "resourceType" : "ExplanationOfBenefit",
   "status" : "active",
@@ -3629,7 +3509,18 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
   },
   "careTeam" : [ {
     "provider" : {
-      "reference" : "#careteam-provider-line-1"
+      "display" : "Rogers,Gromit",
+      "identifier" : {
+        "system" : "http://hl7.org/fhir/sid/us-npi",
+        "type" : {
+          "coding" : [ {
+            "code" : "NPI",
+            "display" : "National provider identifier",
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+          } ]
+        },
+        "value" : "1558719914"
+      }
     },
     "role" : {
       "coding" : [ {
@@ -3641,7 +3532,18 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
     "sequence" : 1
   }, {
     "provider" : {
-      "reference" : "#careteam-provider-1"
+      "display" : "Stark,Tony",
+      "identifier" : {
+        "system" : "http://hl7.org/fhir/sid/us-npi",
+        "type" : {
+          "coding" : [ {
+            "code" : "NPI",
+            "display" : "National provider identifier",
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+          } ]
+        },
+        "value" : "1720749690"
+      }
     },
     "role" : {
       "coding" : [ {
@@ -3660,40 +3562,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
     },
     "name" : "Centers for Medicare and Medicaid Services",
     "resourceType" : "Organization"
-  }, {
-    "extension" : [ {
-      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-RNDRG-PRVDR-PRTCPTG-CD",
-      "valueCoding" : {
-        "code" : "1",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RNDRG-PRVDR-PRTCPTG-CD"
-      }
-    }, {
-      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRVDR-TYPE-CD",
-      "valueCoding" : {
-        "code" : "5",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRVDR-TYPE-CD"
-      }
-    } ],
-    "id" : "careteam-provider-line-1",
-    "identifier" : [ {
-      "system" : "http://hl7.org/fhir/sid/us-npi",
-      "type" : {
-        "coding" : [ {
-          "code" : "NPI",
-          "display" : "National provider identifier",
-          "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-        } ]
-      },
-      "value" : "1558719914"
-    } ],
-    "meta" : {
-      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
-    },
-    "name" : [ {
-      "family" : "Rogers",
-      "given" : [ "Gromit" ]
-    } ],
-    "resourceType" : "Practitioner"
   }, {
     "code" : {
       "coding" : [ {
@@ -3718,11 +3586,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
       "value" : 2.3
     }
   }, {
-    "active" : true,
-    "address" : [ {
-      "postalCode" : "79928"
-    } ],
-    "id" : "provider-org",
+    "id" : "1003488552",
     "identifier" : [ {
       "system" : "http://hl7.org/fhir/sid/us-npi",
       "type" : {
@@ -3735,29 +3599,12 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
       "value" : "1003488552"
     } ],
     "meta" : {
-      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|6.1.0" ]
-    },
-    "name" : "CBS Health Corporation",
-    "resourceType" : "Organization"
-  }, {
-    "id" : "careteam-provider-1",
-    "identifier" : [ {
-      "system" : "http://hl7.org/fhir/sid/us-npi",
-      "type" : {
-        "coding" : [ {
-          "code" : "NPI",
-          "display" : "National provider identifier",
-          "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-        } ]
-      },
-      "value" : "1720749690"
-    }, {
-      "system" : "https://bluebutton.cms.gov/identifiers/PIN-NUM",
-      "value" : "9181272391"
-    } ],
-    "meta" : {
       "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
     },
+    "name" : [ {
+      "family" : "CBS Health Corporation",
+      "given" : [ "Wednesday" ]
+    } ],
     "resourceType" : "Practitioner"
   } ],
   "created" : "2025-08-15T00:00:00+00:00",
@@ -4051,7 +3898,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
     }
   },
   "provider" : {
-    "reference" : "#provider-org"
+    "reference" : "#1003488552"
   },
   "resourceType" : "ExplanationOfBenefit",
   "status" : "active",
@@ -4694,7 +4541,18 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
   },
   "careTeam" : [ {
     "provider" : {
-      "reference" : "#careteam-provider-1"
+      "display" : "Stark,Tony",
+      "identifier" : {
+        "system" : "http://hl7.org/fhir/sid/us-npi",
+        "type" : {
+          "coding" : [ {
+            "code" : "NPI",
+            "display" : "National provider identifier",
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+          } ]
+        },
+        "value" : "1437702123"
+      }
     },
     "role" : {
       "coding" : [ {
@@ -4706,7 +4564,18 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
     "sequence" : 1
   }, {
     "provider" : {
-      "reference" : "#careteam-provider-2"
+      "display" : "Garcia,Indiana",
+      "identifier" : {
+        "system" : "http://hl7.org/fhir/sid/us-npi",
+        "type" : {
+          "coding" : [ {
+            "code" : "NPI",
+            "display" : "National provider identifier",
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+          } ]
+        },
+        "value" : "1942945159"
+      }
     },
     "role" : {
       "coding" : [ {
@@ -4718,19 +4587,18 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
     "sequence" : 2
   }, {
     "provider" : {
-      "reference" : "#careteam-provider-3"
-    },
-    "role" : {
-      "coding" : [ {
-        "code" : "otheroperating",
-        "display" : "Other Operating",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
-      } ]
-    },
-    "sequence" : 3
-  }, {
-    "provider" : {
-      "reference" : "#careteam-provider-4"
+      "display" : "Rogers,Gromit",
+      "identifier" : {
+        "system" : "http://hl7.org/fhir/sid/us-npi",
+        "type" : {
+          "coding" : [ {
+            "code" : "NPI",
+            "display" : "National provider identifier",
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+          } ]
+        },
+        "value" : "1558719914"
+      }
     },
     "role" : {
       "coding" : [ {
@@ -4740,18 +4608,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
       } ]
     },
     "sequence" : 4
-  }, {
-    "provider" : {
-      "reference" : "#careteam-provider-5"
-    },
-    "role" : {
-      "coding" : [ {
-        "code" : "referring",
-        "display" : "Referring provider",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
-      } ]
-    },
-    "sequence" : 5
   } ],
   "contained" : [ {
     "active" : true,
@@ -4762,7 +4618,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
     "name" : "Centers for Medicare and Medicaid Services",
     "resourceType" : "Organization"
   }, {
-    "id" : "practitioner-billing",
+    "id" : "1104867175",
     "identifier" : [ {
       "system" : "http://hl7.org/fhir/sid/us-npi",
       "type" : {
@@ -4772,96 +4628,15 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
           "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
         } ]
       },
-      "value" : "1437702123"
+      "value" : "1104867175"
     } ],
     "meta" : {
       "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
     },
-    "resourceType" : "Practitioner"
-  }, {
-    "id" : "careteam-provider-1",
-    "identifier" : [ {
-      "system" : "http://hl7.org/fhir/sid/us-npi",
-      "type" : {
-        "coding" : [ {
-          "code" : "NPI",
-          "display" : "National provider identifier",
-          "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-        } ]
-      },
-      "value" : "1437702123"
+    "name" : [ {
+      "family" : "Garcia",
+      "given" : [ "Indiana" ]
     } ],
-    "meta" : {
-      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
-    },
-    "resourceType" : "Practitioner"
-  }, {
-    "id" : "careteam-provider-2",
-    "identifier" : [ {
-      "system" : "http://hl7.org/fhir/sid/us-npi",
-      "type" : {
-        "coding" : [ {
-          "code" : "NPI",
-          "display" : "National provider identifier",
-          "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-        } ]
-      },
-      "value" : "1437702123"
-    } ],
-    "meta" : {
-      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
-    },
-    "resourceType" : "Practitioner"
-  }, {
-    "id" : "careteam-provider-3",
-    "identifier" : [ {
-      "system" : "http://hl7.org/fhir/sid/us-npi",
-      "type" : {
-        "coding" : [ {
-          "code" : "NPI",
-          "display" : "National provider identifier",
-          "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-        } ]
-      },
-      "value" : "1437702123"
-    } ],
-    "meta" : {
-      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
-    },
-    "resourceType" : "Practitioner"
-  }, {
-    "id" : "careteam-provider-4",
-    "identifier" : [ {
-      "system" : "http://hl7.org/fhir/sid/us-npi",
-      "type" : {
-        "coding" : [ {
-          "code" : "NPI",
-          "display" : "National provider identifier",
-          "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-        } ]
-      },
-      "value" : "1437702123"
-    } ],
-    "meta" : {
-      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
-    },
-    "resourceType" : "Practitioner"
-  }, {
-    "id" : "careteam-provider-5",
-    "identifier" : [ {
-      "system" : "http://hl7.org/fhir/sid/us-npi",
-      "type" : {
-        "coding" : [ {
-          "code" : "NPI",
-          "display" : "National provider identifier",
-          "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-        } ]
-      },
-      "value" : "1437702123"
-    } ],
-    "meta" : {
-      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
-    },
     "resourceType" : "Practitioner"
   } ],
   "created" : "2025-05-30T00:00:00+00:00",
@@ -5222,7 +4997,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
     } ]
   } ],
   "provider" : {
-    "reference" : "#practitioner-billing"
+    "reference" : "#1104867175"
   },
   "resourceType" : "ExplanationOfBenefit",
   "status" : "active",
@@ -6109,7 +5884,18 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
   },
   "careTeam" : [ {
     "provider" : {
-      "reference" : "#careteam-provider-1"
+      "display" : "Stark,Tony",
+      "identifier" : {
+        "system" : "http://hl7.org/fhir/sid/us-npi",
+        "type" : {
+          "coding" : [ {
+            "code" : "NPI",
+            "display" : "National provider identifier",
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+          } ]
+        },
+        "value" : "1437702123"
+      }
     },
     "role" : {
       "coding" : [ {
@@ -6121,7 +5907,18 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
     "sequence" : 1
   }, {
     "provider" : {
-      "reference" : "#careteam-provider-2"
+      "display" : "Garcia,Indiana",
+      "identifier" : {
+        "system" : "http://hl7.org/fhir/sid/us-npi",
+        "type" : {
+          "coding" : [ {
+            "code" : "NPI",
+            "display" : "National provider identifier",
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+          } ]
+        },
+        "value" : "1942945159"
+      }
     },
     "role" : {
       "coding" : [ {
@@ -6133,19 +5930,18 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
     "sequence" : 2
   }, {
     "provider" : {
-      "reference" : "#careteam-provider-3"
-    },
-    "role" : {
-      "coding" : [ {
-        "code" : "otheroperating",
-        "display" : "Other Operating",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
-      } ]
-    },
-    "sequence" : 3
-  }, {
-    "provider" : {
-      "reference" : "#careteam-provider-4"
+      "display" : "Rogers,Gromit",
+      "identifier" : {
+        "system" : "http://hl7.org/fhir/sid/us-npi",
+        "type" : {
+          "coding" : [ {
+            "code" : "NPI",
+            "display" : "National provider identifier",
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+          } ]
+        },
+        "value" : "1558719914"
+      }
     },
     "role" : {
       "coding" : [ {
@@ -6155,18 +5951,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
       } ]
     },
     "sequence" : 4
-  }, {
-    "provider" : {
-      "reference" : "#careteam-provider-5"
-    },
-    "role" : {
-      "coding" : [ {
-        "code" : "referring",
-        "display" : "Referring provider",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
-      } ]
-    },
-    "sequence" : 5
   } ],
   "contained" : [ {
     "active" : true,
@@ -6177,7 +5961,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
     "name" : "Centers for Medicare and Medicaid Services",
     "resourceType" : "Organization"
   }, {
-    "id" : "practitioner-billing",
+    "id" : "1104867175",
     "identifier" : [ {
       "system" : "http://hl7.org/fhir/sid/us-npi",
       "type" : {
@@ -6187,96 +5971,15 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
           "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
         } ]
       },
-      "value" : "1437702123"
+      "value" : "1104867175"
     } ],
     "meta" : {
       "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
     },
-    "resourceType" : "Practitioner"
-  }, {
-    "id" : "careteam-provider-1",
-    "identifier" : [ {
-      "system" : "http://hl7.org/fhir/sid/us-npi",
-      "type" : {
-        "coding" : [ {
-          "code" : "NPI",
-          "display" : "National provider identifier",
-          "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-        } ]
-      },
-      "value" : "1437702123"
+    "name" : [ {
+      "family" : "Garcia",
+      "given" : [ "Indiana" ]
     } ],
-    "meta" : {
-      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
-    },
-    "resourceType" : "Practitioner"
-  }, {
-    "id" : "careteam-provider-2",
-    "identifier" : [ {
-      "system" : "http://hl7.org/fhir/sid/us-npi",
-      "type" : {
-        "coding" : [ {
-          "code" : "NPI",
-          "display" : "National provider identifier",
-          "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-        } ]
-      },
-      "value" : "1437702123"
-    } ],
-    "meta" : {
-      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
-    },
-    "resourceType" : "Practitioner"
-  }, {
-    "id" : "careteam-provider-3",
-    "identifier" : [ {
-      "system" : "http://hl7.org/fhir/sid/us-npi",
-      "type" : {
-        "coding" : [ {
-          "code" : "NPI",
-          "display" : "National provider identifier",
-          "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-        } ]
-      },
-      "value" : "1437702123"
-    } ],
-    "meta" : {
-      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
-    },
-    "resourceType" : "Practitioner"
-  }, {
-    "id" : "careteam-provider-4",
-    "identifier" : [ {
-      "system" : "http://hl7.org/fhir/sid/us-npi",
-      "type" : {
-        "coding" : [ {
-          "code" : "NPI",
-          "display" : "National provider identifier",
-          "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-        } ]
-      },
-      "value" : "1437702123"
-    } ],
-    "meta" : {
-      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
-    },
-    "resourceType" : "Practitioner"
-  }, {
-    "id" : "careteam-provider-5",
-    "identifier" : [ {
-      "system" : "http://hl7.org/fhir/sid/us-npi",
-      "type" : {
-        "coding" : [ {
-          "code" : "NPI",
-          "display" : "National provider identifier",
-          "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
-        } ]
-      },
-      "value" : "1437702123"
-    } ],
-    "meta" : {
-      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
-    },
     "resourceType" : "Practitioner"
   } ],
   "created" : "2025-05-30T00:00:00+00:00",
@@ -6637,7 +6340,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
     } ]
   } ],
   "provider" : {
-    "reference" : "#practitioner-billing"
+    "reference" : "#1104867175"
   },
   "resourceType" : "ExplanationOfBenefit",
   "status" : "active",

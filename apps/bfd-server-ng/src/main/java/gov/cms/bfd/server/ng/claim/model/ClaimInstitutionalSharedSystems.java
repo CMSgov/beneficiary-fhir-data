@@ -2,6 +2,7 @@ package gov.cms.bfd.server.ng.claim.model;
 
 import static gov.cms.bfd.server.ng.claim.model.ClaimSubtype.PDE;
 
+import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -41,13 +42,12 @@ public class ClaimInstitutionalSharedSystems extends ClaimInstitutionalBase {
   @Embedded private NchPrimaryPayorCode nchPrimaryPayorCode;
   @Embedded private TypeOfBillCode typeOfBillCode;
   @Embedded private ClaimDateInstitutionalSharedSystems claimDateSupportingInfo;
-  @Embedded private ServiceProviderHistory serviceProviderHistory;
-  @Embedded private BillingProviderHistory billingProviderHistory;
-  @Embedded private OtherProviderHistory otherProviderHistory;
-  @Embedded private OperatingProviderHistory operatingProviderHistory;
-  @Embedded private AttendingProviderHistory attendingProviderHistory;
-  @Embedded private RenderingProviderHistory renderingProviderHistory;
-  @Embedded private ReferringInstitutionalProviderHistory referringProviderHistory;
+  @Embedded private BillingProviderInstitutional billingProviderHistory;
+  @Embedded private OtherInstitutionalCareTeam otherProviderHistory;
+  @Embedded private OperatingCareTeam operatingProviderHistory;
+  @Embedded private AttendingCareTeam attendingProviderHistory;
+  @Embedded private RenderingCareTeam renderingProviderHistory;
+  @Embedded private ReferringInstitutionalCareTeam referringProviderHistory;
   @Embedded private AdjudicationCharge adjudicationCharge;
   @Embedded private ClaimPaymentAmount claimPaymentAmount;
   @Embedded private ClaimRecordTypeInstitutional claimRecordType;
@@ -105,5 +105,12 @@ public class ClaimInstitutionalSharedSystems extends ClaimInstitutionalBase {
   @Override
   public ClaimSourceId getClaimSourceId() {
     return claimSourceId;
+  }
+
+  /** NCH has no additional care-team members beyond the referring provider added by the base. */
+  @Override
+  protected void addSubclassCareTeam(
+      ExplanationOfBenefit eob, SequenceGenerator sequenceGenerator) {
+    // no-op for SS
   }
 }

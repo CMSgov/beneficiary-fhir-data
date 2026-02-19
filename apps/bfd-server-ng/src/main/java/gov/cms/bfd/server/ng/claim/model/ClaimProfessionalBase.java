@@ -22,11 +22,9 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
 
   abstract ClaimSubmissionDate getClaimSubmissionDate();
 
-  abstract ReferringProfessionalProviderHistory getReferringProviderHistory();
+  abstract ReferringProfessionalCareTeam getReferringProviderHistory();
 
-  abstract BillingProviderHistory getBillingProviderHistory();
-
-  abstract ServiceProviderHistory getServiceProviderHistory();
+  abstract BillingProviderProfessional getBillingProviderHistory();
 
   abstract ClinicalTrialNumber getClinicalTrialNumber();
 
@@ -109,12 +107,10 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
 
     item.getClaimLine()
         .getClaimLineRenderingProvider()
-        .toFhirCareTeamComponentLine(item.getClaimLine().getClaimLineNumber())
-        .ifPresent(
-            c -> {
-              eob.addCareTeam(c.careTeam());
-              eob.addContained(c.practitioner());
-            });
+        .flatMap(
+            provider ->
+                item.getClaimLine().getClaimLineNumber().flatMap(provider::toFhirCareTeamComponent))
+        .ifPresent(eob::addCareTeam);
 
     item.getProcedure()
         .flatMap(
@@ -137,15 +133,7 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
         .ifPresent(
             p -> {
               eob.addContained(p);
-              eob.setProvider(new Reference(p));
-            });
-
-    getServiceProviderHistory()
-        .toFhirNpiType()
-        .ifPresent(
-            p -> {
-              eob.addContained(p);
-              eob.setProvider(new Reference(p));
+              eob.setProvider(new Reference("#" + p.getId()));
             });
   }
 
@@ -169,12 +157,8 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
   private void addCareTeam(ExplanationOfBenefit eob) {
     var sequenceGenerator = new SequenceGenerator();
     getReferringProviderHistory()
-        .toFhirCareTeamComponent(sequenceGenerator)
-        .ifPresent(
-            c -> {
-              eob.addCareTeam(c.careTeam());
-              eob.addContained(c.practitioner());
-            });
+        .toFhirCareTeamComponent(sequenceGenerator.next())
+        .ifPresent(eob::addCareTeam);
     addSubclassCareTeam(eob, sequenceGenerator);
   }
 
