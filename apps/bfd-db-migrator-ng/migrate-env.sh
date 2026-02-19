@@ -10,7 +10,7 @@ db_endpoint="$(aws rds describe-db-clusters --db-cluster-identifier $db_cluster 
 script_dir=$(path=$(realpath "$0") && dirname "$path")
 (
     cd "$script_dir"
-    mvn flyway:migrate -Dflyway.url=jdbc:postgresql://$db_endpoint:5432/fhirdb "-Dflyway.user=$username" "-Dflyway.password=$password" "-Dflyway.outOfOrder=true"
+    mvn flyway:migrate -Dflyway.url=jdbc:postgresql://$db_endpoint:5432/fhirdb "-Dflyway.user=$username" "-Dflyway.password=$password"
 
     echo "Applying grants to 'idr' schema..."
     export PGPASSWORD="$password"
