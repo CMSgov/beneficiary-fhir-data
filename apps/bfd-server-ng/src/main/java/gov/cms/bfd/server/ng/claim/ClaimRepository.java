@@ -107,8 +107,6 @@ public class ClaimRepository {
   public List<Claim> findByBeneXrefSk(
       @MeterTag(key = "hasClaimThroughDate", expression = "hasClaimThroughDate()")
           @MeterTag(key = "hasLastUpdated", expression = "hasLasUpdated()")
-          @MeterTag(key = "hasLimit", expression = "hasLimit()")
-          @MeterTag(key = "hasOffset", expression = "hasOffset()")
           @MeterTag(key = "hasTags", expression = "hasTags()")
           @MeterTag(key = "hasClaimTypeCodes", expression = "hasClaimTypeCodes()")
           @MeterTag(key = "hasSources", expression = "hasSources()")
@@ -121,43 +119,17 @@ public class ClaimRepository {
             new TagCriteriaFilterParam(criteria.tagCriteria()),
             new SourceFilterParam(criteria.sources()));
     var filters = getFilters(filterBuilders);
-    // Some of the filters here appear redundant, but joining on the entire primary key for
-    // beneficiaries (bene_sk + effective timestamp) helps query performance significantly
     var jpql =
         String.format(
             """
-            WITH benes AS (
-                  SELECT b.beneSk beneSk, b.effectiveTimestamp effectiveTimestamp
-                  FROM Beneficiary b
-                  WHERE b.xrefSk = :beneSk AND b.latestTransactionFlag = 'Y'
-             ),
-             claims AS (
-                SELECT c.claimUniqueId claimUniqueId
-                FROM Claim c
-                WHERE EXISTS (
-                  SELECT 1 FROM benes b2
-                    WHERE b2.beneSk = c.beneficiary.beneSk
-                    AND b2.effectiveTimestamp = c.beneficiary.effectiveTimestamp
-                )
-                ORDER BY c.claimUniqueId
-                OFFSET :offset ROWS
-                FETCH NEXT :limit ROWS ONLY
-             )
             %s
-            WHERE c.claimUniqueId IN (SELECT claimUniqueId FROM claims)
-            AND EXISTS (
-              SELECT 1 FROM benes b2
-              WHERE b2.beneSk = b.beneSk
-              AND b2.effectiveTimestamp = b.effectiveTimestamp
-            )
+            WHERE b.xrefSk = :beneSk
             AND (ct.contractPbpSk IS NULL OR ct.contractVersionRank = 1)
             %s
             """,
             CLAIM_TABLES_BASE, filters.filterClause());
     var claims =
         withParams(entityManager.createQuery(jpql, Claim.class), filters.params())
-            .setParameter("limit", criteria.limit().orElse(5000))
-            .setParameter("offset", criteria.offset().orElse(0))
             .setParameter("beneSk", criteria.beneSk())
             .getResultList();
 

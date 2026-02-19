@@ -28,6 +28,24 @@ public record ClaimSearchCriteria(
     List<List<MetaSourceSk>> sources) {
 
   /**
+   * Returns the offset or the default.
+   *
+   * @return offset
+   */
+  public Integer resolveOffset() {
+    return offset.orElse(0);
+  }
+
+  /**
+   * Returns the limit or the default.
+   *
+   * @return limit
+   */
+  public Integer resolveLimit() {
+    return limit.orElse(5000);
+  }
+
+  /**
    * Returns whether a claim through date filter has been provided.
    *
    * @return boolean
@@ -43,24 +61,6 @@ public record ClaimSearchCriteria(
    */
   public boolean hasLasUpdated() {
     return lastUpdated().hasBounds();
-  }
-
-  /**
-   * Returns whether a result limit has been specified.
-   *
-   * @return boolean
-   */
-  public boolean hasLimit() {
-    return limit.isPresent();
-  }
-
-  /**
-   * Returns whether a result offset has been specified.
-   *
-   * @return boolean
-   */
-  public boolean hasOffset() {
-    return offset.isPresent();
   }
 
   /**

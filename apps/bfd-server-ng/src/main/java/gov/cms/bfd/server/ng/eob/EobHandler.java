@@ -85,7 +85,7 @@ public class EobHandler {
 
     var claims = claimRepository.findByBeneXrefSk(repositoryCriteria);
 
-    var filteredClaims = filterSamhsaClaims(claims, samhsaFilterMode);
+    var filteredClaims = filterSamhsaClaims(claims, samhsaFilterMode, repositoryCriteria);
 
     return FhirUtil.bundleOrDefault(
         filteredClaims.map(
@@ -103,14 +103,23 @@ public class EobHandler {
         loadProgressRepository::lastUpdated);
   }
 
-  private Stream<Claim> filterSamhsaClaims(List<Claim> claims, SamhsaFilterMode samhsaFilterMode) {
+  private Stream<Claim> filterSamhsaClaims(
+      List<Claim> claims,
+      SamhsaFilterMode samhsaFilterMode,
+      ClaimSearchCriteria claimSearchCriteria) {
+
     var claimStream = claims.stream().sorted(Comparator.comparing(Claim::getClaimUniqueId));
 
-    return switch (samhsaFilterMode) {
-      case INCLUDE -> claimStream;
-      case ONLY_SAMHSA -> claimStream.filter(this::claimHasSamhsa);
-      case EXCLUDE -> claimStream.filter(claim -> !claimHasSamhsa(claim));
-    };
+    var filteredClaimStream =
+        switch (samhsaFilterMode) {
+          case INCLUDE -> claimStream;
+          case ONLY_SAMHSA -> claimStream.filter(this::claimHasSamhsa);
+          case EXCLUDE -> claimStream.filter(claim -> !claimHasSamhsa(claim));
+        };
+
+    return filteredClaimStream
+        .skip(claimSearchCriteria.resolveOffset())
+        .limit(claimSearchCriteria.resolveLimit());
   }
 
   /**
