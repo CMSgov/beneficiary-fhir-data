@@ -89,8 +89,7 @@ public class Application {
    */
   @Bean
   public Instant clock() {
-    return Clock.fixed(Instant.parse("2026-02-09T00:00:00Z"), ZoneId.of("UTC"))
-        .instant()
-        .truncatedTo(ChronoUnit.DAYS);
+    return Clock.systemUTC().instant()
+            .truncatedTo(ChronoUnit.DAYS);
   }
 }

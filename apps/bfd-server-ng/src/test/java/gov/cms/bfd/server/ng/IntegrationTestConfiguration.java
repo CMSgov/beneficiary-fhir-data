@@ -3,7 +3,10 @@ package gov.cms.bfd.server.ng;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.time.Clock;
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import org.flywaydb.core.Flyway;
 import org.junit.platform.commons.util.StringUtils;
@@ -20,6 +23,13 @@ import org.testcontainers.utility.DockerImageName;
 public class IntegrationTestConfiguration {
   @Value("${project.basedir}")
   private String baseDir;
+
+  @Bean
+  public Instant clock() {
+    return Clock.fixed(Instant.parse("2025-06-15T00:00:00Z"), ZoneId.of("UTC"))
+            .instant()
+            .truncatedTo(ChronoUnit.DAYS);
+  }
 
   // Container lifecycle is managed by Spring,
   // so the resource closing warning is not applicable here
