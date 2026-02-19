@@ -100,6 +100,7 @@ create table idr_new.claim_professional_ss
     clm_prvdr_intrst_pd_amt        numeric,
     clm_mdcr_prfnl_prvdr_asgnmt_sw character varying(2)     not null,
     clm_audt_trl_stus_cd           character varying(2),
+    clm_audt_trl_lctn_cd           character varying(5),
     clm_prvdr_acnt_rcvbl_ofst_amt  numeric,
     clm_clncl_tril_num             character varying(8),
     bfd_claim_updated_ts           timestamp with time zone default now(),
@@ -451,6 +452,7 @@ create table idr_new.claim_institutional_ss
     bfd_claim_updated_ts           timestamp with time zone default now(),
 --  clm_lctn_hstry
     clm_audt_trl_stus_cd           character varying(2),
+    clm_audt_trl_lctn_cd           character varying(5),
 --  fiss
     clm_crnt_stus_cd               character varying(1)     not null,
 -- ss    clm_pps_ind_cd                character varying(1)     not null,

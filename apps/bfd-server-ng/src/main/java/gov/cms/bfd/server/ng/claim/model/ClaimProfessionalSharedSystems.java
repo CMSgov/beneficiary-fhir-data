@@ -34,11 +34,11 @@ public class ClaimProfessionalSharedSystems extends ClaimProfessionalBase {
   @Column(name = "clm_src_id")
   private ClaimSourceId claimSourceId;
 
+  @Column(name = "clm_finl_actn_ind")
+  private ClaimFinalAction finalAction;
+
   @Column(name = "clm_prvdr_acnt_rcvbl_ofst_amt")
   private BigDecimal providerOffsetAmount;
-
-  @Column(name = "clm_audt_trl_stus_cd")
-  private Optional<ClaimAuditTrailStatusCode> claimAuditTrailStatusCode;
 
   @Column(name = "clm_mdcr_prfnl_prvdr_asgnmt_sw")
   private Optional<ProviderAssignmentIndicatorSwitch> providerAssignmentIndicatorSwitch;
@@ -56,6 +56,7 @@ public class ClaimProfessionalSharedSystems extends ClaimProfessionalBase {
   @Embedded private BillingProviderProfessional billingProviderHistory;
   @Embedded private OtherProfessionalCareTeam otherProviderHistory;
   @Embedded ClinicalTrialNumber clinicalTrialNumber;
+  @Embedded private ClaimAuditTrailContext claimAuditTrailContext;
 
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "clm_uniq_id")
@@ -118,10 +119,18 @@ public class ClaimProfessionalSharedSystems extends ClaimProfessionalBase {
    */
   @Override
   protected void applyOutcomeOverride(ExplanationOfBenefit eob) {
-    if (getClaimTypeCode().isPacStage2()) {
-      claimAuditTrailStatusCode
-          .map(ClaimAuditTrailStatusCode::getOutcome)
-          .ifPresent(eob::setOutcome);
-    }
+    var auditTrailStatusCode = claimAuditTrailContext.getAuditTrailStatusCode();
+    auditTrailStatusCode.ifPresentOrElse(
+        status -> eob.setOutcome(status.getOutcome(finalAction)),
+        () -> {
+          if (getClaimTypeCode().isPac()) {
+            eob.setOutcome(ExplanationOfBenefit.RemittanceOutcome.PARTIAL);
+          }
+        });
+  }
+
+  @Override
+  public MetaSourceSk getMetaSourceSk() {
+    return claimAuditTrailContext.getMetaSourceSk();
   }
 }

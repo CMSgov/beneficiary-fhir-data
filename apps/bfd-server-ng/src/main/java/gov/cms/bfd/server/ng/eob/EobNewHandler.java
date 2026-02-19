@@ -5,12 +5,7 @@ import gov.cms.bfd.server.ng.SamhsaFilterMode;
 import gov.cms.bfd.server.ng.SecurityLabel;
 import gov.cms.bfd.server.ng.beneficiary.BeneficiaryRepository;
 import gov.cms.bfd.server.ng.claim.ClaimNewRepository;
-import gov.cms.bfd.server.ng.claim.model.ClaimBase;
-import gov.cms.bfd.server.ng.claim.model.ClaimItemBase;
-import gov.cms.bfd.server.ng.claim.model.ClaimLineHcpcsCode;
-import gov.cms.bfd.server.ng.claim.model.ClaimProcedureBase;
-import gov.cms.bfd.server.ng.claim.model.ClaimTypeCode;
-import gov.cms.bfd.server.ng.claim.model.IcdIndicator;
+import gov.cms.bfd.server.ng.claim.model.*;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.input.TagCriterion;
 import gov.cms.bfd.server.ng.loadprogress.LoadProgressRepository;
@@ -69,6 +64,7 @@ public class EobNewHandler {
    * @param claimTypeCodes claimTypeCodes
    * @param tagCriteria tagCriteria
    * @param samhsaFilterMode SAMHSA filter mode
+   * @param source claim source
    * @return bundle
    */
   public Bundle searchByBene(
@@ -79,7 +75,8 @@ public class EobNewHandler {
       Optional<Integer> startIndex,
       List<List<TagCriterion>> tagCriteria,
       List<ClaimTypeCode> claimTypeCodes,
-      SamhsaFilterMode samhsaFilterMode) {
+      SamhsaFilterMode samhsaFilterMode,
+      List<List<MetaSourceSk>> source) {
     var beneXrefSk = beneficiaryRepository.getXrefSkFromBeneSk(beneSk);
     // Don't return data for historical beneSks
     if (beneXrefSk.isEmpty() || !beneXrefSk.get().equals(beneSk)) {
@@ -88,7 +85,7 @@ public class EobNewHandler {
 
     var claims =
         claimRepository.findByBeneXrefSk(
-            beneXrefSk.get(), serviceDate, lastUpdated, tagCriteria, claimTypeCodes);
+            beneXrefSk.get(), serviceDate, lastUpdated, tagCriteria, claimTypeCodes, source);
 
     var filteredClaims =
         filterSamhsaClaims(claims, samhsaFilterMode)

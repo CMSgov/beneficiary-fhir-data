@@ -3,26 +3,15 @@ package gov.cms.bfd.server.ng.claim;
 import gov.cms.bfd.server.ng.DbFilter;
 import gov.cms.bfd.server.ng.DbFilterBuilder;
 import gov.cms.bfd.server.ng.DbFilterParam;
-import gov.cms.bfd.server.ng.claim.filter.BillablePeriodFilterParam;
-import gov.cms.bfd.server.ng.claim.filter.ClaimTypeCodeFilterParam;
-import gov.cms.bfd.server.ng.claim.filter.LastUpdatedFilterParam;
-import gov.cms.bfd.server.ng.claim.filter.TagCriteriaFilterParam;
-import gov.cms.bfd.server.ng.claim.model.ClaimBase;
-import gov.cms.bfd.server.ng.claim.model.ClaimInstitutionalNch;
-import gov.cms.bfd.server.ng.claim.model.ClaimProfessionalNch;
-import gov.cms.bfd.server.ng.claim.model.ClaimRx;
-import gov.cms.bfd.server.ng.claim.model.ClaimSourceId;
-import gov.cms.bfd.server.ng.claim.model.ClaimTypeCode;
+import gov.cms.bfd.server.ng.claim.filter.*;
+import gov.cms.bfd.server.ng.claim.model.*;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.input.TagCriterion;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,35 +58,16 @@ public class ClaimAsyncService {
       DateTimeRange claimThroughDate,
       DateTimeRange lastUpdated,
       List<List<TagCriterion>> tagCriteria,
-      List<ClaimTypeCode> claimTypeCodes) {
-
-    boolean isNchOrRx =
-        ClaimProfessionalNch.class.isAssignableFrom(claimClass)
-            || ClaimInstitutionalNch.class.isAssignableFrom(claimClass)
-            || ClaimRx.class.isAssignableFrom(claimClass);
-
-    // if searching by NCH and querying for NCH or RX claims remove filter
-    tagCriteria =
-        tagCriteria.stream().map(ArrayList::new).collect(Collectors.toCollection(ArrayList::new));
-    for (var orList : tagCriteria) {
-      for (var it = orList.iterator(); it.hasNext(); ) {
-        var criterion = it.next();
-        // if sourceId is used as criteria
-        if (criterion instanceof TagCriterion.SourceIdCriterion(var sourceId) && sourceId != null) {
-          boolean isNch = sourceId == ClaimSourceId.NATIONAL_CLAIMS_HISTORY;
-          if (isNch && isNchOrRx) {
-            it.remove();
-          }
-        }
-      }
-    }
+      List<ClaimTypeCode> claimTypeCodes,
+      List<List<MetaSourceSk>> sources) {
 
     var filterBuilders =
         List.of(
             new BillablePeriodFilterParam(claimThroughDate),
             new LastUpdatedFilterParam(lastUpdated),
             new ClaimTypeCodeFilterParam(claimTypeCodes),
-            new TagCriteriaFilterParam(tagCriteria));
+            new TagCriteriaFilterParam(tagCriteria),
+            new SourceFilterParam(sources));
     var filters = getFilters(filterBuilders);
 
     var jpql =

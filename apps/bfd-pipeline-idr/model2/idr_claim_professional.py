@@ -48,20 +48,6 @@ class IdrClaimProfessional(IdrBaseModel):
         {UPDATE_TIMESTAMP: True, ALIAS: ALIAS_PRFNL, COLUMN_MAP: "idr_insrt_ts"},
         BeforeValidator(transform_null_date_to_min),
     ]
-    # column from v2_mdcr_clm_lctn_hstry
-    clm_audt_trl_stus_cd: Annotated[
-        str, {ALIAS: ALIAS_LCTN_HSTRY}, BeforeValidator(transform_null_string)
-    ]
-    idr_insrt_ts_lctn_hstry: Annotated[
-        datetime,
-        {BATCH_TIMESTAMP: True, ALIAS: ALIAS_LCTN_HSTRY, COLUMN_MAP: "idr_insrt_ts"},
-        BeforeValidator(transform_null_date_to_min),
-    ]
-    idr_updt_ts_lctn_hstry: Annotated[
-        datetime,
-        {UPDATE_TIMESTAMP: True, ALIAS: ALIAS_LCTN_HSTRY, COLUMN_MAP: "idr_updt_ts"},
-        BeforeValidator(transform_null_date_to_min),
-    ]
 
     @staticmethod
     def table() -> str:
@@ -79,58 +65,16 @@ class IdrClaimProfessional(IdrBaseModel):
     def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
         clm = ALIAS_CLM
         prfnl = ALIAS_PRFNL
-        lctn_hstry = ALIAS_LCTN_HSTRY
         return f"""
-            WITH claims AS (
-                    SELECT
-                        {clm}.clm_uniq_id,
-                        {clm}.geo_bene_sk,
-                        {clm}.clm_type_cd,
-                        {clm}.clm_num_sk,
-                        {clm}.clm_dt_sgntr_sk,
-                        {clm}.clm_idr_ld_dt
-                    FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
-                    WHERE {claim_filter(start_time, partition)}
-                ),
-                latest_clm_lctn_hstry AS (
-                    SELECT
-                        claims.geo_bene_sk,
-                        claims.clm_type_cd,
-                        claims.clm_dt_sgntr_sk,
-                        claims.clm_num_sk,
-                        MAX({lctn_hstry}.clm_lctn_cd_sqnc_num) AS max_clm_lctn_cd_sqnc_num
-                    FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_lctn_hstry {lctn_hstry}
-                    JOIN claims ON
-                        {lctn_hstry}.geo_bene_sk = claims.geo_bene_sk AND
-                        {lctn_hstry}.clm_type_cd = claims.clm_type_cd AND
-                        {lctn_hstry}.clm_dt_sgntr_sk = claims.clm_dt_sgntr_sk AND
-                        {lctn_hstry}.clm_num_sk = claims.clm_num_sk
-                    GROUP BY
-                        claims.geo_bene_sk,
-                        claims.clm_type_cd,
-                        claims.clm_dt_sgntr_sk,
-                        claims.clm_num_sk
-                )
-                SELECT {{COLUMNS}}
-                FROM claims {clm}
-                JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_prfnl {prfnl} ON
-                    {clm}.geo_bene_sk = {prfnl}.geo_bene_sk AND
-                    {clm}.clm_type_cd = {prfnl}.clm_type_cd AND
-                    {clm}.clm_dt_sgntr_sk = {prfnl}.clm_dt_sgntr_sk AND
-                    {clm}.clm_num_sk = {prfnl}.clm_num_sk
-                LEFT JOIN latest_clm_lctn_hstry latest_lctn ON
-                    {clm}.geo_bene_sk = latest_lctn.geo_bene_sk AND
-                    {clm}.clm_type_cd = latest_lctn.clm_type_cd AND
-                    {clm}.clm_dt_sgntr_sk = latest_lctn.clm_dt_sgntr_sk AND
-                    {clm}.clm_num_sk = latest_lctn.clm_num_sk
-                LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_lctn_hstry {lctn_hstry} ON
-                    {clm}.geo_bene_sk = {lctn_hstry}.geo_bene_sk AND
-                    {clm}.clm_type_cd = {lctn_hstry}.clm_type_cd AND
-                    {clm}.clm_dt_sgntr_sk = {lctn_hstry}.clm_dt_sgntr_sk AND
-                    {clm}.clm_num_sk = {lctn_hstry}.clm_num_sk AND
-                    {lctn_hstry}.clm_lctn_cd_sqnc_num = latest_lctn.max_clm_lctn_cd_sqnc_num
-                {{WHERE_CLAUSE}}
-                {{ORDER_BY}}
+            SELECT {{COLUMNS}}
+            FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
+            JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_prfnl {prfnl} ON
+                {clm}.geo_bene_sk = {prfnl}.geo_bene_sk AND
+                {clm}.clm_dt_sgntr_sk = {prfnl}.clm_dt_sgntr_sk AND
+                {clm}.clm_type_cd = {prfnl}.clm_type_cd AND
+                {clm}.clm_num_sk = {prfnl}.clm_num_sk
+            {{WHERE_CLAUSE}} AND {claim_filter(start_time, partition)}
+            {{ORDER_BY}}
         """
 
     @staticmethod

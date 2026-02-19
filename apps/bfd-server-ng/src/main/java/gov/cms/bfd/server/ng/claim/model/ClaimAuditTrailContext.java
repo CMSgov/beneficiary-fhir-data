@@ -3,9 +3,11 @@ package gov.cms.bfd.server.ng.claim.model;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.util.Optional;
+import lombok.Getter;
 
 /** Claim audit trail information. */
 @Embeddable
+@Getter
 public class ClaimAuditTrailContext {
 
   @Column(name = "meta_src_sk", insertable = false, updatable = false)

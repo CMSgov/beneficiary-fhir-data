@@ -166,6 +166,9 @@ class IdrClaimProfessionalSs(IdrBaseModel):
     clm_audt_trl_stus_cd: Annotated[
         str, {ALIAS: ALIAS_LCTN_HSTRY}, BeforeValidator(transform_null_string)
     ]
+    clm_audt_trl_lctn_cd: Annotated[
+        str, {ALIAS: ALIAS_LCTN_HSTRY}, BeforeValidator(transform_null_string)
+    ]
     idr_insrt_ts_lctn_hstry: Annotated[
         datetime,
         {

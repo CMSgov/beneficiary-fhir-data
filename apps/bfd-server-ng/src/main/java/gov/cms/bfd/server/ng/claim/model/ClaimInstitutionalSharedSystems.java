@@ -32,8 +32,8 @@ public class ClaimInstitutionalSharedSystems extends ClaimInstitutionalBase {
   @Column(name = "clm_src_id")
   private ClaimSourceId claimSourceId;
 
-  @Column(name = "clm_audt_trl_stus_cd")
-  private Optional<ClaimAuditTrailStatusCode> claimAuditTrailStatusCode;
+  @Column(name = "clm_finl_actn_ind")
+  private ClaimFinalAction finalAction;
 
   @Column(name = "clm_cntrctr_num")
   private Optional<ClaimContractorNumber> claimContractorNumber;
@@ -55,6 +55,7 @@ public class ClaimInstitutionalSharedSystems extends ClaimInstitutionalBase {
   @Embedded private AdjudicationChargeInstitutional adjudicationChargeInstitutional;
   @Embedded private ClaimFissInstitutional claimFissInstitutional;
   @Embedded private DiagnosisDrgCode diagnosisDrgCode;
+  @Embedded private ClaimAuditTrailContext claimAuditTrailContext;
 
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "clm_uniq_id")
@@ -96,10 +97,17 @@ public class ClaimInstitutionalSharedSystems extends ClaimInstitutionalBase {
     getClaimTypeCode().toFhirInsuranceInstitutional(claimRecordType).ifPresent(eob::addInsurance);
   }
 
-  /** SS outcome is driven by the FISS institutional block and claim type. */
   @Override
   protected void applyOutcomeOverride(ExplanationOfBenefit eob) {
-    claimFissInstitutional.toFhirOutcome(getClaimTypeCode()).ifPresent(eob::setOutcome);
+    // claimFissInstitutional.toFhirOutcome(getClaimTypeCode()).ifPresent(eob::setOutcome);
+    var auditTrailStatusCode = claimAuditTrailContext.getAuditTrailStatusCode();
+    auditTrailStatusCode.ifPresentOrElse(
+        status -> eob.setOutcome(status.getOutcome(finalAction)),
+        () -> {
+          if (getClaimTypeCode().isPac()) {
+            eob.setOutcome(ExplanationOfBenefit.RemittanceOutcome.PARTIAL);
+          }
+        });
   }
 
   @Override
@@ -112,5 +120,10 @@ public class ClaimInstitutionalSharedSystems extends ClaimInstitutionalBase {
   protected void addSubclassCareTeam(
       ExplanationOfBenefit eob, SequenceGenerator sequenceGenerator) {
     // no-op for SS
+  }
+
+  @Override
+  public MetaSourceSk getMetaSourceSk() {
+    return claimAuditTrailContext.getMetaSourceSk();
   }
 }

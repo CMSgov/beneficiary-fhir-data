@@ -120,6 +120,7 @@ public class EobResourceProvider implements IResourceProvider {
       @OptionalParam(name = START_INDEX) final NumberParam startIndex,
       @OptionalParam(name = Constants.PARAM_TAG) final TokenAndListParam tag,
       @OptionalParam(name = TYPE) final TokenAndListParam type,
+      @OptionalParam(name = Constants.PARAM_SOURCE) final TokenAndListParam source,
       final HttpServletRequest request) {
 
     var tagCriteria = FhirInputConverter.parseTagParameter(tag);
@@ -133,7 +134,8 @@ public class EobResourceProvider implements IResourceProvider {
         FhirInputConverter.toIntOptional(startIndex),
         tagCriteria,
         claimTypeCodes,
-        getFilterModeForRequest(request));
+        getFilterModeForRequest(request),
+        FhirInputConverter.parseSourceParameter(source));
   }
 
   /**

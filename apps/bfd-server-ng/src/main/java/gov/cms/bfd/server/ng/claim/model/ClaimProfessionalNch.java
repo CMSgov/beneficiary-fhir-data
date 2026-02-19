@@ -98,4 +98,9 @@ public class ClaimProfessionalNch extends ClaimProfessionalBase {
   public ClaimSourceId getClaimSourceId() {
     return ClaimSourceId.NATIONAL_CLAIMS_HISTORY;
   }
+
+  @Override
+  public MetaSourceSk getMetaSourceSk() {
+    return MetaSourceSk.NCH;
+  }
 }

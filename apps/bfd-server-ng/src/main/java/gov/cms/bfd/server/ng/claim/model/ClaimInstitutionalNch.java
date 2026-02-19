@@ -95,4 +95,9 @@ public class ClaimInstitutionalNch extends ClaimInstitutionalBase {
         .toFhirCareTeamComponent(sequenceGenerator.next())
         .ifPresent(eob::addCareTeam);
   }
+
+  @Override
+  public MetaSourceSk getMetaSourceSk() {
+    return MetaSourceSk.NCH;
+  }
 }

@@ -2,23 +2,15 @@ package gov.cms.bfd.server.ng.claim;
 
 import gov.cms.bfd.server.ng.claim.filter.BillablePeriodFilterParam;
 import gov.cms.bfd.server.ng.claim.filter.LastUpdatedFilterParam;
-import gov.cms.bfd.server.ng.claim.model.ClaimBase;
-import gov.cms.bfd.server.ng.claim.model.ClaimInstitutionalNch;
-import gov.cms.bfd.server.ng.claim.model.ClaimInstitutionalSharedSystems;
-import gov.cms.bfd.server.ng.claim.model.ClaimProfessionalNch;
-import gov.cms.bfd.server.ng.claim.model.ClaimProfessionalSharedSystems;
-import gov.cms.bfd.server.ng.claim.model.ClaimRx;
-import gov.cms.bfd.server.ng.claim.model.ClaimTypeCode;
+import gov.cms.bfd.server.ng.claim.model.*;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.input.TagCriterion;
 import gov.cms.bfd.server.ng.util.LogUtil;
 import io.micrometer.core.annotation.Timed;
 import io.micrometer.core.aop.MeterTag;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -68,6 +60,14 @@ public class ClaimNewRepository {
               FROM ClaimRx c
               JOIN FETCH c.beneficiary b
             """;
+
+  private static final Set<Class<? extends ClaimBase>> ALL_CLAIM_CLASSES =
+      Set.of(
+          ClaimProfessionalNch.class,
+          ClaimInstitutionalBase.class,
+          ClaimProfessionalSharedSystems.class,
+          ClaimInstitutionalSharedSystems.class,
+          ClaimRx.class);
 
   /**
    * Search for a claim by its ID.
@@ -149,6 +149,7 @@ public class ClaimNewRepository {
    * @param lastUpdated last updated
    * @param tagCriteria tag criteria
    * @param claimTypeCodes claimTypeCodes
+   * @param sources claim sources
    * @return claims
    */
   @Timed(value = "application.claim.search_by_bene")
@@ -164,60 +165,86 @@ public class ClaimNewRepository {
           DateTimeRange lastUpdated,
       @MeterTag(key = "hasTags", expression = "size() > 0") List<List<TagCriterion>> tagCriteria,
       @MeterTag(key = "hasClaimTypeCodes", expression = "size() > 0")
-          List<ClaimTypeCode> claimTypeCodes) {
+          List<ClaimTypeCode> claimTypeCodes,
+      @MeterTag(key = "hasSources", expression = "size() > 0") List<List<MetaSourceSk>> sources) {
 
-    // Execute all four queries
-    var professionalSharedSystemsClaims =
-        asyncService.fetchClaims(
-            CLAIM_PROFESSIONAL_SHARED_SYSTEMS,
-            ClaimProfessionalSharedSystems.class,
-            beneSk,
-            claimThroughDate,
-            lastUpdated,
-            tagCriteria,
-            claimTypeCodes);
+    var eligibleClasses = determineEligibleClaimClasses(sources, tagCriteria);
+    var futures = new ArrayList<CompletableFuture<? extends List<? extends ClaimBase>>>();
 
-    var professionalNchClaims =
-        asyncService.fetchClaims(
-            CLAIM_PROFESSIONAL_NCH,
-            ClaimProfessionalNch.class,
-            beneSk,
-            claimThroughDate,
-            lastUpdated,
-            tagCriteria,
-            claimTypeCodes);
+    // Execute all four queries. If tag source id or source queries, filter before we execute
+    if (eligibleClasses.contains(ClaimProfessionalSharedSystems.class)) {
+      futures.add(
+          asyncService.fetchClaims(
+              CLAIM_PROFESSIONAL_SHARED_SYSTEMS,
+              ClaimProfessionalSharedSystems.class,
+              beneSk,
+              claimThroughDate,
+              lastUpdated,
+              tagCriteria,
+              claimTypeCodes,
+              sources));
+    }
 
-    var institutionalSharedSystemsClaims =
-        asyncService.fetchClaims(
-            CLAIM_INSTITUTIONAL_SHARED_SYSTEMS,
-            ClaimInstitutionalSharedSystems.class,
-            beneSk,
-            claimThroughDate,
-            lastUpdated,
-            tagCriteria,
-            claimTypeCodes);
+    if (eligibleClasses.contains(ClaimProfessionalNch.class)) {
+      futures.add(
+          asyncService.fetchClaims(
+              CLAIM_PROFESSIONAL_NCH,
+              ClaimProfessionalNch.class,
+              beneSk,
+              claimThroughDate,
+              lastUpdated,
+              tagCriteria,
+              claimTypeCodes,
+              sources));
+    }
 
-    var institutionalNchClaims =
-        asyncService.fetchClaims(
-            CLAIM_INSTITUTIONAL_NCH,
-            ClaimInstitutionalNch.class,
-            beneSk,
-            claimThroughDate,
-            lastUpdated,
-            tagCriteria,
-            claimTypeCodes);
+    if (eligibleClasses.contains(ClaimInstitutionalSharedSystems.class)) {
+      futures.add(
+          asyncService.fetchClaims(
+              CLAIM_INSTITUTIONAL_SHARED_SYSTEMS,
+              ClaimInstitutionalSharedSystems.class,
+              beneSk,
+              claimThroughDate,
+              lastUpdated,
+              tagCriteria,
+              claimTypeCodes,
+              sources));
+    }
 
-    var rxClaims =
-        asyncService.fetchClaims(
-            CLAIM_RX,
-            ClaimRx.class,
-            beneSk,
-            claimThroughDate,
-            lastUpdated,
-            tagCriteria,
-            claimTypeCodes);
+    if (eligibleClasses.contains(ClaimInstitutionalNch.class)) {
+      futures.add(
+          asyncService.fetchClaims(
+              CLAIM_INSTITUTIONAL_NCH,
+              ClaimInstitutionalNch.class,
+              beneSk,
+              claimThroughDate,
+              lastUpdated,
+              tagCriteria,
+              claimTypeCodes,
+              sources));
+    }
 
-    CompletableFuture.allOf(
+    if (eligibleClasses.contains(ClaimRx.class)) {
+      futures.add(
+          asyncService.fetchClaims(
+              CLAIM_RX,
+              ClaimRx.class,
+              beneSk,
+              claimThroughDate,
+              lastUpdated,
+              tagCriteria,
+              claimTypeCodes,
+              sources));
+    }
+
+    CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+    return futures.stream()
+        .flatMap(f -> f.join().stream())
+        .map(ClaimBase.class::cast)
+        .sorted(Comparator.comparing(ClaimBase::getClaimUniqueId))
+        .toList();
+
+    /*CompletableFuture.allOf(
             professionalNchClaims,
             professionalSharedSystemsClaims,
             institutionalSharedSystemsClaims,
@@ -233,6 +260,59 @@ public class ClaimNewRepository {
     allClaims.addAll(rxClaims.join());
 
     // Sort, apply offset/limit
-    return allClaims.stream().sorted(Comparator.comparing(ClaimBase::getClaimUniqueId)).toList();
+    return allClaims.stream().sorted(Comparator.comparing(ClaimBase::getClaimUniqueId)).toList();*/
+  }
+
+  private Set<Class<? extends ClaimBase>> determineEligibleClaimClasses(
+      List<List<MetaSourceSk>> sources, List<List<TagCriterion>> tagCriteria) {
+    var eligible = new HashSet<>(ALL_CLAIM_CLASSES);
+
+    if (sources != null && !sources.isEmpty()) {
+      var metaSources = sources.stream().flatMap(List::stream).collect(Collectors.toSet());
+      var allowedByMetaSource =
+          metaSources.stream()
+              .flatMap(ms -> mapMetaSourceToClaimClasses(ms).stream())
+              .collect(Collectors.toSet());
+      eligible.retainAll(allowedByMetaSource);
+    }
+
+    if (tagCriteria != null && !tagCriteria.isEmpty()) {
+      var tagSourceIds =
+          tagCriteria.stream()
+              .flatMap(List::stream)
+              .filter(TagCriterion.SourceIdCriterion.class::isInstance)
+              .map(TagCriterion.SourceIdCriterion.class::cast)
+              .map(TagCriterion.SourceIdCriterion::sourceId)
+              .collect(Collectors.toSet());
+
+      if (!tagSourceIds.isEmpty()) {
+        var allowedByTagSource =
+            tagSourceIds.stream()
+                .flatMap(src -> mapClaimSourceIdToClaimClasses(src).stream())
+                .collect(Collectors.toSet());
+
+        eligible.retainAll(allowedByTagSource);
+      }
+    }
+    return eligible;
+  }
+
+  private Set<Class<? extends ClaimBase>> mapMetaSourceToClaimClasses(MetaSourceSk metaSourceSk) {
+    return switch (metaSourceSk) {
+      case NCH -> Set.of(ClaimProfessionalNch.class, ClaimInstitutionalNch.class);
+      case DDPS -> Set.of(ClaimRx.class);
+      case VMS, MCS, FISS ->
+          Set.of(ClaimProfessionalSharedSystems.class, ClaimInstitutionalSharedSystems.class);
+    };
+  }
+
+  private Set<Class<? extends ClaimBase>> mapClaimSourceIdToClaimClasses(ClaimSourceId sourceId) {
+    return switch (sourceId) {
+      case NATIONAL_CLAIMS_HISTORY ->
+          Set.of(ClaimProfessionalNch.class, ClaimInstitutionalNch.class, ClaimRx.class);
+      case VMS, MCS, FISS ->
+          Set.of(ClaimProfessionalSharedSystems.class, ClaimInstitutionalSharedSystems.class);
+      default -> ALL_CLAIM_CLASSES;
+    };
   }
 }

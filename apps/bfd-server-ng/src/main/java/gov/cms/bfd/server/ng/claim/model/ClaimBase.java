@@ -72,7 +72,9 @@ public abstract class ClaimBase {
     claimTypeCode.toFhirSubtype().ifPresent(eob::setSubType);
     claimTypeCode.toFhirAdjudication().ifPresent(eob::addAdjudication);
 
-    eob.setMeta(meta.toFhir(claimTypeCode, getClaimSourceId(), securityStatus, finalAction));
+    eob.setMeta(
+        meta.toFhir(
+            claimTypeCode, getClaimSourceId(), securityStatus, finalAction, getMetaSourceSk()));
     eob.setIdentifier(identifiers.toFhir());
     eob.setBillablePeriod(billablePeriod.toFhir());
     eob.setCreated(DateUtil.toDate(claimEffectiveDate));
@@ -85,7 +87,6 @@ public abstract class ClaimBase {
             });
 
     getClaimSourceId().toFhirOutcome().ifPresent(eob::setOutcome);
-    claimTypeCode.toFhirOutcome().ifPresent(eob::setOutcome);
 
     var initialSupportingInfo =
         Stream.of(
@@ -136,4 +137,11 @@ public abstract class ClaimBase {
    * @return the claim source identifier
    */
   public abstract ClaimSourceId getClaimSourceId();
+
+  /**
+   * Identifies the meta source system from which this claim originated.
+   *
+   * @return the meta source identifier
+   */
+  public abstract MetaSourceSk getMetaSourceSk();
 }
