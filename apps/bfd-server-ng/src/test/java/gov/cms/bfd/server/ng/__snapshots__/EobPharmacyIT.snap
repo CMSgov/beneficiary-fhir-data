@@ -4,6 +4,34 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
     "end" : "2018-08-21",
     "start" : "2018-08-12"
   },
+  "careTeam" : [ {
+    "provider" : {
+      "display" : "Rogers,Gromit",
+      "identifier" : {
+        "system" : "http://hl7.org/fhir/sid/us-npi",
+        "type" : {
+          "coding" : [ {
+            "code" : "01",
+            "display" : "NPI Number",
+            "system" : "http://bluebutton.cms.gov/fhir/CodeSystem/PRVDR-ID-QLFYR-CD"
+          }, {
+            "code" : "NPI",
+            "display" : "National provider identifier",
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+          } ]
+        },
+        "value" : "1730548868"
+      }
+    },
+    "role" : {
+      "coding" : [ {
+        "code" : "prescribing",
+        "display" : "Prescribing provider",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
+      } ]
+    },
+    "sequence" : 1
+  } ],
   "contained" : [ {
     "id" : "1548226988",
     "identifier" : [ {
@@ -18,6 +46,13 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
       "value" : "1548226988"
     }, {
       "system" : "http://bluebutton.cms.gov/fhir/identifiers/GenericIdNum",
+      "type" : {
+        "coding" : [ {
+          "code" : "01",
+          "display" : "NPI Number",
+          "system" : "http://bluebutton.cms.gov/fhir/CodeSystem/PRVDR-ID-QLFYR-CD"
+        } ]
+      },
       "value" : "1548226988"
     } ],
     "meta" : {
@@ -624,7 +659,36 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
     "end" : "2025-08-12",
     "start" : "2025-08-10"
   },
+  "careTeam" : [ {
+    "provider" : {
+      "display" : "Stark,Tony",
+      "identifier" : {
+        "system" : "http://hl7.org/fhir/sid/us-npi",
+        "type" : {
+          "coding" : [ {
+            "code" : "01",
+            "display" : "NPI Number",
+            "system" : "http://bluebutton.cms.gov/fhir/CodeSystem/PRVDR-ID-QLFYR-CD"
+          }, {
+            "code" : "NPI",
+            "display" : "National provider identifier",
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+          } ]
+        },
+        "value" : "1437702123"
+      }
+    },
+    "role" : {
+      "coding" : [ {
+        "code" : "prescribing",
+        "display" : "Prescribing provider",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
+      } ]
+    },
+    "sequence" : 1
+  } ],
   "contained" : [ {
+    "active" : true,
     "id" : "1649041195",
     "identifier" : [ {
       "system" : "http://hl7.org/fhir/sid/us-npi",
@@ -638,16 +702,20 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
       "value" : "1649041195"
     }, {
       "system" : "http://bluebutton.cms.gov/fhir/identifiers/GenericIdNum",
+      "type" : {
+        "coding" : [ {
+          "code" : "01",
+          "display" : "NPI Number",
+          "system" : "http://bluebutton.cms.gov/fhir/CodeSystem/PRVDR-ID-QLFYR-CD"
+        } ]
+      },
       "value" : "1649041195"
     } ],
     "meta" : {
-      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" ]
+      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|6.1.0" ]
     },
-    "name" : [ {
-      "family" : "CBS Health Corporation",
-      "given" : [ "Wednesday" ]
-    } ],
-    "resourceType" : "Practitioner"
+    "name" : "CBS Health Corporation",
+    "resourceType" : "Organization"
   } ],
   "created" : "2025-11-12T00:00:00+00:00",
   "id" : "1409088853940",
