@@ -103,20 +103,10 @@ public class ClaimAsyncService {
     var jpql =
         String.format(
             """
-                    WITH benes AS (
-                        SELECT b.beneSk beneSk, b.effectiveTimestamp effectiveTimestamp
-                        FROM Beneficiary b
-                        WHERE b.xrefSk = :beneSk AND b.latestTransactionFlag = 'Y'
-                    )
-                    %s
-                    WHERE EXISTS (
-                        SELECT 1 FROM benes b2
-                        WHERE b2.beneSk = b.beneSk
-                        AND b2.effectiveTimestamp = b.effectiveTimestamp
-                    )
-                    %s
-                    ORDER BY c.claimUniqueId
-                    """,
+            %s
+            WHERE b.xrefSk = :beneSk
+            %s
+            """,
             baseQuery, filters.filterClause());
 
     var result =
