@@ -211,6 +211,7 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm (
     prvdr_prscrbng_prvdr_npi_num VARCHAR(10),
     clm_prscrbng_prvdr_last_name VARCHAR(60),
     prvdr_prsbng_id_qlfyr_cd VARCHAR(2),
+    clm_prsbng_prvdr_gnrc_id_num VARCHAR(35),
     -- other provider
     prvdr_othr_prvdr_npi_num VARCHAR(10),
     clm_othr_prvdr_npi_num VARCHAR(10),

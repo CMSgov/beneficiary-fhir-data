@@ -98,6 +98,7 @@ class IdrClaimRx(IdrBaseModel):
     ]
     clm_srvc_prvdr_gnrc_id_num: Annotated[str, BeforeValidator(transform_default_string)]
     prvdr_prsbng_id_qlfyr_cd: Annotated[str, BeforeValidator(transform_default_string)]
+    clm_prsbng_prvdr_gnrc_id_num: Annotated[str, BeforeValidator(transform_default_string)]
     idr_insrt_ts_clm: Annotated[
         datetime,
         {ALIAS: ALIAS_CLM, **INSERT_FIELD},
