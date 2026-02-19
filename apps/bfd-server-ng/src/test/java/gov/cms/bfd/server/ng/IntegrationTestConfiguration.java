@@ -25,6 +25,11 @@ public class IntegrationTestConfiguration {
   private String baseDir;
 
   @Bean
+  public Clock testClock() {
+    return Clock.fixed(Instant.parse("2025-06-15T00:00:00Z"), ZoneId.of("UTC"));
+  }
+
+  @Bean
   public Instant clock() {
     return Clock.fixed(Instant.parse("2025-06-15T00:00:00Z"), ZoneId.of("UTC"))
             .instant()
@@ -36,7 +41,8 @@ public class IntegrationTestConfiguration {
   @SuppressWarnings("resource")
   @Bean
   @ServiceConnection
-  public PostgreSQLContainer<?> postgres(Instant date) throws IOException, InterruptedException {
+  public PostgreSQLContainer<?> postgres(Clock clock) throws IOException, InterruptedException {
+    var date = clock.instant().truncatedTo(ChronoUnit.DAYS);
     if (StringUtils.isNotBlank(System.getenv("PGPASSWORD"))
         || StringUtils.isNotBlank(System.getenv("BFD_SENSITIVE_DB_PASSWORD"))) {
       // Postgres environment variables can interfere with the database configuration and should
