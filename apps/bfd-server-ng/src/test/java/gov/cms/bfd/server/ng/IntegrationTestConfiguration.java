@@ -71,10 +71,7 @@ public class IntegrationTestConfiguration {
         "testdb",
         "-c",
         "UPDATE cms_vdm_view_mdcr_prd.v2_mdcr_clm "
-            + "SET \"clm_idr_ld_dt\" = '"
-            + date
-            + "',"
-            + "\"idr_insrt_ts\" = '"
+            + "SET \"idr_insrt_ts\" = '"
             + date
             + "',"
             + "\"idr_updt_ts\" = '"
