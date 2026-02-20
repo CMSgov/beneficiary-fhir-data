@@ -4,6 +4,8 @@ import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import java.time.*;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+
+import net.sf.saxon.expr.parser.Loc;
 import org.hl7.fhir.r4.model.DateTimeType;
 
 /** Date utility methods. */
@@ -75,9 +77,7 @@ public class DateUtil {
    * @param clock A date to check for AOE, defaults to now if null.
    * @return local date
    */
-  public static LocalDate nowAoe(Instant clock) {
-    Instant dateInstance =
-        clock == null ? Clock.systemUTC().instant().truncatedTo(ChronoUnit.DAYS) : clock;
-    return dateInstance.atZone(ZoneId.of("-12:00")).toLocalDate();
+  public static LocalDate nowAoe(Clock clock) {
+     return LocalDate.now(clock.withZone(ZoneId.of("-12:00")));
   }
 }

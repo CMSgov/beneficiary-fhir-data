@@ -36,7 +36,7 @@ public class CoverageRepository {
               key = "hasLastUpdated",
               expression = "lowerBound.isPresent() || upperBound.isPresent()")
           DateTimeRange lastUpdatedRange) {
-    var today = DateUtil.nowAoe(clock.instant());
+    var today = DateUtil.nowAoe(clock);
 
     // Note on sorting here. Although we filter out inactive enrollments we need to handle both
     // active and future coverages. We sort first by active coverage records by latest begin date.

@@ -31,7 +31,7 @@ public class BeneficiaryEntitlementPeriod {
 
   Coverage.CoverageStatus toFhirStatus(Clock clock) {
     if (benefitRangeEndDate.isPresent()
-        && benefitRangeEndDate.get().isBefore(DateUtil.nowAoe(clock.instant()))) {
+        && benefitRangeEndDate.get().isBefore(DateUtil.nowAoe(clock))) {
       return Coverage.CoverageStatus.CANCELLED;
     }
 

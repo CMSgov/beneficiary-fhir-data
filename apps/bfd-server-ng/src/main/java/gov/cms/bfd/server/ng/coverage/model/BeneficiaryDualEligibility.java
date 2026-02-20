@@ -48,7 +48,7 @@ public class BeneficiaryDualEligibility {
 
   Coverage.CoverageStatus toFhirStatus(Clock clock) {
     if (eligibilityEndDate.isPresent()
-        && eligibilityEndDate.get().isBefore(DateUtil.nowAoe(clock.instant()))) {
+        && eligibilityEndDate.get().isBefore(DateUtil.nowAoe(clock))) {
       return Coverage.CoverageStatus.CANCELLED;
     }
 
