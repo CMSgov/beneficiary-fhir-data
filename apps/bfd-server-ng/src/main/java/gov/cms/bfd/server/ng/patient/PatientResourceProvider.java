@@ -12,6 +12,8 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.bfd.server.ng.input.FhirInputConverter;
 import gov.cms.bfd.server.ng.util.SystemUrls;
+
+import java.time.Clock;
 import java.time.Instant;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
@@ -24,7 +26,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class PatientResourceProvider implements IResourceProvider {
 
-  private final Instant clock;
+  private final Clock clock;
 
   @Override
   public Class<Patient> getResourceType() {

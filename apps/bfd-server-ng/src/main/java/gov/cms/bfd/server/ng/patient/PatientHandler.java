@@ -11,6 +11,8 @@ import gov.cms.bfd.server.ng.loadprogress.LoadProgressRepository;
 import gov.cms.bfd.server.ng.model.ProfileType;
 import gov.cms.bfd.server.ng.util.FhirUtil;
 import gov.cms.bfd.server.ng.util.SystemUrls;
+
+import java.time.Clock;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
@@ -82,7 +84,7 @@ public class PatientHandler {
    * @param clock Date to be passed for queries.
    * @return A Bundle of Coverage resources.
    */
-  public Bundle searchByBeneficiaryC4DIC(Long beneSk, Instant clock) {
+  public Bundle searchByBeneficiaryC4DIC(Long beneSk, Clock clock) {
     var beneficiaryOpt =
         coverageRepository
             .searchBeneficiaryWithCoverage(beneSk, new DateTimeRange())

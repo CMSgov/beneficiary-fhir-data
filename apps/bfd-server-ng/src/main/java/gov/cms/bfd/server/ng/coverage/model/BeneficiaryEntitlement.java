@@ -2,7 +2,7 @@ package gov.cms.bfd.server.ng.coverage.model;
 
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.*;
-import java.time.Instant;
+import java.time.Clock;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -70,7 +70,7 @@ public class BeneficiaryEntitlement implements Comparable<BeneficiaryEntitlement
     return entitlementPeriod.toFhirPeriod();
   }
 
-  Coverage.CoverageStatus toFhirStatus(Instant clock) {
+  Coverage.CoverageStatus toFhirStatus(Clock clock) {
     return entitlementPeriod.toFhirStatus(clock);
   }
 

@@ -7,7 +7,8 @@ import gov.cms.bfd.server.ng.util.LogUtil;
 import io.micrometer.core.annotation.Timed;
 import io.micrometer.core.aop.MeterTag;
 import jakarta.persistence.EntityManager;
-import java.time.Instant;
+
+import java.time.Clock;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -19,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 @AllArgsConstructor
 public class CoverageRepository {
   private final EntityManager entityManager;
-  private final Instant clock;
+  private final Clock clock;
 
   /**
    * Retrieves a {@link BeneficiaryCoverage} record by its ID and last updated timestamp.
@@ -35,7 +36,7 @@ public class CoverageRepository {
               key = "hasLastUpdated",
               expression = "lowerBound.isPresent() || upperBound.isPresent()")
           DateTimeRange lastUpdatedRange) {
-    var today = DateUtil.nowAoe(clock);
+    var today = DateUtil.nowAoe(clock.instant());
 
     // Note on sorting here. Although we filter out inactive enrollments we need to handle both
     // active and future coverages. We sort first by active coverage records by latest begin date.

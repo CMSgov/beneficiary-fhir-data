@@ -6,7 +6,8 @@ import gov.cms.bfd.server.ng.input.CoveragePart;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.loadprogress.LoadProgressRepository;
 import gov.cms.bfd.server.ng.util.FhirUtil;
-import java.time.Instant;
+
+import java.time.Clock;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -25,7 +26,7 @@ public class CoverageHandler {
 
   private final CoverageRepository coverageRepository;
   private final LoadProgressRepository loadProgressRepository;
-  private final Instant clock;
+  private final Clock clock;
 
   /**
    * Reads a Coverage resource based on a composite ID ({part}-{bene_sk}).

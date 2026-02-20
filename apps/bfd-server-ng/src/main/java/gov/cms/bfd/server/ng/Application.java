@@ -88,8 +88,7 @@ public class Application {
    * @return clock instant
    */
   @Bean
-  public Instant clock() {
-    return Clock.systemUTC().instant()
-            .truncatedTo(ChronoUnit.DAYS);
+  public Clock clock() {
+    return Clock.systemUTC();
   }
 }

@@ -13,6 +13,8 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+
+import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -153,7 +155,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
    * @return A FHIR Coverage object.
    */
   public Optional<Coverage> toFhirCoverageIfPresent(
-      CoverageCompositeId coverageCompositeId, Instant clock) {
+          CoverageCompositeId coverageCompositeId, Clock clock) {
     return Optional.of(toFhir(coverageCompositeId, clock))
         .filter(c -> !c.getIdentifier().isEmpty());
   }
@@ -168,7 +170,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
    * @return A FHIR Coverage object.
    */
   public Optional<Coverage> toFhirCoverageIfPresentC4DIC(
-      CoverageCompositeId coverageCompositeId, String orgId, Instant clock) {
+      CoverageCompositeId coverageCompositeId, String orgId, Clock clock) {
     return Optional.of(toFhirC4DIC(coverageCompositeId, orgId, clock))
         .filter(c -> !c.getIdentifier().isEmpty());
   }
@@ -180,7 +182,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
    * @param clock Date to be passed for queries.
    * @return A FHIR Coverage object.
    */
-  public Coverage toFhir(CoverageCompositeId coverageCompositeId, Instant clock) {
+  public Coverage toFhir(CoverageCompositeId coverageCompositeId, Clock clock) {
     var coverage = setupBaseCoverage(coverageCompositeId, ProfileType.C4BB);
     coverage.setId(coverageCompositeId.fullId());
 
@@ -207,7 +209,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
    * @return A FHIR Coverage object.
    */
   public Coverage toFhirC4DIC(
-      CoverageCompositeId coverageCompositeId, String orgId, Instant clock) {
+      CoverageCompositeId coverageCompositeId, String orgId, Clock clock) {
     var coverage = setupBaseCoverage(coverageCompositeId, ProfileType.C4DIC);
     var coveragePart = coverageCompositeId.coveragePart();
 
@@ -224,7 +226,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
       CoveragePart coveragePart,
       ProfileType profileType,
       String orgId,
-      Instant clock) {
+      Clock clock) {
     var entitlementOpt = findEntitlement(coveragePart);
     if (entitlementOpt.isEmpty()) {
       return toEmptyResource(coverage);
@@ -280,7 +282,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
   }
 
   private Coverage mapCoverageDual(
-      Coverage coverage, ProfileType profileType, String orgId, Instant clock) {
+      Coverage coverage, ProfileType profileType, String orgId, Clock clock) {
     var dualEligibilityOpt = coverageOptional.getBeneficiaryDualEligibility();
     if (dualEligibilityOpt.isEmpty()) {
       return toEmptyResource(coverage);

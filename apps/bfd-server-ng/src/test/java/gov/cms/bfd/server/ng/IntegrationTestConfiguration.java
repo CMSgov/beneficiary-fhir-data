@@ -25,15 +25,8 @@ public class IntegrationTestConfiguration {
   private String baseDir;
 
   @Bean
-  public Clock testClock() {
+  public Clock clock() {
     return Clock.fixed(Instant.parse("2025-06-15T00:00:00Z"), ZoneId.of("UTC"));
-  }
-
-  @Bean
-  public Instant clock() {
-    return Clock.fixed(Instant.parse("2025-06-15T00:00:00Z"), ZoneId.of("UTC"))
-            .instant()
-            .truncatedTo(ChronoUnit.DAYS);
   }
 
   // Container lifecycle is managed by Spring,
