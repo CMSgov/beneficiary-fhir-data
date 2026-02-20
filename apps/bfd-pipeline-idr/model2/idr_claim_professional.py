@@ -14,7 +14,6 @@ from loader import LoadMode
 from model import (
     ALIAS,
     ALIAS_CLM,
-    ALIAS_LCTN_HSTRY,
     ALIAS_PRFNL,
     BATCH_ID,
     BATCH_TIMESTAMP,
@@ -27,7 +26,6 @@ from model import (
     transform_default_string,
     transform_null_date_to_min,
     transform_null_float,
-    transform_null_string,
 )
 
 
