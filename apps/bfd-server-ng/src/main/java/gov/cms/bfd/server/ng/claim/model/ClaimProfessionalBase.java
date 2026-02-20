@@ -2,31 +2,34 @@ package gov.cms.bfd.server.ng.claim.model;
 
 import gov.cms.bfd.server.ng.ClaimSecurityStatus;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.MappedSuperclass;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
+import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Reference;
 
 /** Shared base for professional claim types (NCH and Shared Systems). */
+@MappedSuperclass
+@Getter
 public abstract class ClaimProfessionalBase extends ClaimBase {
 
-  abstract BloodPints getBloodPints();
+  @Column(name = "clm_cntrctr_num")
+  private Optional<ClaimContractorNumber> claimContractorNumber;
+
+  @Embedded private BloodPints bloodPints;
+  @Embedded private ClaimNearLineRecordType claimRecordType;
+  @Embedded private ClaimPaymentAmount claimPaymentAmount;
+  @Embedded private ClaimSubmissionDate claimSubmissionDate;
+  @Embedded private ReferringProfessionalCareTeam referringProviderHistory;
+  @Embedded private BillingProviderProfessional billingProviderHistory;
+  @Embedded private ClinicalTrialNumber clinicalTrialNumber;
 
   abstract AdjudicationChargeBase getAdjudicationCharge();
-
-  abstract ClaimPaymentAmount getClaimPaymentAmount();
-
-  abstract ClaimNearLineRecordType getClaimRecordType();
-
-  abstract ClaimSubmissionDate getClaimSubmissionDate();
-
-  abstract ReferringProfessionalCareTeam getReferringProviderHistory();
-
-  abstract BillingProviderProfessional getBillingProviderHistory();
-
-  abstract ClinicalTrialNumber getClinicalTrialNumber();
 
   /**
    * Returns supporting-info components that are specific to the subclass.
@@ -141,9 +144,11 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
     var sharedHeaderSupportingInfo =
         Stream.of(
                 getBloodPints().toFhir(supportingInfoFactory),
-                Optional.ofNullable(getClaimContractorNumber())
-                    .flatMap(opt -> opt)
-                    .map(c -> c.toFhir(supportingInfoFactory)))
+                    claimSubmissionDate.toFhir(supportingInfoFactory),
+                Optional.of(claimContractorNumber)
+                        .flatMap(opt -> opt)
+                        .map(c -> c.toFhir(supportingInfoFactory)),
+                    clinicalTrialNumber.toFhir(supportingInfoFactory))
             .flatMap(Optional::stream)
             .toList();
 
@@ -151,8 +156,6 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
         .flatMap(Collection::stream)
         .forEach(eob::addSupportingInfo);
   }
-
-  abstract Optional<ClaimContractorNumber> getClaimContractorNumber();
 
   private void addCareTeam(ExplanationOfBenefit eob) {
     var sequenceGenerator = new SequenceGenerator();

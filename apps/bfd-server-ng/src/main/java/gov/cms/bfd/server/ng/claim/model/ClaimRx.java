@@ -8,6 +8,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.SortedSet;
@@ -32,14 +33,18 @@ public class ClaimRx extends ClaimBase {
   @Column(name = "cntrct_pbp_name")
   private Optional<String> contractName;
 
+  @Column(name = "clm_cntrctr_num")
+  private Optional<ClaimContractorNumber> claimContractorNumber;
+
   @Embedded private ServiceProviderPharmacy serviceProviderHistory;
   @Embedded private PrescribingCareTeam prescribingProviderHistory;
   @Embedded private AdjudicationChargeRx adjudicationCharge;
-  @Embedded private ClaimPaymentDate claimPaymentDate;
+  @Embedded private ClaimPaymentAmount claimPaymentAmount;
   @Embedded private SubmitterContractNumber submitterContractNumber;
   @Embedded private SubmitterContractPBPNumber submitterContractPBPNumber;
   @Embedded private ClaimSubmissionDate claimSubmissionDate;
   @Embedded private ClaimProcessDate claimProcessDate;
+  @Embedded private NchPrimaryPayorCode nchPrimaryPayorCode;
 
   /** Rx claims carry a single embedded line rather than a collection. */
   @Embedded private ClaimItemRx claimItems;
@@ -91,11 +96,13 @@ public class ClaimRx extends ClaimBase {
 
   private List<ExplanationOfBenefit.SupportingInformationComponent> buildHeaderSupportingInfo() {
     return Stream.of(
+            claimContractorNumber.map(c -> c.toFhir(supportingInfoFactory)),
             claimFormatCode
                 .filter(c -> getClaimTypeCode().isClaimSubtype(PDE))
                 .map(c -> c.toFhir(supportingInfoFactory)),
             submitterContractNumber.toFhir(supportingInfoFactory).stream().findFirst(),
             submitterContractPBPNumber.toFhir(supportingInfoFactory).stream().findFirst(),
+            nchPrimaryPayorCode.toFhir(supportingInfoFactory),
             claimSubmissionDate.toFhir(supportingInfoFactory),
             claimProcessDate.toFhir(supportingInfoFactory))
         .flatMap(Optional::stream)
@@ -121,8 +128,27 @@ public class ClaimRx extends ClaimBase {
   }
 
   private void addAdjudicationAndPayment(ExplanationOfBenefit eob) {
+
     adjudicationCharge.toFhirTotal().forEach(eob::addTotal);
-    eob.setPayment(claimPaymentDate.toFhir());
+    adjudicationCharge.toFhirAdjudication().forEach(eob::addAdjudication);
+
+    getTotalDrugCostAmount()
+        .map(AdjudicationChargeType.TOTAL_DRUG_COST_AMOUNT::toFhirTotal)
+        .ifPresent(eob::addTotal);
+
+    eob.setPayment(claimPaymentAmount.toFhir());
+  }
+
+  /**
+   * Accessor for claim line rx total drug cost amount, if this is an PDE claim.
+   *
+   * @return optional total drug cost amount
+   */
+  public Optional<BigDecimal> getTotalDrugCostAmount() {
+    return getClaimItems().stream()
+        .map(ClaimItemRx::getClaimLine)
+        .map(claimLineRx -> claimLineRx.getAdjudicationCharge().getTotalDrugCost())
+        .findFirst();
   }
 
   private void addInsurance(ExplanationOfBenefit eob) {

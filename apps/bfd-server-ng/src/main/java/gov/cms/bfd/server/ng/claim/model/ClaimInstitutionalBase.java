@@ -33,7 +33,6 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
   private Optional<ClaimQueryCode> claimQueryCode;
 
   @Embedded private NchPrimaryPayorCode nchPrimaryPayorCode;
-
   @Embedded private BloodPints bloodPints;
   @Embedded private TypeOfBillCode typeOfBillCode;
   @Embedded private ClaimPaymentAmount claimPaymentAmount;

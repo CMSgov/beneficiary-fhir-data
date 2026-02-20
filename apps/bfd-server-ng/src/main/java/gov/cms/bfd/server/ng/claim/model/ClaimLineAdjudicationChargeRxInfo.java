@@ -3,24 +3,23 @@ package gov.cms.bfd.server.ng.claim.model;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import jakarta.persistence.Transient;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 @Embeddable
 class ClaimLineAdjudicationChargeRxInfo {
-  @Column(name = "clm_rptd_mftr_dscnt_amt")
-  private BigDecimal gapDiscountAmount;
+  @Column(name = "clm_line_ingrdnt_cst_amt")
+  private BigDecimal ingredientCostAmount;
 
   @Column(name = "clm_line_vccn_admin_fee_amt")
   private BigDecimal vaccineAdminFeeAmount;
-
-  @Column(name = "clm_line_troop_tot_amt")
-  private BigDecimal otherTrueOutOfPockPaidAmount;
 
   @Column(name = "clm_line_srvc_cst_amt")
   private BigDecimal dispensingFeeAmount;
@@ -34,9 +33,6 @@ class ClaimLineAdjudicationChargeRxInfo {
   @Column(name = "clm_line_lis_amt")
   private BigDecimal lowIncomeCostShareSubAmount;
 
-  @Column(name = "clm_line_ingrdnt_cst_amt")
-  private BigDecimal ingredientCostAmount;
-
   @Column(name = "clm_line_grs_blw_thrshld_amt")
   private BigDecimal grossCostBelowThresholdAmount;
 
@@ -46,29 +42,15 @@ class ClaimLineAdjudicationChargeRxInfo {
   @Column(name = "clm_prcng_excptn_cd")
   private Optional<ClaimPricingReasonCode> pricingCode;
 
-  @Column(name = "clm_line_grs_cvrd_cst_tot_amt")
-  private BigDecimal grossCoveredCostAmount;
+  @Column(name = "clm_line_rptd_gap_dscnt_amt")
+  private BigDecimal reportedGapDiscountAmount;
 
-  @Column(name = "clm_cms_calcd_mftr_dscnt_amt")
-  private BigDecimal manufacturerDiscountAmount;
-
-  @Column(name = "clm_line_rebt_passthru_pos_amt")
-  private BigDecimal rebatePassthroughPOSAmount;
-
-  @Column(name = "clm_phrmcy_price_dscnt_at_pos_amt")
-  private BigDecimal priceAmount;
-
-  @Column(name = "clm_line_ncvrd_pd_amt")
-  private BigDecimal noncoveredProductPaidAmount;
-
-  @Column(name = "clm_line_bene_pmt_amt")
-  private BigDecimal benePaymentAmount;
-
-  @Column(name = "clm_line_cvrd_pd_amt")
-  private BigDecimal coveredPaidAmount;
-
-  @Column(name = "clm_line_othr_tp_pd_amt")
-  private BigDecimal otherThirdPartyPaidAmount;
+  @Transient
+  public BigDecimal getTotalDrugCost() {
+    return Stream.of(
+            ingredientCostAmount, vaccineAdminFeeAmount, dispensingFeeAmount, salesTaxAmount)
+        .reduce(BigDecimal.ZERO, BigDecimal::add);
+  }
 
   ArrayList<ExplanationOfBenefit.AdjudicationComponent> toFhir() {
     var adjudicationComponent =
@@ -82,14 +64,10 @@ class ClaimLineAdjudicationChargeRxInfo {
                     grossCostBelowThresholdAmount),
                 AdjudicationChargeType.GROSS_DRUG_COST_ABOVE_THRESHOLD_AMOUNT.toFhirAdjudication(
                     grossCostAboveThresholdAmount),
-                AdjudicationChargeType.LINE_BENE_PAYMENT_AMOUNT.toFhirAdjudication(
-                    benePaymentAmount),
-                AdjudicationChargeType.LINE_COVERED_PAID_AMOUNT.toFhirAdjudication(
-                    coveredPaidAmount),
-                AdjudicationChargeType.LINE_NONCOVERED_PRODUCT_PAID_AMOUNT.toFhirAdjudication(
-                    noncoveredProductPaidAmount),
-                AdjudicationChargeType.LINE_OTHER_THIRD_PARTY_PAID_AMOUNT.toFhirAdjudication(
-                    otherThirdPartyPaidAmount)));
+                AdjudicationChargeType.LINE_RX_REPORTED_GAP_DISCOUNT_AMOUNT.toFhirAdjudication(
+                    reportedGapDiscountAmount),
+                AdjudicationChargeType.TOTAL_DRUG_COST_AMOUNT.toFhirAdjudication(
+                    getTotalDrugCost())));
     toAdjudicationComponent().ifPresent(adjudicationComponent::add);
 
     return adjudicationComponent;

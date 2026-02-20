@@ -26,16 +26,11 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @SuppressWarnings("JpaAttributeTypeInspection")
 public class ClaimProfessionalNch extends ClaimProfessionalBase {
 
-  @Column(name = "clm_cntrctr_num")
-  private Optional<ClaimContractorNumber> claimContractorNumber;
-
   @Column(name = "clm_disp_cd")
   private Optional<ClaimDispositionCode> claimDispositionCode;
 
   @Column(name = "clm_query_cd")
   private Optional<ClaimQueryCode> claimQueryCode;
-
-  private ClaimNearLineRecordType claimRecordType;
 
   @Column(name = "clm_mdcr_prfnl_prmry_pyr_amt")
   private BigDecimal primaryProviderPaidAmount;
@@ -43,14 +38,8 @@ public class ClaimProfessionalNch extends ClaimProfessionalBase {
   @Column(name = "clm_carr_pmt_dnl_cd")
   private Optional<ClaimPaymentDenialCode> claimPaymentDenialCode;
 
-  @Embedded private BloodPints bloodPints;
   @Embedded private AdjudicationChargeProfessionalNch adjudicationCharge;
-  @Embedded private ClaimPaymentAmount claimPaymentAmount;
   @Embedded private NchWeeklyProcessingDate nchWeeklyProcessingDate;
-  @Embedded private ClaimSubmissionDate claimSubmissionDate;
-  @Embedded private ReferringProfessionalCareTeam referringProviderHistory;
-  @Embedded private BillingProviderProfessional billingProviderHistory;
-  @Embedded ClinicalTrialNumber clinicalTrialNumber;
 
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "clm_uniq_id")
@@ -60,13 +49,10 @@ public class ClaimProfessionalNch extends ClaimProfessionalBase {
   protected List<ExplanationOfBenefit.SupportingInformationComponent>
       buildSubclassSupportingInfo() {
     return Stream.of(
-            claimContractorNumber.map(c -> c.toFhir(supportingInfoFactory)),
             claimDispositionCode.map(c -> c.toFhir(supportingInfoFactory)),
             claimQueryCode.map(c -> c.toFhir(supportingInfoFactory)),
             nchWeeklyProcessingDate.toFhir(supportingInfoFactory),
-            claimSubmissionDate.toFhir(supportingInfoFactory),
-            claimPaymentDenialCode.map(c -> c.toFhir(supportingInfoFactory)),
-            clinicalTrialNumber.toFhir(supportingInfoFactory))
+            claimPaymentDenialCode.map(c -> c.toFhir(supportingInfoFactory)))
         .flatMap(Optional::stream)
         .toList();
   }
