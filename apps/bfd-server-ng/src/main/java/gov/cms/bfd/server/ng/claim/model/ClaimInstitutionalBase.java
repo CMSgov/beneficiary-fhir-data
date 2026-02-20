@@ -2,6 +2,9 @@ package gov.cms.bfd.server.ng.claim.model;
 
 import gov.cms.bfd.server.ng.ClaimSecurityStatus;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.MappedSuperclass;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Comparator;
@@ -11,15 +14,36 @@ import java.util.List;
 import java.util.Optional;
 import java.util.PriorityQueue;
 import java.util.stream.Stream;
+import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Reference;
 
 /** Shared base for institutional claim types (NCH and Shared Systems variants). */
+@MappedSuperclass
+@Getter
 public abstract class ClaimInstitutionalBase extends ClaimBase {
 
-  abstract BloodPints getBloodPints();
+  @Column(name = "clm_cntrctr_num")
+  private Optional<ClaimContractorNumber> claimContractorNumber;
 
-  abstract TypeOfBillCode getTypeOfBillCode();
+  @Column(name = "clm_disp_cd")
+  private Optional<ClaimDispositionCode> claimDispositionCode;
+
+  @Column(name = "clm_query_cd")
+  private Optional<ClaimQueryCode> claimQueryCode;
+
+  @Embedded private NchPrimaryPayorCode nchPrimaryPayorCode;
+
+  @Embedded private BloodPints bloodPints;
+  @Embedded private TypeOfBillCode typeOfBillCode;
+  @Embedded private ClaimPaymentAmount claimPaymentAmount;
+  @Embedded private DiagnosisDrgCode diagnosisDrgCode;
+  @Embedded private BillingProviderInstitutional billingProviderHistory;
+  @Embedded private OtherInstitutionalCareTeam otherProviderHistory;
+  @Embedded private OperatingCareTeam operatingProviderHistory;
+  @Embedded private AttendingCareTeam attendingProviderHistory;
+  @Embedded private RenderingCareTeam renderingProviderHistory;
+  @Embedded private ReferringInstitutionalCareTeam referringProviderHistory;
 
   abstract SupportingInfoComponentBase getClaimDateSupportingInfo();
 
@@ -28,31 +52,6 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
   abstract AdjudicationChargeInstitutional getAdjudicationChargeInstitutional();
 
   abstract AdjudicationChargeBase getAdjudicationCharge();
-
-  abstract ClaimPaymentAmount getClaimPaymentAmount();
-
-  abstract BillingProviderInstitutional getBillingProviderHistory();
-
-  abstract OtherInstitutionalCareTeam getOtherProviderHistory();
-
-  abstract OperatingCareTeam getOperatingProviderHistory();
-
-  abstract AttendingCareTeam getAttendingProviderHistory();
-
-  abstract RenderingCareTeam getRenderingProviderHistory();
-
-  abstract ReferringInstitutionalCareTeam getReferringProviderHistory();
-
-  abstract DiagnosisDrgCode getDiagnosisDrgCode();
-
-  /**
-   * Returns the supporting-info components that are specific to the subclass (e.g. NCH disposition
-   * code, SS primary payor code + format code).
-   *
-   * @return list of subclass-specific supporting-info components
-   */
-  protected abstract List<ExplanationOfBenefit.SupportingInformationComponent>
-      buildSubclassInitialSupportingInfo();
 
   /**
    * Returns the record-type supporting-info stream, limited to one entry defensively. Each subclass
@@ -108,6 +107,17 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
     addInsurance(eob);
 
     return sortedEob(eob);
+  }
+
+  private List<ExplanationOfBenefit.SupportingInformationComponent>
+      buildSubclassInitialSupportingInfo() {
+    return Stream.of(
+            claimQueryCode.map(c -> c.toFhir(supportingInfoFactory)),
+            claimContractorNumber.map(c -> c.toFhir(supportingInfoFactory)),
+            nchPrimaryPayorCode.toFhir(supportingInfoFactory),
+            claimDispositionCode.map(c -> c.toFhir(supportingInfoFactory)))
+        .flatMap(Optional::stream)
+        .toList();
   }
 
   private void addClaimItems(ExplanationOfBenefit eob) {

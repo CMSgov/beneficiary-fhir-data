@@ -3920,6 +3920,26 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_QUERY_CD",
+            "display" : "Claim Query Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "2",
+            "display" : "HOME HEALTH AGENCY (HHA) BENEFITS EXHAUSTED (OBSOLETE 7/98)",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD"
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "CLM_CNTRCTR_NUM",
             "display" : "Claim Contractor Number",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -3936,7 +3956,27 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CNTRCTR-NUM"
           } ]
         },
-        "sequence" : 4
+        "sequence" : 5
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_DISP_CD",
+            "display" : "Claim Disposition Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "50",
+            "display" : "BENEFICIARY NOT IN FILE",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DISP-CD"
+          } ]
+        },
+        "sequence" : 6
       }, {
         "category" : {
           "coding" : [ {
@@ -3944,7 +3984,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 7,
         "timingDate" : "2019-09-30"
       }, {
         "category" : {
@@ -3958,7 +3998,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 8,
         "timingDate" : "2019-09-30"
       }, {
         "category" : {
@@ -3977,7 +4017,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 7
+        "sequence" : 9
       }, {
         "category" : {
           "coding" : [ {
@@ -3994,7 +4034,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 8
+        "sequence" : 10
       }, {
         "category" : {
           "coding" : [ {
@@ -4014,7 +4054,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 9
+        "sequence" : 11
       }, {
         "category" : {
           "coding" : [ {
@@ -4034,7 +4074,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
           } ]
         },
-        "sequence" : 10
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -4048,7 +4088,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 13
       } ],
       "total" : [ {
         "amount" : {
@@ -8320,6 +8360,26 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_QUERY_CD",
+            "display" : "Claim Query Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "C",
+            "display" : "CREDIT",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD"
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "CLM_CNTRCTR_NUM",
             "display" : "Claim Contractor Number",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -8336,7 +8396,27 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CNTRCTR-NUM"
           } ]
         },
-        "sequence" : 4
+        "sequence" : 5
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_DISP_CD",
+            "display" : "Claim Disposition Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "59",
+            "display" : "BENEFICIARY RECORD FROZEN FOR CLERICAL CORRECTION",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DISP-CD"
+          } ]
+        },
+        "sequence" : 6
       }, {
         "category" : {
           "coding" : [ {
@@ -8344,7 +8424,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 7,
         "timingDate" : "2020-09-11"
       }, {
         "category" : {
@@ -8358,7 +8438,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 8,
         "timingDate" : "2020-09-11"
       }, {
         "category" : {
@@ -8377,7 +8457,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 7
+        "sequence" : 9
       }, {
         "category" : {
           "coding" : [ {
@@ -8394,7 +8474,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 8
+        "sequence" : 10
       }, {
         "category" : {
           "coding" : [ {
@@ -8414,7 +8494,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 9
+        "sequence" : 11
       }, {
         "category" : {
           "coding" : [ {
@@ -8434,7 +8514,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
           } ]
         },
-        "sequence" : 10
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -8448,7 +8528,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 13
       } ],
       "total" : [ {
         "amount" : {
@@ -9027,6 +9107,42 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 67.36
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_BLOOD_CHRG_AMT",
+            "display" : "Blood Charge Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 13.16
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_BLOOD_LBLTY_AMT",
+            "display" : "Beneficiary Blood Deductible Liability Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 165.3
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_BLOOD_NCVRD_CHRG_AMT",
+            "display" : "Blood Noncovered Charge Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
       } ],
       "billablePeriod" : {
         "end" : "2020-03-13",
@@ -9424,6 +9540,26 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_QUERY_CD",
+            "display" : "Claim Query Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "2",
+            "display" : "HOME HEALTH AGENCY (HHA) BENEFITS EXHAUSTED (OBSOLETE 7/98)",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD"
+          } ]
+        },
+        "sequence" : 3
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "CLM_CNTRCTR_NUM",
             "display" : "Claim Contractor Number",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -9440,7 +9576,26 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CNTRCTR-NUM"
           } ]
         },
-        "sequence" : 3
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_NCH_PRMRY_PYR_CD",
+            "display" : "NCH Primary Payer Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "I",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NCH-PRMRY-PYR-CD"
+          } ]
+        },
+        "sequence" : 5
       }, {
         "category" : {
           "coding" : [ {
@@ -9460,7 +9615,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DISP-CD"
           } ]
         },
-        "sequence" : 4
+        "sequence" : 6
       }, {
         "category" : {
           "coding" : [ {
@@ -9468,7 +9623,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 7,
         "timingDate" : "2020-09-11"
       }, {
         "category" : {
@@ -9482,7 +9637,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 8,
         "timingDate" : "2020-09-11"
       }, {
         "category" : {
@@ -9496,7 +9651,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 9,
         "timingDate" : "2020-09-11"
       }, {
         "category" : {
@@ -9515,7 +9670,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 8
+        "sequence" : 10
       }, {
         "category" : {
           "coding" : [ {
@@ -9533,7 +9688,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 9
+        "sequence" : 11
       }, {
         "category" : {
           "coding" : [ {
@@ -9550,7 +9705,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 10
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -9570,7 +9725,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -9590,7 +9745,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-NPMT-RSN-CD"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -9610,7 +9765,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -9630,7 +9785,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-LUP-IND-CD"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -9650,7 +9805,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-RFRL-CD"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -9670,7 +9825,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PPS-IND-CD"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 18
       }, {
         "category" : {
           "coding" : [ {
@@ -9684,7 +9839,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 19
       } ],
       "total" : [ {
         "amount" : {
@@ -9747,6 +9902,38 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[186315498]=[
           }, {
             "code" : "CLM_MDCR_DDCTBL_AMT",
             "display" : "Beneficiary Deductible Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 0
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "coinsurance",
+            "display" : "Co-insurance",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_MDCR_COINSRNC_AMT",
+            "display" : "Beneficiary Coinsurance Liability Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 278589.92
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "noncovered",
+            "display" : "Noncovered",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_NCVRD_CHRG_AMT",
+            "display" : "Inpatient(or other Part A) Non-covered Charge Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -10213,6 +10400,42 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           "coding" : [ {
             "code" : "CLM_SS_OUTLIER_STD_PYMT_AMT",
             "display" : "Short Stay Outlier Payment Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 142.64
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_BLOOD_CHRG_AMT",
+            "display" : "Blood Charge Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 15.53
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_BLOOD_LBLTY_AMT",
+            "display" : "Beneficiary Blood Deductible Liability Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 19.04
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_BLOOD_NCVRD_CHRG_AMT",
+            "display" : "Blood Noncovered Charge Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -11437,6 +11660,26 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_QUERY_CD",
+            "display" : "Claim Query Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "D",
+            "display" : "DEBIT",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD"
+          } ]
+        },
+        "sequence" : 5
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "CLM_CNTRCTR_NUM",
             "display" : "Claim Contractor Number",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -11453,7 +11696,26 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CNTRCTR-NUM"
           } ]
         },
-        "sequence" : 5
+        "sequence" : 6
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_NCH_PRMRY_PYR_CD",
+            "display" : "NCH Primary Payer Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "Y",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NCH-PRMRY-PYR-CD"
+          } ]
+        },
+        "sequence" : 7
       }, {
         "category" : {
           "coding" : [ {
@@ -11473,7 +11735,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DISP-CD"
           } ]
         },
-        "sequence" : 6
+        "sequence" : 8
       }, {
         "category" : {
           "coding" : [ {
@@ -11481,7 +11743,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 9,
         "timingPeriod" : {
           "end" : "2019-12-03",
           "start" : "2019-11-17"
@@ -11493,7 +11755,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 10,
         "timingDate" : "2019-12-03"
       }, {
         "category" : {
@@ -11507,7 +11769,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 11,
         "timingDate" : "2019-12-03"
       }, {
         "category" : {
@@ -11521,7 +11783,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 12,
         "timingDate" : "2019-11-17"
       }, {
         "category" : {
@@ -11535,7 +11797,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 11,
+        "sequence" : 13,
         "timingDate" : "2019-12-03"
       }, {
         "category" : {
@@ -11549,7 +11811,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 12,
+        "sequence" : 14,
         "timingDate" : "2019-12-03"
       }, {
         "category" : {
@@ -11570,7 +11832,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -11588,7 +11850,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -11606,7 +11868,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -11623,7 +11885,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 18
       }, {
         "category" : {
           "coding" : [ {
@@ -11643,7 +11905,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 19
       }, {
         "category" : {
           "coding" : [ {
@@ -11663,7 +11925,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-NPMT-RSN-CD"
           } ]
         },
-        "sequence" : 18
+        "sequence" : 20
       }, {
         "category" : {
           "coding" : [ {
@@ -11683,7 +11945,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
           } ]
         },
-        "sequence" : 19
+        "sequence" : 21
       }, {
         "category" : {
           "coding" : [ {
@@ -11697,7 +11959,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 20
+        "sequence" : 22
       } ],
       "total" : [ {
         "amount" : {
@@ -11760,6 +12022,38 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           }, {
             "code" : "CLM_MDCR_DDCTBL_AMT",
             "display" : "Beneficiary Deductible Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 15.45
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "coinsurance",
+            "display" : "Co-insurance",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_MDCR_COINSRNC_AMT",
+            "display" : "Beneficiary Coinsurance Liability Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 82280.42
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "noncovered",
+            "display" : "Noncovered",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_NCVRD_CHRG_AMT",
+            "display" : "Inpatient(or other Part A) Non-covered Charge Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -12193,6 +12487,42 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           "coding" : [ {
             "code" : "CLM_SS_OUTLIER_STD_PYMT_AMT",
             "display" : "Short Stay Outlier Payment Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 429.56
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_BLOOD_CHRG_AMT",
+            "display" : "Blood Charge Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 3.15
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_BLOOD_LBLTY_AMT",
+            "display" : "Beneficiary Blood Deductible Liability Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 183.23
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_BLOOD_NCVRD_CHRG_AMT",
+            "display" : "Blood Noncovered Charge Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -15112,6 +15442,26 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_QUERY_CD",
+            "display" : "Claim Query Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "2",
+            "display" : "HOME HEALTH AGENCY (HHA) BENEFITS EXHAUSTED (OBSOLETE 7/98)",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD"
+          } ]
+        },
+        "sequence" : 5
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "CLM_CNTRCTR_NUM",
             "display" : "Claim Contractor Number",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -15128,7 +15478,26 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CNTRCTR-NUM"
           } ]
         },
-        "sequence" : 5
+        "sequence" : 6
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_NCH_PRMRY_PYR_CD",
+            "display" : "NCH Primary Payer Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "W",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NCH-PRMRY-PYR-CD"
+          } ]
+        },
+        "sequence" : 7
       }, {
         "category" : {
           "coding" : [ {
@@ -15148,7 +15517,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DISP-CD"
           } ]
         },
-        "sequence" : 6
+        "sequence" : 8
       }, {
         "category" : {
           "coding" : [ {
@@ -15156,7 +15525,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 9,
         "timingPeriod" : {
           "end" : "2019-09-30",
           "start" : "2019-09-23"
@@ -15168,7 +15537,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 10,
         "timingDate" : "2019-09-30"
       }, {
         "category" : {
@@ -15182,7 +15551,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 11,
         "timingDate" : "2019-09-30"
       }, {
         "category" : {
@@ -15196,7 +15565,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 12,
         "timingDate" : "2019-09-30"
       }, {
         "category" : {
@@ -15215,7 +15584,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -15233,7 +15602,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -15250,7 +15619,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -15270,7 +15639,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -15290,7 +15659,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-NPMT-RSN-CD"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -15310,7 +15679,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 18
       }, {
         "category" : {
           "coding" : [ {
@@ -15330,7 +15699,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PPS-IND-CD"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 19
       }, {
         "category" : {
           "coding" : [ {
@@ -15344,7 +15713,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 18
+        "sequence" : 20
       } ],
       "total" : [ {
         "amount" : {
@@ -15407,6 +15776,38 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           }, {
             "code" : "CLM_MDCR_DDCTBL_AMT",
             "display" : "Beneficiary Deductible Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 19.0
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "coinsurance",
+            "display" : "Co-insurance",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_MDCR_COINSRNC_AMT",
+            "display" : "Beneficiary Coinsurance Liability Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 368602.54
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "noncovered",
+            "display" : "Noncovered",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_NCVRD_CHRG_AMT",
+            "display" : "Inpatient(or other Part A) Non-covered Charge Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -15840,6 +16241,42 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           "coding" : [ {
             "code" : "CLM_SS_OUTLIER_STD_PYMT_AMT",
             "display" : "Short Stay Outlier Payment Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 258.22
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_BLOOD_CHRG_AMT",
+            "display" : "Blood Charge Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 0.01
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_BLOOD_LBLTY_AMT",
+            "display" : "Beneficiary Blood Deductible Liability Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 309.4
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_BLOOD_NCVRD_CHRG_AMT",
+            "display" : "Blood Noncovered Charge Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -16885,6 +17322,25 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_NCH_PRMRY_PYR_CD",
+            "display" : "NCH Primary Payer Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "X",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NCH-PRMRY-PYR-CD"
+          } ]
+        },
+        "sequence" : 5
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "CLM_DISP_CD",
             "display" : "Claim Disposition Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -16901,7 +17357,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DISP-CD"
           } ]
         },
-        "sequence" : 5
+        "sequence" : 6
       }, {
         "category" : {
           "coding" : [ {
@@ -16909,7 +17365,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2020-09-11"
       }, {
         "category" : {
@@ -16923,7 +17379,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2020-09-11"
       }, {
         "category" : {
@@ -16944,7 +17400,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
           } ]
         },
-        "sequence" : 8
+        "sequence" : 9
       }, {
         "category" : {
           "coding" : [ {
@@ -16962,7 +17418,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 9
+        "sequence" : 10
       }, {
         "category" : {
           "coding" : [ {
@@ -16980,7 +17436,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 10
+        "sequence" : 11
       }, {
         "category" : {
           "coding" : [ {
@@ -16997,7 +17453,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -17017,7 +17473,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -17031,7 +17487,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 14
       } ],
       "total" : [ {
         "amount" : {
@@ -17094,6 +17550,38 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           }, {
             "code" : "CLM_MDCR_DDCTBL_AMT",
             "display" : "Beneficiary Deductible Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 0
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "coinsurance",
+            "display" : "Co-insurance",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_MDCR_COINSRNC_AMT",
+            "display" : "Beneficiary Coinsurance Liability Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 8645.11
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "noncovered",
+            "display" : "Noncovered",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_NCVRD_CHRG_AMT",
+            "display" : "Inpatient(or other Part A) Non-covered Charge Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -21263,6 +21751,26 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_QUERY_CD",
+            "display" : "Claim Query Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "C",
+            "display" : "CREDIT",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD"
+          } ]
+        },
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "CLM_CNTRCTR_NUM",
             "display" : "Claim Contractor Number",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -21279,7 +21787,27 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CNTRCTR-NUM"
           } ]
         },
-        "sequence" : 4
+        "sequence" : 5
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_DISP_CD",
+            "display" : "Claim Disposition Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "59",
+            "display" : "BENEFICIARY RECORD FROZEN FOR CLERICAL CORRECTION",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DISP-CD"
+          } ]
+        },
+        "sequence" : 6
       }, {
         "category" : {
           "coding" : [ {
@@ -21287,7 +21815,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 7,
         "timingDate" : "2020-09-11"
       }, {
         "category" : {
@@ -21301,7 +21829,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 8,
         "timingDate" : "2020-09-11"
       }, {
         "category" : {
@@ -21320,7 +21848,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 7
+        "sequence" : 9
       }, {
         "category" : {
           "coding" : [ {
@@ -21337,7 +21865,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 8
+        "sequence" : 10
       }, {
         "category" : {
           "coding" : [ {
@@ -21357,7 +21885,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 9
+        "sequence" : 11
       }, {
         "category" : {
           "coding" : [ {
@@ -21377,7 +21905,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
           } ]
         },
-        "sequence" : 10
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -21391,7 +21919,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 13
       } ],
       "total" : [ {
         "amount" : {
@@ -21970,6 +22498,42 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 67.36
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_BLOOD_CHRG_AMT",
+            "display" : "Blood Charge Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 13.16
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_BLOOD_LBLTY_AMT",
+            "display" : "Beneficiary Blood Deductible Liability Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 165.3
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_BLOOD_NCVRD_CHRG_AMT",
+            "display" : "Blood Noncovered Charge Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
       } ],
       "billablePeriod" : {
         "end" : "2020-03-13",
@@ -22367,6 +22931,26 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_QUERY_CD",
+            "display" : "Claim Query Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "2",
+            "display" : "HOME HEALTH AGENCY (HHA) BENEFITS EXHAUSTED (OBSOLETE 7/98)",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD"
+          } ]
+        },
+        "sequence" : 3
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "CLM_CNTRCTR_NUM",
             "display" : "Claim Contractor Number",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -22383,7 +22967,26 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CNTRCTR-NUM"
           } ]
         },
-        "sequence" : 3
+        "sequence" : 4
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_NCH_PRMRY_PYR_CD",
+            "display" : "NCH Primary Payer Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "I",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NCH-PRMRY-PYR-CD"
+          } ]
+        },
+        "sequence" : 5
       }, {
         "category" : {
           "coding" : [ {
@@ -22403,7 +23006,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DISP-CD"
           } ]
         },
-        "sequence" : 4
+        "sequence" : 6
       }, {
         "category" : {
           "coding" : [ {
@@ -22411,7 +23014,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 5,
+        "sequence" : 7,
         "timingDate" : "2020-09-11"
       }, {
         "category" : {
@@ -22425,7 +23028,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 8,
         "timingDate" : "2020-09-11"
       }, {
         "category" : {
@@ -22439,7 +23042,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 9,
         "timingDate" : "2020-09-11"
       }, {
         "category" : {
@@ -22458,7 +23061,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 8
+        "sequence" : 10
       }, {
         "category" : {
           "coding" : [ {
@@ -22476,7 +23079,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 9
+        "sequence" : 11
       }, {
         "category" : {
           "coding" : [ {
@@ -22493,7 +23096,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 10
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -22513,7 +23116,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -22533,7 +23136,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-NPMT-RSN-CD"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -22553,7 +23156,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -22573,7 +23176,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-LUP-IND-CD"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -22593,7 +23196,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-RFRL-CD"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -22613,7 +23216,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PPS-IND-CD"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 18
       }, {
         "category" : {
           "coding" : [ {
@@ -22627,7 +23230,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 19
       } ],
       "total" : [ {
         "amount" : {
@@ -22690,6 +23293,38 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
           }, {
             "code" : "CLM_MDCR_DDCTBL_AMT",
             "display" : "Beneficiary Deductible Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 0
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "coinsurance",
+            "display" : "Co-insurance",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_MDCR_COINSRNC_AMT",
+            "display" : "Beneficiary Coinsurance Liability Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 278589.92
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "noncovered",
+            "display" : "Noncovered",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_NCVRD_CHRG_AMT",
+            "display" : "Inpatient(or other Part A) Non-covered Charge Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -23156,6 +23791,42 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           "coding" : [ {
             "code" : "CLM_SS_OUTLIER_STD_PYMT_AMT",
             "display" : "Short Stay Outlier Payment Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 142.64
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_BLOOD_CHRG_AMT",
+            "display" : "Blood Charge Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 15.53
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_BLOOD_LBLTY_AMT",
+            "display" : "Beneficiary Blood Deductible Liability Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 19.04
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_BLOOD_NCVRD_CHRG_AMT",
+            "display" : "Blood Noncovered Charge Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -24380,6 +25051,26 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_QUERY_CD",
+            "display" : "Claim Query Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "D",
+            "display" : "DEBIT",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD"
+          } ]
+        },
+        "sequence" : 5
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "CLM_CNTRCTR_NUM",
             "display" : "Claim Contractor Number",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -24396,7 +25087,26 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CNTRCTR-NUM"
           } ]
         },
-        "sequence" : 5
+        "sequence" : 6
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_NCH_PRMRY_PYR_CD",
+            "display" : "NCH Primary Payer Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "Y",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NCH-PRMRY-PYR-CD"
+          } ]
+        },
+        "sequence" : 7
       }, {
         "category" : {
           "coding" : [ {
@@ -24416,7 +25126,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DISP-CD"
           } ]
         },
-        "sequence" : 6
+        "sequence" : 8
       }, {
         "category" : {
           "coding" : [ {
@@ -24424,7 +25134,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 9,
         "timingPeriod" : {
           "end" : "2019-12-03",
           "start" : "2019-11-17"
@@ -24436,7 +25146,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 10,
         "timingDate" : "2019-12-03"
       }, {
         "category" : {
@@ -24450,7 +25160,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 11,
         "timingDate" : "2019-12-03"
       }, {
         "category" : {
@@ -24464,7 +25174,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 12,
         "timingDate" : "2019-11-17"
       }, {
         "category" : {
@@ -24478,7 +25188,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 11,
+        "sequence" : 13,
         "timingDate" : "2019-12-03"
       }, {
         "category" : {
@@ -24492,7 +25202,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 12,
+        "sequence" : 14,
         "timingDate" : "2019-12-03"
       }, {
         "category" : {
@@ -24513,7 +25223,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -24531,7 +25241,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -24549,7 +25259,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -24566,7 +25276,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 18
       }, {
         "category" : {
           "coding" : [ {
@@ -24586,7 +25296,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 19
       }, {
         "category" : {
           "coding" : [ {
@@ -24606,7 +25316,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-NPMT-RSN-CD"
           } ]
         },
-        "sequence" : 18
+        "sequence" : 20
       }, {
         "category" : {
           "coding" : [ {
@@ -24626,7 +25336,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
           } ]
         },
-        "sequence" : 19
+        "sequence" : 21
       }, {
         "category" : {
           "coding" : [ {
@@ -24640,7 +25350,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 20
+        "sequence" : 22
       } ],
       "total" : [ {
         "amount" : {
@@ -24703,6 +25413,38 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           }, {
             "code" : "CLM_MDCR_DDCTBL_AMT",
             "display" : "Beneficiary Deductible Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 15.45
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "coinsurance",
+            "display" : "Co-insurance",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_MDCR_COINSRNC_AMT",
+            "display" : "Beneficiary Coinsurance Liability Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 82280.42
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "noncovered",
+            "display" : "Noncovered",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_NCVRD_CHRG_AMT",
+            "display" : "Inpatient(or other Part A) Non-covered Charge Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -25136,6 +25878,42 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           "coding" : [ {
             "code" : "CLM_SS_OUTLIER_STD_PYMT_AMT",
             "display" : "Short Stay Outlier Payment Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 429.56
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_BLOOD_CHRG_AMT",
+            "display" : "Blood Charge Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 3.15
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_BLOOD_LBLTY_AMT",
+            "display" : "Beneficiary Blood Deductible Liability Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 183.23
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_BLOOD_NCVRD_CHRG_AMT",
+            "display" : "Blood Noncovered Charge Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -28055,6 +28833,26 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_QUERY_CD",
+            "display" : "Claim Query Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "2",
+            "display" : "HOME HEALTH AGENCY (HHA) BENEFITS EXHAUSTED (OBSOLETE 7/98)",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD"
+          } ]
+        },
+        "sequence" : 5
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "CLM_CNTRCTR_NUM",
             "display" : "Claim Contractor Number",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -28071,7 +28869,26 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CNTRCTR-NUM"
           } ]
         },
-        "sequence" : 5
+        "sequence" : 6
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_NCH_PRMRY_PYR_CD",
+            "display" : "NCH Primary Payer Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "W",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NCH-PRMRY-PYR-CD"
+          } ]
+        },
+        "sequence" : 7
       }, {
         "category" : {
           "coding" : [ {
@@ -28091,7 +28908,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DISP-CD"
           } ]
         },
-        "sequence" : 6
+        "sequence" : 8
       }, {
         "category" : {
           "coding" : [ {
@@ -28099,7 +28916,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 9,
         "timingPeriod" : {
           "end" : "2019-09-30",
           "start" : "2019-09-23"
@@ -28111,7 +28928,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 10,
         "timingDate" : "2019-09-30"
       }, {
         "category" : {
@@ -28125,7 +28942,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 9,
+        "sequence" : 11,
         "timingDate" : "2019-09-30"
       }, {
         "category" : {
@@ -28139,7 +28956,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 10,
+        "sequence" : 12,
         "timingDate" : "2019-09-30"
       }, {
         "category" : {
@@ -28158,7 +28975,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -28176,7 +28993,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -28193,7 +29010,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 15
       }, {
         "category" : {
           "coding" : [ {
@@ -28213,7 +29030,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 16
       }, {
         "category" : {
           "coding" : [ {
@@ -28233,7 +29050,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-NPMT-RSN-CD"
           } ]
         },
-        "sequence" : 15
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -28253,7 +29070,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
           } ]
         },
-        "sequence" : 16
+        "sequence" : 18
       }, {
         "category" : {
           "coding" : [ {
@@ -28273,7 +29090,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PPS-IND-CD"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 19
       }, {
         "category" : {
           "coding" : [ {
@@ -28287,7 +29104,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 18
+        "sequence" : 20
       } ],
       "total" : [ {
         "amount" : {
@@ -28350,6 +29167,38 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           }, {
             "code" : "CLM_MDCR_DDCTBL_AMT",
             "display" : "Beneficiary Deductible Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 19.0
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "coinsurance",
+            "display" : "Co-insurance",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_MDCR_COINSRNC_AMT",
+            "display" : "Beneficiary Coinsurance Liability Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 368602.54
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "noncovered",
+            "display" : "Noncovered",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_NCVRD_CHRG_AMT",
+            "display" : "Inpatient(or other Part A) Non-covered Charge Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -28783,6 +29632,42 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           "coding" : [ {
             "code" : "CLM_SS_OUTLIER_STD_PYMT_AMT",
             "display" : "Short Stay Outlier Payment Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 258.22
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_BLOOD_CHRG_AMT",
+            "display" : "Blood Charge Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 0.01
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_BLOOD_LBLTY_AMT",
+            "display" : "Beneficiary Blood Deductible Liability Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 309.4
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_BLOOD_NCVRD_CHRG_AMT",
+            "display" : "Blood Noncovered Charge Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -29828,6 +30713,25 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_NCH_PRMRY_PYR_CD",
+            "display" : "NCH Primary Payer Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "X",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NCH-PRMRY-PYR-CD"
+          } ]
+        },
+        "sequence" : 5
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "CLM_DISP_CD",
             "display" : "Claim Disposition Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
@@ -29844,7 +30748,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DISP-CD"
           } ]
         },
-        "sequence" : 5
+        "sequence" : 6
       }, {
         "category" : {
           "coding" : [ {
@@ -29852,7 +30756,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
-        "sequence" : 6,
+        "sequence" : 7,
         "timingDate" : "2020-09-11"
       }, {
         "category" : {
@@ -29866,7 +30770,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 7,
+        "sequence" : 8,
         "timingDate" : "2020-09-11"
       }, {
         "category" : {
@@ -29887,7 +30791,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD"
           } ]
         },
-        "sequence" : 8
+        "sequence" : 9
       }, {
         "category" : {
           "coding" : [ {
@@ -29905,7 +30809,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
-        "sequence" : 9
+        "sequence" : 10
       }, {
         "category" : {
           "coding" : [ {
@@ -29923,7 +30827,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 10
+        "sequence" : 11
       }, {
         "category" : {
           "coding" : [ {
@@ -29940,7 +30844,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -29960,7 +30864,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -29974,7 +30878,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 14
       } ],
       "total" : [ {
         "amount" : {
@@ -30037,6 +30941,38 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           }, {
             "code" : "CLM_MDCR_DDCTBL_AMT",
             "display" : "Beneficiary Deductible Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 0
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "coinsurance",
+            "display" : "Co-insurance",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_MDCR_COINSRNC_AMT",
+            "display" : "Beneficiary Coinsurance Liability Amount",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          } ]
+        }
+      }, {
+        "amount" : {
+          "currency" : "USD",
+          "value" : 8645.11
+        },
+        "category" : {
+          "coding" : [ {
+            "code" : "noncovered",
+            "display" : "Noncovered",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+          }, {
+            "code" : "CLM_NCVRD_CHRG_AMT",
+            "display" : "Inpatient(or other Part A) Non-covered Charge Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
