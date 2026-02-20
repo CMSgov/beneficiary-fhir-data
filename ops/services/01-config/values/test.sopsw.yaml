@@ -161,7 +161,7 @@
 /bfd/${env}/rda-pipeline/nonsensitive/rda/grpc/max_idle_seconds: "600"
 /bfd/${env}/rda-pipeline/nonsensitive/rda/grpc/server_type: Remote
 /bfd/${env}/rda-pipeline/nonsensitive/rda/grpc/inprocess_server/mode: UNDEFINED
-/bfd/${env}/rda-pipeline/nonsensitive/rda/job/interval_seconds: "3600"
+/bfd/${env}/rda-pipeline/nonsensitive/rda/job/interval_seconds: 86400
 /bfd/${env}/rda-pipeline/nonsensitive/rda/job/batch_size: "20"
 /bfd/${env}/rda-pipeline/nonsensitive/rda/job/write_thread_count: "5"
 /bfd/${env}/rda-pipeline/nonsensitive/rda/job/process_dlq: "true"
