@@ -25,9 +25,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @Import(IntegrationTestConfiguration.class)
 @ExtendWith({SnapshotExtension.class})
 @Testcontainers
-@SpringBootTest(
-    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-    properties = "spring.main.allow-bean-definition-overriding=true")
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class IntegrationTestBase {
   @LocalServerPort protected int port;
   protected Expect expect;
