@@ -13,7 +13,6 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-
 import java.time.Clock;
 import java.util.List;
 import java.util.Optional;
@@ -154,7 +153,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
    * @return A FHIR Coverage object.
    */
   public Optional<Coverage> toFhirCoverageIfPresent(
-          CoverageCompositeId coverageCompositeId, Clock clock) {
+      CoverageCompositeId coverageCompositeId, Clock clock) {
     return Optional.of(toFhir(coverageCompositeId, clock))
         .filter(c -> !c.getIdentifier().isEmpty());
   }
@@ -207,8 +206,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
    * @param clock Date to be passed for queries.
    * @return A FHIR Coverage object.
    */
-  public Coverage toFhirC4DIC(
-      CoverageCompositeId coverageCompositeId, String orgId, Clock clock) {
+  public Coverage toFhirC4DIC(CoverageCompositeId coverageCompositeId, String orgId, Clock clock) {
     var coverage = setupBaseCoverage(coverageCompositeId, ProfileType.C4DIC);
     var coveragePart = coverageCompositeId.coveragePart();
 

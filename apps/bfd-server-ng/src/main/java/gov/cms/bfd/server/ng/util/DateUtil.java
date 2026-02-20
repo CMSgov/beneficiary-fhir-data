@@ -2,10 +2,7 @@ package gov.cms.bfd.server.ng.util;
 
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import java.time.*;
-import java.time.temporal.ChronoUnit;
 import java.util.Date;
-
-import net.sf.saxon.expr.parser.Loc;
 import org.hl7.fhir.r4.model.DateTimeType;
 
 /** Date utility methods. */
@@ -78,6 +75,6 @@ public class DateUtil {
    * @return local date
    */
   public static LocalDate nowAoe(Clock clock) {
-     return LocalDate.now(clock.withZone(ZoneId.of("-12:00")));
+    return LocalDate.now(clock.withZone(ZoneId.of("-12:00")));
   }
 }
