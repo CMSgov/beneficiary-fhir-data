@@ -99,4 +99,13 @@ public record DateTimeRange(
         // We need to return something to make the SQL query valid though.
         .orElse("!=");
   }
+
+  /**
+   * Returns whether a lower datetime bound or an upper datetime bound were provided.
+   *
+   * @return boolean
+   */
+  public boolean hasBounds() {
+    return lowerBound().isPresent() || upperBound.isPresent();
+  }
 }

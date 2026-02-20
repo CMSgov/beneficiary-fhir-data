@@ -1107,7 +1107,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
   }, {
     "amount" : {
       "currency" : "USD",
-      "value" : 0.0
+      "value" : 967.88
     },
     "category" : {
       "coding" : [ {
@@ -2227,7 +2227,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
   }, {
     "amount" : {
       "currency" : "USD",
-      "value" : 0.0
+      "value" : 649.73
     },
     "category" : {
       "coding" : [ {
