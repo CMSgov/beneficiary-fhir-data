@@ -64,7 +64,7 @@ def run(load_mode: str) -> None:
         .build()
     )
 
-    if BFD_TEST_DATE is None or not BFD_TEST_DATE:
+    if not BFD_TEST_DATE:
         start_time = datetime.now()
     else:
         start_time = datetime.strptime(BFD_TEST_DATE, "%Y-%m-%dT%H:%M:%SZ")
