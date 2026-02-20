@@ -84,8 +84,6 @@ public class NpiFdaLoadJob implements PipelineJob {
       return NOTHING_TO_DO;
     }
     LOGGER.info("Starting LoadNpiFdaDataJob.");
-    int npiTotal;
-    int fdaTotal;
     try (EntityManager npiEntityManager =
             npiAppState.getEntityManagerFactory().createEntityManager();
         EntityManager fdaEntityManager =
@@ -98,15 +96,19 @@ public class NpiFdaLoadJob implements PipelineJob {
         Future<Integer> npiTotalFuture = executor.submit(loadNpiDataFiles);
         Future<Integer> fdaTotalFuture = executor.submit(loadFdaDataFiles);
         try {
-          npiTotal = npiTotalFuture.get();
-          fdaTotal = fdaTotalFuture.get();
+          npiTotalFuture.get();
+          fdaTotalFuture.get();
         } catch (InterruptedException | ExecutionException ex) {
           npiTotalFuture.cancel(true);
           fdaTotalFuture.cancel(true);
           throw new Exception(ex);
         }
       }
-      return (npiTotal == -1 && fdaTotal == -1) ? NOTHING_TO_DO : SHOULD_TERMINATE;
+
+      // We rely on the scheduling provided by EventBridge to ensure that the NPI/FDA Pipeline Jobs
+      // run on a sufficiently long enough cadence (about once monthly), so we should always
+      // terminate the process.
+      return SHOULD_TERMINATE;
     } finally {
       runningSemaphore.release();
     }
