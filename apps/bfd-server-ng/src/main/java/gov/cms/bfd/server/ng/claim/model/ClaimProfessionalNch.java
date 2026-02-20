@@ -93,14 +93,4 @@ public class ClaimProfessionalNch extends ClaimProfessionalBase {
       ExplanationOfBenefit eob, SequenceGenerator sequenceGenerator) {
     // no-op for NCH
   }
-
-  @Override
-  public ClaimSourceId getClaimSourceId() {
-    return ClaimSourceId.NATIONAL_CLAIMS_HISTORY;
-  }
-
-  @Override
-  public MetaSourceSk getMetaSourceSk() {
-    return MetaSourceSk.NCH;
-  }
 }

@@ -135,7 +135,7 @@ create table idr_new.claim_professional_nch
 --     instnl clm_bill_fac_type_cd       character varying(1)     not null,
 --     instnl clm_bill_freq_cd           character varying(1)     not null,
     clm_finl_actn_ind              character varying(1)     not null,
---   clm_src_id                character varying(5)     not null,
+   clm_src_id                character varying(5)     not null,
     clm_query_cd                   character varying(1)     not null,
 --     pac clm_mdcr_coinsrnc_amt      numeric,
 --     pac clm_blood_lblty_amt        numeric,
@@ -215,7 +215,7 @@ create table idr_new.claim_professional_nch
     clm_mdcr_prfnl_prmry_pyr_amt   numeric,
     clm_mdcr_prfnl_prvdr_asgnmt_sw character varying(2)     not null,
     bfd_claim_updated_ts           timestamp with time zone default now(),
-    --meta_src_sk               integer,
+    meta_src_sk               integer                       not null,
     clm_clncl_tril_num             character varying(8),
     clm_carr_pmt_dnl_cd            character varying(2)
 );
@@ -645,7 +645,7 @@ create table idr_new.claim_institutional_nch
     clm_bill_fac_type_cd           character varying(1)     not null,
     clm_bill_freq_cd               character varying(1)     not null,
     clm_finl_actn_ind              character varying(1)     not null,
---     clm_src_id                 character varying(5)     not null,
+     clm_src_id                 character varying(5)     not null,
 --     clm_query_cd                 character varying(1)     not null,
 --     clm_mdcr_coinsrnc_amt      numeric,
 --     clm_blood_lblty_amt        numeric,
@@ -730,7 +730,7 @@ create table idr_new.claim_institutional_nch
 --     clm_blood_ncvrd_chrg_amt   numeric,
 --     clm_prvdr_intrst_pd_amt    numeric,
     bfd_claim_updated_ts           timestamp with time zone default now(),
---    meta_src_sk                integer,
+    meta_src_sk                    integer                  not null,
     --     clm_instl columns
     clm_admsn_type_cd              varchar(2)               not null,
     bene_ptnt_stus_cd              varchar(2)               not null,
@@ -1058,7 +1058,7 @@ create table idr_new.claim_rx
 --     instnl clm_bill_fac_type_cd       character varying(1)     not null,
 --     instnl clm_bill_freq_cd           character varying(1)     not null,
     clm_finl_actn_ind                 character varying(1)  not null,
---    clm_src_id                        character varying(5)  not null,
+    clm_src_id                        character varying(5)  not null,
 --  non_rx clm_query_cd                 character varying(1)     not null,
 --  non_rx   clm_mdcr_coinsrnc_amt      numeric,
 --  non_rx   clm_blood_lblty_amt        numeric,
@@ -1263,7 +1263,8 @@ create table idr_new.claim_rx
     clm_cms_calcd_mftr_dscnt_amt      numeric,
     clm_line_grs_cvrd_cst_tot_amt     numeric,
     clm_phrmcy_price_dscnt_at_pos_amt numeric,
-    cntrct_pbp_name                   character varying(75) not null
+    cntrct_pbp_name                   character varying(75) not null,
+    meta_src_sk                    integer                  not null
 );
 
 

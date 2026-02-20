@@ -36,7 +36,7 @@ class EobReadIT extends IntegrationTestBase {
   void eobReadValidLong() {
     var eob = eobRead().withId(Long.parseLong(CLAIM_ID_ADJUDICATED)).execute();
     assertFalse(eob.isEmpty());
-    // expectFhir().toMatchSnapshot(eob);
+    expectFhir().toMatchSnapshot(eob);
   }
 
   //    @Test

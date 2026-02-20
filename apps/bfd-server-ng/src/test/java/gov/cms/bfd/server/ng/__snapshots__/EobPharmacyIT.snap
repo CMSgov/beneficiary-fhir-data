@@ -239,7 +239,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
   "meta" : {
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
     "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Pharmacy|2.1.0" ],
-    "source" : "NCH",
+    "source" : "DDPS",
     "tag" : [ {
       "code" : "NationalClaimsHistory",
       "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type"
@@ -624,7 +624,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
   }, {
     "amount" : {
       "currency" : "USD",
-      "value" : 0
+      "value" : 967.88
     },
     "category" : {
       "coding" : [ {
@@ -890,7 +890,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
   "meta" : {
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
     "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Pharmacy|2.1.0" ],
-    "source" : "NCH",
+    "source" : "DDPS",
     "tag" : [ {
       "code" : "NationalClaimsHistory",
       "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type"
@@ -1255,7 +1255,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
   }, {
     "amount" : {
       "currency" : "USD",
-      "value" : 0
+      "value" : 649.73
     },
     "category" : {
       "coding" : [ {

@@ -10,7 +10,7 @@ import lombok.Getter;
 @Getter
 @Entity
 @Table(name = "claim_fiss", schema = "idr")
-public class ClaimFiss extends ClaimFissBase {
+public class ClaimFiss {
   @Id
   @Column(name = "clm_uniq_id")
   private long claimUniqueId;

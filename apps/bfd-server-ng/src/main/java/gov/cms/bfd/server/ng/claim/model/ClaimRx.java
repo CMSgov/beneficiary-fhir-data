@@ -134,16 +134,6 @@ public class ClaimRx extends ClaimBase {
     return Optional.empty();
   }
 
-  @Override
-  public ClaimSourceId getClaimSourceId() {
-    return ClaimSourceId.NATIONAL_CLAIMS_HISTORY;
-  }
-
-  @Override
-  public MetaSourceSk getMetaSourceSk() {
-    return MetaSourceSk.DDPS;
-  }
-
   /** Rx claims have a single embedded rather than a collection. */
   @Override
   public SortedSet<ClaimItemRx> getClaimItems() {

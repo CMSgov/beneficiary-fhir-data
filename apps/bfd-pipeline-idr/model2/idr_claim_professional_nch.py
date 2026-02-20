@@ -88,6 +88,8 @@ class IdrClaimProfessionalNch(IdrBaseModel):
         str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)
     ]
     clm_blood_chrg_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
+    meta_src_sk: Annotated[int, {ALIAS: ALIAS_CLM}]
+    clm_src_id: Annotated[str, {ALIAS: ALIAS_CLM}]
     idr_insrt_ts: Annotated[
         datetime,
         {BATCH_TIMESTAMP: True, INSERT_EXCLUDE: True, ALIAS: ALIAS_CLM, COLUMN_MAP: "idr_insrt_ts"},

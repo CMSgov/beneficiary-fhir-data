@@ -31,12 +31,6 @@ public class ClaimProfessionalSharedSystems extends ClaimProfessionalBase {
   @Column(name = "clm_sbmt_frmt_cd")
   private Optional<ClaimSubmissionFormatCode> claimFormatCode;
 
-  @Column(name = "clm_src_id")
-  private ClaimSourceId claimSourceId;
-
-  @Column(name = "clm_finl_actn_ind")
-  private ClaimFinalAction finalAction;
-
   @Column(name = "clm_prvdr_acnt_rcvbl_ofst_amt")
   private BigDecimal providerOffsetAmount;
 
@@ -56,7 +50,12 @@ public class ClaimProfessionalSharedSystems extends ClaimProfessionalBase {
   @Embedded private BillingProviderProfessional billingProviderHistory;
   @Embedded private OtherProfessionalCareTeam otherProviderHistory;
   @Embedded ClinicalTrialNumber clinicalTrialNumber;
-  @Embedded private ClaimAuditTrailContext claimAuditTrailContext;
+
+  @Column(name = "clm_audt_trl_stus_cd")
+  private Optional<String> claimAuditTrailStatusCode;
+
+  @Column(name = "clm_audt_trl_lctn_cd")
+  private ClaimAuditTrailLocationCode claimAuditTrailLocationCode;
 
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "clm_uniq_id")
@@ -114,23 +113,22 @@ public class ClaimProfessionalSharedSystems extends ClaimProfessionalBase {
   }
 
   /**
-   * For PAC stage-2 claims, the outcome is driven by the audit-trail status code rather than the
-   * default claim-type outcome.
+   * For PAC claims, the outcome is driven by the audit-trail status code, audit-status code, and
+   * the meta source sk rather than the default claim-type outcome.
    */
   @Override
   protected void applyOutcomeOverride(ExplanationOfBenefit eob) {
-    var auditTrailStatusCode = claimAuditTrailContext.getAuditTrailStatusCode();
+    var auditTrailStatusCode =
+        claimAuditTrailStatusCode.flatMap(
+            status ->
+                ClaimAuditTrailStatusCode.tryFromCode(
+                    getMetaSourceSk(), status, claimAuditTrailLocationCode));
     auditTrailStatusCode.ifPresentOrElse(
-        status -> eob.setOutcome(status.getOutcome(finalAction)),
+        status -> eob.setOutcome(status.getOutcome(getFinalAction())),
         () -> {
           if (getClaimTypeCode().isPac()) {
             eob.setOutcome(ExplanationOfBenefit.RemittanceOutcome.PARTIAL);
           }
         });
-  }
-
-  @Override
-  public MetaSourceSk getMetaSourceSk() {
-    return claimAuditTrailContext.getMetaSourceSk();
   }
 }

@@ -33,6 +33,12 @@ public abstract class ClaimBase {
   @Column(name = "clm_uniq_id", insertable = false, updatable = false)
   private long claimUniqueId;
 
+  @Column(name = "clm_src_id")
+  private ClaimSourceId claimSourceId;
+
+  @Column(name = "meta_src_sk")
+  private MetaSourceSk metaSourceSk;
+
   @Column(name = "clm_type_cd")
   private ClaimTypeCode claimTypeCode;
 
@@ -73,8 +79,7 @@ public abstract class ClaimBase {
     claimTypeCode.toFhirAdjudication().ifPresent(eob::addAdjudication);
 
     eob.setMeta(
-        meta.toFhir(
-            claimTypeCode, getClaimSourceId(), securityStatus, finalAction, getMetaSourceSk()));
+        meta.toFhir(claimTypeCode, claimSourceId, securityStatus, finalAction, metaSourceSk));
     eob.setIdentifier(identifiers.toFhir());
     eob.setBillablePeriod(billablePeriod.toFhir());
     eob.setCreated(DateUtil.toDate(claimEffectiveDate));
@@ -86,7 +91,7 @@ public abstract class ClaimBase {
               eob.setInsurer(new Reference(i));
             });
 
-    getClaimSourceId().toFhirOutcome().ifPresent(eob::setOutcome);
+    claimSourceId.toFhirOutcome().ifPresent(eob::setOutcome);
 
     var initialSupportingInfo =
         Stream.of(
@@ -130,18 +135,4 @@ public abstract class ClaimBase {
    * @return the DRG code
    */
   public abstract Optional<Integer> getDrgCode();
-
-  /**
-   * Identifies the source system from which this claim originated.
-   *
-   * @return the claim source identifier
-   */
-  public abstract ClaimSourceId getClaimSourceId();
-
-  /**
-   * Identifies the meta source system from which this claim originated.
-   *
-   * @return the meta source identifier
-   */
-  public abstract MetaSourceSk getMetaSourceSk();
 }

@@ -64,7 +64,7 @@ public class ClaimNewRepository {
   private static final Set<Class<? extends ClaimBase>> ALL_CLAIM_CLASSES =
       Set.of(
           ClaimProfessionalNch.class,
-          ClaimInstitutionalBase.class,
+          ClaimInstitutionalNch.class,
           ClaimProfessionalSharedSystems.class,
           ClaimInstitutionalSharedSystems.class,
           ClaimRx.class);
@@ -168,11 +168,11 @@ public class ClaimNewRepository {
           List<ClaimTypeCode> claimTypeCodes,
       @MeterTag(key = "hasSources", expression = "size() > 0") List<List<MetaSourceSk>> sources) {
 
-    var eligibleClasses = determineEligibleClaimClasses(sources, tagCriteria);
+    var claimTypes = determineClaimTypesToQuery(sources, tagCriteria);
     var futures = new ArrayList<CompletableFuture<? extends List<? extends ClaimBase>>>();
 
-    // Execute all four queries. If tag source id or source queries, filter before we execute
-    if (eligibleClasses.contains(ClaimProfessionalSharedSystems.class)) {
+    // Execute all four queries. If tag source id or meta source provided, filter before we execute
+    if (claimTypes.contains(ClaimProfessionalSharedSystems.class)) {
       futures.add(
           asyncService.fetchClaims(
               CLAIM_PROFESSIONAL_SHARED_SYSTEMS,
@@ -185,7 +185,7 @@ public class ClaimNewRepository {
               sources));
     }
 
-    if (eligibleClasses.contains(ClaimProfessionalNch.class)) {
+    if (claimTypes.contains(ClaimProfessionalNch.class)) {
       futures.add(
           asyncService.fetchClaims(
               CLAIM_PROFESSIONAL_NCH,
@@ -198,7 +198,7 @@ public class ClaimNewRepository {
               sources));
     }
 
-    if (eligibleClasses.contains(ClaimInstitutionalSharedSystems.class)) {
+    if (claimTypes.contains(ClaimInstitutionalSharedSystems.class)) {
       futures.add(
           asyncService.fetchClaims(
               CLAIM_INSTITUTIONAL_SHARED_SYSTEMS,
@@ -211,7 +211,7 @@ public class ClaimNewRepository {
               sources));
     }
 
-    if (eligibleClasses.contains(ClaimInstitutionalNch.class)) {
+    if (claimTypes.contains(ClaimInstitutionalNch.class)) {
       futures.add(
           asyncService.fetchClaims(
               CLAIM_INSTITUTIONAL_NCH,
@@ -224,7 +224,7 @@ public class ClaimNewRepository {
               sources));
     }
 
-    if (eligibleClasses.contains(ClaimRx.class)) {
+    if (claimTypes.contains(ClaimRx.class)) {
       futures.add(
           asyncService.fetchClaims(
               CLAIM_RX,
@@ -243,37 +243,28 @@ public class ClaimNewRepository {
         .map(ClaimBase.class::cast)
         .sorted(Comparator.comparing(ClaimBase::getClaimUniqueId))
         .toList();
-
-    /*CompletableFuture.allOf(
-            professionalNchClaims,
-            professionalSharedSystemsClaims,
-            institutionalSharedSystemsClaims,
-            institutionalNchClaims,
-            rxClaims)
-        .join();
-
-    var allClaims = new ArrayList<ClaimBase>();
-    allClaims.addAll(professionalNchClaims.join());
-    allClaims.addAll(professionalSharedSystemsClaims.join());
-    allClaims.addAll(institutionalSharedSystemsClaims.join());
-    allClaims.addAll(institutionalNchClaims.join());
-    allClaims.addAll(rxClaims.join());
-
-    // Sort, apply offset/limit
-    return allClaims.stream().sorted(Comparator.comparing(ClaimBase::getClaimUniqueId)).toList();*/
   }
 
-  private Set<Class<? extends ClaimBase>> determineEligibleClaimClasses(
+  private Set<Class<? extends ClaimBase>> determineClaimTypesToQuery(
       List<List<MetaSourceSk>> sources, List<List<TagCriterion>> tagCriteria) {
+
+    var hasFinalAction =
+        tagCriteria.stream()
+            .flatMap(List::stream)
+            .anyMatch(TagCriterion.FinalActionCriterion.class::isInstance);
+    if (hasFinalAction) {
+      return ALL_CLAIM_CLASSES;
+    }
+
     var eligible = new HashSet<>(ALL_CLAIM_CLASSES);
 
     if (sources != null && !sources.isEmpty()) {
       var metaSources = sources.stream().flatMap(List::stream).collect(Collectors.toSet());
       var allowedByMetaSource =
           metaSources.stream()
-              .flatMap(ms -> mapMetaSourceToClaimClasses(ms).stream())
+              .flatMap(ms -> mapMetaSourceToClaimType(ms).stream())
               .collect(Collectors.toSet());
-      eligible.retainAll(allowedByMetaSource);
+      eligible.addAll(allowedByMetaSource);
     }
 
     if (tagCriteria != null && !tagCriteria.isEmpty()) {
@@ -288,16 +279,16 @@ public class ClaimNewRepository {
       if (!tagSourceIds.isEmpty()) {
         var allowedByTagSource =
             tagSourceIds.stream()
-                .flatMap(src -> mapClaimSourceIdToClaimClasses(src).stream())
+                .flatMap(src -> mapClaimSourceIdToClaimType(src).stream())
                 .collect(Collectors.toSet());
 
-        eligible.retainAll(allowedByTagSource);
+        eligible.addAll(allowedByTagSource);
       }
     }
     return eligible;
   }
 
-  private Set<Class<? extends ClaimBase>> mapMetaSourceToClaimClasses(MetaSourceSk metaSourceSk) {
+  private Set<Class<? extends ClaimBase>> mapMetaSourceToClaimType(MetaSourceSk metaSourceSk) {
     return switch (metaSourceSk) {
       case NCH -> Set.of(ClaimProfessionalNch.class, ClaimInstitutionalNch.class);
       case DDPS -> Set.of(ClaimRx.class);
@@ -306,7 +297,7 @@ public class ClaimNewRepository {
     };
   }
 
-  private Set<Class<? extends ClaimBase>> mapClaimSourceIdToClaimClasses(ClaimSourceId sourceId) {
+  private Set<Class<? extends ClaimBase>> mapClaimSourceIdToClaimType(ClaimSourceId sourceId) {
     return switch (sourceId) {
       case NATIONAL_CLAIMS_HISTORY ->
           Set.of(ClaimProfessionalNch.class, ClaimInstitutionalNch.class, ClaimRx.class);

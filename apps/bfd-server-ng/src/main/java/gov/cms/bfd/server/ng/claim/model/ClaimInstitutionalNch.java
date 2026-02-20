@@ -84,20 +84,10 @@ public class ClaimInstitutionalNch extends ClaimInstitutionalBase {
   }
 
   @Override
-  public ClaimSourceId getClaimSourceId() {
-    return ClaimSourceId.NATIONAL_CLAIMS_HISTORY;
-  }
-
-  @Override
   protected void addSubclassCareTeam(
       ExplanationOfBenefit eob, SequenceGenerator sequenceGenerator) {
     serviceProviderHistory
         .toFhirCareTeamComponent(sequenceGenerator.next())
         .ifPresent(eob::addCareTeam);
-  }
-
-  @Override
-  public MetaSourceSk getMetaSourceSk() {
-    return MetaSourceSk.NCH;
   }
 }

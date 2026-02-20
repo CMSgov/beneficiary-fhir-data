@@ -24,16 +24,11 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @Getter
 @Entity
 @Table(name = "claim_institutional_ss", schema = "idr_new")
+@SuppressWarnings("java:S6539")
 public class ClaimInstitutionalSharedSystems extends ClaimInstitutionalBase {
 
   @Column(name = "clm_sbmt_frmt_cd")
   private Optional<ClaimSubmissionFormatCode> claimFormatCode;
-
-  @Column(name = "clm_src_id")
-  private ClaimSourceId claimSourceId;
-
-  @Column(name = "clm_finl_actn_ind")
-  private ClaimFinalAction finalAction;
 
   @Column(name = "clm_cntrctr_num")
   private Optional<ClaimContractorNumber> claimContractorNumber;
@@ -53,9 +48,13 @@ public class ClaimInstitutionalSharedSystems extends ClaimInstitutionalBase {
   @Embedded private ClaimRecordTypeInstitutional claimRecordType;
   @Embedded private ClaimInstitutionalSupportingInfoBase supportingInfo;
   @Embedded private AdjudicationChargeInstitutional adjudicationChargeInstitutional;
-  @Embedded private ClaimFissInstitutional claimFissInstitutional;
   @Embedded private DiagnosisDrgCode diagnosisDrgCode;
-  @Embedded private ClaimAuditTrailContext claimAuditTrailContext;
+
+  @Column(name = "clm_audt_trl_stus_cd")
+  private Optional<String> claimAuditTrailStatusCode;
+
+  @Column(name = "clm_audt_trl_lctn_cd")
+  private ClaimAuditTrailLocationCode claimAuditTrailLocationCode;
 
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "clm_uniq_id")
@@ -99,10 +98,13 @@ public class ClaimInstitutionalSharedSystems extends ClaimInstitutionalBase {
 
   @Override
   protected void applyOutcomeOverride(ExplanationOfBenefit eob) {
-    // claimFissInstitutional.toFhirOutcome(getClaimTypeCode()).ifPresent(eob::setOutcome);
-    var auditTrailStatusCode = claimAuditTrailContext.getAuditTrailStatusCode();
+    var auditTrailStatusCode =
+        claimAuditTrailStatusCode.flatMap(
+            status ->
+                ClaimAuditTrailStatusCode.tryFromCode(
+                    getMetaSourceSk(), status, claimAuditTrailLocationCode));
     auditTrailStatusCode.ifPresentOrElse(
-        status -> eob.setOutcome(status.getOutcome(finalAction)),
+        status -> eob.setOutcome(status.getOutcome(getFinalAction())),
         () -> {
           if (getClaimTypeCode().isPac()) {
             eob.setOutcome(ExplanationOfBenefit.RemittanceOutcome.PARTIAL);
@@ -110,20 +112,10 @@ public class ClaimInstitutionalSharedSystems extends ClaimInstitutionalBase {
         });
   }
 
-  @Override
-  public ClaimSourceId getClaimSourceId() {
-    return claimSourceId;
-  }
-
   /** NCH has no additional care-team members beyond the referring provider added by the base. */
   @Override
   protected void addSubclassCareTeam(
       ExplanationOfBenefit eob, SequenceGenerator sequenceGenerator) {
     // no-op for SS
-  }
-
-  @Override
-  public MetaSourceSk getMetaSourceSk() {
-    return claimAuditTrailContext.getMetaSourceSk();
   }
 }

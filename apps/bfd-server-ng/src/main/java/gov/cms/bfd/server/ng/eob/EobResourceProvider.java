@@ -107,6 +107,7 @@ public class EobResourceProvider implements IResourceProvider {
    * @param startIndex start index
    * @param tag tags to filter by
    * @param type claim type to filter by
+   * @param source claim source to filter by
    * @param request HTTP request details
    * @return bundle
    */
