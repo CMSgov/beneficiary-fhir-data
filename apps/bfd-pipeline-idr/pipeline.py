@@ -64,10 +64,10 @@ def run(load_mode: str) -> None:
         .build()
     )
 
-    if any(char.isdigit() for char in BFD_TEST_DATE):
-        start_time = datetime.strptime(BFD_TEST_DATE, "%Y-%m-%dT%H:%M:%SZ")
-    else:
+    if BFD_TEST_DATE is None or not BFD_TEST_DATE:
         start_time = datetime.now()
+    else:
+        start_time = datetime.strptime(BFD_TEST_DATE, "%Y-%m-%dT%H:%M:%SZ")
 
     # if load_benes and load_claims:
     hamilton_driver.execute(  # type: ignore
