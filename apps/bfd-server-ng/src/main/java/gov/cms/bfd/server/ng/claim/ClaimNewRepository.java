@@ -3,6 +3,7 @@ package gov.cms.bfd.server.ng.claim;
 import gov.cms.bfd.server.ng.claim.filter.BillablePeriodFilterParam;
 import gov.cms.bfd.server.ng.claim.filter.LastUpdatedFilterParam;
 import gov.cms.bfd.server.ng.claim.model.*;
+import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.input.TagCriterion;
 import gov.cms.bfd.server.ng.util.LogUtil;
@@ -144,97 +145,46 @@ public class ClaimNewRepository {
   /**
    * Returns claims for the given beneficiary.
    *
-   * @param beneSk bene sk
-   * @param claimThroughDate claim through date
-   * @param lastUpdated last updated
-   * @param tagCriteria tag criteria
-   * @param claimTypeCodes claimTypeCodes
-   * @param sources claim sources
+   * @param criteria filter criteria
    * @return claims
    */
   @Timed(value = "application.claim.search_by_bene")
   public List<ClaimBase> findByBeneXrefSk(
-      long beneSk,
-      @MeterTag(
-              key = "hasClaimThroughDate",
-              expression = "lowerBound.isPresent() || upperBound.isPresent()")
-          DateTimeRange claimThroughDate,
-      @MeterTag(
-              key = "hasLastUpdated",
-              expression = "lowerBound.isPresent() || upperBound.isPresent()")
-          DateTimeRange lastUpdated,
-      @MeterTag(key = "hasTags", expression = "size() > 0") List<List<TagCriterion>> tagCriteria,
-      @MeterTag(key = "hasClaimTypeCodes", expression = "size() > 0")
-          List<ClaimTypeCode> claimTypeCodes,
-      @MeterTag(key = "hasSources", expression = "size() > 0") List<List<MetaSourceSk>> sources) {
+      @MeterTag(key = "hasClaimThroughDate", expression = "hasClaimThroughDate()")
+          @MeterTag(key = "hasLastUpdated", expression = "hasLasUpdated()")
+          @MeterTag(key = "hasTags", expression = "hasTags()")
+          @MeterTag(key = "hasClaimTypeCodes", expression = "hasClaimTypeCodes()")
+          @MeterTag(key = "hasSources", expression = "hasSources()")
+          ClaimSearchCriteria criteria) {
 
-    var claimTypes = determineClaimTypesToQuery(sources, tagCriteria);
+    var claimTypes = determineClaimTypesToQuery(criteria.sources(), criteria.tagCriteria());
     var futures = new ArrayList<CompletableFuture<? extends List<? extends ClaimBase>>>();
 
     // Execute all four queries. If tag source id or meta source provided, filter before we execute
     if (claimTypes.contains(ClaimProfessionalSharedSystems.class)) {
       futures.add(
           asyncService.fetchClaims(
-              CLAIM_PROFESSIONAL_SHARED_SYSTEMS,
-              ClaimProfessionalSharedSystems.class,
-              beneSk,
-              claimThroughDate,
-              lastUpdated,
-              tagCriteria,
-              claimTypeCodes,
-              sources));
+              CLAIM_PROFESSIONAL_SHARED_SYSTEMS, ClaimProfessionalSharedSystems.class, criteria));
     }
 
     if (claimTypes.contains(ClaimProfessionalNch.class)) {
       futures.add(
-          asyncService.fetchClaims(
-              CLAIM_PROFESSIONAL_NCH,
-              ClaimProfessionalNch.class,
-              beneSk,
-              claimThroughDate,
-              lastUpdated,
-              tagCriteria,
-              claimTypeCodes,
-              sources));
+          asyncService.fetchClaims(CLAIM_PROFESSIONAL_NCH, ClaimProfessionalNch.class, criteria));
     }
 
     if (claimTypes.contains(ClaimInstitutionalSharedSystems.class)) {
       futures.add(
           asyncService.fetchClaims(
-              CLAIM_INSTITUTIONAL_SHARED_SYSTEMS,
-              ClaimInstitutionalSharedSystems.class,
-              beneSk,
-              claimThroughDate,
-              lastUpdated,
-              tagCriteria,
-              claimTypeCodes,
-              sources));
+              CLAIM_INSTITUTIONAL_SHARED_SYSTEMS, ClaimInstitutionalSharedSystems.class, criteria));
     }
 
     if (claimTypes.contains(ClaimInstitutionalNch.class)) {
       futures.add(
-          asyncService.fetchClaims(
-              CLAIM_INSTITUTIONAL_NCH,
-              ClaimInstitutionalNch.class,
-              beneSk,
-              claimThroughDate,
-              lastUpdated,
-              tagCriteria,
-              claimTypeCodes,
-              sources));
+          asyncService.fetchClaims(CLAIM_INSTITUTIONAL_NCH, ClaimInstitutionalNch.class, criteria));
     }
 
     if (claimTypes.contains(ClaimRx.class)) {
-      futures.add(
-          asyncService.fetchClaims(
-              CLAIM_RX,
-              ClaimRx.class,
-              beneSk,
-              claimThroughDate,
-              lastUpdated,
-              tagCriteria,
-              claimTypeCodes,
-              sources));
+      futures.add(asyncService.fetchClaims(CLAIM_RX, ClaimRx.class, criteria));
     }
 
     CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();

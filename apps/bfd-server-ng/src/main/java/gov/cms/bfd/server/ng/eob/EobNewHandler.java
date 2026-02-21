@@ -6,8 +6,8 @@ import gov.cms.bfd.server.ng.SecurityLabel;
 import gov.cms.bfd.server.ng.beneficiary.BeneficiaryRepository;
 import gov.cms.bfd.server.ng.claim.ClaimNewRepository;
 import gov.cms.bfd.server.ng.claim.model.*;
+import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
-import gov.cms.bfd.server.ng.input.TagCriterion;
 import gov.cms.bfd.server.ng.loadprogress.LoadProgressRepository;
 import gov.cms.bfd.server.ng.util.FhirUtil;
 import gov.cms.bfd.server.ng.util.IdrConstants;
@@ -56,39 +56,33 @@ public class EobNewHandler {
   /**
    * Search for claims data by bene.
    *
-   * @param beneSk bene sk
-   * @param count record count
-   * @param serviceDate service date
-   * @param lastUpdated last updated
-   * @param startIndex start index
-   * @param claimTypeCodes claimTypeCodes
-   * @param tagCriteria tagCriteria
+   * @param criteria filter criteria
    * @param samhsaFilterMode SAMHSA filter mode
-   * @param source claim source
    * @return bundle
    */
-  public Bundle searchByBene(
-      Long beneSk,
-      Optional<Integer> count,
-      DateTimeRange serviceDate,
-      DateTimeRange lastUpdated,
-      Optional<Integer> startIndex,
-      List<List<TagCriterion>> tagCriteria,
-      List<ClaimTypeCode> claimTypeCodes,
-      SamhsaFilterMode samhsaFilterMode,
-      List<List<MetaSourceSk>> source) {
+  public Bundle searchByBene(ClaimSearchCriteria criteria, SamhsaFilterMode samhsaFilterMode) {
+    var beneSk = criteria.beneSk();
     var beneXrefSk = beneficiaryRepository.getXrefSkFromBeneSk(beneSk);
     // Don't return data for historical beneSks
     if (beneXrefSk.isEmpty() || !beneXrefSk.get().equals(beneSk)) {
       return new Bundle();
     }
 
-    var claims =
-        claimRepository.findByBeneXrefSk(
-            beneXrefSk.get(), serviceDate, lastUpdated, tagCriteria, claimTypeCodes, source);
+    var repositoryCriteria =
+        new ClaimSearchCriteria(
+            beneXrefSk.get(),
+            criteria.claimThroughDate(),
+            criteria.lastUpdated(),
+            criteria.limit(),
+            criteria.offset(),
+            criteria.tagCriteria(),
+            criteria.claimTypeCodes(),
+            criteria.sources());
+
+    var claims = claimRepository.findByBeneXrefSk(repositoryCriteria);
 
     var filteredClaims =
-        filterSamhsaClaims(claims, samhsaFilterMode)
+        filterSamhsaClaims(claims, samhsaFilterMode, repositoryCriteria)
             .map(
                 claim -> {
                   var hasSamhsaClaims =
@@ -100,20 +94,26 @@ public class EobNewHandler {
                           : ClaimSecurityStatus.NONE;
 
                   return claim.toFhir(securityStatus);
-                })
-            .skip(startIndex.orElse(0))
-            .limit(count.orElse(5000));
+                });
 
     return FhirUtil.bundleOrDefault(filteredClaims.toList(), loadProgressRepository::lastUpdated);
   }
 
   private Stream<? extends ClaimBase> filterSamhsaClaims(
-      List<? extends ClaimBase> claims, SamhsaFilterMode samhsaFilterMode) {
+      List<? extends ClaimBase> claims,
+      SamhsaFilterMode samhsaFilterMode,
+      ClaimSearchCriteria claimSearchCriteria) {
     var claimStream = claims.stream().sorted(Comparator.comparing(ClaimBase::getClaimUniqueId));
-    if (samhsaFilterMode == SamhsaFilterMode.INCLUDE) {
-      return claimStream;
-    }
-    return claimStream.filter(claim -> !claimHasSamhsa(claim));
+    var filteredClaimStream =
+        switch (samhsaFilterMode) {
+          case INCLUDE -> claimStream;
+          case ONLY_SAMHSA -> claimStream.filter(this::claimHasSamhsa);
+          case EXCLUDE -> claimStream.filter(claim -> !claimHasSamhsa(claim));
+        };
+
+    return filteredClaimStream
+        .skip(claimSearchCriteria.resolveOffset())
+        .limit(claimSearchCriteria.resolveLimit());
   }
 
   /**

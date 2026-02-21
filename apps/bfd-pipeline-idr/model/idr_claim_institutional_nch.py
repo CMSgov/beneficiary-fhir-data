@@ -69,6 +69,10 @@ class IdrClaimInstitutionalNch(IdrBaseModel):
     clm_obslt_dt: Annotated[
         date | None, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_date_to_null)
     ]
+    clm_mdcr_coinsrnc_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
+    clm_blood_lblty_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
+    clm_ncvrd_chrg_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
+    clm_blood_chrg_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
     clm_finl_actn_ind: Annotated[str, {ALIAS: ALIAS_CLM}]
     clm_bill_clsfctn_cd: Annotated[
         str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)
@@ -81,7 +85,11 @@ class IdrClaimInstitutionalNch(IdrBaseModel):
         date | None, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_date_to_null)
     ]
     clm_ltst_clm_ind: Annotated[str, {ALIAS: ALIAS_CLM}]
+    clm_query_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_disp_cd: Annotated[str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)]
+    clm_nch_prmry_pyr_cd: Annotated[
+        str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)
+    ]
     clm_prvdr_pmt_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
     clm_adjstmt_type_cd: Annotated[
         str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)
@@ -91,6 +99,7 @@ class IdrClaimInstitutionalNch(IdrBaseModel):
     clm_alowd_chrg_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
     clm_mdcr_ddctbl_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
     clm_sbmt_chrg_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
+    clm_blood_ncvrd_chrg_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
     clm_blood_pt_frnsh_qty: Annotated[int | None, {ALIAS: ALIAS_CLM}]
     clm_bene_pd_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
     geo_blg_ssa_state_cd: Annotated[

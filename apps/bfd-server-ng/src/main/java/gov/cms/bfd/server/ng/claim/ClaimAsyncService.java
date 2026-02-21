@@ -5,8 +5,7 @@ import gov.cms.bfd.server.ng.DbFilterBuilder;
 import gov.cms.bfd.server.ng.DbFilterParam;
 import gov.cms.bfd.server.ng.claim.filter.*;
 import gov.cms.bfd.server.ng.claim.model.*;
-import gov.cms.bfd.server.ng.input.DateTimeRange;
-import gov.cms.bfd.server.ng.input.TagCriterion;
+import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
@@ -52,22 +51,15 @@ public class ClaimAsyncService {
 
   @Async
   protected <T extends ClaimBase> CompletableFuture<List<T>> fetchClaims(
-      String baseQuery,
-      Class<T> claimClass,
-      long beneSk,
-      DateTimeRange claimThroughDate,
-      DateTimeRange lastUpdated,
-      List<List<TagCriterion>> tagCriteria,
-      List<ClaimTypeCode> claimTypeCodes,
-      List<List<MetaSourceSk>> sources) {
+      String baseQuery, Class<T> claimClass, ClaimSearchCriteria criteria) {
 
     var filterBuilders =
         List.of(
-            new BillablePeriodFilterParam(claimThroughDate),
-            new LastUpdatedFilterParam(lastUpdated),
-            new ClaimTypeCodeFilterParam(claimTypeCodes),
-            new TagCriteriaFilterParam(tagCriteria),
-            new SourceFilterParam(sources));
+            new BillablePeriodFilterParam(criteria.claimThroughDate()),
+            new LastUpdatedFilterParam(criteria.lastUpdated()),
+            new ClaimTypeCodeFilterParam(criteria.claimTypeCodes()),
+            new TagCriteriaFilterParam(criteria.tagCriteria()),
+            new SourceFilterParam(criteria.sources()));
     var filters = getFilters(filterBuilders);
 
     var jpql =
@@ -81,7 +73,7 @@ public class ClaimAsyncService {
 
     var result =
         withParams(entityManager.createQuery(jpql, claimClass), filters.params())
-            .setParameter("beneSk", beneSk)
+            .setParameter("beneSk", criteria.beneSk())
             .getResultList();
 
     return CompletableFuture.completedFuture(result);

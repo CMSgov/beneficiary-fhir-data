@@ -37,19 +37,9 @@ public class ClaimProfessionalSharedSystems extends ClaimProfessionalBase {
   @Column(name = "clm_mdcr_prfnl_prvdr_asgnmt_sw")
   private Optional<ProviderAssignmentIndicatorSwitch> providerAssignmentIndicatorSwitch;
 
-  @Column(name = "clm_cntrctr_num")
-  private Optional<ClaimContractorNumber> claimContractorNumber;
-
-  @Embedded private BloodPints bloodPints;
   @Embedded private NchPrimaryPayorCode nchPrimaryPayorCode;
   @Embedded private AdjudicationChargeProfessionalSharedSystems adjudicationCharge;
-  @Embedded private ClaimPaymentAmount claimPaymentAmount;
-  @Embedded private ClaimNearLineRecordType claimRecordType;
-  @Embedded private ClaimSubmissionDate claimSubmissionDate;
-  @Embedded private ReferringProfessionalCareTeam referringProviderHistory;
-  @Embedded private BillingProviderProfessional billingProviderHistory;
   @Embedded private OtherProfessionalCareTeam otherProviderHistory;
-  @Embedded ClinicalTrialNumber clinicalTrialNumber;
 
   @Column(name = "clm_audt_trl_stus_cd")
   private Optional<String> claimAuditTrailStatusCode;
@@ -70,9 +60,7 @@ public class ClaimProfessionalSharedSystems extends ClaimProfessionalBase {
       buildSubclassSupportingInfo() {
     return Stream.of(
             nchPrimaryPayorCode.toFhir(supportingInfoFactory),
-            claimSubmissionDate.toFhir(supportingInfoFactory),
-            providerAssignmentIndicatorSwitch.map(c -> c.toFhir(supportingInfoFactory)),
-            clinicalTrialNumber.toFhir(supportingInfoFactory))
+            providerAssignmentIndicatorSwitch.map(c -> c.toFhir(supportingInfoFactory)))
         .flatMap(Optional::stream)
         .toList();
   }
