@@ -18,11 +18,11 @@ from loader import get_connection_string
 from model.base_model import (
     DbType,
     LoadMode,
-    LoadProgress,
     T,
     format_date_opt,
     get_min_transaction_date,
 )
+from model.load_progress import LoadProgress
 from settings import (
     BATCH_MULTIPLIER,
     IDR_ACCOUNT,

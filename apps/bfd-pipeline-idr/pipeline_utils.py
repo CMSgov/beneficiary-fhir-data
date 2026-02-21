@@ -12,9 +12,9 @@ from load_partition import LoadPartition
 from loader import LoadType, PostgresLoader
 from model.base_model import (
     LoadMode,
-    LoadProgress,
     T,
 )
+from model.load_progress import LoadProgress
 
 console_handler = logging.StreamHandler()
 formatter = logging.Formatter("[%(levelname)s] %(asctime)s %(message)s")
