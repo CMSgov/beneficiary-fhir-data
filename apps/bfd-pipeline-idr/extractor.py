@@ -15,7 +15,7 @@ from snowflake.connector import DictCursor, SnowflakeConnection
 from constants import DEFAULT_MIN_DATE
 from load_partition import LoadPartition
 from loader import get_connection_string
-from model import (
+from model.base_model import (
     DbType,
     LoadMode,
     LoadProgress,

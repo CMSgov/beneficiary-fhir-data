@@ -6,7 +6,7 @@ from pathlib import Path
 import psycopg
 
 from loader import get_connection_string
-from model import LoadMode
+from model.base_model import LoadMode
 
 tables = [
     {"csv_name": "SYNTHETIC_BENE_HSTRY.csv", "table": "v2_mdcr_bene_hstry"},

@@ -9,7 +9,7 @@ from hamilton.execution import executors  # type: ignore
 
 import pipeline_nodes
 from load_partition import LoadType
-from model import LoadMode
+from model.base_model import LoadMode
 from settings import LOAD_TYPE, MAX_TASKS
 
 telemetry.disable_telemetry()

@@ -7,7 +7,7 @@ from psycopg.abc import Params, Query
 
 from constants import DEFAULT_MIN_DATE
 from load_partition import LoadPartition, LoadType
-from model import DbType, LoadMode, LoadProgress, T
+from model.base_model import DbType, LoadMode, LoadProgress, T
 from settings import (
     bfd_db_endpoint,
     bfd_db_name,

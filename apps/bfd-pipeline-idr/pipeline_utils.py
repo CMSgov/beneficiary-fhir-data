@@ -10,7 +10,7 @@ from constants import DEFAULT_PARTITION
 from extractor import PostgresExtractor, SnowflakeExtractor
 from load_partition import LoadPartition
 from loader import LoadType, PostgresLoader
-from model import (
+from model.base_model import (
     LoadMode,
     LoadProgress,
     T,
