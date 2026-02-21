@@ -7,23 +7,20 @@ from constants import MIN_CLAIM_LOAD_DATE
 from load_partition import LoadPartition, LoadType
 from model import (
     IdrBaseModel,
-    IdrBeneficiary,
-    IdrBeneficiaryDualEligibility,
-    IdrBeneficiaryEntitlement,
-    IdrBeneficiaryEntitlementReason,
-    IdrBeneficiaryLowIncomeSubsidy,
-    IdrBeneficiaryMaPartDEnrollment,
-    IdrBeneficiaryMaPartDEnrollmentRx,
-    IdrBeneficiaryMbiId,
-    IdrBeneficiaryOvershareMbi,
-    IdrBeneficiaryStatus,
-    IdrBeneficiaryThirdParty,
-    IdrContractPbpContact,
-    IdrContractPbpNumber,
-    IdrProviderHistory,
     LoadMode,
     get_min_transaction_date,
 )
+from model2.idr_beneficiary import IdrBeneficiary
+from model2.idr_beneficiary_dual_eligibility import IdrBeneficiaryDualEligibility
+from model2.idr_beneficiary_entitlement import IdrBeneficiaryEntitlement
+from model2.idr_beneficiary_entitlement_reason import IdrBeneficiaryEntitlementReason
+from model2.idr_beneficiary_low_income_subsidy import IdrBeneficiaryLowIncomeSubsidy
+from model2.idr_beneficiary_ma_part_d_enrollment import IdrBeneficiaryMaPartDEnrollment
+from model2.idr_beneficiary_ma_part_d_enrollment_rx import IdrBeneficiaryMaPartDEnrollmentRx
+from model2.idr_beneficiary_mbi_id import IdrBeneficiaryMbiId
+from model2.idr_beneficiary_overshare_mbi import IdrBeneficiaryOvershareMbi
+from model2.idr_beneficiary_status import IdrBeneficiaryStatus
+from model2.idr_beneficiary_third_party import IdrBeneficiaryThirdParty
 from model2.idr_claim import IdrClaim
 from model2.idr_claim_ansi_signature import IdrClaimAnsiSignature
 from model2.idr_claim_date_signature import IdrClaimDateSignature
@@ -43,6 +40,9 @@ from model2.idr_claim_professional import IdrClaimProfessional
 from model2.idr_claim_professional_nch import IdrClaimProfessionalNch
 from model2.idr_claim_professional_ss import IdrClaimProfessionalSs
 from model2.idr_claim_rx import IdrClaimRx
+from model2.idr_contract_pbp_contact import IdrContractPbpContact
+from model2.idr_contract_pbp_number import IdrContractPbpNumber
+from model2.idr_provider_history import IdrProviderHistory
 from pipeline_utils import extract_and_load
 from settings import TABLES_TO_LOAD
 
