@@ -9,15 +9,19 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 /** Catastrophic coverage codes. */
 public record CatastrophicCoverageCode(String code, String display) {
   /** A - Attachment point met on this event. */
-  public static final CatastrophicCoverageCode A = new CatastrophicCoverageCode("A", "Attachment point met on this event");
+  public static final CatastrophicCoverageCode A =
+      new CatastrophicCoverageCode("A", "Attachment point met on this event");
+
   /** C - Above attachment point. */
-  public static final CatastrophicCoverageCode C = new CatastrophicCoverageCode("C", "Above attachment point");
+  public static final CatastrophicCoverageCode C =
+      new CatastrophicCoverageCode("C", "Above attachment point");
 
   /**
    * Convert from a database code.
    *
    * @param code database code.
-   * @return catastrophic coverage code and its matching display, or an empty string for the display if code is invalid.
+   * @return catastrophic coverage code and its matching display, or an empty string for the display
+   *     if code is invalid.
    */
   public static Optional<CatastrophicCoverageCode> tryFromCode(String code) {
     return switch (code) {
