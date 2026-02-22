@@ -11,8 +11,8 @@ public class ClaimAdjustmentTypeCodeConverter
     implements AttributeConverter<Optional<ClaimAdjustmentTypeCode>, String> {
   @Override
   public String convertToDatabaseColumn(Optional<ClaimAdjustmentTypeCode> claimAdjustmentTypeCode) {
-    // This is a read-only API so this method will never actually persist anything to the database.
-    return claimAdjustmentTypeCode.map(ClaimAdjustmentTypeCode::getCode).orElse("");
+    // This is a read-only API, so this method will never actually persist anything to the database.
+    return claimAdjustmentTypeCode.map(ClaimAdjustmentTypeCode::code).orElse("");
   }
 
   @Override
