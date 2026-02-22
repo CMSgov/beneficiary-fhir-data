@@ -3,14 +3,10 @@ package gov.cms.bfd.server.ng.claim;
 import gov.cms.bfd.server.ng.DbFilter;
 import gov.cms.bfd.server.ng.DbFilterBuilder;
 import gov.cms.bfd.server.ng.DbFilterParam;
-import gov.cms.bfd.server.ng.claim.filter.BillablePeriodFilterParam;
-import gov.cms.bfd.server.ng.claim.filter.ClaimTypeCodeFilterParam;
-import gov.cms.bfd.server.ng.claim.filter.LastUpdatedFilterParam;
-import gov.cms.bfd.server.ng.claim.filter.TagCriteriaFilterParam;
+import gov.cms.bfd.server.ng.claim.filter.*;
 import gov.cms.bfd.server.ng.claim.model.Claim;
-import gov.cms.bfd.server.ng.claim.model.ClaimTypeCode;
+import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
-import gov.cms.bfd.server.ng.input.TagCriterion;
 import gov.cms.bfd.server.ng.util.LogUtil;
 import io.micrometer.core.annotation.Timed;
 import io.micrometer.core.aop.MeterTag;
@@ -104,76 +100,37 @@ public class ClaimRepository {
   /**
    * Returns claims for the given beneficiary.
    *
-   * @param beneSk bene sk
-   * @param claimThroughDate claim through date
-   * @param lastUpdated last updated
-   * @param limit limit
-   * @param offset offset
-   * @param tagCriteria tag criteria
-   * @param claimTypeCodes claimTypeCodes
+   * @param criteria filter criteria
    * @return claims
    */
   @Timed(value = "application.claim.search_by_bene")
   public List<Claim> findByBeneXrefSk(
-      long beneSk,
-      @MeterTag(
-              key = "hasClaimThroughDate",
-              expression = "lowerBound.isPresent() || upperBound.isPresent()")
-          DateTimeRange claimThroughDate,
-      @MeterTag(
-              key = "hasLastUpdated",
-              expression = "lowerBound.isPresent() || upperBound.isPresent()")
-          DateTimeRange lastUpdated,
-      @MeterTag(key = "hasLimit", expression = "isPresent()") Optional<Integer> limit,
-      @MeterTag(key = "hasOffset", expression = "isPresent()") Optional<Integer> offset,
-      @MeterTag(key = "hasTags", expression = "size() > 0") List<List<TagCriterion>> tagCriteria,
-      @MeterTag(key = "hasClaimTypeCodes", expression = "size() > 0")
-          List<ClaimTypeCode> claimTypeCodes) {
+      @MeterTag(key = "hasClaimThroughDate", expression = "hasClaimThroughDate()")
+          @MeterTag(key = "hasLastUpdated", expression = "hasLasUpdated()")
+          @MeterTag(key = "hasTags", expression = "hasTags()")
+          @MeterTag(key = "hasClaimTypeCodes", expression = "hasClaimTypeCodes()")
+          @MeterTag(key = "hasSources", expression = "hasSources()")
+          ClaimSearchCriteria criteria) {
     var filterBuilders =
         List.of(
-            new BillablePeriodFilterParam(claimThroughDate),
-            new LastUpdatedFilterParam(lastUpdated),
-            new ClaimTypeCodeFilterParam(claimTypeCodes),
-            new TagCriteriaFilterParam(tagCriteria));
+            new BillablePeriodFilterParam(criteria.claimThroughDate()),
+            new LastUpdatedFilterParam(criteria.lastUpdated()),
+            new ClaimTypeCodeFilterParam(criteria.claimTypeCodes()),
+            new TagCriteriaFilterParam(criteria.tagCriteria()),
+            new SourceFilterParam(criteria.sources()));
     var filters = getFilters(filterBuilders);
-    // Some of the filters here appear redundant, but joining on the entire primary key for
-    // beneficiaries (bene_sk + effective timestamp) helps query performance significantly
     var jpql =
         String.format(
             """
-            WITH benes AS (
-                  SELECT b.beneSk beneSk, b.effectiveTimestamp effectiveTimestamp
-                  FROM Beneficiary b
-                  WHERE b.xrefSk = :beneSk AND b.latestTransactionFlag = 'Y'
-             ),
-             claims AS (
-                SELECT c.claimUniqueId claimUniqueId
-                FROM Claim c
-                WHERE EXISTS (
-                  SELECT 1 FROM benes b2
-                    WHERE b2.beneSk = c.beneficiary.beneSk
-                    AND b2.effectiveTimestamp = c.beneficiary.effectiveTimestamp
-                )
-                ORDER BY c.claimUniqueId
-                OFFSET :offset ROWS
-                FETCH NEXT :limit ROWS ONLY
-             )
             %s
-            WHERE c.claimUniqueId IN (SELECT claimUniqueId FROM claims)
-            AND EXISTS (
-              SELECT 1 FROM benes b2
-              WHERE b2.beneSk = b.beneSk
-              AND b2.effectiveTimestamp = b.effectiveTimestamp
-            )
+            WHERE b.xrefSk = :beneSk
             AND (ct.contractPbpSk IS NULL OR ct.contractVersionRank = 1)
             %s
             """,
             CLAIM_TABLES_BASE, filters.filterClause());
     var claims =
         withParams(entityManager.createQuery(jpql, Claim.class), filters.params())
-            .setParameter("limit", limit.orElse(5000))
-            .setParameter("offset", offset.orElse(0))
-            .setParameter("beneSk", beneSk)
+            .setParameter("beneSk", criteria.beneSk())
             .getResultList();
 
     claims.stream()

@@ -49,23 +49,27 @@ uv sync
 ### Compile FSH Resources
 
 To compile the .fsh files from this folder
+
 ```sh
 cd sushi && sushi build && cd ..
 ```
 
-This will generate the StructureDefinition and CodeSystem resources necessary for synthetic data generation. Running compile_resources.py is not necessary to generate synthetic data. 
+This will generate the StructureDefinition and CodeSystem resources necessary for synthetic data generation. Running compile_resources.py is not necessary to generate synthetic data.
 
 ### Get Matchbox up and running
-To reduce dependencies on tx.fhir.org as well as improve the speed of validation, we use matchbox to run a local FHIR server. Read more about matchbox at https://ahdis.github.io/matchbox/
+
+To reduce dependencies on tx.fhir.org as well as improve the speed of validation, we use matchbox to run a local FHIR server. Read more about matchbox at <https://ahdis.github.io/matchbox/>
 
 Note: Matchbox uses a significant amount of memory. Allocating at least 8GB of RAM is recommended, and more may be necessary in the future.
 
-To start matchbox, run 
+To start matchbox, run
 
 ```sh
 docker compose up -d
 ```
+
 Note, it takes several minutes and requires a good bit of RAM. It'll be ready once it says that packages have been loaded and some obviously untrue amount of RAM (generally half of what it actually used) was used. Additionally, one can check the logs for "Finished engines during startup" or running a health check using
+
 ```sh
 curl -X GET "http://localhost:8080/matchboxv3/actuator/health"
 ```
@@ -102,7 +106,7 @@ uv run compile_resources.py \
 
 #### Patient Data - `patient_generator.py`
 
-##### Usage
+##### `patient_generator.py` usage
 
 ```text
 usage: patient_generator.py [-h] [--patients PATIENTS] [--claims]
@@ -140,7 +144,7 @@ options:
 
 ```
 
-##### Generating Data
+##### Generating patient data
 
 To generate synthetic patient data, the patient_generator.py script is used.
 To utilize it to generate an entirely _new_ set of data from nothing:
@@ -173,10 +177,68 @@ The files output will be in the `out` folder:
 
 The patient generator creates synthetic beneficiary data with realistic but _synthetic_ MBIs, coverage information, and historical records. It can generate multiple MBI versions per beneficiary and handles beneficiary cross-references with kill credit switches.
 
-#### Claims data
+#### Claims data - `claims_generator.py`
 
-To generate synthetic claims data, the claims_generator.py script is used.
-To utilize it:
+<!-- TODO: Provide an official location for downloading synthetic claims data -->
+> [!IMPORTANT]
+> Synthetic claims data is _much_ larger in size relative to patient data, and so it is not stored in the repository under `./synthetic-data`. If you are looking to regnerate this data, please reach out in #bfd so that the existing dataset can be provided to you.
+
+#### `claims_generator.py` usage
+
+```text
+Usage: claims_generator.py [OPTIONS] [PATHS]...
+
+  Generate synthetic claims data. Provided file PATHS will be updated with new
+  fields.
+
+Options:
+  --sushi / --no-sushi            Generate new StructureDefinitions. Use when
+                                  testing locally if new .fsh files have been
+                                  added.
+  --min-claims INTEGER            Minimum number of claims to generate per
+                                  person
+  --max-claims INTEGER            Maximum number of claims to generate per
+                                  person
+  --force-pac-claims / --no-force-pac-claims
+                                  Generate _new_ partially-adjudicated claims
+                                  when existing pac claims tables exist in the
+                                  synthetic data provided
+  --help                          Show this message and exit.
+```
+
+#### Generating claims data
+
+> [!WARNING]
+> Either `SYNTHETIC_CLM.csv` or `SYNTHETIC_BENE_HSTRY.csv` **must** be provided as claims data generation requires an existing `BENE_SK` or `CLM` to generate/regenerate data.
+
+To generate synthetic claims data, the `claims_generator.py` script is used.
+
+The synthetic claims data generated will be written to the `./out` folder in the form of CSVs, one per-table:
+
+- `SYNTHETIC_CLM.csv`
+- `SYNTHETIC_CLM_RLT_COND_SGNTR_MBR.csv`
+  - This file contains an extra column, `CLM_UNIQ_ID`, that is purely metadata used by the synthetic claims generator and is not consumed by the IDR Pipeline
+- `SYNTHETIC_CLM_LINE.csv`
+- `SYNTHETIC_CLM_LINE_RX.csv`
+- `SYNTHETIC_CLM_VAL.csv`
+- `SYNTHETIC_CLM_DT_SGNTR.csv`
+- `SYNTHETIC_CLM_PROD.csv`
+- `SYNTHETIC_CLM_INSTNL.csv`
+- `SYNTHETIC_CLM_LINE_INSTNL.csv`
+- `SYNTHETIC_CLM_DCMTN.csv`
+- `SYNTHETIC_CLM_FISS.csv`
+- `SYNTHETIC_CLM_PRFNL.csv`
+- `SYNTHETIC_CLM_LINE_PRFNL.csv`
+- `SYNTHETIC_CLM_ANSI_SGNTR.csv`
+- `SYNTHETIC_PRVDR_HSTRY.csv`
+- `SYNTHETIC_CNTRCT_PBP_NUM.csv`
+- `SYNTHETIC_CNTRCT_PBP_CNTCT.csv`
+
+These files represent the schema of the tables the information is sourced from, although for tables other than `CLM_DT_SGNTR`, the `CLM_UNIQ_ID` is propagated instead of the 5 part unique key from the IDR.
+
+##### Using `SYNTHETIC_BENE_HSTRY.csv`
+
+The below will generate _entirely new claims_ for the given `BENE_SK`s in the provided file:
 
 ```sh
 uv run claims_generator.py \
@@ -184,22 +246,68 @@ uv run claims_generator.py \
     out/SYNTHETIC_BENE_HSTRY.csv
 ```
 
---sushi is not strictly needed, if you have a local copy of the compiled shorthand files, but recommended to reduce drift. To specify a list of benes, pass in a .csv file containing a column named BENE_SK.
-The files output will be in the out folder, there are several files:
-SYNTHETIC_CLM.csv
-SYNTHETIC_CLM_LINE.csv
-SYNTHETIC_CLM_VAL.csv
-SYNTHETIC_CLM_DT_SGNTR.csv
-SYNTHETIC_CLM_PROD.csv
-SYNTHETIC_CLM_INSTNL.csv
-SYNTHETIC_CLM_LINE_INSTNL.csv
-SYNTHETIC_CLM_DCMTN.csv
-SYNTHETIC_CLM_FISS.csv
-SYNTHETIC_CLM_PRFNL.csv
-SYNTHETIC_CLM_LINE_PRFNL.csv
-SYNTHETIC_CLM_ANSI_SGNTR.csv
+##### Regenerating existing claims data
 
-These files represent the schema of the tables the information is sourced from, although for tables other than CLM_DT_SGNTR, the CLM_UNIQ_ID is propagated instead of the 5 part unique key from the IDR.
+The below will _re-generate_ **existing claims data** (assume `<PATH_TO_CLAIMS_DATA>` is a local directory containing synthetic claims data):
+
+```sh
+uv run claims_generator.py \
+    --sushi \
+    ./synthetic-data <PATH_TO_CLAIMS_DATA>
+```
+
+If _any_ claims-related tables have had columns added to their respective generation functions, those new columns will be populated with values without impacting existing values in other columns.
+
+> [!CAUTION]
+> If an **existing column value** must be updated, that column value **MUST BE DELETED** from the respective table CSV first so that the values can be regenerated.
+
+#### `--sushi`
+
+`--sushi` is not strictly needed, if you have a local copy of the compiled shorthand files, but recommended to reduce drift. To specify a list of benes, pass in a .csv file containing a column named `BENE_SK`.
+
+## Testing Mapping Changes
+
+### Verifying FML Map Changes
+
+To test updates to your FML map files, run `compile_resources.py` to generate a resource in the `out/` directory and verify the output:
+
+```sh
+uv run compile_resources.py \
+    -m maps/ExplanationOfBenefit-Base.map \
+    -i sample-data/EOB-Carrier-MCS-Sample.json \
+    -o out/ExplanationOfBenefit-MCS.json \
+    -r https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Base \
+    --test
+```
+
+### Updating Structure Definitions
+
+If you add or move a field, you must update the input sample file and the corresponding Structure Definition file (e.g., defining CLM_AUDT_TRL_STUS_CD within the elements of ExplanationOfBenefit-Base.json).
+Example element definition:
+
+```text
+{
+  "id": "ExplanationOfBenefit-Base.CLM_AUDT_TRL_STUS_CD",
+  "path": "ExplanationOfBenefit-Base.CLM_AUDT_TRL_STUS_CD",
+  "label": "Claim Status Code",
+  "min": 0,
+  "max": "1",
+  "type": [{ "code": "string" }]
+}
+```
+
+### Resource Augmentation
+
+Due to FML limitations, some complex mappings that require more than simple lookups are handled via augment_sample_resources.py.
+For example, CLM_AUDT_TRL_STUS_CD on an EOB is derived by combining the status code, location code (CLM_AUDT_TRL_LCTN_CD), and source (META_SRC_SK). The augmentation script resolves these fields into the claim status code.
+To test augmentation logic independently:
+
+```sh
+python augment_sample_resources.py {your_sample_file}.json
+```
+
+> [!NOTE]
+> The `uv run compile_resources.py` command mentioned above also executes this script. You can inspect the output at out/temporary-sample.json and the compiled resource.
 
 ## Data Dictionary
 

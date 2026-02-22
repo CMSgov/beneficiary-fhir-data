@@ -1,18 +1,21 @@
 package gov.cms.bfd.server.ng.input;
 
+import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
-import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import com.google.common.base.Strings;
 import gov.cms.bfd.server.ng.claim.model.ClaimFinalAction;
 import gov.cms.bfd.server.ng.claim.model.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.ClaimTypeCode;
+import gov.cms.bfd.server.ng.claim.model.MetaSourceSk;
+import gov.cms.bfd.server.ng.claim.model.SamhsaSearchIntent;
 import gov.cms.bfd.server.ng.util.IdrConstants;
 import gov.cms.bfd.server.ng.util.SystemUrls;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -159,7 +162,7 @@ public class FhirInputConverter {
   }
 
   /**
-   * Parses the tag query parameter into a list of list of criteria.
+   * Parses the tag query parameter into a nested list of criteria.
    *
    * <p>Outer list is AND conditions, inner list is OR conditions.
    *
@@ -167,24 +170,7 @@ public class FhirInputConverter {
    * @return list of tag criteria
    */
   public static List<List<TagCriterion>> parseTagParameter(@Nullable TokenAndListParam tagParam) {
-    if (tagParam == null || tagParam.getValuesAsQueryTokens().isEmpty()) {
-      return Collections.emptyList();
-    }
-
-    return tagParam.getValuesAsQueryTokens().stream()
-        .map(FhirInputConverter::parseTagQueryToken)
-        .filter(list -> !list.isEmpty())
-        .toList();
-  }
-
-  private static List<TagCriterion> parseTagQueryToken(TokenOrListParam tokenOrListParam) {
-    if (tokenOrListParam == null || tokenOrListParam.getValuesAsQueryTokens().isEmpty()) {
-      return Collections.emptyList();
-    }
-
-    return tokenOrListParam.getValuesAsQueryTokens().stream()
-        .flatMap(token -> FhirInputConverter.parseTagToken(token).stream())
-        .toList();
+    return FhirTokenParameterParser.parse(tagParam, FhirInputConverter::parseTagToken);
   }
 
   private static List<TagCriterion> parseTagToken(TokenParam token) {
@@ -240,19 +226,107 @@ public class FhirInputConverter {
   public static List<ClaimTypeCode> getClaimTypeCodesForType(
       @Nullable TokenAndListParam typeParam) {
 
-    if (typeParam == null || typeParam.getValuesAsQueryTokens().isEmpty()) {
-      return Collections.emptyList();
-    }
-    var typeParams = typeParam.getValuesAsQueryTokens();
-
-    return typeParams.stream()
-        .flatMap(
-            param ->
-                param.getValuesAsQueryTokens() == null
-                    ? Stream.empty()
-                    : param.getValuesAsQueryTokens().stream())
+    return FhirTokenParameterParser.flatten(typeParam)
         .map(token -> token.getValue().trim().toLowerCase())
         .flatMap(normalizedType -> ClaimTypeCode.getClaimTypeCodesByType(normalizedType).stream())
         .toList();
+  }
+
+  /**
+   * Parses the _security search parameter into a {@link SamhsaSearchIntent}.
+   *
+   * <p>Supports granular inclusion and exclusion of the SAMHSA claims.
+   *
+   * @param securityParam _source param from request
+   * @return {@link SamhsaSearchIntent}
+   */
+  public static SamhsaSearchIntent parseSecurityParameter(
+      @Nullable TokenAndListParam securityParam) {
+
+    var tokens = FhirTokenParameterParser.flatten(securityParam).toList();
+
+    if (tokens.isEmpty()) {
+      return SamhsaSearchIntent.UNSPECIFIED;
+    }
+    var requested = false;
+    var excluded = false;
+
+    for (var token : tokens) {
+      validateSamhsaToken(token);
+      var hasNotModifier = TokenParamModifier.NOT == token.getModifier();
+      if (hasNotModifier) {
+        excluded = true;
+      } else {
+        requested = true;
+      }
+    }
+
+    return resolveSamhsaSearchIntent(requested, excluded);
+  }
+
+  private static void validateSamhsaToken(TokenParam token) {
+    if (isSamhsaActCode(token)) {
+      return;
+    }
+    throw new InvalidRequestException(
+        String.format(
+            "Invalid security code: Use '%s' or '%s|%s'.",
+            IdrConstants.SAMHSA_SECURITY_CODE,
+            SystemUrls.SAMHSA_ACT_CODE_SYSTEM_URL,
+            IdrConstants.SAMHSA_SECURITY_CODE));
+  }
+
+  private static boolean isSamhsaActCode(TokenParam token) {
+    var code = token.getValue();
+    var system = token.getSystem();
+
+    return (IdrConstants.SAMHSA_SECURITY_CODE.equalsIgnoreCase(code)
+            && (Strings.isNullOrEmpty(system)))
+        || (SystemUrls.SAMHSA_ACT_CODE_SYSTEM_URL.equalsIgnoreCase(system)
+            && IdrConstants.SAMHSA_SECURITY_CODE.equalsIgnoreCase(code));
+  }
+
+  private static SamhsaSearchIntent resolveSamhsaSearchIntent(
+      boolean requestedSamhsa, boolean excludedSamhsa) {
+    if (requestedSamhsa && excludedSamhsa) {
+      throw new InvalidRequestException(
+          "Conflict in search filters: You have requested both to include and exclude the '42CFRPart2' (SAMHSA) security label. Please choose one to see results.");
+    }
+    if (requestedSamhsa) {
+      return SamhsaSearchIntent.ONLY_SAMHSA;
+    }
+    if (excludedSamhsa) {
+      return SamhsaSearchIntent.EXCLUDE_SAMHSA;
+    }
+
+    return SamhsaSearchIntent.UNSPECIFIED;
+  }
+
+  /**
+   * Parses the source query parameter into a nested list of sources.
+   *
+   * <p>Outer list is AND conditions, inner list is OR conditions.
+   *
+   * @param sourceParam _source param from request
+   * @return list of sources
+   */
+  public static List<List<MetaSourceSk>> parseSourceParameter(
+      @Nullable TokenAndListParam sourceParam) {
+    return FhirTokenParameterParser.parse(sourceParam, token -> List.of(parseSourceToken(token)));
+  }
+
+  private static MetaSourceSk parseSourceToken(TokenParam token) {
+    var source = token.getValue();
+
+    if (source == null || source.trim().isEmpty()) {
+      throw new InvalidRequestException("Source cannot be empty.");
+    }
+
+    return MetaSourceSk.tryFromDisplay(source.trim())
+        .orElseThrow(
+            () ->
+                new InvalidRequestException(
+                    "Unknown source. Supported sources are: "
+                        + Arrays.toString(MetaSourceSk.values())));
   }
 }

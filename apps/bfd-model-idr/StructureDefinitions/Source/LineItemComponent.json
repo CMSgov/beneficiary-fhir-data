@@ -725,11 +725,11 @@
                 ]
             },
             {
-                "id": "LineItemComponent.diagnosisRelatedLine",
-                "path": "LineItemComponent.diagnosisRelatedLine",
+                "id": "LineItemComponent.diagnosisSequence",
+                "path": "LineItemComponent.diagnosisSequence",
                 "label": "Corresponding diagnosis sequence number. Computed based upon resource generation.",
                 "min": 0,
-                "max": "1",
+                "max": "*",
                 "type": [
                     {
                         "code": "string"
@@ -1227,7 +1227,7 @@
               "label": "Supporting Info Sequence Number",
               "definition": "Pre-calculated sequence number for supportingInfo reference.",
               "min": 0,
-              "max": "1",
+            "max": "*",
               "type": [
                 {
                   "code": "string"

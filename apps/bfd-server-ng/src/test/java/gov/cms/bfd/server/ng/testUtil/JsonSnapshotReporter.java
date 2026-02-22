@@ -35,7 +35,7 @@ public class JsonSnapshotReporter implements SnapshotReporter {
       return;
     }
 
-    final var jsondiff = DiffGenerator.diff(current.getBody(), previous.getBody(), jsonMatcher);
+    final var jsondiff = DiffGenerator.diff(previous.getBody(), current.getBody(), jsonMatcher);
 
     // Adds a helpful bit of text at the end that spits out the specific JSON paths that have diffs
     final var errorsView = OnlyErrorDiffViewer.from(jsondiff).toString();

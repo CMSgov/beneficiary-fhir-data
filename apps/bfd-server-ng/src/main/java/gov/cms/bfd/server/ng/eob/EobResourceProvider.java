@@ -15,6 +15,8 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.bfd.server.ng.Configuration;
 import gov.cms.bfd.server.ng.SamhsaFilterMode;
+import gov.cms.bfd.server.ng.claim.model.SamhsaSearchIntent;
+import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
 import gov.cms.bfd.server.ng.input.FhirInputConverter;
 import gov.cms.bfd.server.ng.util.CertificateUtil;
 import jakarta.servlet.http.HttpServletRequest;
@@ -50,7 +52,10 @@ public class EobResourceProvider implements IResourceProvider {
    */
   @Read
   public ExplanationOfBenefit find(@IdParam final IdType fhirId, final HttpServletRequest request) {
-    var eob = eobHandler.find(FhirInputConverter.toLong(fhirId), getFilterModeForRequest(request));
+    var eob =
+        eobHandler.find(
+            FhirInputConverter.toLong(fhirId),
+            getFilterModeForRequest(request, SamhsaSearchIntent.UNSPECIFIED));
     return eob.orElseThrow(() -> new ResourceNotFoundException(fhirId));
   }
 
@@ -64,6 +69,8 @@ public class EobResourceProvider implements IResourceProvider {
    * @param startIndex start index
    * @param tag tags to filter by
    * @param type claim type to filter by
+   * @param source claim source to filter by
+   * @param security security to filter SAMHSA by
    * @param request HTTP request details
    * @return bundle
    */
@@ -77,20 +84,26 @@ public class EobResourceProvider implements IResourceProvider {
       @OptionalParam(name = START_INDEX) final NumberParam startIndex,
       @OptionalParam(name = Constants.PARAM_TAG) final TokenAndListParam tag,
       @OptionalParam(name = TYPE) final TokenAndListParam type,
+      @OptionalParam(name = Constants.PARAM_SOURCE) final TokenAndListParam source,
+      @OptionalParam(name = Constants.PARAM_SECURITY) final TokenAndListParam security,
       final HttpServletRequest request) {
 
     var tagCriteria = FhirInputConverter.parseTagParameter(tag);
     var claimTypeCodes = FhirInputConverter.getClaimTypeCodesForType(type);
+    var samhsaSearchIntent = FhirInputConverter.parseSecurityParameter(security);
 
-    return eobHandler.searchByBene(
-        FhirInputConverter.toLong(patient, "Patient"),
-        Optional.ofNullable(count),
-        FhirInputConverter.toDateTimeRange(serviceDate),
-        FhirInputConverter.toDateTimeRange(lastUpdated),
-        FhirInputConverter.toIntOptional(startIndex),
-        tagCriteria,
-        claimTypeCodes,
-        getFilterModeForRequest(request));
+    var criteria =
+        new ClaimSearchCriteria(
+            FhirInputConverter.toLong(patient, "Patient"),
+            FhirInputConverter.toDateTimeRange(serviceDate),
+            FhirInputConverter.toDateTimeRange(lastUpdated),
+            Optional.ofNullable(count),
+            FhirInputConverter.toIntOptional(startIndex),
+            tagCriteria,
+            claimTypeCodes,
+            FhirInputConverter.parseSourceParameter(source));
+
+    return eobHandler.searchByBene(criteria, getFilterModeForRequest(request, samhsaSearchIntent));
   }
 
   /**
@@ -113,14 +126,24 @@ public class EobResourceProvider implements IResourceProvider {
         FhirInputConverter.toLong(fhirId),
         FhirInputConverter.toDateTimeRange(serviceDate),
         FhirInputConverter.toDateTimeRange(lastUpdated),
-        getFilterModeForRequest(request));
+        getFilterModeForRequest(request, SamhsaSearchIntent.UNSPECIFIED));
   }
 
-  private SamhsaFilterMode getFilterModeForRequest(HttpServletRequest request) {
+  private SamhsaFilterMode getFilterModeForRequest(
+      HttpServletRequest request, SamhsaSearchIntent samhsaSearchIntent) {
     final var certAlias = certificateUtil.getAliasAttribute(request);
     final var samhsaAllowedCertificateAliases = configuration.getSamhsaAllowedCertificateAliases();
-    return certAlias.isEmpty() || !samhsaAllowedCertificateAliases.contains(certAlias.get())
-        ? SamhsaFilterMode.EXCLUDE
-        : SamhsaFilterMode.INCLUDE;
+    final var authorized =
+        certAlias.isPresent() && samhsaAllowedCertificateAliases.contains(certAlias.get());
+
+    if (!authorized) {
+      return SamhsaFilterMode.EXCLUDE;
+    }
+    // authorized, defer to security param
+    return switch (samhsaSearchIntent) {
+      case ONLY_SAMHSA -> SamhsaFilterMode.ONLY_SAMHSA;
+      case EXCLUDE_SAMHSA -> SamhsaFilterMode.EXCLUDE;
+      case UNSPECIFIED -> SamhsaFilterMode.INCLUDE;
+    };
   }
 }

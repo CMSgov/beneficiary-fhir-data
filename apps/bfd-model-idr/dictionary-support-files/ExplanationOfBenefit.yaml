@@ -2444,16 +2444,23 @@
   sourceView: V2_MDCR_CLM_FISS
   sourceColumn: CLM_CRNT_STUS_CD
   fhirPath: ExplanationOfBenefit.outcome
-- inputPath: ExplanationOfBenefit-Professional-Base.CLM_AUDT_TRL_STUS_CD
+- inputPath: ExplanationOfBenefit-Base.CLM_AUDT_TRL_STUS_CD
   appliesTo:
+    - Inpatient
+    - Outpatient
+    - Hospice
+    - HHA
+    - SNF
     - Carrier
     - DME
   sources:
     - MCS
     - VMS
+    - FISS
   sourceView: V2_MDCR_CLM_LCTN_HSTRY
   sourceColumn: CLM_AUDT_TRL_STUS_CD
   fhirPath: ExplanationOfBenefit.outcome
+  notes: The status code can be retrieved via ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_AUDT_TRL_STUS_CD').exists()).code.coding.code
 - inputPath: ExplanationOfBenefit-Base.PRVDR_RFRG_PRVDR_NPI_NUM
   appliesTo:
     - Outpatient
