@@ -1,34 +1,30 @@
 package gov.cms.bfd.server.ng.claim.model;
 
 import gov.cms.bfd.server.ng.util.SystemUrls;
-import java.util.Arrays;
 import java.util.Optional;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /** Catastrophic coverage codes. */
-@AllArgsConstructor
-@Getter
-public enum CatastrophicCoverageCode {
+public record CatastrophicCoverageCode(String code, String display) {
   /** A - Attachment point met on this event. */
-  A("A", "Attachment point met on this event"),
+  public static final CatastrophicCoverageCode A = new CatastrophicCoverageCode("A", "Attachment point met on this event");
   /** C - Above attachment point. */
-  C("C", "Above attachment point");
-
-  private final String code;
-  private final String display;
+  public static final CatastrophicCoverageCode C = new CatastrophicCoverageCode("C", "Above attachment point");
 
   /**
    * Convert from a database code.
    *
-   * @param code database code
-   * @return catastrophic coverage code
+   * @param code database code.
+   * @return catastrophic coverage code and its matching display, or an empty string for the display if code is invalid.
    */
   public static Optional<CatastrophicCoverageCode> tryFromCode(String code) {
-    return Arrays.stream(values()).filter(v -> v.code.equals(code)).findFirst();
+    return switch (code) {
+      case "A" -> Optional.of(A);
+      case "C" -> Optional.of(C);
+      default -> Optional.of(new CatastrophicCoverageCode(code, ""));
+    };
   }
 
   ExplanationOfBenefit.SupportingInformationComponent toFhir(
