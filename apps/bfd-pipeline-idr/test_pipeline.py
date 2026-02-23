@@ -17,11 +17,14 @@ from testcontainers.postgres import PostgresContainer  # type: ignore
 
 from constants import DEFAULT_MAX_DATE
 from load_synthetic import load_from_csv
+from logger_config import configure_logger
 from pipeline import run
 
 # ryuk throws a 500 or 404 error for some reason
 # seems to have issues with podman https://github.com/testcontainers/testcontainers-python/issues/753
 testcontainers_config.ryuk_disabled = True
+
+configure_logger()
 
 
 def _run_migrator(postgres: PostgresContainer) -> None:
@@ -57,6 +60,9 @@ def setup_db() -> Generator[PostgresContainer]:
             load_from_csv(conn, "./test_samples1")  # type: ignore
 
             info = conn.info
+            # Info level logs obscure the error output when running tests
+            # so we want to override this unless the calling process has set this explicitly
+            os.environ.setdefault("IDR_LOG_LEVEL", "warning")
             os.environ["BFD_DB_ENDPOINT"] = info.host
             os.environ["BFD_DB_PORT"] = str(info.port)
             os.environ["BFD_DB_NAME"] = info.dbname
@@ -205,7 +211,7 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
     assert rows[1]["bene_mbi_id"] == "6LM1C27GV22"
 
     cur = conn.execute("select * from idr.claim order by clm_uniq_id")
-    assert cur.rowcount == 142
+    assert cur.rowcount == 143
     rows = cur.fetchmany(1)
     assert rows[0]["clm_uniq_id"] == 113370100080
     assert rows[0]["clm_nrln_ric_cd"] == "W"
@@ -286,3 +292,25 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
     assert cur.rowcount == 2
     rows = cur.fetchmany(1)
     assert rows[0]["bene_sk"] == 353816020
+
+    cur = conn.execute(
+        "select * from idr_new.claim_institutional_ss where clm_uniq_id = 8244064276500"
+    )
+    assert cur.rowcount == 0
+
+    cur = conn.execute("select * from idr_new.claim_institutional_nch order by clm_uniq_id")
+    assert cur.rowcount == 51
+    rows = cur.fetchmany(1)
+    assert rows[0]["clm_uniq_id"] == 113370100080
+
+    cur = conn.execute("select * from idr_new.claim_institutional_ss order by clm_uniq_id")
+    assert cur.rowcount == 21
+
+    cur = conn.execute("select * from idr_new.claim_professional_nch order by clm_uniq_id")
+    assert cur.rowcount == 33
+
+    cur = conn.execute("select * from idr_new.claim_professional_ss order by clm_uniq_id")
+    assert cur.rowcount == 1
+
+    cur = conn.execute("select * from idr_new.claim_rx order by clm_uniq_id")
+    assert cur.rowcount == 19

@@ -16,11 +16,6 @@ from model.base_model import (
 )
 from model.load_progress import LoadProgress
 
-console_handler = logging.StreamHandler()
-formatter = logging.Formatter("[%(levelname)s] %(asctime)s %(message)s")
-console_handler.setFormatter(formatter)
-logging.basicConfig(level=logging.INFO, handlers=[console_handler])
-
 logger = logging.getLogger(__name__)
 
 

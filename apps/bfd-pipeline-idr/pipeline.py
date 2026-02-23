@@ -2,22 +2,17 @@ import logging
 import sys
 from concurrent.futures import ProcessPoolExecutor
 from datetime import UTC, datetime
-from os import getenv
 
 from hamilton import driver, telemetry  # type: ignore
 from hamilton.execution import executors  # type: ignore
 
 import pipeline_nodes
 from load_partition import LoadType
+from logger_config import configure_logger
 from model.base_model import LoadMode
 from settings import LOAD_TYPE, MAX_TASKS
 
 telemetry.disable_telemetry()
-
-console_handler = logging.StreamHandler()
-formatter = logging.Formatter("[%(levelname)s] %(asctime)s %(message)s")
-console_handler.setFormatter(formatter)
-logging.basicConfig(level=getenv("IDR_LOG_LEVEL", "DEBUG").upper(), handlers=[console_handler])
 
 logger = logging.getLogger(__name__)
 
@@ -79,4 +74,5 @@ def run(load_mode: str) -> None:
 
 
 if __name__ == "__main__":
+    configure_logger()
     main()

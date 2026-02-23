@@ -288,7 +288,7 @@ class IdrClaimProfessionalSs(IdrBaseModel):
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
             JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_dt_sgntr {sgntr} ON 
                 {sgntr}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
-            JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_prfnl {prfnl} ON
+            LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_prfnl {prfnl} ON
                 {clm}.geo_bene_sk = {prfnl}.geo_bene_sk AND
                 {clm}.clm_dt_sgntr_sk = {prfnl}.clm_dt_sgntr_sk AND
                 {clm}.clm_type_cd = {prfnl}.clm_type_cd AND
