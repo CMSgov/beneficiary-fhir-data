@@ -12,7 +12,7 @@ public class CatastrophicCoverageCodeConverter
   @Override
   public String convertToDatabaseColumn(
       Optional<CatastrophicCoverageCode> catastrophicCoverageCode) {
-    return catastrophicCoverageCode.map(CatastrophicCoverageCode::code).orElse("");
+    return catastrophicCoverageCode.map(CatastrophicCoverageCode::getCode).orElse("");
   }
 
   @Override
