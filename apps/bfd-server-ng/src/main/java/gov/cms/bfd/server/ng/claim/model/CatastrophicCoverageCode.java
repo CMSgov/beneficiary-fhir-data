@@ -30,20 +30,23 @@ public enum CatastrophicCoverageCode {
    * @return catastrophic coverage code
    */
   public static Optional<CatastrophicCoverageCode> tryFromCode(String code) {
-    return Optional.of(
-        Arrays.stream(values())
-            .filter(v -> v.code.equals(code))
-            .findFirst()
-            .orElse(captureInvalidValue(code)));
+    return
+            Optional.ofNullable(Arrays.stream(values())
+                    .filter(v -> v.code.equals(code))
+                    .findFirst()
+                    .orElse(handleInvalidValueOrNull(code)));
   }
 
   /**
-   * Captures an invalid value and maps it to the INVALID enum.
+   * Handles scenarios where code could not be mapped to a valid value.
    *
    * @param invalidValue the invalid value to capture
    * @return INVALID catastrophic coverage code
    */
-  public static CatastrophicCoverageCode captureInvalidValue(String invalidValue) {
+  public static CatastrophicCoverageCode handleInvalidValueOrNull(String invalidValue) {
+    if (invalidValue == null || invalidValue.isBlank()){
+      return null; // null will trigger tryFromCode to return an empty optional
+    }
     var invalidCatastrophicCoverageCode = CatastrophicCoverageCode.INVALID;
     invalidCatastrophicCoverageCode.code = invalidValue;
     return invalidCatastrophicCoverageCode;
