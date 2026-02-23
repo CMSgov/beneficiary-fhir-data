@@ -3028,6 +3028,18 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
       },
       "category" : {
         "coding" : [ {
+          "code" : "CLM_LINE_CARR_PSYCH_OT_LMT_AMT",
+          "display" : "Therapy Amount Applied to Limit",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 0
+      },
+      "category" : {
+        "coding" : [ {
           "code" : "coinsurance",
           "display" : "Co-insurance",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
@@ -3066,18 +3078,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
         }, {
           "code" : "CLM_LINE_MDCR_DDCTBL_AMT",
           "display" : "Cash Deductible Amount",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-        } ]
-      }
-    }, {
-      "amount" : {
-        "currency" : "USD",
-        "value" : 0
-      },
-      "category" : {
-        "coding" : [ {
-          "code" : "CLM_LINE_OTAF_AMT",
-          "display" : "Provider Obligation To Accept as Full Amount",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
@@ -3148,18 +3148,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
     }, {
       "amount" : {
         "currency" : "USD",
-        "value" : 0
-      },
-      "category" : {
-        "coding" : [ {
-          "code" : "CLM_LINE_CARR_PSYCH_OT_LMT_AMT",
-          "display" : "Therapy Amount Applied to Limit",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-        } ]
-      }
-    }, {
-      "amount" : {
-        "currency" : "USD",
         "value" : 0.35
       },
       "category" : {
@@ -3170,6 +3158,18 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
         }, {
           "code" : "CLM_LINE_SBMT_CHRG_AMT",
           "display" : "Line Submitted Charge Amount",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 0
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "CLM_LINE_OTAF_AMT",
+          "display" : "Provider Obligation To Accept as Full Amount",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
@@ -3691,22 +3691,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
     "adjudication" : [ {
       "amount" : {
         "currency" : "USD",
-        "value" : 0
-      },
-      "category" : {
-        "coding" : [ {
-          "code" : "coinsurance",
-          "display" : "Co-insurance",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-        }, {
-          "code" : "CLM_LINE_MDCR_COINSRNC_AMT",
-          "display" : "Coinsurance Amount",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-        } ]
-      }
-    }, {
-      "amount" : {
-        "currency" : "USD",
         "value" : 992.09
       },
       "category" : {
@@ -3719,72 +3703,16 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
     }, {
       "amount" : {
         "currency" : "USD",
-        "value" : 9650.03
-      },
-      "category" : {
-        "coding" : [ {
-          "code" : "CLM_LINE_PRFNL_INTRST_AMT",
-          "display" : "Professional Interest Amount",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-        } ]
-      }
-    }, {
-      "amount" : {
-        "currency" : "USD",
-        "value" : 2676.69
-      },
-      "category" : {
-        "coding" : [ {
-          "code" : "CLM_MDCR_PRMRY_PYR_ALOWD_AMT",
-          "display" : "Line Primary Payer Allowed Amount",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-        } ]
-      }
-    }, {
-      "amount" : {
-        "currency" : "USD",
-        "value" : 4517.0
-      },
-      "category" : {
-        "coding" : [ {
-          "code" : "priorpayerpaid",
-          "display" : "Prior payer paid",
-          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
-        }, {
-          "code" : "CLM_BENE_PRMRY_PYR_PD_AMT",
-          "display" : "Line Primary Payer Paid Amount",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-        } ]
-      }
-    }, {
-      "amount" : {
-        "currency" : "USD",
         "value" : 0
       },
       "category" : {
         "coding" : [ {
-          "code" : "discount",
-          "display" : "Discount",
-          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
-        }, {
-          "code" : "CLM_LINE_DMERC_SCRN_SVGS_AMT",
-          "display" : "Screen Savings Amount",
+          "code" : "coinsurance",
+          "display" : "Co-insurance",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-        } ]
-      }
-    }, {
-      "amount" : {
-        "currency" : "USD",
-        "value" : 0
-      },
-      "category" : {
-        "coding" : [ {
-          "code" : "eligible",
-          "display" : "Eligible Amount",
-          "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
         }, {
-          "code" : "CLM_LINE_PRFNL_DME_PRICE_AMT",
-          "display" : "Purchase Price Amount",
+          "code" : "CLM_LINE_MDCR_COINSRNC_AMT",
+          "display" : "Coinsurance Amount",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
@@ -3865,6 +3793,94 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
         }, {
           "code" : "CLM_LINE_CVRD_PD_AMT",
           "display" : "Payment Amount",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 0
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "eligible",
+          "display" : "Eligible Amount",
+          "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+        }, {
+          "code" : "CLM_LINE_PRFNL_DME_PRICE_AMT",
+          "display" : "Purchase Price Amount",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 0.35
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "submitted",
+          "display" : "Submitted Amount",
+          "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
+        }, {
+          "code" : "CLM_LINE_SBMT_CHRG_AMT",
+          "display" : "Line Submitted Charge Amount",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 9650.03
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "CLM_LINE_PRFNL_INTRST_AMT",
+          "display" : "Professional Interest Amount",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 2676.69
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "CLM_MDCR_PRMRY_PYR_ALOWD_AMT",
+          "display" : "Line Primary Payer Allowed Amount",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 4517.0
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "priorpayerpaid",
+          "display" : "Prior payer paid",
+          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+        }, {
+          "code" : "CLM_BENE_PRMRY_PYR_PD_AMT",
+          "display" : "Line Primary Payer Paid Amount",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 0
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "discount",
+          "display" : "Discount",
+          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+        }, {
+          "code" : "CLM_LINE_DMERC_SCRN_SVGS_AMT",
+          "display" : "Screen Savings Amount",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
