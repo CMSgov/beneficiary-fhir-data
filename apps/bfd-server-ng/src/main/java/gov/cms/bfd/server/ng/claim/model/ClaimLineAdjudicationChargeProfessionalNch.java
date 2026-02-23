@@ -47,8 +47,12 @@ class ClaimLineAdjudicationChargeProfessionalNch {
   @Column(name = "clm_line_mdcr_ddctbl_amt")
   private BigDecimal deductibleAmount;
 
+  @Column(name = "clm_line_mdcr_coinsrnc_amt")
+  private BigDecimal coinsrncAmount;
+
   List<ExplanationOfBenefit.AdjudicationComponent> toFhir() {
     return List.of(
+        AdjudicationChargeType.LINE_MEDICARE_COINSURANCE_AMOUNT.toFhirAdjudication(coinsrncAmount),
         AdjudicationChargeType.LINE_PROFESSIONAL_THERAPY_LMT_AMOUNT.toFhirAdjudication(
             therapyAmountAppliedToLimit),
         AdjudicationChargeType.LINE_PROFESSIONAL_INTEREST_AMOUNT.toFhirAdjudication(

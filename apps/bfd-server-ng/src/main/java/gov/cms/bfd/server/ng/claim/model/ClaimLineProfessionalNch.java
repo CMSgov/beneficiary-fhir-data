@@ -69,13 +69,9 @@ public class ClaimLineProfessionalNch implements ClaimLineBase {
     hcpcsCode.toFhir().ifPresent(productOrService::addCoding);
 
     line.setQuantity(serviceUnitQuantity.toFhir());
-
     line.setProductOrService(FhirUtil.checkDataAbsent(productOrService));
-
     line.addModifier(hcpcsModifierCode.toFhir());
-
     fromDate.map(d -> line.setServiced(new DateType(DateUtil.toDate(d))));
-
     adjudicationCharge.toFhir().forEach(line::addAdjudication);
 
     return Optional.of(line);

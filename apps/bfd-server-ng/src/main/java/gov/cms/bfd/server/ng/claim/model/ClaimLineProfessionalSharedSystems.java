@@ -69,7 +69,6 @@ public class ClaimLineProfessionalSharedSystems implements ClaimLineBase {
     line.setQuantity(quantity);
     line.addModifier(hcpcsModifierCode.toFhir());
     fromDate.map(d -> line.setServiced(new DateType(DateUtil.toDate(d))));
-
     adjudicationCharge.toFhir().forEach(line::addAdjudication);
 
     return Optional.of(line);

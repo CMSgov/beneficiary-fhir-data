@@ -52,6 +52,7 @@ class IdrClaimItemProfessionalNch(IdrBaseModel):
     clm_line_ansthsa_unit_cnt: Annotated[float | None, {ALIAS: ALIAS_LINE}]
     clm_line_prvdr_pmt_amt: Annotated[float | None, {ALIAS: ALIAS_LINE}]
     clm_line_bene_pd_amt: Annotated[float | None, {ALIAS: ALIAS_LINE}]
+    clm_line_mdcr_coinsrnc_amt: Annotated[float | None, {ALIAS: ALIAS_LINE}]
     clm_line_cvrd_pd_amt: Annotated[float | None, {ALIAS: ALIAS_LINE}]
     clm_line_dgns_cd: Annotated[str, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_null_string)]
     clm_line_from_dt: Annotated[

@@ -3024,6 +3024,22 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
     "adjudication" : [ {
       "amount" : {
         "currency" : "USD",
+        "value" : 0
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "coinsurance",
+          "display" : "Co-insurance",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        }, {
+          "code" : "CLM_LINE_MDCR_COINSRNC_AMT",
+          "display" : "Coinsurance Amount",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
         "value" : 2.44
       },
       "category" : {
@@ -3673,6 +3689,22 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
   },
   "item" : [ {
     "adjudication" : [ {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 0
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "coinsurance",
+          "display" : "Co-insurance",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        }, {
+          "code" : "CLM_LINE_MDCR_COINSRNC_AMT",
+          "display" : "Coinsurance Amount",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
       "amount" : {
         "currency" : "USD",
         "value" : 992.09

@@ -413,7 +413,13 @@ enum AdjudicationChargeType {
       "submitted",
       "Submitted Amount",
       "TOT_RX_CST_AMT",
-      "Total drug cost (Part D)");
+      "Total drug cost (Part D)"),
+  LINE_MEDICARE_COINSURANCE_AMOUNT(
+      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
+      "coinsurance",
+      "Co-insurance",
+      "CLM_LINE_MDCR_COINSRNC_AMT",
+      "Coinsurance Amount");
 
   private final String coding1System;
   private final String coding1Code;

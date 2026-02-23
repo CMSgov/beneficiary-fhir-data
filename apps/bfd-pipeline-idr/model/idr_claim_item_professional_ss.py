@@ -52,6 +52,7 @@ class IdrClaimItemProfessionalSs(IdrBaseModel):
     clm_line_alowd_chrg_amt: Annotated[float | None, {ALIAS: ALIAS_LINE}]
     clm_line_prvdr_pmt_amt: Annotated[float | None, {ALIAS: ALIAS_LINE}]
     clm_line_bene_pd_amt: Annotated[float | None, {ALIAS: ALIAS_LINE}]
+    clm_line_mdcr_coinsrnc_amt: Annotated[float | None, {ALIAS: ALIAS_LINE}]
     clm_line_cvrd_pd_amt: Annotated[float | None, {ALIAS: ALIAS_LINE}]
     clm_line_dgns_cd: Annotated[str, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_null_string)]
     clm_line_from_dt: Annotated[
@@ -128,6 +129,7 @@ class IdrClaimItemProfessionalSs(IdrBaseModel):
     clm_fed_type_srvc_cd: Annotated[
         str, {ALIAS: ALIAS_LINE_PRFNL}, BeforeValidator(transform_default_string)
     ]
+    clm_line_hct_hgb_rslt_num: Annotated[float | None, {ALIAS: ALIAS_LINE_PRFNL}]
     clm_line_prfnl_dme_price_amt: Annotated[float | None, {ALIAS: ALIAS_LINE_PRFNL}]
     clm_pmt_80_100_cd: Annotated[
         str, {ALIAS: ALIAS_LINE_PRFNL}, BeforeValidator(transform_default_string)
