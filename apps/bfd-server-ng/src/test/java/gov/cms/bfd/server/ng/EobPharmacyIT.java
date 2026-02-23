@@ -88,7 +88,7 @@ class EobPharmacyIT extends IntegrationTestBase {
     var detail = item.getDetailFirstRep();
 
     assertEquals("compound", item.getProductOrService().getCoding().get(0).getCode());
-    assertNull(item.getQuantity().getUnit(), "Compound meds should have null unit");
+    assertNull(item.getQuantity().getUnit(), "Compound meds should be null");
     assertEquals("00338004904", detail.getProductOrService().getCoding().get(0).getCode());
   }
 
@@ -96,14 +96,14 @@ class EobPharmacyIT extends IntegrationTestBase {
     var supportingInfo = eob.getSupportingInfo();
     assertTrue(supportingInfo.size() >= 4, "C4BB profile requires >= 4 supporting info");
 
-    boolean hasBadDateTime =
+    var hasBadDateTime =
         supportingInfo.stream()
             .anyMatch(
                 s ->
                     s.hasTiming()
                         && s.getTiming() instanceof DateTimeType dt
                         && dt.getValue().toString().startsWith("9999-12-31"));
-    assertFalse(hasBadDateTime, "Should not contain placeholder '9999' date times");
+    assertFalse(hasBadDateTime, "Should not contain placeholder date times");
   }
 
   private void validateCareTeamAndPrescriber(
