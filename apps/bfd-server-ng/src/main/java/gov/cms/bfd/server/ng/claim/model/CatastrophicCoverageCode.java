@@ -3,14 +3,15 @@ package gov.cms.bfd.server.ng.claim.model;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.util.Arrays;
 import java.util.Optional;
+
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /** Catastrophic coverage codes. */
-@RequiredArgsConstructor
+@AllArgsConstructor
 @Getter
 public enum CatastrophicCoverageCode {
   /** A - Attachment point met on this event. */
@@ -20,9 +21,8 @@ public enum CatastrophicCoverageCode {
   /** INVALID - Represents an invalid code that we still want to capture. */
   INVALID("", "");
 
-  private final String code;
+  private String code;
   private final String display;
-  private String invalidValue;
 
   /**
    * Convert from a database code.
@@ -46,7 +46,7 @@ public enum CatastrophicCoverageCode {
    */
   public static CatastrophicCoverageCode captureInvalidValue(String invalidValue) {
     var invalidCatastrophicCoverageCode = CatastrophicCoverageCode.INVALID;
-    invalidCatastrophicCoverageCode.invalidValue = invalidValue;
+    invalidCatastrophicCoverageCode.code = invalidValue;
     return invalidCatastrophicCoverageCode;
   }
 
