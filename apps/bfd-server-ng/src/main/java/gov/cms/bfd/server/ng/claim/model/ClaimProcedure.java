@@ -30,12 +30,14 @@ public class ClaimProcedure extends ClaimProcedureBase {
 
   @Override
   public Optional<ExplanationOfBenefit.ProcedureComponent> toFhirProcedure() {
-    if (procedureCode.isEmpty() || getSequenceNumber().isEmpty() || getIcdIndicator().isEmpty()) {
+    var sequenceNumber = getSequenceNumber();
+    var icdIndicator = getIcdIndicator();
+    if (procedureCode.isEmpty() || sequenceNumber.isEmpty() || icdIndicator.isEmpty()) {
       return Optional.empty();
     }
     var procedure = new ExplanationOfBenefit.ProcedureComponent();
-    procedure.setSequence(getSequenceNumber().get());
-    var code = getSequenceNumber().get() == 1 ? "principal" : "other";
+    procedure.setSequence(sequenceNumber.get());
+    var code = sequenceNumber.get() == 1 ? "principal" : "other";
     procedure.addType(
         new CodeableConcept()
             .addCoding(
@@ -49,12 +51,11 @@ public class ClaimProcedure extends ClaimProcedureBase {
           }
         });
 
-    String formattedProcedureCode =
-        getIcdIndicator().get().formatProcedureCode(procedureCode.get());
+    var formattedProcedureCode = icdIndicator.get().formatProcedureCode(procedureCode.get());
     procedure.setProcedure(
         new CodeableConcept(
             new Coding()
-                .setSystem(getIcdIndicator().get().getProcedureSystem())
+                .setSystem(icdIndicator.get().getProcedureSystem())
                 .setCode(formattedProcedureCode)));
 
     return Optional.of(procedure);

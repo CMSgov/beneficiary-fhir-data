@@ -39,17 +39,6 @@ class EobReadIT extends IntegrationTestBase {
     expectFhir().toMatchSnapshot(eob);
   }
 
-  //    @Test
-  //    void eobReadQueryCount() {
-  //      var events = ThreadSafeAsyncAppender.createAndAttach();
-  //      try {
-  //        eobResourceProvider.find(new IdType(CLAIM_ID_ADJUDICATED_ICD_9), request);
-  //        assertEquals(8, queryCount(events.getLogs()));
-  //      } finally {
-  //        events.stopAndDetach();
-  //      }
-  //    }
-
   @Test
   void eobReadValidString() {
     var patient = eobRead().withId(CLAIM_ID_ADJUDICATED).execute();

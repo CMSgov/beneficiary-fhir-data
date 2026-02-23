@@ -32,7 +32,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class EobResourceProvider implements IResourceProvider {
   private final EobNewHandler eobHandler;
-  //  private final EobNewHandler eobNewHandler;
   private final CertificateUtil certificateUtil;
   private final Configuration configuration;
   private static final String SERVICE_DATE = "service-date";

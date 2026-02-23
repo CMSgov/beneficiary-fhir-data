@@ -19,6 +19,8 @@ import org.hl7.fhir.r4.model.Reference;
 class ProviderFhirHelper {
   private ProviderFhirHelper() {}
 
+  private static final String NPI_DISPLAY = "National provider identifier";
+
   /**
    * Creates a FHIR {@link Organization} populated with an NPI identifier and optional legal name.
    *
@@ -31,17 +33,7 @@ class ProviderFhirHelper {
       String id, String npiNumber, Optional<String> legalName) {
     var organization = OrganizationFactory.toFhir();
     organization.setId(id);
-    organization.addIdentifier(
-        new Identifier()
-            .setSystem(SystemUrls.NPI)
-            .setValue(npiNumber)
-            .setType(
-                new CodeableConcept()
-                    .addCoding(
-                        new Coding()
-                            .setSystem(SystemUrls.HL7_IDENTIFIER)
-                            .setCode("NPI")
-                            .setDisplay("National provider identifier"))));
+    organization.addIdentifier(createNpiIdentifier(npiNumber));
 
     legalName.ifPresent(organization::setName);
     return organization;
@@ -64,17 +56,7 @@ class ProviderFhirHelper {
             .addProfile(SystemUrls.PROFILE_CARIN_BB_PRACTITIONER_2_1_0)
             .addProfile(SystemUrls.PROFILE_US_CORE_PRACTITIONER_6_1_0));
 
-    practitioner.addIdentifier(
-        new Identifier()
-            .setSystem(SystemUrls.NPI)
-            .setValue(npiNumber)
-            .setType(
-                new CodeableConcept()
-                    .addCoding(
-                        new Coding()
-                            .setSystem(SystemUrls.HL7_IDENTIFIER)
-                            .setCode("NPI")
-                            .setDisplay("National provider identifier"))));
+    practitioner.addIdentifier(createNpiIdentifier(npiNumber));
 
     practitioner.setName(List.of(name));
     return practitioner;
@@ -91,17 +73,7 @@ class ProviderFhirHelper {
   public static Reference createProviderReference(String npiNumber, Optional<String> name) {
     var reference = new Reference();
 
-    reference.setIdentifier(
-        new Identifier()
-            .setSystem(SystemUrls.NPI)
-            .setValue(npiNumber)
-            .setType(
-                new CodeableConcept()
-                    .addCoding(
-                        new Coding()
-                            .setSystem(SystemUrls.HL7_IDENTIFIER)
-                            .setCode("NPI")
-                            .setDisplay("National provider identifier"))));
+    reference.setIdentifier(createNpiIdentifier(npiNumber));
     name.ifPresent(reference::setDisplay);
     return reference;
   }
@@ -127,10 +99,7 @@ class ProviderFhirHelper {
     // If it's an NPI, add the NPI coding
     if (qualifierCode == ProviderIdQualifierCode._01) {
       type.addCoding(
-          new Coding()
-              .setSystem(SystemUrls.HL7_IDENTIFIER)
-              .setCode("NPI")
-              .setDisplay("National provider identifier"));
+          new Coding().setSystem(SystemUrls.HL7_IDENTIFIER).setCode("NPI").setDisplay(NPI_DISPLAY));
       identifier.setSystem(SystemUrls.NPI);
     } else {
       // For other types, use generic system
@@ -142,5 +111,18 @@ class ProviderFhirHelper {
 
     displayName.ifPresent(reference::setDisplay);
     return reference;
+  }
+
+  private static Identifier createNpiIdentifier(String npiNumber) {
+    return new Identifier()
+        .setSystem(SystemUrls.NPI)
+        .setValue(npiNumber)
+        .setType(
+            new CodeableConcept()
+                .addCoding(
+                    new Coding()
+                        .setSystem(SystemUrls.HL7_IDENTIFIER)
+                        .setCode("NPI")
+                        .setDisplay(NPI_DISPLAY)));
   }
 }

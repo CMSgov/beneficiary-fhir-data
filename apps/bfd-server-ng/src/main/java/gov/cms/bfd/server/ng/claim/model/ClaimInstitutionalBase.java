@@ -233,27 +233,29 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
     var poaDiagnoses = new HashMap<String, String>();
 
     for (var item : getClaimItems()) {
-      if (item.getProcedure().isPresent()) {
-        var procedure = item.getProcedure().get();
-        var keyOpt = procedure.getDiagnosisKey();
-        if (keyOpt.isEmpty()) {
-          continue;
-        }
-        var key = keyOpt.get();
+      item.getProcedure()
+          .ifPresent(
+              procedure -> {
+                var keyOpt = procedure.getDiagnosisKey();
+                keyOpt.ifPresent(
+                    key -> {
+                      procedure
+                          .getClaimPoaIndicator()
+                          .ifPresent(
+                              p -> poaDiagnoses.merge(key, p, (oldVal, newVal) -> oldVal + newVal));
 
-        procedure
-            .getClaimPoaIndicator()
-            .ifPresent(p -> poaDiagnoses.merge(key, p, (oldVal, newVal) -> oldVal + newVal));
-
-        diagnosisMap
-            .computeIfAbsent(
-                key,
-                _ ->
-                    new PriorityQueue<>(
-                        Comparator.comparingInt(
-                            a -> a.getDiagnosisPriority(ClaimContext.INSTITUTIONAL).orElse(0))))
-            .add(procedure);
-      }
+                      diagnosisMap
+                          .computeIfAbsent(
+                              key,
+                              _ ->
+                                  new PriorityQueue<>(
+                                      Comparator.comparingInt(
+                                          a ->
+                                              a.getDiagnosisPriority(ClaimContext.INSTITUTIONAL)
+                                                  .orElse(0))))
+                          .add(procedure);
+                    });
+              });
     }
 
     return diagnosisMap.values().stream()

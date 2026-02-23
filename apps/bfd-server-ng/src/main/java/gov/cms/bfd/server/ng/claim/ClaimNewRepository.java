@@ -11,7 +11,9 @@ import io.micrometer.core.annotation.Timed;
 import io.micrometer.core.aop.MeterTag;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -62,7 +64,7 @@ public class ClaimNewRepository {
               JOIN FETCH c.beneficiary b
             """;
 
-  private static final Set<Class<? extends ClaimBase>> ALL_CLAIM_CLASSES =
+  private static final Set<Class<? extends ClaimBase>> ALL_CLAIM_TYPES =
       Set.of(
           ClaimProfessionalNch.class,
           ClaimInstitutionalNch.class,
@@ -188,11 +190,8 @@ public class ClaimNewRepository {
     }
 
     CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
-    return futures.stream()
-        .flatMap(f -> f.join().stream())
-        .map(ClaimBase.class::cast)
-        .sorted(Comparator.comparing(ClaimBase::getClaimUniqueId))
-        .toList();
+    Stream<ClaimBase> claims = futures.stream().flatMap(f -> f.join().stream());
+    return claims.sorted(Comparator.comparing(ClaimBase::getClaimUniqueId)).toList();
   }
 
   private Set<Class<? extends ClaimBase>> determineClaimTypesToQuery(
@@ -203,27 +202,25 @@ public class ClaimNewRepository {
             .flatMap(List::stream)
             .anyMatch(TagCriterion.FinalActionCriterion.class::isInstance);
     if (hasFinalAction) {
-      return ALL_CLAIM_CLASSES;
+      return ALL_CLAIM_TYPES;
     }
 
-    var eligible = new HashSet<>(ALL_CLAIM_CLASSES);
+    var eligible = new HashSet<>(ALL_CLAIM_TYPES);
 
-    if (sources != null && !sources.isEmpty()) {
+    if (!sources.isEmpty()) {
       var metaSources = sources.stream().flatMap(List::stream).collect(Collectors.toSet());
       var allowedByMetaSource =
           metaSources.stream()
               .flatMap(ms -> mapMetaSourceToClaimType(ms).stream())
               .collect(Collectors.toSet());
-      eligible.addAll(allowedByMetaSource);
+      eligible.retainAll(allowedByMetaSource);
     }
 
-    if (tagCriteria != null && !tagCriteria.isEmpty()) {
+    if (!tagCriteria.isEmpty()) {
       var tagSourceIds =
           tagCriteria.stream()
               .flatMap(List::stream)
-              .filter(TagCriterion.SourceIdCriterion.class::isInstance)
-              .map(TagCriterion.SourceIdCriterion.class::cast)
-              .map(TagCriterion.SourceIdCriterion::sourceId)
+              .mapMulti(this::extractSourceId)
               .collect(Collectors.toSet());
 
       if (!tagSourceIds.isEmpty()) {
@@ -232,7 +229,7 @@ public class ClaimNewRepository {
                 .flatMap(src -> mapClaimSourceIdToClaimType(src).stream())
                 .collect(Collectors.toSet());
 
-        eligible.addAll(allowedByTagSource);
+        eligible.retainAll(allowedByTagSource);
       }
     }
     return eligible;
@@ -253,7 +250,13 @@ public class ClaimNewRepository {
           Set.of(ClaimProfessionalNch.class, ClaimInstitutionalNch.class, ClaimRx.class);
       case VMS, MCS, FISS ->
           Set.of(ClaimProfessionalSharedSystems.class, ClaimInstitutionalSharedSystems.class);
-      default -> ALL_CLAIM_CLASSES;
+      default -> ALL_CLAIM_TYPES;
     };
+  }
+
+  private void extractSourceId(TagCriterion criterion, Consumer<ClaimSourceId> consumer) {
+    if (criterion instanceof TagCriterion.SourceIdCriterion(ClaimSourceId sourceId)) {
+      consumer.accept(sourceId);
+    }
   }
 }

@@ -66,40 +66,6 @@ class EobSearchIT extends IntegrationTestBase {
     expectFhir().scenario(searchStyle.name()).toMatchSnapshot(eobBundle);
   }
 
-  //    @Test
-  //    void eobSearchQueryCount() {
-  //      var events = ThreadSafeAsyncAppender.createAndAttach();
-  //      try {
-  //        var bundle =
-  //            eobResourceProvider.searchByPatient(
-  //                new ReferenceParam("178083966"), null, null, null, null, null, null, request);
-  //        assertFalse(bundle.getEntry().isEmpty());
-  //        assertEquals(3, bundle.getEntry().size());
-  //        assertEquals(10, queryCount(events.getLogs()));
-  //      } finally {
-  //        events.stopAndDetach();
-  //      }
-  //    }
-
-  /*@Test
-  void eobSearchQueryCount() {
-    var events = ThreadSafeAppender.startRecord();
-    var bundle =
-        eobResourceProvider.searchByPatient(
-            new ReferenceParam("178083966"),
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            request);
-    assertFalse(bundle.getEntry().isEmpty());
-    assertEquals(2, queryCount(events));
-  }*/
-
   @ParameterizedTest
   @EnumSource(SearchStyleEnum.class)
   void eobSearchByIdEmpty(SearchStyleEnum searchStyle) {

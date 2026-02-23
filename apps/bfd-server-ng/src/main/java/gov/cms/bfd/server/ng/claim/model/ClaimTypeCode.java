@@ -301,6 +301,7 @@ public enum ClaimTypeCode {
   private final int code;
   private final String display;
   private static final String INSURER_ORG = "insurer-org";
+  private static final String PART_A_DISPLAY = "Part A";
 
   /**
    * Converts from a database code.
@@ -378,7 +379,7 @@ public enum ClaimTypeCode {
       return Optional.empty();
     }
 
-    var partDisplay = claimRecordType.getPartDisplay().orElse("Part A");
+    var partDisplay = claimRecordType.getPartDisplay().orElse(PART_A_DISPLAY);
 
     return Optional.of(
         new ExplanationOfBenefit.InsuranceComponent()
@@ -392,7 +393,7 @@ public enum ClaimTypeCode {
       return Optional.empty();
     }
 
-    var partDisplay = claimRecordType.getPartDisplay().orElse("Part A");
+    var partDisplay = claimRecordType.getPartDisplay().orElse(PART_A_DISPLAY);
 
     return Optional.of(
         new ExplanationOfBenefit.InsuranceComponent()
@@ -406,7 +407,7 @@ public enum ClaimTypeCode {
       return Optional.empty();
     }
 
-    var partDisplay = claimRecordType.getPartDisplay().orElse("Part A");
+    var partDisplay = claimRecordType.getPartDisplay().orElse(PART_A_DISPLAY);
 
     return Optional.of(
         new ExplanationOfBenefit.InsuranceComponent()
