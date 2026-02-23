@@ -31,7 +31,11 @@ public enum CatastrophicCoverageCode {
    * @return catastrophic coverage code
    */
   public static Optional<CatastrophicCoverageCode> tryFromCode(String code) {
-    return Optional.of(Arrays.stream(values()).filter(v -> v.code.equals(code)).findFirst().orElse(captureInvalidValue(code)));
+    return Optional.of(
+        Arrays.stream(values())
+            .filter(v -> v.code.equals(code))
+            .findFirst()
+            .orElse(captureInvalidValue(code)));
   }
 
   /**
