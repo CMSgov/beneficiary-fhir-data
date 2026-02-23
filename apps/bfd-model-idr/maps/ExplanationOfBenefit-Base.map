@@ -105,8 +105,8 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
         src.CLM_AUDT_TRL_STUS_CD as auditTrailStatusCode -> tgt.outcome = translate(auditTrailStatusCode, 'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#CLM_AUDT_TRL_STUS_CD_FISS','code') "Set outcome for phase 2/3 FISS";
       } "Set outcome for FISS";
       src.META_SRC_SK as srcSk where srcSk = '1002' -> tgt then {
-        src.CLM_FINAL_ACTION as finalAction where finalAction = Y -> tgt.outcome = "complete" "Set VMS outcome to complete.";
-        src.CLM_FINAL_ACTION as finalAction where finalAction = N -> tgt.outcome = "partial" "Set VMS outcome to partial.";
+        src.CLM_FINL_ACTN_IND as finalAction where finalAction = Y -> tgt.outcome = "complete" "Set VMS outcome to complete.";
+        src.CLM_FINL_ACTN_IND as finalAction where finalAction = N -> tgt.outcome = "partial" "Set VMS outcome to partial.";
       } "Set outcome for VMS";
     } "Complete additional outcomes";
 

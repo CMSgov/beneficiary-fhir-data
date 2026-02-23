@@ -3387,3 +3387,288 @@
   sourceView: V2_MDCR_CLM_LINE_DCMTN
   sourceColumn: CLM_LINE_PA_UNIQ_TRKNG_NUM
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_LINE_PMD_UNIQ_TRKNG_NUM').exists()).value
+- inputPath: ExplanationOfBenefit-Base.CLM_BNFT_ENHNCMT_1_CD
+  appliesTo:
+    - Inpatient
+    - HHA
+    - SNF
+    - Outpatient
+    - Hospice
+  sources:
+    - NCH
+    - FISS
+  cclfMapping:
+    - CCLFA.CLM_DEMO_1ST_NUM
+  sourceView: V2_MDCR_CLM_DCMTN
+  sourceColumn: CLM_BNFT_ENHNCMT_1_CD
+  fhirPath: TODO
+- inputPath: ExplanationOfBenefit-Base.CLM_BNFT_ENHNCMT_2_CD
+  appliesTo:
+    - Inpatient
+    - HHA
+    - SNF
+    - Outpatient
+    - Hospice
+  sources:
+    - NCH
+    - FISS
+  cclfMapping:
+    - CCLFA.CLM_DEMO_2ND_NUM
+  sourceView: V2_MDCR_CLM_DCMTN
+  sourceColumn: CLM_BNFT_ENHNCMT_2_CD
+  fhirPath: TODO
+- inputPath: ExplanationOfBenefit-Base.CLM_BNFT_ENHNCMT_3_CD
+  appliesTo:
+    - Inpatient
+    - HHA
+    - SNF
+    - Outpatient
+    - Hospice
+  sources:
+    - NCH
+    - FISS
+  cclfMapping:
+    - CCLFA.CLM_DEMO_3RD_NUM
+  sourceView: V2_MDCR_CLM_DCMTN
+  sourceColumn: CLM_BNFT_ENHNCMT_3_CD
+  fhirPath: TODO
+- inputPath: ExplanationOfBenefit-Base.CLM_BNFT_ENHNCMT_4_CD
+  appliesTo:
+    - Inpatient
+    - HHA
+    - SNF
+    - Outpatient
+    - Hospice
+  sources:
+    - NCH
+    - FISS
+  cclfMapping:
+    - CCLFA.CLM_DEMO_4TH_NUM
+  sourceView: V2_MDCR_CLM_DCMTN
+  sourceColumn: CLM_BNFT_ENHNCMT_4_CD
+  fhirPath: TODO
+- inputPath: ExplanationOfBenefit-Base.CLM_BNFT_ENHNCMT_5_CD
+  appliesTo:
+    - Inpatient
+    - HHA
+    - SNF
+    - Outpatient
+    - Hospice
+  sources:
+    - NCH
+    - FISS
+  cclfMapping:
+    - CCLFA.CLM_DEMO_5TH_NUM
+  sourceView: V2_MDCR_CLM_DCMTN
+  sourceColumn: CLM_BNFT_ENHNCMT_5_CD
+  fhirPath: TODO
+- inputPath: ExplanationOfBenefit-Base.CLM_NGACO_PBPMT_SW
+  appliesTo:
+    - Inpatient
+    - HHA
+    - SNF
+    - Outpatient
+    - Hospice
+  sources:
+    - NCH
+  cclfMapping:
+    - CCLFA.CLM_NGACO_PBPMT_SW
+  sourceView: V2_MDCR_CLM_DCMTN
+  sourceColumn: CLM_NGACO_PBPMT_SW
+  fhirPath: TODO
+- inputPath: ExplanationOfBenefit-Base.CLM_NGACO_PDSCHRG_HCBS_SW
+  appliesTo:
+    - Inpatient
+    - HHA
+    - SNF
+    - Outpatient
+    - Hospice
+  sources:
+    - NCH
+  cclfMapping:
+    - CCLFA.CLM_NGACO_PDSCHRG_HCBS_SW
+  sourceView: V2_MDCR_CLM_DCMTN
+  sourceColumn: CLM_NGACO_PDSCHRG_HCBS_SW
+  fhirPath: TODO
+  notes: This field is deprecated in shared systems data. Its value can be derived as Y if any CLM_BNFT_ENHNCMT_X_CD  = 3, else N.
+- inputPath: ExplanationOfBenefit-Base.CLM_NGACO_SNF_WVR_SW
+  appliesTo:
+    - Inpatient
+    - HHA
+    - SNF
+    - Outpatient
+    - Hospice
+  sources:
+    - NCH
+  cclfMapping:
+    - CCLFA.CLM_NGACO_SNF_WVR_SW
+  sourceView: V2_MDCR_CLM_DCMTN
+  sourceColumn: CLM_NGACO_SNF_WVR_SW
+  fhirPath: TODO
+  notes: This field is deprecated in shared systems data. Its value can be derived as Y if any CLM_BNFT_ENHNCMT_X_CD  = 4, else N.
+- inputPath: ExplanationOfBenefit-Base.CLM_NGACO_TLHLTH_SW
+  appliesTo:
+    - Inpatient
+    - HHA
+    - SNF
+    - Outpatient
+    - Hospice
+  sources:
+    - NCH
+  cclfMapping:
+    - CCLFA.CLM_NGACO_TLHLTH_SW
+  sourceView: V2_MDCR_CLM_DCMTN
+  sourceColumn: CLM_NGACO_TLHLTH_SW
+  fhirPath: TODO
+  notes: This field is deprecated in shared systems data. Its value can be derived as Y if any CLM_BNFT_ENHNCMT_X_CD  = 2, else N.
+- inputPath: ExplanationOfBenefit-Base.CLM_NGACO_CPTATN_SW
+  appliesTo:
+    - Inpatient
+    - HHA
+    - SNF
+    - Outpatient
+    - Hospice
+  sources:
+    - NCH
+  cclfMapping:
+    - CCLFA.CLM_NGACO_CPTATN_SW
+  sourceView: V2_MDCR_CLM_DCMTN
+  sourceColumn: CLM_NGACO_CPTATN_SW
+  fhirPath: TODO
+  notes: This field is deprecated in shared systems data. Its value can be derived as Y if any CLM_BNFT_ENHNCMT_X_CD  = 5, else N.
+- inputPath: ExplanationOfBenefit-Base.CLM_ACO_CARE_MGMT_HCBS_SW
+  appliesTo:
+    - Inpatient
+    - HHA
+    - SNF
+    - Outpatient
+    - Hospice
+  sources:
+    - NCH
+  cclfMapping:
+    - CCLFA.CLM_NGACO_CMG_WVR_SW
+  sourceView: V2_MDCR_CLM_DCMTN
+  sourceColumn: CLM_ACO_CARE_MGMT_HCBS_SW
+  fhirPath: TODO
+  notes: This field is deprecated in shared systems data. Its value can be derived as Y if any CLM_BNFT_ENHNCMT_X_CD  = 7, else N.
+- inputPath: LineItemComponent.CLM_LINE_NGACO_PBPMT_SW
+  appliesTo:
+    - Carrier
+  sources:
+    - NCH
+  cclfMapping:
+    - CCLFB.CLM_LINE_NGACO_PBPMT_SW
+  sourceView: V2_MDCR_CLM_LINE_DCMTN
+  sourceColumn: CLM_LINE_NGACO_PBPMT_SW
+  fhirPath: TODO
+  notes: This field is deprecated in shared systems data. Its value can be derived as Y if any CLM_LINE_BNFT_ENHNCMT_X_CD = 1, else N.
+- inputPath: LineItemComponent.CLM_LINE_NGACO_PDSCHRG_HCBS_SW
+  appliesTo:
+    - Carrier
+  sources:
+    - NCH
+  cclfMapping:
+    - CCLFB.CLM_LINE_NGACO_PDSCHRG_HCBS_SW
+  sourceView: V2_MDCR_CLM_LINE_DCMTN
+  sourceColumn: CLM_LINE_NGACO_PDSCHRG_HCBS_SW
+  fhirPath: TODO
+  notes: This field is deprecated in shared systems data. Its value can be derived as Y if any CLM_LINE_BNFT_ENHNCMT_X_CD = 3, else N.
+- inputPath: LineItemComponent.CLM_LINE_NGACO_SNF_WVR_SW
+  appliesTo:
+    - Carrier
+  sources:
+    - NCH
+  cclfMapping:
+    - CCLFB.CLM_LINE_NGACO_SNF_WVR_SW
+  sourceView: V2_MDCR_CLM_LINE_DCMTN
+  sourceColumn: CLM_LINE_NGACO_SNF_WVR_SW
+  fhirPath: TODO
+  notes: This field is deprecated in shared systems data. Its value can be derived as Y if any CLM_LINE_BNFT_ENHNCMT_X_CD = 4, else N.
+- inputPath: LineItemComponent.CLM_LINE_NGACO_TLHLTH_SW
+  appliesTo:
+    - Carrier
+  sources:
+    - NCH
+  cclfMapping:
+    - CCLFB.CLM_LINE_NGACO_TLHLTH_SW
+  sourceView: V2_MDCR_CLM_LINE_DCMTN
+  sourceColumn: CLM_LINE_NGACO_TLHLTH_SW
+  fhirPath: TODO
+  notes: This field is deprecated in shared systems data. Its value can be derived as Y if any CLM_LINE_BNFT_ENHNCMT_X_CD = 2, else N.
+- inputPath: LineItemComponent.CLM_LINE_NGACO_CPTATN_SW
+  appliesTo:
+    - Carrier
+  sources:
+    - NCH
+  cclfMapping:
+    - CCLFB.CLM_LINE_NGACO_CPTATN_SW
+  sourceView: V2_MDCR_CLM_LINE_DCMTN
+  sourceColumn: CLM_LINE_NGACO_CPTATN_SW
+  fhirPath: TODO
+  notes: This field is deprecated in shared systems data. Its value can be derived as Y if any CLM_LINE_BNFT_ENHNCMT_X_CD = 5, else N.
+- inputPath: LineItemComponent.CLM_LINE_ACO_CARE_MGMT_HCBS_SW
+  appliesTo:
+    - Carrier
+  sources:
+    - NCH
+  cclfMapping:
+    - CCLFB.CLM_NGACO_CMG_WVR_SW
+  sourceView: V2_MDCR_CLM_LINE_DCMTN
+  sourceColumn: CLM_LINE_ACO_CARE_MGMT_HCBS_SW
+  fhirPath: TODO
+  notes: This field is deprecated in shared systems data. Its value can be derived as Y if any CLM_LINE_BNFT_ENHNCMT_X_CD = 7, else N.
+- inputPath: LineItemComponent.CLM_LINE_BNFT_ENHNCMT_1_CD
+  appliesTo:
+    - Carrier
+  sources:
+    - NCH
+    - MCS
+  cclfMapping:
+    - CCLFB.CLM_DEMO_1ST_NUM
+  sourceView: V2_MDCR_CLM_LINE_DCMTN
+  sourceColumn: CLM_LINE_BNFT_ENHNCMT_1_CD
+  fhirPath: TODO
+- inputPath: LineItemComponent.CLM_LINE_BNFT_ENHNCMT_2_CD
+  appliesTo:
+    - Carrier
+  sources:
+    - NCH
+    - MCS
+  cclfMapping:
+    - CCLFB.CLM_DEMO_2ND_NUM
+  sourceView: V2_MDCR_CLM_LINE_DCMTN
+  sourceColumn: CLM_LINE_BNFT_ENHNCMT_2_CD
+  fhirPath: TODO
+- inputPath: LineItemComponent.CLM_LINE_BNFT_ENHNCMT_3_CD
+  appliesTo:
+    - Carrier
+  sources:
+    - NCH
+    - MCS
+  cclfMapping:
+    - CCLFB.CLM_DEMO_3RD_NUM
+  sourceView: V2_MDCR_CLM_LINE_DCMTN
+  sourceColumn: CLM_LINE_BNFT_ENHNCMT_3_CD
+  fhirPath: TODO
+- inputPath: LineItemComponent.CLM_LINE_BNFT_ENHNCMT_4_CD
+  appliesTo:
+    - Carrier
+  sources:
+    - NCH
+    - MCS
+  cclfMapping:
+    - CCLFB.CLM_DEMO_4TH_NUM
+  sourceView: V2_MDCR_CLM_LINE_DCMTN
+  sourceColumn: CLM_LINE_BNFT_ENHNCMT_4_CD
+  fhirPath: TODO
+- inputPath: LineItemComponent.CLM_LINE_BNFT_ENHNCMT_5_CD
+  appliesTo:
+    - Carrier
+  sources:
+    - NCH
+    - MCS
+  cclfMapping:
+    - CCLFB.CLM_DEMO_5TH_NUM
+  sourceView: V2_MDCR_CLM_LINE_DCMTN
+  sourceColumn: CLM_LINE_BNFT_ENHNCMT_5_CD
+  fhirPath: TODO
