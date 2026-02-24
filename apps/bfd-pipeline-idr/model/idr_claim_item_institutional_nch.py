@@ -89,6 +89,9 @@ class IdrClaimItemInstitutionalNch(IdrBaseModel):
     clm_rndrg_fed_prvdr_spclty_cd: Annotated[
         str, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_default_string)
     ]
+    clm_rndrg_prvdr_type_cd: Annotated[
+        str, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_default_string)
+    ]
     idr_insrt_ts_line: Annotated[
         datetime,
         {ALIAS: ALIAS_LINE, **INSERT_FIELD},

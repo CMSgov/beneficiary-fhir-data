@@ -29,9 +29,6 @@ class ClaimLineAdjudicationChargeInstitutional {
   @Column(name = "clm_line_non_ehr_rdctn_amt")
   private BigDecimal nonEHRReductionAmount;
 
-  @Column(name = "clm_rev_cntr_tdapa_amt")
-  private BigDecimal transitionalDrugAddOnPaymentAmount;
-
   List<ExplanationOfBenefit.AdjudicationComponent> toFhir() {
     return List.of(
         AdjudicationChargeType.LINE_INSTITUTIONAL_ADJUSTED_AMOUNT.toFhirAdjudication(
@@ -45,8 +42,6 @@ class ClaimLineAdjudicationChargeInstitutional {
         AdjudicationChargeType.LINE_INSTITUTIONAL_ADD_ON_PAYMENT_AMOUNT.toFhirAdjudication(
             addOnPaymentAmount),
         AdjudicationChargeType.LINE_INSTITUTIONAL_NON_EHR_REDUCTION_AMOUNT.toFhirAdjudication(
-            nonEHRReductionAmount),
-        AdjudicationChargeType.LINE_INSTITUTIONAL_TRANSITIONAL_DRG_ADD_ON_PAYMENT_ADJUSTMENT
-            .toFhirAdjudication(transitionalDrugAddOnPaymentAmount));
+            nonEHRReductionAmount));
   }
 }

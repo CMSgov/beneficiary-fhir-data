@@ -5057,16 +5057,22 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
       }
     } ],
     "extension" : [ {
-      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-DSCNT-IND-CD",
-      "valueCoding" : {
-        "code" : "1",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-DSCNT-IND-CD"
-      }
-    }, {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-OTAF-ONE-IND-CD",
       "valueCoding" : {
         "code" : "Y",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-OTAF-ONE-IND-CD"
+      }
+    }, {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-CNTR-STUS-CD",
+      "valueCoding" : {
+        "code" : "A",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-STUS-CD"
+      }
+    }, {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-DSCNT-IND-CD",
+      "valueCoding" : {
+        "code" : "1",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-DSCNT-IND-CD"
       }
     }, {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
@@ -5079,12 +5085,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
       "valueCoding" : {
         "code" : "2",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PMT-MTHD-CD"
-      }
-    }, {
-      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-CNTR-STUS-CD",
-      "valueCoding" : {
-        "code" : "A",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-STUS-CD"
       }
     } ],
     "modifier" : [ {
@@ -6624,16 +6624,22 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
       }
     } ],
     "extension" : [ {
-      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-DSCNT-IND-CD",
-      "valueCoding" : {
-        "code" : "1",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-DSCNT-IND-CD"
-      }
-    }, {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-OTAF-ONE-IND-CD",
       "valueCoding" : {
         "code" : "Y",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-OTAF-ONE-IND-CD"
+      }
+    }, {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-CNTR-STUS-CD",
+      "valueCoding" : {
+        "code" : "A",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-STUS-CD"
+      }
+    }, {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-DSCNT-IND-CD",
+      "valueCoding" : {
+        "code" : "1",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-DSCNT-IND-CD"
       }
     }, {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD",
@@ -6646,12 +6652,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
       "valueCoding" : {
         "code" : "2",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PMT-MTHD-CD"
-      }
-    }, {
-      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-CNTR-STUS-CD",
-      "valueCoding" : {
-        "code" : "A",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-STUS-CD"
       }
     } ],
     "modifier" : [ {

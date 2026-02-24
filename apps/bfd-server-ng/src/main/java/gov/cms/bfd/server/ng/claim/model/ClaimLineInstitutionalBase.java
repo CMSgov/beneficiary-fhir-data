@@ -101,7 +101,7 @@ public abstract class ClaimLineInstitutionalBase implements ClaimLineBase {
     getRevenueCenterDate().ifPresent(d -> line.setServiced(new DateType(DateUtil.toDate(d))));
     fromDate.ifPresent(d -> line.setServiced(new DateType(DateUtil.toDate(d))));
     addAdjudication(line);
-    line.setExtension(getExtensions().toFhir());
+    getExtensions().toFhir().forEach(line::addExtension);
 
     return Optional.of(line);
   }

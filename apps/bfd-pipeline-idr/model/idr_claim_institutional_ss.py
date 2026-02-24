@@ -115,7 +115,9 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
     clm_cob_ptnt_resp_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
     clm_mdcr_ddctbl_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
     clm_sbmt_frmt_cd: Annotated[str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)]
-    clm_blg_prvdr_oscar_num: Annotated[str, BeforeValidator(transform_default_string)]
+    clm_blg_prvdr_oscar_num: Annotated[
+        str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)
+    ]
     clm_blg_prvdr_zip5_cd: Annotated[
         str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)
     ]
