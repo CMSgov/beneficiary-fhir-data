@@ -21,9 +21,8 @@ locals {
   default_tags = module.terraservice.default_tags
   env          = module.terraservice.env
   env_key_arn  = module.terraservice.env_key_arn
-
-  name_prefix = "bfd-${local.env}-${local.service}"
-  partners    = toset(["bcda", "ab2d", "dpc"])
+  name_prefix  = "bfd-${local.env}-${local.service}"
+  partners     = toset(["bcda", "ab2d", "dpc"])
 }
 
 module "eft_bucket" {
@@ -33,10 +32,8 @@ module "eft_bucket" {
   bucket_prefix      = "${local.name_prefix}-${each.key}"
   bucket_kms_key_arn = local.env_key_arn
   force_destroy      = false
-
-  ssm_param_name = "/bfd/${local.env}/${local.service}/${each.value}/nonsensitive/bucket"
-
-  tags = { Partner = each.value }
+  ssm_param_name     = "/bfd/${local.env}/${local.service}/${each.value}/nonsensitive/bucket"
+  tags               = { Partner = each.value }
 }
 
 resource "aws_s3_bucket_lifecycle_configuration" "this" {
@@ -44,8 +41,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "this" {
   bucket   = each.value.bucket.id
 
   rule {
-    id = "${local.name_prefix}-${each.key}-7day-object-retention"
-    filter {}
+    id     = "${local.name_prefix}-${each.key}-7day-object-retention"
     status = "Enabled"
 
     expiration {
