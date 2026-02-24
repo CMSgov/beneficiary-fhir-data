@@ -15,7 +15,7 @@ module "terraservice" {
 }
 
 locals {
-  service        = "bene-prefs"
+  service = "bene-prefs"
 
   default_tags = module.terraservice.default_tags
   env          = module.terraservice.env
