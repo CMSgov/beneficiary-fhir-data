@@ -44,7 +44,7 @@ public class DateUtil {
    */
   public static DateTimeType toFhirDate(LocalDate localDate) {
     Date utilDate = toDate(localDate);
-      DateTimeType fhirDate = new DateTimeType(utilDate);
+    DateTimeType fhirDate = new DateTimeType(utilDate);
     fhirDate.setPrecision(TemporalPrecisionEnum.DAY);
     return fhirDate;
   }
