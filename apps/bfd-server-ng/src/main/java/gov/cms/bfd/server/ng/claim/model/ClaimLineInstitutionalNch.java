@@ -16,10 +16,12 @@ public class ClaimLineInstitutionalNch extends ClaimLineInstitutionalBase {
 
   @Embedded private ClaimLineAdjudicationChargeInstitutionalNch adjudicationCharge;
   @Embedded private ClaimAnsiSignatureInfo ansiSignature;
+  @Embedded private ClaimLineInstitutionalNchExtensions claimLineInstitutionalNchExtensions;
 
   @Override
   void addAdjudication(ExplanationOfBenefit.ItemComponent line) {
     adjudicationCharge.toFhir().forEach(line::addAdjudication);
     ansiSignature.toFhir().ifPresent(line::addAdjudication);
+    claimLineInstitutionalNchExtensions.toFhir().forEach(line::addExtension);
   }
 }

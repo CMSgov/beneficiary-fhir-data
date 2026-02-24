@@ -878,10 +878,8 @@ create table idr_new.claim_item_institutional_ss
     clm_line_otaf_amt           numeric,
     -- claim line institutional columns
     clm_rev_apc_hipps_cd        character varying(5)     not null,
-    clm_otaf_one_ind_cd         character varying(1)     not null,
     clm_rev_dscnt_ind_cd        character varying(1)     not null,
     clm_rev_packg_ind_cd        character varying(1)     not null,
-    clm_rev_cntr_stus_cd        character varying(2)     not null,
     clm_rev_pmt_mthd_cd         character varying(2)     not null,
     clm_ddctbl_coinsrnc_cd      character varying(1)     not null,
     clm_line_instnl_rate_amt    numeric,
@@ -890,7 +888,6 @@ create table idr_new.claim_item_institutional_ss
     clm_line_instnl_msp1_pd_amt numeric,
     clm_line_instnl_msp2_pd_amt numeric,
     clm_line_instnl_rev_ctr_dt  date,
-    clm_rev_cntr_tdapa_amt      numeric,
     clm_line_non_ehr_rdctn_amt  numeric,
     clm_line_add_on_pymt_amt    numeric,
     clm_ocrnc_sgntr_sk          numeric,

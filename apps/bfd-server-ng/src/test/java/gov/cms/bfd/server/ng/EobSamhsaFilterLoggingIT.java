@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import gov.cms.bfd.server.ng.eob.EobNewHandler;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.testUtil.ThreadSafeAppender;
-import gov.cms.bfd.server.ng.testUtil.ThreadSafeAsyncAppender;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,29 +22,28 @@ class EobSamhsaFilterLoggingIT extends IntegrationTestBase {
   /** Test that filtering a SAMHSA claim generates appropriate logs. */
   @Test
   void testSamhsaClaimLogging() {
-    var events = ThreadSafeAsyncAppender.createAndAttach();
-    try {
-      eobHandler.searchById(
-          CLAIM_ID_WITH_SAMHSA_DIAGNOSIS,
-          new DateTimeRange(),
-          new DateTimeRange(),
-          SamhsaFilterMode.EXCLUDE);
+    var events = ThreadSafeAppender.startRecord();
 
-    } finally {
-      var samhsaLogs =
-          events.getLogs().stream()
-              .filter(e -> e.getLoggerName().equals("gov.cms.bfd.server.ng.eob.EobNewHandler"))
-              .filter(e -> e.getMessage().contains(SAMHSA_FILTERED_LOG_MESSAGE))
-              .toList();
-      assertEquals(1, samhsaLogs.size(), "Expected exactly one SAMHSA filtering log message");
-      var logEvent = samhsaLogs.get(0);
-      var formattedMessage = logEvent.getFormattedMessage();
-      assertTrue(
-          formattedMessage.contains(SAMHSA_FILTERED_LOG_MESSAGE),
-          "Log message should contain SAMHSA claim filtered text");
-      assertTrue(
-          formattedMessage.contains("type="), "Log message should contain claim type information");
-    }
+    eobHandler.searchById(
+        CLAIM_ID_WITH_SAMHSA_DIAGNOSIS,
+        new DateTimeRange(),
+        new DateTimeRange(),
+        SamhsaFilterMode.EXCLUDE);
+
+    var samhsaLogs =
+        events.stream()
+            .filter(e -> e.getLoggerName().equals(eobHandler.getClass().getName()))
+            .filter(e -> e.getMessage().contains(SAMHSA_FILTERED_LOG_MESSAGE))
+            .toList();
+
+    assertEquals(1, samhsaLogs.size(), "Expected exactly one SAMHSA filtering log message");
+    var logEvent = samhsaLogs.getFirst();
+    var formattedMessage = logEvent.getFormattedMessage();
+    assertTrue(
+        formattedMessage.contains(SAMHSA_FILTERED_LOG_MESSAGE),
+        "Log message should contain SAMHSA claim filtered text");
+    assertTrue(
+        formattedMessage.contains("type="), "Log message should contain claim type information");
   }
 
   /** Test that non-SAMHSA claims do not generate filtering logs. */
