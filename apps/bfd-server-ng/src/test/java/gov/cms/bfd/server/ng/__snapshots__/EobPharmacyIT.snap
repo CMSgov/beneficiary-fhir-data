@@ -19,7 +19,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
   },
   "careTeam" : [ {
     "provider" : {
-      "display" : "Rogers,Gromit",
+      "display" : "Rogers, Gromit",
       "identifier" : {
         "system" : "http://hl7.org/fhir/sid/us-npi",
         "type" : {
@@ -798,7 +798,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
   },
   "careTeam" : [ {
     "provider" : {
-      "display" : "Stark,Tony",
+      "display" : "Stark, Tony",
       "identifier" : {
         "system" : "http://hl7.org/fhir/sid/us-npi",
         "type" : {

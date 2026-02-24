@@ -36,7 +36,6 @@ from model.base_model import (
     transform_default_date_to_null,
     transform_default_string,
     transform_null_date_to_min,
-    transform_null_string,
 )
 
 
@@ -54,7 +53,7 @@ class IdrClaimItemProfessionalNch(IdrBaseModel):
     clm_line_bene_pd_amt: Annotated[float | None, {ALIAS: ALIAS_LINE}]
     clm_line_mdcr_coinsrnc_amt: Annotated[float | None, {ALIAS: ALIAS_LINE}]
     clm_line_cvrd_pd_amt: Annotated[float | None, {ALIAS: ALIAS_LINE}]
-    clm_line_dgns_cd: Annotated[str, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_null_string)]
+    clm_line_dgns_cd: Annotated[str, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_default_string)]
     clm_line_from_dt: Annotated[
         date | None, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_default_date_to_null)
     ]
@@ -81,7 +80,7 @@ class IdrClaimItemProfessionalNch(IdrBaseModel):
     hcpcs_4_mdfr_cd: Annotated[str, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_default_string)]
     hcpcs_5_mdfr_cd: Annotated[str, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_default_string)]
     clm_line_pmd_uniq_trkng_num: Annotated[
-        str, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_null_string)
+        str, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_default_string)
     ]
     clm_rndrg_fed_prvdr_spclty_cd: Annotated[
         str, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_default_string)
@@ -107,7 +106,7 @@ class IdrClaimItemProfessionalNch(IdrBaseModel):
         int | None, {ALIAS: ALIAS_PROCEDURE, COLUMN_MAP: "clm_val_sqnc_num"}
     ]
     clm_prod_type_cd: Annotated[
-        str, {ALIAS: ALIAS_PROCEDURE}, BeforeValidator(transform_null_string)
+        str, {ALIAS: ALIAS_PROCEDURE}, BeforeValidator(transform_default_string)
     ]
     clm_dgns_prcdr_icd_ind: Annotated[
         str, {ALIAS: ALIAS_PROCEDURE}, BeforeValidator(transform_default_string)

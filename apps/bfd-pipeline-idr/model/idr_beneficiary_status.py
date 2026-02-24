@@ -19,8 +19,8 @@ from model.base_model import (
     UPDATE_TIMESTAMP,
     IdrBaseModel,
     deceased_bene_filter,
+    transform_default_string,
     transform_null_date_to_min,
-    transform_null_string,
 )
 
 
@@ -29,7 +29,7 @@ class IdrBeneficiaryStatus(IdrBaseModel):
     bene_mdcr_stus_cd: str
     mdcr_stus_bgn_dt: Annotated[date, {PRIMARY_KEY: True}]
     mdcr_stus_end_dt: Annotated[date, {PRIMARY_KEY: True}]
-    idr_ltst_trans_flg: Annotated[str, BeforeValidator(transform_null_string)]
+    idr_ltst_trans_flg: Annotated[str, BeforeValidator(transform_default_string)]
     idr_trans_efctv_ts: Annotated[datetime, {PRIMARY_KEY: True}]
     idr_trans_obslt_ts: datetime
     idr_insrt_ts: Annotated[datetime, {BATCH_TIMESTAMP: True}]

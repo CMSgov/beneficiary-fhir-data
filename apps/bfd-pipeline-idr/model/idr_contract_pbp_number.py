@@ -18,7 +18,6 @@ from model.base_model import (
     PRIMARY_KEY,
     IdrBaseModel,
     transform_default_string,
-    transform_null_string,
 )
 
 
@@ -26,7 +25,7 @@ class IdrContractPbpNumber(IdrBaseModel):
     cntrct_pbp_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, ALIAS: ALIAS_PBP_NUM}]
     cntrct_drug_plan_ind_cd: Annotated[str, BeforeValidator(transform_default_string)]
     cntrct_pbp_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    cntrct_pbp_name: Annotated[str, BeforeValidator(transform_null_string)]
+    cntrct_pbp_name: Annotated[str, BeforeValidator(transform_default_string)]
     cntrct_num: Annotated[str, BeforeValidator(transform_default_string)]
     cntrct_pbp_num: Annotated[str, BeforeValidator(transform_default_string)]
     cntrct_pbp_sgmt_num: Annotated[

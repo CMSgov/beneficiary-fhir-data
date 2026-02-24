@@ -21,14 +21,14 @@ from model.base_model import (
     UPDATE_TIMESTAMP,
     IdrBaseModel,
     claim_filter,
+    transform_default_string,
     transform_null_date_to_min,
-    transform_null_string,
 )
 
 
 class IdrClaimFiss(IdrBaseModel):
     clm_uniq_id: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, LAST_UPDATED_TIMESTAMP: True}]
-    clm_crnt_stus_cd: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_crnt_stus_cd: Annotated[str, BeforeValidator(transform_default_string)]
     idr_insrt_ts: Annotated[
         datetime,
         {BATCH_TIMESTAMP: True, ALIAS: ALIAS_FISS},

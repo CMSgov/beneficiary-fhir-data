@@ -27,7 +27,6 @@ from model.base_model import (
     transform_default_string,
     transform_null_date_to_min,
     transform_null_float,
-    transform_null_string,
 )
 from model.idr_claim import transform_null_int
 
@@ -37,13 +36,13 @@ class IdrClaimLineRx(IdrBaseModel):
         int, {PRIMARY_KEY: True, BATCH_ID: True, ALIAS: ALIAS_CLM, LAST_UPDATED_TIMESTAMP: True}
     ]
     clm_line_num: Annotated[int, {PRIMARY_KEY: True, ALIAS: ALIAS_RX_LINE}]
-    clm_brnd_gnrc_cd: Annotated[str, BeforeValidator(transform_null_string)]
-    clm_cmpnd_cd: Annotated[str, BeforeValidator(transform_null_string)]
-    clm_ctstrphc_cvrg_ind_cd: Annotated[str, BeforeValidator(transform_null_string)]
-    clm_daw_prod_slctn_cd: Annotated[str, BeforeValidator(transform_null_string)]
-    clm_drug_cvrg_stus_cd: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_brnd_gnrc_cd: Annotated[str, BeforeValidator(transform_default_string)]
+    clm_cmpnd_cd: Annotated[str, BeforeValidator(transform_default_string)]
+    clm_ctstrphc_cvrg_ind_cd: Annotated[str, BeforeValidator(transform_default_string)]
+    clm_daw_prod_slctn_cd: Annotated[str, BeforeValidator(transform_default_string)]
+    clm_drug_cvrg_stus_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_dspnsng_stus_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_line_authrzd_fill_num: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_line_authrzd_fill_num: Annotated[str, BeforeValidator(transform_default_string)]
     clm_line_days_suply_qty: Annotated[int, BeforeValidator(transform_null_int)]
     clm_line_grs_above_thrshld_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_line_grs_blw_thrshld_amt: Annotated[float, BeforeValidator(transform_null_float)]
@@ -58,7 +57,7 @@ class IdrClaimLineRx(IdrBaseModel):
     clm_line_vccn_admin_fee_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_ltc_dspnsng_mthd_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_phrmcy_srvc_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_prcng_excptn_cd: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_prcng_excptn_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_ptnt_rsdnc_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_rptd_mftr_dscnt_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_idr_ld_dt: Annotated[date, {INSERT_EXCLUDE: True, HISTORICAL_BATCH_TIMESTAMP: True}]

@@ -41,7 +41,6 @@ from model.base_model import (
     transform_default_hipps_code,
     transform_default_string,
     transform_null_date_to_min,
-    transform_null_string,
 )
 
 
@@ -109,7 +108,7 @@ class IdrClaimItemInstitutionalSs(IdrBaseModel):
         int | None, {ALIAS: ALIAS_PROCEDURE, COLUMN_MAP: "clm_val_sqnc_num"}
     ]
     clm_prod_type_cd: Annotated[
-        str, {ALIAS: ALIAS_PROCEDURE}, BeforeValidator(transform_null_string)
+        str, {ALIAS: ALIAS_PROCEDURE}, BeforeValidator(transform_default_string)
     ]
     clm_prcdr_cd: Annotated[
         str, {ALIAS: ALIAS_PROCEDURE}, BeforeValidator(transform_default_string)
@@ -213,7 +212,7 @@ class IdrClaimItemInstitutionalSs(IdrBaseModel):
     ]
     # columns from v2_mdcr_clm_line_dcmtn
     clm_line_pa_uniq_trkng_num: Annotated[
-        str, {ALIAS: ALIAS_LINE_DCMTN}, BeforeValidator(transform_null_string)
+        str, {ALIAS: ALIAS_LINE_DCMTN}, BeforeValidator(transform_default_string)
     ]
     idr_insrt_ts_line_dcmtn: Annotated[
         datetime,

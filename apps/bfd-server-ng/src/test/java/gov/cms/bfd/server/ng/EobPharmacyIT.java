@@ -42,7 +42,7 @@ class EobPharmacyIT extends IntegrationTestBase {
     validateProviderAndPractitioner(eob);
     validatePharmacyItems(eob);
     validateSupportingInfo(eob);
-    validateCareTeamAndPrescriber(eob, "Rogers,Gromit", "1730548868");
+    validateCareTeamAndPrescriber(eob, "Rogers, Gromit", "1730548868");
     validateInsurance(eob);
     validateFinancialFieldRedaction(eob);
   }
@@ -64,7 +64,7 @@ class EobPharmacyIT extends IntegrationTestBase {
     assertEquals("1649041195", organization.getId());
     assertEquals("CBS Health Corporation", organization.getName());
 
-    validateCareTeamAndPrescriber(eob, "Stark,Tony", "1437702123");
+    validateCareTeamAndPrescriber(eob, "Stark, Tony", "1437702123");
     validateSupportingInfo(eob);
     validateInsurance(eob);
     validateFinancialFieldRedaction(eob);

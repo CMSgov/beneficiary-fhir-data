@@ -36,7 +36,6 @@ from model.base_model import (
     transform_default_date_to_null,
     transform_default_string,
     transform_null_date_to_min,
-    transform_null_string,
 )
 
 
@@ -58,7 +57,7 @@ class IdrClaimProfessionalNch(IdrBaseModel):
                 ELSE {ALIAS_CLM}.clm_orig_cntl_num
                 END""",
         },
-        BeforeValidator(transform_null_string),
+        BeforeValidator(transform_default_string),
     ]
     clm_from_dt: Annotated[date, {ALIAS: ALIAS_CLM}]
     clm_thru_dt: Annotated[date, {ALIAS: ALIAS_CLM}]
@@ -153,7 +152,7 @@ class IdrClaimProfessionalNch(IdrBaseModel):
         BeforeValidator(transform_null_date_to_min),
     ]
     # Columns from v2_mdcr_clm_dcmtn
-    clm_nrln_ric_cd: Annotated[str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_null_string)]
+    clm_nrln_ric_cd: Annotated[str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_default_string)]
 
     # Columns from v2_mdcr_prvdr_hstry
     prvdr_blg_prvdr_npi_num: Annotated[

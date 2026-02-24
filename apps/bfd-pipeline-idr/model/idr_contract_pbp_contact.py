@@ -15,7 +15,6 @@ from model.base_model import (
     PRIMARY_KEY,
     IdrBaseModel,
     transform_default_string,
-    transform_null_string,
 )
 
 
@@ -26,11 +25,11 @@ class IdrContractPbpContact(IdrBaseModel):
     cntrct_plan_free_extnsn_num: Annotated[str, BeforeValidator(transform_default_string)]
     cntrct_plan_cntct_free_num: Annotated[str, BeforeValidator(transform_default_string)]
     cntrct_plan_cntct_extnsn_num: Annotated[str, BeforeValidator(transform_default_string)]
-    cntrct_plan_cntct_tel_num: Annotated[str, BeforeValidator(transform_null_string)]
+    cntrct_plan_cntct_tel_num: Annotated[str, BeforeValidator(transform_default_string)]
     cntrct_pbp_end_dt: date
     cntrct_pbp_bgn_dt: date
-    cntrct_plan_cntct_st_1_adr: Annotated[str, BeforeValidator(transform_null_string)]
-    cntrct_plan_cntct_st_2_adr: Annotated[str, BeforeValidator(transform_null_string)]
+    cntrct_plan_cntct_st_1_adr: Annotated[str, BeforeValidator(transform_default_string)]
+    cntrct_plan_cntct_st_2_adr: Annotated[str, BeforeValidator(transform_default_string)]
     cntrct_plan_cntct_city_name: Annotated[str, BeforeValidator(transform_default_string)]
     cntrct_plan_cntct_state_cd: Annotated[str, BeforeValidator(transform_default_string)]
     cntrct_plan_cntct_zip_cd: Annotated[str, BeforeValidator(transform_default_string)]

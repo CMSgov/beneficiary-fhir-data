@@ -58,12 +58,6 @@ def transform_default_date_to_null(value: date | None) -> date | None:
     return value
 
 
-def transform_null_string(value: str | None) -> str:
-    if value is None:
-        return ""
-    return value
-
-
 def transform_provider_name(value: str | None) -> str:
     if value is None or value == "<UNAVAIL>":
         return ""
@@ -122,26 +116,32 @@ def get_min_transaction_date(default_date: str = DEFAULT_MIN_DATE) -> datetime:
     return format_date(default_date)
 
 
-def provider_last_name_expr(alias: str, claim_field: str) -> str:
-    return f"""
-        CASE WHEN {alias}.prvdr_last_name IS NULL OR {alias}.prvdr_last_name IN ('', '~')
-        THEN {ALIAS_CLM}.{claim_field}
-        ELSE {alias}.prvdr_last_name
-        END
-    """
-
-
 def provider_last_or_legal_name_expr(alias: str) -> str:
     return f"COALESCE({alias}.prvdr_lgl_name, {alias}.prvdr_last_name)"
+
+
+def _normalize(col: str) -> str:
+    return f"CASE WHEN {col} = '~' THEN '' ELSE {col} END"
 
 
 def provider_careteam_name_expr(alias: str, type: str | None) -> str:
     # Note: Snowflake throws an error if you do COALESCE with a single argument
     # so we need to explicitly pass null here
+
+    # This handles both provider types
+    # - Take the provider name from the claim table if present
+    # - If not, take prvdr_lgl_name for organizations
+    # Otherwise, take last name, first_name
     return f"""
         COALESCE(
             {f"{ALIAS_CLM}.clm_{type}_prvdr_name" if type else "NULL"},
-            {provider_last_or_legal_name_expr(alias)} || ',' || {alias}.prvdr_1st_name
+            CASE 
+                WHEN {alias}.prvdr_last_name IS NULL 
+                    OR {_normalize(f"{alias}.prvdr_last_name")} = ''
+                THEN {_normalize(f"{alias}.prvdr_lgl_name")}
+                ELSE {_normalize(f"{alias}.prvdr_last_name")} 
+                    || COALESCE(', ' || {_normalize(f"{alias}.prvdr_1st_name")}, '')
+            END
         )
     """
 

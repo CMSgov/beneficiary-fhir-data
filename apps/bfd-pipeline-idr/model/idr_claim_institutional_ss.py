@@ -40,7 +40,6 @@ from model.base_model import (
     transform_default_date_to_null,
     transform_default_string,
     transform_null_date_to_min,
-    transform_null_string,
 )
 
 
@@ -62,7 +61,7 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
                 ELSE {ALIAS_CLM}.clm_orig_cntl_num
                 END""",
         },
-        BeforeValidator(transform_null_string),
+        BeforeValidator(transform_default_string),
     ]
     clm_src_id: Annotated[str, {ALIAS: ALIAS_CLM}]
     clm_from_dt: Annotated[date, {ALIAS: ALIAS_CLM}]
@@ -117,7 +116,7 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
     clm_mdcr_ddctbl_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
     clm_sbmt_frmt_cd: Annotated[str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)]
     clm_blg_prvdr_zip5_cd: Annotated[
-        str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_null_string)
+        str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)
     ]
     geo_blg_ssa_state_cd: Annotated[
         str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)
@@ -150,10 +149,10 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
     clm_idr_ld_dt: Annotated[date, {HISTORICAL_BATCH_TIMESTAMP: True, ALIAS: ALIAS_CLM}]
     # columns from v2_mdcr_clm_lctn_hstry
     clm_audt_trl_stus_cd: Annotated[
-        str, {ALIAS: ALIAS_LCTN_HSTRY}, BeforeValidator(transform_null_string)
+        str, {ALIAS: ALIAS_LCTN_HSTRY}, BeforeValidator(transform_default_string)
     ]
     clm_audt_trl_lctn_cd: Annotated[
-        str, {ALIAS: ALIAS_LCTN_HSTRY}, BeforeValidator(transform_null_string)
+        str, {ALIAS: ALIAS_LCTN_HSTRY}, BeforeValidator(transform_default_string)
     ]
     idr_insrt_ts_lctn_hstry: Annotated[
         datetime,
@@ -241,7 +240,7 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
     clm_mdcr_instnl_bene_pd_amt: Annotated[float | None, {ALIAS: ALIAS_INSTNL}]
     clm_mdcr_hospc_prd_cnt: Annotated[int | None, {ALIAS: ALIAS_INSTNL}]
     clm_mdcr_npmt_rsn_cd: Annotated[
-        str, {ALIAS: ALIAS_INSTNL}, BeforeValidator(transform_null_string)
+        str, {ALIAS: ALIAS_INSTNL}, BeforeValidator(transform_default_string)
     ]
     clm_mdcr_ip_pps_drg_wt_num: Annotated[float | None, {ALIAS: ALIAS_INSTNL}]
     clm_mdcr_ip_pps_dsprprtnt_amt: Annotated[float | None, {ALIAS: ALIAS_INSTNL}]

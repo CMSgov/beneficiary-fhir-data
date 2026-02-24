@@ -35,7 +35,6 @@ from model.base_model import (
     transform_null_date_to_min,
     transform_null_float,
     transform_null_int,
-    transform_null_string,
 )
 
 
@@ -55,7 +54,7 @@ class IdrClaimItem(IdrBaseModel):
     clm_line_bene_pd_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_line_cvrd_pd_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_line_blood_ddctbl_amt: Annotated[float, BeforeValidator(transform_null_float)]
-    clm_line_dgns_cd: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_line_dgns_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_line_from_dt: Annotated[date, BeforeValidator(transform_null_date_to_max)]
     clm_line_thru_dt: Annotated[date, BeforeValidator(transform_null_date_to_max)]
     clm_line_mdcr_ddctbl_amt: Annotated[float, BeforeValidator(transform_null_float)]
@@ -79,7 +78,7 @@ class IdrClaimItem(IdrBaseModel):
     hcpcs_4_mdfr_cd: Annotated[str, BeforeValidator(transform_default_string)]
     hcpcs_5_mdfr_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_idr_ld_dt: Annotated[date, {INSERT_EXCLUDE: True, HISTORICAL_BATCH_TIMESTAMP: True}]
-    clm_line_pmd_uniq_trkng_num: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_line_pmd_uniq_trkng_num: Annotated[str, BeforeValidator(transform_default_string)]
     clm_line_othr_tp_pd_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_line_ncvrd_pd_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_line_otaf_amt: Annotated[float, BeforeValidator(transform_null_float)]
@@ -99,7 +98,7 @@ class IdrClaimItem(IdrBaseModel):
         {ALIAS: ALIAS_PROCEDURE, COLUMN_MAP: "clm_val_sqnc_num"},
         BeforeValidator(transform_null_int),
     ]
-    clm_prod_type_cd: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_prod_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_prcdr_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_dgns_prcdr_icd_ind: Annotated[
         str, {ALIAS: ALIAS_PROCEDURE}, BeforeValidator(transform_default_string)
@@ -191,7 +190,7 @@ class IdrClaimItem(IdrBaseModel):
     ]
     clm_rndrg_prvdr_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_line_pa_uniq_trkng_num: Annotated[
-        str, {ALIAS: ALIAS_LINE_DCMTN}, BeforeValidator(transform_null_string)
+        str, {ALIAS: ALIAS_LINE_DCMTN}, BeforeValidator(transform_default_string)
     ]
     idr_insrt_ts_line_dcmtn: Annotated[
         datetime,

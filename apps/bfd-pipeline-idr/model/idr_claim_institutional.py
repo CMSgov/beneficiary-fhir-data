@@ -28,7 +28,6 @@ from model.base_model import (
     transform_null_date_to_min,
     transform_null_float,
     transform_null_int,
-    transform_null_string,
 )
 
 
@@ -50,7 +49,7 @@ class IdrClaimInstitutional(IdrBaseModel):
     clm_instnl_per_diem_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_mdcr_instnl_bene_pd_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_mdcr_hospc_prd_cnt: Annotated[int, BeforeValidator(transform_null_int)]
-    clm_mdcr_npmt_rsn_cd: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_mdcr_npmt_rsn_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_mdcr_ip_pps_drg_wt_num: Annotated[float, BeforeValidator(transform_null_float)]
     clm_mdcr_ip_pps_dsprprtnt_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_mdcr_ip_pps_excptn_amt: Annotated[float, BeforeValidator(transform_null_float)]

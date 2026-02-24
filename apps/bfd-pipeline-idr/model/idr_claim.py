@@ -29,7 +29,6 @@ from model.base_model import (
     transform_null_date_to_min,
     transform_null_float,
     transform_null_int,
-    transform_null_string,
 )
 
 
@@ -41,7 +40,7 @@ class IdrClaim(IdrBaseModel):
     clm_num_sk: Annotated[int, {ALIAS: ALIAS_CLM}]
     bene_sk: int
     clm_cntl_num: str
-    clm_orig_cntl_num: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_orig_cntl_num: Annotated[str, BeforeValidator(transform_default_string)]
     clm_from_dt: date
     clm_thru_dt: date
     clm_efctv_dt: date
@@ -83,14 +82,14 @@ class IdrClaim(IdrBaseModel):
     clm_sbmt_chrg_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_blood_pt_frnsh_qty: Annotated[int, BeforeValidator(transform_null_int)]
     clm_nch_prmry_pyr_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_blg_prvdr_oscar_num: Annotated[str, BeforeValidator(transform_null_string)]
-    clm_nrln_ric_cd: Annotated[str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_null_string)]
+    clm_blg_prvdr_oscar_num: Annotated[str, BeforeValidator(transform_default_string)]
+    clm_nrln_ric_cd: Annotated[str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_default_string)]
     clm_idr_ld_dt: Annotated[date, {HISTORICAL_BATCH_TIMESTAMP: True}]
     clm_srvc_prvdr_gnrc_id_num: Annotated[str, BeforeValidator(transform_default_string)]
     prvdr_prscrbng_prvdr_npi_num: Annotated[str, BeforeValidator(transform_default_and_zero_string)]
     clm_adjstmt_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_bene_pd_amt: Annotated[float, BeforeValidator(transform_null_float)]
-    clm_blg_prvdr_zip5_cd: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_blg_prvdr_zip5_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_sbmt_frmt_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_sbmtr_cntrct_num: Annotated[str, BeforeValidator(transform_default_string)]
     clm_sbmtr_cntrct_pbp_num: Annotated[str, BeforeValidator(transform_default_string)]
@@ -109,18 +108,20 @@ class IdrClaim(IdrBaseModel):
     clm_bnft_enhncmt_5_cd: Annotated[
         str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_default_string)
     ]
-    clm_ngaco_pbpmt_sw: Annotated[str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_null_string)]
+    clm_ngaco_pbpmt_sw: Annotated[
+        str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_default_string)
+    ]
     clm_ngaco_cptatn_sw: Annotated[
-        str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_null_string)
+        str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_default_string)
     ]
     clm_ngaco_pdschrg_hcbs_sw: Annotated[
-        str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_null_string)
+        str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_default_string)
     ]
     clm_ngaco_snf_wvr_sw: Annotated[
-        str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_null_string)
+        str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_default_string)
     ]
     clm_ngaco_tlhlth_sw: Annotated[
-        str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_null_string)
+        str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_default_string)
     ]
     clm_blood_chrg_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_tot_cntrctl_amt: Annotated[float, BeforeValidator(transform_null_float)]

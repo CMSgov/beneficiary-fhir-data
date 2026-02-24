@@ -39,7 +39,6 @@ from model.base_model import (
     transform_default_date_to_null,
     transform_default_string,
     transform_null_date_to_min,
-    transform_null_string,
 )
 
 
@@ -61,7 +60,7 @@ class IdrClaimInstitutionalNch(IdrBaseModel):
                 ELSE {ALIAS_CLM}.clm_orig_cntl_num
                 END""",
         },
-        BeforeValidator(transform_null_string),
+        BeforeValidator(transform_default_string),
     ]
     clm_from_dt: Annotated[date, {ALIAS: ALIAS_CLM}]
     clm_thru_dt: Annotated[date, {ALIAS: ALIAS_CLM}]
@@ -106,7 +105,7 @@ class IdrClaimInstitutionalNch(IdrBaseModel):
         str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)
     ]
     clm_blg_prvdr_zip5_cd: Annotated[
-        str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_null_string)
+        str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)
     ]
     clm_atndg_fed_prvdr_spclty_cd: Annotated[
         str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)
@@ -138,7 +137,7 @@ class IdrClaimInstitutionalNch(IdrBaseModel):
     clm_idr_ld_dt: Annotated[date, {HISTORICAL_BATCH_TIMESTAMP: True, ALIAS: ALIAS_CLM}]
 
     # Columns from v2_mdcr_clm_dcmtn
-    clm_nrln_ric_cd: Annotated[str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_null_string)]
+    clm_nrln_ric_cd: Annotated[str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_default_string)]
     clm_bnft_enhncmt_1_cd: Annotated[
         str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_default_string)
     ]
@@ -154,21 +153,23 @@ class IdrClaimInstitutionalNch(IdrBaseModel):
     clm_bnft_enhncmt_5_cd: Annotated[
         str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_default_string)
     ]
-    clm_ngaco_pbpmt_sw: Annotated[str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_null_string)]
+    clm_ngaco_pbpmt_sw: Annotated[
+        str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_default_string)
+    ]
     clm_ngaco_cptatn_sw: Annotated[
-        str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_null_string)
+        str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_default_string)
     ]
     clm_aco_care_mgmt_hcbs_sw: Annotated[
-        str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_null_string)
+        str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_default_string)
     ]
     clm_ngaco_pdschrg_hcbs_sw: Annotated[
-        str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_null_string)
+        str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_default_string)
     ]
     clm_ngaco_snf_wvr_sw: Annotated[
-        str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_null_string)
+        str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_default_string)
     ]
     clm_ngaco_tlhlth_sw: Annotated[
-        str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_null_string)
+        str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_default_string)
     ]
     idr_insrt_ts_dcmtn: Annotated[
         datetime,
@@ -250,7 +251,7 @@ class IdrClaimInstitutionalNch(IdrBaseModel):
     clm_mdcr_instnl_bene_pd_amt: Annotated[float | None, {ALIAS: ALIAS_INSTNL}]
     clm_mdcr_hospc_prd_cnt: Annotated[int | None, {ALIAS: ALIAS_INSTNL}]
     clm_mdcr_npmt_rsn_cd: Annotated[
-        str, {ALIAS: ALIAS_INSTNL}, BeforeValidator(transform_null_string)
+        str, {ALIAS: ALIAS_INSTNL}, BeforeValidator(transform_default_string)
     ]
     clm_mdcr_ip_pps_drg_wt_num: Annotated[float | None, {ALIAS: ALIAS_INSTNL}]
     clm_mdcr_ip_pps_dsprprtnt_amt: Annotated[float | None, {ALIAS: ALIAS_INSTNL}]

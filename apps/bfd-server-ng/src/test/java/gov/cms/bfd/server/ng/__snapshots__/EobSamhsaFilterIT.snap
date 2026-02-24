@@ -519,7 +519,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
       },
       "careTeam" : [ {
         "provider" : {
-          "display" : "Granger,Hermion",
+          "display" : "Granger, Hermion",
           "identifier" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
             "type" : {
@@ -542,7 +542,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
         "sequence" : 1
       }, {
         "provider" : {
-          "display" : "CBS Health Corporation,Wednesday",
+          "display" : "Addams, Wednesday",
           "identifier" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
             "type" : {
@@ -4751,7 +4751,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
       },
       "careTeam" : [ {
         "provider" : {
-          "display" : "Stark,Tony",
+          "display" : "Stark, Tony",
           "identifier" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
             "type" : {
@@ -4774,7 +4774,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "sequence" : 2
       }, {
         "provider" : {
-          "display" : "Granger,Hermion",
+          "display" : "Granger, Hermion",
           "identifier" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
             "type" : {
@@ -4797,7 +4797,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "sequence" : 3
       }, {
         "provider" : {
-          "display" : "Rogers,Gromit",
+          "display" : "Rogers, Gromit",
           "identifier" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
             "type" : {
@@ -6838,7 +6838,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
       },
       "careTeam" : [ {
         "provider" : {
-          "display" : "Granger,Hermion",
+          "display" : "Granger, Hermion",
           "identifier" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
             "type" : {
@@ -6861,7 +6861,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "sequence" : 1
       }, {
         "provider" : {
-          "display" : "CBS Health Corporation,Wednesday",
+          "display" : "Addams, Wednesday",
           "identifier" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
             "type" : {
@@ -10592,7 +10592,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
       },
       "careTeam" : [ {
         "provider" : {
-          "display" : "Rogers,Gromit",
+          "display" : "Rogers, Gromit",
           "identifier" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
             "type" : {
@@ -12447,7 +12447,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
       },
       "careTeam" : [ {
         "provider" : {
-          "display" : "Stark,Tony",
+          "display" : "Stark, Tony",
           "identifier" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
             "type" : {
@@ -12470,7 +12470,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "sequence" : 2
       }, {
         "provider" : {
-          "display" : "Granger,Hermion",
+          "display" : "Granger, Hermion",
           "identifier" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
             "type" : {
@@ -12493,7 +12493,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "sequence" : 3
       }, {
         "provider" : {
-          "display" : "Rogers,Gromit",
+          "display" : "Rogers, Gromit",
           "identifier" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
             "type" : {
@@ -14534,7 +14534,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
       },
       "careTeam" : [ {
         "provider" : {
-          "display" : "Granger,Hermion",
+          "display" : "Granger, Hermion",
           "identifier" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
             "type" : {
@@ -14557,7 +14557,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "sequence" : 1
       }, {
         "provider" : {
-          "display" : "CBS Health Corporation,Wednesday",
+          "display" : "Addams, Wednesday",
           "identifier" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
             "type" : {
@@ -18288,7 +18288,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
       },
       "careTeam" : [ {
         "provider" : {
-          "display" : "Rogers,Gromit",
+          "display" : "Rogers, Gromit",
           "identifier" : {
             "system" : "http://hl7.org/fhir/sid/us-npi",
             "type" : {

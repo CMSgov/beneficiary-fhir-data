@@ -35,7 +35,6 @@ from model.base_model import (
     transform_default_date_to_null,
     transform_default_string,
     transform_null_date_to_min,
-    transform_null_string,
 )
 
 
@@ -57,7 +56,7 @@ class IdrClaimRx(IdrBaseModel):
                 ELSE {ALIAS_CLM}.clm_prnt_cntl_num
                 END""",
         },
-        BeforeValidator(transform_null_string),
+        BeforeValidator(transform_default_string),
     ]
     clm_orig_cntl_num: Annotated[
         str,
@@ -69,7 +68,7 @@ class IdrClaimRx(IdrBaseModel):
                 ELSE {ALIAS_CLM}.clm_orig_cntl_num
                 END""",
         },
-        BeforeValidator(transform_null_string),
+        BeforeValidator(transform_default_string),
     ]
     clm_from_dt: Annotated[date, {ALIAS: ALIAS_CLM}]
     clm_thru_dt: Annotated[date, {ALIAS: ALIAS_CLM}]
@@ -151,12 +150,12 @@ class IdrClaimRx(IdrBaseModel):
 
     # Columns from V2_MDCR_CLM_LINE_RX
     clm_brnd_gnrc_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_cmpnd_cd: Annotated[str, BeforeValidator(transform_null_string)]
-    clm_ctstrphc_cvrg_ind_cd: Annotated[str, BeforeValidator(transform_null_string)]
-    clm_daw_prod_slctn_cd: Annotated[str, BeforeValidator(transform_null_string)]
-    clm_drug_cvrg_stus_cd: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_cmpnd_cd: Annotated[str, BeforeValidator(transform_default_string)]
+    clm_ctstrphc_cvrg_ind_cd: Annotated[str, BeforeValidator(transform_default_string)]
+    clm_daw_prod_slctn_cd: Annotated[str, BeforeValidator(transform_default_string)]
+    clm_drug_cvrg_stus_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_dspnsng_stus_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_line_authrzd_fill_num: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_line_authrzd_fill_num: Annotated[str, BeforeValidator(transform_default_string)]
     clm_line_days_suply_qty: int | None
     clm_line_grs_above_thrshld_amt: float | None
     clm_line_grs_blw_thrshld_amt: float | None
@@ -171,7 +170,7 @@ class IdrClaimRx(IdrBaseModel):
     clm_line_vccn_admin_fee_amt: float | None
     clm_ltc_dspnsng_mthd_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_phrmcy_srvc_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_prcng_excptn_cd: Annotated[str, BeforeValidator(transform_null_string)]
+    clm_prcng_excptn_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_ptnt_rsdnc_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_line_rptd_gap_dscnt_amt: float | None
     clm_rptd_mftr_dscnt_amt: float | None
@@ -190,7 +189,9 @@ class IdrClaimRx(IdrBaseModel):
         BeforeValidator(transform_null_date_to_min),
     ]
 
-    cntrct_pbp_name: Annotated[str, {ALIAS: ALIAS_PBP_NUM}, BeforeValidator(transform_null_string)]
+    cntrct_pbp_name: Annotated[
+        str, {ALIAS: ALIAS_PBP_NUM}, BeforeValidator(transform_default_string)
+    ]
 
     # Columns from v2_mdcr_clm_dt_sgntr
     clm_cms_proc_dt: Annotated[date | None, BeforeValidator(transform_default_date_to_null)]

@@ -517,7 +517,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
   },
   "careTeam" : [ {
     "provider" : {
-      "display" : "Stark,Tony",
+      "display" : "Stark, Tony",
       "identifier" : {
         "system" : "http://hl7.org/fhir/sid/us-npi",
         "type" : {
@@ -540,7 +540,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
     "sequence" : 1
   }, {
     "provider" : {
-      "display" : "Garcia,Indiana",
+      "display" : "Garcia, Indiana",
       "identifier" : {
         "system" : "http://hl7.org/fhir/sid/us-npi",
         "type" : {
@@ -563,7 +563,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
     "sequence" : 2
   }, {
     "provider" : {
-      "display" : "Rogers,Gromit",
+      "display" : "Rogers, Gromit",
       "identifier" : {
         "system" : "http://hl7.org/fhir/sid/us-npi",
         "type" : {
@@ -1884,7 +1884,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
   },
   "careTeam" : [ {
     "provider" : {
-      "display" : "Stark,Tony",
+      "display" : "Stark, Tony",
       "identifier" : {
         "system" : "http://hl7.org/fhir/sid/us-npi",
         "type" : {
@@ -1907,7 +1907,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
     "sequence" : 1
   }, {
     "provider" : {
-      "display" : "Garcia,Indiana",
+      "display" : "Garcia, Indiana",
       "identifier" : {
         "system" : "http://hl7.org/fhir/sid/us-npi",
         "type" : {
@@ -1930,7 +1930,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
     "sequence" : 2
   }, {
     "provider" : {
-      "display" : "Rogers,Gromit",
+      "display" : "Rogers, Gromit",
       "identifier" : {
         "system" : "http://hl7.org/fhir/sid/us-npi",
         "type" : {
@@ -2864,7 +2864,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
   },
   "careTeam" : [ {
     "provider" : {
-      "display" : "Rogers,Gromit",
+      "display" : "Rogers, Gromit",
       "identifier" : {
         "system" : "http://hl7.org/fhir/sid/us-npi",
         "type" : {
@@ -2887,7 +2887,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
     "sequence" : 1
   }, {
     "provider" : {
-      "display" : "Stark,Tony",
+      "display" : "Stark, Tony",
       "identifier" : {
         "system" : "http://hl7.org/fhir/sid/us-npi",
         "type" : {
@@ -3508,7 +3508,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
   },
   "careTeam" : [ {
     "provider" : {
-      "display" : "Rogers,Gromit",
+      "display" : "Rogers, Gromit",
       "identifier" : {
         "system" : "http://hl7.org/fhir/sid/us-npi",
         "type" : {
@@ -3531,7 +3531,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
     "sequence" : 1
   }, {
     "provider" : {
-      "display" : "Stark,Tony",
+      "display" : "Stark, Tony",
       "identifier" : {
         "system" : "http://hl7.org/fhir/sid/us-npi",
         "type" : {
@@ -4588,7 +4588,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
   },
   "careTeam" : [ {
     "provider" : {
-      "display" : "Stark,Tony",
+      "display" : "Stark, Tony",
       "identifier" : {
         "system" : "http://hl7.org/fhir/sid/us-npi",
         "type" : {
@@ -4611,7 +4611,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
     "sequence" : 1
   }, {
     "provider" : {
-      "display" : "Garcia,Indiana",
+      "display" : "Garcia, Indiana",
       "identifier" : {
         "system" : "http://hl7.org/fhir/sid/us-npi",
         "type" : {
@@ -4634,7 +4634,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
     "sequence" : 2
   }, {
     "provider" : {
-      "display" : "Rogers,Gromit",
+      "display" : "Rogers, Gromit",
       "identifier" : {
         "system" : "http://hl7.org/fhir/sid/us-npi",
         "type" : {
@@ -6155,7 +6155,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
   },
   "careTeam" : [ {
     "provider" : {
-      "display" : "Stark,Tony",
+      "display" : "Stark, Tony",
       "identifier" : {
         "system" : "http://hl7.org/fhir/sid/us-npi",
         "type" : {
@@ -6178,7 +6178,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
     "sequence" : 1
   }, {
     "provider" : {
-      "display" : "Garcia,Indiana",
+      "display" : "Garcia, Indiana",
       "identifier" : {
         "system" : "http://hl7.org/fhir/sid/us-npi",
         "type" : {
@@ -6201,7 +6201,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
     "sequence" : 2
   }, {
     "provider" : {
-      "display" : "Rogers,Gromit",
+      "display" : "Rogers, Gromit",
       "identifier" : {
         "system" : "http://hl7.org/fhir/sid/us-npi",
         "type" : {

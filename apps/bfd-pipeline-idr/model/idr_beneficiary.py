@@ -25,7 +25,6 @@ from model.base_model import (
     transform_default_string,
     transform_null_date_to_max,
     transform_null_date_to_min,
-    transform_null_string,
 )
 
 
@@ -38,7 +37,7 @@ class IdrBeneficiary(IdrBaseModel):
     bene_xref_efctv_sk: int
     bene_mbi_id: str
     bene_1st_name: str
-    bene_midl_name: Annotated[str, BeforeValidator(transform_null_string)]
+    bene_midl_name: Annotated[str, BeforeValidator(transform_default_string)]
     bene_last_name: str
     bene_brth_dt: date
     bene_death_dt: Annotated[date, BeforeValidator(transform_null_date_to_max)]
@@ -48,14 +47,14 @@ class IdrBeneficiary(IdrBaseModel):
     geo_usps_state_cd: Annotated[str, BeforeValidator(transform_default_string)]
     geo_zip5_cd: Annotated[str, BeforeValidator(transform_default_string)]
     geo_zip_plc_name: Annotated[str, BeforeValidator(transform_default_string)]
-    bene_line_1_adr: Annotated[str, BeforeValidator(transform_null_string)]
-    bene_line_2_adr: Annotated[str, BeforeValidator(transform_null_string)]
-    bene_line_3_adr: Annotated[str, BeforeValidator(transform_null_string)]
-    bene_line_4_adr: Annotated[str, BeforeValidator(transform_null_string)]
-    bene_line_5_adr: Annotated[str, BeforeValidator(transform_null_string)]
-    bene_line_6_adr: Annotated[str, BeforeValidator(transform_null_string)]
+    bene_line_1_adr: Annotated[str, BeforeValidator(transform_default_string)]
+    bene_line_2_adr: Annotated[str, BeforeValidator(transform_default_string)]
+    bene_line_3_adr: Annotated[str, BeforeValidator(transform_default_string)]
+    bene_line_4_adr: Annotated[str, BeforeValidator(transform_default_string)]
+    bene_line_5_adr: Annotated[str, BeforeValidator(transform_default_string)]
+    bene_line_6_adr: Annotated[str, BeforeValidator(transform_default_string)]
     cntct_lang_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    idr_ltst_trans_flg: Annotated[str, BeforeValidator(transform_null_string)]
+    idr_ltst_trans_flg: Annotated[str, BeforeValidator(transform_default_string)]
     idr_trans_efctv_ts: Annotated[datetime, {PRIMARY_KEY: True}]
     idr_trans_obslt_ts: datetime
     idr_insrt_ts_bene: Annotated[
