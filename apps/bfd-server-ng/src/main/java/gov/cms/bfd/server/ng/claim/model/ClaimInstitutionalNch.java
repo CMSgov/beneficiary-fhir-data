@@ -26,7 +26,6 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 public class ClaimInstitutionalNch extends ClaimInstitutionalBase {
 
   @Embedded private ClaimDateSupportingInfo claimDateSupportingInfo;
-  @Embedded private AdjudicationChargeInstitutional adjudicationChargeInstitutional;
   @Embedded private AdjudicationChargeInstitutionalNch adjudicationCharge;
   @Embedded private ClaimNearLineRecordType claimRecordType;
   @Embedded private ClaimInstitutionalNchSupportingInfo supportingInfo;
@@ -46,6 +45,9 @@ public class ClaimInstitutionalNch extends ClaimInstitutionalBase {
   /** NCH insurance uses the near-line record variant of the insurance builder. */
   @Override
   protected void addInsurance(ExplanationOfBenefit eob) {
+    var insurance = new ExplanationOfBenefit.InsuranceComponent();
+    insurance.setFocal(true);
+    claimRecordType.toFhirReference(getClaimTypeCode()).ifPresent(insurance::setCoverage);
     getClaimTypeCode().toFhirInsuranceNearLineRecord(claimRecordType).ifPresent(eob::addInsurance);
   }
 

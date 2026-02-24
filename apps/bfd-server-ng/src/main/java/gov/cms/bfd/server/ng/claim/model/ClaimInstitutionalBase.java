@@ -43,12 +43,11 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
   @Embedded private AttendingCareTeam attendingProviderHistory;
   @Embedded private RenderingCareTeam renderingProviderHistory;
   @Embedded private ReferringInstitutionalCareTeam referringProviderHistory;
+  @Embedded private AdjudicationChargeInstitutional adjudicationChargeInstitutional;
 
   abstract SupportingInfoComponentBase getClaimDateSupportingInfo();
 
   abstract SupportingInfoComponentBase getSupportingInfo();
-
-  abstract AdjudicationChargeInstitutional getAdjudicationChargeInstitutional();
 
   abstract AdjudicationChargeBase getAdjudicationCharge();
 

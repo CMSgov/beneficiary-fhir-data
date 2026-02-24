@@ -116,11 +116,7 @@ public class ClaimProfessionalSharedSystems extends ClaimProfessionalBase {
                     getMetaSourceSk(), status, claimAuditTrailLocationCode));
     auditTrailStatusCode.ifPresentOrElse(
         status -> eob.setOutcome(status.getOutcome(getFinalAction())),
-        () -> {
-          if (getClaimTypeCode().isPac()) {
-            eob.setOutcome(ExplanationOfBenefit.RemittanceOutcome.PARTIAL);
-          }
-        });
+        () -> eob.setOutcome(ExplanationOfBenefit.RemittanceOutcome.PARTIAL));
   }
 
   @Override

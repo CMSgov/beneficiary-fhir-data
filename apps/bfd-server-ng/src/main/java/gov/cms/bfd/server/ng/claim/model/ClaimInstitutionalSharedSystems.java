@@ -28,7 +28,6 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 public class ClaimInstitutionalSharedSystems extends ClaimInstitutionalBase {
 
   @Embedded private ClaimDateInstitutionalSharedSystems claimDateSupportingInfo;
-  @Embedded private AdjudicationChargeInstitutional adjudicationChargeInstitutional;
   @Embedded private AdjudicationCharge adjudicationCharge;
   @Embedded private ClaimRecordTypeInstitutional claimRecordType;
   @Embedded private ClaimInstitutionalSupportingInfoBase supportingInfo;
@@ -60,6 +59,9 @@ public class ClaimInstitutionalSharedSystems extends ClaimInstitutionalBase {
   /** SS insurance uses the institutional variant of the insurance builder. */
   @Override
   protected void addInsurance(ExplanationOfBenefit eob) {
+    var insurance = new ExplanationOfBenefit.InsuranceComponent();
+    insurance.setFocal(true);
+    claimRecordType.toFhirReference(getClaimTypeCode()).ifPresent(insurance::setCoverage);
     getClaimTypeCode().toFhirInsuranceInstitutional(claimRecordType).ifPresent(eob::addInsurance);
   }
 
@@ -72,11 +74,7 @@ public class ClaimInstitutionalSharedSystems extends ClaimInstitutionalBase {
                     getMetaSourceSk(), status, claimAuditTrailLocationCode));
     auditTrailStatusCode.ifPresentOrElse(
         status -> eob.setOutcome(status.getOutcome(getFinalAction())),
-        () -> {
-          if (getClaimTypeCode().isPac()) {
-            eob.setOutcome(ExplanationOfBenefit.RemittanceOutcome.PARTIAL);
-          }
-        });
+        () -> eob.setOutcome(ExplanationOfBenefit.RemittanceOutcome.PARTIAL));
   }
 
   /** NCH has no additional care-team members beyond the referring provider added by the base. */
