@@ -76,7 +76,7 @@ public class EobResourceProvider implements IResourceProvider {
    * @return bundle
    */
   @Search
-  public Bundle searchByPatientNew(
+  public Bundle searchByPatient(
       @RequiredParam(name = ExplanationOfBenefit.SP_PATIENT) final ReferenceParam patient,
       @Count final Integer count,
       @OptionalParam(name = SERVICE_DATE) final DateRangeParam serviceDate,

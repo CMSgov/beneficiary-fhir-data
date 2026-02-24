@@ -21,8 +21,7 @@ import org.hl7.fhir.r4.model.Reference;
 /** Shared base for institutional claim types (NCH and Shared Systems variants). */
 @MappedSuperclass
 @Getter
-@SuppressWarnings("java:S6539")
-public abstract class ClaimInstitutionalBase<T extends ClaimItemBase> extends ClaimBase<T> {
+public abstract class ClaimInstitutionalBase extends ClaimBase {
 
   @Column(name = "clm_cntrctr_num")
   private Optional<ClaimContractorNumber> claimContractorNumber;
@@ -121,7 +120,7 @@ public abstract class ClaimInstitutionalBase<T extends ClaimItemBase> extends Cl
   }
 
   private void addClaimItems(ExplanationOfBenefit eob) {
-    getClaimItems()
+    getItems()
         .forEach(
             item -> {
               var claimLine = item.getClaimLine().toFhirItemComponent();
@@ -180,7 +179,7 @@ public abstract class ClaimInstitutionalBase<T extends ClaimItemBase> extends Cl
             .toList();
 
     var claimRelatedConditionCds =
-        getClaimItems().stream()
+        getItems().stream()
             .flatMap(item -> item.getClaimRelatedCondition().stream())
             .flatMap(c -> c.toFhir(supportingInfoFactory).stream())
             .toList();
@@ -233,7 +232,7 @@ public abstract class ClaimInstitutionalBase<T extends ClaimItemBase> extends Cl
     var diagnosisMap = new LinkedHashMap<String, PriorityQueue<ClaimProcedureBase>>();
     var poaDiagnoses = new HashMap<String, String>();
 
-    for (var item : getClaimItems()) {
+    for (var item : getItems()) {
       item.getProcedure()
           .ifPresent(
               procedure -> {

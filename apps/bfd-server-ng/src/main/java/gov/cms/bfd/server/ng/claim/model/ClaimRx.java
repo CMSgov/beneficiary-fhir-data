@@ -25,7 +25,7 @@ import org.hl7.fhir.r4.model.Reference;
 @Getter
 @Entity
 @Table(name = "claim_rx", schema = "idr_new")
-public class ClaimRx extends ClaimBase<ClaimItemRx> {
+public class ClaimRx extends ClaimBase {
 
   @Column(name = "clm_sbmt_frmt_cd")
   private Optional<ClaimSubmissionFormatCode> claimFormatCode;
@@ -76,7 +76,7 @@ public class ClaimRx extends ClaimBase<ClaimItemRx> {
   }
 
   private void addClaimLineItem(ExplanationOfBenefit eob) {
-    claimItems.getClaimLine().toFhirItemComponent().ifPresent(eob::addItem);
+    getClaimItems().getClaimLine().toFhirItemComponent().ifPresent(eob::addItem);
   }
 
   private void addServiceProvider(ExplanationOfBenefit eob) {
@@ -111,12 +111,12 @@ public class ClaimRx extends ClaimBase<ClaimItemRx> {
 
   private List<ExplanationOfBenefit.SupportingInformationComponent> buildLineSupportingInfo() {
     return Stream.concat(
-            claimItems
+            getClaimItems()
                 .getClaimLine()
                 .getClaimRxSupportingInfo()
                 .toFhir(supportingInfoFactory)
                 .stream(),
-            claimItems.getClaimLineRxNum().toFhir(supportingInfoFactory).stream())
+            getClaimItems().getClaimLineRxNum().toFhir(supportingInfoFactory).stream())
         .toList();
   }
 
@@ -145,10 +145,8 @@ public class ClaimRx extends ClaimBase<ClaimItemRx> {
    * @return optional total drug cost amount
    */
   public Optional<BigDecimal> getTotalDrugCostAmount() {
-    return getClaimItems().stream()
-        .map(ClaimItemRx::getClaimLine)
-        .map(claimLineRx -> claimLineRx.getAdjudicationCharge().getTotalDrugCost())
-        .findFirst();
+    return Optional.ofNullable(
+        getClaimItems().getClaimLine().getAdjudicationCharge().getTotalDrugCost());
   }
 
   private void addInsurance(ExplanationOfBenefit eob) {
@@ -162,9 +160,9 @@ public class ClaimRx extends ClaimBase<ClaimItemRx> {
 
   /** Rx claims have a single embedded rather than a collection. */
   @Override
-  public SortedSet<ClaimItemRx> getClaimItems() {
-    var items = new TreeSet<ClaimItemRx>();
-    items.add(claimItems);
+  public SortedSet<ClaimItemBase> getItems() {
+    var items = new TreeSet<ClaimItemBase>();
+    items.add(getClaimItems());
     return items;
   }
 }

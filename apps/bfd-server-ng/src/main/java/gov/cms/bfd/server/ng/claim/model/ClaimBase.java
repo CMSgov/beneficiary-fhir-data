@@ -27,7 +27,7 @@ import org.hl7.fhir.r4.model.Reference;
 @Getter
 @MappedSuperclass
 @SuppressWarnings({"JpaAttributeTypeInspection"})
-public abstract class ClaimBase<T extends ClaimItemBase> {
+public abstract class ClaimBase {
   @Id
   @Column(name = "clm_uniq_id", insertable = false, updatable = false)
   private long claimUniqueId;
@@ -126,7 +126,7 @@ public abstract class ClaimBase<T extends ClaimItemBase> {
    *
    * @return a sorted set of claim items.
    */
-  public abstract SortedSet<T> getClaimItems();
+  public abstract SortedSet<ClaimItemBase> getItems();
 
   /**
    * Returns the Diagnosis-Related Group (DRG) code for this claim, if available.

@@ -9,17 +9,21 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.util.List;
 import java.util.SortedSet;
+import java.util.TreeSet;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /**
  * Claim table. Suppress SonarQube Monster Class warning that dependencies to other class should be
  * reduced from 21 to the max 20. Ignore. Class itself is relatively short in lines of code.
+ * Suppress SonarQube warning to replace type specification with diamond operator since it can't
+ * infer the type for getItems()
  */
 @Getter
 @Entity
 @Table(name = "claim_institutional_nch", schema = "idr_new")
-public class ClaimInstitutionalNch extends ClaimInstitutionalBase<ClaimItemInstitutionalNch> {
+@SuppressWarnings({"java:S2293"})
+public class ClaimInstitutionalNch extends ClaimInstitutionalBase {
 
   @Embedded private ClaimDateSupportingInfo claimDateSupportingInfo;
   @Embedded private AdjudicationChargeInstitutional adjudicationChargeInstitutional;
@@ -47,7 +51,7 @@ public class ClaimInstitutionalNch extends ClaimInstitutionalBase<ClaimItemInsti
 
   @Override
   protected List<ClaimValue> getClaimValues() {
-    return claimItems.stream().map(ClaimItemInstitutionalNch::getClaimValue).toList();
+    return getClaimItems().stream().map(ClaimItemInstitutionalNch::getClaimValue).toList();
   }
 
   @Override
@@ -56,5 +60,10 @@ public class ClaimInstitutionalNch extends ClaimInstitutionalBase<ClaimItemInsti
     serviceProviderHistory
         .toFhirCareTeamComponent(sequenceGenerator.next())
         .ifPresent(eob::addCareTeam);
+  }
+
+  @Override
+  public SortedSet<ClaimItemBase> getItems() {
+    return new TreeSet<ClaimItemBase>(getClaimItems());
   }
 }

@@ -16,7 +16,7 @@ import org.hl7.fhir.r4.model.Reference;
 /** Shared base for professional claim types (NCH and Shared Systems). */
 @MappedSuperclass
 @Getter
-public abstract class ClaimProfessionalBase<T extends ClaimItemBase> extends ClaimBase<T> {
+public abstract class ClaimProfessionalBase extends ClaimBase {
 
   @Column(name = "clm_cntrctr_num")
   private Optional<ClaimContractorNumber> claimContractorNumber;
@@ -77,7 +77,7 @@ public abstract class ClaimProfessionalBase<T extends ClaimItemBase> extends Cla
     var eob = super.toFhir(securityStatus);
     var diagnosisSequenceGenerator = new SequenceGenerator();
 
-    getClaimItems().forEach(item -> addClaimItemToEob(eob, item, diagnosisSequenceGenerator));
+    getItems().forEach(item -> addClaimItemToEob(eob, item, diagnosisSequenceGenerator));
 
     addProviders(eob);
     addAllSupportingInfo(eob);

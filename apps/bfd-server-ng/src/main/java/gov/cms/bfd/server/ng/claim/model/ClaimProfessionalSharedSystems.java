@@ -14,6 +14,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
@@ -21,13 +22,14 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 /**
  * Claim table. Suppress SonarQube Monster Class warning that dependencies to other class should be
  * reduced from 21 to the max 20. Ignore. Class itself is relatively short in lines of code.
+ * Suppress SonarQube warning to replace type specification with diamond operator since it can't
+ * infer the type for getItems()
  */
 @Getter
 @Entity
 @Table(name = "claim_professional_ss", schema = "idr_new")
-@SuppressWarnings("JpaAttributeTypeInspection")
-public class ClaimProfessionalSharedSystems
-    extends ClaimProfessionalBase<ClaimItemProfessionalSharedSystems> {
+@SuppressWarnings({"JpaAttributeTypeInspection", "java:S2293"})
+public class ClaimProfessionalSharedSystems extends ClaimProfessionalBase {
 
   @Column(name = "clm_sbmt_frmt_cd")
   private Optional<ClaimSubmissionFormatCode> claimFormatCode;
@@ -76,7 +78,7 @@ public class ClaimProfessionalSharedSystems
                 .map(c -> c.toFhir(supportingInfoFactory))
                 .stream(),
             // Line-level: Rx number from each claim item.
-            claimItems.stream()
+            getClaimItems().stream()
                 .map(item -> item.getClaimLineRxNum().toFhir(supportingInfoFactory))
                 .flatMap(Optional::stream))
         .toList();
@@ -119,5 +121,10 @@ public class ClaimProfessionalSharedSystems
             eob.setOutcome(ExplanationOfBenefit.RemittanceOutcome.PARTIAL);
           }
         });
+  }
+
+  @Override
+  public SortedSet<ClaimItemBase> getItems() {
+    return new TreeSet<ClaimItemBase>(getClaimItems());
   }
 }

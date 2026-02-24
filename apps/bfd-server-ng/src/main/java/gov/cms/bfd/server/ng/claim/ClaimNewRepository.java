@@ -20,7 +20,6 @@ import org.springframework.stereotype.Repository;
 /** Repository methods for claims. */
 @Repository
 @AllArgsConstructor
-@SuppressWarnings("java:S1452")
 public class ClaimNewRepository {
 
   private final ClaimAsyncService asyncService;
@@ -64,7 +63,7 @@ public class ClaimNewRepository {
               JOIN FETCH c.beneficiary b
             """;
 
-  private static final Set<Class<? extends ClaimBase<?>>> ALL_CLAIM_TYPES =
+  private static final Set<Class<? extends ClaimBase>> ALL_CLAIM_TYPES =
       Set.of(
           ClaimProfessionalNch.class,
           ClaimInstitutionalNch.class,
@@ -81,7 +80,7 @@ public class ClaimNewRepository {
    * @return claim
    */
   @Timed(value = "application.claim.search_by_id")
-  public Optional<ClaimBase<?>> findById(
+  public Optional<ClaimBase> findById(
       long claimUniqueId,
       @MeterTag(
               key = "hasClaimThroughDate",
@@ -130,7 +129,7 @@ public class ClaimNewRepository {
             rxClaims)
         .join();
 
-    var allClaims = new ArrayList<ClaimBase<?>>();
+    var allClaims = new ArrayList<ClaimBase>();
     professionalNchClaims.join().ifPresent(allClaims::add);
     professionalSharedSystemsClaims.join().ifPresent(allClaims::add);
     institutionalSharedSystemsClaims.join().ifPresent(allClaims::add);
@@ -151,7 +150,7 @@ public class ClaimNewRepository {
    * @return claims
    */
   @Timed(value = "application.claim.search_by_bene")
-  public List<ClaimBase<?>> findByBeneXrefSk(
+  public List<ClaimBase> findByBeneXrefSk(
       @MeterTag(key = "hasClaimThroughDate", expression = "hasClaimThroughDate()")
           @MeterTag(key = "hasLastUpdated", expression = "hasLasUpdated()")
           @MeterTag(key = "hasTags", expression = "hasTags()")
@@ -160,7 +159,7 @@ public class ClaimNewRepository {
           ClaimSearchCriteria criteria) {
 
     var claimTypes = determineClaimTypesToQuery(criteria.sources(), criteria.tagCriteria());
-    var futures = new ArrayList<CompletableFuture<? extends List<? extends ClaimBase<?>>>>();
+    var futures = new ArrayList<CompletableFuture<? extends List<? extends ClaimBase>>>();
 
     // Execute all four queries. If tag source id or meta source provided, filter before we execute
     if (claimTypes.contains(ClaimProfessionalSharedSystems.class)) {
@@ -190,11 +189,11 @@ public class ClaimNewRepository {
     }
 
     CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
-    Stream<ClaimBase<?>> claims = futures.stream().flatMap(f -> f.join().stream());
+    Stream<ClaimBase> claims = futures.stream().flatMap(f -> f.join().stream());
     return claims.sorted(Comparator.comparing(ClaimBase::getClaimUniqueId)).toList();
   }
 
-  private Set<Class<? extends ClaimBase<?>>> determineClaimTypesToQuery(
+  private Set<Class<? extends ClaimBase>> determineClaimTypesToQuery(
       List<List<MetaSourceSk>> sources, List<List<TagCriterion>> tagCriteria) {
 
     var hasFinalAction =
@@ -235,7 +234,7 @@ public class ClaimNewRepository {
     return eligible;
   }
 
-  private Set<Class<? extends ClaimBase<?>>> mapMetaSourceToClaimType(MetaSourceSk metaSourceSk) {
+  private Set<Class<? extends ClaimBase>> mapMetaSourceToClaimType(MetaSourceSk metaSourceSk) {
     return switch (metaSourceSk) {
       case NCH -> Set.of(ClaimProfessionalNch.class, ClaimInstitutionalNch.class);
       case DDPS -> Set.of(ClaimRx.class);
@@ -244,7 +243,7 @@ public class ClaimNewRepository {
     };
   }
 
-  private Set<Class<? extends ClaimBase<?>>> mapClaimSourceIdToClaimType(ClaimSourceId sourceId) {
+  private Set<Class<? extends ClaimBase>> mapClaimSourceIdToClaimType(ClaimSourceId sourceId) {
     return switch (sourceId) {
       case NATIONAL_CLAIMS_HISTORY ->
           Set.of(ClaimProfessionalNch.class, ClaimInstitutionalNch.class, ClaimRx.class);
