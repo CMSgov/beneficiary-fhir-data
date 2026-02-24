@@ -750,145 +750,151 @@
                     }
                 ]
             },
-          {
-            "id": "ExplanationOfBenefit-Base.CLM_NGACO_PBPMT_SW",
-            "path": "ExplanationOfBenefit-Base.CLM_NGACO_PBPMT_SW",
-            "label": "PBP Benefit Enhancement Indicator",
-            "min": 0,
-            "max": "1",
-            "type": [
-              {
-                "code": "string"
-              }
-            ]
-          },
-          {
-            "id": "ExplanationOfBenefit-Base.CLM_NGACO_PDSCHRG_HCBS_SW",
-            "path": "ExplanationOfBenefit-Base.CLM_NGACO_PDSCHRG_HCBS_SW",
-            "label": "Post Discharge Home Visit Benefit Enhancement Indicator",
-            "min": 0,
-            "max": "1",
-            "type": [
-              {
-                "code": "string"
-              }
-            ]
-          },
-          {
-            "id": "ExplanationOfBenefit-Base.CLM_NGACO_SNF_WVR_SW",
-            "path": "ExplanationOfBenefit-Base.CLM_NGACO_SNF_WVR_SW",
-            "label": "SNF 3-Day Waiver Benefit Enhancement Indicator",
-            "min": 0,
-            "max": "1",
-            "type": [
-              {
-                "code": "string"
-              }
-            ]
-          },
-          {
-            "id": "ExplanationOfBenefit-Base.CLM_NGACO_TLHLTH_SW",
-            "path": "ExplanationOfBenefit-Base.CLM_NGACO_TLHLTH_SW",
-            "label": "Telehealth Benefit Enhancement Indicator",
-            "min": 0,
-            "max": "1",
-            "type": [
-              {
-                "code": "string"
-              }
-            ]
-          },
-          {
-            "id": "ExplanationOfBenefit-Base.CLM_NGACO_CPTATN_SW",
-            "path": "ExplanationOfBenefit-Base.CLM_NGACO_CPTATN_SW",
-            "label": "AIPBP Benefit Enhancement Indicator",
-            "min": 0,
-            "max": "1",
-            "type": [
-              {
-                "code": "string"
-              }
-            ]
-          },
-          {
-            "id": "ExplanationOfBenefit-Base.CLM_ACO_CARE_MGMT_HCBS_SW",
-            "path": "ExplanationOfBenefit-Base.CLM_ACO_CARE_MGMT_HCBS_SW",
-            "label": "Care Management Home Visits",
-            "min": 0,
-            "max": "1",
-            "type": [
-              {
-                "code": "string"
-              }
-            ]
-          },{
-            "id": "ExplanationOfBenefit-Base.CLM_BNFT_ENHNCMT_1_CD",
-            "path": "ExplanationOfBenefit-Base.CLM_BNFT_ENHNCMT_1_CD",
-            "label": "Claim Benefit Enhancement Code 1",
-            "min": 0,
-            "max": "1",
-            "type": [
-              {
-                "code": "string"
-              }
-            ]
-          },{
-            "id": "ExplanationOfBenefit-Base.CLM_BNFT_ENHNCMT_2_CD",
-            "path": "ExplanationOfBenefit-Base.CLM_BNFT_ENHNCMT_2_CD",
-            "label": "Claim Benefit Enhancement Code 2",
-            "min": 0,
-            "max": "1",
-            "type": [
-              {
-                "code": "string"
-              }
-            ]
-          },{
-            "id": "ExplanationOfBenefit-Base.CLM_BNFT_ENHNCMT_3_CD",
-            "path": "ExplanationOfBenefit-Base.CLM_BNFT_ENHNCMT_3_CD",
-            "label": "Claim Benefit Enhancement Code 3",
-            "min": 0,
-            "max": "1",
-            "type": [
-              {
-                "code": "string"
-              }
-            ]
-          },{
-            "id": "ExplanationOfBenefit-Base.CLM_BNFT_ENHNCMT_4_CD",
-            "path": "ExplanationOfBenefit-Base.CLM_BNFT_ENHNCMT_4_CD",
-            "label": "Claim Benefit Enhancement Code 4",
-            "min": 0,
-            "max": "1",
-            "type": [
-              {
-                "code": "string"
-              }
-            ]
-          },{
-            "id": "ExplanationOfBenefit-Base.CLM_BNFT_ENHNCMT_5_CD",
-            "path": "ExplanationOfBenefit-Base.CLM_BNFT_ENHNCMT_5_CD",
-            "label": "Claim Benefit Enhancement Code 5",
-            "min": 0,
-            "max": "1",
-            "type": [
-              {
-                "code": "string"
-              }
-            ]
-          },
-          {
-            "id": "ExplanationOfBenefit-Base.CLM_AUDT_TRL_STUS_CD",
-            "path": "ExplanationOfBenefit-Base.CLM_AUDT_TRL_STUS_CD",
-            "label": "Claim Status Code",
-            "min": 0,
-            "max": "1",
-            "type": [
-              {
-                "code": "string"
-              }
-            ]
-          }
+            {
+                "id": "ExplanationOfBenefit-Base.CLM_NGACO_PBPMT_SW",
+                "path": "ExplanationOfBenefit-Base.CLM_NGACO_PBPMT_SW",
+                "label": "PBP Benefit Enhancement Indicator",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Base.CLM_NGACO_PDSCHRG_HCBS_SW",
+                "path": "ExplanationOfBenefit-Base.CLM_NGACO_PDSCHRG_HCBS_SW",
+                "label": "Post Discharge Home Visit Benefit Enhancement Indicator",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Base.CLM_NGACO_SNF_WVR_SW",
+                "path": "ExplanationOfBenefit-Base.CLM_NGACO_SNF_WVR_SW",
+                "label": "SNF 3-Day Waiver Benefit Enhancement Indicator",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Base.CLM_NGACO_TLHLTH_SW",
+                "path": "ExplanationOfBenefit-Base.CLM_NGACO_TLHLTH_SW",
+                "label": "Telehealth Benefit Enhancement Indicator",
+                "definition": "A single character code of “Y” or “N” that indicates whether a particular claim/claime line is tied to a Telehealth benefit enhancement.",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Base.CLM_NGACO_CPTATN_SW",
+                "path": "ExplanationOfBenefit-Base.CLM_NGACO_CPTATN_SW",
+                "label": "AIPBP Benefit Enhancement Indicator",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Base.CLM_ACO_CARE_MGMT_HCBS_SW",
+                "path": "ExplanationOfBenefit-Base.CLM_ACO_CARE_MGMT_HCBS_SW",
+                "label": "Care Management Home Visits",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Base.CLM_BNFT_ENHNCMT_1_CD",
+                "path": "ExplanationOfBenefit-Base.CLM_BNFT_ENHNCMT_1_CD",
+                "label": "Claim Benefit Enhancement Code 1",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Base.CLM_BNFT_ENHNCMT_2_CD",
+                "path": "ExplanationOfBenefit-Base.CLM_BNFT_ENHNCMT_2_CD",
+                "label": "Claim Benefit Enhancement Code 2",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Base.CLM_BNFT_ENHNCMT_3_CD",
+                "path": "ExplanationOfBenefit-Base.CLM_BNFT_ENHNCMT_3_CD",
+                "label": "Claim Benefit Enhancement Code 3",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Base.CLM_BNFT_ENHNCMT_4_CD",
+                "path": "ExplanationOfBenefit-Base.CLM_BNFT_ENHNCMT_4_CD",
+                "label": "Claim Benefit Enhancement Code 4",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Base.CLM_BNFT_ENHNCMT_5_CD",
+                "path": "ExplanationOfBenefit-Base.CLM_BNFT_ENHNCMT_5_CD",
+                "label": "Claim Benefit Enhancement Code 5",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "ExplanationOfBenefit-Base.CLM_AUDT_TRL_STUS_CD",
+                "path": "ExplanationOfBenefit-Base.CLM_AUDT_TRL_STUS_CD",
+                "label": "Claim Status Code",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            }
         ]
     }
 }

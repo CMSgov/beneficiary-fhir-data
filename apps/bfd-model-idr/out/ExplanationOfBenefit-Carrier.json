@@ -529,7 +529,8 @@
       },
       {
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-        "code" : "CLM_IDR_LD_DT"
+        "code" : "CLM_IDR_LD_DT",
+        "display" : "Claim IDR Load Date"
       }]
     },
     "timingDate" : "2025-01-18"
@@ -610,7 +611,8 @@
       },
       {
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-        "code" : "CLM_CMS_PROC_DT"
+        "code" : "CLM_CMS_PROC_DT",
+        "display" : "FI Claim Process Date"
       }]
     },
     "timingDate" : "2025-01-01"
@@ -669,7 +671,8 @@
       },
       {
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-        "code" : "CLM_CLNCL_TRIL_NUM"
+        "code" : "CLM_CLNCL_TRIL_NUM",
+        "display" : "Clinical Trial Number"
       }]
     },
     "valueString" : "1337"
@@ -726,7 +729,7 @@
     "diagnosisCodeableConcept" : {
       "coding" : [{
         "system" : "http://hl7.org/fhir/sid/icd-10-cm",
-        "code" : "M48.063"
+        "code" : "M48.062"
       }]
     },
     "type" : [{
@@ -741,7 +744,7 @@
     "diagnosisCodeableConcept" : {
       "coding" : [{
         "system" : "http://hl7.org/fhir/sid/icd-10-cm",
-        "code" : "M47.817"
+        "code" : "M48.063"
       }]
     },
     "type" : [{
@@ -753,6 +756,21 @@
   },
   {
     "sequence" : 4,
+    "diagnosisCodeableConcept" : {
+      "coding" : [{
+        "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+        "code" : "M47.817"
+      }]
+    },
+    "type" : [{
+      "coding" : [{
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
+        "code" : "secondary"
+      }]
+    }]
+  },
+  {
+    "sequence" : 5,
     "diagnosisCodeableConcept" : {
       "coding" : [{
         "system" : "http://hl7.org/fhir/sid/icd-10-cm",
@@ -839,7 +857,6 @@
     }],
     "sequence" : 1,
     "careTeamSequence" : [1],
-    "diagnosisSequence" : [1],
     "informationSequence" : [29],
     "revenue" : {
       "coding" : [{
@@ -1588,7 +1605,7 @@
       "coding" : [{
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
         "code" : "CLM_MDCR_PRFNL_PRMRY_PYR_AMT",
-        "display" : "Carrier Primary Payer Paid Amount"
+        "display" : "Primary Payer Paid Amount"
       }]
     },
     "amount" : {

@@ -35,6 +35,34 @@ line_supporting_info_columns = [
     "CLM_LINE_PMD_UNIQ_TRKNG_NUM",
     "CLM_LINE_PA_UNIQ_TRKNG_NUM",
 ]
+header_to_supp_info_cols = {
+    "CLM_BNFT_ENHNCMT_1_CD": "CLM_BNFT_ENHNCMT_CD",
+    "CLM_BNFT_ENHNCMT_2_CD": "CLM_BNFT_ENHNCMT_CD",
+    "CLM_BNFT_ENHNCMT_3_CD": "CLM_BNFT_ENHNCMT_CD",
+    "CLM_BNFT_ENHNCMT_4_CD": "CLM_BNFT_ENHNCMT_CD",
+    "CLM_BNFT_ENHNCMT_5_CD": "CLM_BNFT_ENHNCMT_CD",
+    "CLM_NGACO_PBPMT_SW": "CLM_NGACO_PBPMT_SW",
+    "CLM_NGACO_PDSCHRG_HCBS_SW": "CLM_NGACO_PDSCHRG_HCBS_SW",
+    "CLM_NGACO_SNF_WVR_SW": "CLM_NGACO_SNF_WVR_SW",
+    "CLM_NGACO_TLHLTH_SW": "CLM_NGACO_TLHLTH_SW",
+    "CLM_NGACO_CPTATN_SW": "CLM_NGACO_CPTATN_SW",
+    "CLM_ACO_CARE_MGMT_HCBS_SW": "CLM_ACO_CARE_MGMT_HCBS_SW",
+}
+
+line_to_supp_info_cols = {
+    "CLM_LINE_BNFT_ENHNCMT_1_CD": "CLM_BNFT_ENHNCMT_CD",
+    "CLM_LINE_BNFT_ENHNCMT_2_CD": "CLM_BNFT_ENHNCMT_CD",
+    "CLM_LINE_BNFT_ENHNCMT_3_CD": "CLM_BNFT_ENHNCMT_CD",
+    "CLM_LINE_BNFT_ENHNCMT_4_CD": "CLM_BNFT_ENHNCMT_CD",
+    "CLM_LINE_BNFT_ENHNCMT_5_CD": "CLM_BNFT_ENHNCMT_CD",
+    "CLM_LINE_NGACO_PBPMT_SW": "CLM_NGACO_PBPMT_SW",
+    "CLM_LINE_NGACO_PDSCHRG_HCBS_SW": "CLM_NGACO_PDSCHRG_HCBS_SW",
+    "CLM_LINE_NGACO_SNF_WVR_SW": "CLM_NGACO_SNF_WVR_SW",
+    "CLM_LINE_NGACO_TLHLTH_SW": "CLM_NGACO_TLHLTH_SW",
+    "CLM_LINE_NGACO_CPTATN_SW": "CLM_NGACO_CPTATN_SW",
+    "CLM_LINE_ACO_CARE_MGMT_HCBS_SW": "CLM_ACO_CARE_MGMT_HCBS_SW",
+}
+
 npis_used = []
 cur_sample_data["providerList"] = []
 cur_careteam_sequence = 1
@@ -130,14 +158,32 @@ for si_comp in supporting_info_components:
     si_comp["ROW_NUM"] = supporting_info_seq
     supporting_info_seq += 1
 
+for source_col, target_col in header_to_supp_info_cols.items():
+    value = cur_sample_data.get(source_col)
+    if value:
+        temp_var = {"ROW_NUM": supporting_info_seq, target_col: value}
+        supporting_info_components.append(temp_var)
+        supporting_info_seq += 1
+
 
 # There can be line item NPIs that are not present at header level, but
 # need to be added to the CareTeam. This populates those.
 line_items = cur_sample_data.get("lineItemComponents", [])
 for item in line_items:
+    if "SEQUENCE_INFO" in item and not isinstance(item["SEQUENCE_INFO"], list):
+        item["SEQUENCE_INFO"] = [item["SEQUENCE_INFO"]]
+
     for line_supporting_info_col in line_supporting_info_columns:
         if item.get(line_supporting_info_col):
-            item["SEQUENCE_INFO"] = supporting_info_seq
+            item.setdefault("SEQUENCE_INFO", []).append(supporting_info_seq)
+            supporting_info_seq += 1
+
+    for source_col, target_col in line_to_supp_info_cols.items():
+        value = item.get(source_col)
+        if value:
+            temp_var = {"ROW_NUM": supporting_info_seq, target_col: value}
+            supporting_info_components.append(temp_var)
+            item.setdefault("SEQUENCE_INFO", []).append(supporting_info_seq)
             supporting_info_seq += 1
 
     for line_col in line_columns:

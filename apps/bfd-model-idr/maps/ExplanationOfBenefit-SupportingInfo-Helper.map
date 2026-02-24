@@ -129,6 +129,7 @@ group addCareMgmtSwitch(source src: SupportingInfoComponent, target tgt: Backbon
 }
 
 group addBenefitEnhancementCode(source src: string, target tgt: BackboneElement){
+    src.ROW_NUM as seqNum -> tgt.sequence = seqNum "set sequence number";
     src -> tgt.category = create('CodeableConcept') as tgtCC then {
         src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
         src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","CLM_BNFT_ENHNCMT_CD") "Add Coding";

@@ -618,7 +618,8 @@
       },
       {
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-        "code" : "CLM_IDR_LD_DT"
+        "code" : "CLM_IDR_LD_DT",
+        "display" : "Claim IDR Load Date"
       }]
     },
     "timingDate" : "2025-01-18"
@@ -699,7 +700,8 @@
       },
       {
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-        "code" : "CLM_CMS_PROC_DT"
+        "code" : "CLM_CMS_PROC_DT",
+        "display" : "FI Claim Process Date"
       }]
     },
     "timingDate" : "2025-01-01"
@@ -737,7 +739,7 @@
       {
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
         "code" : "CLM_FI_ACTN_CD",
-        "display" : "FI or MAC Claim Action Code"
+        "display" : "Claim Fiscal Intermediary Action Code"
       }]
     },
     "code" : {
@@ -761,11 +763,35 @@
         "system" : "http://terminology.hl7.org/CodeSystem/ex-diagnosistype",
         "code" : "principal"
       }]
+    }]
+  },
+  {
+    "sequence" : 2,
+    "diagnosisCodeableConcept" : {
+      "coding" : [{
+        "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+        "code" : "M48.062"
+      }]
     },
-    {
+    "type" : [{
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/ex-diagnosistype",
         "code" : "admitting"
+      }]
+    }]
+  },
+  {
+    "sequence" : 3,
+    "diagnosisCodeableConcept" : {
+      "coding" : [{
+        "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+        "code" : "M48.062"
+      }]
+    },
+    "type" : [{
+      "coding" : [{
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
+        "code" : "other"
       }]
     }],
     "onAdmission" : {
@@ -776,7 +802,7 @@
     }
   },
   {
-    "sequence" : 2,
+    "sequence" : 4,
     "diagnosisCodeableConcept" : {
       "coding" : [{
         "system" : "http://hl7.org/fhir/sid/icd-10-cm",
@@ -797,7 +823,7 @@
     }
   },
   {
-    "sequence" : 3,
+    "sequence" : 5,
     "diagnosisCodeableConcept" : {
       "coding" : [{
         "system" : "http://hl7.org/fhir/sid/icd-10-cm",

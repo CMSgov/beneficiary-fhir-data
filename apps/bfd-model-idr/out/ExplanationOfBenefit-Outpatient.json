@@ -495,7 +495,8 @@
       },
       {
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-        "code" : "CLM_IDR_LD_DT"
+        "code" : "CLM_IDR_LD_DT",
+        "display" : "Claim IDR Load Date"
       }]
     },
     "timingDate" : "2025-01-18"
@@ -576,7 +577,8 @@
       },
       {
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-        "code" : "CLM_CMS_PROC_DT"
+        "code" : "CLM_CMS_PROC_DT",
+        "display" : "FI Claim Process Date"
       }]
     },
     "timingDate" : "2025-01-01"
@@ -614,7 +616,7 @@
       {
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
         "code" : "CLM_FI_ACTN_CD",
-        "display" : "FI or MAC Claim Action Code"
+        "display" : "Claim Fiscal Intermediary Action Code"
       }]
     },
     "code" : {
@@ -667,13 +669,13 @@
     "diagnosisCodeableConcept" : {
       "coding" : [{
         "system" : "http://hl7.org/fhir/sid/icd-10-cm",
-        "code" : "M48.06"
+        "code" : "M47.817"
       }]
     },
     "type" : [{
       "coding" : [{
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
-        "code" : "other"
+        "code" : "patientreasonforvisit"
       }]
     }]
   },
@@ -682,7 +684,7 @@
     "diagnosisCodeableConcept" : {
       "coding" : [{
         "system" : "http://hl7.org/fhir/sid/icd-10-cm",
-        "code" : "E78.00"
+        "code" : "M48.062"
       }]
     },
     "type" : [{
@@ -696,7 +698,23 @@
     "sequence" : 4,
     "diagnosisCodeableConcept" : {
       "coding" : [{
-        "system" : "http://hl7.org/fhir/sid/icd-10-cm"
+        "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+        "code" : "M48.06"
+      }]
+    },
+    "type" : [{
+      "coding" : [{
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
+        "code" : "other"
+      }]
+    }]
+  },
+  {
+    "sequence" : 5,
+    "diagnosisCodeableConcept" : {
+      "coding" : [{
+        "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+        "code" : "E78.00"
       }]
     },
     "type" : [{
