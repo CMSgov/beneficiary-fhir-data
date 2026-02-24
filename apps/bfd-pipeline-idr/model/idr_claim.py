@@ -23,7 +23,6 @@ from model.base_model import (
     UPDATE_TIMESTAMP,
     IdrBaseModel,
     claim_filter,
-    transform_default_and_zero_string,
     transform_default_string,
     transform_null_date_to_max,
     transform_null_date_to_min,
@@ -86,7 +85,7 @@ class IdrClaim(IdrBaseModel):
     clm_nrln_ric_cd: Annotated[str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_default_string)]
     clm_idr_ld_dt: Annotated[date, {HISTORICAL_BATCH_TIMESTAMP: True}]
     clm_srvc_prvdr_gnrc_id_num: Annotated[str, BeforeValidator(transform_default_string)]
-    prvdr_prscrbng_prvdr_npi_num: Annotated[str, BeforeValidator(transform_default_and_zero_string)]
+    prvdr_prscrbng_prvdr_npi_num: Annotated[str, BeforeValidator(transform_default_string)]
     clm_adjstmt_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_bene_pd_amt: Annotated[float, BeforeValidator(transform_null_float)]
     clm_blg_prvdr_zip5_cd: Annotated[str, BeforeValidator(transform_default_string)]
