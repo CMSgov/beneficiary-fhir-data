@@ -8,6 +8,80 @@ conceptmap "FinalActionIndicator" {
   s:N == t:"cancelled"
 }
 
+conceptmap "PRVDR_ID_QLFYR_CD" {
+  prefix s = "https://hl7.org/fhir/string"
+  prefix t = "http://bluebutton.cms.gov/fhir/CodeSystem/PRVDR-ID-QLFYR-CD"
+  
+  s:"01" == t:"NPI Number"
+  s:"06" == t:"UPIN"
+  s:"07" == t:"NCPDP Number"
+  s:"08" == t:"State License Number"
+  s:"11" == t:"TIN"
+  s:"12" == t:"DEA"
+  s:"99" == t:"Other mandatory for Standard Data Format"
+
+}
+
+conceptmap "FED_PRVDR_SPCLTY_TO_TAXONOMY" {
+  prefix s = "https://hl7.org/fhir/string"
+  prefix t = "http://nucc.org/provider-taxonomy"
+
+  s:"1" == t:"208D00000X"
+  s:"2" == t:"208600000X"
+  s:"3" == t:"207K00000X"
+  s:"4" == t:"207Y00000X"
+  s:"5" == t:"207L00000X"
+  s:"6" == t:"207RC0000X"
+  s:"7" == t:"207N00000X"
+  s:"8" == t:"207Q00000X"
+  s:"9" == t:"208VP0014X"
+  s:"10" == t:"207RG0100X"
+  s:"11" == t:"207R00000X"
+  s:"12" == t:"204D00000X"
+  s:"13" == t:"2084N0400X"
+  s:"14" == t:"207T00000X"
+  s:"63" == t:"335V00000X"
+  s:"64" == t:"231H00000X"
+  s:"65" == t:"225100000X"
+  s:"66" == t:"207RR0500X"
+  s:"67" == t:"225X00000X"
+  s:"68" == t:"103TC0700X"
+  s:"69" == t:"291U00000X"
+  s:"70" == t:"193200000X"
+  s:"71" == t:"133V00000X"
+  s:"72" == t:"208VP0000X"
+  s:"74" == t:"261QX0203X"
+  s:"76" == t:"2086S0129X"
+  s:"77" == t:"2086S0129X"
+  s:"78" == t:"2086S0129X"
+  s:"79" == t:"207RA0401X"
+  s:"80" == t:"1041C0700X"
+  s:"81" == t:"207RC0200X"
+  s:"82" == t:"207RH0000X"
+  s:"83" == t:"207RH0003X"
+  s:"84" == t:"2083P0901X"
+  s:"85" == t:"204E00000X"
+  s:"86" == t:"2084N0600X"
+  s:"89" == t:"364S00000X"
+  s:"90" == t:"207RX0202X"
+  s:"91" == t:"2086X0206X"
+  s:"92" == t:"2085R0001X"
+  s:"93" == t:"207P00000X"
+  s:"94" == t:"2085R0204X"
+  s:"96" == t:"156FX1800X"
+  s:"97" == t:"363A00000X"
+  s:"98" == t:"207VX0201X"
+  s:"A0" == t:"282N00000X"
+  s:"A1" == t:"314000000X"
+  s:"A2" == t:"313M00000X"
+  s:"A3" == t:"313M00000X"
+  s:"A4" == t:"251E00000X"
+  s:"A5" == t:"333600000X"
+  s:"A6" == t:"332B00000X"
+  s:"A7" == t:"332B00000X"
+  s:"A8" == t:"332B00000X"
+}
+
 conceptmap "CLM_LTST_CLM_IND" {
   prefix s = "https://hl7.org/fhir/string"
   prefix t = "http://hl7.org/fhir/explanationofbenefit-status"
@@ -75,6 +149,7 @@ conceptmap "profile_metadata" {
   s:82 == t:"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Professional-NonClinician|2.1.0"
   s:1011 == t:"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional|2.1.0"
   s:2011 == t:"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional|2.1.0"
+  s:2700 == t:"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Professional-NonClinician|2.1.0"
 }
 
 conceptmap "subtype" {
