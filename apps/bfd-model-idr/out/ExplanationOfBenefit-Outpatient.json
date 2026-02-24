@@ -43,33 +43,10 @@
     },
     {
       "system" : "http://terminology.hl7.org/NamingSystem/CCN",
-      "value" : "722931"
+      "value" : "00024"
     }],
     "active" : true,
     "name" : "CBS Health Corporation"
-  },
-  {
-    "resourceType" : "Practitioner",
-    "id" : "1942945159",
-    "meta" : {
-      "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0",
-      "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0"]
-    },
-    "identifier" : [{
-      "type" : {
-        "coding" : [{
-          "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
-          "code" : "NPI",
-          "display" : "National provider identifier"
-        }]
-      },
-      "system" : "http://hl7.org/fhir/sid/us-npi",
-      "value" : "1942945159"
-    }],
-    "name" : [{
-      "family" : "Stark",
-      "given" : ["Tony"]
-    }]
   }],
   "identifier" : [{
     "type" : {
@@ -122,10 +99,26 @@
   "careTeam" : [{
     "sequence" : 1,
     "provider" : {
-      "reference" : "#1942945159"
+      "identifier" : {
+        "type" : {
+          "coding" : [{
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code" : "NPI",
+            "display" : "National provider identifier"
+          }]
+        },
+        "system" : "http://hl7.org/fhir/sid/us-npi",
+        "value" : "1942945159"
+      },
+      "display" : "Stark, Tony"
     },
     "role" : {
       "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole",
+        "code" : "otheroperating",
+        "display" : "Other Operating"
+      },
+      {
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
         "code" : "otheroperating",
         "display" : "Other Operating"
@@ -135,10 +128,26 @@
   {
     "sequence" : 2,
     "provider" : {
-      "reference" : "#1942945159"
+      "identifier" : {
+        "type" : {
+          "coding" : [{
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code" : "NPI",
+            "display" : "National provider identifier"
+          }]
+        },
+        "system" : "http://hl7.org/fhir/sid/us-npi",
+        "value" : "1942945159"
+      },
+      "display" : "Stark, Tony"
     },
     "role" : {
       "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole",
+        "code" : "attending",
+        "display" : "Attending"
+      },
+      {
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
         "code" : "attending",
         "display" : "Attending"
@@ -148,10 +157,26 @@
   {
     "sequence" : 3,
     "provider" : {
-      "reference" : "#1942945159"
+      "identifier" : {
+        "type" : {
+          "coding" : [{
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code" : "NPI",
+            "display" : "National provider identifier"
+          }]
+        },
+        "system" : "http://hl7.org/fhir/sid/us-npi",
+        "value" : "1942945159"
+      },
+      "display" : "Stark, Tony"
     },
     "role" : {
       "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole",
+        "code" : "operating",
+        "display" : "Operating"
+      },
+      {
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
         "code" : "operating",
         "display" : "Operating"
@@ -161,10 +186,26 @@
   {
     "sequence" : 4,
     "provider" : {
-      "reference" : "#1942945159"
+      "identifier" : {
+        "type" : {
+          "coding" : [{
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code" : "NPI",
+            "display" : "National provider identifier"
+          }]
+        },
+        "system" : "http://hl7.org/fhir/sid/us-npi",
+        "value" : "1942945159"
+      },
+      "display" : "Stark, Tony"
     },
     "role" : {
       "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole",
+        "code" : "rendering",
+        "display" : "Rendering provider"
+      },
+      {
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
         "code" : "rendering",
         "display" : "Rendering provider"
@@ -495,7 +536,8 @@
       },
       {
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-        "code" : "CLM_IDR_LD_DT"
+        "code" : "CLM_IDR_LD_DT",
+        "display" : "Claim IDR Load Date"
       }]
     },
     "timingDate" : "2025-01-18"
@@ -576,7 +618,8 @@
       },
       {
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-        "code" : "CLM_CMS_PROC_DT"
+        "code" : "CLM_CMS_PROC_DT",
+        "display" : "FI Claim Process Date"
       }]
     },
     "timingDate" : "2025-01-01"
@@ -614,7 +657,7 @@
       {
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
         "code" : "CLM_FI_ACTN_CD",
-        "display" : "FI or MAC Claim Action Code"
+        "display" : "Claim Fiscal Intermediary Action Code"
       }]
     },
     "code" : {
@@ -667,13 +710,13 @@
     "diagnosisCodeableConcept" : {
       "coding" : [{
         "system" : "http://hl7.org/fhir/sid/icd-10-cm",
-        "code" : "M48.06"
+        "code" : "M47.817"
       }]
     },
     "type" : [{
       "coding" : [{
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
-        "code" : "other"
+        "code" : "patientreasonforvisit"
       }]
     }]
   },
@@ -682,7 +725,7 @@
     "diagnosisCodeableConcept" : {
       "coding" : [{
         "system" : "http://hl7.org/fhir/sid/icd-10-cm",
-        "code" : "E78.00"
+        "code" : "M48.062"
       }]
     },
     "type" : [{
@@ -696,7 +739,23 @@
     "sequence" : 4,
     "diagnosisCodeableConcept" : {
       "coding" : [{
-        "system" : "http://hl7.org/fhir/sid/icd-10-cm"
+        "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+        "code" : "M48.06"
+      }]
+    },
+    "type" : [{
+      "coding" : [{
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType",
+        "code" : "other"
+      }]
+    }]
+  },
+  {
+    "sequence" : 5,
+    "diagnosisCodeableConcept" : {
+      "coding" : [{
+        "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+        "code" : "E78.00"
       }]
     },
     "type" : [{
@@ -849,7 +908,8 @@
     "productOrService" : {
       "coding" : [{
         "system" : "http://www.ama-assn.org/go/cpt",
-        "code" : "99213"
+        "code" : "99213",
+        "display" : "Office or other outpatient visit for the evaluation and management of an established patient, which requires a medically appropriate history and/or examination and low level of medical decision making. When using time for code selection, 20-29 minutes of total time is spent on the date of the encounter."
       }]
     },
     "servicedDate" : "2025-01-01",
@@ -956,7 +1016,8 @@
     "productOrService" : {
       "coding" : [{
         "system" : "http://www.ama-assn.org/go/cpt",
-        "code" : "99453"
+        "code" : "99453",
+        "display" : "Remote monitoring of physiologic parameter(s) (eg, weight, blood pressure, pulse oximetry, respiratory flow rate), initial; set-up and patient education on use of equipment"
       }]
     },
     "modifier" : [{
@@ -1119,7 +1180,8 @@
     "modifier" : [{
       "coding" : [{
         "system" : "http://www.ama-assn.org/go/cpt",
-        "code" : "99"
+        "code" : "99",
+        "display" : "Multiple Modifiers: Under certain circumstances 2 or more modifiers may be necessary to completely delineate a service. In such situations modifier 99 should be added to the basic procedure, and other applicable modifiers may be listed as part of the description of the service."
       }]
     }],
     "servicedDate" : "2025-01-01",
@@ -1281,7 +1343,8 @@
       "productOrService" : {
         "coding" : [{
           "system" : "http://hl7.org/fhir/sid/ndc",
-          "code" : "00409189001"
+          "code" : "00409189001",
+          "display" : "Morphine Sulfate, 10 CARTRIDGE in 1 CARTON (0409-1890-01) > 1 mL in 1 CARTRIDGE (0409-1890-03) (package)"
         }]
       },
       "quantity" : {

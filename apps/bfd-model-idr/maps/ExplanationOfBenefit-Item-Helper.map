@@ -59,6 +59,7 @@ group addItem(source src: LineItemComponent, target tgt: BackboneElement){
     src.CLM_SUPLR_TYPE_CD as inputCode where inputCode.length()>0 -> tgt.extension = create('Extension') as tgtExtension then addSuplrTypeCd(inputCode, tgtExtension) "Add  code";
     //calling the same function is intentional. One is populated w/ Carrier, other DME. 
     src.CLM_RNDRG_PRVDR_TYPE_CD as inputCode where inputCode.length()>0 -> tgt.extension = create('Extension') as tgtExtension then addSuplrTypeCd(inputCode, tgtExtension) "Add  code";
+    src.CLM_RNDRG_PRVDR_TAX_NUM as taxNum -> tgt.extension = create('Extension') as tgtExtension then addTaxNum(taxNum, tgtExtension) "Add Tax Number";
 
     src.CLM_RNDRG_PRVDR_PRTCPTG_CD as inputCode where inputCode.length() > 0 -> tgt.extension = create('Extension') as tgtExtension then addParticipatingCode(inputCode, tgtExtension) "Add  code";
 
@@ -81,8 +82,9 @@ group addItem(source src: LineItemComponent, target tgt: BackboneElement){
     src.CLM_FED_TYPE_SRVC_CD as inputCode where inputCode.length()>0 -> tgt.extension = create('Extension') as tgtExtension then addFedSvcTypeCd(inputCode, tgtExtension) "Add  code";
     src.CLM_PMT_80_100_CD as inputCode where inputCode.length()>0 -> tgt.extension = create('Extension') as tgtExtension then add80100Cd(inputCode, tgtExtension) "Add  code";
     src.CLM_PRCSG_IND_CD as inputCode where inputCode.length()>0 -> tgt.extension = create('Extension') as tgtExtension then addPrcsgInd(inputCode, tgtExtension) "Add  code";
-    src.CLM_SRVC_DDCTBL_SW as inputCode where inputCode.length()>0 -> tgt.extension = create('Extension') as tgtExtension then addDeductSwitch(inputCode, tgtExtension) "Add  code";
-    src.CLM_PRVDR_SPCLTY_CD as inputCode where inputCode.length()>0 -> tgt.extension = create('Extension') as tgtExtension then addPrvdrSpclty(inputCode, tgtExtension) "Add  code";
+    src.CLM_SRVC_DDCTBL_SW as inputCode where inputCode.length()>0 -> tgt.extension = create('Extension') as tgtExtension then addDeductSwitch(inputCode, tgtExtension) "Add code";
+    //While we populate this in the careTeam, there can be multiple distinct specialties per NPI on line items. Thus, we populate the extension.
+    src.CLM_PRVDR_SPCLTY_CD as inputCode where inputCode.length()>0 -> tgt.extension = create('Extension') as tgtExtension then addPrvdrSpclty(inputCode, tgtExtension) "Add code";
 
     src.CLM_POS_CD as placeCode -> tgt.location = create('CodeableConcept') as tgtCC then{
         src -> tgtCC.coding = create('Coding') as tgtCoding then{
@@ -532,4 +534,15 @@ group addNDCToInstitutional(source src: LineItemComponent, target tgt: BackboneE
         src.CLM_LINE_NDC_QTY_QLFYR_CD as ndcUnit where ndcUnit.length()>0 -> tgtQuantity.code = translate(ndcUnit,'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#UnitTransform','code') "Set code";
         src.CLM_LINE_NDC_QTY_QLFYR_CD as ndcUnit where ndcUnit.length()>0 -> tgtQuantity.unit = ndcUnit "Set system";
     } "Set quantity of NDC utilized";
+}
+
+group addTaxNum(source src: String, target tgt: Extension){
+    src -> tgt.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRVDR-TAX-NUM" "Add extension url";
+    src -> tgt.value = create('Identifier') as tgtIdentifier then{
+        src -> tgtIdentifier.type = create('CodeableConcept') as tgtCC then {
+            src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/v2-0203","TAX") "Add coding";
+        } "Add CC";
+        src -> tgtIdentifier.system = "urn:oid:2.16.840.1.113883.4.4" "set tax system url";
+        src as taxNum -> tgtIdentifier.value = taxNum "set tax number";
+    } "Add tax number to line item";
 }
