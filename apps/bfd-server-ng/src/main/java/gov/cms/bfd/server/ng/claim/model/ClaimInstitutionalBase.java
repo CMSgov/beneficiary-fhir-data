@@ -196,7 +196,7 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
   }
 
   private void addCareTeam(ExplanationOfBenefit eob) {
-    var sequenceGenerator = new SequenceGenerator();
+    var sequenceGenerator = new SequenceGenerator(eob.getCareTeam().size() + 1);
     Stream.of(
             getAttendingProviderHistory(),
             getOperatingProviderHistory(),

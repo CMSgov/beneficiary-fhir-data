@@ -2907,7 +2907,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
       } ]
     },
-    "sequence" : 1
+    "sequence" : 2
   } ],
   "contained" : [ {
     "active" : true,
@@ -3551,7 +3551,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
       } ]
     },
-    "sequence" : 1
+    "sequence" : 2
   } ],
   "contained" : [ {
     "active" : true,

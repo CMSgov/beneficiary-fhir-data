@@ -158,7 +158,7 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
   }
 
   private void addCareTeam(ExplanationOfBenefit eob) {
-    var sequenceGenerator = new SequenceGenerator();
+    var sequenceGenerator = new SequenceGenerator(eob.getCareTeam().size() + 1);
     getReferringProviderHistory()
         .toFhirCareTeamComponent(sequenceGenerator.next())
         .ifPresent(eob::addCareTeam);
