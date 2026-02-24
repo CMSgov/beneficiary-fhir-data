@@ -27,9 +27,13 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.IdType;
 import org.springframework.stereotype.Component;
 
-/** FHIR endpoints for the ExplanationOfBenefit resource. */
+/**
+ * FHIR endpoints for the ExplanationOfBenefit resource. Temporarily suppress S4144 for
+ * searchByPatientNew.
+ */
 @RequiredArgsConstructor
 @Component
+@SuppressWarnings({"java:S107", "java:S3252", "java:S4144"})
 public class EobResourceProvider implements IResourceProvider {
   private final EobNewHandler eobHandler;
   private final CertificateUtil certificateUtil;
