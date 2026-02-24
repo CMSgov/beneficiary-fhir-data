@@ -136,9 +136,11 @@ def provider_last_or_legal_name_expr(alias: str) -> str:
 
 
 def provider_careteam_name_expr(alias: str, type: str | None) -> str:
+    # Note: Snowflake throws an error if you do COALESCE with a single argument
+    # so we need to explicitly pass null here
     return f"""
         COALESCE(
-            {f"{ALIAS_CLM}.clm_{type}_prvdr_name," if type else ""}
+            {f"{ALIAS_CLM}.clm_{type}_prvdr_name" if type else "NULL"},
             {provider_last_or_legal_name_expr(alias)} || ',' || {alias}.prvdr_1st_name
         )
     """
