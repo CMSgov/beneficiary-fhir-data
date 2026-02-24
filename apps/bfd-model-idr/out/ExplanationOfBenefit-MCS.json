@@ -3,6 +3,7 @@
   "meta" : {
     "lastUpdated" : "2025-01-07T03:02:28.000000Z",
     "source" : "MCS",
+    "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Professional-NonClinician|2.1.0"],
     "tag" : [{
       "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type",
       "code" : "SharedSystem"
@@ -39,6 +40,10 @@
       },
       "system" : "http://hl7.org/fhir/sid/us-npi",
       "value" : "1942945159"
+    },
+    {
+      "system" : "http://terminology.hl7.org/NamingSystem/CCN",
+      "value" : "00024"
     }],
     "name" : [{
       "family" : "Stark",
@@ -52,7 +57,8 @@
     "code" : {
       "coding" : [{
         "system" : "http://loinc.org",
-        "code" : "718-7"
+        "code" : "718-7",
+        "display" : "Hemoglobin [Mass/volume] in Blood"
       }]
     },
     "performer" : [{
@@ -712,6 +718,20 @@
       }
     },
     {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRVDR-TAX-NUM",
+      "valueIdentifier" : {
+        "type" : {
+          "coding" : [{
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code" : "TAX",
+            "display" : "Tax ID number"
+          }]
+        },
+        "system" : "urn:oid:2.16.840.1.113883.4.4",
+        "value" : "15"
+      }
+    },
+    {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-RNDRG-PRVDR-PRTCPTG-CD",
       "valueCoding" : {
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RNDRG-PRVDR-PRTCPTG-CD",
@@ -787,7 +807,8 @@
     "productOrService" : {
       "coding" : [{
         "system" : "http://www.ama-assn.org/go/cpt",
-        "code" : "99213"
+        "code" : "99213",
+        "display" : "Office or other outpatient visit for the evaluation and management of an established patient, which requires a medically appropriate history and/or examination and low level of medical decision making. When using time for code selection, 20-29 minutes of total time is spent on the date of the encounter."
       }]
     },
     "servicedPeriod" : {
@@ -933,7 +954,8 @@
     "productOrService" : {
       "coding" : [{
         "system" : "http://www.ama-assn.org/go/cpt",
-        "code" : "99453"
+        "code" : "99453",
+        "display" : "Remote monitoring of physiologic parameter(s) (eg, weight, blood pressure, pulse oximetry, respiratory flow rate), initial; set-up and patient education on use of equipment"
       }]
     },
     "modifier" : [{
@@ -1150,7 +1172,8 @@
     "modifier" : [{
       "coding" : [{
         "system" : "http://www.ama-assn.org/go/cpt",
-        "code" : "99"
+        "code" : "99",
+        "display" : "Multiple Modifiers: Under certain circumstances 2 or more modifiers may be necessary to completely delineate a service. In such situations modifier 99 should be added to the basic procedure, and other applicable modifiers may be listed as part of the description of the service."
       }]
     }],
     "servicedPeriod" : {
@@ -1428,7 +1451,8 @@
       "productOrService" : {
         "coding" : [{
           "system" : "http://hl7.org/fhir/sid/ndc",
-          "code" : "00409189001"
+          "code" : "00409189001",
+          "display" : "Morphine Sulfate, 10 CARTRIDGE in 1 CARTON (0409-1890-01) > 1 mL in 1 CARTRIDGE (0409-1890-03) (package)"
         }]
       },
       "quantity" : {

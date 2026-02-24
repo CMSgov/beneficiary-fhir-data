@@ -6,10 +6,11 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Stream;
 import org.jetbrains.annotations.Nullable;
 
 /** Generic parser for token parameters using AND/OR semantics. */
-public final class FhirTokenParameterParser {
+public class FhirTokenParameterParser {
 
   private FhirTokenParameterParser() {}
 
@@ -44,5 +45,19 @@ public final class FhirTokenParameterParser {
     return orList.getValuesAsQueryTokens().stream()
         .flatMap(token -> tokenMapper.apply(token).stream())
         .toList();
+  }
+
+  /**
+   * Flattens a TokenAndListParam into a single stream of TokenParam objects.
+   *
+   * @param param from request
+   * @return stream of TokenParams
+   */
+  public static Stream<TokenParam> flatten(TokenAndListParam param) {
+    if (param == null || param.getValuesAsQueryTokens().isEmpty()) {
+      return Stream.empty();
+    }
+    return param.getValuesAsQueryTokens().stream()
+        .flatMap(orList -> orList.getValuesAsQueryTokens().stream());
   }
 }

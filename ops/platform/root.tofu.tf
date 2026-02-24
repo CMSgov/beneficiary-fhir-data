@@ -8,17 +8,21 @@ locals {
   # handled by the Terraservice module.
   account_type = coalesce(var.account_type, one([for x in local.account_types : x if x == terraform.workspace]))
 
+  # This is just a breadcrum - helper variable that is not actually used in code but helps in tracking whether or not we are including this tf.
+  # tflint-ignore: terraform_unused_declarations
   _canary_exists = module.terraservice.canary
 }
 
 variable "region" {
   default  = "us-east-1"
   nullable = false
+  type     = string
 }
 
 variable "secondary_region" {
   default  = "us-west-2"
   nullable = false
+  type     = string
 }
 
 variable "account_type" {
@@ -36,6 +40,7 @@ variable "account_type" {
   }
 }
 
+# tflint-ignore: terraform_required_providers
 provider "aws" {
   region = var.region
   default_tags {
@@ -43,6 +48,7 @@ provider "aws" {
   }
 }
 
+# tflint-ignore: terraform_required_providers, terraform_unused_declarations
 provider "aws" {
   alias = "secondary"
 
@@ -53,6 +59,7 @@ provider "aws" {
 }
 
 terraform {
+  required_version = "~> 1.10.0"
   backend "s3" {
     bucket       = "bfd-platform-${local.account_type}-tf-state"
     key          = "ops/platform/${local.service}/tofu.tfstate"

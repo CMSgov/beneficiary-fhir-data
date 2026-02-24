@@ -149,7 +149,7 @@
 /bfd/${env}/rda-pipeline-alarms/nonsensitive/sns_topics/msgs/alert: bfd-platform-slack-bfd-warnings
 /bfd/${env}/rda-pipeline-alarms/nonsensitive/sns_topics/msgs/warning: bfd-platform-slack-bfd-internal-alerts
 /bfd/${env}/npi-pipeline/nonsensitive/rda/npi_fda_load_job/batch_size: 100000
-/bfd/${env}/npi-pipeline/nonsensitive/rda/npi_fda_load_job/run_interval: 1
+/bfd/${env}/npi-pipeline/nonsensitive/rda/npi_fda_load_job/run_interval: -1
 /bfd/${env}/npi-pipeline/nonsensitive/ecs/resources/cpu: 4096
 /bfd/${env}/npi-pipeline/nonsensitive/ecs/resources/memory: 8192
 /bfd/${env}/npi-pipeline/nonsensitive/ecs/resources/disk_size: 21

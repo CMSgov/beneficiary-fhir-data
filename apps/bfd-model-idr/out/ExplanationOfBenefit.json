@@ -43,35 +43,23 @@
     },
     {
       "system" : "http://terminology.hl7.org/NamingSystem/CCN",
-      "value" : "722931"
+      "value" : "00024"
+    },
+    {
+      "type" : {
+        "coding" : [{
+          "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+          "code" : "TAX",
+          "display" : "Tax ID number"
+        }]
+      },
+      "system" : "urn:oid:2.16.840.1.113883.4.4",
+      "value" : "765432"
     }],
     "active" : true,
     "name" : "CBS Health Corporation",
     "address" : [{
       "postalCode" : "77550"
-    }]
-  },
-  {
-    "resourceType" : "Practitioner",
-    "id" : "1942945159",
-    "meta" : {
-      "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0",
-      "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0"]
-    },
-    "identifier" : [{
-      "type" : {
-        "coding" : [{
-          "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
-          "code" : "NPI",
-          "display" : "National provider identifier"
-        }]
-      },
-      "system" : "http://hl7.org/fhir/sid/us-npi",
-      "value" : "1942945159"
-    }],
-    "name" : [{
-      "family" : "Stark",
-      "given" : ["Tony"]
     }]
   }],
   "identifier" : [{
@@ -125,10 +113,26 @@
   "careTeam" : [{
     "sequence" : 1,
     "provider" : {
-      "reference" : "#1942945159"
+      "identifier" : {
+        "type" : {
+          "coding" : [{
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code" : "NPI",
+            "display" : "National provider identifier"
+          }]
+        },
+        "system" : "http://hl7.org/fhir/sid/us-npi",
+        "value" : "1942945159"
+      },
+      "display" : "Stark, Tony"
     },
     "role" : {
       "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole",
+        "code" : "otheroperating",
+        "display" : "Other Operating"
+      },
+      {
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
         "code" : "otheroperating",
         "display" : "Other Operating"
@@ -138,23 +142,66 @@
   {
     "sequence" : 2,
     "provider" : {
-      "reference" : "#1942945159"
+      "identifier" : {
+        "type" : {
+          "coding" : [{
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code" : "NPI",
+            "display" : "National provider identifier"
+          }]
+        },
+        "system" : "http://hl7.org/fhir/sid/us-npi",
+        "value" : "1942945159"
+      },
+      "display" : "Stark, Tony"
     },
     "role" : {
       "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole",
+        "code" : "attending",
+        "display" : "Attending"
+      },
+      {
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
         "code" : "attending",
         "display" : "Attending"
+      }]
+    },
+    "qualification" : {
+      "coding" : [{
+        "system" : "http://nucc.org/provider-taxonomy",
+        "code" : "204D00000X"
+      },
+      {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRVDR-SPCLTY-CD",
+        "code" : "12",
+        "display" : "OSTEOPATHIC MANIPULATIVE MEDICINE"
       }]
     }
   },
   {
     "sequence" : 3,
     "provider" : {
-      "reference" : "#1942945159"
+      "identifier" : {
+        "type" : {
+          "coding" : [{
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code" : "NPI",
+            "display" : "National provider identifier"
+          }]
+        },
+        "system" : "http://hl7.org/fhir/sid/us-npi",
+        "value" : "1942945159"
+      },
+      "display" : "Stark, Tony"
     },
     "role" : {
       "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole",
+        "code" : "operating",
+        "display" : "Operating"
+      },
+      {
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
         "code" : "operating",
         "display" : "Operating"
@@ -164,10 +211,26 @@
   {
     "sequence" : 4,
     "provider" : {
-      "reference" : "#1942945159"
+      "identifier" : {
+        "type" : {
+          "coding" : [{
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code" : "NPI",
+            "display" : "National provider identifier"
+          }]
+        },
+        "system" : "http://hl7.org/fhir/sid/us-npi",
+        "value" : "1942945159"
+      },
+      "display" : "Stark, Tony"
     },
     "role" : {
       "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole",
+        "code" : "rendering",
+        "display" : "Rendering provider"
+      },
+      {
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
         "code" : "rendering",
         "display" : "Rendering provider"
@@ -1213,7 +1276,8 @@
     "productOrService" : {
       "coding" : [{
         "system" : "http://www.ama-assn.org/go/cpt",
-        "code" : "99213"
+        "code" : "99213",
+        "display" : "Office or other outpatient visit for the evaluation and management of an established patient, which requires a medically appropriate history and/or examination and low level of medical decision making. When using time for code selection, 20-29 minutes of total time is spent on the date of the encounter."
       }]
     },
     "quantity" : {
@@ -1316,7 +1380,8 @@
     "productOrService" : {
       "coding" : [{
         "system" : "http://www.ama-assn.org/go/cpt",
-        "code" : "99453"
+        "code" : "99453",
+        "display" : "Remote monitoring of physiologic parameter(s) (eg, weight, blood pressure, pulse oximetry, respiratory flow rate), initial; set-up and patient education on use of equipment"
       }]
     },
     "modifier" : [{
@@ -1478,7 +1543,8 @@
     "modifier" : [{
       "coding" : [{
         "system" : "http://www.ama-assn.org/go/cpt",
-        "code" : "99"
+        "code" : "99",
+        "display" : "Multiple Modifiers: Under certain circumstances 2 or more modifiers may be necessary to completely delineate a service. In such situations modifier 99 should be added to the basic procedure, and other applicable modifiers may be listed as part of the description of the service."
       }]
     }],
     "servicedDate" : "2025-01-01",
@@ -1639,7 +1705,8 @@
       "productOrService" : {
         "coding" : [{
           "system" : "http://hl7.org/fhir/sid/ndc",
-          "code" : "00409189001"
+          "code" : "00409189001",
+          "display" : "Morphine Sulfate, 10 CARTRIDGE in 1 CARTON (0409-1890-01) > 1 mL in 1 CARTRIDGE (0409-1890-03) (package)"
         }]
       },
       "quantity" : {
