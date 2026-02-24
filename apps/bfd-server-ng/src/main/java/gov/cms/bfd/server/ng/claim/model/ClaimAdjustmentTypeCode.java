@@ -32,9 +32,11 @@ public enum ClaimAdjustmentTypeCode {
   /** 8 - BALANCE RECORD. */
   _8("8", "BALANCE RECORD"),
   /** 9 - UNKNOWN. */
-  _9("9", "UNKNOWN");
+  _9("9", "UNKNOWN"),
+  /** INVALID - Represents an invalid code that we still want to capture. */
+  INVALID("", "");
 
-  private final String code;
+  private String code;
   private final String display;
 
   /**
@@ -44,7 +46,26 @@ public enum ClaimAdjustmentTypeCode {
    * @return claim adjustment type code
    */
   public static Optional<ClaimAdjustmentTypeCode> fromCode(String code) {
-    return Arrays.stream(values()).filter(v -> v.code.equals(code)).findFirst();
+    if (code == null || code.isBlank()) {
+      return Optional.empty();
+    }
+    return Optional.of(
+            Arrays.stream(values())
+                    .filter(v -> v.code.equals(code))
+                    .findFirst()
+                    .orElse(handleInvalidValue(code)));
+  }
+
+  /**
+   * Handles scenarios where code could not be mapped to a valid value.
+   *
+   * @param invalidValue the invalid value to capture
+   * @return INVALID catastrophic coverage code
+   */
+  public static ClaimAdjustmentTypeCode handleInvalidValue(String invalidValue) {
+    var invalidClaimAdjustmentTypeCode = ClaimAdjustmentTypeCode.INVALID;
+    invalidClaimAdjustmentTypeCode.code = invalidValue;
+    return invalidClaimAdjustmentTypeCode;
   }
 
   ExplanationOfBenefit.SupportingInformationComponent toFhir(
