@@ -37,7 +37,7 @@ def main() -> None:
     run(mode)
 
 
-def run(load_mode: str) -> None:
+def run(load_mode: str, start_time:datetime | None=None) -> None:
     logger.info("load start")
     load_mode = LoadMode(load_mode)
 
@@ -64,7 +64,11 @@ def run(load_mode: str) -> None:
         .build()
     )
 
-    start_time = datetime(2025, 6, 15)
+    
+    if start_time is None and load_mode != LoadMode.PRODUCTION:
+        start_time = datetime(2025, 6, 15)
+    else:
+        start_time = datetime.now() if start_time is None else datetime
 
     # if load_benes and load_claims:
     hamilton_driver.execute(  # type: ignore

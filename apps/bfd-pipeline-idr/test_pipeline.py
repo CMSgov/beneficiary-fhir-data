@@ -135,11 +135,11 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
         SET bene_mbi_id = '1S000000000', idr_insrt_ts=%(timestamp)s, idr_updt_ts=%(timestamp)s
         WHERE bene_sk = 10464258
         """,
-        {"timestamp": datetime.now(UTC)},
+        {"timestamp": datetime_now},
     )
     conn.commit()
 
-    run("synthetic")
+    run("synthetic", datetime_now)
 
     cur = conn.execute("select * from idr.beneficiary order by bene_sk")
     rows = cur.fetchmany(2)
