@@ -15,7 +15,6 @@ IDR_ACCOUNT = getenv("IDR_ACCOUNT", "")
 IDR_WAREHOUSE = getenv("IDR_WAREHOUSE", "")
 IDR_DATABASE = getenv("IDR_DATABASE", "")
 IDR_SCHEMA = getenv("IDR_SCHEMA", "")
-BFD_TEST_DATE = getenv("BFD_TEST_DATE", "")
 
 # These need to be lazy-loaded since we override them in the tests
 
@@ -38,7 +37,3 @@ def bfd_db_username() -> str:
 
 def bfd_db_password() -> str:
     return getenv("BFD_DB_PASSWORD", "")
-
-
-def bfd_test_date() -> str:
-    return getenv("BFD_TEST_DATE", "")

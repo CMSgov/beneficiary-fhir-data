@@ -9,7 +9,7 @@ from hamilton.execution import executors  # type: ignore
 import pipeline_nodes
 from load_partition import LoadType
 from model import LoadMode
-from settings import BFD_TEST_DATE, LOAD_TYPE, MAX_TASKS
+from settings import LOAD_TYPE, MAX_TASKS
 
 telemetry.disable_telemetry()
 
@@ -64,10 +64,7 @@ def run(load_mode: str) -> None:
         .build()
     )
 
-    if not BFD_TEST_DATE:
-        start_time = datetime.now()
-    else:
-        start_time = datetime.strptime(BFD_TEST_DATE, "%Y-%m-%dT%H:%M:%SZ")
+    start_time = datetime(2025, 6, 15)
 
     # if load_benes and load_claims:
     hamilton_driver.execute(  # type: ignore

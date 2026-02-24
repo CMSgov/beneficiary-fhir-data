@@ -71,26 +71,7 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
         psycopg.Connection[DictRow],
         psycopg.connect(setup_db.get_connection_url(), row_factory=dict_row),  # type: ignore
     )
-    datetime_now = datetime.now(UTC)
-
-    # Update dates to CURRENT_DATE before pipeline.py
-    # Reason: PAC data older than 60 days is filtered by coalescing
-    # (idr_updt_ts, idr_insrt_ts, clm_idr_ld_dt). Synthetic data has
-    # outdated idr_updt_ts, idr_insrt_ts, and clm_idr_ld_dt values.
-    # Update all values to current dates then change specific dates
-    # to older than 60 days to test the functionality.
-    conn.execute(
-        """
-            UPDATE cms_vdm_view_mdcr_prd.v2_mdcr_clm
-            SET idr_insrt_ts=%(timestamp)s,
-                idr_updt_ts=%(timestamp)s,
-                clm_idr_ld_dt=%(today)s
-            """,
-        {
-            "timestamp": datetime_now,
-            "today": datetime_now.date(),
-        },
-    )
+    datetime_now = datetime.astimezone("UTC").date("2025-06-15")
 
     conn.execute(
         """
@@ -130,7 +111,7 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
 
     conn.commit()
 
-    run("synthetic")
+    run("synthetic", datetime_now)
 
     cur = conn.execute("select * from idr.beneficiary order by bene_sk")
     assert cur.rowcount == 28
