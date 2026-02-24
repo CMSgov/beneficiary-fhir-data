@@ -21,13 +21,12 @@ import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Reference;
 
 /**
- * Claim table. Suppress SonarQube Monster Class warning that dependencies to other class should be
- * reduced from 21 to the max 20. Ignore. Class itself is relatively short in lines of code.
+ * Claim table. Suppress generic wildcard type warning. Wildcard is intentional since each ClaimBase
+ * subtype has its own ClaimItemBase subtype.
  */
 @Getter
 @MappedSuperclass
-// @SuppressWarnings("java:S6539")
-@SuppressWarnings("JpaAttributeTypeInspection")
+@SuppressWarnings({"JpaAttributeTypeInspection", "java:S1452"})
 public abstract class ClaimBase {
   @Id
   @Column(name = "clm_uniq_id", insertable = false, updatable = false)
