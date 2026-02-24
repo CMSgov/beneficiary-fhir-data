@@ -5,6 +5,7 @@ from hamilton.htypes import Collect, Parallelizable  # type: ignore
 
 from constants import MIN_CLAIM_LOAD_DATE
 from load_partition import LoadPartition, LoadType
+from logger_config import configure_logger
 from model.base_model import (
     IdrBaseModel,
     LoadMode,
@@ -47,6 +48,8 @@ from pipeline_utils import extract_and_load
 from settings import TABLES_TO_LOAD
 
 type NodePartitionedModelInput = tuple[type[IdrBaseModel], LoadPartition | None]
+
+configure_logger()
 
 
 def filter_tables(tables: list[type[IdrBaseModel]]) -> list[type[IdrBaseModel]]:
