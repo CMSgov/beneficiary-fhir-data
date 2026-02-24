@@ -178,7 +178,7 @@ public class EobNewHandler {
 
   // Returns true if the given claim contains any procedure that matches a SAMHSA
   // security label code from the dictionary.
-  private boolean claimHasSamhsa(ClaimBase claim) {
+  private boolean claimHasSamhsa(ClaimBase<?> claim) {
     var claimUniqueId = claim.getClaimUniqueId();
     var claimThroughDate =
         claim.getBillablePeriod().getClaimThroughDate().orElse(IdrConstants.DEFAULT_DATE);
@@ -196,7 +196,7 @@ public class EobNewHandler {
         || hcpcsIsSamhsa(claimItem.getClaimLineHcpcsCode(), claimThroughDate, claimUniqueId);
   }
 
-  private boolean drgIsSamhsa(ClaimBase claim, LocalDate claimDate, long claimUniqueId) {
+  private boolean drgIsSamhsa(ClaimBase<?> claim, LocalDate claimDate, long claimUniqueId) {
     var entries = SECURITY_LABELS.get(SystemUrls.CMS_MS_DRG);
     var drg = claim.getDrgCode().map(Object::toString).orElse("");
     return entries.stream()

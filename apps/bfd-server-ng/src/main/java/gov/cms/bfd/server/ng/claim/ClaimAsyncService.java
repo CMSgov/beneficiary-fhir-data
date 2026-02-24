@@ -26,7 +26,7 @@ public class ClaimAsyncService {
   @PersistenceContext private final EntityManager entityManager;
 
   @Async
-  protected <T extends ClaimBase> CompletableFuture<Optional<T>> findByIdInClaimType(
+  protected <T extends ClaimBase<?>> CompletableFuture<Optional<T>> findByIdInClaimType(
       String baseQuery, Class<T> claimClass, long claimUniqueId, DbFilter params) {
 
     LOGGER.info("VIRTUAL THREAD'{}'", Thread.currentThread());
@@ -50,7 +50,7 @@ public class ClaimAsyncService {
   }
 
   @Async
-  protected <T extends ClaimBase> CompletableFuture<List<T>> fetchClaims(
+  protected <T extends ClaimBase<?>> CompletableFuture<List<T>> fetchClaims(
       String baseQuery, Class<T> claimClass, ClaimSearchCriteria criteria) {
 
     var filterBuilders =

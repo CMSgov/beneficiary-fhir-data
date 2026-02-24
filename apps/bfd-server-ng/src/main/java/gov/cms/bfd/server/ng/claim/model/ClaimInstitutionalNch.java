@@ -19,7 +19,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @Getter
 @Entity
 @Table(name = "claim_institutional_nch", schema = "idr_new")
-public class ClaimInstitutionalNch extends ClaimInstitutionalBase {
+public class ClaimInstitutionalNch extends ClaimInstitutionalBase<ClaimItemInstitutionalNch> {
 
   @Embedded private ClaimDateSupportingInfo claimDateSupportingInfo;
   @Embedded private AdjudicationChargeInstitutional adjudicationChargeInstitutional;

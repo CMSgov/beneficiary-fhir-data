@@ -26,7 +26,8 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @Entity
 @Table(name = "claim_professional_ss", schema = "idr_new")
 @SuppressWarnings("JpaAttributeTypeInspection")
-public class ClaimProfessionalSharedSystems extends ClaimProfessionalBase {
+public class ClaimProfessionalSharedSystems
+    extends ClaimProfessionalBase<ClaimItemProfessionalSharedSystems> {
 
   @Column(name = "clm_sbmt_frmt_cd")
   private Optional<ClaimSubmissionFormatCode> claimFormatCode;

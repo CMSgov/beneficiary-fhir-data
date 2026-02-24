@@ -25,7 +25,7 @@ import org.hl7.fhir.r4.model.Reference;
 @Getter
 @Entity
 @Table(name = "claim_rx", schema = "idr_new")
-public class ClaimRx extends ClaimBase {
+public class ClaimRx extends ClaimBase<ClaimItemRx> {
 
   @Column(name = "clm_sbmt_frmt_cd")
   private Optional<ClaimSubmissionFormatCode> claimFormatCode;

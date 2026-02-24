@@ -27,13 +27,10 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.IdType;
 import org.springframework.stereotype.Component;
 
-/**
- * FHIR endpoints for the ExplanationOfBenefit resource. Temporarily suppress S4144 for
- * searchByPatientNew.
- */
+/** FHIR endpoints for the ExplanationOfBenefit resource. */
 @RequiredArgsConstructor
 @Component
-@SuppressWarnings({"java:S107", "java:S3252", "java:S4144"})
+@SuppressWarnings({"java:S107", "java:S3252"})
 public class EobResourceProvider implements IResourceProvider {
   private final EobNewHandler eobHandler;
   private final CertificateUtil certificateUtil;
@@ -61,53 +58,6 @@ public class EobResourceProvider implements IResourceProvider {
             FhirInputConverter.toLong(fhirId),
             getFilterModeForRequest(request, SamhsaSearchIntent.UNSPECIFIED));
     return eob.orElseThrow(() -> new ResourceNotFoundException(fhirId));
-  }
-
-  /**
-   * Search for claims data by bene.
-   *
-   * @param patient patient
-   * @param count record count
-   * @param serviceDate service date
-   * @param lastUpdated last updated
-   * @param startIndex start index
-   * @param tag tags to filter by
-   * @param type claim type to filter by
-   * @param source claim source to filter by
-   * @param security security to filter SAMHSA by
-   * @param request HTTP request details
-   * @return bundle
-   */
-  @Search
-  public Bundle searchByPatient(
-      @RequiredParam(name = ExplanationOfBenefit.SP_PATIENT) final ReferenceParam patient,
-      @Count final Integer count,
-      @OptionalParam(name = SERVICE_DATE) final DateRangeParam serviceDate,
-      @OptionalParam(name = ExplanationOfBenefit.SP_RES_LAST_UPDATED)
-          final DateRangeParam lastUpdated,
-      @OptionalParam(name = START_INDEX) final NumberParam startIndex,
-      @OptionalParam(name = Constants.PARAM_TAG) final TokenAndListParam tag,
-      @OptionalParam(name = TYPE) final TokenAndListParam type,
-      @OptionalParam(name = Constants.PARAM_SOURCE) final TokenAndListParam source,
-      @OptionalParam(name = Constants.PARAM_SECURITY) final TokenAndListParam security,
-      final HttpServletRequest request) {
-
-    var tagCriteria = FhirInputConverter.parseTagParameter(tag);
-    var claimTypeCodes = FhirInputConverter.getClaimTypeCodesForType(type);
-    var samhsaSearchIntent = FhirInputConverter.parseSecurityParameter(security);
-
-    var criteria =
-        new ClaimSearchCriteria(
-            FhirInputConverter.toLong(patient, "Patient"),
-            FhirInputConverter.toDateTimeRange(serviceDate),
-            FhirInputConverter.toDateTimeRange(lastUpdated),
-            Optional.ofNullable(count),
-            FhirInputConverter.toIntOptional(startIndex),
-            tagCriteria,
-            claimTypeCodes,
-            FhirInputConverter.parseSourceParameter(source));
-
-    return eobHandler.searchByBene(criteria, getFilterModeForRequest(request, samhsaSearchIntent));
   }
 
   /**

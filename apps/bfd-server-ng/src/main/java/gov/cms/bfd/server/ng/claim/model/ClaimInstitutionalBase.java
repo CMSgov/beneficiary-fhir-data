@@ -21,7 +21,8 @@ import org.hl7.fhir.r4.model.Reference;
 /** Shared base for institutional claim types (NCH and Shared Systems variants). */
 @MappedSuperclass
 @Getter
-public abstract class ClaimInstitutionalBase extends ClaimBase {
+@SuppressWarnings("java:S6539")
+public abstract class ClaimInstitutionalBase<T extends ClaimItemBase> extends ClaimBase<T> {
 
   @Column(name = "clm_cntrctr_num")
   private Optional<ClaimContractorNumber> claimContractorNumber;
