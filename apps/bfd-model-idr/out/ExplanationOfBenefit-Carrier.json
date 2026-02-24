@@ -57,8 +57,7 @@
     "code" : {
       "coding" : [{
         "system" : "http://loinc.org",
-        "code" : "718-7",
-        "display" : "Hemoglobin [Mass/volume] in Blood"
+        "code" : "718-7"
       }]
     },
     "performer" : [{
@@ -703,6 +702,7 @@
     "valueString" : "1337"
   },
   {
+    "sequence" : 29,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -718,6 +718,7 @@
     "valueString" : "ALA00000047747"
   },
   {
+    "sequence" : 30,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -913,8 +914,7 @@
     "productOrService" : {
       "coding" : [{
         "system" : "http://www.ama-assn.org/go/cpt",
-        "code" : "99213",
-        "display" : "Office or other outpatient visit for the evaluation and management of an established patient, which requires a medically appropriate history and/or examination and low level of medical decision making. When using time for code selection, 20-29 minutes of total time is spent on the date of the encounter."
+        "code" : "99213"
       }]
     },
     "servicedPeriod" : {
@@ -1099,6 +1099,7 @@
     }],
     "sequence" : 2,
     "careTeamSequence" : [2],
+    "informationSequence" : [30],
     "revenue" : {
       "coding" : [{
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD",
@@ -1113,8 +1114,7 @@
     "productOrService" : {
       "coding" : [{
         "system" : "http://www.ama-assn.org/go/cpt",
-        "code" : "99453",
-        "display" : "Remote monitoring of physiologic parameter(s) (eg, weight, blood pressure, pulse oximetry, respiratory flow rate), initial; set-up and patient education on use of equipment"
+        "code" : "99453"
       }]
     },
     "modifier" : [{
@@ -1332,8 +1332,7 @@
     "modifier" : [{
       "coding" : [{
         "system" : "http://www.ama-assn.org/go/cpt",
-        "code" : "99",
-        "display" : "Multiple Modifiers: Under certain circumstances 2 or more modifiers may be necessary to completely delineate a service. In such situations modifier 99 should be added to the basic procedure, and other applicable modifiers may be listed as part of the description of the service."
+        "code" : "99"
       }]
     }],
     "servicedPeriod" : {
@@ -1612,8 +1611,7 @@
       "productOrService" : {
         "coding" : [{
           "system" : "http://hl7.org/fhir/sid/ndc",
-          "code" : "00409189001",
-          "display" : "Morphine Sulfate, 10 CARTRIDGE in 1 CARTON (0409-1890-01) > 1 mL in 1 CARTRIDGE (0409-1890-03) (package)"
+          "code" : "00409189001"
         }]
       },
       "quantity" : {
