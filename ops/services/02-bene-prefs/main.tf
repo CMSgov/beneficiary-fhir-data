@@ -15,8 +15,7 @@ module "terraservice" {
 }
 
 locals {
-  service        = "beneficiary-prefs"
-  target_service = "beneprefs"
+  service        = "bene-prefs"
 
   default_tags = module.terraservice.default_tags
   env          = module.terraservice.env
