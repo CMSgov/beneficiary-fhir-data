@@ -58,28 +58,10 @@ def transform_default_date_to_null(value: date | None) -> date | None:
     return value
 
 
-def transform_provider_name(value: str | None) -> str:
-    if value is None or value == "<UNAVAIL>":
-        return ""
-    return value
-
-
 def transform_default_string(value: str | None) -> str:
     if value is None or value == "~":
         return ""
     return value
-
-
-def transform_default_and_zero_string(value: str | None) -> str:
-    if value is None or value == "~" or value == "0":
-        return ""
-    return value
-
-
-def transform_empty_string(value: str | None) -> str:
-    if value is None:
-        return ""
-    return value.strip()
 
 
 def transform_null_float(value: float | None) -> float:
