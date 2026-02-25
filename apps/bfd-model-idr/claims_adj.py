@@ -160,7 +160,7 @@ class AdjudicatedGeneratorUtil:
                     used_enhancements.add(val)
                 clm[f.CLM_NGACO_PBPMT_SW] = "Y" if "1" in used_enhancements else "N"
                 clm[f.CLM_NGACO_PDSCHRG_HCBS_SW] = "Y" if "3" in used_enhancements else "N"
-                clm[f.CLM_NGACO_SNF_WVR_SW] = "Y" if "3" in used_enhancements else "N"
+                clm[f.CLM_NGACO_SNF_WVR_SW] = "Y" if "4" in used_enhancements else "N"
                 clm[f.CLM_NGACO_TLHLTH_SW] = "Y" if "2" in used_enhancements else "N"
                 clm[f.CLM_NGACO_CPTATN_SW] = "Y" if "5" in used_enhancements else "N"
                 clm[f.CLM_ACO_CARE_MGMT_HCBS_SW] = "Y" if "7" in used_enhancements else "N"
@@ -780,7 +780,7 @@ class AdjudicatedGeneratorUtil:
                 clm_line[f.CLM_LINE_NGACO_PDSCHRG_HCBS_SW] = (
                     "Y" if "3" in used_enhancements else "N"
                 )
-                clm_line[f.CLM_LINE_NGACO_SNF_WVR_SW] = "Y" if "3" in used_enhancements else "N"
+                clm_line[f.CLM_LINE_NGACO_SNF_WVR_SW] = "Y" if "4" in used_enhancements else "N"
                 clm_line[f.CLM_LINE_NGACO_TLHLTH_SW] = "Y" if "2" in used_enhancements else "N"
                 clm_line[f.CLM_LINE_NGACO_CPTATN_SW] = "Y" if "5" in used_enhancements else "N"
                 clm_line[f.CLM_LINE_ACO_CARE_MGMT_HCBS_SW] = (
