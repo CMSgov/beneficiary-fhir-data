@@ -23,6 +23,7 @@ locals {
   name_prefix  = "bfd-${local.env}-${local.service}"
   partners     = toset(["bcda", "ab2d", "dpc"])
 
+  # Reference helper local for future work:
   partner_buckets = {
     for p, m in module.eft_bucket : p => {
       id   = m.bucket.id

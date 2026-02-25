@@ -1,4 +1,6 @@
 
+#Helper outputs for future interfaces or functionality improvements:
+
 output "partner_bucket_names" {
   value = { for p in local.partners : p => module.eft_bucket[p].bucket.bucket }
 }
