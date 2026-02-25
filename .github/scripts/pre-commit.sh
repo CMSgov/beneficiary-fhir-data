@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -e
 
-./pre-commit-check-sop-files.sh
-./pre-commit-shell-check.sh
-./pre-commit-check-git-leaks.sh
+./.github/scripts/pre-commit-check-sop-files.sh
+./.github/scripts/pre-commit-shell-check.sh
+./.github/scripts/pre-commit-check-git-leaks.sh
