@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -e
-
-./pre-push-check-java.sh
-./pre-push-check-pyright.sh
-./pre-push-check-ruff.sh
+pwd
+./.github/scripts/pre-push-check-java.sh
+./.github/scripts/pre-push-check-pyright.sh
+./.github/scripts/pre-push-check-ruff.sh
