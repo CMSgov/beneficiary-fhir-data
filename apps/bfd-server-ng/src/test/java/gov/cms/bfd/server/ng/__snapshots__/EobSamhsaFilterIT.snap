@@ -3217,10 +3217,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
         },
         "code" : {
           "coding" : [ {
-            "code" : "Y",
+            "code" : "y",
             "system" : "https://www.nubc.org/CodeSystem/PointOfOrigin"
           }, {
-            "code" : "Y",
+            "code" : "y",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
@@ -21794,10 +21794,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
         },
         "code" : {
           "coding" : [ {
-            "code" : "Y",
+            "code" : "5",
             "system" : "https://www.nubc.org/CodeSystem/PointOfOrigin"
           }, {
-            "code" : "Y",
+            "code" : "5",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
           } ]
         },
@@ -25915,7 +25915,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         },
         "code" : {
           "coding" : [ {
-            "code" : "1",
+            "code" : "2",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PPS-IND-CD"
           } ]
         },
@@ -31992,7 +31992,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "code" : "0132",
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           }, {
-            "code" : "X",
+            "code" : "M",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DDCTBL-COINSRNC-CD"
           } ]
         },
@@ -32625,7 +32625,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         },
         "code" : {
           "coding" : [ {
-            "code" : "1",
+            "code" : "2",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PPS-IND-CD"
           } ]
         },
@@ -32644,7 +32644,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         },
         "code" : {
           "coding" : [ {
-            "code" : "G",
+            "code" : "X",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-NPMT-RSN-CD"
           } ]
         },
@@ -32663,7 +32663,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         },
         "code" : {
           "coding" : [ {
-            "code" : "1",
+            "code" : "5",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
           } ]
         },
