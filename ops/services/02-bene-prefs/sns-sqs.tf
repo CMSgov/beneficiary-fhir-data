@@ -63,27 +63,10 @@ resource "aws_sns_topic_policy" "partner_bucket_events" {
   policy   = data.aws_iam_policy_document.sns_allow_s3_publish[each.key].json
 }
 
-resource "aws_sqs_queue" "partner_bucket_events_dlq" {
-  for_each = local.partners
-
-  name     = "${local.name_prefix}-${each.key}-bucket-events-dlq"
-
-  tags = merge(local.default_tags, {
-    Env     = local.env
-    Service = local.service
-    Partner = each.key
-  })
-}
-
 resource "aws_sqs_queue" "partner_bucket_events" {
   for_each = local.partners
 
   name     = "${local.name_prefix}-${each.key}-bucket-events"
-
-  redrive_policy = jsonencode({
-    deadLetterTargetArn = aws_sqs_queue.partner_bucket_events_dlq[each.key].arn
-    maxReceiveCount     = 5
-  })
 
   tags = merge(local.default_tags, {
     Env     = local.env
