@@ -298,7 +298,7 @@ create table idr_new.claim_item_professional_ss
     bfd_prvdr_rndrng_careteam_name     character varying(135),
     clm_rndrg_fed_prvdr_spclty_cd  character varying(2),
     clm_rndrg_prvdr_tax_num        character varying(10)    not null,
-    geo_rndrg_ssa_state_cd         character varying(2),
+ -- nch   geo_rndrg_ssa_state_cd         character varying(2),
     clm_rndrg_prvdr_type_cd        character varying(3),
 
 --  instnl, part d   clm_line_othr_tp_pd_amt        numeric,
