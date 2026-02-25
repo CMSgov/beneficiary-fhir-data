@@ -5,11 +5,13 @@ import logging
 import os
 import ssl
 import sys
+from abc import ABCMeta
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import date
-from enum import StrEnum, auto
+from enum import EnumMeta, StrEnum, auto
 from pathlib import Path
-from typing import Any
+from typing import Any, Self
 
 import aiohttp
 import anyio
@@ -31,59 +33,21 @@ SECURITY_LABEL_HL7_ICD10_DIAGNOSIS_SYSTEM = "http://hl7.org/fhir/sid/icd-10-cm"
 SECURITY_LABEL_MEDICARE_ICD10_PROCEDURE_SYSTEM = "http://www.cms.gov/Medicare/Coding/ICD10"
 SECURITY_LABEL_HL7_ICD9_DIAGNOSIS_SYSTEM = "http://hl7.org/fhir/sid/icd-9-cm"
 SECURITY_LABEL_MEDICARE_ICD9_PROCEDURE_SYSTEM = "http://www.cms.gov/Medicare/Coding/ICD9"
+CLM_DGNS_CD_LABELS = [
+    SECURITY_LABEL_HL7_ICD10_DIAGNOSIS_SYSTEM,
+    SECURITY_LABEL_HL7_ICD9_DIAGNOSIS_SYSTEM,
+]
+CLM_PRCDR_CD_LABELS = [
+    SECURITY_LABEL_MEDICARE_ICD10_PROCEDURE_SYSTEM,
+    SECURITY_LABEL_MEDICARE_ICD9_PROCEDURE_SYSTEM,
+]
+CLM_LINE_HCPCS_CD_LABELS = [SECURITY_LABEL_HCPCS_SYSTEM, SECURITY_LABEL_CPT_SYSTEM]
+DGNS_DRG_CD_LABELS = [SECURITY_LABEL_DRG_SYSTEM]
 
-logging.basicConfig(level=os.environ.get("LOG_LEVEL", "INFO").upper())
+LOGGING_LEVEL = os.environ.get("LOG_LEVEL", "INFO").upper()
+logging.basicConfig(level=LOGGING_LEVEL.upper())
+logging.getLogger("psycopg").setLevel(LOGGING_LEVEL)
 logger = logging.getLogger()
-
-
-class VerifyFilteringResult(StrEnum):
-    EMPTY_RESPONSE = auto()
-    PASS = auto()
-    FAIL = auto()
-
-
-class ClaimItemSamhsaColumn(StrEnum):
-    CLM_DGNS_CD = (
-        auto(),
-        [
-            SECURITY_LABEL_HL7_ICD10_DIAGNOSIS_SYSTEM,
-            SECURITY_LABEL_HL7_ICD9_DIAGNOSIS_SYSTEM,
-        ],
-    )
-    CLM_PRCDR_CD = (
-        auto(),
-        [
-            SECURITY_LABEL_MEDICARE_ICD10_PROCEDURE_SYSTEM,
-            SECURITY_LABEL_MEDICARE_ICD9_PROCEDURE_SYSTEM,
-        ],
-    )
-    CLM_LINE_HCPCS_CD = auto(), [SECURITY_LABEL_HCPCS_SYSTEM, SECURITY_LABEL_CPT_SYSTEM]
-
-    def __init__(self, _: str, systems: list[str]) -> None:
-        self.systems = systems
-
-    def __new__(
-        cls: type["ClaimItemSamhsaColumn"], value: str, systems: list[str]
-    ) -> "ClaimItemSamhsaColumn":
-        obj = str.__new__(cls, value)
-        obj._value_ = value
-        obj.systems = systems
-        return obj
-
-
-class ClaimInstitutionalSamhsaColumn(StrEnum):
-    DGNS_DRG_CD = auto(), [SECURITY_LABEL_DRG_SYSTEM]
-
-    def __init__(self, _: str, systems: list[str]) -> None:
-        self.systems = systems
-
-    def __new__(
-        cls: type["ClaimInstitutionalSamhsaColumn"], value: str, systems: list[str]
-    ) -> "ClaimInstitutionalSamhsaColumn":
-        obj = str.__new__(cls, value)
-        obj._value_ = value
-        obj.systems = systems
-        return obj
 
 
 class SecurityLabelModel(BaseModel):
@@ -103,20 +67,22 @@ class DatabaseDetailsModel(BaseModel):
     dbname: str = "fhirdb"
 
     @classmethod
-    def from_conn_str(cls, conn_str: str) -> "DatabaseDetailsModel":
+    def from_conn_str(cls, conn_str: str) -> DatabaseDetailsModel:
         return DatabaseDetailsModel.model_validate(
             dict(entry.split("=") for entry in conn_str.split(" "))
         )
 
     @classmethod
-    def from_env(cls) -> "DatabaseDetailsModel":
-        return DatabaseDetailsModel.model_validate({
-            "host": os.environ.get("PGHOST"),
-            "user": os.environ.get("PGUSER"),
-            "password": os.environ.get("PGPASSWORD"),
-            "port": os.environ.get("PGPORT"),
-            "dbname": os.environ.get("PGDATABASE"),
-        })
+    def from_env(cls) -> DatabaseDetailsModel:
+        return DatabaseDetailsModel.model_validate(
+            {
+                "host": os.environ.get("PGHOST"),
+                "user": os.environ.get("PGUSER"),
+                "password": os.environ.get("PGPASSWORD"),
+                "port": os.environ.get("PGPORT"),
+                "dbname": os.environ.get("PGDATABASE"),
+            }
+        )
 
 
 @dataclass(frozen=True, eq=True)
@@ -125,12 +91,131 @@ class BeneWithSamshaClaims:
     samhsa_claim_ids: list[str]
 
 
+class ABCEnumMeta(EnumMeta, ABCMeta):
+    pass
+
+
+class VerifyFilteringResult(StrEnum):
+    EMPTY_RESPONSE = auto()
+    PASS = auto()
+    FAIL = auto()
+
+
 def normalize_code(code: str) -> str:
     return code.replace(".", "")
 
 
-async def __query_samhsa_claim_any_ids(
+def dgns_drg_cd_generator(
+    column: ClaimTableColumnBase, security_labels: list[SecurityLabelModel]
+) -> list[str]:
+    return [
+        str(int(normalized_code))
+        for label in security_labels
+        if label.system in column.systems
+        and (normalized_code := normalize_code(label.code))
+        and normalized_code.isdigit()
+    ]
+
+
+def default_code_generator(
+    column: ClaimTableColumnBase, security_labels: list[SecurityLabelModel]
+) -> list[str]:
+    return list(
+        itertools.chain.from_iterable(
+            [label.code, normalize_code(label.code)]
+            for label in security_labels
+            if label.system in column.systems
+        )
+    )
+
+
+class ClaimTableColumnBase(StrEnum, metaclass=ABCEnumMeta):
+    def __init__(
+        self,
+        _: str,
+        systems: list[str],
+        code_generator: Callable[[Self, list[SecurityLabelModel]], list[str]],
+    ) -> None:
+        self.systems = systems
+        self.code_generator = code_generator
+
+    def __new__(
+        cls: type[Self],
+        value: str,
+        systems: list[str],
+        code_generator: Callable[[Self, list[SecurityLabelModel]], list[str]],
+    ) -> Self:
+        obj = str.__new__(cls, value)
+        obj._value_ = value
+        obj.systems = systems
+        obj.code_generator = code_generator
+        return obj
+
+
+class ClaimInstitutionalNchColumn(ClaimTableColumnBase):
+    DGNS_DRG_CD = auto(), DGNS_DRG_CD_LABELS, dgns_drg_cd_generator
+
+
+class ClaimInstitutionalSsColumn(ClaimTableColumnBase):
+    DGNS_DRG_CD = auto(), DGNS_DRG_CD_LABELS, dgns_drg_cd_generator
+
+
+class ClaimItemInstitutionalNchColumn(ClaimTableColumnBase):
+    CLM_PRCDR_CD = auto(), CLM_PRCDR_CD_LABELS, default_code_generator
+    CLM_LINE_HCPCS_CD = auto(), CLM_LINE_HCPCS_CD_LABELS, default_code_generator
+
+
+class ClaimItemInstitutionalSsColumn(ClaimTableColumnBase):
+    CLM_PRCDR_CD = auto(), CLM_PRCDR_CD_LABELS, default_code_generator
+    CLM_LINE_HCPCS_CD = auto(), CLM_LINE_HCPCS_CD_LABELS, default_code_generator
+
+
+class ClaimItemProfessionalNchColumn(ClaimTableColumnBase):
+    CLM_DGNS_CD = auto(), CLM_DGNS_CD_LABELS, default_code_generator
+    CLM_LINE_HCPCS_CD = auto(), CLM_LINE_HCPCS_CD_LABELS, default_code_generator
+
+
+class ClaimItemProfessionalSsColumn(ClaimTableColumnBase):
+    CLM_DGNS_CD = auto(), CLM_DGNS_CD_LABELS, default_code_generator
+    CLM_LINE_HCPCS_CD = auto(), CLM_LINE_HCPCS_CD_LABELS, default_code_generator
+
+
+CLAIM_INSTITUTIONAL_NCH_TABLE = "claim_institutional_nch"
+CLAIM_INSTITUTIONAL_SS_TABLE = "claim_institutional_ss"
+CLAIM_PROFESSIONAL_NCH_TABLE = "claim_professional_nch"
+CLAIM_PROFESSIONAL_SS_TABLE = "claim_professional_ss"
+CLAIM_ITEM_INSTITUTIONAL_NCH_TABLE = "claim_item_institutional_nch"
+CLAIM_ITEM_INSTITUTIONAL_SS_TABLE = "claim_item_institutional_ss"
+CLAIM_ITEM_PROFESSIONAL_NCH_TABLE = "claim_item_professional_nch"
+CLAIM_ITEM_PROFESSIONAL_SS_TABLE = "claim_item_professional_ss"
+CLAIMS_TABLES = [
+    CLAIM_INSTITUTIONAL_NCH_TABLE,
+    CLAIM_INSTITUTIONAL_SS_TABLE,
+    CLAIM_PROFESSIONAL_NCH_TABLE,
+    CLAIM_PROFESSIONAL_SS_TABLE,
+]
+TABLES_META: dict[str, tuple[type[ClaimTableColumnBase], str | None]] = {
+    CLAIM_INSTITUTIONAL_NCH_TABLE: (ClaimInstitutionalNchColumn, None),
+    CLAIM_INSTITUTIONAL_SS_TABLE: (ClaimInstitutionalSsColumn, None),
+    CLAIM_ITEM_INSTITUTIONAL_NCH_TABLE: (
+        ClaimItemInstitutionalNchColumn,
+        CLAIM_INSTITUTIONAL_NCH_TABLE,
+    ),
+    CLAIM_ITEM_INSTITUTIONAL_SS_TABLE: (
+        ClaimItemInstitutionalSsColumn,
+        CLAIM_INSTITUTIONAL_SS_TABLE,
+    ),
+    CLAIM_ITEM_PROFESSIONAL_NCH_TABLE: (
+        ClaimItemProfessionalNchColumn,
+        CLAIM_PROFESSIONAL_NCH_TABLE,
+    ),
+    CLAIM_ITEM_PROFESSIONAL_SS_TABLE: (ClaimItemProfessionalSsColumn, CLAIM_PROFESSIONAL_SS_TABLE),
+}
+
+
+async def query_samhsa_claim_any_ids(
     table: str,
+    claim_table: str | None,
     column: str,
     query_params: list[Any],
     tablesample: float,
@@ -155,38 +240,26 @@ async def __query_samhsa_claim_any_ids(
             table,
         )
 
-        # This query looks a bit strange since it's doing a lot of JOINs, but this mimics the Claim
-        # entity in the V3 Server as it joins on many tables to construct a full Claim for an
-        # ExplanationOfBenefit response. In particular, if a "claim" row does not have one or more
-        # corresponding "claim_item", "claim_date_signature", or "beneficiary" row(s), the V3 Server
-        # will disregard the Claim as it is incomplete (likely still loading). This is why this
-        # query INNER JOINs on those tables. "claim_institutional" is optional, so a LEFT JOIN
-        # ensures we take it if it is there, but we do not exclude "claim" rows without it.
-        result = await (
-            await curs.execute(
-                sql.SQL("""
-                SELECT claim.clm_uniq_id, claim.clm_thru_dt, {table}.{column}
-                FROM idr.claim
-                TABLESAMPLE SYSTEM({tablesample})
-                LEFT JOIN idr.claim_institutional
-                    ON claim.clm_uniq_id = claim_institutional.clm_uniq_id
-                INNER JOIN idr.claim_item
-                    ON claim.clm_uniq_id = claim_item.clm_uniq_id
-                INNER JOIN idr.claim_date_signature
-                    ON claim.clm_dt_sgntr_sk = claim_date_signature.clm_dt_sgntr_sk
-                INNER JOIN idr.beneficiary
-                    ON claim.bene_sk = beneficiary.bene_sk
-                WHERE {table}.{column} = ANY(%s)
-                LIMIT {limit};
-                """).format(
-                    table=sql.Identifier(table),
-                    column=sql.Identifier(column),
-                    tablesample=sql.Literal(tablesample),
-                    limit=sql.Literal(limit),
-                ),
-                query_params,
-            )
-        ).fetchall()
+        # This construction looks a little strange, but it's done so that claim _item_ tables are
+        # inner joined with their parent claim tables and claim tables do not have an inner join
+        claim_join = t""
+        if claim_table:
+            claim_join = t"""
+            INNER JOIN idr_new.{claim_table:i}
+                ON {table:i}.clm_uniq_id = {claim_table:i}.clm_uniq_id
+            """
+
+        full_query = t"""
+                SELECT {table:i}.clm_uniq_id, {table:i}.{column:i},
+                    {(claim_table or table):i}.clm_thru_dt
+                FROM idr_new.{table:i}
+                TABLESAMPLE SYSTEM({tablesample:l})
+                {claim_join:q}
+                WHERE {table:i}.{column:i} = ANY({(list(query_params))})
+                LIMIT {limit:l}
+                """
+        logger.debug("Running query:\n%s", sql.as_string(full_query))
+        result = await (await curs.execute(full_query)).fetchall()
         valid_samhsa_claim_ids = [
             int(row["clm_uniq_id"])
             for row in result
@@ -214,58 +287,6 @@ async def __query_samhsa_claim_any_ids(
         return valid_samhsa_claim_ids
 
 
-async def query_samhsa_claim_institutional_ids(
-    security_labels: list[SecurityLabelModel],
-    column: ClaimInstitutionalSamhsaColumn,
-    tablesample: float,
-    limit: int,
-    db_details: DatabaseDetailsModel,
-) -> list[int]:
-    return await __query_samhsa_claim_any_ids(
-        table="claim_institutional",
-        column=column,
-        tablesample=tablesample,
-        limit=limit,
-        query_params=[
-            [
-                int(normalized_code)
-                for label in security_labels
-                if label.system in column.systems
-                and (normalized_code := normalize_code(label.code))
-                and normalized_code.isdigit()
-            ]
-        ],
-        db_details=db_details,
-        security_labels=security_labels,
-    )
-
-
-async def query_samhsa_claim_item_ids(
-    security_labels: list[SecurityLabelModel],
-    column: ClaimItemSamhsaColumn,
-    tablesample: float,
-    limit: int,
-    db_details: DatabaseDetailsModel,
-) -> list[int]:
-    return await __query_samhsa_claim_any_ids(
-        table="claim_item",
-        column=column,
-        tablesample=tablesample,
-        limit=limit,
-        query_params=[
-            list(
-                itertools.chain.from_iterable(
-                    [label.code, normalize_code(label.code)]
-                    for label in security_labels
-                    if label.system in column.systems
-                )
-            )
-        ],
-        db_details=db_details,
-        security_labels=security_labels,
-    )
-
-
 async def query_samhsa_benes_with_claims(
     tablesample: float,
     limit: int,
@@ -276,21 +297,18 @@ async def query_samhsa_benes_with_claims(
         itertools.chain.from_iterable(
             await asyncio.gather(
                 *(
-                    query_samhsa_claim_item_ids(
+                    query_samhsa_claim_any_ids(
+                        table=table,
+                        claim_table=claim_table,
+                        column=column,
+                        query_params=column.code_generator(column, security_labels),
                         security_labels=security_labels,
                         tablesample=tablesample,
                         limit=limit,
-                        column=claim_item_col,
                         db_details=db_details,
                     )
-                    for claim_item_col in ClaimItemSamhsaColumn
-                ),
-                query_samhsa_claim_institutional_ids(
-                    security_labels=security_labels,
-                    tablesample=tablesample,
-                    limit=limit,
-                    column=ClaimInstitutionalSamhsaColumn.DGNS_DRG_CD,
-                    db_details=db_details,
+                    for table, (col_type, claim_table) in TABLES_META.items()
+                    for column in col_type
                 ),
             )
         )
@@ -308,19 +326,29 @@ async def query_samhsa_benes_with_claims(
         conn.cursor(row_factory=dict_row) as curs,
     ):
         logger.info("Connected to %s; querying for bene_sks...", db_details.dbname)
-        result = await (
-            await curs.execute(
-                """
-            SELECT bene_sk, clm_uniq_id from idr.claim
-            WHERE clm_uniq_id = ANY(%s);
-            """,
-                [list(clm_uniq_ids)],
-            )
-        ).fetchall()
-        logger.info("%d potential SAMHSA bene_sks returned", len(result))
+        result = itertools.chain.from_iterable(
+            [
+                await x.fetchall()
+                for x in await asyncio.gather(
+                    *(
+                        curs.execute(
+                            t"""
+                            SELECT beneficiary.bene_sk, {table:i}.clm_uniq_id from idr_new.{table:i}
+                            INNER JOIN idr.beneficiary
+                                ON {table:i}.bene_sk = beneficiary.bene_sk
+                            WHERE clm_uniq_id = ANY({(list(clm_uniq_ids))});
+                            """
+                        )
+                        for table in CLAIMS_TABLES
+                    )
+                )
+            ]
+        )
 
         bene_sks_and_clms = [(str(row["bene_sk"]), str(row["clm_uniq_id"])) for row in result]
         uniq_bene_sks = set(x[0] for x in bene_sks_and_clms)
+
+        logger.info("%d potential SAMHSA bene_sks returned", len(uniq_bene_sks))
 
         return [
             BeneWithSamshaClaims(
