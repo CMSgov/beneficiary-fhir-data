@@ -31,11 +31,9 @@ public enum ClaimAuditTrailLocationCode {
   /** 9 - Reply. */
   REPLY("09", "Reply"),
   /** "" - Not Applicable. */
-  NA("", "Not Applicable"), // MCS & FISS are not dependent on location code
-  /** INVALID - Represents an invalid code that we still want to capture. */
-  INVALID("", "");
+  NA("", "Not Applicable"); // MCS & FISS are not dependent on location code
 
-  private String code;
+  private final String code;
   private final String display;
 
   /**
@@ -48,22 +46,6 @@ public enum ClaimAuditTrailLocationCode {
     if (code == null || code.isBlank()) {
       return Optional.empty();
     }
-    return Optional.of(
-        Arrays.stream(values())
-            .filter(v -> v.code.equals(code))
-            .findFirst()
-            .orElse(handleInvalidValue(code)));
-  }
-
-  /**
-   * Handles scenarios where code could not be mapped to a valid value.
-   *
-   * @param invalidValue the invalid value to capture
-   * @return claim audit trail location code
-   */
-  public static ClaimAuditTrailLocationCode handleInvalidValue(String invalidValue) {
-    var invalidClaimAuditTrailLocationCode = ClaimAuditTrailLocationCode.INVALID;
-    invalidClaimAuditTrailLocationCode.code = invalidValue;
-    return invalidClaimAuditTrailLocationCode;
+    return Arrays.stream(values()).filter(v -> v.code.equals(code)).findFirst();
   }
 }
