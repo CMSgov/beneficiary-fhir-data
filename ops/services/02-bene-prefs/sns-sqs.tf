@@ -10,7 +10,7 @@ data "aws_iam_policy_document" "sns_allow_s3_publish" {
       type        = "Service"
       identifiers = ["s3.amazonaws.com"]
     }
-    
+
     resources = [aws_sns_topic.partner_bucket_events[each.key].arn]
 
     condition {
@@ -35,7 +35,7 @@ data "aws_iam_policy_document" "sqs_allow_sns_send" {
     }
 
     resources = [aws_sqs_queue.partner_bucket_events[each.key].arn]
-    
+
     condition {
       test     = "ArnEquals"
       variable = "aws:SourceArn"
@@ -47,7 +47,7 @@ data "aws_iam_policy_document" "sqs_allow_sns_send" {
 resource "aws_sns_topic" "partner_bucket_events" {
   for_each = local.partners
 
-  name     = "${local.name_prefix}-${each.key}-bucket-events"
+  name = "${local.name_prefix}-${each.key}-bucket-events"
 
   tags = merge(local.default_tags, {
     Env     = local.env
@@ -59,14 +59,14 @@ resource "aws_sns_topic" "partner_bucket_events" {
 resource "aws_sns_topic_policy" "partner_bucket_events" {
   for_each = local.partners
 
-  arn      = aws_sns_topic.partner_bucket_events[each.key].arn
-  policy   = data.aws_iam_policy_document.sns_allow_s3_publish[each.key].json
+  arn    = aws_sns_topic.partner_bucket_events[each.key].arn
+  policy = data.aws_iam_policy_document.sns_allow_s3_publish[each.key].json
 }
 
 resource "aws_sqs_queue" "partner_bucket_events" {
   for_each = local.partners
 
-  name     = "${local.name_prefix}-${each.key}-bucket-events"
+  name = "${local.name_prefix}-${each.key}-bucket-events"
 
   tags = merge(local.default_tags, {
     Env     = local.env
@@ -76,7 +76,7 @@ resource "aws_sqs_queue" "partner_bucket_events" {
 }
 
 resource "aws_sns_topic_subscription" "partner_bucket_events_to_sqs" {
-  for_each  = local.partners
+  for_each = local.partners
 
   topic_arn = aws_sns_topic.partner_bucket_events[each.key].arn
   protocol  = "sqs"
@@ -84,7 +84,7 @@ resource "aws_sns_topic_subscription" "partner_bucket_events_to_sqs" {
 }
 
 resource "aws_sqs_queue_policy" "partner_bucket_events" {
-  for_each  = local.partners
+  for_each = local.partners
 
   queue_url = aws_sqs_queue.partner_bucket_events[each.key].id
   policy    = data.aws_iam_policy_document.sqs_allow_sns_send[each.key].json
