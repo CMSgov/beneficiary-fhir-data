@@ -87,7 +87,7 @@ public enum ClaimAdmissionTypeCode {
    * Handles scenarios where code could not be mapped to a valid value.
    *
    * @param invalidValue the invalid value to capture
-   * @return INVALID claim admission type code
+   * @return claim admission type code
    */
   public static ClaimAdmissionTypeCode handleInvalidValue(String invalidValue) {
     var invalidClaimAdmissionTypeCode = ClaimAdmissionTypeCode.INVALID;

@@ -60,7 +60,7 @@ public enum ClaimAdjustmentTypeCode {
    * Handles scenarios where code could not be mapped to a valid value.
    *
    * @param invalidValue the invalid value to capture
-   * @return INVALID catastrophic coverage code
+   * @return claim adjustment type code
    */
   public static ClaimAdjustmentTypeCode handleInvalidValue(String invalidValue) {
     var invalidClaimAdjustmentTypeCode = ClaimAdjustmentTypeCode.INVALID;

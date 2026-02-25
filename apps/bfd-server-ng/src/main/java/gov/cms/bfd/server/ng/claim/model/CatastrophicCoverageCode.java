@@ -44,7 +44,7 @@ public enum CatastrophicCoverageCode {
    * Handles scenarios where code could not be mapped to a valid value.
    *
    * @param invalidValue the invalid value to capture
-   * @return INVALID catastrophic coverage code
+   * @return catastrophic coverage code
    */
   public static CatastrophicCoverageCode handleInvalidValue(String invalidValue) {
     var invalidCatastrophicCoverageCode = CatastrophicCoverageCode.INVALID;

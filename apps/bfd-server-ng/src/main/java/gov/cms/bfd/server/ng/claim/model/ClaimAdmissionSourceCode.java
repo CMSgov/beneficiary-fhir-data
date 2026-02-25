@@ -137,10 +137,10 @@ public enum ClaimAdmissionSourceCode {
       return Optional.empty();
     }
     return Optional.of(
-            Arrays.stream(values())
-                    .filter(v -> v.code.equals(code))
-                    .findFirst()
-                    .orElse(handleInvalidValue(code)));
+        Arrays.stream(values())
+            .filter(v -> v.code.equals(code))
+            .findFirst()
+            .orElse(handleInvalidValue(code)));
   }
 
   private static ClaimAdmissionSourceCode handleInvalidValue(String invalidValue) {
