@@ -106,5 +106,16 @@ def get_regression_claim_ids(uri: str, table_sample_pct: float | None = None) ->
     Returns:
         List[str]: A list of synthetic beneficiary IDs used for the regression suites
     """
-    claim_query = "SELECT clm_uniq_id from idr.claim limit 1000"
-    return [str(r[0]) for r in _execute(uri, claim_query)]
+    claim_query = """
+    SELECT clm_uniq_id FROM idr_new.claim_rx
+    UNION ALL
+    SELECT clm_uniq_id from idr_new.claim_institutional_nch
+    UNION ALL
+    SELECT clm_uniq_id from idr_new.claim_institutional_ss
+    UNION ALL
+    SELECT clm_uniq_id from idr_new.claim_professional_nch
+    UNION ALL
+    SELECT clm_uniq_id from idr_new.claim_professional_ss
+    limit 1000
+    """
+    return [str(r[0]) for r in set(x for x in _execute(uri, claim_query))]
