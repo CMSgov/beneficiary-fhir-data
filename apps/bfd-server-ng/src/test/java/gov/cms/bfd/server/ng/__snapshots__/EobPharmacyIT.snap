@@ -1881,6 +1881,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
     "code" : {
       "coding" : [ {
         "code" : "08",
+        "display" : "Specialty care pharmacy",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PHRMCY-SRVC-TYPE-CD"
       } ]
     },

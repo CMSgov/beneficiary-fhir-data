@@ -29,8 +29,8 @@ public enum PharmacySrvcTypeCode {
   /** 07 - Managed care organization (MCO) pharmacy. */
   _07("07", "Managed care organization (MCO) pharmacy"),
   /** 08 - Specialty care pharmacy. */
-  _08("99", "Specialty care pharmacy"),
-  /** 18 - Other. */
+  _08("08", "Specialty care pharmacy"),
+  /** 99 - Other. */
   _99("99", "Other"),
   /** INVALID - Represents an invalid code that we still want to capture. */
   INVALID("", "");
