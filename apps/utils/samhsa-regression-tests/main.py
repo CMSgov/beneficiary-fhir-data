@@ -455,32 +455,44 @@ async def verify_samhsa_filtering(
     "--samhsa-cert",
     envvar="SAMHSA_CERT",
     type=Path,
-    required=True,
-    help="Path to the PEM-encoded certificate authorized to retrieve SAMHSA data",
+    required=False,
+    help=(
+        "Path to the PEM-encoded certificate authorized to retrieve SAMHSA data. Optional for "
+        "local testing, REQUIRED for remote"
+    ),
 )
 @click.option(
     "-k",
     "--samhsa-cert-key",
     envvar="SAMHSA_CERT_KEY",
     type=Path,
-    required=True,
-    help="Path to the private key of the certificate authorized to retrieve SAMHSA data",
+    required=False,
+    help=(
+        "Path to the private key of the certificate authorized to retrieve SAMHSA data. Optional "
+        "for local testing, REQUIRED for remote"
+    ),
 )
 @click.option(
     "-C",
     "--no-samhsa-cert",
     envvar="NO_SAMHSA_CERT",
     type=Path,
-    required=True,
-    help="Path to the PEM-encoded certificate NOT authorized to retrieve SAMHSA data",
+    required=False,
+    help=(
+        "Path to the PEM-encoded certificate NOT authorized to retrieve SAMHSA data. Optional for "
+        "local testing, REQUIRED for remote"
+    ),
 )
 @click.option(
     "-K",
     "--no-samhsa-cert-key",
     envvar="NO_SAMHSA_CERT_KEY",
     type=Path,
-    required=True,
-    help="Path to the private key of the certificate NOT authorized to retrieve SAMHSA data",
+    required=False,
+    help=(
+        "Path to the private key of the certificate NOT authorized to retrieve SAMHSA data. "
+        "Optional for local testing, REQUIRED for remote"
+    ),
 )
 @click.option(
     "-H",
@@ -529,10 +541,10 @@ async def verify_samhsa_filtering(
 async def main(
     hostname: str,
     security_labels: Path,
-    samhsa_cert: Path,
-    samhsa_cert_key: Path,
-    no_samhsa_cert: Path,
-    no_samhsa_cert_key: Path,
+    samhsa_cert: Path | None,
+    samhsa_cert_key: Path | None,
+    no_samhsa_cert: Path | None,
+    no_samhsa_cert_key: Path | None,
     host_cert: Path | None,
     db_conn_str: str | None,
     tablesample: int,
@@ -566,6 +578,10 @@ async def main(
     samhsa_ssl_ctx = ssl.create_default_context(purpose=ssl.Purpose.SERVER_AUTH)
     no_samhsa_ssl_ctx = ssl.create_default_context(purpose=ssl.Purpose.SERVER_AUTH)
     if not is_local:
+        if not samhsa_cert or not samhsa_cert_key or not no_samhsa_cert or not no_samhsa_cert_key:
+            logger.error("SAMHSA/non-SAMHSA certificates and keys MUST be provided")
+            sys.exit(1)
+
         samhsa_ssl_ctx.load_cert_chain(
             certfile=samhsa_cert.absolute(),
             keyfile=samhsa_cert_key.absolute(),
@@ -627,15 +643,17 @@ async def main(
         logger.log(
             logging.INFO if all_samhsa_filtered else logging.ERROR,
             "Filtering validation test of %d non-empty SAMHSA EoBs: %s",
-            len([
-                res
-                for res in results
-                if res
-                in [
-                    VerifyFilteringResult.PASS,
-                    VerifyFilteringResult.FAIL,
+            len(
+                [
+                    res
+                    for res in results
+                    if res
+                    in [
+                        VerifyFilteringResult.PASS,
+                        VerifyFilteringResult.FAIL,
+                    ]
                 ]
-            ]),
+            ),
             "PASSED" if all_samhsa_filtered else "FAILED",
         )
 
