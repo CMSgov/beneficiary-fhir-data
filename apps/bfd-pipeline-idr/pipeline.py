@@ -69,7 +69,7 @@ def run(load_mode: str) -> None:
     )
 
     if load_mode is LoadMode.PRODUCTION or bfd_test_date is None:
-        start_time = datetime.now(datetime.timezone.utc)
+        start_time = datetime.now(datetime.utc)
     else:
         start_time = bfd_test_date()
 
