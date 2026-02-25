@@ -65,17 +65,13 @@ public class BillingProviderProfessional extends ProviderHistoryBase {
 
   private Organization createOrganization(String npiNumber) {
     var org = ProviderFhirHelper.createOrganizationWithNpi(npiNumber, npiNumber, getProviderName());
-
     providerTaxNumber.ifPresent(ptn -> org.addIdentifier(toFhirTaxIdentifier(ptn)));
-
     return org;
   }
 
   private Practitioner createBillingPractitioner(String npiNumber) {
     var practitioner = ProviderFhirHelper.createPractitioner(npiNumber, npiNumber, toFhirName());
-
     providerTaxNumber.ifPresent(ptn -> practitioner.addIdentifier(toFhirTaxIdentifier(ptn)));
-
     return practitioner;
   }
 
