@@ -1,0 +1,41 @@
+
+data "aws_iam_policy_document" "sns_allow_s3_publish" {
+  for_each = local.partners
+
+  statement {
+    sid     = "AllowS3Publish"
+    effect  = "Allow"
+    actions = ["SNS:Publish"]
+    principals {
+      type        = "Service"
+      identifiers = ["s3.amazonaws.com"]
+    }
+
+    resources = [aws_sns_topic.partner_bucket_events[each.key].arn]
+
+    condition {
+      test     = "ArnLike"
+      variable = "aws:SourceArn"
+      values   = [module.buckets[each.key].bucket.arn]
+    }
+  }
+}
+
+resource "aws_sns_topic" "partner_bucket_events" {
+  for_each = local.partners
+
+  name = "${local.name_prefix}-${each.key}-bucket-events"
+
+  tags = merge(local.default_tags, {
+    Env     = local.env
+    Service = local.service
+    Partner = each.key
+  })
+}
+
+resource "aws_sns_topic_policy" "partner_bucket_events" {
+  for_each = local.partners
+
+  arn    = aws_sns_topic.partner_bucket_events[each.key].arn
+  policy = data.aws_iam_policy_document.sns_allow_s3_publish[each.key].json
+}

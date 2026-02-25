@@ -17,23 +17,43 @@ module "terraservice" {
 locals {
   service = "bene-prefs"
 
-  default_tags = module.terraservice.default_tags
-  env          = module.terraservice.env
-  env_key_arn  = module.terraservice.env_key_arn
-  name_prefix  = "bfd-${local.env}-${local.service}"
-  partners     = toset(["bcda", "ab2d", "dpc"])
+  ssm_config               = nonsensitive(module.terraservice.ssm_config)
+  default_tags             = module.terraservice.default_tags
+  env                      = module.terraservice.env
+  env_key_arn              = module.terraservice.env_key_arn
+  name_prefix              = "bfd-${local.env}-${local.service}"
+  partners                 = toset(["bcda", "ab2d", "dpc"])
+  iam_path                 = module.terraservice.default_iam_path
+  permissions_boundary_arn = module.terraservice.default_permissions_boundary_arn
 
-  # Reference helper local for future work:
-  partner_buckets = {
-    for p, m in module.eft_bucket : p => {
-      id   = m.bucket.id
-      arn  = m.bucket.arn
-      name = m.bucket.bucket
+  root_dir = "bfdeft01"
+
+  # First, construct the configuration for each partner. Partners with invalid path configuration
+  # will be discarded below. We could assume that configuration is infallible for all properties, or
+  # that invaild values will fail fast. But, invalid paths may not cause Terraform (really, AWS) to
+  # fail fast when generating corresponding infrastructure. We don't want that to happen, so we need
+  # to check those preconditions manually. The verbosity and repetition is intentional, albeit
+  # unfortunate, as Terraform does not support the language constructs necessary to reduce it
+  partners_config = {
+    for partner in local.partners :
+    partner => {
+      bucket_home_path = "/${local.root_dir}/${partner}/in",
+      bucket_iam_assumer_arns = jsondecode(
+        lookup(local.ssm_config, "/${partner}/${local.service}/bucket_iam_assumer_arns_json", "[]")
+      )
+      s3_notifications = {
+        received_file_targets = jsondecode(
+          # TODO: Come back and fix this so that it's not hard-coded to "eft":
+          lookup(local.ssm_config, "/${partner}/eft/inbound/s3_notifications/received_file_targets_json", "[]")
+        )
+      }
     }
   }
+
+  topic_arn_placeholder = "%TOPIC_ARN%"
 }
 
-module "eft_bucket" {
+module "buckets" {
   for_each = local.partners
   source   = "../../terraform-modules/general/secure-bucket"
 
@@ -45,7 +65,7 @@ module "eft_bucket" {
 }
 
 resource "aws_s3_bucket_lifecycle_configuration" "this" {
-  for_each = module.eft_bucket
+  for_each = module.buckets
   bucket   = each.value.bucket.id
 
   rule {
@@ -58,9 +78,10 @@ resource "aws_s3_bucket_lifecycle_configuration" "this" {
   }
 }
 
+/*
 resource "aws_s3_bucket_notification" "partner_bucket_events" {
   for_each = local.partners
-  bucket   = module.eft_bucket[each.key].bucket.id
+  bucket   = module.buckets[each.key].bucket.id
   topic {
     topic_arn = aws_sns_topic.partner_bucket_events[each.key].arn
     events    = ["s3:ObjectCreated:*"]
@@ -68,4 +89,73 @@ resource "aws_s3_bucket_notification" "partner_bucket_events" {
   depends_on = [
     aws_sns_topic_policy.partner_bucket_events
   ]
+}
+*/
+
+data "aws_iam_policy_document" "topic_received_s3_notifs" {
+  for_each = toset(local.partners)
+
+  statement {
+    sid       = "Allow_Publish_from_S3"
+    actions   = ["SNS:Publish"]
+    resources = [local.topic_arn_placeholder]
+
+    principals {
+      type        = "Service"
+      identifiers = ["s3.amazonaws.com"]
+    }
+
+    condition {
+      test     = "ArnLike"
+      variable = "aws:SourceArn"
+      values   = ["${module.buckets[each.key].bucket.arn}"]
+    }
+  }
+
+  dynamic "statement" {
+    for_each = {
+      for index, target in local.partners_config[each.key].s3_notifications.received_file_targets
+      : index => target
+    }
+    content {
+      sid       = "Allow_Subscribe_from_${each.key}_${statement.key}"
+      actions   = ["SNS:Subscribe", "SNS:Receive"]
+      resources = [local.topic_arn_placeholder]
+
+      principals {
+        type        = "AWS"
+        identifiers = [statement.value.principal]
+      }
+
+      condition {
+        test     = "StringEquals"
+        variable = "sns:Protocol"
+        values   = [statement.value.protocol]
+
+      }
+
+      condition {
+        test     = "ForAllValues:StringEquals"
+        variable = "sns:Endpoint"
+        values   = [statement.value.arn]
+      }
+    }
+  }
+}
+
+module "topics" {
+  for_each = toset(local.partners)
+
+  source = "../../terraform-modules/general/logging-sns-topic"
+
+  topic_name                   = "${local.name_prefix}-received-s3-${each.key}"
+  additional_topic_policy_docs = [data.aws_iam_policy_document.topic_received_s3_notifs[each.key].json]
+
+  iam_path                 = local.iam_path
+  permissions_boundary_arn = local.permissions_boundary_arn
+
+  kms_key_arn = local.env_key_arn
+
+  sqs_sample_rate    = 100
+  lambda_sample_rate = 100
 }
