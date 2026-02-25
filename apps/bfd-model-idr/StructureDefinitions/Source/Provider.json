@@ -92,9 +92,9 @@
                 ]
             },
             {
-                "id": "Provider.PRVDR_MDL_NAME",
-                "path": "Provider.PRVDR_MDL_NAME",
-                "label": "Provider Middle Name",
+                "id": "Provider.PRVDR_LAST_OR_LGL_NAME",
+                "path": "Provider.PRVDR_LAST_OR_LGL_NAME",
+                "label": "Provider Last or Legal Name",
                 "min": 0,
                 "max": "1",
                 "type": [
@@ -104,9 +104,9 @@
                 ]
             },
             {
-                "id": "Provider.PRVDR_NAME",
-                "path": "Provider.PRVDR_NAME",
-                "label": "Provider Name",
+                "id": "Provider.PRVDR_CARETEAM_NAME",
+                "path": "Provider.PRVDR_CARETEAM_NAME",
+                "label": "Provider Name when rendered in a care team.",
                 "min": 0,
                 "max": "1",
                 "type": [
@@ -140,12 +140,12 @@
                 ]
             },
             {
-                "id": "Provider.taxonomyCodes",
-                "path": "Provider.taxonomyCodes",
-                "label": "Taxonomy Codes",
-                "definition": "This is PRVDR_TXNMY_CMPST_CD split every 10 characters. Derived.",
+                "id": "Provider.specialtyCode",
+                "path": "Provider.specialtyCode",
+                "label": "CMS Federal Specialty Code",
+                "definition": "CMS Federal Specialty code.",
                 "min": 0,
-                "max": "*",
+                "max": "1",
                 "type": [
                     {
                         "code": "string"
@@ -189,9 +189,46 @@
                 ]
             },
             {
-                "id": "Provider.prvdr_zip",
-                "path": "Provider.prvdr_zip",
+                "id": "Provider.CLM_BLG_PRVDR_ZIP5_CD",
+                "path": "Provider.CLM_BLG_PRVDR_ZIP5_CD",
                 "label": "Billing Provider Zip 5",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "Provider.CLM_BLG_PRVDR_TAX_NUM",
+                "path": "Provider.CLM_BLG_PRVDR_TAX_NUM",
+                "label": "Provider Tax Number",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "Provider.PRVDR_ID_QLFYR_CD",
+                "path": "Provider.PRVDR_ID_QLFYR_CD",
+                "label": "Provider Identifier Qualifier Code",
+                "min": 0,
+                "max": "1",
+                "type": [
+                    {
+                        "code": "string"
+                    }
+                ]
+            },
+            {
+                "id": "Provider.CLM_PRVDR_GNRC_ID_NUM",
+                "path": "Provider.CLM_PRVDR_GNRC_ID_NUM",
+                "label": "Provider Generic ID Number",
+                "definition": "Indicates the ID number submitted for the provider on a claim. The type of the identifier is noted by PRVDR_ID_QLFYR_CD.",
                 "min": 0,
                 "max": "1",
                 "type": [

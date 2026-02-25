@@ -666,7 +666,7 @@
           {
             "id": "SupportingInfoComponent.CLM_CMS_PROC_DT",
             "path": "SupportingInfoComponent.CLM_CMS_PROC_DT",
-            "label": "FI Claim Process Date",
+            "label": "Claim Process Date",
             "min": 0,
             "max": "1",
             "type": [

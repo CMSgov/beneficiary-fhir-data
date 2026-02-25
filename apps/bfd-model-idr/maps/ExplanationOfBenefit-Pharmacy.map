@@ -12,6 +12,7 @@ uses "http://hl7.org/fhir/StructureDefinition/ExplanationOfBenefit" alias BFDEOB
 
 imports "https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper"
 imports "https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Base"
+imports "https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-SupportingInfo-Helper"
 
 group createEOBPharmacy(source src: ExplanationOfBenefitPharmacy, target tgt: BFDEOB){
     
@@ -51,11 +52,6 @@ group createEOBPharmacy(source src: ExplanationOfBenefitPharmacy, target tgt: BF
       src.CLM_FROM_DT as fromDate -> billablePeriod.start = fromDate "Set from date";
       src.CLM_THRU_DT as toDate -> billablePeriod.end = toDate "Set to date";
     } "Set EOB period";
-
-    src.CLM_IDR_LD_DT as idrLdDt -> tgt.extension = create('Extension') as tgtExtension then{
-      src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-IDR-LD-DT" "Add url";
-      src -> tgtExtension.value = idrLdDt "add date";
-    } "add idr load date";
     
     src.CLM_EFCTV_DT as efctvDate -> tgt.created = efctvDate "Add created date for EOB";
 
@@ -69,35 +65,38 @@ group createEOBPharmacy(source src: ExplanationOfBenefitPharmacy, target tgt: BF
       src -> tgtBBElement.date = paidDate "Add paid date";
     } "CLM_PD_DT";
 
-    // CMS process date - from CLM_DT_SGNTR
-    src.CLM_CMS_PROC_DT as procDt -> tgt.extension = create('Extension') as tgtExtension then {
-      src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-CMS-PROC-DT" "Add url";
-      procDt -> tgtExtension.value = procDt "set process date";
-    } "CLM_CMS_PROC_DT";
-
     // Provider organization for pharmacy - only create when needed based on NPI_TYPE
 
-    src.PRVDR_SRVC_PRVDR_NPI_NUM as blgNPI -> tgt then{
-      //We don't populate careTeamType when it's the provider, so we can uniquely identify it as billing.
-        src -> tgt.provider = create('Reference') as tgtRef, tgtRef.reference = append("#", blgNPI) "Add reference to NPI";
-        src.providerList as provider where provider.isDuplicate.exists().not() and provider.careTeamType.exists().not() and provider.NPI_TYPE = 1 -> tgt.contained = create('Practitioner') as tgtPract then createPractitioner(provider, tgtPract) "Add Practitioner";
-        src.providerList as provider where provider.isDuplicate.exists().not() and provider.careTeamType.exists().not() and provider.NPI_TYPE = 2 -> tgt.contained = create('Organization') as tgtOrg then createOrg(provider, tgtOrg) "Add Organization";
-    } "Add billing provider";
+    //We don't populate careTeamType when it's the provider, so we can uniquely identify it as billing.
+    src -> tgt.provider = create('Reference') as tgtRef, tgtRef.reference = "#BILLING-ID" "Add reference to non-NPI";
+    src.PRVDR_SRVC_PRVDR_NPI_NUM as blgNPI -> tgt.provider = create('Reference') as tgtRef, tgtRef.reference = append("#", blgNPI) "Add reference to NPI";
+
+    src.providerList as provider where provider.isDuplicate.exists().not() and provider.careTeamType.exists().not() and provider.NPI_TYPE = 1 -> tgt.contained = create('Practitioner') as tgtPract then createPractitioner(provider, tgtPract) "Add Practitioner";
+    src.providerList as provider where provider.isDuplicate.exists().not() and provider.careTeamType.exists().not() and provider.NPI_TYPE = 2 -> tgt.contained = create('Organization') as tgtOrg then createOrg(provider, tgtOrg) "Add Organization";
+    //The above handles instances where the id is type NPI. If there's no NPI, we're going to populate it as an org. 
+    src.providerList as provider where provider.isDuplicate.exists().not() and provider.careTeamType.exists().not() and provider.NPI_TYPE.exists().not() -> tgt.contained = create('Organization') as tgtOrg then createOrg(provider, tgtOrg) "Add Organization - Non NPI";
+
 
     src.providerList as pList where pList.careTeamType.exists() -> tgt then {
-      pList where pList.NPI_TYPE = 1 and pList.isDuplicate.exists().not() -> tgt.contained = create('Practitioner') as tgtPract then createPractitioner(pList, tgtPract) "Add Practitioner";
-      pList where pList.NPI_TYPE = 2 and pList.isDuplicate.exists().not() -> tgt.contained = create('Organization') as tgtOrg then createOrg(pList, tgtOrg) "Add Organization";
-
       src -> tgt.careTeam = create('BackboneElement') as tgtBBElement then {
-        pList.careTeamType as careTeamType -> tgtBBElement.role = cc("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole", careTeamType) "Add role";
+        pList.careTeamType as careTeamType -> tgtBBElement.role = create('CodeableConcept') as tgtCC then {
+            careTeamType -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claimcareteamrole", careTeamType) "Add THO coding";
+            pList.careTeamType as legacyType where legacyType != "supervisor" -> tgtCC.coding = c("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole", legacyType) "Add C4BB system";
+        } "Add care team types";
         pList.careTeamSequenceNumber as seqNum -> tgtBBElement.sequence = seqNum "Set sequence";
         src -> tgtBBElement.provider = create('Reference') as tgtReference then {
-          pList.PRVDR_SK as npi -> tgtReference.reference = append("#", npi) "Add reference";
+           pList.PRVDR_ID_QLFYR_CD as qlfyrCd -> tgtReference.identifier = create('Identifier') as tgtId then {
+                qlfyrCd -> tgtId.type = create('CodeableConcept') as tgtCC then {
+                    qlfyrCd -> tgtCC.coding = c("http://bluebutton.cms.gov/fhir/CodeSystem/PRVDR-ID-QLFYR-CD",qlfyrCd) "Add coding for type";
+                    pList.PRVDR_ID_QLFYR_CD as npiType where npiType = "01" -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/v2-0203","NPI") "Add NPI type";
+                } "Add type";
+                qlfyrCd as notNPI where npi != "01" -> tgtId.system = "http://bluebutton.cms.gov/fhir/identifiers/GenericIdNum" "set id num system url";
+                qlfyrCd as npi where npi = "01" -> tgtId.system = "http://hl7.org/fhir/sid/us-npi" "set NPI system url";
+                pList.CLM_PRVDR_GNRC_ID_NUM as idNum -> tgtId.value = idNum "set id num";
+            } "Add qualifier code and id num";
+          pList.PRVDR_CARETEAM_NAME as name -> tgtReference.display = name "set name";
         } "Add reference to EOB";
         
-        pList.taxonomyCodes as taxonomyCodes -> tgtBBElement.qualification = create('CodeableConcept') as qualCC then{
-          taxonomyCodes -> qualCC.coding = c("http://nucc.org/provider-taxonomy", taxonomyCodes) "add taxonomy";
-        } "Add taxonomy/qualifications";
       } "Add CareTeam Element";
 
     } "Add CareTeam providers";
@@ -148,13 +147,6 @@ group createEOBPharmacy(source src: ExplanationOfBenefitPharmacy, target tgt: BF
       lineItem.TOT_RX_CST_AMT as totRxCstAmt -> tgtBBElement.amount = create('Money') as tgtMoney then addMoney(totRxCstAmt, tgtMoney) "Add Money";
     } "Add Total Drug Cost Amount";
 
-    src.CLM_ADJSTMT_TYPE_CD as adjTypeCd -> tgt.extension = create('Extension') as tgtExtension then {
-      src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-ADJSTMT-TYPE-CD" "Add url";
-      src -> tgtExtension.value = create('Coding') as tgtCoding then{
-        src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADJSTMT-TYPE-CD",
-        tgtCoding.code = adjTypeCd "Add code";
-      } "Add coding";
-    } "CLM_ADJSTMT_TYPE_CD";
 }
 
 group addMoney(source src: String, target tgt: Money){
@@ -163,7 +155,11 @@ group addMoney(source src: String, target tgt: Money){
 }
 group addPharmacySupportingInfo(source src: SupportingInfoComponent, target tgt: BackboneElement){
     src.ROW_NUM as seqNum -> tgt.sequence = seqNum "set sequence number";
-    
+
+    src.CLM_IDR_LD_DT as idrLdDt -> tgt then addClaimIDRLoadDate(src, tgt) "Add Claim IDR Load Date";
+    src.CLM_ADJSTMT_TYPE_CD as adjTypeCd -> tgt then addAdjustmentTypeCode(src, tgt) "Add Adjustment Type Code";
+    src.CLM_CMS_PROC_DT as procDt -> tgt then addFIClaimProcessDate(src, tgt) "Add FI Claim Process Date";
+
     // Refills authorized (always zero in IDR data)
     src.CLM_LINE_AUTHRZD_FILL_NUM as refills -> tgt then addRefillsAuthorized(src, tgt) "Add refills authorized";
     

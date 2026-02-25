@@ -72,7 +72,16 @@ class EobSearchIT extends IntegrationTestBase {
     var events = ThreadSafeAppender.startRecord();
     var bundle =
         eobResourceProvider.searchByPatient(
-            new ReferenceParam("178083966"), null, null, null, null, null, null, null, request);
+            new ReferenceParam("178083966"),
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            request);
     assertFalse(bundle.getEntry().isEmpty());
     assertEquals(2, queryCount(events));
   }
