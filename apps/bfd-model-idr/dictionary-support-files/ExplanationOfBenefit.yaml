@@ -48,6 +48,7 @@
     - FISS
     - MCS
     - NCH
+    - VMS
   referenceTable: Final-Action
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_FINL_ACTN_IND
