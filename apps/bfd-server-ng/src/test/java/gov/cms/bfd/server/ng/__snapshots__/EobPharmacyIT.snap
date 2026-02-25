@@ -889,8 +889,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
     },
     "code" : {
       "coding" : [ {
-        "code" : "C",
-        "display" : "Above attachment point",
+        "code" : "B",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CTSTRPHC-CVRG-IND-CD"
       } ]
     },
