@@ -431,7 +431,7 @@ SELECT
   COALESCE(t47.app_fhir_v3_generate_insurance_card_call_synthetic_count, 0)
     app_fhir_v3_generate_insurance_card_call_synthetic_count,
   COALESCE(t48.app_fhir_v3_generate_insurance_card_call_real_count, 0)
-    app_fhir_v3_generate_insurance_card_call_real_count
+    app_fhir_v3_generate_insurance_card_call_real_count,
   /* AUTH per applicaiton */
   COALESCE(t101.app_auth_ok_real_bene_count, 0)
     app_auth_ok_real_bene_count,
@@ -1526,7 +1526,8 @@ FROM
         CONTAINS((SELECT enabled_metrics_list FROM report_params),
           'app_fhir_v3_generate_insurance_card_call_synthetic_count')
 
-        AND path LIKE '/v3/fhir/Patient/\$generate-insurance-card%'
+        AND path LIKE '/v3/fhir/Patient/%'
+        AND path LIKE '%insurance-card%'
         AND req_qparam_lastupdated != ''
 
         AND request_method = 'GET'
@@ -1552,7 +1553,8 @@ FROM
         CONTAINS((SELECT enabled_metrics_list FROM report_params),
           'app_fhir_v3_generate_insurance_card_call_real_count')
 
-        AND path LIKE '/v3/fhir/Patient/\$generate-insurance-card%'
+        AND path LIKE '/v3/fhir/Patient/%'
+        AND path LIKE '%insurance-card%'
         AND req_qparam_lastupdated != ''
 
         AND request_method = 'GET'
