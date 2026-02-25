@@ -8,19 +8,21 @@ checkPythonRuff() {
 
     git fetch origin 2>&1
     doesRemoteExist="$(git ls-remote origin ${branch_name})"
-    echo "hello"
     tmpfile=$(mktemp)
     if [ "$doesRemoteExist" = '' ]; then
       echo 'No Remote exists, checking apps directory on local for changes to Python files.'
-      git diff --name-only origin/master..HEAD apps | grep .py$ > "$tmpfile"
+      git diff --name-only origin/master..HEAD apps > "$tmpfile"
     else
       echo "Remote exists, checking apps directory on branch: ${branch_name} for changes to Python files"
-      git diff --name-only "origin/${branch_name}:apps" "${branch_name}:apps" | grep .py$ > "$tmpfile"
+      git diff --name-only "origin/${branch_name}:apps" "${branch_name}:apps" > "$tmpfile"
+    fi
+
+    if [ -s "$tmpfile" ]; then
+      echo "Filter out non-Python files"
+      cat $tmpfile | grep .py$ > $tmpfile
     fi
 
     commits=$(cat "$tmpfile")
-    echo 'commits'
-    echo "$commits"
     rm "$tmpfile"
     for file in $commits
     do
