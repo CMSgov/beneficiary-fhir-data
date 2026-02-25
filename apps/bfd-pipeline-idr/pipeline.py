@@ -1,7 +1,7 @@
 import logging
 import sys
 from concurrent.futures import ProcessPoolExecutor
-from datetime import datetime
+from datetime import UTC, datetime
 
 from hamilton import driver, telemetry  # type: ignore
 from hamilton.execution import executors  # type: ignore
@@ -69,7 +69,7 @@ def run(load_mode: str) -> None:
     )
 
     if load_mode is LoadMode.PRODUCTION or bfd_test_date is None:
-        start_time = datetime.now(datetime.utc)
+        start_time = datetime.now(UTC)
     else:
         start_time = bfd_test_date()
 
