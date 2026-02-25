@@ -29,9 +29,11 @@ public enum ClaimQueryCode {
   /** C - CREDIT. */
   C("C", "CREDIT"),
   /** D - DEBIT. */
-  D("D", "DEBIT");
+  D("D", "DEBIT"),
+  /** INVALID - Represents an invalid code that we still want to capture. */
+  INVALID("", "");
 
-  private final String code;
+  private String code;
   private final String display;
 
   /**
@@ -41,7 +43,26 @@ public enum ClaimQueryCode {
    * @return claim query code
    */
   public static Optional<ClaimQueryCode> tryFromCode(String code) {
-    return Arrays.stream(values()).filter(v -> v.code.equals(code)).findFirst();
+    if (code == null || code.isBlank()) {
+      return Optional.empty();
+    }
+    return Optional.of(
+        Arrays.stream(values())
+            .filter(v -> v.code.equals(code))
+            .findFirst()
+            .orElse(handleInvalidValue(code)));
+  }
+
+  /**
+   * Handles scenarios where code could not be mapped to a valid value.
+   *
+   * @param invalidValue the invalid value to capture
+   * @return claim query code
+   */
+  public static ClaimQueryCode handleInvalidValue(String invalidValue) {
+    var invalidClaimQueryCode = ClaimQueryCode.INVALID;
+    invalidClaimQueryCode.code = invalidValue;
+    return invalidClaimQueryCode;
   }
 
   ExplanationOfBenefit.SupportingInformationComponent toFhir(

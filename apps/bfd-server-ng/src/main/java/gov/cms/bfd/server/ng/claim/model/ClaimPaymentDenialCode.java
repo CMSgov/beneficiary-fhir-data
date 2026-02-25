@@ -191,9 +191,11 @@ public enum ClaimPaymentDenialCode {
   /** Y - MSP COST AVOIDED - IRS/SSA DATA MATCH PROJECT. */
   Y("Y", "MSP COST AVOIDED - IRS/SSA DATA MATCH PROJECT"),
   /** Z - ZERO PAYMENT , ALLOWED TEST. */
-  Z("Z", "ZERO PAYMENT , ALLOWED TEST");
+  Z("Z", "ZERO PAYMENT , ALLOWED TEST"),
+  /** INVALID - Represents an invalid code that we still want to capture. */
+  INVALID("", "");
 
-  private final String code;
+  private String code;
   private final String display;
 
   /**
@@ -203,7 +205,26 @@ public enum ClaimPaymentDenialCode {
    * @return claim payment denial code
    */
   public static Optional<ClaimPaymentDenialCode> tryFromCode(String code) {
-    return Arrays.stream(values()).filter(v -> v.code.equals(code)).findFirst();
+    if (code == null || code.isBlank()) {
+      return Optional.empty();
+    }
+    return Optional.of(
+        Arrays.stream(values())
+            .filter(v -> v.code.equals(code))
+            .findFirst()
+            .orElse(handleInvalidValue(code)));
+  }
+
+  /**
+   * Handles scenarios where code could not be mapped to a valid value.
+   *
+   * @param invalidValue the invalid value to capture
+   * @return claim payment denial code
+   */
+  public static ClaimPaymentDenialCode handleInvalidValue(String invalidValue) {
+    var invalidClaimPaymentDenialCode = ClaimPaymentDenialCode.INVALID;
+    invalidClaimPaymentDenialCode.code = invalidValue;
+    return invalidClaimPaymentDenialCode;
   }
 
   ExplanationOfBenefit.SupportingInformationComponent toFhir(

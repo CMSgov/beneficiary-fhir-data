@@ -18,9 +18,11 @@ public enum DrugCoverageStatusCode {
   /** E - Supplemental drugs (reported by plans that provide Enhanced Alternative coverage). */
   E("E", "Supplemental drugs (reported by plans that provide Enhanced Alternative coverage)"),
   /** O - Over-the-counter drugs. */
-  O("O", "Over-the-counter drugs");
+  O("O", "Over-the-counter drugs"),
+  /** INVALID - Represents an invalid code that we still want to capture. */
+  INVALID("", "");
 
-  private final String code;
+  private String code;
   private final String display;
 
   /**
@@ -30,7 +32,26 @@ public enum DrugCoverageStatusCode {
    * @return drug coverage status code
    */
   public static Optional<DrugCoverageStatusCode> tryFromCode(String code) {
-    return Arrays.stream(values()).filter(v -> v.code.equals(code)).findFirst();
+    if (code == null || code.isBlank()) {
+      return Optional.empty();
+    }
+    return Optional.of(
+        Arrays.stream(values())
+            .filter(v -> v.code.equals(code))
+            .findFirst()
+            .orElse(handleInvalidValue(code)));
+  }
+
+  /**
+   * Handles scenarios where code could not be mapped to a valid value.
+   *
+   * @param invalidValue the invalid value to capture
+   * @return drug coverage status code
+   */
+  public static DrugCoverageStatusCode handleInvalidValue(String invalidValue) {
+    var invalidDrugCoverageStatusCode = DrugCoverageStatusCode.INVALID;
+    invalidDrugCoverageStatusCode.code = invalidValue;
+    return invalidDrugCoverageStatusCode;
   }
 
   ExplanationOfBenefit.SupportingInformationComponent toFhir(

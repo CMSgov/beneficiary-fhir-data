@@ -16,9 +16,11 @@ public enum PpsIndicatorCode {
   /** 2 - PPS bill; claim contains PPS indicator. */
   PPS("2", "PPS bill; claim contains PPS indicator"),
   /** unknown - Not a PPS bill. */
-  NOT_PPS("unknown", "Not a PPS bill");
+  NOT_PPS("unknown", "Not a PPS bill"),
+  /** INVALID - Represents an invalid code that we still want to capture. */
+  INVALID("", "");
 
-  private final String code;
+  private String code;
   private final String display;
 
   /**
@@ -28,7 +30,26 @@ public enum PpsIndicatorCode {
    * @return claim PPS indicator code
    */
   public static Optional<PpsIndicatorCode> fromCode(String code) {
-    return Arrays.stream(values()).filter(v -> v.code.equals(code)).findFirst();
+    if (code == null || code.isBlank()) {
+      return Optional.empty();
+    }
+    return Optional.of(
+        Arrays.stream(values())
+            .filter(v -> v.code.equals(code))
+            .findFirst()
+            .orElse(handleInvalidValue(code)));
+  }
+
+  /**
+   * Handles scenarios where code could not be mapped to a valid value.
+   *
+   * @param invalidValue the invalid value to capture
+   * @return claim PPS indicator code
+   */
+  public static PpsIndicatorCode handleInvalidValue(String invalidValue) {
+    var invalidPpsIndicatorCode = PpsIndicatorCode.INVALID;
+    invalidPpsIndicatorCode.code = invalidValue;
+    return invalidPpsIndicatorCode;
   }
 
   ExplanationOfBenefit.SupportingInformationComponent toFhir(

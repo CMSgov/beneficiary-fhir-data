@@ -31,19 +31,40 @@ public enum PharmacySrvcTypeCode {
   /** 08 - Specialty care pharmacy. */
   _08("99", "Specialty care pharmacy"),
   /** 18 - Other. */
-  _99("99", "Other");
+  _99("99", "Other"),
+  /** INVALID - Represents an invalid code that we still want to capture. */
+  INVALID("", "");
 
-  private final String code;
+  private String code;
   private final String display;
 
   /**
    * Convert from a database code.
    *
    * @param code database code
-   * @return claim dispense status code
+   * @return pharmacy service type code
    */
   public static Optional<PharmacySrvcTypeCode> tryFromCode(String code) {
-    return Arrays.stream(values()).filter(v -> v.code.equals(code)).findFirst();
+    if (code == null || code.isBlank()) {
+      return Optional.empty();
+    }
+    return Optional.of(
+        Arrays.stream(values())
+            .filter(v -> v.code.equals(code))
+            .findFirst()
+            .orElse(handleInvalidValue(code)));
+  }
+
+  /**
+   * Handles scenarios where code could not be mapped to a valid value.
+   *
+   * @param invalidValue the invalid value to capture
+   * @return pharmacy service type code
+   */
+  public static PharmacySrvcTypeCode handleInvalidValue(String invalidValue) {
+    var invalidPharmacySrvcTypeCode = PharmacySrvcTypeCode.INVALID;
+    invalidPharmacySrvcTypeCode.code = invalidValue;
+    return invalidPharmacySrvcTypeCode;
   }
 
   ExplanationOfBenefit.SupportingInformationComponent toFhir(

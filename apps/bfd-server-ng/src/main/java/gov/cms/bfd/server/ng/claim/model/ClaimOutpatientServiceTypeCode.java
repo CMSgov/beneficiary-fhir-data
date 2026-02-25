@@ -31,9 +31,11 @@ public enum ClaimOutpatientServiceTypeCode {
   /** 8 - Reserved. */
   _8("8", "Reserved"),
   /** 9 - Unknown (Information not available). */
-  _9("9", "Unknown (Information not available)");
+  _9("9", "Unknown (Information not available)"),
+  /** INVALID - Represents an invalid code that we still want to capture. */
+  INVALID("", "");
 
-  private final String code;
+  private String code;
   private final String display;
 
   /**
@@ -43,7 +45,26 @@ public enum ClaimOutpatientServiceTypeCode {
    * @return claim outpatient service type code
    */
   public static Optional<ClaimOutpatientServiceTypeCode> tryFromCode(String code) {
-    return Arrays.stream(values()).filter(v -> v.code.equals(code)).findFirst();
+    if (code == null || code.isBlank()) {
+      return Optional.empty();
+    }
+    return Optional.of(
+        Arrays.stream(values())
+            .filter(v -> v.code.equals(code))
+            .findFirst()
+            .orElse(handleInvalidValue(code)));
+  }
+
+  /**
+   * Handles scenarios where code could not be mapped to a valid value.
+   *
+   * @param invalidValue the invalid value to capture
+   * @return claim outpatient service type code
+   */
+  public static ClaimOutpatientServiceTypeCode handleInvalidValue(String invalidValue) {
+    var invalidClaimOutpatientServiceTypeCode = ClaimOutpatientServiceTypeCode.INVALID;
+    invalidClaimOutpatientServiceTypeCode.code = invalidValue;
+    return invalidClaimOutpatientServiceTypeCode;
   }
 
   ExplanationOfBenefit.SupportingInformationComponent toFhir(

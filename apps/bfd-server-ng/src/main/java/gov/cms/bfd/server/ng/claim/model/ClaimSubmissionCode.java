@@ -112,19 +112,40 @@ public enum ClaimSubmissionCode {
    */
   _45(
       "45",
-      "For the prescriber ID submitted, the associated DEA number is a valid hospital DEA number with suffix (rarely populated)");
+      "For the prescriber ID submitted, the associated DEA number is a valid hospital DEA number with suffix (rarely populated)"),
+  /** INVALID - Represents an invalid code that we still want to capture. */
+  INVALID("", "");
 
-  private final String code;
+  private String code;
   private final String display;
 
   /**
    * Convert from a database code.
    *
    * @param code database code
-   * @return Pharmacy service type code
+   * @return Claim submission code
    */
   public static Optional<ClaimSubmissionCode> tryFromCode(String code) {
-    return Arrays.stream(values()).filter(v -> v.code.equals(code)).findFirst();
+    if (code == null || code.isBlank()) {
+      return Optional.empty();
+    }
+    return Optional.of(
+        Arrays.stream(values())
+            .filter(v -> v.code.equals(code))
+            .findFirst()
+            .orElse(handleInvalidValue(code)));
+  }
+
+  /**
+   * Handles scenarios where code could not be mapped to a valid value.
+   *
+   * @param invalidValue the invalid value to capture
+   * @return Claim submission code
+   */
+  public static ClaimSubmissionCode handleInvalidValue(String invalidValue) {
+    var invalidClaimSubmissionCode = ClaimSubmissionCode.INVALID;
+    invalidClaimSubmissionCode.code = invalidValue;
+    return invalidClaimSubmissionCode;
   }
 
   ExplanationOfBenefit.SupportingInformationComponent toFhir(
