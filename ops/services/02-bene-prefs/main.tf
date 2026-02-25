@@ -22,6 +22,14 @@ locals {
   env_key_arn  = module.terraservice.env_key_arn
   name_prefix  = "bfd-${local.env}-${local.service}"
   partners     = toset(["bcda", "ab2d", "dpc"])
+
+  partner_buckets = {
+    for p, m in module.eft_bucket : p => {
+      id   = m.bucket.id
+      arn  = m.bucket.arn
+      name = m.bucket.bucket
+    }
+  }
 }
 
 module "eft_bucket" {
@@ -47,4 +55,16 @@ resource "aws_s3_bucket_lifecycle_configuration" "this" {
       days = 7
     }
   }
+}
+
+resource "aws_s3_bucket_notification" "partner_bucket_events" {
+  for_each = local.partners
+  bucket   = local.partner_buckets[each.value].id
+  topic {
+    topic_arn = aws_sns_topic.partner_bucket_events[each.value].arn
+    events    = ["s3:ObjectCreated:*"]
+  }
+  depends_on = [
+    aws_sns_topic_policy.partner_bucket_events
+  ]
 }
