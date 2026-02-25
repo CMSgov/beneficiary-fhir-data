@@ -8,7 +8,7 @@ checkPythonRuff() {
 
     git fetch origin 2>&1
     doesRemoteExist="$(git ls-remote origin ${branch_name})"
-
+    echo "hello"
     tmpfile=$(mktemp)
     if [ "$doesRemoteExist" = '' ]; then
       echo 'No Remote exists, checking apps directory on local for changes to Python files.'
@@ -19,6 +19,8 @@ checkPythonRuff() {
     fi
 
     commits=$(cat "$tmpfile")
+    echo 'commits'
+    echo "$commits"
     rm "$tmpfile"
     for file in $commits
     do
