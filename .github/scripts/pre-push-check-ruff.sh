@@ -2,8 +2,8 @@
 set -e
 
 checkPythonRuff() {
-  if [ "$(which pyright)" ]; then
-    echo 'Verifying Python source code format...'
+  if [ "$(which ruff)" ]; then
+    echo 'Verifying Python source code format with Ruff...'
     branch_name="$(git rev-parse --abbrev-ref HEAD 2>&1)"
 
     git fetch origin 2>&1
@@ -28,7 +28,7 @@ checkPythonRuff() {
       fi
     done
   else
-    echo 'Please install pyright before committing.'
+    echo 'Please install ruff before committing.'
     exit 1
   fi
 }

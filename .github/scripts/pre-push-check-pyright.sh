@@ -3,7 +3,7 @@ set -e
 
 checkPythonPyright() {
   if [ "$(which pyright)" ]; then
-    echo 'Verifying Python source code format...'
+    echo 'Verifying Python source code format with Pyright...'
     branch_name="$(git rev-parse --abbrev-ref HEAD 2>&1)"
 
     git fetch origin 2>&1
