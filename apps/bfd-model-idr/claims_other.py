@@ -1,3 +1,4 @@
+import itertools
 import random
 import string
 from datetime import date, datetime
@@ -10,8 +11,6 @@ from faker import Faker
 import field_constants as f
 from claims_static import (
     AVAIL_CONTRACT_NAMES,
-    AVAIL_CONTRACT_NUMS,
-    AVAIL_PBP_NUMS,
     AVAIL_PBP_TYPE_CODES,
     AVAILABLE_FAMILY_NAMES,
     AVAILABLE_GIVEN_NAMES,
@@ -21,7 +20,13 @@ from claims_static import (
     AVAILABLE_PROVIDER_TYPE_CODES,
     NOW,
 )
-from generator_util import CLM_ANSI_SGNTR, RowAdapter, gen_basic_id
+from generator_util import (
+    AVAIL_CONTRACT_NUMS,
+    AVAIL_PBP_NUMS,
+    CLM_ANSI_SGNTR,
+    RowAdapter,
+    gen_basic_id,
+)
 
 _faker = Faker()
 
@@ -124,17 +129,44 @@ class OtherGeneratorUtil:
         last_day = today.replace(month=12, day=31)
 
         contract_pbp_nums: list[RowAdapter] = []
-        for pbp_num in all_pbp_nums:
+        contract_pbp_contacts: list[RowAdapter] = []
+        contract_num_and_pbp_num_pairs = list(
+            itertools.product(AVAIL_CONTRACT_NUMS, AVAIL_PBP_NUMS)
+        )
+        random.shuffle(contract_num_and_pbp_num_pairs)
+        used_pairs = set()
+
+        for pbp_num in init_contract_pbp_nums:
+            cntrct = pbp_num.get(f.CNTRCT_NUM)
+            pbp = pbp_num.get(f.CNTRCT_PBP_NUM)
+            if cntrct and pbp:
+                used_pairs.add((cntrct, pbp))
+
+        available_contract_num_pairs = [
+            pair for pair in contract_num_and_pbp_num_pairs if pair not in used_pairs
+        ]
+        pair_index = 0
+
+        for i in range(amount):
+            pbp_num = all_pbp_nums[i]
+            pbp_contact = all_pbp_contacts[i]
+            contract_num = pbp_num.get(f.CNTRCT_NUM)
+            pbp_val = pbp_num.get(f.CNTRCT_PBP_NUM)
+            if not contract_num or not pbp_val:
+                contract_num, pbp_val = available_contract_num_pairs[pair_index]
+                pair_index += 1
+            sk = pbp_num.get(f.CNTRCT_PBP_SK) or gen_basic_id(field=f.CNTRCT_PBP_SK, length=12)
             effective_date = _faker.date_between_dates(date.fromisoformat("2020-01-01"), NOW)
             end_date = _faker.date_between_dates(effective_date, NOW + relativedelta(years=3))
             obsolete_date = random.choice(
                 [_faker.date_between_dates(effective_date, NOW), date.fromisoformat("9999-12-31")]
             )
+
             pbp_num.extend(
                 {
-                    f.CNTRCT_PBP_SK: gen_basic_id(field=f.CNTRCT_PBP_SK, length=12),
-                    f.CNTRCT_NUM: random.choice(AVAIL_CONTRACT_NUMS),
-                    f.CNTRCT_PBP_NUM: random.choice(AVAIL_PBP_NUMS),
+                    f.CNTRCT_PBP_SK: sk,
+                    f.CNTRCT_NUM: contract_num,
+                    f.CNTRCT_PBP_NUM: pbp_val,
                     f.CNTRCT_PBP_NAME: random.choice(AVAIL_CONTRACT_NAMES),
                     f.CNTRCT_PBP_TYPE_CD: random.choice(AVAIL_PBP_TYPE_CODES),
                     f.CNTRCT_DRUG_PLAN_IND_CD: random.choice(["Y", "N"]),
@@ -143,13 +175,10 @@ class OtherGeneratorUtil:
                     f.CNTRCT_PBP_SK_OBSLT_DT: obsolete_date.isoformat(),
                 }
             )
-            contract_pbp_nums.append(pbp_num)
 
-        contract_pbp_contacts: list[RowAdapter] = []
-        for pbp_contact in all_pbp_contacts:
             pbp_contact.extend(
                 {
-                    f.CNTRCT_PBP_SK: gen_basic_id(field=f.CNTRCT_PBP_SK, length=12),
+                    f.CNTRCT_PBP_SK: sk,
                     f.CNTRCT_PLAN_CNTCT_OBSLT_DT: "9999-12-31",
                     f.CNTRCT_PLAN_CNTCT_TYPE_CD: random.choice(["~", "30", "62"]),
                     f.CNTRCT_PLAN_FREE_EXTNSN_NUM: "".join(random.choices(string.digits, k=7)),
@@ -177,6 +206,8 @@ class OtherGeneratorUtil:
                     f.CNTRCT_PLAN_CNTCT_ZIP_CD: "".join(random.choices(string.digits, k=9)),
                 }
             )
+
+            contract_pbp_nums.append(pbp_num)
             contract_pbp_contacts.append(pbp_contact)
 
         return contract_pbp_nums, contract_pbp_contacts

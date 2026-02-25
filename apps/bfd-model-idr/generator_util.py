@@ -47,6 +47,19 @@ CLM_ANSI_SGNTR = "SYNTHETIC_CLM_ANSI_SGNTR"
 PRVDR_HSTRY = "SYNTHETIC_PRVDR_HSTRY"
 CNTRCT_PBP_NUM = "SYNTHETIC_CNTRCT_PBP_NUM"
 CNTRCT_PBP_CNTCT = "SYNTHETIC_CNTRCT_PBP_CNTCT"
+AVAIL_PBP_NUMS = ["001", "002", "003", "004", "005", "006", "007", "008", "009", "010"]
+AVAIL_CONTRACT_NUMS = [
+    "Z0001",
+    "Z0002",
+    "Z0003",
+    "Z0004",
+    "Z0005",
+    "Z0006",
+    "Z0007",
+    "Z0008",
+    "Z0009",
+    "Z0010",
+]
 
 # Lazily computed output table by filename (see above constants) to mappings of the file's rows by
 # BENE_SK. Dramatically speeds up generation with large static inputs versus just doing typical list
@@ -790,32 +803,8 @@ class GeneratorUtil:
             datetime.date(year=2021, month=1, day=1),
         )
         enrollment_end_date = "9999-12-31"
-        avail_pbp_nums = [
-            "-01",
-            "-02",
-            "-03",
-            "-04",
-            "-05",
-            "-06",
-            "-07",
-            "-08",
-            "-09",
-            "-10",
-        ]
-        avail_contract_nums = [
-            "Z0001",
-            "Z0002",
-            "Z0003",
-            "Z0004",
-            "Z0005",
-            "Z0006",
-            "Z0007",
-            "Z0008",
-            "Z0009",
-            "Z0010",
-        ]
-        cntrct_num = random.choice(avail_contract_nums)
-        pbp_num = random.choice(avail_pbp_nums)
+        cntrct_num = random.choice(AVAIL_CONTRACT_NUMS)
+        pbp_num = random.choice(AVAIL_PBP_NUMS)
         cvrg_type_cd = "11" if pdp_only else "3"
         bene_enrlmt_pgm_type_cd = random.choice(["1", "2", "3"])
         bene_enrlmt_emplr_sbsdy_sw = random.choice(["Y", "~", "1"])
