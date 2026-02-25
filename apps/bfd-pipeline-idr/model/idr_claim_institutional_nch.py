@@ -122,8 +122,6 @@ class IdrClaimInstitutionalNch(IdrBaseModel):
     clm_rndrg_fed_prvdr_spclty_cd: Annotated[
         str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)
     ]
-    meta_src_sk: Annotated[int, {ALIAS: ALIAS_CLM}]
-    clm_src_id: Annotated[str, {ALIAS: ALIAS_CLM}]
     idr_insrt_ts_clm: Annotated[
         datetime,
         {ALIAS: ALIAS_CLM, **INSERT_FIELD},

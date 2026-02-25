@@ -417,18 +417,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
   }, {
     "amount" : {
       "currency" : "USD",
-      "value" : 0
-    },
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_BLOOD_CHRG_AMT",
-        "display" : "Blood Charge Amount",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-      } ]
-    }
-  }, {
-    "amount" : {
-      "currency" : "USD",
       "value" : 8.66
     },
     "category" : {
@@ -1784,18 +1772,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
   }, {
     "amount" : {
       "currency" : "USD",
-      "value" : 0
-    },
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_BLOOD_CHRG_AMT",
-        "display" : "Blood Charge Amount",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-      } ]
-    }
-  }, {
-    "amount" : {
-      "currency" : "USD",
       "value" : 8.66
     },
     "category" : {
@@ -2764,18 +2740,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
   }, {
     "amount" : {
       "currency" : "USD",
-      "value" : 0
-    },
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_BLOOD_CHRG_AMT",
-        "display" : "Blood Charge Amount",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-      } ]
-    }
-  }, {
-    "amount" : {
-      "currency" : "USD",
       "value" : 14.05
     },
     "category" : {
@@ -3475,18 +3439,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
         "code" : "other",
         "display" : "Other",
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus"
-      } ]
-    }
-  }, {
-    "amount" : {
-      "currency" : "USD",
-      "value" : 0
-    },
-    "category" : {
-      "coding" : [ {
-        "code" : "CLM_BLOOD_CHRG_AMT",
-        "display" : "Blood Charge Amount",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
       } ]
     }
   }, {

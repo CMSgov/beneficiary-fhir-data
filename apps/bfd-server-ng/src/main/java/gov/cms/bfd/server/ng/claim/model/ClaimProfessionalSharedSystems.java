@@ -50,6 +50,12 @@ public class ClaimProfessionalSharedSystems extends ClaimProfessionalBase {
   @Column(name = "clm_audt_trl_lctn_cd")
   private ClaimAuditTrailLocationCode claimAuditTrailLocationCode;
 
+  @Column(name = "clm_src_id")
+  private ClaimSourceId claimSourceId;
+
+  @Column(name = "meta_src_sk")
+  private MetaSourceSk metaSourceSk;
+
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "clm_uniq_id")
   private SortedSet<ClaimItemProfessionalSharedSystems> claimItems;
@@ -88,6 +94,15 @@ public class ClaimProfessionalSharedSystems extends ClaimProfessionalBase {
   protected void addSubclassAdjudication(ExplanationOfBenefit eob) {
     eob.addAdjudication(
         AdjudicationChargeType.PROVIDER_OFFSET_AMOUNT.toFhirAdjudication(providerOffsetAmount));
+  }
+
+  /**
+   * Returns the system type.
+   *
+   * @return system type
+   */
+  public static SystemType getSystemType() {
+    return SystemType.SS;
   }
 
   /**

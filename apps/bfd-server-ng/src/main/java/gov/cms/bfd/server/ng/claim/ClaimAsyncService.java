@@ -26,21 +26,26 @@ public class ClaimAsyncService {
   @PersistenceContext private final EntityManager entityManager;
 
   @Async
-  protected <T extends ClaimBase> CompletableFuture<Optional<T>> findByIdInClaimType(
-      String baseQuery, Class<T> claimClass, long claimUniqueId, DbFilter params) {
+  protected <C extends ClaimBase, B extends DbFilterBuilder>
+      CompletableFuture<Optional<C>> findByIdInClaimType(
+          String baseQuery,
+          Class<C> claimClass,
+          SystemType systemType,
+          long claimUniqueId,
+          List<B> paramBuilders) {
 
-    LOGGER.info("VIRTUAL THREAD'{}'", Thread.currentThread());
+    var filters = getFilters(paramBuilders, systemType);
     var jpql =
         String.format(
             """
-                  %s
-                  WHERE c.claimUniqueId = :claimUniqueId
-                  %s
-                  """,
-            baseQuery, params.filterClause());
+            %s
+            WHERE c.claimUniqueId = :claimUniqueId
+            %s
+            """,
+            baseQuery, filters.filterClause());
 
     var result =
-        withParams(entityManager.createQuery(jpql, claimClass), params.params())
+        withParams(entityManager.createQuery(jpql, claimClass), filters.params())
             .setParameter("claimUniqueId", claimUniqueId)
             .getResultList()
             .stream()
@@ -51,7 +56,7 @@ public class ClaimAsyncService {
 
   @Async
   protected <T extends ClaimBase> CompletableFuture<List<T>> fetchClaims(
-      String baseQuery, Class<T> claimClass, ClaimSearchCriteria criteria) {
+      String baseQuery, Class<T> claimClass, SystemType systemType, ClaimSearchCriteria criteria) {
 
     var filterBuilders =
         List.of(
@@ -60,7 +65,7 @@ public class ClaimAsyncService {
             new ClaimTypeCodeFilterParam(criteria.claimTypeCodes()),
             new TagCriteriaFilterParam(criteria.tagCriteria()),
             new SourceFilterParam(criteria.sources()));
-    var filters = getFilters(filterBuilders);
+    var filters = getFilters(filterBuilders, systemType);
 
     var jpql =
         String.format(
@@ -79,11 +84,11 @@ public class ClaimAsyncService {
     return CompletableFuture.completedFuture(result);
   }
 
-  <T extends DbFilterBuilder> DbFilter getFilters(List<T> builders) {
+  <T extends DbFilterBuilder> DbFilter getFilters(List<T> builders, SystemType systemType) {
     var sb = new StringBuilder();
     var queryParams = new ArrayList<DbFilterParam>();
     for (var builder : builders) {
-      var params = builder.getFilters("c");
+      var params = builder.getFilters("c", systemType);
       sb.append(params.filterClause());
       queryParams.addAll(params.params());
     }

@@ -87,7 +87,6 @@ class IdrClaimProfessionalSs(IdrBaseModel):
     clm_blg_prvdr_tax_num: Annotated[
         str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)
     ]
-    clm_blood_chrg_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
     clm_mdcr_coinsrnc_amt: float | None
     clm_blood_lblty_amt: float | None
     clm_ncvrd_chrg_amt: float | None

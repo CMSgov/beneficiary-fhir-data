@@ -67,6 +67,25 @@ public class ClaimProfessionalNch extends ClaimProfessionalBase {
         AdjudicationChargeType.PAYER_PAID_AMOUNT.toFhirAdjudication(primaryProviderPaidAmount));
   }
 
+  @Override
+  ClaimSourceId getClaimSourceId() {
+    return ClaimSourceId.NATIONAL_CLAIMS_HISTORY;
+  }
+
+  @Override
+  MetaSourceSk getMetaSourceSk() {
+    return MetaSourceSk.NCH;
+  }
+
+  /**
+   * Returns the system type.
+   *
+   * @return system type
+   */
+  public static SystemType getSystemType() {
+    return SystemType.NCH;
+  }
+
   /** NCH has no additional care-team members beyond the referring provider added by the base. */
   @Override
   protected void addSubclassCareTeam(

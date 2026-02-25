@@ -84,7 +84,7 @@ public class Claim {
   @Embedded private NchPrimaryPayorCode nchPrimaryPayorCode;
   @Embedded private TypeOfBillCode typeOfBillCode;
   @Embedded private CareTeam careTeam;
-  @Embedded private AdjudicationCharge adjudicationCharge;
+  @Embedded private AdjudicationChargeInstitutionalSharedSystems adjudicationCharge;
   @Embedded private ClaimPaymentAmount claimPaymentAmount;
   @Embedded private ClaimRecordType claimRecordType;
   @Embedded private ClaimIDRLoadDate claimIDRLoadDate;

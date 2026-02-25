@@ -52,8 +52,27 @@ public class ClaimInstitutionalNch extends ClaimInstitutionalBase {
   }
 
   @Override
+  ClaimSourceId getClaimSourceId() {
+    return ClaimSourceId.NATIONAL_CLAIMS_HISTORY;
+  }
+
+  @Override
+  MetaSourceSk getMetaSourceSk() {
+    return MetaSourceSk.NCH;
+  }
+
+  @Override
   protected List<ClaimValue> getClaimValues() {
     return getClaimItems().stream().map(ClaimItemInstitutionalNch::getClaimValue).toList();
+  }
+
+  /**
+   * Returns the system type.
+   *
+   * @return system type
+   */
+  public static SystemType getSystemType() {
+    return SystemType.NCH;
   }
 
   @Override

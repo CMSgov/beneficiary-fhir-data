@@ -5,6 +5,7 @@ import gov.cms.bfd.server.ng.DbFilterBuilder;
 import gov.cms.bfd.server.ng.DbFilterParam;
 import gov.cms.bfd.server.ng.claim.filter.*;
 import gov.cms.bfd.server.ng.claim.model.Claim;
+import gov.cms.bfd.server.ng.claim.model.SystemType;
 import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.util.LogUtil;
@@ -143,7 +144,8 @@ public class ClaimRepository {
     var sb = new StringBuilder();
     var queryParams = new ArrayList<DbFilterParam>();
     for (var builder : builders) {
-      var params = builder.getFilters("c");
+      // placeholder since we don't care about SystemType here
+      var params = builder.getFilters("c", SystemType.SS);
       sb.append(params.filterClause());
       queryParams.addAll(params.params());
     }

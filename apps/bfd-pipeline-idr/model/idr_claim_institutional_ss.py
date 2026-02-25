@@ -73,7 +73,6 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
     clm_mdcr_coinsrnc_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
     clm_blood_lblty_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
     clm_ncvrd_chrg_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
-    clm_blood_chrg_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
     clm_finl_actn_ind: Annotated[str, {ALIAS: ALIAS_CLM}]
     clm_bill_clsfctn_cd: Annotated[
         str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)
@@ -119,9 +118,6 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
         str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)
     ]
     clm_blg_prvdr_zip5_cd: Annotated[
-        str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)
-    ]
-    geo_blg_ssa_state_cd: Annotated[
         str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)
     ]
     clm_atndg_fed_prvdr_spclty_cd: Annotated[

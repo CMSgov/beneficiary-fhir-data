@@ -32,7 +32,7 @@ IDR_SCHEMA = getenv("IDR_SCHEMA", "")
 def force_load_progress() -> bool:
     # We don't normally want to store the load progress info for synthetic data since the dates
     # won't be in order like in prod. However, we need a way to override this for the tests.
-    return _parse_bool_default_false("IDR_FORCE_LOAD_PROGESS")
+    return _parse_bool_default_false("IDR_FORCE_LOAD_PROGRESS")
 
 
 def bfd_db_port() -> str:

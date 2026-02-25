@@ -154,6 +154,25 @@ public class ClaimRx extends ClaimBase {
   }
 
   @Override
+  ClaimSourceId getClaimSourceId() {
+    return ClaimSourceId.NATIONAL_CLAIMS_HISTORY;
+  }
+
+  @Override
+  MetaSourceSk getMetaSourceSk() {
+    return MetaSourceSk.DDPS;
+  }
+
+  /**
+   * Returns the system type.
+   *
+   * @return system type
+   */
+  public static SystemType getSystemType() {
+    return SystemType.DDPS;
+  }
+
+  @Override
   public Optional<Integer> getDrgCode() {
     return Optional.empty();
   }

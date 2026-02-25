@@ -94,31 +94,42 @@ public class ClaimNewRepository {
         List.of(
             new BillablePeriodFilterParam(claimThroughDate),
             new LastUpdatedFilterParam(lastUpdated));
-    var params = asyncService.getFilters(paramBuilders);
 
     var professionalSharedSystemsClaims =
         asyncService.findByIdInClaimType(
             CLAIM_PROFESSIONAL_SHARED_SYSTEMS,
             ClaimProfessionalSharedSystems.class,
+            ClaimProfessionalSharedSystems.getSystemType(),
             claimUniqueId,
-            params);
+            paramBuilders);
 
     var professionalNchClaims =
         asyncService.findByIdInClaimType(
-            CLAIM_PROFESSIONAL_NCH, ClaimProfessionalNch.class, claimUniqueId, params);
+            CLAIM_PROFESSIONAL_NCH,
+            ClaimProfessionalNch.class,
+            ClaimProfessionalSharedSystems.getSystemType(),
+            claimUniqueId,
+            paramBuilders);
 
     var institutionalSharedSystemsClaims =
         asyncService.findByIdInClaimType(
             CLAIM_INSTITUTIONAL_SHARED_SYSTEMS,
             ClaimInstitutionalSharedSystems.class,
+            ClaimInstitutionalSharedSystems.getSystemType(),
             claimUniqueId,
-            params);
+            paramBuilders);
 
     var institutionalNchClaims =
         asyncService.findByIdInClaimType(
-            CLAIM_INSTITUTIONAL_NCH, ClaimInstitutionalNch.class, claimUniqueId, params);
+            CLAIM_INSTITUTIONAL_NCH,
+            ClaimInstitutionalNch.class,
+            ClaimInstitutionalNch.getSystemType(),
+            claimUniqueId,
+            paramBuilders);
 
-    var rxClaims = asyncService.findByIdInClaimType(CLAIM_RX, ClaimRx.class, claimUniqueId, params);
+    var rxClaims =
+        asyncService.findByIdInClaimType(
+            CLAIM_RX, ClaimRx.class, ClaimRx.getSystemType(), claimUniqueId, paramBuilders);
 
     // Wait for all queries
     CompletableFuture.allOf(
@@ -165,27 +176,42 @@ public class ClaimNewRepository {
     if (claimTypes.contains(ClaimProfessionalSharedSystems.class)) {
       futures.add(
           asyncService.fetchClaims(
-              CLAIM_PROFESSIONAL_SHARED_SYSTEMS, ClaimProfessionalSharedSystems.class, criteria));
+              CLAIM_PROFESSIONAL_SHARED_SYSTEMS,
+              ClaimProfessionalSharedSystems.class,
+              ClaimProfessionalSharedSystems.getSystemType(),
+              criteria));
     }
 
     if (claimTypes.contains(ClaimProfessionalNch.class)) {
       futures.add(
-          asyncService.fetchClaims(CLAIM_PROFESSIONAL_NCH, ClaimProfessionalNch.class, criteria));
+          asyncService.fetchClaims(
+              CLAIM_PROFESSIONAL_NCH,
+              ClaimProfessionalNch.class,
+              ClaimProfessionalNch.getSystemType(),
+              criteria));
     }
 
     if (claimTypes.contains(ClaimInstitutionalSharedSystems.class)) {
       futures.add(
           asyncService.fetchClaims(
-              CLAIM_INSTITUTIONAL_SHARED_SYSTEMS, ClaimInstitutionalSharedSystems.class, criteria));
+              CLAIM_INSTITUTIONAL_SHARED_SYSTEMS,
+              ClaimInstitutionalSharedSystems.class,
+              ClaimInstitutionalSharedSystems.getSystemType(),
+              criteria));
     }
 
     if (claimTypes.contains(ClaimInstitutionalNch.class)) {
       futures.add(
-          asyncService.fetchClaims(CLAIM_INSTITUTIONAL_NCH, ClaimInstitutionalNch.class, criteria));
+          asyncService.fetchClaims(
+              CLAIM_INSTITUTIONAL_NCH,
+              ClaimInstitutionalNch.class,
+              ClaimInstitutionalNch.getSystemType(),
+              criteria));
     }
 
     if (claimTypes.contains(ClaimRx.class)) {
-      futures.add(asyncService.fetchClaims(CLAIM_RX, ClaimRx.class, criteria));
+      futures.add(
+          asyncService.fetchClaims(CLAIM_RX, ClaimRx.class, ClaimRx.getSystemType(), criteria));
     }
 
     CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();

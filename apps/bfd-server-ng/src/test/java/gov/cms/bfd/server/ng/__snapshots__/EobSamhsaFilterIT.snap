@@ -419,18 +419,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
       }, {
         "amount" : {
           "currency" : "USD",
-          "value" : 0
-        },
-        "category" : {
-          "coding" : [ {
-            "code" : "CLM_BLOOD_CHRG_AMT",
-            "display" : "Blood Charge Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
           "value" : 3.15
         },
         "category" : {

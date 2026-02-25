@@ -3,6 +3,7 @@ package gov.cms.bfd.server.ng.claim.filter;
 import gov.cms.bfd.server.ng.DbFilter;
 import gov.cms.bfd.server.ng.DbFilterBuilder;
 import gov.cms.bfd.server.ng.DbFilterParam;
+import gov.cms.bfd.server.ng.claim.model.SystemType;
 import gov.cms.bfd.server.ng.input.TagCriterion;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +19,7 @@ public record TagCriteriaFilterParam(List<List<TagCriterion>> tagCriteria)
 
   @NotNull
   @Override
-  public DbFilter getFilters(@NotNull String claimTableAlias) {
+  public DbFilter getFilters(@NotNull String claimTableAlias, @NotNull SystemType systemType) {
     var stringBuilder = new StringBuilder();
     var params = new ArrayList<DbFilterParam>();
     for (var i = 0; i < tagCriteria.size(); i++) {
@@ -28,21 +29,42 @@ public record TagCriteriaFilterParam(List<List<TagCriterion>> tagCriteria)
       }
       var clauses = new ArrayList<String>();
       for (var j = 0; j < orList.size(); j++) {
-        var criterion = orList.get(j);
-        var paramName = "tag_" + i + "_" + j;
-        switch (criterion) {
-          case TagCriterion.SourceIdCriterion(var sourceId) -> {
+        addParam(i, j, claimTableAlias, orList.get(j), systemType, clauses, params);
+      }
+      if (!clauses.isEmpty()) {
+        stringBuilder.append(" AND (").append(String.join(" OR ", clauses)).append(")");
+      }
+    }
+    return new DbFilter(stringBuilder.toString(), params);
+  }
+
+  private void addParam(
+      int i,
+      int j,
+      String claimTableAlias,
+      TagCriterion criterion,
+      SystemType systemType,
+      ArrayList<String> clauses,
+      ArrayList<DbFilterParam> params) {
+    var paramName = "tag_" + i + "_" + j;
+    switch (criterion) {
+      case TagCriterion.SourceIdCriterion(var sourceId) -> {
+        if (systemType.isCompatibleWith(sourceId)) {
+          if (systemType == SystemType.SS) {
             clauses.add(claimTableAlias + ".claimSourceId = :tag_" + i + "_" + j);
             params.add(new DbFilterParam(paramName, sourceId));
           }
-          case TagCriterion.FinalActionCriterion(var finalAction) -> {
-            clauses.add(claimTableAlias + ".finalAction = :tag_" + i + "_" + j);
-            params.add(new DbFilterParam(paramName, finalAction));
-          }
+        } else {
+          // If the system is incompatible, we set this filter to FALSE since it shouldn't match
+          // anything.
+          // Note that it could still be combined with an OR so we can't just ignore it.
+          clauses.add("FALSE");
         }
       }
-      stringBuilder.append(" AND (").append(String.join(" OR ", clauses)).append(")");
+      case TagCriterion.FinalActionCriterion(var finalAction) -> {
+        clauses.add(claimTableAlias + ".finalAction = :tag_" + i + "_" + j);
+        params.add(new DbFilterParam(paramName, finalAction));
+      }
     }
-    return new DbFilter(stringBuilder.toString(), params);
   }
 }

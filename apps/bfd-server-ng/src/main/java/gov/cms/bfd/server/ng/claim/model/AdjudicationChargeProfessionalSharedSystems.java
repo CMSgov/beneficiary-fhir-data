@@ -39,9 +39,6 @@ class AdjudicationChargeProfessionalSharedSystems implements AdjudicationChargeB
   @Column(name = "clm_othr_tp_pd_amt")
   private BigDecimal otherThirdPartyPayerPaidAmount;
 
-  @Column(name = "clm_blood_chrg_amt")
-  private BigDecimal bloodChargeAmount;
-
   @Column(name = "clm_blood_lblty_amt")
   private BigDecimal bloodLiabilityAmount;
 
@@ -81,7 +78,6 @@ class AdjudicationChargeProfessionalSharedSystems implements AdjudicationChargeB
   public List<ExplanationOfBenefit.AdjudicationComponent> toFhirAdjudication() {
     return List.of(
         AdjudicationChargeType.BENE_INTEREST_PAID_AMOUNT.toFhirAdjudication(beneInterestPaidAmount),
-        AdjudicationChargeType.BLOOD_CHARGE_AMOUNT.toFhirAdjudication(bloodChargeAmount),
         AdjudicationChargeType.BENE_BLOOD_DEDUCTIBLE_LIABILITY_AMOUNT.toFhirAdjudication(
             bloodLiabilityAmount),
         AdjudicationChargeType.BLOOD_NONCOVERED_CHARGE_AMOUNT.toFhirAdjudication(

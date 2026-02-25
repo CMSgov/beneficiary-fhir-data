@@ -3,6 +3,7 @@ package gov.cms.bfd.server.ng.claim.filter;
 import gov.cms.bfd.server.ng.DbFilter;
 import gov.cms.bfd.server.ng.DbFilterBuilder;
 import gov.cms.bfd.server.ng.DbFilterParam;
+import gov.cms.bfd.server.ng.claim.model.SystemType;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import java.util.ArrayList;
 import org.jetbrains.annotations.NotNull;
@@ -15,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
 public record LastUpdatedFilterParam(DateTimeRange lastUpdated) implements DbFilterBuilder {
   @Override
   @NotNull
-  public DbFilter getFilters(@NotNull String claimTableAlias) {
+  public DbFilter getFilters(@NotNull String claimTableAlias, @NotNull SystemType systemType) {
     var filterClause = new StringBuilder();
     var params = new ArrayList<DbFilterParam>();
     lastUpdated

@@ -28,9 +28,15 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 public class ClaimInstitutionalSharedSystems extends ClaimInstitutionalBase {
 
   @Embedded private ClaimDateInstitutionalSharedSystems claimDateSupportingInfo;
-  @Embedded private AdjudicationCharge adjudicationCharge;
+  @Embedded private AdjudicationChargeInstitutionalSharedSystems adjudicationCharge;
   @Embedded private ClaimRecordTypeInstitutional claimRecordType;
   @Embedded private ClaimInstitutionalSupportingInfoBase supportingInfo;
+
+  @Column(name = "clm_src_id")
+  private ClaimSourceId claimSourceId;
+
+  @Column(name = "meta_src_sk")
+  private MetaSourceSk metaSourceSk;
 
   @Column(name = "clm_audt_trl_stus_cd")
   private Optional<String> claimAuditTrailStatusCode;
@@ -47,6 +53,15 @@ public class ClaimInstitutionalSharedSystems extends ClaimInstitutionalBase {
     return getClaimItems().stream()
         .map(ClaimItemInstitutionalSharedSystems::getClaimValue)
         .toList();
+  }
+
+  /**
+   * Returns the system type.
+   *
+   * @return system type
+   */
+  public static SystemType getSystemType() {
+    return SystemType.SS;
   }
 
   /** SS record-type supporting info from limited to one entry. */

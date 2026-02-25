@@ -32,12 +32,6 @@ public abstract class ClaimBase {
   @Column(name = "clm_uniq_id", insertable = false, updatable = false)
   private long claimUniqueId;
 
-  @Column(name = "clm_src_id")
-  private ClaimSourceId claimSourceId;
-
-  @Column(name = "meta_src_sk")
-  private MetaSourceSk metaSourceSk;
-
   @Column(name = "clm_type_cd")
   private ClaimTypeCode claimTypeCode;
 
@@ -78,7 +72,8 @@ public abstract class ClaimBase {
     claimTypeCode.toFhirAdjudication().ifPresent(eob::addAdjudication);
 
     eob.setMeta(
-        meta.toFhir(claimTypeCode, claimSourceId, securityStatus, finalAction, metaSourceSk));
+        meta.toFhir(
+            claimTypeCode, getClaimSourceId(), securityStatus, finalAction, getMetaSourceSk()));
     eob.setIdentifier(identifiers.toFhir());
     eob.setBillablePeriod(billablePeriod.toFhir());
     eob.setCreated(DateUtil.toDate(claimEffectiveDate));
@@ -90,7 +85,7 @@ public abstract class ClaimBase {
               eob.setInsurer(new Reference(i));
             });
 
-    claimSourceId.toFhirOutcome().ifPresent(eob::setOutcome);
+    getClaimSourceId().toFhirOutcome().ifPresent(eob::setOutcome);
 
     var initialSupportingInfo =
         Stream.of(
@@ -120,6 +115,10 @@ public abstract class ClaimBase {
     eob.getExtension().sort(Comparator.comparing(Extension::getUrl));
     return eob;
   }
+
+  abstract ClaimSourceId getClaimSourceId();
+
+  abstract MetaSourceSk getMetaSourceSk();
 
   /**
    * Returns the set of claim items associated with this claim.

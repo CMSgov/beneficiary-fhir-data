@@ -24,9 +24,6 @@ class AdjudicationChargeProfessionalNch implements AdjudicationChargeBase {
   @Column(name = "clm_mdcr_ddctbl_amt")
   private BigDecimal deductibleAmount;
 
-  @Column(name = "clm_blood_chrg_amt")
-  private BigDecimal bloodChargeAmount;
-
   @Override
   public List<ExplanationOfBenefit.TotalComponent> toFhirTotal() {
     return List.of(
@@ -39,7 +36,6 @@ class AdjudicationChargeProfessionalNch implements AdjudicationChargeBase {
 
   @Override
   public List<ExplanationOfBenefit.AdjudicationComponent> toFhirAdjudication() {
-    return List.of(
-        AdjudicationChargeType.BLOOD_CHARGE_AMOUNT.toFhirAdjudication(bloodChargeAmount));
+    return List.of();
   }
 }
