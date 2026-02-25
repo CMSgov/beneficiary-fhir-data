@@ -18,6 +18,9 @@ from testcontainers.postgres import PostgresContainer  # type: ignore
 from constants import DEFAULT_MAX_DATE
 from load_synthetic import load_from_csv
 from pipeline import run
+from settings import (
+    bfd_test_date,
+)
 
 # ryuk throws a 500 or 404 error for some reason
 # seems to have issues with podman https://github.com/testcontainers/testcontainers-python/issues/753
@@ -71,7 +74,8 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
         psycopg.Connection[DictRow],
         psycopg.connect(setup_db.get_connection_url(), row_factory=dict_row),  # type: ignore
     )
-    datetime_now = datetime.astimezone("UTC").date("2025-06-15")
+    
+    datetime_now = bfd_test_date()
 
     conn.execute(
         """

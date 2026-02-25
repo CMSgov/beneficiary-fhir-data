@@ -9,7 +9,11 @@ from hamilton.execution import executors  # type: ignore
 import pipeline_nodes
 from load_partition import LoadType
 from model import LoadMode
-from settings import LOAD_TYPE, MAX_TASKS
+from settings import (
+    LOAD_TYPE,
+    MAX_TASKS,
+    bfd_test_date,
+)
 
 telemetry.disable_telemetry()
 
@@ -37,7 +41,7 @@ def main() -> None:
     run(mode)
 
 
-def run(load_mode: str, start_time:datetime | None=None) -> None:
+def run(load_mode: str) -> None:
     logger.info("load start")
     load_mode = LoadMode(load_mode)
 
@@ -64,11 +68,10 @@ def run(load_mode: str, start_time:datetime | None=None) -> None:
         .build()
     )
 
-    
-    if start_time is None and load_mode != LoadMode.PRODUCTION:
-        start_time = datetime(2025, 6, 15)
-    else:
-        start_time = datetime.now() if start_time is None else datetime
+    if load_mode is LoadMode.PRODUCTION or bfd_test_date is None:
+        start_time = datetime.now(datetime.timezone.utc)
+    else: 
+        start_time= bfd_test_date()
 
     # if load_benes and load_claims:
     hamilton_driver.execute(  # type: ignore
