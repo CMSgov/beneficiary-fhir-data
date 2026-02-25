@@ -52,6 +52,8 @@ WITH report_params AS (
       'app_fhir_v3_eob_since_call_synthetic_count',
       'app_fhir_v3_coverage_since_call_real_count',
       'app_fhir_v3_coverage_since_call_synthetic_count',
+      'app_fhir_v3_generate_insurance_card_call_real_count',
+      'app_fhir_v3_generate_insurance_card_call_synthetic_count',
       'app_auth_ok_real_bene_count',
       'app_auth_ok_synthetic_bene_count',
       'app_auth_ok_real_bene_distinct_count',
