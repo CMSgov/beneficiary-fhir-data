@@ -1526,7 +1526,7 @@ FROM
         CONTAINS((SELECT enabled_metrics_list FROM report_params),
           'app_fhir_v3_generate_insurance_card_call_synthetic_count')
 
-        AND path LIKE '/v3/fhir/Patient/$generate-insurance-card%'
+        AND path LIKE '/v3/fhir/Patient/\$generate-insurance-card%'
         AND req_qparam_lastupdated != ''
 
         AND request_method = 'GET'
@@ -1552,7 +1552,7 @@ FROM
         CONTAINS((SELECT enabled_metrics_list FROM report_params),
           'app_fhir_v3_generate_insurance_card_call_real_count')
 
-        AND path LIKE '/v3/fhir/Patient/$generate-insurance-card%'
+        AND path LIKE '/v3/fhir/Patient/\$generate-insurance-card%'
         AND req_qparam_lastupdated != ''
 
         AND request_method = 'GET'
