@@ -53,7 +53,7 @@ public class ClaimLine {
   @Embedded private ClaimRenderingProvider claimRenderingProvider;
 
   Optional<ExplanationOfBenefit.ItemComponent> toFhirItemComponent(
-      ClaimItem claimItem, List<ClaimProcedure> diagnoses) {
+      ClaimItem claimItem, List<ClaimProcedureInstitutional> diagnoses) {
     if (claimLineNumber.isEmpty()) {
       return Optional.empty();
     }
@@ -132,7 +132,7 @@ public class ClaimLine {
    * @param diagnoses The parent claim entity containing all claim procedures.
    * @return The row ids of the matching claim procedure
    */
-  public List<PositiveIntType> diagnosisRelatedLines(List<ClaimProcedure> diagnoses) {
+  public List<PositiveIntType> diagnosisRelatedLines(List<ClaimProcedureInstitutional> diagnoses) {
     if (diagnosisCode.isEmpty()) {
       return List.of();
     }

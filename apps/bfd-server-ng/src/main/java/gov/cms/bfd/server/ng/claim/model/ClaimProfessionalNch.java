@@ -60,15 +60,6 @@ public class ClaimProfessionalNch extends ClaimProfessionalBase {
         .toList();
   }
 
-  /** NCH Rx supporting info: per-line Rx numbers collected from each claim item. */
-  @Override
-  protected List<ExplanationOfBenefit.SupportingInformationComponent> buildRxSupportingInfo() {
-    return getClaimItems().stream()
-        .map(item -> item.getClaimLineRxNum().toFhir(supportingInfoFactory))
-        .flatMap(Optional::stream)
-        .toList();
-  }
-
   /** NCH adjudication: payer-paid (primary provider paid) amount. */
   @Override
   protected void addSubclassAdjudication(ExplanationOfBenefit eob) {

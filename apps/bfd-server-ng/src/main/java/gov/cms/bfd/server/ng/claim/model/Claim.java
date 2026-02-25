@@ -204,7 +204,7 @@ public class Claim {
                     eob.addCareTeam(c.careTeam());
                     eob.addContained(c.practitioner());
                   });
-          item.getClaimProcedure().toFhirProcedure().ifPresent(eob::addProcedure);
+          item.getClaimProcedureInstitutional().toFhirProcedure().ifPresent(eob::addProcedure);
           item.getClaimItemOptional()
               .getClaimLineProfessional()
               .flatMap(i -> i.toFhirObservation(item.getClaimItemId().getBfdRowId()))
@@ -391,7 +391,7 @@ public class Claim {
     return eob;
   }
 
-  private List<ClaimProcedure> computeConsolidatedDiagnoses() {
+  private List<ClaimProcedureInstitutional> computeConsolidatedDiagnoses() {
     var claimContextOpt = claimTypeCode.toContext();
     if (claimContextOpt.isEmpty()) {
       return Collections.emptyList();
@@ -400,10 +400,10 @@ public class Claim {
 
     // Group the diagnoses by code + ICD indicator and sort them by rank.
     // We'll pick the first diagnosis from each group and discard the rest.
-    var diagnosisMap = new LinkedHashMap<String, PriorityQueue<ClaimProcedure>>();
+    var diagnosisMap = new LinkedHashMap<String, PriorityQueue<ClaimProcedureInstitutional>>();
     var poaDiagnoses = new HashMap<String, String>();
     for (var item : claimItems) {
-      var procedure = item.getClaimProcedure();
+      var procedure = item.getClaimProcedureInstitutional();
       var keyOpt = procedure.getDiagnosisKey();
       if (keyOpt.isEmpty()) {
         continue;
@@ -417,10 +417,10 @@ public class Claim {
           diagnosisMap.computeIfAbsent(
               key,
               _ ->
-                  new PriorityQueue<ClaimProcedure>(
+                  new PriorityQueue<ClaimProcedureInstitutional>(
                       Comparator.comparing(a -> a.getDiagnosisPriority(claimContext).orElse(0))));
 
-      queue.add(item.getClaimProcedure());
+      queue.add(item.getClaimProcedureInstitutional());
     }
 
     return diagnosisMap.values().stream()

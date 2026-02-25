@@ -39,14 +39,6 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
   abstract List<ExplanationOfBenefit.SupportingInformationComponent> buildSubclassSupportingInfo();
 
   /**
-   * Returns Rx supporting-info components (format code, line Rx numbers, etc.) that are specific to
-   * the subclass.
-   *
-   * @return list of subclass-specific Rx supporting-info components; may be empty
-   */
-  abstract List<ExplanationOfBenefit.SupportingInformationComponent> buildRxSupportingInfo();
-
-  /**
    * Adds any adjudication entries that are unique to the subclass.
    *
    * @param eob the EOB being built
@@ -152,7 +144,7 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
             .flatMap(Optional::stream)
             .toList();
 
-    Stream.of(sharedHeaderSupportingInfo, buildSubclassSupportingInfo(), buildRxSupportingInfo())
+    Stream.of(sharedHeaderSupportingInfo, buildSubclassSupportingInfo())
         .flatMap(Collection::stream)
         .forEach(eob::addSupportingInfo);
   }

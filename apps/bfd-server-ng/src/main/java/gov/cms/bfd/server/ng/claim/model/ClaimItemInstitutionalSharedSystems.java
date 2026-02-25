@@ -18,7 +18,7 @@ import lombok.Getter;
 public class ClaimItemInstitutionalSharedSystems implements ClaimItemBase {
   @EmbeddedId private ClaimItemId claimItemId;
   @Embedded private ClaimLineInstitutionalSharedSystems claimLine;
-  @Embedded private ClaimProcedure claimProcedure;
+  @Embedded private ClaimProcedureInstitutional claimProcedure;
   @Embedded private ClaimValue claimValue;
   @Embedded private ClaimRelatedCondition claimRelatedCondition;
 

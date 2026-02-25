@@ -19,7 +19,6 @@ public class ClaimItemProfessionalNch implements ClaimItemBase {
   @EmbeddedId private ClaimItemId claimItemId;
   @Embedded private ClaimLineProfessionalNch claimLine;
   @Embedded private ClaimProcedureProfessional claimProcedure;
-  @Embedded private ClaimLineRxNumber claimLineRxNum;
 
   @JoinColumn(name = "clm_uniq_id")
   @ManyToOne

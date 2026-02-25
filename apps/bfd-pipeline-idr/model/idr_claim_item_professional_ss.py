@@ -112,7 +112,6 @@ class IdrClaimItemProfessionalSs(IdrBaseModel):
         str, {ALIAS: ALIAS_PROCEDURE}, BeforeValidator(transform_default_string)
     ]
     clm_dgns_cd: Annotated[str, {ALIAS: ALIAS_PROCEDURE}, BeforeValidator(transform_default_string)]
-    clm_poa_ind: Annotated[str, {ALIAS: ALIAS_PROCEDURE}, BeforeValidator(transform_default_string)]
     idr_insrt_ts_prod: Annotated[
         datetime,
         {ALIAS: ALIAS_PROCEDURE, **INSERT_FIELD},

@@ -8,7 +8,7 @@ import gov.cms.bfd.server.ng.claim.ClaimRepository;
 import gov.cms.bfd.server.ng.claim.model.Claim;
 import gov.cms.bfd.server.ng.claim.model.ClaimItem;
 import gov.cms.bfd.server.ng.claim.model.ClaimLine;
-import gov.cms.bfd.server.ng.claim.model.ClaimProcedure;
+import gov.cms.bfd.server.ng.claim.model.ClaimProcedureInstitutional;
 import gov.cms.bfd.server.ng.claim.model.IcdIndicator;
 import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
@@ -198,7 +198,8 @@ public class EobHandler {
 
   private boolean claimItemIsSamhsa(
       ClaimItem claimItem, LocalDate claimThroughDate, long claimUniqueId) {
-    return procedureIsSamhsa(claimItem.getClaimProcedure(), claimThroughDate, claimUniqueId)
+    return procedureIsSamhsa(
+            claimItem.getClaimProcedureInstitutional(), claimThroughDate, claimUniqueId)
         || hcpcsIsSamhsa(claimItem.getClaimLine(), claimThroughDate, claimUniqueId);
   }
 
@@ -220,7 +221,7 @@ public class EobHandler {
 
   // Checks ICDs.
   private boolean procedureIsSamhsa(
-      ClaimProcedure procedure, LocalDate claimDate, long claimUniqueId) {
+      ClaimProcedureInstitutional procedure, LocalDate claimDate, long claimUniqueId) {
     var diagnosisCode = procedure.getDiagnosisCode().orElse("");
     var procedureCode = procedure.getProcedureCode().orElse("");
     // If the ICD indicator isn't something valid, it's probably a PAC claim with a mistake in the

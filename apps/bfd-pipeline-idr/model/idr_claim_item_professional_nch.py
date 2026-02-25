@@ -66,7 +66,6 @@ class IdrClaimItemProfessionalNch(IdrBaseModel):
     ]
     clm_line_ndc_cd: Annotated[str, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_default_string)]
     clm_line_srvc_unit_qty: Annotated[float | None, {ALIAS: ALIAS_LINE}]
-    clm_line_rx_num: Annotated[str, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_default_string)]
     clm_pos_cd: Annotated[str, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_default_string)]
     clm_rndrg_prvdr_tax_num: Annotated[
         str, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_default_string)
@@ -112,7 +111,6 @@ class IdrClaimItemProfessionalNch(IdrBaseModel):
         str, {ALIAS: ALIAS_PROCEDURE}, BeforeValidator(transform_default_string)
     ]
     clm_dgns_cd: Annotated[str, {ALIAS: ALIAS_PROCEDURE}, BeforeValidator(transform_default_string)]
-    clm_poa_ind: Annotated[str, {ALIAS: ALIAS_PROCEDURE}, BeforeValidator(transform_default_string)]
     idr_insrt_ts_prod: Annotated[
         datetime,
         {ALIAS: ALIAS_PROCEDURE, **INSERT_FIELD},

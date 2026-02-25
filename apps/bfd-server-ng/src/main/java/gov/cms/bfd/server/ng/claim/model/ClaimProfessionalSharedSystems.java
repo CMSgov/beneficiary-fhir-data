@@ -61,27 +61,26 @@ public class ClaimProfessionalSharedSystems extends ClaimProfessionalBase {
   @Override
   protected List<ExplanationOfBenefit.SupportingInformationComponent>
       buildSubclassSupportingInfo() {
-    return Stream.of(
-            nchPrimaryPayorCode.toFhir(supportingInfoFactory),
-            providerAssignmentIndicatorSwitch.map(c -> c.toFhir(supportingInfoFactory)))
+    return Stream.concat(
+            Stream.of(
+                nchPrimaryPayorCode.toFhir(supportingInfoFactory),
+                providerAssignmentIndicatorSwitch.map(c -> c.toFhir(supportingInfoFactory))),
+            buildRxSupportingInfo())
         .flatMap(Optional::stream)
         .toList();
   }
 
-  /** SS Rx supporting info: PDE format code (header level) and per-line Rx numbers. */
-  @Override
-  protected List<ExplanationOfBenefit.SupportingInformationComponent> buildRxSupportingInfo() {
+  private Stream<Optional<ExplanationOfBenefit.SupportingInformationComponent>>
+      buildRxSupportingInfo() {
     return Stream.concat(
-            // Header-level: format code, only when this is a PDE subtype claim.
-            claimFormatCode
-                .filter(c -> getClaimTypeCode().isClaimSubtype(PDE))
-                .map(c -> c.toFhir(supportingInfoFactory))
-                .stream(),
-            // Line-level: Rx number from each claim item.
-            getClaimItems().stream()
-                .map(item -> item.getClaimLineRxNum().toFhir(supportingInfoFactory))
-                .flatMap(Optional::stream))
-        .toList();
+        // Header-level: format code, only when this is a PDE subtype claim.
+        claimFormatCode
+            .filter(_ -> getClaimTypeCode().isClaimSubtype(PDE))
+            .map(c -> Optional.of(c.toFhir(supportingInfoFactory)))
+            .stream(),
+        // Line-level: Rx number from each claim item.
+        getClaimItems().stream()
+            .map(item -> item.getClaimLineRxNum().toFhir(supportingInfoFactory)));
   }
 
   /** SS adjudication: provider account-receivable offset amount. */

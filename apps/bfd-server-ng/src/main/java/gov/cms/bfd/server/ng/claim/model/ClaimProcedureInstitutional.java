@@ -15,7 +15,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 /** Procedure and diagnosis info. */
 @Embeddable
 @Getter
-public class ClaimProcedure extends ClaimProcedureBase {
+public class ClaimProcedureInstitutional extends ClaimProcedureBase {
 
   @Column(name = "clm_prcdr_prfrm_dt")
   private Optional<LocalDate> procedureDate;

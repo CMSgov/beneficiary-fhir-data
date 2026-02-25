@@ -18,7 +18,7 @@ import org.jetbrains.annotations.NotNull;
 public class ClaimItem implements Comparable<ClaimItem> {
   @EmbeddedId private ClaimItemId claimItemId;
   @Embedded private ClaimLine claimLine;
-  @Embedded private ClaimProcedure claimProcedure;
+  @Embedded private ClaimProcedureInstitutional claimProcedureInstitutional;
   @Embedded private ClaimValue claimValue;
   @Embedded private ClaimLineRxNumber claimLineRxNum;
   @Embedded private ClaimRelatedCondition claimRelatedCondition;

@@ -18,7 +18,7 @@ import lombok.Getter;
 public class ClaimItemInstitutionalNch implements ClaimItemBase {
   @EmbeddedId private ClaimItemId claimItemId;
   @Embedded private ClaimLineInstitutionalNch claimLine;
-  @Embedded private ClaimProcedure claimProcedure;
+  @Embedded private ClaimProcedureInstitutional claimProcedure;
   @Embedded private ClaimValue claimValue;
   @Embedded private ClaimRelatedCondition claimRelatedCondition;
 
