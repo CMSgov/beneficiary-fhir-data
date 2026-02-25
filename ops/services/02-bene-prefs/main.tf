@@ -59,9 +59,9 @@ resource "aws_s3_bucket_lifecycle_configuration" "this" {
 
 resource "aws_s3_bucket_notification" "partner_bucket_events" {
   for_each = local.partners
-  bucket   = local.partner_buckets[each.value].id
+  bucket   = module.eft_bucket[each.key].bucket.id
   topic {
-    topic_arn = aws_sns_topic.partner_bucket_events[each.value].arn
+    topic_arn = aws_sns_topic.partner_bucket_events[each.key].arn
     events    = ["s3:ObjectCreated:*"]
   }
   depends_on = [
