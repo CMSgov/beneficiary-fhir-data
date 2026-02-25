@@ -70,8 +70,8 @@ def run(load_mode: str) -> None:
 
     if load_mode is LoadMode.PRODUCTION or bfd_test_date is None:
         start_time = datetime.now(datetime.timezone.utc)
-    else: 
-        start_time= bfd_test_date()
+    else:
+        start_time = bfd_test_date()
 
     # if load_benes and load_claims:
     hamilton_driver.execute(  # type: ignore

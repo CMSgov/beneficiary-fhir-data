@@ -74,7 +74,7 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
         psycopg.Connection[DictRow],
         psycopg.connect(setup_db.get_connection_url(), row_factory=dict_row),  # type: ignore
     )
-    
+
     datetime_now = bfd_test_date()
 
     conn.execute(
