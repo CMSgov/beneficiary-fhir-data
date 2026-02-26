@@ -456,6 +456,10 @@ public class SystemUrls {
   public static final String CARIN_CODE_SYSTEM_CLAIM_CARE_TEAM_ROLE =
       "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole";
 
+  /** HL7 THO - Claim Care Team Role Code System. */
+  public static final String HL7_THO_CLAIM_CARE_TEAM_ROLE =
+      "http://terminology.hl7.org/CodeSystem/claimcareteamrole";
+
   /** CARIN Blue Button - C4BB Payer Adjudication Status. */
   public static final String CARIN_CODE_SYSTEM_PAYER_ADJUDICATION_STATUS =
       "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus";

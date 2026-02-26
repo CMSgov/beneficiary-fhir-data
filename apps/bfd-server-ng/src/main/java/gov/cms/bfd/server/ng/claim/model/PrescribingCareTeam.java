@@ -1,12 +1,9 @@
 package gov.cms.bfd.server.ng.claim.model;
 
-import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.util.Optional;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /** Attending Provider History. * */
@@ -33,23 +30,13 @@ public class PrescribingCareTeam extends ProviderHistoryBase {
     return getProviderNpiNumber()
         .flatMap(
             npi ->
-                providerQualifierCode.map(
+                providerQualifierCode.flatMap(
                     qualifier -> {
                       var providerReference =
-                          ProviderFhirHelper.createProviderReference(
+                          ProviderFhirHelper.createProviderReferenceWithQualifier(
                               npi, qualifier, getProviderName());
 
-                      var role = getCareTeamType();
-
-                      return new ExplanationOfBenefit.CareTeamComponent()
-                          .setSequence(sequence)
-                          .setRole(
-                              new CodeableConcept(
-                                  new Coding()
-                                      .setSystem(SystemUrls.CARIN_CODE_SYSTEM_CLAIM_CARE_TEAM_ROLE)
-                                      .setCode(role.getRoleCode())
-                                      .setDisplay(role.getRoleDisplay())))
-                          .setProvider(providerReference);
+                      return getCareTeamComponent(sequence, providerReference);
                     }));
   }
 }

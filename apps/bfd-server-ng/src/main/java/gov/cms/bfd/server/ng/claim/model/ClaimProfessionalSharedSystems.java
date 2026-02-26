@@ -42,7 +42,7 @@ public class ClaimProfessionalSharedSystems extends ClaimProfessionalBase {
 
   @Embedded private NchPrimaryPayorCode nchPrimaryPayorCode;
   @Embedded private AdjudicationChargeProfessionalSharedSystems adjudicationCharge;
-  @Embedded private OtherProfessionalCareTeam otherProviderHistory;
+  @Embedded private OtherProfessionalSharedSystemsCareTeam otherProviderHistory;
 
   @Column(name = "clm_audt_trl_stus_cd")
   private Optional<String> claimAuditTrailStatusCode;
