@@ -104,7 +104,6 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
     clm_pmt_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
     clm_alowd_chrg_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
     clm_sbmt_chrg_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
-    clm_blood_pt_frnsh_qty: Annotated[int | None, {ALIAS: ALIAS_CLM}]
     clm_blood_ncvrd_chrg_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
     clm_bene_intrst_pd_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
     clm_bene_pd_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]

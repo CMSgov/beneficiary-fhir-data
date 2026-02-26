@@ -89,6 +89,10 @@ public class ClaimProfessionalSharedSystems extends ClaimProfessionalBase {
             .map(item -> item.getClaimLineRxNum().toFhir(supportingInfoFactory)));
   }
 
+  Optional<ClaimRecordType> getClaimRecordTypeOptional() {
+    return Optional.empty();
+  }
+
   /** SS adjudication: provider account-receivable offset amount. */
   @Override
   protected void addSubclassAdjudication(ExplanationOfBenefit eob) {

@@ -33,7 +33,6 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
   private Optional<ClaimQueryCode> claimQueryCode;
 
   @Embedded private NchPrimaryPayorCode nchPrimaryPayorCode;
-  @Embedded private BloodPints bloodPints;
   @Embedded private TypeOfBillCode typeOfBillCode;
   @Embedded private ClaimPaymentAmount claimPaymentAmount;
   @Embedded private DiagnosisDrgCode diagnosisDrgCode;
@@ -51,6 +50,10 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
 
   abstract AdjudicationChargeBase getAdjudicationCharge();
 
+  abstract List<ExplanationOfBenefit.SupportingInformationComponent> buildSubclassSupportingInfo();
+
+  abstract Optional<ClaimRecordType> getClaimRecordTypeOptional();
+
   /**
    * Returns the record-type supporting-info stream, limited to one entry defensively. Each subclass
    * produces this from its own concrete record-type field.
@@ -59,13 +62,6 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
    */
   protected abstract List<ExplanationOfBenefit.SupportingInformationComponent>
       buildRecordTypeSupportingInfo();
-
-  /**
-   * Adds the insurance component to the EOB.
-   *
-   * @param eob the EOB being built
-   */
-  protected abstract void addInsurance(ExplanationOfBenefit eob);
 
   /**
    * Returns the claim values from all items, used to populate institutional adjudication.
@@ -105,6 +101,10 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
     addInsurance(eob);
 
     return sortedEob(eob);
+  }
+
+  private void addInsurance(ExplanationOfBenefit eob) {
+    eob.addInsurance(getClaimTypeCode().toFhirInsurance(getClaimRecordTypeOptional()));
   }
 
   private List<ExplanationOfBenefit.SupportingInformationComponent>
@@ -172,9 +172,9 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
   private void addAllSupportingInfo(ExplanationOfBenefit eob) {
     var sharedInitialSupportingInfo =
         Stream.of(
-                getBloodPints().toFhir(supportingInfoFactory),
-                getTypeOfBillCode().toFhir(supportingInfoFactory))
-            .flatMap(Optional::stream)
+                getTypeOfBillCode().toFhir(supportingInfoFactory).stream(),
+                buildSubclassSupportingInfo().stream())
+            .flatMap(s -> s)
             .toList();
 
     var claimRelatedConditionCds =

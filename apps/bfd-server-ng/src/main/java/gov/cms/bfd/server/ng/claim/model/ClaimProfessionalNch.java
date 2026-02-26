@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.ng.claim.model;
 
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
+import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -43,6 +44,11 @@ public class ClaimProfessionalNch extends ClaimProfessionalBase {
 
   @Embedded private AdjudicationChargeProfessionalNch adjudicationCharge;
   @Embedded private NchWeeklyProcessingDate nchWeeklyProcessingDate;
+  @Embedded private BloodPints bloodPints;
+
+  @AttributeOverride(name = "claimRecordTypeCode", column = @Column(name = "clm_nrln_ric_cd"))
+  @Embedded
+  private ClaimRecordType claimRecordType;
 
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "clm_uniq_id")
@@ -55,9 +61,15 @@ public class ClaimProfessionalNch extends ClaimProfessionalBase {
             claimDispositionCode.map(c -> c.toFhir(supportingInfoFactory)),
             claimQueryCode.map(c -> c.toFhir(supportingInfoFactory)),
             nchWeeklyProcessingDate.toFhir(supportingInfoFactory),
+            bloodPints.toFhir(supportingInfoFactory),
             claimPaymentDenialCode.map(c -> c.toFhir(supportingInfoFactory)))
         .flatMap(Optional::stream)
         .toList();
+  }
+
+  @Override
+  Optional<ClaimRecordType> getClaimRecordTypeOptional() {
+    return Optional.of(claimRecordType);
   }
 
   /** NCH adjudication: payer-paid (primary provider paid) amount. */

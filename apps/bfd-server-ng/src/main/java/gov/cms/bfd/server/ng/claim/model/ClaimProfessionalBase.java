@@ -21,8 +21,6 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
   @Column(name = "clm_cntrctr_num")
   private Optional<ClaimContractorNumber> claimContractorNumber;
 
-  @Embedded private BloodPints bloodPints;
-  @Embedded private ClaimNearLineRecordType claimRecordType;
   @Embedded private ClaimPaymentAmount claimPaymentAmount;
   @Embedded private ClaimSubmissionDate claimSubmissionDate;
   @Embedded private ReferringProfessionalCareTeam referringProviderHistory;
@@ -52,6 +50,8 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
    * @param sequenceGenerator shared sequence generator for care-team entries
    */
   abstract void addSubclassCareTeam(ExplanationOfBenefit eob, SequenceGenerator sequenceGenerator);
+
+  abstract Optional<ClaimRecordType> getClaimRecordTypeOptional();
 
   /**
    * Optionally overrides the EOB outcome for subclass-specific logic (e.g. SS PAC-stage-2 audit
@@ -135,12 +135,11 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
   private void addAllSupportingInfo(ExplanationOfBenefit eob) {
     var sharedHeaderSupportingInfo =
         Stream.of(
-                getBloodPints().toFhir(supportingInfoFactory),
-                    claimSubmissionDate.toFhir(supportingInfoFactory),
+                claimSubmissionDate.toFhir(supportingInfoFactory),
                 Optional.of(claimContractorNumber)
-                        .flatMap(opt -> opt)
-                        .map(c -> c.toFhir(supportingInfoFactory)),
-                    clinicalTrialNumber.toFhir(supportingInfoFactory))
+                    .flatMap(opt -> opt)
+                    .map(c -> c.toFhir(supportingInfoFactory)),
+                clinicalTrialNumber.toFhir(supportingInfoFactory))
             .flatMap(Optional::stream)
             .toList();
 
@@ -158,9 +157,7 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
   }
 
   private void addInsurance(ExplanationOfBenefit eob) {
-    getClaimTypeCode()
-        .toFhirInsuranceNearLineRecord(getClaimRecordType())
-        .ifPresent(eob::addInsurance);
+    eob.addInsurance(getClaimTypeCode().toFhirInsurance(getClaimRecordTypeOptional()));
   }
 
   @Override

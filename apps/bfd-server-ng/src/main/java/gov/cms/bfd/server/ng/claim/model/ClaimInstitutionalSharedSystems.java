@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.ng.claim.model;
 
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
+import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -29,7 +30,11 @@ public class ClaimInstitutionalSharedSystems extends ClaimInstitutionalBase {
 
   @Embedded private ClaimDateInstitutionalSharedSystems claimDateSupportingInfo;
   @Embedded private AdjudicationChargeInstitutionalSharedSystems adjudicationCharge;
-  @Embedded private ClaimRecordTypeInstitutional claimRecordType;
+
+  @AttributeOverride(name = "claimRecordTypeCode", column = @Column(name = "clm_ric_cd"))
+  @Embedded
+  private ClaimRecordType claimRecordType;
+
   @Embedded private ClaimInstitutionalSupportingInfoBase supportingInfo;
 
   @Column(name = "clm_src_id")
@@ -49,10 +54,21 @@ public class ClaimInstitutionalSharedSystems extends ClaimInstitutionalBase {
   private SortedSet<ClaimItemInstitutionalSharedSystems> claimItems;
 
   @Override
+  Optional<ClaimRecordType> getClaimRecordTypeOptional() {
+    return Optional.of(claimRecordType);
+  }
+
+  @Override
   protected List<ClaimValue> getClaimValues() {
     return getClaimItems().stream()
         .map(ClaimItemInstitutionalSharedSystems::getClaimValue)
         .toList();
+  }
+
+  @Override
+  protected List<ExplanationOfBenefit.SupportingInformationComponent>
+      buildSubclassSupportingInfo() {
+    return List.of();
   }
 
   /**
@@ -68,16 +84,7 @@ public class ClaimInstitutionalSharedSystems extends ClaimInstitutionalBase {
   @Override
   protected List<ExplanationOfBenefit.SupportingInformationComponent>
       buildRecordTypeSupportingInfo() {
-    return claimRecordType.toFhir(supportingInfoFactory).limit(1).toList();
-  }
-
-  /** SS insurance uses the institutional variant of the insurance builder. */
-  @Override
-  protected void addInsurance(ExplanationOfBenefit eob) {
-    var insurance = new ExplanationOfBenefit.InsuranceComponent();
-    insurance.setFocal(true);
-    claimRecordType.toFhirReference(getClaimTypeCode()).ifPresent(insurance::setCoverage);
-    getClaimTypeCode().toFhirInsuranceInstitutional(claimRecordType).ifPresent(eob::addInsurance);
+    return claimRecordType.toFhir(supportingInfoFactory).stream().toList();
   }
 
   @Override

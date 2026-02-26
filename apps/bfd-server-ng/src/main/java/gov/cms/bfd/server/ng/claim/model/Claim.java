@@ -6,6 +6,7 @@ import gov.cms.bfd.server.ng.ClaimSecurityStatus;
 import gov.cms.bfd.server.ng.beneficiary.model.BeneficiarySimple;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
+import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -86,7 +87,11 @@ public class Claim {
   @Embedded private CareTeam careTeam;
   @Embedded private AdjudicationChargeInstitutionalSharedSystems adjudicationCharge;
   @Embedded private ClaimPaymentAmount claimPaymentAmount;
-  @Embedded private ClaimRecordType claimRecordType;
+
+  @AttributeOverride(name = "claimRecordTypeCode", column = @Column(name = "clm_ric_cd"))
+  @Embedded
+  private ClaimRecordType claimRecordType;
+
   @Embedded private ClaimIDRLoadDate claimIDRLoadDate;
   @Embedded private SubmitterContractNumber submitterContractNumber;
   @Embedded private SubmitterContractPBPNumber submitterContractPBPNumber;
@@ -289,7 +294,7 @@ public class Claim {
             initialSupportingInfo,
             // In real data, this should only ever have one value, but we're explicitly
             // limiting it to be defensive.
-            recordTypeCodes.limit(1).toList(),
+            recordTypeCodes.map(List::of).orElse(List.of()),
             claimDateSignature.getSupportingInfo().toFhir(supportingInfoFactory),
             institutional
                 .map(i -> i.getSupportingInfo().toFhir(supportingInfoFactory))
@@ -324,10 +329,10 @@ public class Claim {
 
     var insurance = new ExplanationOfBenefit.InsuranceComponent();
     insurance.setFocal(true);
-    claimRecordType.toFhirReference(claimTypeCode).ifPresent(insurance::setCoverage);
+    claimRecordType.toFhirReference().ifPresent(insurance::setCoverage);
 
-    claimTypeCode.toFhirInsurance(claimRecordType).ifPresent(eob::addInsurance);
-    claimTypeCode.toFhirPartDInsurance().ifPresent(eob::addInsurance);
+    eob.addInsurance(claimTypeCode.toFhirInsurance(Optional.of(claimRecordType)));
+    eob.addInsurance(claimTypeCode.toFhirPartDInsurance());
     adjudicationCharge.toFhirTotal().forEach(eob::addTotal);
     getBenePaidAmount()
         .map(AdjudicationChargeType.BENE_PAID_AMOUNT::toFhirTotal)

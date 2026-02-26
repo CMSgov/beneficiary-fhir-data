@@ -14,7 +14,6 @@ from loader import LoadMode
 from model.base_model import (
     ALIAS,
     ALIAS_CLM,
-    ALIAS_DCMTN,
     ALIAS_LCTN_HSTRY,
     ALIAS_PRFNL,
     ALIAS_PRVDR_BLG,
@@ -82,7 +81,6 @@ class IdrClaimProfessionalSs(IdrBaseModel):
     clm_pmt_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
     clm_alowd_chrg_amt: float | None
     clm_sbmt_chrg_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
-    clm_blood_pt_frnsh_qty: Annotated[int | None, {ALIAS: ALIAS_CLM}]
     clm_bene_pd_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
     clm_blg_prvdr_tax_num: Annotated[
         str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)
@@ -187,8 +185,6 @@ class IdrClaimProfessionalSs(IdrBaseModel):
         },
         BeforeValidator(transform_null_date_to_min),
     ]
-    # Columns from v2_mdcr_clm_dcmtn
-    clm_nrln_ric_cd: Annotated[str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_default_string)]
 
     # Columns from v2_mdcr_prvdr_hstry
     prvdr_blg_prvdr_npi_num: Annotated[
@@ -246,7 +242,6 @@ class IdrClaimProfessionalSs(IdrBaseModel):
         clm = ALIAS_CLM
         sgntr = ALIAS_SGNTR
         prfnl = ALIAS_PRFNL
-        dcmtn = ALIAS_DCMTN
         lctn_hstry = ALIAS_LCTN_HSTRY
         prvdr_blg = ALIAS_PRVDR_BLG
         prvdr_rfrg = ALIAS_PRVDR_RFRG
@@ -291,11 +286,6 @@ class IdrClaimProfessionalSs(IdrBaseModel):
                 {clm}.clm_dt_sgntr_sk = {prfnl}.clm_dt_sgntr_sk AND
                 {clm}.clm_type_cd = {prfnl}.clm_type_cd AND
                 {clm}.clm_num_sk = {prfnl}.clm_num_sk
-            LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_dcmtn {dcmtn} ON
-                {clm}.geo_bene_sk = {dcmtn}.geo_bene_sk AND
-                {clm}.clm_dt_sgntr_sk = {dcmtn}.clm_dt_sgntr_sk AND
-                {clm}.clm_type_cd = {dcmtn}.clm_type_cd AND
-                {clm}.clm_num_sk = {dcmtn}.clm_num_sk
             LEFT JOIN latest_clm_lctn_hstry latest_lctn ON
                 {clm}.geo_bene_sk = latest_lctn.geo_bene_sk AND
                 {clm}.clm_type_cd = latest_lctn.clm_type_cd AND

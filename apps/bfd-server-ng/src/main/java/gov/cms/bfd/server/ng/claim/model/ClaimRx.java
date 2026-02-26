@@ -150,7 +150,7 @@ public class ClaimRx extends ClaimBase {
   }
 
   private void addInsurance(ExplanationOfBenefit eob) {
-    getClaimTypeCode().toFhirPartDInsurance().ifPresent(eob::addInsurance);
+    eob.addInsurance(getClaimTypeCode().toFhirPartDInsurance());
   }
 
   @Override

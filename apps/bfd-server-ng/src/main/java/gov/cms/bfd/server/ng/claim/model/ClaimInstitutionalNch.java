@@ -1,6 +1,8 @@
 package gov.cms.bfd.server.ng.claim.model;
 
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -8,8 +10,10 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.util.List;
+import java.util.Optional;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
@@ -27,9 +31,14 @@ public class ClaimInstitutionalNch extends ClaimInstitutionalBase {
 
   @Embedded private ClaimDateSupportingInfo claimDateSupportingInfo;
   @Embedded private AdjudicationChargeInstitutionalNch adjudicationCharge;
-  @Embedded private ClaimNearLineRecordType claimRecordType;
+
+  @AttributeOverride(name = "claimRecordTypeCode", column = @Column(name = "clm_nrln_ric_cd"))
+  @Embedded
+  private ClaimRecordType claimRecordType;
+
   @Embedded private ClaimInstitutionalNchSupportingInfo supportingInfo;
   @Embedded private ServiceCareTeam serviceProviderHistory;
+  @Embedded private BloodPints bloodPints;
 
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "clm_uniq_id")
@@ -39,16 +48,13 @@ public class ClaimInstitutionalNch extends ClaimInstitutionalBase {
   @Override
   protected List<ExplanationOfBenefit.SupportingInformationComponent>
       buildRecordTypeSupportingInfo() {
-    return claimRecordType.toFhir(supportingInfoFactory).limit(1).toList();
+    return claimRecordType.toFhir(supportingInfoFactory).stream().toList();
   }
 
-  /** NCH insurance uses the near-line record variant of the insurance builder. */
   @Override
-  protected void addInsurance(ExplanationOfBenefit eob) {
-    var insurance = new ExplanationOfBenefit.InsuranceComponent();
-    insurance.setFocal(true);
-    claimRecordType.toFhirReference(getClaimTypeCode()).ifPresent(insurance::setCoverage);
-    getClaimTypeCode().toFhirInsuranceNearLineRecord(claimRecordType).ifPresent(eob::addInsurance);
+  protected List<ExplanationOfBenefit.SupportingInformationComponent>
+      buildSubclassSupportingInfo() {
+    return Stream.of(bloodPints.toFhir(supportingInfoFactory)).flatMap(Optional::stream).toList();
   }
 
   @Override
@@ -59,6 +65,11 @@ public class ClaimInstitutionalNch extends ClaimInstitutionalBase {
   @Override
   MetaSourceSk getMetaSourceSk() {
     return MetaSourceSk.NCH;
+  }
+
+  @Override
+  Optional<ClaimRecordType> getClaimRecordTypeOptional() {
+    return Optional.of(claimRecordType);
   }
 
   @Override

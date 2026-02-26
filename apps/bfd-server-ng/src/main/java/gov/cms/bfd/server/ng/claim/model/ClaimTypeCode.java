@@ -7,7 +7,6 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -296,12 +295,11 @@ public enum ClaimTypeCode {
   /** 2900 - HOSPICE NOTICE OF ELECTION. */
   _2900(2900, "HOSPICE NOTICE OF ELECTION");
 
-  private static final Set<Integer> PART_B_CODES =
-      Set.of(_1700.code, _1800.code, _2700.code, _2800.code);
   private final int code;
   private final String display;
   private static final String INSURER_ORG = "insurer-org";
   private static final String PART_A_DISPLAY = "Part A";
+  private static final String PART_B_DISPLAY = "Part B";
 
   /**
    * Converts from a database code.
@@ -362,61 +360,27 @@ public enum ClaimTypeCode {
     return Optional.of(organization);
   }
 
-  Optional<ExplanationOfBenefit.InsuranceComponent> toFhirPartDInsurance() {
-    if (!isClaimSubtype(ClaimSubtype.PDE)) {
-      return Optional.empty();
-    }
-
+  ExplanationOfBenefit.InsuranceComponent toFhirPartDInsurance() {
     var insurance = new ExplanationOfBenefit.InsuranceComponent();
     insurance.setFocal(true);
     insurance.setCoverage(new Reference().setDisplay("Part D"));
-    return Optional.of(insurance);
+    return insurance;
   }
 
-  Optional<ExplanationOfBenefit.InsuranceComponent> toFhirInsurance(
-      ClaimRecordType claimRecordType) {
-    if (isClaimSubtype(ClaimSubtype.PDE)) {
-      return Optional.empty();
+  ExplanationOfBenefit.InsuranceComponent toFhirInsurance(
+      Optional<ClaimRecordType> claimRecordType) {
+    var insurance = new ExplanationOfBenefit.InsuranceComponent();
+    insurance.setFocal(true);
+    claimRecordType.flatMap(ClaimRecordType::toFhirReference).ifPresent(insurance::setCoverage);
+    if (insurance.getCoverage().isEmpty()) {
+      var fallbackDisplay =
+          isClaimSubtype(ClaimSubtype.CARRIER) || isClaimSubtype(ClaimSubtype.DME)
+              ? PART_B_DISPLAY
+              : PART_A_DISPLAY;
+      insurance.setCoverage(new Reference().setDisplay(fallbackDisplay));
     }
 
-    var partDisplay = claimRecordType.getPartDisplay().orElse(PART_A_DISPLAY);
-
-    return Optional.of(
-        new ExplanationOfBenefit.InsuranceComponent()
-            .setFocal(true)
-            .setCoverage(new Reference().setDisplay(partDisplay)));
-  }
-
-  Optional<ExplanationOfBenefit.InsuranceComponent> toFhirInsuranceNearLineRecord(
-      ClaimNearLineRecordType claimRecordType) {
-    if (isClaimSubtype(ClaimSubtype.PDE)) {
-      return Optional.empty();
-    }
-
-    var partDisplay = claimRecordType.getPartDisplay().orElse(PART_A_DISPLAY);
-
-    return Optional.of(
-        new ExplanationOfBenefit.InsuranceComponent()
-            .setFocal(true)
-            .setCoverage(new Reference().setDisplay(partDisplay)));
-  }
-
-  Optional<ExplanationOfBenefit.InsuranceComponent> toFhirInsuranceInstitutional(
-      ClaimRecordTypeInstitutional claimRecordType) {
-    if (isClaimSubtype(ClaimSubtype.PDE)) {
-      return Optional.empty();
-    }
-
-    var partDisplay = claimRecordType.getPartDisplay().orElse(PART_A_DISPLAY);
-
-    return Optional.of(
-        new ExplanationOfBenefit.InsuranceComponent()
-            .setFocal(true)
-            .setCoverage(new Reference().setDisplay(partDisplay)));
-  }
-
-  Optional<String> toDisplay() {
-    return PART_B_CODES.contains(code) ? Optional.of("Part B") : Optional.empty();
+    return insurance;
   }
 
   boolean isPac() {
