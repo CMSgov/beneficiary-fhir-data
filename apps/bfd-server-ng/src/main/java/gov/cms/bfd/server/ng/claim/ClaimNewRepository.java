@@ -1,7 +1,7 @@
 package gov.cms.bfd.server.ng.claim;
 
-import gov.cms.bfd.server.ng.claim.filter.BillablePeriodFilterParam;
-import gov.cms.bfd.server.ng.claim.filter.LastUpdatedFilterParam;
+import gov.cms.bfd.server.ng.DbFilterBuilder;
+import gov.cms.bfd.server.ng.claim.filter.*;
 import gov.cms.bfd.server.ng.claim.model.*;
 import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
@@ -174,14 +174,21 @@ public class ClaimNewRepository {
           @MeterTag(key = "hasSources", expression = "hasSources()")
           ClaimSearchCriteria criteria) {
 
+    List<DbFilterBuilder> filterBuilders =
+        List.of(
+            new BillablePeriodFilterParam(criteria.claimThroughDate()),
+            new LastUpdatedFilterParam(criteria.lastUpdated()),
+            new ClaimTypeCodeFilterParam(criteria.claimTypeCodes()),
+            new TagCriteriaFilterParam(criteria.tagCriteria()),
+            new SourceFilterParam(criteria.sources()));
+
     var futures =
         ALL_CLAIM_TYPES.stream()
-            .filter(
-                claimTypeDefinition -> criteria.matchesSystemType(claimTypeDefinition.systemType()))
+            .filter(claimTypeDefinition -> claimTypeDefinition.matchesSystemType(filterBuilders))
             .map(
                 d ->
                     asyncService.fetchClaims(
-                        d.baseQuery(), d.claimClass(), d.systemType(), criteria))
+                        d.baseQuery(), d.claimClass(), d.systemType(), criteria, filterBuilders))
             .toList();
 
     CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();

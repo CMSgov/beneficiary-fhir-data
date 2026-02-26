@@ -1,13 +1,9 @@
 package gov.cms.bfd.server.ng.input;
 
-import gov.cms.bfd.server.ng.claim.model.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.ClaimTypeCode;
 import gov.cms.bfd.server.ng.claim.model.MetaSourceSk;
-import gov.cms.bfd.server.ng.claim.model.SystemType;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 /**
  * Represents the search criteria used to retrieve claims for a specific beneficiary.
@@ -92,48 +88,5 @@ public record ClaimSearchCriteria(
    */
   public boolean hasSources() {
     return !sources.isEmpty();
-  }
-
-  /**
-   * Determine whether claims from the specified system type should be queried based on the current
-   * search criteria.
-   *
-   * @param systemType system type which indicates a claim's source
-   * @return boolean
-   */
-  public boolean matchesSystemType(SystemType systemType) {
-    var hasFinalAction =
-        tagCriteria.stream()
-            .flatMap(List::stream)
-            .anyMatch(TagCriterion.FinalActionCriterion.class::isInstance);
-    if (hasFinalAction) {
-      return true;
-    }
-
-    var matchesSourceParam = true;
-    if (!sources.isEmpty()) {
-      var metaSources = sources.stream().flatMap(List::stream).toList();
-      matchesSourceParam = systemType.isCompatibleWithAny(metaSources);
-    }
-
-    var matchesTagSource = true;
-    if (!tagCriteria.isEmpty()) {
-      var tagSourceIds =
-          tagCriteria.stream()
-              .flatMap(List::stream)
-              .mapMulti(this::extractSourceId)
-              .collect(Collectors.toSet());
-
-      if (!tagSourceIds.isEmpty()) {
-        matchesTagSource = tagSourceIds.stream().anyMatch(systemType::isCompatibleWith);
-      }
-    }
-    return matchesSourceParam && matchesTagSource;
-  }
-
-  private void extractSourceId(TagCriterion criterion, Consumer<ClaimSourceId> consumer) {
-    if (criterion instanceof TagCriterion.SourceIdCriterion(ClaimSourceId sourceId)) {
-      consumer.accept(sourceId);
-    }
   }
 }

@@ -12,4 +12,13 @@ public interface DbFilterBuilder {
    * @return configured filter
    */
   DbFilter getFilters(String claimTableAlias, SystemType systemType);
+
+  /**
+   * Determine whether claims from the specified system type should be queried based on the current
+   * search criteria.
+   *
+   * @param systemType system type which indicates a claim's source
+   * @return boolean
+   */
+  boolean matchesSystemType(SystemType systemType);
 }

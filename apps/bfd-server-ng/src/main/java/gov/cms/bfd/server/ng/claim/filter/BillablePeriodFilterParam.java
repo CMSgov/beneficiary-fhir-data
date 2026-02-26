@@ -43,4 +43,9 @@ public record BillablePeriodFilterParam(DateTimeRange claimThroughDate) implemen
             });
     return new DbFilter(filterClause.toString(), params);
   }
+
+  @Override
+  public boolean matchesSystemType(@NotNull SystemType systemType) {
+    return true;
+  }
 }

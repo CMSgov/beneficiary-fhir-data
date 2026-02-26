@@ -48,4 +48,12 @@ public record SourceFilterParam(List<List<MetaSourceSk>> metaSourceSk) implement
 
     return new DbFilter(stringBuilder.toString(), params);
   }
+
+  @Override
+  public boolean matchesSystemType(@NotNull SystemType systemType) {
+    if (metaSourceSk().isEmpty()) {
+      return true;
+    }
+    return metaSourceSk.stream().flatMap(List::stream).anyMatch(systemType::isCompatibleWith);
+  }
 }

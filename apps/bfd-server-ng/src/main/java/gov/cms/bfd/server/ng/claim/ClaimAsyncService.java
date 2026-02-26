@@ -3,7 +3,6 @@ package gov.cms.bfd.server.ng.claim;
 import gov.cms.bfd.server.ng.DbFilter;
 import gov.cms.bfd.server.ng.DbFilterBuilder;
 import gov.cms.bfd.server.ng.DbFilterParam;
-import gov.cms.bfd.server.ng.claim.filter.*;
 import gov.cms.bfd.server.ng.claim.model.*;
 import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
 import jakarta.persistence.EntityManager;
@@ -56,15 +55,12 @@ public class ClaimAsyncService {
 
   @Async
   protected <T extends ClaimBase> CompletableFuture<List<T>> fetchClaims(
-      String baseQuery, Class<T> claimClass, SystemType systemType, ClaimSearchCriteria criteria) {
+      String baseQuery,
+      Class<T> claimClass,
+      SystemType systemType,
+      ClaimSearchCriteria criteria,
+      List<DbFilterBuilder> filterBuilders) {
 
-    var filterBuilders =
-        List.of(
-            new BillablePeriodFilterParam(criteria.claimThroughDate()),
-            new LastUpdatedFilterParam(criteria.lastUpdated()),
-            new ClaimTypeCodeFilterParam(criteria.claimTypeCodes()),
-            new TagCriteriaFilterParam(criteria.tagCriteria()),
-            new SourceFilterParam(criteria.sources()));
     var filters = getFilters(filterBuilders, systemType);
 
     var jpql =

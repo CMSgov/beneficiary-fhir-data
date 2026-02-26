@@ -3,10 +3,12 @@ package gov.cms.bfd.server.ng.claim.filter;
 import gov.cms.bfd.server.ng.DbFilter;
 import gov.cms.bfd.server.ng.DbFilterBuilder;
 import gov.cms.bfd.server.ng.DbFilterParam;
+import gov.cms.bfd.server.ng.claim.model.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.SystemType;
 import gov.cms.bfd.server.ng.input.TagCriterion;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -65,6 +67,31 @@ public record TagCriteriaFilterParam(List<List<TagCriterion>> tagCriteria)
         clauses.add(claimTableAlias + ".finalAction = :tag_" + i + "_" + j);
         params.add(new DbFilterParam(paramName, finalAction));
       }
+    }
+  }
+
+  @Override
+  public boolean matchesSystemType(@NotNull SystemType systemType) {
+    if (tagCriteria.isEmpty()) {
+      return true;
+    }
+    var hasFinalAction =
+        tagCriteria.stream()
+            .flatMap(List::stream)
+            .anyMatch(TagCriterion.FinalActionCriterion.class::isInstance);
+    if (hasFinalAction) {
+      return true;
+    }
+
+    return tagCriteria.stream()
+        .flatMap(List::stream)
+        .mapMulti(this::extractSourceId)
+        .anyMatch(systemType::isCompatibleWith);
+  }
+
+  private void extractSourceId(TagCriterion criterion, Consumer<ClaimSourceId> consumer) {
+    if (criterion instanceof TagCriterion.SourceIdCriterion(ClaimSourceId sourceId)) {
+      consumer.accept(sourceId);
     }
   }
 }

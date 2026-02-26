@@ -26,4 +26,9 @@ public record ClaimTypeCodeFilterParam(List<ClaimTypeCode> claimTypeCodes)
         String.format(" AND %s.claimTypeCode IN :claimTypeCodes", claimTableAlias),
         List.of(new DbFilterParam("claimTypeCodes", claimTypeCodes)));
   }
+
+  @Override
+  public boolean matchesSystemType(@NotNull SystemType systemType) {
+    return true;
+  }
 }
