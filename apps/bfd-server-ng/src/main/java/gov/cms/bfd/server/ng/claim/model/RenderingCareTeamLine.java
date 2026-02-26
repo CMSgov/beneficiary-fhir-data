@@ -4,7 +4,7 @@ import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 
-/** Attending Provider History. * */
+/** Rendering Provider History. * */
 @Embeddable
 @AttributeOverride(
     name = "providerNpiNumber",

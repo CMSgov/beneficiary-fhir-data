@@ -40,6 +40,10 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
       "coding" : [ {
         "code" : "prescribing",
         "display" : "Prescribing provider",
+        "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole"
+      }, {
+        "code" : "prescribing",
+        "display" : "Prescribing provider",
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
       } ]
     },
@@ -817,6 +821,10 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
     },
     "role" : {
       "coding" : [ {
+        "code" : "prescribing",
+        "display" : "Prescribing provider",
+        "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole"
+      }, {
         "code" : "prescribing",
         "display" : "Prescribing provider",
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"

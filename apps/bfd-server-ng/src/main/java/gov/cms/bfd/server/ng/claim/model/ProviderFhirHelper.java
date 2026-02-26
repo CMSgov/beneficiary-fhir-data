@@ -87,7 +87,7 @@ class ProviderFhirHelper {
    * @param displayName optional provider name
    * @return a fully populated FHIR {@link Reference} instance
    */
-  public static Reference createProviderReference(
+  public static Reference createProviderReferenceWithQualifier(
       String idNumber, ProviderIdQualifierCode qualifierCode, Optional<String> displayName) {
 
     var reference = new Reference();

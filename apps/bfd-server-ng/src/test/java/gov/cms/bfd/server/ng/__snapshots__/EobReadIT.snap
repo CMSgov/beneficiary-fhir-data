@@ -522,6 +522,10 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
       "coding" : [ {
         "code" : "attending",
         "display" : "Attending",
+        "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole"
+      }, {
+        "code" : "attending",
+        "display" : "Attending",
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
       } ]
     },
@@ -545,6 +549,10 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
       "coding" : [ {
         "code" : "operating",
         "display" : "Operating",
+        "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole"
+      }, {
+        "code" : "operating",
+        "display" : "Operating",
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
       } ]
     },
@@ -566,6 +574,10 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
     },
     "role" : {
       "coding" : [ {
+        "code" : "rendering",
+        "display" : "Rendering provider",
+        "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole"
+      }, {
         "code" : "rendering",
         "display" : "Rendering provider",
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
@@ -1877,6 +1889,10 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
       "coding" : [ {
         "code" : "attending",
         "display" : "Attending",
+        "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole"
+      }, {
+        "code" : "attending",
+        "display" : "Attending",
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
       } ]
     },
@@ -1900,6 +1916,10 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
       "coding" : [ {
         "code" : "operating",
         "display" : "Operating",
+        "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole"
+      }, {
+        "code" : "operating",
+        "display" : "Operating",
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
       } ]
     },
@@ -1921,6 +1941,10 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
     },
     "role" : {
       "coding" : [ {
+        "code" : "rendering",
+        "display" : "Rendering provider",
+        "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole"
+      }, {
         "code" : "rendering",
         "display" : "Rendering provider",
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
@@ -2845,6 +2869,10 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
       "coding" : [ {
         "code" : "rendering",
         "display" : "Rendering provider",
+        "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole"
+      }, {
+        "code" : "rendering",
+        "display" : "Rendering provider",
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
       } ]
     },
@@ -2866,6 +2894,10 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
     },
     "role" : {
       "coding" : [ {
+        "code" : "referring",
+        "display" : "Referring provider",
+        "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole"
+      }, {
         "code" : "referring",
         "display" : "Referring provider",
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
@@ -3477,6 +3509,10 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
       "coding" : [ {
         "code" : "rendering",
         "display" : "Rendering provider",
+        "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole"
+      }, {
+        "code" : "rendering",
+        "display" : "Rendering provider",
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
       } ]
     },
@@ -3498,6 +3534,10 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
     },
     "role" : {
       "coding" : [ {
+        "code" : "referring",
+        "display" : "Referring provider",
+        "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole"
+      }, {
         "code" : "referring",
         "display" : "Referring provider",
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
@@ -4557,6 +4597,10 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
       "coding" : [ {
         "code" : "attending",
         "display" : "Attending",
+        "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole"
+      }, {
+        "code" : "attending",
+        "display" : "Attending",
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
       } ]
     },
@@ -4580,6 +4624,10 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
       "coding" : [ {
         "code" : "operating",
         "display" : "Operating",
+        "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole"
+      }, {
+        "code" : "operating",
+        "display" : "Operating",
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
       } ]
     },
@@ -4601,6 +4649,10 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
     },
     "role" : {
       "coding" : [ {
+        "code" : "rendering",
+        "display" : "Rendering provider",
+        "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole"
+      }, {
         "code" : "rendering",
         "display" : "Rendering provider",
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
@@ -6124,6 +6176,10 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
       "coding" : [ {
         "code" : "attending",
         "display" : "Attending",
+        "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole"
+      }, {
+        "code" : "attending",
+        "display" : "Attending",
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
       } ]
     },
@@ -6147,6 +6203,10 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
       "coding" : [ {
         "code" : "operating",
         "display" : "Operating",
+        "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole"
+      }, {
+        "code" : "operating",
+        "display" : "Operating",
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
       } ]
     },
@@ -6168,6 +6228,10 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
     },
     "role" : {
       "coding" : [ {
+        "code" : "rendering",
+        "display" : "Rendering provider",
+        "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole"
+      }, {
         "code" : "rendering",
         "display" : "Rendering provider",
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"

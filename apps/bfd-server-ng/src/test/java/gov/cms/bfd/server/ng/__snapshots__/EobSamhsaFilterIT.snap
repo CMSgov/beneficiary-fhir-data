@@ -524,6 +524,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
           "coding" : [ {
             "code" : "attending",
             "display" : "Attending",
+            "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole"
+          }, {
+            "code" : "attending",
+            "display" : "Attending",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
           } ]
         },
@@ -545,6 +549,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
         },
         "role" : {
           "coding" : [ {
+            "code" : "otheroperating",
+            "display" : "Other Operating",
+            "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole"
+          }, {
             "code" : "otheroperating",
             "display" : "Other Operating",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
@@ -4756,6 +4764,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           "coding" : [ {
             "code" : "operating",
             "display" : "Operating",
+            "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole"
+          }, {
+            "code" : "operating",
+            "display" : "Operating",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
           } ]
         },
@@ -4779,6 +4791,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           "coding" : [ {
             "code" : "otheroperating",
             "display" : "Other Operating",
+            "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole"
+          }, {
+            "code" : "otheroperating",
+            "display" : "Other Operating",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
           } ]
         },
@@ -4800,6 +4816,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         },
         "role" : {
           "coding" : [ {
+            "code" : "rendering",
+            "display" : "Rendering provider",
+            "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole"
+          }, {
             "code" : "rendering",
             "display" : "Rendering provider",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
@@ -6843,6 +6863,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           "coding" : [ {
             "code" : "attending",
             "display" : "Attending",
+            "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole"
+          }, {
+            "code" : "attending",
+            "display" : "Attending",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
           } ]
         },
@@ -6864,6 +6888,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         },
         "role" : {
           "coding" : [ {
+            "code" : "otheroperating",
+            "display" : "Other Operating",
+            "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole"
+          }, {
             "code" : "otheroperating",
             "display" : "Other Operating",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
@@ -10597,6 +10625,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           "coding" : [ {
             "code" : "referring",
             "display" : "Referring provider",
+            "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole"
+          }, {
+            "code" : "referring",
+            "display" : "Referring provider",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
           } ]
         },
@@ -12452,6 +12484,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           "coding" : [ {
             "code" : "operating",
             "display" : "Operating",
+            "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole"
+          }, {
+            "code" : "operating",
+            "display" : "Operating",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
           } ]
         },
@@ -12475,6 +12511,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           "coding" : [ {
             "code" : "otheroperating",
             "display" : "Other Operating",
+            "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole"
+          }, {
+            "code" : "otheroperating",
+            "display" : "Other Operating",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
           } ]
         },
@@ -12496,6 +12536,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         },
         "role" : {
           "coding" : [ {
+            "code" : "rendering",
+            "display" : "Rendering provider",
+            "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole"
+          }, {
             "code" : "rendering",
             "display" : "Rendering provider",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
@@ -14539,6 +14583,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           "coding" : [ {
             "code" : "attending",
             "display" : "Attending",
+            "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole"
+          }, {
+            "code" : "attending",
+            "display" : "Attending",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
           } ]
         },
@@ -14560,6 +14608,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         },
         "role" : {
           "coding" : [ {
+            "code" : "otheroperating",
+            "display" : "Other Operating",
+            "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole"
+          }, {
             "code" : "otheroperating",
             "display" : "Other Operating",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
@@ -18291,6 +18343,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         },
         "role" : {
           "coding" : [ {
+            "code" : "referring",
+            "display" : "Referring provider",
+            "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole"
+          }, {
             "code" : "referring",
             "display" : "Referring provider",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
