@@ -723,11 +723,6 @@
 /bfd/${env}/server-alarms/nonsensitive/sns_topics/slos/high_alert: bfd-platform-splunk-on-call-incident
 /bfd/${env}/server-alarms/nonsensitive/sns_topics/slos/alert: bfd-platform-slack-bfd-alerts
 /bfd/${env}/server-alarms/nonsensitive/sns_topics/slos/warning: bfd-platform-slack-bfd-warnings
-/bfd/${env}/eft-o11y/nonsensitive/outbound/alarms/lambda_errors/breach_topic: bfd-platform-splunk-on-call-incident
-/bfd/${env}/eft-o11y/nonsensitive/outbound/alarms/lambda_errors/ok_topic: UNDEFINED
-/bfd/${env}/eft-o11y/nonsensitive/outbound/alarms/sns_failures/breach_topic: bfd-platform-slack-bfd-alerts
-/bfd/${env}/eft-o11y/nonsensitive/outbound/alarms/sns_failures/ok_topic: UNDEFINED
-/bfd/${env}/eft-o11y/nonsensitive/outbound/slack_notifier/webhook_ssm_path: /bfd/platform/alerting/sensitive/slack/bfd-internal-alerts/webhook
 sops:
   kms:
     - arn: arn:aws:kms:us-east-1:${ACCOUNT_ID}:alias/bfd-prod-config-cmk
