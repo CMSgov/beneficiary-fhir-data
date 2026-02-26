@@ -12,6 +12,7 @@ module "terraservice" {
 
   service              = local.service
   relative_module_root = "ops/services/02-bene-prefs"
+  ssm_hierarchy_roots   = concat(["bfd"], tolist(local.partners))
 }
 
 locals {
@@ -43,8 +44,7 @@ locals {
       )
       s3_notifications = {
         received_file_targets = jsondecode(
-          # TODO: Come back and fix this so that it's not hard-coded to "eft":
-          lookup(local.ssm_config, "/${partner}/eft/inbound/s3_notifications/received_file_targets_json", "[]")
+          lookup(local.ssm_config, "/${partner}/${local.service}/inbound/s3_notifications/received_file_targets_json", "[]")
         )
       }
     }
@@ -78,19 +78,14 @@ resource "aws_s3_bucket_lifecycle_configuration" "this" {
   }
 }
 
-/*
-resource "aws_s3_bucket_notification" "partner_bucket_events" {
+resource "aws_s3_bucket_notification" "buckets" {
   for_each = local.partners
   bucket   = module.buckets[each.key].bucket.id
   topic {
-    topic_arn = aws_sns_topic.partner_bucket_events[each.key].arn
+    topic_arn = module.topics[each.key].topic.arn
     events    = ["s3:ObjectCreated:*"]
   }
-  depends_on = [
-    aws_sns_topic_policy.partner_bucket_events
-  ]
 }
-*/
 
 data "aws_iam_policy_document" "topic_received_s3_notifs" {
   for_each = toset(local.partners)
