@@ -76,16 +76,8 @@ class IdrClaimRx(IdrBaseModel):
     clm_obslt_dt: Annotated[
         date | None, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_date_to_null)
     ]
-    clm_mdcr_coinsrnc_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
     clm_finl_actn_ind: Annotated[str, {ALIAS: ALIAS_CLM}]
-    clm_bene_intrst_pd_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
-    clm_bene_pd_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
     clm_bene_pmt_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
-    clm_bene_pmt_coinsrnc_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
-    clm_cntrctr_num: Annotated[str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)]
-    clm_pmt_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
-    clm_alowd_chrg_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
-    clm_sbmt_chrg_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
     clm_pd_dt: Annotated[
         date | None, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_date_to_null)
     ]
@@ -93,10 +85,6 @@ class IdrClaimRx(IdrBaseModel):
     clm_adjstmt_type_cd: Annotated[
         str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)
     ]
-    clm_nch_prmry_pyr_cd: Annotated[
-        str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)
-    ]
-    clm_mdcr_ddctbl_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
     clm_sbmt_frmt_cd: Annotated[str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)]
     clm_sbmtr_cntrct_num: Annotated[
         str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)
@@ -152,8 +140,6 @@ class IdrClaimRx(IdrBaseModel):
     clm_ctstrphc_cvrg_ind_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_daw_prod_slctn_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_drug_cvrg_stus_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_dspnsng_stus_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_line_authrzd_fill_num: Annotated[str, BeforeValidator(transform_default_string)]
     clm_line_days_suply_qty: int | None
     clm_line_grs_above_thrshld_amt: float | None
     clm_line_grs_blw_thrshld_amt: float | None
