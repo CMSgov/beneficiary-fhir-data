@@ -103,7 +103,7 @@ data "aws_iam_policy_document" "topic_received_s3_notifs" {
     condition {
       test     = "ArnLike"
       variable = "aws:SourceArn"
-      values   = ["${module.buckets[each.key].bucket.arn}"]
+      values   = [module.buckets[each.key].bucket.arn]
     }
   }
 
