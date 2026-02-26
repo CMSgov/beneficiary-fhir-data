@@ -15,8 +15,6 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @Getter
 class ClaimLineRxSupportingInfo {
 
-  @Embedded private ClaimLineRxRefillNumber refillsAuthorized;
-
   @Column(name = "clm_phrmcy_srvc_type_cd")
   private Optional<PharmacySrvcTypeCode> pharmacyServiceTypeCode;
 
@@ -45,13 +43,9 @@ class ClaimLineRxSupportingInfo {
   @Column(name = "clm_ctstrphc_cvrg_ind_cd")
   private Optional<CatastrophicCoverageCode> catastrophicCovCode;
 
-  @Column(name = "clm_dspnsng_stus_cd")
-  private Optional<ClaimDispenseStatusCode> claimDispensingStatusCode;
-
   List<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {
     return Stream.of(
-            Optional.of(refillsAuthorized.toFhir(supportingInfoFactory)),
             pharmacyServiceTypeCode.map(c -> c.toFhir(supportingInfoFactory)),
             claimPrescriptionOriginCode.map(c -> c.toFhir(supportingInfoFactory)),
             brandGenericCode.map(s -> s.toFhir(supportingInfoFactory)),
@@ -62,8 +56,7 @@ class ClaimLineRxSupportingInfo {
             Optional.of(fillNumber.toFhir(supportingInfoFactory)),
             claimDispenseAsWrittenProdSelectCode.toFhir(supportingInfoFactory),
             drugCoverageStatusCode.map(s -> s.toFhir(supportingInfoFactory)),
-            catastrophicCovCode.map(s -> s.toFhir(supportingInfoFactory)),
-            claimDispensingStatusCode.map(s -> s.toFhir(supportingInfoFactory)))
+            catastrophicCovCode.map(s -> s.toFhir(supportingInfoFactory)))
         .flatMap(Optional::stream)
         .toList();
   }

@@ -33,18 +33,14 @@ public class ClaimRx extends ClaimBase {
   @Column(name = "cntrct_pbp_name")
   private Optional<String> contractName;
 
-  @Column(name = "clm_cntrctr_num")
-  private Optional<ClaimContractorNumber> claimContractorNumber;
-
   @Embedded private ServiceProviderPharmacy serviceProviderHistory;
   @Embedded private PrescribingCareTeam prescribingProviderHistory;
   @Embedded private AdjudicationChargeRx adjudicationCharge;
-  @Embedded private ClaimPaymentAmount claimPaymentAmount;
+  @Embedded private ClaimPaymentDate claimPaymentDate;
   @Embedded private SubmitterContractNumber submitterContractNumber;
   @Embedded private SubmitterContractPBPNumber submitterContractPBPNumber;
   @Embedded private ClaimSubmissionDate claimSubmissionDate;
   @Embedded private ClaimProcessDate claimProcessDate;
-  @Embedded private NchPrimaryPayorCode nchPrimaryPayorCode;
 
   /** Rx claims carry a single embedded line rather than a collection. */
   @Embedded private ClaimItemRx claimItems;
@@ -96,13 +92,11 @@ public class ClaimRx extends ClaimBase {
 
   private List<ExplanationOfBenefit.SupportingInformationComponent> buildHeaderSupportingInfo() {
     return Stream.of(
-            claimContractorNumber.map(c -> c.toFhir(supportingInfoFactory)),
             claimFormatCode
                 .filter(c -> getClaimTypeCode().isClaimSubtype(PDE))
                 .map(c -> c.toFhir(supportingInfoFactory)),
             submitterContractNumber.toFhir(supportingInfoFactory).stream().findFirst(),
             submitterContractPBPNumber.toFhir(supportingInfoFactory).stream().findFirst(),
-            nchPrimaryPayorCode.toFhir(supportingInfoFactory),
             claimSubmissionDate.toFhir(supportingInfoFactory),
             claimProcessDate.toFhir(supportingInfoFactory))
         .flatMap(Optional::stream)
@@ -136,7 +130,7 @@ public class ClaimRx extends ClaimBase {
         .map(AdjudicationChargeType.TOTAL_DRUG_COST_AMOUNT::toFhirTotal)
         .ifPresent(eob::addTotal);
 
-    eob.setPayment(claimPaymentAmount.toFhir());
+    claimPaymentDate.toFhir().ifPresent(eob::setPayment);
   }
 
   /**
