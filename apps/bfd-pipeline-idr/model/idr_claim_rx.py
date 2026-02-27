@@ -30,6 +30,7 @@ from model.base_model import (
     UPDATE_FIELD,
     IdrBaseModel,
     claim_filter,
+    clm_orig_cntl_num_expr,
     provider_careteam_name_expr,
     provider_last_or_legal_name_expr,
     transform_default_date_to_null,
@@ -62,11 +63,7 @@ class IdrClaimRx(IdrBaseModel):
         str,
         {
             ALIAS: ALIAS_CLM,
-            EXPR: f"""CASE 
-                WHEN {ALIAS_CLM}.clm_cntl_num = {ALIAS_CLM}.clm_orig_cntl_num 
-                THEN '' 
-                ELSE {ALIAS_CLM}.clm_orig_cntl_num
-                END""",
+            EXPR: clm_orig_cntl_num_expr(),
         },
         BeforeValidator(transform_default_string),
     ]
@@ -96,9 +93,15 @@ class IdrClaimRx(IdrBaseModel):
     prvdr_srvc_id_qlfyr_cd: Annotated[
         str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)
     ]
-    clm_srvc_prvdr_gnrc_id_num: Annotated[str, BeforeValidator(transform_default_string)]
-    prvdr_prsbng_id_qlfyr_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_prsbng_prvdr_gnrc_id_num: Annotated[str, BeforeValidator(transform_default_string)]
+    clm_srvc_prvdr_gnrc_id_num: Annotated[
+        str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)
+    ]
+    prvdr_prsbng_id_qlfyr_cd: Annotated[
+        str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)
+    ]
+    clm_prsbng_prvdr_gnrc_id_num: Annotated[
+        str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)
+    ]
     idr_insrt_ts_clm: Annotated[
         datetime,
         {ALIAS: ALIAS_CLM, **INSERT_FIELD},
@@ -135,33 +138,41 @@ class IdrClaimRx(IdrBaseModel):
     ]
 
     # Columns from V2_MDCR_CLM_LINE_RX
-    clm_brnd_gnrc_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_cmpnd_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_ctstrphc_cvrg_ind_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_daw_prod_slctn_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_drug_cvrg_stus_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_line_days_suply_qty: int | None
-    clm_line_grs_above_thrshld_amt: float | None
-    clm_line_grs_blw_thrshld_amt: float | None
-    clm_line_ingrdnt_cst_amt: float | None
-    clm_line_lis_amt: float | None
-    clm_line_plro_amt: float | None
-    clm_line_rx_fill_num: int | None
+    clm_brnd_gnrc_cd: Annotated[
+        str, {ALIAS: ALIAS_RX_LINE}, BeforeValidator(transform_default_string)
+    ]
+    clm_cmpnd_cd: Annotated[str, {ALIAS: ALIAS_RX_LINE}, BeforeValidator(transform_default_string)]
+    clm_ctstrphc_cvrg_ind_cd: Annotated[
+        str, {ALIAS: ALIAS_RX_LINE}, BeforeValidator(transform_default_string)
+    ]
+    clm_daw_prod_slctn_cd: Annotated[
+        str, {ALIAS: ALIAS_RX_LINE}, BeforeValidator(transform_default_string)
+    ]
+    clm_drug_cvrg_stus_cd: Annotated[
+        str, {ALIAS: ALIAS_RX_LINE}, BeforeValidator(transform_default_string)
+    ]
+    clm_line_days_suply_qty: Annotated[int | None, {ALIAS: ALIAS_RX_LINE}]
+    clm_line_grs_above_thrshld_amt: Annotated[float | None, {ALIAS: ALIAS_RX_LINE}]
+    clm_line_grs_blw_thrshld_amt: Annotated[float | None, {ALIAS: ALIAS_RX_LINE}]
+    clm_line_ingrdnt_cst_amt: Annotated[float | None, {ALIAS: ALIAS_RX_LINE}]
+    clm_line_lis_amt: Annotated[float | None, {ALIAS: ALIAS_RX_LINE}]
+    clm_line_plro_amt: Annotated[float | None, {ALIAS: ALIAS_RX_LINE}]
+    clm_line_rx_fill_num: Annotated[int | None, {ALIAS: ALIAS_RX_LINE}]
     clm_line_rx_orgn_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_line_sls_tax_amt: float | None
-    clm_line_srvc_cst_amt: float | None
-    clm_line_troop_tot_amt: float | None
-    clm_line_vccn_admin_fee_amt: float | None
+    clm_line_sls_tax_amt: Annotated[float | None, {ALIAS: ALIAS_RX_LINE}]
+    clm_line_srvc_cst_amt: Annotated[float | None, {ALIAS: ALIAS_RX_LINE}]
+    clm_line_troop_tot_amt: Annotated[float | None, {ALIAS: ALIAS_RX_LINE}]
+    clm_line_vccn_admin_fee_amt: Annotated[float | None, {ALIAS: ALIAS_RX_LINE}]
     clm_ltc_dspnsng_mthd_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_phrmcy_srvc_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_prcng_excptn_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_ptnt_rsdnc_cd: Annotated[str, BeforeValidator(transform_default_string)]
-    clm_line_rptd_gap_dscnt_amt: float | None
-    clm_rptd_mftr_dscnt_amt: float | None
-    clm_line_rebt_passthru_pos_amt: float | None
-    clm_cms_calcd_mftr_dscnt_amt: float | None
-    clm_line_grs_cvrd_cst_tot_amt: float | None
-    clm_phrmcy_price_dscnt_at_pos_amt: float | None
+    clm_line_rptd_gap_dscnt_amt: Annotated[float | None, {ALIAS: ALIAS_RX_LINE}]
+    clm_rptd_mftr_dscnt_amt: Annotated[float | None, {ALIAS: ALIAS_RX_LINE}]
+    clm_line_rebt_passthru_pos_amt: Annotated[float | None, {ALIAS: ALIAS_RX_LINE}]
+    clm_cms_calcd_mftr_dscnt_amt: Annotated[float | None, {ALIAS: ALIAS_RX_LINE}]
+    clm_line_grs_cvrd_cst_tot_amt: Annotated[float | None, {ALIAS: ALIAS_RX_LINE}]
+    clm_phrmcy_price_dscnt_at_pos_amt: Annotated[float | None, {ALIAS: ALIAS_RX_LINE}]
     idr_insrt_ts_line_rx: Annotated[
         datetime,
         {ALIAS: ALIAS_RX_LINE, **INSERT_FIELD},
@@ -173,6 +184,7 @@ class IdrClaimRx(IdrBaseModel):
         BeforeValidator(transform_null_date_to_min),
     ]
 
+    # Columns from v2_mdcr_cntrct_pbp_num
     cntrct_pbp_name: Annotated[
         str, {ALIAS: ALIAS_PBP_NUM}, BeforeValidator(transform_default_string)
     ]

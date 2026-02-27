@@ -336,6 +336,7 @@ create table idr_new.claim_item_professional_ss
     clm_line_rbndlg_crtfctn_num    character varying(10),
     clm_line_hct_lvl_num           numeric,
     clm_line_hgb_lvl_num           numeric,
+    clm_line_prfrmg_prvdr_lclty_cd character varying(2),
     primary key (clm_uniq_id, bfd_row_id)
 );
 

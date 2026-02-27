@@ -110,6 +110,14 @@ def _normalize_to_null(col: str) -> str:
     return f"CASE WHEN {col} IN ('', '~') THEN NULL ELSE {col} END"
 
 
+def clm_orig_cntl_num_expr() -> str:
+    return f"""CASE 
+                WHEN {ALIAS_CLM}.clm_cntl_num = {ALIAS_CLM}.clm_orig_cntl_num 
+                THEN '' 
+                ELSE {ALIAS_CLM}.clm_orig_cntl_num
+                END"""
+
+
 def provider_careteam_name_expr(alias: str, type: str | None) -> str:
     # Note: Snowflake throws an error if you do COALESCE with a single argument
     # so we need to explicitly pass null here

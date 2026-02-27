@@ -625,6 +625,7 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_mcs (
     clm_type_cd INT NOT NULL,
     clm_num_sk BIGINT NOT NULL,
     clm_line_num INT NOT NULL,
+    clm_line_prfrmg_prvdr_lclty_cd VARCHAR(2),
     clm_line_rbndlg_crtfctn_num    VARCHAR(10),
     clm_line_hct_lvl_num           NUMERIC,
     clm_line_hgb_lvl_num           NUMERIC,

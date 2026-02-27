@@ -31,6 +31,7 @@ from model.base_model import (
     UPDATE_TIMESTAMP,
     IdrBaseModel,
     claim_filter,
+    clm_orig_cntl_num_expr,
     provider_careteam_name_expr,
     provider_last_or_legal_name_expr,
     transform_default_date_to_null,
@@ -51,11 +52,7 @@ class IdrClaimProfessionalNch(IdrBaseModel):
         str,
         {
             ALIAS: ALIAS_CLM,
-            EXPR: f"""CASE 
-                WHEN {ALIAS_CLM}.clm_cntl_num = {ALIAS_CLM}.clm_orig_cntl_num 
-                THEN '' 
-                ELSE {ALIAS_CLM}.clm_orig_cntl_num
-                END""",
+            EXPR: clm_orig_cntl_num_expr(),
         },
         BeforeValidator(transform_default_string),
     ]

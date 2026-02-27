@@ -185,6 +185,9 @@ class IdrClaimItemProfessionalSs(IdrBaseModel):
     ]
     clm_line_hct_lvl_num: Annotated[float | None, {ALIAS: ALIAS_LINE_MCS}]
     clm_line_hgb_lvl_num: Annotated[float | None, {ALIAS: ALIAS_LINE_MCS}]
+    clm_line_prfrmg_prvdr_lclty_cd: Annotated[
+        str, {ALIAS: ALIAS_LINE_MCS}, BeforeValidator(transform_default_string)
+    ]
     idr_insrt_ts_line_mcs: Annotated[
         datetime,
         {ALIAS: ALIAS_LINE_MCS, **INSERT_FIELD},
