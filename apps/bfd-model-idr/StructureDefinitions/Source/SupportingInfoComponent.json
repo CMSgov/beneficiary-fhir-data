@@ -666,7 +666,7 @@
           {
             "id": "SupportingInfoComponent.CLM_CMS_PROC_DT",
             "path": "SupportingInfoComponent.CLM_CMS_PROC_DT",
-            "label": "FI Claim Process Date",
+            "label": "Claim Process Date",
             "min": 0,
             "max": "1",
             "type": [
@@ -790,6 +790,89 @@
             "id": "SupportingInfoComponent.CLM_AUDT_TRL_STUS_CD",
             "path": "SupportingInfoComponent.CLM_AUDT_TRL_STUS_CD",
             "label": "Claim Status Code",
+            "min": 0,
+            "max": "1",
+            "type": [
+              {
+                "code": "string"
+              }
+            ]
+          },{
+            "id": "SupportingInfoComponent.CLM_BNFT_ENHNCMT_CD",
+            "path": "SupportingInfoComponent.CLM_BNFT_ENHNCMT_CD",
+            "label": "Claim Benefit Enhancement Code ",
+            "min": 0,
+            "max": "1",
+            "type": [
+              {
+                "code": "string"
+              }
+            ]
+          },
+          {
+            "id": "SupportingInfoComponent.CLM_NGACO_PBPMT_SW",
+            "path": "SupportingInfoComponent.CLM_NGACO_PBPMT_SW",
+            "label": "PBP Benefit Enhancement Indicator",
+            "min": 0,
+            "max": "1",
+            "type": [
+              {
+                "code": "string"
+              }
+            ]
+          },
+          {
+            "id": "SupportingInfoComponent.CLM_NGACO_PDSCHRG_HCBS_SW",
+            "path": "SupportingInfoComponent.CLM_NGACO_PDSCHRG_HCBS_SW",
+            "label": "Post Discharge Home Visit Benefit Enhancement Indicator",
+            "min": 0,
+            "max": "1",
+            "type": [
+              {
+                "code": "string"
+              }
+            ]
+          },
+          {
+            "id": "SupportingInfoComponent.CLM_NGACO_SNF_WVR_SW",
+            "path": "SupportingInfoComponent.CLM_NGACO_SNF_WVR_SW",
+            "label": "SNF 3-Day Waiver Benefit Enhancement Indicator",
+            "min": 0,
+            "max": "1",
+            "type": [
+              {
+                "code": "string"
+              }
+            ]
+          },
+          {
+            "id": "SupportingInfoComponent.CLM_NGACO_TLHLTH_SW",
+            "path": "SupportingInfoComponent.CLM_NGACO_TLHLTH_SW",
+            "label": "Telehealth Benefit Enhancement Indicator",
+            "min": 0,
+            "max": "1",
+            "type": [
+              {
+                "code": "string"
+              }
+            ]
+          },
+          {
+            "id": "SupportingInfoComponent.CLM_NGACO_CPTATN_SW",
+            "path": "SupportingInfoComponent.CLM_NGACO_CPTATN_SW",
+            "label": "AIPBP Benefit Enhancement Indicator",
+            "min": 0,
+            "max": "1",
+            "type": [
+              {
+                "code": "string"
+              }
+            ]
+          },
+          {
+            "id": "SupportingInfoComponent.CLM_ACO_CARE_MGMT_HCBS_SW",
+            "path": "SupportingInfoComponent.CLM_ACO_CARE_MGMT_HCBS_SW",
+            "label": "Care Management Home Visits Enhancement Indicator",
             "min": 0,
             "max": "1",
             "type": [
