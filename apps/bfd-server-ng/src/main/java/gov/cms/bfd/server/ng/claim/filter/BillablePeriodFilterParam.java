@@ -3,6 +3,7 @@ package gov.cms.bfd.server.ng.claim.filter;
 import gov.cms.bfd.server.ng.DbFilter;
 import gov.cms.bfd.server.ng.DbFilterBuilder;
 import gov.cms.bfd.server.ng.DbFilterParam;
+import gov.cms.bfd.server.ng.claim.model.SystemType;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import java.util.ArrayList;
 import java.util.Optional;
@@ -16,7 +17,7 @@ import org.jetbrains.annotations.NotNull;
 public record BillablePeriodFilterParam(DateTimeRange claimThroughDate) implements DbFilterBuilder {
   @NotNull
   @Override
-  public DbFilter getFilters(@NotNull String claimTableAlias) {
+  public DbFilter getFilters(@NotNull String claimTableAlias, @NotNull SystemType systemType) {
     var filterClause = new StringBuilder();
     var params = new ArrayList<DbFilterParam>();
     claimThroughDate
@@ -41,5 +42,10 @@ public record BillablePeriodFilterParam(DateTimeRange claimThroughDate) implemen
               params.add(new DbFilterParam("claimThroughDateUpperBound", Optional.of(d)));
             });
     return new DbFilter(filterClause.toString(), params);
+  }
+
+  @Override
+  public boolean matchesSystemType(@NotNull SystemType systemType) {
+    return true;
   }
 }

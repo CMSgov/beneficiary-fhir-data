@@ -78,7 +78,7 @@ public class IntegrationTestConfiguration {
             .configuration(
                 Map.of(
                     "flyway.schemas",
-                    "idr",
+                    "idr,idr_new",
                     "flyway.url",
                     container.getJdbcUrl(),
                     "flyway.user",
@@ -108,6 +108,8 @@ public class IntegrationTestConfiguration {
     // Partitions are necessary for massive amounts of prod data, but will cause our modestly-sized
     // test data to load significantly slower.
     env.put("IDR_ENABLE_PARTITIONS", "0");
+    // Suppress noisy output unless the log level is explicitly set
+    env.putIfAbsent("IDR_LOG_LEVEL", "WARNING");
 
     processBuilder
         .directory(new File(Paths.get(baseDir, "../bfd-pipeline-idr").toString()))

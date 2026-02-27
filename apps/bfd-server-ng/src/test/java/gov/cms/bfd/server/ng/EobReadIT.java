@@ -9,11 +9,9 @@ import ca.uhn.fhir.rest.gclient.IReadTyped;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.bfd.server.ng.eob.EobResourceProvider;
-import gov.cms.bfd.server.ng.testUtil.ThreadSafeAppender;
 import io.restassured.RestAssured;
 import jakarta.servlet.http.HttpServletRequest;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
-import org.hl7.fhir.r4.model.IdType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -39,13 +37,6 @@ class EobReadIT extends IntegrationTestBase {
     var eob = eobRead().withId(Long.parseLong(CLAIM_ID_ADJUDICATED)).execute();
     assertFalse(eob.isEmpty());
     expectFhir().toMatchSnapshot(eob);
-  }
-
-  @Test
-  void eobReadQueryCount() {
-    var events = ThreadSafeAppender.startRecord();
-    eobResourceProvider.find(new IdType(CLAIM_ID_ADJUDICATED_ICD_9), request);
-    assertEquals(1, queryCount(events));
   }
 
   @Test

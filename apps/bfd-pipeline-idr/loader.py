@@ -3,16 +3,20 @@ from collections.abc import Iterator, Sequence
 from datetime import UTC, date, datetime
 
 import psycopg
+from psycopg.abc import Params, Query
+from psycopg.errors import DeadlockDetected
 
 from constants import DEFAULT_MIN_DATE
 from load_partition import LoadPartition, LoadType
-from model import DbType, LoadMode, LoadProgress, T
+from model.base_model import DbType, LoadMode, T
+from model.load_progress import LoadProgress
 from settings import (
     bfd_db_endpoint,
     bfd_db_name,
     bfd_db_password,
     bfd_db_port,
     bfd_db_username,
+    force_load_progress,
 )
 from timer import Timer
 
@@ -44,9 +48,10 @@ class PostgresLoader:
         partition: LoadPartition,
         progress: LoadProgress | None,
         load_type: LoadType,
+        load_mode: LoadMode,
     ) -> bool:
         return BatchLoader(
-            self.conn, fetch_results, model, job_start, partition, progress, load_type
+            self.conn, fetch_results, model, job_start, partition, progress, load_type, load_mode
         ).load()
 
     def close(self) -> None:
@@ -63,6 +68,7 @@ class BatchLoader:
         partition: LoadPartition,
         progress: LoadProgress | None,
         load_type: LoadType,
+        load_mode: LoadMode,
     ) -> None:
         self.conn = conn
         self.fetch_results = fetch_results
@@ -89,6 +95,7 @@ class BatchLoader:
         self.insert_timer = Timer("insert", model, partition)
         self.commit_timer = Timer("commit", model, partition)
         self.load_type = load_type
+        self.enable_load_progress = load_mode == LoadMode.IDR or force_load_progress()
 
     def load(
         self,
@@ -143,7 +150,8 @@ class BatchLoader:
         return data_loaded
 
     def _insert_batch_start(self, cur: psycopg.Cursor) -> None:
-        cur.execute(
+        self._update_load_progress(
+            cur,
             f"""
             INSERT INTO idr.load_progress(
                 table_name, 
@@ -176,7 +184,8 @@ class BatchLoader:
         )
 
     def _mark_batch_complete(self, cur: psycopg.Cursor) -> None:
-        cur.execute(
+        self._update_load_progress(
+            cur,
             """
             UPDATE idr.load_progress
             SET batch_complete_ts = NOW()
@@ -222,16 +231,17 @@ class BatchLoader:
             )
             batch_id_col = self.model.batch_id_col()
             batch_id = last[batch_id_col] if batch_id_col else 0
-            cur.execute(
+            self._update_load_progress(
+                cur,
                 """
-            UPDATE idr.load_progress
-            SET 
-                last_ts = %(last_ts)s,
-                last_id = %(last_id)s
-            WHERE
-                table_name = %(table)s 
-                AND batch_partition = %(partition)s
-            """,
+                UPDATE idr.load_progress
+                SET 
+                    last_ts = %(last_ts)s,
+                    last_id = %(last_id)s
+                WHERE
+                    table_name = %(table)s 
+                    AND batch_partition = %(partition)s
+                """,
                 {
                     "table": self.table,
                     "partition": self.partition.name,
@@ -239,6 +249,12 @@ class BatchLoader:
                     "last_id": batch_id,
                 },
             )
+
+    def _update_load_progress(
+        self, cur: psycopg.Cursor, query: Query, params: Params | None
+    ) -> None:
+        if self.enable_load_progress:
+            cur.execute(query, params)
 
     def _merge(self, cur: psycopg.Cursor, timestamp: datetime) -> None:
         unique_key = self.model.unique_key()
@@ -277,25 +293,34 @@ class BatchLoader:
             key = self.model.last_updated_timestamp_col()
             last_updated_cols = self.model.last_updated_date_column()
             set_clause = ", ".join(f"{col} = %(timestamp)s" for col in last_updated_cols)
-            # Locking rows to prevent Deadlocks when multiple nodes update this table
-            cur.execute(
-                f"""
-                WITH locked AS (
-                    SELECT {key}
-                    FROM {self.model.last_updated_date_table()}
-                    WHERE {key} IN (
-                        SELECT {key} FROM {self.temp_table}
+
+            try:
+                cur.execute(
+                    f"""
+                    WITH locked AS (
+                        SELECT {key}
+                        FROM {self.model.last_updated_date_table()}
+                        WHERE {key} IN (
+                            SELECT {key} FROM {self.temp_table}
+                        )
+                        ORDER BY {key}
+                        FOR UPDATE
                     )
-                    ORDER BY {key}
-                    FOR UPDATE
+                    UPDATE {self.model.last_updated_date_table()} u
+                    SET {set_clause}
+                    FROM locked l
+                    WHERE u.{key} = l.{key};
+                    """,  # type: ignore
+                    {"timestamp": timestamp},
                 )
-                UPDATE {self.model.last_updated_date_table()} u
-                SET {set_clause}
-                FROM locked l
-                WHERE u.{key} = l.{key};
-                """,  # type: ignore
-                {"timestamp": timestamp},
-            )
+            except DeadlockDetected as ex:
+                # We require multi-step transactions since we're dealing with temp tables, so there
+                # is a chance of a deadlock here.
+                # Locking rows helps reduce the chance of this when multiple nodes update this
+                # table, but it doesn't eliminate the possibility.
+                # However, it's safe to ignore this because if the timestamp for this row is being
+                # updated concurrently then it's going to have the same end result anyway
+                logger.warning("deadlock updating update timestamp, ignoring: %s", ex)
 
     def _copy_data(self, cur: psycopg.Cursor, results: Sequence[T]) -> None:
         # Use COPY to load the batch into Postgres.

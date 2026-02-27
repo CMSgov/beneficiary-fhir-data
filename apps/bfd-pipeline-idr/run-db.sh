@@ -2,6 +2,25 @@
 
 set -e
 
+SCRIPT_DIR=$(path=$(realpath "$0") && dirname "$path")
+readonly SCRIPT_DIR
+
+DB_ENDPOINT=localhost
+readonly DB_ENDPOINT
+
+DB_USERNAME=bfd
+readonly DB_USERNAME
+
+DB_PASSWORD=InsecureLocalDev
+readonly DB_PASSWORD
+
+function do_load() {
+  PGPASSWORD="$DB_PASSWORD" psql "host=$DB_ENDPOINT port=5432 dbname=fhirdb user=$DB_USERNAME" -f "$SCRIPT_DIR/mock-idr.sql"
+  BFD_DB_USERNAME="$DB_USERNAME" BFD_DB_PASSWORD="$DB_PASSWORD" BFD_DB_ENDPOINT="$DB_ENDPOINT" uv run load_synthetic.py "$1"
+  docker exec -u postgres bfd-idr-db psql fhirdb bfd -c "VACUUM FULL ANALYZE"
+  BFD_DB_USERNAME="$DB_USERNAME" BFD_DB_PASSWORD="$DB_PASSWORD" BFD_DB_ENDPOINT="$DB_ENDPOINT" IDR_LOAD_TYPE=initial IDR_ENABLE_DATE_PARTITIONS=0 uv run pipeline.py synthetic
+}
+
 image=postgres:16.6
 max_connections=500
 docker pull $image
@@ -32,20 +51,30 @@ docker exec bfd-idr-db createdb --host localhost --username bfd --owner bfd fhir
 echo
 echo Database created successfully.
 
-script_dir=$(path=$(realpath "$0") && dirname "$path")
-
-docker cp "$script_dir/mock-idr.sql" bfd-idr-db:/docker-entrypoint-initdb.d/mock-idr.sql
+docker cp "$SCRIPT_DIR/mock-idr.sql" bfd-idr-db:/docker-entrypoint-initdb.d/mock-idr.sql
 
 echo
 echo Creating schema.
 
 docker exec -u postgres bfd-idr-db psql fhirdb bfd -f docker-entrypoint-initdb.d/mock-idr.sql
-"$script_dir/../bfd-db-migrator-ng/migrate-local.sh"
-
-uv sync
-BFD_DB_ENDPOINT=localhost BFD_DB_USERNAME=bfd BFD_DB_PASSWORD=InsecureLocalDev uv run load_synthetic.py "$1" 
-docker exec -u postgres bfd-idr-db psql fhirdb bfd -c "VACUUM FULL ANALYZE"
-BFD_DB_ENDPOINT=localhost BFD_DB_USERNAME=bfd BFD_DB_PASSWORD=InsecureLocalDev IDR_LOAD_TYPE=initial IDR_ENABLE_PARTITIONS=0 uv run pipeline.py local
+"$SCRIPT_DIR/../bfd-db-migrator-ng/migrate-local.sh"
 
 echo
 echo Schema created successfully.
+
+uv sync
+
+if [[ -d "$1/0" ]]; then
+  echo "Loading batches in $1..."
+  for batch_dir in "$1"/*/; do
+    echo "Loading batch $batch_dir..."
+    do_load "$batch_dir"
+    echo "Done loading batch $batch_dir"
+  done
+  echo "Done loading all batches"
+else
+  echo "Loading full tables from $1..."
+  do_load "$1"
+  echo "Done loading full tables from $1"
+fi
+

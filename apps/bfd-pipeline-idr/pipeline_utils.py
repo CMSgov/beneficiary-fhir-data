@@ -10,16 +10,11 @@ from constants import DEFAULT_PARTITION
 from extractor import PostgresExtractor, SnowflakeExtractor
 from load_partition import LoadPartition
 from loader import LoadType, PostgresLoader
-from model import (
+from model.base_model import (
     LoadMode,
-    LoadProgress,
     T,
 )
-
-console_handler = logging.StreamHandler()
-formatter = logging.Formatter("[%(levelname)s] %(asctime)s %(message)s")
-console_handler.setFormatter(formatter)
-logging.basicConfig(level=logging.INFO, handlers=[console_handler])
+from model.load_progress import LoadProgress
 
 logger = logging.getLogger(__name__)
 
@@ -71,10 +66,10 @@ def extract_and_load(
                     progress.batch_complete_ts,
                 )
             else:
-                logger.info("no previous progress for %s", cls.table())
+                logger.info("no previous progress for %s - %s", cls.table(), partition.name)
 
             data_iter = data_extractor.extract_idr_data(progress, job_start, load_mode)
-            res = loader.load(data_iter, cls, job_start, partition, progress, load_type)
+            res = loader.load(data_iter, cls, job_start, partition, progress, load_type, load_mode)
             data_extractor.close()
             loader.close()
             return res
@@ -99,3 +94,6 @@ def extract_and_load(
                 logger.error("max attempts exceeded")
                 raise ex
             time.sleep(1)
+        except Exception as ex:
+            logger.error("error loading %s", cls.table(), exc_info=ex)
+            raise ex

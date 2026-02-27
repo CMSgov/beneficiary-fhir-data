@@ -5,7 +5,7 @@ import jakarta.persistence.Converter;
 import java.util.Optional;
 
 /** Converts any zero double values to None. */
-@Converter
+@Converter(autoApply = true)
 public class NonZeroDoubleConverter implements AttributeConverter<Optional<Double>, Double> {
   @Override
   public Double convertToDatabaseColumn(Optional<Double> value) {
