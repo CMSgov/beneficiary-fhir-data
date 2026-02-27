@@ -9,7 +9,7 @@ import lombok.Getter;
 @Getter
 @Embeddable
 public class ClaimItemRx implements ClaimItemBase {
-  @Embedded private ClaimLineRxInfo claimLine;
+  @Embedded private ClaimLineRx claimLine;
   @Embedded private ClaimLineRxNumber claimLineRxNum;
 
   @Override

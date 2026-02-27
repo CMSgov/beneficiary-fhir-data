@@ -11,8 +11,6 @@ import jakarta.persistence.TypedQuery;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import lombok.AllArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Repository;
 
@@ -21,7 +19,6 @@ import org.springframework.stereotype.Repository;
 @AllArgsConstructor
 public class ClaimAsyncService {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(ClaimAsyncService.class);
   @PersistenceContext private final EntityManager entityManager;
 
   @Async

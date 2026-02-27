@@ -4,12 +4,8 @@ import gov.cms.bfd.server.ng.ClaimSecurityStatus;
 import gov.cms.bfd.server.ng.SamhsaFilterMode;
 import gov.cms.bfd.server.ng.SecurityLabel;
 import gov.cms.bfd.server.ng.beneficiary.BeneficiaryRepository;
-import gov.cms.bfd.server.ng.claim.ClaimRepository;
-import gov.cms.bfd.server.ng.claim.model.Claim;
-import gov.cms.bfd.server.ng.claim.model.ClaimItem;
-import gov.cms.bfd.server.ng.claim.model.ClaimLine;
-import gov.cms.bfd.server.ng.claim.model.ClaimProcedureInstitutional;
-import gov.cms.bfd.server.ng.claim.model.IcdIndicator;
+import gov.cms.bfd.server.ng.claim.ClaimNewRepository;
+import gov.cms.bfd.server.ng.claim.model.*;
 import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.loadprogress.LoadProgressRepository;
@@ -39,7 +35,7 @@ public class EobHandler {
   private static final Logger LOGGER = LoggerFactory.getLogger(EobHandler.class);
 
   private final BeneficiaryRepository beneficiaryRepository;
-  private final ClaimRepository claimRepository;
+  private final ClaimNewRepository claimRepository;
   private final LoadProgressRepository loadProgressRepository;
 
   // Cache the security labels map to avoid repeated I/O and parsing
@@ -85,31 +81,29 @@ public class EobHandler {
 
     var claims = claimRepository.findByBeneXrefSk(repositoryCriteria);
 
-    var filteredClaims = filterSamhsaClaims(claims, samhsaFilterMode, repositoryCriteria);
+    var filteredClaims =
+        filterSamhsaClaims(claims, samhsaFilterMode, repositoryCriteria)
+            .map(
+                claim -> {
+                  var hasSamhsaClaims =
+                      samhsaFilterMode == SamhsaFilterMode.INCLUDE && claimHasSamhsa(claim);
 
-    return FhirUtil.bundleOrDefault(
-        filteredClaims.map(
-            claim -> {
-              var hasSamhsaClaims =
-                  samhsaFilterMode == SamhsaFilterMode.INCLUDE && claimHasSamhsa(claim);
+                  var securityStatus =
+                      hasSamhsaClaims
+                          ? ClaimSecurityStatus.SAMHSA_APPLICABLE
+                          : ClaimSecurityStatus.NONE;
 
-              var securityStatus =
-                  hasSamhsaClaims
-                      ? ClaimSecurityStatus.SAMHSA_APPLICABLE
-                      : ClaimSecurityStatus.NONE;
+                  return claim.toFhir(securityStatus);
+                });
 
-              return claim.toFhir(securityStatus);
-            }),
-        loadProgressRepository::lastUpdated);
+    return FhirUtil.bundleOrDefault(filteredClaims.toList(), loadProgressRepository::lastUpdated);
   }
 
-  private Stream<Claim> filterSamhsaClaims(
-      List<Claim> claims,
+  private Stream<? extends ClaimBase> filterSamhsaClaims(
+      List<? extends ClaimBase> claims,
       SamhsaFilterMode samhsaFilterMode,
       ClaimSearchCriteria claimSearchCriteria) {
-
-    var claimStream = claims.stream().sorted(Comparator.comparing(Claim::getClaimUniqueId));
-
+    var claimStream = claims.stream().sorted(Comparator.comparing(ClaimBase::getClaimUniqueId));
     var filteredClaimStream =
         switch (samhsaFilterMode) {
           case INCLUDE -> claimStream;
@@ -184,26 +178,25 @@ public class EobHandler {
 
   // Returns true if the given claim contains any procedure that matches a SAMHSA
   // security label code from the dictionary.
-  private boolean claimHasSamhsa(Claim claim) {
+  private boolean claimHasSamhsa(ClaimBase claim) {
     var claimUniqueId = claim.getClaimUniqueId();
     var claimThroughDate =
         claim.getBillablePeriod().getClaimThroughDate().orElse(IdrConstants.DEFAULT_DATE);
     var drgSamhsa = drgIsSamhsa(claim, claimThroughDate, claimUniqueId);
     var claimItemSamhsa =
-        claim.getClaimItems().stream()
+        claim.getItems().stream()
             .anyMatch(e -> claimItemIsSamhsa(e, claimThroughDate, claimUniqueId));
 
     return drgSamhsa || claimItemSamhsa;
   }
 
   private boolean claimItemIsSamhsa(
-      ClaimItem claimItem, LocalDate claimThroughDate, long claimUniqueId) {
-    return procedureIsSamhsa(
-            claimItem.getClaimProcedureInstitutional(), claimThroughDate, claimUniqueId)
-        || hcpcsIsSamhsa(claimItem.getClaimLine(), claimThroughDate, claimUniqueId);
+      ClaimItemBase claimItem, LocalDate claimThroughDate, long claimUniqueId) {
+    return procedureIsSamhsa(claimItem.getProcedure(), claimThroughDate, claimUniqueId)
+        || hcpcsIsSamhsa(claimItem.getClaimLineHcpcsCode(), claimThroughDate, claimUniqueId);
   }
 
-  private boolean drgIsSamhsa(Claim claim, LocalDate claimDate, long claimUniqueId) {
+  private boolean drgIsSamhsa(ClaimBase claim, LocalDate claimDate, long claimUniqueId) {
     var entries = SECURITY_LABELS.get(SystemUrls.CMS_MS_DRG);
     var drg = claim.getDrgCode().map(Object::toString).orElse("");
     return entries.stream()
@@ -211,8 +204,12 @@ public class EobHandler {
             e -> isCodeSamhsa(drg, claimDate, e, "DRG", claimUniqueId, SystemUrls.CMS_MS_DRG));
   }
 
-  private boolean hcpcsIsSamhsa(ClaimLine claimLine, LocalDate claimDate, long claimUniqueId) {
-    var hcpcs = claimLine.getHcpcsCode().getHcpcsCode().orElse("");
+  private boolean hcpcsIsSamhsa(
+      Optional<ClaimLineHcpcsCode> hcpcsCode, LocalDate claimDate, long claimUniqueId) {
+    if (hcpcsCode.isEmpty()) {
+      return false;
+    }
+    var hcpcs = hcpcsCode.get().getHcpcsCode().orElse("");
     return Stream.of(SystemUrls.AMA_CPT, SystemUrls.CMS_HCPCS)
         .flatMap(s -> SECURITY_LABELS.get(s).stream().map(c -> Map.entry(s, c)))
         .anyMatch(
@@ -221,7 +218,11 @@ public class EobHandler {
 
   // Checks ICDs.
   private boolean procedureIsSamhsa(
-      ClaimProcedureInstitutional procedure, LocalDate claimDate, long claimUniqueId) {
+      Optional<? extends ClaimProcedureBase> proc, LocalDate claimDate, long claimUniqueId) {
+    if (proc.isEmpty()) {
+      return false;
+    }
+    var procedure = proc.get();
     var diagnosisCode = procedure.getDiagnosisCode().orElse("");
     var procedureCode = procedure.getProcedureCode().orElse("");
     // If the ICD indicator isn't something valid, it's probably a PAC claim with a mistake in the

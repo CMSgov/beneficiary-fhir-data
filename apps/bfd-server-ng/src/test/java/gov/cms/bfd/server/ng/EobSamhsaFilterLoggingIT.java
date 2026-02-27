@@ -3,7 +3,7 @@ package gov.cms.bfd.server.ng;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import gov.cms.bfd.server.ng.eob.EobNewHandler;
+import gov.cms.bfd.server.ng.eob.EobHandler;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.testUtil.ThreadSafeAppender;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +17,7 @@ class EobSamhsaFilterLoggingIT extends IntegrationTestBase {
   private static final long CLAIM_ID_WITH_SAMHSA_DIAGNOSIS = 4146709784142L;
   private static final long CLAIM_ID_WITH_NO_SAMHSA = 566745788569L;
   private static final String SAMHSA_FILTERED_LOG_MESSAGE = "SAMHSA claim filtered";
-  private final EobNewHandler eobHandler;
+  private final EobHandler eobHandler;
 
   /** Test that filtering a SAMHSA claim generates appropriate logs. */
   @Test

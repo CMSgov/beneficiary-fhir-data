@@ -32,7 +32,7 @@ import org.springframework.stereotype.Component;
 @Component
 @SuppressWarnings({"java:S107", "java:S3252"})
 public class EobResourceProvider implements IResourceProvider {
-  private final EobNewHandler eobHandler;
+  private final EobHandler eobHandler;
   private final CertificateUtil certificateUtil;
   private final Configuration configuration;
   private static final String SERVICE_DATE = "service-date";

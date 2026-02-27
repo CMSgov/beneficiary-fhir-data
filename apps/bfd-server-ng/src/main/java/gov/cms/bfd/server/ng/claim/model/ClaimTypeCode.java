@@ -383,10 +383,6 @@ public enum ClaimTypeCode {
     return insurance;
   }
 
-  boolean isPac() {
-    return isBetween(1000, 2999);
-  }
-
   Optional<ExplanationOfBenefit.AdjudicationComponent> toFhirAdjudication() {
     if (isClaimSubtype(ClaimSubtype.PDE)) {
       return Optional.empty();

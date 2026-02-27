@@ -15,7 +15,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 public class ClaimLineInstitutionalNch extends ClaimLineInstitutionalBase {
 
   @Embedded private ClaimLineAdjudicationChargeInstitutionalNch adjudicationCharge;
-  @Embedded private ClaimAnsiSignatureInfo ansiSignature;
+  @Embedded private ClaimAnsiSignature ansiSignature;
   @Embedded private ClaimLineInstitutionalNchExtensions claimLineInstitutionalNchExtensions;
 
   @Override
