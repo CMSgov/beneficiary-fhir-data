@@ -15,6 +15,7 @@ from typing import Any, Self
 import pandas as pd
 import tqdm
 from dateutil.parser import parse
+from dateutil.relativedelta import relativedelta
 from faker import Faker
 
 BENE_HSTRY = "SYNTHETIC_BENE_HSTRY"
@@ -60,6 +61,16 @@ AVAIL_CONTRACT_NUMS = [
     "Z0009",
     "Z0010",
 ]
+AVAIL_PBP_TYPE_CODES = ["01", "02", "48", "04", "09", "18", "10"]
+AVAIL_CONTRACT_NAMES = [
+    "Health Plan",
+    "Wellness",
+    "Silver Fox",
+    "Vitality Plan",
+    "Wellness Plus",
+    "Happy Heart",
+]
+NOW = date.today()
 
 # Lazily computed output table by filename (see above constants) to mappings of the file's rows by
 # BENE_SK. Dramatically speeds up generation with large static inputs versus just doing typical list
@@ -70,6 +81,8 @@ _tables_by_bene_sk: dict[str, dict[str, dict[str, Any]]] = {}
 # Lazily computed table of field names to already used IDs so that their uniqueness is guaranteed.
 # Used with the gen_*_id functions below.
 __used_ids_by_field: dict[str, set[str]] = {}
+
+_faker = Faker()
 
 
 class RowAdapter:
@@ -282,6 +295,8 @@ class GeneratorUtil:
         self.bene_mapd_enrlmt_rx: list[dict[str, Any]] = []
         self.bene_mapd_enrlmt: list[dict[str, Any]] = []
         self.code_systems = {}
+        self.cntrct_pbp_num: list[dict[str, Any]] = []
+        self.cntrct_pbp_cntct: list[dict[str, Any]] = []
 
         self.load_addresses()
         self.load_code_systems()
@@ -530,13 +545,12 @@ class GeneratorUtil:
         future: bool,
         force_ztm: bool,
     ):
-        now = datetime.date.today()
         if expired:
-            medicare_start_date = now - datetime.timedelta(days=730)
-            medicare_end_date = now - datetime.timedelta(days=365)
+            medicare_start_date = NOW - datetime.timedelta(days=730)
+            medicare_end_date = NOW - datetime.timedelta(days=365)
         elif future:
-            medicare_start_date = now + datetime.timedelta(days=365)
-            medicare_end_date = now + datetime.timedelta(days=730)
+            medicare_start_date = NOW + datetime.timedelta(days=365)
+            medicare_end_date = NOW + datetime.timedelta(days=730)
         else:
             medicare_start_date = parse(
                 self.mbi_table[patient["BENE_MBI_ID"]]["BENE_MBI_EFCTV_DT"]
@@ -766,7 +780,9 @@ class GeneratorUtil:
 
         self.bene_lis.append(lis_row.kv)
 
-    def generate_bene_mapd_enrlmt_rx(self, rx_row: RowAdapter, contract_num: str, pbp_num: str):
+    def generate_bene_mapd_enrlmt_rx(
+        self, rx_row: RowAdapter, contract_pbp_sk: str, contract_num: str, pbp_num: str
+    ):
         enrollment_start_date = self.fake.date_between_dates(
             datetime.date(year=2017, month=5, day=20),
             datetime.date(year=2021, month=1, day=1),
@@ -780,7 +796,7 @@ class GeneratorUtil:
         prcsr_num = str(random.randint(-999999, -100000))
         bank_id_num = str(random.randint(-99999, -10000))
 
-        rx_row["CNTRCT_PBP_SK"] = gen_basic_id(field="CNTRCT_PBP_SK", length=12)
+        rx_row["CNTRCT_PBP_SK"] = contract_pbp_sk
         rx_row["BENE_ENRLMT_BGN_DT"] = str(enrollment_start_date)
         rx_row["BENE_ENRLMT_PDP_RX_INFO_BGN_DT"] = str(rx_start_date)
         rx_row["IDR_LTST_TRANS_FLG"] = "Y"
@@ -803,15 +819,19 @@ class GeneratorUtil:
             datetime.date(year=2021, month=1, day=1),
         )
         enrollment_end_date = "9999-12-31"
-        cntrct_num = random.choice(AVAIL_CONTRACT_NUMS)
-        pbp_num = random.choice(AVAIL_PBP_NUMS)
         cvrg_type_cd = "11" if pdp_only else "3"
         bene_enrlmt_pgm_type_cd = random.choice(["1", "2", "3"])
         bene_enrlmt_emplr_sbsdy_sw = random.choice(["Y", "~", "1"])
+        contract = random.choice(self.cntrct_pbp_num)
+        contract_pbp_sk = contract["CNTRCT_PBP_SK"] or gen_basic_id(
+            field="CNTRCT_PBP_SK", length=12
+        )
+        contract_num = contract["CNTRCT_NUM"] or random.choice(AVAIL_CONTRACT_NUMS)
+        pbp_num = contract["CNTRCT_PBP_NUM"] or random.choice(AVAIL_PBP_NUMS)
 
-        enrollment_row["CNTRCT_PBP_SK"] = gen_basic_id(field="CNTRCT_PBP_SK", length=12)
+        enrollment_row["CNTRCT_PBP_SK"] = contract_pbp_sk
         enrollment_row["IDR_LTST_TRANS_FLG"] = "Y"
-        enrollment_row["BENE_CNTRCT_NUM"] = cntrct_num
+        enrollment_row["BENE_CNTRCT_NUM"] = contract_num
         enrollment_row["BENE_PBP_NUM"] = pbp_num
         enrollment_row["BENE_CVRG_TYPE_CD"] = cvrg_type_cd
         enrollment_row["BENE_ENRLMT_PGM_TYPE_CD"] = bene_enrlmt_pgm_type_cd
@@ -824,14 +844,113 @@ class GeneratorUtil:
         enrollment_row["IDR_TRANS_OBSLT_TS"] = "9999-12-31T00:00:00.000000+0000"
 
         self.bene_mapd_enrlmt.append(enrollment_row.kv)
-        return (cntrct_num, pbp_num)
+        return contract_pbp_sk, contract_num, pbp_num
+
+    def gen_contract_plan(
+        self,
+        amount: int,
+        init_contract_pbp_nums: list[RowAdapter] | None = None,
+        init_contract_pbp_contacts: list[RowAdapter] | None = None,
+    ):
+        init_contract_pbp_nums = init_contract_pbp_nums or []
+        init_contract_pbp_contacts = init_contract_pbp_contacts or []
+        additional_pbp_nums = [RowAdapter({}) for _ in range(amount - len(init_contract_pbp_nums))]
+        additional_pbp_contacts = [
+            RowAdapter({}) for _ in range(amount - len(init_contract_pbp_contacts))
+        ]
+        all_pbp_nums = init_contract_pbp_nums + additional_pbp_nums
+        all_pbp_contacts = init_contract_pbp_contacts + additional_pbp_contacts
+
+        used_pairs = {
+            (
+                row.get("CNTRCT_NUM"),
+                row.get("CNTRCT_PBP_NUM"),
+            )
+            for row in init_contract_pbp_nums
+            if row.get("CNTRCT_NUM") and row.get("CNTRCT_PBP_NUM")
+        }
+
+        contract_num_and_pbp_num_pairs = list(
+            itertools.product(AVAIL_CONTRACT_NUMS, AVAIL_PBP_NUMS)
+        )
+        random.shuffle(contract_num_and_pbp_num_pairs)
+
+        available_contract_num_pairs = [
+            pair for pair in contract_num_and_pbp_num_pairs if pair not in used_pairs
+        ]
+        pair_index = 0
+
+        contract_pbp_nums: list[RowAdapter] = []
+        contract_pbp_contacts: list[RowAdapter] = []
+
+        for i in range(amount):
+            pbp_num = all_pbp_nums[i]
+            pbp_contact = all_pbp_contacts[i]
+            contract_num = pbp_num.get("CNTRCT_NUM")
+            pbp_val = pbp_num.get("CNTRCT_PBP_NUM")
+            if not contract_num or not pbp_val:
+                contract_num, pbp_val = available_contract_num_pairs[pair_index]
+                pair_index += 1
+            sk = pbp_num.get("CNTRCT_PBP_SK") or gen_basic_id(field="CNTRCT_PBP_SK", length=12)
+            effective_date = _faker.date_between_dates(date.fromisoformat("2020-01-01"), NOW)
+            end_date = _faker.date_between_dates(effective_date, NOW + relativedelta(years=3))
+            obsolete_date = random.choice(
+                [_faker.date_between_dates(effective_date, NOW), date.fromisoformat("9999-12-31")]
+            )
+            last_day = NOW.replace(month=12, day=31)
+
+            pbp_num["CNTRCT_PBP_SK"] = sk
+            pbp_num["CNTRCT_NUM"] = contract_num
+            pbp_num["CNTRCT_PBP_NUM"] = pbp_val
+            pbp_num["CNTRCT_PBP_NAME"] = random.choice(AVAIL_CONTRACT_NAMES)
+            pbp_num["CNTRCT_PBP_TYPE_CD"] = random.choice(AVAIL_PBP_TYPE_CODES)
+            pbp_num["CNTRCT_DRUG_PLAN_IND_CD"] = random.choice(["Y", "N"])
+            pbp_num["CNTRCT_PBP_SK_EFCTV_DT"] = effective_date.isoformat()
+            pbp_num["CNTRCT_PBP_END_DT"] = end_date.isoformat()
+            pbp_num["CNTRCT_PBP_SK_OBSLT_DT"] = obsolete_date.isoformat()
+
+            pbp_contact["CNTRCT_PBP_SK"] = sk
+            pbp_contact["CNTRCT_PLAN_CNTCT_OBSLT_DT"] = "9999-12-31"
+            pbp_contact["CNTRCT_PLAN_CNTCT_TYPE_CD"] = random.choice(["~", "30", "62"])
+            pbp_contact["CNTRCT_PLAN_FREE_EXTNSN_NUM"] = "".join(random.choices(string.digits, k=7))
+            pbp_contact["CNTRCT_PLAN_CNTCT_FREE_NUM"] = "".join(random.choices(string.digits, k=10))
+            pbp_contact["CNTRCT_PLAN_CNTCT_EXTNSN_NUM"] = "".join(
+                random.choices(string.digits, k=7)
+            )
+            pbp_contact["CNTRCT_PLAN_CNTCT_TEL_NUM"] = "".join(random.choices(string.digits, k=10))
+            pbp_contact["CNTRCT_PBP_END_DT"] = last_day.isoformat()
+            pbp_contact["CNTRCT_PBP_BGN_DT"] = NOW.isoformat()
+            pbp_contact["CNTRCT_PLAN_CNTCT_ST_1_ADR"] = random.choice(
+                [
+                    "319 E. Street",
+                    "North Street",
+                    "West Street",
+                ]
+            )
+            pbp_contact["CNTRCT_PLAN_CNTCT_ST_2_ADR"] = random.choice(["Avenue M", ""])
+            pbp_contact["CNTRCT_PLAN_CNTCT_CITY_NAME"] = random.choice(
+                [
+                    "Los Angeles",
+                    "San Jose",
+                    "San Francisco",
+                ]
+            )
+            pbp_contact["CNTRCT_PLAN_CNTCT_STATE_CD"] = "CA"
+            pbp_contact["CNTRCT_PLAN_CNTCT_ZIP_CD"] = "".join(random.choices(string.digits, k=9))
+
+            contract_pbp_nums.append(pbp_num)
+            contract_pbp_contacts.append(pbp_contact)
+            self.cntrct_pbp_num.append(pbp_num.kv)
+            self.cntrct_pbp_cntct.append(pbp_contact.kv)
+
+        return contract_pbp_nums, contract_pbp_contacts
 
     def save_output_files(self):
         Path("out").mkdir(exist_ok=True)
 
         mbi_arr = [{"BENE_MBI_ID": mbi, **self.mbi_table[mbi]} for mbi in self.mbi_table]
 
-        beneficiary_exports = [
+        beneficiary_and_contract_exports = [
             (self.bene_hstry_table, f"out/{BENE_HSTRY}.csv", GeneratorUtil.ALL_KEYS),
             (mbi_arr, f"out/{BENE_MBI_ID}.csv", GeneratorUtil.ALL_KEYS),
             (self.mdcr_stus, f"out/{BENE_STUS}.csv", GeneratorUtil.ALL_KEYS),
@@ -851,9 +970,11 @@ class GeneratorUtil:
                 GeneratorUtil.ALL_KEYS,
             ),
             (self.bene_mapd_enrlmt, f"out/{BENE_MAPD_ENRLMT}.csv", GeneratorUtil.ALL_KEYS),
+            (self.cntrct_pbp_num, f"out/{CNTRCT_PBP_NUM}.csv", GeneratorUtil.ALL_KEYS),
+            (self.cntrct_pbp_cntct, f"out/{CNTRCT_PBP_CNTCT}.csv", GeneratorUtil.ALL_KEYS),
         ]
 
-        with tqdm.tqdm(beneficiary_exports) as t:
+        with tqdm.tqdm(beneficiary_and_contract_exports) as t:
             for data, path, cols in t:
                 t.set_postfix(file=path)  # type: ignore
                 self.export_df(data, path, cols)
