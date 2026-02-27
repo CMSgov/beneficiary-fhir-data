@@ -48,7 +48,6 @@ public class FileBasedAssertionHelper {
    * @param truncateFile true causes file to be truncated (set to 0 length)
    * @param maxWaitSeconds maximum amount of time to wait for lock
    * @throws InterruptedException lock acquisition interrupted
-   * @throws junit.framework.AssertionFailedError lock acquisition timed out
    * @throws IOException file truncation failed
    */
   public void beginTest(boolean truncateFile, long maxWaitSeconds)
