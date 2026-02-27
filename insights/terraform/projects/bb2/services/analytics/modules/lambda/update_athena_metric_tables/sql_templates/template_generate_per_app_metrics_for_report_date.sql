@@ -52,6 +52,8 @@ WITH report_params AS (
       'app_fhir_v3_eob_since_call_synthetic_count',
       'app_fhir_v3_coverage_since_call_real_count',
       'app_fhir_v3_coverage_since_call_synthetic_count',
+      'app_fhir_v3_generate_insurance_card_call_real_count',
+      'app_fhir_v3_generate_insurance_card_call_synthetic_count',
       'app_auth_ok_real_bene_count',
       'app_auth_ok_synthetic_bene_count',
       'app_auth_ok_real_bene_distinct_count',
@@ -426,7 +428,10 @@ SELECT
     app_fhir_v3_coverage_since_call_real_count,
   COALESCE(t46.app_fhir_v3_coverage_since_call_synthetic_count, 0)
     app_fhir_v3_coverage_since_call_synthetic_count,
-
+  COALESCE(t47.app_fhir_v3_generate_insurance_card_call_synthetic_count, 0)
+    app_fhir_v3_generate_insurance_card_call_synthetic_count,
+  COALESCE(t48.app_fhir_v3_generate_insurance_card_call_real_count, 0)
+    app_fhir_v3_generate_insurance_card_call_real_count,
   /* AUTH per applicaiton */
   COALESCE(t101.app_auth_ok_real_bene_count, 0)
     app_auth_ok_real_bene_count,
@@ -1506,6 +1511,60 @@ FROM
         NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
         NULLIF(resp_app_name,''))
   ) t46 ON t46.app_name = t0.name
+
+  LEFT JOIN
+  (
+    SELECT
+      COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
+        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
+        NULLIF(resp_app_name,'')) as app_name,
+      count(*) as app_fhir_v3_generate_insurance_card_call_synthetic_count
+    FROM
+      request_response_middleware_events
+    WHERE
+      (
+        CONTAINS((SELECT enabled_metrics_list FROM report_params),
+          'app_fhir_v3_generate_insurance_card_call_synthetic_count')
+
+        AND path LIKE '/v3/fhir/Patient/%'
+        AND path LIKE '%insurance-card%'
+        AND req_qparam_lastupdated != ''
+
+        AND request_method = 'GET'
+        AND response_code = 200
+        AND try_cast(fhir_id_v2 as BIGINT) < 0
+      )
+    GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
+        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
+        NULLIF(resp_app_name,''))
+  ) t47 ON t47.app_name = t0.name
+
+  LEFT JOIN
+  (
+    SELECT
+      COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
+        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
+        NULLIF(resp_app_name,'')) as app_name,
+      count(*) as app_fhir_v3_generate_insurance_card_call_real_count
+    FROM
+      request_response_middleware_events
+    WHERE
+      (
+        CONTAINS((SELECT enabled_metrics_list FROM report_params),
+          'app_fhir_v3_generate_insurance_card_call_real_count')
+
+        AND path LIKE '/v3/fhir/Patient/%'
+        AND path LIKE '%insurance-card%'
+        AND req_qparam_lastupdated != ''
+
+        AND request_method = 'GET'
+        AND response_code = 200
+        AND try_cast(fhir_id_v2 as BIGINT) > 0
+      )
+    GROUP BY COALESCE(NULLIF(app_name,''), NULLIF(application.name,''),
+        NULLIF(auth_app_name,''), NULLIF(req_app_name,''),
+        NULLIF(resp_app_name,''))
+  ) t48 ON t48.app_name = t0.name
 
   /* AUTH per application */
   LEFT JOIN

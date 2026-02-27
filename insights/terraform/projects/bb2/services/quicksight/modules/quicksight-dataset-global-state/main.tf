@@ -690,6 +690,14 @@ resource "aws_quicksight_data_set" "quicksight_data_set_global_state" {
         type = "INTEGER"
       }
       input_columns {
+        name = "fhir_v3_generate_insurance_card_call_real_count"
+        type = "INTEGER"
+      }
+      input_columns {
+        name = "fhir_v3_generate_insurance_card_call_synthetic_count"
+        type = "INTEGER"
+      }
+      input_columns {
         name = "auth_ok_real_bene_count"
         type = "INTEGER"
       }
