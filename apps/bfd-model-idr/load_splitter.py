@@ -1,5 +1,6 @@
 import csv
 import itertools
+import shutil
 from collections import defaultdict
 from pathlib import Path
 
@@ -56,7 +57,12 @@ from generator_util import (
     show_default=True,
     help="Number of CLMs to batch each set of CSVs by",
 )
-@click.argument("out", nargs=1, type=click.Path(exists=True, path_type=Path))
+@click.argument(
+    "out",
+    nargs=1,
+    type=click.Path(exists=True, path_type=Path),
+    default="./batched_out",
+)
 def main(clm_batches_size: int, out: Path):
     files_to_copy: dict[str, list[RowAdapter]] = {
         BENE_HSTRY: [],
@@ -178,6 +184,11 @@ def main(clm_batches_size: int, out: Path):
 
     print(f"Done batching, writing to {out}...")
     out.mkdir(parents=True, exist_ok=True)
+    for existing_batch in (
+        dir for dir in out.glob("*/") if str(dir.name).isdigit() and dir.is_dir()
+    ):
+        shutil.rmtree(existing_batch)
+
     for batch_num, batch in tqdm.tqdm(batched_tables.items()):
         batch_num_dir = out.joinpath(f"{batch_num}")
         batch_num_dir.mkdir(exist_ok=True)
