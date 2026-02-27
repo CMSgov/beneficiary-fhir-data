@@ -29,12 +29,7 @@ locals {
 
   root_dir = "bfdeft01"
 
-  # First, construct the configuration for each partner. Partners with invalid path configuration
-  # will be discarded below. We could assume that configuration is infallible for all properties, or
-  # that invaild values will fail fast. But, invalid paths may not cause Terraform (really, AWS) to
-  # fail fast when generating corresponding infrastructure. We don't want that to happen, so we need
-  # to check those preconditions manually. The verbosity and repetition is intentional, albeit
-  # unfortunate, as Terraform does not support the language constructs necessary to reduce it
+# Build up the partners config for the bucket assumer arns and S3 notification received file targets:
   partners_config = {
     for partner in local.partners :
     partner => {
