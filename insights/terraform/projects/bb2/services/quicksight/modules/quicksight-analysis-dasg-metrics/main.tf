@@ -527,12 +527,12 @@ resource "aws_quicksight_analysis" "quicksight_analysis_dasg_metrics" {
               }
               selected_field_options {
                 custom_label = "TOTAL V3 Generate Insurance Card Calls Made"
-                field_id     = "395e9e0d-ae34-480e-8f58-5fe90f34425e.fhir_v3_generate_insurance_card_call_real_count.22.1770146650001"
+                field_id     = "395e9e0d-ae34-480e-8f58-5fe90f34425e.fhir_v3_generate_insurance_card_call_real_count.26.1772213941067"
                 visibility   = "VISIBLE"
               }
               selected_field_options {
                 custom_label = "TOTAL V3 Generate Insurance Card Calls Made WoW %"
-                field_id     = "f1a2b3c4-d5e6-7890-abcd-ef1234567890.22.1770146660001"
+                field_id     = "db26ea0b-c755-4881-8152-ee1ec448f042.27.1772214152630"
                 visibility   = "VISIBLE"
               }
             }
@@ -983,7 +983,7 @@ resource "aws_quicksight_analysis" "quicksight_analysis_dasg_metrics" {
                 }
                 values {
                   numerical_measure_field {
-                    field_id = "395e9e0d-ae34-480e-8f58-5fe90f34425e.fhir_v3_generate_insurance_card_call_real_count.22.1770146650001"
+                    field_id = "73bc51bc-79d0-43d6-8757-eae5d7dea826.app_fhir_v3_generate_insurance_card_call_real_count.5.1772212977956"
 
                     aggregation_function {
                       simple_numerical_aggregation = "SUM"
@@ -997,7 +997,7 @@ resource "aws_quicksight_analysis" "quicksight_analysis_dasg_metrics" {
                 }
                 values {
                   numerical_measure_field {
-                    field_id = "f1a2b3c4-d5e6-7890-abcd-ef1234567890.22.1770146660001"
+                    field_id = "db26ea0b-c755-4881-8152-ee1ec448f042.27.1772214152630"
 
                     column {
                       column_name         = "fhir_v3_generate_insurance_card_call_real_count_wow_percent"
