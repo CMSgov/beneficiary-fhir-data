@@ -647,8 +647,7 @@
       "productOrService" : {
         "coding" : [{
           "system" : "http://hl7.org/fhir/sid/ndc",
-          "code" : "00071015523",
-          "display" : "Lipitor, 90 TABLET, FILM COATED in 1 BOTTLE (0071-0155-23) (package)"
+          "code" : "00071015523"
         }]
       },
       "quantity" : {
