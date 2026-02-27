@@ -41,7 +41,7 @@ class BillingProvider {
   private Organization createOrganization(ProviderHistory providerHistory) {
     var org =
         ProviderFhirHelper.createOrganizationWithNpi(
-            PROVIDER_ORG, billingNpiNumber, providerHistory.getProviderLegalName());
+            billingNpiNumber, billingNpiNumber, providerHistory.getProviderLegalName());
 
     billingOscarNumber.ifPresent(
         n ->
@@ -55,7 +55,7 @@ class BillingProvider {
   private Practitioner createBillingPractitioner(ProviderHistory providerHistory) {
     var practitioner =
         ProviderFhirHelper.createPractitioner(
-            PRACTITIONER_BILLING, billingNpiNumber, providerHistory.toFhirName());
+            billingNpiNumber, billingNpiNumber, providerHistory.toFhirName());
     billingZip5Code.ifPresent(
         zipCode -> practitioner.addAddress(new Address().setPostalCode(zipCode)));
     return practitioner;

@@ -21,17 +21,9 @@ enum CareTeamType {
   private final String roleDisplay;
 
   CareTeamComponents toFhir(
-      SequenceGenerator sequenceGenerator,
-      String value,
-      HumanName name,
-      Optional<String> pinNumber) {
+      SequenceGenerator sequenceGenerator, String npi, HumanName name, Optional<String> pinNumber) {
     var sequence = sequenceGenerator.next();
-    var id =
-        (roleCode.equals(PRESCRIBING.roleCode)
-                ? "careteam-prescriber-practitioner-"
-                : "careteam-provider-")
-            + sequence;
-    var practitioner = ProviderFhirHelper.createPractitioner(id, value, name);
+    var practitioner = ProviderFhirHelper.createPractitioner(npi, npi, name);
 
     pinNumber.ifPresent(
         p ->
