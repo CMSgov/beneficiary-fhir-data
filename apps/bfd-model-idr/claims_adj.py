@@ -7,9 +7,7 @@ import field_constants as f
 from claims_static import (
     ADJUDICATED_PROFESSIONAL_CLAIM_TYPES,
     AVAIL_CLM_RLT_COND_SK,
-    AVAIL_CONTRACT_NUMS,
     AVAIL_OSCAR_CODES_INSTITUTIONAL,
-    AVAIL_PBP_NUMS,
     AVAILABLE_NDC,
     CLM_POA_IND_CHOICES,
     FISS_CLM_TYPE_CDS,
@@ -28,6 +26,8 @@ from claims_static import (
 )
 from claims_util import add_meta_timestamps, get_ric_cd_for_clm_type_cd
 from generator_util import (
+    AVAIL_CONTRACT_NUMS,
+    AVAIL_PBP_NUMS,
     GeneratorUtil,
     RowAdapter,
     gen_basic_id,
@@ -96,18 +96,27 @@ class AdjudicatedGeneratorUtil:
             clm[f.CLM_QUERY_CD] = random.choice(gen_utils.code_systems[f.CLM_QUERY_CD])
         else:
             clm[f.CLM_SRVC_PRVDR_GNRC_ID_NUM] = random.choice(TYPE_2_NPIS)
-            clm[f.PRVDR_SRVC_ID_QLFYR_CD] = random.choice(gen_utils.code_systems[f.PRVDR_ID_QLFYR_CD])
+            clm[f.PRVDR_SRVC_ID_QLFYR_CD] = random.choice(
+                gen_utils.code_systems[f.PRVDR_ID_QLFYR_CD]
+            )
             clm[f.PRVDR_SRVC_PRVDR_NPI_NUM] = clm[f.CLM_SRVC_PRVDR_GNRC_ID_NUM]
             clm[f.CLM_PD_DT] = random_date(clm[f.CLM_FROM_DT], clm[f.CLM_THRU_DT])
-            clm[f.PRVDR_PRSBNG_ID_QLFYR_CD] = random.choice(gen_utils.code_systems[f.PRVDR_ID_QLFYR_CD])
+            clm[f.PRVDR_PRSBNG_ID_QLFYR_CD] = random.choice(
+                gen_utils.code_systems[f.PRVDR_ID_QLFYR_CD]
+            )
             clm[f.CLM_PRSBNG_PRVDR_GNRC_ID_NUM] = random.choice(TYPE_1_NPIS)
             clm[f.PRVDR_PRSCRBNG_PRVDR_NPI_NUM] = clm[f.CLM_PRSBNG_PRVDR_GNRC_ID_NUM]
             clm[f.CLM_SBMT_CHRG_AMT] = round(random.uniform(1, 1000000), 2)
             clm[f.CLM_SBMT_FRMT_CD] = random.choice(gen_utils.code_systems[f.CLM_SBMT_FRMT_CD])
-            clm[f.CLM_SBMTR_CNTRCT_NUM] = random.choice(AVAIL_CONTRACT_NUMS)
-            clm[f.CLM_SBMTR_CNTRCT_PBP_NUM] = random.choice(AVAIL_PBP_NUMS)
             clm[f.CLM_BENE_PMT_AMT] = round(random.uniform(0, 1000), 2)
             clm[f.CLM_OTHR_TP_PD_AMT] = round(random.uniform(0, 1000), 2)
+            if gen_utils.cntrct_pbp_num:
+                contract = random.choice(gen_utils.cntrct_pbp_num)
+                clm[f.CLM_SBMTR_CNTRCT_NUM] = contract["CNTRCT_NUM"]
+                clm[f.CLM_SBMTR_CNTRCT_PBP_NUM] = contract["CNTRCT_PBP_NUM"]
+            else:
+                clm[f.CLM_SBMTR_CNTRCT_NUM] = random.choice(AVAIL_CONTRACT_NUMS)
+                clm[f.CLM_SBMTR_CNTRCT_PBP_NUM] = random.choice(AVAIL_PBP_NUMS)
 
         if clm_type_cd in INSTITUTIONAL_CLAIM_TYPES:
             tob_code = random.choice(gen_utils.code_systems[f.CLM_BILL_FREQ_CD])
@@ -131,19 +140,27 @@ class AdjudicatedGeneratorUtil:
             clm[f.PRVDR_BLG_PRVDR_NPI_NUM] = random.choice(TYPE_2_NPIS)
             clm[f.CLM_ATNDG_PRVDR_NPI_NUM] = random.choice(TYPE_1_NPIS)
             clm[f.PRVDR_ATNDG_PRVDR_NPI_NUM] = clm[f.CLM_ATNDG_PRVDR_NPI_NUM]
-            clm[f.CLM_OPRTG_FED_PRVDR_SPCLTY_CD] = random.choice(gen_utils.code_systems[f.CLM_PRVDR_SPCLTY_CD])
+            clm[f.CLM_OPRTG_FED_PRVDR_SPCLTY_CD] = random.choice(
+                gen_utils.code_systems[f.CLM_PRVDR_SPCLTY_CD]
+            )
             clm[f.CLM_OPRTG_PRVDR_NAME] = random.choice(["Random last, First", "~"])
             clm[f.CLM_OPRTG_PRVDR_NPI_NUM] = random.choice(TYPE_1_NPIS)
             clm[f.PRVDR_OPRTG_PRVDR_NPI_NUM] = clm[f.CLM_OPRTG_PRVDR_NPI_NUM]
-            clm[f.CLM_OTHR_FED_PRVDR_SPCLTY_CD] = random.choice(gen_utils.code_systems[f.CLM_PRVDR_SPCLTY_CD])
+            clm[f.CLM_OTHR_FED_PRVDR_SPCLTY_CD] = random.choice(
+                gen_utils.code_systems[f.CLM_PRVDR_SPCLTY_CD]
+            )
             clm[f.CLM_OTHR_PRVDR_NAME] = random.choice(["Random last, First", "~"])
             clm[f.CLM_OTHR_PRVDR_NPI_NUM] = random.choice(TYPE_1_NPIS)
             clm[f.PRVDR_OTHR_PRVDR_NPI_NUM] = clm[f.CLM_OTHR_PRVDR_NPI_NUM]
-            clm[f.CLM_RNDRG_FED_PRVDR_SPCLTY_CD] = random.choice(gen_utils.code_systems[f.CLM_PRVDR_SPCLTY_CD])
+            clm[f.CLM_RNDRG_FED_PRVDR_SPCLTY_CD] = random.choice(
+                gen_utils.code_systems[f.CLM_PRVDR_SPCLTY_CD]
+            )
             clm[f.CLM_RNDRG_PRVDR_NAME] = random.choice(["Random last, First", "~"])
             clm[f.CLM_RNDRG_PRVDR_NPI_NUM] = random.choice(TYPE_1_NPIS)
             clm[f.PRVDR_RNDRNG_PRVDR_NPI_NUM] = clm[f.CLM_RNDRG_PRVDR_NPI_NUM]
-            clm[f.CLM_ATNDG_FED_PRVDR_SPCLTY_CD] = random.choice(gen_utils.code_systems[f.CLM_PRVDR_SPCLTY_CD])
+            clm[f.CLM_ATNDG_FED_PRVDR_SPCLTY_CD] = random.choice(
+                gen_utils.code_systems[f.CLM_PRVDR_SPCLTY_CD]
+            )
             clm[f.CLM_ATNDG_PRVDR_NAME] = random.choice(["Random last, First", "~"])
             clm[f.CLM_BLG_PRVDR_OSCAR_NUM] = random.choice(AVAIL_OSCAR_CODES_INSTITUTIONAL)
             clm[f.CLM_MDCR_COINSRNC_AMT] = round(random.uniform(0, 25), 2)
@@ -762,7 +779,9 @@ class AdjudicatedGeneratorUtil:
             clm_line[f.CLM_RNDRG_PRVDR_PIN_NUM] = random.choice(["29364819", "19238747"])
             clm_line[f.PRVDR_RNDRNG_PRVDR_NPI_NUM] = random.choice(TYPE_1_NPIS)
             clm_line[f.CLM_RNDRG_PRVDR_NPI_NUM] = clm_line[f.PRVDR_RNDRNG_PRVDR_NPI_NUM]
-            clm_line[f.CLM_RNDRG_FED_PRVDR_SPCLTY_CD] = random.choice(gen_utils.code_systems[f.CLM_PRVDR_SPCLTY_CD])
+            clm_line[f.CLM_RNDRG_FED_PRVDR_SPCLTY_CD] = random.choice(
+                gen_utils.code_systems[f.CLM_PRVDR_SPCLTY_CD]
+            )
             if random.choice([0, 10]) == 7:
                 clm_line[f.CLM_LINE_ANSTHSA_UNIT_CNT] = random.uniform(0, 10)
             if random.choice([0, 15]) == 7:

@@ -19,6 +19,8 @@ from generator_util import (
     BENE_STUS,
     BENE_TP,
     BENE_XREF,
+    CNTRCT_PBP_CNTCT,
+    CNTRCT_PBP_NUM,
     GeneratorUtil,
     RowAdapter,
     load_file_dict,
@@ -158,6 +160,7 @@ def regenerate_static_tables(generator: GeneratorUtil, files: dict[str, list[Row
     for bene_mapd_enrlmt_rx_row in files[BENE_MAPD_ENRLMT_RX]:
         generator.generate_bene_mapd_enrlmt_rx(
             rx_row=bene_mapd_enrlmt_rx_row,
+            contract_pbp_sk=bene_mapd_enrlmt_rx_row["CNTRCT_PBP_SK"],
             contract_num=bene_mapd_enrlmt_rx_row["BENE_CNTRCT_NUM"],
             pbp_num=bene_mapd_enrlmt_rx_row["BENE_PBP_NUM"],
         )
@@ -190,8 +193,16 @@ def load_inputs():
         BENE_MAPD_ENRLMT: [],
         BENE_MAPD_ENRLMT_RX: [],
         BENE_LIS: [],
+        CNTRCT_PBP_NUM: [],
+        CNTRCT_PBP_CNTCT: [],
     }
     load_file_dict(files=files, paths=args.paths, exclude_empty=args.exclude_empty)
+
+    generator.gen_contract_plan(
+        amount=10,
+        init_contract_pbp_nums=files[CNTRCT_PBP_NUM],
+        init_contract_pbp_contacts=files[CNTRCT_PBP_CNTCT],
+    )
 
     if any(file for file in files.values()):
         regenerate_static_tables(generator, files)
@@ -267,11 +278,12 @@ def load_inputs():
                 for_file=BENE_MAPD_ENRLMT,
                 bene_sk=patient["BENE_SK"],
             ):
-                contract_num, pbp_num = generator.generate_bene_mapd_enrlmt(
+                contract_pbp_sk, contract_num, pbp_num = generator.generate_bene_mapd_enrlmt(
                     enrollment_row=RowAdapter(initial_kv_template.copy()), pdp_only=probability(0.5)
                 )
                 generator.generate_bene_mapd_enrlmt_rx(
                     rx_row=RowAdapter(initial_kv_template.copy()),
+                    contract_pbp_sk=contract_pbp_sk,
                     contract_num=contract_num,
                     pbp_num=pbp_num,
                 )
