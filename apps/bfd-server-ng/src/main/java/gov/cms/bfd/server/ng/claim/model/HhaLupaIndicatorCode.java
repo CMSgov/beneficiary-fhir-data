@@ -16,19 +16,40 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @AllArgsConstructor
 public enum HhaLupaIndicatorCode {
   /** L. */
-  L("L", "Low utilization payment adjustment (LUPA) claim");
+  L("L", "Low utilization payment adjustment (LUPA) claim"),
+  /** INVALID - Represents an invalid code that we still want to capture. */
+  INVALID("", "");
 
-  private final String code;
+  private String code;
   private final String display;
 
   /**
    * Converts from a database code.
    *
    * @param code database code.
-   * @return paid switch
+   * @return HHA LUPA indicator code
    */
   public static Optional<HhaLupaIndicatorCode> tryFromCode(String code) {
-    return Arrays.stream(values()).filter(c -> c.code.equals(code)).findFirst();
+    if (code == null || code.isBlank()) {
+      return Optional.empty();
+    }
+    return Optional.of(
+        Arrays.stream(values())
+            .filter(c -> c.code.equals(code))
+            .findFirst()
+            .orElse(handleInvalidValue(code)));
+  }
+
+  /**
+   * Handles scenarios where code could not be mapped to a valid value.
+   *
+   * @param invalidValue the invalid value to capture
+   * @return HHA LUPA indicator code
+   */
+  public static HhaLupaIndicatorCode handleInvalidValue(String invalidValue) {
+    var invalidHhaLupaIndicatorCode = HhaLupaIndicatorCode.INVALID;
+    invalidHhaLupaIndicatorCode.code = invalidValue;
+    return invalidHhaLupaIndicatorCode;
   }
 
   ExplanationOfBenefit.SupportingInformationComponent toFhir(

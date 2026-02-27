@@ -318,9 +318,11 @@ public enum PatientStatusCode {
   /** 98 - RESERVED FOR NATIONAL ASSIGNMENT. */
   _98("98", "RESERVED FOR NATIONAL ASSIGNMENT"),
   /** 99 - RESERVED FOR NATIONAL ASSIGNMENT. */
-  _99("99", "RESERVED FOR NATIONAL ASSIGNMENT");
+  _99("99", "RESERVED FOR NATIONAL ASSIGNMENT"),
+  /** INVALID - Represents an invalid code that we still want to capture. */
+  INVALID("", "");
 
-  private final String code;
+  private String code;
   private final String display;
 
   /**
@@ -330,7 +332,26 @@ public enum PatientStatusCode {
    * @return patient status code
    */
   public static Optional<PatientStatusCode> tryFromCode(String code) {
-    return Arrays.stream(values()).filter(v -> v.code.equals(code)).findFirst();
+    if (code == null || code.isBlank()) {
+      return Optional.empty();
+    }
+    return Optional.of(
+        Arrays.stream(values())
+            .filter(v -> v.code.equals(code))
+            .findFirst()
+            .orElse(handleInvalidValue(code)));
+  }
+
+  /**
+   * Handles scenarios where code could not be mapped to a valid value.
+   *
+   * @param invalidValue the invalid value to capture
+   * @return patient status code
+   */
+  public static PatientStatusCode handleInvalidValue(String invalidValue) {
+    var invalidPatientStatusCode = PatientStatusCode.INVALID;
+    invalidPatientStatusCode.code = invalidValue;
+    return invalidPatientStatusCode;
   }
 
   ExplanationOfBenefit.SupportingInformationComponent toFhir(

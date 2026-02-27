@@ -16,9 +16,11 @@ public enum ClaimDispenseStatusCode {
   /** P - Partially filled. */
   P("P", "Partially filled"),
   /** C - Completely filled. */
-  C("C", "Completely filled");
+  C("C", "Completely filled"),
+  /** INVALID - Represents an invalid code that we still want to capture. */
+  INVALID("", "");
 
-  private final String code;
+  private String code;
   private final String display;
 
   /**
@@ -28,7 +30,26 @@ public enum ClaimDispenseStatusCode {
    * @return claim dispense status code
    */
   public static Optional<ClaimDispenseStatusCode> tryFromCode(String code) {
-    return Arrays.stream(values()).filter(v -> v.code.equals(code)).findFirst();
+    if (code == null || code.isBlank()) {
+      return Optional.empty();
+    }
+    return Optional.of(
+        Arrays.stream(values())
+            .filter(v -> v.code.equals(code))
+            .findFirst()
+            .orElse(handleInvalidValue(code)));
+  }
+
+  /**
+   * Handles scenarios where code could not be mapped to a valid value.
+   *
+   * @param invalidValue the invalid value to capture
+   * @return claim dispense status code
+   */
+  public static ClaimDispenseStatusCode handleInvalidValue(String invalidValue) {
+    var invalidClaimDispenseStatusCode = ClaimDispenseStatusCode.INVALID;
+    invalidClaimDispenseStatusCode.code = invalidValue;
+    return invalidClaimDispenseStatusCode;
   }
 
   ExplanationOfBenefit.SupportingInformationComponent toFhir(

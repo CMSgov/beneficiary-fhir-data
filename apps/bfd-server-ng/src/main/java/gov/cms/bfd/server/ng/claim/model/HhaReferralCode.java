@@ -96,19 +96,40 @@ public enum HhaReferralCode {
    */
   C(
       "C",
-      "READMISSION TO SAME HHA - IF A BENEFICIARY IS DISCHARGED FROM AN HHA AND THEN READMITTED WITHIN THE ORIGINAL 60-DAY EPISODE THE ORIGINAL EPISODE MUST BE CLOSED EARLY AND A NEW ONE CREATED.");
+      "READMISSION TO SAME HHA - IF A BENEFICIARY IS DISCHARGED FROM AN HHA AND THEN READMITTED WITHIN THE ORIGINAL 60-DAY EPISODE THE ORIGINAL EPISODE MUST BE CLOSED EARLY AND A NEW ONE CREATED."),
+  /** INVALID - Represents an invalid code that we still want to capture. */
+  INVALID("", "");
 
-  private final String code;
+  private String code;
   private final String display;
 
   /**
    * Converts from a database code.
    *
    * @param code database code.
-   * @return paid switch
+   * @return HHA referral code
    */
   public static Optional<HhaReferralCode> tryFromCode(String code) {
-    return Arrays.stream(values()).filter(c -> c.code.equals(code)).findFirst();
+    if (code == null || code.isBlank()) {
+      return Optional.empty();
+    }
+    return Optional.of(
+        Arrays.stream(values())
+            .filter(c -> c.code.equals(code))
+            .findFirst()
+            .orElse(handleInvalidValue(code)));
+  }
+
+  /**
+   * Handles scenarios where code could not be mapped to a valid value.
+   *
+   * @param invalidValue the invalid value to capture
+   * @return HHA referral code
+   */
+  public static HhaReferralCode handleInvalidValue(String invalidValue) {
+    var invalidHhaReferralCode = HhaReferralCode.INVALID;
+    invalidHhaReferralCode.code = invalidValue;
+    return invalidHhaReferralCode;
   }
 
   ExplanationOfBenefit.SupportingInformationComponent toFhir(

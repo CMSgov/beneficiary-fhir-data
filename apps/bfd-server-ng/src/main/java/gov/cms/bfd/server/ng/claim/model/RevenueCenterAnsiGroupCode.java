@@ -51,19 +51,40 @@ public enum RevenueCenterAnsiGroupCode {
    */
   PR(
       "PR",
-      "Patient Responsibility -- this group should be used when the adjustment represents an amount that should be billed to the patient or insured. This group would typically be used for deductible and copay adjustments.");
+      "Patient Responsibility -- this group should be used when the adjustment represents an amount that should be billed to the patient or insured. This group would typically be used for deductible and copay adjustments."),
+  /** INVALID - Represents an invalid code that we still want to capture. */
+  INVALID("", "");
 
-  private final String code;
+  private String code;
   private final String display;
 
   /**
    * Convert from a database code.
    *
    * @param code database code
-   * @return list of FHIR codings
+   * @return revenue center ANSI group code
    */
   public static Optional<RevenueCenterAnsiGroupCode> tryFromCode(String code) {
-    return Arrays.stream(values()).filter(v -> v.code.equals(code)).findFirst();
+    if (code == null || code.isBlank()) {
+      return Optional.empty();
+    }
+    return Optional.of(
+        Arrays.stream(values())
+            .filter(v -> v.code.equals(code))
+            .findFirst()
+            .orElse(handleInvalidValue(code)));
+  }
+
+  /**
+   * Handles scenarios where code could not be mapped to a valid value.
+   *
+   * @param invalidValue the invalid value to capture
+   * @return revenue center ANSI group code
+   */
+  public static RevenueCenterAnsiGroupCode handleInvalidValue(String invalidValue) {
+    var invalidRevenueCenterAnsiGroupCode = RevenueCenterAnsiGroupCode.INVALID;
+    invalidRevenueCenterAnsiGroupCode.code = invalidValue;
+    return invalidRevenueCenterAnsiGroupCode;
   }
 
   /**

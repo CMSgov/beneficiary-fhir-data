@@ -16,9 +16,11 @@ public enum McoPaidSwitch {
   /** Unpaid. */
   UNPAID("0", "No managed care organization (MCO) payment"),
   /** Paid. */
-  PAID("1", "MCO paid provider for the claim");
+  PAID("1", "MCO paid provider for the claim"),
+  /** INVALID - Represents an invalid code that we still want to capture. */
+  INVALID("", "");
 
-  private final String code;
+  private String code;
   private final String display;
 
   /**
@@ -28,7 +30,26 @@ public enum McoPaidSwitch {
    * @return paid switch
    */
   public static Optional<McoPaidSwitch> tryFromCode(String code) {
-    return Arrays.stream(values()).filter(c -> c.code.equals(code)).findFirst();
+    if (code == null || code.isBlank()) {
+      return Optional.empty();
+    }
+    return Optional.of(
+        Arrays.stream(values())
+            .filter(c -> c.code.equals(code))
+            .findFirst()
+            .orElse(handleInvalidValue(code)));
+  }
+
+  /**
+   * Handles scenarios where code could not be mapped to a valid value.
+   *
+   * @param invalidValue the invalid value to capture
+   * @return paid switch
+   */
+  public static McoPaidSwitch handleInvalidValue(String invalidValue) {
+    var invalidMcoPaidSwitch = McoPaidSwitch.INVALID;
+    invalidMcoPaidSwitch.code = invalidValue;
+    return invalidMcoPaidSwitch;
   }
 
   ExplanationOfBenefit.SupportingInformationComponent toFhir(

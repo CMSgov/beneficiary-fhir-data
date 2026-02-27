@@ -66,9 +66,11 @@ public enum ClaimDispositionCode {
   /** SV - SECURITY VIOLATION. */
   SV("SV", "SECURITY VIOLATION"),
   /** UR - UTILIZATION REJECT. */
-  UR("UR", "UTILIZATION REJECT");
+  UR("UR", "UTILIZATION REJECT"),
+  /** INVALID - Represents an invalid code that we still want to capture. */
+  INVALID("", "");
 
-  private final String code;
+  private String code;
   private final String display;
 
   /**
@@ -78,7 +80,26 @@ public enum ClaimDispositionCode {
    * @return claim disposition code
    */
   public static Optional<ClaimDispositionCode> fromCode(String code) {
-    return Arrays.stream(values()).filter(v -> v.code.equals(code)).findFirst();
+    if (code == null || code.isBlank()) {
+      return Optional.empty();
+    }
+    return Optional.of(
+        Arrays.stream(values())
+            .filter(v -> v.code.equals(code))
+            .findFirst()
+            .orElse(handleInvalidValue(code)));
+  }
+
+  /**
+   * Handles scenarios where code could not be mapped to a valid value.
+   *
+   * @param invalidValue the invalid value to capture
+   * @return claim disposition code
+   */
+  public static ClaimDispositionCode handleInvalidValue(String invalidValue) {
+    var invalidClaimDispositionCode = ClaimDispositionCode.INVALID;
+    invalidClaimDispositionCode.code = invalidValue;
+    return invalidClaimDispositionCode;
   }
 
   ExplanationOfBenefit.SupportingInformationComponent toFhir(

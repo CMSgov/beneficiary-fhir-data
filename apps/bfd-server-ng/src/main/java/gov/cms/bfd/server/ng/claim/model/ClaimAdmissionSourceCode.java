@@ -119,9 +119,11 @@ public enum ClaimAdmissionSourceCode {
   /** Y - RESERVED FOR NATIONAL ASSIGNMENT (NON-NEWBORN). */
   Y("Y", "RESERVED FOR NATIONAL ASSIGNMENT (NON-NEWBORN)"),
   /** Z - RESERVED FOR NATIONAL ASSIGNMENT (NON-NEWBORN). */
-  Z("Z", "RESERVED FOR NATIONAL ASSIGNMENT (NON-NEWBORN)");
+  Z("Z", "RESERVED FOR NATIONAL ASSIGNMENT (NON-NEWBORN)"),
+  /** INVALID - Represents an invalid code that we still want to capture. */
+  INVALID("", "");
 
-  private final String code;
+  private String code;
   private final String display;
 
   /**
@@ -131,7 +133,20 @@ public enum ClaimAdmissionSourceCode {
    * @return claim admission source code
    */
   public static Optional<ClaimAdmissionSourceCode> tryFromCode(String code) {
-    return Arrays.stream(values()).filter(v -> v.code.equals(code)).findFirst();
+    if (code == null || code.isBlank()) {
+      return Optional.empty();
+    }
+    return Optional.of(
+        Arrays.stream(values())
+            .filter(v -> v.code.equals(code))
+            .findFirst()
+            .orElse(handleInvalidValue(code)));
+  }
+
+  private static ClaimAdmissionSourceCode handleInvalidValue(String invalidValue) {
+    var invalidClaimAdmissionSourceCode = ClaimAdmissionSourceCode.INVALID;
+    invalidClaimAdmissionSourceCode.code = invalidValue;
+    return invalidClaimAdmissionSourceCode;
   }
 
   ExplanationOfBenefit.SupportingInformationComponent toFhir(

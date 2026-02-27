@@ -59,9 +59,11 @@ public enum ClaimAdmissionTypeCode {
   /** 8 - Reserved. */
   _8("8", "Reserved"),
   /** 9 - Unknown - Information not available. */
-  _9("9", "Unknown - Information not available.");
+  _9("9", "Unknown - Information not available."),
+  /** INVALID - Represents an invalid code that we still want to capture. */
+  INVALID("", "");
 
-  private final String code;
+  private String code;
   private final String display;
 
   /**
@@ -71,7 +73,26 @@ public enum ClaimAdmissionTypeCode {
    * @return claim admission type code
    */
   public static Optional<ClaimAdmissionTypeCode> tryFromCode(String code) {
-    return Arrays.stream(values()).filter(v -> v.code.equals(code)).findFirst();
+    if (code == null || code.isBlank()) {
+      return Optional.empty();
+    }
+    return Optional.of(
+        Arrays.stream(values())
+            .filter(v -> v.code.equals(code))
+            .findFirst()
+            .orElse(handleInvalidValue(code)));
+  }
+
+  /**
+   * Handles scenarios where code could not be mapped to a valid value.
+   *
+   * @param invalidValue the invalid value to capture
+   * @return claim admission type code
+   */
+  public static ClaimAdmissionTypeCode handleInvalidValue(String invalidValue) {
+    var invalidClaimAdmissionTypeCode = ClaimAdmissionTypeCode.INVALID;
+    invalidClaimAdmissionTypeCode.code = invalidValue;
+    return invalidClaimAdmissionTypeCode;
   }
 
   ExplanationOfBenefit.SupportingInformationComponent toFhir(

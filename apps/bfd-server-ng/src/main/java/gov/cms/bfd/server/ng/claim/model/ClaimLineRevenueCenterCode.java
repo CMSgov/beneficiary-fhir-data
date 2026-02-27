@@ -1442,9 +1442,11 @@ public enum ClaimLineRevenueCenterCode {
   /** 3105 - ADULT CARE - ADULT FOSTER CARE - DAILY. */
   _3105("3105", "ADULT CARE - ADULT FOSTER CARE - DAILY"),
   /** 3109 - ADULT CARE - OTHER ADULT CARE. */
-  _3109("3109", "ADULT CARE - OTHER ADULT CARE");
+  _3109("3109", "ADULT CARE - OTHER ADULT CARE"),
+  /** INVALID - Represents an invalid code that we still want to capture. */
+  INVALID("", "");
 
-  private final String code;
+  private String code;
   private final String display;
 
   /**
@@ -1454,7 +1456,26 @@ public enum ClaimLineRevenueCenterCode {
    * @return revenue center code
    */
   public static Optional<ClaimLineRevenueCenterCode> tryFromCode(String code) {
-    return Arrays.stream(values()).filter(v -> v.code.equals(code)).findFirst();
+    if (code == null || code.isBlank()) {
+      return Optional.empty();
+    }
+    return Optional.of(
+        Arrays.stream(values())
+            .filter(v -> v.code.equals(code))
+            .findFirst()
+            .orElse(handleInvalidValue(code)));
+  }
+
+  /**
+   * Handles scenarios where code could not be mapped to a valid value.
+   *
+   * @param invalidValue the invalid value to capture
+   * @return revenue center code
+   */
+  public static ClaimLineRevenueCenterCode handleInvalidValue(String invalidValue) {
+    var invalidClaimLineRevenueCenterCode = ClaimLineRevenueCenterCode.INVALID;
+    invalidClaimLineRevenueCenterCode.code = invalidValue;
+    return invalidClaimLineRevenueCenterCode;
   }
 
   CodeableConcept toFhir(Optional<ClaimLineDeductibleCoinsuranceCode> deductibleCoinsuranceCode) {

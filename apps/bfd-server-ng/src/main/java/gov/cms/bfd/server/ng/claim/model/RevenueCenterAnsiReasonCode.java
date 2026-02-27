@@ -557,9 +557,11 @@ public enum RevenueCenterAnsiReasonCode {
       "B23",
       "Claim/service denied because this provider has failed an aspect of a proficiency testing program."),
   /** W1 - Workers Compensation State Fee Schedule Adjustment. */
-  W1("W1", "Workers Compensation State Fee Schedule Adjustment.");
+  W1("W1", "Workers Compensation State Fee Schedule Adjustment."),
+  /** INVALID - Represents an invalid code that we still want to capture. */
+  INVALID("", "");
 
-  private final String code;
+  private String code;
   private final String display;
 
   /**
@@ -569,7 +571,26 @@ public enum RevenueCenterAnsiReasonCode {
    * @return ANSI adjustment reason code
    */
   public static Optional<RevenueCenterAnsiReasonCode> tryFromCode(String code) {
-    return Arrays.stream(values()).filter(v -> v.code.equals(code)).findFirst();
+    if (code == null || code.isBlank()) {
+      return Optional.empty();
+    }
+    return Optional.of(
+        Arrays.stream(values())
+            .filter(v -> v.code.equals(code))
+            .findFirst()
+            .orElse(handleInvalidValue(code)));
+  }
+
+  /**
+   * Handles scenarios where code could not be mapped to a valid value.
+   *
+   * @param invalidValue the invalid value to capture
+   * @return ANSI adjustment reason code
+   */
+  public static RevenueCenterAnsiReasonCode handleInvalidValue(String invalidValue) {
+    var invalidRevenueCenterAnsiReasonCode = RevenueCenterAnsiReasonCode.INVALID;
+    invalidRevenueCenterAnsiReasonCode.code = invalidValue;
+    return invalidRevenueCenterAnsiReasonCode;
   }
 
   /**

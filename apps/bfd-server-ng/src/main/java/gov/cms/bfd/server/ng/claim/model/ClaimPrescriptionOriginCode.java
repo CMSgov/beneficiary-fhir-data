@@ -25,9 +25,11 @@ public enum ClaimPrescriptionOriginCode {
   /** 4 - Facsimile. */
   _4("4", "Facsimile"),
   /** 5 - Pharmacy. */
-  _5("5", "Pharmacy");
+  _5("5", "Pharmacy"),
+  /** INVALID - Represents an invalid code that we still want to capture. */
+  INVALID("", "");
 
-  private final String code;
+  private String code;
   private final String display;
 
   /**
@@ -37,7 +39,26 @@ public enum ClaimPrescriptionOriginCode {
    * @return Prescription Origination Code
    */
   public static Optional<ClaimPrescriptionOriginCode> tryFromCode(String code) {
-    return Arrays.stream(values()).filter(v -> v.code.equals(code)).findFirst();
+    if (code == null || code.isBlank()) {
+      return Optional.empty();
+    }
+    return Optional.of(
+        Arrays.stream(values())
+            .filter(v -> v.code.equals(code))
+            .findFirst()
+            .orElse(handleInvalidValue(code)));
+  }
+
+  /**
+   * Handles scenarios where code could not be mapped to a valid value.
+   *
+   * @param invalidValue the invalid value to capture
+   * @return Prescription Origination Code
+   */
+  public static ClaimPrescriptionOriginCode handleInvalidValue(String invalidValue) {
+    var invalidClaimPrescriptionOriginCode = ClaimPrescriptionOriginCode.INVALID;
+    invalidClaimPrescriptionOriginCode.code = invalidValue;
+    return invalidClaimPrescriptionOriginCode;
   }
 
   ExplanationOfBenefit.SupportingInformationComponent toFhir(

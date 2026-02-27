@@ -20,9 +20,11 @@ public enum ClaimLineCompoundCode {
   /** 1 - Not a compound. */
   _1("1", "Not a compound"),
   /** 2 - Compound. */
-  _2("2", "Compound");
+  _2("2", "Compound"),
+  /** INVALID - Represents an invalid code that we still want to capture. */
+  INVALID("", "");
 
-  private final String code;
+  private String code;
   private final String display;
 
   /**
@@ -32,7 +34,26 @@ public enum ClaimLineCompoundCode {
    * @return genric brand indicator code
    */
   public static Optional<ClaimLineCompoundCode> tryFromCode(String code) {
-    return Arrays.stream(values()).filter(v -> v.code.equals(code)).findFirst();
+    if (code == null || code.isBlank()) {
+      return Optional.empty();
+    }
+    return Optional.of(
+        Arrays.stream(values())
+            .filter(v -> v.code.equals(code))
+            .findFirst()
+            .orElse(handleInvalidValue(code)));
+  }
+
+  /**
+   * Handles scenarios where code could not be mapped to a valid value.
+   *
+   * @param invalidValue the invalid value to capture
+   * @return genric brand indicator code
+   */
+  public static ClaimLineCompoundCode handleInvalidValue(String invalidValue) {
+    var invalidClaimLineCompoundCode = ClaimLineCompoundCode.INVALID;
+    invalidClaimLineCompoundCode.code = invalidValue;
+    return invalidClaimLineCompoundCode;
   }
 
   ExplanationOfBenefit.SupportingInformationComponent toFhir(
