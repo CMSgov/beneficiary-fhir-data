@@ -3,7 +3,7 @@ import shutil
 import subprocess
 import time
 from collections.abc import Generator
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import cast
 
@@ -18,6 +18,9 @@ from testcontainers.postgres import PostgresContainer  # type: ignore
 from constants import DEFAULT_MAX_DATE
 from load_synthetic import load_from_csv
 from pipeline import run
+from settings import (
+    bfd_test_date,
+)
 
 # ryuk throws a 500 or 404 error for some reason
 # seems to have issues with podman https://github.com/testcontainers/testcontainers-python/issues/753
@@ -71,26 +74,8 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
         psycopg.Connection[DictRow],
         psycopg.connect(setup_db.get_connection_url(), row_factory=dict_row),  # type: ignore
     )
-    datetime_now = datetime.now(UTC)
 
-    # Update dates to CURRENT_DATE before pipeline.py
-    # Reason: PAC data older than 60 days is filtered by coalescing
-    # (idr_updt_ts, idr_insrt_ts, clm_idr_ld_dt). Synthetic data has
-    # outdated idr_updt_ts, idr_insrt_ts, and clm_idr_ld_dt values.
-    # Update all values to current dates then change specific dates
-    # to older than 60 days to test the functionality.
-    conn.execute(
-        """
-            UPDATE cms_vdm_view_mdcr_prd.v2_mdcr_clm
-            SET idr_insrt_ts=%(timestamp)s,
-                idr_updt_ts=%(timestamp)s,
-                clm_idr_ld_dt=%(today)s
-            """,
-        {
-            "timestamp": datetime_now,
-            "today": datetime_now.date(),
-        },
-    )
+    datetime_now = bfd_test_date()
 
     conn.execute(
         """
@@ -154,7 +139,7 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
         SET bene_mbi_id = '1S000000000', idr_insrt_ts=%(timestamp)s, idr_updt_ts=%(timestamp)s
         WHERE bene_sk = 10464258
         """,
-        {"timestamp": datetime.now(UTC)},
+        {"timestamp": datetime_now},
     )
     conn.commit()
 

@@ -1,10 +1,7 @@
 package gov.cms.bfd.server.ng.util;
 
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.util.Date;
 import org.hl7.fhir.r4.model.DateTimeType;
 
@@ -74,9 +71,10 @@ public class DateUtil {
    * <a href="https://en.wikipedia.org/wiki/Anywhere_on_Earth">"Anywhere on Earth"</a> time which
    * indicates a period that expires when the date passes everywhere on Earth.
    *
+   * @param clock A date to check for AOE, defaults to now if null.
    * @return local date
    */
-  public static LocalDate nowAoe() {
-    return LocalDate.now(ZoneId.of("-12:00"));
+  public static LocalDate nowAoe(Clock clock) {
+    return LocalDate.now(clock.withZone(ZoneId.of("-12:00")));
   }
 }
