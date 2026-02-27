@@ -150,6 +150,21 @@ class AdjudicatedGeneratorUtil:
             clm[f.CLM_BLG_PRVDR_ZIP5_CD] = random.choice(["75205", "77550", "77005"])
             clm[f.CLM_RLT_COND_SGNTR_SK] = random.choice(AVAIL_CLM_RLT_COND_SK)
 
+            if probability(0.5):
+                enhancement_options = ["", "1", "2", "3", "4", "5", "7"]
+                used_enhancements = set()
+                for i in range(1, 6):
+                    field_key = getattr(f, f"CLM_BNFT_ENHNCMT_{i}_CD")
+                    val = random.choice(enhancement_options)
+                    clm[field_key] = val
+                    used_enhancements.add(val)
+                clm[f.CLM_NGACO_PBPMT_SW] = "Y" if "1" in used_enhancements else "N"
+                clm[f.CLM_NGACO_PDSCHRG_HCBS_SW] = "Y" if "3" in used_enhancements else "N"
+                clm[f.CLM_NGACO_SNF_WVR_SW] = "Y" if "4" in used_enhancements else "N"
+                clm[f.CLM_NGACO_TLHLTH_SW] = "Y" if "2" in used_enhancements else "N"
+                clm[f.CLM_NGACO_CPTATN_SW] = "Y" if "5" in used_enhancements else "N"
+                clm[f.CLM_ACO_CARE_MGMT_HCBS_SW] = "Y" if "7" in used_enhancements else "N"
+
         if clm_type_cd == 40 or (clm_type_cd > 70 and clm_type_cd <= 82):
             clm[f.PRVDR_RFRG_PRVDR_NPI_NUM] = random.choice(TYPE_1_NPIS)
         if clm_type_cd > 70 and clm_type_cd <= 82:
@@ -752,6 +767,25 @@ class AdjudicatedGeneratorUtil:
                 clm_line[f.CLM_LINE_ANSTHSA_UNIT_CNT] = random.uniform(0, 10)
             if random.choice([0, 15]) == 7:
                 clm_line[f.CLM_LINE_RX_NUM] = random.choice(["1234", "423482347"])
+
+            if probability(0.5):
+                enhancement_options = ["", "1", "2", "3", "4", "5", "7"]
+                used_enhancements = set()
+                for i in range(1, 6):
+                    field_key = getattr(f, f"CLM_LINE_BNFT_ENHNCMT_{i}_CD")
+                    val = random.choice(enhancement_options)
+                    clm_line[field_key] = val
+                    used_enhancements.add(val)
+                clm_line[f.CLM_LINE_NGACO_PBPMT_SW] = "Y" if "1" in used_enhancements else "N"
+                clm_line[f.CLM_LINE_NGACO_PDSCHRG_HCBS_SW] = (
+                    "Y" if "3" in used_enhancements else "N"
+                )
+                clm_line[f.CLM_LINE_NGACO_SNF_WVR_SW] = "Y" if "4" in used_enhancements else "N"
+                clm_line[f.CLM_LINE_NGACO_TLHLTH_SW] = "Y" if "2" in used_enhancements else "N"
+                clm_line[f.CLM_LINE_NGACO_CPTATN_SW] = "Y" if "5" in used_enhancements else "N"
+                clm_line[f.CLM_LINE_ACO_CARE_MGMT_HCBS_SW] = (
+                    "Y" if "7" in used_enhancements else "N"
+                )
 
         if clm_type_cd == 81 or clm_type_cd == 82:
             clm_line[f.PRVDR_RNDRNG_PRVDR_NPI_NUM] = random.choice(TYPE_1_NPIS)

@@ -50,9 +50,93 @@ group addSupportingInfo(source src: SupportingInfoComponent, target tgt: Backbon
             src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","CLM_LINE_HCT_HGB_RSLT_NUM") "Add Coding";
         } "Add category";
      } "set category";
-    
-     
+
+    src.CLM_BNFT_ENHNCMT_CD as code -> tgt then addBenefitEnhancementCode(code,tgt) "Add benefit enhancement code 1";
+
+    src.CLM_NGACO_PBPMT_SW as sw -> tgt then addPBPMTSwitch(src,tgt) "Add switch";
+    src.CLM_NGACO_PDSCHRG_HCBS_SW as sw -> tgt then addPdschrgSwitch(src,tgt) "Add switch";
+    src.CLM_NGACO_SNF_WVR_SW as sw -> tgt then addSnfSwitch(src,tgt) "Add switch";
+    src.CLM_NGACO_TLHLTH_SW as sw -> tgt then addTeleSwitch(src,tgt) "Add switch";
+    src.CLM_NGACO_CPTATN_SW as sw -> tgt then addCptatnSwitch(src,tgt) "Add switch";
+    src.CLM_ACO_CARE_MGMT_HCBS_SW as sw -> tgt then addCareMgmtSwitch(src,tgt) "Add switch";
+
+    /*
+    src.CLM_LINE_NGACO_PBPMT_SW as sw -> tgt then addPBPMTSwitch(src,tgt) "Add switch";
+    src.CLM_LINE_NGACO_PDSCHRG_HCBS_SW as sw -> tgt then addPdschrgSwitch(src,tgt) "Add switch";
+    src.CLM_LINE_NGACO_SNF_WVR_SW as sw -> tgt then addSnfSwitch(src,tgt) "Add switch";
+    src.CLM_LINE_NGACO_TLHLTH_SW as sw -> tgt then addTeleSwitch(src,tgt) "Add switch";
+    src.CLM_LINE_NGACO_CPTATN_SW as sw -> tgt then addCptatnSwitch(src,tgt) "Add switch";
+    src.CLM_LINE_ACO_CARE_MGMT_HCBS_SW as sw -> tgt then addCareMgmtSwitch(src,tgt) "Add switch";
+*/
 }
+
+//Note: the input in the base is header-level (institutional) and line-item level for professional claims. 
+//We consolidate them in augment_sample_resources and use a pointer to them from line-items, where appropriate. Otherwise it's
+//implied that they are header-level. 
+group addPBPMTSwitch(source src: SupportingInfoComponent, target tgt: BackboneElement){
+    src -> tgt.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","CLM_NGACO_PBPMT_SW") "Add Coding";
+    } "Add category";
+    src -> tgt.code = create('CodeableConcept') as tgtCC then {
+        src.CLM_NGACO_PBPMT_SW as val -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD-SWITCH",val) "Add coding";
+    } "Add CC";
+}
+group addPdschrgSwitch(source src: SupportingInfoComponent, target tgt: BackboneElement){
+    src -> tgt.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","CLM_NGACO_PDSCHRG_HCBS_SW") "Add Coding";
+    } "Add category";
+    src -> tgt.code = create('CodeableConcept') as tgtCC then {
+        src.CLM_NGACO_PDSCHRG_HCBS_SW as val -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD-SWITCH",val) "Add coding";
+    } "Add CC";
+}
+group addSnfSwitch(source src: SupportingInfoComponent, target tgt: BackboneElement){
+    src -> tgt.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","CLM_NGACO_SNF_WVR_SW") "Add Coding";
+    } "Add category";
+    src -> tgt.code = create('CodeableConcept') as tgtCC then {
+        src.CLM_NGACO_SNF_WVR_SW as val -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD-SWITCH",val) "Add coding";
+    } "Add CC";
+}
+group addTeleSwitch(source src: SupportingInfoComponent, target tgt: BackboneElement){
+    src -> tgt.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","CLM_NGACO_TLHLTH_SW") "Add Coding";
+    } "Add category";
+    src -> tgt.code = create('CodeableConcept') as tgtCC then {
+        src.CLM_NGACO_TLHLTH_SW as val -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD-SWITCH",val) "Add coding";
+    } "Add CC";
+}
+group addCptatnSwitch(source src: SupportingInfoComponent, target tgt: BackboneElement){
+    src -> tgt.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","CLM_NGACO_CPTATN_SW") "Add Coding";
+    } "Add category";
+    src -> tgt.code = create('CodeableConcept') as tgtCC then {
+        src.CLM_NGACO_CPTATN_SW as val -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD-SWITCH",val) "Add coding";
+    } "Add CC";
+}
+group addCareMgmtSwitch(source src: SupportingInfoComponent, target tgt: BackboneElement){
+    src -> tgt.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","CLM_ACO_CARE_MGMT_HCBS_SW") "Add Coding";
+    } "Add category";
+    src -> tgt.code = create('CodeableConcept') as tgtCC then {
+        src.CLM_ACO_CARE_MGMT_HCBS_SW as val -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD-SWITCH",val) "Add coding";
+    } "Add CC";
+}
+
+group addBenefitEnhancementCode(source src: string, target tgt: BackboneElement){
+    src.ROW_NUM as seqNum -> tgt.sequence = seqNum "set sequence number";
+    src -> tgt.category = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","CLM_BNFT_ENHNCMT_CD") "Add Coding";
+    } "Add category";
+    src as code -> tgt.code = cc("https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD",code) "add benefit enhancement code";
+}
+
 
 //To get the individual codes, join V2_MDCR_CLM.CLM_RLT_COND_SGNTR_SK to V2_MDCR_CLM_RLT_COND_SGNTR_MBR, and for each CLM_RLT_COND_SGNTR_SQNC_NUM, there should be a CLM_RLT_COND_CD populated. EG clm_rlt_cond_sgntr_sk 89543 would have 5 CLM_RLT_COND_CD
 //If the SK value is 0 or 1, don't populate these supportingInfo elements (eg Part D / Professional claims don't have them. This is institutional only.)
