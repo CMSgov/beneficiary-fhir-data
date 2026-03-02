@@ -3,54 +3,73 @@ import sys
 from dataclasses import asdict, dataclass, field
 from decimal import Decimal
 from pathlib import Path
+from typing import Optional
 
 import pandas as pd
 
 prvdr_info_file = "sample-data/PRVDR_HSTRY_POC.csv"
 df = pd.read_csv(prvdr_info_file, dtype={"PRVDR_SK": str})
-df.head()
 
 cur_sample = sys.argv[1]
 cur_sample_data = {}
 with Path(cur_sample).open("r") as file:
     cur_sample_data = json.load(file)
 
-header_columns = {
-    "PRVDR_BLG_PRVDR_NPI_NUM": "",
+OTHR_PRVDR_MEANING = (
+    "supervisor" if cur_sample_data.get("CLM_TYPE_CD") in ("1700", "2700") else "otheroperating"
+)
+
+careteam_header_columns = {
     "PRVDR_RFRG_PRVDR_NPI_NUM": "referring",
-    "PRVDR_OTHR_PRVDR_NPI_NUM": "otheroperating",
+    "PRVDR_OTHR_PRVDR_NPI_NUM": OTHR_PRVDR_MEANING,
     "PRVDR_ATNDG_PRVDR_NPI_NUM": "attending",
     "PRVDR_OPRTG_PRVDR_NPI_NUM": "operating",
     "PRVDR_RNDRNG_PRVDR_NPI_NUM": "rendering",
-    "PRVDR_PRSCRBNG_PRVDR_NPI_NUM": "prescribing",
+    "CLM_PRSBNG_PRVDR_GNRC_ID_NUM": "prescribing",
+    # This is purposely commented out to note we do not pull it in on the careteam (for now).
     "PRVDR_SRVC_PRVDR_NPI_NUM": "",
-}
-line_columns = {
-    "PRVDR_RNDRNG_PRVDR_NPI_NUM": "rendering",
-    "CLM_LINE_ORDRG_PRVDR_NPI_NUM": "",
-    "CLM_FAC_PRVDR_NPI_NUM": "",
 }
 
 line_supporting_info_columns = [
     "CLM_LINE_PMD_UNIQ_TRKNG_NUM",
     "CLM_LINE_PA_UNIQ_TRKNG_NUM",
 ]
+header_to_supp_info_cols = {
+    "CLM_BNFT_ENHNCMT_1_CD": "CLM_BNFT_ENHNCMT_CD",
+    "CLM_BNFT_ENHNCMT_2_CD": "CLM_BNFT_ENHNCMT_CD",
+    "CLM_BNFT_ENHNCMT_3_CD": "CLM_BNFT_ENHNCMT_CD",
+    "CLM_BNFT_ENHNCMT_4_CD": "CLM_BNFT_ENHNCMT_CD",
+    "CLM_BNFT_ENHNCMT_5_CD": "CLM_BNFT_ENHNCMT_CD",
+    "CLM_NGACO_PBPMT_SW": "CLM_NGACO_PBPMT_SW",
+    "CLM_NGACO_PDSCHRG_HCBS_SW": "CLM_NGACO_PDSCHRG_HCBS_SW",
+    "CLM_NGACO_SNF_WVR_SW": "CLM_NGACO_SNF_WVR_SW",
+    "CLM_NGACO_TLHLTH_SW": "CLM_NGACO_TLHLTH_SW",
+    "CLM_NGACO_CPTATN_SW": "CLM_NGACO_CPTATN_SW",
+    "CLM_ACO_CARE_MGMT_HCBS_SW": "CLM_ACO_CARE_MGMT_HCBS_SW",
+}
+
+line_to_supp_info_cols = {
+    "CLM_LINE_BNFT_ENHNCMT_1_CD": "CLM_BNFT_ENHNCMT_CD",
+    "CLM_LINE_BNFT_ENHNCMT_2_CD": "CLM_BNFT_ENHNCMT_CD",
+    "CLM_LINE_BNFT_ENHNCMT_3_CD": "CLM_BNFT_ENHNCMT_CD",
+    "CLM_LINE_BNFT_ENHNCMT_4_CD": "CLM_BNFT_ENHNCMT_CD",
+    "CLM_LINE_BNFT_ENHNCMT_5_CD": "CLM_BNFT_ENHNCMT_CD",
+    "CLM_LINE_NGACO_PBPMT_SW": "CLM_NGACO_PBPMT_SW",
+    "CLM_LINE_NGACO_PDSCHRG_HCBS_SW": "CLM_NGACO_PDSCHRG_HCBS_SW",
+    "CLM_LINE_NGACO_SNF_WVR_SW": "CLM_NGACO_SNF_WVR_SW",
+    "CLM_LINE_NGACO_TLHLTH_SW": "CLM_NGACO_TLHLTH_SW",
+    "CLM_LINE_NGACO_CPTATN_SW": "CLM_NGACO_CPTATN_SW",
+    "CLM_LINE_ACO_CARE_MGMT_HCBS_SW": "CLM_ACO_CARE_MGMT_HCBS_SW",
+}
+
 npis_used = []
 cur_sample_data["providerList"] = []
 cur_careteam_sequence = 1
-# we only use PRVDR_SRVC_PRVDR_NPI_NUM for part D events.
+# we only use CLM_SRVC_PRVDR_GNRC_ID_NUM for part D events (we filter for PRVDR_SRVC_NPI_)
 if cur_sample_data.get("CLM_TYPE_CD") not in (1, 2, 3, 4):
-    header_columns.pop("PRVDR_SRVC_PRVDR_NPI_NUM")
-
-populate_fields_except_na = [
-    "PRVDR_LGL_NAME",
-    "PRVDR_OSCAR_NUM",
-    "PRVDR_LAST_NAME",
-    "PRVDR_1ST_NAME",
-    "PRVDR_MDL_NAME",
-    "PRVDR_TYPE_CD",
-]
-provider_list = []
+    billing_column = "PRVDR_BLG_PRVDR_NPI_NUM"
+else:
+    billing_column = "CLM_SRVC_PRVDR_GNRC_ID_NUM"
 
 rx_line_financial_fields = [
     "CLM_LINE_INGRDNT_CST_AMT",
@@ -66,62 +85,163 @@ def convert_to_decimal(val: str | None) -> Decimal:
     except (TypeError, ValueError):
         return 0.0
 
+@dataclass
+class Provider:
+    PRVDR_SK: Optional[str] = None
+    PRVDR_ID_QLFYR_CD: Optional[str] = None
+    NPI_TYPE: Optional[str] = None
+    careTeamType: Optional[str] = None
+    careTeamSequenceNumber: Optional[str] = None
+    PRVDR_LAST_OR_LGL_NAME: Optional[str] = None
+    PRVDR_1ST_NAME: Optional[str] = None
+    PRVDR_CARETEAM_NAME: Optional[str] = None
+    specialtyCode: Optional[str] = None
+    PRVDR_OSCAR_NUM: Optional[str] = None
+    CLM_BLG_PRVDR_ZIP5_CD: Optional[str] = None
+    CLM_PRVDR_GNRC_ID_NUM: Optional[str] = None
+    CLM_BLG_PRVDR_TAX_NUM: Optional[str] = None
+
+provider_list = []
+
+populate_fields_except_na = [
+    "PRVDR_LGL_NAME",
+    "PRVDR_OSCAR_NUM",
+    "PRVDR_LAST_NAME",
+    "PRVDR_1ST_NAME",
+    "PRVDR_MDL_NAME",
+    "PRVDR_TYPE_CD",
+]
+provider_list = []
 
 # There may be an opportunity to consolidate even the duplicate NPIs into a
 # single careTeam reference, but we should wait to get feedback on this
 # The reason being: it's possible to lose context on rendering vs ordering
-for column in header_columns:
-    if column not in cur_sample_data:
-        continue
-    provider_object = {}
-    provider_object["PRVDR_SK"] = cur_sample_data.get(column)
-    if provider_object.get("PRVDR_SK") in npis_used:
-        provider_object["isDuplicate"] = True
+def create_billing_and_service_provider(billing_col_name):
+    provider_object = Provider(PRVDR_LAST_OR_LGL_NAME="N/A")
+
+    qualifier = cur_sample_data.get("PRVDR_SRVC_ID_QLFYR_CD")
+    if qualifier:
+        provider_object.PRVDR_ID_QLFYR_CD = qualifier
+        provider_object.CLM_PRVDR_GNRC_ID_NUM = cur_sample_data.get("CLM_SRVC_PRVDR_GNRC_ID_NUM")
+    if qualifier in ("01", None):
+        # Only pull NPI data if it's an NPI
+        npi_num = cur_sample_data.get(billing_col_name)
+        prvdr_hstry_for_npi = json.loads(df[df["PRVDR_SK"] == str(npi_num)].iloc[0].to_json())
+        provider_object.NPI_TYPE = "2" if prvdr_hstry_for_npi.get("PRVDR_LGL_NAME") else "1"
+        provider_object.PRVDR_SK = npi_num
+        provider_object.PRVDR_LAST_OR_LGL_NAME = (
+            prvdr_hstry_for_npi["PRVDR_LGL_NAME"]
+            if provider_object.NPI_TYPE == "2"
+            else prvdr_hstry_for_npi["PRVDR_LAST_NAME"]
+        )
+        if prvdr_hstry_for_npi.get("PRVDR_1ST_NAME"):
+            provider_object.PRVDR_1ST_NAME = prvdr_hstry_for_npi.get("PRVDR_1ST_NAME")
+        if cur_sample_data.get("CLM_BLG_PRVDR_OSCAR_NUM"):
+            provider_object.PRVDR_OSCAR_NUM = cur_sample_data.get("CLM_BLG_PRVDR_OSCAR_NUM")
+        if cur_sample_data.get("CLM_BLG_PRVDR_TAX_NUM"):
+            provider_object.CLM_BLG_PRVDR_TAX_NUM = cur_sample_data.get("CLM_BLG_PRVDR_TAX_NUM")
+        if cur_sample_data.get("CLM_BLG_PRVDR_ZIP5_CD"):
+            provider_object.CLM_BLG_PRVDR_ZIP5_CD = cur_sample_data.get("CLM_BLG_PRVDR_ZIP5_CD")
+
+        if qualifier == "01":
+            provider_object.PRVDR_SK = cur_sample_data.get("CLM_SRVC_PRVDR_GNRC_ID_NUM")
+        # set other fields according to NPPES
     else:
-        npis_used.append(provider_object.get("PRVDR_SK"))
+        # only relevant to PDE.
+        provider_object.CLM_PRVDR_GNRC_ID_NUM = cur_sample_data["CLM_SRVC_PRVDR_GNRC_ID_NUM"]
+    return provider_object
 
-    prvdr_hstry_for_npi = json.loads(
-        df[df["PRVDR_SK"] == str(provider_object.get("PRVDR_SK"))].iloc[0].to_json()
+provider_list.append(create_billing_and_service_provider(billing_column))
+
+# For careteam elements, we don't need OSCAR number, TAX num (it's line-item), etc.
+# We DO care about qualifiers + taxonomy, so we have a separate method.
+def create_careteam_provider(careteam_column):
+    provider_object = Provider(PRVDR_CARETEAM_NAME="N/A")
+    qualifier = cur_sample_data.get("PRVDR_PRSBNG_ID_QLFYR_CD")
+    if qualifier:
+        provider_object.PRVDR_ID_QLFYR_CD = qualifier
+        provider_object.CLM_PRVDR_GNRC_ID_NUM = cur_sample_data.get("CLM_PRSBNG_PRVDR_GNRC_ID_NUM")
+    if qualifier in ("01", None):
+        # Only pull NPI data if it's an NPI
+        npi_num = cur_sample_data.get(careteam_column)
+        prvdr_hstry_for_npi = json.loads(df[df["PRVDR_SK"] == str(npi_num)].iloc[0].to_json())
+        provider_object.NPI_TYPE = "2" if prvdr_hstry_for_npi.get("PRVDR_LGL_NAME") else "1"
+        provider_object.PRVDR_SK = npi_num
+        # set a default name using PRVDR_HSTRY if not available.
+        provider_object.PRVDR_CARETEAM_NAME = (
+            prvdr_hstry_for_npi["PRVDR_LGL_NAME"]
+            if provider_object.NPI_TYPE == "2"
+            else prvdr_hstry_for_npi["PRVDR_LAST_NAME"]
+            + ", "
+            + prvdr_hstry_for_npi["PRVDR_1ST_NAME"]
+        )
+
+        provider_object.careTeamType = careteam_header_columns.get(careteam_column)
+        if qualifier:
+            provider_object.PRVDR_SK = cur_sample_data.get("CLM_PRSBNG_PRVDR_GNRC_ID_NUM")
+        else:  # taxonomy codes only present in non-PDE
+            cur_prov_type = careteam_column.split("_")[1]
+            cur_specialty_code_col = "CLM_" + cur_prov_type + "_FED_PRVDR_SPCLTY_CD"
+            if cur_sample_data.get(cur_specialty_code_col):
+                provider_object.specialtyCode = cur_sample_data.get(cur_specialty_code_col)
+            cur_prvdr_name_col = "CLM_" + cur_prov_type + "_PRVDR_NAME"
+            if cur_sample_data.get(cur_prvdr_name_col):
+                provider_object.PRVDR_CARETEAM_NAME = cur_sample_data.get(cur_prvdr_name_col)
+    else:
+        provider_object.CLM_PRVDR_GNRC_ID_NUM = cur_sample_data["CLM_PRSBNG_PRVDR_GNRC_ID_NUM"]
+    return provider_object
+
+
+for careteam_column in careteam_header_columns:
+    if careteam_column not in cur_sample_data:
+        continue
+    provider_object = create_careteam_provider(careteam_column)
+    provider_object.careTeamSequenceNumber = sum(
+        1 for item in provider_list if provider_object.careTeamType
     )
-    provider_object["NPI_TYPE"] = "2" if prvdr_hstry_for_npi.get("PRVDR_LGL_NAME") else "1"
-
-    provider_object.update(
-        {
-            fld: prvdr_hstry_for_npi[fld]
-            for fld in populate_fields_except_na
-            if prvdr_hstry_for_npi.get(fld)
-        }
-    )
-
-    if prvdr_hstry_for_npi.get("PRVDR_TXNMY_CMPST_CD"):
-        taxonomy_val = prvdr_hstry_for_npi.get("PRVDR_TXNMY_CMPST_CD")
-        taxonomy_codes = [taxonomy_val[i : i + 10] for i in range(len(taxonomy_val), 10)]
-        provider_object["taxonomyCodes"] = taxonomy_codes
-
-    # assign care team type + sequence for header-level info
-    if len(header_columns.get(column)) > 0:
-        provider_object["careTeamType"] = header_columns.get(column)
-        provider_object["careTeamSequenceNumber"] = cur_careteam_sequence
-        cur_careteam_sequence += 1
-
-        line_items = cur_sample_data.get("lineItemComponents", [])
-        for item in line_items:
-            # If there's a column that matches the header level NPI at the line level,
-            # then we want to populate the sequence.
-            # Because there can be multiple rendering providers on line items,
-            # we need to ensure those NPIs match.
-            if column in item and item.get(column) == cur_sample_data.get(column):
-                if item.get("careTeamSequences"):
-                    item["careTeamSequence"].append(provider_object.get("careTeamSequenceNumber"))
-                else:
-                    item["careTeamSequence"] = [provider_object.get("careTeamSequenceNumber")]
-
-    # We may want to remove this in the future, depending on requirements
-    # regarding address info.
-    if column == "PRVDR_BLG_PRVDR_NPI_NUM" and "CLM_BLG_PRVDR_ZIP5_CD" in cur_sample_data:
-        provider_object["prvdr_zip"] = cur_sample_data.get("CLM_BLG_PRVDR_ZIP5_CD")
-
     provider_list.append(provider_object)
+
+
+# Distinct method since line items end up cleaner
+def create_rendering_line_provider(npi_num):
+    provider_object = Provider(
+        PRVDR_SK=npi_num, careTeamType="rendering", PRVDR_CARETEAM_NAME="N/A"
+    )
+    prvdr_hstry_for_npi = json.loads(df[df["PRVDR_SK"] == str(npi_num)].iloc[0].to_json())
+    provider_object.NPI_TYPE = "2" if prvdr_hstry_for_npi.get("PRVDR_LGL_NAME") else "1"
+    provider_object.PRVDR_CARETEAM_NAME = (
+        prvdr_hstry_for_npi["PRVDR_LGL_NAME"]
+        if provider_object.NPI_TYPE == "2"
+        else prvdr_hstry_for_npi["PRVDR_LAST_NAME"] + ", " + prvdr_hstry_for_npi["PRVDR_1ST_NAME"]
+    )
+    return provider_object
+
+# now we go through the line items!
+for line_item in cur_sample_data["lineItemComponents"]:
+    # we only care about PRVDR_RNDRNG_PRVDR_NPI_NUM
+    cur_rendering_providers = [
+        x.PRVDR_SK for x in provider_list if getattr(x, "careTeamType", None) == "rendering"
+    ]
+    prvdr_npi_num = line_item.get("PRVDR_RNDRNG_PRVDR_NPI_NUM")
+    if prvdr_npi_num and prvdr_npi_num not in cur_rendering_providers:
+        # add rendering provider
+        provider = create_rendering_line_provider(prvdr_npi_num)
+        if line_item.get("CLM_RNDRG_FED_PRVDR_SPCLTY_CD"):
+            provider.specialtyCode = line_item.get("CLM_RNDRG_FED_PRVDR_SPCLTY_CD")
+        provider.careTeamSequenceNumber = sum(
+            1 for item in provider_list if provider_object.careTeamType
+        )
+        line_item["careTeamSequence"] = provider.careTeamSequenceNumber
+        provider_list.append(provider)
+
+    if prvdr_npi_num:
+        sequence = next(
+            x.careTeamSequenceNumber
+            for x in provider_list
+            if getattr(x, "careTeamType", None) == "rendering"
+            and getattr(x, "PRVDR_SK", None) == prvdr_npi_num
+        )
+        line_item["careTeamSequence"] = [sequence]
 
 supporting_info_seq = 1
 supporting_info_components = cur_sample_data.get("supportingInfoComponents", [])
@@ -130,63 +250,33 @@ for si_comp in supporting_info_components:
     si_comp["ROW_NUM"] = supporting_info_seq
     supporting_info_seq += 1
 
+for source_col, target_col in header_to_supp_info_cols.items():
+    value = cur_sample_data.get(source_col)
+    if value:
+        temp_var = {"ROW_NUM": supporting_info_seq, target_col: value}
+        supporting_info_components.append(temp_var)
+        supporting_info_seq += 1
+
 
 # There can be line item NPIs that are not present at header level, but
 # need to be added to the CareTeam. This populates those.
 line_items = cur_sample_data.get("lineItemComponents", [])
 for item in line_items:
+    if "SEQUENCE_INFO" in item and not isinstance(item["SEQUENCE_INFO"], list):
+        item["SEQUENCE_INFO"] = [item["SEQUENCE_INFO"]]
+
     for line_supporting_info_col in line_supporting_info_columns:
         if item.get(line_supporting_info_col):
-            item["SEQUENCE_INFO"] = supporting_info_seq
+            item.setdefault("SEQUENCE_INFO", []).append(supporting_info_seq)
             supporting_info_seq += 1
 
-    for line_col in line_columns:
-        if line_col in item and item.get(line_col) not in npis_used:
-            npi = item.get(line_col)
-            provider_object = {}
-            provider_object["PRVDR_SK"] = item.get(line_col)
-            npis_used.append(provider_object.get("PRVDR_SK"))
-
-            prvdr_hstry_for_npi = json.loads(
-                df[df["PRVDR_SK"] == str(provider_object.get("PRVDR_SK"))].iloc[0].to_json()
-            )
-            provider_object["NPI_TYPE"] = "2" if prvdr_hstry_for_npi.get("PRVDR_LGL_NAME") else "1"
-            provider_object.update(
-                {
-                    fld: prvdr_hstry_for_npi[fld]
-                    for fld in populate_fields_except_na
-                    if prvdr_hstry_for_npi.get(fld)
-                }
-            )
-
-            if prvdr_hstry_for_npi.get("PRVDR_TXNMY_CMPST_CD"):
-                taxonomy_val = prvdr_hstry_for_npi.get("PRVDR_TXNMY_CMPST_CD")
-                taxonomy_codes = [taxonomy_val[i : i + 10] for i in range(len(taxonomy_val), 10)]
-                provider_object["taxonomyCodes"] = taxonomy_codes
-
-            if len(line_columns.get(line_col)) > 0:
-                provider_object["careTeamType"] = line_columns.get(line_col)
-                provider_object["careTeamSequenceNumber"] = cur_careteam_sequence
-                cur_careteam_sequence += 1
-
-            item["careTeamSequence"] = [provider_object.get("careTeamSequenceNumber")]
-            provider_list.append(provider_object)
-
-        elif (
-            line_col in item and "careTeamSequence" not in item and item.get(line_col) in npis_used
-        ):
-            npi = item.get(line_col)
-
-            matching_providers = [
-                x.get("careTeamSequenceNumber")
-                for x in provider_list
-                if "careTeamSequenceNumber" in x
-                and x.get("PRVDR_SK") == npi
-                and "careTeamType" in x
-                and x.get("careTeamType") == line_columns.get(line_col)
-            ]
-            careTeamSequence = matching_providers[0]
-            item["careTeamSequence"] = [careTeamSequence]
+    for source_col, target_col in line_to_supp_info_cols.items():
+        value = item.get(source_col)
+        if value:
+            temp_var = {"ROW_NUM": supporting_info_seq, target_col: value}
+            supporting_info_components.append(temp_var)
+            item.setdefault("SEQUENCE_INFO", []).append(supporting_info_seq)
+            supporting_info_seq += 1
 
     # for part D claims, sum CLM_LINE_INGRDNT_CST_AMT, CLM_LINE_SRVC_CST_AMT, CLM_LINE_SLS_TAX_AMT,
     # CLM_LINE_VCCN_ADMIN_FEE_AMT to set TOT_RX_CST_AMT
@@ -197,19 +287,19 @@ for item in line_items:
     if tot_rx_amt > 0.0:
         item["TOT_RX_CST_AMT"] = str(tot_rx_amt)
 
-cur_sample_data["providerList"] = provider_list
-
+cur_sample_data["providerList"] = [
+    {k: v for k, v in asdict(p).items() if v is not None} for p in provider_list
+]
 
 # diagnoses section
 @dataclass
 class Diagnosis:
     CLM_DGNS_CD: str
-    CLM_PROD_TYPE_CD: str = "D"
-    CLM_POA_IND: str = "~"
-    CLM_DGNS_PRCDR_ICD_IND: str = "0"
-    ROW_NUM: str = "1"
+    CLM_PROD_TYPE_CD: str = 'D'
+    CLM_POA_IND: str = '~'
+    CLM_DGNS_PRCDR_ICD_IND: str = '0'
+    ROW_NUM: str = '1'
     clm_prod_type_cd_map: list[str] = field(default_factory=list)
-
 
 diagnosis_codes = [
     Diagnosis(
@@ -289,7 +379,7 @@ for item in cur_sample_data.get("lineItemComponents", []):
             (
                 d
                 for d in diagnosis_codes
-                if line_dgns_cd == d.CLM_DGNS_CD and d.CLM_PROD_TYPE_CD == "D"
+                if line_dgns_cd == d.CLM_DGNS_CD and d.CLM_PROD_TYPE_CD == 'D'
             ),
             None,
         ):

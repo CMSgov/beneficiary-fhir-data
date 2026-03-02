@@ -9,7 +9,6 @@ uses "http://hl7.org/fhir/StructureDefinition/ProcedureComponent" alias Procedur
 uses "http://hl7.org/fhir/StructureDefinition/DiagnosisComponent" alias DiagnosisComponent as source
 uses "http://hl7.org/fhir/StructureDefinition/SupportingInfoComponent" alias SupportingInfoComponent as source
 uses "http://hl7.org/fhir/StructureDefinition/LineItemComponent" alias LineItemComponent as source
-uses "http://hl7.org/fhir/StructureDefinition/CareTeamComponent" alias CareTeamComponent as source
 uses "http://hl7.org/fhir/StructureDefinition/Provider" alias ProviderComponent as source
 
 
@@ -94,7 +93,6 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
         src.providerList as provider where provider.isDuplicate.exists().not() and provider.careTeamType.exists().not() and provider.NPI_TYPE = 1 -> tgt.contained = create('Practitioner') as tgtPract then createPractitioner(provider, tgtPract) "Add Practitioner";
         src.providerList as provider where provider.isDuplicate.exists().not() and provider.careTeamType.exists().not() and provider.NPI_TYPE = 2 -> tgt.contained = create('Organization') as tgtOrg then createOrg(provider, tgtOrg) "Add Organization";
     } "Add billing provider";
-
     src.CLM_SRC_ID as sourceSk where sourceSk = '20000' -> tgt.outcome = "complete" "Set NCH outcome to complete.";
     src.CLM_TYPE_CD as typeCd where(typeCd >= 1000 and typeCd < 3000) -> tgt then {
       src -> tgt.outcome = "partial" "Default pac outcome to partial";
@@ -105,8 +103,8 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
         src.CLM_AUDT_TRL_STUS_CD as auditTrailStatusCode -> tgt.outcome = translate(auditTrailStatusCode, 'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#CLM_AUDT_TRL_STUS_CD_FISS','code') "Set outcome for phase 2/3 FISS";
       } "Set outcome for FISS";
       src.META_SRC_SK as srcSk where srcSk = '1002' -> tgt then {
-        src.CLM_FINAL_ACTION as finalAction where finalAction = Y -> tgt.outcome = "complete" "Set VMS outcome to complete.";
-        src.CLM_FINAL_ACTION as finalAction where finalAction = N -> tgt.outcome = "partial" "Set VMS outcome to partial.";
+        src.CLM_FINL_ACTN_IND as finalAction where finalAction = Y -> tgt.outcome = "complete" "Set VMS outcome to complete.";
+        src.CLM_FINL_ACTN_IND as finalAction where finalAction = N -> tgt.outcome = "partial" "Set VMS outcome to partial.";
       } "Set outcome for VMS";
     } "Complete additional outcomes";
 
@@ -155,23 +153,30 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
     } "Create Item and SupportingInfo";
 
     //There may be instances where, for example, the attending and the operating provider are the same (or some other permutation).
-    //In these instances, the FML will product duplicate contained resources. We do not actually want to populate dual identical resources, so they're filtered out by the compilation script.
-    src.providerList as pList where pList.careTeamType.exists() -> tgt then {
-      pList where pList.NPI_TYPE = 1 and pList.isDuplicate.exists().not() -> tgt.contained = create('Practitioner') as tgtPract then createPractitioner(pList, tgtPract) "Add Practitioner";
-      pList where pList.NPI_TYPE = 2 and pList.isDuplicate.exists().not() -> tgt.contained = create('Organization') as tgtOrg then createOrg(pList, tgtOrg) "Add Organization";
+    //We will populate one per role.  
+    src.providerList as pList where pList.careTeamType.exists() and pList.PRVDR_SK.exists() -> tgt.careTeam = create('BackboneElement') as tgtCareTeam then {
+      //These have been moved into THO, so we'll populate all where appropriate and drop the C4BB system eventually
+      pList.careTeamType as careTeamType -> tgtCareTeam.role = create('CodeableConcept') as tgtCC then {
+        careTeamType -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claimcareteamrole", careTeamType) "Add THO coding";
+        pList.careTeamType as legacyType where legacyType != "supervisor" -> tgtCC.coding = c("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole", legacyType) "Add C4BB system";
+      } "Add care team types";
 
-      src -> tgt.careTeam = create('BackboneElement') as tgtBBElement then {
-        pList.careTeamType as careTeamType -> tgtBBElement.role = cc("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole", careTeamType) "Add role";
-        pList.careTeamSequenceNumber as seqNum -> tgtBBElement.sequence = seqNum "Set sequence";
-        src -> tgtBBElement.provider = create('Reference') as tgtReference then {
-          pList.PRVDR_SK as npi -> tgtReference.reference = append("#", npi) "Add reference";
+      pList.careTeamSequenceNumber as seqNum -> tgtCareTeam.sequence = seqNum "Set sequence";
+      //In contrast to prior approaches, we'll populate both Organizations and Practitioners inline.
+      src -> tgtCareTeam.provider = create('Reference') as tgtReference then {
+          pList.PRVDR_SK as npi -> tgtReference.identifier = create('Identifier') as tgtId then {
+            src -> tgtId.type = cc("http://terminology.hl7.org/CodeSystem/v2-0203", "NPI") "Set type";
+            src -> tgtId.system = "http://hl7.org/fhir/sid/us-npi" "Set System";
+            npi -> tgtId.value = npi "Set NPI";
+          } "Add identifier when NPI";
+          //See augment_sample_resources for how this is constructed. It will be blank in some instances. 
+          pList.PRVDR_CARETEAM_NAME as name -> tgtReference.display = name "Set name";
+
         } "Add reference to EOB";
-        
-        pList.taxonomyCodes as taxonomyCodes -> tgtBBElement.qualification = create('CodeableConcept') as qualCC then{
-          taxonomyCodes -> qualCC.coding = c("http://nucc.org/provider-taxonomy", taxonomyCodes) "add taxonomy";
-        } "Add taxonomy/qualifications";
-      } "Add CareTeam Element";
-
+      pList.specialtyCode as specialtyCode -> tgtCareTeam.qualification = create('CodeableConcept') as tgtCC then {
+        specialtyCode -> tgtCC.coding = translate(specialtyCode,'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#FED_PRVDR_SPCLTY_TO_TAXONOMY','coding') "add taxonomy";
+        specialtyCode -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRVDR-SPCLTY-CD",specialtyCode) "Add coding";
+      } "Add specialty codes";
     } "Add CareTeam providers";
 
     //Add header level adjudication.
@@ -579,30 +584,62 @@ group createInsurerOrgPartAB(source src: ExplanationOfBenefitBase, target tgtOrg
 }
 
 group createOrg(source src: Provider, target tgt: Organization){
+  src -> tgt.id = "BILLING-ID" "set id when no npi present";
   src.PRVDR_SK as npi -> tgt.id = npi "Set org id";
-  src -> tgt.meta = create('Meta') as tgtMeta then {
-          src -> tgtMeta.profile = "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0" "Set org profile";
-          src -> tgtMeta.profile = "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|6.1.0" "Set org profile";
-        } "Set practitioner metadata";
-  src -> tgt.active = "true" "set org status";
+  
+  //Only applies to PDE but this function is referenced from PDE, so we add it here.
+  src.PRVDR_ID_QLFYR_CD as qlfyrCd -> tgt.identifier = create('Identifier') as tgtId then {
+    src -> tgtId.type = create('CodeableConcept') as tgtCC then {
+      qlfyrCd -> tgtCC.coding = c("http://bluebutton.cms.gov/fhir/CodeSystem/PRVDR-ID-QLFYR-CD",qlfyrCd) "Add qualifier code";
+    } "Add type";
+    src -> tgtId.system = "http://bluebutton.cms.gov/fhir/identifiers/GenericIdNum" "set id num system url";
+    src.CLM_PRVDR_GNRC_ID_NUM as idNum -> tgtId.value = idNum "set id num";
+  } "Add qualifier code and id num";
+
   src.PRVDR_SK as npi -> tgt.identifier = create('Identifier') as tgtId then {
     src -> tgtId.type = cc("http://terminology.hl7.org/CodeSystem/v2-0203","NPI") "Add ID Type";
     src -> tgtId.system = "http://hl7.org/fhir/sid/us-npi" "set NPI system url";
     npi -> tgtId.value = npi "set NPI";
   } "Create NPI identifier";
-  src.PRVDR_LGL_NAME as orgName -> tgt.name = orgName;
+
+  //when PRVDR_SK is missing (eg NPI) these won't conform, so don't add the profile. 
+  src.PRVDR_SK as sk -> tgt.meta = create('Meta') as tgtMeta then {
+          src -> tgtMeta.profile = "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0" "Set org profile";
+          src -> tgtMeta.profile = "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|6.1.0" "Set org profile";
+  } "Set Org metadata";
+  src -> tgt.active = "true" "set org status";
+  
+  src.PRVDR_LAST_OR_LGL_NAME as orgName -> tgt.name = orgName;
   src.PRVDR_OSCAR_NUM as ccn -> tgt.identifier = create('Identifier') as tgtId then{
     src -> tgtId.system = "http://terminology.hl7.org/NamingSystem/CCN" "set ccn system url";
     src -> tgtId.value = ccn "set ccn";
   } "Add OSCAR/CCN num";
 
-  src.prvdr_zip as zip5 -> tgt.address = create('Address') as tgtAddress then{
+  //since we pass in a Provider we do have to pass through the context even though it's CLM_BLG_PRVDR_TAX_NUM at header level
+  src.CLM_BLG_PRVDR_TAX_NUM as taxId -> tgt.identifier = create('Identifier') as tgtId then{
+    src -> tgtId.type = cc("http://terminology.hl7.org/CodeSystem/v2-0203","TAX") "set type";
+    src -> tgtId.system = "urn:oid:2.16.840.1.113883.4.4" "add system";
+    taxId -> tgtId.value = taxId "set tax Id";
+  } "Add tax Id";
+
+  src.CLM_BLG_PRVDR_ZIP5_CD as zip5 -> tgt.address = create('Address') as tgtAddress then{
     zip5-> tgtAddress.postalCode = zip5 "add zip code";
   } "Add zip code";
 }
 
 group createPractitioner(source src: Provider, target tgt: Practitioner){
+  src -> tgt.id = "BILLING-ID" "set billing ID";
   src.PRVDR_SK as npi -> tgt.id = npi "Set id";
+
+  //This will practically result in two NPIs, but that's okay, because we're going for ease and consistency.
+  src.PRVDR_ID_QLFYR_CD as qlfyrCd -> tgt.identifier = create('Identifier') as tgtId then {
+    src -> tgtId.type = create('CodeableConcept') as tgtCC then {
+      qlfyrCd -> tgtCC.coding = c("http://bluebutton.cms.gov/fhir/CodeSystem/PRVDR-ID-QLFYR-CD",qlfyrCd) "Add qualifier code";
+    } "Add type";
+    src -> tgtId.system = "http://bluebutton.cms.gov/fhir/identifiers/GenericIdNum" "set id num system url";
+    src.CLM_PRVDR_GNRC_ID_NUM as idNum -> tgtId.value = idNum "set id num";
+  } "Add qualifier code and id num";
+
   src -> tgt.meta = create('Meta') as tgtMeta then {
           src -> tgtMeta.profile = "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0" "Set profile";
           src -> tgtMeta.profile = "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" "Set profile";
@@ -614,17 +651,23 @@ group createPractitioner(source src: Provider, target tgt: Practitioner){
     src.PRVDR_SK as npi -> tgtId.value = npi "set NPI";
   } "Create NPI identifier";
 
-  src.PRVDR_LAST_NAME as familyName -> tgt.name = create('HumanName') as tgtName then {
+  src.PRVDR_OSCAR_NUM as ccn -> tgt.identifier = create('Identifier') as tgtId then{
+    src -> tgtId.system = "http://terminology.hl7.org/NamingSystem/CCN" "set ccn system url";
+    src -> tgtId.value = ccn "set ccn";
+  } "Add OSCAR/CCN num";
+
+  src.CLM_BLG_PRVDR_TAX_NUM as taxId -> tgt.identifier = create('Identifier') as tgtId then{
+    src -> tgtId.type = cc("http://terminology.hl7.org/CodeSystem/v2-0203","TAX") "set type";
+    src -> tgtId.system = "urn:oid:2.16.840.1.113883.4.4" "add system";
+    taxId -> tgtId.value = taxId "set tax Id";
+  } "Add tax Id";
+
+  src.PRVDR_LAST_OR_LGL_NAME as familyName -> tgt.name = create('HumanName') as tgtName then {
     familyName -> tgtName.family = familyName "set family name";
     src.PRVDR_1ST_NAME as firstName -> tgtName.given = firstName "set first name";
-    src.PRVDR_MDL_NAME as middleName -> tgtName.given = middleName "set middle name";
   } "Add name";
 
-  src.taxonomyCodes as taxonomyCodes -> tgt.qualification = create('BackboneElement') as tgtBBElement then{
-    taxonomyCodes as taxCode -> tgtBBElement.code = cc("http://nucc.org/provider-taxonomy", taxCode) "Add qualification";
-  } "Add taxonomy info to Practitioner resource.";
-
-  src.prvdr_zip as zip5 -> tgt.address = create('Address') as tgtAddress then{
+  src.CLM_BLG_PRVDR_ZIP5_CD as zip5 -> tgt.address = create('Address') as tgtAddress then{
     zip5-> tgtAddress.postalCode = zip5 "add zip code";
   } "Add zip code";
 }
