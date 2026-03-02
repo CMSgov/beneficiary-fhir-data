@@ -160,6 +160,26 @@ resource "aws_quicksight_analysis" "quicksight_analysis_dasg_metrics" {
       expression          = "round({auth_demoscope_required_choice_not_sharing_real_bene_count} / ({auth_demoscope_required_choice_sharing_real_bene_count} + {auth_demoscope_required_choice_not_sharing_real_bene_count}) , 3)"
       name                = "auth_bene_chose_not_to_share_demographic_scopes_percent"
     }
+    calculated_fields {
+      data_set_identifier = "prod_global_state"
+      expression          = "round(({auth_v1_v2_user_makes_it_to_permission_screen_bene_count - auth_v1_v2_user_clicks_connect_bene_count}) / {auth_v1_v2_user_makes_it_to_permission_screen_bene_count} , 3)"
+      name                = "auth_v1_v2_user_makes_it_to_permission_screen_but_does_not_click_connect_percent"
+    }
+    calculated_fields {
+      data_set_identifier = "prod_global_state"
+      expression          = "round({auth_v1_v2_user_clicks_connect_bene_count} / {auth_v1_v2_user_makes_it_to_permission_screen_bene_count} , 3)"
+      name                = "auth_v1_v2_user_makes_it_to_permission_screen_and_clicks_connect_percent"
+    }
+    calculated_fields {
+      data_set_identifier = "prod_global_state"
+      expression          = "round(({auth_v3_user_makes_it_to_permission_screen_bene_count - auth_v3_user_clicks_connect_bene_count}) / {auth_v3_user_makes_it_to_permission_screen_bene_count} , 3)"
+      name                = "auth_v1_v2_user_makes_it_to_permission_screen_but_does_not_click_connect_percent"
+    }
+    calculated_fields {
+      data_set_identifier = "prod_global_state"
+      expression          = "round({auth_v3_user_clicks_connect_bene_count} / {auth_v3_user_makes_it_to_permission_screen_bene_count} , 3)"
+      name                = "auth_v1_v2_user_makes_it_to_permission_screen_and_clicks_connect_percent"
+    }
 
     filter_groups {
       cross_dataset   = "SINGLE_DATASET"
