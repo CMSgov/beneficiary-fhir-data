@@ -6,8 +6,6 @@ Id: ExplanationOfBenefit-Pharmacy
 * . ^label = "Explanation of Benefit Pharmacy Resource for IDR. Ignore in DD Generation"
 * lastUpdated 0..1 string "This field represents the last time that an ExplanationOfBenefit was updated."
 * lastUpdated ^label = "Last Updated Time"
-* CLM_BENE_XREF_EFCTV_SK 1..1 string "Beneficiary Source Key"
-* CLM_BENE_XREF_EFCTV_SK ^label = "Beneficiary Source Key"
 * BENE_SK 1..1 string "Beneficiary Source Key - On Claim"
 * BENE_SK ^label = "Beneficiary Source Key - On Claim"
 * CLM_TYPE_CD 1..1 integer "Claim Type Code"

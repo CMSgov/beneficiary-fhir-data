@@ -8,8 +8,6 @@ Id: ExplanationOfBenefit-Base
 * lastUpdated ^label = "Last Updated Time"
 * CLM_FINL_ACTN_IND 1..1 string "Final Action Indicator"
 * CLM_FINL_ACTN_IND ^label = "Final Action Indicator"
-* CLM_BENE_XREF_EFCTV_SK 1..1 string "The Beneficiary Source Key"
-* CLM_BENE_XREF_EFCTV_SK ^label = "Beneficiary Source Key"
 * BENE_SK 1..1 string "Beneficiary Source Key - On Claim"
 * BENE_SK ^label = "Beneficiary Source Key - On Claim"
 * CLM_TYPE_CD 1..1 integer "Claim Type Code"
