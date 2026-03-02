@@ -13,61 +13,65 @@ WITH report_params AS (
        being worked on.
     */
     ARRAY [
-      'fhir_v1_call_real_count',
-      'fhir_v1_call_synthetic_count',
-      'fhir_v1_eob_call_real_count',
-      'fhir_v1_eob_call_synthetic_count',
-      'fhir_v1_coverage_call_real_count',
-      'fhir_v1_coverage_call_synthetic_count',
-      'fhir_v1_patient_call_real_count',
-      'fhir_v1_patient_call_synthetic_count',
-      'fhir_v1_metadata_call_count',
-      'fhir_v1_eob_since_call_real_count',
-      'fhir_v1_eob_since_call_synthetic_count',
-      'fhir_v1_coverage_since_call_real_count',
-      'fhir_v1_coverage_since_call_synthetic_count',
-      'fhir_v2_call_real_count',
-      'fhir_v2_call_synthetic_count',
-      'fhir_v2_eob_call_real_count',
-      'fhir_v2_eob_call_synthetic_count',
-      'fhir_v2_coverage_call_real_count',
-      'fhir_v2_coverage_call_synthetic_count',
-      'fhir_v2_patient_call_real_count',
-      'fhir_v2_patient_call_synthetic_count',
-      'fhir_v2_metadata_call_count',
-      'fhir_v2_eob_since_call_real_count',
-      'fhir_v2_eob_since_call_synthetic_count',
-      'fhir_v2_coverage_since_call_real_count',
-      'fhir_v2_coverage_since_call_synthetic_count',
-      'fhir_v3_call_real_count',
-      'fhir_v3_call_synthetic_count',
-      'fhir_v3_eob_call_real_count',
-      'fhir_v3_eob_call_synthetic_count',
-      'fhir_v3_coverage_call_real_count',
-      'fhir_v3_coverage_call_synthetic_count',
-      'fhir_v3_patient_call_real_count',
-      'fhir_v3_patient_call_synthetic_count',
-      'fhir_v3_metadata_call_count',
-      'fhir_v3_eob_since_call_real_count',
-      'fhir_v3_eob_since_call_synthetic_count',
-      'fhir_v3_coverage_since_call_real_count',
-      'fhir_v3_coverage_since_call_synthetic_count',
-      'auth_ok_real_bene_count',
-      'auth_ok_synthetic_bene_count',
-      'auth_fail_or_deny_real_bene_count',
-      'auth_fail_or_deny_synthetic_bene_count',
-      'auth_demoscope_required_choice_sharing_real_bene_count',
-      'auth_demoscope_required_choice_sharing_synthetic_bene_count',
-      'auth_demoscope_required_choice_not_sharing_real_bene_count',
-      'auth_demoscope_required_choice_not_sharing_synthetic_bene_count',
-      'auth_demoscope_required_choice_deny_real_bene_count',
-      'auth_demoscope_required_choice_deny_synthetic_bene_count',
-      'auth_demoscope_not_required_not_sharing_real_bene_count',
-      'auth_demoscope_not_required_not_sharing_synthetic_bene_count',
-      'auth_demoscope_not_required_deny_real_bene_count',
-      'auth_demoscope_not_required_deny_synthetic_bene_count',
-      'sdk_requests_python_count',
-      'sdk_requests_node_count'
+      -- 'fhir_v1_call_real_count',
+      -- 'fhir_v1_call_synthetic_count',
+      -- 'fhir_v1_eob_call_real_count',
+      -- 'fhir_v1_eob_call_synthetic_count',
+      -- 'fhir_v1_coverage_call_real_count',
+      -- 'fhir_v1_coverage_call_synthetic_count',
+      -- 'fhir_v1_patient_call_real_count',
+      -- 'fhir_v1_patient_call_synthetic_count',
+      -- 'fhir_v1_metadata_call_count',
+      -- 'fhir_v1_eob_since_call_real_count',
+      -- 'fhir_v1_eob_since_call_synthetic_count',
+      -- 'fhir_v1_coverage_since_call_real_count',
+      -- 'fhir_v1_coverage_since_call_synthetic_count',
+      -- 'fhir_v2_call_real_count',
+      -- 'fhir_v2_call_synthetic_count',
+      -- 'fhir_v2_eob_call_real_count',
+      -- 'fhir_v2_eob_call_synthetic_count',
+      -- 'fhir_v2_coverage_call_real_count',
+      -- 'fhir_v2_coverage_call_synthetic_count',
+      -- 'fhir_v2_patient_call_real_count',
+      -- 'fhir_v2_patient_call_synthetic_count',
+      -- 'fhir_v2_metadata_call_count',
+      -- 'fhir_v2_eob_since_call_real_count',
+      -- 'fhir_v2_eob_since_call_synthetic_count',
+      -- 'fhir_v2_coverage_since_call_real_count',
+      -- 'fhir_v2_coverage_since_call_synthetic_count',
+      -- 'fhir_v3_call_real_count',
+      -- 'fhir_v3_call_synthetic_count',
+      -- 'fhir_v3_eob_call_real_count',
+      -- 'fhir_v3_eob_call_synthetic_count',
+      -- 'fhir_v3_coverage_call_real_count',
+      -- 'fhir_v3_coverage_call_synthetic_count',
+      -- 'fhir_v3_patient_call_real_count',
+      -- 'fhir_v3_patient_call_synthetic_count',
+      -- 'fhir_v3_metadata_call_count',
+      -- 'fhir_v3_eob_since_call_real_count',
+      -- 'fhir_v3_eob_since_call_synthetic_count',
+      -- 'fhir_v3_coverage_since_call_real_count',
+      -- 'fhir_v3_coverage_since_call_synthetic_count',
+      'auth_v1_v2_user_makes_it_to_permission_screen_bene_count',
+      'auth_v3_user_makes_it_to_permission_screen_bene_count',
+      'auth_v1_v2_user_clicks_connect_bene_count',
+      'auth_v3_user_clicks_connect_bene_count'
+      -- 'auth_ok_real_bene_count',
+      -- 'auth_ok_synthetic_bene_count',
+      -- 'auth_fail_or_deny_real_bene_count',
+      -- 'auth_fail_or_deny_synthetic_bene_count',
+      -- 'auth_demoscope_required_choice_sharing_real_bene_count',
+      -- 'auth_demoscope_required_choice_sharing_synthetic_bene_count',
+      -- 'auth_demoscope_required_choice_not_sharing_real_bene_count',
+      -- 'auth_demoscope_required_choice_not_sharing_synthetic_bene_count',
+      -- 'auth_demoscope_required_choice_deny_real_bene_count',
+      -- 'auth_demoscope_required_choice_deny_synthetic_bene_count',
+      -- 'auth_demoscope_not_required_not_sharing_real_bene_count',
+      -- 'auth_demoscope_not_required_not_sharing_synthetic_bene_count',
+      -- 'auth_demoscope_not_required_deny_real_bene_count',
+      -- 'auth_demoscope_not_required_deny_synthetic_bene_count',
+      -- 'sdk_requests_python_count',
+      -- 'sdk_requests_node_count'
     ] as enabled_metrics_list 
 ),
 
@@ -1315,6 +1319,68 @@ SELECT
       )
   ) as fhir_v3_coverage_since_call_synthetic_count,
   /* AUTH and demographic scopes stats top level */
+  (
+    select
+      count(*)
+    from
+      api_audit_events
+    WHERE
+      (
+        CONTAINS((SELECT enabled_metrics_list FROM report_params),
+          'auth_v1_v2_user_makes_it_to_permission_screen_bene_count')
+        AND try_cast(crosswalk_fhir_id as BIGINT) > 0
+        AND type = 'Authentication:success'
+        AND 
+        ( path = 'v1/mymedicare/sls-callback'
+          OR path = 'v2/mymedicare/sls-callback'
+        )
+      )
+  ) as auth_v1_v2_user_makes_it_to_permission_screen_bene_count,
+(
+    select
+      count(*)
+    from
+      api_audit_events
+    WHERE
+      (
+        CONTAINS((SELECT enabled_metrics_list FROM report_params),
+          'auth_v3_user_makes_it_to_permission_screen_bene_count')
+        AND try_cast(crosswalk_fhir_id as BIGINT) > 0
+        type = 'Authentication:success'
+        AND path = 'v3/mymedicare/sls-callback'
+      )
+  ) as auth_v3_user_makes_it_to_permission_screen_bene_count,
+  (
+    select
+      count(*)
+    from
+      api_audit_events
+    WHERE
+      (
+        CONTAINS((SELECT enabled_metrics_list FROM report_params),
+          'auth_v1_v2_user_clicks_connect_bene_count')
+        AND try_cast(crosswalk_fhir_id as BIGINT) > 0
+        AND type = 'Authorization'
+        AND 
+        ( path LIKE '/v1/o/authorize%'
+          OR path LIKE '/v2/o/authorize%'
+        )
+      )
+  ) as auth_v1_v2_user_clicks_connect_bene_count,
+  (
+    select
+      count(*)
+    from
+      api_audit_events
+    WHERE
+      (
+        CONTAINS((SELECT enabled_metrics_list FROM report_params),
+          'auth_v3_user_clicks_connect_bene_count')
+        AND try_cast(crosswalk_fhir_id as BIGINT) > 0
+        AND type = 'Authorization'
+        AND path LIKE '/v3/o/authorize%'
+      )
+  ) as auth_v3_user_clicks_connect_bene_count,
   (
     select
       count(*)
