@@ -155,7 +155,7 @@ def main(clm_batches_size: int, out: Path):
     batched_tables[0].update(files_to_copy)
     print(f"Batching: {', '.join(files_to_split.keys())}...")
     for batch_num, batch in tqdm.tqdm(
-        enumerate(itertools.batched(files_to_split[CLM], n=clm_batches_size, strict=False))
+        list(enumerate(itertools.batched(files_to_split[CLM], n=clm_batches_size, strict=False)))
     ):
         batched_tables_per_clm = [
             {

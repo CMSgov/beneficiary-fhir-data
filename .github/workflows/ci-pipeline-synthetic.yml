@@ -38,14 +38,15 @@ jobs:
       - name: Ensure synthetic data pipeline runs
         run: |
           cd ${{ github.workspace }}/apps/bfd-model-idr
-          uv run patient_generator.py --patients 100
-          uv run claims_generator.py ./out/SYNTHETIC_BENE_HSTRY.csv
+          uv run patient_generator.py --claims --patients 100
           cd ../bfd-pipeline-idr
           ./run-db.sh
       - name: Ensure synthetic data pipeline runs with existing synthetic data
         run: |
           cd ${{ github.workspace }}/apps/bfd-model-idr
-          uv run patient_generator.py ./synthetic-data
-          uv run claims_generator.py ./out/SYNTHETIC_BENE_HSTRY.csv
+          uv run patient_generator.py --claims ./synthetic-data
+          # Split claims output into batches of 5000 CLMs to avoid timeouts with new claims schema
+          uv run load_splitter.py -c 5000
           cd ../bfd-pipeline-idr
-          ./run-db.sh
+          # Load from batched_out instead of out due to splitting load
+          ./run-db.sh ../bfd-model-idr/batched_out
