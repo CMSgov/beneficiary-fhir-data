@@ -1,7 +1,7 @@
 {
   "resourceType" : "ExplanationOfBenefit",
   "meta" : {
-    "lastUpdated" : "2026-02-27T17:44:09.393923Z",
+    "lastUpdated" : "2026-03-02T18:00:23.443871Z",
     "source" : "NCH",
     "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Professional-NonClinician|2.1.0"],
     "tag" : [{
@@ -702,6 +702,7 @@
     }
   },
   {
+    "sequence" : 29,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -717,6 +718,7 @@
     "valueString" : "ALA00000047747"
   },
   {
+    "sequence" : 30,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -893,6 +895,7 @@
     }],
     "sequence" : 1,
     "careTeamSequence" : [1],
+    "informationSequence" : [29],
     "revenue" : {
       "coding" : [{
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD",
@@ -1096,6 +1099,7 @@
     }],
     "sequence" : 2,
     "careTeamSequence" : [2],
+    "informationSequence" : [30],
     "revenue" : {
       "coding" : [{
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD",

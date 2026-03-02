@@ -1,7 +1,7 @@
 {
   "resourceType" : "ExplanationOfBenefit",
   "meta" : {
-    "lastUpdated" : "2026-03-02T17:27:20.206374Z",
+    "lastUpdated" : "2026-03-02T17:58:49.332977Z",
     "source" : "NCH",
     "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional|2.1.0"],
     "tag" : [{
@@ -878,6 +878,24 @@
         "code" : "123"
       }]
     }
+  },
+  {
+    "sequence" : 34
+  },
+  {
+    "sequence" : 35
+  },
+  {
+    "sequence" : 36
+  },
+  {
+    "sequence" : 37
+  },
+  {
+    "sequence" : 38
+  },
+  {
+    "sequence" : 39
   }],
   "diagnosis" : [{
     "sequence" : 1,
