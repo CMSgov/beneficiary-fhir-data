@@ -4,11 +4,15 @@ from dataclasses import asdict, dataclass, field
 from decimal import Decimal
 from pathlib import Path
 from typing import Optional
+from datetime import datetime, timezone
 
 import pandas as pd
 
 prvdr_info_file = "sample-data/PRVDR_HSTRY_POC.csv"
 df = pd.read_csv(prvdr_info_file, dtype={"PRVDR_SK": str})
+
+cond_sk_info_file = "sample-data/CLM_RLT_COND_SGNTR_MBR_POC.csv"
+cond_sk_df = pd.read_csv(cond_sk_info_file, dtype={"CLM_RLT_COND_SGNTR_SK": str})
 
 cur_sample = sys.argv[1]
 cur_sample_data = {}
@@ -216,7 +220,26 @@ for line_item in cur_sample_data["lineItemComponents"]:
         line_item["careTeamSequence"] = [sequence]
 
 supporting_info_seq = 1
-supporting_info_components = cur_sample_data.get("supportingInfoComponents", [])
+if "supportingInfoComponents" not in cur_sample_data:
+    cur_sample_data["supportingInfoComponents"] = []
+supporting_info_components = cur_sample_data["supportingInfoComponents"]
+
+cond_sk = cur_sample_data.get("CLM_RLT_COND_SGNTR_SK")
+if cond_sk:
+    matching_rows = cond_sk_df[cond_sk_df["CLM_RLT_COND_SGNTR_SK"] == str(cond_sk)]
+    for _, row in matching_rows.iterrows():
+        cond_cd = row.get("CLM_RLT_COND_CD")
+        if pd.notna(cond_cd) and str(cond_cd) != "~":
+            supporting_info_components.append({"CLM_RLT_COND_CD": str(cond_cd)})
+
+fac_type = cur_sample_data.get("CLM_BILL_FAC_TYPE_CD")
+clsfctn = cur_sample_data.get("CLM_BILL_CLSFCTN_CD")
+freq = cur_sample_data.get("CLM_BILL_FREQ_CD")
+
+if fac_type and clsfctn and freq:
+    supporting_info_components.append(
+        {"TYPE_OF_BILL_CD": "0" + str(fac_type) + str(clsfctn) + str(freq)}
+    )
 
 for si_comp in supporting_info_components:
     si_comp["ROW_NUM"] = supporting_info_seq
@@ -339,6 +362,8 @@ for item in cur_sample_data.get("lineItemComponents", []):
             item["diagnosisSequence"] = [int(match.ROW_NUM)]
 
 filename = "out/temporary-sample.json"
+
+cur_sample_data["lastUpdated"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
 with Path(filename).open("w") as f:
     json.dump(cur_sample_data, f, indent=4)
