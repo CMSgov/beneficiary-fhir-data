@@ -36,6 +36,7 @@ public class ClaimAsyncService {
             """
             %s
             WHERE c.claimUniqueId = :claimUniqueId
+            AND b.latestTransactionFlag = 'Y'
             %s
             """,
             baseQuery, filters.filterClause());
@@ -65,6 +66,7 @@ public class ClaimAsyncService {
             """
             %s
             WHERE b.xrefSk = :beneSk
+            AND b.latestTransactionFlag = 'Y'
             %s
             """,
             baseQuery, filters.filterClause());
