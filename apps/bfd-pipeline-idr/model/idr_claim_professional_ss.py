@@ -74,9 +74,7 @@ class IdrClaimProfessionalSs(IdrBaseModel):
     clm_adjstmt_type_cd: Annotated[
         str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)
     ]
-    clm_pd_stus_cd: Annotated[
-        str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)
-    ]
+    clm_pd_stus_cd: Annotated[str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)]
     clm_cntrctr_num: Annotated[str, BeforeValidator(transform_default_string)]
     clm_pmt_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
     clm_alowd_chrg_amt: float | None

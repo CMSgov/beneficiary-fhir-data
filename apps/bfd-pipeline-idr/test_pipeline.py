@@ -293,9 +293,7 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
     rows = cur.fetchmany(1)
     assert rows[0]["bene_sk"] == 353816020
 
-    cur = conn.execute(
-        "select * from idr.claim_institutional_ss where clm_uniq_id = 8244064276500"
-    )
+    cur = conn.execute("select * from idr.claim_institutional_ss where clm_uniq_id = 8244064276500")
     assert cur.rowcount == 0
 
     cur = conn.execute("select * from idr.claim_institutional_nch order by clm_uniq_id")
