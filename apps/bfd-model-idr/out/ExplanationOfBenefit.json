@@ -878,6 +878,160 @@
         "display" : "Original debit action (always a 1 for all regular bills)"
       }]
     }
+  },
+  {
+    "sequence" : 34,
+    "category" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      },
+      {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code" : "CLM_BNFT_ENHNCMT_CD",
+        "display" : "Claim Benefit Enhancement Code"
+      }]
+    },
+    "code" : {
+      "coding" : [{
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD",
+        "code" : "1",
+        "display" : "POPULATION BASED PAYMENTS (PBP)"
+      }]
+    }
+  },
+  {
+    "sequence" : 35,
+    "category" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      },
+      {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code" : "CLM_BNFT_ENHNCMT_CD",
+        "display" : "Claim Benefit Enhancement Code"
+      }]
+    },
+    "code" : {
+      "coding" : [{
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD",
+        "code" : "2",
+        "display" : "TELEHEALTH"
+      }]
+    }
+  },
+  {
+    "sequence" : 36,
+    "category" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      },
+      {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code" : "CLM_BNFT_ENHNCMT_CD",
+        "display" : "Claim Benefit Enhancement Code"
+      }]
+    },
+    "code" : {
+      "coding" : [{
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD",
+        "code" : "3",
+        "display" : "POST DISCHARGE HOME VISITS"
+      }]
+    }
+  },
+  {
+    "sequence" : 37,
+    "category" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      },
+      {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code" : "CLM_BNFT_ENHNCMT_CD",
+        "display" : "Claim Benefit Enhancement Code"
+      }]
+    },
+    "code" : {
+      "coding" : [{
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD",
+        "code" : "4",
+        "display" : "THREE DAY SNF - WAIVER"
+      }]
+    }
+  },
+  {
+    "sequence" : 38,
+    "category" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      },
+      {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code" : "CLM_BNFT_ENHNCMT_CD",
+        "display" : "Claim Benefit Enhancement Code"
+      }]
+    },
+    "code" : {
+      "coding" : [{
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD",
+        "code" : "5",
+        "display" : "CAPITATION (AIPBP/TCC)"
+      }]
+    }
+  },
+  {
+    "sequence" : 39,
+    "category" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      },
+      {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code" : "CLM_ACO_CARE_MGMT_HCBS_SW",
+        "display" : "Care Management Home Visits Enhancement"
+      }]
+    },
+    "code" : {
+      "coding" : [{
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD-SWITCH",
+        "code" : "Y",
+        "display" : "This benefit enhancement is present for this claim/claim line."
+      }]
+    }
+  },
+  {
+    "sequence" : 40,
+    "category" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      },
+      {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code" : "CLM_BNFT_ENHNCMT_CD",
+        "display" : "Claim Benefit Enhancement Code"
+      }]
+    },
+    "code" : {
+      "coding" : [{
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD",
+        "code" : "7",
+        "display" : "CARE MANAGEMENT HOME VISITS"
+      }]
+    }
   }],
   "diagnosis" : [{
     "sequence" : 1,
@@ -1103,6 +1257,7 @@
     "sequence" : 1,
     "careTeamSequence" : [4],
     "diagnosisSequence" : [4],
+    "informationSequence" : [40],
     "revenue" : {
       "coding" : [{
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD",
