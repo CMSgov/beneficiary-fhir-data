@@ -149,3 +149,15 @@ module "topics" {
   sqs_sample_rate    = 100
   lambda_sample_rate = 100
 }
+
+resource "aws_dynamodb_table" "bene_preferences_tracker" {
+  name             = "bfd-${local.env}-bene-preferences"
+  billing_mode     = "PAY_PER_REQUEST"
+  hash_key         = "partner"
+  attribute {
+    name = "partner"
+    type = "S"
+  }
+
+  tags = local.default_tags
+}
