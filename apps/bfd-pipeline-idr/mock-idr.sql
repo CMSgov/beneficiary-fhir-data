@@ -269,6 +269,7 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm (
     clm_blood_ncvrd_chrg_amt NUMERIC,
     clm_prvdr_intrst_pd_amt NUMERIC,
     meta_src_sk NUMERIC,
+    clm_pd_stus_cd VARCHAR(1),
     PRIMARY KEY (geo_bene_sk, clm_dt_sgntr_sk, clm_type_cd, clm_num_sk)
 );
 

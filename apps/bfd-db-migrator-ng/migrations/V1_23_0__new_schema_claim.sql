@@ -103,6 +103,7 @@ create table idr_new.claim_professional_ss
     clm_audt_trl_lctn_cd           character varying(5),
     clm_prvdr_acnt_rcvbl_ofst_amt  numeric,
     clm_clncl_tril_num             character varying(8),
+    clm_pd_stus_cd                 character varying(1),
     bfd_claim_updated_ts           timestamp with time zone default now(),
     meta_src_sk                    integer                  not null
 );
@@ -502,7 +503,8 @@ create table idr_new.claim_institutional_ss
     clm_hac_rdctn_pymt_amt         numeric,
     clm_mdcr_ip_1st_yr_rate_amt    numeric,
     clm_site_ntrl_cst_bsd_pymt_amt numeric,
-    clm_ss_outlier_std_pymt_amt    numeric
+    clm_ss_outlier_std_pymt_amt    numeric,
+    clm_pd_stus_cd                 character varying(1)
 --  nch   clm_op_srvc_type_cd            varchar(1)
 );
 

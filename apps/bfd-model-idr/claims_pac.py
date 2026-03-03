@@ -113,6 +113,8 @@ class PacGeneratorUtil:
         clm[f.CLM_DT_SGNTR_SK] = gen_basic_id(field=f.CLM_DT_SGNTR_SK, length=12)
         clm[f.GEO_BENE_SK] = gen_basic_id(field=f.GEO_BENE_SK, length=5)
 
+        clm[f.CLM_PD_STUS_CD] = random.choice(['S','T','R','D','1','P','2','I'])
+
         if pac_clm_type_cd in FISS_CLM_TYPE_CDS:
             clm[f.CLM_SRC_ID] = 21000  # FISS
             clm[f.META_SRC_SK] = 1003  # FISS
