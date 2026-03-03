@@ -25,7 +25,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
  */
 @Getter
 @Entity
-@Table(name = "claim_institutional_nch", schema = "idr_new")
+@Table(name = "claim_institutional_nch", schema = "idr")
 @SuppressWarnings({"java:S2293"})
 public class ClaimInstitutionalNch extends ClaimInstitutionalBase {
 

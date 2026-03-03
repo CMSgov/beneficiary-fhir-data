@@ -88,9 +88,7 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
     clm_nch_prmry_pyr_cd: Annotated[
         str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)
     ]
-    clm_pd_stus_cd: Annotated[
-        str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)
-    ]
+    clm_pd_stus_cd: Annotated[str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)]
     clm_prvdr_pmt_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
     clm_query_cd: Annotated[str, BeforeValidator(transform_default_string)]
     clm_disp_cd: Annotated[str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)]

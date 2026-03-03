@@ -14,7 +14,7 @@ import lombok.Getter;
 @Getter
 @Entity
 @EqualsAndHashCode
-@Table(name = "claim_item_professional_nch", schema = "idr_new")
+@Table(name = "claim_item_professional_nch", schema = "idr")
 public class ClaimItemProfessionalNch implements ClaimItemBase {
   @EmbeddedId private ClaimItemId claimItemId;
   @Embedded private ClaimLineProfessionalNch claimLine;

@@ -24,7 +24,7 @@ import org.hl7.fhir.r4.model.Reference;
  */
 @Getter
 @Entity
-@Table(name = "claim_rx", schema = "idr_new")
+@Table(name = "claim_rx", schema = "idr")
 public class ClaimRx extends ClaimBase {
 
   @Column(name = "clm_sbmt_frmt_cd")

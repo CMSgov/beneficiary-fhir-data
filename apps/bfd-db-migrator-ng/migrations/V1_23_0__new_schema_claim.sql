@@ -1,4 +1,4 @@
-create table idr_new.claim_professional_ss
+create table idr.claim_professional_ss
 (
     clm_uniq_id                    bigint                   not null primary key,
     --claim date sgntr
@@ -108,7 +108,7 @@ create table idr_new.claim_professional_ss
     meta_src_sk                    integer                  not null
 );
 
-create table idr_new.claim_professional_nch
+create table idr.claim_professional_nch
 (
     clm_uniq_id                    bigint                   not null primary key,
     --claim date sgntr
@@ -221,11 +221,11 @@ create table idr_new.claim_professional_nch
     clm_carr_pmt_dnl_cd            character varying(2)
 );
 
-create index on idr_new.claim_professional_ss (bene_sk);
+create index on idr.claim_professional_ss (bene_sk);
 
-create index on idr_new.claim_professional_nch (bene_sk);
+create index on idr.claim_professional_nch (bene_sk);
 
-create table idr_new.claim_item_professional_ss
+create table idr.claim_item_professional_ss
 (
     clm_uniq_id                    bigint                   not null,
     bfd_row_id                     integer                  not null,
@@ -341,7 +341,7 @@ create table idr_new.claim_item_professional_ss
     primary key (clm_uniq_id, bfd_row_id)
 );
 
-create table idr_new.claim_institutional_ss
+create table idr.claim_institutional_ss
 (
     clm_uniq_id                    bigint                   not null primary key,
     --claim date sgntr
@@ -508,7 +508,7 @@ create table idr_new.claim_institutional_ss
 --  nch   clm_op_srvc_type_cd            varchar(1)
 );
 
-create table idr_new.claim_item_professional_nch
+create table idr.claim_item_professional_nch
 (
     clm_uniq_id                    bigint                   not null,
     bfd_row_id                     integer                  not null,
@@ -620,7 +620,7 @@ create table idr_new.claim_item_professional_nch
     primary key (clm_uniq_id, bfd_row_id)
 );
 
-create table idr_new.claim_institutional_nch
+create table idr.claim_institutional_nch
 (
     clm_uniq_id                    bigint                   not null primary key,
     --claim date sgntr
@@ -783,12 +783,12 @@ create table idr_new.claim_institutional_nch
 );
 
 
-create index on idr_new.claim_institutional_ss (bene_sk);
+create index on idr.claim_institutional_ss (bene_sk);
 
-create index on idr_new.claim_institutional_nch (bene_sk);
+create index on idr.claim_institutional_nch (bene_sk);
 
 
-create table idr_new.claim_item_institutional_ss
+create table idr.claim_item_institutional_ss
 (
     clm_uniq_id                 bigint                   not null,
     bfd_row_id                  integer                  not null,
@@ -912,7 +912,7 @@ create table idr_new.claim_item_institutional_ss
     primary key (clm_uniq_id, bfd_row_id)
 );
 
-create table idr_new.claim_item_institutional_nch
+create table idr.claim_item_institutional_nch
 (
     clm_uniq_id                 bigint                   not null,
     bfd_row_id                  integer                  not null,
@@ -1030,7 +1030,7 @@ create table idr_new.claim_item_institutional_nch
 );
 
 
-create table idr_new.claim_rx
+create table idr.claim_rx
 (
     clm_uniq_id                       bigint                not null primary key,
     --claim date sgntr
@@ -1268,4 +1268,4 @@ create table idr_new.claim_rx
 );
 
 
-create index on idr_new.claim_rx (bene_sk);
+create index on idr.claim_rx (bene_sk);

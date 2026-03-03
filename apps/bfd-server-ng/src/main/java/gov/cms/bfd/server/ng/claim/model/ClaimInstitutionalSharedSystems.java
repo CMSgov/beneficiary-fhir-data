@@ -24,7 +24,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
  */
 @Getter
 @Entity
-@Table(name = "claim_institutional_ss", schema = "idr_new")
+@Table(name = "claim_institutional_ss", schema = "idr")
 @SuppressWarnings({"java:S6539", "java:S2293"})
 public class ClaimInstitutionalSharedSystems extends ClaimInstitutionalBase {
 

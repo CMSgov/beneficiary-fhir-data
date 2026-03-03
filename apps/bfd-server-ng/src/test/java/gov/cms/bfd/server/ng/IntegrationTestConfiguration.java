@@ -78,7 +78,7 @@ public class IntegrationTestConfiguration {
             .configuration(
                 Map.of(
                     "flyway.schemas",
-                    "idr,idr_new",
+                    "idr",
                     "flyway.url",
                     container.getJdbcUrl(),
                     "flyway.user",

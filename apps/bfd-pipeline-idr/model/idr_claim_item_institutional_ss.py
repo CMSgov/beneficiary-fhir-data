@@ -266,7 +266,7 @@ class IdrClaimItemInstitutionalSs(IdrBaseModel):
 
     @staticmethod
     def table() -> str:
-        return "idr_new.claim_item_institutional_ss"
+        return "idr.claim_item_institutional_ss"
 
     @staticmethod
     def last_updated_date_table() -> str:

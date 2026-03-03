@@ -132,15 +132,15 @@ class EobSearchIT extends IntegrationTestBase {
                     """
                       select max(bfd_claim_updated_ts)
                       from (
-                          select bfd_claim_updated_ts from idr_new.claim_professional_nch where bene_sk = :beneSk
+                          select bfd_claim_updated_ts from idr.claim_professional_nch where bene_sk = :beneSk
                           union all
-                          select bfd_claim_updated_ts from idr_new.claim_professional_ss where bene_sk = :beneSk
+                          select bfd_claim_updated_ts from idr.claim_professional_ss where bene_sk = :beneSk
                           union all
-                          select bfd_claim_updated_ts from idr_new.claim_institutional_nch where bene_sk = :beneSk
+                          select bfd_claim_updated_ts from idr.claim_institutional_nch where bene_sk = :beneSk
                           union all
-                          select bfd_claim_updated_ts from idr_new.claim_institutional_ss where bene_sk = :beneSk
+                          select bfd_claim_updated_ts from idr.claim_institutional_ss where bene_sk = :beneSk
                           union all
-                          select bfd_claim_updated_ts from idr_new.claim_rx where bene_sk = :beneSk
+                          select bfd_claim_updated_ts from idr.claim_rx where bene_sk = :beneSk
                       ) all_claims
                    """)
                 .setParameter("beneSk", Long.valueOf(BENE_ID_NON_CURRENT))

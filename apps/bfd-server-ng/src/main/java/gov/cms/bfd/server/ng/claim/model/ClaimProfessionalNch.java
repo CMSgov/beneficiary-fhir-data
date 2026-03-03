@@ -26,7 +26,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
  */
 @Getter
 @Entity
-@Table(name = "claim_professional_nch", schema = "idr_new")
+@Table(name = "claim_professional_nch", schema = "idr")
 @SuppressWarnings({"JpaAttributeTypeInspection", "java:S2293"})
 public class ClaimProfessionalNch extends ClaimProfessionalBase {
 

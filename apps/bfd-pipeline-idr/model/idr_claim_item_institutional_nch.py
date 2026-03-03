@@ -238,7 +238,7 @@ class IdrClaimItemInstitutionalNch(IdrBaseModel):
 
     @staticmethod
     def table() -> str:
-        return "idr_new.claim_item_institutional_nch"
+        return "idr.claim_item_institutional_nch"
 
     @staticmethod
     def last_updated_date_table() -> str:
