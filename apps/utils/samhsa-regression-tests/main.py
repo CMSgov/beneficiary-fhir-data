@@ -6,7 +6,7 @@ import os
 import ssl
 import sys
 from abc import ABCMeta
-from collections.abc import Callable
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from datetime import date
 from enum import EnumMeta, StrEnum, auto
@@ -413,17 +413,20 @@ async def verify_samhsa_filtering(
                 for entry in no_samhsa_bundle_entries
             ]
             bene_samhsa_claims_set = set(samhsa_bene.samhsa_claim_ids)
+            samhsa_unauthed_unfiltered_clms = set(all_samhsa_filtered_clm_ids).intersection(
+                bene_samhsa_claims_set
+            )
             # We should expect the intersection of the set of all claims on the SAMHSA unauthorized
             # response to have _zero_ SAMHSA claim IDs on it.
-            samhsa_claims_filtered_when_not_authorized = (
-                len(set(all_samhsa_filtered_clm_ids).intersection(bene_samhsa_claims_set)) == 0
+            samhsa_claims_filtered_when_not_authorized = len(samhsa_unauthed_unfiltered_clms) == 0
+            samhsa_authed_clms_intersection = set(all_samhsa_allowed_clm_ids).intersection(
+                bene_samhsa_claims_set
             )
             # We should expect the intersection of the set of all claims on the SAMHSA _authorized_
             # response to be exactly the set of SAMHSA claims retrieved from the database, as we
             # expect that no SAMHSA claims are filtered
             samhsa_claims_unfiltered_when_authorized = (
-                set(all_samhsa_allowed_clm_ids).intersection(bene_samhsa_claims_set)
-                == bene_samhsa_claims_set
+                samhsa_authed_clms_intersection == bene_samhsa_claims_set
             )
             final_result = (
                 VerifyFilteringResult.PASS
@@ -445,20 +448,45 @@ async def verify_samhsa_filtering(
 
             if final_result == VerifyFilteringResult.FAIL:
                 logger.debug(
-                    (
-                        "Bene SK: %s, SAMHSA claim IDs: %s, authorized response claim IDs: %s, "
-                        "unauthorized response claim IDs: %s"
-                    ),
+                    "Bene SK: %s, all SAMHSA claim IDs: %s",
                     samhsa_bene.bene_sk,
-                    samhsa_bene.samhsa_claim_ids,
-                    all_samhsa_allowed_clm_ids,
-                    all_samhsa_filtered_clm_ids,
+                    ",".join(samhsa_bene.samhsa_claim_ids),
+                )
+                logger.debug(
+                    "Bene SK: %s, SAMHSA-allowed resp clm_uniq_ids: %s",
+                    samhsa_bene.bene_sk,
+                    ",".join(all_samhsa_allowed_clm_ids),
+                )
+                logger.debug(
+                    "Bene SK: %s, SAMHSA-filtered resp clm_uniq_ids: %s",
+                    samhsa_bene.bene_sk,
+                    ",".join(all_samhsa_filtered_clm_ids),
+                )
+                logger.debug(
+                    "Bene SK: %s, unfiltered clms: %s",
+                    samhsa_bene.bene_sk,
+                    ",".join(samhsa_unauthed_unfiltered_clms),
+                )
+                logger.debug(
+                    "Bene SK: %s, SAMHSA intersected clms: %s",
+                    samhsa_bene.bene_sk,
+                    ",".join(samhsa_authed_clms_intersection),
                 )
 
             return final_result
     except Exception:
         logger.exception("Failed to query for %s", samhsa_bene.bene_sk)
         return VerifyFilteringResult.EMPTY_RESPONSE
+
+
+async def gather_with_concurrency[T](n: int, *coros: Awaitable[T]) -> list[T]:
+    semaphore = asyncio.Semaphore(n)
+
+    async def sem_coro(coro: Awaitable[T]) -> T:
+        async with semaphore:
+            return await coro
+
+    return await asyncio.gather(*(sem_coro(c) for c in coros))
 
 
 @click.command()
@@ -593,6 +621,12 @@ async def main(
         security_labels=samhsa_labels, db_details=db_details, tablesample=tablesample, limit=limit
     )
 
+    if LOGGING_LEVEL == "DEBUG":
+        for samhsa_bene in samhsa_benes:
+            logger.debug(
+                "Bene SK: %s, clms: %s", samhsa_bene.bene_sk, ",".join(samhsa_bene.samhsa_claim_ids)
+            )
+
     # We check for localhost or 127.0.0.1 (the most common local addresses) to determine if this is
     # a local test. If it is, we don't supply real certificate values or worry about loading
     # certificates at all. We just provide the dummy certificates directly via the header. We use
@@ -638,7 +672,8 @@ async def main(
             headers={LOCALHOST_CERTIFICATE_HEADER: "samhsa_not_allowed"} if is_local else None,
         ) as no_samhsa_session,
     ):
-        results = await asyncio.gather(
+        results = await gather_with_concurrency(
+            10,
             *(
                 verify_samhsa_filtering(
                     url=full_eob_url,
@@ -647,7 +682,7 @@ async def main(
                     samhsa_bene=samhsa_bene,
                 )
                 for samhsa_bene in samhsa_benes
-            )
+            ),
         )
 
         all_samhsa_filtered = all(
