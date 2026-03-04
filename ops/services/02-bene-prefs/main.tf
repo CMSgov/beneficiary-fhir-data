@@ -12,7 +12,7 @@ module "terraservice" {
 
   service              = local.service
   relative_module_root = "ops/services/02-bene-prefs"
-  ssm_hierarchy_roots   = concat(["bfd"], tolist(local.partners))
+  ssm_hierarchy_roots  = concat(["bfd"], tolist(local.partners))
 }
 
 locals {
@@ -23,13 +23,13 @@ locals {
   env                      = module.terraservice.env
   env_key_arn              = module.terraservice.env_key_arn
   name_prefix              = "bfd-${local.env}-${local.service}"
-  partners                 = toset(["bcda", "ab2d", "dpc"])
+  partners                 = contains(["test", "prod"], local.env) ? toset(["bcda", "ab2d", "dpc"]) : toset([])
   iam_path                 = module.terraservice.default_iam_path
   permissions_boundary_arn = module.terraservice.default_permissions_boundary_arn
 
   root_dir = "bfdeft01"
 
-# Build up the partners config for the bucket assumer arns and S3 notification received file targets:
+  # Build up the partners config for the bucket assumer arns and S3 notification received file targets:
   partners_config = {
     for partner in local.partners :
     partner => {
@@ -148,4 +148,18 @@ module "topics" {
 
   sqs_sample_rate    = 100
   lambda_sample_rate = 100
+}
+
+resource "aws_dynamodb_table" "bene_preferences_tracker" {
+  count = contains(["test", "prod"], local.env) ? 1 : 0
+
+  name         = "bfd-${local.env}-bene-preferences"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "partner"
+  attribute {
+    name = "partner"
+    type = "S"
+  }
+
+  tags = local.default_tags
 }
