@@ -194,9 +194,12 @@ CLAIMS_TABLES = [
     CLAIM_PROFESSIONAL_NCH_TABLE,
     CLAIM_PROFESSIONAL_SS_TABLE,
 ]
-TABLES_META: dict[str, tuple[type[ClaimTableColumnBase], str | None]] = {
-    CLAIM_INSTITUTIONAL_NCH_TABLE: (ClaimInstitutionalNchColumn, None),
-    CLAIM_INSTITUTIONAL_SS_TABLE: (ClaimInstitutionalSsColumn, None),
+TABLES_META: dict[str, tuple[type[ClaimTableColumnBase], str]] = {
+    CLAIM_INSTITUTIONAL_NCH_TABLE: (
+        ClaimInstitutionalNchColumn,
+        CLAIM_ITEM_INSTITUTIONAL_NCH_TABLE,
+    ),
+    CLAIM_INSTITUTIONAL_SS_TABLE: (ClaimInstitutionalSsColumn, CLAIM_ITEM_INSTITUTIONAL_SS_TABLE),
     CLAIM_ITEM_INSTITUTIONAL_NCH_TABLE: (
         ClaimItemInstitutionalNchColumn,
         CLAIM_INSTITUTIONAL_NCH_TABLE,
@@ -215,7 +218,7 @@ TABLES_META: dict[str, tuple[type[ClaimTableColumnBase], str | None]] = {
 
 async def query_samhsa_claim_any_ids(
     table: str,
-    claim_table: str | None,
+    join_table: str,
     column: str,
     query_params: list[Any],
     tablesample: float,
@@ -240,24 +243,31 @@ async def query_samhsa_claim_any_ids(
             table,
         )
 
-        # This construction looks a little strange, but it's done so that claim _item_ tables are
-        # inner joined with their parent claim tables and claim tables do not have an inner join
-        claim_join = t""
-        if claim_table:
-            claim_join = t"""
-            INNER JOIN idr_new.{claim_table:i}
-                ON {table:i}.clm_uniq_id = {claim_table:i}.clm_uniq_id
+        # This construction looks a little strange, but it's done so that _claims_ tables are joined
+        # with their _claim_items_ tables and _claim_items_ tables are joined with their _claims_
+        # tables as a claim.
+        #
+        # We do this for two reasons:
+        #
+        # 1. Claims are invalid if they have no claim items
+        # 2. Claim items are invalid if they have no claim
+        claim_join = t"""
+            INNER JOIN idr_new.{join_table:i}
+                ON {table:i}.clm_uniq_id = {join_table:i}.clm_uniq_id
             """
 
+        # Either "table" or "join_table" can be the claims table, and "clm_thru_dt" does not exist
+        # on claim_item* tables, so we need to determine what the claims table is
+        claims_table = next(x for x in CLAIMS_TABLES if x in [table, join_table])
         full_query = t"""
-                SELECT {table:i}.clm_uniq_id, {table:i}.{column:i},
-                    {(claim_table or table):i}.clm_thru_dt
-                FROM idr_new.{table:i}
-                TABLESAMPLE SYSTEM({tablesample:l})
-                {claim_join:q}
-                WHERE {table:i}.{column:i} = ANY({(list(query_params))})
-                LIMIT {limit:l}
-                """
+            SELECT {table:i}.clm_uniq_id, {table:i}.{column:i},
+                {(claims_table):i}.clm_thru_dt
+            FROM idr_new.{table:i}
+            TABLESAMPLE SYSTEM({tablesample:l})
+            {claim_join:q}
+            WHERE {table:i}.{column:i} = ANY({(list(query_params))})
+            LIMIT {limit:l}
+            """
         logger.debug("Running query:\n%s", sql.as_string(full_query))
         result = await (await curs.execute(full_query)).fetchall()
         valid_samhsa_claim_ids = [
@@ -299,7 +309,7 @@ async def query_samhsa_benes_with_claims(
                 *(
                     query_samhsa_claim_any_ids(
                         table=table,
-                        claim_table=claim_table,
+                        join_table=join_table,
                         column=column,
                         query_params=column.code_generator(column, security_labels),
                         security_labels=security_labels,
@@ -307,7 +317,7 @@ async def query_samhsa_benes_with_claims(
                         limit=limit,
                         db_details=db_details,
                     )
-                    for table, (col_type, claim_table) in TABLES_META.items()
+                    for table, (col_type, join_table) in TABLES_META.items()
                     for column in col_type
                 ),
             )
