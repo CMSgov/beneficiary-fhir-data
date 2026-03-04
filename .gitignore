@@ -29,3 +29,6 @@
 *.tfstate.backup
 .terraform.tfstate.lock.info
 .terraform/
+
+# Allow pre-commit config file
+!.pre-commit-config.yaml

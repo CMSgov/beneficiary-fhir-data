@@ -1,0 +1,52 @@
+
+repos:
+  # pre-commit hooks
+- repo: local
+  hooks:
+    - id: pre-commit-check-sop-files-script
+      name: Pre-commit Check SOP Files Script
+      entry: ./.github/scripts/pre-commit-check-sop-files.sh
+      language: script
+      stages: [ pre-commit ]
+      verbose: true
+- repo: https://github.com/shellcheck-py/shellcheck-py
+  rev: v0.11.0.1
+  hooks:
+    - id: shellcheck
+      files: '.*\.sh'
+      args: ['-e', 'SC1071,SC2239', '-S', 'warning']
+      stages: [ pre-commit ]
+      verbose: true
+- repo: https://github.com/gitleaks/gitleaks
+  rev: v8.24.2
+  hooks:
+    - id: gitleaks
+
+  # pre-push hooks
+- repo: https://github.com/astral-sh/ruff-pre-commit
+  rev: v0.15.0
+  hooks:
+    # Run the linter.
+    - id: ruff-check
+      args: [ --fix ]
+      stages: [ pre-push ]
+      verbose: true
+    # Run the formatter.
+    - id: ruff-format
+      stages: [ pre-push ]
+      verbose: true
+- repo: https://github.com/RobertCraigie/pyright-python
+  rev: v1.1.408
+  hooks:
+    - id: pyright
+      stages: [ pre-push ]
+      verbose: true
+- repo: local
+  hooks:
+    - id: pre-push-script
+      name: Pre-push Script
+      pass_filenames: false
+      entry: ./.github/scripts/pre-push.sh
+      language: script
+      stages: [ pre-push ]
+      verbose: true
