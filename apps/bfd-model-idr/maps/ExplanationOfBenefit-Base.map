@@ -21,11 +21,8 @@ imports "https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Item-Help
 
 group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
     
+    //TODO after discussions - update to be based on final action. 
     src -> tgt.status = "active" "Set status";
-    //CLM_LTST_CLM_IND = latest claim indicator
-    //CLM_FINL_ACTN_IND = claim is done processing
-    //CLM_CNTL_NUM = claim control number
-    //ORIG_CLM_CNTL_NUM = original claim control number. subsumes previous ones. 
 
     src -> tgt.use = "claim" "Set use code";
     src -> tgt.type = create('CodeableConcept') as tgtCC then {
@@ -39,7 +36,7 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
     } "Create type";
 
     src -> tgt.patient = create('Reference') as tgtReference then {
-      src.CLM_BENE_XREF_EFCTV_SK as ptId -> tgtReference.reference = append("Patient/",ptId) "Concatenate patient id";
+      src.BENE_SK as ptId -> tgtReference.reference = append("Patient/",ptId) "Concatenate patient id";
     } "Add patient reference to EOB";
 
     src -> tgt.meta = create('Meta') as tgtMeta then {
@@ -63,7 +60,7 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
       src.CLM_CNTL_NUM as claimCntlNum -> tgtIdentifier.value = claimCntlNum "Set identifier Value";
     } "Add CLM_CNTL_NUM as identifier";
 
-    src.clmCntlArray as otherClaimNumber -> tgt.related = create('BackboneElement') as tgtBBElement then {
+    src.CLM_ORIG_CNTL_NUM as otherClaimNumber -> tgt.related = create('BackboneElement') as tgtBBElement then {
       src -> tgtBBElement.relationship = cc("http://terminology.hl7.org/CodeSystem/ex-relatedclaimrelationship","prior") "Add relationshipp";
       src -> tgtBBElement.reference = create('Identifier') as tgtId then{
         src -> tgtId.system = "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM" "Add system";
@@ -103,8 +100,8 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
         src.CLM_AUDT_TRL_STUS_CD as auditTrailStatusCode -> tgt.outcome = translate(auditTrailStatusCode, 'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#CLM_AUDT_TRL_STUS_CD_FISS','code') "Set outcome for phase 2/3 FISS";
       } "Set outcome for FISS";
       src.META_SRC_SK as srcSk where srcSk = '1002' -> tgt then {
-        src.CLM_FINAL_ACTION as finalAction where finalAction = Y -> tgt.outcome = "complete" "Set VMS outcome to complete.";
-        src.CLM_FINAL_ACTION as finalAction where finalAction = N -> tgt.outcome = "partial" "Set VMS outcome to partial.";
+        src.CLM_FINL_ACTN_IND as finalAction where finalAction = Y -> tgt.outcome = "complete" "Set VMS outcome to complete.";
+        src.CLM_FINL_ACTN_IND as finalAction where finalAction = N -> tgt.outcome = "partial" "Set VMS outcome to partial.";
       } "Set outcome for VMS";
     } "Complete additional outcomes";
 

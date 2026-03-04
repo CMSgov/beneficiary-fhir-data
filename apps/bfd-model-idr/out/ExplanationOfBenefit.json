@@ -1,7 +1,7 @@
 {
   "resourceType" : "ExplanationOfBenefit",
   "meta" : {
-    "lastUpdated" : "2025-01-07T03:02:28.000000Z",
+    "lastUpdated" : "2026-03-02T17:58:49.332977Z",
     "source" : "NCH",
     "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional|2.1.0"],
     "tag" : [{
@@ -382,6 +382,480 @@
     "sequence" : 9,
     "category" : {
       "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      },
+      {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code" : "CLM_NCH_WKLY_PROC_DT",
+        "display" : "Weekly Process Date"
+      }]
+    },
+    "timingDate" : "2025-01-18"
+  },
+  {
+    "sequence" : 10,
+    "category" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      },
+      {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code" : "CLM_NCVRD_FROM_DT",
+        "display" : "Noncovered Stay From Date"
+      }]
+    },
+    "timingDate" : "2025-01-01"
+  },
+  {
+    "sequence" : 11,
+    "category" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      },
+      {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code" : "CLM_NCVRD_THRU_DT",
+        "display" : "Noncovered Stay Through Date"
+      }]
+    },
+    "timingDate" : "2025-01-02"
+  },
+  {
+    "sequence" : 12,
+    "category" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      },
+      {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code" : "CLM_ACTV_CARE_THRU_DT",
+        "display" : "Covered Care Through Date"
+      }]
+    },
+    "timingDate" : "2025-01-11"
+  },
+  {
+    "sequence" : 13,
+    "category" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      },
+      {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code" : "CLM_MDCR_EXHSTD_DT",
+        "display" : "Medicare Benefits Exhausted Date"
+      }]
+    },
+    "timingDate" : "2025-01-11"
+  },
+  {
+    "sequence" : 14,
+    "category" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      },
+      {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code" : "CLM_NCH_PRMRY_PYR_CD",
+        "display" : "NCH Primary Payer Code"
+      }]
+    },
+    "code" : {
+      "coding" : [{
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRMRY-PYR-CD",
+        "code" : "I",
+        "display" : "VETERAN'S AFFAIRS"
+      }]
+    }
+  },
+  {
+    "sequence" : 15,
+    "category" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      },
+      {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code" : "CLM_PPS_IND_CD",
+        "display" : "Claim PPS Indicator Code"
+      }]
+    },
+    "code" : {
+      "coding" : [{
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PPS-IND-CD",
+        "code" : "2",
+        "display" : "PPS bill; claim contains PPS indicator"
+      }]
+    }
+  },
+  {
+    "sequence" : 16,
+    "category" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      },
+      {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code" : "CLM_QLFY_STAY_FROM_DT",
+        "display" : "Qualified Stay From Date"
+      }]
+    },
+    "timingDate" : "2025-01-02"
+  },
+  {
+    "sequence" : 17,
+    "category" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      },
+      {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code" : "CLM_QLFY_STAY_THRU_DT",
+        "display" : "Qualified Stay Through Date"
+      }]
+    },
+    "timingDate" : "2025-01-01"
+  },
+  {
+    "sequence" : 18,
+    "category" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      },
+      {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code" : "CLM_HHA_LUP_IND_CD",
+        "display" : "Claim Lupa Indicator Code"
+      }]
+    },
+    "code" : {
+      "coding" : [{
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-LUP-IND-CD",
+        "code" : "L",
+        "display" : "Low utilization payment adjustment (LUPA) claim"
+      }]
+    }
+  },
+  {
+    "sequence" : 19,
+    "category" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      },
+      {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code" : "CLM_HHA_RFRL_CD",
+        "display" : "Claim Referral Code"
+      }]
+    },
+    "code" : {
+      "coding" : [{
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-RFRL-CD",
+        "code" : "C",
+        "display" : "READMISSION TO SAME HHA - IF A BENEFICIARY IS DISCHARGED FROM AN HHA AND THEN READMITTED WITHIN THE ORIGINAL 60-DAY EPISODE THE ORIGINAL EPISODE MUST BE CLOSED EARLY AND A NEW ONE CREATED."
+      }]
+    }
+  },
+  {
+    "sequence" : 20,
+    "category" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      },
+      {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code" : "DGNS_DRG_OUTLIER_CD",
+        "display" : "Claim Diagnosis Related Group Outlier Stay Code"
+      }]
+    },
+    "code" : {
+      "coding" : [{
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/DGNS-DRG-OUTLIER-CD",
+        "code" : "6",
+        "display" : "Valid diagnosis related groups (DRG) received from the intermediary *** Non-PPS Only ***"
+      }]
+    }
+  },
+  {
+    "sequence" : 21,
+    "category" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      },
+      {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code" : "CLM_PPS_IND_CD",
+        "display" : "Claim PPS Indicator Code"
+      }]
+    },
+    "code" : {
+      "coding" : [{
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PPS-IND-CD",
+        "code" : "2",
+        "display" : "PPS bill; claim contains PPS indicator"
+      }]
+    }
+  },
+  {
+    "sequence" : 22,
+    "category" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      },
+      {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code" : "CLM_NRLN_RIC_CD",
+        "display" : "Near Line Record Identification Code"
+      }]
+    },
+    "code" : {
+      "coding" : [{
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD",
+        "code" : "V",
+        "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA])"
+      }]
+    }
+  },
+  {
+    "sequence" : 23,
+    "category" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      },
+      {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code" : "CLM_QUERY_CD",
+        "display" : "Claim Query Code"
+      }]
+    },
+    "code" : {
+      "coding" : [{
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD",
+        "code" : "3",
+        "display" : "FINAL BILL"
+      }]
+    }
+  },
+  {
+    "sequence" : 24,
+    "category" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      },
+      {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code" : "CLM_IDR_LD_DT",
+        "display" : "Claim IDR Load Date"
+      }]
+    },
+    "timingDate" : "2025-01-18"
+  },
+  {
+    "sequence" : 25,
+    "category" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      },
+      {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code" : "CLM_CNTRCTR_NUM",
+        "display" : "Claim Contractor Number"
+      }]
+    },
+    "code" : {
+      "coding" : [{
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CNTRCTR-NUM",
+        "code" : "10312",
+        "display" : "PALMETTO GBA LLC"
+      }]
+    }
+  },
+  {
+    "sequence" : 26,
+    "category" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      },
+      {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code" : "CLM_ADJSTMT_TYPE_CD",
+        "display" : "Claim Adjustment Type Code"
+      }]
+    },
+    "code" : {
+      "coding" : [{
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADJSTMT-TYPE-CD",
+        "code" : "0",
+        "display" : "ORIGINAL"
+      }]
+    }
+  },
+  {
+    "sequence" : 27,
+    "category" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      },
+      {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code" : "CLM_DISP_CD",
+        "display" : "Claim Disposition Code"
+      }]
+    },
+    "code" : {
+      "coding" : [{
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DISP-CD",
+        "code" : "1",
+        "display" : "DEBIT ACCEPTED"
+      }]
+    }
+  },
+  {
+    "sequence" : 28,
+    "category" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      },
+      {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code" : "CLM_CMS_PROC_DT",
+        "display" : "FI Claim Process Date"
+      }]
+    },
+    "timingDate" : "2025-01-01"
+  },
+  {
+    "sequence" : 29,
+    "category" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      },
+      {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code" : "CLM_MDCR_NPMT_RSN_CD",
+        "display" : "Claim Non Payment Reason Code"
+      }]
+    },
+    "code" : {
+      "coding" : [{
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-NPMT-RSN-CD",
+        "code" : "P",
+        "display" : "PAYMENT REQUESTED"
+      }]
+    }
+  },
+  {
+    "sequence" : 30,
+    "category" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      },
+      {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code" : "CLM_FI_ACTN_CD",
+        "display" : "Claim Fiscal Intermediary Action Code"
+      }]
+    },
+    "code" : {
+      "coding" : [{
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD",
+        "code" : "1",
+        "display" : "Original debit action (always a 1 for all regular bills)"
+      }]
+    }
+  },
+  {
+    "sequence" : 31,
+    "category" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      },
+      {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code" : "CLM_RLT_COND_CD",
+        "display" : "Claim Related Condition Code"
+      }]
+    },
+    "code" : {
+      "coding" : [{
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+        "code" : "09",
+        "display" : "NEITHER PATIENT NOR SPOUSE IS EMPLOYED"
+      }]
+    }
+  },
+  {
+    "sequence" : 32,
+    "category" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      },
+      {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code" : "CLM_RLT_COND_CD",
+        "display" : "Claim Related Condition Code"
+      }]
+    },
+    "code" : {
+      "coding" : [{
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
+        "code" : "10",
+        "display" : "PATIENT AND/OR SPOUSE IS EMPLOYED BUT NO EGHP COVERAGE EXISTS OR (EFF 9/93) OTHER EMPLOYER SPONSORED/PROVIDEDHEALTH INSURANCE COVERING PATIENT."
+      }]
+    }
+  },
+  {
+    "sequence" : 33,
+    "category" : {
+      "coding" : [{
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
         "code" : "typeofbill"
       }]
@@ -406,478 +880,22 @@
     }
   },
   {
-    "sequence" : 10,
-    "category" : {
-      "coding" : [{
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-        "code" : "info",
-        "display" : "Information"
-      },
-      {
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-        "code" : "CLM_NCH_WKLY_PROC_DT",
-        "display" : "Weekly Process Date"
-      }]
-    },
-    "timingDate" : "2025-01-18"
+    "sequence" : 34
   },
   {
-    "sequence" : 11,
-    "category" : {
-      "coding" : [{
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-        "code" : "info",
-        "display" : "Information"
-      },
-      {
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-        "code" : "CLM_NCVRD_FROM_DT",
-        "display" : "Noncovered Stay From Date"
-      }]
-    },
-    "timingDate" : "2025-01-01"
+    "sequence" : 35
   },
   {
-    "sequence" : 12,
-    "category" : {
-      "coding" : [{
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-        "code" : "info",
-        "display" : "Information"
-      },
-      {
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-        "code" : "CLM_NCVRD_THRU_DT",
-        "display" : "Noncovered Stay Through Date"
-      }]
-    },
-    "timingDate" : "2025-01-02"
+    "sequence" : 36
   },
   {
-    "sequence" : 13,
-    "category" : {
-      "coding" : [{
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-        "code" : "info",
-        "display" : "Information"
-      },
-      {
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-        "code" : "CLM_ACTV_CARE_THRU_DT",
-        "display" : "Covered Care Through Date"
-      }]
-    },
-    "timingDate" : "2025-01-11"
+    "sequence" : 37
   },
   {
-    "sequence" : 14,
-    "category" : {
-      "coding" : [{
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-        "code" : "info",
-        "display" : "Information"
-      },
-      {
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-        "code" : "CLM_MDCR_EXHSTD_DT",
-        "display" : "Medicare Benefits Exhausted Date"
-      }]
-    },
-    "timingDate" : "2025-01-11"
+    "sequence" : 38
   },
   {
-    "sequence" : 15,
-    "category" : {
-      "coding" : [{
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-        "code" : "info",
-        "display" : "Information"
-      },
-      {
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-        "code" : "CLM_NCH_PRMRY_PYR_CD",
-        "display" : "NCH Primary Payer Code"
-      }]
-    },
-    "code" : {
-      "coding" : [{
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRMRY-PYR-CD",
-        "code" : "I",
-        "display" : "VETERAN'S AFFAIRS"
-      }]
-    }
-  },
-  {
-    "sequence" : 16,
-    "category" : {
-      "coding" : [{
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-        "code" : "info",
-        "display" : "Information"
-      },
-      {
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-        "code" : "CLM_PPS_IND_CD",
-        "display" : "Claim PPS Indicator Code"
-      }]
-    },
-    "code" : {
-      "coding" : [{
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PPS-IND-CD",
-        "code" : "2",
-        "display" : "PPS bill; claim contains PPS indicator"
-      }]
-    }
-  },
-  {
-    "sequence" : 17,
-    "category" : {
-      "coding" : [{
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-        "code" : "info",
-        "display" : "Information"
-      },
-      {
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-        "code" : "CLM_QLFY_STAY_FROM_DT",
-        "display" : "Qualified Stay From Date"
-      }]
-    },
-    "timingDate" : "2025-01-02"
-  },
-  {
-    "sequence" : 18,
-    "category" : {
-      "coding" : [{
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-        "code" : "info",
-        "display" : "Information"
-      },
-      {
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-        "code" : "CLM_QLFY_STAY_THRU_DT",
-        "display" : "Qualified Stay Through Date"
-      }]
-    },
-    "timingDate" : "2025-01-01"
-  },
-  {
-    "sequence" : 19,
-    "category" : {
-      "coding" : [{
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-        "code" : "info",
-        "display" : "Information"
-      },
-      {
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-        "code" : "CLM_HHA_LUP_IND_CD",
-        "display" : "Claim Lupa Indicator Code"
-      }]
-    },
-    "code" : {
-      "coding" : [{
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-LUP-IND-CD",
-        "code" : "L",
-        "display" : "Low utilization payment adjustment (LUPA) claim"
-      }]
-    }
-  },
-  {
-    "sequence" : 20,
-    "category" : {
-      "coding" : [{
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-        "code" : "info",
-        "display" : "Information"
-      },
-      {
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-        "code" : "CLM_HHA_RFRL_CD",
-        "display" : "Claim Referral Code"
-      }]
-    },
-    "code" : {
-      "coding" : [{
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-HHA-RFRL-CD",
-        "code" : "C",
-        "display" : "READMISSION TO SAME HHA - IF A BENEFICIARY IS DISCHARGED FROM AN HHA AND THEN READMITTED WITHIN THE ORIGINAL 60-DAY EPISODE THE ORIGINAL EPISODE MUST BE CLOSED EARLY AND A NEW ONE CREATED."
-      }]
-    }
-  },
-  {
-    "sequence" : 21,
-    "category" : {
-      "coding" : [{
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-        "code" : "info",
-        "display" : "Information"
-      },
-      {
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-        "code" : "DGNS_DRG_OUTLIER_CD",
-        "display" : "Claim Diagnosis Related Group Outlier Stay Code"
-      }]
-    },
-    "code" : {
-      "coding" : [{
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/DGNS-DRG-OUTLIER-CD",
-        "code" : "6",
-        "display" : "Valid diagnosis related groups (DRG) received from the intermediary *** Non-PPS Only ***"
-      }]
-    }
-  },
-  {
-    "sequence" : 22,
-    "category" : {
-      "coding" : [{
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-        "code" : "info",
-        "display" : "Information"
-      },
-      {
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-        "code" : "CLM_PPS_IND_CD",
-        "display" : "Claim PPS Indicator Code"
-      }]
-    },
-    "code" : {
-      "coding" : [{
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PPS-IND-CD",
-        "code" : "2",
-        "display" : "PPS bill; claim contains PPS indicator"
-      }]
-    }
-  },
-  {
-    "sequence" : 23,
-    "category" : {
-      "coding" : [{
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-        "code" : "info",
-        "display" : "Information"
-      },
-      {
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-        "code" : "CLM_NRLN_RIC_CD",
-        "display" : "Near Line Record Identification Code"
-      }]
-    },
-    "code" : {
-      "coding" : [{
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD",
-        "code" : "V",
-        "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA])"
-      }]
-    }
-  },
-  {
-    "sequence" : 24,
-    "category" : {
-      "coding" : [{
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-        "code" : "info",
-        "display" : "Information"
-      },
-      {
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-        "code" : "CLM_RLT_COND_CD",
-        "display" : "Claim Related Condition Code"
-      }]
-    },
-    "code" : {
-      "coding" : [{
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
-        "code" : "04",
-        "display" : "INFORMATION ONLY BILL"
-      }]
-    }
-  },
-  {
-    "sequence" : 25,
-    "category" : {
-      "coding" : [{
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-        "code" : "info",
-        "display" : "Information"
-      },
-      {
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-        "code" : "CLM_RLT_COND_CD",
-        "display" : "Claim Related Condition Code"
-      }]
-    },
-    "code" : {
-      "coding" : [{
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD",
-        "code" : "DR",
-        "display" : "DISASTER RELATED  (EFF. 10/2005)"
-      }]
-    }
-  },
-  {
-    "sequence" : 26,
-    "category" : {
-      "coding" : [{
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-        "code" : "info",
-        "display" : "Information"
-      },
-      {
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-        "code" : "CLM_QUERY_CD",
-        "display" : "Claim Query Code"
-      }]
-    },
-    "code" : {
-      "coding" : [{
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD",
-        "code" : "3",
-        "display" : "FINAL BILL"
-      }]
-    }
-  },
-  {
-    "sequence" : 27,
-    "category" : {
-      "coding" : [{
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-        "code" : "info",
-        "display" : "Information"
-      },
-      {
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-        "code" : "CLM_IDR_LD_DT",
-        "display" : "Claim IDR Load Date"
-      }]
-    },
-    "timingDate" : "2025-01-18"
-  },
-  {
-    "sequence" : 28,
-    "category" : {
-      "coding" : [{
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-        "code" : "info",
-        "display" : "Information"
-      },
-      {
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-        "code" : "CLM_CNTRCTR_NUM",
-        "display" : "Claim Contractor Number"
-      }]
-    },
-    "code" : {
-      "coding" : [{
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CNTRCTR-NUM",
-        "code" : "10312",
-        "display" : "PALMETTO GBA LLC"
-      }]
-    }
-  },
-  {
-    "sequence" : 29,
-    "category" : {
-      "coding" : [{
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-        "code" : "info",
-        "display" : "Information"
-      },
-      {
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-        "code" : "CLM_ADJSTMT_TYPE_CD",
-        "display" : "Claim Adjustment Type Code"
-      }]
-    },
-    "code" : {
-      "coding" : [{
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADJSTMT-TYPE-CD",
-        "code" : "0",
-        "display" : "ORIGINAL"
-      }]
-    }
-  },
-  {
-    "sequence" : 30,
-    "category" : {
-      "coding" : [{
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-        "code" : "info",
-        "display" : "Information"
-      },
-      {
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-        "code" : "CLM_DISP_CD",
-        "display" : "Claim Disposition Code"
-      }]
-    },
-    "code" : {
-      "coding" : [{
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DISP-CD",
-        "code" : "1",
-        "display" : "DEBIT ACCEPTED"
-      }]
-    }
-  },
-  {
-    "sequence" : 31,
-    "category" : {
-      "coding" : [{
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-        "code" : "info",
-        "display" : "Information"
-      },
-      {
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-        "code" : "CLM_CMS_PROC_DT",
-        "display" : "FI Claim Process Date"
-      }]
-    },
-    "timingDate" : "2025-01-01"
-  },
-  {
-    "sequence" : 32,
-    "category" : {
-      "coding" : [{
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-        "code" : "info",
-        "display" : "Information"
-      },
-      {
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-        "code" : "CLM_MDCR_NPMT_RSN_CD",
-        "display" : "Claim Non Payment Reason Code"
-      }]
-    },
-    "code" : {
-      "coding" : [{
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-NPMT-RSN-CD",
-        "code" : "P",
-        "display" : "PAYMENT REQUESTED"
-      }]
-    }
-  },
-  {
-    "sequence" : 33,
-    "category" : {
-      "coding" : [{
-        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
-        "code" : "info",
-        "display" : "Information"
-      },
-      {
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
-        "code" : "CLM_FI_ACTN_CD",
-        "display" : "Claim Fiscal Intermediary Action Code"
-      }]
-    },
-    "code" : {
-      "coding" : [{
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD",
-        "code" : "1",
-        "display" : "Original debit action (always a 1 for all regular bills)"
-      }]
-    }
+    "sequence" : 39
   }],
   "diagnosis" : [{
     "sequence" : 1,
@@ -1121,8 +1139,7 @@
     "productOrService" : {
       "coding" : [{
         "system" : "http://www.ama-assn.org/go/cpt",
-        "code" : "99213",
-        "display" : "Office or other outpatient visit for the evaluation and management of an established patient, which requires a medically appropriate history and/or examination and low level of medical decision making. When using time for code selection, 20-29 minutes of total time is spent on the date of the encounter."
+        "code" : "99213"
       }]
     },
     "quantity" : {
@@ -1225,8 +1242,7 @@
     "productOrService" : {
       "coding" : [{
         "system" : "http://www.ama-assn.org/go/cpt",
-        "code" : "99453",
-        "display" : "Remote monitoring of physiologic parameter(s) (eg, weight, blood pressure, pulse oximetry, respiratory flow rate), initial; set-up and patient education on use of equipment"
+        "code" : "99453"
       }]
     },
     "modifier" : [{
@@ -1388,8 +1404,7 @@
     "modifier" : [{
       "coding" : [{
         "system" : "http://www.ama-assn.org/go/cpt",
-        "code" : "99",
-        "display" : "Multiple Modifiers: Under certain circumstances 2 or more modifiers may be necessary to completely delineate a service. In such situations modifier 99 should be added to the basic procedure, and other applicable modifiers may be listed as part of the description of the service."
+        "code" : "99"
       }]
     }],
     "servicedDate" : "2025-01-01",
@@ -1550,8 +1565,7 @@
       "productOrService" : {
         "coding" : [{
           "system" : "http://hl7.org/fhir/sid/ndc",
-          "code" : "00409189001",
-          "display" : "Morphine Sulfate, 10 CARTRIDGE in 1 CARTON (0409-1890-01) > 1 mL in 1 CARTRIDGE (0409-1890-03) (package)"
+          "code" : "00409189001"
         }]
       },
       "quantity" : {

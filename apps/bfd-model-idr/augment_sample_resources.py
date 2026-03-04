@@ -4,11 +4,15 @@ from dataclasses import asdict, dataclass, field
 from decimal import Decimal
 from pathlib import Path
 from typing import Optional
+from datetime import datetime, timezone
 
 import pandas as pd
 
 prvdr_info_file = "sample-data/PRVDR_HSTRY_POC.csv"
 df = pd.read_csv(prvdr_info_file, dtype={"PRVDR_SK": str})
+
+cond_sk_info_file = "sample-data/CLM_RLT_COND_SGNTR_MBR_POC.csv"
+cond_sk_df = pd.read_csv(cond_sk_info_file, dtype={"CLM_RLT_COND_SGNTR_SK": str})
 
 cur_sample = sys.argv[1]
 cur_sample_data = {}
@@ -34,7 +38,35 @@ line_supporting_info_columns = [
     "CLM_LINE_PMD_UNIQ_TRKNG_NUM",
     "CLM_LINE_PA_UNIQ_TRKNG_NUM",
 ]
-# npis_used = []
+header_to_supp_info_cols = {
+    "CLM_BNFT_ENHNCMT_1_CD": "CLM_BNFT_ENHNCMT_CD",
+    "CLM_BNFT_ENHNCMT_2_CD": "CLM_BNFT_ENHNCMT_CD",
+    "CLM_BNFT_ENHNCMT_3_CD": "CLM_BNFT_ENHNCMT_CD",
+    "CLM_BNFT_ENHNCMT_4_CD": "CLM_BNFT_ENHNCMT_CD",
+    "CLM_BNFT_ENHNCMT_5_CD": "CLM_BNFT_ENHNCMT_CD",
+    "CLM_NGACO_PBPMT_SW": "CLM_NGACO_PBPMT_SW",
+    "CLM_NGACO_PDSCHRG_HCBS_SW": "CLM_NGACO_PDSCHRG_HCBS_SW",
+    "CLM_NGACO_SNF_WVR_SW": "CLM_NGACO_SNF_WVR_SW",
+    "CLM_NGACO_TLHLTH_SW": "CLM_NGACO_TLHLTH_SW",
+    "CLM_NGACO_CPTATN_SW": "CLM_NGACO_CPTATN_SW",
+    "CLM_ACO_CARE_MGMT_HCBS_SW": "CLM_ACO_CARE_MGMT_HCBS_SW",
+}
+
+line_to_supp_info_cols = {
+    "CLM_LINE_BNFT_ENHNCMT_1_CD": "CLM_BNFT_ENHNCMT_CD",
+    "CLM_LINE_BNFT_ENHNCMT_2_CD": "CLM_BNFT_ENHNCMT_CD",
+    "CLM_LINE_BNFT_ENHNCMT_3_CD": "CLM_BNFT_ENHNCMT_CD",
+    "CLM_LINE_BNFT_ENHNCMT_4_CD": "CLM_BNFT_ENHNCMT_CD",
+    "CLM_LINE_BNFT_ENHNCMT_5_CD": "CLM_BNFT_ENHNCMT_CD",
+    "CLM_LINE_NGACO_PBPMT_SW": "CLM_NGACO_PBPMT_SW",
+    "CLM_LINE_NGACO_PDSCHRG_HCBS_SW": "CLM_NGACO_PDSCHRG_HCBS_SW",
+    "CLM_LINE_NGACO_SNF_WVR_SW": "CLM_NGACO_SNF_WVR_SW",
+    "CLM_LINE_NGACO_TLHLTH_SW": "CLM_NGACO_TLHLTH_SW",
+    "CLM_LINE_NGACO_CPTATN_SW": "CLM_NGACO_CPTATN_SW",
+    "CLM_LINE_ACO_CARE_MGMT_HCBS_SW": "CLM_ACO_CARE_MGMT_HCBS_SW",
+}
+
+npis_used = []
 cur_sample_data["providerList"] = []
 cur_careteam_sequence = 1
 # we only use CLM_SRVC_PRVDR_GNRC_ID_NUM for part D events (we filter for PRVDR_SRVC_NPI_)
@@ -216,19 +248,57 @@ for line_item in cur_sample_data["lineItemComponents"]:
         line_item["careTeamSequence"] = [sequence]
 
 supporting_info_seq = 1
-supporting_info_components = cur_sample_data.get("supportingInfoComponents", [])
+if "supportingInfoComponents" not in cur_sample_data:
+    cur_sample_data["supportingInfoComponents"] = []
+supporting_info_components = cur_sample_data["supportingInfoComponents"]
+
+cond_sk = cur_sample_data.get("CLM_RLT_COND_SGNTR_SK")
+if cond_sk:
+    matching_rows = cond_sk_df[cond_sk_df["CLM_RLT_COND_SGNTR_SK"] == str(cond_sk)]
+    for _, row in matching_rows.iterrows():
+        cond_cd = row.get("CLM_RLT_COND_CD")
+        if pd.notna(cond_cd) and str(cond_cd) != "~":
+            supporting_info_components.append({"CLM_RLT_COND_CD": str(cond_cd)})
+
+fac_type = cur_sample_data.get("CLM_BILL_FAC_TYPE_CD")
+clsfctn = cur_sample_data.get("CLM_BILL_CLSFCTN_CD")
+freq = cur_sample_data.get("CLM_BILL_FREQ_CD")
+
+if fac_type and clsfctn and freq:
+    supporting_info_components.append(
+        {"TYPE_OF_BILL_CD": "0" + str(fac_type) + str(clsfctn) + str(freq)}
+    )
 
 for si_comp in supporting_info_components:
     si_comp["ROW_NUM"] = supporting_info_seq
     supporting_info_seq += 1
 
+for source_col, target_col in header_to_supp_info_cols.items():
+    value = cur_sample_data.get(source_col)
+    if value:
+        temp_var = {"ROW_NUM": supporting_info_seq, target_col: value}
+        supporting_info_components.append(temp_var)
+        supporting_info_seq += 1
+
+
 # There can be line item NPIs that are not present at header level, but
 # need to be added to the CareTeam. This populates those.
 line_items = cur_sample_data.get("lineItemComponents", [])
 for item in line_items:
+    if "SEQUENCE_INFO" in item and not isinstance(item["SEQUENCE_INFO"], list):
+        item["SEQUENCE_INFO"] = [item["SEQUENCE_INFO"]]
+
     for line_supporting_info_col in line_supporting_info_columns:
         if item.get(line_supporting_info_col):
-            item["SEQUENCE_INFO"] = supporting_info_seq
+            item.setdefault("SEQUENCE_INFO", []).append(supporting_info_seq)
+            supporting_info_seq += 1
+
+    for source_col, target_col in line_to_supp_info_cols.items():
+        value = item.get(source_col)
+        if value:
+            temp_var = {"ROW_NUM": supporting_info_seq, target_col: value}
+            supporting_info_components.append(temp_var)
+            item.setdefault("SEQUENCE_INFO", []).append(supporting_info_seq)
             supporting_info_seq += 1
 
     # for part D claims, sum CLM_LINE_INGRDNT_CST_AMT, CLM_LINE_SRVC_CST_AMT, CLM_LINE_SLS_TAX_AMT,
@@ -339,6 +409,8 @@ for item in cur_sample_data.get("lineItemComponents", []):
             item["diagnosisSequence"] = [int(match.ROW_NUM)]
 
 filename = "out/temporary-sample.json"
+
+cur_sample_data["lastUpdated"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
 with Path(filename).open("w") as f:
     json.dump(cur_sample_data, f, indent=4)

@@ -27,7 +27,7 @@ group createEOBPharmacy(source src: ExplanationOfBenefitPharmacy, target tgt: BF
     } "Create type";
 
     src -> tgt.patient = create('Reference') as tgtReference then {
-      src.CLM_BENE_XREF_EFCTV_SK as ptId -> tgtReference.reference = append("Patient/",ptId) "Concatenate patient id";
+      src.BENE_SK as ptId -> tgtReference.reference = append("Patient/",ptId) "Concatenate patient id";
     } "Add patient reference to EOB";
 
     src -> tgt.meta = create('Meta') as tgtMeta then {
