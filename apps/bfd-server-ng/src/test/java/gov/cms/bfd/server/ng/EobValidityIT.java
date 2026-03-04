@@ -1,7 +1,6 @@
 package gov.cms.bfd.server.ng;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.stream.Collectors;
 import org.hl7.fhir.r4.model.Bundle;
@@ -30,6 +29,13 @@ class EobValidityIT extends IntegrationTestBase {
     assertFalse(
         eob.getMeta().getProfile().isEmpty(), "EOB Meta must have at least one Profile defined");
     assertFalse(eob.hasExtension());
+
+    final var uniqueResourceIds =
+        eob.getContained().stream().map(r -> r.fhirType() + r.getId()).distinct().count();
+    assertEquals(
+        uniqueResourceIds,
+        eob.getContained().size(),
+        "EOB Contained Resources must be unique per FHIR type");
 
     var hasCarinProfile =
         eob.getMeta().getProfile().stream()

@@ -115,7 +115,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
   },
   "careTeam" : [ {
     "provider" : {
-      "reference" : "#careteam-prescriber-practitioner-1"
+      "reference" : "#1730548868"
     },
     "role" : {
       "coding" : [ {
@@ -127,7 +127,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
     "sequence" : 1
   } ],
   "contained" : [ {
-    "id" : "provider-practitioner",
+    "id" : "1548226988",
     "identifier" : [ {
       "system" : "http://hl7.org/fhir/sid/us-npi",
       "type" : {
@@ -149,7 +149,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
     } ],
     "resourceType" : "Practitioner"
   }, {
-    "id" : "careteam-prescriber-practitioner-1",
+    "id" : "1730548868",
     "identifier" : [ {
       "system" : "http://hl7.org/fhir/sid/us-npi",
       "type" : {
@@ -502,7 +502,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
     "date" : "2018-08-20"
   },
   "provider" : {
-    "reference" : "#provider-practitioner"
+    "reference" : "#1548226988"
   },
   "resourceType" : "ExplanationOfBenefit",
   "status" : "active",
@@ -1285,7 +1285,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
   },
   "careTeam" : [ {
     "provider" : {
-      "reference" : "#careteam-prescriber-practitioner-1"
+      "reference" : "#1437702123"
     },
     "role" : {
       "coding" : [ {
@@ -1298,7 +1298,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
   } ],
   "contained" : [ {
     "active" : true,
-    "id" : "provider-org",
+    "id" : "1649041195",
     "identifier" : [ {
       "system" : "http://hl7.org/fhir/sid/us-npi",
       "type" : {
@@ -1316,7 +1316,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
     "name" : "CBS Health Corporation",
     "resourceType" : "Organization"
   }, {
-    "id" : "careteam-prescriber-practitioner-1",
+    "id" : "1437702123",
     "identifier" : [ {
       "system" : "http://hl7.org/fhir/sid/us-npi",
       "type" : {
@@ -1667,7 +1667,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
     "date" : "2025-08-11"
   },
   "provider" : {
-    "reference" : "#provider-org"
+    "reference" : "#1649041195"
   },
   "resourceType" : "ExplanationOfBenefit",
   "status" : "active",
