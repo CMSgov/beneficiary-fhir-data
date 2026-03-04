@@ -17,9 +17,11 @@ public enum ClaimLineBrandGenericCode {
   /** B - Brand. */
   B("B", "Brand"),
   /** G - Generic Null/Missing. */
-  G("G", "Generic Null/Missing");
+  G("G", "Generic Null/Missing"),
+  /** INVALID - Represents an invalid code that we still want to capture. */
+  INVALID("", "");
 
-  private final String code;
+  private String code;
   private final String display;
 
   /**
@@ -29,7 +31,26 @@ public enum ClaimLineBrandGenericCode {
    * @return genric brand indicator code
    */
   public static Optional<ClaimLineBrandGenericCode> tryFromCode(String code) {
-    return Arrays.stream(values()).filter(v -> v.code.equals(code)).findFirst();
+    if (code == null || code.isBlank()) {
+      return Optional.empty();
+    }
+    return Optional.of(
+        Arrays.stream(values())
+            .filter(v -> v.code.equals(code))
+            .findFirst()
+            .orElse(handleInvalidValue(code)));
+  }
+
+  /**
+   * Handles scenarios where code could not be mapped to a valid value.
+   *
+   * @param invalidValue the invalid value to capture
+   * @return genric brand indicator code
+   */
+  public static ClaimLineBrandGenericCode handleInvalidValue(String invalidValue) {
+    var invalidClaimLineBrandGenericCode = ClaimLineBrandGenericCode.INVALID;
+    invalidClaimLineBrandGenericCode.code = invalidValue;
+    return invalidClaimLineBrandGenericCode;
   }
 
   ExplanationOfBenefit.SupportingInformationComponent toFhir(

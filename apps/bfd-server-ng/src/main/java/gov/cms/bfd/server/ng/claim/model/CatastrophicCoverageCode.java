@@ -16,19 +16,40 @@ public enum CatastrophicCoverageCode {
   /** A - Attachment point met on this event. */
   A("A", "Attachment point met on this event"),
   /** C - Above attachment point. */
-  C("C", "Above attachment point");
+  C("C", "Above attachment point"),
+  /** INVALID - Represents an invalid code that we still want to capture. */
+  INVALID("", "");
 
-  private final String code;
+  private String code;
   private final String display;
 
   /**
    * Convert from a database code.
    *
    * @param code database code
-   * @return catastrophic coverage code
+   * @return catastrophic coverage code or empty Optional if code is null or blank
    */
   public static Optional<CatastrophicCoverageCode> tryFromCode(String code) {
-    return Arrays.stream(values()).filter(v -> v.code.equals(code)).findFirst();
+    if (code == null || code.isBlank()) {
+      return Optional.empty();
+    }
+    return Optional.of(
+        Arrays.stream(values())
+            .filter(v -> v.code.equals(code))
+            .findFirst()
+            .orElse(handleInvalidValue(code)));
+  }
+
+  /**
+   * Handles scenarios where code could not be mapped to a valid value.
+   *
+   * @param invalidValue the invalid value to capture
+   * @return catastrophic coverage code
+   */
+  public static CatastrophicCoverageCode handleInvalidValue(String invalidValue) {
+    var invalidCatastrophicCoverageCode = CatastrophicCoverageCode.INVALID;
+    invalidCatastrophicCoverageCode.code = invalidValue;
+    return invalidCatastrophicCoverageCode;
   }
 
   ExplanationOfBenefit.SupportingInformationComponent toFhir(

@@ -2327,9 +2327,11 @@ public enum ClaimRelatedConditionCode {
   /** ZY - PAYER CODE - NOT CURRENTLY USED BY MEDICARE. */
   ZY("ZY", "PAYER CODE - NOT CURRENTLY USED BY MEDICARE"),
   /** ZZ - PAYER CODE - NOT CURRENTLY USED BY MEDICARE. */
-  ZZ("ZZ", "PAYER CODE - NOT CURRENTLY USED BY MEDICARE");
+  ZZ("ZZ", "PAYER CODE - NOT CURRENTLY USED BY MEDICARE"),
+  /** INVALID - Represents an invalid code that we still want to capture. */
+  INVALID("", "");
 
-  private final String code;
+  private String code;
   private final String display;
 
   /**
@@ -2339,7 +2341,26 @@ public enum ClaimRelatedConditionCode {
    * @return claim type code
    */
   public static Optional<ClaimRelatedConditionCode> fromCode(String code) {
-    return Arrays.stream(values()).filter(c -> c.code.equals(code)).findFirst();
+    if (code == null || code.isBlank()) {
+      return Optional.empty();
+    }
+    return Optional.of(
+        Arrays.stream(values())
+            .filter(c -> c.code.equals(code))
+            .findFirst()
+            .orElse(handleInvalidValue(code)));
+  }
+
+  /**
+   * Handles scenarios where code could not be mapped to a valid value.
+   *
+   * @param invalidValue the invalid value to capture
+   * @return claim related condition code
+   */
+  public static ClaimRelatedConditionCode handleInvalidValue(String invalidValue) {
+    var invalidClaimRelatedConditionCode = ClaimRelatedConditionCode.INVALID;
+    invalidClaimRelatedConditionCode.code = invalidValue;
+    return invalidClaimRelatedConditionCode;
   }
 
   CodeableConcept toFhir() {

@@ -17,19 +17,40 @@ public enum ProviderAssignmentIndicatorSwitch {
   /** L - Assigned Claim. */
   L("L", "Assigned Claim"),
   /** N - Non-assigned claim. */
-  N("N", "Non-assigned claim");
+  N("N", "Non-assigned claim"),
+  /** INVALID - Represents an invalid code that we still want to capture. */
+  INVALID("", "");
 
-  private final String code;
+  private String code;
   private final String display;
 
   /**
    * Convert from a database code.
    *
    * @param code database code
-   * @return claim payment denial code
+   * @return provider assignment indicator switch
    */
   public static Optional<ProviderAssignmentIndicatorSwitch> tryFromCode(String code) {
-    return Arrays.stream(values()).filter(v -> v.code.equals(code)).findFirst();
+    if (code == null || code.isBlank()) {
+      return Optional.empty();
+    }
+    return Optional.of(
+        Arrays.stream(values())
+            .filter(v -> v.code.equals(code))
+            .findFirst()
+            .orElse(handleInvalidValue(code)));
+  }
+
+  /**
+   * Handles scenarios where code could not be mapped to a valid value.
+   *
+   * @param invalidValue the invalid value to capture
+   * @return provider assignment indicator switch
+   */
+  public static ProviderAssignmentIndicatorSwitch handleInvalidValue(String invalidValue) {
+    var invalidProviderAssignmentIndicatorSwitch = ProviderAssignmentIndicatorSwitch.INVALID;
+    invalidProviderAssignmentIndicatorSwitch.code = invalidValue;
+    return invalidProviderAssignmentIndicatorSwitch;
   }
 
   ExplanationOfBenefit.SupportingInformationComponent toFhir(

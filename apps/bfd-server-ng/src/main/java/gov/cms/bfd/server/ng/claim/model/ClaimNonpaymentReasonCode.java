@@ -184,9 +184,11 @@ public enum ClaimNonpaymentReasonCode {
    */
   Z(
       "Z",
-      "ZERO REIMBURSEMENT REQUEST FOR ANTICIPATED PAYMENTS (RAPS) - ZERO REIMBURSEMENT MADE DUE TO MEDICAL REVIEW INTERVENTION OR WHERE PROVIDER SPECIFIC ZERO PAYMENT HAS BEEN DETERMINED. (EFFECTIVE WITH HHPPS - 10/00)");
+      "ZERO REIMBURSEMENT REQUEST FOR ANTICIPATED PAYMENTS (RAPS) - ZERO REIMBURSEMENT MADE DUE TO MEDICAL REVIEW INTERVENTION OR WHERE PROVIDER SPECIFIC ZERO PAYMENT HAS BEEN DETERMINED. (EFFECTIVE WITH HHPPS - 10/00)"),
+  /** INVALID - Represents an invalid code that we still want to capture. */
+  INVALID("", "");
 
-  private final String code;
+  private String code;
   private final String display;
 
   /**
@@ -196,7 +198,26 @@ public enum ClaimNonpaymentReasonCode {
    * @return claim nonpayment reason code
    */
   public static Optional<ClaimNonpaymentReasonCode> tryFromCode(String code) {
-    return Arrays.stream(values()).filter(v -> v.code.equals(code)).findFirst();
+    if (code == null || code.isBlank()) {
+      return Optional.empty();
+    }
+    return Optional.of(
+        Arrays.stream(values())
+            .filter(v -> v.code.equals(code))
+            .findFirst()
+            .orElse(handleInvalidValue(code)));
+  }
+
+  /**
+   * Handles scenarios where code could not be mapped to a valid value.
+   *
+   * @param invalidValue the invalid value to capture
+   * @return claim nonpayment reason code
+   */
+  public static ClaimNonpaymentReasonCode handleInvalidValue(String invalidValue) {
+    var invalidClaimNonpaymentReasonCode = ClaimNonpaymentReasonCode.INVALID;
+    invalidClaimNonpaymentReasonCode.code = invalidValue;
+    return invalidClaimNonpaymentReasonCode;
   }
 
   ExplanationOfBenefit.SupportingInformationComponent toFhir(

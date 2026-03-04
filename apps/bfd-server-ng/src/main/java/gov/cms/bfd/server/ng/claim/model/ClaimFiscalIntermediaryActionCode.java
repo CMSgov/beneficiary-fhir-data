@@ -19,19 +19,40 @@ public enum ClaimFiscalIntermediaryActionCode {
   /** 5 - Force action code 3 (secondary debit adjustment). */
   _5("5", "Force action code 3 (secondary debit adjustment)"),
   /** 8 - Benefits refused. */
-  _8("8", "Benefits refused");
+  _8("8", "Benefits refused"),
+  /** INVALID - Represents an invalid code that we still want to capture. */
+  INVALID("", "");
 
-  private final String code;
+  private String code;
   private final String display;
 
   /**
-   * Convert from a database code.
+   * Converts from a database code.
    *
    * @param code database code
    * @return claim fiscal intermediary action code
    */
   public static Optional<ClaimFiscalIntermediaryActionCode> tryFromCode(String code) {
-    return Arrays.stream(values()).filter(v -> v.code.equals(code)).findFirst();
+    if (code == null || code.isBlank()) {
+      return Optional.empty();
+    }
+    return Optional.of(
+        Arrays.stream(values())
+            .filter(c -> c.code.equals(code))
+            .findFirst()
+            .orElse(handleInvalidValue(code)));
+  }
+
+  /**
+   * Handles scenarios where code could not be mapped to a valid value.
+   *
+   * @param invalidValue the invalid value to capture
+   * @return claim fiscal intermediary action code
+   */
+  public static ClaimFiscalIntermediaryActionCode handleInvalidValue(String invalidValue) {
+    var invalidClaimFiscalIntermediaryActionCode = ClaimFiscalIntermediaryActionCode.INVALID;
+    invalidClaimFiscalIntermediaryActionCode.code = invalidValue;
+    return invalidClaimFiscalIntermediaryActionCode;
   }
 
   ExplanationOfBenefit.SupportingInformationComponent toFhir(

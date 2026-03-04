@@ -661,9 +661,11 @@ public enum ClaimContractorNumber {
       "19003",
       "NORIDAN ADMINISTRATIVE SERVICES, LLC(EFF. 10/01/06) (REPLACES CARRIER #05655) DME MAC"),
   /** 52280 - NE -WISCONSIN PHYSICIANS SERVICE INSURANCE CORPORATION. */
-  _52280("52280", "NE -WISCONSIN PHYSICIANS SERVICE INSURANCE CORPORATION");
+  _52280("52280", "NE -WISCONSIN PHYSICIANS SERVICE INSURANCE CORPORATION"),
+  /** INVALID - Represents an invalid code that we still want to capture. */
+  INVALID("", "");
 
-  private final String code;
+  private String code;
   private final String display;
 
   /**
@@ -673,7 +675,26 @@ public enum ClaimContractorNumber {
    * @return claim contractor number
    */
   public static Optional<ClaimContractorNumber> fromCode(String code) {
-    return Arrays.stream(values()).filter(v -> v.code.equals(code)).findFirst();
+    if (code == null || code.isBlank()) {
+      return Optional.empty();
+    }
+    return Optional.of(
+        Arrays.stream(values())
+            .filter(v -> v.code.equals(code))
+            .findFirst()
+            .orElse(handleInvalidValue(code)));
+  }
+
+  /**
+   * Handles scenarios where code could not be mapped to a valid value.
+   *
+   * @param invalidValue the invalid value to capture
+   * @return claim contractor number
+   */
+  public static ClaimContractorNumber handleInvalidValue(String invalidValue) {
+    var invalidClaimContractorNumber = ClaimContractorNumber.INVALID;
+    invalidClaimContractorNumber.code = invalidValue;
+    return invalidClaimContractorNumber;
   }
 
   ExplanationOfBenefit.SupportingInformationComponent toFhir(

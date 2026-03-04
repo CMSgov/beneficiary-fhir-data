@@ -38,9 +38,11 @@ public enum ClaimRecordTypeCode {
       "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA])",
       "Part A"),
   /** W - Part B institutional claim record (outpatient [HOP], HHA). */
-  W("W", "Part B institutional claim record (outpatient [HOP], HHA)", "Part B");
+  W("W", "Part B institutional claim record (outpatient [HOP], HHA)", "Part B"),
+  /** INVALID - Represents an invalid code that we still want to capture. */
+  INVALID("", "", "");
 
-  private final String code;
+  private String code;
   private final String display;
   private final String partDisplay;
 
@@ -51,7 +53,26 @@ public enum ClaimRecordTypeCode {
    * @return claim record type code
    */
   public static Optional<ClaimRecordTypeCode> fromCode(String code) {
-    return Arrays.stream(values()).filter(v -> v.code.equals(code)).findFirst();
+    if (code == null || code.isBlank()) {
+      return Optional.empty();
+    }
+    return Optional.of(
+        Arrays.stream(values())
+            .filter(v -> v.code.equals(code))
+            .findFirst()
+            .orElse(handleInvalidValue(code)));
+  }
+
+  /**
+   * Handles scenarios where code could not be mapped to a valid value.
+   *
+   * @param invalidValue the invalid value to capture
+   * @return INVALID claim record type code
+   */
+  public static ClaimRecordTypeCode handleInvalidValue(String invalidValue) {
+    var invalidClaimRecordTypeCode = ClaimRecordTypeCode.INVALID;
+    invalidClaimRecordTypeCode.code = invalidValue;
+    return invalidClaimRecordTypeCode;
   }
 
   ExplanationOfBenefit.SupportingInformationComponent toFhir(

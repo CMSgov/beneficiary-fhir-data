@@ -36,9 +36,11 @@ public enum ClaimLineDeductibleCoinsuranceCode {
   /** N - Override code; non-EGHP services involved. */
   N("N", "Override code; non-EGHP services involved"),
   /** X - Override code: MSP (Medicare is secondary payer) cost avoided. */
-  X("X", "Override code: MSP (Medicare is secondary payer) cost avoided");
+  X("X", "Override code: MSP (Medicare is secondary payer) cost avoided"),
+  /** INVALID - Represents an invalid code that we still want to capture. */
+  INVALID("", "");
 
-  private final String code;
+  private String code;
   private final String display;
 
   /**
@@ -48,7 +50,26 @@ public enum ClaimLineDeductibleCoinsuranceCode {
    * @return coinsurance code
    */
   public static Optional<ClaimLineDeductibleCoinsuranceCode> tryFromCode(String code) {
-    return Arrays.stream(values()).filter(v -> v.code.equals(code)).findFirst();
+    if (code == null || code.isBlank()) {
+      return Optional.empty();
+    }
+    return Optional.of(
+        Arrays.stream(values())
+            .filter(v -> v.code.equals(code))
+            .findFirst()
+            .orElse(handleInvalidValue(code)));
+  }
+
+  /**
+   * Handles scenarios where code could not be mapped to a valid value.
+   *
+   * @param invalidValue the invalid value to capture
+   * @return coinsurance code
+   */
+  public static ClaimLineDeductibleCoinsuranceCode handleInvalidValue(String invalidValue) {
+    var invalidClaimLineDeductibleCoinsuranceCode = ClaimLineDeductibleCoinsuranceCode.INVALID;
+    invalidClaimLineDeductibleCoinsuranceCode.code = invalidValue;
+    return invalidClaimLineDeductibleCoinsuranceCode;
   }
 
   Coding toFhir() {

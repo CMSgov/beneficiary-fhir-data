@@ -45,19 +45,40 @@ public enum ClaimPatientResidenceCode {
   /** 14 - Homeless Shelter. */
   _14("14", "Homeless Shelter"),
   /** 15 - Correctional Institution. */
-  _15("15", "Correctional Institution");
+  _15("15", "Correctional Institution"),
+  /** INVALID - Represents an invalid code that we still want to capture. */
+  INVALID("", "");
 
-  private final String code;
+  private String code;
   private final String display;
 
   /**
    * Convert from a database code.
    *
    * @param code database code
-   * @return claim dispense status code
+   * @return claim patient residence code
    */
   public static Optional<ClaimPatientResidenceCode> tryFromCode(String code) {
-    return Arrays.stream(values()).filter(v -> v.code.equals(code)).findFirst();
+    if (code == null || code.isBlank()) {
+      return Optional.empty();
+    }
+    return Optional.of(
+        Arrays.stream(values())
+            .filter(v -> v.code.equals(code))
+            .findFirst()
+            .orElse(handleInvalidValue(code)));
+  }
+
+  /**
+   * Handles scenarios where code could not be mapped to a valid value.
+   *
+   * @param invalidValue the invalid value to capture
+   * @return claim patient residence code
+   */
+  public static ClaimPatientResidenceCode handleInvalidValue(String invalidValue) {
+    var invalidClaimPatientResidenceCode = ClaimPatientResidenceCode.INVALID;
+    invalidClaimPatientResidenceCode.code = invalidValue;
+    return invalidClaimPatientResidenceCode;
   }
 
   ExplanationOfBenefit.SupportingInformationComponent toFhir(
