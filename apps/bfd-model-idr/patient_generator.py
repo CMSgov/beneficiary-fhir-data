@@ -357,7 +357,12 @@ if __name__ == "__main__":
         try:
             # Call claims_generator.py with the generated SYNTHETIC_BENE_HSTRY.csv file
             result = subprocess.run(
-                args=[sys.executable, "claims_generator.py", f"out/{BENE_HSTRY}.csv"],
+                args=[
+                    sys.executable,
+                    "claims_generator.py",
+                    f"out/{BENE_HSTRY}.csv",
+                    f"out/{CNTRCT_PBP_NUM}.csv",
+                ],
                 check=True,
                 stdout=sys.stdout,
                 stderr=sys.stderr,
