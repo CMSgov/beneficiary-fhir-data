@@ -282,19 +282,7 @@ uv run compile_resources.py \
 
 ### Updating Structure Definitions
 
-If you add or move a field, you must update the input sample file and the corresponding Structure Definition file (e.g., defining CLM_AUDT_TRL_STUS_CD within the elements of ExplanationOfBenefit-Base.json).
-Example element definition:
-
-```text
-{
-  "id": "ExplanationOfBenefit-Base.CLM_AUDT_TRL_STUS_CD",
-  "path": "ExplanationOfBenefit-Base.CLM_AUDT_TRL_STUS_CD",
-  "label": "Claim Status Code",
-  "min": 0,
-  "max": "1",
-  "type": [{ "code": "string" }]
-}
-```
+FHIR Mapping Language is used to go from source to target. The source data structure must be defined, and we define them using FHIR Shorthand (https://hl7.org/fhir/uv/shorthand/N2/). When a new source field is added, add it to the relevant .fsh file (or create a new one) in the sushi/input folder. StructureDefinitions for input data structures should follow the naming convention of StructureDefinition-<Resource>.fsh
 
 ### Resource Augmentation
 

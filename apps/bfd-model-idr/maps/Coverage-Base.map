@@ -2,7 +2,7 @@
 //Must appear in order map -> conceptmap -> uses -> imports -> groups
 map "https://bfd.cms.gov/MappingLanguage/Maps/Coverage-Base" = "BFD-Coverage-Base-Map"
 
-uses "http://hl7.org/fhir/StructureDefinition/Coverage-Base" alias CoverageBase as source
+uses "https://bluebutton.cms.gov/fhir/StructureDefinition/Coverage-Base" alias CoverageBase as source
 //hl7.org urls are used for dependent resources as the FHIR validator resolves them as such. 
 
 //The first specified target is what the default output will output as the ResourceType
@@ -33,8 +33,6 @@ group createCoverageBase(source src: CoverageBase, target tgt: BFDCoverage){
     src.coveragePart as coveragePart where coveragePart = "C" -> tgt then createPartCCoverage(src,tgt) "Create Part C Coverage";
     //Generally, there's two ways to end up at part D: BENE_CVRG_TYPE_CD = 11 (PDP), or the part C contract offers part D coverage.
     src.coveragePart as coveragePart where coveragePart = "D" -> tgt then createPartDCoverage(src,tgt) "Create Part D Coverage";
-
-    
 
 }
 
