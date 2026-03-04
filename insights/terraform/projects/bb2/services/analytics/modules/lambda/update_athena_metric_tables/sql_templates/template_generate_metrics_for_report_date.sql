@@ -1346,7 +1346,7 @@ SELECT
         CONTAINS((SELECT enabled_metrics_list FROM report_params),
           'auth_v3_user_makes_it_to_permission_screen_bene_count')
         AND try_cast(crosswalk_fhir_id as BIGINT) > 0
-        type = 'Authentication:success'
+        AND type = 'Authentication:success'
         AND path = 'v3/mymedicare/sls-callback'
       )
   ) as auth_v3_user_makes_it_to_permission_screen_bene_count,
