@@ -187,11 +187,10 @@ class PartnerPreferences:
     def __store_preferences(
         self, preferences_data: str, file_name: str, store_local: bool = False
     ) -> None:
-        ## FIXME: Remove below
-        local_file = Path("/".join([self.partner, file_name.split("/")[-1]]))
-        with Path.open(local_file, "wb") as local:
-            local.write(preferences_data.encode("utf-8"))
-        ## FIXME: Remove above
+        if store_local:
+            local_file = Path("/".join([self.partner, file_name.split("/")[-1]]))
+            with Path.open(local_file, "wb") as local:
+                local.write(preferences_data.encode("utf-8"))
 
         bs_report = preferences_data.encode("utf-8")
         buffer = BytesIO(bs_report)
