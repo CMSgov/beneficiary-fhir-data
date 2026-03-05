@@ -252,7 +252,7 @@ async def query_samhsa_claim_any_ids(
         # 1. Claims are invalid if they have no claim items
         # 2. Claim items are invalid if they have no claim
         claim_join = t"""
-            INNER JOIN idr_new.{join_table:i}
+            INNER JOIN idr.{join_table:i}
                 ON {table:i}.clm_uniq_id = {join_table:i}.clm_uniq_id
             """
 
@@ -262,7 +262,7 @@ async def query_samhsa_claim_any_ids(
         full_query = t"""
             SELECT {table:i}.clm_uniq_id, {table:i}.{column:i},
                 {(claims_table):i}.clm_thru_dt
-            FROM idr_new.{table:i}
+            FROM idr.{table:i}
             TABLESAMPLE SYSTEM({tablesample:l})
             {claim_join:q}
             WHERE {table:i}.{column:i} = ANY({(list(query_params))})
@@ -343,7 +343,7 @@ async def query_samhsa_benes_with_claims(
                     *(
                         curs.execute(
                             t"""
-                            SELECT beneficiary.bene_sk, {table:i}.clm_uniq_id from idr_new.{table:i}
+                            SELECT beneficiary.bene_sk, {table:i}.clm_uniq_id from idr.{table:i}
                             INNER JOIN idr.beneficiary
                                 ON {table:i}.bene_sk = beneficiary.bene_sk
                             WHERE clm_uniq_id = ANY({(list(clm_uniq_ids))});
