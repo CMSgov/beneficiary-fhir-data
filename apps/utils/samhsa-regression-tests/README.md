@@ -46,6 +46,8 @@ Options:
                                  beneficiaries) to return from queries
                                  onclaim_item and claim_institutional;
                                  defaults to 300 rows
+  -p, --concurrency INTEGER      Number of concurrent requests to make against
+                                 the v3 Server.
   --help                         Show this message and exit.
 ```
 
