@@ -1,7 +1,7 @@
 {
   "resourceType" : "ExplanationOfBenefit",
   "meta" : {
-    "lastUpdated" : "2025-01-07T03:02:28.000000Z",
+    "lastUpdated" : "2026-03-02T17:59:36.560837Z",
     "source" : "NCH",
     "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional|2.1.0"],
     "tag" : [{
@@ -360,33 +360,6 @@
     "sequence" : 9,
     "category" : {
       "coding" : [{
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
-        "code" : "typeofbill"
-      }]
-    },
-    "code" : {
-      "coding" : [{
-        "system" : "https://www.nubc.org/CodeSystem/TypeOfBill",
-        "code" : "0123"
-      },
-      {
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FAC-TYPE-CD",
-        "code" : "1"
-      },
-      {
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-CLSFCTN-CD",
-        "code" : "12"
-      },
-      {
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD",
-        "code" : "123"
-      }]
-    }
-  },
-  {
-    "sequence" : 10,
-    "category" : {
-      "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
         "code" : "info",
         "display" : "Information"
@@ -400,7 +373,7 @@
     "timingDate" : "2025-01-18"
   },
   {
-    "sequence" : 11,
+    "sequence" : 10,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -416,7 +389,7 @@
     "timingDate" : "2025-01-01"
   },
   {
-    "sequence" : 12,
+    "sequence" : 11,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -432,7 +405,7 @@
     "timingDate" : "2025-01-02"
   },
   {
-    "sequence" : 13,
+    "sequence" : 12,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -448,7 +421,7 @@
     "timingDate" : "2025-01-11"
   },
   {
-    "sequence" : 14,
+    "sequence" : 13,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -464,7 +437,7 @@
     "timingDate" : "2025-01-11"
   },
   {
-    "sequence" : 15,
+    "sequence" : 14,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -486,7 +459,7 @@
     }
   },
   {
-    "sequence" : 16,
+    "sequence" : 15,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -508,7 +481,7 @@
     }
   },
   {
-    "sequence" : 17,
+    "sequence" : 16,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -524,7 +497,7 @@
     "timingDate" : "2025-01-02"
   },
   {
-    "sequence" : 18,
+    "sequence" : 17,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -540,7 +513,7 @@
     "timingDate" : "2025-01-01"
   },
   {
-    "sequence" : 19,
+    "sequence" : 18,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -562,7 +535,7 @@
     }
   },
   {
-    "sequence" : 20,
+    "sequence" : 19,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -584,7 +557,7 @@
     }
   },
   {
-    "sequence" : 21,
+    "sequence" : 20,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -606,7 +579,7 @@
     }
   },
   {
-    "sequence" : 22,
+    "sequence" : 21,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -628,7 +601,7 @@
     }
   },
   {
-    "sequence" : 23,
+    "sequence" : 22,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -644,7 +617,7 @@
     "timingDate" : "2025-01-18"
   },
   {
-    "sequence" : 24,
+    "sequence" : 23,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -666,7 +639,7 @@
     }
   },
   {
-    "sequence" : 25,
+    "sequence" : 24,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -688,7 +661,7 @@
     }
   },
   {
-    "sequence" : 26,
+    "sequence" : 25,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -710,7 +683,7 @@
     }
   },
   {
-    "sequence" : 27,
+    "sequence" : 26,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -726,7 +699,7 @@
     "timingDate" : "2025-01-01"
   },
   {
-    "sequence" : 28,
+    "sequence" : 27,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -748,7 +721,7 @@
     }
   },
   {
-    "sequence" : 29,
+    "sequence" : 28,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -766,6 +739,33 @@
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD",
         "code" : "1",
         "display" : "Original debit action (always a 1 for all regular bills)"
+      }]
+    }
+  },
+  {
+    "sequence" : 29,
+    "category" : {
+      "coding" : [{
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
+        "code" : "typeofbill"
+      }]
+    },
+    "code" : {
+      "coding" : [{
+        "system" : "https://www.nubc.org/CodeSystem/TypeOfBill",
+        "code" : "0123"
+      },
+      {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FAC-TYPE-CD",
+        "code" : "1"
+      },
+      {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-CLSFCTN-CD",
+        "code" : "12"
+      },
+      {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD",
+        "code" : "123"
       }]
     }
   }],

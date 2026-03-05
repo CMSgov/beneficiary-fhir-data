@@ -52,6 +52,8 @@ WITH report_params AS (
       'fhir_v3_eob_since_call_synthetic_count',
       'fhir_v3_coverage_since_call_real_count',
       'fhir_v3_coverage_since_call_synthetic_count',
+      'fhir_v3_generate_insurance_card_call_real_count',
+      'fhir_v3_generate_insurance_card_call_synthetic_count',
       'auth_ok_real_bene_count',
       'auth_ok_synthetic_bene_count',
       'auth_fail_or_deny_real_bene_count',
@@ -523,6 +525,12 @@ global_state_metrics_per_app_for_max_group_timestamp AS (
       "sum"(
         app_fhir_v3_coverage_since_call_synthetic_count
       ) app_all_fhir_v3_coverage_since_call_synthetic_count,
+      "sum"(
+        app_fhir_v3_generate_insurance_card_call_real_count
+      ) app_all_fhir_v3_generate_insurance_card_call_real_count,
+      "sum"(
+        app_fhir_v3_generate_insurance_card_call_synthetic_count
+      ) app_all_fhir_v3_generate_insurance_card_call_synthetic_count,
       "sum"(
         app_auth_ok_real_bene_count
       ) app_all_auth_ok_real_bene_count,
@@ -1314,6 +1322,37 @@ SELECT
         and req_qparam_lastupdated != ''
       )
   ) as fhir_v3_coverage_since_call_synthetic_count,
+
+  (
+    select
+      count(*)
+    from
+      v3_fhir_events
+    WHERE
+      (
+        CONTAINS((SELECT enabled_metrics_list FROM report_params),
+          'fhir_v3_generate_insurance_card_call_real_count')
+        AND path LIKE '/v3/fhir/Patient/%'
+        AND path LIKE '%insurance-card%'
+        and try_cast(fhir_id as BIGINT) > 0
+      )
+  ) as fhir_v3_generate_insurance_card_call_real_count,
+
+  (
+    select
+      count(*)
+    from
+      v3_fhir_events
+    WHERE
+      (
+        CONTAINS((SELECT enabled_metrics_list FROM report_params),
+          'fhir_v3_generate_insurance_card_call_synthetic_count')
+        AND path LIKE '/v3/fhir/Patient/%'
+        AND path LIKE '%insurance-card%'
+        and try_cast(fhir_id as BIGINT) < 0
+      )
+  ) as fhir_v3_generate_insurance_card_call_synthetic_count,
+
   /* AUTH and demographic scopes stats top level */
   (
     select
