@@ -58,8 +58,8 @@
     </modules>
 
     <properties>
-        <surefire.jvm.args />
-        <failsafe.jvm.args />
+        <surefire.jvm.args/>
+        <failsafe.jvm.args/>
         <!-- As specified in
         http://docs.codehaus.org/display/MAVENUSER/POM+Element+for+Source+File+Encoding,
             this property is used by many different plugins to specify the source file
@@ -139,10 +139,10 @@
 
         <!-- Jackson versions should be kept in sync when possible but can diverge slightly
             when vulnerabilities or other fixes affect some but not all components -->
-        <jackson-databind.version>2.18.3</jackson-databind.version>
-        <jackson-datatype-jdk8.version>2.18.3</jackson-datatype-jdk8.version>
+        <jackson-databind.version>2.18.6</jackson-databind.version>
+        <jackson-datatype-jdk8.version>2.18.6</jackson-datatype-jdk8.version>
         <jackson-dataformat-yaml.version>2.18.3</jackson-dataformat-yaml.version>
-        <jackson-datatype-jsr310.version>2.18.3</jackson-datatype-jsr310.version>
+        <jackson-datatype-jsr310.version>2.18.6</jackson-datatype-jsr310.version>
         <jackson-annotations.version>2.18.3</jackson-annotations.version>
         <!-- This snakeyaml version overrides the one normally imported by jackson-dataformat-yaml. -->
         <snakeyaml.version>2.4</snakeyaml.version>
@@ -218,8 +218,8 @@
         <!-- Note: See gov.cms.bfd.model.rif.schema.DatabaseTestHelper for details
             on the default 'jdbc:bfd-test:' URL here. -->
         <its.db.url>jdbc:bfd-test:tc</its.db.url>
-        <its.db.username />
-        <its.db.password />
+        <its.db.username/>
+        <its.db.password/>
         <!-- Docker image used with testcontainers to provide a working database for testing. -->
         <!-- This has a default value in gov.cms.bfd.DatabaseTestUtils that must also be changed
         when changing this property. -->
@@ -260,7 +260,7 @@
         <!-- Additional image tag for images built by jib.  (e.g. release number or commit hash)-->
         <jib.tag>${project.version}</jib.tag>
         <!-- Optional image namespace. -->
-        <jib.namespace />
+        <jib.namespace/>
         <!-- Skip by default.  Override to allow images to be built. -->
         <jib.skip>true</jib.skip>
 
