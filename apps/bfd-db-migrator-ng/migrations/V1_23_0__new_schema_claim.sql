@@ -247,7 +247,6 @@ create table idr.claim_institutional_ss
     clm_prvdr_intrst_pd_amt        numeric,
     bfd_claim_updated_ts           timestamp with time zone default now(),
     clm_audt_trl_stus_cd           character varying(2),
-    clm_audt_trl_lctn_cd           character varying(5),
     clm_crnt_stus_cd               character varying(1)     not null,
     meta_src_sk                    integer                  not null,
     clm_admsn_type_cd              varchar(2)               not null,

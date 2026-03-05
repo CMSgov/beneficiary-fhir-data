@@ -46,9 +46,6 @@ public class ClaimInstitutionalSharedSystems extends ClaimInstitutionalBase {
   @Column(name = "clm_audt_trl_stus_cd")
   private Optional<String> claimAuditTrailStatusCode;
 
-  @Column(name = "clm_audt_trl_lctn_cd")
-  private ClaimAuditTrailLocationCode claimAuditTrailLocationCode;
-
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "clm_uniq_id")
   private SortedSet<ClaimItemInstitutionalSharedSystems> claimItems;
@@ -93,7 +90,7 @@ public class ClaimInstitutionalSharedSystems extends ClaimInstitutionalBase {
         claimAuditTrailStatusCode.flatMap(
             status ->
                 ClaimAuditTrailStatusCode.tryFromCode(
-                    getMetaSourceSk(), status, claimAuditTrailLocationCode));
+                    getMetaSourceSk(), status, ClaimAuditTrailLocationCode.NA));
     auditTrailStatusCode.ifPresentOrElse(
         status -> eob.setOutcome(status.getOutcome(getFinalAction())),
         () -> eob.setOutcome(ExplanationOfBenefit.RemittanceOutcome.PARTIAL));
