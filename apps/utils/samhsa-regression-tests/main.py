@@ -604,6 +604,14 @@ async def gather_with_concurrency[T](n: int, *coros: Awaitable[T]) -> list[T]:
         "claim_item and claim_institutional; defaults to 300 rows"
     ),
 )
+@click.option(
+    "-p",  # "parallel" (even though concurrency is NOT parallelism)
+    "--concurrency",
+    envvar="CONCURRENCY",
+    type=int,
+    default=10,
+    help="Number of concurrent requests to make against the v3 Server.",
+)
 async def main(
     hostname: str,
     security_labels: Path,
@@ -615,6 +623,7 @@ async def main(
     db_conn_str: str | None,
     tablesample: int,
     limit: int,
+    concurrency: int,
 ) -> bool:
     samhsa_labels = TypeAdapter(list[SecurityLabelModel]).validate_python(
         yaml.safe_load(security_labels.read_text()),
@@ -683,7 +692,7 @@ async def main(
         ) as no_samhsa_session,
     ):
         results = await gather_with_concurrency(
-            10,
+            concurrency,
             *(
                 verify_samhsa_filtering(
                     url=full_eob_url,
