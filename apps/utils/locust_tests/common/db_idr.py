@@ -106,16 +106,44 @@ def get_regression_claim_ids(uri: str, table_sample_pct: float | None = None) ->
     Returns:
         List[str]: A list of synthetic beneficiary IDs used for the regression suites
     """
+    # TODO: Update this with latest psycopg templated strings to reduce duplication
     claim_query = """
-    SELECT clm_uniq_id FROM idr_new.claim_rx
+    SELECT clm_uniq_id FROM (SELECT clm_uniq_id FROM idr_new.claim_rx LIMIT 200) t1
     UNION ALL
-    SELECT clm_uniq_id from idr_new.claim_institutional_nch
+    SELECT clm_uniq_id FROM (
+            SELECT DISTINCT claim_institutional_nch.clm_uniq_id FROM idr_new.claim_institutional_nch
+            WHERE EXISTS (
+                SELECT 1 FROM idr_new.claim_item_institutional_nch
+                WHERE claim_item_institutional_nch.clm_uniq_id = claim_institutional_nch.clm_uniq_id
+            )
+            LIMIT 200
+        ) t2
     UNION ALL
-    SELECT clm_uniq_id from idr_new.claim_institutional_ss
+    SELECT clm_uniq_id FROM (
+            SELECT DISTINCT claim_institutional_ss.clm_uniq_id FROM idr_new.claim_institutional_ss
+            WHERE EXISTS (
+                SELECT 1 FROM idr_new.claim_item_institutional_ss
+                WHERE claim_item_institutional_ss.clm_uniq_id = claim_institutional_ss.clm_uniq_id
+            )
+            LIMIT 200
+        ) t3
     UNION ALL
-    SELECT clm_uniq_id from idr_new.claim_professional_nch
+    SELECT clm_uniq_id FROM (
+            SELECT DISTINCT claim_professional_nch.clm_uniq_id FROM idr_new.claim_professional_nch
+            WHERE EXISTS (
+                SELECT 1 FROM idr_new.claim_item_professional_nch
+                WHERE claim_item_professional_nch.clm_uniq_id = claim_professional_nch.clm_uniq_id
+            )
+            LIMIT 200
+        ) t4
     UNION ALL
-    SELECT clm_uniq_id from idr_new.claim_professional_ss
-    limit 1000
+    SELECT clm_uniq_id FROM (
+            SELECT DISTINCT claim_professional_ss.clm_uniq_id FROM idr_new.claim_professional_ss
+            WHERE EXISTS (
+                SELECT 1 FROM idr_new.claim_item_professional_ss
+                WHERE claim_item_professional_ss.clm_uniq_id = claim_professional_ss.clm_uniq_id
+            )
+            LIMIT 200
+        ) t5;
     """
     return [str(r[0]) for r in set(x for x in _execute(uri, claim_query))]
