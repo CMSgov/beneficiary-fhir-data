@@ -14,7 +14,7 @@ class ClaimLineNdc {
   private Optional<String> ndcCode;
 
   @Column(name = "clm_line_ndc_qty")
-  private double ndcQuantity;
+  private Optional<Double> ndcQuantity;
 
   @Column(name = "clm_line_ndc_qty_qlfyr_cd")
   private Optional<IdrUnit> ndcQuantityQualifierCode;
@@ -27,7 +27,7 @@ class ClaimLineNdc {
     detail.setSequence(1);
     detail.setProductOrService(
         new CodeableConcept(new Coding().setSystem(SystemUrls.NDC).setCode(ndcCode.get())));
-    ndcQuantityQualifierCode.ifPresent(c -> detail.setQuantity(c.toFhir(ndcQuantity)));
+    ndcQuantityQualifierCode.ifPresent(c -> detail.setQuantity(c.toFhir(ndcQuantity.get())));
     return Optional.of(detail);
   }
 

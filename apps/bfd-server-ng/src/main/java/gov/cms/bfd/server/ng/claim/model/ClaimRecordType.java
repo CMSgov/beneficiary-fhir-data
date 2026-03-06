@@ -3,38 +3,29 @@ package gov.cms.bfd.server.ng.claim.model;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.util.Optional;
-import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Reference;
 
 /**
  * Represents the record type information associated with a claim. This includes both the {@link
- * ClaimRecordTypeCode} and near-line {@link ClaimNearLineRecordTypeCode}. This class provides
- * utilities for converting these internal codes into their FHIR representations.
+ * ClaimRecordTypeCode} and near-line {@link ClaimRecordTypeCode}. This class provides utilities for
+ * converting these internal codes into their FHIR representations.
  */
 @Embeddable
 @Getter
 public class ClaimRecordType {
-  @Column(name = "clm_nrln_ric_cd")
-  private Optional<ClaimNearLineRecordTypeCode> claimNearLineRecordTypeCode;
 
-  @Column(name = "clm_ric_cd")
-  private Optional<ClaimRecordTypeCode> claimRecordTypeCode;
+  @Column private Optional<ClaimRecordTypeCode> claimRecordTypeCode;
 
   /**
    * Converts the record type information into a FHIR {@link Reference}.
    *
-   * @param claimTypeCode the claim type code used as a fallback display value
    * @return a FHIR {@link Reference} with the chosen display value, or empty if none is available
    */
-  public Optional<Reference> toFhirReference(ClaimTypeCode claimTypeCode) {
-    return Stream.of(
-            claimRecordTypeCode.map(ClaimRecordTypeCode::getDisplay),
-            claimNearLineRecordTypeCode.map(ClaimNearLineRecordTypeCode::getDisplay),
-            claimTypeCode.toDisplay())
-        .flatMap(Optional::stream)
-        .findFirst()
+  public Optional<Reference> toFhirReference() {
+    return claimRecordTypeCode
+        .map(ClaimRecordTypeCode::getDisplay)
         .map(display -> new Reference().setDisplay(display));
   }
 
@@ -45,21 +36,8 @@ public class ClaimRecordType {
    * @param supportingInfoFactory a factory for constructing supporting information elements
    * @return a stream of supporting information components derived from available record type codes
    */
-  public Stream<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
+  public Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {
-    return Stream.concat(
-        claimRecordTypeCode.stream().map(code -> code.toFhir(supportingInfoFactory)),
-        claimNearLineRecordTypeCode.stream().map(code -> code.toFhir(supportingInfoFactory)));
-  }
-
-  /**
-   * Gets the part display string.
-   *
-   * @return the part display string
-   */
-  public Optional<String> getPartDisplay() {
-    return claimRecordTypeCode
-        .map(ClaimRecordTypeCode::getPartDisplay)
-        .or(() -> claimNearLineRecordTypeCode.map(ClaimNearLineRecordTypeCode::getPartDisplay));
+    return claimRecordTypeCode.map(code -> code.toFhir(supportingInfoFactory));
   }
 }

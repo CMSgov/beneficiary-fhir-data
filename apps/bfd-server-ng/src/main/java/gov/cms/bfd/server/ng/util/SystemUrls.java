@@ -456,6 +456,10 @@ public class SystemUrls {
   public static final String CARIN_CODE_SYSTEM_CLAIM_CARE_TEAM_ROLE =
       "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole";
 
+  /** HL7 THO - Claim Care Team Role Code System. */
+  public static final String HL7_THO_CLAIM_CARE_TEAM_ROLE =
+      "http://terminology.hl7.org/CodeSystem/claimcareteamrole";
+
   /** CARIN Blue Button - C4BB Payer Adjudication Status. */
   public static final String CARIN_CODE_SYSTEM_PAYER_ADJUDICATION_STATUS =
       "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus";
@@ -830,4 +834,19 @@ public class SystemUrls {
 
   /** CLIA. */
   public static final String CLIA = "http://terminology.hl7.org/NamingSystem/CLIA";
+
+  /** NUCC provider taxonomy. */
+  public static final String NUCC_PROVIDER_TAXONOMY = "http://nucc.org/provider-taxonomy";
+
+  /** Claim prodvider specialty code. */
+  public static final String CMS_CLM_PRVDR_SPCLTY_CD =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRVDR-SPCLTY-CD";
+
+  /** Provider ID qualifier code. */
+  public static final String CMS_PRVDR_ID_QLFYR_CD =
+      "http://bluebutton.cms.gov/fhir/CodeSystem/PRVDR-ID-QLFYR-CD";
+
+  /** Provider generic ID number. */
+  public static final String CMS_GENERIC_ID_NUM =
+      "http://bluebutton.cms.gov/fhir/identifiers/GenericIdNum";
 }

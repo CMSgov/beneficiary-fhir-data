@@ -41,6 +41,12 @@ This is useful for loading our synthetic data stored in our repository, or the t
 uv run pytest
 ```
 
+## Settings
+
+The pipeline has many settings that can be tweaked for different kinds of loads.
+These are all done using environment variables starting with `IDR_`.
+See `settings.py` for the current list of settings.
+
 ## Loading synthetic data into a live environment
 
 Test data must be generated first (see details in `bfd-model-idr`)
