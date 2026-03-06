@@ -171,9 +171,10 @@ class PartnerPreferences:
         self, preferences_data: str, file_name: str, store_local: bool = False
     ) -> None:
         if store_local:
-            local_file = Path("/".join([self.partner, file_name.split("/")[-1]]))
+            local_file = Path("/".join([file_name.split("/")[-1]]))
             with Path.open(local_file, "wb") as local:
-                print(f'storing local... {local_file}')
+                #TODO: Consider implementing a logger instead of print statement
+                print(f"storing local... {local_file}")
                 local.write(preferences_data.encode("utf-8"))
 
         bs_report = preferences_data.encode("utf-8")
@@ -198,6 +199,9 @@ class PartnerPreferences:
         Args:
             since_timestamp: ISO 8601 timestamp string. If None, uses last execution timestamp.
             until_timestamp: ISO 8601 timestamp string. If None, uses the current time.
+            store_preferences: When `True`, write the preferences to S3. Default is `True`.
+            set_last_execution: When `True`, update last_execution in DynamoDB . Default is `True`.
+            store_local: When `True`, store preferences locally. Default is `False`.
         """
         query_since_timestamp = since_timestamp or self.last_execution
         query_until_timestamp = until_timestamp or datetime.now(UTC).isoformat()
