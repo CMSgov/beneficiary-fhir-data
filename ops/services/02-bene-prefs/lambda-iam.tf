@@ -157,14 +157,14 @@ resource "aws_iam_role" "lambda" {
 }
 
 resource "aws_iam_role_policy_attachment" "lambda" {
-  for_each = {
-    cloudwatch = aws_iam_policy.lambda_cloudwatch[0].arn
-    dynamodb   = aws_iam_policy.lambda_dynamodb[0].arn
-    kms        = aws_iam_policy.lambda_kms[0].arn
-    s3         = aws_iam_policy.lambda_s3[0].arn
-    ssm        = aws_iam_policy.lambda_ssm[0].arn
-    vpc_access = data.aws_iam_policy.lambda_vpc_access_role[0].arn
-  }
+  for_each = { for k, v in {
+    cloudwatch = try(aws_iam_policy.lambda_cloudwatch[0].arn, "")
+    dynamodb   = try(aws_iam_policy.lambda_dynamodb[0].arn, "")
+    kms        = try(aws_iam_policy.lambda_kms[0].arn, "")
+    s3         = try(aws_iam_policy.lambda_s3[0].arn, "")
+    ssm        = try(aws_iam_policy.lambda_ssm[0].arn, "")
+    vpc_access = try(data.aws_iam_policy.lambda_vpc_access_role[0].arn, "")
+  } : k => v if length(v) > 0 }
 
   role       = aws_iam_role.lambda[0].name
   policy_arn = each.value
