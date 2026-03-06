@@ -32,7 +32,7 @@ BOTO_CONFIG = Config(
     },
 )
 SSM_CLIENT = boto3.client("ssm", config=BOTO_CONFIG)
-#TODO: Consider whether the below is a sensible default
+# TODO: Consider whether the below is a sensible default
 PARTNERS = os.environ.get("PARTNERS", "")
 
 
@@ -109,6 +109,7 @@ def execute_query(query: str) -> list:
         return results
 
     except snowflake.connector.errors.Error as e:
+        # TODO: Consider implementing a logger instead of print statement
         print(f"Snowflake error: {e}", file=sys.stderr)
         raise
 
@@ -137,6 +138,7 @@ class PartnerPreferences:
                 return self.__execution
 
         except ClientError as e:
+            # TODO: Consider implementing a logger instead of print statement
             print(f"""
             Error retrieving last execution for {self.partner}: {e.response["Error"]["Message"]}
             """)
@@ -162,10 +164,13 @@ class PartnerPreferences:
                 },
                 ReturnValues="NONE",
             )
+
+            # TODO: Consider implementing a logger instead of print statement
             print(f"Updated last_execution for {self.partner}: {latest_timestamp}")
             self.__execution = timestamp
 
         except ClientError as e:
+            # TODO: Consider implementing a logger instead of print statement
             print(f"Error updating last execution {self.partner}: {e.response['Error']['Message']}")
             raise
 
@@ -175,7 +180,7 @@ class PartnerPreferences:
         if store_local:
             local_file = Path("/".join([file_name.split("/")[-1]]))
             with Path.open(local_file, "wb") as local:
-                #TODO: Consider implementing a logger instead of print statement
+                # TODO: Consider implementing a logger instead of print statement
                 print(f"storing local... {local_file}")
                 local.write(preferences_data.encode("utf-8"))
 
@@ -214,9 +219,8 @@ class PartnerPreferences:
                 query_until_timestamp=query_until_timestamp,
             )
 
-        # FIXME: debug logging
-        # print(query)
-        # FIXME: debug logging
+        # TODO: Implement feature for logging the rendered query template to stdout
+        # or through a logfile here
 
         results = execute_query(query)
 
@@ -232,6 +236,7 @@ class PartnerPreferences:
             )
 
         if store_preferences:
+            # TODO: Consider implementing a logger instead of print statement
             print(f"storing... {file_name}")
             self.__store_preferences(preferences_data, file_name, store_local=store_local)
 
