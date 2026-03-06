@@ -156,8 +156,8 @@ module "topics" {
   lambda_sample_rate = 100
 }
 
-resource "aws_dynamodb_table" "bene_preferences_tracker" {
-  count = contains(["test", "prod"], local.env) ? 1 : 0
+resource "aws_dynamodb_table" "this" {
+  count = local.env == "prod" ? 1 : 0
 
   name         = "bfd-${local.env}-bene-preferences"
   billing_mode = "PAY_PER_REQUEST"
