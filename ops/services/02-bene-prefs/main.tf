@@ -13,19 +13,26 @@ module "terraservice" {
   service              = local.service
   relative_module_root = "ops/services/02-bene-prefs"
   ssm_hierarchy_roots  = concat(["bfd"], tolist(local.partners))
+  subnet_layers        = ["private"]
 }
 
 locals {
-  service = "bene-prefs"
+  service           = "bene-prefs"
+  conditional_count = local.env == "prod" ? 1 : 0
 
+  app_subnets              = module.terraservice.subnets_map["private"]
   ssm_config               = nonsensitive(module.terraservice.ssm_config)
   default_tags             = module.terraservice.default_tags
   env                      = module.terraservice.env
   env_key_arn              = module.terraservice.env_key_arn
+  env_key_alias            = module.terraservice.env_key_alias
   name_prefix              = "bfd-${local.env}-${local.service}"
   partners                 = contains(["test", "prod"], local.env) ? toset(["bcda", "ab2d", "dpc"]) : toset([])
   iam_path                 = module.terraservice.default_iam_path
   permissions_boundary_arn = module.terraservice.default_permissions_boundary_arn
+  region                   = module.terraservice.region
+  account_id               = module.terraservice.account_id
+  vpc                      = module.terraservice.vpc
 
   root_dir = "bfdeft01"
 
@@ -79,6 +86,7 @@ resource "aws_s3_bucket_notification" "buckets" {
   topic {
     topic_arn = module.topics[each.key].topic.arn
     events    = ["s3:ObjectCreated:*"]
+    filter_prefix = "${local.root_dir}/${each.key}/in/"
   }
 }
 
@@ -150,8 +158,8 @@ module "topics" {
   lambda_sample_rate = 100
 }
 
-resource "aws_dynamodb_table" "bene_preferences_tracker" {
-  count = contains(["test", "prod"], local.env) ? 1 : 0
+resource "aws_dynamodb_table" "this" {
+  count = local.env == "prod" ? 1 : 0
 
   name         = "bfd-${local.env}-bene-preferences"
   billing_mode = "PAY_PER_REQUEST"
