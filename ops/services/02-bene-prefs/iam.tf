@@ -39,6 +39,19 @@ data "aws_iam_policy_document" "partner_bucket_access" {
       "${module.buckets[each.key].bucket.arn}${each.value.bucket_home_path}/*"
     ]
   }
+  statement {
+    sid = "AllowEncryptionAndDecryptionOfS3Files"
+    actions = [
+      "kms:Encrypt",
+      "kms:Decrypt",
+      "kms:ReEncrypt*",
+      "kms:GenerateDataKey*",
+      "kms:DescribeKey",
+    ]
+    resources = [
+      local.env_key_arn
+    ]
+  }
 }
 
 resource "aws_iam_policy" "partner_bucket_access" {
