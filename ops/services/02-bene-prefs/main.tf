@@ -17,7 +17,8 @@ module "terraservice" {
 }
 
 locals {
-  service = "bene-prefs"
+  service           = "bene-prefs"
+  conditional_count = local.env == "prod" ? 1 : 0
 
   app_subnets              = module.terraservice.subnets_map["private"]
   ssm_config               = nonsensitive(module.terraservice.ssm_config)

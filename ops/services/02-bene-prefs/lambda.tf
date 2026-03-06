@@ -8,11 +8,15 @@ locals {
 }
 
 resource "aws_cloudwatch_log_group" "this" {
+  count = local.conditional_count
+
   name       = "/aws/lambda/${local.name_prefix}"
   kms_key_id = local.env_key_arn
 }
 
 resource "aws_security_group" "lambda" {
+  count = local.conditional_count
+
   description = "${local.lambda_full_name} Lambda security group in ${local.env}"
   name        = local.lambda_full_name
   tags        = { Name = "${local.lambda_full_name}-sg" }
@@ -27,6 +31,8 @@ resource "aws_security_group" "lambda" {
 }
 
 data "external" "package" {
+  count = local.conditional_count
+
   program = [
     "bash",
     "-c",
@@ -35,7 +41,8 @@ data "external" "package" {
 }
 
 resource "aws_lambda_function" "this" {
-  depends_on = [aws_iam_role_policy_attachment.lambda]
+  count      = local.conditional_count
+  depends_on = [aws_iam_role_policy_attachment.lambda[0]]
 
   function_name = local.lambda_full_name
   description   = "Lambda to run the ${local.service} service for DASG"
@@ -43,7 +50,7 @@ resource "aws_lambda_function" "this" {
   filename      = local.lambda_dist_path
   kms_key_arn   = local.env_key_arn
 
-  source_code_hash = data.external.package.result.hash
+  source_code_hash = data.external.package[0].result.hash
   architectures    = ["arm64"]
   package_type     = "Zip"
   runtime          = local.lambda_runtime
@@ -61,10 +68,10 @@ resource "aws_lambda_function" "this" {
   }
 
   vpc_config {
-    security_group_ids = [aws_security_group.lambda.id]
+    security_group_ids = [aws_security_group.lambda[0].id]
     subnet_ids         = local.app_subnets[*].id
   }
   replace_security_groups_on_destroy = true
 
-  role = aws_iam_role.lambda.arn
+  role = aws_iam_role.lambda[0].arn
 }

@@ -1,12 +1,16 @@
 data "aws_iam_policy_document" "lambda_cloudwatch" {
+  count = local.conditional_count
+
   statement {
     sid       = "AllowLogStreamControl"
     actions   = ["logs:CreateLogStream", "logs:PutLogEvents"]
-    resources = ["${aws_cloudwatch_log_group.this.arn}:*"]
+    resources = ["${aws_cloudwatch_log_group.this[0].arn}:*"]
   }
 }
 
 data "aws_iam_policy_document" "lambda_assume" {
+  count = local.conditional_count
+
   statement {
     actions = ["sts:AssumeRole"]
     principals {
@@ -17,16 +21,20 @@ data "aws_iam_policy_document" "lambda_assume" {
 }
 
 resource "aws_iam_policy" "lambda_cloudwatch" {
+  count = local.conditional_count
+
   name = "${local.lambda_full_name}-logs"
   path = local.iam_path
   description = join("", [
     "Grants permissions for the ${local.lambda_full_name} Lambda to write to its ",
     "corresponding CloudWatch Log Group and Log Streams"
   ])
-  policy = data.aws_iam_policy_document.lambda_cloudwatch.json
+  policy = data.aws_iam_policy_document.lambda_cloudwatch[0].json
 }
 
 data "aws_iam_policy_document" "lambda_ssm" {
+  count = local.conditional_count
+
   statement {
     sid     = "AllowAccessToUsedParams"
     actions = ["ssm:GetParameter"]
@@ -45,15 +53,19 @@ data "aws_iam_policy_document" "lambda_ssm" {
 }
 
 resource "aws_iam_policy" "lambda_ssm" {
+  count = local.conditional_count
+
   name = "${local.lambda_full_name}-ssm"
   path = local.iam_path
   description = join("", [
     "Grants permissions for the ${local.lambda_full_name} Lambda to get SSM parameters"
   ])
-  policy = data.aws_iam_policy_document.lambda_ssm.json
+  policy = data.aws_iam_policy_document.lambda_ssm[0].json
 }
 
 data "aws_iam_policy_document" "lambda_kms" {
+  count = local.conditional_count
+
   statement {
     sid       = "AllowEncryptAndDecryptWithEnvCmk"
     actions   = ["kms:Encrypt", "kms:Decrypt", "kms:GenerateDataKey"]
@@ -62,17 +74,21 @@ data "aws_iam_policy_document" "lambda_kms" {
 }
 
 resource "aws_iam_policy" "lambda_kms" {
+  count = local.conditional_count
+
   name = "${local.lambda_full_name}-kms"
   path = local.iam_path
   description = join("", [
     "Grants permissions for the ${local.lambda_full_name} Lambda to use the ",
     "${local.env_key_alias} key"
   ])
-  policy = data.aws_iam_policy_document.lambda_kms.json
+  policy = data.aws_iam_policy_document.lambda_kms[0].json
 }
 
 
 data "aws_iam_policy_document" "lambda_dynamodb" {
+  count = local.conditional_count
+
   statement {
     sid       = "AllowEncryptAndDecryptWithEnvCmk"
     actions   = ["dynamodb:*"]
@@ -81,16 +97,20 @@ data "aws_iam_policy_document" "lambda_dynamodb" {
 }
 
 resource "aws_iam_policy" "lambda_dynamodb" {
+  count = local.conditional_count
+
   name = "${local.lambda_full_name}-dynamodb"
   path = local.iam_path
   description = join("", [
     "Grants permissions for the ${local.lambda_full_name} Lambda to use the ",
     "${aws_dynamodb_table.this[0].name} table"
   ])
-  policy = data.aws_iam_policy_document.lambda_dynamodb.json
+  policy = data.aws_iam_policy_document.lambda_dynamodb[0].json
 }
 
 data "aws_iam_policy_document" "lambda_s3" {
+  count = local.conditional_count
+
   statement {
     sid = "AllowS3BucketAccess"
     actions = [
@@ -108,38 +128,44 @@ data "aws_iam_policy_document" "lambda_s3" {
 }
 
 resource "aws_iam_policy" "lambda_s3" {
+  count = local.conditional_count
+
   name = "${local.lambda_full_name}-s3"
   path = local.iam_path
   description = join("", [
     "Grants permissions for the ${local.lambda_full_name} Lambda to interact with the ",
     "${local.service} partner S3 Buckets"
   ])
-  policy = data.aws_iam_policy_document.lambda_s3.json
+  policy = data.aws_iam_policy_document.lambda_s3[0].json
 }
 
 data "aws_iam_policy" "lambda_vpc_access_role" {
+  count = local.conditional_count
+
   name = "AWSLambdaVPCAccessExecutionRole"
 }
 
 resource "aws_iam_role" "lambda" {
+  count = local.conditional_count
+
   name                  = local.lambda_full_name
   path                  = local.iam_path
   description           = "TODO"
-  assume_role_policy    = data.aws_iam_policy_document.lambda_assume.json
+  assume_role_policy    = data.aws_iam_policy_document.lambda_assume[0].json
   permissions_boundary  = local.permissions_boundary_arn
   force_detach_policies = true
 }
 
 resource "aws_iam_role_policy_attachment" "lambda" {
   for_each = {
-    cloudwatch = aws_iam_policy.lambda_cloudwatch.arn
-    dynamodb   = aws_iam_policy.lambda_dynamodb.arn
-    kms        = aws_iam_policy.lambda_kms.arn
-    s3         = aws_iam_policy.lambda_s3.arn
-    ssm        = aws_iam_policy.lambda_ssm.arn
-    vpc_access = data.aws_iam_policy.lambda_vpc_access_role.arn
+    cloudwatch = aws_iam_policy.lambda_cloudwatch[0].arn
+    dynamodb   = aws_iam_policy.lambda_dynamodb[0].arn
+    kms        = aws_iam_policy.lambda_kms[0].arn
+    s3         = aws_iam_policy.lambda_s3[0].arn
+    ssm        = aws_iam_policy.lambda_ssm[0].arn
+    vpc_access = data.aws_iam_policy.lambda_vpc_access_role[0].arn
   }
 
-  role       = aws_iam_role.lambda.name
+  role       = aws_iam_role.lambda[0].name
   policy_arn = each.value
 }
