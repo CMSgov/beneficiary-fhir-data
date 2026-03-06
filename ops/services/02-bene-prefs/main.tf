@@ -86,6 +86,7 @@ resource "aws_s3_bucket_notification" "buckets" {
   topic {
     topic_arn = module.topics[each.key].topic.arn
     events    = ["s3:ObjectCreated:*"]
+    filter_prefix = "${local.root_dir}/${each.key}/in/"
   }
 }
 
