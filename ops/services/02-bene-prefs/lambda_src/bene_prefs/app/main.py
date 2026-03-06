@@ -32,6 +32,8 @@ BOTO_CONFIG = Config(
     },
 )
 SSM_CLIENT = boto3.client("ssm", config=BOTO_CONFIG)
+#TODO: Consider whether the below is a sensible default
+PARTNERS = os.environ.get("PARTNERS", "")
 
 
 def get_ssm_parameter(name: str, with_decrypt: bool = True) -> str:
@@ -237,12 +239,17 @@ class PartnerPreferences:
             self.__set_last_execution()
 
 
-def handler(event: dict[str, Any], context: dict[str, Any]):
-    bcda = PartnerPreferences("bcda")
-    bcda.generate_preferences()
+def handler(event: dict[str, Any], context: dict[str, Any]) -> None:
+    partners = [p.strip() for p in PARTNERS.split(",")]
 
-    ab2d = PartnerPreferences("ab2d")
-    ab2d.generate_preferences()
+    if "bcda" in partners:
+        bcda = PartnerPreferences("bcda")
+        bcda.generate_preferences()
 
-    dpc = PartnerPreferences("dpc")
-    dpc.generate_preferences()
+    if "ab2d" in partners:
+        ab2d = PartnerPreferences("ab2d")
+        ab2d.generate_preferences()
+
+    if "dpc" in partners:
+        dpc = PartnerPreferences("dpc")
+        dpc.generate_preferences()
