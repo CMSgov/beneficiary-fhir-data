@@ -21,6 +21,7 @@ BFD_ENV = os.environ.get("BFD_ENV", "prod")
 YYYYMMDD = datetime.now(UTC).strftime("%Y%m%d")
 YYMMDD = datetime.now(UTC).strftime("%y%m%d")
 TABLE_NAME = f"bfd-{BFD_ENV}-bene-preferences"
+TEMPLATES = f"{[i for i in Path('.').rglob('templates')][0]}"
 
 BOTO_CONFIG = Config(
     region_name=REGION,
@@ -137,9 +138,9 @@ class PartnerPreferences:
         self.__dynamodb = boto3.resource("dynamodb", region_name=region_name)
         self.__execution = None
         self.partner = partner
-        self.query_template = Path(f"./templates/{partner}.sql.j2")
-        self.prefs_template = Path(f"./templates/{partner}.prefs.j2")
-        self.file_name_template = Path(f"./templates/{partner}.file-name.j2")
+        self.query_template = Path(f"{TEMPLATES}/{partner}.sql.j2")
+        self.prefs_template = Path(f"{TEMPLATES}/{partner}.prefs.j2")
+        self.file_name_template = Path(f"{TEMPLATES}/{partner}.file-name.j2")
         self.table = self.__dynamodb.Table(TABLE_NAME)
 
     @property
@@ -190,6 +191,7 @@ class PartnerPreferences:
         if store_local:
             local_file = Path("/".join([self.partner, file_name.split("/")[-1]]))
             with Path.open(local_file, "wb") as local:
+                print(f'storing local... {local_file}')
                 local.write(preferences_data.encode("utf-8"))
 
         bs_report = preferences_data.encode("utf-8")
@@ -242,13 +244,14 @@ class PartnerPreferences:
             )
 
         if store_preferences:
-            self.__store_preferences(preferences_data, file_name)
+            print(f"storing... {file_name}")
+            self.__store_preferences(preferences_data, file_name, store_local=store_local)
 
         if set_last_execution:
             self.__set_last_execution()
 
 
-def lambda_handler(event: dict[str, Any], context: dict[str, Any]):
+def handler(event: dict[str, Any], context: dict[str, Any]):
     bcda = PartnerPreferences("bcda")
     bcda.generate_preferences()
 

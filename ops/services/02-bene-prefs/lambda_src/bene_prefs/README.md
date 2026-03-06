@@ -3,7 +3,7 @@
 ## Overview
 `bene-prefs` is a DASG system that fetches Medicare Beneficiary Preferences data directly from IDR-C and provides this data in a familiar format to BFD Partners: AB2D, BCDA, and DPC.
 
-The [templates directory](./templates) stores [jinja templates](https://jinja.palletsprojects.com/en/stable/) where there is a template for each partner's:
+The [templates directory](./app/templates) stores [jinja templates](https://jinja.palletsprojects.com/en/stable/) where there is a template for each partner's:
 - snowflake sql query `<partner>.sql.j2`
 - fixed-width preferences file format `<partner>.prefs.j2`
 - the resultant name of the preferences file `<partner>.file-name.j2`.
