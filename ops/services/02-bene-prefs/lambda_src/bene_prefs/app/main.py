@@ -21,7 +21,8 @@ BFD_ENV = os.environ.get("BFD_ENV", "prod")
 YYYYMMDD = datetime.now(UTC).strftime("%Y%m%d")
 YYMMDD = datetime.now(UTC).strftime("%y%m%d")
 TABLE_NAME = f"bfd-{BFD_ENV}-bene-preferences"
-TEMPLATES = f"{[i for i in Path('.').rglob('templates')][0]}"
+# Dynamically find the single templates directory below:
+TEMPLATES = f"{[i for i in Path().rglob('templates')][0]}"
 
 BOTO_CONFIG = Config(
     region_name=REGION,
