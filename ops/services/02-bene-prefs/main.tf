@@ -101,7 +101,7 @@ data "aws_iam_policy_document" "topic_received_s3_notifs" {
       identifiers = ["s3.amazonaws.com"]
     }
 
-    condition { #FIXME: Soften or remove the conditional here
+    condition {
       test     = "ArnLike"
       variable = "aws:SourceArn"
       values   = [module.buckets[each.key].bucket.arn]
