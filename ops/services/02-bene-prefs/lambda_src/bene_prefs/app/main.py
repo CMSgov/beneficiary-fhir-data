@@ -65,35 +65,17 @@ def execute_query(query: str) -> list:
     Returns:
         List: The results of the query.
     """
-    account = os.getenv("SNOWFLAKE_ACCOUNT")
-    database = os.getenv("SNOWFLAKE_DATABASE")
-    private_key_raw = os.getenv("SNOWFLAKE_PRIVATE_KEY_RAW")
-    schema = os.getenv("SNOWFLAKE_SCHEMA")
-    user = os.getenv("SNOWFLAKE_USER")
-    warehouse = os.getenv("SNOWFLAKE_WAREHOUSE")
-
-    required_vars = {
-        "SNOWFLAKE_ACCOUNT": account,
-        "SNOWFLAKE_DATABASE": database,
-        "SNOWFLAKE_PRIVATE_KEY_RAW": private_key_raw,
-        "SNOWFLAKE_SCHEMA": schema,
-        "SNOWFLAKE_USER": user,
-        "SNOWFLAKE_WAREHOUSE": warehouse,
-    }
-
-    missing_vars = [var for var, value in required_vars.items() if not value]
-    if missing_vars:
-        try:
-            account = get_ssm_parameter(f"/bfd/{BFD_ENV}/idr-pipeline/sensitive/idr_account")
-            database = get_ssm_parameter(f"/bfd/{BFD_ENV}/idr-pipeline/sensitive/idr_database")
-            private_key_raw = get_ssm_parameter(
-                f"/bfd/{BFD_ENV}/idr-pipeline/sensitive/idr_private_key"
-            )
-            schema = get_ssm_parameter(f"/bfd/{BFD_ENV}/idr-pipeline/sensitive/idr_schema")
-            user = get_ssm_parameter(f"/bfd/{BFD_ENV}/idr-pipeline/sensitive/idr_username")
-            warehouse = get_ssm_parameter(f"/bfd/{BFD_ENV}/idr-pipeline/sensitive/idr_warehouse")
-        except:
-            raise ValueError(f"Missing required environment variables: {', '.join(missing_vars)}")
+    try:
+        account = get_ssm_parameter(f"/bfd/{BFD_ENV}/idr-pipeline/sensitive/idr_account")
+        database = get_ssm_parameter(f"/bfd/{BFD_ENV}/idr-pipeline/sensitive/idr_database")
+        private_key_raw = get_ssm_parameter(
+            f"/bfd/{BFD_ENV}/idr-pipeline/sensitive/idr_private_key"
+        )
+        schema = get_ssm_parameter(f"/bfd/{BFD_ENV}/idr-pipeline/sensitive/idr_schema")
+        user = get_ssm_parameter(f"/bfd/{BFD_ENV}/idr-pipeline/sensitive/idr_username")
+        warehouse = get_ssm_parameter(f"/bfd/{BFD_ENV}/idr-pipeline/sensitive/idr_warehouse")
+    except Exception as exc:
+        raise ValueError(f"Missing snowflake configuration: {exc}")
 
     try:
         # Load and prepare private key for authentication
