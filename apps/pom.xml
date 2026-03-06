@@ -121,7 +121,7 @@
         <micrometer.version>1.14.14</micrometer.version>
         <metrics.version>4.2.30</metrics.version>
         <git-build-hook-maven-plugin.version>3.5.0</git-build-hook-maven-plugin.version>
-        <aws-java-sdk-bom.version>2.33.4</aws-java-sdk-bom.version>
+        <aws-java-sdk-bom.version>2.40.17</aws-java-sdk-bom.version>
         <aws.crt.version>0.35.0</aws.crt.version>
         <aws-advanced-jdbc-wrapper.version>2.6.5</aws-advanced-jdbc-wrapper.version>
         <spring-data-jpa.version>3.4.10</spring-data-jpa.version>
@@ -169,7 +169,7 @@
             The version used here should be compatible with SLF4J.
             See the compatible versions here: https://www.slf4j.org/manual.html
         -->
-        <logback.core.version>1.5.15</logback.core.version>
+        <logback.core.version>1.5.25</logback.core.version>
         <zjsonpatch.version>0.4.16</zjsonpatch.version>
         <freemarker.version>2.3.32</freemarker.version>
         <reflections.version>0.10.2</reflections.version>
