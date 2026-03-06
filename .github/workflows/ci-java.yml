@@ -110,6 +110,41 @@ jobs:
 
       - name: 'Run Maven Build'
         run: |
+          # TODO: Remove the below in BFD-4585
+          # This constructs the IDR_TABLES environment variable for the IDR Pipeline such that only
+          # existing tables post BFD-4502 are loaded into as the models for the old tables have not
+          # yet been removed.
+          idr_tables=(
+            "idr.beneficiary"
+            "idr.beneficiary_dual_eligibility"
+            "idr.beneficiary_entitlement"
+            "idr.beneficiary_entitlement_reason"
+            "idr.beneficiary_low_income_subsidy"
+            "idr.beneficiary_ma_part_d_enrollment"
+            "idr.beneficiary_ma_part_d_enrollment_rx"
+            "idr.beneficiary_mbi_id"
+            "idr.beneficiary_overshare_mbi"
+            "idr.beneficiary_status"
+            "idr.beneficiary_third_party"
+            "idr.claim_date_signature"
+            "idr.claim_institutional_nch"
+            "idr.claim_institutional_ss"
+            "idr.claim_item_institutional_nch"
+            "idr.claim_item_institutional_ss"
+            "idr.claim_item_professional_nch"
+            "idr.claim_item_professional_ss"
+            "idr.claim_professional_nch"
+            "idr.claim_professional_ss"
+            "idr.claim_rx"
+            "idr.contract_pbp_contact"
+            "idr.contract_pbp_number"
+            "idr.load_progress"
+            "idr.provider_history"
+          )
+
+          export IDR_TABLES="$(echo "${idr_tables[@]}" | tr ' ' ',')"
+          # TODO: Remove above in BFD-4585
+
           mvn clean install \
           --threads 1C \
           --no-transfer-progress \
