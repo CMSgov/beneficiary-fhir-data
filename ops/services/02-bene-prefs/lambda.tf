@@ -75,3 +75,28 @@ resource "aws_lambda_function" "this" {
 
   role = aws_iam_role.lambda[0].arn
 }
+
+resource "aws_cloudwatch_event_rule" "this" {
+  count = local.conditional_count
+
+  name                = local.lambda_full_name
+  description         = "Trigger {aws_lambda_function.this[0].function_name}"
+  schedule_expression = "cron(30 02 ? * SUN-FRI *)"
+}
+
+resource "aws_cloudwatch_event_target" "this" {
+  count = local.conditional_count
+
+  arn  = aws_lambda_function.this[0].arn
+  rule = aws_cloudwatch_event_rule.this[0].name
+}
+
+resource "aws_lambda_permission" "this" {
+  count = local.conditional_count
+
+  statement_id  = "AllowExecutionFromCloudWatchEvents"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.this[0].function_name
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.this[0].arn
+}
