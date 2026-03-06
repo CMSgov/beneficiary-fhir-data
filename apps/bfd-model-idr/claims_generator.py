@@ -174,6 +174,7 @@ class _ClaimsFile(StrEnum):
             f.CLM_NGACO_TLHLTH_SW,
             f.CLM_NGACO_CPTATN_SW,
             f.CLM_ACO_CARE_MGMT_HCBS_SW,
+            f.CLM_PD_STUS_CD,
             f.IDR_INSRT_TS,
             f.IDR_UPDT_TS,
         ],

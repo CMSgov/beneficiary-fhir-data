@@ -42,15 +42,11 @@ class Identifiers {
                     .setValue(s)));
 
     claimOriginalControlNumber.ifPresent(
-        s -> {
-          // Only populate if there are not duplicate CLM_CNTL_NUMs
-          if (claimControlNumber.isEmpty() || !claimControlNumber.get().equals(s)) {
+        s ->
             identifiers.add(
                 new Identifier()
                     .setSystem(SystemUrls.BLUE_BUTTON_CLAIM_CONTROL_NUMBER)
-                    .setValue(s));
-          }
-        });
+                    .setValue(s)));
     return identifiers;
   }
 }

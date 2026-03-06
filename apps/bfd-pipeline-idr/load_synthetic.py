@@ -1,4 +1,5 @@
 import csv
+import logging
 import sys
 import typing
 from pathlib import Path
@@ -6,7 +7,10 @@ from pathlib import Path
 import psycopg
 
 from loader import get_connection_string
-from model import LoadMode
+from logger_config import configure_logger
+from model.base_model import LoadMode
+
+logger = logging.getLogger(__name__)
 
 tables = [
     {"csv_name": "SYNTHETIC_BENE_HSTRY.csv", "table": "v2_mdcr_bene_hstry"},
@@ -47,9 +51,6 @@ tables = [
 
 def load_from_csv(conn: psycopg.Connection, src_folder: str) -> None:
     with conn.cursor() as cur:
-        # timestamps will be all over the place for synthetic data,
-        # so we need to make sure that the progress tracking doesn't mess with it.
-        cur.execute("DELETE FROM idr.load_progress")
         for table in tables:
             # Clear out any previous data
             sql_table = table["table"]
@@ -70,7 +71,7 @@ def _load_file(
         raise OSError(f"path {src_folder} not found")
 
     for match in path.glob(f"./**/{file}"):
-        print(f"loading {match}")
+        logger.info("loading %s", match)
         with match.open() as f:
             reader = csv.DictReader(f)
             # skip empty files
@@ -104,6 +105,8 @@ def _load_file(
 
 
 if __name__ == "__main__":
+    configure_logger()
+
     base_dir = sys.argv[1] if len(sys.argv) > 1 and sys.argv[1] != "" else "../bfd-model-idr/out"
     load_from_csv(
         psycopg.connect(get_connection_string(LoadMode.SYNTHETIC)),

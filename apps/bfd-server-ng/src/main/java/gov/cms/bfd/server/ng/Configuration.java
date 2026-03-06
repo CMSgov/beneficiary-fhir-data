@@ -54,6 +54,7 @@ public class Configuration implements Serializable {
   // Default to local configuration, this should be overridden on deployment with the correct
   // environment.
   private String env = BFD_ENV_LOCAL;
+  private String dbIdentifier = "";
   private Local local = new Local();
   private Sensitive sensitive = new Sensitive();
   private Nonsensitive nonsensitive = new Nonsensitive();

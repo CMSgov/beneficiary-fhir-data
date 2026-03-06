@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.ng;
 
+import com.google.common.base.Strings;
 import org.springframework.boot.autoconfigure.jdbc.JdbcConnectionDetails;
 import software.amazon.awssdk.services.rds.RdsClient;
 import software.amazon.awssdk.services.rds.model.DescribeDbClustersRequest;
@@ -12,14 +13,17 @@ public class JdbcConfiguration implements JdbcConnectionDetails {
   private final Configuration.Nonsensitive.Db nonsensitiveDb;
   private final Configuration.Sensitive.Db sensitiveDb;
   private final String localDbHost;
-  private final String env;
+  private final String dbIdentifier;
   private final boolean useRds;
 
   JdbcConfiguration(Configuration configuration) {
     nonsensitiveDb = configuration.getNonsensitive().getDb();
     sensitiveDb = configuration.getSensitive().getDb();
     localDbHost = configuration.getLocal().getDbHost();
-    env = configuration.getEnv();
+    dbIdentifier =
+        Strings.isNullOrEmpty(configuration.getDbIdentifier())
+            ? String.format(nonsensitiveDb.getClusterIdentifierTemplate(), configuration.getEnv())
+            : configuration.getDbIdentifier();
     useRds = configuration.useRds();
   }
 
@@ -37,10 +41,9 @@ public class JdbcConfiguration implements JdbcConnectionDetails {
   public String getJdbcUrl() {
     if (useRds) {
       try (var rdsClient = RdsClient.create()) {
-        var clusterIdentifier = String.format(nonsensitiveDb.getClusterIdentifierTemplate(), env);
         var clusters =
             rdsClient.describeDBClusters(
-                DescribeDbClustersRequest.builder().dbClusterIdentifier(clusterIdentifier).build());
+                DescribeDbClustersRequest.builder().dbClusterIdentifier(dbIdentifier).build());
         return getConnectionString(clusters.dbClusters().getFirst().readerEndpoint());
       }
     } else {

@@ -8,4 +8,13 @@ import java.util.List;
  * @param filterClause SQL WHERE clause fragment for filtering
  * @param params params to pass to the query
  */
-public record DbFilter(String filterClause, List<DbFilterParam> params) {}
+public record DbFilter(String filterClause, List<DbFilterParam> params) {
+  /**
+   * Returns an empty DB filter.
+   *
+   * @return filter
+   */
+  public static DbFilter empty() {
+    return new DbFilter("", List.of());
+  }
+}
