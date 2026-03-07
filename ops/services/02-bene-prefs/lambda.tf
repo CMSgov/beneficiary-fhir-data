@@ -44,19 +44,18 @@ resource "aws_lambda_function" "this" {
   count      = local.conditional_count
   depends_on = [aws_iam_role_policy_attachment.lambda[0]]
 
-  function_name = local.lambda_full_name
-  description   = "Lambda to run the ${local.service} service for DASG"
-  filename      = local.lambda_dist_path
-  kms_key_arn   = local.env_key_arn
-
+  function_name    = local.lambda_full_name
+  description      = "Lambda to run the ${local.service} service for DASG"
+  filename         = local.lambda_dist_path
+  kms_key_arn      = local.env_key_arn
   source_code_hash = data.external.package[0].result.hash
   architectures    = ["arm64"]
   package_type     = "Zip"
   runtime          = local.lambda_runtime
   handler          = "app.main.handler"
+  memory_size      = 1024
+  timeout          = 10 * 60 # 10 minutes
 
-  memory_size = 1024
-  timeout     = 10 * 60 # 10 minutes
   tags = {
     Name   = local.lambda_full_name
     sha256 = data.external.package[0].result.hash
