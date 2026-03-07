@@ -46,7 +46,6 @@ resource "aws_lambda_function" "this" {
 
   function_name = local.lambda_full_name
   description   = "Lambda to run the ${local.service} service for DASG"
-  tags          = { Name = local.lambda_full_name }
   filename      = local.lambda_dist_path
   kms_key_arn   = local.env_key_arn
 
@@ -58,6 +57,10 @@ resource "aws_lambda_function" "this" {
 
   memory_size = 1024
   timeout     = 10 * 60 # 10 minutes
+  tags = {
+    Name   = local.lambda_full_name
+    sha256 = data.external.package[0].result.hash
+  }
 
   environment {
     variables = {
