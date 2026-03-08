@@ -36,7 +36,8 @@ data "external" "package" {
   program = [
     "bash",
     "-c",
-    "${local.lambda_source_path}/package.sh"
+    "${local.lambda_source_path}/package.sh",
+    local.env
   ]
 }
 

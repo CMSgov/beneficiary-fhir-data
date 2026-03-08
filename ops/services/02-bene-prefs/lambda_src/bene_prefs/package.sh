@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # shellcheck disable=SC2164
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-STORED_SHA256_SUM="$(aws lambda get-function --function-name bfd-prod-bene-prefs-function --query Tags.sha256 --output text 2>/dev/null || echo 0)"
+BFD_ENV="${1:-prod}"
+STORED_SHA256_SUM="$(aws lambda get-function --function-name "bfd-${BFD_ENV}-bene-prefs-function" --query Tags.sha256 --output text 2>/dev/null || echo 0)"
 SHA256_SUM="$(git ls-files "$SCRIPT_DIR" \
     | sort \
     | xargs sha256sum \
