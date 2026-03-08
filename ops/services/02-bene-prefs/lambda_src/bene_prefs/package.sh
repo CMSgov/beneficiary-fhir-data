@@ -3,7 +3,7 @@
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 BFD_ENV="${1:-prod}"
 STORED_SHA256_SUM="$(aws lambda get-function --function-name "bfd-${BFD_ENV}-bene-prefs-function" --query Tags.sha256 --output text 2>/dev/null || echo 0)"
-SHA256_SUM="$(git ls-files "$SCRIPT_DIR" \
+SHA256_SUM="$(git ls-files "$SCRIPT_DIR" | grep -v README.md \
     | sort \
     | xargs sha256sum \
     | sha256sum | cut -f1 -d ' ')"
