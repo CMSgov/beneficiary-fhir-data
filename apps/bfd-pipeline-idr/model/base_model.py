@@ -188,6 +188,8 @@ ALIAS_CLM_GRP = "clm_grp"
 ALIAS_RLT_COND = "rltcond"
 ALIAS_PBP_NUM = "pbp_num"
 ALIAS_CNTRCT_SGMT = "sgmt"
+ALIAS_OCRNC_SGNTR = "ocrnc_sgntr_mbr"
+ALIAS_RLT_OCRNC_SGNTR = "rlt_ocrnc_sgntr_mbr"
 
 INSERT_FIELD = {BATCH_TIMESTAMP: True, INSERT_EXCLUDE: True, COLUMN_MAP: "idr_insrt_ts"}
 UPDATE_FIELD = {UPDATE_TIMESTAMP: True, INSERT_EXCLUDE: True, COLUMN_MAP: "idr_updt_ts"}

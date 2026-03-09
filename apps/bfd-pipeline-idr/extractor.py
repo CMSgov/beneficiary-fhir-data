@@ -82,6 +82,7 @@ class Extractor(ABC, Generic[T]):  # noqa: UP046
     ) -> Iterator[Sequence[T]]:
         is_historical = progress is None or progress.is_historical()
         fetch_query = self.get_query(start_time, load_mode)
+        print(fetch_query)
         # GREATEST doesn't work with nulls so we need to coalesce here
         batch_timestamp_cols = self._coalesce_dates(
             self.cls.batch_timestamp_col_alias(is_historical)
