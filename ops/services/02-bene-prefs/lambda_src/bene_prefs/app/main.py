@@ -176,7 +176,11 @@ class PartnerPreferences:
             raise
 
     def __store_preferences(
-        self, preferences_data: str, file_name: str, store_local: bool = False
+        self,
+        preferences_data: str,
+        file_name: str,
+        store_remote: bool = True,
+        store_local: bool = False,
     ) -> None:
         if store_local:
             local_file = Path("/".join([file_name.split("/")[-1]]))
@@ -185,31 +189,34 @@ class PartnerPreferences:
                 print(f"storing local... {local_file}")
                 local.write(preferences_data.encode("utf-8"))
 
-        bs_report = preferences_data.encode("utf-8")
-        buffer = BytesIO(bs_report)
-        buffer.seek(0)
+        if store_remote:
+            bs_report = preferences_data.encode("utf-8")
+            buffer = BytesIO(bs_report)
+            buffer.seek(0)
 
-        bucket = get_ssm_parameter(f"/bfd/{BFD_ENV}/bene-prefs/{self.partner}/nonsensitive/bucket")
+            bucket = get_ssm_parameter(
+                f"/bfd/{BFD_ENV}/bene-prefs/{self.partner}/nonsensitive/bucket"
+            )
 
-        s3 = boto3.client("s3", config=BOTO_CONFIG)
-        s3.upload_fileobj(buffer, bucket, file_name)
+            s3 = boto3.client("s3", config=BOTO_CONFIG)
+            s3.upload_fileobj(buffer, bucket, file_name)
 
     def generate_preferences(
         self,
         since_timestamp: str | None = None,
         until_timestamp: str | None = None,
-        store_preferences: bool = True,
         set_last_execution: bool = True,
         store_local: bool = False,
+        store_remote: bool = True,
     ) -> None:
         """Generate and store the preferences report in AWS S3.
 
         Args:
             since_timestamp: ISO 8601 timestamp string. If None, uses last execution timestamp.
             until_timestamp: ISO 8601 timestamp string. If None, uses the current time.
-            store_preferences: When `True`, write the preferences to S3. Default is `True`.
             set_last_execution: When `True`, update last_execution in DynamoDB . Default is `True`.
             store_local: When `True`, store preferences locally. Default is `False`.
+            store_remote: When `True`, write the preferences to S3. Default is `True`.
         """
         query_since_timestamp = since_timestamp or self.last_execution
         query_until_timestamp = until_timestamp or datetime.now(UTC).isoformat()
@@ -236,10 +243,9 @@ class PartnerPreferences:
                 report_time=datetime.now(UTC).strftime("%H%M%S"),
             )
 
-        if store_preferences:
-            # TODO: Consider implementing a logger instead of print statement
-            print(f"storing... {file_name}")
-            self.__store_preferences(preferences_data, file_name, store_local=store_local)
+        self.__store_preferences(
+            preferences_data, file_name, store_remote=store_remote, store_local=store_local
+        )
 
         if set_last_execution:
             self.__set_last_execution()
