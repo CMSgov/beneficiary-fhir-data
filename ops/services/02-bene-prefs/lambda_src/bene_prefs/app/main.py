@@ -17,6 +17,7 @@ from typing import Any
 
 REGION = os.environ.get("AWS_CURRENT_REGION", "us-east-1")
 BFD_ENV = os.environ.get("BFD_ENV", "prod")
+PARTNERS = os.environ.get("PARTNERS", "")
 
 YYYYMMDD = datetime.now(UTC).strftime("%Y%m%d")
 YYMMDD = datetime.now(UTC).strftime("%y%m%d")
@@ -33,8 +34,6 @@ BOTO_CONFIG = Config(
     },
 )
 SSM_CLIENT = boto3.client("ssm", config=BOTO_CONFIG)
-# TODO: Consider whether the below is a sensible default
-PARTNERS = os.environ.get("PARTNERS", "")
 
 
 def get_ssm_parameter(name: str, with_decrypt: bool = True) -> str:
