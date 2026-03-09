@@ -13,11 +13,15 @@ from cryptography.hazmat.primitives import serialization
 from jinja2 import Template
 from snowflake.connector import DictCursor
 
+from aws_lambda_powertools import Logger
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 REGION = os.environ.get("AWS_CURRENT_REGION", "us-east-1")
 BFD_ENV = os.environ.get("BFD_ENV", "prod")
 PARTNERS = os.environ.get("PARTNERS", "")
+
+if os.environ.get("POWERTOOLS_SERVICE_NAME") is None:
+    os.environ["POWERTOOLS_SERVICE_NAME"] = "bene-prefs"
 
 YYYYMMDD = datetime.now(UTC).strftime("%Y%m%d")
 YYMMDD = datetime.now(UTC).strftime("%y%m%d")
@@ -34,6 +38,8 @@ BOTO_CONFIG = Config(
     },
 )
 SSM_CLIENT = boto3.client("ssm", config=BOTO_CONFIG)
+
+logger = Logger()
 
 
 def get_ssm_parameter(name: str, with_decrypt: bool = True) -> str:
@@ -109,8 +115,7 @@ def execute_query(query: str) -> list:
         return results
 
     except snowflake.connector.errors.Error as e:
-        # TODO: Consider implementing a logger instead of print statement
-        print(f"Snowflake error: {e}", file=sys.stderr)
+        logger.exception("Snowflake error: {e}")
         raise
 
     finally:
@@ -127,6 +132,8 @@ class PartnerPreferences:
         self.prefs_template = Path(f"{TEMPLATES}/{partner}.prefs.j2")
         self.file_name_template = Path(f"{TEMPLATES}/{partner}.file-name.j2")
         self.table = self.__dynamodb.Table(TABLE_NAME)
+        self._logger = Logger()
+        self._logger.append_keys(partner=partner)
 
     @property
     def last_execution(self) -> str | None:
@@ -138,8 +145,7 @@ class PartnerPreferences:
                 return self.__execution
 
         except ClientError as e:
-            # TODO: Consider implementing a logger instead of print statement
-            print(f"""
+            self._logger.exception(f"""
             Error retrieving last execution for {self.partner}: {e.response["Error"]["Message"]}
             """)
             raise
@@ -165,13 +171,13 @@ class PartnerPreferences:
                 ReturnValues="NONE",
             )
 
-            # TODO: Consider implementing a logger instead of print statement
-            print(f"Updated last_execution for {self.partner}: {latest_timestamp}")
-            self.__execution = timestamp
+            self._logger.info(f"Updated last_execution: {latest_timestamp}")
+            self.__execution = latest_timestamp
 
         except ClientError as e:
-            # TODO: Consider implementing a logger instead of print statement
-            print(f"Error updating last execution {self.partner}: {e.response['Error']['Message']}")
+            self._logger.exception(
+                f"Error updating last execution: {e.response['Error']['Message']}"
+            )
             raise
 
     def __store_preferences(
@@ -184,8 +190,7 @@ class PartnerPreferences:
         if store_local:
             local_file = Path("/".join([file_name.split("/")[-1]]))
             with Path.open(local_file, "wb") as local:
-                # TODO: Consider implementing a logger instead of print statement
-                print(f"storing local... {local_file}")
+                self._logger.info(f"storing local... {local_file}")
                 local.write(preferences_data.encode("utf-8"))
 
         if store_remote:
@@ -198,6 +203,7 @@ class PartnerPreferences:
             )
 
             s3 = boto3.client("s3", config=BOTO_CONFIG)
+            self._logger.info(f"storing s3 object... {file_name}")
             s3.upload_fileobj(buffer, bucket, file_name)
 
     def generate_preferences(
@@ -226,9 +232,7 @@ class PartnerPreferences:
                 query_until_timestamp=query_until_timestamp,
             )
 
-        # TODO: Implement feature for logging the rendered query template to stdout
-        # or through a logfile here
-
+        self._logger.debug(query)
         results = execute_query(query)
 
         with Path.open(self.prefs_template) as template:
