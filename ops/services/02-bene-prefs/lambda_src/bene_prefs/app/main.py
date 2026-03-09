@@ -255,6 +255,15 @@ class PartnerPreferences:
 
 
 def handler(event: dict, context: LambdaContext) -> None:
+    """Lambda event handler function.
+
+    Args:
+        event (dict): EventBridge Scheduler/S3 Bucket Notification event details. Unused
+        context (LambdaContext): Lambda execution context. Unused
+
+    Raises:
+        RuntimeError: If any required environment variables are undefined
+    """
     partners = [p.strip() for p in PARTNERS.split(",")]
 
     if "bcda" in partners:
