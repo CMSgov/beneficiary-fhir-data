@@ -13,7 +13,7 @@ from cryptography.hazmat.primitives import serialization
 from jinja2 import Template
 from snowflake.connector import DictCursor
 
-from typing import Any
+from aws_lambda_powertools.utilities.typing import LambdaContext
 
 REGION = os.environ.get("AWS_CURRENT_REGION", "us-east-1")
 BFD_ENV = os.environ.get("BFD_ENV", "prod")
@@ -250,7 +250,7 @@ class PartnerPreferences:
             self.__set_last_execution()
 
 
-def handler(event: dict[str, Any], context: dict[str, Any]) -> None:
+def handler(event: dict, context: LambdaContext) -> None:
     partners = [p.strip() for p in PARTNERS.split(",")]
 
     if "bcda" in partners:
