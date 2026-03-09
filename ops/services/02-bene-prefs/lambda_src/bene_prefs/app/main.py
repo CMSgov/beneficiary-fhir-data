@@ -146,7 +146,7 @@ class PartnerPreferences:
 
         except ClientError as e:
             self._logger.exception(f"""
-            Error retrieving last execution for {self.partner}: {e.response["Error"]["Message"]}
+            Error retrieving last execution: {e.response["Error"]["Message"]}
             """)
             raise
 
@@ -171,7 +171,9 @@ class PartnerPreferences:
                 ReturnValues="NONE",
             )
 
-            self._logger.info(f"Updated last_execution: {latest_timestamp}")
+            self._logger.info(
+                f"Updating last_exeuction from {self.last_execution} to {latest_timestamp}"
+            )
             self.__execution = latest_timestamp
 
         except ClientError as e:
@@ -190,7 +192,7 @@ class PartnerPreferences:
         if store_local:
             local_file = Path("/".join([file_name.split("/")[-1]]))
             with Path.open(local_file, "wb") as local:
-                self._logger.info(f"storing local... {local_file}")
+                self._logger.info(f"Storing local file:{local_file}")
                 local.write(preferences_data.encode("utf-8"))
 
         if store_remote:
@@ -203,7 +205,7 @@ class PartnerPreferences:
             )
 
             s3 = boto3.client("s3", config=BOTO_CONFIG)
-            self._logger.info(f"storing s3 object... {file_name}")
+            self._logger.info(f"Storing remote file: s3://{bucket}/{file_name}")
             s3.upload_fileobj(buffer, bucket, file_name)
 
     def generate_preferences(
@@ -226,24 +228,37 @@ class PartnerPreferences:
         query_since_timestamp = since_timestamp or self.last_execution
         query_until_timestamp = until_timestamp or datetime.now(UTC).isoformat()
 
+        self._logger.info(
+            f"Rendering query template {self.query_template} with query_since_timestamp={query_since_timestamp}, query_until_timestamp={query_until_timestamp}"
+        )
+
         with Path.open(self.query_template) as template:
             query = Template(template.read()).render(
                 query_since_timestamp=query_since_timestamp,
                 query_until_timestamp=query_until_timestamp,
             )
 
-        self._logger.debug(query)
+        # TODO: Probably ought to change this to a debug-level log...
+        self._logger.info(query)
         results = execute_query(query)
 
+        self._logger.info(
+            f"Rendering prefs template {self.prefs_template} with data=<redacted>, extract_date={YYYYMMDD}"
+        )
         with Path.open(self.prefs_template) as template:
             preferences_data = Template(template.read()).render(data=results, extract_date=YYYYMMDD)
 
+        report_time = datetime.now(UTC).strftime("%H%M%S")
+
+        self._logger.info(
+            f"Rendering file_name template {self.file_name_template} with partner={self.partner}, env_indicator={self.environment_indicator}, report_date={YYYYMMDD}, report_time={report_time}"
+        )
         with Path.open(self.file_name_template) as template:
             file_name = Template(template.read()).render(
                 partner=self.partner,
                 env_indicator=self.environment_indicator,
                 report_date=YYMMDD,
-                report_time=datetime.now(UTC).strftime("%H%M%S"),
+                report_time=report_time,
             )
 
         self.__store_preferences(
@@ -251,7 +266,7 @@ class PartnerPreferences:
         )
 
         if set_last_execution:
-            self.__set_last_execution()
+            self.__set_last_execution(query_until_timestamp)
 
 
 def handler(event: dict, context: LambdaContext) -> None:
