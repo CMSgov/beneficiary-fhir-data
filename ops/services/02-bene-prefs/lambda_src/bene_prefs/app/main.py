@@ -167,8 +167,8 @@ class PartnerPreferences:
         store_local: bool = False,
     ) -> None:
         if store_local:
-            local_file = Path("/".join([file_name.split("/")[-1]]))
-            with Path.open(local_file, "wb") as local:
+            local_file = Path(file_name).name
+            with Path.open(Path(local_file), "wb") as local:
                 self._logger.info(f"Storing local file:{local_file}")
                 local.write(preferences_data.encode("utf-8"))
 
