@@ -2,7 +2,7 @@ import logging
 import time
 
 from load_partition import LoadPartition
-from model import T
+from model.base_model import T
 
 logger = logging.getLogger(__name__)
 

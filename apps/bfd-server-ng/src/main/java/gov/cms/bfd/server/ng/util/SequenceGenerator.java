@@ -6,6 +6,18 @@ import java.util.Iterator;
 public class SequenceGenerator implements Iterator<Integer> {
   private int current = 1;
 
+  /** Default constructor start sequence at 1. */
+  public SequenceGenerator() {}
+
+  /**
+   * Creates a sequence starting from a specific number.
+   *
+   * @param start number sequence should start at
+   */
+  public SequenceGenerator(int start) {
+    this.current = start;
+  }
+
   @Override
   public boolean hasNext() {
     return true;

@@ -30,6 +30,7 @@ import org.springframework.stereotype.Component;
 /** FHIR endpoints for the ExplanationOfBenefit resource. */
 @RequiredArgsConstructor
 @Component
+@SuppressWarnings({"java:S107", "java:S3252"})
 public class EobResourceProvider implements IResourceProvider {
   private final EobHandler eobHandler;
   private final CertificateUtil certificateUtil;
