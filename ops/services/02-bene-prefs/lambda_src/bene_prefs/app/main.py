@@ -1,5 +1,4 @@
 import os
-import sys
 from datetime import UTC, datetime
 from io import BytesIO
 from pathlib import Path
