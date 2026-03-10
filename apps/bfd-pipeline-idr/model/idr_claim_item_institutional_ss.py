@@ -93,7 +93,7 @@ class IdrClaimItemInstitutionalSs(IdrBaseModel):
     hcpcs_4_mdfr_cd: Annotated[str, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_default_string)]
     hcpcs_5_mdfr_cd: Annotated[str, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_default_string)]
     clm_idr_ld_dt: Annotated[
-        date, {INSERT_EXCLUDE: True, ALIAS: ALIAS_LINE, HISTORICAL_BATCH_TIMESTAMP: True}
+        date, {INSERT_EXCLUDE: True, ALIAS: ALIAS_CLM, HISTORICAL_BATCH_TIMESTAMP: True}
     ]
     clm_rndrg_fed_prvdr_spclty_cd: Annotated[
         str, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_default_string)
@@ -201,7 +201,6 @@ class IdrClaimItemInstitutionalSs(IdrBaseModel):
     clm_line_instnl_msp1_pd_amt: Annotated[float | None, {ALIAS: ALIAS_LINE_INSTNL}]
     clm_line_instnl_msp2_pd_amt: Annotated[float | None, {ALIAS: ALIAS_LINE_INSTNL}]
     clm_line_instnl_rev_ctr_dt: Annotated[date | None, {ALIAS: ALIAS_LINE_INSTNL}]
-    clm_idr_ld_dt: Annotated[date, {INSERT_EXCLUDE: True, HISTORICAL_BATCH_TIMESTAMP: True}]
     clm_line_add_on_pymt_amt: Annotated[float | None, {ALIAS: ALIAS_LINE_INSTNL}]
     clm_line_non_ehr_rdctn_amt: Annotated[float | None, {ALIAS: ALIAS_LINE_INSTNL}]
     idr_insrt_ts_line_instnl: Annotated[
