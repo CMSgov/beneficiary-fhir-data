@@ -22,7 +22,6 @@ from model.idr_beneficiary_mbi_id import IdrBeneficiaryMbiId
 from model.idr_beneficiary_overshare_mbi import IdrBeneficiaryOvershareMbi
 from model.idr_beneficiary_status import IdrBeneficiaryStatus
 from model.idr_beneficiary_third_party import IdrBeneficiaryThirdParty
-from model.idr_claim_date_signature import IdrClaimDateSignature
 from model.idr_claim_institutional_nch import IdrClaimInstitutionalNch
 from model.idr_claim_institutional_ss import IdrClaimInstitutionalSs
 from model.idr_claim_item_institutional_nch import IdrClaimItemInstitutionalNch
@@ -61,7 +60,6 @@ def claim_tables() -> list[type[IdrBaseModel]]:
 def claim_aux_tables() -> list[type[IdrBaseModel]]:
     return filter_tables(
         [
-            IdrClaimDateSignature,
             IdrProviderHistory,
             # RX/Part D is special because we combine claim + claim line
             IdrClaimRx,
