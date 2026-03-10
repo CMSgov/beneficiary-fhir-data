@@ -184,8 +184,7 @@ class PartnerPreferences:
 
     def generate_preferences(
         self,
-        since_timestamp: str | None = None,
-        until_timestamp: str | None = None,
+        timestamp_range: tuple[str, str] = ("", ""),
         set_last_execution: bool = True,
         store_local: bool = False,
         store_remote: bool = True,
@@ -193,14 +192,13 @@ class PartnerPreferences:
         """Generate and store the preferences report in AWS S3.
 
         Args:
-            since_timestamp: ISO 8601 timestamp string. If None, uses last execution timestamp.
-            until_timestamp: ISO 8601 timestamp string. If None, uses the current time.
+            timestamp_range: Tuple bounding (lower, upper) ISO 8601 timestamp strings.
             set_last_execution: When `True`, update last_execution in DynamoDB . Default is `True`.
             store_local: When `True`, store preferences locally. Default is `False`.
             store_remote: When `True`, write the preferences to S3. Default is `True`.
         """
-        query_since_timestamp = since_timestamp or self.last_execution
-        query_until_timestamp = until_timestamp or datetime.now(UTC).isoformat()
+        query_since_timestamp = timestamp_range[0]
+        query_until_timestamp = timestamp_range[1]
 
         self._logger.info(
             f"Rendering query template {self.query_template.filename} with query_since_timestamp={query_since_timestamp}, query_until_timestamp={query_until_timestamp}"
