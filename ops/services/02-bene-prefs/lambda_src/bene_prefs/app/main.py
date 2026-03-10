@@ -26,10 +26,7 @@ if os.environ.get("POWERTOOLS_SERVICE_NAME") is None:
 YYYYMMDD = datetime.now(UTC).strftime("%Y%m%d")
 YYMMDD = datetime.now(UTC).strftime("%y%m%d")
 TABLE_NAME = f"bfd-{BFD_ENV}-bene-preferences"
-TEMPLATES = Environment(
-    loader=PackageLoader("app", "templates"),
-    undefined=StrictUndefined
-)
+TEMPLATES = Environment(loader=PackageLoader("app", "templates"), undefined=StrictUndefined)
 
 BOTO_CONFIG = Config(
     region_name=REGION,
@@ -59,7 +56,8 @@ def execute_query(query: str) -> list:
         account = SSM.get(f"/bfd/{BFD_ENV}/idr-pipeline/sensitive/idr_account", decrypt=True)
         database = SSM.get(f"/bfd/{BFD_ENV}/idr-pipeline/sensitive/idr_database", decrypt=True)
         private_key_raw = SSM.get(
-            f"/bfd/{BFD_ENV}/idr-pipeline/sensitive/idr_private_key", decrypt=True)
+            f"/bfd/{BFD_ENV}/idr-pipeline/sensitive/idr_private_key", decrypt=True
+        )
         schema = SSM.get(f"/bfd/{BFD_ENV}/idr-pipeline/sensitive/idr_schema", decrypt=True)
         user = SSM.get(f"/bfd/{BFD_ENV}/idr-pipeline/sensitive/idr_username", decrypt=True)
         warehouse = SSM.get(f"/bfd/{BFD_ENV}/idr-pipeline/sensitive/idr_warehouse", decrypt=True)
@@ -229,11 +227,11 @@ class PartnerPreferences:
         )
 
         file_name = self.file_name_template.render(
-                partner=self.partner,
-                env_indicator=self.environment_indicator,
-                report_date=YYMMDD,
-                report_time=report_time,
-            )
+            partner=self.partner,
+            env_indicator=self.environment_indicator,
+            report_date=YYMMDD,
+            report_time=report_time,
+        )
 
         self._store_preferences(
             preferences_data, file_name, store_remote=store_remote, store_local=store_local
