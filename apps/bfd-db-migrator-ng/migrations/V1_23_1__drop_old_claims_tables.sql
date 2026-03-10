@@ -33,3 +33,7 @@ DROP TABLE idr.claim_fiss CASCADE;
 TRUNCATE TABLE idr.claim_ansi_signature CASCADE;
 
 DROP TABLE idr.claim_ansi_signature CASCADE;
+
+TRUNCATE TABLE idr.claim_date_signature CASCADE;
+
+DROP TABLE idr.claim_date_signature CASCADE;
