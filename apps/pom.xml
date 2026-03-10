@@ -179,7 +179,9 @@
         <jakarta.el.version>4.0.2</jakarta.el.version>
         <poi.version>5.2.5</poi.version>
         <javapoet.version>1.13.0</javapoet.version>
-        <jetty.version>12.1.0</jetty.version>
+
+        <!-- Fix for Snyk vulnerability (CWE-770 and CWE-436)-->
+        <jetty.version>12.1.6</jetty.version>
         <org.apache.httpcomponents.httpclient.version>4.5.14</org.apache.httpcomponents.httpclient.version>
         <datasource-proxy.version>1.10</datasource-proxy.version>
         <cors.filter.version>1.0.1</cors.filter.version>
@@ -303,6 +305,24 @@
 
     <dependencyManagement>
         <dependencies>
+            <!-- Fix for Snyk vulnerability (CWE-93)-->
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-codec-http</artifactId>
+                <version>4.1.129.Final</version>
+            </dependency>
+            <!-- Fix for Snyk vulnerability (CWE-835 and CWE-770)-->
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-compress</artifactId>
+                <version>1.26.0</version>
+            </dependency>
+            <!-- Fix for Snyk vulnerability (CWE-79)-->
+            <dependency>
+                <groupId>com.googlecode.owasp-java-html-sanitizer</groupId>
+                <artifactId>owasp-java-html-sanitizer</artifactId>
+                <version>20260102.1</version>
+            </dependency>
             <!-- https://mvnrepository.com/artifact/jakarta.servlet/jakarta.servlet-api -->
             <dependency>
                 <groupId>jakarta.servlet</groupId>
