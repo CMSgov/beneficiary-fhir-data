@@ -10,7 +10,7 @@ from botocore.config import Config
 from botocore.exceptions import ClientError
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
-from jinja2 import Template
+from jinja2 import Environment, PackageLoader, StrictUndefined
 from snowflake.connector import DictCursor
 
 from aws_lambda_powertools import Logger
@@ -26,8 +26,10 @@ if os.environ.get("POWERTOOLS_SERVICE_NAME") is None:
 YYYYMMDD = datetime.now(UTC).strftime("%Y%m%d")
 YYMMDD = datetime.now(UTC).strftime("%y%m%d")
 TABLE_NAME = f"bfd-{BFD_ENV}-bene-preferences"
-# Dynamically find the single templates directory below:
-TEMPLATES = f"{[i for i in Path().rglob('templates')][0]}"
+TEMPLATES = Environment(
+    loader=PackageLoader("app", "templates"),
+    undefined=StrictUndefined
+)
 
 BOTO_CONFIG = Config(
     region_name=REGION,
@@ -128,10 +130,10 @@ class PartnerPreferences:
         self.__dynamodb = boto3.resource("dynamodb", region_name=region_name)
         self.__execution = None
         self.partner = partner
-        self.query_template = Path(f"{TEMPLATES}/{partner}.sql.j2")
-        self.prefs_template = Path(f"{TEMPLATES}/{partner}.prefs.j2")
-        self.file_name_template = Path(f"{TEMPLATES}/{partner}.file-name.j2")
         self.table = self.__dynamodb.Table(TABLE_NAME)
+        self.query_template = TEMPLATES.get_template(f"{partner}.sql.j2")
+        self.prefs_template = TEMPLATES.get_template(f"{partner}.prefs.j2")
+        self.file_name_template = TEMPLATES.get_template(f"{partner}.file-name.j2")
         self._logger = Logger()
         self._logger.append_keys(partner=partner)
 
@@ -229,32 +231,30 @@ class PartnerPreferences:
         query_until_timestamp = until_timestamp or datetime.now(UTC).isoformat()
 
         self._logger.info(
-            f"Rendering query template {self.query_template} with query_since_timestamp={query_since_timestamp}, query_until_timestamp={query_until_timestamp}"
+            f"Rendering query template {self.query_template.filename} with query_since_timestamp={query_since_timestamp}, query_until_timestamp={query_until_timestamp}"
         )
 
-        with Path.open(self.query_template) as template:
-            query = Template(template.read()).render(
-                query_since_timestamp=query_since_timestamp,
-                query_until_timestamp=query_until_timestamp,
-            )
+        query = self.query_template.render(
+            query_since_timestamp=query_since_timestamp,
+            query_until_timestamp=query_until_timestamp,
+        )
 
         # TODO: Probably ought to change this to a debug-level log...
         self._logger.info(query)
         results = execute_query(query)
 
         self._logger.info(
-            f"Rendering prefs template {self.prefs_template} with data=<redacted>, extract_date={YYYYMMDD}"
+            f"Rendering prefs template {self.prefs_template.filename} of {len(results)} records with data=<redacted>, extract_date={YYYYMMDD}"
         )
-        with Path.open(self.prefs_template) as template:
-            preferences_data = Template(template.read()).render(data=results, extract_date=YYYYMMDD)
+        preferences_data = self.prefs_template.render(data=results, extract_date=YYYYMMDD)
 
         report_time = datetime.now(UTC).strftime("%H%M%S")
 
         self._logger.info(
-            f"Rendering file_name template {self.file_name_template} with partner={self.partner}, env_indicator={self.environment_indicator}, report_date={YYYYMMDD}, report_time={report_time}"
+            f"Rendering file_name template {self.file_name_template.filename} with partner={self.partner}, env_indicator={self.environment_indicator}, report_date={YYYYMMDD}, report_time={report_time}"
         )
-        with Path.open(self.file_name_template) as template:
-            file_name = Template(template.read()).render(
+
+        file_name = self.file_name_template.render(
                 partner=self.partner,
                 env_indicator=self.environment_indicator,
                 report_date=YYMMDD,
