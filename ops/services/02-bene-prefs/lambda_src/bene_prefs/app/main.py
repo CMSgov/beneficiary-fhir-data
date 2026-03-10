@@ -39,6 +39,7 @@ BOTO_CONFIG = Config(
     },
 )
 SSM_CLIENT = boto3.client("ssm", config=BOTO_CONFIG)
+TABLE = boto3.resource("dynamodb", config=BOTO_CONFIG).Table(TABLE_NAME)
 
 logger = Logger()
 
@@ -125,11 +126,9 @@ def execute_query(query: str) -> list:
 
 
 class PartnerPreferences:
-    def __init__(self, partner: str, region_name: str = "us-east-1") -> None:
-        self.__dynamodb = boto3.resource("dynamodb", region_name=region_name)
+    def __init__(self, partner: str) -> None:
         self._execution = None
         self.partner = partner
-        self.table = self.__dynamodb.Table(TABLE_NAME)
         self.query_template = TEMPLATES.get_template(f"{partner}.sql.j2")
         self.prefs_template = TEMPLATES.get_template(f"{partner}.prefs.j2")
         self.file_name_template = TEMPLATES.get_template(f"{partner}.file-name.j2")
@@ -139,7 +138,7 @@ class PartnerPreferences:
     @property
     def last_execution(self) -> str | None:
         try:
-            response = self.table.get_item(Key={"partner": self.partner})
+            response = TABLE.get_item(Key={"partner": self.partner})
 
             if "Item" in response:
                 self._execution = response["Item"].get("last_execution")
@@ -162,7 +161,7 @@ class PartnerPreferences:
         latest_timestamp = timestamp or datetime.now(UTC).isoformat()
 
         try:
-            self.table.update_item(
+            TABLE.update_item(
                 Key={"partner": self.partner},
                 UpdateExpression="SET last_execution = :timestamp, updated_at = :updated",
                 ExpressionAttributeValues={
