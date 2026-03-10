@@ -22,22 +22,13 @@ from model.idr_beneficiary_mbi_id import IdrBeneficiaryMbiId
 from model.idr_beneficiary_overshare_mbi import IdrBeneficiaryOvershareMbi
 from model.idr_beneficiary_status import IdrBeneficiaryStatus
 from model.idr_beneficiary_third_party import IdrBeneficiaryThirdParty
-from model.idr_claim import IdrClaim
-from model.idr_claim_ansi_signature import IdrClaimAnsiSignature
 from model.idr_claim_date_signature import IdrClaimDateSignature
-from model.idr_claim_fiss import IdrClaimFiss
-from model.idr_claim_institutional import IdrClaimInstitutional
 from model.idr_claim_institutional_nch import IdrClaimInstitutionalNch
 from model.idr_claim_institutional_ss import IdrClaimInstitutionalSs
-from model.idr_claim_item import IdrClaimItem
 from model.idr_claim_item_institutional_nch import IdrClaimItemInstitutionalNch
 from model.idr_claim_item_institutional_ss import IdrClaimItemInstitutionalSs
 from model.idr_claim_item_professional_nch import IdrClaimItemProfessionalNch
 from model.idr_claim_item_professional_ss import IdrClaimItemProfessionalSs
-from model.idr_claim_line_institutional import IdrClaimLineInstitutional
-from model.idr_claim_line_professional import IdrClaimLineProfessional
-from model.idr_claim_line_rx import IdrClaimLineRx
-from model.idr_claim_professional import IdrClaimProfessional
 from model.idr_claim_professional_nch import IdrClaimProfessionalNch
 from model.idr_claim_professional_ss import IdrClaimProfessionalSs
 from model.idr_claim_rx import IdrClaimRx
@@ -59,7 +50,6 @@ def filter_tables(tables: list[type[IdrBaseModel]]) -> list[type[IdrBaseModel]]:
 def claim_tables() -> list[type[IdrBaseModel]]:
     return filter_tables(
         [
-            IdrClaim,
             IdrClaimProfessionalNch,
             IdrClaimInstitutionalNch,
             IdrClaimProfessionalSs,
@@ -71,15 +61,7 @@ def claim_tables() -> list[type[IdrBaseModel]]:
 def claim_aux_tables() -> list[type[IdrBaseModel]]:
     return filter_tables(
         [
-            IdrClaimInstitutional,
             IdrClaimDateSignature,
-            IdrClaimFiss,
-            IdrClaimItem,
-            IdrClaimLineInstitutional,
-            IdrClaimAnsiSignature,
-            IdrClaimProfessional,
-            IdrClaimLineProfessional,
-            IdrClaimLineRx,
             IdrProviderHistory,
             # RX/Part D is special because we combine claim + claim line
             IdrClaimRx,
