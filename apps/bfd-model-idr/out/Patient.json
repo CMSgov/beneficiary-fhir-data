@@ -1,0 +1,79 @@
+{
+  "resourceType" : "Patient",
+  "id" : "123456789",
+  "meta" : {
+    "lastUpdated" : "2020-01-07T03:02:28.000000Z",
+    "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.1.0",
+    "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0"]
+  },
+  "extension" : [{
+    "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
+    "valueCode" : "248152002"
+  },
+  {
+    "extension" : [{
+      "url" : "ombCategory",
+      "valueCoding" : {
+        "system" : "urn:oid:2.16.840.1.113883.6.238",
+        "code" : "2135-2",
+        "display" : "Hispanic or Latino"
+      }
+    },
+    {
+      "url" : "text",
+      "valueString" : "Hispanic or Latino"
+    }],
+    "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity"
+  }],
+  "identifier" : [{
+    "type" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+        "code" : "MB"
+      }]
+    },
+    "system" : "http://hl7.org/fhir/sid/us-mbi",
+    "value" : "AAA1AA0AA11",
+    "period" : {
+      "start" : "2017-05-11",
+      "end" : "2017-07-01"
+    }
+  },
+  {
+    "type" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+        "code" : "MB"
+      }]
+    },
+    "system" : "http://hl7.org/fhir/sid/us-mbi",
+    "value" : "ABB2BB0BB22",
+    "period" : {
+      "start" : "2017-07-02"
+    }
+  }],
+  "name" : [{
+    "family" : "Sheep",
+    "given" : ["Frankie",
+    "Le Petit Prince"]
+  }],
+  "gender" : "female",
+  "birthDate" : "1995-03-11",
+  "deceasedDateTime" : "2024-03-11",
+  "address" : [{
+    "line" : ["505 University Dr",
+    "TEST for line 2"],
+    "city" : "College Station",
+    "state" : "TX",
+    "postalCode" : "77840"
+  }],
+  "communication" : [{
+    "language" : {
+      "coding" : [{
+        "system" : "urn:ietf:bcp:47",
+        "code" : "en"
+      }]
+    },
+    "preferred" : true
+  }]
+}

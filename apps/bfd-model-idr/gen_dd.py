@@ -61,7 +61,7 @@ for walk_info in os.walk(structure_def_folder):
                 continue
             for element in test_resource["differential"]["element"]:
                 structure_def_names_descriptions[element["id"]] = {}
-                structure_def_names_descriptions[element["id"]]["name"] = element["label"]
+                structure_def_names_descriptions[element["id"]]["name"] = element["short"]
                 if "definition" in element:
                     structure_def_names_descriptions[element["id"]]["definition"] = element[
                         "definition"
