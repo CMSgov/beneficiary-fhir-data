@@ -19,10 +19,12 @@ from model.base_model import (
     ALIAS_LINE,
     ALIAS_LINE_INSTNL,
     ALIAS_OCRNC_SGNTR,
+    ALIAS_OCRNC_SGNTR_DERIVED_DATES,
     ALIAS_PROCEDURE,
     ALIAS_PRVDR_RNDRNG,
     ALIAS_RLT_COND,
     ALIAS_RLT_OCRNC_SGNTR,
+    ALIAS_RLT_OCRNC_SGNTR_DERIVED_DATES,
     ALIAS_VAL,
     BATCH_ID,
     COLUMN_MAP,
@@ -154,6 +156,7 @@ class IdrClaimItemInstitutionalNch(IdrBaseModel):
     ]
     # todo: confirm if we can remove
     # clm_rlt_cond_sgntr_sqnc_num: Annotated[int | None, {ALIAS: ALIAS_RLT_COND}]
+    """
     idr_insrt_ts_rlt_cond: Annotated[
         datetime,
         {ALIAS: ALIAS_RLT_COND, **INSERT_FIELD},
@@ -164,6 +167,7 @@ class IdrClaimItemInstitutionalNch(IdrBaseModel):
         {ALIAS: ALIAS_RLT_COND, **UPDATE_FIELD},
         BeforeValidator(transform_null_date_to_min),
     ]
+    """
 
     # Columns from v2_mdcr_clm_line_instnl
     clm_rev_apc_hipps_cd: Annotated[
@@ -239,45 +243,61 @@ class IdrClaimItemInstitutionalNch(IdrBaseModel):
 
     # columns derived from v2_mdcr_clm_ocrnc_sgntr_mbr
     bfd_clm_ncvrd_from_dt: Annotated[
-        date | None, {ALIAS: ALIAS_OCRNC_SGNTR}, BeforeValidator(transform_default_date_to_null)
+        date | None,
+        {ALIAS: ALIAS_OCRNC_SGNTR_DERIVED_DATES},
+        BeforeValidator(transform_default_date_to_null),
     ]
     bfd_clm_ncvrd_thru_dt: Annotated[
-        date | None, {ALIAS: ALIAS_OCRNC_SGNTR}, BeforeValidator(transform_default_date_to_null)
+        date | None,
+        {ALIAS: ALIAS_OCRNC_SGNTR_DERIVED_DATES},
+        BeforeValidator(transform_default_date_to_null),
     ]
     bfd_clm_qlfy_stay_from_dt: Annotated[
-        date | None, {ALIAS: ALIAS_OCRNC_SGNTR}, BeforeValidator(transform_default_date_to_null)
+        date | None,
+        {ALIAS: ALIAS_OCRNC_SGNTR_DERIVED_DATES},
+        BeforeValidator(transform_default_date_to_null),
     ]
     bfd_clm_qlfy_stay_thru_dt: Annotated[
-        date | None, {ALIAS: ALIAS_OCRNC_SGNTR}, BeforeValidator(transform_default_date_to_null)
+        date | None,
+        {ALIAS: ALIAS_OCRNC_SGNTR_DERIVED_DATES},
+        BeforeValidator(transform_default_date_to_null),
     ]
+    """
     idr_insrt_ts_ocrnc_sgntr: Annotated[
         datetime,
-        {ALIAS: ALIAS_OCRNC_SGNTR, **INSERT_FIELD},
+        {ALIAS: ALIAS_OCRNC_SGNTR_DERIVED_DATES, **INSERT_FIELD},
         BeforeValidator(transform_null_date_to_min),
     ]
     idr_updt_ts_ocrnc_sgntr: Annotated[
         datetime,
-        {ALIAS: ALIAS_OCRNC_SGNTR, **UPDATE_FIELD},
+        {ALIAS: ALIAS_OCRNC_SGNTR_DERIVED_DATES, **UPDATE_FIELD},
         BeforeValidator(transform_null_date_to_min),
     ]
+    """
 
     # columns derived from v2_clm_rlt_ocrnc_sgntr_mbr
     bfd_clm_mdcr_exhstd_dt: Annotated[
-        date | None, {ALIAS: ALIAS_RLT_OCRNC_SGNTR}, BeforeValidator(transform_default_date_to_null)
+        date | None,
+        {ALIAS: ALIAS_RLT_OCRNC_SGNTR_DERIVED_DATES},
+        BeforeValidator(transform_default_date_to_null),
     ]
     bfd_clm_actv_care_thru_dt: Annotated[
-        date | None, {ALIAS: ALIAS_RLT_OCRNC_SGNTR}, BeforeValidator(transform_default_date_to_null)
+        date | None,
+        {ALIAS: ALIAS_RLT_OCRNC_SGNTR_DERIVED_DATES},
+        BeforeValidator(transform_default_date_to_null),
     ]
-    idr_insrt_ts_rlt_ocrnc_sgntr: Annotated[
+    """
+    idr_insrt_ts_ocrnc_sgntr: Annotated[
         datetime,
-        {ALIAS: ALIAS_RLT_OCRNC_SGNTR, **INSERT_FIELD},
+        {ALIAS: ALIAS_RLT_OCRNC_SGNTR_DERIVED_DATES, **INSERT_FIELD},
         BeforeValidator(transform_null_date_to_min),
     ]
-    idr_updt_ts_rlt_ocrnc_sgntr: Annotated[
+    idr_updt_ts_ocrnc_sgntr: Annotated[
         datetime,
-        {ALIAS: ALIAS_RLT_OCRNC_SGNTR, **UPDATE_FIELD},
+        {ALIAS: ALIAS_RLT_OCRNC_SGNTR_DERIVED_DATES, **UPDATE_FIELD},
         BeforeValidator(transform_null_date_to_min),
     ]
+    """
 
     @staticmethod
     def table() -> str:
@@ -304,6 +324,8 @@ class IdrClaimItemInstitutionalNch(IdrBaseModel):
         prvdr_rndrng = ALIAS_PRVDR_RNDRNG
         ocrnc_sgntr = ALIAS_OCRNC_SGNTR
         rlt_ocrnc_sgntr = ALIAS_RLT_OCRNC_SGNTR
+        ocrnc_sgntr_dd = ALIAS_OCRNC_SGNTR_DERIVED_DATES
+        rlt_ocrnc_sgntr_dd = ALIAS_RLT_OCRNC_SGNTR_DERIVED_DATES
         # This query is taking all the values for CLM_PROD, CLM_LINE, and CLM_VAL and storing
         # them in a unified table. This is necessary because each of these tables have a different
         # number of rows for each claim. If we don't combine these values, we would either have to
@@ -458,7 +480,7 @@ class IdrClaimItemInstitutionalNch(IdrBaseModel):
                 claim_related_conditions AS {not_materialized} (
                     SELECT
                         clm_rlt_cond_sgntr_sk,
-                        {clm_rlt_cond_cd_agg} AS clm_rlt_cond_cd,
+                        ARRAY_TO_STRING({clm_rlt_cond_cd_agg}, '') AS clm_rlt_cond_cd,
                         MAX(idr_insrt_ts) AS idr_insrt_ts_rlt_cond_sgntr,
                         MAX(idr_updt_ts) AS idr_updt_ts_rlt_cond_sgntr
                     FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_rlt_cond_sgntr_mbr {rlt_cond}
@@ -500,10 +522,10 @@ class IdrClaimItemInstitutionalNch(IdrBaseModel):
                     AND {val}.bfd_row_id = {clm_grp}.bfd_row_id
                 LEFT JOIN claim_related_conditions {rlt_cond}
                     ON {rlt_cond}.clm_rlt_cond_sgntr_sk = {clm}.clm_rlt_cond_sgntr_sk
-                LEFT JOIN derived_occurrence_span_dates {ocrnc_sgntr}
-                    ON {ocrnc_sgntr}.clm_ocrnc_sgntr_sk = {clm}.clm_ocrnc_sgntr_sk
-                LEFT JOIN derived_related_occurrence_dates {rlt_ocrnc_sgntr}
-                    ON {rlt_ocrnc_sgntr}.clm_rlt_ocrnc_sgntr_sk = {clm}.clm_rlt_ocrnc_sgntr_sk
+                LEFT JOIN derived_occurrence_span_dates {ocrnc_sgntr_dd} 
+                    ON {ocrnc_sgntr_dd}.clm_ocrnc_sgntr_sk = {clm}.clm_ocrnc_sgntr_sk
+                LEFT JOIN derived_related_occurrence_dates {rlt_ocrnc_sgntr_dd}
+                    ON {rlt_ocrnc_sgntr_dd}.clm_rlt_ocrnc_sgntr_sk = {clm}.clm_rlt_ocrnc_sgntr_sk
                 LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_instnl {line_instnl}
                     ON {line_instnl}.geo_bene_sk = {line}.geo_bene_sk
                     AND {line_instnl}.clm_type_cd = {line}.clm_type_cd

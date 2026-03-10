@@ -190,6 +190,9 @@ ALIAS_PBP_NUM = "pbp_num"
 ALIAS_CNTRCT_SGMT = "sgmt"
 ALIAS_OCRNC_SGNTR = "ocrnc_sgntr_mbr"
 ALIAS_RLT_OCRNC_SGNTR = "rlt_ocrnc_sgntr_mbr"
+ALIAS_OCRNC_SGNTR_DERIVED_DATES = "ocrnc_sgntr_mbr_derived_dates"
+ALIAS_RLT_OCRNC_SGNTR_DERIVED_DATES = "rlt_ocrnc_sgntr_mbr_derived_dates"
+ALIAS_LINE_FISS_BFNT_FLATTENED = "line_fiss_bnft_flattened"
 
 INSERT_FIELD = {BATCH_TIMESTAMP: True, INSERT_EXCLUDE: True, COLUMN_MAP: "idr_insrt_ts"}
 UPDATE_FIELD = {UPDATE_TIMESTAMP: True, INSERT_EXCLUDE: True, COLUMN_MAP: "idr_updt_ts"}

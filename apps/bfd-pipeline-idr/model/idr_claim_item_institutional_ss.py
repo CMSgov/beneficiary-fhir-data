@@ -19,12 +19,15 @@ from model.base_model import (
     ALIAS_LINE_DCMTN,
     ALIAS_LINE_FISS,
     ALIAS_LINE_FISS_BFNT,
+    ALIAS_LINE_FISS_BFNT_FLATTENED,
     ALIAS_LINE_INSTNL,
     ALIAS_OCRNC_SGNTR,
+    ALIAS_OCRNC_SGNTR_DERIVED_DATES,
     ALIAS_PROCEDURE,
     ALIAS_PRVDR_RNDRNG,
     ALIAS_RLT_COND,
     ALIAS_RLT_OCRNC_SGNTR,
+    ALIAS_RLT_OCRNC_SGNTR_DERIVED_DATES,
     ALIAS_VAL,
     BATCH_ID,
     COLUMN_MAP,
@@ -161,8 +164,9 @@ class IdrClaimItemInstitutionalSs(IdrBaseModel):
     clm_rlt_cond_cd: Annotated[
         str, {ALIAS: ALIAS_RLT_COND}, BeforeValidator(transform_default_string)
     ]
-    # todo: confirm if we can remove
+    # todo: confirm if we can remove clm_rlt_cond_sgntr_sqnc_num and idr timestamps
     # clm_rlt_cond_sgntr_sqnc_num: Annotated[int | None, {ALIAS: ALIAS_RLT_COND}]
+    """
     idr_insrt_ts_rlt_cond: Annotated[
         datetime,
         {ALIAS: ALIAS_RLT_COND, **INSERT_FIELD},
@@ -173,6 +177,7 @@ class IdrClaimItemInstitutionalSs(IdrBaseModel):
         {ALIAS: ALIAS_RLT_COND, **UPDATE_FIELD},
         BeforeValidator(transform_null_date_to_min),
     ]
+    """
 
     # Columns from v2_mdcr_clm_line_instnl
     clm_rev_apc_hipps_cd: Annotated[
@@ -250,81 +255,99 @@ class IdrClaimItemInstitutionalSs(IdrBaseModel):
 
     # columns derived from v2_mdcr_clm_ocrnc_sgntr_mbr
     bfd_clm_ncvrd_from_dt: Annotated[
-        date | None, {ALIAS: ALIAS_OCRNC_SGNTR}, BeforeValidator(transform_default_date_to_null)
+        date | None,
+        {ALIAS: ALIAS_OCRNC_SGNTR_DERIVED_DATES},
+        BeforeValidator(transform_default_date_to_null),
     ]
     bfd_clm_ncvrd_thru_dt: Annotated[
-        date | None, {ALIAS: ALIAS_OCRNC_SGNTR}, BeforeValidator(transform_default_date_to_null)
+        date | None,
+        {ALIAS: ALIAS_OCRNC_SGNTR_DERIVED_DATES},
+        BeforeValidator(transform_default_date_to_null),
     ]
     bfd_clm_qlfy_stay_from_dt: Annotated[
-        date | None, {ALIAS: ALIAS_OCRNC_SGNTR}, BeforeValidator(transform_default_date_to_null)
+        date | None,
+        {ALIAS: ALIAS_OCRNC_SGNTR_DERIVED_DATES},
+        BeforeValidator(transform_default_date_to_null),
     ]
     bfd_clm_qlfy_stay_thru_dt: Annotated[
-        date | None, {ALIAS: ALIAS_OCRNC_SGNTR}, BeforeValidator(transform_default_date_to_null)
+        date | None,
+        {ALIAS: ALIAS_OCRNC_SGNTR_DERIVED_DATES},
+        BeforeValidator(transform_default_date_to_null),
     ]
+    """
     idr_insrt_ts_ocrnc_sgntr: Annotated[
         datetime,
-        {ALIAS: ALIAS_OCRNC_SGNTR, **INSERT_FIELD},
+        {ALIAS: ALIAS_OCRNC_SGNTR_DERIVED_DATES, **INSERT_FIELD},
         BeforeValidator(transform_null_date_to_min),
     ]
     idr_updt_ts_ocrnc_sgntr: Annotated[
         datetime,
-        {ALIAS: ALIAS_OCRNC_SGNTR, **UPDATE_FIELD},
+        {ALIAS: ALIAS_OCRNC_SGNTR_DERIVED_DATES, **UPDATE_FIELD},
         BeforeValidator(transform_null_date_to_min),
     ]
+    """
 
     # columns derived from v2_clm_rlt_ocrnc_sgntr_mbr
     bfd_clm_mdcr_exhstd_dt: Annotated[
-        date | None, {ALIAS: ALIAS_RLT_OCRNC_SGNTR}, BeforeValidator(transform_default_date_to_null)
+        date | None,
+        {ALIAS: ALIAS_RLT_OCRNC_SGNTR_DERIVED_DATES},
+        BeforeValidator(transform_default_date_to_null),
     ]
     bfd_clm_actv_care_thru_dt: Annotated[
-        date | None, {ALIAS: ALIAS_RLT_OCRNC_SGNTR}, BeforeValidator(transform_default_date_to_null)
+        date | None,
+        {ALIAS: ALIAS_RLT_OCRNC_SGNTR_DERIVED_DATES},
+        BeforeValidator(transform_default_date_to_null),
     ]
-    idr_insrt_ts_rlt_ocrnc_sgntr: Annotated[
+    """
+    idr_insrt_ts_ocrnc_sgntr: Annotated[
         datetime,
-        {ALIAS: ALIAS_RLT_OCRNC_SGNTR, **INSERT_FIELD},
+        {ALIAS: ALIAS_RLT_OCRNC_SGNTR_DERIVED_DATES, **INSERT_FIELD},
         BeforeValidator(transform_null_date_to_min),
     ]
-    idr_updt_ts_rlt_ocrnc_sgntr: Annotated[
+    idr_updt_ts_ocrnc_sgntr: Annotated[
         datetime,
-        {ALIAS: ALIAS_RLT_OCRNC_SGNTR, **UPDATE_FIELD},
+        {ALIAS: ALIAS_RLT_OCRNC_SGNTR_DERIVED_DATES, **UPDATE_FIELD},
         BeforeValidator(transform_null_date_to_min),
     ]
+    """
 
     # columns derived from v2_mdcr_clm_line_fiss_bnft_svg
     clm_bnft_svg_ansi_grp_1_cd: Annotated[
-        str, {ALIAS: ALIAS_LINE_FISS_BFNT}, BeforeValidator(transform_default_string)
+        str, {ALIAS: ALIAS_LINE_FISS_BFNT_FLATTENED}, BeforeValidator(transform_default_string)
     ]
     clm_bnft_svg_ansi_grp_2_cd: Annotated[
-        str, {ALIAS: ALIAS_LINE_FISS_BFNT}, BeforeValidator(transform_default_string)
+        str, {ALIAS: ALIAS_LINE_FISS_BFNT_FLATTENED}, BeforeValidator(transform_default_string)
     ]
     clm_bnft_svg_ansi_grp_3_cd: Annotated[
-        str, {ALIAS: ALIAS_LINE_FISS_BFNT}, BeforeValidator(transform_default_string)
+        str, {ALIAS: ALIAS_LINE_FISS_BFNT_FLATTENED}, BeforeValidator(transform_default_string)
     ]
     clm_bnft_svg_ansi_grp_4_cd: Annotated[
-        str, {ALIAS: ALIAS_LINE_FISS_BFNT}, BeforeValidator(transform_default_string)
+        str, {ALIAS: ALIAS_LINE_FISS_BFNT_FLATTENED}, BeforeValidator(transform_default_string)
     ]
     clm_bnft_svg_ansi_rsn_1_cd: Annotated[
-        str, {ALIAS: ALIAS_LINE_FISS_BFNT}, BeforeValidator(transform_default_string)
+        str, {ALIAS: ALIAS_LINE_FISS_BFNT_FLATTENED}, BeforeValidator(transform_default_string)
     ]
     clm_bnft_svg_ansi_rsn_2_cd: Annotated[
-        str, {ALIAS: ALIAS_LINE_FISS_BFNT}, BeforeValidator(transform_default_string)
+        str, {ALIAS: ALIAS_LINE_FISS_BFNT_FLATTENED}, BeforeValidator(transform_default_string)
     ]
     clm_bnft_svg_ansi_rsn_3_cd: Annotated[
-        str, {ALIAS: ALIAS_LINE_FISS_BFNT}, BeforeValidator(transform_default_string)
+        str, {ALIAS: ALIAS_LINE_FISS_BFNT_FLATTENED}, BeforeValidator(transform_default_string)
     ]
     clm_bnft_svg_ansi_rsn_4_cd: Annotated[
-        str, {ALIAS: ALIAS_LINE_FISS_BFNT}, BeforeValidator(transform_default_string)
+        str, {ALIAS: ALIAS_LINE_FISS_BFNT_FLATTENED}, BeforeValidator(transform_default_string)
     ]
+    """
     idr_insrt_ts_line_fiss_bnft: Annotated[
         datetime,
-        {ALIAS: ALIAS_LINE_FISS_BFNT, **INSERT_FIELD},
+        {ALIAS: ALIAS_LINE_FISS_BFNT_FLATTENED, **INSERT_FIELD},
         BeforeValidator(transform_null_date_to_min),
     ]
     idr_updt_ts_line_fiss_bnft: Annotated[
         datetime,
-        {ALIAS: ALIAS_LINE_FISS_BFNT, **UPDATE_FIELD},
+        {ALIAS: ALIAS_LINE_FISS_BFNT_FLATTENED, **UPDATE_FIELD},
         BeforeValidator(transform_null_date_to_min),
     ]
+    """
 
     @staticmethod
     def table() -> str:
@@ -353,6 +376,9 @@ class IdrClaimItemInstitutionalSs(IdrBaseModel):
         prvdr_rndrng = ALIAS_PRVDR_RNDRNG
         ocrnc_sgntr = ALIAS_OCRNC_SGNTR
         rlt_ocrnc_sgntr = ALIAS_RLT_OCRNC_SGNTR
+        ocrnc_sgntr_dd = ALIAS_OCRNC_SGNTR_DERIVED_DATES
+        rlt_ocrnc_sgntr_dd = ALIAS_RLT_OCRNC_SGNTR_DERIVED_DATES
+        line_fiss_bnft_flattened = ALIAS_LINE_FISS_BFNT_FLATTENED
         # This query is taking all the values for CLM_PROD, CLM_LINE, and CLM_VAL and storing
         # them in a unified table. This is necessary because each of these tables have a different
         # number of rows for each claim. If we don't combine these values, we would either have to
@@ -507,7 +533,7 @@ class IdrClaimItemInstitutionalSs(IdrBaseModel):
                 claim_related_conditions AS {not_materialized} (
                     SELECT
                         clm_rlt_cond_sgntr_sk,
-                        {clm_rlt_cond_cd_agg} AS clm_rlt_cond_cd,
+                        ARRAY_TO_STRING({clm_rlt_cond_cd_agg}, '') AS clm_rlt_cond_cd,
                         MAX(idr_insrt_ts) AS idr_insrt_ts_rlt_cond_sgntr,
                         MAX(idr_updt_ts) AS idr_updt_ts_rlt_cond_sgntr
                     FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_rlt_cond_sgntr_mbr {rlt_cond}
@@ -582,10 +608,10 @@ class IdrClaimItemInstitutionalSs(IdrBaseModel):
                     AND {val}.bfd_row_id = {clm_grp}.bfd_row_id
                 LEFT JOIN claim_related_conditions {rlt_cond}
                     ON {rlt_cond}.clm_rlt_cond_sgntr_sk = {clm}.clm_rlt_cond_sgntr_sk
-                LEFT JOIN derived_occurrence_span_dates {ocrnc_sgntr}
-                    ON {ocrnc_sgntr}.clm_ocrnc_sgntr_sk = {clm}.clm_ocrnc_sgntr_sk
-                LEFT JOIN derived_related_occurrence_dates {rlt_ocrnc_sgntr}
-                    ON {rlt_ocrnc_sgntr}.clm_rlt_ocrnc_sgntr_sk = {clm}.clm_rlt_ocrnc_sgntr_sk
+                LEFT JOIN derived_occurrence_span_dates {ocrnc_sgntr_dd} 
+                    ON {ocrnc_sgntr_dd}.clm_ocrnc_sgntr_sk = {clm}.clm_ocrnc_sgntr_sk
+                LEFT JOIN derived_related_occurrence_dates {rlt_ocrnc_sgntr_dd}
+                    ON {rlt_ocrnc_sgntr_dd}.clm_rlt_ocrnc_sgntr_sk = {clm}.clm_rlt_ocrnc_sgntr_sk
                 LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_instnl {line_instnl}
                     ON {line_instnl}.geo_bene_sk = {line}.geo_bene_sk
                     AND {line_instnl}.clm_type_cd = {line}.clm_type_cd
@@ -607,12 +633,12 @@ class IdrClaimItemInstitutionalSs(IdrBaseModel):
                 LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_prvdr_hstry {prvdr_rndrng}
                     ON {prvdr_rndrng}.prvdr_npi_num = {line}.prvdr_rndrng_prvdr_npi_num
                     AND {prvdr_rndrng}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
-                LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_fiss_bnft_svg {line_fiss_bnft}
-                    ON {line_fiss_bnft}.geo_bene_sk = {line}.geo_bene_sk
-                    AND {line_fiss_bnft}.clm_type_cd = {line}.clm_type_cd
-                    AND {line_fiss_bnft}.clm_num_sk = {line}.clm_num_sk
-                    AND {line_fiss_bnft}.clm_dt_sgntr_sk = {line}.clm_dt_sgntr_sk
-                    AND {line_fiss_bnft}.clm_line_num = {line}.clm_line_num
+                LEFT JOIN claim_line_fiss_bnft_svg {line_fiss_bnft_flattened}
+                    ON {line_fiss_bnft_flattened}.geo_bene_sk = {line}.geo_bene_sk
+                    AND {line_fiss_bnft_flattened}.clm_type_cd = {line}.clm_type_cd
+                    AND {line_fiss_bnft_flattened}.clm_num_sk = {line}.clm_num_sk
+                    AND {line_fiss_bnft_flattened}.clm_dt_sgntr_sk = {line}.clm_dt_sgntr_sk
+                    AND {line_fiss_bnft_flattened}.clm_line_num = {line}.clm_line_num
                 {{WHERE_CLAUSE}}
                 {{ORDER_BY}}
         """
