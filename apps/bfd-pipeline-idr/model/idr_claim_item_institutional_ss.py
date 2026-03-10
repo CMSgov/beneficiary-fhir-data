@@ -21,12 +21,10 @@ from model.base_model import (
     ALIAS_LINE_FISS_BFNT,
     ALIAS_LINE_FISS_BFNT_FLATTENED,
     ALIAS_LINE_INSTNL,
-    ALIAS_OCRNC_SGNTR,
     ALIAS_OCRNC_SGNTR_DERIVED_DATES,
     ALIAS_PROCEDURE,
     ALIAS_PRVDR_RNDRNG,
     ALIAS_RLT_COND,
-    ALIAS_RLT_OCRNC_SGNTR,
     ALIAS_RLT_OCRNC_SGNTR_DERIVED_DATES,
     ALIAS_VAL,
     BATCH_ID,
@@ -40,6 +38,9 @@ from model.base_model import (
     UPDATE_FIELD,
     IdrBaseModel,
     claim_filter,
+    claim_occurrence_cte,
+    claim_related_conditions_cte,
+    claim_related_occurrences_cte,
     get_min_transaction_date,
     provider_careteam_name_expr,
     transform_default_date_to_null,
@@ -172,11 +173,6 @@ class IdrClaimItemInstitutionalSs(IdrBaseModel):
         {ALIAS: ALIAS_RLT_COND, **INSERT_FIELD},
         BeforeValidator(transform_null_date_to_min),
     ]
-    idr_updt_ts_rlt_cond: Annotated[
-        datetime,
-        {ALIAS: ALIAS_RLT_COND, **UPDATE_FIELD},
-        BeforeValidator(transform_null_date_to_min),
-    ]
     """
 
     # Columns from v2_mdcr_clm_line_instnl
@@ -298,12 +294,12 @@ class IdrClaimItemInstitutionalSs(IdrBaseModel):
         BeforeValidator(transform_default_date_to_null),
     ]
     """
-    idr_insrt_ts_ocrnc_sgntr: Annotated[
+    idr_insrt_ts_rlt_ocrnc_sgntr: Annotated[
         datetime,
         {ALIAS: ALIAS_RLT_OCRNC_SGNTR_DERIVED_DATES, **INSERT_FIELD},
         BeforeValidator(transform_null_date_to_min),
     ]
-    idr_updt_ts_ocrnc_sgntr: Annotated[
+    idr_updt_ts_rlt_ocrnc_sgntr: Annotated[
         datetime,
         {ALIAS: ALIAS_RLT_OCRNC_SGNTR_DERIVED_DATES, **UPDATE_FIELD},
         BeforeValidator(transform_null_date_to_min),
@@ -373,8 +369,6 @@ class IdrClaimItemInstitutionalSs(IdrBaseModel):
         line_fiss = ALIAS_LINE_FISS
         line_fiss_bnft = ALIAS_LINE_FISS_BFNT
         prvdr_rndrng = ALIAS_PRVDR_RNDRNG
-        ocrnc_sgntr = ALIAS_OCRNC_SGNTR
-        rlt_ocrnc_sgntr = ALIAS_RLT_OCRNC_SGNTR
         ocrnc_sgntr_dd = ALIAS_OCRNC_SGNTR_DERIVED_DATES
         rlt_ocrnc_sgntr_dd = ALIAS_RLT_OCRNC_SGNTR_DERIVED_DATES
         line_fiss_bnft_flattened = ALIAS_LINE_FISS_BFNT_FLATTENED
@@ -407,13 +401,6 @@ class IdrClaimItemInstitutionalSs(IdrBaseModel):
         # non-indexed data in memory. This is fine in Snowflake because it's fundamentally
         # different, but we need to force this behavior for local testing.
         not_materialized = "" if load_mode == LoadMode.IDR else "NOT MATERIALIZED"
-        clm_rlt_cond_cd_agg = ""
-        if load_mode == LoadMode.IDR:
-            clm_rlt_cond_cd_agg = f"""ARRAY_AGG({rlt_cond}.clm_rlt_cond_cd) 
-                WITHIN GROUP (ORDER BY {rlt_cond}.clm_rlt_cond_sgntr_sqnc_num)"""
-        else:
-            clm_rlt_cond_cd_agg = f"""ARRAY_AGG({rlt_cond}.clm_rlt_cond_cd 
-                ORDER BY {rlt_cond}.clm_rlt_cond_sgntr_sqnc_num)"""
 
         return f"""
                 WITH claims AS {not_materialized} (
@@ -477,69 +464,11 @@ class IdrClaimItemInstitutionalSs(IdrBaseModel):
                         AND {val}.clm_num_sk = {clm}.clm_num_sk
                         AND {val}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
                 ),
-                claim_occurrence_spans AS {not_materialized} (
-                    SELECT * FROM
-                        (SELECT
-                            {ocrnc_sgntr}.*,
-                            ROW_NUMBER() OVER (
-                                PARTITION BY clm_ocrnc_sgntr_sk, clm_ocrnc_span_cd
-                                ORDER BY clm_ocrnc_span_thru_dt DESC
-                            ) AS bfd_row_id
-                        FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_ocrnc_sgntr_mbr {ocrnc_sgntr}
-                        WHERE clm_ocrnc_span_cd IN ('70', '74'))
-                    WHERE bfd_row_id = 1
-                ),
-                derived_occurrence_span_dates AS (
-                    SELECT
-                        clm_ocrnc_sgntr_sk,
-                        MAX(CASE WHEN clm_ocrnc_span_cd = '74'
-                            THEN clm_ocrnc_span_from_dt END) AS bfd_clm_ncvrd_from_dt,
-                        MAX(CASE WHEN clm_ocrnc_span_cd = '74'
-                            THEN clm_ocrnc_span_thru_dt END) AS bfd_clm_ncvrd_thru_dt,
-                        MAX(CASE WHEN clm_ocrnc_span_cd = '70'
-                            THEN clm_ocrnc_span_from_dt END) AS bfd_clm_qlfy_stay_from_dt,
-                        MAX(CASE WHEN clm_ocrnc_span_cd = '70'
-                            THEN clm_ocrnc_span_thru_dt END) AS bfd_clm_qlfy_stay_thru_dt,
-                        MAX(idr_insrt_ts) AS idr_insrt_ts_ocrnc_sgntr,
-                        MAX(idr_updt_ts) AS idr_updt_ts_ocrnc_sgntr
-                    FROM claim_occurrence_spans
-                    GROUP BY clm_ocrnc_sgntr_sk
-                ),
-                claim_related_occurrences AS {not_materialized} (
-                    SELECT * FROM
-                        (SELECT
-                            {rlt_ocrnc_sgntr}.*,
-                            ROW_NUMBER() OVER (
-                                PARTITION BY clm_rlt_ocrnc_sgntr_sk, clm_rlt_ocrnc_cd
-                                ORDER BY clm_rlt_ocrnc_dt DESC 
-                            ) AS bfd_row_id
-                        FROM cms_vdm_view_mdcr_prd.v2_clm_rlt_ocrnc_sgntr_mbr {rlt_ocrnc_sgntr}
-                        WHERE clm_rlt_ocrnc_cd IN ('A3', '22'))
-                    WHERE bfd_row_id = 1
-                ),
-                derived_related_occurrence_dates AS (
-                    SELECT
-                        clm_rlt_ocrnc_sgntr_sk,
-                        MAX(CASE WHEN clm_rlt_ocrnc_cd = 'A3'
-                            THEN clm_rlt_ocrnc_dt END) AS bfd_clm_mdcr_exhstd_dt,
-                        MAX(CASE WHEN clm_rlt_ocrnc_cd = '22'
-                            THEN clm_rlt_ocrnc_dt END) AS bfd_clm_actv_care_thru_dt,
-                        MAX(idr_insrt_ts) AS idr_insrt_ts_rlt_ocrnc_sgntr,
-                        MAX(idr_updt_ts) AS idr_updt_ts_rlt_ocrnc_sgntr
-                    FROM claim_related_occurrences
-                    GROUP BY clm_rlt_ocrnc_sgntr_sk
-                ),
-                claim_related_conditions AS {not_materialized} (
-                    SELECT
-                        clm_rlt_cond_sgntr_sk,
-                        ARRAY_TO_STRING({clm_rlt_cond_cd_agg}, '') AS clm_rlt_cond_cd,
-                        MAX(idr_insrt_ts) AS idr_insrt_ts_rlt_cond_sgntr,
-                        MAX(idr_updt_ts) AS idr_updt_ts_rlt_cond_sgntr
-                    FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_rlt_cond_sgntr_mbr {rlt_cond}
-                    WHERE clm_rlt_cond_sgntr_sk NOT IN (0, 1, -1)
-                    AND clm_rlt_cond_cd != '~'
-                    GROUP BY clm_rlt_cond_sgntr_sk
-                ),
+                claim_occurrence_spans_dates AS {not_materialized} ({claim_occurrence_cte()}),
+                claim_related_occurrences_dates AS {not_materialized} 
+                    ({claim_related_occurrences_cte()}),
+                claim_related_conditions AS {not_materialized} 
+                    ({claim_related_conditions_cte(load_mode)}),
                 claim_line_fiss_bnft_svg AS {not_materialized} (
                     SELECT
                         geo_bene_sk,
@@ -607,9 +536,9 @@ class IdrClaimItemInstitutionalSs(IdrBaseModel):
                     AND {val}.bfd_row_id = {clm_grp}.bfd_row_id
                 LEFT JOIN claim_related_conditions {rlt_cond}
                     ON {rlt_cond}.clm_rlt_cond_sgntr_sk = {clm}.clm_rlt_cond_sgntr_sk
-                LEFT JOIN derived_occurrence_span_dates {ocrnc_sgntr_dd} 
+                LEFT JOIN claim_occurrence_spans_dates {ocrnc_sgntr_dd} 
                     ON {ocrnc_sgntr_dd}.clm_ocrnc_sgntr_sk = {clm}.clm_ocrnc_sgntr_sk
-                LEFT JOIN derived_related_occurrence_dates {rlt_ocrnc_sgntr_dd}
+                LEFT JOIN claim_related_occurrences_dates {rlt_ocrnc_sgntr_dd}
                     ON {rlt_ocrnc_sgntr_dd}.clm_rlt_ocrnc_sgntr_sk = {clm}.clm_rlt_ocrnc_sgntr_sk
                 LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_instnl {line_instnl}
                     ON {line_instnl}.geo_bene_sk = {line}.geo_bene_sk

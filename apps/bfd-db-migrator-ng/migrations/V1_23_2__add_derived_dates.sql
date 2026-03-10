@@ -9,7 +9,8 @@ ADD COLUMN bfd_clm_qlfy_stay_from_dt date,
 ADD COLUMN bfd_clm_qlfy_stay_thru_dt date,
 -- columns derived from v2_clm_rlt_ocrnc_sgntr_mbr
 ADD COLUMN bfd_clm_mdcr_exhstd_dt date,
-ADD COLUMN bfd_clm_actv_care_thru_dt date;
+ADD COLUMN bfd_clm_actv_care_thru_dt date,
+DROP COLUMN clm_rlt_cond_sgntr_sqnc_num;
 
 ALTER TABLE idr.claim_item_institutional_ss
 -- columns derived from v2_mdcr_clm_ocrnc_sgntr_mbr
