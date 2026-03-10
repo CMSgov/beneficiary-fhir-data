@@ -39,6 +39,7 @@ BOTO_CONFIG = Config(
         "mode": "adaptive",
     },
 )
+S3 = boto3.client("s3", config=BOTO_CONFIG)
 SSM = SSMProvider(config=BOTO_CONFIG)
 TABLE = boto3.resource("dynamodb", config=BOTO_CONFIG).Table(TABLE_NAME)
 
@@ -180,9 +181,8 @@ class PartnerPreferences:
 
             bucket = SSM.get(f"/bfd/{BFD_ENV}/bene-prefs/{self.partner}/nonsensitive/bucket")
 
-            s3 = boto3.client("s3", config=BOTO_CONFIG)
             self._logger.info(f"Storing remote file: s3://{bucket}/{file_name}")
-            s3.upload_fileobj(buffer, bucket, file_name)
+            S3.upload_fileobj(buffer, bucket, file_name)
 
     def generate_preferences(
         self,
