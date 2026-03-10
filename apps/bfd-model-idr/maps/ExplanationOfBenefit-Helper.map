@@ -113,6 +113,7 @@ conceptmap "CLM_TYPE_CD" {
   s:82 == t:"professional"
   s:1011 == t:"institutional"
   s:2011 == t:"institutional"
+  s:2700 == t:"professional"
 }
 
 conceptmap "RIC_CD" {
@@ -193,16 +194,19 @@ conceptmap "META_SRC_SK" {
   s:"1001" == t:"MCS"
   s:"1002" == t:"VMS"
   s:"1003" == t:"FISS"
+  s:"1004" == t:"MAP"
 }
 
 conceptmap "SYSTEM_TYPE" {
   prefix s = "https://hl7.org/fhir/string"
   prefix t = "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type"
 
-  s:"20000" == t:"NationalClaimsHistory"
-  s:"21000" == t:"SharedSystem"
-  s:"22000" == t:"SharedSystem"
-  s:"23000" == t:"SharedSystem"
+  s:"1" == t:"DDPS"
+  s:"7" == t:"NationalClaimsHistory"
+  s:"1001" == t:"SharedSystem"
+  s:"1002" == t:"SharedSystem"
+  s:"1003" == t:"SharedSystem"
+  s:"1004" == t:"SharedSystem"
 }
 
 conceptmap "FINAL_ACTION" {
@@ -211,6 +215,22 @@ conceptmap "FINAL_ACTION" {
 
   s:"Y" == t:"FinalAction"
   s:"N" == t:"NotFinalAction"
+}
+
+conceptmap "CLM_PD_STUS_CD" {
+  prefix s = "https://hl7.org/fhir/string"
+  prefix t = "https://hl7.org/fhir/string"
+
+  s:"P" == t:"complete"
+  s:"1" == t:"complete"
+  s:"R" == t:"complete"
+  s:"2" == t:"complete"
+  s:"D" == t:"complete"
+  s:"Y" == t:"complete"
+  s:"~" == t:"partial"
+  s:"I" == t:"partial"
+  s:"S" == t:"partial"
+  s:"T" == t:"partial"
 }
 
 conceptmap "CLM_AUDT_TRL_STUS_CD_MCS" {

@@ -121,6 +121,7 @@
   sourceView: V2_MDCR_BENE_MDCR_STUS_CD
   sourceColumn: BENE_ESRD_STUS_ID
   nameOverride: Beneficiary ESRD Status ID
+  definitionOverride: A beneficiary's end stage renal disease status indicator.
 - inputPath: Coverage-Base.BENE_DSBLD_STUS_ID
   appliesTo:
     - PartA
@@ -130,6 +131,7 @@
   sourceView: V2_MDCR_BENE_MDCR_STUS_CD
   sourceColumn: BENE_DSBLD_STUS_ID
   nameOverride: Beneficiary Disabled Status Code
+  definitionOverride: AN IDENTIFIER INDICATING WHETHER DISABILITY IS A REASON FOR A BENEFICIARYS ENTITLEMENT TO MEDICARE.
 - inputPath: Coverage-Base.BENE_DUAL_STUS_CD
   appliesTo:
     - DUAL

@@ -8,8 +8,7 @@ import yaml
 
 print("Generating Data Dictionary")
 dd_support_folder = "./dictionary-support-files"
-idr_ref_folder = "./ReferenceTables"
-structure_def_folder = "./StructureDefinitions/Source"
+structure_def_folder = "./sushi/fsh-generated/resources"
 
 """
 This data structure will get more complex as BFD adds more "types" of data. We're effectively trying
@@ -44,7 +43,6 @@ sample_sources_by_profile = {
 
 sample_resources_by_profile = {}
 dd_df = []
-idr_table_descriptors = {}
 structure_def_names_descriptions = {}
 
 for resource_type in sample_sources_by_profile:
@@ -53,10 +51,14 @@ for resource_type in sample_sources_by_profile:
 
 
 for walk_info in os.walk(structure_def_folder):
-    files = list(filter(lambda file: ".json" in file, walk_info[2]))
+    files = list(
+        filter(lambda file: ".json" in file and "StructureDefinition" in file, walk_info[2])
+    )
     for file_name in files:
         with Path(structure_def_folder + "/" + file_name).open() as file:
             test_resource = json.load(file)
+            if test_resource.get("kind") != "logical":
+                continue
             for element in test_resource["differential"]["element"]:
                 structure_def_names_descriptions[element["id"]] = {}
                 structure_def_names_descriptions[element["id"]]["name"] = element["label"]
@@ -65,16 +67,9 @@ for walk_info in os.walk(structure_def_folder):
                         "definition"
                     ]
 
-for walk_info in os.walk(idr_ref_folder):
-    files = list(filter(lambda file: ".csv" in file, walk_info[2]))
-    for file_name in files:
-        idr_table_descriptors[file_name[0 : len(file_name) - 4]] = {}
-        df = pd.read_csv(idr_ref_folder + "/" + str(file_name))
-        for _, row in df.iterrows():
-            idr_table_descriptors[file_name[0 : len(file_name) - 4]][row["name"]] = row["comment"]
 
-coverage_parts = ['PartA','PartB','PartC','PartD','DUAL']
-claim_profiles = ['HHA','Hospice','SNF','DME','Carrier','Inpatient','Outpatient','Pharmacy']
+coverage_parts = ["PartA", "PartB", "PartC", "PartD", "DUAL"]
+claim_profiles = ["HHA", "Hospice", "SNF", "DME", "Carrier", "Inpatient", "Outpatient", "Pharmacy"]
 for walk_info in os.walk(dd_support_folder):
     files = list(filter(lambda file: ".yaml" in file, walk_info[2]))
     for file_name in files:
@@ -82,34 +77,34 @@ for walk_info in os.walk(dd_support_folder):
             data = yaml.safe_load(file)
             current_resource_type = file_name[0 : len(file_name) - 5]
             for entry in data:
-                if 'suppressInDD' in entry and entry['suppressInDD']:
+                if "suppressInDD" in entry and entry["suppressInDD"]:
                     continue
                 if "fhirPath" in entry:
                     entry["appliesTo"].sort()
                     if "sources" in entry:
                         entry["sources"].sort()
-                    if('Patient' in entry['appliesTo']):
-                        entry['FHIR Resource'] = 'Patient'
-                    elif(any(x in coverage_parts for x in entry['appliesTo'])):
-                        entry['FHIR Resource'] = 'Coverage'
-                        entry['Coverage / Claim Type'] = entry['appliesTo']
-                    elif(any(x in claim_profiles for x in entry['appliesTo'])):
-                        entry['FHIR Resource'] = 'ExplanationOfBenefit'
-                        entry['Coverage / Claim Type'] = entry['appliesTo']
+                    if "Patient" in entry["appliesTo"]:
+                        entry["FHIR Resource"] = "Patient"
+                    elif any(x in coverage_parts for x in entry["appliesTo"]):
+                        entry["FHIR Resource"] = "Coverage"
+                        entry["Coverage / Claim Type"] = entry["appliesTo"]
+                    elif any(x in claim_profiles for x in entry["appliesTo"]):
+                        entry["FHIR Resource"] = "ExplanationOfBenefit"
+                        entry["Coverage / Claim Type"] = entry["appliesTo"]
 
-                    #This opportunistically populates examples based upon the samples created from executing FML
+                    # This opportunistically populates examples based upon the samples created from executing FML
                     result = subprocess.run(
                         [
                             "node",
                             "eval_fhirpath.js",
-                            json.dumps(sample_resources_by_profile[entry['appliesTo'][0]]),
+                            json.dumps(sample_resources_by_profile[entry["appliesTo"][0]]),
                             entry["fhirPath"],
                         ],
                         cwd=os.path.dirname(__file__),
                         check=True,
                         stdout=subprocess.PIPE,
                     )
-                    entry['example']=json.loads(result.stdout)
+                    entry["example"] = json.loads(result.stdout)
                     if "iif" in entry["fhirPath"] or "union" in entry["fhirPath"]:
                         pass
                     elif len(entry["example"]) > 0:
@@ -120,19 +115,6 @@ for walk_info in os.walk(dd_support_folder):
                     source_view = entry.get("sourceView")
                     source_column = entry.get("sourceColumn")
 
-                    if source_view:
-                        table = idr_table_descriptors.get(source_view)
-                        if table:
-                            description = table.get(source_column)
-                            if description:
-                                entry["Description"] = description
-                            else:
-                                print(
-                                    f"[WARN] sourceColumn '{source_column}' not found in sourceView '{source_view}'"
-                                )
-                        else:
-                            print(f"[WARN] sourceView '{source_view}' not found in idr_table_descriptors")
-
                     # Populate the element names + missing descriptions
                     if entry["inputPath"] in structure_def_names_descriptions:
                         entry["Field Name"] = structure_def_names_descriptions[
@@ -141,11 +123,16 @@ for walk_info in os.walk(dd_support_folder):
                         if "definition" in structure_def_names_descriptions[entry["inputPath"]]:
                             entry["Description"] = structure_def_names_descriptions[
                                 entry["inputPath"]
-                            ]["definition"]
-                    entry.pop("inputPath")
+                            ]["definition"]                    
+                    #nameOverride and definitionOverride only exist when a field is derived IN fml.
                     if "nameOverride" in entry:
                         entry["Field Name"] = entry["nameOverride"]
-
+                        entry["Description"] = entry["definitionOverride"]
+                    elif "Description" not in entry or not entry["Description"]:
+                        raise ValueError(
+                            f"Entry {entry.get("inputPath", 'Unknown')} has no definition. "
+                        )
+                    entry.pop("inputPath")
                     dd_df.append(entry)
 
 dd_df = pd.DataFrame(dd_df)
