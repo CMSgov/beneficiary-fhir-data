@@ -127,7 +127,7 @@ def execute_query(query: str) -> list:
 class PartnerPreferences:
     def __init__(self, partner: str, region_name: str = "us-east-1") -> None:
         self.__dynamodb = boto3.resource("dynamodb", region_name=region_name)
-        self.__execution = None
+        self._execution = None
         self.partner = partner
         self.table = self.__dynamodb.Table(TABLE_NAME)
         self.query_template = TEMPLATES.get_template(f"{partner}.sql.j2")
@@ -142,8 +142,8 @@ class PartnerPreferences:
             response = self.table.get_item(Key={"partner": self.partner})
 
             if "Item" in response:
-                self.__execution = response["Item"].get("last_execution")
-                return self.__execution
+                self._execution = response["Item"].get("last_execution")
+                return self._execution
 
         except ClientError as e:
             self._logger.exception(f"""
@@ -151,14 +151,14 @@ class PartnerPreferences:
             """)
             raise
 
-        return self.__execution
+        return self._execution
 
     @property
     def environment_indicator(self) -> str:
         """Return a 'P' for production or a T for test."""
         return "P" if BFD_ENV == "prod" else "T"
 
-    def __set_last_execution(self, timestamp: str | None = None) -> None:
+    def _set_last_execution(self, timestamp: str | None = None) -> None:
         latest_timestamp = timestamp or datetime.now(UTC).isoformat()
 
         try:
@@ -175,7 +175,7 @@ class PartnerPreferences:
             self._logger.info(
                 f"Updating last_exeuction from {self.last_execution} to {latest_timestamp}"
             )
-            self.__execution = latest_timestamp
+            self._execution = latest_timestamp
 
         except ClientError as e:
             self._logger.exception(
@@ -183,7 +183,7 @@ class PartnerPreferences:
             )
             raise
 
-    def __store_preferences(
+    def _store_preferences(
         self,
         preferences_data: str,
         file_name: str,
@@ -260,12 +260,12 @@ class PartnerPreferences:
                 report_time=report_time,
             )
 
-        self.__store_preferences(
+        self._store_preferences(
             preferences_data, file_name, store_remote=store_remote, store_local=store_local
         )
 
         if set_last_execution:
-            self.__set_last_execution(query_until_timestamp)
+            self._set_last_execution(query_until_timestamp)
 
 
 def handler(event: dict, context: LambdaContext) -> None:
