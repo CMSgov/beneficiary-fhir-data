@@ -14,6 +14,7 @@ from snowflake.connector import DictCursor
 
 from aws_lambda_powertools import Logger
 from aws_lambda_powertools.utilities.typing import LambdaContext
+from aws_lambda_powertools.utilities.parameters import SSMProvider
 
 REGION = os.environ.get("AWS_CURRENT_REGION", "us-east-1")
 BFD_ENV = os.environ.get("BFD_ENV", "prod")
@@ -38,32 +39,10 @@ BOTO_CONFIG = Config(
         "mode": "adaptive",
     },
 )
-SSM_CLIENT = boto3.client("ssm", config=BOTO_CONFIG)
+SSM = SSMProvider(config=BOTO_CONFIG)
 TABLE = boto3.resource("dynamodb", config=BOTO_CONFIG).Table(TABLE_NAME)
 
 logger = Logger()
-
-
-def get_ssm_parameter(name: str, with_decrypt: bool = True) -> str:
-    """Retrieve SSM parameter using the global SSM_CLIENT.
-
-    Args:
-        name (str): The name of the SSM parameter to retrieve
-        with_decrypt (bool, optional): Whether or not to decrypt the retrieved SSM parameter.
-        Defaults to True.
-
-    Raises:
-        ValueError: Raised if the parameter was not found
-
-    Returns:
-        str: The value of the SSM parameter
-    """
-    response = SSM_CLIENT.get_parameter(Name=name, WithDecryption=with_decrypt)
-
-    try:
-        return response["Parameter"]["Value"]  # type: ignore
-    except KeyError as exc:
-        raise ValueError(f'SSM parameter "{name}" not found or empty') from exc
 
 
 def execute_query(query: str) -> list:
@@ -76,14 +55,13 @@ def execute_query(query: str) -> list:
         List: The results of the query.
     """
     try:
-        account = get_ssm_parameter(f"/bfd/{BFD_ENV}/idr-pipeline/sensitive/idr_account")
-        database = get_ssm_parameter(f"/bfd/{BFD_ENV}/idr-pipeline/sensitive/idr_database")
-        private_key_raw = get_ssm_parameter(
-            f"/bfd/{BFD_ENV}/idr-pipeline/sensitive/idr_private_key"
-        )
-        schema = get_ssm_parameter(f"/bfd/{BFD_ENV}/idr-pipeline/sensitive/idr_schema")
-        user = get_ssm_parameter(f"/bfd/{BFD_ENV}/idr-pipeline/sensitive/idr_username")
-        warehouse = get_ssm_parameter(f"/bfd/{BFD_ENV}/idr-pipeline/sensitive/idr_warehouse")
+        account = SSM.get(f"/bfd/{BFD_ENV}/idr-pipeline/sensitive/idr_account", decrypt=True)
+        database = SSM.get(f"/bfd/{BFD_ENV}/idr-pipeline/sensitive/idr_database", decrypt=True)
+        private_key_raw = SSM.get(
+            f"/bfd/{BFD_ENV}/idr-pipeline/sensitive/idr_private_key", decrypt=True)
+        schema = SSM.get(f"/bfd/{BFD_ENV}/idr-pipeline/sensitive/idr_schema", decrypt=True)
+        user = SSM.get(f"/bfd/{BFD_ENV}/idr-pipeline/sensitive/idr_username", decrypt=True)
+        warehouse = SSM.get(f"/bfd/{BFD_ENV}/idr-pipeline/sensitive/idr_warehouse", decrypt=True)
     except Exception as exc:
         raise ValueError(f"Missing snowflake configuration: {exc}")
 
@@ -200,9 +178,7 @@ class PartnerPreferences:
             buffer = BytesIO(bs_report)
             buffer.seek(0)
 
-            bucket = get_ssm_parameter(
-                f"/bfd/{BFD_ENV}/bene-prefs/{self.partner}/nonsensitive/bucket"
-            )
+            bucket = SSM.get(f"/bfd/{BFD_ENV}/bene-prefs/{self.partner}/nonsensitive/bucket")
 
             s3 = boto3.client("s3", config=BOTO_CONFIG)
             self._logger.info(f"Storing remote file: s3://{bucket}/{file_name}")
