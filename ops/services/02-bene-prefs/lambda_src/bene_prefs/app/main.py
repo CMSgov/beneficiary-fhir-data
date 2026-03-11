@@ -44,7 +44,7 @@ logger = Logger()
 
 
 def execute_query(query: str) -> list:
-    """Execute the given query and return the resultant rows from Snwoflake.
+    """Execute the given query and return the resultant rows from Snowflake.
 
     Args:
         query: the fully specified (un-templated) Snowflake SQL query.
