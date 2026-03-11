@@ -24,22 +24,12 @@ import java.util.function.Supplier;
  */
 public class AbstractJsonConverter<T> implements AttributeConverter<T, String> {
 
-  /* Workaround for Snyk.io vulnerability discovery (CWE-770 - Allocation of Resources Without Limits or Throttling)*/
-  static StreamReadConstraints constraints =
-      StreamReadConstraints.builder()
-          .maxNumberLength(1000)
-          .maxStringLength(10000)
-          .maxNestingDepth(100)
-          .build();
-
-  static JsonFactory factory = JsonFactory.builder().streamReadConstraints(constraints).build();
-
   /**
    * Used to map basic objects to json strings. {@link ObjectMapper} instances are thread safe so
    * this singleton instance ensures consistent formatting behavior for all instances.
    */
   private static final ObjectMapper objectMapper =
-      JsonMapper.builder(factory)
+      JsonMapper.builder()
           .enable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY)
           .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
           .addModule(new Jdk8Module())
