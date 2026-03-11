@@ -1089,26 +1089,6 @@
                     <rulesUri>file://${maven.multiModuleProjectDirectory}/rules.xml</rulesUri>
                 </configuration>
             </plugin>
-            <!-- Reduce noise by limiting installation to the bfd-parent, disabling inheritance to children. -->
-            <plugin>
-                <groupId>com.rudikershaw.gitbuildhook</groupId>
-                <artifactId>git-build-hook-maven-plugin</artifactId>
-                <version>${git-build-hook-maven-plugin.version}</version>
-                <inherited>false</inherited>
-                <configuration>
-                    <installHooks>
-                        <pre-commit>${project.basedir}/../.github/scripts/pre-commit.sh</pre-commit>
-                        <pre-push>${project.basedir}/../.github/scripts/pre-push.sh</pre-push>
-                    </installHooks>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>install</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>

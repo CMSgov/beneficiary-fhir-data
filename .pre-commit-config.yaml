@@ -43,10 +43,10 @@ repos:
       verbose: true
 - repo: local
   hooks:
-    - id: pre-push-script
+    - id: pre-push-check-java-script
       name: Pre-push Script
       pass_filenames: false
-      entry: ./.github/scripts/pre-push.sh
+      entry: ./.github/scripts/pre-push-check-java.sh
       language: script
       stages: [ pre-push ]
       verbose: true
