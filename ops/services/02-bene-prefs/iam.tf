@@ -38,7 +38,7 @@ data "aws_iam_policy_document" "partner_bucket_access" {
       "s3:DeleteObjectVersion"
     ]
     resources = [
-      "${module.buckets[each.key].bucket.arn}${each.value.bucket_home_path}/*"
+      "${module.buckets[each.key].bucket.arn}${each.value.bucket_home_path}*"
     ]
   }
   statement {

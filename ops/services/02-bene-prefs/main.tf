@@ -40,7 +40,7 @@ locals {
   partners_config = {
     for partner in local.partners :
     partner => {
-      bucket_home_path = "/${local.root_dir}/${partner}/in",
+      bucket_home_path = "/"
       bucket_iam_assumer_arns = jsondecode(
         lookup(local.ssm_config, "/${partner}/${local.service}/bucket_iam_assumer_arns_json", "[]")
       )
