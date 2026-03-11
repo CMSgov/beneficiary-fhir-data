@@ -236,7 +236,11 @@ class PartnerPreferences:
         )
 
         if set_last_execution:
-            self._set_last_execution(query_until_timestamp)
+            if results:
+                max_insert_timestamp = max(results, key=lambda x: x.get('IDR_INSRT_TS')).get('IDR_INSRT_TS').isoformat()
+                self._set_last_execution(max_insert_timestamp)
+            else:
+                self._logger.info("Empty results. Skipping set of last execution.")
 
 
 def handler(event: dict, context: LambdaContext) -> None:
