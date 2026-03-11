@@ -6,4 +6,3 @@ Run `mvn versions:update-properties` to update dependencies to their latest vers
 Incompatible dependency versions should be tracked in `rules.xml`.
 
 Note: running `mvn versions:use-latest-versions` should yield no changes as long as all versions are correctly tracked as properties.
-
