@@ -50,11 +50,11 @@ public record TagCriteriaFilterParam(List<List<TagCriterion>> tagCriteria)
       ArrayList<DbFilterParam> params) {
     var paramName = "tag_" + i + "_" + j;
     switch (criterion) {
-      case TagCriterion.SourceIdCriterion(var sourceId) -> {
-        if (systemType.isCompatibleWith(sourceId)) {
+      case TagCriterion.MetaSourceSkCriterion(var metaSrcSk) -> {
+        if (systemType.isCompatibleWith(metaSrcSk)) {
           if (systemType == SystemType.SS) {
             clauses.add(claimTableAlias + ".metaSourceSk = :tag_" + i + "_" + j);
-            params.add(new DbFilterParam(paramName, sourceId));
+            params.add(new DbFilterParam(paramName, metaSrcSk));
           }
         } else {
           // If the system is incompatible, we set this filter to FALSE since it shouldn't match
@@ -90,8 +90,8 @@ public record TagCriteriaFilterParam(List<List<TagCriterion>> tagCriteria)
   }
 
   private void extractSourceId(TagCriterion criterion, Consumer<MetaSourceSk> consumer) {
-    if (criterion instanceof TagCriterion.SourceIdCriterion(MetaSourceSk sourceId)) {
-      consumer.accept(sourceId);
+    if (criterion instanceof TagCriterion.MetaSourceSkCriterion(MetaSourceSk metaSourceSk)) {
+      consumer.accept(metaSourceSk);
     }
   }
 }

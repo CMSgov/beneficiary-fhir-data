@@ -1,11 +1,6 @@
 package gov.cms.bfd.server.ng.input;
 
 import ca.uhn.fhir.rest.param.*;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.NumberParam;
-import ca.uhn.fhir.rest.param.ReferenceParam;
-import ca.uhn.fhir.rest.param.TokenAndListParam;
-import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.base.Strings;
 import gov.cms.bfd.server.ng.claim.model.ClaimFinalAction;
@@ -196,7 +191,7 @@ public class FhirInputConverter {
         throw new InvalidRequestException("Unknown claim source id: " + code);
       }
       return sourceIds.stream()
-          .map(id -> (TagCriterion) new TagCriterion.SourceIdCriterion(id))
+          .map(id -> (TagCriterion) new TagCriterion.MetaSourceSkCriterion(id))
           .toList();
 
     } else if (SystemUrls.BLUE_BUTTON_FINAL_ACTION_STATUS.equals(system)) {

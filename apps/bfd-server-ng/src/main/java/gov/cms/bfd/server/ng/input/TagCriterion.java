@@ -5,14 +5,15 @@ import gov.cms.bfd.server.ng.claim.model.MetaSourceSk;
 
 /** Parsed criteria from _tag. Expansion requires deliberate addition in TagCriterion. */
 public sealed interface TagCriterion
-    permits TagCriterion.SourceIdCriterion, TagCriterion.FinalActionCriterion {
+    permits TagCriterion.MetaSourceSkCriterion, TagCriterion.FinalActionCriterion {
 
   /**
    * Filter claims by source.
    *
-   * @param sourceId desired source
+   * @param metaSourceSk desired source
    */
-  record SourceIdCriterion(MetaSourceSk sourceId) implements TagCriterion {}
+  record MetaSourceSkCriterion(MetaSourceSk metaSourceSk) implements TagCriterion {
+  }
 
   /**
    * Criterion filtering by {@link ClaimFinalAction}.
