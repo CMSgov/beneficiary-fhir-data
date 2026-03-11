@@ -513,8 +513,7 @@ def claim_occurrence_cte() -> str:
                         THEN clm_ocrnc_span_from_dt END) AS bfd_clm_qlfy_stay_from_dt,
                     MAX(CASE WHEN clm_ocrnc_span_cd = '70'
                         THEN clm_ocrnc_span_thru_dt END) AS bfd_clm_qlfy_stay_thru_dt,
-                    MAX(idr_insrt_ts) AS idr_insrt_ts_ocrnc_sgntr,
-                    MAX(idr_updt_ts) AS idr_updt_ts_ocrnc_sgntr
+                    MAX(idr_insrt_ts) AS idr_insrt_ts
                 FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_ocrnc_sgntr_mbr {ocrnc_sgntr}
                 WHERE clm_ocrnc_span_cd IN ('{qualifying_stay_cd}', '{non_covered_stay_cd}')
                 GROUP BY clm_ocrnc_sgntr_sk"""
@@ -531,8 +530,7 @@ def claim_related_occurrences_cte() -> str:
                     THEN clm_rlt_ocrnc_dt END) AS bfd_clm_mdcr_exhstd_dt,
                 MAX(CASE WHEN clm_rlt_ocrnc_cd = '22'
                     THEN clm_rlt_ocrnc_dt END) AS bfd_clm_actv_care_thru_dt,
-                MAX(idr_insrt_ts) AS idr_insrt_ts_rlt_ocrnc_sgntr,
-                MAX(idr_updt_ts) AS idr_updt_ts_rlt_ocrnc_sgntr
+                MAX(idr_insrt_ts) AS idr_insrt_ts
             FROM cms_vdm_view_mdcr_prd.v2_clm_rlt_ocrnc_sgntr_mbr {rlt_ocrnc_sgntr}
             WHERE clm_rlt_ocrnc_cd in ('{medicare_exhausted_cd}', '{active_care_cd}')
             GROUP BY clm_rlt_ocrnc_sgntr_sk
@@ -566,7 +564,7 @@ def claim_related_conditions_cte(load_mode: LoadMode) -> str:
             SELECT
                 clm_rlt_cond_sgntr_sk,
                 ARRAY_TO_STRING({clm_rlt_cond_cd_agg}, '') AS clm_rlt_cond_cd,
-                MAX(idr_insrt_ts) AS idr_insrt_ts_rlt_cond
+                MAX(idr_insrt_ts) AS idr_insrt_ts
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_rlt_cond_sgntr_mbr {rlt_cond}
             WHERE clm_rlt_cond_sgntr_sk NOT IN (0, 1, -1)
             AND clm_rlt_cond_cd != '~'

@@ -367,15 +367,11 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
     clm_rlt_cond_cd: Annotated[
         str, {ALIAS: ALIAS_RLT_COND}, BeforeValidator(transform_default_string)
     ]
-    # todo: confirm if we can remove clm_rlt_cond_sgntr_sqnc_num and idr timestamps
-    # clm_rlt_cond_sgntr_sqnc_num: Annotated[int | None, {ALIAS: ALIAS_RLT_COND}]
-    """
     idr_insrt_ts_rlt_cond: Annotated[
         datetime,
         {ALIAS: ALIAS_RLT_COND, **INSERT_FIELD},
         BeforeValidator(transform_null_date_to_min),
     ]
-    """
 
     # columns derived from v2_mdcr_clm_ocrnc_sgntr_mbr
     bfd_clm_ncvrd_from_dt: Annotated[
@@ -398,18 +394,11 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
         {ALIAS: ALIAS_OCRNC_SGNTR_DERIVED_DATES},
         BeforeValidator(transform_default_date_to_null),
     ]
-    """
     idr_insrt_ts_ocrnc_sgntr: Annotated[
         datetime,
         {ALIAS: ALIAS_OCRNC_SGNTR_DERIVED_DATES, **INSERT_FIELD},
         BeforeValidator(transform_null_date_to_min),
     ]
-    idr_updt_ts_ocrnc_sgntr: Annotated[
-        datetime,
-        {ALIAS: ALIAS_OCRNC_SGNTR_DERIVED_DATES, **UPDATE_FIELD},
-        BeforeValidator(transform_null_date_to_min),
-    ]
-    """
 
     # columns derived from v2_clm_rlt_ocrnc_sgntr_mbr
     bfd_clm_mdcr_exhstd_dt: Annotated[
@@ -422,18 +411,11 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
         {ALIAS: ALIAS_RLT_OCRNC_SGNTR_DERIVED_DATES},
         BeforeValidator(transform_default_date_to_null),
     ]
-    """
     idr_insrt_ts_rlt_ocrnc_sgntr: Annotated[
         datetime,
         {ALIAS: ALIAS_RLT_OCRNC_SGNTR_DERIVED_DATES, **INSERT_FIELD},
         BeforeValidator(transform_null_date_to_min),
     ]
-    idr_updt_ts_rlt_ocrnc_sgntr: Annotated[
-        datetime,
-        {ALIAS: ALIAS_RLT_OCRNC_SGNTR_DERIVED_DATES, **UPDATE_FIELD},
-        BeforeValidator(transform_null_date_to_min),
-    ]
-    """
 
     @staticmethod
     def table() -> str:

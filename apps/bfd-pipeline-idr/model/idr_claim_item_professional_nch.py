@@ -305,10 +305,7 @@ class IdrClaimItemProfessionalNch(IdrBaseModel):
                         {clm}.clm_type_cd, 
                         {clm}.clm_num_sk, 
                         {clm}.clm_dt_sgntr_sk,
-                        {clm}.clm_rlt_cond_sgntr_sk,
-                        {clm}.clm_idr_ld_dt,
-                        {clm}.clm_rlt_ocrnc_sgntr_sk,
-                        {clm}.clm_ocrnc_sgntr_sk
+                        {clm}.clm_idr_ld_dt
                     FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
                     WHERE
                         {claim_filter(start_time, partition)} AND

@@ -28,6 +28,7 @@ from model.base_model import (
     EXPR,
     HISTORICAL_BATCH_TIMESTAMP,
     INSERT_EXCLUDE,
+    INSERT_FIELD,
     LAST_UPDATED_TIMESTAMP,
     PRIMARY_KEY,
     UPDATE_TIMESTAMP,
@@ -248,18 +249,11 @@ class IdrClaimProfessionalSs(IdrBaseModel):
         {ALIAS: ALIAS_OCRNC_SGNTR_DERIVED_DATES},
         BeforeValidator(transform_default_date_to_null),
     ]
-    """
     idr_insrt_ts_ocrnc_sgntr: Annotated[
         datetime,
         {ALIAS: ALIAS_OCRNC_SGNTR_DERIVED_DATES, **INSERT_FIELD},
         BeforeValidator(transform_null_date_to_min),
     ]
-    idr_updt_ts_ocrnc_sgntr: Annotated[
-        datetime,
-        {ALIAS: ALIAS_OCRNC_SGNTR_DERIVED_DATES, **UPDATE_FIELD},
-        BeforeValidator(transform_null_date_to_min),
-    ]
-    """
 
     # columns derived from v2_clm_rlt_ocrnc_sgntr_mbr
     bfd_clm_mdcr_exhstd_dt: Annotated[
@@ -272,18 +266,11 @@ class IdrClaimProfessionalSs(IdrBaseModel):
         {ALIAS: ALIAS_RLT_OCRNC_SGNTR_DERIVED_DATES},
         BeforeValidator(transform_default_date_to_null),
     ]
-    """
     idr_insrt_ts_rlt_ocrnc_sgntr: Annotated[
         datetime,
         {ALIAS: ALIAS_RLT_OCRNC_SGNTR_DERIVED_DATES, **INSERT_FIELD},
         BeforeValidator(transform_null_date_to_min),
     ]
-    idr_updt_ts_rlt_ocrnc_sgntr: Annotated[
-        datetime,
-        {ALIAS: ALIAS_RLT_OCRNC_SGNTR_DERIVED_DATES, **UPDATE_FIELD},
-        BeforeValidator(transform_null_date_to_min),
-    ]
-    """
 
     @staticmethod
     def table() -> str:

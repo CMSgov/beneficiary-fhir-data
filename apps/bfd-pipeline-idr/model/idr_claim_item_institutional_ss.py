@@ -253,7 +253,6 @@ class IdrClaimItemInstitutionalSs(IdrBaseModel):
     bfd_clm_bnft_svg_ansi_rsn_4_cd: Annotated[
         str, {ALIAS: ALIAS_LINE_FISS_BFNT_FLATTENED}, BeforeValidator(transform_default_string)
     ]
-    """
     idr_insrt_ts_line_fiss_bnft: Annotated[
         datetime,
         {ALIAS: ALIAS_LINE_FISS_BFNT_FLATTENED, **INSERT_FIELD},
@@ -264,7 +263,6 @@ class IdrClaimItemInstitutionalSs(IdrBaseModel):
         {ALIAS: ALIAS_LINE_FISS_BFNT_FLATTENED, **UPDATE_FIELD},
         BeforeValidator(transform_null_date_to_min),
     ]
-    """
 
     @staticmethod
     def table() -> str:
@@ -329,10 +327,7 @@ class IdrClaimItemInstitutionalSs(IdrBaseModel):
                         {clm}.clm_type_cd, 
                         {clm}.clm_num_sk, 
                         {clm}.clm_dt_sgntr_sk,
-                        {clm}.clm_rlt_cond_sgntr_sk,
-                        {clm}.clm_idr_ld_dt,
-                        {clm}.clm_rlt_ocrnc_sgntr_sk,
-                        {clm}.clm_ocrnc_sgntr_sk
+                        {clm}.clm_idr_ld_dt
                     FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
                     WHERE
                         {claim_filter(start_time, partition)} AND
@@ -406,8 +401,8 @@ class IdrClaimItemInstitutionalSs(IdrBaseModel):
                             THEN clm_bnft_svg_ansi_grp_cd END) AS bfd_clm_bnft_svg_ansi_grp_4_cd,
                         MAX(CASE WHEN clm_line_bnft_svg_sqnc_num = 4
                             THEN clm_bnft_svg_ansi_rsn_cd END) AS bfd_clm_bnft_svg_ansi_rsn_4_cd,
-                        MAX(idr_insrt_ts) AS idr_insrt_ts_line_fiss_bnft,
-                        MAX(idr_updt_ts) AS idr_updt_ts_line_fiss_bnft
+                        MAX(idr_insrt_ts) AS idr_insrt_ts,
+                        MAX(idr_updt_ts) AS idr_updt_ts
                     FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_fiss_bnft_svg {line_fiss_bnft}
                     JOIN claims {clm}
                         ON {line_fiss_bnft}.geo_bene_sk = {clm}.geo_bene_sk

@@ -177,7 +177,11 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
             .flatMap(s -> s)
             .toList();
 
-    // Handle claim related csondition codes after BFD-4523
+    // Handle claim related condition codes after BFD-4523
+    var claimRelatedConditionCodes =
+        getClaimRelatedCondition().stream()
+            .flatMap(c -> c.toFhir(supportingInfoFactory).stream())
+            .toList();
 
     Stream.of(
             buildSubclassInitialSupportingInfo(),
@@ -185,7 +189,8 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
             getClaimDateSupportingInfo().toFhir(supportingInfoFactory),
             buildRecordTypeSupportingInfo(),
             getSupportingInfo().toFhir(supportingInfoFactory),
-            getDiagnosisDrgCode().toFhir(supportingInfoFactory).stream().toList())
+            getDiagnosisDrgCode().toFhir(supportingInfoFactory).stream().toList(),
+            claimRelatedConditionCodes)
         .flatMap(Collection::stream)
         .forEach(eob::addSupportingInfo);
   }

@@ -18,8 +18,7 @@ ADD COLUMN bfd_clm_qlfy_stay_thru_dt date,
 -- columns derived from v2_clm_rlt_ocrnc_sgntr_mbr
 ADD COLUMN bfd_clm_mdcr_exhstd_dt date,
 ADD COLUMN bfd_clm_actv_care_thru_dt date,
-ADD COLUMN clm_rlt_cond_cd character varying(60),
-ADD COLUMN clm_rlt_cond_sgntr_sqnc_num integer;
+ADD COLUMN clm_rlt_cond_cd character varying(60);
 
 ALTER TABLE idr.claim_professional_nch
 -- columns derived from v2_mdcr_clm_ocrnc_sgntr_mbr
