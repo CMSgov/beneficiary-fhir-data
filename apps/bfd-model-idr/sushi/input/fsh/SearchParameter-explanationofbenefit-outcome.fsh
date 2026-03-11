@@ -10,4 +10,3 @@ Usage: #definition
 * base[0] = #ExplanationOfBenefit
 * type = #token
 * expression = "ExplanationOfBenefit.outcome"
-* comparator[0] = #eq
