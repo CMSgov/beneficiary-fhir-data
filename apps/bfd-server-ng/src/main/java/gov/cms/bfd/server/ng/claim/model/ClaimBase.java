@@ -71,9 +71,7 @@ public abstract class ClaimBase {
     claimTypeCode.toFhirSubtype().ifPresent(eob::setSubType);
     claimTypeCode.toFhirAdjudication().ifPresent(eob::addAdjudication);
 
-    eob.setMeta(
-        meta.toFhir(
-            claimTypeCode, getClaimSourceId(), securityStatus, finalAction, getMetaSourceSk()));
+    eob.setMeta(meta.toFhir(claimTypeCode, securityStatus, finalAction, getMetaSourceSk()));
     eob.setIdentifier(identifiers.toFhir());
     eob.setBillablePeriod(billablePeriod.toFhir());
     eob.setCreated(DateUtil.toDate(claimEffectiveDate));
