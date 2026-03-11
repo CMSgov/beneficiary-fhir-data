@@ -569,5 +569,6 @@ def claim_related_conditions_cte(load_mode: LoadMode) -> str:
                 MAX(idr_insrt_ts) AS idr_insrt_ts_rlt_cond
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_rlt_cond_sgntr_mbr {rlt_cond}
             WHERE clm_rlt_cond_sgntr_sk NOT IN (0, 1, -1)
+            AND clm_rlt_cond_cd != '~'
             GROUP BY clm_rlt_cond_sgntr_sk
     """
