@@ -515,17 +515,8 @@ def claim_occurrence_cte() -> str:
                         THEN clm_ocrnc_span_thru_dt END) AS bfd_clm_qlfy_stay_thru_dt,
                     MAX(idr_insrt_ts) AS idr_insrt_ts_ocrnc_sgntr,
                     MAX(idr_updt_ts) AS idr_updt_ts_ocrnc_sgntr
-                FROM (
-                    SELECT
-                        {ocrnc_sgntr}.*,
-                        ROW_NUMBER() OVER (
-                            PARTITION BY clm_ocrnc_sgntr_sk, clm_ocrnc_span_cd
-                            ORDER BY clm_ocrnc_span_thru_dt DESC
-                        ) AS bfd_row_id
-                    FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_ocrnc_sgntr_mbr {ocrnc_sgntr}
-                    WHERE clm_ocrnc_span_cd IN ('{qualifying_stay_cd}', '{non_covered_stay_cd}')
-                )
-                WHERE bfd_row_id = 1
+                FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_ocrnc_sgntr_mbr {ocrnc_sgntr}
+                WHERE clm_ocrnc_span_cd IN ('{qualifying_stay_cd}', '{non_covered_stay_cd}')
                 GROUP BY clm_ocrnc_sgntr_sk"""
 
 
@@ -542,17 +533,8 @@ def claim_related_occurrences_cte() -> str:
                     THEN clm_rlt_ocrnc_dt END) AS bfd_clm_actv_care_thru_dt,
                 MAX(idr_insrt_ts) AS idr_insrt_ts_rlt_ocrnc_sgntr,
                 MAX(idr_updt_ts) AS idr_updt_ts_rlt_ocrnc_sgntr
-            FROM (
-                SELECT
-                    {rlt_ocrnc_sgntr}.*,
-                    ROW_NUMBER() OVER (
-                        PARTITION BY clm_rlt_ocrnc_sgntr_sk, clm_rlt_ocrnc_cd
-                        ORDER BY clm_rlt_ocrnc_dt DESC 
-                    ) AS bfd_row_id
-                FROM cms_vdm_view_mdcr_prd.v2_clm_rlt_ocrnc_sgntr_mbr {rlt_ocrnc_sgntr}
-                WHERE clm_rlt_ocrnc_cd IN ('{medicare_exhausted_cd}', '{active_care_cd}')
-            )
-            WHERE bfd_row_id = 1
+            FROM cms_vdm_view_mdcr_prd.v2_clm_rlt_ocrnc_sgntr_mbr {rlt_ocrnc_sgntr}
+            WHERE clm_rlt_ocrnc_cd in ('{medicare_exhausted_cd}', '{active_care_cd}')
             GROUP BY clm_rlt_ocrnc_sgntr_sk
     """
 

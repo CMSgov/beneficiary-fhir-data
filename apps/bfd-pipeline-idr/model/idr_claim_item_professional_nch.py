@@ -18,10 +18,8 @@ from model.base_model import (
     ALIAS_LINE,
     ALIAS_LINE_DCMTN,
     ALIAS_LINE_PRFNL,
-    ALIAS_OCRNC_SGNTR_DERIVED_DATES,
     ALIAS_PROCEDURE,
     ALIAS_PRVDR_RNDRNG,
-    ALIAS_RLT_OCRNC_SGNTR_DERIVED_DATES,
     BATCH_ID,
     COLUMN_MAP,
     EXPR,
@@ -33,8 +31,6 @@ from model.base_model import (
     UPDATE_FIELD,
     IdrBaseModel,
     claim_filter,
-    claim_occurrence_cte,
-    claim_related_occurrences_cte,
     get_min_transaction_date,
     provider_careteam_name_expr,
     transform_default_date_to_null,
@@ -246,64 +242,6 @@ class IdrClaimItemProfessionalNch(IdrBaseModel):
         BeforeValidator(transform_default_string),
     ]
 
-    # columns derived from v2_mdcr_clm_ocrnc_sgntr_mbr
-    bfd_clm_ncvrd_from_dt: Annotated[
-        date | None,
-        {ALIAS: ALIAS_OCRNC_SGNTR_DERIVED_DATES},
-        BeforeValidator(transform_default_date_to_null),
-    ]
-    bfd_clm_ncvrd_thru_dt: Annotated[
-        date | None,
-        {ALIAS: ALIAS_OCRNC_SGNTR_DERIVED_DATES},
-        BeforeValidator(transform_default_date_to_null),
-    ]
-    bfd_clm_qlfy_stay_from_dt: Annotated[
-        date | None,
-        {ALIAS: ALIAS_OCRNC_SGNTR_DERIVED_DATES},
-        BeforeValidator(transform_default_date_to_null),
-    ]
-    bfd_clm_qlfy_stay_thru_dt: Annotated[
-        date | None,
-        {ALIAS: ALIAS_OCRNC_SGNTR_DERIVED_DATES},
-        BeforeValidator(transform_default_date_to_null),
-    ]
-    """
-    idr_insrt_ts_ocrnc_sgntr: Annotated[
-        datetime,
-        {ALIAS: ALIAS_OCRNC_SGNTR_DERIVED_DATES, **INSERT_FIELD},
-        BeforeValidator(transform_null_date_to_min),
-    ]
-    idr_updt_ts_ocrnc_sgntr: Annotated[
-        datetime,
-        {ALIAS: ALIAS_OCRNC_SGNTR_DERIVED_DATES, **UPDATE_FIELD},
-        BeforeValidator(transform_null_date_to_min),
-    ]
-    """
-
-    # columns derived from v2_clm_rlt_ocrnc_sgntr_mbr
-    bfd_clm_mdcr_exhstd_dt: Annotated[
-        date | None,
-        {ALIAS: ALIAS_RLT_OCRNC_SGNTR_DERIVED_DATES},
-        BeforeValidator(transform_default_date_to_null),
-    ]
-    bfd_clm_actv_care_thru_dt: Annotated[
-        date | None,
-        {ALIAS: ALIAS_RLT_OCRNC_SGNTR_DERIVED_DATES},
-        BeforeValidator(transform_default_date_to_null),
-    ]
-    """
-    idr_insrt_ts_rlt_ocrnc_sgntr: Annotated[
-        datetime,
-        {ALIAS: ALIAS_RLT_OCRNC_SGNTR_DERIVED_DATES, **INSERT_FIELD},
-        BeforeValidator(transform_null_date_to_min),
-    ]
-    idr_updt_ts_rlt_ocrnc_sgntr: Annotated[
-        datetime,
-        {ALIAS: ALIAS_RLT_OCRNC_SGNTR_DERIVED_DATES, **UPDATE_FIELD},
-        BeforeValidator(transform_null_date_to_min),
-    ]
-    """
-
     @staticmethod
     def table() -> str:
         return "idr.claim_item_professional_nch"
@@ -329,8 +267,6 @@ class IdrClaimItemProfessionalNch(IdrBaseModel):
         line_dcmtn = ALIAS_LINE_DCMTN
         line_prfnl = ALIAS_LINE_PRFNL
         prvdr_rndrng = ALIAS_PRVDR_RNDRNG
-        ocrnc_sgntr_dd = ALIAS_OCRNC_SGNTR_DERIVED_DATES
-        rlt_ocrnc_sgntr_dd = ALIAS_RLT_OCRNC_SGNTR_DERIVED_DATES
         # This query is taking all the values for CLM_PROD, CLM_LINE, and CLM_VAL and storing
         # them in a unified table. This is necessary because each of these tables have a different
         # number of rows for each claim. If we don't combine these values, we would either have to
@@ -408,9 +344,6 @@ class IdrClaimItemProfessionalNch(IdrBaseModel):
                         AND {prod}.clm_num_sk = {clm}.clm_num_sk
                         AND {prod}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
                 ),
-                claim_occurrence_spans_dates AS {not_materialized} ({claim_occurrence_cte()}),
-                claim_related_occurrences_dates AS {not_materialized} 
-                    ({claim_related_occurrences_cte()}),
                 claim_groups AS (
                     SELECT clm_uniq_id, bfd_row_id
                     FROM claim_lines
@@ -434,10 +367,6 @@ class IdrClaimItemProfessionalNch(IdrBaseModel):
                     AND {prod}.clm_num_sk = {clm}.clm_num_sk
                     AND {prod}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
                     AND {prod}.bfd_row_id = {clm_grp}.bfd_row_id
-                LEFT JOIN claim_occurrence_spans_dates {ocrnc_sgntr_dd} 
-                    ON {ocrnc_sgntr_dd}.clm_ocrnc_sgntr_sk = {clm}.clm_ocrnc_sgntr_sk
-                LEFT JOIN claim_related_occurrences_dates {rlt_ocrnc_sgntr_dd}
-                    ON {rlt_ocrnc_sgntr_dd}.clm_rlt_ocrnc_sgntr_sk = {clm}.clm_rlt_ocrnc_sgntr_sk
                 LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_prfnl {line_prfnl}
                     ON {line_prfnl}.geo_bene_sk = {line}.geo_bene_sk
                     AND {line_prfnl}.clm_type_cd = {line}.clm_type_cd
