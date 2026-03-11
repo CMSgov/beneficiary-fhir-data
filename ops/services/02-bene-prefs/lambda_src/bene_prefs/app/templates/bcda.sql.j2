@@ -1,3 +1,4 @@
+{# bcda.sql.j2 #}
 with ordered_xref as (
     select
         bene_sk,
@@ -81,3 +82,4 @@ where med.idr_insrt_ts BETWEEN to_timestamp('{{query_since_timestamp}}') AND to_
 where to_date(med.idr_insrt_ts) = current_date()
     OR to_date(sa.idr_insrt_ts) = current_date()
 {% endif %}
+{# bcda.sql.j2 #}
