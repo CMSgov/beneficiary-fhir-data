@@ -15,7 +15,7 @@ import lombok.Getter;
  */
 @Entity
 @Getter
-@Table(name = "beneficiary", schema = "idr")
+@Table(name = "valid_beneficiary", schema = "idr")
 public class BeneficiarySimple {
   @Id
   @Column(name = "bene_sk")

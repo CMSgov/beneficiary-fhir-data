@@ -101,6 +101,9 @@ class IdrClaimInstitutionalNch(IdrBaseModel):
     geo_blg_ssa_state_cd: Annotated[
         str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)
     ]
+    clm_blg_prvdr_oscar_num: Annotated[
+        str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)
+    ]
     clm_blg_prvdr_zip5_cd: Annotated[
         str, {ALIAS: ALIAS_CLM}, BeforeValidator(transform_default_string)
     ]
