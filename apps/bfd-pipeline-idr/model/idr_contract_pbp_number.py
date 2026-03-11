@@ -65,7 +65,7 @@ class IdrContractPbpNumber(IdrBaseModel):
             )
             SELECT 
                 {{COLUMNS}},
-                RANK() OVER (
+                ROW_NUMBER() OVER (
                     PARTITION BY cntrct_num, cntrct_pbp_num 
                     ORDER BY cntrct_pbp_sk_obslt_dt DESC) AS bfd_contract_version_rank
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_cntrct_pbp_num {pbp_num}

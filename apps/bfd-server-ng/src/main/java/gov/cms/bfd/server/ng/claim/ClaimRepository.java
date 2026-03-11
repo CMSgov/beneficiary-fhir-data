@@ -17,7 +17,7 @@ import org.springframework.stereotype.Repository;
 /** Repository methods for claims. */
 @Repository
 @AllArgsConstructor
-public class ClaimNewRepository {
+public class ClaimRepository {
 
   private final ClaimAsyncService asyncService;
 
