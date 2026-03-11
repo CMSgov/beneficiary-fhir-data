@@ -12,8 +12,7 @@ public sealed interface TagCriterion
    *
    * @param metaSourceSk desired source
    */
-  record MetaSourceSkCriterion(MetaSourceSk metaSourceSk) implements TagCriterion {
-  }
+  record MetaSourceSkCriterion(MetaSourceSk metaSourceSk) implements TagCriterion {}
 
   /**
    * Criterion filtering by {@link ClaimFinalAction}.
