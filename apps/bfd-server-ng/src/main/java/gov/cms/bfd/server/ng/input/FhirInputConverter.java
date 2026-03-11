@@ -9,7 +9,6 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.base.Strings;
 import gov.cms.bfd.server.ng.claim.model.ClaimFinalAction;
-import gov.cms.bfd.server.ng.claim.model.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.ClaimTypeCode;
 import gov.cms.bfd.server.ng.claim.model.MetaSourceSk;
 import gov.cms.bfd.server.ng.claim.model.SamhsaSearchIntent;
@@ -34,12 +33,13 @@ public class FhirInputConverter {
   private static final Set<String> SUPPORTED_SYSTEM_TYPES =
       Set.of(
           IdrConstants.SYSTEM_TYPE_NCH.toUpperCase(),
-          IdrConstants.SYSTEM_TYPE_SHARED.toUpperCase());
+          IdrConstants.SYSTEM_TYPE_SHARED.toUpperCase(),
+          IdrConstants.SYSTEM_TYPE_DDPS.toUpperCase());
 
-  private static final Map<String, List<ClaimSourceId>> SOURCE_ID_MAP =
-      Stream.of(ClaimSourceId.values())
-          .filter(s -> s.getSystemType().isPresent())
-          .collect(Collectors.groupingBy(s -> s.getSystemType().get().toUpperCase()));
+  private static final Map<String, List<MetaSourceSk>> SOURCE_ID_MAP =
+      Stream.of(MetaSourceSk.values())
+          .filter(s -> s.toFhirSystemType().isPresent())
+          .collect(Collectors.groupingBy(s -> s.toFhirSystemType().get().getCode().toUpperCase()));
 
   private static final Set<String> SUPPORTED_FINAL_ACTION_STATUSES =
       Stream.of(ClaimFinalAction.values())
@@ -186,8 +186,10 @@ public class FhirInputConverter {
       if (!SUPPORTED_SYSTEM_TYPES.contains(code.toUpperCase())) {
         throw new InvalidRequestException(
             String.format(
-                "Unsupported _tag value for system type. Supported values are '%s', '%s'.",
-                IdrConstants.SYSTEM_TYPE_NCH, IdrConstants.SYSTEM_TYPE_SHARED));
+                "Unsupported _tag value for system type. Supported values are '%s', '%s', '%s'.",
+                IdrConstants.SYSTEM_TYPE_NCH,
+                IdrConstants.SYSTEM_TYPE_SHARED,
+                IdrConstants.SYSTEM_TYPE_DDPS));
       }
       var sourceIds = SOURCE_ID_MAP.get(code.toUpperCase());
       if (sourceIds == null || sourceIds.isEmpty()) {

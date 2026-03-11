@@ -3801,11 +3801,11 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
         } ],
         "source" : "FISS",
         "tag" : [ {
-          "code" : "SharedSystem",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type"
-        }, {
           "code" : "FinalAction",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Final-Action"
+        }, {
+          "code" : "SharedSystem",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type"
         } ]
       },
       "outcome" : "queued",
@@ -5811,11 +5811,11 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional|2.1.0" ],
         "source" : "NCH",
         "tag" : [ {
-          "code" : "NationalClaimsHistory",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type"
-        }, {
           "code" : "FinalAction",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Final-Action"
+        }, {
+          "code" : "NationalClaimsHistory",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type"
         } ]
       },
       "outcome" : "complete",
@@ -9665,11 +9665,11 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional|2.1.0" ],
         "source" : "NCH",
         "tag" : [ {
-          "code" : "NationalClaimsHistory",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type"
-        }, {
           "code" : "FinalAction",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Final-Action"
+        }, {
+          "code" : "NationalClaimsHistory",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type"
         } ]
       },
       "outcome" : "complete",
@@ -11542,11 +11542,11 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional|2.1.0" ],
         "source" : "NCH",
         "tag" : [ {
-          "code" : "NationalClaimsHistory",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type"
-        }, {
           "code" : "FinalAction",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Final-Action"
+        }, {
+          "code" : "NationalClaimsHistory",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type"
         } ]
       },
       "outcome" : "complete",
@@ -13531,11 +13531,11 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional|2.1.0" ],
         "source" : "NCH",
         "tag" : [ {
-          "code" : "NationalClaimsHistory",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type"
-        }, {
           "code" : "FinalAction",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Final-Action"
+        }, {
+          "code" : "NationalClaimsHistory",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type"
         } ]
       },
       "outcome" : "complete",
@@ -17385,11 +17385,11 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional|2.1.0" ],
         "source" : "NCH",
         "tag" : [ {
-          "code" : "NationalClaimsHistory",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type"
-        }, {
           "code" : "FinalAction",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Final-Action"
+        }, {
+          "code" : "NationalClaimsHistory",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type"
         } ]
       },
       "outcome" : "complete",
@@ -19262,11 +19262,11 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional|2.1.0" ],
         "source" : "NCH",
         "tag" : [ {
-          "code" : "NationalClaimsHistory",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type"
-        }, {
           "code" : "FinalAction",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Final-Action"
+        }, {
+          "code" : "NationalClaimsHistory",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type"
         } ]
       },
       "outcome" : "complete",

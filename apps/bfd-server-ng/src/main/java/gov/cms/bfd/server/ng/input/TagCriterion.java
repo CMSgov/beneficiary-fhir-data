@@ -1,18 +1,18 @@
 package gov.cms.bfd.server.ng.input;
 
 import gov.cms.bfd.server.ng.claim.model.ClaimFinalAction;
-import gov.cms.bfd.server.ng.claim.model.ClaimSourceId;
+import gov.cms.bfd.server.ng.claim.model.MetaSourceSk;
 
 /** Parsed criteria from _tag. Expansion requires deliberate addition in TagCriterion. */
 public sealed interface TagCriterion
     permits TagCriterion.SourceIdCriterion, TagCriterion.FinalActionCriterion {
 
   /**
-   * Criterion filtering by {@link ClaimSourceId}.
+   * Filter claims by source.
    *
-   * @param sourceId source ID enum value
+   * @param sourceId desired source
    */
-  record SourceIdCriterion(ClaimSourceId sourceId) implements TagCriterion {}
+  record SourceIdCriterion(MetaSourceSk sourceId) implements TagCriterion {}
 
   /**
    * Criterion filtering by {@link ClaimFinalAction}.

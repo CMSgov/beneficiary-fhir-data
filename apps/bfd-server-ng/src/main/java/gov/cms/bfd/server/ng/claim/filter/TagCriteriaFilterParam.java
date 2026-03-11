@@ -3,7 +3,7 @@ package gov.cms.bfd.server.ng.claim.filter;
 import gov.cms.bfd.server.ng.DbFilter;
 import gov.cms.bfd.server.ng.DbFilterBuilder;
 import gov.cms.bfd.server.ng.DbFilterParam;
-import gov.cms.bfd.server.ng.claim.model.ClaimSourceId;
+import gov.cms.bfd.server.ng.claim.model.MetaSourceSk;
 import gov.cms.bfd.server.ng.claim.model.SystemType;
 import gov.cms.bfd.server.ng.input.TagCriterion;
 import java.util.ArrayList;
@@ -53,7 +53,7 @@ public record TagCriteriaFilterParam(List<List<TagCriterion>> tagCriteria)
       case TagCriterion.SourceIdCriterion(var sourceId) -> {
         if (systemType.isCompatibleWith(sourceId)) {
           if (systemType == SystemType.SS) {
-            clauses.add(claimTableAlias + ".claimSourceId = :tag_" + i + "_" + j);
+            clauses.add(claimTableAlias + ".metaSourceSk = :tag_" + i + "_" + j);
             params.add(new DbFilterParam(paramName, sourceId));
           }
         } else {
@@ -89,8 +89,8 @@ public record TagCriteriaFilterParam(List<List<TagCriterion>> tagCriteria)
         .anyMatch(systemType::isCompatibleWith);
   }
 
-  private void extractSourceId(TagCriterion criterion, Consumer<ClaimSourceId> consumer) {
-    if (criterion instanceof TagCriterion.SourceIdCriterion(ClaimSourceId sourceId)) {
+  private void extractSourceId(TagCriterion criterion, Consumer<MetaSourceSk> consumer) {
+    if (criterion instanceof TagCriterion.SourceIdCriterion(MetaSourceSk sourceId)) {
       consumer.accept(sourceId);
     }
   }

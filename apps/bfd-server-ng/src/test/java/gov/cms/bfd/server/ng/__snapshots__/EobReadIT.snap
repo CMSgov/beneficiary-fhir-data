@@ -933,11 +933,11 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
     "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Outpatient-Institutional|2.1.0" ],
     "source" : "FISS",
     "tag" : [ {
-      "code" : "SharedSystem",
-      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type"
-    }, {
       "code" : "NotFinalAction",
       "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Final-Action"
+    }, {
+      "code" : "SharedSystem",
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type"
     } ]
   },
   "outcome" : "partial",
@@ -2300,11 +2300,11 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
     "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Outpatient-Institutional|2.1.0" ],
     "source" : "FISS",
     "tag" : [ {
-      "code" : "SharedSystem",
-      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type"
-    }, {
       "code" : "FinalAction",
       "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Final-Action"
+    }, {
+      "code" : "SharedSystem",
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type"
     } ]
   },
   "outcome" : "queued",
@@ -3196,11 +3196,11 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
     "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Professional-NonClinician|2.1.0" ],
     "source" : "VMS",
     "tag" : [ {
-      "code" : "SharedSystem",
-      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type"
-    }, {
       "code" : "FinalAction",
       "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Final-Action"
+    }, {
+      "code" : "SharedSystem",
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type"
     } ]
   },
   "outcome" : "complete",
@@ -3903,11 +3903,11 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
     "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Professional-NonClinician|2.1.0" ],
     "source" : "NCH",
     "tag" : [ {
-      "code" : "NationalClaimsHistory",
-      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type"
-    }, {
       "code" : "FinalAction",
       "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Final-Action"
+    }, {
+      "code" : "NationalClaimsHistory",
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type"
     } ]
   },
   "outcome" : "complete",
@@ -5131,11 +5131,11 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
     "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional|2.1.0" ],
     "source" : "NCH",
     "tag" : [ {
-      "code" : "NationalClaimsHistory",
-      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type"
-    }, {
       "code" : "FinalAction",
       "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Final-Action"
+    }, {
+      "code" : "NationalClaimsHistory",
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type"
     } ]
   },
   "outcome" : "complete",
@@ -6710,11 +6710,11 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
     "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional|2.1.0" ],
     "source" : "NCH",
     "tag" : [ {
-      "code" : "NationalClaimsHistory",
-      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type"
-    }, {
       "code" : "FinalAction",
       "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Final-Action"
+    }, {
+      "code" : "NationalClaimsHistory",
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type"
     } ]
   },
   "outcome" : "complete",

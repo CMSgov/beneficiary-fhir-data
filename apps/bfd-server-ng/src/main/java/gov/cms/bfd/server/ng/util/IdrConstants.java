@@ -28,6 +28,9 @@ public class IdrConstants {
   /** The code for final action claims. */
   public static final String FINAL_ACTION = "FinalAction";
 
+  /** The code for DDPS claims. */
+  public static final String SYSTEM_TYPE_DDPS = "DDPS";
+
   /** The code for partially adjudicated claims. */
   public static final String SYSTEM_TYPE_NCH = "NationalClaimsHistory";
 
