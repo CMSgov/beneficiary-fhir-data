@@ -33,8 +33,7 @@ public class FhirInputConverter {
 
   private static final Map<String, List<MetaSourceSk>> SOURCE_ID_MAP =
       Stream.of(MetaSourceSk.values())
-          .filter(s -> s.toFhirSystemType().isPresent())
-          .collect(Collectors.groupingBy(s -> s.toFhirSystemType().get().getCode().toUpperCase()));
+          .collect(Collectors.groupingBy(s -> s.toFhirSystemType().getCode().toUpperCase()));
 
   private static final Set<String> SUPPORTED_FINAL_ACTION_STATUSES =
       Stream.of(ClaimFinalAction.values())

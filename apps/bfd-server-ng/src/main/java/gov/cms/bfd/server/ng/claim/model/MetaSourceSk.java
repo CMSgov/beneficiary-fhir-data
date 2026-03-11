@@ -54,16 +54,9 @@ public enum MetaSourceSk {
   /**
    * Represents the FHIR system type for this claim source.
    *
-   * @return the FHIR system type as an optional Coding
+   * @return the FHIR system type as a Coding
    */
-  public Optional<Coding> toFhirSystemType() {
-    String type =
-        switch (this) {
-          case DDPS -> IdrConstants.SYSTEM_TYPE_DDPS;
-          case NCH -> IdrConstants.SYSTEM_TYPE_NCH;
-          case MCS, VMS, FISS -> IdrConstants.SYSTEM_TYPE_SHARED;
-        };
-
-    return Optional.of(new Coding().setSystem(SystemUrls.BLUE_BUTTON_SYSTEM_TYPE).setCode(type));
+  public Coding toFhirSystemType() {
+    return new Coding().setSystem(SystemUrls.BLUE_BUTTON_SYSTEM_TYPE).setCode(systemType);
   }
 }

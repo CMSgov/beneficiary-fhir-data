@@ -20,7 +20,7 @@ class Meta {
       MetaSourceSk metaSourceSk) {
     var meta = new org.hl7.fhir.r4.model.Meta().setLastUpdated(DateUtil.toDate(updatedTimestamp));
     claimTypeCode.toFhirStructureDefinition().ifPresent(meta::addProfile);
-    metaSourceSk.toFhirSystemType().ifPresent(meta::addTag);
+    meta.addTag(metaSourceSk.toFhirSystemType());
     finalAction.toFhirFinalAction().ifPresent(meta::addTag);
     meta.addSecurity(ClaimSecurityStatus.toFhir(securityStatus));
     meta.setSource(metaSourceSk.getDisplay());
