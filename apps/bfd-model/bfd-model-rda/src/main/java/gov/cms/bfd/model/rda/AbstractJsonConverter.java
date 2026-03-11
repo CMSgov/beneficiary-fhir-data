@@ -3,9 +3,7 @@ package gov.cms.bfd.model.rda;
 import static java.lang.String.format;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.StreamReadConstraints;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -23,7 +21,6 @@ import java.util.function.Supplier;
  * @param <T> type of one of our data POJOs
  */
 public class AbstractJsonConverter<T> implements AttributeConverter<T, String> {
-
   /**
    * Used to map basic objects to json strings. {@link ObjectMapper} instances are thread safe so
    * this singleton instance ensures consistent formatting behavior for all instances.
