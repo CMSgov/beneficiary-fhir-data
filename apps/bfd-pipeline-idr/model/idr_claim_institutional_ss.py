@@ -478,7 +478,8 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
                     claims.clm_dt_sgntr_sk,
                     claims.clm_num_sk
             ),
-            claim_occurrence_spans_dates AS {not_materialized} ({claim_occurrence_cte()}),
+            claim_occurrence_spans_dates AS {not_materialized} 
+                ({claim_occurrence_cte()}),
             claim_related_occurrences_dates AS {not_materialized} 
                 ({claim_related_occurrences_cte()}),
             claim_related_conditions AS {not_materialized} 

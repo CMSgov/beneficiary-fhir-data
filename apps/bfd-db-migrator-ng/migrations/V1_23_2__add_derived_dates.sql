@@ -52,10 +52,8 @@ ADD COLUMN bfd_clm_bnft_svg_ansi_rsn_3_cd character varying(3),
 ADD COLUMN bfd_clm_bnft_svg_ansi_rsn_4_cd character varying(3),
 DROP COLUMN clm_bnft_svg_ansi_grp_cd,
 DROP COLUMN clm_bnft_svg_ansi_rsn_cd,
-DROP COLUMN clm_rlt_cond_cd,
 DROP COLUMN clm_rlt_cond_sgntr_sqnc_num;
 
 ALTER TABLE idr.claim_item_institutional_nch
-DROP COLUMN clm_rlt_cond_cd,
 DROP COLUMN clm_rlt_cond_sgntr_sqnc_num;
 

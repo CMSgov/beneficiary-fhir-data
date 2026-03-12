@@ -473,11 +473,12 @@ class IdrClaimInstitutionalNch(IdrBaseModel):
                 FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
                 WHERE {claim_filter(start_time, partition)}
             ),
-            claim_occurrence_spans_dates AS {not_materialized} ({claim_occurrence_cte()}),
-                claim_related_occurrences_dates AS {not_materialized} 
-                    ({claim_related_occurrences_cte()}),
-                claim_related_conditions AS {not_materialized} 
-                    ({claim_related_conditions_cte(load_mode)})
+            claim_occurrence_spans_dates AS {not_materialized} 
+                ({claim_occurrence_cte()}),
+            claim_related_occurrences_dates AS {not_materialized} 
+                ({claim_related_occurrences_cte()}),
+            claim_related_conditions AS {not_materialized} 
+                ({claim_related_conditions_cte(load_mode)})
             SELECT {{COLUMNS}}
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
             JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_dt_sgntr {sgntr} ON 

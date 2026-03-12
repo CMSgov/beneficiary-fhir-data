@@ -504,19 +504,19 @@ def claim_occurrence_cte() -> str:
     non_covered_stay_cd = "74"
     return f"""
             SELECT
-                    clm_ocrnc_sgntr_sk,
-                    MAX(CASE WHEN clm_ocrnc_span_cd = '74'
-                        THEN clm_ocrnc_span_from_dt END) AS bfd_clm_ncvrd_from_dt,
-                    MAX(CASE WHEN clm_ocrnc_span_cd = '74'
-                        THEN clm_ocrnc_span_thru_dt END) AS bfd_clm_ncvrd_thru_dt,
-                    MAX(CASE WHEN clm_ocrnc_span_cd = '70'
-                        THEN clm_ocrnc_span_from_dt END) AS bfd_clm_qlfy_stay_from_dt,
-                    MAX(CASE WHEN clm_ocrnc_span_cd = '70'
-                        THEN clm_ocrnc_span_thru_dt END) AS bfd_clm_qlfy_stay_thru_dt,
-                    MAX(idr_insrt_ts) AS idr_insrt_ts
-                FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_ocrnc_sgntr_mbr {ocrnc_sgntr}
-                WHERE clm_ocrnc_span_cd IN ('{qualifying_stay_cd}', '{non_covered_stay_cd}')
-                GROUP BY clm_ocrnc_sgntr_sk"""
+                clm_ocrnc_sgntr_sk,
+                MAX(CASE WHEN clm_ocrnc_span_cd = '{non_covered_stay_cd}'
+                    THEN clm_ocrnc_span_from_dt END) AS bfd_clm_ncvrd_from_dt,
+                MAX(CASE WHEN clm_ocrnc_span_cd = '{non_covered_stay_cd}'
+                    THEN clm_ocrnc_span_thru_dt END) AS bfd_clm_ncvrd_thru_dt,
+                MAX(CASE WHEN clm_ocrnc_span_cd = '{qualifying_stay_cd}'
+                    THEN clm_ocrnc_span_from_dt END) AS bfd_clm_qlfy_stay_from_dt,
+                MAX(CASE WHEN clm_ocrnc_span_cd = '{qualifying_stay_cd}'
+                    THEN clm_ocrnc_span_thru_dt END) AS bfd_clm_qlfy_stay_thru_dt,
+                MAX(idr_insrt_ts) AS idr_insrt_ts
+            FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_ocrnc_sgntr_mbr {ocrnc_sgntr}
+            WHERE clm_ocrnc_span_cd IN ('{qualifying_stay_cd}', '{non_covered_stay_cd}')
+            GROUP BY clm_ocrnc_sgntr_sk"""
 
 
 def claim_related_occurrences_cte() -> str:
@@ -526,9 +526,9 @@ def claim_related_occurrences_cte() -> str:
     return f"""
             SELECT
                 clm_rlt_ocrnc_sgntr_sk,
-                MAX(CASE WHEN clm_rlt_ocrnc_cd = 'A3'
+                MAX(CASE WHEN clm_rlt_ocrnc_cd = '{medicare_exhausted_cd}'
                     THEN clm_rlt_ocrnc_dt END) AS bfd_clm_mdcr_exhstd_dt,
-                MAX(CASE WHEN clm_rlt_ocrnc_cd = '22'
+                MAX(CASE WHEN clm_rlt_ocrnc_cd = '{active_care_cd}'
                     THEN clm_rlt_ocrnc_dt END) AS bfd_clm_actv_care_thru_dt,
                 MAX(idr_insrt_ts) AS idr_insrt_ts
             FROM cms_vdm_view_mdcr_prd.v2_clm_rlt_ocrnc_sgntr_mbr {rlt_ocrnc_sgntr}

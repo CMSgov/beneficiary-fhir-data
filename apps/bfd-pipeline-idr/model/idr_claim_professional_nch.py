@@ -261,7 +261,8 @@ class IdrClaimProfessionalNch(IdrBaseModel):
         rlt_ocrnc_sgntr_dd = ALIAS_RLT_OCRNC_SGNTR_DERIVED_DATES
         not_materialized = "" if load_mode == LoadMode.IDR else "NOT MATERIALIZED"
         return f"""
-            WITH claim_occurrence_spans_dates AS {not_materialized} ({claim_occurrence_cte()}),
+            WITH claim_occurrence_spans_dates AS {not_materialized} 
+                ({claim_occurrence_cte()}),
             claim_related_occurrences_dates AS {not_materialized} 
                 ({claim_related_occurrences_cte()})
             SELECT {{COLUMNS}}
