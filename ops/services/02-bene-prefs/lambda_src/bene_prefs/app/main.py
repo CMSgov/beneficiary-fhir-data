@@ -137,13 +137,9 @@ class PartnerPreferences:
     @property
     def partner_code(self) -> str:
         """Return partner-specific preferences code."""
-        codes = {
-            "ab2d": "MED_AB2D",
-            "bcda": "MED",
-            "dpc": "MED_DPC"
-        }
+        codes = {"ab2d": "MED_AB2D", "bcda": "MED", "dpc": "MED_DPC"}
         try:
-           code = codes[self.partner]
+            code = codes[self.partner]
         except KeyError as exc:
             self._logger.exception(f"Invalid partner: {exc}")
             raise
