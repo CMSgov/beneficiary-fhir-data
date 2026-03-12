@@ -518,6 +518,15 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
         "value" : "1437702123"
       }
     },
+    "qualification" : {
+      "coding" : [ {
+        "code" : "207L00000X",
+        "system" : "http://nucc.org/provider-taxonomy"
+      }, {
+        "code" : "5",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRVDR-SPCLTY-CD"
+      } ]
+    },
     "role" : {
       "coding" : [ {
         "code" : "attending",
@@ -1884,6 +1893,15 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
         },
         "value" : "1437702123"
       }
+    },
+    "qualification" : {
+      "coding" : [ {
+        "code" : "207L00000X",
+        "system" : "http://nucc.org/provider-taxonomy"
+      }, {
+        "code" : "5",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRVDR-SPCLTY-CD"
+      } ]
     },
     "role" : {
       "coding" : [ {
@@ -4593,6 +4611,15 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
         "value" : "1437702123"
       }
     },
+    "qualification" : {
+      "coding" : [ {
+        "code" : "207L00000X",
+        "system" : "http://nucc.org/provider-taxonomy"
+      }, {
+        "code" : "5",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRVDR-SPCLTY-CD"
+      } ]
+    },
     "role" : {
       "coding" : [ {
         "code" : "attending",
@@ -6165,6 +6192,15 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
         },
         "value" : "1437702123"
       }
+    },
+    "qualification" : {
+      "coding" : [ {
+        "code" : "207L00000X",
+        "system" : "http://nucc.org/provider-taxonomy"
+      }, {
+        "code" : "5",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRVDR-SPCLTY-CD"
+      } ]
     },
     "role" : {
       "coding" : [ {

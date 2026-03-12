@@ -147,11 +147,9 @@ public enum ProviderSpecialtyCode {
         new CodeableConcept(
             new Coding()
                 .setSystem(SystemUrls.NUCC_PROVIDER_TAXONOMY)
-                .setCode(String.valueOf(code)));
+                .setCode(String.valueOf(taxonomyCode)));
     codeableConcept.addCoding(
-        new Coding()
-            .setSystem(SystemUrls.CMS_CLM_PRVDR_SPCLTY_CD)
-            .setCode(String.valueOf(taxonomyCode)));
+        new Coding().setSystem(SystemUrls.CMS_CLM_PRVDR_SPCLTY_CD).setCode(String.valueOf(code)));
     return codeableConcept;
   }
 }
