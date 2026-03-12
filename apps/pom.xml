@@ -999,10 +999,6 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-javadoc-plugin</artifactId>
                     <version>${javadoc.version}</version>
-		    <configuration>
-                        <failOnError>false</failOnError>
-                        <doclint>none</doclint>
-                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
