@@ -10,12 +10,12 @@ The [templates directory](./app/templates) stores [jinja templates](https://jinj
 
 Below are the steps taken to generate the partner's preferences files:
 1. `last_execution` is stored from the DynmoDB table that tracks execution timestamps
-1. `query` is stored from the rendered query template using `last_execution` from the previous step and the current time
-1. `results` are stored from the execution of the previous step's `query`
-1. `preferences_data` is stored from the rendered preferences template using the `results` from the previous step
-1. `file_name` is rendered to provide a name to the resultant preferences file
-1. `preferences_data` is written to partner-specific AWS S3 Bucket under the `file_name` object.
-1. `last_execution` is updated in the DynamoDB table that tracks execution timestamps.
+2. `query` is stored from the rendered query template using `last_execution` from the previous step and the current time
+3. `results` are stored from the execution of the previous step's `query`
+4. `preferences_data` is stored from the rendered preferences template using the `results` from the previous step
+5. `file_name` is rendered to provide a name to the resultant preferences file
+6. `preferences_data` is written to partner-specific AWS S3 Bucket under the `file_name` object.
+7. `last_execution` is updated in the DynamoDB table that tracks execution timestamps.
 
 ### Quirks and Features
 
