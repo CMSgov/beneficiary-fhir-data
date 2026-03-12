@@ -12,20 +12,20 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @Embeddable
 public class ClaimDispenseAsWrittenProdSelectCode {
   @Column(name = "clm_daw_prod_slctn_cd")
-  private Optional<String> dispenseAsWrittenProdSelectCode;
+  private String dispenseAsWrittenProdSelectCode;
 
   Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {
-    if (dispenseAsWrittenProdSelectCode.isEmpty()) {
-      return Optional.empty();
+    String code = dispenseAsWrittenProdSelectCode;
+    if (code == null || code.trim().isEmpty()) {
+      code = "0";
     }
+
     var supportingInfo = supportingInfoFactory.createSupportingInfo();
     supportingInfo.setCategory(CarinSupportingInfoCategory.DAW_CODE.toFhir());
     supportingInfo.setCode(
         new CodeableConcept(
-            new Coding()
-                .setSystem(SystemUrls.HL7_CLAIM_DAW_PROD_SELECT_CODE)
-                .setCode(dispenseAsWrittenProdSelectCode.get())));
+            new Coding().setSystem(SystemUrls.HL7_CLAIM_DAW_PROD_SELECT_CODE).setCode(code)));
 
     return Optional.of(supportingInfo);
   }
