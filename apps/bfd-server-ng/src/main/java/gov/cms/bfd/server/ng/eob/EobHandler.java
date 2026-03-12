@@ -4,7 +4,7 @@ import gov.cms.bfd.server.ng.ClaimSecurityStatus;
 import gov.cms.bfd.server.ng.SamhsaFilterMode;
 import gov.cms.bfd.server.ng.SecurityLabel;
 import gov.cms.bfd.server.ng.beneficiary.BeneficiaryRepository;
-import gov.cms.bfd.server.ng.claim.ClaimNewRepository;
+import gov.cms.bfd.server.ng.claim.ClaimRepository;
 import gov.cms.bfd.server.ng.claim.model.*;
 import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
@@ -35,7 +35,7 @@ public class EobHandler {
   private static final Logger LOGGER = LoggerFactory.getLogger(EobHandler.class);
 
   private final BeneficiaryRepository beneficiaryRepository;
-  private final ClaimNewRepository claimRepository;
+  private final ClaimRepository claimRepository;
   private final LoadProgressRepository loadProgressRepository;
 
   // Cache the security labels map to avoid repeated I/O and parsing
