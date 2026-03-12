@@ -1,15 +1,12 @@
-from collections.abc import Sequence
 from datetime import date, datetime
 from typing import Annotated
 
 from pydantic import BeforeValidator
 
 from constants import (
-    CLAIM_PROFESSIONAL_SS_TABLE,
     DEFAULT_MAX_DATE,
-    PROFESSIONAL_PAC_PARTITIONS,
 )
-from load_partition import LoadPartition, LoadPartitionGroup
+from load_partition import LoadPartition
 from loader import LoadMode
 from model.base_model import (
     ALIAS,
@@ -31,8 +28,8 @@ from model.base_model import (
     PRIMARY_KEY,
     UPDATE_FIELD,
     IdrBaseModel,
+    ModelType,
     claim_filter,
-    get_min_transaction_date,
     provider_careteam_name_expr,
     transform_default_date_to_null,
     transform_default_string,
@@ -216,19 +213,17 @@ class IdrClaimItemProfessionalSs(IdrBaseModel):
         return "idr.claim_item_professional_ss"
 
     @staticmethod
-    def last_updated_date_table() -> str:
-        return CLAIM_PROFESSIONAL_SS_TABLE
-
-    @staticmethod
     def last_updated_date_column() -> list[str]:
         return ["bfd_claim_updated_ts"]
 
     @staticmethod
-    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
-        return PROFESSIONAL_PAC_PARTITIONS
+    def model_type() -> ModelType:
+        return ModelType.SS_PROFESSIONAL_CLAIM
 
-    @staticmethod
-    def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:
+    @classmethod
+    def fetch_query(
+        cls, partition: LoadPartition, start_time: datetime, load_mode: LoadMode
+    ) -> str:
         clm = ALIAS_CLM
         clm_grp = ALIAS_CLM_GRP
         prod = ALIAS_PROCEDURE
@@ -280,7 +275,7 @@ class IdrClaimItemProfessionalSs(IdrBaseModel):
                     FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
                     WHERE
                         {claim_filter(start_time, partition)} AND
-                        {clm}.clm_idr_ld_dt >= '{get_min_transaction_date()}'
+                        {clm}.clm_idr_ld_dt >= '{cls.model_type().min_transaction_date}'
                 ),
                 claim_lines AS {not_materialized} (
                     SELECT

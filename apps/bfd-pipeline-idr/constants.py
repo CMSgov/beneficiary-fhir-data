@@ -5,9 +5,7 @@ from settings import PARTITION_TYPE
 
 DEFAULT_MAX_DATE = "9999-12-31"
 DEFAULT_MIN_DATE = "0001-01-01"
-MIN_CLAIM_LOAD_DATE = "2014-06-30"
 ALTERNATE_DEFAULT_DATE = "1000-01-01"
-CLAIM_TABLE = "idr.claim"
 BENEFICIARY_TABLE = "idr.beneficiary"
 CLAIM_RX_TABLE = "idr.claim_rx"
 CLAIM_PROFESSIONAL_NCH_TABLE = "idr.claim_professional_nch"
@@ -200,3 +198,7 @@ COMBINED_CLAIM_PARTITION = LoadPartitionGroup(
 DEFAULT_PARTITION = LoadPartition("default", [], PartitionType.ALL, None, None, 0)
 
 NON_CLAIM_PARTITION = LoadPartitionGroup("default", [], PartitionType.ALL, None, 1)
+
+# Need to declare this separately because python struggles
+# with type-hinting empty arrays :(
+EMPTY_PARTITION: list[LoadPartitionGroup] = []

@@ -1,5 +1,7 @@
 from os import getenv
 
+MIN_CLAIM_LOAD_DATE = "2014-06-30"
+
 
 def _parse_bool_default_false(var_name: str) -> bool:
     return getenv(var_name, "").lower() in ("1", "true")
@@ -14,10 +16,15 @@ def _parse_bool_default_true(var_name: str) -> bool:
 # the smaller volume of data means this will probably be much slower
 ENABLE_DATE_PARTITIONS = _parse_bool_default_true("IDR_ENABLE_DATE_PARTITIONS")
 
-# Minimum claim date to load.
+# Minimum claim date to load for NCH (and DDPS).
 # Any claims created before this date will be skipped.
 # Useful for partial loads with large amounts of data.
-MIN_TRANSACTION_DATE = getenv("IDR_MIN_TRANSACTION_DATE")
+MIN_NCH_CLAIM_TRANSACTION_DATE = getenv("IDR_MIN_NCH_CLAIM_TRANSACTION_DATE", MIN_CLAIM_LOAD_DATE)
+
+# Minimum claim date to load for shared systems.
+# Any claims created before this date will be skipped.
+# Useful for partial loads with large amounts of data.
+MIN_SS_CLAIM_TRANSACTION_DATE = getenv("IDR_MIN_SS_CLAIM_TRANSACTION_DATE", MIN_CLAIM_LOAD_DATE)
 
 # Partition type - year/month/day
 # This should be set to "day" in prod to reduce the batch sizes

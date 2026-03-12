@@ -20,7 +20,6 @@ from model.base_model import (
     LoadMode,
     T,
     format_date_opt,
-    get_min_transaction_date,
 )
 from model.load_progress import LoadProgress
 from settings import (
@@ -90,7 +89,7 @@ class Extractor(ABC, Generic[T]):  # noqa: UP046
         # We need to create batches using the most recent timestamp from all of the
         # insert/update timestamps
         batch_timestamp_clause = self._greatest_col([*batch_timestamp_cols, *update_timestamp_cols])
-        min_transaction_date = get_min_transaction_date()
+        min_transaction_date = self.cls.model_type().min_transaction_date
 
         batch_id_order = ""
         batch_id_clause = ""

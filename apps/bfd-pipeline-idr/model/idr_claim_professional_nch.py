@@ -1,4 +1,3 @@
-from collections.abc import Sequence
 from datetime import date, datetime
 from typing import Annotated
 
@@ -7,9 +6,8 @@ from pydantic import BeforeValidator
 from constants import (
     CLAIM_PROFESSIONAL_NCH_TABLE,
     DEFAULT_MAX_DATE,
-    PROFESSIONAL_ADJUDICATED_PARTITIONS,
 )
-from load_partition import LoadPartition, LoadPartitionGroup
+from load_partition import LoadPartition
 from loader import LoadMode
 from model.base_model import (
     ALIAS,
@@ -30,6 +28,7 @@ from model.base_model import (
     PRIMARY_KEY,
     UPDATE_TIMESTAMP,
     IdrBaseModel,
+    ModelType,
     claim_filter,
     clm_orig_cntl_num_expr,
     provider_careteam_name_expr,
@@ -192,15 +191,17 @@ class IdrClaimProfessionalNch(IdrBaseModel):
         return CLAIM_PROFESSIONAL_NCH_TABLE
 
     @staticmethod
-    def last_updated_date_table() -> str:
-        return CLAIM_PROFESSIONAL_NCH_TABLE
-
-    @staticmethod
     def last_updated_date_column() -> list[str]:
         return ["bfd_claim_updated_ts"]
 
     @staticmethod
-    def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
+    def model_type() -> ModelType:
+        return ModelType.NCH_PROFESSIONAL_CLAIM
+
+    @classmethod
+    def fetch_query(
+        cls, partition: LoadPartition, start_time: datetime, load_mode: LoadMode
+    ) -> str:
         clm = ALIAS_CLM
         sgntr = ALIAS_SGNTR
         prfnl = ALIAS_PRFNL
@@ -235,7 +236,3 @@ class IdrClaimProfessionalNch(IdrBaseModel):
             {{WHERE_CLAUSE}} AND {claim_filter(start_time, partition)}
             {{ORDER_BY}}
         """
-
-    @staticmethod
-    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
-        return PROFESSIONAL_ADJUDICATED_PARTITIONS

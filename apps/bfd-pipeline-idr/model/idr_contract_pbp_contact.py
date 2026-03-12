@@ -1,4 +1,3 @@
-from collections.abc import Sequence
 from datetime import date, datetime
 from typing import Annotated
 
@@ -6,14 +5,14 @@ from pydantic import BeforeValidator
 
 from constants import (
     DEFAULT_MAX_DATE,
-    NON_CLAIM_PARTITION,
 )
-from load_partition import LoadPartition, LoadPartitionGroup
+from load_partition import LoadPartition
 from loader import LoadMode
 from model.base_model import (
     BATCH_ID,
     PRIMARY_KEY,
     IdrBaseModel,
+    ModelType,
     transform_default_string,
 )
 
@@ -39,15 +38,17 @@ class IdrContractPbpContact(IdrBaseModel):
         return "idr.contract_pbp_contact"
 
     @staticmethod
-    def last_updated_date_table() -> str:
-        return ""
-
-    @staticmethod
     def last_updated_date_column() -> list[str]:
         return []
 
     @staticmethod
-    def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
+    def model_type() -> ModelType:
+        return ModelType.BENEFICIARY
+
+    @classmethod
+    def fetch_query(
+        cls, partition: LoadPartition, start_time: datetime, load_mode: LoadMode
+    ) -> str:
         return f"""
             WITH contract_contacts as (
                 SELECT {{COLUMNS}}, ROW_NUMBER() OVER (
@@ -65,7 +66,3 @@ class IdrContractPbpContact(IdrBaseModel):
             )
             SELECT {{COLUMNS}} FROM contract_contacts WHERE row_order = 1
         """
-
-    @staticmethod
-    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
-        return [NON_CLAIM_PARTITION]

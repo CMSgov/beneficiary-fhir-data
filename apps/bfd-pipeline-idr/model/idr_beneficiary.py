@@ -1,4 +1,3 @@
-from collections.abc import Sequence
 from datetime import date, datetime
 from typing import Annotated
 
@@ -6,9 +5,8 @@ from pydantic import BeforeValidator
 
 from constants import (
     BENEFICIARY_TABLE,
-    NON_CLAIM_PARTITION,
 )
-from load_partition import LoadPartition, LoadPartitionGroup
+from load_partition import LoadPartition
 from loader import LoadMode
 from model.base_model import (
     ALIAS,
@@ -21,6 +19,7 @@ from model.base_model import (
     PRIMARY_KEY,
     UPDATE_TIMESTAMP,
     IdrBaseModel,
+    ModelType,
     deceased_bene_filter,
     transform_default_string,
     transform_null_date_to_max,
@@ -88,15 +87,17 @@ class IdrBeneficiary(IdrBaseModel):
         return ["bene_xref_efctv_sk_computed"]
 
     @staticmethod
-    def last_updated_date_table() -> str:
-        return BENEFICIARY_TABLE
-
-    @staticmethod
     def last_updated_date_column() -> list[str]:
         return ["bfd_patient_updated_ts"]
 
     @staticmethod
-    def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
+    def model_type() -> ModelType:
+        return ModelType.BENEFICIARY
+
+    @classmethod
+    def fetch_query(
+        cls, partition: LoadPartition, start_time: datetime, load_mode: LoadMode
+    ) -> str:  # noqa: ARG004
         hstry = ALIAS_HSTRY
         xref = ALIAS_XREF
         # There can be multiple xref records for the same bene_sk/bene_ref_sk combo
@@ -151,7 +152,3 @@ class IdrBeneficiary(IdrBaseModel):
             AND NOT EXISTS (SELECT 1 FROM deceased_benes db WHERE db.bene_sk = {hstry}.bene_sk)
             {{ORDER_BY}}
         """
-
-    @staticmethod
-    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
-        return [NON_CLAIM_PARTITION]

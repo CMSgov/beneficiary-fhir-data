@@ -26,7 +26,8 @@ export BFD_DB_ENDPOINT
 
 # TODO: remove these at some point
 # useful for testing the initial claim load
-export IDR_MIN_TRANSACTION_DATE=2024-07-01
+export IDR_MIN_NCH_CLAIM_TRANSACTION_DATE=2024-07-01
+export IDR_MIN_SS_CLAIM_TRANSACTION_DATE=2024-07-01
 export IDR_LOAD_TYPE=initial
 export IDR_PARTITION_TYPE=day
 export IDR_LATEST_CLAIMS=1
