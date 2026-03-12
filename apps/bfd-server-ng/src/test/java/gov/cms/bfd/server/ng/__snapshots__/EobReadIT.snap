@@ -1070,11 +1070,23 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
   }, {
     "category" : {
       "coding" : [ {
-        "code" : "clmrecvddate",
+        "code" : "admissionperiod",
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
       } ]
     },
     "sequence" : 6,
+    "timingPeriod" : {
+      "end" : "2021-10-03",
+      "start" : "2021-09-27"
+    }
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "clmrecvddate",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+      } ]
+    },
+    "sequence" : 7,
     "timingDate" : "2021-10-03"
   }, {
     "category" : {
@@ -1088,7 +1100,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 7,
+    "sequence" : 8,
     "timingDate" : "2021-10-03"
   }, {
     "category" : {
@@ -1107,7 +1119,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
       } ]
     },
-    "sequence" : 8
+    "sequence" : 9
   }, {
     "category" : {
       "coding" : [ {
@@ -1125,7 +1137,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
       } ]
     },
-    "sequence" : 9
+    "sequence" : 10
   }, {
     "category" : {
       "coding" : [ {
@@ -1142,7 +1154,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
       } ]
     },
-    "sequence" : 10
+    "sequence" : 11
   }, {
     "category" : {
       "coding" : [ {
@@ -1162,7 +1174,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
       } ]
     },
-    "sequence" : 11
+    "sequence" : 12
   }, {
     "category" : {
       "coding" : [ {
@@ -1182,7 +1194,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
       } ]
     },
-    "sequence" : 12
+    "sequence" : 13
   }, {
     "category" : {
       "coding" : [ {
@@ -1196,7 +1208,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
         "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
       } ]
     },
-    "sequence" : 13
+    "sequence" : 14
   } ],
   "total" : [ {
     "amount" : {
@@ -2446,11 +2458,23 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
   }, {
     "category" : {
       "coding" : [ {
-        "code" : "clmrecvddate",
+        "code" : "admissionperiod",
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
       } ]
     },
     "sequence" : 6,
+    "timingPeriod" : {
+      "end" : "2021-10-03",
+      "start" : "2021-09-27"
+    }
+  }, {
+    "category" : {
+      "coding" : [ {
+        "code" : "clmrecvddate",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+      } ]
+    },
+    "sequence" : 7,
     "timingDate" : "2021-10-03"
   }, {
     "category" : {
@@ -2464,7 +2488,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 7,
+    "sequence" : 8,
     "timingDate" : "2021-10-03"
   }, {
     "category" : {
@@ -2483,7 +2507,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
       } ]
     },
-    "sequence" : 8
+    "sequence" : 9
   }, {
     "category" : {
       "coding" : [ {
@@ -2501,7 +2525,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
       } ]
     },
-    "sequence" : 9
+    "sequence" : 10
   }, {
     "category" : {
       "coding" : [ {
@@ -2518,7 +2542,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
       } ]
     },
-    "sequence" : 10
+    "sequence" : 11
   }, {
     "category" : {
       "coding" : [ {
@@ -2538,7 +2562,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
       } ]
     },
-    "sequence" : 11
+    "sequence" : 12
   }, {
     "category" : {
       "coding" : [ {
@@ -2558,7 +2582,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
       } ]
     },
-    "sequence" : 12
+    "sequence" : 13
   }, {
     "category" : {
       "coding" : [ {
@@ -2572,7 +2596,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
         "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
       } ]
     },
-    "sequence" : 13
+    "sequence" : 14
   } ],
   "total" : [ {
     "amount" : {
