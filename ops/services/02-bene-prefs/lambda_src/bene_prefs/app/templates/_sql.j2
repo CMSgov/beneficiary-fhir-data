@@ -44,8 +44,8 @@ prefs_sks as (
 select bene_sk
 from idrc_prd.cms_vdm_view_mdcr_prd.v2_mdcr_bene_shrng_prefnc
 where bene_shrng_prefnc_type_cd = '{{partner_code}}'                      {#- only fetch specific code for given partner #}
-    and idr_trans_obslt_ts = TO_DATE('9999-12-31', 'YYYY-MM-DD')          {#- only fetch the latest preference record #}
-    and bene_shrng_prefnc_trmntn_dt = TO_DATE('9999-12-31', 'YYYY-MM-DD') {#- only fetch preferences that haven't yet been terminated #}
+    and idr_trans_obslt_ts = to_date('9999-12-31', 'YYYY-MM-DD')          {#- only fetch the latest preference record #}
+    and bene_shrng_prefnc_trmntn_dt = to_date('9999-12-31', 'YYYY-MM-DD') {#- only fetch preferences that haven't yet been terminated #}
     and idr_insrt_ts BETWEEN to_timestamp('{{query_since_timestamp}}') AND to_timestamp('{{query_until_timestamp}}')
 )
 select distinct
@@ -59,5 +59,5 @@ join beneficiaries_history bh
 where
     prefs.bene_sk in (select bene_sk from prefs_sks)                            {#- only fetch SKs that match the sks with preferences from the queried period #}
     and prefs.bene_shrng_prefnc_type_cd = '{{partner_code}}'                    {#- only fetch specific code for given partner #}
-    and prefs.idr_trans_obslt_ts = TO_DATE('9999-12-31', 'YYYY-MM-DD')          {#- only fetch the latest preference record #}
-    and prefs.bene_shrng_prefnc_trmntn_dt = TO_DATE('9999-12-31', 'YYYY-MM-DD') {#- only fetch preferences that haven't yet been terminated #}
+    and prefs.idr_trans_obslt_ts = to_date('9999-12-31', 'YYYY-MM-DD')          {#- only fetch the latest preference record #}
+    and prefs.bene_shrng_prefnc_trmntn_dt = to_date('9999-12-31', 'YYYY-MM-DD') {#- only fetch preferences that haven't yet been terminated #}
