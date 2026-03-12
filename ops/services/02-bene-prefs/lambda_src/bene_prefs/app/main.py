@@ -192,10 +192,10 @@ class PartnerPreferences:
         """Generate and store the preferences report in AWS S3.
 
         Args:
-            timestamp_range: Tuple bounding (lower, upper) ISO 8601 timestamp strings.
-            set_last_execution: When `True`, update last_execution in DynamoDB . Default is `True`.
-            store_local: When `True`, store preferences locally. Default is `False`.
-            store_remote: When `True`, write the preferences to S3. Default is `True`.
+            timestamp_range (tuple): Tuple bounding (lower, upper) ISO 8601 timestamp strings. Default range between last execution and utc-now.
+            set_last_execution (bool): When `True`, update last_execution in DynamoDB . Default is `True`.
+            store_local (bool): When `True`, store preferences locally. Default is `False`.
+            store_remote (bool): When `True`, write the preferences to S3. Default is `True`.
         """
         query_since_timestamp = timestamp_range[0] or self.last_execution
         query_until_timestamp = timestamp_range[1] or datetime.now(UTC).isoformat()
@@ -237,7 +237,11 @@ class PartnerPreferences:
 
         if set_last_execution:
             if results:
-                max_insert_timestamp = max(results, key=lambda x: x.get('IDR_INSRT_TS')).get('IDR_INSRT_TS').isoformat()
+                max_insert_timestamp = (
+                    max(results, key=lambda x: x.get("IDR_INSRT_TS"))
+                    .get("IDR_INSRT_TS")
+                    .isoformat()
+                )
                 self._set_last_execution(max_insert_timestamp)
             else:
                 self._logger.info("Empty results. Skipping set of last execution.")
