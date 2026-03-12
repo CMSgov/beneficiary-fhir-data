@@ -1,6 +1,5 @@
 package gov.cms.bfd.server.ng.claim.model;
 
-import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
@@ -8,8 +7,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /**
@@ -1703,10 +1700,6 @@ public enum ClaimAuditTrailStatusCode {
   private final ExplanationOfBenefit.RemittanceOutcome outcome;
   private final String display;
 
-  private String getCompositeStatusCode() {
-    return source.getPrefix() + locationCode.getCode() + statusCode;
-  }
-
   /**
    * Currently, we cannot confidently determine outcome for VMS since VMS is dependent on claim
    * audit trail status code and claim audit trail location code. Instead, we use claim final action
@@ -1747,18 +1740,5 @@ public enum ClaimAuditTrailStatusCode {
   public static Optional<ClaimAuditTrailStatusCode> tryFromCode(
       MetaSourceSk source, String statusCode, ClaimAuditTrailLocationCode locationCode) {
     return Optional.ofNullable(CLAIM_STATUS_LOOKUP.get(new Key(source, statusCode, locationCode)));
-  }
-
-  ExplanationOfBenefit.SupportingInformationComponent toFhir(
-      SupportingInfoFactory supportingInfoFactory) {
-    return supportingInfoFactory
-        .createSupportingInfo()
-        .setCategory(BlueButtonSupportingInfoCategory.CLM_AUDT_TRL_STUS_CD.toFhir())
-        .setCode(
-            new CodeableConcept(
-                new Coding()
-                    .setSystem(SystemUrls.BLUE_BUTTON_CODE_SYSTEM_CLAIM_AUDIT_TRAIL_STATUS_CODE)
-                    .setDisplay(display)
-                    .setCode(getCompositeStatusCode())));
   }
 }

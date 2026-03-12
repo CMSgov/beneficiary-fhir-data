@@ -165,6 +165,26 @@ resource "aws_quicksight_analysis" "quicksight_analysis_dasg_metrics" {
       expression          = "round({auth_demoscope_required_choice_not_sharing_real_bene_count} / ({auth_demoscope_required_choice_sharing_real_bene_count} + {auth_demoscope_required_choice_not_sharing_real_bene_count}) , 3)"
       name                = "auth_bene_chose_not_to_share_demographic_scopes_percent"
     }
+    calculated_fields {
+      data_set_identifier = "prod_global_state"
+      expression          = "round(({auth_v1_v2_user_makes_it_to_permission_screen_bene_count} - {auth_v1_v2_user_clicks_connect_bene_count}) / {auth_v1_v2_user_makes_it_to_permission_screen_bene_count} , 3)"
+      name                = "auth_v1_v2_user_makes_it_to_permission_screen_but_does_not_click_connect_percent"
+    }
+    calculated_fields {
+      data_set_identifier = "prod_global_state"
+      expression          = "round({auth_v1_v2_user_clicks_connect_bene_count} / {auth_v1_v2_user_makes_it_to_permission_screen_bene_count} , 3)"
+      name                = "auth_v1_v2_user_makes_it_to_permission_screen_and_clicks_connect_percent"
+    }
+    calculated_fields {
+      data_set_identifier = "prod_global_state"
+      expression          = "round(({auth_v3_user_makes_it_to_permission_screen_bene_count} - {auth_v3_user_clicks_connect_bene_count}) / {auth_v3_user_makes_it_to_permission_screen_bene_count} , 3)"
+      name                = "auth_v3_user_makes_it_to_permission_screen_but_does_not_click_connect_percent"
+    }
+    calculated_fields {
+      data_set_identifier = "prod_global_state"
+      expression          = "round({auth_v3_user_clicks_connect_bene_count} / {auth_v3_user_makes_it_to_permission_screen_bene_count} , 3)"
+      name                = "auth_v3_user_makes_it_to_permission_screen_and_clicks_connect_percent"
+    }
 
     filter_groups {
       cross_dataset   = "SINGLE_DATASET"
@@ -1131,6 +1151,26 @@ resource "aws_quicksight_analysis" "quicksight_analysis_dasg_metrics" {
                 visibility   = "VISIBLE"
               }
               selected_field_options {
+                custom_label = "V1/V2 Percent of enrollees who arrive at permission screen, but do NOT click "Connect""
+                field_id     = "37a508af-53a4-4390-8884-b23297bc77fc.13.1772657698202"
+                visibility   = "VISIBLE"
+              }
+              selected_field_options {
+                custom_label = "V1/V2 Percent of enrollees who click "Connect" on permission screen"
+                field_id     = "3df28b02-4b58-483f-b01a-f89bab6fba71.12.1772657961625"
+                visibility   = "VISIBLE"
+              }
+              selected_field_options {
+                custom_label = "V3 Percent of enrollees who arrive at permission screen, but do NOT click "Connect""
+                field_id     = "5a6bdf89-7b95-491c-97b9-2305fb219bc1.13.1772657991367"
+                visibility   = "VISIBLE"
+              }
+              selected_field_options {
+                custom_label = "V3 Percent of enrollees who click "Connect" on permission screen"
+                field_id     = "ed175d95-f9de-4523-adce-3c6221cf34f8.14.1772658015315"
+                visibility   = "VISIBLE"
+              }
+              selected_field_options {
                 custom_label = "NODE SDK Requests"
                 field_id     = "395e9e0d-ae34-480e-8f58-5fe90f34425e.sdk_requests_node_count.14.1691762512237"
                 visibility   = "VISIBLE"
@@ -1317,6 +1357,102 @@ resource "aws_quicksight_analysis" "quicksight_analysis_dasg_metrics" {
                     column {
                       column_name         = "auth_demoscope_required_choice_sharing_real_bene_count"
                       data_set_identifier = "prod_global_state"
+                    }
+                  }
+                }
+                values {
+                  numerical_measure_field {
+                    field_id = "37a508af-53a4-4390-8884-b23297bc77fc.13.1772657698202"
+
+                    aggregation_function {
+                      simple_numerical_aggregation = "SUM"
+                    }
+
+                    column {
+                      column_name         = "auth_v1_v2_user_makes_it_to_permission_screen_but_does_not_click_connect_percent"
+                      data_set_identifier = "prod_global_state"
+                    }
+
+                    format_configuration {
+                      numeric_format_configuration {
+                        percentage_display_format_configuration {
+                          null_value_format_configuration {
+                            null_string = "null"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+                values {
+                  numerical_measure_field {
+                    field_id = "3df28b02-4b58-483f-b01a-f89bab6fba71.12.1772657961625"
+
+                    aggregation_function {
+                      simple_numerical_aggregation = "SUM"
+                    }
+
+                    column {
+                      column_name         = "auth_v1_v2_user_makes_it_to_permission_screen_and_clicks_connect_percent"
+                      data_set_identifier = "prod_global_state"
+                    }
+
+                    format_configuration {
+                      numeric_format_configuration {
+                        percentage_display_format_configuration {
+                          null_value_format_configuration {
+                            null_string = "null"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+                values {
+                  numerical_measure_field {
+                    field_id = "5a6bdf89-7b95-491c-97b9-2305fb219bc1.13.1772657991367"
+
+                    aggregation_function {
+                      simple_numerical_aggregation = "SUM"
+                    }
+
+                    column {
+                      column_name         = "auth_v3_user_makes_it_to_permission_screen_but_does_not_click_connect_percent"
+                      data_set_identifier = "prod_global_state"
+                    }
+
+                    format_configuration {
+                      numeric_format_configuration {
+                        percentage_display_format_configuration {
+                          null_value_format_configuration {
+                            null_string = "null"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+                values {
+                  numerical_measure_field {
+                    field_id = "ed175d95-f9de-4523-adce-3c6221cf34f8.14.1772658015315"
+
+                    aggregation_function {
+                      simple_numerical_aggregation = "SUM"
+                    }
+
+                    column {
+                      column_name         = "auth_v3_user_makes_it_to_permission_screen_and_clicks_connect_percent"
+                      data_set_identifier = "prod_global_state"
+                    }
+
+                    format_configuration {
+                      numeric_format_configuration {
+                        percentage_display_format_configuration {
+                          null_value_format_configuration {
+                            null_string = "null"
+                          }
+                        }
+                      }
                     }
                   }
                 }

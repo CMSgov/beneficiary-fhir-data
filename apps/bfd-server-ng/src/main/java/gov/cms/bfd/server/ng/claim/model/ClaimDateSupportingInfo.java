@@ -8,7 +8,7 @@ import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 @Embeddable
-class ClaimDateSupportingInfo {
+class ClaimDateSupportingInfo implements SupportingInfoComponentBase {
   @Embedded private AdmissionPeriod admissionPeriod;
   @Embedded private ClaimSubmissionDate claimSubmissionDate;
   @Embedded private NchWeeklyProcessingDate nchWeeklyProcessingDate;
@@ -20,7 +20,8 @@ class ClaimDateSupportingInfo {
   @Embedded private QualifyStayThruDate qualifyStayThruDate;
   @Embedded private ClaimProcessDate claimProcessDate;
 
-  List<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
+  @Override
+  public List<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {
     return Stream.of(
             admissionPeriod.toFhir(supportingInfoFactory),

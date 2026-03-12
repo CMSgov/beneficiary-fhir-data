@@ -209,7 +209,7 @@ Options:
 #### Generating claims data
 
 > [!WARNING]
-> Either `SYNTHETIC_CLM.csv` or `SYNTHETIC_BENE_HSTRY.csv` **must** be provided as claims data generation requires an existing `BENE_SK` or `CLM` to generate/regenerate data.
+> Either `SYNTHETIC_CLM.csv` or `SYNTHETIC_BENE_HSTRY.csv` **must** be provided as claims data generation requires an existing `BENE_SK` or `CLM` to generate/regenerate data. It is recommended that `SYNTHETIC_CNTRCT_PBP_NUM.csv` also be provided so new claims use the same generated contracts. If not provided, newly generated claims will instead use randomly selected contract nums and pbp nums. This may result in claims referencing contracts that do not exist in the generated contract tables.
 
 To generate synthetic claims data, the `claims_generator.py` script is used.
 
@@ -236,14 +236,14 @@ The synthetic claims data generated will be written to the `./out` folder in the
 
 These files represent the schema of the tables the information is sourced from, although for tables other than `CLM_DT_SGNTR`, the `CLM_UNIQ_ID` is propagated instead of the 5 part unique key from the IDR.
 
-##### Using `SYNTHETIC_BENE_HSTRY.csv`
+##### Using `SYNTHETIC_BENE_HSTRY.csv` and `SYNTHETIC_CNTRCT_PBP_NUM.csv`
 
 The below will generate _entirely new claims_ for the given `BENE_SK`s in the provided file:
 
 ```sh
 uv run claims_generator.py \
     --sushi \
-    out/SYNTHETIC_BENE_HSTRY.csv
+    out/SYNTHETIC_BENE_HSTRY.csv out/SYNTHETIC_CNTRCT_PBP_NUM.csv
 ```
 
 ##### Regenerating existing claims data
@@ -282,19 +282,7 @@ uv run compile_resources.py \
 
 ### Updating Structure Definitions
 
-If you add or move a field, you must update the input sample file and the corresponding Structure Definition file (e.g., defining CLM_AUDT_TRL_STUS_CD within the elements of ExplanationOfBenefit-Base.json).
-Example element definition:
-
-```text
-{
-  "id": "ExplanationOfBenefit-Base.CLM_AUDT_TRL_STUS_CD",
-  "path": "ExplanationOfBenefit-Base.CLM_AUDT_TRL_STUS_CD",
-  "label": "Claim Status Code",
-  "min": 0,
-  "max": "1",
-  "type": [{ "code": "string" }]
-}
-```
+FHIR Mapping Language is used to go from source to target. The source data structure must be defined, and we define them using FHIR Shorthand (https://hl7.org/fhir/uv/shorthand/N2/). When a new source field is added, add it to the relevant .fsh file (or create a new one) in the sushi/input folder. StructureDefinitions for input data structures should follow the naming convention of StructureDefinition-<Resource>.fsh
 
 ### Resource Augmentation
 

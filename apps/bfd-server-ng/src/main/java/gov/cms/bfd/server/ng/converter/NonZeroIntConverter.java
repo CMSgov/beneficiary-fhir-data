@@ -5,7 +5,7 @@ import jakarta.persistence.Converter;
 import java.util.Optional;
 
 /** Converts any zero values to None. */
-@Converter
+@Converter(autoApply = true)
 public class NonZeroIntConverter implements AttributeConverter<Optional<Integer>, Integer> {
   @Override
   public Integer convertToDatabaseColumn(Optional<Integer> value) {
@@ -16,7 +16,8 @@ public class NonZeroIntConverter implements AttributeConverter<Optional<Integer>
 
   @Override
   public Optional<Integer> convertToEntityAttribute(Integer value) {
-    if (value == 0) {
+
+    if (value == null || value == 0) {
       return Optional.empty();
     }
     return Optional.of(value);
