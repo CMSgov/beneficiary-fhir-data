@@ -35,7 +35,9 @@ class ClaimLineRxSupportingInfo {
 
   @Embedded private ClaimLineRxDaysSupplyQuantity daysSupply;
   @Embedded private ClaimLineRxFillNumber fillNumber;
-  @Embedded private ClaimDispenseAsWrittenProdSelectCode claimDispenseAsWrittenProdSelectCode;
+
+  @Column(name = "clm_daw_prod_slctn_cd")
+  private Optional<ClaimDispenseAsWrittenCode> claimDispenseAsWrittenCode;
 
   @Column(name = "clm_drug_cvrg_stus_cd")
   private Optional<DrugCoverageStatusCode> drugCoverageStatusCode;
@@ -45,7 +47,7 @@ class ClaimLineRxSupportingInfo {
 
   List<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {
-    return Stream.of(
+    return Stream.<Optional<ExplanationOfBenefit.SupportingInformationComponent>>of(
             pharmacyServiceTypeCode.map(c -> c.toFhir(supportingInfoFactory)),
             claimPrescriptionOriginCode.map(c -> c.toFhir(supportingInfoFactory)),
             brandGenericCode.map(s -> s.toFhir(supportingInfoFactory)),
@@ -54,7 +56,7 @@ class ClaimLineRxSupportingInfo {
             compoundCode.map(s -> s.toFhir(supportingInfoFactory)),
             Optional.of(daysSupply.toFhir(supportingInfoFactory)),
             Optional.of(fillNumber.toFhir(supportingInfoFactory)),
-            Optional.of(claimDispenseAsWrittenProdSelectCode.toFhir(supportingInfoFactory)),
+            claimDispenseAsWrittenCode.map(c -> c.toFhir(supportingInfoFactory)),
             drugCoverageStatusCode.map(s -> s.toFhir(supportingInfoFactory)),
             catastrophicCovCode.map(s -> s.toFhir(supportingInfoFactory)))
         .flatMap(Optional::stream)

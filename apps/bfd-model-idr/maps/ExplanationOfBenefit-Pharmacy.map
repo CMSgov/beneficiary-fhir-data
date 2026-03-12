@@ -303,8 +303,8 @@ group addDispenseAsWritten(source src: SupportingInfoComponent, target tgt: Back
         src -> tgtCC.coding = translate("CLM_DAW_PROD_SLCTN_CD",'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#C4BB-SupportingInfo-Categories','coding') "set coding";
     } "set category";
     src -> tgt.code = create('CodeableConcept') as tgtCC then{
-        src.CLM_DAW_PROD_SLCTN_CD as val where val.length() > 0 -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/NCPDPDispensedAsWrittenOrProductSelectionCode", val) "Add coding";
-        src.CLM_DAW_PROD_SLCTN_CD as val where val.length() = 0 -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/NCPDPDispensedAsWrittenOrProductSelectionCode", 0) "Add coding";
+        src.CLM_DAW_PROD_SLCTN_CD as val -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/NCPDPDispensedAsWrittenOrProductSelectionCode", val) "Add coding";
+        src.CLM_DAW_PROD_SLCTN_CD as val -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DAW-PROD-SLCTN-CD", val) "Add coding";
     } "Add CC";
 }
 

@@ -1,7 +1,7 @@
 {
   "resourceType" : "ExplanationOfBenefit",
   "meta" : {
-    "lastUpdated" : "2026-03-02T18:01:01.244960Z",
+    "lastUpdated" : "2026-03-12T19:50:18.018307Z",
     "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Pharmacy|2.1.0"],
     "tag" : [{
       "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type",
@@ -287,6 +287,10 @@
     "code" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/NCPDPDispensedAsWrittenOrProductSelectionCode",
+        "code" : "0"
+      },
+      {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DAW-PROD-SLCTN-CD",
         "code" : "0"
       }]
     }
