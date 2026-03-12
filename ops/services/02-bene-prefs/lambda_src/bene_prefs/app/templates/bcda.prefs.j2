@@ -1,16 +1,16 @@
 {{ 'HDR_BENEDATASHR' }}{{ extract_date }}
 {% for row in data %}
-{{- '%-11s'  | format(row['MBI']              | default('', True)) }}
-{{- '%-10s'  | format(row['LKEY']             | default('', True)) }}
-{{- '%-333s' | format('')                                          }}
-{{- '%-8s'   | format(row['EFFECTIVEDT']      | default('', True)) }}
-{{- '%-5s'   | format(row['SOURCECDE']        | default('', True)) }}
-{{- '%-1s'   | format('')                                          }}
-{{- '%-1s'   | format(row['PREFINDTOR']       | default('', True)) }}
-{{- '%-8s'   | format(row['SAMHSAEFFECTIVEDT']| default('', True)) }}
-{{- '%-5s'   | format(row['SAMHSASOURCECDE']  | default('', True)) }}
-{{- '%-1s'   | format('')                                          }}
-{{- '%-1s'   | format(row['SAMHSAPREFINDTOR'] | default('', True)) }}
-{{- '%-5s'   | format(row['ACOID']            | default('', True)) }}
+{{- '%-11s'  | format(row['BENE_MBI_ID']                     | default('', True)) }}
+{{- '%-10s'  | format(row['LKEY']                            | default('', True)) }}
+{{- '%-333s' | format('')                                                         }}
+{{- '%-8s'   | format(row['BENE_SHRNG_PREFNC_EFCTV_DT']      | default('', True)) }}
+{{- '%-5s'   | format(row['BENE_SHRNG_PREFNC_SBMTR_TYPE_CD'] | default('', True)) }}
+{{- '%-1s'   | format('')                                                         }}
+{{- '%-1s'   | format(row['BENE_SHRNG_PREFNC_OPT_IN_SW']     | default('', True)) }}
+{{- '%-8s'   | format(row['SAMHSAEFFECTIVEDT']               | default('', True)) }}
+{{- '%-5s'   | format(row['SAMHSASOURCECDE']                 | default('', True)) }}
+{{- '%-1s'   | format('')                                                         }}
+{{- '%-1s'   | format(row['SAMHSAPREFINDTOR']                | default('', True)) }}
+{{- '%-5s'   | format(row['ACOID']                           | default('', True)) }}
 {% endfor %}
 {{- 'TRL_BENEDATASHR' }}{{- extract_date }}{{- '%010d' | format(data | length) }}
