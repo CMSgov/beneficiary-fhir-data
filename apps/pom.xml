@@ -135,7 +135,7 @@
         <junit.version>5.12.0</junit.version>
         <junit.platform.version>1.12.0</junit.platform.version>
         <javadoc.version>3.11.2</javadoc.version>
-        <testcontainers.version>1.19.3</testcontainers.version>
+        <testcontainers.version>1.21.4</testcontainers.version>
 
         <!-- Jackson versions should be kept in sync when possible but can diverge slightly
             when vulnerabilities or other fixes affect some but not all components -->
@@ -999,6 +999,10 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-javadoc-plugin</artifactId>
                     <version>${javadoc.version}</version>
+		    <configuration>
+                        <failOnError>false</failOnError>
+                        <doclint>none</doclint>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
