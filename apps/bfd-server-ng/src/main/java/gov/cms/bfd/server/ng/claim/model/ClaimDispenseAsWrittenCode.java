@@ -3,6 +3,8 @@ package gov.cms.bfd.server.ng.claim.model;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.util.Optional;
 import java.util.stream.Stream;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
@@ -12,6 +14,8 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
  *
  * <p>Valid values are 0 through 9.
  */
+@Getter
+@AllArgsConstructor
 public enum ClaimDispenseAsWrittenCode {
   /** 0: No product selection indicated. */
   _0("0"),
@@ -35,19 +39,6 @@ public enum ClaimDispenseAsWrittenCode {
   _9("9");
 
   private final String code;
-
-  ClaimDispenseAsWrittenCode(String code) {
-    this.code = code;
-  }
-
-  /**
-   * Gets the string code.
-   *
-   * @return the code
-   */
-  public String getCode() {
-    return code;
-  }
 
   /**
    * Tries to find the enum by its database code value. Returns empty if it does not match exactly.

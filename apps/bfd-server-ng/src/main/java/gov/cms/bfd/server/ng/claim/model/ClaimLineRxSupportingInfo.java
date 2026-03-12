@@ -47,7 +47,7 @@ class ClaimLineRxSupportingInfo {
 
   List<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {
-    return Stream.<Optional<ExplanationOfBenefit.SupportingInformationComponent>>of(
+    return Stream.of(
             pharmacyServiceTypeCode.map(c -> c.toFhir(supportingInfoFactory)),
             claimPrescriptionOriginCode.map(c -> c.toFhir(supportingInfoFactory)),
             brandGenericCode.map(s -> s.toFhir(supportingInfoFactory)),
