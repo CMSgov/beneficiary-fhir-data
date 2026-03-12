@@ -19,11 +19,19 @@ Below are the steps taken to generate the partner's preferences files:
 
 ### Quirks and Features
 
-- Scheduled (daily) execution to fetch timely beneficiary preference data
-- Queries, response files, and file names are supported by maintainable templates
-- Supports _historical_ cross-reference relationships: a beneficiary's preference today are automatically applied to their previous identifiers
+- Scheduled (twice-daily) execution to fetch timely beneficiary preference data
+  - Monday through Saturday at 1017 UTC and 2217 UTC ([05|06]17 and [21|22]17 for EST|EDT)
+  - Sundays are excluded with no evidence of preference inserts occurring on a Sunday to the beginning of the preference data
+  ```sql
+  select count(*), dayofweek(idr_insrt_ts), dayname(idr_insrt_ts)
+  from idrc_prd.cms_vdm_view_mdcr_prd.v2_mdcr_bene_shrng_prefnc
+  group by dayofweek(idr_insrt_ts), dayname(idr_insrt_ts)
+  order by dayofweek(idr_insrt_ts)
+  ```
+- Queries, response files, and file names are supported by maintainable templates including
+- Supports _historical_ cross-reference relationships: a beneficiary's preference today are automatically applied to their previous identifiers using BFD's tested logic for bene cross-references
 
 ### Future Work
 As of this writing, this **does not** support prospective/forward-looking cross-references automatically.
-That is, if a beneficiary is issued a new MBI today, the beneficary's preferences associated with their _previous_ (historical) MBI (or MBIs) may not follow.
-We're working to a solution for this in the near term as soon as the initial version supports parity with the existing EFT process is in production.
+That is, if a beneficiary opts out of data sharing **today** and they are issued a new MBI **tomorrow**, there is no automatic linking of that new MBI to their preferences record.
+A solution will be available shortly after parity with the existing EFT-based process has been reached in production.
