@@ -197,8 +197,8 @@ class PartnerPreferences:
             store_local: When `True`, store preferences locally. Default is `False`.
             store_remote: When `True`, write the preferences to S3. Default is `True`.
         """
-        query_since_timestamp = timestamp_range[0]
-        query_until_timestamp = timestamp_range[1]
+        query_since_timestamp = timestamp_range[0] or self.last_execution
+        query_until_timestamp = timestamp_range[1] or datetime.now(UTC).isoformat()
 
         self._logger.info(
             f"Rendering query template {self.query_template.filename} with query_since_timestamp={query_since_timestamp}, query_until_timestamp={query_until_timestamp}"

@@ -48,11 +48,7 @@ from
 where bene_shrng_prefnc_type_cd = 'MED'                                         {#- NOTE: only fetch 'MED' Coded preferences for BCDA #}
     and idr_trans_obslt_ts = TO_DATE('9999-12-31', 'YYYY-MM-DD')                {#- NOTE: only fetch the latest preference record #}
     and bene_shrng_prefnc_trmntn_dt = TO_DATE('9999-12-31', 'YYYY-MM-DD') {#- NOTE: only fetch preferences that haven't yet been terminated #}
-{%- if query_since_timestamp != '' and query_until_timestamp != '' %}
     and idr_insrt_ts BETWEEN to_timestamp('{{query_since_timestamp}}') AND to_timestamp('{{query_until_timestamp}}')
-{%- else %}
-    and to_date(idr_insrt_ts) = current_date()
-{%- endif %}
 )
 select distinct
     bh.bene_mbi_id,
