@@ -1,6 +1,6 @@
-{{ 'HDR_BENEDATASHR' }}{{ extract_date }}
+{{ 'HDR_BENEDATARSP' }}{{ extract_date }}
 {% for row in data %}
-{{- '%-11s'  | format(row['MBI']        | default('', True)) }}
-{{- '%-1s'   | format(row['PREFINDTOR'] | default('', True)) }}
+{{- '%-11s' | format(row['BENE_MBI_ID']                 | default('', True)) }}
+{{- '%-1s'  | format(row['BENE_SHRNG_PREFNC_OPT_IN_SW'] | default('', True)) }}
 {% endfor %}
-{{- 'TRL_BENEDATASHR' }}{{- extract_date }}{{- '%010d' | format(data | length) }}
+{{- 'TRL_BENEDATARSP' }}{{- extract_date }}{{- '%010d' | format(data | length) }}
