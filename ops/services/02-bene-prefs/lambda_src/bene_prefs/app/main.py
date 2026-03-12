@@ -134,6 +134,22 @@ class PartnerPreferences:
         """Return a 'P' for production or a T for test."""
         return "P" if BFD_ENV == "prod" else "T"
 
+    @property
+    def partner_code(self) -> str:
+        """Return partner-specific preferences code."""
+        codes = {
+            "ab2d": "MED_AB2D",
+            "bcda": "MED",
+            "dpc": "MED_DPC"
+        }
+        try:
+           code = codes[self.partner]
+        except KeyError as exc:
+            self._logger.exception(f"Invalid partner: {exc}")
+            raise
+
+        return code
+
     def _set_last_execution(self, timestamp: str | None = None) -> None:
         latest_timestamp = timestamp or datetime.now(UTC).isoformat()
 
@@ -205,6 +221,7 @@ class PartnerPreferences:
         )
 
         query = self.query_template.render(
+            partner_code=self.partner_code,
             query_since_timestamp=query_since_timestamp,
             query_until_timestamp=query_until_timestamp,
         )

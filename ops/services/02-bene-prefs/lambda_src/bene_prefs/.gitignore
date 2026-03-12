@@ -4,6 +4,7 @@
 !README.md
 !app/__init__.py
 !app/main.py
+!app/templates/_sql.j2
 !app/templates/ab2d.file-name.j2
 !app/templates/ab2d.prefs.j2
 !app/templates/ab2d.sql.j2
