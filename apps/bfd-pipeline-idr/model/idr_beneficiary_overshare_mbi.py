@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Annotated
+from typing import Annotated, override
 
 from load_partition import LoadPartition
 from loader import LoadMode
@@ -13,26 +13,31 @@ from model.base_model import (
 class IdrBeneficiaryOvershareMbi(IdrBaseModel):
     bene_mbi_id: Annotated[str, {PRIMARY_KEY: True}]
 
+    @override
     @staticmethod
     def table() -> str:
         return "idr.beneficiary_overshare_mbi"
 
+    @override
     @staticmethod
     def should_replace() -> bool:
         return True
 
+    @override
     @staticmethod
     def last_updated_date_column() -> list[str]:
         return []
 
+    @override
     @staticmethod
     def model_type() -> ModelType:
         return ModelType.BENEFICIARY
 
+    @override
     @classmethod
     def fetch_query(
         cls, partition: LoadPartition, start_time: datetime, load_mode: LoadMode
-    ) -> str:  # noqa: ARG004
+    ) -> str:
         # The xref data in the bene_hstry table is not completely reliable
         # because sometimes HICNs can be reused, causing two records to be
         # xref'd even if they're not the same person.

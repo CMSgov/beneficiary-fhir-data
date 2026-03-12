@@ -1,14 +1,12 @@
-from collections.abc import Sequence
 from datetime import date, datetime
-from typing import Annotated
+from typing import Annotated, override
 
 from pydantic import BeforeValidator
 
 from constants import (
     DEFAULT_MAX_DATE,
-    PROFESSIONAL_ADJUDICATED_PARTITIONS,
 )
-from load_partition import LoadPartition, LoadPartitionGroup
+from load_partition import LoadPartition
 from loader import LoadMode
 from model.base_model import (
     ALIAS,
@@ -241,22 +239,22 @@ class IdrClaimItemProfessionalNch(IdrBaseModel):
         BeforeValidator(transform_default_string),
     ]
 
+    @override
     @staticmethod
     def table() -> str:
         return "idr.claim_item_professional_nch"
 
+    @override
     @staticmethod
     def last_updated_date_column() -> list[str]:
         return ["bfd_claim_updated_ts"]
 
-    @staticmethod
-    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
-        return PROFESSIONAL_ADJUDICATED_PARTITIONS
-
+    @override
     @staticmethod
     def model_type() -> ModelType:
         return ModelType.NCH_PROFESSIONAL_CLAIM
 
+    @override
     @classmethod
     def fetch_query(
         cls, partition: LoadPartition, start_time: datetime, load_mode: LoadMode

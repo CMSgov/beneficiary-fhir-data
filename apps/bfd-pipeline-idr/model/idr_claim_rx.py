@@ -1,5 +1,5 @@
 from datetime import date, datetime
-from typing import Annotated
+from typing import Annotated, override
 
 from pydantic import BeforeValidator
 
@@ -230,18 +230,22 @@ class IdrClaimRx(IdrBaseModel):
         BeforeValidator(transform_default_string),
     ]
 
+    @override
     @staticmethod
     def table() -> str:
         return CLAIM_RX_TABLE
 
+    @override
     @staticmethod
     def last_updated_date_column() -> list[str]:
         return ["bfd_claim_updated_ts"]
 
+    @override
     @staticmethod
     def model_type() -> ModelType:
         return ModelType.RX_CLAIM
 
+    @override
     @classmethod
     def fetch_query(
         cls, partition: LoadPartition, start_time: datetime, load_mode: LoadMode

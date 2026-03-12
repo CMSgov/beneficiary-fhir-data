@@ -1,5 +1,5 @@
 from datetime import date, datetime
-from typing import Annotated
+from typing import Annotated, override
 
 from pydantic import BeforeValidator
 
@@ -78,26 +78,31 @@ class IdrBeneficiary(IdrBaseModel):
         BeforeValidator(transform_null_date_to_min),
     ]
 
+    @override
     @staticmethod
     def table() -> str:
         return BENEFICIARY_TABLE
 
+    @override
     @staticmethod
     def computed_keys() -> list[str]:
         return ["bene_xref_efctv_sk_computed"]
 
+    @override
     @staticmethod
     def last_updated_date_column() -> list[str]:
         return ["bfd_patient_updated_ts"]
 
+    @override
     @staticmethod
     def model_type() -> ModelType:
         return ModelType.BENEFICIARY
 
+    @override
     @classmethod
     def fetch_query(
         cls, partition: LoadPartition, start_time: datetime, load_mode: LoadMode
-    ) -> str:  # noqa: ARG004
+    ) -> str:
         hstry = ALIAS_HSTRY
         xref = ALIAS_XREF
         # There can be multiple xref records for the same bene_sk/bene_ref_sk combo

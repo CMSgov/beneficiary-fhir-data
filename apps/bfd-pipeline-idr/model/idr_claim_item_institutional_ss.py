@@ -1,5 +1,5 @@
 from datetime import date, datetime
-from typing import Annotated
+from typing import Annotated, override
 
 from pydantic import BeforeValidator
 
@@ -261,18 +261,22 @@ class IdrClaimItemInstitutionalSs(IdrBaseModel):
     #     BeforeValidator(transform_null_date_to_min),
     # ]
 
+    @override
     @staticmethod
     def table() -> str:
         return "idr.claim_item_institutional_ss"
 
+    @override
     @staticmethod
     def last_updated_date_column() -> list[str]:
         return ["bfd_claim_updated_ts"]
 
+    @override
     @staticmethod
     def model_type() -> ModelType:
         return ModelType.SS_INSTITUTIONAL_CLAIM
 
+    @override
     @classmethod
     def fetch_query(
         cls, partition: LoadPartition, start_time: datetime, load_mode: LoadMode

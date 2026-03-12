@@ -1,5 +1,5 @@
 from datetime import date, datetime
-from typing import Annotated
+from typing import Annotated, override
 
 from pydantic import BeforeValidator
 
@@ -42,18 +42,22 @@ class IdrBeneficiaryMaPartDEnrollmentRx(IdrBaseModel):
         datetime, {UPDATE_TIMESTAMP: True}, BeforeValidator(transform_null_date_to_min)
     ]
 
+    @override
     @staticmethod
     def table() -> str:
         return "idr.beneficiary_ma_part_d_enrollment_rx"
 
+    @override
     @staticmethod
     def last_updated_date_column() -> list[str]:
         return ["bfd_part_d_coverage_updated_ts"]
 
+    @override
     @staticmethod
     def model_type() -> ModelType:
         return ModelType.BENEFICIARY
 
+    @override
     @classmethod
     def fetch_query(
         cls, partition: LoadPartition, start_time: datetime, load_mode: LoadMode

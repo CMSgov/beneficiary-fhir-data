@@ -1,4 +1,5 @@
 from datetime import UTC, datetime
+from typing import override
 
 from load_partition import LoadPartition
 from loader import LoadMode
@@ -17,18 +18,22 @@ class LoadProgress(IdrBaseModel):
     def query_placeholder() -> str:
         return "table_name"
 
+    @override
     @staticmethod
     def table() -> str:
         return "idr.load_progress"
 
+    @override
     @staticmethod
     def last_updated_date_column() -> list[str]:
         return []
 
+    @override
     @staticmethod
     def model_type() -> ModelType:
         return ModelType.LOAD_PROGRESS
 
+    @override
     @classmethod
     def fetch_query(
         cls, partition: LoadPartition, start_time: datetime, load_mode: LoadMode

@@ -1,5 +1,5 @@
 from datetime import date, datetime
-from typing import Annotated
+from typing import Annotated, override
 
 from pydantic import BeforeValidator
 
@@ -33,18 +33,22 @@ class IdrContractPbpContact(IdrBaseModel):
     cntrct_plan_cntct_state_cd: Annotated[str, BeforeValidator(transform_default_string)]
     cntrct_plan_cntct_zip_cd: Annotated[str, BeforeValidator(transform_default_string)]
 
+    @override
     @staticmethod
     def table() -> str:
         return "idr.contract_pbp_contact"
 
+    @override
     @staticmethod
     def last_updated_date_column() -> list[str]:
         return []
 
+    @override
     @staticmethod
     def model_type() -> ModelType:
         return ModelType.BENEFICIARY
 
+    @override
     @classmethod
     def fetch_query(
         cls, partition: LoadPartition, start_time: datetime, load_mode: LoadMode
