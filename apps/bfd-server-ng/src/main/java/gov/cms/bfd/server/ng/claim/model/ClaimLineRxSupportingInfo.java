@@ -54,7 +54,7 @@ class ClaimLineRxSupportingInfo {
             compoundCode.map(s -> s.toFhir(supportingInfoFactory)),
             Optional.of(daysSupply.toFhir(supportingInfoFactory)),
             Optional.of(fillNumber.toFhir(supportingInfoFactory)),
-            claimDispenseAsWrittenProdSelectCode.toFhir(supportingInfoFactory),
+            Optional.of(claimDispenseAsWrittenProdSelectCode.toFhir(supportingInfoFactory)),
             drugCoverageStatusCode.map(s -> s.toFhir(supportingInfoFactory)),
             catastrophicCovCode.map(s -> s.toFhir(supportingInfoFactory)))
         .flatMap(Optional::stream)
