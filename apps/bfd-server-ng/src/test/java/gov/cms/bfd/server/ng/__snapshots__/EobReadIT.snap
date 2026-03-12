@@ -2895,11 +2895,11 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
     "role" : {
       "coding" : [ {
         "code" : "referring",
-        "display" : "Referring provider",
+        "display" : "Referring",
         "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole"
       }, {
         "code" : "referring",
-        "display" : "Referring provider",
+        "display" : "Referring",
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
       } ]
     },
@@ -3535,11 +3535,11 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
     "role" : {
       "coding" : [ {
         "code" : "referring",
-        "display" : "Referring provider",
+        "display" : "Referring",
         "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole"
       }, {
         "code" : "referring",
-        "display" : "Referring provider",
+        "display" : "Referring",
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
       } ]
     },
@@ -4815,12 +4815,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
       "coding" : [ {
         "code" : "W5813XD",
         "system" : "http://hl7.org/fhir/sid/icd-9-cm"
-      } ]
-    },
-    "onAdmission" : {
-      "coding" : [ {
-        "code" : "0",
-        "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding"
       } ]
     },
     "sequence" : 8,
@@ -6394,12 +6388,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
       "coding" : [ {
         "code" : "W5813XD",
         "system" : "http://hl7.org/fhir/sid/icd-9-cm"
-      } ]
-    },
-    "onAdmission" : {
-      "coding" : [ {
-        "code" : "0",
-        "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding"
       } ]
     },
     "sequence" : 8,

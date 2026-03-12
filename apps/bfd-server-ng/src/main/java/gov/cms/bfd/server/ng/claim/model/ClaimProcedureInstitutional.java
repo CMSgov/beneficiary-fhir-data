@@ -68,19 +68,21 @@ public class ClaimProcedureInstitutional extends ClaimProcedureBase {
 
     diagnosis.ifPresent(
         diagnosisComponent ->
-            this.claimPoaIndicator.ifPresent(
-                poaCode -> {
-                  var onAdmissionConcept = new CodeableConcept();
-                  poaCode
-                      .chars()
-                      .forEach(
-                          c ->
-                              onAdmissionConcept
-                                  .addCoding()
-                                  .setSystem(SystemUrls.POA_CODING)
-                                  .setCode(Character.toString(c)));
-                  diagnosisComponent.setOnAdmission(onAdmissionConcept);
-                }));
+            this.claimPoaIndicator
+                .filter(poaCode -> !"0".equals(poaCode))
+                .ifPresent(
+                    poaCode -> {
+                      var onAdmissionConcept = new CodeableConcept();
+                      poaCode
+                          .chars()
+                          .forEach(
+                              c ->
+                                  onAdmissionConcept
+                                      .addCoding()
+                                      .setSystem(SystemUrls.POA_CODING)
+                                      .setCode(Character.toString(c)));
+                      diagnosisComponent.setOnAdmission(onAdmissionConcept);
+                    }));
 
     return diagnosis;
   }

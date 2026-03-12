@@ -605,12 +605,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "http://hl7.org/fhir/sid/icd-9-cm"
           } ]
         },
-        "onAdmission" : {
-          "coding" : [ {
-            "code" : "0",
-            "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding"
-          } ]
-        },
         "sequence" : 3,
         "type" : [ {
           "coding" : [ {
@@ -743,12 +737,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
           "coding" : [ {
             "code" : "F55.2",
             "system" : "http://hl7.org/fhir/sid/icd-10-cm"
-          } ]
-        },
-        "onAdmission" : {
-          "coding" : [ {
-            "code" : "0",
-            "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding"
           } ]
         },
         "sequence" : 10,
@@ -7084,12 +7072,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "http://hl7.org/fhir/sid/icd-10-cm"
           } ]
         },
-        "onAdmission" : {
-          "coding" : [ {
-            "code" : "0",
-            "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding"
-          } ]
-        },
         "sequence" : 10,
         "type" : [ {
           "coding" : [ {
@@ -10624,11 +10606,11 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "role" : {
           "coding" : [ {
             "code" : "referring",
-            "display" : "Referring provider",
+            "display" : "Referring",
             "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole"
           }, {
             "code" : "referring",
-            "display" : "Referring provider",
+            "display" : "Referring",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
           } ]
         },
@@ -14804,12 +14786,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "http://hl7.org/fhir/sid/icd-10-cm"
           } ]
         },
-        "onAdmission" : {
-          "coding" : [ {
-            "code" : "0",
-            "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding"
-          } ]
-        },
         "sequence" : 10,
         "type" : [ {
           "coding" : [ {
@@ -18344,11 +18320,11 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "role" : {
           "coding" : [ {
             "code" : "referring",
-            "display" : "Referring provider",
+            "display" : "Referring",
             "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole"
           }, {
             "code" : "referring",
-            "display" : "Referring provider",
+            "display" : "Referring",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
           } ]
         },
