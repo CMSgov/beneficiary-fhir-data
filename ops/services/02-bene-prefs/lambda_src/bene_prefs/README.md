@@ -35,3 +35,40 @@ Below are the steps taken to generate the partner's preferences files:
 As of this writing, this **does not** support prospective/forward-looking cross-references automatically.
 That is, if a beneficiary opts out of data sharing **today** and they are issued a new MBI **tomorrow**, there is no automatic linking of that new MBI to their preferences record.
 A solution will be available shortly after parity with the existing EFT-based process has been reached in production.
+
+## Development
+### Initial Setup
+1. Run `uv sync` to install packages and provision the local `.venv`.
+2. Subsequent steps assume you're shell has either
+  - executed `source .venv/bin/activate`
+  - prefix execution with `uv run`, e.g. `uv run python` for the appropriate interpreter
+
+### Exploratory Testing
+This is intended as a short-term solution that we don't expect to iterate on in the future.
+Given the limited investment and complexities surrounding test data avilability (or lack thereof), manual/exploratory testing is used.
+A python repl with something like the below may be helpful when evaluting production data:
+
+``` python
+# executed from an authenticated shell with the production BFD account
+from app.main import PartnerPreferences
+    ab2d = PartnerPreferences("ab2d")
+    ab2d.generate_preferences(
+        set_last_execution=False,
+        store_local=True,
+        store_remote=False
+    )
+
+    bcda = PartnerPreferences("bcda")
+    bcda.generate_preferences(
+        set_last_execution=False,
+        store_local=True,
+        store_remote=False
+    )
+
+    dpc = PartnerPreferences("dpc")
+    dpc.generate_preferences(
+        set_last_execution=False,
+        store_local=True,
+        store_remote=False
+    )
+```
