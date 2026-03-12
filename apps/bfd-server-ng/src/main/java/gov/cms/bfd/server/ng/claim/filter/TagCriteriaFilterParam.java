@@ -3,7 +3,7 @@ package gov.cms.bfd.server.ng.claim.filter;
 import gov.cms.bfd.server.ng.DbFilter;
 import gov.cms.bfd.server.ng.DbFilterBuilder;
 import gov.cms.bfd.server.ng.DbFilterParam;
-import gov.cms.bfd.server.ng.claim.model.ClaimSourceId;
+import gov.cms.bfd.server.ng.claim.model.MetaSourceSk;
 import gov.cms.bfd.server.ng.claim.model.SystemType;
 import gov.cms.bfd.server.ng.input.TagCriterion;
 import java.util.ArrayList;
@@ -50,11 +50,11 @@ public record TagCriteriaFilterParam(List<List<TagCriterion>> tagCriteria)
       ArrayList<DbFilterParam> params) {
     var paramName = "tag_" + i + "_" + j;
     switch (criterion) {
-      case TagCriterion.SourceIdCriterion(var sourceId) -> {
-        if (systemType.isCompatibleWith(sourceId)) {
+      case TagCriterion.MetaSourceSkCriterion(var metaSrcSk) -> {
+        if (systemType.isCompatibleWith(metaSrcSk)) {
           if (systemType == SystemType.SS) {
-            clauses.add(claimTableAlias + ".claimSourceId = :tag_" + i + "_" + j);
-            params.add(new DbFilterParam(paramName, sourceId));
+            clauses.add(claimTableAlias + ".metaSourceSk = :tag_" + i + "_" + j);
+            params.add(new DbFilterParam(paramName, metaSrcSk));
           }
         } else {
           // If the system is incompatible, we set this filter to FALSE since it shouldn't match
@@ -89,9 +89,9 @@ public record TagCriteriaFilterParam(List<List<TagCriterion>> tagCriteria)
         .anyMatch(systemType::isCompatibleWith);
   }
 
-  private void extractSourceId(TagCriterion criterion, Consumer<ClaimSourceId> consumer) {
-    if (criterion instanceof TagCriterion.SourceIdCriterion(ClaimSourceId sourceId)) {
-      consumer.accept(sourceId);
+  private void extractSourceId(TagCriterion criterion, Consumer<MetaSourceSk> consumer) {
+    if (criterion instanceof TagCriterion.MetaSourceSkCriterion(MetaSourceSk metaSourceSk)) {
+      consumer.accept(metaSourceSk);
     }
   }
 }

@@ -1,12 +1,9 @@
 package gov.cms.bfd.server.ng.claim.model;
 
-import gov.cms.bfd.server.ng.util.IdrConstants;
-import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.util.Arrays;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /** The source of the claim. */
@@ -14,23 +11,22 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @AllArgsConstructor
 public enum ClaimSourceId {
   /** Medicaid Claims. */
-  MEDICAID("N/A", "Medicaid", Optional.empty()),
+  MEDICAID("N/A", "Medicaid"),
   /** NCH Claims. */
-  NATIONAL_CLAIMS_HISTORY("20000", "NCH", Optional.of(IdrConstants.SYSTEM_TYPE_NCH)),
+  NATIONAL_CLAIMS_HISTORY("20000", "NCH"),
   /** FISS Claims. */
-  FISS("21000", "FISS", Optional.of(IdrConstants.SYSTEM_TYPE_SHARED)),
+  FISS("21000", "FISS"),
   /** MCS Claims. */
-  MCS("22000", "MCS", Optional.of(IdrConstants.SYSTEM_TYPE_SHARED)),
+  MCS("22000", "MCS"),
   /** VMS Claims. */
-  VMS("23000", "VMS", Optional.of(IdrConstants.SYSTEM_TYPE_SHARED)),
+  VMS("23000", "VMS"),
   /** EDPS Claims. */
-  EDPS("24000", "EDPS", Optional.empty()),
+  EDPS("24000", "EDPS"),
   /** Dual claims. */
-  ENCOUNTER_MEDICAID_DUALS("25000", "EncounterMedicaidDuals", Optional.empty());
+  ENCOUNTER_MEDICAID_DUALS("25000", "EncounterMedicaidDuals");
 
   private final String id;
   private final String source;
-  private final Optional<String> systemType;
 
   /**
    * Converts from a database identifier.
@@ -43,11 +39,6 @@ public enum ClaimSourceId {
         .filter(c -> c.id.equals(id))
         .findFirst()
         .orElseThrow(() -> new IllegalArgumentException("Unknown ClaimSourceId: " + id));
-  }
-
-  Optional<Coding> toFhirSystemType() {
-    return systemType.map(
-        s -> new Coding().setSystem(SystemUrls.BLUE_BUTTON_SYSTEM_TYPE).setCode(s));
   }
 
   Optional<ExplanationOfBenefit.RemittanceOutcome> toFhirOutcome() {

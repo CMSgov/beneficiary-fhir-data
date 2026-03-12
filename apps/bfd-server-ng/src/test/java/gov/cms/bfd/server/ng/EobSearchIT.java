@@ -11,7 +11,6 @@ import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import gov.cms.bfd.server.ng.claim.model.ClaimFinalAction;
-import gov.cms.bfd.server.ng.claim.model.ClaimSourceId;
 import gov.cms.bfd.server.ng.claim.model.ClaimSubtype;
 import gov.cms.bfd.server.ng.claim.model.MetaSourceSk;
 import gov.cms.bfd.server.ng.eob.EobResourceProvider;
@@ -89,7 +88,7 @@ class EobSearchIT extends IntegrationTestBase {
                     .identifier(BENE_ID_ALL_PARTS_WITH_XREF))
             .usingStyle(searchStyle)
             .execute();
-    assertEquals(5, eobBundle.getEntry().size());
+    assertEquals(6, eobBundle.getEntry().size());
     expectFhir().scenario(searchStyle.name()).toMatchSnapshot(eobBundle);
   }
 
@@ -158,7 +157,7 @@ class EobSearchIT extends IntegrationTestBase {
                     .afterOrEquals()
                     .day(DateUtil.toDate(lastUpdated)))
             .execute();
-    assertEquals(5, eobBundle.getEntry().size());
+    assertEquals(6, eobBundle.getEntry().size());
 
     eobBundle =
         searchBundle()
@@ -233,33 +232,37 @@ class EobSearchIT extends IntegrationTestBase {
                         3,
                         style),
                     Arguments.of(
+                        "WithTag_DDPS",
+                        List.of(List.of(tag(SystemUrls.BLUE_BUTTON_SYSTEM_TYPE, "DDPS"))),
+                        1,
+                        style),
+                    Arguments.of(
                         "WithTagFinalActionAndSharedSystem",
                         List.of(
-                            List.of(sourceId(ClaimSourceId.FISS)),
+                            List.of(systemType(MetaSourceSk.FISS)),
                             List.of(finalAction(ClaimFinalAction.YES))),
                         2,
                         style),
                     Arguments.of(
                         "WithIncompatibleTags",
                         List.of(
-                            List.of(sourceId(ClaimSourceId.FISS)),
-                            List.of(sourceId(ClaimSourceId.NATIONAL_CLAIMS_HISTORY))),
+                            List.of(systemType(MetaSourceSk.FISS)),
+                            List.of(systemType(MetaSourceSk.NCH))),
                         0,
                         style),
                     Arguments.of(
                         "WithCombinedTagOr",
                         List.of(
                             List.of(
-                                sourceId(ClaimSourceId.NATIONAL_CLAIMS_HISTORY),
-                                finalAction(ClaimFinalAction.YES))),
-                        4,
+                                systemType(MetaSourceSk.NCH), finalAction(ClaimFinalAction.YES))),
+                        5,
                         style),
                     Arguments.of(
                         "WithSystemTag_FinalAction",
                         List.of(
                             List.of(
                                 tag(SystemUrls.BLUE_BUTTON_FINAL_ACTION_STATUS, "FinalAction"))),
-                        4,
+                        5,
                         style)));
   }
 
@@ -306,8 +309,8 @@ class EobSearchIT extends IntegrationTestBase {
     return new Coding(system, code, null);
   }
 
-  private static Coding sourceId(ClaimSourceId sourceId) {
-    return tag(SystemUrls.BLUE_BUTTON_SYSTEM_TYPE, sourceId.getSystemType().get());
+  private static Coding systemType(MetaSourceSk metaSourceSk) {
+    return tag(SystemUrls.BLUE_BUTTON_SYSTEM_TYPE, metaSourceSk.getSystemType());
   }
 
   private static Coding finalAction(ClaimFinalAction finalAction) {
@@ -370,13 +373,12 @@ class EobSearchIT extends IntegrationTestBase {
             .usingStyle(searchStyle)
             .execute();
 
-    assertEquals(5, eobBundleWildcard.getEntry().size(), "Should find ALL EOBs for '*' type");
+    assertEquals(6, eobBundleWildcard.getEntry().size(), "Should find ALL EOBs for '*' type");
     expectFhir().scenario(searchStyle.name() + "_WithWildcard").toMatchSnapshot(eobBundleWildcard);
 
     String[] zeroResultClaimTypes = {
       ClaimSubtype.DME.getCode(),
       ClaimSubtype.SNF.getCode(),
-      ClaimSubtype.PDE.getCode(),
       ClaimSubtype.HOSPICE.getCode(),
       ClaimSubtype.INPATIENT.getCode()
     };
@@ -465,6 +467,11 @@ class EobSearchIT extends IntegrationTestBase {
                         2,
                         style),
                     Arguments.of(
+                        "WithSource_DDPS",
+                        List.of(List.of(MetaSourceSk.DDPS.getDisplay())),
+                        1,
+                        style),
+                    Arguments.of(
                         "WithCombinedSourceAnd",
                         List.of(List.of("DDPS"), List.of("NCH")),
                         0,
@@ -480,7 +487,7 @@ class EobSearchIT extends IntegrationTestBase {
                             List.of(
                                 MetaSourceSk.DDPS.getDisplay().toLowerCase(),
                                 MetaSourceSk.NCH.getDisplay())),
-                        2,
+                        3,
                         style)));
   }
 
