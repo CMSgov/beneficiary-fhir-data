@@ -142,9 +142,13 @@ public class ClaimRx extends ClaimBase {
   }
 
   private Optional<ExplanationOfBenefit.AdjudicationComponent> headerAdjudicationComponent() {
-    var reasonCode = pricingCode.map(ClaimPricingReasonCode::toFhir);
+    if (pricingCode.isEmpty()) {
+      return Optional.empty();
+    }
+
+    var reasonCode = pricingCode.get().toFhir();
     var reasonCodeableConcept = new CodeableConcept();
-    reasonCode.ifPresent(reasonCodeableConcept::addCoding);
+    reasonCodeableConcept.addCoding(reasonCode);
 
     return Optional.of(
         new ExplanationOfBenefit.AdjudicationComponent()
