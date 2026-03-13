@@ -1,16 +1,12 @@
 package gov.cms.bfd.server.ng.claim.model;
 
-import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Transient;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Stream;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 @Embeddable
@@ -39,9 +35,6 @@ class ClaimLineAdjudicationChargeRx {
   @Column(name = "clm_line_grs_above_thrshld_amt")
   private BigDecimal grossCostAboveThresholdAmount;
 
-  @Column(name = "clm_prcng_excptn_cd")
-  private Optional<ClaimPricingReasonCode> pricingCode;
-
   @Column(name = "clm_line_rptd_gap_dscnt_amt")
   private BigDecimal reportedGapDiscountAmount;
 
@@ -68,24 +61,7 @@ class ClaimLineAdjudicationChargeRx {
                     reportedGapDiscountAmount),
                 AdjudicationChargeType.TOTAL_DRUG_COST_AMOUNT.toFhirAdjudication(
                     getTotalDrugCost())));
-    toAdjudicationComponent().ifPresent(adjudicationComponent::add);
 
     return adjudicationComponent;
-  }
-
-  private Optional<ExplanationOfBenefit.AdjudicationComponent> toAdjudicationComponent() {
-    var reasonCode = pricingCode.map(ClaimPricingReasonCode::toFhir);
-    var reasonCodeableConcept = new CodeableConcept();
-    reasonCode.ifPresent(reasonCodeableConcept::addCoding);
-
-    return Optional.of(
-        new ExplanationOfBenefit.AdjudicationComponent()
-            .setCategory(
-                new CodeableConcept(
-                    new Coding()
-                        .setSystem(SystemUrls.CARIN_CODE_SYSTEM_ADJUDICATION_DISCRIMINATOR)
-                        .setCode("benefitpaymentstatus")
-                        .setDisplay("Benefit Payment Status")))
-            .setReason(reasonCodeableConcept));
   }
 }
