@@ -429,7 +429,7 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
     @override
     @staticmethod
     def model_type() -> ModelType:
-        return ModelType.SS_INSTITUTIONAL_CLAIM
+        return ModelType.CLAIM_INSTITUTIONAL_SS
 
     @override
     @classmethod

@@ -32,7 +32,7 @@ PART_D_PARTITIONS = [
     LoadPartitionGroup("part_d_adjustment", [2, 3, 4], PartitionType.PART_D, partition_range),
 ]
 
-INSTITUTIONAL_ADJUDICATED_PARTITIONS = [
+INSTITUTIONAL_NCH_PARTITIONS = [
     # Outpatient
     LoadPartitionGroup("outpatient", [40], PartitionType.INSTITUTIONAL, partition_range),
     # HHA, SNF, Hospice, Inpatient, MA
@@ -44,7 +44,7 @@ INSTITUTIONAL_ADJUDICATED_PARTITIONS = [
     ),
 ]
 
-INSTITUTIONAL_PAC_PARTITIONS = [
+INSTITUTIONAL_SS_PARTITIONS = [
     LoadPartitionGroup(
         "institututional_pac",
         [
@@ -156,7 +156,7 @@ INSTITUTIONAL_PAC_PARTITIONS = [
     )
 ]
 
-PROFESSIONAL_ADJUDICATED_PARTITIONS = [
+PROFESSIONAL_NCH_PARTITIONS = [
     LoadPartitionGroup(
         "professional",
         [71, 72, 81, 82],
@@ -165,7 +165,7 @@ PROFESSIONAL_ADJUDICATED_PARTITIONS = [
     ),
 ]
 
-PROFESSIONAL_PAC_PARTITIONS = [
+PROFESSIONAL_SS_PARTITIONS = [
     LoadPartitionGroup(
         "professional_pac",
         [1700, 1800, 2700, 2800],
@@ -177,10 +177,10 @@ PROFESSIONAL_PAC_PARTITIONS = [
 
 ALL_CLAIM_PARTITIONS = [
     *PART_D_PARTITIONS,
-    *INSTITUTIONAL_ADJUDICATED_PARTITIONS,
-    *INSTITUTIONAL_PAC_PARTITIONS,
-    *PROFESSIONAL_ADJUDICATED_PARTITIONS,
-    *PROFESSIONAL_PAC_PARTITIONS,
+    *INSTITUTIONAL_NCH_PARTITIONS,
+    *INSTITUTIONAL_SS_PARTITIONS,
+    *PROFESSIONAL_NCH_PARTITIONS,
+    *PROFESSIONAL_SS_PARTITIONS,
 ]
 
 ALL_CLAIM_TYPE_CODES = [code for c in ALL_CLAIM_PARTITIONS for code in c.claim_type_codes]

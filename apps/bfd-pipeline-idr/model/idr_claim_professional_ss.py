@@ -284,7 +284,7 @@ class IdrClaimProfessionalSs(IdrBaseModel):
     @override
     @staticmethod
     def model_type() -> ModelType:
-        return ModelType.SS_PROFESSIONAL_CLAIM
+        return ModelType.CLAIM_PROFESSIONAL_SS
 
     @override
     @classmethod

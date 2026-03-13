@@ -243,7 +243,7 @@ class IdrClaimRx(IdrBaseModel):
     @override
     @staticmethod
     def model_type() -> ModelType:
-        return ModelType.RX_CLAIM
+        return ModelType.CLAIM_RX
 
     @override
     @classmethod

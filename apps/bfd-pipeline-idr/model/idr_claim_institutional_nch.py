@@ -447,7 +447,7 @@ class IdrClaimInstitutionalNch(IdrBaseModel):
     @override
     @staticmethod
     def model_type() -> ModelType:
-        return ModelType.NCH_INSTITUTIONAL_CLAIM
+        return ModelType.CLAIM_INSTITUTIONAL_NCH
 
     @override
     @classmethod
