@@ -57,5 +57,5 @@ class IdrBeneficiaryOvershareMbi(IdrBaseModel):
                      AND xref.bene_kill_cred_cd = '2'
                ) AND hstry.bene_mbi_id IS NOT NULL
                GROUP BY hstry.bene_mbi_id
-               HAVING COUNT(DISTINCT hstry.bene_sk) > 1 \
+               HAVING COUNT(DISTINCT hstry.bene_sk) > 1
                """

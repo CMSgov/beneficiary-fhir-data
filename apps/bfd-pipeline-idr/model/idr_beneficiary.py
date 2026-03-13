@@ -15,6 +15,7 @@ from model.base_model import (
     BATCH_ID,
     BATCH_TIMESTAMP,
     COLUMN_MAP,
+    EXPR,
     LAST_UPDATED_TIMESTAMP,
     PRIMARY_KEY,
     UPDATE_TIMESTAMP,
@@ -33,7 +34,26 @@ class IdrBeneficiary(IdrBaseModel):
         int,
         {PRIMARY_KEY: True, BATCH_ID: True, ALIAS: ALIAS_HSTRY, LAST_UPDATED_TIMESTAMP: True},
     ]
-    bene_xref_efctv_sk: int
+    bene_xref_efctv_sk: Annotated[
+        int,
+        # The merge is only valid if kill credit is present AND set to 2.
+        # If not, we should act like it's not present.
+        # Additionally, sometimes the xref_efctv_sk can be missing (set to 0 )
+        # due to upstream issues. In this case, we just treat the xref_sk and the bene_sk
+        # as the same.
+        {
+            EXPR: f"""
+            CASE
+                WHEN 
+                    {ALIAS_HSTRY}.bene_xref_efctv_sk = 0 OR 
+                    ({ALIAS_HSTRY}.bene_xref_efctv_sk != {ALIAS_HSTRY}.bene_sk 
+                        AND {ALIAS_XREF}.bene_kill_cred_cd != '2')
+                THEN {ALIAS_HSTRY}.bene_sk 
+                ELSE {ALIAS_HSTRY}.bene_xref_efctv_sk 
+            END
+            """
+        },
+    ]
     bene_mbi_id: str
     bene_1st_name: str
     bene_midl_name: Annotated[str, BeforeValidator(transform_default_string)]

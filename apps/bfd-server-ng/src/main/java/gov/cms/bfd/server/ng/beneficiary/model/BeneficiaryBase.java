@@ -28,7 +28,7 @@ public abstract class BeneficiaryBase {
   @Column(name = "bene_sk", insertable = false, updatable = false)
   protected long beneSk;
 
-  @Column(name = "bene_xref_efctv_sk_computed")
+  @Column(name = "bene_xref_efctv_sk")
   protected long xrefSk;
 
   @Column(name = "bene_brth_dt")
