@@ -19,12 +19,12 @@ ENABLE_DATE_PARTITIONS = _parse_bool_default_true("IDR_ENABLE_DATE_PARTITIONS")
 # Minimum claim date to load for NCH (and DDPS).
 # Any claims created before this date will be skipped.
 # Useful for partial loads with large amounts of data.
-MIN_CLAIM_NCH_TRANSACTION_DATE = getenv("IDR_MIN_NCH_CLAIM_TRANSACTION_DATE", MIN_CLAIM_LOAD_DATE)
+MIN_CLAIM_NCH_TRANSACTION_DATE = getenv("IDR_MIN_CLAIM_NCH_TRANSACTION_DATE", MIN_CLAIM_LOAD_DATE)
 
 # Minimum claim date to load for shared systems.
 # Any claims created before this date will be skipped.
 # Useful for partial loads with large amounts of data.
-MIN_CLAIM_SS_TRANSACTION_DATE = getenv("IDR_MIN_SS_CLAIM_TRANSACTION_DATE", MIN_CLAIM_LOAD_DATE)
+MIN_CLAIM_SS_TRANSACTION_DATE = getenv("IDR_MIN_CLAIM_SS_TRANSACTION_DATE", MIN_CLAIM_LOAD_DATE)
 
 # Partition type - year/month/day
 # This should be set to "day" in prod to reduce the batch sizes
