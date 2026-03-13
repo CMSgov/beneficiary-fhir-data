@@ -406,10 +406,6 @@ public enum ClaimTypeCode {
     return Optional.of(adjudication);
   }
 
-  private boolean isBetween(int lower, int upper) {
-    return (code >= lower) && (code <= upper);
-  }
-
   boolean isClaimSubtype(ClaimSubtype subtype) {
     return CLAIM_TYPE_CODE_MAP.getOrDefault(subtype, List.of()).contains(this);
   }

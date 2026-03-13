@@ -26,7 +26,7 @@ public class ClaimRepository {
               SELECT c
               FROM ClaimProfessionalSharedSystems c
               JOIN FETCH c.beneficiary b
-              JOIN FETCH c.claimItems AS cl
+              LEFT JOIN FETCH c.claimItems AS cl
             """;
 
   private static final String CLAIM_PROFESSIONAL_NCH =
@@ -42,7 +42,7 @@ public class ClaimRepository {
               SELECT c
               FROM ClaimInstitutionalSharedSystems c
               JOIN FETCH c.beneficiary b
-              JOIN FETCH c.claimItems AS cl
+              LEFT JOIN FETCH c.claimItems AS cl
             """;
 
   private static final String CLAIM_INSTITUTIONAL_NCH =

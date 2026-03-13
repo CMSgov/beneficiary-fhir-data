@@ -30,6 +30,7 @@ public class ClaimInstitutionalSharedSystems extends ClaimInstitutionalBase {
 
   @Embedded private ClaimDateInstitutionalSharedSystems claimDateSupportingInfo;
   @Embedded private AdjudicationChargeInstitutionalSharedSystems adjudicationCharge;
+  @Embedded private ClaimRelatedCondition claimRelatedCondition;
 
   @AttributeOverride(name = "claimRecordTypeCode", column = @Column(name = "clm_ric_cd"))
   @Embedded
@@ -106,5 +107,10 @@ public class ClaimInstitutionalSharedSystems extends ClaimInstitutionalBase {
   @Override
   public SortedSet<ClaimItemBase> getItems() {
     return new TreeSet<ClaimItemBase>(getClaimItems());
+  }
+
+  @Override
+  public Optional<ClaimRelatedCondition> getClaimRelatedCondition() {
+    return Optional.of(claimRelatedCondition);
   }
 }

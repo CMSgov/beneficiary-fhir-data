@@ -178,4 +178,9 @@ public class ClaimRx extends ClaimBase {
     items.add(getClaimItems());
     return items;
   }
+
+  @Override
+  public Optional<ClaimRelatedCondition> getClaimRelatedCondition() {
+    return Optional.empty();
+  }
 }

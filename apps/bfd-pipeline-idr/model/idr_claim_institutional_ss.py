@@ -18,12 +18,15 @@ from model.base_model import (
     ALIAS_FISS,
     ALIAS_INSTNL,
     ALIAS_LCTN_HSTRY,
+    ALIAS_OCRNC_SGNTR_DERIVED_DATES,
     ALIAS_PRVDR_ATNDG,
     ALIAS_PRVDR_BLG,
     ALIAS_PRVDR_OPRTG,
     ALIAS_PRVDR_OTHR,
     ALIAS_PRVDR_RFRG,
     ALIAS_PRVDR_RNDRNG,
+    ALIAS_RLT_COND,
+    ALIAS_RLT_OCRNC_SGNTR_DERIVED_DATES,
     ALIAS_SGNTR,
     BATCH_ID,
     COLUMN_MAP,
@@ -35,6 +38,9 @@ from model.base_model import (
     UPDATE_FIELD,
     IdrBaseModel,
     claim_filter,
+    claim_occurrence_cte,
+    claim_related_conditions_cte,
+    claim_related_occurrences_cte,
     clm_orig_cntl_num_expr,
     provider_careteam_name_expr,
     provider_last_or_legal_name_expr,
@@ -357,6 +363,60 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
         BeforeValidator(transform_default_string),
     ]
 
+    # Columns from V2_MDCR_CLM_RLT_COND_SGNTR_MBR
+    clm_rlt_cond_cd: Annotated[
+        str, {ALIAS: ALIAS_RLT_COND}, BeforeValidator(transform_default_string)
+    ]
+    idr_insrt_ts_rlt_cond: Annotated[
+        datetime,
+        {ALIAS: ALIAS_RLT_COND, **INSERT_FIELD},
+        BeforeValidator(transform_null_date_to_min),
+    ]
+
+    # columns derived from v2_mdcr_clm_ocrnc_sgntr_mbr
+    bfd_clm_ncvrd_from_dt: Annotated[
+        date | None,
+        {ALIAS: ALIAS_OCRNC_SGNTR_DERIVED_DATES},
+        BeforeValidator(transform_default_date_to_null),
+    ]
+    bfd_clm_ncvrd_thru_dt: Annotated[
+        date | None,
+        {ALIAS: ALIAS_OCRNC_SGNTR_DERIVED_DATES},
+        BeforeValidator(transform_default_date_to_null),
+    ]
+    bfd_clm_qlfy_stay_from_dt: Annotated[
+        date | None,
+        {ALIAS: ALIAS_OCRNC_SGNTR_DERIVED_DATES},
+        BeforeValidator(transform_default_date_to_null),
+    ]
+    bfd_clm_qlfy_stay_thru_dt: Annotated[
+        date | None,
+        {ALIAS: ALIAS_OCRNC_SGNTR_DERIVED_DATES},
+        BeforeValidator(transform_default_date_to_null),
+    ]
+    idr_insrt_ts_ocrnc_sgntr: Annotated[
+        datetime,
+        {ALIAS: ALIAS_OCRNC_SGNTR_DERIVED_DATES, **INSERT_FIELD},
+        BeforeValidator(transform_null_date_to_min),
+    ]
+
+    # columns derived from v2_clm_rlt_ocrnc_sgntr_mbr
+    bfd_clm_mdcr_exhstd_dt: Annotated[
+        date | None,
+        {ALIAS: ALIAS_RLT_OCRNC_SGNTR_DERIVED_DATES},
+        BeforeValidator(transform_default_date_to_null),
+    ]
+    bfd_clm_actv_care_thru_dt: Annotated[
+        date | None,
+        {ALIAS: ALIAS_RLT_OCRNC_SGNTR_DERIVED_DATES},
+        BeforeValidator(transform_default_date_to_null),
+    ]
+    idr_insrt_ts_rlt_ocrnc_sgntr: Annotated[
+        datetime,
+        {ALIAS: ALIAS_RLT_OCRNC_SGNTR_DERIVED_DATES, **INSERT_FIELD},
+        BeforeValidator(transform_null_date_to_min),
+    ]
+
     @staticmethod
     def table() -> str:
         return CLAIM_INSTITUTIONAL_SS_TABLE
@@ -370,7 +430,7 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
         return ["bfd_claim_updated_ts"]
 
     @staticmethod
-    def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
+    def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:
         clm = ALIAS_CLM
         dcmtn = ALIAS_DCMTN
         sgntr = ALIAS_SGNTR
@@ -383,6 +443,10 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
         prvdr_blg = ALIAS_PRVDR_BLG
         prvdr_rfrg = ALIAS_PRVDR_RFRG
         prvdr_rndrg = ALIAS_PRVDR_RNDRNG
+        rlt_cond = ALIAS_RLT_COND
+        ocrnc_sgntr_dd = ALIAS_OCRNC_SGNTR_DERIVED_DATES
+        rlt_ocrnc_sgntr_dd = ALIAS_RLT_OCRNC_SGNTR_DERIVED_DATES
+        not_materialized = "" if load_mode == LoadMode.IDR else "NOT MATERIALIZED"
         return f"""
             WITH claims AS (
                 SELECT
@@ -413,7 +477,13 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
                     claims.clm_type_cd,
                     claims.clm_dt_sgntr_sk,
                     claims.clm_num_sk
-            )
+            ),
+            claim_occurrence_spans_dates AS {not_materialized} 
+                ({claim_occurrence_cte()}),
+            claim_related_occurrences_dates AS {not_materialized} 
+                ({claim_related_occurrences_cte()}),
+            claim_related_conditions AS {not_materialized} 
+                ({claim_related_conditions_cte(load_mode)})
             SELECT {{COLUMNS}}
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
             JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_dt_sgntr {sgntr} ON 
@@ -462,6 +532,12 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
             LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_prvdr_hstry {prvdr_othr} ON 
                 {prvdr_othr}.prvdr_npi_num = {clm}.prvdr_othr_prvdr_npi_num AND
                 {prvdr_othr}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
+            LEFT JOIN claim_related_conditions {rlt_cond}
+                ON {rlt_cond}.clm_rlt_cond_sgntr_sk = {clm}.clm_rlt_cond_sgntr_sk
+            LEFT JOIN claim_occurrence_spans_dates {ocrnc_sgntr_dd} 
+                ON {ocrnc_sgntr_dd}.clm_ocrnc_sgntr_sk = {clm}.clm_ocrnc_sgntr_sk
+            LEFT JOIN claim_related_occurrences_dates {rlt_ocrnc_sgntr_dd}
+                ON {rlt_ocrnc_sgntr_dd}.clm_rlt_ocrnc_sgntr_sk = {clm}.clm_rlt_ocrnc_sgntr_sk
             {{WHERE_CLAUSE}} AND {claim_filter(start_time, partition)}
             {{ORDER_BY}}
         """

@@ -109,4 +109,9 @@ public class ClaimProfessionalNch extends ClaimProfessionalBase {
   public SortedSet<ClaimItemBase> getItems() {
     return new TreeSet<ClaimItemBase>(getClaimItems());
   }
+
+  @Override
+  public Optional<ClaimRelatedCondition> getClaimRelatedCondition() {
+    return Optional.empty();
+  }
 }

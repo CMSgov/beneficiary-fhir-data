@@ -270,6 +270,8 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm (
     clm_prvdr_intrst_pd_amt NUMERIC,
     meta_src_sk NUMERIC,
     clm_pd_stus_cd VARCHAR(1),
+    clm_rlt_ocrnc_sgntr_sk INT,
+    clm_ocrnc_sgntr_sk INT,
     PRIMARY KEY (geo_bene_sk, clm_dt_sgntr_sk, clm_type_cd, clm_num_sk)
 );
 
@@ -653,6 +655,7 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_fiss_bnft_svg (
     clm_type_cd INT NOT NULL,
     clm_num_sk BIGINT NOT NULL,
     clm_line_num INT NOT NULL,
+    clm_line_bnft_svg_sqnc_num INT NOT NULL,
     clm_bnft_svg_ansi_grp_cd VARCHAR(2),
     clm_bnft_svg_ansi_rsn_cd VARCHAR(3),
     idr_insrt_ts TIMESTAMPTZ,
@@ -689,15 +692,19 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_clm_ocrnc_sgntr_mbr (
     clm_ocrnc_sgntr_sqnc_num INT NOT NULL,
     clm_ocrnc_span_from_dt DATE NOT NULL,
     clm_ocrnc_span_thru_dt DATE NOT NULL,
+    idr_insrt_ts TIMESTAMPTZ,
+    idr_updt_ts TIMESTAMPTZ,
     PRIMARY KEY (clm_ocrnc_sgntr_sk, clm_ocrnc_span_cd, clm_ocrnc_sgntr_sqnc_num, clm_ocrnc_span_from_dt, clm_ocrnc_span_thru_dt)
 );
 
 CREATE TABLE cms_vdm_view_mdcr_prd.v2_clm_rlt_ocrnc_sgntr_mbr (
-    clm_ocrnc_sgntr_sk INT NOT NULL,
+    clm_rlt_ocrnc_sgntr_sk INT NOT NULL,
     clm_rlt_ocrnc_cd VARCHAR(2) NOT NULL,
     clm_rlt_ocrnc_sgntr_sqnc_num INT NOT NULL,
     clm_rlt_ocrnc_dt DATE NOT NULL,
-    PRIMARY KEY (clm_ocrnc_sgntr_sk, clm_rlt_ocrnc_cd, clm_rlt_ocrnc_sgntr_sqnc_num, clm_rlt_ocrnc_dt)
+    idr_insrt_ts TIMESTAMPTZ,
+    idr_updt_ts TIMESTAMPTZ,
+    PRIMARY KEY (clm_rlt_ocrnc_sgntr_sk, clm_rlt_ocrnc_cd, clm_rlt_ocrnc_sgntr_sqnc_num, clm_rlt_ocrnc_dt)
 );
 
 CREATE INDEX
