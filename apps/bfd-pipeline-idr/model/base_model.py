@@ -193,6 +193,11 @@ ALIAS_CLM_GRP = "clm_grp"
 ALIAS_RLT_COND = "rltcond"
 ALIAS_PBP_NUM = "pbp_num"
 ALIAS_CNTRCT_SGMT = "sgmt"
+ALIAS_OCRNC_SGNTR = "ocrnc_sgntr_mbr"
+ALIAS_RLT_OCRNC_SGNTR = "rlt_ocrnc_sgntr_mbr"
+ALIAS_OCRNC_SGNTR_DERIVED_DATES = "ocrnc_sgntr_mbr_derived_dates"
+ALIAS_RLT_OCRNC_SGNTR_DERIVED_DATES = "rlt_ocrnc_sgntr_mbr_derived_dates"
+ALIAS_LINE_FISS_BFNT_FLATTENED = "line_fiss_bnft_flattened"
 
 INSERT_FIELD = {BATCH_TIMESTAMP: True, INSERT_EXCLUDE: True, COLUMN_MAP: "idr_insrt_ts"}
 UPDATE_FIELD = {UPDATE_TIMESTAMP: True, INSERT_EXCLUDE: True, COLUMN_MAP: "idr_updt_ts"}
@@ -549,3 +554,77 @@ def transform_default_hipps_code(value: str | None) -> str:
     if value is None or value == "00000":
         return ""
     return value
+
+
+def claim_occurrence_cte() -> str:
+    ocrnc_sgntr = ALIAS_OCRNC_SGNTR
+    qualifying_stay_cd = "70"
+    non_covered_stay_cd = "74"
+    return f"""
+            SELECT
+                clm_ocrnc_sgntr_sk,
+                MAX(CASE WHEN clm_ocrnc_span_cd = '{non_covered_stay_cd}'
+                    THEN clm_ocrnc_span_from_dt END) AS bfd_clm_ncvrd_from_dt,
+                MAX(CASE WHEN clm_ocrnc_span_cd = '{non_covered_stay_cd}'
+                    THEN clm_ocrnc_span_thru_dt END) AS bfd_clm_ncvrd_thru_dt,
+                MAX(CASE WHEN clm_ocrnc_span_cd = '{qualifying_stay_cd}'
+                    THEN clm_ocrnc_span_from_dt END) AS bfd_clm_qlfy_stay_from_dt,
+                MAX(CASE WHEN clm_ocrnc_span_cd = '{qualifying_stay_cd}'
+                    THEN clm_ocrnc_span_thru_dt END) AS bfd_clm_qlfy_stay_thru_dt,
+                MAX(idr_insrt_ts) AS idr_insrt_ts
+            FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_ocrnc_sgntr_mbr {ocrnc_sgntr}
+            WHERE clm_ocrnc_span_cd IN ('{qualifying_stay_cd}', '{non_covered_stay_cd}')
+            GROUP BY clm_ocrnc_sgntr_sk"""
+
+
+def claim_related_occurrences_cte() -> str:
+    rlt_ocrnc_sgntr = ALIAS_RLT_OCRNC_SGNTR
+    medicare_exhausted_cd = "A3"
+    active_care_cd = "22"
+    return f"""
+            SELECT
+                clm_rlt_ocrnc_sgntr_sk,
+                MAX(CASE WHEN clm_rlt_ocrnc_cd = '{medicare_exhausted_cd}'
+                    THEN clm_rlt_ocrnc_dt END) AS bfd_clm_mdcr_exhstd_dt,
+                MAX(CASE WHEN clm_rlt_ocrnc_cd = '{active_care_cd}'
+                    THEN clm_rlt_ocrnc_dt END) AS bfd_clm_actv_care_thru_dt,
+                MAX(idr_insrt_ts) AS idr_insrt_ts
+            FROM cms_vdm_view_mdcr_prd.v2_clm_rlt_ocrnc_sgntr_mbr {rlt_ocrnc_sgntr}
+            WHERE clm_rlt_ocrnc_cd in ('{medicare_exhausted_cd}', '{active_care_cd}')
+            GROUP BY clm_rlt_ocrnc_sgntr_sk
+    """
+
+
+def claim_related_conditions_cte(load_mode: LoadMode) -> str:
+    rlt_cond = ALIAS_RLT_COND
+    clm_rlt_cond_cd_agg = ""
+    if load_mode == LoadMode.IDR:
+        clm_rlt_cond_cd_agg = """
+            ARRAY_AGG(
+                CASE
+                    WHEN LENGTH(clm_rlt_cond_cd) = 2 THEN clm_rlt_cond_cd
+                    ELSE '~' || clm_rlt_cond_cd
+                END
+            ) WITHIN GROUP (ORDER BY clm_rlt_cond_sgntr_sqnc_num, clm_rlt_cond_cd)
+        """
+    else:
+        clm_rlt_cond_cd_agg = """
+            ARRAY_AGG(
+                CASE
+                    WHEN LENGTH(clm_rlt_cond_cd) = 2 THEN clm_rlt_cond_cd
+                    ELSE '~' || clm_rlt_cond_cd
+                END
+                ORDER BY clm_rlt_cond_sgntr_sqnc_num, clm_rlt_cond_cd
+            )
+        """
+
+    return f"""
+            SELECT
+                clm_rlt_cond_sgntr_sk,
+                ARRAY_TO_STRING({clm_rlt_cond_cd_agg}, '') AS clm_rlt_cond_cd,
+                MAX(idr_insrt_ts) AS idr_insrt_ts
+            FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_rlt_cond_sgntr_mbr {rlt_cond}
+            WHERE clm_rlt_cond_sgntr_sk NOT IN (0, 1, -1)
+            AND clm_rlt_cond_cd != '~'
+            GROUP BY clm_rlt_cond_sgntr_sk
+    """

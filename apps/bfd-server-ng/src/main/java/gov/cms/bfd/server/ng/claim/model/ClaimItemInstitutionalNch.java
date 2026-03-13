@@ -20,7 +20,6 @@ public class ClaimItemInstitutionalNch implements ClaimItemBase {
   @Embedded private ClaimLineInstitutionalNch claimLine;
   @Embedded private ClaimProcedureInstitutional claimProcedure;
   @Embedded private ClaimValue claimValue;
-  @Embedded private ClaimRelatedCondition claimRelatedCondition;
 
   @JoinColumn(name = "clm_uniq_id")
   @ManyToOne
@@ -34,10 +33,5 @@ public class ClaimItemInstitutionalNch implements ClaimItemBase {
   @Override
   public Optional<ClaimLineHcpcsCode> getClaimLineHcpcsCode() {
     return Optional.of(claimLine.getHcpcsCode());
-  }
-
-  @Override
-  public Optional<ClaimRelatedCondition> getClaimRelatedCondition() {
-    return Optional.of(claimRelatedCondition);
   }
 }

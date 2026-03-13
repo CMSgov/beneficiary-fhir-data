@@ -196,7 +196,7 @@ class IdrClaimItemProfessionalSs(IdrBaseModel):
         BeforeValidator(transform_null_date_to_min),
     ]
 
-    # Columns from v2_mdcr_prvdr_hstry
+    # Columns derived from v2_mdcr_prvdr_hstry
     prvdr_rndrng_prvdr_npi_num: Annotated[
         str,
         {COLUMN_MAP: "prvdr_npi_num", ALIAS: ALIAS_PRVDR_RNDRNG},
@@ -274,7 +274,6 @@ class IdrClaimItemProfessionalSs(IdrBaseModel):
                         {clm}.clm_type_cd, 
                         {clm}.clm_num_sk, 
                         {clm}.clm_dt_sgntr_sk,
-                        {clm}.clm_rlt_cond_sgntr_sk,
                         {clm}.clm_idr_ld_dt
                     FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
                     WHERE
