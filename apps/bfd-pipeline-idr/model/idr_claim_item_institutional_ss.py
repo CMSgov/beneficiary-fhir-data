@@ -1,15 +1,12 @@
-from collections.abc import Sequence
 from datetime import date, datetime
-from typing import Annotated
+from typing import Annotated, override
 
 from pydantic import BeforeValidator
 
 from constants import (
-    CLAIM_INSTITUTIONAL_SS_TABLE,
     DEFAULT_MAX_DATE,
-    INSTITUTIONAL_PAC_PARTITIONS,
 )
-from load_partition import LoadPartition, LoadPartitionGroup
+from load_partition import LoadPartition
 from loader import LoadMode
 from model.base_model import (
     ALIAS,
@@ -34,8 +31,8 @@ from model.base_model import (
     PRIMARY_KEY,
     UPDATE_FIELD,
     IdrBaseModel,
+    ModelType,
     claim_filter,
-    get_min_transaction_date,
     provider_careteam_name_expr,
     transform_default_date_to_null,
     transform_default_hipps_code,
@@ -264,20 +261,26 @@ class IdrClaimItemInstitutionalSs(IdrBaseModel):
         BeforeValidator(transform_null_date_to_min),
     ]
 
+    @override
     @staticmethod
     def table() -> str:
         return "idr.claim_item_institutional_ss"
 
-    @staticmethod
-    def last_updated_date_table() -> str:
-        return CLAIM_INSTITUTIONAL_SS_TABLE
-
+    @override
     @staticmethod
     def last_updated_date_column() -> list[str]:
         return ["bfd_claim_updated_ts"]
 
+    @override
     @staticmethod
-    def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:
+    def model_type() -> ModelType:
+        return ModelType.CLAIM_INSTITUTIONAL_SS
+
+    @override
+    @classmethod
+    def fetch_query(
+        cls, partition: LoadPartition, start_time: datetime, load_mode: LoadMode
+    ) -> str:
         clm = ALIAS_CLM
         clm_grp = ALIAS_CLM_GRP
         prod = ALIAS_PROCEDURE
@@ -331,7 +334,7 @@ class IdrClaimItemInstitutionalSs(IdrBaseModel):
                     FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
                     WHERE
                         {claim_filter(start_time, partition)} AND
-                        {clm}.clm_idr_ld_dt >= '{get_min_transaction_date()}'
+                        {clm}.clm_idr_ld_dt >= '{cls.model_type().min_transaction_date}'
                 ),
                 claim_lines AS {not_materialized} (
                     SELECT
@@ -478,7 +481,3 @@ class IdrClaimItemInstitutionalSs(IdrBaseModel):
                 {{WHERE_CLAUSE}}
                 {{ORDER_BY}}
         """
-
-    @staticmethod
-    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
-        return INSTITUTIONAL_PAC_PARTITIONS

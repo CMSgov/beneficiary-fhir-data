@@ -1,15 +1,13 @@
-from collections.abc import Sequence
 from datetime import date, datetime
-from typing import Annotated
+from typing import Annotated, override
 
 from pydantic import BeforeValidator
 
 from constants import (
     CLAIM_PROFESSIONAL_SS_TABLE,
     DEFAULT_MAX_DATE,
-    PROFESSIONAL_PAC_PARTITIONS,
 )
-from load_partition import LoadPartition, LoadPartitionGroup
+from load_partition import LoadPartition
 from loader import LoadMode
 from model.base_model import (
     ALIAS,
@@ -33,6 +31,7 @@ from model.base_model import (
     PRIMARY_KEY,
     UPDATE_TIMESTAMP,
     IdrBaseModel,
+    ModelType,
     claim_filter,
     claim_occurrence_cte,
     claim_related_occurrences_cte,
@@ -272,20 +271,26 @@ class IdrClaimProfessionalSs(IdrBaseModel):
         BeforeValidator(transform_null_date_to_min),
     ]
 
+    @override
     @staticmethod
     def table() -> str:
         return CLAIM_PROFESSIONAL_SS_TABLE
 
-    @staticmethod
-    def last_updated_date_table() -> str:
-        return CLAIM_PROFESSIONAL_SS_TABLE
-
+    @override
     @staticmethod
     def last_updated_date_column() -> list[str]:
         return ["bfd_claim_updated_ts"]
 
+    @override
     @staticmethod
-    def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:
+    def model_type() -> ModelType:
+        return ModelType.CLAIM_PROFESSIONAL_SS
+
+    @override
+    @classmethod
+    def fetch_query(
+        cls, partition: LoadPartition, start_time: datetime, load_mode: LoadMode
+    ) -> str:
         clm = ALIAS_CLM
         sgntr = ALIAS_SGNTR
         prfnl = ALIAS_PRFNL
@@ -367,7 +372,3 @@ class IdrClaimProfessionalSs(IdrBaseModel):
             {{WHERE_CLAUSE}} AND {claim_filter(start_time, partition)}
             {{ORDER_BY}}
         """
-
-    @staticmethod
-    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
-        return PROFESSIONAL_PAC_PARTITIONS

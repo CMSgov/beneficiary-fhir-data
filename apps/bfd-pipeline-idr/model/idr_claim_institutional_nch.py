@@ -1,15 +1,13 @@
-from collections.abc import Sequence
 from datetime import date, datetime
-from typing import Annotated
+from typing import Annotated, override
 
 from pydantic import BeforeValidator
 
 from constants import (
     CLAIM_INSTITUTIONAL_NCH_TABLE,
     DEFAULT_MAX_DATE,
-    INSTITUTIONAL_ADJUDICATED_PARTITIONS,
 )
-from load_partition import LoadPartition, LoadPartitionGroup
+from load_partition import LoadPartition
 from loader import LoadMode
 from model.base_model import (
     ALIAS,
@@ -36,6 +34,7 @@ from model.base_model import (
     PRIMARY_KEY,
     UPDATE_FIELD,
     IdrBaseModel,
+    ModelType,
     claim_filter,
     claim_occurrence_cte,
     claim_related_conditions_cte,
@@ -435,20 +434,26 @@ class IdrClaimInstitutionalNch(IdrBaseModel):
         BeforeValidator(transform_null_date_to_min),
     ]
 
+    @override
     @staticmethod
     def table() -> str:
         return CLAIM_INSTITUTIONAL_NCH_TABLE
 
-    @staticmethod
-    def last_updated_date_table() -> str:
-        return CLAIM_INSTITUTIONAL_NCH_TABLE
-
+    @override
     @staticmethod
     def last_updated_date_column() -> list[str]:
         return ["bfd_claim_updated_ts"]
 
+    @override
     @staticmethod
-    def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:
+    def model_type() -> ModelType:
+        return ModelType.CLAIM_INSTITUTIONAL_NCH
+
+    @override
+    @classmethod
+    def fetch_query(
+        cls, partition: LoadPartition, start_time: datetime, load_mode: LoadMode
+    ) -> str:
         clm = ALIAS_CLM
         dcmtn = ALIAS_DCMTN
         sgntr = ALIAS_SGNTR
@@ -526,7 +531,3 @@ class IdrClaimInstitutionalNch(IdrBaseModel):
             {{WHERE_CLAUSE}} AND {claim_filter(start_time, partition)}
             {{ORDER_BY}}
         """
-
-    @staticmethod
-    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
-        return INSTITUTIONAL_ADJUDICATED_PARTITIONS

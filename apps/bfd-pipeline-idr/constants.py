@@ -5,9 +5,7 @@ from settings import PARTITION_TYPE
 
 DEFAULT_MAX_DATE = "9999-12-31"
 DEFAULT_MIN_DATE = "0001-01-01"
-MIN_CLAIM_LOAD_DATE = "2014-06-30"
 ALTERNATE_DEFAULT_DATE = "1000-01-01"
-CLAIM_TABLE = "idr.claim"
 BENEFICIARY_TABLE = "idr.beneficiary"
 CLAIM_RX_TABLE = "idr.claim_rx"
 CLAIM_PROFESSIONAL_NCH_TABLE = "idr.claim_professional_nch"
@@ -34,7 +32,7 @@ PART_D_PARTITIONS = [
     LoadPartitionGroup("part_d_adjustment", [2, 3, 4], PartitionType.PART_D, partition_range),
 ]
 
-INSTITUTIONAL_ADJUDICATED_PARTITIONS = [
+INSTITUTIONAL_NCH_PARTITIONS = [
     # Outpatient
     LoadPartitionGroup("outpatient", [40], PartitionType.INSTITUTIONAL, partition_range),
     # HHA, SNF, Hospice, Inpatient, MA
@@ -46,7 +44,7 @@ INSTITUTIONAL_ADJUDICATED_PARTITIONS = [
     ),
 ]
 
-INSTITUTIONAL_PAC_PARTITIONS = [
+INSTITUTIONAL_SS_PARTITIONS = [
     LoadPartitionGroup(
         "institututional_pac",
         [
@@ -158,7 +156,7 @@ INSTITUTIONAL_PAC_PARTITIONS = [
     )
 ]
 
-PROFESSIONAL_ADJUDICATED_PARTITIONS = [
+PROFESSIONAL_NCH_PARTITIONS = [
     LoadPartitionGroup(
         "professional",
         [71, 72, 81, 82],
@@ -167,7 +165,7 @@ PROFESSIONAL_ADJUDICATED_PARTITIONS = [
     ),
 ]
 
-PROFESSIONAL_PAC_PARTITIONS = [
+PROFESSIONAL_SS_PARTITIONS = [
     LoadPartitionGroup(
         "professional_pac",
         [1700, 1800, 2700, 2800],
@@ -179,10 +177,10 @@ PROFESSIONAL_PAC_PARTITIONS = [
 
 ALL_CLAIM_PARTITIONS = [
     *PART_D_PARTITIONS,
-    *INSTITUTIONAL_ADJUDICATED_PARTITIONS,
-    *INSTITUTIONAL_PAC_PARTITIONS,
-    *PROFESSIONAL_ADJUDICATED_PARTITIONS,
-    *PROFESSIONAL_PAC_PARTITIONS,
+    *INSTITUTIONAL_NCH_PARTITIONS,
+    *INSTITUTIONAL_SS_PARTITIONS,
+    *PROFESSIONAL_NCH_PARTITIONS,
+    *PROFESSIONAL_SS_PARTITIONS,
 ]
 
 ALL_CLAIM_TYPE_CODES = [code for c in ALL_CLAIM_PARTITIONS for code in c.claim_type_codes]
@@ -200,3 +198,7 @@ COMBINED_CLAIM_PARTITION = LoadPartitionGroup(
 DEFAULT_PARTITION = LoadPartition("default", [], PartitionType.ALL, None, None, 0)
 
 NON_CLAIM_PARTITION = LoadPartitionGroup("default", [], PartitionType.ALL, None, 1)
+
+# Need to declare this separately because python struggles
+# with type-hinting empty arrays :(
+EMPTY_PARTITION: list[LoadPartitionGroup] = []

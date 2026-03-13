@@ -1,14 +1,12 @@
-from collections.abc import Sequence
 from datetime import date, datetime
-from typing import Annotated
+from typing import Annotated, override
 
 from pydantic import BeforeValidator
 
 from constants import (
     BENEFICIARY_TABLE,
-    NON_CLAIM_PARTITION,
 )
-from load_partition import LoadPartition, LoadPartitionGroup
+from load_partition import LoadPartition
 from loader import LoadMode
 from model.base_model import (
     ALIAS,
@@ -17,10 +15,12 @@ from model.base_model import (
     BATCH_ID,
     BATCH_TIMESTAMP,
     COLUMN_MAP,
+    EXPR,
     LAST_UPDATED_TIMESTAMP,
     PRIMARY_KEY,
     UPDATE_TIMESTAMP,
     IdrBaseModel,
+    ModelType,
     deceased_bene_filter,
     transform_default_string,
     transform_null_date_to_max,
@@ -34,7 +34,26 @@ class IdrBeneficiary(IdrBaseModel):
         int,
         {PRIMARY_KEY: True, BATCH_ID: True, ALIAS: ALIAS_HSTRY, LAST_UPDATED_TIMESTAMP: True},
     ]
-    bene_xref_efctv_sk: int
+    bene_xref_efctv_sk: Annotated[
+        int,
+        # The merge is only valid if kill credit is present AND set to 2.
+        # If not, we should act like it's not present.
+        # Additionally, sometimes the xref_efctv_sk can be missing (set to 0 )
+        # due to upstream issues. In this case, we just treat the xref_sk and the bene_sk
+        # as the same.
+        {
+            EXPR: f"""
+            CASE
+                WHEN 
+                    {ALIAS_HSTRY}.bene_xref_efctv_sk = 0 OR 
+                    ({ALIAS_HSTRY}.bene_xref_efctv_sk != {ALIAS_HSTRY}.bene_sk 
+                        AND {ALIAS_XREF}.bene_kill_cred_cd != '2')
+                THEN {ALIAS_HSTRY}.bene_sk 
+                ELSE {ALIAS_HSTRY}.bene_xref_efctv_sk 
+            END
+            """
+        },
+    ]
     bene_mbi_id: str
     bene_1st_name: str
     bene_midl_name: Annotated[str, BeforeValidator(transform_default_string)]
@@ -79,24 +98,31 @@ class IdrBeneficiary(IdrBaseModel):
         BeforeValidator(transform_null_date_to_min),
     ]
 
+    @override
     @staticmethod
     def table() -> str:
         return BENEFICIARY_TABLE
 
+    @override
     @staticmethod
     def computed_keys() -> list[str]:
         return ["bene_xref_efctv_sk_computed"]
 
-    @staticmethod
-    def last_updated_date_table() -> str:
-        return BENEFICIARY_TABLE
-
+    @override
     @staticmethod
     def last_updated_date_column() -> list[str]:
         return ["bfd_patient_updated_ts"]
 
+    @override
     @staticmethod
-    def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
+    def model_type() -> ModelType:
+        return ModelType.BENEFICIARY
+
+    @override
+    @classmethod
+    def fetch_query(
+        cls, partition: LoadPartition, start_time: datetime, load_mode: LoadMode
+    ) -> str:
         hstry = ALIAS_HSTRY
         xref = ALIAS_XREF
         # There can be multiple xref records for the same bene_sk/bene_ref_sk combo
@@ -151,7 +177,3 @@ class IdrBeneficiary(IdrBaseModel):
             AND NOT EXISTS (SELECT 1 FROM deceased_benes db WHERE db.bene_sk = {hstry}.bene_sk)
             {{ORDER_BY}}
         """
-
-    @staticmethod
-    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
-        return [NON_CLAIM_PARTITION]
