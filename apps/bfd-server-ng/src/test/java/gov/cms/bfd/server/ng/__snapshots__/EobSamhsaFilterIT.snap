@@ -605,12 +605,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "http://hl7.org/fhir/sid/icd-9-cm"
           } ]
         },
-        "onAdmission" : {
-          "coding" : [ {
-            "code" : "0",
-            "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding"
-          } ]
-        },
         "sequence" : 3,
         "type" : [ {
           "coding" : [ {
@@ -743,12 +737,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
           "coding" : [ {
             "code" : "F55.2",
             "system" : "http://hl7.org/fhir/sid/icd-10-cm"
-          } ]
-        },
-        "onAdmission" : {
-          "coding" : [ {
-            "code" : "0",
-            "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding"
           } ]
         },
         "sequence" : 10,
@@ -3976,11 +3964,23 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "clmrecvddate",
+            "code" : "admissionperiod",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
         "sequence" : 7,
+        "timingPeriod" : {
+          "end" : "2019-09-30",
+          "start" : "2019-09-23"
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "clmrecvddate",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+          } ]
+        },
+        "sequence" : 8,
         "timingDate" : "2019-09-30"
       }, {
         "category" : {
@@ -3994,7 +3994,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2019-09-30"
       }, {
         "category" : {
@@ -4013,7 +4013,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 9
+        "sequence" : 10
       }, {
         "category" : {
           "coding" : [ {
@@ -4030,7 +4030,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 10
+        "sequence" : 11
       }, {
         "category" : {
           "coding" : [ {
@@ -4050,7 +4050,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -4070,7 +4070,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -4084,7 +4084,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 14
       } ],
       "total" : [ {
         "amount" : {
@@ -7082,12 +7082,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           "coding" : [ {
             "code" : "W30.3XXA",
             "system" : "http://hl7.org/fhir/sid/icd-10-cm"
-          } ]
-        },
-        "onAdmission" : {
-          "coding" : [ {
-            "code" : "0",
-            "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding"
           } ]
         },
         "sequence" : 10,
@@ -10624,11 +10618,11 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "role" : {
           "coding" : [ {
             "code" : "referring",
-            "display" : "Referring provider",
+            "display" : "Referring",
             "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole"
           }, {
             "code" : "referring",
-            "display" : "Referring provider",
+            "display" : "Referring",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
           } ]
         },
@@ -14804,12 +14798,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "http://hl7.org/fhir/sid/icd-10-cm"
           } ]
         },
-        "onAdmission" : {
-          "coding" : [ {
-            "code" : "0",
-            "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding"
-          } ]
-        },
         "sequence" : 10,
         "type" : [ {
           "coding" : [ {
@@ -18344,11 +18332,11 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "role" : {
           "coding" : [ {
             "code" : "referring",
-            "display" : "Referring provider",
+            "display" : "Referring",
             "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole"
           }, {
             "code" : "referring",
-            "display" : "Referring provider",
+            "display" : "Referring",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
           } ]
         },

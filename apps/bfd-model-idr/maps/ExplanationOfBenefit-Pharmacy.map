@@ -304,6 +304,7 @@ group addDispenseAsWritten(source src: SupportingInfoComponent, target tgt: Back
     } "set category";
     src -> tgt.code = create('CodeableConcept') as tgtCC then{
         src.CLM_DAW_PROD_SLCTN_CD as val -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/NCPDPDispensedAsWrittenOrProductSelectionCode", val) "Add coding";
+        src.CLM_DAW_PROD_SLCTN_CD as val -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DAW-PROD-SLCTN-CD", val) "Add coding";
     } "Add CC";
 }
 

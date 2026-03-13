@@ -80,13 +80,6 @@ public abstract class ClaimLineInstitutionalBase implements ClaimLineBase {
     hcpcsCode.toFhir().ifPresent(productOrService::addCoding);
     getHippsCode().toFhir().ifPresent(productOrService::addCoding);
 
-    var quantity = serviceUnitQuantity.toFhir();
-
-    if (productOrService.isEmpty()) {
-      ndc.toFhirCoding().ifPresent(productOrService::addCoding);
-      ndc.getQualifier().ifPresent(quantity::setUnit);
-    }
-
     line.setProductOrService(FhirUtil.checkDataAbsent(productOrService));
     ndc.toFhirDetail().ifPresent(line::addDetail);
     line.setQuantity(serviceUnitQuantity.toFhir());
