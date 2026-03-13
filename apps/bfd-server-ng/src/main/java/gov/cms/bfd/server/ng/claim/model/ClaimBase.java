@@ -133,7 +133,7 @@ public abstract class ClaimBase {
   public abstract Optional<Integer> getDrgCode();
 
   /**
-   * Returns the ClaimRelatedCondition for this claim line, if present.
+   * Returns the ClaimRelatedCondition for this claim, if present.
    *
    * @return the ClaimRelatedCondition
    */
