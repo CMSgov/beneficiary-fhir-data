@@ -1,8 +1,8 @@
 package gov.cms.bfd.server.ng.claim.model;
 
 import gov.cms.bfd.server.ng.util.SystemUrls;
+import java.util.Arrays;
 import java.util.Optional;
-import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -47,12 +47,7 @@ public enum ClaimDispenseAsWrittenCode {
    * @return The matched enum, or empty if none matches
    */
   public static Optional<ClaimDispenseAsWrittenCode> tryFromCode(String code) {
-    if (code == null) {
-      return Optional.empty();
-    }
-    return Stream.of(ClaimDispenseAsWrittenCode.values())
-        .filter(e -> e.getCode().equals(code))
-        .findFirst();
+    return Arrays.stream(values()).filter(e -> e.code.equals(code)).findFirst();
   }
 
   /**
