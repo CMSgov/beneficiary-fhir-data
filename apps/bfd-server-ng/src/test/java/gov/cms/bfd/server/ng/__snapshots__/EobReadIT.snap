@@ -1320,22 +1320,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
   }, {
     "amount" : {
       "currency" : "USD",
-      "value" : 0
-    },
-    "category" : {
-      "coding" : [ {
-        "code" : "coinsurance",
-        "display" : "Co-insurance",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
-      }, {
-        "code" : "CLM_BENE_PMT_COINSRNC_AMT",
-        "display" : "Beneficiary Coinsurance Amount",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-      } ]
-    }
-  }, {
-    "amount" : {
-      "currency" : "USD",
       "value" : 1128.8
     },
     "category" : {
@@ -2687,22 +2671,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
   }, {
     "amount" : {
       "currency" : "USD",
-      "value" : 0
-    },
-    "category" : {
-      "coding" : [ {
-        "code" : "coinsurance",
-        "display" : "Co-insurance",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
-      }, {
-        "code" : "CLM_BENE_PMT_COINSRNC_AMT",
-        "display" : "Beneficiary Coinsurance Amount",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-      } ]
-    }
-  }, {
-    "amount" : {
-      "currency" : "USD",
       "value" : 1128.8
     },
     "category" : {
@@ -3132,10 +3100,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
       },
       "category" : {
         "coding" : [ {
-          "code" : "eligible",
-          "display" : "Eligible Amount",
-          "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-        }, {
           "code" : "CLM_LINE_PRFNL_DME_PRICE_AMT",
           "display" : "Purchase Price Amount",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
@@ -3795,10 +3759,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
       },
       "category" : {
         "coding" : [ {
-          "code" : "eligible",
-          "display" : "Eligible Amount",
-          "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-        }, {
           "code" : "CLM_LINE_PRFNL_DME_PRICE_AMT",
           "display" : "Purchase Price Amount",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"

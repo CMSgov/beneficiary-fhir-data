@@ -374,8 +374,7 @@ group addAdjudicationPaidByMedicare(source src: String, target tgt: BackboneElem
 //CLM_LINE_BLOOD_DDCTBL_AMT <-- blood deductible 
 group addAdjudicationBloodDeductible(source src: String, target tgt: BackboneElement){
     src -> tgt.category = create('CodeableConcept') as tgtCC then {
-        src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/adjudication", "deductible") "Add coding 1";
-        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_BLOOD_DDCTBL_AMT") "Add coding 2";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_BLOOD_DDCTBL_AMT") "Add coding 1";
     } "add category";
     src -> tgt.amount = create('Money') as tgtMoney then addMoney(src, tgtMoney) "Add Money";
 }
@@ -429,8 +428,7 @@ group addLineCoinsuranceAmt(source src: String, target tgt: BackboneElement){
 
 group addLineDMEPrice(source src: String, target tgt: BackboneElement){
     src -> tgt.category = create('CodeableConcept') as tgtCC then {
-        src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/adjudication", "eligible") "Add coding 1";
-        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_PRFNL_DME_PRICE_AMT") "Add coding 2";
+        src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication", "CLM_LINE_PRFNL_DME_PRICE_AMT") "Add coding 1";
     } "add category";
     src -> tgt.amount = create('Money') as tgtMoney then addMoney(src, tgtMoney) "Add Money";
 }
