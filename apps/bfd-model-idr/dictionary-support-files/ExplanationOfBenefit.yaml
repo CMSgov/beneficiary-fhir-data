@@ -1524,7 +1524,7 @@
     - CCLF2.CLM_LINE_INSTNL_REV_CTR_DT
   sourceView: V2_MDCR_CLM_LINE_INSTNL
   sourceColumn: CLM_LINE_INSTNL_REV_CTR_DT
-  fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_INSTNL_MSP2_PD_AMT')).amount.value
+  fhirPath: ExplanationOfBenefit.item.servicedDate
 - inputPath: SupportingInfoComponent.CLM_ACTV_CARE_FROM_DT
   appliesTo:
     - Inpatient
