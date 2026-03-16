@@ -56,7 +56,7 @@ public record TagCriteriaFilterParam(List<List<TagCriterion>> tagCriteria)
             clauses.add(claimTableAlias + ".metaSourceSk = :tag_" + i + "_" + j);
             params.add(new DbFilterParam(paramName, metaSrcSk));
           } else {
-            clauses.add("1=1");
+            clauses.add("TRUE");
           }
         } else {
           // If the system is incompatible, we set this filter to FALSE since it shouldn't match
