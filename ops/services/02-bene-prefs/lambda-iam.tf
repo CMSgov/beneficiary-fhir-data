@@ -150,7 +150,7 @@ resource "aws_iam_role" "lambda" {
 
   name                  = local.lambda_full_name
   path                  = local.iam_path
-  description           = "TODO"
+  description           = "Queries for beneficiary preferences from IDR and generates files in a format expected by partners"
   assume_role_policy    = data.aws_iam_policy_document.lambda_assume[0].json
   permissions_boundary  = local.permissions_boundary_arn
   force_detach_policies = true
