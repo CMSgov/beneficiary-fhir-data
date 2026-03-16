@@ -16,6 +16,7 @@ public class ClaimPoaIndicatorConverter implements AttributeConverter<Optional<S
   @Override
   public Optional<String> convertToEntityAttribute(String dbData) {
     if (dbData == null || dbData.trim().isEmpty() || "0".equals(dbData)) {
+      // Special snowflake - treat 0 as null for POA indicators.
       return Optional.empty();
     }
     return Optional.of(dbData);

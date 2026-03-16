@@ -18,6 +18,7 @@ public class ClaimDispenseAsWrittenConverter
   @Override
   public Optional<ClaimDispenseAsWrittenCode> convertToEntityAttribute(String code) {
     if (code == null || code.isBlank()) {
+      // Special snowflake - treat 0 as null for DAW codes.
       return ClaimDispenseAsWrittenCode.tryFromCode("0");
     }
     return ClaimDispenseAsWrittenCode.tryFromCode(code.strip());
