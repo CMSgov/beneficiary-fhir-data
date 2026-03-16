@@ -1,3 +1,4 @@
+import importlib
 import os
 import shutil
 import subprocess
@@ -18,9 +19,7 @@ from testcontainers.postgres import PostgresContainer  # type: ignore
 from constants import DEFAULT_MAX_DATE
 from load_synthetic import load_from_csv
 from pipeline import run
-from settings import (
-    bfd_test_date,
-)
+from settings import bfd_test_date
 
 # ryuk throws a 500 or 404 error for some reason
 # seems to have issues with podman https://github.com/testcontainers/testcontainers-python/issues/753
@@ -66,51 +65,13 @@ def setup_db() -> Generator[PostgresContainer]:
             os.environ["BFD_DB_USERNAME"] = info.user
             os.environ["BFD_DB_PASSWORD"] = info.password
             os.environ["IDR_BATCH_SIZE"] = "100000"
+            os.environ["BFD_TEST_DATE"] = "2025-06-15"
         yield postgres
-
 
 def test_pipeline(setup_db: PostgresContainer) -> None:
     conn = cast(
         psycopg.Connection[DictRow],
         psycopg.connect(setup_db.get_connection_url(), row_factory=dict_row),  # type: ignore
-    )
-
-    datetime_now = bfd_test_date()
-
-    conn.execute(
-        """
-            UPDATE cms_vdm_view_mdcr_prd.v2_mdcr_clm
-            SET idr_updt_ts=%(none)s, idr_insrt_ts=%(timestamp)s
-            WHERE clm_uniq_id = 1128619260039
-            """,
-        {"none": None, "timestamp": datetime_now - timedelta(days=65)},
-    )
-
-    conn.execute(
-        """
-            UPDATE cms_vdm_view_mdcr_prd.v2_mdcr_clm
-            SET idr_updt_ts=%(timestamp)s
-            WHERE clm_uniq_id = 123359318723
-            """,
-        {"timestamp": datetime_now - timedelta(days=65)},
-    )
-
-    conn.execute(
-        """
-            UPDATE cms_vdm_view_mdcr_prd.v2_mdcr_clm
-            SET idr_insrt_ts=%(none)s
-            WHERE clm_uniq_id = 9844382563835
-            """,
-        {"none": None},
-    )
-
-    conn.execute(
-        """
-            UPDATE cms_vdm_view_mdcr_prd.v2_mdcr_clm
-            SET idr_updt_ts=%(none)s
-            WHERE clm_uniq_id = 6919983105596
-            """,
-        {"none": None},
     )
 
     conn.commit()
@@ -131,17 +92,17 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
     rows = cur.fetchmany(1)
     assert rows[0]["bene_mbi_id"] == "1BC3JG0FM51"
 
-    # Wait for system time to advance enough to update the timestamp
-    time.sleep(0.05)
     conn.execute(
         """
         UPDATE cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry
         SET bene_mbi_id = '1S000000000', idr_insrt_ts=%(timestamp)s, idr_updt_ts=%(timestamp)s
         WHERE bene_sk = 10464258
         """,
-        {"timestamp": datetime_now},
+        {"timestamp": bfd_test_date()},
     )
     conn.commit()
+
+    os.environ['BFD_TEST_DATE'] = "2025-06-16"
 
     run("synthetic")
 
