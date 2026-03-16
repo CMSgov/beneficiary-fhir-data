@@ -102,7 +102,9 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
     )
     conn.commit()
 
-    os.environ['BFD_TEST_DATE'] = "2025-06-16"
+    date_adv = datetime.strftime(bfd_test_date() + timedelta(days=1), "%Y-%m-%d")
+
+    os.environ['BFD_TEST_DATE'] = date_adv
 
     run("synthetic")
 
