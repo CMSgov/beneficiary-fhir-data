@@ -1,14 +1,9 @@
-from collections.abc import Sequence
 from datetime import date, datetime
-from typing import Annotated
+from typing import Annotated, override
 
 from pydantic import BeforeValidator
 
-from constants import (
-    BENEFICIARY_TABLE,
-    NON_CLAIM_PARTITION,
-)
-from load_partition import LoadPartition, LoadPartitionGroup
+from load_partition import LoadPartition
 from loader import LoadMode
 from model.base_model import (
     BATCH_TIMESTAMP,
@@ -16,6 +11,7 @@ from model.base_model import (
     PRIMARY_KEY,
     UPDATE_TIMESTAMP,
     IdrBaseModel,
+    ModelType,
     transform_default_string,
     transform_null_date_to_max,
     transform_null_date_to_min,
@@ -34,27 +30,29 @@ class IdrBeneficiaryMbiId(IdrBaseModel):
         datetime, {UPDATE_TIMESTAMP: True}, BeforeValidator(transform_null_date_to_min)
     ]
 
+    @override
     @staticmethod
     def table() -> str:
         return "idr.beneficiary_mbi_id"
 
-    @staticmethod
-    def last_updated_date_table() -> str:
-        return BENEFICIARY_TABLE
-
+    @override
     @staticmethod
     def last_updated_date_column() -> list[str]:
         return ["bfd_patient_updated_ts"]
 
+    @override
     @staticmethod
-    def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
+    def model_type() -> ModelType:
+        return ModelType.BENEFICIARY
+
+    @override
+    @classmethod
+    def fetch_query(
+        cls, partition: LoadPartition, start_time: datetime, load_mode: LoadMode
+    ) -> str:
         return """
                SELECT {COLUMNS}
                FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_mbi_id
                    {WHERE_CLAUSE}
                    {ORDER_BY}
                """
-
-    @staticmethod
-    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
-        return [NON_CLAIM_PARTITION]

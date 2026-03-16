@@ -1,15 +1,12 @@
-from collections.abc import Sequence
 from datetime import date, datetime
-from typing import Annotated
+from typing import Annotated, override
 
 from pydantic import BeforeValidator
 
 from constants import (
-    CLAIM_INSTITUTIONAL_NCH_TABLE,
     DEFAULT_MAX_DATE,
-    INSTITUTIONAL_ADJUDICATED_PARTITIONS,
 )
-from load_partition import LoadPartition, LoadPartitionGroup
+from load_partition import LoadPartition
 from loader import LoadMode
 from model.base_model import (
     ALIAS,
@@ -20,7 +17,6 @@ from model.base_model import (
     ALIAS_LINE_INSTNL,
     ALIAS_PROCEDURE,
     ALIAS_PRVDR_RNDRNG,
-    ALIAS_RLT_COND,
     ALIAS_VAL,
     BATCH_ID,
     COLUMN_MAP,
@@ -32,8 +28,8 @@ from model.base_model import (
     PRIMARY_KEY,
     UPDATE_FIELD,
     IdrBaseModel,
+    ModelType,
     claim_filter,
-    get_min_transaction_date,
     provider_careteam_name_expr,
     transform_default_date_to_null,
     transform_default_hipps_code,
@@ -81,7 +77,7 @@ class IdrClaimItemInstitutionalNch(IdrBaseModel):
     hcpcs_4_mdfr_cd: Annotated[str, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_default_string)]
     hcpcs_5_mdfr_cd: Annotated[str, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_default_string)]
     clm_idr_ld_dt: Annotated[
-        date, {ALIAS: ALIAS_LINE}, {INSERT_EXCLUDE: True, HISTORICAL_BATCH_TIMESTAMP: True}
+        date, {ALIAS: ALIAS_CLM}, {INSERT_EXCLUDE: True, HISTORICAL_BATCH_TIMESTAMP: True}
     ]
     clm_line_pmd_uniq_trkng_num: Annotated[
         str, {ALIAS: ALIAS_LINE}, BeforeValidator(transform_default_string)
@@ -146,24 +142,6 @@ class IdrClaimItemInstitutionalNch(IdrBaseModel):
         BeforeValidator(transform_null_date_to_min),
     ]
 
-    # Columns from V2_MDCR_CLM_RLT_COND_SGNTR_MBR
-    clm_rlt_cond_cd: Annotated[
-        str, {ALIAS: ALIAS_RLT_COND}, BeforeValidator(transform_default_string)
-    ]
-    clm_rlt_cond_sgntr_sqnc_num: Annotated[
-        int | None, {ALIAS: ALIAS_RLT_COND}, {ALIAS: ALIAS_RLT_COND}
-    ]
-    idr_insrt_ts_rlt_cond: Annotated[
-        datetime,
-        {ALIAS: ALIAS_RLT_COND, **INSERT_FIELD},
-        BeforeValidator(transform_null_date_to_min),
-    ]
-    idr_updt_ts_rlt_cond: Annotated[
-        datetime,
-        {ALIAS: ALIAS_RLT_COND, **UPDATE_FIELD},
-        BeforeValidator(transform_null_date_to_min),
-    ]
-
     # Columns from v2_mdcr_clm_line_instnl
     clm_rev_apc_hipps_cd: Annotated[
         str, {ALIAS: ALIAS_LINE_INSTNL}, BeforeValidator(transform_default_hipps_code)
@@ -192,7 +170,6 @@ class IdrClaimItemInstitutionalNch(IdrBaseModel):
     clm_line_instnl_msp1_pd_amt: Annotated[float | None, {ALIAS: ALIAS_LINE_INSTNL}]
     clm_line_instnl_msp2_pd_amt: Annotated[float | None, {ALIAS: ALIAS_LINE_INSTNL}]
     clm_line_instnl_rev_ctr_dt: Annotated[date | None, {ALIAS: ALIAS_LINE_INSTNL}]
-    clm_idr_ld_dt: Annotated[date, {INSERT_EXCLUDE: True, HISTORICAL_BATCH_TIMESTAMP: True}]
     clm_rev_cntr_tdapa_amt: Annotated[float | None, {ALIAS: ALIAS_LINE_INSTNL}]
     clm_line_add_on_pymt_amt: Annotated[float | None, {ALIAS: ALIAS_LINE_INSTNL}]
     idr_insrt_ts_line_instnl: Annotated[
@@ -236,27 +213,32 @@ class IdrClaimItemInstitutionalNch(IdrBaseModel):
         BeforeValidator(transform_default_string),
     ]
 
+    @override
     @staticmethod
     def table() -> str:
         return "idr.claim_item_institutional_nch"
 
-    @staticmethod
-    def last_updated_date_table() -> str:
-        return CLAIM_INSTITUTIONAL_NCH_TABLE
-
+    @override
     @staticmethod
     def last_updated_date_column() -> list[str]:
         return ["bfd_claim_updated_ts"]
 
+    @override
     @staticmethod
-    def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:
+    def model_type() -> ModelType:
+        return ModelType.CLAIM_INSTITUTIONAL_NCH
+
+    @override
+    @classmethod
+    def fetch_query(
+        cls, partition: LoadPartition, start_time: datetime, load_mode: LoadMode
+    ) -> str:
         clm = ALIAS_CLM
         clm_grp = ALIAS_CLM_GRP
         prod = ALIAS_PROCEDURE
         line = ALIAS_LINE
         line_instnl = ALIAS_LINE_INSTNL
         val = ALIAS_VAL
-        rlt_cond = ALIAS_RLT_COND
         ansi_sgntr = ALIAS_ANSI_SGNTR
         prvdr_rndrng = ALIAS_PRVDR_RNDRNG
         # This query is taking all the values for CLM_PROD, CLM_LINE, and CLM_VAL and storing
@@ -297,12 +279,11 @@ class IdrClaimItemInstitutionalNch(IdrBaseModel):
                         {clm}.clm_type_cd, 
                         {clm}.clm_num_sk, 
                         {clm}.clm_dt_sgntr_sk,
-                        {clm}.clm_rlt_cond_sgntr_sk,
                         {clm}.clm_idr_ld_dt
                     FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
                     WHERE
                         {claim_filter(start_time, partition)} AND
-                        {clm}.clm_idr_ld_dt >= '{get_min_transaction_date()}'
+                        {clm}.clm_idr_ld_dt >= '{cls.model_type().min_transaction_date}'
                 ),
                 claim_lines AS {not_materialized} (
                     SELECT
@@ -349,22 +330,6 @@ class IdrClaimItemInstitutionalNch(IdrBaseModel):
                         AND {val}.clm_num_sk = {clm}.clm_num_sk
                         AND {val}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
                 ),
-                claim_related_conditions AS {not_materialized} (
-                    SELECT
-                        {clm}.clm_uniq_id,
-                        {rlt_cond}.*,
-                        ROW_NUMBER() OVER (
-                            PARTITION BY {clm}.clm_uniq_id 
-                            ORDER BY {rlt_cond}.clm_rlt_cond_cd,
-                                {rlt_cond}.clm_rlt_cond_sgntr_sqnc_num
-                        ) AS bfd_row_id
-                    FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_rlt_cond_sgntr_mbr {rlt_cond}
-                    JOIN claims {clm}
-                        ON {rlt_cond}.clm_rlt_cond_sgntr_sk = {clm}.clm_rlt_cond_sgntr_sk
-                    WHERE 
-                        {clm}.clm_rlt_cond_sgntr_sk != 0
-                        AND {clm}.clm_rlt_cond_sgntr_sk != 1
-                ),
                 claim_groups AS (
                     SELECT clm_uniq_id, bfd_row_id
                     FROM claim_lines
@@ -374,9 +339,6 @@ class IdrClaimItemInstitutionalNch(IdrBaseModel):
                     UNION
                     SELECT clm_uniq_id, bfd_row_id
                     FROM claim_vals
-                    UNION
-                    SELECT clm_uniq_id, bfd_row_id
-                    FROM claim_related_conditions
                 )
                 SELECT {{COLUMNS}}
                 FROM claims {clm}
@@ -400,9 +362,6 @@ class IdrClaimItemInstitutionalNch(IdrBaseModel):
                     AND {val}.clm_num_sk = {clm}.clm_num_sk
                     AND {val}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
                     AND {val}.bfd_row_id = {clm_grp}.bfd_row_id
-                LEFT JOIN claim_related_conditions {rlt_cond}
-                    ON {rlt_cond}.clm_uniq_id = {clm}.clm_uniq_id
-                    AND {rlt_cond}.bfd_row_id = {clm_grp}.bfd_row_id
                 LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_instnl {line_instnl}
                     ON {line_instnl}.geo_bene_sk = {line}.geo_bene_sk
                     AND {line_instnl}.clm_type_cd = {line}.clm_type_cd
@@ -417,7 +376,3 @@ class IdrClaimItemInstitutionalNch(IdrBaseModel):
                 {{WHERE_CLAUSE}}
                 {{ORDER_BY}}
         """
-
-    @staticmethod
-    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
-        return INSTITUTIONAL_ADJUDICATED_PARTITIONS

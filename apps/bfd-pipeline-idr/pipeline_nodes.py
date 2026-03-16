@@ -3,13 +3,11 @@ from datetime import datetime
 
 from hamilton.htypes import Collect, Parallelizable  # type: ignore
 
-from constants import MIN_CLAIM_LOAD_DATE
 from load_partition import LoadPartition, LoadType
 from logger_config import configure_logger
 from model.base_model import (
     IdrBaseModel,
     LoadMode,
-    get_min_transaction_date,
 )
 from model.idr_beneficiary import IdrBeneficiary
 from model.idr_beneficiary_dual_eligibility import IdrBeneficiaryDualEligibility
@@ -33,7 +31,6 @@ from model.idr_claim_professional_ss import IdrClaimProfessionalSs
 from model.idr_claim_rx import IdrClaimRx
 from model.idr_contract_pbp_contact import IdrContractPbpContact
 from model.idr_contract_pbp_number import IdrContractPbpNumber
-from model.idr_provider_history import IdrProviderHistory
 from pipeline_utils import extract_and_load
 from settings import TABLES_TO_LOAD
 
@@ -60,7 +57,6 @@ def claim_tables() -> list[type[IdrBaseModel]]:
 def claim_aux_tables() -> list[type[IdrBaseModel]]:
     return filter_tables(
         [
-            IdrProviderHistory,
             # RX/Part D is special because we combine claim + claim line
             IdrClaimRx,
             IdrClaimItemProfessionalNch,
@@ -96,16 +92,14 @@ def bene_tables() -> list[type[IdrBaseModel]]:
 def _gen_partitioned_node_inputs(
     model_types: list[type[IdrBaseModel]], load_type: LoadType
 ) -> list[NodePartitionedModelInput]:
-    start_date = get_min_transaction_date(MIN_CLAIM_LOAD_DATE)
-
     models_and_partitions = [
         (
             m,
             [
                 partition
-                for partition_group in m.fetch_query_partitions()
+                for partition_group in m.model_type().partitions
                 for partition in partition_group.generate_ranges(
-                    load_type, datetime.date(start_date)
+                    load_type, datetime.date(m.model_type().min_transaction_date)
                 )
             ],
         )

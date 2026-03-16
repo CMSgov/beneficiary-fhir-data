@@ -39,6 +39,7 @@ public class ClaimInstitutionalNch extends ClaimInstitutionalBase {
   @Embedded private ClaimInstitutionalNchSupportingInfo supportingInfo;
   @Embedded private ServiceCareTeam serviceProviderHistory;
   @Embedded private BloodPints bloodPints;
+  @Embedded private ClaimRelatedCondition claimRelatedCondition;
 
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "clm_uniq_id")
@@ -97,5 +98,10 @@ public class ClaimInstitutionalNch extends ClaimInstitutionalBase {
   @Override
   public SortedSet<ClaimItemBase> getItems() {
     return new TreeSet<ClaimItemBase>(getClaimItems());
+  }
+
+  @Override
+  public Optional<ClaimRelatedCondition> getClaimRelatedCondition() {
+    return Optional.of(claimRelatedCondition);
   }
 }

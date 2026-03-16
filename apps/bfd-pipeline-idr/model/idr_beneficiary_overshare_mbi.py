@@ -1,39 +1,43 @@
-from collections.abc import Sequence
 from datetime import datetime
-from typing import Annotated
+from typing import Annotated, override
 
-from constants import (
-    NON_CLAIM_PARTITION,
-)
-from load_partition import LoadPartition, LoadPartitionGroup
+from load_partition import LoadPartition
 from loader import LoadMode
 from model.base_model import (
     PRIMARY_KEY,
     IdrBaseModel,
+    ModelType,
 )
 
 
 class IdrBeneficiaryOvershareMbi(IdrBaseModel):
     bene_mbi_id: Annotated[str, {PRIMARY_KEY: True}]
 
+    @override
     @staticmethod
     def table() -> str:
         return "idr.beneficiary_overshare_mbi"
 
+    @override
     @staticmethod
     def should_replace() -> bool:
         return True
 
-    @staticmethod
-    def last_updated_date_table() -> str:
-        return ""
-
+    @override
     @staticmethod
     def last_updated_date_column() -> list[str]:
         return []
 
+    @override
     @staticmethod
-    def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
+    def model_type() -> ModelType:
+        return ModelType.BENEFICIARY
+
+    @override
+    @classmethod
+    def fetch_query(
+        cls, partition: LoadPartition, start_time: datetime, load_mode: LoadMode
+    ) -> str:
         # The xref data in the bene_hstry table is not completely reliable
         # because sometimes HICNs can be reused, causing two records to be
         # xref'd even if they're not the same person.
@@ -53,9 +57,5 @@ class IdrBeneficiaryOvershareMbi(IdrBaseModel):
                      AND xref.bene_kill_cred_cd = '2'
                ) AND hstry.bene_mbi_id IS NOT NULL
                GROUP BY hstry.bene_mbi_id
-               HAVING COUNT(DISTINCT hstry.bene_sk) > 1 \
+               HAVING COUNT(DISTINCT hstry.bene_sk) > 1
                """
-
-    @staticmethod
-    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
-        return [NON_CLAIM_PARTITION]

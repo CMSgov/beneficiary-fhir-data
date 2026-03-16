@@ -20,7 +20,7 @@ public class BeneficiarySimple {
   @Column(name = "bene_sk")
   private long beneSk;
 
-  @Column(name = "bene_xref_efctv_sk_computed")
+  @Column(name = "bene_xref_efctv_sk")
   private long xrefSk;
 
   @Convert(converter = DefaultFalseBooleanConverter.class)

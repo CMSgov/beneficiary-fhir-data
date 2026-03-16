@@ -1,5 +1,21 @@
 gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
 {
+  "adjudication" : [ {
+    "category" : {
+      "coding" : [ {
+        "code" : "benefitpaymentstatus",
+        "display" : "Benefit Payment Status",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
+      } ]
+    },
+    "reason" : {
+      "coding" : [ {
+        "code" : "outofnetwork",
+        "display" : "Out Of Network",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus"
+      } ]
+    }
+  } ],
   "billablePeriod" : {
     "end" : "2018-08-21",
     "start" : "2018-08-12"
@@ -167,21 +183,6 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
           "code" : "TOT_RX_CST_AMT",
           "display" : "Total drug cost (Part D)",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-        } ]
-      }
-    }, {
-      "category" : {
-        "coding" : [ {
-          "code" : "benefitpaymentstatus",
-          "display" : "Benefit Payment Status",
-          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
-        } ]
-      },
-      "reason" : {
-        "coding" : [ {
-          "code" : "outofnetwork",
-          "display" : "Out Of Network",
-          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus"
         } ]
       }
     } ],
@@ -615,6 +616,22 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
 
 gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
 {
+  "adjudication" : [ {
+    "category" : {
+      "coding" : [ {
+        "code" : "benefitpaymentstatus",
+        "display" : "Benefit Payment Status",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
+      } ]
+    },
+    "reason" : {
+      "coding" : [ {
+        "code" : "outofnetwork",
+        "display" : "Out Of Network",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus"
+      } ]
+    }
+  } ],
   "billablePeriod" : {
     "end" : "2025-08-12",
     "start" : "2025-08-10"
@@ -777,21 +794,6 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
           "code" : "TOT_RX_CST_AMT",
           "display" : "Total drug cost (Part D)",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-        } ]
-      }
-    }, {
-      "category" : {
-        "coding" : [ {
-          "code" : "benefitpaymentstatus",
-          "display" : "Benefit Payment Status",
-          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
-        } ]
-      },
-      "reason" : {
-        "coding" : [ {
-          "code" : "outofnetwork",
-          "display" : "Out Of Network",
-          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus"
         } ]
       }
     } ],
