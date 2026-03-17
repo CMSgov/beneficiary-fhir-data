@@ -576,7 +576,7 @@ gov.cms.bfd.server.ng.PatientCoverageC4DICSearchIT.patientCoverageSearchByIdDual
         "reference" : "Organization/{uuid}"
       } ],
       "period" : {
-        "start" : "2020-04-08"
+        "start" : "2020-04-01"
       },
       "relationship" : {
         "coding" : [ {

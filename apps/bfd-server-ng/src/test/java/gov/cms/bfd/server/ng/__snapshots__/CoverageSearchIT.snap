@@ -2350,12 +2350,6 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithExpiredCoverage[
         "resourceType" : "Organization"
       } ],
       "extension" : [ {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-BUYIN-CD",
-        "valueCoding" : {
-          "code" : "H",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-BUYIN-CD"
-        }
-      }, {
         "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-ENRLMT-RSN-CD",
         "valueCoding" : {
           "code" : "A",
@@ -2366,12 +2360,6 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithExpiredCoverage[
         "valueCoding" : {
           "code" : "Y",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-STUS-CD"
-        }
-      }, {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-ENTLMT-RSN-CD",
-        "valueCoding" : {
-          "code" : "0",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-RSN-CD"
         }
       } ],
       "id" : "part-a-421056595",
@@ -2457,12 +2445,6 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithExpiredCoverage[
         "resourceType" : "Organization"
       } ],
       "extension" : [ {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-BUYIN-CD",
-        "valueCoding" : {
-          "code" : "H",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-BUYIN-CD"
-        }
-      }, {
         "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-ENRLMT-RSN-CD",
         "valueCoding" : {
           "code" : "B",
@@ -2473,12 +2455,6 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithExpiredCoverage[
         "valueCoding" : {
           "code" : "Y",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-STUS-CD"
-        }
-      }, {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-ENTLMT-RSN-CD",
-        "valueCoding" : {
-          "code" : "0",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-RSN-CD"
         }
       } ],
       "id" : "part-b-421056595",
@@ -2581,12 +2557,6 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithExpiredCoverage[
         "resourceType" : "Organization"
       } ],
       "extension" : [ {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-BUYIN-CD",
-        "valueCoding" : {
-          "code" : "H",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-BUYIN-CD"
-        }
-      }, {
         "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-ENRLMT-RSN-CD",
         "valueCoding" : {
           "code" : "A",
@@ -2597,12 +2567,6 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithExpiredCoverage[
         "valueCoding" : {
           "code" : "Y",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-STUS-CD"
-        }
-      }, {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-ENTLMT-RSN-CD",
-        "valueCoding" : {
-          "code" : "0",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-RSN-CD"
         }
       } ],
       "id" : "part-a-421056595",
@@ -2688,12 +2652,6 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithExpiredCoverage[
         "resourceType" : "Organization"
       } ],
       "extension" : [ {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-BUYIN-CD",
-        "valueCoding" : {
-          "code" : "H",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-BUYIN-CD"
-        }
-      }, {
         "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-ENRLMT-RSN-CD",
         "valueCoding" : {
           "code" : "B",
@@ -2704,12 +2662,6 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithExpiredCoverage[
         "valueCoding" : {
           "code" : "Y",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-STUS-CD"
-        }
-      }, {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-ENTLMT-RSN-CD",
-        "valueCoding" : {
-          "code" : "0",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-RSN-CD"
         }
       } ],
       "id" : "part-b-421056595",
@@ -2812,12 +2764,6 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithExpiredCoverage[
         "resourceType" : "Organization"
       } ],
       "extension" : [ {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-BUYIN-CD",
-        "valueCoding" : {
-          "code" : "H",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-BUYIN-CD"
-        }
-      }, {
         "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-ENRLMT-RSN-CD",
         "valueCoding" : {
           "code" : "A",
@@ -2828,12 +2774,6 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithExpiredCoverage[
         "valueCoding" : {
           "code" : "Y",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-STUS-CD"
-        }
-      }, {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-ENTLMT-RSN-CD",
-        "valueCoding" : {
-          "code" : "0",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-RSN-CD"
         }
       } ],
       "id" : "part-a-421056595",
@@ -2919,12 +2859,6 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithExpiredCoverage[
         "resourceType" : "Organization"
       } ],
       "extension" : [ {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-BUYIN-CD",
-        "valueCoding" : {
-          "code" : "H",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-BUYIN-CD"
-        }
-      }, {
         "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-ENRLMT-RSN-CD",
         "valueCoding" : {
           "code" : "B",
@@ -2935,12 +2869,6 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithExpiredCoverage[
         "valueCoding" : {
           "code" : "Y",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-STUS-CD"
-        }
-      }, {
-        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-ENTLMT-RSN-CD",
-        "valueCoding" : {
-          "code" : "0",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-RSN-CD"
         }
       } ],
       "id" : "part-b-421056595",
@@ -4628,7 +4556,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithSinglePartShould
         "reference" : "#cms-org"
       } ],
       "period" : {
-        "start" : "2020-04-08"
+        "start" : "2020-04-01"
       },
       "relationship" : {
         "coding" : [ {
