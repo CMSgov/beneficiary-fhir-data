@@ -20,6 +20,7 @@ repos:
   rev: v8.24.2
   hooks:
     - id: gitleaks
+      stages: [ pre-commit ]
 
   # pre-push hooks
 - repo: https://github.com/astral-sh/ruff-pre-commit
@@ -43,7 +44,7 @@ repos:
 - repo: local
   hooks:
     - id: pre-push-check-java-script
-      name: Pre-push Script
+      name: Pre-push Check Java Format Script
       pass_filenames: false
       entry: ./.github/scripts/pre-push-check-java.sh
       language: script
