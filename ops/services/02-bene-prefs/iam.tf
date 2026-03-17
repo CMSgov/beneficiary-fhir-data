@@ -20,7 +20,7 @@ data "aws_iam_policy_document" "partner_bucket_access" {
   for_each = local.partners_config
 
   statement {
-    sid     = "AllowPartnersBenePrefsS3List${each.key}"
+    sid = "AllowPartnersBenePrefsS3List${each.key}"
     actions = [
       "s3:ListBucket"
     ]
@@ -30,13 +30,28 @@ data "aws_iam_policy_document" "partner_bucket_access" {
   }
 
   statement {
-    sid     = "AllowPartnersBenePrefsS3ReadWrite${each.key}"
+    sid = "AllowPartnersBenePrefsS3ReadWrite${each.key}"
     actions = [
       "s3:GetObject",
       "s3:PutObject",
+      "s3:DeleteObject",
+      "s3:DeleteObjectVersion"
     ]
     resources = [
-        "${module.buckets[each.key].bucket.arn}${each.value.bucket_home_path}/*"
+      "${module.buckets[each.key].bucket.arn}${each.value.bucket_home_path}*"
+    ]
+  }
+  statement {
+    sid = "AllowEncryptionAndDecryptionOfS3Files"
+    actions = [
+      "kms:Encrypt",
+      "kms:Decrypt",
+      "kms:ReEncrypt*",
+      "kms:GenerateDataKey*",
+      "kms:DescribeKey",
+    ]
+    resources = [
+      local.env_key_arn
     ]
   }
 }
@@ -47,7 +62,7 @@ resource "aws_iam_policy" "partner_bucket_access" {
   name        = "${local.name_prefix}-${each.key}-bucket-access-policy"
   path        = local.iam_path
   description = "Policy granting cross-account access to ${each.key} beneficiary prefs bucket when role is assumed"
-  policy = data.aws_iam_policy_document.partner_bucket_access[each.key].json
+  policy      = data.aws_iam_policy_document.partner_bucket_access[each.key].json
 }
 
 resource "aws_iam_role" "partner_bucket_access" {

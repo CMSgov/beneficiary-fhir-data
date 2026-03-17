@@ -1,0 +1,6 @@
+{{ 'HDR_BENEDATARSP' }}{{ extract_date }}
+{% for row in data %}
+{{- '%-11s' | format(row['BENE_MBI_ID']                 | default('', True)) }}
+{{- '%-1s'  | format(row['BENE_SHRNG_PREFNC_OPT_IN_SW'] | default('', True)) }}
+{% endfor %}
+{{- 'TRL_BENEDATARSP' }}{{- extract_date }}{{- '%010d' | format(data | length) }}
