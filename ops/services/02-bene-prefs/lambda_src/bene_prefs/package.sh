@@ -9,6 +9,8 @@ SHA256_SUM="$(git ls-files "$SCRIPT_DIR" | grep -v README.md \
     | sha256sum | cut -f1 -d ' ')"
 
 if ! [ "$STORED_SHA256_SUM" = "$SHA256_SUM" ]; then
+    uv sync --directory "$SCRIPT_DIR"
+
     uv export \
         --directory "$SCRIPT_DIR" \
         --frozen \
@@ -17,12 +19,12 @@ if ! [ "$STORED_SHA256_SUM" = "$SHA256_SUM" ]; then
         -qo requirements.txt
 
     uv pip install \
-    --directory "$SCRIPT_DIR" \
-    --no-installer-metadata \
-    --no-compile-bytecode \
-    --python-platform aarch64-manylinux2014 \
-    --target packages \
-    -qr requirements.txt
+        --directory "$SCRIPT_DIR" \
+        --no-installer-metadata \
+        --no-compile-bytecode \
+        --python-platform aarch64-manylinux2014 \
+        --target packages \
+        -qr requirements.txt
 
     cd "${SCRIPT_DIR}/packages"
     zip -qr "${SCRIPT_DIR}/package.zip" .
