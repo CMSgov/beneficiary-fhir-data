@@ -258,6 +258,12 @@ class EobSearchIT extends IntegrationTestBase {
                         5,
                         style),
                     Arguments.of(
+                        "WithCombinedTagOrDDPSNCH",
+                        List.of(
+                            List.of(systemType(MetaSourceSk.NCH), systemType(MetaSourceSk.DDPS))),
+                        3,
+                        style),
+                    Arguments.of(
                         "WithSystemTag_FinalAction",
                         List.of(
                             List.of(
