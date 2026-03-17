@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.stream.Collectors;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+import org.hl7.fhir.r4.model.PrimitiveType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -45,7 +46,7 @@ class EobValidityIT extends IntegrationTestBase {
             "EOB (ID: %s) must have a valid CARIN BB Profile. Found: %s",
             eob.getIdElement().getIdPart(),
             eob.getMeta().getProfile().stream()
-                .map(p -> p.getValueAsString())
+                .map(PrimitiveType::getValueAsString)
                 .collect(Collectors.joining(", "))));
 
     validateCodingsAndSystemUrls(eob);

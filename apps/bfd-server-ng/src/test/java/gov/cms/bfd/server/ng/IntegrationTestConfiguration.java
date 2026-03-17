@@ -100,6 +100,8 @@ public class IntegrationTestConfiguration {
     // test data to load significantly slower.
     env.put("IDR_ENABLE_PARTITIONS", "0");
     env.put("BFD_TEST_DATE", date.toString());
+    // Suppress noisy output unless the log level is explicitly set
+    env.putIfAbsent("IDR_LOG_LEVEL", "WARNING");
 
     processBuilder
         .directory(new File(Paths.get(baseDir, "../bfd-pipeline-idr").toString()))

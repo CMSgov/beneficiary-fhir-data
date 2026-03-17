@@ -1,0 +1,76 @@
+[project]
+name = "bene-prefs"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = "~=3.13.0"
+dependencies = [
+    "cryptography==45.0.6",
+    "snowflake-connector-python==4.3.0",
+    "python-dateutil==2.9.0",
+    "boto3>=1.42.56",
+    "jinja2>=3.1.6",
+    "aws-lambda-powertools>=3.25.0",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.14.6",
+    "uv>=0.9.11",
+    "pytest>=9.0.1",
+    "testcontainers>=4.13.3",
+    "pyright>=1.1.407",
+]
+
+[tool.ruff]
+# Set the maximum line length to 100.
+line-length = 100
+
+[tool.ruff.lint]
+select = [
+    "D",    # pydocstyle
+    "E501",
+    # pycodestyle
+    "E",
+    # Pyflakes
+    "F",
+    # pyupgrade
+    "UP",
+    # flake8-bugbear
+    "B",
+    # flake8-simplify
+    "SIM",
+    # isort
+    "I",
+    "ANN",
+    "LOG",
+    "G",
+    "PT",
+    "RSE",
+    "PIE",
+    "RET",
+    "SLF",
+    "ARG",
+    "PTH",
+    "PLE",
+    "PLW",
+    "PERF",
+    "FURB",
+    "RUF",
+]
+
+# Don't require docstrings
+ignore = ["D100", "D101", "D102", "D103", "D104", "D105", "D107"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "pep257"
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = true
+
+[tool.pyright]
+typeCheckingMode = "strict"
+venvPath = "."
+venv = ".venv"

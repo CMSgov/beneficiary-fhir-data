@@ -185,28 +185,6 @@ AVAILABLE_NDC = [
     "00264780020",
 ]
 CLM_POA_IND_CHOICES = ["N", "1", "U", "X", "W", "0", "~", "Z", "Y", ""]
-AVAIL_PBP_NUMS = ["001", "002", "003", "004", "005", "006", "007", "008", "009", "010"]
-AVAIL_CONTRACT_NUMS = [
-    "Z0001",
-    "Z0002",
-    "Z0003",
-    "Z0004",
-    "Z0005",
-    "Z0006",
-    "Z0007",
-    "Z0008",
-    "Z0009",
-    "Z0010",
-]
-AVAIL_PBP_TYPE_CODES = ["01", "02", "48", "04", "09", "18", "10"]
-AVAIL_CONTRACT_NAMES = [
-    "Health Plan",
-    "Wellness",
-    "Silver Fox",
-    "Vitality Plan",
-    "Wellness Plus",
-    "Happy Heart",
-]
 AVAIL_CLM_RLT_COND_SK = ["193064687", "117814", "193065597", "117853", "193074307"]
 NON_SAMHSA_DGNS_DRG_CDS = list(range(43))
 SAMHSA_DGNS_DRG_CDS = [

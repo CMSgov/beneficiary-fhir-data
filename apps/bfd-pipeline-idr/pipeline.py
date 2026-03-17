@@ -8,19 +8,11 @@ from hamilton.execution import executors  # type: ignore
 
 import pipeline_nodes
 from load_partition import LoadType
-from model import LoadMode
-from settings import (
-    LOAD_TYPE,
-    MAX_TASKS,
-    bfd_test_date,
-)
+from logger_config import configure_logger
+from model.base_model import LoadMode
+from settings import LOAD_TYPE, MAX_TASKS, bfd_test_date
 
 telemetry.disable_telemetry()
-
-console_handler = logging.StreamHandler()
-formatter = logging.Formatter("[%(levelname)s] %(asctime)s %(message)s")
-console_handler.setFormatter(formatter)
-logging.basicConfig(level=logging.INFO, handlers=[console_handler])
 
 logger = logging.getLogger(__name__)
 
@@ -53,7 +45,7 @@ def run(load_mode: str) -> None:
     # Setting this parameter will cause old processes to be recycled, allowing resources used by
     # these processes to be freed.
     # This will allow memory usage to remain constant over time.
-    max_tasks_per_child = 1 if load_mode == LoadMode.PRODUCTION else None
+    max_tasks_per_child = 1 if load_mode == LoadMode.IDR else None
 
     hamilton_driver = (
         driver.Builder()
@@ -68,10 +60,7 @@ def run(load_mode: str) -> None:
         .build()
     )
 
-    if load_mode is LoadMode.PRODUCTION or bfd_test_date() is None:
-        start_time = datetime.now(UTC)
-    else:
-        start_time = bfd_test_date()
+    start_time = datetime.now(UTC) if bfd_test_date() is None else bfd_test_date()
 
     # if load_benes and load_claims:
     hamilton_driver.execute(  # type: ignore
@@ -85,4 +74,5 @@ def run(load_mode: str) -> None:
 
 
 if __name__ == "__main__":
+    configure_logger()
     main()

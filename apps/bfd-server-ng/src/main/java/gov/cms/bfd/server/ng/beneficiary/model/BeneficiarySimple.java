@@ -6,28 +6,24 @@ import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import java.time.ZonedDateTime;
 import lombok.Getter;
 
 /**
- * A simplified beneficiary model for use with claims data. Excess data is omitted to avoid
- * over-fetching.
+ * A simplified beneficiary model for use with claims data. Excess data is omitted to avoid the
+ * performance penality of over-fetching data not needed specifically for claims.
  */
 @Entity
 @Getter
-@Table(name = "beneficiary", schema = "idr")
+@Table(name = "valid_beneficiary", schema = "idr")
 public class BeneficiarySimple {
   @Id
   @Column(name = "bene_sk")
   private long beneSk;
 
-  @Column(name = "bene_xref_efctv_sk_computed")
+  @Column(name = "bene_xref_efctv_sk")
   private long xrefSk;
 
   @Convert(converter = DefaultFalseBooleanConverter.class)
   @Column(name = "idr_ltst_trans_flg")
-  protected Boolean latestTransactionFlag;
-
-  @Column(name = "idr_trans_efctv_ts")
-  protected ZonedDateTime effectiveTimestamp;
+  private Boolean latestTransactionFlag;
 }

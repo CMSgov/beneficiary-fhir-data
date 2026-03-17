@@ -12,28 +12,35 @@ module "terraservice" {
 
   service              = local.service
   relative_module_root = "ops/services/02-bene-prefs"
-  ssm_hierarchy_roots   = concat(["bfd"], tolist(local.partners))
+  ssm_hierarchy_roots  = concat(["bfd"], tolist(local.partners))
+  subnet_layers        = ["private"]
 }
 
 locals {
-  service = "bene-prefs"
+  service           = "bene-prefs"
+  conditional_count = local.env == "prod" ? 1 : 0
 
+  app_subnets              = module.terraservice.subnets_map["private"]
   ssm_config               = nonsensitive(module.terraservice.ssm_config)
   default_tags             = module.terraservice.default_tags
   env                      = module.terraservice.env
   env_key_arn              = module.terraservice.env_key_arn
+  env_key_alias            = module.terraservice.env_key_alias
   name_prefix              = "bfd-${local.env}-${local.service}"
-  partners                 = toset(["bcda", "ab2d", "dpc"])
+  partners                 = contains(["test", "prod"], local.env) ? toset(["bcda", "ab2d", "dpc"]) : toset([])
   iam_path                 = module.terraservice.default_iam_path
   permissions_boundary_arn = module.terraservice.default_permissions_boundary_arn
+  region                   = module.terraservice.region
+  account_id               = module.terraservice.account_id
+  vpc                      = module.terraservice.vpc
 
   root_dir = "bfdeft01"
 
-# Build up the partners config for the bucket assumer arns and S3 notification received file targets:
+  # Build up the partners config for the bucket assumer arns and S3 notification received file targets:
   partners_config = {
     for partner in local.partners :
     partner => {
-      bucket_home_path = "/${local.root_dir}/${partner}/in",
+      bucket_home_path = "/"
       bucket_iam_assumer_arns = jsondecode(
         lookup(local.ssm_config, "/${partner}/${local.service}/bucket_iam_assumer_arns_json", "[]")
       )
@@ -77,8 +84,9 @@ resource "aws_s3_bucket_notification" "buckets" {
   for_each = local.partners
   bucket   = module.buckets[each.key].bucket.id
   topic {
-    topic_arn = module.topics[each.key].topic.arn
-    events    = ["s3:ObjectCreated:*"]
+    topic_arn     = module.topics[each.key].topic.arn
+    events        = ["s3:ObjectCreated:*"]
+    filter_prefix = "${local.root_dir}/${each.key}/in/"
   }
 }
 
@@ -150,10 +158,12 @@ module "topics" {
   lambda_sample_rate = 100
 }
 
-resource "aws_dynamodb_table" "bene_preferences_tracker" {
-  name             = "bfd-${local.env}-bene-preferences"
-  billing_mode     = "PAY_PER_REQUEST"
-  hash_key         = "partner"
+resource "aws_dynamodb_table" "this" {
+  count = local.env == "prod" ? 1 : 0
+
+  name         = "bfd-${local.env}-bene-preferences"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "partner"
   attribute {
     name = "partner"
     type = "S"

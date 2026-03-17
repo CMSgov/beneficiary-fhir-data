@@ -180,6 +180,10 @@ resource "aws_ecs_task_definition" "server" {
             value = local.env
           },
           {
+            name  = "BFD_DB_IDENTIFIER"
+            value = local.db_cluster_identifier
+          },
+          {
             name  = "SPRING_PROFILES_ACTIVE"
             value = "aws"
           },

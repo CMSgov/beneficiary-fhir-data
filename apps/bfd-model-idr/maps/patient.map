@@ -4,7 +4,7 @@ map "https://bfd.cms.gov/MappingLanguage/Maps/Patient" = "BFD-Patient-Map"
 
 
 uses "http://hl7.org/fhir/StructureDefinition/Beneficiary" alias Bene as source
-uses "https://bfd.cms.gov/fhir/StructureDefinition/Bene-MBI" alias BeneMBI as source
+uses "http://hl7.org/fhir/StructureDefinition/Bene-MBI" alias BeneMBI as source
 //The first specified target is what the default output will output as the ResourceType
 uses "http://hl7.org/fhir/StructureDefinition/Patient" alias BFDPatient as target
 
