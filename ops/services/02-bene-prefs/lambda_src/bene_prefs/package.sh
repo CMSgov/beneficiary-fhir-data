@@ -9,6 +9,8 @@ SHA256_SUM="$(git ls-files "$SCRIPT_DIR" | grep -v README.md \
     | sha256sum | cut -f1 -d ' ')"
 
 if ! [ "$STORED_SHA256_SUM" = "$SHA256_SUM" ]; then
+    uv sync --directory "$SCRIPT_DIR"
+
     uv export \
         --directory "$SCRIPT_DIR" \
         --frozen \
