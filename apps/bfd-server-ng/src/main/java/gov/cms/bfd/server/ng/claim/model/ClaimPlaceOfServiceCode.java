@@ -14,7 +14,7 @@ import org.hl7.fhir.r4.model.Coding;
  */
 @AllArgsConstructor
 @Getter
-@SuppressWarnings("java:S115")
+@SuppressWarnings({"java:S115", "java:S1192"})
 public enum ClaimPlaceOfServiceCode {
   /** 00 - UNASSIGNED. */
   _00("00", "UNASSIGNED"),

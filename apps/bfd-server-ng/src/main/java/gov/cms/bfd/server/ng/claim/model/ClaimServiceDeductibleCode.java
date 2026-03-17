@@ -1,9 +1,12 @@
 package gov.cms.bfd.server.ng.claim.model;
 
+import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.util.Arrays;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Extension;
 
 /**
  * Claim service deductible codes. Suppress SonarQube warning that constant names should comply with
@@ -29,5 +32,10 @@ public enum ClaimServiceDeductibleCode {
    */
   public static Optional<ClaimServiceDeductibleCode> fromCode(String code) {
     return Arrays.stream(values()).filter(v -> v.code.equals(code)).findFirst();
+  }
+
+  Extension toFhir() {
+    return new Extension(SystemUrls.EXT_CLM_SRVC_DDCTBL_SW_URL)
+        .setValue(new Coding(SystemUrls.SYS_CLM_SRVC_DDCTBL_SW, code, display));
   }
 }

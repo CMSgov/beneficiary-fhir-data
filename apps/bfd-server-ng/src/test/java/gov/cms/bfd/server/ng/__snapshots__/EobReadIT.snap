@@ -3172,6 +3172,26 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
           "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus"
         } ]
       }
+    }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 0
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "CLM_LINE_OTAF_AMT",
+          "display" : "Provider Obligation To Accept as Full Amount",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    } ],
+    "extension" : [ {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-SRVC-DDCTBL-SW",
+      "valueCoding" : {
+        "code" : "0",
+        "display" : "Service Subject to Deductible",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-SRVC-DDCTBL-SW"
+      }
     } ],
     "locationCodeableConcept" : {
       "coding" : [ {
@@ -3851,6 +3871,62 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
           "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus"
         } ]
       }
+    }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 9650.03
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "CLM_LINE_PRFNL_INTRST_AMT",
+          "display" : "Professional Interest Amount",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 2676.69
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "CLM_MDCR_PRMRY_PYR_ALOWD_AMT",
+          "display" : "Line Primary Payer Allowed Amount",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 4517.0
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "priorpayerpaid",
+          "display" : "Prior payer paid",
+          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+        }, {
+          "code" : "CLM_BENE_PRMRY_PYR_PD_AMT",
+          "display" : "Line Primary Payer Paid Amount",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 0
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "discount",
+          "display" : "Discount",
+          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
+        }, {
+          "code" : "CLM_LINE_DMERC_SCRN_SVGS_AMT",
+          "display" : "Screen Savings Amount",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
     } ],
     "extension" : [ {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PMT-80-100-CD",
@@ -3858,6 +3934,13 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
         "code" : "0",
         "display" : "80%",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PMT-80-100-CD"
+      }
+    }, {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-SRVC-DDCTBL-SW",
+      "valueCoding" : {
+        "code" : "0",
+        "display" : "Service Subject to Deductible",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-SRVC-DDCTBL-SW"
       }
     }, {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MTUS-IND-CD",

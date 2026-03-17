@@ -23,12 +23,16 @@ public class ClaimLineProfessionalExtensions {
   @Column(name = "clm_prvdr_spclty_cd")
   private Optional<ProviderSpecialtyCode> providerSpecialtyCode;
 
+  @Column(name = "clm_srvc_ddctbl_sw")
+  private Optional<ClaimServiceDeductibleCode> serviceDeductibleCode;
+
   List<Extension> toFhir() {
     return Stream.of(
             supplierTypeCode.map(ClaimSupplierTypeCode::toFhir),
             federalTypeOfServiceCode.map(ClaimFederalTypeOfServiceCode::toFhir),
             paymentCode.map(ClaimPaymentCode::toFhir),
-            providerSpecialtyCode.map(ProviderSpecialtyCode::toFhirExtension))
+            providerSpecialtyCode.map(ProviderSpecialtyCode::toFhirExtension),
+            serviceDeductibleCode.map(ClaimServiceDeductibleCode::toFhir))
         .flatMap(Optional::stream)
         .toList();
   }

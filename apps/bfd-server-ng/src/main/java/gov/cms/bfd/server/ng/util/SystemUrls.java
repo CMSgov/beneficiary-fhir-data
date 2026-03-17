@@ -386,6 +386,24 @@ public class SystemUrls {
       "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRVDR-TYPE-CD";
 
   /**
+   * Extension URL for Claim Service Deductible Code. Source:
+   * V2_MDCR_CLM_LINE_PRFNL.CLM_SRVC_DDCTBL_SW (from v2_mdcr_clm_line_prfnl) <a
+   * href="https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-SRVC-DDCTBL-SW">CLM-SRVC-DDCTBL-SW
+   * Extension</a>
+   */
+  public static final String EXT_CLM_SRVC_DDCTBL_SW_URL =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-SRVC-DDCTBL-SW";
+
+  /**
+   * System URL for the BFD/BlueButton Claim Service Deductible Code System. Used for the coding in
+   * the CLM-SRVC-DDCTBL-SW extension. <a
+   * href="https://bluebutton.cms.gov/fhir/CodeSystem/CLM-SRVC-DDCTBL-SW">CLM-SRVC-DDCTBL-SW
+   * CodeSystem</a>
+   */
+  public static final String SYS_CLM_SRVC_DDCTBL_SW =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-SRVC-DDCTBL-SW";
+
+  /**
    * Extension URL for BFD Low Income Subsidy Part D Premium Percentage. Source:
    * V2_MDCR_BENE_LIS.BENE-LIS-PTD-PRM-PCT (from v2_mdcr_bene_lis) <a
    * href="https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-LIS-PTD-PRM-PCT">BENE-LIS-PTD-PRM-PCT
