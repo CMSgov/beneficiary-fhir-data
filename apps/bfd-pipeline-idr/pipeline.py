@@ -60,7 +60,10 @@ def run(load_mode: str) -> None:
         .build()
     )
 
-    start_time = datetime.now(UTC) if bfd_test_date() is None else bfd_test_date()
+    if load_mode is not LoadMode.LOCAL or load_mode is not LoadMode.SYNTHETIC or bfd_test_date() is None:  # noqa: E501
+        start_time = datetime.now(UTC)
+    else:
+        start_time = bfd_test_date()
 
     # if load_benes and load_claims:
     hamilton_driver.execute(  # type: ignore
