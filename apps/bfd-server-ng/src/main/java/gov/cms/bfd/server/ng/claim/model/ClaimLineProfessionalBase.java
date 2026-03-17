@@ -31,11 +31,14 @@ abstract class ClaimLineProfessionalBase implements ClaimLineBase {
   @Column(name = "clm_line_from_dt")
   private Optional<LocalDate> fromDate;
 
+  @Column(name = "clm_pos_cd")
+  private Optional<ClaimPlaceOfServiceCode> placeOfServiceCode;
+
   @Embedded private ClaimLineHcpcsCode hcpcsCode;
   @Embedded private ClaimLineServiceUnitQuantity serviceUnitQuantity;
   @Embedded private ClaimLineHcpcsModifierCode hcpcsModifierCode;
-
   @Embedded private RenderingCareTeamLine claimLineRenderingProvider;
+  @Embedded private ClaimLineProfessionalExtensions extensions;
 
   @Override
   public Optional<ExplanationOfBenefit.ItemComponent> toFhirItemComponent() {
@@ -48,6 +51,8 @@ abstract class ClaimLineProfessionalBase implements ClaimLineBase {
     line.addModifier(hcpcsModifierCode.toFhir());
     fromDate.map(d -> line.setServiced(new DateType(DateUtil.toDate(d))));
     getAdjudicationCharge().toFhir().forEach(line::addAdjudication);
+    placeOfServiceCode.map(c -> line.setLocation(c.toFhir()));
+    populateFhirExtensions(line);
 
     return Optional.of(line);
   }
@@ -71,4 +76,8 @@ abstract class ClaimLineProfessionalBase implements ClaimLineBase {
   abstract ClaimLineAdjudicationChargeProfessionalBase getAdjudicationCharge();
 
   abstract void populateProductAndQuantity(ExplanationOfBenefit.ItemComponent item);
+
+  protected void populateFhirExtensions(ExplanationOfBenefit.ItemComponent line) {
+    getExtensions().toFhir().forEach(line::addExtension);
+  }
 }

@@ -3158,18 +3158,28 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
         } ]
       }
     }, {
-      "amount" : {
-        "currency" : "USD",
-        "value" : 0
-      },
       "category" : {
         "coding" : [ {
-          "code" : "CLM_LINE_OTAF_AMT",
-          "display" : "Provider Obligation To Accept as Full Amount",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          "code" : "benefitpaymentstatus",
+          "display" : "Benefit Payment Status",
+          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
+        } ]
+      },
+      "reason" : {
+        "coding" : [ {
+          "code" : "other",
+          "display" : "Other",
+          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus"
         } ]
       }
     } ],
+    "locationCodeableConcept" : {
+      "coding" : [ {
+        "code" : "68",
+        "display" : "UNASSIGNED",
+        "system" : "https://www.cms.gov/Medicare/Coding/place-of-service-codes/Place_of_Service_Code_Set"
+      } ]
+    },
     "modifier" : [ {
       "coding" : [ {
         "code" : "PC",
@@ -3505,6 +3515,12 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
         "value" : "1558719914"
       }
     },
+    "qualification" : {
+      "coding" : [ {
+        "code" : "61",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRVDR-SPCLTY-CD"
+      } ]
+    },
     "role" : {
       "coding" : [ {
         "code" : "rendering",
@@ -3821,62 +3837,60 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
         } ]
       }
     }, {
-      "amount" : {
-        "currency" : "USD",
-        "value" : 9650.03
-      },
       "category" : {
         "coding" : [ {
-          "code" : "CLM_LINE_PRFNL_INTRST_AMT",
-          "display" : "Professional Interest Amount",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          "code" : "benefitpaymentstatus",
+          "display" : "Benefit Payment Status",
+          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
         } ]
-      }
-    }, {
-      "amount" : {
-        "currency" : "USD",
-        "value" : 2676.69
       },
-      "category" : {
+      "reason" : {
         "coding" : [ {
-          "code" : "CLM_MDCR_PRMRY_PYR_ALOWD_AMT",
-          "display" : "Line Primary Payer Allowed Amount",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-        } ]
-      }
-    }, {
-      "amount" : {
-        "currency" : "USD",
-        "value" : 4517.0
-      },
-      "category" : {
-        "coding" : [ {
-          "code" : "priorpayerpaid",
-          "display" : "Prior payer paid",
-          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
-        }, {
-          "code" : "CLM_BENE_PRMRY_PYR_PD_AMT",
-          "display" : "Line Primary Payer Paid Amount",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-        } ]
-      }
-    }, {
-      "amount" : {
-        "currency" : "USD",
-        "value" : 0
-      },
-      "category" : {
-        "coding" : [ {
-          "code" : "discount",
-          "display" : "Discount",
-          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
-        }, {
-          "code" : "CLM_LINE_DMERC_SCRN_SVGS_AMT",
-          "display" : "Screen Savings Amount",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+          "code" : "other",
+          "display" : "Other",
+          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus"
         } ]
       }
     } ],
+    "extension" : [ {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PMT-80-100-CD",
+      "valueCoding" : {
+        "code" : "0",
+        "display" : "80%",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PMT-80-100-CD"
+      }
+    }, {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MTUS-IND-CD",
+      "valueCoding" : {
+        "code" : "0",
+        "display" : "VALUES REPORTED AS ZERO",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MTUS-IND-CD"
+      }
+    }, {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PHYSN-ASTNT-CD",
+      "valueCoding" : {
+        "code" : "0",
+        "display" : "N/A",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PHYSN-ASTNT-CD"
+      }
+    }, {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRCSG-IND-CD",
+      "valueCoding" : {
+        "code" : "Z",
+        "display" : "Bundled test, no payment",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRCSG-IND-CD"
+      }
+    }, {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-LINE-PRFNL-MTUS-CNT",
+      "valueDecimal" : 2.0
+    } ],
+    "locationCodeableConcept" : {
+      "coding" : [ {
+        "code" : "68",
+        "display" : "UNASSIGNED",
+        "system" : "https://www.cms.gov/Medicare/Coding/place-of-service-codes/Place_of_Service_Code_Set"
+      } ]
+    },
     "modifier" : [ {
       "coding" : [ {
         "code" : "PC",

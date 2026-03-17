@@ -26,6 +26,7 @@ import org.hl7.fhir.r4.model.Reference;
 public class ClaimLineProfessionalNch extends ClaimLineProfessionalBase implements ClaimLineBase {
 
   @Embedded private ClaimLineAdjudicationChargeProfessionalNch adjudicationCharge;
+  @Embedded private ClaimLineProfessionalNchExtensions claimLineProfessionalNchExtensions;
 
   @Column(name = "clm_line_hct_hgb_type_cd")
   private Optional<ClaimLineHCTHGBTestTypeCode> claimLineHCTHGBTestTypeCode;
@@ -81,5 +82,11 @@ public class ClaimLineProfessionalNch extends ClaimLineProfessionalBase implemen
         });
 
     return Optional.of(observation);
+  }
+
+  @Override
+  protected void populateFhirExtensions(ExplanationOfBenefit.ItemComponent line) {
+    super.populateFhirExtensions(line);
+    claimLineProfessionalNchExtensions.toFhir().forEach(line::addExtension);
   }
 }

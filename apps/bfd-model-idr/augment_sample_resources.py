@@ -105,8 +105,6 @@ class Provider:
     CLM_PRVDR_GNRC_ID_NUM: Optional[str] = None
     CLM_BLG_PRVDR_TAX_NUM: Optional[str] = None
 
-provider_list = []
-
 populate_fields_except_na = [
     "PRVDR_LGL_NAME",
     "PRVDR_OSCAR_NUM",

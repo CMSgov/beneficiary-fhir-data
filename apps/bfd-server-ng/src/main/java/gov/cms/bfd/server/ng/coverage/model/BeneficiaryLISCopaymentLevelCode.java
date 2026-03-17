@@ -34,6 +34,6 @@ public enum BeneficiaryLISCopaymentLevelCode {
 
   Extension toFhir() {
     return new Extension(SystemUrls.EXT_BENE_LIS_COPMT_LVL_CD_URL)
-        .setValue(new Coding(SystemUrls.SYS_BENE_LIS_COPMT_LVL_CD_CD, code, null));
+        .setValue(new Coding(SystemUrls.SYS_BENE_LIS_COPMT_LVL_CD, code, null));
   }
 }
