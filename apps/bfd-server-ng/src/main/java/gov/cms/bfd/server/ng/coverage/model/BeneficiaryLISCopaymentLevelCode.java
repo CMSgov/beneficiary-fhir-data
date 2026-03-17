@@ -11,7 +11,6 @@ import org.hl7.fhir.r4.model.Extension;
 /** Beneficiary Low Income Subsidy Copayment Level Code. */
 @RequiredArgsConstructor
 @Getter
-@SuppressWarnings("java:S115")
 public enum BeneficiaryLISCopaymentLevelCode {
 
   /** 1 - High. */

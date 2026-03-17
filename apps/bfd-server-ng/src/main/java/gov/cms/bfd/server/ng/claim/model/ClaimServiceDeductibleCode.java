@@ -14,7 +14,6 @@ import org.hl7.fhir.r4.model.Extension;
  */
 @AllArgsConstructor
 @Getter
-@SuppressWarnings("java:S115")
 public enum ClaimServiceDeductibleCode {
   /** 0 - Service Subject to Deductible. */
   _0("0", "Service Subject to Deductible"),

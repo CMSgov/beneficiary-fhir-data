@@ -12,7 +12,6 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 /** Provider Assignment Indicator Switch info. * */
 @AllArgsConstructor
 @Getter
-@SuppressWarnings("java:S115")
 public enum ProviderAssignmentIndicatorSwitch {
   /** L - Assigned Claim. */
   L("L", "Assigned Claim"),

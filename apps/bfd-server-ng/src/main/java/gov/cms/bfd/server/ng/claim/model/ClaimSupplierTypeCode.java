@@ -14,7 +14,6 @@ import org.hl7.fhir.r4.model.Extension;
  */
 @AllArgsConstructor
 @Getter
-@SuppressWarnings("java:S115")
 public enum ClaimSupplierTypeCode {
   /**
    * 0 - CLINICS, GROUPS, ASSOCIATIONS, PARTNERSHIPS, OR OTHER ENTITIES FOR WHOM THE CARRIER'S OWN

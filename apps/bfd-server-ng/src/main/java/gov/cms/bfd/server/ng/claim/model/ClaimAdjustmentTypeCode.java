@@ -15,7 +15,6 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
  */
 @AllArgsConstructor
 @Getter
-@SuppressWarnings("java:S115")
 public enum ClaimAdjustmentTypeCode {
   /** 0 - ORIGINAL. */
   _0("0", "ORIGINAL"),

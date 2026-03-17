@@ -14,7 +14,6 @@ import org.hl7.fhir.r4.model.Extension;
  */
 @AllArgsConstructor
 @Getter
-@SuppressWarnings("java:S115")
 public enum ReducedPaymentPhysicianAssistantCode {
   /** 0 - N/A. */
   _0("0", "N/A"),

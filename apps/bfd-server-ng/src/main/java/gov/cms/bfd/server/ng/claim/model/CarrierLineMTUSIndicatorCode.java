@@ -14,7 +14,6 @@ import org.hl7.fhir.r4.model.Extension;
  */
 @AllArgsConstructor
 @Getter
-@SuppressWarnings("java:S115")
 public enum CarrierLineMTUSIndicatorCode {
   /** 0 - VALUES REPORTED AS ZERO. */
   _0("0", "VALUES REPORTED AS ZERO"),
