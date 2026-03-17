@@ -7,10 +7,12 @@ import jakarta.persistence.Convert;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.MappedSuperclass;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.StringType;
 
 /** Claim line info. */
@@ -52,7 +54,7 @@ abstract class ClaimLineProfessionalBase implements ClaimLineBase {
     fromDate.map(d -> line.setServiced(new DateType(DateUtil.toDate(d))));
     getAdjudicationCharge().toFhir().forEach(line::addAdjudication);
     placeOfServiceCode.map(c -> line.setLocation(c.toFhir()));
-    populateFhirExtensions(line);
+    getFhirExtensions().forEach(line::addExtension);
 
     return Optional.of(line);
   }
@@ -77,7 +79,7 @@ abstract class ClaimLineProfessionalBase implements ClaimLineBase {
 
   abstract void populateProductAndQuantity(ExplanationOfBenefit.ItemComponent item);
 
-  protected void populateFhirExtensions(ExplanationOfBenefit.ItemComponent line) {
-    getExtensions().toFhir().forEach(line::addExtension);
+  protected List<Extension> getFhirExtensions() {
+    return getExtensions().toFhir();
   }
 }

@@ -3182,6 +3182,18 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
         } ]
       }
     }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 0
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "CLM_LINE_OTAF_AMT",
+          "display" : "Provider Obligation To Accept as Full Amount",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
       "category" : {
         "coding" : [ {
           "code" : "benefitpaymentstatus",
@@ -3194,18 +3206,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
           "code" : "other",
           "display" : "Other",
           "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus"
-        } ]
-      }
-    }, {
-      "amount" : {
-        "currency" : "USD",
-        "value" : 0
-      },
-      "category" : {
-        "coding" : [ {
-          "code" : "CLM_LINE_OTAF_AMT",
-          "display" : "Provider Obligation To Accept as Full Amount",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
     } ],
@@ -3563,6 +3563,9 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
       "coding" : [ {
         "code" : "61",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRVDR-SPCLTY-CD"
+      }, {
+        "code" : "251V00000X",
+        "system" : "http://nucc.org/provider-taxonomy"
       } ]
     },
     "role" : {
@@ -3878,21 +3881,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
           "code" : "CLM_LINE_SBMT_CHRG_AMT",
           "display" : "Line Submitted Charge Amount",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-        } ]
-      }
-    }, {
-      "category" : {
-        "coding" : [ {
-          "code" : "benefitpaymentstatus",
-          "display" : "Benefit Payment Status",
-          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
-        } ]
-      },
-      "reason" : {
-        "coding" : [ {
-          "code" : "other",
-          "display" : "Other",
-          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus"
         } ]
       }
     }, {

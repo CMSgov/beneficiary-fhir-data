@@ -1,13 +1,10 @@
 package gov.cms.bfd.server.ng.claim.model;
 
-import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Stream;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 @MappedSuperclass
@@ -41,22 +38,6 @@ abstract class ClaimLineAdjudicationChargeProfessionalBase {
   private BigDecimal purchasePriceAmount;
 
   List<ExplanationOfBenefit.AdjudicationComponent> toFhir() {
-    var benefitPaymentStatus = new ExplanationOfBenefit.AdjudicationComponent();
-    benefitPaymentStatus.setCategory(
-        new CodeableConcept()
-            .addCoding(
-                new Coding()
-                    .setSystem(SystemUrls.CARIN_CODE_SYSTEM_ADJUDICATION_DISCRIMINATOR)
-                    .setCode("benefitpaymentstatus")
-                    .setDisplay("Benefit Payment Status")));
-    benefitPaymentStatus.setReason(
-        new CodeableConcept()
-            .addCoding(
-                new Coding()
-                    .setSystem(SystemUrls.CARIN_CODE_SYSTEM_PAYER_ADJUDICATION_STATUS)
-                    .setCode("other")
-                    .setDisplay("Other")));
-
     return Stream.concat(
             Stream.of(
                 AdjudicationChargeType.LINE_PROFESSIONAL_THERAPY_LMT_AMOUNT.toFhirAdjudication(
@@ -75,8 +56,7 @@ abstract class ClaimLineAdjudicationChargeProfessionalBase {
                 AdjudicationChargeType.LINE_PROFESSIONAL_PURCHASE_PRICE_AMOUNT.toFhirAdjudication(
                     purchasePriceAmount),
                 AdjudicationChargeType.LINE_SUBMITTED_CHARGE_AMOUNT.toFhirAdjudication(
-                    submittedChargeAmount),
-                benefitPaymentStatus),
+                    submittedChargeAmount)),
             subClassCharges())
         .toList();
   }
