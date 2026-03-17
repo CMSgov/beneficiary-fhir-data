@@ -39,7 +39,13 @@ env:
 jobs:
   deploy-layer:
     if: ${{ fromJson(inputs.matrix-json)[inputs.layer-level] != fromJson('[]') }}
+
+    # Note cancel-inprogress set to false and fail-fast set to false should alleviate unreleased tofu locks:
+    concurrency:
+      group: deploy-env-svc-${{ inputs.account-type }}-${{ inputs.bfd-env }}-${{ matrix.context.layer }}-${{ matrix.context.service }}
+      cancel-in-progress: false
     strategy:
+      fail-fast: false
       matrix:
         context: ${{ fromJson(inputs.matrix-json)[inputs.layer-level] }}
     runs-on:
@@ -75,4 +81,4 @@ jobs:
           cw-log-group: ${{ env.DEFAULT_LOG_GROUP }}
           cw-log-stream: ${{ matrix.context.service }}-${{ github.run_id }}-${{ github.run_attempt }}
           skip-apply: ${{ inputs.skip-applies && 'true' || 'false' }}
-
+          

@@ -86,3 +86,38 @@ runs:
         tofu apply -no-color -input=false tfplan 2>&1 | "$STDOUT_TO_CWLOGS_SCRIPT"
         echo "OpenTofu plan for ${{ inputs.service-path }} applied"
       shell: bash
+
+    - name: Force-unlock tofu state (on failure/cancel)
+      if: failure() || cancelled()
+      continue-on-error: true
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        run_with_auto_unlock() {
+          # Run the command, capture output
+          set +e
+          out="$("$@" 2>&1)"
+          rc=$?
+          set -e
+
+          if [[ $rc -eq 0 ]]; then
+            return 0
+          fi
+
+          # Detect lock failure + extract ID
+          if echo "$out" | grep -q "Error acquiring the state lock" && echo "$out" | grep -q "Lock Info:"; then
+            lock_id="$(echo "$out" | awk -F'ID:[[:space:]]+' '/^[[:space:]]*ID:/ {print $2; exit}' | awk '{print $1}')"
+            if [[ -n "${lock_id:-}" ]]; then
+              echo "Detected lock; force-unlocking: $lock_id"
+              tofu force-unlock -force "$lock_id" -no-color
+              echo "Retrying command after unlock..."
+              "$@"
+              return 0
+            fi
+          fi
+
+          return $rc
+        }
+
+        run_with_auto_unlock tofu plan -no-color -refresh=false -lock-timeout=0s
