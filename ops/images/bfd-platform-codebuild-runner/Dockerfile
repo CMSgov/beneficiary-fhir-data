@@ -33,3 +33,15 @@ RUN curl -fsSL -o /usr/local/bin/sops https://github.com/getsops/sops/releases/d
     && checksum=$(sha256sum /usr/local/bin/sops | cut -f 1 -d ' ') \
     && [[ "${checksum}" = "${sops_checksum}" ]] \
     && chmod +x /usr/local/bin/sops
+
+FROM sops as uv
+
+ARG uv_version=0.10.11
+ARG uv_checksum=23003df007937dd607409c8ddf010baa82bad2673e60e254632ca5b04edcce13
+
+RUN curl -fsSL -o /tmp/uv.tar.gz https://github.com/astral-sh/uv/releases/download/${uv_version}/uv-aarch64-unknown-linux-gnu.tar.gz \
+    && checksum=$(sha256sum /tmp/uv.tar.gz | cut -f 1 -d ' ') \
+    && [[ "${checksum}" = "${uv_checksum}" ]] \
+    && tar -xf /tmp/uv.tar.gz -C /usr/local/bin --strip-components=1 \
+    && rm /tmp/uv.tar.gz \
+    && chmod +x /usr/local/bin/uv /usr/local/bin/uvx
