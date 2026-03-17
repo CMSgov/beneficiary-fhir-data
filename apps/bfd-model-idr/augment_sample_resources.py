@@ -50,6 +50,7 @@ header_to_supp_info_cols = {
     "CLM_NGACO_TLHLTH_SW": "CLM_NGACO_TLHLTH_SW",
     "CLM_NGACO_CPTATN_SW": "CLM_NGACO_CPTATN_SW",
     "CLM_ACO_CARE_MGMT_HCBS_SW": "CLM_ACO_CARE_MGMT_HCBS_SW",
+    "CLM_PD_STUS_CD": "CLM_PD_STUS_CD"
 }
 
 line_to_supp_info_cols = {

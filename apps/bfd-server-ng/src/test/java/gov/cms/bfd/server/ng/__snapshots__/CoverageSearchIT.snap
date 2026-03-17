@@ -2368,6 +2368,24 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithExpiredCoverage[
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-STUS-CD"
         }
       }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-STUS-CD",
+        "valueCoding" : {
+          "code" : "21",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-STUS-CD"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-ESRD-STUS-ID",
+        "valueCoding" : {
+          "code" : "Y",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ESRD-STUS-ID"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-DSBLD-STUS-ID",
+        "valueCoding" : {
+          "code" : "Y",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-DSBLD-STUS-ID"
+        }
+      }, {
         "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-ENTLMT-RSN-CD",
         "valueCoding" : {
           "code" : "0",
@@ -2473,6 +2491,24 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithExpiredCoverage[
         "valueCoding" : {
           "code" : "Y",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-STUS-CD"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-STUS-CD",
+        "valueCoding" : {
+          "code" : "21",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-STUS-CD"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-ESRD-STUS-ID",
+        "valueCoding" : {
+          "code" : "Y",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ESRD-STUS-ID"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-DSBLD-STUS-ID",
+        "valueCoding" : {
+          "code" : "Y",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-DSBLD-STUS-ID"
         }
       }, {
         "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-ENTLMT-RSN-CD",
@@ -2599,6 +2635,24 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithExpiredCoverage[
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-STUS-CD"
         }
       }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-STUS-CD",
+        "valueCoding" : {
+          "code" : "21",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-STUS-CD"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-ESRD-STUS-ID",
+        "valueCoding" : {
+          "code" : "Y",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ESRD-STUS-ID"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-DSBLD-STUS-ID",
+        "valueCoding" : {
+          "code" : "Y",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-DSBLD-STUS-ID"
+        }
+      }, {
         "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-ENTLMT-RSN-CD",
         "valueCoding" : {
           "code" : "0",
@@ -2704,6 +2758,24 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithExpiredCoverage[
         "valueCoding" : {
           "code" : "Y",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-STUS-CD"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-STUS-CD",
+        "valueCoding" : {
+          "code" : "21",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-STUS-CD"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-ESRD-STUS-ID",
+        "valueCoding" : {
+          "code" : "Y",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ESRD-STUS-ID"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-DSBLD-STUS-ID",
+        "valueCoding" : {
+          "code" : "Y",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-DSBLD-STUS-ID"
         }
       }, {
         "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-ENTLMT-RSN-CD",
@@ -2830,6 +2902,24 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithExpiredCoverage[
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-STUS-CD"
         }
       }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-STUS-CD",
+        "valueCoding" : {
+          "code" : "21",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-STUS-CD"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-ESRD-STUS-ID",
+        "valueCoding" : {
+          "code" : "Y",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ESRD-STUS-ID"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-DSBLD-STUS-ID",
+        "valueCoding" : {
+          "code" : "Y",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-DSBLD-STUS-ID"
+        }
+      }, {
         "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-ENTLMT-RSN-CD",
         "valueCoding" : {
           "code" : "0",
@@ -2935,6 +3025,24 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithExpiredCoverage[
         "valueCoding" : {
           "code" : "Y",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-ENTLMT-STUS-CD"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-STUS-CD",
+        "valueCoding" : {
+          "code" : "21",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-MDCR-STUS-CD"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-ESRD-STUS-ID",
+        "valueCoding" : {
+          "code" : "Y",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ESRD-STUS-ID"
+        }
+      }, {
+        "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-DSBLD-STUS-ID",
+        "valueCoding" : {
+          "code" : "Y",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-DSBLD-STUS-ID"
         }
       }, {
         "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-MDCR-ENTLMT-RSN-CD",
@@ -4628,7 +4736,7 @@ gov.cms.bfd.server.ng.CoverageSearchIT.coverageSearchForBeneWithSinglePartShould
         "reference" : "#cms-org"
       } ],
       "period" : {
-        "start" : "2020-04-08"
+        "start" : "2020-04-01"
       },
       "relationship" : {
         "coding" : [ {

@@ -105,11 +105,6 @@ class IdrBeneficiary(IdrBaseModel):
 
     @override
     @staticmethod
-    def computed_keys() -> list[str]:
-        return ["bene_xref_efctv_sk_computed"]
-
-    @override
-    @staticmethod
     def last_updated_date_column() -> list[str]:
         return ["bfd_patient_updated_ts"]
 

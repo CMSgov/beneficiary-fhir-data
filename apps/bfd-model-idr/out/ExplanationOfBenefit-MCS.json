@@ -1,7 +1,7 @@
 {
   "resourceType" : "ExplanationOfBenefit",
   "meta" : {
-    "lastUpdated" : "2026-03-02T18:00:07.770689Z",
+    "lastUpdated" : "2026-03-10T19:57:34.766406Z",
     "source" : "MCS",
     "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Professional-NonClinician|2.1.0"],
     "tag" : [{
@@ -85,6 +85,10 @@
   "status" : "active",
   "type" : {
     "coding" : [{
+      "system" : "http://terminology.hl7.org/CodeSystem/claim-type",
+      "code" : "professional"
+    },
+    {
       "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-TYPE-CD",
       "code" : "2700",
       "display" : "PROF MEDICARE SS PART B PROFESSIONAL"
@@ -608,6 +612,27 @@
   },
   {
     "sequence" : 28,
+    "category" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      },
+      {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code" : "CLM_PD_STUS_CD",
+        "display" : "Claim Paid Status Code"
+      }]
+    },
+    "code" : {
+      "coding" : [{
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PD-STUS-CD",
+        "code" : "D"
+      }]
+    }
+  },
+  {
+    "sequence" : 29,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
