@@ -97,17 +97,19 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
     rows = cur.fetchmany(1)
     assert rows[0]["bene_mbi_id"] == "1BC3JG0FM51"
 
+    cur = conn.execute("select max(last_ts) as max_ts from idr.load_progress")
+    
+    date_adv = datetime.strftime(cur.fetchone()["max_ts"] + timedelta(days=1), "%Y-%m-%d")
+
     conn.execute(
         """
         UPDATE cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry
         SET bene_mbi_id = '1S000000000', idr_insrt_ts=%(timestamp)s, idr_updt_ts=%(timestamp)s
         WHERE bene_sk = 10464258
         """,
-        {"timestamp": bfd_test_date()},
+        {"timestamp": date_adv},
     )
     conn.commit()
-
-    date_adv = datetime.strftime(bfd_test_date() + timedelta(days=1), "%Y-%m-%d")
 
     os.environ['BFD_TEST_DATE'] = date_adv
 
