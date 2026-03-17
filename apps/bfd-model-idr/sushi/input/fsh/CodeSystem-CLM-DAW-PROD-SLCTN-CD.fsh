@@ -10,7 +10,7 @@ Description: "Indicates the prescriber's instructions regarding generic substitu
 * #1 "Supplemental drugs (reported by plans that provide Enhanced Alternative coverage)"
 * #2 "Substitution allowed – Patient requested that brand be dispensed"
 * #3 "Substitution allowed – Pharmacist selected product dispensed"
-* #4 "Substitution allowed - Generic not in stock
+* #4 "Substitution allowed - Generic not in stock"
 * #5 "Substitution allowed – Brand drug dispensed as generic"
 * #6 "Override"
 * #7 "Substitution not allowed – Brand drug mandated by law"
