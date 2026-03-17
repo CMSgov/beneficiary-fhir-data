@@ -17,12 +17,12 @@ if ! [ "$STORED_SHA256_SUM" = "$SHA256_SUM" ]; then
         -qo requirements.txt
 
     uv pip install \
-    --directory "$SCRIPT_DIR" \
-    --no-installer-metadata \
-    --no-compile-bytecode \
-    --python-platform aarch64-manylinux2014 \
-    --target packages \
-    -qr requirements.txt
+        --directory "$SCRIPT_DIR" \
+        --no-installer-metadata \
+        --no-compile-bytecode \
+        --python-platform aarch64-manylinux2014 \
+        --target packages \
+        -qr requirements.txt
 
     cd "${SCRIPT_DIR}/packages"
     zip -qr "${SCRIPT_DIR}/package.zip" .
