@@ -294,10 +294,6 @@ class IdrBaseModel(BaseModel, ABC):
     def model_type() -> ModelType:
         """Value representing the type of model."""
 
-    @staticmethod
-    def computed_keys() -> list[str]:
-        return []
-
     @classmethod
     def unique_key(cls) -> list[str]:
         return cls._extract_meta_keys(PRIMARY_KEY)
