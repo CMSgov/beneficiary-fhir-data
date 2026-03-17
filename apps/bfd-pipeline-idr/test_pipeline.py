@@ -36,7 +36,8 @@ def _run_migrator(postgres: PostgresContainer) -> None:
             "-Dflyway.url="
             f"jdbc:postgresql://localhost:{postgres.get_exposed_port(5432)}/{postgres.dbname} "
             f"-Dflyway.user={postgres.username} "
-            f"-Dflyway.password={postgres.password}",
+            f"-Dflyway.password={postgres.password} "
+            "-Duser.timezone=UTC",
             cwd="../bfd-db-migrator-ng",
             shell=True,
             capture_output=True,
