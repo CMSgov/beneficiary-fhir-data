@@ -1,9 +1,11 @@
 package gov.cms.bfd.server.ng.claim.model;
 
+import gov.cms.bfd.server.ng.claim.converter.ClaimPoaIndicatorConverter;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Embeddable;
 import java.time.LocalDate;
 import java.util.Optional;
@@ -23,6 +25,7 @@ public class ClaimProcedureInstitutional extends ClaimProcedureBase {
   @Column(name = "clm_prcdr_cd") // SAMHSA
   private Optional<String> procedureCode;
 
+  @Convert(converter = ClaimPoaIndicatorConverter.class)
   @Column(name = "clm_poa_ind")
   private Optional<String> claimPoaIndicator;
 
