@@ -1,6 +1,6 @@
 FROM public.ecr.aws/lambda/provided:al2023.2026.03.12.12-arm64 as dnf
 
-RUN dnf install jq unzip tar gzip libicu aws-cli git gettext java-25-amazon-corretto-headless -y && dnf clean all
+RUN dnf install jq unzip tar gzip libicu aws-cli git gettext java-25-amazon-corretto-headless findutils zip -y && dnf clean all
 
 FROM dnf as opentofu
 
