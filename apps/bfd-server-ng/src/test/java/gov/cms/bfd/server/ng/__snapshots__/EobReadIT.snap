@@ -3184,7 +3184,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
     "locationCodeableConcept" : {
       "coding" : [ {
         "code" : "68",
-        "display" : "UNASSIGNED",
+        "display" : "Unassigned",
         "system" : "https://www.cms.gov/Medicare/Coding/place-of-service-codes/Place_of_Service_Code_Set"
       } ]
     },
@@ -3942,7 +3942,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
     "locationCodeableConcept" : {
       "coding" : [ {
         "code" : "68",
-        "display" : "UNASSIGNED",
+        "display" : "Unassigned",
         "system" : "https://www.cms.gov/Medicare/Coding/place-of-service-codes/Place_of_Service_Code_Set"
       } ]
     },
