@@ -57,9 +57,7 @@ enum AdjudicationChargeType {
       "CLM_LINE_CVRD_PD_AMT",
       "Payment Amount"),
   LINE_BLOOD_DEDUCTIBLE_AMOUNT(
-      SystemUrls.HL7_ADJUDICATION,
-      "deductible",
-      "Deductible",
+      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
       "CLM_LINE_BLOOD_DDCTBL_AMT",
       "Revenue Center Blood Deductible Amount"),
   LINE_MEDICARE_DEDUCTIBLE_AMOUNT(
@@ -399,9 +397,7 @@ enum AdjudicationChargeType {
       "CLM_LINE_DMERC_SCRN_SVGS_AMT",
       "Screen Savings Amount"),
   LINE_PROFESSIONAL_PURCHASE_PRICE_AMOUNT(
-      SystemUrls.HL7_ADJUDICATION,
-      "eligible",
-      "Eligible Amount",
+      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
       "CLM_LINE_PRFNL_DME_PRICE_AMT",
       "Purchase Price Amount"),
   LINE_RX_REPORTED_GAP_DISCOUNT_AMOUNT(
