@@ -1,7 +1,7 @@
 {
   "resourceType" : "ExplanationOfBenefit",
   "meta" : {
-    "lastUpdated" : "2026-03-10T20:42:46.048707Z",
+    "lastUpdated" : "2026-03-18T17:02:18.712640Z",
     "source" : "DDPS",
     "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Pharmacy|2.1.0"],
     "tag" : [{
@@ -292,7 +292,8 @@
       },
       {
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DAW-PROD-SLCTN-CD",
-        "code" : "0"
+        "code" : "0",
+        "display" : "No product selection indicated"
       }]
     }
   },
@@ -530,7 +531,7 @@
         {
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
           "code" : "CLM_LINE_BENE_PMT_AMT",
-          "display" : "Patient Responsibility Payment Amount"
+          "display" : "Line Paid By Beneficiary Amount"
         }]
       },
       "amount" : {
@@ -687,7 +688,7 @@
       {
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
         "code" : "CLM_BENE_PMT_AMT",
-        "display" : "Beneficiary Paid Amount"
+        "display" : "Paid By Beneficiary Amount"
       }]
     },
     "amount" : {
