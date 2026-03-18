@@ -44,8 +44,7 @@ public sealed interface ClaimLineRevenueCenterCode
                     .setCode(getCode())
                     .setDisplay(getDisplay()))
             .addCoding(new Coding().setSystem(SystemUrls.NUBC_REVENUE_CODES).setCode(getCode()));
-    deductibleCoinsuranceCode.ifPresent(
-        c -> codeableConcept.addCoding(c.toFhir()));
+    deductibleCoinsuranceCode.ifPresent(c -> codeableConcept.addCoding(c.toFhir()));
     return codeableConcept;
   }
 
