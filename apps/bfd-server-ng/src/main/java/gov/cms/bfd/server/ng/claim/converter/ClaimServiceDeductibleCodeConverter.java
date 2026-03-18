@@ -17,6 +17,6 @@ public class ClaimServiceDeductibleCodeConverter
 
   @Override
   public Optional<ClaimServiceDeductibleCode> convertToEntityAttribute(String code) {
-    return ClaimServiceDeductibleCode.fromCode(code);
+    return ClaimServiceDeductibleCode.tryFromCode(code);
   }
 }

@@ -19,6 +19,6 @@ public class ReducedPaymentPhysicianAssistantCodeConverter
 
   @Override
   public Optional<ReducedPaymentPhysicianAssistantCode> convertToEntityAttribute(String code) {
-    return ReducedPaymentPhysicianAssistantCode.fromCode(code);
+    return ReducedPaymentPhysicianAssistantCode.tryFromCode(code);
   }
 }
