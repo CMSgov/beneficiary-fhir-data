@@ -43,7 +43,7 @@ enum AdjudicationChargeType {
       "paidbypatient",
       "Paid by patient",
       "CLM_LINE_BENE_PMT_AMT",
-      "Beneficiary Paid Amount"),
+      "Line Paid By Beneficiary Amount"),
   LINE_BENE_PAID_AMOUNT(
       SystemUrls.CARIN_CODE_SYSTEM_ADJUDICATION,
       "paidtopatient",
@@ -107,7 +107,7 @@ enum AdjudicationChargeType {
       "paidbypatient",
       "Paid by patient",
       "CLM_BENE_PMT_AMT",
-      "Patient Responsibility Payment Amount"),
+      "Paid By Beneficiary Amount"),
   PROVIDER_PAYMENT_AMOUNT(
       SystemUrls.CARIN_CODE_SYSTEM_ADJUDICATION,
       "paidtoprovider",
@@ -219,7 +219,7 @@ enum AdjudicationChargeType {
       "paidtopatient",
       "Paid to patient",
       "CLM_MDCR_INSTNL_BENE_PD_AMT",
-      "Institutional Beneficiary Paid Amount"),
+      "Institutional Paid to Beneficiary Amount"),
   STANDARDIZED_PAYMENT_AMOUNT(
       SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
       "CLM_FINL_STDZD_PYMT_AMT",
@@ -409,9 +409,9 @@ enum AdjudicationChargeType {
       "submitted",
       "Submitted Amount",
       "TOT_RX_CST_AMT",
-      "Total drug cost (Part D)"),
+      "Total RX Cost Amount"),
   LINE_MEDICARE_COINSURANCE_AMOUNT(
-      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
+      SystemUrls.CARIN_CODE_SYSTEM_ADJUDICATION,
       "coinsurance",
       "Co-insurance",
       "CLM_LINE_MDCR_COINSRNC_AMT",

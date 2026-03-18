@@ -1,7 +1,7 @@
 {
   "resourceType" : "ExplanationOfBenefit",
   "meta" : {
-    "lastUpdated" : "2026-03-10T20:46:21.760887Z",
+    "lastUpdated" : "2026-03-18T16:59:48.700001Z",
     "source" : "NCH",
     "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional|2.1.0"],
     "tag" : [{
@@ -1414,7 +1414,7 @@
         {
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
           "code" : "CLM_LINE_BENE_PMT_AMT",
-          "display" : "Patient Responsibility Payment Amount"
+          "display" : "Line Paid By Beneficiary Amount"
         }]
       },
       "amount" : {
@@ -1461,11 +1461,6 @@
     {
       "category" : {
         "coding" : [{
-          "system" : "http://terminology.hl7.org/CodeSystem/adjudication",
-          "code" : "deductible",
-          "display" : "Deductible"
-        },
-        {
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
           "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
           "display" : "Blood Deductible Amount"
@@ -1584,11 +1579,6 @@
     {
       "category" : {
         "coding" : [{
-          "system" : "http://terminology.hl7.org/CodeSystem/adjudication",
-          "code" : "deductible",
-          "display" : "Deductible"
-        },
-        {
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
           "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
           "display" : "Blood Deductible Amount"
