@@ -6,6 +6,7 @@ from pathlib import Path
 
 import psycopg
 
+from extractor import CsvFile, DbExecutor, PostgresExecutor
 from loader import get_connection_string
 from logger_config import configure_logger
 from model.base_model import LoadMode
@@ -49,21 +50,18 @@ tables = [
 ]
 
 
-def load_from_csv(conn: psycopg.Connection, src_folder: str) -> None:
-    with conn.cursor() as cur:
-        for table in tables:
-            # Clear out any previous data
-            sql_table = table["table"]
-            full_table = f"cms_vdm_view_mdcr_prd.{sql_table}"
-            cur.execute(f"TRUNCATE TABLE {full_table}")  # type: ignore
-            file = table["csv_name"]
-            _load_file(cur, src_folder, file, sql_table, full_table)
-            conn.commit()
+def load_from_csv(extractor: DbExecutor, src_folder: str) -> None:
+    for table in tables:
+        # Clear out any previous data
+        sql_table = table["table"]
+        full_table = f"cms_vdm_view_mdcr_prd.{sql_table}"
+        extractor.execute(f"TRUNCATE TABLE {full_table}")  # type: ignore
+        file = table["csv_name"]
+        _load_file(extractor, src_folder, file, sql_table)
+        extractor.commit()
 
 
-def _load_file(
-    cur: psycopg.Cursor, src_folder: str, file: str, sql_table: str, full_table: str
-) -> None:
+def _load_file(extractor: DbExecutor, src_folder: str, file: str, sql_table: str) -> None:
     path = Path(src_folder)
     # `glob` will return nothing for an invalid path so we'll explicitly make sure you supplied a
     # valid path
@@ -80,13 +78,13 @@ def _load_file(
 
             # fetch the list of columns from the database and filter them out
             # so we don't get errors trying to insert extra columns
-            db_columns = cur.execute(
+            db_columns = extractor.query(
                 f"""
                     SELECT column_name FROM INFORMATION_SCHEMA.COLUMNS
                     WHERE table_name = '{sql_table}'
                 """  # type: ignore
             )
-            db_columns = [typing.cast(str, col[0]).lower() for col in db_columns]
+            db_columns = [typing.cast(str, col["column_name"]).lower() for col in db_columns]
 
             cols = [
                 col
@@ -96,12 +94,7 @@ def _load_file(
             # skip empty files since we won't have any valid columns
             # which causes the COPY command below to fail
             if cols:
-                cols_str = ",".join(cols)
-                with cur.copy(
-                    f"COPY {full_table} ({cols_str}) FROM STDIN"  # type: ignore
-                ) as copy:
-                    for row in reader:
-                        copy.write_row([row[c] if row[c] else None for c in cols])
+                extractor.copy(CsvFile(cols, sql_table, match))
 
 
 if __name__ == "__main__":
@@ -109,6 +102,6 @@ if __name__ == "__main__":
 
     base_dir = sys.argv[1] if len(sys.argv) > 1 and sys.argv[1] != "" else "../bfd-model-idr/out"
     load_from_csv(
-        psycopg.connect(get_connection_string(LoadMode.SYNTHETIC)),
+        PostgresExecutor(psycopg.connect(get_connection_string(LoadMode.SYNTHETIC))),
         base_dir,
     )

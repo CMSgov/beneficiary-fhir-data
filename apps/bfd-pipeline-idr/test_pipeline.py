@@ -15,6 +15,7 @@ from testcontainers.core.config import testcontainers_config  # type: ignore
 # https://github.com/testcontainers/testcontainers-python/issues/305
 from testcontainers.postgres import PostgresContainer  # type: ignore
 
+from extractor import PostgresExecutor
 from load_synthetic import load_from_csv
 from logger_config import configure_logger
 from pipeline import run
@@ -57,7 +58,7 @@ def setup_db() -> Generator[PostgresContainer]:
             conn.commit()
 
             _run_migrator(postgres)
-            load_from_csv(conn, "./test_samples1")  # type: ignore
+            load_from_csv(PostgresExecutor(conn), "./test_samples1")  # type: ignore
 
             info = conn.info
             # Info level logs obscure the error output when running tests
