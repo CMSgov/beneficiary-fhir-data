@@ -432,6 +432,7 @@ enum AdjudicationChargeType {
   }
 
   private CodeableConcept buildCategory() {
+
     var category =
         new CodeableConcept()
             .addCoding(

@@ -12,7 +12,6 @@ import org.hl7.fhir.r4.model.Coding;
 /** Maps provider identifier qualifier codes to FHIR. */
 @Getter
 @AllArgsConstructor
-@SuppressWarnings("java:S115")
 public enum ProviderIdQualifierCode {
 
   /** 01 - NPI Number. */

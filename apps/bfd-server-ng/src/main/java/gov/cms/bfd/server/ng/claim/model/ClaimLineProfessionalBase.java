@@ -7,10 +7,12 @@ import jakarta.persistence.Convert;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.MappedSuperclass;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.StringType;
 
 /** Claim line info. */
@@ -31,11 +33,14 @@ abstract class ClaimLineProfessionalBase implements ClaimLineBase {
   @Column(name = "clm_line_from_dt")
   private Optional<LocalDate> fromDate;
 
+  @Column(name = "clm_pos_cd")
+  private Optional<ClaimPlaceOfServiceCode> placeOfServiceCode;
+
   @Embedded private ClaimLineHcpcsCode hcpcsCode;
   @Embedded private ClaimLineServiceUnitQuantity serviceUnitQuantity;
   @Embedded private ClaimLineHcpcsModifierCode hcpcsModifierCode;
-
   @Embedded private RenderingCareTeamLine claimLineRenderingProvider;
+  @Embedded private ClaimLineProfessionalExtensions extensions;
 
   @Override
   public Optional<ExplanationOfBenefit.ItemComponent> toFhirItemComponent() {
@@ -48,6 +53,8 @@ abstract class ClaimLineProfessionalBase implements ClaimLineBase {
     line.addModifier(hcpcsModifierCode.toFhir());
     fromDate.map(d -> line.setServiced(new DateType(DateUtil.toDate(d))));
     getAdjudicationCharge().toFhir().forEach(line::addAdjudication);
+    placeOfServiceCode.map(c -> line.setLocation(c.toFhir()));
+    getFhirExtensions().forEach(line::addExtension);
 
     return Optional.of(line);
   }
@@ -71,4 +78,8 @@ abstract class ClaimLineProfessionalBase implements ClaimLineBase {
   abstract ClaimLineAdjudicationChargeProfessionalBase getAdjudicationCharge();
 
   abstract void populateProductAndQuantity(ExplanationOfBenefit.ItemComponent item);
+
+  protected List<Extension> getFhirExtensions() {
+    return getExtensions().toFhir();
+  }
 }

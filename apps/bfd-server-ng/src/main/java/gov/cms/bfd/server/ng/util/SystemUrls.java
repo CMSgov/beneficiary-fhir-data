@@ -206,8 +206,202 @@ public class SystemUrls {
    * href="https://bluebutton.cms.gov/fhir/CodeSystem/BENE-LIS-COPMT-LVL-CD">BENE-LIS-COPMT-LVL-CD
    * CodeSystem</a>
    */
-  public static final String SYS_BENE_LIS_COPMT_LVL_CD_CD =
+  public static final String SYS_BENE_LIS_COPMT_LVL_CD =
       "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-LIS-COPMT-LVL-CD";
+
+  /**
+   * Extension URL for Carrier line Reduced Payment Physician Assistant Code. Source:
+   * V2_MDCR_CLM_LINE_PRFNL.CLM_PHYSN_ASTNT_CD (from v2_mdcr_clm_line_prfnl) <a
+   * href="https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PHYSN-ASTNT-CD">Extension</a>
+   */
+  public static final String EXT_CLM_PHYSN_ASTNT_CD_URL =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PHYSN-ASTNT-CD";
+
+  /**
+   * System URL for the BFD/BlueButton Carrier line Reduced Payment Physician Assistant Code System.
+   * Used for the coding in the CLM-PHYSN-ASTNT-CD extension. <a
+   * href="https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PHYSN-ASTNT-CD">CLM-PHYSN-ASTNT-CD">CodeSystem</a>
+   */
+  public static final String SYS_CLM_PHYSN_ASTNT_CD =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PHYSN-ASTNT-CD";
+
+  /**
+   * Extension URL for Claim Federal Type of Service Code. Source:
+   * V2_MDCR_CLM_LINE_PRFNL.CLM_FED_TYPE_SRVC_CD (from v2_mdcr_clm_line_prfnl) <a
+   * href="https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-FED-TYPE-SRVC-CD">Extension</a>
+   */
+  public static final String EXT_CLM_FED_TYPE_SRVC_CD_URL =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-FED-TYPE-SRVC-CD";
+
+  /**
+   * System URL for the BFD/BlueButton Carrier line Reduced Payment Physician Assistant Code System.
+   * Used for the coding in the CLM-FED-TYPE-SRVC-CD extension. <a
+   * href="https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FED-TYPE-SRVC-CD">CodeSystem</a>
+   */
+  public static final String SYS_CLM_FED_TYPE_SRVC_CD =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FED-TYPE-SRVC-CD";
+
+  /**
+   * Extension URL for Claim Line Carrier Health Professional Shortage Area Scarcity Code. Source:
+   * V2_MDCR_CLM_LINE_PRFNL.CLM_LINE_CARR_HPSA_SCRCTY_CD (from v2_mdcr_clm_line_prfnl) <a
+   * href="https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-LINE-CARR-HPSA-SCRCTY-CD">Extension</a>
+   */
+  public static final String EXT_CLM_LINE_CARR_HPSA_SCRCTY_CD_URL =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-LINE-CARR-HPSA-SCRCTY-CD";
+
+  /**
+   * System URL for the BFD/BlueButton Claim Line Carrier Health Professional Shortage Area Scarcity
+   * Code System. Used for the coding in the CLM-LINE-CARR-HPSA-SCRCTY-CD extension. <a
+   * href="https://bluebutton.cms.gov/fhir/CodeSystem/CLM-LINE-CARR-HPSA-SCRCTY-CD">CodeSystem</a>
+   */
+  public static final String SYS_CLM_LINE_CARR_HPSA_SCRCTY_CD =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-LINE-CARR-HPSA-SCRCTY-CD";
+
+  /**
+   * Extension URL for Payment Code. Source: V2_MDCR_CLM_LINE_PRFNL.CLM_PMT_80_100_CD (from
+   * v2_mdcr_clm_line_prfnl) <a
+   * href="https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PMT-80-100-CD">Extension</a>
+   */
+  public static final String EXT_CLM_PMT_80_100_CD_URL =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PMT-80-100-CD";
+
+  /**
+   * System URL for the BFD/BlueButton Payment Code System. Used for the coding in the
+   * CLM-PMT-80-100-CD extension. <a
+   * href="https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PMT-80-100-CD">CodeSystem</a>
+   */
+  public static final String SYS_CLM_PMT_80_100_CD =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PMT-80-100-CD";
+
+  /**
+   * System URL for the BFD/BlueButton Claim Place Of Service Code System. Used for the coding in
+   * the CLM-POS-CD location. <a
+   * href="https://www.cms.gov/Medicare/Coding/place-of-service-codes/Place_of_Service_Code_Set">CodeSystem</a>
+   */
+  public static final String SYS_CLM_POS_CD =
+      "https://www.cms.gov/Medicare/Coding/place-of-service-codes/Place_of_Service_Code_Set";
+
+  /**
+   * Extension URL for Claim Pricing Locality Code. Source:
+   * V2_MDCR_CLM_LINE_PRFNL.CLM_PRCNG_LCLTY_CD (from v2_mdcr_clm_line_prfnl) <a
+   * href="https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRCNG-LCLTY-CD">CLM-PRCNG-LCLTY-CD
+   * Extension</a>
+   */
+  public static final String EXT_CLM_PRCNG_LCLTY_CD_URL =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRCNG-LCLTY-CD";
+
+  /**
+   * System URL for the BFD/BlueButton Claim Pricing Locality Code System. Used for the coding in
+   * the CLM-PRCNG-LCLTY-CD extension. <a
+   * href="https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRCNG-LCLTY-CD">CodeSystem</a>
+   */
+  public static final String SYS_CLM_PRCNG_LCLTY_CD =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRCNG-LCLTY-CD";
+
+  /**
+   * Extension URL for Claim Primary Payer Code. Source: V2_MDCR_CLM_LINE_PRFNL.CLM_PRMRY_PYR_CD
+   * (from v2_mdcr_clm_line_prfnl) <a
+   * href="https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRMRY-PYR-CD">CLM-PRMRY-PYR-CD
+   * Extension</a>
+   */
+  public static final String EXT_CLM_PRMRY_PYR_CD_URL =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRMRY-PYR-CD";
+
+  /**
+   * System URL for the BFD/BlueButton Claim Primary Payer Code System. Used for the coding in the
+   * CLM-PRMRY-PYR-CD extension. <a
+   * href="https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRMRY-PYR-CD">CodeSystem</a>
+   */
+  public static final String SYS_CLM_PRMRY_PYR_CD =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRMRY-PYR-CD";
+
+  /**
+   * Extension URL for Claim Processing Indicator Code. Source:
+   * V2_MDCR_CLM_LINE_PRFNL.CLM-PRCSG-IND-CD (from v2_mdcr_clm_line_prfnl) <a
+   * href="https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRCSG-IND-CD">CLM-PRCSG-IND-CD
+   * Extension</a>
+   */
+  public static final String EXT_CLM_PRCSG_IND_CD_URL =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRCSG-IND-CD";
+
+  /**
+   * System URL for the BFD/BlueButton Claim Processing Indicator Code System. Used for the coding
+   * in the CLM-PRCSG-IND-CD extension. <a
+   * href="https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRCSG-IND-CD">CLM-PRCSG-IND-CD
+   * CodeSystem</a>
+   */
+  public static final String SYS_CLM_PRCSG_IND_CD =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRCSG-IND-CD";
+
+  /**
+   * Extension URL for Carrier Line Miles/Time/Units/Services (MTUS) Indicator Code. Source:
+   * V2_MDCR_CLM_LINE_PRFNL.CLM_MTUS_IND_CD (from v2_mdcr_clm_line_prfnl) <a
+   * href="https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MTUS-IND-CD">CLM-MTUS-IND-CD
+   * Extension</a>
+   */
+  public static final String EXT_CLM_MTUS_IND_CD_URL =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MTUS-IND-CD";
+
+  /**
+   * System URL for the BFD/BlueButton Carrier Line Miles/Time/Units/Services (MTUS) Indicator Code
+   * System. Used for the coding in the CLM-MTUS-IND-CD extension. <a
+   * href="https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MTUS-IND-CD">CLM-MTUS-IND-CD
+   * CodeSystem</a>
+   */
+  public static final String SYS_CLM_MTUS_IND_CD =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MTUS-IND-CD";
+
+  /**
+   * Extension URL for Claim Provider Specialty Code. Source:
+   * V2_MDCR_CLM_LINE_PRFNL.CLM_PRVDR_SPCLTY_CD (from v2_mdcr_clm_line_prfnl) <a
+   * href="https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRVDR-SPCLTY-CD">CLM-PRVDR-SPCLTY-CD
+   * Extension</a>
+   */
+  public static final String EXT_CLM_PRVDR_SPCLTY_CD_URL =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRVDR-SPCLTY-CD";
+
+  /**
+   * System URL for the BFD/BlueButton Claim Provider Specialty Code System. Used for the coding in
+   * the CLM-PRVDR-SPCLTY-CD extension. <a
+   * href="https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRVDR-SPCLTY-CD">CLM-PRVDR-SPCLTY-CD
+   * CodeSystem</a>
+   */
+  public static final String SYS_CLM_PRVDR_SPCLTY_CD =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRVDR-SPCLTY-CD";
+
+  /**
+   * Extension URL for Claim Line Professional MTUS Count. Source:
+   * V2_MDCR_CLM_LINE_PRFNL.CLM_LINE_PRFNL_MTUS_CNT (from v2_mdcr_clm_line_prfnl) <a
+   * href="https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-LINE-PRFNL-MTUS-CNT">Extension</a>
+   */
+  public static final String EXT_CLM_LINE_PRFNL_MTUS_CNT_URL =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-LINE-PRFNL-MTUS-CNT";
+
+  /** Blue Button structure definition - provider type code. */
+  public static final String EXT_PROVIDER_TYPE_CD_URL =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRVDR-TYPE-CD";
+
+  /** Blue Button code system - provider type code. */
+  public static final String SYS_PROVIDER_TYPE_CD =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRVDR-TYPE-CD";
+
+  /**
+   * Extension URL for Claim Service Deductible Code. Source:
+   * V2_MDCR_CLM_LINE_PRFNL.CLM_SRVC_DDCTBL_SW (from v2_mdcr_clm_line_prfnl) <a
+   * href="https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-SRVC-DDCTBL-SW">CLM-SRVC-DDCTBL-SW
+   * Extension</a>
+   */
+  public static final String EXT_CLM_SRVC_DDCTBL_SW_URL =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-SRVC-DDCTBL-SW";
+
+  /**
+   * System URL for the BFD/BlueButton Claim Service Deductible Code System. Used for the coding in
+   * the CLM-SRVC-DDCTBL-SW extension. <a
+   * href="https://bluebutton.cms.gov/fhir/CodeSystem/CLM-SRVC-DDCTBL-SW">CLM-SRVC-DDCTBL-SW
+   * CodeSystem</a>
+   */
+  public static final String SYS_CLM_SRVC_DDCTBL_SW =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-SRVC-DDCTBL-SW";
 
   /**
    * Extension URL for BFD Low Income Subsidy Part D Premium Percentage. Source:
@@ -717,14 +911,6 @@ public class SystemUrls {
   public static final String BLUE_BUTTON_CODE_SYSTEM_PROVIDER_PARTICIPATING_CODE =
       "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RNDRG-PRVDR-PRTCPTG-CD";
 
-  /** Blue Button structure definition - provider type code. */
-  public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_PROVIDER_TYPE_CODE =
-      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRVDR-TYPE-CD";
-
-  /** Blue Button code system - provider type code. */
-  public static final String BLUE_BUTTON_CODE_SYSTEM_PROVIDER_TYPE_CODE =
-      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRVDR-TYPE-CD";
-
   /** Blue Button code system - pin number. */
   public static final String BLUE_BUTTON_PIN_NUM = "https://bluebutton.cms.gov/identifiers/PIN-NUM";
 
@@ -837,10 +1023,6 @@ public class SystemUrls {
 
   /** NUCC provider taxonomy. */
   public static final String NUCC_PROVIDER_TAXONOMY = "http://nucc.org/provider-taxonomy";
-
-  /** Claim prodvider specialty code. */
-  public static final String CMS_CLM_PRVDR_SPCLTY_CD =
-      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRVDR-SPCLTY-CD";
 
   /** Provider ID qualifier code. */
   public static final String CMS_PRVDR_ID_QLFYR_CD =

@@ -12,7 +12,6 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 /** Submission clarification codes. */
 @AllArgsConstructor
 @Getter
-@SuppressWarnings("java:S115")
 public enum ClaimSubmissionCode {
   /** 00 - (Unknown value – rarely populated). */
   _00("00", "(Unknown value – rarely populated)"),
