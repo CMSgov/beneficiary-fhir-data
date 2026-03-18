@@ -3,7 +3,7 @@ from collections.abc import Iterator, Sequence
 from datetime import UTC, date, datetime
 
 import psycopg
-from psycopg.abc import Params, Query
+from psycopg.abc import Params, QueryNoTemplate
 from psycopg.errors import DeadlockDetected
 
 from constants import DEFAULT_MIN_DATE
@@ -250,7 +250,7 @@ class BatchLoader:
             )
 
     def _update_load_progress(
-        self, cur: psycopg.Cursor, query: Query, params: Params | None
+        self, cur: psycopg.Cursor, query: QueryNoTemplate, params: Params | None
     ) -> None:
         if self.enable_load_progress:
             cur.execute(query, params)

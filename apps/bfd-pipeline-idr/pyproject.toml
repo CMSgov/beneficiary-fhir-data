@@ -6,9 +6,10 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "cryptography==45.0.6",
-    "psycopg[binary,pool]==3.2.13",
-    "pydantic==2.12.4",
-    "snowflake-connector-python==4.1.0",
+    "psycopg[binary,pool]==3.3.3",
+    "pydantic==2.12.5",
+    "snowflake-connector-python==4.3.0",
+    "snowflake-snowpark-python==1.47.0",
     "sf-hamilton==1.89.0",
     "python-dateutil==2.9.0",
 ]
