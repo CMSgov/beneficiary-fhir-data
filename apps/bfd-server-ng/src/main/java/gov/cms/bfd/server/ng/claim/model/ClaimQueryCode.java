@@ -66,7 +66,6 @@ public sealed interface ClaimQueryCode permits ClaimQueryCode.Valid, ClaimQueryC
   /** Enum for all known, valid codes. */
   @AllArgsConstructor
   @Getter
-  @SuppressWarnings("java:S115")
   enum Valid implements ClaimQueryCode {
     /** 0 - CREDIT ADJUSTMENT. */
     _0("0", "CREDIT ADJUSTMENT"),

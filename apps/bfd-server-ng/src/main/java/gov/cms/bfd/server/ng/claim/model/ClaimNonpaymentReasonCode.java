@@ -70,7 +70,6 @@ public sealed interface ClaimNonpaymentReasonCode
   /** Enum for all known, valid codes. */
   @AllArgsConstructor
   @Getter
-  @SuppressWarnings("java:S115")
   enum Valid implements ClaimNonpaymentReasonCode {
     /** ! - MSP COST AVOIDED - COB CONTRACTOR (00 2-BYTE CODE). */
     EXCLAMATION("!", "MSP COST AVOIDED - COB CONTRACTOR (00 2-BYTE CODE)"),

@@ -78,7 +78,6 @@ public sealed interface ClaimLineCompoundCode
    */
   @AllArgsConstructor
   @Getter
-  @SuppressWarnings("java:S115")
   enum Valid implements ClaimLineCompoundCode {
     /** 0 - Not specified (missing values are also possible). */
     _0("0", "Not specified (missing values are also possible)"),

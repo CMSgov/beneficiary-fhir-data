@@ -518,15 +518,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
         "value" : "1437702123"
       }
     },
-    "qualification" : {
-      "coding" : [ {
-        "code" : "207L00000X",
-        "system" : "http://nucc.org/provider-taxonomy"
-      }, {
-        "code" : "5",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRVDR-SPCLTY-CD"
-      } ]
-    },
     "role" : {
       "coding" : [ {
         "code" : "attending",
@@ -1341,22 +1332,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
   }, {
     "amount" : {
       "currency" : "USD",
-      "value" : 0
-    },
-    "category" : {
-      "coding" : [ {
-        "code" : "coinsurance",
-        "display" : "Co-insurance",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
-      }, {
-        "code" : "CLM_BENE_PMT_COINSRNC_AMT",
-        "display" : "Beneficiary Coinsurance Amount",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-      } ]
-    }
-  }, {
-    "amount" : {
-      "currency" : "USD",
       "value" : 1128.8
     },
     "category" : {
@@ -1905,15 +1880,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
         },
         "value" : "1437702123"
       }
-    },
-    "qualification" : {
-      "coding" : [ {
-        "code" : "207L00000X",
-        "system" : "http://nucc.org/provider-taxonomy"
-      }, {
-        "code" : "5",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRVDR-SPCLTY-CD"
-      } ]
     },
     "role" : {
       "coding" : [ {
@@ -2729,22 +2695,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
   }, {
     "amount" : {
       "currency" : "USD",
-      "value" : 0
-    },
-    "category" : {
-      "coding" : [ {
-        "code" : "coinsurance",
-        "display" : "Co-insurance",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
-      }, {
-        "code" : "CLM_BENE_PMT_COINSRNC_AMT",
-        "display" : "Beneficiary Coinsurance Amount",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-      } ]
-    }
-  }, {
-    "amount" : {
-      "currency" : "USD",
       "value" : 1128.8
     },
     "category" : {
@@ -3174,10 +3124,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
       },
       "category" : {
         "coding" : [ {
-          "code" : "eligible",
-          "display" : "Eligible Amount",
-          "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-        }, {
           "code" : "CLM_LINE_PRFNL_DME_PRICE_AMT",
           "display" : "Purchase Price Amount",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
@@ -3211,7 +3157,37 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
         } ]
       }
+    }, {
+      "category" : {
+        "coding" : [ {
+          "code" : "benefitpaymentstatus",
+          "display" : "Benefit Payment Status",
+          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
+        } ]
+      },
+      "reason" : {
+        "coding" : [ {
+          "code" : "other",
+          "display" : "Other",
+          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus"
+        } ]
+      }
     } ],
+    "extension" : [ {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-SRVC-DDCTBL-SW",
+      "valueCoding" : {
+        "code" : "0",
+        "display" : "Service Subject to Deductible",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-SRVC-DDCTBL-SW"
+      }
+    } ],
+    "locationCodeableConcept" : {
+      "coding" : [ {
+        "code" : "68",
+        "display" : "UNASSIGNED",
+        "system" : "https://www.cms.gov/Medicare/Coding/place-of-service-codes/Place_of_Service_Code_Set"
+      } ]
+    },
     "modifier" : [ {
       "coding" : [ {
         "code" : "PC",
@@ -3547,6 +3523,15 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
         "value" : "1558719914"
       }
     },
+    "qualification" : {
+      "coding" : [ {
+        "code" : "61",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRVDR-SPCLTY-CD"
+      }, {
+        "code" : "251V00000X",
+        "system" : "http://nucc.org/provider-taxonomy"
+      } ]
+    },
     "role" : {
       "coding" : [ {
         "code" : "rendering",
@@ -3837,10 +3822,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
       },
       "category" : {
         "coding" : [ {
-          "code" : "eligible",
-          "display" : "Eligible Amount",
-          "system" : "http://terminology.hl7.org/CodeSystem/adjudication"
-        }, {
           "code" : "CLM_LINE_PRFNL_DME_PRICE_AMT",
           "display" : "Purchase Price Amount",
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
@@ -3919,6 +3900,52 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
         } ]
       }
     } ],
+    "extension" : [ {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PMT-80-100-CD",
+      "valueCoding" : {
+        "code" : "0",
+        "display" : "80%",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PMT-80-100-CD"
+      }
+    }, {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-SRVC-DDCTBL-SW",
+      "valueCoding" : {
+        "code" : "0",
+        "display" : "Service Subject to Deductible",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-SRVC-DDCTBL-SW"
+      }
+    }, {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MTUS-IND-CD",
+      "valueCoding" : {
+        "code" : "0",
+        "display" : "VALUES REPORTED AS ZERO",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MTUS-IND-CD"
+      }
+    }, {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PHYSN-ASTNT-CD",
+      "valueCoding" : {
+        "code" : "0",
+        "display" : "N/A",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PHYSN-ASTNT-CD"
+      }
+    }, {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRCSG-IND-CD",
+      "valueCoding" : {
+        "code" : "Z",
+        "display" : "Bundled test, no payment",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRCSG-IND-CD"
+      }
+    }, {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-LINE-PRFNL-MTUS-CNT",
+      "valueDecimal" : 2.0
+    } ],
+    "locationCodeableConcept" : {
+      "coding" : [ {
+        "code" : "68",
+        "display" : "UNASSIGNED",
+        "system" : "https://www.cms.gov/Medicare/Coding/place-of-service-codes/Place_of_Service_Code_Set"
+      } ]
+    },
     "modifier" : [ {
       "coding" : [ {
         "code" : "PC",
@@ -4634,15 +4661,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
         },
         "value" : "1437702123"
       }
-    },
-    "qualification" : {
-      "coding" : [ {
-        "code" : "207L00000X",
-        "system" : "http://nucc.org/provider-taxonomy"
-      }, {
-        "code" : "5",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRVDR-SPCLTY-CD"
-      } ]
     },
     "role" : {
       "coding" : [ {
@@ -6216,15 +6234,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
         },
         "value" : "1437702123"
       }
-    },
-    "qualification" : {
-      "coding" : [ {
-        "code" : "207L00000X",
-        "system" : "http://nucc.org/provider-taxonomy"
-      }, {
-        "code" : "5",
-        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRVDR-SPCLTY-CD"
-      } ]
     },
     "role" : {
       "coding" : [ {

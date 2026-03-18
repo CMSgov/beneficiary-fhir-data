@@ -52,13 +52,12 @@ public sealed interface BeneficiaryLISCopaymentLevelCode
    */
   default Extension toFhir() {
     return new Extension(SystemUrls.EXT_BENE_LIS_COPMT_LVL_CD_URL)
-        .setValue(new Coding(SystemUrls.SYS_BENE_LIS_COPMT_LVL_CD_CD, getCode(), null));
+        .setValue(new Coding(SystemUrls.SYS_BENE_LIS_COPMT_LVL_CD, getCode(), null));
   }
 
   /** Enum for all known, valid codes. */
   @AllArgsConstructor
   @Getter
-  @SuppressWarnings("java:S115")
   enum Valid implements BeneficiaryLISCopaymentLevelCode {
     /** 1 - High. */
     _1("1", "High"),

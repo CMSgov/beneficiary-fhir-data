@@ -72,7 +72,6 @@ public sealed interface HhaReferralCode permits HhaReferralCode.Valid, HhaReferr
    */
   @AllArgsConstructor
   @Getter
-  @SuppressWarnings("java:S115")
   enum Valid implements HhaReferralCode {
     /**
      * 1 - PHYSICIAN REFERRAL - THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF A PERSONAL

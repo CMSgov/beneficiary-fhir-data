@@ -61,7 +61,6 @@ public sealed interface ClaimLineDeductibleCoinsuranceCode
    */
   @Getter
   @AllArgsConstructor
-  @SuppressWarnings("java:S115")
   enum Valid implements ClaimLineDeductibleCoinsuranceCode {
     /** 0 - Charges are subject to deductible and coinsurance. */
     _0("0", "Charges are subject to deductible and coinsurance"),

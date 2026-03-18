@@ -64,7 +64,6 @@ public sealed interface PharmacySrvcTypeCode
    */
   @AllArgsConstructor
   @Getter
-  @SuppressWarnings("java:S115")
   enum Valid implements PharmacySrvcTypeCode {
     /** 01 - Community/retail pharmacy. */
     _01("01", "Community/retail pharmacy"),

@@ -70,7 +70,6 @@ public sealed interface ClaimDispositionCode
    */
   @AllArgsConstructor
   @Getter
-  @SuppressWarnings("java:S115")
   enum Valid implements ClaimDispositionCode {
     /** 1 - DEBIT ACCEPTED. */
     _1("1", "DEBIT ACCEPTED"),

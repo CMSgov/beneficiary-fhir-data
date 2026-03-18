@@ -4238,22 +4238,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
         },
         "category" : {
           "coding" : [ {
-            "code" : "coinsurance",
-            "display" : "Co-insurance",
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
-          }, {
-            "code" : "CLM_BENE_PMT_COINSRNC_AMT",
-            "display" : "Beneficiary Coinsurance Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 0
-        },
-        "category" : {
-          "coding" : [ {
             "code" : "paidtopatient",
             "display" : "Paid to patient",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"

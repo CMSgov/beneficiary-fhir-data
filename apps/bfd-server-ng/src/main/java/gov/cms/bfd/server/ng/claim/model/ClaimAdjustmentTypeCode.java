@@ -70,7 +70,6 @@ public sealed interface ClaimAdjustmentTypeCode
    */
   @AllArgsConstructor
   @Getter
-  @SuppressWarnings("java:S115")
   enum Valid implements ClaimAdjustmentTypeCode {
     /** 0 - ORIGINAL. */
     _0("0", "ORIGINAL"),

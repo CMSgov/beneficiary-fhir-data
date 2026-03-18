@@ -65,7 +65,6 @@ public sealed interface RevenueCenterAnsiReasonCode
    */
   @Getter
   @AllArgsConstructor
-  @SuppressWarnings("java:S115")
   enum Valid implements RevenueCenterAnsiReasonCode {
     /** 1 - Deductible Amount. */
     _1("1", "Deductible Amount"),

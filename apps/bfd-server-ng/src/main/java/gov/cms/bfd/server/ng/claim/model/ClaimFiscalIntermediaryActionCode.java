@@ -70,7 +70,6 @@ public sealed interface ClaimFiscalIntermediaryActionCode
    */
   @AllArgsConstructor
   @Getter
-  @SuppressWarnings("java:S115")
   enum Valid implements ClaimFiscalIntermediaryActionCode {
     /** 1 - Original debit action (always a 1 for all regular bills). */
     _1("1", "Original debit action (always a 1 for all regular bills)"),

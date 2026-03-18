@@ -70,7 +70,6 @@ public sealed interface ClaimRecordTypeCode
    */
   @AllArgsConstructor
   @Getter
-  @SuppressWarnings("java:S115")
   enum Valid implements ClaimRecordTypeCode {
     /** M - Part B DMEPOS claim record (processed by DME Regional Carrier). */
     M("M", "Part B DMEPOS claim record (processed by DME Regional Carrier)", "Part B"),

@@ -3035,7 +3035,6 @@
     - SNF
     - Carrier
   sources:
-    - FISS
     - MCS
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_BENE_PMT_COINSRNC_AMT

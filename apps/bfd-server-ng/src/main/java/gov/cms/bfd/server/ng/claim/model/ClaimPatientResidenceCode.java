@@ -67,7 +67,6 @@ public sealed interface ClaimPatientResidenceCode
   /** Enum for all known, valid codes. */
   @AllArgsConstructor
   @Getter
-  @SuppressWarnings("java:S115")
   enum Valid implements ClaimPatientResidenceCode {
     /** 00 - Not specified, other patient residence not identified below. */
     _00("00", "Not specified, other patient residence not identified below"),

@@ -72,7 +72,6 @@ public sealed interface ClaimPrescriptionOriginCode
   /** Enum for all known, valid codes. */
   @AllArgsConstructor
   @Getter
-  @SuppressWarnings("java:S115")
   enum Valid implements ClaimPrescriptionOriginCode {
     /** 0 - Not specified. */
     _0("0", "Not specified"),

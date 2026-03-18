@@ -12,12 +12,18 @@ import org.hl7.fhir.r4.model.Coding;
 public sealed interface ClaimRelatedConditionCode
     permits ClaimRelatedConditionCode.Valid, ClaimRelatedConditionCode.Invalid {
 
-  /** Returns the code. */
-  @SuppressWarnings("checkstyle:JavadocMethod")
+  /**
+   * Gets the code value.
+   *
+   * @return the code
+   */
   String getCode();
 
-  /** Returns the display or returns an empty string if invalid. */
-  @SuppressWarnings("checkstyle:JavadocMethod")
+  /**
+   * Gets the display value.
+   *
+   * @return the display
+   */
   String getDisplay();
 
   /**

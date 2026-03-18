@@ -71,7 +71,6 @@ public sealed interface ClaimAdmissionTypeCode
    */
   @AllArgsConstructor
   @Getter
-  @SuppressWarnings("java:S115")
   enum Valid implements ClaimAdmissionTypeCode {
     /** 0 - Unknown Value (but present in data). */
     _0("0", "Unknown Value (but present in data)"),
