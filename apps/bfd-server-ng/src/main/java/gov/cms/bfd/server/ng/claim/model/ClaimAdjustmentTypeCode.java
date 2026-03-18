@@ -13,12 +13,18 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 public sealed interface ClaimAdjustmentTypeCode
     permits ClaimAdjustmentTypeCode.Valid, ClaimAdjustmentTypeCode.Invalid {
 
-  /** Returns the code. */
-  @SuppressWarnings("checkstyle:JavadocMethod")
+  /**
+   * Gets the code value.
+   *
+   * @return the code
+   */
   String getCode();
 
-  /** Returns the display or returns an empty string if invalid. */
-  @SuppressWarnings("checkstyle:JavadocMethod")
+  /**
+   * Gets the display value.
+   *
+   * @return the display
+   */
   String getDisplay();
 
   /**
