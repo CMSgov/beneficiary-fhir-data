@@ -56,6 +56,12 @@ class PacGeneratorUtil:
             f.CLM_FINL_ACTN_IND,
             f.CLM_RIC_CD,
             f.CLM_RLT_COND_SGNTR_SK,
+            f.CLM_NGACO_PBPMT_SW,
+            f.CLM_NGACO_PDSCHRG_HCBS_SW,
+            f.CLM_NGACO_SNF_WVR_SW,
+            f.CLM_NGACO_TLHLTH_SW,
+            f.CLM_NGACO_CPTATN_SW,
+            f.CLM_ACO_CARE_MGMT_HCBS_SW,
         }
         clm = self._prepare_pac_row(
             init_row=init_clm,
@@ -106,6 +112,8 @@ class PacGeneratorUtil:
 
         clm[f.CLM_DT_SGNTR_SK] = gen_basic_id(field=f.CLM_DT_SGNTR_SK, length=12)
         clm[f.GEO_BENE_SK] = gen_basic_id(field=f.GEO_BENE_SK, length=5)
+
+        clm[f.CLM_PD_STUS_CD] = random.choice(["S", "T", "R", "D", "1", "P", "2", "I"])
 
         if pac_clm_type_cd in FISS_CLM_TYPE_CDS:
             clm[f.CLM_SRC_ID] = 21000  # FISS
@@ -201,6 +209,12 @@ class PacGeneratorUtil:
                 f.GEO_BENE_SK,
                 f.CLM_DT_SGNTR_SK,
                 f.CLM_TYPE_CD,
+                f.CLM_LINE_NGACO_PBPMT_SW,
+                f.CLM_LINE_NGACO_PDSCHRG_HCBS_SW,
+                f.CLM_LINE_NGACO_SNF_WVR_SW,
+                f.CLM_LINE_NGACO_TLHLTH_SW,
+                f.CLM_LINE_NGACO_CPTATN_SW,
+                f.CLM_LINE_ACO_CARE_MGMT_HCBS_SW,
             },
         )
         clm_line[f.CLM_LINE_NUM] = init_clm_line[f.CLM_LINE_NUM]

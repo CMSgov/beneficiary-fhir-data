@@ -9,24 +9,34 @@ import java.time.temporal.ChronoUnit;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 
 /** Test class for {@link gov.cms.bfd.pipeline.rda.grpc.AbstractCleanupJob}. */
 class AbstractCleanupJobTest {
 
+  public static final Instant MOCK_NOW = Instant.parse("2025-01-01T00:00:00Z");
+
   /** test utilities. */
   private CleanupTestUtils utils;
+
+  private MockedStatic<Instant> instantMockedStatic;
 
   /** test initialization. */
   @BeforeEach
   void init() {
     utils = new CleanupTestUtils();
     utils.init();
+
+    instantMockedStatic = Mockito.mockStatic(Instant.class, Mockito.CALLS_REAL_METHODS);
+    instantMockedStatic.when(Instant::now).thenReturn(MOCK_NOW);
   }
 
   /** test teardown. */
   @AfterEach
   void cleanupAfterEach() {
     utils.truncateTables();
+    instantMockedStatic.close();
   }
 
   /**

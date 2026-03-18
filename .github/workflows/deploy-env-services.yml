@@ -10,6 +10,7 @@ on:
         description: Comma-separated list of services to deploy
         default: >-
           config,
+          bene-prefs,
           cluster,
           database,
           locust,
@@ -57,6 +58,7 @@ on:
         description: Comma-separated list of services to deploy
         default: >-
           config,
+          bene-prefs,
           cluster,
           database,
           locust,
@@ -104,6 +106,7 @@ env:
         { "layer": "01", "service": "config", "runner": "lambda" }
       ],
       "02": [
+        { "layer": "02", "service": "bene-prefs", "runner": "lambda" },
         { "layer": "02", "service": "cluster", "runner": "lambda" },
         { "layer": "02", "service": "database", "runner": "small" }
       ],

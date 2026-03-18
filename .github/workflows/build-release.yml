@@ -188,7 +188,7 @@ jobs:
           token: ${{ steps.generate_token.outputs.token }}
 
       - name: Retrieve base java image
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           pattern: '*bfd-platform-base-java*'
           merge-multiple: true
@@ -271,7 +271,7 @@ jobs:
         working-directory: ${{ runner.temp }}
 
       - name: Upload jib image artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: jib-images
           path: ${{ runner.temp }}/*.tar
@@ -367,7 +367,7 @@ jobs:
           ls -l assets
 
       - name: Upload release artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: release-artifacts
           path: assets/*
@@ -397,13 +397,13 @@ jobs:
           echo "role-arn=$role_arn" >> "$GITHUB_OUTPUT"
 
       - name: Download jib image artifacts
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: jib-images
           path: ${{ runner.temp }}
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v5
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ steps.get-role-arn.outputs.role-arn }}
           role-session-name: build-release-${{ github.run_id }}-${{ github.run_attempt }}
@@ -479,7 +479,7 @@ jobs:
     steps:
       - name: Pull release artifacts
         id: pull-release-artifacts
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: release-artifacts
 

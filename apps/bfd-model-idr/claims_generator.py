@@ -33,7 +33,6 @@ from generator_util import (
     CLM_PROD,
     CLM_RLT_COND_SGNTR_MBR,
     CLM_VAL,
-    CNTRCT_PBP_CNTCT,
     CNTRCT_PBP_NUM,
     PRVDR_HSTRY,
     GeneratorUtil,
@@ -164,6 +163,18 @@ class _ClaimsFile(StrEnum):
             f.CLM_SBMTR_CNTRCT_NUM,
             f.CLM_SBMTR_CNTRCT_PBP_NUM,
             f.CLM_OTHR_TP_PD_AMT,
+            f.CLM_BNFT_ENHNCMT_1_CD,
+            f.CLM_BNFT_ENHNCMT_2_CD,
+            f.CLM_BNFT_ENHNCMT_3_CD,
+            f.CLM_BNFT_ENHNCMT_4_CD,
+            f.CLM_BNFT_ENHNCMT_5_CD,
+            f.CLM_NGACO_PBPMT_SW,
+            f.CLM_NGACO_PDSCHRG_HCBS_SW,
+            f.CLM_NGACO_SNF_WVR_SW,
+            f.CLM_NGACO_TLHLTH_SW,
+            f.CLM_NGACO_CPTATN_SW,
+            f.CLM_ACO_CARE_MGMT_HCBS_SW,
+            f.CLM_PD_STUS_CD,
             f.IDR_INSRT_TS,
             f.IDR_UPDT_TS,
         ],
@@ -457,6 +468,17 @@ class _ClaimsFile(StrEnum):
             f.CLM_LINE_GRS_CVRD_CST_TOT_AMT,
             f.CLM_LINE_OTHR_TP_PD_AMT,
             f.CLM_RNDRNG_PRVDR_NPI_NUM,
+            f.CLM_LINE_BNFT_ENHNCMT_1_CD,
+            f.CLM_LINE_BNFT_ENHNCMT_2_CD,
+            f.CLM_LINE_BNFT_ENHNCMT_3_CD,
+            f.CLM_LINE_BNFT_ENHNCMT_4_CD,
+            f.CLM_LINE_BNFT_ENHNCMT_5_CD,
+            f.CLM_LINE_NGACO_PBPMT_SW,
+            f.CLM_LINE_NGACO_PDSCHRG_HCBS_SW,
+            f.CLM_LINE_NGACO_SNF_WVR_SW,
+            f.CLM_LINE_NGACO_TLHLTH_SW,
+            f.CLM_LINE_NGACO_CPTATN_SW,
+            f.CLM_LINE_ACO_CARE_MGMT_HCBS_SW,
             f.IDR_INSRT_TS,
             f.IDR_UPDT_TS,
         ],
@@ -520,39 +542,6 @@ class _ClaimsFile(StrEnum):
             f.CLM_VAL_SQNC_NUM,
             f.IDR_INSRT_TS,
             f.IDR_UPDT_TS,
-        ],
-    )
-    CNTRCT_PBP_CNTCT = (
-        CNTRCT_PBP_CNTCT,
-        [
-            f.CNTRCT_PBP_SK,
-            f.CNTRCT_PLAN_CNTCT_OBSLT_DT,
-            f.CNTRCT_PLAN_CNTCT_TYPE_CD,
-            f.CNTRCT_PLAN_FREE_EXTNSN_NUM,
-            f.CNTRCT_PLAN_CNTCT_FREE_NUM,
-            f.CNTRCT_PLAN_CNTCT_EXTNSN_NUM,
-            f.CNTRCT_PLAN_CNTCT_TEL_NUM,
-            f.CNTRCT_PBP_END_DT,
-            f.CNTRCT_PBP_BGN_DT,
-            f.CNTRCT_PLAN_CNTCT_ST_1_ADR,
-            f.CNTRCT_PLAN_CNTCT_ST_2_ADR,
-            f.CNTRCT_PLAN_CNTCT_CITY_NAME,
-            f.CNTRCT_PLAN_CNTCT_STATE_CD,
-            f.CNTRCT_PLAN_CNTCT_ZIP_CD,
-        ],
-    )
-    CNTRCT_PBP_NUM = (
-        CNTRCT_PBP_NUM,
-        [
-            f.CNTRCT_PBP_SK,
-            f.CNTRCT_NUM,
-            f.CNTRCT_PBP_NUM,
-            f.CNTRCT_PBP_NAME,
-            f.CNTRCT_PBP_TYPE_CD,
-            f.CNTRCT_DRUG_PLAN_IND_CD,
-            f.CNTRCT_PBP_SK_EFCTV_DT,
-            f.CNTRCT_PBP_END_DT,
-            f.CNTRCT_PBP_SK_OBSLT_DT,
         ],
     )
     PRVDR_HSTRY = (
@@ -734,24 +723,20 @@ def generate(
         CLM_RLT_COND_SGNTR_MBR: [],
         PRVDR_HSTRY: [],
         CNTRCT_PBP_NUM: [],
-        CNTRCT_PBP_CNTCT: [],
     }
     load_file_dict(files=files, paths=list(paths))
+    gen_utils.cntrct_pbp_num = [row.kv for row in files[CNTRCT_PBP_NUM]]
 
     out_tables: dict[str, list[RowAdapter]] = {k: [] for k in files}
 
-    if not files[BENE_HSTRY] and not files[CLM]:
-        print(f"{BENE_HSTRY} and/or {CLM} must be provided for claims data generation to proceed")
+    if not files[BENE_HSTRY] and not files[CLM] and not files[CNTRCT_PBP_NUM]:
+        print(
+            f"{BENE_HSTRY} and {CNTRCT_PBP_NUM} and/or {CLM} must be provided for "
+            f"claims data generation to proceed"
+        )
         sys.exit(1)
 
     other_util = OtherGeneratorUtil()
-    cntrct_pbp_num, cntrct_pbp_cntct = other_util.gen_contract_plan(
-        amount=10,
-        init_contract_pbp_nums=files[CNTRCT_PBP_NUM],
-        init_contract_pbp_contacts=files[CNTRCT_PBP_CNTCT],
-    )
-    out_tables[CNTRCT_PBP_NUM].extend(cntrct_pbp_num)
-    out_tables[CNTRCT_PBP_CNTCT].extend(cntrct_pbp_cntct)
 
     out_tables[PRVDR_HSTRY].extend(
         other_util.gen_provider_history(amount=14, init_provider_historys=files[PRVDR_HSTRY])

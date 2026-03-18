@@ -48,6 +48,7 @@
     - FISS
     - MCS
     - NCH
+    - VMS
   referenceTable: Final-Action
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_FINL_ACTN_IND
@@ -76,19 +77,24 @@
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_CNTL_NUM
   fhirPath: ExplanationOfBenefit.identifier.where(system = 'https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM').value
-- inputPath: ExplanationOfBenefit-Base.clmCntlArray
+- inputPath: ExplanationOfBenefit-Base.CLM_ORIG_CNTL_NUM
   appliesTo:
     - Inpatient
     - Outpatient
     - HHA
     - Hospice
     - SNF
+    - Carrier
+    - DME
   sources:
     - FISS
     - NCH
+    - MCS
+    - VMS
   cclfMapping:
     - CCLF1.CLM_ORG_CNTL_NUM
-  bfdDerived: true
+  sourceView: V2_MDCR_CLM
+  sourceColumn: CLM_ORIG_CNTL_NUM
   fhirPath: ExplanationOfBenefit.related.where(relationship.coding.system = 'http://terminology.hl7.org/CodeSystem/ex-relatedclaimrelationship').reference.where(system='https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM').value
 - inputPath: ExplanationOfBenefit-Base.CLM_TYPE_CD
   appliesTo:
@@ -119,10 +125,6 @@
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_TYPE_CD
   fhirPath: ExplanationOfBenefit.type.coding.where(system = 'https://bluebutton.cms.gov/fhir/CodeSystem/CLM-TYPE-CD').code
-- inputPath: ExplanationOfBenefit-Base.CLM_BENE_XREF_EFCTV_SK
-  appliesTo:
-    - Inpatient
-  bfdDerived: True
 - inputPath: ExplanationOfBenefit-Base.BENE_SK
   appliesTo:
     - Inpatient
@@ -1522,7 +1524,7 @@
     - CCLF2.CLM_LINE_INSTNL_REV_CTR_DT
   sourceView: V2_MDCR_CLM_LINE_INSTNL
   sourceColumn: CLM_LINE_INSTNL_REV_CTR_DT
-  fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_INSTNL_MSP2_PD_AMT')).amount.value
+  fhirPath: ExplanationOfBenefit.item.servicedDate
 - inputPath: SupportingInfoComponent.CLM_ACTV_CARE_FROM_DT
   appliesTo:
     - Inpatient
@@ -1677,7 +1679,7 @@
   bfdDerived: True
   notes: This field is derived from 0 + CLM_BILL_FAC_TYPE_CD + CLM_BILL_CLSFCTN_CD + CLM_BILL_FREQ_CD because the codes are dependent upon one another, and require concatenation to be meaningful in a machine-readable format. 
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.system='http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType' and category.coding.code='typeofbill').code.coding.where(system='https://www.nubc.org/CodeSystem/TypeOfBill').code
-- inputPath: SupportingInfoComponent.CLM_BILL_FAC_TYPE_CD
+- inputPath: ExplanationOfBenefit-Base.CLM_BILL_FAC_TYPE_CD
   appliesTo:
     - Inpatient
     - Outpatient
@@ -1692,8 +1694,10 @@
   cclfMapping: 
     - CCLF1.CLM_BILL_FAC_TYPE_CD
   referenceTable: CLM_BILL_FAC_TYPE_CD
+  sourceView: V2_MDCR_CLM
+  sourceColumn: CLM_BILL_FAC_TYPE_CD
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.system='http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType' and category.coding.code='typeofbill').code.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FAC-TYPE-CD').code
-- inputPath: SupportingInfoComponent.CLM_BILL_CLSFCTN_CD
+- inputPath: ExplanationOfBenefit-Base.CLM_BILL_CLSFCTN_CD
   appliesTo:
     - Inpatient
     - Outpatient
@@ -1708,8 +1712,11 @@
   cclfMapping: 
     - CCLF1.CLM_BILL_CLSFCTN_CD
   referenceTable: CLM_BILL_CLSFCTN_CD
+  sourceView: V2_MDCR_CLM
+  sourceColumn: CLM_BILL_CLSFCTN_CD
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.system='http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType' and category.coding.code='typeofbill').code.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-CLSFCTN-CD').code
-- inputPath: SupportingInfoComponent.CLM_BILL_FREQ_CD
+  notes: Concatenated with the preceding digit, since meaning is dependent upon the previous column.
+- inputPath: ExplanationOfBenefit-Base.CLM_BILL_FREQ_CD
   appliesTo:
     - Inpatient
     - Outpatient
@@ -1724,7 +1731,10 @@
   cclfMapping: 
     - CCLF1.CLM_BILL_FREQ_CD
   referenceTable: CLM_BILL_FREQ_CD
+  sourceView: V2_MDCR_CLM
+  sourceColumn: CLM_BILL_FREQ_CD
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.system='http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType' and category.coding.code='typeofbill').code.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD').code
+  notes: Concatenated with the preceding two digits, since meaning is dependent upon those columns.
 - inputPath: SupportingInfoComponent.CLM_NCH_WKLY_PROC_DT
   appliesTo:
     - Inpatient
@@ -2430,18 +2440,6 @@
   sourceView: V2_MDCR_CLM_INSTNL
   sourceColumn: CLM_MDCR_HHA_TOT_VISIT_CNT
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_MDCR_HHA_TOT_VISIT_CNT').exists()).value
-- inputPath: ExplanationOfBenefit-Institutional-Base.CLM_CRNT_STUS_CD
-  appliesTo:
-    - Inpatient
-    - SNF
-    - Hospice
-    - HHA
-    - Outpatient
-  sources:
-    - FISS
-  sourceView: V2_MDCR_CLM_FISS
-  sourceColumn: CLM_CRNT_STUS_CD
-  fhirPath: ExplanationOfBenefit.outcome
 - inputPath: ExplanationOfBenefit-Base.CLM_AUDT_TRL_STUS_CD
   appliesTo:
     - Inpatient
@@ -2457,8 +2455,24 @@
     - FISS
   sourceView: V2_MDCR_CLM_LCTN_HSTRY
   sourceColumn: CLM_AUDT_TRL_STUS_CD
-  fhirPath: ExplanationOfBenefit.outcome
-  notes: The status code can be retrieved via ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_AUDT_TRL_STUS_CD').exists()).code.coding.code
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_AUDT_TRL_STUS_CD').exists()).code.coding.code
+- inputPath: ExplanationOfBenefit-Base.CLM_PD_STUS_CD
+  appliesTo:
+    - Inpatient
+    - Outpatient
+    - Hospice
+    - HHA
+    - SNF
+    - Carrier
+    - DME
+  sources:
+    - MCS
+    - VMS
+    - FISS
+  sourceView: V2_MDCR_CLM
+  sourceColumn: CLM_PD_STUS_CD
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_PD_STUS_CD').exists()).code.coding.code
+  notes: Used to populate ExplanationOfBenefit.outcome
 - inputPath: ExplanationOfBenefit-Base.PRVDR_RFRG_PRVDR_NPI_NUM
   appliesTo:
     - Outpatient
@@ -3268,8 +3282,7 @@
   sourceColumn: CLM_RLT_COND_SGNTR_SK
   cclfMapping:
     - CCLFA.CLM_RLT_COND_CD
-  bfdDerived: true
-  notes: The actual values are not derived, but this variable as marked as derived to call attention to the flattened structure compared to the upstream source.
+  notes: One signature can correspond to many codes.
   fhirPath: ExplanationOfBenefit.supportingInfo.where(code.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD').code.coding.code
 - inputPath: LineItemComponent.CLM_LINE_ADD_ON_PYMT_AMT
   appliesTo:
@@ -3384,3 +3397,299 @@
   sourceView: V2_MDCR_CLM_LINE_DCMTN
   sourceColumn: CLM_LINE_PA_UNIQ_TRKNG_NUM
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_LINE_PMD_UNIQ_TRKNG_NUM').exists()).value
+- inputPath: ExplanationOfBenefit-Base.CLM_BNFT_ENHNCMT_1_CD
+  appliesTo:
+    - Inpatient
+    - HHA
+    - SNF
+    - Outpatient
+    - Hospice
+  sources:
+    - NCH
+    - FISS
+  cclfMapping:
+    - CCLFA.CLM_DEMO_1ST_NUM
+  sourceView: V2_MDCR_CLM_DCMTN
+  sourceColumn: CLM_BNFT_ENHNCMT_1_CD
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_BNFT_ENHNCMT_CD').exists()).value
+  notes: There may be multiple. These are unordered, but there are a maximum of 5 per institutional claim header, and 5 per professional claim line.
+- inputPath: ExplanationOfBenefit-Base.CLM_BNFT_ENHNCMT_2_CD
+  appliesTo:
+    - Inpatient
+    - HHA
+    - SNF
+    - Outpatient
+    - Hospice
+  sources:
+    - NCH
+    - FISS
+  cclfMapping:
+    - CCLFA.CLM_DEMO_2ND_NUM
+  sourceView: V2_MDCR_CLM_DCMTN
+  sourceColumn: CLM_BNFT_ENHNCMT_2_CD
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_BNFT_ENHNCMT_CD').exists()).value
+  notes: There may be multiple. These are unordered, but there are a maximum of 5 per institutional claim header, and 5 per professional claim line.
+- inputPath: ExplanationOfBenefit-Base.CLM_BNFT_ENHNCMT_3_CD
+  appliesTo:
+    - Inpatient
+    - HHA
+    - SNF
+    - Outpatient
+    - Hospice
+  sources:
+    - NCH
+    - FISS
+  cclfMapping:
+    - CCLFA.CLM_DEMO_3RD_NUM
+  sourceView: V2_MDCR_CLM_DCMTN
+  sourceColumn: CLM_BNFT_ENHNCMT_3_CD
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_BNFT_ENHNCMT_CD').exists()).value
+  notes: There may be multiple. These are unordered, but there are a maximum of 5 per institutional claim header, and 5 per professional claim line.
+- inputPath: ExplanationOfBenefit-Base.CLM_BNFT_ENHNCMT_4_CD
+  appliesTo:
+    - Inpatient
+    - HHA
+    - SNF
+    - Outpatient
+    - Hospice
+  sources:
+    - NCH
+    - FISS
+  cclfMapping:
+    - CCLFA.CLM_DEMO_4TH_NUM
+  sourceView: V2_MDCR_CLM_DCMTN
+  sourceColumn: CLM_BNFT_ENHNCMT_4_CD
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_BNFT_ENHNCMT_CD').exists()).value
+  notes: There may be multiple. These are unordered, but there are a maximum of 5 per institutional claim header, and 5 per professional claim line.
+- inputPath: ExplanationOfBenefit-Base.CLM_BNFT_ENHNCMT_5_CD
+  appliesTo:
+    - Inpatient
+    - HHA
+    - SNF
+    - Outpatient
+    - Hospice
+  sources:
+    - NCH
+    - FISS
+  cclfMapping:
+    - CCLFA.CLM_DEMO_5TH_NUM
+  sourceView: V2_MDCR_CLM_DCMTN
+  sourceColumn: CLM_BNFT_ENHNCMT_5_CD
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_BNFT_ENHNCMT_CD').exists()).value
+  notes: There may be multiple. These are unordered, but there are a maximum of 5 per institutional claim header, and 5 per professional claim line.
+- inputPath: ExplanationOfBenefit-Base.CLM_NGACO_PBPMT_SW
+  appliesTo:
+    - Inpatient
+    - HHA
+    - SNF
+    - Outpatient
+    - Hospice
+  sources:
+    - NCH
+  cclfMapping:
+    - CCLFA.CLM_NGACO_PBPMT_SW
+  sourceView: V2_MDCR_CLM_DCMTN
+  sourceColumn: CLM_NGACO_PBPMT_SW
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_NGACO_PBPMT_SW').exists()).value
+  notes: This field is deprecated in shared systems data. Its value can be derived as Y if any CLM_BNFT_ENHNCMT_X_CD  = 1, else N.
+- inputPath: ExplanationOfBenefit-Base.CLM_NGACO_PDSCHRG_HCBS_SW
+  appliesTo:
+    - Inpatient
+    - HHA
+    - SNF
+    - Outpatient
+    - Hospice
+  sources:
+    - NCH
+  cclfMapping:
+    - CCLFA.CLM_NGACO_PDSCHRG_HCBS_SW
+  sourceView: V2_MDCR_CLM_DCMTN
+  sourceColumn: CLM_NGACO_PDSCHRG_HCBS_SW
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_NGACO_PDSCHRG_HCBS_SW').exists()).value
+  notes: This field is deprecated in shared systems data. Its value can be derived as Y if any CLM_BNFT_ENHNCMT_X_CD  = 3, else N.
+- inputPath: ExplanationOfBenefit-Base.CLM_NGACO_SNF_WVR_SW
+  appliesTo:
+    - Inpatient
+    - HHA
+    - SNF
+    - Outpatient
+    - Hospice
+  sources:
+    - NCH
+  cclfMapping:
+    - CCLFA.CLM_NGACO_SNF_WVR_SW
+  sourceView: V2_MDCR_CLM_DCMTN
+  sourceColumn: CLM_NGACO_SNF_WVR_SW
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_NGACO_SNF_WVR_SW').exists()).value
+  notes: This field is deprecated in shared systems data. Its value can be derived as Y if any CLM_BNFT_ENHNCMT_X_CD  = 4, else N.
+- inputPath: ExplanationOfBenefit-Base.CLM_NGACO_TLHLTH_SW
+  appliesTo:
+    - Inpatient
+    - HHA
+    - SNF
+    - Outpatient
+    - Hospice
+  sources:
+    - NCH
+  cclfMapping:
+    - CCLFA.CLM_NGACO_TLHLTH_SW
+  sourceView: V2_MDCR_CLM_DCMTN
+  sourceColumn: CLM_NGACO_TLHLTH_SW
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_NGACO_TLHLTH_SW').exists()).value
+  notes: This field is deprecated in shared systems data. Its value can be derived as Y if any CLM_BNFT_ENHNCMT_X_CD  = 2, else N.
+- inputPath: ExplanationOfBenefit-Base.CLM_NGACO_CPTATN_SW
+  appliesTo:
+    - Inpatient
+    - HHA
+    - SNF
+    - Outpatient
+    - Hospice
+  sources:
+    - NCH
+  cclfMapping:
+    - CCLFA.CLM_NGACO_CPTATN_SW
+  sourceView: V2_MDCR_CLM_DCMTN
+  sourceColumn: CLM_NGACO_CPTATN_SW
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_NGACO_CPTATN_SW').exists()).value
+  notes: This field is deprecated in shared systems data. Its value can be derived as Y if any CLM_BNFT_ENHNCMT_X_CD  = 5, else N.
+- inputPath: ExplanationOfBenefit-Base.CLM_ACO_CARE_MGMT_HCBS_SW
+  appliesTo:
+    - Inpatient
+    - HHA
+    - SNF
+    - Outpatient
+    - Hospice
+  sources:
+    - NCH
+  cclfMapping:
+    - CCLFA.CLM_NGACO_CMG_WVR_SW
+  sourceView: V2_MDCR_CLM_DCMTN
+  sourceColumn: CLM_ACO_CARE_MGMT_HCBS_SW
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_ACO_CARE_MGMT_HCBS_SW').exists()).value
+  notes: This field is deprecated in shared systems data. Its value can be derived as Y if any CLM_BNFT_ENHNCMT_X_CD  = 7, else N.
+- inputPath: LineItemComponent.CLM_LINE_NGACO_PBPMT_SW
+  appliesTo:
+    - Carrier
+  sources:
+    - NCH
+  cclfMapping:
+    - CCLFB.CLM_LINE_NGACO_PBPMT_SW
+  sourceView: V2_MDCR_CLM_LINE_DCMTN
+  sourceColumn: CLM_LINE_NGACO_PBPMT_SW
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_LINE_NGACO_PBPMT_SW').exists()).value
+  notes: This field is deprecated in shared systems data. Its value can be derived as Y if any CLM_LINE_BNFT_ENHNCMT_X_CD = 1, else N.
+- inputPath: LineItemComponent.CLM_LINE_NGACO_PDSCHRG_HCBS_SW
+  appliesTo:
+    - Carrier
+  sources:
+    - NCH
+  cclfMapping:
+    - CCLFB.CLM_LINE_NGACO_PDSCHRG_HCBS_SW
+  sourceView: V2_MDCR_CLM_LINE_DCMTN
+  sourceColumn: CLM_LINE_NGACO_PDSCHRG_HCBS_SW
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_LINE_NGACO_PDSCHRG_HCBS_SW').exists()).value
+  notes: This field is deprecated in shared systems data. Its value can be derived as Y if any CLM_LINE_BNFT_ENHNCMT_X_CD = 3, else N.
+- inputPath: LineItemComponent.CLM_LINE_NGACO_SNF_WVR_SW
+  appliesTo:
+    - Carrier
+  sources:
+    - NCH
+  cclfMapping:
+    - CCLFB.CLM_LINE_NGACO_SNF_WVR_SW
+  sourceView: V2_MDCR_CLM_LINE_DCMTN
+  sourceColumn: CLM_LINE_NGACO_SNF_WVR_SW
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_LINE_NGACO_SNF_WVR_SW').exists()).value
+  notes: This field is deprecated in shared systems data. Its value can be derived as Y if any CLM_LINE_BNFT_ENHNCMT_X_CD = 4, else N.
+- inputPath: LineItemComponent.CLM_LINE_NGACO_TLHLTH_SW
+  appliesTo:
+    - Carrier
+  sources:
+    - NCH
+  cclfMapping:
+    - CCLFB.CLM_LINE_NGACO_TLHLTH_SW
+  sourceView: V2_MDCR_CLM_LINE_DCMTN
+  sourceColumn: CLM_LINE_NGACO_TLHLTH_SW
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_LINE_NGACO_TLHLTH_SW').exists()).value
+  notes: This field is deprecated in shared systems data. Its value can be derived as Y if any CLM_LINE_BNFT_ENHNCMT_X_CD = 2, else N.
+- inputPath: LineItemComponent.CLM_LINE_NGACO_CPTATN_SW
+  appliesTo:
+    - Carrier
+  sources:
+    - NCH
+  cclfMapping:
+    - CCLFB.CLM_LINE_NGACO_CPTATN_SW
+  sourceView: V2_MDCR_CLM_LINE_DCMTN
+  sourceColumn: CLM_LINE_NGACO_CPTATN_SW
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_LINE_NGACO_CPTATN_SW').exists()).value
+  notes: This field is deprecated in shared systems data. Its value can be derived as Y if any CLM_LINE_BNFT_ENHNCMT_X_CD = 5, else N.
+- inputPath: LineItemComponent.CLM_LINE_ACO_CARE_MGMT_HCBS_SW
+  appliesTo:
+    - Carrier
+  sources:
+    - NCH
+  cclfMapping:
+    - CCLFB.CLM_NGACO_CMG_WVR_SW
+  sourceView: V2_MDCR_CLM_LINE_DCMTN
+  sourceColumn: CLM_LINE_ACO_CARE_MGMT_HCBS_SW
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_LINE_ACO_CARE_MGMT_HCBS_SW').exists()).value
+  notes: This field is deprecated in shared systems data. Its value can be derived as Y if any CLM_LINE_BNFT_ENHNCMT_X_CD = 7, else N.
+- inputPath: LineItemComponent.CLM_LINE_BNFT_ENHNCMT_1_CD
+  appliesTo:
+    - Carrier
+  sources:
+    - NCH
+    - MCS
+  cclfMapping:
+    - CCLFB.CLM_DEMO_1ST_NUM
+  sourceView: V2_MDCR_CLM_LINE_DCMTN
+  sourceColumn: CLM_LINE_BNFT_ENHNCMT_1_CD
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_BNFT_ENHNCMT_CD').exists()).value
+  notes: There may be multiple. These are unordered, but there are a maximum of 5 per institutional claim header, and 5 per professional claim line. The infoSequence element on the ExplanationOfBenefit.item can be used to determine which are relevant to a given claim line.
+- inputPath: LineItemComponent.CLM_LINE_BNFT_ENHNCMT_2_CD
+  appliesTo:
+    - Carrier
+  sources:
+    - NCH
+    - MCS
+  cclfMapping:
+    - CCLFB.CLM_DEMO_2ND_NUM
+  sourceView: V2_MDCR_CLM_LINE_DCMTN
+  sourceColumn: CLM_LINE_BNFT_ENHNCMT_2_CD
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_BNFT_ENHNCMT_CD').exists()).value
+  notes: There may be multiple. These are unordered, but there are a maximum of 5 per institutional claim header, and 5 per professional claim line. The infoSequence element on the ExplanationOfBenefit.item can be used to determine which are relevant to a given claim line.
+- inputPath: LineItemComponent.CLM_LINE_BNFT_ENHNCMT_3_CD
+  appliesTo:
+    - Carrier
+  sources:
+    - NCH
+    - MCS
+  cclfMapping:
+    - CCLFB.CLM_DEMO_3RD_NUM
+  sourceView: V2_MDCR_CLM_LINE_DCMTN
+  sourceColumn: CLM_LINE_BNFT_ENHNCMT_3_CD
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_BNFT_ENHNCMT_CD').exists()).value
+  notes: There may be multiple. These are unordered, but there are a maximum of 5 per institutional claim header, and 5 per professional claim line. The infoSequence element on the ExplanationOfBenefit.item can be used to determine which are relevant to a given claim line.
+- inputPath: LineItemComponent.CLM_LINE_BNFT_ENHNCMT_4_CD
+  appliesTo:
+    - Carrier
+  sources:
+    - NCH
+    - MCS
+  cclfMapping:
+    - CCLFB.CLM_DEMO_4TH_NUM
+  sourceView: V2_MDCR_CLM_LINE_DCMTN
+  sourceColumn: CLM_LINE_BNFT_ENHNCMT_4_CD
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_BNFT_ENHNCMT_CD').exists()).value
+  notes: There may be multiple. These are unordered, but there are a maximum of 5 per institutional claim header, and 5 per professional claim line.The infoSequence element on the ExplanationOfBenefit.item can be used to determine which are relevant to a given claim line.
+- inputPath: LineItemComponent.CLM_LINE_BNFT_ENHNCMT_5_CD
+  appliesTo:
+    - Carrier
+  sources:
+    - NCH
+    - MCS
+  cclfMapping:
+    - CCLFB.CLM_DEMO_5TH_NUM
+  sourceView: V2_MDCR_CLM_LINE_DCMTN
+  sourceColumn: CLM_LINE_BNFT_ENHNCMT_5_CD
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_BNFT_ENHNCMT_CD').exists()).value
+  notes: There may be multiple. These are unordered, but there are a maximum of 5 per institutional claim header, and 5 per professional claim line. The infoSequence element on the ExplanationOfBenefit.item can be used to determine which are relevant to a given claim line.

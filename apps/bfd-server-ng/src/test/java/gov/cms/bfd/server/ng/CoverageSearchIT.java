@@ -346,7 +346,7 @@ class CoverageSearchIT extends IntegrationTestBase {
     assertEquals(
         2,
         coverageBundle.getEntry().size(),
-        "Should find no Coverage for a beneficiary whose entitlement periods are all in the past.");
+        "Should find no active Coverage for a beneficiary whose entitlement periods are all in the past.");
     for (var coverage : getCoverageFromBundle(coverageBundle)) {
       assertEquals(Coverage.CoverageStatus.CANCELLED, coverage.getStatus());
     }
