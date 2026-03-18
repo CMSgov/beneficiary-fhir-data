@@ -10,18 +10,16 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /** Catastrophic coverage codes. */
-@AllArgsConstructor
-@Getter
-public enum CatastrophicCoverageCode {
-  /** A - Attachment point met on this event. */
-  A("A", "Attachment point met on this event"),
-  /** C - Above attachment point. */
-  C("C", "Above attachment point"),
-  /** INVALID - Represents an invalid code that we still want to capture. */
-  INVALID("", "");
+public sealed interface CatastrophicCoverageCode
+    permits CatastrophicCoverageCode.Valid, CatastrophicCoverageCode.Invalid {
 
-  private String code;
-  private final String display;
+  /** Returns the code. */
+  @SuppressWarnings("checkstyle:JavadocMethod")
+  String getCode();
+
+  /** Returns the display or returns an empty string if invalid. */
+  @SuppressWarnings("checkstyle:JavadocMethod")
+  String getDisplay();
 
   /**
    * Convert from a database code.
@@ -29,30 +27,25 @@ public enum CatastrophicCoverageCode {
    * @param code database code
    * @return catastrophic coverage code or empty Optional if code is null or blank
    */
-  public static Optional<CatastrophicCoverageCode> tryFromCode(String code) {
+  static Optional<CatastrophicCoverageCode> tryFromCode(String code) {
     if (code == null || code.isBlank()) {
       return Optional.empty();
     }
     return Optional.of(
-        Arrays.stream(values())
+        Arrays.stream(Valid.values())
             .filter(v -> v.code.equals(code))
+            .map(v -> (CatastrophicCoverageCode) v)
             .findFirst()
-            .orElse(handleInvalidValue(code)));
+            .orElseGet(() -> new Invalid(code)));
   }
 
   /**
-   * Handles scenarios where code could not be mapped to a valid value.
+   * Maps enum/record to FHIR spec.
    *
-   * @param invalidValue the invalid value to capture
-   * @return catastrophic coverage code
+   * @param supportingInfoFactory the supportingInfoFactory containing the other mappings.
+   * @return supportingInfoFactory
    */
-  public static CatastrophicCoverageCode handleInvalidValue(String invalidValue) {
-    var invalidCatastrophicCoverageCode = CatastrophicCoverageCode.INVALID;
-    invalidCatastrophicCoverageCode.code = invalidValue;
-    return invalidCatastrophicCoverageCode;
-  }
-
-  ExplanationOfBenefit.SupportingInformationComponent toFhir(
+  default ExplanationOfBenefit.SupportingInformationComponent toFhir(
       SupportingInfoFactory supportingInfoFactory) {
     var supportingInfo = supportingInfoFactory.createSupportingInfo();
     supportingInfo.setCategory(BlueButtonSupportingInfoCategory.CLM_CTSTRPHC_CVRG_IND_CD.toFhir());
@@ -60,8 +53,34 @@ public enum CatastrophicCoverageCode {
         new CodeableConcept(
             new Coding()
                 .setSystem(SystemUrls.BLUE_BUTTON_CODE_SYSTEM_CATASTROPHIC_COVERAGE_CODE)
-                .setCode(code)
-                .setDisplay(display)));
+                .setCode(getCode())
+                .setDisplay(getDisplay())));
     return supportingInfo;
+  }
+
+  /** Enum for all known, valid codes. */
+  @AllArgsConstructor
+  @Getter
+  enum Valid implements CatastrophicCoverageCode {
+    /** A - Attachment point met on this event. */
+    A("A", "Attachment point met on this event"),
+    /** C - Above attachment point. */
+    C("C", "Above attachment point");
+
+    private final String code;
+    private final String display;
+  }
+
+  /** Captures unknown/invalid codes. */
+  record Invalid(String code) implements CatastrophicCoverageCode {
+    @Override
+    public String getDisplay() {
+      return "";
+    }
+
+    @Override
+    public String getCode() {
+      return code;
+    }
   }
 }
