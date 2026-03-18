@@ -112,7 +112,7 @@ runs:
               echo "Detected lock; force-unlocking: $lock_id"
               tofu force-unlock -force "$lock_id" -no-color
               echo "Retrying command after unlock..."
-              "$@"
+              "$@" &>/dev/null
               return 0
             fi
           fi
@@ -120,4 +120,4 @@ runs:
           return $rc
         }
 
-        run_with_auto_unlock tofu plan -no-color -refresh=false -lock-timeout=0s
+        run_with_auto_unlock tofu plan -no-color -refresh=false -lock-timeout=30s
