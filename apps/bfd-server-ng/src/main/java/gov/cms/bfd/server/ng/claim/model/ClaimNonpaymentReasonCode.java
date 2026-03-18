@@ -15,7 +15,6 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
  */
 @AllArgsConstructor
 @Getter
-@SuppressWarnings("java:S115")
 public enum ClaimNonpaymentReasonCode {
   /** ! - MSP COST AVOIDED - COB CONTRACTOR (00 2-BYTE CODE). */
   EXCLAMATION("!", "MSP COST AVOIDED - COB CONTRACTOR (00 2-BYTE CODE)"),

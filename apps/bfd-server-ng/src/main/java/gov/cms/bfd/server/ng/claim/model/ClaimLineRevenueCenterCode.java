@@ -14,7 +14,6 @@ import org.hl7.fhir.r4.model.Coding;
  */
 @AllArgsConstructor
 @Getter
-@SuppressWarnings("java:S115")
 public enum ClaimLineRevenueCenterCode {
   /** 0001 - TOTAL CHARGE. */
   _0001("0001", "TOTAL CHARGE"),

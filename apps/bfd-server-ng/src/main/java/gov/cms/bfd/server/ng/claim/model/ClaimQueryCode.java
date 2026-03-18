@@ -12,7 +12,6 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 /** Claim query codes. */
 @AllArgsConstructor
 @Getter
-@SuppressWarnings("java:S115")
 public enum ClaimQueryCode {
   /** 0 - CREDIT ADJUSTMENT. */
   _0("0", "CREDIT ADJUSTMENT"),

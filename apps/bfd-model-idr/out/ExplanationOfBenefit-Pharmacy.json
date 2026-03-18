@@ -289,6 +289,10 @@
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/NCPDPDispensedAsWrittenOrProductSelectionCode",
         "code" : "0"
+      },
+      {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DAW-PROD-SLCTN-CD",
+        "code" : "0"
       }]
     }
   },

@@ -31,10 +31,6 @@ public class ClaimLineProfessionalSharedSystems extends ClaimLineProfessionalBas
     var productOrService = new CodeableConcept();
     getHcpcsCode().toFhir().ifPresent(productOrService::addCoding);
     var quantity = getServiceUnitQuantity().toFhir();
-    if (productOrService.isEmpty()) {
-      ndc.toFhirCoding().ifPresent(productOrService::addCoding);
-      ndc.getQualifier().ifPresent(quantity::setUnit);
-    }
     ndc.toFhirDetail().ifPresent(line::addDetail);
     line.setProductOrService(FhirUtil.checkDataAbsent(productOrService));
     line.setQuantity(quantity);

@@ -111,7 +111,6 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
     clm_bene_intrst_pd_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
     clm_bene_pd_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
     clm_bene_pmt_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
-    clm_bene_pmt_coinsrnc_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
     clm_othr_tp_pd_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
     clm_cob_ptnt_resp_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]
     clm_mdcr_ddctbl_amt: Annotated[float | None, {ALIAS: ALIAS_CLM}]

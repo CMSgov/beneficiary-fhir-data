@@ -12,7 +12,6 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 /** Compound codes. */
 @AllArgsConstructor
 @Getter
-@SuppressWarnings("java:S115")
 public enum ClaimLineCompoundCode {
 
   /** 0 - Not specified (missing values are also possible). */

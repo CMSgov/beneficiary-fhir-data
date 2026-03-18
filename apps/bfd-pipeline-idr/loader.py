@@ -208,8 +208,7 @@ class BatchLoader:
             f"CREATE TEMPORARY TABLE {self.temp_table} (LIKE {self.table}) ON COMMIT DROP"  # type: ignore
         )
         # Created/updated columns don't need to be loaded from the source.
-        exclude_cols = self.model.computed_keys() + self.meta_keys
-        for col in exclude_cols:
+        for col in self.meta_keys:
             cur.execute(f"ALTER TABLE {self.temp_table} DROP COLUMN {col}")  # type: ignore
 
     def _calculate_load_progress(self, cur: psycopg.Cursor, results: Sequence[T]) -> None:

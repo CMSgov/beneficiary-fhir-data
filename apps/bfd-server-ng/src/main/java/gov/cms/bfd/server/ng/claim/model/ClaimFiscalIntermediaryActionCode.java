@@ -12,7 +12,6 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 /** Claim fiscal intermediary action codes. */
 @AllArgsConstructor
 @Getter
-@SuppressWarnings("java:S115")
 public enum ClaimFiscalIntermediaryActionCode {
   /** 1 - Original debit action (always a 1 for all regular bills). */
   _1("1", "Original debit action (always a 1 for all regular bills)"),

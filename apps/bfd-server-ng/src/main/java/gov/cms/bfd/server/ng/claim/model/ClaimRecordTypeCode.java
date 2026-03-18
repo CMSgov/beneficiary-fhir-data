@@ -15,7 +15,6 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
  */
 @AllArgsConstructor
 @Getter
-@SuppressWarnings("java:S115")
 public enum ClaimRecordTypeCode {
   /** M - Part B DMEPOS claim record (processed by DME Regional Carrier). */
   M("M", "Part B DMEPOS claim record (processed by DME Regional Carrier)", "Part B"),

@@ -55,7 +55,7 @@ class IdrContractPbpNumber(IdrBaseModel):
         # obsolete pbp_sks.
         # Additionally, some contracts are marked obsolete and no non-obsolete record
         # is created, so we have to use RANK to get the latest version of each contract.
-        # Then, these can be queries by searching for rows where
+        # Then, these can be queried by searching for rows where
         # bfd_contract_version_rank = 1
         return f"""
             WITH sgmt as (
