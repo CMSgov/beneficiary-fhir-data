@@ -13,95 +13,21 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
  * Home Health Agency (HHA) referral codes for claims. Suppress SonarQube warning that constant
  * names should comply with naming conventions
  */
-@Getter
-@AllArgsConstructor
-@SuppressWarnings("java:S115")
-public enum HhaReferralCode {
-  /**
-   * 1 - PHYSICIAN REFERRAL - THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF A PERSONAL
-   * PHYSICIAN.
-   */
-  _1(
-      "1",
-      "PHYSICIAN REFERRAL - THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF A PERSONAL PHYSICIAN."),
-  /**
-   * 2 - CLINIC REFERRAL - THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF THIS FACILITY&#x27;S
-   * CLINIC PHYSICIAN.
-   */
-  _2(
-      "2",
-      "CLINIC REFERRAL - THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF THIS FACILITY'S CLINIC PHYSICIAN."),
-  /**
-   * 3 - HMO REFERRAL - THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF AN HEALTH MAINTENANCE
-   * ORGANIZATION (HMO)PHYSICIAN.
-   */
-  _3(
-      "3",
-      "HMO REFERRAL - THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF AN HEALTH MAINTENANCE ORGANIZATION (HMO)PHYSICIAN."),
-  /**
-   * 4 - TRANSFER FROM HOSPITAL - THE PATIENT WAS ADMITTED AS AN INPATIENT TRANSFER FROM AN ACUTE
-   * CARE FACILITY.
-   */
-  _4(
-      "4",
-      "TRANSFER FROM HOSPITAL - THE PATIENT WAS ADMITTED AS AN INPATIENT TRANSFER FROM AN ACUTE CARE FACILITY."),
-  /**
-   * 5 - TRANSFER FROM A SKILLED NURSING FACILITY (SNF) - THE PATIENT WAS ADMITTED AS AN INPATIENT
-   * TRANSFER FROM A SNF.
-   */
-  _5(
-      "5",
-      "TRANSFER FROM A SKILLED NURSING FACILITY (SNF) - THE PATIENT WAS ADMITTED AS AN INPATIENT TRANSFER FROM A SNF."),
-  /**
-   * 6 - TRANSFER FROM ANOTHER HEALTH CARE FACILITY - THE PATIENT WAS ADMITTED AS A TRANSFER FROM A
-   * HEALTH CARE FACILITY OTHER THAN AN ACUTE CARE FACILITY OR SNF.
-   */
-  _6(
-      "6",
-      "TRANSFER FROM ANOTHER HEALTH CARE FACILITY - THE PATIENT WAS ADMITTED AS A TRANSFER FROM A HEALTH CARE FACILITY OTHER THAN AN ACUTE CARE FACILITY OR SNF."),
-  /**
-   * 7 - EMERGENCY ROOM - THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF THIS FACILITY&#x27;S
-   * EMERGENCY ROOM PHYSICIAN.
-   */
-  _7(
-      "7",
-      "EMERGENCY ROOM - THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF THIS FACILITY'S EMERGENCY ROOM PHYSICIAN."),
-  /**
-   * 8 - COURT/LAW ENFORCEMENT - THE PATIENT WAS ADMITTED UPON THE DIRECTION OF A COURT OF LAW OR
-   * UPON THE REQUEST OF A LAW ENFORCEMENT AGENCY&#x27;S REPRESENTATIVE.
-   */
-  _8(
-      "8",
-      "COURT/LAW ENFORCEMENT - THE PATIENT WAS ADMITTED UPON THE DIRECTION OF A COURT OF LAW OR UPON THE REQUEST OF A LAW ENFORCEMENT AGENCY'S REPRESENTATIVE."),
-  /** 9 - INFORMATION NOT AVAILABLE - THE MEANS BY WHICH THE PATIENT WAS ADMITTED IS NOT KNOWN. */
-  _9("9", "INFORMATION NOT AVAILABLE - THE MEANS BY WHICH THE PATIENT WAS ADMITTED IS NOT KNOWN."),
-  /**
-   * A - TRANSFER FROM A CRITICAL ACCESS HOSPITAL - PATIENT WAS ADMITTED/REFERRED TO THIS FACILITY
-   * AS A TRANSFER FROM A CRITICAL ACCESS HOSPITAL.
-   */
-  A(
-      "A",
-      "TRANSFER FROM A CRITICAL ACCESS HOSPITAL - PATIENT WAS ADMITTED/REFERRED TO THIS FACILITY AS A TRANSFER FROM A CRITICAL ACCESS HOSPITAL."),
-  /**
-   * B - TRANSFER FROM ANOTHER HHA – BENEFICIARIES ARE PERMITTED TO TRANSFER FROM ONE HHA TO ANOTHER
-   * UNRELATED HHA UNDER HH PPS.(EFF. 10/00).
-   */
-  B(
-      "B",
-      "TRANSFER FROM ANOTHER HHA – BENEFICIARIES ARE PERMITTED TO TRANSFER FROM ONE HHA TO ANOTHER UNRELATED HHA UNDER HH PPS.(EFF. 10/00)"),
-  /**
-   * C - READMISSION TO SAME HHA - IF A BENEFICIARY IS DISCHARGED FROM AN HHA AND THEN READMITTED
-   * WITHIN THE ORIGINAL 60-DAY EPISODE THE ORIGINAL EPISODE MUST BE CLOSED EARLY AND A NEW ONE
-   * CREATED.
-   */
-  C(
-      "C",
-      "READMISSION TO SAME HHA - IF A BENEFICIARY IS DISCHARGED FROM AN HHA AND THEN READMITTED WITHIN THE ORIGINAL 60-DAY EPISODE THE ORIGINAL EPISODE MUST BE CLOSED EARLY AND A NEW ONE CREATED."),
-  /** INVALID - Represents an invalid code that we still want to capture. */
-  INVALID("", "");
+public sealed interface HhaReferralCode permits HhaReferralCode.Valid, HhaReferralCode.Invalid {
 
-  private String code;
-  private final String display;
+  /**
+   * Gets the code value.
+   *
+   * @return the code
+   */
+  String getCode();
+
+  /**
+   * Gets the display value.
+   *
+   * @return the display
+   */
+  String getDisplay();
 
   /**
    * Converts from a database code.
@@ -109,30 +35,25 @@ public enum HhaReferralCode {
    * @param code database code.
    * @return HHA referral code
    */
-  public static Optional<HhaReferralCode> tryFromCode(String code) {
+  static Optional<HhaReferralCode> tryFromCode(String code) {
     if (code == null || code.isBlank()) {
       return Optional.empty();
     }
     return Optional.of(
-        Arrays.stream(values())
-            .filter(c -> c.code.equals(code))
+        Arrays.stream(Valid.values())
+            .filter(c -> c.getCode().equals(code))
             .findFirst()
-            .orElse(handleInvalidValue(code)));
+            .map(c -> (HhaReferralCode) c)
+            .orElse(new Invalid(code)));
   }
 
   /**
-   * Handles scenarios where code could not be mapped to a valid value.
+   * Converts to a FHIR SupportingInformationComponent.
    *
-   * @param invalidValue the invalid value to capture
-   * @return HHA referral code
+   * @param supportingInfoFactory factory to create FHIR components
+   * @return the FHIR component
    */
-  public static HhaReferralCode handleInvalidValue(String invalidValue) {
-    var invalidHhaReferralCode = HhaReferralCode.INVALID;
-    invalidHhaReferralCode.code = invalidValue;
-    return invalidHhaReferralCode;
-  }
-
-  ExplanationOfBenefit.SupportingInformationComponent toFhir(
+  default ExplanationOfBenefit.SupportingInformationComponent toFhir(
       SupportingInfoFactory supportingInfoFactory) {
     return supportingInfoFactory
         .createSupportingInfo()
@@ -141,7 +62,117 @@ public enum HhaReferralCode {
             new CodeableConcept(
                 new Coding()
                     .setSystem(SystemUrls.BLUE_BUTTON_CODE_SYSTEM_HHA_REFERAL_CODE)
-                    .setCode(code)
-                    .setDisplay(display)));
+                    .setCode(getCode())
+                    .setDisplay(getDisplay())));
+  }
+
+  /**
+   * Valid HHA referral codes. Suppress SonarQube warning that constant names should comply with
+   * naming conventions.
+   */
+  @AllArgsConstructor
+  @Getter
+  @SuppressWarnings("java:S115")
+  enum Valid implements HhaReferralCode {
+    /**
+     * 1 - PHYSICIAN REFERRAL - THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF A PERSONAL
+     * PHYSICIAN.
+     */
+    _1(
+        "1",
+        "PHYSICIAN REFERRAL - THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF A PERSONAL PHYSICIAN."),
+    /**
+     * 2 - CLINIC REFERRAL - THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF THIS
+     * FACILITY&#x27;S CLINIC PHYSICIAN.
+     */
+    _2(
+        "2",
+        "CLINIC REFERRAL - THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF THIS FACILITY'S CLINIC PHYSICIAN."),
+    /**
+     * 3 - HMO REFERRAL - THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF AN HEALTH MAINTENANCE
+     * ORGANIZATION (HMO)PHYSICIAN.
+     */
+    _3(
+        "3",
+        "HMO REFERRAL - THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF AN HEALTH MAINTENANCE ORGANIZATION (HMO)PHYSICIAN."),
+    /**
+     * 4 - TRANSFER FROM HOSPITAL - THE PATIENT WAS ADMITTED AS AN INPATIENT TRANSFER FROM AN ACUTE
+     * CARE FACILITY.
+     */
+    _4(
+        "4",
+        "TRANSFER FROM HOSPITAL - THE PATIENT WAS ADMITTED AS AN INPATIENT TRANSFER FROM AN ACUTE CARE FACILITY."),
+    /**
+     * 5 - TRANSFER FROM A SKILLED NURSING FACILITY (SNF) - THE PATIENT WAS ADMITTED AS AN INPATIENT
+     * TRANSFER FROM A SNF.
+     */
+    _5(
+        "5",
+        "TRANSFER FROM A SKILLED NURSING FACILITY (SNF) - THE PATIENT WAS ADMITTED AS AN INPATIENT TRANSFER FROM A SNF."),
+    /**
+     * 6 - TRANSFER FROM ANOTHER HEALTH CARE FACILITY - THE PATIENT WAS ADMITTED AS A TRANSFER FROM
+     * A HEALTH CARE FACILITY OTHER THAN AN ACUTE CARE FACILITY OR SNF.
+     */
+    _6(
+        "6",
+        "TRANSFER FROM ANOTHER HEALTH CARE FACILITY - THE PATIENT WAS ADMITTED AS A TRANSFER FROM A HEALTH CARE FACILITY OTHER THAN AN ACUTE CARE FACILITY OR SNF."),
+    /**
+     * 7 - EMERGENCY ROOM - THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF THIS FACILITY&#x27;S
+     * EMERGENCY ROOM PHYSICIAN.
+     */
+    _7(
+        "7",
+        "EMERGENCY ROOM - THE PATIENT WAS ADMITTED UPON THE RECOMMENDATION OF THIS FACILITY'S EMERGENCY ROOM PHYSICIAN."),
+    /**
+     * 8 - COURT/LAW ENFORCEMENT - THE PATIENT WAS ADMITTED UPON THE DIRECTION OF A COURT OF LAW OR
+     * UPON THE REQUEST OF A LAW ENFORCEMENT AGENCY&#x27;S REPRESENTATIVE.
+     */
+    _8(
+        "8",
+        "COURT/LAW ENFORCEMENT - THE PATIENT WAS ADMITTED UPON THE DIRECTION OF A COURT OF LAW OR UPON THE REQUEST OF A LAW ENFORCEMENT AGENCY'S REPRESENTATIVE."),
+    /** 9 - INFORMATION NOT AVAILABLE - THE MEANS BY WHICH THE PATIENT WAS ADMITTED IS NOT KNOWN. */
+    _9(
+        "9",
+        "INFORMATION NOT AVAILABLE - THE MEANS BY WHICH THE PATIENT WAS ADMITTED IS NOT KNOWN."),
+    /**
+     * A - TRANSFER FROM A CRITICAL ACCESS HOSPITAL - PATIENT WAS ADMITTED/REFERRED TO THIS FACILITY
+     * AS A TRANSFER FROM A CRITICAL ACCESS HOSPITAL.
+     */
+    A(
+        "A",
+        "TRANSFER FROM A CRITICAL ACCESS HOSPITAL - PATIENT WAS ADMITTED/REFERRED TO THIS FACILITY AS A TRANSFER FROM A CRITICAL ACCESS HOSPITAL."),
+    /**
+     * B - TRANSFER FROM ANOTHER HHA – BENEFICIARIES ARE PERMITTED TO TRANSFER FROM ONE HHA TO
+     * ANOTHER UNRELATED HHA UNDER HH PPS.(EFF. 10/00).
+     */
+    B(
+        "B",
+        "TRANSFER FROM ANOTHER HHA – BENEFICIARIES ARE PERMITTED TO TRANSFER FROM ONE HHA TO ANOTHER UNRELATED HHA UNDER HH PPS.(EFF. 10/00)"),
+    /**
+     * C - READMISSION TO SAME HHA - IF A BENEFICIARY IS DISCHARGED FROM AN HHA AND THEN READMITTED
+     * WITHIN THE ORIGINAL 60-DAY EPISODE THE ORIGINAL EPISODE MUST BE CLOSED EARLY AND A NEW ONE
+     * CREATED.
+     */
+    C(
+        "C",
+        "READMISSION TO SAME HHA - IF A BENEFICIARY IS DISCHARGED FROM AN HHA AND THEN READMITTED WITHIN THE ORIGINAL 60-DAY EPISODE THE ORIGINAL EPISODE MUST BE CLOSED EARLY AND A NEW ONE CREATED.");
+
+    private final String code;
+    private final String display;
+  }
+
+  /**
+   * Represents an invalid or unknown HHA referral code that could not be mapped to a valid value.
+   */
+  record Invalid(String code) implements HhaReferralCode {
+    @Override
+    public String getCode() {
+      return code;
+    }
+
+    @Override
+    public String getDisplay() {
+      return "";
+    }
   }
 }

@@ -9,52 +9,76 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Extension;
 
 /** Beneficiary Low Income Subsidy Copayment Level Code. */
-@AllArgsConstructor
-@Getter
-@SuppressWarnings("java:S115")
-public enum BeneficiaryLISCopaymentLevelCode {
+public sealed interface BeneficiaryLISCopaymentLevelCode
+    permits BeneficiaryLISCopaymentLevelCode.Valid, BeneficiaryLISCopaymentLevelCode.Invalid {
 
-  /** 1 - High. */
-  _1("1", "High"),
-  /** 4 - 15% Copayment. */
-  _4("4", "15% Copayment"),
-  /** INVALID - Represents an invalid code that we still want to capture. */
-  INVALID("", "");
+  /**
+   * Gets the code value.
+   *
+   * @return the code
+   */
+  String getCode();
 
-  private String code;
-  private final String display;
+  /**
+   * Gets the display value.
+   *
+   * @return the display
+   */
+  String getDisplay();
 
   /**
    * Convert from a database code.
    *
    * @param code database code
-   * @return beneficiary low income subsidy copayment level code
+   * @return beneficiary low income subsidy copayment level code or empty Optional if code is null
+   *     or blank
    */
-  public static Optional<BeneficiaryLISCopaymentLevelCode> tryFromCode(String code) {
+  static Optional<BeneficiaryLISCopaymentLevelCode> tryFromCode(String code) {
     if (code == null || code.isBlank()) {
       return Optional.empty();
     }
     return Optional.of(
-        Arrays.stream(values())
+        Arrays.stream(Valid.values())
             .filter(v -> v.code.equals(code))
+            .map(v -> (BeneficiaryLISCopaymentLevelCode) v)
             .findFirst()
-            .orElse(handleInvalidValue(code)));
+            .orElseGet(() -> new Invalid(code)));
   }
 
   /**
-   * Handles scenarios where code could not be mapped to a valid value.
+   * Maps interface to FHIR spec.
    *
-   * @param invalidValue the invalid value to capture
-   * @return beneficiary low income subsidy copayment level code
+   * @return FHIR Extension
    */
-  public static BeneficiaryLISCopaymentLevelCode handleInvalidValue(String invalidValue) {
-    var invalidBeneficiaryLISCopaymentLevelCode = BeneficiaryLISCopaymentLevelCode.INVALID;
-    invalidBeneficiaryLISCopaymentLevelCode.code = invalidValue;
-    return invalidBeneficiaryLISCopaymentLevelCode;
+  default Extension toFhir() {
+    return new Extension(SystemUrls.EXT_BENE_LIS_COPMT_LVL_CD_URL)
+        .setValue(new Coding(SystemUrls.SYS_BENE_LIS_COPMT_LVL_CD_CD, getCode(), null));
   }
 
-  Extension toFhir() {
-    return new Extension(SystemUrls.EXT_BENE_LIS_COPMT_LVL_CD_URL)
-        .setValue(new Coding(SystemUrls.SYS_BENE_LIS_COPMT_LVL_CD_CD, code, null));
+  /** Enum for all known, valid codes. */
+  @AllArgsConstructor
+  @Getter
+  @SuppressWarnings("java:S115")
+  enum Valid implements BeneficiaryLISCopaymentLevelCode {
+    /** 1 - High. */
+    _1("1", "High"),
+    /** 4 - 15% Copayment. */
+    _4("4", "15% Copayment");
+
+    private final String code;
+    private final String display;
+  }
+
+  /** Captures unknown/invalid codes. */
+  record Invalid(String code) implements BeneficiaryLISCopaymentLevelCode {
+    @Override
+    public String getDisplay() {
+      return "";
+    }
+
+    @Override
+    public String getCode() {
+      return code;
+    }
   }
 }

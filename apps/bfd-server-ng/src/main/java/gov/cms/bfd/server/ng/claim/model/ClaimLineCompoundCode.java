@@ -10,22 +10,22 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /** Compound codes. */
-@AllArgsConstructor
-@Getter
-@SuppressWarnings("java:S115")
-public enum ClaimLineCompoundCode {
+public sealed interface ClaimLineCompoundCode
+    permits ClaimLineCompoundCode.Valid, ClaimLineCompoundCode.Invalid {
 
-  /** 0 - Not specified (missing values are also possible). */
-  _0("0", "Not specified (missing values are also possible)"),
-  /** 1 - Not a compound. */
-  _1("1", "Not a compound"),
-  /** 2 - Compound. */
-  _2("2", "Compound"),
-  /** INVALID - Represents an invalid code that we still want to capture. */
-  INVALID("", "");
+  /**
+   * Gets the code value.
+   *
+   * @return the code
+   */
+  String getCode();
 
-  private String code;
-  private final String display;
+  /**
+   * Gets the display value.
+   *
+   * @return the display
+   */
+  String getDisplay();
 
   /**
    * Convert from a database code.
@@ -33,30 +33,25 @@ public enum ClaimLineCompoundCode {
    * @param code database code
    * @return genric brand indicator code
    */
-  public static Optional<ClaimLineCompoundCode> tryFromCode(String code) {
+  static Optional<ClaimLineCompoundCode> tryFromCode(String code) {
     if (code == null || code.isBlank()) {
       return Optional.empty();
     }
     return Optional.of(
-        Arrays.stream(values())
+        Arrays.stream(Valid.values())
             .filter(v -> v.code.equals(code))
+            .map(v -> (ClaimLineCompoundCode) v)
             .findFirst()
-            .orElse(handleInvalidValue(code)));
+            .orElseGet(() -> new Invalid(code)));
   }
 
   /**
-   * Handles scenarios where code could not be mapped to a valid value.
+   * Maps enum/record to FHIR spec.
    *
-   * @param invalidValue the invalid value to capture
-   * @return genric brand indicator code
+   * @param supportingInfoFactory the supportingInfoFactory containing the other mappings.
+   * @return supportingInfoFactory
    */
-  public static ClaimLineCompoundCode handleInvalidValue(String invalidValue) {
-    var invalidClaimLineCompoundCode = ClaimLineCompoundCode.INVALID;
-    invalidClaimLineCompoundCode.code = invalidValue;
-    return invalidClaimLineCompoundCode;
-  }
-
-  ExplanationOfBenefit.SupportingInformationComponent toFhir(
+  default ExplanationOfBenefit.SupportingInformationComponent toFhir(
       SupportingInfoFactory supportingInfoFactory) {
     var supportingInfo = supportingInfoFactory.createSupportingInfo();
     supportingInfo.setCategory(CarinSupportingInfoCategory.COMPOUND_CODE.toFhir());
@@ -66,14 +61,46 @@ public enum ClaimLineCompoundCode {
             .addCoding(
                 new Coding()
                     .setSystem(SystemUrls.HL7_CLAIM_COMPOUND_CODE)
-                    .setCode(code)
-                    .setDisplay(display))
+                    .setCode(getCode())
+                    .setDisplay(getDisplay()))
             .addCoding(
                 new Coding()
                     .setSystem(SystemUrls.BLUE_BUTTON_CLAIM_COMPOUND_CODE)
-                    .setCode(code)
-                    .setDisplay(display));
+                    .setCode(getCode())
+                    .setDisplay(getDisplay()));
     supportingInfo.setCode(codeableConcept);
     return supportingInfo;
+  }
+
+  /**
+   * Enum for all known, valid compound codes. Suppress SonarQube warning that constant names should
+   * comply with naming conventions.
+   */
+  @AllArgsConstructor
+  @Getter
+  @SuppressWarnings("java:S115")
+  enum Valid implements ClaimLineCompoundCode {
+    /** 0 - Not specified (missing values are also possible). */
+    _0("0", "Not specified (missing values are also possible)"),
+    /** 1 - Not a compound. */
+    _1("1", "Not a compound"),
+    /** 2 - Compound. */
+    _2("2", "Compound");
+
+    private final String code;
+    private final String display;
+  }
+
+  /** Captures unknown/invalid codes. */
+  record Invalid(String code) implements ClaimLineCompoundCode {
+    @Override
+    public String getDisplay() {
+      return "";
+    }
+
+    @Override
+    public String getCode() {
+      return code;
+    }
   }
 }

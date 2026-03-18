@@ -10,49 +10,47 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /** PPS Indicator codes. */
-@AllArgsConstructor
-@Getter
-public enum PpsIndicatorCode {
-  /** 2 - PPS bill; claim contains PPS indicator. */
-  PPS("2", "PPS bill; claim contains PPS indicator"),
-  /** unknown - Not a PPS bill. */
-  NOT_PPS("unknown", "Not a PPS bill"),
-  /** INVALID - Represents an invalid code that we still want to capture. */
-  INVALID("", "");
+public sealed interface PpsIndicatorCode permits PpsIndicatorCode.Valid, PpsIndicatorCode.Invalid {
 
-  private String code;
-  private final String display;
+  /**
+   * Gets the code value.
+   *
+   * @return the code
+   */
+  String getCode();
+
+  /**
+   * Gets the display value.
+   *
+   * @return the display
+   */
+  String getDisplay();
 
   /**
    * Convert from a database code.
    *
    * @param code database code
-   * @return claim PPS indicator code
+   * @return claim PPS indicator code or empty Optional if code is null or blank
    */
-  public static Optional<PpsIndicatorCode> fromCode(String code) {
+  static Optional<PpsIndicatorCode> fromCode(String code) {
     if (code == null || code.isBlank()) {
       return Optional.empty();
     }
     return Optional.of(
-        Arrays.stream(values())
+        Arrays.stream(Valid.values())
             .filter(v -> v.code.equals(code))
+            .map(v -> (PpsIndicatorCode) v)
             .findFirst()
-            .orElse(handleInvalidValue(code)));
+            .orElseGet(() -> new Invalid(code)));
   }
 
   /**
-   * Handles scenarios where code could not be mapped to a valid value.
+   * Maps interface to FHIR spec.
    *
-   * @param invalidValue the invalid value to capture
-   * @return claim PPS indicator code
+   * @param supportingInfoFactory the supportingInfoFactory containing the other mappings.
+   * @return supportingInfoFactory
    */
-  public static PpsIndicatorCode handleInvalidValue(String invalidValue) {
-    var invalidPpsIndicatorCode = PpsIndicatorCode.INVALID;
-    invalidPpsIndicatorCode.code = invalidValue;
-    return invalidPpsIndicatorCode;
-  }
-
-  ExplanationOfBenefit.SupportingInformationComponent toFhir(
+  default ExplanationOfBenefit.SupportingInformationComponent toFhir(
       SupportingInfoFactory supportingInfoFactory) {
     return supportingInfoFactory
         .createSupportingInfo()
@@ -61,7 +59,33 @@ public enum PpsIndicatorCode {
             new CodeableConcept(
                 new Coding()
                     .setSystem(SystemUrls.BLUE_BUTTON_CODE_SYSTEM_PPS_INDICATOR_CODE)
-                    .setCode(code)
-                    .setDisplay(display)));
+                    .setCode(getCode())
+                    .setDisplay(getDisplay())));
+  }
+
+  /** Enum for all known, valid codes. */
+  @AllArgsConstructor
+  @Getter
+  enum Valid implements PpsIndicatorCode {
+    /** 2 - PPS bill; claim contains PPS indicator. */
+    PPS("2", "PPS bill; claim contains PPS indicator"),
+    /** unknown - Not a PPS bill. */
+    NOT_PPS("unknown", "Not a PPS bill");
+
+    private final String code;
+    private final String display;
+  }
+
+  /** Captures unknown/invalid codes. */
+  record Invalid(String code) implements PpsIndicatorCode {
+    @Override
+    public String getDisplay() {
+      return "";
+    }
+
+    @Override
+    public String getCode() {
+      return code;
+    }
   }
 }
