@@ -1,12 +1,12 @@
+import argparse
 import csv
 import logging
-import sys
 import typing
 from pathlib import Path
 
 import psycopg
 
-from extractor import CsvFile, DbExecutor, PostgresExecutor
+from extractor import CsvFile, DbExecutor, PostgresExecutor, SnowflakeExecutor
 from loader import get_connection_string
 from logger_config import configure_logger
 from model.base_model import LoadMode
@@ -81,7 +81,7 @@ def _load_file(extractor: DbExecutor, src_folder: str, file: str, sql_table: str
             db_columns = extractor.query(
                 f"""
                     SELECT column_name FROM INFORMATION_SCHEMA.COLUMNS
-                    WHERE table_name = '{sql_table}'
+                    WHERE table_name ilike '{sql_table}'
                 """  # type: ignore
             )
             db_columns = [typing.cast(str, col["column_name"]).lower() for col in db_columns]
@@ -99,9 +99,16 @@ def _load_file(extractor: DbExecutor, src_folder: str, file: str, sql_table: str
 
 if __name__ == "__main__":
     configure_logger()
+    parser = argparse.ArgumentParser(description="Loads synthetic data")
+    parser.add_argument("database_type", default="postgres", choices=["postgres", "snowflake"])
+    parser.add_argument(
+        "base_dir", default="../bfd-model-idr/out", help="base directory to load files from"
+    )
 
-    base_dir = sys.argv[1] if len(sys.argv) > 1 and sys.argv[1] != "" else "../bfd-model-idr/out"
+    args = parser.parse_args()
     load_from_csv(
-        PostgresExecutor(psycopg.connect(get_connection_string(LoadMode.SYNTHETIC))),
-        base_dir,
+        SnowflakeExecutor()
+        if args.database_type == "snowflake"
+        else PostgresExecutor(psycopg.connect(get_connection_string(LoadMode.SYNTHETIC))),
+        args.base_dir,
     )
