@@ -355,7 +355,7 @@ class SnowflakeExecutor(DbExecutor):
             {
                 "account": IDR_ACCOUNT,
                 "user": IDR_USERNAME,
-                "private_key": private_key_bytes,
+                "private_key": private_key_bytes,  # type: ignore
                 "warehouse": IDR_WAREHOUSE,
                 "database": IDR_DATABASE,
                 "schema": IDR_SCHEMA,
@@ -365,15 +365,22 @@ class SnowflakeExecutor(DbExecutor):
 
     @override
     def commit(self) -> None:
-        self.session.commit()
+        self.conn.commit()
 
     @override
     def copy(self, file: CsvFile) -> None:
         self.session.sql("create or replace temp stage source_stage").collect()
         self.session.file.put(str(file.csv_file.absolute()), "@source_stage")
         self.session.sql(f"""COPY INTO 
-                            {file.full_table()}({file.cols_str})
-                            FROM @source_stage/{file.csv_file.name}""")
+                            {file.full_table()}
+                            FROM @source_stage/{file.csv_file.name}
+                            FILE_FORMAT = (
+                                TYPE = 'CSV', 
+                                PARSE_HEADER = TRUE
+                                ERROR_ON_COLUMN_COUNT_MISMATCH = FALSE
+                            )
+                            MATCH_BY_COLUMN_NAME = CASE_INSENSITIVE
+                            """).collect()
         self.session.commit()
 
     @override
@@ -386,5 +393,5 @@ class SnowflakeExecutor(DbExecutor):
         self, sql: str, params: dict[str, DbType] | None = None
     ) -> Iterator[dict[str, DbType]]:
         cur = self.conn.cursor(DictCursor)
-        res = cur.execute(sql, params)
-        return res.fetchall()  # type: ignore
+        res = cur.execute(sql, params).fetchall()  # type: ignore
+        return [{k.lower(): r[k] for k in r} for r in res]  # type: ignore
