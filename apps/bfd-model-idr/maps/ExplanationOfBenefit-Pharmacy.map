@@ -93,6 +93,8 @@ group createEOBPharmacy(source src: ExplanationOfBenefitPharmacy, target tgt: BF
                 qlfyrCd as notNPI where npi != "01" -> tgtId.system = "http://bluebutton.cms.gov/fhir/identifiers/GenericIdNum" "set id num system url";
                 qlfyrCd as npi where npi = "01" -> tgtId.system = "http://hl7.org/fhir/sid/us-npi" "set NPI system url";
                 pList.CLM_PRVDR_GNRC_ID_NUM as idNum -> tgtId.value = idNum "set id num";
+                pList.NPI_TYPE as npiType where npiType = "1" -> tgtReference.type = "Practitioner" "Type 1";
+                pList.NPI_TYPE as npiType where npiType = "2" -> tgtReference.type = "Organization" "Type 2";
             } "Add qualifier code and id num";
           pList.PRVDR_CARETEAM_NAME as name -> tgtReference.display = name "set name";
         } "Add reference to EOB";
