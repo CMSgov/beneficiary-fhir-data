@@ -32,4 +32,5 @@ locals {
     prod     = ["sandbox", "prod", "platform"]
   }
   envs = local.envs_per_acc[local.account_type]
+  name_prefix          = "bfd-${local.env}-${local.service}"
 }
