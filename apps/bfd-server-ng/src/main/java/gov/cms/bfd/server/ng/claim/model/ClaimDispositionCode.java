@@ -65,8 +65,7 @@ public sealed interface ClaimDispositionCode
   }
 
   /**
-   * Enum for all known, valid claim disposition codes. Suppress SonarQube warning that constant
-   * names should comply with naming conventions.
+   * Enum for all known, valid claim disposition codes.
    */
   @AllArgsConstructor
   @Getter

@@ -55,8 +55,7 @@ public sealed interface CarrierLineMTUSIndicatorCode
   }
 
   /**
-   * Carrier line miles/time/units/services (MTUS) indicator codes. Suppress SonarQube warning that
-   * constant names should comply with naming conventions.
+   * Carrier line miles/time/units/services (MTUS) indicator codes.
    */
   @AllArgsConstructor
   @Getter

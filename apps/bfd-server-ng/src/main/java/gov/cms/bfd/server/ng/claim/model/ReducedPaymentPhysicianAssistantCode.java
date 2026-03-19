@@ -9,8 +9,7 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Extension;
 
 /**
- * Carrier line reduced payment physician assistant codes. Suppress SonarQube warning that constant
- * names should comply with naming conventions.
+ * Carrier line reduced payment physician assistant codes.
  */
 public sealed interface ReducedPaymentPhysicianAssistantCode
     permits ReducedPaymentPhysicianAssistantCode.Valid,

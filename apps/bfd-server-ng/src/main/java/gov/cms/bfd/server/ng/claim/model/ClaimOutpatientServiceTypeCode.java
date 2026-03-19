@@ -67,7 +67,7 @@ public sealed interface ClaimOutpatientServiceTypeCode
   /** Enum for all known, valid codes. */
   @AllArgsConstructor
   @Getter
-  @SuppressWarnings({"java:S115", "java:S1192"})
+  @SuppressWarnings("java:S1192")
   enum Valid implements ClaimOutpatientServiceTypeCode {
     /** 0 - Blank. */
     _0("0", "Blank"),

@@ -65,8 +65,7 @@ public sealed interface ClaimRecordTypeCode
   }
 
   /**
-   * Enum for all known, valid claim record type codes. Suppress SonarQube warning that constant
-   * names should comply with naming conventions.
+   * Enum for all known, valid claim record type codes.
    */
   @AllArgsConstructor
   @Getter

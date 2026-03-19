@@ -65,8 +65,7 @@ public sealed interface ClaimFiscalIntermediaryActionCode
   }
 
   /**
-   * Enum for all known, valid fiscal intermediary action codes. Suppress SonarQube warning that
-   * constant names should comply with naming conventions.
+   * Enum for all known, valid fiscal intermediary action codes.
    */
   @AllArgsConstructor
   @Getter

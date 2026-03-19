@@ -60,8 +60,7 @@ public sealed interface RevenueCenterAnsiReasonCode
   }
 
   /**
-   * Enum for all known, valid revenue center ANSI reason codes. Suppress SonarQube warning that
-   * constant names should comply with naming conventions.
+   * Enum for all known, valid revenue center ANSI reason codes.
    */
   @Getter
   @AllArgsConstructor

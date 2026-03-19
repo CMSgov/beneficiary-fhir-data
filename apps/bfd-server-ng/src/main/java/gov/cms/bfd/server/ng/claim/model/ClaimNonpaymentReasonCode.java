@@ -10,8 +10,7 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /**
- * Claim nonpayment reason codes. Suppress SonarQube warning that constant names should comply with
- * naming conventions.
+ * Claim nonpayment reason codes.
  */
 public sealed interface ClaimNonpaymentReasonCode
     permits ClaimNonpaymentReasonCode.Valid, ClaimNonpaymentReasonCode.Invalid {

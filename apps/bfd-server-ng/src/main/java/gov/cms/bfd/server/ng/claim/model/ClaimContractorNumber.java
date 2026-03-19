@@ -65,12 +65,11 @@ public sealed interface ClaimContractorNumber
   }
 
   /**
-   * Enum for all known, valid contractor numbers. Suppress SonarQube warning that constant names
-   * should comply with naming conventions.
+   * Enum for all known, valid contractor numbers.
    */
   @AllArgsConstructor
   @Getter
-  @SuppressWarnings({"java:S115", "java:S1192"})
+  @SuppressWarnings("java:S1192")
   enum Valid implements ClaimContractorNumber {
     /** 00234 - ARKANSAS, LOUISIANA, AND MISSISSIPPI (PART A ROLL UP NUMBER). */
     _00234("00234", "ARKANSAS, LOUISIANA, AND MISSISSIPPI (PART A ROLL UP NUMBER)"),

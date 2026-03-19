@@ -65,8 +65,7 @@ public sealed interface ClaimAdjustmentTypeCode
   }
 
   /**
-   * Enum for all known, valid claim adjustment type codes. Suppress SonarQube warning that constant
-   * names should comply with naming conventions.
+   * Enum for all known, valid claim adjustment type codes.
    */
   @AllArgsConstructor
   @Getter

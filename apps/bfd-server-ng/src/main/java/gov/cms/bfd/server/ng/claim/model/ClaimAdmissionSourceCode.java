@@ -68,12 +68,11 @@ public sealed interface ClaimAdmissionSourceCode
   }
 
   /**
-   * Claim admission codes. Suppress SonarQube warning that constant names should comply with naming
-   * conventions
+   * Claim admission codes.
    */
   @AllArgsConstructor
   @Getter
-  @SuppressWarnings({"java:S115", "java:S1192"})
+  @SuppressWarnings( "java:S1192")
   enum Valid implements ClaimAdmissionSourceCode {
     /**
      * 1 - NON-HEALTH CARE FACILITY POINT OF ORIGIN (NON-NEWBORN)/RESERVED FOR NATIONAL ASSIGNMENT

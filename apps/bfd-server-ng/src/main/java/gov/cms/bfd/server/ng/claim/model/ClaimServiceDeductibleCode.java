@@ -9,8 +9,7 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Extension;
 
 /**
- * Claim service deductible codes. Suppress SonarQube warning that constant names should comply with
- * naming conventions.
+ * Claim service deductible codes.
  */
 public sealed interface ClaimServiceDeductibleCode
     permits ClaimServiceDeductibleCode.Valid, ClaimServiceDeductibleCode.Invalid {

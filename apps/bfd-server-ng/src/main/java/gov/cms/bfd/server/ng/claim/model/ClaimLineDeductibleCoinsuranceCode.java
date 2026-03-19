@@ -56,8 +56,7 @@ public sealed interface ClaimLineDeductibleCoinsuranceCode
   }
 
   /**
-   * Enum for all known, valid coinsurance codes. Suppress SonarQube warning that constant names
-   * should comply with naming conventions.
+   * Enum for all known, valid coinsurance codes.
    */
   @Getter
   @AllArgsConstructor

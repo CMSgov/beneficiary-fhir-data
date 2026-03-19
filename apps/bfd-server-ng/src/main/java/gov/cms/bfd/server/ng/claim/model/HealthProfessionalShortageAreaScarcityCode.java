@@ -9,8 +9,7 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Extension;
 
 /**
- * Claim line carrier health professional shortage area scarcity codes. Suppress SonarQube warning
- * that constant names should comply with naming conventions.
+ * Claim line carrier health professional shortage area scarcity codes.
  */
 public sealed interface HealthProfessionalShortageAreaScarcityCode
     permits HealthProfessionalShortageAreaScarcityCode.Valid,

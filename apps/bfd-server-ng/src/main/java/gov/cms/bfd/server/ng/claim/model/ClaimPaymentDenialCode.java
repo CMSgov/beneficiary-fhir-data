@@ -10,7 +10,6 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /** Claim Payment denial code. * */
-@SuppressWarnings("java:S115")
 public sealed interface ClaimPaymentDenialCode
     permits ClaimPaymentDenialCode.Valid, ClaimPaymentDenialCode.Invalid {
 

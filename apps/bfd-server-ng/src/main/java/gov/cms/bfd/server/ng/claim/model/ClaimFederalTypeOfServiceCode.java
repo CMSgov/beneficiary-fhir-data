@@ -55,8 +55,7 @@ public sealed interface ClaimFederalTypeOfServiceCode
   }
 
   /**
-   * Claim federal type of service codes. Suppress SonarQube warning that constant names should
-   * comply with * naming conventions.
+   * Claim federal type of service codes.
    */
   @AllArgsConstructor
   @Getter

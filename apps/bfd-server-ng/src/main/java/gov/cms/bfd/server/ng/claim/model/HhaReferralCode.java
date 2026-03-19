@@ -10,8 +10,7 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /**
- * Home Health Agency (HHA) referral codes for claims. Suppress SonarQube warning that constant
- * names should comply with naming conventions
+ * Home Health Agency (HHA) referral codes for claims.
  */
 public sealed interface HhaReferralCode permits HhaReferralCode.Valid, HhaReferralCode.Invalid {
 
@@ -67,8 +66,7 @@ public sealed interface HhaReferralCode permits HhaReferralCode.Valid, HhaReferr
   }
 
   /**
-   * Valid HHA referral codes. Suppress SonarQube warning that constant names should comply with
-   * naming conventions.
+   * Valid HHA referral codes.
    */
   @AllArgsConstructor
   @Getter

@@ -9,8 +9,7 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Extension;
 
 /**
- * Claim pricing locality codes. Suppress SonarQube warning that constant names should comply with
- * naming conventions.
+ * Claim pricing locality codes.
  */
 public sealed interface ClaimPricingLocalityCode
     permits ClaimPricingLocalityCode.Valid, ClaimPricingLocalityCode.Invalid {

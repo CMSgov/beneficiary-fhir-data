@@ -10,10 +10,9 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 /**
- * Patient status info. Suppress SonarQube warning that constant names should comply with naming
- * conventions
+ * Patient status info.
  */
-@SuppressWarnings({"java:S115", "java:S1192"})
+@SuppressWarnings("java:S1192")
 public sealed interface PatientStatusCode
     permits PatientStatusCode.Valid, PatientStatusCode.Invalid {
 

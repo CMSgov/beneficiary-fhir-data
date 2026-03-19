@@ -9,7 +9,6 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 
 /** Revenue centers. */
-@SuppressWarnings("java:S115")
 public sealed interface ClaimLineRevenueCenterCode
     permits ClaimLineRevenueCenterCode.Valid, ClaimLineRevenueCenterCode.Invalid {
 
@@ -67,8 +66,7 @@ public sealed interface ClaimLineRevenueCenterCode
   }
 
   /**
-   * Revenue centers. Suppress SonarQube warning that constant names should comply with naming
-   * conventions
+   * Revenue centers.
    */
   @AllArgsConstructor
   @Getter

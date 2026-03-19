@@ -66,8 +66,7 @@ public sealed interface ClaimAdmissionTypeCode
   }
 
   /**
-   * Enum for all known, valid claim admission type codes. Suppress SonarQube warning that constant
-   * names should comply with naming conventions.
+   * Enum for all known, valid claim admission type codes.
    */
   @AllArgsConstructor
   @Getter

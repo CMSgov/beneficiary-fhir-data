@@ -59,8 +59,7 @@ public sealed interface PharmacySrvcTypeCode
   }
 
   /**
-   * Enum for all known, valid pharmacy service type codes. Suppress SonarQube warning that constant
-   * names should comply with naming conventions.
+   * Enum for all known, valid pharmacy service type codes.
    */
   @AllArgsConstructor
   @Getter

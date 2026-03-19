@@ -53,8 +53,7 @@ public sealed interface ClaimPaymentCode permits ClaimPaymentCode.Valid, ClaimPa
   }
 
   /**
-   * Claim payment codes. Suppress SonarQube warning that constant names should comply with naming
-   * conventions.
+   * Claim payment codes.
    */
   @AllArgsConstructor
   @Getter

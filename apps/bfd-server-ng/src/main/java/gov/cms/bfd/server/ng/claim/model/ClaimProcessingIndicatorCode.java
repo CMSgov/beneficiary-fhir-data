@@ -9,8 +9,7 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Extension;
 
 /**
- * Claim processing indicator codes. Suppress SonarQube warning that constant names should comply
- * with naming conventions.
+ * Claim processing indicator codes.
  */
 public sealed interface ClaimProcessingIndicatorCode
     permits ClaimProcessingIndicatorCode.Valid, ClaimProcessingIndicatorCode.Invalid {
