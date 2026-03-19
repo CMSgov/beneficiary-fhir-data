@@ -206,7 +206,12 @@ UPDATE_FIELD = {UPDATE_TIMESTAMP: True, INSERT_EXCLUDE: True, COLUMN_MAP: "idr_u
 class LoadMode(StrEnum):
     LOCAL = "local"
     SYNTHETIC = "synthetic"
-    IDR = ""
+    PROD = "prod"
+
+
+class Source(StrEnum):
+    POSTGRES = "postgres"
+    SNOWFLAKE = "snowflake"
 
 
 class ModelType(Enum):
@@ -285,7 +290,7 @@ class IdrBaseModel(BaseModel, ABC):
         cls,
         partition: LoadPartition,
         start_time: datetime,
-        load_mode: LoadMode,
+        source: Source,
     ) -> str:
         """Query used to fetch the data."""
 
@@ -591,10 +596,10 @@ def claim_related_occurrences_cte() -> str:
     """
 
 
-def claim_related_conditions_cte(load_mode: LoadMode) -> str:
+def claim_related_conditions_cte(source: Source) -> str:
     rlt_cond = ALIAS_RLT_COND
     clm_rlt_cond_cd_agg = ""
-    if load_mode == LoadMode.IDR:
+    if source == Source.SNOWFLAKE:
         clm_rlt_cond_cd_agg = """
             ARRAY_AGG(
                 CASE

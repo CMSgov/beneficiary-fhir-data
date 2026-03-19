@@ -6,8 +6,8 @@ from pydantic import BeforeValidator
 from constants import (
     DEFAULT_MAX_DATE,
 )
+from extractor import Source
 from load_partition import LoadPartition
-from loader import LoadMode
 from model.base_model import (
     ALIAS,
     ALIAS_CLM,
@@ -256,9 +256,7 @@ class IdrClaimItemProfessionalNch(IdrBaseModel):
 
     @override
     @classmethod
-    def fetch_query(
-        cls, partition: LoadPartition, start_time: datetime, load_mode: LoadMode
-    ) -> str:
+    def fetch_query(cls, partition: LoadPartition, start_time: datetime, source: Source) -> str:
         clm = ALIAS_CLM
         clm_grp = ALIAS_CLM_GRP
         prod = ALIAS_PROCEDURE
@@ -294,7 +292,7 @@ class IdrClaimItemProfessionalNch(IdrBaseModel):
         # it will behave extremely poorly when trying to join against these large sets of
         # non-indexed data in memory. This is fine in Snowflake because it's fundamentally
         # different, but we need to force this behavior for local testing.
-        not_materialized = "" if load_mode == LoadMode.IDR else "NOT MATERIALIZED"
+        not_materialized = "" if source == Source.SNOWFLAKE else "NOT MATERIALIZED"
 
         return f"""
                 WITH claims AS {not_materialized} (

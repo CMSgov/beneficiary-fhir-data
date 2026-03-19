@@ -8,7 +8,6 @@ from constants import (
     DEFAULT_MAX_DATE,
 )
 from load_partition import LoadPartition
-from loader import LoadMode
 from model.base_model import (
     ALIAS,
     ALIAS_CLM,
@@ -28,6 +27,7 @@ from model.base_model import (
     UPDATE_FIELD,
     IdrBaseModel,
     ModelType,
+    Source,
     claim_filter,
     clm_orig_cntl_num_expr,
     provider_careteam_name_expr,
@@ -247,9 +247,7 @@ class IdrClaimRx(IdrBaseModel):
 
     @override
     @classmethod
-    def fetch_query(
-        cls, partition: LoadPartition, start_time: datetime, load_mode: LoadMode
-    ) -> str:
+    def fetch_query(cls, partition: LoadPartition, start_time: datetime, source: Source) -> str:
         clm = ALIAS_CLM
         line = ALIAS_LINE
         rx_line = ALIAS_RX_LINE

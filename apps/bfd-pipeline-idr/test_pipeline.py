@@ -138,7 +138,7 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
 
     conn.commit()
 
-    run("synthetic")
+    run("postgres", "synthetic")
 
     cur = conn.execute("select * from idr.beneficiary order by bene_sk")
     assert cur.rowcount == 28
@@ -166,7 +166,7 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
     )
     conn.commit()
 
-    run("synthetic")
+    run("postgres", "synthetic")
 
     cur = conn.execute("select * from idr.beneficiary order by bene_sk")
     rows = cur.fetchmany(2)

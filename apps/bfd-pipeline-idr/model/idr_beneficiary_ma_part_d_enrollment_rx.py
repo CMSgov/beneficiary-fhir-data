@@ -7,7 +7,6 @@ from constants import (
     DEFAULT_MAX_DATE,
 )
 from load_partition import LoadPartition
-from loader import LoadMode
 from model.base_model import (
     ALIAS_HSTRY,
     BATCH_ID,
@@ -17,6 +16,7 @@ from model.base_model import (
     UPDATE_TIMESTAMP,
     IdrBaseModel,
     ModelType,
+    Source,
     deceased_bene_filter,
     transform_default_string,
     transform_null_date_to_min,
@@ -59,9 +59,7 @@ class IdrBeneficiaryMaPartDEnrollmentRx(IdrBaseModel):
 
     @override
     @classmethod
-    def fetch_query(
-        cls, partition: LoadPartition, start_time: datetime, load_mode: LoadMode
-    ) -> str:
+    def fetch_query(cls, partition: LoadPartition, start_time: datetime, source: Source) -> str:
         hstry = ALIAS_HSTRY
         return f"""
                 SELECT {{COLUMNS}}

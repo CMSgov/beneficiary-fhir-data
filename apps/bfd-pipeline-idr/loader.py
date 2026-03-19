@@ -95,7 +95,7 @@ class BatchLoader:
         self.insert_timer = Timer("insert", model, partition)
         self.commit_timer = Timer("commit", model, partition)
         self.load_type = load_type
-        self.enable_load_progress = load_mode == LoadMode.IDR or force_load_progress()
+        self.enable_load_progress = load_mode == LoadMode.PROD or force_load_progress()
 
     def load(
         self,
