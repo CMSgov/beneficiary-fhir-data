@@ -3146,18 +3146,6 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
         } ]
       }
     }, {
-      "amount" : {
-        "currency" : "USD",
-        "value" : 0
-      },
-      "category" : {
-        "coding" : [ {
-          "code" : "CLM_LINE_OTAF_AMT",
-          "display" : "Provider Obligation To Accept as Full Amount",
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-        } ]
-      }
-    }, {
       "category" : {
         "coding" : [ {
           "code" : "benefitpaymentstatus",
@@ -3172,6 +3160,18 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
           "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus"
         } ]
       }
+    }, {
+      "amount" : {
+        "currency" : "USD",
+        "value" : 0
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "CLM_LINE_OTAF_AMT",
+          "display" : "Provider Obligation To Accept as Full Amount",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
     } ],
     "extension" : [ {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-SRVC-DDCTBL-SW",
@@ -3184,7 +3184,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
     "locationCodeableConcept" : {
       "coding" : [ {
         "code" : "68",
-        "display" : "UNASSIGNED",
+        "display" : "Unassigned",
         "system" : "https://www.cms.gov/Medicare/Coding/place-of-service-codes/Place_of_Service_Code_Set"
       } ]
     },
@@ -3844,6 +3844,21 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
         } ]
       }
     }, {
+      "category" : {
+        "coding" : [ {
+          "code" : "benefitpaymentstatus",
+          "display" : "Benefit Payment Status",
+          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator"
+        } ]
+      },
+      "reason" : {
+        "coding" : [ {
+          "code" : "other",
+          "display" : "Other",
+          "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus"
+        } ]
+      }
+    }, {
       "amount" : {
         "currency" : "USD",
         "value" : 9650.03
@@ -3942,7 +3957,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
     "locationCodeableConcept" : {
       "coding" : [ {
         "code" : "68",
-        "display" : "UNASSIGNED",
+        "display" : "Unassigned",
         "system" : "https://www.cms.gov/Medicare/Coding/place-of-service-codes/Place_of_Service_Code_Set"
       } ]
     },
