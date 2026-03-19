@@ -2388,9 +2388,7 @@ public sealed interface ClaimRelatedConditionCode
     /** ZY - PAYER CODE - NOT CURRENTLY USED BY MEDICARE. */
     ZY("ZY", "PAYER CODE - NOT CURRENTLY USED BY MEDICARE"),
     /** ZZ - PAYER CODE - NOT CURRENTLY USED BY MEDICARE. */
-    ZZ("ZZ", "PAYER CODE - NOT CURRENTLY USED BY MEDICARE"),
-    /** INVALID - Represents an invalid code that we still want to capture. */
-    INVALID("", "");
+    ZZ("ZZ", "PAYER CODE - NOT CURRENTLY USED BY MEDICARE");
 
     private final String code;
     private final String display;

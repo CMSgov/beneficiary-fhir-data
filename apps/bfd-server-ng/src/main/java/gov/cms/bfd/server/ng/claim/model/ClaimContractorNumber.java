@@ -721,9 +721,7 @@ public sealed interface ClaimContractorNumber
         "19003",
         "NORIDAN ADMINISTRATIVE SERVICES, LLC(EFF. 10/01/06) (REPLACES CARRIER #05655) DME MAC"),
     /** 52280 - NE -WISCONSIN PHYSICIANS SERVICE INSURANCE CORPORATION. */
-    _52280("52280", "NE -WISCONSIN PHYSICIANS SERVICE INSURANCE CORPORATION"),
-    /** INVALID - Represents an invalid code that we still want to capture. */
-    INVALID("", "");
+    _52280("52280", "NE -WISCONSIN PHYSICIANS SERVICE INSURANCE CORPORATION");
 
     private final String code;
     private final String display;
