@@ -9,9 +9,7 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
-/**
- * Home Health Agency (HHA) referral codes for claims.
- */
+/** Home Health Agency (HHA) referral codes for claims. */
 public sealed interface HhaReferralCode permits HhaReferralCode.Valid, HhaReferralCode.Invalid {
 
   /**
@@ -65,9 +63,7 @@ public sealed interface HhaReferralCode permits HhaReferralCode.Valid, HhaReferr
                     .setDisplay(getDisplay())));
   }
 
-  /**
-   * Valid HHA referral codes.
-   */
+  /** Valid HHA referral codes. */
   @AllArgsConstructor
   @Getter
   enum Valid implements HhaReferralCode {

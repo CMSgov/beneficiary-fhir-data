@@ -54,9 +54,7 @@ public sealed interface ClaimFederalTypeOfServiceCode
         .setValue(new Coding(SystemUrls.SYS_CLM_FED_TYPE_SRVC_CD, getCode(), getDisplay()));
   }
 
-  /**
-   * Claim federal type of service codes.
-   */
+  /** Claim federal type of service codes. */
   @AllArgsConstructor
   @Getter
   enum Valid implements ClaimFederalTypeOfServiceCode {

@@ -67,12 +67,10 @@ public sealed interface ClaimAdmissionSourceCode
                         .setDisplay(getDisplay())));
   }
 
-  /**
-   * Claim admission codes.
-   */
+  /** Claim admission codes. */
   @AllArgsConstructor
   @Getter
-  @SuppressWarnings( "java:S1192")
+  @SuppressWarnings("java:S1192")
   enum Valid implements ClaimAdmissionSourceCode {
     /**
      * 1 - NON-HEALTH CARE FACILITY POINT OF ORIGIN (NON-NEWBORN)/RESERVED FOR NATIONAL ASSIGNMENT

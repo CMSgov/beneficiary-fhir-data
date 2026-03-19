@@ -64,9 +64,7 @@ public sealed interface ClaimDispositionCode
                     .setCode(getCode())));
   }
 
-  /**
-   * Enum for all known, valid claim disposition codes.
-   */
+  /** Enum for all known, valid claim disposition codes. */
   @AllArgsConstructor
   @Getter
   enum Valid implements ClaimDispositionCode {

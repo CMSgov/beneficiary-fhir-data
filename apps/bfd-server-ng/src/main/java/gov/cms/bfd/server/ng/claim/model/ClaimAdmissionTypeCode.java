@@ -65,9 +65,7 @@ public sealed interface ClaimAdmissionTypeCode
                         .setCode(getCode())));
   }
 
-  /**
-   * Enum for all known, valid claim admission type codes.
-   */
+  /** Enum for all known, valid claim admission type codes. */
   @AllArgsConstructor
   @Getter
   enum Valid implements ClaimAdmissionTypeCode {

@@ -8,9 +8,7 @@ import lombok.Getter;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Extension;
 
-/**
- * Claim service deductible codes.
- */
+/** Claim service deductible codes. */
 public sealed interface ClaimServiceDeductibleCode
     permits ClaimServiceDeductibleCode.Valid, ClaimServiceDeductibleCode.Invalid {
 

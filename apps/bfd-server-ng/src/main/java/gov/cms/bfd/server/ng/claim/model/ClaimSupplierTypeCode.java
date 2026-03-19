@@ -9,8 +9,8 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Extension;
 
 /**
- * Claim supplier type codes. In practice, only certain values will be populated, since this uses a subset
- * of provider codes, but we bind to that codesystem for ease.
+ * Claim supplier type codes. In practice, only certain values will be populated, since this uses a
+ * subset of provider codes, but we bind to that codesystem for ease.
  */
 public sealed interface ClaimSupplierTypeCode
     permits ClaimSupplierTypeCode.Valid, ClaimSupplierTypeCode.Invalid {

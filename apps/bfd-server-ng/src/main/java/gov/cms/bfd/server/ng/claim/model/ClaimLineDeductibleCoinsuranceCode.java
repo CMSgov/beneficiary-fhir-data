@@ -55,9 +55,7 @@ public sealed interface ClaimLineDeductibleCoinsuranceCode
         .setDisplay(getDisplay());
   }
 
-  /**
-   * Enum for all known, valid coinsurance codes.
-   */
+  /** Enum for all known, valid coinsurance codes. */
   @Getter
   @AllArgsConstructor
   enum Valid implements ClaimLineDeductibleCoinsuranceCode {

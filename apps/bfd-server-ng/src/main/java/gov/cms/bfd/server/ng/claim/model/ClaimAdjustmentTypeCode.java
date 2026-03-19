@@ -64,9 +64,7 @@ public sealed interface ClaimAdjustmentTypeCode
                     .setDisplay(getDisplay())));
   }
 
-  /**
-   * Enum for all known, valid claim adjustment type codes.
-   */
+  /** Enum for all known, valid claim adjustment type codes. */
   @AllArgsConstructor
   @Getter
   enum Valid implements ClaimAdjustmentTypeCode {

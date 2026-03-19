@@ -64,9 +64,7 @@ public sealed interface ClaimRecordTypeCode
                     .setCode(getCode())));
   }
 
-  /**
-   * Enum for all known, valid claim record type codes.
-   */
+  /** Enum for all known, valid claim record type codes. */
   @AllArgsConstructor
   @Getter
   enum Valid implements ClaimRecordTypeCode {

@@ -65,9 +65,7 @@ public sealed interface ClaimLineRevenueCenterCode
             .orElse(new Invalid(code)));
   }
 
-  /**
-   * Revenue centers.
-   */
+  /** Revenue centers. */
   @AllArgsConstructor
   @Getter
   enum Valid implements ClaimLineRevenueCenterCode {

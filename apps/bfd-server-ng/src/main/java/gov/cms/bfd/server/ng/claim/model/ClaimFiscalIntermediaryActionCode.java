@@ -64,9 +64,7 @@ public sealed interface ClaimFiscalIntermediaryActionCode
     return supportingInfo;
   }
 
-  /**
-   * Enum for all known, valid fiscal intermediary action codes.
-   */
+  /** Enum for all known, valid fiscal intermediary action codes. */
   @AllArgsConstructor
   @Getter
   enum Valid implements ClaimFiscalIntermediaryActionCode {

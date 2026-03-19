@@ -54,9 +54,7 @@ public sealed interface CarrierLineMTUSIndicatorCode
         .setValue(new Coding(SystemUrls.SYS_CLM_MTUS_IND_CD, getCode(), getDisplay()));
   }
 
-  /**
-   * Carrier line miles/time/units/services (MTUS) indicator codes.
-   */
+  /** Carrier line miles/time/units/services (MTUS) indicator codes. */
   @AllArgsConstructor
   @Getter
   enum Valid implements CarrierLineMTUSIndicatorCode {

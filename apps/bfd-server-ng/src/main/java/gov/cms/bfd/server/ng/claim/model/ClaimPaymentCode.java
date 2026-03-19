@@ -52,9 +52,7 @@ public sealed interface ClaimPaymentCode permits ClaimPaymentCode.Valid, ClaimPa
         .setValue(new Coding(SystemUrls.SYS_CLM_PMT_80_100_CD, getCode(), getDisplay()));
   }
 
-  /**
-   * Claim payment codes.
-   */
+  /** Claim payment codes. */
   @AllArgsConstructor
   @Getter
   enum Valid implements ClaimPaymentCode {

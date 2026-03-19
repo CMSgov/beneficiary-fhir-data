@@ -9,9 +9,7 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
-/**
- * Patient status info.
- */
+/** Patient status info. */
 @SuppressWarnings("java:S1192")
 public sealed interface PatientStatusCode
     permits PatientStatusCode.Valid, PatientStatusCode.Invalid {

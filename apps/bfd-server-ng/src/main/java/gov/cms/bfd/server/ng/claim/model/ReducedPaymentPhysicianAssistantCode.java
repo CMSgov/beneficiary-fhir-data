@@ -8,9 +8,7 @@ import lombok.Getter;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Extension;
 
-/**
- * Carrier line reduced payment physician assistant codes.
- */
+/** Carrier line reduced payment physician assistant codes. */
 public sealed interface ReducedPaymentPhysicianAssistantCode
     permits ReducedPaymentPhysicianAssistantCode.Valid,
         ReducedPaymentPhysicianAssistantCode.Invalid {

@@ -59,9 +59,7 @@ public sealed interface RevenueCenterAnsiReasonCode
                 .setCode(getCode())));
   }
 
-  /**
-   * Enum for all known, valid revenue center ANSI reason codes.
-   */
+  /** Enum for all known, valid revenue center ANSI reason codes. */
   @Getter
   @AllArgsConstructor
   enum Valid implements RevenueCenterAnsiReasonCode {

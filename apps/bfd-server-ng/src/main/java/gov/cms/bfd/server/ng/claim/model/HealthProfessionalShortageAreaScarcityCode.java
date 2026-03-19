@@ -8,9 +8,7 @@ import lombok.Getter;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Extension;
 
-/**
- * Claim line carrier health professional shortage area scarcity codes.
- */
+/** Claim line carrier health professional shortage area scarcity codes. */
 public sealed interface HealthProfessionalShortageAreaScarcityCode
     permits HealthProfessionalShortageAreaScarcityCode.Valid,
         HealthProfessionalShortageAreaScarcityCode.Invalid {

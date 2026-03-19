@@ -64,9 +64,7 @@ public sealed interface ClaimContractorNumber
                     .setCode(getCode())));
   }
 
-  /**
-   * Enum for all known, valid contractor numbers.
-   */
+  /** Enum for all known, valid contractor numbers. */
   @AllArgsConstructor
   @Getter
   @SuppressWarnings("java:S1192")

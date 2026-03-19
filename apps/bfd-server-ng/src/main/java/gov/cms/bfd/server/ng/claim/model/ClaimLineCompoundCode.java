@@ -72,9 +72,7 @@ public sealed interface ClaimLineCompoundCode
     return supportingInfo;
   }
 
-  /**
-   * Enum for all known, valid compound codes.
-   */
+  /** Enum for all known, valid compound codes. */
   @AllArgsConstructor
   @Getter
   enum Valid implements ClaimLineCompoundCode {

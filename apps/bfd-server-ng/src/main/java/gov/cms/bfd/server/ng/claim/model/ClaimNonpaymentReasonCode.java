@@ -9,9 +9,7 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
-/**
- * Claim nonpayment reason codes.
- */
+/** Claim nonpayment reason codes. */
 public sealed interface ClaimNonpaymentReasonCode
     permits ClaimNonpaymentReasonCode.Valid, ClaimNonpaymentReasonCode.Invalid {
 

@@ -8,9 +8,7 @@ import lombok.Getter;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Extension;
 
-/**
- * Claim pricing locality codes.
- */
+/** Claim pricing locality codes. */
 public sealed interface ClaimPricingLocalityCode
     permits ClaimPricingLocalityCode.Valid, ClaimPricingLocalityCode.Invalid {
 

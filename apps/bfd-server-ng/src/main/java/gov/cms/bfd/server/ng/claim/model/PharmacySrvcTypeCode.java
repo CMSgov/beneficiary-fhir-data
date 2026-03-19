@@ -58,9 +58,7 @@ public sealed interface PharmacySrvcTypeCode
     return supportingInfo;
   }
 
-  /**
-   * Enum for all known, valid pharmacy service type codes.
-   */
+  /** Enum for all known, valid pharmacy service type codes. */
   @AllArgsConstructor
   @Getter
   enum Valid implements PharmacySrvcTypeCode {

@@ -58,9 +58,7 @@ public sealed interface ClaimRelatedConditionCode
                 .setDisplay(getDisplay()));
   }
 
-  /**
-   * Claim Related Condition Code.
-   */
+  /** Claim Related Condition Code. */
   @Getter
   @AllArgsConstructor
   @SuppressWarnings("java:S1192")
