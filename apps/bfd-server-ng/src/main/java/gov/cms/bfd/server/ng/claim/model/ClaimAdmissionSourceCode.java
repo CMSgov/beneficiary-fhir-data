@@ -183,9 +183,7 @@ public sealed interface ClaimAdmissionSourceCode
     /** Y - RESERVED FOR NATIONAL ASSIGNMENT (NON-NEWBORN). */
     Y("Y", "RESERVED FOR NATIONAL ASSIGNMENT (NON-NEWBORN)"),
     /** Z - RESERVED FOR NATIONAL ASSIGNMENT (NON-NEWBORN). */
-    Z("Z", "RESERVED FOR NATIONAL ASSIGNMENT (NON-NEWBORN)"),
-    /** INVALID - Represents an invalid code that we still want to capture. */
-    INVALID("", "");
+    Z("Z", "RESERVED FOR NATIONAL ASSIGNMENT (NON-NEWBORN)");
 
     private final String code;
     private final String display;
