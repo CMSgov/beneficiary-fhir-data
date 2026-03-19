@@ -7,7 +7,6 @@ from constants import (
     DEFAULT_MAX_DATE,
 )
 from load_partition import LoadPartition
-from loader import LoadMode
 from model.base_model import (
     ALIAS_HSTRY,
     BATCH_ID,
@@ -17,6 +16,7 @@ from model.base_model import (
     UPDATE_TIMESTAMP,
     IdrBaseModel,
     ModelType,
+    Source,
     deceased_bene_filter,
     transform_default_string,
     transform_null_date_to_max,
@@ -62,9 +62,7 @@ class IdrBeneficiaryMaPartDEnrollment(IdrBaseModel):
 
     @override
     @classmethod
-    def fetch_query(
-        cls, partition: LoadPartition, start_time: datetime, load_mode: LoadMode
-    ) -> str:
+    def fetch_query(cls, partition: LoadPartition, start_time: datetime, source: Source) -> str:
         # There are only a very few instances where non-obsolete records have a
         # bene_enrlmt_pgm_type_cd set to '~' and these are all from the 80s,
         # so it should be safe to filter these.

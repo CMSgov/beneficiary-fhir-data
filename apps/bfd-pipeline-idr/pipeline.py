@@ -1,5 +1,5 @@
+import argparse
 import logging
-import sys
 from concurrent.futures import ProcessPoolExecutor
 from datetime import UTC, datetime
 
@@ -9,7 +9,7 @@ from hamilton.execution import executors  # type: ignore
 import pipeline_nodes
 from load_partition import LoadType
 from logger_config import configure_logger
-from model.base_model import LoadMode
+from model.base_model import LoadMode, Source
 from settings import LOAD_TYPE, MAX_TASKS
 
 telemetry.disable_telemetry()
@@ -29,13 +29,18 @@ class MultiProcessingExecutor(executors.PoolExecutor):
 
 
 def main() -> None:
-    mode = sys.argv[1] if len(sys.argv) > 1 else ""
-    run(mode)
+    parser = argparse.ArgumentParser(description="IDR pipeline")
+    parser.add_argument("source", default="postgres", choices=["postgres", "snowflake"])
+    parser.add_argument("load_mode", default="prod", choices=["local", "synthetic", "prod"])
+    args = parser.parse_args()
+
+    run(args.source, args.load_mode)
 
 
-def run(load_mode: str) -> None:
+def run(source: str, load_mode: str) -> None:
     logger.info("load start")
     load_mode = LoadMode(load_mode)
+    source = Source(source)
 
     load_type = LoadType(LOAD_TYPE)
 
@@ -45,7 +50,7 @@ def run(load_mode: str) -> None:
     # Setting this parameter will cause old processes to be recycled, allowing resources used by
     # these processes to be freed.
     # This will allow memory usage to remain constant over time.
-    max_tasks_per_child = 1 if load_mode == LoadMode.IDR else None
+    max_tasks_per_child = 1 if load_mode == LoadMode.PROD else None
 
     hamilton_driver = (
         driver.Builder()
@@ -69,6 +74,7 @@ def run(load_mode: str) -> None:
             "load_type": load_type,
             "load_mode": load_mode,
             "start_time": start_time,
+            "source": source,
         },
     )
 

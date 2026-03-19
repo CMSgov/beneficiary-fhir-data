@@ -22,6 +22,7 @@ from loader import get_connection_string
 from model.base_model import (
     DbType,
     LoadMode,
+    Source,
     T,
     format_date_opt,
 )
@@ -87,17 +88,17 @@ class Extractor(ABC, Generic[T]):  # noqa: UP046
         # the total memory used here based on the number of columns
         return round(BATCH_MULTIPLIER / len(self.cls.columns_raw()))
 
-    def get_query(self, start_time: datetime, load_mode: LoadMode) -> str:
-        query = self.cls.fetch_query(self.partition, start_time, load_mode)
+    def get_query(self, start_time: datetime, source: Source) -> str:
+        query = self.cls.fetch_query(self.partition, start_time, source)
         columns = ",".join(self.cls.column_aliases())
         columns_raw = ",".join(self.cls.columns_raw())
         return query.replace("{COLUMNS}", columns).replace("{COLUMNS_NO_ALIAS}", columns_raw)
 
     def extract_idr_data(
-        self, progress: LoadProgress | None, start_time: datetime, load_mode: LoadMode
+        self, progress: LoadProgress | None, start_time: datetime, source: Source
     ) -> Iterator[Sequence[T]]:
         is_historical = progress is None or progress.is_historical()
-        fetch_query = self.get_query(start_time, load_mode)
+        fetch_query = self.get_query(start_time, source)
         # GREATEST doesn't work with nulls so we need to coalesce here
         batch_timestamp_cols = self._coalesce_dates(
             self.cls.batch_timestamp_col_alias(is_historical)

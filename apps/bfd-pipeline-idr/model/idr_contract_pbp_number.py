@@ -4,7 +4,6 @@ from typing import Annotated, override
 from pydantic import BeforeValidator
 
 from load_partition import LoadPartition
-from loader import LoadMode
 from model.base_model import (
     ALIAS,
     ALIAS_CNTRCT_SGMT,
@@ -14,6 +13,7 @@ from model.base_model import (
     PRIMARY_KEY,
     IdrBaseModel,
     ModelType,
+    Source,
     transform_default_string,
 )
 
@@ -47,9 +47,7 @@ class IdrContractPbpNumber(IdrBaseModel):
 
     @override
     @classmethod
-    def fetch_query(
-        cls, partition: LoadPartition, start_time: datetime, load_mode: LoadMode
-    ) -> str:
+    def fetch_query(cls, partition: LoadPartition, start_time: datetime, source: Source) -> str:
         pbp_num = ALIAS_PBP_NUM
         # We need to include obsolete records since some bene_mapd records are tied to
         # obsolete pbp_sks.

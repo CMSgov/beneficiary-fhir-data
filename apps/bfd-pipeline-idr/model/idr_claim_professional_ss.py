@@ -8,7 +8,6 @@ from constants import (
     DEFAULT_MAX_DATE,
 )
 from load_partition import LoadPartition
-from loader import LoadMode
 from model.base_model import (
     ALIAS,
     ALIAS_CLM,
@@ -32,6 +31,7 @@ from model.base_model import (
     UPDATE_TIMESTAMP,
     IdrBaseModel,
     ModelType,
+    Source,
     claim_filter,
     claim_occurrence_cte,
     claim_related_occurrences_cte,
@@ -288,9 +288,7 @@ class IdrClaimProfessionalSs(IdrBaseModel):
 
     @override
     @classmethod
-    def fetch_query(
-        cls, partition: LoadPartition, start_time: datetime, load_mode: LoadMode
-    ) -> str:
+    def fetch_query(cls, partition: LoadPartition, start_time: datetime, source: Source) -> str:
         clm = ALIAS_CLM
         sgntr = ALIAS_SGNTR
         prfnl = ALIAS_PRFNL
@@ -300,7 +298,7 @@ class IdrClaimProfessionalSs(IdrBaseModel):
         prvdr_othr = ALIAS_PRVDR_OTHR
         ocrnc_sgntr_dd = ALIAS_OCRNC_SGNTR_DERIVED_DATES
         rlt_ocrnc_sgntr_dd = ALIAS_RLT_OCRNC_SGNTR_DERIVED_DATES
-        not_materialized = "" if load_mode == LoadMode.IDR else "NOT MATERIALIZED"
+        not_materialized = "" if source == Source.SNOWFLAKE else "NOT MATERIALIZED"
         return f"""
             WITH claims AS (
                 SELECT

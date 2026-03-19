@@ -7,7 +7,7 @@ from snowflake.connector.errors import ForbiddenError
 from snowflake.connector.network import ReauthenticationRequest, RetryRequest
 
 from constants import DEFAULT_PARTITION
-from extractor import PostgresExtractor, SnowflakeExtractor
+from extractor import PostgresExtractor, SnowflakeExtractor, Source
 from load_partition import LoadPartition
 from loader import LoadType, PostgresLoader
 from model.base_model import (
@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 
 def get_progress(
     load_mode: LoadMode,
+    source: Source,
     table_name: str,
     start_time: datetime,
     partition: LoadPartition,
@@ -28,23 +29,24 @@ def get_progress(
     return PostgresExtractor(
         load_mode=load_mode, cls=LoadProgress, partition=partition
     ).extract_single(
-        LoadProgress.fetch_query(partition, start_time, load_mode),
+        LoadProgress.fetch_query(partition, start_time, source),
         {LoadProgress.query_placeholder(): table_name},
     )
 
 
 def extract_and_load(
     cls: type[T],
+    source: Source,
     load_mode: LoadMode,
     job_start: datetime,
     load_type: LoadType,
     partition: LoadPartition | None = None,
 ) -> bool:
     partition = partition or DEFAULT_PARTITION
-    if load_mode == LoadMode.LOCAL or load_mode == LoadMode.SYNTHETIC:
-        data_extractor = PostgresExtractor(load_mode=load_mode, cls=cls, partition=partition)
-    else:
+    if source == Source.SNOWFLAKE:
         data_extractor = SnowflakeExtractor(cls=cls, partition=partition)
+    else:
+        data_extractor = PostgresExtractor(load_mode=load_mode, cls=cls, partition=partition)
 
     logger.info("loading %s", cls.table())
     last_error = datetime.min.replace(tzinfo=UTC)
@@ -54,7 +56,7 @@ def extract_and_load(
 
     while True:
         try:
-            progress = get_progress(load_mode, cls.table(), job_start, partition)
+            progress = get_progress(load_mode, source, cls.table(), job_start, partition)
 
             if progress:
                 logger.info(
@@ -68,7 +70,7 @@ def extract_and_load(
             else:
                 logger.info("no previous progress for %s - %s", cls.table(), partition.name)
 
-            data_iter = data_extractor.extract_idr_data(progress, job_start, load_mode)
+            data_iter = data_extractor.extract_idr_data(progress, job_start, source)
             res = loader.load(data_iter, cls, job_start, partition, progress, load_type, load_mode)
             data_extractor.close()
             loader.close()

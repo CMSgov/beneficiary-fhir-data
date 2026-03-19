@@ -7,7 +7,6 @@ from constants import (
     BENEFICIARY_TABLE,
 )
 from load_partition import LoadPartition
-from loader import LoadMode
 from model.base_model import (
     ALIAS,
     ALIAS_HSTRY,
@@ -21,6 +20,7 @@ from model.base_model import (
     UPDATE_TIMESTAMP,
     IdrBaseModel,
     ModelType,
+    Source,
     deceased_bene_filter,
     transform_default_string,
     transform_null_date_to_max,
@@ -115,9 +115,7 @@ class IdrBeneficiary(IdrBaseModel):
 
     @override
     @classmethod
-    def fetch_query(
-        cls, partition: LoadPartition, start_time: datetime, load_mode: LoadMode
-    ) -> str:
+    def fetch_query(cls, partition: LoadPartition, start_time: datetime, source: Source) -> str:
         hstry = ALIAS_HSTRY
         xref = ALIAS_XREF
         # There can be multiple xref records for the same bene_sk/bene_ref_sk combo

@@ -19,7 +19,7 @@ readonly DB_ENDPOINT
 
 function do_load() {
   PGPASSWORD="$DB_PASSWORD" psql "host=$DB_ENDPOINT port=5432 dbname=fhirdb user=$DB_USERNAME" -f "$SCRIPT_DIR/mock-idr.sql"
-  BFD_DB_USERNAME="$DB_USERNAME" BFD_DB_PASSWORD="$DB_PASSWORD" BFD_DB_ENDPOINT="$DB_ENDPOINT" uv run load_synthetic.py "$1"
+  BFD_DB_USERNAME="$DB_USERNAME" BFD_DB_PASSWORD="$DB_PASSWORD" BFD_DB_ENDPOINT="$DB_ENDPOINT" uv run load_synthetic.py snowflake "$1"
   BFD_DB_USERNAME="$DB_USERNAME" BFD_DB_PASSWORD="$DB_PASSWORD" BFD_DB_ENDPOINT="$DB_ENDPOINT" IDR_LOAD_TYPE=initial IDR_ENABLE_DATE_PARTITIONS=0 uv run pipeline.py synthetic
 }
 

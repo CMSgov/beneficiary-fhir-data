@@ -2,11 +2,11 @@ from datetime import datetime
 from typing import Annotated, override
 
 from load_partition import LoadPartition
-from loader import LoadMode
 from model.base_model import (
     PRIMARY_KEY,
     IdrBaseModel,
     ModelType,
+    Source,
 )
 
 
@@ -35,9 +35,7 @@ class IdrBeneficiaryOvershareMbi(IdrBaseModel):
 
     @override
     @classmethod
-    def fetch_query(
-        cls, partition: LoadPartition, start_time: datetime, load_mode: LoadMode
-    ) -> str:
+    def fetch_query(cls, partition: LoadPartition, start_time: datetime, source: Source) -> str:
         # The xref data in the bene_hstry table is not completely reliable
         # because sometimes HICNs can be reused, causing two records to be
         # xref'd even if they're not the same person.

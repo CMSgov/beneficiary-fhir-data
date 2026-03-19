@@ -2,8 +2,7 @@ from datetime import UTC, datetime
 from typing import override
 
 from load_partition import LoadPartition
-from loader import LoadMode
-from model.base_model import IdrBaseModel, ModelType
+from model.base_model import IdrBaseModel, ModelType, Source
 
 
 class LoadProgress(IdrBaseModel):
@@ -35,9 +34,7 @@ class LoadProgress(IdrBaseModel):
 
     @override
     @classmethod
-    def fetch_query(
-        cls, partition: LoadPartition, start_time: datetime, load_mode: LoadMode
-    ) -> str:
+    def fetch_query(cls, partition: LoadPartition, start_time: datetime, source: Source) -> str:
         return f"""
         SELECT table_name, last_ts, last_id, batch_partition, job_start_ts, batch_complete_ts
         FROM idr.load_progress
