@@ -18,7 +18,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
  */
 @Getter
 @AllArgsConstructor
-@SuppressWarnings({"java:S115", "java:S1192"})
+@SuppressWarnings("java:S1192")
 public enum ClaimAuditTrailStatusCode {
 
   /** FISS - A - QUEUED - Accept. */
