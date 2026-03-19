@@ -17,6 +17,6 @@ public class ClaimProcessingIndicatorCodeConverter
 
   @Override
   public Optional<ClaimProcessingIndicatorCode> convertToEntityAttribute(String code) {
-    return ClaimProcessingIndicatorCode.fromCode(code);
+    return ClaimProcessingIndicatorCode.tryFromCode(code);
   }
 }

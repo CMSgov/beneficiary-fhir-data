@@ -1,7 +1,7 @@
 {
   "resourceType" : "ExplanationOfBenefit",
   "meta" : {
-    "lastUpdated" : "2026-03-18T17:00:24.062825Z",
+    "lastUpdated" : "2026-03-18T20:17:35.306307Z",
     "source" : "NCH",
     "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional|2.1.0"],
     "tag" : [{
@@ -98,6 +98,7 @@
   "careTeam" : [{
     "sequence" : 1,
     "provider" : {
+      "type" : "Practitioner",
       "identifier" : {
         "type" : {
           "coding" : [{
@@ -127,6 +128,7 @@
   {
     "sequence" : 2,
     "provider" : {
+      "type" : "Practitioner",
       "identifier" : {
         "type" : {
           "coding" : [{
@@ -156,6 +158,7 @@
   {
     "sequence" : 3,
     "provider" : {
+      "type" : "Practitioner",
       "identifier" : {
         "type" : {
           "coding" : [{
@@ -185,6 +188,7 @@
   {
     "sequence" : 4,
     "provider" : {
+      "type" : "Practitioner",
       "identifier" : {
         "type" : {
           "coding" : [{

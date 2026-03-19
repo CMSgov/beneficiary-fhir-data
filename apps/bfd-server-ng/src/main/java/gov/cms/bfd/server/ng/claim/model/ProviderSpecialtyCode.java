@@ -13,7 +13,7 @@ import org.hl7.fhir.r4.model.Extension;
 /** Maps internal provider specialty codes to NUCC taxonomy codes. */
 @Getter
 @AllArgsConstructor
-@SuppressWarnings({"java:S115", "java:S1192"})
+@SuppressWarnings("java:S1192")
 public enum ProviderSpecialtyCode {
   /** 01 - GENERAL PRACTICE - 208D00000X. */
   _01("01", "GENERAL PRACTICE", "208D00000X"),

@@ -21,6 +21,6 @@ public class HealthProfessionalShortageAreaScarcityCodeConverter
   @Override
   public Optional<HealthProfessionalShortageAreaScarcityCode> convertToEntityAttribute(
       String code) {
-    return HealthProfessionalShortageAreaScarcityCode.fromCode(code);
+    return HealthProfessionalShortageAreaScarcityCode.tryFromCode(code);
   }
 }

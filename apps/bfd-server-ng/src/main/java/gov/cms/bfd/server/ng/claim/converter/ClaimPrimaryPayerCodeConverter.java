@@ -16,6 +16,6 @@ public class ClaimPrimaryPayerCodeConverter
 
   @Override
   public Optional<ClaimPrimaryPayerCode> convertToEntityAttribute(String code) {
-    return ClaimPrimaryPayerCode.fromCode(code);
+    return ClaimPrimaryPayerCode.tryFromCode(code);
   }
 }
