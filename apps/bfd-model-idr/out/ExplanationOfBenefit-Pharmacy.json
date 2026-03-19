@@ -1,7 +1,7 @@
 {
   "resourceType" : "ExplanationOfBenefit",
   "meta" : {
-    "lastUpdated" : "2026-03-18T17:02:18.712640Z",
+    "lastUpdated" : "2026-03-18T20:19:19.286130Z",
     "source" : "DDPS",
     "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Pharmacy|2.1.0"],
     "tag" : [{
@@ -81,6 +81,7 @@
   "careTeam" : [{
     "sequence" : 1,
     "provider" : {
+      "type" : "Practitioner",
       "identifier" : {
         "type" : {
           "coding" : [{

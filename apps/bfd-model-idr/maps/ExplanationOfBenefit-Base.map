@@ -159,6 +159,8 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
           } "Add identifier when NPI";
           //See augment_sample_resources for how this is constructed. It will be blank in some instances. 
           pList.PRVDR_CARETEAM_NAME as name -> tgtReference.display = name "Set name";
+          pList.NPI_TYPE as npiType where npiType = "1" -> tgtReference.type = "Practitioner" "Type 1";
+          pList.NPI_TYPE as npiType where npiType = "2" -> tgtReference.type = "Organization" "Type 2";
 
         } "Add reference to EOB";
       pList.specialtyCode as specialtyCode -> tgtCareTeam.qualification = create('CodeableConcept') as tgtCC then {
