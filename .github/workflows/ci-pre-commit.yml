@@ -10,7 +10,7 @@ jobs:
           fetch-depth: 0
       - uses: j178/prek-action@v1
         with:
-          extra-args: --hook-stage pre-commit --from-ref ${{ github.ref_name }} --to-ref ${{ github.head_ref }} # this is default hook-stage, but we want to override the default extra-args of --all-files
+          extra-args: --hook-stage pre-commit --from-ref ${{ github.base_ref }} --to-ref ${{ github.head_ref }} # this is default hook-stage, but we want to override the default extra-args of --all-files
       - uses: j178/prek-action@v1
         with:
-          extra-args: --hook-stage pre-push --from-ref ${{ github.ref_name }} --to-ref ${{ github.head_ref }}
+          extra-args: --hook-stage pre-push --from-ref ${{ github.base_ref }} --to-ref ${{ github.head_ref }}
