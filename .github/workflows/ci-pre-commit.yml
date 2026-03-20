@@ -6,6 +6,8 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
       - uses: j178/prek-action@v1
         with:
           extra-args: --hook-stage pre-commit --from-ref master --to-ref HEAD # this is default hook-stage, but we want to override the default extra-args of --all-files
