@@ -1,5 +1,5 @@
 name: CI - Prek (Pre-commit) Checks
-on: [pull_request]
+on: [push]
 
 jobs:
   prek:
@@ -11,7 +11,7 @@ jobs:
       - uses: j178/prek-action@v1
         with:
           # this is default hook-stage, but we want to override the default value of '--all-files' for extra-args 
-          extra-args: --hook-stage pre-commit --from-ref ${{ github.base_ref }} --to-ref ${{ github.head_ref }} 
+          extra-args: --hook-stage pre-commit --from-ref ${{ github.event.pull_request.base.sha }} --to-ref ${{ github.event.pull_request.head.sha }}
       - uses: j178/prek-action@v1
         with:
-          extra-args: --hook-stage pre-push --from-ref ${{ github.base_ref }} --to-ref ${{ github.head_ref }}
+          extra-args: --hook-stage pre-push --from-ref ${{ github.event.pull_request.base.sha }} --to-ref ${{ github.event.pull_request.head.sha }}
