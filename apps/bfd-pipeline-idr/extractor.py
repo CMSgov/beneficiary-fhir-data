@@ -379,6 +379,7 @@ class SnowflakeExecutor(DbExecutor):
                                 TYPE = 'CSV', 
                                 PARSE_HEADER = TRUE
                                 ERROR_ON_COLUMN_COUNT_MISMATCH = FALSE
+                                FIELD_OPTIONALLY_ENCLOSED_BY = '"'
                             )
                             MATCH_BY_COLUMN_NAME = CASE_INSENSITIVE
                             """).collect()
