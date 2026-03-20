@@ -4,6 +4,7 @@ import static gov.cms.bfd.server.ng.claim.model.ClaimSubtype.PDE;
 
 import gov.cms.bfd.server.ng.ClaimSecurityStatus;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
+import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -15,6 +16,8 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.Stream;
 import lombok.Getter;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Reference;
 
@@ -32,6 +35,9 @@ public class ClaimRx extends ClaimBase {
 
   @Column(name = "cntrct_pbp_name")
   private Optional<String> contractName;
+
+  @Column(name = "clm_prcng_excptn_cd")
+  private Optional<ClaimPricingReasonCode> pricingCode;
 
   @Embedded private ServiceProviderPharmacy serviceProviderHistory;
   @Embedded private PrescribingCareTeam prescribingProviderHistory;
@@ -130,7 +136,29 @@ public class ClaimRx extends ClaimBase {
         .map(AdjudicationChargeType.TOTAL_DRUG_COST_AMOUNT::toFhirTotal)
         .ifPresent(eob::addTotal);
 
+    headerAdjudicationComponent().ifPresent(eob::addAdjudication);
+
     claimPaymentDate.toFhir().ifPresent(eob::setPayment);
+  }
+
+  private Optional<ExplanationOfBenefit.AdjudicationComponent> headerAdjudicationComponent() {
+    if (pricingCode.isEmpty()) {
+      return Optional.empty();
+    }
+
+    var reasonCode = pricingCode.get().toFhir();
+    var reasonCodeableConcept = new CodeableConcept();
+    reasonCodeableConcept.addCoding(reasonCode);
+
+    return Optional.of(
+        new ExplanationOfBenefit.AdjudicationComponent()
+            .setCategory(
+                new CodeableConcept(
+                    new Coding()
+                        .setSystem(SystemUrls.CARIN_CODE_SYSTEM_ADJUDICATION_DISCRIMINATOR)
+                        .setCode("benefitpaymentstatus")
+                        .setDisplay("Benefit Payment Status")))
+            .setReason(reasonCodeableConcept));
   }
 
   /**
@@ -177,5 +205,10 @@ public class ClaimRx extends ClaimBase {
     var items = new TreeSet<ClaimItemBase>();
     items.add(getClaimItems());
     return items;
+  }
+
+  @Override
+  public Optional<ClaimRelatedCondition> getClaimRelatedCondition() {
+    return Optional.empty();
   }
 }

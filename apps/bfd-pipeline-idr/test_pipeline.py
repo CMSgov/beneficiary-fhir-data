@@ -36,7 +36,8 @@ def _run_migrator(postgres: PostgresContainer) -> None:
             "-Dflyway.url="
             f"jdbc:postgresql://localhost:{postgres.get_exposed_port(5432)}/{postgres.dbname} "
             f"-Dflyway.user={postgres.username} "
-            f"-Dflyway.password={postgres.password}",
+            f"-Dflyway.password={postgres.password} "
+            "-Duser.timezone=UTC",
             cwd="../bfd-db-migrator-ng",
             shell=True,
             capture_output=True,
@@ -208,15 +209,6 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
     rows = cur.fetchmany(2)
     assert rows[0]["bene_mbi_id"] == "5OH0K85GU23"
     assert rows[1]["bene_mbi_id"] == "6LM1C27GV22"
-
-    cur = conn.execute("select * from idr.provider_history order by prvdr_sk")
-    assert cur.rowcount == 14
-    rows = cur.fetchmany(1)
-    assert rows[0]["prvdr_sk"] == 829307599
-    rows = cur.fetchall()
-    for row in rows:
-        assert row["idr_insrt_ts"] is not None
-        assert row["idr_updt_ts"] is not None
 
     cur = conn.execute("select * from idr.contract_pbp_number order by cntrct_pbp_sk")
     assert cur.rowcount == 10

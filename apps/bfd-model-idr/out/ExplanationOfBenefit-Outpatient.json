@@ -1,7 +1,7 @@
 {
   "resourceType" : "ExplanationOfBenefit",
   "meta" : {
-    "lastUpdated" : "2026-03-02T17:59:51.693023Z",
+    "lastUpdated" : "2026-03-18T20:18:08.933551Z",
     "source" : "NCH",
     "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Outpatient-Institutional|2.1.0"],
     "tag" : [{
@@ -99,6 +99,7 @@
   "careTeam" : [{
     "sequence" : 1,
     "provider" : {
+      "type" : "Practitioner",
       "identifier" : {
         "type" : {
           "coding" : [{
@@ -128,6 +129,7 @@
   {
     "sequence" : 2,
     "provider" : {
+      "type" : "Practitioner",
       "identifier" : {
         "type" : {
           "coding" : [{
@@ -157,6 +159,7 @@
   {
     "sequence" : 3,
     "provider" : {
+      "type" : "Practitioner",
       "identifier" : {
         "type" : {
           "coding" : [{
@@ -186,6 +189,7 @@
   {
     "sequence" : 4,
     "provider" : {
+      "type" : "Practitioner",
       "identifier" : {
         "type" : {
           "coding" : [{
@@ -1074,7 +1078,7 @@
         {
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
           "code" : "CLM_LINE_BENE_PMT_AMT",
-          "display" : "Patient Responsibility Payment Amount"
+          "display" : "Line Paid By Beneficiary Amount"
         }]
       },
       "amount" : {
@@ -1121,11 +1125,6 @@
     {
       "category" : {
         "coding" : [{
-          "system" : "http://terminology.hl7.org/CodeSystem/adjudication",
-          "code" : "deductible",
-          "display" : "Deductible"
-        },
-        {
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
           "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
           "display" : "Blood Deductible Amount"
@@ -1245,11 +1244,6 @@
     {
       "category" : {
         "coding" : [{
-          "system" : "http://terminology.hl7.org/CodeSystem/adjudication",
-          "code" : "deductible",
-          "display" : "Deductible"
-        },
-        {
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
           "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
           "display" : "Blood Deductible Amount"
@@ -1653,7 +1647,7 @@
       {
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication",
         "code" : "CLM_BENE_PD_AMT",
-        "display" : "Beneficiary Payment Amount"
+        "display" : "Amount Paid To Beneficiary Amount"
       }]
     },
     "amount" : {

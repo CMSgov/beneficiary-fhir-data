@@ -2,6 +2,8 @@
 
 set -e
 
+export TZ=UTC
+
 username="$(aws ssm get-parameter --name /bfd/${BFD_ENV}/migrator/sensitive/db/username --with-decryption --query "Parameter.Value" --output text)"
 password="$(aws ssm get-parameter --name /bfd/${BFD_ENV}/migrator/sensitive/db/password --with-decryption --query "Parameter.Value" --output text)"
 db_cluster="bfd-${BFD_ENV}-aurora-cluster"

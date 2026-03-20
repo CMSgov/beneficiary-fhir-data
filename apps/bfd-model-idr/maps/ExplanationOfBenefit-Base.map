@@ -44,7 +44,7 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
       src.CLM_TYPE_CD as typeCd -> tgtMeta.profile = translate(typeCd,'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#profile_metadata','code') "set profile";
       //CodeSystem -> CLM_SRC_ID
       src.META_SRC_SK as sourceSk -> tgtMeta.source = translate(sourceSk, 'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#META_SRC_SK','code') "set source";
-      src.CLM_SRC_ID as sourceSk -> tgtMeta.tag = translate(sourceSk, 'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#SYSTEM_TYPE','coding') "set source";
+      src.META_SRC_SK as sourceSk -> tgtMeta.tag = translate(sourceSk, 'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#SYSTEM_TYPE','coding') "set source";
       src.CLM_FINL_ACTN_IND as faInd -> tgtMeta.tag = translate(faInd, 'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#FINAL_ACTION','coding') "set source";
     } "Create metadata";
 
@@ -93,16 +93,7 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
     src.CLM_SRC_ID as sourceSk where sourceSk = '20000' -> tgt.outcome = "complete" "Set NCH outcome to complete.";
     src.CLM_TYPE_CD as typeCd where(typeCd >= 1000 and typeCd < 3000) -> tgt then {
       src -> tgt.outcome = "partial" "Default pac outcome to partial";
-      src.META_SRC_SK as srcSk where srcSk = '1001' -> tgt then {
-        src.CLM_AUDT_TRL_STUS_CD as auditTrailStatusCode -> tgt.outcome = translate(auditTrailStatusCode, 'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#CLM_AUDT_TRL_STUS_CD_MCS','code') "Set outcome for phase 2/3 MCS";
-      } "Set outcome for MCS";
-      src.META_SRC_SK as srcSk where srcSk = '1003' -> tgt then {
-        src.CLM_AUDT_TRL_STUS_CD as auditTrailStatusCode -> tgt.outcome = translate(auditTrailStatusCode, 'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#CLM_AUDT_TRL_STUS_CD_FISS','code') "Set outcome for phase 2/3 FISS";
-      } "Set outcome for FISS";
-      src.META_SRC_SK as srcSk where srcSk = '1002' -> tgt then {
-        src.CLM_FINL_ACTN_IND as finalAction where finalAction = Y -> tgt.outcome = "complete" "Set VMS outcome to complete.";
-        src.CLM_FINL_ACTN_IND as finalAction where finalAction = N -> tgt.outcome = "partial" "Set VMS outcome to partial.";
-      } "Set outcome for VMS";
+      src.CLM_PD_STUS_CD as cd -> tgt.outcome = translate(cd, 'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#CLM_PD_STUS_CD','code') "Set outcome for Shared Systems Data";
     } "Complete additional outcomes";
 
     //Building out procedure, diagnosis, supportingInfo, item, and then careteam
@@ -168,6 +159,8 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
           } "Add identifier when NPI";
           //See augment_sample_resources for how this is constructed. It will be blank in some instances. 
           pList.PRVDR_CARETEAM_NAME as name -> tgtReference.display = name "Set name";
+          pList.NPI_TYPE as npiType where npiType = "1" -> tgtReference.type = "Practitioner" "Type 1";
+          pList.NPI_TYPE as npiType where npiType = "2" -> tgtReference.type = "Organization" "Type 2";
 
         } "Add reference to EOB";
       pList.specialtyCode as specialtyCode -> tgtCareTeam.qualification = create('CodeableConcept') as tgtCC then {

@@ -34,7 +34,7 @@ group createEOBPharmacy(source src: ExplanationOfBenefitPharmacy, target tgt: BF
       src.lastUpdated as lastUpdated -> tgtMeta.lastUpdated = lastUpdated "set lastUpdated";
       src.CLM_TYPE_CD as typeCd -> tgtMeta.profile = translate(typeCd,'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#profile_metadata','code') "set profile";
       src.META_SRC_SK as sourceSk -> tgtMeta.source = translate(sourceSk, 'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#META_SRC_SK','code') "set source";
-      src.CLM_SRC_ID as sourceSk -> tgtMeta.tag = translate(sourceSk, 'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#SYSTEM_TYPE','coding') "set source";
+      src.META_SRC_SK as sk -> tgtMeta.tag = translate(sk, 'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#SYSTEM_TYPE','coding') "set source";
       src.CLM_FINL_ACTN_IND as faInd -> tgtMeta.tag = translate(faInd, 'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#FINAL_ACTION','coding') "set source";
     } "Create metadata";
 
@@ -93,6 +93,8 @@ group createEOBPharmacy(source src: ExplanationOfBenefitPharmacy, target tgt: BF
                 qlfyrCd as notNPI where npi != "01" -> tgtId.system = "http://bluebutton.cms.gov/fhir/identifiers/GenericIdNum" "set id num system url";
                 qlfyrCd as npi where npi = "01" -> tgtId.system = "http://hl7.org/fhir/sid/us-npi" "set NPI system url";
                 pList.CLM_PRVDR_GNRC_ID_NUM as idNum -> tgtId.value = idNum "set id num";
+                pList.NPI_TYPE as npiType where npiType = "1" -> tgtReference.type = "Practitioner" "Type 1";
+                pList.NPI_TYPE as npiType where npiType = "2" -> tgtReference.type = "Organization" "Type 2";
             } "Add qualifier code and id num";
           pList.PRVDR_CARETEAM_NAME as name -> tgtReference.display = name "set name";
         } "Add reference to EOB";
@@ -304,6 +306,7 @@ group addDispenseAsWritten(source src: SupportingInfoComponent, target tgt: Back
     } "set category";
     src -> tgt.code = create('CodeableConcept') as tgtCC then{
         src.CLM_DAW_PROD_SLCTN_CD as val -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/NCPDPDispensedAsWrittenOrProductSelectionCode", val) "Add coding";
+        src.CLM_DAW_PROD_SLCTN_CD as val -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DAW-PROD-SLCTN-CD", val) "Add coding";
     } "Add CC";
 }
 

@@ -9,61 +9,39 @@ import lombok.Getter;
 import org.hl7.fhir.r4.model.Coding;
 
 /** Revenue center ANSI adjustment group codes for claims. */
-@Getter
-@AllArgsConstructor
-public enum RevenueCenterAnsiGroupCode {
-  /**
-   * CO - Contractual Obligations -- this group code should be used when a contractual agreement
-   * between the payer and payee, or a regulatory requirement, resulted in an adjustment. Generally,
-   * these adjustments are considered a write-off for the provider and are not billed to the
-   * patient.
-   */
-  CO(
-      "CO",
-      "Contractual Obligations -- this group code should be used when a contractual agreement between the payer and payee, or a regulatory requirement, resulted in an adjustment. Generally, these adjustments are considered a write-off for the provider and are not billed to the patient."),
-  /**
-   * CR - Corrections and Reversals -- this group code should be used for correcting a prior claim.
-   * It applies when there is a change to a previously adjudicated claim.
-   */
-  CR(
-      "CR",
-      "Corrections and Reversals -- this group code should be used for correcting a prior claim. It applies when there is a change to a previously adjudicated claim."),
-  /**
-   * OA - Other Adjustments -- this group code should be used when no other group code applies to
-   * the adjustment.
-   */
-  OA(
-      "OA",
-      "Other Adjustments -- this group code should be used when no other group code applies to the adjustment."),
-  /**
-   * PI - Payer Initiated Reductions -- this group code should be used when, in the opinion of the
-   * payer, the adjustment is not the responsibility of the patient, but there is no supporting
-   * contract between the provider and the payer (i.e., medical review or professional review
-   * organization adjustments).
-   */
-  PI(
-      "PI",
-      "Payer Initiated Reductions -- this group code should be used when, in the opinion of the payer, the adjustment is not the responsibility of the patient, but there is no supporting contract between the provider and the payer (i.e., medical review or professional review organization adjustments)."),
-  /**
-   * PR - Patient Responsibility -- this group should be used when the adjustment represents an
-   * amount that should be billed to the patient or insured. This group would typically be used for
-   * deductible and copay adjustments.
-   */
-  PR(
-      "PR",
-      "Patient Responsibility -- this group should be used when the adjustment represents an amount that should be billed to the patient or insured. This group would typically be used for deductible and copay adjustments.");
+public sealed interface RevenueCenterAnsiGroupCode
+    permits RevenueCenterAnsiGroupCode.Valid, RevenueCenterAnsiGroupCode.Invalid {
 
-  private final String code;
-  private final String display;
+  /**
+   * Gets the code value.
+   *
+   * @return the code
+   */
+  String getCode();
+
+  /**
+   * Gets the display value.
+   *
+   * @return the display
+   */
+  String getDisplay();
 
   /**
    * Convert from a database code.
    *
    * @param code database code
-   * @return list of FHIR codings
+   * @return revenue center ANSI group code or empty Optional if code is null or blank
    */
-  public static Optional<RevenueCenterAnsiGroupCode> tryFromCode(String code) {
-    return Arrays.stream(values()).filter(v -> v.code.equals(code)).findFirst();
+  static Optional<RevenueCenterAnsiGroupCode> tryFromCode(String code) {
+    if (code == null || code.isBlank()) {
+      return Optional.empty();
+    }
+    return Optional.of(
+        Arrays.stream(Valid.values())
+            .filter(v -> v.code.equals(code))
+            .map(v -> (RevenueCenterAnsiGroupCode) v)
+            .findFirst()
+            .orElseGet(() -> new Invalid(code)));
   }
 
   /**
@@ -72,12 +50,82 @@ public enum RevenueCenterAnsiGroupCode {
    *
    * @return list of FHIR codings
    */
-  public Optional<List<Coding>> toFhirCodings() {
-    return Optional.of(
-        List.of(
-            new Coding().setSystem(SystemUrls.X12_CLAIM_ADJUSTMENT_GROUP_CODES).setCode(code),
-            new Coding()
-                .setSystem(SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ANSI_GRP_CODE)
-                .setCode(code)));
+  Optional<List<Coding>> toFhirCodings();
+
+  /** Enum for all known, valid codes. */
+  @AllArgsConstructor
+  @Getter
+  enum Valid implements RevenueCenterAnsiGroupCode {
+    /**
+     * CO - Contractual Obligations -- this group code should be used when a contractual agreement
+     * between the payer and payee, or a regulatory requirement, resulted in an adjustment.
+     * Generally, these adjustments are considered a write-off for the provider and are not billed
+     * to the patient.
+     */
+    CO(
+        "CO",
+        "Contractual Obligations -- this group code should be used when a contractual agreement between the payer and payee, or a regulatory requirement, resulted in an adjustment. Generally, these adjustments are considered a write-off for the provider and are not billed to the patient."),
+    /**
+     * CR - Corrections and Reversals -- this group code should be used for correcting a prior
+     * claim. It applies when there is a change to a previously adjudicated claim.
+     */
+    CR(
+        "CR",
+        "Corrections and Reversals -- this group code should be used for correcting a prior claim. It applies when there is a change to a previously adjudicated claim."),
+    /**
+     * OA - Other Adjustments -- this group code should be used when no other group code applies to
+     * the adjustment.
+     */
+    OA(
+        "OA",
+        "Other Adjustments -- this group code should be used when no other group code applies to the adjustment."),
+    /**
+     * PI - Payer Initiated Reductions -- this group code should be used when, in the opinion of the
+     * payer, the adjustment is not the responsibility of the patient, but there is no supporting
+     * contract between the provider and the payer (i.e., medical review or professional review
+     * organization adjustments).
+     */
+    PI(
+        "PI",
+        "Payer Initiated Reductions -- this group code should be used when, in the opinion of the payer, the adjustment is not the responsibility of the patient, but there is no supporting contract between the provider and the payer (i.e., medical review or professional review organization adjustments)."),
+    /**
+     * PR - Patient Responsibility -- this group should be used when the adjustment represents an
+     * amount that should be billed to the patient or insured. This group would typically be used
+     * for deductible and copay adjustments.
+     */
+    PR(
+        "PR",
+        "Patient Responsibility -- this group should be used when the adjustment represents an amount that should be billed to the patient or insured. This group would typically be used for deductible and copay adjustments.");
+
+    private final String code;
+    private final String display;
+
+    @Override
+    public Optional<List<Coding>> toFhirCodings() {
+      return Optional.of(
+          List.of(
+              new Coding().setSystem(SystemUrls.X12_CLAIM_ADJUSTMENT_GROUP_CODES).setCode(code),
+              new Coding()
+                  .setSystem(SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ANSI_GRP_CODE)
+                  .setCode(code)));
+    }
+  }
+
+  /** Captures unknown/invalid codes. */
+  record Invalid(String code) implements RevenueCenterAnsiGroupCode {
+    @Override
+    public String getDisplay() {
+      return "";
+    }
+
+    @Override
+    public String getCode() {
+      return code;
+    }
+
+    @Override
+    public Optional<List<Coding>> toFhirCodings() {
+      return Optional.empty();
+    }
   }
 }

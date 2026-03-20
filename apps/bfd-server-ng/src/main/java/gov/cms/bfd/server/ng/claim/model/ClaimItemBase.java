@@ -28,13 +28,6 @@ public interface ClaimItemBase extends Comparable<ClaimItemBase> {
   Optional<ClaimLineHcpcsCode> getClaimLineHcpcsCode();
 
   /**
-   * Returns the ClaimRelatedCondition for this claim line, if present.
-   *
-   * @return the ClaimRelatedCondition
-   */
-  Optional<ClaimRelatedCondition> getClaimRelatedCondition();
-
-  /**
    * Returns claim line professional information.
    *
    * @return the claim line professional info.

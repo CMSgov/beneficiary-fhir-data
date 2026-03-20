@@ -35,7 +35,9 @@ class ClaimLineRxSupportingInfo {
 
   @Embedded private ClaimLineRxDaysSupplyQuantity daysSupply;
   @Embedded private ClaimLineRxFillNumber fillNumber;
-  @Embedded private ClaimDispenseAsWrittenProdSelectCode claimDispenseAsWrittenProdSelectCode;
+
+  @Column(name = "clm_daw_prod_slctn_cd")
+  private Optional<ClaimDispenseAsWrittenCode> claimDispenseAsWrittenCode;
 
   @Column(name = "clm_drug_cvrg_stus_cd")
   private Optional<DrugCoverageStatusCode> drugCoverageStatusCode;
@@ -54,7 +56,7 @@ class ClaimLineRxSupportingInfo {
             compoundCode.map(s -> s.toFhir(supportingInfoFactory)),
             Optional.of(daysSupply.toFhir(supportingInfoFactory)),
             Optional.of(fillNumber.toFhir(supportingInfoFactory)),
-            claimDispenseAsWrittenProdSelectCode.toFhir(supportingInfoFactory),
+            claimDispenseAsWrittenCode.map(c -> c.toFhir(supportingInfoFactory)),
             drugCoverageStatusCode.map(s -> s.toFhir(supportingInfoFactory)),
             catastrophicCovCode.map(s -> s.toFhir(supportingInfoFactory)))
         .flatMap(Optional::stream)
@@ -68,7 +70,7 @@ class ClaimLineRxSupportingInfo {
    */
   public Optional<Coding> toFhirNdcCompound() {
     return compoundCode
-        .filter(c -> c == ClaimLineCompoundCode._2)
+        .filter(c -> c.getCode().equals("2"))
         .map(c -> new Coding().setSystem(SystemUrls.CARIN_COMPOUND_LITERAL).setCode("compound"));
   }
 }

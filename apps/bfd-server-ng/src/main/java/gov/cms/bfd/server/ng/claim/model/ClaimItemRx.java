@@ -26,9 +26,4 @@ public class ClaimItemRx implements ClaimItemBase {
   public ClaimItemId getClaimItemId() {
     return new ClaimItemId();
   }
-
-  @Override
-  public Optional<ClaimRelatedCondition> getClaimRelatedCondition() {
-    return Optional.empty();
-  }
 }

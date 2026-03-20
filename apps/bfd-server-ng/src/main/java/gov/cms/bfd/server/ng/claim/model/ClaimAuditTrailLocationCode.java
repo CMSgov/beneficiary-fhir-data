@@ -8,7 +8,6 @@ import lombok.Getter;
 /** Claim audit trail location codes mapped from CLM_AUDT_TRL_LCTN_CD. */
 @Getter
 @AllArgsConstructor
-@SuppressWarnings("java:S115")
 public enum ClaimAuditTrailLocationCode {
   /** 0 - Completed. */
   COMPLETED("00", "Completed"),

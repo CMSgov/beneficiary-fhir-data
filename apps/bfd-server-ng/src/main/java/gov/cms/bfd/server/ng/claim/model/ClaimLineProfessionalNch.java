@@ -9,14 +9,11 @@ import jakarta.persistence.Convert;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import lombok.Getter;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.ExplanationOfBenefit;
-import org.hl7.fhir.r4.model.Identifier;
-import org.hl7.fhir.r4.model.Observation;
-import org.hl7.fhir.r4.model.Quantity;
-import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.*;
 
 /** Claim line info. */
 @Embeddable
@@ -26,6 +23,7 @@ import org.hl7.fhir.r4.model.Reference;
 public class ClaimLineProfessionalNch extends ClaimLineProfessionalBase implements ClaimLineBase {
 
   @Embedded private ClaimLineAdjudicationChargeProfessionalNch adjudicationCharge;
+  @Embedded private ClaimLineProfessionalNchExtensions claimLineProfessionalNchExtensions;
 
   @Column(name = "clm_line_hct_hgb_type_cd")
   private Optional<ClaimLineHCTHGBTestTypeCode> claimLineHCTHGBTestTypeCode;
@@ -81,5 +79,12 @@ public class ClaimLineProfessionalNch extends ClaimLineProfessionalBase implemen
         });
 
     return Optional.of(observation);
+  }
+
+  @Override
+  protected List<Extension> getFhirExtensions() {
+    var extensions = new ArrayList<>(super.getFhirExtensions());
+    extensions.addAll(claimLineProfessionalNchExtensions.toFhir());
+    return extensions;
   }
 }

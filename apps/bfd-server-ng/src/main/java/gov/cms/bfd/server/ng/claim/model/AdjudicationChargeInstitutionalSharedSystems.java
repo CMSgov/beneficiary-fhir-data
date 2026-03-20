@@ -24,9 +24,6 @@ class AdjudicationChargeInstitutionalSharedSystems implements AdjudicationCharge
   @Column(name = "clm_bene_intrst_pd_amt")
   private BigDecimal beneInterestPaidAmount;
 
-  @Column(name = "clm_bene_pmt_coinsrnc_amt")
-  private BigDecimal beneCoinsuranceAmount;
-
   @Column(name = "clm_mdcr_ddctbl_amt")
   private BigDecimal deductibleAmount;
 
@@ -73,8 +70,7 @@ class AdjudicationChargeInstitutionalSharedSystems implements AdjudicationCharge
         AdjudicationChargeType.INPATIENT_NON_COVERED_CHARGE_AMOUNT.toFhirTotal(
             noncoveredChargeAmount),
         AdjudicationChargeType.OTHER_THIRD_PARTY_PAYER_PAID_AMOUNT.toFhirTotal(
-            otherThirdPartyPayerPaidAmount),
-        AdjudicationChargeType.BENE_COINSURANCE_AMOUNT.toFhirTotal(beneCoinsuranceAmount));
+            otherThirdPartyPayerPaidAmount));
   }
 
   @Override

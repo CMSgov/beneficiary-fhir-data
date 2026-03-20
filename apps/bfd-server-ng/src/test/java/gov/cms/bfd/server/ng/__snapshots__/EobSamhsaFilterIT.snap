@@ -605,12 +605,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "http://hl7.org/fhir/sid/icd-9-cm"
           } ]
         },
-        "onAdmission" : {
-          "coding" : [ {
-            "code" : "0",
-            "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding"
-          } ]
-        },
         "sequence" : 3,
         "type" : [ {
           "coding" : [ {
@@ -745,12 +739,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "http://hl7.org/fhir/sid/icd-10-cm"
           } ]
         },
-        "onAdmission" : {
-          "coding" : [ {
-            "code" : "0",
-            "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding"
-          } ]
-        },
         "sequence" : 10,
         "type" : [ {
           "coding" : [ {
@@ -869,7 +857,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
               "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
             }, {
               "code" : "CLM_LINE_BENE_PMT_AMT",
-              "display" : "Beneficiary Paid Amount",
+              "display" : "Line Paid By Beneficiary Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -1181,7 +1169,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
               "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
             }, {
               "code" : "CLM_LINE_BENE_PMT_AMT",
-              "display" : "Beneficiary Paid Amount",
+              "display" : "Line Paid By Beneficiary Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -1466,7 +1454,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
               "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
             }, {
               "code" : "CLM_LINE_BENE_PMT_AMT",
-              "display" : "Beneficiary Paid Amount",
+              "display" : "Line Paid By Beneficiary Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -1778,7 +1766,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
               "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
             }, {
               "code" : "CLM_LINE_BENE_PMT_AMT",
-              "display" : "Beneficiary Paid Amount",
+              "display" : "Line Paid By Beneficiary Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -2072,7 +2060,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
               "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
             }, {
               "code" : "CLM_LINE_BENE_PMT_AMT",
-              "display" : "Beneficiary Paid Amount",
+              "display" : "Line Paid By Beneficiary Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -2372,7 +2360,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
               "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
             }, {
               "code" : "CLM_LINE_BENE_PMT_AMT",
-              "display" : "Beneficiary Paid Amount",
+              "display" : "Line Paid By Beneficiary Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -2663,7 +2651,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
               "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
             }, {
               "code" : "CLM_LINE_BENE_PMT_AMT",
-              "display" : "Beneficiary Paid Amount",
+              "display" : "Line Paid By Beneficiary Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -2969,7 +2957,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
               "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
             }, {
               "code" : "CLM_LINE_BENE_PMT_AMT",
-              "display" : "Beneficiary Paid Amount",
+              "display" : "Line Paid By Beneficiary Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -3275,7 +3263,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
               "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
             }, {
               "code" : "CLM_LINE_BENE_PMT_AMT",
-              "display" : "Beneficiary Paid Amount",
+              "display" : "Line Paid By Beneficiary Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -3569,7 +3557,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
               "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
             }, {
               "code" : "CLM_LINE_BENE_PMT_AMT",
-              "display" : "Beneficiary Paid Amount",
+              "display" : "Line Paid By Beneficiary Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -3976,11 +3964,23 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
       }, {
         "category" : {
           "coding" : [ {
-            "code" : "clmrecvddate",
+            "code" : "admissionperiod",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
         },
         "sequence" : 7,
+        "timingPeriod" : {
+          "end" : "2019-09-30",
+          "start" : "2019-09-23"
+        }
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "clmrecvddate",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+          } ]
+        },
+        "sequence" : 8,
         "timingDate" : "2019-09-30"
       }, {
         "category" : {
@@ -3994,8 +3994,25 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 8,
+        "sequence" : 9,
         "timingDate" : "2019-09-30"
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "pointoforigin",
+            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "y",
+            "system" : "https://www.nubc.org/CodeSystem/PointOfOrigin"
+          }, {
+            "code" : "y",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-SRC-CD"
+          } ]
+        },
+        "sequence" : 10
       }, {
         "category" : {
           "coding" : [ {
@@ -4013,7 +4030,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-PTNT-STUS-CD"
           } ]
         },
-        "sequence" : 9
+        "sequence" : 11
       }, {
         "category" : {
           "coding" : [ {
@@ -4030,7 +4047,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-ADMSN-TYPE-CD"
           } ]
         },
-        "sequence" : 10
+        "sequence" : 12
       }, {
         "category" : {
           "coding" : [ {
@@ -4050,7 +4067,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-INSTNL-MCO-PD-SW"
           } ]
         },
-        "sequence" : 11
+        "sequence" : 13
       }, {
         "category" : {
           "coding" : [ {
@@ -4070,7 +4087,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
           } ]
         },
-        "sequence" : 12
+        "sequence" : 14
       }, {
         "category" : {
           "coding" : [ {
@@ -4084,7 +4101,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 13
+        "sequence" : 15
       } ],
       "total" : [ {
         "amount" : {
@@ -4130,7 +4147,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
           }, {
             "code" : "CLM_BENE_PMT_AMT",
-            "display" : "Patient Responsibility Payment Amount",
+            "display" : "Paid By Beneficiary Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -4221,28 +4238,12 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
         },
         "category" : {
           "coding" : [ {
-            "code" : "coinsurance",
-            "display" : "Co-insurance",
-            "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
-          }, {
-            "code" : "CLM_BENE_PMT_COINSRNC_AMT",
-            "display" : "Beneficiary Coinsurance Amount",
-            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
-          } ]
-        }
-      }, {
-        "amount" : {
-          "currency" : "USD",
-          "value" : 0
-        },
-        "category" : {
-          "coding" : [ {
             "code" : "paidtopatient",
             "display" : "Paid to patient",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
           }, {
             "code" : "CLM_MDCR_INSTNL_BENE_PD_AMT",
-            "display" : "Institutional Beneficiary Paid Amount",
+            "display" : "Institutional Paid to Beneficiary Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -5006,7 +5007,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
               "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
             }, {
               "code" : "CLM_LINE_BENE_PMT_AMT",
-              "display" : "Beneficiary Paid Amount",
+              "display" : "Line Paid By Beneficiary Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -5298,7 +5299,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
               "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
             }, {
               "code" : "CLM_LINE_BENE_PMT_AMT",
-              "display" : "Beneficiary Paid Amount",
+              "display" : "Line Paid By Beneficiary Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -5570,7 +5571,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
               "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
             }, {
               "code" : "CLM_LINE_BENE_PMT_AMT",
-              "display" : "Beneficiary Paid Amount",
+              "display" : "Line Paid By Beneficiary Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -6262,6 +6263,25 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_PPS_IND_CD",
+            "display" : "Claim PPS Indicator Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "1",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PPS-IND-CD"
+          } ]
+        },
+        "sequence" : 22
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "drg",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -6272,7 +6292,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 22
+        "sequence" : 23
       } ],
       "total" : [ {
         "amount" : {
@@ -6382,7 +6402,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
           }, {
             "code" : "CLM_MDCR_INSTNL_BENE_PD_AMT",
-            "display" : "Institutional Beneficiary Paid Amount",
+            "display" : "Institutional Paid to Beneficiary Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -7084,12 +7104,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "http://hl7.org/fhir/sid/icd-10-cm"
           } ]
         },
-        "onAdmission" : {
-          "coding" : [ {
-            "code" : "0",
-            "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding"
-          } ]
-        },
         "sequence" : 10,
         "type" : [ {
           "coding" : [ {
@@ -7180,7 +7194,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
               "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
             }, {
               "code" : "CLM_LINE_BENE_PMT_AMT",
-              "display" : "Beneficiary Paid Amount",
+              "display" : "Line Paid By Beneficiary Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -7470,7 +7484,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
               "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
             }, {
               "code" : "CLM_LINE_BENE_PMT_AMT",
-              "display" : "Beneficiary Paid Amount",
+              "display" : "Line Paid By Beneficiary Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -7732,7 +7746,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
               "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
             }, {
               "code" : "CLM_LINE_BENE_PMT_AMT",
-              "display" : "Beneficiary Paid Amount",
+              "display" : "Line Paid By Beneficiary Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -8027,7 +8041,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
               "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
             }, {
               "code" : "CLM_LINE_BENE_PMT_AMT",
-              "display" : "Beneficiary Paid Amount",
+              "display" : "Line Paid By Beneficiary Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -8298,7 +8312,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
               "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
             }, {
               "code" : "CLM_LINE_BENE_PMT_AMT",
-              "display" : "Beneficiary Paid Amount",
+              "display" : "Line Paid By Beneficiary Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -8575,7 +8589,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
               "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
             }, {
               "code" : "CLM_LINE_BENE_PMT_AMT",
-              "display" : "Beneficiary Paid Amount",
+              "display" : "Line Paid By Beneficiary Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -8849,7 +8863,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
               "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
             }, {
               "code" : "CLM_LINE_BENE_PMT_AMT",
-              "display" : "Beneficiary Paid Amount",
+              "display" : "Line Paid By Beneficiary Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -9138,7 +9152,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
               "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
             }, {
               "code" : "CLM_LINE_BENE_PMT_AMT",
-              "display" : "Beneficiary Paid Amount",
+              "display" : "Line Paid By Beneficiary Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -9427,7 +9441,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
               "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
             }, {
               "code" : "CLM_LINE_BENE_PMT_AMT",
-              "display" : "Beneficiary Paid Amount",
+              "display" : "Line Paid By Beneficiary Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -10144,7 +10158,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
           }, {
             "code" : "CLM_MDCR_INSTNL_BENE_PD_AMT",
-            "display" : "Institutional Beneficiary Paid Amount",
+            "display" : "Institutional Paid to Beneficiary Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -10624,11 +10638,11 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "role" : {
           "coding" : [ {
             "code" : "referring",
-            "display" : "Referring provider",
+            "display" : "Referring",
             "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole"
           }, {
             "code" : "referring",
-            "display" : "Referring provider",
+            "display" : "Referring",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
           } ]
         },
@@ -10769,7 +10783,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
               "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
             }, {
               "code" : "CLM_LINE_BENE_PMT_AMT",
-              "display" : "Beneficiary Paid Amount",
+              "display" : "Line Paid By Beneficiary Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -11037,7 +11051,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
               "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
             }, {
               "code" : "CLM_LINE_BENE_PMT_AMT",
-              "display" : "Beneficiary Paid Amount",
+              "display" : "Line Paid By Beneficiary Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -11261,6 +11275,9 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           }, {
             "code" : "0132",
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
+          }, {
+            "code" : "5",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DDCTBL-COINSRNC-CD"
           } ]
         },
         "sequence" : 2,
@@ -11310,7 +11327,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
               "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
             }, {
               "code" : "CLM_LINE_BENE_PMT_AMT",
-              "display" : "Beneficiary Paid Amount",
+              "display" : "Line Paid By Beneficiary Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -11802,6 +11819,63 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_MDCR_NPMT_RSN_CD",
+            "display" : "Claim Non Payment Reason Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "44",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-NPMT-RSN-CD"
+          } ]
+        },
+        "sequence" : 14
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_FI_ACTN_CD",
+            "display" : "Claim Fiscal Intermediary Action Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "7",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
+          } ]
+        },
+        "sequence" : 15
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_PPS_IND_CD",
+            "display" : "Claim PPS Indicator Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "1",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PPS-IND-CD"
+          } ]
+        },
+        "sequence" : 16
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "drg",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -11812,7 +11886,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 17
       } ],
       "total" : [ {
         "amount" : {
@@ -11922,7 +11996,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
           }, {
             "code" : "CLM_MDCR_INSTNL_BENE_PD_AMT",
-            "display" : "Institutional Beneficiary Paid Amount",
+            "display" : "Institutional Paid to Beneficiary Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -12726,7 +12800,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
               "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
             }, {
               "code" : "CLM_LINE_BENE_PMT_AMT",
-              "display" : "Beneficiary Paid Amount",
+              "display" : "Line Paid By Beneficiary Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -13018,7 +13092,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
               "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
             }, {
               "code" : "CLM_LINE_BENE_PMT_AMT",
-              "display" : "Beneficiary Paid Amount",
+              "display" : "Line Paid By Beneficiary Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -13290,7 +13364,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
               "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
             }, {
               "code" : "CLM_LINE_BENE_PMT_AMT",
-              "display" : "Beneficiary Paid Amount",
+              "display" : "Line Paid By Beneficiary Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -13982,6 +14056,25 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_PPS_IND_CD",
+            "display" : "Claim PPS Indicator Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "1",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PPS-IND-CD"
+          } ]
+        },
+        "sequence" : 22
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "drg",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -13992,7 +14085,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 22
+        "sequence" : 23
       } ],
       "total" : [ {
         "amount" : {
@@ -14102,7 +14195,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
           }, {
             "code" : "CLM_MDCR_INSTNL_BENE_PD_AMT",
-            "display" : "Institutional Beneficiary Paid Amount",
+            "display" : "Institutional Paid to Beneficiary Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -14804,12 +14897,6 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "http://hl7.org/fhir/sid/icd-10-cm"
           } ]
         },
-        "onAdmission" : {
-          "coding" : [ {
-            "code" : "0",
-            "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding"
-          } ]
-        },
         "sequence" : 10,
         "type" : [ {
           "coding" : [ {
@@ -14900,7 +14987,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
               "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
             }, {
               "code" : "CLM_LINE_BENE_PMT_AMT",
-              "display" : "Beneficiary Paid Amount",
+              "display" : "Line Paid By Beneficiary Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -15190,7 +15277,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
               "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
             }, {
               "code" : "CLM_LINE_BENE_PMT_AMT",
-              "display" : "Beneficiary Paid Amount",
+              "display" : "Line Paid By Beneficiary Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -15452,7 +15539,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
               "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
             }, {
               "code" : "CLM_LINE_BENE_PMT_AMT",
-              "display" : "Beneficiary Paid Amount",
+              "display" : "Line Paid By Beneficiary Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -15747,7 +15834,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
               "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
             }, {
               "code" : "CLM_LINE_BENE_PMT_AMT",
-              "display" : "Beneficiary Paid Amount",
+              "display" : "Line Paid By Beneficiary Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -16018,7 +16105,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
               "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
             }, {
               "code" : "CLM_LINE_BENE_PMT_AMT",
-              "display" : "Beneficiary Paid Amount",
+              "display" : "Line Paid By Beneficiary Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -16295,7 +16382,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
               "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
             }, {
               "code" : "CLM_LINE_BENE_PMT_AMT",
-              "display" : "Beneficiary Paid Amount",
+              "display" : "Line Paid By Beneficiary Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -16569,7 +16656,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
               "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
             }, {
               "code" : "CLM_LINE_BENE_PMT_AMT",
-              "display" : "Beneficiary Paid Amount",
+              "display" : "Line Paid By Beneficiary Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -16858,7 +16945,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
               "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
             }, {
               "code" : "CLM_LINE_BENE_PMT_AMT",
-              "display" : "Beneficiary Paid Amount",
+              "display" : "Line Paid By Beneficiary Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -17147,7 +17234,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
               "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
             }, {
               "code" : "CLM_LINE_BENE_PMT_AMT",
-              "display" : "Beneficiary Paid Amount",
+              "display" : "Line Paid By Beneficiary Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -17864,7 +17951,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
           }, {
             "code" : "CLM_MDCR_INSTNL_BENE_PD_AMT",
-            "display" : "Institutional Beneficiary Paid Amount",
+            "display" : "Institutional Paid to Beneficiary Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }
@@ -18344,11 +18431,11 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "role" : {
           "coding" : [ {
             "code" : "referring",
-            "display" : "Referring provider",
+            "display" : "Referring",
             "system" : "http://terminology.hl7.org/CodeSystem/claimcareteamrole"
           }, {
             "code" : "referring",
-            "display" : "Referring provider",
+            "display" : "Referring",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole"
           } ]
         },
@@ -18489,7 +18576,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
               "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
             }, {
               "code" : "CLM_LINE_BENE_PMT_AMT",
-              "display" : "Beneficiary Paid Amount",
+              "display" : "Line Paid By Beneficiary Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -18757,7 +18844,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
               "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
             }, {
               "code" : "CLM_LINE_BENE_PMT_AMT",
-              "display" : "Beneficiary Paid Amount",
+              "display" : "Line Paid By Beneficiary Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -18981,6 +19068,9 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           }, {
             "code" : "0132",
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
+          }, {
+            "code" : "5",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DDCTBL-COINSRNC-CD"
           } ]
         },
         "sequence" : 2,
@@ -19030,7 +19120,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
               "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
             }, {
               "code" : "CLM_LINE_BENE_PMT_AMT",
-              "display" : "Beneficiary Paid Amount",
+              "display" : "Line Paid By Beneficiary Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -19522,6 +19612,63 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "CLM_MDCR_NPMT_RSN_CD",
+            "display" : "Claim Non Payment Reason Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "44",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-NPMT-RSN-CD"
+          } ]
+        },
+        "sequence" : 14
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_FI_ACTN_CD",
+            "display" : "Claim Fiscal Intermediary Action Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "7",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
+          } ]
+        },
+        "sequence" : 15
+      }, {
+        "category" : {
+          "coding" : [ {
+            "code" : "CLM_PPS_IND_CD",
+            "display" : "Claim PPS Indicator Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "1",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PPS-IND-CD"
+          } ]
+        },
+        "sequence" : 16
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "drg",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -19532,7 +19679,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 14
+        "sequence" : 17
       } ],
       "total" : [ {
         "amount" : {
@@ -19642,7 +19789,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication"
           }, {
             "code" : "CLM_MDCR_INSTNL_BENE_PD_AMT",
-            "display" : "Institutional Beneficiary Paid Amount",
+            "display" : "Institutional Paid to Beneficiary Amount",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
           } ]
         }

@@ -40,6 +40,54 @@ conceptmap "FED_PRVDR_SPCLTY_TO_TAXONOMY" {
   s:"12" == t:"204D00000X"
   s:"13" == t:"2084N0400X"
   s:"14" == t:"207T00000X"
+  s:"15" == t:"235Z00000X"
+  s:"16" == t:"207V00000X"
+  s:"17" == t:"2086H0002X"
+  s:"18" == t:"207W00000X"
+  s:"19" == t:"1223S0112X"
+  s:"20" == t:"207X00000X"
+  s:"21" == t:"207RC0001X"
+  s:"22" == t:"207ZP0101X"
+  s:"23" == t:"207XX0005X"
+  s:"24" == t:"208200000X"
+  s:"25" == t:"208100000X"
+  s:"26" == t:"2084P0800X"
+  s:"27" == t:"207QG0300X"
+  s:"28" == t:"208C00000X"
+  s:"29" == t:"207RP1001X"
+  s:"30" == t:"2085R0202X"
+  s:"31" == t:"163WC3500X"
+  s:"32" == t:"367H00000X"
+  s:"33" == t:"208G00000X"
+  s:"34" == t:"208800000X"
+  s:"35" == t:"111N00000X"
+  s:"36" == t:"207U00000X"
+  s:"37" == t:"208000000X"
+  s:"39" == t:"207RN0300X"
+  s:"40" == t:"2086S0105X"
+  s:"41" == t:"152W00000X"
+  s:"42" == t:"367A00000X"
+  s:"43" == t:"367500000X"
+  s:"44" == t:"207RI0200X"
+  s:"45" == t:"261QR0208X"
+  s:"45" == t:"261QR0207X"
+  s:"46" == t:"207RE0101X"
+  s:"47" == t:"293D00000X"
+  s:"48" == t:"213E00000X"
+  s:"49" == t:"261QA1903X"
+  s:"50" == t:"363L00000X"
+  s:"51" == t:"335E00000X"
+  s:"52" == t:"335E00000X"
+  s:"53" == t:"335E00000X"
+  s:"54" == t:"332B00000X"
+  s:"55" == t:"222Z00000X"
+  s:"56" == t:"224P00000X"
+  s:"57" == t:"222Z00000X"
+  s:"58" == t:"332B00000X"
+  s:"59" == t:"341600000X"
+  s:"60" == t:"251K00000X"
+  s:"61" == t:"251V00000X"
+  s:"62" == t:"103T00000X"
   s:"63" == t:"335V00000X"
   s:"64" == t:"231H00000X"
   s:"65" == t:"225100000X"
@@ -113,6 +161,7 @@ conceptmap "CLM_TYPE_CD" {
   s:82 == t:"professional"
   s:1011 == t:"institutional"
   s:2011 == t:"institutional"
+  s:2700 == t:"professional"
 }
 
 conceptmap "RIC_CD" {
@@ -193,16 +242,19 @@ conceptmap "META_SRC_SK" {
   s:"1001" == t:"MCS"
   s:"1002" == t:"VMS"
   s:"1003" == t:"FISS"
+  s:"1004" == t:"MAP"
 }
 
 conceptmap "SYSTEM_TYPE" {
   prefix s = "https://hl7.org/fhir/string"
   prefix t = "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type"
 
-  s:"20000" == t:"NationalClaimsHistory"
-  s:"21000" == t:"SharedSystem"
-  s:"22000" == t:"SharedSystem"
-  s:"23000" == t:"SharedSystem"
+  s:"1" == t:"DDPS"
+  s:"7" == t:"NationalClaimsHistory"
+  s:"1001" == t:"SharedSystem"
+  s:"1002" == t:"SharedSystem"
+  s:"1003" == t:"SharedSystem"
+  s:"1004" == t:"SharedSystem"
 }
 
 conceptmap "FINAL_ACTION" {
@@ -211,6 +263,22 @@ conceptmap "FINAL_ACTION" {
 
   s:"Y" == t:"FinalAction"
   s:"N" == t:"NotFinalAction"
+}
+
+conceptmap "CLM_PD_STUS_CD" {
+  prefix s = "https://hl7.org/fhir/string"
+  prefix t = "https://hl7.org/fhir/string"
+
+  s:"P" == t:"complete"
+  s:"1" == t:"complete"
+  s:"R" == t:"complete"
+  s:"2" == t:"complete"
+  s:"D" == t:"complete"
+  s:"Y" == t:"complete"
+  s:"~" == t:"partial"
+  s:"I" == t:"partial"
+  s:"S" == t:"partial"
+  s:"T" == t:"partial"
 }
 
 conceptmap "CLM_AUDT_TRL_STUS_CD_MCS" {

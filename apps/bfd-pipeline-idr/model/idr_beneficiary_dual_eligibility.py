@@ -1,14 +1,9 @@
-from collections.abc import Sequence
 from datetime import date, datetime
-from typing import Annotated
+from typing import Annotated, override
 
 from pydantic import BeforeValidator
 
-from constants import (
-    BENEFICIARY_TABLE,
-    NON_CLAIM_PARTITION,
-)
-from load_partition import LoadPartition, LoadPartitionGroup
+from load_partition import LoadPartition
 from loader import LoadMode
 from model.base_model import (
     ALIAS_HSTRY,
@@ -18,6 +13,7 @@ from model.base_model import (
     PRIMARY_KEY,
     UPDATE_TIMESTAMP,
     IdrBaseModel,
+    ModelType,
     deceased_bene_filter,
     transform_default_string,
     transform_null_date_to_min,
@@ -39,22 +35,28 @@ class IdrBeneficiaryDualEligibility(IdrBaseModel):
         datetime, {UPDATE_TIMESTAMP: True}, BeforeValidator(transform_null_date_to_min)
     ]
 
+    @override
     @staticmethod
     def table() -> str:
         return "idr.beneficiary_dual_eligibility"
 
-    @staticmethod
-    def last_updated_date_table() -> str:
-        return BENEFICIARY_TABLE
-
+    @override
     @staticmethod
     def last_updated_date_column() -> list[str]:
         return [
             "bfd_part_dual_coverage_updated_ts",
         ]
 
+    @override
     @staticmethod
-    def fetch_query(partition: LoadPartition, start_time: datetime, load_mode: LoadMode) -> str:  # noqa: ARG004
+    def model_type() -> ModelType:
+        return ModelType.BENEFICIARY
+
+    @override
+    @classmethod
+    def fetch_query(
+        cls, partition: LoadPartition, start_time: datetime, load_mode: LoadMode
+    ) -> str:
         hstry = ALIAS_HSTRY
         return f"""
             SELECT {{COLUMNS}}
@@ -66,7 +68,3 @@ class IdrBeneficiaryDualEligibility(IdrBaseModel):
             )
             {{ORDER_BY}}
         """
-
-    @staticmethod
-    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
-        return [NON_CLAIM_PARTITION]

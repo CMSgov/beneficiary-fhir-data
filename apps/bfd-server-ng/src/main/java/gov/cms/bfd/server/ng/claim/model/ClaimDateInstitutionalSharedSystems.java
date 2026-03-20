@@ -10,6 +10,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @Embeddable
 class ClaimDateInstitutionalSharedSystems implements SupportingInfoComponentBase {
 
+  @Embedded private AdmissionPeriod admissionPeriod;
   @Embedded private ClaimSubmissionDate claimSubmissionDate;
   @Embedded private QualifyStayFromDate qualifyStayFromDate;
   @Embedded private ClaimProcessDate claimProcessDate;
@@ -18,6 +19,7 @@ class ClaimDateInstitutionalSharedSystems implements SupportingInfoComponentBase
   public List<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {
     return Stream.of(
+            admissionPeriod.toFhir(supportingInfoFactory),
             claimSubmissionDate.toFhir(supportingInfoFactory),
             qualifyStayFromDate.toFhir(supportingInfoFactory),
             claimProcessDate.toFhir(supportingInfoFactory))

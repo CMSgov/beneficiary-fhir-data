@@ -1524,7 +1524,7 @@
     - CCLF2.CLM_LINE_INSTNL_REV_CTR_DT
   sourceView: V2_MDCR_CLM_LINE_INSTNL
   sourceColumn: CLM_LINE_INSTNL_REV_CTR_DT
-  fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_INSTNL_MSP2_PD_AMT')).amount.value
+  fhirPath: ExplanationOfBenefit.item.servicedDate
 - inputPath: SupportingInfoComponent.CLM_ACTV_CARE_FROM_DT
   appliesTo:
     - Inpatient
@@ -2455,8 +2455,24 @@
     - FISS
   sourceView: V2_MDCR_CLM_LCTN_HSTRY
   sourceColumn: CLM_AUDT_TRL_STUS_CD
-  fhirPath: ExplanationOfBenefit.outcome
-  notes: The status code can be retrieved via ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_AUDT_TRL_STUS_CD').exists()).code.coding.code
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_AUDT_TRL_STUS_CD').exists()).code.coding.code
+- inputPath: ExplanationOfBenefit-Base.CLM_PD_STUS_CD
+  appliesTo:
+    - Inpatient
+    - Outpatient
+    - Hospice
+    - HHA
+    - SNF
+    - Carrier
+    - DME
+  sources:
+    - MCS
+    - VMS
+    - FISS
+  sourceView: V2_MDCR_CLM
+  sourceColumn: CLM_PD_STUS_CD
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_PD_STUS_CD').exists()).code.coding.code
+  notes: Used to populate ExplanationOfBenefit.outcome
 - inputPath: ExplanationOfBenefit-Base.PRVDR_RFRG_PRVDR_NPI_NUM
   appliesTo:
     - Outpatient
@@ -3019,7 +3035,6 @@
     - SNF
     - Carrier
   sources:
-    - FISS
     - MCS
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_BENE_PMT_COINSRNC_AMT

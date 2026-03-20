@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
-from collections.abc import Callable, Iterable, Sequence
+from collections.abc import Callable, Iterable
 from datetime import UTC, date, datetime, timedelta
-from enum import StrEnum
+from enum import Enum, StrEnum
 from typing import Any, TypeVar, cast
 
 from pydantic import BaseModel
@@ -9,22 +9,33 @@ from pydantic import BaseModel
 from constants import (
     ALL_CLAIM_TYPE_CODES,
     ALTERNATE_DEFAULT_DATE,
+    BENEFICIARY_TABLE,
+    CLAIM_INSTITUTIONAL_NCH_TABLE,
+    CLAIM_INSTITUTIONAL_SS_TABLE,
+    CLAIM_PROFESSIONAL_NCH_TABLE,
+    CLAIM_PROFESSIONAL_SS_TABLE,
+    CLAIM_RX_TABLE,
     DEATH_DATE_CUTOFF_YEARS,
     DEFAULT_MAX_DATE,
     DEFAULT_MIN_DATE,
-    MIN_CLAIM_LOAD_DATE,
+    EMPTY_PARTITION,
+    INSTITUTIONAL_NCH_PARTITIONS,
+    INSTITUTIONAL_SS_PARTITIONS,
+    NON_CLAIM_PARTITION,
     PART_D_CLAIM_TYPE_CODES,
+    PART_D_PARTITIONS,
+    PROFESSIONAL_NCH_PARTITIONS,
+    PROFESSIONAL_SS_PARTITIONS,
 )
 from load_partition import LoadPartition, LoadPartitionGroup, PartitionType
-from settings import LATEST_CLAIMS, MIN_TRANSACTION_DATE
+from settings import (
+    LATEST_CLAIMS,
+    MIN_CLAIM_LOAD_DATE,
+    MIN_CLAIM_NCH_TRANSACTION_DATE,
+    MIN_CLAIM_SS_TRANSACTION_DATE,
+)
 
 type DbType = str | float | int | bool | date | datetime
-
-
-class LoadMode(StrEnum):
-    LOCAL = "local"
-    SYNTHETIC = "synthetic"
-    IDR = ""
 
 
 def transform_null_date_to_max(value: date | None) -> date:
@@ -90,12 +101,6 @@ def format_date_opt(date_str: str | None) -> datetime | None:
 
 def format_date(date_str: str) -> datetime:
     return cast(datetime, format_date_opt(date_str))
-
-
-def get_min_transaction_date(default_date: str = DEFAULT_MIN_DATE) -> datetime:
-    if MIN_TRANSACTION_DATE is not None:
-        return format_date(MIN_TRANSACTION_DATE)
-    return format_date(default_date)
 
 
 def provider_last_or_legal_name_expr(alias: str) -> str:
@@ -188,9 +193,68 @@ ALIAS_CLM_GRP = "clm_grp"
 ALIAS_RLT_COND = "rltcond"
 ALIAS_PBP_NUM = "pbp_num"
 ALIAS_CNTRCT_SGMT = "sgmt"
+ALIAS_OCRNC_SGNTR = "ocrnc_sgntr_mbr"
+ALIAS_RLT_OCRNC_SGNTR = "rlt_ocrnc_sgntr_mbr"
+ALIAS_OCRNC_SGNTR_DERIVED_DATES = "ocrnc_sgntr_mbr_derived_dates"
+ALIAS_RLT_OCRNC_SGNTR_DERIVED_DATES = "rlt_ocrnc_sgntr_mbr_derived_dates"
+ALIAS_LINE_FISS_BFNT_FLATTENED = "line_fiss_bnft_flattened"
 
 INSERT_FIELD = {BATCH_TIMESTAMP: True, INSERT_EXCLUDE: True, COLUMN_MAP: "idr_insrt_ts"}
 UPDATE_FIELD = {UPDATE_TIMESTAMP: True, INSERT_EXCLUDE: True, COLUMN_MAP: "idr_updt_ts"}
+
+
+class LoadMode(StrEnum):
+    LOCAL = "local"
+    SYNTHETIC = "synthetic"
+    IDR = ""
+
+
+class ModelType(Enum):
+    CLAIM_INSTITUTIONAL_NCH = (
+        MIN_CLAIM_NCH_TRANSACTION_DATE,
+        CLAIM_INSTITUTIONAL_NCH_TABLE,
+        INSTITUTIONAL_NCH_PARTITIONS,
+    )
+    CLAIM_INSTITUTIONAL_SS = (
+        MIN_CLAIM_SS_TRANSACTION_DATE,
+        CLAIM_INSTITUTIONAL_SS_TABLE,
+        INSTITUTIONAL_SS_PARTITIONS,
+    )
+    CLAIM_PROFESSIONAL_NCH = (
+        MIN_CLAIM_NCH_TRANSACTION_DATE,
+        CLAIM_PROFESSIONAL_NCH_TABLE,
+        PROFESSIONAL_NCH_PARTITIONS,
+    )
+    CLAIM_PROFESSIONAL_SS = (
+        MIN_CLAIM_SS_TRANSACTION_DATE,
+        CLAIM_PROFESSIONAL_SS_TABLE,
+        PROFESSIONAL_SS_PARTITIONS,
+    )
+    CLAIM_RX = (MIN_CLAIM_NCH_TRANSACTION_DATE, CLAIM_RX_TABLE, PART_D_PARTITIONS)
+    BENEFICIARY = (DEFAULT_MIN_DATE, BENEFICIARY_TABLE, [NON_CLAIM_PARTITION])
+    LOAD_PROGRESS = (DEFAULT_MIN_DATE, "", EMPTY_PARTITION)
+
+    def __init__(
+        self,
+        min_transaction_date: str,
+        last_updated_table: str,
+        partitions: list[LoadPartitionGroup],
+    ) -> None:
+        self._min_transaction_date = format_date(min_transaction_date)
+        self._last_updated_table = last_updated_table
+        self._partitions = partitions
+
+    @property
+    def min_transaction_date(self) -> datetime:
+        return self._min_transaction_date
+
+    @property
+    def last_updated_table(self) -> str:
+        return self._last_updated_table
+
+    @property
+    def partitions(self) -> list[LoadPartitionGroup]:
+        return self._partitions
 
 
 class IdrBaseModel(BaseModel, ABC):
@@ -199,10 +263,11 @@ class IdrBaseModel(BaseModel, ABC):
     def table() -> str:
         """BFD table name populated by this model."""
 
-    @staticmethod
-    @abstractmethod
-    def last_updated_date_table() -> str:
-        """BFD table to keep track of last updated date for this model."""
+    @classmethod
+    def last_updated_date_table(cls) -> str:
+        if not cls.last_updated_date_column():
+            return ""
+        return cls.model_type().last_updated_table
 
     @staticmethod
     @abstractmethod
@@ -214,9 +279,10 @@ class IdrBaseModel(BaseModel, ABC):
         """Whether to merge or replace data when loading this table."""
         return False
 
-    @staticmethod
+    @classmethod
     @abstractmethod
     def fetch_query(
+        cls,
         partition: LoadPartition,
         start_time: datetime,
         load_mode: LoadMode,
@@ -225,15 +291,8 @@ class IdrBaseModel(BaseModel, ABC):
 
     @staticmethod
     @abstractmethod
-    def fetch_query_partitions() -> Sequence[LoadPartitionGroup]:
-        """Partitions fetch queries of this model to allow for parallel fetching of data via ray.
-
-        [] is returned for models that do not do any such partitioning.
-        """
-
-    @staticmethod
-    def computed_keys() -> list[str]:
-        return []
+    def model_type() -> ModelType:
+        """Value representing the type of model."""
 
     @classmethod
     def unique_key(cls) -> list[str]:
@@ -491,3 +550,77 @@ def transform_default_hipps_code(value: str | None) -> str:
     if value is None or value == "00000":
         return ""
     return value
+
+
+def claim_occurrence_cte() -> str:
+    ocrnc_sgntr = ALIAS_OCRNC_SGNTR
+    qualifying_stay_cd = "70"
+    non_covered_stay_cd = "74"
+    return f"""
+            SELECT
+                clm_ocrnc_sgntr_sk,
+                MAX(CASE WHEN clm_ocrnc_span_cd = '{non_covered_stay_cd}'
+                    THEN clm_ocrnc_span_from_dt END) AS bfd_clm_ncvrd_from_dt,
+                MAX(CASE WHEN clm_ocrnc_span_cd = '{non_covered_stay_cd}'
+                    THEN clm_ocrnc_span_thru_dt END) AS bfd_clm_ncvrd_thru_dt,
+                MAX(CASE WHEN clm_ocrnc_span_cd = '{qualifying_stay_cd}'
+                    THEN clm_ocrnc_span_from_dt END) AS bfd_clm_qlfy_stay_from_dt,
+                MAX(CASE WHEN clm_ocrnc_span_cd = '{qualifying_stay_cd}'
+                    THEN clm_ocrnc_span_thru_dt END) AS bfd_clm_qlfy_stay_thru_dt,
+                MAX(idr_insrt_ts) AS idr_insrt_ts
+            FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_ocrnc_sgntr_mbr {ocrnc_sgntr}
+            WHERE clm_ocrnc_span_cd IN ('{qualifying_stay_cd}', '{non_covered_stay_cd}')
+            GROUP BY clm_ocrnc_sgntr_sk"""
+
+
+def claim_related_occurrences_cte() -> str:
+    rlt_ocrnc_sgntr = ALIAS_RLT_OCRNC_SGNTR
+    medicare_exhausted_cd = "A3"
+    active_care_cd = "22"
+    return f"""
+            SELECT
+                clm_rlt_ocrnc_sgntr_sk,
+                MAX(CASE WHEN clm_rlt_ocrnc_cd = '{medicare_exhausted_cd}'
+                    THEN clm_rlt_ocrnc_dt END) AS bfd_clm_mdcr_exhstd_dt,
+                MAX(CASE WHEN clm_rlt_ocrnc_cd = '{active_care_cd}'
+                    THEN clm_rlt_ocrnc_dt END) AS bfd_clm_actv_care_thru_dt,
+                MAX(idr_insrt_ts) AS idr_insrt_ts
+            FROM cms_vdm_view_mdcr_prd.v2_clm_rlt_ocrnc_sgntr_mbr {rlt_ocrnc_sgntr}
+            WHERE clm_rlt_ocrnc_cd in ('{medicare_exhausted_cd}', '{active_care_cd}')
+            GROUP BY clm_rlt_ocrnc_sgntr_sk
+    """
+
+
+def claim_related_conditions_cte(load_mode: LoadMode) -> str:
+    rlt_cond = ALIAS_RLT_COND
+    clm_rlt_cond_cd_agg = ""
+    if load_mode == LoadMode.IDR:
+        clm_rlt_cond_cd_agg = """
+            ARRAY_AGG(
+                CASE
+                    WHEN LENGTH(clm_rlt_cond_cd) = 2 THEN clm_rlt_cond_cd
+                    ELSE '~' || clm_rlt_cond_cd
+                END
+            ) WITHIN GROUP (ORDER BY clm_rlt_cond_sgntr_sqnc_num, clm_rlt_cond_cd)
+        """
+    else:
+        clm_rlt_cond_cd_agg = """
+            ARRAY_AGG(
+                CASE
+                    WHEN LENGTH(clm_rlt_cond_cd) = 2 THEN clm_rlt_cond_cd
+                    ELSE '~' || clm_rlt_cond_cd
+                END
+                ORDER BY clm_rlt_cond_sgntr_sqnc_num, clm_rlt_cond_cd
+            )
+        """
+
+    return f"""
+            SELECT
+                clm_rlt_cond_sgntr_sk,
+                ARRAY_TO_STRING({clm_rlt_cond_cd_agg}, '') AS clm_rlt_cond_cd,
+                MAX(idr_insrt_ts) AS idr_insrt_ts
+            FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_rlt_cond_sgntr_mbr {rlt_cond}
+            WHERE clm_rlt_cond_sgntr_sk NOT IN (0, 1, -1)
+            AND clm_rlt_cond_cd != '~'
+            GROUP BY clm_rlt_cond_sgntr_sk
+    """

@@ -1,7 +1,9 @@
 package gov.cms.bfd.server.ng.claim.model;
 
+import gov.cms.bfd.server.ng.converter.WhitespaceTrimConverter;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import java.util.Optional;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Extension;
@@ -12,6 +14,7 @@ import org.hl7.fhir.r4.model.Extension;
  */
 public class ClaimRevenuePaymentMethodCode {
   @Column(name = "clm_rev_pmt_mthd_cd")
+  @Convert(converter = WhitespaceTrimConverter.class)
   private Optional<String> revenuePaymentMethodCode;
 
   Optional<Extension> toFhir() {

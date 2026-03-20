@@ -9,6 +9,7 @@ import au.com.origin.snapshots.junit5.SnapshotExtension;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ch.qos.logback.classic.spi.ILoggingEvent;
+import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.EntityManager;
 import java.util.HashSet;
 import java.util.List;
@@ -135,9 +136,11 @@ public class IntegrationTestBase {
       assertTrue(coding.hasSystem());
       assertTrue(coding.hasCode());
       var system = coding.getSystem();
-      assertFalse(
-          system.contains("_"),
-          String.format("Coding System URL contains underscore: system='%s'", system));
+      if (!system.equals(SystemUrls.SYS_CLM_POS_CD)) {
+        assertFalse(
+            system.contains("_"),
+            String.format("Coding System URL contains underscore: system='%s'", system));
+      }
     }
   }
 

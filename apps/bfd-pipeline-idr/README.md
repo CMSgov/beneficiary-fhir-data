@@ -41,6 +41,14 @@ This is useful for loading our synthetic data stored in our repository, or the t
 uv run pytest
 ```
 
+### Debugging generated queries
+
+The queries used here are heavily dynamic and sometimes it's useful to inspect the generated result.
+
+To inspect a single query, run `IDR_LOG_LEVEL=debug IDR_TABLES="idr.<your_table_name>" ./run-db.sh ./test_samples1`
+
+This will enable debug logging and only run against a single table to prevent dozens of queries from spamming the logs.
+
 ## Settings
 
 The pipeline has many settings that can be tweaked for different kinds of loads.

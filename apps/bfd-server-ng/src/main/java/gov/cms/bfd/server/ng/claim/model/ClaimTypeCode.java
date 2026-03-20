@@ -16,13 +16,9 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Reference;
 
-/**
- * Claim type codes. Suppress SonarQube warning that constant names should comply with naming
- * conventions
- */
+/** Claim type codes. */
 @Getter
 @AllArgsConstructor
-@SuppressWarnings("java:S115")
 public enum ClaimTypeCode {
   /** 1 - MEDICARE PART D ORIGINAL CLAIM. */
   _1(1, "MEDICARE PART D ORIGINAL CLAIM"),
@@ -404,10 +400,6 @@ public enum ClaimTypeCode {
                     .setCode("other")
                     .setDisplay("Other")));
     return Optional.of(adjudication);
-  }
-
-  private boolean isBetween(int lower, int upper) {
-    return (code >= lower) && (code <= upper);
   }
 
   boolean isClaimSubtype(ClaimSubtype subtype) {

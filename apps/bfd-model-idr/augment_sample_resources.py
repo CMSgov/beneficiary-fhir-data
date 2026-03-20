@@ -50,6 +50,7 @@ header_to_supp_info_cols = {
     "CLM_NGACO_TLHLTH_SW": "CLM_NGACO_TLHLTH_SW",
     "CLM_NGACO_CPTATN_SW": "CLM_NGACO_CPTATN_SW",
     "CLM_ACO_CARE_MGMT_HCBS_SW": "CLM_ACO_CARE_MGMT_HCBS_SW",
+    "CLM_PD_STUS_CD": "CLM_PD_STUS_CD"
 }
 
 line_to_supp_info_cols = {
@@ -104,8 +105,6 @@ class Provider:
     CLM_BLG_PRVDR_ZIP5_CD: Optional[str] = None
     CLM_PRVDR_GNRC_ID_NUM: Optional[str] = None
     CLM_BLG_PRVDR_TAX_NUM: Optional[str] = None
-
-provider_list = []
 
 populate_fields_except_na = [
     "PRVDR_LGL_NAME",
