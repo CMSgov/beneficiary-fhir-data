@@ -14,4 +14,4 @@ jobs:
           extra-args: --hook-stage pre-commit --from-ref origin/master --to-ref HEAD
       - uses: j178/prek-action@v1
         with:
-          extra-args: --hook-stage pre-push --from-ref ${{ github.event.pull_request.base.sha }} --to-ref ${{ github.event.pull_request.head.sha }}
+          extra-args: --hook-stage pre-push --from-ref origin/master --to-ref HEAD
