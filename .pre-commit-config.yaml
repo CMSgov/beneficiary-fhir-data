@@ -35,10 +35,10 @@ repos:
     - id: ruff-format
       stages: [ pre-push ]
       verbose: true
-- repo: https://github.com/RobertCraigie/pyright-python
-  rev: v1.1.408
-  hooks:
-    - id: pyright
+- repo: https://github.com/DetachHead/basedpyright-prek-mirror
+  rev: 1.38.3
+  hooks: 
+    - id: basedpyright
       stages: [ pre-push ]
       verbose: true
 - repo: local
