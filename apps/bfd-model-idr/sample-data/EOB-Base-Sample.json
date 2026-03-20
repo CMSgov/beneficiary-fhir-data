@@ -228,7 +228,6 @@
     ],
     "lineItemComponents":[
         {
-            "CLM_LINE_DGNS_CD": "M48.062",
             "PRVDR_RNDRNG_PRVDR_NPI_NUM": "1942945159",
             "CLM_LINE_ADD_ON_PYMT_AMT": "11.11",
             "CLM_LINE_NON_EHR_RDCTN_AMT": "11.12",

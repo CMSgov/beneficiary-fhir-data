@@ -26,7 +26,7 @@ abstract class ClaimLineProfessionalBase implements ClaimLineBase {
   private Optional<Integer> claimLineNumber;
 
   @Column(name = "clm_line_dgns_cd")
-  private Optional<String> diagnosisCode;
+  private Optional<String> claimLineDiagnosisCode;
 
   private Optional<String> trackingNumber;
 

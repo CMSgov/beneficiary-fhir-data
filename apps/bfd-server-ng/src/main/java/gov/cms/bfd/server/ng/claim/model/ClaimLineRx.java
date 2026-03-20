@@ -72,4 +72,9 @@ public class ClaimLineRx implements ClaimLineBase {
   public Optional<Integer> getClaimLineNumber() {
     return Optional.empty();
   }
+
+  @Override
+  public Optional<String> getClaimLineDiagnosisCode() {
+    return Optional.empty();
+  }
 }

@@ -34,28 +34,22 @@ public abstract class ClaimProcedureBase {
         s -> s + "|" + getIcdIndicator().map(IcdIndicator::getCode).orElse(""));
   }
 
-  Optional<Integer> getDiagnosisPriority(ClaimContext claimContext) {
-    return diagnosisType.map(d -> d.getPriority(claimContext));
-  }
-
   Optional<ExplanationOfBenefit.ProcedureComponent> toFhirProcedure() {
     return Optional.empty();
   }
 
-  Optional<ExplanationOfBenefit.DiagnosisComponent> toFhirDiagnosis(
-      SequenceGenerator sequenceGenerator, ClaimContext claimContext) {
-    if (diagnosisCode.isEmpty()) {
+  abstract Optional<ExplanationOfBenefit.DiagnosisComponent> toFhirDiagnosis(
+      SequenceGenerator sequenceGenerator);
+
+  protected Optional<ExplanationOfBenefit.DiagnosisComponent> buildBaseDiagnosis(
+      SequenceGenerator sequenceGenerator, String typeCode, String typeSystem) {
+    if (diagnosisCode.isEmpty() || icdIndicator.isEmpty()) {
       return Optional.empty();
     }
 
     var diagnosis = new ExplanationOfBenefit.DiagnosisComponent();
     diagnosis.setSequence(sequenceGenerator.next());
-
-    diagnosisType.ifPresent(
-        d ->
-            diagnosis.addType(
-                new CodeableConcept(
-                    new Coding().setSystem(d.getSystem()).setCode(d.getFhirCode(claimContext)))));
+    diagnosis.addType(new CodeableConcept(new Coding().setSystem(typeSystem).setCode(typeCode)));
 
     var formattedCode = icdIndicator.get().formatDiagnosisCode(diagnosisCode.get());
     diagnosis.setDiagnosis(
@@ -66,12 +60,6 @@ public abstract class ClaimProcedureBase {
 
     return Optional.of(diagnosis);
   }
-
-  Optional<String> getClaimPoaIndicator() {
-    return Optional.empty();
-  }
-
-  void setClaimPoaIndicator(String poaIndicator) {}
 
   /**
    * Gets the procedure code.

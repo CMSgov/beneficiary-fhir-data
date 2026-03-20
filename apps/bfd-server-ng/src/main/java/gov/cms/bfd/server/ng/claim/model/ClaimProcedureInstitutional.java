@@ -66,25 +66,31 @@ public class ClaimProcedureInstitutional extends ClaimProcedureBase {
 
   @Override
   public Optional<ExplanationOfBenefit.DiagnosisComponent> toFhirDiagnosis(
-      SequenceGenerator sequenceGenerator, ClaimContext claimContext) {
-    var diagnosis = super.toFhirDiagnosis(sequenceGenerator, claimContext);
+      SequenceGenerator sequenceGenerator) {
+    return getDiagnosisType()
+        .flatMap(
+            type -> {
+              var diagnosis =
+                  buildBaseDiagnosis(sequenceGenerator, type.getFhirCode(), type.getSystem());
 
-    diagnosis.ifPresent(
-        diagnosisComponent ->
-            this.claimPoaIndicator.ifPresent(
-                poaCode -> {
-                  var onAdmissionConcept = new CodeableConcept();
-                  poaCode
-                      .chars()
-                      .forEach(
-                          c ->
-                              onAdmissionConcept
-                                  .addCoding()
-                                  .setSystem(SystemUrls.POA_CODING)
-                                  .setCode(Character.toString(c)));
-                  diagnosisComponent.setOnAdmission(onAdmissionConcept);
-                }));
-
-    return diagnosis;
+              if (type == ClaimDiagnosisType.PRESENT_ON_ADMISSION) {
+                diagnosis.ifPresent(
+                    diagnosisComponent ->
+                        claimPoaIndicator.ifPresent(
+                            poaCode -> {
+                              var onAdmissionConcept = new CodeableConcept();
+                              poaCode
+                                  .chars()
+                                  .forEach(
+                                      c ->
+                                          onAdmissionConcept
+                                              .addCoding()
+                                              .setSystem(SystemUrls.POA_CODING)
+                                              .setCode(Character.toString(c)));
+                              diagnosisComponent.setOnAdmission(onAdmissionConcept);
+                            }));
+              }
+              return diagnosis;
+            });
   }
 }
