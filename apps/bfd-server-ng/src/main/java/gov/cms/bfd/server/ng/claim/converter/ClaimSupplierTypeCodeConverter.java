@@ -16,6 +16,6 @@ public class ClaimSupplierTypeCodeConverter
 
   @Override
   public Optional<ClaimSupplierTypeCode> convertToEntityAttribute(String code) {
-    return ClaimSupplierTypeCode.fromCode(code);
+    return ClaimSupplierTypeCode.tryFromCode(code);
   }
 }

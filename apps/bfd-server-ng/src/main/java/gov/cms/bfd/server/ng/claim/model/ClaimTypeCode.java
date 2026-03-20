@@ -16,10 +16,7 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Reference;
 
-/**
- * Claim type codes. Suppress SonarQube warning that constant names should comply with naming
- * conventions
- */
+/** Claim type codes. */
 @Getter
 @AllArgsConstructor
 public enum ClaimTypeCode {

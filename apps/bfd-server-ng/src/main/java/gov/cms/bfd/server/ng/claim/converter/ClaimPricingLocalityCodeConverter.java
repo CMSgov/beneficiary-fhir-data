@@ -17,6 +17,6 @@ public class ClaimPricingLocalityCodeConverter
 
   @Override
   public Optional<ClaimPricingLocalityCode> convertToEntityAttribute(String code) {
-    return ClaimPricingLocalityCode.fromCode(code);
+    return ClaimPricingLocalityCode.tryFromCode(code);
   }
 }

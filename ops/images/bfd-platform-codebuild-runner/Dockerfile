@@ -45,3 +45,8 @@ RUN curl -fsSL -o /tmp/uv.tar.gz https://github.com/astral-sh/uv/releases/downlo
     && tar -xf /tmp/uv.tar.gz -C /usr/local/bin --strip-components=1 \
     && rm /tmp/uv.tar.gz \
     && chmod +x /usr/local/bin/uv /usr/local/bin/uvx
+
+# Fix installing python versions and packages when running on a Lambda CodeBuild Runner where only
+# $LAMBDA_TASK_ROOT and /tmp are writeable
+ENV XDG_CACHE_HOME=${LAMBDA_TASK_ROOT}/.cache
+ENV UV_PYTHON_INSTALL_DIR=${LAMBDA_TASK_ROOT}/.python

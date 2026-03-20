@@ -70,7 +70,7 @@ class ClaimLineRxSupportingInfo {
    */
   public Optional<Coding> toFhirNdcCompound() {
     return compoundCode
-        .filter(c -> c == ClaimLineCompoundCode._2)
+        .filter(c -> c.getCode().equals("2"))
         .map(c -> new Coding().setSystem(SystemUrls.CARIN_COMPOUND_LITERAL).setCode("compound"));
   }
 }

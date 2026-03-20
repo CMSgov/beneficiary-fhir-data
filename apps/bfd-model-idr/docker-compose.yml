@@ -1,6 +1,6 @@
 services:
   matchbox:
-    image: europe-west6-docker.pkg.dev/ahdis-ch/ahdis/matchbox:v4.0.16
+    image: europe-west6-docker.pkg.dev/ahdis-ch/ahdis/matchbox:v4.0.18
     container_name: matchbox
     restart: on-failure
     ports:
