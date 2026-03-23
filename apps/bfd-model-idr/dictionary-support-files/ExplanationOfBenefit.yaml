@@ -1542,6 +1542,7 @@
   sourceView: V2_MDCR_CLM_DT_SGNTR
   sourceColumn: CLM_ACTV_CARE_FROM_DT
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.system='http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType' and category.coding.code='admissionperiod').timing.start
+  notes: This element (forming admissionperiod) is not available for some HHA claims due to a CMS data limitation. 
 - inputPath: SupportingInfoComponent.CLM_DSCHRG_DT
   appliesTo:
     - Inpatient
@@ -1556,6 +1557,7 @@
   sourceView: V2_MDCR_CLM_DT_SGNTR
   sourceColumn: CLM_DSCHRG_DT
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.system='http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType' and category.coding.code='admissionperiod').timing.end
+  notes: This element (forming admissionperiod) is not available for some HHA claims due to a CMS data limitation. 
 - inputPath: SupportingInfoComponent.CLM_ADMSN_TYPE_CD
   appliesTo:
     - Inpatient
