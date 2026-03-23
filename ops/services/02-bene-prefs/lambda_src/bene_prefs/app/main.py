@@ -287,6 +287,8 @@ def handler(event: dict[str, Any], context: LambdaContext) -> None:  # noqa: ARG
     Raises:
         RuntimeError: If any required environment variables are undefined
     """
+    # PARTNERS is a comma-separated list of participating partners. The value of PARTNERS is derived
+    # directly from the bene-prefs Terraservice
     partners = [p.strip() for p in PARTNERS.split(",")]
 
     if "bcda" in partners:
