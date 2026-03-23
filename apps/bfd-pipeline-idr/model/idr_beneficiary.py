@@ -55,6 +55,7 @@ class IdrBeneficiary(IdrBaseModel):
         },
     ]
     bene_mbi_id: str
+    bene_ssn_num: Annotated[str, BeforeValidator(transform_default_string)]
     bene_1st_name: str
     bene_midl_name: Annotated[str, BeforeValidator(transform_default_string)]
     bene_last_name: str
