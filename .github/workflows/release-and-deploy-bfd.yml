@@ -33,8 +33,43 @@ defaults:
   run:
     shell: bash
 
+# -------------------------
+# START NOTIFICATION
+# -------------------------
 jobs:
+  notify-start:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Load Slack webhook
+        uses: cmsgov/cdap/actions/aws-params-env-action@main
+        with:
+          params: |
+            SLACK_WEBHOOK_URL=/bfd/platform/alerting/sensitive/slack/bfd-notices/webhook
+
+      - name: Slack - STARTED
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ env.SLACK_WEBHOOK_URL }}
+          SLACK_USERNAME: BFD Deploy Bot
+          SLACK_ICON_EMOJI: ":rocket:"
+          SLACK_COLOR: "#FFFF00"
+          SLACK_TITLE: ":hourglass_flowing_sand: BFD Release STARTED"
+          SLACK_MESSAGE: |
+            Version: *${{ inputs.release-version || 'latest' }}*
+            Triggered by: ${{ github.actor }}
+            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+  # -------------------------
+  # BUILD
+  # -------------------------
   build-release:
+    needs: notify-start
     if: ${{ github.ref_name == github.event.repository.default_branch }}
     uses: ./.github/workflows/build-release.yml
     with:
@@ -43,9 +78,12 @@ jobs:
       awsRegion: ${{ inputs.aws-region }}
     secrets: inherit
 
+  # -------------------------
+  # DEPLOYMENTS
+  # -------------------------
   deploy-platform:
     uses: ./.github/workflows/deploy-platform-services.yml
-    needs: [build-release]
+    needs: build-release
     strategy:
       matrix:
         account-type: ["prod", "non-prod"]
@@ -77,3 +115,84 @@ jobs:
       bfd-env: prod
       git-ref: refs/tags/${{ needs.build-release.outputs.bfd_release }}
     secrets: inherit
+
+  # -------------------------
+  # Final Slack Notification Summary
+  # -------------------------
+  workflow-summary:
+    name: Final Slack Summary
+    runs-on: ubuntu-latest
+    needs:
+      - build-release
+      - deploy-platform
+      - deploy-to-test
+      - deploy-to-sandbox
+      - deploy-to-prod
+    if: always()
+
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Load Slack webhook
+        uses: cmsgov/cdap/actions/aws-params-env-action@main
+        with:
+          params: |
+            SLACK_WEBHOOK_URL=/bfd/platform/alerting/sensitive/slack/bfd-notices/webhook
+
+      # -------------------------
+      # DETERMINE STATUS
+      # -------------------------
+      - name: Compute status
+        id: status
+        run: |
+          if [[ "${{ needs.build-release.result }}" != "success" ]]; then
+            echo "status=FAILED" >> $GITHUB_OUTPUT
+            echo "failed_stage=build-release" >> $GITHUB_OUTPUT
+          elif [[ "${{ needs.deploy-platform.result }}" != "success" ]]; then
+            echo "status=FAILED" >> $GITHUB_OUTPUT
+            echo "failed_stage=deploy-platform" >> $GITHUB_OUTPUT
+          elif [[ "${{ needs.deploy-to-test.result }}" != "success" ]]; then
+            echo "status=FAILED" >> $GITHUB_OUTPUT
+            echo "failed_stage=deploy-to-test" >> $GITHUB_OUTPUT
+          elif [[ "${{ needs.deploy-to-sandbox.result }}" != "success" ]]; then
+            echo "status=FAILED" >> $GITHUB_OUTPUT
+            echo "failed_stage=deploy-to-sandbox" >> $GITHUB_OUTPUT
+          elif [[ "${{ needs.deploy-to-prod.result }}" != "success" ]]; then
+            echo "status=FAILED" >> $GITHUB_OUTPUT
+            echo "failed_stage=deploy-to-prod" >> $GITHUB_OUTPUT
+          else
+            echo "status=SUCCESS" >> $GITHUB_OUTPUT
+            echo "failed_stage=none" >> $GITHUB_OUTPUT
+          fi
+
+      # TODO: Reevaluate after trying this out a couple of times whether we need to prune it or alter it.
+      # -------------------------
+      # Send Slack
+      # -------------------------
+      - name: Slack - FINAL SUMMARY
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ env.SLACK_WEBHOOK_URL }}
+          SLACK_USERNAME: BFD Deploy Bot
+          SLACK_ICON_EMOJI: ":checkered_flag:"
+          SLACK_COLOR: ${{ steps.status.outputs.status == 'SUCCESS' && 'good' || 'danger' }}
+          SLACK_TITLE: ${{ steps.status.outputs.status == 'SUCCESS' && ':white_check_mark: BFD Deploy SUCCESS' || ':x: BFD Deploy FAILED' }}
+          SLACK_MESSAGE: |
+            ${{ steps.status.outputs.status == 'FAILED' && '@bfd-engineers' || '' }}
+
+            *Status:* ${{ steps.status.outputs.status }}
+            *Version:* ${{ inputs.release-version || 'latest' }}
+            *Failed Stage:* ${{ steps.status.outputs.failed_stage }}
+
+            *Build:* ${{ needs.build-release.result }}
+            *Platform:* ${{ needs.deploy-platform.result }}
+            *Test:* ${{ needs.deploy-to-test.result }}
+            *Sandbox:* ${{ needs.deploy-to-sandbox.result }}
+            *Prod:* ${{ needs.deploy-to-prod.result }}
+
+            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
