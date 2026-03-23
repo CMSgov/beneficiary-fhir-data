@@ -1,6 +1,8 @@
 
 repos:
+  #
   # pre-commit hooks
+  #
 - repo: local
   hooks:
     - id: pre-commit-check-sop-files-script
@@ -22,7 +24,9 @@ repos:
     - id: gitleaks
       stages: [ pre-commit ]
 
+  #
   # pre-push hooks
+  #
 - repo: https://github.com/astral-sh/ruff-pre-commit
   rev: v0.15.0
   hooks:
