@@ -186,10 +186,10 @@ class AdjudicatedGeneratorUtil:
             clm[f.PRVDR_RFRG_PRVDR_NPI_NUM] = random.choice(TYPE_1_NPIS)
         if clm_type_cd > 70 and clm_type_cd <= 82:
             clm[f.CLM_BLG_PRVDR_NPI_NUM] = random.choice(TYPE_1_NPIS)
+            clm[f.PRVDR_BLG_PRVDR_NPI_NUM] = clm[f.CLM_BLG_PRVDR_NPI_NUM]
             clm[f.CLM_RLT_COND_SGNTR_SK] = "0"
             if random.choice([0, 1]):
                 clm[f.CLM_BLG_PRVDR_NPI_NUM] = random.choice(TYPE_2_NPIS)
-                clm[f.PRVDR_BLG_PRVDR_NPI_NUM] = clm[f.CLM_BLG_PRVDR_NPI_NUM]
 
         # generate claim header financial elements here
         clm[f.CLM_SBMT_CHRG_AMT] = round(random.uniform(1, 1000000), 2)
