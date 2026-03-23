@@ -69,28 +69,31 @@ public class ClaimProcedureInstitutional extends ClaimProcedureBase {
       SequenceGenerator sequenceGenerator) {
     return getDiagnosisType()
         .flatMap(
-            type -> {
-              var diagnosis =
-                  buildBaseDiagnosis(sequenceGenerator, type.getFhirCode(), type.getSystem());
+            type ->
+                buildBaseDiagnosis(sequenceGenerator, type.getFhirCode(), type.getSystem())
+                    .map(diagnosisComponent -> applyPoaIfPresent(type, diagnosisComponent)));
+  }
 
-              if (type == ClaimDiagnosisType.PRESENT_ON_ADMISSION) {
-                diagnosis.ifPresent(
-                    diagnosisComponent ->
-                        claimPoaIndicator.ifPresent(
-                            poaCode -> {
-                              var onAdmissionConcept = new CodeableConcept();
-                              poaCode
-                                  .chars()
-                                  .forEach(
-                                      c ->
-                                          onAdmissionConcept
-                                              .addCoding()
-                                              .setSystem(SystemUrls.POA_CODING)
-                                              .setCode(Character.toString(c)));
-                              diagnosisComponent.setOnAdmission(onAdmissionConcept);
-                            }));
-              }
-              return diagnosis;
-            });
+  private ExplanationOfBenefit.DiagnosisComponent applyPoaIfPresent(
+      ClaimDiagnosisType type, ExplanationOfBenefit.DiagnosisComponent diagnosis) {
+    if (type != ClaimDiagnosisType.PRESENT_ON_ADMISSION) {
+      return diagnosis;
+    }
+
+    claimPoaIndicator.ifPresent(
+        poaCode -> {
+          var onAdmissionConcept = new CodeableConcept();
+          poaCode
+              .chars()
+              .forEach(
+                  c ->
+                      onAdmissionConcept
+                          .addCoding()
+                          .setSystem(SystemUrls.POA_CODING)
+                          .setCode(Character.toString(c)));
+          diagnosis.setOnAdmission(onAdmissionConcept);
+        });
+
+    return diagnosis;
   }
 }
