@@ -808,7 +808,7 @@ class AdjudicatedGeneratorUtil:
 
         if clm_type_cd == 81 or clm_type_cd == 82:
             clm_line[f.PRVDR_RNDRNG_PRVDR_NPI_NUM] = random.choice(TYPE_1_NPIS)
-            clm_line[f.CLM_RNDRNG_PRVDR_NPI_NUM] = clm_line[f.PRVDR_RNDRNG_PRVDR_NPI_NUM]
+            clm_line[f.CLM_RNDRG_PRVDR_NPI_NUM] = clm_line[f.PRVDR_RNDRNG_PRVDR_NPI_NUM]
 
         clm_line[f.CLM_LINE_HCPCS_CD] = random.choice(get_hcpcs_proc_codes(self.enable_samhsa))
         num_mods = random.randint(0, 5)
