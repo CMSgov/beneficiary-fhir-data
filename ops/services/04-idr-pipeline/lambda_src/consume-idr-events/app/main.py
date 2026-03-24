@@ -21,8 +21,8 @@ logger = Logger()
 
 class IdrLoadEventModel(BaseModel):
     id: str
-    job: Annotated[str, Field(validation_alias="jobName")]
-    message: Annotated[str, Field(validation_alias="jobMessage")]
+    job_name: Annotated[str, Field(validation_alias="jobName")]
+    job_message: Annotated[str, Field(validation_alias="jobMessage")]
     event_time: datetime
 
 
@@ -54,8 +54,8 @@ def insert_event(event: IdrLoadEventModel) -> None:
             )
             VALUES(
                 {event.id},
-                {event.job},
-                {event.message},
+                {event.job_name},
+                {event.job_message},
                 {event.event_time}
             )
             """)
