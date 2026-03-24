@@ -180,7 +180,7 @@ jobs:
           SLACK_USERNAME: BFD Deploy Bot
           SLACK_ICON_EMOJI: ":checkered_flag:"
           SLACK_COLOR: ${{ steps.status.outputs.status == 'SUCCESS' && 'good' || 'danger' }}
-          SLACK_TITLE: ${{ steps.status.outputs.status == 'SUCCESS' && ':white_check_mark: BFD Deploy SUCCESS' || ':x: BFD Deploy FAILED' }}
+          SLACK_TITLE: "${{ steps.status.outputs.status == 'SUCCESS' && ':white_check_mark: BFD Deploy SUCCESS' || ':x: BFD Deploy FAILED' }}"
           SLACK_MESSAGE: |
             ${{ steps.status.outputs.status == 'FAILED' && '@bfd-engineers' || '' }}
 
