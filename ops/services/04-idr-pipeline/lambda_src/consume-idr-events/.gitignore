@@ -1,0 +1,9 @@
+*
+!.gitignore
+!.python-version
+!README.md
+!app
+!app/__init__.py
+!app/main.py
+!pyproject.toml
+!uv.lock
