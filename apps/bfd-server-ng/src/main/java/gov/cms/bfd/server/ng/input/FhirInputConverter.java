@@ -3,10 +3,13 @@ package gov.cms.bfd.server.ng.input;
 import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.base.Strings;
+import gov.cms.bfd.server.ng.beneficiary.model.PatientMatch;
+import gov.cms.bfd.server.ng.beneficiary.model.PatientMatchEntry;
 import gov.cms.bfd.server.ng.claim.model.ClaimFinalAction;
 import gov.cms.bfd.server.ng.claim.model.ClaimTypeCode;
 import gov.cms.bfd.server.ng.claim.model.MetaSourceSk;
 import gov.cms.bfd.server.ng.claim.model.SamhsaSearchIntent;
+import gov.cms.bfd.server.ng.util.DateUtil;
 import gov.cms.bfd.server.ng.util.IdrConstants;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.util.Arrays;
@@ -17,7 +20,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Patient;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -226,6 +232,32 @@ public class FhirInputConverter {
         .map(token -> token.getValue().trim().toLowerCase())
         .flatMap(normalizedType -> ClaimTypeCode.getClaimTypeCodesByType(normalizedType).stream())
         .toList();
+  }
+
+  public static Optional<PatientMatch> getPatientMatch(@Nullable Patient patient) {
+    if (patient == null) {
+      return Optional.empty();
+    }
+    var name = patient.getName().stream().findFirst();
+    var birthDate = Optional.ofNullable(patient.getBirthDate()).map(DateUtil::toLocalDate);
+    var firstName = name.map(HumanName::getGivenAsSingleString);
+    var lastName = name.map(HumanName::getFamily);
+    var mbi =
+        patient.getIdentifier().stream()
+            .filter(i -> i.getSystem().equals(SystemUrls.CMS_MBI))
+            .map(Identifier::getValue)
+            .findFirst();
+
+    return Optional.of(
+        PatientMatch.builder()
+            .firstName(new PatientMatchEntry(firstName.map(i -> i), "firstName"))
+            .lastName(new PatientMatchEntry(lastName.map(i -> i), "lastName"))
+            .mbi(new PatientMatchEntry(mbi.map(i -> i), "mbi"))
+            .birthDate(new PatientMatchEntry(birthDate.map(i -> i), "birthDate"))
+            .address(new PatientMatchEntry(Optional.empty(), "address"))
+            .zipCode(new PatientMatchEntry(Optional.empty(), "zipCode"))
+            .ssnLastFourDigits(new PatientMatchEntry(Optional.empty(), "ssn"))
+            .build());
   }
 
   /**

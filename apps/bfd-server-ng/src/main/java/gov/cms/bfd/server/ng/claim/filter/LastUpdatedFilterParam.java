@@ -16,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
 public record LastUpdatedFilterParam(DateTimeRange lastUpdated) implements DbFilterBuilder {
   @Override
   @NotNull
-  public DbFilter getFilters(@NotNull String claimTableAlias, @NotNull SystemType systemType) {
+  public DbFilter getFilters(@NotNull String tableAlias, @NotNull SystemType systemType) {
     var filterClause = new StringBuilder();
     var params = new ArrayList<DbFilterParam>();
     lastUpdated
@@ -26,7 +26,7 @@ public record LastUpdatedFilterParam(DateTimeRange lastUpdated) implements DbFil
               filterClause.append(
                   String.format(
                       " AND (%s.meta.updatedTimestamp %s :lastUpdatedLowerBound)",
-                      claimTableAlias, lastUpdated.getLowerBoundSqlOperator()));
+                      tableAlias, lastUpdated.getLowerBoundSqlOperator()));
               params.add(new DbFilterParam("lastUpdatedLowerBound", d));
             });
 
@@ -37,7 +37,7 @@ public record LastUpdatedFilterParam(DateTimeRange lastUpdated) implements DbFil
               filterClause.append(
                   String.format(
                       " AND (%s.meta.updatedTimestamp %s :lastUpdatedUpperBound)",
-                      claimTableAlias, lastUpdated.getUpperBoundSqlOperator()));
+                      tableAlias, lastUpdated.getUpperBoundSqlOperator()));
               params.add(new DbFilterParam("lastUpdatedUpperBound", d));
             });
     return new DbFilter(filterClause.toString(), params);

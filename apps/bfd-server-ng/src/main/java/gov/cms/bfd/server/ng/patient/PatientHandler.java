@@ -3,6 +3,7 @@ package gov.cms.bfd.server.ng.patient;
 import gov.cms.bfd.server.ng.beneficiary.BeneficiaryRepository;
 import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
 import gov.cms.bfd.server.ng.beneficiary.model.OrganizationFactory;
+import gov.cms.bfd.server.ng.beneficiary.model.PatientMatch;
 import gov.cms.bfd.server.ng.coverage.CoverageRepository;
 import gov.cms.bfd.server.ng.input.CoverageCompositeId;
 import gov.cms.bfd.server.ng.input.CoveragePart;
@@ -69,6 +70,16 @@ public class PatientHandler {
   public Bundle searchByIdentifier(final String identifier, final DateTimeRange lastUpdated) {
     var xrefBeneSk = beneficiaryRepository.getXrefSkFromMbi(identifier);
     var beneficiary = xrefBeneSk.flatMap(x -> beneficiaryRepository.findById(x, lastUpdated));
+
+    return FhirUtil.bundleOrDefault(
+        beneficiary.map(this::toFhir), loadProgressRepository::lastUpdated);
+  }
+
+  public Bundle matchPatient(Optional<PatientMatch> patientMatch) {
+    if (patientMatch.isEmpty()) {
+      return new Bundle();
+    }
+    var beneficiary = beneficiaryRepository.searchPatientMatch(patientMatch.get());
 
     return FhirUtil.bundleOrDefault(
         beneficiary.map(this::toFhir), loadProgressRepository::lastUpdated);

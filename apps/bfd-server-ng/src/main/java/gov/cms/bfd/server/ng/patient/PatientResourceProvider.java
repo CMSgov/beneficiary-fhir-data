@@ -2,6 +2,7 @@ package gov.cms.bfd.server.ng.patient;
 
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
+import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
@@ -83,5 +84,11 @@ public class PatientResourceProvider implements IResourceProvider {
   public Bundle searchC4DICByBeneficiary(@IdParam final IdType beneSK) {
     var beneSk = FhirInputConverter.toLong(new IdType(beneSK.getValue()));
     return patientHandler.searchByBeneficiaryC4DIC(beneSk);
+  }
+
+  @Operation(name = "idi-match", idempotent = true)
+  public Bundle patientMatch(@OperationParam(name = "IDIPatient") final Patient patient) {
+    var patientMatch = FhirInputConverter.getPatientMatch(patient);
+    return patientHandler.matchPatient(patientMatch);
   }
 }

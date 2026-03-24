@@ -1,12 +1,21 @@
 package gov.cms.bfd.server.ng.beneficiary;
 
+import gov.cms.bfd.server.ng.DbFilter;
+import gov.cms.bfd.server.ng.DbFilterBuilder;
+import gov.cms.bfd.server.ng.DbFilterParam;
+import gov.cms.bfd.server.ng.beneficiary.filter.PatientMatchFilter;
 import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
+import gov.cms.bfd.server.ng.beneficiary.model.BeneficiaryBase;
 import gov.cms.bfd.server.ng.beneficiary.model.BeneficiaryIdentity;
+import gov.cms.bfd.server.ng.beneficiary.model.PatientMatch;
+import gov.cms.bfd.server.ng.claim.model.SystemType;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.util.LogUtil;
 import io.micrometer.core.annotation.Timed;
 import io.micrometer.core.aop.MeterTag;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
@@ -122,5 +131,55 @@ public class BeneficiaryRepository {
         .getResultList()
         .stream()
         .findFirst();
+  }
+
+  public Optional<Beneficiary> searchPatientMatch(PatientMatch patientMatch) {
+    var scenarios = patientMatch.getValidScenarios();
+    for (var scenario : scenarios) {
+      var filters = new PatientMatchFilter(scenario).getFilters("bene", SystemType.NCH);
+
+      var benes =
+          withParams(
+                  entityManager.createQuery(
+                      String.format(
+                          """
+                  SELECT bene
+                  FROM Beneficiary bene
+                  WHERE TRUE
+                  %s
+                  ORDER BY bene.obsoleteTimestamp DESC
+                  """,
+                          filters.filterClause()),
+                      Beneficiary.class),
+                  filters.params())
+              .getResultList()
+              .stream()
+              .toList();
+      var uniqueXrefs = benes.stream().map(BeneficiaryBase::getXrefSk).distinct().toList();
+      if (uniqueXrefs.size() != 1) {
+        continue;
+      }
+
+      return benes.stream().findFirst();
+    }
+    return Optional.empty();
+  }
+
+  <T extends DbFilterBuilder> DbFilter getFilters(List<T> builders, SystemType systemType) {
+    var sb = new StringBuilder();
+    var queryParams = new ArrayList<DbFilterParam>();
+    for (var builder : builders) {
+      var params = builder.getFilters("c", systemType);
+      sb.append(params.filterClause());
+      queryParams.addAll(params.params());
+    }
+    return new DbFilter(sb.toString(), queryParams);
+  }
+
+  private <T extends Query> T withParams(T query, List<DbFilterParam> params) {
+    for (var param : params) {
+      query.setParameter(param.name(), param.value());
+    }
+    return query;
   }
 }
