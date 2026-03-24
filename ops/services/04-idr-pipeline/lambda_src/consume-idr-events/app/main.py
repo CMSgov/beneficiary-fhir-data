@@ -52,12 +52,13 @@ def insert_event(event: IdrLoadEventModel) -> None:
     ):
         logger.info("Connected to %s", DB_ENDPOINT)
 
+        event_dict = event.model_dump()
         query_template = t"""
             INSERT INTO {DB_SCHEMA:i}.{IDR_LOAD_EVENTS_TABLE:i} (
-                {sql.SQL(", ").join(sql.Identifier(x) for x in IdrLoadEventModel.model_fields):q}
+                {sql.SQL(", ").join(sql.Identifier(k) for k in event_dict):q}
             )
             VALUES (
-                {sql.SQL(", ").join(event.model_dump().values()):q}
+                {sql.SQL(", ").join(event_dict.values()):q}
             )
         """
         logger.info(
