@@ -141,7 +141,7 @@ public class BeneficiaryRepository {
                           """
                   SELECT bene
                   FROM Beneficiary bene
-                  WHERE TRUE
+                  WHERE bene.latestTransactionFlag = 'Y'
                   %s
                   ORDER BY bene.obsoleteTimestamp DESC
                   """,
