@@ -585,9 +585,7 @@ def _format_from_dict(tokens: dict, is_military: bool = False) -> str:
                     # usaddress merged part of Zip into StateName
                     # e.g., 'ON K1A'
                     state = state_parts[0]
-                    zip_code = " ".join(state_parts[1:]) + (
-                        " " + zip_code if zip_code else ""
-                    )
+                    zip_code = " ".join(state_parts[1:]) + (" " + zip_code if zip_code else "")
 
             last_line += (" " if last_line else "") + state
 
@@ -671,10 +669,7 @@ def _format_from_raw(raw_parsed: list) -> str:
     # usaddress strips \n from values sometimes, so we'll just join with space
     # and do a naive newline check
     final_raw = (
-        " ".join(reconstructed)
-        .replace(" \n ", "\n")
-        .replace("\n ", "\n")
-        .replace(" \n", "\n")
+        " ".join(reconstructed).replace(" \n ", "\n").replace("\n ", "\n").replace(" \n", "\n")
     )
     lines = final_raw.split("\n")
     return "\n".join(_apply_pr_exceptions(line) for line in lines)
@@ -712,13 +707,9 @@ def _apply_pr_exceptions(text: str) -> str:
             condo_lines.append(line_clean)
         elif any(k in line_up for k in ("PO BOX", "STA", "STATION")):
             postal_lines.append(line_clean)
-        elif (
-            any(
-                k in line_up
-                for k in ("CALLE", "C/ ", "AVE", "AVENIDA", "KM", "ROAD", "ROUTE", "RR")
-            )
-            or re.search(r"^\d", line_clean)
-        ):
+        elif any(
+            k in line_up for k in ("CALLE", "C/ ", "AVE", "AVENIDA", "KM", "ROAD", "ROUTE", "RR")
+        ) or re.search(r"^\d", line_clean):
             street_lines.append(line_clean)
         else:
             other_lines.append(line_clean)
