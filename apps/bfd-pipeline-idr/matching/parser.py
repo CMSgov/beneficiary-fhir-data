@@ -500,6 +500,7 @@ def _format_from_dict(tokens: dict[str, str], is_military: bool = False) -> str:
         occ_type: str = _format_secondary_unit(tokens["OccupancyType"])
         street_parts.append(occ_type)
         if "OccupancyIdentifier" in tokens:
+
             def fallback_occ_id() -> str:
                 return tokens["OccupancyIdentifier"]
 
