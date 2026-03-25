@@ -1,0 +1,22 @@
+# .github/workflows/deploy-env-services.yml
+name: "Dummy Env Deploy"
+on:
+  workflow_call:
+    inputs:
+      bfd-env:
+        required: true
+        type: string
+      git-ref:
+        required: true
+        type: string
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Mock Deploy Env
+        run: |
+          echo "Simulating environment deployment..."
+          echo "Deploying ${{ inputs.git-ref }} to ${{ inputs.bfd-env }} environment"
+          sleep 3
+          echo "Deployment complete."

@@ -1,0 +1,36 @@
+# .github/workflows/build-release.yml
+name: "Dummy Build"
+on:
+  workflow_call:
+    inputs:
+      releaseVersion:
+        required: true
+        type: string
+      developmentVersion:
+        required: true
+        type: string
+      awsRegion:
+        required: true
+        type: string
+    outputs:
+      # This output is expected by the main workflow's deployment jobs.
+      bfd_release:
+        description: "The version that was built."
+        value: ${{ jobs.build.outputs.release_version }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      release_version: ${{ steps.mock_build.outputs.version }}
+    steps:
+      - name: Mock Build
+        id: mock_build
+        run: |
+          echo "Simulating build..."
+          echo "Building version: ${{ inputs.releaseVersion }} in ${{ inputs.awsRegion }}"
+          # Sleep for a few seconds to simulate work
+          sleep 5
+          # Set a mock version for the output
+          echo "version=${{ inputs.releaseVersion }}-mock" >> $GITHUB_OUTPUT
+          echo "Build complete."
