@@ -34,7 +34,7 @@ public class DateUtil {
   }
 
   public static LocalDate toLocalDate(Date date) {
-    return LocalDate.from(date.toInstant());
+    return date.toInstant().atZone(DateUtil.ZONE_ID_UTC).toLocalDate();
   }
 
   /**

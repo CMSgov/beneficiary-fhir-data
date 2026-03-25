@@ -16,8 +16,16 @@ public record PatientMatchFilter(List<PatientMatchEntry> entries) implements DbF
     var filterClause = new StringBuilder();
     var params = new ArrayList<DbFilterParam>();
     for (var entry : entries) {
-      filterClause.append(String.format(" AND %1$s.%2$s = :%2$s", tableAlias, entry.name()));
-      params.add(new DbFilterParam(entry.name(), entry.value()));
+
+      entry
+          .value()
+          .ifPresent(
+              v -> {
+                var paramName = entry.name().replace(".", "_");
+                filterClause.append(
+                    String.format(" AND %s.%s = :%s", tableAlias, entry.name(), paramName));
+                params.add(new DbFilterParam(paramName, v));
+              });
     }
     return new DbFilter(filterClause.toString(), params);
   }

@@ -27,7 +27,27 @@ public record PatientMatch(
             // #6 - requires ITIN
             // #7 - requires ITIN
             // #8
-            List.of(firstName, birthDate, mbi));
+            List.of(firstName, birthDate, mbi)
+            // #9 - requires legal ID
+            // #10 - requires legal ID
+            // #11 - requires phone
+            // #12 - requires email
+            // #13 - requires phone
+            // #14 - requires ITIN
+            // #15 - requires email
+            // #16 - requires ITIN
+            // #17 - requires phone
+            // #18 - requires ITIN
+            // #19 - requires email
+            // #20 - requires ITIN
+            // #21 - requires phone
+            // #22 - requires legal ID
+            // #23 - requires email
+            // #24 - requires email
+            // #25 - requires legal ID
+            // #26 - requires UUID
+            // #27 - requires patient ID
+            );
     return scenarios.stream().filter(this::allFieldsPresent).toList();
   }
 

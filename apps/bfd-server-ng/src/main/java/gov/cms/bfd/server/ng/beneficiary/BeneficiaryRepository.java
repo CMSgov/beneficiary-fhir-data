@@ -1,7 +1,5 @@
 package gov.cms.bfd.server.ng.beneficiary;
 
-import gov.cms.bfd.server.ng.DbFilter;
-import gov.cms.bfd.server.ng.DbFilterBuilder;
 import gov.cms.bfd.server.ng.DbFilterParam;
 import gov.cms.bfd.server.ng.beneficiary.filter.PatientMatchFilter;
 import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
@@ -15,7 +13,6 @@ import io.micrometer.core.annotation.Timed;
 import io.micrometer.core.aop.MeterTag;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
@@ -163,17 +160,6 @@ public class BeneficiaryRepository {
       return benes.stream().findFirst();
     }
     return Optional.empty();
-  }
-
-  <T extends DbFilterBuilder> DbFilter getFilters(List<T> builders, SystemType systemType) {
-    var sb = new StringBuilder();
-    var queryParams = new ArrayList<DbFilterParam>();
-    for (var builder : builders) {
-      var params = builder.getFilters("c", systemType);
-      sb.append(params.filterClause());
-      queryParams.addAll(params.params());
-    }
-    return new DbFilter(sb.toString(), queryParams);
   }
 
   private <T extends Query> T withParams(T query, List<DbFilterParam> params) {

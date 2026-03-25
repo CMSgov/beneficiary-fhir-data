@@ -250,9 +250,9 @@ public class FhirInputConverter {
 
     return Optional.of(
         PatientMatch.builder()
-            .firstName(new PatientMatchEntry(firstName.map(i -> i), "firstName"))
-            .lastName(new PatientMatchEntry(lastName.map(i -> i), "lastName"))
-            .mbi(new PatientMatchEntry(mbi.map(i -> i), "mbi"))
+            .firstName(new PatientMatchEntry(firstName.map(i -> i), "beneficiaryName.firstName"))
+            .lastName(new PatientMatchEntry(lastName.map(i -> i), "beneficiaryName.lastName"))
+            .mbi(new PatientMatchEntry(mbi.map(i -> i), "identifier.mbi"))
             .birthDate(new PatientMatchEntry(birthDate.map(i -> i), "birthDate"))
             .address(new PatientMatchEntry(Optional.empty(), "address"))
             .zipCode(new PatientMatchEntry(Optional.empty(), "zipCode"))
