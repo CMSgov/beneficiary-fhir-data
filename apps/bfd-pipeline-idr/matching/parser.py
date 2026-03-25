@@ -1,7 +1,8 @@
 import re
 import unicodedata
+from collections.abc import Callable
 
-import usaddress
+import usaddress  # type: ignore
 
 from .constants import DIACRITICS, DIRECTIONALS, SECONDARY_UNITS, STATES, SUFFIX_MAP
 
@@ -10,7 +11,7 @@ def remove_diacritics(text: str) -> str:
     # Explicit mapping based on PDF specifications.
     # The Project US@ spec varies from the fallback in a few instances,
     # so we can expand the constant mapping.
-    mapped_chars = []
+    mapped_chars: list[str] = []
     for char in text:
         if char in DIACRITICS:
             mapped_chars.append(DIACRITICS[char])
@@ -83,7 +84,7 @@ def _apply_smart_state_abbreviations(text: str) -> str:
 def _apply_highway_fixes(text: str) -> str:
     text = _apply_smart_state_abbreviations(text)
 
-    def repl_interstate(match: re.Match) -> str:
+    def repl_interstate(match: re.Match[str]) -> str:
         full = match.group(0)
         idx = match.start()
         if idx > 0:
@@ -98,7 +99,7 @@ def _apply_highway_fixes(text: str) -> str:
                     return full
         return f"INTERSTATE {match.group(1)}"
 
-    replaces = [
+    replaces: list[tuple[str, str | Callable[[re.Match[str]], str]]] = [
         (r"\bBX\s+(\d+)\b", r"BOX \1"),
         (r"\b(RR|HC|RFD|RD|RT)(\d+)\b", r"\1 \2"),
         # Support (RFD|RD|RT|RR) [Optional Route] [Number] [BOX|#] [AlphaNum] [Trailing Text]
@@ -188,7 +189,7 @@ CANADIAN_PROVINCES = (
 )
 
 
-def _apply_canada_fixes(lines: list) -> list:
+def _apply_canada_fixes(lines: list[str]) -> list[str]:
     """Combine Canadian Province and Postal Code with double spacing if separate."""
     postal_code = ""
     postal_idx = -1
@@ -234,7 +235,7 @@ def normalize_address(address_str: str) -> str:
     is_military = any(re.search(r"\b(AP|AE|AA)\b", line.upper()) for line in lines)
     is_pr = any(re.search(r"\bPR\b", line.upper()) for line in lines)
 
-    formatted_lines = []
+    formatted_lines: list[str] = []
     highway_keywords = (
         "COUNTY HIGHWAY",
         "COUNTY ROAD",
@@ -262,6 +263,8 @@ def normalize_address(address_str: str) -> str:
                 formatted_lines.append(_format_from_raw(raw_parsed))
                 continue
 
+            parsed_tokens: dict[str, str]
+            addr_type: str
             parsed_tokens, addr_type = usaddress.tag(line)
 
             # Check if line contains a Canadian Province
@@ -292,7 +295,7 @@ def normalize_address(address_str: str) -> str:
     # Ensure Country is on the bottom line for International
     from .constants import COUNTRIES
 
-    normalized_lines = []
+    normalized_lines: list[str] = []
     country_line = ""
     for line in formatted_lines:
         if line.strip().upper() in COUNTRIES:
@@ -350,9 +353,9 @@ def _format_from_dict(tokens: dict, is_military: bool = False) -> str:
             del tokens["OccupancyIdentifier"]
 
     # Build up the address lines
-    line1_parts = []
-    line2_parts = []
-    last_line_parts = []
+    line1_parts: list[str] = []
+    line2_parts: list[str] = []
+    last_line_parts: list[str] = []
 
     # Check for Business or Recipient/Building (e.g., URB)
     for key in ["Recipient", "BuildingName", "LandmarkName"]:
@@ -370,7 +373,7 @@ def _format_from_dict(tokens: dict, is_military: bool = False) -> str:
             break
 
     # Build Street Address Line
-    street_parts = []
+    street_parts: list[str] = []
     if "AddressNumber" not in tokens and "StreetName" not in tokens and line1_parts:
         # For single-line isolated setups, merge Recipient continuous to address vectors
         street_parts.append(line1_parts.pop(0))
@@ -546,7 +549,7 @@ def _format_from_dict(tokens: dict, is_military: bool = False) -> str:
         line2_parts.append(line2_str)
 
     # Combine lines
-    final_lines = []
+    final_lines: list[str] = []
     if line1_parts:
         final_lines.append(_apply_pr_exceptions(" ".join(line1_parts)))
     if line2_parts:
@@ -600,7 +603,7 @@ def _format_from_dict(tokens: dict, is_military: bool = False) -> str:
     return "\n".join(final_lines)
 
 
-def _format_from_raw(raw_parsed: list) -> str:
+def _format_from_raw(raw_parsed: list[tuple[str, str]]) -> str:
     # For complex/failing parses, we recreate the string processing parts
     # manually mapped to basic rules
     # This is a fallback
@@ -646,7 +649,7 @@ def _format_from_raw(raw_parsed: list) -> str:
             if can_swap and not any(v.isdigit() for v, _label in raw_parsed[:-1]):
                 raw_parsed = [raw_parsed[-1], *raw_parsed[:-1]]
 
-    reconstructed = []
+    reconstructed: list[str] = []
     for p_val, p_label in raw_parsed:
         # apply directional checks
         res_val = p_val
@@ -688,11 +691,11 @@ def _apply_pr_exceptions(text: str) -> str:
     if re.search(r"\b[A-Z]{2}\b\s+\d{5}", lines[-1].upper()):
         last_line = lines.pop(-1)
 
-    urb_lines = []
-    condo_lines = []
-    street_lines = []
-    postal_lines = []
-    other_lines = []
+    urb_lines: list[str] = []
+    condo_lines: list[str] = []
+    street_lines: list[str] = []
+    postal_lines: list[str] = []
+    other_lines: list[str] = []
 
     for line in lines:
         line_clean = line.strip()
@@ -740,13 +743,13 @@ def _apply_pr_exceptions(text: str) -> str:
     text = re.sub(r"\b(RUTA RURAL|RURAL)\b", "RR", text, flags=re.IGNORECASE)
 
     lines = text.split("\n")
-    final_lines = []
+    final_lines: list[str] = []
     for line in lines:
         line_str = line.strip()
         # Remove hyphens from alphanumeric house numbers at the absolute front (e.g., A-17 -> A17)
         line_str = re.sub(r"^([A-Z]{1,2})-(\d+[A-Z]?)\b", r"\1\2", line_str)
         words = line_str.split()
-        new_words = []
+        new_words: list[str] = []
         skip = False
         for i, w in enumerate(words):
             if skip:
