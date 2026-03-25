@@ -12,7 +12,6 @@ import gov.cms.bfd.server.ng.util.LogUtil;
 import io.micrometer.core.annotation.Timed;
 import io.micrometer.core.aop.MeterTag;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.Query;
 import java.util.List;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
@@ -133,10 +132,10 @@ public class BeneficiaryRepository {
   public Optional<Beneficiary> searchPatientMatch(PatientMatch patientMatch) {
     var scenarios = patientMatch.getValidScenarios();
     for (var scenario : scenarios) {
-      var filters = new PatientMatchFilter(scenario).getFilters("bene", SystemType.NCH);
+      var filters = new PatientMatchFilter(scenario).getFilters("bene", SystemType.UNKNOWN);
 
       var benes =
-          withParams(
+          DbFilterParam.withParams(
                   entityManager.createQuery(
                       String.format(
                           """
@@ -160,12 +159,5 @@ public class BeneficiaryRepository {
       return benes.stream().findFirst();
     }
     return Optional.empty();
-  }
-
-  private <T extends Query> T withParams(T query, List<DbFilterParam> params) {
-    for (var param : params) {
-      query.setParameter(param.name(), param.value());
-    }
-    return query;
   }
 }

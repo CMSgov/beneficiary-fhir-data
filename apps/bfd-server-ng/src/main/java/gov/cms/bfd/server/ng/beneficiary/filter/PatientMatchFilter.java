@@ -16,7 +16,6 @@ public record PatientMatchFilter(List<PatientMatchEntry> entries) implements DbF
     var filterClause = new StringBuilder();
     var params = new ArrayList<DbFilterParam>();
     for (var entry : entries) {
-
       entry
           .value()
           .ifPresent(
