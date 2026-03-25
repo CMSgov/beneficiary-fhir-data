@@ -2,16 +2,14 @@ package gov.cms.bfd.server.ng.beneficiary;
 
 import gov.cms.bfd.server.ng.DbFilterParam;
 import gov.cms.bfd.server.ng.beneficiary.filter.PatientMatchFilter;
-import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
-import gov.cms.bfd.server.ng.beneficiary.model.BeneficiaryBase;
-import gov.cms.bfd.server.ng.beneficiary.model.BeneficiaryIdentity;
-import gov.cms.bfd.server.ng.beneficiary.model.PatientMatch;
+import gov.cms.bfd.server.ng.beneficiary.model.*;
 import gov.cms.bfd.server.ng.claim.model.SystemType;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.util.LogUtil;
 import io.micrometer.core.annotation.Timed;
 import io.micrometer.core.aop.MeterTag;
 import jakarta.persistence.EntityManager;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
@@ -22,6 +20,8 @@ import org.springframework.stereotype.Repository;
 @AllArgsConstructor
 public class BeneficiaryRepository {
   private final EntityManager entityManager;
+
+  private static final String PATIENT_MATCH_TYPE = "exact";
 
   /**
    * Queries for current and historical MBIs and BENE_SKs, along with their start/end dates.
@@ -137,8 +137,10 @@ public class BeneficiaryRepository {
    * @return beneficiary, if found
    */
   @Timed(value = "application.beneficiary.patient_match")
-  public Optional<Beneficiary> searchPatientMatch(PatientMatch patientMatch) {
+  public PatientMatchResult searchPatientMatch(PatientMatch patientMatch) {
     var scenarios = patientMatch.getValidScenarios();
+    var combinationResults = new ArrayList<MatchCombinationResult>();
+    var combinationIndex = 1;
     for (var scenario : scenarios) {
       var filters = new PatientMatchFilter(scenario).getFilters("bene", SystemType.UNKNOWN);
 
@@ -154,15 +156,24 @@ public class BeneficiaryRepository {
                       """,
                   filters.filterClause()),
               Beneficiary.class);
-      var benes =
-          DbFilterParam.withParams(query, filters.params()).getResultList().stream().toList();
+      var benes = DbFilterParam.withParams(query, filters.params()).getResultList().stream().toList();
+      var matchedRecords =
+          benes.stream()
+              .map(b -> new MatchedRecord(b.getBeneSk(), b.getEffectiveTimestamp()))
+              .toList();
+      var combinationId = String.format("%02d", combinationIndex++);
+      combinationResults.add(
+          new MatchCombinationResult(combinationId, PATIENT_MATCH_TYPE, matchedRecords));
       var uniqueXrefs = benes.stream().map(BeneficiaryBase::getXrefSk).distinct().toList();
-      if (uniqueXrefs.size() != 1) {
-        continue;
-      }
 
-      return benes.stream().findFirst();
+      if (uniqueXrefs.size() == 1) {
+        var matchedBene = benes.getFirst();
+        var finalDetermination =
+            new FinalDetermination(combinationId, PATIENT_MATCH_TYPE, matchedRecords.getFirst());
+        return new PatientMatchResult(
+            combinationResults, Optional.of(finalDetermination), Optional.of(matchedBene));
+      }
     }
-    return Optional.empty();
+    return new PatientMatchResult(combinationResults, Optional.empty(), Optional.empty());
   }
 }
