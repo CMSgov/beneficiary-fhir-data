@@ -4,14 +4,18 @@ import gov.cms.bfd.server.ng.beneficiary.BeneficiaryRepository;
 import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
 import gov.cms.bfd.server.ng.beneficiary.model.OrganizationFactory;
 import gov.cms.bfd.server.ng.beneficiary.model.PatientMatch;
+import gov.cms.bfd.server.ng.beneficiary.model.PatientMatchAuditRecord;
 import gov.cms.bfd.server.ng.coverage.CoverageRepository;
 import gov.cms.bfd.server.ng.input.CoverageCompositeId;
 import gov.cms.bfd.server.ng.input.CoveragePart;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.loadprogress.LoadProgressRepository;
 import gov.cms.bfd.server.ng.model.ProfileType;
+import gov.cms.bfd.server.ng.util.DateUtil;
 import gov.cms.bfd.server.ng.util.FhirUtil;
+import gov.cms.bfd.server.ng.util.PatientMatchAuditLogUtil;
 import gov.cms.bfd.server.ng.util.SystemUrls;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -32,8 +36,11 @@ import org.springframework.stereotype.Component;
 public class PatientHandler {
   private final BeneficiaryRepository beneficiaryRepository;
   private final LoadProgressRepository loadProgressRepository;
-
   private final CoverageRepository coverageRepository;
+
+  private static final String BLUEBUTTON_CLIENT_IP_HEADER = "X-BLUEBUTTON-CLIENT-IP";
+  private static final String BLUEBUTTON_CLIENT_NAME_HEADER = "X-BLUEBUTTON-CLIENT-NAME";
+  private static final String BLUEBUTTON_CLIENT_ID_HEADER = "X-BLUEBUTTON-CLIENT-ID";
 
   /**
    * Returns a {@link Patient} by their {@link IdType}.
@@ -75,11 +82,24 @@ public class PatientHandler {
         beneficiary.map(this::toFhir), loadProgressRepository::lastUpdated);
   }
 
-  public Bundle matchPatient(Optional<PatientMatch> patientMatch) {
+  public Bundle matchPatient(Optional<PatientMatch> patientMatch, HttpServletRequest request) {
     if (patientMatch.isEmpty()) {
       return new Bundle();
     }
-    var beneficiary = beneficiaryRepository.searchPatientMatch(patientMatch.get());
+    var result = beneficiaryRepository.searchPatientMatch(patientMatch.get());
+    var beneficiary = result.matchedBeneficiary();
+    var clientIp = request.getHeader(BLUEBUTTON_CLIENT_IP_HEADER);
+    var clientName = request.getHeader(BLUEBUTTON_CLIENT_NAME_HEADER);
+    var clientId = request.getHeader(BLUEBUTTON_CLIENT_ID_HEADER);
+    var auditRecord =
+        new PatientMatchAuditRecord(
+            Optional.ofNullable(clientIp),
+            Optional.ofNullable(clientName),
+            Optional.ofNullable(clientId),
+            DateUtil.nowAoe(),
+            result.combinations(),
+            result.finalDetermination());
+    PatientMatchAuditLogUtil.logPatientMatches(auditRecord);
 
     return FhirUtil.bundleOrDefault(
         beneficiary.map(this::toFhir), loadProgressRepository::lastUpdated);
