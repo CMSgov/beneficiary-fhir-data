@@ -47,7 +47,8 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE }}
-          aws-region: ${{ vars.AWS_REGION }}
+          aws-region: ${{ inputs.aws-region || 'us-east-1' }}
+
 
       - name: Load Slack webhook
         uses: cmsgov/cdap/actions/aws-params-env-action@main
@@ -138,7 +139,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE }}
-          aws-region: ${{ vars.AWS_REGION }}
+          aws-region: ${{ inputs.aws-region || 'us-east-1' }}
 
       - name: Load Slack webhook
         uses: cmsgov/cdap/actions/aws-params-env-action@main
