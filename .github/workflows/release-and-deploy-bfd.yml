@@ -43,13 +43,6 @@ jobs:
   notify-start:
     runs-on: ubuntu-latest
     steps:
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.AWS_ROLE }}
-          aws-region: ${{ inputs.aws-region || 'us-east-1' }}
-
-
       - name: Load Slack webhook
         uses: cmsgov/cdap/actions/aws-params-env-action@main
         with:
@@ -86,7 +79,8 @@ jobs:
   # DEPLOYMENTS
   # -------------------------
   deploy-platform:
-    uses: ./.github/workflows/deploy-platform-services.yml
+#    uses: ./.github/workflows/deploy-platform-services.yml
+    uses: ./.github/workflows/dummy-deploy-platform-services.yml
     needs: build-release
     strategy:
       matrix:
@@ -97,7 +91,8 @@ jobs:
     secrets: inherit
 
   deploy-to-test:
-    uses: ./.github/workflows/deploy-env-services.yml
+#    uses: ./.github/workflows/deploy-env-services.yml
+    uses: ./.github/workflows/dummy-deploy-env-services.yml
     needs: [build-release, deploy-platform]
     with:
       bfd-env: test
@@ -105,7 +100,8 @@ jobs:
     secrets: inherit
 
   deploy-to-sandbox:
-    uses: ./.github/workflows/deploy-env-services.yml
+#    uses: ./.github/workflows/deploy-env-services.yml
+    uses: ./.github/workflows/dummy-deploy-env-services.yml
     needs: [build-release, deploy-to-test]
     with:
       bfd-env: sandbox
@@ -113,7 +109,8 @@ jobs:
     secrets: inherit
 
   deploy-to-prod:
-    uses: ./.github/workflows/deploy-env-services.yml
+#    uses: ./.github/workflows/deploy-env-services.yml
+    uses: ./.github/workflows/dummy-deploy-env-services.yml
     needs: [build-release, deploy-to-sandbox]
     with:
       bfd-env: prod
@@ -135,12 +132,6 @@ jobs:
     if: always()
 
     steps:
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.AWS_ROLE }}
-          aws-region: ${{ inputs.aws-region || 'us-east-1' }}
-
       - name: Load Slack webhook
         uses: cmsgov/cdap/actions/aws-params-env-action@main
         with:
