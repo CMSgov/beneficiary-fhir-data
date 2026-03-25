@@ -1,12 +1,15 @@
 import re
 import unicodedata
+
 import usaddress
-from .constants import STATES, SECONDARY_UNITS, SUFFIX_MAP, DIRECTIONALS, DIACRITICS
+
+from .constants import DIACRITICS, DIRECTIONALS, SECONDARY_UNITS, STATES, SUFFIX_MAP
 
 
 def remove_diacritics(text: str) -> str:
     # Explicit mapping based on PDF specifications.
-    # The Project US@ spec varies from the fallback in a few instances, so we can expand the constant mapping.
+    # The Project US@ spec varies from the fallback in a few instances,
+    # so we can expand the constant mapping.
     mapped_chars = []
     for char in text:
         if char in DIACRITICS:
@@ -61,7 +64,7 @@ def _apply_smart_state_abbreviations(text: str) -> str:
                 if "HIGHWAY" not in [w.upper() for w in words]:
                     words.insert(i + 1, "HIGHWAY")
                 break
-            elif next_word in (
+            if next_word in (
                 "HIGHWAY",
                 "ROUTE",
                 "FM",
@@ -80,7 +83,7 @@ def _apply_smart_state_abbreviations(text: str) -> str:
 def _apply_highway_fixes(text: str) -> str:
     text = _apply_smart_state_abbreviations(text)
 
-    def repl_interstate(match):
+    def repl_interstate(match: re.Match) -> str:
         full = match.group(0)
         idx = match.start()
         if idx > 0:
@@ -164,8 +167,7 @@ def normalize_text(text: str) -> str:
     # Compress spaces around hyphens
     text = re.sub(r"\s*-\s*", "-", text)
     # Compress multiple spaces into one
-    text = re.sub(r"[^\S\r\n]+", " ", text).strip()
-    return text
+    return re.sub(r"[^\S\r\n]+", " ", text).strip()
 
 
 CANADIAN_POSTAL_CODE_PATTERN = r"\b[A-Z]\d[A-Z]\s?\d[A-Z]\d\b"
@@ -187,7 +189,7 @@ CANADIAN_PROVINCES = (
 
 
 def _apply_canada_fixes(lines: list) -> list:
-    """Combines Canadian Province and Postal Code with double spacing if separate."""
+    """Combine Canadian Province and Postal Code with double spacing if separate."""
     postal_code = ""
     postal_idx = -1
     for i, line in enumerate(lines):
@@ -215,7 +217,7 @@ def _apply_canada_fixes(lines: list) -> list:
 
 
 def normalize_address(address_str: str) -> str:
-    """Takes a multi-line address string and converts it to Project US@ format."""
+    """Take a multi-line address string and convert it to Project US@ format."""
     # First, split lines and normalize each line
     lines = [normalize_text(line) for line in address_str.split("\n")]
     # Remove empty lines
@@ -469,7 +471,8 @@ def _format_from_dict(tokens: dict, is_military: bool = False) -> str:
 
         if "StreetNamePreDirectional" in tokens:
             if "StreetName" in tokens and tokens["StreetName"].strip().startswith("AND "):
-                # Do not abbreviate PreDirectional if it forms a compound street name (e.g., EAST AND WEST)
+                # Do not abbreviate PreDirectional if it forms a compound street name
+                # (e.g., EAST AND WEST)
                 street_parts.append(tokens["StreetNamePreDirectional"])
             else:
                 street_parts.append(_format_directional(tokens["StreetNamePreDirectional"]))
@@ -600,7 +603,8 @@ def _format_from_dict(tokens: dict, is_military: bool = False) -> str:
 
 
 def _format_from_raw(raw_parsed: list) -> str:
-    # For complex/failing parses, we recreate the string processing parts manually mapped to basic rules
+    # For complex/failing parses, we recreate the string processing parts
+    # manually mapped to basic rules
     # This is a fallback
 
     # smart swap numbers to front for address lines ending with digit (e.g., ACHENSEEWEG 25)
@@ -642,29 +646,30 @@ def _format_from_raw(raw_parsed: list) -> str:
                     can_swap = False
                     break
             if can_swap and not any(v.isdigit() for v, _label in raw_parsed[:-1]):
-                raw_parsed = [raw_parsed[-1]] + raw_parsed[:-1]
+                raw_parsed = [raw_parsed[-1], *raw_parsed[:-1]]
 
     reconstructed = []
-    for val, label in raw_parsed:
+    for p_val, p_label in raw_parsed:
         # apply directional checks
-        if "Directional" in label:
-            val = _format_directional(val)
+        res_val = p_val
+        if "Directional" in p_label:
+            res_val = _format_directional(p_val)
         # apply suffix checks
-        if "PostType" in label or label == "StreetNamePostType":
-            val = _format_suffix(val)
+        elif "PostType" in p_label or p_label == "StreetNamePostType":
+            res_val = _format_suffix(p_val)
         # apply state checks
-        if label == "StateName":
-            val = _format_state(val)
+        elif p_label == "StateName":
+            res_val = _format_state(p_val)
         # apply secondary unit
-        if label == "OccupancyType":
-            val = _format_secondary_unit(val)
-        if label == "SubaddressType":
-            if val.upper() in ("PMB", "PRIVATE MAILBOX"):
-                val = "PMB"
-        reconstructed.append(val)
+        elif p_label == "OccupancyType":
+            res_val = _format_secondary_unit(p_val)
+        elif p_label == "SubaddressType" and p_val.upper() in ("PMB", "PRIVATE MAILBOX"):
+            res_val = "PMB"
+        reconstructed.append(res_val)
 
     # Reassemble and try to figure out lines based on newlines that were in the original
-    # usaddress strips \n from values sometimes, so we'll just join with space and do a naive newline check
+    # usaddress strips \n from values sometimes, so we'll just join with space
+    # and do a naive newline check
     final_raw = (
         " ".join(reconstructed)
         .replace(" \n ", "\n")
@@ -679,7 +684,7 @@ def _apply_pr_exceptions(text: str) -> str:
     from .constants import PR_URBANIZATION_EXCEPTIONS
 
     # Reorder Station lines to be ABOVE delivery lines if they are below (e.g., Sta below PO Box)
-    lines = [l.strip() for l in text.split("\n") if l.strip()]
+    lines = [line.strip() for line in text.split("\n") if line.strip()]
     if not lines:
         return text
 
@@ -707,11 +712,13 @@ def _apply_pr_exceptions(text: str) -> str:
             condo_lines.append(line_clean)
         elif any(k in line_up for k in ("PO BOX", "STA", "STATION")):
             postal_lines.append(line_clean)
-        elif any(
-            k in line_up for k in ("CALLE", "C/ ", "AVE", "AVENIDA", "KM", "ROAD", "ROUTE", "RR")
+        elif (
+            any(
+                k in line_up
+                for k in ("CALLE", "C/ ", "AVE", "AVENIDA", "KM", "ROAD", "ROUTE", "RR")
+            )
+            or re.search(r"^\d", line_clean)
         ):
-            street_lines.append(line_clean)
-        elif re.search(r"^\d", line_clean):
             street_lines.append(line_clean)
         else:
             other_lines.append(line_clean)
