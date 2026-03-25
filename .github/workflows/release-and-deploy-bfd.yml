@@ -32,6 +32,9 @@ permissions:
   id-token: write # This is required for requesting the AWS IAM OIDC JWT
   contents: write # This is required for actions/checkout
 
+env:
+  AWS_REGION: us-east-1
+
 defaults:
   run:
     shell: bash
