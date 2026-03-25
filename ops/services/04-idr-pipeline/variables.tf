@@ -12,9 +12,30 @@ variable "pipeline_repository_override" {
   type        = string
 }
 
+variable "consume_idr_events_repository_override" {
+  default     = null
+  description = "Overrides the ECR repository for the consume-idr-events container image. If not provided, the default will be used"
+  sensitive   = false
+  type        = string
+}
+
 variable "pipeline_version_override" {
   default     = null
   description = "Overrides the version for pipeline container image resolution. If not provided, the latest BFD version will be used"
   sensitive   = false
   type        = string
+}
+
+variable "consume_idr_events_version_override" {
+  default     = null
+  description = "Overrides the version for consume-idr-events container image resolution. If not provided, the latest BFD version will be used"
+  sensitive   = false
+  type        = string
+}
+
+variable "apply_events_resources_override" {
+  default     = false
+  description = "Overrides whether or not IDR load events related resources (SQS Queue, Lambda, etc.) are created"
+  sensitive   = false
+  type        = bool
 }

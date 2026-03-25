@@ -32,7 +32,7 @@ locals {
   app_subnets              = module.terraservice.subnets_map["private"]
   data_subnets             = module.terraservice.subnets_map["private"]
 
-  is_prod = local.env == "prod"
+  apply_events_resources = local.env == "prod" || var.apply_events_resources_override
 
   name_prefix = "bfd-${local.env}-${local.service}"
 
