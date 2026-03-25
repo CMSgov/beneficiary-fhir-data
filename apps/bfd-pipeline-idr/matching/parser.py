@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 import re
+import typing
 import unicodedata
 from collections.abc import Callable
 
@@ -259,38 +262,37 @@ def normalize_address(address_str: str) -> str:
                 and re.search(r"\b(STA|STATION)\b", line.upper())
                 and "PO BOX" not in line.upper()
             ):
-                raw_parsed = usaddress.parse(line)
+                raw_parsed: list[tuple[str, str]] = usaddress.parse(line)
                 formatted_lines.append(_format_from_raw(raw_parsed))
                 continue
 
             parsed_tokens: dict[str, str]
             addr_type: str
-            parsed_tokens, addr_type = usaddress.tag(line)
+            parsed_tokens, addr_type = typing.cast(tuple[dict[str, str], str], usaddress.tag(line))
 
             # Check if line contains a Canadian Province
             is_canada_line = False
             if "StateName" in parsed_tokens:
                 state_val = parsed_tokens["StateName"].upper().split()[0]
-                from .constants import CANADIAN_PROVINCES
-
                 if state_val in CANADIAN_PROVINCES:
                     is_canada_line = True
 
             if addr_type == "Ambiguous" and not is_canada_line:
-                raw_parsed = usaddress.parse(line)
+                raw_parsed: list[tuple[str, str]] = usaddress.parse(line)
                 fmt_string = _format_from_raw(raw_parsed)
             else:
                 fmt_string = _format_from_dict(parsed_tokens, is_military=is_military)
             if not fmt_string.strip() and line.strip():
                 # Dictionary returned empty for a non-empty line, fallback to raw sequential
-                raw_parsed = usaddress.parse(line)
+                raw_parsed: list[tuple[str, str]] = usaddress.parse(line)
                 fmt_string = _format_from_raw(raw_parsed)
             formatted_lines.append(fmt_string)
-        except usaddress.RepeatedLabelError as e:
-            raw_parsed = e.parsed_string
-            formatted_lines.append(_format_from_raw(raw_parsed))
-        except Exception:
-            formatted_lines.append(line)
+        except Exception as e:
+            if "RepeatedLabelError" in str(type(e)):
+                raw_parsed: list[tuple[str, str]] = getattr(e, "parsed_string", [])
+                formatted_lines.append(_format_from_raw(raw_parsed))
+            else:
+                formatted_lines.append(line)
 
     # Ensure Country is on the bottom line for International
     from .constants import COUNTRIES
@@ -331,7 +333,7 @@ def _format_state(word: str) -> str:
     return STATES.get(word, word)
 
 
-def _format_from_dict(tokens: dict, is_military: bool = False) -> str:
+def _format_from_dict(tokens: dict[str, str], is_military: bool = False) -> str:
     from .constants import SECONDARY_UNITS
 
     # Standardize dictionary bad tags for non-unit strings ending with digits
@@ -340,7 +342,7 @@ def _format_from_dict(tokens: dict, is_military: bool = False) -> str:
         and "OccupancyIdentifier" in tokens
         and "AddressNumber" not in tokens
     ):
-        orig_type = tokens["OccupancyType"].upper()
+        orig_type: str = tokens.get("OccupancyType", "").upper()
         if (
             orig_type not in SECONDARY_UNITS
             and orig_type not in SECONDARY_UNITS.values()
@@ -360,11 +362,11 @@ def _format_from_dict(tokens: dict, is_military: bool = False) -> str:
     # Check for Business or Recipient/Building (e.g., URB)
     for key in ["Recipient", "BuildingName", "LandmarkName"]:
         if key in tokens:
-            val = tokens[key].strip()
+            val: str = tokens[key].strip()
             # If the value consists solely of secondary units, re-categorize it to OccupancyType
-            val_upper = val.upper()
+            val_upper: str = val.upper()
             # Extract basic words removing numbers/punctuation for comparison
-            words = re.sub(r"[^A-Z\s]", "", val_upper).split()
+            words: list[str] = re.sub(r"[^A-Z\s]", "", val_upper).split()
             if words and all(w in SECONDARY_UNITS or w in SECONDARY_UNITS.values() for w in words):
                 tokens["OccupancyType"] = val
                 del tokens[key]
@@ -380,7 +382,7 @@ def _format_from_dict(tokens: dict, is_military: bool = False) -> str:
 
     # Re-categorize false-positive BoxType as Secondary Unit
     if "USPSBoxType" in tokens:
-        box_type_str = tokens["USPSBoxType"].upper()
+        box_type_str: str = tokens["USPSBoxType"].upper()
         if (
             box_type_str in SECONDARY_UNITS
             or box_type_str in SECONDARY_UNITS.values()
@@ -409,14 +411,14 @@ def _format_from_dict(tokens: dict, is_military: bool = False) -> str:
             "PSC",
             "UMR",
         ):
-            occ_val = _format_secondary_unit(tokens.pop("OccupancyType"))
-            occ_id = tokens.pop("OccupancyIdentifier", "")
+            occ_val: str = _format_secondary_unit(tokens.pop("OccupancyType", ""))
+            occ_id: str = tokens.pop("OccupancyIdentifier", "")
             street_parts.extend([occ_val, occ_id])
 
-        group_type = tokens.get("USPSBoxGroupType", "")
-        group_id = tokens.get("USPSBoxGroupID", "")
-        box_type = tokens.get("USPSBoxType", "")
-        box_id = tokens.get("USPSBoxID", "")
+        group_type: str = tokens.get("USPSBoxGroupType", "")
+        group_id: str = tokens.get("USPSBoxGroupID", "")
+        box_type: str = tokens.get("USPSBoxType", "")
+        box_id: str = tokens.get("USPSBoxID", "")
 
         # Format Group (e.g., RR, HC)
         if group_type:
@@ -495,11 +497,14 @@ def _format_from_dict(tokens: dict, is_military: bool = False) -> str:
 
     # Secondary Unit
     if "OccupancyType" in tokens:
-        occ_type = _format_secondary_unit(tokens["OccupancyType"])
+        occ_type: str = _format_secondary_unit(tokens["OccupancyType"])
         street_parts.append(occ_type)
         if "OccupancyIdentifier" in tokens:
-            occ_id = (
-                tokens["OccupancyIdentifier"].get_text()
+            def fallback_occ_id() -> str:
+                return tokens["OccupancyIdentifier"]
+
+            occ_id: str = str(
+                getattr(tokens["OccupancyIdentifier"], "get_text", fallback_occ_id)()
                 if hasattr(tokens["OccupancyIdentifier"], "get_text")
                 else tokens["OccupancyIdentifier"]
             )
@@ -507,7 +512,7 @@ def _format_from_dict(tokens: dict, is_military: bool = False) -> str:
                 occ_id = str(occ_id)[1:].strip()
             street_parts.append(occ_id)
     elif "OccupancyIdentifier" in tokens:
-        occ_id = (
+        occ_id: str = (
             tokens["OccupancyIdentifier"].get_text()
             if hasattr(tokens["OccupancyIdentifier"], "get_text")
             else tokens["OccupancyIdentifier"]
@@ -516,7 +521,7 @@ def _format_from_dict(tokens: dict, is_military: bool = False) -> str:
 
     # Private Mailbox (PMB)
     if "SubaddressType" in tokens:
-        sub_type = tokens["SubaddressType"].strip()
+        sub_type: str = tokens["SubaddressType"].strip()
         if sub_type in ("PMB", "PRIVATE MAILBOX"):
             sub_type = "PMB"
         # PDF says PMB or # identifier may be used
