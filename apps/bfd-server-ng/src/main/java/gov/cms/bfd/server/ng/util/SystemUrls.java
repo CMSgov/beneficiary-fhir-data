@@ -982,6 +982,9 @@ public class SystemUrls {
   /** <a href="https://terminology.hl7.org/6.2.0/NamingSystem-cmsMBI.html">CMS MBI.</a> */
   public static final String CMS_MBI = "http://hl7.org/fhir/sid/us-mbi";
 
+  /** <a href="https://terminology.hl7.org/5.5.0/NamingSystem-ssn.html">US SSN.</a> */
+  public static final String US_SSN = "http://hl7.org/fhir/sid/us-ssn";
+
   /** HL7 - US-NPI. */
   public static final String NPI = "http://hl7.org/fhir/sid/us-npi";
 

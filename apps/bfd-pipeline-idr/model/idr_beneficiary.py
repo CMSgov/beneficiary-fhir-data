@@ -73,6 +73,12 @@ class IdrBeneficiary(IdrBaseModel):
     bene_line_4_adr: Annotated[str, BeforeValidator(transform_default_string)]
     bene_line_5_adr: Annotated[str, BeforeValidator(transform_default_string)]
     bene_line_6_adr: Annotated[str, BeforeValidator(transform_default_string)]
+    # TODO: actual implementation
+    bfd_normalized_address: Annotated[
+        str,
+        {EXPR: "COALESCE(bene_line_1_adr, '')"},
+        BeforeValidator(transform_default_string),
+    ]
     cntct_lang_cd: Annotated[str, BeforeValidator(transform_default_string)]
     idr_ltst_trans_flg: Annotated[str, BeforeValidator(transform_default_string)]
     idr_trans_efctv_ts: Annotated[datetime, {PRIMARY_KEY: True}]

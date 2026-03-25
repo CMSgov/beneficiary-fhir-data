@@ -8,7 +8,6 @@ public record PatientMatch(
     PatientMatchEntry firstName,
     PatientMatchEntry lastName,
     PatientMatchEntry address,
-    PatientMatchEntry zipCode,
     PatientMatchEntry ssnLastFourDigits,
     PatientMatchEntry birthDate,
     PatientMatchEntry mbi) {
@@ -17,7 +16,7 @@ public record PatientMatch(
     var scenarios =
         List.of(
             // #1
-            List.of(firstName, lastName, birthDate, address, zipCode),
+            List.of(firstName, lastName, birthDate, address),
             // #2 - requires phone
             // #3 - requires email
             // #4

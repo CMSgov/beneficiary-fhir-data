@@ -20,10 +20,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.StringType;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -82,7 +84,7 @@ public class FhirInputConverter {
         throw new InvalidRequestException("ID is not a valid number");
       }
       return longId;
-    } catch (NumberFormatException ex) {
+    } catch (NumberFormatException _) {
       throw new InvalidRequestException("ID is not a valid number");
     }
   }
@@ -240,13 +242,16 @@ public class FhirInputConverter {
     }
     var name = patient.getName().stream().findFirst();
     var birthDate = Optional.ofNullable(patient.getBirthDate()).map(DateUtil::toLocalDate);
-    var firstName = name.map(HumanName::getGivenAsSingleString);
+    var firstName = name.flatMap(n -> n.getGiven().stream().findFirst()).map(StringType::toString);
     var lastName = name.map(HumanName::getFamily);
-    var mbi =
-        patient.getIdentifier().stream()
-            .filter(i -> i.getSystem().equals(SystemUrls.CMS_MBI))
-            .map(Identifier::getValue)
-            .findFirst();
+    var addressInput = patient.getAddress().stream().findFirst();
+    var address = addressInput.flatMap(FhirInputConverter::formatAddress);
+    var mbi = findIdentifier(patient, SystemUrls.CMS_MBI);
+    var ssnLastFourLength = 4;
+    var ssn =
+        findIdentifier(patient, SystemUrls.US_SSN)
+            .filter(s -> s.length() >= ssnLastFourLength)
+            .map(s -> s.substring(s.length() - ssnLastFourLength));
 
     return Optional.of(
         PatientMatch.builder()
@@ -254,10 +259,24 @@ public class FhirInputConverter {
             .lastName(new PatientMatchEntry(lastName.map(i -> i), "beneficiaryName.lastName"))
             .mbi(new PatientMatchEntry(mbi.map(i -> i), "identifier.mbi"))
             .birthDate(new PatientMatchEntry(birthDate.map(i -> i), "birthDate"))
-            .address(new PatientMatchEntry(Optional.empty(), "address"))
-            .zipCode(new PatientMatchEntry(Optional.empty(), "zipCode"))
-            .ssnLastFourDigits(new PatientMatchEntry(Optional.empty(), "ssn"))
+            .address(new PatientMatchEntry(address.map(i -> i), "address.normalizedAddress"))
+            .ssnLastFourDigits(new PatientMatchEntry(ssn.map(i -> i), "ssn"))
             .build());
+  }
+
+  private static Optional<String> formatAddress(Address address) {
+    var line = address.getLine().stream().findFirst().map(StringType::toString);
+    return line.map(
+        s ->
+            String.format(
+                "%s %s %s %s", s, address.getCity(), address.getState(), address.getPostalCode()));
+  }
+
+  private static Optional<String> findIdentifier(Patient patient, String system) {
+    return patient.getIdentifier().stream()
+        .filter(i -> i.getSystem().equals(system))
+        .map(Identifier::getValue)
+        .findFirst();
   }
 
   /**

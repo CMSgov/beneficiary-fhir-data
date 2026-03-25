@@ -16,6 +16,9 @@ public class Address {
   @Column(name = "geo_zip_plc_name")
   private Optional<String> city;
 
+  @Column(name = "bfd_normalized_address")
+  private String normalizedAddress;
+
   @Column(name = "bene_line_1_adr")
   private Optional<String> addressLine1;
 
