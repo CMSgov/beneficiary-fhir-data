@@ -1,6 +1,8 @@
 *
 !.gitignore
 !.python-version
+!Dockerfile
+!Dockerfile.dockerignore
 !README.md
 !app
 !app/__init__.py
