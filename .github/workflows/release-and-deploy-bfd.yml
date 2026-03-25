@@ -77,7 +77,7 @@ jobs:
   # -------------------------
   deploy-platform:
     uses: ./.github/workflows/deploy-platform-services.yml
-    needs: build-release
+    needs: [build-release]
     strategy:
       matrix:
         account-type: ["prod", "non-prod"]
