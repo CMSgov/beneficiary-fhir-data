@@ -193,7 +193,7 @@ CANADIAN_PROVINCES = (
 
 
 def _apply_canada_fixes(lines: list[str]) -> list[str]:
-    """Combine Canadian Province and Postal Code with double spacing if separate."""
+    """Combine Canadian Province and Postal Code with single spacing if separate."""
     postal_code = ""
     postal_idx = -1
     for i, line in enumerate(lines):
@@ -214,7 +214,7 @@ def _apply_canada_fixes(lines: list[str]) -> list[str]:
                     for prov in CANADIAN_PROVINCES
                 ):
                     # Combine with double space
-                    lines[j] = lines[j].strip() + "  " + postal_code
+                    lines[j] = lines[j].strip() + " " + postal_code
                     lines.pop(postal_idx)
                     break
     return lines
@@ -227,7 +227,7 @@ def normalize_address(address_str: str) -> str:
     # Remove empty lines
     lines = [line for line in lines if line]
 
-    # Pre-process Canadian addresses to combine Province and Postal Code with double spacing
+    # Pre-process Canadian addresses to combine Province and Postal Code with single spacing
     lines = _apply_canada_fixes(lines)
 
     # Re-split lines if any rule added a newline (e.g. rural route splits)
@@ -266,9 +266,7 @@ def normalize_address(address_str: str) -> str:
                 formatted_lines.append(_format_from_raw(raw_parsed))
                 continue
 
-            parsed_tokens: dict[str, str]
-            addr_type: str
-            parsed_tokens, addr_type = typing.cast(tuple[dict[str, str], str], usaddress.tag(line))
+            parsed_tokens, addr_type = usaddress.tag(line)  # type: ignore
 
             # Check if line contains a Canadian Province
             is_canada_line = False
@@ -501,23 +499,23 @@ def _format_from_dict(tokens: dict[str, str], is_military: bool = False) -> str:
         street_parts.append(occ_type)
         if "OccupancyIdentifier" in tokens:
 
-            def fallback_occ_id() -> str:
-                return tokens["OccupancyIdentifier"]
+            def get_val(obj: object) -> str:
+                if hasattr(obj, "get_text") and callable(typing.cast(typing.Any, obj).get_text):
+                    return str(typing.cast(typing.Any, obj).get_text())
+                return str(obj)
 
-            occ_id: str = str(
-                getattr(tokens["OccupancyIdentifier"], "get_text", fallback_occ_id)()
-                if hasattr(tokens["OccupancyIdentifier"], "get_text")
-                else tokens["OccupancyIdentifier"]
-            )
+            occ_id: str = get_val(tokens["OccupancyIdentifier"])
             if str(occ_id).startswith("#"):
                 occ_id = str(occ_id)[1:].strip()
             street_parts.append(occ_id)
     elif "OccupancyIdentifier" in tokens:
-        occ_id: str = (
-            tokens["OccupancyIdentifier"].get_text()
-            if hasattr(tokens["OccupancyIdentifier"], "get_text")
-            else tokens["OccupancyIdentifier"]
-        )
+
+        def get_val_simple(obj: object) -> str:
+            if hasattr(obj, "get_text") and callable(typing.cast(typing.Any, obj).get_text):
+                return str(typing.cast(typing.Any, obj).get_text())
+            return str(obj)
+
+        occ_id: str = get_val_simple(tokens["OccupancyIdentifier"])
         street_parts.append(occ_id)
 
     # Private Mailbox (PMB)
@@ -600,7 +598,7 @@ def _format_from_dict(tokens: dict[str, str], is_military: bool = False) -> str:
 
         if is_canada:
             if zip_code:
-                last_line += ("  " if last_line else "") + zip_code
+                last_line += (" " if last_line else "") + zip_code
         else:
             if zip_code:
                 last_line += (" " if last_line else "") + zip_code
