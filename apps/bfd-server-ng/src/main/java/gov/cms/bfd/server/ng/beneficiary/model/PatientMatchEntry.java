@@ -1,5 +1,5 @@
 package gov.cms.bfd.server.ng.beneficiary.model;
 
-import java.util.Optional;
+import java.util.List;
 
-public record PatientMatchEntry(Optional<Object> value, String name) {}
+public record PatientMatchEntry(List<Object> values, String name) {}

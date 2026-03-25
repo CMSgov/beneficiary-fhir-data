@@ -7,7 +7,7 @@ import lombok.Builder;
 public record PatientMatch(
     PatientMatchEntry firstName,
     PatientMatchEntry lastName,
-    PatientMatchEntry address,
+    PatientMatchEntry addresses,
     PatientMatchEntry ssnLastFourDigits,
     PatientMatchEntry birthDate,
     PatientMatchEntry mbi) {
@@ -16,7 +16,7 @@ public record PatientMatch(
     var scenarios =
         List.of(
             // #1
-            List.of(firstName, lastName, birthDate, address),
+            List.of(firstName, lastName, birthDate, addresses),
             // #2 - requires phone
             // #3 - requires email
             // #4
@@ -51,6 +51,6 @@ public record PatientMatch(
   }
 
   boolean allFieldsPresent(List<PatientMatchEntry> entries) {
-    return entries.stream().allMatch(e -> e.value().isPresent());
+    return entries.stream().noneMatch(e -> e.values().isEmpty());
   }
 }

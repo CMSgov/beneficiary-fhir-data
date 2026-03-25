@@ -15,16 +15,11 @@ public record PatientMatchFilter(List<PatientMatchEntry> entries) implements DbF
   public DbFilter getFilters(@NotNull String tableAlias, @NotNull SystemType systemType) {
     var filterClause = new StringBuilder();
     var params = new ArrayList<DbFilterParam>();
+
     for (var entry : entries) {
-      entry
-          .value()
-          .ifPresent(
-              v -> {
-                var paramName = entry.name().replace(".", "_");
-                filterClause.append(
-                    String.format(" AND %s.%s = :%s", tableAlias, entry.name(), paramName));
-                params.add(new DbFilterParam(paramName, v));
-              });
+      var paramName = entry.name().replace(".", "_");
+      filterClause.append(String.format(" AND %s.%s IN :%s", tableAlias, entry.name(), paramName));
+      params.add(new DbFilterParam(paramName, entry.values()));
     }
     return new DbFilter(filterClause.toString(), params);
   }
