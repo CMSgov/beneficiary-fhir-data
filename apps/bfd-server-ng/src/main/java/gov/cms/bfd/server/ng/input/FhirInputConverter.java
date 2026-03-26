@@ -12,6 +12,7 @@ import gov.cms.bfd.server.ng.claim.model.SamhsaSearchIntent;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import gov.cms.bfd.server.ng.util.IdrConstants;
 import gov.cms.bfd.server.ng.util.SystemUrls;
+import java.text.Normalizer;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -21,7 +22,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.Address;
-import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
@@ -244,8 +244,9 @@ public class FhirInputConverter {
     Optional<Object> birthDate =
         Optional.ofNullable(patient.getBirthDate()).map(DateUtil::toLocalDate);
     Optional<Object> firstName =
-        name.flatMap(n -> n.getGiven().stream().findFirst()).map(StringType::toString);
-    Optional<Object> lastName = name.map(HumanName::getFamily);
+        name.flatMap(n -> n.getGiven().stream().findFirst())
+            .map(s -> normalizeString(s.toString()));
+    Optional<Object> lastName = name.map(n -> normalizeString(n.getFamily()));
     var addresses =
         patient.getAddress().stream()
             .map(FhirInputConverter::formatAddress)
@@ -262,8 +263,11 @@ public class FhirInputConverter {
     return Optional.of(
         PatientMatch.builder()
             .firstName(
-                new PatientMatchEntry(firstName.stream().toList(), "beneficiaryName.firstName"))
-            .lastName(new PatientMatchEntry(lastName.stream().toList(), "beneficiaryName.lastName"))
+                new PatientMatchEntry(
+                    firstName.stream().toList(), "beneficiaryName.normalizedFirstName"))
+            .lastName(
+                new PatientMatchEntry(
+                    lastName.stream().toList(), "beneficiaryName.normalizedLastName"))
             .mbi(new PatientMatchEntry(mbi.stream().toList(), "identifier.mbi"))
             .birthDate(new PatientMatchEntry(birthDate.stream().toList(), "birthDate"))
             .addresses(new PatientMatchEntry(addresses, "address.normalizedAddress"))
@@ -284,6 +288,12 @@ public class FhirInputConverter {
         .filter(i -> i.getSystem().equals(system))
         .map(Identifier::getValue)
         .findFirst();
+  }
+
+  private static String normalizeString(String value) {
+    return Normalizer.normalize(value, Normalizer.Form.NFD)
+        .replaceAll("\\p{Punct}\\s", "")
+        .toUpperCase();
   }
 
   /**
