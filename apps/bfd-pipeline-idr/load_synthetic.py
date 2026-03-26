@@ -101,7 +101,7 @@ def _load_file(
                     f"COPY {full_table} ({cols_str}) FROM STDIN"  # type: ignore
                 ) as copy:
                     for row in reader:
-                        copy.write_row([row[c] if row[c] else None for c in cols])
+                        copy.write_row([row[c] or None for c in cols])
 
 
 if __name__ == "__main__":
