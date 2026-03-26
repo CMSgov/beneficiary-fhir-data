@@ -20,7 +20,6 @@
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_apply_events_resources_override"></a> [apply\_events\_resources\_override](#input\_apply\_events\_resources\_override) | Overrides whether or not IDR load events related resources (SQS Queue, Lambda, etc.) are created | `bool` | `false` | no |
 | <a name="input_consume_idr_events_repository_override"></a> [consume\_idr\_events\_repository\_override](#input\_consume\_idr\_events\_repository\_override) | Overrides the ECR repository for the consume-idr-events container image. If not provided, the default will be used | `string` | `null` | no |
 | <a name="input_consume_idr_events_version_override"></a> [consume\_idr\_events\_version\_override](#input\_consume\_idr\_events\_version\_override) | Overrides the version for consume-idr-events container image resolution. If not provided, the latest BFD version will be used | `string` | `null` | no |
 | <a name="input_db_environment_override"></a> [db\_environment\_override](#input\_db\_environment\_override) | For use in database maintenance contexts or in ephemeral environments only | `string` | `null` | no |
