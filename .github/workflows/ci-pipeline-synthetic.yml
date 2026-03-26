@@ -3,8 +3,8 @@ name: CI - Synthetic Pipeline
 on:
   pull_request:
     paths:
-      - "apps/bfd-model-idr/*"
-      - "apps/bfd-pipeline/bfd-pipeline-idr/*"
+      - "apps/bfd-model-idr/**"
+      - "apps/bfd-pipeline-idr/**"
       - ".github/workflows/ci-pipeline-synthetic.yml"
   merge_group:
 
@@ -38,14 +38,17 @@ jobs:
       - name: Ensure synthetic data pipeline runs
         run: |
           cd ${{ github.workspace }}/apps/bfd-model-idr
-          uv run patient_generator.py
-          uv run claims_generator.py ./out/SYNTHETIC_BENE_HSTRY.csv
+          uv run patient_generator.py --claims --patients 100
           cd ../bfd-pipeline-idr
           ./run-db.sh
       - name: Ensure synthetic data pipeline runs with existing synthetic data
         run: |
           cd ${{ github.workspace }}/apps/bfd-model-idr
-          uv run patient_generator.py ./synthetic-data
-          uv run claims_generator.py ./out/SYNTHETIC_BENE_HSTRY.csv
+          uv run patient_generator.py --claims ./synthetic-data
+          # Split claims output into 1000 CLMs batches
+          uv run load_splitter.py -c 1000
           cd ../bfd-pipeline-idr
-          ./run-db.sh
+          # Load from batched_out/0 to load _just_ the first batch to validate that the structure
+          # of data is OK and the data was regenerated properly without taking a significant amount
+          # of time to load the full dataset
+          ./run-db.sh ../bfd-model-idr/batched_out/0

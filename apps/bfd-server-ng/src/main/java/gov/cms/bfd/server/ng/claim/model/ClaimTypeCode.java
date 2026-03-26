@@ -7,7 +7,6 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,13 +16,9 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Reference;
 
-/**
- * Claim type codes. Suppress SonarQube warning that constant names should comply with naming
- * conventions
- */
+/** Claim type codes. */
 @Getter
 @AllArgsConstructor
-@SuppressWarnings("java:S115")
 public enum ClaimTypeCode {
   /** 1 - MEDICARE PART D ORIGINAL CLAIM. */
   _1(1, "MEDICARE PART D ORIGINAL CLAIM"),
@@ -296,11 +291,11 @@ public enum ClaimTypeCode {
   /** 2900 - HOSPICE NOTICE OF ELECTION. */
   _2900(2900, "HOSPICE NOTICE OF ELECTION");
 
-  private static final Set<Integer> PART_B_CODES =
-      Set.of(_1700.code, _1800.code, _2700.code, _2800.code);
   private final int code;
   private final String display;
   private static final String INSURER_ORG = "insurer-org";
+  private static final String PART_A_DISPLAY = "Part A";
+  private static final String PART_B_DISPLAY = "Part B";
 
   /**
    * Converts from a database code.
@@ -361,40 +356,27 @@ public enum ClaimTypeCode {
     return Optional.of(organization);
   }
 
-  Optional<ExplanationOfBenefit.InsuranceComponent> toFhirPartDInsurance() {
-    if (!isClaimSubtype(ClaimSubtype.PDE)) {
-      return Optional.empty();
-    }
-
+  ExplanationOfBenefit.InsuranceComponent toFhirPartDInsurance() {
     var insurance = new ExplanationOfBenefit.InsuranceComponent();
     insurance.setFocal(true);
     insurance.setCoverage(new Reference().setDisplay("Part D"));
-    return Optional.of(insurance);
+    return insurance;
   }
 
-  Optional<ExplanationOfBenefit.InsuranceComponent> toFhirInsurance(
-      ClaimRecordType claimRecordType) {
-    if (isClaimSubtype(ClaimSubtype.PDE)) {
-      return Optional.empty();
+  ExplanationOfBenefit.InsuranceComponent toFhirInsurance(
+      Optional<ClaimRecordType> claimRecordType) {
+    var insurance = new ExplanationOfBenefit.InsuranceComponent();
+    insurance.setFocal(true);
+    claimRecordType.flatMap(ClaimRecordType::toFhirReference).ifPresent(insurance::setCoverage);
+    if (insurance.getCoverage().isEmpty()) {
+      var fallbackDisplay =
+          isClaimSubtype(ClaimSubtype.CARRIER) || isClaimSubtype(ClaimSubtype.DME)
+              ? PART_B_DISPLAY
+              : PART_A_DISPLAY;
+      insurance.setCoverage(new Reference().setDisplay(fallbackDisplay));
     }
 
-    var partDisplay = claimRecordType.getPartDisplay().orElse("Part A");
-
-    return Optional.of(
-        new ExplanationOfBenefit.InsuranceComponent()
-            .setFocal(true)
-            .setCoverage(new Reference().setDisplay(partDisplay)));
-  }
-
-  Optional<String> toDisplay() {
-    return PART_B_CODES.contains(code) ? Optional.of("Part B") : Optional.empty();
-  }
-
-  Optional<ExplanationOfBenefit.RemittanceOutcome> toFhirOutcome() {
-    if (isPacStage1()) {
-      return Optional.of(ExplanationOfBenefit.RemittanceOutcome.PARTIAL);
-    }
-    return Optional.empty();
+    return insurance;
   }
 
   Optional<ExplanationOfBenefit.AdjudicationComponent> toFhirAdjudication() {
@@ -418,18 +400,6 @@ public enum ClaimTypeCode {
                     .setCode("other")
                     .setDisplay("Other")));
     return Optional.of(adjudication);
-  }
-
-  boolean isPacStage1() {
-    return isBetween(1000, 1999);
-  }
-
-  boolean isPacStage2() {
-    return isBetween(2000, 2999);
-  }
-
-  private boolean isBetween(int lower, int upper) {
-    return (code >= lower) && (code <= upper);
   }
 
   boolean isClaimSubtype(ClaimSubtype subtype) {

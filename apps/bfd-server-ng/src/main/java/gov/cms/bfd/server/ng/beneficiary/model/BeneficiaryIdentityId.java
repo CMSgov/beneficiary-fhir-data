@@ -23,7 +23,7 @@ public class BeneficiaryIdentityId {
   @Column(name = "bene_mbi_id")
   private String mbi;
 
-  @Column(name = "bene_xref_efctv_sk_computed")
+  @Column(name = "bene_xref_efctv_sk")
   private long xrefSk;
 
   @Column(name = "bene_mbi_efctv_dt")

@@ -180,6 +180,10 @@ resource "aws_ecs_task_definition" "server" {
             value = local.env
           },
           {
+            name  = "BFD_DB_IDENTIFIER"
+            value = local.db_cluster_identifier
+          },
+          {
             name  = "SPRING_PROFILES_ACTIVE"
             value = "aws"
           },
@@ -296,7 +300,7 @@ resource "aws_ecs_service" "server" {
   enable_ecs_managed_tags            = true
   health_check_grace_period_seconds  = 0
   name                               = local.service
-  propagate_tags                     = "NONE"
+  propagate_tags                     = "TASK_DEFINITION"
   scheduling_strategy                = "REPLICA"
   task_definition                    = aws_ecs_task_definition.server.arn
   triggers                           = {}

@@ -1,0 +1,13 @@
+Logical: DiagnosisComponent
+Id: DiagnosisComponent
+* ^name = "Diagnosis info"
+* ^url = "http://hl7.org/fhir/StructureDefinition/DiagnosisComponent"
+* ^status = #draft
+* ^type = "DiagnosisComponent"
+* . ^label = "Diagnosis Info for IDR. Ignore in DD Generation"
+* CLM_VAL_SQNC_NUM 1..1 string "Diagnosis Sequence Number" "A SYSTEM GENERATED SEQUENCE NUMBER FOR A COMBINATION OF CLAIM KEY AND PRODUCT"
+* ROW_NUM 1..1 string "Generated Row Number" "This is a non-overlapping number that should be used as the sequence number for a diagnosis on a given claim."
+* CLM_DGNS_CD 1..1 string "Claim Diagnosis Code" "A CODE IDENTIFYING AN INTERNATIONAL CLASSIFICATION OF DISEASES, CLINICAL MODIFICATION (ICD_CM) DIAGNOSIS RELEVANT TO THE SERVICE BEING PROVIDED OR THE REASON FOR THE SERVICE."
+* CLM_DGNS_PRCDR_ICD_IND 1..1 string "Diagnosis Procedure ICD indicator" "THIS IS THE CLAIM PROD VERSION CODE WHICH IS SPACES OR 9 FOR ICD 9 AND 0 FOR ICD 10."
+* CLM_PROD_TYPE_CD 1..1 string "Diagnosis Prod Type Code" "UNIQUELY IDENTIFIES A TYPE OF PROCEDURE OR A DIAGNOSIS CATEGORY."
+* CLM_POA_IND 1..1 string "Claim Present on Admission Indicator" "THE CODE USED TO INDICATE A CONDITION WAS PRESENT AT THE TIME THE BENEFICIARY WAS ADMITTED TO A GENERAL ACUTE CARE FACILITY.NOT APPLICABLE TO NON-DIAGNOSTIC PRODUCTS."

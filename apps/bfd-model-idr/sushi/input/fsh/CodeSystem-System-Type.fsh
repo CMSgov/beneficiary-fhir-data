@@ -8,3 +8,5 @@ Description: "Tag codes indicating whether or not a claim comes from a CMS Share
 
 * #NationalClaimsHistory "National Claims History"
 * #SharedSystem "Shared System"
+* #DDPS "Drug Data Processing System"
+* #EDPS "Encounter Data Processing System"

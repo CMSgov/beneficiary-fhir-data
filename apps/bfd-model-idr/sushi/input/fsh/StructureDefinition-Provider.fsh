@@ -1,0 +1,23 @@
+Logical: Provider
+Id: Provider
+* ^status = #draft
+* ^type = "Provider"
+* . ^label = "IDR Provider Base. Ignore in DD Generation"
+* PRVDR_SK 1..1 string "Provider SK - (NPI in almost all instances)" "Provider SK - (NPI in almost all instances)"
+* NPI_TYPE 1..1 string "NPI Type - Type 1 for Practitioner, Type 2 for Organization" "NPI Type - Type 1 for Practitioner, Type 2 for Organization"
+* careTeamType 0..1 string "Care Team Type" "Care Team Type"
+* careTeamSequenceNumber 0..1 string "Care Team Sequence Number" "Care Team Sequence Number"
+* PRVDR_1ST_NAME 0..1 string "First Name" "First Name"
+* PRVDR_LGL_NAME 0..1 string "Provider Legal Name" "Provider Legal Name"
+* PRVDR_LAST_OR_LGL_NAME 0..1 string "Provider Last or Legal Name" "Provider Last or Legal Name"
+* PRVDR_CARETEAM_NAME 0..1 string "Provider Name when rendered in a care team." "Provider Name when rendered in a care team."
+* PRVDR_TYPE_CD 0..1 string "Provider Type Code" "Provider Type Code"
+* PRVDR_LAST_NAME 0..1 string "Provider Last Name" "Provider Last Name"
+* specialtyCode 0..1 string "CMS Federal Specialty code." "CMS Federal Specialty Code"
+* PRVDR_OSCAR_NUM 0..1 string "Provider OSCAR number" "Provider OSCAR number"
+* PRVDR_EMPLR_ID_NUM 0..1 string "Provider Employer ID Number" "Provider Employer ID Number"
+* isDuplicate 0..1 string "BFD derived field. If an NPI is present in 2+ fields, this will be 'true' and thus we don't re-create the contained resource."
+* CLM_BLG_PRVDR_ZIP5_CD 0..1 string "Billing Provider Zip 5" "Billing Provider Zip 5"
+* CLM_BLG_PRVDR_TAX_NUM 0..1 string "Provider Tax Number" "Provider Tax Number"
+* PRVDR_ID_QLFYR_CD 0..1 string "Provider Identifier Qualifier Code" "Provider Identifier Qualifier Code"
+* CLM_PRVDR_GNRC_ID_NUM 0..1 string "Provider Generic ID Number" "Indicates the ID number submitted for the provider on a claim. The type of the identifier is noted by PRVDR_ID_QLFYR_CD."

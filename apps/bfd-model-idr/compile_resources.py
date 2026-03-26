@@ -39,19 +39,6 @@ def get_referenced_maps(compiled_map_path):
         print("Error reading map:", e)
         return set()
 
-
-def get_structure_definitions():
-    try:
-        source_dir = Path(__file__).parent.absolute() / "StructureDefinitions" / "Source"
-        structure_defs = [
-            f"StructureDefinitions/Source/{file.name}" for file in source_dir.glob("*.json")
-        ]
-        return " ".join([f"-ig {def_file}" for def_file in structure_defs])
-    except Exception as e:
-        print("Error reading StructureDef", e)
-        return ""
-
-
 def get_sushi_resources():
     try:
         sushi_dir = Path(__file__).parent.absolute() / "sushi" / "fsh-generated" / "resources"
@@ -201,10 +188,6 @@ def main():
 
     script_dir = Path(__file__).parent.absolute()
 
-    # When we convert the existing StructureDefinitions to .fsh we won't need this,
-    # it'll just generate them with SUSHI.
-    structure_defs = get_structure_definitions()
-
     # Generate Structure Definitions + CodeSystems
     if(args.sushi):
         print("Running sushi build")
@@ -254,7 +237,7 @@ def main():
 
     print("Executing Transform")
     execute_cmd = f"java -jar validator_cli.jar {input_file} -output {args.output} -transform \
-        {args.resource} -version 4.0.1 -ig {compiled_map_path} {structure_defs} \
+        {args.resource} -version 4.0.1 -ig {compiled_map_path} \
             -ig hl7.fhir.us.carin-bb#2.1.0 {map_imports} {sushi_resources} -tx {MATCHBOX_SERVER}/tx"
     stdout, stderr = run_command(execute_cmd, cwd=script_dir)
 

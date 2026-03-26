@@ -1,11 +1,11 @@
-FROM public.ecr.aws/lambda/provided:al2023.2025.10.28.11-arm64 as dnf
+FROM public.ecr.aws/lambda/provided:al2023.2026.03.12.12-arm64 as dnf
 
-RUN dnf install jq unzip tar gzip libicu aws-cli git gettext java-25-amazon-corretto-headless -y && dnf clean all
+RUN dnf install jq unzip tar gzip libicu aws-cli git gettext java-25-amazon-corretto-headless findutils zip -y && dnf clean all
 
 FROM dnf as opentofu
 
-ARG opentofu_version=1.10.1
-ARG opentofu_checksum=102ca3c409da379f13baf272d0301afcd4f5e4a558970b7bc4473f2f286d4598
+ARG opentofu_version=1.10.6
+ARG opentofu_checksum=a32f653d686a8cad9b9be82101eb5b5e834fbfa8d095842fa1820c5d27fad967
 
 RUN curl -fsSL -o /tmp/tofu.zip https://github.com/opentofu/opentofu/releases/download/v${opentofu_version}/tofu_${opentofu_version}_linux_arm64.zip \
     && checksum=$(sha256sum /tmp/tofu.zip | cut -f 1 -d ' ') \
@@ -16,8 +16,8 @@ ENV TF_DATA_DIR=/tmp
 
 FROM opentofu as yq
 
-ARG yq_version=4.45.4
-ARG yq_checksum=a02cc637409db44a9f9cb55ea92c40019582ba88083c4d930a727ec4b59ed439
+ARG yq_version=4.52.4
+ARG yq_checksum=4c2cc022a129be5cc1187959bb4b09bebc7fb543c5837b93001c68f97ce39a5d
 
 RUN curl -fsSL -o /usr/local/bin/yq https://github.com/mikefarah/yq/releases/download/v${yq_version}/yq_linux_arm64 \
     && checksum=$(sha256sum /usr/local/bin/yq | cut -f 1 -d ' ') \
@@ -26,10 +26,27 @@ RUN curl -fsSL -o /usr/local/bin/yq https://github.com/mikefarah/yq/releases/dow
 
 FROM yq as sops
 
-ARG sops_version=3.10.2
-ARG sops_checksum=e91ddc04e6a78f5aed9e4fc347a279b539c43b74d99e6b8078e2f2f6f5b309f5
+ARG sops_version=3.12.1
+ARG sops_checksum=c7904d07bf1fb3ffdc329b0103ce70ff6a884aa7af7931427402bea0c09cc522
 
 RUN curl -fsSL -o /usr/local/bin/sops https://github.com/getsops/sops/releases/download/v${sops_version}/sops-v${sops_version}.linux.arm64 \
     && checksum=$(sha256sum /usr/local/bin/sops | cut -f 1 -d ' ') \
     && [[ "${checksum}" = "${sops_checksum}" ]] \
     && chmod +x /usr/local/bin/sops
+
+FROM sops as uv
+
+ARG uv_version=0.10.11
+ARG uv_checksum=23003df007937dd607409c8ddf010baa82bad2673e60e254632ca5b04edcce13
+
+RUN curl -fsSL -o /tmp/uv.tar.gz https://github.com/astral-sh/uv/releases/download/${uv_version}/uv-aarch64-unknown-linux-gnu.tar.gz \
+    && checksum=$(sha256sum /tmp/uv.tar.gz | cut -f 1 -d ' ') \
+    && [[ "${checksum}" = "${uv_checksum}" ]] \
+    && tar -xf /tmp/uv.tar.gz -C /usr/local/bin --strip-components=1 \
+    && rm /tmp/uv.tar.gz \
+    && chmod +x /usr/local/bin/uv /usr/local/bin/uvx
+
+# Fix installing python versions and packages when running on a Lambda CodeBuild Runner where only
+# $LAMBDA_TASK_ROOT and /tmp are writeable
+ENV XDG_CACHE_HOME=${LAMBDA_TASK_ROOT}/.cache
+ENV UV_PYTHON_INSTALL_DIR=${LAMBDA_TASK_ROOT}/.python

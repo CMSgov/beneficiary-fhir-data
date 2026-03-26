@@ -5,14 +5,9 @@ import gov.cms.bfd.server.ng.SamhsaFilterMode;
 import gov.cms.bfd.server.ng.SecurityLabel;
 import gov.cms.bfd.server.ng.beneficiary.BeneficiaryRepository;
 import gov.cms.bfd.server.ng.claim.ClaimRepository;
-import gov.cms.bfd.server.ng.claim.model.Claim;
-import gov.cms.bfd.server.ng.claim.model.ClaimItem;
-import gov.cms.bfd.server.ng.claim.model.ClaimLine;
-import gov.cms.bfd.server.ng.claim.model.ClaimProcedure;
-import gov.cms.bfd.server.ng.claim.model.ClaimTypeCode;
-import gov.cms.bfd.server.ng.claim.model.IcdIndicator;
+import gov.cms.bfd.server.ng.claim.model.*;
+import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
-import gov.cms.bfd.server.ng.input.TagCriterion;
 import gov.cms.bfd.server.ng.loadprogress.LoadProgressRepository;
 import gov.cms.bfd.server.ng.util.FhirUtil;
 import gov.cms.bfd.server.ng.util.IdrConstants;
@@ -61,65 +56,64 @@ public class EobHandler {
   /**
    * Search for claims data by bene.
    *
-   * @param beneSk bene sk
-   * @param count record count
-   * @param serviceDate service date
-   * @param lastUpdated last updated
-   * @param startIndex start index
-   * @param claimTypeCodes claimTypeCodes
-   * @param tagCriteria tagCriteria
+   * @param criteria filter criteria
    * @param samhsaFilterMode SAMHSA filter mode
    * @return bundle
    */
-  public Bundle searchByBene(
-      Long beneSk,
-      Optional<Integer> count,
-      DateTimeRange serviceDate,
-      DateTimeRange lastUpdated,
-      Optional<Integer> startIndex,
-      List<List<TagCriterion>> tagCriteria,
-      List<ClaimTypeCode> claimTypeCodes,
-      SamhsaFilterMode samhsaFilterMode) {
+  public Bundle searchByBene(ClaimSearchCriteria criteria, SamhsaFilterMode samhsaFilterMode) {
+    var beneSk = criteria.beneSk();
     var beneXrefSk = beneficiaryRepository.getXrefSkFromBeneSk(beneSk);
     // Don't return data for historical beneSks
     if (beneXrefSk.isEmpty() || !beneXrefSk.get().equals(beneSk)) {
       return new Bundle();
     }
 
-    var claims =
-        claimRepository.findByBeneXrefSk(
+    var repositoryCriteria =
+        new ClaimSearchCriteria(
             beneXrefSk.get(),
-            serviceDate,
-            lastUpdated,
-            count,
-            startIndex,
-            tagCriteria,
-            claimTypeCodes);
+            criteria.claimThroughDate(),
+            criteria.lastUpdated(),
+            criteria.limit(),
+            criteria.offset(),
+            criteria.tagCriteria(),
+            criteria.claimTypeCodes(),
+            criteria.sources());
 
-    var filteredClaims = filterSamhsaClaims(claims, samhsaFilterMode);
+    var claims = claimRepository.findByBeneXrefSk(repositoryCriteria);
 
-    return FhirUtil.bundleOrDefault(
-        filteredClaims.map(
-            claim -> {
-              var hasSamhsaClaims =
-                  samhsaFilterMode == SamhsaFilterMode.INCLUDE && claimHasSamhsa(claim);
+    var filteredClaims =
+        filterSamhsaClaims(claims, samhsaFilterMode, repositoryCriteria)
+            .map(
+                claim -> {
+                  var hasSamhsaClaims =
+                      samhsaFilterMode == SamhsaFilterMode.INCLUDE && claimHasSamhsa(claim);
 
-              var securityStatus =
-                  hasSamhsaClaims
-                      ? ClaimSecurityStatus.SAMHSA_APPLICABLE
-                      : ClaimSecurityStatus.NONE;
+                  var securityStatus =
+                      hasSamhsaClaims
+                          ? ClaimSecurityStatus.SAMHSA_APPLICABLE
+                          : ClaimSecurityStatus.NONE;
 
-              return claim.toFhir(securityStatus);
-            }),
-        loadProgressRepository::lastUpdated);
+                  return claim.toFhir(securityStatus);
+                });
+
+    return FhirUtil.bundleOrDefault(filteredClaims.toList(), loadProgressRepository::lastUpdated);
   }
 
-  private Stream<Claim> filterSamhsaClaims(List<Claim> claims, SamhsaFilterMode samhsaFilterMode) {
-    var claimStream = claims.stream().sorted(Comparator.comparing(Claim::getClaimUniqueId));
-    if (samhsaFilterMode == SamhsaFilterMode.INCLUDE) {
-      return claimStream;
-    }
-    return claimStream.filter(claim -> !claimHasSamhsa(claim));
+  private Stream<? extends ClaimBase> filterSamhsaClaims(
+      List<? extends ClaimBase> claims,
+      SamhsaFilterMode samhsaFilterMode,
+      ClaimSearchCriteria claimSearchCriteria) {
+    var claimStream = claims.stream().sorted(Comparator.comparing(ClaimBase::getClaimUniqueId));
+    var filteredClaimStream =
+        switch (samhsaFilterMode) {
+          case INCLUDE -> claimStream;
+          case ONLY_SAMHSA -> claimStream.filter(this::claimHasSamhsa);
+          case EXCLUDE -> claimStream.filter(claim -> !claimHasSamhsa(claim));
+        };
+
+    return filteredClaimStream
+        .skip(claimSearchCriteria.resolveOffset())
+        .limit(claimSearchCriteria.resolveLimit());
   }
 
   /**
@@ -184,25 +178,25 @@ public class EobHandler {
 
   // Returns true if the given claim contains any procedure that matches a SAMHSA
   // security label code from the dictionary.
-  private boolean claimHasSamhsa(Claim claim) {
+  private boolean claimHasSamhsa(ClaimBase claim) {
     var claimUniqueId = claim.getClaimUniqueId();
     var claimThroughDate =
         claim.getBillablePeriod().getClaimThroughDate().orElse(IdrConstants.DEFAULT_DATE);
     var drgSamhsa = drgIsSamhsa(claim, claimThroughDate, claimUniqueId);
     var claimItemSamhsa =
-        claim.getClaimItems().stream()
+        claim.getItems().stream()
             .anyMatch(e -> claimItemIsSamhsa(e, claimThroughDate, claimUniqueId));
 
     return drgSamhsa || claimItemSamhsa;
   }
 
   private boolean claimItemIsSamhsa(
-      ClaimItem claimItem, LocalDate claimThroughDate, long claimUniqueId) {
-    return procedureIsSamhsa(claimItem.getClaimProcedure(), claimThroughDate, claimUniqueId)
-        || hcpcsIsSamhsa(claimItem.getClaimLine(), claimThroughDate, claimUniqueId);
+      ClaimItemBase claimItem, LocalDate claimThroughDate, long claimUniqueId) {
+    return procedureIsSamhsa(claimItem.getProcedure(), claimThroughDate, claimUniqueId)
+        || hcpcsIsSamhsa(claimItem.getClaimLineHcpcsCode(), claimThroughDate, claimUniqueId);
   }
 
-  private boolean drgIsSamhsa(Claim claim, LocalDate claimDate, long claimUniqueId) {
+  private boolean drgIsSamhsa(ClaimBase claim, LocalDate claimDate, long claimUniqueId) {
     var entries = SECURITY_LABELS.get(SystemUrls.CMS_MS_DRG);
     var drg = claim.getDrgCode().map(Object::toString).orElse("");
     return entries.stream()
@@ -210,8 +204,12 @@ public class EobHandler {
             e -> isCodeSamhsa(drg, claimDate, e, "DRG", claimUniqueId, SystemUrls.CMS_MS_DRG));
   }
 
-  private boolean hcpcsIsSamhsa(ClaimLine claimLine, LocalDate claimDate, long claimUniqueId) {
-    var hcpcs = claimLine.getHcpcsCode().getHcpcsCode().orElse("");
+  private boolean hcpcsIsSamhsa(
+      Optional<ClaimLineHcpcsCode> hcpcsCode, LocalDate claimDate, long claimUniqueId) {
+    if (hcpcsCode.isEmpty()) {
+      return false;
+    }
+    var hcpcs = hcpcsCode.get().getHcpcsCode().orElse("");
     return Stream.of(SystemUrls.AMA_CPT, SystemUrls.CMS_HCPCS)
         .flatMap(s -> SECURITY_LABELS.get(s).stream().map(c -> Map.entry(s, c)))
         .anyMatch(
@@ -220,7 +218,11 @@ public class EobHandler {
 
   // Checks ICDs.
   private boolean procedureIsSamhsa(
-      ClaimProcedure procedure, LocalDate claimDate, long claimUniqueId) {
+      Optional<? extends ClaimProcedureBase> proc, LocalDate claimDate, long claimUniqueId) {
+    if (proc.isEmpty()) {
+      return false;
+    }
+    var procedure = proc.get();
     var diagnosisCode = procedure.getDiagnosisCode().orElse("");
     var procedureCode = procedure.getProcedureCode().orElse("");
     // If the ICD indicator isn't something valid, it's probably a PAC claim with a mistake in the

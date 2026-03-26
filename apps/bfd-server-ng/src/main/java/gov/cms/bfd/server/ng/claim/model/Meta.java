@@ -15,17 +15,15 @@ class Meta {
 
   org.hl7.fhir.r4.model.Meta toFhir(
       ClaimTypeCode claimTypeCode,
-      ClaimSourceId claimSourceId,
       ClaimSecurityStatus securityStatus,
-      ClaimFinalAction finalAction) {
-    var meta =
-        new org.hl7.fhir.r4.model.Meta()
-            .setLastUpdated(DateUtil.toDate(updatedTimestamp))
-            .setSource(claimSourceId.getSource());
+      ClaimFinalAction finalAction,
+      MetaSourceSk metaSourceSk) {
+    var meta = new org.hl7.fhir.r4.model.Meta().setLastUpdated(DateUtil.toDate(updatedTimestamp));
     claimTypeCode.toFhirStructureDefinition().ifPresent(meta::addProfile);
-    claimSourceId.toFhirSystemType().ifPresent(meta::addTag);
+    meta.addTag(metaSourceSk.toFhirSystemType());
     finalAction.toFhirFinalAction().ifPresent(meta::addTag);
     meta.addSecurity(ClaimSecurityStatus.toFhir(securityStatus));
+    meta.setSource(metaSourceSk.getDisplay());
     return meta;
   }
 }

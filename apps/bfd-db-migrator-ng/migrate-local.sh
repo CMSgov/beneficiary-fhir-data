@@ -2,6 +2,8 @@
 
 set -e
 
+export TZ=UTC
+
 script_dir=$(path=$(realpath "$0") && dirname "$path")
 (
     cd "$script_dir"

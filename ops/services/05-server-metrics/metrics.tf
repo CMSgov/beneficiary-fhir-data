@@ -5,17 +5,20 @@ locals {
   }
 
   endpoints = {
-    all                = ["*/fhir/*"]
-    metadata           = ["*/fhir/metadata*"]
-    coverage_all       = ["*/fhir/Coverage*"]
-    patient_all        = ["*/fhir/Patient*"]
-    eob_all            = ["*/fhir/ExplanationOfBenefit*"]
-    claim_all          = ["*/fhir/Claim", "*/fhir/Claim/"]
-    claim_response_all = ["*/fhir/ClaimResponse", "*/fhir/ClaimResponse/"]
+    all                = { match = "*/fhir/*" }
+    metadata           = { match = "*/fhir/metadata*" }
+    coverage_all       = { match = "*/fhir/Coverage*" }
+    patient_all        = { match = "*/fhir/Patient*" }
+    eob_all            = { match = "*/fhir/ExplanationOfBenefit*" }
+    claim_all          = { match = "*/fhir/Claim*", no_match = "*/fhir/ClaimResponse*" }
+    claim_response_all = { match = "*/fhir/ClaimResponse*" }
   }
   endpoint_patterns = {
     for name, patterns in local.endpoints :
-    name => "(${join(" || ", [for pattern in patterns : "$.mdc.http_access_request_uri = \"${pattern}\""])})"
+    name => "(${join(" && ", [
+      "$.mdc.http_access_request_uri = \"${patterns.match}\"",
+      "$.mdc.http_access_request_uri != \"${try(patterns.no_match, "")}\"",
+    ])})"
   }
   filter_variations = {
     all_partners = {

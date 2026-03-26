@@ -15,13 +15,15 @@ from testcontainers.core.config import testcontainers_config  # type: ignore
 # https://github.com/testcontainers/testcontainers-python/issues/305
 from testcontainers.postgres import PostgresContainer  # type: ignore
 
-from constants import DEFAULT_MAX_DATE
 from load_synthetic import load_from_csv
+from logger_config import configure_logger
 from pipeline import run
 
 # ryuk throws a 500 or 404 error for some reason
 # seems to have issues with podman https://github.com/testcontainers/testcontainers-python/issues/753
 testcontainers_config.ryuk_disabled = True
+
+configure_logger()
 
 
 def _run_migrator(postgres: PostgresContainer) -> None:
@@ -34,7 +36,8 @@ def _run_migrator(postgres: PostgresContainer) -> None:
             "-Dflyway.url="
             f"jdbc:postgresql://localhost:{postgres.get_exposed_port(5432)}/{postgres.dbname} "
             f"-Dflyway.user={postgres.username} "
-            f"-Dflyway.password={postgres.password}",
+            f"-Dflyway.password={postgres.password} "
+            "-Duser.timezone=UTC",
             cwd="../bfd-db-migrator-ng",
             shell=True,
             capture_output=True,
@@ -57,12 +60,16 @@ def setup_db() -> Generator[PostgresContainer]:
             load_from_csv(conn, "./test_samples1")  # type: ignore
 
             info = conn.info
+            # Info level logs obscure the error output when running tests
+            # so we want to override this unless the calling process has set this explicitly
+            os.environ.setdefault("IDR_LOG_LEVEL", "warning")
             os.environ["BFD_DB_ENDPOINT"] = info.host
             os.environ["BFD_DB_PORT"] = str(info.port)
             os.environ["BFD_DB_NAME"] = info.dbname
             os.environ["BFD_DB_USERNAME"] = info.user
             os.environ["BFD_DB_PASSWORD"] = info.password
             os.environ["IDR_BATCH_SIZE"] = "100000"
+            os.environ["IDR_FORCE_LOAD_PROGRESS"] = "1"
         yield postgres
 
 
@@ -203,61 +210,6 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
     assert rows[0]["bene_mbi_id"] == "5OH0K85GU23"
     assert rows[1]["bene_mbi_id"] == "6LM1C27GV22"
 
-    cur = conn.execute("select * from idr.claim order by clm_uniq_id")
-    assert cur.rowcount == 142
-    rows = cur.fetchmany(1)
-    assert rows[0]["clm_uniq_id"] == 113370100080
-    assert rows[0]["clm_nrln_ric_cd"] == "W"
-
-    cur = conn.execute("select * from idr.claim where clm_uniq_id = 8244064276500")
-    assert cur.rowcount == 0
-
-    cur = conn.execute("select * from idr.claim_institutional order by clm_uniq_id")
-    assert cur.rowcount == 72
-    rows = cur.fetchmany(1)
-    assert rows[0]["clm_uniq_id"] == 113370100080
-
-    cur = conn.execute("select * from idr.claim_date_signature order by clm_dt_sgntr_sk")
-    assert cur.rowcount == 142
-    rows = cur.fetchmany(2)
-    assert rows[0]["clm_dt_sgntr_sk"] == 2334117069
-    assert rows[0]["clm_cms_proc_dt"] == datetime.strptime(DEFAULT_MAX_DATE, "%Y-%m-%d").date()
-    assert rows[1]["clm_cms_proc_dt"] == datetime.strptime(DEFAULT_MAX_DATE, "%Y-%m-%d").date()
-
-    cur = conn.execute("select * from idr.claim_professional order by clm_uniq_id")
-    assert cur.rowcount == 33
-    rows = cur.fetchmany(1)
-    assert rows[0]["clm_uniq_id"] == 797757725380
-
-    cur = conn.execute("select * from idr.claim_item order by clm_uniq_id")
-    assert cur.rowcount == 1590
-    rows = cur.fetchmany(1)
-    assert rows[0]["clm_uniq_id"] == 113370100080
-
-    cur = conn.execute("select * from idr.claim_line_institutional order by clm_uniq_id")
-    assert cur.rowcount == 594
-    rows = cur.fetchmany(1)
-    assert rows[0]["clm_uniq_id"] == 113370100080
-
-    cur = conn.execute("select * from idr.claim_line_professional order by clm_uniq_id")
-    assert cur.rowcount == 281
-    rows = cur.fetchmany(1)
-    assert rows[0]["clm_uniq_id"] == 797757725380
-
-    cur = conn.execute("select * from idr.claim_ansi_signature order by clm_ansi_sgntr_sk")
-    assert cur.rowcount == 12072
-    rows = cur.fetchmany(1)
-    assert rows[0]["clm_ansi_sgntr_sk"] == 0
-
-    cur = conn.execute("select * from idr.provider_history order by prvdr_sk")
-    assert cur.rowcount == 14
-    rows = cur.fetchmany(1)
-    assert rows[0]["prvdr_sk"] == 829307599
-    rows = cur.fetchall()
-    for row in rows:
-        assert row["idr_insrt_ts"] is not None
-        assert row["idr_updt_ts"] is not None
-
     cur = conn.execute("select * from idr.contract_pbp_number order by cntrct_pbp_sk")
     assert cur.rowcount == 10
     rows = cur.fetchmany(1)
@@ -285,3 +237,51 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
     assert cur.rowcount == 2
     rows = cur.fetchmany(1)
     assert rows[0]["bene_sk"] == 353816020
+
+    cur = conn.execute("select * from idr.claim_institutional_ss where clm_uniq_id = 8244064276500")
+    assert cur.rowcount == 0
+
+    cur = conn.execute("select * from idr.claim_institutional_nch order by clm_uniq_id")
+    assert cur.rowcount == 51
+    rows = cur.fetchmany(1)
+    assert rows[0]["clm_uniq_id"] == 113370100080
+
+    cur = conn.execute("select * from idr.claim_institutional_ss order by clm_uniq_id")
+    assert cur.rowcount == 21
+    rows = cur.fetchmany(1)
+    assert rows[0]["clm_uniq_id"] == 580550863030
+
+    cur = conn.execute("select * from idr.claim_professional_nch order by clm_uniq_id")
+    assert cur.rowcount == 33
+    rows = cur.fetchmany(1)
+    assert rows[0]["clm_uniq_id"] == 797757725380
+
+    cur = conn.execute("select * from idr.claim_professional_ss order by clm_uniq_id")
+    assert cur.rowcount == 1
+    rows = cur.fetchmany(1)
+    assert rows[0]["clm_uniq_id"] == 4991490559710
+
+    cur = conn.execute("select * from idr.claim_rx order by clm_uniq_id")
+    assert cur.rowcount == 19
+    rows = cur.fetchmany(1)
+    assert rows[0]["clm_uniq_id"] == 166776396279
+
+    cur = conn.execute("select * from idr.claim_item_institutional_nch order by clm_uniq_id")
+    assert cur.rowcount == 795
+    rows = cur.fetchmany(1)
+    assert rows[0]["clm_uniq_id"] == 113370100080
+
+    cur = conn.execute("select * from idr.claim_item_institutional_ss order by clm_uniq_id")
+    assert cur.rowcount == 334
+    rows = cur.fetchmany(1)
+    assert rows[0]["clm_uniq_id"] == 580550863030
+
+    cur = conn.execute("select * from idr.claim_item_professional_nch order by clm_uniq_id")
+    assert cur.rowcount == 442
+    rows = cur.fetchmany(1)
+    assert rows[0]["clm_uniq_id"] == 119855147698
+
+    cur = conn.execute("select * from idr.claim_item_professional_ss order by clm_uniq_id")
+    assert cur.rowcount == 1
+    rows = cur.fetchmany(1)
+    assert rows[0]["clm_uniq_id"] == 4991490559710

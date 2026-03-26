@@ -1,62 +1,80 @@
 package gov.cms.bfd.server.ng.claim;
 
-import gov.cms.bfd.server.ng.DbFilter;
 import gov.cms.bfd.server.ng.DbFilterBuilder;
-import gov.cms.bfd.server.ng.DbFilterParam;
-import gov.cms.bfd.server.ng.claim.filter.BillablePeriodFilterParam;
-import gov.cms.bfd.server.ng.claim.filter.ClaimTypeCodeFilterParam;
-import gov.cms.bfd.server.ng.claim.filter.LastUpdatedFilterParam;
-import gov.cms.bfd.server.ng.claim.filter.TagCriteriaFilterParam;
-import gov.cms.bfd.server.ng.claim.model.Claim;
-import gov.cms.bfd.server.ng.claim.model.ClaimTypeCode;
+import gov.cms.bfd.server.ng.claim.filter.*;
+import gov.cms.bfd.server.ng.claim.model.*;
+import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
-import gov.cms.bfd.server.ng.input.TagCriterion;
 import gov.cms.bfd.server.ng.util.LogUtil;
 import io.micrometer.core.annotation.Timed;
 import io.micrometer.core.aop.MeterTag;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.TypedQuery;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 /** Repository methods for claims. */
-// NOTE: @Transactional is needed to ensure our custom transaction manager is used
-@Transactional(readOnly = true)
 @Repository
 @AllArgsConstructor
 public class ClaimRepository {
 
-  private final EntityManager entityManager;
+  private final ClaimAsyncService asyncService;
 
-  private static final String CLAIM_TABLES_BASE =
+  private static final String CLAIM_PROFESSIONAL_SHARED_SYSTEMS =
       """
-        SELECT c
-        FROM Claim c
-        JOIN FETCH c.beneficiary b
-        JOIN FETCH c.claimDateSignature AS cds
-        JOIN FETCH c.claimItems AS cl
-        LEFT JOIN FETCH c.claimOptional.claimInstitutional ci
-        LEFT JOIN FETCH c.claimOptional.claimProfessional cp
-        LEFT JOIN FETCH cl.claimItemOptional.claimLineInstitutional cli
-        LEFT JOIN FETCH cl.claimItemOptional.claimLineProfessional clp
-        LEFT JOIN FETCH c.claimOptional.claimFiss cf
-        LEFT JOIN FETCH cli.claimLineInstitutionalOptional.ansiSignature a
-        LEFT JOIN FETCH cl.claimItemOptional.claimLineRx clr
-        LEFT JOIN FETCH c.claimOptional.contract ct
-        LEFT JOIN FETCH ct.contractOptional.contractPlanContactInfo cc
-        LEFT JOIN FETCH c.claimOptional.serviceProviderHistory p
-        LEFT JOIN FETCH c.claimOptional.attendingProviderHistory ap
-        LEFT JOIN FETCH c.claimOptional.operatingProviderHistory orp
-        LEFT JOIN FETCH c.claimOptional.otherProviderHistory otp
-        LEFT JOIN FETCH c.claimOptional.renderingProviderHistory rp
-        LEFT JOIN FETCH c.claimOptional.prescribingProviderHistory pp
-        LEFT JOIN FETCH c.claimOptional.billingProviderHistory bp
-        LEFT JOIN FETCH c.claimOptional.referringProviderHistory rph
-      """;
+              SELECT c
+              FROM ClaimProfessionalSharedSystems c
+              JOIN FETCH c.beneficiary b
+              LEFT JOIN FETCH c.claimItems AS cl
+            """;
+
+  private static final String CLAIM_PROFESSIONAL_NCH =
+      """
+              SELECT c
+              FROM ClaimProfessionalNch c
+              JOIN FETCH c.beneficiary b
+              JOIN FETCH c.claimItems AS cl
+            """;
+
+  private static final String CLAIM_INSTITUTIONAL_SHARED_SYSTEMS =
+      """
+              SELECT c
+              FROM ClaimInstitutionalSharedSystems c
+              JOIN FETCH c.beneficiary b
+              LEFT JOIN FETCH c.claimItems AS cl
+            """;
+
+  private static final String CLAIM_INSTITUTIONAL_NCH =
+      """
+              SELECT c
+              FROM ClaimInstitutionalNch c
+              JOIN FETCH c.beneficiary b
+              JOIN FETCH c.claimItems AS cl
+            """;
+
+  private static final String CLAIM_RX =
+      """
+              SELECT c
+              FROM ClaimRx c
+              JOIN FETCH c.beneficiary b
+            """;
+
+  private static final List<ClaimTypeDefinition> ALL_CLAIM_TYPES =
+      List.of(
+          new ClaimTypeDefinition(
+              CLAIM_PROFESSIONAL_SHARED_SYSTEMS,
+              ClaimProfessionalSharedSystems.class,
+              SystemType.SS),
+          new ClaimTypeDefinition(
+              CLAIM_PROFESSIONAL_NCH, ClaimProfessionalNch.class, SystemType.NCH),
+          new ClaimTypeDefinition(
+              CLAIM_INSTITUTIONAL_SHARED_SYSTEMS,
+              ClaimInstitutionalSharedSystems.class,
+              SystemType.SS),
+          new ClaimTypeDefinition(
+              CLAIM_INSTITUTIONAL_NCH, ClaimInstitutionalNch.class, SystemType.NCH),
+          new ClaimTypeDefinition(CLAIM_RX, ClaimRx.class, SystemType.DDPS));
 
   /**
    * Search for a claim by its ID.
@@ -67,7 +85,7 @@ public class ClaimRepository {
    * @return claim
    */
   @Timed(value = "application.claim.search_by_id")
-  public Optional<Claim> findById(
+  public Optional<ClaimBase> findById(
       long claimUniqueId,
       @MeterTag(
               key = "hasClaimThroughDate",
@@ -81,122 +99,100 @@ public class ClaimRepository {
         List.of(
             new BillablePeriodFilterParam(claimThroughDate),
             new LastUpdatedFilterParam(lastUpdated));
-    var params = getFilters(paramBuilders);
-    var jpql =
-        String.format(
-            """
-              %s
-              WHERE c.claimUniqueId = :claimUniqueId
-              AND (ct.contractPbpSk IS NULL OR ct.contractVersionRank = 1)
-              %s
-            """,
-            CLAIM_TABLES_BASE, params.filterClause());
-    var results =
-        withParams(entityManager.createQuery(jpql, Claim.class), params.params())
-            .setParameter("claimUniqueId", claimUniqueId)
-            .getResultList();
 
-    var optionalClaim = results.stream().findFirst();
-    optionalClaim.ifPresent(claim -> LogUtil.logBeneSk(claim.getBeneficiary().getBeneSk()));
-    return optionalClaim;
+    var professionalSharedSystemsClaims =
+        asyncService.findByIdInClaimType(
+            CLAIM_PROFESSIONAL_SHARED_SYSTEMS,
+            ClaimProfessionalSharedSystems.class,
+            ClaimProfessionalSharedSystems.getSystemType(),
+            claimUniqueId,
+            paramBuilders);
+
+    var professionalNchClaims =
+        asyncService.findByIdInClaimType(
+            CLAIM_PROFESSIONAL_NCH,
+            ClaimProfessionalNch.class,
+            ClaimProfessionalSharedSystems.getSystemType(),
+            claimUniqueId,
+            paramBuilders);
+
+    var institutionalSharedSystemsClaims =
+        asyncService.findByIdInClaimType(
+            CLAIM_INSTITUTIONAL_SHARED_SYSTEMS,
+            ClaimInstitutionalSharedSystems.class,
+            ClaimInstitutionalSharedSystems.getSystemType(),
+            claimUniqueId,
+            paramBuilders);
+
+    var institutionalNchClaims =
+        asyncService.findByIdInClaimType(
+            CLAIM_INSTITUTIONAL_NCH,
+            ClaimInstitutionalNch.class,
+            ClaimInstitutionalNch.getSystemType(),
+            claimUniqueId,
+            paramBuilders);
+
+    var rxClaims =
+        asyncService.findByIdInClaimType(
+            CLAIM_RX, ClaimRx.class, ClaimRx.getSystemType(), claimUniqueId, paramBuilders);
+
+    // Wait for all queries
+    CompletableFuture.allOf(
+            professionalNchClaims,
+            professionalSharedSystemsClaims,
+            institutionalSharedSystemsClaims,
+            institutionalNchClaims,
+            rxClaims)
+        .join();
+
+    var allClaims = new ArrayList<ClaimBase>();
+    professionalNchClaims.join().ifPresent(allClaims::add);
+    professionalSharedSystemsClaims.join().ifPresent(allClaims::add);
+    institutionalSharedSystemsClaims.join().ifPresent(allClaims::add);
+    institutionalNchClaims.join().ifPresent(allClaims::add);
+    rxClaims.join().ifPresent(allClaims::add);
+
+    var result = allClaims.stream().findFirst();
+
+    result.ifPresent(claim -> LogUtil.logBeneSk(claim.getBeneficiary().getBeneSk()));
+
+    return result;
   }
 
   /**
    * Returns claims for the given beneficiary.
    *
-   * @param beneSk bene sk
-   * @param claimThroughDate claim through date
-   * @param lastUpdated last updated
-   * @param limit limit
-   * @param offset offset
-   * @param tagCriteria tag criteria
-   * @param claimTypeCodes claimTypeCodes
+   * @param criteria filter criteria
    * @return claims
    */
   @Timed(value = "application.claim.search_by_bene")
-  public List<Claim> findByBeneXrefSk(
-      long beneSk,
-      @MeterTag(
-              key = "hasClaimThroughDate",
-              expression = "lowerBound.isPresent() || upperBound.isPresent()")
-          DateTimeRange claimThroughDate,
-      @MeterTag(
-              key = "hasLastUpdated",
-              expression = "lowerBound.isPresent() || upperBound.isPresent()")
-          DateTimeRange lastUpdated,
-      @MeterTag(key = "hasLimit", expression = "isPresent()") Optional<Integer> limit,
-      @MeterTag(key = "hasOffset", expression = "isPresent()") Optional<Integer> offset,
-      @MeterTag(key = "hasTags", expression = "size() > 0") List<List<TagCriterion>> tagCriteria,
-      @MeterTag(key = "hasClaimTypeCodes", expression = "size() > 0")
-          List<ClaimTypeCode> claimTypeCodes) {
-    var filterBuilders =
+  public List<ClaimBase> findByBeneXrefSk(
+      @MeterTag(key = "hasClaimThroughDate", expression = "hasClaimThroughDate()")
+          @MeterTag(key = "hasLastUpdated", expression = "hasLasUpdated()")
+          @MeterTag(key = "hasTags", expression = "hasTags()")
+          @MeterTag(key = "hasClaimTypeCodes", expression = "hasClaimTypeCodes()")
+          @MeterTag(key = "hasSources", expression = "hasSources()")
+          ClaimSearchCriteria criteria) {
+
+    List<DbFilterBuilder> filterBuilders =
         List.of(
-            new BillablePeriodFilterParam(claimThroughDate),
-            new LastUpdatedFilterParam(lastUpdated),
-            new ClaimTypeCodeFilterParam(claimTypeCodes),
-            new TagCriteriaFilterParam(tagCriteria));
-    var filters = getFilters(filterBuilders);
-    // Some of the filters here appear redundant, but joining on the entire primary key for
-    // beneficiaries (bene_sk + effective timestamp) helps query performance significantly
-    var jpql =
-        String.format(
-            """
-            WITH benes AS (
-                  SELECT b.beneSk beneSk, b.effectiveTimestamp effectiveTimestamp
-                  FROM Beneficiary b
-                  WHERE b.xrefSk = :beneSk AND b.latestTransactionFlag = 'Y'
-             ),
-             claims AS (
-                SELECT c.claimUniqueId claimUniqueId
-                FROM Claim c
-                WHERE EXISTS (
-                  SELECT 1 FROM benes b2
-                    WHERE b2.beneSk = c.beneficiary.beneSk
-                    AND b2.effectiveTimestamp = c.beneficiary.effectiveTimestamp
-                )
-                ORDER BY c.claimUniqueId
-                OFFSET :offset ROWS
-                FETCH NEXT :limit ROWS ONLY
-             )
-            %s
-            WHERE c.claimUniqueId IN (SELECT claimUniqueId FROM claims)
-            AND EXISTS (
-              SELECT 1 FROM benes b2
-              WHERE b2.beneSk = b.beneSk
-              AND b2.effectiveTimestamp = b.effectiveTimestamp
-            )
-            AND (ct.contractPbpSk IS NULL OR ct.contractVersionRank = 1)
-            %s
-            """,
-            CLAIM_TABLES_BASE, filters.filterClause());
-    var claims =
-        withParams(entityManager.createQuery(jpql, Claim.class), filters.params())
-            .setParameter("limit", limit.orElse(5000))
-            .setParameter("offset", offset.orElse(0))
-            .setParameter("beneSk", beneSk)
-            .getResultList();
+            new BillablePeriodFilterParam(criteria.claimThroughDate()),
+            new LastUpdatedFilterParam(criteria.lastUpdated()),
+            new ClaimTypeCodeFilterParam(criteria.claimTypeCodes()),
+            new TagCriteriaFilterParam(criteria.tagCriteria()),
+            new SourceFilterParam(criteria.sources()));
 
-    claims.stream()
-        .findFirst()
-        .ifPresent(claim -> LogUtil.logBeneSk(claim.getBeneficiary().getBeneSk()));
-    return claims;
-  }
+    var futures =
+        ALL_CLAIM_TYPES.stream()
+            .filter(claimTypeDefinition -> claimTypeDefinition.matchesSystemType(filterBuilders))
+            .map(
+                d ->
+                    asyncService.fetchClaims(
+                        d.baseQuery(), d.claimClass(), d.systemType(), criteria, filterBuilders))
+            .toList();
 
-  private <T extends DbFilterBuilder> DbFilter getFilters(List<T> builders) {
-    var sb = new StringBuilder();
-    var queryParams = new ArrayList<DbFilterParam>();
-    for (var builder : builders) {
-      var params = builder.getFilters("c");
-      sb.append(params.filterClause());
-      queryParams.addAll(params.params());
-    }
-    return new DbFilter(sb.toString(), queryParams);
-  }
-
-  private <T> TypedQuery<T> withParams(TypedQuery<T> query, List<DbFilterParam> params) {
-    for (var param : params) {
-      query.setParameter(param.name(), param.value());
-    }
-    return query;
+    CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+    Stream<ClaimBase> claims = futures.stream().flatMap(f -> f.join().stream());
+    return claims.sorted(Comparator.comparing(ClaimBase::getClaimUniqueId)).toList();
   }
 }

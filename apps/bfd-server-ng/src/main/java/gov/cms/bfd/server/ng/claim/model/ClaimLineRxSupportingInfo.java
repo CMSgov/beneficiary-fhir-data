@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model;
 
+import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
@@ -7,13 +8,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 import lombok.Getter;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
 @Embeddable
 @Getter
 class ClaimLineRxSupportingInfo {
-
-  @Embedded private ClaimLineRxRefillNumber refillsAuthorized;
 
   @Column(name = "clm_phrmcy_srvc_type_cd")
   private Optional<PharmacySrvcTypeCode> pharmacyServiceTypeCode;
@@ -35,7 +35,9 @@ class ClaimLineRxSupportingInfo {
 
   @Embedded private ClaimLineRxDaysSupplyQuantity daysSupply;
   @Embedded private ClaimLineRxFillNumber fillNumber;
-  @Embedded private ClaimDispenseAsWrittenProdSelectCode claimDispenseAsWrittenProdSelectCode;
+
+  @Column(name = "clm_daw_prod_slctn_cd")
+  private Optional<ClaimDispenseAsWrittenCode> claimDispenseAsWrittenCode;
 
   @Column(name = "clm_drug_cvrg_stus_cd")
   private Optional<DrugCoverageStatusCode> drugCoverageStatusCode;
@@ -43,13 +45,9 @@ class ClaimLineRxSupportingInfo {
   @Column(name = "clm_ctstrphc_cvrg_ind_cd")
   private Optional<CatastrophicCoverageCode> catastrophicCovCode;
 
-  @Column(name = "clm_dspnsng_stus_cd")
-  private Optional<ClaimDispenseStatusCode> claimDispensingStatusCode;
-
   List<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {
     return Stream.of(
-            Optional.of(refillsAuthorized.toFhir(supportingInfoFactory)),
             pharmacyServiceTypeCode.map(c -> c.toFhir(supportingInfoFactory)),
             claimPrescriptionOriginCode.map(c -> c.toFhir(supportingInfoFactory)),
             brandGenericCode.map(s -> s.toFhir(supportingInfoFactory)),
@@ -58,11 +56,21 @@ class ClaimLineRxSupportingInfo {
             compoundCode.map(s -> s.toFhir(supportingInfoFactory)),
             Optional.of(daysSupply.toFhir(supportingInfoFactory)),
             Optional.of(fillNumber.toFhir(supportingInfoFactory)),
-            claimDispenseAsWrittenProdSelectCode.toFhir(supportingInfoFactory),
+            claimDispenseAsWrittenCode.map(c -> c.toFhir(supportingInfoFactory)),
             drugCoverageStatusCode.map(s -> s.toFhir(supportingInfoFactory)),
-            catastrophicCovCode.map(s -> s.toFhir(supportingInfoFactory)),
-            claimDispensingStatusCode.map(s -> s.toFhir(supportingInfoFactory)))
+            catastrophicCovCode.map(s -> s.toFhir(supportingInfoFactory)))
         .flatMap(Optional::stream)
         .toList();
+  }
+
+  /**
+   * Per C4BB, if compound code = 2 -> populate productOrService with "compound".
+   *
+   * @return Optional containing the coding if applicable, otherwise empty
+   */
+  public Optional<Coding> toFhirNdcCompound() {
+    return compoundCode
+        .filter(c -> c.getCode().equals("2"))
+        .map(c -> new Coding().setSystem(SystemUrls.CARIN_COMPOUND_LITERAL).setCode("compound"));
   }
 }

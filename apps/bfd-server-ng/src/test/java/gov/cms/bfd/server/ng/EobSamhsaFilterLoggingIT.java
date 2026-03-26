@@ -32,12 +32,12 @@ class EobSamhsaFilterLoggingIT extends IntegrationTestBase {
 
     var samhsaLogs =
         events.stream()
-            .filter(e -> e.getLoggerName().equals("gov.cms.bfd.server.ng.eob.EobHandler"))
+            .filter(e -> e.getLoggerName().equals(eobHandler.getClass().getName()))
             .filter(e -> e.getMessage().contains(SAMHSA_FILTERED_LOG_MESSAGE))
             .toList();
 
     assertEquals(1, samhsaLogs.size(), "Expected exactly one SAMHSA filtering log message");
-    var logEvent = samhsaLogs.get(0);
+    var logEvent = samhsaLogs.getFirst();
     var formattedMessage = logEvent.getFormattedMessage();
     assertTrue(
         formattedMessage.contains(SAMHSA_FILTERED_LOG_MESSAGE),

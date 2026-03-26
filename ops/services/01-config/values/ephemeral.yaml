@@ -61,6 +61,7 @@ copy:
   - /bfd/${env}/server-ng/nonsensitive/client_certificates # copy all client_certificates recursively
   - /bfd/${env}/server-ng/sensitive/db/username
   - /bfd/${env}/server-ng/sensitive/db/password
+  - /bfd/${env}/server-ng/nonsensitive/samhsa_allowed_certificate_aliases_json
 # "values" defines a key-value map exactly the same as the typical seed environment ".sops.yaml"
 # configuration format. Takes precedence over any copied SSM parameters
 values:

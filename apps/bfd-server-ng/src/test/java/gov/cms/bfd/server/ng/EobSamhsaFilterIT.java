@@ -6,12 +6,16 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.SearchStyleEnum;
 import ca.uhn.fhir.rest.client.interceptor.AdditionalRequestHeadersInterceptor;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.IReadTyped;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.bfd.server.ng.eob.EobHandler;
+import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import gov.cms.bfd.server.ng.util.IdrConstants;
@@ -53,13 +57,10 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
   private static final long CLAIM_UNIQUE_ID_FOR_ICD_10_PROCEDURE = 6647624169509L;
   private static final long CLAIM_UNIQUE_ID_FOR_ICD_9_DIAGNOSIS = 5312173004042L;
   private static final long CLAIM_UNIQUE_ID_FOR_ICD_9_PROCEDURE = 6103633914327L;
-  private static final long CLAIM_UNIQUE_ID_FOR_HCPCS = 7095549187112L;
   private static final long CLAIM_UNIQUE_ID_FOR_DRG = 9644464937468L;
   private static final long CLAIM_UNIQUE_ID_FOR_DRG_WITH_EXPIRED_CODE_522 = 9688880648059L;
   private static final long CLAIM_UNIQUE_ID_FOR_DRG_WITH_EXPIRED_CODE_523 = 3159002171180L;
-  private static final long CLAIM_UNIQUE_ID_FOR_CPT = 4722020775430L;
   private static final long CLAIM_UNIQUE_ID_FOR_FUTURE_HCPCS = 6871761612138L;
-  private static final long CLAIM_UNIQUE_ID_FOR_FUTURE_HCPCS_AFTER_CODE_START = 6871761612139L;
 
   private static final long CLAIM_UNIQUE_ID_WITH_NO_SAMHSA = 566745788569L;
   private static final long CLAIM_UNIQUE_ID_WITH_MULTIPLE_SAMHSA_CODES = 3233800161009L;
@@ -69,7 +70,6 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
   private static final long BENE_SK3 = 455108118;
   private static final long BENE_SK4 = 167719446;
   private static final long BENE_SK5 = 27590072;
-  private static final long BENE_SK6 = 186315498;
 
   // System: icd-10-cm [clm_dgns_cd]
   private static final String ICD10_DIAGNOSIS = "F10.10";
@@ -147,16 +147,17 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
 
   private List<ExplanationOfBenefit> getClaimsByBene(
       long beneSk, SamhsaFilterMode samhsaFilterMode) {
-    var claims =
-        eobHandler.searchByBene(
+    var criteria =
+        new ClaimSearchCriteria(
             beneSk,
+            new DateTimeRange(),
+            new DateTimeRange(),
             Optional.empty(),
-            new DateTimeRange(),
-            new DateTimeRange(),
             Optional.empty(),
             Collections.emptyList(),
             List.of(),
-            samhsaFilterMode);
+            Collections.emptyList());
+    var claims = eobHandler.searchByBene(criteria, samhsaFilterMode);
     return getEobFromBundle(claims);
   }
 
@@ -192,26 +193,13 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
                 CLAIM_UNIQUE_ID_WITH_NO_SAMHSA,
                 CLAIM_WITH_HCPCS_IN_ICD),
             List.of(CLAIM_WITH_HCPCS_IN_ICD)),
-        Arguments.of(
-            BENE_SK2,
-            List.of(CLAIM_UNIQUE_ID_FOR_HCPCS, CLAIM_UNIQUE_ID_FOR_ICD_10_DIAGNOSIS),
-            List.of(),
-            List.of()),
+        Arguments.of(BENE_SK2, List.of(CLAIM_UNIQUE_ID_FOR_ICD_10_DIAGNOSIS), List.of(), List.of()),
         Arguments.of(BENE_SK3, List.of(CLAIM_UNIQUE_ID_FOR_ICD_10_PROCEDURE), List.of(), List.of()),
         Arguments.of(BENE_SK4, List.of(CLAIM_UNIQUE_ID_FOR_ICD_9_DIAGNOSIS), List.of(), List.of()),
         Arguments.of(
             BENE_SK5,
-            List.of(
-                CLAIM_UNIQUE_ID_FOR_ICD_9_PROCEDURE,
-                CLAIM_UNIQUE_ID_FOR_DRG,
-                CLAIM_UNIQUE_ID_FOR_CPT),
+            List.of(CLAIM_UNIQUE_ID_FOR_ICD_9_PROCEDURE, CLAIM_UNIQUE_ID_FOR_DRG),
             List.of(),
-            List.of()),
-        Arguments.of(
-            BENE_SK6,
-            List.of(CLAIM_UNIQUE_ID_FOR_FUTURE_HCPCS_AFTER_CODE_START),
-            List.of(
-                CLAIM_UNIQUE_ID_FOR_DRG_WITH_EXPIRED_CODE_523, CLAIM_UNIQUE_ID_FOR_FUTURE_HCPCS),
             List.of()));
   }
 
@@ -291,7 +279,7 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
         skipBundleVerification);
   }
 
-  @ValueSource(longs = {BENE_SK, BENE_SK2, BENE_SK3, BENE_SK4, BENE_SK5, BENE_SK6})
+  @ValueSource(longs = {BENE_SK, BENE_SK2, BENE_SK3, BENE_SK4, BENE_SK5})
   @ParameterizedTest
   void shouldNotFilterSamhsaIfAllowedCert(long beneSk) {
     var bundle = searchBundle(beneSk, SamhsaCertType.SAMHSA_ALLOWED_CERT).execute();
@@ -372,10 +360,6 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
   private static Stream<Arguments> ensureProcedure() {
     return Stream.of(
         Arguments.of(
-            CLAIM_UNIQUE_ID_FOR_ICD_10_PROCEDURE, ICD10_PROCEDURE, SystemUrls.CMS_ICD_10_PROCEDURE),
-        Arguments.of(
-            CLAIM_UNIQUE_ID_FOR_ICD_9_PROCEDURE, ICD9_PROCEDURE, SystemUrls.CMS_ICD_9_PROCEDURE),
-        Arguments.of(
             CLAIM_UNIQUE_ID_WITH_MULTIPLE_SAMHSA_CODES,
             ICD10_PROCEDURE2,
             SystemUrls.CMS_ICD_10_PROCEDURE),
@@ -400,13 +384,9 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
 
   private static Stream<Arguments> ensureHcpcs() {
     return Stream.of(
-        Arguments.of(CLAIM_UNIQUE_ID_FOR_HCPCS, HCPCS, SystemUrls.CMS_HCPCS),
-        Arguments.of(CLAIM_UNIQUE_ID_FOR_CPT, CPT, SystemUrls.AMA_CPT),
         Arguments.of(CLAIM_UNIQUE_ID_WITH_MULTIPLE_SAMHSA_CODES, HCPCS2, SystemUrls.CMS_HCPCS),
         Arguments.of(CLAIM_UNIQUE_ID_WITH_MULTIPLE_SAMHSA_CODES, CPT2, SystemUrls.AMA_CPT),
-        Arguments.of(CLAIM_UNIQUE_ID_FOR_FUTURE_HCPCS, FUTURE_HCPCS, SystemUrls.CMS_HCPCS),
-        Arguments.of(
-            CLAIM_UNIQUE_ID_FOR_FUTURE_HCPCS_AFTER_CODE_START, FUTURE_HCPCS, SystemUrls.CMS_HCPCS));
+        Arguments.of(CLAIM_UNIQUE_ID_FOR_FUTURE_HCPCS, FUTURE_HCPCS, SystemUrls.CMS_HCPCS));
   }
 
   @MethodSource
@@ -535,5 +515,186 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
     SAMHSA_NOT_ALLOWED_CERT("samhsa_not_allowed");
 
     private final String certValue;
+  }
+
+  static Stream<Arguments> provideSecurityScenarios() {
+    return Stream.of(SearchStyleEnum.values())
+        .flatMap(
+            style ->
+                Stream.of(
+                    Arguments.of(
+                        "NoCert_SamhsaRequested_NoSamhsa",
+                        List.of(List.of(securityClause(SecurityModifier.NONE, samhsaCodeOnly()))),
+                        SamhsaCertType.NO_CERT,
+                        List.of(
+                            CLAIM_UNIQUE_ID_FOR_DRG_WITH_EXPIRED_CODE_522,
+                            CLAIM_WITH_HCPCS_IN_ICD,
+                            CLAIM_UNIQUE_ID_WITH_NO_SAMHSA),
+                        false,
+                        style),
+                    Arguments.of(
+                        "NotAllowedCert_SamhsaRequested_NoSamhsa",
+                        List.of(
+                            List.of(securityClause(SecurityModifier.NONE, samhsaCodeAndSystem()))),
+                        SamhsaCertType.SAMHSA_NOT_ALLOWED_CERT,
+                        List.of(
+                            CLAIM_UNIQUE_ID_FOR_DRG_WITH_EXPIRED_CODE_522,
+                            CLAIM_WITH_HCPCS_IN_ICD,
+                            CLAIM_UNIQUE_ID_WITH_NO_SAMHSA),
+                        false,
+                        style),
+                    Arguments.of(
+                        "AllowedCert_SamhsaCodeRequested_OnlySamhsa",
+                        List.of(List.of(securityClause(SecurityModifier.NONE, samhsaCodeOnly()))),
+                        SamhsaCertType.SAMHSA_ALLOWED_CERT,
+                        List.of(CLAIM_UNIQUE_ID_WITH_MULTIPLE_SAMHSA_CODES),
+                        false,
+                        style),
+                    Arguments.of(
+                        "AllowedCert_SamhsaCodeAndSystemRequested_OnlySamhsa",
+                        List.of(
+                            List.of(securityClause(SecurityModifier.NONE, samhsaCodeAndSystem()))),
+                        SamhsaCertType.SAMHSA_ALLOWED_CERT,
+                        List.of(CLAIM_UNIQUE_ID_WITH_MULTIPLE_SAMHSA_CODES),
+                        false,
+                        style),
+                    Arguments.of(
+                        "AllowedCert_InvalidCodeRequest_NoClaims",
+                        List.of(
+                            List.of(securityClause(SecurityModifier.NONE, invalidSamhsaCode()))),
+                        SamhsaCertType.SAMHSA_ALLOWED_CERT,
+                        List.of(),
+                        true,
+                        style),
+                    Arguments.of(
+                        "AllowedCert_SamhsaAndNonSamhsa_NoClaims",
+                        List.of(
+                            List.of(securityClause(SecurityModifier.NONE, samhsaCodeOnly())),
+                            List.of(securityClause(SecurityModifier.NOT, samhsaCodeAndSystem()))),
+                        SamhsaCertType.SAMHSA_ALLOWED_CERT,
+                        List.of(),
+                        true,
+                        style),
+                    Arguments.of(
+                        "AllowedCert_SamhsaOrNonSamhsa_AllClaims",
+                        List.of(
+                            List.of(
+                                securityClause(SecurityModifier.NOT, samhsaCodeAndSystem()),
+                                securityClause(SecurityModifier.NONE, samhsaCodeAndSystem()))),
+                        SamhsaCertType.SAMHSA_ALLOWED_CERT,
+                        List.of(
+                            CLAIM_UNIQUE_ID_FOR_DRG_WITH_EXPIRED_CODE_522,
+                            CLAIM_WITH_HCPCS_IN_ICD,
+                            CLAIM_UNIQUE_ID_WITH_NO_SAMHSA),
+                        false,
+                        style),
+                    Arguments.of(
+                        "AllowedCert_ExcludedSamhsaCodeRequested_NoSamhsa",
+                        List.of(List.of(securityClause(SecurityModifier.NOT, samhsaCodeOnly()))),
+                        SamhsaCertType.SAMHSA_ALLOWED_CERT,
+                        List.of(
+                            CLAIM_UNIQUE_ID_FOR_DRG_WITH_EXPIRED_CODE_522,
+                            CLAIM_WITH_HCPCS_IN_ICD,
+                            CLAIM_UNIQUE_ID_WITH_NO_SAMHSA),
+                        false,
+                        style),
+                    Arguments.of(
+                        "AllowedCert_ExcludedSamhsaCodeAndSystemRequested_NoSamhsa",
+                        List.of(
+                            List.of(securityClause(SecurityModifier.NOT, samhsaCodeAndSystem()))),
+                        SamhsaCertType.SAMHSA_ALLOWED_CERT,
+                        List.of(
+                            CLAIM_UNIQUE_ID_FOR_DRG_WITH_EXPIRED_CODE_522,
+                            CLAIM_WITH_HCPCS_IN_ICD,
+                            CLAIM_UNIQUE_ID_WITH_NO_SAMHSA),
+                        false,
+                        style),
+                    Arguments.of(
+                        "AllowedCert_ExcludedSamhsaCodeRequested_InvalidCode_NoClaims",
+                        List.of(List.of(securityClause(SecurityModifier.NOT, invalidSamhsaCode()))),
+                        SamhsaCertType.SAMHSA_ALLOWED_CERT,
+                        List.of(),
+                        true,
+                        style)));
+  }
+
+  @MethodSource({"provideSecurityScenarios"})
+  @ParameterizedTest
+  void eobSearchBySecurity(
+      String scenarioName,
+      List<List<SecurityClause>> securityScenarios,
+      SamhsaCertType certType,
+      List<Long> expectedClaimIds,
+      boolean expectException,
+      SearchStyleEnum searchStyle) {
+    var query = searchBundle(BENE_SK, certType);
+    var paramName = new StringBuilder(Constants.PARAM_SECURITY);
+
+    for (var securityScenario : securityScenarios) {
+      if (securityScenario.getFirst().modifier() == SecurityModifier.NOT) {
+        paramName.append(":not");
+      }
+      if (securityScenario.size() == 1) {
+        var clause = securityScenario.getFirst();
+        var coding = clause.coding();
+
+        query.and(
+            new TokenClientParam(paramName.toString())
+                .exactly()
+                .systemAndCode(coding.getSystem(), coding.getCode()));
+      } else {
+        var joinedOrValues = securityScenario.stream().map(SecurityClause::coding).toList();
+        query.and(
+            new TokenClientParam(paramName.toString())
+                .exactly()
+                .codings(joinedOrValues.toArray(new Coding[0])));
+      }
+    }
+
+    if (expectException) {
+      assertThrows(
+          InvalidRequestException.class,
+          query.usingStyle(searchStyle)::execute,
+          "Should throw InvalidRequestException: " + scenarioName);
+    } else {
+      var eobBundle = query.usingStyle(searchStyle).execute();
+      var actualClaimsIds =
+          getEobFromBundle(eobBundle).stream()
+              .map(ExplanationOfBenefit::getIdPart)
+              .map(Long::parseLong)
+              .toList();
+
+      assertTrue(
+          expectedClaimIds.containsAll(actualClaimsIds)
+              && actualClaimsIds.containsAll(expectedClaimIds),
+          "Returned claim IDs did not match expected IDs for scenario " + scenarioName);
+    }
+  }
+
+  private static Coding security(String system, String code) {
+    return new Coding(system, code, null);
+  }
+
+  private static Coding samhsaCodeOnly() {
+    return security(null, IdrConstants.SAMHSA_SECURITY_CODE);
+  }
+
+  private static Coding samhsaCodeAndSystem() {
+    return security(SystemUrls.SAMHSA_ACT_CODE_SYSTEM_URL, IdrConstants.SAMHSA_SECURITY_CODE);
+  }
+
+  private static Coding invalidSamhsaCode() {
+    return security(SystemUrls.SAMHSA_ACT_CODE_SYSTEM_URL, "42CFR");
+  }
+
+  private enum SecurityModifier {
+    NONE,
+    NOT
+  }
+
+  private record SecurityClause(SecurityModifier modifier, Coding coding) {}
+
+  private static SecurityClause securityClause(SecurityModifier modifier, Coding coding) {
+    return new SecurityClause(modifier, coding);
   }
 }

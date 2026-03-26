@@ -43,7 +43,7 @@ enum AdjudicationChargeType {
       "paidbypatient",
       "Paid by patient",
       "CLM_LINE_BENE_PMT_AMT",
-      "Beneficiary Paid Amount"),
+      "Line Paid By Beneficiary Amount"),
   LINE_BENE_PAID_AMOUNT(
       SystemUrls.CARIN_CODE_SYSTEM_ADJUDICATION,
       "paidtopatient",
@@ -57,9 +57,7 @@ enum AdjudicationChargeType {
       "CLM_LINE_CVRD_PD_AMT",
       "Payment Amount"),
   LINE_BLOOD_DEDUCTIBLE_AMOUNT(
-      SystemUrls.HL7_ADJUDICATION,
-      "deductible",
-      "Deductible",
+      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
       "CLM_LINE_BLOOD_DDCTBL_AMT",
       "Revenue Center Blood Deductible Amount"),
   LINE_MEDICARE_DEDUCTIBLE_AMOUNT(
@@ -109,7 +107,7 @@ enum AdjudicationChargeType {
       "paidbypatient",
       "Paid by patient",
       "CLM_BENE_PMT_AMT",
-      "Patient Responsibility Payment Amount"),
+      "Paid By Beneficiary Amount"),
   PROVIDER_PAYMENT_AMOUNT(
       SystemUrls.CARIN_CODE_SYSTEM_ADJUDICATION,
       "paidtoprovider",
@@ -221,7 +219,7 @@ enum AdjudicationChargeType {
       "paidtopatient",
       "Paid to patient",
       "CLM_MDCR_INSTNL_BENE_PD_AMT",
-      "Institutional Beneficiary Paid Amount"),
+      "Institutional Paid to Beneficiary Amount"),
   STANDARDIZED_PAYMENT_AMOUNT(
       SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
       "CLM_FINL_STDZD_PYMT_AMT",
@@ -399,9 +397,7 @@ enum AdjudicationChargeType {
       "CLM_LINE_DMERC_SCRN_SVGS_AMT",
       "Screen Savings Amount"),
   LINE_PROFESSIONAL_PURCHASE_PRICE_AMOUNT(
-      SystemUrls.HL7_ADJUDICATION,
-      "eligible",
-      "Eligible Amount",
+      SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
       "CLM_LINE_PRFNL_DME_PRICE_AMT",
       "Purchase Price Amount"),
   LINE_RX_REPORTED_GAP_DISCOUNT_AMOUNT(
@@ -413,7 +409,13 @@ enum AdjudicationChargeType {
       "submitted",
       "Submitted Amount",
       "TOT_RX_CST_AMT",
-      "Total drug cost (Part D)");
+      "Total RX Cost Amount"),
+  LINE_MEDICARE_COINSURANCE_AMOUNT(
+      SystemUrls.CARIN_CODE_SYSTEM_ADJUDICATION,
+      "coinsurance",
+      "Co-insurance",
+      "CLM_LINE_MDCR_COINSRNC_AMT",
+      "Coinsurance Amount");
 
   private final String coding1System;
   private final String coding1Code;
@@ -426,6 +428,7 @@ enum AdjudicationChargeType {
   }
 
   private CodeableConcept buildCategory() {
+
     var category =
         new CodeableConcept()
             .addCoding(

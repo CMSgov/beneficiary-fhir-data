@@ -26,6 +26,7 @@ data "aws_iam_policy_document" "github_actions_iam" {
       "iam:UntagRole*",
       "iam:UntagPolicy*",
       "iam:AssumeRolePolicy*",
+      "iam:UpdateAssumeRolePolicy",
       "iam:UpdateRole*",
       "iam:PassRole",
       "iam:ListAccountAliases",
