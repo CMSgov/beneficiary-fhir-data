@@ -28,6 +28,10 @@ from model.base_model import (
 )
 
 
+def _normalize_name(col: str) -> str:
+    return f"UPPER(REGEXP_REPLACE(UNACCENT({col}), '[[:punct:]]|\\s', '', 'g'))"
+
+
 class IdrBeneficiary(IdrBaseModel):
     # columns from V2_MDCR_BENE_HSTRY
     bene_sk: Annotated[
@@ -59,6 +63,8 @@ class IdrBeneficiary(IdrBaseModel):
     bene_1st_name: str
     bene_midl_name: Annotated[str, BeforeValidator(transform_default_string)]
     bene_last_name: str
+    bfd_normalized_1st_name: Annotated[str, {EXPR: _normalize_name("bene_1st_name")}]
+    bfd_normalized_last_name: Annotated[str, {EXPR: _normalize_name("bene_last_name")}]
     bene_brth_dt: date
     bene_death_dt: Annotated[date, BeforeValidator(transform_null_date_to_max)]
     bene_vrfy_death_day_sw: Annotated[str, BeforeValidator(transform_default_string)]
