@@ -1,6 +1,7 @@
 import functools
 import logging
 import re
+import typing
 from collections.abc import Callable, Iterable
 from datetime import UTC, datetime, timedelta
 from enum import StrEnum
@@ -195,22 +196,58 @@ def get_unreported_jobs(
     return _connect_and_do(load_mode, _do)
 
 
-def update_start_times(
-    load_mode: LoadMode, events: list[IdrJobLoadEvent], start_time: datetime
+def _update_time_column(
+    time_column: str, load_mode: LoadMode, events: list[IdrJobLoadEvent], time: datetime
 ) -> None:
     def _do(curs: Cursor[DictRow]) -> None:
         update_jobs_query = t"""
             UPDATE {"idr":i}.{LOAD_EVENTS_TABLE:i}
-            SET {fields(IdrJobLoadEvent).start_time:i}={start_time.astimezone(UTC)}
+            SET {time_column:i}={time.astimezone(UTC)}
             WHERE {fields(IdrJobLoadEvent).id:i} = ANY({[event.id for event in events]})
             RETURNING *;
             """
-        logger.info("Updating start times for %d event(s)...", len(events))
+        logger.info("Updating %s for %d event(s)...", time_column, len(events))
         logger.debug("Query: %s", _clean_query_str(update_jobs_query))
-        updated_rows = curs.execute(update_jobs_query)
-        logger.info("Updated %d event(s) successfully", len(list(updated_rows)))
+        updated_rows = list(curs.execute(update_jobs_query))
+        logger.info("Updated %d event(s) successfully", len(updated_rows))
+        if logger.getEffectiveLevel() == logging.DEBUG:
+            updated_events = TypeAdapter(list[IdrJobLoadEvent]).validate_python(updated_rows)
+            logger.debug("Updated rows: %s", updated_events)
 
     _connect_and_do(load_mode, _do)
+
+
+def update_start_times(
+    load_mode: LoadMode, events: list[IdrJobLoadEvent], start_time: datetime
+) -> None:
+    _update_time_column(
+        time_column=typing.cast(str, fields(IdrJobLoadEvent).start_time),
+        load_mode=load_mode,
+        events=events,
+        time=start_time,
+    )
+
+
+def update_completion_times(
+    load_mode: LoadMode, events: list[IdrJobLoadEvent], completion_time: datetime
+) -> None:
+    _update_time_column(
+        time_column=typing.cast(str, fields(IdrJobLoadEvent).completion_time),
+        load_mode=load_mode,
+        events=events,
+        time=completion_time,
+    )
+
+
+def update_failure_times(
+    load_mode: LoadMode, events: list[IdrJobLoadEvent], failure_time: datetime
+) -> None:
+    _update_time_column(
+        time_column=typing.cast(str, fields(IdrJobLoadEvent).failure_time),
+        load_mode=load_mode,
+        events=events,
+        time=failure_time,
+    )
 
 
 def get_tables_to_load(job_types: Iterable[IdrJobType]) -> set[str]:
