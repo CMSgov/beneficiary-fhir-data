@@ -16,11 +16,22 @@ class _GetFields:
         return getattr(self._model, item)
 
 
+@dataclass(frozen=True)
+class _GetAliases:
+    _model: type[BaseModel]
+
+    def __getattr__(self, item: str) -> Any:  # noqa: ANN401
+        if item in self._model.model_fields:
+            return self._model.model_fields[item].alias or item
+
+        return getattr(self._model, item)
+
+
 TModel = TypeVar("TModel", bound=type[BaseModel])
 
 
-def fields[TModel: type[BaseModel]](model: TModel, /) -> TModel:
-    return cast(TModel, _GetFields(model))
+def fields[TModel: type[BaseModel]](model: TModel, by_alias: bool = False) -> TModel:
+    return cast(TModel, _GetFields(model)) if not by_alias else cast(TModel, _GetAliases(model))
 
 
 if not TYPE_CHECKING:
