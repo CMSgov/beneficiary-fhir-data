@@ -135,13 +135,13 @@
         <junit.version>5.12.0</junit.version>
         <junit.platform.version>1.12.0</junit.platform.version>
         <javadoc.version>3.11.2</javadoc.version>
-        <testcontainers.version>1.19.3</testcontainers.version>
+        <testcontainers.version>1.21.4</testcontainers.version>
 
         <!-- Jackson versions should be kept in sync when possible but can diverge slightly
             when vulnerabilities or other fixes affect some but not all components -->
         <jackson-databind.version>2.18.6</jackson-databind.version>
         <jackson-datatype-jdk8.version>2.18.6</jackson-datatype-jdk8.version>
-        <jackson-dataformat-yaml.version>2.18.3</jackson-dataformat-yaml.version>
+        <jackson-dataformat-yaml.version>2.18.6</jackson-dataformat-yaml.version>
         <jackson-datatype-jsr310.version>2.18.6</jackson-datatype-jsr310.version>
         <jackson-annotations.version>2.18.3</jackson-annotations.version>
         <!-- This snakeyaml version overrides the one normally imported by jackson-dataformat-yaml. -->

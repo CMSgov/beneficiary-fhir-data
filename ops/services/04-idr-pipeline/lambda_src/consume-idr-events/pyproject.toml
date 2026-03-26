@@ -1,26 +1,18 @@
 [project]
-name = "bene-prefs"
+name = "consume-idr-events"
 version = "0.1.0"
-description = "Add your description here"
+description = "Lambda to consume IDR load events from the IDR Events SQS Queue into the v3 DB"
 readme = "README.md"
-requires-python = "~=3.13.0"
+requires-python = "~=3.14.0"
 dependencies = [
-    "cryptography==45.0.6",
-    "snowflake-connector-python==4.3.0",
-    "python-dateutil==2.9.0",
     "boto3>=1.42.56",
-    "jinja2>=3.1.6",
     "aws-lambda-powertools>=3.25.0",
+    "psycopg[binary]>=3.2.10",
+    "pydantic>=2.12.2",
 ]
 
 [dependency-groups]
-dev = [
-    "ruff>=0.14.6",
-    "uv>=0.9.11",
-    "pytest>=9.0.1",
-    "testcontainers>=4.13.3",
-    "pyright>=1.1.407",
-]
+dev = ["ruff>=0.14.6", "uv>=0.9.11", "pyright>=1.1.407"]
 
 [tool.ruff]
 # Set the maximum line length to 100.
