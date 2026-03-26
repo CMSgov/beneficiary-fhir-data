@@ -138,10 +138,10 @@ public class BeneficiaryRepository {
    */
   @Timed(value = "application.beneficiary.patient_match")
   public PatientMatchResult searchPatientMatch(PatientMatch patientMatch) {
-    var scenarios = patientMatch.getValidScenarios();
     var combinationResults = new ArrayList<MatchCombinationResult>();
-    var combinationIndex = 1;
-    for (var scenario : scenarios) {
+    for (var indexedScenarios : patientMatch.getValidScenarios()) {
+      var combinationIndex = indexedScenarios.combinationIndex();
+      var scenario = indexedScenarios.entries();
       var filters = new PatientMatchFilter(scenario).getFilters("bene", SystemType.UNKNOWN);
 
       var query =
@@ -161,15 +161,14 @@ public class BeneficiaryRepository {
           benes.stream()
               .map(b -> new MatchedRecord(b.getBeneSk(), b.getEffectiveTimestamp()))
               .toList();
-      var combinationId = String.format("%02d", combinationIndex++);
       combinationResults.add(
-          new MatchCombinationResult(combinationId, PATIENT_MATCH_TYPE, matchedRecords));
+          new MatchCombinationResult(combinationIndex, PATIENT_MATCH_TYPE, matchedRecords));
       var uniqueXrefs = benes.stream().map(BeneficiaryBase::getXrefSk).distinct().toList();
 
       if (uniqueXrefs.size() == 1) {
         var matchedBene = benes.getFirst();
         var finalDetermination =
-            new FinalDetermination(combinationId, PATIENT_MATCH_TYPE, matchedRecords.getFirst());
+            new FinalDetermination(combinationIndex, PATIENT_MATCH_TYPE, matchedRecords.getFirst());
         return new PatientMatchResult(
             combinationResults, Optional.of(finalDetermination), Optional.of(matchedBene));
       }

@@ -8,6 +8,7 @@ import gov.cms.bfd.sharedutils.database.DataSourceFactory;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
 import gov.cms.bfd.sharedutils.database.HikariDataSourceFactory;
 import java.io.Serializable;
+import java.net.URI;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
@@ -22,8 +23,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.jdbc.JdbcConnectionDetails;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.providers.AwsRegionProvider;
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 
 /** Root configuration class. */
 @Data
@@ -89,7 +93,7 @@ public class Configuration implements Serializable {
    * @return wrapper factory.
    */
   public DataSourceFactory getDataSourceFactory() {
-    if (useRds()) {
+    if (notLocal()) {
       var awsConfig = getRdsClientConfig();
       return new AwsWrapperDataSourceFactory(getDatabaseOptions(), awsConfig);
     } else {
@@ -97,8 +101,32 @@ public class Configuration implements Serializable {
     }
   }
 
-  boolean useRds() {
+  boolean notLocal() {
     return !env.equalsIgnoreCase(BFD_ENV_LOCAL);
+  }
+
+  public enum AuditLoggerType {
+    DYNAMO_DB,
+    LOG_STREAM
+  }
+
+  public AuditLoggerType getAuditLoggerType() {
+    return notLocal() ? AuditLoggerType.DYNAMO_DB : AuditLoggerType.LOG_STREAM;
+  }
+
+  public DynamoDbClient getDynamoDbClient() {
+    var region = regionProvider.getRegion();
+
+    if (!notLocal()) {
+      return DynamoDbClient.builder()
+          .endpointOverride(URI.create("http://localhost:8000"))
+          .region(region)
+          .credentialsProvider(
+              StaticCredentialsProvider.create(AwsBasicCredentials.create("dummy", "dummy")))
+          .build();
+    }
+
+    return DynamoDbClient.builder().region(region).credentialsProvider(credentialsProvider).build();
   }
 
   private Map<String, String> getClientCertsToAliasesInternal() {
@@ -117,7 +145,7 @@ public class Configuration implements Serializable {
   }
 
   private DatabaseOptions.DataSourceType getDataSourceType() {
-    return useRds()
+    return notLocal()
         ? DatabaseOptions.DataSourceType.AWS_WRAPPER
         : DatabaseOptions.DataSourceType.HIKARI;
   }

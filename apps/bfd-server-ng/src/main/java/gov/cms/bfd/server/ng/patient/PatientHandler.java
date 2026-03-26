@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.ng.patient;
 
+import gov.cms.bfd.server.ng.AuditLogger;
 import gov.cms.bfd.server.ng.beneficiary.BeneficiaryRepository;
 import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
 import gov.cms.bfd.server.ng.beneficiary.model.OrganizationFactory;
@@ -11,11 +12,8 @@ import gov.cms.bfd.server.ng.input.CoveragePart;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.loadprogress.LoadProgressRepository;
 import gov.cms.bfd.server.ng.model.ProfileType;
-import gov.cms.bfd.server.ng.util.DateUtil;
-import gov.cms.bfd.server.ng.util.FhirUtil;
-import gov.cms.bfd.server.ng.util.PatientMatchAuditLogUtil;
-import gov.cms.bfd.server.ng.util.SystemUrls;
-import jakarta.servlet.http.HttpServletRequest;
+import gov.cms.bfd.server.ng.util.*;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -31,6 +29,7 @@ import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 
 /**
@@ -43,10 +42,7 @@ public class PatientHandler {
   private final BeneficiaryRepository beneficiaryRepository;
   private final LoadProgressRepository loadProgressRepository;
   private final CoverageRepository coverageRepository;
-
-  private static final String BLUEBUTTON_CLIENT_IP_HEADER = "X-BLUEBUTTON-CLIENT-IP";
-  private static final String BLUEBUTTON_CLIENT_NAME_HEADER = "X-BLUEBUTTON-CLIENT-NAME";
-  private static final String BLUEBUTTON_CLIENT_ID_HEADER = "X-BLUEBUTTON-CLIENT-ID";
+  private final AuditLogger auditLogger;
 
   /**
    * Returns a {@link Patient} by their {@link IdType}.
@@ -94,24 +90,24 @@ public class PatientHandler {
    * @param patientMatch match request
    * @return bundle
    */
-  public Bundle matchPatient(Optional<PatientMatch> patientMatch, HttpServletRequest request) {
+  public Bundle matchPatient(Optional<PatientMatch> patientMatch) {
     if (patientMatch.isEmpty()) {
       return patientMatchBundle(Optional.empty());
     }
     var result = beneficiaryRepository.searchPatientMatch(patientMatch.get());
     var beneficiary = result.matchedBeneficiary();
-    var clientIp = request.getHeader(BLUEBUTTON_CLIENT_IP_HEADER);
-    var clientName = request.getHeader(BLUEBUTTON_CLIENT_NAME_HEADER);
-    var clientId = request.getHeader(BLUEBUTTON_CLIENT_ID_HEADER);
+    var clientIp = MDC.get(LoggerConstants.CLIENT_IP_KEY);
+    var clientName = MDC.get(LoggerConstants.CLIENT_NAME_KEY);
+    var clientId = MDC.get(LoggerConstants.CLIENT_ID_KEY);
     var auditRecord =
         new PatientMatchAuditRecord(
-            Optional.ofNullable(clientIp),
-            Optional.ofNullable(clientName),
-            Optional.ofNullable(clientId),
-            DateUtil.nowAoe(),
+            clientIp,
+            clientName,
+            clientId,
+            Instant.now(),
             result.combinations(),
             result.finalDetermination());
-    PatientMatchAuditLogUtil.logPatientMatches(auditRecord);
+    auditLogger.log(auditRecord);
 
     return FhirUtil.bundleOrDefault(
         beneficiary.map(this::toFhir), loadProgressRepository::lastUpdated);
