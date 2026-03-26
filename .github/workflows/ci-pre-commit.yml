@@ -5,6 +5,11 @@ jobs:
   prek:
     runs-on: ubuntu-24.04
     steps:
+      - name: Setup JDK
+        uses: actions/setup-java@v5
+        with:
+          java-version: "25"
+          distribution: corretto
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
