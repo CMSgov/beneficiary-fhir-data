@@ -45,7 +45,6 @@ resource "aws_sqs_queue" "events_dlq" {
   message_retention_seconds = 14 * 24 * 60 * 60 # 14 days, in seconds, which is the maximum
 }
 
-
 resource "aws_sqs_queue_redrive_allow_policy" "events" {
   queue_url = aws_sqs_queue.events_dlq.id
   redrive_allow_policy = jsonencode({
