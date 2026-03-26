@@ -1,3 +1,4 @@
+from datetime import timedelta
 from os import getenv
 
 MIN_CLAIM_LOAD_DATE = "2014-06-30"
@@ -62,6 +63,12 @@ TABLES_TO_LOAD = [t for t in getenv("IDR_TABLES", "").split(",") if t]
 """List of tables to include - any table not included will be skipped.
 Useful if you only want to load a subset of data and don't want to wait
 for the other tables to load."""
+
+INCREMENTAL_IDR_JOB_GRACE_PERIOD = timedelta(
+    hours=int(getenv("INCREMENTAL_IDR_JOB_GRACE_PERIOD_HRS", default="24"))
+)
+"""Amount of time to tolerate no new incoming IDR Job Events for a given IDR Job type
+before simply loading the relevant tables. Defaults to 24 hours."""
 
 # IDR credentials, these are pulled from SSM in prod.
 # You likely don't want to touch these otherwise.
