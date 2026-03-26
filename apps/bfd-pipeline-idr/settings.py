@@ -1,3 +1,4 @@
+from datetime import datetime
 from os import getenv
 
 MIN_CLAIM_LOAD_DATE = "2014-06-30"
@@ -104,3 +105,6 @@ def bfd_db_username() -> str:
 
 def bfd_db_password() -> str:
     return getenv("BFD_DB_PASSWORD", "")
+
+def bfd_test_date() -> datetime:
+    return datetime.strptime(getenv("BFD_TEST_DATE", ""), "%Y-%m-%d")

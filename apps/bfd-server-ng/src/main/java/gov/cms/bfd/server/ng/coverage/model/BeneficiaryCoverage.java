@@ -13,6 +13,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.time.Clock;
 import java.util.List;
 import java.util.Optional;
 import java.util.SortedSet;
@@ -148,10 +149,13 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
    * type.
    *
    * @param coverageCompositeId The full ID for the Coverage resource.
+   * @param clock Date to be passed for queries.
    * @return A FHIR Coverage object.
    */
-  public Optional<Coverage> toFhirCoverageIfPresent(CoverageCompositeId coverageCompositeId) {
-    return Optional.of(toFhir(coverageCompositeId)).filter(c -> !c.getIdentifier().isEmpty());
+  public Optional<Coverage> toFhirCoverageIfPresent(
+      CoverageCompositeId coverageCompositeId, Clock clock) {
+    return Optional.of(toFhir(coverageCompositeId, clock))
+        .filter(c -> !c.getIdentifier().isEmpty());
   }
 
   /**
@@ -160,11 +164,12 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
    *
    * @param coverageCompositeId The full ID for the Coverage resource.
    * @param orgId The organization reference ID (only used if isC4DIC is true).
+   * @param clock Date to be passed for queries.
    * @return A FHIR Coverage object.
    */
   public Optional<Coverage> toFhirCoverageIfPresentC4DIC(
-      CoverageCompositeId coverageCompositeId, String orgId) {
-    return Optional.of(toFhirC4DIC(coverageCompositeId, orgId))
+      CoverageCompositeId coverageCompositeId, String orgId, Clock clock) {
+    return Optional.of(toFhirC4DIC(coverageCompositeId, orgId, clock))
         .filter(c -> !c.getIdentifier().isEmpty());
   }
 
@@ -172,9 +177,10 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
    * Creates a FHIR Coverage resource.
    *
    * @param coverageCompositeId The full ID for the Coverage resource.
+   * @param clock Date to be passed for queries.
    * @return A FHIR Coverage object.
    */
-  public Coverage toFhir(CoverageCompositeId coverageCompositeId) {
+  public Coverage toFhir(CoverageCompositeId coverageCompositeId, Clock clock) {
     var coverage = setupBaseCoverage(coverageCompositeId, ProfileType.C4BB);
     coverage.setId(coverageCompositeId.fullId());
 
@@ -185,10 +191,10 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
     var coveragePart = coverageCompositeId.coveragePart();
 
     return switch (coveragePart) {
-      case PART_A, PART_B -> mapCoverageAB(coverage, coveragePart, ProfileType.C4BB, "");
+      case PART_A, PART_B -> mapCoverageAB(coverage, coveragePart, ProfileType.C4BB, "", clock);
       case PART_C -> mapCoverageC(coverage, coveragePart, ProfileType.C4BB, "");
       case PART_D -> mapCoverageD(coverage, coveragePart, ProfileType.C4BB, "");
-      case DUAL -> mapCoverageDual(coverage, ProfileType.C4BB, "");
+      case DUAL -> mapCoverageDual(coverage, ProfileType.C4BB, "", clock);
     };
   }
 
@@ -197,22 +203,27 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
    *
    * @param coverageCompositeId The full ID for the Coverage resource.
    * @param orgId The organization reference ID.
+   * @param clock Date to be passed for queries.
    * @return A FHIR Coverage object.
    */
-  public Coverage toFhirC4DIC(CoverageCompositeId coverageCompositeId, String orgId) {
+  public Coverage toFhirC4DIC(CoverageCompositeId coverageCompositeId, String orgId, Clock clock) {
     var coverage = setupBaseCoverage(coverageCompositeId, ProfileType.C4DIC);
     var coveragePart = coverageCompositeId.coveragePart();
 
     return switch (coveragePart) {
-      case PART_A, PART_B -> mapCoverageAB(coverage, coveragePart, ProfileType.C4DIC, orgId);
+      case PART_A, PART_B -> mapCoverageAB(coverage, coveragePart, ProfileType.C4DIC, orgId, clock);
       case PART_C -> mapCoverageC(coverage, coveragePart, ProfileType.C4DIC, orgId);
       case PART_D -> mapCoverageD(coverage, coveragePart, ProfileType.C4DIC, orgId);
-      case DUAL -> mapCoverageDual(coverage, ProfileType.C4DIC, orgId);
+      case DUAL -> mapCoverageDual(coverage, ProfileType.C4DIC, orgId, clock);
     };
   }
 
   private Coverage mapCoverageAB(
-      Coverage coverage, CoveragePart coveragePart, ProfileType profileType, String orgId) {
+      Coverage coverage,
+      CoveragePart coveragePart,
+      ProfileType profileType,
+      String orgId,
+      Clock clock) {
     var entitlementOpt = findEntitlement(coveragePart);
     if (entitlementOpt.isEmpty()) {
       return toEmptyResource(coverage);
@@ -222,7 +233,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
 
     var entitlement = entitlementOpt.get();
     coverage.setPeriod(entitlement.toFhirPeriod());
-    coverage.setStatus(entitlement.toFhirStatus());
+    coverage.setStatus(entitlement.toFhirStatus(clock));
 
     if (profileType == ProfileType.C4DIC) {
       coverage.addPayor(new Reference().setReference(ORGANIZATION_REF + orgId));
@@ -267,7 +278,8 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
     return emptyCoverage;
   }
 
-  private Coverage mapCoverageDual(Coverage coverage, ProfileType profileType, String orgId) {
+  private Coverage mapCoverageDual(
+      Coverage coverage, ProfileType profileType, String orgId, Clock clock) {
     var dualEligibilityOpt = coverageOptional.getBeneficiaryDualEligibility();
     if (dualEligibilityOpt.isEmpty()) {
       return toEmptyResource(coverage);
@@ -275,7 +287,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
 
     var dualEligibility = dualEligibilityOpt.get();
     coverage.setPeriod(dualEligibility.toFhirPeriod());
-    coverage.setStatus(dualEligibility.toFhirStatus());
+    coverage.setStatus(dualEligibility.toFhirStatus(clock));
     identifier
         .toFhir(profileType == ProfileType.C4DIC ? orgId : "")
         .ifPresent(coverage::addIdentifier);

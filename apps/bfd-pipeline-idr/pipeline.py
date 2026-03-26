@@ -10,7 +10,7 @@ import pipeline_nodes
 from load_partition import LoadType
 from logger_config import configure_logger
 from model.base_model import LoadMode
-from settings import LOAD_TYPE, MAX_TASKS
+from settings import LOAD_TYPE, MAX_TASKS, bfd_test_date
 
 telemetry.disable_telemetry()
 
@@ -60,7 +60,10 @@ def run(load_mode: str) -> None:
         .build()
     )
 
-    start_time = datetime.now(UTC)
+    if load_mode is not LoadMode.LOCAL or load_mode is not LoadMode.SYNTHETIC or bfd_test_date() is None:  # noqa: E501
+        start_time = datetime.now(UTC)
+    else:
+        start_time = bfd_test_date()
 
     # if load_benes and load_claims:
     hamilton_driver.execute(  # type: ignore

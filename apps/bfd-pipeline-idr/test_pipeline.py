@@ -1,9 +1,9 @@
 import os
 import shutil
 import subprocess
-import time
+
 from collections.abc import Generator
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import cast
 
@@ -18,6 +18,7 @@ from testcontainers.postgres import PostgresContainer  # type: ignore
 from load_synthetic import load_from_csv
 from logger_config import configure_logger
 from pipeline import run
+from settings import bfd_test_date
 
 # ryuk throws a 500 or 404 error for some reason
 # seems to have issues with podman https://github.com/testcontainers/testcontainers-python/issues/753
@@ -70,69 +71,13 @@ def setup_db() -> Generator[PostgresContainer]:
             os.environ["BFD_DB_PASSWORD"] = info.password
             os.environ["IDR_BATCH_SIZE"] = "100000"
             os.environ["IDR_FORCE_LOAD_PROGRESS"] = "1"
+            os.environ["BFD_TEST_DATE"] = "2025-06-15"
         yield postgres
-
 
 def test_pipeline(setup_db: PostgresContainer) -> None:
     conn = cast(
         psycopg.Connection[DictRow],
         psycopg.connect(setup_db.get_connection_url(), row_factory=dict_row),  # type: ignore
-    )
-    datetime_now = datetime.now(UTC)
-
-    # Update dates to CURRENT_DATE before pipeline.py
-    # Reason: PAC data older than 60 days is filtered by coalescing
-    # (idr_updt_ts, idr_insrt_ts, clm_idr_ld_dt). Synthetic data has
-    # outdated idr_updt_ts, idr_insrt_ts, and clm_idr_ld_dt values.
-    # Update all values to current dates then change specific dates
-    # to older than 60 days to test the functionality.
-    conn.execute(
-        """
-            UPDATE cms_vdm_view_mdcr_prd.v2_mdcr_clm
-            SET idr_insrt_ts=%(timestamp)s,
-                idr_updt_ts=%(timestamp)s,
-                clm_idr_ld_dt=%(today)s
-            """,
-        {
-            "timestamp": datetime_now,
-            "today": datetime_now.date(),
-        },
-    )
-
-    conn.execute(
-        """
-            UPDATE cms_vdm_view_mdcr_prd.v2_mdcr_clm
-            SET idr_updt_ts=%(none)s, idr_insrt_ts=%(timestamp)s
-            WHERE clm_uniq_id = 1128619260039
-            """,
-        {"none": None, "timestamp": datetime_now - timedelta(days=65)},
-    )
-
-    conn.execute(
-        """
-            UPDATE cms_vdm_view_mdcr_prd.v2_mdcr_clm
-            SET idr_updt_ts=%(timestamp)s
-            WHERE clm_uniq_id = 123359318723
-            """,
-        {"timestamp": datetime_now - timedelta(days=65)},
-    )
-
-    conn.execute(
-        """
-            UPDATE cms_vdm_view_mdcr_prd.v2_mdcr_clm
-            SET idr_insrt_ts=%(none)s
-            WHERE clm_uniq_id = 9844382563835
-            """,
-        {"none": None},
-    )
-
-    conn.execute(
-        """
-            UPDATE cms_vdm_view_mdcr_prd.v2_mdcr_clm
-            SET idr_updt_ts=%(none)s
-            WHERE clm_uniq_id = 6919983105596
-            """,
-        {"none": None},
     )
 
     conn.commit()
@@ -153,17 +98,21 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
     rows = cur.fetchmany(1)
     assert rows[0]["bene_mbi_id"] == "1BC3JG0FM51"
 
-    # Wait for system time to advance enough to update the timestamp
-    time.sleep(0.05)
+    cur = conn.execute("select max(last_ts) as max_ts from idr.load_progress")
+    
+    date_adv = datetime.strftime(cur.fetchone()["max_ts"] + timedelta(days=1), "%Y-%m-%d")
+
     conn.execute(
         """
         UPDATE cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry
         SET bene_mbi_id = '1S000000000', idr_insrt_ts=%(timestamp)s, idr_updt_ts=%(timestamp)s
         WHERE bene_sk = 10464258
         """,
-        {"timestamp": datetime.now(UTC)},
+        {"timestamp": date_adv},
     )
     conn.commit()
+
+    os.environ['BFD_TEST_DATE'] = date_adv
 
     run("synthetic")
 
