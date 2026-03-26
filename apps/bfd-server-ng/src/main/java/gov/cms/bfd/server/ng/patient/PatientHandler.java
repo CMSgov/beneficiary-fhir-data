@@ -23,8 +23,14 @@ import java.util.UUID;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Meta;
+import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Reference;
 import org.springframework.stereotype.Component;
 
 /**
@@ -84,7 +90,7 @@ public class PatientHandler {
 
   public Bundle matchPatient(Optional<PatientMatch> patientMatch, HttpServletRequest request) {
     if (patientMatch.isEmpty()) {
-      return new Bundle();
+      return patientMatchBundle(Optional.empty());
     }
     var result = beneficiaryRepository.searchPatientMatch(patientMatch.get());
     var beneficiary = result.matchedBeneficiary();
@@ -101,8 +107,7 @@ public class PatientHandler {
             result.finalDetermination());
     PatientMatchAuditLogUtil.logPatientMatches(auditRecord);
 
-    return FhirUtil.bundleOrDefault(
-        beneficiary.map(this::toFhir), loadProgressRepository::lastUpdated);
+    return patientMatchBundle(beneficiary);
   }
 
   /**
@@ -168,5 +173,40 @@ public class PatientHandler {
                         .getOther()
                         .getReference()
                         .equals(newLink.getOther().getReference()));
+  }
+
+  private Bundle patientMatchBundle(Optional<Beneficiary> beneficiary) {
+    var bundle = new Bundle();
+    bundle.setId("IDI-Match");
+    bundle.setMeta(new Meta().addProfile(SystemUrls.PROFILE_IDENTITY_MATCHING));
+    bundle.setIdentifier(new Identifier().setAssigner(new Reference().setDisplay("CMS")));
+    bundle.setType(Bundle.BundleType.SEARCHSET);
+    var cmsOrg = new Organization();
+    cmsOrg.setId("cms-org").setMeta(new Meta().addProfile(SystemUrls.PROFILE_US_CORE_ORGANIZATION));
+    cmsOrg
+        .setActive(true)
+        .addType(
+            new CodeableConcept(
+                new Coding()
+                    .setSystem(SystemUrls.HL7_ORGANIZATION_TYPE)
+                    .setCode("pay")
+                    .setDisplay("Payer")));
+    cmsOrg.setName("CMS");
+
+    var bundleEntry =
+        new Bundle.BundleEntryComponent().setFullUrl(SystemUrls.CMS_GOV).setResource(cmsOrg);
+    bundleEntry.setSearch(
+        new Bundle.BundleEntrySearchComponent().setMode(Bundle.SearchEntryMode.MATCH));
+    bundle.addEntry(bundleEntry);
+    beneficiary.ifPresent(
+        b ->
+            bundle.addEntry(
+                new Bundle.BundleEntryComponent()
+                    .setResource(toFhir(b))
+                    .setSearch(
+                        new Bundle.BundleEntrySearchComponent()
+                            .setMode(Bundle.SearchEntryMode.MATCH))));
+
+    return bundle;
   }
 }

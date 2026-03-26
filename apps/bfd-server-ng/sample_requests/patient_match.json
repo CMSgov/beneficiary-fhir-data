@@ -1,0 +1,46 @@
+{
+    "resourceType": "Parameters",
+    "parameter": [
+        {
+            "name": "IDIPatient",
+            "resource": {
+                "resourceType": "Patient",
+                "meta": {
+                    "profile": [
+                        "http://hl7.org/fhir/us/identity-matching/StructureDefinition/IDI-Patient"
+                    ]
+                },
+                "identifier": [
+                    {
+                        "type": {
+                            "coding": [
+                                {
+                                    "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                                    "code": "MB"
+                                }
+                            ]
+                        },
+                        "system": "http://hl7.org/fhir/sid/us-mbi",
+                        "value": "1S00E00DC37"
+                    }
+                ],
+                "name": [
+                    {
+                        "family": "Jones",
+                        "given": [
+                            "Joey"
+                        ]
+                    }
+                ],
+                "birthDate": "1965-10-06",
+                "address": [
+                    {
+                        "state": "TX",
+                        "postalCode": "77551",
+                        "line": "2904 61st"
+                    }
+                ]
+            }
+        }
+    ]
+}
