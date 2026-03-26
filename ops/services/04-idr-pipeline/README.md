@@ -1,3 +1,24 @@
+# `idr-pipeline` Terraservice
+
+This Terraservice defines the ECS Service for the IDR Pipeline workload along with the IDR Load Events SQS Queue and corresponding `consume-idr-events` Lambda.
+
+## Direct Terraservice Dependencies
+
+_Note: This does not include transitive dependencies (dependencies of dependencies)._
+
+| Terraservice | Required for Established? | Required for Ephemeral? | Details |
+|---|---|---|---|
+| `config` | Yes | Yes | N/A |
+| `cluster` | Yes | Yes | N/A |
+| `database` | Yes | No | This Terraservice may be skipped in **ephemeral environments** by specifying the `db_environment_override` in ephemeral environments to an existing cluster in the same seed environment |
+| `migrator` | Yes | No | This Terraservice may be skipped in **ephemeral environments**, if is known that there are no new migrations to run |
+
+## Deployment
+
+1. Initialize the Tofu configuration for the appropriate `parent_env`
+2. Select an appropriate workspace, i.e. `tofu workspace test`
+3. Run `tofu apply` to deploy the infrastructure
+
 <!-- BEGIN_TF_DOCS -->
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
      'terraform-docs --config "$(git rev-parse --show-toplevel)/.terraform-docs.yml" .'
