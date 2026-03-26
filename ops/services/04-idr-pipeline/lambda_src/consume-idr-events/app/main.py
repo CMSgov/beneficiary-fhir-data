@@ -2,7 +2,7 @@ import json
 import os
 import re
 from datetime import datetime
-from typing import Annotated, Any
+from typing import Any
 
 import psycopg
 from aws_lambda_powertools import Logger
@@ -10,7 +10,6 @@ from aws_lambda_powertools.utilities import parameters
 from aws_lambda_powertools.utilities.data_classes import SQSEvent
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from psycopg import sql
-from pydantic.fields import Field
 from pydantic.main import BaseModel
 
 BFD_ENVIRONMENT = os.environ.get("BFD_ENVIRONMENT", "")
@@ -28,8 +27,8 @@ logger = Logger()
 
 class IdrLoadEventModel(BaseModel):
     id: str
-    job_name: Annotated[str, Field(validation_alias="jobName")]
-    job_message: Annotated[str, Field(validation_alias="jobMessage")]
+    job_name: str
+    job_message: str
     event_time: datetime
 
 
@@ -86,10 +85,15 @@ def handler(event: dict[str, Any], context: LambdaContext) -> None:  # noqa: ARG
 
         for sqs_record in sqs_event.records:
             raw_message: dict[str, Any] = json.loads(sqs_record.body)
-            raw_message["id"] = sqs_record.message_id
-            raw_message["event_time"] = sqs_record.attributes.sent_timestamp
 
-            idr_load_event = IdrLoadEventModel.model_validate(raw_message, by_alias=True)
+            idr_load_event = IdrLoadEventModel.model_validate(
+                {
+                    "id": sqs_record.message_id,
+                    "job_name": raw_message["jobName"],
+                    "job_message": raw_message["jobMessage"],
+                    "event_time": sqs_record.attributes.sent_timestamp,
+                },
+            )
             insert_event(idr_load_event)
 
     # TODO: Trigger idr-pipeline after inserting events
