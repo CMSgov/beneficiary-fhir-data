@@ -1,0 +1,76 @@
+[project]
+name = "consume-idr-events"
+version = "0.1.0"
+description = "Lambda to consume IDR load events from the IDR Events SQS Queue into the v3 DB"
+readme = "README.md"
+requires-python = "~=3.14.0"
+dependencies = [
+    "boto3>=1.42.56",
+    "aws-lambda-powertools>=3.25.0",
+    "psycopg[binary]>=3.2.10",
+    "pydantic>=2.12.2",
+]
+
+[dependency-groups]
+dev = ["ruff>=0.14.6", "uv>=0.9.11", "pyright>=1.1.407"]
+
+[tool.ruff]
+# Set the maximum line length to 100.
+line-length = 100
+
+[tool.ruff.lint]
+select = [
+    "D",    # pydocstyle
+    "E501",
+    # pycodestyle
+    "E",
+    # Pyflakes
+    "F",
+    # pyupgrade
+    "UP",
+    # flake8-bugbear
+    "B",
+    # flake8-simplify
+    "SIM",
+    # isort
+    "I",
+    "ANN",
+    "LOG",
+    "G",
+    "PT",
+    "RSE",
+    "PIE",
+    "RET",
+    "SLF",
+    "ARG",
+    "PTH",
+    "PLE",
+    "PLW",
+    "PERF",
+    "FURB",
+    "RUF",
+]
+
+# Don't require docstrings
+ignore = ["D100", "D101", "D102", "D103", "D104", "D105", "D107"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "pep257"
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = true
+
+[tool.pyright]
+typeCheckingMode = "strict"
+venvPath = "."
+venv = ".venv"
+reportMissingTypeStubs = "none"
+# Usage of _some_ of Powertools for AWS Lambda necessitates disabling some of Pyright's strict mode
+# features, sadly. The Powertools team seems to be aware of this incompatibility, but it seems
+# unlikely that any improvements will be made.
+reportUnknownMemberType = false
+reportUnknownVariableType = false
+reportUnknownArgumentType = false
+reportUnknownParameterType = false

@@ -54,6 +54,12 @@
     "platform": "linux/arm64"
   },
   {
+    "name": "bfd-platform-consume-idr-events",
+    "dockerfile": "ops/services/04-idr-pipeline/lambda_src/consume-idr-events/Dockerfile",
+    "contextDir": "ops/services/04-idr-pipeline/lambda_src/consume-idr-events",
+    "platform": "linux/arm64"
+  },
+  {
     "name": "bfd-platform-codebuild-runner",
     "dockerfile": "ops/images/bfd-platform-codebuild-runner/Dockerfile",
     "contextDir": "ops/images/bfd-platform-codebuild-runner",
