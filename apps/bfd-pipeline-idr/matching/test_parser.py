@@ -43,6 +43,12 @@ class TestProjectUsatParser(unittest.TestCase):
         address8 = "PERIDOT 27\nWASHINGTON DC 20001"
         expected8 = "27 PERIDOT\nWASHINGTON DC 20001"
         assert normalize_address(address8) == expected8
+
+        # Directional as street name (e.g., SOUTH BLVD)
+        # Should be spelled out per Project US@ standards
+        address9 = "5464 SOUTH BLVD\nMAPLE HEIGHTS OH 44137"
+        expected9 = "5464 SOUTH BLVD\nMAPLE HEIGHTS OH 44137"
+        assert normalize_address(address9) == expected9
         
         # Duplicate line 1 and 2
         address9 = "45 MALL DR\n45 MALL DR\nSAN JUAN PR 00901"
@@ -61,6 +67,11 @@ class TestProjectUsatParser(unittest.TestCase):
         res = normalize_address(address)
         assert "PO BOX 11890" in res
         assert "SAN JUAN PR 00902-1190" in res
+
+        # Typo fix for B0X (zero)
+        address2 = "PO B0X 186\nNEW YORK NY 10001"
+        expected2 = "PO BOX 186\nNEW YORK NY 10001"
+        assert normalize_address(address2) == expected2
 
     def test_rural_route(self) -> None:
         cases = [
@@ -113,6 +124,10 @@ class TestProjectUsatParser(unittest.TestCase):
             (
                 "RR 04 BOX 12\nSOMEPLACE PR 00901",
                 "RR 4 BOX 12\nSOMEPLACE PR 00901",
+            ),
+            (
+                "RR 3\nSOMEPLACE TX 77001",
+                "RR 3\nSOMEPLACE TX 77001",
             ),
         ]
         for address, expected in cases:
@@ -326,6 +341,18 @@ class TestProjectUsatParser(unittest.TestCase):
         # Address split/format might uppercase and normalize
         # We check the street name is fully converted to the expected mapped ascii values
         assert expected_str in res
+
+    def test_general_delivery(self) -> None:
+        # Standard general delivery
+        address1 = "GENERAL DELIVERY\nNEW YORK NY 10001"
+        expected1 = "GENERAL DELIVERY\nNEW YORK NY 10001"
+        assert normalize_address(address1) == expected1
+
+        # Complex line with both general delivery and physical (messy data support)
+        # Parser now correctly splits these into Recipient (L1) and Delivery (L2)
+        address2 = "GENERAL DELIVERY 390 9TH AVE\nNEW YORK NY 10001"
+        expected2 = "GENERAL DELIVERY\n390 9TH AVE\nNEW YORK NY 10001"
+        assert normalize_address(address2) == expected2
 
 
 if __name__ == "__main__":

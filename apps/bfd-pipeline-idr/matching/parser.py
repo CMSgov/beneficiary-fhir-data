@@ -137,6 +137,7 @@ def _apply_highway_fixes(text: str) -> str:
         (r"\bUS HWY\b", "US HIGHWAY"),
         (r"\bBUZON\b", "BOX"),
         (r"\bBZN\b", "BOX"),
+        (r"\bB0X\b", "BOX"),
         (r"\bRUTA RURAL\b", "RR"),
         (r"\bIH(\d+[A-Z]?)\b", r"INTERSTATE \1"),
         (r"\bI\s?(\d+[A-Z]?)(?:\s+(?:HIGHWAY|HWY))?\b", repl_interstate),
@@ -284,9 +285,16 @@ def normalize_address(address_str: str) -> str:
                 if state_val in CANADIAN_PROVINCES:
                     is_canada_line = True
 
-            if addr_type == "Ambiguous" and not is_canada_line:
-                raw_parsed_ambig: list[tuple[str, str]] = usaddress.parse(line)
-                fmt_string = _format_from_raw(raw_parsed_ambig)
+            if (
+                (addr_type == "Ambiguous" and not is_canada_line)
+                or (
+                    "StreetName" not in parsed_tokens
+                    and "USPSBoxType" not in parsed_tokens
+                    and "USPSBoxGroupType" not in parsed_tokens
+                )
+            ):
+                raw_parsed_fallback: list[tuple[str, str]] = usaddress.parse(line)
+                fmt_string = _format_from_raw(raw_parsed_fallback)
             else:
                 fmt_string = _format_from_dict(parsed_tokens, is_military=is_military)
             if not fmt_string.strip() and line.strip():
@@ -375,6 +383,9 @@ def _format_from_dict(tokens: dict[str, str], is_military: bool = False) -> str:
                 del tokens[key]
                 break
             line1_parts.append(val)
+            # If this is General Delivery, remove it from tokens to prevent doubling
+            if val.upper() == "GENERAL DELIVERY":
+                del tokens[key]
             break
 
     # Build Street Address Line
@@ -418,10 +429,15 @@ def _format_from_dict(tokens: dict[str, str], is_military: bool = False) -> str:
             occ_id_raw: str = tokens.pop("OccupancyIdentifier", "")
             street_parts.extend([occ_val, occ_id_raw])
 
-        group_type: str = tokens.get("USPSBoxGroupType", "")
-        group_id: str = tokens.get("USPSBoxGroupID", "")
-        box_type: str = tokens.get("USPSBoxType", "")
-        box_id: str = tokens.get("USPSBoxID", "")
+        group_type = tokens.get("USPSBoxGroupType", "")
+        group_id = tokens.get("USPSBoxGroupID", "")
+        box_type = tokens.get("USPSBoxType", "")
+        box_id = tokens.get("USPSBoxID", "")
+
+        # Fallback for usaddress occasionally tagging RR number as box_id
+        if group_type and not group_id and box_id and not box_type:
+            group_id = box_id
+            box_id = ""
 
         # Format Group (e.g., RR, HC)
         if group_type:
@@ -461,8 +477,17 @@ def _format_from_dict(tokens: dict[str, str], is_military: bool = False) -> str:
     elif (
         tokens.get("AddressNumber") == "GENERAL DELIVERY"
         or tokens.get("StreetName") == "GENERAL DELIVERY"
+        or tokens.get("Recipient", "").upper() == "GENERAL DELIVERY"
+        or tokens.get("BuildingName", "").upper() == "GENERAL DELIVERY"
     ):
         street_parts.append("GENERAL DELIVERY")
+        # If there's other info, we'll keep it as secondary
+        if "AddressNumber" in tokens and tokens["AddressNumber"] != "GENERAL DELIVERY":
+            street_parts.append(tokens["AddressNumber"])
+        if "StreetName" in tokens and tokens["StreetName"] != "GENERAL DELIVERY":
+            street_parts.append(tokens["StreetName"])
+        if "StreetNamePostType" in tokens:
+            street_parts.append(_format_suffix(tokens["StreetNamePostType"]))
 
     # Standard Street Address
     else:
@@ -478,12 +503,19 @@ def _format_from_dict(tokens: dict[str, str], is_military: bool = False) -> str:
             street_parts.append(tokens["StreetNamePreModifier"])
 
         if "StreetNamePreDirectional" in tokens:
-            if "StreetName" in tokens and tokens["StreetName"].strip().startswith("AND "):
-                # Do not abbreviate PreDirectional if it forms a compound street name
-                # (e.g., EAST AND WEST)
-                street_parts.append(tokens["StreetNamePreDirectional"])
+            if "StreetName" in tokens and (
+                tokens["StreetName"].strip().startswith("AND ")
+                or "StreetName" in tokens
+            ):
+                # Standard case: Abbreviate if a street name exists
+                # (except for compound names handled by the 'AND' check)
+                if tokens["StreetName"].strip().startswith("AND "):
+                    street_parts.append(tokens["StreetNamePreDirectional"])
+                else:
+                    street_parts.append(_format_directional(tokens["StreetNamePreDirectional"]))
             else:
-                street_parts.append(_format_directional(tokens["StreetNamePreDirectional"]))
+                # If StreetName is missing, keep full spelling (e.g. SOUTH BLVD)
+                street_parts.append(tokens["StreetNamePreDirectional"])
 
         if "StreetNamePreType" in tokens:
             # PreTypes like "COUNTY HIGHWAY" are typically NOT abbreviated in Project US@
@@ -496,7 +528,11 @@ def _format_from_dict(tokens: dict[str, str], is_military: bool = False) -> str:
             street_parts.append(_format_suffix(tokens["StreetNamePostType"]))
 
         if "StreetNamePostDirectional" in tokens:
-            street_parts.append(_format_directional(tokens["StreetNamePostDirectional"]))
+            if "StreetName" in tokens:
+                street_parts.append(_format_directional(tokens["StreetNamePostDirectional"]))
+            else:
+                # If StreetName is missing, keep full spelling
+                street_parts.append(tokens["StreetNamePostDirectional"])
 
     # Secondary Unit
     if "OccupancyType" in tokens:
@@ -574,20 +610,33 @@ def _format_from_dict(tokens: dict[str, str], is_military: bool = False) -> str:
             last_line += city
 
         # Handle Canada spacing
-        is_canada = False
         if state:
             state_parts = state.split()
-            if state_parts[0] in (
-                "AB", "BC", "MB", "NB", "NL", "NT", "NS", "NU", "ON", "PE", "QC", "SK", "YT",
+            if (
+                state_parts[0]
+                in (
+                    "AB",
+                    "BC",
+                    "MB",
+                    "NB",
+                    "NL",
+                    "NT",
+                    "NS",
+                    "NU",
+                    "ON",
+                    "PE",
+                    "QC",
+                    "SK",
+                    "YT",
+                )
+                and len(state_parts) > 1
             ):
-                is_canada = True
-                if len(state_parts) > 1:
-                    # usaddress merged part of Zip into StateName
-                    # e.g., 'ON K1A'
-                    state = state_parts[0]
-                    zip_code_val = (
-                        " ".join(state_parts[1:]) + (" " + zip_code_val if zip_code_val else "")
-                    )
+                # usaddress merged part of Zip into StateName
+                # e.g., 'ON K1A'
+                state = state_parts[0]
+                zip_code_val = (
+                    " ".join(state_parts[1:]) + (" " + zip_code_val if zip_code_val else "")
+                )
 
             last_line += (" " if last_line else "") + state
 
@@ -622,12 +671,14 @@ def _format_from_raw(raw_parsed: list[tuple[str, str]]) -> str:
             if can_swap and not any(v.isdigit() for v, _label in raw_parsed[:-1]):
                 raw_parsed = [raw_parsed[-1], *raw_parsed[:-1]]
 
+    has_street_name = any(label == "StreetName" for _val, label in raw_parsed)
     reconstructed: list[str] = []
     for p_val, p_label in raw_parsed:
         # apply directional checks
         res_val = p_val
         if "Directional" in p_label:
-            res_val = _format_directional(p_val)
+            # Preservation for directional street names (e.g. SOUTH BLVD)
+            res_val = _format_directional(p_val) if has_street_name else p_val
         # apply suffix checks
         elif "PostType" in p_label or p_label == "StreetNamePostType":
             res_val = _format_suffix(p_val)
