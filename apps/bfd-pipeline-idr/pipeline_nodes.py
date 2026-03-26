@@ -32,61 +32,45 @@ from model.idr_claim_rx import IdrClaimRx
 from model.idr_contract_pbp_contact import IdrContractPbpContact
 from model.idr_contract_pbp_number import IdrContractPbpNumber
 from pipeline_utils import extract_and_load
-from settings import TABLES_TO_LOAD
 
 type NodePartitionedModelInput = tuple[type[IdrBaseModel], LoadPartition | None]
 
 configure_logger()
 
-
-def filter_tables(tables: list[type[IdrBaseModel]]) -> list[type[IdrBaseModel]]:
-    return [t for t in tables if TABLES_TO_LOAD == [] or t.table() in TABLES_TO_LOAD]
-
-
-def claim_tables() -> list[type[IdrBaseModel]]:
-    return filter_tables(
-        [
-            IdrClaimProfessionalNch,
-            IdrClaimInstitutionalNch,
-            IdrClaimProfessionalSs,
-            IdrClaimInstitutionalSs,
-        ]
-    )
-
-
-def claim_aux_tables() -> list[type[IdrBaseModel]]:
-    return filter_tables(
-        [
-            # RX/Part D is special because we combine claim + claim line
-            IdrClaimRx,
-            IdrClaimItemProfessionalNch,
-            IdrClaimItemInstitutionalNch,
-            IdrClaimItemProfessionalSs,
-            IdrClaimItemInstitutionalSs,
-        ]
-    )
-
-
-def bene_aux_tables() -> list[type[IdrBaseModel]]:
-    return filter_tables(
-        [
-            IdrBeneficiaryStatus,
-            IdrBeneficiaryThirdParty,
-            IdrBeneficiaryEntitlement,
-            IdrBeneficiaryEntitlementReason,
-            IdrBeneficiaryDualEligibility,
-            IdrBeneficiaryMbiId,
-            IdrContractPbpContact,
-            IdrContractPbpNumber,
-            IdrBeneficiaryMaPartDEnrollment,
-            IdrBeneficiaryMaPartDEnrollmentRx,
-            IdrBeneficiaryLowIncomeSubsidy,
-        ]
-    )
+_CLAIM_TABLES: list[type[IdrBaseModel]] = [
+    IdrClaimProfessionalNch,
+    IdrClaimInstitutionalNch,
+    IdrClaimProfessionalSs,
+    IdrClaimInstitutionalSs,
+]
+_CLAIM_AUX_TABLES: list[type[IdrBaseModel]] = [
+    # RX/Part D is special because we combine claim + claim line
+    IdrClaimRx,
+    IdrClaimItemProfessionalNch,
+    IdrClaimItemInstitutionalNch,
+    IdrClaimItemProfessionalSs,
+    IdrClaimItemInstitutionalSs,
+]
+_BENE_AUX_TABLES: list[type[IdrBaseModel]] = [
+    IdrBeneficiaryStatus,
+    IdrBeneficiaryThirdParty,
+    IdrBeneficiaryEntitlement,
+    IdrBeneficiaryEntitlementReason,
+    IdrBeneficiaryDualEligibility,
+    IdrBeneficiaryMbiId,
+    IdrContractPbpContact,
+    IdrContractPbpNumber,
+    IdrBeneficiaryMaPartDEnrollment,
+    IdrBeneficiaryMaPartDEnrollmentRx,
+    IdrBeneficiaryLowIncomeSubsidy,
+]
+_BENE_TABLES: list[type[IdrBaseModel]] = [IdrBeneficiary]
 
 
-def bene_tables() -> list[type[IdrBaseModel]]:
-    return filter_tables([IdrBeneficiary])
+def filter_tables(
+    tables: list[type[IdrBaseModel]], tables_to_load: set[str]
+) -> list[type[IdrBaseModel]]:
+    return [t for t in tables if not tables_to_load or t.table() in tables_to_load]
 
 
 def _gen_partitioned_node_inputs(
@@ -127,14 +111,27 @@ def stage1(load_mode: LoadMode, start_time: datetime, load_type: LoadType) -> bo
     )
 
 
-def stage2_inputs(load_type: LoadType, stage1: bool) -> Parallelizable[NodePartitionedModelInput]:  # noqa: ARG001
+def stage2_inputs(
+    load_type: LoadType,
+    tables_to_load: set[str],
+    stage1: bool,  # noqa: ARG001
+) -> Parallelizable[NodePartitionedModelInput]:
     if load_type == LoadType.INITIAL:
         yield from _gen_partitioned_node_inputs(
-            [*claim_aux_tables(), *bene_aux_tables(), *claim_tables(), *bene_tables()], load_type
+            filter_tables(
+                [
+                    *_CLAIM_AUX_TABLES,
+                    *_BENE_AUX_TABLES,
+                    *_CLAIM_TABLES,
+                    *_BENE_TABLES,
+                ],
+                tables_to_load,
+            ),
+            load_type,
         )
     else:
         yield from _gen_partitioned_node_inputs(
-            [*claim_aux_tables(), *bene_aux_tables()], load_type
+            filter_tables([*_CLAIM_AUX_TABLES, *_BENE_AUX_TABLES], tables_to_load), load_type
         )
 
 
@@ -167,10 +164,13 @@ def collect_stage2(
 
 def stage3_inputs(
     load_type: LoadType,
+    tables_to_load: set[str],
     collect_stage2: bool,  # noqa: ARG001
 ) -> Parallelizable[NodePartitionedModelInput]:
     if load_type == LoadType.INCREMENTAL:
-        yield from _gen_partitioned_node_inputs(claim_tables(), load_type)
+        yield from _gen_partitioned_node_inputs(
+            filter_tables(_CLAIM_TABLES, tables_to_load), load_type
+        )
     else:
         yield from _gen_partitioned_node_inputs([], load_type)
 

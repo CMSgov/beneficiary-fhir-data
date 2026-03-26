@@ -7,10 +7,18 @@ from hamilton import driver, telemetry  # type: ignore
 from hamilton.execution import executors  # type: ignore
 
 import pipeline_nodes
+from load_events import (
+    IdrJobLoadEvent,
+    get_eligible_events,
+    get_tables_to_load,
+    get_unreported_jobs,
+    update_completion_times,
+    update_start_times,
+)
 from load_partition import LoadType
 from logger_config import configure_logger
 from model.base_model import LoadMode
-from settings import LOAD_TYPE, MAX_TASKS
+from settings import INCREMENTAL_IDR_JOB_GRACE_PERIOD, LOAD_TYPE, MAX_TASKS, TABLES_TO_LOAD
 
 telemetry.disable_telemetry()
 
@@ -61,6 +69,21 @@ def run(load_mode: str) -> None:
     )
 
     start_time = datetime.now(UTC)
+    tables_to_load = set(TABLES_TO_LOAD)
+    idr_job_events: list[IdrJobLoadEvent] = []
+    if load_type == LoadType.INCREMENTAL and not tables_to_load:
+        idr_job_events = get_eligible_events(load_mode=load_mode, start_time=start_time)
+        unreported_jobs = get_unreported_jobs(
+            load_mode=load_mode,
+            start_time=start_time,
+            grace_period=INCREMENTAL_IDR_JOB_GRACE_PERIOD,
+        )
+
+        update_start_times(load_mode=load_mode, events=idr_job_events, start_time=start_time)
+
+        tables_to_load = get_tables_to_load(
+            unreported_jobs | {event.job_type for event in idr_job_events}
+        )
 
     # if load_benes and load_claims:
     hamilton_driver.execute(  # type: ignore
@@ -69,8 +92,14 @@ def run(load_mode: str) -> None:
             "load_type": load_type,
             "load_mode": load_mode,
             "start_time": start_time,
+            "tables_to_load": tables_to_load,
         },
     )
+
+    if load_type == LoadType.INCREMENTAL and idr_job_events:
+        update_completion_times(
+            load_mode=load_mode, events=idr_job_events, completion_time=datetime.now(UTC)
+        )
 
 
 if __name__ == "__main__":

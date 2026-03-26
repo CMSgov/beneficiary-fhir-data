@@ -62,7 +62,7 @@ In prod, we want to run as many tasks as possible without running out of memory.
 TABLES_TO_LOAD = [t for t in getenv("IDR_TABLES", "").split(",") if t]
 """List of tables to include - any table not included will be skipped.
 Useful if you only want to load a subset of data and don't want to wait
-for the other tables to load."""
+for the other tables to load. Takes precedence over idr_load_events in incremental mode."""
 
 INCREMENTAL_IDR_JOB_GRACE_PERIOD = timedelta(
     hours=int(getenv("INCREMENTAL_IDR_JOB_GRACE_PERIOD_HRS", default="24"))
