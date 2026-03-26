@@ -1,13 +1,15 @@
 import logging
 import re
-from datetime import UTC, datetime
+from collections.abc import Callable
+from datetime import UTC, datetime, timedelta
 from enum import StrEnum
+from string.templatelib import Template
 from typing import Annotated
 from uuid import UUID
 
 import psycopg
-from psycopg import sql
-from psycopg.rows import dict_row
+from psycopg import Cursor, sql
+from psycopg.rows import DictRow, dict_row
 from pydantic.fields import Field
 from pydantic.main import BaseModel
 from pydantic.type_adapter import TypeAdapter
@@ -111,11 +113,20 @@ class IdrJobLoadEvent(BaseModel):
     failure_time: datetime | None
 
 
-def get_eligible_events(load_mode: LoadMode, start_time: datetime) -> list[IdrJobLoadEvent]:
+def _connect_and_do[T](load_mode: LoadMode, func: Callable[[Cursor[DictRow]], T]) -> T:
     with (
         psycopg.connect(get_connection_string(load_mode)) as conn,
         conn.cursor(row_factory=dict_row) as curs,
     ):
+        return func(curs)
+
+
+def _clean_query_str(query: Template) -> str:
+    return re.sub(r"\s+", " ", sql.as_string(query).strip())
+
+
+def get_eligible_events(load_mode: LoadMode, start_time: datetime) -> list[IdrJobLoadEvent]:
+    def _do(curs: Cursor[DictRow]) -> list[IdrJobLoadEvent]:
         sql_fields = sql.SQL(", ").join(
             [
                 sql.Identifier(field.alias or name)
@@ -130,11 +141,54 @@ def get_eligible_events(load_mode: LoadMode, start_time: datetime) -> list[IdrJo
                 AND {fields(IdrJobLoadEvent).failure_time:i} IS NULL
             """
         logger.info(
-            "Retrieving eligible load events; query: %s",
-            re.sub(r"\s+", " ", sql.as_string(get_events_query).strip()),
+            "Retrieving eligible load events; query: %s", _clean_query_str(get_events_query)
         )
         results = curs.execute(get_events_query)
         load_events = TypeAdapter(list[IdrJobLoadEvent]).validate_python(results, by_alias=True)
         logger.info("Retrieved %d event(s)", len(load_events))
 
         return load_events
+
+    return _connect_and_do(load_mode, _do)
+
+
+def get_unreported_jobs(
+    load_mode: LoadMode, start_time: datetime, grace_period: timedelta
+) -> set[IdrJobType]:
+    def _do(curs: Cursor[DictRow]) -> set[IdrJobType]:
+        get_jobs_query = t"""
+            SELECT {fields(IdrJobLoadEvent, by_alias=True).job_type:i}
+                FROM {"idr":i}.{LOAD_EVENTS_TABLE:i}
+            WHERE {fields(IdrJobLoadEvent).event_time:i}
+                    >= {start_time.astimezone(UTC) - grace_period}
+                AND {fields(IdrJobLoadEvent).failure_time:i} IS NULL
+            """
+        grace_period_hours = int(grace_period.total_seconds() / 60 / 60)
+        logger.info(
+            "Retrieving job types reported in the last %d hour(s); query: %s",
+            grace_period_hours,
+            _clean_query_str(get_jobs_query),
+        )
+        results = curs.execute(get_jobs_query)
+        # We're retrieving the jobs that _have_ been reported within the past x hrs; we then take
+        # the set difference of this set with the set of all job types to get those that haven't
+        # been reported
+        reported_jobs = TypeAdapter(set[IdrJobType]).validate_python(
+            x[fields(IdrJobLoadEvent, by_alias=True).job_type] for x in results
+        )
+        unreported_jobs = set(IdrJobType).difference(reported_jobs)
+        if len(unreported_jobs) >= 0:
+            logger.warning(
+                "%d jobs were not reported as having completed in the last %d hour(s)",
+                len(unreported_jobs),
+                grace_period_hours,
+            )
+        else:
+            logger.info(
+                "No jobs reported as incomplete in the last %d hour(s)",
+                grace_period_hours,
+            )
+
+        return unreported_jobs
+
+    return _connect_and_do(load_mode, _do)
