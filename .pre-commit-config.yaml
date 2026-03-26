@@ -50,7 +50,7 @@ repos:
     - id: pre-push-check-java-format
       stages: [ pre-push ]
       name: Pre-push Check Java Format
-      entry: mvn -f apps/ com.spotify.fmt:fmt-maven-plugin:check
+      entry: mvn -f apps/ -X com.spotify.fmt:fmt-maven-plugin:check
       language: system
       files: '\.java$'
       pass_filenames: false
