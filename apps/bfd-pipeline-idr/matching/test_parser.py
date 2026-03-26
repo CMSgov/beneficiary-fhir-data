@@ -43,6 +43,11 @@ class TestProjectUsatParser(unittest.TestCase):
         address8 = "PERIDOT 27\nWASHINGTON DC 20001"
         expected8 = "27 PERIDOT\nWASHINGTON DC 20001"
         assert normalize_address(address8) == expected8
+        
+        # Duplicate line 1 and 2
+        address9 = "45 MALL DR\n45 MALL DR\nSAN JUAN PR 00901"
+        expected9 = "45 MALL DR\nSAN JUAN PR 00901"
+        assert normalize_address(address9) == expected9
 
     def test_diacritics_and_punctuation(self) -> None:
         address = "123 Nórth Main St., Apt. #4-B\nNew York, NY (10001)"
@@ -305,6 +310,7 @@ class TestProjectUsatParser(unittest.TestCase):
                 "KENTUCKY STATE HIGHWAY 625\nHERNDON VA 22071",
                 "KY STATE HIGHWAY 625\nHERNDON VA 22071",
             ),
+            ("1984 US 70 HWY\nHERNDON VA 22071", "1984 US HIGHWAY 70\nHERNDON VA 22071"),
         ]
         for address, expected in cases:
             with self.subTest(address=address):

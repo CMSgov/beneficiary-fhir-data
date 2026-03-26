@@ -7,13 +7,19 @@ from collections.abc import Callable
 
 import usaddress  # type: ignore
 
-from .constants import DIACRITICS, DIRECTIONALS, SECONDARY_UNITS, STATES, SUFFIX_MAP
+from .constants import (
+    COUNTRIES,
+    DIACRITICS,
+    DIRECTIONALS,
+    PR_URBANIZATION_EXCEPTIONS,
+    SECONDARY_UNITS,
+    STATES,
+    SUFFIX_MAP,
+)
 
 
 def remove_diacritics(text: str) -> str:
-    # Explicit mapping based on PDF specifications.
-    # The Project US@ spec varies from the fallback in a few instances,
-    # so we can expand the constant mapping.
+    """Remove diacritics from text based on Project US@ specifications."""
     mapped_chars: list[str] = []
     for char in text:
         if char in DIACRITICS:
@@ -27,8 +33,7 @@ def remove_diacritics(text: str) -> str:
 
 
 def _apply_smart_state_abbreviations(text: str) -> str:
-    from .constants import STATES
-
+    """Intelligently abbreviate state names when followed by Highway/Route keywords."""
     words = text.split()
     if not words:
         return text
@@ -85,6 +90,7 @@ def _apply_smart_state_abbreviations(text: str) -> str:
 
 
 def _apply_highway_fixes(text: str) -> str:
+    """Normalize highway and route notations into standard Project US@ format."""
     text = _apply_smart_state_abbreviations(text)
 
     def repl_interstate(match: re.Match[str]) -> str:
@@ -95,8 +101,6 @@ def _apply_highway_fixes(text: str) -> str:
             words = before.split()
             if words:
                 last_word = words[-1].upper()
-                from .constants import SECONDARY_UNITS
-
                 if last_word in SECONDARY_UNITS or last_word in SECONDARY_UNITS.values():
                     # Likely a secondary unit ID (eg APT I1), not an Interstate highway
                     return full
@@ -134,19 +138,19 @@ def _apply_highway_fixes(text: str) -> str:
         (r"\bBUZON\b", "BOX"),
         (r"\bBZN\b", "BOX"),
         (r"\bRUTA RURAL\b", "RR"),
-        (r"\bIH(\d+)\b", r"INTERSTATE \1"),
-        (r"\bI\s?(\d+)\b", repl_interstate),
-        (r"\bUS (\d+)\b", r"US HIGHWAY \1"),
+        (r"\bIH(\d+[A-Z]?)\b", r"INTERSTATE \1"),
+        (r"\bI\s?(\d+[A-Z]?)(?:\s+(?:HIGHWAY|HWY))?\b", repl_interstate),
+        (r"\bUS(?:\s+HIGHWAY)?\s+(\d+[A-Z]?)(?:\s+(?:HIGHWAY|HWY))?\b", r"US HIGHWAY \1"),
         (r"\bBYP ROAD\b", "BYPASS ROAD"),
-        (r"\bKY (\d{1,4})\b", r"KY HIGHWAY \1"),
+        (r"\bKY\s+(\d{1,4})(?:\s+(?:HIGHWAY|HWY))?\b", r"KY HIGHWAY \1"),
         (r"\bCNTY\b", "COUNTY"),
-        (r"\bCR\b", "COUNTY ROAD"),
+        (r"\bCR\s+(\d+[A-Z]?)(?:\s+(?:ROAD|RD))?\b", r"COUNTY ROAD \1"),
         (r"\bHWY\b", "HIGHWAY"),
         (r"\bRD\b", "ROAD"),
         (r"\bRT\b", "ROUTE"),
         (r"\bRTE\b", "ROUTE"),
-        (r"\bSR ([A-Z]+)\b", r"STATE ROUTE \1"),
-        (r"\bSR (\d+)\b", r"STATE ROAD \1"),
+        (r"\bSR\s+([A-Z]+)(?:\s+(?:ROUTE|RT|RTE|ROAD|RD))?\b", r"STATE ROUTE \1"),
+        (r"\bSR\s+(\d+[A-Z]?)(?:\s+(?:ROAD|RD|ROUTE|RT|RTE))?\b", r"STATE ROAD \1"),
         (r"\bSR\b", "STATE ROAD"),
         (r"\bTSR\b", "TOWNSHIP ROAD"),
     ]
@@ -156,6 +160,7 @@ def _apply_highway_fixes(text: str) -> str:
 
 
 def normalize_text(text: str) -> str:
+    """Uppercase text and normalize basic punctuation/spacing."""
     text = remove_diacritics(text)
     text = text.upper()
     text = _apply_highway_fixes(text)
@@ -224,8 +229,12 @@ def normalize_address(address_str: str) -> str:
     """Take a multi-line address string and convert it to Project US@ format."""
     # First, split lines and normalize each line
     lines = [normalize_text(line) for line in address_str.split("\n")]
-    # Remove empty lines
-    lines = [line for line in lines if line]
+    # Remove empty lines and deduplicate
+    deduped_lines: list[str] = []
+    for line in lines:
+        if line and line not in deduped_lines:
+            deduped_lines.append(line)
+    lines = deduped_lines
 
     # Pre-process Canadian addresses to combine Province and Postal Code with single spacing
     lines = _apply_canada_fixes(lines)
@@ -276,24 +285,21 @@ def normalize_address(address_str: str) -> str:
                     is_canada_line = True
 
             if addr_type == "Ambiguous" and not is_canada_line:
-                raw_parsed: list[tuple[str, str]] = usaddress.parse(line)
-                fmt_string = _format_from_raw(raw_parsed)
+                raw_parsed_ambig: list[tuple[str, str]] = usaddress.parse(line)
+                fmt_string = _format_from_raw(raw_parsed_ambig)
             else:
                 fmt_string = _format_from_dict(parsed_tokens, is_military=is_military)
             if not fmt_string.strip() and line.strip():
                 # Dictionary returned empty for a non-empty line, fallback to raw sequential
-                raw_parsed: list[tuple[str, str]] = usaddress.parse(line)
-                fmt_string = _format_from_raw(raw_parsed)
+                raw_parsed_fallback: list[tuple[str, str]] = usaddress.parse(line)
+                fmt_string = _format_from_raw(raw_parsed_fallback)
             formatted_lines.append(fmt_string)
         except Exception as e:
             if "RepeatedLabelError" in str(type(e)):
-                raw_parsed: list[tuple[str, str]] = getattr(e, "parsed_string", [])
-                formatted_lines.append(_format_from_raw(raw_parsed))
+                raw_parsed_err: list[tuple[str, str]] = getattr(e, "parsed_string", [])
+                formatted_lines.append(_format_from_raw(raw_parsed_err))
             else:
                 formatted_lines.append(line)
-
-    # Ensure Country is on the bottom line for International
-    from .constants import COUNTRIES
 
     normalized_lines: list[str] = []
     country_line = ""
@@ -332,8 +338,7 @@ def _format_state(word: str) -> str:
 
 
 def _format_from_dict(tokens: dict[str, str], is_military: bool = False) -> str:
-    from .constants import SECONDARY_UNITS
-
+    """Format an address from a dictionary of usaddress tags."""
     # Standardize dictionary bad tags for non-unit strings ending with digits
     if (
         "OccupancyType" in tokens
@@ -410,8 +415,8 @@ def _format_from_dict(tokens: dict[str, str], is_military: bool = False) -> str:
             "UMR",
         ):
             occ_val: str = _format_secondary_unit(tokens.pop("OccupancyType", ""))
-            occ_id: str = tokens.pop("OccupancyIdentifier", "")
-            street_parts.extend([occ_val, occ_id])
+            occ_id_raw: str = tokens.pop("OccupancyIdentifier", "")
+            street_parts.extend([occ_val, occ_id_raw])
 
         group_type: str = tokens.get("USPSBoxGroupType", "")
         group_id: str = tokens.get("USPSBoxGroupID", "")
@@ -499,12 +504,12 @@ def _format_from_dict(tokens: dict[str, str], is_military: bool = False) -> str:
         street_parts.append(occ_type)
         if "OccupancyIdentifier" in tokens:
 
-            def get_val(obj: object) -> str:
+            def get_val_txt(obj: object) -> str:
                 if hasattr(obj, "get_text") and callable(typing.cast(typing.Any, obj).get_text):
                     return str(typing.cast(typing.Any, obj).get_text())
                 return str(obj)
 
-            occ_id: str = get_val(tokens["OccupancyIdentifier"])
+            occ_id: str = get_val_txt(tokens["OccupancyIdentifier"])
             if str(occ_id).startswith("#"):
                 occ_id = str(occ_id)[1:].strip()
             street_parts.append(occ_id)
@@ -515,8 +520,8 @@ def _format_from_dict(tokens: dict[str, str], is_military: bool = False) -> str:
                 return str(typing.cast(typing.Any, obj).get_text())
             return str(obj)
 
-        occ_id: str = get_val_simple(tokens["OccupancyIdentifier"])
-        street_parts.append(occ_id)
+        occ_id_simple: str = get_val_simple(tokens["OccupancyIdentifier"])
+        street_parts.append(occ_id_simple)
 
     # Private Mailbox (PMB)
     if "SubaddressType" in tokens:
@@ -530,11 +535,11 @@ def _format_from_dict(tokens: dict[str, str], is_military: bool = False) -> str:
 
     # City, State, ZIP — Moved up for boundary standalone passes
     if "StateName" in tokens:
-        state = _format_state(tokens["StateName"])
+        state_val_dict = _format_state(tokens["StateName"])
         if "PlaceName" in tokens:
-            last_line_parts.append(state)
+            last_line_parts.append(state_val_dict)
         else:
-            street_parts.insert(0, state)
+            street_parts.insert(0, state_val_dict)
 
     if "ZipCode" in tokens:
         if "PlaceName" in tokens:
@@ -562,7 +567,7 @@ def _format_from_dict(tokens: dict[str, str], is_military: bool = False) -> str:
         # Construct City State Zip carefully
         city = last_line_parts[0] if len(last_line_parts) > 0 else ""
         state = last_line_parts[1] if len(last_line_parts) > 1 else ""
-        zip_code = last_line_parts[2] if len(last_line_parts) > 2 else ""
+        zip_code_val = last_line_parts[2] if len(last_line_parts) > 2 else ""
 
         last_line = ""
         if city:
@@ -573,80 +578,44 @@ def _format_from_dict(tokens: dict[str, str], is_military: bool = False) -> str:
         if state:
             state_parts = state.split()
             if state_parts[0] in (
-                "AB",
-                "BC",
-                "MB",
-                "NB",
-                "NL",
-                "NT",
-                "NS",
-                "NU",
-                "ON",
-                "PE",
-                "QC",
-                "SK",
-                "YT",
+                "AB", "BC", "MB", "NB", "NL", "NT", "NS", "NU", "ON", "PE", "QC", "SK", "YT",
             ):
                 is_canada = True
                 if len(state_parts) > 1:
                     # usaddress merged part of Zip into StateName
                     # e.g., 'ON K1A'
                     state = state_parts[0]
-                    zip_code = " ".join(state_parts[1:]) + (" " + zip_code if zip_code else "")
+                    zip_code_val = (
+                        " ".join(state_parts[1:]) + (" " + zip_code_val if zip_code_val else "")
+                    )
 
             last_line += (" " if last_line else "") + state
 
-        if is_canada:
-            if zip_code:
-                last_line += (" " if last_line else "") + zip_code
-        else:
-            if zip_code:
-                last_line += (" " if last_line else "") + zip_code
+        if zip_code_val:
+            last_line += (" " if last_line else "") + zip_code_val
         final_lines.append(last_line)
 
     return "\n".join(final_lines)
 
 
 def _format_from_raw(raw_parsed: list[tuple[str, str]]) -> str:
-    # For complex/failing parses, we recreate the string processing parts
-    # manually mapped to basic rules
-    # This is a fallback
-
+    """Fallback formatter for complex addresses that usaddress cannot tag."""
     # smart swap numbers to front for address lines ending with digit (e.g., ACHENSEEWEG 25)
     if raw_parsed:
-        from .constants import SECONDARY_UNITS
-
         v_last, l_last = raw_parsed[-1]
         if v_last.isdigit() and len(raw_parsed) > 1 and l_last != "ZipCode":
-            highway_keywords = (
-                "HIGHWAY",
-                "ROAD",
-                "ROUTE",
-                "FM",
-                "US",
-                "INTERSTATE",
-                "SR",
-                "ST",
-                "COUNTY",
-                "STATE",
-                "EXPRESSWAY",
-                "PARKWAY",
-                "BOULEVARD",
-                "DRIVE",
-                "AVENUE",
-                "WAY",
-                "CALLE",
-                "C/",
-                "AVENIDA",
-                "KM",
+            highway_keywords_check = (
+                "HIGHWAY", "ROAD", "ROUTE", "FM", "US", "INTERSTATE", "SR", "ST",
+                "COUNTY", "STATE", "EXPRESSWAY", "PARKWAY", "BOULEVARD", "DRIVE",
+                "AVENUE", "WAY", "CALLE", "C/", "AVENIDA", "KM",
             )
             can_swap = True
-            for v, _label in raw_parsed[:-1]:
-                v_up = v.upper()
+            for v_chk, _label in raw_parsed[:-1]:
+                v_up = v_chk.upper()
                 if (
                     v_up in SECONDARY_UNITS
                     or v_up in SECONDARY_UNITS.values()
-                    or v_up in highway_keywords
+                    or v_up in highway_keywords_check
                 ):
                     can_swap = False
                     break
@@ -678,26 +647,25 @@ def _format_from_raw(raw_parsed: list[tuple[str, str]]) -> str:
     final_raw = (
         " ".join(reconstructed).replace(" \n ", "\n").replace("\n ", "\n").replace(" \n", "\n")
     )
-    lines = final_raw.split("\n")
-    return "\n".join(_apply_pr_exceptions(line) for line in lines)
+    lines_raw = final_raw.split("\n")
+    return "\n".join(_apply_pr_exceptions(line_item) for line_item in lines_raw)
 
 
 def _apply_pr_exceptions(text: str) -> str:
-    from .constants import PR_URBANIZATION_EXCEPTIONS
-
+    """Apply Project US@ Puerto Rico specific formatting and reordering rules."""
     # Reorder Station lines to be ABOVE delivery lines if they are below (e.g., Sta below PO Box)
     lines = [line.strip() for line in text.split("\n") if line.strip()]
     if not lines:
         return text
 
-    last_line = ""
+    last_line_val = ""
     # If the last line contains a State and Zip code, isolate it from reordering
     if re.search(r"\b[A-Z]{2}\b\s+\d{5}", lines[-1].upper()):
-        last_line = lines.pop(-1)
+        last_line_val = lines.pop(-1)
 
     urb_lines: list[str] = []
     condo_lines: list[str] = []
-    street_lines: list[str] = []
+    street_lines_list: list[str] = []
     postal_lines: list[str] = []
     other_lines: list[str] = []
 
@@ -717,7 +685,7 @@ def _apply_pr_exceptions(text: str) -> str:
         elif any(
             k in line_up for k in ("CALLE", "C/ ", "AVE", "AVENIDA", "KM", "ROAD", "ROUTE", "RR")
         ) or re.search(r"^\d", line_clean):
-            street_lines.append(line_clean)
+            street_lines_list.append(line_clean)
         else:
             other_lines.append(line_clean)
 
@@ -734,9 +702,9 @@ def _apply_pr_exceptions(text: str) -> str:
                 postal_lines[i], postal_lines[i + 1] = postal_lines[i + 1], postal_lines[i]
                 break
 
-    lines = urb_lines + condo_lines + street_lines + other_lines + postal_lines
-    if last_line:
-        lines.append(last_line)
+    lines = urb_lines + condo_lines + street_lines_list + other_lines + postal_lines
+    if last_line_val:
+        lines.append(last_line_val)
     text = "\n".join(lines)
 
     # Standardize Spanish boxes on the combined text (e.g., APARTADO -> PO BOX)
@@ -746,37 +714,37 @@ def _apply_pr_exceptions(text: str) -> str:
     # Standardize Spanish rural routes (e.g., RUTA RURAL -> RR)
     text = re.sub(r"\b(RUTA RURAL|RURAL)\b", "RR", text, flags=re.IGNORECASE)
 
-    lines = text.split("\n")
-    final_lines: list[str] = []
-    for line in lines:
-        line_str = line.strip()
+    lines_pr = text.split("\n")
+    final_lines_pr: list[str] = []
+    for line_pr in lines_pr:
+        line_str = line_pr.strip()
         # Remove hyphens from alphanumeric house numbers at the absolute front (e.g., A-17 -> A17)
         line_str = re.sub(r"^([A-Z]{1,2})-(\d+[A-Z]?)\b", r"\1\2", line_str)
-        words = line_str.split()
+        words_pr = line_str.split()
         new_words: list[str] = []
         skip = False
-        for i, w in enumerate(words):
+        for i, w_pr in enumerate(words_pr):
             if skip:
                 skip = False
                 continue
-            w_upper = w.upper()
-            if w_upper in ("URB", "URBANIZATION") and i + 1 < len(words):
-                next_word = words[i + 1].upper()
+            w_upper_pr = w_pr.upper()
+            if w_upper_pr in ("URB", "URBANIZATION") and i + 1 < len(words_pr):
+                next_word_pr = words_pr[i + 1].upper()
                 if (
-                    next_word in PR_URBANIZATION_EXCEPTIONS
-                    or next_word in PR_URBANIZATION_EXCEPTIONS.values()
+                    next_word_pr in PR_URBANIZATION_EXCEPTIONS
+                    or next_word_pr in PR_URBANIZATION_EXCEPTIONS.values()
                 ):
-                    mapped_val = PR_URBANIZATION_EXCEPTIONS.get(next_word, next_word)
-                    new_words.append(mapped_val)
+                    mapped_val_pr = PR_URBANIZATION_EXCEPTIONS.get(next_word_pr, next_word_pr)
+                    new_words.append(mapped_val_pr)
                     skip = True
                     continue
-            w_mapped = w
-            if w_upper in PR_URBANIZATION_EXCEPTIONS:
-                w_mapped = PR_URBANIZATION_EXCEPTIONS[w_upper]
-            elif w_upper in PR_URBANIZATION_EXCEPTIONS.values():
-                w_mapped = w_upper
-            elif w_upper == "URBANIZATION":
-                w_mapped = "URB"
-            new_words.append(w_mapped)
-        final_lines.append(" ".join(new_words))
-    return "\n".join(final_lines)
+            w_mapped_pr = w_pr
+            if w_upper_pr in PR_URBANIZATION_EXCEPTIONS:
+                w_mapped_pr = PR_URBANIZATION_EXCEPTIONS[w_upper_pr]
+            elif w_upper_pr in PR_URBANIZATION_EXCEPTIONS.values():
+                w_mapped_pr = w_upper_pr
+            elif w_upper_pr == "URBANIZATION":
+                w_mapped_pr = "URB"
+            new_words.append(w_mapped_pr)
+        final_lines_pr.append(" ".join(new_words))
+    return "\n".join(final_lines_pr)
