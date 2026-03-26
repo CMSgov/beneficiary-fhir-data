@@ -7,15 +7,11 @@ locals {
 }
 
 data "aws_ecr_image" "events" {
-  count = local.apply_events_resources ? 1 : 0
-
   repository_name = local.events_repository_name
   image_tag       = local.events_version
 }
 
 resource "aws_security_group" "events" {
-  count = local.apply_events_resources ? 1 : 0
-
   lifecycle {
     create_before_destroy = true
   }
@@ -28,18 +24,14 @@ resource "aws_security_group" "events" {
 }
 
 resource "aws_vpc_security_group_egress_rule" "events_allow_all_traffic_ipv4" {
-  count = local.apply_events_resources ? 1 : 0
-
-  security_group_id = one(aws_security_group.events[*].id)
+  security_group_id = aws_security_group.events.id
   cidr_ipv4         = "0.0.0.0/0"
   ip_protocol       = "-1" # semantically equivalent to all ports
 }
 
 resource "aws_vpc_security_group_ingress_rule" "allow_events_rds_cluster" {
-  count = local.apply_events_resources ? 1 : 0
-
   security_group_id            = data.aws_security_group.aurora_cluster.id
-  referenced_security_group_id = one(aws_security_group.events[*].id)
+  referenced_security_group_id = aws_security_group.events.id
   from_port                    = 5432
   to_port                      = 5432
   ip_protocol                  = "TCP"
@@ -47,8 +39,6 @@ resource "aws_vpc_security_group_ingress_rule" "allow_events_rds_cluster" {
 }
 
 resource "aws_cloudwatch_log_group" "events" {
-  count = local.apply_events_resources ? 1 : 0
-
   name              = "/aws/lambda/${local.events_lambda_full_name}"
   kms_key_id        = local.env_key_arn
   retention_in_days = 30
@@ -56,14 +46,12 @@ resource "aws_cloudwatch_log_group" "events" {
 }
 
 resource "aws_lambda_function" "events" {
-  count = local.apply_events_resources ? 1 : 0
-
   depends_on = [aws_iam_role_policy_attachment.events]
 
   function_name = local.events_lambda_full_name
   description = join("", [
-    "Lambda invoked by ${one(aws_sqs_queue.events[*].name)} SQS Queue to consume and load IDR Job ",
-    "events into the v3 database"
+    "Lambda invoked by ${aws_sqs_queue.events.name} SQS Queue to consume and load IDR Job events ",
+    "into the v3 database"
   ])
   tags = {
     Name    = local.events_lambda_full_name,
@@ -72,8 +60,8 @@ resource "aws_lambda_function" "events" {
 
   kms_key_arn = local.env_key_arn
 
-  image_uri        = one(data.aws_ecr_image.events[*].image_uri)
-  source_code_hash = trimprefix(one(data.aws_ecr_image.events[*].id), "sha256:")
+  image_uri        = data.aws_ecr_image.events.image_uri
+  source_code_hash = trimprefix(data.aws_ecr_image.events.id, "sha256:")
   architectures    = ["arm64"]
   package_type     = "Image"
 
@@ -82,7 +70,7 @@ resource "aws_lambda_function" "events" {
 
   logging_config {
     log_format = "Text"
-    log_group  = one(aws_cloudwatch_log_group.events[*].name)
+    log_group  = aws_cloudwatch_log_group.events.name
   }
 
   environment {
@@ -93,45 +81,40 @@ resource "aws_lambda_function" "events" {
   }
 
   vpc_config {
-    security_group_ids = aws_security_group.events[*].id
+    security_group_ids = [aws_security_group.events.id]
     subnet_ids         = local.app_subnets[*].id
   }
   replace_security_groups_on_destroy = true
 
-  role = one(aws_iam_role.events[*].arn)
+  role = aws_iam_role.events.arn
 }
 
 resource "aws_lambda_permission" "events_allow_sqs" {
-  count = local.apply_events_resources ? 1 : 0
-
-  statement_id   = "${one(aws_lambda_function.events[*].function_name)}-allow-sqs"
+  statement_id   = "${aws_lambda_function.events.function_name}-allow-sqs"
   action         = "lambda:InvokeFunction"
   principal      = "sqs.amazonaws.com"
-  function_name  = one(aws_lambda_function.events[*].function_name)
-  source_arn     = one(aws_sqs_queue.events[*].arn)
+  function_name  = aws_lambda_function.events.function_name
+  source_arn     = aws_sqs_queue.events.arn
   source_account = local.account_id
 }
 
 resource "aws_lambda_event_source_mapping" "events" {
-  count      = local.apply_events_resources ? 1 : 0
   depends_on = [aws_iam_role_policy_attachment.events]
 
-  event_source_arn = one(aws_sqs_queue.events[*].arn)
-  function_name    = one(aws_lambda_function.events[*].function_name)
+  event_source_arn = aws_sqs_queue.events.arn
+  function_name    = aws_lambda_function.events.function_name
   batch_size       = 1
 }
 
 resource "aws_lambda_function_event_invoke_config" "events" {
-  count = local.apply_events_resources ? 1 : 0
-
-  function_name          = one(aws_lambda_function.events[*].function_name)
+  function_name          = aws_lambda_function.events.function_name
   maximum_retry_attempts = 2
 
   # If the Lambda exhausts all of its retry attempts, we want failing events to land into a DLQ such
   # that responding engineers can analyze the event and retry, if necessary
   destination_config {
     on_failure {
-      destination = one(aws_sqs_queue.events_dlq[*].arn)
+      destination = aws_sqs_queue.events_dlq.arn
     }
   }
 }

@@ -32,8 +32,6 @@ locals {
   app_subnets              = module.terraservice.subnets_map["private"]
   data_subnets             = module.terraservice.subnets_map["private"]
 
-  apply_events_resources = local.env == "prod" || var.apply_events_resources_override
-
   name_prefix = "bfd-${local.env}-${local.service}"
 
   pipeline_repository_name = coalesce(var.pipeline_repository_override, "bfd-platform-base-python")

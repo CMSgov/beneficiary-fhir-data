@@ -32,10 +32,3 @@ variable "consume_idr_events_version_override" {
   sensitive   = false
   type        = string
 }
-
-variable "apply_events_resources_override" {
-  default     = false
-  description = "Overrides whether or not IDR load events related resources (SQS Queue, Lambda, etc.) are created"
-  sensitive   = false
-  type        = bool
-}
