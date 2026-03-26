@@ -47,10 +47,11 @@ repos:
       verbose: true
 - repo: local
   hooks:
-    - id: pre-push-check-java-script
-      name: Pre-push Check Java Format Script
-      pass_filenames: false
-      entry: ./.github/scripts/pre-push-check-java.sh
-      language: script
+    - id: pre-push-check-java-format
       stages: [ pre-push ]
+      name: Pre-push Check Java Format
+      entry: mvn -f apps/ com.spotify.fmt:fmt-maven-plugin:check
+      language: system
+      files: '\.java$'
+      pass_filenames: false
       verbose: true
