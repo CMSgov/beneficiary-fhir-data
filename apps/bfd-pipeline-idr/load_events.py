@@ -1,6 +1,7 @@
+import functools
 import logging
 import re
-from collections.abc import Callable
+from collections.abc import Callable, Iterable
 from datetime import UTC, datetime, timedelta
 from enum import StrEnum
 from string.templatelib import Template
@@ -192,3 +193,7 @@ def get_unreported_jobs(
         return unreported_jobs
 
     return _connect_and_do(load_mode, _do)
+
+
+def get_tables_to_load(job_types: Iterable[IdrJobType]) -> set[str]:
+    return functools.reduce(set[str].union, (x.tables for x in job_types))
