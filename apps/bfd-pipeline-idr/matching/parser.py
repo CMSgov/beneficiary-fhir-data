@@ -285,13 +285,10 @@ def normalize_address(address_str: str) -> str:
                 if state_val in CANADIAN_PROVINCES:
                     is_canada_line = True
 
-            if (
-                (addr_type == "Ambiguous" and not is_canada_line)
-                or (
-                    "StreetName" not in parsed_tokens
-                    and "USPSBoxType" not in parsed_tokens
-                    and "USPSBoxGroupType" not in parsed_tokens
-                )
+            if (addr_type == "Ambiguous" and not is_canada_line) or (
+                "StreetName" not in parsed_tokens
+                and "USPSBoxType" not in parsed_tokens
+                and "USPSBoxGroupType" not in parsed_tokens
             ):
                 raw_parsed_fallback: list[tuple[str, str]] = usaddress.parse(line)
                 fmt_string = _format_from_raw(raw_parsed_fallback)
@@ -504,8 +501,7 @@ def _format_from_dict(tokens: dict[str, str], is_military: bool = False) -> str:
 
         if "StreetNamePreDirectional" in tokens:
             if "StreetName" in tokens and (
-                tokens["StreetName"].strip().startswith("AND ")
-                or "StreetName" in tokens
+                tokens["StreetName"].strip().startswith("AND ") or "StreetName" in tokens
             ):
                 # Standard case: Abbreviate if a street name exists
                 # (except for compound names handled by the 'AND' check)
@@ -634,8 +630,8 @@ def _format_from_dict(tokens: dict[str, str], is_military: bool = False) -> str:
                 # usaddress merged part of Zip into StateName
                 # e.g., 'ON K1A'
                 state = state_parts[0]
-                zip_code_val = (
-                    " ".join(state_parts[1:]) + (" " + zip_code_val if zip_code_val else "")
+                zip_code_val = " ".join(state_parts[1:]) + (
+                    " " + zip_code_val if zip_code_val else ""
                 )
 
             last_line += (" " if last_line else "") + state
@@ -654,9 +650,26 @@ def _format_from_raw(raw_parsed: list[tuple[str, str]]) -> str:
         v_last, l_last = raw_parsed[-1]
         if v_last.isdigit() and len(raw_parsed) > 1 and l_last != "ZipCode":
             highway_keywords_check = (
-                "HIGHWAY", "ROAD", "ROUTE", "FM", "US", "INTERSTATE", "SR", "ST",
-                "COUNTY", "STATE", "EXPRESSWAY", "PARKWAY", "BOULEVARD", "DRIVE",
-                "AVENUE", "WAY", "CALLE", "C/", "AVENIDA", "KM",
+                "HIGHWAY",
+                "ROAD",
+                "ROUTE",
+                "FM",
+                "US",
+                "INTERSTATE",
+                "SR",
+                "ST",
+                "COUNTY",
+                "STATE",
+                "EXPRESSWAY",
+                "PARKWAY",
+                "BOULEVARD",
+                "DRIVE",
+                "AVENUE",
+                "WAY",
+                "CALLE",
+                "C/",
+                "AVENIDA",
+                "KM",
             )
             can_swap = True
             for v_chk, _label in raw_parsed[:-1]:

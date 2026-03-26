@@ -49,7 +49,7 @@ class TestProjectUsatParser(unittest.TestCase):
         address9 = "5464 SOUTH BLVD\nMAPLE HEIGHTS OH 44137"
         expected9 = "5464 SOUTH BLVD\nMAPLE HEIGHTS OH 44137"
         assert normalize_address(address9) == expected9
-        
+
         # Duplicate line 1 and 2
         address9 = "45 MALL DR\n45 MALL DR\nSAN JUAN PR 00901"
         expected9 = "45 MALL DR\nSAN JUAN PR 00901"
