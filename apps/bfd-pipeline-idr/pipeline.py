@@ -13,6 +13,7 @@ from load_events import (
     get_tables_to_load,
     get_unreported_jobs,
     update_completion_times,
+    update_failure_times,
     update_start_times,
 )
 from load_partition import LoadType
@@ -86,17 +87,30 @@ def run(load_mode: str) -> None:
         )
 
     # if load_benes and load_claims:
-    hamilton_driver.execute(  # type: ignore
-        final_vars=["do_stage4"],
-        inputs={
-            "load_type": load_type,
-            "load_mode": load_mode,
-            "start_time": start_time,
-            "tables_to_load": tables_to_load,
-        },
-    )
+    try:
+        hamilton_driver.execute(  # type: ignore
+            final_vars=["do_stage4"],
+            inputs={
+                "load_type": load_type,
+                "load_mode": load_mode,
+                "start_time": start_time,
+                "tables_to_load": tables_to_load,
+            },
+        )
+    except Exception:
+        if idr_job_events:
+            logger.error(
+                "%d IDR job load events failed to be fully processed: %s",
+                len(idr_job_events),
+                ", ".join(str(event.id) for event in idr_job_events),
+            )
+            update_failure_times(
+                load_mode=load_mode, events=idr_job_events, failure_time=datetime.now(UTC)
+            )
+        logger.exception("Unrecoverable exception raised during pipeline load")
+        raise
 
-    if load_type == LoadType.INCREMENTAL and idr_job_events:
+    if idr_job_events:
         update_completion_times(
             load_mode=load_mode, events=idr_job_events, completion_time=datetime.now(UTC)
         )
