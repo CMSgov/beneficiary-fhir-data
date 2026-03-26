@@ -24,11 +24,9 @@ on:
           - us-east-1
           - us-west-2
         required: true
-
 permissions:
   id-token: write # This is required for requesting the AWS IAM OIDC JWT
   contents: write # This is required for actions/checkout
-
 defaults:
   run:
     shell: bash
