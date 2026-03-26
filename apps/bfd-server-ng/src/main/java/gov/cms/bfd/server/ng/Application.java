@@ -13,8 +13,10 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 
 /** BFD Server startup class. */
 @ServletComponentScan(basePackageClasses = {RestfulServer.class})
@@ -77,5 +79,22 @@ public class Application {
     timedAspect.setMeterTagAnnotationHandler(
         new MeterTagAnnotationHandler(aClass -> valueResolver, aClass -> valueExpressionResolver));
     return timedAspect;
+  }
+
+  @Bean
+  @Primary
+  public AuditLogger auditLogger(
+      Configuration configuration,
+      DynamoDbAuditLogger dynamoLogger,
+      LogStreamAuditLogger logStreamLogger) {
+    return switch (configuration.getAuditLoggerType()) {
+      case DYNAMO_DB -> dynamoLogger;
+      case LOG_STREAM -> logStreamLogger;
+    };
+  }
+
+  @Bean
+  public DynamoDbClient dynamoDbClient(Configuration configuration) {
+    return configuration.getDynamoDbClient();
   }
 }

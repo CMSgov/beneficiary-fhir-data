@@ -1,13 +1,13 @@
 package gov.cms.bfd.server.ng.beneficiary.model;
 
-import java.time.LocalDate;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
 public record PatientMatchAuditRecord(
-    Optional<String> clientIp,
-    Optional<String> clientName,
-    Optional<String> clientId,
-    LocalDate timestamp,
+    String clientIp,
+    String clientName,
+    String clientId,
+    Instant timestamp,
     List<MatchCombinationResult> combinationsEvaluated,
     Optional<FinalDetermination> finalDetermination) {}

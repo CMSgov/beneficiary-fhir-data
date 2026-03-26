@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.ng.beneficiary.model;
 
 import java.util.List;
+import java.util.Map;
 import lombok.Builder;
 
 @Builder
@@ -12,20 +13,20 @@ public record PatientMatch(
     PatientMatchEntry birthDate,
     PatientMatchEntry mbi) {
 
-  public List<List<PatientMatchEntry>> getValidScenarios() {
+  public List<IndexedScenario> getValidScenarios() {
     var scenarios =
-        List.of(
-            // #1
+        Map.of(
+            "01",
             List.of(firstName, lastName, birthDate, addresses),
             // #2 - requires phone
             // #3 - requires email
-            // #4
+            "04",
             List.of(firstName, lastName, birthDate, ssnLastFourDigits),
-            // #5
+            "05",
             List.of(firstName, lastName, birthDate, ssnLastFourDigits),
             // #6 - requires ITIN
             // #7 - requires ITIN
-            // #8
+            "08",
             List.of(firstName, birthDate, mbi)
             // #9 - requires legal ID
             // #10 - requires legal ID
@@ -47,7 +48,10 @@ public record PatientMatch(
             // #26 - requires UUID
             // #27 - requires patient ID
             );
-    return scenarios.stream().filter(this::allFieldsPresent).toList();
+    return scenarios.entrySet().stream()
+        .filter(e -> allFieldsPresent(e.getValue()))
+        .map(e -> new IndexedScenario(e.getKey(), e.getValue()))
+        .toList();
   }
 
   boolean allFieldsPresent(List<PatientMatchEntry> entries) {
