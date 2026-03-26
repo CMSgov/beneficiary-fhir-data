@@ -10,12 +10,15 @@ jobs:
         with:
           java-version: "25"
           distribution: corretto
-      - uses: actions/checkout@v6
+      - name: Checkout Project
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
-      - uses: j178/prek-action@v1
+      - name: Run Prek pre-commit hooks
+        uses: j178/prek-action@v1
         with:
           extra-args: --hook-stage pre-commit --from-ref origin/${{github.base_ref}} --to-ref HEAD
-      - uses: j178/prek-action@v1
+      - name: Run Prek pre-push hooks
+        uses: j178/prek-action@v1
         with:
           extra-args: --hook-stage pre-push --from-ref origin/${{github.base_ref}} --to-ref HEAD
