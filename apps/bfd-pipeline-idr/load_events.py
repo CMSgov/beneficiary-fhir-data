@@ -195,5 +195,23 @@ def get_unreported_jobs(
     return _connect_and_do(load_mode, _do)
 
 
+def update_start_times(
+    load_mode: LoadMode, events: list[IdrJobLoadEvent], start_time: datetime
+) -> None:
+    def _do(curs: Cursor[DictRow]) -> None:
+        update_jobs_query = t"""
+            UPDATE {"idr":i}.{LOAD_EVENTS_TABLE:i}
+            SET {fields(IdrJobLoadEvent).start_time:i}={start_time.astimezone(UTC)}
+            WHERE {fields(IdrJobLoadEvent).id:i} = ANY({[event.id for event in events]})
+            RETURNING *;
+            """
+        logger.info("Updating start times for %d event(s)...", len(events))
+        logger.debug("Query: %s", _clean_query_str(update_jobs_query))
+        updated_rows = curs.execute(update_jobs_query)
+        logger.info("Updated %d event(s) successfully", len(list(updated_rows)))
+
+    _connect_and_do(load_mode, _do)
+
+
 def get_tables_to_load(job_types: Iterable[IdrJobType]) -> set[str]:
     return functools.reduce(set[str].union, (x.tables for x in job_types))
