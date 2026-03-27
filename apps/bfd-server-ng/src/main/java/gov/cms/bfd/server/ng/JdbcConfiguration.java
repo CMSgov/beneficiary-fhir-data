@@ -24,7 +24,7 @@ public class JdbcConfiguration implements JdbcConnectionDetails {
         Strings.isNullOrEmpty(configuration.getDbIdentifier())
             ? String.format(nonsensitiveDb.getClusterIdentifierTemplate(), configuration.getEnv())
             : configuration.getDbIdentifier();
-    useRds = configuration.useRds();
+    useRds = configuration.notLocal();
   }
 
   @Override

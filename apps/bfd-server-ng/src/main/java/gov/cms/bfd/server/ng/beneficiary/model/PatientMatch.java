@@ -12,20 +12,17 @@ public record PatientMatch(
     PatientMatchEntry birthDate,
     PatientMatchEntry mbi) {
 
-  public List<List<PatientMatchEntry>> getValidScenarios() {
+  public List<IndexedScenario> getValidScenarios() {
     var scenarios =
         List.of(
-            // #1
-            List.of(firstName, lastName, birthDate, addresses),
+            new IndexedScenario("01", List.of(firstName, lastName, birthDate, addresses)),
             // #2 - requires phone
             // #3 - requires email
-            // #4
-            List.of(firstName, lastName, birthDate, ssnLastFourDigits),
+            new IndexedScenario("04", List.of(firstName, lastName, birthDate, ssnLastFourDigits)),
             // #5 - same as #4 but fuzzy (not implemented yet)
             // #6 - requires ITIN
             // #7 - requires ITIN
-            // #8
-            List.of(firstName, birthDate, mbi)
+            new IndexedScenario("08", List.of(firstName, birthDate, mbi))
             // #9 - requires legal ID
             // #10 - requires legal ID
             // #11 - requires phone
@@ -46,7 +43,8 @@ public record PatientMatch(
             // #26 - requires UUID
             // #27 - requires patient ID
             );
-    return scenarios.stream().filter(this::allFieldsPresent).toList();
+
+    return scenarios.stream().filter(s -> allFieldsPresent(s.entries())).toList();
   }
 
   boolean allFieldsPresent(List<PatientMatchEntry> entries) {
