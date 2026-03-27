@@ -1,7 +1,6 @@
 package gov.cms.bfd.server.ng.beneficiary.model;
 
 import java.util.List;
-import java.util.Map;
 import lombok.Builder;
 
 /**
