@@ -77,16 +77,30 @@ class PatientMatchIT extends IntegrationTestBase {
             // Scenario 1 - first name, last name, DOB, address
             Optional.of("Joey"),
             Optional.of("Erdapfel"),
-            Optional.of("2024-07-02"),
+            Optional.of("1925-08-16"),
             Optional.of(
                 new Address()
-                    .addLine("3728 Broadway")
+                    .addLine("3728 Broadway Ave J")
                     .setCity("Galveston")
                     .setState("TX")
                     .setPostalCode("77550")),
             Optional.empty(),
             Optional.empty(),
-            false),
+            true),
+        Arguments.of(
+            // Scenario 1 - invalid/should fail
+            Optional.of("Joey"),
+            Optional.of("Erdapfel"),
+            Optional.of("1925-08-16"),
+            Optional.of(
+                new Address()
+                    .addLine("3728 Broadway Ave J")
+                    .setCity("Galveston")
+                    .setState("TX")
+                    .setPostalCode("77550")),
+            Optional.empty(),
+            Optional.empty(),
+            true),
         // Scenario 4 - first name, last name, DOB, SSN last 4
         Arguments.of(
             Optional.of("Joey"),

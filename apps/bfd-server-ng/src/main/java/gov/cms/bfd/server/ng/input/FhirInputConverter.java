@@ -276,11 +276,23 @@ public class FhirInputConverter {
   }
 
   private static Optional<Object> formatAddress(Address address) {
-    var line = address.getLine().stream().findFirst().map(StringType::toString);
-    return line.map(
-        s ->
-            String.format(
-                "%s %s %s %s", s, address.getCity(), address.getState(), address.getPostalCode()));
+    var line = address.getLine().stream().findFirst().map(StringType::toString).orElse("");
+    var fullAddress =
+        Stream.of(line, address.getCity(), address.getState(), address.getPostalCode())
+            .map(FhirInputConverter::toUpperIfPresent)
+            .flatMap(Optional::stream)
+            .collect(Collectors.joining(" "));
+    if (StringUtils.isEmpty(fullAddress)) {
+      return Optional.empty();
+    }
+    return Optional.of(fullAddress);
+  }
+
+  private static Optional<String> toUpperIfPresent(@Nullable String value) {
+    if (StringUtils.isEmpty(value)) {
+      return Optional.empty();
+    }
+    return Optional.of(value.toUpperCase());
   }
 
   private static Optional<String> findIdentifier(Patient patient, String system) {
