@@ -73,32 +73,56 @@ class PatientMatchIT extends IntegrationTestBase {
 
   private static Stream<Arguments> verifyPatientMatch() {
     return Stream.of(
-        //        Arguments.of(
-        //            Optional.of("Joey"),
-        //            Optional.of("Erdapfel"),
-        //            Optional.of("2024-07-02"),
-        //            Optional.of(
-        //                new Address()
-        //                    .addLine("3728 Broadway")
-        //                    .setCity("Galveston")
-        //                    .setState("TX")
-        //                    .setPostalCode("77550")),
-        //            Optional.empty(),
-        //            Optional.empty()),
+        Arguments.of(
+            // Scenario 1 - first name, last name, DOB, address
+            Optional.of("Joey"),
+            Optional.of("Erdapfel"),
+            Optional.of("2024-07-02"),
+            Optional.of(
+                new Address()
+                    .addLine("3728 Broadway")
+                    .setCity("Galveston")
+                    .setState("TX")
+                    .setPostalCode("77550")),
+            Optional.empty(),
+            Optional.empty(),
+            false),
+        // Scenario 4 - first name, last name, DOB, SSN last 4
         Arguments.of(
             Optional.of("Joey"),
             Optional.of("Erdapfel"),
             Optional.of("1925-08-16"),
             Optional.empty(),
             Optional.empty(),
-            Optional.of("8346")),
+            Optional.of("8346"),
+            true),
+        // Scenario 4 - invalid/should fail
+        Arguments.of(
+            Optional.of("Joe"),
+            Optional.of("Erdapfel"),
+            Optional.of("1925-08-16"),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.of("8346"),
+            false),
+        // Scenario 8 - first name, DOB, SSN
         Arguments.of(
             Optional.of("Joey"),
             Optional.empty(),
             Optional.of("1925-08-16"),
             Optional.empty(),
             Optional.of("5I50JT9WX60"),
-            Optional.empty()));
+            Optional.empty(),
+            true),
+        // Scenario 8 - invalid/should fail
+        Arguments.of(
+            Optional.of("Joey"),
+            Optional.empty(),
+            Optional.of("1925-08-17"),
+            Optional.empty(),
+            Optional.of("5I50JT9WX60"),
+            Optional.empty(),
+            false));
   }
 
   @ParameterizedTest
@@ -109,7 +133,8 @@ class PatientMatchIT extends IntegrationTestBase {
       Optional<String> birthDateStr,
       Optional<Address> address,
       Optional<String> mbi,
-      Optional<String> ssnLastFour) {
+      Optional<String> ssnLastFour,
+      boolean shouldMatch) {
     var birthDate =
         birthDateStr.map(
             d -> {
@@ -123,6 +148,6 @@ class PatientMatchIT extends IntegrationTestBase {
 
     var patient = buildRequest(firstName, lastName, birthDate, address, mbi, ssnLastFour);
     var res = searchBundle(patient);
-    assertEquals(2, res.getEntry().size());
+    assertEquals(shouldMatch ? 2 : 1, res.getEntry().size());
   }
 }
