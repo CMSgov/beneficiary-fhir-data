@@ -179,7 +179,7 @@ def get_unreported_jobs(
             x[fields(IdrJobLoadEvent, by_alias=True).job_type] for x in results
         )
         unreported_jobs = set(IdrJobType).difference(reported_jobs)
-        if len(unreported_jobs) >= 0:
+        if len(unreported_jobs) > 0:
             logger.warning(
                 "%d jobs were not reported as having completed in the last %d hour(s)",
                 len(unreported_jobs),
