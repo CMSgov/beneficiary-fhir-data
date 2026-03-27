@@ -65,12 +65,19 @@ _BENE_AUX_TABLES: list[type[IdrBaseModel]] = [
     IdrBeneficiaryLowIncomeSubsidy,
 ]
 _BENE_TABLES: list[type[IdrBaseModel]] = [IdrBeneficiary]
+_LOAD_ALL_TABLES = {"all"}
 
 
 def filter_tables(
     tables: list[type[IdrBaseModel]], tables_to_load: set[str] | None
 ) -> list[type[IdrBaseModel]]:
-    return [t for t in tables if tables_to_load is None or t.table() in tables_to_load]
+    return [
+        t
+        for t in tables
+        if tables_to_load is None
+        or tables_to_load == _LOAD_ALL_TABLES
+        or t.table() in tables_to_load
+    ]
 
 
 def _gen_partitioned_node_inputs(
