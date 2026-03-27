@@ -21,8 +21,7 @@ public record PatientMatch(
             // #3 - requires email
             // #4
             List.of(firstName, lastName, birthDate, ssnLastFourDigits),
-            // #5
-            List.of(firstName, lastName, birthDate, ssnLastFourDigits),
+            // #5 - same as #4 but fuzzy (not implemented yet)
             // #6 - requires ITIN
             // #7 - requires ITIN
             // #8
