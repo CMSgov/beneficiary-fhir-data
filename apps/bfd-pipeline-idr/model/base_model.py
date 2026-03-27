@@ -401,7 +401,9 @@ class IdrBaseModel(BaseModel, ABC):
 
     @classmethod
     def insert_keys(cls) -> list[str]:
-        return [key for key in cls.model_fields if not cls._extract_meta(key, INSERT_EXCLUDE)]
+        return [
+            key for key in cls.model_fields if not cls._extract_meta(key, INSERT_EXCLUDE)
+        ] + list(cls.model_computed_fields)
 
 
 T = TypeVar("T", bound=IdrBaseModel)
