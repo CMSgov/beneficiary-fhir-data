@@ -323,8 +323,8 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
         conn.commit()
 
         # To simulate a new CLMNCH and FISS load, get a known NCH claim and re-insert it with an
-        # updated insert timestamp and ID into the relevant institutional claim staging tables (CLM and
-        # CLM_INSTNL)
+        # updated insert timestamp and ID into the relevant institutional claim staging tables (CLM
+        # and CLM_INSTNL)
         staging_clm_table = sql.Identifier("cms_vdm_view_mdcr_prd", "v2_mdcr_clm")
         cur = conn.execute(
             t"""
