@@ -94,13 +94,13 @@ class PatientMatchIT extends IntegrationTestBase {
             Optional.of("1925-08-16"),
             Optional.of(
                 new Address()
-                    .addLine("3728 Broadway Ave J")
+                    .addLine("3728 Broadway Avenue J")
                     .setCity("Galveston")
                     .setState("TX")
                     .setPostalCode("77550")),
             Optional.empty(),
             Optional.empty(),
-            true),
+            false),
         // Scenario 4 - first name, last name, DOB, SSN last 4
         Arguments.of(
             Optional.of("Joey"),
