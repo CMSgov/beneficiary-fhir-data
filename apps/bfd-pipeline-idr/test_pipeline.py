@@ -17,11 +17,13 @@ from testcontainers.core.config import testcontainers_config  # type: ignore
 from testcontainers.postgres import PostgresContainer  # type: ignore
 
 from load_events import IdrJobLoadEvent, IdrJobType
+from load_partition import LoadType
 from load_synthetic import load_from_csv
 from logger_config import configure_logger
 from model.base_model import LoadMode
 from pipeline import run
 from pydantic_utils import fields
+from settings import LOAD_TYPE
 
 # ryuk throws a 500 or 404 error for some reason
 # seems to have issues with podman https://github.com/testcontainers/testcontainers-python/issues/753
@@ -291,264 +293,265 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
 
     conn.commit()
 
-    # Test incremental loading logic involving 'idr_load_events'
-    # First, pretend that loading ./test_samples1 was the result of loading _all_ possible jobs
-    # by inserting load events with completion times of datetime_now + 1hr for all types
-    idr_jobs_table = sql.Identifier("idr", "idr_load_events")
-    load_1_complete_time = datetime_now + timedelta(hours=1)
-    load_jobs = [
-        IdrJobLoadEvent(
-            id=uuid4(),
-            job_type=job_type,
-            job_message="SUCCESSFUL",
-            event_time=datetime_now,
-            completion_time=load_1_complete_time,
-        ).model_dump(by_alias=True)
-        for job_type in IdrJobType
-    ]
-    for job in load_jobs:
+    # Test incremental loading logic involving 'idr_load_events' if we're testing incremental mode
+    if LOAD_TYPE == LoadType.INCREMENTAL:
+        # First, pretend that loading ./test_samples1 was the result of loading _all_ possible jobs
+        # by inserting load events with completion times of datetime_now + 1hr for all types
+        idr_jobs_table = sql.Identifier("idr", "idr_load_events")
+        load_1_complete_time = datetime_now + timedelta(hours=1)
+        load_jobs = [
+            IdrJobLoadEvent(
+                id=uuid4(),
+                job_type=job_type,
+                job_message="SUCCESSFUL",
+                event_time=datetime_now,
+                completion_time=load_1_complete_time,
+            ).model_dump(by_alias=True)
+            for job_type in IdrJobType
+        ]
+        for job in load_jobs:
+            conn.execute(
+                t"""
+                INSERT INTO {idr_jobs_table:i} (
+                    {sql.SQL(", ").join(sql.Identifier(k) for k in job):q}
+                )
+                VALUES (
+                    {sql.SQL(", ").join(job.values()):q}
+                )
+                """
+            )
+        conn.commit()
+
+        # To simulate a new CLMNCH and FISS load, get a known NCH claim and re-insert it with an
+        # updated insert timestamp and ID into the relevant institutional claim staging tables (CLM and
+        # CLM_INSTNL)
+        staging_clm_table = sql.Identifier("cms_vdm_view_mdcr_prd", "v2_mdcr_clm")
+        cur = conn.execute(
+            t"""
+            SELECT * from {staging_clm_table:i}
+            WHERE {"clm_uniq_id":i} = {"0113370100080"}
+            """
+        )
+        conn.commit()
+        assert cur.rowcount == 1
+        nch_clm_row = cur.fetchmany(1)[0]
+        nch_clm_ts = load_1_complete_time + timedelta(hours=1)
+        nch_clm_row["clm_uniq_id"] = (
+            "9999999999998"  # This clm_uniq_id does not exist in ./test_samples1
+        )
+        nch_clm_row["clm_num_sk"] = 2
+        nch_clm_row["idr_insrt_ts"] = nch_clm_ts
+        nch_clm_row["idr_updt_ts"] = nch_clm_ts
         conn.execute(
             t"""
-            INSERT INTO {idr_jobs_table:i} (
-                {sql.SQL(", ").join(sql.Identifier(k) for k in job):q}
+            INSERT INTO {staging_clm_table:i} (
+                {sql.SQL(", ").join(sql.Identifier(k) for k in nch_clm_row):q}
             )
             VALUES (
-                {sql.SQL(", ").join(job.values()):q}
+                {sql.SQL(", ").join(nch_clm_row.values()):q}
             )
             """
         )
-    conn.commit()
-
-    # To simulate a new CLMNCH and FISS load, get a known NCH claim and re-insert it with an
-    # updated insert timestamp and ID into the relevant institutional claim staging tables (CLM and
-    # CLM_INSTNL)
-    staging_clm_table = sql.Identifier("cms_vdm_view_mdcr_prd", "v2_mdcr_clm")
-    cur = conn.execute(
-        t"""
-        SELECT * from {staging_clm_table:i}
-        WHERE {"clm_uniq_id":i} = {"0113370100080"}
-        """
-    )
-    conn.commit()
-    assert cur.rowcount == 1
-    nch_clm_row = cur.fetchmany(1)[0]
-    nch_clm_ts = load_1_complete_time + timedelta(hours=1)
-    nch_clm_row["clm_uniq_id"] = (
-        "9999999999998"  # This clm_uniq_id does not exist in ./test_samples1
-    )
-    nch_clm_row["clm_num_sk"] = 2
-    nch_clm_row["idr_insrt_ts"] = nch_clm_ts
-    nch_clm_row["idr_updt_ts"] = nch_clm_ts
-    conn.execute(
-        t"""
-        INSERT INTO {staging_clm_table:i} (
-            {sql.SQL(", ").join(sql.Identifier(k) for k in nch_clm_row):q}
+        conn.commit()
+        staging_clm_instnl_table = sql.Identifier("cms_vdm_view_mdcr_prd", "v2_mdcr_clm_instnl")
+        cur = conn.execute(
+            t"""
+            SELECT * from {staging_clm_instnl_table:i}
+            WHERE {"clm_dt_sgntr_sk":i} = {"876776550714"}
+            """
         )
-        VALUES (
-            {sql.SQL(", ").join(nch_clm_row.values()):q}
+        conn.commit()
+        assert cur.rowcount == 1
+        nch_clm_instnl_row = cur.fetchmany(1)[0]
+        nch_clm_instnl_row["clm_num_sk"] = 2
+        nch_clm_instnl_row["idr_insrt_ts"] = nch_clm_ts
+        nch_clm_instnl_row["idr_updt_ts"] = nch_clm_ts
+        cur = conn.execute(
+            t"""
+            INSERT INTO {staging_clm_instnl_table:i} (
+                {sql.SQL(", ").join(sql.Identifier(k) for k in nch_clm_instnl_row):q}
+            )
+            VALUES (
+                {sql.SQL(", ").join(nch_clm_instnl_row.values()):q}
+            )
+            """
         )
-        """
-    )
-    conn.commit()
-    staging_clm_instnl_table = sql.Identifier("cms_vdm_view_mdcr_prd", "v2_mdcr_clm_instnl")
-    cur = conn.execute(
-        t"""
-        SELECT * from {staging_clm_instnl_table:i}
-        WHERE {"clm_dt_sgntr_sk":i} = {"876776550714"}
-        """
-    )
-    conn.commit()
-    assert cur.rowcount == 1
-    nch_clm_instnl_row = cur.fetchmany(1)[0]
-    nch_clm_instnl_row["clm_num_sk"] = 2
-    nch_clm_instnl_row["idr_insrt_ts"] = nch_clm_ts
-    nch_clm_instnl_row["idr_updt_ts"] = nch_clm_ts
-    cur = conn.execute(
-        t"""
-        INSERT INTO {staging_clm_instnl_table:i} (
-            {sql.SQL(", ").join(sql.Identifier(k) for k in nch_clm_instnl_row):q}
+        conn.commit()
+
+        # Do it again for a known shared-systems claim
+        cur = conn.execute(
+            t"""
+            SELECT * from {staging_clm_table:i}
+            WHERE {"clm_uniq_id":i} = {"849348853948"}
+            """
         )
-        VALUES (
-            {sql.SQL(", ").join(nch_clm_instnl_row.values()):q}
+        conn.commit()
+        assert cur.rowcount == 1
+        ss_clm_row = cur.fetchmany(1)[0]
+        ss_clm_ts = load_1_complete_time + timedelta(hours=1)
+        ss_clm_row["clm_uniq_id"] = (
+            "9999999999999"  # This clm_uniq_id does not exist in ./test_samples1
         )
-        """
-    )
-    conn.commit()
-
-    # Do it again for a known shared-systems claim
-    cur = conn.execute(
-        t"""
-        SELECT * from {staging_clm_table:i}
-        WHERE {"clm_uniq_id":i} = {"849348853948"}
-        """
-    )
-    conn.commit()
-    assert cur.rowcount == 1
-    ss_clm_row = cur.fetchmany(1)[0]
-    ss_clm_ts = load_1_complete_time + timedelta(hours=1)
-    ss_clm_row["clm_uniq_id"] = (
-        "9999999999999"  # This clm_uniq_id does not exist in ./test_samples1
-    )
-    ss_clm_row["clm_num_sk"] = 2
-    ss_clm_row["idr_insrt_ts"] = ss_clm_ts
-    ss_clm_row["idr_updt_ts"] = ss_clm_ts
-    conn.execute(
-        t"""
-        INSERT INTO {staging_clm_table:i} (
-            {sql.SQL(", ").join(sql.Identifier(k) for k in ss_clm_row):q}
+        ss_clm_row["clm_num_sk"] = 2
+        ss_clm_row["idr_insrt_ts"] = ss_clm_ts
+        ss_clm_row["idr_updt_ts"] = ss_clm_ts
+        conn.execute(
+            t"""
+            INSERT INTO {staging_clm_table:i} (
+                {sql.SQL(", ").join(sql.Identifier(k) for k in ss_clm_row):q}
+            )
+            VALUES (
+                {sql.SQL(", ").join(ss_clm_row.values()):q}
+            )
+            """
         )
-        VALUES (
-            {sql.SQL(", ").join(ss_clm_row.values()):q}
+        conn.commit()
+        cur = conn.execute(
+            t"""
+            SELECT * from {staging_clm_instnl_table:i}
+            WHERE {"clm_dt_sgntr_sk":i} = {"246326234188"}
+            """
         )
-        """
-    )
-    conn.commit()
-    cur = conn.execute(
-        t"""
-        SELECT * from {staging_clm_instnl_table:i}
-        WHERE {"clm_dt_sgntr_sk":i} = {"246326234188"}
-        """
-    )
-    conn.commit()
-    assert cur.rowcount == 1
-    ss_clm_instnl_row = cur.fetchmany(1)[0]
-    ss_clm_instnl_row["clm_num_sk"] = 2
-    ss_clm_instnl_row["idr_insrt_ts"] = ss_clm_ts
-    ss_clm_instnl_row["idr_updt_ts"] = ss_clm_ts
-    cur = conn.execute(
-        t"""
-        INSERT INTO {staging_clm_instnl_table:i} (
-            {sql.SQL(", ").join(sql.Identifier(k) for k in ss_clm_instnl_row):q}
+        conn.commit()
+        assert cur.rowcount == 1
+        ss_clm_instnl_row = cur.fetchmany(1)[0]
+        ss_clm_instnl_row["clm_num_sk"] = 2
+        ss_clm_instnl_row["idr_insrt_ts"] = ss_clm_ts
+        ss_clm_instnl_row["idr_updt_ts"] = ss_clm_ts
+        cur = conn.execute(
+            t"""
+            INSERT INTO {staging_clm_instnl_table:i} (
+                {sql.SQL(", ").join(sql.Identifier(k) for k in ss_clm_instnl_row):q}
+            )
+            VALUES (
+                {sql.SQL(", ").join(ss_clm_instnl_row.values()):q}
+            )
+            """
         )
-        VALUES (
-            {sql.SQL(", ").join(ss_clm_instnl_row.values()):q}
+        conn.commit()
+
+        # Simulate running the pipeline in the middle of a "ongoing load" (NCH + SS claims being
+        # added)
+        run(LoadMode.SYNTHETIC)
+
+        # Check to make sure the NCH claim was not loaded as no corresponding event should exist
+        # in idr_load_events nor has it been 24 hours since the last load of NCH data
+        nch_table = sql.Identifier("idr", "claim_institutional_nch")
+        cur = conn.execute(
+            t"""
+            SELECT * FROM {nch_table:i}
+            WHERE {"clm_uniq_id":i} = {nch_clm_row["clm_uniq_id"]}
+            """
         )
-        """
-    )
-    conn.commit()
+        conn.commit()
+        assert cur.rowcount == 0
 
-    # Simulate running the pipeline in the middle of a "ongoing load" (NCH + SS claims being
-    # added)
-    run(LoadMode.SYNTHETIC)
-
-    # Check to make sure the NCH claim was not loaded as no corresponding event should exist
-    # in idr_load_events nor has it been 24 hours since the last load of NCH data
-    nch_table = sql.Identifier("idr", "claim_institutional_nch")
-    cur = conn.execute(
-        t"""
-        SELECT * FROM {nch_table:i}
-        WHERE {"clm_uniq_id":i} = {nch_clm_row["clm_uniq_id"]}
-        """
-    )
-    conn.commit()
-    assert cur.rowcount == 0
-
-    # _Now_ insert an event into idr_load_events indicating that the NCH load job was
-    # completed
-    nch_load_job = IdrJobLoadEvent(
-        id=uuid4(),
-        job_type=IdrJobType.NCH,
-        job_message="SUCCESSFUL",
-        event_time=nch_clm_ts + timedelta(hours=1),
-    )
-    nch_job_dict = nch_load_job.model_dump(by_alias=True)
-    conn.execute(
-        t"""
-        INSERT INTO {idr_jobs_table:i} (
-            {sql.SQL(", ").join(sql.Identifier(k) for k in nch_job_dict):q}
+        # _Now_ insert an event into idr_load_events indicating that the NCH load job was
+        # completed
+        nch_load_job = IdrJobLoadEvent(
+            id=uuid4(),
+            job_type=IdrJobType.NCH,
+            job_message="SUCCESSFUL",
+            event_time=nch_clm_ts + timedelta(hours=1),
         )
-        VALUES (
-            {sql.SQL(", ").join(nch_job_dict.values()):q}
+        nch_job_dict = nch_load_job.model_dump(by_alias=True)
+        conn.execute(
+            t"""
+            INSERT INTO {idr_jobs_table:i} (
+                {sql.SQL(", ").join(sql.Identifier(k) for k in nch_job_dict):q}
+            )
+            VALUES (
+                {sql.SQL(", ").join(nch_job_dict.values()):q}
+            )
+            """
         )
-        """
-    )
-    conn.commit()
+        conn.commit()
 
-    # Run the Pipeline with the NCH event having been inserted indicating that there is NCH
-    # data to load
-    run(LoadMode.SYNTHETIC)
+        # Run the Pipeline with the NCH event having been inserted indicating that there is NCH
+        # data to load
+        run(LoadMode.SYNTHETIC)
 
-    # Check for the NCH claim in the v3 idr schema
-    cur = conn.execute(
-        t"""
-        SELECT * FROM {nch_table:i}
-        WHERE {"clm_uniq_id":i} = {nch_clm_row["clm_uniq_id"]}
-        """
-    )
-    conn.commit()
-    assert cur.rowcount == 1
-    rows = cur.fetchmany(1)
-    assert str(rows[0]["clm_uniq_id"]) == str(nch_clm_row["clm_uniq_id"])
-
-    # Confirm the NCH load event has a completion time
-    cur = conn.execute(
-        t"""
-        SELECT * FROM {idr_jobs_table:i}
-        WHERE {fields(IdrJobLoadEvent).id:i} = {nch_load_job.id}
-        """
-    )
-    conn.commit()
-    assert cur.rowcount == 1
-    updated_nch_job = IdrJobLoadEvent.model_validate(cur.fetchmany(1)[0], by_alias=True)
-    assert updated_nch_job.completion_time
-    assert updated_nch_job.completion_time >= nch_clm_ts
-
-    # Check that the SS claim was _not_ loaded since its load job has not "yet" completed
-    ss_table = sql.Identifier("idr", "claim_institutional_ss")
-    cur = conn.execute(
-        t"""
-        SELECT * FROM {ss_table:i}
-        WHERE {"clm_uniq_id":i} = {ss_clm_row["clm_uniq_id"]}
-        """
-    )
-    conn.commit()
-    assert cur.rowcount == 0
-
-    # _Now_ insert an event into idr_load_events indicating that the FISS load job was
-    # completed
-    ss_load_job = IdrJobLoadEvent(
-        id=uuid4(),
-        job_type=IdrJobType.FISS,
-        job_message="SUCCESSFUL",
-        event_time=ss_clm_ts + timedelta(hours=1.5),
-    )
-    ss_job_dict = ss_load_job.model_dump(by_alias=True)
-    conn.execute(
-        t"""
-        INSERT INTO {idr_jobs_table:i} (
-            {sql.SQL(", ").join(sql.Identifier(k) for k in ss_job_dict):q}
+        # Check for the NCH claim in the v3 idr schema
+        cur = conn.execute(
+            t"""
+            SELECT * FROM {nch_table:i}
+            WHERE {"clm_uniq_id":i} = {nch_clm_row["clm_uniq_id"]}
+            """
         )
-        VALUES (
-            {sql.SQL(", ").join(ss_job_dict.values()):q}
+        conn.commit()
+        assert cur.rowcount == 1
+        rows = cur.fetchmany(1)
+        assert str(rows[0]["clm_uniq_id"]) == str(nch_clm_row["clm_uniq_id"])
+
+        # Confirm the NCH load event has a completion time
+        cur = conn.execute(
+            t"""
+            SELECT * FROM {idr_jobs_table:i}
+            WHERE {fields(IdrJobLoadEvent).id:i} = {nch_load_job.id}
+            """
         )
-        """
-    )
-    conn.commit()
+        conn.commit()
+        assert cur.rowcount == 1
+        updated_nch_job = IdrJobLoadEvent.model_validate(cur.fetchmany(1)[0], by_alias=True)
+        assert updated_nch_job.completion_time
+        assert updated_nch_job.completion_time >= nch_clm_ts
 
-    # Run one last time now that the FISS "job" has completed and the SS claim can be loaded
-    run(LoadMode.SYNTHETIC)
+        # Check that the SS claim was _not_ loaded since its load job has not "yet" completed
+        ss_table = sql.Identifier("idr", "claim_institutional_ss")
+        cur = conn.execute(
+            t"""
+            SELECT * FROM {ss_table:i}
+            WHERE {"clm_uniq_id":i} = {ss_clm_row["clm_uniq_id"]}
+            """
+        )
+        conn.commit()
+        assert cur.rowcount == 0
 
-    # Check for the SS claim in the v3 idr schema
-    cur = conn.execute(
-        t"""
-        SELECT * FROM {ss_table:i}
-        WHERE {"clm_uniq_id":i} = {ss_clm_row["clm_uniq_id"]}
-        """
-    )
-    conn.commit()
-    assert cur.rowcount == 1
-    rows = cur.fetchmany(1)
-    assert str(rows[0]["clm_uniq_id"]) == str(ss_clm_row["clm_uniq_id"])
+        # _Now_ insert an event into idr_load_events indicating that the FISS load job was
+        # completed
+        ss_load_job = IdrJobLoadEvent(
+            id=uuid4(),
+            job_type=IdrJobType.FISS,
+            job_message="SUCCESSFUL",
+            event_time=ss_clm_ts + timedelta(hours=1.5),
+        )
+        ss_job_dict = ss_load_job.model_dump(by_alias=True)
+        conn.execute(
+            t"""
+            INSERT INTO {idr_jobs_table:i} (
+                {sql.SQL(", ").join(sql.Identifier(k) for k in ss_job_dict):q}
+            )
+            VALUES (
+                {sql.SQL(", ").join(ss_job_dict.values()):q}
+            )
+            """
+        )
+        conn.commit()
 
-    # Confirm the SS load event has a completion time
-    cur = conn.execute(
-        t"""
-        SELECT * FROM {idr_jobs_table:i}
-        WHERE {fields(IdrJobLoadEvent).id:i} = {ss_load_job.id}
-        """
-    )
-    conn.commit()
-    assert cur.rowcount == 1
-    updated_ss_job = IdrJobLoadEvent.model_validate(cur.fetchmany(1)[0], by_alias=True)
-    assert updated_ss_job.completion_time
-    assert updated_ss_job.completion_time >= ss_clm_ts
+        # Run one last time now that the FISS "job" has completed and the SS claim can be loaded
+        run(LoadMode.SYNTHETIC)
+
+        # Check for the SS claim in the v3 idr schema
+        cur = conn.execute(
+            t"""
+            SELECT * FROM {ss_table:i}
+            WHERE {"clm_uniq_id":i} = {ss_clm_row["clm_uniq_id"]}
+            """
+        )
+        conn.commit()
+        assert cur.rowcount == 1
+        rows = cur.fetchmany(1)
+        assert str(rows[0]["clm_uniq_id"]) == str(ss_clm_row["clm_uniq_id"])
+
+        # Confirm the SS load event has a completion time
+        cur = conn.execute(
+            t"""
+            SELECT * FROM {idr_jobs_table:i}
+            WHERE {fields(IdrJobLoadEvent).id:i} = {ss_load_job.id}
+            """
+        )
+        conn.commit()
+        assert cur.rowcount == 1
+        updated_ss_job = IdrJobLoadEvent.model_validate(cur.fetchmany(1)[0], by_alias=True)
+        assert updated_ss_job.completion_time
+        assert updated_ss_job.completion_time >= ss_clm_ts
