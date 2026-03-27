@@ -18,8 +18,8 @@ import lombok.Getter;
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
 public final class Codebook {
-  /** The short identifier for this {@link Codebook}, for use in debugging. */
-  @XmlAttribute private final String id;
+    /** The short identifier for this {@link Codebook}, for use in debugging. */
+   @XmlAttribute private final String id;
 
   /** The descriptive English name for this {@link Codebook}. */
   @XmlAttribute private final String name;
@@ -31,8 +31,8 @@ public final class Codebook {
   @XmlAttribute private final String version;
 
   /** The mutable {@link List} of {@link Variable}s in the {@link Codebook}. */
-  @XmlElement(name = "variable")
-  private final List<Variable> variables;
+       @XmlElement(name = "variable")
+     private final List<Variable> variables;
 
   /**
    * Constructs a new {@link Codebook}.
@@ -42,7 +42,7 @@ public final class Codebook {
    */
   public Codebook(SupportedCodebook codebookSource) {
     this.id = codebookSource.name();
-    this.name = codebookSource.getDisplayName();
+       this.name = codebookSource.getDisplayName();
     this.version = codebookSource.getVersion();
     this.variables = new ArrayList<>();
   }

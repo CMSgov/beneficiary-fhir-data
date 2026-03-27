@@ -58,13 +58,13 @@ class AdjudicatedGeneratorUtil:
 
         clm_type_cd = (
             int(clm[f.CLM_TYPE_CD])
-            if clm.kv.get(f.CLM_TYPE_CD)
+               if clm.kv.get(f.CLM_TYPE_CD)
             else random.choice([1, 2, 3, 4, 10, 20, 30, 40, 50, 60, 71, 72, 81, 82])
         )
         clm[f.CLM_TYPE_CD] = clm_type_cd
         clm_src_id = 20000
         clm[f.CLM_SRC_ID] = clm_src_id
-        clm[f.META_SRC_SK] = 7
+      clm[f.META_SRC_SK] = 7
         clm[f.CLM_FROM_DT] = random_date(min_date, max_date)
         clm[f.CLM_THRU_DT] = gen_thru_dt(clm[f.CLM_FROM_DT])
 
@@ -78,7 +78,7 @@ class AdjudicatedGeneratorUtil:
                 field=f.CLM_ORIG_CNTL_NUM, parts=[(string.digits, 14), (string.ascii_uppercase, 3)]
             )
             clm[f.CLM_RLT_COND_SGNTR_SK] = "-1"
-            clm[f.META_SRC_SK] = 1
+               clm[f.META_SRC_SK] = 1
 
         if clm_type_cd in (20, 30, 40, 60, 61, 62, 63, 71, 72):
             clm[f.CLM_BLOOD_PT_FRNSH_QTY] = random.randint(0, 20)
