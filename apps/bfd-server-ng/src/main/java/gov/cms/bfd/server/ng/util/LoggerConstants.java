@@ -26,18 +26,21 @@ public class LoggerConstants {
   /** Name of message for logging patient match results. */
   public static final String PATIENT_MATCH_REQUESTED = "Patient Match Requested";
 
-  /** Name of the Client IP key from $IDI-MATCH calls to BFD for logging. */
+  /** Name of the client IP key from $IDI-MATCH calls to BFD for logging. */
   public static final String CLIENT_IP_KEY = "clientIp";
 
+  /** Name of the client IP header. */
   public static final String CLIENT_IP_HEADER = "X-CLIENT-IP";
 
-  /** Name of the Client Name key from $IDI-MATCH calls to BFD for logging. */
+  /** Name of the client Name key from $IDI-MATCH calls to BFD for logging. */
   public static final String CLIENT_NAME_KEY = "clientName";
 
+  /** Name of the client name header. */
   public static final String CLIENT_NAME_HEADER = "X-CLIENT-NAME";
 
-  /** Name of the Client ID key from $IDI-MATCH calls to BFD for logging. */
+  /** Name of the client ID key from $IDI-MATCH calls to BFD for logging. */
   public static final String CLIENT_ID_KEY = "clientId";
 
+  /** Name of the client ID header. */
   public static final String CLIENT_ID_HEADER = "X-CLIENT-ID";
 }

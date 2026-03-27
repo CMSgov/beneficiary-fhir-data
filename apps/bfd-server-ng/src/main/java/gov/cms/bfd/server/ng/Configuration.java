@@ -1,7 +1,11 @@
 package gov.cms.bfd.server.ng;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
+import gov.cms.bfd.server.ng.log.AuditLogger;
+import gov.cms.bfd.server.ng.log.DynamoDbAuditLogger;
+import gov.cms.bfd.server.ng.log.LogStreamAuditLogger;
 import gov.cms.bfd.sharedutils.config.AwsClientConfig;
 import gov.cms.bfd.sharedutils.database.AwsWrapperDataSourceFactory;
 import gov.cms.bfd.sharedutils.database.DataSourceFactory;
@@ -94,19 +98,52 @@ public class Configuration implements Serializable {
     }
   }
 
+  /**
+   * Creates a new {@link LogStreamAuditLogger}. If {@link AuditLoggerType} is DYNAMO_DB both
+   * loggers will be used.
+   *
+   * @param objectMapper used for serializing patient audit records
+   * @return audit logger
+   */
+  public AuditLogger getAuditLogger(ObjectMapper objectMapper) {
+    var logStreamLogger = new LogStreamAuditLogger(objectMapper);
+    if (getAuditLoggerType() == AuditLoggerType.DYNAMO_DB) {
+      var dynamoLogger = new DynamoDbAuditLogger(getDynamoDbClient(), objectMapper);
+
+      return auditRecord -> {
+        logStreamLogger.log(auditRecord);
+        dynamoLogger.log(auditRecord);
+      };
+    }
+    return logStreamLogger;
+  }
+
   boolean notLocal() {
     return !env.equalsIgnoreCase(BFD_ENV_LOCAL);
   }
 
+  /** Represents possible types of audit logging. */
   public enum AuditLoggerType {
+    /** Use DYNAMO_DB for audit logging. */
     DYNAMO_DB,
+    /** Use standard log stream for audit logging. */
     LOG_STREAM
   }
 
+  /**
+   * Returns the {@link AuditLoggerType} to use based on the current environment.
+   *
+   * @return the audit logger type
+   */
   public AuditLoggerType getAuditLoggerType() {
     return notLocal() ? AuditLoggerType.DYNAMO_DB : AuditLoggerType.LOG_STREAM;
   }
 
+  /**
+   * Creates a new {@link DynamoDbClient}.
+   *
+   * @return a configured {@link DynamoDbClient} instance
+   */
   public DynamoDbClient getDynamoDbClient() {
     var region = regionProvider.getRegion();
 
