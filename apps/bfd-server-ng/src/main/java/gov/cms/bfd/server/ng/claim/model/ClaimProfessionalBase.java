@@ -5,9 +5,7 @@ import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.MappedSuperclass;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
@@ -68,29 +66,41 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
   public ExplanationOfBenefit toFhir(ClaimSecurityStatus securityStatus) {
     var eob = super.toFhir(securityStatus);
     var diagnosisSequenceGenerator = new SequenceGenerator();
+    var diagnosisSequenceMap = buildDiagnosisSequences(eob, diagnosisSequenceGenerator);
 
-    getItems().forEach(item -> addClaimItemToEob(eob, item, diagnosisSequenceGenerator));
-
+    getItems().forEach(item -> addClaimItemToEob(eob, item, diagnosisSequenceMap));
     addProviders(eob);
     addAllSupportingInfo(eob);
     addCareTeam(eob);
-
     getAdjudicationCharge().toFhirTotal().forEach(eob::addTotal);
     getAdjudicationCharge().toFhirAdjudication().forEach(eob::addAdjudication);
     eob.setPayment(getClaimPaymentAmount().toFhir());
     addSubclassAdjudication(eob);
     applyOutcomeOverride(eob);
-
     addInsurance(eob);
 
     return sortedEob(eob);
   }
 
   private void addClaimItemToEob(
-      ExplanationOfBenefit eob, ClaimItemBase item, SequenceGenerator diagnosisSequenceGenerator) {
+      ExplanationOfBenefit eob,
+      ClaimItemBase item,
+      Map<String, List<Integer>> diagnosisSequenceMap) {
 
     var claimLine = item.getClaimLine().toFhirItemComponent();
     claimLine.ifPresent(eob::addItem);
+
+    // populates diagnosisSequence only if CLM_LINE_DGNS_CD is present in D-type codes
+    claimLine.ifPresent(
+        line -> {
+          var hasLineDiagnosis = item.getClaimLine().getClaimLineDiagnosisCode().isPresent();
+          if (hasLineDiagnosis) {
+            item.getProcedure()
+                .flatMap(ClaimProcedureBase::getDiagnosisKey)
+                .map(diagnosisSequenceMap::get)
+                .ifPresent(sequences -> sequences.forEach(line::addDiagnosisSequence));
+          }
+        });
 
     item.getClaimLine()
         .toFhirSupportingInfo(supportingInfoFactory)
@@ -106,12 +116,6 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
             provider ->
                 item.getClaimLine().getClaimLineNumber().flatMap(provider::toFhirCareTeamComponent))
         .ifPresent(eob::addCareTeam);
-
-    item.getProcedure()
-        .flatMap(
-            procedure ->
-                procedure.toFhirDiagnosis(diagnosisSequenceGenerator, ClaimContext.PROFESSIONAL))
-        .ifPresent(eob::addDiagnosis);
 
     // Procedure is present on SS items but not on NCH items; the item exposes it as Optional.
     item.getProcedure().flatMap(ClaimProcedureBase::toFhirProcedure).ifPresent(eob::addProcedure);
@@ -163,5 +167,30 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
   @Override
   public Optional<Integer> getDrgCode() {
     return Optional.empty();
+  }
+
+  private Map<String, List<Integer>> buildDiagnosisSequences(
+      ExplanationOfBenefit eob, SequenceGenerator sequenceGenerator) {
+    var diagnosisSequenceMap = new HashMap<String, List<Integer>>();
+
+    for (var item : getItems()) {
+      item.getProcedure()
+          .ifPresent(
+              procedure ->
+                  procedure
+                      .toFhirDiagnosis(sequenceGenerator)
+                      .ifPresent(
+                          diagnosisComponent -> {
+                            eob.addDiagnosis(diagnosisComponent);
+                            procedure
+                                .getDiagnosisKey()
+                                .ifPresent(
+                                    key ->
+                                        diagnosisSequenceMap
+                                            .computeIfAbsent(key, _ -> new ArrayList<>())
+                                            .add(diagnosisComponent.getSequence()));
+                          }));
+    }
+    return diagnosisSequenceMap;
   }
 }

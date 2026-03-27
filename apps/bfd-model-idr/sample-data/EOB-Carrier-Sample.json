@@ -142,6 +142,7 @@
     ],
     "lineItemComponents": [
         {
+            "CLM_LINE_DGNS_CD": "M48.062",
             "diagnosisRelatedLine": "1",
             "CLM_RNDRG_PRVDR_TYPE_CD": "5",
             "CARR_LINE_PRVDR_TYPE_CD": "5",

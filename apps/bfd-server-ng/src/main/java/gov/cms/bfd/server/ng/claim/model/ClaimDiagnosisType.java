@@ -11,22 +11,21 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum ClaimDiagnosisType {
   /** Principal diagnosis. */
-  PRINCIPAL("P", "principal", SystemUrls.HL7_DIAGNOSIS_TYPE, 1),
+  PRINCIPAL("P", "principal", SystemUrls.HL7_DIAGNOSIS_TYPE),
   /** Admitting diagnosis. */
-  ADMITTING("A", "admitting", SystemUrls.HL7_DIAGNOSIS_TYPE, 1),
+  ADMITTING("A", "admitting", SystemUrls.HL7_DIAGNOSIS_TYPE),
   /** First diagnosis. */
-  FIRST("1", "externalcauseofinjury", SystemUrls.CARIN_CODE_SYSTEM_DIAGNOSIS_TYPE, 1),
+  FIRST("1", "externalcauseofinjury", SystemUrls.CARIN_CODE_SYSTEM_DIAGNOSIS_TYPE),
   /** Present on admission. */
-  PRESENT_ON_ADMISSION("D", "other", SystemUrls.CARIN_CODE_SYSTEM_DIAGNOSIS_TYPE, 2),
+  PRESENT_ON_ADMISSION("D", "other", SystemUrls.CARIN_CODE_SYSTEM_DIAGNOSIS_TYPE),
   /** E code. */
-  DIAGNOSIS_E_CODE("E", "externalcauseofinjury", SystemUrls.CARIN_CODE_SYSTEM_DIAGNOSIS_TYPE, 1),
+  DIAGNOSIS_E_CODE("E", "externalcauseofinjury", SystemUrls.CARIN_CODE_SYSTEM_DIAGNOSIS_TYPE),
   /** R code. */
-  DIAGNOSIS_R_CODE("R", "patientreasonforvisit", SystemUrls.CARIN_CODE_SYSTEM_DIAGNOSIS_TYPE, 1);
+  DIAGNOSIS_R_CODE("R", "patientreasonforvisit", SystemUrls.CARIN_CODE_SYSTEM_DIAGNOSIS_TYPE);
 
   private final String idrCode;
   private final String fhirCode;
   private final String system;
-  private final int priority;
 
   /**
    * Converts from a database code.
@@ -36,32 +35,5 @@ public enum ClaimDiagnosisType {
    */
   public static Optional<ClaimDiagnosisType> tryFromIdrCode(String idrCode) {
     return Arrays.stream(values()).filter(v -> v.idrCode.equals(idrCode)).findFirst();
-  }
-
-  /**
-   * Returns FHIR code based on claim context. Professional context overrides only one case (idrCode
-   * "D").
-   *
-   * @param claimContext context enum
-   * @return override value for professional PRESENT_ON_ADMISSION value
-   */
-  public String getFhirCode(ClaimContext claimContext) {
-    if (claimContext == ClaimContext.PROFESSIONAL && this == PRESENT_ON_ADMISSION) {
-      return "secondary"; // override
-    }
-    return fhirCode;
-  }
-
-  /**
-   * Returns the priority of the diagnosis type.
-   *
-   * @param claimContext context
-   * @return priority
-   */
-  public int getPriority(ClaimContext claimContext) {
-    if (getFhirCode(claimContext).equals("secondary")) {
-      return 2;
-    }
-    return priority;
   }
 }

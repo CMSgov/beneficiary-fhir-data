@@ -1,7 +1,7 @@
 {
   "resourceType" : "ExplanationOfBenefit",
   "meta" : {
-    "lastUpdated" : "2026-03-18T20:18:40.916877Z",
+    "lastUpdated" : "2026-03-20T15:05:57.779742Z",
     "source" : "NCH",
     "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Professional-NonClinician|2.1.0"],
     "tag" : [{
@@ -897,6 +897,7 @@
     }],
     "sequence" : 1,
     "careTeamSequence" : [1],
+    "diagnosisSequence" : [2],
     "informationSequence" : [29],
     "revenue" : {
       "coding" : [{

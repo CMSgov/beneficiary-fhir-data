@@ -163,7 +163,6 @@
     ],
     "lineItemComponents": [
         {
-            "CLM_LINE_DGNS_CD": "E78.00",
             "diagnosisRelatedLine": "5",
             "CLM_LINE_NUM": "1",
             "CLM_LINE_HCPCS_CD": "99213",

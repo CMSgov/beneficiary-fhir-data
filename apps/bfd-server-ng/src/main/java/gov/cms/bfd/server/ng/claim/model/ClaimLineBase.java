@@ -16,4 +16,6 @@ interface ClaimLineBase {
   Optional<RenderingCareTeamLine> getClaimLineRenderingProvider();
 
   Optional<Integer> getClaimLineNumber();
+
+  Optional<String> getClaimLineDiagnosisCode();
 }

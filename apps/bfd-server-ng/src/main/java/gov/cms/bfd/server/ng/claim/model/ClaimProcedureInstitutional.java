@@ -66,24 +66,33 @@ public class ClaimProcedureInstitutional extends ClaimProcedureBase {
 
   @Override
   public Optional<ExplanationOfBenefit.DiagnosisComponent> toFhirDiagnosis(
-      SequenceGenerator sequenceGenerator, ClaimContext claimContext) {
-    var diagnosis = super.toFhirDiagnosis(sequenceGenerator, claimContext);
+      SequenceGenerator sequenceGenerator) {
+    return getDiagnosisType()
+        .flatMap(
+            type ->
+                buildBaseDiagnosis(sequenceGenerator, type.getFhirCode(), type.getSystem())
+                    .map(diagnosisComponent -> applyPoaIfPresent(type, diagnosisComponent)));
+  }
 
-    diagnosis.ifPresent(
-        diagnosisComponent ->
-            this.claimPoaIndicator.ifPresent(
-                poaCode -> {
-                  var onAdmissionConcept = new CodeableConcept();
-                  poaCode
-                      .chars()
-                      .forEach(
-                          c ->
-                              onAdmissionConcept
-                                  .addCoding()
-                                  .setSystem(SystemUrls.POA_CODING)
-                                  .setCode(Character.toString(c)));
-                  diagnosisComponent.setOnAdmission(onAdmissionConcept);
-                }));
+  private ExplanationOfBenefit.DiagnosisComponent applyPoaIfPresent(
+      ClaimDiagnosisType type, ExplanationOfBenefit.DiagnosisComponent diagnosis) {
+    if (type != ClaimDiagnosisType.PRESENT_ON_ADMISSION) {
+      return diagnosis;
+    }
+
+    claimPoaIndicator.ifPresent(
+        poaCode -> {
+          var onAdmissionConcept = new CodeableConcept();
+          poaCode
+              .chars()
+              .forEach(
+                  c ->
+                      onAdmissionConcept
+                          .addCoding()
+                          .setSystem(SystemUrls.POA_CODING)
+                          .setCode(Character.toString(c)));
+          diagnosis.setOnAdmission(onAdmissionConcept);
+        });
 
     return diagnosis;
   }

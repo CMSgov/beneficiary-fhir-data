@@ -1,8 +1,8 @@
 package gov.cms.bfd.server.ng;
 
+import static gov.cms.bfd.server.ng.claim.model.ClaimDiagnosisType.*;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.springframework.test.util.AssertionErrors.assertEquals;
 
 import au.com.origin.snapshots.Expect;
 import au.com.origin.snapshots.junit5.SnapshotExtension;
@@ -11,9 +11,9 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.EntityManager;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -148,19 +148,44 @@ public class IntegrationTestBase {
     // Get all diagnoses, ensure there are not multiple instances of the same
     // diagnosis
     var diagnoses = eob.getDiagnosis();
-    var seenDiagnoses = new HashSet<String>();
+    var isProfessionalClaim = eob.getType().hasCoding(SystemUrls.HL7_CLAIM_TYPE, "professional");
     for (var diagnosis : diagnoses) {
-      var diagnosisCode = diagnosis.getDiagnosisCodeableConcept().getCodingFirstRep().getCode();
-      assertTrue(seenDiagnoses.add(diagnosisCode), "Duplicate diagnosis: " + diagnosisCode);
       assertTrue(diagnosis.hasSequence(), "Diagnosis must have sequence (R4 rule)");
       assertTrue(diagnosis.hasType(), "Diagnosis must have type (C4BB rule)");
-      var specialCodes = Set.of("other", "secondary");
-      if (diagnosis.getType().get(0).getCoding().stream()
-          .anyMatch(c -> specialCodes.contains(c.getCode()))) {
-        assertEquals(
-            "Other/secondary diagnosis must be the only diagnosis when present",
-            1,
-            diagnosis.getType().get(0).getCoding().size());
+      var codings = diagnosis.getType().getFirst().getCoding();
+      var typeCodes = codings.stream().map(Coding::getCode).collect(Collectors.toSet());
+
+      if (isProfessionalClaim) {
+        var hasValidTypes =
+            typeCodes.stream()
+                .allMatch(type -> type.equals("principal") || type.equals("secondary"));
+        assertTrue(
+            hasValidTypes,
+            "Professional diagnoses must be of the following types only: principal or secondary");
+      } else {
+        var institutionalDiagnosisTypes =
+            Set.of(
+                PRINCIPAL.getFhirCode(),
+                ADMITTING.getFhirCode(),
+                DIAGNOSIS_E_CODE.getFhirCode(),
+                DIAGNOSIS_R_CODE.getFhirCode(),
+                PRESENT_ON_ADMISSION.getFhirCode());
+        var hasValidTypes = typeCodes.stream().allMatch(institutionalDiagnosisTypes::contains);
+        assertTrue(
+            hasValidTypes,
+            "Institutional diagnoses must be of the following types only: principal, admitting, "
+                + "externalcauseofinjury, other, or patientreasonforvisit");
+        if (diagnosis.hasOnAdmission()) {
+          assertTrue(
+              typeCodes.contains("other"),
+              "POA indicator should only be present on D-type diagnoses");
+        }
+        if (typeCodes.contains(PRINCIPAL.getFhirCode())
+            || typeCodes.contains(ADMITTING.getFhirCode())
+            || typeCodes.contains(DIAGNOSIS_E_CODE.getFhirCode())
+            || typeCodes.contains(DIAGNOSIS_R_CODE.getFhirCode())) {
+          assertFalse(diagnosis.hasOnAdmission(), "PEAR diagnoses should not have POA indicator");
+        }
       }
     }
   }
