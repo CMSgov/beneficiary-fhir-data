@@ -1,0 +1,33 @@
+{
+    "resourceType": "Parameters",
+    "parameter": [
+        {
+            "name": "IDIPatient",
+            "resource": {
+                "resourceType": "Patient",
+                "meta": {
+                    "profile": [
+                        "http://hl7.org/fhir/us/identity-matching/StructureDefinition/IDI-Patient"
+                    ]
+                },
+                "name": [
+                    {
+                        "family": "Coffee",
+                        "given": [
+                            "Joey"
+                        ]
+                    }
+                ],
+                "birthDate": "1966-05-23",
+                "address": [
+                    {
+                        "state": "MA",
+                        "city": "Abington",
+                        "postalCode": "02351",
+                        "line": "777 Brockton Ave"
+                    }
+                ]
+            }
+        }
+    ]
+}
