@@ -251,4 +251,4 @@ def update_failure_times(
 
 
 def get_tables_to_load(job_types: Iterable[IdrJobType]) -> set[str]:
-    return functools.reduce(set[str].union, (x.tables for x in job_types))
+    return functools.reduce(set[str].union, (x.tables for x in job_types)) if job_types else set()
