@@ -68,9 +68,9 @@ _BENE_TABLES: list[type[IdrBaseModel]] = [IdrBeneficiary]
 
 
 def filter_tables(
-    tables: list[type[IdrBaseModel]], tables_to_load: set[str]
+    tables: list[type[IdrBaseModel]], tables_to_load: set[str] | None
 ) -> list[type[IdrBaseModel]]:
-    return [t for t in tables if not tables_to_load or t.table() in tables_to_load]
+    return [t for t in tables if tables_to_load is None or t.table() in tables_to_load]
 
 
 def _gen_partitioned_node_inputs(
@@ -113,7 +113,7 @@ def stage1(load_mode: LoadMode, start_time: datetime, load_type: LoadType) -> bo
 
 def stage2_inputs(
     load_type: LoadType,
-    tables_to_load: set[str],
+    tables_to_load: set[str] | None,
     stage1: bool,  # noqa: ARG001
 ) -> Parallelizable[NodePartitionedModelInput]:
     if load_type == LoadType.INITIAL:
@@ -164,7 +164,7 @@ def collect_stage2(
 
 def stage3_inputs(
     load_type: LoadType,
-    tables_to_load: set[str],
+    tables_to_load: set[str] | None,
     collect_stage2: bool,  # noqa: ARG001
 ) -> Parallelizable[NodePartitionedModelInput]:
     if load_type == LoadType.INCREMENTAL:

@@ -59,7 +59,8 @@ MAX_TASKS = int(getenv("IDR_MAX_TASKS", "32"))
 Changing this has a drastic effect on the runtime.
 In prod, we want to run as many tasks as possible without running out of memory."""
 
-TABLES_TO_LOAD = [t for t in getenv("IDR_TABLES", "").split(",") if t]
+_IDR_TABLES = getenv("IDR_TABLES", None)
+TABLES_TO_LOAD = [t.strip() for t in _IDR_TABLES.split(",")] if _IDR_TABLES else None
 """List of tables to include - any table not included will be skipped.
 Useful if you only want to load a subset of data and don't want to wait
 for the other tables to load. Takes precedence over idr_load_events in incremental mode."""

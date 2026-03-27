@@ -70,7 +70,7 @@ def run(load_mode: str) -> None:
     )
 
     start_time = datetime.now(UTC)
-    tables_to_load = set(TABLES_TO_LOAD)
+    tables_to_load = set(TABLES_TO_LOAD) if TABLES_TO_LOAD else None
     idr_job_events: list[IdrJobLoadEvent] = []
     if load_type == LoadType.INCREMENTAL and not tables_to_load:
         idr_job_events = get_eligible_events(load_mode=load_mode, start_time=start_time)
