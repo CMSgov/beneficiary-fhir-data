@@ -12,6 +12,7 @@ from uuid import UUID
 import psycopg
 from psycopg import Cursor, sql
 from psycopg.rows import DictRow, dict_row
+from pydantic.config import ConfigDict
 from pydantic.fields import Field
 from pydantic.main import BaseModel
 from pydantic.type_adapter import TypeAdapter
@@ -110,9 +111,11 @@ class IdrJobLoadEvent(BaseModel):
     job_type: Annotated[IdrJobType, Field(alias="job_name")]
     job_message: str
     event_time: datetime
-    start_time: datetime | None
-    completion_time: datetime | None
-    failure_time: datetime | None
+    start_time: datetime | None = None
+    completion_time: datetime | None = None
+    failure_time: datetime | None = None
+
+    model_config = ConfigDict(validate_by_name=True)
 
 
 def _connect_and_do[T](load_mode: LoadMode, func: Callable[[Cursor[DictRow]], T]) -> T:
