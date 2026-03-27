@@ -245,8 +245,8 @@ public class FhirInputConverter {
         Optional.ofNullable(patient.getBirthDate()).map(DateUtil::toLocalDate);
     Optional<Object> firstName =
         name.flatMap(n -> n.getGiven().stream().findFirst())
-            .map(s -> normalizeString(s.toString()));
-    Optional<Object> lastName = name.map(n -> normalizeString(n.getFamily()));
+            .flatMap(s -> normalizeString(s.toString()));
+    Optional<Object> lastName = name.flatMap(n -> normalizeString(n.getFamily()));
     var addresses =
         patient.getAddress().stream()
             .map(FhirInputConverter::formatAddress)
@@ -271,16 +271,28 @@ public class FhirInputConverter {
             .mbi(new PatientMatchEntry(mbi.stream().toList(), "identifier.mbi"))
             .birthDate(new PatientMatchEntry(birthDate.stream().toList(), "birthDate"))
             .addresses(new PatientMatchEntry(addresses, "address.normalizedAddress"))
-            .ssnLastFourDigits(new PatientMatchEntry(ssn.stream().toList(), "ssn"))
+            .ssnLastFourDigits(new PatientMatchEntry(ssn.stream().toList(), "ssnLastFourDigits"))
             .build());
   }
 
   private static Optional<Object> formatAddress(Address address) {
-    var line = address.getLine().stream().findFirst().map(StringType::toString);
-    return line.map(
-        s ->
-            String.format(
-                "%s %s %s %s", s, address.getCity(), address.getState(), address.getPostalCode()));
+    var line = address.getLine().stream().findFirst().map(StringType::toString).orElse("");
+    var fullAddress =
+        Stream.of(line, address.getCity(), address.getState(), address.getPostalCode())
+            .map(FhirInputConverter::toUpperIfPresent)
+            .flatMap(Optional::stream)
+            .collect(Collectors.joining(" "));
+    if (StringUtils.isEmpty(fullAddress)) {
+      return Optional.empty();
+    }
+    return Optional.of(fullAddress);
+  }
+
+  private static Optional<String> toUpperIfPresent(@Nullable String value) {
+    if (StringUtils.isEmpty(value)) {
+      return Optional.empty();
+    }
+    return Optional.of(value.toUpperCase());
   }
 
   private static Optional<String> findIdentifier(Patient patient, String system) {
@@ -290,10 +302,14 @@ public class FhirInputConverter {
         .findFirst();
   }
 
-  private static String normalizeString(String value) {
-    return Normalizer.normalize(value, Normalizer.Form.NFD)
-        .replaceAll("\\p{Punct}\\s", "")
-        .toUpperCase();
+  private static Optional<String> normalizeString(@Nullable String value) {
+    if (StringUtils.isBlank(value)) {
+      return Optional.empty();
+    }
+    return Optional.of(
+        Normalizer.normalize(value, Normalizer.Form.NFD)
+            .replaceAll("\\p{Punct}\\s", "")
+            .toUpperCase());
   }
 
   /**

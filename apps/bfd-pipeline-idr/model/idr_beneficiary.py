@@ -1,13 +1,14 @@
 from datetime import date, datetime
 from typing import Annotated, override
 
-from pydantic import BeforeValidator
+from pydantic import BeforeValidator, computed_field
 
 from constants import (
     BENEFICIARY_TABLE,
 )
 from load_partition import LoadPartition
 from loader import LoadMode
+from matching import normalize_address
 from model.base_model import (
     ALIAS,
     ALIAS_HSTRY,
@@ -79,12 +80,6 @@ class IdrBeneficiary(IdrBaseModel):
     bene_line_4_adr: Annotated[str, BeforeValidator(transform_default_string)]
     bene_line_5_adr: Annotated[str, BeforeValidator(transform_default_string)]
     bene_line_6_adr: Annotated[str, BeforeValidator(transform_default_string)]
-    # TODO: actual implementation
-    bfd_normalized_address: Annotated[
-        str,
-        {EXPR: "COALESCE(bene_line_1_adr, '')"},
-        BeforeValidator(transform_default_string),
-    ]
     cntct_lang_cd: Annotated[str, BeforeValidator(transform_default_string)]
     idr_ltst_trans_flg: Annotated[str, BeforeValidator(transform_default_string)]
     idr_trans_efctv_ts: Annotated[datetime, {PRIMARY_KEY: True}]
@@ -110,6 +105,21 @@ class IdrBeneficiary(IdrBaseModel):
         {UPDATE_TIMESTAMP: True, ALIAS: ALIAS_XREF, COLUMN_MAP: "idr_updt_ts"},
         BeforeValidator(transform_null_date_to_min),
     ]
+
+    @computed_field
+    @property
+    def bfd_normalized_address(self) -> str:
+        return normalize_address(  # type: ignore
+            f"{self.bene_line_1_adr} "  # type: ignore
+            f"{self.bene_line_2_adr} "  # type: ignore
+            f"{self.bene_line_3_adr} "  # type: ignore
+            f"{self.bene_line_4_adr} "  # type: ignore
+            f"{self.bene_line_5_adr} "  # type: ignore
+            f"{self.bene_line_6_adr}, "  # type: ignore
+            f"{self.geo_zip_plc_name} "  # type: ignore
+            f"{self.geo_usps_state_cd} "  # type: ignore
+            f"{self.geo_zip5_cd}"  # type: ignore
+        ).replace("\n", " ")
 
     @override
     @staticmethod

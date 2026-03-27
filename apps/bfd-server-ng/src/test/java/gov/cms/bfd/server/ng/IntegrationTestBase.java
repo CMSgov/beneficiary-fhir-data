@@ -85,7 +85,10 @@ public class IntegrationTestBase {
   }
 
   protected IGenericClient getFhirClient() {
-    FhirContext ctx = FhirContext.forR4Cached();
+    return getFhirClient(FhirContext.forR4Cached());
+  }
+
+  protected IGenericClient getFhirClient(FhirContext ctx) {
     return ctx.newRestfulGenericClient(getServerUrl());
   }
 
