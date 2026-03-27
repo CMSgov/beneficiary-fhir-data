@@ -89,7 +89,7 @@ def run(load_mode: str) -> None:
     # if load_benes and load_claims:
     try:
         hamilton_driver.execute(  # type: ignore
-            final_vars=["do_stage4"],
+            final_vars=["collect_stage4"],
             inputs={
                 "load_type": load_type,
                 "load_mode": load_mode,

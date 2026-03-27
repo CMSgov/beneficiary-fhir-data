@@ -197,18 +197,39 @@ def collect_stage3(
     return all(do_stage3)
 
 
-def do_stage4(
+def stage4_inputs(
+    load_type: LoadType,
+    tables_to_load: set[str] | None,
     collect_stage3: bool,  # noqa: ARG001
+) -> Parallelizable[NodePartitionedModelInput]:
+    if load_type == LoadType.INCREMENTAL:
+        yield from _gen_partitioned_node_inputs(
+            filter_tables(_BENE_TABLES, tables_to_load), load_type
+        )
+    else:
+        yield from _gen_partitioned_node_inputs([], load_type)
+
+
+def do_stage4(
+    stage4_inputs: NodePartitionedModelInput,
     load_type: LoadType,
     load_mode: LoadMode,
     start_time: datetime,
 ) -> bool:
+    model_type, partition = stage4_inputs
     if load_type == LoadType.INCREMENTAL:
         return extract_and_load(
-            cls=IdrBeneficiary,
-            partition=None,
+            cls=model_type,
+            partition=partition,
             job_start=start_time,
             load_mode=load_mode,
             load_type=load_type,
         )
+
     return False
+
+
+def collect_stage4(
+    do_stage4: Collect[bool],
+) -> bool:
+    return all(do_stage4)
