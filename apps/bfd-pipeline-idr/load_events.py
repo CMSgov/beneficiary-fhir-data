@@ -49,44 +49,64 @@ logger = logging.getLogger(__name__)
 
 LOAD_EVENTS_TABLE = "idr_load_events"
 _PART_D_TABLES = {
-    IdrBeneficiaryMaPartDEnrollment.table(),
-    IdrBeneficiaryMaPartDEnrollmentRx.table(),
     IdrClaimRx.table(),
-    IdrContractPbpContact.table(),
-    IdrContractPbpNumber.table(),
 }
-_SHARED_SYSTEMS_TABLES = {
-    IdrClaimProfessionalSs.table(),
-    IdrClaimInstitutionalSs.table(),
-    IdrClaimItemProfessionalSs.table(),
-    IdrClaimItemInstitutionalSs.table(),
+_MCS_VMS_TABLES = {
+    x.table()
+    for x in {
+        IdrClaimProfessionalSs,
+        IdrClaimItemProfessionalSs,
+    }
+}
+_FISS_TABLES = {
+    x.table()
+    for x in {
+        IdrClaimInstitutionalSs,
+        IdrClaimItemInstitutionalSs,
+    }
 }
 _NCH_TABLES = {
-    IdrClaimProfessionalNch.table(),
-    IdrClaimInstitutionalNch.table(),
-    IdrClaimItemProfessionalNch.table(),
-    IdrClaimItemInstitutionalNch.table(),
+    x.table()
+    for x in {
+        IdrClaimProfessionalNch,
+        IdrClaimInstitutionalNch,
+        IdrClaimItemProfessionalNch,
+        IdrClaimItemInstitutionalNch,
+    }
 }
 _BENE_TABLES = {
-    IdrBeneficiaryDualEligibility.table(),
-    IdrBeneficiaryEntitlementReason.table(),
-    IdrBeneficiaryEntitlement.table(),
-    IdrBeneficiaryLowIncomeSubsidy.table(),
-    IdrBeneficiaryMbiId.table(),
-    IdrBeneficiaryOvershareMbi.table(),
-    IdrBeneficiaryStatus.table(),
-    IdrBeneficiaryThirdParty.table(),
-    IdrBeneficiary.table(),
+    x.table()
+    for x in {
+        IdrBeneficiaryDualEligibility,
+        IdrBeneficiaryEntitlementReason,
+        IdrBeneficiaryEntitlement,
+        IdrBeneficiaryLowIncomeSubsidy,
+        IdrBeneficiaryMbiId,
+        IdrBeneficiaryOvershareMbi,
+        IdrBeneficiaryStatus,
+        IdrBeneficiaryThirdParty,
+        IdrBeneficiary,
+        IdrBeneficiaryMaPartDEnrollment,
+        IdrBeneficiaryMaPartDEnrollmentRx,
+    }
+}
+_HPMS_TABLES = {
+    x.table()
+    for x in {
+        IdrContractPbpContact,
+        IdrContractPbpNumber,
+    }
 }
 
 
 class IdrJobType(StrEnum):
     DDPS = ("DDPS_SNOWFLAKE", _PART_D_TABLES)
-    FISS = ("FISS_SNOWFLAKE", _SHARED_SYSTEMS_TABLES)
-    MCS = ("MCS_SNOWFLAKE", _SHARED_SYSTEMS_TABLES)
-    VMS = ("VMS_SNOWFLAKE", _SHARED_SYSTEMS_TABLES)
+    FISS = ("FISS_SNOWFLAKE", _FISS_TABLES)
+    MCS = ("MCS_SNOWFLAKE", _MCS_VMS_TABLES)
+    VMS = ("VMS_SNOWFLAKE", _MCS_VMS_TABLES)
     NCH = ("CLMNCH_SNOWFLAKE", _NCH_TABLES)
     BENE = ("BENE_SNOWFLAKE", _BENE_TABLES)
+    HPMS = ("HPMS_SNOWFLAKE", _HPMS_TABLES)
 
     def __init__(
         self,
