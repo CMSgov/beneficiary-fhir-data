@@ -3,14 +3,14 @@ name = "bfd-pipeline-idr"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.14"
 dependencies = [
-    "cryptography==45.0.6",
-    "psycopg[binary,pool]==3.2.13",
-    "pydantic==2.12.4",
-    "snowflake-connector-python==4.1.0",
-    "sf-hamilton==1.89.0",
-    "python-dateutil==2.9.0",
+    "cryptography>=45.0.6",
+    "psycopg[binary,pool]>=3.2.13",
+    "pydantic>=2.12.4",
+    "snowflake-connector-python>=4.1.0",
+    "sf-hamilton>=1.89.0",
+    "python-dateutil>=2.9.0",
     "usaddress>=0.5.16",
 ]
 

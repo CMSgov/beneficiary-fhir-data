@@ -82,10 +82,10 @@ def _load_file(
             # fetch the list of columns from the database and filter them out
             # so we don't get errors trying to insert extra columns
             db_columns = cur.execute(
-                f"""
+                t"""
                     SELECT column_name FROM INFORMATION_SCHEMA.COLUMNS
-                    WHERE table_name = '{sql_table}'
-                """  # type: ignore
+                    WHERE table_name = {sql_table}
+                """
             )
             db_columns = [typing.cast(str, col[0]).lower() for col in db_columns]
 
@@ -102,7 +102,7 @@ def _load_file(
                     f"COPY {full_table} ({cols_str}) FROM STDIN"  # type: ignore
                 ) as copy:
                     for row in reader:
-                        copy.write_row([row[c] if row[c] else None for c in cols])
+                        copy.write_row([row[c] or None for c in cols])
 
 
 if __name__ == "__main__":
