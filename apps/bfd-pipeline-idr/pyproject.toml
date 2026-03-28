@@ -12,6 +12,7 @@ dependencies = [
     "sf-hamilton>=1.89.0",
     "python-dateutil>=2.9.0",
     "usaddress>=0.5.16",
+    "unidecode>=1.4.0",
 ]
 
 [dependency-groups]

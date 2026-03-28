@@ -17,4 +17,3 @@ WHERE NOT EXISTS(SELECT 1 FROM idr.beneficiary_overshare_mbi om WHERE om.bene_mb
 
 CREATE INDEX ON idr.beneficiary(bfd_normalized_address);
 
-CREATE EXTENSION unaccent SCHEMA PUBLIC;
