@@ -19,6 +19,12 @@ public class Name {
   @Column(name = "bene_last_name")
   private String lastName;
 
+  @Column(name = "bfd_normalized_1st_name")
+  private String normalizedFirstName;
+
+  @Column(name = "bfd_normalized_last_name")
+  private String normalizedLastName;
+
   HumanName toFhir() {
     var givens = new ArrayList<StringType>();
     givens.add(new StringType(firstName));

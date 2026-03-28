@@ -1,7 +1,12 @@
 package gov.cms.bfd.server.ng.beneficiary;
 
+import gov.cms.bfd.server.ng.DbFilterParam;
+import gov.cms.bfd.server.ng.beneficiary.filter.PatientMatchFilter;
 import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
+import gov.cms.bfd.server.ng.beneficiary.model.BeneficiaryBase;
 import gov.cms.bfd.server.ng.beneficiary.model.BeneficiaryIdentity;
+import gov.cms.bfd.server.ng.beneficiary.model.PatientMatch;
+import gov.cms.bfd.server.ng.claim.model.SystemType;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.util.LogUtil;
 import io.micrometer.core.annotation.Timed;
@@ -122,5 +127,37 @@ public class BeneficiaryRepository {
         .getResultList()
         .stream()
         .findFirst();
+  }
+
+  public Optional<Beneficiary> searchPatientMatch(PatientMatch patientMatch) {
+    var scenarios = patientMatch.getValidScenarios();
+    for (var scenario : scenarios) {
+      var filters = new PatientMatchFilter(scenario).getFilters("bene", SystemType.UNKNOWN);
+
+      var benes =
+          DbFilterParam.withParams(
+                  entityManager.createQuery(
+                      String.format(
+                          """
+                  SELECT bene
+                  FROM Beneficiary bene
+                  WHERE bene.latestTransactionFlag = 'Y'
+                  %s
+                  ORDER BY bene.obsoleteTimestamp DESC
+                  """,
+                          filters.filterClause()),
+                      Beneficiary.class),
+                  filters.params())
+              .getResultList()
+              .stream()
+              .toList();
+      var uniqueXrefs = benes.stream().map(BeneficiaryBase::getXrefSk).distinct().toList();
+      if (uniqueXrefs.size() != 1) {
+        continue;
+      }
+
+      return benes.stream().findFirst();
+    }
+    return Optional.empty();
   }
 }

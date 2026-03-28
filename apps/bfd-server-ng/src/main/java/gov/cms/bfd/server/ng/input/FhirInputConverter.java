@@ -3,12 +3,16 @@ package gov.cms.bfd.server.ng.input;
 import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.base.Strings;
+import gov.cms.bfd.server.ng.beneficiary.model.PatientMatch;
+import gov.cms.bfd.server.ng.beneficiary.model.PatientMatchEntry;
 import gov.cms.bfd.server.ng.claim.model.ClaimFinalAction;
 import gov.cms.bfd.server.ng.claim.model.ClaimTypeCode;
 import gov.cms.bfd.server.ng.claim.model.MetaSourceSk;
 import gov.cms.bfd.server.ng.claim.model.SamhsaSearchIntent;
+import gov.cms.bfd.server.ng.util.DateUtil;
 import gov.cms.bfd.server.ng.util.IdrConstants;
 import gov.cms.bfd.server.ng.util.SystemUrls;
+import java.text.Normalizer;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +21,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.StringType;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -76,7 +84,7 @@ public class FhirInputConverter {
         throw new InvalidRequestException("ID is not a valid number");
       }
       return longId;
-    } catch (NumberFormatException ex) {
+    } catch (NumberFormatException _) {
       throw new InvalidRequestException("ID is not a valid number");
     }
   }
@@ -226,6 +234,82 @@ public class FhirInputConverter {
         .map(token -> token.getValue().trim().toLowerCase())
         .flatMap(normalizedType -> ClaimTypeCode.getClaimTypeCodesByType(normalizedType).stream())
         .toList();
+  }
+
+  public static Optional<PatientMatch> getPatientMatch(@Nullable Patient patient) {
+    if (patient == null) {
+      return Optional.empty();
+    }
+    var name = patient.getName().stream().findFirst();
+    Optional<Object> birthDate =
+        Optional.ofNullable(patient.getBirthDate()).map(DateUtil::toLocalDate);
+    Optional<Object> firstName =
+        name.flatMap(n -> n.getGiven().stream().findFirst())
+            .flatMap(s -> normalizeString(s.toString()));
+    Optional<Object> lastName = name.flatMap(n -> normalizeString(n.getFamily()));
+    var addresses =
+        patient.getAddress().stream()
+            .map(FhirInputConverter::formatAddress)
+            .flatMap(Optional::stream)
+            .toList();
+    Optional<Object> mbi = findIdentifier(patient, SystemUrls.CMS_MBI).map(i -> i);
+
+    var ssnLastFourLength = 4;
+    Optional<Object> ssn =
+        findIdentifier(patient, SystemUrls.US_SSN)
+            .filter(s -> s.length() >= ssnLastFourLength)
+            .map(s -> s.substring(s.length() - ssnLastFourLength));
+
+    return Optional.of(
+        PatientMatch.builder()
+            .firstName(
+                new PatientMatchEntry(
+                    firstName.stream().toList(), "beneficiaryName.normalizedFirstName"))
+            .lastName(
+                new PatientMatchEntry(
+                    lastName.stream().toList(), "beneficiaryName.normalizedLastName"))
+            .mbi(new PatientMatchEntry(mbi.stream().toList(), "identifier.mbi"))
+            .birthDate(new PatientMatchEntry(birthDate.stream().toList(), "birthDate"))
+            .addresses(new PatientMatchEntry(addresses, "address.normalizedAddress"))
+            .ssnLastFourDigits(new PatientMatchEntry(ssn.stream().toList(), "ssnLastFourDigits"))
+            .build());
+  }
+
+  private static Optional<Object> formatAddress(Address address) {
+    var line = address.getLine().stream().findFirst().map(StringType::toString).orElse("");
+    var fullAddress =
+        Stream.of(line, address.getCity(), address.getState(), address.getPostalCode())
+            .map(FhirInputConverter::toUpperIfPresent)
+            .flatMap(Optional::stream)
+            .collect(Collectors.joining(" "));
+    if (StringUtils.isEmpty(fullAddress)) {
+      return Optional.empty();
+    }
+    return Optional.of(fullAddress);
+  }
+
+  private static Optional<String> toUpperIfPresent(@Nullable String value) {
+    if (StringUtils.isEmpty(value)) {
+      return Optional.empty();
+    }
+    return Optional.of(value.toUpperCase());
+  }
+
+  private static Optional<String> findIdentifier(Patient patient, String system) {
+    return patient.getIdentifier().stream()
+        .filter(i -> i.getSystem().equals(system))
+        .map(Identifier::getValue)
+        .findFirst();
+  }
+
+  private static Optional<String> normalizeString(@Nullable String value) {
+    if (StringUtils.isBlank(value)) {
+      return Optional.empty();
+    }
+    return Optional.of(
+        Normalizer.normalize(value, Normalizer.Form.NFD)
+            .replaceAll("\\p{Punct}\\s", "")
+            .toUpperCase());
   }
 
   /**

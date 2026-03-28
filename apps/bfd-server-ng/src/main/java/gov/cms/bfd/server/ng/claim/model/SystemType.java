@@ -9,7 +9,9 @@ public enum SystemType {
   /** Shared Systems. */
   SS,
   /** Drug Data Processing systems. */
-  DDPS;
+  DDPS,
+  /** Unknown (used for bene data). */
+  UNKNOWN;
 
   /**
    * Checks if the system type is compatible with any of the given meta_src_sk values.
@@ -32,6 +34,7 @@ public enum SystemType {
       case NCH -> source == MetaSourceSk.NCH;
       case DDPS -> source == MetaSourceSk.DDPS;
       case SS -> source != MetaSourceSk.NCH && source != MetaSourceSk.DDPS;
+      case UNKNOWN -> false;
     };
   }
 
@@ -45,6 +48,7 @@ public enum SystemType {
     return switch (this) {
       case NCH, DDPS -> sourceId == ClaimSourceId.NATIONAL_CLAIMS_HISTORY;
       case SS -> sourceId != ClaimSourceId.NATIONAL_CLAIMS_HISTORY;
+      case UNKNOWN -> false;
     };
   }
 }

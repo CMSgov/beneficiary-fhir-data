@@ -33,6 +33,10 @@ public class DateUtil {
     return Date.from(localDate.atStartOfDay(ZONE_ID_UTC).toInstant());
   }
 
+  public static LocalDate toLocalDate(Date date) {
+    return date.toInstant().atZone(DateUtil.ZONE_ID_UTC).toLocalDate();
+  }
+
   /**
    * Converts the {@link ZonedDateTime} to a {@link Date} object with the same date and time info.
    *

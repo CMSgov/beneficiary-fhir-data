@@ -7,7 +7,6 @@ import gov.cms.bfd.server.ng.claim.model.*;
 import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.TypedQuery;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import lombok.AllArgsConstructor;
@@ -42,7 +41,7 @@ public class ClaimAsyncService {
             baseQuery, filters.filterClause());
 
     var result =
-        withParams(entityManager.createQuery(jpql, claimClass), filters.params())
+        DbFilterParam.withParams(entityManager.createQuery(jpql, claimClass), filters.params())
             .setParameter("claimUniqueId", claimUniqueId)
             .getResultList()
             .stream()
@@ -72,7 +71,7 @@ public class ClaimAsyncService {
             baseQuery, filters.filterClause());
 
     var result =
-        withParams(entityManager.createQuery(jpql, claimClass), filters.params())
+        DbFilterParam.withParams(entityManager.createQuery(jpql, claimClass), filters.params())
             .setParameter("beneSk", criteria.beneSk())
             .getResultList();
 
@@ -88,12 +87,5 @@ public class ClaimAsyncService {
       queryParams.addAll(params.params());
     }
     return new DbFilter(sb.toString(), queryParams);
-  }
-
-  private <T> TypedQuery<T> withParams(TypedQuery<T> query, List<DbFilterParam> params) {
-    for (var param : params) {
-      query.setParameter(param.name(), param.value());
-    }
-    return query;
   }
 }

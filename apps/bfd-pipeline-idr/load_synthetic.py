@@ -69,9 +69,10 @@ def _load_file(
     # valid path
     if not path.exists():
         raise OSError(f"path {src_folder} not found")
+    paths = [path] if path.is_file() and src_folder.endswith(file) else path.glob(f"./**/{file}")
 
-    for match in path.glob(f"./**/{file}"):
-        logger.info("loading %s", match)
+    for match in paths:
+        logger.info("loading from file: %s", match)
         with match.open() as f:
             reader = csv.DictReader(f)
             # skip empty files

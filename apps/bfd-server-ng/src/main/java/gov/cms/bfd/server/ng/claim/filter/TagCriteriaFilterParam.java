@@ -21,7 +21,7 @@ public record TagCriteriaFilterParam(List<List<TagCriterion>> tagCriteria)
 
   @NotNull
   @Override
-  public DbFilter getFilters(@NotNull String claimTableAlias, @NotNull SystemType systemType) {
+  public DbFilter getFilters(@NotNull String tableAlias, @NotNull SystemType systemType) {
     var stringBuilder = new StringBuilder();
     var params = new ArrayList<DbFilterParam>();
     for (var i = 0; i < tagCriteria.size(); i++) {
@@ -31,7 +31,7 @@ public record TagCriteriaFilterParam(List<List<TagCriterion>> tagCriteria)
       }
       var clauses = new ArrayList<String>();
       for (var j = 0; j < orList.size(); j++) {
-        addParam(i, j, claimTableAlias, orList.get(j), systemType, clauses, params);
+        addParam(i, j, tableAlias, orList.get(j), systemType, clauses, params);
       }
       if (!clauses.isEmpty()) {
         stringBuilder.append(" AND (").append(String.join(" OR ", clauses)).append(")");
