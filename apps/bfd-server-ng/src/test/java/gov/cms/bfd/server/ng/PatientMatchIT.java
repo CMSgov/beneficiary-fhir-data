@@ -77,7 +77,18 @@ class PatientMatchIT extends IntegrationTestBase {
   private Stream<Arguments> verifyPatientMatch() {
     var testBene = TestBene.fromBene(getBeneficiaryFromBeneSk("-300428640"));
     var testBeneWithSpaces = TestBene.fromBene(getBeneficiaryFromBeneSk("-18976899"));
+    // precondition - should have whitespace in the name
     assertTrue(testBeneWithSpaces.bene.getBeneficiaryName().getFirstName().contains(" "));
+
+    var duplicateBene1 = TestBene.fromBene(getBeneficiaryFromBeneSk("-591866793"));
+    var duplicateBene2 = TestBene.fromBene(getBeneficiaryFromBeneSk("-591866794"));
+    // precondition - these two should have the same info but different xref sks
+    assertNotEquals(duplicateBene1.bene.getXrefSk(), duplicateBene2.bene.getXrefSk());
+    assertEquals(
+        duplicateBene1.bene.getBeneficiaryName(), duplicateBene2.bene.getBeneficiaryName());
+    assertEquals(duplicateBene1.bene.getBirthDate(), duplicateBene2.bene.getBirthDate());
+    assertEquals(
+        duplicateBene1.bene.getSsnLastFourDigits(), duplicateBene2.bene.getSsnLastFourDigits());
 
     return Stream.of(
         Arguments.of(
@@ -116,6 +127,16 @@ class PatientMatchIT extends IntegrationTestBase {
             Optional.empty(),
             Optional.empty()),
         Arguments.of(
+            "Scenario 1 - duplicate bene should return no results",
+            duplicateBene1.bene,
+            Optional.of(duplicateBene1.firstName),
+            Optional.of(duplicateBene1.lastName),
+            Optional.of(duplicateBene1.birthDate),
+            Optional.of(duplicateBene1.address),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty()),
+        Arguments.of(
             "Scenario 4 - first name, last name, DOB, SSN last 4",
             testBene.bene,
             Optional.of(testBene.firstName),
@@ -126,6 +147,16 @@ class PatientMatchIT extends IntegrationTestBase {
             Optional.of(testBene.ssnLastFour),
             Optional.of(4)),
         Arguments.of(
+            "Scenario 4 - duplicate bene should return no results",
+            duplicateBene1.bene,
+            Optional.of(duplicateBene1.firstName),
+            Optional.of(duplicateBene1.lastName),
+            Optional.of(duplicateBene1.birthDate),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.of(duplicateBene1.ssnLastFour),
+            Optional.empty()),
+        Arguments.of(
             "Scenario 4 - invalid/should fail",
             testBene.bene,
             Optional.of(testBene.firstName),
@@ -135,6 +166,8 @@ class PatientMatchIT extends IntegrationTestBase {
             Optional.empty(),
             Optional.of("fakeSsn"),
             Optional.empty()),
+        // Note: it's impossible for this to produce two beneficiaries with different xrefs
+        // because we already protect against MBIs incorrectly attributed to multiple benes
         Arguments.of(
             "Scenario 8 - first name, DOB, MBI",
             testBene.bene,
