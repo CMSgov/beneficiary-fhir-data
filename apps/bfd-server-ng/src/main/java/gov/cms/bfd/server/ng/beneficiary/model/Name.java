@@ -4,11 +4,13 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.util.ArrayList;
 import java.util.Optional;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.StringType;
 
 /** Beneficiary name information. */
+@EqualsAndHashCode
 @Getter
 @Embeddable
 public class Name {
