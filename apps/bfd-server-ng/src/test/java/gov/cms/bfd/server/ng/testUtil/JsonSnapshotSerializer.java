@@ -28,7 +28,7 @@ public class JsonSnapshotSerializer extends ToStringSnapshotSerializer {
           Pattern.MULTILINE | Pattern.DOTALL);
   private static final Pattern CLAIM_IDR_LOAD_DATE_REGEX =
       Pattern.compile(
-          "(\"code\"\\s*:\\s*\"CLM_IDR_LD_DT\"[\\s\\S]*?\"timingDate\"\\s*:\\s*\")\\d{4}-\\d{2}-\\d{2}(\")?",
+          "(\"code\"\\s*:\\s*\"CLM_IDR_LD_DT\".*?\"timingDate\"\\s*:\\s*\")\\d{4}-\\d{2}-\\d{2}(\")?",
           Pattern.MULTILINE | Pattern.DOTALL);
   private static final String DEFAULT_UUID = "00000000-0000-0000-0000-000000000000";
 
