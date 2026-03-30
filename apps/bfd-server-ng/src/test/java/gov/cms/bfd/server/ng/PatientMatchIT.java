@@ -68,10 +68,6 @@ class PatientMatchIT extends IntegrationTestBase {
     return patient;
   }
 
-  private String normalizeAddress(String address) {
-    return address.replace("Avenue", "Ave");
-  }
-
   @Test
   void emptyRequestReturnsEmptyBundle() {
     var res = searchBundle(new Patient());
@@ -79,100 +75,95 @@ class PatientMatchIT extends IntegrationTestBase {
   }
 
   private Stream<Arguments> verifyPatientMatch() {
-    var testBene = getBeneficiaryFromBeneSk("-300428640");
+    var testBene = TestBene.fromBene(getBeneficiaryFromBeneSk("-300428640"));
+    var testBeneWithSpaces = TestBene.fromBene(getBeneficiaryFromBeneSk("-18976899"));
+    assertTrue(testBeneWithSpaces.bene.getBeneficiaryName().getFirstName().contains(" "));
 
-    var firstName = testBene.getBeneficiaryName().getFirstName();
-    var lastName = testBene.getBeneficiaryName().getLastName();
-    var birthDate = DateUtil.toDate(testBene.getBirthDate());
-    var addressIn = testBene.getAddress();
-    var combinedLines =
-        List.of(addressIn.getAddressLine1().get(), addressIn.getAddressLine2().get()).stream()
-            .map(this::normalizeAddress)
-            .collect(Collectors.joining(" "));
-    var address =
-        new Address()
-            .addLine(combinedLines)
-            .setCity(addressIn.getCity().get())
-            .setState(addressIn.getStateCode().get())
-            .setPostalCode(addressIn.getZipCode().get());
-    var ssnLastFour = testBene.getSsnLastFourDigits();
-    var mbi = testBene.getIdentifier().getMbi();
     return Stream.of(
         Arguments.of(
             "Scenario 1 - first name, last name, DOB, address",
-            testBene,
-            Optional.of(firstName),
-            Optional.of(lastName),
-            Optional.of(birthDate),
-            Optional.of(address),
+            testBene.bene,
+            Optional.of(testBene.firstName),
+            Optional.of(testBene.lastName),
+            Optional.of(testBene.birthDate),
+            Optional.of(testBene.address),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.of(1)),
+        Arguments.of(
+            "Scenario 1 - name with spaces",
+            testBeneWithSpaces.bene,
+            Optional.of(testBeneWithSpaces.firstName.replace(" ", "")),
+            Optional.of(testBeneWithSpaces.lastName),
+            Optional.of(testBeneWithSpaces.birthDate),
+            Optional.of(testBeneWithSpaces.address),
             Optional.empty(),
             Optional.empty(),
             Optional.of(1)),
         Arguments.of(
             "Scenario 1 - invalid/should fail",
-            testBene,
-            Optional.of(firstName),
-            Optional.of(lastName),
-            Optional.of(birthDate),
+            testBene.bene,
+            Optional.of(testBene.firstName),
+            Optional.of(testBene.lastName),
+            Optional.of(testBene.birthDate),
             Optional.of(
                 new Address()
                     .addLine("3728 Broadway Avenue J")
-                    .setCity(address.getCity())
-                    .setState(address.getState())
-                    .setPostalCode(address.getPostalCode())),
+                    .setCity(testBene.address.getCity())
+                    .setState(testBene.address.getState())
+                    .setPostalCode(testBene.address.getPostalCode())),
             Optional.empty(),
             Optional.empty(),
             Optional.empty()),
         Arguments.of(
             "Scenario 4 - first name, last name, DOB, SSN last 4",
-            testBene,
-            Optional.of(firstName),
-            Optional.of(lastName),
-            Optional.of(birthDate),
+            testBene.bene,
+            Optional.of(testBene.firstName),
+            Optional.of(testBene.lastName),
+            Optional.of(testBene.birthDate),
             Optional.empty(),
             Optional.empty(),
-            Optional.of(ssnLastFour),
+            Optional.of(testBene.ssnLastFour),
             Optional.of(4)),
-        //
         Arguments.of(
             "Scenario 4 - invalid/should fail",
-            testBene,
-            Optional.of(firstName),
-            Optional.of(lastName),
-            Optional.of(birthDate),
+            testBene.bene,
+            Optional.of(testBene.firstName),
+            Optional.of(testBene.lastName),
+            Optional.of(testBene.birthDate),
             Optional.empty(),
             Optional.empty(),
-            Optional.of("8347"),
+            Optional.of("fakeSsn"),
             Optional.empty()),
         Arguments.of(
             "Scenario 8 - first name, DOB, MBI",
-            testBene,
-            Optional.of(firstName),
+            testBene.bene,
+            Optional.of(testBene.firstName),
             Optional.empty(),
-            Optional.of(birthDate),
+            Optional.of(testBene.birthDate),
             Optional.empty(),
-            Optional.of(mbi),
+            Optional.of(testBene.mbi),
             Optional.empty(),
             Optional.of(8)),
         Arguments.of(
             " Scenario 8 - invalid/should fail",
-            testBene,
-            Optional.of(firstName),
+            testBene.bene,
+            Optional.of(testBene.firstName),
             Optional.empty(),
-            Optional.of(birthDate),
+            Optional.of(testBene.birthDate),
             Optional.empty(),
-            Optional.of("5I50JT9WX61"),
+            Optional.of("wrongMbi"),
             Optional.empty(),
             Optional.empty()),
         Arguments.of(
             " Scenario 1 failure, scenario 4 success",
-            testBene,
-            Optional.of(firstName),
-            Optional.of(lastName),
-            Optional.of(birthDate),
+            testBene.bene,
+            Optional.of(testBene.firstName),
+            Optional.of(testBene.lastName),
+            Optional.of(testBene.birthDate),
             Optional.of(new Address().addLine("fake")),
             Optional.empty(),
-            Optional.of(ssnLastFour),
+            Optional.of(testBene.ssnLastFour),
             Optional.of(4)));
   }
 
@@ -213,5 +204,39 @@ class PatientMatchIT extends IntegrationTestBase {
             .findFirst()
             .get()
             .getValue());
+  }
+
+  private record TestBene(
+      String firstName,
+      String lastName,
+      Address address,
+      Date birthDate,
+      String mbi,
+      String ssnLastFour,
+      Beneficiary bene) {
+    private static TestBene fromBene(Beneficiary testBene) {
+      var firstName = testBene.getBeneficiaryName().getFirstName();
+      var lastName = testBene.getBeneficiaryName().getLastName();
+      var birthDate = DateUtil.toDate(testBene.getBirthDate());
+      var addressIn = testBene.getAddress();
+      var combinedLines =
+          Stream.of(addressIn.getAddressLine1(), addressIn.getAddressLine2())
+              .flatMap(Optional::stream)
+              .map(TestBene::normalizeAddress)
+              .collect(Collectors.joining(" "));
+      var address =
+          new Address()
+              .addLine(combinedLines)
+              .setCity(addressIn.getCity().get())
+              .setState(addressIn.getStateCode().get())
+              .setPostalCode(addressIn.getZipCode().get());
+      var ssnLastFour = testBene.getSsnLastFourDigits();
+      var mbi = testBene.getIdentifier().getMbi();
+      return new TestBene(firstName, lastName, address, birthDate, mbi, ssnLastFour, testBene);
+    }
+
+    private static String normalizeAddress(String address) {
+      return address.replace("Avenue", "Ave");
+    }
   }
 }
