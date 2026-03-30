@@ -24,6 +24,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+// Tells JUnit to re-use the same test instance per class
+// This is fine because we do not (and should not) have tests that rely on shared static state
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class PatientMatchIT extends IntegrationTestBase {
   private Bundle searchBundle(Patient patient) {
@@ -72,6 +74,21 @@ class PatientMatchIT extends IntegrationTestBase {
   void emptyRequestReturnsEmptyBundle() {
     var res = searchBundle(new Patient());
     assertEquals(1, res.getEntry().size());
+  }
+
+  @Test
+  void patientMatchSnapshot() {
+    var testBene = TestBene.fromBene(getBeneficiaryFromBeneSk("-300428640"));
+    var patient =
+        buildRequest(
+            Optional.of(testBene.firstName),
+            Optional.of(testBene.lastName),
+            Optional.of(testBene.birthDate),
+            List.of(testBene.address),
+            Optional.of(testBene.mbi),
+            Optional.of(testBene.ssnLastFour));
+    var bundle = searchBundle(patient);
+    expectFhir().toMatchSnapshot(bundle);
   }
 
   private Stream<Arguments> verifyPatientMatch() {

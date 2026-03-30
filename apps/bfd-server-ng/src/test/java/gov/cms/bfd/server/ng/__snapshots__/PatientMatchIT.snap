@@ -1,0 +1,99 @@
+gov.cms.bfd.server.ng.PatientMatchIT.patientMatchSnapshot=[
+{
+  "entry" : [ {
+    "fullUrl" : "https://cms.gov",
+    "resource" : {
+      "active" : true,
+      "id" : "cms-org",
+      "meta" : {
+        "profile" : [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization" ]
+      },
+      "name" : "CMS",
+      "resourceType" : "Organization",
+      "type" : [ {
+        "coding" : [ {
+          "code" : "pay",
+          "display" : "Payer",
+          "system" : "http://terminology.hl7.org/CodeSystem/organization-type"
+        } ]
+      } ]
+    },
+    "search" : {
+      "mode" : "match"
+    }
+  }, {
+    "fullUrl" : "{uuid}",
+    "resource" : {
+      "address" : [ {
+        "postalCode" : "77550",
+        "state" : "TX"
+      } ],
+      "birthDate" : "1925-08-16",
+      "communication" : [ {
+        "language" : {
+          "coding" : [ {
+            "code" : "es",
+            "system" : "urn:ietf:bcp:47"
+          } ]
+        }
+      } ],
+      "deceasedDateTime" : "2024-07-02",
+      "extension" : [ {
+        "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
+        "valueCode" : "248152002"
+      }, {
+        "extension" : [ {
+          "url" : "ombCategory",
+          "valueCoding" : {
+            "code" : "UNK",
+            "display" : "Unknown",
+            "system" : "http://terminology.hl7.org/CodeSystem/v3-NullFlavor"
+          }
+        }, {
+          "url" : "text",
+          "valueString" : "Unknown"
+        } ],
+        "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
+      } ],
+      "gender" : "female",
+      "id" : "-300428640",
+      "identifier" : [ {
+        "period" : {
+          "start" : "2018-12-01T00:00:00+00:00"
+        },
+        "system" : "http://hl7.org/fhir/sid/us-mbi",
+        "type" : {
+          "coding" : [ {
+            "code" : "MB",
+            "system" : "http://terminology.hl7.org/CodeSystem/v2-0203"
+          } ]
+        },
+        "value" : "5I50JT9WX60"
+      } ],
+      "meta" : {
+        "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
+        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0" ]
+      },
+      "name" : [ {
+        "family" : "Erdapfel",
+        "given" : [ "Joey" ]
+      } ],
+      "resourceType" : "Patient"
+    },
+    "search" : {
+      "mode" : "match"
+    }
+  } ],
+  "id" : "IDI-Match",
+  "identifier" : {
+    "assigner" : {
+      "display" : "CMS"
+    }
+  },
+  "meta" : {
+    "profile" : [ "http://hl7.org/fhir/us/identity-matching/StructureDefinition/idi-match-bundle" ]
+  },
+  "resourceType" : "Bundle",
+  "type" : "searchset"
+}
+]
