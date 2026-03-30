@@ -79,12 +79,8 @@ class PatientMatchIT extends IntegrationTestBase {
   }
 
   private Stream<Arguments> verifyPatientMatch() {
-    var testBene =
-        entityManager
-            .createQuery("SELECT b FROM Beneficiary b WHERE b.beneSk = :beneSk", Beneficiary.class)
-            .setParameter("beneSk", "-300428640")
-            .getResultList()
-            .getFirst();
+    var testBene = getBeneficiaryFromBeneSk("-300428640");
+
     var firstName = testBene.getBeneficiaryName().getFirstName();
     var lastName = testBene.getBeneficiaryName().getLastName();
     var birthDate = DateUtil.toDate(testBene.getBirthDate());
@@ -102,8 +98,8 @@ class PatientMatchIT extends IntegrationTestBase {
     var ssnLastFour = testBene.getSsnLastFourDigits();
     var mbi = testBene.getIdentifier().getMbi();
     return Stream.of(
-        // Scenario 1 - first name, last name, DOB, address
         Arguments.of(
+            "Scenario 1 - first name, last name, DOB, address",
             testBene,
             Optional.of(firstName),
             Optional.of(lastName),
@@ -111,9 +107,9 @@ class PatientMatchIT extends IntegrationTestBase {
             Optional.of(address),
             Optional.empty(),
             Optional.empty(),
-            true),
-        // Scenario 1 - invalid/should fail
+            Optional.of(1)),
         Arguments.of(
+            "Scenario 1 - invalid/should fail",
             testBene,
             Optional.of(firstName),
             Optional.of(lastName),
@@ -126,9 +122,9 @@ class PatientMatchIT extends IntegrationTestBase {
                     .setPostalCode(address.getPostalCode())),
             Optional.empty(),
             Optional.empty(),
-            false),
-        // Scenario 4 - first name, last name, DOB, SSN last 4
+            Optional.empty()),
         Arguments.of(
+            "Scenario 4 - first name, last name, DOB, SSN last 4",
             testBene,
             Optional.of(firstName),
             Optional.of(lastName),
@@ -136,9 +132,10 @@ class PatientMatchIT extends IntegrationTestBase {
             Optional.empty(),
             Optional.empty(),
             Optional.of(ssnLastFour),
-            true),
-        // Scenario 4 - invalid/should fail
+            Optional.of(4)),
+        //
         Arguments.of(
+            "Scenario 4 - invalid/should fail",
             testBene,
             Optional.of(firstName),
             Optional.of(lastName),
@@ -146,9 +143,9 @@ class PatientMatchIT extends IntegrationTestBase {
             Optional.empty(),
             Optional.empty(),
             Optional.of("8347"),
-            false),
-        // Scenario 8 - first name, DOB, MBI
+            Optional.empty()),
         Arguments.of(
+            "Scenario 8 - first name, DOB, MBI",
             testBene,
             Optional.of(firstName),
             Optional.empty(),
@@ -156,9 +153,9 @@ class PatientMatchIT extends IntegrationTestBase {
             Optional.empty(),
             Optional.of(mbi),
             Optional.empty(),
-            true),
-        // Scenario 8 - invalid/should fail
+            Optional.of(8)),
         Arguments.of(
+            " Scenario 8 - invalid/should fail",
             testBene,
             Optional.of(firstName),
             Optional.empty(),
@@ -166,12 +163,23 @@ class PatientMatchIT extends IntegrationTestBase {
             Optional.empty(),
             Optional.of("5I50JT9WX61"),
             Optional.empty(),
-            false));
+            Optional.empty()),
+        Arguments.of(
+            " Scenario 1 failure, scenario 4 success",
+            testBene,
+            Optional.of(firstName),
+            Optional.of(lastName),
+            Optional.of(birthDate),
+            Optional.of(new Address().addLine("fake")),
+            Optional.empty(),
+            Optional.of(ssnLastFour),
+            Optional.of(4)));
   }
 
-  @ParameterizedTest
+  @ParameterizedTest(name = "{0}")
   @MethodSource
   void verifyPatientMatch(
+      String testName,
       Beneficiary beneficiary,
       Optional<String> firstName,
       Optional<String> lastName,
@@ -179,12 +187,11 @@ class PatientMatchIT extends IntegrationTestBase {
       Optional<Address> address,
       Optional<String> mbi,
       Optional<String> ssnLastFour,
-      boolean shouldMatch) {
-
+      Optional<Integer> expectedMatchNumber) {
     var patient = buildRequest(firstName, lastName, birthDate, address, mbi, ssnLastFour);
     var bundle = searchBundle(patient);
-    assertEquals(shouldMatch ? 2 : 1, bundle.getEntry().size());
-    if (!shouldMatch) {
+    assertEquals(expectedMatchNumber.isPresent() ? 2 : 1, bundle.getEntry().size());
+    if (expectedMatchNumber.isEmpty()) {
       return;
     }
     var entry =
