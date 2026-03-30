@@ -21,13 +21,12 @@ public class DynamoDbAuditLogger implements AuditLogger {
 
   private final DynamoDbClient dynamoDbClient;
   private final ObjectMapper objectMapper;
-  private static final String PATIENT_MATCH_AUDIT_TABLE = "patient_match_audit";
+  private final String tableName;
 
   @Override
   public void log(PatientMatchAuditRecord auditRecord) {
     try {
       var items = new HashMap<String, AttributeValue>();
-      System.out.println(auditRecord);
       var matchedBeneSk =
           auditRecord
               .finalDetermination()
@@ -42,7 +41,7 @@ public class DynamoDbAuditLogger implements AuditLogger {
                 .distinct()
                 .toList();
 
-        items.put("matchedBeneSk", AttributeValue.fromS(matchedBeneSk.get().toString()));
+        items.put("matchedBeneSk", AttributeValue.fromN(matchedBeneSk.get().toString()));
         items.put(
             "beneSksFound",
             AttributeValue.fromNs(beneSksFound.stream().map(String::valueOf).toList()));
@@ -54,17 +53,16 @@ public class DynamoDbAuditLogger implements AuditLogger {
             "combinationsEvaluated",
             AttributeValue.fromS(
                 objectMapper.writeValueAsString(auditRecord.combinationsEvaluated())));
-        items.put(
-            "finalDetermination",
-            AttributeValue.fromS(
-                objectMapper.writeValueAsString(auditRecord.finalDetermination())));
+        auditRecord
+            .finalDetermination()
+            .ifPresent(f -> items.put("finalDetermination", AttributeValue.fromS(f.combination())));
 
-        PutItemRequest request =
-            PutItemRequest.builder().tableName(PATIENT_MATCH_AUDIT_TABLE).item(items).build();
+        PutItemRequest request = PutItemRequest.builder().tableName(tableName).item(items).build();
         dynamoDbClient.putItem(request);
       }
     } catch (Exception e) {
-      LOGGER.warn("Failed to write audit log to DynamoDB", e);
+      LOGGER.error("Failed to write audit log to DynamoDB", e);
+      throw new RuntimeException("Audit logged failed", e);
     }
   }
 }

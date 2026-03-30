@@ -168,7 +168,7 @@ public class BeneficiaryRepository {
       if (uniqueXrefs.size() == 1) {
         var matchedBene = benes.getFirst();
         var finalDetermination =
-            new FinalDetermination(combinationIndex, PATIENT_MATCH_TYPE, matchedRecords.getFirst());
+            new FinalDetermination(combinationIndex, matchedRecords.getFirst());
         return new PatientMatchResult(
             combinationResults, Optional.of(finalDetermination), Optional.of(matchedBene));
       }
