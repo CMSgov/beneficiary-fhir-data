@@ -64,13 +64,13 @@ public class BeneficiaryRepository {
             .createQuery(
                 String.format(
                     """
-              SELECT bene
-              FROM Beneficiary bene
-              WHERE bene.beneSk = :beneSk
-                AND ((cast(:lowerBound AS ZonedDateTime)) IS NULL OR bene.patientMeta.updatedTimestamp %s :lowerBound)
-                AND ((cast(:upperBound AS ZonedDateTime)) IS NULL OR bene.patientMeta.updatedTimestamp %s :upperBound)
-              ORDER BY bene.obsoleteTimestamp DESC
-              """,
+                    SELECT bene
+                    FROM Beneficiary bene
+                    WHERE bene.beneSk = :beneSk
+                      AND ((cast(:lowerBound AS ZonedDateTime)) IS NULL OR bene.patientMeta.updatedTimestamp %s :lowerBound)
+                      AND ((cast(:upperBound AS ZonedDateTime)) IS NULL OR bene.patientMeta.updatedTimestamp %s :upperBound)
+                    ORDER BY bene.obsoleteTimestamp DESC
+                    """,
                     lastUpdatedRange.getLowerBoundSqlOperator(),
                     lastUpdatedRange.getUpperBoundSqlOperator()),
                 Beneficiary.class)
@@ -118,10 +118,10 @@ public class BeneficiaryRepository {
     return entityManager
         .createQuery(
             """
-            SELECT bene.xrefSk
-            FROM Beneficiary bene
-            WHERE bene.identifier.mbi = :mbi
-          """,
+              SELECT bene.xrefSk
+              FROM Beneficiary bene
+              WHERE bene.identifier.mbi = :mbi
+            """,
             Long.class)
         .setParameter("mbi", mbi)
         .getResultList()
@@ -129,6 +129,7 @@ public class BeneficiaryRepository {
         .findFirst();
   }
 
+  @Timed(value = "application.beneficiary.patient_match")
   public Optional<Beneficiary> searchPatientMatch(PatientMatch patientMatch) {
     var scenarios = patientMatch.getValidScenarios();
     for (var scenario : scenarios) {
@@ -139,12 +140,12 @@ public class BeneficiaryRepository {
                   entityManager.createQuery(
                       String.format(
                           """
-                  SELECT bene
-                  FROM Beneficiary bene
-                  WHERE bene.latestTransactionFlag = 'Y'
-                  %s
-                  ORDER BY bene.obsoleteTimestamp DESC
-                  """,
+                          SELECT bene
+                          FROM Beneficiary bene
+                          WHERE bene.latestTransactionFlag = 'Y'
+                          %s
+                          ORDER BY bene.obsoleteTimestamp DESC
+                          """,
                           filters.filterClause()),
                       Beneficiary.class),
                   filters.params())
