@@ -4,7 +4,7 @@ import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.base.Strings;
 import gov.cms.bfd.server.ng.beneficiary.model.PatientMatch;
-import gov.cms.bfd.server.ng.beneficiary.model.PatientMatchEntry;
+import gov.cms.bfd.server.ng.beneficiary.model.PatientMatchParameter;
 import gov.cms.bfd.server.ng.claim.model.ClaimFinalAction;
 import gov.cms.bfd.server.ng.claim.model.ClaimTypeCode;
 import gov.cms.bfd.server.ng.claim.model.MetaSourceSk;
@@ -236,6 +236,12 @@ public class FhirInputConverter {
         .toList();
   }
 
+  /**
+   * Converts the {@link Patient} into a {@link PatientMatch} request.
+   *
+   * @param patient patient input
+   * @return match request
+   */
   public static Optional<PatientMatch> getPatientMatch(@Nullable Patient patient) {
     if (patient == null) {
       return Optional.empty();
@@ -260,18 +266,21 @@ public class FhirInputConverter {
             .filter(s -> s.length() >= ssnLastFourLength)
             .map(s -> s.substring(s.length() - ssnLastFourLength));
 
+    // Note: the paths here are used for building queries and must match the property names in
+    // Beneficiary.java
     return Optional.of(
         PatientMatch.builder()
             .firstName(
-                new PatientMatchEntry(
+                new PatientMatchParameter(
                     firstName.stream().toList(), "beneficiaryName.normalizedFirstName"))
             .lastName(
-                new PatientMatchEntry(
+                new PatientMatchParameter(
                     lastName.stream().toList(), "beneficiaryName.normalizedLastName"))
-            .mbi(new PatientMatchEntry(mbi.stream().toList(), "identifier.mbi"))
-            .birthDate(new PatientMatchEntry(birthDate.stream().toList(), "birthDate"))
-            .addresses(new PatientMatchEntry(addresses, "address.normalizedAddress"))
-            .ssnLastFourDigits(new PatientMatchEntry(ssn.stream().toList(), "ssnLastFourDigits"))
+            .mbi(new PatientMatchParameter(mbi.stream().toList(), "identifier.mbi"))
+            .birthDate(new PatientMatchParameter(birthDate.stream().toList(), "birthDate"))
+            .addresses(new PatientMatchParameter(addresses, "address.normalizedAddress"))
+            .ssnLastFourDigits(
+                new PatientMatchParameter(ssn.stream().toList(), "ssnLastFourDigits"))
             .build());
   }
 

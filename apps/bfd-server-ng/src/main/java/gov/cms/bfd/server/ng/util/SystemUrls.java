@@ -524,6 +524,7 @@ public class SystemUrls {
   public static final String PROFILE_US_CORE_ORGANIZATION_6_1_0 =
       "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|6.1.0";
 
+  /** HL7 - US Core Organization Profile. */
   public static final String PROFILE_US_CORE_ORGANIZATION =
       "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization";
 
@@ -531,6 +532,7 @@ public class SystemUrls {
   public static final String PROFILE_US_CORE_PRACTITIONER_6_1_0 =
       "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0";
 
+  /** HL7 - IDI Match Bundle Profile. */
   public static final String PROFILE_IDENTITY_MATCHING =
       "http://hl7.org/fhir/us/identity-matching/StructureDefinition/idi-match-bundle";
 
@@ -693,6 +695,7 @@ public class SystemUrls {
   public static final String HL7_CLAIM_PRESCRIPTION_ORIGIN_CODE =
       "http://terminology.hl7.org/CodeSystem/NCPDPPrescriptionOriginCode";
 
+  /** HL7 - Organization Type. */
   public static final String HL7_ORGANIZATION_TYPE =
       "http://terminology.hl7.org/CodeSystem/organization-type";
 
@@ -1044,5 +1047,6 @@ public class SystemUrls {
   public static final String CMS_GENERIC_ID_NUM =
       "http://bluebutton.cms.gov/fhir/identifiers/GenericIdNum";
 
+  /** CMS URL. */
   public static final String CMS_GOV = "https://cms.gov";
 }

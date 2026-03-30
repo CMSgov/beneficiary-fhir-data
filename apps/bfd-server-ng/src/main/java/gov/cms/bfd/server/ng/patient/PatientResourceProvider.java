@@ -86,6 +86,12 @@ public class PatientResourceProvider implements IResourceProvider {
     return patientHandler.searchByBeneficiaryC4DIC(beneSk);
   }
 
+  /**
+   * Performs a patient match based on the beneficiary information provided.
+   *
+   * @param patient beneficiary input
+   * @return A bundle with the attached patient, if found
+   */
   @Operation(name = "idi-match", idempotent = true)
   public Bundle patientMatch(@OperationParam(name = "IDIPatient") final Patient patient) {
     var patientMatch = FhirInputConverter.getPatientMatch(patient);

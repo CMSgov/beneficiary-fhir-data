@@ -129,6 +129,13 @@ public class BeneficiaryRepository {
         .findFirst();
   }
 
+  /**
+   * Searches the database for a matching beneficiary, iterating through all valid match attempt
+   * permutations until one is found or all attempts are exhausted.
+   *
+   * @param patientMatch patient match request
+   * @return beneficiary, if found
+   */
   @Timed(value = "application.beneficiary.patient_match")
   public Optional<Beneficiary> searchPatientMatch(PatientMatch patientMatch) {
     var scenarios = patientMatch.getValidScenarios();
