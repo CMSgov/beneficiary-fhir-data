@@ -22,7 +22,7 @@ gov.cms.bfd.server.ng.PatientMatchIT.patientMatchSnapshot=[
       "mode" : "match"
     }
   }, {
-    "fullUrl" : "{uuid}",
+    "fullUrl" : "urn:uuid:00000000-0000-0000-0000-000000000000",
     "resource" : {
       "address" : [ {
         "postalCode" : "77550",
