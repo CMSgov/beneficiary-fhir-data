@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.util.ParametersUtil;
 import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
-import gov.cms.bfd.server.ng.beneficiary.model.BeneficiaryBase;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.util.Date;
@@ -94,6 +93,8 @@ class PatientMatchIT extends IntegrationTestBase {
     var historicalBene = TestBene.fromBene(getBeneficiaryFromBeneSk("-415220062", 0));
     var currentBene = TestBene.fromBene(getBeneficiaryFromBeneSk("-415220062", 1));
 
+    // precondition - same bene, different addresses
+    assertEquals(historicalBene.bene.getBeneSk(), currentBene.bene.getBeneSk());
     assertNotEquals(historicalBene.bene.getAddress(), currentBene.bene.getAddress());
     return Stream.of(
         Arguments.of(

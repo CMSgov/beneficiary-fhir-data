@@ -3,7 +3,6 @@ package gov.cms.bfd.server.ng.beneficiary.model;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.util.Optional;
-
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
