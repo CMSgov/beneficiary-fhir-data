@@ -34,6 +34,8 @@ public class LogStreamAuditLogger implements AuditLogger {
                 .filter(Objects::nonNull)
                 .distinct()
                 .toList();
+        var successfulCombination =
+            auditRecord.finalDetermination().map(FinalDetermination::combination).orElse("");
         LOGGER
             .atInfo()
             .setMessage(LoggerConstants.PATIENT_MATCH_REQUESTED)
@@ -45,7 +47,7 @@ public class LogStreamAuditLogger implements AuditLogger {
             .addKeyValue("clientName", auditRecord.clientName())
             .addKeyValue("clientIp", auditRecord.clientIp())
             .addKeyValue("combinationsEvaluated", auditRecord.combinationsEvaluated())
-            .addKeyValue("finalDetermination", auditRecord.finalDetermination())
+            .addKeyValue("finalDetermination", successfulCombination)
             .log();
       }
     } catch (Exception e) {

@@ -108,7 +108,9 @@ public class Configuration implements Serializable {
   public AuditLogger getAuditLogger(ObjectMapper objectMapper) {
     var logStreamLogger = new LogStreamAuditLogger(objectMapper);
     if (getAuditLoggerType() == AuditLoggerType.DYNAMO_DB) {
-      var dynamoLogger = new DynamoDbAuditLogger(getDynamoDbClient(), objectMapper);
+      var dynamoLogger =
+          new DynamoDbAuditLogger(
+              getDynamoDbClient(), objectMapper, getPatientMatchAuditTableName());
 
       return auditRecord -> {
         logStreamLogger.log(auditRecord);
@@ -157,6 +159,10 @@ public class Configuration implements Serializable {
     }
 
     return DynamoDbClient.builder().region(region).credentialsProvider(credentialsProvider).build();
+  }
+
+  private String getPatientMatchAuditTableName() {
+    return String.format("bfd-%s-patient-match-audit", env);
   }
 
   private Map<String, String> getClientCertsToAliasesInternal() {
