@@ -86,7 +86,6 @@ def run(load_mode: str) -> None:
             unreported_jobs | {event.job_type for event in idr_job_events}
         )
 
-    # if load_benes and load_claims:
     try:
         hamilton_driver.execute(  # type: ignore
             final_vars=["collect_stage4"],

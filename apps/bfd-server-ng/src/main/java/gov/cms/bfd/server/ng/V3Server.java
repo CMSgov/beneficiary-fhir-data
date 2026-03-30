@@ -65,13 +65,13 @@ public class V3Server extends RestfulServer {
     var nonsensitiveConfig = configuration.getNonsensitive();
 
     return switch (provider) {
-      case EobResourceProvider eob ->
+      case EobResourceProvider _ ->
           checkAndLogProviderStatus(
               nonsensitiveConfig.isEobEnabled(), provider.getResourceType().getSimpleName());
-      case PatientResourceProvider patientProvider ->
+      case PatientResourceProvider _ ->
           checkAndLogProviderStatus(
               nonsensitiveConfig.isPatientEnabled(), provider.getResourceType().getSimpleName());
-      case CoverageResourceProvider coverageProvider ->
+      case CoverageResourceProvider _ ->
           checkAndLogProviderStatus(
               nonsensitiveConfig.isCoverageEnabled(), provider.getResourceType().getSimpleName());
       default -> {

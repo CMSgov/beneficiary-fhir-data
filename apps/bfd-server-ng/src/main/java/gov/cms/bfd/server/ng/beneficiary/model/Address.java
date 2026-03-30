@@ -3,8 +3,10 @@ package gov.cms.bfd.server.ng.beneficiary.model;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.util.Optional;
+import lombok.Getter;
 
 /** Beneficiary address information. */
+@Getter
 @Embeddable
 public class Address {
   @Column(name = "geo_usps_state_cd")

@@ -9,6 +9,7 @@ import au.com.origin.snapshots.junit5.SnapshotExtension;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ch.qos.logback.classic.spi.ILoggingEvent;
+import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.EntityManager;
 import java.util.HashSet;
@@ -116,6 +117,14 @@ public class IntegrationTestBase {
         .map(Bundle.BundleEntryComponent::getResource)
         .map(ExplanationOfBenefit.class::cast)
         .toList();
+  }
+
+  protected Beneficiary getBeneficiaryFromBeneSk(String beneSk) {
+    return entityManager
+        .createQuery("SELECT b FROM Beneficiary b WHERE b.beneSk = :beneSk", Beneficiary.class)
+        .setParameter("beneSk", beneSk)
+        .getResultList()
+        .getFirst();
   }
 
   protected List<Extension> getExtensionByUrl(DomainResource resource, String url) {

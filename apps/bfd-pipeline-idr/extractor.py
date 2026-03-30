@@ -24,6 +24,7 @@ from model.base_model import (
 from model.load_progress import LoadProgress
 from settings import (
     BATCH_MULTIPLIER,
+    ENABLE_DATE_PARTITIONS,
     IDR_ACCOUNT,
     IDR_DATABASE,
     IDR_PRIVATE_KEY,
@@ -66,9 +67,12 @@ class Extractor(ABC, Generic[T]):  # noqa: UP046
         return f"GREATEST({','.join(cols)})"
 
     def _get_batch_size(self) -> int:
-        # Larger tables take up more memory, so we'll try to normalize
-        # the total memory used here based on the number of columns
-        return round(BATCH_MULTIPLIER / len(self.cls.columns_raw()))
+        if ENABLE_DATE_PARTITIONS:
+            # Larger tables take up more memory, so we'll try to normalize
+            # the total memory used here based on the number of columns
+            return round(BATCH_MULTIPLIER / len(self.cls.columns_raw()))
+        # If date partitioning is not enabled, the number of concurrent jobs will be small
+        return 100_000
 
     def get_query(self, start_time: datetime, load_mode: LoadMode) -> str:
         query = self.cls.fetch_query(self.partition, start_time, load_mode)

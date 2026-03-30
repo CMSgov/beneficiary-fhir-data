@@ -1,7 +1,10 @@
+import re
+import string
 from datetime import date, datetime
 from typing import Annotated, override
 
 from pydantic import BeforeValidator, computed_field
+from unidecode import unidecode
 
 from constants import (
     BENEFICIARY_TABLE,
@@ -29,8 +32,12 @@ from model.base_model import (
 )
 
 
-def _normalize_name(col: str) -> str:
-    return f"UPPER(REGEXP_REPLACE(UNACCENT({col}), '[[:punct:]]|\\s', '', 'g'))"
+def _normalize_str(s: str) -> str:
+    cleaned_str = unidecode(s).translate(translator)
+    return re.sub(r"\s+", "", cleaned_str).upper()
+
+
+translator = str.maketrans("", "", string.punctuation)
 
 
 class IdrBeneficiary(IdrBaseModel):
@@ -64,8 +71,6 @@ class IdrBeneficiary(IdrBaseModel):
     bene_1st_name: str
     bene_midl_name: Annotated[str, BeforeValidator(transform_default_string)]
     bene_last_name: str
-    bfd_normalized_1st_name: Annotated[str, {EXPR: _normalize_name("bene_1st_name")}]
-    bfd_normalized_last_name: Annotated[str, {EXPR: _normalize_name("bene_last_name")}]
     bene_brth_dt: date
     bene_death_dt: Annotated[date, BeforeValidator(transform_null_date_to_max)]
     bene_vrfy_death_day_sw: Annotated[str, BeforeValidator(transform_default_string)]
@@ -105,6 +110,16 @@ class IdrBeneficiary(IdrBaseModel):
         {UPDATE_TIMESTAMP: True, ALIAS: ALIAS_XREF, COLUMN_MAP: "idr_updt_ts"},
         BeforeValidator(transform_null_date_to_min),
     ]
+
+    @computed_field
+    @property
+    def bfd_normalized_1st_name(self) -> str:
+        return _normalize_str(self.bene_1st_name)
+
+    @computed_field
+    @property
+    def bfd_normalized_last_name(self) -> str:
+        return _normalize_str(self.bene_last_name)
 
     @computed_field
     @property
