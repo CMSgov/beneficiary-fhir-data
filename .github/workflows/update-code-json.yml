@@ -30,7 +30,7 @@ jobs:
 
       - name: "Generate an App Token"
         id: generate_token
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@v3
         with:
           app-id: ${{ secrets.BFD_RELEASE_APP_ID }}
           private-key: ${{ secrets.BFD_RELEASE_APP_KEY }}
