@@ -9,7 +9,7 @@ RUN dnf -y install shadow-utils && \
     dnf -y clean all && \
     rm -rf /var/cache
 
-FROM groupadd as deps
+FROM groupadd AS deps
 
 # Setup a non-root user
 RUN groupadd --system --gid 999 nonroot \
