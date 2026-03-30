@@ -182,6 +182,7 @@ public class PatientHandler {
             bundle.addEntry(
                 new Bundle.BundleEntryComponent()
                     .setResource(toFhir(b))
+                    .setFullUrl("urn:uuid:" + UUID.randomUUID())
                     .setSearch(
                         new Bundle.BundleEntrySearchComponent()
                             .setMode(Bundle.SearchEntryMode.MATCH))));

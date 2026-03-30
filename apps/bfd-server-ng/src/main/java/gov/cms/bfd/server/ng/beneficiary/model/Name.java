@@ -4,10 +4,12 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.util.ArrayList;
 import java.util.Optional;
+import lombok.Getter;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.StringType;
 
 /** Beneficiary name information. */
+@Getter
 @Embeddable
 public class Name {
   @Column(name = "bene_1st_name")
