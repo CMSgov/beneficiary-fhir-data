@@ -455,6 +455,7 @@ jobs:
         bfd-platform-server-regression,
         bfd-platform-mount-certstores,
         bfd-platform-server-fluent-bit,
+        bfd-platform-idr-pipeline,
         bfd-platform-run-locust,
         bfd-platform-eft-sftp-outbound-transfer-lambda,
         bfd-platform-pipeline-ccw-manifests-verifier-lambda,
