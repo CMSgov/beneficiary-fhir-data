@@ -40,8 +40,8 @@ public class AllowedUriFilter extends OncePerRequestFilter {
     // certificate. For non-local requests, this means the request is not authorized
     final var certAlias = certificateUtil.getAliasAttribute(request).orElse("");
 
-    var internalCerts = configuration.getNonsensitive().getInternalCertificateAliases();
-    var disabledUris = configuration.getNonsensitive().getDisabledUris();
+    var internalCerts = configuration.getInternalCertificateAliases();
+    var disabledUris = configuration.getDisabledUris();
     var requestUri = request.getRequestURI();
     var isUriDisabled = disabledUris.stream().anyMatch(requestUri::startsWith);
     if (isUriDisabled) {

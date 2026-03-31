@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
-import java.util.List;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
@@ -21,7 +20,7 @@ class ServerConfigurationIT extends IntegrationTestBase {
   @DynamicPropertySource
   static void registerDynamicProperties(DynamicPropertyRegistry registry) {
     // These properties will apply to all tests in this class.
-    registry.add("bfd.nonsensitive.disabled_uris", () -> List.of("/v3/fhir/ExplanationOfBenefit"));
+    registry.add("bfd.nonsensitive.disabled_uris_json", () -> "['/v3/fhir/ExplanationOfBenefit']");
   }
 
   @Test

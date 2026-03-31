@@ -9,7 +9,6 @@ import gov.cms.bfd.sharedutils.database.DatabaseOptions;
 import gov.cms.bfd.sharedutils.database.HikariDataSourceFactory;
 import java.io.Serializable;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,7 +64,14 @@ public class Configuration implements Serializable {
 
   @Getter(lazy = true)
   private final Set<String> samhsaAllowedCertificateAliases =
-      getSamhsaAllowedCertificateAliasesInternal();
+      getValuesFromJson(nonsensitive.samhsaAllowedCertificateAliasesJson);
+
+  @Getter(lazy = true)
+  private final Set<String> disabledUris = getValuesFromJson(nonsensitive.disabledUrisJson);
+
+  @Getter(lazy = true)
+  private final Set<String> internalCertificateAliases =
+      getValuesFromJson(nonsensitive.internalCertificateAliasesJson);
 
   /**
    * Determines if the profile requires auth.
@@ -101,9 +107,9 @@ public class Configuration implements Serializable {
             Collectors.toMap(e -> StringUtils.deleteWhitespace(e.getValue()), Map.Entry::getKey));
   }
 
-  private Set<String> getSamhsaAllowedCertificateAliasesInternal() {
+  private Set<String> getValuesFromJson(String jsonStr) {
     final var setType = new TypeToken<Set<String>>() {}.getType();
-    return new Gson().fromJson(nonsensitive.samhsaAllowedCertificateAliasesJson, setType);
+    return new Gson().fromJson(jsonStr, setType);
   }
 
   private JdbcConnectionDetails getJdbcConfiguration() {
@@ -193,8 +199,9 @@ public class Configuration implements Serializable {
   @ConfigurationProperties
   public static class Nonsensitive {
     private Db db = new Db();
-    private List<String> disabledUris = new ArrayList<>();
-    private List<String> internalCertificateAliases = new ArrayList<>();
+    private String disabledUrisJson = "[]";
+    private String internalCertificateAliasesJson = "[]";
+    private String samhsaAllowedCertificateAliasesJson = "[]";
 
     /** Nonsensitive database configuration. */
     @Data
@@ -235,7 +242,5 @@ public class Configuration implements Serializable {
     }
 
     private final Map<String, String> clientCertificates = new HashMap<>();
-
-    private String samhsaAllowedCertificateAliasesJson;
   }
 }
