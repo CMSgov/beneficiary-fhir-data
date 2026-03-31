@@ -6282,6 +6282,20 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "PRVDR_FAC_FIPS_ST_CD",
+            "display" : "Facility FIPS State Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 23,
+        "valueString" : "04"
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "drg",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -6292,7 +6306,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 23
+        "sequence" : 24
       } ],
       "total" : [ {
         "amount" : {
@@ -10038,6 +10052,20 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "PRVDR_FAC_FIPS_ST_CD",
+            "display" : "Facility FIPS State Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 20,
+        "valueString" : "04"
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "drg",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -10048,7 +10076,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 20
+        "sequence" : 21
       } ],
       "total" : [ {
         "amount" : {
@@ -11876,6 +11904,20 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "PRVDR_FAC_FIPS_ST_CD",
+            "display" : "Facility FIPS State Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 17,
+        "valueString" : "04"
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "drg",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -11886,7 +11928,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
@@ -14075,6 +14117,20 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "PRVDR_FAC_FIPS_ST_CD",
+            "display" : "Facility FIPS State Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 23,
+        "valueString" : "04"
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "drg",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -14085,7 +14141,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 23
+        "sequence" : 24
       } ],
       "total" : [ {
         "amount" : {
@@ -17831,6 +17887,20 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "PRVDR_FAC_FIPS_ST_CD",
+            "display" : "Facility FIPS State Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 20,
+        "valueString" : "04"
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "drg",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -17841,7 +17911,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 20
+        "sequence" : 21
       } ],
       "total" : [ {
         "amount" : {
@@ -19669,6 +19739,20 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "PRVDR_FAC_FIPS_ST_CD",
+            "display" : "Facility FIPS State Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "sequence" : 17,
+        "valueString" : "04"
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "drg",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -19679,7 +19763,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {

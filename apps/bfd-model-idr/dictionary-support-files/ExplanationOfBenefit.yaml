@@ -3692,3 +3692,28 @@
   sourceColumn: CLM_LINE_BNFT_ENHNCMT_5_CD
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_BNFT_ENHNCMT_CD').exists()).value
   notes: There may be multiple. These are unordered, but there are a maximum of 5 per institutional claim header, and 5 per professional claim line. The infoSequence element on the ExplanationOfBenefit.item can be used to determine which are relevant to a given claim line.
+- inputPath: SupportingInfoComponent.GEO_BLG_SSA_STATE_CD                       
+  appliesTo:                                                                    
+    - Inpatient                                                                 
+    - Outpatient                                                                
+    - HHA
+    - Hospice
+    - SNF                                                                       
+  sources:
+    - NCH                                                                       
+  cclfMapping:  
+    - CCLF1.PRVDR_FAC_FIPS_ST_CD
+  sourceView: V2_MDCR_CLM_INSTNL
+  sourceColumn: GEO_BLG_SSA_STATE_CD                                            
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='PRVDR_FAC_FIPS_ST_CD').exists()).value
+- inputPath: LineItemComponent.GEO_RNDRG_SSA_STATE_CD                           
+  appliesTo:                                                                    
+    - Carrier
+    - DME                                                                       
+  sources:      
+    - NCH
+  cclfMapping:
+    - CCLF5.RNDRG_PRVDR_FIPS_ST_CD                                              
+  sourceView: V2_MDCR_CLM_LINE_PRFNL
+  sourceColumn: GEO_RNDRG_SSA_STATE_CD                                          
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='RNDRG_PRVDR_FIPS_ST_CD').exists()).value   
