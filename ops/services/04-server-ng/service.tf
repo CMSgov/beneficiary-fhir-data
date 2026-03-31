@@ -412,8 +412,6 @@ resource "aws_appautoscaling_policy" "server_track_cpu" {
 }
 
 resource "aws_dynamodb_table" "patient_match_audit_table" {
-  count = local.env == "prod" ? 1 : 0
-
   name         = "bfd-${local.env}-patient-match-audit"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "matchedBeneSk"
