@@ -24,6 +24,12 @@
     "platform": "linux/arm64"
   },
   {
+    "name": "bfd-platform-idr-pipeline",
+    "dockerfile": "apps/bfd-pipeline-idr/Dockerfile",
+    "contextDir": "apps/bfd-pipeline-idr",
+    "platform": "linux/arm64"
+  },
+  {
     "name": "bfd-platform-server-regression",
     "dockerfile": "apps/utils/locust_tests/server-regression.Dockerfile",
     "contextDir": "apps/utils/locust_tests",

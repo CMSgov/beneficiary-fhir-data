@@ -42,6 +42,7 @@ locals {
     "bfd-platform-mount-certstores",
     "bfd-platform-server-fluent-bit",
     # application container image repositories
+    "bfd-platform-idr-pipeline",
     "bfd-db-migrator",
     "bfd-pipeline-app",
     "bfd-server",
