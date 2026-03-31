@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.util.ParametersUtil;
+import com.google.common.base.CharMatcher;
 import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import gov.cms.bfd.server.ng.util.SystemUrls;
@@ -113,6 +114,11 @@ class PatientMatchIT extends IntegrationTestBase {
     // precondition - same bene, different addresses
     assertEquals(historicalBene.bene.getBeneSk(), currentBene.bene.getBeneSk());
     assertNotEquals(historicalBene.bene.getAddress(), currentBene.bene.getAddress());
+
+    var beneWithDiacritics = TestBene.fromBene(getBeneficiaryFromBeneSk("-614916732"));
+    // precondition - first and last name should contain diacritics
+    assertFalse(CharMatcher.ascii().matchesAllOf(beneWithDiacritics.firstName));
+    assertFalse(CharMatcher.ascii().matchesAllOf(beneWithDiacritics.lastName));
     return Stream.of(
         Arguments.of(
             "Scenario 1 - first name, last name, DOB, address",
@@ -228,6 +234,16 @@ class PatientMatchIT extends IntegrationTestBase {
             List.of(),
             Optional.empty(),
             Optional.of("fakeSsn"),
+            Optional.empty()),
+        Arguments.of(
+            "Scenario 4 - name with diacritics",
+            beneWithDiacritics.bene,
+            Optional.of(beneWithDiacritics.firstName),
+            Optional.of(beneWithDiacritics.lastName),
+            Optional.of(beneWithDiacritics.birthDate),
+            List.of(),
+            Optional.empty(),
+            Optional.of(beneWithDiacritics.ssnLastFour),
             Optional.empty()),
         Arguments.of(
             " Scenario 1 failure, scenario 4 success",
