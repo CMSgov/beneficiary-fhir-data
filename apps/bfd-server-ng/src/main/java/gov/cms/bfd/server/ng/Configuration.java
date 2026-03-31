@@ -9,6 +9,7 @@ import gov.cms.bfd.sharedutils.database.DatabaseOptions;
 import gov.cms.bfd.sharedutils.database.HikariDataSourceFactory;
 import java.io.Serializable;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -192,9 +193,8 @@ public class Configuration implements Serializable {
   @ConfigurationProperties
   public static class Nonsensitive {
     private Db db = new Db();
-    private boolean eobEnabled = true;
-    private boolean patientEnabled = true;
-    private boolean coverageEnabled = true;
+    private List<String> disabledUris = new ArrayList<>();
+    private List<String> internalCertificateAliases = new ArrayList<>();
 
     /** Nonsensitive database configuration. */
     @Data

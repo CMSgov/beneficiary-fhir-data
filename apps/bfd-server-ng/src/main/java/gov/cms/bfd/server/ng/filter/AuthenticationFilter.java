@@ -45,15 +45,6 @@ public class AuthenticationFilter extends OncePerRequestFilter {
       response.sendError(401, MISSING_INVALID_HEADER_MSG);
       return;
     }
-    // TODO: remove
-    var env = System.getenv("BFD_ENV");
-    if (env != null
-        && env.equalsIgnoreCase("prod")
-        && !certAlias.get().equalsIgnoreCase("bluebutton_backend_prod_data_server_client_test")
-        && request.getRequestURI().equals("/v3/fhir/Patient/$idi-match")) {
-      response.sendError(401, MISSING_INVALID_HEADER_MSG);
-      return;
-    }
 
     filterChain.doFilter(request, response);
   }

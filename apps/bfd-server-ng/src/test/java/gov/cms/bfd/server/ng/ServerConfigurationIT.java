@@ -6,7 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
+import java.util.List;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
@@ -15,18 +16,22 @@ import org.springframework.test.context.DynamicPropertySource;
 
 class ServerConfigurationIT extends IntegrationTestBase {
 
-  static final String EOB_UNKNOWN_RESOURCE_TYPE_ERROR_MESSAGE_FRAGMENT =
-      "HAPI-0302: Unknown resource type 'ExplanationOfBenefit'";
+  static final String RESOURCE_NOT_ALLOWED_MESSAGE_FRAGMENT = "Resource not allowed.";
 
   @DynamicPropertySource
   static void registerDynamicProperties(DynamicPropertyRegistry registry) {
     // These properties will apply to all tests in this class.
-    // For this test, we want to ensure Patient and Coverage are ON by default, and EOB is OFF by
-    // default.
-    // This setup mirrors what we expect in 'prod-like' environments initially.
-    registry.add("bfd.nonsensitive.eob_enabled", () -> "false");
-    registry.add("bfd.nonsensitive.patient_enabled", () -> "true");
-    registry.add("bfd.nonsensitive.coverage_enabled", () -> "true");
+    registry.add("bfd.nonsensitive.disabled_uris", () -> List.of("/v3/fhir/ExplanationOfBenefit"));
+  }
+
+  @Test
+  void disallowedEndpointReturns401() {
+    given()
+        .when()
+        .get(getServerUrl() + "/ExplanationOfBenefit")
+        .then()
+        .statusCode(401)
+        .body(containsString(RESOURCE_NOT_ALLOWED_MESSAGE_FRAGMENT));
   }
 
   @Test
@@ -52,11 +57,12 @@ class ServerConfigurationIT extends IntegrationTestBase {
 
     var thrown =
         assertThrows(
-            ResourceNotFoundException.class,
+            AuthenticationException.class,
             readRequest::execute,
-            "Expected ResourceNotFoundException because ExplanationOfBenefit endpoint should be disabled.");
+            "Expected AuthenticationException because ExplanationOfBenefit endpoint should be"
+                + " disabled.");
 
-    assertTrue(thrown.getMessage().contains(EOB_UNKNOWN_RESOURCE_TYPE_ERROR_MESSAGE_FRAGMENT));
+    assertTrue(thrown.getResponseBody().contains(RESOURCE_NOT_ALLOWED_MESSAGE_FRAGMENT));
 
     assertDoesNotThrow(
         () -> {
