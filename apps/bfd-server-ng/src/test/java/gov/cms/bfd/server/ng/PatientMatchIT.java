@@ -119,6 +119,15 @@ class PatientMatchIT extends IntegrationTestBase {
     // precondition - first and last name should contain diacritics
     assertFalse(CharMatcher.ascii().matchesAllOf(beneWithDiacritics.firstName));
     assertFalse(CharMatcher.ascii().matchesAllOf(beneWithDiacritics.lastName));
+
+    var xrefBeneOld = TestBene.fromBene(getBeneficiaryFromBeneSk("-752271050"));
+    var xrefBeneCurrent = TestBene.fromBene(getBeneficiaryFromBeneSk("-408071088"));
+    // precondition - xrefBeneOld should be xrefed to xrefBeneCurrent
+    assertEquals(xrefBeneOld.bene.getXrefSk(), xrefBeneCurrent.bene.getXrefSk());
+    assertNotEquals(xrefBeneOld.bene.getBeneSk(), xrefBeneCurrent.bene.getXrefSk());
+    assertEquals(xrefBeneOld.bene.getXrefSk(), xrefBeneCurrent.bene.getBeneSk());
+    assertNotEquals(
+        xrefBeneOld.bene.getIdentifier().getMbi(), xrefBeneCurrent.bene.getIdentifier().getMbi());
     return Stream.of(
         Arguments.of(
             "Scenario 1 - first name, last name, DOB, address",
@@ -206,6 +215,16 @@ class PatientMatchIT extends IntegrationTestBase {
             Optional.empty(),
             Optional.of(1)),
         Arguments.of(
+            "Scenario 1 - xref",
+            xrefBeneOld.bene,
+            Optional.of(xrefBeneOld.firstName),
+            Optional.of(xrefBeneOld.lastName),
+            Optional.of(xrefBeneOld.birthDate),
+            List.of(xrefBeneOld.address),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.of(1)),
+        Arguments.of(
             "Scenario 4 - first name, last name, DOB, SSN last 4",
             testBene.bene,
             Optional.of(testBene.firstName),
@@ -245,6 +264,16 @@ class PatientMatchIT extends IntegrationTestBase {
             Optional.empty(),
             Optional.of(beneWithDiacritics.ssnLastFour),
             Optional.empty()),
+        Arguments.of(
+            "Scenario 4 - xref",
+            xrefBeneOld.bene,
+            Optional.of(xrefBeneOld.firstName),
+            Optional.of(xrefBeneOld.lastName),
+            Optional.of(xrefBeneOld.birthDate),
+            List.of(),
+            Optional.empty(),
+            Optional.of(xrefBeneOld.ssnLastFour),
+            Optional.of(4)),
         Arguments.of(
             " Scenario 1 failure, scenario 4 success",
             testBene.bene,
@@ -286,6 +315,16 @@ class PatientMatchIT extends IntegrationTestBase {
             List.of(duplicateBene1.address),
             Optional.of(duplicateBene1.mbi),
             Optional.of(duplicateBene1.ssnLastFour),
+            Optional.of(8)),
+        Arguments.of(
+            "Scenario 8 - xref",
+            xrefBeneOld.bene,
+            Optional.of(xrefBeneOld.firstName),
+            Optional.empty(),
+            Optional.of(xrefBeneOld.birthDate),
+            List.of(),
+            Optional.of(xrefBeneOld.mbi),
+            Optional.empty(),
             Optional.of(8)));
   }
 
@@ -313,19 +352,26 @@ class PatientMatchIT extends IntegrationTestBase {
             .findFirst()
             .get();
     var patientResult = (Patient) entry.getResource();
+
+    var replaceCount =
+        patientResult.getLink().stream()
+            .filter(l -> l.getType() == Patient.LinkType.REPLACEDBY)
+            .count();
+    // xref benes won't have bene information supplied
+    if (replaceCount == 1) {
+      return;
+    }
     var name = patientResult.getName().stream().findFirst().get();
     var expectedName = beneficiary.getBeneficiaryName();
     assertEquals(expectedName.getFirstName(), name.getGiven().getFirst().toString());
     assertEquals(expectedName.getLastName(), name.getFamily());
 
     assertEquals(DateUtil.toDate(beneficiary.getBirthDate()), patientResult.getBirthDate());
-    assertEquals(
-        beneficiary.getIdentifier().getMbi(),
-        patientResult.getIdentifier().stream()
-            .filter(i -> i.getSystem().equals(SystemUrls.CMS_MBI))
-            .findFirst()
-            .get()
-            .getValue());
+    var inputMbi = beneficiary.getIdentifier().getMbi();
+    assert (patientResult.getIdentifier().stream()
+            .filter(i -> i.getSystem().equals(SystemUrls.CMS_MBI) && i.getValue().equals(inputMbi))
+            .count()
+        == 1);
   }
 
   private record TestBene(
