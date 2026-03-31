@@ -64,13 +64,13 @@ public class BeneficiaryRepository {
             .createQuery(
                 String.format(
                     """
-              SELECT bene
-              FROM Beneficiary bene
-              WHERE bene.beneSk = :beneSk
-                AND ((cast(:lowerBound AS ZonedDateTime)) IS NULL OR bene.patientMeta.updatedTimestamp %s :lowerBound)
-                AND ((cast(:upperBound AS ZonedDateTime)) IS NULL OR bene.patientMeta.updatedTimestamp %s :upperBound)
-              ORDER BY bene.obsoleteTimestamp DESC
-              """,
+                    SELECT bene
+                    FROM Beneficiary bene
+                    WHERE bene.beneSk = :beneSk
+                      AND ((cast(:lowerBound AS ZonedDateTime)) IS NULL OR bene.patientMeta.updatedTimestamp %s :lowerBound)
+                      AND ((cast(:upperBound AS ZonedDateTime)) IS NULL OR bene.patientMeta.updatedTimestamp %s :upperBound)
+                    ORDER BY bene.obsoleteTimestamp DESC
+                    """,
                     lastUpdatedRange.getLowerBoundSqlOperator(),
                     lastUpdatedRange.getUpperBoundSqlOperator()),
                 Beneficiary.class)
@@ -118,10 +118,10 @@ public class BeneficiaryRepository {
     return entityManager
         .createQuery(
             """
-            SELECT bene.xrefSk
-            FROM Beneficiary bene
-            WHERE bene.identifier.mbi = :mbi
-          """,
+              SELECT bene.xrefSk
+              FROM Beneficiary bene
+              WHERE bene.identifier.mbi = :mbi
+            """,
             Long.class)
         .setParameter("mbi", mbi)
         .getResultList()
@@ -129,11 +129,19 @@ public class BeneficiaryRepository {
         .findFirst();
   }
 
+  /**
+   * Searches the database for a matching beneficiary, iterating through all valid match attempt
+   * permutations until one is found or all attempts are exhausted.
+   *
+   * @param patientMatch patient match request
+   * @return beneficiary, if found
+   */
+  @Timed(value = "application.beneficiary.patient_match")
   public PatientMatchResult searchPatientMatch(PatientMatch patientMatch) {
     var combinationResults = new ArrayList<MatchCombinationResult>();
-    for (var indexedScenarios : patientMatch.getValidScenarios()) {
-      var combinationIndex = indexedScenarios.combinationIndex();
-      var scenario = indexedScenarios.entries();
+    for (var indexedScenario : patientMatch.getValidScenarios()) {
+      var combinationIndex = indexedScenario.combinationIndex();
+      var scenario = indexedScenario.entries();
       var filters = new PatientMatchFilter(scenario).getFilters("bene", SystemType.UNKNOWN);
 
       var benes =
@@ -141,12 +149,12 @@ public class BeneficiaryRepository {
                   entityManager.createQuery(
                       String.format(
                           """
-                  SELECT bene
-                  FROM Beneficiary bene
-                  WHERE bene.latestTransactionFlag = 'Y'
-                  %s
-                  ORDER BY bene.obsoleteTimestamp DESC
-                  """,
+                          SELECT bene
+                          FROM Beneficiary bene
+                          WHERE bene.latestTransactionFlag = 'Y'
+                          %s
+                          ORDER BY bene.obsoleteTimestamp DESC
+                          """,
                           filters.filterClause()),
                       Beneficiary.class),
                   filters.params())

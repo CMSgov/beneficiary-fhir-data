@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.util.ParametersUtil;
+import com.google.common.base.CharMatcher;
 import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import gov.cms.bfd.server.ng.util.SystemUrls;
@@ -24,6 +25,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+// Tells JUnit to re-use the same test instance per class
+// This is fine because we do not (and should not) have tests that rely on shared static state
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class PatientMatchIT extends IntegrationTestBase {
   private Bundle searchBundle(Patient patient) {
@@ -50,7 +53,7 @@ class PatientMatchIT extends IntegrationTestBase {
       Optional<String> firstName,
       Optional<String> lastName,
       Optional<Date> birthDate,
-      Optional<Address> address,
+      List<Address> addresses,
       Optional<String> mbi,
       Optional<String> ssnLastFour) {
     var patient = new Patient();
@@ -59,7 +62,7 @@ class PatientMatchIT extends IntegrationTestBase {
     lastName.ifPresent(name::setFamily);
     patient.setName(List.of(name));
     birthDate.ifPresent(patient::setBirthDate);
-    address.ifPresent(patient::addAddress);
+    addresses.forEach(patient::addAddress);
     mbi.ifPresent(
         m -> patient.addIdentifier(new Identifier().setSystem(SystemUrls.CMS_MBI).setValue(m)));
     ssnLastFour.ifPresent(
@@ -72,6 +75,21 @@ class PatientMatchIT extends IntegrationTestBase {
   void emptyRequestReturnsEmptyBundle() {
     var res = searchBundle(new Patient());
     assertEquals(1, res.getEntry().size());
+  }
+
+  @Test
+  void patientMatchSnapshot() {
+    var testBene = TestBene.fromBene(getBeneficiaryFromBeneSk("-300428640"));
+    var patient =
+        buildRequest(
+            Optional.of(testBene.firstName),
+            Optional.of(testBene.lastName),
+            Optional.of(testBene.birthDate),
+            List.of(testBene.address),
+            Optional.of(testBene.mbi),
+            Optional.of(testBene.ssnLastFour));
+    var bundle = searchBundle(patient);
+    expectFhir().toMatchSnapshot(bundle);
   }
 
   private Stream<Arguments> verifyPatientMatch() {
@@ -90,6 +108,17 @@ class PatientMatchIT extends IntegrationTestBase {
     assertEquals(
         duplicateBene1.bene.getSsnLastFourDigits(), duplicateBene2.bene.getSsnLastFourDigits());
 
+    var historicalBene = TestBene.fromBene(getBeneficiaryFromBeneSk("-415220062", 0));
+    var currentBene = TestBene.fromBene(getBeneficiaryFromBeneSk("-415220062", 1));
+
+    // precondition - same bene, different addresses
+    assertEquals(historicalBene.bene.getBeneSk(), currentBene.bene.getBeneSk());
+    assertNotEquals(historicalBene.bene.getAddress(), currentBene.bene.getAddress());
+
+    var beneWithDiacritics = TestBene.fromBene(getBeneficiaryFromBeneSk("-614916732"));
+    // precondition - first and last name should contain diacritics
+    assertFalse(CharMatcher.ascii().matchesAllOf(beneWithDiacritics.firstName));
+    assertFalse(CharMatcher.ascii().matchesAllOf(beneWithDiacritics.lastName));
     return Stream.of(
         Arguments.of(
             "Scenario 1 - first name, last name, DOB, address",
@@ -97,7 +126,7 @@ class PatientMatchIT extends IntegrationTestBase {
             Optional.of(testBene.firstName),
             Optional.of(testBene.lastName),
             Optional.of(testBene.birthDate),
-            Optional.of(testBene.address),
+            List.of(testBene.address),
             Optional.empty(),
             Optional.empty(),
             Optional.of(1)),
@@ -107,7 +136,7 @@ class PatientMatchIT extends IntegrationTestBase {
             Optional.of(testBeneWithSpaces.firstName.replace(" ", "")),
             Optional.of(testBeneWithSpaces.lastName),
             Optional.of(testBeneWithSpaces.birthDate),
-            Optional.of(testBeneWithSpaces.address),
+            List.of(testBeneWithSpaces.address),
             Optional.empty(),
             Optional.empty(),
             Optional.of(1)),
@@ -117,7 +146,7 @@ class PatientMatchIT extends IntegrationTestBase {
             Optional.of(testBene.firstName),
             Optional.of(testBene.lastName),
             Optional.of(testBene.birthDate),
-            Optional.of(
+            List.of(
                 new Address()
                     .addLine("3728 Broadway Avenue J")
                     .setCity(testBene.address.getCity())
@@ -132,17 +161,57 @@ class PatientMatchIT extends IntegrationTestBase {
             Optional.of(duplicateBene1.firstName),
             Optional.of(duplicateBene1.lastName),
             Optional.of(duplicateBene1.birthDate),
-            Optional.of(duplicateBene1.address),
+            List.of(duplicateBene1.address),
             Optional.empty(),
             Optional.empty(),
             Optional.empty()),
+        Arguments.of(
+            "Scenario 1 - historical address should not match",
+            historicalBene.bene,
+            Optional.of(historicalBene.firstName),
+            Optional.of(historicalBene.lastName),
+            Optional.of(historicalBene.birthDate),
+            List.of(historicalBene.address),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty()),
+        Arguments.of(
+            "Scenario 1 - current address should match",
+            currentBene.bene,
+            Optional.of(currentBene.firstName),
+            Optional.of(currentBene.lastName),
+            Optional.of(currentBene.birthDate),
+            List.of(currentBene.address),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.of(1)),
+        Arguments.of(
+            "Scenario 1 - current and historical address should match",
+            currentBene.bene,
+            Optional.of(currentBene.firstName),
+            Optional.of(currentBene.lastName),
+            Optional.of(currentBene.birthDate),
+            List.of(currentBene.address, historicalBene.address),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.of(1)),
+        Arguments.of(
+            "Scenario 1 - current and historical address should match (reverse order)",
+            currentBene.bene,
+            Optional.of(currentBene.firstName),
+            Optional.of(currentBene.lastName),
+            Optional.of(currentBene.birthDate),
+            List.of(historicalBene.address, currentBene.address),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.of(1)),
         Arguments.of(
             "Scenario 4 - first name, last name, DOB, SSN last 4",
             testBene.bene,
             Optional.of(testBene.firstName),
             Optional.of(testBene.lastName),
             Optional.of(testBene.birthDate),
-            Optional.empty(),
+            List.of(),
             Optional.empty(),
             Optional.of(testBene.ssnLastFour),
             Optional.of(4)),
@@ -152,7 +221,7 @@ class PatientMatchIT extends IntegrationTestBase {
             Optional.of(duplicateBene1.firstName),
             Optional.of(duplicateBene1.lastName),
             Optional.of(duplicateBene1.birthDate),
-            Optional.empty(),
+            List.of(),
             Optional.empty(),
             Optional.of(duplicateBene1.ssnLastFour),
             Optional.empty()),
@@ -162,10 +231,30 @@ class PatientMatchIT extends IntegrationTestBase {
             Optional.of(testBene.firstName),
             Optional.of(testBene.lastName),
             Optional.of(testBene.birthDate),
-            Optional.empty(),
+            List.of(),
             Optional.empty(),
             Optional.of("fakeSsn"),
             Optional.empty()),
+        Arguments.of(
+            "Scenario 4 - name with diacritics",
+            beneWithDiacritics.bene,
+            Optional.of(beneWithDiacritics.firstName),
+            Optional.of(beneWithDiacritics.lastName),
+            Optional.of(beneWithDiacritics.birthDate),
+            List.of(),
+            Optional.empty(),
+            Optional.of(beneWithDiacritics.ssnLastFour),
+            Optional.empty()),
+        Arguments.of(
+            " Scenario 1 failure, scenario 4 success",
+            testBene.bene,
+            Optional.of(testBene.firstName),
+            Optional.of(testBene.lastName),
+            Optional.of(testBene.birthDate),
+            List.of(new Address().addLine("fake")),
+            Optional.empty(),
+            Optional.of(testBene.ssnLastFour),
+            Optional.of(4)),
         // Note: it's impossible for this to produce two beneficiaries with different xrefs
         // because we already protect against MBIs incorrectly attributed to multiple benes
         Arguments.of(
@@ -174,7 +263,7 @@ class PatientMatchIT extends IntegrationTestBase {
             Optional.of(testBene.firstName),
             Optional.empty(),
             Optional.of(testBene.birthDate),
-            Optional.empty(),
+            List.of(),
             Optional.of(testBene.mbi),
             Optional.empty(),
             Optional.of(8)),
@@ -184,20 +273,20 @@ class PatientMatchIT extends IntegrationTestBase {
             Optional.of(testBene.firstName),
             Optional.empty(),
             Optional.of(testBene.birthDate),
-            Optional.empty(),
+            List.of(),
             Optional.of("wrongMbi"),
             Optional.empty(),
             Optional.empty()),
         Arguments.of(
-            " Scenario 1 failure, scenario 4 success",
-            testBene.bene,
-            Optional.of(testBene.firstName),
-            Optional.of(testBene.lastName),
-            Optional.of(testBene.birthDate),
-            Optional.of(new Address().addLine("fake")),
-            Optional.empty(),
-            Optional.of(testBene.ssnLastFour),
-            Optional.of(4)));
+            "Scenario 1/4 fail, scenario 8 success",
+            duplicateBene1.bene,
+            Optional.of(duplicateBene1.firstName),
+            Optional.of(duplicateBene1.lastName),
+            Optional.of(duplicateBene1.birthDate),
+            List.of(duplicateBene1.address),
+            Optional.of(duplicateBene1.mbi),
+            Optional.of(duplicateBene1.ssnLastFour),
+            Optional.of(8)));
   }
 
   @ParameterizedTest(name = "{0}")
@@ -208,11 +297,11 @@ class PatientMatchIT extends IntegrationTestBase {
       Optional<String> firstName,
       Optional<String> lastName,
       Optional<Date> birthDate,
-      Optional<Address> address,
+      List<Address> addresses,
       Optional<String> mbi,
       Optional<String> ssnLastFour,
       Optional<Integer> expectedMatchNumber) {
-    var patient = buildRequest(firstName, lastName, birthDate, address, mbi, ssnLastFour);
+    var patient = buildRequest(firstName, lastName, birthDate, addresses, mbi, ssnLastFour);
     var bundle = searchBundle(patient);
     assertEquals(expectedMatchNumber.isPresent() ? 2 : 1, bundle.getEntry().size());
     if (expectedMatchNumber.isEmpty()) {

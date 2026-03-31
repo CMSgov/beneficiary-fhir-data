@@ -3,15 +3,31 @@ package gov.cms.bfd.server.ng.beneficiary.model;
 import java.util.List;
 import lombok.Builder;
 
+/**
+ * Represents a patient match request.
+ *
+ * @param firstName bene first name
+ * @param lastName bene last name
+ * @param addresses historical and current bene addresses
+ * @param ssnLastFourDigits last four SSN digits
+ * @param birthDate birthdate
+ * @param mbi MBI
+ */
 @Builder
 public record PatientMatch(
-    PatientMatchEntry firstName,
-    PatientMatchEntry lastName,
-    PatientMatchEntry addresses,
-    PatientMatchEntry ssnLastFourDigits,
-    PatientMatchEntry birthDate,
-    PatientMatchEntry mbi) {
+    PatientMatchParameter firstName,
+    PatientMatchParameter lastName,
+    PatientMatchParameter addresses,
+    PatientMatchParameter ssnLastFourDigits,
+    PatientMatchParameter birthDate,
+    PatientMatchParameter mbi) {
 
+  /**
+   * Returns the list of valid match scenarios based on the provided input. A match can only be
+   * attempted if all inputs required are present.
+   *
+   * @return list of valid scenarios
+   */
   public List<IndexedScenario> getValidScenarios() {
     var scenarios =
         List.of(
@@ -47,7 +63,7 @@ public record PatientMatch(
     return scenarios.stream().filter(s -> allFieldsPresent(s.entries())).toList();
   }
 
-  boolean allFieldsPresent(List<PatientMatchEntry> entries) {
+  boolean allFieldsPresent(List<PatientMatchParameter> entries) {
     return entries.stream().noneMatch(e -> e.values().isEmpty());
   }
 }

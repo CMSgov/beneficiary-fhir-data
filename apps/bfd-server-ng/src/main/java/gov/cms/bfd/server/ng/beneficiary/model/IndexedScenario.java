@@ -8,4 +8,4 @@ import java.util.List;
  * @param combinationIndex the index of the combination
  * @param entries the criteria used to patient match for this combination
  */
-public record IndexedScenario(String combinationIndex, List<PatientMatchEntry> entries) {}
+public record IndexedScenario(String combinationIndex, List<PatientMatchParameter> entries) {}

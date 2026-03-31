@@ -84,6 +84,12 @@ public class PatientHandler {
         beneficiary.map(this::toFhir), loadProgressRepository::lastUpdated);
   }
 
+  /**
+   * Attempts to match a beneficiary based on the patient input.
+   *
+   * @param patientMatch match request
+   * @return bundle
+   */
   public Bundle matchPatient(Optional<PatientMatch> patientMatch) {
     if (patientMatch.isEmpty()) {
       return patientMatchBundle(Optional.empty());

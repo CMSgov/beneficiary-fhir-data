@@ -127,6 +127,26 @@ public class IntegrationTestBase {
         .getFirst();
   }
 
+  // IMPORTANT: since we must treat bene_sk as the primary key of the entity due to other JPA
+  // limitations,
+  // we can't load multiple beneficiaries with the same bene_sk in the same query.
+  // Therefore, we should not provide a way to return multiple benes here.
+  protected Beneficiary getBeneficiaryFromBeneSk(String beneSk, int offset) {
+    return entityManager
+        .createQuery(
+            """
+        SELECT b FROM Beneficiary b
+        WHERE b.beneSk = :beneSk
+        ORDER BY b.effectiveTimestamp DESC
+         OFFSET :offset ROWS
+        """,
+            Beneficiary.class)
+        .setParameter("beneSk", beneSk)
+        .setParameter("offset", offset)
+        .getResultList()
+        .getFirst();
+  }
+
   protected List<Extension> getExtensionByUrl(DomainResource resource, String url) {
     return resource.getExtension().stream().filter(e -> e.getUrl().equals(url)).toList();
   }
