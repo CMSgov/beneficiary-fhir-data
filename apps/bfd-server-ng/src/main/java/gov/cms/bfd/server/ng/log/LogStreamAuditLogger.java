@@ -5,6 +5,7 @@ import gov.cms.bfd.server.ng.beneficiary.model.FinalDetermination;
 import gov.cms.bfd.server.ng.beneficiary.model.MatchedRecord;
 import gov.cms.bfd.server.ng.beneficiary.model.PatientMatchAuditRecord;
 import gov.cms.bfd.server.ng.util.LoggerConstants;
+import java.util.HashMap;
 import java.util.Objects;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
@@ -40,14 +41,15 @@ public class LogStreamAuditLogger implements AuditLogger {
             .atInfo()
             .setMessage(LoggerConstants.PATIENT_MATCH_REQUESTED)
             .addKeyValue("logType", "patientMatchAudit")
-            .addKeyValue("matchedBeneSk", matchedBeneSk.get().toString())
-            .addKeyValue("beneSksFound", beneSksFound.stream().map(String::valueOf).toList())
-            .addKeyValue("timestamp", auditRecord.timestamp().toString())
-            .addKeyValue("clientId", auditRecord.clientId())
-            .addKeyValue("clientName", auditRecord.clientName())
-            .addKeyValue("clientIp", auditRecord.clientIp())
-            .addKeyValue("combinationsEvaluated", auditRecord.combinationsEvaluated())
-            .addKeyValue("finalDetermination", successfulCombination)
+            .addKeyValue("audit.matchedBeneSk", matchedBeneSk.get().toString())
+            .addKeyValue("audit.beneSksFound", beneSksFound.stream().map(String::valueOf).toList())
+            .addKeyValue("audit.timestamp", auditRecord.timestamp().toString())
+            .addKeyValue(
+                "audit.combinationsEvaluated",
+                auditRecord.combinationsEvaluated().stream()
+                    .map(c -> objectMapper.convertValue(c, HashMap.class))
+                    .toList())
+            .addKeyValue("audit.finalDetermination", successfulCombination)
             .log();
       }
     } catch (Exception e) {

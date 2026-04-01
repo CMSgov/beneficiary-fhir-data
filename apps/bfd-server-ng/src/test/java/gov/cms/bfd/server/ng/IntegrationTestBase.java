@@ -9,12 +9,11 @@ import au.com.origin.snapshots.junit5.SnapshotExtension;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ch.qos.logback.classic.spi.ILoggingEvent;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.EntityManager;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,6 +22,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
+import software.amazon.awssdk.services.dynamodb.model.QueryRequest;
 
 @Import(IntegrationTestConfiguration.class)
 @ExtendWith({SnapshotExtension.class})
@@ -32,6 +34,9 @@ public class IntegrationTestBase {
   @LocalServerPort protected int port;
   protected Expect expect;
   @Autowired protected EntityManager entityManager;
+  @Autowired protected Configuration configuration;
+  @Autowired protected ObjectMapper objectMapper;
+  @Autowired protected DynamoDbClient dynamoDbClient;
 
   protected static final String HISTORICAL_MERGED_BENE_SK = "848484848";
   protected static final String HISTORICAL_MERGED_BENE_SK2 = "121212121";
@@ -207,5 +212,28 @@ public class IntegrationTestBase {
       var scale = value.scale();
       assertTrue(scale <= 2);
     }
+  }
+
+  public record PatientMatchTestAuditRecord(Long matchedBeneSk, Integer scenarioIndex) {}
+
+  protected List<PatientMatchTestAuditRecord> getAuditRecordFromDynamo(Long beneSk) {
+    var tableName = configuration.getPatientMatchAuditTableName();
+    var request =
+        QueryRequest.builder()
+            .tableName(tableName)
+            .keyConditionExpression("matchedBeneSk = :beneSk")
+            .expressionAttributeValues(
+                Map.of(":beneSk", AttributeValue.builder().n(beneSk.toString()).build()))
+            .build();
+
+    var response = dynamoDbClient.query(request);
+    return response.items().stream()
+        .map(
+            item -> {
+              var matchedBeneSk = Long.parseLong(item.get("matchedBeneSk").n());
+              var successfulCombination = Integer.parseInt(item.get("finalDetermination").s());
+              return new PatientMatchTestAuditRecord(matchedBeneSk, successfulCombination);
+            })
+        .toList();
   }
 }

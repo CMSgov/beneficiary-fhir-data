@@ -6,7 +6,7 @@
         value="${CONSOLE_LOG_PATTERN:-%clr(%d{${LOG_DATEFORMAT_PATTERN:-HH:mm:ss.SSSXXX}}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}){} %clr(${PID:-}){magenta} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m %kvp%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}}" />
     <include resource="org/springframework/boot/logging/logback/defaults.xml" />
     <springProfile name="local">
-        <include resource="org/springframework/boot/logging/logback/console-appender.xml" />
+        <include resource="org/springframework/boot/logging/logback/structured-console-appender.xml" />
         <logger name="org.springframework.web" level="DEBUG" />
     </springProfile>
     <springProfile name="aws">

@@ -96,9 +96,9 @@ public class PatientHandler {
     }
     var result = beneficiaryRepository.searchPatientMatch(patientMatch.get());
     var beneficiary = result.matchedBeneficiary();
-    var clientIp = MDC.get(LoggerConstants.CLIENT_IP_KEY);
-    var clientName = MDC.get(LoggerConstants.CLIENT_NAME_KEY);
-    var clientId = MDC.get(LoggerConstants.CLIENT_ID_KEY);
+    var clientIp = MDC.get(LoggerConstants.MDC_CLIENT_IP_KEY);
+    var clientName = MDC.get(LoggerConstants.MDC_CLIENT_NAME_KEY);
+    var clientId = MDC.get(LoggerConstants.MDC_CLIENT_ID_KEY);
     var auditRecord =
         new PatientMatchAuditRecord(
             clientIp,

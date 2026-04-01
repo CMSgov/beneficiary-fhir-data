@@ -4,12 +4,19 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.util.ParametersUtil;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import com.google.common.base.CharMatcher;
 import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
+import gov.cms.bfd.server.ng.log.LogStreamAuditLogger;
 import gov.cms.bfd.server.ng.util.DateUtil;
+import gov.cms.bfd.server.ng.util.LoggerConstants;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -19,16 +26,22 @@ import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.ResourceType;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.slf4j.LoggerFactory;
+import software.amazon.awssdk.services.dynamodb.model.*;
 
 // Tells JUnit to re-use the same test instance per class
 // This is fine because we do not (and should not) have tests that rely on shared static state
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class PatientMatchIT extends IntegrationTestBase {
+  private ListAppender<ILoggingEvent> logAppender;
+
   private Bundle searchBundle(Patient patient) {
     var ctx = FhirContext.forR4();
     var params = ParametersUtil.newInstance(ctx);
@@ -40,6 +53,9 @@ class PatientMatchIT extends IntegrationTestBase {
             .onType(Patient.class)
             .named("idi-match")
             .withParameters(params)
+            .withAdditionalHeader("X-CLIENT-IP", "127.0.0.1")
+            .withAdditionalHeader("X-CLIENT-NAME", "test-client")
+            .withAdditionalHeader("X-CLIENT-ID", "client-123")
             .returnResourceType(Bundle.class)
             .execute();
     // Organization should always be the first entry in the bundle
@@ -406,5 +422,97 @@ class PatientMatchIT extends IntegrationTestBase {
     private static String normalizeAddress(String address) {
       return address.replace("Avenue", "Ave");
     }
+  }
+
+  @ParameterizedTest(name = "{0} - audit log")
+  @MethodSource("verifyPatientMatch")
+  void verifyAuditLog(
+      String testName,
+      Beneficiary beneficiary,
+      Optional<String> firstName,
+      Optional<String> lastName,
+      Optional<Date> birthDate,
+      List<Address> addresses,
+      Optional<String> mbi,
+      Optional<String> ssnLastFour,
+      Optional<Integer> expectedMatchNumber) {
+    var patient = buildRequest(firstName, lastName, birthDate, addresses, mbi, ssnLastFour);
+    searchBundle(patient);
+    var auditRecords = getAuditRecordFromDynamo(beneficiary.getBeneSk());
+    var logs = logAppender.list;
+
+    if (expectedMatchNumber.isPresent()) {
+      assertFalse(auditRecords.isEmpty(), "Expected audit record for " + testName);
+      var matchedScenario =
+          auditRecords.stream()
+              .anyMatch(r -> Objects.equals(r.scenarioIndex(), expectedMatchNumber.get()));
+      assertTrue(
+          matchedScenario, "Expected successful patient match combination not found in audit log");
+
+      assertFalse(logs.isEmpty(), "Expected log stream audit record for " + testName);
+      var foundStandardAuditLog =
+          logs.stream()
+              .anyMatch(
+                  event ->
+                      event
+                          .getFormattedMessage()
+                          .contains(LoggerConstants.PATIENT_MATCH_REQUESTED));
+      assertTrue(foundStandardAuditLog, "Expected standard audit log for " + testName);
+    } else {
+      assertTrue(auditRecords.isEmpty(), "Expected no audit records for " + testName);
+      assertTrue(logs.isEmpty(), "Expected no log stream audit records for " + testName);
+    }
+  }
+
+  @BeforeAll
+  void setupDynamDbTable() {
+    dynamoDbClient.createTable(
+        CreateTableRequest.builder()
+            .tableName(configuration.getPatientMatchAuditTableName())
+            .keySchema(
+                KeySchemaElement.builder()
+                    .attributeName("matchedBeneSk")
+                    .keyType(KeyType.HASH)
+                    .build(),
+                KeySchemaElement.builder()
+                    .attributeName("timestamp")
+                    .keyType(KeyType.RANGE)
+                    .build())
+            .attributeDefinitions(
+                AttributeDefinition.builder()
+                    .attributeName("matchedBeneSk")
+                    .attributeType(ScalarAttributeType.N)
+                    .build(),
+                AttributeDefinition.builder()
+                    .attributeName("timestamp")
+                    .attributeType(ScalarAttributeType.S)
+                    .build())
+            .billingMode(BillingMode.PAY_PER_REQUEST)
+            .build());
+  }
+
+  @BeforeEach
+  void clearDynamDbTable() {
+    var tableName = configuration.getPatientMatchAuditTableName();
+    var response = dynamoDbClient.scan(d -> d.tableName(tableName));
+    for (var item : response.items()) {
+      dynamoDbClient.deleteItem(
+          d ->
+              d.tableName(tableName)
+                  .key(
+                      Map.of(
+                          "matchedBeneSk",
+                          item.get("matchedBeneSk"),
+                          "timestamp",
+                          item.get("timestamp"))));
+    }
+  }
+
+  @BeforeEach
+  void setupLogAppender() {
+    var logger = (Logger) LoggerFactory.getLogger(LogStreamAuditLogger.class);
+    logAppender = new ListAppender<>();
+    logAppender.start();
+    logger.addAppender(logAppender);
   }
 }

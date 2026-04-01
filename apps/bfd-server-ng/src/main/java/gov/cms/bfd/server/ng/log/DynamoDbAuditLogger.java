@@ -57,7 +57,7 @@ public class DynamoDbAuditLogger implements AuditLogger {
             .finalDetermination()
             .ifPresent(f -> items.put("finalDetermination", AttributeValue.fromS(f.combination())));
 
-        PutItemRequest request = PutItemRequest.builder().tableName(tableName).item(items).build();
+        var request = PutItemRequest.builder().tableName(tableName).item(items).build();
         dynamoDbClient.putItem(request);
       }
     } catch (Exception e) {

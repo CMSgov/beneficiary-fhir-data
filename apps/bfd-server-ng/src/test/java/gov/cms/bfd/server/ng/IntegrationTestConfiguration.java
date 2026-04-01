@@ -1,19 +1,31 @@
 package gov.cms.bfd.server.ng;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import gov.cms.bfd.server.ng.log.AuditLogger;
+import gov.cms.bfd.server.ng.log.DynamoDbAuditLogger;
+import gov.cms.bfd.server.ng.log.LogStreamAuditLogger;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Paths;
 import java.util.Map;
 import org.flywaydb.core.Flyway;
 import org.junit.platform.commons.util.StringUtils;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.ClassPathResource;
+import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.DockerImageName;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 
 @TestConfiguration
 public class IntegrationTestConfiguration {
@@ -122,5 +134,46 @@ public class IntegrationTestConfiguration {
     if (code > 0) {
       throw new RuntimeException("Command failed. See logs for details.");
     }
+  }
+
+  @Bean
+  public GenericContainer<?> dynamoDbContainer() {
+    var container =
+        new GenericContainer<>(DockerImageName.parse("amazon/dynamodb-local:latest"))
+            .withExposedPorts(8000)
+            .waitingFor(Wait.forListeningPort());
+    container.start();
+    return container;
+  }
+
+  @Bean
+  @Primary
+  public DynamoDbClient testDynamoDbClient(
+      @Qualifier("dynamoDbContainer") GenericContainer<?> dynamoDbContainer) {
+    var endpoint =
+        String.format(
+            "http://%s:%d", dynamoDbContainer.getHost(), dynamoDbContainer.getMappedPort(8000));
+
+    return DynamoDbClient.builder()
+        .endpointOverride(URI.create(endpoint))
+        .region(Region.US_EAST_1)
+        .credentialsProvider(
+            StaticCredentialsProvider.create(AwsBasicCredentials.create("dummy", "dummy")))
+        .build();
+  }
+
+  @Bean
+  @Primary
+  public AuditLogger testAuditLogger(
+      DynamoDbClient testDynamoDbClient, Configuration configuration, ObjectMapper objectMapper) {
+    var logStreamLogger = new LogStreamAuditLogger(objectMapper);
+    var dynamoLogger =
+        new DynamoDbAuditLogger(
+            testDynamoDbClient, objectMapper, configuration.getPatientMatchAuditTableName());
+
+    return auditRecord -> {
+      logStreamLogger.log(auditRecord);
+      dynamoLogger.log(auditRecord);
+    };
   }
 }

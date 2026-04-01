@@ -97,11 +97,11 @@ public class Configuration implements Serializable {
    * @return wrapper factory.
    */
   public DataSourceFactory getDataSourceFactory() {
-    if (notLocal()) {
+    if (isLocal()) {
+      return new HikariDataSourceFactory(getDatabaseOptions());
+    } else {
       var awsConfig = getRdsClientConfig();
       return new AwsWrapperDataSourceFactory(getDatabaseOptions(), awsConfig);
-    } else {
-      return new HikariDataSourceFactory(getDatabaseOptions());
     }
   }
 
@@ -127,8 +127,8 @@ public class Configuration implements Serializable {
     return logStreamLogger;
   }
 
-  boolean notLocal() {
-    return !env.equalsIgnoreCase(BFD_ENV_LOCAL);
+  boolean isLocal() {
+    return env.equalsIgnoreCase(BFD_ENV_LOCAL);
   }
 
   /** Represents possible types of audit logging. */
@@ -145,7 +145,7 @@ public class Configuration implements Serializable {
    * @return the audit logger type
    */
   public AuditLoggerType getAuditLoggerType() {
-    return notLocal() ? AuditLoggerType.DYNAMO_DB : AuditLoggerType.LOG_STREAM;
+    return isLocal() ? AuditLoggerType.LOG_STREAM : AuditLoggerType.DYNAMO_DB;
   }
 
   /**
@@ -156,7 +156,7 @@ public class Configuration implements Serializable {
   public DynamoDbClient getDynamoDbClient() {
     var region = regionProvider.getRegion();
 
-    if (!notLocal()) {
+    if (isLocal()) {
       return DynamoDbClient.builder()
           .endpointOverride(URI.create("http://localhost:8000"))
           .region(region)
@@ -168,7 +168,7 @@ public class Configuration implements Serializable {
     return DynamoDbClient.builder().region(region).credentialsProvider(credentialsProvider).build();
   }
 
-  private String getPatientMatchAuditTableName() {
+  protected String getPatientMatchAuditTableName() {
     return String.format("bfd-%s-patient-match-audit", env);
   }
 
@@ -188,9 +188,9 @@ public class Configuration implements Serializable {
   }
 
   private DatabaseOptions.DataSourceType getDataSourceType() {
-    return notLocal()
-        ? DatabaseOptions.DataSourceType.AWS_WRAPPER
-        : DatabaseOptions.DataSourceType.HIKARI;
+    return isLocal()
+        ? DatabaseOptions.DataSourceType.HIKARI
+        : DatabaseOptions.DataSourceType.AWS_WRAPPER;
   }
 
   private AwsClientConfig getRdsClientConfig() {

@@ -42,7 +42,7 @@ public class ExtractMetadataFilter implements Filter {
       var isPatientMatchRequest = uri != null && uri.contains("/Patient/$idi-match");
       if (certAlias.isPresent()) {
         certificateUtil.attachCertAliasToRequest(httpRequest, certAlias.get());
-        MDC.put(LoggerConstants.CERTIFICATE_ALIAS, certAlias.get());
+        MDC.put(LoggerConstants.MDC_CERTIFICATE_ALIAS, certAlias.get());
       }
 
       var clientIp = httpRequest.getHeader(LoggerConstants.CLIENT_IP_HEADER);
@@ -59,23 +59,17 @@ public class ExtractMetadataFilter implements Filter {
         return;
       }
 
-      MDC.put(LoggerConstants.URI_KEY, uri);
-      MDC.put(LoggerConstants.REQUEST_ID_KEY, httpRequest.getRequestId());
-      MDC.put(LoggerConstants.REMOTE_ADDRESS_KEY, httpRequest.getRemoteAddr());
-      MDC.put(LoggerConstants.CLIENT_IP_KEY, clientIp);
-      MDC.put(LoggerConstants.CLIENT_NAME_KEY, clientName);
-      MDC.put(LoggerConstants.CLIENT_ID_KEY, clientId);
+      MDC.put(LoggerConstants.MDC_URI_KEY, uri);
+      MDC.put(LoggerConstants.MDC_REQUEST_ID_KEY, httpRequest.getRequestId());
+      MDC.put(LoggerConstants.MDC_REMOTE_ADDRESS_KEY, httpRequest.getRemoteAddr());
+      MDC.put(LoggerConstants.MDC_CLIENT_IP_KEY, clientIp);
+      MDC.put(LoggerConstants.MDC_CLIENT_NAME_KEY, clientName);
+      MDC.put(LoggerConstants.MDC_CLIENT_ID_KEY, clientId);
     }
 
     filterChain.doFilter(servletRequest, servletResponse);
 
     // Clean up to prevent leaks
-    MDC.remove(LoggerConstants.CERTIFICATE_ALIAS);
-    MDC.remove(LoggerConstants.URI_KEY);
-    MDC.remove(LoggerConstants.REQUEST_ID_KEY);
-    MDC.remove(LoggerConstants.REMOTE_ADDRESS_KEY);
-    MDC.remove(LoggerConstants.CLIENT_IP_KEY);
-    MDC.remove(LoggerConstants.CLIENT_NAME_KEY);
-    MDC.remove(LoggerConstants.CLIENT_ID_KEY);
+    MDC.clear();
   }
 }
