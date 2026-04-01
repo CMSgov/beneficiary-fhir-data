@@ -424,7 +424,8 @@ resource "aws_dynamodb_table" "patient_match_audit_table" {
   }
 
   point_in_time_recovery {
-    enabled = true
+    enabled                 = true
+    recovery_period_in_days = 35
   }
 
   attribute {
