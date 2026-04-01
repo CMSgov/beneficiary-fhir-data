@@ -5,13 +5,14 @@ description = "Lambda to consolidate running the IDR Pipeline Task"
 readme = "README.md"
 requires-python = "~=3.14.0"
 dependencies = [
-    "boto3>=1.42.56",
-    "aws-lambda-powertools>=3.25.0",
-    "pydantic>=2.12.2",
+    "boto3",
+    "aws-lambda-powertools",
+    "pydantic",
+    "pydantic-settings"
 ]
 
 [dependency-groups]
-dev = ["ruff>=0.14.6", "uv>=0.9.11", "pyright>=1.1.407"]
+dev = ["boto3-stubs[ecs,scheduler]", "ruff", "uv", "pyright"]
 
 [tool.ruff]
 # Set the maximum line length to 100.
