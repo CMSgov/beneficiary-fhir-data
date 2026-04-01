@@ -3,9 +3,10 @@ package gov.cms.bfd.server.ng;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import ca.uhn.fhir.rest.client.interceptor.AdditionalRequestHeadersInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.Patient;
@@ -21,16 +22,7 @@ class ServerConfigurationIT extends IntegrationTestBase {
   static void registerDynamicProperties(DynamicPropertyRegistry registry) {
     // These properties will apply to all tests in this class.
     registry.add("bfd.nonsensitive.disabled_uris_json", () -> "['/v3/fhir/ExplanationOfBenefit']");
-  }
-
-  @Test
-  void disallowedEndpointReturns401() {
-    given()
-        .when()
-        .get(getServerUrl() + "/ExplanationOfBenefit")
-        .then()
-        .statusCode(401)
-        .body(containsString(RESOURCE_NOT_ALLOWED_MESSAGE_FRAGMENT));
+    registry.add("bfd.nonsensitive.internal_certificate_aliases_json", () -> "['good_cert']");
   }
 
   @Test
@@ -49,19 +41,8 @@ class ServerConfigurationIT extends IntegrationTestBase {
   }
 
   @Test
-  void eobEndpointIsDisabledWhenConfigured() {
+  void otherEndpointsAreAllowed() {
     var fhirClient = getFhirClient();
-    var readRequest =
-        fhirClient.read().resource("ExplanationOfBenefit").withId(BENE_ID_PART_A_ONLY);
-
-    var thrown =
-        assertThrows(
-            AuthenticationException.class,
-            readRequest::execute,
-            "Expected AuthenticationException because ExplanationOfBenefit endpoint should be"
-                + " disabled.");
-
-    assertTrue(thrown.getResponseBody().contains(RESOURCE_NOT_ALLOWED_MESSAGE_FRAGMENT));
 
     assertDoesNotThrow(
         () -> {
@@ -78,5 +59,27 @@ class ServerConfigurationIT extends IntegrationTestBase {
               .execute();
         },
         "Expected Coverage endpoint to be accessible and not throw an exception.");
+  }
+
+  @Test
+  void disabledEndpointAcceptsAllowedCert() {
+    var fhirClient = getFhirClient();
+    var headersInterceptor = new AdditionalRequestHeadersInterceptor();
+    headersInterceptor.addHeaderValue("X-Amzn-Mtls-Clientcert", "good_cert");
+    fhirClient.registerInterceptor(headersInterceptor);
+    assertDoesNotThrow(
+        () -> fhirClient.read().resource("ExplanationOfBenefit").withId(CLAIM_ID_ADJUDICATED));
+  }
+
+  @Test
+  void disabledEndpointRejectsNotAllowedCert() {
+    var fhirClient = getFhirClient();
+    var headersInterceptor = new AdditionalRequestHeadersInterceptor();
+    headersInterceptor.addHeaderValue("X-Amzn-Mtls-Clientcert", "bad_cert");
+    fhirClient.registerInterceptor(headersInterceptor);
+    var readRequest =
+        fhirClient.read().resource("ExplanationOfBenefit").withId(CLAIM_ID_ADJUDICATED);
+    var thrown = assertThrows(AuthenticationException.class, readRequest::execute);
+    assertEquals(RESOURCE_NOT_ALLOWED_MESSAGE_FRAGMENT, thrown.getResponseBody());
   }
 }

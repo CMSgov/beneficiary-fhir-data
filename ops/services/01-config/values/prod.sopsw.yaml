@@ -726,6 +726,8 @@
   TTsBlDu/w61r8pmhA8kyoml5xx/gAuqr87676Wq7EHQIc3LntyMGcoybJIqHow==
   -----END CERTIFICATE-----
 /bfd/${env}/server-ng/nonsensitive/samhsa_allowed_certificate_aliases_json: '["bluebutton_backend_test_samhsa", "bluebutton_root_ca", "regression_tests"]'
+/bfd/${env}/server-ng/nonsensitive/disabled_uris_json: '["/v3/fhir/Patient/$idi-match"]'
+/bfd/${env}/server-ng/nonsensitive/internal_certificate_aliases_json: '["bluebutton_backend_prod_data_server_client_test"]'
 /bfd/${env}/server-ng/nonsensitive/ecs/capacity/min: 3
 /bfd/${env}/server-ng/nonsensitive/ecs/capacity/max: 12
 /bfd/${env}/server-ng/nonsensitive/ecs/resources/cpu: 4096

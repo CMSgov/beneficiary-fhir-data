@@ -43,7 +43,8 @@ public class AllowedUriFilter extends OncePerRequestFilter {
     var internalCerts = configuration.getInternalCertificateAliases();
     var disabledUris = configuration.getDisabledUris();
     var requestUri = request.getRequestURI();
-    var isUriDisabled = disabledUris.stream().anyMatch(requestUri::startsWith);
+    var isUriDisabled =
+        disabledUris.stream().anyMatch(r -> requestUri.toLowerCase().startsWith(r.toLowerCase()));
     if (isUriDisabled) {
       LOGGER
           .atInfo()
