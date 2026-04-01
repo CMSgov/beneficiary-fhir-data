@@ -58,6 +58,7 @@ public class Configuration implements Serializable {
   private JdbcConnectionDetails jdbcConnectionDetails;
 
   private static final String BFD_ENV_LOCAL = "local";
+  private String dynamoLocalUrl = "http://localhost:8000";
 
   // Default to local configuration, this should be overridden on deployment with the correct
   // environment.

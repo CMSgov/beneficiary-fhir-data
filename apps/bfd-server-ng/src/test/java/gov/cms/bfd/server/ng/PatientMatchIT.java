@@ -26,10 +26,7 @@ import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.ResourceType;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -53,9 +50,9 @@ class PatientMatchIT extends IntegrationTestBase {
             .onType(Patient.class)
             .named("idi-match")
             .withParameters(params)
-            .withAdditionalHeader("X-CLIENT-IP", "127.0.0.1")
-            .withAdditionalHeader("X-CLIENT-NAME", "test-client")
-            .withAdditionalHeader("X-CLIENT-ID", "client-123")
+            .withAdditionalHeader(LoggerConstants.CLIENT_IP_HEADER, "127.0.0.1")
+            .withAdditionalHeader(LoggerConstants.CLIENT_NAME_HEADER, "test-client")
+            .withAdditionalHeader(LoggerConstants.CLIENT_ID_HEADER, "client-123")
             .returnResourceType(Bundle.class)
             .execute();
     // Organization should always be the first entry in the bundle
@@ -437,29 +434,63 @@ class PatientMatchIT extends IntegrationTestBase {
       Optional<String> ssnLastFour,
       Optional<Integer> expectedMatchNumber) {
     var patient = buildRequest(firstName, lastName, birthDate, addresses, mbi, ssnLastFour);
-    searchBundle(patient);
-    var auditRecords = getAuditRecordFromDynamo(beneficiary.getBeneSk());
+    var bundle = searchBundle(patient);
     var logs = logAppender.list;
+    var beneSk = beneficiary.getBeneSk();
 
     if (expectedMatchNumber.isPresent()) {
-      assertFalse(auditRecords.isEmpty(), "Expected audit record for " + testName);
-      var matchedScenario =
-          auditRecords.stream()
-              .anyMatch(r -> Objects.equals(r.scenarioIndex(), expectedMatchNumber.get()));
-      assertTrue(
-          matchedScenario, "Expected successful patient match combination not found in audit log");
+      var entry =
+          bundle.getEntry().stream()
+              .filter(b -> !SystemUrls.CMS_GOV.equals(b.getFullUrl()))
+              .findFirst()
+              .get();
+      var patientResult = (Patient) entry.getResource();
+      beneSk = Long.parseLong(patientResult.getIdElement().getIdPart());
+    }
 
-      assertFalse(logs.isEmpty(), "Expected log stream audit record for " + testName);
-      var foundStandardAuditLog =
-          logs.stream()
-              .anyMatch(
-                  event ->
-                      event
-                          .getFormattedMessage()
-                          .contains(LoggerConstants.PATIENT_MATCH_REQUESTED));
-      assertTrue(foundStandardAuditLog, "Expected standard audit log for " + testName);
+    var auditRecords = getAuditRecordFromDynamo(beneSk);
+
+    if (expectedMatchNumber.isPresent()) {
+      auditRecords.stream()
+          .filter(r -> Objects.equals(r.scenarioIndex(), expectedMatchNumber.get()))
+          .findFirst()
+          .ifPresentOrElse(
+              testAuditRecord ->
+                  assertAll(
+                      () -> assertNotNull(testAuditRecord.clientId()),
+                      () -> assertNotNull(testAuditRecord.clientName()),
+                      () -> assertNotNull(testAuditRecord.clientIp())),
+              () ->
+                  fail(
+                      "Expected successful patient match combination not found in dynamoDB audit table"));
+
+      logs.stream()
+          .filter(
+              event ->
+                  event.getFormattedMessage().contains(LoggerConstants.PATIENT_MATCH_REQUESTED))
+          .findFirst()
+          .ifPresentOrElse(
+              event -> {
+                var mdc = event.getMDCPropertyMap();
+                var keyValuePairsMap =
+                    event.getKeyValuePairs().stream()
+                        .collect(
+                            Collectors.toMap(pair -> pair.key, pair -> String.valueOf(pair.value)));
+                var successfulCombination =
+                    Integer.parseInt(keyValuePairsMap.get("audit.finalDetermination"));
+                assertAll(
+                    () -> assertNotNull(mdc.get(LoggerConstants.MDC_CLIENT_IP_KEY), "127.0.0.1"),
+                    () ->
+                        assertNotNull(mdc.get(LoggerConstants.MDC_CLIENT_NAME_KEY), "test-client"),
+                    () -> assertNotNull(mdc.get(LoggerConstants.MDC_CLIENT_ID_KEY), "client-123"),
+                    () -> assertEquals("patientMatchAudit", keyValuePairsMap.get("logType")),
+                    () -> assertEquals(expectedMatchNumber.get(), successfulCombination));
+              },
+              () -> fail("Expected log stream audit record not found for " + testName));
     } else {
-      assertTrue(auditRecords.isEmpty(), "Expected no audit records for " + testName);
+      assertTrue(
+          auditRecords.isEmpty(),
+          "Expected no audit records in dynamoDB audit table for " + testName);
       assertTrue(logs.isEmpty(), "Expected no log stream audit records for " + testName);
     }
   }

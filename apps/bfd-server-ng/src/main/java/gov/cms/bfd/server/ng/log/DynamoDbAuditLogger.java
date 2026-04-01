@@ -5,7 +5,6 @@ import gov.cms.bfd.server.ng.beneficiary.model.FinalDetermination;
 import gov.cms.bfd.server.ng.beneficiary.model.MatchedRecord;
 import gov.cms.bfd.server.ng.beneficiary.model.PatientMatchAuditRecord;
 import java.util.HashMap;
-import java.util.Objects;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +36,6 @@ public class DynamoDbAuditLogger implements AuditLogger {
             auditRecord.combinationsEvaluated().stream()
                 .flatMap(c -> c.matchedRecords().stream())
                 .map(MatchedRecord::beneSk)
-                .filter(Objects::nonNull)
                 .distinct()
                 .toList();
 

@@ -214,7 +214,12 @@ public class IntegrationTestBase {
     }
   }
 
-  public record PatientMatchTestAuditRecord(Long matchedBeneSk, Integer scenarioIndex) {}
+  public record PatientMatchTestAuditRecord(
+      Long matchedBeneSk,
+      Integer scenarioIndex,
+      String clientId,
+      String clientName,
+      String clientIp) {}
 
   protected List<PatientMatchTestAuditRecord> getAuditRecordFromDynamo(Long beneSk) {
     var tableName = configuration.getPatientMatchAuditTableName();
@@ -232,7 +237,11 @@ public class IntegrationTestBase {
             item -> {
               var matchedBeneSk = Long.parseLong(item.get("matchedBeneSk").n());
               var successfulCombination = Integer.parseInt(item.get("finalDetermination").s());
-              return new PatientMatchTestAuditRecord(matchedBeneSk, successfulCombination);
+              var clientId = item.get("clientId").s();
+              var clientName = item.get("clientName").s();
+              var clientIP = item.get("clientIp").s();
+              return new PatientMatchTestAuditRecord(
+                  matchedBeneSk, successfulCombination, clientId, clientName, clientIP);
             })
         .toList();
   }
