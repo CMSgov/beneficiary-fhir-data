@@ -423,6 +423,10 @@ resource "aws_dynamodb_table" "patient_match_audit_table" {
     kms_key_arn = local.env_key_arn
   }
 
+  point_in_time_recovery {
+    enabled = true
+  }
+
   attribute {
     name = "matchedBeneSk"
     type = "N"
