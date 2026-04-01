@@ -416,6 +416,12 @@ resource "aws_dynamodb_table" "patient_match_audit_table" {
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "matchedBeneSk"
   range_key    = "timestamp"
+  deletion_protection_enabled = local.env == "prod" ? true : false
+
+  server_side_encryption {
+    enabled     = true
+    kms_key_arn = local.env_key_arn
+  }
 
   attribute {
     name = "matchedBeneSk"
