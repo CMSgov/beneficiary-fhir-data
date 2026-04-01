@@ -1,22 +1,20 @@
 package gov.cms.bfd.server.ng.log;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.bfd.server.ng.beneficiary.model.FinalDetermination;
 import gov.cms.bfd.server.ng.beneficiary.model.MatchedRecord;
 import gov.cms.bfd.server.ng.beneficiary.model.PatientMatchAuditRecord;
 import java.util.HashMap;
 import lombok.AllArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
+import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
 import software.amazon.awssdk.services.dynamodb.model.PutItemRequest;
 
 /** Logs patient match audit records to DynamoDB table. */
 @AllArgsConstructor
 public class DynamoDbAuditLogger implements AuditLogger {
-
-  private static final Logger LOGGER = LoggerFactory.getLogger(DynamoDbAuditLogger.class);
 
   private final DynamoDbClient dynamoDbClient;
   private final ObjectMapper objectMapper;
@@ -58,9 +56,10 @@ public class DynamoDbAuditLogger implements AuditLogger {
         var request = PutItemRequest.builder().tableName(tableName).item(items).build();
         dynamoDbClient.putItem(request);
       }
-    } catch (Exception e) {
-      LOGGER.error("Failed to write audit log to DynamoDB", e);
-      throw new RuntimeException("Audit logged failed", e);
+    } catch (JsonProcessingException e) {
+      throw new IllegalArgumentException("Failed to serialize patient match audit record", e);
+    } catch (DynamoDbException e) {
+      throw new IllegalStateException("Failed to persist patient match audit record", e);
     }
   }
 }
