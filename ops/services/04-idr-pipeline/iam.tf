@@ -1,5 +1,5 @@
 data "aws_iam_policy_document" "service_assume_role" {
-  for_each = toset(["ecs-tasks", "lambda"])
+  for_each = toset(["ecs-tasks", "lambda", "scheduler"])
   statement {
     actions = ["sts:AssumeRole"]
     principals {
@@ -134,6 +134,7 @@ data "aws_iam_policy_document" "idr_execution_ecr" {
     ]
     resources = [
       data.aws_ecr_repository.pipeline.arn,
+      data.aws_ecr_repository.idr_old.arn, # TODO: Remove this when "idr_old" resources are removed
       "arn:aws:ecr:us-east-1:593207742271:repository/aws-guardduty-agent-fargate",
       "arn:aws:ecr:us-west-2:733349766148:repository/aws-guardduty-agent-fargate"
     ]
