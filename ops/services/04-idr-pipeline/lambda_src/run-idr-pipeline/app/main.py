@@ -325,7 +325,12 @@ def handler(event: dict[str, Any], context: LambdaContext) -> dict[str, Any]:
         json_safe_result = {
             k: v.isoformat() if isinstance(v, datetime) else v for k, v in asdict(result).items()
         }
-        return {"result_type": type(result).__name__, "details": filtered_dict(json_safe_result)}
+        lambda_result = {
+            "result_type": type(result).__name__,
+            "details": filtered_dict(json_safe_result),
+        }
+        logger.info(lambda_result)
+        return lambda_result
     except Exception:
         logger.exception("Unrecoverable exception raised")
         raise
