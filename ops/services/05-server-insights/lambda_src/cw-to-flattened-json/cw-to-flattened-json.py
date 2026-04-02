@@ -143,9 +143,7 @@ def processRecords(
             yield {"result": "Dropped", "recordId": recId}
         elif data["messageType"] == "DATA_MESSAGE":
             valid_log_events = [
-                x
-                for x in (transformLogEvent(e) for e in data["logEvents"])
-                if x is not None
+                x for x in (transformLogEvent(e) for e in data["logEvents"]) if x is not None
             ]
             if valid_log_events:
                 joinedData = "".join(valid_log_events)
@@ -193,9 +191,7 @@ def putRecordsToFirehoseStream(
     # for a valid response will prevent this
     response = None
     try:
-        response = client.put_record_batch(
-            DeliveryStreamName=streamName, Records=records
-        )
+        response = client.put_record_batch(DeliveryStreamName=streamName, Records=records)
     except Exception as e:
         failedRecords = records
         errMsg = str(e)
@@ -225,8 +221,7 @@ def putRecordsToFirehoseStream(
             )
         else:
             raise RuntimeError(
-                "Could not put records after %s attempts. %s"
-                % (str(maxAttempts), errMsg)
+                "Could not put records after %s attempts. %s" % (str(maxAttempts), errMsg)
             )
 
 
@@ -274,8 +269,7 @@ def putRecordsToKinesisStream(
             )
         else:
             raise RuntimeError(
-                "Could not put records after %s attempts. %s"
-                % (str(maxAttempts), errMsg)
+                "Could not put records after %s attempts. %s" % (str(maxAttempts), errMsg)
             )
 
 
@@ -338,9 +332,7 @@ def lambda_handler(event: dict[str, Any], context: dict[str, Any]):
             projectedSize += len(rec["data"]) + len(rec["recordId"])
             # 6000000 instead of 6291456 to leave ample headroom for the stuff we didn't account for
             if projectedSize > 6000000:
-                recordListsToReingest.append(
-                    [createReingestionRecord(isSas, originalRecord)]
-                )
+                recordListsToReingest.append([createReingestionRecord(isSas, originalRecord)])
                 del rec["data"]
                 rec["result"] = "Dropped"
 
@@ -361,9 +353,7 @@ def lambda_handler(event: dict[str, Any], context: dict[str, Any]):
             print("Reingested %d/%d" % (recordsReingestedSoFar, len(flattenedList)))
 
     num_processed_ok = len([r for r in records if r["result"] == "Ok"])
-    num_processed_failed = len(
-        [r for r in records if r["result"] == "ProcessingFailed"]
-    )
+    num_processed_failed = len([r for r in records if r["result"] == "ProcessingFailed"])
     num_split = len([rl for rl in recordListsToReingest if len(rl) > 1])
     num_reingested_asis = len([rl for rl in recordListsToReingest if len(rl) == 1])
     num_actual_dropped = len([r for r in records if r["result"] == "Dropped"]) - (

@@ -33,7 +33,7 @@ class ValidationGoal(Enum):
     SLA_EOB_WITH_SINCE = (100, 250, 1000)
     SLA_EOB_WITHOUT_SINCE = (500, 1000, 3000)
     SLA_V1_BASELINE = (700, 1000, 3000)
-    SLA_V2_BASELINE = (700, 1000, 3000)  # noqa: PIE796
+    SLA_V2_BASELINE = (700, 1000, 3000)
 
     def __init__(self, sla_50: int, sla_95: int, sla_99: int) -> None:
         self.sla_50 = sla_50
@@ -48,7 +48,7 @@ def set_validation_goal(validation_goal: ValidationGoal) -> None:
     Args:
         validation_goal (ValidationGoal): The validation goal to validate against
     """
-    global _validation_goal  # noqa: PLW0603
+    global _validation_goal
     _validation_goal = validation_goal
 
 

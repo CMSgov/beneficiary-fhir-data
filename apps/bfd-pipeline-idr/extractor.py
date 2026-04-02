@@ -6,13 +6,9 @@ from typing import Generic
 
 import psycopg
 import snowflake.connector
+from constants import DEFAULT_MIN_DATE
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
-from psycopg.rows import dict_row
-from pydantic import TypeAdapter
-from snowflake.connector import DictCursor, SnowflakeConnection
-
-from constants import DEFAULT_MIN_DATE
 from load_partition import LoadPartition
 from loader import get_connection_string
 from model.base_model import (
@@ -22,6 +18,8 @@ from model.base_model import (
     format_date_opt,
 )
 from model.load_progress import LoadProgress
+from psycopg.rows import dict_row
+from pydantic import TypeAdapter
 from settings import (
     BATCH_MULTIPLIER,
     IDR_ACCOUNT,
@@ -32,13 +30,14 @@ from settings import (
     IDR_WAREHOUSE,
     MIN_BATCH_COMPLETION_DATE,
 )
+from snowflake.connector import DictCursor, SnowflakeConnection
 from timer import Timer
 
 logger = logging.getLogger(__name__)
 
 
 # TODO: UP046 seems to cause issues with pyright
-class Extractor(ABC, Generic[T]):  # noqa: UP046
+class Extractor(ABC, Generic[T]):
     def __init__(self, cls: type[T], partition: LoadPartition) -> None:
         self.cls = cls
         self.type_adapter = TypeAdapter(list[self.cls])

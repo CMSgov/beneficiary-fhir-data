@@ -4,8 +4,6 @@ from datetime import UTC, date, datetime, timedelta
 from enum import Enum, StrEnum
 from typing import Any, TypeVar, cast
 
-from pydantic import BaseModel
-
 from constants import (
     ALL_CLAIM_TYPE_CODES,
     ALTERNATE_DEFAULT_DATE,
@@ -28,6 +26,7 @@ from constants import (
     PROFESSIONAL_SS_PARTITIONS,
 )
 from load_partition import LoadPartition, LoadPartitionGroup, PartitionType
+from pydantic import BaseModel
 from settings import (
     LATEST_CLAIMS,
     MIN_CLAIM_LOAD_DATE,

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import asyncio
 import itertools
 import json
@@ -251,23 +253,32 @@ async def query_samhsa_claim_any_ids(
         #
         # 1. Claims are invalid if they have no claim items
         # 2. Claim items are invalid if they have no claim
-        claim_join = t"""
-            INNER JOIN idr.{join_table:i}
-                ON {table:i}.clm_uniq_id = {join_table:i}.clm_uniq_id
-            """
+        claim_join = sql.SQL("""
+            INNER JOIN idr.{join_table}
+                ON {table}.clm_uniq_id = {join_table}.clm_uniq_id
+            """).format(
+            table=sql.Identifier(table),
+            join_table=sql.Identifier(join_table),
+        )
 
         # Either "table" or "join_table" can be the claims table, and "clm_thru_dt" does not exist
         # on claim_item* tables, so we need to determine what the claims table is
         claims_table = next(x for x in CLAIMS_TABLES if x in [table, join_table])
-        full_query = t"""
-            SELECT {table:i}.clm_uniq_id, {table:i}.{column:i},
-                {(claims_table):i}.clm_thru_dt
-            FROM idr.{table:i}
-            TABLESAMPLE SYSTEM({tablesample:l})
-            {claim_join:q}
-            WHERE {table:i}.{column:i} = ANY({(list(query_params))})
-            LIMIT {limit:l}
-            """
+        full_query = sql.SQL("""
+            SELECT {table}.clm_uniq_id, {table}.{column},
+            {claims_table}.clm_thru_dt
+            FROM idr.{table}
+            TABLESAMPLE SYSTEM({tablesample})
+            {claim_join}
+            WHERE {table}.{column} = ANY(%s)
+            LIMIT %s
+            """).format(
+            table=sql.Identifier(table),
+            column=sql.Identifier(column),
+            claims_table=sql.Identifier(claims_table),
+            tablesample=sql.Literal(tablesample),
+            claim_join=claim_join,
+        )
         logger.debug("Running query:\n%s", sql.as_string(full_query))
         result = await (await curs.execute(full_query)).fetchall()
         valid_samhsa_claim_ids = [
@@ -342,12 +353,14 @@ async def query_samhsa_benes_with_claims(
                 for x in await asyncio.gather(
                     *(
                         curs.execute(
-                            t"""
-                            SELECT beneficiary.bene_sk, {table:i}.clm_uniq_id from idr.{table:i}
+                            sql.SQL("""
+                            SELECT beneficiary.bene_sk, {table}.clm_uniq_id from idr.{table}
                             INNER JOIN idr.beneficiary
-                                ON {table:i}.bene_sk = beneficiary.bene_sk
+                                ON {table}.bene_sk = beneficiary.bene_sk
                             WHERE clm_uniq_id = ANY({(list(clm_uniq_ids))});
-                            """
+                            """).format(
+                                table=sql.Identifier(table),
+                            )
                         )
                         for table in CLAIMS_TABLES
                     )

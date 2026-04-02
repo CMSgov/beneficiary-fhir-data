@@ -1,13 +1,13 @@
 import sys
 
+
 def validate_file(filename):
-    '''Validates synthea rif csv files and ensures that the file is valid for loading
+    """Validates synthea rif csv files and ensures that the file is valid for loading
     into the pipeline. This is primarily designed to check synthea files for minor
     errors post-generation. Validations can be added here as needed.
-    '''
-
+    """
     passed = True
-    
+
     with open(filename) as infile:
         lineCount = 0
         expectedColumns = 0
@@ -31,13 +31,14 @@ def validate_file(filename):
                 print("Bad column count on line " + str(lineCount))
                 passed = False
             lineCount = lineCount + 1
-            
+
     if passed:
         print("Validation passed")
     else:
         print("Validation failed")
-    
+
     return passed
+
 
 ## Runs the program via run args when this file is run
 if __name__ == "__main__":

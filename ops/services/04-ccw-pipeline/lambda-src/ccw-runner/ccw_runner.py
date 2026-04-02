@@ -82,7 +82,7 @@ logger = Logger()
 
 
 @logger.inject_lambda_context(clear_state=True, log_event=True)
-def handler(event: dict[Any, Any], context: LambdaContext) -> None:  # noqa: ARG001
+def handler(event: dict[Any, Any], context: LambdaContext) -> None:
     """Lambda event handler function.
 
     Args:
@@ -93,17 +93,19 @@ def handler(event: dict[Any, Any], context: LambdaContext) -> None:  # noqa: ARG
         RuntimeError: If any required environment variables are undefined
     """
     try:
-        if not all([
-            REGION,
-            BFD_ENVIRONMENT,
-            DB_ENDPOINT,
-            CCW_BUCKET,
-            ECS_CLUSTER_ARN,
-            CCW_TASK_DEFINITION_ARN,
-            CCW_TASK_GROUP,
-            CCW_TASK_SUBNETS,
-            CCW_TASK_SECURITY_GROUP_ID,
-        ]):
+        if not all(
+            [
+                REGION,
+                BFD_ENVIRONMENT,
+                DB_ENDPOINT,
+                CCW_BUCKET,
+                ECS_CLUSTER_ARN,
+                CCW_TASK_DEFINITION_ARN,
+                CCW_TASK_GROUP,
+                CCW_TASK_SUBNETS,
+                CCW_TASK_SECURITY_GROUP_ID,
+            ]
+        ):
             raise RuntimeError("Not all necessary environment variables were defined")
 
         utc_now = datetime.now(UTC)

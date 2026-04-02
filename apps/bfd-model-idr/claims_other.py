@@ -2,10 +2,8 @@ import random
 from datetime import date, datetime
 from typing import Any
 
-import pandas as pd
-from faker import Faker
-
 import field_constants as f
+import pandas as pd
 from claims_static import (
     AVAILABLE_FAMILY_NAMES,
     AVAILABLE_GIVEN_NAMES,
@@ -15,6 +13,7 @@ from claims_static import (
     AVAILABLE_PROVIDER_TYPE_CODES,
     NOW,
 )
+from faker import Faker
 from generator_util import (
     CLM_ANSI_SGNTR,
     RowAdapter,

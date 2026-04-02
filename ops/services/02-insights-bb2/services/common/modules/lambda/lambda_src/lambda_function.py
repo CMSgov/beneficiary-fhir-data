@@ -63,12 +63,12 @@ The code below will:
 """
 
 import base64
-import json
 import gzip
-from io import BytesIO
-import boto3
-
+import json
 from datetime import datetime
+from io import BytesIO
+
+import boto3
 
 
 def format_unix_timestamp(ts):
@@ -78,11 +78,7 @@ def format_unix_timestamp(ts):
     """
     dt = datetime.utcfromtimestamp(ts / 1000)
 
-    return (
-        dt.replace(microsecond=0).isoformat().replace("+00:00", "")
-        if dt is not None
-        else None
-    )
+    return dt.replace(microsecond=0).isoformat().replace("+00:00", "") if dt is not None else None
 
 
 def transformLogEvent(log_event):
@@ -118,7 +114,7 @@ def transformLogEvent(log_event):
 
     # The BB2 event has a nested message JSON as well
     # message_dict = event_dict["message"]
-    message_dict = event_dict.get("message", None)
+    message_dict = event_dict.get("message")
 
     if message_dict is None:
         # This condition is generally caused by non-Django format logging,
@@ -177,9 +173,7 @@ def putRecordsToFirehoseStream(streamName, records, client, attemptsMade, maxAtt
     # response will prevent this
     response = None
     try:
-        response = client.put_record_batch(
-            DeliveryStreamName=streamName, Records=records
-        )
+        response = client.put_record_batch(DeliveryStreamName=streamName, Records=records)
     except Exception as e:
         failedRecords = records
         errMsg = str(e)
@@ -207,8 +201,7 @@ def putRecordsToFirehoseStream(streamName, records, client, attemptsMade, maxAtt
             )
         else:
             raise RuntimeError(
-                "Could not put records after %s attempts. %s"
-                % (str(maxAttempts), errMsg)
+                "Could not put records after %s attempts. %s" % (str(maxAttempts), errMsg)
             )
 
 
@@ -248,8 +241,7 @@ def putRecordsToKinesisStream(streamName, records, client, attemptsMade, maxAtte
             )
         else:
             raise RuntimeError(
-                "Could not put records after %s attempts. %s"
-                % (str(maxAttempts), errMsg)
+                "Could not put records after %s attempts. %s" % (str(maxAttempts), errMsg)
             )
 
 
@@ -259,8 +251,7 @@ def createReingestionRecord(isSas, originalRecord):
             "data": base64.b64decode(originalRecord["data"]),
             "partitionKey": originalRecord["kinesisRecordMetadata"]["partitionKey"],
         }
-    else:
-        return {"data": base64.b64decode(originalRecord["data"])}
+    return {"data": base64.b64decode(originalRecord["data"])}
 
 
 def getReingestionRecord(isSas, reIngestionRecord):
@@ -269,8 +260,7 @@ def getReingestionRecord(isSas, reIngestionRecord):
             "Data": reIngestionRecord["data"],
             "PartitionKey": reIngestionRecord["partitionKey"],
         }
-    else:
-        return {"Data": reIngestionRecord["data"]}
+    return {"Data": reIngestionRecord["data"]}
 
 
 def lambda_handler(event, context):
@@ -294,9 +284,7 @@ def lambda_handler(event, context):
         # 6000000 instead of 6291456 to leave ample headroom for the stuff we didn't account for
         if projectedSize > 6000000:
             totalRecordsToBeReingested += 1
-            recordsToReingest.append(
-                getReingestionRecord(isSas, dataByRecordId[rec["recordId"]])
-            )
+            recordsToReingest.append(getReingestionRecord(isSas, dataByRecordId[rec["recordId"]]))
             records[idx]["result"] = "Dropped"
             del records[idx]["data"]
 

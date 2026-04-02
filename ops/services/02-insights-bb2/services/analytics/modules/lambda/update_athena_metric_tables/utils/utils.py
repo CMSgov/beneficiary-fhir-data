@@ -1,12 +1,12 @@
-import boto3
 import csv
 import re
 import time
-
-from datetime import datetime, timezone
-from dateutil.relativedelta import relativedelta, MO
+from datetime import UTC, datetime
 from io import StringIO
 from string import Template
+
+import boto3
+from dateutil.relativedelta import MO, relativedelta
 
 """
 Summary:
@@ -46,10 +46,8 @@ def run_athena_query_result_to_s3(session, params, max_execution=60):
             state = response["QueryExecution"]["Status"]["State"]
             if state == "FAILED":
                 return False
-            elif state == "SUCCEEDED":
-                s3_path = response["QueryExecution"]["ResultConfiguration"][
-                    "OutputLocation"
-                ]
+            if state == "SUCCEEDED":
+                s3_path = response["QueryExecution"]["ResultConfiguration"]["OutputLocation"]
                 return s3_path
 
         time.sleep(5)
@@ -77,8 +75,7 @@ def download_content_from_s3(s3_path, csv_format=True):
         for line in csv.DictReader(f):
             result_list.append(line)
         return result_list
-    else:
-        return f.getvalue()
+    return f.getvalue()
 
 
 def check_table_exists(session, params, table_basename):
@@ -102,8 +99,7 @@ def check_table_exists(session, params, table_basename):
 
     if count == "0":
         return False
-    else:
-        return True
+    return True
 
 
 def check_table_for_report_date_entry(session, params, table_basename):
@@ -136,12 +132,11 @@ def check_table_for_report_date_entry(session, params, table_basename):
 
     if count == "0":
         return False
-    else:
-        return True
+    return True
 
 
 def get_sql_from_template_file(filepath, params):
-    f = open(filepath, "rt")
+    f = open(filepath)
     # read file contents to template obj
     template = Template(f.read())
     f.close()
@@ -167,12 +162,7 @@ def get_table_columns_select_list(session, params, table_basename):
     Ex:  "vpc, start_date, end_date, ..."
     """
     params["query"] = (
-        "SHOW COLUMNS FROM "
-        + params["database"]
-        + "."
-        + params["env"]
-        + "_"
-        + table_basename
+        "SHOW COLUMNS FROM " + params["database"] + "." + params["env"] + "_" + table_basename
     )
 
     output_s3_path = run_athena_query_result_to_s3(session, params, 1000)
@@ -239,7 +229,6 @@ def update_or_create_table_for_report_date(
 
 
 def update_or_create_metrics_table(session, params, table_basename, template_file):
-
     print("##")
     print(
         "## --- UPDATE/CREATE TABLE:  "
@@ -265,12 +254,11 @@ def update_or_create_metrics_table(session, params, table_basename, template_fil
                 print("## TABLE already has entry for report_date. Skipping...")
                 success_flag = True
                 break
-            else:
-                print("## Updating TABLE...")
-                # Update table
-                update_or_create_table_for_report_date(
-                    session, params, table_basename, template_file, table_exists
-                )
+            print("## Updating TABLE...")
+            # Update table
+            update_or_create_table_for_report_date(
+                session, params, table_basename, template_file, table_exists
+            )
         else:
             # Create table
             print("## Creating new TABLE...")
@@ -307,11 +295,9 @@ def get_report_dates_from_target_date(target_date_str=""):
        partition_1
     """
     if target_date_str == "":
-        target_date = datetime.now(timezone.utc)
+        target_date = datetime.now(UTC)
     else:
-        target_date = datetime.strptime(target_date_str, "%Y-%m-%d").astimezone(
-            timezone.utc
-        )
+        target_date = datetime.strptime(target_date_str, "%Y-%m-%d").astimezone(UTC)
 
     # Get report_date (Monday) from target date
     report_date = target_date + relativedelta(weekday=MO(-1))

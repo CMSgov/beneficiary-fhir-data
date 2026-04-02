@@ -4,10 +4,9 @@ import argparse
 import sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
-from typing import Dict, Optional, Tuple
 
 
-def java_map(source_root: Path) -> Dict[Tuple[str, str], str]:
+def java_map(source_root: Path) -> dict[tuple[str, str], str]:
     """
     Return map of (vm_class_name, sourcefilename) -> normalized_relative_path where:
       - `vm_class_name` like 'gov/cms/bfd/migrator/app/AppConfiguration'
@@ -15,7 +14,7 @@ def java_map(source_root: Path) -> Dict[Tuple[str, str], str]:
       - `normalized_relative_path` is a POSIX-style, relative path like
           'bfd-db-migrator/src/main/java/gov/cms/bfd/migrator/app/AppConfiguration.java'
     """
-    index: Dict[Tuple[str, str], str] = {}
+    index: dict[tuple[str, str], str] = {}
 
     for java_file in source_root.rglob("**/main/**/*.java"):
         relative_path = java_file.relative_to(source_root)
@@ -33,11 +32,11 @@ def java_map(source_root: Path) -> Dict[Tuple[str, str], str]:
 
 
 def path_from_map(
-    index: Dict[Tuple[str, str], str],
+    index: dict[tuple[str, str], str],
     class_vm_name: str,
     source_file_name: str,
     pkg_name: str,
-) -> Optional[str]:
+) -> str | None:
     """
     Attempt a best match for a given class/sourcefile name in the computed java index
 
@@ -53,21 +52,17 @@ def path_from_map(
 
     if key_exact in index:
         return index[key_exact]
-    else:
-        # Constructed VM name from package + sourcefilename
-        simple_name = source_file_name.replace(".java", "")
-        vm_from_pkg = f"{pkg_name}/{simple_name}"
-        key_pkg = (vm_from_pkg, source_file_name)
+    # Constructed VM name from package + sourcefilename
+    simple_name = source_file_name.replace(".java", "")
+    vm_from_pkg = f"{pkg_name}/{simple_name}"
+    key_pkg = (vm_from_pkg, source_file_name)
 
-        if key_pkg in index:
-            return index[key_pkg]
-        else:
-            return None
+    if key_pkg in index:
+        return index[key_pkg]
+    return None
 
 
-def build_output_tree(
-    jacoco_root: ET.Element, version: int, source_root: Path
-) -> ET.Element:
+def build_output_tree(jacoco_root: ET.Element, version: int, source_root: Path) -> ET.Element:
     coverage_root = ET.Element("coverage")
     coverage_root.set("version", str(version))
     java_index = java_map(source_root)
@@ -79,9 +74,7 @@ def build_output_tree(
             class_vm_name = (
                 cls.get("name") or ""
             ).strip()  # e.g. 'gov/cms/bfd/migrator/app/AppConfiguration'
-            source_file_name = (
-                cls.get("sourcefilename") or ""
-            ).strip()  # 'AppConfiguration.java'
+            source_file_name = (cls.get("sourcefilename") or "").strip()  # 'AppConfiguration.java'
 
             # Try to resolve the class to a real path
             path = path_from_map(java_index, class_vm_name, source_file_name, pkg_name)

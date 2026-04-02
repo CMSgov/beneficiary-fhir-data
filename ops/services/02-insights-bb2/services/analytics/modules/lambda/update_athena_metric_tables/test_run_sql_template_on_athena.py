@@ -1,13 +1,12 @@
 import argparse
-import boto3
 
+import boto3
 from utils.utils import (
     get_report_dates_from_target_date,
-    run_athena_query_using_template,
     output_results_list_to_csv_file,
+    run_athena_query_using_template,
     update_or_create_metrics_table,
 )
-
 
 """
 Summary:
@@ -88,7 +87,7 @@ parser.add_argument(
 parser.add_argument(
     "--update-per-app-table",
     default=False,
-    action='store_true',
+    action="store_true",
     help="Update or create table for per-app table basename.",
 )
 
@@ -157,9 +156,7 @@ if UPDATE_PER_APP_TABLE:
         print("---")
         print("--- SUCCESS: PER_APP TABLE was updated/created!")
         print("---")
-        print(
-            "--- NOTE: You can DROP the table via the console if wanting to re-created it"
-        )
+        print("--- NOTE: You can DROP the table via the console if wanting to re-created it")
         print("---       or use a different report_date to add new entries.")
         print("---")
     else:

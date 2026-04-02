@@ -1,11 +1,12 @@
 import argparse
-import boto3
 import re
 
+import boto3
 from utils.utils import (
-    run_athena_query_result_to_s3,
     download_content_from_s3,
+    run_athena_query_result_to_s3,
 )
+
 """
 Summary:
 
@@ -33,7 +34,10 @@ def get_table_columns(session, params, table_name):
     result_list = download_content_from_s3(output_s3_path)
 
     # Get the first keyname from the very first list item.
-    keyname = [a for a, b in result_list[0].items()][0]
+    try:
+        keyname = next(iter(result_list[0]), None)
+    except StopIteration:
+        raise ValueError("result_list[0] has no items")
 
     split_regex = re.compile(r"(\w+)\s*(date\s|int\s|bigint\s|string\s|boolean\s)\s+$")
 
@@ -75,9 +79,7 @@ def alter_table_add_columns(session, params, table_name, alter_list):
         print("---")
         return False
 
-    alter_sql = (
-        "ALTER TABLE " + params["database"] + "." + table_name + " ADD COLUMNS ("
-    )
+    alter_sql = "ALTER TABLE " + params["database"] + "." + table_name + " ADD COLUMNS ("
 
     cnt = 0
     for i in alter_list:
@@ -135,7 +137,7 @@ parser.add_argument(
 parser.add_argument(
     "--alter-table",
     default=False,
-    action='store_true',
+    action="store_true",
     help="ALTER the destination table with schema differences.",
 )
 

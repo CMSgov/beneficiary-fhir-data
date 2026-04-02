@@ -9,13 +9,20 @@ from uuid import uuid4
 
 import psycopg
 import pytest
+<<<<<<< Updated upstream
 from psycopg import sql
+=======
+from load_synthetic import load_from_csv
+from logger_config import configure_logger
+from pipeline import run
+>>>>>>> Stashed changes
 from psycopg.rows import DictRow, dict_row
 from testcontainers.core.config import testcontainers_config  # type: ignore
 
 # https://github.com/testcontainers/testcontainers-python/issues/305
 from testcontainers.postgres import PostgresContainer  # type: ignore
 
+<<<<<<< Updated upstream
 from load_events import IdrJobLoadEvent, IdrJobType
 from load_partition import LoadType
 from load_synthetic import load_from_csv
@@ -25,6 +32,8 @@ from pipeline import run
 from pydantic_utils import fields
 from settings import LOAD_TYPE
 
+=======
+>>>>>>> Stashed changes
 # ryuk throws a 500 or 404 error for some reason
 # seems to have issues with podman https://github.com/testcontainers/testcontainers-python/issues/753
 testcontainers_config.ryuk_disabled = True

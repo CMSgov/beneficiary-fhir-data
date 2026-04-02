@@ -5,7 +5,6 @@ import typing
 from pathlib import Path
 
 import psycopg
-
 from loader import get_connection_string
 from logger_config import configure_logger
 from model.base_model import LoadMode
@@ -17,10 +16,7 @@ tables = [
     {"csv_name": "SYNTHETIC_BENE_MBI_ID.csv", "table": "v2_mdcr_bene_mbi_id"},
     {"csv_name": "SYNTHETIC_BENE_XREF.csv", "table": "v2_mdcr_bene_xref"},
     {"csv_name": "SYNTHETIC_BENE_MDCR_ENTLMT.csv", "table": "v2_mdcr_bene_mdcr_entlmt"},
-    {
-        "csv_name": "SYNTHETIC_BENE_MDCR_ENTLMT_RSN.csv",
-        "table": "v2_mdcr_bene_mdcr_entlmt_rsn",
-    },
+    {"csv_name": "SYNTHETIC_BENE_MDCR_ENTLMT_RSN.csv", "table": "v2_mdcr_bene_mdcr_entlmt_rsn"},
     {"csv_name": "SYNTHETIC_BENE_MDCR_STUS.csv", "table": "v2_mdcr_bene_mdcr_stus"},
     {"csv_name": "SYNTHETIC_BENE_TP.csv", "table": "v2_mdcr_bene_tp"},
     {"csv_name": "SYNTHETIC_BENE_CMBND_DUAL_MDCR.csv", "table": "v2_mdcr_bene_cmbnd_dual_mdcr"},

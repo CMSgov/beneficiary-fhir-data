@@ -2,10 +2,6 @@ import logging
 import time
 from datetime import UTC, datetime, timedelta
 
-from snowflake.connector import ProgrammingError
-from snowflake.connector.errors import ForbiddenError
-from snowflake.connector.network import ReauthenticationRequest, RetryRequest
-
 from constants import DEFAULT_PARTITION
 from extractor import PostgresExtractor, SnowflakeExtractor
 from load_partition import LoadPartition
@@ -15,6 +11,9 @@ from model.base_model import (
     T,
 )
 from model.load_progress import LoadProgress
+from snowflake.connector import ProgrammingError
+from snowflake.connector.errors import ForbiddenError
+from snowflake.connector.network import ReauthenticationRequest, RetryRequest
 
 logger = logging.getLogger(__name__)
 

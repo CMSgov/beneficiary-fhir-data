@@ -5,9 +5,8 @@ from collections import defaultdict
 from pathlib import Path
 
 import click
-import tqdm
-
 import field_constants as f
+import tqdm
 from claims_util import four_part_key
 from generator_util import (
     BENE_DUAL,

@@ -1,4 +1,5 @@
 import argparse
+
 from lambda_function import lambda_handler
 
 """
@@ -109,7 +110,7 @@ event = {
     "ENV": ENV,
     "BASENAME_MAIN": BASENAME_MAIN,
     "BASENAME_PER_APP": BASENAME_PER_APP,
-    "RETRY_SLEEP_SECONDS": RETRY_SLEEP_SECONDS
+    "RETRY_SLEEP_SECONDS": RETRY_SLEEP_SECONDS,
 }
 
 

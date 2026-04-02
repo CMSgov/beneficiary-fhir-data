@@ -39,6 +39,7 @@ def get_referenced_maps(compiled_map_path):
         print("Error reading map:", e)
         return set()
 
+
 def get_sushi_resources():
     try:
         sushi_dir = Path(__file__).parent.absolute() / "sushi" / "fsh-generated" / "resources"
@@ -49,6 +50,7 @@ def get_sushi_resources():
     except Exception as e:
         print(f"Error getting SUSHI resources: {e}")
         return ""
+
 
 # populate matchbox's tx library
 def upload_resources(resource_dir, server_url):
@@ -189,7 +191,7 @@ def main():
     script_dir = Path(__file__).parent.absolute()
 
     # Generate Structure Definitions + CodeSystems
-    if(args.sushi):
+    if args.sushi:
         print("Running sushi build")
         stdout, stderr = run_command("sushi build", cwd=script_dir / "sushi")
         print("SUSHI output:")
@@ -227,13 +229,13 @@ def main():
     referenced_maps = get_referenced_maps(compiled_map_path)
     map_imports = " ".join([f"-ig {map_file}" for map_file in referenced_maps])
 
-    #Augment source file if needed. Currently just for providers.
+    # Augment source file if needed. Currently just for providers.
     (input_file,) = {args.input}
-    if 'EOB' in input_file:
+    if "EOB" in input_file:
         print("Augmenting input file")
         augmentation_cmd = f"python augment_sample_resources.py {args.input}"
         stdout, stderr = run_command(augmentation_cmd, cwd=script_dir)
-        input_file = 'out/temporary-sample.json'
+        input_file = "out/temporary-sample.json"
 
     print("Executing Transform")
     execute_cmd = f"java -jar validator_cli.jar {input_file} -output {args.output} -transform \

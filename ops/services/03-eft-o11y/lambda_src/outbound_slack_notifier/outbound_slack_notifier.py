@@ -89,7 +89,7 @@ def _slack_status_notif(status_notification: StatusNotification) -> None:
 
 
 @logger.inject_lambda_context(clear_state=True, log_event=True)
-def handler(event: dict[Any, Any], context: LambdaContext) -> None:  # noqa: ARG001
+def handler(event: dict[Any, Any], context: LambdaContext) -> None:
     try:
         if not all([BFD_ENVIRONMENT, SLACK_WEBHOOK_URL]):
             raise RuntimeError("Not all necessary environment variables were defined")

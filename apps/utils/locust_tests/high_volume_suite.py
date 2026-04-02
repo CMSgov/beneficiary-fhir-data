@@ -10,14 +10,13 @@ from typing import (
     TypeVar,
 )
 
-from locust import TaskSet, User, events, tag, task
-from locust.env import Environment
-
 from common import data, db
 from common.bfd_user_base import BFDUserBase
 from common.locust_utils import is_distributed, is_locust_master
 from common.url_path import create_url_path
 from common.user_init_aware_load_shape import UserInitAwareLoadShape
+from locust import TaskSet, User, events, tag, task
+from locust.env import Environment
 
 TaskT = TypeVar("TaskT", Callable[..., None], type["TaskSet"])
 MASTER_BENE_IDS: Collection[str] = []
@@ -28,7 +27,7 @@ EXCLUDE_TAGS: set[str] = set()
 
 
 @events.test_start.add_listener
-def _(environment: Environment, **kwargs: dict[str, Any]) -> None:  # noqa: ARG001
+def _(environment: Environment, **kwargs: dict[str, Any]) -> None:
     if (
         is_distributed(environment) and is_locust_master(environment)
     ) or not environment.parsed_options:
@@ -36,7 +35,7 @@ def _(environment: Environment, **kwargs: dict[str, Any]) -> None:  # noqa: ARG0
 
     # See https://docs.locust.io/en/stable/extending-locust.html#test-data-management
     # for Locust's documentation on the test data management pattern used here
-    global MASTER_BENE_IDS  # noqa: PLW0603
+    global MASTER_BENE_IDS
     MASTER_BENE_IDS = data.load_from_parsed_opts(
         environment.parsed_options,
         db.get_bene_ids,
@@ -44,21 +43,21 @@ def _(environment: Environment, **kwargs: dict[str, Any]) -> None:  # noqa: ARG0
         data_type_name="bene_ids",
     )
 
-    global TAGS  # noqa: PLW0603
+    global TAGS
     TAGS = (
         set(environment.parsed_options.locust_tags.split())
         if hasattr(environment.parsed_options, "locust_tags")
         else set()
     )
 
-    global EXCLUDE_TAGS  # noqa: PLW0603
+    global EXCLUDE_TAGS
     EXCLUDE_TAGS = (
         set(environment.parsed_options.locust_exclude_tags.split())
         if hasattr(environment.parsed_options, "locust_exclude_tags")
         else set()
     )
 
-    global MASTER_CONTRACT_DATA  # noqa: PLW0603
+    global MASTER_CONTRACT_DATA
     MASTER_CONTRACT_DATA = data.load_from_parsed_opts(
         environment.parsed_options,
         db.get_contract_ids,
@@ -66,7 +65,7 @@ def _(environment: Environment, **kwargs: dict[str, Any]) -> None:  # noqa: ARG0
         data_type_name="contract_data",
     )
 
-    global MASTER_HASHED_MBIS  # noqa: PLW0603
+    global MASTER_HASHED_MBIS
     MASTER_HASHED_MBIS = data.load_from_parsed_opts(
         environment.parsed_options,
         db.get_hashed_mbis,
@@ -296,7 +295,7 @@ class PatientTaskSet(HighVolumeTaskSet):
     def patient_test_coverage_contract_v1(self) -> None:
         """Patient search by coverage contract (all pages)."""
 
-        def make_url():  # noqa: ANN202
+        def make_url():
             contract = self.user.contract_data.pop()
             return create_url_path(
                 "/v1/fhir/Patient",

@@ -1,6 +1,6 @@
 # pylint: disable=pointless-statement, expression-not-assigned
 # pyright: reportUnusedExpression=false
-from typing import Any, Optional
+from typing import Any
 
 from diagrams import Cluster, Diagram, Edge
 from diagrams.aws.compute import LambdaFunction
@@ -12,9 +12,9 @@ graph_attrs = {"direction": "RL"}
 
 
 def _solid_cluster(
-    label: Optional[str] = None,
-    direction: Optional[str] = None,
-    graph_attr: Optional[dict[Any, Any]] = None,
+    label: str | None = None,
+    direction: str | None = None,
+    graph_attr: dict[Any, Any] | None = None,
 ) -> Cluster:
     return Cluster(
         label=label or "",

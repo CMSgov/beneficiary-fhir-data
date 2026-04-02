@@ -3,8 +3,13 @@ import string
 from datetime import date
 from typing import Any
 
+<<<<<<< Updated upstream
 import field_constants as f
 from claims_static import (
+=======
+from . import field_constants as f
+from .claims_static import (
+>>>>>>> Stashed changes
     ADJUDICATED_PROFESSIONAL_CLAIM_TYPES,
     AVAIL_CLM_RLT_COND_SK,
     AVAIL_OSCAR_CODES_INSTITUTIONAL,

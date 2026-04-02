@@ -1,6 +1,6 @@
 #
-# Script for creating a file that describes which bene ids were generated 
-# and what claim types were associated with each bene id. 
+# Script for creating a file that describes which bene ids were generated
+# and what claim types were associated with each bene id.
 # Will overwrite any characteristics.csv at output location, assuming queries succeed
 #
 # Args:
@@ -14,40 +14,60 @@
 # Requires psycopg2 and boto3 installed
 #
 
+<<<<<<< Updated upstream
 import sys
 import psycopg2
 import re
 import csv
 from pathlib import Path
+=======
+import csv
+import sys
+>>>>>>> Stashed changes
 
+import psycopg2
 import ssmutil
+
 
 def generate_characteristics_file(args):
     """
     Generates a beneficiary characteristics file for a given
     synthea load, and exports it as a csv.
     """
-    
     bene_id_start = args[0]
     bene_id_end = args[1]
-    output_path = args[2] if args[2].endswith('/') else args[2] + "/"
+    output_path = args[2] if args[2].endswith("/") else args[2] + "/"
     env = args[3]
-    
+
     db_string = ""
 
-    if "test" == env:
+    if env == "test":
         db_string = ssmutil.get_ssm_db_string("test")
-    elif "prd-sbx" == env:
+    elif env == "prd-sbx":
         db_string = ssmutil.get_ssm_db_string("prd-sbx")
-    elif "prod" == env:
+    elif env == "prod":
         db_string = ssmutil.get_ssm_db_string("prod")
     else:
         print(f"(Validation Failure) Unknown environment string {env}")
         print("Returning with exit code 1")
         sys.exit(1)
-    
-    header = ['Beneficiary Id','MBI Unhashed','Part D Contract Number','Carrier Claims Total','DME Claims Total','HHA Claims Total','Hospice Claims Total','Inpatient Claims Total','Outpatient Claims Total','SNF Claims Total','Part D Events Total','FISS','MCS']
-    
+
+    header = [
+        "Beneficiary Id",
+        "MBI Unhashed",
+        "Part D Contract Number",
+        "Carrier Claims Total",
+        "DME Claims Total",
+        "HHA Claims Total",
+        "Hospice Claims Total",
+        "Inpatient Claims Total",
+        "Outpatient Claims Total",
+        "SNF Claims Total",
+        "Part D Events Total",
+        "FISS",
+        "MCS",
+    ]
+
     ## get data for csv from db
     bene_data = {}
     carrier_data = {}
@@ -58,7 +78,7 @@ def generate_characteristics_file(args):
     outpatient_data = {}
     snf_data = {}
     pde_data = {}
-    
+
     try:
         ## bene data, 3 columns: bene id, unhashed mbi, concatenated contract numbers
         bene_data = get_bene_data(bene_id_start, bene_id_end, db_string)
@@ -67,7 +87,9 @@ def generate_characteristics_file(args):
         hha_data = get_table_count("hha_claims", bene_id_start, bene_id_end, db_string)
         hospice_data = get_table_count("hospice_claims", bene_id_start, bene_id_end, db_string)
         inpatient_data = get_table_count("inpatient_claims", bene_id_start, bene_id_end, db_string)
-        outpatient_data = get_table_count("outpatient_claims", bene_id_start, bene_id_end, db_string)
+        outpatient_data = get_table_count(
+            "outpatient_claims", bene_id_start, bene_id_end, db_string
+        )
         snf_data = get_table_count("snf_claims", bene_id_start, bene_id_end, db_string)
         pde_data = get_table_count("partd_events", bene_id_start, bene_id_end, db_string)
         fiss_data, mcs_data = get_rda_claim_count(db_string, bene_id_start, bene_id_end)
@@ -75,21 +97,33 @@ def generate_characteristics_file(args):
         print(f"Unexpected error while running queries: {err}")
         print("Returning with exit code 1")
         sys.exit(1)
-    
+
     ## synthesize data into final rows
-    final_data_rows = put_data_into_final_rows(bene_data, carrier_data, dme_data, hha_data, hospice_data, inpatient_data, outpatient_data, snf_data, pde_data, fiss_data, mcs_data )
-    
+    final_data_rows = put_data_into_final_rows(
+        bene_data,
+        carrier_data,
+        dme_data,
+        hha_data,
+        hospice_data,
+        inpatient_data,
+        outpatient_data,
+        snf_data,
+        pde_data,
+        fiss_data,
+        mcs_data,
+    )
+
     ## Write csv to filesystem + header
-    filePath = output_path + 'characteristics.csv'
+    filePath = output_path + "characteristics.csv"
     print("Writing final csv...")
     try:
-        with open(filePath, 'w') as f:
+        with open(filePath, "w") as f:
             writer = csv.writer(f)
             writer.writerow(header)
             writer.writerows(final_data_rows)
             num_rows = len(final_data_rows)
             print(f"Wrote out {num_rows} to {filePath}")
-    except IOError as err:
+    except OSError as err:
         print(f"IOError while opening/writing csv: {err}")
         print("Returning with exit code 1")
         sys.exit(1)
@@ -97,33 +131,41 @@ def generate_characteristics_file(args):
         print(f"Unexpected error while opening/writing csv: {err}")
         print("Returning with exit code 1")
         sys.exit(1)
-    
+
     print("Returning with exit code 0 (No errors)")
     sys.exit(0)
-    
+
 
 def get_bene_data(bene_id_start, bene_id_end, db_string):
     """
-    Gets the initial data from the beneficiary table including the beneficiary id, 
+    Gets the initial data from the beneficiary table including the beneficiary id,
     mbi, and a concatenated list of contract numbers.
     """
-    
-    query = f"SELECT bene_id, mbi_num, concat_ws(',', ptd_cntrct_jan_id, ptd_cntrct_feb_id,ptd_cntrct_mar_id,ptd_cntrct_apr_id,ptd_cntrct_may_id,ptd_cntrct_jun_id,"\
-        f" ptd_cntrct_jul_id, ptd_cntrct_aug_id, ptd_cntrct_sept_id, ptd_cntrct_oct_id, ptd_cntrct_nov_id, ptd_cntrct_dec_id) as \"Part D Contract Number\""\
+    query = (
+        f"SELECT bene_id, mbi_num, concat_ws(',', ptd_cntrct_jan_id, ptd_cntrct_feb_id,ptd_cntrct_mar_id,ptd_cntrct_apr_id,ptd_cntrct_may_id,ptd_cntrct_jun_id,"
+        f' ptd_cntrct_jul_id, ptd_cntrct_aug_id, ptd_cntrct_sept_id, ptd_cntrct_oct_id, ptd_cntrct_nov_id, ptd_cntrct_dec_id) as "Part D Contract Number"'
         f" FROM ccw.beneficiaries WHERE bene_id <= {bene_id_start} and bene_id > {bene_id_end} order by bene_id desc"
+<<<<<<< Updated upstream
         
     print(f"Starting query for bene data...");
+=======
+    )
+
+    print("Starting query for bene data...")
+>>>>>>> Stashed changes
     raw_query_response = _execute_query(db_string, query)
     rows = len(raw_query_response)
     print(f"Got {rows} results from bene data query.");
     return raw_query_response
-    
+
+
 def get_table_count(table_name, bene_id_start, bene_id_end, db_string):
     """
     Gets the table count for each bene in the specified range for the specified
     database, and returns a dictionary with the bene id as the key and the
     table count as the value.
     """
+<<<<<<< Updated upstream
     
     query = "SELECT bene_id, count(*)"\
             f" FROM ccw.{table_name}"\
@@ -132,6 +174,16 @@ def get_table_count(table_name, bene_id_start, bene_id_end, db_string):
             " ORDER BY bene_id desc;"\
             
     print(f"Starting query for {table_name} count...");
+=======
+    query = (
+        "SELECT bene_id, count(*)"
+        f" FROM ccw.{table_name}"
+        f" WHERE bene_id <= {bene_id_start} and bene_id > {bene_id_end}"
+        " GROUP BY bene_id"
+        " ORDER BY bene_id desc;"
+    )
+    print(f"Starting query for {table_name} count...")
+>>>>>>> Stashed changes
     raw_query_response = _execute_query(db_string, query)
     rows = len(raw_query_response)
     print(f"Got {table_name} counts for {rows} benes.");
@@ -139,16 +191,29 @@ def get_table_count(table_name, bene_id_start, bene_id_end, db_string):
     dict_response = {}
     for entry in raw_query_response:
         dict_response[entry[0]] = entry[1]
-    
+
     return dict_response
 
-def put_data_into_final_rows(bene_data, carrier_data, dme_data, hha_data, hospice_data, inpatient_data, outpatient_data, snf_data, pde_data, fiss_data, mcs_data):
+
+def put_data_into_final_rows(
+    bene_data,
+    carrier_data,
+    dme_data,
+    hha_data,
+    hospice_data,
+    inpatient_data,
+    outpatient_data,
+    snf_data,
+    pde_data,
+    fiss_data,
+    mcs_data,
+):
     """
     Takes the bene data and table counts and creates a list of rows that will
     be used in the final csv characteristics file.
     """
     final_rows = []
-    
+
     print("Setting up final data rows...")
     for row in bene_data:
         bene_id = row[0]
@@ -164,9 +229,26 @@ def put_data_into_final_rows(bene_data, carrier_data, dme_data, hha_data, hospic
         pde_count = pde_data[bene_id] if bene_id in pde_data else 0
         fiss_count = fiss_data.get(bene_id, 0)
         mcs_count = mcs_data.get(bene_id, 0)
-        final_rows.append([bene_id, mbi, contracts, carrier_count, dme_count, hha_count, hospice_count, inpatient_count, outpatient_count, snf_count, pde_count, fiss_count , mcs_count])
-        
+        final_rows.append(
+            [
+                bene_id,
+                mbi,
+                contracts,
+                carrier_count,
+                dme_count,
+                hha_count,
+                hospice_count,
+                inpatient_count,
+                outpatient_count,
+                snf_count,
+                pde_count,
+                fiss_count,
+                mcs_count,
+            ]
+        )
+
     return final_rows
+
 
 def _execute_query(uri: str, query: str):
     """
@@ -175,14 +257,14 @@ def _execute_query(uri: str, query: str):
     conn = None
     finalResults = []
     try:
-        with psycopg2.connect(uri) as conn:
-            with conn.cursor() as cursor:
-                cursor.execute(query)
-                finalResults = cursor.fetchall()
+        with psycopg2.connect(uri) as conn, conn.cursor() as cursor:
+            cursor.execute(query)
+            finalResults = cursor.fetchall()
     finally:
         conn.close()
 
     return finalResults
+
 
 def get_rda_claim_count(db_string, bene_id_start, bene_id_end):
     query_fiss = f"""
@@ -207,7 +289,6 @@ def get_rda_claim_count(db_string, bene_id_start, bene_id_end):
     mcs_counts = {row[0]: row[1] for row in _execute_query(db_string, query_mcs)}
 
     return fiss_counts, mcs_counts
-
 
 
 ## Runs the program via run args when this file is run

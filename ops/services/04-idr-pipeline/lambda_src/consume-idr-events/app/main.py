@@ -52,14 +52,12 @@ def insert_event(event: IdrLoadEventModel) -> None:
         logger.info("Connected to %s", DB_ENDPOINT)
 
         event_dict = event.model_dump()
-        query_template = t"""
-            INSERT INTO {DB_SCHEMA:i}.{IDR_LOAD_EVENTS_TABLE:i} (
-                {sql.SQL(", ").join(sql.Identifier(k) for k in event_dict):q}
-            )
-            VALUES (
-                {sql.SQL(", ").join(event_dict.values()):q}
-            )
-        """
+        query_template = sql.SQL("INSERT INTO {}.{} ({}) VALUES ({})").format(
+            sql.Identifier(DB_SCHEMA),
+            sql.Identifier(IDR_LOAD_EVENTS_TABLE),
+            sql.SQL(", ").join(map(sql.Identifier, event_dict.keys())),
+            sql.SQL(", ").join(map(sql.Literal, event_dict.values())),
+        )
         logger.info(
             "Executing query: %s",
             re.sub(r"\s+", " ", sql.as_string(query_template)),
@@ -71,7 +69,7 @@ def insert_event(event: IdrLoadEventModel) -> None:
 
 
 @logger.inject_lambda_context(clear_state=True, log_event=True)
-def handler(event: dict[str, Any], context: LambdaContext) -> None:  # noqa: ARG001
+def handler(event: dict[str, Any], context: LambdaContext) -> None:
     try:
         if not all([BFD_ENVIRONMENT, DB_ENDPOINT]):
             raise RuntimeError("Not all necessary environment variables were defined")

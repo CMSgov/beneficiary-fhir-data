@@ -4,7 +4,6 @@ from datetime import UTC, date, datetime
 from enum import IntFlag, StrEnum, auto
 
 from dateutil.relativedelta import relativedelta
-
 from settings import ENABLE_DATE_PARTITIONS
 
 

@@ -38,7 +38,7 @@ sample_sources_by_profile = {
     "Carrier": "out/ExplanationOfBenefit-Carrier.json",
     "DME": "out/ExplanationOfBenefit-DME.json",
     "Pharmacy": "out/ExplanationOfBenefit-Pharmacy.json",
-    "Patient": "out/Patient.json"
+    "Patient": "out/Patient.json",
 }
 
 sample_resources_by_profile = {}
@@ -117,20 +117,20 @@ for walk_info in os.walk(dd_support_folder):
 
                     # Populate the element names + missing descriptions
                     if entry["inputPath"] in structure_def_names_descriptions:
-                        entry["Field Name"] = structure_def_names_descriptions[
-                            entry["inputPath"]
-                        ]["name"]
+                        entry["Field Name"] = structure_def_names_descriptions[entry["inputPath"]][
+                            "name"
+                        ]
                         if "definition" in structure_def_names_descriptions[entry["inputPath"]]:
                             entry["Description"] = structure_def_names_descriptions[
                                 entry["inputPath"]
-                            ]["definition"]                    
-                    #nameOverride and definitionOverride only exist when a field is derived IN fml.
+                            ]["definition"]
+                    # nameOverride and definitionOverride only exist when a field is derived IN fml.
                     if "nameOverride" in entry:
                         entry["Field Name"] = entry["nameOverride"]
                         entry["Description"] = entry["definitionOverride"]
                     elif "Description" not in entry or not entry["Description"]:
                         raise ValueError(
-                            f"Entry {entry.get("inputPath", 'Unknown')} has no definition. "
+                            f"Entry {entry.get('inputPath', 'Unknown')} has no definition. "
                         )
                     entry.pop("inputPath")
                     dd_df.append(entry)
@@ -163,7 +163,7 @@ dd_df.to_csv(
         "sources",
         "referenceTable",
         "cclfMapping",
-        "ccwMapping"
+        "ccwMapping",
     ],
 )
 export_columns = [
@@ -180,7 +180,7 @@ export_columns = [
     "sources",
     "referenceTable",
     "cclfMapping",
-    "ccwMapping"
+    "ccwMapping",
 ]
 export_df = dd_df[export_columns]
 tips_df = pd.read_csv(dd_support_folder + "/tips.csv")

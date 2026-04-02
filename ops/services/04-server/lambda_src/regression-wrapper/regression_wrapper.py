@@ -74,7 +74,7 @@ class ResultModel(BaseModel):
 
 
 @logger.inject_lambda_context(clear_state=True, log_event=True)
-def handler(event: dict[Any, Any], context: LambdaContext) -> None:  # noqa: ARG001
+def handler(event: dict[Any, Any], context: LambdaContext) -> None:
     codedeploy_event = CodeDeployLifecycleHookEvent(event)
 
     lambda_client = boto3.client("lambda", config=BOTO_CONFIG)

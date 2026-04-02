@@ -1,8 +1,6 @@
 from datetime import date, datetime
 from typing import Annotated, override
 
-from pydantic import BeforeValidator
-
 from constants import (
     DEFAULT_MAX_DATE,
 )
@@ -15,6 +13,7 @@ from model.base_model import (
     ModelType,
     transform_default_string,
 )
+from pydantic import BeforeValidator
 
 
 class IdrContractPbpContact(IdrBaseModel):

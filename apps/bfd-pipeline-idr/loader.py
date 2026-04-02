@@ -3,13 +3,12 @@ from collections.abc import Iterator, Sequence
 from datetime import UTC, date, datetime
 
 import psycopg
-from psycopg.abc import Params, Query
-from psycopg.errors import DeadlockDetected
-
 from constants import DEFAULT_MIN_DATE
 from load_partition import LoadPartition, LoadType
 from model.base_model import DbType, LoadMode, T
 from model.load_progress import LoadProgress
+from psycopg.abc import Params, Query
+from psycopg.errors import DeadlockDetected
 from settings import (
     bfd_db_endpoint,
     bfd_db_name,

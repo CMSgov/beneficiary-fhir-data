@@ -17,13 +17,6 @@ from aws_lambda_powertools.utilities.parser import envelopes
 from aws_lambda_powertools.utilities.parser.models import S3Model
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from botocore.config import Config
-from paramiko.ssh_exception import (
-    AuthenticationException,
-    BadHostKeyException,
-    NoValidConnectionsError,
-    SSHException,
-)
-
 from errors import (
     BaseTransferError,
     InvalidObjectKeyError,
@@ -32,6 +25,12 @@ from errors import (
     SFTPTransferError,
     UnknownPartnerError,
     UnrecognizedFileError,
+)
+from paramiko.ssh_exception import (
+    AuthenticationException,
+    BadHostKeyException,
+    NoValidConnectionsError,
+    SSHException,
 )
 from s3 import S3EventType
 from sns import (
@@ -316,7 +315,7 @@ def _handle_s3_event(s3_object_key: str) -> None:
 
 
 @logger.inject_lambda_context(clear_state=True, log_event=True)
-def handler(event: dict[Any, Any], context: LambdaContext) -> None:  # noqa: ARG001
+def handler(event: dict[Any, Any], context: LambdaContext) -> None:
     try:
         if not all(
             [

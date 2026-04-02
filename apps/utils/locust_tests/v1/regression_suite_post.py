@@ -10,13 +10,12 @@ import itertools
 from collections.abc import Collection
 from typing import Any
 
-from locust import events, tag, task
-from locust.env import Environment
-
 from common import data, db
 from common.bfd_user_base import BFDUserBase, set_comparisons_metadata_path
 from common.locust_utils import is_distributed, is_locust_master
 from common.user_init_aware_load_shape import UserInitAwareLoadShape
+from locust import events, tag, task
+from locust.env import Environment
 
 master_bene_ids: Collection[str] = []
 master_contract_data: Collection[dict[str, str]] = []
@@ -24,7 +23,7 @@ master_mbis: Collection[str] = []
 
 
 @events.test_start.add_listener
-def _(environment: Environment, **kwargs: dict[str, Any]) -> None:  # noqa: ARG001
+def _(environment: Environment, **kwargs: dict[str, Any]) -> None:
     if (
         is_distributed(environment) and is_locust_master(environment)
     ) or not environment.parsed_options:
@@ -32,21 +31,21 @@ def _(environment: Environment, **kwargs: dict[str, Any]) -> None:  # noqa: ARG0
 
     # See https://docs.locust.io/en/stable/extending-locust.html#test-data-management
     # for Locust's documentation on the test data management pattern used here
-    global master_bene_ids  # noqa: PLW0603
+    global master_bene_ids
     master_bene_ids = data.load_from_parsed_opts(
         environment.parsed_options,
         db.get_regression_bene_ids,
         data_type_name="bene_ids",
     )
 
-    global master_contract_data  # noqa: PLW0603
+    global master_contract_data
     master_contract_data = data.load_from_parsed_opts(
         environment.parsed_options,
         db.get_regression_contract_ids,
         data_type_name="contract_data",
     )
 
-    global master_mbis  # noqa: PLW0603
+    global master_mbis
     master_mbis = data.load_from_parsed_opts(
         environment.parsed_options,
         db.get_regression_mbis,

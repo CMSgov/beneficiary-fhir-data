@@ -3,12 +3,11 @@ import logging
 from collections.abc import Collection
 from typing import Any, ClassVar
 
-from locust import events, tag, task
-from locust.env import Environment
-
 from common import data, db_idr
 from common.bfd_user_base import BFDUserBase
 from common.locust_utils import is_distributed, is_locust_master
+from locust import events, tag, task
+from locust.env import Environment
 
 master_bene_sks: Collection[str] = []
 master_bene_sks_part_a: Collection[str] = []
@@ -18,7 +17,7 @@ master_claim_ids: Collection[str] = []
 
 
 @events.test_start.add_listener
-def _(environment: Environment, **kwargs: dict[str, Any]) -> None:  # noqa: ARG001
+def _(environment: Environment, **kwargs: dict[str, Any]) -> None:
     if (
         is_distributed(environment) and is_locust_master(environment)
     ) or not environment.parsed_options:
@@ -26,35 +25,35 @@ def _(environment: Environment, **kwargs: dict[str, Any]) -> None:  # noqa: ARG0
 
     # See https://docs.locust.io/en/stable/extending-locust.html#test-data-management
     # for Locust's documentation on the test data management pattern used here
-    global master_bene_sks  # noqa: PLW0603
+    global master_bene_sks
     master_bene_sks = data.load_from_parsed_opts(
         environment.parsed_options,
         db_idr.get_regression_bene_sks,
         data_type_name="bene_ids",
     )
 
-    global master_bene_sks_part_a  # noqa: PLW0603
+    global master_bene_sks_part_a
     master_bene_sks_part_a = data.load_from_parsed_opts(
         environment.parsed_options,
         db_idr.get_regression_current_part_a_bene_sks,
         data_type_name="bene_ids_part_a",
     )
 
-    global master_bene_sks_part_b  # noqa: PLW0603
+    global master_bene_sks_part_b
     master_bene_sks_part_b = data.load_from_parsed_opts(
         environment.parsed_options,
         db_idr.get_regression_current_part_b_bene_sks,
         data_type_name="bene_ids_part_b",
     )
 
-    global master_bene_mbis  # noqa: PLW0603
+    global master_bene_mbis
     master_bene_mbis = data.load_from_parsed_opts(
         environment.parsed_options,
         db_idr.get_regression_bene_mbis,
         data_type_name="bene_mbis",
     )
 
-    global master_claim_ids  # noqa: PLW0603
+    global master_claim_ids
     master_claim_ids = data.load_from_parsed_opts(
         environment.parsed_options,
         db_idr.get_regression_claim_ids,

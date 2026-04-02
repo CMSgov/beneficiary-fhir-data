@@ -7,9 +7,8 @@ from pathlib import Path
 from typing import Any
 
 import click
-import tqdm
-
 import field_constants as f
+import tqdm
 from claims_adj import AdjudicatedGeneratorUtil
 from claims_other import OtherGeneratorUtil
 from claims_pac import PacGeneratorUtil

@@ -2,7 +2,6 @@ import random
 from datetime import datetime
 
 from hamilton.htypes import Collect, Parallelizable  # type: ignore
-
 from load_partition import LoadPartition, LoadType
 from logger_config import configure_logger
 from model.base_model import (
@@ -118,11 +117,15 @@ def stage1(load_mode: LoadMode, start_time: datetime, load_type: LoadType) -> bo
     )
 
 
+<<<<<<< Updated upstream
 def stage2_inputs(
     load_type: LoadType,
     tables_to_load: set[str] | None,
     stage1: bool,  # noqa: ARG001
 ) -> Parallelizable[NodePartitionedModelInput]:
+=======
+def stage2_inputs(load_type: LoadType, stage1: bool) -> Parallelizable[NodePartitionedModelInput]:
+>>>>>>> Stashed changes
     if load_type == LoadType.INITIAL:
         yield from _gen_partitioned_node_inputs(
             filter_tables(
@@ -171,8 +174,12 @@ def collect_stage2(
 
 def stage3_inputs(
     load_type: LoadType,
+<<<<<<< Updated upstream
     tables_to_load: set[str] | None,
     collect_stage2: bool,  # noqa: ARG001
+=======
+    collect_stage2: bool,
+>>>>>>> Stashed changes
 ) -> Parallelizable[NodePartitionedModelInput]:
     if load_type == LoadType.INCREMENTAL:
         yield from _gen_partitioned_node_inputs(
@@ -204,6 +211,7 @@ def collect_stage3(
     return all(do_stage3)
 
 
+<<<<<<< Updated upstream
 def stage4_inputs(
     load_type: LoadType,
     tables_to_load: set[str] | None,
@@ -219,6 +227,10 @@ def stage4_inputs(
 
 def do_stage4(
     stage4_inputs: NodePartitionedModelInput,
+=======
+def do_stage4(
+    collect_stage3: bool,
+>>>>>>> Stashed changes
     load_type: LoadType,
     load_mode: LoadMode,
     start_time: datetime,

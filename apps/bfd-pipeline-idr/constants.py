@@ -1,5 +1,4 @@
 from dateutil.relativedelta import relativedelta
-
 from load_partition import LoadPartition, LoadPartitionGroup, PartitionType
 from settings import PARTITION_TYPE
 

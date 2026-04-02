@@ -1,8 +1,6 @@
 from datetime import datetime
 from typing import Annotated, override
 
-from pydantic import BeforeValidator
-
 from load_partition import LoadPartition
 from loader import LoadMode
 from model.base_model import (
@@ -16,6 +14,7 @@ from model.base_model import (
     ModelType,
     transform_default_string,
 )
+from pydantic import BeforeValidator
 
 
 class IdrContractPbpNumber(IdrBaseModel):

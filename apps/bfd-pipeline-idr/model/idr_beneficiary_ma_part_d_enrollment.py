@@ -1,8 +1,6 @@
 from datetime import date, datetime
 from typing import Annotated, override
 
-from pydantic import BeforeValidator
-
 from constants import (
     DEFAULT_MAX_DATE,
 )
@@ -22,6 +20,7 @@ from model.base_model import (
     transform_null_date_to_max,
     transform_null_date_to_min,
 )
+from pydantic import BeforeValidator
 
 
 class IdrBeneficiaryMaPartDEnrollment(IdrBaseModel):

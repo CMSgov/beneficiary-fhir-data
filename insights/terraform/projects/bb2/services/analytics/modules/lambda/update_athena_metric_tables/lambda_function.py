@@ -1,11 +1,10 @@
-import boto3
 import datetime
 
+import boto3
 from utils.utils import (
     get_report_dates_from_target_date,
     update_or_create_metrics_table,
 )
-
 
 """
 Summary:
@@ -53,9 +52,7 @@ For each of the tables, it does the following:
 """
 
 
-TEMPLATE_FILE_PER_APP = (
-    "./sql_templates/template_generate_per_app_metrics_for_report_date.sql"
-)
+TEMPLATE_FILE_PER_APP = "./sql_templates/template_generate_per_app_metrics_for_report_date.sql"
 
 TEMPLATE_FILE_MAIN = "./sql_templates/template_generate_metrics_for_report_date.sql"
 
@@ -80,7 +77,7 @@ def lambda_handler(event, context):
         "basename_main": event["BASENAME_MAIN"],
         "basename_per_app": event["BASENAME_PER_APP"],
         "report_dates": report_dates,
-        "retry_sleep_seconds": event.get("RETRY_SLEEP_SECONDS", "300")
+        "retry_sleep_seconds": event.get("RETRY_SLEEP_SECONDS", "300"),
     }
 
     lambda_start_time = datetime.datetime.now()

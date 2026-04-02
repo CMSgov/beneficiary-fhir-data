@@ -1,12 +1,11 @@
 import csv
 
-
 # Set the following to the location of the target Column file to be used
 # for setting the expected headers LIST (header_enum_order_list) for
 # header reference and validation:
 COLUMN_HEADER_ENUM_FILE = "./BeneficiaryColumn.java"
 
-'''
+"""
 This tool was used for remapping and formatting the files provided for
 synthetic beneficiary data for the Jira BLUEBUTTON-1896 story (AB2D
 request: generate synthetic part D enrollment data).
@@ -126,98 +125,71 @@ It performs the following:
            contract_z12_count = 11900
            Assign the remaining 11,900 benes to Z0012.
 
-'''
+"""
 
 # LIST of input files. Output files with have ".new" appended.
 rif_filenames_in = [
-                    "synthetic_data/synthetic-beneficiary-1999.rif",
-                    "synthetic_data/synthetic-beneficiary-2000.rif",
-                    "synthetic_data/synthetic-beneficiary-2014.rif"]
+    "synthetic_data/synthetic-beneficiary-1999.rif",
+    "synthetic_data/synthetic-beneficiary-2000.rif",
+    "synthetic_data/synthetic-beneficiary-2014.rif",
+]
 
 in_delimiter = "|"
 
 # These are the target PTD columns to be updated
-ptd_contract_list = ["PTD_CNTRCT_JAN_ID",
-                     "PTD_CNTRCT_FEB_ID",
-                     "PTD_CNTRCT_MAR_ID",
-                     "PTD_CNTRCT_APR_ID",
-                     "PTD_CNTRCT_MAY_ID",
-                     "PTD_CNTRCT_JUN_ID",
-                     "PTD_CNTRCT_JUL_ID",
-                     "PTD_CNTRCT_AUG_ID",
-                     "PTD_CNTRCT_SEPT_ID",
-                     "PTD_CNTRCT_OCT_ID",
-                     "PTD_CNTRCT_NOV_ID",
-                     "PTD_CNTRCT_DEC_ID"]
+ptd_contract_list = [
+    "PTD_CNTRCT_JAN_ID",
+    "PTD_CNTRCT_FEB_ID",
+    "PTD_CNTRCT_MAR_ID",
+    "PTD_CNTRCT_APR_ID",
+    "PTD_CNTRCT_MAY_ID",
+    "PTD_CNTRCT_JUN_ID",
+    "PTD_CNTRCT_JUL_ID",
+    "PTD_CNTRCT_AUG_ID",
+    "PTD_CNTRCT_SEPT_ID",
+    "PTD_CNTRCT_OCT_ID",
+    "PTD_CNTRCT_NOV_ID",
+    "PTD_CNTRCT_DEC_ID",
+]
 
 
-''' Mapping dictionary for columns that are updated:
+""" Mapping dictionary for columns that are updated:
 
              Dict item:  [ start_id, end_id, new_contract_id,
                            expected_count, updated_counter ]
 
              NOTE: Will compare ID's as integer values for ranges.
-'''
-ptd_contract_map_dict = {"Z0": [-19990000000100,
-                                -19990000000001,
-                                "Z0000",
-                                100,
-                                0],
-                         "Z1": [-19990000001100,
-                                -19990000000101,
-                                "Z0001",
-                                1000,
-                                0],
-                         "Z2": [-19990000003100,
-                                -19990000001101,
-                                "Z0002",
-                                2000,
-                                0],
-                         "Z5": [-19990000008100,
-                                -19990000003101,
-                                "Z0005",
-                                5000,
-                                0],
-                         "Z10a": [-19990000010000,
-                                  -19990000008101,
-                                  "Z0010",
-                                  1900,
-                                  0],
-                         "Z10b": [-20000000008100,
-                                  -20000000000001,
-                                  "Z0010",
-                                  8100,
-                                  0],
-                         "Z12a": [-20000000010000,
-                                  -20000000008101,
-                                  "Z0012",
-                                  1900,
-                                  0],
-                         "Z12b": [-20140000010000,
-                                  -20140000000001,
-                                  "Z0012",
-                                  10000,
-                                  0], }
+"""
+ptd_contract_map_dict = {
+    "Z0": [-19990000000100, -19990000000001, "Z0000", 100, 0],
+    "Z1": [-19990000001100, -19990000000101, "Z0001", 1000, 0],
+    "Z2": [-19990000003100, -19990000001101, "Z0002", 2000, 0],
+    "Z5": [-19990000008100, -19990000003101, "Z0005", 5000, 0],
+    "Z10a": [-19990000010000, -19990000008101, "Z0010", 1900, 0],
+    "Z10b": [-20000000008100, -20000000000001, "Z0010", 8100, 0],
+    "Z12a": [-20000000010000, -20000000008101, "Z0012", 1900, 0],
+    "Z12b": [-20140000010000, -20140000000001, "Z0012", 10000, 0],
+}
 
 header_enum_order_list = ["DML_IND"]
 
-print("")
-print("")
+print()
+print()
 print("--------CONFIGURATION SUMMARY--------")
-print("")
-print("")
+print()
+print()
 print("BENE_ID MAPPING DICTIONARY:  ", ptd_contract_map_dict)
-print("")
+print()
 print("PROCESSING FILES FROM rif_filenames_in LIST: ", rif_filenames_in)
-print("")
-print("")
+print()
+print()
 print("UPDATING COLUMNS IN THE ptd_contract_list:  ", ptd_contract_list)
-print("")
-print("")
+print()
+print()
 print("--------RUNNING--------")
 
 # Generate  header_enum_order_list headers LIST from *Column.java source file
-f = open(COLUMN_HEADER_ENUM_FILE, 'r')
+f = open(COLUMN_HEADER_ENUM_FILE)
 
 parse_items_flag = False
 
@@ -238,21 +210,18 @@ f.close()
 
 # process rif files:
 for filename_in in rif_filenames_in:
-
     filename_out = filename_in + ".new"
 
-    with open(filename_in, 'r') as file_in:
+    with open(filename_in) as file_in:
+        file_out = open(filename_out, "w")
 
-        file_out = open(filename_out, 'w')
-
-        print("PROCESSING FILE: IN={}  OUT={}".format(filename_in,
-                                                      filename_out))
+        print(f"PROCESSING FILE: IN={filename_in}  OUT={filename_out}")
 
         # creating a csv reader object
         csvreader = csv.DictReader(file_in, delimiter=in_delimiter)
 
         # Output header line
-        out_line = '|'.join(header_enum_order_list)
+        out_line = "|".join(header_enum_order_list)
         print(out_line, file=file_out)
 
         row_count = 0
@@ -264,10 +233,12 @@ for filename_in in rif_filenames_in:
             if row_count == 1:
                 for key in row:
                     if key not in header_enum_order_list:
-                        raise SystemExit("ERROR: Input file header key " +
-                                         "is not in the " +
-                                         "header_enum_order_list list: " +
-                                         key)
+                        raise SystemExit(
+                            "ERROR: Input file header key "
+                            + "is not in the "
+                            + "header_enum_order_list list: "
+                            + key
+                        )
 
             # Output row fields based on enum mapping
             row_list = []
@@ -275,10 +246,12 @@ for filename_in in rif_filenames_in:
                 # Is the col_name included in the input file?
                 if col_name in row:
                     if col_name == "BENE_ID" and int(row["BENE_ID"]) > 0:
-                        raise SystemExit("ERROR: Input file header key " +
-                                         " is not in the " +
-                                         "header_enum_order_list list: " +
-                                         key)
+                        raise SystemExit(
+                            "ERROR: Input file header key "
+                            + " is not in the "
+                            + "header_enum_order_list list: "
+                            + key
+                        )
 
                     # Map PDE CONTRACT fields
                     # Get map_list for bene_id
@@ -297,9 +270,12 @@ for filename_in in rif_filenames_in:
                                 break
 
                         if not new_contract_map_list:
-                            raise SystemExit("ERROR: Does not have a mapping" +
-                                             " entry in dictionary for " +
-                                             "bene_id:  " + str(bene_id))
+                            raise SystemExit(
+                                "ERROR: Does not have a mapping"
+                                + " entry in dictionary for "
+                                + "bene_id:  "
+                                + str(bene_id)
+                            )
 
                     # Is this a contract field that gets updated?
                     if col_name in ptd_contract_list:
@@ -311,29 +287,30 @@ for filename_in in rif_filenames_in:
 
                 else:
                     # col_name is not in row, so provide empty value
-                    raise SystemExit("ERROR: col_name entry is not in " +
-                                     " row for:  " + col_name)
+                    raise SystemExit("ERROR: col_name entry is not in " + " row for:  " + col_name)
 
             # Validate row_list count is same as header_enum_order_list.
             if len(row_list) != len(header_enum_order_list):
-                raise SystemExit("ERROR: Was expecting: " +
-                                 str(len(header_enum_order_list)) +
-                                 "  field count but got: " +
-                                 str(len(row_list)))
+                raise SystemExit(
+                    "ERROR: Was expecting: "
+                    + str(len(header_enum_order_list))
+                    + "  field count but got: "
+                    + str(len(row_list))
+                )
 
             # Output row to stdout
-            print('|'.join(row_list), file=file_out)
+            print("|".join(row_list), file=file_out)
 
         file_out.close()
 
-print("")
-print("")
+print()
+print()
 print("--------COMPLETION SUMMARY--------")
-print("")
-print("")
+print()
+print()
 print("BENE_ID MAPPING DICTIONARY:  ", ptd_contract_map_dict)
-print("")
-print("")
+print()
+print()
 # Verify counts for updates
 for map_name in ptd_contract_map_dict:
     map_list = ptd_contract_map_dict[map_name]
@@ -343,14 +320,12 @@ for map_name in ptd_contract_map_dict:
     expected_count = map_list[3]
     updated_count = map_list[4]
 
-    msg = "MAPPING {}:  Updated {} of {} expected records with new "\
-          " contract ID = {}"
+    msg = "MAPPING {}:  Updated {} of {} expected records with new  contract ID = {}"
     print(msg.format(map_name, updated_count, expected_count, contract_id))
-    print("")
+    print()
     if updated_count != expected_count:
-        raise SystemExit("ERROR: Was expecting a record count of: " +
-                         str(expected_count))
+        raise SystemExit("ERROR: Was expecting a record count of: " + str(expected_count))
 
-print("")
-print("")
+print()
+print()
 print("SUCCESS:  Processing of all files was successful!!!")

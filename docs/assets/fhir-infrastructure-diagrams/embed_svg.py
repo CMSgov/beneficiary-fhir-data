@@ -1,7 +1,7 @@
 import base64
+import mimetypes
 import os
 import sys
-import mimetypes
 from xml.dom import minidom
 
 
@@ -26,4 +26,6 @@ def embed_images(svg_file, svg_file_out=None):
 
 if __name__ == "__main__":
     svg_file = sys.argv[1] if len(sys.argv) == 2 else "my_diagram.svg"
-    embed_images(svg_file) # outputs my_diagram_out.svg with base64 encoded data URLs for the images
+    embed_images(
+        svg_file
+    )  # outputs my_diagram_out.svg with base64 encoded data URLs for the images

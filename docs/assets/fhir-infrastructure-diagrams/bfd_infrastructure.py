@@ -10,11 +10,11 @@ from diagrams.generic.place import Datacenter
 #######################################################
 
 legend_text = (
-"legend: \l"
-"prod-sbx.bfd.cms.gov - External Facing(DMZ Subnets) requires mTLS \l"
-"prod.bfd.cms.gov/test.bfd.cms.gov - Internal Facing (App Subnets) requires mTLS \l"
-"AZs - BFD does not exercise the assignment of resources per AZ. \l"
-"Colocation of pipeline/migrator workloads reside with writer aurora node \l"
+    "legend: \l"
+    "prod-sbx.bfd.cms.gov - External Facing(DMZ Subnets) requires mTLS \l"
+    "prod.bfd.cms.gov/test.bfd.cms.gov - Internal Facing (App Subnets) requires mTLS \l"
+    "AZs - BFD does not exercise the assignment of resources per AZ. \l"
+    "Colocation of pipeline/migrator workloads reside with writer aurora node \l"
 )
 
 title = "BFD High Level View - Infrastructure"
@@ -31,7 +31,11 @@ with Diagram(
     filename=filename,
     outformat=outformat,
 ) as diag:
-    Node(label=legend_text, width="8", shape="plaintext", )
+    Node(
+        label=legend_text,
+        width="8",
+        shape="plaintext",
+    )
     # Cluster = Group, so this outline will group all the items nested in it automatically
     with Cluster("CMS AWS"):
         etl = S3("CCW Data Ingest")
@@ -60,13 +64,13 @@ with Diagram(
                 migrator = EC2("DB Migrator")
                 pipeline = EC2("CCW Data Pipeline")
                 rda_pipeline = EC2("RDA Data Pipeline")
-                
+
     with Cluster("CCW"):
         ccw = Datacenter("CCW ETL Process")
 
- ###################################################
-    # FLOW OF ACTION, NETWORK, or OTHER PATH TO CHART #
-###################################################
+        ###################################################
+        # FLOW OF ACTION, NETWORK, or OTHER PATH TO CHART #
+        ###################################################
         elb >> server1 >> db1
         elb >> server2 >> db2
         elb >> server3 >> db3
@@ -77,5 +81,5 @@ with Diagram(
     ab2d >> elb
     dpc >> elb
     rda >> rda_pipeline >> db_writer
-    
+
 diag

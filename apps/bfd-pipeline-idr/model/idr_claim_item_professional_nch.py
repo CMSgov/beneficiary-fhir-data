@@ -1,8 +1,6 @@
 from datetime import date, datetime
 from typing import Annotated, override
 
-from pydantic import BeforeValidator
-
 from constants import (
     DEFAULT_MAX_DATE,
 )
@@ -34,6 +32,7 @@ from model.base_model import (
     transform_default_string,
     transform_null_date_to_min,
 )
+from pydantic import BeforeValidator
 
 
 class IdrClaimItemProfessionalNch(IdrBaseModel):
