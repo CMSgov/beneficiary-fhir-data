@@ -43,7 +43,7 @@ resource "aws_lambda_function" "run_idr" {
   package_type     = "Image"
 
   memory_size = 128
-  timeout     = 60
+  timeout     = 90
 
   logging_config {
     log_format = "Text"
