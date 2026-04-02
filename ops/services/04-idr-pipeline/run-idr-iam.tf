@@ -123,9 +123,9 @@ resource "aws_iam_policy" "run_idr_ecs" {
 
 data "aws_iam_policy_document" "run_idr_iam" {
   statement {
-    sid       = "AllowPassRoleToSchedulerRole"
+    sid       = "AllowPassRoleToExecutionAndSchedulerRole"
     actions   = ["iam:PassRole"]
-    resources = [aws_iam_role.run_idr_scheduler.arn]
+    resources = [aws_iam_role.run_idr_scheduler.arn, aws_iam_role.idr_execution.arn]
   }
 }
 
