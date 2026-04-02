@@ -92,6 +92,10 @@ mvn spring-boot run -Dspring-boot.run.profiles=local,sqlprofile
 
 The Swagger UI is available at `/v3/fhir/swagger-ui`
 
+## Sample Requests
+
+Sample requests are available under the `sample-requests` folder.
+
 ## Tests
 
 Note that certain Postgres environment variables can interfere with the database connection in the tests,
