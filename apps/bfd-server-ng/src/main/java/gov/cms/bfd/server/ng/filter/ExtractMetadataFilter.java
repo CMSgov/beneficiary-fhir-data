@@ -1,8 +1,9 @@
 package gov.cms.bfd.server.ng.filter;
 
+import static gov.cms.bfd.server.ng.util.LoggerConstants.*;
+
 import com.google.common.base.Strings;
 import gov.cms.bfd.server.ng.util.CertificateUtil;
-import gov.cms.bfd.server.ng.util.LoggerConstants;
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -42,12 +43,12 @@ public class ExtractMetadataFilter implements Filter {
       var isPatientMatchRequest = uri != null && uri.contains("/Patient/$idi-match");
       if (certAlias.isPresent()) {
         certificateUtil.attachCertAliasToRequest(httpRequest, certAlias.get());
-        MDC.put(LoggerConstants.MDC_CERTIFICATE_ALIAS, certAlias.get());
+        MDC.put(logKey(MDC_PREFIX, CERTIFICATE_ALIAS), certAlias.get());
       }
 
-      var clientIp = httpRequest.getHeader(LoggerConstants.CLIENT_IP_HEADER);
-      var clientName = httpRequest.getHeader(LoggerConstants.CLIENT_NAME_HEADER);
-      var clientId = httpRequest.getHeader(LoggerConstants.CLIENT_ID_HEADER);
+      var clientIp = httpRequest.getHeader(CLIENT_IP_HEADER);
+      var clientName = httpRequest.getHeader(CLIENT_NAME_HEADER);
+      var clientId = httpRequest.getHeader(CLIENT_ID_HEADER);
 
       if (isPatientMatchRequest
           && (Strings.isNullOrEmpty(clientIp)
@@ -59,12 +60,12 @@ public class ExtractMetadataFilter implements Filter {
         return;
       }
 
-      MDC.put(LoggerConstants.MDC_URI_KEY, uri);
-      MDC.put(LoggerConstants.MDC_REQUEST_ID_KEY, httpRequest.getRequestId());
-      MDC.put(LoggerConstants.MDC_REMOTE_ADDRESS_KEY, httpRequest.getRemoteAddr());
-      MDC.put(LoggerConstants.MDC_CLIENT_IP_KEY, clientIp);
-      MDC.put(LoggerConstants.MDC_CLIENT_NAME_KEY, clientName);
-      MDC.put(LoggerConstants.MDC_CLIENT_ID_KEY, clientId);
+      MDC.put(logKey(MDC_PREFIX, URI_KEY), uri);
+      MDC.put(logKey(MDC_PREFIX, REQUEST_ID_KEY), httpRequest.getRequestId());
+      MDC.put(logKey(MDC_PREFIX, REMOTE_ADDRESS_KEY), httpRequest.getRemoteAddr());
+      MDC.put(logKey(MDC_PREFIX, CLIENT_IP_KEY), clientIp);
+      MDC.put(logKey(MDC_PREFIX, CLIENT_NAME_KEY), clientName);
+      MDC.put(logKey(MDC_PREFIX, CLIENT_ID_KEY), clientId);
     }
 
     filterChain.doFilter(servletRequest, servletResponse);

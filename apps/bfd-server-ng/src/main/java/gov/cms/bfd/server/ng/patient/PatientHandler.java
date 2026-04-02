@@ -1,5 +1,7 @@
 package gov.cms.bfd.server.ng.patient;
 
+import static gov.cms.bfd.server.ng.util.LoggerConstants.*;
+
 import gov.cms.bfd.server.ng.beneficiary.BeneficiaryRepository;
 import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
 import gov.cms.bfd.server.ng.beneficiary.model.OrganizationFactory;
@@ -96,9 +98,9 @@ public class PatientHandler {
     }
     var result = beneficiaryRepository.searchPatientMatch(patientMatch.get());
     var beneficiary = result.matchedBeneficiary();
-    var clientIp = MDC.get(LoggerConstants.MDC_CLIENT_IP_KEY);
-    var clientName = MDC.get(LoggerConstants.MDC_CLIENT_NAME_KEY);
-    var clientId = MDC.get(LoggerConstants.MDC_CLIENT_ID_KEY);
+    var clientIp = MDC.get(logKey(MDC_PREFIX, CLIENT_IP_KEY));
+    var clientName = MDC.get(logKey(MDC_PREFIX, CLIENT_NAME_KEY));
+    var clientId = MDC.get(logKey(MDC_PREFIX, CLIENT_ID_KEY));
     var auditRecord =
         new PatientMatchAuditRecord(
             clientIp,

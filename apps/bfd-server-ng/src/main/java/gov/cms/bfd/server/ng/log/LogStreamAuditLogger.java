@@ -1,12 +1,10 @@
 package gov.cms.bfd.server.ng.log;
 
+import static gov.cms.bfd.server.ng.util.LoggerConstants.*;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
-import gov.cms.bfd.server.ng.beneficiary.model.FinalDetermination;
-import gov.cms.bfd.server.ng.beneficiary.model.MatchedRecord;
 import gov.cms.bfd.server.ng.beneficiary.model.PatientMatchAuditRecord;
-import gov.cms.bfd.server.ng.util.LoggerConstants;
 import java.util.HashMap;
-import java.util.Objects;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,34 +20,25 @@ public class LogStreamAuditLogger implements AuditLogger {
   @Override
   public void log(PatientMatchAuditRecord auditRecord) {
     try {
-      var matchedBeneSk =
-          auditRecord
-              .finalDetermination()
-              .map(FinalDetermination::matchedRecord)
-              .map(MatchedRecord::beneSk);
+      var matchedBeneSk = PatientMatchAuditUtil.getMatchedBeneSk(auditRecord);
       if (matchedBeneSk.isPresent()) {
-        var beneSksFound =
-            auditRecord.combinationsEvaluated().stream()
-                .flatMap(c -> c.matchedRecords().stream())
-                .map(MatchedRecord::beneSk)
-                .filter(Objects::nonNull)
-                .distinct()
-                .toList();
-        var successfulCombination =
-            auditRecord.finalDetermination().map(FinalDetermination::combination).orElse("");
+        var beneSksFound = PatientMatchAuditUtil.getBeneSksFound(auditRecord);
+        var successfulCombination = PatientMatchAuditUtil.getSuccessfulCombination(auditRecord);
         LOGGER
             .atInfo()
-            .setMessage(LoggerConstants.PATIENT_MATCH_REQUESTED)
+            .setMessage(PATIENT_MATCH_REQUESTED)
             .addKeyValue("logType", "patientMatchAudit")
-            .addKeyValue("audit.matchedBeneSk", matchedBeneSk.get().toString())
-            .addKeyValue("audit.beneSksFound", beneSksFound.stream().map(String::valueOf).toList())
-            .addKeyValue("audit.timestamp", auditRecord.timestamp().toString())
+            .addKeyValue(logKey(AUDIT_PREFIX, MATCHED_BENE_SK), matchedBeneSk.get().toString())
             .addKeyValue(
-                "audit.combinationsEvaluated",
+                logKey(AUDIT_PREFIX, BENE_SKS_FOUND),
+                beneSksFound.stream().map(String::valueOf).toList())
+            .addKeyValue(logKey(AUDIT_PREFIX, TIMESTAMP), auditRecord.timestamp().toString())
+            .addKeyValue(
+                logKey(AUDIT_PREFIX, COMBINATIONS_EVALUATED),
                 auditRecord.combinationsEvaluated().stream()
                     .map(c -> objectMapper.convertValue(c, HashMap.class))
                     .toList())
-            .addKeyValue("audit.finalDetermination", successfulCombination)
+            .addKeyValue(logKey(AUDIT_PREFIX, FINAL_DETERMINATION), successfulCombination)
             .log();
       }
     } catch (Exception e) {

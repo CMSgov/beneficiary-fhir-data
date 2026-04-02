@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.ng;
 
+import static gov.cms.bfd.server.ng.util.LoggerConstants.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -12,13 +13,8 @@ import com.google.common.base.CharMatcher;
 import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
 import gov.cms.bfd.server.ng.log.LogStreamAuditLogger;
 import gov.cms.bfd.server.ng.util.DateUtil;
-import gov.cms.bfd.server.ng.util.LoggerConstants;
 import gov.cms.bfd.server.ng.util.SystemUrls;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.*;
@@ -46,9 +42,9 @@ class PatientMatchIT extends IntegrationTestBase {
             .onType(Patient.class)
             .named("idi-match")
             .withParameters(params)
-            .withAdditionalHeader(LoggerConstants.CLIENT_IP_HEADER, "127.0.0.1")
-            .withAdditionalHeader(LoggerConstants.CLIENT_NAME_HEADER, "test-client")
-            .withAdditionalHeader(LoggerConstants.CLIENT_ID_HEADER, "client-123")
+            .withAdditionalHeader(CLIENT_IP_HEADER, "127.0.0.1")
+            .withAdditionalHeader(CLIENT_NAME_HEADER, "test-client")
+            .withAdditionalHeader(CLIENT_ID_HEADER, "client-123")
             .returnResourceType(Bundle.class)
             .execute();
     // Organization should always be the first entry in the bundle
@@ -417,6 +413,29 @@ class PatientMatchIT extends IntegrationTestBase {
     }
   }
 
+  private Bundle searchBundleWithUniqueClientIds(Patient patient, String clientId) {
+    var ctx = FhirContext.forR4();
+    var params = ParametersUtil.newInstance(ctx);
+    ParametersUtil.addParameterToParameters(ctx, params, "IDIPatient", patient);
+
+    var res =
+        getFhirClient(ctx)
+            .operation()
+            .onType(Patient.class)
+            .named("idi-match")
+            .withParameters(params)
+            .withAdditionalHeader(CLIENT_IP_HEADER, "127.0.0.1")
+            .withAdditionalHeader(CLIENT_NAME_HEADER, "test-client")
+            .withAdditionalHeader(CLIENT_ID_HEADER, clientId)
+            .returnResourceType(Bundle.class)
+            .execute();
+    // Organization should always be the first entry in the bundle
+    assertEquals(
+        ResourceType.Organization, res.getEntry().getFirst().getResource().getResourceType());
+
+    return res;
+  }
+
   @ParameterizedTest(name = "{0} - audit log")
   @MethodSource("verifyPatientMatch")
   void verifyAuditLog(
@@ -430,8 +449,8 @@ class PatientMatchIT extends IntegrationTestBase {
       Optional<String> ssnLastFour,
       Optional<Integer> expectedMatchNumber) {
     var patient = buildRequest(firstName, lastName, birthDate, addresses, mbi, ssnLastFour);
-    var bundle = searchBundle(patient);
-    var logs = logAppender.list;
+    var testClientId = UUID.randomUUID().toString();
+    var bundle = searchBundleWithUniqueClientIds(patient, testClientId);
     var beneSk = beneficiary.getBeneSk();
 
     if (expectedMatchNumber.isPresent()) {
@@ -444,7 +463,19 @@ class PatientMatchIT extends IntegrationTestBase {
       beneSk = Long.parseLong(patientResult.getIdElement().getIdPart());
     }
 
-    var auditRecords = getAuditRecordFromDynamo(beneSk);
+    var auditRecords = getAuditRecordFromDynamo(beneSk, testClientId);
+    var log =
+        logAppender.list.stream()
+            .filter(
+                event -> {
+                  var clientIdMatch =
+                      testClientId.equals(
+                          event.getMDCPropertyMap().get(logKey(MDC_PREFIX, CLIENT_ID_KEY)));
+                  var containsPatientMatchRequestMsg =
+                      event.getFormattedMessage().contains(PATIENT_MATCH_REQUESTED);
+                  return clientIdMatch && containsPatientMatchRequestMsg;
+                })
+            .findFirst();
 
     if (expectedMatchNumber.isPresent()) {
       auditRecords.stream()
@@ -460,34 +491,27 @@ class PatientMatchIT extends IntegrationTestBase {
                   fail(
                       "Expected successful patient match combination not found in dynamoDB audit table"));
 
-      logs.stream()
-          .filter(
-              event ->
-                  event.getFormattedMessage().contains(LoggerConstants.PATIENT_MATCH_REQUESTED))
-          .findFirst()
-          .ifPresentOrElse(
-              event -> {
-                var mdc = event.getMDCPropertyMap();
-                var keyValuePairsMap =
-                    event.getKeyValuePairs().stream()
-                        .collect(
-                            Collectors.toMap(pair -> pair.key, pair -> String.valueOf(pair.value)));
-                var successfulCombination =
-                    Integer.parseInt(keyValuePairsMap.get("audit.finalDetermination"));
-                assertAll(
-                    () -> assertNotNull(mdc.get(LoggerConstants.MDC_CLIENT_IP_KEY), "127.0.0.1"),
-                    () ->
-                        assertNotNull(mdc.get(LoggerConstants.MDC_CLIENT_NAME_KEY), "test-client"),
-                    () -> assertNotNull(mdc.get(LoggerConstants.MDC_CLIENT_ID_KEY), "client-123"),
-                    () -> assertEquals("patientMatchAudit", keyValuePairsMap.get("logType")),
-                    () -> assertEquals(expectedMatchNumber.get(), successfulCombination));
-              },
-              () -> fail("Expected log stream audit record not found for " + testName));
+      log.ifPresentOrElse(
+          event -> {
+            var mdc = event.getMDCPropertyMap();
+            var keyValuePairsMap =
+                event.getKeyValuePairs().stream()
+                    .collect(
+                        Collectors.toMap(pair -> pair.key, pair -> String.valueOf(pair.value)));
+            var successfulCombination =
+                Integer.parseInt(keyValuePairsMap.get("audit.finalDetermination"));
+            assertAll(
+                () -> assertEquals("127.0.0.1", mdc.get(logKey(MDC_PREFIX, CLIENT_IP_KEY))),
+                () -> assertEquals("test-client", mdc.get(logKey(MDC_PREFIX, CLIENT_NAME_KEY))),
+                () -> assertEquals("patientMatchAudit", keyValuePairsMap.get("logType")),
+                () -> assertEquals(expectedMatchNumber.get(), successfulCombination));
+          },
+          () -> fail("Expected log stream audit record not found for " + testName));
     } else {
       assertTrue(
           auditRecords.isEmpty(),
           "Expected no audit records in dynamoDB audit table for " + testName);
-      assertTrue(logs.isEmpty(), "Expected no log stream audit records for " + testName);
+      assertTrue(log.isEmpty(), "Expected no log stream audit records for " + testName);
     }
   }
 
@@ -518,7 +542,7 @@ class PatientMatchIT extends IntegrationTestBase {
   }
 
   @BeforeAll
-  void setupDynamDbTable() {
+  void setupDynamoDbTable() {
     dynamoDbClient.createTable(
         CreateTableRequest.builder()
             .tableName(configuration.getPatientMatchAuditTableName())
@@ -544,34 +568,11 @@ class PatientMatchIT extends IntegrationTestBase {
             .build());
   }
 
-  @BeforeEach
-  void clearDynamDbTable() {
-    var tableName = configuration.getPatientMatchAuditTableName();
-    var response = dynamoDbClient.scan(d -> d.tableName(tableName));
-    for (var item : response.items()) {
-      dynamoDbClient.deleteItem(
-          d ->
-              d.tableName(tableName)
-                  .key(
-                      Map.of(
-                          "matchedBeneSk",
-                          item.get("matchedBeneSk"),
-                          "timestamp",
-                          item.get("timestamp"))));
-    }
-  }
-
-  @BeforeEach
+  @BeforeAll
   void setupLogAppender() {
     var logger = (Logger) LoggerFactory.getLogger(LogStreamAuditLogger.class);
     logAppender = new ListAppender<>();
     logAppender.start();
     logger.addAppender(logAppender);
-  }
-
-  @AfterEach
-  void tearDownLogAppender() {
-    var logger = (Logger) LoggerFactory.getLogger(LogStreamAuditLogger.class);
-    logger.detachAppender(logAppender);
   }
 }

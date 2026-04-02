@@ -1,9 +1,9 @@
 package gov.cms.bfd.server.ng.log;
 
+import static gov.cms.bfd.server.ng.util.LoggerConstants.*;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import gov.cms.bfd.server.ng.beneficiary.model.FinalDetermination;
-import gov.cms.bfd.server.ng.beneficiary.model.MatchedRecord;
 import gov.cms.bfd.server.ng.beneficiary.model.PatientMatchAuditRecord;
 import java.util.HashMap;
 import lombok.AllArgsConstructor;
@@ -24,34 +24,24 @@ public class DynamoDbAuditLogger implements AuditLogger {
   public void log(PatientMatchAuditRecord auditRecord) {
     try {
       var items = new HashMap<String, AttributeValue>();
-      var matchedBeneSk =
-          auditRecord
-              .finalDetermination()
-              .map(FinalDetermination::matchedRecord)
-              .map(MatchedRecord::beneSk);
+      var matchedBeneSk = PatientMatchAuditUtil.getMatchedBeneSk(auditRecord);
       if (matchedBeneSk.isPresent()) {
-        var beneSksFound =
-            auditRecord.combinationsEvaluated().stream()
-                .flatMap(c -> c.matchedRecords().stream())
-                .map(MatchedRecord::beneSk)
-                .distinct()
-                .toList();
+        var beneSksFound = PatientMatchAuditUtil.getBeneSksFound(auditRecord);
+        var successfulCombination = PatientMatchAuditUtil.getSuccessfulCombination(auditRecord);
 
-        items.put("matchedBeneSk", AttributeValue.fromN(matchedBeneSk.get().toString()));
+        items.put(MATCHED_BENE_SK, AttributeValue.fromN(matchedBeneSk.get().toString()));
         items.put(
-            "beneSksFound",
+            BENE_SKS_FOUND,
             AttributeValue.fromNs(beneSksFound.stream().map(String::valueOf).toList()));
-        items.put("timestamp", AttributeValue.fromS(auditRecord.timestamp().toString()));
-        items.put("clientId", AttributeValue.fromS(auditRecord.clientId()));
-        items.put("clientName", AttributeValue.fromS(auditRecord.clientName()));
-        items.put("clientIp", AttributeValue.fromS(auditRecord.clientIp()));
+        items.put(TIMESTAMP, AttributeValue.fromS(auditRecord.timestamp().toString()));
+        items.put(CLIENT_ID_KEY, AttributeValue.fromS(auditRecord.clientId()));
+        items.put(CLIENT_NAME_KEY, AttributeValue.fromS(auditRecord.clientName()));
+        items.put(CLIENT_IP_KEY, AttributeValue.fromS(auditRecord.clientIp()));
         items.put(
-            "combinationsEvaluated",
+            COMBINATIONS_EVALUATED,
             AttributeValue.fromS(
                 objectMapper.writeValueAsString(auditRecord.combinationsEvaluated())));
-        auditRecord
-            .finalDetermination()
-            .ifPresent(f -> items.put("finalDetermination", AttributeValue.fromS(f.combination())));
+        items.put(FINAL_DETERMINATION, AttributeValue.fromS(successfulCombination));
 
         var request = PutItemRequest.builder().tableName(tableName).item(items).build();
         dynamoDbClient.putItem(request);

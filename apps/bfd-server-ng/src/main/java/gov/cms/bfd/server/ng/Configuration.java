@@ -159,7 +159,7 @@ public class Configuration implements Serializable {
 
     if (isLocal()) {
       return DynamoDbClient.builder()
-          .endpointOverride(URI.create("http://localhost:8000"))
+          .endpointOverride(URI.create(dynamoLocalUrl))
           .region(region)
           .credentialsProvider(
               StaticCredentialsProvider.create(AwsBasicCredentials.create("dummy", "dummy")))

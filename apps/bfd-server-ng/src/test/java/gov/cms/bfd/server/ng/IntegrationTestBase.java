@@ -219,7 +219,8 @@ public class IntegrationTestBase {
       String clientName,
       String clientIp) {}
 
-  protected List<PatientMatchTestAuditRecord> getAuditRecordFromDynamo(Long beneSk) {
+  protected List<PatientMatchTestAuditRecord> getAuditRecordFromDynamo(
+      Long beneSk, String testClientId) {
     var tableName = configuration.getPatientMatchAuditTableName();
     var request =
         QueryRequest.builder()
@@ -231,6 +232,7 @@ public class IntegrationTestBase {
 
     var response = dynamoDbClient.query(request);
     return response.items().stream()
+        .filter(item -> testClientId.equals(item.get("clientId").s()))
         .map(
             item -> {
               var matchedBeneSk = Long.parseLong(item.get("matchedBeneSk").n());

@@ -137,6 +137,7 @@ public class IntegrationTestConfiguration {
   }
 
   @Bean
+  @SuppressWarnings("resource")
   public GenericContainer<?> dynamoDbContainer() {
     var container =
         new GenericContainer<>(DockerImageName.parse("amazon/dynamodb-local:latest"))
