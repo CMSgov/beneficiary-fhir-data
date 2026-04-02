@@ -315,7 +315,18 @@ def result_handler(event: dict[str, Any], context: LambdaContext) -> LambdaResul
     launched_task_arn = next((x["taskArn"] for x in resp["tasks"] if "taskArn" in x), "unknown")
     logger.info("New IDR Pipeline Task '%s' launched successfully.", launched_task_arn)
 
-    return PipelineStartedResult(task_arn=launched_task_arn)
+    return PipelineStartedResult(
+        task_arn=launched_task_arn,
+        exec_command=(
+            f"aws ecs execute-command --cluster {settings.ecs_cluster_arn.split('/')[-1]}"
+            f" --task {launched_task_arn.split('/')[-1]}"
+            f" --container {settings.idr_container_name}"
+            " --interactive"
+            " --command '/bin/bash'"
+        )
+        if invoke_model.ecs_exec
+        else None,
+    )
 
 
 @logger.inject_lambda_context(clear_state=True, log_event=True)
