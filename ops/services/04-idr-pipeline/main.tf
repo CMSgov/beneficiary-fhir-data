@@ -188,7 +188,7 @@ resource "aws_ecs_task_definition" "idr_new" {
             sourceVolume  = "tmp"
           }
         ]
-        # readonlyRootFilesystem = true
+        readonlyRootFilesystem = true
         # Empty declarations reduce Terraform diff noise
         portMappings   = []
         systemControls = []
