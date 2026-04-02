@@ -27,6 +27,8 @@ The schema is implemented within the Lambda's source as the `InvokeModel`, for f
 | :--- | :--- | :--- | :--- |
 | `env` | `object` (`dict[str, str]`) or `null` | Yes | A mapping of environment variable name to value for the container environment; specifically, for the IDR Pipeline process |
 | `command` | `string` or `null` | Yes | A command-line string for a container to run as its `CMD` entrypoint |
+| `cpu` | `int` or `null` | Yes | Amount of CPU to give to the Task |
+| `memory` | `int` or `null` | Yes | Amount of memory to give to the Task |
 | `ecs_exec` | `boolean` or `null` | Yes | A boolean indicating whether "ECS exec" is enabled for the container session so that an operator can interactively connect to the running `idr-pipeline` Task |
 | `reschedule` | `boolean` or `null` | Yes | A boolean indicating whether the Lambda will reschedule itself to run again if an `idr-pipeline` Task is already running |
 
@@ -38,6 +40,7 @@ The following JSON structure represents an example payload for invoking the `run
 - sets the `CMD` to `sleep infinity` to keep the Task alive indefinitely
 - sets `ecs_exec` to `true` allowing an operator to `aws ecs execute-command ...` into the container
 - sets `reschedule` to `true` signaling to the Lambda to reschedule itself if the `idr-pipeline` Task is already running
+- leaves `cpu` and `memory` unset to use the defaults provided in the Task Definition
 
 ```json
 {

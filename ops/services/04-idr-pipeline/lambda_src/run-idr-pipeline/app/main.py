@@ -75,6 +75,8 @@ class CapacityProviderStrategyModel(BaseModel):
 class InvokeModel(BaseModel):
     env: dict[str, str] | None = None
     command: str | None = None
+    cpu: int | None = None
+    memory: int | None = None
     ecs_exec: bool | None = False
     reschedule: bool | None = False
 
@@ -283,14 +285,18 @@ def result_handler(event: dict[str, Any], context: LambdaContext) -> LambdaResul
     # Avoid even _setting_ arguments (specifically, "overrides") of run_task if unnecessary
     optional_args = filtered_dict(
         {
-            "overrides": {
-                "containerOverrides": [
-                    {"name": settings.idr_container_name}
-                    | filtered_dict(asdict(idr_container_overrides))
-                ]
-            }
-            if idr_container_overrides.command or idr_container_overrides.environment
-            else None
+            "overrides": filtered_dict(
+                {
+                    "containerOverrides": [
+                        {"name": settings.idr_container_name}
+                        | filtered_dict(asdict(idr_container_overrides))
+                    ]
+                    if idr_container_overrides.command or idr_container_overrides.environment
+                    else None,
+                    "cpu": str(invoke_model.cpu) if invoke_model.cpu else None,
+                    "memory": str(invoke_model.memory) if invoke_model.memory else None,
+                }
+            )
         }
     )
     resp = ecs_client.run_task(
