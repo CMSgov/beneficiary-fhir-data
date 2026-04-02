@@ -154,24 +154,24 @@ class BatchLoader:
             cur,
             f"""
             INSERT INTO idr.load_progress(
-                table_name, 
-                last_ts, 
+                table_name,
+                last_ts,
                 last_id,
                 batch_partition,
-                job_start_ts, 
+                job_start_ts,
                 batch_start_ts,
                 batch_complete_ts)
             VALUES(
                 %(table)s,
-                '{DEFAULT_MIN_DATE}', 
+                '{DEFAULT_MIN_DATE}',
                 0,
                 %(partition)s,
                 %(job_start_ts)s,
                 %(batch_start_ts)s,
                 '{DEFAULT_MIN_DATE}'
             )
-            ON CONFLICT (table_name, batch_partition) DO UPDATE 
-            SET 
+            ON CONFLICT (table_name, batch_partition) DO UPDATE
+            SET
                 job_start_ts = EXCLUDED.job_start_ts,
                 batch_start_ts = EXCLUDED.batch_start_ts
             """,
@@ -234,11 +234,11 @@ class BatchLoader:
                 cur,
                 """
                 UPDATE idr.load_progress
-                SET 
+                SET
                     last_ts = %(last_ts)s,
                     last_id = %(last_id)s
                 WHERE
-                    table_name = %(table)s 
+                    table_name = %(table)s
                     AND batch_partition = %(partition)s
                 """,
                 {
@@ -253,7 +253,7 @@ class BatchLoader:
         self, cur: psycopg.Cursor, query: Query, params: Params | None
     ) -> None:
         if self.enable_load_progress:
-            cur.execute(query, params)
+            cur.execute(query, params)  # type: ignore
 
     def _merge(self, cur: psycopg.Cursor, timestamp: datetime) -> None:
         unique_key = self.model.unique_key()

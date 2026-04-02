@@ -529,9 +529,7 @@ def claim_filter(start_time: datetime, partition: LoadPartition) -> str:
         else f" AND {clm}.clm_from_dt >= '{MIN_CLAIM_LOAD_DATE}'"
     )
 
-    claim_type_codes = (
-        partition.claim_type_codes if partition.claim_type_codes else ALL_CLAIM_TYPE_CODES
-    )
+    claim_type_codes = partition.claim_type_codes or ALL_CLAIM_TYPE_CODES
     hstry = ALIAS_HSTRY
     return f"""
     (
