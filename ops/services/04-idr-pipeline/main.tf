@@ -54,6 +54,18 @@ locals {
   idr_memory                       = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/resources/memory"])
   idr_disk_size                    = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/resources/disk_size"])
   idr_capacity_provider_strategies = module.data_strategies.strategies
+  idr_task_ssm = {
+    for k, v in {
+      IDR_USERNAME    = "/bfd/${local.env}/idr-pipeline/sensitive/idr_username"
+      IDR_PRIVATE_KEY = "/bfd/${local.env}/idr-pipeline/sensitive/idr_private_key"
+      IDR_ACCOUNT     = "/bfd/${local.env}/idr-pipeline/sensitive/idr_account"
+      IDR_WAREHOUSE   = "/bfd/${local.env}/idr-pipeline/sensitive/idr_warehouse"
+      IDR_DATABASE    = "/bfd/${local.env}/idr-pipeline/sensitive/idr_database"
+      IDR_SCHEMA      = "/bfd/${local.env}/idr-pipeline/sensitive/idr_schema"
+      BFD_DB_USERNAME = "/bfd/${local.env}/idr-pipeline/sensitive/db/username"
+      BFD_DB_PASSWORD = "/bfd/${local.env}/idr-pipeline/sensitive/db/password"
+    } : k => "arn:aws:ssm:${local.region}:${local.account_id}:parameter/${trim(v, "/")}"
+  }
 }
 
 resource "aws_cloudwatch_log_group" "idr_messages" {
@@ -129,6 +141,13 @@ resource "aws_ecs_task_definition" "idr_new" {
         image     = data.aws_ecr_image.pipeline.image_uri
         essential = true
         cpu       = 0
+        secrets = [
+          for k, v in local.idr_task_ssm :
+          {
+            name      = k
+            valueFrom = v
+          }
+        ]
         environment = [
           {
             name  = "TZ"
@@ -137,6 +156,10 @@ resource "aws_ecs_task_definition" "idr_new" {
           {
             name  = "BFD_ENV"
             value = local.env
+          },
+          {
+            name  = "BFD_DB_ENDPOINT"
+            value = data.aws_rds_cluster.main.endpoint
           },
           {
             name = "CONFIG_SETTINGS_JSON"
