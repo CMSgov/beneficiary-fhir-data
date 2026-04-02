@@ -76,8 +76,9 @@ resource "aws_lambda_function" "events" {
 
   environment {
     variables = {
-      BFD_ENVIRONMENT = local.env
-      DB_ENDPOINT     = data.aws_rds_cluster.main.endpoint
+      BFD_ENVIRONMENT              = local.env
+      DB_ENDPOINT                  = data.aws_rds_cluster.main.endpoint
+      RUN_IDR_PIPELINE_LAMBDA_NAME = aws_lambda_function.run_idr.function_name
     }
   }
 
