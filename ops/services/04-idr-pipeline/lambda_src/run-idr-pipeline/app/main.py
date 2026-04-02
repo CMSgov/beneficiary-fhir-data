@@ -100,11 +100,6 @@ class IdrContainerOverrides:
         return IdrContainerOverrides(command=command_seq, environment=env_kvs)
 
 
-type LambdaResult = (
-    AlreadyRunningResult | AlreadyScheduledResult | RescheduledResult | PipelineStartedResult
-)
-
-
 @dataclass(frozen=True, eq=True)
 class AlreadyRunningResult:
     running_task_arns: list[str]
@@ -128,6 +123,11 @@ class RescheduledResult:
 class PipelineStartedResult:
     task_arn: str
     exec_command: str | None = None
+
+
+type LambdaResult = (
+    AlreadyRunningResult | AlreadyScheduledResult | RescheduledResult | PipelineStartedResult
+)
 
 
 def get_at_schedule_datetime(at_expression: str, timezone: str) -> datetime | None:
