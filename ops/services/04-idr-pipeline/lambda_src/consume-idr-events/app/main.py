@@ -20,7 +20,7 @@ DB_PASSWORD = os.environ.get("DB_PASSWORD") or os.environ.get("PGPASSWORD")
 DB_DATABASE = os.environ.get("DB_DATABASE") or os.environ.get("PGDATABASE", default="fhirdb")
 DB_SCHEMA = os.environ.get("DB_SCHEMA", default="idr")
 
-IDR_LOAD_EVENTS_TABLE = "idr_load_events"
+SOURCE_LOAD_EVENTS_TABLE = "source_load_events"
 
 logger = Logger()
 
@@ -53,7 +53,7 @@ def insert_event(event: IdrLoadEventModel) -> None:
 
         event_dict = event.model_dump()
         query_template = t"""
-            INSERT INTO {DB_SCHEMA:i}.{IDR_LOAD_EVENTS_TABLE:i} (
+            INSERT INTO {DB_SCHEMA:i}.{SOURCE_LOAD_EVENTS_TABLE:i} (
                 {sql.SQL(", ").join(sql.Identifier(k) for k in event_dict):q}
             )
             VALUES (
@@ -66,7 +66,7 @@ def insert_event(event: IdrLoadEventModel) -> None:
         )
         curs.execute(query_template)
         logger.info(
-            "Inserted '%s' into %s successfully", event.model_dump_json(), IDR_LOAD_EVENTS_TABLE
+            "Inserted '%s' into %s successfully", event.model_dump_json(), SOURCE_LOAD_EVENTS_TABLE
         )
 
 
