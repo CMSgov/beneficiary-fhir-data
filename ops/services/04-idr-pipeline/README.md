@@ -1,6 +1,70 @@
 # `idr-pipeline` Terraservice
 
-This Terraservice defines the ECS Service for the IDR Pipeline workload along with the IDR Load Events SQS Queue and corresponding `consume-idr-events` Lambda.
+This Terraservice defines several important IDR Pipeline related resources:
+
+- the ECS Task Definition for the IDR Pipeline Task workload
+- the `run-idr-pipeline` Lambda that manages running the `idr-pipeline` Task and allows for manual override of its container's `CMD` and environment
+- the IDR Load Events SQS Queue
+- the `consume-idr-events` Lambda that consumes events from the aforementioned Queue, loading events into the `idr.source_load_events` and starting the `run-idr-pipeline` Lambda
+
+## `run-idr-pipeline` Lambda
+
+### Invocation
+
+> [!IMPORTANT]
+> It is **vital** that invocations specify a read timeout _greater_ than the `spawned_runtime` of the Locust test, otherwise the the synchronous invocation will fail and start another Lambda erroneously. This can be done by specifying the `--cli-read-timeout <seconds>` flag in the AWS CLI or `read_timeout` in the [`botocore.config` object](https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html)
+
+> [!NOTE]
+> Specifying no invocation payload will result in a _typical_ `idr-pipeline` Task spawning in `incremental`, `IDR` mode with the `run-idr-pipeline` _not_ rescheduling itself if an `idr-pipeline` Task is already running
+
+The `run-locust` Lambda can be [invoked synchronously](https://docs.amazonaws.cn/en_us/lambda/latest/dg/invocation-sync.html) using the `InvokeFunction` AWS API Action (e.g. `aws lambda invoke...`) or in the AWS Console in the `Test` tab given a JSON payload following the schema below.
+
+The schema is implemented within the Lambda's source as the `InvokeModel`, for further context.
+
+#### Payload Schema
+
+| Field | Type | Optional | Description |
+| :--- | :--- | :--- | :--- |
+| `env` | `object` (`dict[str, str]`) or `null` | Yes | A mapping of environment variable name to value for the container environment; specifically, for the IDR Pipeline process |
+| `command` | `string` or `null` | Yes | A command-line string for a container to run as its `CMD` entrypoint |
+| `ecs_exec` | `boolean` or `null` | Yes | A boolean indicating whether "ECS exec" is enabled for the container session so that an operator can interactively connect to the running `idr-pipeline` Task |
+| `reschedule` | `boolean` or `null` | Yes | A boolean indicating whether the Lambda will reschedule itself to run again if an `idr-pipeline` Task is already running |
+
+#### Example JSON Payload
+
+The following JSON structure represents an example payload for invoking the `run-idr-pipeline` Lambda that:
+
+- sets a few environment variables
+- sets the `CMD` to `sleep infinity` to keep the Task alive indefinitely
+- sets `ecs_exec` to `true` allowing an operator to `aws ecs execute-command ...` into the container
+- sets `reschedule` to `true` signaling to the Lambda to reschedule itself if the `idr-pipeline` Task is already running
+
+```json
+{
+  "env": {
+    "SOME_IDR_PIPELINE_ENV_VAR": "some_value",
+    "ANOTHER_VAR": "another_value"
+  },
+  "command": "sleep infinity",
+  "ecs_exec": true,
+  "reschedule": true
+}
+```
+
+### Result
+
+Upon a successful invocation of `run-idr-pipeline`, it will return a JSON object with details about the result of running the Lambda. The `result_type` property indicates the overall result with the `details` property containing further context.
+
+Errors will return the error message and exception context.PipelineStartedResult
+
+#### `result_type`s
+
+| `result_type` | Description |
+| :--- | :--- |
+| `AlreadyRunningResult` | The `idr-pipeline` Task is already running and `reschedule` was `false`, so there was nothing to do |
+| `AlreadyScheduledResult` | The `idr-pipeline` Task is already running and `reschedule` was `true`, _but_ a Schedule already exists within the `LAMBDA_RESCHEDULE_IN` period that will re-run the Lambda, so there was nothing to do |
+| `RescheduledResult` | The `idr-pipeline` Task is already running and `reschedule` was `true` _and_ no Schedule exists within the `LAMBDA_RESCHEDULE_IN` period so a Schedule was created to re-invoke the Lambda when that period of time elapses |
+| `PipelineStartedResult` | The `idr-pipeline` Task was started with the provided inputs successfully |
 
 ## Direct Terraservice Dependencies
 
@@ -12,12 +76,6 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 | `cluster` | Yes | Yes | N/A |
 | `database` | Yes | No | This Terraservice may be skipped in **ephemeral environments** by specifying the `db_environment_override` in ephemeral environments to an existing cluster in the same seed environment |
 | `migrator` | Yes | No | This Terraservice may be skipped in **ephemeral environments**, if is known that there are no new migrations to run |
-
-## Deployment
-
-1. Initialize the Tofu configuration for the appropriate `parent_env`
-2. Select an appropriate workspace, i.e. `tofu workspace test`
-3. Run `tofu apply` to deploy the infrastructure
 
 <!-- BEGIN_TF_DOCS -->
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
