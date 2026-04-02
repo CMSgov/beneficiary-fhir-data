@@ -9,7 +9,6 @@ import au.com.origin.snapshots.junit5.SnapshotExtension;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ch.qos.logback.classic.spi.ILoggingEvent;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.EntityManager;
@@ -35,7 +34,6 @@ public class IntegrationTestBase {
   protected Expect expect;
   @Autowired protected EntityManager entityManager;
   @Autowired protected Configuration configuration;
-  @Autowired protected ObjectMapper objectMapper;
   @Autowired protected DynamoDbClient dynamoDbClient;
 
   protected static final String HISTORICAL_MERGED_BENE_SK = "848484848";

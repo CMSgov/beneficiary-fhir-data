@@ -3,6 +3,7 @@ package gov.cms.bfd.server.ng;
 import static org.junit.jupiter.api.Assertions.*;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.ParametersUtil;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -20,12 +21,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.hl7.fhir.r4.model.Address;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.HumanName;
-import org.hl7.fhir.r4.model.Identifier;
-import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.ResourceType;
+import org.hl7.fhir.r4.model.*;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -495,6 +491,32 @@ class PatientMatchIT extends IntegrationTestBase {
     }
   }
 
+  @Test
+  void requestWithMissingHeadersFails() {
+    var ctx = FhirContext.forR4();
+    var params = ParametersUtil.newInstance(ctx);
+    var testBene = TestBene.fromBene(getBeneficiaryFromBeneSk("-300428640"));
+    var patient =
+        buildRequest(
+            Optional.of(testBene.firstName),
+            Optional.of(testBene.lastName),
+            Optional.of(testBene.birthDate),
+            List.of(testBene.address),
+            Optional.of(testBene.mbi),
+            Optional.of(testBene.ssnLastFour));
+    ParametersUtil.addParameterToParameters(ctx, params, "IDIPatient", patient);
+
+    var res =
+        getFhirClient(ctx)
+            .operation()
+            .onType(Patient.class)
+            .named("idi-match")
+            .withParameters(params)
+            .returnResourceType(Bundle.class);
+
+    assertThrows(InvalidRequestException.class, res::execute);
+  }
+
   @BeforeAll
   void setupDynamDbTable() {
     dynamoDbClient.createTable(
@@ -545,5 +567,11 @@ class PatientMatchIT extends IntegrationTestBase {
     logAppender = new ListAppender<>();
     logAppender.start();
     logger.addAppender(logAppender);
+  }
+
+  @AfterEach
+  void tearDownLogAppender() {
+    var logger = (Logger) LoggerFactory.getLogger(LogStreamAuditLogger.class);
+    logger.detachAppender(logAppender);
   }
 }

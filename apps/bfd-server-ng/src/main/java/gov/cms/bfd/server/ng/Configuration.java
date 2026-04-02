@@ -107,8 +107,8 @@ public class Configuration implements Serializable {
   }
 
   /**
-   * Creates a new {@link LogStreamAuditLogger}. If {@link AuditLoggerType} is DYNAMO_DB both
-   * loggers will be used.
+   * Creates a new {@link AuditLogger}. If {@link AuditLoggerType} is DYNAMO_DB both loggers will be
+   * used.
    *
    * @param objectMapper used for serializing patient audit records
    * @return audit logger
