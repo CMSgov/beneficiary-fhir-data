@@ -27,18 +27,18 @@ public class ClaimAsyncService {
           Class<C> claimClass,
           SystemType systemType,
           long claimUniqueId,
-          List<B> paramBuilders) {
+          List<B> filterBuilders) {
 
-    var filters = getFilters(paramBuilders, systemType);
+    var filters = getFilters(filterBuilders, systemType);
+    var whereClause = buildWhereClause(filters, systemType);
     var jpql =
         String.format(
             """
             %s
             WHERE c.claimUniqueId = :claimUniqueId
-            AND b.latestTransactionFlag = 'Y'
             %s
             """,
-            baseQuery, filters.filterClause());
+            baseQuery, whereClause);
 
     var result =
         DbFilterParam.withParams(entityManager.createQuery(jpql, claimClass), filters.params())
@@ -59,16 +59,15 @@ public class ClaimAsyncService {
       List<DbFilterBuilder> filterBuilders) {
 
     var filters = getFilters(filterBuilders, systemType);
-
+    var whereClause = buildWhereClause(filters, systemType);
     var jpql =
         String.format(
             """
-            %s
-            WHERE b.xrefSk = :beneSk
-            AND b.latestTransactionFlag = 'Y'
-            %s
+             %s
+             WHERE b.xrefSk = :beneSk
+             %s
             """,
-            baseQuery, filters.filterClause());
+            baseQuery, whereClause);
 
     var result =
         DbFilterParam.withParams(entityManager.createQuery(jpql, claimClass), filters.params())
@@ -76,6 +75,18 @@ public class ClaimAsyncService {
             .getResultList();
 
     return CompletableFuture.completedFuture(result);
+  }
+
+  private String buildWhereClause(DbFilter filter, SystemType systemType) {
+    var latestClaimFilter =
+        systemType.filterLatestClaims() ? "AND c.latestClaimIndicator = 'Y'" : "";
+    return String.format(
+        """
+        AND b.latestTransactionFlag = 'Y'
+        %s
+        %s
+        """,
+        filter.filterClause(), latestClaimFilter);
   }
 
   <T extends DbFilterBuilder> DbFilter getFilters(List<T> builders, SystemType systemType) {

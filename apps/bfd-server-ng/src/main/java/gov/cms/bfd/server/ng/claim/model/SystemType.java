@@ -39,6 +39,15 @@ public enum SystemType {
   }
 
   /**
+   * Whether the system type should filter out non-latest claims.
+   *
+   * @return boolean
+   */
+  public boolean filterLatestClaims() {
+    return this != DDPS;
+  }
+
+  /**
    * Checks if the system type is compatible with claim source id.
    *
    * @param sourceId claim_src_id

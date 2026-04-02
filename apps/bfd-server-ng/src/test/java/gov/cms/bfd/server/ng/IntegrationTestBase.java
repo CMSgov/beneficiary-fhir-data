@@ -71,7 +71,8 @@ public class IntegrationTestBase {
   protected static final String CLAIM_ID_PROFESSIONAL_ORG = "3351266481402";
   protected static final String CLAIM_ID_PROFESSIONAL_MCS = "3351266481403";
   protected static final String CLAIM_ID_RX_ORGANIZATION = "1409088853940";
-  protected static final String CLM_CNTL_NUM_DUPE = "31646182683546TDF";
+  protected static final String CLAIM_ID_RX_NON_LATEST = "1409088853949";
+  protected static final String CLAIM_ID_PROFESSIONAL_NON_LATEST = "3351266481404";
 
   protected static final String DUAL_ONLY_BENE_COVERAGE_STATUS_CODE = "XX";
 
