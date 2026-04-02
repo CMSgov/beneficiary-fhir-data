@@ -38,6 +38,10 @@ IDR_TASK_SCHEDULE_NAME_TEMPLATE = "bfd-{env!s}-run-idr-pipeline-at-{unix_timesta
 logger = Logger()
 
 
+# BaseSettings, from pydantic-settings, uses Pydantic to validate and define what would otherwise be
+# typical environment variable settings for this Lambda. Pydantic auto-validates each field from the
+# environment, case-insensitively, using each field's validation alias. For example,
+# idr_task_subnet_ids is set by the environment variable IDR_TASK_SUBNET_IDS_JSON, and so on.
 class Settings(BaseSettings):
     bfd_environment: str
     ecs_cluster_arn: str
