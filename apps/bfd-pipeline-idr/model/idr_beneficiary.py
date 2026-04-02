@@ -124,16 +124,16 @@ class IdrBeneficiary(IdrBaseModel):
     @computed_field
     @property
     def bfd_normalized_address(self) -> str:
-        return normalize_address(  # type: ignore
-            f"{self.bene_line_1_adr} "  # type: ignore
-            f"{self.bene_line_2_adr} "  # type: ignore
-            f"{self.bene_line_3_adr} "  # type: ignore
-            f"{self.bene_line_4_adr} "  # type: ignore
-            f"{self.bene_line_5_adr} "  # type: ignore
-            f"{self.bene_line_6_adr}, "  # type: ignore
-            f"{self.geo_zip_plc_name} "  # type: ignore
-            f"{self.geo_usps_state_cd} "  # type: ignore
-            f"{self.geo_zip5_cd}"  # type: ignore
+        return normalize_address(
+            f"{self.bene_line_1_adr} "
+            f"{self.bene_line_2_adr} "
+            f"{self.bene_line_3_adr} "
+            f"{self.bene_line_4_adr} "
+            f"{self.bene_line_5_adr} "
+            f"{self.bene_line_6_adr}, "
+            f"{self.geo_zip_plc_name} "
+            f"{self.geo_usps_state_cd} "
+            f"{self.geo_zip5_cd}"
         ).replace("\n", " ")
 
     @override
