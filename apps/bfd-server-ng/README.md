@@ -115,7 +115,7 @@ mvn clean verify -DupdateSnapshot=
 Log messages from the server process will not be shown in the console output.
 To see detailed log info, look at the files created under `target/failsafe-reports/logs`.
 
-## mTLS and SAMHSA Authorization
+## mTLS, SAMHSA Authorization, and Security Configuration
 
 BFD utilizes mTLS for authentication, authorization (specifically for SAMHSA data), and transport security.
 
@@ -137,6 +137,14 @@ xh \
   'http://localhost:8080/v3/fhir/ExplanationOfBenefit?patient=<bene>' \
   'X-Amzn-Mtls-Clientcert:samhsa_allowed' | jq
 ```
+
+### Disabling Endpoints
+
+Occasionally, we may need to disable specific endpoints for security reasons or to allow for safely testing new features without allowing external users to access them.
+To do this, we can use two parameters in SSM:
+
+* `/bfd/${env}/server-ng/nonsensitive/internal_certificate_aliases_json` - lists which certificates are used only internally and should be able to access disabled endpoints.
+* `/bfd/${env}/server-ng/nonsensitive/disabled_uris_json` - list of disabled URIs. This uses a prefix match, so disabling `/v3/fhir/Patient` would disable `/v3/fhir/Patient/1` as well.
 
 ## Generating enum values
 
