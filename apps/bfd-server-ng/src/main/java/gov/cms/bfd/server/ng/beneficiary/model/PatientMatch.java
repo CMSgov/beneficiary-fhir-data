@@ -65,7 +65,7 @@ public record PatientMatch(
     return scenarios.stream().filter(this::allFieldsPresent).toList();
   }
 
-  boolean allFieldsPresent(List<PatientMatchParameter> entries) {
+  private boolean allFieldsPresent(List<PatientMatchParameter> entries) {
     return entries.stream().noneMatch(e -> e.values().isEmpty());
   }
 }

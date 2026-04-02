@@ -142,23 +142,20 @@ public class BeneficiaryRepository {
     for (var scenario : scenarios) {
       var filters = new PatientMatchFilter(scenario).getFilters("bene", SystemType.UNKNOWN);
 
+      var query =
+          entityManager.createQuery(
+              String.format(
+                  """
+                      SELECT bene
+                      FROM Beneficiary bene
+                      WHERE bene.latestTransactionFlag = 'Y'
+                      %s
+                      ORDER BY bene.obsoleteTimestamp DESC
+                      """,
+                  filters.filterClause()),
+              Beneficiary.class);
       var benes =
-          DbFilterParam.withParams(
-                  entityManager.createQuery(
-                      String.format(
-                          """
-                          SELECT bene
-                          FROM Beneficiary bene
-                          WHERE bene.latestTransactionFlag = 'Y'
-                          %s
-                          ORDER BY bene.obsoleteTimestamp DESC
-                          """,
-                          filters.filterClause()),
-                      Beneficiary.class),
-                  filters.params())
-              .getResultList()
-              .stream()
-              .toList();
+          DbFilterParam.withParams(query, filters.params()).getResultList().stream().toList();
       var uniqueXrefs = benes.stream().map(BeneficiaryBase::getXrefSk).distinct().toList();
       if (uniqueXrefs.size() != 1) {
         continue;

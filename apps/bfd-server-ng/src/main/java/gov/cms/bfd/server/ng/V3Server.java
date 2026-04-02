@@ -34,7 +34,7 @@ public class V3Server extends RestfulServer {
 
     this.setFhirContext(FhirContext.forR4());
 
-    this.registerProviders(resourceProviders); // Register the filtered list
+    this.registerProviders(resourceProviders);
     this.registerInterceptor(new LoggingInterceptor());
     this.registerInterceptor(new BanUnsupportedHttpMethodsInterceptor());
     this.registerInterceptor(new ExceptionHandlingInterceptor());
