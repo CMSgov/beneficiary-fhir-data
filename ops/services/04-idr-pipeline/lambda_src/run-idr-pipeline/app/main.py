@@ -140,7 +140,7 @@ def get_at_schedule_datetime(at_expression: str, timezone: str) -> datetime | No
     return datetime.strptime(f"{matches[1]}", "%Y-%m-%dT%H:%M:%S").astimezone(ZoneInfo(timezone))
 
 
-def filter_none(unfiltered_dict: dict[str, Any | None]) -> dict[str, Any]:
+def filter_falsey(unfiltered_dict: dict[str, Any | None]) -> dict[str, Any]:
     return {k: v for k, v in unfiltered_dict.items() if v}
 
 
@@ -283,13 +283,13 @@ def result_handler(event: dict[str, Any], context: LambdaContext) -> LambdaResul
     logger.info("No running IDR Pipeline Tasks found; proceeding to launch a new Task...")
     idr_container_overrides = IdrContainerOverrides.from_invoke(invoke_model)
     # Avoid even _setting_ arguments (specifically, "overrides") of run_task if unnecessary
-    optional_args = filter_none(
+    optional_args = filter_falsey(
         {
-            "overrides": filter_none(
+            "overrides": filter_falsey(
                 {
                     "containerOverrides": [
                         {"name": settings.idr_container_name}
-                        | filter_none(asdict(idr_container_overrides))
+                        | filter_falsey(asdict(idr_container_overrides))
                     ]
                     if idr_container_overrides.command or idr_container_overrides.environment
                     else None,
@@ -348,7 +348,7 @@ def handler(event: dict[str, Any], context: LambdaContext) -> dict[str, Any]:
         }
         lambda_result = {
             "result_type": type(result).__name__,
-            "details": filter_none(json_safe_result),
+            "details": filter_falsey(json_safe_result),
         }
         logger.info(lambda_result)
         return lambda_result
