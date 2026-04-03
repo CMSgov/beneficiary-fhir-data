@@ -3,9 +3,10 @@ import html
 import json
 import re
 import sys
+from typing import Any
 
 
-def gen_enum(fsh_output_file: str, int_codes=False):
+def gen_enum(fsh_output_file: str, int_codes: bool = False):
     with open(
         f"../bfd-model-idr/sushi/fsh-generated/resources/{fsh_output_file}.json",
         "r",
@@ -21,7 +22,7 @@ def gen_enum(fsh_output_file: str, int_codes=False):
             f_out.write(",\n".join(enum_vals) + ";")
 
 
-def get_enum_val(concept, int_codes):
+def get_enum_val(concept: dict[str, Any], int_codes: bool):
     code = concept["code"]
     display = concept["display"].replace('"', "")
     prefix = "_" if re.match("\\d", code[0]) else ""

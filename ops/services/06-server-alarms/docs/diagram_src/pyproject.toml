@@ -1,0 +1,5 @@
+[project]
+name = "server-alarms-docs-diagram"
+version = "0.1.0"
+description = "BFD Server Alarms Docs Diagram"
+dependencies = ["diagrams>=0.25.1"]

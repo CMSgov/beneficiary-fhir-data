@@ -1,0 +1,7 @@
+[project]
+name = "terraform-bb2-common"
+version = "0.1.0"
+description = "Terraform BB2 Common"
+
+# Add project-specific dependencies here
+[tool.uv.dependencies]

@@ -1,5 +1,4 @@
 [project]
-requires-python = ">=3.13"
 name = "locust-tests"
 version = "1.0.0"
 dependencies = [
@@ -19,62 +18,16 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-  "ruff>=0.11.11",
   "types-boto3[essential,ssm]>=1.38.19",
   "types-gevent>=25.4.0.20250516",
-  "uv>=0.7.8",
-  "pyright>=1.1.403",
 ]
 # Install this dependency group (via uv [sync|run] --group lambda-run-locust) when working on the
 # run-locust Lambda
 lambda-run-locust = ["aws-lambda-powertools[all]>=3.8.0"]
 
-[tool.ruff]
-# Set the maximum line length to 100.
-line-length = 100
-
-[tool.ruff.lint]
-select = [
-  "D",    # pydocstyle
-  "E501",
-  # pycodestyle
-  "E",
-  # Pyflakes
-  "F",
-  # pyupgrade
-  "UP",
-  # flake8-bugbear
-  "B",
-  # flake8-simplify
-  "SIM",
-  # isort
-  "I",
-  "ANN",
-  "LOG",
-  "G",
-  "PT",
-  "RSE",
-  "PIE",
-  "RET",
-  "SLF",
-  "ARG",
-  "PTH",
-  "PLE",
-  "PLW",
-  "PERF",
-  "FURB",
-  "RUF",
-]
-# Don't require docstrings
-ignore = ["D100", "D101", "D102", "D103", "D104", "D105", "D107", "D205"]
-
-[tool.ruff.lint.pydocstyle]
-convention = "pep257"
-
-[tool.ruff.format]
-quote-style = "double"
-indent-style = "space"
-docstring-code-format = true
+# Inherits tool configurations from 
+# ../../pyproject.toml (apps workspace) and 
+# ../../../pyproject.toml (root)
 
 [tool.locust]
 # Specify locust test parameters here or on the command line
@@ -94,23 +47,8 @@ docstring-code-format = true
 # stats-store-tag = some_tag2
 # stats-compare-previous = true
 
-[tool.black]
-# Compromise between Black's default of 88 and wasting horizontal screen space.
-# According to Black's style guide, line lengths greater than 100 cause issues
-# for individuals with poor sight. So, 100 seems like the best bet here.
-line-length = 100
-
-[tool.isort]
-profile = "isort"
-
 [tool.pyright]
-venvPath = "."
-venv = ".venv"
-typeCheckingMode = "strict"
-# Compromising between practicality and strictness here by enabling strict type checking and
-# selectively disabling rules that are, realistically, not possible to fully resolve in a project
-# using boto3 and Locust
-# TODO: In the future, consider enabling some of these where possible to take full advantage of Pyright
+# Project-specific pyright overrides for locust_tests
 reportUnknownMemberType = false
 reportUnknownVariableType = false
 reportUnknownArgumentType = false

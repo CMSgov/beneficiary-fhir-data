@@ -1,0 +1,7 @@
+[project]
+name = "insights-scripts-bb2"
+version = "0.1.0"
+description = "Insights BB2 Scripts"
+
+# Add project-specific dependencies here
+[tool.uv.dependencies]

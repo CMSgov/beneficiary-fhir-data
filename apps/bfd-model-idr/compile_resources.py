@@ -2,8 +2,9 @@ import argparse
 import json
 import subprocess
 import sys
-import requests
 from pathlib import Path
+
+import requests
 
 MATCHBOX_SERVER = "http://localhost:8080/matchboxv3"
 

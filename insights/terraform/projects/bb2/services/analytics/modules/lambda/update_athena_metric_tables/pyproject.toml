@@ -1,0 +1,7 @@
+[project]
+name = "terraform-bb2-analytics-update-athena-metric-tables"
+version = "0.1.0"
+description = "Terraform BB2 Analytics Update Athena Metric Tables"
+
+# Add project-specific dependencies here
+[tool.uv.dependencies]

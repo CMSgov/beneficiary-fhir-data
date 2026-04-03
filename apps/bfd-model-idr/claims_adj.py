@@ -3,8 +3,8 @@ import string
 from datetime import date
 from typing import Any
 
-import field_constants as f
-from claims_static import (
+from .import field_constants as f
+from .claims_static import (
     ADJUDICATED_PROFESSIONAL_CLAIM_TYPES,
     AVAIL_CLM_RLT_COND_SK,
     AVAIL_OSCAR_CODES_INSTITUTIONAL,
@@ -24,8 +24,8 @@ from claims_static import (
     get_icd_10_dgns_codes,
     get_icd_10_prcdr_codes,
 )
-from claims_util import add_meta_timestamps, get_ric_cd_for_clm_type_cd
-from generator_util import (
+from .claims_util import add_meta_timestamps, get_ric_cd_for_clm_type_cd
+from .generator_util import (
     AVAIL_CONTRACT_NUMS,
     AVAIL_PBP_NUMS,
     GeneratorUtil,
@@ -37,7 +37,6 @@ from generator_util import (
     probability,
     random_date,
 )
-
 
 class AdjudicatedGeneratorUtil:
     def __init__(self, enable_samhsa: bool) -> None:

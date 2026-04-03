@@ -71,8 +71,9 @@ to the AWS Blueprint and should not be changed without accepting the maintenance
 import base64
 import gzip
 import json
+from collections.abc import Generator
 from datetime import datetime  # BFD modification
-from typing import Any, Generator
+from typing import Any
 
 import boto3
 
@@ -83,7 +84,6 @@ def format_json(y: dict[str, Any]) -> dict[str, Any]:
     convert field names to lower case, and replace "." with "_" in field names.
     Code credits: https://towardsdatascience.com/flattening-json-objects-in-python-f5343c794b10
     """
-
     out: dict[str, Any] = {}
 
     def flatten(x: dict[str, Any] | str, name: str = ""):
@@ -109,13 +109,12 @@ def transformLogEvent(log_event: dict[str, Any]) -> str | None:
     Returns:
     str: The transformed log event.
     """
-
     # BFD modification to the blueprint to format the message json uniformly.
     try:
         log_event_json = json.loads(log_event["message"])
     except json.JSONDecodeError as exc:
         print(
-            f'Unable to transform log ID {log_event["id"]} due to JSON error "{str(exc)}" decoding'
+            f'Unable to transform log ID {log_event["id"]} due to JSON error "{exc!s}" decoding'
             f" message: {log_event['message']}"
         )
         return None
@@ -133,7 +132,7 @@ def transformLogEvent(log_event: dict[str, Any]) -> str | None:
 
 def processRecords(
     records: list[dict[str, Any]],
-) -> Generator[dict[str, Any], None, None]:
+) -> Generator[dict[str, Any]]:
     for r in records:
         data = loadJsonGzipBase64(r["data"])
         recId = r["recordId"]

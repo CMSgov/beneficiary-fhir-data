@@ -1,0 +1,4 @@
+[project]
+name = "apps-utils-locust-tests-common"
+version = "0.1.0"
+description = "BFD Insights BB2 Update Athena Metric Tables"

@@ -1,0 +1,7 @@
+[project]
+name = "docs-assets-fhir-infrastructure-diagrams"
+version = "0.1.0"
+description = "FHIR Infrastructure Diagrams"
+
+# Add project-specific dependencies here
+[tool.uv.dependencies]

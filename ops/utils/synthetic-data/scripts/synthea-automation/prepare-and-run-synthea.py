@@ -34,7 +34,6 @@ import functools
 import sys
 import os
 import time
-import fileinput
 import subprocess
 import shlex
 

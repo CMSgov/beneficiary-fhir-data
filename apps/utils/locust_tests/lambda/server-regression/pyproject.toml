@@ -1,0 +1,4 @@
+[project]
+name = "apps-utils-locust-tests-common-server-regression"
+version = "0.1.0"
+description = "BFD Apps Utils Locust Tests Common Lambda Server Regression"

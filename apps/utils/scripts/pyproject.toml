@@ -1,0 +1,4 @@
+[project]
+name = "utils-scripts"
+version = "0.1.0"
+description = "BFD Utils Scripts"

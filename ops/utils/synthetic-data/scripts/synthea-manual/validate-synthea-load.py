@@ -15,8 +15,6 @@
 
 import sys
 import psycopg2
-import fileinput
-import shlex
 
 import ssmutil
 from pathlib import Path
@@ -40,7 +38,7 @@ def validate_synthea_load(args):
     prod_string = ssmutil.get_ssm_db_string("prod")
     
     ## Sanity check the tables and make sure the last line of each synthea file exists in the corresponding table
-    print(f"Reading data from synthea output files for validation...")
+    print("Reading data from synthea output files for validation...")
     table_ids = {}
     if Path(synthea_output_folder + "carrier.csv").is_file():
         table_ids['carrier'] = get_bene_id_from_last_file_line(synthea_output_folder + "carrier.csv")
@@ -107,7 +105,7 @@ def get_bene_id_from_last_file_line(file_path):
         last_line = lines[-1]
         return last_line.split('|')[get_bene_id_index(lines[0])]
         
-    return -1;
+    return -1
     
 def get_bene_id_index(header):
     """

@@ -1,0 +1,9 @@
+[project]
+name = "synthea-manual"
+version = "0.1.0"
+description = "BFD Synthea Manual"
+
+[tool.uv]
+
+# Add project-specific dependencies here
+[tool.uv.dependencies]

@@ -1,0 +1,4 @@
+[project]
+name = "insights-bb2-update-athena-metric-tables-utils"
+version = "0.1.0"
+description = "BFD Insights BB2 Update Athena Metric Tables Utils"

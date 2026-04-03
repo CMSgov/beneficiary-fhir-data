@@ -1,0 +1,4 @@
+[project]
+name = "apps-bfd-pipeline-idr-model"
+version = "0.1.0"
+description = "BFD Pipeline IDR Model"

@@ -1,0 +1,4 @@
+[project]
+name = "apps-utils-locust-tests-common-lambda-run-locust"
+version = "0.1.0"
+description = "BFD Locust Tests Common Lambda Run Locust"

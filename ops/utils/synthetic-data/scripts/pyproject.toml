@@ -1,0 +1,9 @@
+[project]
+name = "synthetic-data-scripts"
+version = "0.1.0"
+description = "BFD Synthetic Data Scripts"
+
+[tool.uv]
+
+# Add project-specific dependencies here
+[tool.uv.dependencies]

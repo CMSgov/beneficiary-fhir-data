@@ -1,0 +1,4 @@
+[project]
+name = "terraform-bb2-analytics-update-athena-metric-tables-utils"
+version = "0.1.0"
+description = "Terraform BB2 Analytics Update Athena Metric Tables Utils"

@@ -1,0 +1,4 @@
+[project]
+name = "synthetic-data-outpatient"
+version = "0.1.0"
+description = "BFD Synthetic Data Outpatient"
