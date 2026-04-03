@@ -8,6 +8,7 @@ from psycopg.errors import DeadlockDetected
 
 from constants import DEFAULT_MIN_DATE
 from load_partition import LoadPartition, LoadType
+from load_progress_utils import should_track_load_progress
 from model.base_model import DbType, LoadMode, T
 from model.load_progress import LoadProgress
 from settings import (
@@ -16,7 +17,6 @@ from settings import (
     bfd_db_password,
     bfd_db_port,
     bfd_db_username,
-    force_load_progress,
 )
 from timer import Timer
 
@@ -95,7 +95,7 @@ class BatchLoader:
         self.insert_timer = Timer("insert", model, partition)
         self.commit_timer = Timer("commit", model, partition)
         self.load_type = load_type
-        self.enable_load_progress = load_mode == LoadMode.IDR or force_load_progress()
+        self.enable_load_progress = should_track_load_progress(load_mode)
 
     def load(
         self,
