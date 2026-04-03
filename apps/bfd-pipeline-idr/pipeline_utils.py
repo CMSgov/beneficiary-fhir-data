@@ -25,6 +25,9 @@ def get_progress(
     start_time: datetime,
     partition: LoadPartition,
 ) -> LoadProgress | None:
+    if load_mode == LoadMode.SYNTHETIC:
+        return None
+
     return PostgresExtractor(
         load_mode=load_mode, cls=LoadProgress, partition=partition
     ).extract_single(
