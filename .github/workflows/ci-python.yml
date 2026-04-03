@@ -7,7 +7,6 @@ on:
       - "**/*.toml"
       - "**/uv.lock"
       - ".github/workflows/ci-python.yml"
-
   merge_group:
 
 env:
@@ -52,12 +51,10 @@ jobs:
       fail-fast: false
     steps:
       - name: Checkout code
-        id: code-checkout
         uses: actions/checkout@v6
-        with:
-          ref: ${{ inputs.branch }}
-      # Maven is needed to run the migrator
-      - name: "Setup JDK"
+
+      - name: Setup JDK (only for IDR pipeline)
+        if: matrix.project == 'apps/bfd-pipeline-idr'
         uses: actions/setup-java@v5
         with:
           java-version: "25"
@@ -66,21 +63,32 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v7
         with:
-          version: "0.4.0"
+          version: ${{ env.UV_VERSION }}
 
       - name: Set up Python
-        run: uv python install 3.13.0
+        run: |
+          cd ${{ github.workspace }}
+          uv python install 3.13.0
 
       - name: Install workspace dependencies
-        run: uv sync --all-extras --dev
-
-      - name: Run checks on project
         run: |
-          echo "Checking ${{ matrix.project }}"
-          cd ${{ matrix.project }}
+          cd ${{ github.workspace }}
+          uv sync --all-groups
+
+      - name: Run linting (ruff checks)
+        run: |
+          cd ${{ github.workspace }}
+          uv run ruff check --fix
+
+      - name: Run formatting check (ruff format)
+        run: |
+          cd ${{ github.workspace }}
+          uv run ruff format --check
           
-          # Linting
-          uv run ruff check --fix .
+      - name: Run type checking (pyright)
+        run: |
+          cd ${{ github.workspace }}
+          uv run pyright
           
           # Formatting
           uv run ruff format --check .
