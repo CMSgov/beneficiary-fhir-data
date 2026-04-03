@@ -17,7 +17,7 @@ import org.jetbrains.annotations.NotNull;
 public record BillablePeriodFilterParam(DateTimeRange claimThroughDate) implements DbFilterBuilder {
   @NotNull
   @Override
-  public DbFilter getFilters(@NotNull String claimTableAlias, @NotNull SystemType systemType) {
+  public DbFilter getFilters(@NotNull String tableAlias, @NotNull SystemType systemType) {
     var filterClause = new StringBuilder();
     var params = new ArrayList<DbFilterParam>();
     claimThroughDate
@@ -27,7 +27,7 @@ public record BillablePeriodFilterParam(DateTimeRange claimThroughDate) implemen
               filterClause.append(
                   String.format(
                       " AND (%s.billablePeriod.claimThroughDate %s :claimThroughDateLowerBound)",
-                      claimTableAlias, claimThroughDate.getLowerBoundSqlOperator()));
+                      tableAlias, claimThroughDate.getLowerBoundSqlOperator()));
               params.add(new DbFilterParam("claimThroughDateLowerBound", Optional.of(d)));
             });
 
@@ -38,7 +38,7 @@ public record BillablePeriodFilterParam(DateTimeRange claimThroughDate) implemen
               filterClause.append(
                   String.format(
                       " AND (%s.billablePeriod.claimThroughDate %s :claimThroughDateUpperBound)",
-                      claimTableAlias, claimThroughDate.getUpperBoundSqlOperator()));
+                      tableAlias, claimThroughDate.getUpperBoundSqlOperator()));
               params.add(new DbFilterParam("claimThroughDateUpperBound", Optional.of(d)));
             });
     return new DbFilter(filterClause.toString(), params);

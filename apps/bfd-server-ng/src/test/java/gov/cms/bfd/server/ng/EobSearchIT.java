@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.ng;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -11,6 +12,7 @@ import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import gov.cms.bfd.server.ng.claim.model.ClaimFinalAction;
+import gov.cms.bfd.server.ng.claim.model.ClaimProfessionalNch;
 import gov.cms.bfd.server.ng.claim.model.ClaimSubtype;
 import gov.cms.bfd.server.ng.claim.model.MetaSourceSk;
 import gov.cms.bfd.server.ng.eob.EobResourceProvider;
@@ -540,5 +542,46 @@ class EobSearchIT extends IntegrationTestBase {
           eobBundle.getEntry().size(),
           "Should find " + expectedCount + " EOBs for scenario " + scenarioName);
     }
+  }
+
+  @Test
+  void eobSearchNonLatestProfessionalIsNotReturned() {
+    var claims =
+        entityManager
+            .createQuery(
+                """
+                SELECT c
+                FROM ClaimProfessionalNch c
+                JOIN FETCH c.beneficiary b
+                JOIN FETCH c.claimItems cl
+                WHERE c.claimUniqueId = :claimId
+                """,
+                ClaimProfessionalNch.class)
+            .setParameter("claimId", Long.parseLong(CLAIM_ID_PROFESSIONAL_NON_LATEST))
+            .getResultList();
+    // Precondition - claim should be available in the db
+    assertFalse(claims.isEmpty());
+    var eobBundle =
+        searchBundle()
+            .where(
+                new TokenClientParam(ExplanationOfBenefit.SP_RES_ID)
+                    .exactly()
+                    .identifier(CLAIM_ID_PROFESSIONAL_NON_LATEST))
+            .execute();
+
+    assertEquals(0, getEobFromBundle(eobBundle).size());
+  }
+
+  @Test
+  void eobSearchNonLatestPartDIsReturned() {
+    var eobBundle =
+        searchBundle()
+            .where(
+                new TokenClientParam(ExplanationOfBenefit.SP_RES_ID)
+                    .exactly()
+                    .identifier(CLAIM_ID_RX_NON_LATEST))
+            .execute();
+
+    assertEquals(1, getEobFromBundle(eobBundle).size());
   }
 }

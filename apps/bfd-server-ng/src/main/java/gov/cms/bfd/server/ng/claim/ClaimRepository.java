@@ -26,7 +26,7 @@ public class ClaimRepository {
               SELECT c
               FROM ClaimProfessionalSharedSystems c
               JOIN FETCH c.beneficiary b
-              LEFT JOIN FETCH c.claimItems AS cl
+              LEFT JOIN FETCH c.claimItems cl
             """;
 
   private static final String CLAIM_PROFESSIONAL_NCH =
@@ -34,7 +34,7 @@ public class ClaimRepository {
               SELECT c
               FROM ClaimProfessionalNch c
               JOIN FETCH c.beneficiary b
-              JOIN FETCH c.claimItems AS cl
+              JOIN FETCH c.claimItems cl
             """;
 
   private static final String CLAIM_INSTITUTIONAL_SHARED_SYSTEMS =
@@ -42,7 +42,7 @@ public class ClaimRepository {
               SELECT c
               FROM ClaimInstitutionalSharedSystems c
               JOIN FETCH c.beneficiary b
-              LEFT JOIN FETCH c.claimItems AS cl
+              LEFT JOIN FETCH c.claimItems cl
             """;
 
   private static final String CLAIM_INSTITUTIONAL_NCH =
@@ -50,7 +50,7 @@ public class ClaimRepository {
               SELECT c
               FROM ClaimInstitutionalNch c
               JOIN FETCH c.beneficiary b
-              JOIN FETCH c.claimItems AS cl
+              JOIN FETCH c.claimItems cl
             """;
 
   private static final String CLAIM_RX =

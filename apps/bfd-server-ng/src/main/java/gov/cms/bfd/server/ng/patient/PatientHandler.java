@@ -3,6 +3,7 @@ package gov.cms.bfd.server.ng.patient;
 import gov.cms.bfd.server.ng.beneficiary.BeneficiaryRepository;
 import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
 import gov.cms.bfd.server.ng.beneficiary.model.OrganizationFactory;
+import gov.cms.bfd.server.ng.beneficiary.model.PatientMatch;
 import gov.cms.bfd.server.ng.coverage.CoverageRepository;
 import gov.cms.bfd.server.ng.input.CoverageCompositeId;
 import gov.cms.bfd.server.ng.input.CoveragePart;
@@ -18,8 +19,14 @@ import java.util.UUID;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Meta;
+import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Reference;
 import org.springframework.stereotype.Component;
 
 /**
@@ -72,6 +79,20 @@ public class PatientHandler {
 
     return FhirUtil.bundleOrDefault(
         beneficiary.map(this::toFhir), loadProgressRepository::lastUpdated);
+  }
+
+  /**
+   * Attempts to match a beneficiary based on the patient input.
+   *
+   * @param patientMatch match request
+   * @return bundle
+   */
+  public Bundle matchPatient(Optional<PatientMatch> patientMatch) {
+    if (patientMatch.isEmpty()) {
+      return patientMatchBundle(Optional.empty());
+    }
+    var beneficiary = beneficiaryRepository.searchPatientMatch(patientMatch.get());
+    return patientMatchBundle(beneficiary);
   }
 
   /**
@@ -137,5 +158,41 @@ public class PatientHandler {
                         .getOther()
                         .getReference()
                         .equals(newLink.getOther().getReference()));
+  }
+
+  private Bundle patientMatchBundle(Optional<Beneficiary> beneficiary) {
+    var bundle = new Bundle();
+    bundle.setId("IDI-Match");
+    bundle.setMeta(new Meta().addProfile(SystemUrls.PROFILE_IDENTITY_MATCHING));
+    bundle.setIdentifier(new Identifier().setAssigner(new Reference().setDisplay("CMS")));
+    bundle.setType(Bundle.BundleType.SEARCHSET);
+    var cmsOrg = new Organization();
+    cmsOrg.setId("cms-org").setMeta(new Meta().addProfile(SystemUrls.PROFILE_US_CORE_ORGANIZATION));
+    cmsOrg
+        .setActive(true)
+        .addType(
+            new CodeableConcept(
+                new Coding()
+                    .setSystem(SystemUrls.HL7_ORGANIZATION_TYPE)
+                    .setCode("pay")
+                    .setDisplay("Payer")));
+    cmsOrg.setName("CMS");
+
+    var bundleEntry =
+        new Bundle.BundleEntryComponent().setFullUrl(SystemUrls.CMS_GOV).setResource(cmsOrg);
+    bundleEntry.setSearch(
+        new Bundle.BundleEntrySearchComponent().setMode(Bundle.SearchEntryMode.MATCH));
+    bundle.addEntry(bundleEntry);
+    beneficiary.ifPresent(
+        b ->
+            bundle.addEntry(
+                new Bundle.BundleEntryComponent()
+                    .setResource(toFhir(b))
+                    .setFullUrl("urn:uuid:" + UUID.randomUUID())
+                    .setSearch(
+                        new Bundle.BundleEntrySearchComponent()
+                            .setMode(Bundle.SearchEntryMode.MATCH))));
+
+    return bundle;
   }
 }
