@@ -96,14 +96,15 @@ public class EobHandler {
                   return claim.toFhir(securityStatus);
                 });
 
-    return FhirUtil.bundleOrDefault(filteredClaims.toList(), loadProgressRepository::lastUpdated);
+    return FhirUtil.bundleOrDefault(filteredClaims, loadProgressRepository::lastUpdated);
   }
 
   private Stream<? extends ClaimBase> filterSamhsaClaims(
       List<? extends ClaimBase> claims,
       SamhsaFilterMode samhsaFilterMode,
       ClaimSearchCriteria claimSearchCriteria) {
-    var claimStream = claims.stream().sorted(Comparator.comparing(ClaimBase::getClaimUniqueId));
+    var claimStream =
+        claims.parallelStream().sorted(Comparator.comparing(ClaimBase::getClaimUniqueId));
     var filteredClaimStream =
         switch (samhsaFilterMode) {
           case INCLUDE -> claimStream;

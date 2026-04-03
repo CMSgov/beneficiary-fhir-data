@@ -413,6 +413,17 @@ class EobSearchIT extends IntegrationTestBase {
     }
   }
 
+  @Test
+  void eobSearchInvalidIdBadRequest() {
+    var searchWithIdentifier =
+        searchBundle()
+            .where(
+                new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
+                    .exactly()
+                    .identifier("abc123"));
+    assertThrows(InvalidRequestException.class, searchWithIdentifier::execute);
+  }
+
   @ParameterizedTest
   @ValueSource(
       strings = {
