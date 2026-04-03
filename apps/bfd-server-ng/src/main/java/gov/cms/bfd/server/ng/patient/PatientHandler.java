@@ -111,8 +111,7 @@ public class PatientHandler {
             result.finalDetermination());
     auditLogger.log(auditRecord);
 
-    return FhirUtil.bundleOrDefault(
-        beneficiary.map(this::toFhir), loadProgressRepository::lastUpdated);
+    return patientMatchBundle(beneficiary);
   }
 
   /**

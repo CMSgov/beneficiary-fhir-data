@@ -139,24 +139,25 @@ public class BeneficiaryRepository {
   @Timed(value = "application.beneficiary.patient_match")
   public PatientMatchResult searchPatientMatch(PatientMatch patientMatch) {
     var combinationResults = new ArrayList<MatchCombinationResult>();
-    for (var indexedScenarios : patientMatch.getValidScenarios()) {
-      var combinationIndex = indexedScenarios.combinationIndex();
-      var scenario = indexedScenarios.entries();
+    for (var indexedScenario : patientMatch.getValidScenarios()) {
+      var combinationIndex = indexedScenario.combinationIndex();
+      var scenario = indexedScenario.entries();
       var filters = new PatientMatchFilter(scenario).getFilters("bene", SystemType.UNKNOWN);
 
       var query =
           entityManager.createQuery(
               String.format(
                   """
-                      SELECT bene
-                      FROM Beneficiary bene
-                      WHERE bene.latestTransactionFlag = 'Y'
-                      %s
-                      ORDER BY bene.obsoleteTimestamp DESC
-                      """,
+                  SELECT bene
+                  FROM Beneficiary bene
+                  WHERE bene.latestTransactionFlag = 'Y'
+                  %s
+                  ORDER BY bene.obsoleteTimestamp DESC
+                  """,
                   filters.filterClause()),
               Beneficiary.class);
-      var benes = DbFilterParam.withParams(query, filters.params()).getResultList().stream().toList();
+      var benes =
+          DbFilterParam.withParams(query, filters.params()).getResultList().stream().toList();
       var matchedRecords =
           benes.stream()
               .map(b -> new MatchedRecord(b.getBeneSk(), b.getEffectiveTimestamp()))
