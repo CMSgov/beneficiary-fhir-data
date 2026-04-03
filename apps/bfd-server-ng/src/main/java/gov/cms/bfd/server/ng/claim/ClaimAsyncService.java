@@ -7,7 +7,6 @@ import gov.cms.bfd.server.ng.claim.model.*;
 import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.TypedQuery;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import lombok.AllArgsConstructor;
@@ -28,21 +27,21 @@ public class ClaimAsyncService {
           Class<C> claimClass,
           SystemType systemType,
           long claimUniqueId,
-          List<B> paramBuilders) {
+          List<B> filterBuilders) {
 
-    var filters = getFilters(paramBuilders, systemType);
+    var filters = getFilters(filterBuilders, systemType);
+    var whereClause = buildWhereClause(filters, systemType);
     var jpql =
         String.format(
             """
             %s
             WHERE c.claimUniqueId = :claimUniqueId
-            AND b.latestTransactionFlag = 'Y'
             %s
             """,
-            baseQuery, filters.filterClause());
+            baseQuery, whereClause);
 
     var result =
-        withParams(entityManager.createQuery(jpql, claimClass), filters.params())
+        DbFilterParam.withParams(entityManager.createQuery(jpql, claimClass), filters.params())
             .setParameter("claimUniqueId", claimUniqueId)
             .getResultList()
             .stream()
@@ -60,23 +59,34 @@ public class ClaimAsyncService {
       List<DbFilterBuilder> filterBuilders) {
 
     var filters = getFilters(filterBuilders, systemType);
-
+    var whereClause = buildWhereClause(filters, systemType);
     var jpql =
         String.format(
             """
-            %s
-            WHERE b.xrefSk = :beneSk
-            AND b.latestTransactionFlag = 'Y'
-            %s
+             %s
+             WHERE b.xrefSk = :beneSk
+             %s
             """,
-            baseQuery, filters.filterClause());
+            baseQuery, whereClause);
 
     var result =
-        withParams(entityManager.createQuery(jpql, claimClass), filters.params())
+        DbFilterParam.withParams(entityManager.createQuery(jpql, claimClass), filters.params())
             .setParameter("beneSk", criteria.beneSk())
             .getResultList();
 
     return CompletableFuture.completedFuture(result);
+  }
+
+  private String buildWhereClause(DbFilter filter, SystemType systemType) {
+    var latestClaimFilter =
+        systemType.filterLatestClaims() ? "AND c.latestClaimIndicator = 'Y'" : "";
+    return String.format(
+        """
+        AND b.latestTransactionFlag = 'Y'
+        %s
+        %s
+        """,
+        filter.filterClause(), latestClaimFilter);
   }
 
   <T extends DbFilterBuilder> DbFilter getFilters(List<T> builders, SystemType systemType) {
@@ -88,12 +98,5 @@ public class ClaimAsyncService {
       queryParams.addAll(params.params());
     }
     return new DbFilter(sb.toString(), queryParams);
-  }
-
-  private <T> TypedQuery<T> withParams(TypedQuery<T> query, List<DbFilterParam> params) {
-    for (var param : params) {
-      query.setParameter(param.name(), param.value());
-    }
-    return query;
   }
 }

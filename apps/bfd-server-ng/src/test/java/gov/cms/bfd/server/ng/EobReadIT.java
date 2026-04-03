@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.rest.gclient.IReadTyped;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import gov.cms.bfd.server.ng.claim.model.ClaimProfessionalNch;
 import gov.cms.bfd.server.ng.eob.EobResourceProvider;
 import io.restassured.RestAssured;
 import jakarta.servlet.http.HttpServletRequest;
@@ -99,6 +100,33 @@ class EobReadIT extends IntegrationTestBase {
     var eob = eobRead().withId(Long.parseLong(CLAIM_ID_PROFESSIONAL_ORG)).execute();
     assertFalse(eob.isEmpty());
     expectFhir().toMatchSnapshot(eob);
+  }
+
+  @Test
+  void eobReadNonLatestPartDIsReturned() {
+    var eob = eobRead().withId(Long.parseLong(CLAIM_ID_RX_NON_LATEST)).execute();
+    assertFalse(eob.isEmpty());
+  }
+
+  @Test
+  void eobReadNonLatestProfessionalIsNotReturned() {
+    var claims =
+        entityManager
+            .createQuery(
+                """
+                SELECT c
+                  FROM ClaimProfessionalNch c
+                  JOIN FETCH c.beneficiary b
+                  JOIN FETCH c.claimItems cl
+                  WHERE c.claimUniqueId = :claimId
+                """,
+                ClaimProfessionalNch.class)
+            .setParameter("claimId", Long.parseLong(CLAIM_ID_PROFESSIONAL_NON_LATEST))
+            .getResultList();
+    // Precondition - claim should be available in the db
+    assertFalse(claims.isEmpty());
+    var eobRequest = eobRead().withId(Long.parseLong(CLAIM_ID_PROFESSIONAL_NON_LATEST));
+    assertThrows(ResourceNotFoundException.class, eobRequest::execute);
   }
 
   @ParameterizedTest

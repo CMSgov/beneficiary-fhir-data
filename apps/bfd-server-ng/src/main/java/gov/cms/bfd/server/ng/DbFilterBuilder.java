@@ -7,11 +7,11 @@ public interface DbFilterBuilder {
   /**
    * Gets the filters for this filter type.
    *
-   * @param claimTableAlias SQL alias for the claim table
+   * @param tableAlias SQL alias for the table
    * @param systemType System type
    * @return configured filter
    */
-  DbFilter getFilters(String claimTableAlias, SystemType systemType);
+  DbFilter getFilters(String tableAlias, SystemType systemType);
 
   /**
    * Determine whether claims from the specified system type should be queried based on the current

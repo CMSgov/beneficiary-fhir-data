@@ -257,9 +257,9 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
     assert rows[0]["clm_uniq_id"] == 580550863030
 
     cur = conn.execute("select * from idr.claim_professional_nch order by clm_uniq_id")
-    assert cur.rowcount == 33
+    assert cur.rowcount == 51
     rows = cur.fetchmany(1)
-    assert rows[0]["clm_uniq_id"] == 797757725380
+    assert rows[0]["clm_uniq_id"] == 119855147698
 
     cur = conn.execute("select * from idr.claim_professional_ss order by clm_uniq_id")
     assert cur.rowcount == 1

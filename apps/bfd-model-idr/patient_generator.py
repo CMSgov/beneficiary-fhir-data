@@ -236,6 +236,12 @@ def load_inputs():
         patient["BENE_LAST_NAME"] = random.choice(available_family_names)
         dob = generator.fake.date_of_birth(minimum_age=45)
         patient["BENE_BRTH_DT"] = str(dob)
+        ssn_prefix = random.choices(
+            ["000", "666", str(random.randint(900, 999))], weights=[1, 1, 100]
+        )[0]
+        patient["BENE_SSN_NUM"] = ssn_prefix + "".join(
+            [str(random.randint(0, 9)) for _ in range(6)]
+        )
         if probability(0.2):
             # death!
             death_date = generator.fake.date_between_dates(
