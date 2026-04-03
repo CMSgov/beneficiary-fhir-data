@@ -4,12 +4,20 @@ from os import getenv
 MIN_CLAIM_LOAD_DATE = "2014-06-30"
 
 
-def parse_bool_default_false(var_name: str) -> bool:
+def _parse_bool_default_false(var_name: str) -> bool:
     return getenv(var_name, "").lower() in ("1", "true")
 
 
 def _parse_bool_default_true(var_name: str) -> bool:
     return getenv(var_name, "1").lower() not in ("0", "false")
+
+
+# Tracking load progress is disabled for synthetic data loads.
+# Use this to force enabling load progress for testing.
+def force_load_progress() -> bool:
+    # We don't normally want to store the load progress info for synthetic data since the dates
+    # won't be in order like in prod. However, we need a way to override this for the tests.
+    return _parse_bool_default_false("IDR_FORCE_LOAD_PROGRESS")
 
 
 ENABLE_DATE_PARTITIONS = _parse_bool_default_true("IDR_ENABLE_DATE_PARTITIONS")
@@ -31,7 +39,7 @@ PARTITION_TYPE = getenv("IDR_PARTITION_TYPE", "year").lower()
 """Partition type (year/month/day).
 This should be set to "day" in prod to reduce the batch sizes"""
 
-LATEST_CLAIMS = parse_bool_default_false("IDR_LATEST_CLAIMS")
+LATEST_CLAIMS = _parse_bool_default_false("IDR_LATEST_CLAIMS")
 """Only pull in latest claims.
 Useful for the initial data pull since we only want to pull in
 the latest version of each claim."""

@@ -8,7 +8,6 @@ from psycopg.errors import DeadlockDetected
 
 from constants import DEFAULT_MIN_DATE
 from load_partition import LoadPartition, LoadType
-from load_progress_utils import should_track_load_progress
 from model.base_model import DbType, LoadMode, T
 from model.load_progress import LoadProgress
 from settings import (
@@ -17,6 +16,7 @@ from settings import (
     bfd_db_password,
     bfd_db_port,
     bfd_db_username,
+    force_load_progress,
 )
 from timer import Timer
 
@@ -352,3 +352,8 @@ def _convert_date(date_field: date | datetime) -> datetime:
     if type(date_field) is datetime:
         return date_field.replace(tzinfo=UTC)
     return datetime.combine(date_field, datetime.min.time()).replace(tzinfo=UTC)
+
+
+def should_track_load_progress(load_mode: LoadMode) -> bool:
+    # Whether to read/write load progress, which is diabled for synthetic and testing loads.
+    return load_mode == LoadMode.IDR or force_load_progress()

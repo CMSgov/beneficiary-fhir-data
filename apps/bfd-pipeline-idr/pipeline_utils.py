@@ -9,8 +9,7 @@ from snowflake.connector.network import ReauthenticationRequest, RetryRequest
 from constants import DEFAULT_PARTITION
 from extractor import PostgresExtractor, SnowflakeExtractor
 from load_partition import LoadPartition
-from load_progress_utils import should_track_load_progress
-from loader import LoadType, PostgresLoader
+from loader import LoadType, PostgresLoader, should_track_load_progress
 from model.base_model import (
     LoadMode,
     T,
