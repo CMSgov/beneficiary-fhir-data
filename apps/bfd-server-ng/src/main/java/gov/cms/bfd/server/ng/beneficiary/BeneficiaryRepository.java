@@ -146,12 +146,12 @@ public class BeneficiaryRepository {
           entityManager.createQuery(
               String.format(
                   """
-                      SELECT bene
-                      FROM Beneficiary bene
-                      WHERE bene.latestTransactionFlag = 'Y'
-                      %s
-                      ORDER BY bene.obsoleteTimestamp DESC
-                      """,
+                  SELECT bene
+                  FROM Beneficiary bene
+                  WHERE bene.latestTransactionFlag = 'Y'
+                  %s
+                  ORDER BY bene.obsoleteTimestamp DESC
+                  """,
                   filters.filterClause()),
               Beneficiary.class);
       var benes =
@@ -160,8 +160,9 @@ public class BeneficiaryRepository {
       if (uniqueXrefs.size() != 1) {
         continue;
       }
-
-      return benes.stream().findFirst();
+      var bene = benes.stream().findFirst();
+      bene.ifPresent(b -> LogUtil.logBeneSk(b.getBeneSk()));
+      return bene;
     }
     return Optional.empty();
   }

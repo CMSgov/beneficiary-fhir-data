@@ -5,6 +5,7 @@ import gov.cms.bfd.server.ng.DbFilterBuilder;
 import gov.cms.bfd.server.ng.DbFilterParam;
 import gov.cms.bfd.server.ng.claim.model.*;
 import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
+import gov.cms.bfd.server.ng.util.LogUtil;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.util.*;
@@ -46,7 +47,7 @@ public class ClaimAsyncService {
             .getResultList()
             .stream()
             .findFirst();
-
+    result.ifPresent(claim -> LogUtil.logBeneSk(claim.getBeneficiary().getBeneSk()));
     return CompletableFuture.completedFuture(result);
   }
 
@@ -73,7 +74,9 @@ public class ClaimAsyncService {
         DbFilterParam.withParams(entityManager.createQuery(jpql, claimClass), filters.params())
             .setParameter("beneSk", criteria.beneSk())
             .getResultList();
-
+    result.stream()
+        .findFirst()
+        .ifPresent(claim -> LogUtil.logBeneSk(claim.getBeneficiary().getBeneSk()));
     return CompletableFuture.completedFuture(result);
   }
 

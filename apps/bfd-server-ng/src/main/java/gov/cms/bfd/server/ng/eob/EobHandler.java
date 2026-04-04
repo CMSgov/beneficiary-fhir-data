@@ -103,6 +103,8 @@ public class EobHandler {
       List<? extends ClaimBase> claims,
       SamhsaFilterMode samhsaFilterMode,
       ClaimSearchCriteria claimSearchCriteria) {
+    // Process claims in parallel
+    // Note: DO NOT call toList() until the very end as this will have drastic impacts on perf
     var claimStream =
         claims.parallelStream().sorted(Comparator.comparing(ClaimBase::getClaimUniqueId));
     var filteredClaimStream =
