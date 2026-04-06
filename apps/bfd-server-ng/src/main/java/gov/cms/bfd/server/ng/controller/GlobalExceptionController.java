@@ -1,8 +1,11 @@
 package gov.cms.bfd.server.ng.controller;
 
-import gov.cms.bfd.server.ng.util.LoggerConstants;
+import static gov.cms.bfd.server.ng.util.LoggerConstants.*;
+
+import gov.cms.bfd.server.ng.util.CertificateUtil;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.web.servlet.error.ErrorController;
@@ -11,8 +14,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 /** Handles any error redirects and redacts information that shouldn't be returned to the user. */
 @RestController
+@RequiredArgsConstructor
 public class GlobalExceptionController implements ErrorController {
   private static final Logger LOGGER = LoggerFactory.getLogger(GlobalExceptionController.class);
+
+  private final CertificateUtil certificateUtil;
 
   /**
    * Handler for the error redirect. Spring will invoke /error automatically for error responses.
@@ -26,6 +32,7 @@ public class GlobalExceptionController implements ErrorController {
     var message = request.getAttribute(RequestDispatcher.ERROR_MESSAGE);
     // Note: this doesn't include the query string
     var originalUri = request.getAttribute(RequestDispatcher.ERROR_REQUEST_URI);
+    var certificateAlias = certificateUtil.getAliasFromCert(request);
     var logBuilder = LOGGER.atError();
     // Unexpected errors could contain anything, so we should not return the text to the user.
     var responseMessage = "an unknown error occurred";
@@ -45,12 +52,14 @@ public class GlobalExceptionController implements ErrorController {
       logBuilder = logBuilder.addKeyValue("statusCode", statusCode);
     }
     // Since this is controller is hit from a redirect, we don't have the context from the normal
-    // MDC filter, so we need to add them to the log here explicitly,
+    // MDC filter, so we need to add them to the log here explicitly. We skip using the MDC because
+    // we'd just immediately clear it.
     logBuilder
         .setMessage(responseMessage)
-        .addKeyValue(LoggerConstants.URI_KEY, originalUri)
-        .addKeyValue(LoggerConstants.REQUEST_ID_KEY, request.getRequestId())
-        .addKeyValue(LoggerConstants.REMOTE_ADDRESS_KEY, request.getRemoteAddr())
+        .addKeyValue(logKey(MDC_PREFIX, CERTIFICATE_ALIAS), certificateAlias.orElse(null))
+        .addKeyValue(logKey(MDC_PREFIX, URI_KEY), originalUri)
+        .addKeyValue(logKey(MDC_PREFIX, REQUEST_ID_KEY), request.getRequestId())
+        .addKeyValue(logKey(MDC_PREFIX, REMOTE_ADDRESS_KEY), request.getRemoteAddr())
         .log();
 
     return responseMessage;
