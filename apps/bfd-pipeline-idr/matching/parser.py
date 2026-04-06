@@ -139,19 +139,19 @@ def _apply_highway_fixes(text: str) -> str:
         (r"\bBZN\b", "BOX"),
         (r"\bB0X\b", "BOX"),
         (r"\bRUTA RURAL\b", "RR"),
-        (r"\bIH(\d+[A-Z]?)\b", r"INTERSTATE \1"),
-        (r"\bI\s?(\d+[A-Z]?)(?:\s+(?:HIGHWAY|HWY))?\b", repl_interstate),
-        (r"\bUS(?:\s+HIGHWAY)?\s+(\d+[A-Z]?)(?:\s+(?:HIGHWAY|HWY))?\b", r"US HIGHWAY \1"),
+        (r"\bIH(\d{1,4}[A-Z]?)\b", r"INTERSTATE \1"),
+        (r"\bI\s?(\d{1,4}[A-Z]?)(?:\s+(?:HIGHWAY|HWY))?\b", repl_interstate),
+        (r"\bUS(?:\s+HIGHWAY)?\s+(\d{1,4}[A-Z]?)(?:\s+(?:HIGHWAY|HWY))?\b", r"US HIGHWAY \1"),
         (r"\bBYP ROAD\b", "BYPASS ROAD"),
         (r"\bKY\s+(\d{1,4})(?:\s+(?:HIGHWAY|HWY))?\b", r"KY HIGHWAY \1"),
         (r"\bCNTY\b", "COUNTY"),
-        (r"\bCR\s+(\d+[A-Z]?)(?:\s+(?:ROAD|RD))?\b", r"COUNTY ROAD \1"),
+        (r"\bCR\s+(\d{1,4}[A-Z]?)(?:\s+(?:ROAD|RD))?\b", r"COUNTY ROAD \1"),
         (r"\bHWY\b", "HIGHWAY"),
         (r"\bRD\b", "ROAD"),
         (r"\bRT\b", "ROUTE"),
         (r"\bRTE\b", "ROUTE"),
         (r"\bSR\s+([A-Z]+)(?:\s+(?:ROUTE|RT|RTE|ROAD|RD))?\b", r"STATE ROUTE \1"),
-        (r"\bSR\s+(\d+[A-Z]?)(?:\s+(?:ROAD|RD|ROUTE|RT|RTE))?\b", r"STATE ROAD \1"),
+        (r"\bSR\s+(\d{1,4}[A-Z]?)(?:\s+(?:ROAD|RD|ROUTE|RT|RTE))?\b", r"STATE ROAD \1"),
         (r"\bSR\b", "STATE ROAD"),
         (r"\bTSR\b", "TOWNSHIP ROAD"),
     ]
@@ -632,6 +632,18 @@ def _format_from_raw(raw_parsed: list[tuple[str, str]]) -> str:
                     break
             if can_swap and not any(v.isdigit() for v, _label in raw_parsed[:-1]):
                 raw_parsed = [raw_parsed[-1], *raw_parsed[:-1]]
+
+    # Identify and fix lines that are just City State Zip incorrectly tagged
+    if len(raw_parsed) >= 2:
+        v_state, l_state = raw_parsed[-2]
+        _, l_zip = raw_parsed[-1]
+        is_state_abbr = v_state.upper() in STATES.values()
+        is_state_name = v_state.upper() in STATES
+        if l_zip == "ZipCode" and (is_state_abbr or is_state_name) and l_state != "StateName":
+            raw_parsed[-2] = (v_state, "StateName")
+            for i in range(len(raw_parsed) - 2):
+                if raw_parsed[i][1] in ("StreetName", "PlaceName", "StreetNamePostType"):
+                    raw_parsed[i] = (raw_parsed[i][0], "PlaceName")
 
     has_street_name = any(label == "StreetName" for _val, label in raw_parsed)
     reconstructed: list[str] = []

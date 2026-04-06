@@ -14,6 +14,10 @@ class TestProjectUsatParser(unittest.TestCase):
         expected2 = "200 EAST AND WEST RD"
         assert normalize_address(address2) == expected2
 
+        address444 = "6647 WILDFLOWER DR S\nCOTTAGE GROVE MN 55016"
+        expected444 = "6647 WILDFLOWER DR S"
+        assert normalize_address(address444) == expected444
+
         # False-positive Recipient (e.g., OFC OFC)
         address3 = "312 2ND ST NW OFC OFC\nWASHINGTON DC 20001"
         expected3 = "312 2ND ST NW OFC OFC"
@@ -54,6 +58,23 @@ class TestProjectUsatParser(unittest.TestCase):
         address9 = "45 MALL DR\n45 MALL DR\nSAN JUAN PR 00901"
         expected9 = "45 MALL DR"
         assert normalize_address(address9) == expected9
+
+    def test_inline_addresses(self) -> None:
+        cases = [
+            ("1325 Main St, Madison, WI, US 57303", "1325 MAIN ST"),
+            ("308 Oak St, Madison, WI, US 53711", "308 OAK ST"),
+            ("124 Lake Street, Vernon, CT, US 06066", "124 LAKE ST"),
+            ("8855 Orchid Blvd, Reading, PA, US 19602", "8855 ORCHID BLVD"),
+            ("458 Streich Street Lunenburg, MA, US 01462", "458 STREICH ST"),
+            ("3268 West Johnson St. Apt 117 Garland, TX, US 75043", "3268 W JOHNSON ST APT 117"),
+            ("7324 Roosevelt Ave Indianapolis, IN, US 46201", "7324 ROOSEVELT AVE"),
+            ("742 Evergreen Terrace Madison, WI, US 53711", "742 EVERGREEN TER"),
+            ("123 Peachtree Road Augusta, GA, US 30909", "123 PEACHTREE RD"),
+            ("110 Westminster St Providence, RI, US 02903", "110 WESTMINSTER ST"),
+        ]
+        for address, expected in cases:
+            with self.subTest(address=address):
+                assert normalize_address(address) == expected
 
     def test_diacritics_and_punctuation(self) -> None:
         address = "123 Nórth Main St., Apt. #4-B\nNew York, NY (10001)"
