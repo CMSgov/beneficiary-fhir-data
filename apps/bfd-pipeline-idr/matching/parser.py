@@ -306,16 +306,9 @@ def normalize_address(address_str: str) -> str:
             else:
                 formatted_lines.append(line)
 
-    normalized_lines: list[str] = []
-    country_line = ""
-    for line in formatted_lines:
-        if line.strip().upper() in COUNTRIES:
-            country_line = line
-        else:
-            normalized_lines.append(line)
-
-    if country_line:
-        normalized_lines.append(country_line)
+    normalized_lines = [
+        line for line in formatted_lines if line.strip() and line.strip().upper() not in COUNTRIES
+    ]
 
     res = "\n".join(normalized_lines)
 
@@ -565,7 +558,7 @@ def _format_from_dict(tokens: dict[str, str], is_military: bool = False) -> str:
         if "SubaddressIdentifier" in tokens:
             street_parts.append(tokens["SubaddressIdentifier"])
 
-    # City, State, ZIP — Moved up for boundary standalone passes
+    # City, State, ZIP — Only move to last_line_parts if they appear together
     if "StateName" in tokens:
         state_val_dict = _format_state(tokens["StateName"])
         if "PlaceName" in tokens:
@@ -595,50 +588,6 @@ def _format_from_dict(tokens: dict[str, str], is_military: bool = False) -> str:
         final_lines.append(_apply_pr_exceptions(" ".join(line1_parts)))
     if line2_parts:
         final_lines.append(_apply_pr_exceptions(" ".join(line2_parts)))
-    if last_line_parts:
-        # Construct City State Zip carefully
-        city = last_line_parts[0] if len(last_line_parts) > 0 else ""
-        state = last_line_parts[1] if len(last_line_parts) > 1 else ""
-        zip_code_val = last_line_parts[2] if len(last_line_parts) > 2 else ""
-
-        last_line = ""
-        if city:
-            last_line += city
-
-        # Handle Canada spacing
-        if state:
-            state_parts = state.split()
-            if (
-                state_parts[0]
-                in (
-                    "AB",
-                    "BC",
-                    "MB",
-                    "NB",
-                    "NL",
-                    "NT",
-                    "NS",
-                    "NU",
-                    "ON",
-                    "PE",
-                    "QC",
-                    "SK",
-                    "YT",
-                )
-                and len(state_parts) > 1
-            ):
-                # usaddress merged part of Zip into StateName
-                # e.g., 'ON K1A'
-                state = state_parts[0]
-                zip_code_val = " ".join(state_parts[1:]) + (
-                    " " + zip_code_val if zip_code_val else ""
-                )
-
-            last_line += (" " if last_line else "") + state
-
-        if zip_code_val:
-            last_line += (" " if last_line else "") + zip_code_val
-        final_lines.append(last_line)
 
     return "\n".join(final_lines)
 
@@ -686,7 +635,12 @@ def _format_from_raw(raw_parsed: list[tuple[str, str]]) -> str:
 
     has_street_name = any(label == "StreetName" for _val, label in raw_parsed)
     reconstructed: list[str] = []
+    geo_labels = ("PlaceName", "StateName", "ZipCode", "CountryName")
+    has_other = any(p_label not in geo_labels for _, p_label in raw_parsed)
+
     for p_val, p_label in raw_parsed:
+        if p_label in geo_labels and not has_other:
+            continue
         # apply directional checks
         res_val = p_val
         if "Directional" in p_label:
@@ -698,6 +652,7 @@ def _format_from_raw(raw_parsed: list[tuple[str, str]]) -> str:
         # apply state checks
         elif p_label == "StateName":
             res_val = _format_state(p_val)
+
         # apply secondary unit
         elif p_label == "OccupancyType":
             res_val = _format_secondary_unit(p_val)
@@ -721,11 +676,6 @@ def _apply_pr_exceptions(text: str) -> str:
     lines = [line.strip() for line in text.split("\n") if line.strip()]
     if not lines:
         return text
-
-    last_line_val = ""
-    # If the last line contains a State and Zip code, isolate it from reordering
-    if re.search(r"\b[A-Z]{2}\b\s+\d{5}", lines[-1].upper()):
-        last_line_val = lines.pop(-1)
 
     urb_lines: list[str] = []
     condo_lines: list[str] = []
@@ -767,8 +717,7 @@ def _apply_pr_exceptions(text: str) -> str:
                 break
 
     lines = urb_lines + condo_lines + street_lines_list + other_lines + postal_lines
-    if last_line_val:
-        lines.append(last_line_val)
+
     text = "\n".join(lines)
 
     # Standardize Spanish boxes on the combined text (e.g., APARTADO -> PO BOX)
