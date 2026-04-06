@@ -51,6 +51,7 @@ class EobValidityIT extends IntegrationTestBase {
 
     validateCodingsAndSystemUrls(eob);
     validateFinancialPrecision(eob);
+    validateCareTeamProviderTypes(eob);
 
     // EOB do not require diagnoses (for example, pharmacy).
     if (eob.hasDiagnosis()) {

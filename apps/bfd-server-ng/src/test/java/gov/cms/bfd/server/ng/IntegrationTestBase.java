@@ -245,4 +245,17 @@ public class IntegrationTestBase {
             })
         .toList();
   }
+
+  protected void validateCareTeamProviderTypes(ExplanationOfBenefit eob) {
+    if (eob.hasCareTeam()) {
+      for (var careTeamComponent : eob.getCareTeam()) {
+        if (careTeamComponent.hasProvider()) {
+          var providerReference = careTeamComponent.getProvider();
+          assertTrue(providerReference.hasType(), "Careteam provider reference must have type set");
+          var expectedReferenceTypes = Set.of("Practitioner", "Organization");
+          assertTrue(expectedReferenceTypes.contains(providerReference.getType()));
+        }
+      }
+    }
+  }
 }
