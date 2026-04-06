@@ -154,10 +154,13 @@ class IdrBeneficiary(IdrBaseModel):
         if not normalized:
             return ""
         address = normalized[0]
-
-        return " ".join(
-            [address[k] for k in address if k not in ("PlaceName", "StateName", "ZipCode")]
-        )
+        try:
+            return " ".join(
+                [address[k] for k in address if k not in ("PlaceName", "StateName", "ZipCode")]
+            )
+        except Exception as ex:
+            print(address)
+            print(ex)
 
     @override
     @staticmethod
