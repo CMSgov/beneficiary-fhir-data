@@ -135,26 +135,19 @@ class IdrBeneficiary(IdrBaseModel):
             or self.bene_line_1_adr in ("UNK ADDRESS", "UNK", "UNKNOW")
         ):
             return ""
-        normalized = normalize_address(
-            f"{self.bene_line_1_adr} "
-            f"{self.bene_line_2_adr} "
-            f"{self.bene_line_3_adr} "
-            f"{self.bene_line_4_adr} "
-            f"{self.bene_line_5_adr} "
-            f"{self.bene_line_6_adr}, "
-            f"{self.geo_zip_plc_name} "
-            f"{self.geo_usps_state_cd} "
-            f"{self.geo_zip5_cd}"
-        ).replace("\n", " ")
-        try:
-            parsed = usaddress.tag(normalized)  # type: ignore
 
-            if not normalized:
-                return ""
-            address = parsed[0]
-            return " ".join(
-                [address[k] for k in address if k not in ("PlaceName", "StateName", "ZipCode")]
-            )
+        try:
+            return normalize_address(
+                f"{self.bene_line_1_adr} "
+                f"{self.bene_line_2_adr} "
+                f"{self.bene_line_3_adr} "
+                f"{self.bene_line_4_adr} "
+                f"{self.bene_line_5_adr} "
+                f"{self.bene_line_6_adr}, "
+                f"{self.geo_zip_plc_name}, "
+                f"{self.geo_usps_state_cd}, "
+                f"{self.geo_zip5_cd}"
+            ).replace("\n", " ")
         except Exception:
             # Not logging exception since it could contain address
             logger.warning("error normalizing address. bene_sk: %d", self.bene_sk)

@@ -170,7 +170,7 @@ def normalize_text(text: str) -> str:
     text = re.sub(r"(\d)\.(\d)", r"\1_DOT_\2", text)
 
     # Remove specific punctuation: *, ., (, ), ", :, ;, ', &, @
-    text = re.sub(r'[*.,()":;\'&@]', "", text)
+    text = re.sub(r'[*.()":;\'&@]', "", text)
 
     # Restore floating point periods
     text = text.replace("_DOT_", ".")
