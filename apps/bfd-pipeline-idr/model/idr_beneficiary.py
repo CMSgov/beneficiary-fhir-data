@@ -161,6 +161,7 @@ class IdrBeneficiary(IdrBaseModel):
         except Exception as ex:
             print(address)
             print(ex)
+            raise
 
     @override
     @staticmethod
