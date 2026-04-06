@@ -147,21 +147,17 @@ class IdrBeneficiary(IdrBaseModel):
             f"{self.geo_zip5_cd}"
         ).replace("\n", " ")
         try:
-            normalized = usaddress.tag(normalized)  # type: ignore
-        except Exception:
-            # Not logging exception since it could contain address
-            logger.warning("error normalizing address. bene_sk: %d", self.bene_sk)
-        if not normalized:
-            return ""
-        address = normalized[0]
-        try:
+            parsed = usaddress.tag(normalized)  # type: ignore
+
+            if not normalized:
+                return ""
+            address = parsed[0]
             return " ".join(
                 [address[k] for k in address if k not in ("PlaceName", "StateName", "ZipCode")]
             )
-        except Exception as ex:
-            print(address)
-            print(ex)
-            raise
+        except Exception:
+            # Not logging exception since it could contain address
+            logger.warning("error normalizing address. bene_sk: %d", self.bene_sk)
 
     @override
     @staticmethod
