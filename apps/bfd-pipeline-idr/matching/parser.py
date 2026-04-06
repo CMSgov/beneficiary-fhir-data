@@ -169,7 +169,8 @@ def normalize_text(text: str) -> str:
     # Mask floating point periods to preserve them (e.g. 39.2)
     text = re.sub(r"(\d)\.(\d)", r"\1_DOT_\2", text)
 
-    # Remove specific punctuation: *, ., (, ), ", :, ;, ', &, @
+    # Remove unnecessary punctuation
+    # Preserve commas since they reduce ambiguity in address components
     text = re.sub(r'[*.()":;\'&@]', "", text)
 
     # Restore floating point periods
