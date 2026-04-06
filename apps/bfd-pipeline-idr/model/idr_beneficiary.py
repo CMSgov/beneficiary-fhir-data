@@ -158,6 +158,7 @@ class IdrBeneficiary(IdrBaseModel):
         except Exception:
             # Not logging exception since it could contain address
             logger.warning("error normalizing address. bene_sk: %d", self.bene_sk)
+            return ""
 
     @override
     @staticmethod
