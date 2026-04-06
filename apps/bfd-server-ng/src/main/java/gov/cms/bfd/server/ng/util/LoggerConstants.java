@@ -14,8 +14,11 @@ public class LoggerConstants {
   /** Log key prefix for patient match audit logging. */
   public static final String AUDIT_PREFIX = "audit.";
 
+  /** Name of the logType log key. */
+  public static final String LOG_TYPE = "logType";
+
   /** Name of message for logging bene_sk. */
-  public static final String BENE_SK_REQUESTED = "bene_sk Requested";
+  public static final String BENE_SK_FOUND = "bene_sk found";
 
   /** Name of the URI key for logging. */
   public static final String URI_KEY = "uri";
