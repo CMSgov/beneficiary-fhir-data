@@ -1,3 +1,4 @@
+import logging
 import re
 import string
 from datetime import date, datetime
@@ -31,6 +32,8 @@ from model.base_model import (
     transform_null_date_to_max,
     transform_null_date_to_min,
 )
+
+logger = logging.getLogger(__name__)
 
 
 def _normalize_str(s: str) -> str:
@@ -143,7 +146,11 @@ class IdrBeneficiary(IdrBaseModel):
             f"{self.geo_usps_state_cd} "
             f"{self.geo_zip5_cd}"
         ).replace("\n", " ")
-        normalized = usaddress.tag(normalized)  # type: ignore
+        try:
+            normalized = usaddress.tag(normalized)  # type: ignore
+        except Exception:
+            # Not logging exception since it could contain address
+            logger.warning("error normalizing address. bene_sk: %d", self.bene_sk)
         if not normalized:
             return ""
         address = normalized[0]
