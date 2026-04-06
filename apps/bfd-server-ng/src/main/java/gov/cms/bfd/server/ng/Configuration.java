@@ -1,13 +1,18 @@
 package gov.cms.bfd.server.ng;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
+import gov.cms.bfd.server.ng.log.AuditLogger;
+import gov.cms.bfd.server.ng.log.DynamoDbAuditLogger;
+import gov.cms.bfd.server.ng.log.LogStreamAuditLogger;
 import gov.cms.bfd.sharedutils.config.AwsClientConfig;
 import gov.cms.bfd.sharedutils.database.AwsWrapperDataSourceFactory;
 import gov.cms.bfd.sharedutils.database.DataSourceFactory;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
 import gov.cms.bfd.sharedutils.database.HikariDataSourceFactory;
 import java.io.Serializable;
+import java.net.URI;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
@@ -22,8 +27,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.jdbc.JdbcConnectionDetails;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.providers.AwsRegionProvider;
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 
 /** Root configuration class. */
 @Data
@@ -50,6 +58,7 @@ public class Configuration implements Serializable {
   private JdbcConnectionDetails jdbcConnectionDetails;
 
   private static final String BFD_ENV_LOCAL = "local";
+  private String dynamoLocalUrl = "http://localhost:8000";
 
   // Default to local configuration, this should be overridden on deployment with the correct
   // environment.
@@ -89,16 +98,79 @@ public class Configuration implements Serializable {
    * @return wrapper factory.
    */
   public DataSourceFactory getDataSourceFactory() {
-    if (useRds()) {
+    if (isLocal()) {
+      return new HikariDataSourceFactory(getDatabaseOptions());
+    } else {
       var awsConfig = getRdsClientConfig();
       return new AwsWrapperDataSourceFactory(getDatabaseOptions(), awsConfig);
-    } else {
-      return new HikariDataSourceFactory(getDatabaseOptions());
     }
   }
 
-  boolean useRds() {
-    return !env.equalsIgnoreCase(BFD_ENV_LOCAL);
+  /**
+   * Creates a new {@link AuditLogger}. If {@link AuditLoggerType} is DYNAMO_DB both loggers will be
+   * used.
+   *
+   * @param objectMapper used for serializing patient audit records
+   * @return audit logger
+   */
+  public AuditLogger getAuditLogger(ObjectMapper objectMapper) {
+    var logStreamLogger = new LogStreamAuditLogger(objectMapper);
+    if (getAuditLoggerType() == AuditLoggerType.DYNAMO_DB) {
+      var dynamoLogger =
+          new DynamoDbAuditLogger(
+              getDynamoDbClient(), objectMapper, getPatientMatchAuditTableName());
+
+      return auditRecord -> {
+        logStreamLogger.log(auditRecord);
+        dynamoLogger.log(auditRecord);
+      };
+    }
+    return logStreamLogger;
+  }
+
+  boolean isLocal() {
+    return env.equalsIgnoreCase(BFD_ENV_LOCAL);
+  }
+
+  /** Represents possible types of audit logging. */
+  public enum AuditLoggerType {
+    /** Use DYNAMO_DB for audit logging. */
+    DYNAMO_DB,
+    /** Use standard log stream for audit logging. */
+    LOG_STREAM
+  }
+
+  /**
+   * Returns the {@link AuditLoggerType} to use based on the current environment.
+   *
+   * @return the audit logger type
+   */
+  public AuditLoggerType getAuditLoggerType() {
+    return isLocal() ? AuditLoggerType.LOG_STREAM : AuditLoggerType.DYNAMO_DB;
+  }
+
+  /**
+   * Creates a new {@link DynamoDbClient}.
+   *
+   * @return a configured {@link DynamoDbClient} instance
+   */
+  public DynamoDbClient getDynamoDbClient() {
+    var region = regionProvider.getRegion();
+
+    if (isLocal()) {
+      return DynamoDbClient.builder()
+          .endpointOverride(URI.create(dynamoLocalUrl))
+          .region(region)
+          .credentialsProvider(
+              StaticCredentialsProvider.create(AwsBasicCredentials.create("dummy", "dummy")))
+          .build();
+    }
+
+    return DynamoDbClient.builder().region(region).credentialsProvider(credentialsProvider).build();
+  }
+
+  protected String getPatientMatchAuditTableName() {
+    return String.format("bfd-%s-patient-match-audit", env);
   }
 
   private Map<String, String> getClientCertsToAliasesInternal() {
@@ -117,9 +189,9 @@ public class Configuration implements Serializable {
   }
 
   private DatabaseOptions.DataSourceType getDataSourceType() {
-    return useRds()
-        ? DatabaseOptions.DataSourceType.AWS_WRAPPER
-        : DatabaseOptions.DataSourceType.HIKARI;
+    return isLocal()
+        ? DatabaseOptions.DataSourceType.HIKARI
+        : DatabaseOptions.DataSourceType.AWS_WRAPPER;
   }
 
   private AwsClientConfig getRdsClientConfig() {

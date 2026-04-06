@@ -4,6 +4,7 @@ locals {
   events_version            = coalesce(var.consume_idr_events_version_override, local.bfd_version)
   events_lambda_name        = "consume-idr-events"
   events_lambda_full_name   = "${local.name_prefix}-${local.events_lambda_name}"
+  events_lambda_timeout     = aws_lambda_function.run_idr.timeout * 2
 }
 
 data "aws_ecr_image" "events" {
@@ -66,7 +67,7 @@ resource "aws_lambda_function" "events" {
   package_type     = "Image"
 
   memory_size = 128
-  timeout     = 60
+  timeout     = local.events_lambda_timeout
 
   logging_config {
     log_format = "Text"
@@ -75,8 +76,9 @@ resource "aws_lambda_function" "events" {
 
   environment {
     variables = {
-      BFD_ENVIRONMENT = local.env
-      DB_ENDPOINT     = data.aws_rds_cluster.main.endpoint
+      BFD_ENVIRONMENT              = local.env
+      DB_ENDPOINT                  = data.aws_rds_cluster.main.endpoint
+      RUN_IDR_PIPELINE_LAMBDA_NAME = aws_lambda_function.run_idr.function_name
     }
   }
 
