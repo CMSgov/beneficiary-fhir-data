@@ -3,6 +3,7 @@ import string
 from datetime import date, datetime
 from typing import Annotated, override
 
+import usaddress
 from pydantic import BeforeValidator, computed_field
 from unidecode import unidecode
 
@@ -124,7 +125,14 @@ class IdrBeneficiary(IdrBaseModel):
     @computed_field
     @property
     def bfd_normalized_address(self) -> str:
-        return normalize_address(
+        # Ignore empty or unknown addresses
+        if (
+            not _normalize_str(self.bene_line_1_adr)
+            or self.bene_line_1_adr.startswith("UNKNOWN")
+            or self.bene_line_1_adr in ("UNK ADDRESS", "UNK", "UNKNOW")
+        ):
+            return ""
+        normalized = normalize_address(
             f"{self.bene_line_1_adr} "
             f"{self.bene_line_2_adr} "
             f"{self.bene_line_3_adr} "
@@ -135,6 +143,14 @@ class IdrBeneficiary(IdrBaseModel):
             f"{self.geo_usps_state_cd} "
             f"{self.geo_zip5_cd}"
         ).replace("\n", " ")
+        normalized = usaddress.tag(normalized)
+        if not normalized:
+            return ""
+        address = normalized[0]
+
+        return " ".join(
+            [address[k] for k in address if k not in ("PlaceName", "StateName", "ZipCode")]
+        )
 
     @override
     @staticmethod
