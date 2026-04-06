@@ -4,14 +4,17 @@ import re
 from datetime import datetime
 from typing import Any
 
+import boto3
 import psycopg
 from aws_lambda_powertools import Logger
 from aws_lambda_powertools.utilities import parameters
 from aws_lambda_powertools.utilities.data_classes import SQSEvent
 from aws_lambda_powertools.utilities.typing import LambdaContext
+from botocore.config import Config
 from psycopg import sql
 from pydantic.main import BaseModel
 
+REGION = os.environ.get("AWS_CURRENT_REGION", default="us-east-1")
 BFD_ENVIRONMENT = os.environ.get("BFD_ENVIRONMENT", "")
 DB_ENDPOINT = os.environ.get("DB_ENDPOINT") or os.environ.get("PGHOST", default="")
 DB_PORT = int(os.environ.get("DB_PORT") or os.environ.get("PGPORT", default="5432"))
@@ -19,8 +22,20 @@ DB_USERNAME = os.environ.get("DB_USERNAME") or os.environ.get("PGUSER")
 DB_PASSWORD = os.environ.get("DB_PASSWORD") or os.environ.get("PGPASSWORD")
 DB_DATABASE = os.environ.get("DB_DATABASE") or os.environ.get("PGDATABASE", default="fhirdb")
 DB_SCHEMA = os.environ.get("DB_SCHEMA", default="idr")
+RUN_IDR_PIPELINE_LAMBDA_NAME = os.environ.get("RUN_IDR_PIPELINE_LAMBDA_NAME")
 
-IDR_LOAD_EVENTS_TABLE = "idr_load_events"
+BOTO_CONFIG = Config(
+    region_name=REGION,
+    # Instructs boto3 to retry upto 10 times using an exponential backoff
+    retries={
+        "total_max_attempts": 10,
+        "mode": "adaptive",
+    },
+    # Double the read timeout for some extra safety when synchronously invoking the run-idr-pipeline
+    # Lambda
+    read_timeout=120,
+)
+SOURCE_LOAD_EVENTS_TABLE = "source_load_events"
 
 logger = Logger()
 
@@ -30,6 +45,11 @@ class IdrLoadEventModel(BaseModel):
     job_name: str
     job_message: str
     event_time: datetime
+
+
+class RunIdrPipelineResultModel(BaseModel):
+    result_type: str
+    details: dict[str, Any]
 
 
 def insert_event(event: IdrLoadEventModel) -> None:
@@ -53,7 +73,7 @@ def insert_event(event: IdrLoadEventModel) -> None:
 
         event_dict = event.model_dump()
         query_template = t"""
-            INSERT INTO {DB_SCHEMA:i}.{IDR_LOAD_EVENTS_TABLE:i} (
+            INSERT INTO {DB_SCHEMA:i}.{SOURCE_LOAD_EVENTS_TABLE:i} (
                 {sql.SQL(", ").join(sql.Identifier(k) for k in event_dict):q}
             )
             VALUES (
@@ -66,14 +86,14 @@ def insert_event(event: IdrLoadEventModel) -> None:
         )
         curs.execute(query_template)
         logger.info(
-            "Inserted '%s' into %s successfully", event.model_dump_json(), IDR_LOAD_EVENTS_TABLE
+            "Inserted '%s' into %s successfully", event.model_dump_json(), SOURCE_LOAD_EVENTS_TABLE
         )
 
 
 @logger.inject_lambda_context(clear_state=True, log_event=True)
 def handler(event: dict[str, Any], context: LambdaContext) -> None:  # noqa: ARG001
     try:
-        if not all([BFD_ENVIRONMENT, DB_ENDPOINT]):
+        if not BFD_ENVIRONMENT or not DB_ENDPOINT or not RUN_IDR_PIPELINE_LAMBDA_NAME:
             raise RuntimeError("Not all necessary environment variables were defined")
 
         sqs_event = SQSEvent(event)
@@ -96,7 +116,22 @@ def handler(event: dict[str, Any], context: LambdaContext) -> None:  # noqa: ARG
             )
             insert_event(idr_load_event)
 
-    # TODO: Trigger idr-pipeline after inserting events
+        logger.info(
+            "Invoking the %s Lambda to start the IDR Pipeline if it is not already running...",
+            RUN_IDR_PIPELINE_LAMBDA_NAME,
+        )
+        lambda_client = boto3.client("lambda", config=BOTO_CONFIG)
+        response = lambda_client.invoke(
+            FunctionName=RUN_IDR_PIPELINE_LAMBDA_NAME,
+            InvocationType="RequestResponse",
+            Payload=json.dumps({"reschedule": True}),
+        )
+        lambda_result = RunIdrPipelineResultModel.model_validate_json(response["Payload"].read())
+        logger.info(
+            "Successfully invoked the %s Lambda. See next log for result",
+            RUN_IDR_PIPELINE_LAMBDA_NAME,
+        )
+        logger.info(lambda_result.model_dump())
     except Exception:
         logger.exception("Unrecoverable exception raised")
         raise

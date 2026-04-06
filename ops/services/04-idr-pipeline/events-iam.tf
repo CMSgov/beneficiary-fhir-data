@@ -79,6 +79,23 @@ resource "aws_iam_policy" "events_sqs" {
   policy      = data.aws_iam_policy_document.events_sqs.json
 }
 
+data "aws_iam_policy_document" "events_lambda" {
+  statement {
+    sid       = "AllowInvokeRunIdrPipelineLambda"
+    actions   = ["lambda:InvokeFunction"]
+    resources = [aws_lambda_function.run_idr.arn]
+  }
+}
+
+resource "aws_iam_policy" "events_lambda" {
+  name = "${local.events_lambda_full_name}-lambda-policy"
+  path = local.iam_path
+  description = join("", [
+    "Grants permission for the ${local.events_lambda_full_name} to invoke the ",
+    "${aws_lambda_function.run_idr.function_name} Lambda"
+  ])
+  policy = data.aws_iam_policy_document.events_lambda.json
+}
 
 resource "aws_iam_role" "events" {
   name                  = local.events_lambda_full_name
@@ -91,11 +108,12 @@ resource "aws_iam_role" "events" {
 
 resource "aws_iam_role_policy_attachment" "events" {
   for_each = {
-    logs = aws_iam_policy.events_logs.arn
-    ssm  = aws_iam_policy.events_ssm.arn
-    kms  = aws_iam_policy.events_kms.arn
-    sqs  = aws_iam_policy.events_sqs.arn
-    vpc  = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+    logs   = aws_iam_policy.events_logs.arn
+    ssm    = aws_iam_policy.events_ssm.arn
+    kms    = aws_iam_policy.events_kms.arn
+    sqs    = aws_iam_policy.events_sqs.arn
+    lambda = aws_iam_policy.events_lambda.arn
+    vpc    = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
   }
 
   role       = aws_iam_role.events.name
