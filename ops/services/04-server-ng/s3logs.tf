@@ -79,6 +79,7 @@ resource "aws_kinesis_firehose_delivery_stream" "s3logs" {
               for k, v in {
                 level      = "(.[\"log.level\"] // \"unknown\")"
                 cert_alias = "(.[\"mdc.certificateAlias\"] // \"unknown\")"
+                resource   = "(.resource // \"unknown\")"
               } : "${k}:${v}"
             ]
           ))}}"
@@ -113,6 +114,7 @@ resource "aws_kinesis_firehose_delivery_stream" "s3logs" {
         ["hour", { filter = "timestamp", value = "hh" }],
         ["level", { filter = "partitionKeyFromQuery", value = "level" }],
         ["cert_alias", { filter = "partitionKeyFromQuery", value = "cert_alias" }],
+        ["resource", { filter = "partitionKeyFromQuery", value = "resource" }]
       ] : "${tupl[0]}=!{${tupl[1].filter}:${tupl[1].value}}"
     ])}/"
   }
