@@ -455,10 +455,12 @@ jobs:
         bfd-platform-server-regression,
         bfd-platform-mount-certstores,
         bfd-platform-server-fluent-bit,
+        bfd-platform-idr-pipeline,
         bfd-platform-run-locust,
         bfd-platform-eft-sftp-outbound-transfer-lambda,
         bfd-platform-pipeline-ccw-manifests-verifier-lambda,
         bfd-platform-pipeline-ccw-runner,
+        bfd-platform-consume-idr-events,
         bfd-platform-codebuild-runner
       baseImagesVersion: ${{ needs.compute-version-strings.outputs.bfd_release }}
       cleanupImageArtifacts: false # We'll cleanup at the end of build-release, so don't do anything

@@ -1,30 +1,18 @@
 [project]
-name = "bfd-pipeline-idr"
+name = "consume-idr-events"
 version = "0.1.0"
-description = "Add your description here"
+description = "Lambda to consume IDR load events from the IDR Events SQS Queue into the v3 DB"
 readme = "README.md"
-requires-python = ">=3.14"
+requires-python = "~=3.14.0"
 dependencies = [
-    "cryptography>=45.0.6",
-    "psycopg[binary,pool]>=3.2.13",
-    "pydantic>=2.12.4",
-    "snowflake-connector-python>=4.1.0",
-    "sf-hamilton>=1.89.0",
-    "python-dateutil>=2.9.0",
+    "boto3>=1.42.56",
+    "aws-lambda-powertools>=3.25.0",
+    "psycopg[binary]>=3.2.10",
+    "pydantic>=2.12.2",
 ]
 
 [dependency-groups]
-dev = [
-    "ruff>=0.14.6",
-    "uv>=0.9.11",
-    "pytest>=9.0.1",
-    "testcontainers>=4.13.3",
-    "pyright>=1.1.407",
-]
-
-# [[tool.mypy.overrides]]
-# module = ["testcontainers.*"]
-# follow_untyped_imports = true
+dev = ["ruff>=0.14.6", "uv>=0.9.11", "pyright>=1.1.407"]
 
 [tool.ruff]
 # Set the maximum line length to 100.
@@ -62,6 +50,7 @@ select = [
     "FURB",
     "RUF",
 ]
+
 # Don't require docstrings
 ignore = ["D100", "D101", "D102", "D103", "D104", "D105", "D107"]
 
@@ -77,3 +66,11 @@ docstring-code-format = true
 typeCheckingMode = "strict"
 venvPath = "."
 venv = ".venv"
+reportMissingTypeStubs = "none"
+# Usage of _some_ of Powertools for AWS Lambda necessitates disabling some of Pyright's strict mode
+# features, sadly. The Powertools team seems to be aware of this incompatibility, but it seems
+# unlikely that any improvements will be made.
+reportUnknownMemberType = false
+reportUnknownVariableType = false
+reportUnknownArgumentType = false
+reportUnknownParameterType = false
