@@ -4,7 +4,6 @@ import string
 from datetime import date, datetime
 from typing import Annotated, override
 
-import usaddress
 from pydantic import BeforeValidator, computed_field
 from unidecode import unidecode
 
