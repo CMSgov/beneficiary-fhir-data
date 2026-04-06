@@ -63,7 +63,7 @@ _IDR_TABLES = getenv("IDR_TABLES", None)
 TABLES_TO_LOAD = {t.strip().lower() for t in _IDR_TABLES.split(",")} if _IDR_TABLES else None
 """List of tables to include - any table not included will be skipped.
 Useful if you only want to load a subset of data and don't want to wait
-for the other tables to load. Takes precedence over idr_load_events in incremental mode."""
+for the other tables to load. Takes precedence over source_load_events table in incremental mode."""
 
 INCREMENTAL_IDR_JOB_GRACE_PERIOD = timedelta(
     hours=int(getenv("INCREMENTAL_IDR_JOB_GRACE_PERIOD_HRS", default="24"))

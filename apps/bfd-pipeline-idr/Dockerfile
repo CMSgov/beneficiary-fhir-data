@@ -50,8 +50,5 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 # Place executables in the environment at the front of the path
 ENV PATH="/app/.venv/bin:$PATH"
 
-# Set the entrypoint to allow for command-line modesetting
-ENTRYPOINT ["uv", "run", "--no-sync", "pipeline.py"]
-
 # Run the pipeline in IDR mode by default
-CMD []
+CMD ["uv", "run", "--no-sync", "pipeline.py"]

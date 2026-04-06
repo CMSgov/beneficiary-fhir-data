@@ -33,6 +33,7 @@ locals {
     "bfd-platform-run-locust",
     "bfd-platform-pipeline-ccw-runner",
     "bfd-platform-consume-idr-events",
+    "bfd-platform-run-idr-pipeline",
     "bfd-platform-synthea-generation",
     # base container image repositories
     "bfd-platform-base-python",
