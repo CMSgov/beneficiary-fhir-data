@@ -41,6 +41,9 @@ public abstract class ClaimBase {
   @Column(name = "clm_finl_actn_ind")
   private ClaimFinalAction finalAction;
 
+  @Column(name = "clm_ltst_clm_ind")
+  private ClaimLatestClaim latestClaim;
+
   @Column(name = "clm_adjstmt_type_cd")
   private Optional<ClaimAdjustmentTypeCode> claimAdjustmentTypeCode;
 

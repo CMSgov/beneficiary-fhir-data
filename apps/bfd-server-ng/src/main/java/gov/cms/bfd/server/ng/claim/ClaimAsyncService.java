@@ -37,6 +37,7 @@ public class ClaimAsyncService {
             %s
             WHERE c.claimUniqueId = :claimUniqueId
             AND b.latestTransactionFlag = 'Y'
+            AND ( c.latestClaim = 'Y' OR c.claimTypeCode IN ( 1, 2, 3, 4 ) )
             %s
             """,
             baseQuery, filters.filterClause());

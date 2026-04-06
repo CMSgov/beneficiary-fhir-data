@@ -1,6 +1,7 @@
 import logging
 import time
 from datetime import UTC, datetime, timedelta
+from typing import Optional
 
 from snowflake.connector import ProgrammingError
 from snowflake.connector.errors import ForbiddenError
@@ -11,6 +12,7 @@ from extractor import PostgresExtractor, SnowflakeExtractor
 from load_partition import LoadPartition
 from loader import LoadType, PostgresLoader
 from model.base_model import (
+    IdrBaseModel,
     LoadMode,
     T,
 )
@@ -97,3 +99,50 @@ def extract_and_load(
         except Exception as ex:
             logger.error("error loading %s", cls.table(), exc_info=ex)
             raise ex
+
+def purge_non_latest_claims(
+    cls: type[IdrBaseModel],
+    load_mode: LoadMode,
+    job_start: datetime,
+    load_type: LoadType,
+    parent_child_tables: dict[type[IdrBaseModel], type[IdrBaseModel] | None],
+    partition: LoadPartition = DEFAULT_PARTITION
+) -> bool:
+    parent_table: type[IdrBaseModel] = cls
+    child_table: type[IdrBaseModel] | None = parent_child_tables[cls]
+    loader = PostgresLoader(load_mode)
+
+    claim_range_filter = '1 = 1' if partition.start_date is None else f'AND p.clm_frm_dt BETWEEN {partition.start_date.strftime('%Y-%m-%d')} AND {partition.start_date.strftime('%Y-%m-%d')}'
+    claim_type_code_filter = f'p.clm_type_cd IN ( {",".join([str(c) for c in partition.claim_type_codes])} )'
+
+    if (child_table):
+        childSQL = f"""
+            DELETE FROM %(child_table)s AS c
+            WHERE EXISTS
+                (   SELECT NULL
+                    FROM %(parent_table)s AS p 
+                    WHERE p.clm_uniq_id = c.clm_uniq_id
+                        AND p.clm_ltst_clm_ind  = 'N' 
+                        AND p.clm_type_cd NOT IN ( 1, 2, 3, 4 )
+                        AND {claim_range_filter}
+                        AND {claim_type_code_filter}
+                )
+        """
+        try:
+            loader.run_sql(childSQL, {"parent_table" : parent_table.table(), "child_table" : child_table.table()})
+        except Exception:
+            return False
+
+    parentSQL = f"""
+        DELETE FROM %(parent_table)s AS p
+        WHERE p.clm_ltst_clm_ind  = 'N' 
+	        AND p.clm_type_cd NOT IN ( 1, 2, 3, 4 )
+            AND {claim_range_filter}
+            AND {claim_type_code_filter}
+    """
+    try:
+        loader.run_sql(parentSQL, {"parent_table" : parent_table.table()})
+        return True
+    except Exception:
+        return False
+    
