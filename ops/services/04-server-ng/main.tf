@@ -44,3 +44,14 @@ locals {
   green_state = "green"
   blue_state  = "blue"
 }
+
+data "aws_iam_policy_document" "service_assume_role" {
+  for_each = toset(["ecs-tasks", "ecs", "firehose"])
+  statement {
+    actions = ["sts:AssumeRole"]
+    principals {
+      type        = "Service"
+      identifiers = ["${each.value}.amazonaws.com"]
+    }
+  }
+}
