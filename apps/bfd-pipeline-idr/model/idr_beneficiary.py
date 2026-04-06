@@ -143,7 +143,7 @@ class IdrBeneficiary(IdrBaseModel):
             f"{self.geo_usps_state_cd} "
             f"{self.geo_zip5_cd}"
         ).replace("\n", " ")
-        normalized = usaddress.tag(normalized)
+        normalized = usaddress.tag(normalized)  # type: ignore
         if not normalized:
             return ""
         address = normalized[0]
