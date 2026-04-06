@@ -1,6 +1,8 @@
 package gov.cms.bfd.server.ng;
 
 import ca.uhn.fhir.rest.server.RestfulServer;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import gov.cms.bfd.server.ng.log.AuditLogger;
 import io.micrometer.common.annotation.ValueResolver;
 import io.micrometer.core.aop.MeterTagAnnotationHandler;
 import io.micrometer.core.aop.TimedAspect;
@@ -15,6 +17,7 @@ import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 
 /** BFD Server startup class. */
 @ServletComponentScan(basePackageClasses = {RestfulServer.class})
@@ -77,5 +80,28 @@ public class Application {
     timedAspect.setMeterTagAnnotationHandler(
         new MeterTagAnnotationHandler(aClass -> valueResolver, aClass -> valueExpressionResolver));
     return timedAspect;
+  }
+
+  /**
+   * Creates the audit logger(s).
+   *
+   * @param configuration app configuration
+   * @param objectMapper object mapper
+   * @return audit logger
+   */
+  @Bean
+  public AuditLogger auditLogger(Configuration configuration, ObjectMapper objectMapper) {
+    return configuration.getAuditLogger(objectMapper);
+  }
+
+  /**
+   * Creates the DynamoDbClient.
+   *
+   * @param configuration app configuration
+   * @return DynamoDbClient
+   */
+  @Bean
+  public DynamoDbClient dynamoDbClient(Configuration configuration) {
+    return configuration.getDynamoDbClient();
   }
 }

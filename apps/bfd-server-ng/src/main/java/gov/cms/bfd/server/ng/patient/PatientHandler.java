@@ -1,17 +1,21 @@
 package gov.cms.bfd.server.ng.patient;
 
+import static gov.cms.bfd.server.ng.util.LoggerConstants.*;
+
 import gov.cms.bfd.server.ng.beneficiary.BeneficiaryRepository;
 import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
 import gov.cms.bfd.server.ng.beneficiary.model.OrganizationFactory;
 import gov.cms.bfd.server.ng.beneficiary.model.PatientMatch;
+import gov.cms.bfd.server.ng.beneficiary.model.PatientMatchAuditRecord;
 import gov.cms.bfd.server.ng.coverage.CoverageRepository;
 import gov.cms.bfd.server.ng.input.CoverageCompositeId;
 import gov.cms.bfd.server.ng.input.CoveragePart;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.loadprogress.LoadProgressRepository;
+import gov.cms.bfd.server.ng.log.AuditLogger;
 import gov.cms.bfd.server.ng.model.ProfileType;
-import gov.cms.bfd.server.ng.util.FhirUtil;
-import gov.cms.bfd.server.ng.util.SystemUrls;
+import gov.cms.bfd.server.ng.util.*;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -27,6 +31,7 @@ import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 
 /**
@@ -38,8 +43,8 @@ import org.springframework.stereotype.Component;
 public class PatientHandler {
   private final BeneficiaryRepository beneficiaryRepository;
   private final LoadProgressRepository loadProgressRepository;
-
   private final CoverageRepository coverageRepository;
+  private final AuditLogger auditLogger;
 
   /**
    * Returns a {@link Patient} by their {@link IdType}.
@@ -91,7 +96,21 @@ public class PatientHandler {
     if (patientMatch.isEmpty()) {
       return patientMatchBundle(Optional.empty());
     }
-    var beneficiary = beneficiaryRepository.searchPatientMatch(patientMatch.get());
+    var result = beneficiaryRepository.searchPatientMatch(patientMatch.get());
+    var beneficiary = result.matchedBeneficiary();
+    var clientIp = MDC.get(logKey(MDC_PREFIX, CLIENT_IP_KEY));
+    var clientName = MDC.get(logKey(MDC_PREFIX, CLIENT_NAME_KEY));
+    var clientId = MDC.get(logKey(MDC_PREFIX, CLIENT_ID_KEY));
+    var auditRecord =
+        new PatientMatchAuditRecord(
+            clientIp,
+            clientName,
+            clientId,
+            Instant.now(),
+            result.combinations(),
+            result.finalDetermination());
+    auditLogger.log(auditRecord);
+
     return patientMatchBundle(beneficiary);
   }
 

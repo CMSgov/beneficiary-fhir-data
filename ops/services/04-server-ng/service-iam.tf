@@ -90,6 +90,21 @@ resource "aws_iam_policy" "ssm_params" {
   policy      = data.aws_iam_policy_document.ssm_params.json
 }
 
+data "aws_iam_policy_document" "dynamodb" {
+  statement {
+    sid       = "AllowPatientMatchAuditAccess"
+    actions   = ["dynamodb:PutItem", "dynamodb:Query", "dynamodb:GetItem"]
+    resources = [aws_dynamodb_table.patient_match_audit_table.arn, "${aws_dynamodb_table.patient_match_audit_table.arn}/index/*"]
+  }
+}
+
+resource "aws_iam_policy" "dynamodb" {
+  name        = "${local.name_prefix}-dynamodb-policy"
+  path        = local.iam_path
+  description = "Permissions for the ${local.env} ${local.service} to write and query patient match audit logs in DynamoDb from the ${local.service} container"
+  policy      = data.aws_iam_policy_document.dynamodb.json
+}
+
 resource "aws_iam_role" "service_role" {
   name                  = "${local.name_prefix}-service-role"
   path                  = local.iam_path
@@ -105,6 +120,7 @@ resource "aws_iam_role_policy_attachment" "service_role" {
     rds        = aws_iam_policy.rds.arn
     logs       = aws_iam_policy.logs.arn
     ssm_params = aws_iam_policy.ssm_params.arn
+    dynamodb   = aws_iam_policy.dynamodb.arn
   }
 
   role       = aws_iam_role.service_role.name
