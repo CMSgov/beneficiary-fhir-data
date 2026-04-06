@@ -56,27 +56,31 @@ data "aws_ecr_image" "server" {
 }
 
 resource "aws_cloudwatch_log_group" "log_router_messages" {
-  name         = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/log_router/messages"
-  kms_key_id   = local.env_key_arn
-  skip_destroy = true
+  name              = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/log_router/messages"
+  kms_key_id        = local.env_key_arn
+  retention_in_days = local.ten_year_retention_days
+  skip_destroy      = true
 }
 
 resource "aws_cloudwatch_log_group" "service_connect_messages" {
-  name         = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/service-connect/messages"
-  kms_key_id   = local.env_key_arn
-  skip_destroy = true
+  name              = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/service-connect/messages"
+  kms_key_id        = local.env_key_arn
+  retention_in_days = local.ten_year_retention_days
+  skip_destroy      = true
 }
 
 resource "aws_cloudwatch_log_group" "server_messages" {
-  name         = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/${local.service}/messages"
-  kms_key_id   = local.env_key_arn
-  skip_destroy = true
+  name              = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/${local.service}/messages"
+  kms_key_id        = local.env_key_arn
+  retention_in_days = local.ten_year_retention_days
+  skip_destroy      = true
 }
 
 resource "aws_cloudwatch_log_group" "server_access" {
-  name         = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/${local.service}/access"
-  kms_key_id   = local.env_key_arn
-  skip_destroy = true
+  name              = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/${local.service}/access"
+  kms_key_id        = local.env_key_arn
+  retention_in_days = local.ten_year_retention_days
+  skip_destroy      = true
 }
 
 resource "aws_ecs_task_definition" "server" {

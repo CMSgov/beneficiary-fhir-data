@@ -46,6 +46,8 @@ locals {
 
   name_prefix = "bfd-${local.env}-${local.service}"
 
+  ten_year_retention_days = 3653 # 3653 is the closest accepted value to ten years of retention
+
   green_state = "green"
   blue_state  = "blue"
 }
