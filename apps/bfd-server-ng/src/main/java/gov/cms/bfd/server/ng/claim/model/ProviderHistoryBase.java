@@ -16,6 +16,9 @@ public abstract class ProviderHistoryBase {
   private Optional<String> providerNpiNumber;
   private Optional<String> providerName;
 
+  private static final String PRACTITIONER = "Practitioner";
+  private static final String ORGANIZATION = "Organization";
+
   /** Represents the enum NPI Type. */
   public enum NpiType {
     /** NPI belongs to an individual. */
@@ -26,14 +29,37 @@ public abstract class ProviderHistoryBase {
 
   protected abstract CareTeamType getCareTeamType();
 
+  protected ProviderHistoryBase.NpiType getNpiType() {
+    if (getProviderName().isEmpty()) {
+      return ProviderHistoryBase.NpiType.ORGANIZATION;
+    } else {
+      return ProviderHistoryBase.NpiType.INDIVIDUAL;
+    }
+  }
+
   Optional<ExplanationOfBenefit.CareTeamComponent> toFhirCareTeamComponent(Integer sequence) {
     if (providerNpiNumber.isEmpty()) {
       return Optional.empty();
     }
     var providerReference =
         ProviderFhirHelper.createProviderReference(providerNpiNumber.get(), providerName);
+    setCareTeamMemberReferenceType(providerReference);
 
     return getCareTeamComponent(sequence, providerReference);
+  }
+
+  /**
+   * Sets provider reference type for care team members based on the member's NPI type.
+   *
+   * @param providerReference the provider reference
+   */
+  protected void setCareTeamMemberReferenceType(Reference providerReference) {
+    var npiType = getNpiType();
+    if (npiType.equals(NpiType.INDIVIDUAL)) {
+      providerReference.setType(PRACTITIONER);
+    } else if (npiType.equals(NpiType.ORGANIZATION)) {
+      providerReference.setType(ORGANIZATION);
+    }
   }
 
   Optional<ExplanationOfBenefit.CareTeamComponent> getCareTeamComponent(

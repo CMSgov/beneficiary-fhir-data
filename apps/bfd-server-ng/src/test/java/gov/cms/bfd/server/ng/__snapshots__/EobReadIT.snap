@@ -516,7 +516,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
           } ]
         },
         "value" : "1437702123"
-      }
+      },
+      "type" : "Practitioner"
     },
     "role" : {
       "coding" : [ {
@@ -543,7 +544,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
           } ]
         },
         "value" : "1942945159"
-      }
+      },
+      "type" : "Practitioner"
     },
     "role" : {
       "coding" : [ {
@@ -570,7 +572,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
           } ]
         },
         "value" : "1558719914"
-      }
+      },
+      "type" : "Practitioner"
     },
     "role" : {
       "coding" : [ {
@@ -1879,7 +1882,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
           } ]
         },
         "value" : "1437702123"
-      }
+      },
+      "type" : "Practitioner"
     },
     "role" : {
       "coding" : [ {
@@ -1906,7 +1910,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
           } ]
         },
         "value" : "1942945159"
-      }
+      },
+      "type" : "Practitioner"
     },
     "role" : {
       "coding" : [ {
@@ -1933,7 +1938,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
           } ]
         },
         "value" : "1558719914"
-      }
+      },
+      "type" : "Practitioner"
     },
     "role" : {
       "coding" : [ {
@@ -2855,7 +2861,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
           } ]
         },
         "value" : "1558719914"
-      }
+      },
+      "type" : "Practitioner"
     },
     "role" : {
       "coding" : [ {
@@ -2882,7 +2889,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
           } ]
         },
         "value" : "1720749690"
-      }
+      },
+      "type" : "Practitioner"
     },
     "role" : {
       "coding" : [ {
@@ -3521,7 +3529,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
           } ]
         },
         "value" : "1558719914"
-      }
+      },
+      "type" : "Practitioner"
     },
     "qualification" : {
       "coding" : [ {
@@ -3557,7 +3566,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
           } ]
         },
         "value" : "1720749690"
-      }
+      },
+      "type" : "Practitioner"
     },
     "role" : {
       "coding" : [ {
@@ -4675,7 +4685,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
           } ]
         },
         "value" : "1437702123"
-      }
+      },
+      "type" : "Practitioner"
     },
     "role" : {
       "coding" : [ {
@@ -4702,7 +4713,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
           } ]
         },
         "value" : "1942945159"
-      }
+      },
+      "type" : "Practitioner"
     },
     "role" : {
       "coding" : [ {
@@ -4729,7 +4741,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
           } ]
         },
         "value" : "1558719914"
-      }
+      },
+      "type" : "Practitioner"
     },
     "role" : {
       "coding" : [ {
@@ -6248,7 +6261,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
           } ]
         },
         "value" : "1437702123"
-      }
+      },
+      "type" : "Practitioner"
     },
     "role" : {
       "coding" : [ {
@@ -6275,7 +6289,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
           } ]
         },
         "value" : "1942945159"
-      }
+      },
+      "type" : "Practitioner"
     },
     "role" : {
       "coding" : [ {
@@ -6302,7 +6317,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
           } ]
         },
         "value" : "1558719914"
-      }
+      },
+      "type" : "Practitioner"
     },
     "role" : {
       "coding" : [ {

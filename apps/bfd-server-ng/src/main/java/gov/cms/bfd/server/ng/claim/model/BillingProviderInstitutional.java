@@ -28,15 +28,9 @@ public class BillingProviderInstitutional extends ProviderHistoryBase {
   @Column(name = "clm_blg_prvdr_oscar_num")
   private Optional<String> providerOscarNumber;
 
-  /**
-   * Derives the NPI_TYPE based on the presence of the providerLegalName. NPI_TYPE = INDIVIDUAL
-   * means the NPI is for an individual (legal name is null/empty). NPI_TYPE = ORGANIZATION means
-   * the NPI is for an organization (legal name is present).
-   *
-   * @return the NPI type
-   */
+  @Override
   @Transient
-  public ProviderHistoryBase.NpiType getNpiType() {
+  protected ProviderHistoryBase.NpiType getNpiType() {
     if (providerFirstName.isEmpty()) {
       return ProviderHistoryBase.NpiType.ORGANIZATION;
     } else {
