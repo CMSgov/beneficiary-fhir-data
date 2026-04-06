@@ -2,16 +2,14 @@ package gov.cms.bfd.server.ng.beneficiary;
 
 import gov.cms.bfd.server.ng.DbFilterParam;
 import gov.cms.bfd.server.ng.beneficiary.filter.PatientMatchFilter;
-import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
-import gov.cms.bfd.server.ng.beneficiary.model.BeneficiaryBase;
-import gov.cms.bfd.server.ng.beneficiary.model.BeneficiaryIdentity;
-import gov.cms.bfd.server.ng.beneficiary.model.PatientMatch;
+import gov.cms.bfd.server.ng.beneficiary.model.*;
 import gov.cms.bfd.server.ng.claim.model.SystemType;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.util.LogUtil;
 import io.micrometer.core.annotation.Timed;
 import io.micrometer.core.aop.MeterTag;
 import jakarta.persistence.EntityManager;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
@@ -22,6 +20,8 @@ import org.springframework.stereotype.Repository;
 @AllArgsConstructor
 public class BeneficiaryRepository {
   private final EntityManager entityManager;
+
+  private static final String PATIENT_MATCH_TYPE = "exact";
 
   /**
    * Queries for current and historical MBIs and BENE_SKs, along with their start/end dates.
@@ -36,10 +36,10 @@ public class BeneficiaryRepository {
     return entityManager
         .createQuery(
             """
-            SELECT identity
-            FROM BeneficiaryIdentity identity
-            WHERE identity.id.xrefSk = :beneXrefSk
-            """,
+                    SELECT identity
+                    FROM BeneficiaryIdentity identity
+                    WHERE identity.id.xrefSk = :beneXrefSk
+                    """,
             BeneficiaryIdentity.class)
         .setParameter("beneXrefSk", beneXrefSk)
         .getResultList();
@@ -64,13 +64,13 @@ public class BeneficiaryRepository {
             .createQuery(
                 String.format(
                     """
-                    SELECT bene
-                    FROM Beneficiary bene
-                    WHERE bene.beneSk = :beneSk
-                      AND ((cast(:lowerBound AS ZonedDateTime)) IS NULL OR bene.patientMeta.updatedTimestamp %s :lowerBound)
-                      AND ((cast(:upperBound AS ZonedDateTime)) IS NULL OR bene.patientMeta.updatedTimestamp %s :upperBound)
-                    ORDER BY bene.obsoleteTimestamp DESC
-                    """,
+                                    SELECT bene
+                                    FROM Beneficiary bene
+                                    WHERE bene.beneSk = :beneSk
+                                      AND ((cast(:lowerBound AS ZonedDateTime)) IS NULL OR bene.patientMeta.updatedTimestamp %s :lowerBound)
+                                      AND ((cast(:upperBound AS ZonedDateTime)) IS NULL OR bene.patientMeta.updatedTimestamp %s :upperBound)
+                                    ORDER BY bene.obsoleteTimestamp DESC
+                                    """,
                     lastUpdatedRange.getLowerBoundSqlOperator(),
                     lastUpdatedRange.getUpperBoundSqlOperator()),
                 Beneficiary.class)
@@ -96,10 +96,10 @@ public class BeneficiaryRepository {
     return entityManager
         .createQuery(
             """
-              SELECT bene.xrefSk
-              FROM Beneficiary bene
-              WHERE bene.beneSk = :beneSk
-            """,
+                      SELECT bene.xrefSk
+                      FROM Beneficiary bene
+                      WHERE bene.beneSk = :beneSk
+                    """,
             Long.class)
         .setParameter("beneSk", beneSk)
         .getResultList()
@@ -118,10 +118,10 @@ public class BeneficiaryRepository {
     return entityManager
         .createQuery(
             """
-              SELECT bene.xrefSk
-              FROM Beneficiary bene
-              WHERE bene.identifier.mbi = :mbi
-            """,
+                      SELECT bene.xrefSk
+                      FROM Beneficiary bene
+                      WHERE bene.identifier.mbi = :mbi
+                    """,
             Long.class)
         .setParameter("mbi", mbi)
         .getResultList()
@@ -137,33 +137,44 @@ public class BeneficiaryRepository {
    * @return beneficiary, if found
    */
   @Timed(value = "application.beneficiary.patient_match")
-  public Optional<Beneficiary> searchPatientMatch(PatientMatch patientMatch) {
-    var scenarios = patientMatch.getValidScenarios();
-    for (var scenario : scenarios) {
+  public PatientMatchResult searchPatientMatch(PatientMatch patientMatch) {
+    var combinationResults = new ArrayList<MatchCombinationResult>();
+    for (var indexedScenario : patientMatch.getValidScenarios()) {
+      var combinationIndex = indexedScenario.combinationIndex();
+      var scenario = indexedScenario.entries();
       var filters = new PatientMatchFilter(scenario).getFilters("bene", SystemType.UNKNOWN);
 
       var query =
           entityManager.createQuery(
               String.format(
                   """
-                  SELECT bene
-                  FROM Beneficiary bene
-                  WHERE bene.latestTransactionFlag = 'Y'
-                  %s
-                  ORDER BY bene.obsoleteTimestamp DESC
-                  """,
+                              SELECT bene
+                              FROM Beneficiary bene
+                              WHERE bene.latestTransactionFlag = 'Y'
+                              %s
+                              ORDER BY bene.obsoleteTimestamp DESC
+                              """,
                   filters.filterClause()),
               Beneficiary.class);
       var benes =
           DbFilterParam.withParams(query, filters.params()).getResultList().stream().toList();
+      var matchedRecords =
+          benes.stream()
+              .map(b -> new MatchedRecord(b.getBeneSk(), b.getEffectiveTimestamp()))
+              .toList();
+      combinationResults.add(
+          new MatchCombinationResult(combinationIndex, PATIENT_MATCH_TYPE, matchedRecords));
       var uniqueXrefs = benes.stream().map(BeneficiaryBase::getXrefSk).distinct().toList();
-      if (uniqueXrefs.size() != 1) {
-        continue;
+
+      if (uniqueXrefs.size() == 1) {
+        var matchedBene = benes.getFirst();
+        LogUtil.logBeneSk(matchedBene.getBeneSk());
+        var finalDetermination =
+            new FinalDetermination(combinationIndex, matchedRecords.getFirst());
+        return new PatientMatchResult(
+            combinationResults, Optional.of(finalDetermination), Optional.of(matchedBene));
       }
-      var bene = benes.stream().findFirst();
-      bene.ifPresent(b -> LogUtil.logBeneSk(b.getBeneSk()));
-      return bene;
     }
-    return Optional.empty();
+    return new PatientMatchResult(combinationResults, Optional.empty(), Optional.empty());
   }
 }

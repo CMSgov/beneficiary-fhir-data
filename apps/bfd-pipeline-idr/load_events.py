@@ -47,7 +47,7 @@ from pydantic_utils import fields
 configure_logger()
 logger = logging.getLogger(__name__)
 
-LOAD_EVENTS_TABLE = "idr_load_events"
+LOAD_EVENTS_TABLE = "source_load_events"
 _PART_D_TABLES = {
     IdrClaimRx.table(),
 }

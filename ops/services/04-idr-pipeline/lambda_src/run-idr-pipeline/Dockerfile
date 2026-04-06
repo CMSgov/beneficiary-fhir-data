@@ -25,6 +25,6 @@ FROM lambda
 # Copy the runtime dependencies from the builder stage.
 COPY --from=builder ${LAMBDA_TASK_ROOT} ${LAMBDA_TASK_ROOT}
 # Copy the application code.
-COPY app ${LAMBDA_TASK_ROOT}/app
+COPY ./app ${LAMBDA_TASK_ROOT}/app
 CMD [ "app.main.handler" ]
 

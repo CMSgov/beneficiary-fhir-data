@@ -1,13 +1,18 @@
 [project]
-name = "consume-idr-events"
+name = "run-idr-pipeline"
 version = "0.1.0"
-description = "Lambda to consume IDR load events from the IDR Events SQS Queue into the v3 DB"
+description = "Lambda to consolidate running the IDR Pipeline Task"
 readme = "README.md"
 requires-python = "~=3.14.0"
-dependencies = ["boto3", "aws-lambda-powertools", "psycopg[binary]", "pydantic"]
+dependencies = [
+    "boto3",
+    "aws-lambda-powertools",
+    "pydantic",
+    "pydantic-settings"
+]
 
 [dependency-groups]
-dev = ["boto3-stubs[lambda]", "ruff", "uv", "pyright"]
+dev = ["boto3-stubs[ecs,scheduler]", "ruff", "uv", "pyright"]
 
 [tool.ruff]
 # Set the maximum line length to 100.

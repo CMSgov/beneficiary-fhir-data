@@ -1,7 +1,9 @@
 package gov.cms.bfd.server.ng.filter;
 
+import static gov.cms.bfd.server.ng.util.LoggerConstants.*;
+
+import com.google.common.base.Strings;
 import gov.cms.bfd.server.ng.util.CertificateUtil;
-import gov.cms.bfd.server.ng.util.LoggerConstants;
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -9,6 +11,7 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.MDC;
@@ -33,24 +36,41 @@ public class ExtractMetadataFilter implements Filter {
       ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
       throws IOException, ServletException {
 
-    if (servletRequest instanceof HttpServletRequest httpRequest) {
+    if (servletRequest instanceof HttpServletRequest httpRequest
+        && servletResponse instanceof HttpServletResponse httpResponse) {
       final var certAlias = certificateUtil.getAliasFromCert(httpRequest);
+      final var uri = httpRequest.getRequestURI();
+      var isPatientMatchRequest = uri != null && uri.contains("/Patient/$idi-match");
       if (certAlias.isPresent()) {
         certificateUtil.attachCertAliasToRequest(httpRequest, certAlias.get());
-        MDC.put(LoggerConstants.CERTIFICATE_ALIAS, certAlias.get());
+        MDC.put(logKey(MDC_PREFIX, CERTIFICATE_ALIAS), certAlias.get());
       }
 
-      MDC.put(LoggerConstants.URI_KEY, httpRequest.getRequestURI());
-      MDC.put(LoggerConstants.REQUEST_ID_KEY, httpRequest.getRequestId());
-      MDC.put(LoggerConstants.REMOTE_ADDRESS_KEY, httpRequest.getRemoteAddr());
+      var clientIp = httpRequest.getHeader(CLIENT_IP_HEADER);
+      var clientName = httpRequest.getHeader(CLIENT_NAME_HEADER);
+      var clientId = httpRequest.getHeader(CLIENT_ID_HEADER);
+
+      if (isPatientMatchRequest
+          && (Strings.isNullOrEmpty(clientIp)
+              || Strings.isNullOrEmpty(clientName)
+              || Strings.isNullOrEmpty(clientId))) {
+        httpResponse.sendError(
+            HttpServletResponse.SC_BAD_REQUEST,
+            "Missing Required Headers: X-CLIENT-IP, X-CLIENT-NAME, X-CLIENT-ID");
+        return;
+      }
+
+      MDC.put(logKey(MDC_PREFIX, URI_KEY), uri);
+      MDC.put(logKey(MDC_PREFIX, REQUEST_ID_KEY), httpRequest.getRequestId());
+      MDC.put(logKey(MDC_PREFIX, REMOTE_ADDRESS_KEY), httpRequest.getRemoteAddr());
+      MDC.put(logKey(MDC_PREFIX, CLIENT_IP_KEY), clientIp);
+      MDC.put(logKey(MDC_PREFIX, CLIENT_NAME_KEY), clientName);
+      MDC.put(logKey(MDC_PREFIX, CLIENT_ID_KEY), clientId);
     }
 
     filterChain.doFilter(servletRequest, servletResponse);
 
     // Clean up to prevent leaks
-    MDC.remove(LoggerConstants.CERTIFICATE_ALIAS);
-    MDC.remove(LoggerConstants.URI_KEY);
-    MDC.remove(LoggerConstants.REQUEST_ID_KEY);
-    MDC.remove(LoggerConstants.REMOTE_ADDRESS_KEY);
+    MDC.clear();
   }
 }

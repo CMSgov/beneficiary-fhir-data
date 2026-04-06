@@ -410,3 +410,33 @@ resource "aws_appautoscaling_policy" "server_track_cpu" {
     scale_out_cooldown = 60
   }
 }
+
+resource "aws_dynamodb_table" "patient_match_audit_table" {
+  name                        = "bfd-${local.env}-patient-match-audit"
+  billing_mode                = "PAY_PER_REQUEST"
+  hash_key                    = "matchedBeneSk"
+  range_key                   = "timestamp"
+  deletion_protection_enabled = local.env == "prod" ? true : false
+
+  server_side_encryption {
+    enabled     = true
+    kms_key_arn = local.env_key_arn
+  }
+
+  point_in_time_recovery {
+    enabled                 = true
+    recovery_period_in_days = 35
+  }
+
+  attribute {
+    name = "matchedBeneSk"
+    type = "N"
+  }
+
+  attribute {
+    name = "timestamp"
+    type = "S"
+  }
+
+  tags = local.default_tags
+}

@@ -1,5 +1,5 @@
 data "aws_iam_policy_document" "service_assume_role" {
-  for_each = toset(["ecs-tasks", "lambda"])
+  for_each = toset(["ecs-tasks", "lambda", "scheduler"])
   statement {
     actions = ["sts:AssumeRole"]
     principals {
@@ -134,6 +134,7 @@ data "aws_iam_policy_document" "idr_execution_ecr" {
     ]
     resources = [
       data.aws_ecr_repository.pipeline.arn,
+      data.aws_ecr_repository.idr_old.arn, # TODO: Remove this when "idr_old" resources are removed
       "arn:aws:ecr:us-east-1:593207742271:repository/aws-guardduty-agent-fargate",
       "arn:aws:ecr:us-west-2:733349766148:repository/aws-guardduty-agent-fargate"
     ]
@@ -162,6 +163,27 @@ resource "aws_iam_policy" "idr_execution_logs" {
   policy      = data.aws_iam_policy_document.idr_execution_logs.json
 }
 
+data "aws_iam_policy_document" "idr_execution_ssm_params" {
+  statement {
+    sid       = "AllowGetPipelineTaskSecretsFromSSM"
+    actions   = ["ssm:GetParameter", "ssm:GetParameters"]
+    resources = values(local.idr_task_ssm)
+  }
+
+  statement {
+    sid       = "AllowDecryptParametersWithEnvCMK"
+    actions   = ["kms:Decrypt"]
+    resources = [local.env_key_arn]
+  }
+}
+
+resource "aws_iam_policy" "idr_execution_ssm_params" {
+  name        = "${local.name_prefix}-execution-ssm-params-policy"
+  path        = local.iam_path
+  description = "Permissions for the ${local.env} ${local.service} ECS task executor to get required SSM parameeters"
+  policy      = data.aws_iam_policy_document.idr_execution_ssm_params.json
+}
+
 resource "aws_iam_role" "idr_execution" {
   name                  = "${local.name_prefix}-execution-role"
   path                  = local.iam_path
@@ -173,8 +195,9 @@ resource "aws_iam_role" "idr_execution" {
 
 resource "aws_iam_role_policy_attachment" "idr_execution" {
   for_each = {
-    ecr  = aws_iam_policy.idr_execution_ecr.arn
-    logs = aws_iam_policy.idr_execution_logs.arn
+    ecr        = aws_iam_policy.idr_execution_ecr.arn
+    logs       = aws_iam_policy.idr_execution_logs.arn
+    ssm_params = aws_iam_policy.idr_execution_ssm_params.arn
   }
 
   role       = aws_iam_role.idr_execution.name
