@@ -1,3 +1,4 @@
+import logging
 import re
 import string
 from datetime import date, datetime
@@ -30,6 +31,8 @@ from model.base_model import (
     transform_null_date_to_max,
     transform_null_date_to_min,
 )
+
+logger = logging.getLogger(__name__)
 
 
 def _normalize_str(s: str) -> str:
@@ -124,17 +127,30 @@ class IdrBeneficiary(IdrBaseModel):
     @computed_field
     @property
     def bfd_normalized_address(self) -> str:
-        return normalize_address(
-            f"{self.bene_line_1_adr} "
-            f"{self.bene_line_2_adr} "
-            f"{self.bene_line_3_adr} "
-            f"{self.bene_line_4_adr} "
-            f"{self.bene_line_5_adr} "
-            f"{self.bene_line_6_adr}, "
-            f"{self.geo_zip_plc_name} "
-            f"{self.geo_usps_state_cd} "
-            f"{self.geo_zip5_cd}"
-        ).replace("\n", " ")
+        # Ignore empty or unknown addresses
+        if (
+            not _normalize_str(self.bene_line_1_adr)
+            or self.bene_line_1_adr.startswith("UNKNOWN")
+            or self.bene_line_1_adr in ("UNK ADDRESS", "UNK", "UNKNOW")
+        ):
+            return ""
+
+        try:
+            return normalize_address(
+                f"{self.bene_line_1_adr} "
+                f"{self.bene_line_2_adr} "
+                f"{self.bene_line_3_adr} "
+                f"{self.bene_line_4_adr} "
+                f"{self.bene_line_5_adr} "
+                f"{self.bene_line_6_adr}, "
+                f"{self.geo_zip_plc_name}, "
+                f"{self.geo_usps_state_cd}, "
+                f"{self.geo_zip5_cd}"
+            ).replace("\n", " ")
+        except Exception:
+            # Not logging exception since it could contain address
+            logger.warning("error normalizing address. bene_sk: %d", self.bene_sk)
+            return ""
 
     @override
     @staticmethod

@@ -286,15 +286,12 @@ public class FhirInputConverter {
 
   private static Optional<Object> formatAddress(Address address) {
     var line = address.getLine().stream().findFirst().map(StringType::toString).orElse("");
-    var fullAddress =
-        Stream.of(line, address.getCity(), address.getState(), address.getPostalCode())
-            .map(FhirInputConverter::toUpperIfPresent)
-            .flatMap(Optional::stream)
-            .collect(Collectors.joining(" "));
-    if (StringUtils.isEmpty(fullAddress)) {
+    var fullAddress = FhirInputConverter.toUpperIfPresent(line);
+
+    if (StringUtils.isEmpty(fullAddress.orElse(""))) {
       return Optional.empty();
     }
-    return Optional.of(fullAddress);
+    return fullAddress.map(v -> v);
   }
 
   private static Optional<String> toUpperIfPresent(@Nullable String value) {
