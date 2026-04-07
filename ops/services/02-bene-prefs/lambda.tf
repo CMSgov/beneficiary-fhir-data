@@ -1,5 +1,5 @@
 locals {
-  participating_partners = ["bcda", "ab2d"]
+  participating_partners = ["bcda", "ab2d", "dpc"]
 
   lambda_full_name   = "${local.name_prefix}-function"
   lambda_source_path = "${path.module}/lambda_src/bene_prefs"
