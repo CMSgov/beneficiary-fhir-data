@@ -1,4 +1,5 @@
 [project]
+requires-python = "==3.13.*"
 name = "locust-tests"
 version = "1.0.0"
 dependencies = [
@@ -13,20 +14,21 @@ dependencies = [
   "jinja2>=3.1.6",
   "idna>=3.7",
   "certifi>=2025.4.26",
-  "psycopg[binary,pool]",
+  "psycopg[binary,pool]>=3.2.9",
 ]
 
 [dependency-groups]
 dev = [
-  "ruff>=0.11.11",
   "types-boto3[essential,ssm]>=1.38.19",
   "types-gevent>=25.4.0.20250516",
-  "uv>=0.7.8",
-  "pyright>=1.1.403",
 ]
 # Install this dependency group (via uv [sync|run] --group lambda-run-locust) when working on the
 # run-locust Lambda
 lambda-run-locust = ["aws-lambda-powertools[all]>=3.8.0"]
+
+# Inherits tool configurations from 
+# ../../pyproject.toml (apps workspace) and 
+# ../../../pyproject.toml (root)
 
 [tool.locust]
 # Specify locust test parameters here or on the command line
@@ -46,11 +48,13 @@ lambda-run-locust = ["aws-lambda-powertools[all]>=3.8.0"]
 # stats-store-tag = some_tag2
 # stats-compare-previous = true
 
-[tool.black]
-# Compromise between Black's default of 88 and wasting horizontal screen space.
-# According to Black's style guide, line lengths greater than 100 cause issues
-# for individuals with poor sight. So, 100 seems like the best bet here.
-line-length = 100
-
-[tool.isort]
-profile = "isort"
+[tool.pyright]
+# Project-specific pyright overrides for locust_tests
+reportUnknownMemberType = false
+reportUnknownVariableType = false
+reportUnknownArgumentType = false
+reportUnknownParameterType = false
+reportMissingTypeArgument = false
+reportMissingParameterType = false
+reportConstantRedefinition = false
+reportMissingTypeStubs = false

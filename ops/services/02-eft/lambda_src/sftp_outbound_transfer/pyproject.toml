@@ -1,17 +1,17 @@
 [project]
 name = "sftp-outbound-transfer"
 version = "1.0.0"
-dependencies = ["aws-lambda-powertools[all]", "paramiko", "boto3", "pydantic"]
+requires-python = "==3.13.*"
+dependencies = ["aws-lambda-powertools[all]", "paramiko", "boto3"]
 
 # Part of apps workspace inherits from ../../../../../apps/pyproject.toml
 # Per-file ignores defined in apps/pyproject.toml
 
-[dependency-groups]
-dev = ["pytest", "pyright", "ruff", "boto3-stubs[sns,ssm]"]
-
-[tool.uv.sources]
-sftp-outbound-transfer = { editable = true, path = "." }
-
 [tool.pyright]
-include = ["."]
-exclude = ["**/__pycache__", "venv", ".uv"]
+venvPath = "."
+venv = ".venv"
+# AWS Lambda Powertools compatibility
+reportUnknownMemberType = false
+reportUnknownVariableType = false
+reportUnknownArgumentType = false
+reportUnknownParameterType = false
