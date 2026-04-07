@@ -36,10 +36,10 @@ public class BeneficiaryRepository {
     return entityManager
         .createQuery(
             """
-            SELECT identity
-            FROM BeneficiaryIdentity identity
-            WHERE identity.id.xrefSk = :beneXrefSk
-            """,
+                SELECT identity
+                FROM BeneficiaryIdentity identity
+                WHERE identity.id.xrefSk = :beneXrefSk
+                """,
             BeneficiaryIdentity.class)
         .setParameter("beneXrefSk", beneXrefSk)
         .getResultList();
@@ -96,10 +96,10 @@ public class BeneficiaryRepository {
     return entityManager
         .createQuery(
             """
-              SELECT bene.xrefSk
-              FROM Beneficiary bene
-              WHERE bene.beneSk = :beneSk
-            """,
+                 SELECT bene.xrefSk
+                 FROM Beneficiary bene
+                 WHERE bene.beneSk = :beneSk
+               """,
             Long.class)
         .setParameter("beneSk", beneSk)
         .getResultList()
@@ -118,10 +118,10 @@ public class BeneficiaryRepository {
     return entityManager
         .createQuery(
             """
-              SELECT bene.xrefSk
-              FROM Beneficiary bene
-              WHERE bene.identifier.mbi = :mbi
-            """,
+                  SELECT bene.xrefSk
+                  FROM Beneficiary bene
+                  WHERE bene.identifier.mbi = :mbi
+                """,
             Long.class)
         .setParameter("mbi", mbi)
         .getResultList()
@@ -168,6 +168,7 @@ public class BeneficiaryRepository {
 
       if (uniqueXrefs.size() == 1) {
         var matchedBene = benes.getFirst();
+        LogUtil.logBeneSk(matchedBene.getBeneSk());
         var finalDetermination =
             new FinalDetermination(combinationIndex, matchedRecords.getFirst());
         return new PatientMatchResult(

@@ -101,7 +101,7 @@ public class FhirInputConverter {
     }
     try {
       return Optional.of(numberParam.getValue().intValueExact());
-    } catch (ArithmeticException ex) {
+    } catch (ArithmeticException _) {
       throw new InvalidRequestException("Numeric input was not in a valid format");
     }
   }
@@ -114,8 +114,12 @@ public class FhirInputConverter {
    * @return ID
    */
   public static Long toLong(@Nullable ReferenceParam reference, String validResourceType) {
-    if (reference == null || reference.getIdPartAsLong() == null) {
-      throw new InvalidRequestException("Reference is missing");
+    try {
+      if (reference == null || reference.getIdPartAsLong() == null) {
+        throw new InvalidRequestException("Reference is missing");
+      }
+    } catch (NumberFormatException _) {
+      throw new InvalidRequestException("Reference is not a valid number");
     }
     var resourceType = reference.getResourceType();
     if (!StringUtils.isBlank(resourceType) && !resourceType.equals(validResourceType)) {
