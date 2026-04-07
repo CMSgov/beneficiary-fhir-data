@@ -3,7 +3,6 @@ name = "bene-prefs"
 version = "0.1.0"
 description = "BFD Beneficiary Preferences"
 readme = "README.md"
-requires-python = "==3.13.*"
 dependencies = [
     "cryptography==45.0.6",
     "snowflake-connector-python==4.3.0",
