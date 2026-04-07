@@ -1,4 +1,5 @@
 [project]
+requires-python = "==3.13.*"
 name = "locust-tests"
 version = "1.0.0"
 dependencies = [
@@ -13,7 +14,7 @@ dependencies = [
   "jinja2>=3.1.6",
   "idna>=3.7",
   "certifi>=2025.4.26",
-  "psycopg[binary,pool]",
+  "psycopg[binary,pool]>=3.2.9",
 ]
 
 [dependency-groups]

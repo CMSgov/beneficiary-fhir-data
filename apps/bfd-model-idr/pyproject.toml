@@ -3,12 +3,13 @@ name = "sythetic-data-generator"
 version = "0.1.0"
 description = " IDR Model Sythetic Data Generator"
 readme = "README.md"
+requires-python = "==3.13.*"
 dependencies = [
     "faker>=37.1.0",
     "pandas>=3.0.2",
     "xlsxwriter>=3.2.5",
     "pyyaml>=6.0.2",
-    "pydantic",
+    "pydantic>=2.12.3",
     "tqdm>=4.67.1",
     "click>=8.3.1",
     "requests>=2.32.5",
