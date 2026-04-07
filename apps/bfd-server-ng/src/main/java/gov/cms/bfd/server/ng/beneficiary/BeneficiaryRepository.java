@@ -36,10 +36,10 @@ public class BeneficiaryRepository {
     return entityManager
         .createQuery(
             """
-                    SELECT identity
-                    FROM BeneficiaryIdentity identity
-                    WHERE identity.id.xrefSk = :beneXrefSk
-                    """,
+                SELECT identity
+                FROM BeneficiaryIdentity identity
+                WHERE identity.id.xrefSk = :beneXrefSk
+                """,
             BeneficiaryIdentity.class)
         .setParameter("beneXrefSk", beneXrefSk)
         .getResultList();
