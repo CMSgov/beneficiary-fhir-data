@@ -95,7 +95,7 @@ class BatchLoader:
         self.insert_timer = Timer("insert", model, partition)
         self.commit_timer = Timer("commit", model, partition)
         self.load_type = load_type
-        self.enable_load_progress = load_mode == LoadMode.IDR or force_load_progress()
+        self.enable_load_progress = should_track_load_progress(load_mode)
 
     def load(
         self,
@@ -352,3 +352,8 @@ def _convert_date(date_field: date | datetime) -> datetime:
     if type(date_field) is datetime:
         return date_field.replace(tzinfo=UTC)
     return datetime.combine(date_field, datetime.min.time()).replace(tzinfo=UTC)
+
+
+def should_track_load_progress(load_mode: LoadMode) -> bool:
+    # Whether to read/write load progress, which is diabled for synthetic and testing loads.
+    return load_mode == LoadMode.IDR or force_load_progress()

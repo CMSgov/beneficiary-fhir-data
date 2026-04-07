@@ -12,6 +12,14 @@ def _parse_bool_default_true(var_name: str) -> bool:
     return getenv(var_name, "1").lower() not in ("0", "false")
 
 
+# Tracking load progress is disabled for synthetic data loads.
+# Use this to force enabling load progress for testing.
+def force_load_progress() -> bool:
+    # We don't normally want to store the load progress info for synthetic data since the dates
+    # won't be in order like in prod. However, we need a way to override this for the tests.
+    return _parse_bool_default_false("IDR_FORCE_LOAD_PROGRESS")
+
+
 ENABLE_DATE_PARTITIONS = _parse_bool_default_true("IDR_ENABLE_DATE_PARTITIONS")
 """Enables partitioning claims data based on dates.
 It's useful to disable this for synthetic loads since
@@ -81,14 +89,6 @@ IDR_DATABASE = getenv("IDR_DATABASE", "")
 IDR_SCHEMA = getenv("IDR_SCHEMA", "")
 
 # These need to be lazy-loaded since we override them in the tests
-
-
-# Tracking load progress is disabled for synthetic data loads.
-# Use this to force enabling load progress for testing.
-def force_load_progress() -> bool:
-    # We don't normally want to store the load progress info for synthetic data since the dates
-    # won't be in order like in prod. However, we need a way to override this for the tests.
-    return _parse_bool_default_false("IDR_FORCE_LOAD_PROGRESS")
 
 
 # Database credentials/settings
