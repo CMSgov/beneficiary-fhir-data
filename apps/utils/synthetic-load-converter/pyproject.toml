@@ -1,6 +1,6 @@
 [project]
 version = "0.1.0"
-requires-python = "<4.0,>=3.12"
+requires-python = "==3.13.*"
 dependencies = [
     "boto3<2.0.0,>=1.35.93",
     "types-boto3[essential]<2.0.0,>=1.35.93",
