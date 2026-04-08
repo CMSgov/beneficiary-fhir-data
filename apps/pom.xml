@@ -121,7 +121,7 @@
         <micrometer.version>1.14.14</micrometer.version>
         <metrics.version>4.2.30</metrics.version>
         <git-build-hook-maven-plugin.version>3.5.0</git-build-hook-maven-plugin.version>
-        <aws-java-sdk-bom.version>2.40.17</aws-java-sdk-bom.version>
+        <aws-java-sdk-bom.version>2.42.29</aws-java-sdk-bom.version>
         <aws.crt.version>0.35.0</aws.crt.version>
         <aws-advanced-jdbc-wrapper.version>2.6.5</aws-advanced-jdbc-wrapper.version>
         <spring-data-jpa.version>3.4.10</spring-data-jpa.version>
@@ -305,13 +305,6 @@
 
     <dependencyManagement>
         <dependencies>
-            <!-- Fix for Snyk vulnerability (CWE-93)-->
-            <dependency>
-                <groupId>io.netty</groupId>
-                <artifactId>netty-codec-http</artifactId>
-                <version>4.1.129.Final</version>
-            </dependency>
-            <!-- Fix for Snyk vulnerability (CWE-835 and CWE-770)-->
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-compress</artifactId>
