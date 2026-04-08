@@ -5,12 +5,3 @@ dependencies = ["aws-lambda-powertools[all]", "paramiko", "boto3"]
 
 # Part of apps workspace inherits from ../../../../../apps/pyproject.toml
 # Per-file ignores defined in apps/pyproject.toml
-
-[tool.pyright]
-venvPath = "."
-venv = ".venv"
-# AWS Lambda Powertools compatibility
-reportUnknownMemberType = false
-reportUnknownVariableType = false
-reportUnknownArgumentType = false
-reportUnknownParameterType = false
