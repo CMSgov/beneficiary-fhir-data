@@ -889,11 +889,11 @@ public class SystemUrls {
 
   /** Blue Button code system - ANSI Group Code - Claim Adjustment Group Code. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_ANSI_GRP_CODE =
-      "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CODE";
+      "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CD";
 
   /** Blue Button code system - ANSI Reason Code - Claim Adjustment Reason Code. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_ANSI_RSN_CODE =
-      "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CODE";
+      "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CD";
 
   /** Blue Button code system - dual status code. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_DUAL_STATUS_CODE =
