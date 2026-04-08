@@ -36,7 +36,7 @@ public class PrescribingCareTeam extends ProviderHistoryBase {
                       var providerReference =
                           ProviderFhirHelper.createProviderReferenceWithQualifier(
                               npi, qualifier, getProviderName());
-                      providerReference.setType(NpiType.INDIVIDUAL.getType()); // todo: TBD
+                      providerReference.setType(NpiType.INDIVIDUAL.getType());
 
                       return getCareTeamComponent(sequence, providerReference);
                     }));
