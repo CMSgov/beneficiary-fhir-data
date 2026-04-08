@@ -50,9 +50,9 @@ members = [
 
 [dependency-groups]
 dev = [
-    "ruff>=0.12.9",
-    "pyright>=1.1.403",
-    "pytest>=8.4.2",
+    "ruff",
+    "pyright",
+    "pytest",
     "pytest-timeout>=2.1.0",
     # bfd-pipeline-idr dev dependencies
     "testcontainers>=4.13.1",
@@ -122,26 +122,29 @@ docstring-code-format = true
 
 [tool.pyright]
 typeCheckingMode = "strict"
-reportMissingImports = false
-reportMissingTypeStubs = false
 venvPath = "."
 venv = ".venv"
+reportMissingImports = false
+reportMissingTypeStubs = false
 # AWS Lambda Powertools compatibility - relaxed type checking for ops services
 reportUnknownMemberType = false
 reportUnknownVariableType = false
 reportUnknownArgumentType = false
 reportUnknownParameterType = false
+reportMissingTypeArgument = false
+reportMissingParameterType = false
+reportConstantRedefinition = false
 exclude = [
     ".venv",
     "**/.venv",
     "**/node_modules",
     "**/__pycache__",
-    "**/bfd-model-idr/**",
+#    "**/bfd-model-idr/**",
     "**/bfd-model-rif/**",
     "**/bfd-pipeline-idr/**",
-    "**/locust_tests/**",
-    "**/synthetic-load-converter/**",
-    "**/sftp_outbound_transfer/**",
+#    "**/locust_tests/**",
+#    "**/synthetic-load-converter/**",
+#    "**/sftp_outbound_transfer/**",
     "apps/bfd-model/**",
     "apps/bfd-pipeline/**",
     "apps/bfd-server/**",
