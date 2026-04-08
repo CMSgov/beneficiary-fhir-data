@@ -4,7 +4,6 @@ import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
-import jakarta.persistence.Transient;
 import java.util.Optional;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -29,16 +28,6 @@ public class BillingProviderProfessional extends ProviderHistoryBase {
   @Override
   protected CareTeamType getCareTeamType() {
     return CareTeamType.BILLING;
-  }
-
-  @Override
-  @Transient
-  protected ProviderHistoryBase.NpiType getNpiType() {
-    if (providerFirstName.isEmpty()) {
-      return ProviderHistoryBase.NpiType.ORGANIZATION;
-    } else {
-      return ProviderHistoryBase.NpiType.INDIVIDUAL;
-    }
   }
 
   /**
