@@ -248,14 +248,23 @@ public class IntegrationTestBase {
 
   protected void validateCareTeamProviderTypes(ExplanationOfBenefit eob) {
     if (eob.hasCareTeam()) {
-      for (var careTeamComponent : eob.getCareTeam()) {
-        if (careTeamComponent.hasProvider()) {
-          var providerReference = careTeamComponent.getProvider();
-          assertTrue(providerReference.hasType(), "Careteam provider reference must have type set");
-          var expectedReferenceTypes = Set.of("Practitioner", "Organization");
-          assertTrue(expectedReferenceTypes.contains(providerReference.getType()));
-        }
-      }
+      var isProfessional =
+          eob.getType().getCoding().stream()
+              .anyMatch(
+                  c ->
+                      "http://terminology.hl7.org/CodeSystem/claim-type".equals(c.getSystem())
+                          && "professional".equals(c.getCode()));
+      var expectedReferenceTypes = Set.of("Practitioner", "Organization");
+
+      eob.getCareTeam().stream()
+          .filter(ctc -> ctc.hasProvider() && (!isProfessional || ctc.hasQualification()))
+          .forEach(
+              ctc -> {
+                var providerReference = ctc.getProvider();
+                assertTrue(
+                    providerReference.hasType(), "Careteam provider reference must have type set");
+                assertTrue(expectedReferenceTypes.contains(providerReference.getType()));
+              });
     }
   }
 }

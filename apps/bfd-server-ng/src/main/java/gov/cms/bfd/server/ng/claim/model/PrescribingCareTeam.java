@@ -6,7 +6,7 @@ import jakarta.persistence.Embeddable;
 import java.util.Optional;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 
-/** Attending Provider History. * */
+/** Prescribing Provider History. * */
 @Embeddable
 @AttributeOverride(
     name = "providerNpiNumber",
@@ -25,7 +25,8 @@ public class PrescribingCareTeam extends ProviderHistoryBase {
   }
 
   @Override
-  Optional<ExplanationOfBenefit.CareTeamComponent> toFhirCareTeamComponent(Integer sequence) {
+  Optional<ExplanationOfBenefit.CareTeamComponent> toFhirCareTeamComponent(
+      Integer sequence, Optional<ClaimContext> claimContext) {
 
     return getProviderNpiNumber()
         .flatMap(
@@ -35,7 +36,7 @@ public class PrescribingCareTeam extends ProviderHistoryBase {
                       var providerReference =
                           ProviderFhirHelper.createProviderReferenceWithQualifier(
                               npi, qualifier, getProviderName());
-                      setCareTeamMemberReferenceType(providerReference);
+                      providerReference.setType(NpiType.INDIVIDUAL.getType()); // todo: TBD
 
                       return getCareTeamComponent(sequence, providerReference);
                     }));

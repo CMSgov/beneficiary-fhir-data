@@ -2861,8 +2861,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
           } ]
         },
         "value" : "1558719914"
-      },
-      "type" : "Practitioner"
+      }
     },
     "role" : {
       "coding" : [ {
@@ -2889,8 +2888,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
           } ]
         },
         "value" : "1720749690"
-      },
-      "type" : "Practitioner"
+      }
     },
     "role" : {
       "coding" : [ {
@@ -3530,7 +3528,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
         },
         "value" : "1558719914"
       },
-      "type" : "Practitioner"
+      "type" : "Organization"
     },
     "qualification" : {
       "coding" : [ {
@@ -3566,8 +3564,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
           } ]
         },
         "value" : "1720749690"
-      },
-      "type" : "Practitioner"
+      }
     },
     "role" : {
       "coding" : [ {
