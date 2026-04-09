@@ -131,6 +131,7 @@ class AdjudicatedGeneratorUtil:
         if clm[f.CLM_TYPE_CD] == 3 or clm[f.CLM_ADJSTMT_TYPE_CD] == "1":
             clm[f.CLM_FINL_ACTN_IND] = "N"
 
+
         clm_ltst_clm_ind = "N"
         if clm_type_cd in (1, 2, 3, 4, 10, 20, 30, 40, 50, 60, 61, 62, 63, 71, 72, 81, 82):
             clm_ltst_clm_ind = random.choice(["Y", "N"])
