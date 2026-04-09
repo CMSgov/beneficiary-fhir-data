@@ -32,7 +32,9 @@ from model.base_model import (
     UPDATE_FIELD,
     IdrBaseModel,
     ModelType,
-    claim_filter,
+    claim,
+    claim_base,
+    claim_clause,
     provider_careteam_name_expr,
     transform_default_date_to_null,
     transform_default_hipps_code,
@@ -323,18 +325,23 @@ class IdrClaimItemInstitutionalSs(IdrBaseModel):
         not_materialized = "" if load_mode == LoadMode.IDR else "NOT MATERIALIZED"
 
         return f"""
-                WITH claims AS {not_materialized} (
-                    SELECT 
-                        {clm}.clm_uniq_id, 
-                        {clm}.geo_bene_sk, 
-                        {clm}.clm_type_cd, 
-                        {clm}.clm_num_sk, 
-                        {clm}.clm_dt_sgntr_sk,
-                        {clm}.clm_idr_ld_dt
-                    FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
-                    WHERE
-                        {claim_filter(start_time, partition)} AND
-                        {clm}.clm_idr_ld_dt >= '{cls.model_type().min_transaction_date}'
+                WITH claim_base AS (
+                    {claim_base(start_time, partition, cls.model_type())}
+                ),
+                claims as (
+                    {claim()}
+                    UNION
+                    {claim_clause("v2_mdcr_clm_line")}
+                    UNION
+                    {claim_clause("v2_mdcr_clm_prod")}
+                    UNION
+                    {claim_clause("v2_mdcr_clm_val")}
+                    UNION
+                    {claim_clause("v2_mdcr_clm_line_instnl")}
+                    UNION
+                    {claim_clause("v2_mdcr_clm_line_fiss")}
+                    UNION
+                    {claim_clause("v2_mdcr_clm_line_fiss_bnft_svg")}
                 ),
                 claim_lines AS {not_materialized} (
                     SELECT
@@ -478,6 +485,5 @@ class IdrClaimItemInstitutionalSs(IdrBaseModel):
                     AND {line_fiss_bnft_flattened}.clm_num_sk = {line}.clm_num_sk
                     AND {line_fiss_bnft_flattened}.clm_dt_sgntr_sk = {line}.clm_dt_sgntr_sk
                     AND {line_fiss_bnft_flattened}.clm_line_num = {line}.clm_line_num
-                {{WHERE_CLAUSE}}
                 {{ORDER_BY}}
         """

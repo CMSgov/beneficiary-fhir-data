@@ -462,7 +462,7 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
         not_materialized = "" if load_mode == LoadMode.IDR else "NOT MATERIALIZED"
         return f"""
             WITH claim_base AS (
-                {claim_base(start_time, partition)}
+                {claim_base(start_time, partition, cls.model_type())}
             ),
             claims AS (
                 {claim()}
@@ -565,6 +565,6 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
                 ON {ocrnc_sgntr_dd}.clm_ocrnc_sgntr_sk = {clm}.clm_ocrnc_sgntr_sk
             LEFT JOIN claim_related_occurrences_dates {rlt_ocrnc_sgntr_dd}
                 ON {rlt_ocrnc_sgntr_dd}.clm_rlt_ocrnc_sgntr_sk = {clm}.clm_rlt_ocrnc_sgntr_sk
-            {{WHERE_CLAUSE}} AND {base_claim_clause(partition)}
+            WHERE {base_claim_clause(partition)}
             {{ORDER_BY}}
         """

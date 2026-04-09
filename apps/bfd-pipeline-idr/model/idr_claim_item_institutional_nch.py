@@ -276,7 +276,7 @@ class IdrClaimItemInstitutionalNch(IdrBaseModel):
 
         return f"""
                 WITH claim_base AS (
-                    {claim_base(start_time, partition)}
+                    {claim_base(start_time, partition, cls.model_type())}
                 ),
                 claims as (
                     {claim()}

@@ -32,10 +32,16 @@ from model.base_model import (
     UPDATE_TIMESTAMP,
     IdrBaseModel,
     ModelType,
-    claim_filter,
+    base_claim_clause,
+    claim,
+    claim_base,
+    claim_clause,
     claim_occurrence_cte,
     claim_related_occurrences_cte,
+    clm_dt_sgntr_clause,
+    clm_ocrnc_sgntr_clause,
     clm_orig_cntl_num_expr,
+    clm_rlt_ocrnc_clause,
     provider_careteam_name_expr,
     provider_last_or_legal_name_expr,
     transform_default_date_to_null,
@@ -302,16 +308,23 @@ class IdrClaimProfessionalSs(IdrBaseModel):
         rlt_ocrnc_sgntr_dd = ALIAS_RLT_OCRNC_SGNTR_DERIVED_DATES
         not_materialized = "" if load_mode == LoadMode.IDR else "NOT MATERIALIZED"
         return f"""
-            WITH claims AS (
-                SELECT
-                    {clm}.clm_uniq_id,
-                    {clm}.geo_bene_sk,
-                    {clm}.clm_type_cd,
-                    {clm}.clm_num_sk,
-                    {clm}.clm_dt_sgntr_sk,
-                    {clm}.clm_idr_ld_dt
-                FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
-                WHERE {claim_filter(start_time, partition)}
+            WITH claim_base AS (
+                {claim_base(start_time, partition, cls.model_type())}
+            ),
+            claims AS (
+                {claim()}
+                UNION
+                {clm_dt_sgntr_clause()}
+                UNION
+                {claim_clause("v2_mdcr_clm_prfnl")}
+                UNION
+                {claim_clause("v2_mdcr_clm_dcmtn")}
+                UNION
+                {claim_clause("v2_mdcr_clm_lctn_hstry")}
+                UNION
+                {clm_ocrnc_sgntr_clause()}
+                UNION
+                {clm_rlt_ocrnc_clause()}
             ),
             latest_clm_lctn_hstry AS (
                 SELECT
@@ -369,6 +382,6 @@ class IdrClaimProfessionalSs(IdrBaseModel):
                 ON {ocrnc_sgntr_dd}.clm_ocrnc_sgntr_sk = {clm}.clm_ocrnc_sgntr_sk
             LEFT JOIN claim_related_occurrences_dates {rlt_ocrnc_sgntr_dd}
                 ON {rlt_ocrnc_sgntr_dd}.clm_rlt_ocrnc_sgntr_sk = {clm}.clm_rlt_ocrnc_sgntr_sk
-            {{WHERE_CLAUSE}} AND {claim_filter(start_time, partition)}
+            WHERE {base_claim_clause(partition)}
             {{ORDER_BY}}
         """

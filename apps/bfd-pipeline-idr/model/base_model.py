@@ -145,7 +145,7 @@ def provider_careteam_name_expr(alias: str, type: str | None) -> str:
     """
 
 
-def claim_base(start_time: datetime, partition: LoadPartition) -> str:
+def claim_base(start_time: datetime, partition: LoadPartition, model_type: ModelType) -> str:
     clm = ALIAS_CLM
     return f"""
     SELECT
@@ -161,7 +161,9 @@ def claim_base(start_time: datetime, partition: LoadPartition) -> str:
         idr_insrt_ts,
         idr_updt_ts
     FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
-    WHERE {claim_filter(start_time, partition)}
+    WHERE 
+        {claim_filter(start_time, partition)} AND
+        {clm}.clm_idr_ld_dt >= '{model_type.min_transaction_date}'
     """
 
 
