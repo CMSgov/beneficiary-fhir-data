@@ -338,10 +338,9 @@ def handler(event: dict[Any, Any], context: LambdaContext) -> None:  # noqa: ARG
             raise ValueError("Invalid invocation event, no records")
 
         for s3_record in s3_event_records:
-            
-            if not (s3_data := s3_record.s3) or not (s3_object := s3_data.object):
-                logger.error("Skipping record: 's3.object' data is missing or None")
-                continue
+            if s3_record.s3.object is None:
+                logger.warning("S3 record object is missing", s3_record=s3_record)
+                continue  # Skip this loop iteration
 
             s3_event_time = s3_record.eventTime.astimezone(UTC)
             s3_object_key = unquote_plus(s3_record.s3.object.key)
