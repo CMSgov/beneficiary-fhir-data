@@ -1,7 +1,10 @@
 [project]
 name = "sftp-outbound-transfer"
 version = "1.0.0"
-dependencies = ["aws-lambda-powertools[all]", "paramiko", "boto3"]
+dependencies = ["aws-lambda-powertools[all]", "paramiko", "boto3", "pydantic"]
 
 # Part of apps workspace inherits from ../../../../../apps/pyproject.toml
 # Per-file ignores defined in apps/pyproject.toml
+
+[dependency-groups]
+dev = ["pytest", "pyright", "ruff", "boto3-stubs[sns,ssm]"]

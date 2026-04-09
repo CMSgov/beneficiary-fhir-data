@@ -401,8 +401,10 @@ class HighVolumeUser(BFDUserBase):
         class_members = inspect.getmembers(sys.modules[__name__], inspect.isclass)
         potential_tasks = list(
             filter(
-                lambda potential_task: hasattr(potential_task[1], "tasks")
-                and issubclass(potential_task[1], HighVolumeTaskSet),
+                lambda potential_task: (
+                    hasattr(potential_task[1], "tasks")
+                    and issubclass(potential_task[1], HighVolumeTaskSet)
+                ),
                 class_members,
             )
         )
