@@ -4,10 +4,10 @@ version = "1.0.0"
 requires-python = ">=3.14"
 dependencies = [
     "aiohttp>=3.13.0",
-    "psycopg[binary]>=3.2.10",
+    "psycopg[binary]>=3.2.10"",
     "asyncclick>=8.3.0.5",
     "anyio>=4.11.0",
-    "pydantic>=2.12.2",
+    "pydantic",
     "pyyaml>=6.0.3",
 ]
 

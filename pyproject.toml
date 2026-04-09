@@ -5,18 +5,12 @@ requires-python="==3.13.*"
 description = "BFD Python workspace for unified dependency management"
 
 dependencies = [
-    # bfd-pipeline-idr dependencies
-    "cryptography>=45.0.6",
-    "psycopg[binary,pool]>=3.2.10",
-    "pydantic>=2.11.9",
-    "snowflake-connector-python>=3.17.4",
-    "ray==2.47",
-    "sf-hamilton[ray]>=1.88.0",
+    "psycopg[binary,pool]>=3.2.13",
+    "pydantic==2.12.*",
     # sftp-outbound-transfer dependencies
     "aws-lambda-powertools[all]",
     "paramiko",
     "boto3",
-    # samhsa-regression-tests dependencies
     "aiohttp>=3.13.0",
     "asyncclick>=8.3.0.5",
     "anyio>=4.11.0",
@@ -52,16 +46,19 @@ members = [
 dev = [
     "ruff",
     "pyright",
-    "pytest",
-    "pytest-timeout>=2.1.0",
     # bfd-pipeline-idr dev dependencies
     "testcontainers>=4.13.1",
     # sftp-outbound-transfer dev dependencies
     "boto3-stubs[sns,ssm]",
     "usaddress",
 ]
+test = [
+    "pytest",
+    "pytest-timeout>=2.1.0",
+]
 
 [tool.ruff]
+target-version = "py313"
 extend-exclude = [
     "apps/utils/scripts",
     "apps/bfd-model",
@@ -74,7 +71,7 @@ extend-exclude = [
     "build",
     "dist",
 ]
-line-length = 200
+line-length = 100
 
 [tool.ruff.lint]
 select = [
@@ -125,7 +122,7 @@ typeCheckingMode = "strict"
 venvPath = "."
 venv = ".venv"
 reportMissingImports = false
-reportMissingTypeStubs = false
+reportMissingTypeStubs = "none"
 # AWS Lambda Powertools compatibility - relaxed type checking for ops services
 reportUnknownMemberType = false
 reportUnknownVariableType = false
