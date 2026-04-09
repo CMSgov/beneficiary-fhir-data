@@ -27,24 +27,6 @@ repos:
   #
   # pre-push hooks
   #
-- repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.15.0
-  hooks:
-    # Run the linter.
-    - id: ruff-check
-      args: [ --fix ]
-      stages: [ pre-push ]
-      verbose: true
-    # Run the formatter.
-    - id: ruff-format
-      stages: [ pre-push ]
-      verbose: true
-- repo: https://github.com/DetachHead/basedpyright-prek-mirror
-  rev: 1.38.3
-  hooks: 
-    - id: basedpyright
-      stages: [ pre-push ]
-      verbose: true
 - repo: local
   hooks:
     - id: pre-push-check-java-format
