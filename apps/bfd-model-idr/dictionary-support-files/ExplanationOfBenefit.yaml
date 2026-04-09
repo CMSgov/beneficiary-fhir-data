@@ -3705,6 +3705,7 @@
     - CCLF1.PRVDR_FAC_FIPS_ST_CD
   sourceView: V2_MDCR_CLM_INSTNL
   sourceColumn: GEO_BLG_SSA_STATE_CD                                            
+  notes: The source column contains an SSA state code, which is converted to a FIPS state code in the output.  
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='PRVDR_FAC_FIPS_ST_CD').exists()).value
 - inputPath: LineItemComponent.GEO_RNDRG_SSA_STATE_CD                           
   appliesTo:                                                                    
@@ -3716,4 +3717,5 @@
     - CCLF5.RNDRG_PRVDR_FIPS_ST_CD                                              
   sourceView: V2_MDCR_CLM_LINE_PRFNL
   sourceColumn: GEO_RNDRG_SSA_STATE_CD                                          
+  notes: The source column contains an SSA state code, which is converted to a FIPS state code in the output.  
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='RNDRG_PRVDR_FIPS_ST_CD').exists()).value   
