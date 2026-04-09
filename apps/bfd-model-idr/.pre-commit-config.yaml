@@ -8,4 +8,3 @@ repos:
         entry: uv run pyright
         language: system
         verbose: true
-        pass_filenames: false
