@@ -17,7 +17,7 @@ from aws_lambda_powertools.utilities.parser import envelopes
 from aws_lambda_powertools.utilities.parser.models import S3Model
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from botocore.config import Config
-from errors import (
+from sftp_outbound_transfer_errors import (
     BaseTransferError,
     InvalidObjectKeyError,
     InvalidPendingDirError,
