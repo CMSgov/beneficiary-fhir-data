@@ -145,6 +145,173 @@ def provider_careteam_name_expr(alias: str, type: str | None) -> str:
     """
 
 
+def claim_base(start_time: datetime, partition: LoadPartition) -> str:
+    clm = ALIAS_CLM
+    return f"""
+    SELECT
+        clm_uniq_id,
+        geo_bene_sk,
+        clm_type_cd,
+        clm_num_sk,
+        clm_dt_sgntr_sk,
+        clm_ocrnc_sgntr_sk,
+        clm_rlt_cond_sgntr_sk,
+        clm_rlt_ocrnc_sgntr_sk,
+        clm_idr_ld_dt,
+        idr_insrt_ts,
+        idr_updt_ts
+    FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
+    WHERE {claim_filter(start_time, partition)}
+    """
+
+
+def claim() -> str:
+    clm = ALIAS_CLM
+    return f"""
+        SELECT
+            {clm}.clm_uniq_id,
+            {clm}.geo_bene_sk,
+            {clm}.clm_type_cd,
+            {clm}.clm_num_sk,
+            {clm}.clm_dt_sgntr_sk,
+            {clm}.clm_idr_ld_dt
+        FROM claim_base clm
+        WHERE (
+            {clm}.clm_idr_ld_dt {{FILTER_OP}} {{LAST_TS}} 
+            OR {clm}.idr_insrt_ts {{FILTER_OP}} {{LAST_TS}} 
+            OR {clm}.idr_updt_ts {{FILTER_OP}} {{LAST_TS}}
+        )       
+    """
+
+
+def claim_clause(table: str) -> str:
+    clm = ALIAS_CLM
+    return f"""
+            SELECT
+                {clm}.clm_uniq_id,
+                {clm}.geo_bene_sk,
+                {clm}.clm_type_cd,
+                {clm}.clm_num_sk,
+                {clm}.clm_dt_sgntr_sk,
+                {clm}.clm_idr_ld_dt
+        FROM cms_vdm_view_mdcr_prd.{table} temp
+        JOIN claim_base clm ON
+            {clm}.geo_bene_sk = temp.geo_bene_sk AND
+            {clm}.clm_dt_sgntr_sk = temp.clm_dt_sgntr_sk AND
+            {clm}.clm_type_cd = temp.clm_type_cd AND
+            {clm}.clm_num_sk = temp.clm_num_sk
+            WHERE ({clm}.idr_insrt_ts {{FILTER_OP}} {{LAST_TS}} 
+                OR {clm}.idr_updt_ts {{FILTER_OP}} {{LAST_TS}})
+        """
+
+
+def clm_ansi_sgntr_clause() -> str:
+    clm = ALIAS_CLM
+    return f"""
+            SELECT
+                {clm}.clm_uniq_id,
+                {clm}.geo_bene_sk,
+                {clm}.clm_type_cd,
+                {clm}.clm_num_sk,
+                {clm}.clm_dt_sgntr_sk,
+                {clm}.clm_idr_ld_dt
+        FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_ansi_sgntr temp
+        JOIN claim_base clm ON
+            {clm}.clm_dt_sgntr_sk = temp.clm_ansi_sgntr_sk
+            WHERE (temp.idr_insrt_ts {{FILTER_OP}} {{LAST_TS}} 
+                OR temp.idr_updt_ts {{FILTER_OP}} {{LAST_TS}})
+    """
+
+
+def clm_dt_sgntr_clause() -> str:
+    clm = ALIAS_CLM
+    return f"""
+            SELECT
+                {clm}.clm_uniq_id,
+                {clm}.geo_bene_sk,
+                {clm}.clm_type_cd,
+                {clm}.clm_num_sk,
+                {clm}.clm_dt_sgntr_sk,
+                {clm}.clm_idr_ld_dt
+        FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_dt_sgntr temp
+        JOIN claim_base clm ON
+            {clm}.clm_dt_sgntr_sk = temp.clm_dt_sgntr_sk
+            WHERE (temp.idr_insrt_ts {{FILTER_OP}} {{LAST_TS}} 
+                OR temp.idr_updt_ts {{FILTER_OP}} {{LAST_TS}})
+        """
+
+
+def clm_ocrnc_sgntr_clause() -> str:
+    clm = ALIAS_CLM
+    return f"""
+        SELECT 
+            {clm}.clm_uniq_id,
+                {clm}.geo_bene_sk,
+                {clm}.clm_type_cd,
+                {clm}.clm_num_sk,
+                {clm}.clm_dt_sgntr_sk,
+                {clm}.clm_idr_ld_dt
+            FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_ocrnc_sgntr_mbr sgntr
+            JOIN claim_base clm ON
+                {clm}.clm_ocrnc_sgntr_sk = sgntr.clm_ocrnc_sgntr_sk
+            WHERE sgntr.clm_ocrnc_span_cd IN ('70', '74') AND (
+                sgntr.idr_insrt_ts {{FILTER_OP}} {{LAST_TS}} 
+                OR sgntr.idr_updt_ts {{FILTER_OP}} {{LAST_TS}} 
+            )
+    """
+
+
+def clm_rlt_ocrnc_clause() -> str:
+    clm = ALIAS_CLM
+    return f"""
+        SELECT
+            {clm}.clm_uniq_id,
+                {clm}.geo_bene_sk,
+                {clm}.clm_type_cd,
+                {clm}.clm_num_sk,
+                {clm}.clm_dt_sgntr_sk,
+                {clm}.clm_idr_ld_dt
+        FROM cms_vdm_view_mdcr_prd.v2_clm_rlt_ocrnc_sgntr_mbr sgntr
+        JOIN claim_base clm ON
+                {clm}.clm_rlt_ocrnc_sgntr_sk = sgntr.clm_rlt_ocrnc_sgntr_sk
+        WHERE sgntr.clm_rlt_ocrnc_cd IN ('A3', '22') AND (
+                sgntr.idr_insrt_ts {{FILTER_OP}} {{LAST_TS}} 
+                OR sgntr.idr_updt_ts {{FILTER_OP}} {{LAST_TS}}
+            )
+    """
+
+
+def clm_rlt_cond_sgntr_clause() -> str:
+    clm = ALIAS_CLM
+    return f"""
+        SELECT
+           {clm}.clm_uniq_id,
+                {clm}.geo_bene_sk,
+                {clm}.clm_type_cd,
+                {clm}.clm_num_sk,
+                {clm}.clm_dt_sgntr_sk,
+                {clm}.clm_idr_ld_dt
+            FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_rlt_cond_sgntr_mbr sgntr
+            JOIN claim_base clm ON
+                    {clm}.clm_rlt_cond_sgntr_sk = sgntr.clm_rlt_cond_sgntr_sk
+            WHERE sgntr.clm_rlt_cond_sgntr_sk NOT IN (0, 1, -1)
+                AND sgntr.clm_rlt_cond_cd != '~' 
+                AND (
+                    sgntr.idr_insrt_ts {{FILTER_OP}} {{LAST_TS}} 
+                    OR sgntr.idr_updt_ts {{FILTER_OP}} {{LAST_TS}}
+                )
+    """
+
+
+def base_claim_clause(partition: LoadPartition) -> str:
+    clm = ALIAS_CLM
+    claim_type_codes = partition.claim_type_codes or ALL_CLAIM_TYPE_CODES
+    return f"""
+    ({clm}.clm_type_cd IN ({",".join([str(c) for c in claim_type_codes])})
+    AND {clm}.clm_from_dt >= '{MIN_CLAIM_LOAD_DATE}')
+    """
+
+
 PRIMARY_KEY = "primary_key"
 BATCH_TIMESTAMP = "batch_timestamp"
 HISTORICAL_BATCH_TIMESTAMP = "historical_batch_timestamp"

@@ -107,9 +107,12 @@ class Extractor(ABC, Generic[T]):  # noqa: UP046
             return self.extract_many(
                 fetch_query.replace(
                     "{WHERE_CLAUSE}",
-                    f"WHERE ({batch_timestamp_clause} >= '{min_transaction_date}')",
-                ).replace("{ORDER_BY}", order_by),
-                {},
+                    f"WHERE ({batch_timestamp_clause} >= %(timestamp)s)",
+                )
+                .replace("{FILTER_OP}", ">=")
+                .replace("{LAST_TS}", "%(timestamp)s")
+                .replace("{ORDER_BY}", order_by),
+                {"timestamp": min_transaction_date},
             )
 
         previous_batch_complete = progress.batch_complete_ts >= progress.job_start_ts
@@ -151,7 +154,10 @@ class Extractor(ABC, Generic[T]):  # noqa: UP046
                         {batch_id_clause}
                     )
                     """,
-            ).replace("{ORDER_BY}", order_by),
+            )
+            .replace("{FILTER_OP}", filter_op)
+            .replace("{LAST_TS}", "%(timestamp)s")
+            .replace("{ORDER_BY}", order_by),
             {"timestamp": compare_timestamp},
         )
 

@@ -29,7 +29,10 @@ from model.base_model import (
     UPDATE_FIELD,
     IdrBaseModel,
     ModelType,
-    claim_filter,
+    claim,
+    claim_base,
+    claim_clause,
+    clm_ansi_sgntr_clause,
     provider_careteam_name_expr,
     transform_default_date_to_null,
     transform_default_hipps_code,
@@ -272,18 +275,21 @@ class IdrClaimItemInstitutionalNch(IdrBaseModel):
         not_materialized = "" if load_mode == LoadMode.IDR else "NOT MATERIALIZED"
 
         return f"""
-                WITH claims AS {not_materialized} (
-                    SELECT 
-                        {clm}.clm_uniq_id, 
-                        {clm}.geo_bene_sk, 
-                        {clm}.clm_type_cd, 
-                        {clm}.clm_num_sk, 
-                        {clm}.clm_dt_sgntr_sk,
-                        {clm}.clm_idr_ld_dt
-                    FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
-                    WHERE
-                        {claim_filter(start_time, partition)} AND
-                        {clm}.clm_idr_ld_dt >= '{cls.model_type().min_transaction_date}'
+                WITH claim_base AS (
+                    {claim_base(start_time, partition)}
+                ),
+                claims as (
+                    {claim()}
+                    UNION
+                    {claim_clause("v2_mdcr_clm_line")}
+                    UNION
+                    {claim_clause("v2_mdcr_clm_prod")}
+                    UNION
+                    {claim_clause("v2_mdcr_clm_val")}
+                    UNION
+                    {claim_clause("v2_mdcr_clm_line_instnl")}
+                    UNION
+                    {clm_ansi_sgntr_clause()}
                 ),
                 claim_lines AS {not_materialized} (
                     SELECT
@@ -373,6 +379,5 @@ class IdrClaimItemInstitutionalNch(IdrBaseModel):
                 LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_prvdr_hstry {prvdr_rndrng}
                     ON {prvdr_rndrng}.prvdr_npi_num = {line}.prvdr_rndrng_prvdr_npi_num
                     AND {prvdr_rndrng}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
-                {{WHERE_CLAUSE}}
                 {{ORDER_BY}}
         """

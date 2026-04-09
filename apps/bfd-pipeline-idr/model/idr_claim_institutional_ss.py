@@ -36,11 +36,18 @@ from model.base_model import (
     UPDATE_FIELD,
     IdrBaseModel,
     ModelType,
-    claim_filter,
+    base_claim_clause,
+    claim,
+    claim_base,
+    claim_clause,
     claim_occurrence_cte,
     claim_related_conditions_cte,
     claim_related_occurrences_cte,
+    clm_dt_sgntr_clause,
+    clm_ocrnc_sgntr_clause,
     clm_orig_cntl_num_expr,
+    clm_rlt_cond_sgntr_clause,
+    clm_rlt_ocrnc_clause,
     provider_careteam_name_expr,
     provider_last_or_legal_name_expr,
     transform_default_date_to_null,
@@ -222,8 +229,10 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
     bene_ptnt_stus_cd: Annotated[
         str, {ALIAS: ALIAS_INSTNL}, BeforeValidator(transform_default_string)
     ]
-    dgns_drg_cd: Annotated[int, {ALIAS: ALIAS_INSTNL}]
-    clm_mdcr_instnl_mco_pd_sw: Annotated[str, {ALIAS: ALIAS_INSTNL}]
+    dgns_drg_cd: Annotated[int | None, {ALIAS: ALIAS_INSTNL}]
+    clm_mdcr_instnl_mco_pd_sw: Annotated[
+        str, {ALIAS: ALIAS_INSTNL}, BeforeValidator(transform_default_string)
+    ]
     clm_admsn_src_cd: Annotated[
         str, {ALIAS: ALIAS_INSTNL}, BeforeValidator(transform_default_string)
     ]
@@ -452,16 +461,25 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
         rlt_ocrnc_sgntr_dd = ALIAS_RLT_OCRNC_SGNTR_DERIVED_DATES
         not_materialized = "" if load_mode == LoadMode.IDR else "NOT MATERIALIZED"
         return f"""
-            WITH claims AS (
-                SELECT
-                    {clm}.clm_uniq_id,
-                    {clm}.geo_bene_sk,
-                    {clm}.clm_type_cd,
-                    {clm}.clm_num_sk,
-                    {clm}.clm_dt_sgntr_sk,
-                    {clm}.clm_idr_ld_dt
-                FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
-                WHERE {claim_filter(start_time, partition)}
+            WITH claim_base AS (
+                {claim_base(start_time, partition)}
+            ),
+            claims AS (
+                {claim()}
+                UNION
+                {clm_dt_sgntr_clause()}
+                UNION
+                {claim_clause("v2_mdcr_clm_instnl")}
+                UNION
+                {claim_clause("v2_mdcr_clm_dcmtn")}
+                UNION
+                {claim_clause("v2_mdcr_clm_fiss")}
+                UNION
+                {clm_ocrnc_sgntr_clause()}
+                UNION
+                {clm_rlt_cond_sgntr_clause()}
+                UNION
+                {clm_rlt_ocrnc_clause()}
             ),
             latest_clm_lctn_hstry AS (
                 SELECT
@@ -489,7 +507,12 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
             claim_related_conditions AS {not_materialized} 
                 ({claim_related_conditions_cte(load_mode)})
             SELECT {{COLUMNS}}
-            FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
+            FROM claims c
+            JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm} ON
+                {clm}.geo_bene_sk = c.geo_bene_sk AND
+                {clm}.clm_dt_sgntr_sk = c.clm_dt_sgntr_sk AND
+                {clm}.clm_type_cd = c.clm_type_cd AND
+                {clm}.clm_num_sk = c.clm_num_sk
             JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_dt_sgntr {sgntr} ON 
                 {sgntr}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
             LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_instnl {instnl} ON
@@ -542,6 +565,6 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
                 ON {ocrnc_sgntr_dd}.clm_ocrnc_sgntr_sk = {clm}.clm_ocrnc_sgntr_sk
             LEFT JOIN claim_related_occurrences_dates {rlt_ocrnc_sgntr_dd}
                 ON {rlt_ocrnc_sgntr_dd}.clm_rlt_ocrnc_sgntr_sk = {clm}.clm_rlt_ocrnc_sgntr_sk
-            {{WHERE_CLAUSE}} AND {claim_filter(start_time, partition)}
+            {{WHERE_CLAUSE}} AND {base_claim_clause(partition)}
             {{ORDER_BY}}
         """
