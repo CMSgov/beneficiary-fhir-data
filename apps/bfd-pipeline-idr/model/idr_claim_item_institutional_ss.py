@@ -32,9 +32,9 @@ from model.base_model import (
     UPDATE_FIELD,
     IdrBaseModel,
     ModelType,
-    claim,
-    claim_base,
-    claim_clause,
+    clm_base_query,
+    clm_child_query,
+    clm_query,
     provider_careteam_name_expr,
     transform_default_date_to_null,
     transform_default_hipps_code,
@@ -326,22 +326,22 @@ class IdrClaimItemInstitutionalSs(IdrBaseModel):
 
         return f"""
                 WITH claim_base AS (
-                    {claim_base(start_time, partition, cls.model_type())}
+                    {clm_base_query(start_time, partition, cls.model_type())}
                 ),
                 claims as (
-                    {claim()}
+                    {clm_query()}
                     UNION
-                    {claim_clause("v2_mdcr_clm_line")}
+                    {clm_child_query("v2_mdcr_clm_line")}
                     UNION
-                    {claim_clause("v2_mdcr_clm_prod")}
+                    {clm_child_query("v2_mdcr_clm_prod")}
                     UNION
-                    {claim_clause("v2_mdcr_clm_val")}
+                    {clm_child_query("v2_mdcr_clm_val")}
                     UNION
-                    {claim_clause("v2_mdcr_clm_line_instnl")}
+                    {clm_child_query("v2_mdcr_clm_line_instnl")}
                     UNION
-                    {claim_clause("v2_mdcr_clm_line_fiss")}
+                    {clm_child_query("v2_mdcr_clm_line_fiss")}
                     UNION
-                    {claim_clause("v2_mdcr_clm_line_fiss_bnft_svg")}
+                    {clm_child_query("v2_mdcr_clm_line_fiss_bnft_svg")}
                 ),
                 claim_lines AS {not_materialized} (
                     SELECT

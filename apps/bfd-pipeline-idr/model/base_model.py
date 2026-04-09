@@ -145,7 +145,7 @@ def provider_careteam_name_expr(alias: str, type: str | None) -> str:
     """
 
 
-def claim_base(start_time: datetime, partition: LoadPartition, model_type: ModelType) -> str:
+def clm_base_query(start_time: datetime, partition: LoadPartition, model_type: ModelType) -> str:
     clm = ALIAS_CLM
     return f"""
     SELECT
@@ -167,7 +167,7 @@ def claim_base(start_time: datetime, partition: LoadPartition, model_type: Model
     """
 
 
-def claim() -> str:
+def clm_query() -> str:
     clm = ALIAS_CLM
     return f"""
         SELECT
@@ -186,7 +186,7 @@ def claim() -> str:
     """
 
 
-def claim_clause(table: str) -> str:
+def clm_child_query(table: str) -> str:
     clm = ALIAS_CLM
     return f"""
             SELECT
@@ -207,7 +207,7 @@ def claim_clause(table: str) -> str:
         """
 
 
-def clm_ansi_sgntr_clause() -> str:
+def clm_ansi_sgntr_query() -> str:
     clm = ALIAS_CLM
     return f"""
             SELECT
@@ -225,7 +225,7 @@ def clm_ansi_sgntr_clause() -> str:
     """
 
 
-def clm_dt_sgntr_clause() -> str:
+def clm_dt_sgntr_query() -> str:
     clm = ALIAS_CLM
     return f"""
             SELECT
@@ -243,7 +243,7 @@ def clm_dt_sgntr_clause() -> str:
         """
 
 
-def clm_ocrnc_sgntr_clause() -> str:
+def clm_ocrnc_sgntr_query() -> str:
     clm = ALIAS_CLM
     return f"""
         SELECT 
@@ -283,7 +283,7 @@ def clm_rlt_ocrnc_clause() -> str:
     """
 
 
-def clm_rlt_cond_sgntr_clause() -> str:
+def clm_rlt_cond_sgntr_query() -> str:
     clm = ALIAS_CLM
     return f"""
         SELECT
@@ -305,7 +305,7 @@ def clm_rlt_cond_sgntr_clause() -> str:
     """
 
 
-def base_claim_clause(partition: LoadPartition) -> str:
+def base_claim_filter(partition: LoadPartition) -> str:
     clm = ALIAS_CLM
     claim_type_codes = partition.claim_type_codes or ALL_CLAIM_TYPE_CODES
     return f"""

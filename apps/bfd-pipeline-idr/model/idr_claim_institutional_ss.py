@@ -36,17 +36,17 @@ from model.base_model import (
     UPDATE_FIELD,
     IdrBaseModel,
     ModelType,
-    base_claim_clause,
-    claim,
-    claim_base,
-    claim_clause,
+    base_claim_filter,
     claim_occurrence_cte,
     claim_related_conditions_cte,
     claim_related_occurrences_cte,
-    clm_dt_sgntr_clause,
-    clm_ocrnc_sgntr_clause,
+    clm_base_query,
+    clm_child_query,
+    clm_dt_sgntr_query,
+    clm_ocrnc_sgntr_query,
     clm_orig_cntl_num_expr,
-    clm_rlt_cond_sgntr_clause,
+    clm_query,
+    clm_rlt_cond_sgntr_query,
     clm_rlt_ocrnc_clause,
     provider_careteam_name_expr,
     provider_last_or_legal_name_expr,
@@ -462,22 +462,22 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
         not_materialized = "" if load_mode == LoadMode.IDR else "NOT MATERIALIZED"
         return f"""
             WITH claim_base AS (
-                {claim_base(start_time, partition, cls.model_type())}
+                {clm_base_query(start_time, partition, cls.model_type())}
             ),
             claims AS (
-                {claim()}
+                {clm_query()}
                 UNION
-                {clm_dt_sgntr_clause()}
+                {clm_dt_sgntr_query()}
                 UNION
-                {claim_clause("v2_mdcr_clm_instnl")}
+                {clm_child_query("v2_mdcr_clm_instnl")}
                 UNION
-                {claim_clause("v2_mdcr_clm_dcmtn")}
+                {clm_child_query("v2_mdcr_clm_dcmtn")}
                 UNION
-                {claim_clause("v2_mdcr_clm_fiss")}
+                {clm_child_query("v2_mdcr_clm_fiss")}
                 UNION
-                {clm_ocrnc_sgntr_clause()}
+                {clm_ocrnc_sgntr_query()}
                 UNION
-                {clm_rlt_cond_sgntr_clause()}
+                {clm_rlt_cond_sgntr_query()}
                 UNION
                 {clm_rlt_ocrnc_clause()}
             ),
@@ -565,6 +565,6 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
                 ON {ocrnc_sgntr_dd}.clm_ocrnc_sgntr_sk = {clm}.clm_ocrnc_sgntr_sk
             LEFT JOIN claim_related_occurrences_dates {rlt_ocrnc_sgntr_dd}
                 ON {rlt_ocrnc_sgntr_dd}.clm_rlt_ocrnc_sgntr_sk = {clm}.clm_rlt_ocrnc_sgntr_sk
-            WHERE {base_claim_clause(partition)}
+            WHERE {base_claim_filter(partition)}
             {{ORDER_BY}}
         """

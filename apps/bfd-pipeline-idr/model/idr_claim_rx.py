@@ -28,12 +28,12 @@ from model.base_model import (
     UPDATE_FIELD,
     IdrBaseModel,
     ModelType,
-    base_claim_clause,
-    claim,
-    claim_base,
-    claim_clause,
-    clm_dt_sgntr_clause,
+    base_claim_filter,
+    clm_base_query,
+    clm_child_query,
+    clm_dt_sgntr_query,
     clm_orig_cntl_num_expr,
+    clm_query,
     provider_careteam_name_expr,
     provider_last_or_legal_name_expr,
     transform_default_date_to_null,
@@ -263,18 +263,18 @@ class IdrClaimRx(IdrBaseModel):
         pbp_num = ALIAS_PBP_NUM
         return f"""
             WITH claim_base AS (
-                {claim_base(start_time, partition, cls.model_type())}
+                {clm_base_query(start_time, partition, cls.model_type())}
             ),
             claims AS (
-                {claim()}
+                {clm_query()}
                 UNION
-                {clm_dt_sgntr_clause()}
+                {clm_dt_sgntr_query()}
                 UNION
-                {claim_clause("v2_mdcr_clm_line")}
+                {clm_child_query("v2_mdcr_clm_line")}
                 UNION
-                {claim_clause("v2_mdcr_clm_line_rx")}
+                {clm_child_query("v2_mdcr_clm_line_rx")}
                 UNION
-                {claim_clause("v2_mdcr_clm_dcmtn")}
+                {clm_child_query("v2_mdcr_clm_dcmtn")}
             ),
             contracts AS (
                 SELECT cntrct_pbp_name, cntrct_num, cntrct_pbp_num,
@@ -308,6 +308,6 @@ class IdrClaimRx(IdrBaseModel):
                 ON {pbp_num}.cntrct_num = {clm}.clm_sbmtr_cntrct_num
                 AND {pbp_num}.cntrct_pbp_num = {clm}.clm_sbmtr_cntrct_pbp_num
                 AND {pbp_num}.contract_version_rank = 1
-            WHERE {base_claim_clause(partition)}
+            WHERE {base_claim_filter(partition)}
             {{ORDER_BY}}
         """
