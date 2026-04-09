@@ -17,6 +17,13 @@ from aws_lambda_powertools.utilities.parser import envelopes
 from aws_lambda_powertools.utilities.parser.models import S3Model
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from botocore.config import Config
+from paramiko.ssh_exception import (
+    AuthenticationException,
+    BadHostKeyException,
+    NoValidConnectionsError,
+    SSHException,
+)
+from s3 import S3EventType
 from sftp_outbound_transfer_errors import (
     BaseTransferError,
     InvalidObjectKeyError,
@@ -26,13 +33,6 @@ from sftp_outbound_transfer_errors import (
     UnknownPartnerError,
     UnrecognizedFileError,
 )
-from paramiko.ssh_exception import (
-    AuthenticationException,
-    BadHostKeyException,
-    NoValidConnectionsError,
-    SSHException,
-)
-from s3 import S3EventType
 from sns import (
     FileDiscoveredDetails,
     StatusNotification,
