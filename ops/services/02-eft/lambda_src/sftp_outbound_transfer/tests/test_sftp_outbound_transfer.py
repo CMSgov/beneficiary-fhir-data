@@ -11,7 +11,7 @@ import paramiko
 import pytest
 from pydantic import ValidationError
 from sftp_outbound_transfer import handler
-from sftp_outbound_transfer.errors import (
+from sftp_outbound_transfer_errors import (
     InvalidObjectKeyError,
     InvalidPendingDirError,
     SFTPConnectionError,
