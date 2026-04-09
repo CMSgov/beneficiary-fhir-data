@@ -5,7 +5,7 @@ modules.
 from typing import Any
 
 
-def to_bool(from_obj: Any | None) -> bool:  # noqa: ANN401
+def to_bool(from_obj: Any | None) -> bool:
     """Convert any object with a valid string representation into a bool by checking if its string
     representation is "true", case-insensitive.
 
