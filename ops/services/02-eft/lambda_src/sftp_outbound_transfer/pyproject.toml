@@ -8,3 +8,10 @@ dependencies = ["aws-lambda-powertools[all]", "paramiko", "boto3", "pydantic"]
 
 [dependency-groups]
 dev = ["pytest", "pyright", "ruff", "boto3-stubs[sns,ssm]"]
+
+[tool.uv.sources]
+sftp-outbound-transfer = { editable = true, path = "." }
+
+[tool.pyright]
+include = ["."]
+exclude = ["**/__pycache__", "venv", ".uv"]
