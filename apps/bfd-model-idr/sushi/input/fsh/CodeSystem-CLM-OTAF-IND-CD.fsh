@@ -1,5 +1,5 @@
 CodeSystem: CLM_OTAF_IND_CD
-Title: "Claim Revenue Discount Indicator Code"
+Title: "Claim OTAF Indicator Code"
 Id: CLM-OTAF-IND-CD
 Description: "THE DOMAIN OF OTAF INDICATOR CODES"
 * ^url = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-OTAF-IND-CD"
