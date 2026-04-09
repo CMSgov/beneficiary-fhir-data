@@ -1,9 +1,10 @@
 import json
 import sys
 from dataclasses import asdict, dataclass, field
-from datetime import UTC, datetime
 from decimal import Decimal
 from pathlib import Path
+from typing import Optional
+from datetime import datetime, timezone
 
 import pandas as pd
 
@@ -49,7 +50,7 @@ header_to_supp_info_cols = {
     "CLM_NGACO_TLHLTH_SW": "CLM_NGACO_TLHLTH_SW",
     "CLM_NGACO_CPTATN_SW": "CLM_NGACO_CPTATN_SW",
     "CLM_ACO_CARE_MGMT_HCBS_SW": "CLM_ACO_CARE_MGMT_HCBS_SW",
-    "CLM_PD_STUS_CD": "CLM_PD_STUS_CD",
+    "CLM_PD_STUS_CD": "CLM_PD_STUS_CD"
 }
 
 line_to_supp_info_cols = {
@@ -90,23 +91,21 @@ def convert_to_decimal(val: str | None) -> Decimal:
     except (TypeError, ValueError):
         return 0.0
 
-
 @dataclass
 class Provider:
-    PRVDR_SK: str | None = None
-    PRVDR_ID_QLFYR_CD: str | None = None
-    NPI_TYPE: str | None = None
-    careTeamType: str | None = None
-    careTeamSequenceNumber: str | None = None
-    PRVDR_LAST_OR_LGL_NAME: str | None = None
-    PRVDR_1ST_NAME: str | None = None
-    PRVDR_CARETEAM_NAME: str | None = None
-    specialtyCode: str | None = None
-    PRVDR_OSCAR_NUM: str | None = None
-    CLM_BLG_PRVDR_ZIP5_CD: str | None = None
-    CLM_PRVDR_GNRC_ID_NUM: str | None = None
-    CLM_BLG_PRVDR_TAX_NUM: str | None = None
-
+    PRVDR_SK: Optional[str] = None
+    PRVDR_ID_QLFYR_CD: Optional[str] = None
+    NPI_TYPE: Optional[str] = None
+    careTeamType: Optional[str] = None
+    careTeamSequenceNumber: Optional[str] = None
+    PRVDR_LAST_OR_LGL_NAME: Optional[str] = None
+    PRVDR_1ST_NAME: Optional[str] = None
+    PRVDR_CARETEAM_NAME: Optional[str] = None
+    specialtyCode: Optional[str] = None
+    PRVDR_OSCAR_NUM: Optional[str] = None
+    CLM_BLG_PRVDR_ZIP5_CD: Optional[str] = None
+    CLM_PRVDR_GNRC_ID_NUM: Optional[str] = None
+    CLM_BLG_PRVDR_TAX_NUM: Optional[str] = None
 
 populate_fields_except_na = [
     "PRVDR_LGL_NAME",
@@ -117,7 +116,6 @@ populate_fields_except_na = [
     "PRVDR_TYPE_CD",
 ]
 provider_list = []
-
 
 # There may be an opportunity to consolidate even the duplicate NPIs into a
 # single careTeam reference, but we should wait to get feedback on this
@@ -157,9 +155,7 @@ def create_billing_and_service_provider(billing_col_name):
         provider_object.CLM_PRVDR_GNRC_ID_NUM = cur_sample_data["CLM_SRVC_PRVDR_GNRC_ID_NUM"]
     return provider_object
 
-
 provider_list.append(create_billing_and_service_provider(billing_column))
-
 
 # For careteam elements, we don't need OSCAR number, TAX num (it's line-item), etc.
 # We DO care about qualifiers + taxonomy, so we have a separate method.
@@ -223,7 +219,6 @@ def create_rendering_line_provider(npi_num):
         else prvdr_hstry_for_npi["PRVDR_LAST_NAME"] + ", " + prvdr_hstry_for_npi["PRVDR_1ST_NAME"]
     )
     return provider_object
-
 
 # now we go through the line items!
 for line_item in cur_sample_data["lineItemComponents"]:
@@ -319,17 +314,15 @@ cur_sample_data["providerList"] = [
     {k: v for k, v in asdict(p).items() if v is not None} for p in provider_list
 ]
 
-
 # diagnoses section
 @dataclass
 class Diagnosis:
     CLM_DGNS_CD: str
-    CLM_PROD_TYPE_CD: str = "D"
-    CLM_POA_IND: str = "~"
-    CLM_DGNS_PRCDR_ICD_IND: str = "0"
-    ROW_NUM: str = "1"
+    CLM_PROD_TYPE_CD: str = 'D'
+    CLM_POA_IND: str = '~'
+    CLM_DGNS_PRCDR_ICD_IND: str = '0'
+    ROW_NUM: str = '1'
     clm_prod_type_cd_map: list[str] = field(default_factory=list)
-
 
 diagnosis_codes = [
     Diagnosis(
@@ -409,7 +402,7 @@ for item in cur_sample_data.get("lineItemComponents", []):
             (
                 d
                 for d in diagnosis_codes
-                if line_dgns_cd == d.CLM_DGNS_CD and d.CLM_PROD_TYPE_CD == "D"
+                if line_dgns_cd == d.CLM_DGNS_CD and d.CLM_PROD_TYPE_CD == 'D'
             ),
             None,
         ):
@@ -417,7 +410,7 @@ for item in cur_sample_data.get("lineItemComponents", []):
 
 filename = "out/temporary-sample.json"
 
-cur_sample_data["lastUpdated"] = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+cur_sample_data["lastUpdated"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
 with Path(filename).open("w") as f:
     json.dump(cur_sample_data, f, indent=4)
