@@ -183,7 +183,7 @@ def clm_query() -> str:
             {clm}.clm_num_sk,
             {clm}.clm_dt_sgntr_sk,
             {clm}.clm_idr_ld_dt
-        FROM claim_base clm
+        FROM claim_base {clm}
         WHERE (
             {clm}.clm_idr_ld_dt {{FILTER_OP}} {{LAST_TS}} 
             OR {clm}.idr_insrt_ts {{FILTER_OP}} {{LAST_TS}} 
