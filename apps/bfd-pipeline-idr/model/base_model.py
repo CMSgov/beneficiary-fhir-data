@@ -154,22 +154,22 @@ NON_COVERED_STAY_CD = "74"
 def clm_base_query(start_time: datetime, partition: LoadPartition, model_type: ModelType) -> str:
     clm = ALIAS_CLM
     return f"""
-    SELECT
-        clm_uniq_id,
-        geo_bene_sk,
-        clm_type_cd,
-        clm_num_sk,
-        clm_dt_sgntr_sk,
-        clm_ocrnc_sgntr_sk,
-        clm_rlt_cond_sgntr_sk,
-        clm_rlt_ocrnc_sgntr_sk,
-        clm_idr_ld_dt,
-        idr_insrt_ts,
-        idr_updt_ts
-    FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
-    WHERE 
-        {claim_filter(start_time, partition)} AND
-        {clm}.clm_idr_ld_dt >= '{model_type.min_transaction_date}'
+        SELECT
+            clm_uniq_id,
+            geo_bene_sk,
+            clm_type_cd,
+            clm_num_sk,
+            clm_dt_sgntr_sk,
+            clm_ocrnc_sgntr_sk,
+            clm_rlt_cond_sgntr_sk,
+            clm_rlt_ocrnc_sgntr_sk,
+            clm_idr_ld_dt,
+            idr_insrt_ts,
+            idr_updt_ts
+        FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
+        WHERE 
+            {claim_filter(start_time, partition)} AND
+            {clm}.clm_idr_ld_dt >= '{model_type.min_transaction_date}'
     """
 
 
@@ -195,57 +195,57 @@ def clm_query() -> str:
 def clm_child_query(table: str) -> str:
     clm = ALIAS_CLM
     return f"""
-            SELECT
-                {clm}.clm_uniq_id,
-                {clm}.geo_bene_sk,
-                {clm}.clm_type_cd,
-                {clm}.clm_num_sk,
-                {clm}.clm_dt_sgntr_sk,
-                {clm}.clm_idr_ld_dt
+        SELECT
+            {clm}.clm_uniq_id,
+            {clm}.geo_bene_sk,
+            {clm}.clm_type_cd,
+            {clm}.clm_num_sk,
+            {clm}.clm_dt_sgntr_sk,
+            {clm}.clm_idr_ld_dt
         FROM cms_vdm_view_mdcr_prd.{table} temp
         JOIN claim_base clm ON
             {clm}.geo_bene_sk = temp.geo_bene_sk AND
             {clm}.clm_dt_sgntr_sk = temp.clm_dt_sgntr_sk AND
             {clm}.clm_type_cd = temp.clm_type_cd AND
             {clm}.clm_num_sk = temp.clm_num_sk
-            WHERE (temp.idr_insrt_ts {{FILTER_OP}} {{LAST_TS}} 
-                OR temp.idr_updt_ts {{FILTER_OP}} {{LAST_TS}})
+        WHERE (temp.idr_insrt_ts {{FILTER_OP}} {{LAST_TS}} 
+            OR temp.idr_updt_ts {{FILTER_OP}} {{LAST_TS}})
         """
 
 
 def clm_ansi_sgntr_query() -> str:
     clm = ALIAS_CLM
     return f"""
-            SELECT
-                {clm}.clm_uniq_id,
-                {clm}.geo_bene_sk,
-                {clm}.clm_type_cd,
-                {clm}.clm_num_sk,
-                {clm}.clm_dt_sgntr_sk,
-                {clm}.clm_idr_ld_dt
+        SELECT
+            {clm}.clm_uniq_id,
+            {clm}.geo_bene_sk,
+            {clm}.clm_type_cd,
+            {clm}.clm_num_sk,
+            {clm}.clm_dt_sgntr_sk,
+            {clm}.clm_idr_ld_dt
         FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_ansi_sgntr sgntr
         JOIN claim_base clm ON
             {clm}.clm_dt_sgntr_sk = sgntr.clm_ansi_sgntr_sk
-            WHERE (sgntr.idr_insrt_ts {{FILTER_OP}} {{LAST_TS}} 
-                OR sgntr.idr_updt_ts {{FILTER_OP}} {{LAST_TS}})
+        WHERE (sgntr.idr_insrt_ts {{FILTER_OP}} {{LAST_TS}} 
+            OR sgntr.idr_updt_ts {{FILTER_OP}} {{LAST_TS}})
     """
 
 
 def clm_dt_sgntr_query() -> str:
     clm = ALIAS_CLM
     return f"""
-            SELECT
-                {clm}.clm_uniq_id,
-                {clm}.geo_bene_sk,
-                {clm}.clm_type_cd,
-                {clm}.clm_num_sk,
-                {clm}.clm_dt_sgntr_sk,
-                {clm}.clm_idr_ld_dt
+        SELECT
+            {clm}.clm_uniq_id,
+            {clm}.geo_bene_sk,
+            {clm}.clm_type_cd,
+            {clm}.clm_num_sk,
+            {clm}.clm_dt_sgntr_sk,
+            {clm}.clm_idr_ld_dt
         FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_dt_sgntr sgntr
         JOIN claim_base clm ON
             {clm}.clm_dt_sgntr_sk = sgntr.clm_dt_sgntr_sk
-            WHERE (sgntr.idr_insrt_ts {{FILTER_OP}} {{LAST_TS}} 
-                OR sgntr.idr_updt_ts {{FILTER_OP}} {{LAST_TS}})
+        WHERE (sgntr.idr_insrt_ts {{FILTER_OP}} {{LAST_TS}} 
+            OR sgntr.idr_updt_ts {{FILTER_OP}} {{LAST_TS}})
         """
 
 
@@ -254,19 +254,19 @@ def clm_ocrnc_sgntr_query() -> str:
     return f"""
         SELECT 
             {clm}.clm_uniq_id,
-                {clm}.geo_bene_sk,
-                {clm}.clm_type_cd,
-                {clm}.clm_num_sk,
-                {clm}.clm_dt_sgntr_sk,
-                {clm}.clm_idr_ld_dt
-            FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_ocrnc_sgntr_mbr sgntr
-            JOIN claim_base clm ON
-                {clm}.clm_ocrnc_sgntr_sk = sgntr.clm_ocrnc_sgntr_sk
-            WHERE sgntr.clm_ocrnc_span_cd IN ('{QUALIFYING_STAY_CD}', '{NON_COVERED_STAY_CD}') 
-            AND (
-                sgntr.idr_insrt_ts {{FILTER_OP}} {{LAST_TS}} 
-                OR sgntr.idr_updt_ts {{FILTER_OP}} {{LAST_TS}} 
-            )
+            {clm}.geo_bene_sk,
+            {clm}.clm_type_cd,
+            {clm}.clm_num_sk,
+            {clm}.clm_dt_sgntr_sk,
+            {clm}.clm_idr_ld_dt
+        FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_ocrnc_sgntr_mbr sgntr
+        JOIN claim_base clm ON
+            {clm}.clm_ocrnc_sgntr_sk = sgntr.clm_ocrnc_sgntr_sk
+        WHERE sgntr.clm_ocrnc_span_cd IN ('{QUALIFYING_STAY_CD}', '{NON_COVERED_STAY_CD}') 
+        AND (
+            sgntr.idr_insrt_ts {{FILTER_OP}} {{LAST_TS}} 
+            OR sgntr.idr_updt_ts {{FILTER_OP}} {{LAST_TS}} 
+        )
     """
 
 
@@ -275,17 +275,17 @@ def clm_rlt_ocrnc_clause() -> str:
     return f"""
         SELECT
             {clm}.clm_uniq_id,
-                {clm}.geo_bene_sk,
-                {clm}.clm_type_cd,
-                {clm}.clm_num_sk,
-                {clm}.clm_dt_sgntr_sk,
-                {clm}.clm_idr_ld_dt
+            {clm}.geo_bene_sk,
+            {clm}.clm_type_cd,
+            {clm}.clm_num_sk,
+            {clm}.clm_dt_sgntr_sk,
+            {clm}.clm_idr_ld_dt
         FROM cms_vdm_view_mdcr_prd.v2_clm_rlt_ocrnc_sgntr_mbr sgntr
         JOIN claim_base clm ON
-                {clm}.clm_rlt_ocrnc_sgntr_sk = sgntr.clm_rlt_ocrnc_sgntr_sk
+            {clm}.clm_rlt_ocrnc_sgntr_sk = sgntr.clm_rlt_ocrnc_sgntr_sk
         WHERE sgntr.clm_rlt_ocrnc_cd IN ('{MEDICARE_EXHAUSTED_CD}', '{ACTIVE_CARE_CD}') AND (
-                sgntr.idr_insrt_ts {{FILTER_OP}} {{LAST_TS}} 
-                OR sgntr.idr_updt_ts {{FILTER_OP}} {{LAST_TS}}
+            sgntr.idr_insrt_ts {{FILTER_OP}} {{LAST_TS}} 
+            OR sgntr.idr_updt_ts {{FILTER_OP}} {{LAST_TS}}
             )
     """
 
@@ -295,14 +295,14 @@ def clm_rlt_cond_sgntr_query() -> str:
     return f"""
         SELECT
             {clm}.clm_uniq_id,
-                {clm}.geo_bene_sk,
-                {clm}.clm_type_cd,
-                {clm}.clm_num_sk,
-                {clm}.clm_dt_sgntr_sk,
-                {clm}.clm_idr_ld_dt
+            {clm}.geo_bene_sk,
+            {clm}.clm_type_cd,
+            {clm}.clm_num_sk,
+            {clm}.clm_dt_sgntr_sk,
+            {clm}.clm_idr_ld_dt
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_rlt_cond_sgntr_mbr sgntr
             JOIN claim_base clm ON
-                    {clm}.clm_rlt_cond_sgntr_sk = sgntr.clm_rlt_cond_sgntr_sk
+                {clm}.clm_rlt_cond_sgntr_sk = sgntr.clm_rlt_cond_sgntr_sk
             WHERE sgntr.clm_rlt_cond_sgntr_sk NOT IN (0, 1, -1)
                 AND sgntr.clm_rlt_cond_cd != '~' 
                 AND (
