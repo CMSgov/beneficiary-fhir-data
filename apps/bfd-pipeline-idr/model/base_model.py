@@ -725,6 +725,7 @@ def claim_occurrence_cte() -> str:
     ocrnc_sgntr = ALIAS_OCRNC_SGNTR
     qualifying_stay_cd = "70"
     non_covered_stay_cd = "74"
+    # Note: idr_updt_ts is always null
     return f"""
             SELECT
                 clm_ocrnc_sgntr_sk,
@@ -746,6 +747,7 @@ def claim_related_occurrences_cte() -> str:
     rlt_ocrnc_sgntr = ALIAS_RLT_OCRNC_SGNTR
     medicare_exhausted_cd = "A3"
     active_care_cd = "22"
+    # Note: idr_updt_ts is always null
     return f"""
             SELECT
                 clm_rlt_ocrnc_sgntr_sk,
@@ -782,7 +784,7 @@ def claim_related_conditions_cte(load_mode: LoadMode) -> str:
                 ORDER BY clm_rlt_cond_sgntr_sqnc_num, clm_rlt_cond_cd
             )
         """
-
+    # Note: idr_updt_ts is always null
     return f"""
             SELECT
                 clm_rlt_cond_sgntr_sk,
