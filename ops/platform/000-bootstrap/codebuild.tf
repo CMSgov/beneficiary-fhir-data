@@ -162,6 +162,7 @@ resource "aws_cloudwatch_log_group" "runner" {
 
   name       = "/aws/codebuild/${each.value.name}"
   kms_key_id = aws_kms_key.primary["platform"].arn
+  retention_in_days = 2557
 }
 
 resource "aws_codebuild_project" "runner" {
