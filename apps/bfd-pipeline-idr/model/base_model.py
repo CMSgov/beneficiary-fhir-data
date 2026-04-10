@@ -408,6 +408,7 @@ class IdrBaseModel(BaseModel, ABC):
 
 T = TypeVar("T", bound=IdrBaseModel)
 
+
 def prune_cap(start_time: datetime) -> str:
     clm = ALIAS_CLM
     pac_cutoff_date = start_time - timedelta(days=60)
