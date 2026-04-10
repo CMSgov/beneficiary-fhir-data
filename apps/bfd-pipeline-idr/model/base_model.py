@@ -208,8 +208,8 @@ def clm_child_query(table: str) -> str:
             {clm}.clm_dt_sgntr_sk = temp.clm_dt_sgntr_sk AND
             {clm}.clm_type_cd = temp.clm_type_cd AND
             {clm}.clm_num_sk = temp.clm_num_sk
-            WHERE ({clm}.idr_insrt_ts {{FILTER_OP}} {{LAST_TS}} 
-                OR {clm}.idr_updt_ts {{FILTER_OP}} {{LAST_TS}})
+            WHERE (temp.idr_insrt_ts {{FILTER_OP}} {{LAST_TS}} 
+                OR temp.idr_updt_ts {{FILTER_OP}} {{LAST_TS}})
         """
 
 
@@ -223,11 +223,11 @@ def clm_ansi_sgntr_query() -> str:
                 {clm}.clm_num_sk,
                 {clm}.clm_dt_sgntr_sk,
                 {clm}.clm_idr_ld_dt
-        FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_ansi_sgntr temp
+        FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_ansi_sgntr sgntr
         JOIN claim_base clm ON
-            {clm}.clm_dt_sgntr_sk = temp.clm_ansi_sgntr_sk
-            WHERE (temp.idr_insrt_ts {{FILTER_OP}} {{LAST_TS}} 
-                OR temp.idr_updt_ts {{FILTER_OP}} {{LAST_TS}})
+            {clm}.clm_dt_sgntr_sk = sgntr.clm_ansi_sgntr_sk
+            WHERE (sgntr.idr_insrt_ts {{FILTER_OP}} {{LAST_TS}} 
+                OR sgntr.idr_updt_ts {{FILTER_OP}} {{LAST_TS}})
     """
 
 
@@ -241,11 +241,11 @@ def clm_dt_sgntr_query() -> str:
                 {clm}.clm_num_sk,
                 {clm}.clm_dt_sgntr_sk,
                 {clm}.clm_idr_ld_dt
-        FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_dt_sgntr temp
+        FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_dt_sgntr sgntr
         JOIN claim_base clm ON
-            {clm}.clm_dt_sgntr_sk = temp.clm_dt_sgntr_sk
-            WHERE (temp.idr_insrt_ts {{FILTER_OP}} {{LAST_TS}} 
-                OR temp.idr_updt_ts {{FILTER_OP}} {{LAST_TS}})
+            {clm}.clm_dt_sgntr_sk = sgntr.clm_dt_sgntr_sk
+            WHERE (sgntr.idr_insrt_ts {{FILTER_OP}} {{LAST_TS}} 
+                OR sgntr.idr_updt_ts {{FILTER_OP}} {{LAST_TS}})
         """
 
 
@@ -294,7 +294,7 @@ def clm_rlt_cond_sgntr_query() -> str:
     clm = ALIAS_CLM
     return f"""
         SELECT
-           {clm}.clm_uniq_id,
+            {clm}.clm_uniq_id,
                 {clm}.geo_bene_sk,
                 {clm}.clm_type_cd,
                 {clm}.clm_num_sk,
