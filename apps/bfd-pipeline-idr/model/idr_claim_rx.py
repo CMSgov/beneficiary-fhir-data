@@ -285,7 +285,12 @@ class IdrClaimRx(IdrBaseModel):
                 FROM cms_vdm_view_mdcr_prd.v2_mdcr_cntrct_pbp_num
             )
             SELECT {{COLUMNS}}
-            FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
+            FROM claims c
+            JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm} ON
+                {clm}.geo_bene_sk = c.geo_bene_sk AND
+                {clm}.clm_dt_sgntr_sk = c.clm_dt_sgntr_sk AND
+                {clm}.clm_type_cd = c.clm_type_cd AND
+                {clm}.clm_num_sk = c.clm_num_sk
             JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_dt_sgntr {sgntr} ON 
                 {sgntr}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
             JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_line {line} ON
@@ -308,6 +313,6 @@ class IdrClaimRx(IdrBaseModel):
                 ON {pbp_num}.cntrct_num = {clm}.clm_sbmtr_cntrct_num
                 AND {pbp_num}.cntrct_pbp_num = {clm}.clm_sbmtr_cntrct_pbp_num
                 AND {pbp_num}.contract_version_rank = 1
-            WHERE {base_claim_filter(partition)}
+            {{WHERE_CLAUSE}} AND {base_claim_filter(partition)}
             {{ORDER_BY}}
         """

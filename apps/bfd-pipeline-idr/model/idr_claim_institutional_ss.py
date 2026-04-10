@@ -475,6 +475,8 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
                 UNION
                 {clm_child_query("v2_mdcr_clm_fiss")}
                 UNION
+                {clm_child_query("v2_mdcr_clm_lctn_hstry")}
+                UNION
                 {clm_ocrnc_sgntr_query()}
                 UNION
                 {clm_rlt_cond_sgntr_query()}
@@ -565,6 +567,6 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
                 ON {ocrnc_sgntr_dd}.clm_ocrnc_sgntr_sk = {clm}.clm_ocrnc_sgntr_sk
             LEFT JOIN claim_related_occurrences_dates {rlt_ocrnc_sgntr_dd}
                 ON {rlt_ocrnc_sgntr_dd}.clm_rlt_ocrnc_sgntr_sk = {clm}.clm_rlt_ocrnc_sgntr_sk
-            WHERE {base_claim_filter(partition)}
+            {{WHERE_CLAUSE}} AND {base_claim_filter(partition)}
             {{ORDER_BY}}
         """
