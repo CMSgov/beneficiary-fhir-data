@@ -301,7 +301,7 @@ def clm_rlt_cond_sgntr_query() -> str:
             {clm}.clm_dt_sgntr_sk,
             {clm}.clm_idr_ld_dt
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_rlt_cond_sgntr_mbr sgntr
-            JOIN claim_base clm ON
+            JOIN claim_base {clm} ON
                 {clm}.clm_rlt_cond_sgntr_sk = sgntr.clm_rlt_cond_sgntr_sk
             WHERE sgntr.clm_rlt_cond_sgntr_sk NOT IN (0, 1, -1)
                 AND sgntr.clm_rlt_cond_cd != '~' 
