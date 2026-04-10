@@ -13,12 +13,25 @@ module "bucket_tf_state" {
   }
 }
 
+resource "aws_s3_bucket_versioning" "this" {
+  for_each = module.bucket_tf_state
+  
+  # Assumes the module outputs a 'bucket' object with an 'id' attribute
+  bucket = each.value.bucket.id 
+  
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
 resource "aws_s3_bucket_lifecycle_configuration" "this" {
   for_each = module.bucket_tf_state
   bucket   = each.value.bucket.id
 
+  depends_on = [aws_s3_bucket_versioning.this]
+
   rule {
-    id     = "${local.name_prefix}-${each.key}-versions-retained"
+    id     = "${each.value.bucket.id}-versions-retained"
     status = "Enabled"
 
     noncurrent_version_expiration {
