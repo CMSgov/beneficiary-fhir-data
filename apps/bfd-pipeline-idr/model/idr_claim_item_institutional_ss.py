@@ -337,6 +337,8 @@ class IdrClaimItemInstitutionalSs(IdrBaseModel):
                     UNION
                     {clm_child_query("v2_mdcr_clm_val")}
                     UNION
+                    {clm_child_query("v2_mdcr_clm_line_dcmtn")}
+                    UNION
                     {clm_child_query("v2_mdcr_clm_line_instnl")}
                     UNION
                     {clm_child_query("v2_mdcr_clm_line_fiss")}

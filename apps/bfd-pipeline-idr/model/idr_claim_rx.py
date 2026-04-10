@@ -273,8 +273,6 @@ class IdrClaimRx(IdrBaseModel):
                 {clm_child_query("v2_mdcr_clm_line")}
                 UNION
                 {clm_child_query("v2_mdcr_clm_line_rx")}
-                UNION
-                {clm_child_query("v2_mdcr_clm_dcmtn")}
             ),
             contracts AS (
                 SELECT cntrct_pbp_name, cntrct_num, cntrct_pbp_num,
