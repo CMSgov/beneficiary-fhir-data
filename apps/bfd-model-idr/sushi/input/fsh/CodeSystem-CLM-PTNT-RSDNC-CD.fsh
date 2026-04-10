@@ -1,5 +1,5 @@
 CodeSystem: CLM_PTNT_RSDNC_CD
-Title: "Pharmacy service type code"
+Title: "Patient Residence Code"
 Id: CLM-PTNT-RSDNC-CD
 Description: "This variable indicates where the beneficiary lived when the prescription was filled, as reported on the PDE record. CMS requires Part D plans to maintain pharmacy networks that are sufficient to ensure convenient access to Medicare beneficiaries – including retail, home infusion, and long-term care pharmacies. This variable is designed to help CMS and plan sponsors monitor beneficiary access to a range of 'in-network' pharmacies."
 * ^url = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PTNT-RSDNC-CD"
