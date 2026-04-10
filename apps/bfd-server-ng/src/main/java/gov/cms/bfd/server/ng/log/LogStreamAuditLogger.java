@@ -27,7 +27,7 @@ public class LogStreamAuditLogger implements AuditLogger {
         LOGGER
             .atInfo()
             .setMessage(PATIENT_MATCH_REQUESTED)
-            .addKeyValue("logType", "patientMatchAudit")
+            .addKeyValue(LOG_TYPE, "patientMatchAudit")
             .addKeyValue(logKey(AUDIT_PREFIX, MATCHED_BENE_SK), matchedBeneSk.get().toString())
             .addKeyValue(
                 logKey(AUDIT_PREFIX, BENE_SKS_FOUND),

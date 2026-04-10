@@ -37,7 +37,8 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
           } ]
         },
         "value" : "1730548868"
-      }
+      },
+      "type" : "Practitioner"
     },
     "role" : {
       "coding" : [ {
@@ -652,7 +653,8 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
           } ]
         },
         "value" : "1437702123"
-      }
+      },
+      "type" : "Practitioner"
     },
     "role" : {
       "coding" : [ {

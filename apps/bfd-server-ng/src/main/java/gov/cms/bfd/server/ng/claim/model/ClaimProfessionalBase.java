@@ -100,11 +100,14 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
               claimLine.ifPresent(cl -> cl.addInformationSequence(si.getSequence()));
             });
 
+    var claimContext = getClaimTypeCode().toContext();
     item.getClaimLine()
         .getClaimLineRenderingProvider()
         .flatMap(
             provider ->
-                item.getClaimLine().getClaimLineNumber().flatMap(provider::toFhirCareTeamComponent))
+                item.getClaimLine()
+                    .getClaimLineNumber()
+                    .flatMap(sequence -> provider.toFhirCareTeamComponent(sequence, claimContext)))
         .ifPresent(eob::addCareTeam);
 
     item.getProcedure()
@@ -151,7 +154,7 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
   private void addCareTeam(ExplanationOfBenefit eob) {
     var sequenceGenerator = new SequenceGenerator(eob.getCareTeam().size() + 1);
     getReferringProviderHistory()
-        .toFhirCareTeamComponent(sequenceGenerator.next())
+        .toFhirCareTeamComponent(sequenceGenerator.next(), getClaimTypeCode().toContext())
         .ifPresent(eob::addCareTeam);
     addSubclassCareTeam(eob, sequenceGenerator);
   }

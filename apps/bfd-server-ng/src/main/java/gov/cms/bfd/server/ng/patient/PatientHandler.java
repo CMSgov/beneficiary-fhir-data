@@ -17,7 +17,6 @@ import gov.cms.bfd.server.ng.model.ProfileType;
 import gov.cms.bfd.server.ng.util.*;
 import java.time.Instant;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -126,7 +125,7 @@ public class PatientHandler {
             .searchBeneficiaryWithCoverage(beneSk, new DateTimeRange())
             .filter(b -> !b.isMergedBeneficiary());
     if (beneficiaryOpt.isEmpty()) {
-      return FhirUtil.bundleOrDefault(List.of(), loadProgressRepository::lastUpdated);
+      return FhirUtil.bundleOrDefault(Stream.of(), loadProgressRepository::lastUpdated);
     }
     var beneficiary = beneficiaryOpt.get();
 
