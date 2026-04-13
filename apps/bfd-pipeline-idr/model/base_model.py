@@ -145,6 +145,182 @@ def provider_careteam_name_expr(alias: str, type: str | None) -> str:
     """
 
 
+MEDICARE_EXHAUSTED_CD = "A3"
+ACTIVE_CARE_CD = "22"
+QUALIFYING_STAY_CD = "70"
+NON_COVERED_STAY_CD = "74"
+
+
+def clm_base_query(start_time: datetime, partition: LoadPartition, model_type: ModelType) -> str:
+    clm = ALIAS_CLM
+    return f"""
+        SELECT
+            clm_uniq_id,
+            geo_bene_sk,
+            clm_type_cd,
+            clm_num_sk,
+            clm_dt_sgntr_sk,
+            clm_ocrnc_sgntr_sk,
+            clm_rlt_cond_sgntr_sk,
+            clm_rlt_ocrnc_sgntr_sk,
+            clm_idr_ld_dt,
+            idr_insrt_ts,
+            idr_updt_ts
+        FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
+        WHERE 
+            {claim_filter(start_time, partition)} AND
+            {clm}.clm_idr_ld_dt >= '{model_type.min_transaction_date}'
+    """
+
+
+def clm_query() -> str:
+    clm = ALIAS_CLM
+    return f"""
+        SELECT
+            {clm}.clm_uniq_id,
+            {clm}.geo_bene_sk,
+            {clm}.clm_type_cd,
+            {clm}.clm_num_sk,
+            {clm}.clm_dt_sgntr_sk,
+            {clm}.clm_idr_ld_dt
+        FROM claim_base {clm}
+        WHERE (
+            {clm}.clm_idr_ld_dt {{FILTER_OP}} {{LAST_TS}} 
+            OR {clm}.idr_insrt_ts {{FILTER_OP}} {{LAST_TS}} 
+            OR {clm}.idr_updt_ts {{FILTER_OP}} {{LAST_TS}}
+        )       
+    """
+
+
+def clm_child_query(table: str) -> str:
+    clm = ALIAS_CLM
+    return f"""
+        SELECT
+            {clm}.clm_uniq_id,
+            {clm}.geo_bene_sk,
+            {clm}.clm_type_cd,
+            {clm}.clm_num_sk,
+            {clm}.clm_dt_sgntr_sk,
+            {clm}.clm_idr_ld_dt
+        FROM cms_vdm_view_mdcr_prd.{table} temp
+        JOIN claim_base clm ON
+            {clm}.geo_bene_sk = temp.geo_bene_sk AND
+            {clm}.clm_dt_sgntr_sk = temp.clm_dt_sgntr_sk AND
+            {clm}.clm_type_cd = temp.clm_type_cd AND
+            {clm}.clm_num_sk = temp.clm_num_sk
+        WHERE (temp.idr_insrt_ts {{FILTER_OP}} {{LAST_TS}} 
+            OR temp.idr_updt_ts {{FILTER_OP}} {{LAST_TS}})
+        """
+
+
+def clm_ansi_sgntr_query() -> str:
+    clm = ALIAS_CLM
+    return f"""
+        SELECT
+            {clm}.clm_uniq_id,
+            {clm}.geo_bene_sk,
+            {clm}.clm_type_cd,
+            {clm}.clm_num_sk,
+            {clm}.clm_dt_sgntr_sk,
+            {clm}.clm_idr_ld_dt
+        FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_ansi_sgntr sgntr
+        JOIN claim_base clm ON
+            {clm}.clm_dt_sgntr_sk = sgntr.clm_ansi_sgntr_sk
+        WHERE (sgntr.idr_insrt_ts {{FILTER_OP}} {{LAST_TS}} 
+            OR sgntr.idr_updt_ts {{FILTER_OP}} {{LAST_TS}})
+    """
+
+
+def clm_dt_sgntr_query() -> str:
+    clm = ALIAS_CLM
+    return f"""
+        SELECT
+            {clm}.clm_uniq_id,
+            {clm}.geo_bene_sk,
+            {clm}.clm_type_cd,
+            {clm}.clm_num_sk,
+            {clm}.clm_dt_sgntr_sk,
+            {clm}.clm_idr_ld_dt
+        FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_dt_sgntr sgntr
+        JOIN claim_base clm ON
+            {clm}.clm_dt_sgntr_sk = sgntr.clm_dt_sgntr_sk
+        WHERE (sgntr.idr_insrt_ts {{FILTER_OP}} {{LAST_TS}} 
+            OR sgntr.idr_updt_ts {{FILTER_OP}} {{LAST_TS}})
+        """
+
+
+def clm_ocrnc_sgntr_query() -> str:
+    clm = ALIAS_CLM
+    return f"""
+        SELECT 
+            {clm}.clm_uniq_id,
+            {clm}.geo_bene_sk,
+            {clm}.clm_type_cd,
+            {clm}.clm_num_sk,
+            {clm}.clm_dt_sgntr_sk,
+            {clm}.clm_idr_ld_dt
+        FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_ocrnc_sgntr_mbr sgntr
+        JOIN claim_base clm ON
+            {clm}.clm_ocrnc_sgntr_sk = sgntr.clm_ocrnc_sgntr_sk
+        WHERE sgntr.clm_ocrnc_span_cd IN ('{QUALIFYING_STAY_CD}', '{NON_COVERED_STAY_CD}') 
+        AND (
+            sgntr.idr_insrt_ts {{FILTER_OP}} {{LAST_TS}} 
+            OR sgntr.idr_updt_ts {{FILTER_OP}} {{LAST_TS}} 
+        )
+    """
+
+
+def clm_rlt_ocrnc_clause() -> str:
+    clm = ALIAS_CLM
+    return f"""
+        SELECT
+            {clm}.clm_uniq_id,
+            {clm}.geo_bene_sk,
+            {clm}.clm_type_cd,
+            {clm}.clm_num_sk,
+            {clm}.clm_dt_sgntr_sk,
+            {clm}.clm_idr_ld_dt
+        FROM cms_vdm_view_mdcr_prd.v2_clm_rlt_ocrnc_sgntr_mbr sgntr
+        JOIN claim_base clm ON
+            {clm}.clm_rlt_ocrnc_sgntr_sk = sgntr.clm_rlt_ocrnc_sgntr_sk
+        WHERE sgntr.clm_rlt_ocrnc_cd IN ('{MEDICARE_EXHAUSTED_CD}', '{ACTIVE_CARE_CD}') AND (
+            sgntr.idr_insrt_ts {{FILTER_OP}} {{LAST_TS}} 
+            OR sgntr.idr_updt_ts {{FILTER_OP}} {{LAST_TS}}
+            )
+    """
+
+
+def clm_rlt_cond_sgntr_query() -> str:
+    clm = ALIAS_CLM
+    return f"""
+        SELECT
+            {clm}.clm_uniq_id,
+            {clm}.geo_bene_sk,
+            {clm}.clm_type_cd,
+            {clm}.clm_num_sk,
+            {clm}.clm_dt_sgntr_sk,
+            {clm}.clm_idr_ld_dt
+            FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_rlt_cond_sgntr_mbr sgntr
+            JOIN claim_base {clm} ON
+                {clm}.clm_rlt_cond_sgntr_sk = sgntr.clm_rlt_cond_sgntr_sk
+            WHERE sgntr.clm_rlt_cond_sgntr_sk NOT IN (0, 1, -1)
+                AND sgntr.clm_rlt_cond_cd != '~' 
+                AND (
+                    sgntr.idr_insrt_ts {{FILTER_OP}} {{LAST_TS}} 
+                    OR sgntr.idr_updt_ts {{FILTER_OP}} {{LAST_TS}}
+                )
+    """
+
+
+def base_claim_filter(partition: LoadPartition) -> str:
+    clm = ALIAS_CLM
+    claim_type_codes = partition.claim_type_codes or ALL_CLAIM_TYPE_CODES
+    return f"""
+    ({clm}.clm_type_cd IN ({",".join([str(c) for c in claim_type_codes])})
+    AND {clm}.clm_from_dt >= '{MIN_CLAIM_LOAD_DATE}')
+    """
+
+
 PRIMARY_KEY = "primary_key"
 BATCH_TIMESTAMP = "batch_timestamp"
 HISTORICAL_BATCH_TIMESTAMP = "historical_batch_timestamp"
@@ -568,39 +744,38 @@ def transform_default_hipps_code(value: str | None) -> str:
 
 def claim_occurrence_cte() -> str:
     ocrnc_sgntr = ALIAS_OCRNC_SGNTR
-    qualifying_stay_cd = "70"
-    non_covered_stay_cd = "74"
+    # Note: idr_updt_ts is always null
     return f"""
             SELECT
                 clm_ocrnc_sgntr_sk,
-                MAX(CASE WHEN clm_ocrnc_span_cd = '{non_covered_stay_cd}'
+                MAX(CASE WHEN clm_ocrnc_span_cd = '{NON_COVERED_STAY_CD}'
                     THEN clm_ocrnc_span_from_dt END) AS bfd_clm_ncvrd_from_dt,
-                MAX(CASE WHEN clm_ocrnc_span_cd = '{non_covered_stay_cd}'
+                MAX(CASE WHEN clm_ocrnc_span_cd = '{NON_COVERED_STAY_CD}'
                     THEN clm_ocrnc_span_thru_dt END) AS bfd_clm_ncvrd_thru_dt,
-                MAX(CASE WHEN clm_ocrnc_span_cd = '{qualifying_stay_cd}'
+                MAX(CASE WHEN clm_ocrnc_span_cd = '{QUALIFYING_STAY_CD}'
                     THEN clm_ocrnc_span_from_dt END) AS bfd_clm_qlfy_stay_from_dt,
-                MAX(CASE WHEN clm_ocrnc_span_cd = '{qualifying_stay_cd}'
+                MAX(CASE WHEN clm_ocrnc_span_cd = '{QUALIFYING_STAY_CD}'
                     THEN clm_ocrnc_span_thru_dt END) AS bfd_clm_qlfy_stay_thru_dt,
                 MAX(idr_insrt_ts) AS idr_insrt_ts
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_ocrnc_sgntr_mbr {ocrnc_sgntr}
-            WHERE clm_ocrnc_span_cd IN ('{qualifying_stay_cd}', '{non_covered_stay_cd}')
+            WHERE clm_ocrnc_span_cd IN ('{QUALIFYING_STAY_CD}', '{NON_COVERED_STAY_CD}')
             GROUP BY clm_ocrnc_sgntr_sk"""
 
 
 def claim_related_occurrences_cte() -> str:
     rlt_ocrnc_sgntr = ALIAS_RLT_OCRNC_SGNTR
-    medicare_exhausted_cd = "A3"
-    active_care_cd = "22"
+
+    # Note: idr_updt_ts is always null
     return f"""
             SELECT
                 clm_rlt_ocrnc_sgntr_sk,
-                MAX(CASE WHEN clm_rlt_ocrnc_cd = '{medicare_exhausted_cd}'
+                MAX(CASE WHEN clm_rlt_ocrnc_cd = '{MEDICARE_EXHAUSTED_CD}'
                     THEN clm_rlt_ocrnc_dt END) AS bfd_clm_mdcr_exhstd_dt,
-                MAX(CASE WHEN clm_rlt_ocrnc_cd = '{active_care_cd}'
+                MAX(CASE WHEN clm_rlt_ocrnc_cd = '{ACTIVE_CARE_CD}'
                     THEN clm_rlt_ocrnc_dt END) AS bfd_clm_actv_care_thru_dt,
                 MAX(idr_insrt_ts) AS idr_insrt_ts
             FROM cms_vdm_view_mdcr_prd.v2_clm_rlt_ocrnc_sgntr_mbr {rlt_ocrnc_sgntr}
-            WHERE clm_rlt_ocrnc_cd in ('{medicare_exhausted_cd}', '{active_care_cd}')
+            WHERE clm_rlt_ocrnc_cd in ('{MEDICARE_EXHAUSTED_CD}', '{ACTIVE_CARE_CD}')
             GROUP BY clm_rlt_ocrnc_sgntr_sk
     """
 
@@ -627,7 +802,7 @@ def claim_related_conditions_cte(load_mode: LoadMode) -> str:
                 ORDER BY clm_rlt_cond_sgntr_sqnc_num, clm_rlt_cond_cd
             )
         """
-
+    # Note: idr_updt_ts is always null
     return f"""
             SELECT
                 clm_rlt_cond_sgntr_sk,
