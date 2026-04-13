@@ -190,7 +190,7 @@ jobs:
           # Get an ordered array of layers to deploy from the filtered list of services that will
           # be deployed
           layers="$(
-            jq '
+            jq -c '
               to_entries
                 | map(select(.value != [] and .value != null) | .key)
                 | sort
