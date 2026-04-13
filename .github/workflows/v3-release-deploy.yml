@@ -3,6 +3,16 @@ name: "(TEMPORARY) v3 Release and Deployment"
 on:
   workflow_dispatch:
     inputs:
+      run-type:
+        description: >-
+          Specify whether to just build, just deploy, or both
+        required: true
+        default: BUILD_AND_DEPLOY
+        type: choice
+        options:
+          - BUILD_ONLY
+          - DEPLOY_ONLY
+          - BUILD_AND_DEPLOY
       version-suffix:
         description: >-
           Version suffix appended to current version extracted from apps/pom.xml. Recommended to be
@@ -101,7 +111,7 @@ jobs:
           echo "envs-as-json=$envs_as_json" >> "$GITHUB_OUTPUT"
 
   deploy-platform:
-    if: ${{ inputs.deploy-platform }}
+    if: ${{ inputs.deploy-platform && (inputs.run-type == 'DEPLOY_ONLY' || inputs.run-type == 'BUILD_AND_DEPLOY') }}
     uses: ./.github/workflows/deploy-platform-services.yml
     needs: [setup]
     strategy:
@@ -114,9 +124,14 @@ jobs:
     secrets: inherit
 
   pull-base-java:
-    # deploy-platform is conditional, so we want to run this step if it runs or not; the below
-    # condition is how we do that
-    if: ${{ (always() && !cancelled()) && contains(needs.*.result, 'success') }}
+    # deploy-platform is conditional, so we want to run this step if it runs or not as long as it
+    # did not fail.
+    if: |
+      (inputs.run-type == 'BUILD_ONLY' || inputs.run-type == 'BUILD_AND_DEPLOY')
+        && (
+          (always() && !cancelled())
+            && (needs.deploy-platform.result != 'failure' && needs.setup.result == 'success')
+        )
     needs: [deploy-platform, setup]
     runs-on: ${{ format('codebuild-bfd-non-prod-platform-docker-{0}-{1}', github.run_id, github.run_attempt) }}
     steps:
@@ -158,9 +173,13 @@ jobs:
 
   build-server-ng-image:
     # For reasons unknown, _downstream_ jobs must also guard against
-    # their needed Jobs depending on conditional jobs. So, we must include the below if even though
-    # this step does not directly depend on "deploy-platform"
-    if: ${{ (always() && !cancelled()) && contains(needs.*.result, 'success') }}
+    # their needed Jobs depending on conditional jobs.
+    if: |
+      (inputs.run-type == 'BUILD_ONLY' || inputs.run-type == 'BUILD_AND_DEPLOY')
+        && (
+          (always() && !cancelled())
+            && (needs.pull-base-java.result != 'failure' && needs.setup.result == 'success')
+        )
     runs-on: ubuntu-24.04-arm
     needs: [setup, pull-base-java]
     env:
@@ -241,7 +260,12 @@ jobs:
           retention-days: 1
 
   push-jib-images:
-    if: ${{ (always() && !cancelled()) && contains(needs.*.result, 'success') }}
+    if: |
+      (inputs.run-type == 'BUILD_ONLY' || inputs.run-type == 'BUILD_AND_DEPLOY')
+        && (
+          (always() && !cancelled())
+            && (needs.build-server-ng-image.result != 'failure' && needs.setup.result == 'success')
+        )
     needs: [setup, build-server-ng-image]
     strategy:
       matrix:
@@ -295,9 +319,14 @@ jobs:
         working-directory: ${{ runner.temp }}
 
   build-other-images:
-    # deploy-platform is conditional, so we want to run this step if it runs or not; the below
-    # condition is how we do that
-    if: ${{ (always() && !cancelled()) && contains(needs.*.result, 'success') }}
+    # deploy-platform is conditional, so we want to run this step if it runs or not as long as it
+    # did not fail.
+    if: |
+      (inputs.run-type == 'BUILD_ONLY' || inputs.run-type == 'BUILD_AND_DEPLOY')
+        && (
+          (always() && !cancelled())
+            && (needs.deploy-platform.result != 'failure' && needs.setup.result == 'success')
+        )
     uses: ./.github/workflows/build-container-images.yml
     needs: [deploy-platform, setup]
     permissions:
@@ -321,7 +350,16 @@ jobs:
     secrets: inherit
 
   deploy-to-envs:
-    if: ${{ needs.setup.outputs.envs-as-json != '[]' && (always() && !cancelled()) && contains(needs.*.result, 'success') }}
+    if: |
+      needs.setup.outputs.envs-as-json != '[]'
+        && (inputs.run-type == 'DEPLOY_ONLY' || inputs.run-type == 'BUILD_AND_DEPLOY')
+          && (
+            (always() && !cancelled())
+              && (needs.push-jib-images.result != 'failure'
+                && needs.build-other-images.result != 'failure'
+                && needs.setup.result == 'success'
+              )
+          )
     uses: ./.github/workflows/deploy-env-services.yml
     needs: [setup, push-jib-images, build-other-images]
     strategy:
