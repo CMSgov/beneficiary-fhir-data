@@ -38,7 +38,7 @@ env:
   AWS_REGION: ${{ inputs.aws-region }}
   JIB_IMAGES: |
     [
-      "bfd-server-ng",
+      "bfd-server-ng"
     ]
   BASE_IMAGES: |
     [
