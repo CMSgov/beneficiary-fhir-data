@@ -151,7 +151,7 @@ jobs:
 
       - name: Load base image into Docker
         run: |
-          docker load --input "${{ runner.temp }}/bfd-platform-base-java.tar"
+          docker load --input "${{ runner.temp }}/bfd-platform-base-java_latest.tar"
 
       - name: Install gitleaks
         run: |
