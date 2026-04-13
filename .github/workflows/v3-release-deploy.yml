@@ -58,7 +58,7 @@ jobs:
   compute-version-strings:
     runs-on: ubuntu-24.04
     outputs:
-      current-release: ${{ steps.bfd-version-strings.outputs.current-release }}
+      current-version: ${{ steps.bfd-version-strings.outputs.current-version }}
       full-version-tag: ${{ steps.bfd-version-strings.outputs.full-version-tag }}
     steps:
       - name: Checkout
@@ -75,18 +75,12 @@ jobs:
       - name: Set and Validate Version Strings
         id: bfd-version-strings
         run: |
-          # Set default values for bfd-parent version based on existing version string in apps/pom.xml
           BFD_PARENT_POM_VERSION="$(yq --output-format=yaml .project.version apps/pom.xml)"
-
-          # Remove '-SNAPSHOT' suffix, if it exists
-          BFD_RELEASE="$(yq 'split("-") | .[0]' <<< "$BFD_PARENT_POM_VERSION")"
-
-          # Attach '-SNAPSHOT' suffix unconditionally
           FULL_VERSION_TAG="$(yq 'split("-") | .[0] | split(".") | map(. type = "!!int") | [.[0], .[1], .[2]] | join(".")' <<< "$BFD_PARENT_POM_VERSION")-SNAPSHOT-${{ inputs.version-suffix }}"
 
-          # Validate and set current-release and full-version-tag
-          echo "$BFD_RELEASE" | grep -P '^\d+\.\d+\.\d+$|^\d+\.\d+\.\d+-[a-zA-Z0-9-]+$'
-          echo current-release="$BFD_RELEASE" >> "$GITHUB_OUTPUT"
+          # Validate and set current-version and full-version-tag
+          echo "$BFD_PARENT_POM_VERSION" | grep -P '^\d+\.\d+\.\d+$|^\d+\.\d+\.\d+-SNAPSHOT$'
+          echo current-version="$BFD_PARENT_POM_VERSION" >> "$GITHUB_OUTPUT"
           echo "$FULL_VERSION_TAG" | grep -P '^\d+\.\d+\.\d+-SNAPSHOT-.+'
           echo full-version-tag="$FULL_VERSION_TAG" >> "$GITHUB_OUTPUT"
 
@@ -134,7 +128,7 @@ jobs:
     runs-on: ubuntu-24.04-arm
     needs: [compute-version-strings, pull-base-java]
     env:
-      CURRENT_RELEASE: ${{ needs.compute-version-strings.outputs.current-release }}
+      CURRENT_VERSION: ${{ needs.compute-version-strings.outputs.current-version }}
       FULL_VERSION_TAG: ${{ needs.compute-version-strings.outputs.full-version-tag }}
     steps:
       - name: Checkout
@@ -199,7 +193,7 @@ jobs:
           readarray -t images < <(echo "$JIB_IMAGES" | jq -r -c '.[]')
           for image in "${images[@]}"
           do
-            docker save "$image:$CURRENT_RELEASE" > "${image}.tar"
+            docker save "$image:$CURRENT_VERSION" > "${image}.tar"
           done
         working-directory: ${{ runner.temp }}
 
