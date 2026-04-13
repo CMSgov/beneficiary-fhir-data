@@ -54,8 +54,6 @@ runs:
 
     - name: OpenTofu init
       run: |
-        cd "${{ github.workspace }}/${{ inputs.service-path }}"
-
         tofu --version
 
         # Often OpenTofu stdout/stderr logs contain sensitive/private information. GHA logs are
@@ -67,12 +65,14 @@ runs:
           -reconfigure \
           -no-color 2>&1 | "$STDOUT_TO_CWLOGS_SCRIPT"
         echo "tofu init for \"${{ inputs.bfd-env }}\" completed"
-        exec "$TOFU_CI_SCRIPT" workspace select \
+
+        tofu workspace select \
           -no-color \
           -var parent_env="${{ steps.get-parent-env.outputs.parent-env }}" \
           -or-create "${{ inputs.bfd-env }}" 2>&1 | "$STDOUT_TO_CWLOGS_SCRIPT"
         echo "Selected workspace \"${{ inputs.bfd-env }}\""
       shell: bash
+      working-directory: ${{ github.workspace }}/${{ inputs.service-path }}
 
       # We split Tofu steps into "start"/"do"/"end" steps in order to attempt to avoid GitHub
       # Actions' poor signaling behavior on exit.
@@ -80,10 +80,9 @@ runs:
       # https://github.com/orgs/community/discussions/26311
     - name: Start OpenTofu Plan
       run: |
-        cd "${{ github.workspace }}/${{ inputs.service-path }}"
-
         echo "Generating OpenTofu plan for ${{ inputs.service-path }}..."
       shell: bash
+      working-directory: ${{ github.workspace }}/${{ inputs.service-path }}
 
       # Having this "exec ..." be the first command should ensure that the wrapper script is the
       # "leader" process
@@ -92,6 +91,7 @@ runs:
         exec "$TOFU_CI_SCRIPT" plan ${{ steps.setup-tofu.outputs.tf-vars-args }} -no-color \
           -out=tfplan 2>&1 | "$STDOUT_TO_CWLOGS_SCRIPT"
       shell: bash
+      working-directory: ${{ github.workspace }}/${{ inputs.service-path }}
 
     - name: End OpenTofu plan
       run: |
@@ -101,16 +101,16 @@ runs:
     - name: Start apply env service
       if: ${{ inputs.skip-apply != 'true' }}
       run: |
-        cd "${{ github.workspace }}/${{ inputs.service-path }}"
-
         echo "Applying OpenTofu plan for ${{ inputs.service-path }}..."
       shell: bash
+      working-directory: ${{ github.workspace }}/${{ inputs.service-path }}
 
     - name: Do apply env service
       if: ${{ inputs.skip-apply != 'true' }}
       run: |
         exec "$TOFU_CI_SCRIPT" apply -no-color -input=false tfplan 2>&1 | "$STDOUT_TO_CWLOGS_SCRIPT"
       shell: bash
+      working-directory: ${{ github.workspace }}/${{ inputs.service-path }}
 
     - name: End apply env service
       if: ${{ inputs.skip-apply != 'true' }}
