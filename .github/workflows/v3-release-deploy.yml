@@ -169,10 +169,23 @@ jobs:
           java-version: "25"
           distribution: corretto
 
+      - name: Build bfd-server-ng and deps
+        run: |-
+          mvn clean install \
+            -DskipTests=true \
+            -DskipITs \
+            -Dmaven.javadoc.skip=true \
+            -Dcheckstyle.skip \
+            -Dmaven.build.cache.enabled=true \
+            --threads 1C \
+            -pl :bfd-server-ng \
+            -am
+        working-directory: ./apps
+
       - name: Build bfd-server-ng Image
         run: |-
-          mvn --batch-mode compile com.google.cloud.tools:jib-maven-plugin:dockerBuild \
-            -pl :bfd-server-ng -am \
+          mvn --batch-mode com.google.cloud.tools:jib-maven-plugin:dockerBuild \
+            -pl :bfd-server-ng \
             -Djib.skip=false \
             -Djib.from="docker://bfd-platform-base-java:latest"
         working-directory: ./apps
