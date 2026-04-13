@@ -1,11 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
+SCRIPT_DIR=$(path=$(realpath "$0") && dirname "$path")
+readonly SCRIPT_DIR
 
-export TZ=UTC
-
-script_dir=$(path=$(realpath "$0") && dirname "$path")
-(
-    cd "$script_dir"
-    mvn flyway:migrate -Dflyway.url=jdbc:postgresql://localhost:5432/fhirdb -Dflyway.user=bfd -Dflyway.password=InsecureLocalDev
-)
+BFD_ENV=local "$SCRIPT_DIR"/migrate.sh
