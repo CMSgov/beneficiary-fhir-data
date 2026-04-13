@@ -211,6 +211,7 @@ jobs:
         account: ["prod", "non-prod"]
     runs-on: codebuild-bfd-${{ matrix.account }}-platform-docker-${{ github.run_id }}-${{ github.run_attempt }}
     env:
+      CURRENT_VERSION: ${{ needs.compute-version-strings.outputs.current-version }}
       FULL_VERSION_TAG: ${{ needs.compute-version-strings.outputs.full-version-tag }}
     steps:
       - name: Get role ARN
@@ -249,7 +250,8 @@ jobs:
             docker load --input "$image_filename"
 
             image="$(basename "$image_filename" .tar)"
-            docker tag "$image:$FULL_VERSION_TAG" "$REGISTRY/$image:$FULL_VERSION_TAG"
+            docker tag "$image:$CURRENT_VERSION" "$REGISTRY/$image:$FULL_VERSION_TAG"
+            docker rmi "$image:$CURRENT_VERSION"
 
             docker push "$REGISTRY/$image:$FULL_VERSION_TAG"
           done
