@@ -30,12 +30,20 @@ set +e
 task_id="-1"
 task_start_retries=3
 while ((task_start_retries > 0)); do
-  for migrator_task_arn in $(aws ecs list-tasks --cluster "$CLUSTER_NAME" --family "$TASK_DEFINITION_FAMILY" --query "taskArns" --output text); do
-    current_task_state="$(aws ecs describe-tasks \
+  for migrator_task_arn in $(
+    aws ecs list-tasks \
       --cluster "$CLUSTER_NAME" \
-      --tasks "$migrator_task_arn" \
-      --query "tasks[0].lastStatus" \
-      --output text || echo "n/a")"
+      --family "$TASK_DEFINITION_FAMILY" \
+      --query "taskArns" \
+      --output text
+  ); do
+    current_task_state="$(
+      aws ecs describe-tasks \
+        --cluster "$CLUSTER_NAME" \
+        --tasks "$migrator_task_arn" \
+        --query "tasks[0].lastStatus" \
+        --output text || echo "n/a"
+    )"
     if [[ $current_task_state == "PROVISIONING" ||
       $current_task_state == "PENDING" ||
       $current_task_state == "ACTIVATING" ||
