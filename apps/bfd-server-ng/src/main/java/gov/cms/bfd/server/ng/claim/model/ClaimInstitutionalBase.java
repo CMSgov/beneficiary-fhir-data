@@ -123,6 +123,7 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
         .forEach(
             item -> {
               var claimLine = item.getClaimLine().toFhirItemComponent();
+              var claimContext = getClaimTypeCode().toContext();
 
               claimLine.ifPresent(eob::addItem);
               item.getClaimLine()
@@ -131,7 +132,9 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
                       provider ->
                           item.getClaimLine()
                               .getClaimLineNumber()
-                              .flatMap(provider::toFhirCareTeamComponent))
+                              .flatMap(
+                                  sequence ->
+                                      provider.toFhirCareTeamComponent(sequence, claimContext)))
                   .ifPresent(eob::addCareTeam);
               item.getClaimLine()
                   .toFhirSupportingInfo(supportingInfoFactory)
@@ -197,13 +200,14 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
 
   private void addCareTeam(ExplanationOfBenefit eob) {
     var sequenceGenerator = new SequenceGenerator(eob.getCareTeam().size() + 1);
+    var claimContext = getClaimTypeCode().toContext();
     Stream.of(
             getAttendingProviderHistory(),
             getOperatingProviderHistory(),
             getOtherProviderHistory(),
             getRenderingProviderHistory(),
             getReferringProviderHistory())
-        .flatMap(p -> p.toFhirCareTeamComponent(sequenceGenerator.next()).stream())
+        .flatMap(p -> p.toFhirCareTeamComponent(sequenceGenerator.next(), claimContext).stream())
         .forEach(eob::addCareTeam);
 
     addSubclassCareTeam(eob, sequenceGenerator);
