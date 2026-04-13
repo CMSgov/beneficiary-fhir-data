@@ -18,6 +18,10 @@ inputs:
     description: "JSON object map of variables to their values"
     required: false
     default: "{}"
+outputs:
+  tf-vars-args:
+    description: Argument string passed to tofu plan specifying variables
+    value: ${{ steps.gen-tf-vars-args.outputs.tf-vars-args }}
 runs:
   using: "composite"
   steps:
