@@ -97,6 +97,7 @@ env:
   JIB_IMAGES: |
     [
       "bfd-server",
+      "bfd-server-ng",
       "bfd-pipeline-app",
       "bfd-db-migrator"
     ]
