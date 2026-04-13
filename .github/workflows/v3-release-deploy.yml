@@ -172,7 +172,7 @@ jobs:
       - name: Build bfd-server-ng Image
         run: |-
           mvn --batch-mode compile com.google.cloud.tools:jib-maven-plugin:dockerBuild \
-            -pl :bfd-server-ng \
+            -pl :bfd-server-ng -am \
             -Djib.skip=false \
             -Djib.from="docker://bfd-platform-base-java:latest"
         working-directory: ./apps
