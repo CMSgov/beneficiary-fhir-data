@@ -6,10 +6,10 @@ Flyway-based migrations sub-project.
 
 ### Against Local Environment
 
-Run migrations against a localhost database:
+Run migrations against a `localhost` database:
 
 ```sh
-./migrate-local.sh
+./migrate.sh
 ```
 
 ### Against a Live Environment
