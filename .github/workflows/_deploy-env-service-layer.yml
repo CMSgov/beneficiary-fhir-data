@@ -77,7 +77,7 @@ jobs:
           ALL_VARS_JSON: ${{ inputs.all-vars-json || '{}' }}
           SERVICE: ${{ matrix.context.service }}
         run: |
-          tofu_vars_json="$(jq --arg service "$SERVICE" '.[$service] // {}')"
+          tofu_vars_json="$(jq --arg service "$SERVICE" '.[$service] // {}' <<<"$ALL_VARS_JSON")"
 
           echo "tofu-vars-json=$tofu_vars_json" >> "$GITHUB_OUTPUT"
 
@@ -90,4 +90,3 @@ jobs:
           cw-log-stream: ${{ matrix.context.service }}-${{ github.run_id }}-${{ github.run_attempt }}
           skip-apply: ${{ inputs.skip-applies && 'true' || 'false' }}
           tofu-vars-json: ${{ steps.get-tofu-vars.outputs.tofu-vars-json }}
-
