@@ -134,6 +134,7 @@ jobs:
     runs-on: ubuntu-24.04-arm
     needs: [compute-version-strings, pull-base-java]
     env:
+      CURRENT_RELEASE: ${{ needs.compute-version-strings.outputs.current-release }}
       FULL_VERSION_TAG: ${{ needs.compute-version-strings.outputs.full-version-tag }}
     steps:
       - name: Checkout
@@ -152,6 +153,7 @@ jobs:
       - name: Load base image into Docker
         run: |
           docker load --input "${{ runner.temp }}/bfd-platform-base-java_latest.tar"
+          rm -f "${{ runner.temp }}/bfd-platform-base-java_latest.tar"
 
       - name: Install gitleaks
         run: |
@@ -178,6 +180,7 @@ jobs:
             -Dcheckstyle.skip \
             -Dmaven.build.cache.enabled=true \
             --threads 1C \
+            --no-transfer-progress \
             -pl :bfd-server-ng \
             -am
         working-directory: ./apps
@@ -187,7 +190,8 @@ jobs:
           mvn --batch-mode com.google.cloud.tools:jib-maven-plugin:dockerBuild \
             -pl :bfd-server-ng \
             -Djib.skip=false \
-            -Djib.from="docker://bfd-platform-base-java:latest"
+            -Djib.from="docker://bfd-platform-base-java:latest" \
+            --no-transfer-progress
         working-directory: ./apps
 
       - name: Export jib images
@@ -195,7 +199,7 @@ jobs:
           readarray -t images < <(echo "$JIB_IMAGES" | jq -r -c '.[]')
           for image in "${images[@]}"
           do
-            docker save "$image:$BFD_RELEASE" > "${image}.tar"
+            docker save "$image:$CURRENT_RELEASE" > "${image}.tar"
           done
         working-directory: ${{ runner.temp }}
 
