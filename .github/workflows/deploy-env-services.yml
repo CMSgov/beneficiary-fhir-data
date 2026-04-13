@@ -26,6 +26,10 @@ on:
           rda-pipeline-alarms,
           server-alarms
         required: true
+      all-vars-json:
+        description: >-
+          Tofu plan variables per-service in JSON; see Workflow for format
+        required: false
       aws-region:
         description: >-
           Override the AWS Region
@@ -74,6 +78,11 @@ on:
           rda-pipeline-alarms,
           server-alarms
         required: false
+      all-vars-json:
+        type: string
+        description: >-
+          Tofu plan variables per-service in JSON; see Workflow for format
+        required: false
       aws-region:
         type: string
         description: >-
@@ -93,7 +102,6 @@ on:
           Defaults to the selected branch/tag
         default: ""
         required: false
-
 
 permissions:
   id-token: write # This is required for requesting the AWS IAM OIDC JWT
@@ -151,6 +159,7 @@ jobs:
     outputs:
       account-type: ${{ steps.get-account-type.outputs.account-type }}
       deploy-jobs-matrix-json: ${{ steps.get-deploy-jobs-matrix-json.outputs.deploy-jobs-matrix-json }}
+      layers: ${{ steps.get-deploy-jobs-matrix-json.outputs.layers }}
     steps:
       - name: Get account type from parent env
         id: get-account-type
@@ -176,100 +185,42 @@ jobs:
               | from_entries
             ' <<<"$DEPLOY_JOBS_MATRIX_JSON"
           )"
+          jq -c <<<"$deploy_jobs_matrix_json"
+
+          # Get an ordered array of layers to deploy from the filtered list of services that will
+          # be deployed
+          layers="$(
+            jq '
+              to_entries
+                | map(select(.value != [] and .value != null) | .key)
+                | sort
+            ' <<<"$deploy_jobs_matrix_json"
+          )"
+          jq -c <<<"$layers"
 
           echo "deploy-jobs-matrix-json=$deploy_jobs_matrix_json" >> "$GITHUB_OUTPUT"
+          echo "layers=$layers" >> "$GITHUB_OUTPUT"
 
-  deploy-layer-01:
+  deploy-layers:
     uses: ./.github/workflows/_deploy-env-service-layer.yml
     needs: [setup]
+    strategy:
+      matrix:
+        layer-level: ${{ fromJson(needs.setup.outputs.layers) }}
+      fail-fast: true
+      # We "abuse" the fact that matrix jobs with a maximum parallelism of 1 will run in the order
+      # of the matrix input, that being "layer-level"
+      max-parallel: 1
     permissions:
       contents: read
       id-token: write
     with:
-      layer-level: '01'
+      layer-level: ${{ matrix.layer-level }}
       bfd-env: ${{ inputs.bfd-env }}
       account-type: ${{ needs.setup.outputs.account-type }}
       matrix-json: ${{ needs.setup.outputs.deploy-jobs-matrix-json }}
       aws-region: ${{ inputs.aws-region }}
       skip-applies: ${{ inputs.skip-applies }}
-      git-ref: ${{ inputs.git-ref || github.ref }}
-    secrets: inherit
-
-  deploy-layer-02:
-    uses: ./.github/workflows/_deploy-env-service-layer.yml
-    needs: [setup, deploy-layer-01]
-    permissions:
-      contents: read
-      id-token: write
-    with:
-      layer-level: '02'
-      bfd-env: ${{ inputs.bfd-env }}
-      account-type: ${{ needs.setup.outputs.account-type }}
-      matrix-json: ${{ needs.setup.outputs.deploy-jobs-matrix-json }}
-      aws-region: ${{ inputs.aws-region }}
-      skip-applies: ${{ inputs.skip-applies }}
-      git-ref: ${{ inputs.git-ref || github.ref }}
-    secrets: inherit
-
-  deploy-layer-03:
-    uses: ./.github/workflows/_deploy-env-service-layer.yml
-    needs: [setup, deploy-layer-02]
-    permissions:
-      contents: read
-      id-token: write
-    with:
-      layer-level: '03'
-      bfd-env: ${{ inputs.bfd-env }}
-      account-type: ${{ needs.setup.outputs.account-type }}
-      matrix-json: ${{ needs.setup.outputs.deploy-jobs-matrix-json }}
-      aws-region: ${{ inputs.aws-region }}
-      skip-applies: ${{ inputs.skip-applies }}
-    secrets: inherit
-
-  deploy-layer-04:
-    uses: ./.github/workflows/_deploy-env-service-layer.yml
-    needs: [setup, deploy-layer-03]
-    permissions:
-      contents: read
-      id-token: write
-    with:
-      layer-level: '04'
-      bfd-env: ${{ inputs.bfd-env }}
-      account-type: ${{ needs.setup.outputs.account-type }}
-      matrix-json: ${{ needs.setup.outputs.deploy-jobs-matrix-json }}
-      aws-region: ${{ inputs.aws-region }}
-      skip-applies: ${{ inputs.skip-applies }}
-      git-ref: ${{ inputs.git-ref || github.ref }}
-    secrets: inherit
-
-  deploy-layer-05:
-    uses: ./.github/workflows/_deploy-env-service-layer.yml
-    needs: [setup, deploy-layer-04]
-    permissions:
-      contents: read
-      id-token: write
-    with:
-      layer-level: '05'
-      bfd-env: ${{ inputs.bfd-env }}
-      account-type: ${{ needs.setup.outputs.account-type }}
-      matrix-json: ${{ needs.setup.outputs.deploy-jobs-matrix-json }}
-      aws-region: ${{ inputs.aws-region }}
-      skip-applies: ${{ inputs.skip-applies }}
-      git-ref: ${{ inputs.git-ref || github.ref }}
-    secrets: inherit
-
-  deploy-layer-06:
-    uses: ./.github/workflows/_deploy-env-service-layer.yml
-    needs: [setup, deploy-layer-05]
-    permissions:
-      contents: read
-      id-token: write
-    with:
-      layer-level: '06'
-      bfd-env: ${{ inputs.bfd-env }}
-      account-type: ${{ needs.setup.outputs.account-type }}
-      matrix-json: ${{ needs.setup.outputs.deploy-jobs-matrix-json }}
-      aws-region: ${{ inputs.aws-region }}
-      skip-applies: ${{ inputs.skip-applies }}
+      all-vars-json: ${{ inputs.all-vars-json }}
       git-ref: ${{ inputs.git-ref || github.ref }}
     secrets: inherit

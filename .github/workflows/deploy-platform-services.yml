@@ -16,6 +16,10 @@ on:
           ecr,
           network
         required: true
+      all-vars-json:
+        description: >-
+          Tofu plan variables per-service in JSON; see Workflow for format
+        required: false
       aws-region:
         description: >-
           Override the AWS Region
@@ -53,6 +57,11 @@ on:
           backup,
           ecr,
           network
+        required: false
+      all-vars-json:
+        type: string
+        description: >-
+          Tofu plan variables per-service in JSON; see Workflow for format
         required: false
       aws-region:
         type: string
@@ -105,6 +114,7 @@ jobs:
     runs-on: ubuntu-24.04
     outputs:
       deploy-jobs-matrix-json: ${{ steps.get-deploy-jobs-matrix-json.outputs.deploy-jobs-matrix-json }}
+      layers: ${{ steps.get-deploy-jobs-matrix-json.outputs.layers }}
     steps:
       - name: Get filtered deploy jobs matrix JSON as output
         id: get-deploy-jobs-matrix-json
@@ -122,51 +132,41 @@ jobs:
               | from_entries
             ' <<<"$DEPLOY_JOBS_MATRIX_JSON"
           )"
+          jq -c <<<"$deploy_jobs_matrix_json"
+
+          # Get an ordered array of layers to deploy from the filtered list of services that will
+          # be deployed
+          layers="$(
+            jq '
+              to_entries
+                | map(select(.value != [] and .value != null) | .key)
+                | sort
+            ' <<<"$deploy_jobs_matrix_json"
+          )"
+          jq -c <<<"$layers"
 
           echo "deploy-jobs-matrix-json=$deploy_jobs_matrix_json" >> "$GITHUB_OUTPUT"
+          echo "layers=$layers" >> "$GITHUB_OUTPUT"
 
-  deploy-layer-000:
+  deploy-layers:
     uses: ./.github/workflows/_deploy-platform-service-layer.yml
     needs: [setup]
+    strategy:
+      matrix:
+        layer-level: ${{ fromJson(needs.setup.outputs.layers) }}
+      fail-fast: true
+      # We "abuse" the fact that matrix jobs with a maximum parallelism of 1 will run in the order
+      # of the matrix input, that being "layer-level"
+      max-parallel: 1
     permissions:
       contents: read
       id-token: write
     with:
-      layer-level: '000'
+      layer-level: ${{ matrix.layer-level }}
       account-type: ${{ inputs.account-type }}
       matrix-json: ${{ needs.setup.outputs.deploy-jobs-matrix-json }}
       aws-region: ${{ inputs.aws-region }}
       skip-applies: ${{ inputs.skip-applies }}
+      all-vars-json: ${{ inputs.all-vars-json }}
       git-ref: ${{ inputs.git-ref || github.ref }}
     secrets: inherit
-
-  deploy-layer-01:
-    uses: ./.github/workflows/_deploy-platform-service-layer.yml
-    needs: [setup, deploy-layer-000]
-    permissions:
-      contents: read
-      id-token: write
-    with:
-      layer-level: '01'
-      account-type: ${{ inputs.account-type }}
-      matrix-json: ${{ needs.setup.outputs.deploy-jobs-matrix-json }}
-      aws-region: ${{ inputs.aws-region }}
-      skip-applies: ${{ inputs.skip-applies }}
-      git-ref: ${{ inputs.git-ref || github.ref }}
-    secrets: inherit
-
-  deploy-layer-02:
-    uses: ./.github/workflows/_deploy-platform-service-layer.yml
-    needs: [setup, deploy-layer-01]
-    permissions:
-      contents: read
-      id-token: write
-    with:
-      layer-level: '02'
-      account-type: ${{ inputs.account-type }}
-      matrix-json: ${{ needs.setup.outputs.deploy-jobs-matrix-json }}
-      aws-region: ${{ inputs.aws-region }}
-      skip-applies: ${{ inputs.skip-applies }}
-      git-ref: ${{ inputs.git-ref || github.ref }}
-    secrets: inherit
-
