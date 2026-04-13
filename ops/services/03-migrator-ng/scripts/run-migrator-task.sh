@@ -27,7 +27,7 @@ done
 
 task_id="-1"
 task_start_retries=0
-while [[ $task_id == "-1" ]] && (( task_start_retries < 3)); do
+while [[ $task_id == "-1" ]] && ((task_start_retries < 3)); do
   task_id="$(
     aws ecs run-task \
       --group "$TASK_NAME" \
@@ -42,13 +42,13 @@ while [[ $task_id == "-1" ]] && (( task_start_retries < 3)); do
       --query "tasks[0].taskArn" \
       --output text || echo "-1"
   )"
-  task_start_retries=$((task_start_retries + 1))
+  ((task_start_retries++))
   sleep 5
 done
 
 echo "Started $TASK_NAME ($task_id) in $CLUSTER_NAME. Waiting until it has completed or failed..."
 
-until [[
+until [[ 
   $(aws ecs describe-tasks \
     --cluster "$CLUSTER_NAME" \
     --tasks "$task_id" \
