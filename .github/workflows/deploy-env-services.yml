@@ -16,9 +16,11 @@ on:
           locust,
           migrator,
           ccw-pipeline,
+          idr-pipeline,
           npi-pipeline,
           rda-pipeline,
           server,
+          server-ng,
           ccw-pipeline-metrics,
           rda-pipeline-metrics,
           server-metrics,
@@ -64,9 +66,11 @@ on:
           locust,
           migrator,
           ccw-pipeline,
+          idr-pipeline,
           npi-pipeline,
           rda-pipeline,
           server,
+          server-ng,
           ccw-pipeline-metrics,
           rda-pipeline-metrics,
           server-metrics,
@@ -116,9 +120,11 @@ env:
       ],
       "04": [
         { "layer": "04", "service": "ccw-pipeline", "runner": "lambda" },
+        { "layer": "04", "service": "idr-pipeline", "runner": "lambda" },
         { "layer": "04", "service": "npi-pipeline", "runner": "lambda" },
         { "layer": "04", "service": "rda-pipeline", "runner": "lambda" },
-        { "layer": "04", "service": "server", "runner": "lambda" }
+        { "layer": "04", "service": "server", "runner": "lambda" },
+        { "layer": "04", "service": "server-ng", "runner": "lambda" }
       ],
       "05": [
         { "layer": "05", "service": "ccw-pipeline-metrics", "runner": "lambda" },
