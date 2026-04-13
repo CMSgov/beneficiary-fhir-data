@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -Eeou pipefail
+
 #######################################
 # DB Migrator ECS Run Task Script
 #######################################
@@ -23,20 +25,26 @@ until aws iam get-role --role-name "$ROLE_NAME" &>/dev/null; do
   sleep 1
 done
 
-task_id="$(
-  aws ecs run-task \
-    --group "$TASK_NAME" \
-    --cluster "$CLUSTER_NAME" \
-    --task-definition "$TASK_DEFINITION_ARN" \
-    --enable-ecs-managed-tags \
-    --propagate-tags TASK_DEFINITION \
-    --count 1 \
-    --platform-version "LATEST" \
-    --capacity-provider-strategy "$CAPACITY_PROVIDER_STRATEGIES" \
-    --network-configuration "$NETWORK_CONFIG_JSON" \
-    --query "tasks[0].taskArn" \
-    --output text
-)"
+task_id="-1"
+task_start_retries=0
+while [[ $task_id == "-1" ]] && (( task_start_retries < 3)); do
+  task_id="$(
+    aws ecs run-task \
+      --group "$TASK_NAME" \
+      --cluster "$CLUSTER_NAME" \
+      --task-definition "$TASK_DEFINITION_ARN" \
+      --enable-ecs-managed-tags \
+      --propagate-tags TASK_DEFINITION \
+      --count 1 \
+      --platform-version "LATEST" \
+      --capacity-provider-strategy "$CAPACITY_PROVIDER_STRATEGIES" \
+      --network-configuration "$NETWORK_CONFIG_JSON" \
+      --query "tasks[0].taskArn" \
+      --output text || echo "-1"
+  )"
+  task_start_retries=$((task_start_retries + 1))
+  sleep 5
+done
 
 echo "Started $TASK_NAME ($task_id) in $CLUSTER_NAME. Waiting until it has completed or failed..."
 
