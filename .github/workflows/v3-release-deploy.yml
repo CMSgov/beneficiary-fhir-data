@@ -1,0 +1,279 @@
+---
+name: "(TEMPORARY) v3 Release and Deployment"
+on:
+  workflow_dispatch:
+    inputs:
+      version-suffix:
+        description: >-
+          Version suffix appended to current version extracted from apps/pom.xml. Recommended to be
+          <abbreviated-branch-or-ticket-num>-<count>; e.g.: 1234-1, 4567-10, etc. The full version
+          that is used to tag Images will then be <current-version>-<version-suffix>, e.g.:
+          9.999.0-SNAPSHOT-1234-1, 3.456.7-SNAPSHOT-4567-10, etc.
+        required: true
+        default: ""
+      envs:
+        description: >-
+          List of environments to deploy to
+        required: true
+        default: >-
+          test,
+          sandbox,
+          prod
+      aws-region:
+        description: >-
+          Override the AWS Region destination for uploaded artifacts.
+          Default to `us-east-1`.
+        default: us-east-1
+        type: choice
+        options:
+          - us-east-1
+          - us-west-2
+        required: true
+
+permissions:
+  id-token: write # This is required for requesting the AWS IAM OIDC JWT
+  contents: write # This is required for actions/checkout
+
+env:
+  AWS_REGION: ${{ inputs.aws-region }}
+  JIB_IMAGES: |
+    [
+      "bfd-server-ng",
+    ]
+  BASE_IMAGES: |
+    [
+      "bfd-platform-base-java"
+    ]
+  ACCOUNT_ROLE_MAP: |
+    {
+      "prod": "${{ secrets.PROD_ACCOUNT_GHA_ROLE_ARN }}",
+      "non-prod": "${{ secrets.NON_PROD_ACCOUNT_GHA_ROLE_ARN }}"
+    }
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  compute-version-strings:
+    runs-on: ubuntu-24.04
+    outputs:
+      current-release: ${{ steps.bfd-version-strings.outputs.current-release }}
+      full-version-tag: ${{ steps.bfd-version-strings.outputs.full-version-tag }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ github.ref_name }}
+
+      - name: "Install yq"
+        run: |
+          sudo wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq
+          sudo chmod +x /usr/bin/yq
+
+      - name: Set and Validate Version Strings
+        id: bfd-version-strings
+        run: |
+          # Set default values for bfd-parent version based on existing version string in apps/pom.xml
+          BFD_PARENT_POM_VERSION="$(yq --output-format=yaml .project.version apps/pom.xml)"
+
+          # Remove '-SNAPSHOT' suffix, if it exists
+          BFD_RELEASE="$(yq 'split("-") | .[0]' <<< "$BFD_PARENT_POM_VERSION")"
+
+          # Attach '-SNAPSHOT' suffix unconditionally
+          FULL_VERSION_TAG="$(yq 'split("-") | .[0] | split(".") | map(. type = "!!int") | [.[0], .[1], .[2]] | join(".")' <<< "$BFD_PARENT_POM_VERSION")-SNAPSHOT-${{ inputs.version-suffix }}"
+
+          # Validate and set current-release and full-version-tag
+          echo "$BFD_RELEASE" | grep -P '^\d+\.\d+\.\d+$|^\d+\.\d+\.\d+-[a-zA-Z0-9-]+$'
+          echo current-release="$BFD_RELEASE" >> "$GITHUB_OUTPUT"
+          echo "$FULL_VERSION_TAG" | grep -P '^\d+\.\d+\.\d+-SNAPSHOT-.+'
+          echo full-version-tag="$FULL_VERSION_TAG" >> "$GITHUB_OUTPUT"
+
+  pull-base-java:
+    needs: compute-version-strings
+    runs-on: ${{ format('codebuild-bfd-non-prod-platform-docker-{0}-{1}', github.run_id, github.run_attempt) }}
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.NON_PROD_ACCOUNT_GHA_ROLE_ARN }}
+          role-session-name: v3-release-deploy-${{ github.run_id }}-${{ github.run_attempt }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to ECR
+        id: ecr-login
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Pull base images
+        env:
+          REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+          BASE_IMAGES_VERSION: latest
+        run: |
+          echo "::add-mask::$REGISTRY"
+
+          readarray -t images < <(echo "$BASE_IMAGES" | jq -r -c '.[]')
+          for image in "${images[@]}"
+          do
+            docker pull "${REGISTRY}/${image}:${BASE_IMAGES_VERSION}"
+
+            docker tag "${REGISTRY}/${image}:${BASE_IMAGES_VERSION}" "${image}:${BASE_IMAGES_VERSION}"
+            docker rmi "${REGISTRY}/${image}:${BASE_IMAGES_VERSION}"
+
+            docker save "${image}:${BASE_IMAGES_VERSION}" > "${{ runner.temp }}/${image}_${BASE_IMAGES_VERSION}.tar"
+          done
+
+      - name: Upload base image artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: base-java
+          path: ${{ runner.temp }}/*.tar
+          retention-days: 1
+
+  build-server-ng-image:
+    runs-on: ubuntu-24.04-arm
+    needs: [compute-version-strings, pull-base-java]
+    env:
+      FULL_VERSION_TAG: ${{ needs.compute-version-strings.outputs.full-version-tag }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ github.ref_name }}
+
+      - name: Retrieve base java image
+        uses: actions/download-artifact@v8
+        with:
+          pattern: "*bfd-platform-base-java*"
+          merge-multiple: true
+          path: ${{ runner.temp }}
+
+      - name: Load base image into Docker
+        run: |
+          docker load --input "${{ runner.temp }}/bfd-platform-base-java.tar"
+
+      - name: Install gitleaks
+        run: |
+          curl -s https://api.github.com/repos/gitleaks/gitleaks/releases/latest \
+            | grep "browser_download_url.*linux_x64.tar.gz" \
+            | cut -d : -f 2,3 \
+            | tr -d \" \
+            | wget -qi -
+          sudo tar -xzf "$(find -iname 'gitleaks*.tar.gz')" -C /usr/bin gitleaks
+          sudo chmod +x /usr/bin/gitleaks
+
+      - name: Setup JDK
+        uses: actions/setup-java@v5
+        with:
+          java-version: "25"
+          distribution: corretto
+
+      - name: Build bfd-server-ng Image
+        run: |-
+          mvn --batch-mode compile com.google.cloud.tools:jib-maven-plugin:dockerBuild \
+            -pl :bfd-server-ng \
+            -Djib.skip=false \
+            -Djib.from="docker://bfd-platform-base-java:latest"
+        working-directory: ./apps
+
+      - name: Export jib images
+        run: |
+          readarray -t images < <(echo "$JIB_IMAGES" | jq -r -c '.[]')
+          for image in "${images[@]}"
+          do
+            docker save "$image:$BFD_RELEASE" > "${image}.tar"
+          done
+        working-directory: ${{ runner.temp }}
+
+      - name: Upload jib image artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: jib-images
+          path: ${{ runner.temp }}/*.tar
+          retention-days: 1
+
+  push-jib-images:
+    needs: [compute-version-strings, build-server-ng-image]
+    strategy:
+      matrix:
+        account: ["prod", "non-prod"]
+    runs-on: codebuild-bfd-${{ matrix.account }}-platform-docker-${{ github.run_id }}-${{ github.run_attempt }}
+    env:
+      FULL_VERSION_TAG: ${{ needs.compute-version-strings.outputs.full-version-tag }}
+    steps:
+      - name: Get role ARN
+        id: get-role-arn
+        run: |
+          role_arn="$(jq -r --arg account_type "${{ matrix.account }}" '.[$account_type]' <<<"$ACCOUNT_ROLE_MAP")"
+
+          echo "::add-mask::$role_arn"
+          echo "role-arn=$role_arn" >> "$GITHUB_OUTPUT"
+
+      - name: Download jib image artifacts
+        uses: actions/download-artifact@v8
+        with:
+          name: jib-images
+          path: ${{ runner.temp }}
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ steps.get-role-arn.outputs.role-arn }}
+          role-session-name: v3-release-deploy-${{ github.run_id }}-${{ github.run_attempt }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to ECR
+        id: ecr-login
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Push jib images
+        env:
+          REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+        run: |
+          echo "::add-mask::$REGISTRY"
+
+          for image_filename in ./*.tar
+          do
+            docker load --input "$image_filename"
+
+            image="$(basename "$image_filename" .tar)"
+            docker tag "$image:$FULL_VERSION_TAG" "$REGISTRY/$image:$FULL_VERSION_TAG"
+
+            docker push "$REGISTRY/$image:$FULL_VERSION_TAG"
+          done
+        working-directory: ${{ runner.temp }}
+
+  build-other-images:
+    uses: ./.github/workflows/build-container-images.yml
+    needs: [compute-version-strings]
+    permissions:
+      contents: read
+      id-token: write
+    with:
+      branch: ${{ github.ref_name }}
+      versionTag: ${{ needs.compute-version-strings.outputs.full-version-tag }}
+      awsRegion: ${{ inputs.aws-region }}
+      # Build other images, like Lambda images, Python applications, etc.
+      # See .github/workflows/build_container_images_matrix.json for list of buildable images
+      imagesCsv: >-
+        bfd-platform-server-fluent-bit,
+        bfd-platform-idr-pipeline,
+        bfd-platform-migrator-ng,
+        bfd-platform-consume-idr-events,
+        bfd-platform-run-idr-pipeline
+      baseImagesVersion: latest
+      cleanupImageArtifacts: false # We'll cleanup at the end, so don't do anything
+      tagLatest: false
+    secrets: inherit
+
+  cleanup-artifacts:
+    if: ${{ !cancelled() }}
+    needs: [build-other-images]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Delete all artifacts
+        uses: GeekyEggo/delete-artifact@v5.1.0
+        with:
+          name: "*"
+          failOnError: false
