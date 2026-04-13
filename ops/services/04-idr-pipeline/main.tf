@@ -74,8 +74,7 @@ resource "aws_cloudwatch_log_group" "idr_messages" {
   skip_destroy = true
 }
 
-# TODO: Rename this when "idr_old" resources are destroyed/deleted
-resource "aws_security_group" "idr_new" {
+resource "aws_security_group" "idr" {
   lifecycle {
     create_before_destroy = true
   }
@@ -87,25 +86,22 @@ resource "aws_security_group" "idr_new" {
   revoke_rules_on_delete = true
 }
 
-# TODO: Rename this when "idr_old" resources are destroyed/deleted
-resource "aws_vpc_security_group_egress_rule" "idr_new_allow_all_traffic_ipv4" {
-  security_group_id = aws_security_group.idr_new.id
+resource "aws_vpc_security_group_egress_rule" "idr_allow_all_traffic_ipv4" {
+  security_group_id = aws_security_group.idr.id
   cidr_ipv4         = "0.0.0.0/0"
   ip_protocol       = "-1" # semantically equivalent to all ports
 }
 
-# TODO: Rename this when "idr_old" resources are destroyed/deleted
-resource "aws_vpc_security_group_ingress_rule" "idr_new_allow_db_access" {
+resource "aws_vpc_security_group_ingress_rule" "idr_allow_db_access" {
   security_group_id            = data.aws_security_group.aurora_cluster.id
-  referenced_security_group_id = aws_security_group.idr_new.id
+  referenced_security_group_id = aws_security_group.idr.id
   from_port                    = 5432
   to_port                      = 5432
   ip_protocol                  = "TCP"
   description                  = "Grants ${local.env} ${local.service} ECS task containers access to the ${local.env} database"
 }
 
-# TODO: Rename this to "idr" when "idr_old" resources are destroyed/deleted
-resource "aws_ecs_task_definition" "idr_new" {
+resource "aws_ecs_task_definition" "idr" {
   family                   = local.name_prefix
   requires_compatibilities = ["FARGATE"]
   execution_role_arn       = aws_iam_role.idr_execution.arn
@@ -162,6 +158,22 @@ resource "aws_ecs_task_definition" "idr_new" {
             value = data.aws_rds_cluster.main.endpoint
           },
           {
+            name  = "IDR_MIN_CLAIM_NCH_TRANSACTION_DATE"
+            value = "2014-06-30"
+          },
+          {
+            name  = "IDR_MIN_CLAIM_SS_TRANSACTION_DATE"
+            value = "2021-03-01"
+          },
+          {
+            name  = "IDR_LATEST_CLAIMS"
+            value = "0"
+          },
+          {
+            name  = "IDR_ENABLE_DATE_PARTITIONS"
+            value = "0"
+          },
+          {
             name = "CONFIG_SETTINGS_JSON"
             value = jsonencode(
               {
@@ -197,188 +209,3 @@ resource "aws_ecs_task_definition" "idr_new" {
     ]
   )
 }
-
-# TODO: The below resources should be removed when initial loads are totally completed
-
-data "aws_ecr_repository" "idr_old" {
-  name = "bfd-platform-base-python"
-}
-
-data "aws_ecr_image" "idr_old" {
-  repository_name = data.aws_ecr_repository.idr_old.name
-  image_tag       = "2.240.1"
-}
-
-resource "aws_ecs_task_definition" "idr_old" {
-  count = local.env == "prod" ? 1 : 0
-
-  family                   = local.name_prefix
-  requires_compatibilities = ["FARGATE"]
-  execution_role_arn       = aws_iam_role.idr_execution.arn
-  task_role_arn            = aws_iam_role.idr_task.arn
-  track_latest             = false
-
-  network_mode = "awsvpc"
-  cpu          = "16384"
-  memory       = "122880"
-
-  ephemeral_storage {
-    size_in_gib = local.idr_disk_size
-  }
-
-  runtime_platform {
-    cpu_architecture        = "ARM64"
-    operating_system_family = "LINUX"
-  }
-
-  volume {
-    configure_at_launch = false
-    name                = "tmp"
-  }
-
-  container_definitions = jsonencode(
-    [
-      {
-        name       = local.service
-        image      = data.aws_ecr_image.idr_old.image_uri
-        essential  = true
-        cpu        = 0
-        entryPoint = ["sleep", "infinity"]
-        environment = [
-          {
-            name  = "TZ"
-            value = "UTC"
-          },
-          {
-            name  = "BFD_ENV"
-            value = local.env
-          },
-          {
-            name = "CONFIG_SETTINGS_JSON"
-            value = jsonencode(
-              {
-                ssmHierarchies = local.idr_ssm_hierarchies
-              }
-            )
-          },
-        ]
-        logConfiguration = {
-          logDriver = "awslogs"
-          options = {
-            awslogs-group         = aws_cloudwatch_log_group.idr_messages.name
-            awslogs-stream-prefix = "messages"
-            awslogs-region        = local.region
-            max-buffer-size       = "25m"
-            mode                  = "non-blocking"
-          }
-        }
-        stopTimeout = 120 # Allow enough time for Pipeline to gracefully stop on spot termination.
-        mountPoints = [
-          {
-            containerPath = "/tmp"
-            readOnly      = false
-            sourceVolume  = "tmp"
-          }
-        ]
-        # readonlyRootFilesystem = true
-        # Empty declarations reduce Terraform diff noise
-        portMappings   = []
-        systemControls = []
-        volumesFrom    = []
-      }
-    ]
-  )
-}
-
-moved {
-  from = aws_ecs_task_definition.idr
-  to   = aws_ecs_task_definition.idr_old[0]
-}
-
-resource "aws_ecs_service" "idr_old" {
-  count      = local.env == "prod" ? 1 : 0
-  depends_on = [aws_iam_role_policy_attachment.idr_task, aws_iam_role_policy_attachment.idr_execution]
-
-  cluster                            = data.aws_ecs_cluster.main.arn
-  availability_zone_rebalancing      = "ENABLED"
-  deployment_maximum_percent         = 200
-  deployment_minimum_healthy_percent = 100
-  enable_execute_command             = true
-  desired_count                      = 1
-  enable_ecs_managed_tags            = true
-  health_check_grace_period_seconds  = 0
-  name                               = local.service
-  propagate_tags                     = "TASK_DEFINITION"
-  scheduling_strategy                = "REPLICA"
-  task_definition                    = one(aws_ecs_task_definition.idr_old[*].arn)
-
-  dynamic "capacity_provider_strategy" {
-    for_each = local.idr_capacity_provider_strategies
-    content {
-      capacity_provider = capacity_provider_strategy.value.capacity_provider
-      base              = capacity_provider_strategy.value.base
-      weight            = capacity_provider_strategy.value.weight
-    }
-  }
-
-  deployment_controller {
-    type = "ECS"
-  }
-
-  network_configuration {
-    assign_public_ip = false
-    security_groups  = aws_security_group.idr_old[*].id
-    subnets          = local.writer_adjacent_subnets
-  }
-}
-
-moved {
-  from = aws_ecs_service.idr
-  to   = aws_ecs_service.idr_old[0]
-}
-
-resource "aws_security_group" "idr_old" {
-  count = local.env == "prod" ? 1 : 0
-
-  name                   = "${local.name_prefix}-sg"
-  description            = "Allow ${local.service} egress anywhere"
-  vpc_id                 = local.vpc.id
-  tags                   = { Name = "${local.name_prefix}-sg" }
-  revoke_rules_on_delete = true
-}
-
-moved {
-  from = aws_security_group.idr
-  to   = aws_security_group.idr_old[0]
-}
-
-resource "aws_vpc_security_group_egress_rule" "idr_old_allow_all_traffic_ipv4" {
-  count = local.env == "prod" ? 1 : 0
-
-  security_group_id = one(aws_security_group.idr_old[*].id)
-  cidr_ipv4         = "0.0.0.0/0"
-  ip_protocol       = "-1" # semantically equivalent to all ports
-}
-
-moved {
-  from = aws_vpc_security_group_egress_rule.idr_allow_all_traffic_ipv4
-  to   = aws_vpc_security_group_egress_rule.idr_old_allow_all_traffic_ipv4[0]
-}
-
-resource "aws_vpc_security_group_ingress_rule" "idr_old_allow_db_access" {
-  count = local.env == "prod" ? 1 : 0
-
-  security_group_id            = data.aws_security_group.aurora_cluster.id
-  referenced_security_group_id = one(aws_security_group.idr_old[*].id)
-  from_port                    = 5432
-  to_port                      = 5432
-  ip_protocol                  = "TCP"
-  description                  = "Grants ${local.env} ${local.service} ECS task containers access to the ${local.env} database"
-}
-
-moved {
-  from = aws_vpc_security_group_ingress_rule.idr_allow_db_access
-  to   = aws_vpc_security_group_ingress_rule.idr_old_allow_db_access[0]
-}
-
-# TODO: The above resources should be removed when initial loads are totally completed
