@@ -83,6 +83,10 @@ resource "aws_ecs_task_definition" "this" {
     name                = "tmp"
   }
 
+  tags = {
+    "${local.service}.version" = local.migrator_version
+  }
+
   container_definitions = jsonencode(
     [
       {
@@ -192,10 +196,6 @@ resource "null_resource" "start_migrator" {
           subnets        = local.writer_adjacent_subnets
         }
       })
-      TASK_TAGS_JSON = jsonencode([
-        for key, value in local.default_tags
-        : { key = key, value = tostring(value) }
-      ])
       LOG_GROUP_NAME = aws_cloudwatch_log_group.messages.name
     }
     interpreter = ["/usr/bin/env", "bash"]

@@ -14,7 +14,6 @@
 #   $CLUSTER_NAME: Name of the ECS Cluster to run in
 #   $TASK_DEFINITION_ARN: ARN of the Task Definition revision to run a Task based on
 #   $NETWORK_CONFIG_JSON: JSON object of awsvpc network configuration (subnets, security group, etc.)
-#   $TASK_TAGS_JSON: JSON list of { "key": "<key>", "value": "<value>" } tag objects
 #   $LOG_GROUP_NAME: Name of the CloudWatch Log Group for Migrator standard output. Used only for
 #                    assisting operators in observing the Migrator's behavior
 #######################################
@@ -24,11 +23,12 @@ task_id="$(
     --group "$TASK_NAME" \
     --cluster "$CLUSTER_NAME" \
     --task-definition "$TASK_DEFINITION_ARN" \
+    --enable-ecs-managed-tags \
+    --propagate-tags TASK_DEFINITION \
     --count 1 \
     --platform-version "LATEST" \
     --capacity-provider-strategy "$CAPACITY_PROVIDER_STRATEGIES" \
     --network-configuration "$NETWORK_CONFIG_JSON" \
-    --tags "$TASK_TAGS_JSON" \
     --query "tasks[0].taskArn" \
     --output text
 )"
