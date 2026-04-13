@@ -15,6 +15,7 @@ on:
           database,
           locust,
           migrator,
+          migrator-ng,
           ccw-pipeline,
           idr-pipeline,
           npi-pipeline,
@@ -65,6 +66,7 @@ on:
           database,
           locust,
           migrator,
+          migrator-ng,
           ccw-pipeline,
           idr-pipeline,
           npi-pipeline,
@@ -116,7 +118,8 @@ env:
       ],
       "03": [
         { "layer": "03", "service": "locust", "runner": "lambda" },
-        { "layer": "03", "service": "migrator", "runner": "small" }
+        { "layer": "03", "service": "migrator", "runner": "small" },
+        { "layer": "03", "service": "migrator-ng", "runner": "small" }
       ],
       "04": [
         { "layer": "04", "service": "ccw-pipeline", "runner": "lambda" },
