@@ -73,7 +73,7 @@ jobs:
           ALL_VARS_JSON: ${{ inputs.all-vars-json || '{}' }}
           SERVICE: ${{ matrix.context.service }}
         run: |
-          tofu_vars_json="$(jq --arg service "$SERVICE" '.[$service] // {}' <<<"$ALL_VARS_JSON")"
+          tofu_vars_json="$(jq -c --arg service "$SERVICE" '.[$service] // {}' <<<"$ALL_VARS_JSON")"
 
           echo "tofu-vars-json=$tofu_vars_json" >> "$GITHUB_OUTPUT"
 
