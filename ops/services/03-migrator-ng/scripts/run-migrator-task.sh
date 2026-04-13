@@ -93,11 +93,13 @@ until [[
   sleep 5
 done
 
-task_exit_code=$(aws ecs describe-tasks \
-  --cluster "$CLUSTER_NAME" \
-  --tasks "$task_id" \
-  --query "tasks[0].containers[?name=='$CONTAINER_NAME'].exitCode" \
-  --output text)
+task_exit_code=$(
+  aws ecs describe-tasks \
+    --cluster "$CLUSTER_NAME" \
+    --tasks "$task_id" \
+    --query "tasks[0].containers[?name=='$CONTAINER_NAME'].exitCode" \
+    --output text
+)
 
 if [[ $task_exit_code != "0" ]]; then
   echo "$TASK_NAME failed. Check CloudWatch Logs (aws logs tail '$LOG_GROUP_NAME') for more information"
