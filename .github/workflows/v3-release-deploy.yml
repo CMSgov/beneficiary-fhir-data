@@ -61,11 +61,12 @@ defaults:
     shell: bash
 
 jobs:
-  compute-version-strings:
+  setup:
     runs-on: ubuntu-24.04
     outputs:
       current-version: ${{ steps.bfd-version-strings.outputs.current-version }}
       full-version-tag: ${{ steps.bfd-version-strings.outputs.full-version-tag }}
+      envs-as-json: ${{ steps.envs-as-json.outputs.envs-as-json }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -90,10 +91,19 @@ jobs:
           echo "$FULL_VERSION_TAG" | grep -P '^\d+\.\d+\.\d+-SNAPSHOT-.+'
           echo full-version-tag="$FULL_VERSION_TAG" >> "$GITHUB_OUTPUT"
 
+      - name: Envs as JSON
+        id: envs-as-json
+        env:
+          ENVS: ${{ inputs.envs }}
+        run: |
+          envs_as_json="$(jq -Rc '[(split(",") // [])[]| sub("^ "; "") | sub(" $"; "")]' <<<"$ENVS")"
+
+          echo "envs-as-json=$envs_as_json" >> "$GITHUB_OUTPUT"
+
   deploy-platform:
     if: ${{ inputs.deploy-platform }}
     uses: ./.github/workflows/deploy-platform-services.yml
-    needs: [compute-version-strings]
+    needs: [setup]
     strategy:
       matrix:
         account-type: ["prod", "non-prod"]
@@ -107,7 +117,7 @@ jobs:
     # deploy-platform is conditional, so we want to run this step if it runs or not; the below
     # condition is how we do that
     if: ${{ (always() && !cancelled()) && contains(needs.*.result, 'success') }}
-    needs: [deploy-platform, compute-version-strings]
+    needs: [deploy-platform, setup]
     runs-on: ${{ format('codebuild-bfd-non-prod-platform-docker-{0}-{1}', github.run_id, github.run_attempt) }}
     steps:
       - name: Configure AWS credentials
@@ -148,10 +158,10 @@ jobs:
 
   build-server-ng-image:
     runs-on: ubuntu-24.04-arm
-    needs: [compute-version-strings, pull-base-java]
+    needs: [setup, pull-base-java]
     env:
-      CURRENT_VERSION: ${{ needs.compute-version-strings.outputs.current-version }}
-      FULL_VERSION_TAG: ${{ needs.compute-version-strings.outputs.full-version-tag }}
+      CURRENT_VERSION: ${{ needs.setup.outputs.current-version }}
+      FULL_VERSION_TAG: ${{ needs.setup.outputs.full-version-tag }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -227,14 +237,14 @@ jobs:
           retention-days: 1
 
   push-jib-images:
-    needs: [compute-version-strings, build-server-ng-image]
+    needs: [setup, build-server-ng-image]
     strategy:
       matrix:
         account: ["prod", "non-prod"]
     runs-on: codebuild-bfd-${{ matrix.account }}-platform-docker-${{ github.run_id }}-${{ github.run_attempt }}
     env:
-      CURRENT_VERSION: ${{ needs.compute-version-strings.outputs.current-version }}
-      FULL_VERSION_TAG: ${{ needs.compute-version-strings.outputs.full-version-tag }}
+      CURRENT_VERSION: ${{ needs.setup.outputs.current-version }}
+      FULL_VERSION_TAG: ${{ needs.setup.outputs.full-version-tag }}
     steps:
       - name: Get role ARN
         id: get-role-arn
@@ -284,13 +294,13 @@ jobs:
     # condition is how we do that
     if: ${{ (always() && !cancelled()) && contains(needs.*.result, 'success') }}
     uses: ./.github/workflows/build-container-images.yml
-    needs: [deploy-platform, compute-version-strings]
+    needs: [deploy-platform, setup]
     permissions:
       contents: read
       id-token: write
     with:
       branch: ${{ github.ref_name }}
-      versionTag: ${{ needs.compute-version-strings.outputs.full-version-tag }}
+      versionTag: ${{ needs.setup.outputs.full-version-tag }}
       awsRegion: ${{ inputs.aws-region }}
       # Build other images, like Lambda images, Python applications, etc.
       # See .github/workflows/build_container_images_matrix.json for list of buildable images
@@ -303,6 +313,41 @@ jobs:
       baseImagesVersion: latest
       cleanupImageArtifacts: false # We'll cleanup at the end, so don't do anything
       tagLatest: false
+    secrets: inherit
+
+  deploy-to-envs:
+    if: ${{ needs.setup.outputs.envs-as-json != '[]' }}
+    uses: ./.github/workflows/deploy-env-services.yml
+    needs: [setup, push-jib-images, build-other-images]
+    strategy:
+      matrix:
+        bfd-env: ${{ fromJson(needs.setup.outputs.envs-as-json) }}
+      fail-fast: true
+    with:
+      bfd-env: ${{ matrix.bfd-env }}
+      services: >-
+        config,
+        cluster,
+        database,
+        migrator-ng,
+        idr-pipeline,
+        server-ng
+      git-ref: ${{ github.ref_name }}
+      all-vars-json: >-
+        {
+          "migrator-ng": {
+            "migrator_version_override": "${{ needs.setup.outputs.full-version-tag }}"
+          },
+          "idr-pipeline": {
+            "consume_idr_events_version_override": "${{ needs.setup.outputs.full-version-tag }}",
+            "pipeline_version_override": "${{ needs.setup.outputs.full-version-tag }}",
+            "run_idr_pipeline_version_override": "${{ needs.setup.outputs.full-version-tag }}"
+          },
+          "server-ng": {
+            "log_router_version_override": "${{ needs.setup.outputs.full-version-tag }}",
+            "server_version_override": "${{ needs.setup.outputs.full-version-tag }}"
+          }
+        }
     secrets: inherit
 
   cleanup-artifacts:
