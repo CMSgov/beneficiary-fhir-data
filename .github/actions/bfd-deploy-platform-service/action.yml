@@ -37,6 +37,13 @@ runs:
         cw-log-stream: ${{ inputs.cw-log-stream }}
         tofu-vars-json: ${{ inputs.tofu-vars-json }}
 
+    # This step is necessary as it seems that some objects (like "github" or "inputs") are
+    # unavailable when the top-level "env" is evaluated for Composite Actions
+    - name: Setup environment
+      run: |
+        echo "TOFU_CI_SCRIPT=${{ github.workspace }}/.github/scripts/tofu-ci.sh" >> $GITHUB_ENV
+      shell: bash
+
     - name: OpenTofu init
       run: |
         cd "${{ github.workspace }}/${{ inputs.service-path }}"
@@ -64,7 +71,7 @@ runs:
         cd "${{ github.workspace }}/${{ inputs.service-path }}"
 
         echo "Generating OpenTofu plan for ${{ inputs.service-path }}..."
-        tofu plan ${{ steps.gen-tf-vars-args.outputs.tf-vars-args }} -no-color \
+        exec "$TOFU_CI_SCRIPT" plan ${{ steps.gen-tf-vars-args.outputs.tf-vars-args }} -no-color \
           -out=tfplan 2>&1 | "$STDOUT_TO_CWLOGS_SCRIPT"
         echo "Plan generated for ${{ inputs.service-path }} successfully"
       shell: bash
@@ -75,6 +82,6 @@ runs:
         cd "${{ github.workspace }}/${{ inputs.service-path }}"
 
         echo "Applying OpenTofu plan for ${{ inputs.service-path }}..."
-        tofu apply -no-color -input=false tfplan 2>&1 | "$STDOUT_TO_CWLOGS_SCRIPT"
+        exec "$TOFU_CI_SCRIPT" apply -no-color -input=false tfplan 2>&1 | "$STDOUT_TO_CWLOGS_SCRIPT"
         echo "OpenTofu plan for ${{ inputs.service-path }} applied"
       shell: bash
