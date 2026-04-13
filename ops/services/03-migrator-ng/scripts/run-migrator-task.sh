@@ -9,6 +9,7 @@
 # Intended to be ran in a "local_exec" provisioner of a null_resource resource.
 #
 # Environment Variables:
+#   $ROLE_NAME: Name of the migrator IAM Role used in the Task Definition
 #   $TASK_NAME: Name of the migrator Task, also the group name; typically just "migrator"
 #   $CONTAINER_NAME: Name of the migrator container; typically just "migrator"
 #   $CLUSTER_NAME: Name of the ECS Cluster to run in
@@ -17,6 +18,10 @@
 #   $LOG_GROUP_NAME: Name of the CloudWatch Log Group for Migrator standard output. Used only for
 #                    assisting operators in observing the Migrator's behavior
 #######################################
+
+until aws iam get-role --role-name "$ROLE_NAME" &>/dev/null; do
+  sleep 1
+done
 
 task_id="$(
   aws ecs run-task \

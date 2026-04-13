@@ -177,6 +177,7 @@ resource "null_resource" "start_migrator" {
 
   provisioner "local-exec" {
     environment = {
+      ROLE_NAME           = aws_iam_role.task.name
       TASK_NAME           = local.service
       CONTAINER_NAME      = local.service
       CLUSTER_NAME        = data.aws_ecs_cluster.main.cluster_name
