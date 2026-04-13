@@ -74,23 +74,47 @@ runs:
         echo "Selected workspace \"${{ inputs.bfd-env }}\""
       shell: bash
 
-    - name: Generate OpenTofu plan
+      # We split Tofu steps into "start"/"do"/"end" steps in order to attempt to avoid GitHub
+      # Actions' poor signaling behavior on exit.
+      # See the README of https://github.com/ringerc/github-actions-signal-handling-demo and
+      # https://github.com/orgs/community/discussions/26311
+    - name: Start OpenTofu Plan
       run: |
         cd "${{ github.workspace }}/${{ inputs.service-path }}"
 
         echo "Generating OpenTofu plan for ${{ inputs.service-path }}..."
+      shell: bash
+
+      # Having this "exec ..." be the first command should ensure that the wrapper script is the
+      # "leader" process
+    - name: Do OpenTofu plan
+      run: |
         exec "$TOFU_CI_SCRIPT" plan ${{ steps.setup-tofu.outputs.tf-vars-args }} -no-color \
           -out=tfplan 2>&1 | "$STDOUT_TO_CWLOGS_SCRIPT"
+      shell: bash
+
+    - name: End OpenTofu plan
+      run: |
         echo "Plan generated for ${{ inputs.service-path }} successfully"
       shell: bash
 
-    - name: Apply env service
+    - name: Start apply env service
       if: ${{ inputs.skip-apply != 'true' }}
       run: |
         cd "${{ github.workspace }}/${{ inputs.service-path }}"
 
         echo "Applying OpenTofu plan for ${{ inputs.service-path }}..."
+      shell: bash
+
+    - name: Do apply env service
+      if: ${{ inputs.skip-apply != 'true' }}
+      run: |
         exec "$TOFU_CI_SCRIPT" apply -no-color -input=false tfplan 2>&1 | "$STDOUT_TO_CWLOGS_SCRIPT"
+      shell: bash
+
+    - name: End apply env service
+      if: ${{ inputs.skip-apply != 'true' }}
+      run: |
         echo "OpenTofu plan for ${{ inputs.service-path }} applied"
       shell: bash
 
