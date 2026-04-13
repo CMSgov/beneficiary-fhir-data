@@ -177,11 +177,12 @@ resource "null_resource" "start_migrator" {
 
   provisioner "local-exec" {
     environment = {
-      ROLE_NAME           = aws_iam_role.task.name
-      TASK_NAME           = local.service
-      CONTAINER_NAME      = local.service
-      CLUSTER_NAME        = data.aws_ecs_cluster.main.cluster_name
-      TASK_DEFINITION_ARN = aws_ecs_task_definition.this.arn
+      ROLE_NAME              = aws_iam_role.task.name
+      TASK_NAME              = local.service
+      CONTAINER_NAME         = local.service
+      CLUSTER_NAME           = data.aws_ecs_cluster.main.cluster_name
+      TASK_DEFINITION_ARN    = aws_ecs_task_definition.this.arn
+      TASK_DEFINITION_FAMILY = aws_ecs_task_definition.this.family
       CAPACITY_PROVIDER_STRATEGIES = jsonencode([
         for strategy in local.capacity_provider_strategies
         : {
