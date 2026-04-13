@@ -121,11 +121,6 @@ resource "aws_ecs_task_definition" "idr" {
     operating_system_family = "LINUX"
   }
 
-  volume {
-    configure_at_launch = false
-    name                = "tmp"
-  }
-
   tags = {
     "${local.service}.version" = local.pipeline_version
   }
@@ -193,13 +188,19 @@ resource "aws_ecs_task_definition" "idr" {
           }
         }
         stopTimeout = 120 # Allow enough time for Pipeline to gracefully stop on spot termination.
-        mountPoints = [
-          {
-            containerPath = "/tmp"
-            readOnly      = false
-            sourceVolume  = "tmp"
-          }
-        ]
+        linuxParameters = {
+          tmpfs = [
+            {
+              containerPath = "/app/.cache"
+              size          = min(max(128, floor(0.025 * local.idr_memory)), 256) # Min 128 MiB/max 256 MiB
+              mountOptions = [
+                "uid=1001",
+                "gid=1001"
+              ]
+            }
+          ]
+        }
+        mountPoints            = []
         readonlyRootFilesystem = true
         # Empty declarations reduce Terraform diff noise
         portMappings   = []
