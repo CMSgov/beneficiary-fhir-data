@@ -9,6 +9,8 @@
 /bfd/${env}/database/sensitive/rds_master_password: ENC[AES256_GCM,data:8J/yHRtlGtEviFeAN3CRDcaeiqs3eg43kQ==,iv:YNtQM7wPLWAJ5tKpoJKoDXpw14oVWSCyWdLa0wDQtxE=,tag:MSjXceufUXgvh4Rp6wKmoQ==,type:str]
 /bfd/${env}/migrator/sensitive/db/password: ENC[AES256_GCM,data:zCHMta7qIkMN3rodQAeeuvOOyOaVLI0k,iv:Xefj2dgHO0It1KRAkJtY8IQFhyCcA/jWDp+rbu63KfE=,tag:KdBDttqGw+N5A9hPLx99dw==,type:str]
 /bfd/${env}/migrator/sensitive/db/username: ENC[AES256_GCM,data:Do3zIjkbMJQET3xrQB4+EnXMhQ==,iv:izvA+v4TbP54TzmKuZQUboqvJAnVyLHNKwYP4sZ9Euk=,tag:A5akv4oMxuPxA3QlzBRT3Q==,type:str]
+/bfd/${env}/migrator-ng/sensitive/db/password: ENC[AES256_GCM,data:03kVbQpwPF1/D5MlgooJdAQb7TNUklp9,iv:7+f8WeBK0Tjy/oejPSkEvHr2pIBcNF2rAvrYrGM686Y=,tag:zjgs0Mjm35ELebWkm9PTtg==,type:str]
+/bfd/${env}/migrator-ng/sensitive/db/username: ENC[AES256_GCM,data:BDEvk70WYXPKITbvyK/PuIprTQ==,iv:98N5M5lZn6fbww9dAhJEHtv+wZyPelILdav3u0twaMQ=,tag:OTWbuwfQjiBhL68v9Q7V+Q==,type:str]
 /bfd/${env}/ccw-pipeline/sensitive/ccw/ccw_rif_role_external_id: ENC[AES256_GCM,data:7NWm,iv:JHrYKhdUL/QnssQpuz3Ek8YDd/0ghG2/ZxWByRqjTm8=,tag:I9lYQDMFP6R70JtvBnW2rA==,type:str]
 /bfd/${env}/ccw-pipeline/sensitive/ccw/ccw_rif_role_principal_arns: ENC[AES256_GCM,data:z3J7P+9i0hk8tRZ55Bk0YZkQao4J5zs4zRxTdmi1+e5TOpB8DuZwf2FNMcaDr+D7wKmrv9H6u3zXD+aSQYtuvBMpuOumpfijgHNOdWK+VaxX3EeKK4pSnU065cXu1tdPlzNI7uf8BHaFS9o=,iv:o6YWe4CpCdV5MvkB/DTvak0bEe2N+T38TVNoPks97TA=,tag:qLHbv2eB6RWhxeP9TN5RSA==,type:str]
 /bfd/${env}/ccw-pipeline/sensitive/db/password: ENC[AES256_GCM,data:0pBdpU8x+ex4r3Or+JA/mi5pTrZg971d,iv:VpamsuPQINontkvws5Js4Zz5/V6VdTwzIv3fhVUtYL8=,tag:aI/3eGdp4epnuJG7UuBNeg==,type:str]
@@ -101,6 +103,10 @@
 /bfd/${env}/migrator/nonsensitive/ecs/resources/memory: 4096
 /bfd/${env}/migrator/nonsensitive/ecs/capacity_provider/FARGATE/base: 0
 /bfd/${env}/migrator/nonsensitive/ecs/capacity_provider/FARGATE/weight: 100
+/bfd/${env}/migrator-ng/nonsensitive/ecs/resources/cpu: 2048
+/bfd/${env}/migrator-ng/nonsensitive/ecs/resources/memory: 4096
+/bfd/${env}/migrator-ng/nonsensitive/ecs/capacity_provider/FARGATE/base: 0
+/bfd/${env}/migrator-ng/nonsensitive/ecs/capacity_provider/FARGATE/weight: 100
 /bfd/${env}/idr-pipeline/nonsensitive/ecs/resources/cpu: 4096
 /bfd/${env}/idr-pipeline/nonsensitive/ecs/resources/memory: 8192
 /bfd/${env}/idr-pipeline/nonsensitive/ecs/resources/disk_size: 21
