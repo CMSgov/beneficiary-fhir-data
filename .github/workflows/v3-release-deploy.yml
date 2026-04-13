@@ -19,6 +19,12 @@ on:
           test,
           sandbox,
           prod
+      deploy-platform:
+        description: >-
+          Deploy platform Terraservices?
+        required: true
+        type: boolean
+        default: false
       aws-region:
         description: >-
           Override the AWS Region destination for uploaded artifacts.
@@ -84,8 +90,24 @@ jobs:
           echo "$FULL_VERSION_TAG" | grep -P '^\d+\.\d+\.\d+-SNAPSHOT-.+'
           echo full-version-tag="$FULL_VERSION_TAG" >> "$GITHUB_OUTPUT"
 
+  deploy-platform:
+    if: ${{ inputs.deploy-platform }}
+    uses: ./.github/workflows/deploy-platform-services.yml
+    needs: [compute-version-strings]
+    strategy:
+      matrix:
+        account-type: ["prod", "non-prod"]
+      fail-fast: false
+    with:
+      account-type: ${{ matrix.account-type }}
+      git-ref: ${{ github.ref_name }}
+    secrets: inherit
+
   pull-base-java:
-    needs: compute-version-strings
+    # deploy-platform is conditional, so we want to run this step if it runs or not; the below
+    # condition is how we do that
+    if: ${{ (always() && !cancelled()) && contains(needs.*.result, 'success') }}
+    needs: [deploy-platform, compute-version-strings]
     runs-on: ${{ format('codebuild-bfd-non-prod-platform-docker-{0}-{1}', github.run_id, github.run_attempt) }}
     steps:
       - name: Configure AWS credentials
@@ -258,8 +280,11 @@ jobs:
         working-directory: ${{ runner.temp }}
 
   build-other-images:
+    # deploy-platform is conditional, so we want to run this step if it runs or not; the below
+    # condition is how we do that
+    if: ${{ (always() && !cancelled()) && contains(needs.*.result, 'success') }}
     uses: ./.github/workflows/build-container-images.yml
-    needs: [compute-version-strings]
+    needs: [deploy-platform, compute-version-strings]
     permissions:
       contents: read
       id-token: write
