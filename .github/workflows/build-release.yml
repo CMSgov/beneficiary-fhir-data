@@ -175,7 +175,7 @@ jobs:
     steps:
       - name: "Generate an App Token"
         id: generate_token
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@v3
         with:
           app-id: ${{ secrets.BFD_RELEASE_APP_ID }}
           private-key: ${{ secrets.BFD_RELEASE_APP_KEY }}
@@ -503,7 +503,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Delete all artifacts
-        uses: GeekyEggo/delete-artifact@v5.1.0
+        uses: GeekyEggo/delete-artifact@v6.0.0
         with:
           name: '*'
           failOnError: false
