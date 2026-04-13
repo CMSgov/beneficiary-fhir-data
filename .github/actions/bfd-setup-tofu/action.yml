@@ -110,9 +110,11 @@ runs:
     # -var=var1=val1 -var=var2=123 -var=var3=true
     - name: Generate OpenTofu vars args
       id: gen-tf-vars-args
+      env:
+        TOFU_VARS_JSON: ${{ inputs.tofu-vars-json }}
       run: |
         tf_vars_args="$(
-          echo "${{ inputs.tofu-vars-json }}" | jq -r 'to_entries |
+          echo "$TOFU_VARS_JSON" | jq -r 'to_entries |
             map(select(.value != null and .value != "")) |
             map("\"-var=" + .key + "=" + (.value | tostring)+ "\"") |
             join(" ")'
