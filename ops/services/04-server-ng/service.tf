@@ -108,6 +108,11 @@ resource "aws_ecs_task_definition" "server" {
     name                = "tmp_${local.service}"
   }
 
+  tags = {
+    "${local.service}.version" = local.server_version
+    "log_router.version"       = local.log_router_version
+  }
+
   container_definitions = jsonencode(
     [
       {
@@ -117,7 +122,7 @@ resource "aws_ecs_task_definition" "server" {
         cpu               = max(min(1024, floor(0.05 * local.server_cpu)), 256)    # Max 1 CPU, min 1/4
         memoryReservation = max(min(1024, floor(0.08 * local.server_memory)), 256) # Max 1 GB, min 256 MiB
         memory            = max(min(1024, floor(0.10 * local.server_memory)), 312) # Max 1 GB, min 312 MiB
-        user              = "0" # Default; reduces unnecessary terraform diff output
+        user              = "0"                                                    # Default; reduces unnecessary terraform diff output
         environment = [
           {
             name  = "AWS_REGION"
