@@ -56,14 +56,14 @@ locals {
   idr_capacity_provider_strategies = module.data_strategies.strategies
   idr_task_ssm = {
     for k, v in {
-      IDR_USERNAME    = "/bfd/${local.env}/idr-pipeline/sensitive/idr_username"
-      IDR_PRIVATE_KEY = "/bfd/${local.env}/idr-pipeline/sensitive/idr_private_key"
-      IDR_ACCOUNT     = "/bfd/${local.env}/idr-pipeline/sensitive/idr_account"
-      IDR_WAREHOUSE   = "/bfd/${local.env}/idr-pipeline/sensitive/idr_warehouse"
-      IDR_DATABASE    = "/bfd/${local.env}/idr-pipeline/sensitive/idr_database"
-      IDR_SCHEMA      = "/bfd/${local.env}/idr-pipeline/sensitive/idr_schema"
-      BFD_DB_USERNAME = "/bfd/${local.env}/idr-pipeline/sensitive/db/username"
-      BFD_DB_PASSWORD = "/bfd/${local.env}/idr-pipeline/sensitive/db/password"
+      IDR_USERNAME    = "/bfd/${local.env}/${local.service}/sensitive/idr_username"
+      IDR_PRIVATE_KEY = "/bfd/${local.env}/${local.service}/sensitive/idr_private_key"
+      IDR_ACCOUNT     = "/bfd/${local.env}/${local.service}/sensitive/idr_account"
+      IDR_WAREHOUSE   = "/bfd/${local.env}/${local.service}/sensitive/idr_warehouse"
+      IDR_DATABASE    = "/bfd/${local.env}/${local.service}/sensitive/idr_database"
+      IDR_SCHEMA      = "/bfd/${local.env}/${local.service}/sensitive/idr_schema"
+      BFD_DB_USERNAME = "/bfd/${local.env}/${local.service}/sensitive/db/username"
+      BFD_DB_PASSWORD = "/bfd/${local.env}/${local.service}/sensitive/db/password"
     } : k => "arn:aws:ssm:${local.region}:${local.account_id}:parameter/${trim(v, "/")}"
   }
 }
