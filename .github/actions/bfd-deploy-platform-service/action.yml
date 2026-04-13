@@ -46,8 +46,6 @@ runs:
 
     - name: OpenTofu init
       run: |
-        cd "${{ github.workspace }}/${{ inputs.service-path }}"
-
         tofu --version
 
         # Often OpenTofu stdout/stderr logs contain sensitive/private information. GHA logs are
@@ -59,29 +57,56 @@ runs:
           -reconfigure \
           -no-color 2>&1 | "$STDOUT_TO_CWLOGS_SCRIPT"
         echo "tofu init for \"${{ inputs.account-type }}\" completed"
+
         tofu workspace select \
           -no-color \
           -var account_type="${{ inputs.account-type }}" \
           -or-create "${{ inputs.account-type }}" 2>&1 | "$STDOUT_TO_CWLOGS_SCRIPT"
         echo "Selected workspace \"${{ inputs.account-type }}\""
       shell: bash
+      working-directory: ${{ github.workspace }}/${{ inputs.service-path }}
 
-    - name: Generate OpenTofu plan
+      # We split Tofu steps into "start"/"do"/"end" steps in order to attempt to avoid GitHub
+      # Actions' poor signaling behavior on exit.
+      # See the README of https://github.com/ringerc/github-actions-signal-handling-demo and
+      # https://github.com/orgs/community/discussions/26311
+    - name: Start OpenTofu Plan
       run: |
-        cd "${{ github.workspace }}/${{ inputs.service-path }}"
-
         echo "Generating OpenTofu plan for ${{ inputs.service-path }}..."
-        exec "$TOFU_CI_SCRIPT" plan ${{ steps.gen-tf-vars-args.outputs.tf-vars-args }} -no-color \
+      shell: bash
+      working-directory: ${{ github.workspace }}/${{ inputs.service-path }}
+
+      # Having this "exec ..." be the first command should ensure that the wrapper script is the
+      # "leader" process
+    - name: Do OpenTofu plan
+      run: |
+        exec "$TOFU_CI_SCRIPT" plan ${{ steps.setup-tofu.outputs.tf-vars-args }} -no-color \
           -out=tfplan 2>&1 | "$STDOUT_TO_CWLOGS_SCRIPT"
+      shell: bash
+      working-directory: ${{ github.workspace }}/${{ inputs.service-path }}
+
+    - name: End OpenTofu plan
+      run: |
         echo "Plan generated for ${{ inputs.service-path }} successfully"
       shell: bash
 
-    - name: Apply Terraservice
+    - name: Start apply Terraservice
       if: ${{ inputs.skip-apply != 'true' }}
       run: |
-        cd "${{ github.workspace }}/${{ inputs.service-path }}"
-
         echo "Applying OpenTofu plan for ${{ inputs.service-path }}..."
+      shell: bash
+      working-directory: ${{ github.workspace }}/${{ inputs.service-path }}
+
+    - name: Do apply Terraservice
+      if: ${{ inputs.skip-apply != 'true' }}
+      run: |
         exec "$TOFU_CI_SCRIPT" apply -no-color -input=false tfplan 2>&1 | "$STDOUT_TO_CWLOGS_SCRIPT"
+      shell: bash
+      working-directory: ${{ github.workspace }}/${{ inputs.service-path }}
+
+    - name: End apply Terraservice
+      if: ${{ inputs.skip-apply != 'true' }}
+      run: |
         echo "OpenTofu plan for ${{ inputs.service-path }} applied"
       shell: bash
+
