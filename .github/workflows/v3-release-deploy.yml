@@ -157,6 +157,10 @@ jobs:
           retention-days: 1
 
   build-server-ng-image:
+    # For reasons unknown, _downstream_ jobs must also guard against
+    # their needed Jobs depending on conditional jobs. So, we must include the below if even though
+    # this step does not directly depend on "deploy-platform"
+    if: ${{ (always() && !cancelled()) && contains(needs.*.result, 'success') }}
     runs-on: ubuntu-24.04-arm
     needs: [setup, pull-base-java]
     env:
@@ -237,6 +241,7 @@ jobs:
           retention-days: 1
 
   push-jib-images:
+    if: ${{ (always() && !cancelled()) && contains(needs.*.result, 'success') }}
     needs: [setup, build-server-ng-image]
     strategy:
       matrix:
@@ -316,7 +321,7 @@ jobs:
     secrets: inherit
 
   deploy-to-envs:
-    if: ${{ needs.setup.outputs.envs-as-json != '[]' }}
+    if: ${{ needs.setup.outputs.envs-as-json != '[]' && (always() && !cancelled()) && contains(needs.*.result, 'success') }}
     uses: ./.github/workflows/deploy-env-services.yml
     needs: [setup, push-jib-images, build-other-images]
     strategy:
