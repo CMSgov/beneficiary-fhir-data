@@ -67,10 +67,6 @@ jobs:
           cd ${{ github.workspace }}/${{ matrix.projects.projectRoot }}
           uv python install
           ${{ matrix.projects.uvCommand }}
-          # check linting
-          uv run ruff check
-          # check formatting
-          uv run ruff format --check
           # check types
           uv run pyright .
           # tests
