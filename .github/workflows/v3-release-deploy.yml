@@ -117,7 +117,7 @@ jobs:
           # Validate and set current-version and full-version-tag
           echo "$bfd_parent_pom_version" | grep -P '^\d+\.\d+\.\d+$|^\d+\.\d+\.\d+-SNAPSHOT$'
           echo current-version="$bfd_parent_pom_version" >> "$GITHUB_OUTPUT"
-          echo "$full_version_tag" | grep -P '^v3\.\d{4}.\d{2}.\d{2}.\d+-.*$'
+          echo "$full_version_tag" | grep -P '^v3\.\d{4}.\d{2}.\d{2}.\d+.*$'
           echo full-version-tag="$full_version_tag" >> "$GITHUB_OUTPUT"
 
       - name: Envs as JSON
