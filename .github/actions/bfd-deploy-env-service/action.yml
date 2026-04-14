@@ -92,14 +92,23 @@ runs:
       continue-on-error: true
       shell: bash
       run: |
-        set -euo pipefail
+        # Temporary Enable xtrace globally:
+        set -x -euo pipefail
 
         run_with_auto_unlock() {
+          # Temporary Enable xtrace:
+          set -x
+
           # Run the command, capture output
           set +e
           out="$("$@" 2>&1)"
           rc=$?
           set -e
+
+          # DEBUG
+          echo "--- DEBUG: Captured Output ---"
+          echo "$out"
+          echo "--- DEBUG: End Captured Output (RC: $rc) ---"
 
           if [[ $rc -eq 0 ]]; then
             return 0
@@ -112,7 +121,11 @@ runs:
               echo "Detected lock; force-unlocking: $lock_id"
               tofu force-unlock -force "$lock_id" -no-color
               return 0
+            else
+              echo "Detected lock error, but could not extract lock ID."
             fi
+          else
+            echo "Command failed, but no state lock detected in output."
           fi
 
           return $rc
