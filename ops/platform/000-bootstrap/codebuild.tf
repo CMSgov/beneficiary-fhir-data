@@ -160,8 +160,8 @@ resource "aws_codebuild_source_credential" "github" {
 resource "aws_cloudwatch_log_group" "runner" {
   for_each = local.codebuild_runner_config
 
-  name       = "/aws/codebuild/${each.value.name}"
-  kms_key_id = aws_kms_key.primary["platform"].arn
+  name              = "/aws/codebuild/${each.value.name}"
+  kms_key_id        = aws_kms_key.primary["platform"].arn
   retention_in_days = 2557
 }
 
