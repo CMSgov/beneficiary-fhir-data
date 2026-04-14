@@ -258,14 +258,7 @@ class PatientSearchIT extends IntegrationTestBase {
   @ParameterizedTest
   @MethodSource
   void patientSearchByDate(ICriterion<TokenClientParam> searchCriteriaId, String beneSk) {
-    var lastUpdated =
-        entityManager
-            .createQuery(
-                "SELECT b.patientMeta.updatedTimestamp FROM Beneficiary b WHERE b.beneSk=:beneSk",
-                ZonedDateTime.class)
-            .setParameter("beneSk", beneSk)
-            .getResultList()
-            .getFirst();
+    var lastUpdated = getBeneficiaryFromBeneSk(beneSk).getPatientMeta().getUpdatedTimestamp();
 
     for (var searchStyle : SearchStyleEnum.values()) {
       var patientBundle =

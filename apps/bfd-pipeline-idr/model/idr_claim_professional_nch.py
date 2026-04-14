@@ -21,21 +21,25 @@ from model.base_model import (
     ALIAS_RLT_OCRNC_SGNTR_DERIVED_DATES,
     ALIAS_SGNTR,
     BATCH_ID,
-    BATCH_TIMESTAMP,
     COLUMN_MAP,
     EXPR,
     HISTORICAL_BATCH_TIMESTAMP,
-    INSERT_EXCLUDE,
     INSERT_FIELD,
     LAST_UPDATED_TIMESTAMP,
     PRIMARY_KEY,
-    UPDATE_TIMESTAMP,
+    UPDATE_FIELD,
     IdrBaseModel,
     ModelType,
-    claim_filter,
+    base_claim_filter,
     claim_occurrence_cte,
     claim_related_occurrences_cte,
+    clm_base_query,
+    clm_child_query,
+    clm_dt_sgntr_query,
+    clm_ocrnc_sgntr_query,
     clm_orig_cntl_num_expr,
+    clm_query,
+    clm_rlt_ocrnc_clause,
     provider_careteam_name_expr,
     provider_last_or_legal_name_expr,
     transform_default_date_to_null,
@@ -89,12 +93,12 @@ class IdrClaimProfessionalNch(IdrBaseModel):
     ]
     idr_insrt_ts: Annotated[
         datetime,
-        {BATCH_TIMESTAMP: True, INSERT_EXCLUDE: True, ALIAS: ALIAS_CLM, COLUMN_MAP: "idr_insrt_ts"},
+        {ALIAS: ALIAS_CLM, **INSERT_FIELD},
         BeforeValidator(transform_null_date_to_min),
     ]
     idr_updt_ts: Annotated[
         datetime,
-        {UPDATE_TIMESTAMP: True, INSERT_EXCLUDE: True, ALIAS: ALIAS_CLM, COLUMN_MAP: "idr_updt_ts"},
+        {ALIAS: ALIAS_CLM, **UPDATE_FIELD},
         BeforeValidator(transform_null_date_to_min),
     ]
     clm_idr_ld_dt: Annotated[date, {HISTORICAL_BATCH_TIMESTAMP: True, ALIAS: ALIAS_CLM}]
@@ -104,22 +108,12 @@ class IdrClaimProfessionalNch(IdrBaseModel):
     clm_nch_wkly_proc_dt: Annotated[date | None, BeforeValidator(transform_default_date_to_null)]
     idr_insrt_ts_sgntr: Annotated[
         datetime,
-        {
-            BATCH_TIMESTAMP: True,
-            INSERT_EXCLUDE: True,
-            ALIAS: ALIAS_SGNTR,
-            COLUMN_MAP: "idr_insrt_ts",
-        },
+        {ALIAS: ALIAS_SGNTR, **INSERT_FIELD},
         BeforeValidator(transform_null_date_to_min),
     ]
     idr_updt_ts_sgntr: Annotated[
         datetime,
-        {
-            UPDATE_TIMESTAMP: True,
-            INSERT_EXCLUDE: True,
-            ALIAS: ALIAS_SGNTR,
-            COLUMN_MAP: "idr_updt_ts",
-        },
+        {ALIAS: ALIAS_SGNTR, **UPDATE_FIELD},
         BeforeValidator(transform_null_date_to_min),
     ]
 
@@ -131,27 +125,26 @@ class IdrClaimProfessionalNch(IdrBaseModel):
     clm_mdcr_prfnl_prvdr_asgnmt_sw: Annotated[str, BeforeValidator(transform_default_string)]
     idr_insrt_ts_prfnl: Annotated[
         datetime,
-        {
-            BATCH_TIMESTAMP: True,
-            INSERT_EXCLUDE: True,
-            ALIAS: ALIAS_PRFNL,
-            COLUMN_MAP: "idr_insrt_ts",
-        },
+        {ALIAS: ALIAS_PRFNL, **INSERT_FIELD},
         BeforeValidator(transform_null_date_to_min),
     ]
     idr_updt_ts_prfnl: Annotated[
         datetime,
-        {
-            UPDATE_TIMESTAMP: True,
-            INSERT_EXCLUDE: True,
-            ALIAS: ALIAS_PRFNL,
-            COLUMN_MAP: "idr_updt_ts",
-        },
+        {ALIAS: ALIAS_PRFNL, **UPDATE_FIELD},
         BeforeValidator(transform_null_date_to_min),
     ]
     # Columns from v2_mdcr_clm_dcmtn
     clm_nrln_ric_cd: Annotated[str, {ALIAS: ALIAS_DCMTN}, BeforeValidator(transform_default_string)]
-
+    idr_insrt_ts_dcmtn: Annotated[
+        datetime,
+        {ALIAS: ALIAS_DCMTN, **INSERT_FIELD},
+        BeforeValidator(transform_null_date_to_min),
+    ]
+    idr_updt_ts_dcmtn: Annotated[
+        datetime,
+        {ALIAS: ALIAS_DCMTN, **UPDATE_FIELD},
+        BeforeValidator(transform_null_date_to_min),
+    ]
     # Columns from v2_mdcr_prvdr_hstry
     prvdr_blg_prvdr_npi_num: Annotated[
         str,
@@ -266,15 +259,36 @@ class IdrClaimProfessionalNch(IdrBaseModel):
         rlt_ocrnc_sgntr_dd = ALIAS_RLT_OCRNC_SGNTR_DERIVED_DATES
         not_materialized = "" if load_mode == LoadMode.IDR else "NOT MATERIALIZED"
         return f"""
-            WITH claim_occurrence_spans_dates AS {not_materialized} 
+            WITH claim_base AS (
+                {clm_base_query(start_time, partition, cls.model_type())}
+            ),
+            claims AS (
+                {clm_query()}
+                UNION
+                {clm_dt_sgntr_query()}
+                UNION
+                {clm_child_query("v2_mdcr_clm_prfnl")}
+                UNION
+                {clm_child_query("v2_mdcr_clm_dcmtn")}
+                UNION
+                {clm_ocrnc_sgntr_query()}
+                UNION
+                {clm_rlt_ocrnc_clause()}
+            ),
+            claim_occurrence_spans_dates AS {not_materialized} 
                 ({claim_occurrence_cte()}),
             claim_related_occurrences_dates AS {not_materialized} 
                 ({claim_related_occurrences_cte()})
             SELECT {{COLUMNS}}
-            FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
+            FROM claims c
+            JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm} ON
+                {clm}.geo_bene_sk = c.geo_bene_sk AND
+                {clm}.clm_dt_sgntr_sk = c.clm_dt_sgntr_sk AND
+                {clm}.clm_type_cd = c.clm_type_cd AND
+                {clm}.clm_num_sk = c.clm_num_sk
             JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_dt_sgntr {sgntr} ON 
                 {sgntr}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
-            JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_prfnl {prfnl} ON
+            LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_prfnl {prfnl} ON
                 {clm}.geo_bene_sk = {prfnl}.geo_bene_sk AND
                 {clm}.clm_dt_sgntr_sk = {prfnl}.clm_dt_sgntr_sk AND
                 {clm}.clm_type_cd = {prfnl}.clm_type_cd AND
@@ -297,6 +311,6 @@ class IdrClaimProfessionalNch(IdrBaseModel):
                 ON {ocrnc_sgntr_dd}.clm_ocrnc_sgntr_sk = {clm}.clm_ocrnc_sgntr_sk
             LEFT JOIN claim_related_occurrences_dates {rlt_ocrnc_sgntr_dd}
                 ON {rlt_ocrnc_sgntr_dd}.clm_rlt_ocrnc_sgntr_sk = {clm}.clm_rlt_ocrnc_sgntr_sk
-            {{WHERE_CLAUSE}} AND {claim_filter(start_time, partition)}
+            {{WHERE_CLAUSE}} AND {base_claim_filter(partition)}
             {{ORDER_BY}}
         """

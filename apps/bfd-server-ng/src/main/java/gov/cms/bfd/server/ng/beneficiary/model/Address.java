@@ -3,8 +3,12 @@ package gov.cms.bfd.server.ng.beneficiary.model;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.util.Optional;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 
 /** Beneficiary address information. */
+@EqualsAndHashCode
+@Getter
 @Embeddable
 public class Address {
   @Column(name = "geo_usps_state_cd")
@@ -15,6 +19,9 @@ public class Address {
 
   @Column(name = "geo_zip_plc_name")
   private Optional<String> city;
+
+  @Column(name = "bfd_normalized_address")
+  private String normalizedAddress;
 
   @Column(name = "bene_line_1_adr")
   private Optional<String> addressLine1;

@@ -12,23 +12,25 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public class JsonSnapshotSerializer extends ToStringSnapshotSerializer {
 
+  private static final String UUID_REGEX =
+      "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}";
   private static final Pattern LOCALHOST_REGEX = Pattern.compile("http://localhost:\\d+");
-  private static final Pattern UUID_REGEX =
-      Pattern.compile(
-          "\"id\"\\s*:\\s*\"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\"");
+  private static final Pattern ID_UUID_REGEX =
+      Pattern.compile(String.format("\"id\"\\s*:\\s*\"%s\"", UUID_REGEX));
   private static final Pattern FULLURL_UUID_REGEX =
       Pattern.compile(
-          "\"fullUrl\"\\s*:\\s*\"urn:uuid:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\"",
+          String.format("\"fullUrl\"\\s*:\\s*\"urn:uuid:%s\"", UUID_REGEX),
           Pattern.MULTILINE | Pattern.DOTALL);
   private static final Pattern LAST_UPDATED_REGEX = Pattern.compile("\"lastUpdated\":\\s*\".*\"");
   private static final Pattern REFERENCE_UUID_REGEX =
       Pattern.compile(
-          "\"reference\"\\s*:\\s*\"([A-Za-z]+)/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\"",
+          String.format("\"reference\"\\s*:\\s*\"([A-Za-z]+)/%s\"", UUID_REGEX),
           Pattern.MULTILINE | Pattern.DOTALL);
   private static final Pattern CLAIM_IDR_LOAD_DATE_REGEX =
       Pattern.compile(
-          "(\"code\"\\s*:\\s*\"CLM_IDR_LD_DT\"[\\s\\S]*?\"timingDate\"\\s*:\\s*\")\\d{4}-\\d{2}-\\d{2}(\")?",
+          "(\"code\"\\s*:\\s*\"CLM_IDR_LD_DT\".*?\"timingDate\"\\s*:\\s*\")\\d{4}-\\d{2}-\\d{2}(\")?",
           Pattern.MULTILINE | Pattern.DOTALL);
+  private static final String DEFAULT_UUID = "00000000-0000-0000-0000-000000000000";
 
   @Override
   public String getOutputFormat() {
@@ -60,9 +62,15 @@ public class JsonSnapshotSerializer extends ToStringSnapshotSerializer {
     // Ports are randomized
     json = LOCALHOST_REGEX.matcher(json).replaceAll("http://localhost");
     // Generated UUIDs are random
-    json = UUID_REGEX.matcher(json).replaceAll("\"id\" : \"{uuid}\"");
-    json = FULLURL_UUID_REGEX.matcher(json).replaceAll("\"fullUrl\" : \"{uuid}\"");
-    json = REFERENCE_UUID_REGEX.matcher(json).replaceAll("\"reference\": \"$1/{uuid}\"");
+    json = ID_UUID_REGEX.matcher(json).replaceAll(String.format("\"id\" : \"%s\"", DEFAULT_UUID));
+    json =
+        FULLURL_UUID_REGEX
+            .matcher(json)
+            .replaceAll(String.format("\"fullUrl\" : \"urn:uuid:%s\"", DEFAULT_UUID));
+    json =
+        REFERENCE_UUID_REGEX
+            .matcher(json)
+            .replaceAll(String.format("\"reference\": \"$1/%s\"", DEFAULT_UUID));
     // lastUpdated gets reset whenever we recreate the test data
     json =
         LAST_UPDATED_REGEX
