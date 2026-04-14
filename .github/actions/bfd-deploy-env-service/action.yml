@@ -107,12 +107,10 @@ runs:
 
           # Detect lock failure + extract ID
           if echo "$out" | grep -q "Error acquiring the state lock" && echo "$out" | grep -q "Lock Info:"; then
-            lock_id="$(echo "$out" | awk -F'ID:[[:space:]]+' '/^[[:space:]]*ID:/ {print $2; exit}' | awk '{print $1}')"
+            lock_id="$(echo "$out" | grep ' ID: ' | cut -d: -f2 | tr -d ' ' || true)"
             if [[ -n "${lock_id:-}" ]]; then
               echo "Detected lock; force-unlocking: $lock_id"
               tofu force-unlock -force "$lock_id" -no-color
-              echo "Retrying command after unlock..."
-              "$@" &>/dev/null
               return 0
             fi
           fi
