@@ -19,7 +19,7 @@ on:
           <abbreviated-branch-or-ticket-num>-<count>; e.g.: 1234-1, 4567-10, etc. The full version
           that is used to tag Images will then be <base-tag>-<version-suffix>, e.g.:
           v3.2026.30.01.0-1234-1
-        required: true
+        required: false
         default: ""
       envs:
         description: >-
@@ -109,8 +109,11 @@ jobs:
           VERSION_SUFFIX: ${{ inputs.version-suffix }}
         run: |
           bfd_parent_pom_version="$(yq --output-format=yaml .project.version apps/pom.xml)"
-          full_version_tag="$REF_NAME-$VERSION_SUFFIX"
-          
+          full_version_tag="$REF_NAME"
+          if [[ -n $VERSION_SUFFIX ]]; then
+            full_version_tag="$REF_NAME-$VERSION_SUFFIX"
+          fi
+
           # Validate and set current-version and full-version-tag
           echo "$bfd_parent_pom_version" | grep -P '^\d+\.\d+\.\d+$|^\d+\.\d+\.\d+-SNAPSHOT$'
           echo current-version="$bfd_parent_pom_version" >> "$GITHUB_OUTPUT"
