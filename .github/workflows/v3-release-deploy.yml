@@ -18,7 +18,7 @@ on:
           Version suffix appended to the current, valid v3 tag name. Recommended to be
           <abbreviated-branch-or-ticket-num>-<count>; e.g.: 1234-1, 4567-10, etc. The full version
           that is used to tag Images will then be <base-tag>-<version-suffix>, e.g.:
-          v3.2026.30.01.0-1234-1
+          v3.2026.01.30.0-1234-1
         required: false
         default: ""
       envs:
@@ -88,7 +88,7 @@ jobs:
             exit 1
           fi
           if ! echo "$REF_NAME" | grep -P '^v3\.\d{4}.\d{2}.\d{2}.\d+$'; then
-            echo "$REF_NAME MUST be in the form 'v3.yyyy.dd.MM.<integer>', e.g.: v3.2026.30.01.0"
+            echo "$REF_NAME MUST be in the form 'v3.yyyy.MM.dd.<integer>', e.g.: v3.2026.01.30.0"
             exit 1
           fi
 
