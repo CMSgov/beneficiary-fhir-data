@@ -92,6 +92,8 @@ runs:
       continue-on-error: true
       shell: bash
       run: |
+        cd "${{ github.workspace }}/${{ inputs.service-path }}"
+
         # Temporary Enable xtrace globally:
         set -x -euo pipefail
 
