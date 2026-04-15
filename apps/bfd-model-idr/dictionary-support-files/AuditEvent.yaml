@@ -1,18 +1,30 @@
 - inputPath: BFDAuditLog.matchedBeneSk
+  appliesTo: 
+    - Audit
   fhirPath: AuditEvent.entity.where(type.coding.code = 'Patient').what.reference.substring(8)
   notes: The SK of the beneficiary that was matched during the query process.
 - inputPath: BFDAuditLog.purposeOfEvent
+  appliesTo: 
+    - Audit
   fhirPath: AuditEvent.purposeOfEvent.coding.where(system = 'http://terminology.hl7.org/CodeSystem/v3-ActReason').code
   notes: The purpose of the audit event.
 - inputPath: BFDAuditLog.timeStamp
+  appliesTo: 
+    - Audit
   fhirPath: AuditEvent.recorded
   notes: The exact date and time when the audit event was captured.
 - inputPath: BFDAuditLog.clientIp
+  appliesTo: 
+    - Audit
   fhirPath: AuditEvent.agent.network.address
   notes: The IP address from which the client request originated.
 - inputPath: BFDAuditLog.clientName
+  appliesTo: 
+    - Audit
   fhirPath: AuditEvent.agent.name
   notes: The human-readable name of the client application.
 - inputPath: BFDAuditLog.finalDetermination
+  appliesTo: 
+    - Audit
   fhirPath: AuditEvent.entity.where(type.coding.code = 'Patient').name
   notes: The combination evaluated that returned a unique match.

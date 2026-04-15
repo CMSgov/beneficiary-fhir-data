@@ -13,10 +13,10 @@
     }]
   }],
   "agent" : [{
-    "name" : "Alex Dzeda's test app",
+    "name" : "Alex's test app",
     "requestor" : true,
     "network" : {
-      "address" : "52.70.76.139",
+      "address" : "192.0.0.1",
       "type" : "2"
     }
   }],

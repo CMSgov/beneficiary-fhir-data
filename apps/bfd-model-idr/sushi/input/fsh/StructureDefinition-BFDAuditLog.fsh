@@ -10,7 +10,7 @@ Description: "IDR BFDAuditLog Base. Ignore in DD Generation"
 * ^baseDefinition = "http://hl7.org/fhir/StructureDefinition/Base"
 * . ^label = "IDR BFDAuditLog Base. Ignore in DD Generation"
 
-* matchedBeneSk 1..1 string "Matched Beneficiary SK" "The SK of the beneficiary that was matched."
+* matchedBeneSk 1..1 string "Matched Beneficiary FHIR ID" "The FHIR ID of the beneficiary that was matched."
 * purposeOfEvent 1..1 string "Purpose of Event" "The purpose of the audit event (e.g., PATRQT)."
 * timeStamp 1..1 dateTime "Timestamp" "The time the audit event occurred."
 * clientIp 1..1 string "Client IP" "The IP address of the client."
