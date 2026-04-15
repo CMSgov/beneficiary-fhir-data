@@ -16,7 +16,6 @@ module "bucket_tf_state" {
 resource "aws_s3_bucket_versioning" "this" {
   for_each = module.bucket_tf_state
 
-  # Assumes the module outputs a 'bucket' object with an 'id' attribute
   bucket = each.value.bucket.id
 
   versioning_configuration {
