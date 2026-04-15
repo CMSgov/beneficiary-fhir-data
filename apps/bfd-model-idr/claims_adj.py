@@ -128,6 +128,7 @@ class AdjudicatedGeneratorUtil:
         clm[f.CLM_NCH_PRMRY_PYR_CD] = random.choice(gen_utils.code_systems[f.CLM_NCH_PRMRY_PYR_CD])
 
         clm[f.CLM_FINL_ACTN_IND] = "Y"
+        
         if clm[f.CLM_TYPE_CD] == 3 or clm[f.CLM_ADJSTMT_TYPE_CD] == "1":
             clm[f.CLM_FINL_ACTN_IND] = "N"
 
