@@ -84,6 +84,8 @@ for walk_info in os.walk(dd_support_folder):
                 if "fhirPath" in entry:
                     if "appliesTo" in entry:
                         entry["appliesTo"].sort()
+                    if "sources" in entry:
+                        entry["sources"].sort()
                     if "Patient" in entry["appliesTo"]:
                         entry["FHIR Resource"] = "Patient"
                     elif any(x in coverage_parts for x in entry["appliesTo"]):
