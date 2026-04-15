@@ -5,6 +5,7 @@ batched_out/*
 !batched_out/.gitkeep
 out/*
 !out/.gitkeep
+!out/AuditEvent.json
 !out/Patient.json
 !out/Coverage-FFS.json
 !out/Coverage-FFS-PartB.json

@@ -1,0 +1,42 @@
+map "https://bfd.cms.gov/MappingLanguage/Maps/BFDAuditLog" = "BFD-BFDAuditLog-Map"
+
+uses "http://hl7.org/fhir/StructureDefinition/BFDAuditLog" alias BFDAuditLogLogical as source
+uses "http://hl7.org/fhir/StructureDefinition/AuditEvent" alias FHIRAuditEvent as target
+
+group createAuditEvent(source src: BFDAuditLogLogical, target tgt: FHIRAuditEvent) {
+    src.timeStamp as time -> tgt.recorded = time "Set recorded time";
+    
+    src -> tgt.type = create('Coding') as typeCoding then {
+        src -> typeCoding.system = "http://terminology.hl7.org/CodeSystem/audit-event-type" "Set system";
+        src -> typeCoding.code = "rest" "Set code for Query";
+    } "Set type";
+
+    src -> tgt.purposeOfEvent = cc("http://terminology.hl7.org/CodeSystem/v3-ActReason", "PATRQT") "Set purpose of event";
+
+    src -> tgt.agent = create('BackboneElement') as agent then {
+        src -> agent.requestor = true "Set requestor";
+        src.clientName as name -> agent.name = name "Set client name as altId";
+        src.clientIp as ip -> agent.network = create('BackboneElement') as network then {
+            ip -> network.address = ip "Set IP address";
+            src -> network.type = "2" "Set network type (IP address)";
+        } "Set network";
+    } "Set agent";
+
+    src.matchedBeneSk as beneSk -> tgt.entity = create('BackboneElement') as entity then {
+        src -> entity.type = create('Coding') as entityType then {
+            src -> entityType.system = "http://hl7.org/fhir/resource-types" "Set system";
+            src -> entityType.code = "Patient" "Set code for Patient";
+            src -> entityType.display = "Patient" "Set display";
+        } "Set entity type";
+        src -> entity.role = create('Coding') as entityRole then {
+            src -> entityRole.system = "http://terminology.hl7.org/CodeSystem/object-role" "Set system";
+            src -> entityRole.code = "1" "Set code for Patient";
+            src -> entityRole.display = "Patient" "Set display";
+        } "Set entity role";
+        beneSk -> entity.what = create('Reference') as tgtRef then {
+            beneSk -> tgtRef.reference = append("Patient/", beneSk) "Set patient reference";
+        } "Add reference";
+        src.finalDetermination as det -> entity.name = det "Set final determination (table 2 combination) as entity name";
+        src -> entity.description = "Name refers to the combination evaluated that returned a unique match. 'What' refers to the unique match itself." "Set SKs found as description";
+    } "Set unique match (Patient) entity";
+}
