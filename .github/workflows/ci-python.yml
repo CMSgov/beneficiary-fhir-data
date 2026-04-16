@@ -6,6 +6,7 @@ on:
       - "**/*.py"
       - "**/*requirement*.txt"
       - "**/uv.lock"
+      - "**/pyproject.toml"
       - ".github/workflows/ci-python.yml"
 
   merge_group:
@@ -13,9 +14,11 @@ on:
 env:
   BASE_COMMIT: ""
   GH_TOKEN: ${{ github.token }}
+  PYTHON_MIN: 3.13
+  PYTHON_MAX: 3.14
 
 jobs:
-  matrix-pytest:
+  setup-workspace:
     runs-on: ubuntu-24.04
     strategy:
       matrix:
@@ -60,12 +63,15 @@ jobs:
           java-version: "25"
           distribution: "corretto"
       - uses: astral-sh/setup-uv@v7
+        with:
+          version: "latest"
+          enable-cache: true
       - name: Run Python Tests per project
         id: run-pytest-set
         run: |
           echo "Testing ${{ matrix.projects.projectName }}"
           cd ${{ github.workspace }}/${{ matrix.projects.projectRoot }}
-          uv python install
+          uv python install ${{ env.PYTHON_MIN }} ${{ env.PYTHON_MAX }}
           ${{ matrix.projects.uvCommand }}
           # check types
           uv run pyright .

@@ -23,8 +23,8 @@ from paramiko.ssh_exception import (
     NoValidConnectionsError,
     SSHException,
 )
-
-from errors import (
+from s3 import S3EventType
+from sftp_outbound_transfer_errors import (
     BaseTransferError,
     InvalidObjectKeyError,
     InvalidPendingDirError,
@@ -33,7 +33,6 @@ from errors import (
     UnknownPartnerError,
     UnrecognizedFileError,
 )
-from s3 import S3EventType
 from sns import (
     FileDiscoveredDetails,
     StatusNotification,
@@ -339,6 +338,10 @@ def handler(event: dict[Any, Any], context: LambdaContext) -> None:  # noqa: ARG
             raise ValueError("Invalid invocation event, no records")
 
         for s3_record in s3_event_records:
+            if s3_record.s3.object is None:
+                logger.warning("S3 record object is missing", s3_record=s3_record)
+                continue  # Skip this loop iteration
+
             s3_event_time = s3_record.eventTime.astimezone(UTC)
             s3_object_key = unquote_plus(s3_record.s3.object.key)
             s3_event_name = s3_record.eventName

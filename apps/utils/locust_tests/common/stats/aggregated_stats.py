@@ -9,10 +9,9 @@ from dataclasses import dataclass
 from enum import StrEnum
 from typing import Any
 
+from common.validation import ValidationResult
 from locust.env import Environment
 from locust.stats import PERCENTILES_TO_REPORT, StatsEntry
-
-from common.validation import ValidationResult
 
 ResponseTimePercentiles = dict[str, int | float]
 """A type representing a dictionary of stringified percentile keys to their integer or
