@@ -503,7 +503,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Delete all artifacts
-        uses: GeekyEggo/delete-artifact@v6.0.0
+        uses: GeekyEggo/delete-artifact@176a747ab7e287e3ff4787bf8a148716375ca118
         with:
           name: '*'
           failOnError: false

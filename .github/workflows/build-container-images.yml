@@ -250,7 +250,7 @@ jobs:
           ref: ${{ inputs.branch || github.ref_name }}
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
+        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd
         with:
           driver-opts: network=host
 
@@ -293,7 +293,7 @@ jobs:
 
       # TODO: This becomes just "build" and push is within codebuild. "build" emits a .tar.gz artifact
       - name: Build image
-        uses: docker/build-push-action@v7
+        uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294
         with:
           file: ${{ matrix.image.dockerfile }}
           context: ${{ matrix.image.contextDir }}
@@ -392,7 +392,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Delete all image artifacts
-        uses: GeekyEggo/delete-artifact@v6.0.0
+        uses: GeekyEggo/delete-artifact@176a747ab7e287e3ff4787bf8a148716375ca118
         with:
           name: '*'
           failOnError: false
