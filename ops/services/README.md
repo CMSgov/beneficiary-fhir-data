@@ -14,7 +14,7 @@ Terraservices are opinionated, top-level, _flat_ modules that aim to describe th
 
 - Terraservices are opinionated, meaning that "hardcoding" invariant attribute values and resource definitions is _encouraged_. If a value changes depending on environment or cannot be computed, only then should it be elevated into our SSM configuration
 - Terraservices, excluding those that are `apply`'d prior to the Terraservice describing our SSM configuration (i.e. `base` or `config`), should expose as few variables as possible. Variables that _are_ exposed should be constrained to overrides only, and should be introduced sparingly
-- It should be possible for any operator, in the correct Terraform Workspace, to simply `terraform apply` the Terraservice and generate appropriate resources
+- It should be possible for any operator, in the correct OpenTofu Workspace, to simply `tofu apply` the Terraservice and generate appropriate resources
 
 ## Service Folder Naming Conventions
 
