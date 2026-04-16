@@ -504,7 +504,6 @@ jobs:
     steps:
       - name: Delete all artifacts
         uses: GeekyEggo/delete-artifact@176a747ab7e287e3ff4787bf8a148716375ca118 # v6
-
         with:
           name: '*'
           failOnError: false
