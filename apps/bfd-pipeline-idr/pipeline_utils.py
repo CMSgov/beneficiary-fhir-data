@@ -41,7 +41,8 @@ def extract_and_load(
     load_mode: LoadMode,
     job_start: datetime,
     load_type: LoadType,
-    partition: LoadPartition | None = None,
+    start_time: datetime,
+    partition: LoadPartition | None = None
 ) -> bool:
     partition = partition or DEFAULT_PARTITION
     if load_mode == LoadMode.LOCAL or load_mode == LoadMode.SYNTHETIC:
@@ -74,6 +75,7 @@ def extract_and_load(
             data_iter = data_extractor.extract_idr_data(progress, job_start, load_mode)
             res = loader.load(data_iter, cls, job_start, partition, progress, load_type, load_mode)
             data_extractor.close()
+            prune_cap(loader, start_time)
             loader.close()
             return res
         # Snowflake will throw a reauth error if the pipeline has been running for several hours
@@ -100,3 +102,17 @@ def extract_and_load(
         except Exception as ex:
             logger.error("error loading %s", cls.table(), exc_info=ex)
             raise ex
+
+def prune_cap(loader: PostgresLoader, start_time: datetime) -> bool:
+    pac_cutoff_date = start_time - timedelta(days=60)
+    start_time_sql = pac_cutoff_date.strftime("'%Y-%m-%d %H:%M:%S'")
+    pac_phase_1_min = 1000
+    pac_phase_1_max = 1999
+
+    loader.run_sql(f"""
+        DELETE FROM idr.claim_institutional_ss ss WHERE clm_uniq_id IN 
+                   (SELECT clm_uniq_id FROM idr.claim_institutional_ss JOIN 
+                   idr.beneficiary_entitlement be ON ss.bene_sk = be.bene_sk WHERE ss.clm_type_cd 
+                   BETWEEN {pac_phase_1_min} AND {pac_phase_1_max}
+                   AND be.idr_updt_ts <= {start_time_sql});
+    """)
