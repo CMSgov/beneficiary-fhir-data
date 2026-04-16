@@ -584,20 +584,6 @@ class IdrBaseModel(BaseModel, ABC):
 
 T = TypeVar("T", bound=IdrBaseModel)
 
-
-def prune_cap(start_time: datetime) -> str:
-    clm = ALIAS_CLM
-    pac_cutoff_date = start_time - timedelta(days=60)
-    start_time_sql = pac_cutoff_date.strftime("'%Y-%m-%d %H:%M:%S'")
-    pac_phase_1_min = 1000
-    pac_phase_1_max = 1999
-
-    return f"""
-        DELETE FROM %{clm}.clm_type_cd BETWEEN %{pac_phase_1_min} AND %{pac_phase_1_max} 
-        AND {clm}.idr_updt_ts <= {start_time_sql};
-    """
-
-
 def deceased_bene_filter(alias: str) -> str:
     return f"""
             SELECT bene_sk
