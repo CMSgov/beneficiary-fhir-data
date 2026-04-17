@@ -176,7 +176,8 @@
             "CLM_LINE_CARR_PSYCH_OT_LMT_AMT": "11.12",
             "CLM_LINE_PRFNL_INTRST_AMT": "11.13",
             "CLM_MDCR_PRMRY_PYR_ALOWD_AMT": "11.14",
-            "CLM_LINE_PMD_UNIQ_TRKNG_NUM": "ALA00000047747"
+            "CLM_LINE_PMD_UNIQ_TRKNG_NUM": "ALA00000047747",
+            "GEO_RNDRG_SSA_STATE_CD": "03"
         },
         {
             "PRVDR_RNDRNG_PRVDR_NPI_NUM": "1952378861",
