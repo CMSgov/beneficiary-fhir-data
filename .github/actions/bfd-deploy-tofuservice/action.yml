@@ -154,7 +154,6 @@ runs:
       continue-on-error: true
       shell: bash
       run: |
-        cd "${{ github.workspace }}/${{ inputs.service-path }}"
         set -euo pipefail
 
         run_with_auto_unlock() {
@@ -182,3 +181,4 @@ runs:
         }
 
         run_with_auto_unlock tofu plan -no-color -refresh=false -lock-timeout=10s
+      working-directory: ${{ github.workspace }}/${{ inputs.service-path }}
