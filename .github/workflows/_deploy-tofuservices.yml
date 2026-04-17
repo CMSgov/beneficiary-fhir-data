@@ -95,6 +95,12 @@ jobs:
 
           echo "account-type=$account_type" >> "$GITHUB_OUTPUT"
 
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.git-ref || github.ref_name }}
+
       - name: Discover Tofuservices
         id: discover-services
         uses: ./.github/actions/bfd-discover-tofuservices
