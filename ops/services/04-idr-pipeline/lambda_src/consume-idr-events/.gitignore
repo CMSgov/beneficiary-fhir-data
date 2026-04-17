@@ -9,3 +9,6 @@
 !app/main.py
 !pyproject.toml
 !uv.lock
+
+# Allow pre-commit config file
+!.pre-commit-config.yaml
