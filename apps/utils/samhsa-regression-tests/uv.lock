@@ -393,7 +393,7 @@ requires-dist = [
     { name = "anyio", specifier = ">=4.11.0" },
     { name = "asyncclick", specifier = ">=8.3.0.5" },
     { name = "psycopg", extras = ["binary"], specifier = ">=3.2.10" },
-    { name = "pydantic", specifier = ">=2.12.2" },
+    { name = "pydantic" },
     { name = "pyyaml", specifier = ">=6.0.3" },
 ]
 
