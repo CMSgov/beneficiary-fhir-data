@@ -44,4 +44,4 @@ runs:
 
         echo "services-json=$services_json" >> $GITHUB_OUTPUT
       shell: bash
-      working-directory: ${{ steps.get-discovery-path.output.path }}
+      working-directory: ${{ steps.get-discovery-path.outputs.path }}
