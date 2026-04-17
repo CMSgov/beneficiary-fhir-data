@@ -548,16 +548,25 @@ group addBlgStCd(source src: SupportingInfoComponent, target tgt: BackboneElemen
       src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";             
       src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","PRVDR_FAC_FIPS_ST_CD") "Add Coding";                   
     } "Add category";   
-                                                                                 
-    src.GEO_BLG_SSA_STATE_CD as val -> tgt.valueString = translate(val, 'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#SSA_TO_FIPS_STATE_CD', 'code') "Set value";
+    src -> tgt.code = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = create('Coding') as tgtCoding then {
+            src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/US-FIPS-STATE-CODES" "Set coding";
+            src.GEO_BLG_SSA_STATE_CD as val -> tgtCoding.code = translate(val, 'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#SSA_TO_FIPS_STATE_CD', 'code') "Add code";
+        } "Add coding";
+    } "Add CC"; 
 }                                                                                                    
                             
 group addRndrgStCd(source src: SupportingInfoComponent, target tgt: BackboneElement){
     src -> tgt.category = create('CodeableConcept') as tgtCC then {
       src -> tgtCC.coding = c("http://terminology.hl7.org/CodeSystem/claiminformationcategory","info") "Add Coding";
       src -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information","RNDRG_PRVDR_FIPS_ST_CD") "Add Coding";
-    } "Add category";                                                                                
-    src.GEO_RNDRG_SSA_STATE_CD as val -> tgt.valueString = translate(val, 'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#SSA_TO_FIPS_STATE_CD', 'code') "Set value";
+    } "Add category";      
+    src -> tgt.code = create('CodeableConcept') as tgtCC then {
+        src -> tgtCC.coding = create('Coding') as tgtCoding then {
+            src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/US-FIPS-STATE-CODES" "Set coding";
+            src.GEO_RNDRG_SSA_STATE_CD as val -> tgtCoding.code = translate(val, 'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#SSA_TO_FIPS_STATE_CD', 'code') "Add code";
+        } "Add coding";
+    } "Add CC";                                                                          
 }     
 
 group addPMDUTNSupportingInfo(source item : LineItemComponent,target tgtSI : SupportingInfoComponent) {
