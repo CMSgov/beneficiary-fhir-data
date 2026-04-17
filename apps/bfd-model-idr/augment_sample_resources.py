@@ -1,10 +1,9 @@
 import json
 import sys
 from dataclasses import asdict, dataclass, field
+from datetime import UTC, datetime
 from decimal import Decimal
 from pathlib import Path
-from typing import Optional
-from datetime import datetime, timezone
 
 import pandas as pd
 
@@ -92,19 +91,19 @@ def convert_to_decimal(val: str | None) -> Decimal:
 
 @dataclass
 class Provider:
-    PRVDR_SK: Optional[str] = None
-    PRVDR_ID_QLFYR_CD: Optional[str] = None
-    NPI_TYPE: Optional[str] = None
-    careTeamType: Optional[str] = None
-    careTeamSequenceNumber: Optional[str] = None
-    PRVDR_LAST_OR_LGL_NAME: Optional[str] = None
-    PRVDR_1ST_NAME: Optional[str] = None
-    PRVDR_CARETEAM_NAME: Optional[str] = None
-    specialtyCode: Optional[str] = None
-    PRVDR_OSCAR_NUM: Optional[str] = None
-    CLM_BLG_PRVDR_ZIP5_CD: Optional[str] = None
-    CLM_PRVDR_GNRC_ID_NUM: Optional[str] = None
-    CLM_BLG_PRVDR_TAX_NUM: Optional[str] = None
+    PRVDR_SK: str | None = None
+    PRVDR_ID_QLFYR_CD: str | None = None
+    NPI_TYPE: str | None = None
+    careTeamType: str | None = None
+    careTeamSequenceNumber: str | None = None
+    PRVDR_LAST_OR_LGL_NAME: str | None = None
+    PRVDR_1ST_NAME: str | None = None
+    PRVDR_CARETEAM_NAME: str | None = None
+    specialtyCode: str | None = None
+    PRVDR_OSCAR_NUM: str | None = None
+    CLM_BLG_PRVDR_ZIP5_CD: str | None = None
+    CLM_PRVDR_GNRC_ID_NUM: str | None = None
+    CLM_BLG_PRVDR_TAX_NUM: str | None = None
 
 populate_fields_except_na = [
     "PRVDR_LGL_NAME",
@@ -409,7 +408,7 @@ for item in cur_sample_data.get("lineItemComponents", []):
 
 filename = "out/temporary-sample.json"
 
-cur_sample_data["lastUpdated"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+cur_sample_data["lastUpdated"] = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
 with Path(filename).open("w") as f:
     json.dump(cur_sample_data, f, indent=4)

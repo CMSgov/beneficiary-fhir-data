@@ -1,10 +1,9 @@
 import random
 from datetime import date, datetime
 
-from faker import Faker
-
 import field_constants as f
 from claims_static import NOW
+from faker import Faker
 from generator_util import RowAdapter
 
 _faker = Faker()

@@ -2,8 +2,9 @@ import argparse
 import json
 import subprocess
 import sys
-import requests
 from pathlib import Path
+
+import requests
 
 MATCHBOX_SERVER = "http://localhost:8080/matchboxv3"
 
@@ -126,9 +127,10 @@ def run_conformance_test(input_file, output_file):
 
         errors = []
         if "issue" in outcome:
-            for issue in outcome["issue"]:
-                if issue.get("severity") in ["error", "fatal"]:
-                    errors.append(issue)
+            errors.extend(
+                issue for issue in outcome["issue"]
+                if issue.get("severity") in ["error", "fatal"]
+            )
 
         if errors:
             print(f"Validation failed with {len(errors)} errors. Note, not all errors are bad:")
