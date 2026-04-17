@@ -148,8 +148,7 @@ jobs:
     if: |
       (inputs.run-type == 'BUILD_ONLY' || inputs.run-type == 'BUILD_AND_DEPLOY')
         && (
-          (always() && !cancelled())
-            && (needs.deploy-platform.result != 'failure' && needs.setup.result == 'success')
+          (!failure() && !cancelled()) && needs.setup.result == 'success'
         )
     needs: [deploy-platform, setup]
     runs-on: ${{ format('codebuild-bfd-non-prod-platform-docker-{0}-{1}', github.run_id, github.run_attempt) }}
@@ -196,8 +195,7 @@ jobs:
     if: |
       (inputs.run-type == 'BUILD_ONLY' || inputs.run-type == 'BUILD_AND_DEPLOY')
         && (
-          (always() && !cancelled())
-            && (needs.pull-base-java.result != 'failure' && needs.setup.result == 'success')
+          (!failure() && !cancelled()) && needs.setup.result == 'success'
         )
     runs-on: ubuntu-24.04-arm
     needs: [setup, pull-base-java]
@@ -282,8 +280,7 @@ jobs:
     if: |
       (inputs.run-type == 'BUILD_ONLY' || inputs.run-type == 'BUILD_AND_DEPLOY')
         && (
-          (always() && !cancelled())
-            && (needs.build-server-ng-image.result != 'failure' && needs.setup.result == 'success')
+          (!failure() && !cancelled()) && needs.setup.result == 'success'
         )
     needs: [setup, build-server-ng-image]
     strategy:
@@ -343,8 +340,7 @@ jobs:
     if: |
       (inputs.run-type == 'BUILD_ONLY' || inputs.run-type == 'BUILD_AND_DEPLOY')
         && (
-          (always() && !cancelled())
-            && (needs.deploy-platform.result != 'failure' && needs.setup.result == 'success')
+          (!failure() && !cancelled()) && needs.setup.result == 'success'
         )
     uses: ./.github/workflows/build-container-images.yml
     needs: [deploy-platform, setup]
@@ -373,11 +369,7 @@ jobs:
       needs.setup.outputs.envs-as-json != '[]'
         && (inputs.run-type == 'DEPLOY_ONLY' || inputs.run-type == 'BUILD_AND_DEPLOY')
           && (
-            (always() && !cancelled())
-              && (needs.push-jib-images.result != 'failure'
-                && needs.build-other-images.result != 'failure'
-                && needs.setup.result == 'success'
-              )
+            (!failure() && !cancelled()) && needs.setup.result == 'success'
           )
     uses: ./.github/workflows/deploy-env-services.yml
     needs: [setup, push-jib-images, build-other-images]
