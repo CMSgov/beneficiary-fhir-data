@@ -110,7 +110,8 @@ jobs:
       - name: Filter discovered Tofuservices
         id: filtered-tofuservices
         env:
-          SERVICES: ${{ steps.discover-services.outputs.services-json }}
+          SERVICES: ${{ inputs.services }}
+          DISCOVERED_SERVICES_JSON: ${{ steps.discover-services.outputs.services-json }}
         run: |
           filtered_tofuservices="$(
             jq -c --arg services "$SERVICES" '
@@ -121,7 +122,7 @@ jobs:
                   .value |= map(select(.service | IN($filterServices[])))
                 )
               | from_entries
-            ' <<<"$DEPLOY_JOBS_MATRIX_JSON"
+            ' <<<"$DISCOVERED_SERVICES_JSON"
           )"
           jq -c <<<"$filtered_tofuservices"
 
