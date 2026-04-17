@@ -27,6 +27,17 @@ on:
       skip-applies:
         type: boolean
         required: true
+      # Typically, this would be an environment variable, but Actions does not support the "env"
+      # context within a "runs-on", so this is next best thing
+      service-runner-overrides-json:
+        type: string
+        required: true
+        default: |
+          {
+            "database": "small",
+            "migrator": "small",
+            "migrator-ng": "small"
+          }
       per-service-vars-json:
         type: string
         required: false
@@ -42,13 +53,6 @@ env:
     }
   DEFAULT_ENVIRONMENT_LOG_GROUP: /bfd/${{ inputs.env-or-account }}/github_actions/deploy_env_services/tofu
   DEFAULT_PLATFORM_LOG_GROUP: /bfd/platform/github_actions/deploy_platform_services/tofu
-  DEFAULT_SERVICE_RUNNER: lambda
-  SERVICE_RUNNER_OVERRIDES_JSON: |
-    {
-      "database": "small",
-      "migrator": "small",
-      "migrator-ng": "small"
-    }
 
 jobs:
   deploy-layer:
@@ -58,7 +62,7 @@ jobs:
       matrix:
         context: ${{ fromJson(inputs.matrix-json)[inputs.layer-level] }}
     runs-on:
-      - codebuild-bfd-${{ inputs.account-type }}-platform-${{ fromJson(env.SERVICE_RUNNER_OVERRIDES_JSON)[matrix.context.service] || env.DEFAULT_SERVICE_RUNNER }}-${{ github.run_id }}-${{ github.run_attempt }}
+      - codebuild-bfd-${{ inputs.account-type }}-platform-${{ fromJson(inputs.service-runner-overrides-json)[matrix.context.service] || 'lambda' }}-${{ github.run_id }}-${{ github.run_attempt }}
         service:${{ matrix.context.service }}
     steps:
       - name: Checkout
@@ -98,7 +102,7 @@ jobs:
           service-type: ${{ inputs.service-type }}
           env-or-account: ${{ inputs.env-or-account }}
           service-path: ${{ matrix.context.path }}
-          cw-log-group: ${{ inputs.service-type == "ENVIRONMENT" && env.DEFAULT_ENVIRONMENT_LOG_GROUP || env.DEFAULT_PLATFORM_LOG_GROUP }}
+          cw-log-group: ${{ inputs.service-type == 'ENVIRONMENT' && env.DEFAULT_ENVIRONMENT_LOG_GROUP || env.DEFAULT_PLATFORM_LOG_GROUP }}
           cw-log-stream: ${{ matrix.context.service }}-${{ github.run_id }}-${{ github.run_attempt }}
           skip-apply: ${{ inputs.skip-applies && 'true' || 'false' }}
           tofu-vars-json: ${{ steps.get-tofu-vars.outputs.tofu-vars-json }}
