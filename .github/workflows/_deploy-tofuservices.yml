@@ -77,7 +77,7 @@ jobs:
     steps:
       - name: Validate service-type
         run: |
-          if [[ $SERVICE_TYPE != "PLATFORM" || $SERVICE_TYPE != "ENVIRONMENT" ]]; then
+          if [[ $SERVICE_TYPE != "PLATFORM" && $SERVICE_TYPE != "ENVIRONMENT" ]]; then
             echo "service-type must be one of PLATFORM, ENVIRONMENT"
             exit 1
           fi
