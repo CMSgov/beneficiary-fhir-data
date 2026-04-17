@@ -9,7 +9,7 @@ outputs:
     description: Auto-discovered Tofuservices partitioned by layer in JSON format
     value: ${{ steps.discover-services.outputs.services-json }}
 runs:
-  using: "composite"
+  using: composite
   steps:
     # This step is necessary as it seems that some objects (like "github" or "inputs") are
     # unavailable when the top-level "env" is evaluated for Composite Actions
@@ -31,6 +31,7 @@ runs:
           echo "Invalid service-type '$SERVICE_TYPE', must be one of: $(jq -r 'keys | @csv' <<<"$SERVICE_TYPES_JSON")"
           exit 1
         fi
+        echo "Discovery path: $discovery_path"
 
         echo "path=${{ github.workspace }}/$discovery_path" >> $GITHUB_OUTPUT
       shell: bash
@@ -39,6 +40,8 @@ runs:
       id: discover-services
       run: |
         services_json="$("$DISCOVERY_SCRIPT" | jq -c)"
+        echo "Services: $services_json"
+
         echo "services-json=$services_json" >> $GITHUB_OUTPUT
       shell: bash
       working-directory: ${{ steps.get-discovery-path.output.path }}
