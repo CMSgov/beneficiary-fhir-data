@@ -12,3 +12,30 @@ module "bucket_tf_state" {
     stack       = each.key
   }
 }
+
+resource "aws_s3_bucket_versioning" "this" {
+  for_each = module.bucket_tf_state
+
+  bucket = each.value.bucket.id
+
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "this" {
+  for_each = module.bucket_tf_state
+  bucket   = each.value.bucket.id
+
+  depends_on = [aws_s3_bucket_versioning.this]
+
+  rule {
+    id     = "${each.value.bucket.id}-versions-retained"
+    status = "Enabled"
+
+    noncurrent_version_expiration {
+      noncurrent_days           = 30
+      newer_noncurrent_versions = 3
+    }
+  }
+}

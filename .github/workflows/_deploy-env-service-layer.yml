@@ -40,6 +40,7 @@ jobs:
   deploy-layer:
     if: ${{ fromJson(inputs.matrix-json)[inputs.layer-level] != fromJson('[]') }}
     strategy:
+      fail-fast: false
       matrix:
         context: ${{ fromJson(inputs.matrix-json)[inputs.layer-level] }}
     runs-on:
