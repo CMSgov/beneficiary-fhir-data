@@ -47,7 +47,7 @@ runs:
       shell: bash
 
     - name: Get parent environment
-      if: ${{ inputs.service-type == "ENVIRONMENT" }}
+      if: ${{ inputs.service-type == 'ENVIRONMENT' }}
       id: get-parent-env
       env:
         ENV_OR_ACCOUNT: ${{ inputs.env-or-account }}
