@@ -1,0 +1,159 @@
+# Not intended to be used directly; use either "Deploy Platform Services" or "Deploy Environment
+# Services"
+
+name: "Deploy Tofuservices"
+on:
+  workflow_call:
+    inputs:
+      service-type:
+        type: string
+        description: >-
+          The type of Tofuservice to deploy. Will determine where in the repository the Tofuservice
+          is discovered from. MUST be either "ENVIRONMENT" or "PLATFORM"
+        default: ENVIRONMENT
+        required: true
+      env-or-account:
+        type: string
+        description: >-
+          If service-type is ENVIRONMENT this represents the BFD Environment, e.g. test, 9999-prod.
+          Else, if service-type is PLATFORM, this represents the account type, either prod or
+          non-prod
+        required: true
+      services:
+        type: string
+        description: Comma-separated list of services to deploy
+        default: ""
+        required: true
+      per-service-vars-json:
+        type: string
+        description: >-
+          Tofu plan variables per-service in JSON; see Workflow for format
+        required: false
+      aws-region:
+        type: string
+        description: >-
+          Override the AWS Region
+        default: us-east-1
+        required: false
+      skip-applies:
+        type: boolean
+        description: >-
+          If true, skips the apply step for each Tofuservice such that only the plans are generated
+        default: false
+        required: false
+      git-ref:
+        type: string
+        description: >-
+          The Git reference (branch, tag, commit, etc.) to use for deploy.
+          Defaults to the selected branch/tag
+        default: ""
+        required: false
+
+permissions:
+  id-token: write # This is required for requesting the AWS IAM OIDC JWT
+  contents: write # This is required for actions/checkout
+
+env:
+  PARENT_ENV_ACCOUNT_MAP: |
+    {
+      "test": "non-prod",
+      "sandbox": "prod",
+      "prod": "prod"
+    }
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  setup:
+    runs-on: ubuntu-24.04
+    env:
+      SERVICE_TYPE: ${{ inputs.service-type }}
+    outputs:
+      account-type: ${{ steps.get-account-type.outputs.account-type }}
+      services-json: ${{ steps.filtered-tofuservices.outputs.services-json }}
+      layers: ${{ steps.filtered-tofuservices.outputs.layers }}
+    steps:
+      - name: Validate service-type
+        run: |
+          if [[ $SERVICE_TYPE != "PLATFORM" || $SERVICE_TYPE != "ENVIRONMENT" ]]; then
+            echo "service-type must be one of PLATFORM, ENVIRONMENT"
+            exit 1
+          fi
+
+      - name: Get account type
+        id: get-account-type
+        env:
+          ENV_OR_ACCOUNT: ${{ inputs.env-or-account }}
+        run: |
+          account_type="$ENV_OR_ACCOUNT"
+          if [[ $SERVICE_TYPE == "ENVIRONMENT" ]]; then
+            parent_env="$(echo "${{ inputs.env-or-account }}" | grep -Po '(prod|sandbox|test)$')"
+            account_type="$(jq -r --arg parent_env "$parent_env" '.[$parent_env]' <<<"$PARENT_ENV_ACCOUNT_MAP")"
+          fi
+
+          echo "account-type=$account_type" >> "$GITHUB_OUTPUT"
+
+      - name: Discover Tofuservices
+        id: discover-services
+        uses: ./.github/actions/bfd-discover-tofuservices
+        with:
+          service-type: ${{ inputs.service-type }}
+
+      - name: Filter discovered Tofuservices
+        id: filtered-tofuservices
+        env:
+          SERVICES: ${{ steps.discover-services.outputs.services-json }}
+        run: |
+          filtered_tofuservices="$(
+            jq -c --arg services "$SERVICES" '
+              # Convert the CSV list of services into an array
+              ($services | split(",") | map(gsub("^\\s+|\\s+$"; ""))) as $filterServices
+              | to_entries
+              | map(
+                  .value |= map(select(.service | IN($filterServices[])))
+                )
+              | from_entries
+            ' <<<"$DEPLOY_JOBS_MATRIX_JSON"
+          )"
+          jq -c <<<"$filtered_tofuservices"
+
+          # Get an ordered array of layers to deploy from the filtered list of services that will
+          # be deployed
+          layers="$(
+            jq -c '
+              to_entries
+                | map(select(.value != [] and .value != null) | .key)
+                | sort
+            ' <<<"$filtered_tofuservices"
+          )"
+          jq -c <<<"$layers"
+
+          echo "services-json=$filtered_tofuservices" >> "$GITHUB_OUTPUT"
+          echo "layers=$layers" >> "$GITHUB_OUTPUT"
+
+  deploy-layers:
+    uses: ./.github/workflows/_deploy-tofuservice-layer.yml
+    needs: [setup]
+    strategy:
+      matrix:
+        layer-level: ${{ fromJson(needs.setup.outputs.layers) }}
+      fail-fast: true
+      # We "abuse" the fact that matrix jobs with a maximum parallelism of 1 will run in the order
+      # of the matrix input, that being "layer-level"
+      max-parallel: 1
+    permissions:
+      contents: read
+      id-token: write
+    with:
+      service-type: ${{ inputs.service-type }}
+      env-or-account: ${{ inputs.env-or-account }}
+      account-type: ${{ needs.setup.outputs.account-type }}
+      matrix-json: ${{ needs.setup.outputs.services-json }}
+      layer-level: ${{ matrix.layer-level }}
+      aws-region: ${{ inputs.aws-region }}
+      skip-applies: ${{ inputs.skip-applies }}
+      per-service-vars-json: ${{ inputs.per-service-vars-json }}
+      git-ref: ${{ inputs.git-ref || github.ref }}
+    secrets: inherit

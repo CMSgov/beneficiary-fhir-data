@@ -1,4 +1,3 @@
----
 name: "Deploy Environment Services"
 on:
   workflow_dispatch:
@@ -26,7 +25,7 @@ on:
           rda-pipeline-alarms,
           server-alarms
         required: true
-      all-vars-json:
+      per-service-vars-json:
         description: >-
           Tofu plan variables per-service in JSON; see Workflow for format
         required: false
@@ -78,7 +77,7 @@ on:
           rda-pipeline-alarms,
           server-alarms
         required: false
-      all-vars-json:
+      per-service-vars-json:
         type: string
         description: >-
           Tofu plan variables per-service in JSON; see Workflow for format
@@ -107,120 +106,15 @@ permissions:
   id-token: write # This is required for requesting the AWS IAM OIDC JWT
   contents: write # This is required for actions/checkout
 
-env:
-  DEPLOY_JOBS_MATRIX_JSON: |
-    {
-      "01": [
-        { "layer": "01", "service": "config", "runner": "lambda" }
-      ],
-      "02": [
-        { "layer": "02", "service": "bene-prefs", "runner": "lambda" },
-        { "layer": "02", "service": "cluster", "runner": "lambda" },
-        { "layer": "02", "service": "database", "runner": "small" }
-      ],
-      "03": [
-        { "layer": "03", "service": "locust", "runner": "lambda" },
-        { "layer": "03", "service": "migrator", "runner": "small" },
-        { "layer": "03", "service": "migrator-ng", "runner": "small" }
-      ],
-      "04": [
-        { "layer": "04", "service": "ccw-pipeline", "runner": "lambda" },
-        { "layer": "04", "service": "idr-pipeline", "runner": "lambda" },
-        { "layer": "04", "service": "npi-pipeline", "runner": "lambda" },
-        { "layer": "04", "service": "rda-pipeline", "runner": "lambda" },
-        { "layer": "04", "service": "server", "runner": "lambda" },
-        { "layer": "04", "service": "server-ng", "runner": "lambda" }
-      ],
-      "05": [
-        { "layer": "05", "service": "ccw-pipeline-metrics", "runner": "lambda" },
-        { "layer": "05", "service": "rda-pipeline-metrics", "runner": "lambda" },
-        { "layer": "05", "service": "server-metrics", "runner": "lambda" }
-      ],
-      "06": [
-        { "layer": "06", "service": "ccw-pipeline-alarms", "runner": "lambda" },
-        { "layer": "06", "service": "rda-pipeline-alarms", "runner": "lambda" },
-        { "layer": "06", "service": "server-alarms", "runner": "lambda" }
-      ]
-    }
-  PARENT_ENV_ACCOUNT_MAP: |
-    {
-      "test": "non-prod",
-      "sandbox": "prod",
-      "prod": "prod"
-    }
-
-defaults:
-  run:
-    shell: bash
-
 jobs:
-  setup:
-    runs-on: ubuntu-24.04
-    outputs:
-      account-type: ${{ steps.get-account-type.outputs.account-type }}
-      deploy-jobs-matrix-json: ${{ steps.get-deploy-jobs-matrix-json.outputs.deploy-jobs-matrix-json }}
-      layers: ${{ steps.get-deploy-jobs-matrix-json.outputs.layers }}
-    steps:
-      - name: Get account type from parent env
-        id: get-account-type
-        run: |
-          parent_env="$(echo "${{ inputs.bfd-env }}" | grep -Po '(prod|sandbox|test)$')"
-          account_type="$(jq -r --arg parent_env "$parent_env" '.[$parent_env]' <<<"$PARENT_ENV_ACCOUNT_MAP")"
-
-          echo "account-type=$account_type" >> "$GITHUB_OUTPUT"
-
-      - name: Get filtered deploy jobs matrix JSON as output
-        id: get-deploy-jobs-matrix-json
-        env:
-          SERVICES: ${{ inputs.services }}
-        run: |
-          deploy_jobs_matrix_json="$(
-            jq -c --arg services "$SERVICES" '
-              # Convert the CSV list of services into an array
-              ($services | split(",") | map(gsub("^\\s+|\\s+$"; ""))) as $filterServices
-              | to_entries
-              | map(
-                  .value |= map(select(.service | IN($filterServices[])))
-                )
-              | from_entries
-            ' <<<"$DEPLOY_JOBS_MATRIX_JSON"
-          )"
-          jq -c <<<"$deploy_jobs_matrix_json"
-
-          # Get an ordered array of layers to deploy from the filtered list of services that will
-          # be deployed
-          layers="$(
-            jq -c '
-              to_entries
-                | map(select(.value != [] and .value != null) | .key)
-                | sort
-            ' <<<"$deploy_jobs_matrix_json"
-          )"
-          jq -c <<<"$layers"
-
-          echo "deploy-jobs-matrix-json=$deploy_jobs_matrix_json" >> "$GITHUB_OUTPUT"
-          echo "layers=$layers" >> "$GITHUB_OUTPUT"
-
-  deploy-layers:
-    uses: ./.github/workflows/_deploy-env-service-layer.yml
-    needs: [setup]
-    strategy:
-      matrix:
-        layer-level: ${{ fromJson(needs.setup.outputs.layers) }}
-      fail-fast: true
-      # We "abuse" the fact that matrix jobs with a maximum parallelism of 1 will run in the order
-      # of the matrix input, that being "layer-level"
-      max-parallel: 1
-    permissions:
-      contents: read
-      id-token: write
+  deploy:
+    uses: ./.github/workflows/_deploy-tofuservices.yml
     with:
-      layer-level: ${{ matrix.layer-level }}
-      bfd-env: ${{ inputs.bfd-env }}
-      account-type: ${{ needs.setup.outputs.account-type }}
-      matrix-json: ${{ needs.setup.outputs.deploy-jobs-matrix-json }}
+      service-type: ENVIRONMENT
+      env-or-account: ${{ inputs.bfd-env }}
+      services: ${{ inputs.services }}
+      per-service-vars-json: ${{ inputs.per-service-vars-json }}
       aws-region: ${{ inputs.aws-region }}
       skip-applies: ${{ inputs.skip-applies }}
-      all-vars-json: ${{ inputs.all-vars-json }}
-      git-ref: ${{ inputs.git-ref || github.ref }}
+      git-ref: ${{ inputs.git-ref }}
     secrets: inherit

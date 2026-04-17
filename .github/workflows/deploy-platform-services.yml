@@ -1,11 +1,15 @@
----
 name: "Deploy Platform Services"
 on:
   workflow_dispatch:
     inputs:
       account-type:
         description: The BFD account type to deploy services to
+        default: non-prod
         required: true
+        type: choice
+        options:
+          - non-prod
+          - prod
       services:
         description: Comma-separated list of services to deploy
         default: >-
@@ -16,7 +20,7 @@ on:
           ecr,
           network
         required: true
-      all-vars-json:
+      per-service-vars-json:
         description: >-
           Tofu plan variables per-service in JSON; see Workflow for format
         required: false
@@ -58,7 +62,7 @@ on:
           ecr,
           network
         required: false
-      all-vars-json:
+      per-service-vars-json:
         type: string
         description: >-
           Tofu plan variables per-service in JSON; see Workflow for format
@@ -83,90 +87,19 @@ on:
         default: ""
         required: false
 
-
 permissions:
   id-token: write # This is required for requesting the AWS IAM OIDC JWT
   contents: write # This is required for actions/checkout
 
-env:
-  DEPLOY_JOBS_MATRIX_JSON: |
-    {
-      "000": [
-        { "layer": "000", "service": "bootstrap", "runner": "lambda" }
-      ],
-      "01": [
-        { "layer": "01", "service": "config", "runner": "lambda" }
-      ],
-      "02": [
-        { "layer": "02", "service": "alerting", "runner": "lambda" },
-        { "layer": "02", "service": "backup", "runner": "lambda" },
-        { "layer": "02", "service": "ecr", "runner": "lambda" },
-        { "layer": "02", "service": "network", "runner": "lambda" }
-      ]
-    }
-
-defaults:
-  run:
-    shell: bash
-
 jobs:
-  setup:
-    runs-on: ubuntu-24.04
-    outputs:
-      deploy-jobs-matrix-json: ${{ steps.get-deploy-jobs-matrix-json.outputs.deploy-jobs-matrix-json }}
-      layers: ${{ steps.get-deploy-jobs-matrix-json.outputs.layers }}
-    steps:
-      - name: Get filtered deploy jobs matrix JSON as output
-        id: get-deploy-jobs-matrix-json
-        env:
-          SERVICES: ${{ inputs.services }}
-        run: |
-          deploy_jobs_matrix_json="$(
-            jq -c --arg services "$SERVICES" '
-              # Convert the CSV list of services into an array
-              ($services | split(",") | map(gsub("^\\s+|\\s+$"; ""))) as $filterServices
-              | to_entries
-              | map(
-                  .value |= map(select(.service | IN($filterServices[])))
-                )
-              | from_entries
-            ' <<<"$DEPLOY_JOBS_MATRIX_JSON"
-          )"
-          jq -c <<<"$deploy_jobs_matrix_json"
-
-          # Get an ordered array of layers to deploy from the filtered list of services that will
-          # be deployed
-          layers="$(
-            jq '
-              to_entries
-                | map(select(.value != [] and .value != null) | .key)
-                | sort
-            ' <<<"$deploy_jobs_matrix_json"
-          )"
-          jq -c <<<"$layers"
-
-          echo "deploy-jobs-matrix-json=$deploy_jobs_matrix_json" >> "$GITHUB_OUTPUT"
-          echo "layers=$layers" >> "$GITHUB_OUTPUT"
-
-  deploy-layers:
-    uses: ./.github/workflows/_deploy-platform-service-layer.yml
-    needs: [setup]
-    strategy:
-      matrix:
-        layer-level: ${{ fromJson(needs.setup.outputs.layers) }}
-      fail-fast: true
-      # We "abuse" the fact that matrix jobs with a maximum parallelism of 1 will run in the order
-      # of the matrix input, that being "layer-level"
-      max-parallel: 1
-    permissions:
-      contents: read
-      id-token: write
+  deploy:
+    uses: ./.github/workflows/_deploy-tofuservices.yml
     with:
-      layer-level: ${{ matrix.layer-level }}
-      account-type: ${{ inputs.account-type }}
-      matrix-json: ${{ needs.setup.outputs.deploy-jobs-matrix-json }}
+      service-type: PLATFORM
+      env-or-account: ${{ inputs.account-type }}
+      services: ${{ inputs.services }}
+      per-service-vars-json: ${{ inputs.per-service-vars-json }}
       aws-region: ${{ inputs.aws-region }}
       skip-applies: ${{ inputs.skip-applies }}
-      all-vars-json: ${{ inputs.all-vars-json }}
-      git-ref: ${{ inputs.git-ref || github.ref }}
+      git-ref: ${{ inputs.git-ref }}
     secrets: inherit

@@ -395,7 +395,7 @@ jobs:
         idr-pipeline,
         server-ng
       git-ref: ${{ github.ref_name }}
-      all-vars-json: >-
+      per-service-vars-json: >-
         {
           "migrator-ng": {
             "migrator_version_override": "${{ needs.setup.outputs.full-version-tag }}"

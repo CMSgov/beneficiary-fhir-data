@@ -1,11 +1,13 @@
-name: "Deploy Environment Terraservice"
-description: "Composite action to deploy an environment-specific BFD Terraservice"
+name: Deploy Tofuservice
+description: Composite action to deploy a BFD Tofuservice
 inputs:
-  bfd-env:
-    description: "The BFD environment to deploy the given service to"
+  service-type:
+    description: Type of Tofuservice. Either "PLATFORM" or "ENVIRONMENT"
+  env-or-account:
+    description: The environment (if env service) or account (if platform service)
     required: true
   service-path:
-    description: "The path to the Terraservice relative to the root of the repository"
+    description: "The path to the Tofuservice relative to the root of the repository"
     required: true
   cw-log-group:
     description: >-
@@ -17,16 +19,16 @@ inputs:
     required: true
   skip-apply:
     description: >-
-      Skip the apply of the given Terraservice. Useful for logging the plan without making any
+      Skip the apply of the given Tofuservice. Useful for logging the plan without making any
       modifications
     default: "false" # Composite Action inputs must be strings
     required: false
   tofu-vars-json:
-    description: "JSON object map of variables to their values"
+    description: JSON object map of variables to their values
     required: false
     default: "{}"
 runs:
-  using: "composite"
+  using: composite
   steps:
     - name: Setup OpenTofu and shell environment
       id: setup-tofu
@@ -45,14 +47,21 @@ runs:
       shell: bash
 
     - name: Get parent environment
+      if: ${{ inputs.service-type == "ENVIRONMENT" }}
       id: get-parent-env
+      env:
+        ENV_OR_ACCOUNT: ${{ inputs.env-or-account }}
       run: |
-        parent_env="$(echo "${{ inputs.bfd-env }}" | grep -Po '(prod|sandbox|test)$')"
+        parent_env="$(echo "$ENV_OR_ACCOUNT" | grep -Po '(prod|sandbox|test)$')"
 
         echo "parent-env=$parent_env" >> $GITHUB_OUTPUT
       shell: bash
 
     - name: OpenTofu init
+      env:
+        SERVICE_TYPE: ${{ inputs.service-type }}
+        PARENT_ENV: ${{ steps.get-parent-env.outputs.parent-env }}
+        ENV_OR_ACCOUNT: ${{ inputs.env-or-account }}
       run: |
         tofu --version
 
@@ -60,17 +69,31 @@ runs:
         # available for anyone logged in with a GitHub account to view, and so this information must
         # be protected. Instead of logging to stdout, all potentially sensitive OpenTofu log output
         # is instead logged to CloudWatch
-        TF_WORKSPACE=default tofu init \
-          -var parent_env="${{ steps.get-parent-env.outputs.parent-env }}" \
-          -reconfigure \
-          -no-color 2>&1 | "$STDOUT_TO_CWLOGS_SCRIPT"
-        echo "tofu init for \"${{ inputs.bfd-env }}\" completed"
+        if [[ $SERVICE_TYPE == "PLATFORM" ]]; then
+          TF_WORKSPACE=default tofu init \
+            -var account_type="$ENV_OR_ACCOUNT" \
+            -reconfigure \
+            -no-color 2>&1 | "$STDOUT_TO_CWLOGS_SCRIPT"
+        else
+          TF_WORKSPACE=default tofu init \
+            -var parent_env="$PARENT_ENV" \
+            -reconfigure \
+            -no-color 2>&1 | "$STDOUT_TO_CWLOGS_SCRIPT"
+        fi
+        echo "tofu init for \"$ENV_OR_ACCOUNT\" completed"
 
-        tofu workspace select \
-          -no-color \
-          -var parent_env="${{ steps.get-parent-env.outputs.parent-env }}" \
-          -or-create "${{ inputs.bfd-env }}" 2>&1 | "$STDOUT_TO_CWLOGS_SCRIPT"
-        echo "Selected workspace \"${{ inputs.bfd-env }}\""
+        if [[ $SERVICE_TYPE == "PLATFORM" ]]; then
+          tofu workspace select \
+            -no-color \
+            -var account_type="$ENV_OR_ACCOUNT" \
+            -or-create "$ENV_OR_ACCOUNT" 2>&1 | "$STDOUT_TO_CWLOGS_SCRIPT"
+        else
+          tofu workspace select \
+            -no-color \
+            -var parent_env="$PARENT_ENV" \
+            -or-create "$ENV_OR_ACCOUNT" 2>&1 | "$STDOUT_TO_CWLOGS_SCRIPT"
+        fi
+        echo "Selected workspace \"$ENV_OR_ACCOUNT\""
       shell: bash
       working-directory: ${{ github.workspace }}/${{ inputs.service-path }}
 
@@ -79,8 +102,10 @@ runs:
       # See the README of https://github.com/ringerc/github-actions-signal-handling-demo and
       # https://github.com/orgs/community/discussions/26311
     - name: Start OpenTofu Plan
+      env:
+        SERVICE_PATH: ${{ inputs.service-path }}
       run: |
-        echo "Generating OpenTofu plan for ${{ inputs.service-path }}..."
+        echo "Generating OpenTofu plan for $SERVICE_PATH..."
       shell: bash
       working-directory: ${{ github.workspace }}/${{ inputs.service-path }}
 
@@ -94,14 +119,18 @@ runs:
       working-directory: ${{ github.workspace }}/${{ inputs.service-path }}
 
     - name: End OpenTofu plan
+      env:
+        SERVICE_PATH: ${{ inputs.service-path }}
       run: |
-        echo "Plan generated for ${{ inputs.service-path }} successfully"
+        echo "Plan generated for $SERVICE_PATH successfully"
       shell: bash
 
     - name: Start apply env service
       if: ${{ inputs.skip-apply != 'true' }}
+      env:
+        SERVICE_PATH: ${{ inputs.service-path }}
       run: |
-        echo "Applying OpenTofu plan for ${{ inputs.service-path }}..."
+        echo "Applying OpenTofu plan for $SERVICE_PATH..."
       shell: bash
       working-directory: ${{ github.workspace }}/${{ inputs.service-path }}
 
@@ -114,8 +143,10 @@ runs:
 
     - name: End apply env service
       if: ${{ inputs.skip-apply != 'true' }}
+      env:
+        SERVICE_PATH: ${{ inputs.service-path }}
       run: |
-        echo "OpenTofu plan for ${{ inputs.service-path }} applied"
+        echo "OpenTofu plan for $SERVICE_PATH applied"
       shell: bash
 
     - name: Force-unlock tofu state (on failure/cancel)
