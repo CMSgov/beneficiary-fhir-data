@@ -31,7 +31,7 @@ on:
       # context within a "runs-on", so this is next best thing
       service-runner-overrides-json:
         type: string
-        required: true
+        required: false
         default: |
           {
             "database": "small",
