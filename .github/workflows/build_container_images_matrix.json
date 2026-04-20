@@ -30,6 +30,12 @@
     "platform": "linux/arm64"
   },
   {
+    "name": "bfd-platform-migrator-ng",
+    "dockerfile": "apps/bfd-db-migrator-ng/Dockerfile",
+    "contextDir": "apps/bfd-db-migrator-ng",
+    "platform": "linux/arm64"
+  },
+  {
     "name": "bfd-platform-server-regression",
     "dockerfile": "apps/utils/locust_tests/server-regression.Dockerfile",
     "contextDir": "apps/utils/locust_tests",

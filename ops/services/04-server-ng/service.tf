@@ -76,8 +76,15 @@ resource "aws_cloudwatch_log_group" "server_messages" {
   skip_destroy      = true
 }
 
-resource "aws_cloudwatch_log_group" "server_access" {
-  name              = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/${local.service}/access"
+resource "aws_cloudwatch_log_group" "server_healthchecks" {
+  name              = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/${local.service}/healthchecks"
+  kms_key_id        = local.env_key_arn
+  retention_in_days = local.ten_year_retention_days
+  skip_destroy      = true
+}
+
+resource "aws_cloudwatch_log_group" "server_nonjson" {
+  name              = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/${local.service}/nonjson"
   kms_key_id        = local.env_key_arn
   retention_in_days = local.ten_year_retention_days
   skip_destroy      = true
@@ -108,16 +115,21 @@ resource "aws_ecs_task_definition" "server" {
     name                = "tmp_${local.service}"
   }
 
+  tags = {
+    "${local.service}.version" = local.server_version
+    "log_router.version"       = local.log_router_version
+  }
+
   container_definitions = jsonencode(
     [
       {
         name              = "log_router"
         image             = data.aws_ecr_image.log_router.image_uri
         essential         = true
-        cpu               = 128
-        memoryReservation = 50
-        memory            = 100
-        user              = "0" # Default; reduces unnecessary terraform diff output
+        cpu               = max(min(1024, floor(0.05 * local.server_cpu)), 256)    # Max 1 CPU, min 1/4
+        memoryReservation = max(min(1024, floor(0.08 * local.server_memory)), 256) # Max 1 GB, min 256 MiB
+        memory            = max(min(1024, floor(0.10 * local.server_memory)), 312) # Max 1 GB, min 312 MiB
+        user              = "0"                                                    # Default; reduces unnecessary terraform diff output
         environment = [
           {
             name  = "AWS_REGION"
@@ -128,15 +140,19 @@ resource "aws_ecs_task_definition" "server" {
             value = aws_cloudwatch_log_group.server_messages.name
           },
           {
-            name  = "ACCESS_LOG_GROUP"
-            value = aws_cloudwatch_log_group.server_access.name
+            name  = "HEALTHCHECK_LOG_GROUP"
+            value = aws_cloudwatch_log_group.server_healthchecks.name
           },
+          {
+            name  = "NONJSON_LOG_GROUP"
+            value = aws_cloudwatch_log_group.server_nonjson.name
+          }
         ]
         firelensConfiguration = {
           type = "fluentbit"
           options = {
             "config-file-type"        = "file"
-            "config-file-value"       = "/server-fluentbit.conf"
+            "config-file-value"       = "/server-ng-fluentbit.conf"
             "enable-ecs-log-metadata" = "false"
           }
         }

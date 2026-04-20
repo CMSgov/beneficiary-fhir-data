@@ -5,6 +5,8 @@
 /bfd/${env}/database/sensitive/rds_master_password: ENC[AES256_GCM,data:GfsMLl4mh0LMdVh3BJXTkoZnLwB7bw==,iv:Jna60PWrBNqRa+PazBChazSaK1wowZXmZrrCHPvGZf4=,tag:6K6QWaM8t1LHqd3l/n7Xvw==,type:str]
 /bfd/${env}/migrator/sensitive/db/password: ENC[AES256_GCM,data:wS0Vf+/AfXXD/9DYzokdZDpIux7wPULy,iv:pBc6g1eF4bxfKHEIPattNMVE3b+umRXJxcJNiwE3fDc=,tag:PH/3eaYR2p0YYt2uVvo+qA==,type:str]
 /bfd/${env}/migrator/sensitive/db/username: ENC[AES256_GCM,data:B344dEF079UE4DCRxL+f5SOuAA==,iv:RiMWAKu+6ZYPv4rN/KeNqwRywtPs3IP3Qrz3uPYA2bg=,tag:/vGB2vM7dTsqJld6wgG7cA==,type:str]
+/bfd/${env}/migrator-ng/sensitive/db/password: ENC[AES256_GCM,data:LiK1fkRjUBy7I+uzExNo6PEXhdtthKWF,iv:f9P0nGsVn7rkNUFGdV7pNEYhS1QfCVExjux6b0mdd8c=,tag:qCagWCjJff0I5bcxMWqCDw==,type:str]
+/bfd/${env}/migrator-ng/sensitive/db/username: ENC[AES256_GCM,data:SibdXvYw3OCC92ATmEtgtkE+xQ==,iv:ZBNDhpJbWPLy5U5L9BVjFO3VQdZdWsmB8HETuezqRjM=,tag:L9pLFAv1P5tA88PluG+n5w==,type:str]
 /bfd/${env}/idr-pipeline/nonsensitive/ecs/resources/cpu: 4096
 /bfd/${env}/idr-pipeline/nonsensitive/ecs/resources/memory: 8192
 /bfd/${env}/idr-pipeline/nonsensitive/ecs/resources/disk_size: 21
@@ -92,6 +94,10 @@
 /bfd/${env}/migrator/nonsensitive/ecs/resources/memory: 4096
 /bfd/${env}/migrator/nonsensitive/ecs/capacity_provider/FARGATE/base: 0
 /bfd/${env}/migrator/nonsensitive/ecs/capacity_provider/FARGATE/weight: 100
+/bfd/${env}/migrator-ng/nonsensitive/ecs/resources/cpu: 2048
+/bfd/${env}/migrator-ng/nonsensitive/ecs/resources/memory: 4096
+/bfd/${env}/migrator-ng/nonsensitive/ecs/capacity_provider/FARGATE/base: 0
+/bfd/${env}/migrator-ng/nonsensitive/ecs/capacity_provider/FARGATE/weight: 100
 /bfd/${env}/ccw-pipeline/nonsensitive/db/auth_type: UNDEFINED
 /bfd/${env}/ccw-pipeline/nonsensitive/db/data_source_type: HIKARI
 /bfd/${env}/ccw-pipeline/nonsensitive/db/hikari/max_pool_size: UNDEFINED
@@ -1557,4 +1563,4 @@ sops:
       enc: AQICAHhJyyTYz7F9ZtNNOqGQey2/S5rpRtPB96w5RrdTRf7ycQFKTOb7uLgtYqFd+lCmkLF3AAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQM2hGiKtGbX/DxiwP0AgEQgDvBGTkDcOudxsok1MRLWKiTtoPF+gvgaeTcTHaVK4hX2w0zxRbM3/llsarbb7f1u+7fAEPFZftQd+EUhA==
       aws_profile: ""
   unencrypted_regex: /nonsensitive/
-  version: 3.11.0
+  version: 3.12.2

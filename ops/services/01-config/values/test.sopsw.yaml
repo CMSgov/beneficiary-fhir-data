@@ -10,6 +10,8 @@
 /bfd/${env}/database/sensitive/rds_master_password: ENC[AES256_GCM,data:mnZANVDaGHpcpFy6+2iP,iv:yaNcWypZbQtzeQsWic9rVJK90qhHL1+xSo/Hgr8i4fc=,tag:di5NASDsF17pNU0ofiJsbw==,type:str]
 /bfd/${env}/migrator/sensitive/db/password: ENC[AES256_GCM,data:7SSc7TrZRS+RcRV44BVkEYtfWAdbrfW3,iv:7qccZn0gngoSSHEFTyJ1qrdYjovFqmKYPIX8Mt7OTlo=,tag:tSFu+GHgnYE/R/VI77oVTw==,type:str]
 /bfd/${env}/migrator/sensitive/db/username: ENC[AES256_GCM,data:dDqXmVnBSIzRmg/1wofXQQII+g==,iv:8fuVFyaC6/f3aUDuG5Fildz31eFFiet7stl2WSehrak=,tag:BHaQb68R0KAckEzXyBrQ1Q==,type:str]
+/bfd/${env}/migrator-ng/sensitive/db/password: ENC[AES256_GCM,data:EGL6cJRreeLN/daP2uG3bPbnn0tb8PM/,iv:JrESoCRlElQ0Z0G1wloc5cwrOQfJxA/XQAnc531d14o=,tag:T+3lr+cAKpus34R4V8sELA==,type:str]
+/bfd/${env}/migrator-ng/sensitive/db/username: ENC[AES256_GCM,data:/5i1ijRLu1YoTrWSjTCZKEb0wg==,iv:wRzJ3KA0VkPm0CJwzr+o54uIuoyk4d8+BdLIFixEgV8=,tag:dwwskN6IZkKQzcV4qqB38A==,type:str]
 /bfd/${env}/ccw-pipeline/sensitive/ccw/ccw_rif_role_external_id: ENC[AES256_GCM,data:capvbKBI9kw4,iv:gfiId52SIH2SuoDGjc9r8AULNXKOpXIEUNC1LeFvWQ8=,tag:HlQvL8Ttx9SeZTV2/7qHag==,type:str]
 /bfd/${env}/ccw-pipeline/sensitive/ccw/ccw_rif_role_principal_arns: ENC[AES256_GCM,data:Ufsue/KNpXAj,iv:TZ8glXKc2d1t9Vz0Ly9iCay2kDoFuxFLKieRl8qwPcw=,tag:tl1upKnHLSfSoZ/HmVIKAg==,type:str]
 /bfd/${env}/ccw-pipeline/sensitive/db/password: ENC[AES256_GCM,data:RUnYMqzoaUV37ypfMhaDWYEk0BPugVVt,iv:vG6hQopWp2+yrOUQHjqKWkvEb3eokCxUDW+whVoTCag=,tag:aBZBgIz4sWjIcVaZNAeucg==,type:str]
@@ -93,6 +95,10 @@
 /bfd/${env}/migrator/nonsensitive/ecs/resources/memory: 4096
 /bfd/${env}/migrator/nonsensitive/ecs/capacity_provider/FARGATE/base: 0
 /bfd/${env}/migrator/nonsensitive/ecs/capacity_provider/FARGATE/weight: 100
+/bfd/${env}/migrator-ng/nonsensitive/ecs/resources/cpu: 2048
+/bfd/${env}/migrator-ng/nonsensitive/ecs/resources/memory: 4096
+/bfd/${env}/migrator-ng/nonsensitive/ecs/capacity_provider/FARGATE/base: 0
+/bfd/${env}/migrator-ng/nonsensitive/ecs/capacity_provider/FARGATE/weight: 100
 /bfd/${env}/idr-pipeline/nonsensitive/ecs/resources/cpu: 4096
 /bfd/${env}/idr-pipeline/nonsensitive/ecs/resources/memory: 8192
 /bfd/${env}/idr-pipeline/nonsensitive/ecs/resources/disk_size: 21

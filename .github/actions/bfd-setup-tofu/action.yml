@@ -18,6 +18,10 @@ inputs:
     description: "JSON object map of variables to their values"
     required: false
     default: "{}"
+outputs:
+  tf-vars-args:
+    description: Argument string passed to tofu plan specifying variables
+    value: ${{ steps.gen-tf-vars-args.outputs.tf-vars-args }}
 runs:
   using: "composite"
   steps:
@@ -110,9 +114,11 @@ runs:
     # -var=var1=val1 -var=var2=123 -var=var3=true
     - name: Generate OpenTofu vars args
       id: gen-tf-vars-args
+      env:
+        TOFU_VARS_JSON: ${{ inputs.tofu-vars-json }}
       run: |
         tf_vars_args="$(
-          echo "${{ inputs.tofu-vars-json }}" | jq -r 'to_entries |
+          echo "$TOFU_VARS_JSON" | jq -r 'to_entries |
             map(select(.value != null and .value != "")) |
             map("\"-var=" + .key + "=" + (.value | tostring)+ "\"") |
             join(" ")'
@@ -155,3 +161,4 @@ runs:
       uses: opentofu/setup-opentofu@592200bd4b9bbf4772ace78f887668b1aee8f716 # v1.0.5
       with:
         tofu_version: ${{ steps.get-opentofu-version.outputs.tofu-version }}
+        tofu_wrapper: false # Necessary to wrap with tofu-ci.sh
