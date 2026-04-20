@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.Getter;
+import org.hibernate.annotations.Formula;
 import org.hl7.fhir.r4.model.Patient;
 
 /**
@@ -30,6 +31,9 @@ public abstract class BeneficiaryBase {
 
   @Column(name = "bene_xref_efctv_sk")
   protected long xrefSk;
+
+  @Formula("RIGHT(bene_ssn_num, 4)")
+  protected String ssnLastFourDigits;
 
   @Column(name = "bene_brth_dt")
   protected LocalDate birthDate;

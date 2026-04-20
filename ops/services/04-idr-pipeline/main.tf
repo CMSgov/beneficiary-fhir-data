@@ -32,11 +32,9 @@ locals {
   app_subnets              = module.terraservice.subnets_map["private"]
   data_subnets             = module.terraservice.subnets_map["private"]
 
-  is_prod = local.env == "prod"
-
   name_prefix = "bfd-${local.env}-${local.service}"
 
-  pipeline_repository_name = coalesce(var.pipeline_repository_override, "bfd-platform-base-python")
+  pipeline_repository_name = coalesce(var.pipeline_repository_override, "bfd-platform-${local.service}")
   pipeline_version         = coalesce(var.pipeline_version_override, local.bfd_version)
 
   db_environment        = coalesce(var.db_environment_override, local.env)
@@ -56,6 +54,18 @@ locals {
   idr_memory                       = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/resources/memory"])
   idr_disk_size                    = nonsensitive(local.ssm_config["/bfd/${local.service}/ecs/resources/disk_size"])
   idr_capacity_provider_strategies = module.data_strategies.strategies
+  idr_task_ssm = {
+    for k, v in {
+      IDR_USERNAME    = "/bfd/${local.env}/idr-pipeline/sensitive/idr_username"
+      IDR_PRIVATE_KEY = "/bfd/${local.env}/idr-pipeline/sensitive/idr_private_key"
+      IDR_ACCOUNT     = "/bfd/${local.env}/idr-pipeline/sensitive/idr_account"
+      IDR_WAREHOUSE   = "/bfd/${local.env}/idr-pipeline/sensitive/idr_warehouse"
+      IDR_DATABASE    = "/bfd/${local.env}/idr-pipeline/sensitive/idr_database"
+      IDR_SCHEMA      = "/bfd/${local.env}/idr-pipeline/sensitive/idr_schema"
+      BFD_DB_USERNAME = "/bfd/${local.env}/idr-pipeline/sensitive/db/username"
+      BFD_DB_PASSWORD = "/bfd/${local.env}/idr-pipeline/sensitive/db/password"
+    } : k => "arn:aws:ssm:${local.region}:${local.account_id}:parameter/${trim(v, "/")}"
+  }
 }
 
 resource "aws_cloudwatch_log_group" "idr_messages" {
@@ -64,7 +74,38 @@ resource "aws_cloudwatch_log_group" "idr_messages" {
   skip_destroy = true
 }
 
-resource "aws_ecs_task_definition" "idr" {
+# TODO: Rename this when "idr_old" resources are destroyed/deleted
+resource "aws_security_group" "idr_new" {
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  name_prefix            = "${local.name_prefix}-sg"
+  description            = "Allow ${local.service} egress anywhere"
+  vpc_id                 = local.vpc.id
+  tags                   = { Name = "${local.name_prefix}-sg" }
+  revoke_rules_on_delete = true
+}
+
+# TODO: Rename this when "idr_old" resources are destroyed/deleted
+resource "aws_vpc_security_group_egress_rule" "idr_new_allow_all_traffic_ipv4" {
+  security_group_id = aws_security_group.idr_new.id
+  cidr_ipv4         = "0.0.0.0/0"
+  ip_protocol       = "-1" # semantically equivalent to all ports
+}
+
+# TODO: Rename this when "idr_old" resources are destroyed/deleted
+resource "aws_vpc_security_group_ingress_rule" "idr_new_allow_db_access" {
+  security_group_id            = data.aws_security_group.aurora_cluster.id
+  referenced_security_group_id = aws_security_group.idr_new.id
+  from_port                    = 5432
+  to_port                      = 5432
+  ip_protocol                  = "TCP"
+  description                  = "Grants ${local.env} ${local.service} ECS task containers access to the ${local.env} database"
+}
+
+# TODO: Rename this to "idr" when "idr_old" resources are destroyed/deleted
+resource "aws_ecs_task_definition" "idr_new" {
   family                   = local.name_prefix
   requires_compatibilities = ["FARGATE"]
   execution_role_arn       = aws_iam_role.idr_execution.arn
@@ -89,11 +130,117 @@ resource "aws_ecs_task_definition" "idr" {
     name                = "tmp"
   }
 
+  tags = {
+    "${local.service}.version" = local.pipeline_version
+  }
+
+  container_definitions = jsonencode(
+    [
+      {
+        name      = local.service
+        image     = data.aws_ecr_image.pipeline.image_uri
+        essential = true
+        cpu       = 0
+        secrets = [
+          for k, v in local.idr_task_ssm :
+          {
+            name      = k
+            valueFrom = v
+          }
+        ]
+        environment = [
+          {
+            name  = "TZ"
+            value = "UTC"
+          },
+          {
+            name  = "BFD_ENV"
+            value = local.env
+          },
+          {
+            name  = "BFD_DB_ENDPOINT"
+            value = data.aws_rds_cluster.main.endpoint
+          },
+          {
+            name = "CONFIG_SETTINGS_JSON"
+            value = jsonencode(
+              {
+                ssmHierarchies = local.idr_ssm_hierarchies
+              }
+            )
+          },
+        ]
+        logConfiguration = {
+          logDriver = "awslogs"
+          options = {
+            awslogs-group         = aws_cloudwatch_log_group.idr_messages.name
+            awslogs-stream-prefix = "messages"
+            awslogs-region        = local.region
+            max-buffer-size       = "25m"
+            mode                  = "non-blocking"
+          }
+        }
+        stopTimeout = 120 # Allow enough time for Pipeline to gracefully stop on spot termination.
+        mountPoints = [
+          {
+            containerPath = "/tmp"
+            readOnly      = false
+            sourceVolume  = "tmp"
+          }
+        ]
+        readonlyRootFilesystem = true
+        # Empty declarations reduce Terraform diff noise
+        portMappings   = []
+        systemControls = []
+        volumesFrom    = []
+      }
+    ]
+  )
+}
+
+# TODO: The below resources should be removed when initial loads are totally completed
+
+data "aws_ecr_repository" "idr_old" {
+  name = "bfd-platform-base-python"
+}
+
+data "aws_ecr_image" "idr_old" {
+  repository_name = data.aws_ecr_repository.idr_old.name
+  image_tag       = "2.240.1"
+}
+
+resource "aws_ecs_task_definition" "idr_old" {
+  count = local.env == "prod" ? 1 : 0
+
+  family                   = local.name_prefix
+  requires_compatibilities = ["FARGATE"]
+  execution_role_arn       = aws_iam_role.idr_execution.arn
+  task_role_arn            = aws_iam_role.idr_task.arn
+  track_latest             = false
+
+  network_mode = "awsvpc"
+  cpu          = "16384"
+  memory       = "122880"
+
+  ephemeral_storage {
+    size_in_gib = local.idr_disk_size
+  }
+
+  runtime_platform {
+    cpu_architecture        = "ARM64"
+    operating_system_family = "LINUX"
+  }
+
+  volume {
+    configure_at_launch = false
+    name                = "tmp"
+  }
+
   container_definitions = jsonencode(
     [
       {
         name       = local.service
-        image      = data.aws_ecr_image.pipeline.image_uri
+        image      = data.aws_ecr_image.idr_old.image_uri
         essential  = true
         cpu        = 0
         entryPoint = ["sleep", "infinity"]
@@ -143,7 +290,13 @@ resource "aws_ecs_task_definition" "idr" {
   )
 }
 
-resource "aws_ecs_service" "idr" {
+moved {
+  from = aws_ecs_task_definition.idr
+  to   = aws_ecs_task_definition.idr_old[0]
+}
+
+resource "aws_ecs_service" "idr_old" {
+  count      = local.env == "prod" ? 1 : 0
   depends_on = [aws_iam_role_policy_attachment.idr_task, aws_iam_role_policy_attachment.idr_execution]
 
   cluster                            = data.aws_ecs_cluster.main.arn
@@ -157,7 +310,7 @@ resource "aws_ecs_service" "idr" {
   name                               = local.service
   propagate_tags                     = "TASK_DEFINITION"
   scheduling_strategy                = "REPLICA"
-  task_definition                    = aws_ecs_task_definition.idr.arn
+  task_definition                    = one(aws_ecs_task_definition.idr_old[*].arn)
 
   dynamic "capacity_provider_strategy" {
     for_each = local.idr_capacity_provider_strategies
@@ -174,12 +327,19 @@ resource "aws_ecs_service" "idr" {
 
   network_configuration {
     assign_public_ip = false
-    security_groups  = [aws_security_group.idr.id]
+    security_groups  = aws_security_group.idr_old[*].id
     subnets          = local.writer_adjacent_subnets
   }
 }
 
-resource "aws_security_group" "idr" {
+moved {
+  from = aws_ecs_service.idr
+  to   = aws_ecs_service.idr_old[0]
+}
+
+resource "aws_security_group" "idr_old" {
+  count = local.env == "prod" ? 1 : 0
+
   name                   = "${local.name_prefix}-sg"
   description            = "Allow ${local.service} egress anywhere"
   vpc_id                 = local.vpc.id
@@ -187,17 +347,38 @@ resource "aws_security_group" "idr" {
   revoke_rules_on_delete = true
 }
 
-resource "aws_vpc_security_group_egress_rule" "idr_allow_all_traffic_ipv4" {
-  security_group_id = aws_security_group.idr.id
+moved {
+  from = aws_security_group.idr
+  to   = aws_security_group.idr_old[0]
+}
+
+resource "aws_vpc_security_group_egress_rule" "idr_old_allow_all_traffic_ipv4" {
+  count = local.env == "prod" ? 1 : 0
+
+  security_group_id = one(aws_security_group.idr_old[*].id)
   cidr_ipv4         = "0.0.0.0/0"
   ip_protocol       = "-1" # semantically equivalent to all ports
 }
 
-resource "aws_vpc_security_group_ingress_rule" "idr_allow_db_access" {
+moved {
+  from = aws_vpc_security_group_egress_rule.idr_allow_all_traffic_ipv4
+  to   = aws_vpc_security_group_egress_rule.idr_old_allow_all_traffic_ipv4[0]
+}
+
+resource "aws_vpc_security_group_ingress_rule" "idr_old_allow_db_access" {
+  count = local.env == "prod" ? 1 : 0
+
   security_group_id            = data.aws_security_group.aurora_cluster.id
-  referenced_security_group_id = aws_security_group.idr.id
+  referenced_security_group_id = one(aws_security_group.idr_old[*].id)
   from_port                    = 5432
   to_port                      = 5432
   ip_protocol                  = "TCP"
   description                  = "Grants ${local.env} ${local.service} ECS task containers access to the ${local.env} database"
 }
+
+moved {
+  from = aws_vpc_security_group_ingress_rule.idr_allow_db_access
+  to   = aws_vpc_security_group_ingress_rule.idr_old_allow_db_access[0]
+}
+
+# TODO: The above resources should be removed when initial loads are totally completed

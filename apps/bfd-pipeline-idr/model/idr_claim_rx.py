@@ -28,8 +28,12 @@ from model.base_model import (
     UPDATE_FIELD,
     IdrBaseModel,
     ModelType,
-    claim_filter,
+    base_claim_filter,
+    clm_base_query,
+    clm_child_query,
+    clm_dt_sgntr_query,
     clm_orig_cntl_num_expr,
+    clm_query,
     provider_careteam_name_expr,
     provider_last_or_legal_name_expr,
     transform_default_date_to_null,
@@ -258,7 +262,19 @@ class IdrClaimRx(IdrBaseModel):
         prvdr_prscrbng = ALIAS_PRVDR_PRSCRBNG
         pbp_num = ALIAS_PBP_NUM
         return f"""
-            WITH contracts AS (
+            WITH claim_base AS (
+                {clm_base_query(start_time, partition, cls.model_type())}
+            ),
+            claims AS (
+                {clm_query()}
+                UNION
+                {clm_dt_sgntr_query()}
+                UNION
+                {clm_child_query("v2_mdcr_clm_line")}
+                UNION
+                {clm_child_query("v2_mdcr_clm_line_rx")}
+            ),
+            contracts AS (
                 SELECT cntrct_pbp_name, cntrct_num, cntrct_pbp_num,
                 RANK() OVER (
                     PARTITION BY cntrct_num, cntrct_pbp_num 
@@ -267,7 +283,12 @@ class IdrClaimRx(IdrBaseModel):
                 FROM cms_vdm_view_mdcr_prd.v2_mdcr_cntrct_pbp_num
             )
             SELECT {{COLUMNS}}
-            FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
+            FROM claims c
+            JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm} ON
+                {clm}.geo_bene_sk = c.geo_bene_sk AND
+                {clm}.clm_dt_sgntr_sk = c.clm_dt_sgntr_sk AND
+                {clm}.clm_type_cd = c.clm_type_cd AND
+                {clm}.clm_num_sk = c.clm_num_sk
             JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_dt_sgntr {sgntr} ON 
                 {sgntr}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
             JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_line {line} ON
@@ -290,6 +311,6 @@ class IdrClaimRx(IdrBaseModel):
                 ON {pbp_num}.cntrct_num = {clm}.clm_sbmtr_cntrct_num
                 AND {pbp_num}.cntrct_pbp_num = {clm}.clm_sbmtr_cntrct_pbp_num
                 AND {pbp_num}.contract_version_rank = 1
-            {{WHERE_CLAUSE}} AND {claim_filter(start_time, partition)}
+            {{WHERE_CLAUSE}} AND {base_claim_filter(partition)}
             {{ORDER_BY}}
         """

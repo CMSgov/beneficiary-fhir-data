@@ -18,7 +18,7 @@ public record SourceFilterParam(List<List<MetaSourceSk>> metaSourceSk) implement
 
   @NotNull
   @Override
-  public DbFilter getFilters(@NotNull String claimTableAlias, @NotNull SystemType systemType) {
+  public DbFilter getFilters(@NotNull String tableAlias, @NotNull SystemType systemType) {
     var stringBuilder = new StringBuilder();
     var params = new ArrayList<DbFilterParam>();
 
@@ -32,7 +32,7 @@ public record SourceFilterParam(List<List<MetaSourceSk>> metaSourceSk) implement
         if (systemType == SystemType.SS) {
           stringBuilder
               .append(" AND ")
-              .append(claimTableAlias)
+              .append(tableAlias)
               .append(".metaSourceSk IN :")
               .append(paramName);
 

@@ -516,7 +516,17 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
           } ]
         },
         "value" : "1437702123"
-      }
+      },
+      "type" : "Organization"
+    },
+    "qualification" : {
+      "coding" : [ {
+        "code" : "A0",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRVDR-SPCLTY-CD"
+      }, {
+        "code" : "282N00000X",
+        "system" : "http://nucc.org/provider-taxonomy"
+      } ]
     },
     "role" : {
       "coding" : [ {
@@ -543,7 +553,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
           } ]
         },
         "value" : "1942945159"
-      }
+      },
+      "type" : "Practitioner"
     },
     "role" : {
       "coding" : [ {
@@ -570,7 +581,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
           } ]
         },
         "value" : "1558719914"
-      }
+      },
+      "type" : "Practitioner"
     },
     "role" : {
       "coding" : [ {
@@ -1879,7 +1891,17 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
           } ]
         },
         "value" : "1437702123"
-      }
+      },
+      "type" : "Organization"
+    },
+    "qualification" : {
+      "coding" : [ {
+        "code" : "A0",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRVDR-SPCLTY-CD"
+      }, {
+        "code" : "282N00000X",
+        "system" : "http://nucc.org/provider-taxonomy"
+      } ]
     },
     "role" : {
       "coding" : [ {
@@ -1906,7 +1928,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
           } ]
         },
         "value" : "1942945159"
-      }
+      },
+      "type" : "Practitioner"
     },
     "role" : {
       "coding" : [ {
@@ -1933,7 +1956,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
           } ]
         },
         "value" : "1558719914"
-      }
+      },
+      "type" : "Practitioner"
     },
     "role" : {
       "coding" : [ {
@@ -3464,7 +3488,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
           } ]
         },
         "value" : "1558719914"
-      }
+      },
+      "type" : "Organization"
     },
     "qualification" : {
       "coding" : [ {
@@ -4605,7 +4630,17 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
           } ]
         },
         "value" : "1437702123"
-      }
+      },
+      "type" : "Organization"
+    },
+    "qualification" : {
+      "coding" : [ {
+        "code" : "A0",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRVDR-SPCLTY-CD"
+      }, {
+        "code" : "282N00000X",
+        "system" : "http://nucc.org/provider-taxonomy"
+      } ]
     },
     "role" : {
       "coding" : [ {
@@ -4632,7 +4667,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
           } ]
         },
         "value" : "1942945159"
-      }
+      },
+      "type" : "Practitioner"
     },
     "role" : {
       "coding" : [ {
@@ -4659,7 +4695,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
           } ]
         },
         "value" : "1558719914"
-      }
+      },
+      "type" : "Practitioner"
     },
     "role" : {
       "coding" : [ {
@@ -6184,7 +6221,17 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
           } ]
         },
         "value" : "1437702123"
-      }
+      },
+      "type" : "Organization"
+    },
+    "qualification" : {
+      "coding" : [ {
+        "code" : "A0",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRVDR-SPCLTY-CD"
+      }, {
+        "code" : "282N00000X",
+        "system" : "http://nucc.org/provider-taxonomy"
+      } ]
     },
     "role" : {
       "coding" : [ {
@@ -6211,7 +6258,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
           } ]
         },
         "value" : "1942945159"
-      }
+      },
+      "type" : "Practitioner"
     },
     "role" : {
       "coding" : [ {
@@ -6238,7 +6286,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
           } ]
         },
         "value" : "1558719914"
-      }
+      },
+      "type" : "Practitioner"
     },
     "role" : {
       "coding" : [ {

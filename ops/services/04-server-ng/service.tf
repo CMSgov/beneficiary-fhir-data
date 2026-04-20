@@ -56,27 +56,31 @@ data "aws_ecr_image" "server" {
 }
 
 resource "aws_cloudwatch_log_group" "log_router_messages" {
-  name         = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/log_router/messages"
-  kms_key_id   = local.env_key_arn
-  skip_destroy = true
+  name              = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/log_router/messages"
+  kms_key_id        = local.env_key_arn
+  retention_in_days = local.ten_year_retention_days
+  skip_destroy      = true
 }
 
 resource "aws_cloudwatch_log_group" "service_connect_messages" {
-  name         = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/service-connect/messages"
-  kms_key_id   = local.env_key_arn
-  skip_destroy = true
+  name              = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/service-connect/messages"
+  kms_key_id        = local.env_key_arn
+  retention_in_days = local.ten_year_retention_days
+  skip_destroy      = true
 }
 
 resource "aws_cloudwatch_log_group" "server_messages" {
-  name         = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/${local.service}/messages"
-  kms_key_id   = local.env_key_arn
-  skip_destroy = true
+  name              = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/${local.service}/messages"
+  kms_key_id        = local.env_key_arn
+  retention_in_days = local.ten_year_retention_days
+  skip_destroy      = true
 }
 
 resource "aws_cloudwatch_log_group" "server_access" {
-  name         = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/${local.service}/access"
-  kms_key_id   = local.env_key_arn
-  skip_destroy = true
+  name              = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/${local.service}/access"
+  kms_key_id        = local.env_key_arn
+  retention_in_days = local.ten_year_retention_days
+  skip_destroy      = true
 }
 
 resource "aws_ecs_task_definition" "server" {
@@ -300,7 +304,7 @@ resource "aws_ecs_service" "server" {
   enable_ecs_managed_tags            = true
   health_check_grace_period_seconds  = 0
   name                               = local.service
-  propagate_tags                     = "NONE"
+  propagate_tags                     = "TASK_DEFINITION"
   scheduling_strategy                = "REPLICA"
   task_definition                    = aws_ecs_task_definition.server.arn
   triggers                           = {}
@@ -409,4 +413,34 @@ resource "aws_appautoscaling_policy" "server_track_cpu" {
     scale_in_cooldown  = 300
     scale_out_cooldown = 60
   }
+}
+
+resource "aws_dynamodb_table" "patient_match_audit_table" {
+  name                        = "bfd-${local.env}-patient-match-audit"
+  billing_mode                = "PAY_PER_REQUEST"
+  hash_key                    = "matchedBeneSk"
+  range_key                   = "timestamp"
+  deletion_protection_enabled = local.env == "prod" ? true : false
+
+  server_side_encryption {
+    enabled     = true
+    kms_key_arn = local.env_key_arn
+  }
+
+  point_in_time_recovery {
+    enabled                 = true
+    recovery_period_in_days = 35
+  }
+
+  attribute {
+    name = "matchedBeneSk"
+    type = "N"
+  }
+
+  attribute {
+    name = "timestamp"
+    type = "S"
+  }
+
+  tags = local.default_tags
 }

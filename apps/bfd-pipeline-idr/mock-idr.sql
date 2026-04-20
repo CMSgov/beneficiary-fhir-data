@@ -26,6 +26,7 @@ CREATE TABLE cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry (
     bene_xref_sk BIGINT NOT NULL,
     bene_xref_efctv_sk BIGINT NOT NULL, 
     bene_mbi_id VARCHAR(11),
+    bene_ssn_num VARCHAR(9),
     bene_1st_name VARCHAR(30),
     bene_midl_name VARCHAR(15),
     bene_last_name VARCHAR(40),

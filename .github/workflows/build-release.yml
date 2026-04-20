@@ -175,7 +175,7 @@ jobs:
     steps:
       - name: "Generate an App Token"
         id: generate_token
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@f8d387b68d61c58ab83c6c016672934102569859 # v3
         with:
           app-id: ${{ secrets.BFD_RELEASE_APP_ID }}
           private-key: ${{ secrets.BFD_RELEASE_APP_KEY }}
@@ -455,10 +455,13 @@ jobs:
         bfd-platform-server-regression,
         bfd-platform-mount-certstores,
         bfd-platform-server-fluent-bit,
+        bfd-platform-idr-pipeline,
         bfd-platform-run-locust,
         bfd-platform-eft-sftp-outbound-transfer-lambda,
         bfd-platform-pipeline-ccw-manifests-verifier-lambda,
         bfd-platform-pipeline-ccw-runner,
+        bfd-platform-consume-idr-events,
+        bfd-platform-run-idr-pipeline,
         bfd-platform-codebuild-runner
       baseImagesVersion: ${{ needs.compute-version-strings.outputs.bfd_release }}
       cleanupImageArtifacts: false # We'll cleanup at the end of build-release, so don't do anything
@@ -500,7 +503,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Delete all artifacts
-        uses: GeekyEggo/delete-artifact@v5.1.0
+        uses: GeekyEggo/delete-artifact@176a747ab7e287e3ff4787bf8a148716375ca118 # v6
         with:
           name: '*'
           failOnError: false

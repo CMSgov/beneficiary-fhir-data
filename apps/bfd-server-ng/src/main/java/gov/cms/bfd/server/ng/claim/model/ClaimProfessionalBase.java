@@ -110,11 +110,14 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
               claimLine.ifPresent(cl -> cl.addInformationSequence(si.getSequence()));
             });
 
+    var claimContext = getClaimTypeCode().toContext();
     item.getClaimLine()
         .getClaimLineRenderingProvider()
         .flatMap(
             provider ->
-                item.getClaimLine().getClaimLineNumber().flatMap(provider::toFhirCareTeamComponent))
+                item.getClaimLine()
+                    .getClaimLineNumber()
+                    .flatMap(sequence -> provider.toFhirCareTeamComponent(sequence, claimContext)))
         .ifPresent(eob::addCareTeam);
 
     // Procedure is present on SS items but not on NCH items; the item exposes it as Optional.
@@ -155,7 +158,7 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
   private void addCareTeam(ExplanationOfBenefit eob) {
     var sequenceGenerator = new SequenceGenerator(eob.getCareTeam().size() + 1);
     getReferringProviderHistory()
-        .toFhirCareTeamComponent(sequenceGenerator.next())
+        .toFhirCareTeamComponent(sequenceGenerator.next(), getClaimTypeCode().toContext())
         .ifPresent(eob::addCareTeam);
     addSubclassCareTeam(eob, sequenceGenerator);
   }

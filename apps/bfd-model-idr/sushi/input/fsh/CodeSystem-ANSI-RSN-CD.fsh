@@ -2,7 +2,7 @@ CodeSystem: ANSI_RSN_CD
 Title: "ANSI Reason Code - Claim Adjustment Reason Code"
 Id: ANSI-RSN-CD
 Description: "A code used to identify the detailed reason an adjustment was made (e.g. reason for denial or reducing payment)."
-* ^url = "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CODE"
+* ^url = "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CD"
 * ^status = #active
 * ^content = #complete
 

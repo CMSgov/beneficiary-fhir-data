@@ -1,13 +1,18 @@
+import logging
+import re
+import string
 from datetime import date, datetime
 from typing import Annotated, override
 
-from pydantic import BeforeValidator
+from pydantic import BeforeValidator, computed_field
+from unidecode import unidecode
 
 from constants import (
     BENEFICIARY_TABLE,
 )
 from load_partition import LoadPartition
 from loader import LoadMode
+from matching import normalize_address
 from model.base_model import (
     ALIAS,
     ALIAS_HSTRY,
@@ -26,6 +31,16 @@ from model.base_model import (
     transform_null_date_to_max,
     transform_null_date_to_min,
 )
+
+logger = logging.getLogger(__name__)
+
+
+def _normalize_str(s: str) -> str:
+    cleaned_str = unidecode(s).translate(translator)
+    return re.sub(r"\s+", "", cleaned_str).upper()
+
+
+translator = str.maketrans("", "", string.punctuation)
 
 
 class IdrBeneficiary(IdrBaseModel):
@@ -55,6 +70,7 @@ class IdrBeneficiary(IdrBaseModel):
         },
     ]
     bene_mbi_id: str
+    bene_ssn_num: Annotated[str, BeforeValidator(transform_default_string)]
     bene_1st_name: str
     bene_midl_name: Annotated[str, BeforeValidator(transform_default_string)]
     bene_last_name: str
@@ -97,6 +113,44 @@ class IdrBeneficiary(IdrBaseModel):
         {UPDATE_TIMESTAMP: True, ALIAS: ALIAS_XREF, COLUMN_MAP: "idr_updt_ts"},
         BeforeValidator(transform_null_date_to_min),
     ]
+
+    @computed_field
+    @property
+    def bfd_normalized_1st_name(self) -> str:
+        return _normalize_str(self.bene_1st_name)
+
+    @computed_field
+    @property
+    def bfd_normalized_last_name(self) -> str:
+        return _normalize_str(self.bene_last_name)
+
+    @computed_field
+    @property
+    def bfd_normalized_address(self) -> str:
+        # Ignore empty or unknown addresses
+        if (
+            not _normalize_str(self.bene_line_1_adr)
+            or self.bene_line_1_adr.startswith("UNKNOWN")
+            or self.bene_line_1_adr in ("UNK ADDRESS", "UNK", "UNKNOW")
+        ):
+            return ""
+
+        try:
+            return normalize_address(
+                f"{self.bene_line_1_adr} "
+                f"{self.bene_line_2_adr} "
+                f"{self.bene_line_3_adr} "
+                f"{self.bene_line_4_adr} "
+                f"{self.bene_line_5_adr} "
+                f"{self.bene_line_6_adr}, "
+                f"{self.geo_zip_plc_name}, "
+                f"{self.geo_usps_state_cd}, "
+                f"{self.geo_zip5_cd}"
+            ).replace("\n", " ")
+        except Exception:
+            # Not logging exception since it could contain address
+            logger.warning("error normalizing address. bene_sk: %d", self.bene_sk)
+            return ""
 
     @override
     @staticmethod

@@ -9,9 +9,11 @@ import au.com.origin.snapshots.junit5.SnapshotExtension;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ch.qos.logback.classic.spi.ILoggingEvent;
+import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.EntityManager;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -22,6 +24,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
+import software.amazon.awssdk.services.dynamodb.model.QueryRequest;
 
 @Import(IntegrationTestConfiguration.class)
 @ExtendWith({SnapshotExtension.class})
@@ -31,6 +36,8 @@ public class IntegrationTestBase {
   @LocalServerPort protected int port;
   protected Expect expect;
   @Autowired protected EntityManager entityManager;
+  @Autowired protected Configuration configuration;
+  @Autowired protected DynamoDbClient dynamoDbClient;
 
   protected static final String HISTORICAL_MERGED_BENE_SK = "848484848";
   protected static final String HISTORICAL_MERGED_BENE_SK2 = "121212121";
@@ -70,7 +77,8 @@ public class IntegrationTestBase {
   protected static final String CLAIM_ID_PROFESSIONAL_ORG = "3351266481402";
   protected static final String CLAIM_ID_PROFESSIONAL_MCS = "3351266481403";
   protected static final String CLAIM_ID_RX_ORGANIZATION = "1409088853940";
-  protected static final String CLM_CNTL_NUM_DUPE = "31646182683546TDF";
+  protected static final String CLAIM_ID_RX_NON_LATEST = "1409088853949";
+  protected static final String CLAIM_ID_PROFESSIONAL_NON_LATEST = "3351266481404";
 
   protected static final String DUAL_ONLY_BENE_COVERAGE_STATUS_CODE = "XX";
 
@@ -85,7 +93,10 @@ public class IntegrationTestBase {
   }
 
   protected IGenericClient getFhirClient() {
-    FhirContext ctx = FhirContext.forR4Cached();
+    return getFhirClient(FhirContext.forR4Cached());
+  }
+
+  protected IGenericClient getFhirClient(FhirContext ctx) {
     return ctx.newRestfulGenericClient(getServerUrl());
   }
 
@@ -113,6 +124,34 @@ public class IntegrationTestBase {
         .map(Bundle.BundleEntryComponent::getResource)
         .map(ExplanationOfBenefit.class::cast)
         .toList();
+  }
+
+  protected Beneficiary getBeneficiaryFromBeneSk(String beneSk) {
+    return entityManager
+        .createQuery("SELECT b FROM Beneficiary b WHERE b.beneSk = :beneSk", Beneficiary.class)
+        .setParameter("beneSk", beneSk)
+        .getResultList()
+        .getFirst();
+  }
+
+  // IMPORTANT: since we must treat bene_sk as the primary key of the entity due to other JPA
+  // limitations,
+  // we can't load multiple beneficiaries with the same bene_sk in the same query.
+  // Therefore, we should not provide a way to return multiple benes here.
+  protected Beneficiary getBeneficiaryFromBeneSk(String beneSk, int offset) {
+    return entityManager
+        .createQuery(
+            """
+        SELECT b FROM Beneficiary b
+        WHERE b.beneSk = :beneSk
+        ORDER BY b.effectiveTimestamp DESC
+         OFFSET :offset ROWS
+        """,
+            Beneficiary.class)
+        .setParameter("beneSk", beneSk)
+        .setParameter("offset", offset)
+        .getResultList()
+        .getFirst();
   }
 
   protected List<Extension> getExtensionByUrl(DomainResource resource, String url) {
@@ -198,6 +237,62 @@ public class IntegrationTestBase {
       var value = money.getValue();
       var scale = value.scale();
       assertTrue(scale <= 2);
+    }
+  }
+
+  public record PatientMatchTestAuditRecord(
+      Long matchedBeneSk,
+      Integer scenarioIndex,
+      String clientId,
+      String clientName,
+      String clientIp) {}
+
+  protected List<PatientMatchTestAuditRecord> getAuditRecordFromDynamo(
+      Long beneSk, String testClientId) {
+    var tableName = configuration.getPatientMatchAuditTableName();
+    var request =
+        QueryRequest.builder()
+            .tableName(tableName)
+            .keyConditionExpression("matchedBeneSk = :beneSk")
+            .expressionAttributeValues(
+                Map.of(":beneSk", AttributeValue.builder().n(beneSk.toString()).build()))
+            .build();
+
+    var response = dynamoDbClient.query(request);
+    return response.items().stream()
+        .filter(item -> testClientId.equals(item.get("clientId").s()))
+        .map(
+            item -> {
+              var matchedBeneSk = Long.parseLong(item.get("matchedBeneSk").n());
+              var successfulCombination = Integer.parseInt(item.get("finalDetermination").s());
+              var clientId = item.get("clientId").s();
+              var clientName = item.get("clientName").s();
+              var clientIP = item.get("clientIp").s();
+              return new PatientMatchTestAuditRecord(
+                  matchedBeneSk, successfulCombination, clientId, clientName, clientIP);
+            })
+        .toList();
+  }
+
+  protected void validateCareTeamProviderTypes(ExplanationOfBenefit eob) {
+    if (eob.hasCareTeam()) {
+      var isProfessional =
+          eob.getType().getCoding().stream()
+              .anyMatch(
+                  c ->
+                      "http://terminology.hl7.org/CodeSystem/claim-type".equals(c.getSystem())
+                          && "professional".equals(c.getCode()));
+      var expectedReferenceTypes = Set.of("Practitioner", "Organization");
+
+      eob.getCareTeam().stream()
+          .filter(ctc -> ctc.hasProvider() && (!isProfessional || ctc.hasQualification()))
+          .forEach(
+              ctc -> {
+                var providerReference = ctc.getProvider();
+                assertTrue(
+                    providerReference.hasType(), "Careteam provider reference must have type set");
+                assertTrue(expectedReferenceTypes.contains(providerReference.getType()));
+              });
     }
   }
 }
