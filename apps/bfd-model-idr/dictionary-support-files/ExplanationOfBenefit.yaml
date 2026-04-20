@@ -3692,7 +3692,7 @@
   sourceColumn: CLM_LINE_BNFT_ENHNCMT_5_CD
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_BNFT_ENHNCMT_CD').exists()).value
   notes: There may be multiple. These are unordered, but there are a maximum of 5 per institutional claim header, and 5 per professional claim line. The infoSequence element on the ExplanationOfBenefit.item can be used to determine which are relevant to a given claim line.
-- inputPath: SupportingInfoComponent.GEO_BLG_SSA_STATE_CD                       
+- inputPath: ExplanationOfBenefitBase.GEO_BLG_SSA_STATE_CD                       
   appliesTo:                                                                    
     - Inpatient                                                                 
     - Outpatient                                                                
@@ -3703,10 +3703,10 @@
     - NCH                                                                       
   cclfMapping:  
     - CCLF1.PRVDR_FAC_FIPS_ST_CD
-  sourceView: V2_MDCR_CLM_INSTNL
+  sourceView: V2_MDCR_CLM
   sourceColumn: GEO_BLG_SSA_STATE_CD                                            
   notes: The source column contains an SSA state code, which is converted to a FIPS state code in the output.  
-  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='PRVDR_FAC_FIPS_ST_CD').exists()).value
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='PRVDR_FAC_FIPS_ST_CD').exists()).code
 - inputPath: LineItemComponent.GEO_RNDRG_SSA_STATE_CD                           
   appliesTo:                                                                    
     - Carrier
@@ -3715,7 +3715,7 @@
     - NCH
   cclfMapping:
     - CCLF5.RNDRG_PRVDR_FIPS_ST_CD                                              
-  sourceView: V2_MDCR_CLM_LINE_PRFNL
+  sourceView: V2_MDCR_CLM_LINE
   sourceColumn: GEO_RNDRG_SSA_STATE_CD                                          
   notes: The source column contains an SSA state code, which is converted to a FIPS state code in the output.  
-  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='RNDRG_PRVDR_FIPS_ST_CD').exists()).value   
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='RNDRG_PRVDR_FIPS_ST_CD').exists()).code   
