@@ -487,5 +487,6 @@ class IdrClaimItemInstitutionalSs(IdrBaseModel):
                     AND {line_fiss_bnft_flattened}.clm_num_sk = {line}.clm_num_sk
                     AND {line_fiss_bnft_flattened}.clm_dt_sgntr_sk = {line}.clm_dt_sgntr_sk
                     AND {line_fiss_bnft_flattened}.clm_line_num = {line}.clm_line_num
+                {{WHERE_CLAUSE}}
                 {{ORDER_BY}}
         """

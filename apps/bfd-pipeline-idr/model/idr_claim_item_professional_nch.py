@@ -381,5 +381,6 @@ class IdrClaimItemProfessionalNch(IdrBaseModel):
                 LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_prvdr_hstry {prvdr_rndrng}
                     ON {prvdr_rndrng}.prvdr_npi_num = {line}.prvdr_rndrng_prvdr_npi_num
                     AND {prvdr_rndrng}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
+                {{WHERE_CLAUSE}}
                 {{ORDER_BY}}
         """
