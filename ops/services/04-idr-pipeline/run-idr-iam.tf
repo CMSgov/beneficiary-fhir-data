@@ -104,7 +104,7 @@ data "aws_iam_policy_document" "run_idr_ecs" {
   statement {
     sid       = "AllowRunPipelineIDREcsTaskIn${title(replace(local.env, "-", ""))}Cluster"
     actions   = ["ecs:RunTask"]
-    resources = [aws_ecs_task_definition.idr_new.arn]
+    resources = [aws_ecs_task_definition.idr.arn]
 
     condition {
       test     = "ArnEquals"

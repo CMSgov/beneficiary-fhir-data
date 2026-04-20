@@ -12,6 +12,8 @@ copy:
   - /bfd/${env}/database/nonsensitive/rds_instance_class
   - /bfd/${env}/migrator/sensitive/db/password
   - /bfd/${env}/migrator/sensitive/db/username
+  - /bfd/${env}/migrator-ng/sensitive/db/password
+  - /bfd/${env}/migrator-ng/sensitive/db/username
   - /bfd/${env}/idr-pipeline/sensitive/db/username
   - /bfd/${env}/idr-pipeline/sensitive/db/password
   - /bfd/${env}/idr-pipeline/sensitive/idr_username
@@ -81,6 +83,8 @@ values:
   /bfd/${env}/migrator/nonsensitive/ecs/resources/memory: 4096
   /bfd/${env}/migrator/nonsensitive/new_relic_metric_host: https://gov-metric-api.newrelic.com
   /bfd/${env}/migrator/nonsensitive/new_relic_metric_path: /metric/v1
+  /bfd/${env}/migrator-ng/nonsensitive/ecs/resources/cpu: 2048
+  /bfd/${env}/migrator-ng/nonsensitive/ecs/resources/memory: 4096
   /bfd/${env}/idr-pipeline/nonsensitive/ecs/resources/cpu: 4096
   /bfd/${env}/idr-pipeline/nonsensitive/ecs/resources/memory: 8192
   /bfd/${env}/idr-pipeline/nonsensitive/ecs/resources/disk_size: 21

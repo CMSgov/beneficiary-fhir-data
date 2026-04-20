@@ -129,7 +129,7 @@ jobs:
       - name: Validate Inputs
         run: |
           echo "Validating inputs to ensure they conform to expected formats..."
-          echo "${{ inputs.versionTag }}" | grep -P '^\d+\.\d+\.\d+$|^\d+\.\d+\.\d+-[a-zA-Z0-9-]+$'
+          echo "${{ inputs.versionTag }}" | grep -P '^\d+\.\d+\.\d+$|^\d+\.\d+\.\d+-[a-zA-Z0-9-]+|v3\.\d{4}.\d{2}.\d{2}.\d+.*$'
 
       - uses: actions/checkout@v6
         with:
@@ -396,4 +396,3 @@ jobs:
         with:
           name: '*'
           failOnError: false
-

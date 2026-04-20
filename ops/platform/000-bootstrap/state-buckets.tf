@@ -32,6 +32,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "this" {
   rule {
     id     = "${each.value.bucket.id}-versions-retained"
     status = "Enabled"
+    filter {} # Apply to all objects in the Bucket
 
     noncurrent_version_expiration {
       noncurrent_days           = 30
