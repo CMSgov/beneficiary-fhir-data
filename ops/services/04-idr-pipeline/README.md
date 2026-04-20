@@ -12,6 +12,7 @@ This Terraservice defines several important IDR Pipeline related resources:
 >
 > - `IDR_MIN_CLAIM_NCH_TRANSACTION_DATE`: `2014-06-30`
 > - `IDR_MIN_CLAIM_SS_TRANSACTION_DATE`: `2021-03-01`
+> Additional context for these dates is available within Confluence under the `v3 Decision Log`
 
 ## `run-idr-pipeline` Lambda
 
