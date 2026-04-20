@@ -7,6 +7,12 @@ This Terraservice defines several important IDR Pipeline related resources:
 - the IDR Load Events SQS Queue
 - the `consume-idr-events` Lambda that consumes events from the aforementioned Queue, loading events into the `idr.source_load_events` and starting the `run-idr-pipeline` Lambda
 
+> [!IMPORTANT]
+> The following variables are statically defined within the `idr-pipeline`'s Task Definition so as to ensure that IDR data is only loaded as far back as necessary:
+>
+> - `IDR_MIN_CLAIM_NCH_TRANSACTION_DATE`: `2014-06-30`
+> - `IDR_MIN_CLAIM_SS_TRANSACTION_DATE`: `2021-03-01`
+
 ## `run-idr-pipeline` Lambda
 
 ### Invocation
@@ -58,7 +64,7 @@ The following JSON structure represents an example payload for invoking the `run
 
 Upon a successful invocation of `run-idr-pipeline`, it will return a JSON object with details about the result of running the Lambda. The `result_type` property indicates the overall result with the `details` property containing further context.
 
-Errors will return the error message and exception context.PipelineStartedResult
+Errors will return the error message and exception context.
 
 #### `result_type`s
 
