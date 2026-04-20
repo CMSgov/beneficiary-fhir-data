@@ -1034,5 +1034,4 @@ public class SystemUrls {
 
   public static final String US_FIPS_STATE_CODES =
       "https://bluebutton.cms.gov/fhir/CodeSystem/US-FIPS-STATE-CODES";
-      
 }
