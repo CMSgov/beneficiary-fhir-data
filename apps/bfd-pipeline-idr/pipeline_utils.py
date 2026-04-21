@@ -104,7 +104,7 @@ def extract_and_load(
             raise ex
 
 
-def prune_cap(loader: PostgresLoader, start_time: datetime) -> bool:
+def prune_cap(loader: PostgresLoader, start_time: datetime) -> None:
     pac_cutoff_date = start_time - timedelta(days=60)
     start_time_sql = pac_cutoff_date.strftime("'%Y-%m-%d %H:%M:%S'")
     pac_phase_1_min = 1000
