@@ -29,7 +29,7 @@ class FhirInputConverterTest {
     var emptyId = new IdType();
     var blankId = new IdType("");
 
-    assertThrows(InvalidRequestException.class, () -> FhirInputConverter.toLong((IdType) null));
+    assertThrows(InvalidRequestException.class, () -> FhirInputConverter.toLong(null));
     assertThrows(InvalidRequestException.class, () -> FhirInputConverter.toLong(emptyId));
     assertThrows(InvalidRequestException.class, () -> FhirInputConverter.toLong(blankId));
 

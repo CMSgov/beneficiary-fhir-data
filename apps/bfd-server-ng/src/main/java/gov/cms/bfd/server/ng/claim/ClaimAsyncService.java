@@ -10,14 +10,16 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import lombok.AllArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Repository;
 
 /** Repository methods for claims. */
 @Repository
+@AllArgsConstructor
 public class ClaimAsyncService {
 
-  @PersistenceContext private EntityManager entityManager;
+  @PersistenceContext private final EntityManager entityManager;
 
   @Async
   protected <C extends ClaimBase, B extends DbFilterBuilder>
