@@ -131,6 +131,23 @@ reportUnknownParameterType = false
 reportMissingTypeArgument = false
 reportMissingParameterType = false
 reportConstantRedefinition = false
+include = [
+    "apps/bfd-model-idr", 
+    "apps/bfd-server-ng/codegen",
+    "apps/utils/locust_tests",
+    "apps/utils/synthetic-load-converter",
+    "ops/images/bfd-platform-mount-certstores",
+    "ops/platform/02-alerting/lambda_src/slack-alerter",
+    "ops/services/02-bene-prefs/lambda_src/bene_prefs",
+    "ops/services/02-eft/lambda_src/sftp_outbound_transfer",
+    "ops/services/03-eft-o11y/lambda_src/outbound_slack_notifier",
+    "ops/services/04-ccw-pipeline/lambda-src/ccw-runner",
+    "ops/services/04-server/lambda_src/regression-wrapper",
+    "ops/services/05-server-insights/lambda_src/cw-to-flattened-json",
+    "ops/services/06-ccw-pipeline-alarms/lambda_src/manifests-verifier",
+    "ops/services/06-server-alarms/lambda_src/error_alerter",
+    "ops/terraform-modules/general/trigger-glue-crawler/lambda_src",
+]
 
 [tool.pytest.ini_options]
 timeout = 600
