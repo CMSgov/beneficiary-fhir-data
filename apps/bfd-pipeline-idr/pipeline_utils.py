@@ -42,7 +42,7 @@ def extract_and_load(
     job_start: datetime,
     load_type: LoadType,
     start_time: datetime,
-    partition: LoadPartition | None = None
+    partition: LoadPartition | None = None,
 ) -> bool:
     partition = partition or DEFAULT_PARTITION
     if load_mode == LoadMode.LOCAL or load_mode == LoadMode.SYNTHETIC:
@@ -102,6 +102,7 @@ def extract_and_load(
         except Exception as ex:
             logger.error("error loading %s", cls.table(), exc_info=ex)
             raise ex
+
 
 def prune_cap(loader: PostgresLoader, start_time: datetime) -> bool:
     pac_cutoff_date = start_time - timedelta(days=60)
