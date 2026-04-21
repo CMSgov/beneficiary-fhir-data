@@ -22,6 +22,7 @@ public class ClaimAsyncService {
   @PersistenceContext private final EntityManager entityManager;
 
   @Async
+  @SuppressWarnings("java:S2077")
   protected <C extends ClaimBase, B extends DbFilterBuilder>
       CompletableFuture<List<C>> findByIdsInClaimType(
           String baseQuery,

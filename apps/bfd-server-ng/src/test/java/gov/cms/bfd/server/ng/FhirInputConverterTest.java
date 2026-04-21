@@ -59,10 +59,7 @@ class FhirInputConverterTest {
 
     var paramOr =
         new TokenAndListParam()
-            .addAnd(
-                new TokenOrListParam()
-                    .addOr(new TokenParam("3"))
-                    .addOr(new TokenParam("4")));
+            .addAnd(new TokenOrListParam().addOr(new TokenParam("3")).addOr(new TokenParam("4")));
     assertEquals(List.of(3L, 4L), FhirInputConverter.toLongList(paramOr));
   }
 
