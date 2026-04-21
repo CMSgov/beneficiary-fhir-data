@@ -584,6 +584,7 @@ class IdrBaseModel(BaseModel, ABC):
 
 T = TypeVar("T", bound=IdrBaseModel)
 
+
 def deceased_bene_filter(alias: str) -> str:
     return f"""
             SELECT bene_sk
