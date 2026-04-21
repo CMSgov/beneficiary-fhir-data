@@ -3,6 +3,7 @@ from typing import Annotated, override
 
 from pydantic import BeforeValidator
 
+from constants import IDR_BENE_MBI_TABLE
 from load_partition import LoadPartition
 from loader import LoadMode
 from model.base_model import (
@@ -50,9 +51,9 @@ class IdrBeneficiaryMbiId(IdrBaseModel):
     def fetch_query(
         cls, partition: LoadPartition, start_time: datetime, load_mode: LoadMode
     ) -> str:
-        return """
-               SELECT {COLUMNS}
-               FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_mbi_id
-                   {WHERE_CLAUSE}
-                   {ORDER_BY}
+        return f"""
+               SELECT {{COLUMNS}}
+               FROM {IDR_BENE_MBI_TABLE}
+                   {{WHERE_CLAUSE}}
+                   {{ORDER_BY}}
                """
