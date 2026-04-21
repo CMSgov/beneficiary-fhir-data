@@ -3698,7 +3698,8 @@
     - Outpatient                                                                
     - HHA
     - Hospice
-    - SNF                                                                       
+    - SNF
+    - DME
   sources:
     - NCH                                                                       
   cclfMapping:  

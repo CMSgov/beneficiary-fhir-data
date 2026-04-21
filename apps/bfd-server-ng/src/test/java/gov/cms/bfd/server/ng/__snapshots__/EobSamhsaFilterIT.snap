@@ -6283,7 +6283,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "category" : {
           "coding" : [ {
             "code" : "PRVDR_FAC_FIPS_ST_CD",
-            "display" : "Facility FIPS State Code",
+            "display" : "Federal Information Processing Standards (FIPS) State Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
           }, {
             "code" : "info",
@@ -6291,8 +6291,13 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 23,
-        "valueString" : "04"
+        "code" : {
+          "coding" : [ {
+            "code" : "04",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/US-FIPS-STATE-CODES"
+          } ]
+        },
+        "sequence" : 23
       }, {
         "category" : {
           "coding" : [ {
@@ -10053,7 +10058,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "category" : {
           "coding" : [ {
             "code" : "PRVDR_FAC_FIPS_ST_CD",
-            "display" : "Facility FIPS State Code",
+            "display" : "Federal Information Processing Standards (FIPS) State Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
           }, {
             "code" : "info",
@@ -10061,8 +10066,13 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 20,
-        "valueString" : "04"
+        "code" : {
+          "coding" : [ {
+            "code" : "04",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/US-FIPS-STATE-CODES"
+          } ]
+        },
+        "sequence" : 20
       }, {
         "category" : {
           "coding" : [ {
@@ -11905,7 +11915,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "category" : {
           "coding" : [ {
             "code" : "PRVDR_FAC_FIPS_ST_CD",
-            "display" : "Facility FIPS State Code",
+            "display" : "Federal Information Processing Standards (FIPS) State Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
           }, {
             "code" : "info",
@@ -11913,8 +11923,13 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 17,
-        "valueString" : "04"
+        "code" : {
+          "coding" : [ {
+            "code" : "04",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/US-FIPS-STATE-CODES"
+          } ]
+        },
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {
@@ -14118,7 +14133,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "category" : {
           "coding" : [ {
             "code" : "PRVDR_FAC_FIPS_ST_CD",
-            "display" : "Facility FIPS State Code",
+            "display" : "Federal Information Processing Standards (FIPS) State Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
           }, {
             "code" : "info",
@@ -14126,8 +14141,13 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 23,
-        "valueString" : "04"
+        "code" : {
+          "coding" : [ {
+            "code" : "04",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/US-FIPS-STATE-CODES"
+          } ]
+        },
+        "sequence" : 23
       }, {
         "category" : {
           "coding" : [ {
@@ -17888,7 +17908,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "category" : {
           "coding" : [ {
             "code" : "PRVDR_FAC_FIPS_ST_CD",
-            "display" : "Facility FIPS State Code",
+            "display" : "Federal Information Processing Standards (FIPS) State Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
           }, {
             "code" : "info",
@@ -17896,8 +17916,13 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 20,
-        "valueString" : "04"
+        "code" : {
+          "coding" : [ {
+            "code" : "04",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/US-FIPS-STATE-CODES"
+          } ]
+        },
+        "sequence" : 20
       }, {
         "category" : {
           "coding" : [ {
@@ -19740,7 +19765,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "category" : {
           "coding" : [ {
             "code" : "PRVDR_FAC_FIPS_ST_CD",
-            "display" : "Facility FIPS State Code",
+            "display" : "Federal Information Processing Standards (FIPS) State Code",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
           }, {
             "code" : "info",
@@ -19748,8 +19773,13 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
           } ]
         },
-        "sequence" : 17,
-        "valueString" : "04"
+        "code" : {
+          "coding" : [ {
+            "code" : "04",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/US-FIPS-STATE-CODES"
+          } ]
+        },
+        "sequence" : 17
       }, {
         "category" : {
           "coding" : [ {

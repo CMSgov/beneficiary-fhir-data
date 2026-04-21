@@ -1032,6 +1032,7 @@ public class SystemUrls {
   public static final String CMS_GENERIC_ID_NUM =
       "http://bluebutton.cms.gov/fhir/identifiers/GenericIdNum";
 
+  /** US FIPS state codes system URL. */
   public static final String US_FIPS_STATE_CODES =
       "https://bluebutton.cms.gov/fhir/CodeSystem/US-FIPS-STATE-CODES";
 }
