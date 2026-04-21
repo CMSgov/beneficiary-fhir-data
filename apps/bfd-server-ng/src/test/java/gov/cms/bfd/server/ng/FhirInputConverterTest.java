@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import gov.cms.bfd.server.ng.input.FhirInputConverter;
@@ -59,7 +60,7 @@ class FhirInputConverterTest {
     var paramOr =
         new TokenAndListParam()
             .addAnd(
-                new ca.uhn.fhir.rest.param.TokenOrListParam()
+                new TokenOrListParam()
                     .addOr(new TokenParam("3"))
                     .addOr(new TokenParam("4")));
     assertEquals(List.of(3L, 4L), FhirInputConverter.toLongList(paramOr));
