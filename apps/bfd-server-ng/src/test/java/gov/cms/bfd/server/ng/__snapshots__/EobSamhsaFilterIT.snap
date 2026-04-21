@@ -518,7 +518,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
               } ]
             },
             "value" : "1023051596"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -545,7 +546,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
               } ]
             },
             "value" : "1003488552"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -4269,7 +4271,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
 
 gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[167719446]=[
 {
-  "id" : "{uuid}",
+  "id" : "00000000-0000-0000-0000-000000000000",
   "link" : [ {
     "relation" : "self",
     "url" : "http://localhost/v3/fhir/ExplanationOfBenefit?patient=167719446"
@@ -4285,7 +4287,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[167719446]=[
 
 gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[27590072]=[
 {
-  "id" : "{uuid}",
+  "id" : "00000000-0000-0000-0000-000000000000",
   "link" : [ {
     "relation" : "self",
     "url" : "http://localhost/v3/fhir/ExplanationOfBenefit?patient=27590072"
@@ -4759,7 +4761,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
               } ]
             },
             "value" : "1720749690"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -4786,7 +4789,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
               } ]
             },
             "value" : "1023051596"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -4813,7 +4817,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
               } ]
             },
             "value" : "1558719914"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -6877,7 +6882,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
               } ]
             },
             "value" : "1023051596"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -6904,7 +6910,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
               } ]
             },
             "value" : "1003488552"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -10633,7 +10640,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
               } ]
             },
             "value" : "1730548868"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -12014,7 +12022,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
       "use" : "claim"
     }
   } ],
-  "id" : "{uuid}",
+  "id" : "00000000-0000-0000-0000-000000000000",
   "link" : [ {
     "relation" : "self",
     "url" : "http://localhost/v3/fhir/ExplanationOfBenefit?patient=412457726"
@@ -12030,7 +12038,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
 
 gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[455108118]=[
 {
-  "id" : "{uuid}",
+  "id" : "00000000-0000-0000-0000-000000000000",
   "link" : [ {
     "relation" : "self",
     "url" : "http://localhost/v3/fhir/ExplanationOfBenefit?patient=455108118"
@@ -12046,7 +12054,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[455108118]=[
 
 gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[794471559]=[
 {
-  "id" : "{uuid}",
+  "id" : "00000000-0000-0000-0000-000000000000",
   "link" : [ {
     "relation" : "self",
     "url" : "http://localhost/v3/fhir/ExplanationOfBenefit?patient=794471559"
@@ -12062,7 +12070,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[794471559]=[
 
 gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[167719446]=[
 {
-  "id" : "{uuid}",
+  "id" : "00000000-0000-0000-0000-000000000000",
   "link" : [ {
     "relation" : "self",
     "url" : "http://localhost/v3/fhir/ExplanationOfBenefit?patient=167719446"
@@ -12078,7 +12086,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
 
 gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[27590072]=[
 {
-  "id" : "{uuid}",
+  "id" : "00000000-0000-0000-0000-000000000000",
   "link" : [ {
     "relation" : "self",
     "url" : "http://localhost/v3/fhir/ExplanationOfBenefit?patient=27590072"
@@ -12552,7 +12560,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
               } ]
             },
             "value" : "1720749690"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -12579,7 +12588,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
               } ]
             },
             "value" : "1023051596"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -12606,7 +12616,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
               } ]
             },
             "value" : "1558719914"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -14670,7 +14681,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
               } ]
             },
             "value" : "1023051596"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -14697,7 +14709,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
               } ]
             },
             "value" : "1003488552"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -18426,7 +18439,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
               } ]
             },
             "value" : "1730548868"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -19807,7 +19821,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
       "use" : "claim"
     }
   } ],
-  "id" : "{uuid}",
+  "id" : "00000000-0000-0000-0000-000000000000",
   "link" : [ {
     "relation" : "self",
     "url" : "http://localhost/v3/fhir/ExplanationOfBenefit?patient=412457726"
@@ -19823,7 +19837,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
 
 gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[455108118]=[
 {
-  "id" : "{uuid}",
+  "id" : "00000000-0000-0000-0000-000000000000",
   "link" : [ {
     "relation" : "self",
     "url" : "http://localhost/v3/fhir/ExplanationOfBenefit?patient=455108118"
@@ -19839,7 +19853,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
 
 gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[794471559]=[
 {
-  "id" : "{uuid}",
+  "id" : "00000000-0000-0000-0000-000000000000",
   "link" : [ {
     "relation" : "self",
     "url" : "http://localhost/v3/fhir/ExplanationOfBenefit?patient=794471559"

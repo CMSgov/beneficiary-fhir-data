@@ -17,13 +17,13 @@ public record ClaimTypeCodeFilterParam(List<ClaimTypeCode> claimTypeCodes)
     implements DbFilterBuilder {
   @NotNull
   @Override
-  public DbFilter getFilters(@NotNull String claimTableAlias, @NotNull SystemType systemType) {
+  public DbFilter getFilters(@NotNull String tableAlias, @NotNull SystemType systemType) {
     if (claimTypeCodes.isEmpty()) {
       return DbFilter.empty();
     }
 
     return new DbFilter(
-        String.format(" AND %s.claimTypeCode IN :claimTypeCodes", claimTableAlias),
+        String.format(" AND %s.claimTypeCode IN :claimTypeCodes", tableAlias),
         List.of(new DbFilterParam("claimTypeCodes", claimTypeCodes)));
   }
 

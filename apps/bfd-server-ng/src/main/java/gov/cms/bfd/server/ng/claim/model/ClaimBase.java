@@ -2,8 +2,10 @@ package gov.cms.bfd.server.ng.claim.model;
 
 import gov.cms.bfd.server.ng.ClaimSecurityStatus;
 import gov.cms.bfd.server.ng.beneficiary.model.BeneficiarySimple;
+import gov.cms.bfd.server.ng.converter.DefaultFalseBooleanConverter;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
@@ -41,8 +43,9 @@ public abstract class ClaimBase {
   @Column(name = "clm_finl_actn_ind")
   private ClaimFinalAction finalAction;
 
+  @Convert(converter = DefaultFalseBooleanConverter.class)
   @Column(name = "clm_ltst_clm_ind")
-  private ClaimLatestClaim latestClaim;
+  private Boolean latestClaimIndicator;
 
   @Column(name = "clm_adjstmt_type_cd")
   private Optional<ClaimAdjustmentTypeCode> claimAdjustmentTypeCode;

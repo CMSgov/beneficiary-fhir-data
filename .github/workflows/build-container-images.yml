@@ -129,7 +129,7 @@ jobs:
       - name: Validate Inputs
         run: |
           echo "Validating inputs to ensure they conform to expected formats..."
-          echo "${{ inputs.versionTag }}" | grep -P '^\d+\.\d+\.\d+$|^\d+\.\d+\.\d+-[a-zA-Z0-9-]+$'
+          echo "${{ inputs.versionTag }}" | grep -P '^\d+\.\d+\.\d+$|^\d+\.\d+\.\d+-[a-zA-Z0-9-]+|v3\.\d{4}.\d{2}.\d{2}.\d+.*$'
 
       - uses: actions/checkout@v6
         with:
@@ -250,7 +250,7 @@ jobs:
           ref: ${{ inputs.branch || github.ref_name }}
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v4
         with:
           driver-opts: network=host
 
@@ -293,7 +293,7 @@ jobs:
 
       # TODO: This becomes just "build" and push is within codebuild. "build" emits a .tar.gz artifact
       - name: Build image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f # v7.1.0
         with:
           file: ${{ matrix.image.dockerfile }}
           context: ${{ matrix.image.contextDir }}
@@ -392,8 +392,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Delete all image artifacts
-        uses: GeekyEggo/delete-artifact@v5.1.0
+        uses: GeekyEggo/delete-artifact@176a747ab7e287e3ff4787bf8a148716375ca118 # v6
         with:
           name: '*'
           failOnError: false
-

@@ -5,7 +5,6 @@ import gov.cms.bfd.server.ng.claim.filter.*;
 import gov.cms.bfd.server.ng.claim.model.*;
 import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
-import gov.cms.bfd.server.ng.util.LogUtil;
 import io.micrometer.core.annotation.Timed;
 import io.micrometer.core.aop.MeterTag;
 import java.util.*;
@@ -23,42 +22,42 @@ public class ClaimRepository {
 
   private static final String CLAIM_PROFESSIONAL_SHARED_SYSTEMS =
       """
-              SELECT c
-              FROM ClaimProfessionalSharedSystems c
-              JOIN FETCH c.beneficiary b
-              LEFT JOIN FETCH c.claimItems AS cl
-            """;
+        SELECT c
+        FROM ClaimProfessionalSharedSystems c
+        JOIN FETCH c.beneficiary b
+        LEFT JOIN FETCH c.claimItems cl
+      """;
 
   private static final String CLAIM_PROFESSIONAL_NCH =
       """
-              SELECT c
-              FROM ClaimProfessionalNch c
-              JOIN FETCH c.beneficiary b
-              JOIN FETCH c.claimItems AS cl
-            """;
+        SELECT c
+        FROM ClaimProfessionalNch c
+        JOIN FETCH c.beneficiary b
+        JOIN FETCH c.claimItems cl
+      """;
 
   private static final String CLAIM_INSTITUTIONAL_SHARED_SYSTEMS =
       """
-              SELECT c
-              FROM ClaimInstitutionalSharedSystems c
-              JOIN FETCH c.beneficiary b
-              LEFT JOIN FETCH c.claimItems AS cl
-            """;
+        SELECT c
+        FROM ClaimInstitutionalSharedSystems c
+        JOIN FETCH c.beneficiary b
+        LEFT JOIN FETCH c.claimItems cl
+      """;
 
   private static final String CLAIM_INSTITUTIONAL_NCH =
       """
-              SELECT c
-              FROM ClaimInstitutionalNch c
-              JOIN FETCH c.beneficiary b
-              JOIN FETCH c.claimItems AS cl
-            """;
+        SELECT c
+        FROM ClaimInstitutionalNch c
+        JOIN FETCH c.beneficiary b
+        JOIN FETCH c.claimItems cl
+      """;
 
   private static final String CLAIM_RX =
       """
-              SELECT c
-              FROM ClaimRx c
-              JOIN FETCH c.beneficiary b
-            """;
+        SELECT c
+        FROM ClaimRx c
+        JOIN FETCH c.beneficiary b
+      """;
 
   private static final List<ClaimTypeDefinition> ALL_CLAIM_TYPES =
       List.of(
@@ -152,11 +151,7 @@ public class ClaimRepository {
     institutionalNchClaims.join().ifPresent(allClaims::add);
     rxClaims.join().ifPresent(allClaims::add);
 
-    var result = allClaims.stream().findFirst();
-
-    result.ifPresent(claim -> LogUtil.logBeneSk(claim.getBeneficiary().getBeneSk()));
-
-    return result;
+    return allClaims.stream().findFirst();
   }
 
   /**

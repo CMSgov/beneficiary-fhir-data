@@ -18,7 +18,7 @@ resource "aws_sqs_queue" "events" {
   max_message_size           = 1048576
   message_retention_seconds  = 4 * 24 * 60 * 60 # 4 days
   receive_wait_time_seconds  = 0
-  visibility_timeout_seconds = 60
+  visibility_timeout_seconds = local.events_lambda_timeout
 }
 
 data "aws_iam_policy_document" "events_queue_policy" {

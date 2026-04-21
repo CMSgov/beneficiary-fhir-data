@@ -1,5 +1,7 @@
 package gov.cms.bfd.server.ng.util;
 
+import static gov.cms.bfd.server.ng.util.LoggerConstants.LOG_TYPE;
+
 import org.slf4j.LoggerFactory;
 
 /** Utility class used for logging. */
@@ -20,8 +22,9 @@ public class LogUtil {
   public static void logBeneSk(Long beneSk) {
     LOGGER
         .atInfo()
-        .setMessage(LoggerConstants.BENE_SK_REQUESTED)
-        .addKeyValue("bene_sk", beneSk)
+        .setMessage(LoggerConstants.BENE_SK_FOUND)
+        .addKeyValue(LOG_TYPE, "beneFound")
+        .addKeyValue("beneSk", beneSk)
         .log();
   }
 }

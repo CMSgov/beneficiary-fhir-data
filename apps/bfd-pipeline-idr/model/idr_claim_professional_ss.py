@@ -32,10 +32,16 @@ from model.base_model import (
     UPDATE_TIMESTAMP,
     IdrBaseModel,
     ModelType,
-    claim_filter,
+    base_claim_filter,
     claim_occurrence_cte,
     claim_related_occurrences_cte,
+    clm_base_query,
+    clm_child_query,
+    clm_dt_sgntr_query,
+    clm_ocrnc_sgntr_query,
     clm_orig_cntl_num_expr,
+    clm_query,
+    clm_rlt_ocrnc_clause,
     provider_careteam_name_expr,
     provider_last_or_legal_name_expr,
     transform_default_date_to_null,
@@ -302,16 +308,23 @@ class IdrClaimProfessionalSs(IdrBaseModel):
         rlt_ocrnc_sgntr_dd = ALIAS_RLT_OCRNC_SGNTR_DERIVED_DATES
         not_materialized = "" if load_mode == LoadMode.IDR else "NOT MATERIALIZED"
         return f"""
-            WITH claims AS (
-                SELECT
-                    {clm}.clm_uniq_id,
-                    {clm}.geo_bene_sk,
-                    {clm}.clm_type_cd,
-                    {clm}.clm_num_sk,
-                    {clm}.clm_dt_sgntr_sk,
-                    {clm}.clm_idr_ld_dt
-                FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
-                WHERE {claim_filter(start_time, partition)}
+            WITH claim_base AS (
+                {clm_base_query(start_time, partition, cls.model_type())}
+            ),
+            claims AS (
+                {clm_query()}
+                UNION
+                {clm_dt_sgntr_query()}
+                UNION
+                {clm_child_query("v2_mdcr_clm_prfnl")}
+                UNION
+                {clm_child_query("v2_mdcr_clm_dcmtn")}
+                UNION
+                {clm_child_query("v2_mdcr_clm_lctn_hstry")}
+                UNION
+                {clm_ocrnc_sgntr_query()}
+                UNION
+                {clm_rlt_ocrnc_clause()}
             ),
             latest_clm_lctn_hstry AS (
                 SELECT
@@ -337,7 +350,12 @@ class IdrClaimProfessionalSs(IdrBaseModel):
             claim_related_occurrences_dates AS {not_materialized} 
                 ({claim_related_occurrences_cte()})
             SELECT {{COLUMNS}}
-            FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm}
+            FROM claims c
+            JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm} ON
+                {clm}.geo_bene_sk = c.geo_bene_sk AND
+                {clm}.clm_dt_sgntr_sk = c.clm_dt_sgntr_sk AND
+                {clm}.clm_type_cd = c.clm_type_cd AND
+                {clm}.clm_num_sk = c.clm_num_sk
             JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_dt_sgntr {sgntr} ON 
                 {sgntr}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
             LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_prfnl {prfnl} ON
@@ -369,6 +387,6 @@ class IdrClaimProfessionalSs(IdrBaseModel):
                 ON {ocrnc_sgntr_dd}.clm_ocrnc_sgntr_sk = {clm}.clm_ocrnc_sgntr_sk
             LEFT JOIN claim_related_occurrences_dates {rlt_ocrnc_sgntr_dd}
                 ON {rlt_ocrnc_sgntr_dd}.clm_rlt_ocrnc_sgntr_sk = {clm}.clm_rlt_ocrnc_sgntr_sk
-            {{WHERE_CLAUSE}} AND {claim_filter(start_time, partition)}
+            {{WHERE_CLAUSE}} AND {base_claim_filter(partition)}
             {{ORDER_BY}}
         """

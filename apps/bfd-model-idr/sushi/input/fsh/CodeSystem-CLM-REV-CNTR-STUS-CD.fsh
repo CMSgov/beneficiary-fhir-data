@@ -1,7 +1,7 @@
 CodeSystem: CLM_REV_CNTR_STUS_CD
-Title: "Revenue Center Payment Method Indicator Code"
+Title: "Revenue Center Status Code"
 Id: CLM-REV-CNTR-STUS-CD
-Description: "THE DOMAIN OF CLAIM PAYMENT METHOD CODES."
+Description: "THE DOMAIN OF CLAIM REVENUE CENTER STATUS CODES."
 * ^url = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-STUS-CD"
 * ^status = #active
 * ^content = #complete

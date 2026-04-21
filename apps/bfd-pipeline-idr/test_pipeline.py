@@ -257,9 +257,9 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
     assert rows[0]["clm_uniq_id"] == 580550863030
 
     cur = conn.execute("select * from idr.claim_professional_nch order by clm_uniq_id")
-    assert cur.rowcount == 33
+    assert cur.rowcount == 51
     rows = cur.fetchmany(1)
-    assert rows[0]["clm_uniq_id"] == 797757725380
+    assert rows[0]["clm_uniq_id"] == 119855147698
 
     cur = conn.execute("select * from idr.claim_professional_ss order by clm_uniq_id")
     assert cur.rowcount == 1
@@ -293,11 +293,12 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
 
     conn.commit()
 
-    # Test incremental loading logic involving 'idr_load_events' if we're testing incremental mode
+    # Test incremental loading logic involving 'source_load_events' if we're testing incremental
+    # mode
     if LOAD_TYPE == LoadType.INCREMENTAL:
         # First, pretend that loading ./test_samples1 was the result of loading _all_ possible jobs
         # by inserting load events with completion times of datetime_now + 1hr for all types
-        idr_jobs_table = sql.Identifier("idr", "idr_load_events")
+        idr_jobs_table = sql.Identifier("idr", "source_load_events")
         load_1_complete_time = datetime_now + timedelta(hours=1)
         load_jobs = [
             IdrJobLoadEvent(
@@ -435,7 +436,7 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
         run(LoadMode.SYNTHETIC)
 
         # Check to make sure the NCH claim was not loaded as no corresponding event should exist
-        # in idr_load_events nor has it been 24 hours since the last load of NCH data
+        # in source_load_events nor has it been 24 hours since the last load of NCH data
         nch_table = sql.Identifier("idr", "claim_institutional_nch")
         cur = conn.execute(
             t"""
@@ -446,7 +447,7 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
         conn.commit()
         assert cur.rowcount == 0
 
-        # _Now_ insert an event into idr_load_events indicating that the NCH load job was
+        # _Now_ insert an event into source_load_events indicating that the NCH load job was
         # completed
         nch_load_job = IdrJobLoadEvent(
             id=uuid4(),
@@ -507,7 +508,7 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
         conn.commit()
         assert cur.rowcount == 0
 
-        # _Now_ insert an event into idr_load_events indicating that the FISS load job was
+        # _Now_ insert an event into source_load_events indicating that the FISS load job was
         # completed
         ss_load_job = IdrJobLoadEvent(
             id=uuid4(),
