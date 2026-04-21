@@ -50,7 +50,10 @@ public class EobHandler {
    * @return an Optional containing the ExplanationOfBenefit if found
    */
   public Optional<ExplanationOfBenefit> find(final Long fhirId, SamhsaFilterMode samhsaFilterMode) {
-    return searchByIdInner(fhirId, new DateTimeRange(), new DateTimeRange(), samhsaFilterMode);
+    var eobs =
+        searchByIdsInner(
+            List.of(fhirId), new DateTimeRange(), new DateTimeRange(), samhsaFilterMode);
+    return eobs.stream().findFirst();
   }
 
   /**
@@ -123,40 +126,43 @@ public class EobHandler {
   /**
    * Search for claims data by claim ID.
    *
-   * @param claimUniqueId claim ID
+   * @param claimUniqueIds claim IDs
    * @param serviceDate service date
    * @param lastUpdated last updated
    * @param samhsaFilterMode SAMHSA filter mode
    * @return bundle
    */
   public Bundle searchById(
-      Long claimUniqueId,
+      List<Long> claimUniqueIds,
       DateTimeRange serviceDate,
       DateTimeRange lastUpdated,
       SamhsaFilterMode samhsaFilterMode) {
-    var eob = searchByIdInner(claimUniqueId, serviceDate, lastUpdated, samhsaFilterMode);
-    return FhirUtil.bundleOrDefault(eob.map(e -> e), loadProgressRepository::lastUpdated);
+    var eobs = searchByIdsInner(claimUniqueIds, serviceDate, lastUpdated, samhsaFilterMode);
+    return FhirUtil.bundleOrDefault(eobs.stream(), loadProgressRepository::lastUpdated);
   }
 
-  private Optional<ExplanationOfBenefit> searchByIdInner(
-      Long claimUniqueId,
+  private List<ExplanationOfBenefit> searchByIdsInner(
+      List<Long> claimUniqueIds,
       DateTimeRange serviceDate,
       DateTimeRange lastUpdated,
       SamhsaFilterMode samhsaFilterMode) {
-    var claimOpt = claimRepository.findById(claimUniqueId, serviceDate, lastUpdated);
-    if (claimOpt.isEmpty()) {
-      return Optional.empty();
-    }
-    var claim = claimOpt.get();
-    var claimHasSamhsa = claimHasSamhsa(claim);
+    var claims = claimRepository.findByIds(claimUniqueIds, serviceDate, lastUpdated);
 
-    if (samhsaFilterMode == SamhsaFilterMode.EXCLUDE && claimHasSamhsa) {
-      return Optional.empty();
-    }
-    var securityStatus =
-        claimHasSamhsa ? ClaimSecurityStatus.SAMHSA_APPLICABLE : ClaimSecurityStatus.NONE;
+    return claims.stream()
+        .filter(
+            claim -> {
+              var claimHasSamhsa = claimHasSamhsa(claim);
+              return samhsaFilterMode != SamhsaFilterMode.EXCLUDE || !claimHasSamhsa;
+            })
+        .map(
+            claim -> {
+              var claimHasSamhsa = claimHasSamhsa(claim);
+              var securityStatus =
+                  claimHasSamhsa ? ClaimSecurityStatus.SAMHSA_APPLICABLE : ClaimSecurityStatus.NONE;
 
-    return Optional.of(claim.toFhir(securityStatus));
+              return claim.toFhir(securityStatus);
+            })
+        .toList();
   }
 
   private boolean isCodeSamhsa(

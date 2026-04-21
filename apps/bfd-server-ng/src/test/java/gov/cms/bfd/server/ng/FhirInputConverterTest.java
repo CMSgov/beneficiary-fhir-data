@@ -29,7 +29,7 @@ class FhirInputConverterTest {
     var emptyId = new IdType();
     var blankId = new IdType("");
 
-    assertThrows(InvalidRequestException.class, () -> FhirInputConverter.toLong(null));
+    assertThrows(InvalidRequestException.class, () -> FhirInputConverter.toLong((IdType) null));
     assertThrows(InvalidRequestException.class, () -> FhirInputConverter.toLong(emptyId));
     assertThrows(InvalidRequestException.class, () -> FhirInputConverter.toLong(blankId));
 
@@ -49,5 +49,28 @@ class FhirInputConverterTest {
     assertThrows(InvalidRequestException.class, () -> FhirInputConverter.toString(null, ""));
     var emptyToken = new TokenParam();
     assertThrows(InvalidRequestException.class, () -> FhirInputConverter.toString(emptyToken, ""));
+  }
+
+  @Test
+  void testToLongList() {
+    var param = new TokenAndListParam().addAnd(new TokenParam("1")).addAnd(new TokenParam("2"));
+    assertEquals(List.of(1L, 2L), FhirInputConverter.toLongList(param));
+
+    var paramOr = new TokenAndListParam()
+        .addAnd(
+            new ca.uhn.fhir.rest.param.TokenOrListParam()
+                .addOr(new TokenParam("3"))
+                .addOr(new TokenParam("4")));
+    assertEquals(List.of(3L, 4L), FhirInputConverter.toLongList(paramOr));
+  }
+
+  @Test
+  void testToLongListTooMany() {
+    var param = new TokenAndListParam();
+    for (int i = 0; i < 101; i++) {
+      param.addAnd(new TokenParam(String.valueOf(i)));
+    }
+    var thrown = assertThrows(InvalidRequestException.class, () -> FhirInputConverter.toLongList(param));
+    assertEquals("A maximum of 100 claim IDs may be requested at once.", thrown.getMessage());
   }
 }

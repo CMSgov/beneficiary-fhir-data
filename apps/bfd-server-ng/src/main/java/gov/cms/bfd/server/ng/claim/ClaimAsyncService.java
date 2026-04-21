@@ -10,24 +10,22 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import lombok.AllArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Repository;
 
 /** Repository methods for claims. */
 @Repository
-@AllArgsConstructor
 public class ClaimAsyncService {
 
-  @PersistenceContext private final EntityManager entityManager;
+  @PersistenceContext private EntityManager entityManager;
 
   @Async
   protected <C extends ClaimBase, B extends DbFilterBuilder>
-      CompletableFuture<Optional<C>> findByIdInClaimType(
+      CompletableFuture<List<C>> findByIdsInClaimType(
           String baseQuery,
           Class<C> claimClass,
           SystemType systemType,
-          long claimUniqueId,
+          List<Long> claimUniqueIds,
           List<B> filterBuilders) {
 
     var filters = getFilters(filterBuilders, systemType);
@@ -36,18 +34,18 @@ public class ClaimAsyncService {
         String.format(
             """
             %s
-            WHERE c.claimUniqueId = :claimUniqueId
+            WHERE c.claimUniqueId IN :claimUniqueIds
             %s
             """,
             baseQuery, whereClause);
 
     var result =
         DbFilterParam.withParams(entityManager.createQuery(jpql, claimClass), filters.params())
-            .setParameter("claimUniqueId", claimUniqueId)
-            .getResultList()
-            .stream()
-            .findFirst();
-    result.ifPresent(claim -> LogUtil.logBeneSk(claim.getBeneficiary().getBeneSk()));
+            .setParameter("claimUniqueIds", claimUniqueIds)
+            .getResultList();
+    result.stream()
+        .findFirst()
+        .ifPresent(claim -> LogUtil.logBeneSk(claim.getBeneficiary().getBeneSk()));
     return CompletableFuture.completedFuture(result);
   }
 
