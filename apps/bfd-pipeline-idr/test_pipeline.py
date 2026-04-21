@@ -16,6 +16,7 @@ from testcontainers.core.config import testcontainers_config  # type: ignore
 # https://github.com/testcontainers/testcontainers-python/issues/305
 from testcontainers.postgres import PostgresContainer  # type: ignore
 
+from constants import IDR_BENE_HISTORY_TABLE, IDR_CLAIM_TABLE
 from load_events import IdrJobLoadEvent, IdrJobType
 from load_partition import LoadType
 from load_synthetic import load_from_csv
@@ -93,8 +94,8 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
     # Update all values to current dates then change specific dates
     # to older than 60 days to test the functionality.
     conn.execute(
-        """
-            UPDATE cms_vdm_view_mdcr_prd.v2_mdcr_clm
+        f"""
+            UPDATE {IDR_CLAIM_TABLE}
             SET idr_insrt_ts=%(timestamp)s,
                 idr_updt_ts=%(timestamp)s,
                 clm_idr_ld_dt=%(today)s
@@ -106,8 +107,8 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
     )
 
     conn.execute(
-        """
-            UPDATE cms_vdm_view_mdcr_prd.v2_mdcr_clm
+        f"""
+            UPDATE {IDR_CLAIM_TABLE}
             SET idr_updt_ts=%(none)s, idr_insrt_ts=%(timestamp)s
             WHERE clm_uniq_id = 1128619260039
             """,
@@ -115,8 +116,8 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
     )
 
     conn.execute(
-        """
-            UPDATE cms_vdm_view_mdcr_prd.v2_mdcr_clm
+        f"""
+            UPDATE {IDR_CLAIM_TABLE}
             SET idr_updt_ts=%(timestamp)s
             WHERE clm_uniq_id = 123359318723
             """,
@@ -124,8 +125,8 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
     )
 
     conn.execute(
-        """
-            UPDATE cms_vdm_view_mdcr_prd.v2_mdcr_clm
+        f"""
+            UPDATE {IDR_CLAIM_TABLE}
             SET idr_insrt_ts=%(none)s
             WHERE clm_uniq_id = 9844382563835
             """,
@@ -133,8 +134,8 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
     )
 
     conn.execute(
-        """
-            UPDATE cms_vdm_view_mdcr_prd.v2_mdcr_clm
+        f"""
+            UPDATE {IDR_CLAIM_TABLE}
             SET idr_updt_ts=%(none)s
             WHERE clm_uniq_id = 6919983105596
             """,
@@ -161,8 +162,8 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
 
     # Wait for system time to advance enough to update the timestamp
     conn.execute(
-        """
-        UPDATE cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry
+        f"""
+        UPDATE {IDR_BENE_HISTORY_TABLE}
         SET bene_mbi_id = '1S000000000', idr_insrt_ts=%(timestamp)s, idr_updt_ts=%(timestamp)s
         WHERE bene_sk = 10464258
         """,
