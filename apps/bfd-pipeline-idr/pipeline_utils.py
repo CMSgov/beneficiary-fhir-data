@@ -107,8 +107,9 @@ def purge_non_latest_claims(
     cls: type[IdrBaseModel],
     load_mode: LoadMode,
     parent_child_tables: dict[type[IdrBaseModel], type[IdrBaseModel] | None],
-    partition: LoadPartition = DEFAULT_PARTITION,
+    partition: LoadPartition | None = None,
 ) -> bool:
+    partition = partition or DEFAULT_PARTITION
     logger.info("purging %s", cls.table())
     parent_table: type[IdrBaseModel] = cls
     child_table: type[IdrBaseModel] | None = parent_child_tables.get(cls)
