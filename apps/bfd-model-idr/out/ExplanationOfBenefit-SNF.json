@@ -1,7 +1,7 @@
 {
   "resourceType" : "ExplanationOfBenefit",
   "meta" : {
-    "lastUpdated" : "2026-03-18T20:17:18.274988Z",
+    "lastUpdated" : "2026-04-22T17:27:37.025217Z",
     "source" : "NCH",
     "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional|2.1.0"],
     "tag" : [{
@@ -710,6 +710,27 @@
       {
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BILL-FREQ-CD",
         "code" : "123"
+      }]
+    }
+  },
+  {
+    "sequence" : 30,
+    "category" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      },
+      {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code" : "PRVDR_FAC_FIPS_ST_CD",
+        "display" : "Federal Information Processing Standards (FIPS) State Code"
+      }]
+    },
+    "code" : {
+      "coding" : [{
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/US-FIPS-STATE-CODES",
+        "code" : "04"
       }]
     }
   }],
