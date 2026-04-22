@@ -79,7 +79,7 @@ resource "aws_kinesis_firehose_delivery_stream" "s3logs" {
               for k, v in {
                 level      = "(.[\"log.level\"] // \"unknown\")"
                 cert_alias = "(.[\"mdc.certificateAlias\"] // \"unknown\")"
-                resource   = "(.resource // \"unknown\")"
+                resource   = "(.[\"mdc.uri\"] // \"unknown\" | split(\"/\") | .[-1])"
               } : "${k}:${v}"
             ]
           ))}}"
