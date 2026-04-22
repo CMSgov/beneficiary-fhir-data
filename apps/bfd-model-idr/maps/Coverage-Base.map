@@ -492,7 +492,7 @@ group AddPartBCoverageElements(source src: CoverageBase, target tgt: BFDCoverage
 
 group SetOrganizationEntryCMS(source src : CoverageBase, target tgt : Organization) {
     src -> tgt.meta = create('Meta') as tgtMeta then{
-        src -> tgtMeta.profile = "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0" "set profile";
+        src -> tgtMeta.profile = "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0" "set profile";
     } "add metadata";
     
     src -> tgt.id = "cms-org" "set org id";
@@ -519,7 +519,7 @@ group SetOrganizationEntryCMS(source src : CoverageBase, target tgt : Organizati
 //Source this information from the respective tables
 group SetOrganizationEntryPartCD(source src : CoverageBase, target tgt : Organization) {
     src -> tgt.meta = create('Meta') as tgtMeta then{
-        src -> tgtMeta.profile = "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0" "set profile";
+        src -> tgtMeta.profile = "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0" "set profile";
     } "add metadata";
     
     src -> tgt.id = "insurer-org" "set org id";

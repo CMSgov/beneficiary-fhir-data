@@ -10,7 +10,7 @@
     "resourceType" : "Organization",
     "id" : "cms-org",
     "meta" : {
-      "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0"]
+      "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0"]
     },
     "active" : true,
     "name" : "Centers for Medicare & Medicaid Services",
