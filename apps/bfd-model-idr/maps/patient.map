@@ -93,8 +93,8 @@ group createPatient(source src: Bene, target patient: BFDPatient){
 
     src -> patient.meta = create('Meta') as tgtMeta then{
         src.lastUpdated as lastUpdated -> tgtMeta.lastUpdated = lastUpdated "Set lastUpdated";
-        src -> tgtMeta.profile = "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.1.0" "Set C4BB profile";
-        src -> tgtMeta.profile = "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0" "Set US Core profile";
+        src -> tgtMeta.profile = "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.2.0" "Set C4BB profile";
+        src -> tgtMeta.profile = "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|7.0.0" "Set US Core profile";
     } "add metadata";
 
     //we have the IF here to only populate if the address is actually available. 

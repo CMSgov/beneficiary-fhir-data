@@ -3,8 +3,8 @@
   "id" : "part-D-123456789",
   "meta" : {
     "lastUpdated" : "2020-01-07T03:02:28.000000Z",
-    "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage|2.1.0",
-    "http://hl7.org/fhir/us/core/StructureDefinition/us-core-coverage|6.1.0"]
+    "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage|2.2.0",
+    "http://hl7.org/fhir/us/core/StructureDefinition/us-core-coverage|7.0.0"]
   },
   "contained" : [{
     "resourceType" : "Organization",

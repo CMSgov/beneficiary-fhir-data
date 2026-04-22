@@ -20,11 +20,14 @@ matchbox:
       displayIssuesAreWarnings: false
       txServer: http://localhost:8080/matchboxv3/tx
       onlyOneEngine: true
-      igsPreloaded: hl7.fhir.us.carin-bb#2.1.0
+      fhirVersion: R4
+      suppressR5: true
+      igsPreloaded: hl7.fhir.us.carin-bb#2.2.0
 hapi:
   fhir:
+    fhir_version: R4
     implementationguides:
       carin:
         name: hl7.fhir.us.carin-bb
-        version: 2.1.0
+        version: 2.2.0
 

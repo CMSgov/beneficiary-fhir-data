@@ -1,13 +1,13 @@
 services:
   matchbox:
-    image: europe-west6-docker.pkg.dev/ahdis-ch/ahdis/matchbox:v4.0.18
+    image: europe-west6-docker.pkg.dev/ahdis-ch/ahdis/matchbox:v4.1.5
     container_name: matchbox
     restart: on-failure
     ports:
       - "8080:8080"
     depends_on:
       - matchbox-db
-    entrypoint: ["java", "-Xms2G", "-Xmx10G", "-Dfhir.settings.path=/config/fhir-settings.json", "-Dspring.config.additional-location=optional:file:/config/application.yaml,optional:file:application.yaml", "-jar", "/matchbox.jar"]
+    entrypoint: ["java", "-Xms2G", "-Xmx12G", "-XX:+UseG1GC", "-XX:MaxMetaspaceSize=512m", "-Dfhir.settings.path=/config/fhir-settings.json", "-Dspring.config.additional-location=optional:file:/config/application.yaml,optional:file:application.yaml", "-jar", "/matchbox.jar"]
     volumes:
       - ./:/config/
   matchbox-db:
