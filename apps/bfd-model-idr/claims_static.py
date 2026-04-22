@@ -230,7 +230,6 @@ AVAILABLE_PROVIDER_LEGAL_NAMES = [
     "CBS Health Corporation",
     "WALPART INC",
     "Bite Aid Corporation",
-    "",
 ]
 AVAILABLE_PROVIDER_TX_CODES = [
     "2081P0301X",

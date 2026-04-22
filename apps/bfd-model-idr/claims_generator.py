@@ -738,8 +738,10 @@ def generate(
 
     other_util = OtherGeneratorUtil()
 
+    generated_provider_histories, generated_type_1_npis, generated_type_2_npis = other_util.gen_provider_history(amount=14, init_provider_historys=files[PRVDR_HSTRY])
+
     out_tables[PRVDR_HSTRY].extend(
-        other_util.gen_provider_history(amount=14, init_provider_historys=files[PRVDR_HSTRY])
+        generated_provider_histories
     )
 
     # This table is special in that its data is mostly static and read from a static file, so we
@@ -860,6 +862,8 @@ def generate(
                 bene_sk=str(pt_bene_sk),
                 init_clm=init_adj_clm,
                 min_date=clm_from_dt_min,
+                generated_type_1_npis=generated_type_1_npis,
+                generated_type_2_npis=generated_type_2_npis,
             )
             adj_clms_tbls[CLM].append(clm)
 
