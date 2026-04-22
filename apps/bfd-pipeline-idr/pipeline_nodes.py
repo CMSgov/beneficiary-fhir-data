@@ -260,9 +260,7 @@ def stage5_inputs(
 
 def do_stage5(
     stage5_inputs: NodePartitionedModelInput,
-    load_type: LoadType,
-    load_mode: LoadMode,
-    start_time: datetime,) -> bool:
+    load_mode: LoadMode,) -> bool:
     model_type, partition = stage5_inputs
     return purge_non_latest_claims(
         cls=model_type,
