@@ -222,8 +222,10 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
     bene_ptnt_stus_cd: Annotated[
         str, {ALIAS: ALIAS_INSTNL}, BeforeValidator(transform_default_string)
     ]
-    dgns_drg_cd: Annotated[int, {ALIAS: ALIAS_INSTNL}]
-    clm_mdcr_instnl_mco_pd_sw: Annotated[str, {ALIAS: ALIAS_INSTNL}]
+    dgns_drg_cd: Annotated[int | None, {ALIAS: ALIAS_INSTNL}]
+    clm_mdcr_instnl_mco_pd_sw: Annotated[
+        str, {ALIAS: ALIAS_INSTNL}, BeforeValidator(transform_default_string)
+    ]
     clm_admsn_src_cd: Annotated[
         str, {ALIAS: ALIAS_INSTNL}, BeforeValidator(transform_default_string)
     ]

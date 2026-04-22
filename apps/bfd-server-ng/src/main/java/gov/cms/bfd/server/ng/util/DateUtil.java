@@ -3,10 +3,16 @@ package gov.cms.bfd.server.ng.util;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import java.time.*;
 import java.util.Date;
+import lombok.AllArgsConstructor;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.springframework.stereotype.Component;
 
 /** Date utility methods. */
+@Component
+@AllArgsConstructor
 public class DateUtil {
+
+  private final Clock clock;
 
   /**
    * UTC {@link ZoneId}. UTC should be used for all datetime conversions to/from an instant
@@ -17,8 +23,6 @@ public class DateUtil {
   /** Minimum possible {@link ZonedDateTime}. */
   public static final ZonedDateTime MIN_DATETIME =
       ZonedDateTime.of(LocalDateTime.MIN, DateUtil.ZONE_ID_UTC);
-
-  private DateUtil() {}
 
   /**
    * Converts the {@link LocalDate} to a {@link Date} set to midnight UTC.
@@ -71,10 +75,9 @@ public class DateUtil {
    * <a href="https://en.wikipedia.org/wiki/Anywhere_on_Earth">"Anywhere on Earth"</a> time which
    * indicates a period that expires when the date passes everywhere on Earth.
    *
-   * @param clock A date to check for AOE, defaults to now if null.
    * @return local date
    */
-  public static LocalDate nowAoe(Clock clock) {
+  public LocalDate nowAoe() {
     return LocalDate.now(clock.withZone(ZoneId.of("-12:00")));
   }
 }

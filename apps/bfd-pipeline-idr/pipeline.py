@@ -60,10 +60,7 @@ def run(load_mode: str) -> None:
         .build()
     )
 
-    if load_mode is not LoadMode.LOCAL or load_mode is not LoadMode.SYNTHETIC or bfd_test_date() is None:  # noqa: E501
-        start_time = datetime.now(UTC)
-    else:
-        start_time = bfd_test_date()
+    start_time = resolve_start_time(load_mode)
 
     # if load_benes and load_claims:
     hamilton_driver.execute(  # type: ignore
@@ -74,6 +71,14 @@ def run(load_mode: str) -> None:
             "start_time": start_time,
         },
     )
+
+
+def resolve_start_time(load_mode: str) -> datetime:
+    test_date = bfd_test_date()
+
+    if test_date and load_mode != LoadMode.IDR:
+        return test_date
+    return datetime.now(UTC)
 
 
 if __name__ == "__main__":

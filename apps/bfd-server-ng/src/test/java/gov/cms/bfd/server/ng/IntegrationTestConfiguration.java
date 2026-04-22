@@ -3,9 +3,7 @@ package gov.cms.bfd.server.ng;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.time.Clock;
-import java.time.Instant;
-import java.time.ZoneId;
+import java.time.*;
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import org.flywaydb.core.Flyway;
@@ -14,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.ClassPathResource;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
@@ -25,8 +24,9 @@ public class IntegrationTestConfiguration {
   private String baseDir;
 
   @Bean
-  public Clock clock() {
-    return Clock.fixed(Instant.parse("2025-06-15T00:00:00Z"), ZoneId.of("UTC"));
+  @Primary
+  public Clock testClock() {
+    return Clock.fixed(Instant.parse("2025-01-02T00:00:00Z"), ZoneId.of("UTC"));
   }
 
   // Container lifecycle is managed by Spring,

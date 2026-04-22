@@ -68,7 +68,7 @@ class IdrBeneficiaryMaPartDEnrollmentRx(IdrBaseModel):
                 FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_mapd_enrlmt_rx enrlmt_rx
                 {{WHERE_CLAUSE}}
                 AND NOT EXISTS (
-                    {deceased_bene_filter(hstry)}
+                    {deceased_bene_filter(hstry, start_time)}
                     AND {hstry}.bene_sk = enrlmt_rx.bene_sk
                 )
                 AND idr_trans_obslt_ts >= '{DEFAULT_MAX_DATE}'

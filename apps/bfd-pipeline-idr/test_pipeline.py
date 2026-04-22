@@ -1,9 +1,8 @@
 import os
 import shutil
 import subprocess
-
 from collections.abc import Generator
-from datetime import datetime, timedelta
+from datetime import timedelta
 from pathlib import Path
 from typing import cast
 
@@ -18,7 +17,6 @@ from testcontainers.postgres import PostgresContainer  # type: ignore
 from load_synthetic import load_from_csv
 from logger_config import configure_logger
 from pipeline import run
-from settings import bfd_test_date
 
 # ryuk throws a 500 or 404 error for some reason
 # seems to have issues with podman https://github.com/testcontainers/testcontainers-python/issues/753
@@ -71,8 +69,9 @@ def setup_db() -> Generator[PostgresContainer]:
             os.environ["BFD_DB_PASSWORD"] = info.password
             os.environ["IDR_BATCH_SIZE"] = "100000"
             os.environ["IDR_FORCE_LOAD_PROGRESS"] = "1"
-            os.environ["BFD_TEST_DATE"] = "2025-06-15"
+            os.environ["BFD_TEST_DATE"] = "2023-04-02"
         yield postgres
+
 
 def test_pipeline(setup_db: PostgresContainer) -> None:
     conn = cast(
@@ -99,8 +98,8 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
     assert rows[0]["bene_mbi_id"] == "1BC3JG0FM51"
 
     cur = conn.execute("select max(last_ts) as max_ts from idr.load_progress")
-    
-    date_adv = datetime.strftime(cur.fetchone()["max_ts"] + timedelta(days=1), "%Y-%m-%d")
+    next_date = cur.fetchone()["max_ts"] + timedelta(days=1)
+    os.environ["BFD_TEST_DATE"] = next_date.isoformat()
 
     conn.execute(
         """
@@ -108,11 +107,9 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
         SET bene_mbi_id = '1S000000000', idr_insrt_ts=%(timestamp)s, idr_updt_ts=%(timestamp)s
         WHERE bene_sk = 10464258
         """,
-        {"timestamp": date_adv},
+        {"timestamp": next_date},
     )
     conn.commit()
-
-    os.environ['BFD_TEST_DATE'] = date_adv
 
     run("synthetic")
 
@@ -165,12 +162,12 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
     assert rows[0]["cntrct_pbp_sk"] == 16513335503
 
     cur = conn.execute("select * from idr.contract_pbp_contact order by cntrct_pbp_sk")
-    assert cur.rowcount == 3
-    rows = cur.fetchmany(4)
-    assert rows[0]["cntrct_pbp_sk"] == 307963392254
-    assert rows[2]["cntrct_pbp_sk"] == 940319838486
+    assert cur.rowcount == 7
+    rows = cur.fetchmany(7)
+    assert rows[0]["cntrct_pbp_sk"] == 130640088184
+    assert rows[6]["cntrct_pbp_sk"] == 940319838486
     # only a future record exists for this contract
-    assert rows[2]["cntrct_pbp_bgn_dt"].strftime("%Y-%m-%d") == "2026-12-01"
+    assert rows[6]["cntrct_pbp_bgn_dt"].strftime("%Y-%m-%d") == "2026-12-01"
 
     cur = conn.execute("select * from idr.beneficiary_ma_part_d_enrollment order by bene_sk")
     assert cur.rowcount == 3
@@ -198,7 +195,7 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
     cur = conn.execute("select * from idr.claim_institutional_ss order by clm_uniq_id")
     assert cur.rowcount == 21
     rows = cur.fetchmany(1)
-    assert rows[0]["clm_uniq_id"] == 580550863030
+    assert rows[0]["clm_uniq_id"] == 123359318723
 
     cur = conn.execute("select * from idr.claim_professional_nch order by clm_uniq_id")
     assert cur.rowcount == 33
@@ -221,9 +218,9 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
     assert rows[0]["clm_uniq_id"] == 113370100080
 
     cur = conn.execute("select * from idr.claim_item_institutional_ss order by clm_uniq_id")
-    assert cur.rowcount == 334
+    assert cur.rowcount == 327
     rows = cur.fetchmany(1)
-    assert rows[0]["clm_uniq_id"] == 580550863030
+    assert rows[0]["clm_uniq_id"] == 123359318723
 
     cur = conn.execute("select * from idr.claim_item_professional_nch order by clm_uniq_id")
     assert cur.rowcount == 442

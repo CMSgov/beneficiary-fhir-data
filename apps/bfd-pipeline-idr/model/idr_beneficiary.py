@@ -159,7 +159,7 @@ class IdrBeneficiary(IdrBaseModel):
                 WHERE ox.row_order = 1
             ),
             deceased_benes AS (
-                {deceased_bene_filter(hstry)}
+                {deceased_bene_filter(hstry, start_time)}
             )
             SELECT {{COLUMNS}}
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry {hstry}

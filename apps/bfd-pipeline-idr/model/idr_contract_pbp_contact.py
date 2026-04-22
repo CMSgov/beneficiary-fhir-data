@@ -65,7 +65,8 @@ class IdrContractPbpContact(IdrBaseModel):
                 END) as row_order
                 FROM cms_vdm_view_mdcr_prd.v2_mdcr_cntrct_pbp_cntct cntct
                 WHERE cntrct_plan_cntct_obslt_dt >= '{DEFAULT_MAX_DATE}'
-                AND cntrct_pbp_bgn_dt >= DATE_TRUNC('MONTH', CURRENT_DATE)
+                AND cntrct_pbp_bgn_dt >= DATE_TRUNC('MONTH', 
+                                                    DATE '{start_time.strftime("%Y-%m-%d")}')
                 AND cntrct_pbp_bgn_dt < cntrct_pbp_end_dt
             )
             SELECT {{COLUMNS}} FROM contract_contacts WHERE row_order = 1

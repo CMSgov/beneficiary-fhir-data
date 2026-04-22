@@ -13,7 +13,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import java.time.Clock;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.SortedSet;
@@ -149,12 +149,12 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
    * type.
    *
    * @param coverageCompositeId The full ID for the Coverage resource.
-   * @param clock Date to be passed for queries.
+   * @param benefitDate date used to determine Coverage status.
    * @return A FHIR Coverage object.
    */
   public Optional<Coverage> toFhirCoverageIfPresent(
-      CoverageCompositeId coverageCompositeId, Clock clock) {
-    return Optional.of(toFhir(coverageCompositeId, clock))
+      CoverageCompositeId coverageCompositeId, LocalDate benefitDate) {
+    return Optional.of(toFhir(coverageCompositeId, benefitDate))
         .filter(c -> !c.getIdentifier().isEmpty());
   }
 
@@ -164,12 +164,12 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
    *
    * @param coverageCompositeId The full ID for the Coverage resource.
    * @param orgId The organization reference ID (only used if isC4DIC is true).
-   * @param clock Date to be passed for queries.
+   * @param benefitDate date used to determine Coverage status.
    * @return A FHIR Coverage object.
    */
   public Optional<Coverage> toFhirCoverageIfPresentC4DIC(
-      CoverageCompositeId coverageCompositeId, String orgId, Clock clock) {
-    return Optional.of(toFhirC4DIC(coverageCompositeId, orgId, clock))
+      CoverageCompositeId coverageCompositeId, String orgId, LocalDate benefitDate) {
+    return Optional.of(toFhirC4DIC(coverageCompositeId, orgId, benefitDate))
         .filter(c -> !c.getIdentifier().isEmpty());
   }
 
@@ -177,10 +177,10 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
    * Creates a FHIR Coverage resource.
    *
    * @param coverageCompositeId The full ID for the Coverage resource.
-   * @param clock Date to be passed for queries.
+   * @param benefitDate date used to determine Coverage status.
    * @return A FHIR Coverage object.
    */
-  public Coverage toFhir(CoverageCompositeId coverageCompositeId, Clock clock) {
+  public Coverage toFhir(CoverageCompositeId coverageCompositeId, LocalDate benefitDate) {
     var coverage = setupBaseCoverage(coverageCompositeId, ProfileType.C4BB);
     coverage.setId(coverageCompositeId.fullId());
 
@@ -191,10 +191,11 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
     var coveragePart = coverageCompositeId.coveragePart();
 
     return switch (coveragePart) {
-      case PART_A, PART_B -> mapCoverageAB(coverage, coveragePart, ProfileType.C4BB, "", clock);
-      case PART_C -> mapCoverageC(coverage, coveragePart, ProfileType.C4BB, "");
-      case PART_D -> mapCoverageD(coverage, coveragePart, ProfileType.C4BB, "");
-      case DUAL -> mapCoverageDual(coverage, ProfileType.C4BB, "", clock);
+      case PART_A, PART_B ->
+          mapCoverageAB(coverage, coveragePart, ProfileType.C4BB, "", benefitDate);
+      case PART_C -> mapCoverageC(coverage, coveragePart, ProfileType.C4BB, "", benefitDate);
+      case PART_D -> mapCoverageD(coverage, coveragePart, ProfileType.C4BB, "", benefitDate);
+      case DUAL -> mapCoverageDual(coverage, ProfileType.C4BB, "", benefitDate);
     };
   }
 
@@ -203,18 +204,20 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
    *
    * @param coverageCompositeId The full ID for the Coverage resource.
    * @param orgId The organization reference ID.
-   * @param clock Date to be passed for queries.
+   * @param benefitDate date used to determine Coverage status.
    * @return A FHIR Coverage object.
    */
-  public Coverage toFhirC4DIC(CoverageCompositeId coverageCompositeId, String orgId, Clock clock) {
+  public Coverage toFhirC4DIC(
+      CoverageCompositeId coverageCompositeId, String orgId, LocalDate benefitDate) {
     var coverage = setupBaseCoverage(coverageCompositeId, ProfileType.C4DIC);
     var coveragePart = coverageCompositeId.coveragePart();
 
     return switch (coveragePart) {
-      case PART_A, PART_B -> mapCoverageAB(coverage, coveragePart, ProfileType.C4DIC, orgId, clock);
-      case PART_C -> mapCoverageC(coverage, coveragePart, ProfileType.C4DIC, orgId);
-      case PART_D -> mapCoverageD(coverage, coveragePart, ProfileType.C4DIC, orgId);
-      case DUAL -> mapCoverageDual(coverage, ProfileType.C4DIC, orgId, clock);
+      case PART_A, PART_B ->
+          mapCoverageAB(coverage, coveragePart, ProfileType.C4DIC, orgId, benefitDate);
+      case PART_C -> mapCoverageC(coverage, coveragePart, ProfileType.C4DIC, orgId, benefitDate);
+      case PART_D -> mapCoverageD(coverage, coveragePart, ProfileType.C4DIC, orgId, benefitDate);
+      case DUAL -> mapCoverageDual(coverage, ProfileType.C4DIC, orgId, benefitDate);
     };
   }
 
@@ -223,7 +226,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
       CoveragePart coveragePart,
       ProfileType profileType,
       String orgId,
-      Clock clock) {
+      LocalDate benefitDate) {
     var entitlementOpt = findEntitlement(coveragePart);
     if (entitlementOpt.isEmpty()) {
       return toEmptyResource(coverage);
@@ -233,7 +236,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
 
     var entitlement = entitlementOpt.get();
     coverage.setPeriod(entitlement.toFhirPeriod());
-    coverage.setStatus(entitlement.toFhirStatus(clock));
+    coverage.setStatus(entitlement.toFhirStatus(benefitDate));
 
     if (profileType == ProfileType.C4DIC) {
       coverage.addPayor(new Reference().setReference(ORGANIZATION_REF + orgId));
@@ -279,7 +282,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
   }
 
   private Coverage mapCoverageDual(
-      Coverage coverage, ProfileType profileType, String orgId, Clock clock) {
+      Coverage coverage, ProfileType profileType, String orgId, LocalDate benefitDate) {
     var dualEligibilityOpt = coverageOptional.getBeneficiaryDualEligibility();
     if (dualEligibilityOpt.isEmpty()) {
       return toEmptyResource(coverage);
@@ -287,7 +290,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
 
     var dualEligibility = dualEligibilityOpt.get();
     coverage.setPeriod(dualEligibility.toFhirPeriod());
-    coverage.setStatus(dualEligibility.toFhirStatus(clock));
+    coverage.setStatus(dualEligibility.toFhirStatus(benefitDate));
     identifier
         .toFhir(profileType == ProfileType.C4DIC ? orgId : "")
         .ifPresent(coverage::addIdentifier);
@@ -308,19 +311,29 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
   }
 
   private Coverage mapCoverageC(
-      Coverage coverage, CoveragePart coveragePart, ProfileType profileType, String orgId) {
+      Coverage coverage,
+      CoveragePart coveragePart,
+      ProfileType profileType,
+      String orgId,
+      LocalDate benefitDate) {
     var enrollmentOpt = getEnrollment(coveragePart);
 
     identifier.toFhir(orgId).ifPresent(coverage::addIdentifier);
 
     return enrollmentOpt
         .map(
-            enrollment -> mapBaseCoverageCD(coverage, coveragePart, enrollment, profileType, orgId))
+            enrollment ->
+                mapBaseCoverageCD(
+                    coverage, coveragePart, enrollment, profileType, orgId, benefitDate))
         .orElseGet(() -> toEmptyResource(coverage));
   }
 
   private Coverage mapCoverageD(
-      Coverage coverage, CoveragePart coveragePart, ProfileType profileType, String orgId) {
+      Coverage coverage,
+      CoveragePart coveragePart,
+      ProfileType profileType,
+      String orgId,
+      LocalDate benefitDate) {
     var enrollmentOpt = getEnrollment(coveragePart);
     if (enrollmentOpt.isEmpty()) {
       return toEmptyResource(coverage);
@@ -328,7 +341,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
 
     var enrollment = enrollmentOpt.get();
     var enrichedCoverage =
-        mapBaseCoverageCD(coverage, coveragePart, enrollment, profileType, orgId);
+        mapBaseCoverageCD(coverage, coveragePart, enrollment, profileType, orgId, benefitDate);
 
     enrollment
         .getMemberId()
@@ -355,11 +368,12 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
       CoveragePart coveragePart,
       BeneficiaryPartCDEnrollment enrollment,
       ProfileType profileType,
-      String orgId) {
+      String orgId,
+      LocalDate benefitDate) {
 
     coverage.setId(createCoverageIdPartCD(coveragePart, enrollment));
     coverage.setPeriod(enrollment.toFhirPeriod());
-    coverage.setStatus(enrollment.toFhirStatus());
+    coverage.setStatus(enrollment.toFhirStatus(benefitDate));
 
     if (profileType == ProfileType.C4DIC) {
       coverage.addPayor(new Reference().setReference(ORGANIZATION_REF + orgId));

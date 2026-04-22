@@ -87,7 +87,7 @@ public class Application {
    * @return clock
    */
   @Bean
-  public Clock clock() {
+  public Clock systemClock() {
     return Clock.systemUTC();
   }
 }

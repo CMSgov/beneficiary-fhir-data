@@ -106,5 +106,7 @@ def bfd_db_username() -> str:
 def bfd_db_password() -> str:
     return getenv("BFD_DB_PASSWORD", "")
 
+
 def bfd_test_date() -> datetime:
-    return datetime.strptime(getenv("BFD_TEST_DATE", ""), "%Y-%m-%d")
+    test_date = getenv("BFD_TEST_DATE", "")
+    return datetime.fromisoformat(test_date) if test_date else None

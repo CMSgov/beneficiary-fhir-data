@@ -64,7 +64,7 @@ class IdrBeneficiaryEntitlement(IdrBaseModel):
             FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_mdcr_entlmt entlmt
             {{WHERE_CLAUSE}}
             AND NOT EXISTS (
-                {deceased_bene_filter(hstry)}
+                {deceased_bene_filter(hstry, start_time)}
                 AND {hstry}.bene_sk = entlmt.bene_sk
             )
             {{ORDER_BY}}
