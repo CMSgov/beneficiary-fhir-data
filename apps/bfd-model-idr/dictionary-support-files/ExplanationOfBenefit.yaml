@@ -2881,6 +2881,8 @@
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_PD_STUS_CD').exists()).code.coding.code
   notes: Used to populate ExplanationOfBenefit.outcome
   profiles:
+    - Basis
+    - Regular
     - Maximus
 - inputPath: ExplanationOfBenefit-Base.PRVDR_RFRG_PRVDR_NPI_NUM
   appliesTo:
