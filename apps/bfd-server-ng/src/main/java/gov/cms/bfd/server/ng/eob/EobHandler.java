@@ -85,7 +85,9 @@ public class EobHandler {
     var claims = claimRepository.findByBeneXrefSk(repositoryCriteria);
 
     var filteredClaims =
-        filterSamhsaClaims(claims, samhsaFilterMode, repositoryCriteria)
+        filterSamhsaClaims(claims, samhsaFilterMode)
+            .skip(repositoryCriteria.resolveOffset())
+            .limit(repositoryCriteria.resolveLimit())
             .map(
                 claim -> {
                   var hasSamhsaClaims =
@@ -103,24 +105,17 @@ public class EobHandler {
   }
 
   private Stream<? extends ClaimBase> filterSamhsaClaims(
-      List<? extends ClaimBase> claims,
-      SamhsaFilterMode samhsaFilterMode,
-      ClaimSearchCriteria claimSearchCriteria) {
+      List<? extends ClaimBase> claims, SamhsaFilterMode samhsaFilterMode) {
     // Process claims in parallel
     // Note: DO NOT call toList() until the very end as materializing the list multiple times could
     // negatively impact perf.
     var claimStream =
         claims.parallelStream().sorted(Comparator.comparing(ClaimBase::getClaimUniqueId));
-    var filteredClaimStream =
-        switch (samhsaFilterMode) {
-          case INCLUDE -> claimStream;
-          case ONLY_SAMHSA -> claimStream.filter(this::claimHasSamhsa);
-          case EXCLUDE -> claimStream.filter(claim -> !claimHasSamhsa(claim));
-        };
-
-    return filteredClaimStream
-        .skip(claimSearchCriteria.resolveOffset())
-        .limit(claimSearchCriteria.resolveLimit());
+    return switch (samhsaFilterMode) {
+      case INCLUDE -> claimStream;
+      case ONLY_SAMHSA -> claimStream.filter(this::claimHasSamhsa);
+      case EXCLUDE -> claimStream.filter(claim -> !claimHasSamhsa(claim));
+    };
   }
 
   /**
@@ -148,17 +143,16 @@ public class EobHandler {
       SamhsaFilterMode samhsaFilterMode) {
     var claims = claimRepository.findByIds(claimUniqueIds, serviceDate, lastUpdated);
 
-    return claims.stream()
-        .filter(
-            claim -> {
-              var claimHasSamhsa = claimHasSamhsa(claim);
-              return samhsaFilterMode != SamhsaFilterMode.EXCLUDE || !claimHasSamhsa;
-            })
+    return filterSamhsaClaims(claims, samhsaFilterMode)
         .map(
             claim -> {
-              var claimHasSamhsa = claimHasSamhsa(claim);
+              var hasSamhsaClaims =
+                  samhsaFilterMode == SamhsaFilterMode.INCLUDE && claimHasSamhsa(claim);
+
               var securityStatus =
-                  claimHasSamhsa ? ClaimSecurityStatus.SAMHSA_APPLICABLE : ClaimSecurityStatus.NONE;
+                  hasSamhsaClaims
+                      ? ClaimSecurityStatus.SAMHSA_APPLICABLE
+                      : ClaimSecurityStatus.NONE;
 
               return claim.toFhir(securityStatus);
             })
