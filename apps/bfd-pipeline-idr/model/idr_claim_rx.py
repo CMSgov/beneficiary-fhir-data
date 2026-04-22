@@ -6,6 +6,12 @@ from pydantic import BeforeValidator
 from constants import (
     CLAIM_RX_TABLE,
     DEFAULT_MAX_DATE,
+    IDR_CLAIM_DATE_SIGNATURE_TABLE,
+    IDR_CLAIM_LINE_RX_TABLE,
+    IDR_CLAIM_LINE_TABLE,
+    IDR_CLAIM_TABLE,
+    IDR_CONTRACT_PBP_NUM_TABLE,
+    IDR_PROVIDER_HISTORY_TABLE,
 )
 from load_partition import LoadPartition
 from loader import LoadMode
@@ -270,9 +276,9 @@ class IdrClaimRx(IdrBaseModel):
                 UNION
                 {clm_dt_sgntr_query()}
                 UNION
-                {clm_child_query("v2_mdcr_clm_line")}
+                {clm_child_query(IDR_CLAIM_LINE_TABLE)}
                 UNION
-                {clm_child_query("v2_mdcr_clm_line_rx")}
+                {clm_child_query(IDR_CLAIM_LINE_RX_TABLE)}
             ),
             contracts AS (
                 SELECT cntrct_pbp_name, cntrct_num, cntrct_pbp_num,
@@ -280,31 +286,31 @@ class IdrClaimRx(IdrBaseModel):
                     PARTITION BY cntrct_num, cntrct_pbp_num 
                     ORDER BY cntrct_pbp_sk_obslt_dt DESC
                 ) AS contract_version_rank
-                FROM cms_vdm_view_mdcr_prd.v2_mdcr_cntrct_pbp_num
+                FROM {IDR_CONTRACT_PBP_NUM_TABLE}
             )
             SELECT {{COLUMNS}}
             FROM claims c
-            JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm} ON
+            JOIN {IDR_CLAIM_TABLE} {clm} ON
                 {clm}.geo_bene_sk = c.geo_bene_sk AND
                 {clm}.clm_dt_sgntr_sk = c.clm_dt_sgntr_sk AND
                 {clm}.clm_type_cd = c.clm_type_cd AND
                 {clm}.clm_num_sk = c.clm_num_sk
-            JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_dt_sgntr {sgntr} ON 
+            JOIN {IDR_CLAIM_DATE_SIGNATURE_TABLE} {sgntr} ON 
                 {sgntr}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
-            JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_line {line} ON
+            JOIN {IDR_CLAIM_LINE_TABLE} {line} ON
                 {clm}.geo_bene_sk = {line}.geo_bene_sk AND
                 {clm}.clm_dt_sgntr_sk = {line}.clm_dt_sgntr_sk AND
                 {clm}.clm_type_cd = {line}.clm_type_cd AND
                 {clm}.clm_num_sk = {line}.clm_num_sk
-            LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_line_rx {rx_line} ON 
+            LEFT JOIN {IDR_CLAIM_LINE_RX_TABLE} {rx_line} ON 
                 {clm}.geo_bene_sk = {rx_line}.geo_bene_sk AND
                 {clm}.clm_dt_sgntr_sk = {rx_line}.clm_dt_sgntr_sk AND
                 {clm}.clm_type_cd = {rx_line}.clm_type_cd AND
                 {clm}.clm_num_sk = {rx_line}.clm_num_sk
-            LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_prvdr_hstry {prvdr_srvc}
+            LEFT JOIN {IDR_PROVIDER_HISTORY_TABLE} {prvdr_srvc}
                 ON {prvdr_srvc}.prvdr_npi_num = {clm}.prvdr_srvc_prvdr_npi_num
                 AND {prvdr_srvc}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
-            LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_prvdr_hstry {prvdr_prscrbng}
+            LEFT JOIN {IDR_PROVIDER_HISTORY_TABLE} {prvdr_prscrbng}
                 ON {prvdr_prscrbng}.prvdr_npi_num = {clm}.prvdr_prscrbng_prvdr_npi_num
                 AND {prvdr_prscrbng}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
             LEFT JOIN contracts {pbp_num}
