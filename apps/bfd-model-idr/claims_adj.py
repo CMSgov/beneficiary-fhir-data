@@ -17,8 +17,6 @@ from claims_static import (
     PHARMACY_CLM_TYPE_CDS,
     TARGET_RLT_COND_CODES,
     TARGET_SEQUENCE_NUMBERS,
-    generated_type_1_npis,
-    generated_type_2_npis,
     get_drg_dgns_codes,
     get_hcpcs_proc_codes,
     get_icd_10_dgns_codes,
