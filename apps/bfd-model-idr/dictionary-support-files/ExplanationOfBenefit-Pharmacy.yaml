@@ -10,6 +10,10 @@
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_UNIQ_ID
   fhirPath: ExplanationOfBenefit.identifier.where(type.coding.system = 'http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType' and type.coding.code = 'uc' ).value
+  profiles:
+    - Basis
+    - Regular
+    - Maximus
 - inputPath: ExplanationOfBenefit-Pharmacy.CLM_ORIG_CNTL_NUM
   appliesTo:
     - Pharmacy
@@ -18,6 +22,10 @@
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_ORIG_CNTL_NUM
   fhirPath: ExplanationOfBenefit.identifier.where(system = 'https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM').value
+  profiles:
+    - Basis
+    - Regular
+    - Maximus
 - inputPath: ExplanationOfBenefit-Pharmacy.CLM_TYPE_CD
   appliesTo:
     - Pharmacy
@@ -29,12 +37,20 @@
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_TYPE_CD
   fhirPath: ExplanationOfBenefit.type.coding.where(system = 'https://bluebutton.cms.gov/fhir/CodeSystem/CLM-TYPE-CD').code
+  profiles:
+    - Basis
+    - Regular
+    - Maximus
 - inputPath: ExplanationOfBenefit-Pharmacy.BENE_SK
   appliesTo:
     - Pharmacy
   sources:
     - DDPS
   fhirPath: ExplanationOfBenefit.patient.reference.substring(8)
+  profiles:
+    - Basis
+    - Regular
+    - Maximus
 - inputPath: ExplanationOfBenefit-Pharmacy.CLM_FROM_DT
   appliesTo:
     - Pharmacy
@@ -43,6 +59,10 @@
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_FROM_DT
   fhirPath: ExplanationOfBenefit.billablePeriod.start
+  profiles:
+    - Basis
+    - Regular
+    - Maximus
 - inputPath: ExplanationOfBenefit-Pharmacy.CLM_THRU_DT
   appliesTo:
     - Pharmacy
@@ -51,6 +71,10 @@
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_THRU_DT
   fhirPath: ExplanationOfBenefit.billablePeriod.end
+  profiles:
+    - Basis
+    - Regular
+    - Maximus
 - inputPath: ExplanationOfBenefit-Pharmacy.CLM_EFCTV_DT
   appliesTo:
     - Pharmacy
@@ -61,6 +85,10 @@
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_EFCTV_DT
   fhirPath: ExplanationOfBenefit.created
+  profiles:
+    - Basis
+    - Regular
+    - Maximus
 - inputPath: ExplanationOfBenefit-Pharmacy.CLM_SRC_ID
   appliesTo:
     - Pharmacy
@@ -70,6 +98,10 @@
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_SRC_ID
   fhirPath: ExplanationOfBenefit.meta.source
+  profiles:
+    - Basis
+    - Regular
+    - Maximus
 - inputPath: ExplanationOfBenefit-Pharmacy.CLM_SRVC_PRVDR_GNRC_ID_NUM
   appliesTo:
     - Pharmacy
@@ -82,6 +114,10 @@
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_SRVC_PRVDR_GNRC_ID_NUM
   fhirPath: ExplanationOfBenefit.contained.where(id = %context.provider.reference.substring(1)).identifier.where(system='http://bluebutton.cms.gov/fhir/identifiers/GenericIdNum').value
+  profiles:
+    - Basis
+    - Regular
+    - Maximus
 - inputPath: ExplanationOfBenefit-Pharmacy.PRVDR_SRVC_PRVDR_NPI_NUM
   appliesTo:
     - Pharmacy
@@ -93,6 +129,10 @@
   sourceColumn: PRVDR_SRVC_PRVDR_NPI_NUM
   fhirPath: ExplanationOfBenefit.contained.where(id = %root.provider.reference.substring(1)).identifier.where(system='http://hl7.org/fhir/sid/us-npi').value
   notes: CCLF7.CLM_SRVC_PRVDR_GNRC_ID_NUM can provide NCPDP numbers in .008% of instances (among other rare ID types). These are surfaced as generic ID numbers, and may require a different FHIRPath expression (using system = "http://bluebutton.cms.gov/fhir/identifiers/GenericIdNum"). 
+  profiles:
+    - Basis
+    - Regular
+    - Maximus
 - inputPath: ExplanationOfBenefit-Pharmacy.PRVDR_SRVC_ID_QLFYR_CD
   appliesTo:
     - Pharmacy
@@ -103,6 +143,10 @@
   sourceView: V2_MDCR_CLM
   sourceColumn: PRVDR_SRVC_ID_QLFYR_CD
   fhirPath: ExplanationOfBenefit.contained.where(id = %context.provider.reference.substring(1)).identifier.type.where(system='http://bluebutton.cms.gov/fhir/CodeSystem/PRVDR-ID-QLFYR-CD').code
+  profiles:
+    - Basis
+    - Regular
+    - Maximus
 - inputPath: ExplanationOfBenefit-Pharmacy.PRVDR_PRSBNG_ID_QLFYR_CD
   appliesTo:
     - Pharmacy
@@ -113,6 +157,10 @@
   sourceView: V2_MDCR_CLM
   sourceColumn: PRVDR_PRSBNG_ID_QLFYR_CD
   fhirPath: ExplanationOfBenefit.careTeam.where(role.coding.where(code = 'prescribing').exists()).provider.identifier.type.coding.where(system='http://bluebutton.cms.gov/fhir/CodeSystem/PRVDR-ID-QLFYR-CD').code
+  profiles:
+    - Basis
+    - Regular
+    - Maximus
 - inputPath: ExplanationOfBenefit-Pharmacy.CLM_PRSBNG_PRVDR_GNRC_ID_NUM
   appliesTo:
     - Pharmacy
@@ -125,6 +173,10 @@
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_PRSBNG_PRVDR_GNRC_ID_NUM
   fhirPath: ExplanationOfBenefit.careTeam.where(role.coding.where(code='prescribing').exists()).provider.identifier.where(system='http://bluebutton.cms.gov/fhir/identifiers/GenericIdNum').value
+  profiles:
+    - Basis
+    - Regular
+    - Maximus
 - inputPath: ExplanationOfBenefit-Pharmacy.PRVDR_PRSCRBNG_PRVDR_NPI_NUM
   appliesTo:
     - Pharmacy
@@ -136,6 +188,10 @@
   sourceColumn: PRVDR_PRSCRBNG_PRVDR_NPI_NUM
   fhirPath: ExplanationOfBenefit.careTeam.where(role.coding.where(code='prescribing').exists()).provider.identifier.where(system='http://hl7.org/fhir/sid/us-npi').value
   notes: Not all will populate an NPI. Some will be other types, see CLM_PRSBNG_PRVDR_GNRC_ID_NUM. 
+  profiles:
+    - Basis
+    - Regular
+    - Maximus
 - inputPath: ExplanationOfBenefit-Pharmacy.PRVDR_LAST_NAME
   appliesTo:
     - Pharmacy
@@ -144,6 +200,10 @@
   sourceView: V2_MDCR_PRVDR_HSTRY
   sourceColumn: PRVDR_LAST_NAME
   fhirPath: ExplanationOfBenefit.careTeam.where(role.coding.where(code='prescribing').exists()).provider.display
+  profiles:
+    - Basis
+    - Regular
+    - Maximus
 - inputPath: ExplanationOfBenefit-Pharmacy.CLM_PD_DT
   appliesTo:
     - Pharmacy
@@ -154,6 +214,10 @@
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_PD_DT
   fhirPath: ExplanationOfBenefit.payment.date
+  profiles:
+    - Basis
+    - Regular
+    - Maximus
 - inputPath: SupportingInfoComponent.CLM_CMS_PROC_DT
   appliesTo:
     - Pharmacy
@@ -162,6 +226,8 @@
   sourceView: V2_MDCR_CLM_DT_SGNTR
   sourceColumn: CLM_CMS_PROC_DT
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_CMS_PROC_DT').exists()).timing
+  profiles:
+    - Maximus
 - inputPath: SupportingInfoComponent.CLM_SBMT_FRMT_CD
   appliesTo:
     - Pharmacy
@@ -173,6 +239,9 @@
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_SBMT_FRMT_CD
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_SBMT_FRMT_CD').exists()).code.coding.code
+  profiles:
+    - Regular
+    - Maximus
 - inputPath: ExplanationOfBenefit-Pharmacy.CLM_BENE_PMT_AMT
   appliesTo:
     - Pharmacy
@@ -183,6 +252,9 @@
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_BENE_PMT_AMT
   fhirPath: ExplanationOfBenefit.total.where(category.coding.where(system='http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication' and code='paidbypatient').exists() and category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_BENE_PMT_AMT').exists()).amount.value
+  profiles:
+    - Regular
+    - Maximus
 - inputPath: ExplanationOfBenefit-Pharmacy.CLM_OTHR_TP_PD_AMT
   appliesTo:
     - Pharmacy
@@ -191,6 +263,9 @@
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_OTHR_TP_PD_AMT
   fhirPath: ExplanationOfBenefit.total.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_OTHR_TP_PD_AMT').exists()).amount.value
+  profiles:
+    - Regular
+    - Maximus
 - inputPath: SupportingInfoComponent.CLM_SBMTR_CNTRCT_NUM
   appliesTo:
     - Pharmacy
@@ -201,6 +276,10 @@
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_SBMTR_CNTRCT_NUM
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_SBMTR_CNTRCT_NUM').exists()).value
+  profiles:
+    - Basis
+    - Regular
+    - Maximus
 - inputPath: SupportingInfoComponent.CLM_SBMTR_CNTRCT_PBP_NUM
   appliesTo:
     - Pharmacy
@@ -211,6 +290,10 @@
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_SBMTR_CNTRCT_PBP_NUM
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_SBMTR_CNTRCT_PBP_NUM').exists()).value
+  profiles:
+    - Basis
+    - Regular
+    - Maximus
 - inputPath: ExplanationOfBenefit-Pharmacy.CNTRCT_PBP_NAME
   appliesTo:
     - Pharmacy
@@ -219,6 +302,10 @@
   sourceView: V2_MDCR_CNTRCT_PBP_NUM
   sourceColumn: CNTRCT_PBP_NAME
   fhirPath: ExplanationOfBenefit.contained.where(id='insurer-org').name
+  profiles:
+    - Basis
+    - Regular
+    - Maximus
 - inputPath: LineItemComponent.CLM_LINE_NUM
   appliesTo:
     - Pharmacy
@@ -227,6 +314,10 @@
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_LINE_NUM
   fhirPath: ExplanationOfBenefit.item.sequence
+  profiles:
+    - Basis
+    - Regular
+    - Maximus
 - inputPath: LineItemComponent.CLM_LINE_FROM_DT
   appliesTo:
     - Pharmacy
@@ -239,6 +330,10 @@
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_LINE_FROM_DT
   fhirPath: ExplanationOfBenefit.item.serviced
+  profiles:
+    - Basis
+    - Regular
+    - Maximus
 - inputPath: LineItemComponent.CLM_LINE_NDC_CD
   appliesTo:
     - Pharmacy
@@ -252,6 +347,10 @@
   sourceColumn: CLM_LINE_NDC_CD
   fhirPath: (ExplanationOfBenefit.item.productOrService.coding|ExplanationOfBenefit.item.detail.productOrService.coding).where(system = 'http://hl7.org/fhir/sid/ndc').code
   notes: For deleted PDE claims, this will have a data absent reason. 
+  profiles:
+    - Basis
+    - Regular
+    - Maximus
 - inputPath: LineItemComponent.CLM_LINE_NDC_QTY
   appliesTo:
     - Pharmacy
@@ -262,6 +361,10 @@
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_LINE_NDC_QTY
   fhirPath: (ExplanationOfBenefit.item.quantity|ExplanationOfBenefit.item.detail.quantity).value
+  profiles:
+    - Basis
+    - Regular
+    - Maximus
 - inputPath: LineItemComponent.CLM_LINE_NDC_QTY_QLFYR_CD
   appliesTo:
     - Pharmacy
@@ -270,6 +373,10 @@
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_LINE_NDC_QTY_QLFYR_CD
   fhirPath: (ExplanationOfBenefit.item.quantity|ExplanationOfBenefit.item.detail.quantity).unit
+  profiles:
+    - Basis
+    - Regular
+    - Maximus
 - inputPath: LineItemComponent.CLM_LINE_CVRD_PD_AMT
   appliesTo:
     - Pharmacy
@@ -279,6 +386,9 @@
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_LINE_CVRD_PD_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='http://terminology.hl7.org/CodeSystem/adjudication' and code='benefit').exists()).amount.value
+  profiles:
+    - Regular
+    - Maximus
 - inputPath: LineItemComponent.CLM_LINE_BENE_PMT_AMT
   appliesTo:
     - Pharmacy
@@ -291,6 +401,9 @@
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_LINE_BENE_PMT_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication' and code='paidbypatient').exists() and category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_LINE_BENE_PMT_AMT').exists()).amount.value
+  profiles:
+    - Regular
+    - Maximus
 - inputPath: LineItemComponent.CLM_LINE_GRS_ABOVE_THRSHLD_AMT
   appliesTo:
     - Pharmacy
@@ -301,6 +414,8 @@
   sourceView: V2_MDCR_CLM_LINE_RX
   sourceColumn: CLM_LINE_GRS_ABOVE_THRSHLD_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and category.coding.code='CLM_LINE_GRS_ABOVE_THRSHLD_AMT').amount.value
+  profiles:
+    - Maximus
 - inputPath: LineItemComponent.CLM_LINE_GRS_BLW_THRSHLD_AMT
   appliesTo:
     - Pharmacy
@@ -311,6 +426,8 @@
   sourceView: V2_MDCR_CLM_LINE_RX
   sourceColumn: CLM_LINE_GRS_BLW_THRSHLD_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and category.coding.code='CLM_LINE_GRS_BLW_THRSHLD_AMT').amount.value
+  profiles:
+    - Maximus
 - inputPath: LineItemComponent.CLM_LINE_LIS_AMT
   appliesTo:
     - Pharmacy
@@ -321,6 +438,8 @@
   sourceView: V2_MDCR_CLM_LINE_RX
   sourceColumn: CLM_LINE_LIS_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and category.coding.code='CLM_LINE_LIS_AMT').amount.value
+  profiles:
+    - Maximus
 - inputPath: LineItemComponent.CLM_LINE_TROOP_TOT_AMT
   appliesTo:
     - Pharmacy
@@ -330,6 +449,8 @@
   sourceColumn: CLM_LINE_TROOP_TOT_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and category.coding.code='CLM_LINE_TROOP_TOT_AMT').amount.value
   suppressInDD: true
+  profiles:
+    - Maximus
 - inputPath: LineItemComponent.CLM_LINE_PLRO_AMT
   appliesTo:
     - Pharmacy
@@ -340,6 +461,8 @@
   sourceView: V2_MDCR_CLM_LINE_RX
   sourceColumn: CLM_LINE_PLRO_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and category.coding.code='CLM_LINE_PLRO_AMT').amount.value
+  profiles:
+    - Maximus
 - inputPath: LineItemComponent.CLM_RPTD_MFTR_DSCNT_AMT
   appliesTo:
     - Pharmacy
@@ -351,6 +474,8 @@
   sourceColumn: CLM_RPTD_MFTR_DSCNT_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and category.coding.code='CLM_RPTD_MFTR_DSCNT_AMT').amount.value
   suppressInDD: true
+  profiles:
+    - Maximus
 - inputPath: LineItemComponent.CLM_LINE_INGRDNT_CST_AMT
   appliesTo:
     - Pharmacy
@@ -360,6 +485,8 @@
   sourceColumn: CLM_LINE_INGRDNT_CST_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and category.coding.code='CLM_LINE_INGRDNT_CST_AMT').amount.value
   suppressInDD: true
+  profiles:
+    - Maximus
 - inputPath: LineItemComponent.CLM_LINE_SRVC_CST_AMT
   appliesTo:
     - Pharmacy
@@ -369,6 +496,8 @@
   sourceColumn: CLM_LINE_SRVC_CST_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and category.coding.code='CLM_LINE_SRVC_CST_AMT').amount.value
   suppressInDD: true
+  profiles:
+    - Maximus
 - inputPath: LineItemComponent.CLM_LINE_SLS_TAX_AMT
   appliesTo:
     - Pharmacy
@@ -378,6 +507,8 @@
   sourceColumn: CLM_LINE_SLS_TAX_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and category.coding.code='CLM_LINE_SLS_TAX_AMT').amount.value
   suppressInDD: true
+  profiles:
+    - Maximus
 - inputPath: LineItemComponent.CLM_LINE_VCCN_ADMIN_FEE_AMT
   appliesTo:
     - Pharmacy
@@ -387,6 +518,8 @@
   sourceColumn: CLM_LINE_VCCN_ADMIN_FEE_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and category.coding.code='CLM_LINE_VCCN_ADMIN_FEE_AMT').amount.value
   suppressInDD: true
+  profiles:
+    - Maximus
 - inputPath: LineItemComponent.CLM_LINE_GRS_CVRD_CST_TOT_AMT
   appliesTo:
     - Pharmacy
@@ -396,6 +529,8 @@
   sourceColumn: CLM_LINE_GRS_CVRD_CST_TOT_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and category.coding.code='CLM_LINE_GRS_CVRD_CST_TOT_AMT').amount.value
   suppressInDD: true
+  profiles:
+    - Maximus
 - inputPath: LineItemComponent.CLM_LINE_RPTD_GAP_DSCNT_AMT
   appliesTo:
     - Pharmacy
@@ -405,6 +540,8 @@
   sourceView: V2_MDCR_CLM_LINE_RX
   sourceColumn: CLM_LINE_RPTD_GAP_DSCNT_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and category.coding.code='CLM_LINE_RPTD_GAP_DSCNT_AMT').amount.value
+  profiles:
+    - Maximus
 - inputPath: LineItemComponent.TOT_RX_CST_AMT
   appliesTo:
     - Pharmacy
@@ -414,6 +551,9 @@
   bfdDerived: True
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='TOT_RX_CST_AMT')).amount.value
   notes: Derived using the sum of CLM_LINE_INGRDNT_CST_AMT, CLM_LINE_SRVC_CST_AMT, CLM_LINE_SLS_TAX_AMT, and CLM_LINE_VCCN_ADMIN_FEE_AMT. TOT_RX_CST_AMT is also set on the EOB's total with fhirPath ExplanationOfBenefit.total.where(category.coding.where(system='http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication' and code='submitted').exists() and category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='TOT_RX_CST_AMT').exists()).amount.value
+  profiles:
+    - Regular
+    - Maximus
 - inputPath: LineItemComponent.CLM_PRCNG_EXCPTN_CD
   appliesTo:
     - Pharmacy
@@ -424,6 +564,10 @@
   sourceView: V2_MDCR_CLM_LINE_RX
   sourceColumn: CLM_PRCNG_EXCPTN_CD
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator' and code='benefitpaymentstatus').exists()).reason.coding.where(system='http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus').code
+  profiles:
+    - Basis
+    - Regular
+    - Maximus
 - inputPath: SupportingInfoComponent.CLM_LINE_AUTHRZD_FILL_NUM
   appliesTo:
     - Pharmacy
@@ -434,6 +578,10 @@
   sourceView: V2_MDCR_CLM_LINE_RX
   sourceColumn: CLM_LINE_AUTHRZD_FILL_NUM
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.system='http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType' and category.coding.code='refillsauthorized').valueQuantity.value
+  profiles:
+    - Basis
+    - Regular
+    - Maximus
 - inputPath: SupportingInfoComponent.CLM_PHRMCY_SRVC_TYPE_CD
   appliesTo:
     - Pharmacy
@@ -447,6 +595,8 @@
   sourceView: V2_MDCR_CLM_LINE_RX
   sourceColumn: CLM_PHRMCY_SRVC_TYPE_CD
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information' and code='CLM_PHRMCY_SRVC_TYPE_CD').exists()).code.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PHRMCY-SRVC-TYPE-CD').code
+  profiles:
+    - Maximus
 - inputPath: SupportingInfoComponent.CLM_LINE_RX_ORGN_CD
   appliesTo:
     - Pharmacy
@@ -458,6 +608,10 @@
   sourceView: V2_MDCR_CLM_LINE_RX
   sourceColumn: CLM_LINE_RX_ORGN_CD
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType' and code='rxorigincode').exists()).code.coding.where(system='http://terminology.hl7.org/CodeSystem/NCPDPPrescriptionOriginCode').code
+  profiles:
+    - Basis
+    - Regular
+    - Maximus
 - inputPath: SupportingInfoComponent.CLM_BRND_GNRC_CD
   appliesTo:
     - Pharmacy
@@ -469,6 +623,10 @@
   ccwMapping:
     - BRND_GNRC_CD
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType' and code='brandgenericindicator').exists()).code.coding.where(system='http://terminology.hl7.org/CodeSystem/NCPDPBrandGenericIndicator').code
+  profiles:
+    - Basis
+    - Regular
+    - Maximus
 - inputPath: SupportingInfoComponent.CLM_PTNT_RSDNC_CD
   appliesTo:
     - Pharmacy
@@ -480,6 +638,8 @@
   sourceView: V2_MDCR_CLM_LINE_RX
   sourceColumn: CLM_PTNT_RSDNC_CD
   fhirPath: ExplanationOfBenefit.supportingInfo.code.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PTNT-RSDNC-CD').code
+  profiles:
+    - Maximus
 - inputPath: SupportingInfoComponent.CLM_LTC_DSPNSNG_MTHD_CD
   appliesTo:
     - Pharmacy
@@ -491,6 +651,8 @@
   sourceView: V2_MDCR_CLM_LINE_RX
   sourceColumn: CLM_LTC_DSPNSNG_MTHD_CD
   fhirPath: ExplanationOfBenefit.supportingInfo.code.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/CLM-LTC-DSPNSNG-MTHD-CD').code 
+  profiles:
+    - Maximus
 - inputPath: SupportingInfoComponent.CLM_CMPND_CD
   appliesTo:
     - Pharmacy
@@ -502,6 +664,10 @@
   sourceView: V2_MDCR_CLM_LINE_RX
   sourceColumn: CLM_CMPND_CD
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType' and code='compoundcode').exists()).code.coding.where(system='http://terminology.hl7.org/CodeSystem/NCPDPCompoundCode').code
+  profiles:
+    - Basis
+    - Regular
+    - Maximus
 - inputPath: SupportingInfoComponent.CLM_LINE_DAYS_SUPLY_QTY
   appliesTo:
     - Pharmacy
@@ -512,6 +678,10 @@
   sourceView: V2_MDCR_CLM_LINE_RX
   sourceColumn: CLM_LINE_DAYS_SUPLY_QTY
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType' and code='dayssupply').exists()).valueQuantity.value
+  profiles:
+    - Basis
+    - Regular
+    - Maximus
 - inputPath: SupportingInfoComponent.CLM_LINE_RX_FILL_NUM
   appliesTo:
     - Pharmacy
@@ -524,6 +694,10 @@
   sourceView: V2_MDCR_CLM_LINE_RX
   sourceColumn: CLM_LINE_RX_FILL_NUM
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType' and code='refillnum').exists()).valueQuantity.value
+  profiles:
+    - Basis
+    - Regular
+    - Maximus
 - inputPath: SupportingInfoComponent.CLM_DAW_PROD_SLCTN_CD
   appliesTo:
     - Pharmacy
@@ -536,6 +710,10 @@
   sourceView: V2_MDCR_CLM_LINE_RX
   sourceColumn: CLM_DAW_PROD_SLCTN_CD
   fhirPath: ExplanationOfBenefit.supportingInfo.code.coding.where(system='http://terminology.hl7.org/CodeSystem/NCPDPDispensedAsWrittenOrProductSelectionCode').code 
+  profiles:
+    - Basis
+    - Regular
+    - Maximus
 - inputPath: SupportingInfoComponent.CLM_DRUG_CVRG_STUS_CD
   appliesTo:
     - Pharmacy
@@ -547,6 +725,8 @@
   sourceView: V2_MDCR_CLM_LINE_RX
   sourceColumn: CLM_DRUG_CVRG_STUS_CD
   fhirPath: ExplanationOfBenefit.supportingInfo.code.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DRUG-CVRG-STUS-CD').code 
+  profiles:
+    - Maximus
 - inputPath: SupportingInfoComponent.CLM_CTSTRPHC_CVRG_IND_CD
   appliesTo:
     - Pharmacy
@@ -558,6 +738,8 @@
   sourceView: V2_MDCR_CLM_LINE_RX
   sourceColumn: CLM_CTSTRPHC_CVRG_IND_CD
   fhirPath: ExplanationOfBenefit.supportingInfo.code.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CTSTRPHC-CVRG-IND-CD').code 
+  profiles:
+    - Maximus
 - inputPath: SupportingInfoComponent.CLM_ADJSTMT_TYPE_CD
   appliesTo:
     - Pharmacy
@@ -571,6 +753,8 @@
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_ADJSTMT_TYPE_CD
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_ADJSTMT_TYPE_CD').exists()).code.coding.code
+  profiles:
+    - Maximus
 - inputPath: SupportingInfoComponent.CLM_DSPNSNG_STUS_CD
   appliesTo:
     - Pharmacy
@@ -584,6 +768,8 @@
   sourceView: V2_MDCR_CLM_LINE_RX
   sourceColumn: CLM_DSPNSNG_STUS_CD
   fhirPath: ExplanationOfBenefit.supportingInfo.code.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DSPNSNG-STUS-CD').code 
+  profiles:
+    - Maximus
 - inputPath: SupportingInfoComponent.CLM_IDR_LD_DT
   appliesTo:
     - Pharmacy
@@ -594,6 +780,8 @@
   sourceView: V2_MDCR_CLM
   sourceColumn: CLM_IDR_LD_DT
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_IDR_LD_DT').exists()).timing
+  profiles:
+    - Maximus
 - inputPath: SupportingInfoComponent.CLM_LINE_RX_NUM
   appliesTo:
     - Pharmacy
@@ -606,6 +794,8 @@
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_LINE_RX_NUM
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information' and code='CLM_LINE_RX_NUM').exists()).value
+  profiles:
+    - Maximus
 - inputPath: LineItemComponent.CLM_LINE_NCVRD_PD_AMT
   appliesTo:
     - Pharmacy
@@ -615,6 +805,8 @@
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_LINE_NCVRD_PD_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_NCVRD_PD_AMT')).amount.value
+  profiles:
+    - Maximus
 - inputPath: LineItemComponent.CLM_LINE_OTHR_TP_PD_AMT
   appliesTo:
     - Pharmacy
@@ -625,6 +817,8 @@
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_LINE_OTHR_TP_PD_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_OTHR_TP_PD_AMT')).amount.value
+  profiles:
+    - Maximus
 - inputPath: LineItemComponent.CLM_CMS_CALCD_MFTR_DSCNT_AMT
   appliesTo:
     - Pharmacy
@@ -634,6 +828,8 @@
   sourceColumn: CLM_CMS_CALCD_MFTR_DSCNT_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and category.coding.code='CLM_CMS_CALCD_MFTR_DSCNT_AMT').amount.value
   suppressInDD: true
+  profiles:
+    - Maximus
 - inputPath: LineItemComponent.CLM_LINE_REBT_PASSTHRU_POS_AMT
   appliesTo:
     - Pharmacy
@@ -643,6 +839,8 @@
   sourceColumn: CLM_LINE_REBT_PASSTHRU_POS_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and category.coding.code='CLM_LINE_REBT_PASSTHRU_POS_AMT').amount.value
   suppressInDD: true
+  profiles:
+    - Maximus
 - inputPath: LineItemComponent.CLM_PHRMCY_PRICE_DSCNT_AT_POS_AMT
   appliesTo:
     - Pharmacy
@@ -652,3 +850,5 @@
   sourceColumn: CLM_PHRMCY_PRICE_DSCNT_AT_POS_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and category.coding.code='CLM_PHRMCY_PRICE_DSCNT_AT_POS_AMT').amount.value
   suppressInDD: true
+  profiles:
+    - Maximus
