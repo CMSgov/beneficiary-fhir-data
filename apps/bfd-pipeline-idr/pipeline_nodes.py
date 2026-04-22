@@ -37,12 +37,12 @@ type NodePartitionedModelInput = tuple[type[IdrBaseModel], LoadPartition | None]
 
 configure_logger()
 
-_CLAIM_PARENT_CHILD_TABLES : dict[type[IdrBaseModel], type[IdrBaseModel] | None] = { 
+_CLAIM_PARENT_CHILD_TABLES: dict[type[IdrBaseModel], type[IdrBaseModel] | None] = {
     IdrClaimProfessionalNch: IdrClaimItemProfessionalNch,
     IdrClaimInstitutionalNch: IdrClaimItemInstitutionalNch,
     IdrClaimProfessionalSs: IdrClaimItemProfessionalSs,
     IdrClaimInstitutionalSs: IdrClaimItemInstitutionalSs,
-    IdrClaimRx: None, # RX/Part D is special because we combine claim + claim line
+    IdrClaimRx: None,  # RX/Part D is special because we combine claim + claim line
 }
 
 _CLAIM_TABLES: list[type[IdrBaseModel]] = [
@@ -243,10 +243,12 @@ def do_stage4(
 
     return False
 
+
 def collect_stage4(
     do_stage4: Collect[bool],
 ) -> bool:
     return all(do_stage4)
+
 
 # stage 5 is purging non-latest claims after extract and load is complete
 def stage5_inputs(
@@ -258,9 +260,11 @@ def stage5_inputs(
         filter_tables([*_CLAIM_TABLES, IdrClaimRx], tables_to_load), load_type
     )
 
+
 def do_stage5(
     stage5_inputs: NodePartitionedModelInput,
-    load_mode: LoadMode,) -> bool:
+    load_mode: LoadMode,
+) -> bool:
     model_type, partition = stage5_inputs
     return purge_non_latest_claims(
         cls=model_type,
@@ -268,6 +272,7 @@ def do_stage5(
         parent_child_tables=_CLAIM_PARENT_CHILD_TABLES,
         load_mode=load_mode,
     )
+
 
 def collect_stage5(
     do_stage5: Collect[bool],

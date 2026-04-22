@@ -102,27 +102,32 @@ def extract_and_load(
             logger.error("error loading %s", cls.table(), exc_info=ex)
             raise ex
 
+
 def purge_non_latest_claims(
     cls: type[IdrBaseModel],
     load_mode: LoadMode,
     parent_child_tables: dict[type[IdrBaseModel], type[IdrBaseModel] | None],
-    partition: LoadPartition = DEFAULT_PARTITION
+    partition: LoadPartition = DEFAULT_PARTITION,
 ) -> bool:
     logger.info("purging %s", cls.table())
     parent_table: type[IdrBaseModel] = cls
     child_table: type[IdrBaseModel] | None = parent_child_tables.get(cls)
     loader = PostgresLoader(load_mode)
 
-    claim_range_filter = '1 = 1' if partition.start_date is None else f"""
-    AND p.clm_frm_dt BETWEEN {partition.start_date.strftime('%Y-%m-%d')} 
-    AND {partition.start_date.strftime('%Y-%m-%d')}
+    claim_range_filter = (
+        "1 = 1"
+        if partition.start_date is None
+        else f"""
+    AND p.clm_frm_dt BETWEEN {partition.start_date.strftime("%Y-%m-%d")} 
+    AND {partition.start_date.strftime("%Y-%m-%d")}
     """
+    )
     claim_type_codes = ",".join([str(c) for c in partition.claim_type_codes])
-    claim_type_code_filter = f'p.clm_type_cd IN ( {claim_type_codes} )'
+    claim_type_code_filter = f"p.clm_type_cd IN ( {claim_type_codes} )"
 
     parent_table_name = parent_table.table()
-    
-    if (child_table):
+
+    if child_table:
         child_table_name = child_table.table()
         logger.info("Child: %s", child_table_name)
         childSQL = f"""
@@ -161,4 +166,3 @@ def purge_non_latest_claims(
     except Exception as e:
         logger.exception(e)
         return False
-    
