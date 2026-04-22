@@ -40,7 +40,8 @@ public class Configuration implements Serializable {
   // Unfortunately, constructor injection doesn't work with @ConfigurationProperties
 
   /** Identifies which Spring profiles indicate that the server is being run on a local machine. */
-  private static final List<String> ALLOWED_LOCAL_PROFILES = List.of("local", "sqlprofile");
+  private static final List<String> ALLOWED_LOCAL_PROFILES =
+      List.of("local", "sql-profile", "structured-log");
 
   // Getters should only be generated for configuration properties, not dependencies
   @Getter(value = AccessLevel.NONE)
