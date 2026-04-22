@@ -1,13 +1,20 @@
+import logging
+import re
+import string
 from datetime import date, datetime
 from typing import Annotated, override
 
-from pydantic import BeforeValidator
+from pydantic import BeforeValidator, computed_field
+from unidecode import unidecode
 
 from constants import (
     BENEFICIARY_TABLE,
+    IDR_BENE_HISTORY_TABLE,
+    IDR_BENE_XREF_TABLE,
 )
 from load_partition import LoadPartition
 from loader import LoadMode
+from matching import normalize_address
 from model.base_model import (
     ALIAS,
     ALIAS_HSTRY,
@@ -26,6 +33,16 @@ from model.base_model import (
     transform_null_date_to_max,
     transform_null_date_to_min,
 )
+
+logger = logging.getLogger(__name__)
+
+
+def _normalize_str(s: str) -> str:
+    cleaned_str = unidecode(s).translate(translator)
+    return re.sub(r"\s+", "", cleaned_str).upper()
+
+
+translator = str.maketrans("", "", string.punctuation)
 
 
 class IdrBeneficiary(IdrBaseModel):
@@ -99,6 +116,44 @@ class IdrBeneficiary(IdrBaseModel):
         BeforeValidator(transform_null_date_to_min),
     ]
 
+    @computed_field
+    @property
+    def bfd_normalized_1st_name(self) -> str:
+        return _normalize_str(self.bene_1st_name)
+
+    @computed_field
+    @property
+    def bfd_normalized_last_name(self) -> str:
+        return _normalize_str(self.bene_last_name)
+
+    @computed_field
+    @property
+    def bfd_normalized_address(self) -> str:
+        # Ignore empty or unknown addresses
+        if (
+            not _normalize_str(self.bene_line_1_adr)
+            or self.bene_line_1_adr.startswith("UNKNOWN")
+            or self.bene_line_1_adr in ("UNK ADDRESS", "UNK", "UNKNOW")
+        ):
+            return ""
+
+        try:
+            return normalize_address(
+                f"{self.bene_line_1_adr} "
+                f"{self.bene_line_2_adr} "
+                f"{self.bene_line_3_adr} "
+                f"{self.bene_line_4_adr} "
+                f"{self.bene_line_5_adr} "
+                f"{self.bene_line_6_adr}, "
+                f"{self.geo_zip_plc_name}, "
+                f"{self.geo_usps_state_cd}, "
+                f"{self.geo_zip5_cd}"
+            ).replace("\n", " ")
+        except Exception:
+            # Not logging exception since it could contain address
+            logger.warning("error normalizing address. bene_sk: %d", self.bene_sk)
+            return ""
+
     @override
     @staticmethod
     def table() -> str:
@@ -140,7 +195,7 @@ class IdrBeneficiary(IdrBaseModel):
                         PARTITION BY bene_sk, bene_xref_sk
                         ORDER BY src_rec_updt_ts DESC
                     ) AS row_order
-                FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_xref
+                FROM {IDR_BENE_XREF_TABLE}
             ),
             current_xref AS (
                 SELECT
@@ -151,7 +206,7 @@ class IdrBeneficiary(IdrBaseModel):
                     bx.idr_insrt_ts,
                     bx.idr_updt_ts
                 FROM ordered_xref ox
-                JOIN cms_vdm_view_mdcr_prd.v2_mdcr_bene_xref bx
+                JOIN {IDR_BENE_XREF_TABLE} bx
                     ON bx.bene_sk = ox.bene_sk
                     AND bx.bene_xref_sk = ox.bene_xref_sk
                     AND bx.bene_hicn_num = ox.bene_hicn_num
@@ -162,7 +217,7 @@ class IdrBeneficiary(IdrBaseModel):
                 {deceased_bene_filter(hstry)}
             )
             SELECT {{COLUMNS}}
-            FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry {hstry}
+            FROM {IDR_BENE_HISTORY_TABLE} {hstry}
             -- NOTE: the join condition is intentionally inverted here
             -- In the xref table, the bene_sk and bene_xref_sk fields are mirrored
             LEFT JOIN current_xref {xref}

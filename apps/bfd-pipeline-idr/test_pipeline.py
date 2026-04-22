@@ -16,6 +16,7 @@ from testcontainers.core.config import testcontainers_config  # type: ignore
 # https://github.com/testcontainers/testcontainers-python/issues/305
 from testcontainers.postgres import PostgresContainer  # type: ignore
 
+from constants import IDR_BENE_HISTORY_TABLE, IDR_CLAIM_TABLE
 from load_events import IdrJobLoadEvent, IdrJobType
 from load_partition import LoadType
 from load_synthetic import load_from_csv
@@ -93,8 +94,8 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
     # Update all values to current dates then change specific dates
     # to older than 60 days to test the functionality.
     conn.execute(
-        """
-            UPDATE cms_vdm_view_mdcr_prd.v2_mdcr_clm
+        f"""
+            UPDATE {IDR_CLAIM_TABLE}
             SET idr_insrt_ts=%(timestamp)s,
                 idr_updt_ts=%(timestamp)s,
                 clm_idr_ld_dt=%(today)s
@@ -106,8 +107,8 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
     )
 
     conn.execute(
-        """
-            UPDATE cms_vdm_view_mdcr_prd.v2_mdcr_clm
+        f"""
+            UPDATE {IDR_CLAIM_TABLE}
             SET idr_updt_ts=%(none)s, idr_insrt_ts=%(timestamp)s
             WHERE clm_uniq_id = 1128619260039
             """,
@@ -115,8 +116,8 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
     )
 
     conn.execute(
-        """
-            UPDATE cms_vdm_view_mdcr_prd.v2_mdcr_clm
+        f"""
+            UPDATE {IDR_CLAIM_TABLE}
             SET idr_updt_ts=%(timestamp)s
             WHERE clm_uniq_id = 123359318723
             """,
@@ -124,8 +125,8 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
     )
 
     conn.execute(
-        """
-            UPDATE cms_vdm_view_mdcr_prd.v2_mdcr_clm
+        f"""
+            UPDATE {IDR_CLAIM_TABLE}
             SET idr_insrt_ts=%(none)s
             WHERE clm_uniq_id = 9844382563835
             """,
@@ -133,8 +134,8 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
     )
 
     conn.execute(
-        """
-            UPDATE cms_vdm_view_mdcr_prd.v2_mdcr_clm
+        f"""
+            UPDATE {IDR_CLAIM_TABLE}
             SET idr_updt_ts=%(none)s
             WHERE clm_uniq_id = 6919983105596
             """,
@@ -161,8 +162,8 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
 
     # Wait for system time to advance enough to update the timestamp
     conn.execute(
-        """
-        UPDATE cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry
+        f"""
+        UPDATE {IDR_BENE_HISTORY_TABLE}
         SET bene_mbi_id = '1S000000000', idr_insrt_ts=%(timestamp)s, idr_updt_ts=%(timestamp)s
         WHERE bene_sk = 10464258
         """,
@@ -257,9 +258,9 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
     assert rows[0]["clm_uniq_id"] == 580550863030
 
     cur = conn.execute("select * from idr.claim_professional_nch order by clm_uniq_id")
-    assert cur.rowcount == 33
+    assert cur.rowcount == 51
     rows = cur.fetchmany(1)
-    assert rows[0]["clm_uniq_id"] == 797757725380
+    assert rows[0]["clm_uniq_id"] == 119855147698
 
     cur = conn.execute("select * from idr.claim_professional_ss order by clm_uniq_id")
     assert cur.rowcount == 1
@@ -293,11 +294,12 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
 
     conn.commit()
 
-    # Test incremental loading logic involving 'idr_load_events' if we're testing incremental mode
+    # Test incremental loading logic involving 'source_load_events' if we're testing incremental
+    # mode
     if LOAD_TYPE == LoadType.INCREMENTAL:
         # First, pretend that loading ./test_samples1 was the result of loading _all_ possible jobs
         # by inserting load events with completion times of datetime_now + 1hr for all types
-        idr_jobs_table = sql.Identifier("idr", "idr_load_events")
+        idr_jobs_table = sql.Identifier("idr", "source_load_events")
         load_1_complete_time = datetime_now + timedelta(hours=1)
         load_jobs = [
             IdrJobLoadEvent(
@@ -435,7 +437,7 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
         run(LoadMode.SYNTHETIC)
 
         # Check to make sure the NCH claim was not loaded as no corresponding event should exist
-        # in idr_load_events nor has it been 24 hours since the last load of NCH data
+        # in source_load_events nor has it been 24 hours since the last load of NCH data
         nch_table = sql.Identifier("idr", "claim_institutional_nch")
         cur = conn.execute(
             t"""
@@ -446,7 +448,7 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
         conn.commit()
         assert cur.rowcount == 0
 
-        # _Now_ insert an event into idr_load_events indicating that the NCH load job was
+        # _Now_ insert an event into source_load_events indicating that the NCH load job was
         # completed
         nch_load_job = IdrJobLoadEvent(
             id=uuid4(),
@@ -507,7 +509,7 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
         conn.commit()
         assert cur.rowcount == 0
 
-        # _Now_ insert an event into idr_load_events indicating that the FISS load job was
+        # _Now_ insert an event into source_load_events indicating that the FISS load job was
         # completed
         ss_load_job = IdrJobLoadEvent(
             id=uuid4(),

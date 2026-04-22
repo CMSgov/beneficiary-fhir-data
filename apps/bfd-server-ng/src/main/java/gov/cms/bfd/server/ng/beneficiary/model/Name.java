@@ -4,10 +4,14 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.util.ArrayList;
 import java.util.Optional;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.StringType;
 
 /** Beneficiary name information. */
+@EqualsAndHashCode
+@Getter
 @Embeddable
 public class Name {
   @Column(name = "bene_1st_name")
@@ -18,6 +22,12 @@ public class Name {
 
   @Column(name = "bene_last_name")
   private String lastName;
+
+  @Column(name = "bfd_normalized_1st_name")
+  private String normalizedFirstName;
+
+  @Column(name = "bfd_normalized_last_name")
+  private String normalizedLastName;
 
   HumanName toFhir() {
     var givens = new ArrayList<StringType>();

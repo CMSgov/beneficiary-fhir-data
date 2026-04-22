@@ -3,6 +3,7 @@ from typing import Annotated, override
 
 from pydantic import BeforeValidator
 
+from constants import IDR_CONTRACT_PBP_NUM_TABLE, IDR_CONTRACT_PBP_SEGMENT_TABLE
 from load_partition import LoadPartition
 from loader import LoadMode
 from model.base_model import (
@@ -62,7 +63,7 @@ class IdrContractPbpNumber(IdrBaseModel):
                 SELECT
                     cntrct_pbp_sk,
                     cntrct_pbp_sgmt_num
-                FROM cms_vdm_view_mdcr_prd.v2_mdcr_cntrct_pbp_sgmt
+                FROM {IDR_CONTRACT_PBP_SEGMENT_TABLE}
                 GROUP BY cntrct_pbp_sk, cntrct_pbp_sgmt_num
                 HAVING COUNT(*) = 1
             )
@@ -71,7 +72,7 @@ class IdrContractPbpNumber(IdrBaseModel):
                 ROW_NUMBER() OVER (
                     PARTITION BY cntrct_num, cntrct_pbp_num 
                     ORDER BY cntrct_pbp_sk_obslt_dt DESC) AS bfd_contract_version_rank
-            FROM cms_vdm_view_mdcr_prd.v2_mdcr_cntrct_pbp_num {pbp_num}
+            FROM {IDR_CONTRACT_PBP_NUM_TABLE} {pbp_num}
             LEFT JOIN sgmt
                     ON {pbp_num}.cntrct_pbp_sk = sgmt.cntrct_pbp_sk
             WHERE {pbp_num}.cntrct_pbp_sk != 0

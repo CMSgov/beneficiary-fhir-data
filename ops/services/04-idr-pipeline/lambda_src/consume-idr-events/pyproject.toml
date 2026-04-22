@@ -4,15 +4,10 @@ version = "0.1.0"
 description = "Lambda to consume IDR load events from the IDR Events SQS Queue into the v3 DB"
 readme = "README.md"
 requires-python = "~=3.14.0"
-dependencies = [
-    "boto3>=1.42.56",
-    "aws-lambda-powertools>=3.25.0",
-    "psycopg[binary]>=3.2.10",
-    "pydantic>=2.12.2",
-]
+dependencies = ["boto3", "aws-lambda-powertools", "psycopg[binary]", "pydantic"]
 
 [dependency-groups]
-dev = ["ruff>=0.14.6", "uv>=0.9.11", "pyright>=1.1.407"]
+dev = ["boto3-stubs[lambda]", "ruff", "uv", "pyright"]
 
 [tool.ruff]
 # Set the maximum line length to 100.

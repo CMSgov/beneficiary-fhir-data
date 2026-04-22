@@ -3,6 +3,7 @@ from typing import Annotated, override
 
 from pydantic import BeforeValidator
 
+from constants import IDR_BENE_STATUS_TABLE
 from load_partition import LoadPartition
 from loader import LoadMode
 from model.base_model import (
@@ -59,7 +60,7 @@ class IdrBeneficiaryStatus(IdrBaseModel):
         hstry = ALIAS_HSTRY
         return f"""
             SELECT {{COLUMNS}}
-            FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_mdcr_stus stus
+            FROM {IDR_BENE_STATUS_TABLE} stus
             {{WHERE_CLAUSE}}
             AND NOT EXISTS (
                 {deceased_bene_filter(hstry)}

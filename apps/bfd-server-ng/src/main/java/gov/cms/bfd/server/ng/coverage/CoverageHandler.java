@@ -7,8 +7,8 @@ import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.loadprogress.LoadProgressRepository;
 import gov.cms.bfd.server.ng.util.FhirUtil;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coverage;
@@ -75,7 +75,7 @@ public class CoverageHandler {
             .searchBeneficiaryWithCoverage(beneSk, lastUpdated)
             .filter(b -> !b.isMergedBeneficiary());
     if (beneficiaryOpt.isEmpty()) {
-      return FhirUtil.bundleOrDefault(List.of(), loadProgressRepository::lastUpdated);
+      return FhirUtil.bundleOrDefault(Stream.of(), loadProgressRepository::lastUpdated);
     }
     var beneficiary = beneficiaryOpt.get();
     var coverages =

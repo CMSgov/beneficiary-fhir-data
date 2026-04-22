@@ -3,10 +3,11 @@ package gov.cms.bfd.server.ng;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.client.interceptor.AdditionalRequestHeadersInterceptor;
+import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
@@ -15,18 +16,13 @@ import org.springframework.test.context.DynamicPropertySource;
 
 class ServerConfigurationIT extends IntegrationTestBase {
 
-  static final String EOB_UNKNOWN_RESOURCE_TYPE_ERROR_MESSAGE_FRAGMENT =
-      "HAPI-0302: Unknown resource type 'ExplanationOfBenefit'";
+  static final String RESOURCE_NOT_ALLOWED_MESSAGE_FRAGMENT = "Resource not allowed.";
 
   @DynamicPropertySource
   static void registerDynamicProperties(DynamicPropertyRegistry registry) {
     // These properties will apply to all tests in this class.
-    // For this test, we want to ensure Patient and Coverage are ON by default, and EOB is OFF by
-    // default.
-    // This setup mirrors what we expect in 'prod-like' environments initially.
-    registry.add("bfd.nonsensitive.eob_enabled", () -> "false");
-    registry.add("bfd.nonsensitive.patient_enabled", () -> "true");
-    registry.add("bfd.nonsensitive.coverage_enabled", () -> "true");
+    registry.add("bfd.nonsensitive.disabled_uris_json", () -> "['/v3/fhir/ExplanationOfBenefit']");
+    registry.add("bfd.nonsensitive.internal_certificate_aliases_json", () -> "['good_cert']");
   }
 
   @Test
@@ -45,18 +41,8 @@ class ServerConfigurationIT extends IntegrationTestBase {
   }
 
   @Test
-  void eobEndpointIsDisabledWhenConfigured() {
+  void otherEndpointsAreAllowed() {
     var fhirClient = getFhirClient();
-    var readRequest =
-        fhirClient.read().resource("ExplanationOfBenefit").withId(BENE_ID_PART_A_ONLY);
-
-    var thrown =
-        assertThrows(
-            ResourceNotFoundException.class,
-            readRequest::execute,
-            "Expected ResourceNotFoundException because ExplanationOfBenefit endpoint should be disabled.");
-
-    assertTrue(thrown.getMessage().contains(EOB_UNKNOWN_RESOURCE_TYPE_ERROR_MESSAGE_FRAGMENT));
 
     assertDoesNotThrow(
         () -> {
@@ -73,5 +59,27 @@ class ServerConfigurationIT extends IntegrationTestBase {
               .execute();
         },
         "Expected Coverage endpoint to be accessible and not throw an exception.");
+  }
+
+  @Test
+  void disabledEndpointAcceptsAllowedCert() {
+    var fhirClient = getFhirClient();
+    var headersInterceptor = new AdditionalRequestHeadersInterceptor();
+    headersInterceptor.addHeaderValue("X-Amzn-Mtls-Clientcert", "good_cert");
+    fhirClient.registerInterceptor(headersInterceptor);
+    assertDoesNotThrow(
+        () -> fhirClient.read().resource("ExplanationOfBenefit").withId(CLAIM_ID_ADJUDICATED));
+  }
+
+  @Test
+  void disabledEndpointRejectsNotAllowedCert() {
+    var fhirClient = getFhirClient();
+    var headersInterceptor = new AdditionalRequestHeadersInterceptor();
+    headersInterceptor.addHeaderValue("X-Amzn-Mtls-Clientcert", "bad_cert");
+    fhirClient.registerInterceptor(headersInterceptor);
+    var readRequest =
+        fhirClient.read().resource("ExplanationOfBenefit").withId(CLAIM_ID_ADJUDICATED);
+    var thrown = assertThrows(AuthenticationException.class, readRequest::execute);
+    assertEquals(RESOURCE_NOT_ALLOWED_MESSAGE_FRAGMENT, thrown.getResponseBody());
   }
 }
