@@ -451,8 +451,9 @@
   sourceView: V2_MDCR_CLM_DCMTN
   sourceColumn: CLM_NRLN_RIC_CD
   fhirPath: ExplanationOfBenefit.supportingInfo.where(code.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD').code.coding.code
-  notes: While not shown in regular/basis, it's still used to populate EoB.insurance.
   profiles:
+    - Basis
+    - Regular
     - Maximus
 - inputPath: SupportingInfoComponent.CLM_OP_SRVC_TYPE_CD
   appliesTo:
