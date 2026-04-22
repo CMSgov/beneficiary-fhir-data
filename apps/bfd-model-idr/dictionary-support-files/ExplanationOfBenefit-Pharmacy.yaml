@@ -754,6 +754,8 @@
   sourceColumn: CLM_ADJSTMT_TYPE_CD
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_ADJSTMT_TYPE_CD').exists()).code.coding.code
   profiles:
+    - Basis
+    - Regular
     - Maximus
 - inputPath: SupportingInfoComponent.CLM_DSPNSNG_STUS_CD
   appliesTo:
