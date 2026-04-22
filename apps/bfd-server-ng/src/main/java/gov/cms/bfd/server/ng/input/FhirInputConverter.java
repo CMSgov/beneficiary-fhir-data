@@ -78,8 +78,7 @@ public class FhirInputConverter {
     if (ids == null) {
       throw new InvalidRequestException("ID is missing");
     }
-    var longIds =
-        FhirTokenParameterParser.flatten(ids).map(FhirInputConverter::toLongFromToken).toList();
+    var longIds = FhirTokenParameterParser.flatten(ids).map(FhirInputConverter::toLong).toList();
     if (longIds.size() > 100) {
       throw new InvalidRequestException("A maximum of 100 claim IDs may be requested at once.");
     }
@@ -92,7 +91,7 @@ public class FhirInputConverter {
    * @param token FHIR token
    * @return long value
    */
-  public static Long toLongFromToken(@Nullable TokenParam token) {
+  public static Long toLong(@Nullable TokenParam token) {
     if (token == null || token.getValue() == null) {
       throw new InvalidRequestException("ID is missing");
     }
