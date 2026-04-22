@@ -1,7 +1,6 @@
 import logging
 import time
 from datetime import UTC, datetime, timedelta
-from typing import Optional
 
 from snowflake.connector import ProgrammingError
 from snowflake.connector.errors import ForbiddenError
@@ -106,8 +105,6 @@ def extract_and_load(
 def purge_non_latest_claims(
     cls: type[IdrBaseModel],
     load_mode: LoadMode,
-    job_start: datetime,
-    load_type: LoadType,
     parent_child_tables: dict[type[IdrBaseModel], type[IdrBaseModel] | None],
     partition: LoadPartition = DEFAULT_PARTITION
 ) -> bool:
@@ -116,14 +113,18 @@ def purge_non_latest_claims(
     child_table: type[IdrBaseModel] | None = parent_child_tables.get(cls)
     loader = PostgresLoader(load_mode)
 
-    claim_range_filter = '1 = 1' if partition.start_date is None else f'AND p.clm_frm_dt BETWEEN {partition.start_date.strftime('%Y-%m-%d')} AND {partition.start_date.strftime('%Y-%m-%d')}'
-    claim_type_code_filter = f'p.clm_type_cd IN ( {",".join([str(c) for c in partition.claim_type_codes])} )'
+    claim_range_filter = '1 = 1' if partition.start_date is None else f"""
+    AND p.clm_frm_dt BETWEEN {partition.start_date.strftime('%Y-%m-%d')} 
+    AND {partition.start_date.strftime('%Y-%m-%d')}
+    """
+    claim_type_codes = ",".join([str(c) for c in partition.claim_type_codes])
+    claim_type_code_filter = f'p.clm_type_cd IN ( {claim_type_codes} )'
 
     parent_table_name = parent_table.table()
     
     if (child_table):
         child_table_name = child_table.table()
-        logger.info("Child: " + child_table_name)
+        logger.info("Child: %s", child_table_name)
         childSQL = f"""
             DELETE FROM {child_table_name} AS c
             WHERE EXISTS
@@ -144,11 +145,11 @@ def purge_non_latest_claims(
             logger.exception(e)
             return False
 
-    logger.info("Parent :" + parent_table_name)
+    logger.info("Parent : %s", parent_table_name)
     parentSQL = f"""
         DELETE FROM {parent_table_name} AS p
         WHERE p.clm_ltst_clm_ind  = 'N' 
-	        AND p.clm_type_cd NOT IN ( 1, 2, 3, 4 )
+            AND p.clm_type_cd NOT IN ( 1, 2, 3, 4 )
             AND {claim_range_filter}
             AND {claim_type_code_filter}
     """

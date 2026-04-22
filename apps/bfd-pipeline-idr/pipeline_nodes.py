@@ -255,7 +255,7 @@ def stage5_inputs(
     collect_stage4: bool,  # noqa: ARG001
 ) -> Parallelizable[NodePartitionedModelInput]:
     yield from _gen_partitioned_node_inputs(
-        filter_tables([*_CLAIM_TABLES, IdrClaimRx], tables_to_load), load_type # only want parent tables and ClaimRx
+        filter_tables([*_CLAIM_TABLES, IdrClaimRx], tables_to_load), load_type
     )
 
 def do_stage5(
@@ -268,9 +268,7 @@ def do_stage5(
         cls=model_type,
         partition=partition,
         parent_child_tables=_CLAIM_PARENT_CHILD_TABLES,
-        job_start=start_time,
         load_mode=load_mode,
-        load_type=load_type
     )
 
 def collect_stage5(
