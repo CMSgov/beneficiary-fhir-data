@@ -37,13 +37,13 @@ type NodePartitionedModelInput = tuple[type[IdrBaseModel], LoadPartition | None]
 
 configure_logger()
 
-_CLAIM_PARENT_CHILD_TABLES : dict[type[IdrBaseModel], type[IdrBaseModel] | None] = [
+_CLAIM_PARENT_CHILD_TABLES : dict[type[IdrBaseModel], type[IdrBaseModel] | None] = { 
     IdrClaimProfessionalNch: IdrClaimItemProfessionalNch,
     IdrClaimInstitutionalNch: IdrClaimItemInstitutionalNch,
     IdrClaimProfessionalSs: IdrClaimItemProfessionalSs,
-    IdrClaimItemProfessionalSs: IdrClaimItemInstitutionalSs,
-    IdrClaimRx: None # RX/Part D is special because we combine claim + claim line
-]
+    IdrClaimInstitutionalSs: IdrClaimItemInstitutionalSs,
+    IdrClaimRx: None, # RX/Part D is special because we combine claim + claim line
+}
 
 _CLAIM_TABLES: list[type[IdrBaseModel]] = [
     IdrClaimProfessionalNch,
