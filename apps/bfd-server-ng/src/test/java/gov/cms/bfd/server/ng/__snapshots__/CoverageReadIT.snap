@@ -35,7 +35,7 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadBeneWithAllCoverage[allCoverage
     } ],
     "id" : "cms-org",
     "meta" : {
-      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0" ]
+      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0" ]
     },
     "name" : "Centers for Medicare and Medicaid Services",
     "resourceType" : "Organization"
@@ -72,7 +72,7 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadBeneWithAllCoverage[allCoverage
   } ],
   "meta" : {
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
-    "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-coverage|6.1.0" ]
+    "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-coverage|7.0.0" ]
   },
   "payor" : [ {
     "reference" : "#cms-org"
@@ -138,7 +138,7 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadBeneWithAllCoverage[allCoverage
     } ],
     "id" : "cms-org",
     "meta" : {
-      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0" ]
+      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0" ]
     },
     "name" : "Centers for Medicare and Medicaid Services",
     "resourceType" : "Organization"
@@ -199,7 +199,7 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadBeneWithAllCoverage[allCoverage
   } ],
   "meta" : {
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
-    "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-coverage|6.1.0" ]
+    "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-coverage|7.0.0" ]
   },
   "payor" : [ {
     "reference" : "#cms-org"
@@ -266,7 +266,7 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadBeneWithAllCoverage[allCoverage
     } ],
     "id" : "cms-org",
     "meta" : {
-      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0" ]
+      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0" ]
     },
     "name" : "Centers for Medicare and Medicaid Services",
     "resourceType" : "Organization"
@@ -327,7 +327,7 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadBeneWithAllCoverage[allCoverage
   } ],
   "meta" : {
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
-    "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-coverage|6.1.0" ]
+    "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-coverage|7.0.0" ]
   },
   "payor" : [ {
     "reference" : "#cms-org"
@@ -391,7 +391,7 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadBeneWithAllCoverage[allCoverage
     } ],
     "id" : "insurer-org",
     "meta" : {
-      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0" ]
+      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0" ]
     },
     "name" : "Silver Fox",
     "resourceType" : "Organization"
@@ -425,7 +425,7 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadBeneWithAllCoverage[allCoverage
   } ],
   "meta" : {
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
-    "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-coverage|6.1.0" ]
+    "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-coverage|7.0.0" ]
   },
   "payor" : [ {
     "reference" : "#insurer-org"
@@ -520,7 +520,7 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadBeneWithAllCoverage[allCoverage
     } ],
     "id" : "insurer-org",
     "meta" : {
-      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0" ]
+      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0" ]
     },
     "name" : "Silver Fox",
     "resourceType" : "Organization"
@@ -562,7 +562,7 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadBeneWithAllCoverage[allCoverage
   } ],
   "meta" : {
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
-    "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-coverage|6.1.0" ]
+    "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-coverage|7.0.0" ]
   },
   "payor" : [ {
     "reference" : "#insurer-org"
@@ -668,7 +668,7 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadDualOnly=[
     } ],
     "id" : "cms-org",
     "meta" : {
-      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0" ]
+      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0" ]
     },
     "name" : "Centers for Medicare and Medicaid Services",
     "resourceType" : "Organization"
@@ -705,7 +705,7 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadDualOnly=[
   } ],
   "meta" : {
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
-    "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-coverage|6.1.0" ]
+    "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-coverage|7.0.0" ]
   },
   "payor" : [ {
     "reference" : "#cms-org"
@@ -771,7 +771,7 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadDualOnlyExpired=[
     } ],
     "id" : "cms-org",
     "meta" : {
-      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0" ]
+      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0" ]
     },
     "name" : "Centers for Medicare and Medicaid Services",
     "resourceType" : "Organization"
@@ -808,7 +808,7 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadDualOnlyExpired=[
   } ],
   "meta" : {
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
-    "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-coverage|6.1.0" ]
+    "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-coverage|7.0.0" ]
   },
   "payor" : [ {
     "reference" : "#cms-org"
@@ -875,7 +875,7 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadForBeneWithMissingTpDataShouldS
     } ],
     "id" : "cms-org",
     "meta" : {
-      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0" ]
+      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0" ]
     },
     "name" : "Centers for Medicare and Medicaid Services",
     "resourceType" : "Organization"
@@ -930,7 +930,7 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadForBeneWithMissingTpDataShouldS
   } ],
   "meta" : {
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
-    "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-coverage|6.1.0" ]
+    "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-coverage|7.0.0" ]
   },
   "payor" : [ {
     "reference" : "#cms-org"
@@ -1005,7 +1005,7 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadForBeneWithOnlyPastEntitlementP
     } ],
     "id" : "cms-org",
     "meta" : {
-      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0" ]
+      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0" ]
     },
     "name" : "Centers for Medicare and Medicaid Services",
     "resourceType" : "Organization"
@@ -1066,7 +1066,7 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadForBeneWithOnlyPastEntitlementP
   } ],
   "meta" : {
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
-    "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-coverage|6.1.0" ]
+    "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-coverage|7.0.0" ]
   },
   "payor" : [ {
     "reference" : "#cms-org"
@@ -1130,7 +1130,7 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadPartCAndDOnly=[
     } ],
     "id" : "insurer-org",
     "meta" : {
-      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0" ]
+      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0" ]
     },
     "name" : "Silver Fox",
     "resourceType" : "Organization"
@@ -1164,7 +1164,7 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadPartCAndDOnly=[
   } ],
   "meta" : {
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
-    "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-coverage|6.1.0" ]
+    "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-coverage|7.0.0" ]
   },
   "payor" : [ {
     "reference" : "#insurer-org"
@@ -1238,7 +1238,7 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadValidPartACompositeId[validPart
     } ],
     "id" : "cms-org",
     "meta" : {
-      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0" ]
+      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0" ]
     },
     "name" : "Centers for Medicare and Medicaid Services",
     "resourceType" : "Organization"
@@ -1299,7 +1299,7 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadValidPartACompositeId[validPart
   } ],
   "meta" : {
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
-    "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-coverage|6.1.0" ]
+    "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-coverage|7.0.0" ]
   },
   "payor" : [ {
     "reference" : "#cms-org"
@@ -1374,7 +1374,7 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadValidPartBCompositeId[validPart
     } ],
     "id" : "cms-org",
     "meta" : {
-      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0" ]
+      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0" ]
     },
     "name" : "Centers for Medicare and Medicaid Services",
     "resourceType" : "Organization"
@@ -1435,7 +1435,7 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadValidPartBCompositeId[validPart
   } ],
   "meta" : {
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
-    "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-coverage|6.1.0" ]
+    "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-coverage|7.0.0" ]
   },
   "payor" : [ {
     "reference" : "#cms-org"
@@ -1496,7 +1496,7 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadValidPartCCompositeId[validPart
     } ],
     "id" : "insurer-org",
     "meta" : {
-      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0" ]
+      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0" ]
     },
     "name" : "Wellness",
     "resourceType" : "Organization"
@@ -1527,7 +1527,7 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadValidPartCCompositeId[validPart
   } ],
   "meta" : {
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
-    "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-coverage|6.1.0" ]
+    "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-coverage|7.0.0" ]
   },
   "payor" : [ {
     "reference" : "#insurer-org"
@@ -1622,7 +1622,7 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadValidPartDCompositeId[validPart
     } ],
     "id" : "insurer-org",
     "meta" : {
-      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0" ]
+      "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0" ]
     },
     "name" : "Vitality Plan",
     "resourceType" : "Organization"
@@ -1664,7 +1664,7 @@ gov.cms.bfd.server.ng.CoverageReadIT.coverageReadValidPartDCompositeId[validPart
   } ],
   "meta" : {
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
-    "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-coverage|6.1.0" ]
+    "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-coverage|7.0.0" ]
   },
   "payor" : [ {
     "reference" : "#insurer-org"
