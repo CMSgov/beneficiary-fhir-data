@@ -862,8 +862,8 @@ def generate(
                 bene_sk=str(pt_bene_sk),
                 init_clm=init_adj_clm,
                 min_date=clm_from_dt_min,
-                generated_type_1_npis=generated_type_1_npis,
-                generated_type_2_npis=generated_type_2_npis,
+                type_1_npis=generated_type_1_npis,
+                type_2_npis=generated_type_2_npis,
             )
             adj_clms_tbls[CLM].append(clm)
 
@@ -961,6 +961,7 @@ def generate(
                     else idx,
                     diagnoses=diagnoses,
                     init_clm_line=init_clm_line,
+                    type_1_npis= generated_type_1_npis
                 )
                 adj_clms_tbls[CLM_LINE].append(clm_line)
 
