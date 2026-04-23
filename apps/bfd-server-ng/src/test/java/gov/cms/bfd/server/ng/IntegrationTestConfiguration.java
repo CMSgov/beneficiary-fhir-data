@@ -32,56 +32,61 @@ public class IntegrationTestConfiguration {
   @Value("${project.basedir}")
   private String baseDir;
 
-  // Container lifecycle is managed by Spring,
-  // so the resource closing warning is not applicable here
-  @SuppressWarnings("resource")
+  private static PostgreSQLContainer<?> postgresContainer;
+  private static GenericContainer<?> dynamoDbContainer;
+
   @Bean
   @ServiceConnection
+  @SuppressWarnings("resource")
   public PostgreSQLContainer<?> postgres() throws IOException, InterruptedException {
-    if (StringUtils.isNotBlank(System.getenv("PGPASSWORD"))
-        || StringUtils.isNotBlank(System.getenv("BFD_SENSITIVE_DB_PASSWORD"))) {
-      // Postgres environment variables can interfere with the database configuration and should
-      // not be used here.
-      throw new RuntimeException("Database variables should not be set while running tests");
+    synchronized (IntegrationTestConfiguration.class) {
+      if (postgresContainer == null) {
+        if (StringUtils.isNotBlank(System.getenv("PGPASSWORD"))
+            || StringUtils.isNotBlank(System.getenv("BFD_SENSITIVE_DB_PASSWORD"))) {
+          // Postgres environment variables can interfere with the database configuration and should
+          // not be used here.
+          throw new RuntimeException("Database variables should not be set while running tests");
+        }
+        // Provides an implementation of JdbcConnectionDetails that will be injected into the Spring
+        // context
+        var databaseImage = System.getProperty("its.testcontainer.db.image", "postgres:16");
+
+        var container =
+            new PostgreSQLContainer<>(
+                    DockerImageName.parse(databaseImage).asCompatibleSubstituteFor("postgres"))
+                .withDatabaseName("testdb")
+                .withUsername("bfdtest")
+                .withPassword("bfdtest")
+                .waitingFor(Wait.forListeningPort())
+                .withInitScript(new ClassPathResource("mock-idr.sql").getPath());
+        container.start();
+        runMigrator(container);
+
+        runPython(container, "uv", "sync");
+        runPython(container, "uv", "run", "load_synthetic.py", "./test_samples2");
+
+        // Update CLM_IDR_LD_DT to CURRENT_DATE before pipeline.py
+        // Reason: PAC data older than 60 days is filtered by coalescing
+        // (idr_updt_ts, idr_insrt_ts, clm_idr_ld_dt). Synthetic data has
+        // outdated clm_idr_ld_dt value and empty idr_updt_ts, idr_insrt_ts.
+
+        container.execInContainer(
+            "psql",
+            "-U",
+            "bfdtest",
+            "-d",
+            "testdb",
+            "-c",
+            "UPDATE cms_vdm_view_mdcr_prd.v2_mdcr_clm "
+                + "SET \"clm_idr_ld_dt\" = CURRENT_DATE,"
+                + "\"idr_insrt_ts\" = CURRENT_TIMESTAMP,"
+                + "\"idr_updt_ts\" = CURRENT_TIMESTAMP;");
+
+        runPython(container, "uv", "run", "pipeline.py", "synthetic");
+        postgresContainer = container;
+      }
     }
-    // Provides an implementation of JdbcConnectionDetails that will be injected into the Spring
-    // context
-    var databaseImage = System.getProperty("its.testcontainer.db.image");
-
-    var container =
-        new PostgreSQLContainer<>(
-                DockerImageName.parse(databaseImage).asCompatibleSubstituteFor("postgres"))
-            .withDatabaseName("testdb")
-            .withUsername("bfdtest")
-            .withPassword("bfdtest")
-            .waitingFor(Wait.forListeningPort())
-            .withInitScript(new ClassPathResource("mock-idr.sql").getPath());
-    container.start();
-    runMigrator(container);
-
-    runPython(container, "uv", "sync");
-    runPython(container, "uv", "run", "load_synthetic.py", "./test_samples2");
-
-    // Update CLM_IDR_LD_DT to CURRENT_DATE before pipeline.py
-    // Reason: PAC data older than 60 days is filtered by coalescing
-    // (idr_updt_ts, idr_insrt_ts, clm_idr_ld_dt). Synthetic data has
-    // outdated clm_idr_ld_dt value and empty idr_updt_ts, idr_insrt_ts.
-
-    container.execInContainer(
-        "psql",
-        "-U",
-        "bfdtest",
-        "-d",
-        "testdb",
-        "-c",
-        "UPDATE cms_vdm_view_mdcr_prd.v2_mdcr_clm "
-            + "SET \"clm_idr_ld_dt\" = CURRENT_DATE,"
-            + "\"idr_insrt_ts\" = CURRENT_TIMESTAMP,"
-            + "\"idr_updt_ts\" = CURRENT_TIMESTAMP;");
-
-    runPython(container, "uv", "run", "pipeline.py", "synthetic");
-
-    return container;
+    return postgresContainer;
   }
 
   private void runMigrator(PostgreSQLContainer<?> container) {
@@ -139,12 +144,17 @@ public class IntegrationTestConfiguration {
   @Bean
   @SuppressWarnings("resource")
   public GenericContainer<?> dynamoDbContainer() {
-    var container =
-        new GenericContainer<>(DockerImageName.parse("amazon/dynamodb-local:latest"))
-            .withExposedPorts(8000)
-            .waitingFor(Wait.forListeningPort());
-    container.start();
-    return container;
+    synchronized (IntegrationTestConfiguration.class) {
+      if (dynamoDbContainer == null) {
+        var container =
+            new GenericContainer<>(DockerImageName.parse("amazon/dynamodb-local:3.3.0"))
+                .withExposedPorts(8000)
+                .waitingFor(Wait.forListeningPort());
+        container.start();
+        dynamoDbContainer = container;
+      }
+    }
+    return dynamoDbContainer;
   }
 
   @Bean
