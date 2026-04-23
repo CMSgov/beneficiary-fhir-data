@@ -16,6 +16,7 @@ import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 
@@ -103,5 +104,15 @@ public class Application {
   @Bean
   public DynamoDbClient dynamoDbClient(Configuration configuration) {
     return configuration.getDynamoDbClient();
+  }
+
+  /**
+   * Creates the custom task executor.
+   *
+   * @return task executor
+   */
+  @Bean
+  public ThreadPoolTaskExecutor taskExecutor() {
+    return new MdcAwareThreadPoolExecutor();
   }
 }
