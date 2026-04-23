@@ -88,18 +88,7 @@ public class EobHandler {
         filterSamhsaClaims(claims, samhsaFilterMode)
             .skip(repositoryCriteria.resolveOffset())
             .limit(repositoryCriteria.resolveLimit())
-            .map(
-                claim -> {
-                  var hasSamhsaClaims =
-                      samhsaFilterMode == SamhsaFilterMode.INCLUDE && claimHasSamhsa(claim);
-
-                  var securityStatus =
-                      hasSamhsaClaims
-                          ? ClaimSecurityStatus.SAMHSA_APPLICABLE
-                          : ClaimSecurityStatus.NONE;
-
-                  return claim.toFhir(securityStatus);
-                });
+            .map(claim -> transformToFhir(claim, samhsaFilterMode));
 
     return FhirUtil.bundleOrDefault(filteredClaims, loadProgressRepository::lastUpdated);
   }
@@ -144,19 +133,32 @@ public class EobHandler {
     var claims = claimRepository.findByIds(claimUniqueIds, serviceDate, lastUpdated);
 
     return filterSamhsaClaims(claims, samhsaFilterMode)
-        .map(
-            claim -> {
-              var hasSamhsaClaims =
-                  samhsaFilterMode == SamhsaFilterMode.INCLUDE && claimHasSamhsa(claim);
-
-              var securityStatus =
-                  hasSamhsaClaims
-                      ? ClaimSecurityStatus.SAMHSA_APPLICABLE
-                      : ClaimSecurityStatus.NONE;
-
-              return claim.toFhir(securityStatus);
-            })
+        .map(claim -> transformToFhir(claim, samhsaFilterMode))
         .toList();
+  }
+
+  /**
+   * Transforms a claim to an EOB, applying SAMHSA security labels if applicable based on the filter
+   * mode.
+   *
+   * @param claim the claim
+   * @param samhsaFilterMode filter mode (only samhsa/exclude claims/include)
+   * @return the transformed EOB
+   */
+  private ExplanationOfBenefit transformToFhir(ClaimBase claim, SamhsaFilterMode samhsaFilterMode) {
+    boolean isSamhsa;
+    if (samhsaFilterMode == SamhsaFilterMode.ONLY_SAMHSA) {
+      isSamhsa = true;
+    } else if (samhsaFilterMode == SamhsaFilterMode.EXCLUDE) {
+      isSamhsa = false;
+    } else {
+      isSamhsa = claimHasSamhsa(claim);
+    }
+
+    var securityStatus =
+        isSamhsa ? ClaimSecurityStatus.SAMHSA_APPLICABLE : ClaimSecurityStatus.NONE;
+
+    return claim.toFhir(securityStatus);
   }
 
   private boolean isCodeSamhsa(
