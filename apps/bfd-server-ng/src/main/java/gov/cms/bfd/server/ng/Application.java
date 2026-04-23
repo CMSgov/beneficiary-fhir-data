@@ -83,16 +83,16 @@ public class Application {
     return timedAspect;
   }
 
-    /**
-     * Configures a date that propagates throughout the application that is overridable in test
-     * configurations.
-     *
-     * @return clock
-     */
-    @Bean
-    public Clock systemClock() {
-        return Clock.systemUTC();
-    }
+  /**
+   * Configures a date that propagates throughout the application that is overridable in test
+   * configurations.
+   *
+   * @return clock
+   */
+  @Bean
+  public Clock systemClock() {
+    return Clock.systemUTC();
+  }
 
   /**
    * Creates the audit logger(s).

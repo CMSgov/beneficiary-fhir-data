@@ -19,7 +19,13 @@ from load_events import (
 from load_partition import LoadType
 from logger_config import configure_logger
 from model.base_model import LoadMode
-from settings import INCREMENTAL_IDR_JOB_GRACE_PERIOD, LOAD_TYPE, MAX_TASKS, TABLES_TO_LOAD, bfd_test_date
+from settings import (
+    INCREMENTAL_IDR_JOB_GRACE_PERIOD,
+    LOAD_TYPE,
+    MAX_TASKS,
+    TABLES_TO_LOAD,
+    bfd_test_date,
+)
 
 telemetry.disable_telemetry()
 

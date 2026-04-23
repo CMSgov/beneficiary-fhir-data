@@ -2,7 +2,7 @@ import os
 import shutil
 import subprocess
 from collections.abc import Generator
-from datetime import UTC, timedelta, datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import cast
 from uuid import uuid4
@@ -16,7 +16,7 @@ from testcontainers.core.config import testcontainers_config  # type: ignore
 # https://github.com/testcontainers/testcontainers-python/issues/305
 from testcontainers.postgres import PostgresContainer  # type: ignore
 
-from constants import IDR_BENE_HISTORY_TABLE, IDR_CLAIM_TABLE
+from constants import IDR_BENE_HISTORY_TABLE
 from load_events import IdrJobLoadEvent, IdrJobType
 from load_partition import LoadType
 from load_synthetic import load_from_csv
@@ -248,6 +248,8 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
         # First, pretend that loading ./test_samples1 was the result of loading _all_ possible jobs
         # by inserting load events with completion times of datetime_now + 1hr for all types
         idr_jobs_table = sql.Identifier("idr", "source_load_events")
+        cur = conn.execute("select max(last_ts) as max_ts from idr.load_progress")
+        datetime_now = cur.fetchone()["max_ts"]
         load_1_complete_time = datetime_now + timedelta(hours=1)
         load_jobs = [
             IdrJobLoadEvent(
@@ -420,7 +422,7 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
 
         # Run the Pipeline with the NCH event having been inserted indicating that there is NCH
         # data to load
-        advance_time(nch_clm_ts, nch_load_job.event_time)
+        advance_time(nch_load_job.event_time)
         run(LoadMode.SYNTHETIC)
 
         # Check for the NCH claim in the v3 idr schema
@@ -481,7 +483,7 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
         conn.commit()
 
         # Run one last time now that the FISS "job" has completed and the SS claim can be loaded
-        advance_time(ss_clm_ts, ss_load_job.event_time)
+        advance_time(ss_load_job.event_time)
         run(LoadMode.SYNTHETIC)
 
         # Check for the SS claim in the v3 idr schema
@@ -509,6 +511,7 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
         assert updated_ss_job.completion_time
         assert updated_ss_job.completion_time >= ss_clm_ts
 
-def advance_time(*timestamps: datetime) -> None:
-    new_time = max(timestamps) + timedelta(minutes=1)
+
+def advance_time(timestamp: datetime) -> None:
+    new_time = timestamp + timedelta(minutes=1)
     os.environ["BFD_TEST_DATE"] = new_time.isoformat()

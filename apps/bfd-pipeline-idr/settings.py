@@ -19,6 +19,7 @@ def force_load_progress() -> bool:
     # won't be in order like in prod. However, we need a way to override this for the tests.
     return _parse_bool_default_false("IDR_FORCE_LOAD_PROGRESS")
 
+
 def bfd_test_date() -> datetime:
     test_date = getenv("BFD_TEST_DATE", "")
     return datetime.fromisoformat(test_date) if test_date else None
