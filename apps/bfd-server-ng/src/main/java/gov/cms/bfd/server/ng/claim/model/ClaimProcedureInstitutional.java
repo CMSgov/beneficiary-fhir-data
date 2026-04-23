@@ -76,7 +76,7 @@ public class ClaimProcedureInstitutional extends ClaimProcedureBase {
 
   private ExplanationOfBenefit.DiagnosisComponent applyPoaIfPresent(
       ClaimDiagnosisType type, ExplanationOfBenefit.DiagnosisComponent diagnosis) {
-    if (type != ClaimDiagnosisType.PRESENT_ON_ADMISSION) {
+    if (type != ClaimDiagnosisType.BASE_DIAGNOSIS_CODE) {
       return diagnosis;
     }
 

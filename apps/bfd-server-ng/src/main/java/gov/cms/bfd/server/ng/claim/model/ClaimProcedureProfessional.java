@@ -15,7 +15,7 @@ public class ClaimProcedureProfessional extends ClaimProcedureBase {
   public Optional<ExplanationOfBenefit.DiagnosisComponent> toFhirDiagnosis(
       SequenceGenerator sequenceGenerator) {
     if (getDiagnosisType()
-        .filter(type -> type == ClaimDiagnosisType.PRESENT_ON_ADMISSION)
+        .filter(type -> type == ClaimDiagnosisType.BASE_DIAGNOSIS_CODE)
         .isEmpty()) {
       return Optional.empty();
     }
@@ -25,6 +25,6 @@ public class ClaimProcedureProfessional extends ClaimProcedureBase {
             .map(_ -> "principal")
             .orElse("secondary");
     return buildBaseDiagnosis(
-        sequenceGenerator, type, ClaimDiagnosisType.PRESENT_ON_ADMISSION.getSystem());
+        sequenceGenerator, type, ClaimDiagnosisType.BASE_DIAGNOSIS_CODE.getSystem());
   }
 }

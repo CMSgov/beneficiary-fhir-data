@@ -208,7 +208,7 @@ public class IntegrationTestBase {
                 ADMITTING.getFhirCode(),
                 DIAGNOSIS_E_CODE.getFhirCode(),
                 DIAGNOSIS_R_CODE.getFhirCode(),
-                PRESENT_ON_ADMISSION.getFhirCode());
+                BASE_DIAGNOSIS_CODE.getFhirCode());
         var hasValidTypes = typeCodes.stream().allMatch(institutionalDiagnosisTypes::contains);
         assertTrue(
             hasValidTypes,

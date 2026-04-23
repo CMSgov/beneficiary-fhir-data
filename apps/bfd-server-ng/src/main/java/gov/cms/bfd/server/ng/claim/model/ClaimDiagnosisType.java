@@ -16,8 +16,8 @@ public enum ClaimDiagnosisType {
   ADMITTING("A", "admitting", SystemUrls.HL7_DIAGNOSIS_TYPE),
   /** First diagnosis. */
   FIRST("1", "externalcauseofinjury", SystemUrls.CARIN_CODE_SYSTEM_DIAGNOSIS_TYPE),
-  /** Present on admission. */
-  PRESENT_ON_ADMISSION("D", "other", SystemUrls.CARIN_CODE_SYSTEM_DIAGNOSIS_TYPE),
+  /** Base diagnosis code. */
+  BASE_DIAGNOSIS_CODE("D", "other", SystemUrls.CARIN_CODE_SYSTEM_DIAGNOSIS_TYPE),
   /** E code. */
   DIAGNOSIS_E_CODE("E", "externalcauseofinjury", SystemUrls.CARIN_CODE_SYSTEM_DIAGNOSIS_TYPE),
   /** R code. */
