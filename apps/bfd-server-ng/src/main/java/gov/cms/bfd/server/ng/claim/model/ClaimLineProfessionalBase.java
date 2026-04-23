@@ -9,6 +9,7 @@ import jakarta.persistence.MappedSuperclass;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
@@ -65,14 +66,18 @@ abstract class ClaimLineProfessionalBase implements ClaimLineBase {
   }
 
   @Override
-  public Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhirSupportingInfo(
+  public List<ExplanationOfBenefit.SupportingInformationComponent> toFhirSupportingInfo(
       SupportingInfoFactory supportingInfoFactory) {
-    return trackingNumber.map(
-        number ->
-            supportingInfoFactory
-                .createSupportingInfo()
-                .setCategory(BlueButtonSupportingInfoCategory.CLM_LINE_PMD_UNIQ_TRKNG_NUM.toFhir())
-                .setValue(new StringType(number)));
+    return Stream.of(
+            trackingNumber.map(
+                number ->
+                    supportingInfoFactory
+                        .createSupportingInfo()
+                        .setCategory(
+                            BlueButtonSupportingInfoCategory.CLM_LINE_PMD_UNIQ_TRKNG_NUM.toFhir())
+                        .setValue(new StringType(number))))
+        .flatMap(Optional::stream)
+        .toList();
   }
 
   abstract ClaimLineAdjudicationChargeProfessionalBase getAdjudicationCharge();

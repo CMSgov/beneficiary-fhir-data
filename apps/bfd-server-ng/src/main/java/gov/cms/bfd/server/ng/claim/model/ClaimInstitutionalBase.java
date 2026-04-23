@@ -132,7 +132,7 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
                   .ifPresent(eob::addCareTeam);
               item.getClaimLine()
                   .toFhirSupportingInfo(supportingInfoFactory)
-                  .ifPresent(
+                  .forEach(
                       si -> {
                         eob.addSupportingInfo(si);
                         claimLine.ifPresent(cl -> cl.addInformationSequence(si.getSequence()));

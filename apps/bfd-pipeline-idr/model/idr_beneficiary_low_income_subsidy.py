@@ -5,6 +5,7 @@ from pydantic import BeforeValidator
 
 from constants import (
     DEFAULT_MAX_DATE,
+    IDR_BENE_LOW_INCOME_SUBSIDY_TABLE,
 )
 from load_partition import LoadPartition
 from loader import LoadMode
@@ -59,7 +60,7 @@ class IdrBeneficiaryLowIncomeSubsidy(IdrBaseModel):
         hstry = ALIAS_HSTRY
         return f"""
                 SELECT {{COLUMNS}}
-                FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_lis bene_lis
+                FROM {IDR_BENE_LOW_INCOME_SUBSIDY_TABLE} bene_lis
                 {{WHERE_CLAUSE}}
                 AND NOT EXISTS (
                     {deceased_bene_filter(hstry)}

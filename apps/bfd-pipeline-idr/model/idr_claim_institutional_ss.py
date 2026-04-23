@@ -6,6 +6,13 @@ from pydantic import BeforeValidator
 from constants import (
     CLAIM_INSTITUTIONAL_SS_TABLE,
     DEFAULT_MAX_DATE,
+    IDR_CLAIM_DATE_SIGNATURE_TABLE,
+    IDR_CLAIM_DOCUMENTATION_TABLE,
+    IDR_CLAIM_FISS_TABLE,
+    IDR_CLAIM_INSTITUTIONAL_TABLE,
+    IDR_CLAIM_LOCATION_HISTORY_TABLE,
+    IDR_CLAIM_TABLE,
+    IDR_PROVIDER_HISTORY_TABLE,
 )
 from load_partition import LoadPartition
 from loader import LoadMode
@@ -469,13 +476,13 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
                 UNION
                 {clm_dt_sgntr_query()}
                 UNION
-                {clm_child_query("v2_mdcr_clm_instnl")}
+                {clm_child_query(IDR_CLAIM_INSTITUTIONAL_TABLE)}
                 UNION
-                {clm_child_query("v2_mdcr_clm_dcmtn")}
+                {clm_child_query(IDR_CLAIM_DOCUMENTATION_TABLE)}
                 UNION
-                {clm_child_query("v2_mdcr_clm_fiss")}
+                {clm_child_query(IDR_CLAIM_FISS_TABLE)}
                 UNION
-                {clm_child_query("v2_mdcr_clm_lctn_hstry")}
+                {clm_child_query(IDR_CLAIM_LOCATION_HISTORY_TABLE)}
                 UNION
                 {clm_ocrnc_sgntr_query()}
                 UNION
@@ -490,7 +497,7 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
                     claims.clm_dt_sgntr_sk,
                     claims.clm_num_sk,
                     MAX({lctn_hstry}.clm_lctn_cd_sqnc_num) AS max_clm_lctn_cd_sqnc_num
-                FROM cms_vdm_view_mdcr_prd.v2_mdcr_clm_lctn_hstry {lctn_hstry}
+                FROM {IDR_CLAIM_LOCATION_HISTORY_TABLE} {lctn_hstry}
                 JOIN claims ON
                     {lctn_hstry}.geo_bene_sk = claims.geo_bene_sk AND
                     {lctn_hstry}.clm_type_cd = claims.clm_type_cd AND
@@ -510,19 +517,19 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
                 ({claim_related_conditions_cte(load_mode)})
             SELECT {{COLUMNS}}
             FROM claims c
-            JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm} ON
+            JOIN {IDR_CLAIM_TABLE} {clm} ON
                 {clm}.geo_bene_sk = c.geo_bene_sk AND
                 {clm}.clm_dt_sgntr_sk = c.clm_dt_sgntr_sk AND
                 {clm}.clm_type_cd = c.clm_type_cd AND
                 {clm}.clm_num_sk = c.clm_num_sk
-            JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_dt_sgntr {sgntr} ON 
+            JOIN {IDR_CLAIM_DATE_SIGNATURE_TABLE} {sgntr} ON 
                 {sgntr}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
-            LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_instnl {instnl} ON
+            LEFT JOIN {IDR_CLAIM_INSTITUTIONAL_TABLE} {instnl} ON
                 {clm}.geo_bene_sk = {instnl}.geo_bene_sk AND
                 {clm}.clm_dt_sgntr_sk = {instnl}.clm_dt_sgntr_sk AND
                 {clm}.clm_type_cd = {instnl}.clm_type_cd AND
                 {clm}.clm_num_sk = {instnl}.clm_num_sk
-            LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_dcmtn {dcmtn} ON
+            LEFT JOIN {IDR_CLAIM_DOCUMENTATION_TABLE} {dcmtn} ON
                 {clm}.geo_bene_sk = {dcmtn}.geo_bene_sk AND
                 {clm}.clm_dt_sgntr_sk = {dcmtn}.clm_dt_sgntr_sk AND
                 {clm}.clm_type_cd = {dcmtn}.clm_type_cd AND
@@ -532,33 +539,33 @@ class IdrClaimInstitutionalSs(IdrBaseModel):
                 {clm}.clm_type_cd = latest_lctn.clm_type_cd AND
                 {clm}.clm_dt_sgntr_sk = latest_lctn.clm_dt_sgntr_sk AND
                 {clm}.clm_num_sk = latest_lctn.clm_num_sk
-            LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_lctn_hstry {lctn_hstry} ON
+            LEFT JOIN {IDR_CLAIM_LOCATION_HISTORY_TABLE} {lctn_hstry} ON
                 {clm}.geo_bene_sk = {lctn_hstry}.geo_bene_sk AND
                 {clm}.clm_type_cd = {lctn_hstry}.clm_type_cd AND
                 {clm}.clm_dt_sgntr_sk = {lctn_hstry}.clm_dt_sgntr_sk AND
                 {clm}.clm_num_sk = {lctn_hstry}.clm_num_sk AND
                 {lctn_hstry}.clm_lctn_cd_sqnc_num = latest_lctn.max_clm_lctn_cd_sqnc_num
-            LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_fiss {fiss} ON
+            LEFT JOIN {IDR_CLAIM_FISS_TABLE} {fiss} ON
                 {clm}.geo_bene_sk = {fiss}.geo_bene_sk AND
                 {clm}.clm_dt_sgntr_sk = {fiss}.clm_dt_sgntr_sk AND
                 {clm}.clm_type_cd = {fiss}.clm_type_cd AND
                 {clm}.clm_num_sk = {fiss}.clm_num_sk
-            LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_prvdr_hstry {prvdr_atng} ON
+            LEFT JOIN {IDR_PROVIDER_HISTORY_TABLE} {prvdr_atng} ON
                 {prvdr_atng}.prvdr_npi_num = {clm}.prvdr_atndg_prvdr_npi_num AND
                 {prvdr_atng}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
-            LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_prvdr_hstry {prvdr_rfrg} ON 
+            LEFT JOIN {IDR_PROVIDER_HISTORY_TABLE} {prvdr_rfrg} ON 
                 {prvdr_rfrg}.prvdr_npi_num = {clm}.prvdr_rfrg_prvdr_npi_num AND
                 {prvdr_rfrg}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
-            LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_prvdr_hstry {prvdr_blg} ON 
+            LEFT JOIN {IDR_PROVIDER_HISTORY_TABLE} {prvdr_blg} ON 
                 {prvdr_blg}.prvdr_npi_num = {clm}.prvdr_blg_prvdr_npi_num AND
                 {prvdr_blg}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
-            LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_prvdr_hstry {prvdr_oprtg} ON 
+            LEFT JOIN {IDR_PROVIDER_HISTORY_TABLE} {prvdr_oprtg} ON 
                 {prvdr_oprtg}.prvdr_npi_num = {clm}.prvdr_oprtg_prvdr_npi_num AND
                 {prvdr_oprtg}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
-            LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_prvdr_hstry {prvdr_rndrg} ON 
+            LEFT JOIN {IDR_PROVIDER_HISTORY_TABLE} {prvdr_rndrg} ON 
                 {prvdr_rndrg}.prvdr_npi_num = {clm}.prvdr_rndrng_prvdr_npi_num AND
                 {prvdr_rndrg}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
-            LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_prvdr_hstry {prvdr_othr} ON 
+            LEFT JOIN {IDR_PROVIDER_HISTORY_TABLE} {prvdr_othr} ON 
                 {prvdr_othr}.prvdr_npi_num = {clm}.prvdr_othr_prvdr_npi_num AND
                 {prvdr_othr}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
             LEFT JOIN claim_related_conditions {rlt_cond}

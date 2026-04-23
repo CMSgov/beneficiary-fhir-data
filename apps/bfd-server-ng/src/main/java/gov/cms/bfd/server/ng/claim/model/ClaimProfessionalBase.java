@@ -104,7 +104,7 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
 
     item.getClaimLine()
         .toFhirSupportingInfo(supportingInfoFactory)
-        .ifPresent(
+        .forEach(
             si -> {
               eob.addSupportingInfo(si);
               claimLine.ifPresent(cl -> cl.addInformationSequence(si.getSequence()));

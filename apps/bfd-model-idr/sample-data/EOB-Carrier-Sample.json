@@ -177,7 +177,8 @@
             "CLM_LINE_CARR_PSYCH_OT_LMT_AMT": "11.12",
             "CLM_LINE_PRFNL_INTRST_AMT": "11.13",
             "CLM_MDCR_PRMRY_PYR_ALOWD_AMT": "11.14",
-            "CLM_LINE_PMD_UNIQ_TRKNG_NUM": "ALA00000047747"
+            "CLM_LINE_PMD_UNIQ_TRKNG_NUM": "ALA00000047747",
+            "GEO_RNDRG_SSA_STATE_CD": "03"
         },
         {
             "PRVDR_RNDRNG_PRVDR_NPI_NUM": "1952378861",
@@ -207,7 +208,8 @@
             "CLM_LINE_CVRD_PD_AMT": "11.14",
             "CLM_LINE_BLOOD_DDCTBL_AMT": "17.11",
             "CLM_LINE_MDCR_DDCTBL_AMT": "3.50",
-            "CLM_LINE_PA_UNIQ_TRKNG_NUM": "0LA00000109286"
+            "CLM_LINE_PA_UNIQ_TRKNG_NUM": "0LA00000109286",
+            "GEO_RNDRG_SSA_STATE_CD": "04"
         },
         {
             "PRVDR_RNDRNG_PRVDR_NPI_NUM": "1952378861",
@@ -226,7 +228,8 @@
             "HCPCS_1_MDFR_CD": "99",
             "CLM_LINE_NCVRD_CHRG_AMT": "",
             "CLM_LINE_FROM_DT": "2025-01-01",
-            "CLM_LINE_PRVDR_PMT_AMT": "14.11"
+            "CLM_LINE_PRVDR_PMT_AMT": "14.11",
+            "GEO_RNDRG_SSA_STATE_CD": "05"
         },
         {
             "PRVDR_RNDRNG_PRVDR_NPI_NUM": "1952378861",
@@ -249,7 +252,8 @@
             "CLM_LINE_INSTNL_MSP1_PD_AMT": "17.00",
             "CLM_LINE_INSTNL_MSP2_PD_AMT": "14.21",
             "CLM_LINE_INSTNL_RATE_AMT": "0.85",
-            "CLM_LINE_BLOOD_DDCTBL_AMT": "1234.0"
+            "CLM_LINE_BLOOD_DDCTBL_AMT": "1234.0",
+            "GEO_RNDRG_SSA_STATE_CD": "03"
         }
     ],
     "profComponents": {

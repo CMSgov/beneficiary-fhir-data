@@ -1,12 +1,15 @@
-# Not intended for use outside of the "Deploy Environment Services" Workflow. This is defined just
+# Not intended for use outside of the "Deploy Tofuervices" Workflow. This is defined just
 # to make things a little DRYer
 
-name: "Deploy Environment Service Layer"
+name: "Deploy Tofuservices Layer"
 
 on:
   workflow_call:
     inputs:
-      bfd-env:
+      service-type:
+        type: string
+        required: true
+      env-or-account:
         type: string
         required: true
       account-type:
@@ -24,6 +27,21 @@ on:
       skip-applies:
         type: boolean
         required: true
+      # Typically, this would be an environment variable, but Actions does not support the "env"
+      # context within a "runs-on", so this is next best thing
+      service-runner-overrides-json:
+        type: string
+        required: false
+        default: |
+          {
+            "bene-prefs": "small",
+            "database": "small",
+            "migrator": "small",
+            "migrator-ng": "small"
+          }
+      per-service-vars-json:
+        type: string
+        required: false
       git-ref:
         type: string
         required: false
@@ -34,7 +52,8 @@ env:
       "prod": "${{ secrets.PROD_ACCOUNT_GHA_ROLE_ARN }}",
       "non-prod": "${{ secrets.NON_PROD_ACCOUNT_GHA_ROLE_ARN }}"
     }
-  DEFAULT_LOG_GROUP: /bfd/${{ inputs.bfd-env }}/github_actions/deploy_env_services/tofu
+  DEFAULT_ENVIRONMENT_LOG_GROUP: /bfd/${{ inputs.env-or-account }}/github_actions/deploy_env_services/tofu
+  DEFAULT_PLATFORM_LOG_GROUP: /bfd/platform/github_actions/deploy_platform_services/tofu
 
 jobs:
   deploy-layer:
@@ -44,7 +63,7 @@ jobs:
       matrix:
         context: ${{ fromJson(inputs.matrix-json)[inputs.layer-level] }}
     runs-on:
-      - codebuild-bfd-${{ inputs.account-type }}-platform-${{ matrix.context.runner }}-${{ github.run_id }}-${{ github.run_attempt }}
+      - codebuild-bfd-${{ inputs.account-type }}-platform-${{ fromJson(inputs.service-runner-overrides-json)[matrix.context.service] || 'lambda' }}-${{ github.run_id }}-${{ github.run_attempt }}
         service:${{ matrix.context.service }}
     steps:
       - name: Checkout
@@ -68,12 +87,23 @@ jobs:
           role-session-name: deploy-${{ matrix.context.layer }}-${{ matrix.context.service }}-${{ github.run_id }}-${{ github.run_attempt }}
           aws-region: ${{ inputs.aws-region }}
 
+      - name: Get tofu vars for service
+        id: get-tofu-vars
+        env:
+          ALL_VARS_JSON: ${{ inputs.per-service-vars-json || '{}' }}
+          SERVICE: ${{ matrix.context.service }}
+        run: |
+          tofu_vars_json="$(jq -c --arg service "$SERVICE" '.[$service] // {}' <<<"$ALL_VARS_JSON")"
+
+          echo "tofu-vars-json=$tofu_vars_json" >> "$GITHUB_OUTPUT"
+
       - name: Deploy ${{ matrix.context.service }}
-        uses: ./.github/actions/bfd-deploy-env-service
+        uses: ./.github/actions/bfd-deploy-tofuservice
         with:
-          bfd-env: ${{ inputs.bfd-env }}
-          service-path: ops/services/${{ matrix.context.layer }}-${{ matrix.context.service }}
-          cw-log-group: ${{ env.DEFAULT_LOG_GROUP }}
+          service-type: ${{ inputs.service-type }}
+          env-or-account: ${{ inputs.env-or-account }}
+          service-path: ${{ matrix.context.path }}
+          cw-log-group: ${{ inputs.service-type == 'ENVIRONMENT' && env.DEFAULT_ENVIRONMENT_LOG_GROUP || env.DEFAULT_PLATFORM_LOG_GROUP }}
           cw-log-stream: ${{ matrix.context.service }}-${{ github.run_id }}-${{ github.run_attempt }}
           skip-apply: ${{ inputs.skip-applies && 'true' || 'false' }}
-
+          tofu-vars-json: ${{ steps.get-tofu-vars.outputs.tofu-vars-json }}

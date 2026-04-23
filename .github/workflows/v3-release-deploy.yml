@@ -1,0 +1,416 @@
+---
+name: "(TEMPORARY) v3 Release and Deployment"
+on:
+  workflow_dispatch:
+    inputs:
+      run-type:
+        description: >-
+          Specify whether to just build, just deploy, or both
+        required: true
+        default: BUILD_AND_DEPLOY
+        type: choice
+        options:
+          - BUILD_ONLY
+          - DEPLOY_ONLY
+          - BUILD_AND_DEPLOY
+      version-suffix:
+        description: >-
+          Version suffix appended to the current, valid v3 tag name. Recommended to be
+          <abbreviated-branch-or-ticket-num>-<count>; e.g.: 1234-1, 4567-10, etc. The full version
+          that is used to tag Images will then be <base-tag>-<version-suffix>, e.g.:
+          v3.2026.01.30.0-1234-1
+        required: false
+        default: ""
+      envs:
+        description: >-
+          List of environments to deploy to
+        required: true
+        default: >-
+          test,
+          sandbox,
+          prod
+      deploy-platform:
+        description: >-
+          Deploy platform Terraservices?
+        required: true
+        type: boolean
+        default: false
+      aws-region:
+        description: >-
+          Override the AWS Region destination for uploaded artifacts.
+          Default to `us-east-1`.
+        default: us-east-1
+        type: choice
+        options:
+          - us-east-1
+          - us-west-2
+        required: true
+
+permissions:
+  id-token: write # This is required for requesting the AWS IAM OIDC JWT
+  contents: write # This is required for actions/checkout
+
+env:
+  AWS_REGION: ${{ inputs.aws-region }}
+  JIB_IMAGES: |
+    [
+      "bfd-server-ng"
+    ]
+  BASE_IMAGES: |
+    [
+      "bfd-platform-base-java"
+    ]
+  ACCOUNT_ROLE_MAP: |
+    {
+      "prod": "${{ secrets.PROD_ACCOUNT_GHA_ROLE_ARN }}",
+      "non-prod": "${{ secrets.NON_PROD_ACCOUNT_GHA_ROLE_ARN }}"
+    }
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  setup:
+    runs-on: ubuntu-24.04
+    outputs:
+      current-version: ${{ steps.bfd-version-strings.outputs.current-version }}
+      full-version-tag: ${{ steps.bfd-version-strings.outputs.full-version-tag }}
+      envs-as-json: ${{ steps.envs-as-json.outputs.envs-as-json }}
+    env:
+      REF_NAME: ${{ github.ref_name }}
+      REF: ${{ github.ref }}
+    steps:
+      - name: Validate ref
+        run: |
+          if ! echo "$REF" | grep -P '^refs/tags.*$'; then
+            echo "$REF_NAME is not a tag; this Workflow must be ran with a valid v3 tag as the reference"
+            exit 1
+          fi
+          if ! echo "$REF_NAME" | grep -P '^v3\.\d{4}.\d{2}.\d{2}.\d+$'; then
+            echo "$REF_NAME MUST be in the form 'v3.yyyy.MM.dd.<integer>', e.g.: v3.2026.01.30.0"
+            exit 1
+          fi
+
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ github.ref_name }}
+
+      - name: "Install yq"
+        run: |
+          sudo wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq
+          sudo chmod +x /usr/bin/yq
+
+      - name: Set and Validate Version Strings
+        id: bfd-version-strings
+        env:
+          VERSION_SUFFIX: ${{ inputs.version-suffix }}
+        run: |
+          bfd_parent_pom_version="$(yq --output-format=yaml .project.version apps/pom.xml)"
+          full_version_tag="$REF_NAME"
+          if [[ -n $VERSION_SUFFIX ]]; then
+            full_version_tag="$REF_NAME-$VERSION_SUFFIX"
+          fi
+
+          # Validate and set current-version and full-version-tag
+          echo "$bfd_parent_pom_version" | grep -P '^\d+\.\d+\.\d+$|^\d+\.\d+\.\d+-SNAPSHOT$'
+          echo current-version="$bfd_parent_pom_version" >> "$GITHUB_OUTPUT"
+          echo "$full_version_tag" | grep -P '^v3\.\d{4}.\d{2}.\d{2}.\d+.*$'
+          echo full-version-tag="$full_version_tag" >> "$GITHUB_OUTPUT"
+
+      - name: Envs as JSON
+        id: envs-as-json
+        env:
+          ENVS: ${{ inputs.envs }}
+        run: |
+          envs_as_json="$(jq -Rc '[(split(",") // [])[]| sub("^ "; "") | sub(" $"; "")]' <<<"$ENVS")"
+
+          echo "envs-as-json=$envs_as_json" >> "$GITHUB_OUTPUT"
+
+  deploy-platform:
+    if: ${{ inputs.deploy-platform && (inputs.run-type == 'DEPLOY_ONLY' || inputs.run-type == 'BUILD_AND_DEPLOY') }}
+    uses: ./.github/workflows/deploy-platform-services.yml
+    needs: [setup]
+    strategy:
+      matrix:
+        account-type: ["prod", "non-prod"]
+      fail-fast: false
+    with:
+      account-type: ${{ matrix.account-type }}
+      git-ref: ${{ github.ref_name }}
+    secrets: inherit
+
+  pull-base-java:
+    # deploy-platform is conditional, so we want to run this step if it runs or not as long as it
+    # did not fail.
+    if: |
+      (inputs.run-type == 'BUILD_ONLY' || inputs.run-type == 'BUILD_AND_DEPLOY')
+        && (
+          (!failure() && !cancelled()) && needs.setup.result == 'success'
+        )
+    needs: [deploy-platform, setup]
+    runs-on: ${{ format('codebuild-bfd-non-prod-platform-docker-{0}-{1}', github.run_id, github.run_attempt) }}
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.NON_PROD_ACCOUNT_GHA_ROLE_ARN }}
+          role-session-name: v3-release-deploy-${{ github.run_id }}-${{ github.run_attempt }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to ECR
+        id: ecr-login
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Pull base images
+        env:
+          REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+          BASE_IMAGES_VERSION: latest
+        run: |
+          echo "::add-mask::$REGISTRY"
+
+          readarray -t images < <(echo "$BASE_IMAGES" | jq -r -c '.[]')
+          for image in "${images[@]}"
+          do
+            docker pull "${REGISTRY}/${image}:${BASE_IMAGES_VERSION}"
+
+            docker tag "${REGISTRY}/${image}:${BASE_IMAGES_VERSION}" "${image}:${BASE_IMAGES_VERSION}"
+            docker rmi "${REGISTRY}/${image}:${BASE_IMAGES_VERSION}"
+
+            docker save "${image}:${BASE_IMAGES_VERSION}" > "${{ runner.temp }}/${image}_${BASE_IMAGES_VERSION}.tar"
+          done
+
+      - name: Upload base image artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: bfd-platform-base-java
+          path: ${{ runner.temp }}/*.tar
+          retention-days: 1
+
+  build-server-ng-image:
+    # For reasons unknown, _downstream_ jobs must also guard against
+    # their needed Jobs depending on conditional jobs.
+    if: |
+      (inputs.run-type == 'BUILD_ONLY' || inputs.run-type == 'BUILD_AND_DEPLOY')
+        && (
+          (!failure() && !cancelled()) && needs.setup.result == 'success'
+        )
+    runs-on: ubuntu-24.04-arm
+    needs: [setup, pull-base-java]
+    env:
+      CURRENT_VERSION: ${{ needs.setup.outputs.current-version }}
+      FULL_VERSION_TAG: ${{ needs.setup.outputs.full-version-tag }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ github.ref_name }}
+
+      - name: Retrieve base java image
+        uses: actions/download-artifact@v8
+        with:
+          pattern: "*bfd-platform-base-java*"
+          merge-multiple: true
+          path: ${{ runner.temp }}
+
+      - name: Load base image into Docker
+        run: |
+          docker load --input "${{ runner.temp }}/bfd-platform-base-java_latest.tar"
+          rm -f "${{ runner.temp }}/bfd-platform-base-java_latest.tar"
+
+      - name: Install gitleaks
+        run: |
+          curl -s https://api.github.com/repos/gitleaks/gitleaks/releases/latest \
+            | grep "browser_download_url.*linux_x64.tar.gz" \
+            | cut -d : -f 2,3 \
+            | tr -d \" \
+            | wget -qi -
+          sudo tar -xzf "$(find -iname 'gitleaks*.tar.gz')" -C /usr/bin gitleaks
+          sudo chmod +x /usr/bin/gitleaks
+
+      - name: Setup JDK
+        uses: actions/setup-java@v5
+        with:
+          java-version: "25"
+          distribution: corretto
+
+      - name: Build bfd-server-ng and deps
+        run: |-
+          mvn clean install \
+            -DskipTests=true \
+            -DskipITs \
+            -Dmaven.javadoc.skip=true \
+            -Dcheckstyle.skip \
+            -Dmaven.build.cache.enabled=true \
+            --threads 1C \
+            --no-transfer-progress \
+            -pl :bfd-server-ng \
+            -am
+        working-directory: ./apps
+
+      - name: Build bfd-server-ng Image
+        run: |-
+          mvn --batch-mode com.google.cloud.tools:jib-maven-plugin:dockerBuild \
+            -pl :bfd-server-ng \
+            -Djib.skip=false \
+            -Djib.from="docker://bfd-platform-base-java:latest" \
+            --no-transfer-progress
+        working-directory: ./apps
+
+      - name: Export jib images
+        run: |
+          readarray -t images < <(echo "$JIB_IMAGES" | jq -r -c '.[]')
+          for image in "${images[@]}"
+          do
+            docker save "$image:$CURRENT_VERSION" > "${image}.tar"
+          done
+        working-directory: ${{ runner.temp }}
+
+      - name: Upload jib image artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: jib-images
+          path: ${{ runner.temp }}/*.tar
+          retention-days: 1
+
+  push-jib-images:
+    if: |
+      (inputs.run-type == 'BUILD_ONLY' || inputs.run-type == 'BUILD_AND_DEPLOY')
+        && (
+          (!failure() && !cancelled()) && needs.setup.result == 'success'
+        )
+    needs: [setup, build-server-ng-image]
+    strategy:
+      matrix:
+        account: ["prod", "non-prod"]
+    runs-on: codebuild-bfd-${{ matrix.account }}-platform-docker-${{ github.run_id }}-${{ github.run_attempt }}
+    env:
+      CURRENT_VERSION: ${{ needs.setup.outputs.current-version }}
+      FULL_VERSION_TAG: ${{ needs.setup.outputs.full-version-tag }}
+    steps:
+      - name: Get role ARN
+        id: get-role-arn
+        run: |
+          role_arn="$(jq -r --arg account_type "${{ matrix.account }}" '.[$account_type]' <<<"$ACCOUNT_ROLE_MAP")"
+
+          echo "::add-mask::$role_arn"
+          echo "role-arn=$role_arn" >> "$GITHUB_OUTPUT"
+
+      - name: Download jib image artifacts
+        uses: actions/download-artifact@v8
+        with:
+          name: jib-images
+          path: ${{ runner.temp }}
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ steps.get-role-arn.outputs.role-arn }}
+          role-session-name: v3-release-deploy-${{ github.run_id }}-${{ github.run_attempt }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to ECR
+        id: ecr-login
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Push jib images
+        env:
+          REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+        run: |
+          echo "::add-mask::$REGISTRY"
+
+          for image_filename in ./*.tar
+          do
+            docker load --input "$image_filename"
+
+            image="$(basename "$image_filename" .tar)"
+            docker tag "$image:$CURRENT_VERSION" "$REGISTRY/$image:$FULL_VERSION_TAG"
+            docker rmi "$image:$CURRENT_VERSION"
+
+            docker push "$REGISTRY/$image:$FULL_VERSION_TAG"
+          done
+        working-directory: ${{ runner.temp }}
+
+  build-other-images:
+    # deploy-platform is conditional, so we want to run this step if it runs or not as long as it
+    # did not fail.
+    if: |
+      (inputs.run-type == 'BUILD_ONLY' || inputs.run-type == 'BUILD_AND_DEPLOY')
+        && (
+          (!failure() && !cancelled()) && needs.setup.result == 'success'
+        )
+    uses: ./.github/workflows/build-container-images.yml
+    needs: [deploy-platform, setup]
+    permissions:
+      contents: read
+      id-token: write
+    with:
+      branch: ${{ github.ref_name }}
+      versionTag: ${{ needs.setup.outputs.full-version-tag }}
+      awsRegion: ${{ inputs.aws-region }}
+      # Build other images, like Lambda images, Python applications, etc.
+      # See .github/workflows/build_container_images_matrix.json for list of buildable images
+      imagesCsv: >-
+        bfd-platform-server-fluent-bit,
+        bfd-platform-idr-pipeline,
+        bfd-platform-migrator-ng,
+        bfd-platform-consume-idr-events,
+        bfd-platform-run-idr-pipeline
+      baseImagesVersion: latest
+      cleanupImageArtifacts: false # We'll cleanup at the end, so don't do anything
+      tagLatest: false
+    secrets: inherit
+
+  deploy-to-envs:
+    if: |
+      needs.setup.outputs.envs-as-json != '[]'
+        && (inputs.run-type == 'DEPLOY_ONLY' || inputs.run-type == 'BUILD_AND_DEPLOY')
+          && (
+            (!failure() && !cancelled()) && needs.setup.result == 'success'
+          )
+    uses: ./.github/workflows/deploy-env-services.yml
+    needs: [setup, push-jib-images, build-other-images]
+    strategy:
+      matrix:
+        bfd-env: ${{ fromJson(needs.setup.outputs.envs-as-json) }}
+      fail-fast: true
+    with:
+      bfd-env: ${{ matrix.bfd-env }}
+      services: >-
+        config,
+        cluster,
+        database,
+        migrator-ng,
+        idr-pipeline,
+        server-ng
+      git-ref: ${{ github.ref_name }}
+      per-service-vars-json: >-
+        {
+          "migrator-ng": {
+            "migrator_version_override": "${{ needs.setup.outputs.full-version-tag }}"
+          },
+          "idr-pipeline": {
+            "consume_idr_events_version_override": "${{ needs.setup.outputs.full-version-tag }}",
+            "pipeline_version_override": "${{ needs.setup.outputs.full-version-tag }}",
+            "run_idr_pipeline_version_override": "${{ needs.setup.outputs.full-version-tag }}"
+          },
+          "server-ng": {
+            "log_router_version_override": "${{ needs.setup.outputs.full-version-tag }}",
+            "server_version_override": "${{ needs.setup.outputs.full-version-tag }}"
+          }
+        }
+    secrets: inherit
+
+  cleanup-artifacts:
+    if: ${{ !cancelled() }}
+    needs: [build-other-images]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Delete all artifacts
+        uses: GeekyEggo/delete-artifact@v5.1.0
+        with:
+          name: "*"
+          failOnError: false

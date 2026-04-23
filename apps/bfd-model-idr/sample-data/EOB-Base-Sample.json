@@ -13,6 +13,7 @@
     "CLM_SRC_ID": "20000",
     "PRVDR_BLG_PRVDR_NPI_NUM": "1548226988",
     "CLM_BLG_PRVDR_ZIP5_CD": "77550",
+    "GEO_BLG_SSA_STATE_CD": "03",
     "diagnoses": [
         {
             "CLM_VAL_SQNC_NUM": "1",

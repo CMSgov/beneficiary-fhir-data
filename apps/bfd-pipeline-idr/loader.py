@@ -4,7 +4,6 @@ from datetime import UTC, date, datetime
 
 import psycopg
 from psycopg.abc import Params, Query
-from psycopg.errors import DeadlockDetected
 
 from constants import DEFAULT_MIN_DATE
 from load_partition import LoadPartition, LoadType
@@ -293,33 +292,30 @@ class BatchLoader:
             last_updated_cols = self.model.last_updated_date_column()
             set_clause = ", ".join(f"{col} = %(timestamp)s" for col in last_updated_cols)
 
-            try:
-                cur.execute(
-                    f"""
-                    WITH locked AS (
-                        SELECT {key}
-                        FROM {self.model.last_updated_date_table()}
-                        WHERE {key} IN (
-                            SELECT {key} FROM {self.temp_table}
-                        )
-                        ORDER BY {key}
-                        FOR UPDATE
+            # We require multi-step transactions since we're dealing with temp tables, so there
+            # is a chance of a deadlock here.
+            # However, it's safe to ignore these because if the timestamp for this row is being
+            # updated concurrently then it's going to have the same end result anyway.
+            # If a deadlock occurs, the CTE returns no rows and this is a no-op.
+
+            cur.execute(
+                f"""
+                WITH current_ts AS (
+                    SELECT {key}
+                    FROM {self.model.last_updated_date_table()}
+                    WHERE {key} IN (
+                        SELECT {key} FROM {self.temp_table}
                     )
-                    UPDATE {self.model.last_updated_date_table()} u
-                    SET {set_clause}
-                    FROM locked l
-                    WHERE u.{key} = l.{key};
-                    """,  # type: ignore
-                    {"timestamp": timestamp},
+                    ORDER BY {key}
+                    FOR UPDATE SKIP LOCKED
                 )
-            except DeadlockDetected as ex:
-                # We require multi-step transactions since we're dealing with temp tables, so there
-                # is a chance of a deadlock here.
-                # Locking rows helps reduce the chance of this when multiple nodes update this
-                # table, but it doesn't eliminate the possibility.
-                # However, it's safe to ignore this because if the timestamp for this row is being
-                # updated concurrently then it's going to have the same end result anyway
-                logger.warning("deadlock updating update timestamp, ignoring: %s", ex)
+                UPDATE {self.model.last_updated_date_table()} u
+                SET {set_clause}
+                FROM current_ts t
+                WHERE u.{key} = t.{key};
+                """,  # type: ignore
+                {"timestamp": timestamp},
+            )
 
     def _copy_data(self, cur: psycopg.Cursor, results: Sequence[T]) -> None:
         # Use COPY to load the batch into Postgres.
