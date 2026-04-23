@@ -71,7 +71,7 @@
         <javaSourceVersion>25</javaSourceVersion>
         <maven.compiler.release>25</maven.compiler.release>
 
-        <project.build.outputTimestamp>2026-04-21T17:33:03Z</project.build.outputTimestamp>
+        <project.build.outputTimestamp>2026-04-22T14:28:28Z</project.build.outputTimestamp>
         <!-- Disable jacoco until automated coverage generation is desired -->
         <maven.jacoco.skip>true</maven.jacoco.skip>
         <sonar.coverageReportPaths>coverage.xml</sonar.coverageReportPaths>
