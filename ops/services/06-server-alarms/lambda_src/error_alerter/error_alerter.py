@@ -5,12 +5,13 @@ import os
 import sys
 import time
 from datetime import UTC, datetime, timedelta
-from typing import Any, TypedDict
+from typing import TypedDict
 from urllib.error import URLError
 from urllib.parse import quote_plus
 from urllib.request import Request, urlopen
 
 import boto3
+from aws_lambda_powertools.utilities.typing import LambdaContext
 from botocore.config import Config
 
 REGION = os.environ.get("AWS_CURRENT_REGION", "us-east-1")
@@ -59,9 +60,8 @@ logger = logging.getLogger()
 try:
     logs_client = boto3.client("logs", config=BOTO_CONFIG)  # type: ignore
 except Exception:
-    logger.error(
-        "Unrecoverable exception occurred when attempting to create boto3 clients/resources:",
-        exc_info=True,
+    logger.exception(
+        "Unrecoverable exception occurred when attempting to create boto3 clients/resources:"
     )
     sys.exit(0)
 
@@ -101,12 +101,13 @@ def __gen_log_insights_url(
     }
     # For whatever reason, '=' is escaped as "~'"
     query_param_fragments = [f"{k}~'{v}" for k, v in query_params.items()]
-    query_params_str = f"({'~'.join(query_param_fragments)}~source~(~'{__escape_log_insights_url_str(source_log_group)}))"
+    query_params_str = f"({'~'.join(query_param_fragments)}"
+    f"~source~(~'{__escape_log_insights_url_str(source_log_group)}))"
 
     return f"{url_prefix}{query_params_str}"
 
 
-def handler(event: dict[str, str], context: Any):
+def handler(_event: dict[str, str], _context: LambdaContext) -> None:
     if not all([REGION, BFD_ENVIRONMENT, LOG_LOOKBACK_SECONDS]):
         logger.error("Not all necessary environment variables were defined, exiting...")
         return
@@ -134,16 +135,15 @@ def handler(event: dict[str, str], context: Any):
             queryString=LOG_INSIGHTS_NOTIF_QUERY,
         )
     except logs_client.exceptions.ClientError:
-        logger.error(
+        logger.exception(
             "An unrecoverable error occurred when trying to query for 500s in %s:",
-            ACCESS_JSON_LOG_GROUP,
-            exc_info=True,
+            ACCESS_JSON_LOG_GROUP
         )
         return
 
     try:
         response = logs_client.get_query_results(queryId=start_query_response["queryId"])
-        while response["status"] == "Running" or response["status"] == "Scheduled":
+        while response["status"] in ("Running", "Scheduled"):
             logger.info(
                 'Query "%s" has not finished running (current status: %s), waiting 1 second...',
                 start_query_response["queryId"],
@@ -152,9 +152,9 @@ def handler(event: dict[str, str], context: Any):
             time.sleep(1)
             response = logs_client.get_query_results(queryId=start_query_response["queryId"])
     except logs_client.exceptions.ClientError:
-        logger.error(
+        logger.exception(
             'Retrieving results for query ID "%s" has failed due to an unrecoverable error:',
-            exc_info=True,
+            start_query_response["queryId"]
         )
         return
 
@@ -213,9 +213,10 @@ def handler(event: dict[str, str], context: Any):
 
     per_partner_tables: dict[str, str] = {}
     for partner, op_counts in partner_to_errors.items():
-        longest_op_chars_count = max(len(x) for x in op_counts.keys())
+        longest_op_chars_count = max(len(x) for x in op_counts)
         longest_err_chars_count = max(len(str(x)) for x in op_counts.values())
-        table_block_str = f"```\n{'Operation':<{longest_op_chars_count}} {'Error Count':<{longest_err_chars_count}}\n"
+        table_block_str = f"```\n{'Operation':<{longest_op_chars_count}} "
+        f"{'Error Count':<{longest_err_chars_count}}\n"
         for op, count in op_counts.items():
             table_block_str += (
                 f"{op:<{longest_op_chars_count}} {count:<{longest_err_chars_count}}\n"
@@ -298,9 +299,8 @@ def handler(event: dict[str, str], context: Any):
                 else:
                     logger.error("%s response received from Slack", response.status)
         except URLError:
-            logger.error(
-                "An unrecoverable error occurred attempting to post Slack message: ",
-                exc_info=True,
+            logger.exception(
+                "An unrecoverable error occurred attempting to post Slack message: "
             )
     else:
         logger.info("No Slack webhook defined, logging Slack message instead")

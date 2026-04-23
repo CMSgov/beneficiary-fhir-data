@@ -1,7 +1,7 @@
 [project]
 name = "bfd-workspace"
 version = "0.1.0"
-requires-python="==3.14.*"
+requires-python="==3.14.3"
 description = "BFD Python workspace for unified dependency management"
 
 dependencies = [
