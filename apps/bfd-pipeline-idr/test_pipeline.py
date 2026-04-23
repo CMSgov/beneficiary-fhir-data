@@ -106,7 +106,10 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
     assert rows[0]["bene_mbi_id"] == "1BC3JG0FM51"
 
     cur = conn.execute("select max(last_ts) as max_ts from idr.load_progress")
-    datetime_now = cur.fetchone()["max_ts"] + timedelta(days=1)
+    row = cur.fetchone()
+    assert row is not None
+    max_ts = cast(datetime, row["max_ts"])
+    datetime_now = max_ts + timedelta(days=1)
     advance_time(datetime_now)
 
     conn.execute(
@@ -249,7 +252,9 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
         # by inserting load events with completion times of datetime_now + 1hr for all types
         idr_jobs_table = sql.Identifier("idr", "source_load_events")
         cur = conn.execute("select max(last_ts) as max_ts from idr.load_progress")
-        datetime_now = cur.fetchone()["max_ts"]
+        row = cur.fetchone()
+        assert row is not None
+        datetime_now = cast(datetime, row["max_ts"])
         load_1_complete_time = datetime_now + timedelta(hours=1)
         load_jobs = [
             IdrJobLoadEvent(

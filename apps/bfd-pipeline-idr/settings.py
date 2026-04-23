@@ -20,7 +20,7 @@ def force_load_progress() -> bool:
     return _parse_bool_default_false("IDR_FORCE_LOAD_PROGRESS")
 
 
-def bfd_test_date() -> datetime:
+def bfd_test_date() -> datetime | None:
     test_date = getenv("BFD_TEST_DATE", "")
     return datetime.fromisoformat(test_date) if test_date else None
 
