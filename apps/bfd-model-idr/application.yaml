@@ -14,6 +14,9 @@ spring:
   jpa:
     properties:
       hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
+      hibernate.search.enabled: false
+      hibernate.cache.use_second_level_cache: false
+      hibernate.cache.use_query_cache: false
 matchbox:
   fhir:
     context:
@@ -22,12 +25,21 @@ matchbox:
       onlyOneEngine: true
       fhirVersion: R4
       suppressR5: true
-      igsPreloaded: hl7.fhir.us.carin-bb#2.2.0
+logging:
+  level:
+    ca.uhn.fhir: ERROR
+    ca.uhn.fhir.rest.server.ResourceBinding: ERROR
+    ch.ahdis.matchbox: DEBUG
 hapi:
   fhir:
     fhir_version: R4
-    implementationguides:
-      carin:
-        name: hl7.fhir.us.carin-bb
-        version: 2.2.0
+    mdm_enabled: false
+    openapi_enabled: false
+    narrative_enabled: false
+    jpa:
+      subscription_matching_enabled: false
+      bulk_export_enabled: false
+      dao_scheduling_enabled: false
+      enforce_referential_integrity_on_delete: false
+      enforce_referential_integrity_on_write: false
 

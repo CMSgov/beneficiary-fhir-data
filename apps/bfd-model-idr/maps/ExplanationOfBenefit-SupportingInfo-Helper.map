@@ -523,7 +523,7 @@ group addAuditTrailStatusCode(source src: SupportingInfoComponent, target tgt: B
     src -> tgt.code = create('CodeableConcept') as tgtCC then {
         src -> tgtCC.coding = create('Coding') as tgtCoding then {
                     src.CLM_AUDT_TRL_STUS_CD as val -> tgtCoding.code=val,
-                    tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD-Augmented" "Set coding";
+                    tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-AUDT-TRL-STUS-CD" "Set coding";
                 } "Add coding";
     } "Add CC";
 }

@@ -174,7 +174,10 @@ group createPartDCoverage(source src: CoverageBase, target tgt: BFDCoverage){
 
     src.BENE_ENRLMT_EMPLR_SBSDY_SW as switch -> tgt.extension = create('Extension') as tgtExtension then{
         src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-ENRLMT-EMPLR-SBSDY-SW" "Add url";
-        src -> tgtExtension.value = switch "Add value";
+        src -> tgtExtension.value = create('Coding') as tgtCoding then{
+            src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ENRLMT-EMPLR-SBSDY-SW" "add system";
+            src -> tgtCoding.code = switch "Add code";
+        } "Add coding";
     } "Add RDS switch ";
 
     //Coverage Type Code Extension
