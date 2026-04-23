@@ -146,14 +146,12 @@ public class EobHandler {
    * @return the transformed EOB
    */
   private ExplanationOfBenefit transformToFhir(ClaimBase claim, SamhsaFilterMode samhsaFilterMode) {
-    boolean isSamhsa;
-    if (samhsaFilterMode == SamhsaFilterMode.ONLY_SAMHSA) {
-      isSamhsa = true;
-    } else if (samhsaFilterMode == SamhsaFilterMode.EXCLUDE) {
-      isSamhsa = false;
-    } else {
-      isSamhsa = claimHasSamhsa(claim);
-    }
+    var isSamhsa =
+        switch (samhsaFilterMode) {
+          case ONLY_SAMHSA -> true;
+          case EXCLUDE -> false;
+          case INCLUDE -> claimHasSamhsa(claim);
+        };
 
     var securityStatus =
         isSamhsa ? ClaimSecurityStatus.SAMHSA_APPLICABLE : ClaimSecurityStatus.NONE;
