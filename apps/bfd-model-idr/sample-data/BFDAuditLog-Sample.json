@@ -1,0 +1,10 @@
+{
+    "matchedBeneSk": "-427786917",
+    "timeStamp": "2026-04-06T15:10:21.178850077Z",
+    "beneSksFound": ["-427786917"],
+    "clientId": "ccXny6hECVFQyAasdfk2H5nfgjEk7Aw5S",
+    "clientIp": "192.0.0.1",
+    "clientName" : "Alex's test app",
+    "combinationsEvaluated": [{"combination":"01","matchType":"exact","matchedRecords":[{"beneSk":-427786917,"effectiveTimestamp":"2017-05-30T04:46:54.260595Z"}]}],
+    "finalDetermination": "01"
+}

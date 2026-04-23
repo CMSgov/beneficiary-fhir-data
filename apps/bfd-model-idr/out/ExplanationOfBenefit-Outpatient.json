@@ -1,7 +1,7 @@
 {
   "resourceType" : "ExplanationOfBenefit",
   "meta" : {
-    "lastUpdated" : "2026-03-18T20:18:08.933551Z",
+    "lastUpdated" : "2026-04-15T19:23:45.794751Z",
     "source" : "NCH",
     "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Outpatient-Institutional|2.1.0"],
     "tag" : [{
@@ -934,8 +934,7 @@
         },
         {
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CODE",
-          "code" : "PR",
-          "display" : "Patient Responsibility -- this group should be used when the adjustment represents an amount that should be billed to the patient or insured. This group would typically be used for deductible and copay adjustments."
+          "code" : "PR"
         },
         {
           "system" : "https://x12.org/codes/claim-adjustment-reason-codes",
@@ -943,8 +942,7 @@
         },
         {
           "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CODE",
-          "code" : "B7",
-          "display" : "This provider was not certified/eligible to be paid for this procedure/service on this date of service."
+          "code" : "B7"
         }]
       }
     },

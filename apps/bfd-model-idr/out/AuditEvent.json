@@ -1,0 +1,40 @@
+{
+  "resourceType" : "AuditEvent",
+  "type" : {
+    "system" : "http://terminology.hl7.org/CodeSystem/audit-event-type",
+    "code" : "rest"
+  },
+  "recorded" : "2026-04-06T15:10:21.178850077Z",
+  "purposeOfEvent" : [{
+    "coding" : [{
+      "system" : "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+      "code" : "PATRQT",
+      "display" : "patient requested"
+    }]
+  }],
+  "agent" : [{
+    "name" : "Alex's test app",
+    "requestor" : true,
+    "network" : {
+      "address" : "192.0.0.1",
+      "type" : "2"
+    }
+  }],
+  "entity" : [{
+    "what" : {
+      "reference" : "Patient/-427786917"
+    },
+    "type" : {
+      "system" : "http://hl7.org/fhir/resource-types",
+      "code" : "Patient",
+      "display" : "Patient"
+    },
+    "role" : {
+      "system" : "http://terminology.hl7.org/CodeSystem/object-role",
+      "code" : "1",
+      "display" : "Patient"
+    },
+    "name" : "01",
+    "description" : "Name refers to the combination evaluated that returned a unique match. 'What' refers to the unique match itself."
+  }]
+}
