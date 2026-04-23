@@ -3,7 +3,6 @@ name = "consume-idr-events"
 version = "0.1.0"
 description = "Lambda to consume IDR load events from the IDR Events SQS Queue into the v3 DB"
 readme = "README.md"
-requires-python = "~=3.14.0"
 dependencies = ["boto3", "aws-lambda-powertools", "psycopg[binary]", "pydantic"]
 
 [dependency-groups]
