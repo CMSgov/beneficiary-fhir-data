@@ -1,5 +1,6 @@
 import json
 import sys
+import yaml
 from dataclasses import asdict, dataclass, field
 from decimal import Decimal
 from pathlib import Path
@@ -33,6 +34,111 @@ careteam_header_columns = {
     # This is purposely commented out to note we do not pull it in on the careteam (for now).
     "PRVDR_SRVC_PRVDR_NPI_NUM": "",
 }
+
+def load_profile_map():
+    profile_map = {}
+    yaml_files = [
+        "dictionary-support-files/ExplanationOfBenefit.yaml",
+        "dictionary-support-files/ExplanationOfBenefit-Pharmacy.yaml",
+    ]
+    for yaml_file in yaml_files:
+        p = Path(yaml_file)
+        if not p.exists():
+            continue
+        with p.open("r") as f:
+            data = yaml.safe_load(f)
+            if not data:
+                continue
+            for item in data:
+                profiles = item.get("profiles")
+                if profiles is None:
+                    continue
+
+                keys = set()
+                if "sourceColumn" in item:
+                    keys.add(item["sourceColumn"])
+                if "inputPath" in item:
+                    keys.add(item["inputPath"].split(".")[-1])
+                if "ccwMapping" in item:
+                    for m in item["ccwMapping"]:
+                        keys.add(m)
+                if "cclfMapping" in item:
+                    for m in item["cclfMapping"]:
+                        keys.add(m.split(".")[-1])
+
+                for key in keys:
+                    profile_map[key] = profiles
+    return profile_map
+
+
+def filter_by_profile(data, profile_type, profile_map):
+    if isinstance(data, dict):
+        for k in list(data.keys()):
+            v = data[k]
+            if k in profile_map and profile_type not in profile_map[k]:
+                del data[k]
+                continue
+            filter_by_profile(v, profile_type, profile_map)
+    elif isinstance(data, list):
+        for item in data:
+            filter_by_profile(item, profile_type, profile_map)
+
+
+def cleanup_empty_items(data):
+    if "supportingInfoComponents" in data:
+        sic = data["supportingInfoComponents"]
+        new_sic = []
+        si_map = {}
+        next_row = 1
+        for item in sic:
+            old_row = item.get("ROW_NUM")
+            if any(k != "ROW_NUM" for k in item):
+                item["ROW_NUM"] = next_row
+                new_sic.append(item)
+                if old_row is not None:
+                    si_map[str(old_row)] = next_row
+                    si_map[int(old_row)] = next_row
+                next_row += 1
+        data["supportingInfoComponents"] = new_sic
+
+        if "lineItemComponents" in data:
+            for li in data["lineItemComponents"]:
+                if "SEQUENCE_INFO" in li:
+                    li["SEQUENCE_INFO"] = [
+                        si_map[int(s)] for s in li["SEQUENCE_INFO"] if int(s) in si_map
+                    ]
+
+    if "diagnoses" in data:
+        diag = data["diagnoses"]
+        new_diag = []
+        diag_map = {}
+        next_row = 1
+        internal_diag_keys = {"ROW_NUM", "clm_prod_type_cd_map"}
+        for item in diag:
+            old_row = item.get("ROW_NUM")
+            if any(k not in internal_diag_keys for k in item):
+                item["ROW_NUM"] = str(next_row) if isinstance(old_row, str) else next_row
+                new_diag.append(item)
+                if old_row is not None:
+                    diag_map[str(old_row)] = next_row
+                    diag_map[int(old_row)] = next_row
+                next_row += 1
+        data["diagnoses"] = new_diag
+
+        # Update diagnosisSequence in lineItemComponents
+        if "lineItemComponents" in data:
+            for li in data["lineItemComponents"]:
+                if "diagnosisSequence" in li:
+                    li["diagnosisSequence"] = [
+                        diag_map[int(s)] for s in li["diagnosisSequence"] if int(s) in diag_map
+                    ]
+
+
+# we filter twice - once before augmentation and again after, to make it simpler.
+profile_map = load_profile_map()
+profile_type = cur_sample_data.get("profile_type", "Maximus").capitalize()
+filter_by_profile(cur_sample_data, profile_type, profile_map)
+
 
 line_supporting_info_columns = [
     "CLM_LINE_PMD_UNIQ_TRKNG_NUM",
@@ -410,6 +516,10 @@ for item in cur_sample_data.get("lineItemComponents", []):
 filename = "out/temporary-sample.json"
 
 cur_sample_data["lastUpdated"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+
+profile_type = cur_sample_data.get("profile_type", "Maximus").capitalize()
+filter_by_profile(cur_sample_data, profile_type, profile_map)
+cleanup_empty_items(cur_sample_data)
 
 with Path(filename).open("w") as f:
     json.dump(cur_sample_data, f, indent=4)
