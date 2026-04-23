@@ -25,7 +25,6 @@ public class CoverageHandler {
 
   private final CoverageRepository coverageRepository;
   private final LoadProgressRepository loadProgressRepository;
-  // private final Clock clock;
   private final DateUtil dateUtil;
 
   /**

@@ -25,7 +25,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class PatientResourceProvider implements IResourceProvider {
 
-  // private final Clock clock;
   private final DateUtil dateUtil;
 
   @Override

@@ -18,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 @AllArgsConstructor
 public class CoverageRepository {
   private final EntityManager entityManager;
-  // private final Clock clock;
   private final DateUtil dateUtil;
 
   /**
