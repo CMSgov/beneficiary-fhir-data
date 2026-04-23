@@ -3,6 +3,7 @@ from typing import Annotated, override
 
 from pydantic import BeforeValidator
 
+from constants import IDR_BENE_ENTITLEMENT_REASON_TABLE
 from load_partition import LoadPartition
 from loader import LoadMode
 from model.base_model import (
@@ -59,7 +60,7 @@ class IdrBeneficiaryEntitlementReason(IdrBaseModel):
         hstry = ALIAS_HSTRY
         return f"""
             SELECT {{COLUMNS}}
-            FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_mdcr_entlmt_rsn rsn
+            FROM {IDR_BENE_ENTITLEMENT_REASON_TABLE} rsn
             {{WHERE_CLAUSE}}
             AND NOT EXISTS (
                 {deceased_bene_filter(hstry, start_time)}

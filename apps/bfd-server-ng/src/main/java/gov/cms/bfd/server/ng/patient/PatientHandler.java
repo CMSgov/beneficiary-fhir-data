@@ -1,26 +1,38 @@
 package gov.cms.bfd.server.ng.patient;
 
+import static gov.cms.bfd.server.ng.util.LoggerConstants.*;
+
 import gov.cms.bfd.server.ng.beneficiary.BeneficiaryRepository;
 import gov.cms.bfd.server.ng.beneficiary.model.Beneficiary;
 import gov.cms.bfd.server.ng.beneficiary.model.OrganizationFactory;
+import gov.cms.bfd.server.ng.beneficiary.model.PatientMatch;
+import gov.cms.bfd.server.ng.beneficiary.model.PatientMatchAuditRecord;
 import gov.cms.bfd.server.ng.coverage.CoverageRepository;
 import gov.cms.bfd.server.ng.input.CoverageCompositeId;
 import gov.cms.bfd.server.ng.input.CoveragePart;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.loadprogress.LoadProgressRepository;
+import gov.cms.bfd.server.ng.log.AuditLogger;
 import gov.cms.bfd.server.ng.model.ProfileType;
 import gov.cms.bfd.server.ng.util.FhirUtil;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.time.LocalDate;
+import java.time.Instant;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Meta;
+import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Reference;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 
 /**
@@ -32,8 +44,8 @@ import org.springframework.stereotype.Component;
 public class PatientHandler {
   private final BeneficiaryRepository beneficiaryRepository;
   private final LoadProgressRepository loadProgressRepository;
-
   private final CoverageRepository coverageRepository;
+  private final AuditLogger auditLogger;
 
   /**
    * Returns a {@link Patient} by their {@link IdType}.
@@ -76,6 +88,34 @@ public class PatientHandler {
   }
 
   /**
+   * Attempts to match a beneficiary based on the patient input.
+   *
+   * @param patientMatch match request
+   * @return bundle
+   */
+  public Bundle matchPatient(Optional<PatientMatch> patientMatch) {
+    if (patientMatch.isEmpty()) {
+      return patientMatchBundle(Optional.empty());
+    }
+    var result = beneficiaryRepository.searchPatientMatch(patientMatch.get());
+    var beneficiary = result.matchedBeneficiary();
+    var clientIp = MDC.get(logKey(MDC_PREFIX, CLIENT_IP_KEY));
+    var clientName = MDC.get(logKey(MDC_PREFIX, CLIENT_NAME_KEY));
+    var clientId = MDC.get(logKey(MDC_PREFIX, CLIENT_ID_KEY));
+    var auditRecord =
+        new PatientMatchAuditRecord(
+            clientIp,
+            clientName,
+            clientId,
+            Instant.now(),
+            result.combinations(),
+            result.finalDetermination());
+    auditLogger.log(auditRecord);
+
+    return patientMatchBundle(beneficiary);
+  }
+
+  /**
    * Searches for all Coverage resources associated with a given beneficiary SK.
    *
    * @param beneSk The beneficiary surrogate key.
@@ -88,7 +128,7 @@ public class PatientHandler {
             .searchBeneficiaryWithCoverage(beneSk, new DateTimeRange())
             .filter(b -> !b.isMergedBeneficiary());
     if (beneficiaryOpt.isEmpty()) {
-      return FhirUtil.bundleOrDefault(List.of(), loadProgressRepository::lastUpdated);
+      return FhirUtil.bundleOrDefault(Stream.of(), loadProgressRepository::lastUpdated);
     }
     var beneficiary = beneficiaryOpt.get();
 
@@ -141,5 +181,41 @@ public class PatientHandler {
                         .getOther()
                         .getReference()
                         .equals(newLink.getOther().getReference()));
+  }
+
+  private Bundle patientMatchBundle(Optional<Beneficiary> beneficiary) {
+    var bundle = new Bundle();
+    bundle.setId("IDI-Match");
+    bundle.setMeta(new Meta().addProfile(SystemUrls.PROFILE_IDENTITY_MATCHING));
+    bundle.setIdentifier(new Identifier().setAssigner(new Reference().setDisplay("CMS")));
+    bundle.setType(Bundle.BundleType.SEARCHSET);
+    var cmsOrg = new Organization();
+    cmsOrg.setId("cms-org").setMeta(new Meta().addProfile(SystemUrls.PROFILE_US_CORE_ORGANIZATION));
+    cmsOrg
+        .setActive(true)
+        .addType(
+            new CodeableConcept(
+                new Coding()
+                    .setSystem(SystemUrls.HL7_ORGANIZATION_TYPE)
+                    .setCode("pay")
+                    .setDisplay("Payer")));
+    cmsOrg.setName("CMS");
+
+    var bundleEntry =
+        new Bundle.BundleEntryComponent().setFullUrl(SystemUrls.CMS_GOV).setResource(cmsOrg);
+    bundleEntry.setSearch(
+        new Bundle.BundleEntrySearchComponent().setMode(Bundle.SearchEntryMode.MATCH));
+    bundle.addEntry(bundleEntry);
+    beneficiary.ifPresent(
+        b ->
+            bundle.addEntry(
+                new Bundle.BundleEntryComponent()
+                    .setResource(toFhir(b))
+                    .setFullUrl("urn:uuid:" + UUID.randomUUID())
+                    .setSearch(
+                        new Bundle.BundleEntrySearchComponent()
+                            .setMode(Bundle.SearchEntryMode.MATCH))));
+
+    return bundle;
   }
 }

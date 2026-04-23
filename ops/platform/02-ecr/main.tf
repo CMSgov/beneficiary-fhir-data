@@ -33,6 +33,7 @@ locals {
     "bfd-platform-run-locust",
     "bfd-platform-pipeline-ccw-runner",
     "bfd-platform-consume-idr-events",
+    "bfd-platform-run-idr-pipeline",
     "bfd-platform-synthea-generation",
     # base container image repositories
     "bfd-platform-base-python",
@@ -42,6 +43,8 @@ locals {
     "bfd-platform-mount-certstores",
     "bfd-platform-server-fluent-bit",
     # application container image repositories
+    "bfd-platform-idr-pipeline",
+    "bfd-platform-migrator-ng",
     "bfd-db-migrator",
     "bfd-pipeline-app",
     "bfd-server",

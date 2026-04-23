@@ -1,14 +1,3 @@
-data "aws_iam_policy_document" "service_assume_role" {
-  for_each = toset(["ecs-tasks", "ecs"])
-  statement {
-    actions = ["sts:AssumeRole"]
-    principals {
-      type        = "Service"
-      identifiers = ["${each.value}.amazonaws.com"]
-    }
-  }
-}
-
 data "aws_iam_policy_document" "kms" {
   statement {
     sid = "AllowEnvCMKAccess"
@@ -55,9 +44,13 @@ resource "aws_iam_policy" "rds" {
 
 data "aws_iam_policy_document" "logs" {
   statement {
-    sid       = "AllowFireLensPutLogEventsAndCreateStream"
-    actions   = ["logs:PutLogEvents", "logs:CreateLogStream"]
-    resources = ["${aws_cloudwatch_log_group.server_access.arn}:log-stream:*", "${aws_cloudwatch_log_group.server_messages.arn}:log-stream:*"]
+    sid     = "AllowFireLensPutLogEventsAndCreateStream"
+    actions = ["logs:PutLogEvents", "logs:CreateLogStream"]
+    resources = [
+      "${aws_cloudwatch_log_group.server_messages.arn}:log-stream:*",
+      "${aws_cloudwatch_log_group.server_healthchecks.arn}:log-stream:*",
+      "${aws_cloudwatch_log_group.server_nonjson.arn}:log-stream:*"
+    ]
   }
 }
 
@@ -90,6 +83,21 @@ resource "aws_iam_policy" "ssm_params" {
   policy      = data.aws_iam_policy_document.ssm_params.json
 }
 
+data "aws_iam_policy_document" "dynamodb" {
+  statement {
+    sid       = "AllowPatientMatchAuditAccess"
+    actions   = ["dynamodb:PutItem", "dynamodb:Query", "dynamodb:GetItem"]
+    resources = [aws_dynamodb_table.patient_match_audit_table.arn, "${aws_dynamodb_table.patient_match_audit_table.arn}/index/*"]
+  }
+}
+
+resource "aws_iam_policy" "dynamodb" {
+  name        = "${local.name_prefix}-dynamodb-policy"
+  path        = local.iam_path
+  description = "Permissions for the ${local.env} ${local.service} to write and query patient match audit logs in DynamoDb from the ${local.service} container"
+  policy      = data.aws_iam_policy_document.dynamodb.json
+}
+
 resource "aws_iam_role" "service_role" {
   name                  = "${local.name_prefix}-service-role"
   path                  = local.iam_path
@@ -105,6 +113,7 @@ resource "aws_iam_role_policy_attachment" "service_role" {
     rds        = aws_iam_policy.rds.arn
     logs       = aws_iam_policy.logs.arn
     ssm_params = aws_iam_policy.ssm_params.arn
+    dynamodb   = aws_iam_policy.dynamodb.arn
   }
 
   role       = aws_iam_role.service_role.name
@@ -153,7 +162,8 @@ data "aws_iam_policy_document" "execution_logs" {
       "${aws_cloudwatch_log_group.log_router_messages.arn}:*",
       "${aws_cloudwatch_log_group.service_connect_messages.arn}:*",
       "${aws_cloudwatch_log_group.server_messages.arn}:*",
-      "${aws_cloudwatch_log_group.server_access.arn}:*"
+      "${aws_cloudwatch_log_group.server_healthchecks.arn}:*",
+      "${aws_cloudwatch_log_group.server_nonjson.arn}:*"
     ]
   }
 }

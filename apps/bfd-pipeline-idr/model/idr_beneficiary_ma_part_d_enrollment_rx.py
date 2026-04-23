@@ -5,6 +5,7 @@ from pydantic import BeforeValidator
 
 from constants import (
     DEFAULT_MAX_DATE,
+    IDR_BENE_MA_PART_D_RX_TABLE,
 )
 from load_partition import LoadPartition
 from loader import LoadMode
@@ -65,7 +66,7 @@ class IdrBeneficiaryMaPartDEnrollmentRx(IdrBaseModel):
         hstry = ALIAS_HSTRY
         return f"""
                 SELECT {{COLUMNS}}
-                FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_mapd_enrlmt_rx enrlmt_rx
+                FROM {IDR_BENE_MA_PART_D_RX_TABLE} enrlmt_rx
                 {{WHERE_CLAUSE}}
                 AND NOT EXISTS (
                     {deceased_bene_filter(hstry, start_time)}
