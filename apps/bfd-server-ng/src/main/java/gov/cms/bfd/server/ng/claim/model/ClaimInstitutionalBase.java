@@ -146,6 +146,8 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
   private void addDiagnoses(ExplanationOfBenefit eob) {
     var diagnosisSequenceGenerator = new SequenceGenerator();
 
+    // We ignore procedures with claim diagnosis type 1 since it's always the same as claim
+    // diagnosis type E with sequence number 1
     for (var item : getItems()) {
       item.getProcedure()
           .flatMap(

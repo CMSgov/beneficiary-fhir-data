@@ -180,20 +180,30 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
       item.getProcedure()
           .ifPresent(
               procedure ->
-                  procedure
-                      .toFhirDiagnosis(sequenceGenerator)
-                      .ifPresent(
-                          diagnosisComponent -> {
-                            eob.addDiagnosis(diagnosisComponent);
-                            procedure
-                                .getDiagnosisKey()
-                                .ifPresent(
-                                    key ->
-                                        diagnosisSequenceMap
-                                            .computeIfAbsent(key, _ -> new ArrayList<>())
-                                            .add(diagnosisComponent.getSequence()));
-                          }));
+                  addDiagnosisAndTrackSequence(
+                      procedure, eob, sequenceGenerator, diagnosisSequenceMap));
     }
     return diagnosisSequenceMap;
+  }
+
+  private void addDiagnosisAndTrackSequence(
+      ClaimProcedureBase procedure,
+      ExplanationOfBenefit eob,
+      SequenceGenerator sequenceGenerator,
+      Map<String, List<Integer>> diagnosisSequenceMap) {
+
+    var diagnosisOpt = procedure.toFhirDiagnosis(sequenceGenerator);
+    if (diagnosisOpt.isEmpty()) return;
+
+    var diagnosisComponent = diagnosisOpt.get();
+    eob.addDiagnosis(diagnosisComponent);
+
+    procedure
+        .getDiagnosisKey()
+        .ifPresent(
+            key ->
+                diagnosisSequenceMap
+                    .computeIfAbsent(key, _ -> new ArrayList<>())
+                    .add(diagnosisComponent.getSequence()));
   }
 }
