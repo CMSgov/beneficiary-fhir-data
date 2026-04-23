@@ -56,27 +56,38 @@ data "aws_ecr_image" "server" {
 }
 
 resource "aws_cloudwatch_log_group" "log_router_messages" {
-  name         = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/log_router/messages"
-  kms_key_id   = local.env_key_arn
-  skip_destroy = true
+  name              = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/log_router/messages"
+  kms_key_id        = local.env_key_arn
+  retention_in_days = local.ten_year_retention_days
+  skip_destroy      = true
 }
 
 resource "aws_cloudwatch_log_group" "service_connect_messages" {
-  name         = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/service-connect/messages"
-  kms_key_id   = local.env_key_arn
-  skip_destroy = true
+  name              = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/service-connect/messages"
+  kms_key_id        = local.env_key_arn
+  retention_in_days = local.ten_year_retention_days
+  skip_destroy      = true
 }
 
 resource "aws_cloudwatch_log_group" "server_messages" {
-  name         = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/${local.service}/messages"
-  kms_key_id   = local.env_key_arn
-  skip_destroy = true
+  name              = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/${local.service}/messages"
+  kms_key_id        = local.env_key_arn
+  retention_in_days = local.ten_year_retention_days
+  skip_destroy      = true
 }
 
-resource "aws_cloudwatch_log_group" "server_access" {
-  name         = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/${local.service}/access"
-  kms_key_id   = local.env_key_arn
-  skip_destroy = true
+resource "aws_cloudwatch_log_group" "server_healthchecks" {
+  name              = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/${local.service}/healthchecks"
+  kms_key_id        = local.env_key_arn
+  retention_in_days = local.ten_year_retention_days
+  skip_destroy      = true
+}
+
+resource "aws_cloudwatch_log_group" "server_nonjson" {
+  name              = "/aws/ecs/${data.aws_ecs_cluster.main.cluster_name}/${local.service}/${local.service}/nonjson"
+  kms_key_id        = local.env_key_arn
+  retention_in_days = local.ten_year_retention_days
+  skip_destroy      = true
 }
 
 resource "aws_ecs_task_definition" "server" {
@@ -104,16 +115,21 @@ resource "aws_ecs_task_definition" "server" {
     name                = "tmp_${local.service}"
   }
 
+  tags = {
+    "${local.service}.version" = local.server_version
+    "log_router.version"       = local.log_router_version
+  }
+
   container_definitions = jsonencode(
     [
       {
         name              = "log_router"
         image             = data.aws_ecr_image.log_router.image_uri
         essential         = true
-        cpu               = 128
-        memoryReservation = 50
-        memory            = 100
-        user              = "0" # Default; reduces unnecessary terraform diff output
+        cpu               = max(min(1024, floor(0.05 * local.server_cpu)), 256)    # Max 1 CPU, min 1/4
+        memoryReservation = max(min(1024, floor(0.08 * local.server_memory)), 256) # Max 1 GB, min 256 MiB
+        memory            = max(min(1024, floor(0.10 * local.server_memory)), 312) # Max 1 GB, min 312 MiB
+        user              = "0"                                                    # Default; reduces unnecessary terraform diff output
         environment = [
           {
             name  = "AWS_REGION"
@@ -124,15 +140,19 @@ resource "aws_ecs_task_definition" "server" {
             value = aws_cloudwatch_log_group.server_messages.name
           },
           {
-            name  = "ACCESS_LOG_GROUP"
-            value = aws_cloudwatch_log_group.server_access.name
+            name  = "HEALTHCHECK_LOG_GROUP"
+            value = aws_cloudwatch_log_group.server_healthchecks.name
           },
+          {
+            name  = "NONJSON_LOG_GROUP"
+            value = aws_cloudwatch_log_group.server_nonjson.name
+          }
         ]
         firelensConfiguration = {
           type = "fluentbit"
           options = {
             "config-file-type"        = "file"
-            "config-file-value"       = "/server-fluentbit.conf"
+            "config-file-value"       = "/server-ng-fluentbit.conf"
             "enable-ecs-log-metadata" = "false"
           }
         }
@@ -300,7 +320,7 @@ resource "aws_ecs_service" "server" {
   enable_ecs_managed_tags            = true
   health_check_grace_period_seconds  = 0
   name                               = local.service
-  propagate_tags                     = "NONE"
+  propagate_tags                     = "TASK_DEFINITION"
   scheduling_strategy                = "REPLICA"
   task_definition                    = aws_ecs_task_definition.server.arn
   triggers                           = {}
@@ -409,4 +429,34 @@ resource "aws_appautoscaling_policy" "server_track_cpu" {
     scale_in_cooldown  = 300
     scale_out_cooldown = 60
   }
+}
+
+resource "aws_dynamodb_table" "patient_match_audit_table" {
+  name                        = "bfd-${local.env}-patient-match-audit"
+  billing_mode                = "PAY_PER_REQUEST"
+  hash_key                    = "matchedBeneSk"
+  range_key                   = "timestamp"
+  deletion_protection_enabled = local.env == "prod" ? true : false
+
+  server_side_encryption {
+    enabled     = true
+    kms_key_arn = local.env_key_arn
+  }
+
+  point_in_time_recovery {
+    enabled                 = true
+    recovery_period_in_days = 35
+  }
+
+  attribute {
+    name = "matchedBeneSk"
+    type = "N"
+  }
+
+  attribute {
+    name = "timestamp"
+    type = "S"
+  }
+
+  tags = local.default_tags
 }

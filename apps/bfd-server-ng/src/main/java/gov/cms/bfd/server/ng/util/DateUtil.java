@@ -34,6 +34,16 @@ public class DateUtil {
   }
 
   /**
+   * Converts the {@link Date} to a {@link LocalDate} set to UTC.
+   *
+   * @param date date
+   * @return local date
+   */
+  public static LocalDate toLocalDate(Date date) {
+    return date.toInstant().atZone(DateUtil.ZONE_ID_UTC).toLocalDate();
+  }
+
+  /**
    * Converts the {@link ZonedDateTime} to a {@link Date} object with the same date and time info.
    *
    * <p>Converts a LocalDate to a FHIR DateTimeType with DAY precision. The underlying instant is

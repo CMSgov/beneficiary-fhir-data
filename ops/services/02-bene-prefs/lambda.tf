@@ -1,5 +1,5 @@
 locals {
-  particpating_partners = "bcda"
+  participating_partners = ["bcda", "ab2d", "dpc"]
 
   lambda_full_name   = "${local.name_prefix}-function"
   lambda_source_path = "${path.module}/lambda_src/bene_prefs"
@@ -66,7 +66,7 @@ resource "aws_lambda_function" "this" {
     variables = {
       BFD_ENV            = local.env
       AWS_CURRENT_REGION = local.region
-      PARTNERS           = local.particpating_partners
+      PARTNERS           = join(",", local.participating_partners)
     }
   }
 
