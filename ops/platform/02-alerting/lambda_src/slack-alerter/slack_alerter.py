@@ -1,7 +1,7 @@
 import json
 import os
 from functools import singledispatch
-from typing import Any, Union
+from typing import Any
 from urllib.error import URLError
 from urllib.request import Request, urlopen
 
@@ -44,7 +44,7 @@ class EventBridgeAlertModel(BaseModel):
     resources: list[str]
 
 
-Alert = Union[CloudWatchAlarmAlertModel, EventBridgeAlertModel]
+Alert = CloudWatchAlarmAlertModel | EventBridgeAlertModel
 
 
 @singledispatch
@@ -67,7 +67,9 @@ def handle_cloudwatch_alarm(alert: CloudWatchAlarmAlertModel) -> dict[str, Any]:
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f":warning: *Alarm Alert: `{alarm_name}`* :warning:\n\n{alarm_message}\n",
+                    "text": (
+                        f":warning: *Alarm Alert: `{alarm_name}`* :warning:\n\n"
+                        f"{alarm_message}\n"),
                 },
             },
             {"type": "divider"},
@@ -106,7 +108,7 @@ def handle_eventbridge_event(alert: EventBridgeAlertModel) -> dict[str, Any]:
 
 
 @logger.inject_lambda_context(clear_state=True, log_event=True)
-def handler(event: dict[str, Any], context: LambdaContext) -> None:
+def handler(event: dict[str, Any], _context: LambdaContext) -> None:
     sns_messages = (
         msg
         for msg in envelopes.SqsEnvelope().parse(data=event, model=SnsNotificationModel)

@@ -36,7 +36,8 @@ BOTO_CONFIG = Config(
     },
 )
 S3_KEY_MATCH_REGEX = re.compile(
-    pattern=rf"databases/{DATABASE_NAME}/{TABLE_NAME}/{'/'.join([f'{partition}=(.*)' for partition in PARTITIONS])}/.*",
+    pattern=rf"databases/{DATABASE_NAME}/{TABLE_NAME}/"
+    rf"{'/'.join([f'{partition}=(.*)' for partition in PARTITIONS])}/.*",
     flags=re.IGNORECASE,
 )
 
@@ -59,7 +60,7 @@ def try_run_crawler(glue_client: GlueClient, name: str) -> bool:
 
 
 @logger.inject_lambda_context(clear_state=True, log_event=True)
-def handler(event: dict[str, Any], context: LambdaContext) -> None:
+def handler(event: dict[str, Any], _context: LambdaContext) -> None:
     if not all([REGION, CRAWLER_NAME, DATABASE_NAME, TABLE_NAME, PARTITIONS]):
         raise RuntimeError("Not all necessary environment variables were defined")
 

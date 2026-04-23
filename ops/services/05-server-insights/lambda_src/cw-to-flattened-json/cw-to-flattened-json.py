@@ -71,22 +71,29 @@ to the AWS Blueprint and should not be changed without accepting the maintenance
 import base64
 import gzip
 import json
+from collections.abc import Generator
 from datetime import datetime  # BFD modification
-from typing import Any, Generator
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from types_boto3_firehose import FirehoseClient
+    from types_boto3_kinesis import KinesisClient
+else:
+    FirehoseClient = object
+    KinesisClient = object
 
 import boto3
 
 
 def format_json(y: dict[str, Any]) -> dict[str, Any]:
-    """
-    BFD modification to add a function to flatten a JSON object (but not pivot out arrays),
-    convert field names to lower case, and replace "." with "_" in field names.
+    """Flatten a JSON object without pivoting arrays.
+
+    BFD modification to convert field names to lower case and replace "." with "_".
     Code credits: https://towardsdatascience.com/flattening-json-objects-in-python-f5343c794b10
     """
-
     out: dict[str, Any] = {}
 
-    def flatten(x: dict[str, Any] | str, name: str = ""):
+    def flatten(x: dict[str, Any] | str, name: str = "") -> None:
         if isinstance(x, dict):
             for a in x:
                 flatten(x[a], name + a.replace(".", "_") + "_")
@@ -109,13 +116,12 @@ def transformLogEvent(log_event: dict[str, Any]) -> str | None:
     Returns:
     str: The transformed log event.
     """
-
     # BFD modification to the blueprint to format the message json uniformly.
     try:
         log_event_json = json.loads(log_event["message"])
     except json.JSONDecodeError as exc:
         print(
-            f'Unable to transform log ID {log_event["id"]} due to JSON error "{str(exc)}" decoding'
+            f'Unable to transform log ID {log_event["id"]} due to JSON error "{exc!s}" decoding'
             f" message: {log_event['message']}"
         )
         return None
@@ -133,7 +139,7 @@ def transformLogEvent(log_event: dict[str, Any]) -> str | None:
 
 def processRecords(
     records: list[dict[str, Any]],
-) -> Generator[dict[str, Any], None, None]:
+) -> Generator[dict[str, Any]]:
     for r in records:
         data = loadJsonGzipBase64(r["data"])
         recId = r["recordId"]
@@ -182,10 +188,10 @@ def splitCWLRecord(cwlRecord: dict[str, Any]) -> list[bytes]:
 def putRecordsToFirehoseStream(
     streamName: str,
     records: list[dict[str, Any]],
-    client: Any,
+    client: FirehoseClient,
     attemptsMade: int,
     maxAttempts: int,
-):
+) -> None:
     failedRecords: list[dict[str, Any]] = []
     codes: list[str] = []
     errMsg = ""
@@ -218,22 +224,21 @@ def putRecordsToFirehoseStream(
         if attemptsMade + 1 < maxAttempts:
             print(
                 "Some records failed while calling PutRecordBatch to Firehose stream,"
-                " retrying. %s" % (errMsg)
+                f" retrying. {errMsg}"
             )
             putRecordsToFirehoseStream(
                 streamName, failedRecords, client, attemptsMade + 1, maxAttempts
             )
         else:
             raise RuntimeError(
-                "Could not put records after %s attempts. %s"
-                % (str(maxAttempts), errMsg)
+                f"Could not put records after {maxAttempts} attempts. {errMsg}"
             )
 
 
 def putRecordsToKinesisStream(
     streamName: str,
     records: list[dict[str, Any]],
-    client: Any,
+    client: KinesisClient,
     attemptsMade: int,
     maxAttempts: int,
 ) -> None:
@@ -267,15 +272,14 @@ def putRecordsToKinesisStream(
         if attemptsMade + 1 < maxAttempts:
             print(
                 "Some records failed while calling PutRecords to Kinesis stream,"
-                " retrying. %s" % (errMsg)
+                f" retrying. {errMsg}"
             )
             putRecordsToKinesisStream(
                 streamName, failedRecords, client, attemptsMade + 1, maxAttempts
             )
         else:
             raise RuntimeError(
-                "Could not put records after %s attempts. %s"
-                % (str(maxAttempts), errMsg)
+                f"Could not put records after {maxAttempts} attempts. {errMsg}"
             )
 
 
@@ -294,7 +298,7 @@ def loadJsonGzipBase64(base64Data: bytes) -> dict[str, Any]:
     return json.loads(gzip.decompress(base64.b64decode(base64Data)))
 
 
-def lambda_handler(event: dict[str, Any], context: dict[str, Any]):
+def lambda_handler( event: dict[str, Any], _context: object) -> dict[str, list[dict[str, Any]]]:
     isSas = "sourceKinesisStreamArn" in event
     streamARN = event["sourceKinesisStreamArn"] if isSas else event["deliveryStreamArn"]
     region = streamARN.split(":")[3]
@@ -358,7 +362,7 @@ def lambda_handler(event: dict[str, Any], context: dict[str, Any]):
             else:
                 putRecordsToFirehoseStream(streamName, recordBatch, client, 0, 20)
             recordsReingestedSoFar += len(recordBatch)
-            print("Reingested %d/%d" % (recordsReingestedSoFar, len(flattenedList)))
+            print(f"Reingested {recordsReingestedSoFar}/{len(flattenedList)}")
 
     num_processed_ok = len([r for r in records if r["result"] == "Ok"])
     num_processed_failed = len(
@@ -370,16 +374,12 @@ def lambda_handler(event: dict[str, Any], context: dict[str, Any]):
         num_reingested_asis + num_split
     )
     print(
-        "%d input records, %d returned as Ok, %d returned as ProcessingFailed, %d split and"
-        " re-ingested, %d re-ingested as-is, %d record(s) dropped"
-        % (
-            len(event["records"]),
-            num_processed_ok,
-            num_processed_failed,
-            num_split,
-            num_reingested_asis,
-            num_actual_dropped,
-        )
+        f'{len(event["records"])} input records, '
+        f"{num_processed_ok} returned as Ok, "
+        f"{num_processed_failed} returned as ProcessingFailed, "
+        f"{num_split} split and re-ingested, "
+        f"{num_reingested_asis} re-ingested as-is, "
+        f"{num_actual_dropped} record(s) dropped"
     )
 
     return {"records": records}
