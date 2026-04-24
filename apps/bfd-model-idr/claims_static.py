@@ -220,6 +220,7 @@ AVAILABLE_PROVIDER_TX_CODES = [
     "207QB0505X",
 ]
 AVAILABLE_PROVIDER_TYPE_CODES = ["BP", "D", "N2", "UI", "BG", "A", "~"]
+AVAILABLE_SSA_STATE_CDS = ["01", "03", "06", "12", "48"]
 
 
 def get_icd_10_dgns_codes(enable_samhsa: bool) -> list[str]:
