@@ -78,7 +78,7 @@ class StatsLoader(ABC):
         """
 
     @staticmethod
-    def create(stats_config: StatsConfiguration, metadata: StatsMetadata) -> "StatsLoader":
+    def create(stats_config: StatsConfiguration, metadata: StatsMetadata) -> StatsLoader:
         """Construct a new concrete instance of StatsLoader that will load from the appropriate
         store as specified in stats_config.
 

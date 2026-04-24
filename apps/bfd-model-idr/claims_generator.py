@@ -575,10 +575,10 @@ class _ClaimsFile(StrEnum):
         self.out_path = Path(f"out/{value}.csv")
 
     def __new__(
-        cls: type["_ClaimsFile"],
+        cls: type[_ClaimsFile],
         value: str,
         ordered_headers: list[str],
-    ) -> "_ClaimsFile":
+    ) -> _ClaimsFile:
         obj = str.__new__(cls, value)
         obj._value_ = value
         obj.ordered_headers = ordered_headers

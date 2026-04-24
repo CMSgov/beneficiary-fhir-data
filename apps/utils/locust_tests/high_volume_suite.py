@@ -84,7 +84,7 @@ class TaskHolder(Protocol[TaskT]):
 
 class HighVolumeTaskSet(TaskSet):
     @property
-    def user(self) -> "HighVolumeUser":
+    def user(self) -> HighVolumeUser:
         # This forces the type of self.user for all derived TaskSets to narrow to HighVolumeUser,
         # thus giving correct type hinting for all of HighVolumeUser's properties.
         return self._high_volume_user

@@ -203,7 +203,7 @@ def gen_numeric_id(field: str, start: int = -1, end: int = -(sys.maxsize - 1)) -
 
 
 def load_file_dict(
-    files: dict[str, list["RowAdapter"]], paths: list[str] | list[Path], exclude_empty: bool = False
+    files: dict[str, list[RowAdapter]], paths: list[str] | list[Path], exclude_empty: bool = False
 ):
     file_paths = set(
         itertools.chain.from_iterable(
@@ -255,7 +255,7 @@ def probability(frac: float) -> bool:
     return random.random() < (frac)
 
 
-def adapters_to_dicts(adapters: list["RowAdapter"]) -> list[dict[str, Any]]:
+def adapters_to_dicts(adapters: list[RowAdapter]) -> list[dict[str, Any]]:
     return [x.kv for x in adapters]
 
 

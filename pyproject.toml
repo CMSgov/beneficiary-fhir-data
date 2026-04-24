@@ -62,6 +62,14 @@ dev = [
 
 [tool.ruff]
 line-length = 100
+extend-exclude = [
+    "docs",
+    "insights",
+    "apps/bfd-model",
+    "apps/utils/scripts",
+    "ops/utils/synthetic-data",
+    "ops/services/02-insights-bb2",
+]
 
 [tool.ruff.lint]
 select = [
