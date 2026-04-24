@@ -78,14 +78,14 @@ public class ClaimRepository {
   /**
    * Search for a claim by its ID.
    *
-   * @param claimUniqueId claim ID
+   * @param claimUniqueIds claim IDs
    * @param claimThroughDate claim through date
    * @param lastUpdated last updated
    * @return claim
    */
   @Timed(value = "application.claim.search_by_id")
-  public Optional<ClaimBase> findById(
-      long claimUniqueId,
+  public List<ClaimBase> findByIds(
+      List<Long> claimUniqueIds,
       @MeterTag(
               key = "hasClaimThroughDate",
               expression = "lowerBound.isPresent() || upperBound.isPresent()")
@@ -94,46 +94,49 @@ public class ClaimRepository {
               key = "hasLastUpdated",
               expression = "lowerBound.isPresent() || upperBound.isPresent()")
           DateTimeRange lastUpdated) {
+    if (claimUniqueIds == null || claimUniqueIds.isEmpty()) {
+      return Collections.emptyList();
+    }
     var paramBuilders =
         List.of(
             new BillablePeriodFilterParam(claimThroughDate),
             new LastUpdatedFilterParam(lastUpdated));
 
     var professionalSharedSystemsClaims =
-        asyncService.findByIdInClaimType(
+        asyncService.findByIdsInClaimType(
             CLAIM_PROFESSIONAL_SHARED_SYSTEMS,
             ClaimProfessionalSharedSystems.class,
             ClaimProfessionalSharedSystems.getSystemType(),
-            claimUniqueId,
+            claimUniqueIds,
             paramBuilders);
 
     var professionalNchClaims =
-        asyncService.findByIdInClaimType(
+        asyncService.findByIdsInClaimType(
             CLAIM_PROFESSIONAL_NCH,
             ClaimProfessionalNch.class,
-            ClaimProfessionalSharedSystems.getSystemType(),
-            claimUniqueId,
+            ClaimProfessionalNch.getSystemType(),
+            claimUniqueIds,
             paramBuilders);
 
     var institutionalSharedSystemsClaims =
-        asyncService.findByIdInClaimType(
+        asyncService.findByIdsInClaimType(
             CLAIM_INSTITUTIONAL_SHARED_SYSTEMS,
             ClaimInstitutionalSharedSystems.class,
             ClaimInstitutionalSharedSystems.getSystemType(),
-            claimUniqueId,
+            claimUniqueIds,
             paramBuilders);
 
     var institutionalNchClaims =
-        asyncService.findByIdInClaimType(
+        asyncService.findByIdsInClaimType(
             CLAIM_INSTITUTIONAL_NCH,
             ClaimInstitutionalNch.class,
             ClaimInstitutionalNch.getSystemType(),
-            claimUniqueId,
+            claimUniqueIds,
             paramBuilders);
 
     var rxClaims =
-        asyncService.findByIdInClaimType(
-            CLAIM_RX, ClaimRx.class, ClaimRx.getSystemType(), claimUniqueId, paramBuilders);
+        asyncService.findByIdsInClaimType(
+            CLAIM_RX, ClaimRx.class, ClaimRx.getSystemType(), claimUniqueIds, paramBuilders);
 
     // Wait for all queries
     CompletableFuture.allOf(
@@ -145,13 +148,13 @@ public class ClaimRepository {
         .join();
 
     var allClaims = new ArrayList<ClaimBase>();
-    professionalNchClaims.join().ifPresent(allClaims::add);
-    professionalSharedSystemsClaims.join().ifPresent(allClaims::add);
-    institutionalSharedSystemsClaims.join().ifPresent(allClaims::add);
-    institutionalNchClaims.join().ifPresent(allClaims::add);
-    rxClaims.join().ifPresent(allClaims::add);
+    allClaims.addAll(professionalNchClaims.join());
+    allClaims.addAll(professionalSharedSystemsClaims.join());
+    allClaims.addAll(institutionalSharedSystemsClaims.join());
+    allClaims.addAll(institutionalNchClaims.join());
+    allClaims.addAll(rxClaims.join());
 
-    return allClaims.stream().findFirst();
+    return allClaims;
   }
 
   /**
