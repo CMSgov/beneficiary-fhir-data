@@ -183,6 +183,15 @@ public class SystemUrls {
       "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-ENRLMT-EMPLR-SBSDY-SW";
 
   /**
+   * System URL for the BFD/BlueButton Beneficiary Enrollment Employer Subsidy Switch Indication.
+   * Used for the coding in the BENE-ENRLMT-EMPLR-SBSDY-SW extension. <a href=
+   * "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ENRLMT-EMPLR-SBSDY-SW">BENE-ENRLMT-EMPLR-SBSDY-SW
+   * CodeSystem</a>
+   */
+  public static final String SYS_BENE_ENRLMT_EMPLR_SBSDY_SW =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ENRLMT-EMPLR-SBSDY-SW";
+
+  /**
    * Extension URL for BFD Medicare Coverage Type Code. Source:
    * V2_MDCR_BENE_MAPD_ENRLMT.BENE_CVRG_TYPE_CD (from v2_mdcr_bene_mapd_enrlmt) <a
    * href="https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-CVRG-TYPE-CD">BENE-CVRG-TYPE-CD

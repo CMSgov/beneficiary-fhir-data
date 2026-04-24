@@ -131,9 +131,9 @@ public class BeneficiaryPartCDEnrollment implements Comparable<BeneficiaryPartCD
 
     var extEmployerSubsidySwitch =
         employerSubsidySwitch.map(
-            number ->
+            code ->
                 new Extension(SystemUrls.EXT_BENE_ENRLMT_EMPLR_SBSDY_SW_URL)
-                    .setValue(new StringType(number)));
+                    .setValue(new Coding(SystemUrls.SYS_BENE_ENRLMT_EMPLR_SBSDY_SW, code, null)));
 
     return Stream.of(
             Optional.of(extContractNumber),
