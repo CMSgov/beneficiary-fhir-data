@@ -75,7 +75,7 @@ def run(load_mode: str) -> None:
         .build()
     )
 
-    start_time = resolve_time(load_mode)
+    start_time = resolve_test_date(load_mode)
     tables_to_load = set(TABLES_TO_LOAD) if TABLES_TO_LOAD else None
     idr_job_events: list[IdrJobLoadEvent] = []
     if load_type == LoadType.INCREMENTAL and not tables_to_load:
@@ -110,18 +110,20 @@ def run(load_mode: str) -> None:
                 ", ".join(str(event.id) for event in idr_job_events),
             )
             update_failure_times(
-                load_mode=load_mode, events=idr_job_events, failure_time=resolve_time(load_mode)
+                load_mode=load_mode,
+                events=idr_job_events,
+                failure_time=resolve_test_date(load_mode),
             )
         logger.exception("Unrecoverable exception raised during pipeline load")
         raise
 
     if idr_job_events:
         update_completion_times(
-            load_mode=load_mode, events=idr_job_events, completion_time=resolve_time(load_mode)
+            load_mode=load_mode, events=idr_job_events, completion_time=resolve_test_date(load_mode)
         )
 
 
-def resolve_time(load_mode: str) -> datetime:
+def resolve_test_date(load_mode: str) -> datetime:
     test_date = bfd_test_date()
 
     if test_date and load_mode != LoadMode.IDR:
