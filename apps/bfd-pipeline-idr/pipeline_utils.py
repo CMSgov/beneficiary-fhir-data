@@ -9,7 +9,7 @@ from snowflake.connector.network import ReauthenticationRequest, RetryRequest
 from constants import DEFAULT_PARTITION
 from extractor import PostgresExtractor, SnowflakeExtractor, Source
 from load_partition import LoadPartition
-from loader import LoadType, PostgresLoader
+from loader import LoadType, PostgresLoader, should_track_load_progress
 from model.base_model import (
     LoadMode,
     T,
@@ -26,6 +26,9 @@ def get_progress(
     start_time: datetime,
     partition: LoadPartition,
 ) -> LoadProgress | None:
+    if not should_track_load_progress(load_mode):
+        return None
+
     return PostgresExtractor(
         load_mode=load_mode, cls=LoadProgress, partition=partition
     ).extract_single(

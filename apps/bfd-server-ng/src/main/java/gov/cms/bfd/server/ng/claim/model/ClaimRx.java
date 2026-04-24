@@ -123,7 +123,7 @@ public class ClaimRx extends ClaimBase {
   private void addPrescribingProviderCareTeam(ExplanationOfBenefit eob) {
     var sequenceGenerator = new SequenceGenerator();
     prescribingProviderHistory
-        .toFhirCareTeamComponent(sequenceGenerator.next())
+        .toFhirCareTeamComponent(sequenceGenerator.next(), getClaimTypeCode().toContext())
         .ifPresent(eob::addCareTeam);
   }
 

@@ -3,6 +3,7 @@ from typing import Annotated, override
 
 from pydantic import BeforeValidator
 
+from constants import IDR_BENE_MBI_TABLE
 from load_partition import LoadPartition
 from model.base_model import (
     BATCH_TIMESTAMP,

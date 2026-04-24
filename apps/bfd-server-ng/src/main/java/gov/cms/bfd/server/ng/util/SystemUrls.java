@@ -524,9 +524,17 @@ public class SystemUrls {
   public static final String PROFILE_US_CORE_ORGANIZATION_6_1_0 =
       "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|6.1.0";
 
+  /** HL7 - US Core Organization Profile. */
+  public static final String PROFILE_US_CORE_ORGANIZATION =
+      "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization";
+
   /** HL7 - US Core Practitioner Profile. */
   public static final String PROFILE_US_CORE_PRACTITIONER_6_1_0 =
       "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0";
+
+  /** HL7 - IDI Match Bundle Profile. */
+  public static final String PROFILE_IDENTITY_MATCHING =
+      "http://hl7.org/fhir/us/identity-matching/StructureDefinition/idi-match-bundle";
 
   /** The URL for your adjudication status code system. */
   public static final String SYS_ADJUDICATION_STATUS =
@@ -686,6 +694,10 @@ public class SystemUrls {
   /** HL7 - National Council for Prescription Drug Programs Prescription Origin Code. */
   public static final String HL7_CLAIM_PRESCRIPTION_ORIGIN_CODE =
       "http://terminology.hl7.org/CodeSystem/NCPDPPrescriptionOriginCode";
+
+  /** HL7 - Organization Type. */
+  public static final String HL7_ORGANIZATION_TYPE =
+      "http://terminology.hl7.org/CodeSystem/organization-type";
 
   /** Blue Button code system - Final Action Status. */
   public static final String BLUE_BUTTON_FINAL_ACTION_STATUS =
@@ -877,11 +889,11 @@ public class SystemUrls {
 
   /** Blue Button code system - ANSI Group Code - Claim Adjustment Group Code. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_ANSI_GRP_CODE =
-      "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CODE";
+      "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CD";
 
   /** Blue Button code system - ANSI Reason Code - Claim Adjustment Reason Code. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_ANSI_RSN_CODE =
-      "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CODE";
+      "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CD";
 
   /** Blue Button code system - dual status code. */
   public static final String BLUE_BUTTON_CODE_SYSTEM_DUAL_STATUS_CODE =
@@ -982,6 +994,9 @@ public class SystemUrls {
   /** <a href="https://terminology.hl7.org/6.2.0/NamingSystem-cmsMBI.html">CMS MBI.</a> */
   public static final String CMS_MBI = "http://hl7.org/fhir/sid/us-mbi";
 
+  /** <a href="https://terminology.hl7.org/5.5.0/NamingSystem-ssn.html">US SSN.</a> */
+  public static final String US_SSN = "http://hl7.org/fhir/sid/us-ssn";
+
   /** HL7 - US-NPI. */
   public static final String NPI = "http://hl7.org/fhir/sid/us-npi";
 
@@ -1031,4 +1046,11 @@ public class SystemUrls {
   /** Provider generic ID number. */
   public static final String CMS_GENERIC_ID_NUM =
       "http://bluebutton.cms.gov/fhir/identifiers/GenericIdNum";
+
+  /** CMS URL. */
+  public static final String CMS_GOV = "https://cms.gov";
+
+  /** US FIPS state codes system URL. */
+  public static final String US_FIPS_STATE_CODES =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/US-FIPS-STATE-CODES";
 }

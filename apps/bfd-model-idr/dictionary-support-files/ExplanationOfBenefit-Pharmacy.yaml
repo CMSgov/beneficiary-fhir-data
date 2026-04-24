@@ -251,6 +251,7 @@
   sourceView: V2_MDCR_CLM_LINE
   sourceColumn: CLM_LINE_NDC_CD
   fhirPath: (ExplanationOfBenefit.item.productOrService.coding|ExplanationOfBenefit.item.detail.productOrService.coding).where(system = 'http://hl7.org/fhir/sid/ndc').code
+  notes: For deleted PDE claims, this will have a data absent reason. 
 - inputPath: LineItemComponent.CLM_LINE_NDC_QTY
   appliesTo:
     - Pharmacy

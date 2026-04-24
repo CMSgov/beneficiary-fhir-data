@@ -518,7 +518,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
               } ]
             },
             "value" : "1023051596"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -545,7 +546,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
               } ]
             },
             "value" : "1003488552"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -4269,7 +4271,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
 
 gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[167719446]=[
 {
-  "id" : "{uuid}",
+  "id" : "00000000-0000-0000-0000-000000000000",
   "link" : [ {
     "relation" : "self",
     "url" : "http://localhost/v3/fhir/ExplanationOfBenefit?patient=167719446"
@@ -4285,7 +4287,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[167719446]=[
 
 gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[27590072]=[
 {
-  "id" : "{uuid}",
+  "id" : "00000000-0000-0000-0000-000000000000",
   "link" : [ {
     "relation" : "self",
     "url" : "http://localhost/v3/fhir/ExplanationOfBenefit?patient=27590072"
@@ -4759,7 +4761,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
               } ]
             },
             "value" : "1720749690"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -4786,7 +4789,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
               } ]
             },
             "value" : "1023051596"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -4813,7 +4817,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
               } ]
             },
             "value" : "1558719914"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -6282,6 +6287,25 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "PRVDR_FAC_FIPS_ST_CD",
+            "display" : "Federal Information Processing Standards (FIPS) State Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "04",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/US-FIPS-STATE-CODES"
+          } ]
+        },
+        "sequence" : 23
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "drg",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -6292,7 +6316,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 23
+        "sequence" : 24
       } ],
       "total" : [ {
         "amount" : {
@@ -6877,7 +6901,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
               } ]
             },
             "value" : "1023051596"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -6904,7 +6929,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
               } ]
             },
             "value" : "1003488552"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -10038,6 +10064,25 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "PRVDR_FAC_FIPS_ST_CD",
+            "display" : "Federal Information Processing Standards (FIPS) State Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "04",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/US-FIPS-STATE-CODES"
+          } ]
+        },
+        "sequence" : 20
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "drg",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -10048,7 +10093,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 20
+        "sequence" : 21
       } ],
       "total" : [ {
         "amount" : {
@@ -10633,7 +10678,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
               } ]
             },
             "value" : "1730548868"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -11876,6 +11922,25 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "PRVDR_FAC_FIPS_ST_CD",
+            "display" : "Federal Information Processing Standards (FIPS) State Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "04",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/US-FIPS-STATE-CODES"
+          } ]
+        },
+        "sequence" : 17
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "drg",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -11886,7 +11951,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
@@ -12014,7 +12079,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
       "use" : "claim"
     }
   } ],
-  "id" : "{uuid}",
+  "id" : "00000000-0000-0000-0000-000000000000",
   "link" : [ {
     "relation" : "self",
     "url" : "http://localhost/v3/fhir/ExplanationOfBenefit?patient=412457726"
@@ -12030,7 +12095,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
 
 gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[455108118]=[
 {
-  "id" : "{uuid}",
+  "id" : "00000000-0000-0000-0000-000000000000",
   "link" : [ {
     "relation" : "self",
     "url" : "http://localhost/v3/fhir/ExplanationOfBenefit?patient=455108118"
@@ -12046,7 +12111,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[455108118]=[
 
 gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[794471559]=[
 {
-  "id" : "{uuid}",
+  "id" : "00000000-0000-0000-0000-000000000000",
   "link" : [ {
     "relation" : "self",
     "url" : "http://localhost/v3/fhir/ExplanationOfBenefit?patient=794471559"
@@ -12062,7 +12127,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[794471559]=[
 
 gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[167719446]=[
 {
-  "id" : "{uuid}",
+  "id" : "00000000-0000-0000-0000-000000000000",
   "link" : [ {
     "relation" : "self",
     "url" : "http://localhost/v3/fhir/ExplanationOfBenefit?patient=167719446"
@@ -12078,7 +12143,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[1
 
 gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[27590072]=[
 {
-  "id" : "{uuid}",
+  "id" : "00000000-0000-0000-0000-000000000000",
   "link" : [ {
     "relation" : "self",
     "url" : "http://localhost/v3/fhir/ExplanationOfBenefit?patient=27590072"
@@ -12552,7 +12617,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
               } ]
             },
             "value" : "1720749690"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -12579,7 +12645,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
               } ]
             },
             "value" : "1023051596"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -12606,7 +12673,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
               } ]
             },
             "value" : "1558719914"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -14075,6 +14143,25 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "PRVDR_FAC_FIPS_ST_CD",
+            "display" : "Federal Information Processing Standards (FIPS) State Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "04",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/US-FIPS-STATE-CODES"
+          } ]
+        },
+        "sequence" : 23
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "drg",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -14085,7 +14172,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 23
+        "sequence" : 24
       } ],
       "total" : [ {
         "amount" : {
@@ -14670,7 +14757,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
               } ]
             },
             "value" : "1023051596"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -14697,7 +14785,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
               } ]
             },
             "value" : "1003488552"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -17831,6 +17920,25 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "PRVDR_FAC_FIPS_ST_CD",
+            "display" : "Federal Information Processing Standards (FIPS) State Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "04",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/US-FIPS-STATE-CODES"
+          } ]
+        },
+        "sequence" : 20
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "drg",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -17841,7 +17949,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 20
+        "sequence" : 21
       } ],
       "total" : [ {
         "amount" : {
@@ -18426,7 +18534,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
               } ]
             },
             "value" : "1730548868"
-          }
+          },
+          "type" : "Practitioner"
         },
         "role" : {
           "coding" : [ {
@@ -19669,6 +19778,25 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
       }, {
         "category" : {
           "coding" : [ {
+            "code" : "PRVDR_FAC_FIPS_ST_CD",
+            "display" : "Federal Information Processing Standards (FIPS) State Code",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+          }, {
+            "code" : "info",
+            "display" : "Information",
+            "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+          } ]
+        },
+        "code" : {
+          "coding" : [ {
+            "code" : "04",
+            "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/US-FIPS-STATE-CODES"
+          } ]
+        },
+        "sequence" : 17
+      }, {
+        "category" : {
+          "coding" : [ {
             "code" : "drg",
             "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
           } ]
@@ -19679,7 +19807,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
           } ]
         },
-        "sequence" : 17
+        "sequence" : 18
       } ],
       "total" : [ {
         "amount" : {
@@ -19807,7 +19935,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
       "use" : "claim"
     }
   } ],
-  "id" : "{uuid}",
+  "id" : "00000000-0000-0000-0000-000000000000",
   "link" : [ {
     "relation" : "self",
     "url" : "http://localhost/v3/fhir/ExplanationOfBenefit?patient=412457726"
@@ -19823,7 +19951,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
 
 gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[455108118]=[
 {
-  "id" : "{uuid}",
+  "id" : "00000000-0000-0000-0000-000000000000",
   "link" : [ {
     "relation" : "self",
     "url" : "http://localhost/v3/fhir/ExplanationOfBenefit?patient=455108118"
@@ -19839,7 +19967,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
 
 gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[794471559]=[
 {
-  "id" : "{uuid}",
+  "id" : "00000000-0000-0000-0000-000000000000",
   "link" : [ {
     "relation" : "self",
     "url" : "http://localhost/v3/fhir/ExplanationOfBenefit?patient=794471559"

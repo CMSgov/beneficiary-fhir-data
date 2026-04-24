@@ -2,7 +2,7 @@ CodeSystem: ANSI_GRP_CD
 Title: "ANSI Group Code - Claim Adjustment Group Code"
 Id: ANSI-GRP-CD
 Description: "The Group Code is combined with the ANSI reason code to demonstrate who has financial responsibility for the amount."
-* ^url = "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CODE"
+* ^url = "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CD"
 * ^status = #active
 * ^content = #complete
 * #CO "Contractual Obligations -- this group code should be used when a contractual agreement between the payer and payee, or a regulatory requirement, resulted in an adjustment. Generally, these adjustments are considered a write-off for the provider and are not billed to the patient."

@@ -1,75 +1,84 @@
 package gov.cms.bfd.server.ng;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import gov.cms.bfd.server.ng.log.AuditLogger;
+import gov.cms.bfd.server.ng.log.DynamoDbAuditLogger;
+import gov.cms.bfd.server.ng.log.LogStreamAuditLogger;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Paths;
+import java.time.*;
+import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import org.flywaydb.core.Flyway;
 import org.junit.platform.commons.util.StringUtils;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.ClassPathResource;
+import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.DockerImageName;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 
 @TestConfiguration
 public class IntegrationTestConfiguration {
   @Value("${project.basedir}")
   private String baseDir;
 
-  // Container lifecycle is managed by Spring,
-  // so the resource closing warning is not applicable here
-  @SuppressWarnings("resource")
+  @Bean
+  @Primary
+  public Clock testClock() {
+    return Clock.fixed(Instant.parse("2025-01-02T00:00:00Z"), ZoneId.of("UTC"));
+  }
+
+  private static PostgreSQLContainer<?> postgresContainer;
+  private static GenericContainer<?> dynamoDbContainer;
+
   @Bean
   @ServiceConnection
-  public PostgreSQLContainer<?> postgres() throws IOException, InterruptedException {
-    if (StringUtils.isNotBlank(System.getenv("PGPASSWORD"))
-        || StringUtils.isNotBlank(System.getenv("BFD_SENSITIVE_DB_PASSWORD"))) {
-      // Postgres environment variables can interfere with the database configuration and should
-      // not be used here.
-      throw new RuntimeException("Database variables should not be set while running tests");
+  @SuppressWarnings("resource")
+  public PostgreSQLContainer<?> postgres(Clock clock) throws IOException, InterruptedException {
+    synchronized (IntegrationTestConfiguration.class) {
+      if (postgresContainer == null) {
+        if (StringUtils.isNotBlank(System.getenv("PGPASSWORD"))
+            || StringUtils.isNotBlank(System.getenv("BFD_SENSITIVE_DB_PASSWORD"))) {
+          // Postgres environment variables can interfere with the database configuration and should
+          // not be used here.
+          throw new RuntimeException("Database variables should not be set while running tests");
+        }
+        // Provides an implementation of JdbcConnectionDetails that will be injected into the Spring
+        // context
+        var databaseImage = System.getProperty("its.testcontainer.db.image", "postgres:16");
+
+        var container =
+            new PostgreSQLContainer<>(
+                    DockerImageName.parse(databaseImage).asCompatibleSubstituteFor("postgres"))
+                .withDatabaseName("testdb")
+                .withUsername("bfdtest")
+                .withPassword("bfdtest")
+                .waitingFor(Wait.forListeningPort())
+                .withInitScript(new ClassPathResource("mock-idr.sql").getPath());
+        container.start();
+        runMigrator(container);
+
+        var date = clock.instant().truncatedTo(ChronoUnit.DAYS);
+
+        runPython(container, date, "uv", "sync");
+        runPython(container, date, "uv", "run", "load_synthetic.py", "./test_samples2");
+        runPython(container, date, "uv", "run", "pipeline.py", "synthetic");
+        postgresContainer = container;
+      }
     }
-    // Provides an implementation of JdbcConnectionDetails that will be injected into the Spring
-    // context
-    var databaseImage = System.getProperty("its.testcontainer.db.image");
-
-    var container =
-        new PostgreSQLContainer<>(
-                DockerImageName.parse(databaseImage).asCompatibleSubstituteFor("postgres"))
-            .withDatabaseName("testdb")
-            .withUsername("bfdtest")
-            .withPassword("bfdtest")
-            .waitingFor(Wait.forListeningPort())
-            .withInitScript(new ClassPathResource("mock-idr.sql").getPath());
-    container.start();
-    runMigrator(container);
-
-    runPython(container, "uv", "sync");
-    runPython(container, "uv", "run", "load_synthetic.py", "./test_samples2");
-
-    // Update CLM_IDR_LD_DT to CURRENT_DATE before pipeline.py
-    // Reason: PAC data older than 60 days is filtered by coalescing
-    // (idr_updt_ts, idr_insrt_ts, clm_idr_ld_dt). Synthetic data has
-    // outdated clm_idr_ld_dt value and empty idr_updt_ts, idr_insrt_ts.
-
-    container.execInContainer(
-        "psql",
-        "-U",
-        "bfdtest",
-        "-d",
-        "testdb",
-        "-c",
-        "UPDATE cms_vdm_view_mdcr_prd.v2_mdcr_clm "
-            + "SET \"clm_idr_ld_dt\" = CURRENT_DATE,"
-            + "\"idr_insrt_ts\" = CURRENT_TIMESTAMP,"
-            + "\"idr_updt_ts\" = CURRENT_TIMESTAMP;");
-
-    runPython(container, "uv", "run", "pipeline.py", "synthetic");
-
-    return container;
+    return postgresContainer;
   }
 
   private void runMigrator(PostgreSQLContainer<?> container) {
@@ -94,7 +103,7 @@ public class IntegrationTestConfiguration {
     }
   }
 
-  private void runPython(PostgreSQLContainer<?> container, String... args)
+  private void runPython(PostgreSQLContainer<?> container, Instant date, String... args)
       throws IOException, InterruptedException {
     ProcessBuilder processBuilder = new ProcessBuilder(args);
     var env = processBuilder.environment();
@@ -108,6 +117,7 @@ public class IntegrationTestConfiguration {
     // Partitions are necessary for massive amounts of prod data, but will cause our modestly-sized
     // test data to load significantly slower.
     env.put("IDR_ENABLE_PARTITIONS", "0");
+    env.put("BFD_TEST_DATE", date.toString());
     // Suppress noisy output unless the log level is explicitly set
     env.putIfAbsent("IDR_LOG_LEVEL", "WARNING");
 
@@ -122,5 +132,52 @@ public class IntegrationTestConfiguration {
     if (code > 0) {
       throw new RuntimeException("Command failed. See logs for details.");
     }
+  }
+
+  @Bean
+  @SuppressWarnings("resource")
+  public GenericContainer<?> dynamoDbContainer() {
+    synchronized (IntegrationTestConfiguration.class) {
+      if (dynamoDbContainer == null) {
+        var container =
+            new GenericContainer<>(DockerImageName.parse("amazon/dynamodb-local:3.3.0"))
+                .withExposedPorts(8000)
+                .waitingFor(Wait.forListeningPort());
+        container.start();
+        dynamoDbContainer = container;
+      }
+    }
+    return dynamoDbContainer;
+  }
+
+  @Bean
+  @Primary
+  public DynamoDbClient testDynamoDbClient(
+      @Qualifier("dynamoDbContainer") GenericContainer<?> dynamoDbContainer) {
+    var endpoint =
+        String.format(
+            "http://%s:%d", dynamoDbContainer.getHost(), dynamoDbContainer.getMappedPort(8000));
+
+    return DynamoDbClient.builder()
+        .endpointOverride(URI.create(endpoint))
+        .region(Region.US_EAST_1)
+        .credentialsProvider(
+            StaticCredentialsProvider.create(AwsBasicCredentials.create("dummy", "dummy")))
+        .build();
+  }
+
+  @Bean
+  @Primary
+  public AuditLogger testAuditLogger(
+      DynamoDbClient testDynamoDbClient, Configuration configuration, ObjectMapper objectMapper) {
+    var logStreamLogger = new LogStreamAuditLogger(objectMapper);
+    var dynamoLogger =
+        new DynamoDbAuditLogger(
+            testDynamoDbClient, objectMapper, configuration.getPatientMatchAuditTableName());
+
+    return auditRecord -> {
+      logStreamLogger.log(auditRecord);
+      dynamoLogger.log(auditRecord);
+    };
   }
 }

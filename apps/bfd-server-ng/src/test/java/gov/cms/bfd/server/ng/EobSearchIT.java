@@ -1,6 +1,7 @@
 package gov.cms.bfd.server.ng;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -11,6 +12,7 @@ import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import gov.cms.bfd.server.ng.claim.model.ClaimFinalAction;
+import gov.cms.bfd.server.ng.claim.model.ClaimProfessionalNch;
 import gov.cms.bfd.server.ng.claim.model.ClaimSubtype;
 import gov.cms.bfd.server.ng.claim.model.MetaSourceSk;
 import gov.cms.bfd.server.ng.eob.EobResourceProvider;
@@ -25,6 +27,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
@@ -67,6 +70,36 @@ class EobSearchIT extends IntegrationTestBase {
 
   @ParameterizedTest
   @EnumSource(SearchStyleEnum.class)
+  void eobSearchByIdMultiple(SearchStyleEnum searchStyle) {
+    var eobBundle =
+        searchBundle()
+            .where(
+                new TokenClientParam(ExplanationOfBenefit.SP_RES_ID)
+                    .exactly()
+                    .codes(CLAIM_ID_PROFESSIONAL, CLAIM_ID_RX))
+            .usingStyle(searchStyle)
+            .execute();
+    assertEquals(2, eobBundle.getEntry().size());
+    expectFhir().scenario(searchStyle.name()).toMatchSnapshot(eobBundle);
+  }
+
+  @ParameterizedTest
+  @EnumSource(SearchStyleEnum.class)
+  void eobSearchByIdMultipleDuplicate(SearchStyleEnum searchStyle) {
+    var eobBundle =
+        searchBundle()
+            .where(
+                new TokenClientParam(ExplanationOfBenefit.SP_RES_ID)
+                    .exactly()
+                    .codes(CLAIM_ID_PROFESSIONAL, CLAIM_ID_RX, CLAIM_ID_RX))
+            .usingStyle(searchStyle)
+            .execute();
+    assertEquals(2, eobBundle.getEntry().size());
+    expectFhir().scenario(searchStyle.name()).toMatchSnapshot(eobBundle);
+  }
+
+  @ParameterizedTest
+  @EnumSource(SearchStyleEnum.class)
   void eobSearchByIdEmpty(SearchStyleEnum searchStyle) {
     var eobBundle =
         searchBundle()
@@ -75,6 +108,16 @@ class EobSearchIT extends IntegrationTestBase {
             .execute();
     assertEquals(0, eobBundle.getEntry().size());
     expectFhir().scenario(searchStyle.name()).toMatchSnapshot(eobBundle);
+  }
+
+  @Test
+  void eobSearchByIdTooMany() {
+    var ids = IntStream.range(0, 101).mapToObj(String::valueOf).toList();
+    var query =
+        searchBundle()
+            .where(new TokenClientParam(ExplanationOfBenefit.SP_RES_ID).exactly().codes(ids));
+    var thrown = assertThrows(InvalidRequestException.class, query::execute);
+    assertTrue(thrown.getMessage().contains("maximum of 100 claim IDs"));
   }
 
   @ParameterizedTest
@@ -411,6 +454,17 @@ class EobSearchIT extends IntegrationTestBase {
     }
   }
 
+  @Test
+  void eobSearchInvalidIdBadRequest() {
+    var searchWithIdentifier =
+        searchBundle()
+            .where(
+                new TokenClientParam(ExplanationOfBenefit.SP_PATIENT)
+                    .exactly()
+                    .identifier("abc123"));
+    assertThrows(InvalidRequestException.class, searchWithIdentifier::execute);
+  }
+
   @ParameterizedTest
   @ValueSource(
       strings = {
@@ -540,5 +594,46 @@ class EobSearchIT extends IntegrationTestBase {
           eobBundle.getEntry().size(),
           "Should find " + expectedCount + " EOBs for scenario " + scenarioName);
     }
+  }
+
+  @Test
+  void eobSearchNonLatestProfessionalIsNotReturned() {
+    var claims =
+        entityManager
+            .createQuery(
+                """
+                SELECT c
+                FROM ClaimProfessionalNch c
+                JOIN FETCH c.beneficiary b
+                JOIN FETCH c.claimItems cl
+                WHERE c.claimUniqueId = :claimId
+                """,
+                ClaimProfessionalNch.class)
+            .setParameter("claimId", Long.parseLong(CLAIM_ID_PROFESSIONAL_NON_LATEST))
+            .getResultList();
+    // Precondition - claim should be available in the db
+    assertFalse(claims.isEmpty());
+    var eobBundle =
+        searchBundle()
+            .where(
+                new TokenClientParam(ExplanationOfBenefit.SP_RES_ID)
+                    .exactly()
+                    .identifier(CLAIM_ID_PROFESSIONAL_NON_LATEST))
+            .execute();
+
+    assertEquals(0, getEobFromBundle(eobBundle).size());
+  }
+
+  @Test
+  void eobSearchNonLatestPartDIsReturned() {
+    var eobBundle =
+        searchBundle()
+            .where(
+                new TokenClientParam(ExplanationOfBenefit.SP_RES_ID)
+                    .exactly()
+                    .identifier(CLAIM_ID_RX_NON_LATEST))
+            .execute();
+
+    assertEquals(1, getEobFromBundle(eobBundle).size());
   }
 }

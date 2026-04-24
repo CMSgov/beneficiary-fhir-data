@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.*;
 
@@ -24,6 +25,7 @@ public class ClaimLineProfessionalNch extends ClaimLineProfessionalBase implemen
 
   @Embedded private ClaimLineAdjudicationChargeProfessionalNch adjudicationCharge;
   @Embedded private ClaimLineProfessionalNchExtensions claimLineProfessionalNchExtensions;
+  @Embedded private RenderingProviderSsaStateCode renderingProviderSsaStateCode;
 
   @Column(name = "clm_line_hct_hgb_type_cd")
   private Optional<ClaimLineHCTHGBTestTypeCode> claimLineHCTHGBTestTypeCode;
@@ -79,6 +81,15 @@ public class ClaimLineProfessionalNch extends ClaimLineProfessionalBase implemen
         });
 
     return Optional.of(observation);
+  }
+
+  @Override
+  public List<ExplanationOfBenefit.SupportingInformationComponent> toFhirSupportingInfo(
+      SupportingInfoFactory supportingInfoFactory) {
+    return Stream.concat(
+            super.toFhirSupportingInfo(supportingInfoFactory).stream(),
+            renderingProviderSsaStateCode.toFhir(supportingInfoFactory).stream())
+        .toList();
   }
 
   @Override

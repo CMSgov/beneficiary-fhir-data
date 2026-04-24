@@ -91,7 +91,7 @@ public class ClaimInstitutionalNch extends ClaimInstitutionalBase {
   protected void addSubclassCareTeam(
       ExplanationOfBenefit eob, SequenceGenerator sequenceGenerator) {
     serviceProviderHistory
-        .toFhirCareTeamComponent(sequenceGenerator.next())
+        .toFhirCareTeamComponent(sequenceGenerator.next(), getClaimTypeCode().toContext())
         .ifPresent(eob::addCareTeam);
   }
 

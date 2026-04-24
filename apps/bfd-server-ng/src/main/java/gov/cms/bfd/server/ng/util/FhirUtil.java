@@ -1,7 +1,6 @@
 package gov.cms.bfd.server.ng.util;
 
 import java.time.ZonedDateTime;
-import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
@@ -58,24 +57,13 @@ public class FhirUtil {
    * @return bundle
    */
   public static Bundle bundleOrDefault(
-      Stream<Resource> resources, Supplier<ZonedDateTime> batchLastUpdated) {
-    return bundleOrDefault(resources.toList(), batchLastUpdated);
-  }
+      Stream<? extends Resource> resources, Supplier<ZonedDateTime> batchLastUpdated) {
+    var bundle = getBundle(resources);
 
-  /**
-   * Creates a bundle from the resource, returning a default bundle with lastUpdated populated if
-   * empty.
-   *
-   * @param resources resources
-   * @param batchLastUpdated last updated
-   * @return bundle
-   */
-  public static Bundle bundleOrDefault(
-      List<? extends Resource> resources, Supplier<ZonedDateTime> batchLastUpdated) {
-    if (resources.isEmpty()) {
+    if (bundle.getEntry().isEmpty()) {
       return defaultBundle(batchLastUpdated);
     }
-    return getBundle(resources.stream());
+    return bundle;
   }
 
   /**
@@ -89,7 +77,7 @@ public class FhirUtil {
   public static Bundle bundleOrDefault(
       Optional<Resource> resource, Supplier<ZonedDateTime> batchLastUpdated) {
     return resource
-        .map(value -> bundleOrDefault(List.of(value), batchLastUpdated))
+        .map(value -> bundleOrDefault(Stream.of(value), batchLastUpdated))
         .orElseGet(() -> defaultBundle(batchLastUpdated));
   }
 

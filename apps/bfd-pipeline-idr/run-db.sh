@@ -57,7 +57,7 @@ echo
 echo Creating schema.
 
 docker exec -u postgres bfd-idr-db psql fhirdb bfd -f docker-entrypoint-initdb.d/mock-idr.sql
-"$SCRIPT_DIR/../bfd-db-migrator-ng/migrate-local.sh"
+BFD_ENV=local "$SCRIPT_DIR/../bfd-db-migrator-ng/migrate.sh"
 
 echo
 echo Schema created successfully.

@@ -1542,6 +1542,7 @@
   sourceView: V2_MDCR_CLM_DT_SGNTR
   sourceColumn: CLM_ACTV_CARE_FROM_DT
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.system='http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType' and category.coding.code='admissionperiod').timing.start
+  notes: This element (forming admissionperiod) is not available for some HHA claims due to a CMS data limitation. 
 - inputPath: SupportingInfoComponent.CLM_DSCHRG_DT
   appliesTo:
     - Inpatient
@@ -1556,6 +1557,7 @@
   sourceView: V2_MDCR_CLM_DT_SGNTR
   sourceColumn: CLM_DSCHRG_DT
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.system='http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType' and category.coding.code='admissionperiod').timing.end
+  notes: This element (forming admissionperiod) is not available for some HHA claims due to a CMS data limitation. 
 - inputPath: SupportingInfoComponent.CLM_ADMSN_TYPE_CD
   appliesTo:
     - Inpatient
@@ -3692,3 +3694,31 @@
   sourceColumn: CLM_LINE_BNFT_ENHNCMT_5_CD
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_BNFT_ENHNCMT_CD').exists()).value
   notes: There may be multiple. These are unordered, but there are a maximum of 5 per institutional claim header, and 5 per professional claim line. The infoSequence element on the ExplanationOfBenefit.item can be used to determine which are relevant to a given claim line.
+- inputPath: ExplanationOfBenefitBase.GEO_BLG_SSA_STATE_CD                       
+  appliesTo:                                                                    
+    - Inpatient                                                                 
+    - Outpatient                                                                
+    - HHA
+    - Hospice
+    - SNF
+    - DME
+  sources:
+    - NCH                                                                       
+  cclfMapping:  
+    - CCLF1.PRVDR_FAC_FIPS_ST_CD
+  sourceView: V2_MDCR_CLM
+  sourceColumn: GEO_BLG_SSA_STATE_CD                                            
+  notes: The source column contains an SSA state code, which is converted to a FIPS state code in the output.  
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='PRVDR_FAC_FIPS_ST_CD').exists()).code
+- inputPath: LineItemComponent.GEO_RNDRG_SSA_STATE_CD                           
+  appliesTo:                                                                    
+    - Carrier
+    - DME                                                                       
+  sources:      
+    - NCH
+  cclfMapping:
+    - CCLF5.RNDRG_PRVDR_FIPS_ST_CD                                              
+  sourceView: V2_MDCR_CLM_LINE
+  sourceColumn: GEO_RNDRG_SSA_STATE_CD                                          
+  notes: The source column contains an SSA state code, which is converted to a FIPS state code in the output.  
+  fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='RNDRG_PRVDR_FIPS_ST_CD').exists()).code   
