@@ -82,10 +82,18 @@ mvn spring-boot:run
 
 ### Profiling SQL queries
 
-The `sqlprofile` profile can be used to log SQL queries and output metrics.
+The `sql-profile` profile can be used to log SQL queries and output metrics.
 
 ```sh
-mvn spring-boot run -Dspring-boot.run.profiles=local,sqlprofile
+mvn spring-boot run -Dspring-boot.run.profiles=local,sql-profile
+```
+
+### Structured Logging
+
+The `structured-log` profile can be used to test structured logs.
+
+```sh
+mvn spring-boot run -Dspring-boot.run.profiles=local,structured-log
 ```
 
 ## Swagger

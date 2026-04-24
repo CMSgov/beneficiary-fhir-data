@@ -40,38 +40,45 @@ public class IntegrationTestConfiguration {
     return Clock.fixed(Instant.parse("2025-01-02T00:00:00Z"), ZoneId.of("UTC"));
   }
 
-  // Container lifecycle is managed by Spring,
-  // so the resource closing warning is not applicable here
-  @SuppressWarnings("resource")
+  private static PostgreSQLContainer<?> postgresContainer;
+  private static GenericContainer<?> dynamoDbContainer;
+
   @Bean
   @ServiceConnection
+  @SuppressWarnings("resource")
   public PostgreSQLContainer<?> postgres(Clock clock) throws IOException, InterruptedException {
-    var date = clock.instant().truncatedTo(ChronoUnit.DAYS);
-    if (StringUtils.isNotBlank(System.getenv("PGPASSWORD"))
-        || StringUtils.isNotBlank(System.getenv("BFD_SENSITIVE_DB_PASSWORD"))) {
-      // Postgres environment variables can interfere with the database configuration and should
-      // not be used here.
-      throw new RuntimeException("Database variables should not be set while running tests");
+    synchronized (IntegrationTestConfiguration.class) {
+      if (postgresContainer == null) {
+        if (StringUtils.isNotBlank(System.getenv("PGPASSWORD"))
+            || StringUtils.isNotBlank(System.getenv("BFD_SENSITIVE_DB_PASSWORD"))) {
+          // Postgres environment variables can interfere with the database configuration and should
+          // not be used here.
+          throw new RuntimeException("Database variables should not be set while running tests");
+        }
+        // Provides an implementation of JdbcConnectionDetails that will be injected into the Spring
+        // context
+        var databaseImage = System.getProperty("its.testcontainer.db.image", "postgres:16");
+
+        var container =
+            new PostgreSQLContainer<>(
+                    DockerImageName.parse(databaseImage).asCompatibleSubstituteFor("postgres"))
+                .withDatabaseName("testdb")
+                .withUsername("bfdtest")
+                .withPassword("bfdtest")
+                .waitingFor(Wait.forListeningPort())
+                .withInitScript(new ClassPathResource("mock-idr.sql").getPath());
+        container.start();
+        runMigrator(container);
+
+        var date = clock.instant().truncatedTo(ChronoUnit.DAYS);
+
+        runPython(container, date, "uv", "sync");
+        runPython(container, date, "uv", "run", "load_synthetic.py", "./test_samples2");
+        runPython(container, date, "uv", "run", "pipeline.py", "synthetic");
+        postgresContainer = container;
+      }
     }
-    // Provides an implementation of JdbcConnectionDetails that will be injected into the Spring
-    // context
-    var databaseImage = System.getProperty("its.testcontainer.db.image");
-    var container =
-        new PostgreSQLContainer<>(
-                DockerImageName.parse(databaseImage).asCompatibleSubstituteFor("postgres"))
-            .withDatabaseName("testdb")
-            .withUsername("bfdtest")
-            .withPassword("bfdtest")
-            .waitingFor(Wait.forListeningPort())
-            .withInitScript(new ClassPathResource("mock-idr.sql").getPath());
-    container.start();
-    runMigrator(container);
-
-    runPython(container, date, "uv", "sync");
-    runPython(container, date, "uv", "run", "load_synthetic.py", "./test_samples2");
-    runPython(container, date, "uv", "run", "pipeline.py", "synthetic");
-
-    return container;
+    return postgresContainer;
   }
 
   private void runMigrator(PostgreSQLContainer<?> container) {
@@ -130,12 +137,17 @@ public class IntegrationTestConfiguration {
   @Bean
   @SuppressWarnings("resource")
   public GenericContainer<?> dynamoDbContainer() {
-    var container =
-        new GenericContainer<>(DockerImageName.parse("amazon/dynamodb-local:latest"))
-            .withExposedPorts(8000)
-            .waitingFor(Wait.forListeningPort());
-    container.start();
-    return container;
+    synchronized (IntegrationTestConfiguration.class) {
+      if (dynamoDbContainer == null) {
+        var container =
+            new GenericContainer<>(DockerImageName.parse("amazon/dynamodb-local:3.3.0"))
+                .withExposedPorts(8000)
+                .waitingFor(Wait.forListeningPort());
+        container.start();
+        dynamoDbContainer = container;
+      }
+    }
+    return dynamoDbContainer;
   }
 
   @Bean

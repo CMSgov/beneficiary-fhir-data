@@ -19,6 +19,7 @@ from claims_static import (
     TARGET_SEQUENCE_NUMBERS,
     TYPE_1_NPIS,
     TYPE_2_NPIS,
+    AVAILABLE_SSA_STATE_CDS,
     get_drg_dgns_codes,
     get_hcpcs_proc_codes,
     get_icd_10_dgns_codes,
@@ -236,6 +237,8 @@ class AdjudicatedGeneratorUtil:
             clm[f.CLM_PRVDR_RMNG_DUE_AMT] = round(random.uniform(0, 1000), 2)
         if clm_type_cd in (10, 20, 30, 40, 50, 60, 61, 62, 63, 64):
             clm[f.CLM_TOT_CNTRCTL_AMT] = round(random.uniform(0, 10000), 2)
+        if clm_type_cd in (10, 20, 30, 40, 50, 60, 61, 62, 63, 64, 81, 82):
+            clm[f.GEO_BLG_SSA_STATE_CD] = random.choice(AVAILABLE_SSA_STATE_CDS)
 
         add_meta_timestamps(clm, clm)
 
@@ -846,6 +849,8 @@ class AdjudicatedGeneratorUtil:
         clm_line[f.CLM_LINE_LTST_CLM_IND] = random.choice(["Y", "N"])
         if clm_type_cd in (20, 30, 40, 50, 60, 61, 62, 63, 64, 71, 72, 81, 82):
             clm_line[f.CLM_LINE_OTAF_AMT] = round(random.uniform(0, 1000), 2)
+        if clm_type_cd in (71, 72, 81, 82):
+            clm_line[f.GEO_RNDRG_SSA_STATE_CD] = random.choice(AVAILABLE_SSA_STATE_CDS)
 
         add_meta_timestamps(clm_line, clm)
 
