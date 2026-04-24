@@ -38,7 +38,10 @@
   },
   {
     "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-ENRLMT-EMPLR-SBSDY-SW",
-    "valueString" : "Y"
+    "valueCoding" : {
+      "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ENRLMT-EMPLR-SBSDY-SW",
+      "code" : "Y"
+    }
   },
   {
     "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-CVRG-TYPE-CD",
