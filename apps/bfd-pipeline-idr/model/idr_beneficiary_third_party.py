@@ -64,7 +64,7 @@ class IdrBeneficiaryThirdParty(IdrBaseModel):
             FROM {IDR_BENE_THIRD_PARTY_TABLE} tp
             {{WHERE_CLAUSE}}
             AND NOT EXISTS (
-                {deceased_bene_filter(hstry)}
+                {deceased_bene_filter(hstry, start_time)}
                 AND {hstry}.bene_sk = tp.bene_sk
             )
             {{ORDER_BY}}

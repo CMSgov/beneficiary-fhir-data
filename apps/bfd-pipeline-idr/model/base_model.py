@@ -592,12 +592,13 @@ class IdrBaseModel(BaseModel, ABC):
 T = TypeVar("T", bound=IdrBaseModel)
 
 
-def deceased_bene_filter(alias: str) -> str:
+def deceased_bene_filter(alias: str, start_time: datetime) -> str:
     return f"""
             SELECT bene_sk
             FROM {IDR_BENE_HISTORY_TABLE} {alias}
             WHERE {alias}.bene_vrfy_death_day_sw = 'Y'
-            AND {alias}.bene_death_dt < CURRENT_DATE - INTERVAL '{DEATH_DATE_CUTOFF_YEARS} years'
+            AND {alias}.bene_death_dt < DATE '{start_time.strftime("%Y-%m-%d")}' 
+            - INTERVAL '{DEATH_DATE_CUTOFF_YEARS} years'
     """
 
 
@@ -719,7 +720,8 @@ def claim_filter(start_time: datetime, partition: LoadPartition) -> str:
     return f"""
     (
         {clm}.bene_sk != 0
-        AND NOT EXISTS ({deceased_bene_filter(hstry)} AND {hstry}.bene_sk = {clm}.bene_sk)
+        AND NOT EXISTS ({deceased_bene_filter(hstry, start_time)} 
+            AND {hstry}.bene_sk = {clm}.bene_sk)
         AND {clm}.clm_type_cd IN ({",".join([str(c) for c in claim_type_codes])})
         {clm_from_filter}
         {latest_claim_ind}

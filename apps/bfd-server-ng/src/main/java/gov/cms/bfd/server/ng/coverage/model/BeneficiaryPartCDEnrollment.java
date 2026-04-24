@@ -7,6 +7,7 @@ import jakarta.persistence.Embedded;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -50,8 +51,8 @@ public class BeneficiaryPartCDEnrollment implements Comparable<BeneficiaryPartCD
     return beneficiaryEnrollmentPeriod.toFhirPeriod();
   }
 
-  Coverage.CoverageStatus toFhirStatus() {
-    return beneficiaryEnrollmentPeriod.toFhirStatus();
+  Coverage.CoverageStatus toFhirStatus(LocalDate benefitDate) {
+    return beneficiaryEnrollmentPeriod.toFhirStatus(benefitDate);
   }
 
   /**

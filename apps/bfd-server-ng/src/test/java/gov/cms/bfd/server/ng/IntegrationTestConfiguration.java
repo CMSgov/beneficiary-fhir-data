@@ -8,6 +8,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Paths;
+import java.time.*;
+import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import org.flywaydb.core.Flyway;
 import org.junit.platform.commons.util.StringUtils;
@@ -32,13 +34,19 @@ public class IntegrationTestConfiguration {
   @Value("${project.basedir}")
   private String baseDir;
 
+  @Bean
+  @Primary
+  public Clock testClock() {
+    return Clock.fixed(Instant.parse("2025-01-02T00:00:00Z"), ZoneId.of("UTC"));
+  }
+
   private static PostgreSQLContainer<?> postgresContainer;
   private static GenericContainer<?> dynamoDbContainer;
 
   @Bean
   @ServiceConnection
   @SuppressWarnings("resource")
-  public PostgreSQLContainer<?> postgres() throws IOException, InterruptedException {
+  public PostgreSQLContainer<?> postgres(Clock clock) throws IOException, InterruptedException {
     synchronized (IntegrationTestConfiguration.class) {
       if (postgresContainer == null) {
         if (StringUtils.isNotBlank(System.getenv("PGPASSWORD"))
@@ -62,27 +70,11 @@ public class IntegrationTestConfiguration {
         container.start();
         runMigrator(container);
 
-        runPython(container, "uv", "sync");
-        runPython(container, "uv", "run", "load_synthetic.py", "./test_samples2");
+        var date = clock.instant().truncatedTo(ChronoUnit.DAYS);
 
-        // Update CLM_IDR_LD_DT to CURRENT_DATE before pipeline.py
-        // Reason: PAC data older than 60 days is filtered by coalescing
-        // (idr_updt_ts, idr_insrt_ts, clm_idr_ld_dt). Synthetic data has
-        // outdated clm_idr_ld_dt value and empty idr_updt_ts, idr_insrt_ts.
-
-        container.execInContainer(
-            "psql",
-            "-U",
-            "bfdtest",
-            "-d",
-            "testdb",
-            "-c",
-            "UPDATE cms_vdm_view_mdcr_prd.v2_mdcr_clm "
-                + "SET \"clm_idr_ld_dt\" = CURRENT_DATE,"
-                + "\"idr_insrt_ts\" = CURRENT_TIMESTAMP,"
-                + "\"idr_updt_ts\" = CURRENT_TIMESTAMP;");
-
-        runPython(container, "uv", "run", "pipeline.py", "synthetic");
+        runPython(container, date, "uv", "sync");
+        runPython(container, date, "uv", "run", "load_synthetic.py", "./test_samples2");
+        runPython(container, date, "uv", "run", "pipeline.py", "synthetic");
         postgresContainer = container;
       }
     }
@@ -111,7 +103,7 @@ public class IntegrationTestConfiguration {
     }
   }
 
-  private void runPython(PostgreSQLContainer<?> container, String... args)
+  private void runPython(PostgreSQLContainer<?> container, Instant date, String... args)
       throws IOException, InterruptedException {
     ProcessBuilder processBuilder = new ProcessBuilder(args);
     var env = processBuilder.environment();
@@ -125,6 +117,7 @@ public class IntegrationTestConfiguration {
     // Partitions are necessary for massive amounts of prod data, but will cause our modestly-sized
     // test data to load significantly slower.
     env.put("IDR_ENABLE_PARTITIONS", "0");
+    env.put("BFD_TEST_DATE", date.toString());
     // Suppress noisy output unless the log level is explicitly set
     env.putIfAbsent("IDR_LOG_LEVEL", "WARNING");
 
