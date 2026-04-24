@@ -369,6 +369,24 @@
     - Basis
     - Regular
     - CMS
+- inputPath: Provider.CLM_BLG_PRVDR_TAX_NUM
+  appliesTo:
+    - Inpatient
+    - Outpatient
+    - SNF
+    - DME
+  sources:
+    - FISS
+    - MCS
+    - VMS
+    - NCH
+  sourceView: V2_MDCR_CLM
+  sourceColumn: CLM_BLG_PRVDR_TAX_NUM
+  fhirPath: ExplanationOfBenefit.contained.where(id = %root.provider.reference.substring(1)).identifier.where(system = 'urn:oid:2.16.840.1.113883.4.4').value
+  profiles:
+    - Basis
+    - Regular
+    - CMS
 - inputPath: SupportingInfoComponent.CLM_QUERY_CD
   appliesTo:
     - Inpatient

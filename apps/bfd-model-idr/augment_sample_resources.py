@@ -20,6 +20,9 @@ cur_sample_data = {}
 with Path(cur_sample).open("r") as file:
     cur_sample_data = json.load(file)
 
+if len(sys.argv) > 2:
+    cur_sample_data["profileType"] = sys.argv[2]
+
 OTHR_PRVDR_MEANING = (
     "supervisor" if cur_sample_data.get("CLM_TYPE_CD") in ("1700", "2700") else "otheroperating"
 )
@@ -52,12 +55,13 @@ def load_profile_map():
 
 def filter_by_profile(data, profile_type, profile_map):
     if isinstance(data, dict):
-        for k in list(data.keys()):
-            v = data[k]
+        for k, v in list(data.items()):
+            if k == "providerList":
+                continue
             if k in profile_map and profile_type not in profile_map[k]:
                 del data[k]
-                continue
-            filter_by_profile(v, profile_type, profile_map)
+            else:
+                filter_by_profile(v, profile_type, profile_map)
     elif isinstance(data, list):
         for item in data:
             filter_by_profile(item, profile_type, profile_map)
@@ -101,8 +105,9 @@ def cleanup_empty_items(data):
 
 # we filter twice - once before augmentation and again after, to make it simpler.
 profile_map = load_profile_map()
-profile_type = cur_sample_data.get("profile_type", "CMS")
+profile_type = cur_sample_data.get("profileType", "CMS")
 profile_type = "CMS" if profile_type.lower() == "cms" else profile_type.capitalize()
+cur_sample_data["profileType"] = profile_type #in case it's not specified, we rely upon this for mapping now.
 
 filter_by_profile(cur_sample_data, profile_type, profile_map)
 
@@ -484,7 +489,7 @@ filename = "out/temporary-sample.json"
 
 cur_sample_data["lastUpdated"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
-profile_type = cur_sample_data.get("profile_type", "CMS")
+profile_type = cur_sample_data.get("profileType", "CMS")
 profile_type = "CMS" if profile_type.lower() == "cms" else profile_type.capitalize()
 
 filter_by_profile(cur_sample_data, profile_type, profile_map)
