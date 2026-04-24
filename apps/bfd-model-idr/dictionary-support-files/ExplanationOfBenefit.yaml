@@ -1211,7 +1211,7 @@
     - CCLFA.CLM_1_REV_CNTR_ANSI_RSN_CD
   sourceView: V2_MDCR_CLM_ANSI_SGNTR
   sourceColumn: CLM_1_REV_CNTR_ANSI_RSN_CD
-  fhirPath: ExplanationOfBenefit.item.adjudication.reason.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CODE').code
+  fhirPath: ExplanationOfBenefit.item.adjudication.reason.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CD').code
   notes: ANSI reason and group codes are unordered.
 - inputPath: LineItemComponent.CLM_1_REV_CNTR_ANSI_GRP_CD
   appliesTo:
@@ -1228,7 +1228,7 @@
     - CCLFA.CLM_1_REV_CNTR_ANSI_GRP_CD
   sourceView: V2_MDCR_CLM_ANSI_SGNTR
   sourceColumn: CLM_1_REV_CNTR_ANSI_GRP_CD
-  fhirPath: ExplanationOfBenefit.item.adjudication.reason.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CODE').code
+  fhirPath: ExplanationOfBenefit.item.adjudication.reason.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CD').code
   notes: ANSI reason and group codes are unordered. 
 - inputPath: LineItemComponent.CLM_2_REV_CNTR_ANSI_RSN_CD
   appliesTo:
@@ -1243,7 +1243,7 @@
     - REV_CNTR_2ND_ANSI_CD
   sourceView: V2_MDCR_CLM_ANSI_SGNTR
   sourceColumn: CLM_2_REV_CNTR_ANSI_RSN_CD
-  fhirPath: ExplanationOfBenefit.item.adjudication.reason.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CODE').code
+  fhirPath: ExplanationOfBenefit.item.adjudication.reason.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CD').code
   notes: ANSI reason and group codes are unordered.
 - inputPath: LineItemComponent.CLM_2_REV_CNTR_ANSI_GRP_CD
   appliesTo:
@@ -1258,7 +1258,7 @@
     - REV_CNTR_2ND_ANSI_CD
   sourceView: V2_MDCR_CLM_ANSI_SGNTR
   sourceColumn: CLM_2_REV_CNTR_ANSI_GRP_CD
-  fhirPath: ExplanationOfBenefit.item.adjudication.reason.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CODE').code
+  fhirPath: ExplanationOfBenefit.item.adjudication.reason.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CD').code
   notes: ANSI reason and group codes are unordered. 
 - inputPath: LineItemComponent.CLM_3_REV_CNTR_ANSI_RSN_CD
   appliesTo:
@@ -1273,7 +1273,7 @@
     - REV_CNTR_3RD_ANSI_CD
   sourceView: V2_MDCR_CLM_ANSI_SGNTR
   sourceColumn: CLM_3_REV_CNTR_ANSI_RSN_CD
-  fhirPath: ExplanationOfBenefit.item.adjudication.reason.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CODE').code
+  fhirPath: ExplanationOfBenefit.item.adjudication.reason.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CD').code
   notes: ANSI reason and group codes are unordered.
 - inputPath: LineItemComponent.CLM_3_REV_CNTR_ANSI_GRP_CD
   appliesTo:
@@ -1288,7 +1288,7 @@
     - REV_CNTR_3RD_ANSI_CD
   sourceView: V2_MDCR_CLM_ANSI_SGNTR
   sourceColumn: CLM_3_REV_CNTR_ANSI_GRP_CD
-  fhirPath: ExplanationOfBenefit.item.adjudication.reason.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CODE').code
+  fhirPath: ExplanationOfBenefit.item.adjudication.reason.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CD').code
   notes: ANSI reason and group codes are unordered. 
 - inputPath: LineItemComponent.CLM_4_REV_CNTR_ANSI_RSN_CD
   appliesTo:
@@ -1303,7 +1303,7 @@
     - REV_CNTR_4TH_ANSI_CD
   sourceView: V2_MDCR_CLM_ANSI_SGNTR
   sourceColumn: CLM_4_REV_CNTR_ANSI_RSN_CD
-  fhirPath: ExplanationOfBenefit.item.adjudication.reason.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CODE').code
+  fhirPath: ExplanationOfBenefit.item.adjudication.reason.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CD').code
   notes: ANSI reason and group codes are unordered.
 - inputPath: LineItemComponent.CLM_4_REV_CNTR_ANSI_GRP_CD
   appliesTo:
@@ -1318,7 +1318,7 @@
     - REV_CNTR_4TH_ANSI_CD
   sourceView: V2_MDCR_CLM_ANSI_SGNTR
   sourceColumn: CLM_4_REV_CNTR_ANSI_GRP_CD
-  fhirPath: ExplanationOfBenefit.item.adjudication.reason.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CODE').code
+  fhirPath: ExplanationOfBenefit.item.adjudication.reason.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CD').code
   notes: ANSI reason and group codes are unordered. 
 - inputPath: LineItemComponent.CLM_LINE_NCVRD_CHRG_AMT
   appliesTo:

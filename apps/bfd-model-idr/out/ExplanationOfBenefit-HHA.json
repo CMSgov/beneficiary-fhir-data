@@ -1093,16 +1093,18 @@
           "code" : "PR"
         },
         {
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CODE",
-          "code" : "PR"
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CD",
+          "code" : "PR",
+          "display" : "Patient Responsibility -- this group should be used when the adjustment represents an amount that should be billed to the patient or insured. This group would typically be used for deductible and copay adjustments."
         },
         {
           "system" : "https://x12.org/codes/claim-adjustment-reason-codes",
           "code" : "B7"
         },
         {
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CODE",
-          "code" : "B7"
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CD",
+          "code" : "B7",
+          "display" : "This provider was not certified/eligible to be paid for this procedure/service on this date of service."
         }]
       }
     },
@@ -1120,16 +1122,18 @@
           "code" : "PR"
         },
         {
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CODE",
-          "code" : "PR"
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CD",
+          "code" : "PR",
+          "display" : "Patient Responsibility -- this group should be used when the adjustment represents an amount that should be billed to the patient or insured. This group would typically be used for deductible and copay adjustments."
         },
         {
           "system" : "https://x12.org/codes/claim-adjustment-reason-codes",
           "code" : "B7"
         },
         {
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CODE",
-          "code" : "B7"
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CD",
+          "code" : "B7",
+          "display" : "This provider was not certified/eligible to be paid for this procedure/service on this date of service."
         }]
       }
     },
@@ -1147,16 +1151,18 @@
           "code" : "PR"
         },
         {
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CODE",
-          "code" : "PR"
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CD",
+          "code" : "PR",
+          "display" : "Patient Responsibility -- this group should be used when the adjustment represents an amount that should be billed to the patient or insured. This group would typically be used for deductible and copay adjustments."
         },
         {
           "system" : "https://x12.org/codes/claim-adjustment-reason-codes",
           "code" : "B7"
         },
         {
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CODE",
-          "code" : "B7"
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CD",
+          "code" : "B7",
+          "display" : "This provider was not certified/eligible to be paid for this procedure/service on this date of service."
         }]
       }
     },
@@ -1174,16 +1180,18 @@
           "code" : "PR"
         },
         {
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CODE",
-          "code" : "PR"
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CD",
+          "code" : "PR",
+          "display" : "Patient Responsibility -- this group should be used when the adjustment represents an amount that should be billed to the patient or insured. This group would typically be used for deductible and copay adjustments."
         },
         {
           "system" : "https://x12.org/codes/claim-adjustment-reason-codes",
           "code" : "B7"
         },
         {
-          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CODE",
-          "code" : "B7"
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CD",
+          "code" : "B7",
+          "display" : "This provider was not certified/eligible to be paid for this procedure/service on this date of service."
         }]
       }
     },
