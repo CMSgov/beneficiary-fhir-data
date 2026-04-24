@@ -37,37 +37,16 @@ careteam_header_columns = {
 
 def load_profile_map():
     profile_map = {}
-    yaml_files = [
-        "dictionary-support-files/ExplanationOfBenefit.yaml",
-        "dictionary-support-files/ExplanationOfBenefit-Pharmacy.yaml",
-    ]
-    for yaml_file in yaml_files:
-        p = Path(yaml_file)
-        if not p.exists():
-            continue
+    paths = [Path("dictionary-support-files/ExplanationOfBenefit.yaml"), 
+             Path("dictionary-support-files/ExplanationOfBenefit-Pharmacy.yaml")]
+
+    for p in filter(Path.exists, paths):
         with p.open("r") as f:
-            data = yaml.safe_load(f)
-            if not data:
-                continue
-            for item in data:
-                profiles = item.get("profiles")
-                if profiles is None:
+            for item in yaml.safe_load(f) or []:
+                if (profiles := item.get("profiles")) is None:
                     continue
-
-                keys = set()
-                if "sourceColumn" in item:
-                    keys.add(item["sourceColumn"])
-                if "inputPath" in item:
-                    keys.add(item["inputPath"].split(".")[-1])
-                if "ccwMapping" in item:
-                    for m in item["ccwMapping"]:
-                        keys.add(m)
-                if "cclfMapping" in item:
-                    for m in item["cclfMapping"]:
-                        keys.add(m.split(".")[-1])
-
-                for key in keys:
-                    profile_map[key] = profiles
+                keys = {item.get("sourceColumn"), item.get("inputPath", "").split(".")[-1]} - {"", None}
+                profile_map.update(dict.fromkeys(keys, profiles))
     return profile_map
 
 
@@ -85,58 +64,46 @@ def filter_by_profile(data, profile_type, profile_map):
 
 
 def cleanup_empty_items(data):
-    if "supportingInfoComponents" in data:
-        sic = data["supportingInfoComponents"]
+    if sic := data.get("supportingInfoComponents"):
         new_sic = []
         si_map = {}
-        next_row = 1
-        for item in sic:
-            old_row = item.get("ROW_NUM")
-            if any(k != "ROW_NUM" for k in item):
-                item["ROW_NUM"] = next_row
-                new_sic.append(item)
-                if old_row is not None:
-                    si_map[str(old_row)] = next_row
-                    si_map[int(old_row)] = next_row
-                next_row += 1
+        # Filter for non-empty items (items having more than just ROW_NUM)
+        for next_row, item in enumerate((i for i in sic if any(k != "ROW_NUM" for k in i)), start=1):
+            if (old_row := item.get("ROW_NUM")) is not None:
+                si_map.update({str(old_row): next_row, int(old_row): next_row})
+            item["ROW_NUM"] = next_row
+            new_sic.append(item)
         data["supportingInfoComponents"] = new_sic
 
-        if "lineItemComponents" in data:
-            for li in data["lineItemComponents"]:
-                if "SEQUENCE_INFO" in li:
-                    li["SEQUENCE_INFO"] = [
-                        si_map[int(s)] for s in li["SEQUENCE_INFO"] if int(s) in si_map
-                    ]
+        for li in data.get("lineItemComponents", []):
+            if seq := li.get("SEQUENCE_INFO"):
+                li["SEQUENCE_INFO"] = [si_map[int(s)] for s in seq if int(s) in si_map]
 
-    if "diagnoses" in data:
-        diag = data["diagnoses"]
+    if diag := data.get("diagnoses"):
         new_diag = []
         diag_map = {}
-        next_row = 1
         internal_diag_keys = {"ROW_NUM", "clm_prod_type_cd_map"}
-        for item in diag:
+        # Filter for non-empty diagnoses
+        for next_row, item in enumerate((i for i in diag if any(k not in internal_diag_keys for k in i)), start=1):
             old_row = item.get("ROW_NUM")
-            if any(k not in internal_diag_keys for k in item):
-                item["ROW_NUM"] = str(next_row) if isinstance(old_row, str) else next_row
-                new_diag.append(item)
-                if old_row is not None:
-                    diag_map[str(old_row)] = next_row
-                    diag_map[int(old_row)] = next_row
-                next_row += 1
+            item["ROW_NUM"] = str(next_row) if isinstance(old_row, str) else next_row
+            if old_row is not None:
+                diag_map.update({str(old_row): next_row, int(old_row): next_row})
+            new_diag.append(item)
         data["diagnoses"] = new_diag
 
         # Update diagnosisSequence in lineItemComponents
-        if "lineItemComponents" in data:
-            for li in data["lineItemComponents"]:
-                if "diagnosisSequence" in li:
-                    li["diagnosisSequence"] = [
-                        diag_map[int(s)] for s in li["diagnosisSequence"] if int(s) in diag_map
-                    ]
+        for li in data.get("lineItemComponents", []):
+            if diag_seq := li.get("diagnosisSequence"):
+                li["diagnosisSequence"] = [diag_map[int(s)] for s in diag_seq if int(s) in diag_map]
+
 
 
 # we filter twice - once before augmentation and again after, to make it simpler.
 profile_map = load_profile_map()
-profile_type = cur_sample_data.get("profile_type", "Maximus").capitalize()
+profile_type = cur_sample_data.get("profile_type", "CMS")
+profile_type = "CMS" if profile_type.lower() == "cms" else profile_type.capitalize()
+
 filter_by_profile(cur_sample_data, profile_type, profile_map)
 
 
@@ -517,7 +484,9 @@ filename = "out/temporary-sample.json"
 
 cur_sample_data["lastUpdated"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
-profile_type = cur_sample_data.get("profile_type", "Maximus").capitalize()
+profile_type = cur_sample_data.get("profile_type", "CMS")
+profile_type = "CMS" if profile_type.lower() == "cms" else profile_type.capitalize()
+
 filter_by_profile(cur_sample_data, profile_type, profile_map)
 cleanup_empty_items(cur_sample_data)
 

@@ -29,7 +29,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Base.CLM_LTST_CLM_IND
   appliesTo:
     - Inpatient
@@ -60,7 +60,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Base.CLM_CNTL_NUM
   appliesTo:
     - Inpatient
@@ -88,7 +88,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Base.CLM_ORIG_CNTL_NUM
   appliesTo:
     - Inpatient
@@ -111,7 +111,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Base.CLM_TYPE_CD
   appliesTo:
     - Inpatient
@@ -144,7 +144,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Base.BENE_SK
   appliesTo:
     - Inpatient
@@ -165,7 +165,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Base.CLM_FROM_DT
   appliesTo:
     - Inpatient
@@ -195,7 +195,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Base.CLM_THRU_DT
   appliesTo:
     - Inpatient
@@ -225,7 +225,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Base.CLM_EFCTV_DT
   appliesTo:
     - Inpatient
@@ -250,7 +250,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: SupportingInfoComponent.CLM_IDR_LD_DT
   appliesTo:
     - Inpatient
@@ -273,7 +273,7 @@
   sourceColumn: CLM_IDR_LD_DT
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_IDR_LD_DT').exists()).timing
   profiles:
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Base.CLM_SRC_ID
   appliesTo:
     - Inpatient
@@ -295,7 +295,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Base.META_SRC_SK
   appliesTo:
     - Inpatient
@@ -316,7 +316,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Base.PRVDR_BLG_PRVDR_NPI_NUM
   appliesTo:
     - Inpatient
@@ -347,7 +347,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Base.CLM_BLG_PRVDR_ZIP5_CD
   appliesTo:
     - Inpatient
@@ -368,7 +368,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: SupportingInfoComponent.CLM_QUERY_CD
   appliesTo:
     - Inpatient
@@ -391,7 +391,7 @@
   sourceColumn: CLM_QUERY_CD
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_QUERY_CD').exists()).code.coding.code
   profiles:
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Base.CLM_NCVRD_CHRG_AMT
   appliesTo:
     - Inpatient
@@ -408,7 +408,7 @@
   fhirPath: ExplanationOfBenefit.total.where(category.coding.where(system='http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication' and code='noncovered').exists() and category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_NCVRD_CHRG_AMT').exists()).amount.value
   profiles:
     - Regular
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Base.CLM_MDCR_DDCTBL_AMT
   appliesTo:
     - Inpatient
@@ -433,7 +433,7 @@
   fhirPath: ExplanationOfBenefit.total.where(category.coding.where(system='http://terminology.hl7.org/CodeSystem/adjudication' and code='deductible').exists() and category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_MDCR_DDCTBL_AMT').exists()).amount.value
   profiles:
     - Regular
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Base.CLM_NRLN_RIC_CD
   appliesTo:
     - Inpatient
@@ -454,7 +454,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: SupportingInfoComponent.CLM_OP_SRVC_TYPE_CD
   appliesTo:
     - Outpatient
@@ -467,7 +467,7 @@
   sourceColumn: CLM_OP_SRVC_TYPE_CD
   fhirPath: ExplanationOfBenefit.supportingInfo.where(code.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/CLM-OP-SRVC-TYPE-CD').code.coding.code
   profiles:
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Base.CLM_OPRTNL_DSPRTNT_AMT
   appliesTo:
     - Inpatient
@@ -481,7 +481,7 @@
   bfdDerived: True
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_OPRTNL_DSPRTNT_AMT').exists()).amount.value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Base.CLM_OPRTNL_IME_AMT
   appliesTo:
     - Inpatient
@@ -495,7 +495,7 @@
   bfdDerived: True
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_OPRTNL_IME_AMT').exists()).amount.value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: SupportingInfoComponent.CLM_CMS_PROC_DT
   appliesTo:
     - Inpatient
@@ -512,7 +512,7 @@
   sourceColumn: CLM_CMS_PROC_DT
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_CMS_PROC_DT').exists()).timing
   profiles:
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Base.CLM_PMT_AMT
   appliesTo:
     - Inpatient
@@ -535,7 +535,7 @@
   fhirPath: ExplanationOfBenefit.payment.amount.value
   profiles:
     - Regular
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Base.PRVDR_ATNDG_PRVDR_NPI_NUM
   appliesTo:
     - Inpatient
@@ -557,7 +557,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Base.PRVDR_OPRTG_PRVDR_NPI_NUM
   appliesTo:
     - Inpatient
@@ -579,7 +579,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: DiagnosisComponent.CLM_VAL_SQNC_NUM
   appliesTo:
     - Inpatient
@@ -598,7 +598,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: DiagnosisComponent.ROW_NUM
   appliesTo:
     - Inpatient
@@ -683,7 +683,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: DiagnosisComponent.CLM_DGNS_PRCDR_ICD_IND
   appliesTo:
     - Inpatient
@@ -754,7 +754,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: DiagnosisComponent.CLM_PROD_TYPE_CD
   appliesTo:
     - Inpatient
@@ -773,7 +773,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: DiagnosisComponent.CLM_POA_IND
   appliesTo:
     - Inpatient
@@ -827,7 +827,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: ProcedureComponent.CLM_VAL_SQNC_NUM
   appliesTo:
     - Inpatient
@@ -846,7 +846,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: ProcedureComponent.CLM_PRCDR_PRFRM_DT
   appliesTo:
     - Inpatient
@@ -890,7 +890,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: ProcedureComponent.CLM_PRCDR_CD
   appliesTo:
     - Inpatient
@@ -934,7 +934,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: ProcedureComponent.CLM_DGNS_PRCDR_ICD_IND
   appliesTo:
     - Inpatient
@@ -979,7 +979,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_LINE_SBMT_CHRG_AMT
   appliesTo:
     - Inpatient
@@ -1002,7 +1002,7 @@
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_SBMT_CHRG_AMT')).amount.value
   profiles:
     - Regular
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_LINE_ALOWD_CHRG_AMT
   appliesTo:
     - Carrier
@@ -1022,7 +1022,7 @@
   notes: Technically this variable is available in partially-adjudicated claims, but is consolidated (and represented) in CLM_ALOWD_CHRG_AMT in both adjudicated + partially-adjudicated claims. Financial fields on 1XXX claim type codes should be expected to change.
   profiles:
     - Regular
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_LINE_NUM
   appliesTo:
     - Inpatient
@@ -1049,7 +1049,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_LINE_HCPCS_CD
   appliesTo:
     - Inpatient
@@ -1076,7 +1076,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_REV_APC_HIPPS_CD
   appliesTo:
     - Outpatient
@@ -1097,7 +1097,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_LINE_NDC_CD
   appliesTo:
     - Inpatient
@@ -1121,7 +1121,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_LINE_NDC_QTY
   appliesTo:
     - Inpatient
@@ -1143,7 +1143,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_LINE_NDC_QTY_QLFYR_CD
   appliesTo:
     - Inpatient
@@ -1165,7 +1165,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_LINE_SRVC_UNIT_QTY
   appliesTo:
     - Inpatient
@@ -1193,7 +1193,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_LINE_REV_CTR_CD
   appliesTo:
     - Inpatient
@@ -1215,7 +1215,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_DDCTBL_COINSRNC_CD
   appliesTo:
     - Inpatient
@@ -1233,7 +1233,7 @@
   sourceColumn: CLM_DDCTBL_COINSRNC_CD
   fhirPath: ExplanationOfBenefit.item.revenue.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DDCTBL-COINSRNC-CD').code
   profiles:
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.HCPCS_1_MDFR_CD
   appliesTo:
     - Inpatient
@@ -1259,7 +1259,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.HCPCS_2_MDFR_CD
   appliesTo:
     - Inpatient
@@ -1285,7 +1285,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.HCPCS_3_MDFR_CD
   appliesTo:
     - Inpatient
@@ -1311,7 +1311,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.HCPCS_4_MDFR_CD
   appliesTo:
     - Inpatient
@@ -1337,7 +1337,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.HCPCS_5_MDFR_CD
   appliesTo:
     - Inpatient
@@ -1361,7 +1361,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_LINE_INSTNL_RATE_AMT
   appliesTo:
     - Inpatient
@@ -1378,7 +1378,7 @@
   sourceColumn: CLM_LINE_INSTNL_RATE_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_INSTNL_RATE_AMT')).amount.value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_1_REV_CNTR_ANSI_RSN_CD
   appliesTo:
     - Inpatient
@@ -1399,7 +1399,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_1_REV_CNTR_ANSI_GRP_CD
   appliesTo:
     - Inpatient
@@ -1420,7 +1420,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_2_REV_CNTR_ANSI_RSN_CD
   appliesTo:
     - Outpatient
@@ -1439,7 +1439,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_2_REV_CNTR_ANSI_GRP_CD
   appliesTo:
     - Inpatient
@@ -1458,7 +1458,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_3_REV_CNTR_ANSI_RSN_CD
   appliesTo:
     - Inpatient
@@ -1477,7 +1477,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_3_REV_CNTR_ANSI_GRP_CD
   appliesTo:
     - Inpatient
@@ -1496,7 +1496,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_4_REV_CNTR_ANSI_RSN_CD
   appliesTo:
     - Inpatient
@@ -1515,7 +1515,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_4_REV_CNTR_ANSI_GRP_CD
   appliesTo:
     - Inpatient
@@ -1534,7 +1534,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_LINE_NCVRD_CHRG_AMT
   appliesTo:
     - Inpatient
@@ -1552,7 +1552,7 @@
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_NCVRD_CHRG_AMT')).amount.value
   profiles:
     - Regular
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_LINE_PRVDR_PMT_AMT
   appliesTo:
     - Inpatient
@@ -1574,7 +1574,7 @@
   sourceColumn: CLM_LINE_PRVDR_PMT_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_PRVDR_PMT_AMT')).amount.value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_LINE_BENE_PMT_AMT
   appliesTo:
     - Inpatient
@@ -1591,7 +1591,7 @@
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_BENE_PMT_AMT')).amount.value
   profiles:
     - Regular
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_LINE_BENE_PD_AMT
   appliesTo:
     - Inpatient
@@ -1614,7 +1614,7 @@
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_BENE_PD_AMT')).amount.value
   profiles:
     - Regular
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_LINE_CVRD_PD_AMT
   appliesTo:
     - Inpatient
@@ -1640,7 +1640,7 @@
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_CVRD_PD_AMT')).amount.value
   profiles:
     - Regular
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_LINE_BLOOD_DDCTBL_AMT
   appliesTo:
     - Inpatient
@@ -1656,7 +1656,7 @@
   sourceColumn: CLM_LINE_BLOOD_DDCTBL_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_BLOOD_DDCTBL_AMT')).amount.value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_LINE_MDCR_DDCTBL_AMT
   appliesTo:
     - Inpatient
@@ -1681,7 +1681,7 @@
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_MDCR_DDCTBL_AMT')).amount.value
   profiles:
     - Regular
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_LINE_INSTNL_ADJSTD_AMT
   appliesTo:
     - Inpatient
@@ -1698,7 +1698,7 @@
   sourceColumn: CLM_LINE_INSTNL_ADJSTD_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_INSTNL_ADJSTD_AMT')).amount.value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_LINE_INSTNL_RDCD_AMT
   appliesTo:
     - Inpatient
@@ -1715,7 +1715,7 @@
   sourceColumn: CLM_LINE_INSTNL_RDCD_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_INSTNL_RDCD_AMT')).amount.value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_LINE_INSTNL_MSP1_PD_AMT
   appliesTo:
     - Inpatient
@@ -1732,7 +1732,7 @@
   sourceColumn: CLM_LINE_INSTNL_MSP1_PD_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_INSTNL_MSP1_PD_AMT')).amount.value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_LINE_INSTNL_MSP2_PD_AMT
   appliesTo:
     - Inpatient
@@ -1749,7 +1749,7 @@
   sourceColumn: CLM_LINE_INSTNL_MSP2_PD_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_INSTNL_MSP2_PD_AMT')).amount.value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_LINE_INSTNL_REV_CTR_DT
   appliesTo:
     - Inpatient
@@ -1770,7 +1770,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: SupportingInfoComponent.CLM_ACTV_CARE_FROM_DT
   appliesTo:
     - Inpatient
@@ -1792,7 +1792,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: SupportingInfoComponent.CLM_DSCHRG_DT
   appliesTo:
     - Inpatient
@@ -1811,7 +1811,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: SupportingInfoComponent.CLM_ADMSN_TYPE_CD
   appliesTo:
     - Inpatient
@@ -1830,7 +1830,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: SupportingInfoComponent.CLM_SUBMSN_DT
   appliesTo:
     - Inpatient
@@ -1851,7 +1851,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: SupportingInfoComponent.BENE_PTNT_STUS_CD
   appliesTo:
     - Inpatient
@@ -1875,7 +1875,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: SupportingInfoComponent.DGNS_DRG_CD
   appliesTo:
     - Inpatient
@@ -1893,7 +1893,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: SupportingInfoComponent.CLM_BLOOD_PT_FRNSH_QTY
   appliesTo:
     - Inpatient
@@ -1908,7 +1908,7 @@
   sourceColumn: CLM_BLOOD_PT_FRNSH_QTY
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_BLOOD_PT_FRNSH_QTY').exists()).value.value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: SupportingInfoComponent.CLM_MDCR_INSTNL_MCO_PD_SW
   appliesTo:
     - Inpatient
@@ -1926,7 +1926,7 @@
   sourceColumn: CLM_MDCR_INSTNL_MCO_PD_SW
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_MDCR_INSTNL_MCO_PD_SW').exists()).code.coding.code
   profiles:
-    - Maximus
+    - CMS
 - inputPath: SupportingInfoComponent.CLM_ADMSN_SRC_CD
   appliesTo:
     - Inpatient
@@ -1945,7 +1945,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: SupportingInfoComponent.TYPE_OF_BILL_CD
   appliesTo:
     - Inpatient
@@ -1962,7 +1962,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Base.CLM_BILL_FAC_TYPE_CD
   appliesTo:
     - Inpatient
@@ -1984,7 +1984,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Base.CLM_BILL_CLSFCTN_CD
   appliesTo:
     - Inpatient
@@ -2007,7 +2007,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Base.CLM_BILL_FREQ_CD
   appliesTo:
     - Inpatient
@@ -2030,7 +2030,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: SupportingInfoComponent.CLM_NCH_WKLY_PROC_DT
   appliesTo:
     - Inpatient
@@ -2048,7 +2048,7 @@
   sourceColumn: CLM_NCH_WKLY_PROC_DT
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_NCH_WKLY_PROC_DT').exists()).timing
   profiles:
-    - Maximus
+    - CMS
 - inputPath: SupportingInfoComponent.CLM_NCVRD_FROM_DT
   appliesTo:
     - Inpatient
@@ -2061,7 +2061,7 @@
   sourceColumn: CLM_NCVRD_FROM_DT
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_NCVRD_FROM_DT').exists()).timing
   profiles:
-    - Maximus
+    - CMS
 - inputPath: SupportingInfoComponent.CLM_NCVRD_THRU_DT
   appliesTo:
     - Inpatient
@@ -2074,7 +2074,7 @@
   sourceColumn: CLM_NCVRD_THRU_DT
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_NCVRD_THRU_DT').exists()).timing
   profiles:
-    - Maximus
+    - CMS
 - inputPath: SupportingInfoComponent.CLM_QLFY_STAY_FROM_DT
   appliesTo:
     - SNF
@@ -2089,7 +2089,7 @@
   sourceColumn: CLM_QLFY_STAY_FROM_DT
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_QLFY_STAY_FROM_DT').exists()).timing
   profiles:
-    - Maximus
+    - CMS
 - inputPath: SupportingInfoComponent.CLM_QLFY_STAY_THRU_DT
   appliesTo:
     - SNF
@@ -2104,7 +2104,7 @@
   sourceColumn: CLM_QLFY_STAY_THRU_DT
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_QLFY_STAY_THRU_DT').exists()).timing
   profiles:
-    - Maximus
+    - CMS
 - inputPath: SupportingInfoComponent.CLM_ACTV_CARE_THRU_DT
   appliesTo:
     - Inpatient
@@ -2117,7 +2117,7 @@
   sourceColumn: CLM_ACTV_CARE_THRU_DT
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_ACTV_CARE_THRU_DT').exists()).timing
   profiles:
-    - Maximus
+    - CMS
 - inputPath: SupportingInfoComponent.CLM_MDCR_EXHSTD_DT
   appliesTo:
     - Inpatient
@@ -2131,7 +2131,7 @@
   sourceColumn: CLM_MDCR_EXHSTD_DT
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_MDCR_EXHSTD_DT').exists()).timing
   profiles:
-    - Maximus
+    - CMS
 - inputPath: SupportingInfoComponent.CLM_FI_ACTN_CD
   appliesTo:
     - Inpatient
@@ -2149,7 +2149,7 @@
   referenceTable: CLM_FI_ACTN_CD
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_FI_ACTN_CD').exists()).code.coding.code
   profiles:
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_MDCR_IP_LRD_USE_CNT
   appliesTo:
     - Inpatient
@@ -2163,7 +2163,7 @@
   sourceColumn: CLM_MDCR_IP_LRD_USE_CNT
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_MDCR_IP_LRD_USE_CNT').exists()).value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_HIPPS_UNCOMPD_CARE_AMT
   appliesTo:
     - Inpatient
@@ -2179,7 +2179,7 @@
   sourceColumn: CLM_HIPPS_UNCOMPD_CARE_AMT 
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_HIPPS_UNCOMPD_CARE_AMT').exists()).amount.value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_INSTNL_MDCR_COINS_DAY_CNT
   appliesTo:
     - Inpatient
@@ -2193,7 +2193,7 @@
   sourceColumn: CLM_INSTNL_MDCR_COINS_DAY_CNT
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_INSTNL_MDCR_COINS_DAY_CNT').exists()).value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: SupportingInfoComponent.CLM_DISP_CD
   appliesTo:
     - Inpatient
@@ -2216,7 +2216,7 @@
   referenceTable: CLM_DISP_CD
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_DISP_CD').exists()).code.coding.code
   profiles:
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Base.CLM_SBMT_CHRG_AMT
   appliesTo:
     - Inpatient
@@ -2241,7 +2241,7 @@
   fhirPath: ExplanationOfBenefit.total.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication').exists() and category.coding.where(code='CLM_SBMT_CHRG_AMT').exists() ).amount.value
   profiles:
     - Regular
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_INSTNL_NCVRD_DAY_CNT
   appliesTo:
     - Inpatient
@@ -2255,7 +2255,7 @@
   sourceColumn: CLM_INSTNL_NCVRD_DAY_CNT
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_INSTNL_NCVRD_DAY_CNT').exists()).value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_INSTNL_PER_DIEM_AMT
   appliesTo:
     - Inpatient
@@ -2271,7 +2271,7 @@
   sourceColumn: CLM_INSTNL_PER_DIEM_AMT
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_INSTNL_PER_DIEM_AMT').exists()).amount.value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: SupportingInfoComponent.CLM_MDCR_NPMT_RSN_CD
   appliesTo:
     - Inpatient
@@ -2291,7 +2291,7 @@
   sourceColumn: CLM_MDCR_NPMT_RSN_CD
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_MDCR_NPMT_RSN_CD').exists()).code.coding.code
   profiles:
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_MDCR_IP_PPS_DRG_WT_NUM
   appliesTo:
     - Inpatient
@@ -2305,7 +2305,7 @@
   sourceColumn: CLM_MDCR_IP_PPS_DRG_WT_NUM
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_MDCR_IP_PPS_DRG_WT_NUM').exists()).value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_MDCR_IP_PPS_DSPRPRTNT_AMT
   appliesTo:
     - Inpatient
@@ -2321,7 +2321,7 @@
   sourceColumn: CLM_MDCR_IP_PPS_DSPRPRTNT_AMT
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_MDCR_IP_PPS_DSPRPRTNT_AMT').exists()).amount.value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_MDCR_IP_PPS_EXCPTN_AMT
   appliesTo:
     - Inpatient
@@ -2335,7 +2335,7 @@
   sourceColumn: CLM_MDCR_IP_PPS_EXCPTN_AMT
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_MDCR_IP_PPS_EXCPTN_AMT').exists()).amount.value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_MDCR_IP_PPS_CPTL_FSP_AMT
   appliesTo:
     - Inpatient
@@ -2349,7 +2349,7 @@
   sourceColumn: CLM_MDCR_IP_PPS_CPTL_FSP_AMT
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_MDCR_IP_PPS_CPTL_FSP_AMT').exists()).amount.value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_MDCR_IP_PPS_CPTL_IME_AMT
   appliesTo:
     - Inpatient
@@ -2365,7 +2365,7 @@
   sourceColumn: CLM_MDCR_IP_PPS_CPTL_IME_AMT
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_MDCR_IP_PPS_CPTL_IME_AMT').exists()).amount.value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_MDCR_IP_PPS_OUTLIER_AMT
   appliesTo:
     - Inpatient
@@ -2379,7 +2379,7 @@
   sourceColumn: CLM_MDCR_IP_PPS_OUTLIER_AMT
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_MDCR_IP_PPS_OUTLIER_AMT').exists()).amount.value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_MDCR_IP_PPS_CPTL_HRMLS_AMT
   appliesTo:
     - Inpatient
@@ -2393,7 +2393,7 @@
   sourceColumn: CLM_MDCR_IP_PPS_CPTL_HRMLS_AMT
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_MDCR_IP_PPS_CPTL_HRMLS_AMT').exists()).amount.value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: SupportingInfoComponent.CLM_PPS_IND_CD
   appliesTo:
     - Inpatient
@@ -2410,7 +2410,7 @@
   sourceColumn: CLM_PPS_IND_CD
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_PPS_IND_CD').exists()).code.coding.code
   profiles:
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_MDCR_IP_PPS_CPTL_TOT_AMT
   appliesTo:
     - Inpatient
@@ -2424,7 +2424,7 @@
   sourceColumn: CLM_MDCR_IP_PPS_CPTL_TOT_AMT
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_MDCR_IP_PPS_CPTL_TOT_AMT').exists()).amount.value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_INSTNL_CVRD_DAY_CNT
   appliesTo:
     - Inpatient
@@ -2437,7 +2437,7 @@
   sourceColumn: CLM_INSTNL_CVRD_DAY_CNT
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_INSTNL_CVRD_DAY_CNT').exists()).value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: SupportingInfoComponent.CLM_CNTRCTR_NUM
   appliesTo:
     - Inpatient
@@ -2463,7 +2463,7 @@
   sourceColumn: CLM_CNTRCTR_NUM
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_CNTRCTR_NUM').exists()).code.coding.code
   profiles:
-    - Maximus
+    - CMS
 - inputPath: SupportingInfoComponent.CLM_NCH_PRMRY_PYR_CD
   appliesTo:
     - Inpatient
@@ -2484,7 +2484,7 @@
   sourceColumn: CLM_NCH_PRMRY_PYR_CD
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_NCH_PRMRY_PYR_CD').exists()).code.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRMRY-PYR-CD').code
   profiles:
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_MDCR_INSTNL_PRMRY_PYR_AMT
   appliesTo:
     - Inpatient
@@ -2500,7 +2500,7 @@
   sourceColumn: CLM_MDCR_INSTNL_PRMRY_PYR_AMT
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_MDCR_INSTNL_PRMRY_PYR_AMT').exists()).amount.value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Base.PRVDR_RNDRNG_PRVDR_NPI_NUM
   appliesTo:
     - Inpatient
@@ -2515,7 +2515,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.PRVDR_RNDRNG_PRVDR_NPI_NUM
   appliesTo:
     - Carrier
@@ -2536,7 +2536,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_INSTNL_PRFNL_AMT
   appliesTo:
     - Inpatient
@@ -2552,7 +2552,7 @@
   sourceColumn: CLM_INSTNL_PRFNL_AMT
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_INSTNL_PRFNL_AMT').exists()).amount.value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Base.CLM_BLOOD_LBLTY_AMT
   appliesTo:
     - Inpatient
@@ -2569,7 +2569,7 @@
   sourceColumn: CLM_BLOOD_LBLTY_AMT
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_BLOOD_LBLTY_AMT').exists()).amount.value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_MDCR_IP_BENE_DDCTBL_AMT
   appliesTo:
     - Inpatient
@@ -2584,7 +2584,7 @@
   sourceColumn: CLM_MDCR_IP_BENE_DDCTBL_AMT
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_MDCR_IP_BENE_DDCTBL_AMT').exists()).amount.value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Base.CLM_MDCR_COINSRNC_AMT
   appliesTo:
     - Inpatient
@@ -2604,7 +2604,7 @@
   fhirPath: ExplanationOfBenefit.total.where(category.coding.where(system='http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication' and code='coinsurance').exists() and category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_MDCR_COINSRNC_AMT').exists()).amount.value
   profiles:
     - Regular
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Base.PRVDR_OTHR_PRVDR_NPI_NUM
   appliesTo:
     - Inpatient
@@ -2629,7 +2629,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_INSTNL_DRG_OUTLIER_AMT
   appliesTo:
     - Inpatient
@@ -2643,7 +2643,7 @@
   sourceColumn: CLM_INSTNL_DRG_OUTLIER_AMT
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_INSTNL_DRG_OUTLIER_AMT').exists()).amount.value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Base.CLM_BLG_PRVDR_OSCAR_NUM
   appliesTo:
     - Inpatient
@@ -2672,7 +2672,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_MDCR_INSTNL_BENE_PD_AMT
   appliesTo:
     - Outpatient
@@ -2686,7 +2686,7 @@
   notes: The processing-equivalent field is CLM_BENE_PD_AMT for institutional claims.
   profiles:
     - Regular
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Base.CLM_PRVDR_PMT_AMT
   appliesTo:
     - Outpatient
@@ -2705,7 +2705,7 @@
   fhirPath: ExplanationOfBenefit.total.where(category.coding.where(system='http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication' and code='paidtoprovider').exists() and category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_PRVDR_PMT_AMT').exists()).amount.value
   profiles:
     - Regular
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_REV_DSCNT_IND_CD
   appliesTo:
     - Outpatient
@@ -2723,7 +2723,7 @@
   referenceTable: CLM_REV_DSCNT_IND_CD
   fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-DSCNT-IND-CD').value.code
   profiles:
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_OTAF_ONE_IND_CD
   appliesTo:
     - Outpatient
@@ -2740,7 +2740,7 @@
   referenceTable: CLM_OTAF_IND_CD
   fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-OTAF-ONE-IND-CD').value.code
   profiles:
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_REV_PACKG_IND_CD
   appliesTo:
     - Inpatient
@@ -2758,7 +2758,7 @@
   referenceTable: CLM_REV_PACKG_IND_CD
   fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PACKG-IND-CD').value.code
   profiles:
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_REV_PMT_MTHD_CD
   appliesTo:
     - Outpatient
@@ -2776,7 +2776,7 @@
   referenceTable: CLM_REV_PMT_MTHD_CD
   fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-PMT-MTHD-CD').value.code
   profiles:
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_REV_CNTR_STUS_CD
   appliesTo:
     - Outpatient
@@ -2794,7 +2794,7 @@
   fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-CNTR-STUS-CD').value.code
   notes: A condensed version of the data available in this field is available for both processed and processing claims in CLM_REV_PMT_MTHD_CD. 
   profiles:
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_MDCR_HOSPC_PRD_CNT
   appliesTo:
     - Hospice
@@ -2806,7 +2806,7 @@
     - BENE_HOSPC_PRD_CNT
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_MDCR_HOSPC_PRD_CNT').exists()).value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: SupportingInfoComponent.CLM_HHA_LUP_IND_CD
   appliesTo:
     - HHA
@@ -2819,7 +2819,7 @@
   sourceColumn: CLM_HHA_LUP_IND_CD
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_HHA_LUP_IND_CD').exists()).code.coding.code
   profiles:
-    - Maximus
+    - CMS
 - inputPath: SupportingInfoComponent.CLM_HHA_RFRL_CD
   appliesTo:
     - HHA
@@ -2832,7 +2832,7 @@
   sourceColumn: CLM_HHA_RFRL_CD
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_HHA_RFRL_CD').exists()).code.coding.code
   profiles:
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_MDCR_HHA_TOT_VISIT_CNT
   appliesTo:
     - HHA
@@ -2845,7 +2845,7 @@
   sourceColumn: CLM_MDCR_HHA_TOT_VISIT_CNT
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_MDCR_HHA_TOT_VISIT_CNT').exists()).value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Base.CLM_AUDT_TRL_STUS_CD
   appliesTo:
     - Inpatient
@@ -2863,7 +2863,7 @@
   sourceColumn: CLM_AUDT_TRL_STUS_CD
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_AUDT_TRL_STUS_CD').exists()).code.coding.code
   profiles:
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Base.CLM_PD_STUS_CD
   appliesTo:
     - Inpatient
@@ -2884,7 +2884,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Base.PRVDR_RFRG_PRVDR_NPI_NUM
   appliesTo:
     - Outpatient
@@ -2909,7 +2909,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Base.CLM_ALOWD_CHRG_AMT
   appliesTo:
     - Carrier
@@ -2925,7 +2925,7 @@
   fhirPath: ExplanationOfBenefit.total.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication').exists() and category.coding.where(code='CLM_ALOWD_CHRG_AMT').exists() ).amount.value
   profiles:
     - Regular
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Base.CLM_BENE_PMT_AMT
   appliesTo:
     - Carrier
@@ -2939,7 +2939,7 @@
   fhirPath: ExplanationOfBenefit.total.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication').exists() and category.coding.where(code='CLM_BENE_PMT_AMT').exists() ).amount.value
   profiles:
     - Regular
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Base.CLM_BENE_PD_AMT
   appliesTo:
     - Carrier
@@ -2954,7 +2954,7 @@
   notes: This refers to the processed field. This field may be populated for institutional processing claims, as it is the equivalent of CLM_MDCR_INSTNL_BENE_PD_AMT
   profiles:
     - Regular
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Base.CLM_RIC_CD
   appliesTo:
     - Inpatient
@@ -2973,7 +2973,7 @@
   sourceColumn: CLM_RIC_CD
   fhirPath: ExplanationOfBenefit.supportingInfo.where(code.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD').code.coding.code
   profiles:
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Institutional-Base.DGNS_DRG_OUTLIER_CD
   appliesTo:
     - Inpatient
@@ -2985,7 +2985,7 @@
   sourceColumn: DGNS_DRG_OUTLIER_CD
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='DGNS_DRG_OUTLIER_CD').exists()).code.coding.code
   profiles:
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_LINE_ANSTHSA_UNIT_CNT
   appliesTo:
     - Carrier
@@ -2997,7 +2997,7 @@
   sourceColumn: CLM_LINE_ANSTHSA_UNIT_CNT
   fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-LINE-ANSTHSA-UNIT-CNT').value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_RNDRG_PRVDR_TAX_NUM
   appliesTo:
     - Carrier
@@ -3013,7 +3013,7 @@
   sourceColumn: CLM_RNDRG_PRVDR_TAX_NUM
   fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRVDR-TAX-NUM').value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_LINE_RX_NUM
   appliesTo:
     - Carrier
@@ -3026,7 +3026,7 @@
   sourceColumn: CLM_LINE_RX_NUM
   fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-LINE-RX-NUM').value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_LINE_FROM_DT
   appliesTo:
     - Carrier
@@ -3053,7 +3053,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_LINE_MDCR_COINSRNC_AMT
   appliesTo:
     - Carrier
@@ -3069,7 +3069,7 @@
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_MDCR_COINSRNC_AMT')).amount.value
   profiles:
     - Regular
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_LINE_DGNS_CD
   appliesTo:
     - Carrier
@@ -3089,7 +3089,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_LINE_THRU_DT
   appliesTo:
     - Carrier
@@ -3116,7 +3116,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_POS_CD
   appliesTo:
     - Carrier
@@ -3135,7 +3135,7 @@
   sourceColumn: CLM_POS_CD
   fhirPath: ExplanationOfBenefit.item.location.coding.where(system='https://www.cms.gov/Medicare/Coding/place-of-service-codes/Place_of_Service_Code_Set').code
   profiles:
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_RNDRG_PRVDR_PRTCPTG_CD
   appliesTo:
     - Carrier
@@ -3150,7 +3150,7 @@
   sourceColumn: CLM_RNDRG_PRVDR_PRTCPTG_CD
   fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-RNDRG-PRVDR-PRTCPTG-CD').value.code
   profiles:
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_RNDRG_PRVDR_TYPE_CD
   appliesTo:
     - Carrier
@@ -3165,7 +3165,7 @@
   fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRVDR-TYPE-CD').value.code
   notes: Still used to populate the qualification. 
   profiles:
-    - Maximus
+    - CMS
 - inputPath: SupportingInfoComponent.CLM_CARR_PMT_DNL_CD
   appliesTo:
     - Carrier
@@ -3182,7 +3182,7 @@
   sourceColumn: CLM_CARR_PMT_DNL_CD
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_CARR_PMT_DNL_CD').exists()).code.coding.code
   profiles:
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Professional-Base.CLM_MDCR_PRFNL_PRMRY_PYR_AMT
   appliesTo:
     - Carrier
@@ -3197,7 +3197,7 @@
   sourceColumn: CLM_MDCR_PRFNL_PRMRY_PYR_AMT
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication').exists() and category.coding.where(code='CLM_MDCR_PRFNL_PRMRY_PYR_AMT').exists()).amount.value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: SupportingInfoComponent.CLM_MDCR_PRFNL_PRVDR_ASGNMT_SW
   appliesTo:
     - Carrier
@@ -3212,7 +3212,7 @@
   sourceColumn: CLM_MDCR_PRFNL_PRVDR_ASGNMT_SW
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_MDCR_PRFNL_PRVDR_ASGNMT_SW').exists()).code.coding.code
   profiles:
-    - Maximus
+    - CMS
 - inputPath: SupportingInfoComponent.CLM_CLNCL_TRIL_NUM
   appliesTo:
     - Carrier
@@ -3227,7 +3227,7 @@
   sourceColumn: CLM_CLNCL_TRIL_NUM
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_CLNCL_TRIL_NUM').exists()).code.coding.code
   profiles:
-    - Maximus
+    - CMS
 - inputPath: SupportingInfoComponent.CLM_LINE_HCT_HGB_RSLT_NUM
   appliesTo:
     - Carrier
@@ -3241,7 +3241,7 @@
   sourceColumn: CLM_LINE_HCT_HGB_RSLT_NUM
   fhirPath: ExplanationOfBenefit.contained.where(id = %root.supportingInfo.valueReference.reference.substring(1)).value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: SupportingInfoComponent.CLM_LINE_HCT_HGB_TYPE_CD
   appliesTo:
     - Carrier
@@ -3255,7 +3255,7 @@
   sourceColumn: CLM_LINE_HCT_HGB_TYPE_CD
   fhirPath: ExplanationOfBenefit.contained.where(id = %root.supportingInfo.valueReference.reference.substring(1)).code.coding
   profiles:
-    - Maximus
+    - CMS
 - inputPath: SupportingInfoComponent.CLM_LINE_CARR_CLNCL_LAB_NUM
   appliesTo:
     - Carrier
@@ -3267,7 +3267,7 @@
   sourceColumn: CLM_LINE_CARR_CLNCL_LAB_NUM
   fhirPath: ExplanationOfBenefit.contained.where(id = %root.supportingInfo.valueReference.reference.substring(1)).performer.identifier.value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_BENE_PRMRY_PYR_PD_AMT
   appliesTo:
     - Carrier
@@ -3281,7 +3281,7 @@
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_BENE_PRMRY_PYR_PD_AMT')).amount.value
   profiles:
     - Regular
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_MTUS_IND_CD
   appliesTo:
     - Carrier
@@ -3296,7 +3296,7 @@
   fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-MTUS-IND-CD').value.code
   referenceTable: CLM_MTUS_IND_CD
   profiles:
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_LINE_PRFNL_MTUS_CNT
   appliesTo:
     - Carrier
@@ -3311,7 +3311,7 @@
   fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-LINE-PRFNL-MTUS-CNT').value
   notes: For processing claims, this is not populated. Refer to CLM_LINE.CLM_LINE_SRVC_UNIT_QTY for the line item service unit quantity.
   profiles:
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_PRCNG_LCLTY_CD
   appliesTo:
     - Carrier
@@ -3326,7 +3326,7 @@
   sourceColumn: CLM_PRCNG_LCLTY_CD
   fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRCNG-LCLTY-CD').value.code
   profiles:
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_PHYSN_ASTNT_CD
   appliesTo:
     - Carrier
@@ -3339,7 +3339,7 @@
   sourceColumn: CLM_PHYSN_ASTNT_CD
   fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PHYSN-ASTNT-CD').value.code
   profiles:
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_LINE_CARR_HPSA_SCRCTY_CD
   appliesTo:
     - Carrier
@@ -3355,7 +3355,7 @@
   sourceColumn: CLM_LINE_CARR_HPSA_SCRCTY_CD
   fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-LINE-CARR-HPSA-SCRCTY-CD').value.code
   profiles:
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_PRMRY_PYR_CD
   appliesTo:
     - Carrier
@@ -3372,7 +3372,7 @@
   sourceColumn: CLM_PRMRY_PYR_CD
   fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRMRY-PYR-CD').value.code
   profiles:
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_FED_TYPE_SRVC_CD
   appliesTo:
     - Carrier
@@ -3390,7 +3390,7 @@
   sourceColumn: CLM_FED_TYPE_SRVC_CD
   fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-FED-TYPE-SRVC-CD').value.code
   profiles:
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_PMT_80_100_CD
   appliesTo:
     - Carrier
@@ -3405,7 +3405,7 @@
   sourceColumn: CLM_PMT_80_100_CD
   fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PMT-80-100-CD').value.code
   profiles:
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_PRCSG_IND_CD
   appliesTo:
     - Carrier
@@ -3422,7 +3422,7 @@
   sourceColumn: CLM_PRCSG_IND_CD
   fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRCSG-IND-CD').value.code
   profiles:
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_SRVC_DDCTBL_SW
   appliesTo:
     - Carrier
@@ -3440,7 +3440,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_PRVDR_SPCLTY_CD
   appliesTo:
     - Carrier
@@ -3456,7 +3456,7 @@
   sourceColumn: CLM_PRVDR_SPCLTY_CD
   fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRVDR-SPCLTY-CD').value.code
   profiles:
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_LINE_DMERC_SCRN_SVGS_AMT
   appliesTo:
     - DME
@@ -3469,7 +3469,7 @@
   sourceColumn: CLM_LINE_DMERC_SCRN_SVGS_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_DMERC_SCRN_SVGS_AMT')).amount.value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_SUPLR_TYPE_CD
   appliesTo:
     - DME
@@ -3483,7 +3483,7 @@
   sourceColumn: CLM_SUPLR_TYPE_CD
   fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRVDR-TYPE-CD').value.code
   profiles:
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_LINE_PRFNL_DME_PRICE_AMT
   appliesTo:
     - DME
@@ -3497,7 +3497,7 @@
   sourceColumn: CLM_LINE_PRFNL_DME_PRICE_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_PRFNL_DME_PRICE_AMT')).amount.value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: SupportingInfoComponent.CLM_ADJSTMT_TYPE_CD
   appliesTo:
     - Inpatient
@@ -3523,7 +3523,7 @@
   profiles:
     - Basis
     - Regular
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Base.CLM_BENE_INTRST_PD_AMT
   appliesTo:
     - Carrier
@@ -3535,7 +3535,7 @@
   sourceColumn: CLM_BENE_INTRST_PD_AMT
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_BENE_INTRST_PD_AMT')).amount.value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Base.CLM_BENE_PMT_COINSRNC_AMT
   appliesTo:
     - Inpatient
@@ -3551,7 +3551,7 @@
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_BENE_PMT_COINSRNC_AMT')).amount.value
   profiles:
     - Regular
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Base.CLM_BLOOD_CHRG_AMT
   appliesTo:
     - Inpatient
@@ -3563,7 +3563,7 @@
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_BLOOD_CHRG_AMT')).amount.value
   notes: This field is not populated as a discrete field in processing institutional claims. To calculate the total blood charge amount, sum the submitted charge amounts line items with revenue center codes 038X.
   profiles:
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Base.CLM_BLOOD_NCVRD_CHRG_AMT
   appliesTo:
     - Inpatient
@@ -3575,7 +3575,7 @@
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_BLOOD_NCVRD_CHRG_AMT')).amount.value
   notes: This field is not populated as a discrete field in processing institutional claims. To calculate the noncovered blood charge amount, sum the noncovered charge amounts line items with revenue center codes 038X.
   profiles:
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Base.CLM_COB_PTNT_RESP_AMT
   appliesTo:
     - Inpatient
@@ -3589,7 +3589,7 @@
   sourceColumn: CLM_COB_PTNT_RESP_AMT
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_COB_PTNT_RESP_AMT')).amount.value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Base.CLM_OTHR_TP_PD_AMT
   appliesTo:
     - DME
@@ -3600,7 +3600,7 @@
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_OTHR_TP_PD_AMT')).amount.value
   profiles:
     - Regular
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Base.CLM_PRVDR_INTRST_PD_AMT
   appliesTo:
     - Inpatient
@@ -3618,7 +3618,7 @@
   sourceColumn: CLM_PRVDR_INTRST_PD_AMT
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_PRVDR_INTRST_PD_AMT')).amount.value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Base.CLM_PRVDR_OTAF_AMT
   appliesTo:
     - Inpatient
@@ -3634,7 +3634,7 @@
   sourceColumn: CLM_PRVDR_OTAF_AMT
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_PRVDR_OTAF_AMT')).amount.value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Base.CLM_PRVDR_RMNG_DUE_AMT
   appliesTo:
     - Outpatient
@@ -3647,7 +3647,7 @@
   sourceColumn: CLM_PRVDR_RMNG_DUE_AMT
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_PRVDR_RMNG_DUE_AMT')).amount.value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Base.CLM_TOT_CNTRCTL_AMT
   appliesTo:
     - Inpatient
@@ -3659,7 +3659,7 @@
   sourceColumn: CLM_TOT_CNTRCTL_AMT
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_TOT_CNTRCTL_AMT')).amount.value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_FINL_STDZD_PYMT_AMT
   appliesTo:
     - HHA
@@ -3671,7 +3671,7 @@
   sourceColumn: CLM_FINL_STDZD_PYMT_AMT
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_FINL_STDZD_PYMT_AMT')).amount.value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_HAC_RDCTN_PYMT_AMT
   appliesTo:
     - Inpatient
@@ -3682,7 +3682,7 @@
   sourceColumn: CLM_HAC_RDCTN_PYMT_AMT
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_HAC_RDCTN_PYMT_AMT')).amount.value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_HIPPS_MODEL_BNDLD_PMT_AMT
   appliesTo:
     - Inpatient
@@ -3693,7 +3693,7 @@
   sourceColumn: CLM_HIPPS_MODEL_BNDLD_PMT_AMT
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_HIPPS_MODEL_BNDLD_PYMT_AMT')).amount.value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_HIPPS_READMSN_RDCTN_AMT
   appliesTo:
     - Inpatient
@@ -3705,7 +3705,7 @@
   sourceColumn: CLM_HIPPS_READMSN_RDCTN_AMT
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_HIPPS_READMSN_RDCTN_AMT')).amount.value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_HIPPS_VBP_AMT
   appliesTo:
     - Inpatient
@@ -3717,7 +3717,7 @@
   sourceColumn: CLM_HIPPS_VBP_AMT
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_HIPPS_VBP_AMT')).amount.value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_INSTNL_LOW_VOL_PMT_AMT
   appliesTo:
     - Inpatient
@@ -3728,7 +3728,7 @@
   sourceColumn: CLM_INSTNL_LOW_VOL_PMT_AMT
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_INSTNL_LOW_VOL_PMT_AMT')).amount.value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_MDCR_IP_1ST_YR_RATE_AMT
   appliesTo:
     - Inpatient
@@ -3739,7 +3739,7 @@
   sourceColumn: CLM_MDCR_IP_1ST_YR_RATE_AMT
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_MDCR_IP_1ST_YR_RATE_AMT')).amount.value 
   profiles:
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_MDCR_IP_SCND_YR_RATE_AMT
   appliesTo:
     - Inpatient
@@ -3750,7 +3750,7 @@
   sourceColumn: CLM_MDCR_IP_SCND_YR_RATE_AMT
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_MDCR_IP_SCND_YR_RATE_AMT')).amount.value  
   profiles:
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_PPS_MD_WVR_STDZD_VAL_AMT
   appliesTo:
     - Inpatient
@@ -3762,7 +3762,7 @@
   sourceColumn: CLM_PPS_MD_WVR_STDZD_VAL_AMT
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_PPS_MD_WVR_STDZD_VAL_AMT')).amount.value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_SITE_NTRL_CST_BSD_PYMT_AMT
   appliesTo:
     - Inpatient
@@ -3773,7 +3773,7 @@
   sourceColumn: CLM_SITE_NTRL_CST_BSD_PYMT_AMT
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_SITE_NTRL_CST_BSD_PYMT_AMT')).amount.value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_SITE_NTRL_IP_PPS_PYMT_AMT
   appliesTo:
     - Inpatient
@@ -3784,7 +3784,7 @@
   sourceColumn: CLM_SITE_NTRL_IP_PPS_PYMT_AMT
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_SITE_NTRL_IP_PPS_PYMT_AMT')).amount.value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Institutional-Base.CLM_SS_OUTLIER_STD_PYMT_AMT
   appliesTo:
     - Inpatient
@@ -3795,7 +3795,7 @@
   sourceColumn: CLM_SS_OUTLIER_STD_PYMT_AMT
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_SS_OUTLIER_STD_PYMT_AMT')).amount.value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Professional-Base.CLM_PRVDR_ACNT_RCVBL_OFST_AMT
   appliesTo:
     - Carrier
@@ -3807,7 +3807,7 @@
   sourceColumn: CLM_PRVDR_ACNT_RCVBL_OFST_AMT
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_PRVDR_ACNT_RCVBL_OFST_AMT')).amount.value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_LINE_OTAF_AMT
   appliesTo:
     - SNF
@@ -3823,7 +3823,7 @@
   sourceColumn: CLM_LINE_OTAF_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_OTAF_AMT')).amount.value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: SupportingInfoComponent.CLM_RLT_COND_CD
   appliesTo:
     - Inpatient
@@ -3842,7 +3842,7 @@
   notes: One signature can correspond to many codes.
   fhirPath: ExplanationOfBenefit.supportingInfo.where(code.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/CLM-RLT-COND-CD').code.coding.code
   profiles:
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_LINE_ADD_ON_PYMT_AMT
   appliesTo:
     - Inpatient
@@ -3857,7 +3857,7 @@
   sourceColumn: CLM_LINE_ADD_ON_PYMT_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_ADD_ON_PYMT_AMT')).amount.value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_LINE_NON_EHR_RDCTN_AMT
   appliesTo:
     - Inpatient
@@ -3867,7 +3867,7 @@
   sourceColumn: CLM_LINE_NON_EHR_RDCTN_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_NON_EHR_RDCTN_AMT')).amount.value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_REV_CNTR_TDAPA_AMT
   appliesTo:
     - Outpatient
@@ -3882,7 +3882,7 @@
   sourceColumn: CLM_REV_CNTR_TDAPA_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_REV_CNTR_TDAPA_AMT')).amount.value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_LINE_CARR_CLNCL_CHRG_AMT
   appliesTo:
     - Carrier
@@ -3893,7 +3893,7 @@
   sourceColumn: CLM_LINE_CARR_CLNCL_CHRG_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_CARR_CLNCL_CHRG_AMT')).amount.value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_LINE_CARR_PSYCH_OT_LMT_AMT
   appliesTo:
     - Carrier
@@ -3904,7 +3904,7 @@
   sourceColumn: CLM_LINE_CARR_PSYCH_OT_LMT_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_CARR_PSYCH_OT_LMT_AMT')).amount.value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_LINE_PRFNL_INTRST_AMT
   appliesTo:
     - Carrier
@@ -3917,7 +3917,7 @@
   sourceColumn: CLM_LINE_PRFNL_INTRST_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_PRFNL_INTRST_AMT')).amount.value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_MDCR_PRMRY_PYR_ALOWD_AMT
   appliesTo:
     - Carrier
@@ -3930,7 +3930,7 @@
   sourceColumn: CLM_MDCR_PRMRY_PYR_ALOWD_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_MDCR_PRMRY_PYR_ALOWD_AMT')).amount.value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: SupportingInfoComponent.CLM_MDCR_NCH_PTNT_STUS_IND_CD
   appliesTo:
     - Inpatient
@@ -3943,7 +3943,7 @@
   referenceTable: CLM_MDCR_NCH_PTNT_STUS_IND_CD
   fhirPath: ExplanationOfBenefit.supportingInfo.where(code.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/CLM-MDCR-NCH-PTNT-STUS-IND-CD').code.coding.code
   profiles:
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_LINE_PMD_UNIQ_TRKNG_NUM
   appliesTo:
     - Inpatient
@@ -3958,7 +3958,7 @@
   sourceColumn: CLM_LINE_PMD_UNIQ_TRKNG_NUM
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_LINE_PMD_UNIQ_TRKNG_NUM').exists()).value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_LINE_PA_UNIQ_TRKNG_NUM
   appliesTo:
     - Inpatient
@@ -3975,7 +3975,7 @@
   sourceColumn: CLM_LINE_PA_UNIQ_TRKNG_NUM
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_LINE_PMD_UNIQ_TRKNG_NUM').exists()).value
   profiles:
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Base.CLM_BNFT_ENHNCMT_1_CD
   appliesTo:
     - Inpatient
@@ -3993,7 +3993,7 @@
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_BNFT_ENHNCMT_CD').exists()).value
   notes: There may be multiple. These are unordered, but there are a maximum of 5 per institutional claim header, and 5 per professional claim line.
   profiles:
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Base.CLM_BNFT_ENHNCMT_2_CD
   appliesTo:
     - Inpatient
@@ -4011,7 +4011,7 @@
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_BNFT_ENHNCMT_CD').exists()).value
   notes: There may be multiple. These are unordered, but there are a maximum of 5 per institutional claim header, and 5 per professional claim line.
   profiles:
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Base.CLM_BNFT_ENHNCMT_3_CD
   appliesTo:
     - Inpatient
@@ -4029,7 +4029,7 @@
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_BNFT_ENHNCMT_CD').exists()).value
   notes: There may be multiple. These are unordered, but there are a maximum of 5 per institutional claim header, and 5 per professional claim line.
   profiles:
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Base.CLM_BNFT_ENHNCMT_4_CD
   appliesTo:
     - Inpatient
@@ -4047,7 +4047,7 @@
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_BNFT_ENHNCMT_CD').exists()).value
   notes: There may be multiple. These are unordered, but there are a maximum of 5 per institutional claim header, and 5 per professional claim line.
   profiles:
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Base.CLM_BNFT_ENHNCMT_5_CD
   appliesTo:
     - Inpatient
@@ -4065,7 +4065,7 @@
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_BNFT_ENHNCMT_CD').exists()).value
   notes: There may be multiple. These are unordered, but there are a maximum of 5 per institutional claim header, and 5 per professional claim line.
   profiles:
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Base.CLM_NGACO_PBPMT_SW
   appliesTo:
     - Inpatient
@@ -4082,7 +4082,7 @@
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_NGACO_PBPMT_SW').exists()).value
   notes: This field is deprecated in shared systems data. Its value can be derived as Y if any CLM_BNFT_ENHNCMT_X_CD  = 1, else N.
   profiles:
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Base.CLM_NGACO_PDSCHRG_HCBS_SW
   appliesTo:
     - Inpatient
@@ -4099,7 +4099,7 @@
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_NGACO_PDSCHRG_HCBS_SW').exists()).value
   notes: This field is deprecated in shared systems data. Its value can be derived as Y if any CLM_BNFT_ENHNCMT_X_CD  = 3, else N.
   profiles:
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Base.CLM_NGACO_SNF_WVR_SW
   appliesTo:
     - Inpatient
@@ -4116,7 +4116,7 @@
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_NGACO_SNF_WVR_SW').exists()).value
   notes: This field is deprecated in shared systems data. Its value can be derived as Y if any CLM_BNFT_ENHNCMT_X_CD  = 4, else N.
   profiles:
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Base.CLM_NGACO_TLHLTH_SW
   appliesTo:
     - Inpatient
@@ -4133,7 +4133,7 @@
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_NGACO_TLHLTH_SW').exists()).value
   notes: This field is deprecated in shared systems data. Its value can be derived as Y if any CLM_BNFT_ENHNCMT_X_CD  = 2, else N.
   profiles:
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Base.CLM_NGACO_CPTATN_SW
   appliesTo:
     - Inpatient
@@ -4150,7 +4150,7 @@
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_NGACO_CPTATN_SW').exists()).value
   notes: This field is deprecated in shared systems data. Its value can be derived as Y if any CLM_BNFT_ENHNCMT_X_CD  = 5, else N.
   profiles:
-    - Maximus
+    - CMS
 - inputPath: ExplanationOfBenefit-Base.CLM_ACO_CARE_MGMT_HCBS_SW
   appliesTo:
     - Inpatient
@@ -4167,7 +4167,7 @@
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_ACO_CARE_MGMT_HCBS_SW').exists()).value
   notes: This field is deprecated in shared systems data. Its value can be derived as Y if any CLM_BNFT_ENHNCMT_X_CD  = 7, else N.
   profiles:
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_LINE_NGACO_PBPMT_SW
   appliesTo:
     - Carrier
@@ -4180,7 +4180,7 @@
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_LINE_NGACO_PBPMT_SW').exists()).value
   notes: This field is deprecated in shared systems data. Its value can be derived as Y if any CLM_LINE_BNFT_ENHNCMT_X_CD = 1, else N.
   profiles:
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_LINE_NGACO_PDSCHRG_HCBS_SW
   appliesTo:
     - Carrier
@@ -4193,7 +4193,7 @@
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_LINE_NGACO_PDSCHRG_HCBS_SW').exists()).value
   notes: This field is deprecated in shared systems data. Its value can be derived as Y if any CLM_LINE_BNFT_ENHNCMT_X_CD = 3, else N.
   profiles:
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_LINE_NGACO_SNF_WVR_SW
   appliesTo:
     - Carrier
@@ -4206,7 +4206,7 @@
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_LINE_NGACO_SNF_WVR_SW').exists()).value
   notes: This field is deprecated in shared systems data. Its value can be derived as Y if any CLM_LINE_BNFT_ENHNCMT_X_CD = 4, else N.
   profiles:
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_LINE_NGACO_TLHLTH_SW
   appliesTo:
     - Carrier
@@ -4219,7 +4219,7 @@
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_LINE_NGACO_TLHLTH_SW').exists()).value
   notes: This field is deprecated in shared systems data. Its value can be derived as Y if any CLM_LINE_BNFT_ENHNCMT_X_CD = 2, else N.
   profiles:
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_LINE_NGACO_CPTATN_SW
   appliesTo:
     - Carrier
@@ -4232,7 +4232,7 @@
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_LINE_NGACO_CPTATN_SW').exists()).value
   notes: This field is deprecated in shared systems data. Its value can be derived as Y if any CLM_LINE_BNFT_ENHNCMT_X_CD = 5, else N.
   profiles:
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_LINE_ACO_CARE_MGMT_HCBS_SW
   appliesTo:
     - Carrier
@@ -4245,7 +4245,7 @@
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_LINE_ACO_CARE_MGMT_HCBS_SW').exists()).value
   notes: This field is deprecated in shared systems data. Its value can be derived as Y if any CLM_LINE_BNFT_ENHNCMT_X_CD = 7, else N.
   profiles:
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_LINE_BNFT_ENHNCMT_1_CD
   appliesTo:
     - Carrier
@@ -4259,7 +4259,7 @@
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_BNFT_ENHNCMT_CD').exists()).value
   notes: There may be multiple. These are unordered, but there are a maximum of 5 per institutional claim header, and 5 per professional claim line. The infoSequence element on the ExplanationOfBenefit.item can be used to determine which are relevant to a given claim line.
   profiles:
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_LINE_BNFT_ENHNCMT_2_CD
   appliesTo:
     - Carrier
@@ -4273,7 +4273,7 @@
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_BNFT_ENHNCMT_CD').exists()).value
   notes: There may be multiple. These are unordered, but there are a maximum of 5 per institutional claim header, and 5 per professional claim line. The infoSequence element on the ExplanationOfBenefit.item can be used to determine which are relevant to a given claim line.
   profiles:
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_LINE_BNFT_ENHNCMT_3_CD
   appliesTo:
     - Carrier
@@ -4287,7 +4287,7 @@
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_BNFT_ENHNCMT_CD').exists()).value
   notes: There may be multiple. These are unordered, but there are a maximum of 5 per institutional claim header, and 5 per professional claim line. The infoSequence element on the ExplanationOfBenefit.item can be used to determine which are relevant to a given claim line.
   profiles:
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_LINE_BNFT_ENHNCMT_4_CD
   appliesTo:
     - Carrier
@@ -4301,7 +4301,7 @@
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_BNFT_ENHNCMT_CD').exists()).value
   notes: There may be multiple. These are unordered, but there are a maximum of 5 per institutional claim header, and 5 per professional claim line.The infoSequence element on the ExplanationOfBenefit.item can be used to determine which are relevant to a given claim line.
   profiles:
-    - Maximus
+    - CMS
 - inputPath: LineItemComponent.CLM_LINE_BNFT_ENHNCMT_5_CD
   appliesTo:
     - Carrier
@@ -4315,4 +4315,4 @@
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_BNFT_ENHNCMT_CD').exists()).value
   notes: There may be multiple. These are unordered, but there are a maximum of 5 per institutional claim header, and 5 per professional claim line. The infoSequence element on the ExplanationOfBenefit.item can be used to determine which are relevant to a given claim line.
   profiles:
-    - Maximus
+    - CMS
