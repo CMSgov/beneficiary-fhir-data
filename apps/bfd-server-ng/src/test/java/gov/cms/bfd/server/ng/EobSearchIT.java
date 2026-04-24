@@ -27,6 +27,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
@@ -69,6 +70,36 @@ class EobSearchIT extends IntegrationTestBase {
 
   @ParameterizedTest
   @EnumSource(SearchStyleEnum.class)
+  void eobSearchByIdMultiple(SearchStyleEnum searchStyle) {
+    var eobBundle =
+        searchBundle()
+            .where(
+                new TokenClientParam(ExplanationOfBenefit.SP_RES_ID)
+                    .exactly()
+                    .codes(CLAIM_ID_PROFESSIONAL, CLAIM_ID_RX))
+            .usingStyle(searchStyle)
+            .execute();
+    assertEquals(2, eobBundle.getEntry().size());
+    expectFhir().scenario(searchStyle.name()).toMatchSnapshot(eobBundle);
+  }
+
+  @ParameterizedTest
+  @EnumSource(SearchStyleEnum.class)
+  void eobSearchByIdMultipleDuplicate(SearchStyleEnum searchStyle) {
+    var eobBundle =
+        searchBundle()
+            .where(
+                new TokenClientParam(ExplanationOfBenefit.SP_RES_ID)
+                    .exactly()
+                    .codes(CLAIM_ID_PROFESSIONAL, CLAIM_ID_RX, CLAIM_ID_RX))
+            .usingStyle(searchStyle)
+            .execute();
+    assertEquals(2, eobBundle.getEntry().size());
+    expectFhir().scenario(searchStyle.name()).toMatchSnapshot(eobBundle);
+  }
+
+  @ParameterizedTest
+  @EnumSource(SearchStyleEnum.class)
   void eobSearchByIdEmpty(SearchStyleEnum searchStyle) {
     var eobBundle =
         searchBundle()
@@ -77,6 +108,16 @@ class EobSearchIT extends IntegrationTestBase {
             .execute();
     assertEquals(0, eobBundle.getEntry().size());
     expectFhir().scenario(searchStyle.name()).toMatchSnapshot(eobBundle);
+  }
+
+  @Test
+  void eobSearchByIdTooMany() {
+    var ids = IntStream.range(0, 101).mapToObj(String::valueOf).toList();
+    var query =
+        searchBundle()
+            .where(new TokenClientParam(ExplanationOfBenefit.SP_RES_ID).exactly().codes(ids));
+    var thrown = assertThrows(InvalidRequestException.class, query::execute);
+    assertTrue(thrown.getMessage().contains("maximum of 100 claim IDs"));
   }
 
   @ParameterizedTest

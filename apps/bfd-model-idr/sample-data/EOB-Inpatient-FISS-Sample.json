@@ -16,6 +16,7 @@
     "CLM_RIC_CD": "U",
     "META_SRC_SK": 1003,
     "CLM_AUDT_TRL_STUS_CD": "A",
+    "GEO_BLG_SSA_STATE_CD": "03",
     "diagnoses": [
         {
             "CLM_VAL_SQNC_NUM": "1",

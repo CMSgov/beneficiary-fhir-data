@@ -1,9 +1,9 @@
 {
   "resourceType" : "ExplanationOfBenefit",
   "meta" : {
-    "lastUpdated" : "2026-04-22T15:04:59.943193Z",
+    "lastUpdated" : "2026-04-22T17:27:25.361249Z",
     "source" : "NCH",
-    "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional|2.2.0"],
+    "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional|2.1.0"],
     "tag" : [{
       "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type",
       "code" : "NationalClaimsHistory"
@@ -17,8 +17,8 @@
     "resourceType" : "Organization",
     "id" : "insurer-org",
     "meta" : {
-      "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0",
-      "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|7.0.0"]
+      "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0",
+      "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|6.1.0"]
     },
     "active" : true,
     "name" : "Centers for Medicare & Medicaid Services"
@@ -27,8 +27,8 @@
     "resourceType" : "Organization",
     "id" : "1548226988",
     "meta" : {
-      "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0",
-      "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|7.0.0"]
+      "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0",
+      "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|6.1.0"]
     },
     "identifier" : [{
       "type" : {
@@ -1012,6 +1012,27 @@
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD-SWITCH",
         "code" : "Y",
         "display" : "This benefit enhancement is present for this claim/claim line."
+      }]
+    }
+  },
+  {
+    "sequence" : 40,
+    "category" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      },
+      {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code" : "PRVDR_FAC_FIPS_ST_CD",
+        "display" : "Federal Information Processing Standards (FIPS) State Code"
+      }]
+    },
+    "code" : {
+      "coding" : [{
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/US-FIPS-STATE-CODES",
+        "code" : "04"
       }]
     }
   }],

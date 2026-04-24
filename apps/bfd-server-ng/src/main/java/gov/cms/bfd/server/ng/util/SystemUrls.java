@@ -1049,4 +1049,8 @@ public class SystemUrls {
 
   /** CMS URL. */
   public static final String CMS_GOV = "https://cms.gov";
+
+  /** US FIPS state codes system URL. */
+  public static final String US_FIPS_STATE_CODES =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/US-FIPS-STATE-CODES";
 }
