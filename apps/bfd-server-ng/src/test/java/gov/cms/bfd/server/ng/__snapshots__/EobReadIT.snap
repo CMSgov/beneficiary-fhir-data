@@ -2952,6 +2952,21 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
     "resourceType" : "Practitioner"
   } ],
   "created" : "2025-08-15T00:00:00+00:00",
+  "diagnosis" : [ {
+    "diagnosisCodeableConcept" : {
+      "coding" : [ {
+        "code" : "W213",
+        "system" : "http://hl7.org/fhir/sid/icd-9-cm"
+      } ]
+    },
+    "sequence" : 1,
+    "type" : [ {
+      "coding" : [ {
+        "code" : "secondary",
+        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
+      } ]
+    } ]
+  } ],
   "id" : "3351266481401",
   "identifier" : [ {
     "type" : {
