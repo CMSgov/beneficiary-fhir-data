@@ -5,14 +5,13 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.14.3"
 dependencies = [
-    "cryptography==45.0.6",
-    "psycopg[binary,pool]==3.3.3",
-    "snowflake-connector-python==4.3.0",
-    "snowflake-snowpark-python==1.47.0",
-    "sf-hamilton==1.89.0",
-    "python-dateutil==2.9.0",
+    "cryptography>=46.0.5",
+    "psycopg[binary,pool]>=3.3.3",
+    "snowflake-connector-python>=4.4.0",
+    "snowflake-snowpark-python>=1.50.0",
+    "sf-hamilton>=1.89.0",
+    "python-dateutil>=2.9.0",
     "pydantic>=2.13.3",
-    "snowflake-connector-python>=4.1.0",
     "usaddress>=0.5.16",
     "unidecode>=1.4.0",
 ]
