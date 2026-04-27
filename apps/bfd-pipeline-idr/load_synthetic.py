@@ -158,18 +158,20 @@ def _load_file(extractor: DbExecutor, src_folder: str, file: str, full_table: st
 
 if __name__ == "__main__":
     configure_logger()
+    default_dir = "../bfd-model-idr/out"
     parser = argparse.ArgumentParser(description="Loads synthetic data")
     parser.add_argument("database_type", default="postgres", choices=["postgres", "snowflake"])
     parser.add_argument(
         "base_dir",
-        default="../bfd-model-idr/out",
+        default=default_dir,
         help="base directory to load files from",
     )
 
     args = parser.parse_args()
+    print("base dir " + args.base_dir)
     load_from_csv(
         SnowflakeExecutor()
         if args.database_type == "snowflake"
         else PostgresExecutor(psycopg.connect(get_connection_string(LoadMode.SYNTHETIC))),
-        args.base_dir,
+        args.base_dir or default_dir,
     )
