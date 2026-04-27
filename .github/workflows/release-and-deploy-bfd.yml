@@ -79,8 +79,7 @@ jobs:
   # DEPLOYMENTS
   # -------------------------
   deploy-platform:
-#    uses: ./.github/workflows/deploy-platform-services.yml
-    uses: ./.github/workflows/dummy-deploy-platform-services.yml
+    uses: ./.github/workflows/deploy-platform-services.yml
     needs: build-release
     strategy:
       matrix:
@@ -91,8 +90,7 @@ jobs:
     secrets: inherit
 
   deploy-to-test:
-#    uses: ./.github/workflows/deploy-env-services.yml
-    uses: ./.github/workflows/dummy-deploy-env-services.yml
+    uses: ./.github/workflows/deploy-env-services.yml
     needs: [build-release, deploy-platform]
     with:
       bfd-env: test
@@ -100,8 +98,7 @@ jobs:
     secrets: inherit
 
   deploy-to-sandbox:
-#    uses: ./.github/workflows/deploy-env-services.yml
-    uses: ./.github/workflows/dummy-deploy-env-services.yml
+    uses: ./.github/workflows/deploy-env-services.yml
     needs: [build-release, deploy-to-test]
     with:
       bfd-env: sandbox
@@ -109,8 +106,7 @@ jobs:
     secrets: inherit
 
   deploy-to-prod:
-#    uses: ./.github/workflows/deploy-env-services.yml
-    uses: ./.github/workflows/dummy-deploy-env-services.yml
+    uses: ./.github/workflows/deploy-env-services.yml
     needs: [build-release, deploy-to-sandbox]
     with:
       bfd-env: prod
