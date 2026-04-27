@@ -1,9 +1,9 @@
 {
   "resourceType" : "ExplanationOfBenefit",
   "meta" : {
-    "lastUpdated" : "2026-04-22T17:28:29.859738Z",
+    "lastUpdated" : "2026-01-01T03:02:28.000000Z",
     "source" : "NCH",
-    "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Professional-NonClinician|2.1.0"],
+    "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Professional-NonClinician|2.2.0"],
     "tag" : [{
       "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type",
       "code" : "NationalClaimsHistory"
@@ -17,8 +17,8 @@
     "resourceType" : "Organization",
     "id" : "insurer-org",
     "meta" : {
-      "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0",
-      "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|6.1.0"]
+      "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0",
+      "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|7.0.0"]
     },
     "active" : true,
     "name" : "Centers for Medicare & Medicaid Services"
@@ -27,8 +27,8 @@
     "resourceType" : "Practitioner",
     "id" : "1942945159",
     "meta" : {
-      "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0",
-      "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0"]
+      "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.2.0",
+      "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|7.0.0"]
     },
     "identifier" : [{
       "type" : {
@@ -981,8 +981,8 @@
     }],
     "sequence" : 1,
     "careTeamSequence" : [1],
-    "informationSequence" : [29,
-    30],
+    "diagnosisSequence" : [2],
+    "informationSequence" : [29],
     "revenue" : {
       "coding" : [{
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD",

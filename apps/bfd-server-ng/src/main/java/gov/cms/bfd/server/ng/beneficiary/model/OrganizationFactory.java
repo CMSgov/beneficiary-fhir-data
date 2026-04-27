@@ -123,7 +123,7 @@ public final class OrganizationFactory {
    * @return a fully populated FHIR {@link Organization} resource for CMS
    */
   public static Organization createCmsOrganization() {
-    return createCmsOrganization("cms-org", SystemUrls.PROFILE_C4BB_ORGANIZATION_2_1_0);
+    return createCmsOrganization("cms-org", SystemUrls.PROFILE_C4BB_ORGANIZATION_2_2_0);
   }
 
   /**
@@ -135,6 +135,6 @@ public final class OrganizationFactory {
    */
   public static Organization createInsurerOrganization(Contract contract) {
     return createInsurerOrganization(
-        "insurer-org", SystemUrls.PROFILE_C4BB_ORGANIZATION_2_1_0, contract);
+        "insurer-org", SystemUrls.PROFILE_C4BB_ORGANIZATION_2_2_0, contract);
   }
 }

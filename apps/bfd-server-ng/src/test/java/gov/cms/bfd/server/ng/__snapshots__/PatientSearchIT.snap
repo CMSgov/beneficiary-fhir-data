@@ -75,7 +75,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByHistoricalMbi[GET]=[
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
-        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0" ]
+        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|7.0.0" ]
       },
       "name" : [ {
         "family" : "Heeler",
@@ -175,7 +175,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByHistoricalMbi[GET_WITH_SEAR
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
-        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0" ]
+        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|7.0.0" ]
       },
       "name" : [ {
         "family" : "Heeler",
@@ -275,7 +275,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByHistoricalMbi[POST]=[
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
-        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0" ]
+        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|7.0.0" ]
       },
       "name" : [ {
         "family" : "Heeler",
@@ -428,7 +428,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdMergedBeneMultipleLinks[G
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
-        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0" ]
+        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|7.0.0" ]
       },
       "name" : [ {
         "family" : "Heeler",
@@ -533,7 +533,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdMergedBeneMultipleLinks[G
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
-        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0" ]
+        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|7.0.0" ]
       },
       "name" : [ {
         "family" : "Heeler",
@@ -638,7 +638,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdMergedBeneMultipleLinks[P
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
-        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0" ]
+        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|7.0.0" ]
       },
       "name" : [ {
         "family" : "Heeler",
@@ -799,7 +799,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdUnMergedWithHistoricKillC
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
-        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0" ]
+        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|7.0.0" ]
       },
       "name" : [ {
         "family" : "Heeler",
@@ -873,7 +873,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdUnMergedWithHistoricKillC
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
-        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0" ]
+        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|7.0.0" ]
       },
       "name" : [ {
         "family" : "Heeler",
@@ -947,7 +947,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdUnMergedWithHistoricKillC
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
-        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0" ]
+        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|7.0.0" ]
       },
       "name" : [ {
         "family" : "Heeler",
@@ -1022,7 +1022,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchById[GET]=[
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
-        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0" ]
+        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|7.0.0" ]
       },
       "name" : [ {
         "family" : "Jones",
@@ -1097,7 +1097,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchById[GET_WITH_SEARCH]=[
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
-        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0" ]
+        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|7.0.0" ]
       },
       "name" : [ {
         "family" : "Jones",
@@ -1172,7 +1172,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchById[POST]=[
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
-        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0" ]
+        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|7.0.0" ]
       },
       "name" : [ {
         "family" : "Jones",
@@ -1320,7 +1320,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdentifier[GET]=[
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
-        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0" ]
+        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|7.0.0" ]
       },
       "name" : [ {
         "family" : "Heeler",
@@ -1420,7 +1420,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdentifier[GET_WITH_SEARCH]
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
-        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0" ]
+        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|7.0.0" ]
       },
       "name" : [ {
         "family" : "Heeler",
@@ -1520,7 +1520,7 @@ gov.cms.bfd.server.ng.PatientSearchIT.patientSearchByIdentifier[POST]=[
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
-        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0" ]
+        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|7.0.0" ]
       },
       "name" : [ {
         "family" : "Heeler",
