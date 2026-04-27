@@ -101,9 +101,6 @@ public abstract class ClaimLineInstitutionalBase implements ClaimLineBase {
         });
 
     line.addModifier(hcpcsModifierCode.toFhir());
-    // getRevenueCenterDate().ifPresent(d -> line.setServiced(new
-    // DateType(DateUtil.toDate(d))));
-    // fromDate.ifPresent(d -> line.setServiced(new DateType(DateUtil.toDate(d))));
     thruDate.ifPresentOrElse(
         thru -> {
           var period = new Period();

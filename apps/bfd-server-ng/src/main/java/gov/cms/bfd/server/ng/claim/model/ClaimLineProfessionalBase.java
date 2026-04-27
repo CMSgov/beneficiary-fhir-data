@@ -66,7 +66,6 @@ abstract class ClaimLineProfessionalBase implements ClaimLineBase {
         },
         () -> fromDate.ifPresent(d -> line.setServiced(new DateType(DateUtil.toDate(d)))));
 
-    // fromDate.map(d -> line.setServiced(new DateType(DateUtil.toDate(d))));
     getAdjudicationCharge().toFhir().forEach(line::addAdjudication);
     placeOfServiceCode.map(c -> line.setLocation(c.toFhir()));
     getFhirExtensions().forEach(line::addExtension);
