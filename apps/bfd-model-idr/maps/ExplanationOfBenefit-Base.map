@@ -108,7 +108,7 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
 
     src.CLM_TYPE_CD as typeCd where((typeCd > 70 and typeCd <= 82) or (typeCd >= 2700 and typeCd < 2900) or (typeCd >= 1700 and typeCd < 1900)) -> tgt then{
       src.diagnoses as diagnoses -> tgt.diagnosis = create('BackboneElement') as tgtDiagnosis then addDiagnosesProfessional(diagnoses, tgtDiagnosis) "Add diagnoses";
-    } "Add diagnoses for institutional claims.";
+    } "Add diagnoses for professional claims.";
     
 
     //Supportinginfo!

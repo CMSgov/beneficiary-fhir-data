@@ -1259,7 +1259,6 @@
   "item" : [{
     "sequence" : 1,
     "careTeamSequence" : [4],
-    "diagnosisSequence" : [4],
     "revenue" : {
       "coding" : [{
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD",
