@@ -143,7 +143,7 @@ def purge_non_latest_claims(
                         AND {claim_type_code_filter}
                 )
         """
-        
+
         loader.run_sql(childSQL)
 
     logger.info("Parent : %s", parent_table_name)
