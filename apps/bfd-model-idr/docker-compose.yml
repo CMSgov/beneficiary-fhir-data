@@ -1,15 +1,32 @@
 services:
   matchbox:
-    image: europe-west6-docker.pkg.dev/ahdis-ch/ahdis/matchbox:v4.0.18
+    image: europe-west6-docker.pkg.dev/ahdis-ch/ahdis/matchbox:v4.1.5
     container_name: matchbox
     restart: on-failure
     ports:
       - "8080:8080"
     depends_on:
       - matchbox-db
-    entrypoint: ["java", "-Xms2G", "-Xmx10G", "-Dfhir.settings.path=/config/fhir-settings.json", "-Dspring.config.additional-location=optional:file:/config/application.yaml,optional:file:application.yaml", "-jar", "/matchbox.jar"]
+    entrypoint: ["java", "-Xms512m", "-Xmx6G", "-XX:+UseZGC", "-XX:ZUncommitDelay=30", "-XX:MaxMetaspaceSize=512m", "-Dfhir.settings.path=/config/fhir-settings.json", "-Dspring.config.additional-location=optional:file:/config/application.yaml", "-jar", "/matchbox.jar"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/matchboxv3/fhir/metadata"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
     volumes:
       - ./:/config/
+  matchbox-setup:
+    image: ghcr.io/astral-sh/uv:python3.14-alpine
+    volumes:
+      - ./:/app
+    working_dir: /app
+    depends_on:
+      matchbox:
+        condition: service_healthy
+    environment:
+      - UV_PYTHON=3.14.3
+      - UV_PROJECT_ENVIRONMENT=/tmp/.venv
+    command: uv run setup_matchbox.py --url http://matchbox:8080/matchboxv3/fhir
   matchbox-db:
     image: postgres:17.7
     container_name: matchbox-db
