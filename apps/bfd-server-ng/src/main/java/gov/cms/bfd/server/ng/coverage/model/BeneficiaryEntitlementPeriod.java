@@ -28,8 +28,8 @@ public class BeneficiaryEntitlementPeriod {
     return period;
   }
 
-  Coverage.CoverageStatus toFhirStatus() {
-    if (benefitRangeEndDate.isPresent() && benefitRangeEndDate.get().isBefore(DateUtil.nowAoe())) {
+  Coverage.CoverageStatus toFhirStatus(LocalDate benefitDate) {
+    if (benefitRangeEndDate.isPresent() && benefitRangeEndDate.get().isBefore(benefitDate)) {
       return Coverage.CoverageStatus.CANCELLED;
     }
 

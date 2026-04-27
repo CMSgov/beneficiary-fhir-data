@@ -8,6 +8,7 @@ import io.micrometer.core.aop.MeterTagAnnotationHandler;
 import io.micrometer.core.aop.TimedAspect;
 import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.servlet.Servlet;
+import java.time.Clock;
 import javax.sql.DataSource;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -81,6 +82,17 @@ public class Application {
     timedAspect.setMeterTagAnnotationHandler(
         new MeterTagAnnotationHandler(aClass -> valueResolver, aClass -> valueExpressionResolver));
     return timedAspect;
+  }
+
+  /**
+   * Configures a date that propagates throughout the application that is overridable in test
+   * configurations.
+   *
+   * @return clock
+   */
+  @Bean
+  public Clock systemClock() {
+    return Clock.systemUTC();
   }
 
   /**
