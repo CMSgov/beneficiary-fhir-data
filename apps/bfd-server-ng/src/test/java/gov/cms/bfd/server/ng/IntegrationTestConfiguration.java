@@ -73,8 +73,8 @@ public class IntegrationTestConfiguration {
         var date = clock.instant().truncatedTo(ChronoUnit.DAYS);
 
         runPython(container, date, "uv", "sync");
-        runPython(container, date, "uv", "run", "load_synthetic.py", "./test_samples2");
-        runPython(container, date, "uv", "run", "pipeline.py", "synthetic");
+        runPython(container, date, "uv", "run", "load_synthetic.py", "postgres", "./test_samples2");
+        runPython(container, date, "uv", "run", "pipeline.py", "postgres", "synthetic");
         postgresContainer = container;
       }
     }
