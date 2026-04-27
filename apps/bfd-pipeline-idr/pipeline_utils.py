@@ -143,13 +143,8 @@ def purge_non_latest_claims(
                         AND {claim_type_code_filter}
                 )
         """
-        try:
-            logger.info("Delete Child SQL:")
-            logger.info(childSQL)
-            loader.run_sql(childSQL)
-        except Exception as e:
-            logger.exception(e)
-            return False
+        
+        loader.run_sql(childSQL)
 
     logger.info("Parent : %s", parent_table_name)
     parentSQL = f"""
@@ -159,11 +154,6 @@ def purge_non_latest_claims(
             AND {claim_range_filter}
             AND {claim_type_code_filter}
     """
-    try:
-        logger.info("Delete Parent SQL:")
-        logger.info(parentSQL)
-        loader.run_sql(parentSQL)
-        return True
-    except Exception as e:
-        logger.exception(e)
-        return False
+
+    loader.run_sql(parentSQL)
+    return True
