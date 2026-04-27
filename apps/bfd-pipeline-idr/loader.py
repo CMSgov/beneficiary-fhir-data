@@ -3,12 +3,12 @@ from collections.abc import Iterator, Sequence
 from datetime import UTC, date, datetime
 
 import psycopg
+from psycopg.abc import Params, QueryNoTemplate
+
 from constants import DEFAULT_MIN_DATE
 from load_partition import LoadPartition, LoadType
 from model.base_model import DbType, LoadMode, T
 from model.load_progress import LoadProgress
-from psycopg.abc import Params, Query, QueryNoTemplate
-from psycopg.errors import DeadlockDetected
 from settings import (
     bfd_db_endpoint,
     bfd_db_name,
@@ -93,9 +93,7 @@ class BatchLoader:
         self.progress = progress
         self.immutable = not model.update_timestamp_col()
         self.meta_keys = (
-            ["bfd_created_ts"]
-            if self.immutable
-            else ["bfd_created_ts", "bfd_updated_ts"]
+            ["bfd_created_ts"] if self.immutable else ["bfd_created_ts", "bfd_updated_ts"]
         )
         self.idr_query_timer = Timer("idr_query", model, partition)
         self.temp_table_timer = Timer("temp_table", model, partition)
@@ -219,9 +217,7 @@ class BatchLoader:
         for col in self.meta_keys:
             cur.execute(f"ALTER TABLE {self.temp_table} DROP COLUMN {col}")  # type: ignore
 
-    def _calculate_load_progress(
-        self, cur: psycopg.Cursor, results: Sequence[T]
-    ) -> None:
+    def _calculate_load_progress(self, cur: psycopg.Cursor, results: Sequence[T]) -> None:
         last = results[len(results) - 1].model_dump()
         # Some tables that contain reference data (like contract info) may not have the
         # normal IDR timestamps.
@@ -298,15 +294,10 @@ class BatchLoader:
             {"timestamp": timestamp},
         )
 
-        if (
-            self.load_type == LoadType.INCREMENTAL
-            and self.model.last_updated_date_table()
-        ):
+        if self.load_type == LoadType.INCREMENTAL and self.model.last_updated_date_table():
             key = self.model.last_updated_timestamp_col()
             last_updated_cols = self.model.last_updated_date_column()
-            set_clause = ", ".join(
-                f"{col} = %(timestamp)s" for col in last_updated_cols
-            )
+            set_clause = ", ".join(f"{col} = %(timestamp)s" for col in last_updated_cols)
 
             # We require multi-step transactions since we're dealing with temp tables, so there
             # is a chance of a deadlock here.
@@ -345,9 +336,7 @@ class BatchLoader:
         with cur.copy(f"COPY {self.temp_table} ({self.cols_str}) FROM STDIN") as copy:  # type: ignore
             for row in results:
                 model_dump = row.model_dump()
-                copy.write_row(
-                    [_remove_null_bytes(model_dump[k]) for k in self.insert_cols]
-                )
+                copy.write_row([_remove_null_bytes(model_dump[k]) for k in self.insert_cols])
 
 
 def _remove_null_bytes(val: DbType) -> DbType:

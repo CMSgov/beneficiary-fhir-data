@@ -279,7 +279,7 @@ class PostgresExecutor(DbExecutor):
                 f"COPY {file.full_table()} ({file.cols_str()}) FROM STDIN"  # type: ignore
             ) as copy:
                 for row in reader:
-                    copy.write_row([row[c] if row[c] else None for c in file.cols])
+                    copy.write_row([row[c] or None for c in file.cols])
 
 
 class SnowflakeExtractor(Extractor[T]):

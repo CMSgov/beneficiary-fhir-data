@@ -13,7 +13,6 @@ from constants import (
     IDR_BENE_XREF_TABLE,
 )
 from load_partition import LoadPartition
-from loader import LoadMode
 from matching import normalize_address
 from model.base_model import (
     ALIAS,
