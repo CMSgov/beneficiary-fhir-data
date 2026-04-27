@@ -119,7 +119,7 @@ def purge_non_latest_claims(
         "1 = 1"
         if partition.start_date is None
         else f"""
-    p.clm_frm_dt BETWEEN {partition.start_date.strftime("%Y-%m-%d")} 
+    p.clm_from_dt BETWEEN {partition.start_date.strftime("%Y-%m-%d")} 
     AND {partition.start_date.strftime("%Y-%m-%d")}
     """
     )
@@ -143,7 +143,7 @@ def purge_non_latest_claims(
                         AND {claim_type_code_filter}
                 )
         """
-
+        
         loader.run_sql(childSQL)
 
     logger.info("Parent : %s", parent_table_name)
