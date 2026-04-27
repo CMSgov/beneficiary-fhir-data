@@ -14,6 +14,7 @@ import lombok.Getter;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.StringType;
 
 /** Claim line info. */
@@ -34,6 +35,9 @@ abstract class ClaimLineProfessionalBase implements ClaimLineBase {
   @Column(name = "clm_line_from_dt")
   private Optional<LocalDate> fromDate;
 
+  @Column(name = "clm_line_thru_dt")
+  private Optional<LocalDate> thruDate;
+
   @Column(name = "clm_pos_cd")
   private Optional<ClaimPlaceOfServiceCode> placeOfServiceCode;
 
@@ -52,7 +56,17 @@ abstract class ClaimLineProfessionalBase implements ClaimLineBase {
     line.setSequence(claimLineNumber.get());
     populateProductAndQuantity(line);
     line.addModifier(hcpcsModifierCode.toFhir());
-    fromDate.map(d -> line.setServiced(new DateType(DateUtil.toDate(d))));
+
+    thruDate.ifPresentOrElse(
+        thru -> {
+          var period = new Period();
+          fromDate.ifPresent(d -> period.setStart(DateUtil.toDate(d)));
+          period.setEnd(DateUtil.toDate(thru));
+          line.setServiced(period);
+        },
+        () -> fromDate.ifPresent(d -> line.setServiced(new DateType(DateUtil.toDate(d)))));
+
+    // fromDate.map(d -> line.setServiced(new DateType(DateUtil.toDate(d))));
     getAdjudicationCharge().toFhir().forEach(line::addAdjudication);
     placeOfServiceCode.map(c -> line.setLocation(c.toFhir()));
     getFhirExtensions().forEach(line::addExtension);

@@ -1053,4 +1053,8 @@ public class SystemUrls {
   /** US FIPS state codes system URL. */
   public static final String US_FIPS_STATE_CODES =
       "https://bluebutton.cms.gov/fhir/CodeSystem/US-FIPS-STATE-CODES";
+
+  /** Claim line anesthesia unit count extension URL. */
+  public static final String EXT_CLM_LINE_ANSTHSA_UNIT_CNT_URL =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-LINE-ANSTHSA-UNIT-CNT";
 }
