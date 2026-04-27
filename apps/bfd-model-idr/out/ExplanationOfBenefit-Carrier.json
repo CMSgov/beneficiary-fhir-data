@@ -1,7 +1,7 @@
 {
   "resourceType" : "ExplanationOfBenefit",
   "meta" : {
-    "lastUpdated" : "2026-03-18T20:18:40.916877Z",
+    "lastUpdated" : "2026-04-22T17:28:29.859738Z",
     "source" : "NCH",
     "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Professional-NonClinician|2.1.0"],
     "tag" : [{
@@ -704,7 +704,91 @@
     }
   },
   {
-    "sequence" : 29,
+    "sequence" : 30,
+    "category" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      },
+      {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code" : "RNDRG_PRVDR_FIPS_ST_CD",
+        "display" : "Rendering Provider FIPS State Code"
+      }]
+    },
+    "code" : {
+      "coding" : [{
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/US-FIPS-STATE-CODES",
+        "code" : "04"
+      }]
+    }
+  },
+  {
+    "sequence" : 32,
+    "category" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      },
+      {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code" : "RNDRG_PRVDR_FIPS_ST_CD",
+        "display" : "Rendering Provider FIPS State Code"
+      }]
+    },
+    "code" : {
+      "coding" : [{
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/US-FIPS-STATE-CODES",
+        "code" : "05"
+      }]
+    }
+  },
+  {
+    "sequence" : 33,
+    "category" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      },
+      {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code" : "RNDRG_PRVDR_FIPS_ST_CD",
+        "display" : "Rendering Provider FIPS State Code"
+      }]
+    },
+    "code" : {
+      "coding" : [{
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/US-FIPS-STATE-CODES",
+        "code" : "06"
+      }]
+    }
+  },
+  {
+    "sequence" : 34,
+    "category" : {
+      "coding" : [{
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+        "code" : "info",
+        "display" : "Information"
+      },
+      {
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information",
+        "code" : "RNDRG_PRVDR_FIPS_ST_CD",
+        "display" : "Rendering Provider FIPS State Code"
+      }]
+    },
+    "code" : {
+      "coding" : [{
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/US-FIPS-STATE-CODES",
+        "code" : "04"
+      }]
+    }
+  },
+  {
+    "sequence" : 30,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -720,7 +804,7 @@
     "valueString" : "ALA00000047747"
   },
   {
-    "sequence" : 30,
+    "sequence" : 32,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -897,7 +981,8 @@
     }],
     "sequence" : 1,
     "careTeamSequence" : [1],
-    "informationSequence" : [29],
+    "informationSequence" : [29,
+    30],
     "revenue" : {
       "coding" : [{
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD",
@@ -1101,7 +1186,8 @@
     }],
     "sequence" : 2,
     "careTeamSequence" : [2],
-    "informationSequence" : [30],
+    "informationSequence" : [31,
+    32],
     "revenue" : {
       "coding" : [{
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD",
@@ -1308,6 +1394,7 @@
     }],
     "sequence" : 3,
     "careTeamSequence" : [2],
+    "informationSequence" : [33],
     "revenue" : {
       "coding" : [{
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD",
@@ -1424,6 +1511,7 @@
     }],
     "sequence" : 4,
     "careTeamSequence" : [2],
+    "informationSequence" : [34],
     "revenue" : {
       "coding" : [{
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD",

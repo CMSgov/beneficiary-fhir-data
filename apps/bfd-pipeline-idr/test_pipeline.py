@@ -2,7 +2,7 @@ import os
 import shutil
 import subprocess
 from collections.abc import Generator
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import cast
 from uuid import uuid4
@@ -16,6 +16,7 @@ from testcontainers.core.config import testcontainers_config  # type: ignore
 # https://github.com/testcontainers/testcontainers-python/issues/305
 from testcontainers.postgres import PostgresContainer  # type: ignore
 
+from constants import IDR_BENE_HISTORY_TABLE
 from load_events import IdrJobLoadEvent, IdrJobType
 from load_partition import LoadType
 from load_synthetic import load_from_csv
@@ -76,6 +77,7 @@ def setup_db() -> Generator[PostgresContainer]:
             os.environ["BFD_DB_PASSWORD"] = info.password
             os.environ["IDR_BATCH_SIZE"] = "100000"
             os.environ["IDR_FORCE_LOAD_PROGRESS"] = "1"
+            os.environ["BFD_TEST_DATE"] = "2023-04-02"
         yield postgres
 
 
@@ -84,66 +86,10 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
         psycopg.Connection[DictRow],
         psycopg.connect(setup_db.get_connection_url(), row_factory=dict_row),  # type: ignore
     )
-    datetime_now = datetime.now(UTC) - timedelta(hours=8)
-
-    # Update dates to CURRENT_DATE before pipeline.py
-    # Reason: PAC data older than 60 days is filtered by coalescing
-    # (idr_updt_ts, idr_insrt_ts, clm_idr_ld_dt). Synthetic data has
-    # outdated idr_updt_ts, idr_insrt_ts, and clm_idr_ld_dt values.
-    # Update all values to current dates then change specific dates
-    # to older than 60 days to test the functionality.
-    conn.execute(
-        """
-            UPDATE cms_vdm_view_mdcr_prd.v2_mdcr_clm
-            SET idr_insrt_ts=%(timestamp)s,
-                idr_updt_ts=%(timestamp)s,
-                clm_idr_ld_dt=%(today)s
-            """,
-        {
-            "timestamp": datetime_now,
-            "today": datetime_now.date(),
-        },
-    )
-
-    conn.execute(
-        """
-            UPDATE cms_vdm_view_mdcr_prd.v2_mdcr_clm
-            SET idr_updt_ts=%(none)s, idr_insrt_ts=%(timestamp)s
-            WHERE clm_uniq_id = 1128619260039
-            """,
-        {"none": None, "timestamp": datetime_now - timedelta(days=65)},
-    )
-
-    conn.execute(
-        """
-            UPDATE cms_vdm_view_mdcr_prd.v2_mdcr_clm
-            SET idr_updt_ts=%(timestamp)s
-            WHERE clm_uniq_id = 123359318723
-            """,
-        {"timestamp": datetime_now - timedelta(days=65)},
-    )
-
-    conn.execute(
-        """
-            UPDATE cms_vdm_view_mdcr_prd.v2_mdcr_clm
-            SET idr_insrt_ts=%(none)s
-            WHERE clm_uniq_id = 9844382563835
-            """,
-        {"none": None},
-    )
-
-    conn.execute(
-        """
-            UPDATE cms_vdm_view_mdcr_prd.v2_mdcr_clm
-            SET idr_updt_ts=%(none)s
-            WHERE clm_uniq_id = 6919983105596
-            """,
-        {"none": None},
-    )
 
     conn.commit()
 
-    run("synthetic")
+    run(LoadMode.SYNTHETIC)
 
     cur = conn.execute("select * from idr.beneficiary order by bene_sk")
     assert cur.rowcount == 28
@@ -159,18 +105,24 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
     rows = cur.fetchmany(1)
     assert rows[0]["bene_mbi_id"] == "1BC3JG0FM51"
 
-    # Wait for system time to advance enough to update the timestamp
+    cur = conn.execute("select max(last_ts) as max_ts from idr.load_progress")
+    row = cur.fetchone()
+    assert row is not None
+    max_ts = cast(datetime, row["max_ts"])
+    datetime_now = max_ts + timedelta(days=1)
+    advance_time(datetime_now)
+
     conn.execute(
-        """
-        UPDATE cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry
+        f"""
+        UPDATE {IDR_BENE_HISTORY_TABLE}
         SET bene_mbi_id = '1S000000000', idr_insrt_ts=%(timestamp)s, idr_updt_ts=%(timestamp)s
         WHERE bene_sk = 10464258
         """,
-        {"timestamp": datetime_now + timedelta(seconds=5)},
+        {"timestamp": datetime_now},
     )
     conn.commit()
 
-    run("synthetic")
+    run(LoadMode.SYNTHETIC)
 
     cur = conn.execute("select * from idr.beneficiary order by bene_sk")
     rows = cur.fetchmany(2)
@@ -221,12 +173,12 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
     assert rows[0]["cntrct_pbp_sk"] == 16513335503
 
     cur = conn.execute("select * from idr.contract_pbp_contact order by cntrct_pbp_sk")
-    assert cur.rowcount == 3
-    rows = cur.fetchmany(4)
-    assert rows[0]["cntrct_pbp_sk"] == 307963392254
-    assert rows[2]["cntrct_pbp_sk"] == 940319838486
+    assert cur.rowcount == 7
+    rows = cur.fetchmany(7)
+    assert rows[0]["cntrct_pbp_sk"] == 130640088184
+    assert rows[6]["cntrct_pbp_sk"] == 940319838486
     # only a future record exists for this contract
-    assert rows[2]["cntrct_pbp_bgn_dt"].strftime("%Y-%m-%d") == "2026-12-01"
+    assert rows[6]["cntrct_pbp_bgn_dt"].strftime("%Y-%m-%d") == "2026-12-01"
 
     cur = conn.execute("select * from idr.beneficiary_ma_part_d_enrollment order by bene_sk")
     assert cur.rowcount == 3
@@ -254,7 +206,7 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
     cur = conn.execute("select * from idr.claim_institutional_ss order by clm_uniq_id")
     assert cur.rowcount == 21
     rows = cur.fetchmany(1)
-    assert rows[0]["clm_uniq_id"] == 580550863030
+    assert rows[0]["clm_uniq_id"] == 123359318723
 
     cur = conn.execute("select * from idr.claim_professional_nch order by clm_uniq_id")
     assert cur.rowcount == 51
@@ -277,9 +229,9 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
     assert rows[0]["clm_uniq_id"] == 113370100080
 
     cur = conn.execute("select * from idr.claim_item_institutional_ss order by clm_uniq_id")
-    assert cur.rowcount == 334
+    assert cur.rowcount == 327
     rows = cur.fetchmany(1)
-    assert rows[0]["clm_uniq_id"] == 580550863030
+    assert rows[0]["clm_uniq_id"] == 123359318723
 
     cur = conn.execute("select * from idr.claim_item_professional_nch order by clm_uniq_id")
     assert cur.rowcount == 442
@@ -299,6 +251,10 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
         # First, pretend that loading ./test_samples1 was the result of loading _all_ possible jobs
         # by inserting load events with completion times of datetime_now + 1hr for all types
         idr_jobs_table = sql.Identifier("idr", "source_load_events")
+        cur = conn.execute("select max(last_ts) as max_ts from idr.load_progress")
+        row = cur.fetchone()
+        assert row is not None
+        datetime_now = cast(datetime, row["max_ts"])
         load_1_complete_time = datetime_now + timedelta(hours=1)
         load_jobs = [
             IdrJobLoadEvent(
@@ -431,8 +387,9 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
         )
         conn.commit()
 
-        # Simulate running the pipeline in the middle of a "ongoing load" (NCH + SS claims being
+        # Simulate running the pipeline in the middle of an "ongoing load" (NCH + SS claims being
         # added)
+        advance_time(ss_clm_ts)
         run(LoadMode.SYNTHETIC)
 
         # Check to make sure the NCH claim was not loaded as no corresponding event should exist
@@ -470,6 +427,7 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
 
         # Run the Pipeline with the NCH event having been inserted indicating that there is NCH
         # data to load
+        advance_time(nch_load_job.event_time)
         run(LoadMode.SYNTHETIC)
 
         # Check for the NCH claim in the v3 idr schema
@@ -530,6 +488,7 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
         conn.commit()
 
         # Run one last time now that the FISS "job" has completed and the SS claim can be loaded
+        advance_time(ss_load_job.event_time)
         run(LoadMode.SYNTHETIC)
 
         # Check for the SS claim in the v3 idr schema
@@ -556,3 +515,8 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
         updated_ss_job = IdrJobLoadEvent.model_validate(cur.fetchmany(1)[0], by_alias=True)
         assert updated_ss_job.completion_time
         assert updated_ss_job.completion_time >= ss_clm_ts
+
+
+def advance_time(timestamp: datetime) -> None:
+    new_time = timestamp + timedelta(minutes=1)
+    os.environ["BFD_TEST_DATE"] = new_time.isoformat()

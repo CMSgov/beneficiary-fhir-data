@@ -3979,6 +3979,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-LINE-PRFNL-MTUS-CNT",
       "valueDecimal" : 2.0
     } ],
+    "informationSequence" : [ 2 ],
     "locationCodeableConcept" : {
       "coding" : [ {
         "code" : "68",
@@ -4051,11 +4052,30 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
   }, {
     "category" : {
       "coding" : [ {
+        "code" : "RNDRG_PRVDR_FIPS_ST_CD",
+        "display" : "Rendering Provider FIPS State Code",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "04",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/US-FIPS-STATE-CODES"
+      } ]
+    },
+    "sequence" : 2
+  }, {
+    "category" : {
+      "coding" : [ {
         "code" : "clmrecvddate",
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
       } ]
     },
-    "sequence" : 2,
+    "sequence" : 3,
     "timingDate" : "2021-10-03"
   }, {
     "category" : {
@@ -4076,7 +4096,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CNTRCTR-NUM"
       } ]
     },
-    "sequence" : 3
+    "sequence" : 4
   }, {
     "category" : {
       "coding" : [ {
@@ -4089,7 +4109,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 4,
+    "sequence" : 5,
     "valueString" : "5201"
   }, {
     "category" : {
@@ -4110,7 +4130,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-QUERY-CD"
       } ]
     },
-    "sequence" : 5
+    "sequence" : 6
   }, {
     "category" : {
       "coding" : [ {
@@ -4123,7 +4143,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 6,
+    "sequence" : 7,
     "timingDate" : "2021-10-03"
   }, {
     "category" : {
@@ -4144,7 +4164,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-CARR-PMT-DNL-CD"
       } ]
     },
-    "sequence" : 7
+    "sequence" : 8
   } ],
   "total" : [ {
     "amount" : {
@@ -5687,6 +5707,25 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
   }, {
     "category" : {
       "coding" : [ {
+        "code" : "PRVDR_FAC_FIPS_ST_CD",
+        "display" : "Federal Information Processing Standards (FIPS) State Code",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "04",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/US-FIPS-STATE-CODES"
+      } ]
+    },
+    "sequence" : 24
+  }, {
+    "category" : {
+      "coding" : [ {
         "code" : "drg",
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
       } ]
@@ -5697,7 +5736,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
         "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
       } ]
     },
-    "sequence" : 24
+    "sequence" : 25
   } ],
   "total" : [ {
     "amount" : {
@@ -7272,6 +7311,25 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
   }, {
     "category" : {
       "coding" : [ {
+        "code" : "PRVDR_FAC_FIPS_ST_CD",
+        "display" : "Federal Information Processing Standards (FIPS) State Code",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
+      }, {
+        "code" : "info",
+        "display" : "Information",
+        "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
+      } ]
+    },
+    "code" : {
+      "coding" : [ {
+        "code" : "04",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/US-FIPS-STATE-CODES"
+      } ]
+    },
+    "sequence" : 24
+  }, {
+    "category" : {
+      "coding" : [ {
         "code" : "drg",
         "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType"
       } ]
@@ -7282,7 +7340,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
         "system" : "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/MS-DRG-Classifications-and-Software"
       } ]
     },
-    "sequence" : 24
+    "sequence" : 25
   } ],
   "total" : [ {
     "amount" : {

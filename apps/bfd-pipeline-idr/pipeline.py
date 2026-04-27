@@ -19,7 +19,13 @@ from load_events import (
 from load_partition import LoadType
 from logger_config import configure_logger
 from model.base_model import LoadMode
-from settings import INCREMENTAL_IDR_JOB_GRACE_PERIOD, LOAD_TYPE, MAX_TASKS, TABLES_TO_LOAD
+from settings import (
+    INCREMENTAL_IDR_JOB_GRACE_PERIOD,
+    LOAD_TYPE,
+    MAX_TASKS,
+    TABLES_TO_LOAD,
+    bfd_test_date,
+)
 
 telemetry.disable_telemetry()
 
@@ -69,7 +75,7 @@ def run(load_mode: str) -> None:
         .build()
     )
 
-    start_time = datetime.now(UTC)
+    start_time = resolve_test_date(load_mode)
     tables_to_load = set(TABLES_TO_LOAD) if TABLES_TO_LOAD else None
     idr_job_events: list[IdrJobLoadEvent] = []
     if load_type == LoadType.INCREMENTAL and not tables_to_load:
@@ -104,15 +110,25 @@ def run(load_mode: str) -> None:
                 ", ".join(str(event.id) for event in idr_job_events),
             )
             update_failure_times(
-                load_mode=load_mode, events=idr_job_events, failure_time=datetime.now(UTC)
+                load_mode=load_mode,
+                events=idr_job_events,
+                failure_time=resolve_test_date(load_mode),
             )
         logger.exception("Unrecoverable exception raised during pipeline load")
         raise
 
     if idr_job_events:
         update_completion_times(
-            load_mode=load_mode, events=idr_job_events, completion_time=datetime.now(UTC)
+            load_mode=load_mode, events=idr_job_events, completion_time=resolve_test_date(load_mode)
         )
+
+
+def resolve_test_date(load_mode: str) -> datetime:
+    test_date = bfd_test_date()
+
+    if test_date and load_mode != LoadMode.IDR:
+        return test_date
+    return datetime.now(UTC)
 
 
 if __name__ == "__main__":

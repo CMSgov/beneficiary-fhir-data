@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import datetime, timedelta
 from os import getenv
 
 MIN_CLAIM_LOAD_DATE = "2014-06-30"
@@ -18,6 +18,11 @@ def force_load_progress() -> bool:
     # We don't normally want to store the load progress info for synthetic data since the dates
     # won't be in order like in prod. However, we need a way to override this for the tests.
     return _parse_bool_default_false("IDR_FORCE_LOAD_PROGRESS")
+
+
+def bfd_test_date() -> datetime | None:
+    test_date = getenv("BFD_TEST_DATE", "")
+    return datetime.fromisoformat(test_date) if test_date else None
 
 
 ENABLE_DATE_PARTITIONS = _parse_bool_default_true("IDR_ENABLE_DATE_PARTITIONS")
