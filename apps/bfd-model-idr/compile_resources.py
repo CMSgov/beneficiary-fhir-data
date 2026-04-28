@@ -238,7 +238,7 @@ def main():
     print("Executing Transform")
     execute_cmd = f"java -jar validator_cli.jar {input_file} -output {args.output} -transform \
         {args.resource} -version 4.0.1 -ig {compiled_map_path} \
-            -ig hl7.fhir.us.carin-bb#2.1.0 {map_imports} {sushi_resources} -tx {MATCHBOX_SERVER}/tx"
+            -ig hl7.fhir.us.carin-bb#2.2.0 {map_imports} {sushi_resources} -tx {MATCHBOX_SERVER}/tx"
     stdout, stderr = run_command(execute_cmd, cwd=script_dir)
 
     print("Execution output:")

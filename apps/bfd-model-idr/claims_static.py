@@ -98,26 +98,6 @@ PROFESSIONAL_CLAIM_TYPES = [
     *MCS_CLM_TYPE_CDS,
     *VMS_CDS,
 ]
-TYPE_1_NPIS = [
-    1942945159,
-    1437702123,
-    1972944437,
-    1447692959,
-    1558719914,
-    1730548868,
-    1023051596,
-    1003488552,
-    1720749690,
-]
-TYPE_2_NPIS = [
-    1093792350,
-    1548226988,
-    1477643690,
-    1104867175,
-    1669572467,
-    1508565987,
-    1649041195,
-]
 AVAIL_OSCAR_CODES_INSTITUTIONAL = [
     "-39T14",
     "-000000",
@@ -230,7 +210,6 @@ AVAILABLE_PROVIDER_LEGAL_NAMES = [
     "CBS Health Corporation",
     "WALPART INC",
     "Bite Aid Corporation",
-    "",
 ]
 AVAILABLE_PROVIDER_TX_CODES = [
     "2081P0301X",
@@ -241,6 +220,7 @@ AVAILABLE_PROVIDER_TX_CODES = [
     "207QB0505X",
 ]
 AVAILABLE_PROVIDER_TYPE_CODES = ["BP", "D", "N2", "UI", "BG", "A", "~"]
+AVAILABLE_SSA_STATE_CDS = ["01", "03", "06", "12", "48"]
 
 
 def get_icd_10_dgns_codes(enable_samhsa: bool) -> list[str]:

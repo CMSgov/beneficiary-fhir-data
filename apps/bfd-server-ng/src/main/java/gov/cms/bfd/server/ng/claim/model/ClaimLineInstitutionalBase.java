@@ -8,7 +8,9 @@ import jakarta.persistence.Convert;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.MappedSuperclass;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.DateType;
@@ -48,14 +50,18 @@ public abstract class ClaimLineInstitutionalBase implements ClaimLineBase {
   @Embedded private RenderingCareTeamLine claimLineRenderingProvider;
 
   @Override
-  public Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhirSupportingInfo(
+  public List<ExplanationOfBenefit.SupportingInformationComponent> toFhirSupportingInfo(
       SupportingInfoFactory supportingInfoFactory) {
-    return trackingNumber.map(
-        number ->
-            supportingInfoFactory
-                .createSupportingInfo()
-                .setCategory(BlueButtonSupportingInfoCategory.CLM_LINE_PMD_UNIQ_TRKNG_NUM.toFhir())
-                .setValue(new StringType(number)));
+    return Stream.of(
+            trackingNumber.map(
+                number ->
+                    supportingInfoFactory
+                        .createSupportingInfo()
+                        .setCategory(
+                            BlueButtonSupportingInfoCategory.CLM_LINE_PMD_UNIQ_TRKNG_NUM.toFhir())
+                        .setValue(new StringType(number))))
+        .flatMap(Optional::stream)
+        .toList();
   }
 
   @Override
@@ -100,4 +106,9 @@ public abstract class ClaimLineInstitutionalBase implements ClaimLineBase {
   }
 
   abstract void addAdjudication(ExplanationOfBenefit.ItemComponent line);
+
+  @Override
+  public Optional<String> getClaimLineDiagnosisCode() {
+    return Optional.empty();
+  }
 }

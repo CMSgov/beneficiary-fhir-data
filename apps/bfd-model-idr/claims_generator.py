@@ -175,6 +175,7 @@ class _ClaimsFile(StrEnum):
             f.CLM_NGACO_CPTATN_SW,
             f.CLM_ACO_CARE_MGMT_HCBS_SW,
             f.CLM_PD_STUS_CD,
+            f.GEO_BLG_SSA_STATE_CD,
             f.IDR_INSRT_TS,
             f.IDR_UPDT_TS,
         ],
@@ -467,7 +468,6 @@ class _ClaimsFile(StrEnum):
             f.CLM_LINE_RX_NUM,
             f.CLM_LINE_GRS_CVRD_CST_TOT_AMT,
             f.CLM_LINE_OTHR_TP_PD_AMT,
-            f.CLM_RNDRNG_PRVDR_NPI_NUM,
             f.CLM_LINE_BNFT_ENHNCMT_1_CD,
             f.CLM_LINE_BNFT_ENHNCMT_2_CD,
             f.CLM_LINE_BNFT_ENHNCMT_3_CD,
@@ -479,6 +479,7 @@ class _ClaimsFile(StrEnum):
             f.CLM_LINE_NGACO_TLHLTH_SW,
             f.CLM_LINE_NGACO_CPTATN_SW,
             f.CLM_LINE_ACO_CARE_MGMT_HCBS_SW,
+            f.GEO_RNDRG_SSA_STATE_CD,
             f.IDR_INSRT_TS,
             f.IDR_UPDT_TS,
         ],
@@ -738,8 +739,10 @@ def generate(
 
     other_util = OtherGeneratorUtil()
 
+    generated_provider_histories, generated_type_1_npis, generated_type_2_npis = other_util.gen_provider_history(amount=14, init_provider_historys=files[PRVDR_HSTRY])
+
     out_tables[PRVDR_HSTRY].extend(
-        other_util.gen_provider_history(amount=14, init_provider_historys=files[PRVDR_HSTRY])
+        generated_provider_histories
     )
 
     # This table is special in that its data is mostly static and read from a static file, so we
@@ -860,6 +863,8 @@ def generate(
                 bene_sk=str(pt_bene_sk),
                 init_clm=init_adj_clm,
                 min_date=clm_from_dt_min,
+                type_1_npis=generated_type_1_npis,
+                type_2_npis=generated_type_2_npis,
             )
             adj_clms_tbls[CLM].append(clm)
 
@@ -957,6 +962,7 @@ def generate(
                     else idx,
                     diagnoses=diagnoses,
                     init_clm_line=init_clm_line,
+                    type_1_npis= generated_type_1_npis
                 )
                 adj_clms_tbls[CLM_LINE].append(clm_line)
 

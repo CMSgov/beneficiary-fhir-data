@@ -63,7 +63,7 @@ class IdrBeneficiaryStatus(IdrBaseModel):
             FROM {IDR_BENE_STATUS_TABLE} stus
             {{WHERE_CLAUSE}}
             AND NOT EXISTS (
-                {deceased_bene_filter(hstry)}
+                {deceased_bene_filter(hstry, start_time)}
                 AND {hstry}.bene_sk = stus.bene_sk
             )
             {{ORDER_BY}}

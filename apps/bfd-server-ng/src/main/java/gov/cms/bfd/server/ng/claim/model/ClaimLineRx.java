@@ -6,6 +6,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -58,9 +59,9 @@ public class ClaimLineRx implements ClaimLineBase {
   }
 
   @Override
-  public Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhirSupportingInfo(
+  public List<ExplanationOfBenefit.SupportingInformationComponent> toFhirSupportingInfo(
       SupportingInfoFactory supportingInfoFactory) {
-    return Optional.empty();
+    return List.of();
   }
 
   @Override
@@ -70,6 +71,11 @@ public class ClaimLineRx implements ClaimLineBase {
 
   @Override
   public Optional<Integer> getClaimLineNumber() {
+    return Optional.empty();
+  }
+
+  @Override
+  public Optional<String> getClaimLineDiagnosisCode() {
     return Optional.empty();
   }
 }
