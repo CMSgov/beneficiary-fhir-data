@@ -25,9 +25,6 @@ on:
           - us-east-1
           - us-west-2
         required: true
-  push:
-    branches:
-      - feature/BFD-4248_GitHub-BuildAndDeploy-Slack-Notification
 
 permissions:
   id-token: write # This is required for requesting the AWS IAM OIDC JWT
