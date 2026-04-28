@@ -63,7 +63,7 @@ jobs:
           role-session-name: get-sops-slack-webhook-${{ github.run_id }}-${{ github.run_attempt }}
           aws-region: ${{ inputs.aws-region }}
 
-      - name: Load Slack webhook
+      - name: Load Start Slack webhook
         uses: cmsgov/cdap/actions/aws-params-env-action@main
         with:
           params: |
@@ -173,12 +173,25 @@ jobs:
           echo "failed_stage=$FAILED_STAGE" >> $GITHUB_OUTPUT
           echo "color=$COLOR" >> $GITHUB_OUTPUT
 
+      - name: Get role ARN
+        id: get-role-arn
+        run: |
+          role_arn="${{ secrets.NON_PROD_ACCOUNT_GHA_ROLE_ARN }}"
+          echo "::add-mask::$role_arn"
+          echo "role-arn=$role_arn" >> "$GITHUB_OUTPUT"
+
       - name: Assume role to AWS
         uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 # v6.1.0
         with:
           role-to-assume: ${{ steps.get-role-arn.outputs.role-arn }}
           role-session-name: get-sops-slack-webhook-${{ github.run_id }}-${{ github.run_attempt }}
           aws-region: ${{ inputs.aws-region }}
+
+      - name: Load Final Slack webhook
+        uses: cmsgov/cdap/actions/aws-params-env-action@main
+        with:
+          params: |
+            SLACK_WEBHOOK_URL=/bfd/platform/alerting/sensitive/slack/bfd-notices/webhook
 
       - name: Slack - FINAL SUMMARY
         uses: slackapi/slack-github-action@03ea5433c137af7c0495bc0cad1af10403fc800c # v3.0.2
