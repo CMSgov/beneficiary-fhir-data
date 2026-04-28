@@ -125,8 +125,6 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
 
     run(LoadMode.SYNTHETIC)
 
-    # sleep(10000)
-
     cur = conn.execute("select * from idr.beneficiary order by bene_sk")
     rows = cur.fetchmany(2)
     assert rows[0]["bene_mbi_id"] == "1S000000000"

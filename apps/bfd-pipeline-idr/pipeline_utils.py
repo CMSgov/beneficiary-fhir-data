@@ -114,8 +114,8 @@ def prune_pac(loader: PostgresLoader, start_time: datetime) -> None:
         DELETE FROM {IDR_CLAIM_TABLE} clm where clm.clm_type_cd BETWEEN {pac_phase_1_min} 
                         AND {pac_phase_1_max}
                         AND COALESCE(
-                        clm.idr_updt_ts,
-                        clm.idr_insrt_ts,
-                        clm.clm_idr_ld_dt
-                        ) >= {start_time_sql};
+                            clm.idr_updt_ts,
+                            clm.idr_insrt_ts,
+                            clm.clm_idr_ld_dt
+                        ) <= {start_time_sql};
     """)
