@@ -16,11 +16,15 @@ on:
         required: false
         default: ""
       aws-region:
-        description: "Override the AWS Region"
+        description: >-
+          Override the AWS Region destination for uploaded artifacts.
+          Default to `us-east-1`.
         default: us-east-1
         type: choice
-        options: [us-east-1, us-west-2]
-        required: false
+        options:
+          - us-east-1
+          - us-west-2
+        required: true
   push:
     branches:
       - feature/BFD-4248_GitHub-BuildAndDeploy-Slack-Notification
