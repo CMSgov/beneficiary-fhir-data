@@ -121,4 +121,9 @@ public abstract class ClaimLineInstitutionalBase implements ClaimLineBase {
   }
 
   abstract void addAdjudication(ExplanationOfBenefit.ItemComponent line);
+
+  @Override
+  public Optional<String> getClaimLineDiagnosisCode() {
+    return Optional.empty();
+  }
 }

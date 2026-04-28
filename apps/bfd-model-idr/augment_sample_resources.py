@@ -51,6 +51,8 @@ header_to_supp_info_cols = {
     "CLM_NGACO_CPTATN_SW": "CLM_NGACO_CPTATN_SW",
     "CLM_ACO_CARE_MGMT_HCBS_SW": "CLM_ACO_CARE_MGMT_HCBS_SW",
     "CLM_PD_STUS_CD": "CLM_PD_STUS_CD",
+    "CLM_NRLN_RIC_CD": "CLM_NRLN_RIC_CD",
+    "CLM_RIC_CD": "CLM_RIC_CD",
     "GEO_BLG_SSA_STATE_CD": "GEO_BLG_SSA_STATE_CD",
 }
 
@@ -411,7 +413,7 @@ for item in cur_sample_data.get("lineItemComponents", []):
 
 filename = "out/temporary-sample.json"
 
-cur_sample_data["lastUpdated"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+cur_sample_data["lastUpdated"] = "2026-01-01T03:02:28.000000Z"
 
 with Path(filename).open("w") as f:
     json.dump(cur_sample_data, f, indent=4)
