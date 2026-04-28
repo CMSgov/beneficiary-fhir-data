@@ -1,7 +1,7 @@
 {
   "resourceType" : "ExplanationOfBenefit",
   "meta" : {
-    "lastUpdated" : "2026-04-27T13:46:32.881995Z",
+    "lastUpdated" : "2026-01-01T03:02:28.000000Z",
     "source" : "NCH",
     "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional|2.2.0",
     "https://bluebutton.cms.gov/fhir/StructureDefinition/ExplanationOfBenefit-Inpatient-Institutional"],

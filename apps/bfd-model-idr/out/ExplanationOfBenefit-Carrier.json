@@ -1,7 +1,7 @@
 {
   "resourceType" : "ExplanationOfBenefit",
   "meta" : {
-    "lastUpdated" : "2026-04-27T13:48:24.824615Z",
+    "lastUpdated" : "2026-01-01T03:02:28.000000Z",
     "source" : "NCH",
     "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Professional-NonClinician|2.2.0",
     "https://bluebutton.cms.gov/fhir/StructureDefinition/ExplanationOfBenefit-Professional-NonClinician"],
@@ -705,7 +705,7 @@
     }
   },
   {
-    "sequence" : 30,
+    "sequence" : 29,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -726,7 +726,7 @@
     }
   },
   {
-    "sequence" : 32,
+    "sequence" : 30,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -747,7 +747,7 @@
     }
   },
   {
-    "sequence" : 33,
+    "sequence" : 31,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -768,7 +768,7 @@
     }
   },
   {
-    "sequence" : 34,
+    "sequence" : 32,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -789,7 +789,7 @@
     }
   },
   {
-    "sequence" : 30,
+    "sequence" : 29,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -805,7 +805,7 @@
     "valueString" : "ALA00000047747"
   },
   {
-    "sequence" : 32,
+    "sequence" : 30,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -1187,8 +1187,7 @@
     }],
     "sequence" : 2,
     "careTeamSequence" : [2],
-    "informationSequence" : [31,
-    32],
+    "informationSequence" : [30],
     "revenue" : {
       "coding" : [{
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD",
@@ -1395,7 +1394,7 @@
     }],
     "sequence" : 3,
     "careTeamSequence" : [2],
-    "informationSequence" : [33],
+    "informationSequence" : [31],
     "revenue" : {
       "coding" : [{
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD",
@@ -1512,7 +1511,7 @@
     }],
     "sequence" : 4,
     "careTeamSequence" : [2],
-    "informationSequence" : [34],
+    "informationSequence" : [32],
     "revenue" : {
       "coding" : [{
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD",

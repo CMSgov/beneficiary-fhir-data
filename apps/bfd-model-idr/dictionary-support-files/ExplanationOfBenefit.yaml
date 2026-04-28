@@ -4350,6 +4350,8 @@
   sourceColumn: GEO_BLG_SSA_STATE_CD                                            
   notes: The source column contains an SSA state code, which is converted to a FIPS state code in the output.  
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='PRVDR_FAC_FIPS_ST_CD').exists()).code
+  profiles:
+    - CMS
 - inputPath: LineItemComponent.GEO_RNDRG_SSA_STATE_CD                           
   appliesTo:                                                                    
     - Carrier
@@ -4362,3 +4364,5 @@
   sourceColumn: GEO_RNDRG_SSA_STATE_CD                                          
   notes: The source column contains an SSA state code, which is converted to a FIPS state code in the output.  
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='RNDRG_PRVDR_FIPS_ST_CD').exists()).code   
+  profiles:
+    - CMS
