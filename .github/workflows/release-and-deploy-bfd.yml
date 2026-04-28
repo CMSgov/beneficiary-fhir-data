@@ -41,6 +41,15 @@ jobs:
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
         with:
           node-version: 24.x
+
+      - name: Assume role to AWS
+        uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 # v6.1.0
+        env:
+          AWS_REGION: ${{ github.event.inputs.aws-region || 'us-east-1' }}
+        with:
+          role-to-assume: arn:aws:iam::${{ github.ref_name =='main' && secrets.PROD_ACCOUNT || secrets.NON_PROD_ACCOUNT }}:role/delegatedadmin/developer/${{ github.ref_name =='main' && 'cdap-prod' || 'cdap-test' }}-github-actions
+          aws-region: ${{ env.AWS_REGION }}
+
       - name: Load Slack webhook
         uses: cmsgov/cdap/actions/aws-params-env-action@main
         with:
