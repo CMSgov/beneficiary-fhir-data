@@ -6,7 +6,7 @@ from snowflake.connector import ProgrammingError
 from snowflake.connector.errors import ForbiddenError
 from snowflake.connector.network import ReauthenticationRequest, RetryRequest
 
-from constants import DEFAULT_PARTITION
+from constants import DEFAULT_PARTITION, IDR_CLAIM_TABLE
 from extractor import PostgresExtractor, SnowflakeExtractor
 from load_partition import LoadPartition
 from loader import LoadType, PostgresLoader, should_track_load_progress
@@ -75,7 +75,7 @@ def extract_and_load(
             data_iter = data_extractor.extract_idr_data(progress, job_start, load_mode)
             res = loader.load(data_iter, cls, job_start, partition, progress, load_type, load_mode)
             data_extractor.close()
-            prune_cap(loader, start_time)
+            prune_pac(loader, start_time)
             loader.close()
             return res
         # Snowflake will throw a reauth error if the pipeline has been running for several hours
@@ -104,16 +104,18 @@ def extract_and_load(
             raise ex
 
 
-def prune_cap(loader: PostgresLoader, start_time: datetime) -> None:
+def prune_pac(loader: PostgresLoader, start_time: datetime) -> None:
     pac_cutoff_date = start_time - timedelta(days=60)
     start_time_sql = pac_cutoff_date.strftime("'%Y-%m-%d %H:%M:%S'")
     pac_phase_1_min = 1000
     pac_phase_1_max = 1999
 
     loader.run_sql(f"""
-        DELETE FROM idr.claim_institutional_ss ss WHERE clm_uniq_id IN 
-                   (SELECT clm_uniq_id FROM idr.claim_institutional_ss JOIN 
-                   idr.beneficiary_entitlement be ON ss.bene_sk = be.bene_sk WHERE ss.clm_type_cd 
-                   BETWEEN {pac_phase_1_min} AND {pac_phase_1_max}
-                   AND be.idr_updt_ts <= {start_time_sql});
+        DELETE FROM {IDR_CLAIM_TABLE} clm where clm.clm_type_cd BETWEEN {pac_phase_1_min} 
+                        AND {pac_phase_1_max}
+                        AND COALESCE(
+                        clm.idr_updt_ts,
+                        clm.idr_insrt_ts,
+                        clm.clm_idr_ld_dt
+                        ) >= {start_time_sql};
     """)

@@ -4,6 +4,7 @@ import subprocess
 from collections.abc import Generator
 from datetime import datetime, timedelta
 from pathlib import Path
+from time import sleep
 from typing import cast
 from uuid import uuid4
 
@@ -123,6 +124,8 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
     conn.commit()
 
     run(LoadMode.SYNTHETIC)
+
+    # sleep(10000)
 
     cur = conn.execute("select * from idr.beneficiary order by bene_sk")
     rows = cur.fetchmany(2)
