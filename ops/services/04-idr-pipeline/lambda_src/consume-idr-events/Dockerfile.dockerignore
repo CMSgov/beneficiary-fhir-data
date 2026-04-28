@@ -1,0 +1,6 @@
+*
+!pyproject.toml
+!uv.lock
+!app
+!app/main.py
+!app/__init__.py

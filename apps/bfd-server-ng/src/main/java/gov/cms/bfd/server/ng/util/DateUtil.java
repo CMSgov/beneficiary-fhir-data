@@ -1,15 +1,18 @@
 package gov.cms.bfd.server.ng.util;
 
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.util.Date;
+import lombok.AllArgsConstructor;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.springframework.stereotype.Component;
 
 /** Date utility methods. */
+@Component
+@AllArgsConstructor
 public class DateUtil {
+
+  private final Clock clock;
 
   /**
    * UTC {@link ZoneId}. UTC should be used for all datetime conversions to/from an instant
@@ -21,8 +24,6 @@ public class DateUtil {
   public static final ZonedDateTime MIN_DATETIME =
       ZonedDateTime.of(LocalDateTime.MIN, DateUtil.ZONE_ID_UTC);
 
-  private DateUtil() {}
-
   /**
    * Converts the {@link LocalDate} to a {@link Date} set to midnight UTC.
    *
@@ -31,6 +32,16 @@ public class DateUtil {
    */
   public static Date toDate(LocalDate localDate) {
     return Date.from(localDate.atStartOfDay(ZONE_ID_UTC).toInstant());
+  }
+
+  /**
+   * Converts the {@link Date} to a {@link LocalDate} set to UTC.
+   *
+   * @param date date
+   * @return local date
+   */
+  public static LocalDate toLocalDate(Date date) {
+    return date.toInstant().atZone(DateUtil.ZONE_ID_UTC).toLocalDate();
   }
 
   /**
@@ -76,7 +87,7 @@ public class DateUtil {
    *
    * @return local date
    */
-  public static LocalDate nowAoe() {
-    return LocalDate.now(ZoneId.of("-12:00"));
+  public LocalDate nowAoe() {
+    return LocalDate.now(clock.withZone(ZoneId.of("-12:00")));
   }
 }

@@ -4,7 +4,6 @@ from datetime import UTC, date, datetime
 
 import psycopg
 from psycopg.abc import Params, Query
-from psycopg.errors import DeadlockDetected
 
 from constants import DEFAULT_MIN_DATE
 from load_partition import LoadPartition, LoadType
@@ -95,7 +94,7 @@ class BatchLoader:
         self.insert_timer = Timer("insert", model, partition)
         self.commit_timer = Timer("commit", model, partition)
         self.load_type = load_type
-        self.enable_load_progress = load_mode == LoadMode.IDR or force_load_progress()
+        self.enable_load_progress = should_track_load_progress(load_mode)
 
     def load(
         self,
@@ -154,24 +153,24 @@ class BatchLoader:
             cur,
             f"""
             INSERT INTO idr.load_progress(
-                table_name, 
-                last_ts, 
+                table_name,
+                last_ts,
                 last_id,
                 batch_partition,
-                job_start_ts, 
+                job_start_ts,
                 batch_start_ts,
                 batch_complete_ts)
             VALUES(
                 %(table)s,
-                '{DEFAULT_MIN_DATE}', 
+                '{DEFAULT_MIN_DATE}',
                 0,
                 %(partition)s,
                 %(job_start_ts)s,
                 %(batch_start_ts)s,
                 '{DEFAULT_MIN_DATE}'
             )
-            ON CONFLICT (table_name, batch_partition) DO UPDATE 
-            SET 
+            ON CONFLICT (table_name, batch_partition) DO UPDATE
+            SET
                 job_start_ts = EXCLUDED.job_start_ts,
                 batch_start_ts = EXCLUDED.batch_start_ts
             """,
@@ -234,11 +233,11 @@ class BatchLoader:
                 cur,
                 """
                 UPDATE idr.load_progress
-                SET 
+                SET
                     last_ts = %(last_ts)s,
                     last_id = %(last_id)s
                 WHERE
-                    table_name = %(table)s 
+                    table_name = %(table)s
                     AND batch_partition = %(partition)s
                 """,
                 {
@@ -253,7 +252,7 @@ class BatchLoader:
         self, cur: psycopg.Cursor, query: Query, params: Params | None
     ) -> None:
         if self.enable_load_progress:
-            cur.execute(query, params)
+            cur.execute(query, params)  # type: ignore
 
     def _merge(self, cur: psycopg.Cursor, timestamp: datetime) -> None:
         unique_key = self.model.unique_key()
@@ -293,33 +292,30 @@ class BatchLoader:
             last_updated_cols = self.model.last_updated_date_column()
             set_clause = ", ".join(f"{col} = %(timestamp)s" for col in last_updated_cols)
 
-            try:
-                cur.execute(
-                    f"""
-                    WITH locked AS (
-                        SELECT {key}
-                        FROM {self.model.last_updated_date_table()}
-                        WHERE {key} IN (
-                            SELECT {key} FROM {self.temp_table}
-                        )
-                        ORDER BY {key}
-                        FOR UPDATE
+            # We require multi-step transactions since we're dealing with temp tables, so there
+            # is a chance of a deadlock here.
+            # However, it's safe to ignore these because if the timestamp for this row is being
+            # updated concurrently then it's going to have the same end result anyway.
+            # If a deadlock occurs, the CTE returns no rows and this is a no-op.
+
+            cur.execute(
+                f"""
+                WITH current_ts AS (
+                    SELECT {key}
+                    FROM {self.model.last_updated_date_table()}
+                    WHERE {key} IN (
+                        SELECT {key} FROM {self.temp_table}
                     )
-                    UPDATE {self.model.last_updated_date_table()} u
-                    SET {set_clause}
-                    FROM locked l
-                    WHERE u.{key} = l.{key};
-                    """,  # type: ignore
-                    {"timestamp": timestamp},
+                    ORDER BY {key}
+                    FOR UPDATE SKIP LOCKED
                 )
-            except DeadlockDetected as ex:
-                # We require multi-step transactions since we're dealing with temp tables, so there
-                # is a chance of a deadlock here.
-                # Locking rows helps reduce the chance of this when multiple nodes update this
-                # table, but it doesn't eliminate the possibility.
-                # However, it's safe to ignore this because if the timestamp for this row is being
-                # updated concurrently then it's going to have the same end result anyway
-                logger.warning("deadlock updating update timestamp, ignoring: %s", ex)
+                UPDATE {self.model.last_updated_date_table()} u
+                SET {set_clause}
+                FROM current_ts t
+                WHERE u.{key} = t.{key};
+                """,  # type: ignore
+                {"timestamp": timestamp},
+            )
 
     def _copy_data(self, cur: psycopg.Cursor, results: Sequence[T]) -> None:
         # Use COPY to load the batch into Postgres.
@@ -352,3 +348,8 @@ def _convert_date(date_field: date | datetime) -> datetime:
     if type(date_field) is datetime:
         return date_field.replace(tzinfo=UTC)
     return datetime.combine(date_field, datetime.min.time()).replace(tzinfo=UTC)
+
+
+def should_track_load_progress(load_mode: LoadMode) -> bool:
+    # Whether to read/write load progress, which is diabled for synthetic and testing loads.
+    return load_mode == LoadMode.IDR or force_load_progress()

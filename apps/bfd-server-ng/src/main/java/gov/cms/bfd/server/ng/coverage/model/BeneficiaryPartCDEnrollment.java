@@ -7,6 +7,7 @@ import jakarta.persistence.Embedded;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -50,8 +51,8 @@ public class BeneficiaryPartCDEnrollment implements Comparable<BeneficiaryPartCD
     return beneficiaryEnrollmentPeriod.toFhirPeriod();
   }
 
-  Coverage.CoverageStatus toFhirStatus() {
-    return beneficiaryEnrollmentPeriod.toFhirStatus();
+  Coverage.CoverageStatus toFhirStatus(LocalDate benefitDate) {
+    return beneficiaryEnrollmentPeriod.toFhirStatus(benefitDate);
   }
 
   /**
@@ -131,9 +132,9 @@ public class BeneficiaryPartCDEnrollment implements Comparable<BeneficiaryPartCD
 
     var extEmployerSubsidySwitch =
         employerSubsidySwitch.map(
-            number ->
+            code ->
                 new Extension(SystemUrls.EXT_BENE_ENRLMT_EMPLR_SBSDY_SW_URL)
-                    .setValue(new StringType(number)));
+                    .setValue(new Coding(SystemUrls.SYS_BENE_ENRLMT_EMPLR_SBSDY_SW, code, null)));
 
     return Stream.of(
             Optional.of(extContractNumber),

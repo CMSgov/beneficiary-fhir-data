@@ -1,13 +1,18 @@
 package gov.cms.bfd.server.ng;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
+import gov.cms.bfd.server.ng.log.AuditLogger;
+import gov.cms.bfd.server.ng.log.DynamoDbAuditLogger;
+import gov.cms.bfd.server.ng.log.LogStreamAuditLogger;
 import gov.cms.bfd.sharedutils.config.AwsClientConfig;
 import gov.cms.bfd.sharedutils.database.AwsWrapperDataSourceFactory;
 import gov.cms.bfd.sharedutils.database.DataSourceFactory;
 import gov.cms.bfd.sharedutils.database.DatabaseOptions;
 import gov.cms.bfd.sharedutils.database.HikariDataSourceFactory;
 import java.io.Serializable;
+import java.net.URI;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
@@ -22,17 +27,22 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.jdbc.JdbcConnectionDetails;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.providers.AwsRegionProvider;
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 
 /** Root configuration class. */
 @Data
 @ConfigurationProperties(prefix = "bfd")
 public class Configuration implements Serializable {
   // Unfortunately, constructor injection doesn't work with @ConfigurationProperties
+  private static final String LOCAL_ENV = "local";
 
   /** Identifies which Spring profiles indicate that the server is being run on a local machine. */
-  private static final List<String> ALLOWED_LOCAL_PROFILES = List.of("local", "sqlprofile");
+  private static final List<String> ALLOWED_LOCAL_PROFILES =
+      List.of(LOCAL_ENV, "sql-profile", "structured-log");
 
   // Getters should only be generated for configuration properties, not dependencies
   @Getter(value = AccessLevel.NONE)
@@ -49,11 +59,11 @@ public class Configuration implements Serializable {
   @Autowired(required = false)
   private JdbcConnectionDetails jdbcConnectionDetails;
 
-  private static final String BFD_ENV_LOCAL = "local";
+  private String dynamoLocalUrl = "http://localhost:8000";
 
   // Default to local configuration, this should be overridden on deployment with the correct
   // environment.
-  private String env = BFD_ENV_LOCAL;
+  private String env = LOCAL_ENV;
   private String dbIdentifier = "";
   private Local local = new Local();
   private Sensitive sensitive = new Sensitive();
@@ -64,7 +74,14 @@ public class Configuration implements Serializable {
 
   @Getter(lazy = true)
   private final Set<String> samhsaAllowedCertificateAliases =
-      getSamhsaAllowedCertificateAliasesInternal();
+      getValuesFromJson(nonsensitive.samhsaAllowedCertificateAliasesJson);
+
+  @Getter(lazy = true)
+  private final Set<String> disabledUris = getValuesFromJson(nonsensitive.disabledUrisJson);
+
+  @Getter(lazy = true)
+  private final Set<String> internalCertificateAliases =
+      getValuesFromJson(nonsensitive.internalCertificateAliasesJson);
 
   /**
    * Determines if the profile requires auth.
@@ -82,16 +99,79 @@ public class Configuration implements Serializable {
    * @return wrapper factory.
    */
   public DataSourceFactory getDataSourceFactory() {
-    if (useRds()) {
+    if (isLocal()) {
+      return new HikariDataSourceFactory(getDatabaseOptions());
+    } else {
       var awsConfig = getRdsClientConfig();
       return new AwsWrapperDataSourceFactory(getDatabaseOptions(), awsConfig);
-    } else {
-      return new HikariDataSourceFactory(getDatabaseOptions());
     }
   }
 
-  boolean useRds() {
-    return !env.equalsIgnoreCase(BFD_ENV_LOCAL);
+  /**
+   * Creates a new {@link AuditLogger}. If {@link AuditLoggerType} is DYNAMO_DB both loggers will be
+   * used.
+   *
+   * @param objectMapper used for serializing patient audit records
+   * @return audit logger
+   */
+  public AuditLogger getAuditLogger(ObjectMapper objectMapper) {
+    var logStreamLogger = new LogStreamAuditLogger(objectMapper);
+    if (getAuditLoggerType() == AuditLoggerType.DYNAMO_DB) {
+      var dynamoLogger =
+          new DynamoDbAuditLogger(
+              getDynamoDbClient(), objectMapper, getPatientMatchAuditTableName());
+
+      return auditRecord -> {
+        logStreamLogger.log(auditRecord);
+        dynamoLogger.log(auditRecord);
+      };
+    }
+    return logStreamLogger;
+  }
+
+  boolean isLocal() {
+    return env.equalsIgnoreCase(LOCAL_ENV);
+  }
+
+  /** Represents possible types of audit logging. */
+  public enum AuditLoggerType {
+    /** Use DYNAMO_DB for audit logging. */
+    DYNAMO_DB,
+    /** Use standard log stream for audit logging. */
+    LOG_STREAM
+  }
+
+  /**
+   * Returns the {@link AuditLoggerType} to use based on the current environment.
+   *
+   * @return the audit logger type
+   */
+  public AuditLoggerType getAuditLoggerType() {
+    return isLocal() ? AuditLoggerType.LOG_STREAM : AuditLoggerType.DYNAMO_DB;
+  }
+
+  /**
+   * Creates a new {@link DynamoDbClient}.
+   *
+   * @return a configured {@link DynamoDbClient} instance
+   */
+  public DynamoDbClient getDynamoDbClient() {
+    var region = regionProvider.getRegion();
+
+    if (isLocal()) {
+      return DynamoDbClient.builder()
+          .endpointOverride(URI.create(dynamoLocalUrl))
+          .region(region)
+          .credentialsProvider(
+              StaticCredentialsProvider.create(AwsBasicCredentials.create("dummy", "dummy")))
+          .build();
+    }
+
+    return DynamoDbClient.builder().region(region).credentialsProvider(credentialsProvider).build();
+  }
+
+  protected String getPatientMatchAuditTableName() {
+    return String.format("bfd-%s-patient-match-audit", env);
   }
 
   private Map<String, String> getClientCertsToAliasesInternal() {
@@ -100,9 +180,9 @@ public class Configuration implements Serializable {
             Collectors.toMap(e -> StringUtils.deleteWhitespace(e.getValue()), Map.Entry::getKey));
   }
 
-  private Set<String> getSamhsaAllowedCertificateAliasesInternal() {
+  private Set<String> getValuesFromJson(String jsonStr) {
     final var setType = new TypeToken<Set<String>>() {}.getType();
-    return new Gson().fromJson(nonsensitive.samhsaAllowedCertificateAliasesJson, setType);
+    return new Gson().fromJson(jsonStr, setType);
   }
 
   private JdbcConnectionDetails getJdbcConfiguration() {
@@ -110,9 +190,9 @@ public class Configuration implements Serializable {
   }
 
   private DatabaseOptions.DataSourceType getDataSourceType() {
-    return useRds()
-        ? DatabaseOptions.DataSourceType.AWS_WRAPPER
-        : DatabaseOptions.DataSourceType.HIKARI;
+    return isLocal()
+        ? DatabaseOptions.DataSourceType.HIKARI
+        : DatabaseOptions.DataSourceType.AWS_WRAPPER;
   }
 
   private AwsClientConfig getRdsClientConfig() {
@@ -192,9 +272,9 @@ public class Configuration implements Serializable {
   @ConfigurationProperties
   public static class Nonsensitive {
     private Db db = new Db();
-    private boolean eobEnabled = true;
-    private boolean patientEnabled = true;
-    private boolean coverageEnabled = true;
+    private String disabledUrisJson = "[]";
+    private String internalCertificateAliasesJson = "[]";
+    private String samhsaAllowedCertificateAliasesJson = "[]";
 
     /** Nonsensitive database configuration. */
     @Data
@@ -235,7 +315,5 @@ public class Configuration implements Serializable {
     }
 
     private final Map<String, String> clientCertificates = new HashMap<>();
-
-    private String samhsaAllowedCertificateAliasesJson;
   }
 }

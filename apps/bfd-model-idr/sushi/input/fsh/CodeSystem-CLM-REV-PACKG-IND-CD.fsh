@@ -1,5 +1,5 @@
 CodeSystem: CLM_REV_PACKG_IND_CD
-Title: "Claim Revenue Discount Indicator Code"
+Title: "Claim Revenue Center Packaging Indicator Code"
 Id: CLM-REV-PACKG-IND-CD
 Description: "THE DOMAIN OF CLAIM REVENUE PACKAGE INDICATOR CODES."
 * ^url = "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-PACKG-IND-CD"

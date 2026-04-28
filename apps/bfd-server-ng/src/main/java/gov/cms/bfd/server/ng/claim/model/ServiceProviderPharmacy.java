@@ -31,15 +31,9 @@ public class ServiceProviderPharmacy extends ProviderHistoryBase {
     return CareTeamType.SERVICE;
   }
 
-  /**
-   * Derives the NPI_TYPE based on the presence of the providerLegalName. NPI_TYPE = INDIVIDUAL
-   * means the NPI is for an individual (legal name is null/empty). NPI_TYPE = ORGANIZATION means
-   * the NPI is for an organization (legal name is present).
-   *
-   * @return the NPI type
-   */
+  @Override
   @Transient
-  public ProviderHistoryBase.NpiType getNpiType() {
+  protected ProviderHistoryBase.NpiType getNpiType() {
     if (providerFirstName.isEmpty() || getProviderNpiNumber().isEmpty()) {
       return ProviderHistoryBase.NpiType.ORGANIZATION;
     } else {

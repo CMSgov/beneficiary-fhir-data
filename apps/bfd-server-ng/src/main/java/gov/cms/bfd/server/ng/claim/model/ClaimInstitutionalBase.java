@@ -1,18 +1,14 @@
 package gov.cms.bfd.server.ng.claim.model;
 
+import static gov.cms.bfd.server.ng.claim.model.ClaimDiagnosisType.*;
+
 import gov.cms.bfd.server.ng.ClaimSecurityStatus;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.MappedSuperclass;
 import java.math.BigDecimal;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Optional;
-import java.util.PriorityQueue;
+import java.util.*;
 import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
@@ -89,10 +85,8 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
   public ExplanationOfBenefit toFhir(ClaimSecurityStatus securityStatus) {
     var eob = super.toFhir(securityStatus);
 
-    var consolidatedDiagnoses = computeConsolidatedDiagnoses();
-
     addClaimItems(eob);
-    addDiagnoses(eob, consolidatedDiagnoses);
+    addDiagnoses(eob);
     addProviders(eob);
     applyOutcomeOverride(eob);
     addAllSupportingInfo(eob);
@@ -123,6 +117,7 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
         .forEach(
             item -> {
               var claimLine = item.getClaimLine().toFhirItemComponent();
+              var claimContext = getClaimTypeCode().toContext();
 
               claimLine.ifPresent(eob::addItem);
               item.getClaimLine()
@@ -131,11 +126,13 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
                       provider ->
                           item.getClaimLine()
                               .getClaimLineNumber()
-                              .flatMap(provider::toFhirCareTeamComponent))
+                              .flatMap(
+                                  sequence ->
+                                      provider.toFhirCareTeamComponent(sequence, claimContext)))
                   .ifPresent(eob::addCareTeam);
               item.getClaimLine()
                   .toFhirSupportingInfo(supportingInfoFactory)
-                  .ifPresent(
+                  .forEach(
                       si -> {
                         eob.addSupportingInfo(si);
                         claimLine.ifPresent(cl -> cl.addInformationSequence(si.getSequence()));
@@ -146,17 +143,21 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
             });
   }
 
-  private void addDiagnoses(
-      ExplanationOfBenefit eob, List<ClaimProcedureBase> consolidatedDiagnoses) {
+  private void addDiagnoses(ExplanationOfBenefit eob) {
     var diagnosisSequenceGenerator = new SequenceGenerator();
-    getClaimTypeCode()
-        .toContext()
-        .ifPresent(
-            ctx ->
-                consolidatedDiagnoses.forEach(
-                    d ->
-                        d.toFhirDiagnosis(diagnosisSequenceGenerator, ctx)
-                            .ifPresent(eob::addDiagnosis)));
+
+    // We ignore procedures with claim diagnosis type 1 since it's always the same as claim
+    // diagnosis type E with sequence number 1
+    for (var item : getItems()) {
+      item.getProcedure()
+          .flatMap(
+              procedure ->
+                  procedure
+                      .getDiagnosisType()
+                      .filter(type -> type != FIRST)
+                      .flatMap(_ -> procedure.toFhirDiagnosis(diagnosisSequenceGenerator)))
+          .ifPresent(eob::addDiagnosis);
+    }
   }
 
   private void addProviders(ExplanationOfBenefit eob) {
@@ -197,13 +198,14 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
 
   private void addCareTeam(ExplanationOfBenefit eob) {
     var sequenceGenerator = new SequenceGenerator(eob.getCareTeam().size() + 1);
+    var claimContext = getClaimTypeCode().toContext();
     Stream.of(
             getAttendingProviderHistory(),
             getOperatingProviderHistory(),
             getOtherProviderHistory(),
             getRenderingProviderHistory(),
             getReferringProviderHistory())
-        .flatMap(p -> p.toFhirCareTeamComponent(sequenceGenerator.next()).stream())
+        .flatMap(p -> p.toFhirCareTeamComponent(sequenceGenerator.next(), claimContext).stream())
         .forEach(eob::addCareTeam);
 
     addSubclassCareTeam(eob, sequenceGenerator);
@@ -217,60 +219,6 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
         .ifPresent(eob::addTotal);
     getAdjudicationCharge().toFhirAdjudication().forEach(eob::addAdjudication);
     eob.setPayment(getClaimPaymentAmount().toFhir());
-  }
-
-  /**
-   * Computes the deduplicated, priority-sorted list of diagnoses across all claim items.
-   *
-   * @return deduplicated list
-   */
-  protected List<ClaimProcedureBase> computeConsolidatedDiagnoses() {
-
-    // Group the diagnoses by code + ICD indicator and sort them by rank.
-    // We'll pick the first diagnosis from each group and discard the rest.
-    var diagnosisMap = new LinkedHashMap<String, PriorityQueue<ClaimProcedureBase>>();
-    var poaDiagnoses = new HashMap<String, String>();
-
-    for (var item : getItems()) {
-      item.getProcedure()
-          .ifPresent(
-              procedure -> {
-                var keyOpt = procedure.getDiagnosisKey();
-                keyOpt.ifPresent(
-                    key -> {
-                      procedure
-                          .getClaimPoaIndicator()
-                          .ifPresent(
-                              p -> poaDiagnoses.merge(key, p, (oldVal, newVal) -> oldVal + newVal));
-
-                      diagnosisMap
-                          .computeIfAbsent(
-                              key,
-                              _ ->
-                                  new PriorityQueue<>(
-                                      Comparator.comparingInt(
-                                          a ->
-                                              a.getDiagnosisPriority(ClaimContext.INSTITUTIONAL)
-                                                  .orElse(0))))
-                          .add(procedure);
-                    });
-              });
-    }
-
-    return diagnosisMap.values().stream()
-        .map(
-            d -> {
-              var procedure = d.peek();
-              // POA may not be set on the diagnosis we pick, but it may be present on one of the
-              // duplicates.
-              // Check these and set the POA indicator where applicable.
-              var poaIndicator = poaDiagnoses.getOrDefault(procedure.getDiagnosisKey().get(), "");
-              if (procedure.getClaimPoaIndicator().isEmpty() && !poaIndicator.isEmpty()) {
-                procedure.setClaimPoaIndicator(poaIndicator);
-              }
-              return procedure;
-            })
-        .toList();
   }
 
   /**

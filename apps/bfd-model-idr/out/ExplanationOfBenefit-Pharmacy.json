@@ -1,9 +1,9 @@
 {
   "resourceType" : "ExplanationOfBenefit",
   "meta" : {
-    "lastUpdated" : "2026-03-18T20:19:19.286130Z",
+    "lastUpdated" : "2026-01-01T03:02:28.000000Z",
     "source" : "DDPS",
-    "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Pharmacy|2.1.0"],
+    "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Pharmacy|2.2.0"],
     "tag" : [{
       "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type",
       "code" : "DDPS"
@@ -13,8 +13,8 @@
     "resourceType" : "Organization",
     "id" : "insurer-org",
     "meta" : {
-      "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0",
-      "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|6.1.0"]
+      "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0",
+      "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|7.0.0"]
     },
     "active" : true,
     "name" : "Super Saver Medicare Rx Saver Plus (PDP)"
