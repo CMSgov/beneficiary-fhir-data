@@ -23,14 +23,17 @@ IDR_DATABASE="$(aws ssm get-parameter --name /bfd/${BFD_ENV}/idr-pipeline/sensit
 readonly IDR_DATABASE
 export IDR_DATABASE
 
-folder="${TMPDIR}/idr_private.p8"
+TEMP_KEY_FILE="${TMPDIR:-'/tmp'}/idr_private.p8"
 
-echo "${IDR_PRIVATE_KEY}" > "${folder}"
+echo "${IDR_PRIVATE_KEY}" > "${TEMP_KEY_FILE}"
+chmod 600 "${TEMP_KEY_FILE}"
 
 (
     cd "$SCRIPT_DIR"
     mvn flyway:migrate \
-        "-Dflyway.url=jdbc:snowflake://$IDR_ACCOUNT.snowflakecomputing.com/?db=${IDR_DATABASE}&warehouse=${IDR_WAREHOUSE}&role=SERVICE_USER&JDBC_QUERY_RESULT_FORMAT=JSON&authenticator=snowflake_jwt&private_key_file=${folder}" \
+        "-Dflyway.url=jdbc:snowflake://$IDR_ACCOUNT.snowflakecomputing.com/?db=${IDR_DATABASE}&warehouse=${IDR_WAREHOUSE}&role=SERVICE_USER&JDBC_QUERY_RESULT_FORMAT=JSON&authenticator=snowflake_jwt&private_key_file=${TEMP_KEY_FILE}" \
         "-Dflyway.user=$IDR_USERNAME" \
         "-Dflyway.callbackLocations=filesystem:$SCRIPT_DIR/callbacks"
-) || rm "${folder}"
+) || rm "${TEMP_KEY_FILE}" # ensure private key gets deleted on failure
+
+rm "${TEMP_KEY_FILE}"
