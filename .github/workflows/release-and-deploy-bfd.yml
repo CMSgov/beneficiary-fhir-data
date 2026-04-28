@@ -49,8 +49,7 @@ jobs:
       - name: Get role ARN
         id: get-role-arn
         run: |
-          role_arn="$(jq -r --arg account_type "${{ matrix.account }}" '.[$account_type]' <<<"$ACCOUNT_ROLE_MAP")"
-
+          role_arn="${{ secrets.NON_PROD_ACCOUNT_GHA_ROLE_ARN }}"
           echo "::add-mask::$role_arn"
           echo "role-arn=$role_arn" >> "$GITHUB_OUTPUT"
 
@@ -61,7 +60,7 @@ jobs:
         with:
           role-to-assume: ${{ steps.get-role-arn.outputs.role-arn }}
           role-session-name: get-sops-slack-webhook-${{ github.run_id }}-${{ github.run_attempt }}
-          aws-region: ${{ env.AWS_REGION }}
+          aws-region: ${{ inputs.aws-region }}
 
       - name: Load Slack webhook
         uses: cmsgov/cdap/actions/aws-params-env-action@main
