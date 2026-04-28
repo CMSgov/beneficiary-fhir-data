@@ -120,7 +120,7 @@ def purge_non_latest_claims(
         if partition.start_date is None
         else f"""
     p.clm_from_dt BETWEEN '{partition.start_date.strftime("%Y-%m-%d")}'
-    AND '{partition.start_date.strftime("%Y-%m-%d")}'
+    AND '{partition.end_date.strftime("%Y-%m-%d")}'
     """
     )
     claim_type_codes = ",".join([str(c) for c in partition.claim_type_codes])
