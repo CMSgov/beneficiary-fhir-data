@@ -60,8 +60,8 @@ abstract class ClaimLineProfessionalBase implements ClaimLineBase {
     thruDate.ifPresentOrElse(
         thru -> {
           var period = new Period();
-          fromDate.ifPresent(d -> period.setStart(DateUtil.toDate(d)));
-          period.setEnd(DateUtil.toDate(thru));
+          fromDate.ifPresent(d -> period.setStartElement(DateUtil.toFhirDate(d)));
+          period.setEndElement(DateUtil.toFhirDate(thru));
           line.setServiced(period);
         },
         () -> fromDate.ifPresent(d -> line.setServiced(new DateType(DateUtil.toDate(d)))));

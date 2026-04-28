@@ -1098,8 +1098,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
         },
         "sequence" : 1,
         "servicedPeriod" : {
-          "end" : "2019-09-30T00:00:00+00:00",
-          "start" : "2019-09-23T00:00:00+00:00"
+          "end" : "2019-09-30",
+          "start" : "2019-09-23"
         }
       }, {
         "adjudication" : [ {
@@ -1386,8 +1386,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
         },
         "sequence" : 2,
         "servicedPeriod" : {
-          "end" : "2019-09-30T00:00:00+00:00",
-          "start" : "2019-09-23T00:00:00+00:00"
+          "end" : "2019-09-30",
+          "start" : "2019-09-23"
         }
       }, {
         "adjudication" : [ {
@@ -1701,8 +1701,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
         },
         "sequence" : 3,
         "servicedPeriod" : {
-          "end" : "2019-09-30T00:00:00+00:00",
-          "start" : "2019-09-23T00:00:00+00:00"
+          "end" : "2019-09-30",
+          "start" : "2019-09-23"
         }
       }, {
         "adjudication" : [ {
@@ -1998,8 +1998,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
         },
         "sequence" : 4,
         "servicedPeriod" : {
-          "end" : "2019-09-30T00:00:00+00:00",
-          "start" : "2019-09-23T00:00:00+00:00"
+          "end" : "2019-09-30",
+          "start" : "2019-09-23"
         }
       }, {
         "adjudication" : [ {
@@ -2301,8 +2301,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
         },
         "sequence" : 5,
         "servicedPeriod" : {
-          "end" : "2019-09-30T00:00:00+00:00",
-          "start" : "2019-09-23T00:00:00+00:00"
+          "end" : "2019-09-30",
+          "start" : "2019-09-23"
         }
       }, {
         "adjudication" : [ {
@@ -2595,8 +2595,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
         },
         "sequence" : 6,
         "servicedPeriod" : {
-          "end" : "2019-09-30T00:00:00+00:00",
-          "start" : "2019-09-23T00:00:00+00:00"
+          "end" : "2019-09-30",
+          "start" : "2019-09-23"
         }
       }, {
         "adjudication" : [ {
@@ -2904,8 +2904,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
         },
         "sequence" : 7,
         "servicedPeriod" : {
-          "end" : "2019-09-30T00:00:00+00:00",
-          "start" : "2019-09-23T00:00:00+00:00"
+          "end" : "2019-09-30",
+          "start" : "2019-09-23"
         }
       }, {
         "adjudication" : [ {
@@ -3213,8 +3213,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
         },
         "sequence" : 8,
         "servicedPeriod" : {
-          "end" : "2019-09-30T00:00:00+00:00",
-          "start" : "2019-09-23T00:00:00+00:00"
+          "end" : "2019-09-30",
+          "start" : "2019-09-23"
         }
       }, {
         "adjudication" : [ {
@@ -3510,8 +3510,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
         },
         "sequence" : 9,
         "servicedPeriod" : {
-          "end" : "2019-09-30T00:00:00+00:00",
-          "start" : "2019-09-23T00:00:00+00:00"
+          "end" : "2019-09-30",
+          "start" : "2019-09-23"
         }
       }, {
         "adjudication" : [ {
@@ -3807,8 +3807,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
         },
         "sequence" : 10,
         "servicedPeriod" : {
-          "end" : "2019-09-30T00:00:00+00:00",
-          "start" : "2019-09-23T00:00:00+00:00"
+          "end" : "2019-09-30",
+          "start" : "2019-09-23"
         }
       } ],
       "meta" : {
@@ -5301,8 +5301,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         },
         "sequence" : 1,
         "servicedPeriod" : {
-          "end" : "2019-12-03T00:00:00+00:00",
-          "start" : "2019-11-17T00:00:00+00:00"
+          "end" : "2019-12-03",
+          "start" : "2019-11-17"
         }
       }, {
         "adjudication" : [ {
@@ -5588,8 +5588,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         },
         "sequence" : 2,
         "servicedPeriod" : {
-          "end" : "2019-12-03T00:00:00+00:00",
-          "start" : "2019-11-17T00:00:00+00:00"
+          "end" : "2019-12-03",
+          "start" : "2019-11-17"
         }
       }, {
         "adjudication" : [ {
@@ -5883,8 +5883,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         },
         "sequence" : 3,
         "servicedPeriod" : {
-          "end" : "2019-12-03T00:00:00+00:00",
-          "start" : "2019-11-17T00:00:00+00:00"
+          "end" : "2019-12-03",
+          "start" : "2019-11-17"
         }
       } ],
       "meta" : {
@@ -7552,8 +7552,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         },
         "sequence" : 1,
         "servicedPeriod" : {
-          "end" : "2019-09-30T00:00:00+00:00",
-          "start" : "2019-09-23T00:00:00+00:00"
+          "end" : "2019-09-30",
+          "start" : "2019-09-23"
         }
       }, {
         "adjudication" : [ {
@@ -7829,8 +7829,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         },
         "sequence" : 2,
         "servicedPeriod" : {
-          "end" : "2019-09-30T00:00:00+00:00",
-          "start" : "2019-09-23T00:00:00+00:00"
+          "end" : "2019-09-30",
+          "start" : "2019-09-23"
         }
       }, {
         "adjudication" : [ {
@@ -8139,8 +8139,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         },
         "sequence" : 3,
         "servicedPeriod" : {
-          "end" : "2019-09-30T00:00:00+00:00",
-          "start" : "2019-09-23T00:00:00+00:00"
+          "end" : "2019-09-30",
+          "start" : "2019-09-23"
         }
       }, {
         "adjudication" : [ {
@@ -8425,8 +8425,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         },
         "sequence" : 4,
         "servicedPeriod" : {
-          "end" : "2019-09-30T00:00:00+00:00",
-          "start" : "2019-09-23T00:00:00+00:00"
+          "end" : "2019-09-30",
+          "start" : "2019-09-23"
         }
       }, {
         "adjudication" : [ {
@@ -8717,8 +8717,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         },
         "sequence" : 5,
         "servicedPeriod" : {
-          "end" : "2019-09-30T00:00:00+00:00",
-          "start" : "2019-09-23T00:00:00+00:00"
+          "end" : "2019-09-30",
+          "start" : "2019-09-23"
         }
       }, {
         "adjudication" : [ {
@@ -9006,8 +9006,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         },
         "sequence" : 6,
         "servicedPeriod" : {
-          "end" : "2019-09-30T00:00:00+00:00",
-          "start" : "2019-09-23T00:00:00+00:00"
+          "end" : "2019-09-30",
+          "start" : "2019-09-23"
         }
       }, {
         "adjudication" : [ {
@@ -9310,8 +9310,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         },
         "sequence" : 7,
         "servicedPeriod" : {
-          "end" : "2019-09-30T00:00:00+00:00",
-          "start" : "2019-09-23T00:00:00+00:00"
+          "end" : "2019-09-30",
+          "start" : "2019-09-23"
         }
       }, {
         "adjudication" : [ {
@@ -9614,8 +9614,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         },
         "sequence" : 8,
         "servicedPeriod" : {
-          "end" : "2019-09-30T00:00:00+00:00",
-          "start" : "2019-09-23T00:00:00+00:00"
+          "end" : "2019-09-30",
+          "start" : "2019-09-23"
         }
       }, {
         "adjudication" : [ {
@@ -9906,8 +9906,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         },
         "sequence" : 9,
         "servicedPeriod" : {
-          "end" : "2019-09-30T00:00:00+00:00",
-          "start" : "2019-09-23T00:00:00+00:00"
+          "end" : "2019-09-30",
+          "start" : "2019-09-23"
         }
       } ],
       "meta" : {
@@ -11274,8 +11274,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         },
         "sequence" : 1,
         "servicedPeriod" : {
-          "end" : "2020-09-11T00:00:00+00:00",
-          "start" : "2020-09-01T00:00:00+00:00"
+          "end" : "2020-09-11",
+          "start" : "2020-09-01"
         }
       }, {
         "adjudication" : [ {
@@ -11565,8 +11565,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         },
         "sequence" : 2,
         "servicedPeriod" : {
-          "end" : "2020-09-11T00:00:00+00:00",
-          "start" : "2020-09-01T00:00:00+00:00"
+          "end" : "2020-09-11",
+          "start" : "2020-09-01"
         }
       }, {
         "adjudication" : [ {
@@ -11851,8 +11851,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         },
         "sequence" : 3,
         "servicedPeriod" : {
-          "end" : "2020-09-11T00:00:00+00:00",
-          "start" : "2020-09-01T00:00:00+00:00"
+          "end" : "2020-09-11",
+          "start" : "2020-09-01"
         }
       } ],
       "meta" : {
@@ -13382,8 +13382,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         },
         "sequence" : 1,
         "servicedPeriod" : {
-          "end" : "2019-12-03T00:00:00+00:00",
-          "start" : "2019-11-17T00:00:00+00:00"
+          "end" : "2019-12-03",
+          "start" : "2019-11-17"
         }
       }, {
         "adjudication" : [ {
@@ -13669,8 +13669,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         },
         "sequence" : 2,
         "servicedPeriod" : {
-          "end" : "2019-12-03T00:00:00+00:00",
-          "start" : "2019-11-17T00:00:00+00:00"
+          "end" : "2019-12-03",
+          "start" : "2019-11-17"
         }
       }, {
         "adjudication" : [ {
@@ -13964,8 +13964,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         },
         "sequence" : 3,
         "servicedPeriod" : {
-          "end" : "2019-12-03T00:00:00+00:00",
-          "start" : "2019-11-17T00:00:00+00:00"
+          "end" : "2019-12-03",
+          "start" : "2019-11-17"
         }
       } ],
       "meta" : {
@@ -15633,8 +15633,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         },
         "sequence" : 1,
         "servicedPeriod" : {
-          "end" : "2019-09-30T00:00:00+00:00",
-          "start" : "2019-09-23T00:00:00+00:00"
+          "end" : "2019-09-30",
+          "start" : "2019-09-23"
         }
       }, {
         "adjudication" : [ {
@@ -15910,8 +15910,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         },
         "sequence" : 2,
         "servicedPeriod" : {
-          "end" : "2019-09-30T00:00:00+00:00",
-          "start" : "2019-09-23T00:00:00+00:00"
+          "end" : "2019-09-30",
+          "start" : "2019-09-23"
         }
       }, {
         "adjudication" : [ {
@@ -16220,8 +16220,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         },
         "sequence" : 3,
         "servicedPeriod" : {
-          "end" : "2019-09-30T00:00:00+00:00",
-          "start" : "2019-09-23T00:00:00+00:00"
+          "end" : "2019-09-30",
+          "start" : "2019-09-23"
         }
       }, {
         "adjudication" : [ {
@@ -16506,8 +16506,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         },
         "sequence" : 4,
         "servicedPeriod" : {
-          "end" : "2019-09-30T00:00:00+00:00",
-          "start" : "2019-09-23T00:00:00+00:00"
+          "end" : "2019-09-30",
+          "start" : "2019-09-23"
         }
       }, {
         "adjudication" : [ {
@@ -16798,8 +16798,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         },
         "sequence" : 5,
         "servicedPeriod" : {
-          "end" : "2019-09-30T00:00:00+00:00",
-          "start" : "2019-09-23T00:00:00+00:00"
+          "end" : "2019-09-30",
+          "start" : "2019-09-23"
         }
       }, {
         "adjudication" : [ {
@@ -17087,8 +17087,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         },
         "sequence" : 6,
         "servicedPeriod" : {
-          "end" : "2019-09-30T00:00:00+00:00",
-          "start" : "2019-09-23T00:00:00+00:00"
+          "end" : "2019-09-30",
+          "start" : "2019-09-23"
         }
       }, {
         "adjudication" : [ {
@@ -17391,8 +17391,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         },
         "sequence" : 7,
         "servicedPeriod" : {
-          "end" : "2019-09-30T00:00:00+00:00",
-          "start" : "2019-09-23T00:00:00+00:00"
+          "end" : "2019-09-30",
+          "start" : "2019-09-23"
         }
       }, {
         "adjudication" : [ {
@@ -17695,8 +17695,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         },
         "sequence" : 8,
         "servicedPeriod" : {
-          "end" : "2019-09-30T00:00:00+00:00",
-          "start" : "2019-09-23T00:00:00+00:00"
+          "end" : "2019-09-30",
+          "start" : "2019-09-23"
         }
       }, {
         "adjudication" : [ {
@@ -17987,8 +17987,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         },
         "sequence" : 9,
         "servicedPeriod" : {
-          "end" : "2019-09-30T00:00:00+00:00",
-          "start" : "2019-09-23T00:00:00+00:00"
+          "end" : "2019-09-30",
+          "start" : "2019-09-23"
         }
       } ],
       "meta" : {
@@ -19355,8 +19355,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         },
         "sequence" : 1,
         "servicedPeriod" : {
-          "end" : "2020-09-11T00:00:00+00:00",
-          "start" : "2020-09-01T00:00:00+00:00"
+          "end" : "2020-09-11",
+          "start" : "2020-09-01"
         }
       }, {
         "adjudication" : [ {
@@ -19646,8 +19646,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         },
         "sequence" : 2,
         "servicedPeriod" : {
-          "end" : "2020-09-11T00:00:00+00:00",
-          "start" : "2020-09-01T00:00:00+00:00"
+          "end" : "2020-09-11",
+          "start" : "2020-09-01"
         }
       }, {
         "adjudication" : [ {
@@ -19932,8 +19932,8 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         },
         "sequence" : 3,
         "servicedPeriod" : {
-          "end" : "2020-09-11T00:00:00+00:00",
-          "start" : "2020-09-01T00:00:00+00:00"
+          "end" : "2020-09-11",
+          "start" : "2020-09-01"
         }
       } ],
       "meta" : {

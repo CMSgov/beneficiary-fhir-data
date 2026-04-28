@@ -939,8 +939,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
     },
     "sequence" : 1,
     "servicedPeriod" : {
-      "end" : "2024-04-01T00:00:00+00:00",
-      "start" : "2024-03-04T00:00:00+00:00"
+      "end" : "2024-04-01",
+      "start" : "2024-03-04"
     }
   } ],
   "meta" : {
@@ -2317,8 +2317,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
     },
     "sequence" : 1,
     "servicedPeriod" : {
-      "end" : "2021-12-26T00:00:00+00:00",
-      "start" : "2021-12-21T00:00:00+00:00"
+      "end" : "2021-12-26",
+      "start" : "2021-12-21"
     }
   } ],
   "meta" : {
@@ -3238,8 +3238,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
     },
     "sequence" : 1,
     "servicedPeriod" : {
-      "end" : "2021-12-26T00:00:00+00:00",
-      "start" : "2021-12-21T00:00:00+00:00"
+      "end" : "2021-12-26",
+      "start" : "2021-12-21"
     }
   } ],
   "meta" : {
@@ -4033,8 +4033,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
     },
     "sequence" : 1,
     "servicedPeriod" : {
-      "end" : "2021-12-26T00:00:00+00:00",
-      "start" : "2021-12-21T00:00:00+00:00"
+      "end" : "2021-12-26",
+      "start" : "2021-12-21"
     }
   } ],
   "meta" : {
@@ -5301,8 +5301,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
     },
     "sequence" : 1,
     "servicedPeriod" : {
-      "end" : "2024-04-01T00:00:00+00:00",
-      "start" : "2024-03-04T00:00:00+00:00"
+      "end" : "2024-04-01",
+      "start" : "2024-03-04"
     }
   } ],
   "meta" : {
@@ -6920,8 +6920,8 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
     },
     "sequence" : 1,
     "servicedPeriod" : {
-      "end" : "2024-04-01T00:00:00+00:00",
-      "start" : "2024-03-04T00:00:00+00:00"
+      "end" : "2024-04-01",
+      "start" : "2024-03-04"
     }
   } ],
   "meta" : {
