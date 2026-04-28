@@ -117,7 +117,7 @@ def purge_non_latest_claims(
 
     claim_range_filter = (
         "1 = 1"
-        if partition.start_date is None
+        if partition.start_date is None or partition.end_date is None
         else f"""
     p.clm_from_dt BETWEEN '{partition.start_date.strftime("%Y-%m-%d")}'
     AND '{partition.end_date.strftime("%Y-%m-%d")}'
