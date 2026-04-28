@@ -42,12 +42,11 @@ jobs:
         with:
           node-version: 24.x
 
-      - name: Assume role to AWS
-        uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 # v6.1.0
-        env:
-          AWS_REGION: ${{ github.event.inputs.aws-region || 'us-east-1' }}
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
         with:
-          role-to-assume: arn:aws:iam::${{ github.ref_name =='main' && secrets.PROD_ACCOUNT || secrets.NON_PROD_ACCOUNT }}:role/delegatedadmin/developer/${{ github.ref_name =='main' && 'cdap-prod' || 'cdap-test' }}-github-actions
+          role-to-assume: ${{ steps.get-role-arn.outputs.role-arn }}
+          role-session-name: get-sops-slack-webhook-${{ github.run_id }}-${{ github.run_attempt }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Load Slack webhook
