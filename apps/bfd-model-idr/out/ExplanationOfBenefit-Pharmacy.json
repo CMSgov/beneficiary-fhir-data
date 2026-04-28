@@ -1,9 +1,10 @@
 {
   "resourceType" : "ExplanationOfBenefit",
   "meta" : {
-    "lastUpdated" : "2026-03-18T20:19:19.286130Z",
+    "lastUpdated" : "2026-04-27T13:49:12.139937Z",
     "source" : "DDPS",
-    "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Pharmacy|2.1.0"],
+    "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Pharmacy|2.2.0",
+    "https://bluebutton.cms.gov/fhir/StructureDefinition/ExplanationOfBenefit-Pharmacy"],
     "tag" : [{
       "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type",
       "code" : "DDPS"

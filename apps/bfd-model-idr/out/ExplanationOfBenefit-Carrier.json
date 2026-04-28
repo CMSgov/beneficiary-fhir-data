@@ -1,9 +1,10 @@
 {
   "resourceType" : "ExplanationOfBenefit",
   "meta" : {
-    "lastUpdated" : "2026-03-18T20:18:40.916877Z",
+    "lastUpdated" : "2026-04-27T13:48:24.824615Z",
     "source" : "NCH",
-    "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Professional-NonClinician|2.1.0"],
+    "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Professional-NonClinician|2.2.0",
+    "https://bluebutton.cms.gov/fhir/StructureDefinition/ExplanationOfBenefit-Professional-NonClinician"],
     "tag" : [{
       "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/System-Type",
       "code" : "NationalClaimsHistory"
@@ -704,7 +705,6 @@
     }
   },
   {
-    "sequence" : 29,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -720,7 +720,6 @@
     "valueString" : "ALA00000047747"
   },
   {
-    "sequence" : 30,
     "category" : {
       "coding" : [{
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
@@ -897,7 +896,6 @@
     }],
     "sequence" : 1,
     "careTeamSequence" : [1],
-    "informationSequence" : [29],
     "revenue" : {
       "coding" : [{
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD",
@@ -1101,7 +1099,6 @@
     }],
     "sequence" : 2,
     "careTeamSequence" : [2],
-    "informationSequence" : [30],
     "revenue" : {
       "coding" : [{
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD",
