@@ -22,6 +22,12 @@ copy:
   - /bfd/${env}/idr-pipeline/sensitive/idr_database
   - /bfd/${env}/idr-pipeline/sensitive/idr_schema
   - /bfd/${env}/idr-pipeline/sensitive/idr_private_key
+  - /bfd/${env}/idr-pipeline/sensitive/synthetic_env_username
+  - /bfd/${env}/idr-pipeline/sensitive/synthetic_env_account
+  - /bfd/${env}/idr-pipeline/sensitive/synthetic_env_database
+  - /bfd/${env}/idr-pipeline/sensitive/synthetic_env_warehouse
+  - /bfd/${env}/idr-pipeline/sensitive/synthetic_env_schema
+  - /bfd/${env}/idr-pipeline/sensitive/synthetic_env_private_key
   - /bfd/${env}/ccw-pipeline/sensitive/db/password
   - /bfd/${env}/ccw-pipeline/sensitive/db/username
   - /bfd/${env}/ccw-pipeline/sensitive/hicn_hash/iterations
@@ -146,7 +152,8 @@ values:
   /bfd/${env}/server/nonsensitive/db/wrapper/use_custom_preset: "true"
   /bfd/${env}/server/nonsensitive/db/wrapper/base_preset: E
   # Plugin list is in sorted order, do not reorder or AWS JDBC Wrapper behavior could change
-  /bfd/${env}/server/nonsensitive/db/wrapper/plugins_csv: "singleNodeHostOverride,initialConnection,auroraConnectionTracker,failover2,efm2"
+  /bfd/${env}/server/nonsensitive/db/wrapper/plugins_csv: "singleNodeHostOverride\
+    ,initialConnection,auroraConnectionTracker,failover2,efm2"
   /bfd/${env}/server/nonsensitive/db/wrapper/host_selector_strategy: leastConnections
   /bfd/${env}/server/nonsensitive/db/wrapper/cluster_topology_refresh_rate_ms: 10000
   /bfd/${env}/server/nonsensitive/db/wrapper/instance_state_monitor_refresh_rate_ms: 5000
@@ -168,7 +175,8 @@ values:
   /bfd/${env}/server-ng/nonsensitive/db/wrapper/use_custom_preset: "true"
   /bfd/${env}/server-ng/nonsensitive/db/wrapper/base_preset: E
   # Plugin list is in sorted order, do not reorder or AWS JDBC Wrapper behavior could change
-  /bfd/${env}/server-ng/nonsensitive/db/wrapper/plugins_csv: "singleNodeHostOverride,initialConnection,auroraConnectionTracker,failover2,efm2"
+  /bfd/${env}/server-ng/nonsensitive/db/wrapper/plugins_csv: "singleNodeHostOverr\
+    ide,initialConnection,auroraConnectionTracker,failover2,efm2"
   /bfd/${env}/server-ng/nonsensitive/db/wrapper/host_selector_strategy: leastConnections
   /bfd/${env}/server-ng/nonsensitive/db/wrapper/cluster_topology_refresh_rate_ms: 10000
   /bfd/${env}/server-ng/nonsensitive/db/wrapper/instance_state_monitor_refresh_rate_ms: 5000

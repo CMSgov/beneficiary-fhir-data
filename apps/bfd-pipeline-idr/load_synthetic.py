@@ -113,7 +113,7 @@ def load_from_csv(extractor: DbExecutor, src_folder: str) -> None:
     for table in tables:
         # Clear out any previous data
         sql_table = table["table"]
-        extractor.execute(f"TRUNCATE TABLE {sql_table}")  # type: ignore
+        extractor.execute(f"TRUNCATE TABLE {sql_table}")
         file = table["csv_name"]
         _load_file(extractor, src_folder, file, sql_table)
         extractor.commit()
@@ -138,10 +138,11 @@ def _load_file(extractor: DbExecutor, src_folder: str, file: str, full_table: st
             # fetch the list of columns from the database and filter them out
             # so we don't get errors trying to insert extra columns
             db_columns = extractor.query(
-                t"""
+                """
                     SELECT column_name FROM INFORMATION_SCHEMA.COLUMNS
-                    WHERE table_name = {sql_table}
-                """  # type: ignore
+                    WHERE table_name = %(sql_table)s
+                """,
+                {"sql_table": sql_table},
             )
             db_columns = [typing.cast(str, col["column_name"]).lower() for col in db_columns]
 
