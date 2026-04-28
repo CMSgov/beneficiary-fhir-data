@@ -173,6 +173,13 @@ jobs:
           echo "failed_stage=$FAILED_STAGE" >> $GITHUB_OUTPUT
           echo "color=$COLOR" >> $GITHUB_OUTPUT
 
+      - name: Assume role to AWS
+        uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 # v6.1.0
+        with:
+          role-to-assume: ${{ steps.get-role-arn.outputs.role-arn }}
+          role-session-name: get-sops-slack-webhook-${{ github.run_id }}-${{ github.run_attempt }}
+          aws-region: ${{ inputs.aws-region }}
+
       - name: Slack - FINAL SUMMARY
         uses: slackapi/slack-github-action@03ea5433c137af7c0495bc0cad1af10403fc800c # v3.0.2
         with:
