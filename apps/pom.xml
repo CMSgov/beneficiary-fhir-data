@@ -45,6 +45,7 @@
 
     <modules>
         <module>bfd-db-migrator-ng</module>
+        <module>bfd-db-migrator-synthetic</module>
         <module>bfd-db-migrator</module>
         <module>bfd-model</module>
         <module>bfd-ops</module>
@@ -159,10 +160,11 @@
         <assertj.version>3.27.3</assertj.version>
         <system-lambda-version>1.2.1</system-lambda-version>
         <postgresql.version>42.7.7</postgresql.version>
+        <snowflake.version>4.1.0</snowflake.version>
         <slf4j.version>2.0.17</slf4j.version>
         <log4j.version>2.24.3</log4j.version>
         <hikari.version>6.2.1</hikari.version>
-        <flyway.version>11.13.2</flyway.version>
+        <flyway.version>12.4.0</flyway.version>
         <checkstyle.version>10.21.4</checkstyle.version>
         <guava.version>32.1.2-jre</guava.version>
         <!--
@@ -393,6 +395,11 @@
             <dependency>
                 <groupId>org.flywaydb</groupId>
                 <artifactId>flyway-database-postgresql</artifactId>
+                <version>${flyway.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.flywaydb</groupId>
+                <artifactId>flyway-database-snowflake</artifactId>
                 <version>${flyway.version}</version>
             </dependency>
             <!-- https://mvnrepository.com/artifact/net.bytebuddy/byte-buddy -->
@@ -672,7 +679,11 @@
                 <artifactId>HikariCP</artifactId>
                 <version>${hikari.version}</version>
             </dependency>
-
+            <dependency>
+                <groupId>net.snowflake</groupId>
+                <artifactId>snowflake-jdbc</artifactId>
+                <version>${snowflake.version}</version>
+            </dependency>
             <dependency>
                 <!-- Used implicitly by jackson-dataformat-yaml.  -->
                 <!-- Defining it here to override older version referenced by jackson-dataformat-yaml. -->

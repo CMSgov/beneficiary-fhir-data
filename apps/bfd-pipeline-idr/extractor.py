@@ -194,9 +194,7 @@ class DbExecutor(ABC):
         pass
 
     @abstractmethod
-    def query(
-        self, sql: str, params: dict[str, DbType] | None = None
-    ) -> Iterator[dict[str, DbType]]:
+    def query(self, sql: str, params: dict[str, DbType] | None = None) -> list[dict[str, DbType]]:
         pass
 
     @abstractmethod
@@ -256,9 +254,7 @@ class PostgresExecutor(DbExecutor):
         cur.execute(sql, params)  # type: ignore
 
     @override
-    def query(
-        self, sql: str, params: dict[str, DbType] | None = None
-    ) -> Iterator[dict[str, DbType]]:
+    def query(self, sql: str, params: dict[str, DbType] | None = None) -> list[dict[str, DbType]]:
         cur = self.conn.cursor(row_factory=dict_row)
         res = cur.execute(sql, params)  # type: ignore
         return res.fetchall()  # type: ignore
@@ -401,9 +397,7 @@ class SnowflakeExecutor(DbExecutor):
         cur.execute(sql, params)
 
     @override
-    def query(
-        self, sql: str, params: dict[str, DbType] | None = None
-    ) -> Iterator[dict[str, DbType]]:
+    def query(self, sql: str, params: dict[str, DbType] | None = None) -> list[dict[str, DbType]]:
         cur = self.conn.cursor(DictCursor)
         res = cur.execute(sql, params).fetchall()  # type: ignore
         return [{k.lower(): r[k] for k in r} for r in res]  # type: ignore

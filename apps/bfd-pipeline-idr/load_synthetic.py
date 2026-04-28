@@ -140,11 +140,12 @@ def _load_file(extractor: DbExecutor, src_folder: str, file: str, full_table: st
             db_columns = extractor.query(
                 """
                     SELECT column_name FROM INFORMATION_SCHEMA.COLUMNS
-                    WHERE table_name = %(sql_table)s
+                    WHERE table_name ilike %(sql_table)s
                 """,
                 {"sql_table": sql_table},
             )
             db_columns = [typing.cast(str, col["column_name"]).lower() for col in db_columns]
+            logger.info("found %d columns", len(db_columns))
 
             cols = [
                 col
