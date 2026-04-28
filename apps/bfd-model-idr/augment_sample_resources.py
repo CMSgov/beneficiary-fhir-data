@@ -128,7 +128,10 @@ header_to_supp_info_cols = {
     "CLM_NGACO_TLHLTH_SW": "CLM_NGACO_TLHLTH_SW",
     "CLM_NGACO_CPTATN_SW": "CLM_NGACO_CPTATN_SW",
     "CLM_ACO_CARE_MGMT_HCBS_SW": "CLM_ACO_CARE_MGMT_HCBS_SW",
-    "CLM_PD_STUS_CD": "CLM_PD_STUS_CD"
+    "CLM_PD_STUS_CD": "CLM_PD_STUS_CD",
+    "CLM_NRLN_RIC_CD": "CLM_NRLN_RIC_CD",
+    "CLM_RIC_CD": "CLM_RIC_CD",
+    "GEO_BLG_SSA_STATE_CD": "GEO_BLG_SSA_STATE_CD",
 }
 
 line_to_supp_info_cols = {
@@ -143,6 +146,7 @@ line_to_supp_info_cols = {
     "CLM_LINE_NGACO_TLHLTH_SW": "CLM_NGACO_TLHLTH_SW",
     "CLM_LINE_NGACO_CPTATN_SW": "CLM_NGACO_CPTATN_SW",
     "CLM_LINE_ACO_CARE_MGMT_HCBS_SW": "CLM_ACO_CARE_MGMT_HCBS_SW",
+    "GEO_RNDRG_SSA_STATE_CD": "GEO_RNDRG_SSA_STATE_CD",
 }
 
 npis_used = []
@@ -487,7 +491,7 @@ for item in cur_sample_data.get("lineItemComponents", []):
 
 filename = "out/temporary-sample.json"
 
-cur_sample_data["lastUpdated"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+cur_sample_data["lastUpdated"] = "2026-01-01T03:02:28.000000Z"
 
 profile_type = cur_sample_data.get("profileType", "CMS")
 profile_type = "CMS" if profile_type.lower() == "cms" else profile_type.capitalize()

@@ -63,7 +63,7 @@ class IdrBeneficiaryLowIncomeSubsidy(IdrBaseModel):
                 FROM {IDR_BENE_LOW_INCOME_SUBSIDY_TABLE} bene_lis
                 {{WHERE_CLAUSE}}
                 AND NOT EXISTS (
-                    {deceased_bene_filter(hstry)}
+                    {deceased_bene_filter(hstry, start_time)}
                     AND {hstry}.bene_sk = bene_lis.bene_sk
                 )
                 AND idr_trans_obslt_ts >= '{DEFAULT_MAX_DATE}'

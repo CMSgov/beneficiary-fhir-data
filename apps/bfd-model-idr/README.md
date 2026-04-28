@@ -60,7 +60,7 @@ This will generate the StructureDefinition and CodeSystem resources necessary fo
 
 To reduce dependencies on tx.fhir.org as well as improve the speed of validation, we use matchbox to run a local FHIR server. Read more about matchbox at <https://ahdis.github.io/matchbox/>
 
-Note: Matchbox uses a significant amount of memory. Allocating at least 8GB of RAM is recommended, and more may be necessary in the future.
+Note: Matchbox uses a good bit of memory. Allocating at least 8GB of RAM is recommended. When new version dependencies are added, the heap allocated required should be re-evaluated. The compose setup is optimized to GC aggressively to reduce the impact. 
 
 To start matchbox, run
 
@@ -68,11 +68,15 @@ To start matchbox, run
 docker compose up -d
 ```
 
-Note, it takes several minutes and requires a good bit of RAM. It'll be ready once it says that packages have been loaded and some obviously untrue amount of RAM (generally half of what it actually used) was used. Additionally, one can check the logs for "Finished engines during startup" or running a health check using
+Note, it takes several minutes and requires a good bit of RAM. Once the uploads from matchbox-setup are completed, matchbox should be ready to use. Additionally, matchbox has a health check available at:
 
 ```sh
 curl -X GET "http://localhost:8080/matchboxv3/actuator/health"
 ```
+
+### Referencing New/Updated Dependencies for Matchbox
+
+As new versions of IGs are released, they may have multiple nested dependencies. This takes up a significant amount of memory if loaded directly into Matchbox. To eliminate heap errors while still being able to accurately validate profiles and terminology, we download the FHIR Packages locally, untar them, and upload relevant resources directly to Matchbox. The list of resources + packages are in matchbox_profiles.txt. To add a new IG reference, follow the syntax in that file. Packages are only uploaded using docker compose up (by calling setup_matchbox.py), so restart the composition if adding more dependencies. 
 
 ### Create FHIR files with synthetic data
 

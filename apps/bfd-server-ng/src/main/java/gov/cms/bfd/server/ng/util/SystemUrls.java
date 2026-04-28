@@ -12,25 +12,25 @@ public class SystemUrls {
 
   /**
    * <a href="https://hl7.org/fhir/us/carin-bb/STU2.1/StructureDefinition-C4BB-Patient.html">C4BB
-   * Patient 2.1.0.</a>
+   * Patient 2.2.0.</a>
    */
-  public static final String PROFILE_C4BB_PATIENT_2_1_0 =
-      "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.1.0";
+  public static final String PROFILE_C4BB_PATIENT_2_2_0 =
+      "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.2.0";
 
   /**
-   * <a href="https://hl7.org/fhir/us/core/STU6.1/StructureDefinition-us-core-patient.html">US Core
-   * Patient 6.1.0.</a>
+   * <a href="https://hl7.org/fhir/us/core/STU7.0/StructureDefinition-us-core-patient.html">US Core
+   * Patient 7.0.0.</a>
    */
-  public static final String PROFILE_US_CORE_PATIENT_6_1_0 =
-      "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0";
+  public static final String PROFILE_US_CORE_PATIENT_7_0_0 =
+      "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|7.0.0";
 
   /**
-   * URL for the CARIN Blue Button (C4BB) Coverage Profile, version 2.1.0. <a
+   * URL for the CARIN Blue Button (C4BB) Coverage Profile, version 2.2.0. <a
    * href="http://hl7.org/fhir/us/carin-bb/STU2.1/StructureDefinition-C4BB-Coverage.html">C4BB
-   * Coverage 2.1.0</a>
+   * Coverage 2.2.0</a>
    */
-  public static final String PROFILE_C4BB_COVERAGE_2_1_0 =
-      "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage|2.1.0";
+  public static final String PROFILE_C4BB_COVERAGE_2_2_0 =
+      "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage|2.2.0";
 
   /**
    * <a href="http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Patient">CARIN Digital
@@ -40,12 +40,12 @@ public class SystemUrls {
       "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Patient";
 
   /**
-   * URL for the US Core Coverage Profile, version 6.1.0. <a
-   * href="http://hl7.org/fhir/us/core/STU6.1/StructureDefinition-us-core-coverage.html">US Core
-   * Coverage 6.1.0</a>
+   * URL for the US Core Coverage Profile, version 7.0.0. <a
+   * href="http://hl7.org/fhir/us/core/STU7.0/StructureDefinition-us-core-coverage.html">US Core
+   * Coverage 7.0.0</a>
    */
-  public static final String PROFILE_US_CORE_COVERAGE_6_1_0 =
-      "http://hl7.org/fhir/us/core/StructureDefinition/us-core-coverage|6.1.0";
+  public static final String PROFILE_US_CORE_COVERAGE_7_0_0 =
+      "http://hl7.org/fhir/us/core/StructureDefinition/us-core-coverage|7.0.0";
 
   /**
    * URL for the CARIN Digital Insurance Card Coverage Profile, version 1.1.0. <a
@@ -56,13 +56,13 @@ public class SystemUrls {
       "http://hl7.org/fhir/us/insurance-card/StructureDefinition/C4DIC-Coverage";
 
   /**
-   * URL for the CARIN Blue Button (C4BB) Organization Profile, version 2.1.0. Used for the
+   * URL for the CARIN Blue Button (C4BB) Organization Profile, version 2.2.0. Used for the
    * contained CMS Organization. <a
    * href="http://hl7.org/fhir/us/carin-bb/STU2.1/StructureDefinition-C4BB-Organization.html">C4BB
-   * Organization 2.1.0</a>
+   * Organization 2.2.0</a>
    */
-  public static final String PROFILE_C4BB_ORGANIZATION_2_1_0 =
-      "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0";
+  public static final String PROFILE_C4BB_ORGANIZATION_2_2_0 =
+      "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0";
 
   /**
    * URL for the CARIN Digital Insurance Card Coverage Profile, version 1.1.0. <a
@@ -181,6 +181,15 @@ public class SystemUrls {
    */
   public static final String EXT_BENE_ENRLMT_EMPLR_SBSDY_SW_URL =
       "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-ENRLMT-EMPLR-SBSDY-SW";
+
+  /**
+   * System URL for the BFD/BlueButton Beneficiary Enrollment Employer Subsidy Switch Indication.
+   * Used for the coding in the BENE-ENRLMT-EMPLR-SBSDY-SW extension. <a href=
+   * "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ENRLMT-EMPLR-SBSDY-SW">BENE-ENRLMT-EMPLR-SBSDY-SW
+   * CodeSystem</a>
+   */
+  public static final String SYS_BENE_ENRLMT_EMPLR_SBSDY_SW =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ENRLMT-EMPLR-SBSDY-SW";
 
   /**
    * Extension URL for BFD Medicare Coverage Type Code. Source:
@@ -521,16 +530,16 @@ public class SystemUrls {
   // Hl7
 
   /** HL7 - US Core Organization Profile. */
-  public static final String PROFILE_US_CORE_ORGANIZATION_6_1_0 =
-      "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|6.1.0";
+  public static final String PROFILE_US_CORE_ORGANIZATION_7_0_0 =
+      "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|7.0.0";
 
   /** HL7 - US Core Organization Profile. */
   public static final String PROFILE_US_CORE_ORGANIZATION =
       "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization";
 
   /** HL7 - US Core Practitioner Profile. */
-  public static final String PROFILE_US_CORE_PRACTITIONER_6_1_0 =
-      "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0";
+  public static final String PROFILE_US_CORE_PRACTITIONER_7_0_0 =
+      "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|7.0.0";
 
   /** HL7 - IDI Match Bundle Profile. */
   public static final String PROFILE_IDENTITY_MATCHING =
@@ -599,12 +608,12 @@ public class SystemUrls {
   // Carin Blue Button
 
   /** CARIN Blue Button - Organization. */
-  public static final String PROFILE_CARIN_BB_ORGANIZATION_2_1_0 =
-      "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0";
+  public static final String PROFILE_CARIN_BB_ORGANIZATION_2_2_0 =
+      "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0";
 
   /** CARIN Blue Button - Practitioner. */
-  public static final String PROFILE_CARIN_BB_PRACTITIONER_2_1_0 =
-      "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0";
+  public static final String PROFILE_CARIN_BB_PRACTITIONER_2_2_0 =
+      "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.2.0";
 
   /** CARIN Blue Button - Institutional Claim SubType Code System. */
   public static final String CARIN_CLAIM_SUBTYPE =
@@ -612,19 +621,19 @@ public class SystemUrls {
 
   /** CARIN Blue Button - ExplanationOfBenefit Pharmacy. */
   public static final String CARIN_STRUCTURE_DEFINITION_PHARMACY =
-      "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Pharmacy|2.1.0";
+      "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Pharmacy|2.2.0";
 
   /** CARIN Blue Button - ExplanationOfBenefit Inpatient Institutional. */
   public static final String CARIN_STRUCTURE_DEFINITION_INPATIENT_INSTITUTIONAL =
-      "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional|2.1.0";
+      "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Inpatient-Institutional|2.2.0";
 
   /** CARIN Blue Button - ExplanationOfBenefit Outpatient Institutional. */
   public static final String CARIN_STRUCTURE_DEFINITION_OUTPATIENT_INSTITUTIONAL =
-      "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Outpatient-Institutional|2.1.0";
+      "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Outpatient-Institutional|2.2.0";
 
   /** CARIN Blue Button - ExplanationOfBenefit Professional NonClinician. */
   public static final String CARIN_STRUCTURE_DEFINITION_PROFESSIONAL =
-      "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Professional-NonClinician|2.1.0";
+      "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Professional-NonClinician|2.2.0";
 
   /** CARIN Blue Button - Identifier Type Code System. */
   public static final String CARIN_CODE_SYSTEM_IDENTIFIER_TYPE =
@@ -1049,4 +1058,8 @@ public class SystemUrls {
 
   /** CMS URL. */
   public static final String CMS_GOV = "https://cms.gov";
+
+  /** US FIPS state codes system URL. */
+  public static final String US_FIPS_STATE_CODES =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/US-FIPS-STATE-CODES";
 }

@@ -64,7 +64,7 @@ class IdrBeneficiaryDualEligibility(IdrBaseModel):
             FROM {IDR_BENE_COMBINED_DUAL_TABLE} dual
             {{WHERE_CLAUSE}}
             AND NOT EXISTS (
-                {deceased_bene_filter(hstry)}
+                {deceased_bene_filter(hstry, start_time)}
                 AND {hstry}.bene_sk = dual.bene_sk
             )
             {{ORDER_BY}}

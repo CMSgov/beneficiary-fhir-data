@@ -17,8 +17,8 @@ group createCoverageBase(source src: CoverageBase, target tgt: BFDCoverage){
     } "Add ID key";
     src -> tgt.meta = create('Meta') as tgtMeta then{
         src.lastUpdated as lastUpdated -> tgtMeta.lastUpdated = lastUpdated "Set lastUpdated";
-        src -> tgtMeta.profile = "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage|2.1.0" "Set C4BB profile";
-        src -> tgtMeta.profile = "http://hl7.org/fhir/us/core/StructureDefinition/us-core-coverage|6.1.0" "Set US Core profile";
+        src -> tgtMeta.profile = "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage|2.2.0" "Set C4BB profile";
+        src -> tgtMeta.profile = "http://hl7.org/fhir/us/core/StructureDefinition/us-core-coverage|7.0.0" "Set US Core profile";
     } "add metadata";
     src.XREF_EFCTV_BENE_SK as beneSk -> tgt.beneficiary = create('Reference') as tgtReference,
         tgtReference.reference = append("Patient/",beneSk) "Set bene_sk";
@@ -174,7 +174,10 @@ group createPartDCoverage(source src: CoverageBase, target tgt: BFDCoverage){
 
     src.BENE_ENRLMT_EMPLR_SBSDY_SW as switch -> tgt.extension = create('Extension') as tgtExtension then{
         src -> tgtExtension.url = "https://bluebutton.cms.gov/fhir/StructureDefinition/BENE-ENRLMT-EMPLR-SBSDY-SW" "Add url";
-        src -> tgtExtension.value = switch "Add value";
+        src -> tgtExtension.value = create('Coding') as tgtCoding then{
+            src -> tgtCoding.system = "https://bluebutton.cms.gov/fhir/CodeSystem/BENE-ENRLMT-EMPLR-SBSDY-SW" "add system";
+            src -> tgtCoding.code = switch "Add code";
+        } "Add coding";
     } "Add RDS switch ";
 
     //Coverage Type Code Extension
@@ -492,7 +495,7 @@ group AddPartBCoverageElements(source src: CoverageBase, target tgt: BFDCoverage
 
 group SetOrganizationEntryCMS(source src : CoverageBase, target tgt : Organization) {
     src -> tgt.meta = create('Meta') as tgtMeta then{
-        src -> tgtMeta.profile = "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0" "set profile";
+        src -> tgtMeta.profile = "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0" "set profile";
     } "add metadata";
     
     src -> tgt.id = "cms-org" "set org id";
@@ -519,7 +522,7 @@ group SetOrganizationEntryCMS(source src : CoverageBase, target tgt : Organizati
 //Source this information from the respective tables
 group SetOrganizationEntryPartCD(source src : CoverageBase, target tgt : Organization) {
     src -> tgt.meta = create('Meta') as tgtMeta then{
-        src -> tgtMeta.profile = "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0" "set profile";
+        src -> tgtMeta.profile = "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0" "set profile";
     } "add metadata";
     
     src -> tgt.id = "insurer-org" "set org id";

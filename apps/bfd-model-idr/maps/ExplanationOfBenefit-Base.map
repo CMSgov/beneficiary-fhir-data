@@ -117,7 +117,7 @@ group createEOBBase(source src: ExplanationOfBenefitBase, target tgt: BFDEOB){
 
     src.CLM_TYPE_CD as typeCd where((typeCd > 70 and typeCd <= 82) or (typeCd >= 2700 and typeCd < 2900) or (typeCd >= 1700 and typeCd < 1900)) -> tgt then{
       src.diagnoses as diagnoses -> tgt.diagnosis = create('BackboneElement') as tgtDiagnosis then addDiagnosesProfessional(diagnoses, tgtDiagnosis) "Add diagnoses";
-    } "Add diagnoses for institutional claims.";
+    } "Add diagnoses for professional claims.";
     
 
     //Supportinginfo!
@@ -575,8 +575,8 @@ group addProcedures(source src: ProcedureComponent, target tgt: BackboneElement)
 group createInsurerOrgPartAB(source src: ExplanationOfBenefitBase, target tgtOrg: Organization){
   src -> tgtOrg.id = "insurer-org" "Set org id";
   src -> tgtOrg.meta = create('Meta') as tgtMeta then {
-    src -> tgtMeta.profile = "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0" "Set org profile";
-    src -> tgtMeta.profile = "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|6.1.0" "Set org profile";
+    src -> tgtMeta.profile = "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0" "Set org profile";
+    src -> tgtMeta.profile = "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|7.0.0" "Set org profile";
   } "Set organization metadata";
   src -> tgtOrg.active = "true" "set org status";
   src -> tgtOrg.name = "Centers for Medicare & Medicaid Services" "set org name";
@@ -603,8 +603,8 @@ group createOrg(source src: Provider, target tgt: Organization){
 
   //when PRVDR_SK is missing (eg NPI) these won't conform, so don't add the profile. 
   src.PRVDR_SK as sk -> tgt.meta = create('Meta') as tgtMeta then {
-          src -> tgtMeta.profile = "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0" "Set org profile";
-          src -> tgtMeta.profile = "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|6.1.0" "Set org profile";
+          src -> tgtMeta.profile = "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0" "Set org profile";
+          src -> tgtMeta.profile = "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|7.0.0" "Set org profile";
   } "Set Org metadata";
   src -> tgt.active = "true" "set org status";
   
@@ -640,8 +640,8 @@ group createPractitioner(source src: Provider, target tgt: Practitioner){
   } "Add qualifier code and id num";
 
   src -> tgt.meta = create('Meta') as tgtMeta then {
-          src -> tgtMeta.profile = "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0" "Set profile";
-          src -> tgtMeta.profile = "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0" "Set profile";
+          src -> tgtMeta.profile = "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.2.0" "Set profile";
+          src -> tgtMeta.profile = "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|7.0.0" "Set profile";
   } "Set practitioner metadata";
 
   src -> tgt.identifier = create('Identifier') as tgtId then {

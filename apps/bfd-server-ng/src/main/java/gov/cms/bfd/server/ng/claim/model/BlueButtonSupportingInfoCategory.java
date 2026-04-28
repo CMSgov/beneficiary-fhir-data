@@ -87,7 +87,12 @@ enum BlueButtonSupportingInfoCategory {
   CLM_AUDT_TRL_STUS_CD("CLM_AUDT_TRL_STUS_CD", "Claim Status Code"),
   /** CLM_LINE_PMD_UNIQ_TRKNG_NUM - Prior Authorization Unique Tracking Number. */
   CLM_LINE_PMD_UNIQ_TRKNG_NUM(
-      "CLM_LINE_PMD_UNIQ_TRKNG_NUM", "Prior Authorization Unique Tracking Number");
+      "CLM_LINE_PMD_UNIQ_TRKNG_NUM", "Prior Authorization Unique Tracking Number"),
+  /** PRVDR_FAC_FIPS_ST_CD - Federal Information Processing Standards (FIPS) State Code. */
+  PRVDR_FAC_FIPS_ST_CD(
+      "PRVDR_FAC_FIPS_ST_CD", "Federal Information Processing Standards (FIPS) State Code"),
+  /** RNDRG_PRVDR_FIPS_ST_CD - Rendering Provider FIPS State Code. */
+  RNDRG_PRVDR_FIPS_ST_CD("RNDRG_PRVDR_FIPS_ST_CD", "Rendering Provider FIPS State Code");
 
   private final String code;
   private final String display;
