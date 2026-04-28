@@ -93,6 +93,7 @@ class BatchLoader:
         self.copy_timer = Timer("copy", model, partition)
         self.insert_timer = Timer("insert", model, partition)
         self.commit_timer = Timer("commit", model, partition)
+        self.progress_update_timer = Timer("progress_update", model, partition)
         self.load_type = load_type
         self.enable_load_progress = should_track_load_progress(load_mode)
 
@@ -298,6 +299,8 @@ class BatchLoader:
             # updated concurrently then it's going to have the same end result anyway.
             # If a deadlock occurs, the CTE returns no rows and this is a no-op.
 
+            self.progress_update_timer.start()
+            cur.execute("SET lock_timeout=1s")
             cur.execute(
                 f"""
                 WITH current_ts AS (
@@ -312,10 +315,11 @@ class BatchLoader:
                 UPDATE {self.model.last_updated_date_table()} u
                 SET {set_clause}
                 FROM current_ts t
-                WHERE u.{key} = t.{key};
+                WHERE u.{key} = t.{key}
                 """,  # type: ignore
                 {"timestamp": timestamp},
             )
+            self.progress_update_timer.stop()
 
     def _copy_data(self, cur: psycopg.Cursor, results: Sequence[T]) -> None:
         # Use COPY to load the batch into Postgres.
