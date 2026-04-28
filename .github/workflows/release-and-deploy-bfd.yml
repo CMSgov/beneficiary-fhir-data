@@ -16,13 +16,10 @@ on:
         required: false
         default: ""
       aws-region:
-        description: >-
-          Override the AWS Region
+        description: "Override the AWS Region"
         default: us-east-1
         type: choice
-        options:
-          - us-east-1
-          - us-west-2
+        options: [us-east-1, us-west-2]
         required: false
   push:
     branches:
@@ -127,6 +124,8 @@ jobs:
     steps:
       - name: Load Slack webhook
         uses: cmsgov/cdap/actions/aws-params-env-action@main
+        env:
+          AWS_REGION: ${{ github.event.inputs.aws-region || 'us-east-1' }}
         with:
           params: |
             SLACK_WEBHOOK_URL=/bfd/platform/alerting/sensitive/slack/bfd-notices/webhook
