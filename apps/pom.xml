@@ -128,8 +128,8 @@
         <spring-framework.version>6.2.11</spring-framework.version>
         <spring-retry.version>2.0.8</spring-retry.version>
         <spring-boot.version>3.5.12</spring-boot.version>
-        <spring-cloud.version>4.2.1</spring-cloud.version>
-        <spring-cloud-aws.version>3.3.0</spring-cloud-aws.version>
+        <spring-cloud.version>4.3.0</spring-cloud.version>
+        <spring-cloud-aws.version>3.4.0</spring-cloud-aws.version>
 
         <hibernate.version>6.4.4.Final</hibernate.version>
         <junit.version>5.12.0</junit.version>
