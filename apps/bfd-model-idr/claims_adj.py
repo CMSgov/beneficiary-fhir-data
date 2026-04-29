@@ -788,7 +788,7 @@ class AdjudicatedGeneratorUtil:
             )
             if random.randint(0, 10) == 7:
                 clm_line[f.CLM_LINE_ANSTHSA_UNIT_CNT] = random.uniform(0, 10)
-            if random.choice([0, 15]) == 7:
+            if random.randint(0, 15) == 7:
                 clm_line[f.CLM_LINE_RX_NUM] = random.choice(["1234", "423482347"])
 
             if probability(0.5):

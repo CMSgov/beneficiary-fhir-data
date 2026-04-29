@@ -48,8 +48,11 @@ public class ClaimLineProfessionalNchExtensions {
             .setValue(new DecimalType(totalUnitsCount));
 
     var anesthesiaUnitCountExtension =
-        new Extension(SystemUrls.EXT_CLM_LINE_ANSTHSA_UNIT_CNT_URL)
-            .setValue(new DecimalType(anesthesiaUnitCount));
+        Optional.ofNullable(anesthesiaUnitCount)
+            .map(
+                v ->
+                    new Extension(SystemUrls.EXT_CLM_LINE_ANSTHSA_UNIT_CNT_URL)
+                        .setValue(new DecimalType(v)));
 
     return Stream.of(
             unitsIndicatorCode.map(CarrierLineMTUSIndicatorCode::toFhir),
@@ -60,7 +63,7 @@ public class ClaimLineProfessionalNchExtensions {
             primaryPayerCode.map(ClaimPrimaryPayerCode::toFhir),
             processingIndicatorCode.map(ClaimProcessingIndicatorCode::toFhir),
             renderingProviderTypeCode.map(ClaimSupplierTypeCode::toFhir),
-            Optional.of(anesthesiaUnitCountExtension),
+            anesthesiaUnitCountExtension,
             Optional.of(totalUnitsCountExtension))
         .flatMap(Optional::stream)
         .toList();
