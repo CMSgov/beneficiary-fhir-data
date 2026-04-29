@@ -29,6 +29,8 @@ from constants import (
     INSTITUTIONAL_NCH_PARTITIONS,
     INSTITUTIONAL_SS_PARTITIONS,
     NON_CLAIM_PARTITION,
+    PAC_PHASE_1_MAX,
+    PAC_PHASE_1_MIN,
     PART_D_CLAIM_TYPE_CODES,
     PART_D_PARTITIONS,
     PROFESSIONAL_NCH_PARTITIONS,
@@ -677,15 +679,14 @@ def claim_filter(start_time: datetime, partition: LoadPartition) -> str:
     # PAC data older than 60 days should be filtered
     pac_cutoff_date = start_time - timedelta(days=60)
     start_time_sql = pac_cutoff_date.strftime("'%Y-%m-%d %H:%M:%S'")
-    pac_phase_1_min = 1000
-    pac_phase_1_max = 1999
+
     # Note: checking clm_type_cd as the first branch of the OR here might be more efficient
     # Since it's more likely to return true
     pac_filter = (
         f"""
         AND
         (
-            {clm}.clm_type_cd NOT BETWEEN {pac_phase_1_min} AND {pac_phase_1_max}
+            {clm}.clm_type_cd NOT BETWEEN {PAC_PHASE_1_MIN} AND {PAC_PHASE_1_MAX}
             OR 
             (
                 {clm}.clm_src_id IN (

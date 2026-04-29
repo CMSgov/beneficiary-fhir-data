@@ -6,7 +6,7 @@ from snowflake.connector import ProgrammingError
 from snowflake.connector.errors import ForbiddenError
 from snowflake.connector.network import ReauthenticationRequest, RetryRequest
 
-from constants import DEFAULT_PARTITION, IDR_CLAIM_TABLE
+from constants import DEFAULT_PARTITION, IDR_CLAIM_TABLE, PAC_PHASE_1_MAX, PAC_PHASE_1_MIN
 from extractor import PostgresExtractor, SnowflakeExtractor
 from load_partition import LoadPartition
 from loader import LoadType, PostgresLoader, should_track_load_progress
@@ -107,12 +107,10 @@ def extract_and_load(
 def prune_pac(loader: PostgresLoader, start_time: datetime) -> None:
     pac_cutoff_date = start_time - timedelta(days=60)
     start_time_sql = pac_cutoff_date.strftime("'%Y-%m-%d %H:%M:%S'")
-    pac_phase_1_min = 1000
-    pac_phase_1_max = 1999
 
     loader.run_sql(f"""
-        DELETE FROM {IDR_CLAIM_TABLE} clm WHERE clm.clm_type_cd BETWEEN {pac_phase_1_min} 
-                        AND {pac_phase_1_max}
+        DELETE FROM {IDR_CLAIM_TABLE} clm WHERE clm.clm_type_cd BETWEEN {PAC_PHASE_1_MIN} 
+                        AND {PAC_PHASE_1_MAX}
                         AND COALESCE(
                             clm.idr_updt_ts,
                             clm.idr_insrt_ts,
