@@ -31,7 +31,7 @@ permissions:
   contents: write # This is required for actions/checkout
 
 env:
-  AWS_REGION: us-east-1
+  AWS_REGION: ${{ inputs.aws-region }}
 
 defaults:
   run:
@@ -138,7 +138,7 @@ jobs:
       - deploy-to-test
       - deploy-to-sandbox
       - deploy-to-prod
-    if: always()
+    if: !cancelled()
     steps:
       - name: Get role ARN
         id: get-role-arn
