@@ -255,6 +255,7 @@ class BatchLoader:
     ) -> None:
         if self.enable_load_progress:
             cur.execute(query, params)  # type: ignore
+            self.conn.commit()
 
     def _merge(self, cur: psycopg.Cursor, timestamp: datetime) -> None:
         unique_key = self.model.unique_key()
@@ -288,6 +289,7 @@ class BatchLoader:
             """,  # type: ignore
             {"timestamp": timestamp},
         )
+        self.conn.commit()
 
         if self.load_type == LoadType.INCREMENTAL and self.model.last_updated_date_table():
             key = self.model.last_updated_timestamp_col()
@@ -299,7 +301,6 @@ class BatchLoader:
             # However, it's safe to ignore these because if the timestamp for this row is being
             # updated concurrently then it's going to have the same end result anyway.
             # If a deadlock occurs, the CTE returns no rows and this is a no-op.
-
             try:
                 self.last_updated_timer.start()
                 cur.execute("SET lock_timeout=1s")
@@ -321,6 +322,7 @@ class BatchLoader:
                     """,  # type: ignore
                     {"timestamp": timestamp},
                 )
+                self.conn.commit()
                 self.last_updated_timer.stop()
             except DeadlockDetected as ex:
                 # We require multi-step transactions since we're dealing with temp tables, so there
