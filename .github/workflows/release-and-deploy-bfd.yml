@@ -131,7 +131,7 @@ jobs:
 
   workflow-summary:
     name: Final Slack Summary
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     needs:
       - build-release
       - deploy-platform
