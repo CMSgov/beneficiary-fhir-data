@@ -13,6 +13,8 @@ on:
 env:
   BASE_COMMIT: ""
   GH_TOKEN: ${{ github.token }}
+  PYTHON_MIN: 3.13
+  PYTHON_MAX: 3.14
 
 jobs:
   matrix-pytest:
@@ -65,7 +67,7 @@ jobs:
         run: |
           echo "Testing ${{ matrix.projects.projectName }}"
           cd ${{ github.workspace }}/${{ matrix.projects.projectRoot }}
-          uv python install
+          uv python install ${{ env.PYTHON_MIN }} ${{ env.PYTHON_MAX }}
           ${{ matrix.projects.uvCommand }}
           # check linting
           uv run ruff check
