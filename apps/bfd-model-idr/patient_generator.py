@@ -6,7 +6,6 @@ import sys
 
 import tqdm
 from faker import Faker
-
 from generator_util import (
     BENE_DUAL,
     BENE_ENTLMT,
