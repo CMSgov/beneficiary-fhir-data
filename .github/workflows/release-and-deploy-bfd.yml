@@ -48,6 +48,8 @@ jobs:
 
       - name: Get role ARN
         id: get-role-arn
+        # It doesn't matter whether we use prod or non-prod account here as either works.
+        # Common platform SSM parameters (such as Webhook URLs) exist in both accounts. 
         run: |
           role_arn="${{ secrets.NON_PROD_ACCOUNT_GHA_ROLE_ARN }}"
           echo "::add-mask::$role_arn"
@@ -142,6 +144,8 @@ jobs:
     steps:
       - name: Get role ARN
         id: get-role-arn
+        # It doesn't matter whether we use prod or non-prod account here as either works.
+        # Common platform SSM parameters (such as Webhook URLs) exist in both accounts. 
         run: |
           role_arn="${{ secrets.NON_PROD_ACCOUNT_GHA_ROLE_ARN }}"
           echo "::add-mask::$role_arn"
