@@ -123,8 +123,8 @@ class EobReadIT extends IntegrationTestBase {
                 ClaimProfessionalNch.class)
             .setParameter("claimId", Long.parseLong(CLAIM_ID_PROFESSIONAL_NON_LATEST))
             .getResultList();
-    // Precondition - claim should be available in the db
-    assertFalse(claims.isEmpty());
+    // Precondition - claim should be purged and not available
+    assertTrue(claims.isEmpty());
     var eobRequest = eobRead().withId(Long.parseLong(CLAIM_ID_PROFESSIONAL_NON_LATEST));
     assertThrows(ResourceNotFoundException.class, eobRequest::execute);
   }
