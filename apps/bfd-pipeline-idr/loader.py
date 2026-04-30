@@ -206,8 +206,10 @@ class BatchLoader:
         # For simplicity's sake, we'll create our temp tables using the existing schema and
         # just drop the columns we need to ignore.
         cur.execute(
-            f"CREATE TEMPORARY TABLE {self.temp_table} (LIKE {self.table}) ON COMMIT DROP"  # type: ignore
+            f"CREATE TEMPORARY TABLE IF NOT EXISTS {self.temp_table} (LIKE {self.table}) "
+            "ON COMMIT PRESERVE ROWS"  # type: ignore
         )
+        cur.execute(f"TRUNCATE TABLE {self.temp_table}") # type: ignore
         # Created/updated columns don't need to be loaded from the source.
         for col in self.meta_keys:
             cur.execute(f"ALTER TABLE {self.temp_table} DROP COLUMN {col}")  # type: ignore
@@ -296,14 +298,12 @@ class BatchLoader:
             last_updated_cols = self.model.last_updated_date_column()
             set_clause = ", ".join(f"{col} = %(timestamp)s" for col in last_updated_cols)
 
-            # We require multi-step transactions since we're dealing with temp tables, so there
-            # is a chance of a deadlock here.
-            # However, it's safe to ignore these because if the timestamp for this row is being
-            # updated concurrently then it's going to have the same end result anyway.
-            # If a deadlock occurs, the CTE returns no rows and this is a no-op.
             try:
                 self.last_updated_timer.start()
-                cur.execute("SET lock_timeout=1s")
+                # We want to immediately terminate the transaction if there is already a lock on
+                # the table so that we avoid extraneous waits because if there is a lock this table
+                # is being updated concurrently and that existing update will have the same result
+                cur.execute("SET lock_timeout=1")
                 cur.execute(
                     f"""
                     WITH current_ts AS (
@@ -325,12 +325,6 @@ class BatchLoader:
                 self.conn.commit()
                 self.last_updated_timer.stop()
             except DeadlockDetected as ex:
-                # We require multi-step transactions since we're dealing with temp tables, so there
-                # is a chance of a deadlock here.
-                # Locking rows helps reduce the chance of this when multiple nodes update this
-                # table, but it doesn't eliminate the possibility.
-                # However, it's safe to ignore this because if the timestamp for this row is being
-                # updated concurrently then it's going to have the same end result anyway
                 logger.warning("deadlock updating update timestamp, ignoring: %s", ex)
 
     def _copy_data(self, cur: psycopg.Cursor, results: Sequence[T]) -> None:
