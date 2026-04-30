@@ -17,7 +17,8 @@ on:
         default: ""
       aws-region:
         description: >-
-          Override the AWS Region
+          Override the AWS Region destination for uploaded artifacts.
+          Default to `us-east-1`.
         default: us-east-1
         type: choice
         options:
@@ -29,12 +30,64 @@ permissions:
   id-token: write # This is required for requesting the AWS IAM OIDC JWT
   contents: write # This is required for actions/checkout
 
+env:
+  AWS_REGION: ${{ inputs.aws-region }}
+
 defaults:
   run:
     shell: bash
 
 jobs:
+  notify-start:
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - name: Setup node
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
+        with:
+          node-version: 24.x
+
+      - name: Get role ARN
+        id: get-role-arn
+        # It doesn't matter whether we use prod or non-prod account here as either works.
+        # Common platform SSM parameters (such as Webhook URLs) exist in both accounts. 
+        run: |
+          role_arn="${{ secrets.NON_PROD_ACCOUNT_GHA_ROLE_ARN }}"
+          echo "::add-mask::$role_arn"
+          echo "role-arn=$role_arn" >> "$GITHUB_OUTPUT"
+
+      - name: Assume role to AWS
+        uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 # v6.1.0
+        with:
+          role-to-assume: ${{ steps.get-role-arn.outputs.role-arn }}
+          role-session-name: get-sops-slack-webhook-${{ github.run_id }}-${{ github.run_attempt }}
+          aws-region: ${{ inputs.aws-region }}
+
+      - name: Load Start Slack webhook
+        uses: cmsgov/cdap/actions/aws-params-env-action@main
+        with:
+          params: |
+            SLACK_WEBHOOK_URL=/bfd/platform/alerting/sensitive/slack/bfd-notices/webhook
+
+      - name: Slack - STARTED
+        uses: slackapi/slack-github-action@03ea5433c137af7c0495bc0cad1af10403fc800c # v3.0.2
+        with:
+          webhook: ${{ env.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          payload: |
+            {
+              "attachments": [
+                {
+                  "color": "yellow",
+                  "title": "BFD Release STARTED",
+                  "text": "Version: *${{ inputs.release-version || 'latest' }}*\n
+                          Triggered by: ${{ github.actor }}\n
+                          <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Workflow Run>"
+                }
+              ]
+            }
+
   build-release:
+    needs: notify-start
     if: ${{ github.ref_name == github.event.repository.default_branch }}
     uses: ./.github/workflows/build-release.yml
     with:
@@ -45,7 +98,7 @@ jobs:
 
   deploy-platform:
     uses: ./.github/workflows/deploy-platform-services.yml
-    needs: [build-release]
+    needs: build-release
     strategy:
       matrix:
         account-type: ["prod", "non-prod"]
@@ -77,3 +130,85 @@ jobs:
       bfd-env: prod
       git-ref: refs/tags/${{ needs.build-release.outputs.bfd_release }}
     secrets: inherit
+
+  workflow-summary:
+    name: Final Slack Summary
+    runs-on: ubuntu-24.04-arm
+    needs:
+      - build-release
+      - deploy-platform
+      - deploy-to-test
+      - deploy-to-sandbox
+      - deploy-to-prod
+    if: !cancelled()
+    steps:
+      - name: Get role ARN
+        id: get-role-arn
+        # It doesn't matter whether we use prod or non-prod account here as either works.
+        # Common platform SSM parameters (such as Webhook URLs) exist in both accounts. 
+        run: |
+          role_arn="${{ secrets.NON_PROD_ACCOUNT_GHA_ROLE_ARN }}"
+          echo "::add-mask::$role_arn"
+          echo "role-arn=$role_arn" >> "$GITHUB_OUTPUT"
+
+      - name: Assume role to AWS
+        uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 # v6.1.0
+        with:
+          role-to-assume: ${{ steps.get-role-arn.outputs.role-arn }}
+          role-session-name: get-sops-slack-webhook-${{ github.run_id }}-${{ github.run_attempt }}
+          aws-region: ${{ inputs.aws-region }}
+
+      - name: Load Slack webhook
+        uses: cmsgov/cdap/actions/aws-params-env-action@main
+        with:
+          params: |
+            SLACK_WEBHOOK_URL=/bfd/platform/alerting/sensitive/slack/bfd-notices/webhook
+
+      - name: Compute status
+        id: status
+        run: |
+          STAGES=("build-release" "deploy-platform" "deploy-to-test" "deploy-to-sandbox" "deploy-to-prod")
+          RESULTS='${{ toJSON(needs) }}'
+          
+          FINAL_STATUS="SUCCESS"
+          FAILED_STAGE="none"
+          COLOR="good"
+          
+          for STAGE in "${STAGES[@]}"; do
+            RESULT=$(echo $RESULTS | jq -r ".[\"$STAGE\"].result")
+            if [[ "$RESULT" != "success" && "$RESULT" != "skipped" ]]; then
+              FINAL_STATUS="FAILED"
+              FAILED_STAGE=$STAGE
+              COLOR="danger"
+              break
+            fi
+          done
+
+          echo "status=$FINAL_STATUS" >> $GITHUB_OUTPUT
+          echo "failed_stage=$FAILED_STAGE" >> $GITHUB_OUTPUT
+          echo "color=$COLOR" >> $GITHUB_OUTPUT
+
+      - name: Slack - FINAL SUMMARY
+        uses: slackapi/slack-github-action@03ea5433c137af7c0495bc0cad1af10403fc800c # v3.0.2
+        with:
+          webhook: ${{ env.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          payload: |
+            {
+              "attachments": [
+                {
+                  "color": "${{ steps.status.outputs.color }}",
+                  "title": "${{ steps.status.outputs.status == 'SUCCESS' && 'BFD Deploy SUCCESS' || 'BFD Deploy FAILED' }}",
+                  "text": "${{ steps.status.outputs.status == 'FAILED' && '<!subteam^BFD-ENGINEERS|@bfd-engineers>' || '' }}\n
+                          *Status:* ${{ steps.status.outputs.status }}\n
+                          *Version:* ${{ inputs.release-version || 'latest' }}\n
+                          *Failed Stage:* ${{ steps.status.outputs.failed_stage }}\n\n
+                          *Build:* ${{ needs.build-release.result }}\n
+                          *Platform:* ${{ needs.deploy-platform.result }}\n
+                          *Test:* ${{ needs.deploy-to-test.result }}\n
+                          *Sandbox:* ${{ needs.deploy-to-sandbox.result }}\n
+                          *Prod:* ${{ needs.deploy-to-prod.result }}\n\n
+                          <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Full Report>"
+                }
+              ]
+            }
