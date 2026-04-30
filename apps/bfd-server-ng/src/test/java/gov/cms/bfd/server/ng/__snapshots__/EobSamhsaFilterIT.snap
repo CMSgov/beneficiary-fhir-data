@@ -5142,7 +5142,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           "category" : {
             "coding" : [ {
               "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
-              "display" : "Revenue Center Blood Deductible Amount",
+              "display" : "Blood Deductible Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -5449,7 +5449,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           "category" : {
             "coding" : [ {
               "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
-              "display" : "Revenue Center Blood Deductible Amount",
+              "display" : "Blood Deductible Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -5736,7 +5736,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           "category" : {
             "coding" : [ {
               "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
-              "display" : "Revenue Center Blood Deductible Amount",
+              "display" : "Blood Deductible Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -7495,7 +7495,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           "category" : {
             "coding" : [ {
               "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
-              "display" : "Revenue Center Blood Deductible Amount",
+              "display" : "Blood Deductible Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -7800,7 +7800,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           "category" : {
             "coding" : [ {
               "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
-              "display" : "Revenue Center Blood Deductible Amount",
+              "display" : "Blood Deductible Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -8077,7 +8077,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           "category" : {
             "coding" : [ {
               "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
-              "display" : "Revenue Center Blood Deductible Amount",
+              "display" : "Blood Deductible Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -8387,7 +8387,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           "category" : {
             "coding" : [ {
               "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
-              "display" : "Revenue Center Blood Deductible Amount",
+              "display" : "Blood Deductible Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -8673,7 +8673,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           "category" : {
             "coding" : [ {
               "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
-              "display" : "Revenue Center Blood Deductible Amount",
+              "display" : "Blood Deductible Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -8965,7 +8965,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           "category" : {
             "coding" : [ {
               "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
-              "display" : "Revenue Center Blood Deductible Amount",
+              "display" : "Blood Deductible Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -9254,7 +9254,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           "category" : {
             "coding" : [ {
               "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
-              "display" : "Revenue Center Blood Deductible Amount",
+              "display" : "Blood Deductible Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -9558,7 +9558,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           "category" : {
             "coding" : [ {
               "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
-              "display" : "Revenue Center Blood Deductible Amount",
+              "display" : "Blood Deductible Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -9862,7 +9862,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           "category" : {
             "coding" : [ {
               "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
-              "display" : "Revenue Center Blood Deductible Amount",
+              "display" : "Blood Deductible Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -11267,7 +11267,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           "category" : {
             "coding" : [ {
               "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
-              "display" : "Revenue Center Blood Deductible Amount",
+              "display" : "Blood Deductible Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -11550,7 +11550,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           "category" : {
             "coding" : [ {
               "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
-              "display" : "Revenue Center Blood Deductible Amount",
+              "display" : "Blood Deductible Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -11841,7 +11841,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           "category" : {
             "coding" : [ {
               "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
-              "display" : "Revenue Center Blood Deductible Amount",
+              "display" : "Blood Deductible Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -13411,7 +13411,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           "category" : {
             "coding" : [ {
               "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
-              "display" : "Revenue Center Blood Deductible Amount",
+              "display" : "Blood Deductible Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -13718,7 +13718,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           "category" : {
             "coding" : [ {
               "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
-              "display" : "Revenue Center Blood Deductible Amount",
+              "display" : "Blood Deductible Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -14005,7 +14005,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           "category" : {
             "coding" : [ {
               "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
-              "display" : "Revenue Center Blood Deductible Amount",
+              "display" : "Blood Deductible Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -15764,7 +15764,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           "category" : {
             "coding" : [ {
               "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
-              "display" : "Revenue Center Blood Deductible Amount",
+              "display" : "Blood Deductible Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -16069,7 +16069,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           "category" : {
             "coding" : [ {
               "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
-              "display" : "Revenue Center Blood Deductible Amount",
+              "display" : "Blood Deductible Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -16346,7 +16346,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           "category" : {
             "coding" : [ {
               "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
-              "display" : "Revenue Center Blood Deductible Amount",
+              "display" : "Blood Deductible Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -16656,7 +16656,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           "category" : {
             "coding" : [ {
               "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
-              "display" : "Revenue Center Blood Deductible Amount",
+              "display" : "Blood Deductible Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -16942,7 +16942,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           "category" : {
             "coding" : [ {
               "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
-              "display" : "Revenue Center Blood Deductible Amount",
+              "display" : "Blood Deductible Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -17234,7 +17234,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           "category" : {
             "coding" : [ {
               "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
-              "display" : "Revenue Center Blood Deductible Amount",
+              "display" : "Blood Deductible Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -17523,7 +17523,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           "category" : {
             "coding" : [ {
               "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
-              "display" : "Revenue Center Blood Deductible Amount",
+              "display" : "Blood Deductible Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -17827,7 +17827,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           "category" : {
             "coding" : [ {
               "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
-              "display" : "Revenue Center Blood Deductible Amount",
+              "display" : "Blood Deductible Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -18131,7 +18131,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           "category" : {
             "coding" : [ {
               "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
-              "display" : "Revenue Center Blood Deductible Amount",
+              "display" : "Blood Deductible Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -19536,7 +19536,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           "category" : {
             "coding" : [ {
               "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
-              "display" : "Revenue Center Blood Deductible Amount",
+              "display" : "Blood Deductible Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -19819,7 +19819,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           "category" : {
             "coding" : [ {
               "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
-              "display" : "Revenue Center Blood Deductible Amount",
+              "display" : "Blood Deductible Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -20110,7 +20110,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           "category" : {
             "coding" : [ {
               "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
-              "display" : "Revenue Center Blood Deductible Amount",
+              "display" : "Blood Deductible Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }

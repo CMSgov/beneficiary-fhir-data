@@ -17,8 +17,8 @@
     "resourceType" : "Organization",
     "id" : "insurer-org",
     "meta" : {
-      "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0",
-      "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|7.0.0"]
+      "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0",
+      "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|6.1.0"]
     },
     "active" : true,
     "name" : "Centers for Medicare & Medicaid Services"
@@ -27,8 +27,8 @@
     "resourceType" : "Practitioner",
     "id" : "1942945159",
     "meta" : {
-      "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.2.0",
-      "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|7.0.0"]
+      "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Practitioner|2.1.0",
+      "http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner|6.1.0"]
     },
     "identifier" : [{
       "type" : {
@@ -982,7 +982,8 @@
     "sequence" : 1,
     "careTeamSequence" : [1],
     "diagnosisSequence" : [2],
-    "informationSequence" : [29],
+    "informationSequence" : [29,
+    30],
     "revenue" : {
       "coding" : [{
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-REV-CNTR-CD",
@@ -1227,9 +1228,7 @@
         "code" : "A5"
       }]
     }],
-    "servicedPeriod" : {
-      "start" : "2025-01-01"
-    },
+    "servicedDate" : "2025-01-01",
     "locationCodeableConcept" : {
       "coding" : [{
         "system" : "https://www.cms.gov/Medicare/Coding/place-of-service-codes/Place_of_Service_Code_Set",
@@ -1419,9 +1418,7 @@
         "code" : "99"
       }]
     }],
-    "servicedPeriod" : {
-      "start" : "2025-01-01"
-    },
+    "servicedDate" : "2025-01-01",
     "locationCodeableConcept" : {
       "coding" : [{
         "system" : "https://www.cms.gov/Medicare/Coding/place-of-service-codes/Place_of_Service_Code_Set",
@@ -1529,9 +1526,7 @@
         "code" : "J2270"
       }]
     },
-    "servicedPeriod" : {
-      "start" : "2025-01-01"
-    },
+    "servicedDate" : "2025-01-01",
     "locationCodeableConcept" : {
       "coding" : [{
         "system" : "https://www.cms.gov/Medicare/Coding/place-of-service-codes/Place_of_Service_Code_Set",

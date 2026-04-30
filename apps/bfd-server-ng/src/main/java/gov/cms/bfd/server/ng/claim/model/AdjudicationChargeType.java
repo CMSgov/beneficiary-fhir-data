@@ -59,7 +59,7 @@ enum AdjudicationChargeType {
   LINE_BLOOD_DEDUCTIBLE_AMOUNT(
       SystemUrls.BLUE_BUTTON_CODE_SYSTEM_ADJUDICATION,
       "CLM_LINE_BLOOD_DDCTBL_AMT",
-      "Revenue Center Blood Deductible Amount"),
+      "Blood Deductible Amount"),
   LINE_MEDICARE_DEDUCTIBLE_AMOUNT(
       SystemUrls.HL7_ADJUDICATION,
       "deductible",
