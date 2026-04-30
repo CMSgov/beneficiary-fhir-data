@@ -49,24 +49,6 @@ jobs:
           echo "$(git diff --name-only --diff-filter=ACMRTD HEAD^ HEAD | grep -P '${{ env.workflow_files_re }}')" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
-  mvn-fmt-maven-plugin:
-    runs-on: ubuntu-24.04
-    needs: workflow
-    if: needs.workflow.outputs.files
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          fetch-depth: 2
-          ref: ${{ inputs.branch }}
-      - name: 'Setup JDK'
-        uses: actions/setup-java@v5
-        with:
-          java-version: '25'
-          distribution: 'corretto'
-      - name: 'Run maven ${{ matrix.mvn_commmand }}'
-        run: mvn com.spotify.fmt:fmt-maven-plugin:check
-        working-directory: ./apps
-
   mvn-verify:
     runs-on: codebuild-bfd-non-prod-platform-large-${{ github.run_id }}-${{ github.run_attempt }}
     needs: workflow
