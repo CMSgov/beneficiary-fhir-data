@@ -45,7 +45,7 @@ def _run_migrator(postgres: PostgresContainer) -> None:
             f"-Dflyway.user={postgres.username} "
             f"-Dflyway.password={postgres.password} "
             "-Duser.timezone=UTC",
-            cwd="../bfd-db-migrator-ng",
+            cwd=Path(__file__).parent.joinpath("../bfd-db-migrator-ng"),
             shell=True,
             capture_output=True,
             check=True,
@@ -59,12 +59,12 @@ def _run_migrator(postgres: PostgresContainer) -> None:
 def setup_db() -> Generator[PostgresContainer]:
     with PostgresContainer("postgres:16", driver="") as postgres:
         with psycopg.connect(postgres.get_connection_url()) as conn:
-            with Path("./mock-idr.sql").open() as f:
+            with Path(__file__).parent.joinpath("./mock-idr.sql").open() as f:
                 conn.execute(f.read())  # type: ignore
             conn.commit()
 
             _run_migrator(postgres)
-            load_from_csv(conn, "./test_samples1")  # type: ignore
+            load_from_csv(conn, Path(__file__).parent.joinpath("./test_samples1"))  # type: ignore
 
             info = conn.info
             # Info level logs obscure the error output when running tests
