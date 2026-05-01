@@ -37,7 +37,7 @@ public class ClaimLineProfessionalNchExtensions {
   private Optional<ClaimProcessingIndicatorCode> processingIndicatorCode;
 
   @Column(name = "clm_line_ansthsa_unit_cnt")
-  private BigDecimal anesthesiaUnitCount;
+  private Optional<BigDecimal> anesthesiaUnitCount;
 
   @Column(name = "clm_rndrg_prvdr_type_cd")
   private Optional<ClaimSupplierTypeCode> renderingProviderTypeCode;
@@ -48,11 +48,10 @@ public class ClaimLineProfessionalNchExtensions {
             .setValue(new DecimalType(totalUnitsCount));
 
     var anesthesiaUnitCountExtension =
-        Optional.ofNullable(anesthesiaUnitCount)
-            .map(
-                v ->
-                    new Extension(SystemUrls.EXT_CLM_LINE_ANSTHSA_UNIT_CNT_URL)
-                        .setValue(new DecimalType(v)));
+        anesthesiaUnitCount.map(
+            v ->
+                new Extension(SystemUrls.EXT_CLM_LINE_ANSTHSA_UNIT_CNT_URL)
+                    .setValue(new DecimalType(v)));
 
     return Stream.of(
             unitsIndicatorCode.map(CarrierLineMTUSIndicatorCode::toFhir),
