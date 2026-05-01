@@ -73,8 +73,20 @@ public class IntegrationTestConfiguration {
         var date = clock.instant().truncatedTo(ChronoUnit.DAYS);
 
         runPython(container, date, "uv", "sync");
-        runPython(container, date, "uv", "run", "load_synthetic.py", "postgres", "./test_samples2");
-        runPython(container, date, "uv", "run", "pipeline.py", "postgres", "synthetic");
+        runPython(
+            container,
+            date,
+            "uv",
+            "run",
+            "pipeline.py",
+            "--source",
+            "postgres",
+            "--load-mode",
+            "synthetic",
+            "--load-type",
+            "initial",
+            "--seed-from",
+            "./test_samples2");
         postgresContainer = container;
       }
     }
@@ -112,8 +124,6 @@ public class IntegrationTestConfiguration {
     env.put("BFD_DB_USERNAME", container.getUsername());
     env.put("BFD_DB_PASSWORD", container.getPassword());
     env.put("BFD_DB_NAME", container.getDatabaseName());
-    // Makes the pipeline go slightly faster by increasing the number of tasks that run in parallel.
-    env.put("IDR_LOAD_TYPE", "initial");
     // Partitions are necessary for massive amounts of prod data, but will cause our modestly-sized
     // test data to load significantly slower.
     env.put("IDR_ENABLE_PARTITIONS", "0");
