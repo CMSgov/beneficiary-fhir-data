@@ -16,7 +16,7 @@ from pydantic import TypeAdapter
 from snowflake.connector import DictCursor, SnowflakeConnection
 from snowflake.snowpark import Session
 
-from constants import DEFAULT_MIN_DATE
+from constants import DEFAULT_MIN_DATE, IDR_PREFIX
 from load_partition import LoadPartition
 from loader import get_connection_string
 from model.base_model import (
@@ -53,7 +53,7 @@ class CsvFile:
         return ",".join(self.cols)
 
     def full_table(self) -> str:
-        return f"cms_vdm_view_mdcr_prd.{self.table}"
+        return f"{IDR_PREFIX}.{self.table}"
 
 
 # TODO: UP046 seems to cause issues with pyright
