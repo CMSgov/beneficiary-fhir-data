@@ -305,7 +305,7 @@
 
     <dependencyManagement>
         <dependencies>            
-        <!-- Fix for Snyk vulnerability (CWE-770)-->
+            <!-- Fix for Snyk vulnerability (CWE-770)-->
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-codec-http2</artifactId>
