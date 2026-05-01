@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """Members of this file/module are related to the loading of performance statistics
 from various data "stores" (such as from files or AWS S3).
 """
@@ -29,7 +31,7 @@ from gevent import monkey
 # We need to monkey patch gevent _before_ importing boto3 to ensure this doesn't happen.
 # See https://stackoverflow.com/questions/40878996/does-boto3-support-greenlets
 monkey.patch_all()
-import boto3  # noqa: E402
+import boto3
 
 AthenaQueryRowResult = dict[str, list[dict[str, str]]]
 """Type representing a single row result from the result of an Athena query"""

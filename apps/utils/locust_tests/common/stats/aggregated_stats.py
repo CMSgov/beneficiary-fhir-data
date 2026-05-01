@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """Members of this file/module should be related to the collection of performance statistics during
 a test run as well as the representation of those statistics via dataclasses or other suitable
 objects.

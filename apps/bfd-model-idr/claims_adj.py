@@ -9,6 +9,7 @@ from claims_static import (
     AVAIL_CLM_RLT_COND_SK,
     AVAIL_OSCAR_CODES_INSTITUTIONAL,
     AVAILABLE_NDC,
+    AVAILABLE_SSA_STATE_CDS,
     CLM_POA_IND_CHOICES,
     FISS_CLM_TYPE_CDS,
     HCPCS_MODS,
@@ -17,7 +18,6 @@ from claims_static import (
     PHARMACY_CLM_TYPE_CDS,
     TARGET_RLT_COND_CODES,
     TARGET_SEQUENCE_NUMBERS,
-    AVAILABLE_SSA_STATE_CDS,
     get_drg_dgns_codes,
     get_hcpcs_proc_codes,
     get_icd_10_dgns_codes,
@@ -49,9 +49,13 @@ class AdjudicatedGeneratorUtil:
         init_clm: RowAdapter | None = None,
         min_date: str = "2018-01-01",
         max_date: str = str(NOW),
-        type_1_npis: list = [0],
-        type_2_npis: list = [0],
+        type_1_npis: list | None = None, 
+        type_2_npis: list | None = None, 
     ):
+
+        self.type_1_npis = type_1_npis if type_1_npis is not None else [0]
+        self.type_2_npis = type_2_npis if type_2_npis is not None else [0]
+
         clm = init_clm or RowAdapter({})
         clm[f.CLM_DT_SGNTR_SK] = gen_basic_id(field=f.CLM_DT_SGNTR_SK, length=12)
         clm[f.CLM_UNIQ_ID] = gen_basic_id(field=f.CLM_UNIQ_ID, length=13)
@@ -744,8 +748,11 @@ class AdjudicatedGeneratorUtil:
         clm_line_num: int,
         diagnoses: list[RowAdapter],
         init_clm_line: RowAdapter | None = None,
-        type_1_npis: list = [0],
+        type_1_npis: list | None = None, 
     ):
+
+        self.type_1_npis = type_1_npis if type_1_npis is not None else [0]
+
         clm_type_cd = int(clm[f.CLM_TYPE_CD])
         clm_line = init_clm_line or RowAdapter({})
         clm_line[f.GEO_BENE_SK] = clm[f.GEO_BENE_SK]

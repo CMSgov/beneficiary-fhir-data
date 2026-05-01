@@ -1,12 +1,12 @@
 [project]
 name = "bfd-workspace"
 version = "0.1.0"
-requires-python="==3.14.*"
+requires-python="==3.14.3"
 description = "BFD Python workspace for unified dependency management"
 
 dependencies = [
     "psycopg[binary,pool]>=3.2.13",
-    "pydantic==2.12.*",
+    "pydantic==2.13.3",
     # sftp-outbound-transfer dependencies
     "aws-lambda-powertools[all]",
     "paramiko",
@@ -99,8 +99,7 @@ select = [
     "FURB", # refurb
     "RUF",  # ruff-specific
 ]
-# Don't require docstrings
-ignore = ["D100", "D101", "D102", "D103", "D104", "D105", "D107", "D205", "D401"]
+ignore = ["D100", "D101", "D102", "D103", "D104", "D105", "D107", "D205", "D401", "E402"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "pep257"

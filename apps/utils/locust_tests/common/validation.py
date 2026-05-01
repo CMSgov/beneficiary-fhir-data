@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """Validate tests against target SLIs."""
 
 import logging

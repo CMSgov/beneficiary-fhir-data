@@ -2,7 +2,6 @@ import logging
 from abc import ABC, abstractmethod
 from collections.abc import Iterator, Mapping, Sequence
 from datetime import datetime
-from typing import Generic
 
 import psycopg
 import snowflake.connector
@@ -38,8 +37,7 @@ from timer import Timer
 logger = logging.getLogger(__name__)
 
 
-# TODO: UP046 seems to cause issues with pyright
-class Extractor(ABC, Generic[T]):
+class Extractor[T](ABC):
     def __init__(self, cls: type[T], partition: LoadPartition) -> None:
         self.cls = cls
         self.type_adapter = TypeAdapter(list[self.cls])

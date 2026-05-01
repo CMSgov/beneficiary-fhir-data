@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """High Volume Load test suite for BFD Server endpoints."""
 
 import inspect

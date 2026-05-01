@@ -15,7 +15,7 @@ from gevent import monkey
 # We need to monkey patch gevent _before_ importing boto3 to ensure this doesn't happen.
 # See https://stackoverflow.com/questions/40878996/does-boto3-support-greenlets
 monkey.patch_all()
-import boto3  # noqa: E402
+import boto3
 
 __s3_client = boto3.client("s3")
 
