@@ -57,14 +57,22 @@ See `settings.py` for the current list of settings.
 
 ## Loading synthetic data into a live environment
 
-Test data must be generated first (see details in `bfd-model-idr`)
+Data is loaded into a live environment from our Snowflake dev instance
 (replace the value of `BFD_ENV` with the environment name you want to target).
+
+This will load the current contents of Snowflake into the environment.
 
 ```sh
 BFD_ENV=1234-test ./load-synthetic-env.sh
 ```
 
-## Running against Snowflake data
+This will first _replace_ the contents in Snowflake with the given CSV data and then load it into the environment.
+
+```sh
+BFD_ENV=1234-test ./load-synthetic-env.sh ../bfd-model-idr/synthetic-data
+```
+
+## Running against production data
 
 Set up credentials
 
@@ -75,7 +83,7 @@ source ./load-credentials.sh
 Run the app (optionally specify a minimum transaction date)
 
 ```sh
-PIPELINE_MIN_TRANSACTION_DATE=2024-01-01 uv run ./pipeline.py
+PIPELINE_MIN_TRANSACTION_DATE=2024-01-01 uv run pipeline.py
 ```
 
 ## Adding data to the model
