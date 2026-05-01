@@ -32,9 +32,9 @@ IDR_SCHEMA="$(aws ssm get-parameter --name /bfd/${BFD_ENV}/idr-pipeline/sensitiv
 readonly IDR_SCHEMA
 export IDR_SCHEMA
 
-function do_load() {
-  uv run load_synthetic.py snowflake "$1"
-  IDR_LOAD_TYPE=initial IDR_ENABLE_DATE_PARTITIONS=0 uv run pipeline.py snowflake synthetic
-}
+args=('--load-type' 'initial' '--source' 'snowflake' '--load-mode' 'synthetic')
+if [[ -n "$1" ]]; then
+    args+=('--seed-from' "$1")
+fi
 
-do_load "$1"
+IDR_ENABLE_DATE_PARTITIONS=0 uv run pipeline.py "${args[@]}"

@@ -1,12 +1,14 @@
-import argparse
 import logging
 from concurrent.futures import ProcessPoolExecutor
 from datetime import UTC, datetime
 
+import click
+import psycopg  # type: ignore
 from hamilton import driver, telemetry  # type: ignore
 from hamilton.execution import executors  # type: ignore
 
 import pipeline_nodes
+from extractor import PostgresExecutor, SnowflakeExecutor
 from load_events import (
     IdrJobLoadEvent,
     get_eligible_events,
@@ -17,11 +19,12 @@ from load_events import (
     update_start_times,
 )
 from load_partition import LoadType
+from load_synthetic import load_from_csv
+from loader import get_connection_string
 from logger_config import configure_logger
 from model.base_model import LoadMode, Source
 from settings import (
     INCREMENTAL_IDR_JOB_GRACE_PERIOD,
-    LOAD_TYPE,
     MAX_TASKS,
     TABLES_TO_LOAD,
     bfd_test_date,
@@ -43,21 +46,45 @@ class MultiProcessingExecutor(executors.PoolExecutor):
         )
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser(description="IDR pipeline")
-    parser.add_argument("source", default="postgres", choices=["postgres", "snowflake"])
-    parser.add_argument("load_mode", default="prod", choices=["local", "synthetic", "prod"])
-    args = parser.parse_args()
+@click.command
+@click.option(
+    "--source",
+    envvar="IDR_SOURCE",
+    type=click.Choice(Source, case_sensitive=False),
+    default=Source.POSTGRES,
+    show_default=True,
+    help="Source to load from",
+)
+@click.option(
+    "--load-mode",
+    envvar="IDR_LOAD_MODE",
+    type=click.Choice(LoadMode, case_sensitive=False),
+    default=LoadMode.LOCAL,
+    show_default=True,
+    help="Mode - affects db connection string and load progress tracking",
+)
+@click.option(
+    "--load-type",
+    envvar="IDR_LOAD_TYPE",
+    type=click.Choice(LoadType, case_sensitive=False),
+    default=LoadType.INITIAL,
+    show_default=True,
+    help="Load type - affects claim filtering",
+)
+@click.option("--seed-from", type=click.Path(exists=True, resolve_path=True))
+def main(source: Source, load_mode: LoadMode, load_type: LoadType, seed_from: str | None) -> None:
+    if seed_from:
+        load_from_csv(
+            SnowflakeExecutor()
+            if source == Source.SNOWFLAKE
+            else PostgresExecutor(psycopg.connect(get_connection_string(LoadMode.SYNTHETIC))),
+            seed_from,
+        )
+    run(source, load_mode, load_type)
 
-    run(args.source, args.load_mode)
 
-
-def run(source: str, load_mode: str) -> None:
+def run(source: Source, load_mode: LoadMode, load_type: LoadType) -> None:
     logger.info("load start")
-    load_mode = LoadMode(load_mode)
-    source = Source(source)
-
-    load_type = LoadType(LOAD_TYPE)
 
     logger.info("load_type %s", load_type)
     # Per the docs (https://docs.python.org/3/library/multiprocessing.html#module-multiprocessing.pool)
