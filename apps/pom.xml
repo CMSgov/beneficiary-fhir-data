@@ -304,7 +304,7 @@
     </properties>
 
     <dependencyManagement>
-        <dependencies>            
+        <dependencies>
             <!-- Fix for Snyk vulnerability (CWE-770)-->
             <dependency>
                 <groupId>io.netty</groupId>
