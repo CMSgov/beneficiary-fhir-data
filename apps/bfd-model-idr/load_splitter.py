@@ -62,7 +62,13 @@ from generator_util import (
     type=click.Path(exists=True),
     default="./batched_out",
 )
-def main(clm_batches_size: int, out: Path):
+
+def main_cli(clm_batches_size: int, out: Path):
+    main(clm_batches_size=clm_batches_size, out=out)
+
+def main(clm_batches_size: int, out: Path = Path("./batched_out")):
+    """Generate synthetic claims data."""
+    out = Path(out) if isinstance(out, str) else out
     files_to_copy: dict[str, list[RowAdapter]] = {
         BENE_HSTRY: [],
         BENE_MBI_ID: [],
@@ -203,4 +209,4 @@ def main(clm_batches_size: int, out: Path):
 
 
 if __name__ == "__main__":
-    main(clm_batches_size=5)
+    main_cli()
