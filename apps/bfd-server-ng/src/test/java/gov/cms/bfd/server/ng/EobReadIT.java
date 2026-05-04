@@ -5,15 +5,12 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.List;
-
 import ca.uhn.fhir.rest.gclient.IReadTyped;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.bfd.server.ng.claim.ClaimRepository;
 import gov.cms.bfd.server.ng.claim.model.ClaimProfessionalNch;
 import gov.cms.bfd.server.ng.eob.EobResourceProvider;
-import gov.cms.bfd.server.ng.input.DateTimeRange;
 import io.restassured.RestAssured;
 import jakarta.servlet.http.HttpServletRequest;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
@@ -151,8 +148,9 @@ class EobReadIT extends IntegrationTestBase {
     // return claim
     assertFalse(claims.isEmpty());
 
-    TestTransaction.end(); // force a commit on Spring-managed test transaction, so API will observe db changes
-    
+    TestTransaction
+        .end(); // force a commit on Spring-managed test transaction, so API will observe db changes
+
     var eobRequest = eobRead().withId(Long.parseLong(CLAIM_ID_PROFESSIONAL_ORG));
     assertThrows(ResourceNotFoundException.class, eobRequest::execute);
 
