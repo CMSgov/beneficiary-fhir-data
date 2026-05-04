@@ -30,6 +30,8 @@ resource "aws_cloudwatch_metric_alarm" "errors" {
   statistic           = "Sum"
   threshold           = 0
   alarm_description   = "RDA Pipeline errors detected in ${local.env}\n\n${local.dashboard_message_fragment}"
+  # disabled for now since RDA errors constantly
+  actions_enabled = false
 
   metric_name = "messages/count/error"
   namespace   = local.metrics_namespace
