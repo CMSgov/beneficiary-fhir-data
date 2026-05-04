@@ -42,7 +42,6 @@ _CLAIM_PARENT_CHILD_TABLES: dict[type[IdrBaseModel], type[IdrBaseModel] | None] 
     IdrClaimInstitutionalNch: IdrClaimItemInstitutionalNch,
     IdrClaimProfessionalSs: IdrClaimItemProfessionalSs,
     IdrClaimInstitutionalSs: IdrClaimItemInstitutionalSs,
-    IdrClaimRx: None,  # RX/Part D is special because we combine claim + claim line
 }
 
 _CLAIM_TABLES: list[type[IdrBaseModel]] = [
@@ -256,9 +255,7 @@ def stage5_inputs(
     tables_to_load: set[str] | None,
     collect_stage4: bool,  # noqa: ARG001
 ) -> Parallelizable[NodePartitionedModelInput]:
-    yield from _gen_partitioned_node_inputs(
-        filter_tables([*_CLAIM_TABLES, IdrClaimRx], tables_to_load), load_type
-    )
+    yield from _gen_partitioned_node_inputs(filter_tables(_CLAIM_TABLES, tables_to_load), load_type)
 
 
 def do_stage5(

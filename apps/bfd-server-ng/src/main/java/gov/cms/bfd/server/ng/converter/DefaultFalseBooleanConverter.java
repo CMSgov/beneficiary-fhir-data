@@ -13,7 +13,7 @@ public class DefaultFalseBooleanConverter implements AttributeConverter<Boolean,
   @Override
   public String convertToDatabaseColumn(Boolean value) {
     // This is a read-only API so this method will never actually persist anything to the database.
-    return String.valueOf(value);
+    return value != null && value ? IdrConstants.YES : IdrConstants.NO;
   }
 
   @Override

@@ -5,11 +5,15 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.List;
+
 import ca.uhn.fhir.rest.gclient.IReadTyped;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import gov.cms.bfd.server.ng.claim.ClaimRepository;
 import gov.cms.bfd.server.ng.claim.model.ClaimProfessionalNch;
 import gov.cms.bfd.server.ng.eob.EobResourceProvider;
+import gov.cms.bfd.server.ng.input.DateTimeRange;
 import io.restassured.RestAssured;
 import jakarta.servlet.http.HttpServletRequest;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
@@ -22,11 +26,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.transaction.TestTransaction;
+import org.springframework.transaction.annotation.Transactional;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 class EobReadIT extends IntegrationTestBase {
   @Autowired private EobResourceProvider eobResourceProvider;
+  @Autowired private ClaimRepository claimRepository;
   @Mock HttpServletRequest request;
 
   private IReadTyped<ExplanationOfBenefit> eobRead() {
@@ -109,7 +116,24 @@ class EobReadIT extends IntegrationTestBase {
   }
 
   @Test
+  @Transactional
   void eobReadNonLatestProfessionalIsNotReturned() {
+    TestTransaction.flagForCommit(); // disable rollback and performa commit at end of transaction
+
+    // temporarily set latest claim to non-latest since purge has removed all non-latest claims
+    var updateCount =
+        entityManager
+            .createQuery(
+                """
+      UPDATE ClaimProfessionalNch c SET
+        c.latestClaimIndicator = :latestClaim
+      WHERE c.claimUniqueId = :claimId
+    """)
+            .setParameter("latestClaim", false)
+            .setParameter("claimId", CLAIM_ID_PROFESSIONAL_ORG)
+            .executeUpdate();
+    assertEquals(1, updateCount);
+
     var claims =
         entityManager
             .createQuery(
@@ -121,12 +145,35 @@ class EobReadIT extends IntegrationTestBase {
                   WHERE c.claimUniqueId = :claimId
                 """,
                 ClaimProfessionalNch.class)
-            .setParameter("claimId", Long.parseLong(CLAIM_ID_PROFESSIONAL_NON_LATEST))
+            .setParameter("claimId", Long.parseLong(CLAIM_ID_PROFESSIONAL_ORG))
             .getResultList();
-    // Precondition - claim should be purged and not available
-    assertTrue(claims.isEmpty());
-    var eobRequest = eobRead().withId(Long.parseLong(CLAIM_ID_PROFESSIONAL_NON_LATEST));
+    // Precondition - claim is normally not avaiable, but making available to verify server does not
+    // return claim
+    assertFalse(claims.isEmpty());
+
+    TestTransaction.end(); // force a commit on Spring-managed test transaction, so API will observe db changes
+    
+    var eobRequest = eobRead().withId(Long.parseLong(CLAIM_ID_PROFESSIONAL_ORG));
     assertThrows(ResourceNotFoundException.class, eobRequest::execute);
+
+    TestTransaction.start();
+    TestTransaction.flagForCommit();
+
+    // reset claim back to latest
+    updateCount =
+        entityManager
+            .createQuery(
+                """
+      UPDATE ClaimProfessionalNch c SET
+        c.latestClaimIndicator = :latestClaim
+      WHERE c.claimUniqueId = :claimId
+    """)
+            .setParameter("latestClaim", true)
+            .setParameter("claimId", CLAIM_ID_PROFESSIONAL_ORG)
+            .executeUpdate();
+    assertEquals(1, updateCount);
+
+    TestTransaction.end();
   }
 
   @ParameterizedTest

@@ -119,9 +119,9 @@ def purge_non_latest_claims(
         "1 = 1"
         if partition.start_date is None or partition.end_date is None
         else f"""
-    p.clm_from_dt BETWEEN '{partition.start_date.strftime("%Y-%m-%d")}'
-    AND '{partition.end_date.strftime("%Y-%m-%d")}'
-    """
+        p.clm_from_dt BETWEEN '{partition.start_date.strftime("%Y-%m-%d")}'
+        AND '{partition.end_date.strftime("%Y-%m-%d")}'
+        """
     )
     claim_type_codes = ",".join([str(c) for c in partition.claim_type_codes])
     claim_type_code_filter = f"p.clm_type_cd IN ( {claim_type_codes} )"
@@ -134,11 +134,11 @@ def purge_non_latest_claims(
         childSQL = f"""
             DELETE FROM {child_table_name} AS c
             WHERE EXISTS
-                (   SELECT NULL
+                (   
+                    SELECT NULL
                     FROM {parent_table_name} AS p 
                     WHERE p.clm_uniq_id = c.clm_uniq_id
                         AND p.clm_ltst_clm_ind  = 'N' 
-                        AND p.clm_type_cd NOT IN ( 1, 2, 3, 4 )
                         AND {claim_range_filter}
                         AND {claim_type_code_filter}
                 )
