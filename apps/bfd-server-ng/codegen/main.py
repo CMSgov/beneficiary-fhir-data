@@ -8,7 +8,6 @@ import sys
 def gen_enum(fsh_output_file: str, int_codes=False):
     with open(
         f"../bfd-model-idr/sushi/fsh-generated/resources/{fsh_output_file}.json",
-        "r",
     ) as f:
         content = f.read()
         json_content = json.loads(content)

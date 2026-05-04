@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import dataclasses
 import re
 from argparse import Namespace
@@ -225,7 +227,7 @@ class StatsConfiguration:
         )
 
     @classmethod
-    def from_parsed_opts(cls, parsed_opts: Namespace) -> "StatsConfiguration":
+    def from_parsed_opts(cls, parsed_opts: Namespace) -> StatsConfiguration:
         """Construct an instance of StatsConfiguration from a parsed options Namespace. This will
         typically be the Locust Environment.parsed_options Namespace.
 

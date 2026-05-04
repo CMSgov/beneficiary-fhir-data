@@ -3,8 +3,6 @@ import sys
 from dataclasses import asdict, dataclass, field
 from decimal import Decimal
 from pathlib import Path
-from typing import Optional
-from datetime import datetime, timezone
 
 import pandas as pd
 
@@ -89,26 +87,23 @@ rx_line_financial_fields = [
 
 
 def convert_to_decimal(val: str | None) -> Decimal:
-    try:
-        return Decimal(val)
-    except (TypeError, ValueError):
-        return 0.0
+    return Decimal(val or 0.0)
 
 @dataclass
 class Provider:
-    PRVDR_SK: Optional[str] = None
-    PRVDR_ID_QLFYR_CD: Optional[str] = None
-    NPI_TYPE: Optional[str] = None
-    careTeamType: Optional[str] = None
-    careTeamSequenceNumber: Optional[str] = None
-    PRVDR_LAST_OR_LGL_NAME: Optional[str] = None
-    PRVDR_1ST_NAME: Optional[str] = None
-    PRVDR_CARETEAM_NAME: Optional[str] = None
-    specialtyCode: Optional[str] = None
-    PRVDR_OSCAR_NUM: Optional[str] = None
-    CLM_BLG_PRVDR_ZIP5_CD: Optional[str] = None
-    CLM_PRVDR_GNRC_ID_NUM: Optional[str] = None
-    CLM_BLG_PRVDR_TAX_NUM: Optional[str] = None
+    PRVDR_SK: str | None = None
+    PRVDR_ID_QLFYR_CD: str | None = None
+    NPI_TYPE: str | None = None
+    careTeamType: str | None = None
+    careTeamSequenceNumber: str | None = None
+    PRVDR_LAST_OR_LGL_NAME: str | None = None
+    PRVDR_1ST_NAME: str | None = None
+    PRVDR_CARETEAM_NAME: str | None = None
+    specialtyCode: str | None = None
+    PRVDR_OSCAR_NUM: str | None = None
+    CLM_BLG_PRVDR_ZIP5_CD: str | None = None
+    CLM_PRVDR_GNRC_ID_NUM: str | None = None
+    CLM_BLG_PRVDR_TAX_NUM: str | None = None
 
 populate_fields_except_na = [
     "PRVDR_LGL_NAME",
@@ -202,12 +197,13 @@ def create_careteam_provider(careteam_column):
 for careteam_column in careteam_header_columns:
     if careteam_column not in cur_sample_data:
         continue
+    
     provider_object = create_careteam_provider(careteam_column)
-    provider_object.careTeamSequenceNumber = sum(
-        1 for item in provider_list if provider_object.careTeamType
-    )
+    
+    count = sum(1 for _ in provider_list if provider_object.careTeamType)
+    provider_object.careTeamSequenceNumber = str(count)
+    
     provider_list.append(provider_object)
-
 
 # Distinct method since line items end up cleaner
 def create_rendering_line_provider(npi_num):
@@ -235,11 +231,16 @@ for line_item in cur_sample_data["lineItemComponents"]:
         provider = create_rendering_line_provider(prvdr_npi_num)
         if line_item.get("CLM_RNDRG_FED_PRVDR_SPCLTY_CD"):
             provider.specialtyCode = line_item.get("CLM_RNDRG_FED_PRVDR_SPCLTY_CD")
-        provider.careTeamSequenceNumber = sum(
-            1 for item in provider_list if provider_object.careTeamType
-        )
-        line_item["careTeamSequence"] = provider.careTeamSequenceNumber
-        provider_list.append(provider)
+
+            sequence_count = sum(
+                1 for _ in provider_list 
+                if getattr(provider, "careTeamType", None)
+            )
+
+            provider.careTeamSequenceNumber = str(sequence_count)
+
+            line_item["careTeamSequence"] = provider.careTeamSequenceNumber
+            provider_list.append(provider)            
 
     if prvdr_npi_num:
         sequence = next(
@@ -366,7 +367,7 @@ def build_claim_audit_trail_composite(sample: dict) -> str:
     status = sample.get("CLM_AUDT_TRL_STUS_CD")
 
     if not status:
-        return None
+        return ""
 
     prefix = meta_src_prefix(meta_src_sk)
 

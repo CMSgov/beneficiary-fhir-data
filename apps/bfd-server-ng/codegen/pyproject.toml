@@ -1,7 +1,6 @@
 [project]
-name = "codegen"
+name = "bfd-server-ng-codegen"
 version = "0.1.0"
-description = "Add your description here"
+description = "BFD Server NG Codegen"
 readme = "README.md"
-requires-python = ">=3.13"
 dependencies = []

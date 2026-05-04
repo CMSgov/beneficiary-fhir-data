@@ -7,16 +7,15 @@ import logging
 from dataclasses import asdict
 from pathlib import Path
 
-from gevent import monkey
-
 from common.stats.aggregated_stats import AggregatedStats
 from common.stats.stats_config import StatsConfiguration, StatsStorageType
+from gevent import monkey
 
 # botocore/boto3 is incompatible with gevent out-of-box causing issues with SSL.
 # We need to monkey patch gevent _before_ importing boto3 to ensure this doesn't happen.
 # See https://stackoverflow.com/questions/40878996/does-boto3-support-greenlets
 monkey.patch_all()
-import boto3  # noqa: E402
+import boto3
 
 __s3_client = boto3.client("s3")
 

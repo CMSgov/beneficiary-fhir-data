@@ -5,9 +5,8 @@ from collections import defaultdict
 from pathlib import Path
 
 import click
-import tqdm
-
 import field_constants as f
+import tqdm
 from claims_util import four_part_key
 from generator_util import (
     BENE_DUAL,
@@ -47,7 +46,7 @@ from generator_util import (
 )
 
 
-@click.command
+@click.command()
 @click.option(
     "-c",
     "--clm-batches-size",
@@ -60,10 +59,16 @@ from generator_util import (
 @click.argument(
     "out",
     nargs=1,
-    type=click.Path(exists=True, path_type=Path),
+    type=click.Path(exists=True),
     default="./batched_out",
 )
-def main(clm_batches_size: int, out: Path):
+
+def main_cli(clm_batches_size: int, out: Path):
+    main(clm_batches_size=clm_batches_size, out=out)
+
+def main(clm_batches_size: int, out: Path = Path("./batched_out")):
+    """Generate synthetic claims data."""
+    out = Path(out) if isinstance(out, str) else out
     files_to_copy: dict[str, list[RowAdapter]] = {
         BENE_HSTRY: [],
         BENE_MBI_ID: [],
@@ -113,15 +118,15 @@ def main(clm_batches_size: int, out: Path):
     )
     clm_dcmtns_per_fpk = partition_rows(
         llist=files_to_split[CLM_DCMTN],
-        part_by=lambda x: four_part_key(x),
+        part_by=four_part_key,
     )
     clm_vals_per_fpk = partition_rows(
         llist=files_to_split[CLM_VAL],
-        part_by=lambda x: four_part_key(x),
+        part_by=four_part_key,
     )
     clm_prods_per_fpk = partition_rows(
         llist=files_to_split[CLM_PROD],
-        part_by=lambda x: four_part_key(x),
+        part_by=four_part_key,
     )
     clm_dt_sgntrs_per_sk = partition_rows(
         llist=files_to_split[CLM_DT_SGNTR],
@@ -129,26 +134,26 @@ def main(clm_batches_size: int, out: Path):
     )
     clm_instnls_per_fpk = partition_rows(
         llist=files_to_split[CLM_INSTNL],
-        part_by=lambda x: four_part_key(x),
+        part_by=four_part_key,
     )
     clm_prfnls_per_fpk = partition_rows(
         llist=files_to_split[CLM_PRFNL],
-        part_by=lambda x: four_part_key(x),
+        part_by=four_part_key,
     )
     clm_line_instnls_per_fpk = partition_rows(
-        llist=files_to_split[CLM_LINE_INSTNL], part_by=lambda x: four_part_key(x)
+        llist=files_to_split[CLM_LINE_INSTNL], part_by=four_part_key
     )
     clm_line_prfnls_per_fpk = partition_rows(
-        llist=files_to_split[CLM_LINE_PRFNL], part_by=lambda x: four_part_key(x)
+        llist=files_to_split[CLM_LINE_PRFNL], part_by=four_part_key
     )
     clm_fiss_per_fpk = partition_rows(
-        llist=files_to_split[CLM_FISS], part_by=lambda x: four_part_key(x)
+        llist=files_to_split[CLM_FISS], part_by=four_part_key
     )
     clm_lctn_hstrys_per_fpk = partition_rows(
-        llist=files_to_split[CLM_LCTN_HSTRY], part_by=lambda x: four_part_key(x)
+        llist=files_to_split[CLM_LCTN_HSTRY], part_by=four_part_key
     )
     clm_line_dcmtns_per_fpk = partition_rows(
-        llist=files_to_split[CLM_LINE_DCMTN], part_by=lambda x: four_part_key(x)
+        llist=files_to_split[CLM_LINE_DCMTN], part_by=four_part_key
     )
 
     batched_tables: dict[int, dict[str, list[RowAdapter]]] = defaultdict(lambda: defaultdict(list))
@@ -204,4 +209,4 @@ def main(clm_batches_size: int, out: Path):
 
 
 if __name__ == "__main__":
-    main()
+    main_cli()

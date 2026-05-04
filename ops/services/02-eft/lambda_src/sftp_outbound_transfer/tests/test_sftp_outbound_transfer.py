@@ -10,8 +10,8 @@ from unittest import mock
 import paramiko
 import pytest
 from pydantic import ValidationError
-
-from errors import (
+from sftp_outbound_transfer import handler
+from sftp_outbound_transfer_errors import (
     InvalidObjectKeyError,
     InvalidPendingDirError,
     SFTPConnectionError,
@@ -19,7 +19,6 @@ from errors import (
     UnknownPartnerError,
     UnrecognizedFileError,
 )
-from sftp_outbound_transfer import handler
 from sns import (
     FileDiscoveredDetails,
     StatusNotification,
@@ -45,10 +44,10 @@ DEFAULT_MOCK_BUCKET = "mock-bucket"
 DEFAULT_MOCK_BUCKET_ROOT_DIR = "mock_root"
 DEFAULT_MOCK_PENDING_DIR = "out"
 DEFAULT_MOCK_OBJECT_FILENAME = "file"
-DEFAULT_MOCK_OBJECT_KEY = f"{DEFAULT_MOCK_BUCKET_ROOT_DIR}/{DEFAULT_MOCK_PARTNER_HOME_DIR}/{DEFAULT_MOCK_PENDING_DIR}/{DEFAULT_MOCK_OBJECT_FILENAME}"  # noqa: E501
+DEFAULT_MOCK_OBJECT_KEY = f"{DEFAULT_MOCK_BUCKET_ROOT_DIR}/{DEFAULT_MOCK_PARTNER_HOME_DIR}/{DEFAULT_MOCK_PENDING_DIR}/{DEFAULT_MOCK_OBJECT_FILENAME}"
 DEFAULT_MOCK_BFD_SNS_TOPIC_ARN = "arn:aws:sns:us-east-1:123456789012:mock-topic"
 DEFAULT_MOCK_SNS_TOPIC_ARNS_BY_PARTNER = {
-    f"{DEFAULT_MOCK_PARTNER_NAME}": f"arn:aws:sns:us-east-1:123456789012:mock-topic-{DEFAULT_MOCK_PARTNER_NAME}"  # noqa: E501
+    f"{DEFAULT_MOCK_PARTNER_NAME}": f"arn:aws:sns:us-east-1:123456789012:mock-topic-{DEFAULT_MOCK_PARTNER_NAME}"
 }
 DEFAULT_MOCK_SNS_TOPIC_ARNS_BY_PARTNER_JSON = json.dumps(DEFAULT_MOCK_SNS_TOPIC_ARNS_BY_PARTNER)
 DEFAULT_MOCK_GLOBAL_CONFIG = GlobalSsmConfig(
@@ -490,7 +489,7 @@ class TestUpdatePipelineSlisHandler:
         assert actual_s3_download_obj_key == expected_s3_download_obj_key
 
         actual_sftp_putfo_path = mock_sftp_client.putfo.call_args.kwargs["remotepath"]
-        expected_sftp_putfo_path = f"{DEFAULT_MOCK_PARTNER_CONFIG.recognized_files[0].staging_folder}/{DEFAULT_MOCK_OBJECT_FILENAME}"  # noqa: E501
+        expected_sftp_putfo_path = f"{DEFAULT_MOCK_PARTNER_CONFIG.recognized_files[0].staging_folder}/{DEFAULT_MOCK_OBJECT_FILENAME}"
         assert actual_sftp_putfo_path == expected_sftp_putfo_path
 
         actual_sftp_chmod_data = mock_sftp_client.chmod.call_args.kwargs
@@ -500,7 +499,7 @@ class TestUpdatePipelineSlisHandler:
         actual_sftp_rename_data = mock_sftp_client.rename.call_args.kwargs
         expected_sftp_rename_data = {
             "oldpath": expected_sftp_putfo_path,
-            "newpath": f"{DEFAULT_MOCK_PARTNER_CONFIG.recognized_files[0].input_folder}/{DEFAULT_MOCK_OBJECT_FILENAME}",  # noqa: E501
+            "newpath": f"{DEFAULT_MOCK_PARTNER_CONFIG.recognized_files[0].input_folder}/{DEFAULT_MOCK_OBJECT_FILENAME}",
         }
         assert actual_sftp_rename_data == expected_sftp_rename_data
 

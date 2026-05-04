@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """High Volume Load test suite for BFD Server endpoints."""
 
 import inspect
@@ -10,13 +12,12 @@ from typing import (
     TypeVar,
 )
 
-from locust import TaskSet, User, events, tag, task
-from locust.env import Environment
-
 from common import data, db
 from common.bfd_user_base import BFDUserBase
 from common.locust_utils import is_distributed, is_locust_master
 from common.user_init_aware_load_shape import UserInitAwareLoadShape
+from locust import TaskSet, User, events, tag, task
+from locust.env import Environment
 
 TaskT = TypeVar("TaskT", Callable[..., None], type["TaskSet"])
 MASTER_BENE_IDS: Collection[str] = []
@@ -27,7 +28,7 @@ EXCLUDE_TAGS: set[str] = set()
 
 
 @events.test_start.add_listener
-def _(environment: Environment, **kwargs: dict[str, Any]) -> None:  # noqa: ARG001
+def _(environment: Environment, **kwargs: dict[str, Any]) -> None:
     if (
         is_distributed(environment) and is_locust_master(environment)
     ) or not environment.parsed_options:
@@ -84,7 +85,7 @@ class TaskHolder(Protocol[TaskT]):
 
 class HighVolumeTaskSet(TaskSet):
     @property
-    def user(self) -> "HighVolumeUser":
+    def user(self) -> HighVolumeUser:
         # This forces the type of self.user for all derived TaskSets to narrow to HighVolumeUser,
         # thus giving correct type hinting for all of HighVolumeUser's properties.
         return self._high_volume_user
@@ -143,7 +144,7 @@ class EobTaskSet(HighVolumeTaskSet):
                 "_lastUpdated": f"gt{self.user.last_updated}",
                 "_IncludeTaxNumbers": "true",
             },
-            name="/v1/fhir/ExplanationOfBenefit/_search search by id / lastUpdated / includeTaxNumbers",  # noqa: E501
+            name="/v1/fhir/ExplanationOfBenefit/_search search by id / lastUpdated / includeTaxNumbers",
         )
 
     @tag("eob_test_id_last_updated_v1", "v1")
@@ -207,7 +208,7 @@ class EobTaskSet(HighVolumeTaskSet):
                 "patient": self.user.bene_ids.pop(),
                 "_IncludeTaxNumbers": "true",
             },
-            name="/v2/fhir/ExplanationOfBenefit/_search search by id / lastUpdated / includeTaxNumbers",  # noqa: E501
+            name="/v2/fhir/ExplanationOfBenefit/_search search by id / lastUpdated / includeTaxNumbers",
         )
 
 
@@ -402,8 +403,10 @@ class HighVolumeUser(BFDUserBase):
         class_members = inspect.getmembers(sys.modules[__name__], inspect.isclass)
         potential_tasks = list(
             filter(
-                lambda potential_task: hasattr(potential_task[1], "tasks")
-                and issubclass(potential_task[1], HighVolumeTaskSet),
+                lambda potential_task: (
+                    hasattr(potential_task[1], "tasks")
+                    and issubclass(potential_task[1], HighVolumeTaskSet)
+                ),
                 class_members,
             )
         )

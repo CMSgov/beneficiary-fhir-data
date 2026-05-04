@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import csv
 import random
 import sys
@@ -7,9 +9,8 @@ from pathlib import Path
 from typing import Any
 
 import click
-import tqdm
-
 import field_constants as f
+import tqdm
 from claims_adj import AdjudicatedGeneratorUtil
 from claims_other import OtherGeneratorUtil
 from claims_pac import PacGeneratorUtil
@@ -576,10 +577,10 @@ class _ClaimsFile(StrEnum):
         self.out_path = Path(f"out/{value}.csv")
 
     def __new__(
-        cls: type["_ClaimsFile"],
+        cls: type[_ClaimsFile],
         value: str,
         ordered_headers: list[str],
-    ) -> "_ClaimsFile":
+    ) -> _ClaimsFile:
         obj = str.__new__(cls, value)
         obj._value_ = value
         obj.ordered_headers = ordered_headers
@@ -619,7 +620,7 @@ def _clean_int_columns(rows: list[dict[str, Any]], cols: list[str]):
     return rows
 
 
-@click.command
+@click.command()
 @click.option(
     "--sushi/--no-sushi",
     envvar="SUSHI",
@@ -688,6 +689,26 @@ def generate(
     bene_sk_mode: BeneSkMode,
     paths: tuple[Path, ...],
 ):
+    """CLI entry point - delegates to core logic."""
+    generate_data(
+        sushi=sushi,
+        min_claims=min_claims,
+        max_claims=max_claims,
+        enable_samhsa=enable_samhsa,
+        pac_gen=pac_gen,
+        bene_sk_mode=bene_sk_mode,
+        paths=paths,
+    )
+
+def generate_data(
+    sushi: bool,
+    min_claims: int,
+    max_claims: int,
+    enable_samhsa: bool,
+    pac_gen: GeneratePacDataMode,
+    bene_sk_mode: BeneSkMode,
+    paths: tuple[Path, ...],
+) -> None:
     """Generate synthetic claims data. Provided file PATHS will be updated with new fields."""
     if min_claims > max_claims:
         print(
@@ -790,7 +811,7 @@ def generate(
     clm_line_rx_per_clm_uniq_id = {str(row[f.CLM_UNIQ_ID]): row for row in files[CLM_LINE_RX]}
     clm_dcmtns_per_fpk = partition_rows(
         llist=files[CLM_DCMTN],
-        part_by=lambda x: four_part_key(x),
+        part_by=four_part_key,
     )
     dsprtnt_clm_val_per_fpk = {
         four_part_key(x): x for x in files[CLM_VAL] if int(x[f.CLM_VAL_CD]) == 18
@@ -800,30 +821,30 @@ def generate(
     }
     proc_clm_prod_per_fpk = partition_rows(
         llist=files[CLM_PROD],
-        part_by=lambda x: four_part_key(x),
+        part_by=four_part_key,
         filter_by=lambda x: x[f.CLM_PROD_TYPE_CD] == "S",
     )
     diag_clm_prod_per_fpk = partition_rows(
         llist=files[CLM_PROD],
-        part_by=lambda x: four_part_key(x),
+        part_by=four_part_key,
         filter_by=lambda x: x[f.CLM_PROD_TYPE_CD] != "S",
     )
     clm_dt_sgntr_per_sk = {str(row[f.CLM_DT_SGNTR_SK]): row for row in files[CLM_DT_SGNTR]}
     clm_instnl_per_fpk = {four_part_key(row): row for row in files[CLM_INSTNL]}
     clm_prfnls_per_fpk = partition_rows(
         llist=files[CLM_PRFNL],
-        part_by=lambda x: four_part_key(x),
+        part_by=four_part_key,
     )
     clm_line_instnls_per_fpk = partition_rows(
-        llist=files[CLM_LINE_INSTNL], part_by=lambda x: four_part_key(x)
+        llist=files[CLM_LINE_INSTNL], part_by=four_part_key
     )
     clm_line_prfnls_per_fpk = partition_rows(
-        llist=files[CLM_LINE_PRFNL], part_by=lambda x: four_part_key(x)
+        llist=files[CLM_LINE_PRFNL], part_by=four_part_key
     )
     clm_fiss_per_fpk = {four_part_key(row): row for row in files[CLM_FISS]}
     clm_lctn_hstry_per_fpk = {four_part_key(row): row for row in files[CLM_LCTN_HSTRY]}
     clm_line_dcmtns_per_clk = partition_rows(
-        llist=files[CLM_LINE_DCMTN], part_by=lambda x: four_part_key(x)
+        llist=files[CLM_LINE_DCMTN], part_by=four_part_key
     )
 
     # pac CLM generation is random per-generation iteration, so the number of pac CLMs rows is
@@ -1032,17 +1053,9 @@ def generate(
             for file_pac_clm in existing_pac_clms
         ]
         init_pac_clms_tbls = (
-            pac_clms_tbls_from_file
-            if pac_clms_tbls_from_file
-            else [
-                x
-                for x in all_adj_clms_tbls
-                if probability(0.5)
-                and int(x[CLM][0][f.CLM_TYPE_CD])
-                not in (1, 2, 3, 4)  # obviously we don't have pac claims for PD claims
-            ]
-            if gen_new_pac_clms
-            else []
+            pac_clms_tbls_from_file or 
+            ([x for x in all_adj_clms_tbls if probability(0.5) and int(x[CLM][0][f.CLM_TYPE_CD]) not in (1, 2, 3, 4)]
+             if gen_new_pac_clms else [])
         )
         for claims_tbls in init_pac_clms_tbls:
             pac_clm = pac_util.gen_pac_clm(init_clm=claims_tbls[CLM][0])

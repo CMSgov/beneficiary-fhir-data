@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """Members of this file/module are related to the loading of performance statistics
 from various data "stores" (such as from files or AWS S3).
 """
@@ -11,8 +13,6 @@ from pathlib import Path
 from statistics import mean
 from typing import Any
 
-from gevent import monkey
-
 from common.stats.aggregated_stats import (
     AggregatedStats,
     FinalCompareResult,
@@ -25,12 +25,13 @@ from common.stats.stats_config import (
     StatsStorageType,
 )
 from common.validation import ValidationResult
+from gevent import monkey
 
 # botocore/boto3 is incompatible with gevent out-of-box causing issues with SSL.
 # We need to monkey patch gevent _before_ importing boto3 to ensure this doesn't happen.
 # See https://stackoverflow.com/questions/40878996/does-boto3-support-greenlets
 monkey.patch_all()
-import boto3  # noqa: E402
+import boto3
 
 AthenaQueryRowResult = dict[str, list[dict[str, str]]]
 """Type representing a single row result from the result of an Athena query"""
@@ -79,7 +80,7 @@ class StatsLoader(ABC):
         """
 
     @staticmethod
-    def create(stats_config: StatsConfiguration, metadata: StatsMetadata) -> "StatsLoader":
+    def create(stats_config: StatsConfiguration, metadata: StatsMetadata) -> StatsLoader:
         """Construct a new concrete instance of StatsLoader that will load from the appropriate
         store as specified in stats_config.
 
@@ -180,7 +181,7 @@ class StatsAthenaLoader(StatsLoader):
     def load_previous(self) -> AggregatedStats | None:
         query = (
             f"SELECT cast(totals as JSON), cast(tasks as JSON) "
-            f'FROM "{self.stats_config.stats_store_s3_database}"."{self.stats_config.stats_store_s3_table}" '  # noqa: E501
+            f'FROM "{self.stats_config.stats_store_s3_database}"."{self.stats_config.stats_store_s3_table}" '
             f"WHERE {self.__get_where_clause()} ORDER BY metadata.timestamp DESC "
             "LIMIT 1"
         )
@@ -191,7 +192,7 @@ class StatsAthenaLoader(StatsLoader):
     def load_average(self) -> AggregatedStats | None:
         query = (
             f"SELECT cast(totals as JSON), cast(tasks as JSON) "
-            f'FROM "{self.stats_config.stats_store_s3_database}"."{self.stats_config.stats_store_s3_table}" '  # noqa: E501
+            f'FROM "{self.stats_config.stats_store_s3_database}"."{self.stats_config.stats_store_s3_table}" '
             f"WHERE {self.__get_where_clause()} "
             "ORDER BY metadata.timestamp DESC "
             f"LIMIT {self.stats_config.stats_compare_load_limit}"

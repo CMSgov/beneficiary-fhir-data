@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 from base64 import b64decode
 from dataclasses import dataclass
@@ -29,7 +31,7 @@ class GlobalSsmConfig:
     home_dirs_to_partner: dict[str, str]
 
     @classmethod
-    def from_ssm(cls, ssm_client: SSMClient, env: str) -> "GlobalSsmConfig":
+    def from_ssm(cls, ssm_client: SSMClient, env: str) -> GlobalSsmConfig:
         sftp_connect_timeout = int(
             get_ssm_parameter(
                 ssm_client=ssm_client,
@@ -105,7 +107,7 @@ class PartnerSsmConfig:
     recognized_files: list[RecognizedFile]
 
     @classmethod
-    def from_ssm(cls, ssm_client: SSMClient, partner: str, env: str) -> "PartnerSsmConfig":
+    def from_ssm(cls, ssm_client: SSMClient, partner: str, env: str) -> PartnerSsmConfig:
         bucket_home_dir = get_ssm_parameter(
             ssm_client=ssm_client,
             path=f"/{partner}/{env}/eft/sensitive/bucket_home_dir",

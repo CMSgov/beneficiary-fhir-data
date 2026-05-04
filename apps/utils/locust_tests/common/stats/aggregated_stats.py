@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """Members of this file/module should be related to the collection of performance statistics during
 a test run as well as the representation of those statistics via dataclasses or other suitable
 objects.
@@ -9,10 +11,9 @@ from dataclasses import dataclass
 from enum import StrEnum
 from typing import Any
 
+from common.validation import ValidationResult
 from locust.env import Environment
 from locust.stats import PERCENTILES_TO_REPORT, StatsEntry
-
-from common.validation import ValidationResult
 
 ResponseTimePercentiles = dict[str, int | float]
 """A type representing a dictionary of stringified percentile keys to their integer or
@@ -58,7 +59,7 @@ class StatsCollector:
         """
         return [stats[key] for key in sorted(stats.keys())]
 
-    def __get_task_stats_list(self) -> list["TaskStats"]:
+    def __get_task_stats_list(self) -> list[TaskStats]:
         """Return a list of TaskStats representing the performance statistics of _all_ Locust tasks
         that ran.
 
@@ -72,7 +73,7 @@ class StatsCollector:
             for stats_entry in self.__sort_stats(stats.entries)
         ]
 
-    def collect_stats(self) -> "AggregatedStats":
+    def collect_stats(self) -> AggregatedStats:
         """Return an AggregatedStats instance representing a snapshot of the
         aggregated performance statistics of the current Locust environment at current time.
 
@@ -123,7 +124,7 @@ class TaskStats:
     completed in a particular timeframe"""
 
     @classmethod
-    def from_stats_entry(cls, stats_entry: StatsEntry) -> "TaskStats":
+    def from_stats_entry(cls, stats_entry: StatsEntry) -> TaskStats:
         """Construct an instance of TaskStats from a Locust StatsEntry
         instance.
 
@@ -232,7 +233,7 @@ class StatsMetadata:
         environment: str,
         tasks_names: list[str],
         locust_env: Environment,
-    ) -> "StatsMetadata":
+    ) -> StatsMetadata:
         """Construct an instance of StatsMetadata by computing its fields from
         a given Locust environment.
 
