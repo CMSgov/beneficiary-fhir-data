@@ -4,7 +4,7 @@ from datetime import UTC, date, datetime
 
 import psycopg
 from psycopg.abc import Params, Query
-from psycopg.errors import DeadlockDetected
+from psycopg.errors import DeadlockDetected, LockNotAvailable
 
 from constants import DEFAULT_MIN_DATE
 from load_partition import LoadPartition, LoadType
@@ -324,8 +324,8 @@ class BatchLoader:
                 )
                 self.conn.commit()
                 self.last_updated_timer.stop()
-            except DeadlockDetected as ex:
-                logger.warning("deadlock updating update timestamp, ignoring: %s", ex)
+            except (DeadlockDetected, LockNotAvailable) as ex:
+                logger.warning("deadlock/lock timeout updating update timestamp, ignoring: %s", ex)
 
     def _copy_data(self, cur: psycopg.Cursor, results: Sequence[T]) -> None:
         # Use COPY to load the batch into Postgres.
