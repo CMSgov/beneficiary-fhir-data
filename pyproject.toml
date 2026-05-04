@@ -15,6 +15,8 @@ dependencies = [
     "asyncclick>=8.3.0.5",
     "anyio>=4.11.0",
     "pyyaml>=6.0.3",
+    "types-click>=7.1.8",
+    "click>=8.3.3",
 ]
 
 [tool.uv.workspace]
@@ -44,6 +46,7 @@ members = [
 
 [dependency-groups]
 dev = [
+    "tqdm",
     "ruff",
     "pyright",
     # bfd-pipeline-idr dev dependencies

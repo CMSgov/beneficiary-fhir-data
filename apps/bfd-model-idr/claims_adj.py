@@ -42,6 +42,13 @@ class AdjudicatedGeneratorUtil:
     def __init__(self, enable_samhsa: bool) -> None:
         self.enable_samhsa = enable_samhsa
 
+    @staticmethod
+    def safe_random_choice(sequence, default=None):
+        """Safely pick a random element from a sequence that might be None."""
+        if not sequence:
+            return default
+        return random.choice(sequence)
+
     def gen_clm(
         self,
         gen_utils: GeneratorUtil,
@@ -100,7 +107,7 @@ class AdjudicatedGeneratorUtil:
         if clm_type_cd not in PHARMACY_CLM_TYPE_CDS:
             clm[f.CLM_QUERY_CD] = random.choice(gen_utils.code_systems[f.CLM_QUERY_CD])
         else:
-            clm[f.CLM_SRVC_PRVDR_GNRC_ID_NUM] = random.choice(type_2_npis)
+            clm[f.CLM_SRVC_PRVDR_GNRC_ID_NUM] = self.safe_random_choice(type_2_npis)
             clm[f.PRVDR_SRVC_ID_QLFYR_CD] = random.choice(
                 gen_utils.code_systems[f.PRVDR_ID_QLFYR_CD]
             )
@@ -109,7 +116,7 @@ class AdjudicatedGeneratorUtil:
             clm[f.PRVDR_PRSBNG_ID_QLFYR_CD] = random.choice(
                 gen_utils.code_systems[f.PRVDR_ID_QLFYR_CD]
             )
-            clm[f.CLM_PRSBNG_PRVDR_GNRC_ID_NUM] = random.choice(type_1_npis)
+            clm[f.CLM_PRSBNG_PRVDR_GNRC_ID_NUM] = self.safe_random_choice(type_1_npis)
             clm[f.PRVDR_PRSCRBNG_PRVDR_NPI_NUM] = clm[f.CLM_PRSBNG_PRVDR_GNRC_ID_NUM]
             clm[f.CLM_SBMT_CHRG_AMT] = round(random.uniform(1, 1000000), 2)
             clm[f.CLM_SBMT_FRMT_CD] = random.choice(gen_utils.code_systems[f.CLM_SBMT_FRMT_CD])
@@ -142,26 +149,26 @@ class AdjudicatedGeneratorUtil:
         clm[f.CLM_LTST_CLM_IND] = clm_ltst_clm_ind
 
         if (clm_type_cd < 65 and clm_type_cd >= 10) or clm_type_cd in FISS_CLM_TYPE_CDS:
-            clm[f.PRVDR_BLG_PRVDR_NPI_NUM] = random.choice(type_2_npis)
-            clm[f.CLM_ATNDG_PRVDR_NPI_NUM] = random.choice(type_1_npis)
+            clm[f.PRVDR_BLG_PRVDR_NPI_NUM] = self.safe_random_choice(type_2_npis)
+            clm[f.CLM_ATNDG_PRVDR_NPI_NUM] = self.safe_random_choice(type_1_npis)
             clm[f.PRVDR_ATNDG_PRVDR_NPI_NUM] = clm[f.CLM_ATNDG_PRVDR_NPI_NUM]
             clm[f.CLM_OPRTG_FED_PRVDR_SPCLTY_CD] = random.choice(
                 gen_utils.code_systems[f.CLM_PRVDR_SPCLTY_CD]
             )
             clm[f.CLM_OPRTG_PRVDR_NAME] = random.choice(["Random last, First", "~"])
-            clm[f.CLM_OPRTG_PRVDR_NPI_NUM] = random.choice(type_1_npis)
+            clm[f.CLM_OPRTG_PRVDR_NPI_NUM] = self.safe_random_choice(type_1_npis)
             clm[f.PRVDR_OPRTG_PRVDR_NPI_NUM] = clm[f.CLM_OPRTG_PRVDR_NPI_NUM]
             clm[f.CLM_OTHR_FED_PRVDR_SPCLTY_CD] = random.choice(
                 gen_utils.code_systems[f.CLM_PRVDR_SPCLTY_CD]
             )
             clm[f.CLM_OTHR_PRVDR_NAME] = random.choice(["Random last, First", "~"])
-            clm[f.CLM_OTHR_PRVDR_NPI_NUM] = random.choice(type_1_npis)
+            clm[f.CLM_OTHR_PRVDR_NPI_NUM] = self.safe_random_choice(type_1_npis)
             clm[f.PRVDR_OTHR_PRVDR_NPI_NUM] = clm[f.CLM_OTHR_PRVDR_NPI_NUM]
             clm[f.CLM_RNDRG_FED_PRVDR_SPCLTY_CD] = random.choice(
                 gen_utils.code_systems[f.CLM_PRVDR_SPCLTY_CD]
             )
             clm[f.CLM_RNDRG_PRVDR_NAME] = random.choice(["Random last, First", "~"])
-            clm[f.CLM_RNDRG_PRVDR_NPI_NUM] = random.choice(type_1_npis)
+            clm[f.CLM_RNDRG_PRVDR_NPI_NUM] = self.safe_random_choice(type_1_npis)
             clm[f.PRVDR_RNDRNG_PRVDR_NPI_NUM] = clm[f.CLM_RNDRG_PRVDR_NPI_NUM]
             clm[f.CLM_ATNDG_FED_PRVDR_SPCLTY_CD] = random.choice(
                 gen_utils.code_systems[f.CLM_PRVDR_SPCLTY_CD]
@@ -188,12 +195,12 @@ class AdjudicatedGeneratorUtil:
                 clm[f.CLM_ACO_CARE_MGMT_HCBS_SW] = "Y" if "7" in used_enhancements else "N"
 
         if clm_type_cd == 40 or (clm_type_cd > 70 and clm_type_cd <= 82):
-            clm[f.PRVDR_RFRG_PRVDR_NPI_NUM] = random.choice(type_1_npis)
+            clm[f.PRVDR_RFRG_PRVDR_NPI_NUM] = self.safe_random_choice(type_1_npis)
         if clm_type_cd > 70 and clm_type_cd <= 82:
-            clm[f.CLM_BLG_PRVDR_NPI_NUM] = random.choice(type_1_npis)
+            clm[f.CLM_BLG_PRVDR_NPI_NUM] = self.safe_random_choice(type_1_npis)
             clm[f.CLM_RLT_COND_SGNTR_SK] = "0"
             if random.choice([0, 1]):
-                clm[f.CLM_BLG_PRVDR_NPI_NUM] = random.choice(type_2_npis)
+                clm[f.CLM_BLG_PRVDR_NPI_NUM] = self.safe_random_choice(type_2_npis)
             clm[f.PRVDR_BLG_PRVDR_NPI_NUM] = clm[f.CLM_BLG_PRVDR_NPI_NUM]
 
         # generate claim header financial elements here
@@ -788,7 +795,7 @@ class AdjudicatedGeneratorUtil:
         if clm_type_cd >= 71 and clm_type_cd <= 72:
             clm_line[f.CLM_RNDRG_PRVDR_TAX_NUM] = random.choice(["1928347912", "912834729"])
             clm_line[f.CLM_RNDRG_PRVDR_PIN_NUM] = random.choice(["29364819", "19238747"])
-            clm_line[f.PRVDR_RNDRNG_PRVDR_NPI_NUM] = random.choice(type_1_npis)
+            clm_line[f.PRVDR_RNDRNG_PRVDR_NPI_NUM] = self.safe_random_choice(type_1_npis)
             clm_line[f.CLM_RNDRG_PRVDR_NPI_NUM] = clm_line[f.PRVDR_RNDRNG_PRVDR_NPI_NUM]
             clm_line[f.CLM_RNDRG_FED_PRVDR_SPCLTY_CD] = random.choice(
                 gen_utils.code_systems[f.CLM_PRVDR_SPCLTY_CD]
@@ -818,7 +825,7 @@ class AdjudicatedGeneratorUtil:
                 )
 
         if clm_type_cd == 81 or clm_type_cd == 82:
-            clm_line[f.PRVDR_RNDRNG_PRVDR_NPI_NUM] = random.choice(type_1_npis)
+            clm_line[f.PRVDR_RNDRNG_PRVDR_NPI_NUM] = self.safe_random_choice(type_1_npis)
             clm_line[f.CLM_RNDRG_PRVDR_NPI_NUM] = clm_line[f.PRVDR_RNDRNG_PRVDR_NPI_NUM]
 
         clm_line[f.CLM_LINE_HCPCS_CD] = random.choice(get_hcpcs_proc_codes(self.enable_samhsa))

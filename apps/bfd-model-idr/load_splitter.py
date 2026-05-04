@@ -46,7 +46,7 @@ from generator_util import (
 )
 
 
-@click.command
+@click.command()
 @click.option(
     "-c",
     "--clm-batches-size",
@@ -59,7 +59,7 @@ from generator_util import (
 @click.argument(
     "out",
     nargs=1,
-    type=click.Path(exists=True, path_type=Path),
+    type=click.Path(exists=True),
     default="./batched_out",
 )
 def main(clm_batches_size: int, out: Path):
@@ -203,4 +203,4 @@ def main(clm_batches_size: int, out: Path):
 
 
 if __name__ == "__main__":
-    main()
+    main(clm_batches_size=5)

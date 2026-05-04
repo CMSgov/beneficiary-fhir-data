@@ -101,9 +101,11 @@ def main():
                     if member.name.endswith(".json"):
                         fname = Path(member.name).name.replace(".json", "")
                         if fname in resource_set:
-                            content = json.loads(tar.extractfile(member).read())
-                            upload_resource(args.url, content, session)
-                            resource_set.remove(fname)
+                            extracted_file = tar.extractfile(member)
+                            if extracted_file is not None:
+                                content = json.loads(extracted_file.read())
+                                upload_resource(args.url, content, session)
+                                resource_set.remove(fname)
 
             for missing in resource_set:
                 logger.warning("Not found in package: %s", missing)

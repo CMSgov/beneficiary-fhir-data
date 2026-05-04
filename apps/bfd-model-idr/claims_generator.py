@@ -620,7 +620,7 @@ def _clean_int_columns(rows: list[dict[str, Any]], cols: list[str]):
     return rows
 
 
-@click.command
+@click.command()
 @click.option(
     "--sushi/--no-sushi",
     envvar="SUSHI",
@@ -689,6 +689,26 @@ def generate(
     bene_sk_mode: BeneSkMode,
     paths: tuple[Path, ...],
 ):
+    """CLI entry point - delegates to core logic."""
+    generate_data(
+        sushi=sushi,
+        min_claims=min_claims,
+        max_claims=max_claims,
+        enable_samhsa=enable_samhsa,
+        pac_gen=pac_gen,
+        bene_sk_mode=bene_sk_mode,
+        paths=paths,
+    )
+
+def generate_data(
+    sushi: bool,
+    min_claims: int,
+    max_claims: int,
+    enable_samhsa: bool,
+    pac_gen: GeneratePacDataMode,
+    bene_sk_mode: BeneSkMode,
+    paths: tuple[Path, ...],
+) -> None:
     """Generate synthetic claims data. Provided file PATHS will be updated with new fields."""
     if min_claims > max_claims:
         print(
