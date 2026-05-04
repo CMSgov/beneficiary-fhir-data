@@ -2,6 +2,15 @@
 
 set -e
 
+read -p "Are you sure you want to overwrite the data in ${BFD_ENV}? " -n 1 -r
+echo    # (optional) move to a new line
+if ! [[ $REPLY =~ ^[Yy]$ ]]
+then
+    echo 'exiting'
+    exit 0
+fi
+
+
 DB_CLUSTER="bfd-${BFD_ENV}-aurora-cluster"
 readonly DB_CLUSTER
 BFD_DB_USERNAME="$(aws ssm get-parameter --name "/bfd/${BFD_ENV}/idr-pipeline/sensitive/db/username" --with-decryption --query "Parameter.Value" --output text)"
