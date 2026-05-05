@@ -41,7 +41,7 @@ _CLAIM_PARENT_CHILD_TABLES_NO_RX: dict[type[IdrBaseModel], type[IdrBaseModel] | 
     IdrClaimProfessionalNch: IdrClaimItemProfessionalNch,
     IdrClaimInstitutionalNch: IdrClaimItemInstitutionalNch,
     IdrClaimProfessionalSs: IdrClaimItemProfessionalSs,
-    IdrClaimInstitutionalSs: IdrClaimItemInstitutionalSs
+    IdrClaimInstitutionalSs: IdrClaimItemInstitutionalSs,
 }
 
 _CLAIM_TABLES: list[type[IdrBaseModel]] = [
@@ -246,6 +246,7 @@ def do_stage4(
 def collect_stage4(do_stage4: Collect[bool]) -> bool:
     return all(do_stage4)
 
+
 def stage5_inputs(
     load_type: LoadType,
     tables_to_load: set[str] | None,
@@ -257,6 +258,7 @@ def stage5_inputs(
         )
     else:
         yield from _gen_partitioned_node_inputs([], load_type)
+
 
 def do_stage5(
     stage5_inputs: NodePartitionedModelInput,
@@ -274,6 +276,7 @@ def do_stage5(
 
     return False
 
+
 def collect_stage5(do_stage4: Collect[bool]) -> bool:
     return all(do_stage4)
 
@@ -283,9 +286,8 @@ def stage6_inputs(
     tables_to_load: set[str] | None,
     collect_stage4: bool,  # noqa: ARG001
 ) -> Parallelizable[NodePartitionedModelInput]:
-    yield from _gen_partitioned_node_inputs(
-        filter_tables(_CLAIM_TABLES, tables_to_load), load_type
-    )
+    yield from _gen_partitioned_node_inputs(filter_tables(_CLAIM_TABLES, tables_to_load), load_type)
+
 
 def do_stage6(
     stage6_inputs: NodePartitionedModelInput,
@@ -300,10 +302,11 @@ def do_stage6(
             partition=partition,
             start_time=start_time,
             parent_child_tables=_CLAIM_PARENT_CHILD_TABLES_NO_RX,
-            load_mode=load_mode
+            load_mode=load_mode,
         )
 
     return False
+
 
 def collect_stage6(do_stage6: Collect[bool]) -> bool:
     return all(do_stage6)

@@ -104,19 +104,19 @@ def extract_and_load(
 
 
 def prune_pac(
-        cls: type[IdrBaseModel],
-        load_mode: LoadMode,
-        start_time: datetime,
-        parent_child_tables: dict[type[IdrBaseModel], type[IdrBaseModel] | None],
-        partition: LoadPartition | None = None
-        ) -> bool:
-    
+    cls: type[IdrBaseModel],
+    load_mode: LoadMode,
+    start_time: datetime,
+    parent_child_tables: dict[type[IdrBaseModel], type[IdrBaseModel] | None],
+    partition: LoadPartition | None = None,
+) -> bool:
+
     partition = partition or DEFAULT_PARTITION
     logger.info("purging %s", cls.table())
     parent_table: type[IdrBaseModel] = cls
     child_table: type[IdrBaseModel] | None = parent_child_tables.get(cls)
     loader = PostgresLoader(load_mode)
-    
+
     pac_cutoff_date = start_time - timedelta(days=60)
     start_time_sql = pac_cutoff_date.strftime("'%Y-%m-%d %H:%M:%S'")
 
@@ -132,8 +132,8 @@ def prune_pac(
                     clm.clm_idr_ld_dt
             ) <= {start_time_sql};
             """
-        )
-    
+    )
+
     claim_type_codes = ",".join([str(c) for c in partition.claim_type_codes])
     claim_type_code_filter = f"p.clm_type_cd IN ( {claim_type_codes} )"
 

@@ -36,7 +36,7 @@ class PostgresLoader:
         self.conn = psycopg.connect(connection_string)
 
     def run_sql(self, sql: str) -> bool:
-        try: 
+        try:
             self.conn.execute(sql)  # type: ignore
             self.conn.commit()
             return True

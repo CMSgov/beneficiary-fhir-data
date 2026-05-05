@@ -542,8 +542,6 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
         conn.commit()
         assert cur.rowcount == 0
 
-    
-
 
 def advance_time(timestamp: datetime) -> None:
     new_time = timestamp + timedelta(minutes=1)
