@@ -263,7 +263,7 @@ def do_stage5(
     load_type: LoadType,
     load_mode: LoadMode,
 ) -> bool:
-    model_type, partition = stage4_inputs
+    model_type, partition = stage5_inputs
     if load_type == LoadType.INCREMENTAL:
         return extract_and_load(
             cls=model_type,
