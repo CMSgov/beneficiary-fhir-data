@@ -31,11 +31,18 @@ from model.idr_claim_professional_ss import IdrClaimProfessionalSs
 from model.idr_claim_rx import IdrClaimRx
 from model.idr_contract_pbp_contact import IdrContractPbpContact
 from model.idr_contract_pbp_number import IdrContractPbpNumber
-from pipeline_utils import extract_and_load
+from pipeline_utils import extract_and_load, purge_non_latest_claims
 
 type NodePartitionedModelInput = tuple[type[IdrBaseModel], LoadPartition | None]
 
 configure_logger()
+
+_CLAIM_PARENT_CHILD_TABLES: dict[type[IdrBaseModel], type[IdrBaseModel] | None] = {
+    IdrClaimProfessionalNch: IdrClaimItemProfessionalNch,
+    IdrClaimInstitutionalNch: IdrClaimItemInstitutionalNch,
+    IdrClaimProfessionalSs: IdrClaimItemProfessionalSs,
+    IdrClaimInstitutionalSs: IdrClaimItemInstitutionalSs,
+}
 
 _CLAIM_TABLES: list[type[IdrBaseModel]] = [
     IdrClaimProfessionalNch,
@@ -240,3 +247,31 @@ def collect_stage4(
     do_stage4: Collect[bool],
 ) -> bool:
     return all(do_stage4)
+
+
+# stage 5 is purging non-latest claims after extract and load is complete
+def stage5_inputs(
+    load_type: LoadType,
+    tables_to_load: set[str] | None,
+    collect_stage4: bool,  # noqa: ARG001
+) -> Parallelizable[NodePartitionedModelInput]:
+    yield from _gen_partitioned_node_inputs(filter_tables(_CLAIM_TABLES, tables_to_load), load_type)
+
+
+def do_stage5(
+    stage5_inputs: NodePartitionedModelInput,
+    load_mode: LoadMode,
+) -> bool:
+    model_type, partition = stage5_inputs
+    return purge_non_latest_claims(
+        cls=model_type,
+        partition=partition,
+        parent_child_tables=_CLAIM_PARENT_CHILD_TABLES,
+        load_mode=load_mode,
+    )
+
+
+def collect_stage5(
+    do_stage5: Collect[bool],
+) -> bool:
+    return all(do_stage5)

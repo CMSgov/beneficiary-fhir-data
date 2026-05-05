@@ -94,7 +94,7 @@ def run(load_mode: str) -> None:
 
     try:
         hamilton_driver.execute(  # type: ignore
-            final_vars=["collect_stage4"],
+            final_vars=["collect_stage5"],
             inputs={
                 "load_type": load_type,
                 "load_mode": load_mode,

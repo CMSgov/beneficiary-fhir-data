@@ -1,7 +1,6 @@
 package gov.cms.bfd.server.ng;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -611,8 +610,8 @@ class EobSearchIT extends IntegrationTestBase {
                 ClaimProfessionalNch.class)
             .setParameter("claimId", Long.parseLong(CLAIM_ID_PROFESSIONAL_NON_LATEST))
             .getResultList();
-    // Precondition - claim should be available in the db
-    assertFalse(claims.isEmpty());
+    // Precondition - claim should be purged and not available
+    assertTrue(claims.isEmpty());
     var eobBundle =
         searchBundle()
             .where(

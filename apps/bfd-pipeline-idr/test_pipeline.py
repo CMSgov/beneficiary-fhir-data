@@ -209,7 +209,7 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
     assert rows[0]["clm_uniq_id"] == 123359318723
 
     cur = conn.execute("select * from idr.claim_professional_nch order by clm_uniq_id")
-    assert cur.rowcount == 51
+    assert cur.rowcount == 50
     rows = cur.fetchmany(1)
     assert rows[0]["clm_uniq_id"] == 119855147698
 
@@ -234,7 +234,7 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
     assert rows[0]["clm_uniq_id"] == 123359318723
 
     cur = conn.execute("select * from idr.claim_item_professional_nch order by clm_uniq_id")
-    assert cur.rowcount == 442
+    assert cur.rowcount == 429
     rows = cur.fetchmany(1)
     assert rows[0]["clm_uniq_id"] == 119855147698
 
@@ -242,6 +242,10 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
     assert cur.rowcount == 1
     rows = cur.fetchmany(1)
     assert rows[0]["clm_uniq_id"] == 4991490559710
+
+    # verify non-latest claim is purged
+    cur = conn.execute("select * from idr.claim_professional_nch where clm_uniq_id = 2569302885900")
+    assert cur.rowcount == 0
 
     conn.commit()
 

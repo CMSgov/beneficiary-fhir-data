@@ -22,6 +22,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.transaction.TestTransaction;
+import org.springframework.transaction.annotation.Transactional;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -109,7 +111,24 @@ class EobReadIT extends IntegrationTestBase {
   }
 
   @Test
+  @Transactional
   void eobReadNonLatestProfessionalIsNotReturned() {
+    TestTransaction.flagForCommit(); // disable rollback and performa commit at end of transaction
+
+    // temporarily set latest claim to non-latest since purge has removed all non-latest claims
+    var updateCount =
+        entityManager
+            .createQuery(
+                """
+      UPDATE ClaimProfessionalNch c SET
+        c.latestClaimIndicator = :latestClaim
+      WHERE c.claimUniqueId = :claimId
+    """)
+            .setParameter("latestClaim", false)
+            .setParameter("claimId", CLAIM_ID_PROFESSIONAL_ORG)
+            .executeUpdate();
+    assertEquals(1, updateCount);
+
     var claims =
         entityManager
             .createQuery(
@@ -121,12 +140,36 @@ class EobReadIT extends IntegrationTestBase {
                   WHERE c.claimUniqueId = :claimId
                 """,
                 ClaimProfessionalNch.class)
-            .setParameter("claimId", Long.parseLong(CLAIM_ID_PROFESSIONAL_NON_LATEST))
+            .setParameter("claimId", Long.parseLong(CLAIM_ID_PROFESSIONAL_ORG))
             .getResultList();
-    // Precondition - claim should be available in the db
+    // Precondition - claim is normally not avaiable, but making available to verify server does not
+    // return claim
     assertFalse(claims.isEmpty());
-    var eobRequest = eobRead().withId(Long.parseLong(CLAIM_ID_PROFESSIONAL_NON_LATEST));
+
+    TestTransaction
+        .end(); // force a commit on Spring-managed test transaction, so API will observe db changes
+
+    var eobRequest = eobRead().withId(Long.parseLong(CLAIM_ID_PROFESSIONAL_ORG));
     assertThrows(ResourceNotFoundException.class, eobRequest::execute);
+
+    TestTransaction.start();
+    TestTransaction.flagForCommit();
+
+    // reset claim back to latest
+    updateCount =
+        entityManager
+            .createQuery(
+                """
+      UPDATE ClaimProfessionalNch c SET
+        c.latestClaimIndicator = :latestClaim
+      WHERE c.claimUniqueId = :claimId
+    """)
+            .setParameter("latestClaim", true)
+            .setParameter("claimId", CLAIM_ID_PROFESSIONAL_ORG)
+            .executeUpdate();
+    assertEquals(1, updateCount);
+
+    TestTransaction.end();
   }
 
   @ParameterizedTest
