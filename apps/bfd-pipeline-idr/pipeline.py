@@ -48,11 +48,11 @@ def main() -> None:
     run(mode)
 
 
-def run(load_mode: str) -> None:
+def run(load_mode: str, load_type: str | None = None) -> None:
     logger.info("load start")
     load_mode = LoadMode(load_mode)
 
-    load_type = LoadType(LOAD_TYPE)
+    load_type = LoadType(load_type or LOAD_TYPE)
 
     logger.info("load_type %s", load_type)
     # Per the docs (https://docs.python.org/3/library/multiprocessing.html#module-multiprocessing.pool)
