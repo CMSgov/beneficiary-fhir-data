@@ -8,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.rest.gclient.IReadTyped;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import gov.cms.bfd.server.ng.claim.ClaimRepository;
 import gov.cms.bfd.server.ng.claim.model.ClaimProfessionalNch;
 import gov.cms.bfd.server.ng.eob.EobResourceProvider;
 import io.restassured.RestAssured;
@@ -30,7 +29,6 @@ import org.springframework.transaction.annotation.Transactional;
 @MockitoSettings(strictness = Strictness.LENIENT)
 class EobReadIT extends IntegrationTestBase {
   @Autowired private EobResourceProvider eobResourceProvider;
-  @Autowired private ClaimRepository claimRepository;
   @Mock HttpServletRequest request;
 
   private IReadTyped<ExplanationOfBenefit> eobRead() {
