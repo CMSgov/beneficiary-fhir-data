@@ -96,6 +96,7 @@ pass along the output file with -o
 pass along the resource url with -r
 pass along --test to run conformance tests
 pass along --skip-structure-map-generation to skip generating the structure map. Only use this in the context of sequential transformations that re-use a structure map.
+pass along --profileType or -p to specify the profile type (Basis, Regular, or CMS) to filter for. Defaults to CMS.
 
 Example (Patient):
 
@@ -295,7 +296,7 @@ For example, CLM_AUDT_TRL_STUS_CD on an EOB is derived by combining the status c
 To test augmentation logic independently:
 
 ```sh
-python augment_sample_resources.py {your_sample_file}.json
+python augment_sample_resources.py {your_sample_file}.json [Basis|Regular|CMS]
 ```
 
 > [!NOTE]

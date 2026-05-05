@@ -1,5 +1,6 @@
 import json
 import sys
+import yaml
 from dataclasses import asdict, dataclass, field
 from decimal import Decimal
 from pathlib import Path
@@ -19,6 +20,9 @@ cur_sample_data = {}
 with Path(cur_sample).open("r") as file:
     cur_sample_data = json.load(file)
 
+if len(sys.argv) > 2:
+    cur_sample_data["profileType"] = sys.argv[2]
+
 OTHR_PRVDR_MEANING = (
     "supervisor" if cur_sample_data.get("CLM_TYPE_CD") in ("1700", "2700") else "otheroperating"
 )
@@ -33,6 +37,80 @@ careteam_header_columns = {
     # This is purposely commented out to note we do not pull it in on the careteam (for now).
     "PRVDR_SRVC_PRVDR_NPI_NUM": "",
 }
+
+def load_profile_map():
+    profile_map = {}
+    paths = [Path("dictionary-support-files/ExplanationOfBenefit.yaml"), 
+             Path("dictionary-support-files/ExplanationOfBenefit-Pharmacy.yaml")]
+
+    for p in filter(Path.exists, paths):
+        with p.open("r") as f:
+            for item in yaml.safe_load(f) or []:
+                if (profiles := item.get("profiles")) is None:
+                    continue
+                keys = {item.get("sourceColumn"), item.get("inputPath", "").split(".")[-1]} - {"", None}
+                profile_map.update(dict.fromkeys(keys, profiles))
+    return profile_map
+
+
+def filter_by_profile(data, profile_type, profile_map):
+    if isinstance(data, dict):
+        for k, v in list(data.items()):
+            if k == "providerList":
+                continue
+            if k in profile_map and profile_type not in profile_map[k]:
+                del data[k]
+            else:
+                filter_by_profile(v, profile_type, profile_map)
+    elif isinstance(data, list):
+        for item in data:
+            filter_by_profile(item, profile_type, profile_map)
+
+
+def cleanup_empty_items(data):
+    if sic := data.get("supportingInfoComponents"):
+        new_sic = []
+        si_map = {}
+        # Filter for non-empty items (items having more than just ROW_NUM)
+        for next_row, item in enumerate((i for i in sic if any(k != "ROW_NUM" for k in i)), start=1):
+            if (old_row := item.get("ROW_NUM")) is not None:
+                si_map.update({str(old_row): next_row, int(old_row): next_row})
+            item["ROW_NUM"] = next_row
+            new_sic.append(item)
+        data["supportingInfoComponents"] = new_sic
+
+        for li in data.get("lineItemComponents", []):
+            if seq := li.get("SEQUENCE_INFO"):
+                li["SEQUENCE_INFO"] = [si_map[int(s)] for s in seq if int(s) in si_map]
+
+    if diag := data.get("diagnoses"):
+        new_diag = []
+        diag_map = {}
+        internal_diag_keys = {"ROW_NUM", "clm_prod_type_cd_map"}
+        # Filter for non-empty diagnoses
+        for next_row, item in enumerate((i for i in diag if any(k not in internal_diag_keys for k in i)), start=1):
+            old_row = item.get("ROW_NUM")
+            item["ROW_NUM"] = str(next_row) if isinstance(old_row, str) else next_row
+            if old_row is not None:
+                diag_map.update({str(old_row): next_row, int(old_row): next_row})
+            new_diag.append(item)
+        data["diagnoses"] = new_diag
+
+        # Update diagnosisSequence in lineItemComponents
+        for li in data.get("lineItemComponents", []):
+            if diag_seq := li.get("diagnosisSequence"):
+                li["diagnosisSequence"] = [diag_map[int(s)] for s in diag_seq if int(s) in diag_map]
+
+
+
+# we filter twice - once before augmentation and again after, to make it simpler.
+profile_map = load_profile_map()
+profile_type = cur_sample_data.get("profileType", "CMS")
+profile_type = "CMS" if profile_type.lower() == "cms" else profile_type.capitalize()
+cur_sample_data["profileType"] = profile_type #in case it's not specified, we rely upon this for mapping now.
+
+filter_by_profile(cur_sample_data, profile_type, profile_map)
+
 
 line_supporting_info_columns = [
     "CLM_LINE_PMD_UNIQ_TRKNG_NUM",
@@ -414,6 +492,12 @@ for item in cur_sample_data.get("lineItemComponents", []):
 filename = "out/temporary-sample.json"
 
 cur_sample_data["lastUpdated"] = "2026-01-01T03:02:28.000000Z"
+
+profile_type = cur_sample_data.get("profileType", "CMS")
+profile_type = "CMS" if profile_type.lower() == "cms" else profile_type.capitalize()
+
+filter_by_profile(cur_sample_data, profile_type, profile_map)
+cleanup_empty_items(cur_sample_data)
 
 with Path(filename).open("w") as f:
     json.dump(cur_sample_data, f, indent=4)

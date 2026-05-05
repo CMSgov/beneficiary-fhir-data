@@ -184,6 +184,13 @@ def main():
         action="store_true",
         help="Skip generating StructureMap (speeds up generating all resources if no changes)",
     )
+    parser.add_argument(
+        "--profileType",
+        "-p",
+        type=str,
+        choices=["Basis", "Regular", "CMS"],
+        help="Profile type to use for filtering (Basis, Regular, or CMS)",
+    )
     args = parser.parse_args()
 
     script_dir = Path(__file__).parent.absolute()
@@ -231,7 +238,8 @@ def main():
     (input_file,) = {args.input}
     if 'EOB' in input_file:
         print("Augmenting input file")
-        augmentation_cmd = f"python augment_sample_resources.py {args.input}"
+        profile_flag = f" {args.profileType}" if args.profileType else ""
+        augmentation_cmd = f"python augment_sample_resources.py {args.input}{profile_flag}"
         stdout, stderr = run_command(augmentation_cmd, cwd=script_dir)
         input_file = 'out/temporary-sample.json'
 

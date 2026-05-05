@@ -47,3 +47,4 @@ Id: ExplanationOfBenefit-Pharmacy
 * CLM_SRVC_PRVDR_GNRC_ID_NUM 0..1 string "Service Provider Generic ID Number" "A NUMBER USED TO IDENTIFY A SERVICE PROVIDER."
 * CLM_PRSBNG_PRVDR_GNRC_ID_NUM 0..1 string "Prescribing Provider Generic ID Number" "A NUMBER IDENTIFYING A GENERIC IDENTIFIER OF A PRESCRIBING PROVIDER SUBMITTED ON A DRUG CLAIM."
 * PRVDR_PRSBNG_ID_QLFYR_CD 0..1 string "Provider Prescribing Identifier Qualifier Code" "A CODE INDICATING THE TYPE OF NUMBER USED TO IDENTIFY A PRESCRIBING PROVIDER ON A CLAIM.  FOR EXAMPLE:  01 = NPI  07 = NCPDP NUMBER  08 = STATE LICENSE NUMBER    REFERENCE TABLE: CLM_PRVDR_ID_QLFYR_CD"
+* profileType 0..1 string "Profile Type" "Identifies which profile this resource conforms to."
