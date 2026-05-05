@@ -140,7 +140,7 @@ jobs:
       - deploy-to-test
       - deploy-to-sandbox
       - deploy-to-prod
-    if: !cancelled()
+    if: ${{ !cancelled() }}
     steps:
       - name: Get role ARN
         id: get-role-arn
