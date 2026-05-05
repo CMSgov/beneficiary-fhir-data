@@ -16,6 +16,7 @@ import gov.cms.bfd.server.ng.log.AuditLogger;
 import gov.cms.bfd.server.ng.model.ProfileType;
 import gov.cms.bfd.server.ng.util.FhirUtil;
 import gov.cms.bfd.server.ng.util.SystemUrls;
+import io.micrometer.core.annotation.Timed;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -93,6 +94,7 @@ public class PatientHandler {
    * @param patientMatch match request
    * @return bundle
    */
+  @Timed("application.patient.handler.match_patient")
   public Bundle matchPatient(Optional<PatientMatch> patientMatch) {
     if (patientMatch.isEmpty()) {
       return patientMatchBundle(Optional.empty());
@@ -122,6 +124,7 @@ public class PatientHandler {
    * @param benefitDate date used to determine Coverage status.
    * @return A Bundle of Coverage resources.
    */
+  @Timed("application.patient.handler.search_by_beneficiary_C4DIC")
   public Bundle searchByBeneficiaryC4DIC(Long beneSk, LocalDate benefitDate) {
     var beneficiaryOpt =
         coverageRepository

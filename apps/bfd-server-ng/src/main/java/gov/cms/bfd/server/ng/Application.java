@@ -7,6 +7,7 @@ import io.micrometer.common.annotation.ValueResolver;
 import io.micrometer.core.aop.MeterTagAnnotationHandler;
 import io.micrometer.core.aop.TimedAspect;
 import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.java21.instrument.binder.jdk.VirtualThreadMetrics;
 import jakarta.servlet.Servlet;
 import java.time.Clock;
 import javax.sql.DataSource;
@@ -82,6 +83,19 @@ public class Application {
     timedAspect.setMeterTagAnnotationHandler(
         new MeterTagAnnotationHandler(aClass -> valueResolver, aClass -> valueExpressionResolver));
     return timedAspect;
+  }
+
+  /**
+   * Configures Micrometer to collect virtual thread metrics.
+   *
+   * @param registry meter registry
+   * @return virtual thread metrics
+   */
+  @Bean
+  public VirtualThreadMetrics virtualThreadMetrics(MeterRegistry registry) {
+    VirtualThreadMetrics metrics = new VirtualThreadMetrics();
+    metrics.bindTo(registry);
+    return metrics;
   }
 
   /**
