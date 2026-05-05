@@ -515,8 +515,8 @@ group addPharmacyItem(source src: LineItemComponent, target tgt: BackboneElement
 group createInsurerOrgPartD(source src: ExplanationOfBenefitPharmacy, target tgtOrg: Organization){
   src -> tgtOrg.id = "insurer-org" "Set org id";
   src -> tgtOrg.meta = create('Meta') as tgtMeta then {
-    src -> tgtMeta.profile = "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.1.0" "Set org profile";
-    src -> tgtMeta.profile = "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|6.1.0" "Set org profile";
+    src -> tgtMeta.profile = "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization|2.2.0" "Set org profile";
+    src -> tgtMeta.profile = "http://hl7.org/fhir/us/core/StructureDefinition/us-core-organization|7.0.0" "Set org profile";
   } "Set organization metadata";
   src -> tgtOrg.active = "true" "set org status";
   src.CNTRCT_PBP_NAME as pbpName -> tgtOrg.name = pbpName "set org name";
