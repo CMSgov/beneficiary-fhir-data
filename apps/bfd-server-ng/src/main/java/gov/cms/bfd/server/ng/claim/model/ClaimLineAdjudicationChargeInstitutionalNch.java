@@ -29,6 +29,9 @@ class ClaimLineAdjudicationChargeInstitutionalNch {
   @Column(name = "clm_line_mdcr_ddctbl_amt")
   private BigDecimal deductibleAmount;
 
+  @Column(name = "clm_line_blood_ddctbl_amt")
+  private BigDecimal bloodDeductibleAmount;
+
   @Column(name = "clm_line_instnl_adjstd_amt")
   private BigDecimal adjustedAmount;
 
@@ -53,6 +56,8 @@ class ClaimLineAdjudicationChargeInstitutionalNch {
   List<ExplanationOfBenefit.AdjudicationComponent> toFhir() {
     return List.of(
         AdjudicationChargeType.LINE_MEDICARE_DEDUCTIBLE_AMOUNT.toFhirAdjudication(deductibleAmount),
+        AdjudicationChargeType.LINE_BLOOD_DEDUCTIBLE_AMOUNT.toFhirAdjudication(
+            bloodDeductibleAmount),
         AdjudicationChargeType.LINE_BENE_PAID_AMOUNT.toFhirAdjudication(benePaidAmount),
         AdjudicationChargeType.LINE_BENE_PAYMENT_AMOUNT.toFhirAdjudication(benePaymentAmount),
         AdjudicationChargeType.LINE_NONCOVERED_CHARGE_AMOUNT.toFhirAdjudication(

@@ -36,10 +36,22 @@ public class ClaimLineProfessionalNchExtensions {
   @Column(name = "clm_prcsg_ind_cd")
   private Optional<ClaimProcessingIndicatorCode> processingIndicatorCode;
 
+  @Column(name = "clm_line_ansthsa_unit_cnt")
+  private Optional<BigDecimal> anesthesiaUnitCount;
+
+  @Column(name = "clm_rndrg_prvdr_type_cd")
+  private Optional<ClaimSupplierTypeCode> renderingProviderTypeCode;
+
   List<Extension> toFhir() {
     var totalUnitsCountExtension =
         new Extension(SystemUrls.EXT_CLM_LINE_PRFNL_MTUS_CNT_URL)
             .setValue(new DecimalType(totalUnitsCount));
+
+    var anesthesiaUnitCountExtension =
+        anesthesiaUnitCount.map(
+            v ->
+                new Extension(SystemUrls.EXT_CLM_LINE_ANSTHSA_UNIT_CNT_URL)
+                    .setValue(new DecimalType(v)));
 
     return Stream.of(
             unitsIndicatorCode.map(CarrierLineMTUSIndicatorCode::toFhir),
@@ -49,6 +61,8 @@ public class ClaimLineProfessionalNchExtensions {
                 HealthProfessionalShortageAreaScarcityCode::toFhir),
             primaryPayerCode.map(ClaimPrimaryPayerCode::toFhir),
             processingIndicatorCode.map(ClaimProcessingIndicatorCode::toFhir),
+            renderingProviderTypeCode.map(ClaimSupplierTypeCode::toFhir),
+            anesthesiaUnitCountExtension,
             Optional.of(totalUnitsCountExtension))
         .flatMap(Optional::stream)
         .toList();

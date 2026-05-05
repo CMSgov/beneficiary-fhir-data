@@ -938,7 +938,10 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase1=[
       } ]
     },
     "sequence" : 1,
-    "servicedDate" : "2024-03-04"
+    "servicedPeriod" : {
+      "end" : "2024-04-01",
+      "start" : "2024-03-04"
+    }
   } ],
   "meta" : {
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -2313,7 +2316,10 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
       } ]
     },
     "sequence" : 1,
-    "servicedDate" : "2021-12-21"
+    "servicedPeriod" : {
+      "end" : "2021-12-26",
+      "start" : "2021-12-21"
+    }
   } ],
   "meta" : {
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -3189,7 +3195,10 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
       "value" : 4.75
     },
     "sequence" : 1,
-    "servicedDate" : "2021-12-21"
+    "servicedPeriod" : {
+      "end" : "2021-12-26",
+      "start" : "2021-12-21"
+    }
   } ],
   "meta" : {
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -3893,6 +3902,13 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PMT-80-100-CD"
       }
     }, {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRVDR-SPCLTY-CD",
+      "valueCoding" : {
+        "code" : "01",
+        "display" : "GENERAL PRACTICE",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRVDR-SPCLTY-CD"
+      }
+    }, {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-SRVC-DDCTBL-SW",
       "valueCoding" : {
         "code" : "0",
@@ -3920,6 +3936,16 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
         "display" : "Bundled test, no payment",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRCSG-IND-CD"
       }
+    }, {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRVDR-TYPE-CD",
+      "valueCoding" : {
+        "code" : "5",
+        "display" : "INSTITUTIONAL PROVIDERS AND INDEPENDENT LABORATORIES FOR WHOM EMPLOYER ID NUMBERS ARE USED IN CODING THE ID FIELD.",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PRVDR-TYPE-CD"
+      }
+    }, {
+      "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-LINE-ANSTHSA-UNIT-CNT",
+      "valueDecimal" : 4.0
     }, {
       "url" : "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-LINE-PRFNL-MTUS-CNT",
       "valueDecimal" : 2.0
@@ -3951,7 +3977,10 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
       "value" : 4.75
     },
     "sequence" : 1,
-    "servicedDate" : "2021-12-21"
+    "servicedPeriod" : {
+      "end" : "2021-12-26",
+      "start" : "2021-12-21"
+    }
   } ],
   "meta" : {
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -4994,6 +5023,18 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
     }, {
       "amount" : {
         "currency" : "USD",
+        "value" : 13.45
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
+          "display" : "Blood Deductible Amount",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
         "value" : 4.06
       },
       "category" : {
@@ -5244,7 +5285,10 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
       } ]
     },
     "sequence" : 1,
-    "servicedDate" : "2024-03-04"
+    "servicedPeriod" : {
+      "end" : "2024-04-01",
+      "start" : "2024-03-04"
+    }
   } ],
   "meta" : {
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -6622,6 +6666,18 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
     }, {
       "amount" : {
         "currency" : "USD",
+        "value" : 13.45
+      },
+      "category" : {
+        "coding" : [ {
+          "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
+          "display" : "Blood Deductible Amount",
+          "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+        } ]
+      }
+    }, {
+      "amount" : {
+        "currency" : "USD",
         "value" : 4.06
       },
       "category" : {
@@ -6872,7 +6928,10 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
       } ]
     },
     "sequence" : 1,
-    "servicedDate" : "2024-03-04"
+    "servicedPeriod" : {
+      "end" : "2024-04-01",
+      "start" : "2024-03-04"
+    }
   } ],
   "meta" : {
     "lastUpdated" : "9999-12-31T00:00:00.000+00:00",

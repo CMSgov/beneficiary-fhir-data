@@ -94,9 +94,10 @@ group addItem(source src: LineItemComponent, target tgt: BackboneElement){
     } "Add location codeable concept";
     
     //only pull in valid dates here.
-    src.CLM_LINE_FROM_DT as clmLineFromDt -> tgt.serviced = create('Period') as tgtPeriod then{
-        clmLineFromDt -> tgtPeriod.start = clmLineFromDt "add start";
-        src.CLM_LINE_THRU_DT as clmLineThruDt -> tgtPeriod.end = clmLineThruDt "add end";
+    src.CLM_LINE_FROM_DT as clmLineFromDt where src.CLM_LINE_THRU_DT.exists().not() -> tgt.serviced = clmLineFromDt "Add serviced Date";
+    src.CLM_LINE_THRU_DT as clmLineThruDt -> tgt.serviced = create('Period') as tgtPeriod then{
+        src.CLM_LINE_FROM_DT as clmLineFromDt -> tgtPeriod.start = clmLineFromDt "add start";
+        clmLineThruDt -> tgtPeriod.end = clmLineThruDt "add end";
     } "Add serviced period";
 
 

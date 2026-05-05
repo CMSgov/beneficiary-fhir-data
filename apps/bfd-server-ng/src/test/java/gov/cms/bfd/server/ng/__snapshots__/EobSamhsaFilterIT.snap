@@ -1157,7 +1157,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
           } ]
         },
         "sequence" : 1,
-        "servicedDate" : "2019-09-23"
+        "servicedPeriod" : {
+          "end" : "2019-09-30",
+          "start" : "2019-09-23"
+        }
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -1442,7 +1445,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
           } ]
         },
         "sequence" : 2,
-        "servicedDate" : "2019-09-23"
+        "servicedPeriod" : {
+          "end" : "2019-09-30",
+          "start" : "2019-09-23"
+        }
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -1754,7 +1760,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
           } ]
         },
         "sequence" : 3,
-        "servicedDate" : "2019-09-23"
+        "servicedPeriod" : {
+          "end" : "2019-09-30",
+          "start" : "2019-09-23"
+        }
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -2048,7 +2057,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
           } ]
         },
         "sequence" : 4,
-        "servicedDate" : "2019-09-23"
+        "servicedPeriod" : {
+          "end" : "2019-09-30",
+          "start" : "2019-09-23"
+        }
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -2348,7 +2360,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
           } ]
         },
         "sequence" : 5,
-        "servicedDate" : "2019-09-23"
+        "servicedPeriod" : {
+          "end" : "2019-09-30",
+          "start" : "2019-09-23"
+        }
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -2639,7 +2654,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
           } ]
         },
         "sequence" : 6,
-        "servicedDate" : "2019-09-23"
+        "servicedPeriod" : {
+          "end" : "2019-09-30",
+          "start" : "2019-09-23"
+        }
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -2945,7 +2963,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
           } ]
         },
         "sequence" : 7,
-        "servicedDate" : "2019-09-23"
+        "servicedPeriod" : {
+          "end" : "2019-09-30",
+          "start" : "2019-09-23"
+        }
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -3251,7 +3272,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
           } ]
         },
         "sequence" : 8,
-        "servicedDate" : "2019-09-23"
+        "servicedPeriod" : {
+          "end" : "2019-09-30",
+          "start" : "2019-09-23"
+        }
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -3545,7 +3569,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
           } ]
         },
         "sequence" : 9,
-        "servicedDate" : "2019-09-23"
+        "servicedPeriod" : {
+          "end" : "2019-09-30",
+          "start" : "2019-09-23"
+        }
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -3839,7 +3866,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.samhsaClaimsIncludeSecurityTagsWhenAllow
           } ]
         },
         "sequence" : 10,
-        "servicedDate" : "2019-09-23"
+        "servicedPeriod" : {
+          "end" : "2019-09-30",
+          "start" : "2019-09-23"
+        }
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -5107,6 +5137,18 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         }, {
           "amount" : {
             "currency" : "USD",
+            "value" : 6.51
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
+              "display" : "Blood Deductible Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
             "value" : 4.58
           },
           "category" : {
@@ -5378,7 +5420,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           } ]
         },
         "sequence" : 1,
-        "servicedDate" : "2019-11-17"
+        "servicedPeriod" : {
+          "end" : "2019-12-03",
+          "start" : "2019-11-17"
+        }
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -5393,6 +5438,18 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             }, {
               "code" : "CLM_LINE_MDCR_DDCTBL_AMT",
               "display" : "Cash Deductible Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 5.62
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
+              "display" : "Blood Deductible Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -5650,7 +5707,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           } ]
         },
         "sequence" : 2,
-        "servicedDate" : "2019-11-17"
+        "servicedPeriod" : {
+          "end" : "2019-12-03",
+          "start" : "2019-11-17"
+        }
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -5665,6 +5725,18 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             }, {
               "code" : "CLM_LINE_MDCR_DDCTBL_AMT",
               "display" : "Cash Deductible Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 1.7
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
+              "display" : "Blood Deductible Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -5930,7 +6002,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           } ]
         },
         "sequence" : 3,
-        "servicedDate" : "2019-11-17"
+        "servicedPeriod" : {
+          "end" : "2019-12-03",
+          "start" : "2019-11-17"
+        }
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -7415,6 +7490,18 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         }, {
           "amount" : {
             "currency" : "USD",
+            "value" : 8.86
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
+              "display" : "Blood Deductible Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
             "value" : 1.29
           },
           "category" : {
@@ -7684,7 +7771,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           } ]
         },
         "sequence" : 1,
-        "servicedDate" : "2019-09-23"
+        "servicedPeriod" : {
+          "end" : "2019-09-30",
+          "start" : "2019-09-23"
+        }
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -7699,6 +7789,18 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             }, {
               "code" : "CLM_LINE_MDCR_DDCTBL_AMT",
               "display" : "Cash Deductible Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 2.92
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
+              "display" : "Blood Deductible Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -7946,7 +8048,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           } ]
         },
         "sequence" : 2,
-        "servicedDate" : "2019-09-23"
+        "servicedPeriod" : {
+          "end" : "2019-09-30",
+          "start" : "2019-09-23"
+        }
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -7961,6 +8066,18 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             }, {
               "code" : "CLM_LINE_MDCR_DDCTBL_AMT",
               "display" : "Cash Deductible Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 7.73
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
+              "display" : "Blood Deductible Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -8241,7 +8358,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           } ]
         },
         "sequence" : 3,
-        "servicedDate" : "2019-09-23"
+        "servicedPeriod" : {
+          "end" : "2019-09-30",
+          "start" : "2019-09-23"
+        }
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -8256,6 +8376,18 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             }, {
               "code" : "CLM_LINE_MDCR_DDCTBL_AMT",
               "display" : "Cash Deductible Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 5.15
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
+              "display" : "Blood Deductible Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -8512,7 +8644,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           } ]
         },
         "sequence" : 4,
-        "servicedDate" : "2019-09-23"
+        "servicedPeriod" : {
+          "end" : "2019-09-30",
+          "start" : "2019-09-23"
+        }
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -8527,6 +8662,18 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             }, {
               "code" : "CLM_LINE_MDCR_DDCTBL_AMT",
               "display" : "Cash Deductible Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 9.93
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
+              "display" : "Blood Deductible Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -8789,7 +8936,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           } ]
         },
         "sequence" : 5,
-        "servicedDate" : "2019-09-23"
+        "servicedPeriod" : {
+          "end" : "2019-09-30",
+          "start" : "2019-09-23"
+        }
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -8804,6 +8954,18 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             }, {
               "code" : "CLM_LINE_MDCR_DDCTBL_AMT",
               "display" : "Cash Deductible Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 14.56
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
+              "display" : "Blood Deductible Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -9063,7 +9225,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           } ]
         },
         "sequence" : 6,
-        "servicedDate" : "2019-09-23"
+        "servicedPeriod" : {
+          "end" : "2019-09-30",
+          "start" : "2019-09-23"
+        }
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -9078,6 +9243,18 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             }, {
               "code" : "CLM_LINE_MDCR_DDCTBL_AMT",
               "display" : "Cash Deductible Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 11.88
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
+              "display" : "Blood Deductible Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -9352,7 +9529,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           } ]
         },
         "sequence" : 7,
-        "servicedDate" : "2019-09-23"
+        "servicedPeriod" : {
+          "end" : "2019-09-30",
+          "start" : "2019-09-23"
+        }
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -9367,6 +9547,18 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             }, {
               "code" : "CLM_LINE_MDCR_DDCTBL_AMT",
               "display" : "Cash Deductible Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 3.16
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
+              "display" : "Blood Deductible Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -9641,7 +9833,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           } ]
         },
         "sequence" : 8,
-        "servicedDate" : "2019-09-23"
+        "servicedPeriod" : {
+          "end" : "2019-09-30",
+          "start" : "2019-09-23"
+        }
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -9656,6 +9851,18 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             }, {
               "code" : "CLM_LINE_MDCR_DDCTBL_AMT",
               "display" : "Cash Deductible Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 12.47
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
+              "display" : "Blood Deductible Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -9918,7 +10125,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           } ]
         },
         "sequence" : 9,
-        "servicedDate" : "2019-09-23"
+        "servicedPeriod" : {
+          "end" : "2019-09-30",
+          "start" : "2019-09-23"
+        }
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -11052,6 +11262,18 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         }, {
           "amount" : {
             "currency" : "USD",
+            "value" : 0.12
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
+              "display" : "Blood Deductible Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
             "value" : 0.41
           },
           "category" : {
@@ -11299,7 +11521,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           } ]
         },
         "sequence" : 1,
-        "servicedDate" : "2020-09-01"
+        "servicedPeriod" : {
+          "end" : "2020-09-11",
+          "start" : "2020-09-01"
+        }
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -11314,6 +11539,18 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             }, {
               "code" : "CLM_LINE_MDCR_DDCTBL_AMT",
               "display" : "Cash Deductible Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.22
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
+              "display" : "Blood Deductible Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -11575,7 +11812,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           } ]
         },
         "sequence" : 2,
-        "servicedDate" : "2020-09-01"
+        "servicedPeriod" : {
+          "end" : "2020-09-11",
+          "start" : "2020-09-01"
+        }
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -11590,6 +11830,18 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             }, {
               "code" : "CLM_LINE_MDCR_DDCTBL_AMT",
               "display" : "Cash Deductible Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 5.39
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
+              "display" : "Blood Deductible Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -11846,7 +12098,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
           } ]
         },
         "sequence" : 3,
-        "servicedDate" : "2020-09-01"
+        "servicedPeriod" : {
+          "end" : "2020-09-11",
+          "start" : "2020-09-01"
+        }
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -13151,6 +13406,18 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         }, {
           "amount" : {
             "currency" : "USD",
+            "value" : 6.51
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
+              "display" : "Blood Deductible Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
             "value" : 4.58
           },
           "category" : {
@@ -13422,7 +13689,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           } ]
         },
         "sequence" : 1,
-        "servicedDate" : "2019-11-17"
+        "servicedPeriod" : {
+          "end" : "2019-12-03",
+          "start" : "2019-11-17"
+        }
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -13437,6 +13707,18 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             }, {
               "code" : "CLM_LINE_MDCR_DDCTBL_AMT",
               "display" : "Cash Deductible Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 5.62
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
+              "display" : "Blood Deductible Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -13694,7 +13976,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           } ]
         },
         "sequence" : 2,
-        "servicedDate" : "2019-11-17"
+        "servicedPeriod" : {
+          "end" : "2019-12-03",
+          "start" : "2019-11-17"
+        }
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -13709,6 +13994,18 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             }, {
               "code" : "CLM_LINE_MDCR_DDCTBL_AMT",
               "display" : "Cash Deductible Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 1.7
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
+              "display" : "Blood Deductible Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -13974,7 +14271,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           } ]
         },
         "sequence" : 3,
-        "servicedDate" : "2019-11-17"
+        "servicedPeriod" : {
+          "end" : "2019-12-03",
+          "start" : "2019-11-17"
+        }
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -15459,6 +15759,18 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         }, {
           "amount" : {
             "currency" : "USD",
+            "value" : 8.86
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
+              "display" : "Blood Deductible Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
             "value" : 1.29
           },
           "category" : {
@@ -15728,7 +16040,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           } ]
         },
         "sequence" : 1,
-        "servicedDate" : "2019-09-23"
+        "servicedPeriod" : {
+          "end" : "2019-09-30",
+          "start" : "2019-09-23"
+        }
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -15743,6 +16058,18 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             }, {
               "code" : "CLM_LINE_MDCR_DDCTBL_AMT",
               "display" : "Cash Deductible Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 2.92
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
+              "display" : "Blood Deductible Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -15990,7 +16317,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           } ]
         },
         "sequence" : 2,
-        "servicedDate" : "2019-09-23"
+        "servicedPeriod" : {
+          "end" : "2019-09-30",
+          "start" : "2019-09-23"
+        }
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -16005,6 +16335,18 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             }, {
               "code" : "CLM_LINE_MDCR_DDCTBL_AMT",
               "display" : "Cash Deductible Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 7.73
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
+              "display" : "Blood Deductible Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -16285,7 +16627,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           } ]
         },
         "sequence" : 3,
-        "servicedDate" : "2019-09-23"
+        "servicedPeriod" : {
+          "end" : "2019-09-30",
+          "start" : "2019-09-23"
+        }
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -16300,6 +16645,18 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             }, {
               "code" : "CLM_LINE_MDCR_DDCTBL_AMT",
               "display" : "Cash Deductible Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 5.15
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
+              "display" : "Blood Deductible Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -16556,7 +16913,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           } ]
         },
         "sequence" : 4,
-        "servicedDate" : "2019-09-23"
+        "servicedPeriod" : {
+          "end" : "2019-09-30",
+          "start" : "2019-09-23"
+        }
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -16571,6 +16931,18 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             }, {
               "code" : "CLM_LINE_MDCR_DDCTBL_AMT",
               "display" : "Cash Deductible Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 9.93
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
+              "display" : "Blood Deductible Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -16833,7 +17205,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           } ]
         },
         "sequence" : 5,
-        "servicedDate" : "2019-09-23"
+        "servicedPeriod" : {
+          "end" : "2019-09-30",
+          "start" : "2019-09-23"
+        }
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -16848,6 +17223,18 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             }, {
               "code" : "CLM_LINE_MDCR_DDCTBL_AMT",
               "display" : "Cash Deductible Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 14.56
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
+              "display" : "Blood Deductible Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -17107,7 +17494,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           } ]
         },
         "sequence" : 6,
-        "servicedDate" : "2019-09-23"
+        "servicedPeriod" : {
+          "end" : "2019-09-30",
+          "start" : "2019-09-23"
+        }
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -17122,6 +17512,18 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             }, {
               "code" : "CLM_LINE_MDCR_DDCTBL_AMT",
               "display" : "Cash Deductible Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 11.88
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
+              "display" : "Blood Deductible Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -17396,7 +17798,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           } ]
         },
         "sequence" : 7,
-        "servicedDate" : "2019-09-23"
+        "servicedPeriod" : {
+          "end" : "2019-09-30",
+          "start" : "2019-09-23"
+        }
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -17411,6 +17816,18 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             }, {
               "code" : "CLM_LINE_MDCR_DDCTBL_AMT",
               "display" : "Cash Deductible Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 3.16
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
+              "display" : "Blood Deductible Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -17685,7 +18102,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           } ]
         },
         "sequence" : 8,
-        "servicedDate" : "2019-09-23"
+        "servicedPeriod" : {
+          "end" : "2019-09-30",
+          "start" : "2019-09-23"
+        }
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -17700,6 +18120,18 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             }, {
               "code" : "CLM_LINE_MDCR_DDCTBL_AMT",
               "display" : "Cash Deductible Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 12.47
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
+              "display" : "Blood Deductible Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -17962,7 +18394,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           } ]
         },
         "sequence" : 9,
-        "servicedDate" : "2019-09-23"
+        "servicedPeriod" : {
+          "end" : "2019-09-30",
+          "start" : "2019-09-23"
+        }
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
@@ -19096,6 +19531,18 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         }, {
           "amount" : {
             "currency" : "USD",
+            "value" : 0.12
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
+              "display" : "Blood Deductible Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
             "value" : 0.41
           },
           "category" : {
@@ -19343,7 +19790,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           } ]
         },
         "sequence" : 1,
-        "servicedDate" : "2020-09-01"
+        "servicedPeriod" : {
+          "end" : "2020-09-11",
+          "start" : "2020-09-01"
+        }
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -19358,6 +19808,18 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             }, {
               "code" : "CLM_LINE_MDCR_DDCTBL_AMT",
               "display" : "Cash Deductible Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 0.22
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
+              "display" : "Blood Deductible Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -19619,7 +20081,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           } ]
         },
         "sequence" : 2,
-        "servicedDate" : "2020-09-01"
+        "servicedPeriod" : {
+          "end" : "2020-09-11",
+          "start" : "2020-09-01"
+        }
       }, {
         "adjudication" : [ {
           "amount" : {
@@ -19634,6 +20099,18 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             }, {
               "code" : "CLM_LINE_MDCR_DDCTBL_AMT",
               "display" : "Cash Deductible Amount",
+              "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
+            } ]
+          }
+        }, {
+          "amount" : {
+            "currency" : "USD",
+            "value" : 5.39
+          },
+          "category" : {
+            "coding" : [ {
+              "code" : "CLM_LINE_BLOOD_DDCTBL_AMT",
+              "display" : "Blood Deductible Amount",
               "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication"
             } ]
           }
@@ -19890,7 +20367,10 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
           } ]
         },
         "sequence" : 3,
-        "servicedDate" : "2020-09-01"
+        "servicedPeriod" : {
+          "end" : "2020-09-11",
+          "start" : "2020-09-01"
+        }
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
