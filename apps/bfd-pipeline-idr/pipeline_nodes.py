@@ -264,12 +264,14 @@ def do_stage5(
     stage5_inputs: NodePartitionedModelInput,
     load_type: LoadType,
     load_mode: LoadMode,
+    start_time: datetime
 ) -> bool:
     model_type, partition = stage5_inputs
     if load_type == LoadType.INCREMENTAL:
         return extract_and_load(
             cls=model_type,
             partition=partition,
+            job_start=start_time,
             load_mode=load_mode,
             load_type=load_type,
         )
