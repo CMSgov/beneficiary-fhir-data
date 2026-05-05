@@ -36,15 +36,13 @@ class PostgresLoader:
         self.conn = psycopg.connect(connection_string)
 
     def run_sql(self, sql: str) -> bool:
-        succ: bool = False
         try: 
-            succ = self.conn.execute(sql)  # type: ignore
+            self.conn.execute(sql)  # type: ignore
             self.conn.commit()
+            return True
         except Exception:
             logger.error("Failed to execute sql query: %s", sql)
             return False
-        
-        return succ
 
     def load(
         self,

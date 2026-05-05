@@ -155,4 +155,4 @@ def prune_pac(
                 )
         """
 
-    loader.run_sql(parentSQL)
+    return loader.run_sql(parentSQL)
