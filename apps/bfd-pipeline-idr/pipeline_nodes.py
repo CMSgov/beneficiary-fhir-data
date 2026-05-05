@@ -262,7 +262,6 @@ def do_stage5(
     stage5_inputs: NodePartitionedModelInput,
     load_type: LoadType,
     load_mode: LoadMode,
-    start_time: datetime,
 ) -> bool:
     model_type, partition = stage4_inputs
     if load_type == LoadType.INCREMENTAL:
