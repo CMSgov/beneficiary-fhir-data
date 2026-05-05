@@ -139,6 +139,8 @@ def prune_pac(
 
     parent_table_name = parent_table.table()
 
+    parentSQL = ""
+
     if child_table:
         child_table_name = child_table.table()
         logger.info("Child: %s", child_table_name)
@@ -152,7 +154,7 @@ def prune_pac(
                         AND p.clm_type_cd NOT IN ( 1, 2, 3, 4 )
                         AND {claim_range_filter}
                         AND {claim_type_code_filter}
-                )
+                );
         """
 
     return loader.run_sql(parentSQL)
