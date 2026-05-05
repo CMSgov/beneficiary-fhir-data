@@ -12,6 +12,9 @@ import gov.cms.bfd.server.ng.loadprogress.LoadProgressRepository;
 import gov.cms.bfd.server.ng.util.FhirUtil;
 import gov.cms.bfd.server.ng.util.IdrConstants;
 import gov.cms.bfd.server.ng.util.SystemUrls;
+import io.micrometer.core.instrument.DistributionSummary;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
@@ -37,6 +40,7 @@ public class EobHandler {
   private final BeneficiaryRepository beneficiaryRepository;
   private final ClaimRepository claimRepository;
   private final LoadProgressRepository loadProgressRepository;
+  private final MeterRegistry meterRegistry;
 
   // Cache the security labels map to avoid repeated I/O and parsing
   private static final Map<String, List<SecurityLabel>> SECURITY_LABELS =
@@ -64,33 +68,53 @@ public class EobHandler {
    * @return bundle
    */
   public Bundle searchByBene(ClaimSearchCriteria criteria, SamhsaFilterMode samhsaFilterMode) {
-    var beneSk = criteria.beneSk();
-    var beneXrefSk = beneficiaryRepository.getXrefSkFromBeneSk(beneSk);
-    // Don't return data for historical beneSks
-    if (beneXrefSk.isEmpty() || !beneXrefSk.get().equals(beneSk)) {
-      return new Bundle();
+    var timer = Timer.start(meterRegistry);
+
+    try {
+      var beneSk = criteria.beneSk();
+      var beneXrefSk = beneficiaryRepository.getXrefSkFromBeneSk(beneSk);
+      // Don't return data for historical beneSks
+      if (beneXrefSk.isEmpty() || !beneXrefSk.get().equals(beneSk)) {
+        return new Bundle();
+      }
+
+      var repositoryCriteria =
+          new ClaimSearchCriteria(
+              beneXrefSk.get(),
+              criteria.claimThroughDate(),
+              criteria.lastUpdated(),
+              criteria.limit(),
+              criteria.offset(),
+              criteria.tagCriteria(),
+              criteria.claimTypeCodes(),
+              criteria.sources());
+
+      var claims = claimRepository.findByBeneXrefSk(repositoryCriteria);
+
+      var filteredClaims =
+          filterSamhsaClaims(claims, samhsaFilterMode)
+              .skip(repositoryCriteria.resolveOffset())
+              .limit(repositoryCriteria.resolveLimit())
+              .map(claim -> transformToFhir(claim, samhsaFilterMode));
+
+      var bundle = FhirUtil.bundleOrDefault(filteredClaims, loadProgressRepository::lastUpdated);
+
+      recordResultSize(bundle, samhsaFilterMode);
+
+      return bundle;
+    } finally {
+      timer.stop(
+          Timer.builder("application.eob.handler.search_by_bene")
+              .tag("samhsa_filter_mode", samhsaFilterMode.name())
+              .register(meterRegistry));
     }
+  }
 
-    var repositoryCriteria =
-        new ClaimSearchCriteria(
-            beneXrefSk.get(),
-            criteria.claimThroughDate(),
-            criteria.lastUpdated(),
-            criteria.limit(),
-            criteria.offset(),
-            criteria.tagCriteria(),
-            criteria.claimTypeCodes(),
-            criteria.sources());
-
-    var claims = claimRepository.findByBeneXrefSk(repositoryCriteria);
-
-    var filteredClaims =
-        filterSamhsaClaims(claims, samhsaFilterMode)
-            .skip(repositoryCriteria.resolveOffset())
-            .limit(repositoryCriteria.resolveLimit())
-            .map(claim -> transformToFhir(claim, samhsaFilterMode));
-
-    return FhirUtil.bundleOrDefault(filteredClaims, loadProgressRepository::lastUpdated);
+  private void recordResultSize(Bundle bundle, SamhsaFilterMode samhsaFilterMode) {
+    DistributionSummary.builder("application.eob.handler.results.size")
+        .tag("samhsa_filter_mode", samhsaFilterMode.name())
+        .register(meterRegistry)
+        .record(bundle.getEntry().size());
   }
 
   private Stream<? extends ClaimBase> filterSamhsaClaims(

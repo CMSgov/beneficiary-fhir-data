@@ -1,11 +1,13 @@
 package gov.cms.bfd.server.ng.coverage;
 
 import gov.cms.bfd.server.ng.coverage.model.BeneficiaryCoverage;
+import gov.cms.bfd.server.ng.input.CoveragePart;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import gov.cms.bfd.server.ng.util.LogUtil;
-import io.micrometer.core.annotation.Timed;
 import io.micrometer.core.aop.MeterTag;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
 import jakarta.persistence.EntityManager;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
@@ -19,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class CoverageRepository {
   private final EntityManager entityManager;
   private final DateUtil dateUtil;
+  private final MeterRegistry meterRegistry;
 
   /**
    * Retrieves a {@link BeneficiaryCoverage} record by its ID and last updated timestamp.
@@ -27,7 +30,6 @@ public class CoverageRepository {
    * @param lastUpdatedRange last updated search range
    * @return beneficiary record
    */
-  @Timed(value = "application.coverage.search_by_bene")
   public Optional<BeneficiaryCoverage> searchBeneficiaryWithCoverage(
       long beneSk,
       @MeterTag(
@@ -41,104 +43,136 @@ public class CoverageRepository {
     // In the case of rx enrollments, if multiple records have matching begin dates then we sort by
     // latest pdp rx info begin date.
 
-    var beneficiaryCoverage =
-        entityManager
-            .createQuery(
-                String.format(
-                    """
-                      WITH latestPartCDEnrollments AS (
-                          SELECT e.id AS id,
-                              ROW_NUMBER() OVER (
-                                  PARTITION BY
-                                    e.id.beneSk,
-                                    e.id.enrollmentProgramTypeCode
-                                  ORDER BY
-                                      CASE
-                                          WHEN e.beneficiaryEnrollmentPeriod.enrollmentBeginDate <= :today
-                                               AND (e.beneficiaryEnrollmentPeriod.enrollmentEndDate IS NULL
-                                                    OR :today <= e.beneficiaryEnrollmentPeriod.enrollmentEndDate)
-                                          THEN 1
-                                          ELSE 2
-                                      END,
-                                      e.beneficiaryEnrollmentPeriod.enrollmentBeginDate DESC,
-                                      e.id.enrollmentPdpRxInfoBeginDate DESC
-                              ) AS row_num
-                          FROM BeneficiaryPartCDEnrollment e
-                          WHERE e.id.beneSk = :beneSk
-                          AND e.beneficiaryEnrollmentPeriod.enrollmentEndDate >= :today
-                      ),
-                      latestLis AS (
-                          SELECT lis.id AS id,
-                              ROW_NUMBER() OVER (
-                                  ORDER BY lis.id.benefitRangeBeginDate DESC
-                              ) AS row_num
-                          FROM BeneficiaryLowIncomeSubsidy lis
-                          WHERE lis.id.beneSk = :beneSk
-                          AND lis.benefitRangeEndDate >= :today
-                      )
-                      SELECT b
-                      FROM BeneficiaryCoverage b
-                      LEFT JOIN FETCH b.coverageOptional.beneficiaryStatus bs
-                      LEFT JOIN FETCH b.coverageOptional.beneficiaryEntitlementReason ber
-                      LEFT JOIN FETCH b.beneficiaryThirdParties tp
-                      LEFT JOIN FETCH b.beneficiaryEntitlements be
-                      LEFT JOIN FETCH b.coverageOptional.beneficiaryDualEligibility de
-                      LEFT JOIN FETCH b.beneficiaryPartCDEnrollments ben
-                      LEFT JOIN FETCH ben.enrollmentOptional.enrollmentContract c
-                      LEFT JOIN FETCH c.contractOptional.contractPlanContactInfo cc
-                      LEFT JOIN FETCH b.beneficiaryLowIncomeSubsidies blis
-                      WHERE b.beneSk = :beneSk
-                        AND (
-                            CAST(:lowerBound AS ZonedDateTime) IS NULL
-                            OR GREATEST(
-                                  b.meta.partACoverageUpdatedTs,
-                                  b.meta.partBCoverageUpdatedTs,
-                                  b.meta.partCCoverageUpdatedTs,
-                                  b.meta.partDCoverageUpdatedTs,
-                                  b.meta.partDualCoverageUpdatedTs
-                              ) %s :lowerBound
-                          )
-                        AND (
-                            CAST(:upperBound AS ZonedDateTime) IS NULL
-                            OR LEAST(
-                                  b.meta.partACoverageUpdatedTs,
-                                  b.meta.partBCoverageUpdatedTs,
-                                  b.meta.partCCoverageUpdatedTs,
-                                  b.meta.partDCoverageUpdatedTs,
-                                  b.meta.partDualCoverageUpdatedTs
-                              ) %s :upperBound
-                          )
-                        AND b.beneSk = b.xrefSk
-                        AND (ben IS NULL
-                            OR EXISTS (
-                            SELECT 1 FROM latestPartCDEnrollments e
-                            WHERE e.row_num = 1
-                                AND e.id.beneSk = ben.id.beneSk
-                                AND e.id.enrollmentBeginDate = ben.id.enrollmentBeginDate
-                                AND e.id.enrollmentProgramTypeCode = ben.id.enrollmentProgramTypeCode
-                                AND e.id.enrollmentPdpRxInfoBeginDate = ben.id.enrollmentPdpRxInfoBeginDate
-                        ))
-                        AND (blis IS NULL
-                            OR EXISTS (
-                            SELECT 1 FROM latestLis e
-                            WHERE e.row_num = 1
-                                AND e.id.beneSk = blis.id.beneSk
-                                AND e.id.benefitRangeBeginDate = blis.id.benefitRangeBeginDate
-                        ))
-                      ORDER BY b.obsoleteTimestamp DESC
-                    """,
-                    lastUpdatedRange.getLowerBoundSqlOperator(),
-                    lastUpdatedRange.getUpperBoundSqlOperator()),
-                BeneficiaryCoverage.class)
-            .setParameter("lowerBound", lastUpdatedRange.getLowerBoundDateTime().orElse(null))
-            .setParameter("upperBound", lastUpdatedRange.getUpperBoundDateTime().orElse(null))
-            .setParameter("today", benefitDate)
-            .setParameter("beneSk", beneSk)
-            .getResultList()
-            .stream()
-            .findFirst();
+    var timer = Timer.start(meterRegistry);
+    var hasPartC = false;
+    var hasPartD = false;
+    var hasLis = false;
 
-    beneficiaryCoverage.ifPresent(coverage -> LogUtil.logBeneSk(coverage.getBeneSk()));
-    return beneficiaryCoverage;
+    try {
+      var beneficiaryCoverage =
+          entityManager
+              .createQuery(
+                  String.format(
+                      """
+                        WITH latestPartCDEnrollments AS (
+                            SELECT e.id AS id,
+                                ROW_NUMBER() OVER (
+                                    PARTITION BY
+                                      e.id.beneSk,
+                                      e.id.enrollmentProgramTypeCode
+                                    ORDER BY
+                                        CASE
+                                            WHEN e.beneficiaryEnrollmentPeriod.enrollmentBeginDate <= :today
+                                                 AND (e.beneficiaryEnrollmentPeriod.enrollmentEndDate IS NULL
+                                                      OR :today <= e.beneficiaryEnrollmentPeriod.enrollmentEndDate)
+                                            THEN 1
+                                            ELSE 2
+                                        END,
+                                        e.beneficiaryEnrollmentPeriod.enrollmentBeginDate DESC,
+                                        e.id.enrollmentPdpRxInfoBeginDate DESC
+                                ) AS row_num
+                            FROM BeneficiaryPartCDEnrollment e
+                            WHERE e.id.beneSk = :beneSk
+                            AND e.beneficiaryEnrollmentPeriod.enrollmentEndDate >= :today
+                        ),
+                        latestLis AS (
+                            SELECT lis.id AS id,
+                                ROW_NUMBER() OVER (
+                                    ORDER BY lis.id.benefitRangeBeginDate DESC
+                                ) AS row_num
+                            FROM BeneficiaryLowIncomeSubsidy lis
+                            WHERE lis.id.beneSk = :beneSk
+                            AND lis.benefitRangeEndDate >= :today
+                        )
+                        SELECT b
+                        FROM BeneficiaryCoverage b
+                        LEFT JOIN FETCH b.coverageOptional.beneficiaryStatus bs
+                        LEFT JOIN FETCH b.coverageOptional.beneficiaryEntitlementReason ber
+                        LEFT JOIN FETCH b.beneficiaryThirdParties tp
+                        LEFT JOIN FETCH b.beneficiaryEntitlements be
+                        LEFT JOIN FETCH b.coverageOptional.beneficiaryDualEligibility de
+                        LEFT JOIN FETCH b.beneficiaryPartCDEnrollments ben
+                        LEFT JOIN FETCH ben.enrollmentOptional.enrollmentContract c
+                        LEFT JOIN FETCH c.contractOptional.contractPlanContactInfo cc
+                        LEFT JOIN FETCH b.beneficiaryLowIncomeSubsidies blis
+                        WHERE b.beneSk = :beneSk
+                          AND (
+                              CAST(:lowerBound AS ZonedDateTime) IS NULL
+                              OR GREATEST(
+                                    b.meta.partACoverageUpdatedTs,
+                                    b.meta.partBCoverageUpdatedTs,
+                                    b.meta.partCCoverageUpdatedTs,
+                                    b.meta.partDCoverageUpdatedTs,
+                                    b.meta.partDualCoverageUpdatedTs
+                                ) %s :lowerBound
+                            )
+                          AND (
+                              CAST(:upperBound AS ZonedDateTime) IS NULL
+                              OR LEAST(
+                                    b.meta.partACoverageUpdatedTs,
+                                    b.meta.partBCoverageUpdatedTs,
+                                    b.meta.partCCoverageUpdatedTs,
+                                    b.meta.partDCoverageUpdatedTs,
+                                    b.meta.partDualCoverageUpdatedTs
+                                ) %s :upperBound
+                            )
+                          AND b.beneSk = b.xrefSk
+                          AND (ben IS NULL
+                              OR EXISTS (
+                              SELECT 1 FROM latestPartCDEnrollments e
+                              WHERE e.row_num = 1
+                                  AND e.id.beneSk = ben.id.beneSk
+                                  AND e.id.enrollmentBeginDate = ben.id.enrollmentBeginDate
+                                  AND e.id.enrollmentProgramTypeCode = ben.id.enrollmentProgramTypeCode
+                                  AND e.id.enrollmentPdpRxInfoBeginDate = ben.id.enrollmentPdpRxInfoBeginDate
+                          ))
+                          AND (blis IS NULL
+                              OR EXISTS (
+                              SELECT 1 FROM latestLis e
+                              WHERE e.row_num = 1
+                                  AND e.id.beneSk = blis.id.beneSk
+                                  AND e.id.benefitRangeBeginDate = blis.id.benefitRangeBeginDate
+                          ))
+                        ORDER BY b.obsoleteTimestamp DESC
+                      """,
+                      lastUpdatedRange.getLowerBoundSqlOperator(),
+                      lastUpdatedRange.getUpperBoundSqlOperator()),
+                  BeneficiaryCoverage.class)
+              .setParameter("lowerBound", lastUpdatedRange.getLowerBoundDateTime().orElse(null))
+              .setParameter("upperBound", lastUpdatedRange.getUpperBoundDateTime().orElse(null))
+              .setParameter("today", benefitDate)
+              .setParameter("beneSk", beneSk)
+              .getResultList()
+              .stream()
+              .findFirst();
+
+      if (beneficiaryCoverage.isPresent()) {
+        var coverage = beneficiaryCoverage.get();
+        LogUtil.logBeneSk(coverage.getBeneSk());
+        var tags = getCoverageTags(coverage);
+        hasPartC = tags.hasPartC;
+        hasPartD = tags.hasPartD;
+        hasLis = tags.hasLis;
+      }
+
+      return beneficiaryCoverage;
+    } finally {
+      timer.stop(
+          Timer.builder("application.coverage.search_by_bene")
+              .tag("hasPartC", String.valueOf(hasPartC))
+              .tag("hasPartD", String.valueOf(hasPartD))
+              .tag("hasLis", String.valueOf(hasLis))
+              .register(meterRegistry));
+    }
   }
+
+  private CoverageTags getCoverageTags(BeneficiaryCoverage coverage) {
+    var hasPartC = coverage.getEnrollment(CoveragePart.PART_C).isPresent();
+    var hasPartD = coverage.getEnrollment(CoveragePart.PART_D).isPresent();
+    var hasLis = !coverage.getBeneficiaryLowIncomeSubsidies().isEmpty();
+
+    return new CoverageTags(hasPartC, hasPartD, hasLis);
+  }
+
+  private record CoverageTags(boolean hasPartC, boolean hasPartD, boolean hasLis) {}
 }

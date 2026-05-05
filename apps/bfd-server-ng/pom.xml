@@ -234,6 +234,13 @@
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>dynamodb</artifactId>
         </dependency>
+
+        <dependency>
+            <!-- Used to collect metrics for virtual threads. -->
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-java21</artifactId>
+            <version>${micrometer.version}</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

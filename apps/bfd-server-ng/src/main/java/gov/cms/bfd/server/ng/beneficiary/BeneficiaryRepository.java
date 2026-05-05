@@ -8,6 +8,9 @@ import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.util.LogUtil;
 import io.micrometer.core.annotation.Timed;
 import io.micrometer.core.aop.MeterTag;
+import io.micrometer.core.instrument.DistributionSummary;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
 import jakarta.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +23,7 @@ import org.springframework.stereotype.Repository;
 @AllArgsConstructor
 public class BeneficiaryRepository {
   private final EntityManager entityManager;
+  private final MeterRegistry meterRegistry;
 
   private static final String PATIENT_MATCH_TYPE = "exact";
 
@@ -136,45 +140,66 @@ public class BeneficiaryRepository {
    * @param patientMatch patient match request
    * @return beneficiary, if found
    */
-  @Timed(value = "application.beneficiary.patient_match")
   public PatientMatchResult searchPatientMatch(PatientMatch patientMatch) {
-    var combinationResults = new ArrayList<MatchCombinationResult>();
-    for (var indexedScenario : patientMatch.getValidScenarios()) {
-      var combinationIndex = indexedScenario.combinationIndex();
-      var scenario = indexedScenario.entries();
-      var filters = new PatientMatchFilter(scenario).getFilters("bene", SystemType.UNKNOWN);
+    var timer = Timer.start(meterRegistry);
+    var scenariosAttempted = 0;
+    var success = false;
 
-      var query =
-          entityManager.createQuery(
-              String.format(
-                  """
-                  SELECT bene
-                  FROM Beneficiary bene
-                  WHERE bene.latestTransactionFlag = 'Y'
-                  %s
-                  ORDER BY bene.obsoleteTimestamp DESC
-                  """,
-                  filters.filterClause()),
-              Beneficiary.class);
-      var benes =
-          DbFilterParam.withParams(query, filters.params()).getResultList().stream().toList();
-      var matchedRecords =
-          benes.stream()
-              .map(b -> new MatchedRecord(b.getBeneSk(), b.getEffectiveTimestamp()))
-              .toList();
-      combinationResults.add(
-          new MatchCombinationResult(combinationIndex, PATIENT_MATCH_TYPE, matchedRecords));
-      var uniqueXrefs = benes.stream().map(BeneficiaryBase::getXrefSk).distinct().toList();
+    try {
+      var combinationResults = new ArrayList<MatchCombinationResult>();
 
-      if (uniqueXrefs.size() == 1) {
-        var matchedBene = benes.getFirst();
-        LogUtil.logBeneSk(matchedBene.getBeneSk());
-        var finalDetermination =
-            new FinalDetermination(combinationIndex, matchedRecords.getFirst());
-        return new PatientMatchResult(
-            combinationResults, Optional.of(finalDetermination), Optional.of(matchedBene));
+      for (var indexedScenario : patientMatch.getValidScenarios()) {
+        scenariosAttempted++;
+
+        var combinationIndex = indexedScenario.combinationIndex();
+        var scenario = indexedScenario.entries();
+        var filters = new PatientMatchFilter(scenario).getFilters("bene", SystemType.UNKNOWN);
+
+        var query =
+            entityManager.createQuery(
+                String.format(
+                    """
+                                      SELECT bene
+                                      FROM Beneficiary bene
+                                      WHERE bene.latestTransactionFlag = 'Y'
+                                      %s
+                                      ORDER BY bene.obsoleteTimestamp DESC
+                                      """,
+                    filters.filterClause()),
+                Beneficiary.class);
+        var benes =
+            DbFilterParam.withParams(query, filters.params()).getResultList().stream().toList();
+        var matchedRecords =
+            benes.stream()
+                .map(b -> new MatchedRecord(b.getBeneSk(), b.getEffectiveTimestamp()))
+                .toList();
+        combinationResults.add(
+            new MatchCombinationResult(combinationIndex, PATIENT_MATCH_TYPE, matchedRecords));
+        var uniqueXrefs = benes.stream().map(BeneficiaryBase::getXrefSk).distinct().toList();
+
+        if (uniqueXrefs.size() == 1) {
+          success = true;
+
+          var matchedBene = benes.getFirst();
+          LogUtil.logBeneSk(matchedBene.getBeneSk());
+          var finalDetermination =
+              new FinalDetermination(combinationIndex, matchedRecords.getFirst());
+          return new PatientMatchResult(
+              combinationResults, Optional.of(finalDetermination), Optional.of(matchedBene));
+        }
       }
+
+      return new PatientMatchResult(combinationResults, Optional.empty(), Optional.empty());
+    } finally {
+      timer.stop(
+          Timer.builder("application.beneficiary.patient_match.outcome")
+              .tag("outcome", success ? "match" : "no_match")
+              .register(meterRegistry));
+
+      DistributionSummary.builder("application.beneficiary.patient_match.scenarios_attempted")
+          .tag("outcome", success ? "match" : "no_match")
+          .register(meterRegistry)
+          .record(scenariosAttempted);
     }
-    return new PatientMatchResult(combinationResults, Optional.empty(), Optional.empty());
   }
 }
