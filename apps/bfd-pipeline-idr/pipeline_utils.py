@@ -6,11 +6,12 @@ from snowflake.connector import ProgrammingError
 from snowflake.connector.errors import ForbiddenError
 from snowflake.connector.network import ReauthenticationRequest, RetryRequest
 
-from constants import DEFAULT_PARTITION
+from constants import DEFAULT_PARTITION, PAC_PHASE_1_MAX, PAC_PHASE_1_MIN
 from extractor import PostgresExtractor, SnowflakeExtractor
 from load_partition import LoadPartition
 from loader import LoadType, PostgresLoader, should_track_load_progress
 from model.base_model import (
+    IdrBaseModel,
     LoadMode,
     T,
 )
@@ -100,3 +101,60 @@ def extract_and_load(
         except Exception as ex:
             logger.error("error loading %s", cls.table(), exc_info=ex)
             raise ex
+
+
+def prune_pac(
+    cls: type[IdrBaseModel],
+    load_mode: LoadMode,
+    start_time: datetime,
+    parent_child_tables: dict[type[IdrBaseModel], type[IdrBaseModel] | None],
+    partition: LoadPartition | None = None,
+) -> bool:
+
+    partition = partition or DEFAULT_PARTITION
+    logger.info("purging %s", cls.table())
+    parent_table: type[IdrBaseModel] = cls
+    child_table: type[IdrBaseModel] | None = parent_child_tables.get(cls)
+    loader = PostgresLoader(load_mode)
+
+    pac_cutoff_date = start_time - timedelta(days=60)
+    start_time_sql = pac_cutoff_date.strftime("'%Y-%m-%d %H:%M:%S'")
+
+    claim_range_filter = (
+        "1 = 1"
+        if partition.start_date is None or partition.end_date is None
+        else f"""
+            p.clm_type_cd BETWEEN '{PAC_PHASE_1_MIN}'
+            AND '{PAC_PHASE_1_MAX}'
+            AND COALESCE(
+                    clm.idr_updt_ts,
+                    clm.idr_insrt_ts,
+                    clm.clm_idr_ld_dt
+            ) <= {start_time_sql};
+            """
+    )
+
+    claim_type_codes = ",".join([str(c) for c in partition.claim_type_codes])
+    claim_type_code_filter = f"p.clm_type_cd IN ( {claim_type_codes} )"
+
+    parent_table_name = parent_table.table()
+
+    parentSQL = ""
+
+    if child_table:
+        child_table_name = child_table.table()
+        logger.info("Child: %s", child_table_name)
+        parentSQL = f"""
+            DELETE FROM {child_table_name} AS c
+            WHERE EXISTS
+                (   SELECT NULL
+                    FROM {parent_table_name} AS p 
+                    WHERE p.clm_uniq_id = c.clm_uniq_id
+                        AND p.clm_ltst_clm_ind  = 'N'
+                        AND p.clm_type_cd NOT IN ( 1, 2, 3, 4 )
+                        AND {claim_range_filter}
+                        AND {claim_type_code_filter}
+                );
+        """
+
+    return loader.run_sql(parentSQL)
