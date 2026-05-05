@@ -55,7 +55,7 @@ def _run_migrator(postgres: PostgresContainer) -> None:
         raise
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture
 def setup_db() -> Generator[PostgresContainer]:
     with PostgresContainer("postgres:16", driver="") as postgres:
         with psycopg.connect(postgres.get_connection_url()) as conn:
@@ -81,8 +81,12 @@ def setup_db() -> Generator[PostgresContainer]:
         yield postgres
 
 
-def test_pipeline(setup_db: PostgresContainer) -> None:
-    load_type = LoadType.INCREMENTAL
+@pytest.mark.parametrize(
+    argnames="load_type",
+    argvalues=[LoadType.INCREMENTAL, LoadType.INITIAL],
+    ids=["test_pipeline--incremental", "test_pipeline--initial"],
+)
+def test_pipeline(setup_db: PostgresContainer, load_type: LoadType) -> None:
     conn = cast(
         psycopg.Connection[DictRow],
         psycopg.connect(setup_db.get_connection_url(), row_factory=dict_row),  # type: ignore
