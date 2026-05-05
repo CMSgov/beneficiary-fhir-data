@@ -3,7 +3,7 @@ from collections.abc import Iterator, Sequence
 from datetime import UTC, date, datetime
 
 import psycopg
-from psycopg.abc import Params, Query
+from psycopg.abc import Params, QueryNoTemplate
 
 from constants import DEFAULT_MIN_DATE
 from load_partition import LoadPartition, LoadType
@@ -50,7 +50,14 @@ class PostgresLoader:
         load_mode: LoadMode,
     ) -> bool:
         return BatchLoader(
-            self.conn, fetch_results, model, job_start, partition, progress, load_type, load_mode
+            self.conn,
+            fetch_results,
+            model,
+            job_start,
+            partition,
+            progress,
+            load_type,
+            load_mode,
         ).load()
 
     def close(self) -> None:
@@ -249,7 +256,7 @@ class BatchLoader:
             )
 
     def _update_load_progress(
-        self, cur: psycopg.Cursor, query: Query, params: Params | None
+        self, cur: psycopg.Cursor, query: QueryNoTemplate, params: Params | None
     ) -> None:
         if self.enable_load_progress:
             cur.execute(query, params)  # type: ignore
@@ -352,4 +359,4 @@ def _convert_date(date_field: date | datetime) -> datetime:
 
 def should_track_load_progress(load_mode: LoadMode) -> bool:
     # Whether to read/write load progress, which is diabled for synthetic and testing loads.
-    return load_mode == LoadMode.IDR or force_load_progress()
+    return load_mode == LoadMode.PROD or force_load_progress()

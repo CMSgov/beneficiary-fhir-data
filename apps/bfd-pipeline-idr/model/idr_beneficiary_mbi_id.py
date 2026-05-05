@@ -5,7 +5,6 @@ from pydantic import BeforeValidator
 
 from constants import IDR_BENE_MBI_TABLE
 from load_partition import LoadPartition
-from loader import LoadMode
 from model.base_model import (
     BATCH_TIMESTAMP,
     LAST_UPDATED_TIMESTAMP,
@@ -13,6 +12,7 @@ from model.base_model import (
     UPDATE_TIMESTAMP,
     IdrBaseModel,
     ModelType,
+    Source,
     transform_default_string,
     transform_null_date_to_max,
     transform_null_date_to_min,
@@ -48,9 +48,7 @@ class IdrBeneficiaryMbiId(IdrBaseModel):
 
     @override
     @classmethod
-    def fetch_query(
-        cls, partition: LoadPartition, start_time: datetime, load_mode: LoadMode
-    ) -> str:
+    def fetch_query(cls, partition: LoadPartition, start_time: datetime, source: Source) -> str:
         return f"""
                SELECT {{COLUMNS}}
                FROM {IDR_BENE_MBI_TABLE}

@@ -165,6 +165,18 @@ resource "aws_ecs_task_definition" "idr" {
             value = "0"
           },
           {
+            name  = "IDR_LOAD_MODE",
+            value = "prod"
+          },
+          {
+            name  = "IDR_LOAD_TYPE",
+            value = "incremental"
+          },
+          {
+            name  = "IDR_SOURCE",
+            value = "snowflake"
+          },
+          {
             name  = "IDR_ENABLE_DATE_PARTITIONS"
             value = "0"
           },

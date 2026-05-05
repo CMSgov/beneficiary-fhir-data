@@ -17,14 +17,14 @@ from testcontainers.core.config import testcontainers_config  # type: ignore
 from testcontainers.postgres import PostgresContainer  # type: ignore
 
 from constants import IDR_BENE_HISTORY_TABLE
+from extractor import PostgresExecutor
 from load_events import IdrJobLoadEvent, IdrJobType
 from load_partition import LoadType
 from load_synthetic import load_from_csv
 from logger_config import configure_logger
-from model.base_model import LoadMode
+from model.base_model import LoadMode, Source
 from pipeline import run
 from pydantic_utils import fields
-from settings import LOAD_TYPE
 
 # ryuk throws a 500 or 404 error for some reason
 # seems to have issues with podman https://github.com/testcontainers/testcontainers-python/issues/753
@@ -64,7 +64,7 @@ def setup_db() -> Generator[PostgresContainer]:
             conn.commit()
 
             _run_migrator(postgres)
-            load_from_csv(conn, "./test_samples1")  # type: ignore
+            load_from_csv(PostgresExecutor(conn), "./test_samples1")  # type: ignore
 
             info = conn.info
             # Info level logs obscure the error output when running tests
@@ -82,6 +82,7 @@ def setup_db() -> Generator[PostgresContainer]:
 
 
 def test_pipeline(setup_db: PostgresContainer) -> None:
+    load_type = LoadType.INCREMENTAL
     conn = cast(
         psycopg.Connection[DictRow],
         psycopg.connect(setup_db.get_connection_url(), row_factory=dict_row),  # type: ignore
@@ -89,7 +90,7 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
 
     conn.commit()
 
-    run(LoadMode.SYNTHETIC)
+    run(Source.POSTGRES, LoadMode.SYNTHETIC, load_type)
 
     cur = conn.execute("select * from idr.beneficiary order by bene_sk")
     assert cur.rowcount == 28
@@ -122,7 +123,7 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
     )
     conn.commit()
 
-    run(LoadMode.SYNTHETIC)
+    run(Source.POSTGRES, LoadMode.SYNTHETIC, load_type)
 
     cur = conn.execute("select * from idr.beneficiary order by bene_sk")
     rows = cur.fetchmany(2)
@@ -247,7 +248,7 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
 
     # Test incremental loading logic involving 'source_load_events' if we're testing incremental
     # mode
-    if LOAD_TYPE == LoadType.INCREMENTAL:
+    if load_type == LoadType.INCREMENTAL:
         # First, pretend that loading ./test_samples1 was the result of loading _all_ possible jobs
         # by inserting load events with completion times of datetime_now + 1hr for all types
         idr_jobs_table = sql.Identifier("idr", "source_load_events")
@@ -390,7 +391,7 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
         # Simulate running the pipeline in the middle of an "ongoing load" (NCH + SS claims being
         # added)
         advance_time(ss_clm_ts)
-        run(LoadMode.SYNTHETIC)
+        run(Source.POSTGRES, LoadMode.SYNTHETIC, load_type)
 
         # Check to make sure the NCH claim was not loaded as no corresponding event should exist
         # in source_load_events nor has it been 24 hours since the last load of NCH data
@@ -428,7 +429,7 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
         # Run the Pipeline with the NCH event having been inserted indicating that there is NCH
         # data to load
         advance_time(nch_load_job.event_time)
-        run(LoadMode.SYNTHETIC)
+        run(Source.POSTGRES, LoadMode.SYNTHETIC, load_type)
 
         # Check for the NCH claim in the v3 idr schema
         cur = conn.execute(
@@ -489,7 +490,7 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
 
         # Run one last time now that the FISS "job" has completed and the SS claim can be loaded
         advance_time(ss_load_job.event_time)
-        run(LoadMode.SYNTHETIC)
+        run(Source.POSTGRES, LoadMode.SYNTHETIC, load_type)
 
         # Check for the SS claim in the v3 idr schema
         cur = conn.execute(

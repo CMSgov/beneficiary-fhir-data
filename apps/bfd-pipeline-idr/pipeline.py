@@ -1,12 +1,14 @@
 import logging
-import sys
 from concurrent.futures import ProcessPoolExecutor
 from datetime import UTC, datetime
 
+import click
+import psycopg  # type: ignore
 from hamilton import driver, telemetry  # type: ignore
 from hamilton.execution import executors  # type: ignore
 
 import pipeline_nodes
+from extractor import PostgresExecutor, SnowflakeExecutor
 from load_events import (
     IdrJobLoadEvent,
     get_eligible_events,
@@ -17,11 +19,12 @@ from load_events import (
     update_start_times,
 )
 from load_partition import LoadType
+from load_synthetic import load_from_csv
+from loader import get_connection_string
 from logger_config import configure_logger
-from model.base_model import LoadMode
+from model.base_model import LoadMode, Source
 from settings import (
     INCREMENTAL_IDR_JOB_GRACE_PERIOD,
-    LOAD_TYPE,
     MAX_TASKS,
     TABLES_TO_LOAD,
     bfd_test_date,
@@ -43,16 +46,45 @@ class MultiProcessingExecutor(executors.PoolExecutor):
         )
 
 
-def main() -> None:
-    mode = sys.argv[1] if len(sys.argv) > 1 else ""
-    run(mode)
+@click.command
+@click.option(
+    "--source",
+    envvar="IDR_SOURCE",
+    type=click.Choice(Source, case_sensitive=False),
+    default=Source.POSTGRES,
+    show_default=True,
+    help="Source to load from",
+)
+@click.option(
+    "--load-mode",
+    envvar="IDR_LOAD_MODE",
+    type=click.Choice(LoadMode, case_sensitive=False),
+    default=LoadMode.LOCAL,
+    show_default=True,
+    help="Mode - affects db connection string and load progress tracking",
+)
+@click.option(
+    "--load-type",
+    envvar="IDR_LOAD_TYPE",
+    type=click.Choice(LoadType, case_sensitive=False),
+    default=LoadType.INITIAL,
+    show_default=True,
+    help="Load type - affects claim filtering",
+)
+@click.option("--seed-from", type=click.Path(exists=True, resolve_path=True))
+def main(source: Source, load_mode: LoadMode, load_type: LoadType, seed_from: str | None) -> None:
+    if seed_from:
+        load_from_csv(
+            SnowflakeExecutor()
+            if source == Source.SNOWFLAKE
+            else PostgresExecutor(psycopg.connect(get_connection_string(LoadMode.SYNTHETIC))),
+            seed_from,
+        )
+    run(source, load_mode, load_type)
 
 
-def run(load_mode: str) -> None:
+def run(source: Source, load_mode: LoadMode, load_type: LoadType) -> None:
     logger.info("load start")
-    load_mode = LoadMode(load_mode)
-
-    load_type = LoadType(LOAD_TYPE)
 
     logger.info("load_type %s", load_type)
     # Per the docs (https://docs.python.org/3/library/multiprocessing.html#module-multiprocessing.pool)
@@ -60,7 +92,7 @@ def run(load_mode: str) -> None:
     # Setting this parameter will cause old processes to be recycled, allowing resources used by
     # these processes to be freed.
     # This will allow memory usage to remain constant over time.
-    max_tasks_per_child = 1 if load_mode == LoadMode.IDR else None
+    max_tasks_per_child = 1 if load_mode == LoadMode.PROD else None
 
     hamilton_driver = (
         driver.Builder()
@@ -100,6 +132,7 @@ def run(load_mode: str) -> None:
                 "load_mode": load_mode,
                 "start_time": start_time,
                 "tables_to_load": tables_to_load,
+                "source": source,
             },
         )
     except Exception:
@@ -119,14 +152,16 @@ def run(load_mode: str) -> None:
 
     if idr_job_events:
         update_completion_times(
-            load_mode=load_mode, events=idr_job_events, completion_time=resolve_test_date(load_mode)
+            load_mode=load_mode,
+            events=idr_job_events,
+            completion_time=resolve_test_date(load_mode),
         )
 
 
-def resolve_test_date(load_mode: str) -> datetime:
+def resolve_test_date(load_mode: LoadMode) -> datetime:
     test_date = bfd_test_date()
 
-    if test_date and load_mode != LoadMode.IDR:
+    if test_date and load_mode != LoadMode.PROD:
         return test_date
     return datetime.now(UTC)
 

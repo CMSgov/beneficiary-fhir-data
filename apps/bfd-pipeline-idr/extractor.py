@@ -1,8 +1,11 @@
+import csv
 import logging
 from abc import ABC, abstractmethod
 from collections.abc import Iterator, Mapping, Sequence
+from dataclasses import dataclass
 from datetime import datetime
-from typing import Generic
+from pathlib import Path
+from typing import Generic, override
 
 import psycopg
 import snowflake.connector
@@ -11,13 +14,15 @@ from cryptography.hazmat.primitives import serialization
 from psycopg.rows import dict_row
 from pydantic import TypeAdapter
 from snowflake.connector import DictCursor, SnowflakeConnection
+from snowflake.snowpark import Session
 
-from constants import DEFAULT_MIN_DATE
+from constants import DEFAULT_MIN_DATE, IDR_PREFIX
 from load_partition import LoadPartition
 from loader import get_connection_string
 from model.base_model import (
     DbType,
     LoadMode,
+    Source,
     T,
     format_date_opt,
 )
@@ -36,6 +41,19 @@ from settings import (
 from timer import Timer
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass
+class CsvFile:
+    cols: list[str]
+    table: str
+    csv_file: Path
+
+    def cols_str(self) -> str:
+        return ",".join(self.cols)
+
+    def full_table(self) -> str:
+        return f"{IDR_PREFIX}.{self.table}"
 
 
 # TODO: UP046 seems to cause issues with pyright
@@ -74,17 +92,17 @@ class Extractor(ABC, Generic[T]):  # noqa: UP046
         # If date partitioning is not enabled, the number of concurrent jobs will be small
         return 100_000
 
-    def get_query(self, start_time: datetime, load_mode: LoadMode) -> str:
-        query = self.cls.fetch_query(self.partition, start_time, load_mode)
+    def get_query(self, start_time: datetime, source: Source) -> str:
+        query = self.cls.fetch_query(self.partition, start_time, source)
         columns = ",".join(self.cls.column_aliases())
         columns_raw = ",".join(self.cls.columns_raw())
         return query.replace("{COLUMNS}", columns).replace("{COLUMNS_NO_ALIAS}", columns_raw)
 
     def extract_idr_data(
-        self, progress: LoadProgress | None, start_time: datetime, load_mode: LoadMode
+        self, progress: LoadProgress | None, start_time: datetime, source: Source
     ) -> Iterator[Sequence[T]]:
         is_historical = progress is None or progress.is_historical()
-        fetch_query = self.get_query(start_time, load_mode)
+        fetch_query = self.get_query(start_time, source)
         # GREATEST doesn't work with nulls so we need to coalesce here
         batch_timestamp_cols = self._coalesce_dates(
             self.cls.batch_timestamp_col_alias(is_historical)
@@ -170,15 +188,35 @@ class Extractor(ABC, Generic[T]):  # noqa: UP046
         return res
 
 
+class DbExecutor(ABC):
+    @abstractmethod
+    def copy(self, file: CsvFile) -> None:
+        pass
+
+    @abstractmethod
+    def query(self, sql: str, params: dict[str, DbType] | None = None) -> list[dict[str, DbType]]:
+        pass
+
+    @abstractmethod
+    def execute(self, sql: str, params: dict[str, DbType] | None = None) -> None:
+        pass
+
+    @abstractmethod
+    def commit(self) -> None:
+        pass
+
+
 class PostgresExtractor(Extractor[T]):
     def __init__(self, cls: type[T], partition: LoadPartition, load_mode: LoadMode) -> None:
         super().__init__(cls, partition)
         self.connection_string = get_connection_string(load_mode)
         self.conn = psycopg.connect(self.connection_string)
 
+    @override
     def reconnect(self) -> None:
         self.conn = psycopg.connect(self.connection_string)
 
+    @override
     def extract_many(
         self,
         sql: str,
@@ -201,20 +239,56 @@ class PostgresExtractor(Extractor[T]):
                 return self._transform([res])[0]
             return None
 
+    @override
     def close(self) -> None:
         self.conn.close()
+
+
+class PostgresExecutor(DbExecutor):
+    def __init__(self, conn: psycopg.connection.Connection) -> None:
+        self.conn = conn
+
+    @override
+    def execute(self, sql: str, params: dict[str, DbType] | None = None) -> None:
+        cur = self.conn.cursor(row_factory=dict_row)
+        cur.execute(sql, params)  # type: ignore
+
+    @override
+    def query(self, sql: str, params: dict[str, DbType] | None = None) -> list[dict[str, DbType]]:
+        cur = self.conn.cursor(row_factory=dict_row)
+        res = cur.execute(sql, params)  # type: ignore
+        return res.fetchall()  # type: ignore
+
+    @override
+    def commit(self) -> None:
+        self.conn.commit()
+
+    @override
+    def copy(self, file: CsvFile) -> None:
+        with self.conn.cursor(row_factory=dict_row) as cur, file.csv_file.open() as f:
+            reader = csv.DictReader(f)
+            # skip empty files
+            if reader.fieldnames is None:
+                return
+
+            with cur.copy(
+                f"COPY {file.full_table()} ({file.cols_str()}) FROM STDIN"  # type: ignore
+            ) as copy:
+                for row in reader:
+                    copy.write_row([row[c] or None for c in file.cols])
 
 
 class SnowflakeExtractor(Extractor[T]):
     def __init__(self, cls: type[T], partition: LoadPartition) -> None:
         super().__init__(cls, partition)
-        self.conn = SnowflakeExtractor._connect()
+        self.conn = SnowflakeExtractor.connect()
 
+    @override
     def reconnect(self) -> None:
-        self.conn = SnowflakeExtractor._connect()
+        self.conn = SnowflakeExtractor.connect()
 
     @staticmethod
-    def _connect() -> SnowflakeConnection:
+    def connect() -> SnowflakeConnection:
         private_key = serialization.load_pem_private_key(
             IDR_PRIVATE_KEY.encode(),
             password=None,
@@ -234,6 +308,7 @@ class SnowflakeExtractor(Extractor[T]):
             schema=IDR_SCHEMA,
         )
 
+    @override
     def extract_many(
         self,
         sql: str,
@@ -266,5 +341,63 @@ class SnowflakeExtractor(Extractor[T]):
             if cur:
                 cur.close()
 
+    @override
     def close(self) -> None:
         self.conn.close()
+
+
+class SnowflakeExecutor(DbExecutor):
+    def __init__(self) -> None:
+        private_key = serialization.load_pem_private_key(
+            IDR_PRIVATE_KEY.encode(),
+            password=None,
+            backend=default_backend(),
+        )
+        private_key_bytes = private_key.private_bytes(
+            encoding=serialization.Encoding.DER,
+            format=serialization.PrivateFormat.PKCS8,
+            encryption_algorithm=serialization.NoEncryption(),
+        )
+        self.session = Session.builder.configs(
+            {
+                "account": IDR_ACCOUNT,
+                "user": IDR_USERNAME,
+                "private_key": private_key_bytes,  # type: ignore
+                "warehouse": IDR_WAREHOUSE,
+                "database": IDR_DATABASE,
+                "schema": IDR_SCHEMA,
+            }
+        ).create()
+        self.conn = SnowflakeExtractor.connect()
+
+    @override
+    def commit(self) -> None:
+        self.conn.commit()
+
+    @override
+    def copy(self, file: CsvFile) -> None:
+        self.session.sql("create or replace temp stage source_stage").collect()
+        self.session.file.put(str(file.csv_file.absolute()), "@source_stage")
+        self.session.sql(f"""COPY INTO 
+                            {file.full_table()}
+                            FROM @source_stage/{file.csv_file.name}
+                            FILE_FORMAT = (
+                                TYPE = 'CSV', 
+                                PARSE_HEADER = TRUE
+                                ERROR_ON_COLUMN_COUNT_MISMATCH = FALSE
+                                FIELD_OPTIONALLY_ENCLOSED_BY = '"'
+                            )
+                            MATCH_BY_COLUMN_NAME = CASE_INSENSITIVE
+                            """).collect()
+        self.session.commit()
+
+    @override
+    def execute(self, sql: str, params: dict[str, DbType] | None = None) -> None:
+        cur = self.conn.cursor(DictCursor)
+        cur.execute(sql, params)
+
+    @override
+    def query(self, sql: str, params: dict[str, DbType] | None = None) -> list[dict[str, DbType]]:
+        cur = self.conn.cursor(DictCursor)
+        res = cur.execute(sql, params).fetchall()  # type: ignore
+        return [{k.lower(): r[k] for k in r} for r in res]  # type: ignore

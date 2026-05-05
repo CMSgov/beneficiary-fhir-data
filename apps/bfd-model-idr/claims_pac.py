@@ -137,7 +137,8 @@ class PacGeneratorUtil:
             init_row=init_clm_dt_sgntr,
             # If these match, the initial clm_dt_sgntr is already "pac" in that it's associated with
             # the pac CLM (because this function will be called after the pac CLM is created)
-            is_pac_predicate=lambda: clm[f.CLM_DT_SGNTR_SK] == init_clm_dt_sgntr[f.CLM_DT_SGNTR_SK],
+            is_pac_predicate=lambda: clm[f.CLM_DT_SGNTR_SK]
+            == init_clm_dt_sgntr.get(f.CLM_DT_SGNTR_SK),
             exclude_fields_always={
                 f.CLM_MDCR_EXHSTD_DT,
                 f.CLM_NCVRD_FROM_DT,
