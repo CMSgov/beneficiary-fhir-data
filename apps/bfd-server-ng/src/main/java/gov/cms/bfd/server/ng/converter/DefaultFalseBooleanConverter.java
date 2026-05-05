@@ -12,7 +12,8 @@ import jakarta.persistence.Converter;
 public class DefaultFalseBooleanConverter implements AttributeConverter<Boolean, String> {
   @Override
   public String convertToDatabaseColumn(Boolean value) {
-    // This is a read-only API so this method will never actually persist anything to the database.
+    // This is a read-only API so this method will only get called in test cases when data needs to
+    // be updated for a specific test
     return value != null && value ? IdrConstants.YES : IdrConstants.NO;
   }
 
