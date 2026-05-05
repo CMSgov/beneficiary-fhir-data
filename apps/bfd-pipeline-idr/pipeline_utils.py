@@ -42,7 +42,6 @@ def extract_and_load(
     load_mode: LoadMode,
     job_start: datetime,
     load_type: LoadType,
-    start_time: datetime,
     partition: LoadPartition | None = None,
 ) -> bool:
     partition = partition or DEFAULT_PARTITION

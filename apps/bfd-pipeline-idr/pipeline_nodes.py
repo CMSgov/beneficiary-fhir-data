@@ -122,7 +122,6 @@ def stage1(load_mode: LoadMode, start_time: datetime, load_type: LoadType) -> bo
         job_start=start_time,
         load_mode=load_mode,
         load_type=load_type,
-        start_time=start_time,
     )
 
 
@@ -168,7 +167,6 @@ def do_stage2(
         job_start=start_time,
         load_mode=load_mode,
         load_type=load_type,
-        start_time=start_time,
     )
 
 
@@ -204,7 +202,6 @@ def do_stage3(
         job_start=start_time,
         load_mode=load_mode,
         load_type=load_type,
-        start_time=start_time,
     )
 
 
@@ -241,7 +238,6 @@ def do_stage4(
             job_start=start_time,
             load_mode=load_mode,
             load_type=load_type,
-            start_time=start_time,
         )
 
     return False
@@ -273,10 +269,8 @@ def do_stage5(
         return extract_and_load(
             cls=model_type,
             partition=partition,
-            job_start=start_time,
             load_mode=load_mode,
             load_type=load_type,
-            start_time=start_time,
         )
 
     return False
