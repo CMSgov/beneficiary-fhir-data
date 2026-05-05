@@ -31,11 +31,18 @@ from model.idr_claim_professional_ss import IdrClaimProfessionalSs
 from model.idr_claim_rx import IdrClaimRx
 from model.idr_contract_pbp_contact import IdrContractPbpContact
 from model.idr_contract_pbp_number import IdrContractPbpNumber
-from pipeline_utils import extract_and_load
+from pipeline_utils import extract_and_load, prune_pac
 
 type NodePartitionedModelInput = tuple[type[IdrBaseModel], LoadPartition | None]
 
 configure_logger()
+
+_CLAIM_PARENT_CHILD_TABLES_NO_RX: dict[type[IdrBaseModel], type[IdrBaseModel] | None] = {
+    IdrClaimProfessionalNch: IdrClaimItemProfessionalNch,
+    IdrClaimInstitutionalNch: IdrClaimItemInstitutionalNch,
+    IdrClaimProfessionalSs: IdrClaimItemProfessionalSs,
+    IdrClaimInstitutionalSs: IdrClaimItemInstitutionalSs
+}
 
 _CLAIM_TABLES: list[type[IdrBaseModel]] = [
     IdrClaimProfessionalNch,
@@ -242,3 +249,68 @@ def do_stage4(
 
 def collect_stage4(do_stage4: Collect[bool]) -> bool:
     return all(do_stage4)
+
+def stage5_inputs(
+    load_type: LoadType,
+    tables_to_load: set[str] | None,
+    collect_stage4: bool,  # noqa: ARG001
+) -> Parallelizable[NodePartitionedModelInput]:
+    if load_type == LoadType.INCREMENTAL:
+        yield from _gen_partitioned_node_inputs(
+            filter_tables(_BENE_TABLES, tables_to_load), load_type
+        )
+    else:
+        yield from _gen_partitioned_node_inputs([], load_type)
+
+def do_stage5(
+    stage5_inputs: NodePartitionedModelInput,
+    load_type: LoadType,
+    load_mode: LoadMode,
+    start_time: datetime,
+) -> bool:
+    model_type, partition = stage4_inputs
+    if load_type == LoadType.INCREMENTAL:
+        return extract_and_load(
+            cls=model_type,
+            partition=partition,
+            job_start=start_time,
+            load_mode=load_mode,
+            load_type=load_type,
+            start_time=start_time,
+        )
+
+    return False
+
+def collect_stage5(do_stage4: Collect[bool]) -> bool:
+    return all(do_stage4)
+
+
+def stage6_inputs(
+    load_type: LoadType,
+    tables_to_load: set[str] | None,
+    collect_stage4: bool,  # noqa: ARG001
+) -> Parallelizable[NodePartitionedModelInput]:
+    yield from _gen_partitioned_node_inputs(
+        filter_tables(_CLAIM_TABLES, tables_to_load), load_type
+    )
+
+def do_stage6(
+    stage6_inputs: NodePartitionedModelInput,
+    load_type: LoadType,
+    load_mode: LoadMode,
+    start_time: datetime,
+) -> bool:
+    model_type, partition = stage6_inputs
+    if load_type == LoadType.INCREMENTAL:
+        return prune_pac(
+            cls=model_type,
+            partition=partition,
+            start_time=start_time,
+            parent_child_tables=_CLAIM_PARENT_CHILD_TABLES_NO_RX,
+            load_mode=load_mode
+        )
+
+    return False
+
+def collect_stage6(do_stage6: Collect[bool]) -> bool:
+    return all(do_stage6)

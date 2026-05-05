@@ -16,7 +16,7 @@ from testcontainers.core.config import testcontainers_config  # type: ignore
 # https://github.com/testcontainers/testcontainers-python/issues/305
 from testcontainers.postgres import PostgresContainer  # type: ignore
 
-from constants import IDR_BENE_HISTORY_TABLE, IDR_PREFIX, PAC_PHASE_1_MAX, PAC_PHASE_1_MIN
+from constants import IDR_BENE_HISTORY_TABLE, PAC_PHASE_1_MAX, PAC_PHASE_1_MIN
 from load_events import IdrJobLoadEvent, IdrJobType
 from load_partition import LoadType
 from load_synthetic import load_from_csv
@@ -518,21 +518,31 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
 
         advance_time(datetime_now - timedelta(days=60))
         run(LoadMode.SYNTHETIC)
-        claim_table = sql.Identifier(IDR_PREFIX, "v2_mdcr_clm")
+
+        claim_prof_ss = sql.Identifier("idr", "claim_professional_ss")
+
         date_minus_sixty = os.environ["BFD_TEST_DATE"]
         cur = conn.execute(
             t"""
-            SELECT * FROM {claim_table:i} WHERE clm_type_cd BETWEEN {PAC_PHASE_1_MIN} 
-                        AND {PAC_PHASE_1_MAX}
-                        AND COALESCE(
-                            idr_updt_ts,
-                            idr_insrt_ts,
-                            clm_idr_ld_dt
-                        ) <= {date_minus_sixty}
+            SELECT clm_uniq_id FROM {claim_prof_ss:i}
+            WHERE clm_type_cd BETWEEN {PAC_PHASE_1_MIN} AND {PAC_PHASE_1_MAX} 
+            AND bfd_updated_ts <= {date_minus_sixty};
             """
         )
         conn.commit()
         assert cur.rowcount == 0
+
+        cur = conn.execute(
+            t"""
+            SELECT clm_uniq_id FROM {ss_table:i}
+            WHERE clm_type_cd BETWEEN {PAC_PHASE_1_MIN} AND {PAC_PHASE_1_MAX} 
+            AND bfd_updated_ts <= {date_minus_sixty};
+            """
+        )
+        conn.commit()
+        assert cur.rowcount == 0
+
+    
 
 
 def advance_time(timestamp: datetime) -> None:
