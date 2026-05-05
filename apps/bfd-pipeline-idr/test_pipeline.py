@@ -55,7 +55,7 @@ def _run_migrator(postgres: PostgresContainer) -> None:
         raise
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture
 def setup_db() -> Generator[PostgresContainer]:
     with PostgresContainer("postgres:16", driver="") as postgres:
         with psycopg.connect(postgres.get_connection_url()) as conn:
@@ -81,7 +81,12 @@ def setup_db() -> Generator[PostgresContainer]:
         yield postgres
 
 
-def test_pipeline(setup_db: PostgresContainer) -> None:
+@pytest.mark.parametrize(
+    argnames="load_type",
+    argvalues=["initial", "incremental"],
+    ids=["test_pipeline--initial", "test_pipeline--incremental"],
+)
+def test_pipeline(setup_db: PostgresContainer, load_type: str) -> None:
     conn = cast(
         psycopg.Connection[DictRow],
         psycopg.connect(setup_db.get_connection_url(), row_factory=dict_row),  # type: ignore
@@ -89,7 +94,7 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
 
     conn.commit()
 
-    run(LoadMode.SYNTHETIC)
+    run(LoadMode.SYNTHETIC, load_type)
 
     cur = conn.execute("select * from idr.beneficiary order by bene_sk")
     assert cur.rowcount == 28
@@ -122,7 +127,7 @@ def test_pipeline(setup_db: PostgresContainer) -> None:
     )
     conn.commit()
 
-    run(LoadMode.SYNTHETIC)
+    run(LoadMode.SYNTHETIC, load_type)
 
     cur = conn.execute("select * from idr.beneficiary order by bene_sk")
     rows = cur.fetchmany(2)
