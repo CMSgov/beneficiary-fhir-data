@@ -125,9 +125,9 @@
         <aws.crt.version>0.35.0</aws.crt.version>
         <aws-advanced-jdbc-wrapper.version>2.6.5</aws-advanced-jdbc-wrapper.version>
         <spring-data-jpa.version>3.4.10</spring-data-jpa.version>
-        <spring-framework.version>6.2.11</spring-framework.version>
+        <spring-framework.version>6.2.18</spring-framework.version>
         <spring-retry.version>2.0.8</spring-retry.version>
-        <spring-boot.version>3.5.12</spring-boot.version>
+        <spring-boot.version>3.5.14</spring-boot.version>
         <spring-cloud.version>4.3.0</spring-cloud.version>
         <spring-cloud-aws.version>3.4.0</spring-cloud-aws.version>
 
@@ -158,7 +158,7 @@
         <rest-assured.version>5.5.1</rest-assured.version>
         <assertj.version>3.27.3</assertj.version>
         <system-lambda-version>1.2.1</system-lambda-version>
-        <postgresql.version>42.7.7</postgresql.version>
+        <postgresql.version>42.7.11</postgresql.version>
         <slf4j.version>2.0.17</slf4j.version>
         <log4j.version>2.24.3</log4j.version>
         <hikari.version>6.2.1</hikari.version>
@@ -177,7 +177,7 @@
         <auto-service.version>1.1.1</auto-service.version>
         <hibernate.validator.version>8.0.1.Final</hibernate.validator.version>
         <jakarta.el.version>4.0.2</jakarta.el.version>
-        <poi.version>5.2.5</poi.version>
+        <poi.version>5.4.0</poi.version>
         <javapoet.version>1.13.0</javapoet.version>
 
         <!-- Fix for Snyk vulnerability (CWE-770 and CWE-436)-->
