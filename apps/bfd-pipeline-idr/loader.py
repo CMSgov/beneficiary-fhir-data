@@ -17,7 +17,7 @@ from settings import (
     bfd_db_username,
     force_load_progress,
 )
-from timer import Timer
+from .timer import Timer
 
 logger = logging.getLogger(__name__)
 

@@ -261,7 +261,8 @@ if cond_sk:
     matching_rows = cond_sk_df[cond_sk_df["CLM_RLT_COND_SGNTR_SK"] == str(cond_sk)]
     for _, row in matching_rows.iterrows():
         cond_cd = row.get("CLM_RLT_COND_CD")
-        if pd.notna(cond_cd) and str(cond_cd) != "~":
+        # Use manual NaN check instead of pd.isna()
+        if cond_cd is not None and cond_cd == cond_cd and str(cond_cd) != "~":
             supporting_info_components.append({"CLM_RLT_COND_CD": str(cond_cd)})
 
 fac_type = cur_sample_data.get("CLM_BILL_FAC_TYPE_CD")

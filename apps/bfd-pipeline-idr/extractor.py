@@ -32,12 +32,14 @@ from settings import (
     IDR_WAREHOUSE,
     MIN_BATCH_COMPLETION_DATE,
 )
-from timer import Timer
+from .timer import Timer
+from typing import Iterator, Sequence
+from model.base_model import IdrBaseModel
+from abc import ABC, abstractmethod
 
 logger = logging.getLogger(__name__)
 
-
-class Extractor[T](ABC):
+class Extractor[T: IdrBaseModel](ABC):
     def __init__(self, cls: type[T], partition: LoadPartition) -> None:
         self.cls = cls
         self.type_adapter = TypeAdapter(list[self.cls])
@@ -66,10 +68,7 @@ class Extractor[T](ABC):
 
     def _get_batch_size(self) -> int:
         if ENABLE_DATE_PARTITIONS:
-            # Larger tables take up more memory, so we'll try to normalize
-            # the total memory used here based on the number of columns
             return round(BATCH_MULTIPLIER / len(self.cls.columns_raw()))
-        # If date partitioning is not enabled, the number of concurrent jobs will be small
         return 100_000
 
     def get_query(self, start_time: datetime, load_mode: LoadMode) -> str:
@@ -83,15 +82,15 @@ class Extractor[T](ABC):
     ) -> Iterator[Sequence[T]]:
         is_historical = progress is None or progress.is_historical()
         fetch_query = self.get_query(start_time, load_mode)
-        # GREATEST doesn't work with nulls so we need to coalesce here
         batch_timestamp_cols = self._coalesce_dates(
             self.cls.batch_timestamp_col_alias(is_historical)
         )
         update_timestamp_cols = self._coalesce_dates(self.cls.update_timestamp_col_alias())
-        # We need to create batches using the most recent timestamp from all of the
-        # insert/update timestamps
         batch_timestamp_clause = self._greatest_col([*batch_timestamp_cols, *update_timestamp_cols])
-        min_transaction_date = self.cls.model_type().min_transaction_date
+        
+        # Fix: defer type checking for dynamic model_type()
+        model_instance = self.cls.model_type()  # type: ignore[call-arg]
+        min_transaction_date = model_instance.min_transaction_date
 
         batch_id_order = ""
         batch_id_clause = ""
@@ -101,7 +100,6 @@ class Extractor[T](ABC):
         logger.info("extracting %s", self.cls.table())
         order_by = f"ORDER BY {batch_timestamp_clause} {batch_id_order}"
         if progress is None:
-            # No saved progress, process the whole table from the beginning
             return self.extract_many(
                 fetch_query.replace(
                     "{WHERE_CLAUSE}",

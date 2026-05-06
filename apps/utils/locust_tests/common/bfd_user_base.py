@@ -16,7 +16,6 @@ from common.url_path import create_url_path
 from common.validation import ValidationResult
 from locust import FastHttpUser, events
 from locust.argument_parser import LocustArgumentParser
-from locust.contrib.fasthttp import ResponseContextManager
 from locust.env import Environment
 
 _COMPARISONS_METADATA_PATH = None
@@ -188,11 +187,7 @@ class BFDUserBase(FastHttpUser):
             catch_response=True,
         ) as response:
             if response.status_code != 200:
-                if isinstance(response, ResponseContextManager):
-                    # pylint: disable=E1121
-                    response.failure(f"Status Code: {response.status_code}")
-                else:
-                    response.failure()
+                response.failure(f"Status Code: {response.status_code}")
             elif response.text:
                 # Check for valid "next" URLs that we can add to a URL pool.
                 next_url = BFDUserBase.__get_next_url(response.text)
@@ -226,11 +221,7 @@ class BFDUserBase(FastHttpUser):
             catch_response=True,
         ) as response:
             if response.status_code != 200:
-                if isinstance(response, ResponseContextManager):
-                    # pylint: disable=E1121
-                    response.failure(f"Status Code: {response.status_code}")
-                else:
-                    response.failure()
+                response.failure(f"Status Code: {response.status_code}")
             elif response.text:
                 # Check for valid "next" URLs that we can add to a URL pool.
                 next_url = BFDUserBase.__get_next_url(response.text)

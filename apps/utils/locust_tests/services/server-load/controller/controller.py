@@ -93,20 +93,19 @@ def _start_node(
 
     return response
 
-
 def _main() -> None:
     try:
         cluster_id = get_ssm_parameter(
-            ssm_client=ssm_client,
+            ssm_client=ssm_client,  # type: ignore[arg-type]
             name=f"/bfd/{environment}/common/nonsensitive/rds_cluster_identifier",
         )
         username = get_ssm_parameter(
-            ssm_client=ssm_client,
+            ssm_client=ssm_client,  # type: ignore[arg-type]
             name=f"/bfd/{environment}/server/sensitive/db/username",
             with_decrypt=True,
         )
         raw_password = get_ssm_parameter(
-            ssm_client=ssm_client,
+            ssm_client=ssm_client,  # type: ignore[arg-type]
             name=f"/bfd/{environment}/server/sensitive/db/password",
             with_decrypt=True,
         )

@@ -5,12 +5,14 @@ requires-python="==3.14.3"
 description = "BFD Python workspace for unified dependency management"
 
 dependencies = [
+    "tqdm",
     "psycopg[binary,pool]>=3.2.13",
     "pydantic==2.13.3",
     # sftp-outbound-transfer dependencies
     "aws-lambda-powertools[all]",
     "paramiko",
     "boto3",
+    "types-boto3>=1.43.2",
     "aiohttp>=3.13.0",
     "asyncclick>=8.3.0.5",
     "anyio>=4.11.0",
@@ -46,7 +48,6 @@ members = [
 
 [dependency-groups]
 dev = [
-    "tqdm",
     "ruff",
     "pyright",
     # bfd-pipeline-idr dev dependencies
@@ -123,6 +124,7 @@ docstring-code-format = true
 typeCheckingMode = "strict"
 venvPath = "."
 venv = ".venv"
+# TODO: Move these downstream for lambdas with powertools only:
 reportMissingImports = false
 reportMissingTypeStubs = "none"
 # AWS Lambda Powertools compatibility - relaxed type checking for ops services
@@ -138,18 +140,15 @@ exclude = [
     "**/.venv",
     "**/node_modules",
     "**/__pycache__",
-#    "**/bfd-model-idr/**",
+    "apps/utils/locust_tests/v1/**",
+    "apps/utils/locust_tests/v2/**",
     "**/bfd-model-rif/**",
-    "**/bfd-pipeline-idr/**",
-#    "**/locust_tests/**",
-#    "**/synthetic-load-converter/**",
-#    "**/sftp_outbound_transfer/**",
     "apps/bfd-model/**",
     "apps/bfd-pipeline/**",
     "apps/bfd-server/**",
-    "apps/utils/**",
+    "ops/utils/synthetic-data/**",
+    "ops/services/02-insights-bb2/**",
     "docs/**",
-    "ops/**",
     "insights/**",
     "src/**",
     "static-site/**",
