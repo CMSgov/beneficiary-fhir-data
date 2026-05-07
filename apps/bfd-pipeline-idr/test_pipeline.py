@@ -55,7 +55,7 @@ def _run_migrator(postgres: PostgresContainer) -> None:
         raise
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="module") # type: ignore[reportUntypedFunctionDecorator]
 def setup_db() -> Generator[PostgresContainer]:
     with PostgresContainer("postgres:16", driver="") as postgres:
         with psycopg.connect(postgres.get_connection_url()) as conn:

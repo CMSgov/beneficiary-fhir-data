@@ -24,12 +24,12 @@ overriden in modules (Locustfiles) that import bfd_user_base using set_compariso
 Also overriden by the value of --stats-compare-meta-file"""
 
 
-@events.init_command_line_parser.add_listener
+@events.init_command_line_parser.add_listener  # type: ignore[reportUntypedFunctionDecorator]
 def _(parser: LocustArgumentParser, **kwargs: dict[str, Any]) -> None:
     custom_args.register_custom_args(parser)
 
 
-@events.init.add_listener
+@events.init.add_listener  # type: ignore[reportUntypedFunctionDecorator]
 def _(environment: Environment, **kwargs: dict[str, Any]) -> None:
     if is_distributed(environment) and is_locust_worker(environment):
         return
@@ -41,7 +41,7 @@ def _(environment: Environment, **kwargs: dict[str, Any]) -> None:
     environment.host = host_no_trailing_slash
 
 
-@events.quitting.add_listener
+@events.quitting.add_listener  # type: ignore[reportUntypedFunctionDecorator]
 def _(environment: Environment, **kwargs: dict[str, Any]) -> None:
     """Run one-time teardown tasks after the tests have completed.
 
@@ -118,7 +118,7 @@ def set_comparisons_metadata_path(path: str) -> None:
     _COMPARISONS_METADATA_PATH = path
 
 
-class BFDUserBase(FastHttpUser):
+class BFDUserBase(FastHttpUser): # type: ignore[reportUntypedBaseClass]
     """Base Class for Locust tests against BFD.
 
     This class should automatically handle most of the common tasks that our load tests require.

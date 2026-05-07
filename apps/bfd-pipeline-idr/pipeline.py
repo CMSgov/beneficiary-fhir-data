@@ -32,7 +32,7 @@ telemetry.disable_telemetry()
 logger = logging.getLogger(__name__)
 
 
-class MultiProcessingExecutor(executors.PoolExecutor):
+class MultiProcessingExecutor(executors.PoolExecutor):  # type: ignore[reportUntypedFunctionDecorator]
     def __init__(self, max_tasks: int, max_tasks_per_child: int | None) -> None:
         self.max_tasks_per_child = max_tasks_per_child
         super().__init__(max_tasks)
