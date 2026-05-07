@@ -19,6 +19,11 @@ dependencies = [
     "pyyaml>=6.0.3",
     "types-click>=7.1.8",
     "click>=8.3.3",
+    "locust>=2.43.4",
+    "pandas>=3.0.2",
+    "faker>=40.15.0",
+    "snowflake-connector-python>=4.3.0",
+    "unidecode>=1.4.0",
 ]
 
 [tool.uv.workspace]
@@ -46,14 +51,21 @@ members = [
     "ops/terraform-modules/general/trigger-glue-crawler/lambda_src",
 ]
 
+[tool.uv.sources]
+common = { editable = true, path = "./apps/utils/locust_tests/common" }
+
 [dependency-groups]
 dev = [
     "ruff",
     "pyright",
+    "mypy-boto3-rds",
+    "mypy-boto3-sqs",
+    "mypy-boto3-ssm",
+    "mypy-boto3-lambda",
+    "boto3-stubs[lambda,rds,sns,sqs,ssm]",
     # bfd-pipeline-idr dev dependencies
     "testcontainers>=4.13.1",
     # sftp-outbound-transfer dev dependencies
-    "boto3-stubs[sns,ssm]",
     "usaddress",
 ]
 test = [

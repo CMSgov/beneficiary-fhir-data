@@ -1,0 +1,16 @@
+{
+  "include": [
+    "apps"
+  ],
+  "executionEnvironments": [
+    {
+      "root": "apps/utils/locust_tests",
+      "extraPaths": [
+        "../../.."  // This allows Pyright to see the root 'common' folder
+      ]
+    }
+  ],
+  "typeCheckingMode": "basic",
+  "reportUntypedBaseClass": "error",
+  "reportUntypedFunctionDecorator": "error"
+}
