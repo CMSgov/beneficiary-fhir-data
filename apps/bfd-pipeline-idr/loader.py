@@ -18,10 +18,7 @@ from settings import (
     bfd_db_username,
     force_load_progress,
 )
-if TYPE_CHECKING:
-    from .timer import Timer 
-else:
-    from timer import Timer 
+from timer import Timer  # pyright: ignore[reportAttributeAccessIssue]
 
 logger = logging.getLogger(__name__)
 
