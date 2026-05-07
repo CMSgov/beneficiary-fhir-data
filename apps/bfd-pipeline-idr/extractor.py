@@ -32,7 +32,7 @@ from settings import (
     IDR_WAREHOUSE,
     MIN_BATCH_COMPLETION_DATE,
 )
-from .timer import Timer
+from timer import Timer  # pyright: ignore[reportAttributeAccessIssue]
 from typing import Iterator, Sequence
 from model.base_model import IdrBaseModel
 from abc import ABC, abstractmethod
