@@ -700,7 +700,9 @@ def generate(
 
     if sushi:
         print("Running sushi build")
-        _, stderr = run_command(["sushi", "build"], cwd="./sushi")
+        sushi_command = ["sushi", "build"]
+        sushi_command.append("-n") # Don't hit the external service tx.fhir.org.
+        _, stderr = run_command(sushi_command, cwd="./sushi")
         if stderr:
             print("SUSHI errors:")
             print(stderr)

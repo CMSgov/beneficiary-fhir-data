@@ -311,8 +311,10 @@ class GeneratorUtil:
             print("Running sushi build")
             try:
                 sushi_dir = "./sushi"
+                sushi_command = ["sushi", "build"]
+                sushi_command.append("-n") # Don't hit the external service tx.fhir.org.
                 result = subprocess.run(
-                    ["sushi", "build"], check=True, cwd=sushi_dir, capture_output=True, text=True
+                    sushi_command, check=True, cwd=sushi_dir, capture_output=True, text=True
                 )
                 if result.returncode == 0:
                     print("Sushi build completed successfully")

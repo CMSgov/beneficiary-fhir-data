@@ -191,7 +191,7 @@ def main():
     # Generate Structure Definitions + CodeSystems
     if(args.sushi):
         print("Running sushi build")
-        stdout, stderr = run_command("sushi build", cwd=script_dir / "sushi")
+        stdout, stderr = run_command("sushi build -n", cwd=script_dir / "sushi")
         print("SUSHI output:")
         print(stdout)
         if stderr:
