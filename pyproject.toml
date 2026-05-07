@@ -136,6 +136,16 @@ docstring-code-format = true
 typeCheckingMode = "strict"
 venvPath = "."
 venv = ".venv"
+extraPaths = [
+    "apps/bfd-pipeline-idr",
+    "apps/bfd-model-idr",
+    "apps/utils/locust_tests"
+]
+executionEnvironments = [
+  { root = "apps/bfd-pipeline-idr" },
+  { root = "apps/bfd-model-idr" },
+  { root = "apps/utils/locust_tests" }
+]
 # TODO: Move these downstream for lambdas with powertools only:
 reportMissingImports = false
 reportMissingTypeStubs = "none"

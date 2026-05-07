@@ -1,6 +1,7 @@
 import logging
 from collections.abc import Iterator, Sequence
 from datetime import UTC, date, datetime
+from typing import TYPE_CHECKING
 
 import psycopg
 from psycopg.abc import Params, Query
@@ -17,7 +18,10 @@ from settings import (
     bfd_db_username,
     force_load_progress,
 )
-from .timer import Timer
+if TYPE_CHECKING:
+    from .timer import Timer 
+else:
+    from timer import Timer 
 
 logger = logging.getLogger(__name__)
 

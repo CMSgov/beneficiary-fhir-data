@@ -6,6 +6,7 @@
     {
       "root": "apps/utils/locust_tests",
       "extraPaths": [
+        "apps/bfd-pipeline-idr",
         "../../.."  // This allows Pyright to see the root 'common' folder
       ]
     }
