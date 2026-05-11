@@ -1,13 +1,15 @@
 package gov.cms.bfd.server.ng.coverage;
 
+import static gov.cms.bfd.server.ng.util.MetricTimer.*;
+
 import gov.cms.bfd.server.ng.coverage.model.BeneficiaryCoverage;
 import gov.cms.bfd.server.ng.input.CoveragePart;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import gov.cms.bfd.server.ng.util.LogUtil;
+import gov.cms.bfd.server.ng.util.MetricTimer;
 import io.micrometer.core.aop.MeterTag;
 import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.Timer;
 import jakarta.persistence.EntityManager;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
@@ -43,7 +45,7 @@ public class CoverageRepository {
     // In the case of rx enrollments, if multiple records have matching begin dates then we sort by
     // latest pdp rx info begin date.
 
-    var timer = Timer.start(meterRegistry);
+    var timer = new MetricTimer(meterRegistry);
     var hasPartC = false;
     var hasPartD = false;
     var hasLis = false;
@@ -158,11 +160,13 @@ public class CoverageRepository {
       return beneficiaryCoverage;
     } finally {
       timer.stop(
-          Timer.builder("application.coverage.search_by_bene")
-              .tag("hasPartC", String.valueOf(hasPartC))
-              .tag("hasPartD", String.valueOf(hasPartD))
-              .tag("hasLis", String.valueOf(hasLis))
-              .register(meterRegistry));
+          "application.coverage.search_by_bene",
+          HAS_PART_C,
+          String.valueOf(hasPartC),
+          HAS_PART_D,
+          String.valueOf(hasPartD),
+          HAS_LIS,
+          String.valueOf(hasLis));
     }
   }
 

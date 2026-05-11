@@ -1,5 +1,7 @@
 package gov.cms.bfd.server.ng.eob;
 
+import static gov.cms.bfd.server.ng.util.MetricTimer.SAMHSA_FILTER_MODE;
+
 import gov.cms.bfd.server.ng.ClaimSecurityStatus;
 import gov.cms.bfd.server.ng.SamhsaFilterMode;
 import gov.cms.bfd.server.ng.SecurityLabel;
@@ -11,10 +13,10 @@ import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.loadprogress.LoadProgressRepository;
 import gov.cms.bfd.server.ng.util.FhirUtil;
 import gov.cms.bfd.server.ng.util.IdrConstants;
+import gov.cms.bfd.server.ng.util.MetricTimer;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import io.micrometer.core.instrument.DistributionSummary;
 import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.Timer;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
@@ -68,7 +70,7 @@ public class EobHandler {
    * @return bundle
    */
   public Bundle searchByBene(ClaimSearchCriteria criteria, SamhsaFilterMode samhsaFilterMode) {
-    var timer = Timer.start(meterRegistry);
+    var timer = new MetricTimer(meterRegistry);
 
     try {
       var beneSk = criteria.beneSk();
@@ -98,21 +100,18 @@ public class EobHandler {
               .map(claim -> transformToFhir(claim, samhsaFilterMode));
 
       var bundle = FhirUtil.bundleOrDefault(filteredClaims, loadProgressRepository::lastUpdated);
-
       recordResultSize(bundle, samhsaFilterMode);
-
       return bundle;
+
     } finally {
       timer.stop(
-          Timer.builder("application.eob.handler.search_by_bene")
-              .tag("samhsa_filter_mode", samhsaFilterMode.name())
-              .register(meterRegistry));
+          "application.eob.handler.search_by_bene", SAMHSA_FILTER_MODE, samhsaFilterMode.name());
     }
   }
 
   private void recordResultSize(Bundle bundle, SamhsaFilterMode samhsaFilterMode) {
     DistributionSummary.builder("application.eob.handler.results.size")
-        .tag("samhsa_filter_mode", samhsaFilterMode.name())
+        .tag(SAMHSA_FILTER_MODE, samhsaFilterMode.name())
         .register(meterRegistry)
         .record(bundle.getEntry().size());
   }

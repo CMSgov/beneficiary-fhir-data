@@ -1,16 +1,18 @@
 package gov.cms.bfd.server.ng.beneficiary;
 
+import static gov.cms.bfd.server.ng.util.MetricTimer.PATIENT_MATCH_OUTCOME;
+
 import gov.cms.bfd.server.ng.DbFilterParam;
 import gov.cms.bfd.server.ng.beneficiary.filter.PatientMatchFilter;
 import gov.cms.bfd.server.ng.beneficiary.model.*;
 import gov.cms.bfd.server.ng.claim.model.SystemType;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.util.LogUtil;
+import gov.cms.bfd.server.ng.util.MetricTimer;
 import io.micrometer.core.annotation.Timed;
 import io.micrometer.core.aop.MeterTag;
 import io.micrometer.core.instrument.DistributionSummary;
 import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.Timer;
 import jakarta.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,9 +42,9 @@ public class BeneficiaryRepository {
     return entityManager
         .createQuery(
             """
-                SELECT identity
-                FROM BeneficiaryIdentity identity
-                WHERE identity.id.xrefSk = :beneXrefSk
+                 SELECT identity
+                 FROM BeneficiaryIdentity identity
+                 WHERE identity.id.xrefSk = :beneXrefSk
                 """,
             BeneficiaryIdentity.class)
         .setParameter("beneXrefSk", beneXrefSk)
@@ -68,12 +70,12 @@ public class BeneficiaryRepository {
             .createQuery(
                 String.format(
                     """
-                    SELECT bene
-                    FROM Beneficiary bene
-                    WHERE bene.beneSk = :beneSk
-                      AND ((cast(:lowerBound AS ZonedDateTime)) IS NULL OR bene.patientMeta.updatedTimestamp %s :lowerBound)
-                      AND ((cast(:upperBound AS ZonedDateTime)) IS NULL OR bene.patientMeta.updatedTimestamp %s :upperBound)
-                    ORDER BY bene.obsoleteTimestamp DESC
+                      SELECT bene
+                      FROM Beneficiary bene
+                      WHERE bene.beneSk = :beneSk
+                        AND ((cast(:lowerBound AS ZonedDateTime)) IS NULL OR bene.patientMeta.updatedTimestamp %s :lowerBound)
+                        AND ((cast(:upperBound AS ZonedDateTime)) IS NULL OR bene.patientMeta.updatedTimestamp %s :upperBound)
+                      ORDER BY bene.obsoleteTimestamp DESC
                     """,
                     lastUpdatedRange.getLowerBoundSqlOperator(),
                     lastUpdatedRange.getUpperBoundSqlOperator()),
@@ -122,9 +124,9 @@ public class BeneficiaryRepository {
     return entityManager
         .createQuery(
             """
-                  SELECT bene.xrefSk
-                  FROM Beneficiary bene
-                  WHERE bene.identifier.mbi = :mbi
+                 SELECT bene.xrefSk
+                 FROM Beneficiary bene
+                 WHERE bene.identifier.mbi = :mbi
                 """,
             Long.class)
         .setParameter("mbi", mbi)
@@ -141,7 +143,7 @@ public class BeneficiaryRepository {
    * @return beneficiary, if found
    */
   public PatientMatchResult searchPatientMatch(PatientMatch patientMatch) {
-    var timer = Timer.start(meterRegistry);
+    var timer = new MetricTimer(meterRegistry);
     var scenariosAttempted = 0;
     var success = false;
 
@@ -159,12 +161,12 @@ public class BeneficiaryRepository {
             entityManager.createQuery(
                 String.format(
                     """
-                                      SELECT bene
-                                      FROM Beneficiary bene
-                                      WHERE bene.latestTransactionFlag = 'Y'
-                                      %s
-                                      ORDER BY bene.obsoleteTimestamp DESC
-                                      """,
+                      SELECT bene
+                      FROM Beneficiary bene
+                      WHERE bene.latestTransactionFlag = 'Y'
+                      %s
+                      ORDER BY bene.obsoleteTimestamp DESC
+                    """,
                     filters.filterClause()),
                 Beneficiary.class);
         var benes =
@@ -191,13 +193,11 @@ public class BeneficiaryRepository {
 
       return new PatientMatchResult(combinationResults, Optional.empty(), Optional.empty());
     } finally {
-      timer.stop(
-          Timer.builder("application.beneficiary.patient_match.outcome")
-              .tag("outcome", success ? "match" : "no_match")
-              .register(meterRegistry));
+      var outcome = success ? "match" : "no_match";
+      timer.stop("application.beneficiary.patient_match.outcome", PATIENT_MATCH_OUTCOME, outcome);
 
       DistributionSummary.builder("application.beneficiary.patient_match.scenarios_attempted")
-          .tag("outcome", success ? "match" : "no_match")
+          .tag(PATIENT_MATCH_OUTCOME, outcome)
           .register(meterRegistry)
           .record(scenariosAttempted);
     }

@@ -1,13 +1,15 @@
 package gov.cms.bfd.server.ng.claim;
 
+import static gov.cms.bfd.server.ng.util.MetricTimer.CLAIM_TYPE;
+
 import gov.cms.bfd.server.ng.DbFilter;
 import gov.cms.bfd.server.ng.DbFilterBuilder;
 import gov.cms.bfd.server.ng.DbFilterParam;
 import gov.cms.bfd.server.ng.claim.model.*;
 import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
 import gov.cms.bfd.server.ng.util.LogUtil;
+import gov.cms.bfd.server.ng.util.MetricTimer;
 import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.Timer;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.util.*;
@@ -45,7 +47,7 @@ public class ClaimAsyncService {
             """,
             baseQuery, whereClause);
 
-    var timer = Timer.start(meterRegistry);
+    var timer = new MetricTimer(meterRegistry);
 
     try {
       var result =
@@ -58,9 +60,7 @@ public class ClaimAsyncService {
       return CompletableFuture.completedFuture(result);
     } finally {
       timer.stop(
-          Timer.builder("application.claim.search_by_ids_in_claim_type")
-              .tag("claim_type", claimClass.getSimpleName())
-              .register(meterRegistry));
+          "application.claim.search_by_ids_in_claim_type", CLAIM_TYPE, claimClass.getSimpleName());
     }
   }
 
@@ -83,7 +83,7 @@ public class ClaimAsyncService {
             """,
             baseQuery, whereClause);
 
-    var timer = Timer.start(meterRegistry);
+    var timer = new MetricTimer(meterRegistry);
 
     try {
       var result =
@@ -96,9 +96,7 @@ public class ClaimAsyncService {
       return CompletableFuture.completedFuture(result);
     } finally {
       timer.stop(
-          Timer.builder("application.claim.fetch_claims_with_claim_type")
-              .tag("claim_type", claimClass.getSimpleName())
-              .register(meterRegistry));
+          "application.claim.fetch_claims_with_claim_type", CLAIM_TYPE, claimClass.getSimpleName());
     }
   }
 
