@@ -296,7 +296,7 @@ jobs:
           npm install -g fsh-sushi
           sushi build
           echo "Installed + run sushi"
-        working-directory: apps/bfd-model-idr
+        working-directory: apps/bfd-model-idr/sushi
 
       - name: Install fhirpath
         run: |
