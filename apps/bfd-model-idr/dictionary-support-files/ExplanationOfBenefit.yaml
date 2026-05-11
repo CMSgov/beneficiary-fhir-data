@@ -3694,7 +3694,7 @@
   sourceColumn: CLM_LINE_BNFT_ENHNCMT_5_CD
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_BNFT_ENHNCMT_CD').exists()).value
   notes: There may be multiple. These are unordered, but there are a maximum of 5 per institutional claim header, and 5 per professional claim line. The infoSequence element on the ExplanationOfBenefit.item can be used to determine which are relevant to a given claim line.
-- inputPath: ExplanationOfBenefitBase.GEO_BLG_SSA_STATE_CD                       
+- inputPath: ExplanationOfBenefit-Base.GEO_BLG_SSA_STATE_CD                       
   appliesTo:                                                                    
     - Inpatient                                                                 
     - Outpatient                                                                
