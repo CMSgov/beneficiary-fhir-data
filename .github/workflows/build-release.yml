@@ -188,26 +188,26 @@ jobs:
           ref: ${{ inputs.releaseBranch || github.ref_name }}
           token: ${{ steps.generate_token.outputs.token }}
 
-      - name: Retrieve base java image
-        uses: actions/download-artifact@v8
-        with:
-          pattern: '*bfd-platform-base-java*'
-          merge-multiple: true
-          path: ${{ runner.temp }}
+      # - name: Retrieve base java image
+      #   uses: actions/download-artifact@v8
+      #   with:
+      #     pattern: '*bfd-platform-base-java*'
+      #     merge-multiple: true
+      #     path: ${{ runner.temp }}
 
-      - name: Load base image into Docker
-        run: |
-          docker load --input "${{ runner.temp }}/bfd-platform-base-java.tar"
+      # - name: Load base image into Docker
+      #   run: |
+      #     docker load --input "${{ runner.temp }}/bfd-platform-base-java.tar"
 
-      - name: Install gitleaks
-        run: |
-          curl -s https://api.github.com/repos/gitleaks/gitleaks/releases/latest \
-            | grep "browser_download_url.*linux_x64.tar.gz" \
-            | cut -d : -f 2,3 \
-            | tr -d \" \
-            | wget -qi -
-          sudo tar -xzf "$(find -iname 'gitleaks*.tar.gz')" -C /usr/bin gitleaks
-          sudo chmod +x /usr/bin/gitleaks
+      # - name: Install gitleaks
+      #   run: |
+      #     curl -s https://api.github.com/repos/gitleaks/gitleaks/releases/latest \
+      #       | grep "browser_download_url.*linux_x64.tar.gz" \
+      #       | cut -d : -f 2,3 \
+      #       | tr -d \" \
+      #       | wget -qi -
+      #     sudo tar -xzf "$(find -iname 'gitleaks*.tar.gz')" -C /usr/bin gitleaks
+      #     sudo chmod +x /usr/bin/gitleaks
 
       - name: Setup JDK
         uses: actions/setup-java@v5
