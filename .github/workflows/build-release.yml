@@ -342,16 +342,16 @@ jobs:
           done
 
           # TODO: Re-enable this once BFD v3 DD generation is fixed
-          # echo "Preparing data dictionary artifacts..."
+          echo "Preparing data dictionary artifacts..."
 
           # # 2) Handle v3 artifacts
-          # for artifact_path in apps/bfd-model-idr/out/bfd_data_dictionary.*
-          # do
-          #   filename="$(basename -- "$artifact_path")"
-          #   artifact_ext="${filename#*.}"
+          for artifact_path in apps/bfd-model-idr/out/bfd_data_dictionary.*
+          do
+             filename="$(basename -- "$artifact_path")"
+             artifact_ext="${filename#*.}"
 
-          #   cp "$artifact_path" "assets/v3-data-dictionary-${BFD_RELEASE}.${artifact_ext}"
-          # done
+             cp "$artifact_path" "assets/v3-data-dictionary-${BFD_RELEASE}.${artifact_ext}"
+          done
 
           echo "Final staged artifacts:"
           ls -l assets
@@ -363,138 +363,138 @@ jobs:
           path: assets/*
           retention-days: 1
 
-      - name: "Perform Exceptional Rollback"
-        if: failure()
-        run: mvn release:rollback
-        working-directory: ./apps
+      # - name: "Perform Exceptional Rollback"
+      #   if: failure()
+      #   run: mvn release:rollback
+      #   working-directory: ./apps
 
-  push-jib-images:
-    needs: [compute-version-strings, run-mvn-release]
-    strategy:
-      matrix:
-        account: ["prod", "non-prod"]
-    runs-on: codebuild-bfd-${{ matrix.account }}-platform-docker-${{ github.run_id }}-${{ github.run_attempt }}
-    env:
-      BFD_RELEASE: ${{ needs.compute-version-strings.outputs.bfd_release }}
-      BFD_DEV_VERSION: ${{ needs.compute-version-strings.outputs.bfd_dev_version }}
-    steps:
-      - name: Get role ARN
-        id: get-role-arn
-        run: |
-          role_arn="$(jq -r --arg account_type "${{ matrix.account }}" '.[$account_type]' <<<"$ACCOUNT_ROLE_MAP")"
+  # push-jib-images:
+  #   needs: [compute-version-strings, run-mvn-release]
+  #   strategy:
+  #     matrix:
+  #       account: ["prod", "non-prod"]
+  #   runs-on: codebuild-bfd-${{ matrix.account }}-platform-docker-${{ github.run_id }}-${{ github.run_attempt }}
+  #   env:
+  #     BFD_RELEASE: ${{ needs.compute-version-strings.outputs.bfd_release }}
+  #     BFD_DEV_VERSION: ${{ needs.compute-version-strings.outputs.bfd_dev_version }}
+  #   steps:
+  #     - name: Get role ARN
+  #       id: get-role-arn
+  #       run: |
+  #         role_arn="$(jq -r --arg account_type "${{ matrix.account }}" '.[$account_type]' <<<"$ACCOUNT_ROLE_MAP")"
 
-          echo "::add-mask::$role_arn"
-          echo "role-arn=$role_arn" >> "$GITHUB_OUTPUT"
+  #         echo "::add-mask::$role_arn"
+  #         echo "role-arn=$role_arn" >> "$GITHUB_OUTPUT"
 
-      - name: Download jib image artifacts
-        uses: actions/download-artifact@v8
-        with:
-          name: jib-images
-          path: ${{ runner.temp }}
+  #     - name: Download jib image artifacts
+  #       uses: actions/download-artifact@v8
+  #       with:
+  #         name: jib-images
+  #         path: ${{ runner.temp }}
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v6
-        with:
-          role-to-assume: ${{ steps.get-role-arn.outputs.role-arn }}
-          role-session-name: build-release-${{ github.run_id }}-${{ github.run_attempt }}
-          aws-region: ${{ env.AWS_REGION }}
+  #     - name: Configure AWS credentials
+  #       uses: aws-actions/configure-aws-credentials@v6
+  #       with:
+  #         role-to-assume: ${{ steps.get-role-arn.outputs.role-arn }}
+  #         role-session-name: build-release-${{ github.run_id }}-${{ github.run_attempt }}
+  #         aws-region: ${{ env.AWS_REGION }}
 
-      - name: Login to ECR
-        id: ecr-login
-        uses: aws-actions/amazon-ecr-login@v2
+  #     - name: Login to ECR
+  #       id: ecr-login
+  #       uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Push jib images
-        env:
-          REGISTRY: ${{ steps.ecr-login.outputs.registry }}
-          PUSH_LATEST: ${{ !contains(needs.compute-version-strings.outputs.bfd_release, '-') }}
-        run: |
-          echo "::add-mask::$REGISTRY"
+  #     - name: Push jib images
+  #       env:
+  #         REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+  #         PUSH_LATEST: ${{ !contains(needs.compute-version-strings.outputs.bfd_release, '-') }}
+  #       run: |
+  #         echo "::add-mask::$REGISTRY"
 
-          for image_filename in ./*.tar
-          do
-            docker load --input "$image_filename"
+  #         for image_filename in ./*.tar
+  #         do
+  #           docker load --input "$image_filename"
 
-            image="$(basename "$image_filename" .tar)"
-            docker tag "$image:$BFD_RELEASE" "$REGISTRY/$image:$BFD_RELEASE"
-            if [[ $PUSH_LATEST == "true" ]]; then
-              # Remove the "latest" tag from the existing latest image
-              aws ecr batch-delete-image --repository-name "$image" --image-ids imageTag=latest &>/dev/null || true
-              # Tag the new release image as "latest"
-              docker tag "$image:$BFD_RELEASE" "$REGISTRY/$image:latest"
-              # Push "latest" tag
-              docker push "$REGISTRY/$image:latest"
-            fi
+  #           image="$(basename "$image_filename" .tar)"
+  #           docker tag "$image:$BFD_RELEASE" "$REGISTRY/$image:$BFD_RELEASE"
+  #           if [[ $PUSH_LATEST == "true" ]]; then
+  #             # Remove the "latest" tag from the existing latest image
+  #             aws ecr batch-delete-image --repository-name "$image" --image-ids imageTag=latest &>/dev/null || true
+  #             # Tag the new release image as "latest"
+  #             docker tag "$image:$BFD_RELEASE" "$REGISTRY/$image:latest"
+  #             # Push "latest" tag
+  #             docker push "$REGISTRY/$image:latest"
+  #           fi
 
-            docker push "$REGISTRY/$image:$BFD_RELEASE"
-          done
-        working-directory: ${{ runner.temp }}
+  #           docker push "$REGISTRY/$image:$BFD_RELEASE"
+  #         done
+  #       working-directory: ${{ runner.temp }}
 
-  build-other-images:
-    uses: ./.github/workflows/build-container-images.yml
-    needs: [compute-version-strings, run-mvn-release]
-    permissions:
-      contents: read
-      id-token: write
-    with:
-      branch: ${{ inputs.releaseBranch || github.ref_name }}
-      versionTag: ${{ needs.compute-version-strings.outputs.bfd_release }}
-      awsRegion: ${{ inputs.awsRegion }}
-      # Build other images, like Lambda images, Python applications, etc.
-      # See .github/workflows/build_container_images_matrix.json for list of buildable images
-      imagesCsv: >-
-        bfd-platform-server-regression,
-        bfd-platform-mount-certstores,
-        bfd-platform-server-fluent-bit,
-        bfd-platform-idr-pipeline,
-        bfd-platform-migrator-ng,
-        bfd-platform-run-locust,
-        bfd-platform-eft-sftp-outbound-transfer-lambda,
-        bfd-platform-pipeline-ccw-manifests-verifier-lambda,
-        bfd-platform-pipeline-ccw-runner,
-        bfd-platform-consume-idr-events,
-        bfd-platform-run-idr-pipeline,
-        bfd-platform-codebuild-runner
-      baseImagesVersion: ${{ needs.compute-version-strings.outputs.bfd_release }}
-      cleanupImageArtifacts: false # We'll cleanup at the end of build-release, so don't do anything
-      tagLatest: ${{ !contains(needs.compute-version-strings.outputs.bfd_release, '-') }}
-    secrets: inherit
+  # build-other-images:
+  #   uses: ./.github/workflows/build-container-images.yml
+  #   needs: [compute-version-strings, run-mvn-release]
+  #   permissions:
+  #     contents: read
+  #     id-token: write
+  #   with:
+  #     branch: ${{ inputs.releaseBranch || github.ref_name }}
+  #     versionTag: ${{ needs.compute-version-strings.outputs.bfd_release }}
+  #     awsRegion: ${{ inputs.awsRegion }}
+  #     # Build other images, like Lambda images, Python applications, etc.
+  #     # See .github/workflows/build_container_images_matrix.json for list of buildable images
+  #     imagesCsv: >-
+  #       bfd-platform-server-regression,
+  #       bfd-platform-mount-certstores,
+  #       bfd-platform-server-fluent-bit,
+  #       bfd-platform-idr-pipeline,
+  #       bfd-platform-migrator-ng,
+  #       bfd-platform-run-locust,
+  #       bfd-platform-eft-sftp-outbound-transfer-lambda,
+  #       bfd-platform-pipeline-ccw-manifests-verifier-lambda,
+  #       bfd-platform-pipeline-ccw-runner,
+  #       bfd-platform-consume-idr-events,
+  #       bfd-platform-run-idr-pipeline,
+  #       bfd-platform-codebuild-runner
+  #     baseImagesVersion: ${{ needs.compute-version-strings.outputs.bfd_release }}
+  #     cleanupImageArtifacts: false # We'll cleanup at the end of build-release, so don't do anything
+  #     tagLatest: ${{ !contains(needs.compute-version-strings.outputs.bfd_release, '-') }}
+  #   secrets: inherit
 
-  create-gh-release:
-    if: ${{ !contains(needs.compute-version-strings.outputs.bfd_release, '-') || inputs.forceRelease }}
-    runs-on: ubuntu-24.04
-    needs:
-      [
-        compute-version-strings,
-        build-base-images,
-        run-mvn-release,
-        push-jib-images,
-        build-other-images,
-      ]
-    steps:
-      - name: Pull release artifacts
-        id: pull-release-artifacts
-        uses: actions/download-artifact@v8
-        with:
-          name: release-artifacts
+  # create-gh-release:
+  #   if: ${{ !contains(needs.compute-version-strings.outputs.bfd_release, '-') || inputs.forceRelease }}
+  #   runs-on: ubuntu-24.04
+  #   needs:
+  #     [
+  #       compute-version-strings,
+  #       build-base-images,
+  #       run-mvn-release,
+  #       push-jib-images,
+  #       build-other-images,
+  #     ]
+  #   steps:
+  #     - name: Pull release artifacts
+  #       id: pull-release-artifacts
+  #       uses: actions/download-artifact@v8
+  #       with:
+  #         name: release-artifacts
 
-      - name: Release
-        uses: ncipollo/release-action@v1
-        with:
-          # NOTE: Prevent automatic promotion of pre-release objects to latest
-          makeLatest: "${{ !contains(needs.compute-version-strings.outputs.bfd_release, '-') }}"
-          generateReleaseNotes: true
-          artifactErrorsFailBuild: true
-          tag: ${{ needs.compute-version-strings.outputs.bfd_release }}
-          name: "v${{ needs.compute-version-strings.outputs.bfd_release }}"
-          artifacts: "*.csv,*.json,*.xlsx,*.yaml"
+  #     - name: Release
+  #       uses: ncipollo/release-action@v1
+  #       with:
+  #         # NOTE: Prevent automatic promotion of pre-release objects to latest
+  #         makeLatest: "${{ !contains(needs.compute-version-strings.outputs.bfd_release, '-') }}"
+  #         generateReleaseNotes: true
+  #         artifactErrorsFailBuild: true
+  #         tag: ${{ needs.compute-version-strings.outputs.bfd_release }}
+  #         name: "v${{ needs.compute-version-strings.outputs.bfd_release }}"
+  #         artifacts: "*.csv,*.json,*.xlsx,*.yaml"
 
-  cleanup-artifacts:
-    if: ${{ !cancelled() }}
-    needs: [build-other-images, create-gh-release]
-    runs-on: ubuntu-24.04
-    steps:
-      - name: Delete all artifacts
-        uses: GeekyEggo/delete-artifact@176a747ab7e287e3ff4787bf8a148716375ca118 # v6
-        with:
-          name: '*'
-          failOnError: false
+  # cleanup-artifacts:
+  #   if: ${{ !cancelled() }}
+  #   needs: [build-other-images, create-gh-release]
+  #   runs-on: ubuntu-24.04
+  #   steps:
+  #     - name: Delete all artifacts
+  #       uses: GeekyEggo/delete-artifact@176a747ab7e287e3ff4787bf8a148716375ca118 # v6
+  #       with:
+  #         name: '*'
+  #         failOnError: false
