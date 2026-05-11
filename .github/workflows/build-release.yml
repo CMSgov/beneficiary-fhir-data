@@ -220,71 +220,71 @@ jobs:
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub Actions"
 
-      - name: Configure additional maven settings.xml
-        run: |-
-          cat <<"EOF" > ~/.m2/settings.xml
-          <settings xmlns="http://maven.apache.org/settings/1.0.0" xmlns:xsi="http://www.w3.org/2001/xmlschema-instance"
-          xsi:schemalocation="http://maven.apache.org/settings/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
-            <servers>
-              <server>
-                <id>github</id>
-                <username>${env.GITHUB_ACTOR}</username>
-                <password>${env.GITHUB_TOKEN}</password>
-              </server>
-            </servers>
-          </settings>
-          EOF
+      # - name: Configure additional maven settings.xml
+      #   run: |-
+      #     cat <<"EOF" > ~/.m2/settings.xml
+      #     <settings xmlns="http://maven.apache.org/settings/1.0.0" xmlns:xsi="http://www.w3.org/2001/xmlschema-instance"
+      #     xsi:schemalocation="http://maven.apache.org/settings/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
+      #       <servers>
+      #         <server>
+      #           <id>github</id>
+      #           <username>${env.GITHUB_ACTOR}</username>
+      #           <password>${env.GITHUB_TOKEN}</password>
+      #         </server>
+      #       </servers>
+      #     </settings>
+      #     EOF
 
-      - name: "Prepare Release"
-        run: |-
-          # We set preparationGoals to an empty string because we don't want to build during the
-          # release:prepare since we will need to build again during release:perform. We expect that the
-          # source code has been verified to compile and pass tests prior to merging to master, so building it
-          # unnecessarily during the prepare phase is redundant.
-          mvn --batch-mode --activate-profiles prepare-release \
-              -Dtag="$BFD_RELEASE" \
-              -DreleaseVersion="$BFD_RELEASE" \
-              -DdevelopmentVersion="$BFD_DEV_VERSION" \
-              -DpreparationGoals="" \
-              release:prepare
-        working-directory: ./apps
-        env:
-          GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
+      # - name: "Prepare Release"
+      #   run: |-
+      #     # We set preparationGoals to an empty string because we don't want to build during the
+      #     # release:prepare since we will need to build again during release:perform. We expect that the
+      #     # source code has been verified to compile and pass tests prior to merging to master, so building it
+      #     # unnecessarily during the prepare phase is redundant.
+      #     mvn --batch-mode --activate-profiles prepare-release \
+      #         -Dtag="$BFD_RELEASE" \
+      #         -DreleaseVersion="$BFD_RELEASE" \
+      #         -DdevelopmentVersion="$BFD_DEV_VERSION" \
+      #         -DpreparationGoals="" \
+      #         release:prepare
+      #   working-directory: ./apps
+      #   env:
+      #     GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
 
-      - name: "Perform Release"
-        run: |-
-          mvn --batch-mode --activate-profiles perform-release \
-              -Dtag="$BFD_RELEASE" \
-              -DreleaseVersion="$BFD_RELEASE" \
-              -DdevelopmentVersion="$BFD_DEV_VERSION" \
-              release:perform
-        working-directory: ./apps
-        env:
-          GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
+      # - name: "Perform Release"
+      #   run: |-
+      #     mvn --batch-mode --activate-profiles perform-release \
+      #         -Dtag="$BFD_RELEASE" \
+      #         -DreleaseVersion="$BFD_RELEASE" \
+      #         -DdevelopmentVersion="$BFD_DEV_VERSION" \
+      #         release:perform
+      #   working-directory: ./apps
+      #   env:
+      #     GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
 
-      - name: Export jib images
-        run: |
-          readarray -t images < <(echo "$JIB_IMAGES" | jq -r -c '.[]')
-          for image in "${images[@]}"
-          do
-            docker save "$image:$BFD_RELEASE" > "${image}.tar"
-          done
-        working-directory: ${{ runner.temp }}
+      # - name: Export jib images
+      #   run: |
+      #     readarray -t images < <(echo "$JIB_IMAGES" | jq -r -c '.[]')
+      #     for image in "${images[@]}"
+      #     do
+      #       docker save "$image:$BFD_RELEASE" > "${image}.tar"
+      #     done
+      #   working-directory: ${{ runner.temp }}
 
-      - name: Upload jib image artifacts
-        uses: actions/upload-artifact@v7
-        with:
-          name: jib-images
-          path: ${{ runner.temp }}/*.tar
-          retention-days: 1
+      # - name: Upload jib image artifacts
+      #   uses: actions/upload-artifact@v7
+      #   with:
+      #     name: jib-images
+      #     path: ${{ runner.temp }}/*.tar
+      #     retention-days: 1
 
-      - name: Get bfd-server-war m2 directory
-        id: get-server-war-dir
-        run: |
-          server_war_dir="$(realpath "$(find ~/.m2/repository -type d -path '*/bfd-server-war/*' | head -n1)")"
-          ls "$server_war_dir"
+      # - name: Get bfd-server-war m2 directory
+      #   id: get-server-war-dir
+      #   run: |
+      #     server_war_dir="$(realpath "$(find ~/.m2/repository -type d -path '*/bfd-server-war/*' | head -n1)")"
+      #     ls "$server_war_dir"
 
-          echo "server-war-dir=$server_war_dir" >> "$GITHUB_OUTPUT"
+      #     echo "server-war-dir=$server_war_dir" >> "$GITHUB_OUTPUT"
 
       - name: Install node
         uses: actions/setup-node@v6
@@ -328,18 +328,18 @@ jobs:
           echo "Preparing server WAR artifacts..."
 
           # 1) Handle v1/v2 artifacts
-          for artifact_path in ${{ steps.get-server-war-dir.outputs.server-war-dir }}/*
-          do
-            filename="$(basename -- "$artifact_path")"
+          # for artifact_path in ${{ steps.get-server-war-dir.outputs.server-war-dir }}/*
+          # do
+          #   filename="$(basename -- "$artifact_path")"
 
-            if [[ "$filename" =~ ^bfd-server-war-$BFD_RELEASE-(.+)$ ]]; then
-              artifact="${BASH_REMATCH[1]}"
-              artifact_ext="${artifact#*.}"
-              artifact_name="${artifact%%.*}"
+          #   if [[ "$filename" =~ ^bfd-server-war-$BFD_RELEASE-(.+)$ ]]; then
+          #     artifact="${BASH_REMATCH[1]}"
+          #     artifact_ext="${artifact#*.}"
+          #     artifact_name="${artifact%%.*}"
 
-              cp "$artifact_path" "assets/${artifact_name}-${BFD_RELEASE}.${artifact_ext}"
-            fi
-          done
+          #     cp "$artifact_path" "assets/${artifact_name}-${BFD_RELEASE}.${artifact_ext}"
+          #   fi
+          # done
 
           # TODO: Re-enable this once BFD v3 DD generation is fixed
           echo "Preparing data dictionary artifacts..."
