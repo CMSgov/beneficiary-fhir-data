@@ -289,7 +289,14 @@ jobs:
       - name: Install node
         uses: actions/setup-node@v6
         with:
-         node-version: "22"
+          node-version: "22"
+
+      - name: Install Sushi
+        working-directory: apps/bfd-model-idr
+        run: |
+          npm install -g fsh-sushi
+          echo "Installed global packages"
+          sushi build
 
       - name: Install fhirpath
         working-directory: apps/bfd-model-idr
