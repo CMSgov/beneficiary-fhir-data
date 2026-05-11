@@ -31,6 +31,9 @@ jobs:
           distribution: "corretto"
       - name: Install dependencies
         run: npm install -g fsh-sushi fhirpath
+      - name: Sync UV in bfd-model-idr
+        run: uv sync
+        working-directory: apps/bfd-model-idr
       - name: Build sushi
         run: |
           cd ${{ github.workspace }}/apps/bfd-model-idr
