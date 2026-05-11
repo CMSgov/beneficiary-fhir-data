@@ -149,27 +149,27 @@ jobs:
           echo "$BFD_DEV_VERSION" | grep -P '^\d+\.\d+\.\d+-SNAPSHOT$'
           echo BFD_DEV_VERSION="${BFD_DEV_VERSION_OVERRIDE:-$BFD_DEV_VERSION_DEFAULT}" >> "$GITHUB_OUTPUT"
 
-  build-base-images:
-    uses: ./.github/workflows/build-container-images.yml
-    needs: compute-version-strings
-    permissions:
-      contents: read
-      id-token: write
-    with:
-      branch: ${{ inputs.releaseBranch || github.ref_name }}
-      versionTag: ${{ needs.compute-version-strings.outputs.bfd_release }}
-      awsRegion: ${{ inputs.awsRegion }}
-      # Build the base images prior to building the application images with jib in "run-mvn-release"
-      # See .github/workflows/build_container_images_matrix.json for list of buildable images
-      imagesCsv: "bfd-platform-base-java, bfd-platform-base-python"
-      cleanupImageArtifacts: false # Keep the built images around so that they can be used for Jib
-      skipBasePull: true # We're building the base images, so don't pull them
-      tagLatest: ${{ !contains(needs.compute-version-strings.outputs.bfd_release, '-') }}
-    secrets: inherit
+  # build-base-images:
+  #   uses: ./.github/workflows/build-container-images.yml
+  #   needs: compute-version-strings
+  #   permissions:
+  #     contents: read
+  #     id-token: write
+  #   with:
+  #     branch: ${{ inputs.releaseBranch || github.ref_name }}
+  #     versionTag: ${{ needs.compute-version-strings.outputs.bfd_release }}
+  #     awsRegion: ${{ inputs.awsRegion }}
+  #     # Build the base images prior to building the application images with jib in "run-mvn-release"
+  #     # See .github/workflows/build_container_images_matrix.json for list of buildable images
+  #     imagesCsv: "bfd-platform-base-java, bfd-platform-base-python"
+  #     cleanupImageArtifacts: false # Keep the built images around so that they can be used for Jib
+  #     skipBasePull: true # We're building the base images, so don't pull them
+  #     tagLatest: ${{ !contains(needs.compute-version-strings.outputs.bfd_release, '-') }}
+  #   secrets: inherit
 
   run-mvn-release:
     runs-on: ubuntu-24.04-arm
-    needs: [compute-version-strings, build-base-images]
+    needs: [compute-version-strings]
     env:
       BFD_RELEASE: ${{ needs.compute-version-strings.outputs.bfd_release }}
       BFD_DEV_VERSION: ${{ needs.compute-version-strings.outputs.bfd_dev_version }}
