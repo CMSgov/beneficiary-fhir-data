@@ -30,11 +30,14 @@ jobs:
           java-version: "25"
           distribution: "corretto"
       - name: Install dependencies
-        run: npm install -g fsh-sushi
+        run: npm install -g fsh-sushi fhirpath
       - name: Build sushi
         run: |
           cd ${{ github.workspace }}/apps/bfd-model-idr
           sushi build ./sushi
+      - name: Generate v3 Data Dictionary
+        run: uv run gen_dd.py
+        working-directory: apps/bfd-model-idr
       - name: Ensure synthetic data pipeline runs
         run: |
           cd ${{ github.workspace }}/apps/bfd-model-idr
