@@ -30,7 +30,7 @@ jobs:
           java-version: "25"
           distribution: "corretto"
       - name: Install dependencies
-        run: npm install -g fsh-sushi fhirpath
+        run: npm install -g fsh-sushi && npm install fhirpath
         working-directory: apps/bfd-model-idr
       - name: Sync UV in bfd-model-idr
         run: uv sync
