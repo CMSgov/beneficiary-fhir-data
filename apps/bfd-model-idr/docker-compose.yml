@@ -9,7 +9,7 @@ services:
       - matchbox-db
     entrypoint: ["java", "-Xms3G", "-Xmx8G", "-XX:+UseZGC", "-XX:ZUncommitDelay=30", "-Dfhir.settings.path=/config/fhir-settings.json", "-Dspring.config.additional-location=optional:file:/config/application.yaml", "-jar", "/matchbox.jar"]
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/matchboxv3/fhir/metadata"]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/matchboxv3/actuator/health"]
       interval: 5s
       timeout: 5s
       retries: 30
@@ -26,7 +26,7 @@ services:
     environment:
       - UV_PYTHON=3.14.3
       - UV_PROJECT_ENVIRONMENT=/tmp/.venv
-    command: /bin/sh -c "sleep 10 && uv run setup_matchbox.py --url http://matchbox:8080/matchboxv3/fhir"
+    command: uv run setup_matchbox.py --url http://matchbox:8080/matchboxv3/fhir
   matchbox-db:
     image: postgres:17.7-alpine
     container_name: matchbox-db
