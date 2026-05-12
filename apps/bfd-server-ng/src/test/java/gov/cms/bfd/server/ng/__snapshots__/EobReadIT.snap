@@ -3668,7 +3668,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
   } ],
   "insurance" : [ {
     "coverage" : {
-      "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA])"
+      "display" : "Part A"
     },
     "focal" : true
   } ],
@@ -4967,7 +4967,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
   } ],
   "insurance" : [ {
     "coverage" : {
-      "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA])"
+      "display" : "Part A"
     },
     "focal" : true
   } ],
@@ -6595,7 +6595,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
   } ],
   "insurance" : [ {
     "coverage" : {
-      "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA])"
+      "display" : "Part A"
     },
     "focal" : true
   } ],

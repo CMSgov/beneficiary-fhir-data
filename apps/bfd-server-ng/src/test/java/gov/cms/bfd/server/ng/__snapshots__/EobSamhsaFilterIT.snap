@@ -5080,7 +5080,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
       } ],
       "insurance" : [ {
         "coverage" : {
-          "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA])"
+          "display" : "Part A"
         },
         "focal" : true
       } ],
@@ -11025,7 +11025,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
       } ],
       "insurance" : [ {
         "coverage" : {
-          "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA])"
+          "display" : "Part A"
         },
         "focal" : true
       } ],
@@ -13124,7 +13124,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
       } ],
       "insurance" : [ {
         "coverage" : {
-          "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA])"
+          "display" : "Part A"
         },
         "focal" : true
       } ],
@@ -19069,7 +19069,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
       } ],
       "insurance" : [ {
         "coverage" : {
-          "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA])"
+          "display" : "Part A"
         },
         "focal" : true
       } ],
