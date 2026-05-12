@@ -4,10 +4,10 @@ requires-python = ">=3.13"
 name = "ccw-runner"
 version = "1.0.0"
 dependencies = [
-    "aws-lambda-powertools[all]",
-    "boto3",
-    "psycopg[binary]",
-    "pydantic",
+    "aws-lambda-powertools[all]>=3.9.0",
+    "boto3>=1.37.25",
+    "psycopg[binary]>=3.2.6",
+    "pydantic>=2.11.1",
 ]
 
 [dependency-groups]
