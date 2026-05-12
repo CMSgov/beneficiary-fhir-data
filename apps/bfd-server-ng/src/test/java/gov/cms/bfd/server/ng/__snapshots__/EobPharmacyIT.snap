@@ -347,7 +347,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
     "category" : {
       "coding" : [ {
         "code" : "CLM_PHRMCY_SRVC_TYPE_CD",
-        "display" : "Pharmacy service type code",
+        "display" : "Pharmacy Service Type Code",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
       }, {
         "code" : "info",
@@ -423,7 +423,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacy=[
     "category" : {
       "coding" : [ {
         "code" : "CLM_LTC_DSPNSNG_MTHD_CD",
-        "display" : "Submission clarification code",
+        "display" : "Submission Clarification Code",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
       }, {
         "code" : "info",
@@ -959,7 +959,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
     "category" : {
       "coding" : [ {
         "code" : "CLM_PHRMCY_SRVC_TYPE_CD",
-        "display" : "Pharmacy service type code",
+        "display" : "Pharmacy Service Type Code",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
       }, {
         "code" : "info",
@@ -1035,7 +1035,7 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
     "category" : {
       "coding" : [ {
         "code" : "CLM_LTC_DSPNSNG_MTHD_CD",
-        "display" : "Submission clarification code",
+        "display" : "Submission Clarification Code",
         "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information"
       }, {
         "code" : "info",

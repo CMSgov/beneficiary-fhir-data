@@ -11571,6 +11571,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           }, {
             "code" : "5",
+            "display" : "RHC or CORF psychiatric",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DDCTBL-COINSRNC-CD"
           } ]
         },
@@ -19615,6 +19616,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
             "system" : "https://www.nubc.org/CodeSystem/RevenueCodes"
           }, {
             "code" : "5",
+            "display" : "RHC or CORF psychiatric",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-DDCTBL-COINSRNC-CD"
           } ]
         },
