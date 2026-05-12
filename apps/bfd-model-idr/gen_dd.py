@@ -163,7 +163,8 @@ dd_df.to_csv(
         "sources",
         "referenceTable",
         "cclfMapping",
-        "ccwMapping"
+        "ccwMapping",
+        "profiles",
     ],
 )
 export_columns = [
@@ -180,7 +181,8 @@ export_columns = [
     "sources",
     "referenceTable",
     "cclfMapping",
-    "ccwMapping"
+    "ccwMapping",
+    "profiles",
 ]
 export_df = dd_df[export_columns]
 tips_df = pd.read_csv(dd_support_folder + "/tips.csv")
