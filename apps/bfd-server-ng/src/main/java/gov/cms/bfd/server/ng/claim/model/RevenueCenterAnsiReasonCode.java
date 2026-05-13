@@ -78,15 +78,15 @@ public sealed interface RevenueCenterAnsiReasonCode
         "The procedure code is inconsistent with the modifier used or a required modifier is missing."),
     /** 5 - The procedure code/bill type is inconsistent with the place of service. */
     _5("5", "The procedure code/bill type is inconsistent with the place of service."),
-    /** 6 - The procedure code is inconsistent with the patient&#x27;s age. */
+    /** 6 - The procedure code is inconsistent with the patient's age. */
     _6("6", "The procedure code is inconsistent with the patient's age."),
-    /** 7 - The procedure code is inconsistent with the patient&#x27;s gender. */
+    /** 7 - The procedure code is inconsistent with the patient's gender. */
     _7("7", "The procedure code is inconsistent with the patient's gender."),
     /** 8 - The procedure code is inconsistent with the provider type. */
     _8("8", "The procedure code is inconsistent with the provider type."),
-    /** 9 - The diagnosis is inconsistent with the patient&#x27;s age. */
+    /** 9 - The diagnosis is inconsistent with the patient's age. */
     _9("9", "The diagnosis is inconsistent with the patient's age."),
-    /** 10 - The diagnosis is inconsistent with the patient&#x27;s gender. */
+    /** 10 - The diagnosis is inconsistent with the patient's gender. */
     _10("10", "The diagnosis is inconsistent with the patient's gender."),
     /** 11 - The diagnosis is inconsistent with the procedure. */
     _11("11", "The diagnosis is inconsistent with the procedure."),
@@ -116,7 +116,7 @@ public sealed interface RevenueCenterAnsiReasonCode
     _18("18", "Duplicate claim/service."),
     /**
      * 19 - Claim denied because this is a work-related injury/illness and thus the liability of the
-     * Worker&#x27;s Compensation Carrier.
+     * Worker's Compensation Carrier.
      */
     _19(
         "19",
@@ -202,8 +202,8 @@ public sealed interface RevenueCenterAnsiReasonCode
         "49",
         "These are non-covered services because this is a routine exam or screening procedure done in conjunction with a routine exam."),
     /**
-     * 50 - These are non-covered services because this is not deemed a &#x27;medical
-     * necessity&#x27; by the payer.
+     * 50 - These are non-covered services because this is not deemed a 'medical necessity' by the
+     * payer.
      */
     _50(
         "50",
@@ -231,8 +231,8 @@ public sealed interface RevenueCenterAnsiReasonCode
         "55",
         "Claim/service denied because procedure/treatment is deemed experimental/investigational by the payer."),
     /**
-     * 56 - Claim/service denied because procedure/treatment has not been deemed &#x27;proven to be
-     * effective&#x27; by payer.
+     * 56 - Claim/service denied because procedure/treatment has not been deemed 'proven to be
+     * effective' by payer.
      */
     _56(
         "56",
@@ -444,7 +444,7 @@ public sealed interface RevenueCenterAnsiReasonCode
     _126("126", "Deductible - Major Medical."),
     /** 127 - Coinsurance - Major Medical. */
     _127("127", "Coinsurance - Major Medical."),
-    /** 128 - Newborn&#x27;s services are covered in the mother&#x27;s allowance. */
+    /** 128 - Newborn's services are covered in the mother's allowance. */
     _128("128", "Newborn's services are covered in the mother's allowance."),
     /** 129 - Claim denied - prior processing information appears incorrect. */
     _129("129", "Claim denied - prior processing information appears incorrect."),
@@ -556,7 +556,7 @@ public sealed interface RevenueCenterAnsiReasonCode
     B11(
         "B11",
         "The claim/service has been transferred to the proper payer/processor for processing. Claim/service not covered by this payer/processor."),
-    /** B12 - Services not documented in patients&#x27; medical records. */
+    /** B12 - Services not documented in patients' medical records. */
     B12("B12", "Services not documented in patients' medical records."),
     /**
      * B13 - Previously paid. Payment for this claim/service may have been provided in a previous
@@ -574,7 +574,7 @@ public sealed interface RevenueCenterAnsiReasonCode
         "Claim/service denied because only one visit or consultation per physician per day is covered."),
     /** B15 - Claim/service adjusted because this procedure/service is not paid separately. */
     B15("B15", "Claim/service adjusted because this procedure/service is not paid separately."),
-    /** B16 - Claim/service adjusted because &#x27;New Patient&#x27; qualifications were not met. */
+    /** B16 - Claim/service adjusted because 'New Patient' qualifications were not met. */
     B16("B16", "Claim/service adjusted because 'New Patient' qualifications were not met."),
     /**
      * B17 - Claim/service adjusted because this service was not prescribed by a physician, not
