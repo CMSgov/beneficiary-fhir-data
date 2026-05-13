@@ -189,7 +189,7 @@ class BFDUserBase(FastHttpUser):
             catch_response=True,
         ) as response:
             if response.status_code != 200:
-                if isinstance(response, ResponseContextManager):
+                if isinstance(response, ResponseContextManager):  # pyright: ignore[reportUnnecessaryIsInstance]
                     # pylint: disable=E1121
                     response.failure(f"Status Code: {response.status_code}")
                 else:
@@ -227,7 +227,7 @@ class BFDUserBase(FastHttpUser):
             catch_response=True,
         ) as response:
             if response.status_code != 200:
-                if isinstance(response, ResponseContextManager):
+                if isinstance(response, ResponseContextManager):  # pyright: ignore[reportUnnecessaryIsInstance]
                     # pylint: disable=E1121
                     response.failure(f"Status Code: {response.status_code}")
                 else:
