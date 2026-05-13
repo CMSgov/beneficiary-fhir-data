@@ -1,7 +1,9 @@
 import logging
 import sys
+from collections.abc import Callable
 from concurrent.futures import ProcessPoolExecutor
 from datetime import UTC, datetime
+from typing import cast
 
 from hamilton import driver, telemetry  # type: ignore
 from hamilton.execution import executors  # type: ignore
@@ -27,7 +29,9 @@ from settings import (
     bfd_test_date,
 )
 
-telemetry.disable_telemetry()
+disable_telemetry = getattr(telemetry, "disable_telemetry", None)
+if callable(disable_telemetry):
+    cast(Callable[[], None], disable_telemetry)()
 
 logger = logging.getLogger(__name__)
 
