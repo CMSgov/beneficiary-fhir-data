@@ -1,0 +1,3 @@
+*
+!migrations/*.sql
+!callbacks/*.sql

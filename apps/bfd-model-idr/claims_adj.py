@@ -786,9 +786,9 @@ class AdjudicatedGeneratorUtil:
             clm_line[f.CLM_RNDRG_FED_PRVDR_SPCLTY_CD] = random.choice(
                 gen_utils.code_systems[f.CLM_PRVDR_SPCLTY_CD]
             )
-            if random.choice([0, 10]) == 7:
+            if random.randint(0, 10) == 7:
                 clm_line[f.CLM_LINE_ANSTHSA_UNIT_CNT] = random.uniform(0, 10)
-            if random.choice([0, 15]) == 7:
+            if random.randint(0, 15) == 7:
                 clm_line[f.CLM_LINE_RX_NUM] = random.choice(["1234", "423482347"])
 
             if probability(0.5):
@@ -956,6 +956,10 @@ class AdjudicatedGeneratorUtil:
         clm_line_prfnl[f.CLM_PHYSN_ASTNT_CD] = random.choice(
             gen_utils.code_systems[f.CLM_PHYSN_ASTNT_CD]
         )
+        clm_line_prfnl[f.CLM_PRVDR_SPCLTY_CD] = random.choice(  
+              gen_utils.code_systems[f.CLM_PRVDR_SPCLTY_CD]
+        )
+
 
         clm_line_prfnl[f.CLM_LINE_CARR_CLNCL_CHRG_AMT] = round(random.uniform(0, 10000), 2)
         clm_line_prfnl[f.CLM_LINE_CARR_PSYCH_OT_LMT_AMT] = round(random.uniform(0, 10000), 2)

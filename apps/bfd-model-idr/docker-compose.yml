@@ -7,9 +7,9 @@ services:
       - "8080:8080"
     depends_on:
       - matchbox-db
-    entrypoint: ["java", "-Xms512m", "-Xmx6G", "-XX:+UseZGC", "-XX:ZUncommitDelay=30", "-XX:MaxMetaspaceSize=512m", "-Dfhir.settings.path=/config/fhir-settings.json", "-Dspring.config.additional-location=optional:file:/config/application.yaml", "-jar", "/matchbox.jar"]
+    entrypoint: ["java", "-Xms3G", "-Xmx8G", "-XX:+UseZGC", "-XX:ZUncommitDelay=30", "-Dfhir.settings.path=/config/fhir-settings.json", "-Dspring.config.additional-location=optional:file:/config/application.yaml", "-jar", "/matchbox.jar"]
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/matchboxv3/fhir/metadata"]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/matchboxv3/actuator/health"]
       interval: 5s
       timeout: 5s
       retries: 30
@@ -28,7 +28,7 @@ services:
       - UV_PROJECT_ENVIRONMENT=/tmp/.venv
     command: uv run setup_matchbox.py --url http://matchbox:8080/matchboxv3/fhir
   matchbox-db:
-    image: postgres:17.7
+    image: postgres:17.7-alpine
     container_name: matchbox-db
     restart: always
     ports:

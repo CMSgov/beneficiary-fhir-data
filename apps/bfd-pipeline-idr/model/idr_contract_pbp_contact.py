@@ -8,12 +8,12 @@ from constants import (
     IDR_CONTRACT_PBP_CONTACT_TABLE,
 )
 from load_partition import LoadPartition
-from loader import LoadMode
 from model.base_model import (
     BATCH_ID,
     PRIMARY_KEY,
     IdrBaseModel,
     ModelType,
+    Source,
     transform_default_string,
 )
 
@@ -51,9 +51,7 @@ class IdrContractPbpContact(IdrBaseModel):
 
     @override
     @classmethod
-    def fetch_query(
-        cls, partition: LoadPartition, start_time: datetime, load_mode: LoadMode
-    ) -> str:
+    def fetch_query(cls, partition: LoadPartition, start_time: datetime, source: Source) -> str:
         return f"""
             WITH contract_contacts as (
                 SELECT {{COLUMNS}}, ROW_NUMBER() OVER (

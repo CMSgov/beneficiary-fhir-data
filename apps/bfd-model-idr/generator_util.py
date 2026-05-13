@@ -413,7 +413,7 @@ class GeneratorUtil:
         bene_xref["IDR_TRANS_EFCTV_TS"] = str(efctv_ts)
         bene_xref["IDR_INSRT_TS"] = str(insrt_ts)
         bene_xref["IDR_UPDT_TS"] = str(updt_ts)
-        bene_xref["IDR_TRANS_OBSLT_TS"] = "9999-12-31T00:00:00.000000+0000"
+        bene_xref["IDR_TRANS_OBSLT_TS"] = "9999-12-31T00:00:00.000000"
 
         self.bene_xref_table.append(bene_xref.kv)
 
@@ -428,7 +428,7 @@ class GeneratorUtil:
         patient["IDR_TRANS_EFCTV_TS"] = str(efctv_ts)
         patient["IDR_INSRT_TS"] = str(insrt_ts)
         patient["IDR_UPDT_TS"] = str(updt_ts)
-        patient["IDR_TRANS_OBSLT_TS"] = "9999-12-31T00:00:00.000000+0000"
+        patient["IDR_TRANS_OBSLT_TS"] = "9999-12-31T00:00:00.000000"
 
     def create_base_patient(self, patient: RowAdapter):
         self.set_timestamps(patient, datetime.date(year=2017, month=5, day=20))
@@ -509,9 +509,7 @@ class GeneratorUtil:
                 historical_patient["IDR_LTST_TRANS_FLG"] = "N"
 
                 self.set_timestamps(historical_patient, obslt_dt)
-                historical_patient.kv["IDR_TRANS_OBSLT_TS"] = (
-                    str(obslt_dt) + "T00:00:00.000000+0000"
-                )
+                historical_patient.kv["IDR_TRANS_OBSLT_TS"] = str(obslt_dt) + "T00:00:00.000000"
                 self.bene_hstry_table.append(historical_patient.kv)
 
                 previous_obslt_dt = obslt_dt  # Store for next iteration
@@ -677,10 +675,10 @@ class GeneratorUtil:
         dual_row["GEO_USPS_STATE_CD"] = medicaid_state_cd
         dual_row["BENE_MDCD_ELGBLTY_BGN_DT"] = dual_start_date
         dual_row["BENE_MDCD_ELGBLTY_END_DT"] = dual_end_date
-        dual_row["IDR_TRANS_EFCTV_TS"] = str(dual_start_date) + "T00:00:00.000000+0000"
-        dual_row["IDR_INSRT_TS"] = str(dual_start_date) + "T00:00:00.000000+0000"
-        dual_row["IDR_UPDT_TS"] = str(dual_start_date) + "T00:00:00.000000+0000"
-        dual_row["IDR_TRANS_OBSLT_TS"] = "9999-12-31T00:00:00.000000+0000"
+        dual_row["IDR_TRANS_EFCTV_TS"] = str(dual_start_date) + "T00:00:00.000000"
+        dual_row["IDR_INSRT_TS"] = str(dual_start_date) + "T00:00:00.000000"
+        dual_row["IDR_UPDT_TS"] = str(dual_start_date) + "T00:00:00.000000"
+        dual_row["IDR_TRANS_OBSLT_TS"] = "9999-12-31T00:00:00.000000"
         self.bene_cmbnd_dual_mdcr.append(dual_row.kv)
 
     def generate_bene_tp(
@@ -693,10 +691,10 @@ class GeneratorUtil:
     ):
         tp_row["IDR_LTST_TRANS_FLG"] = "Y"
         tp_row["BENE_TP_TYPE_CD"] = coverage_type
-        tp_row["IDR_TRANS_EFCTV_TS"] = str(medicare_start_date) + "T00:00:00.000000+0000"
-        tp_row["IDR_INSRT_TS"] = str(medicare_start_date) + "T00:00:00.000000+0000"
-        tp_row["IDR_UPDT_TS"] = str(medicare_start_date) + "T00:00:00.000000+0000"
-        tp_row["IDR_TRANS_OBSLT_TS"] = "9999-12-31T00:00:00.000000+0000"
+        tp_row["IDR_TRANS_EFCTV_TS"] = str(medicare_start_date) + "T00:00:00.000000"
+        tp_row["IDR_INSRT_TS"] = str(medicare_start_date) + "T00:00:00.000000"
+        tp_row["IDR_UPDT_TS"] = str(medicare_start_date) + "T00:00:00.000000"
+        tp_row["IDR_TRANS_OBSLT_TS"] = "9999-12-31T00:00:00.000000"
         tp_row["BENE_RNG_BGN_DT"] = medicare_start_date
         tp_row["BENE_RNG_END_DT"] = medicare_end_date
         tp_row["BENE_BUYIN_CD"] = buy_in_cd
@@ -715,10 +713,10 @@ class GeneratorUtil:
             self.code_systems["BENE_ENRLMT_RSN_CD"]
         )
         entlmt_row["BENE_MDCR_ENTLMT_STUS_CD"] = "Y"
-        entlmt_row["IDR_TRANS_EFCTV_TS"] = str(medicare_start_date) + "T00:00:00.000000+0000"
-        entlmt_row["IDR_INSRT_TS"] = str(medicare_start_date) + "T00:00:00.000000+0000"
-        entlmt_row["IDR_UPDT_TS"] = str(medicare_start_date) + "T00:00:00.000000+0000"
-        entlmt_row["IDR_TRANS_OBSLT_TS"] = "9999-12-31T00:00:00.000000+0000"
+        entlmt_row["IDR_TRANS_EFCTV_TS"] = str(medicare_start_date) + "T00:00:00.000000"
+        entlmt_row["IDR_INSRT_TS"] = str(medicare_start_date) + "T00:00:00.000000"
+        entlmt_row["IDR_UPDT_TS"] = str(medicare_start_date) + "T00:00:00.000000"
+        entlmt_row["IDR_TRANS_OBSLT_TS"] = "9999-12-31T00:00:00.000000"
         entlmt_row["BENE_RNG_BGN_DT"] = medicare_start_date
         entlmt_row["BENE_RNG_END_DT"] = medicare_end_date
         self.mdcr_entlmt.append(entlmt_row.kv)
@@ -731,10 +729,10 @@ class GeneratorUtil:
     ):
         entitlement_reason = random.choice(self.code_systems["BENE_MDCR_ENTLMT_RSN_CD"])
         rsn_row["IDR_LTST_TRANS_FLG"] = "Y"
-        rsn_row["IDR_TRANS_EFCTV_TS"] = str(medicare_start_date) + "T00:00:00.000000+0000"
-        rsn_row["IDR_INSRT_TS"] = str(medicare_start_date) + "T00:00:00.000000+0000"
-        rsn_row["IDR_UPDT_TS"] = str(medicare_start_date) + "T00:00:00.000000+0000"
-        rsn_row["IDR_TRANS_OBSLT_TS"] = "9999-12-31T00:00:00.000000+0000"
+        rsn_row["IDR_TRANS_EFCTV_TS"] = str(medicare_start_date) + "T00:00:00.000000"
+        rsn_row["IDR_INSRT_TS"] = str(medicare_start_date) + "T00:00:00.000000"
+        rsn_row["IDR_UPDT_TS"] = str(medicare_start_date) + "T00:00:00.000000"
+        rsn_row["IDR_TRANS_OBSLT_TS"] = "9999-12-31T00:00:00.000000"
         rsn_row["BENE_MDCR_ENTLMT_RSN_CD"] = entitlement_reason
         rsn_row["BENE_RNG_BGN_DT"] = medicare_start_date
         rsn_row["BENE_RNG_END_DT"] = medicare_end_date
@@ -751,10 +749,10 @@ class GeneratorUtil:
         stus_row["BENE_MDCR_STUS_CD"] = mdcr_stus_cd
         stus_row["MDCR_STUS_BGN_DT"] = medicare_start_date
         stus_row["MDCR_STUS_END_DT"] = medicare_end_date
-        stus_row["IDR_TRANS_EFCTV_TS"] = str(medicare_start_date) + "T00:00:00.000000+0000"
-        stus_row["IDR_INSRT_TS"] = str(medicare_start_date) + "T00:00:00.000000+0000"
-        stus_row["IDR_UPDT_TS"] = str(medicare_start_date) + "T00:00:00.000000+0000"
-        stus_row["IDR_TRANS_OBSLT_TS"] = "9999-12-31T00:00:00.000000+0000"
+        stus_row["IDR_TRANS_EFCTV_TS"] = str(medicare_start_date) + "T00:00:00.000000"
+        stus_row["IDR_INSRT_TS"] = str(medicare_start_date) + "T00:00:00.000000"
+        stus_row["IDR_UPDT_TS"] = str(medicare_start_date) + "T00:00:00.000000"
+        stus_row["IDR_TRANS_OBSLT_TS"] = "9999-12-31T00:00:00.000000"
         self.mdcr_stus.append(stus_row.kv)
 
     def generate_bene_lis(self, lis_row: RowAdapter):
@@ -773,10 +771,10 @@ class GeneratorUtil:
         lis_row["BENE_LIS_PTD_PRM_PCT"] = str(ptd_prm_pct)
         lis_row["BENE_RNG_BGN_DT"] = str(lis_start_date)
         lis_row["BENE_RNG_END_DT"] = lis_end_date
-        lis_row["IDR_TRANS_EFCTV_TS"] = str(lis_start_date) + "T00:00:00.000000+0000"
-        lis_row["IDR_INSRT_TS"] = str(lis_start_date) + "T00:00:00.000000+0000"
-        lis_row["IDR_UPDT_TS"] = str(lis_start_date) + "T00:00:00.000000+0000"
-        lis_row["IDR_TRANS_OBSLT_TS"] = "9999-12-31T00:00:00.000000+0000"
+        lis_row["IDR_TRANS_EFCTV_TS"] = str(lis_start_date) + "T00:00:00.000000"
+        lis_row["IDR_INSRT_TS"] = str(lis_start_date) + "T00:00:00.000000"
+        lis_row["IDR_UPDT_TS"] = str(lis_start_date) + "T00:00:00.000000"
+        lis_row["IDR_TRANS_OBSLT_TS"] = "9999-12-31T00:00:00.000000"
 
         self.bene_lis.append(lis_row.kv)
 
@@ -806,10 +804,10 @@ class GeneratorUtil:
         rx_row["BENE_PDP_ENRLMT_BANK_ID_NUM"] = bank_id_num
         rx_row["BENE_CNTRCT_NUM"] = contract_num
         rx_row["BENE_PBP_NUM"] = pbp_num
-        rx_row["IDR_TRANS_EFCTV_TS"] = str(rx_start_date) + "T00:00:00.000000+0000"
-        rx_row["IDR_INSRT_TS"] = str(rx_start_date) + "T00:00:00.000000+0000"
-        rx_row["IDR_UPDT_TS"] = str(rx_start_date) + "T00:00:00.000000+0000"
-        rx_row["IDR_TRANS_OBSLT_TS"] = "9999-12-31T00:00:00.000000+0000"
+        rx_row["IDR_TRANS_EFCTV_TS"] = str(rx_start_date) + "T00:00:00.000000"
+        rx_row["IDR_INSRT_TS"] = str(rx_start_date) + "T00:00:00.000000"
+        rx_row["IDR_UPDT_TS"] = str(rx_start_date) + "T00:00:00.000000"
+        rx_row["IDR_TRANS_OBSLT_TS"] = "9999-12-31T00:00:00.000000"
 
         self.bene_mapd_enrlmt_rx.append(rx_row.kv)
 
@@ -838,10 +836,10 @@ class GeneratorUtil:
         enrollment_row["BENE_ENRLMT_EMPLR_SBSDY_SW"] = bene_enrlmt_emplr_sbsdy_sw
         enrollment_row["BENE_ENRLMT_BGN_DT"] = str(enrollment_start_date)
         enrollment_row["BENE_ENRLMT_END_DT"] = enrollment_end_date
-        enrollment_row["IDR_TRANS_EFCTV_TS"] = str(enrollment_start_date) + "T00:00:00.000000+0000"
-        enrollment_row["IDR_INSRT_TS"] = str(enrollment_start_date) + "T00:00:00.000000+0000"
-        enrollment_row["IDR_UPDT_TS"] = str(enrollment_start_date) + "T00:00:00.000000+0000"
-        enrollment_row["IDR_TRANS_OBSLT_TS"] = "9999-12-31T00:00:00.000000+0000"
+        enrollment_row["IDR_TRANS_EFCTV_TS"] = str(enrollment_start_date) + "T00:00:00.000000"
+        enrollment_row["IDR_INSRT_TS"] = str(enrollment_start_date) + "T00:00:00.000000"
+        enrollment_row["IDR_UPDT_TS"] = str(enrollment_start_date) + "T00:00:00.000000"
+        enrollment_row["IDR_TRANS_OBSLT_TS"] = "9999-12-31T00:00:00.000000"
 
         self.bene_mapd_enrlmt.append(enrollment_row.kv)
         return contract_pbp_sk, contract_num, pbp_num

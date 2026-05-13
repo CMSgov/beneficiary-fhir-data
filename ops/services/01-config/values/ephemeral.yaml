@@ -22,6 +22,12 @@ copy:
   - /bfd/${env}/idr-pipeline/sensitive/idr_database
   - /bfd/${env}/idr-pipeline/sensitive/idr_schema
   - /bfd/${env}/idr-pipeline/sensitive/idr_private_key
+  - /bfd/${env}/idr-pipeline/sensitive/synthetic_env_username
+  - /bfd/${env}/idr-pipeline/sensitive/synthetic_env_account
+  - /bfd/${env}/idr-pipeline/sensitive/synthetic_env_database
+  - /bfd/${env}/idr-pipeline/sensitive/synthetic_env_warehouse
+  - /bfd/${env}/idr-pipeline/sensitive/synthetic_env_schema
+  - /bfd/${env}/idr-pipeline/sensitive/synthetic_env_private_key
   - /bfd/${env}/ccw-pipeline/sensitive/db/password
   - /bfd/${env}/ccw-pipeline/sensitive/db/username
   - /bfd/${env}/ccw-pipeline/sensitive/hicn_hash/iterations
