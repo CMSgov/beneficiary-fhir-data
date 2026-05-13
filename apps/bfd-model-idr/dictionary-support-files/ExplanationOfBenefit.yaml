@@ -410,6 +410,8 @@
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_QUERY_CD').exists()).code.coding.code
   profiles:
     - CMS
+    - Basis
+    - Regular
 - inputPath: ExplanationOfBenefit-Base.CLM_NCVRD_CHRG_AMT
   appliesTo:
     - Inpatient
@@ -2992,6 +2994,8 @@
   fhirPath: ExplanationOfBenefit.supportingInfo.where(code.coding.system='https://bluebutton.cms.gov/fhir/CodeSystem/CLM-NRLN-RIC-CD').code.coding.code
   profiles:
     - CMS
+    - Basis
+    - Regular
 - inputPath: ExplanationOfBenefit-Institutional-Base.DGNS_DRG_OUTLIER_CD
   appliesTo:
     - Inpatient
@@ -3016,6 +3020,8 @@
   fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-LINE-ANSTHSA-UNIT-CNT').value
   profiles:
     - CMS
+    - Basis
+    - Regular
 - inputPath: LineItemComponent.CLM_RNDRG_PRVDR_TAX_NUM
   appliesTo:
     - Carrier
@@ -3169,6 +3175,8 @@
   fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-RNDRG-PRVDR-PRTCPTG-CD').value.code
   profiles:
     - CMS
+    - Basis
+    - Regular
 - inputPath: LineItemComponent.CLM_RNDRG_PRVDR_TYPE_CD
   appliesTo:
     - Carrier
@@ -3184,6 +3192,8 @@
   notes: Still used to populate the qualification. 
   profiles:
     - CMS
+    - Basis
+    - Regular
 - inputPath: SupportingInfoComponent.CLM_CARR_PMT_DNL_CD
   appliesTo:
     - Carrier
@@ -3286,6 +3296,8 @@
   fhirPath: ExplanationOfBenefit.contained.where(id = %root.supportingInfo.valueReference.reference.substring(1)).performer.identifier.value
   profiles:
     - CMS
+    - Basis
+    - Regular
 - inputPath: LineItemComponent.CLM_BENE_PRMRY_PYR_PD_AMT
   appliesTo:
     - Carrier
@@ -3345,6 +3357,8 @@
   fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRCNG-LCLTY-CD').value.code
   profiles:
     - CMS
+    - Basis
+    - Regular
 - inputPath: LineItemComponent.CLM_PHYSN_ASTNT_CD
   appliesTo:
     - Carrier
@@ -3516,6 +3530,8 @@
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_PRFNL_DME_PRICE_AMT')).amount.value
   profiles:
     - CMS
+    - Basis
+    - Regular
 - inputPath: SupportingInfoComponent.CLM_ADJSTMT_TYPE_CD
   appliesTo:
     - Inpatient
