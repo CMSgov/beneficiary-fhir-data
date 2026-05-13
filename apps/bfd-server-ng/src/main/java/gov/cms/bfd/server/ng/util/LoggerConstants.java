@@ -70,6 +70,58 @@ public class LoggerConstants {
    */
   public static final String FINAL_DETERMINATION = "finalDetermination";
 
+  /** Name of the timestamp when the HAPI request reached pre-handle processing. */
+  public static final String HAPI_INCOMING_PRE_HANDLE =
+      "hapi.server_incoming_request_pre_handle_timestamp_in_millis";
+
+  /** Name of the timestamp when the HAPI request began pre-processing. */
+  public static final String HAPI_INCOMING_PRE_PROCESS =
+      "hapi.server_incoming_request_pre_process_timestamp_in_millis";
+
+  /** Name of the timestamp when the HAPI request completed post-processing. */
+  public static final String HAPI_INCOMING_POST_PROCESS =
+      "hapi.server_incoming_request_post_process_timestamp_in_millis";
+
+  /** Name of the timestamp when the HAPI server began sending the response. */
+  public static final String HAPI_OUTGOING_RESPONSE =
+      "hapi.server_outgoing_response_timestamp_in_millis";
+
+  /** Name of the timestamp when the HAPI requested completed normally. */
+  public static final String HAPI_PROCESS_COMPLETED_NORMALLY =
+      "hapi.server_processing_completed_normally_timestamp_in_millis";
+
+  /** Name of the timestamp when the HAPI requested fully completed processing. */
+  public static final String HAPI_PROCESS_COMPLETED =
+      "hapi.server_processing_completed_timestamp_in_millis";
+
+  /** Name of the timestamp when the request started. */
+  public static final String REQUEST_START_TIME = "request_start_time";
+
+  /** Name of the Accept-Encoding header. */
+  public static final String HTTP_ACCEPT_ENCODING = "http_access_request_header_Accept-Encoding";
+
+  /** Name of the X-Request-ID header. */
+  public static final String HTTP_RESPONSE_X_REQUEST_ID =
+      "http_access_response_header_X-Request-ID";
+
+  /** Name of the outgoing response status code. */
+  public static final String HTTP_RESPONSE_STATUS = "http_access_response_status";
+
+  /** Name of the Content-Length header. */
+  public static final String HTTP_RESPONSE_CONTENT_LENGTH =
+      "http_access_response_header_Content-Length";
+
+  /** Name of the total request duration in milliseconds. */
+  public static final String HTTP_RESPONSE_DURATION_MS =
+      "http_access_response_duration_milliseconds";
+
+  /** Name of the Content-Encoding header. */
+  public static final String HTTP_RESPONSE_CONTENT_ENCODING =
+      "http_access_response_header_Content-Encoding";
+
+  /** Name for the number of FHIR resources returned in the response. */
+  public static final String RESOURCES_RETURNED_COUNT = "resources_returned_count";
+
   /**
    * Returns a log specific key.
    *

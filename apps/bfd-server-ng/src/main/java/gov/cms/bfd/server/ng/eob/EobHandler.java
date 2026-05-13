@@ -11,6 +11,7 @@ import gov.cms.bfd.server.ng.claim.model.*;
 import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.loadprogress.LoadProgressRepository;
+import gov.cms.bfd.server.ng.log.RequestTelemetryLogger;
 import gov.cms.bfd.server.ng.util.FhirUtil;
 import gov.cms.bfd.server.ng.util.IdrConstants;
 import gov.cms.bfd.server.ng.util.MetricTimer;
@@ -43,6 +44,7 @@ public class EobHandler {
   private final ClaimRepository claimRepository;
   private final LoadProgressRepository loadProgressRepository;
   private final MeterRegistry meterRegistry;
+  private final RequestTelemetryLogger requestTelemetryLogger;
 
   // Cache the security labels map to avoid repeated I/O and parsing
   private static final Map<String, List<SecurityLabel>> SECURITY_LABELS =
@@ -110,10 +112,12 @@ public class EobHandler {
   }
 
   private void recordResultSize(Bundle bundle, SamhsaFilterMode samhsaFilterMode) {
+    var resourcesReturned = bundle.getEntry().size();
+    requestTelemetryLogger.recordResourcesReturned(resourcesReturned);
     DistributionSummary.builder("application.eob.handler.results.size")
         .tag(SAMHSA_FILTER_MODE, samhsaFilterMode.name())
         .register(meterRegistry)
-        .record(bundle.getEntry().size());
+        .record(resourcesReturned);
   }
 
   private Stream<? extends ClaimBase> filterSamhsaClaims(
@@ -145,6 +149,7 @@ public class EobHandler {
       DateTimeRange lastUpdated,
       SamhsaFilterMode samhsaFilterMode) {
     var eobs = searchByIdsInner(claimUniqueIds, serviceDate, lastUpdated, samhsaFilterMode);
+    requestTelemetryLogger.recordResourcesReturned(eobs.size());
     return FhirUtil.bundleOrDefault(eobs.stream(), loadProgressRepository::lastUpdated);
   }
 

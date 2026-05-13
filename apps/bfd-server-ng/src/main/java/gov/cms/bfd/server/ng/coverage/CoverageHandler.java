@@ -5,6 +5,7 @@ import gov.cms.bfd.server.ng.input.CoverageCompositeId;
 import gov.cms.bfd.server.ng.input.CoveragePart;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.loadprogress.LoadProgressRepository;
+import gov.cms.bfd.server.ng.log.RequestTelemetryLogger;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import gov.cms.bfd.server.ng.util.FhirUtil;
 import io.micrometer.core.annotation.Timed;
@@ -27,6 +28,7 @@ public class CoverageHandler {
   private final CoverageRepository coverageRepository;
   private final LoadProgressRepository loadProgressRepository;
   private final DateUtil dateUtil;
+  private final RequestTelemetryLogger requestTelemetryLogger;
 
   /**
    * Reads a Coverage resource based on a composite ID ({part}-{bene_sk}).
@@ -64,7 +66,10 @@ public class CoverageHandler {
     var benefitDate = dateUtil.nowAoe();
     var coverage = beneficiary.toFhirCoverageIfPresent(parsedCoverageId, benefitDate);
 
-    return FhirUtil.bundleOrDefault(coverage.map(r -> r), loadProgressRepository::lastUpdated);
+    var bundle =
+        FhirUtil.bundleOrDefault(coverage.map(r -> r), loadProgressRepository::lastUpdated);
+    requestTelemetryLogger.recordResourcesReturned(bundle.getEntry().size());
+    return bundle;
   }
 
   /**
@@ -94,6 +99,8 @@ public class CoverageHandler {
                         new CoverageCompositeId(c, beneficiary.getBeneSk()), benefitDate))
             .flatMap(Optional::stream);
 
-    return FhirUtil.bundleOrDefault(coverages, loadProgressRepository::lastUpdated);
+    var bundle = FhirUtil.bundleOrDefault(coverages, loadProgressRepository::lastUpdated);
+    requestTelemetryLogger.recordResourcesReturned(bundle.getEntry().size());
+    return bundle;
   }
 }
