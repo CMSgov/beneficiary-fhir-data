@@ -1,5 +1,4 @@
 import logging
-import sys
 from collections.abc import Callable
 from concurrent.futures import ProcessPoolExecutor
 from datetime import UTC, datetime
