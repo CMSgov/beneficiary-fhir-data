@@ -3515,7 +3515,8 @@
   sourceColumn: CLM_SUPLR_TYPE_CD
   fhirPath: ExplanationOfBenefit.item.extension.where(url='https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRVDR-TYPE-CD').value.code
   profiles:
-    - CMS
+    - Basis
+    - Regular
 - inputPath: LineItemComponent.CLM_LINE_PRFNL_DME_PRICE_AMT
   appliesTo:
     - DME
