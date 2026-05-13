@@ -14,7 +14,6 @@ from constants import (
     IDR_PROVIDER_HISTORY_TABLE,
 )
 from load_partition import LoadPartition
-from loader import LoadMode
 from model.base_model import (
     ALIAS,
     ALIAS_CLM,
@@ -34,6 +33,7 @@ from model.base_model import (
     UPDATE_FIELD,
     IdrBaseModel,
     ModelType,
+    Source,
     base_claim_filter,
     clm_base_query,
     clm_child_query,
@@ -257,9 +257,7 @@ class IdrClaimRx(IdrBaseModel):
 
     @override
     @classmethod
-    def fetch_query(
-        cls, partition: LoadPartition, start_time: datetime, load_mode: LoadMode
-    ) -> str:
+    def fetch_query(cls, partition: LoadPartition, start_time: datetime, source: Source) -> str:
         clm = ALIAS_CLM
         line = ALIAS_LINE
         rx_line = ALIAS_RX_LINE

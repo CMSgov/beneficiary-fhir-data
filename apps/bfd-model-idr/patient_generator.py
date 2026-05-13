@@ -342,7 +342,7 @@ def load_inputs():
                 days=random.randint(30, 365)
             )
             # We update the underlying dict to avoid RowAdapter ignoring the change
-            prior_patient.kv["IDR_TRANS_OBSLT_TS"] = f"{past_year_date}T00:00:00.000000+0000"
+            prior_patient.kv["IDR_TRANS_OBSLT_TS"] = f"{past_year_date}T00:00:00.000000"
 
             generator.bene_hstry_table.append(prior_patient.kv)
 

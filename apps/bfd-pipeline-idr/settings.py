@@ -49,11 +49,6 @@ LATEST_CLAIMS = _parse_bool_default_false("IDR_LATEST_CLAIMS")
 Useful for the initial data pull since we only want to pull in
 the latest version of each claim."""
 
-LOAD_TYPE = getenv("IDR_LOAD_TYPE", "incremental")
-"""Load type - initial (first load) or incremental (adding on to an existing load).
-The load type affects the shape of the DAG.
-Only useful for prod data and testing."""
-
 BATCH_MULTIPLIER = int(getenv("IDR_BATCH_MULTIPLIER", "2_000_000"))
 """Batch sizes are calculated based on the number of columns in the table
 in order to keep memory usage stable relative to the number of concurrent tasks.

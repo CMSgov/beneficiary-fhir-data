@@ -8,6 +8,7 @@ from logger_config import configure_logger
 from model.base_model import (
     IdrBaseModel,
     LoadMode,
+    Source,
 )
 from model.idr_beneficiary import IdrBeneficiary
 from model.idr_beneficiary_dual_eligibility import IdrBeneficiaryDualEligibility
@@ -108,13 +109,14 @@ def _gen_partitioned_node_inputs(
     return sorted(res, key=lambda m: m[1].priority if m[1] else 0)
 
 
-def stage1(load_mode: LoadMode, start_time: datetime, load_type: LoadType) -> bool:
+def stage1(load_mode: LoadMode, start_time: datetime, load_type: LoadType, source: Source) -> bool:
     return extract_and_load(
         cls=IdrBeneficiaryOvershareMbi,
         partition=None,
         job_start=start_time,
         load_mode=load_mode,
         load_type=load_type,
+        source=source,
     )
 
 
@@ -152,6 +154,7 @@ def do_stage2(
     load_mode: LoadMode,
     start_time: datetime,
     load_type: LoadType,
+    source: Source,
 ) -> bool:
     model_type, partition = stage2_inputs
     return extract_and_load(
@@ -160,6 +163,7 @@ def do_stage2(
         job_start=start_time,
         load_mode=load_mode,
         load_type=load_type,
+        source=source,
     )
 
 
@@ -187,6 +191,7 @@ def do_stage3(
     load_mode: LoadMode,
     start_time: datetime,
     load_type: LoadType,
+    source: Source,
 ) -> bool:
     model_type, partition = stage3_inputs
     return extract_and_load(
@@ -195,6 +200,7 @@ def do_stage3(
         job_start=start_time,
         load_mode=load_mode,
         load_type=load_type,
+        source=source,
     )
 
 
@@ -222,6 +228,7 @@ def do_stage4(
     load_type: LoadType,
     load_mode: LoadMode,
     start_time: datetime,
+    source: Source,
 ) -> bool:
     model_type, partition = stage4_inputs
     if load_type == LoadType.INCREMENTAL:
@@ -231,6 +238,7 @@ def do_stage4(
             job_start=start_time,
             load_mode=load_mode,
             load_type=load_type,
+            source=source,
         )
 
     return False

@@ -1132,7 +1132,8 @@ def generate(
 
             out_tables[CLM_DT_SGNTR].append(
                 pac_util.gen_pac_clm_dt_sgntr(
-                    clm=pac_clm, init_clm_dt_sgntr=claims_tbls[CLM_DT_SGNTR][0]
+                    clm=pac_clm,
+                    init_clm_dt_sgntr=next(iter(claims_tbls[CLM_DT_SGNTR]), RowAdapter({})),
                 )
             )
 
