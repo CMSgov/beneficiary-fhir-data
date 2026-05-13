@@ -11,6 +11,7 @@ Description: "The type of action requested by the intermediary to be taken on an
 * #3 "Secondary debit adjustment"
 * #4 "Cancel only adjustment"
 * #5 "Force action code 3 (secondary debit adjustment)"
+* #6 "Force action code 2"
 * #7 "Outpatient history only"
 * #8 "Benefits refused"
 * #9 "Payment requested"

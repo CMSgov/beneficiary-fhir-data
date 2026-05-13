@@ -78,6 +78,8 @@ public sealed interface ClaimFiscalIntermediaryActionCode
     _4("4", "Cancel only adjustment"),
     /** 5 - Force action code 3 (secondary debit adjustment). */
     _5("5", "Force action code 3 (secondary debit adjustment)"),
+    /** 6 - Force action code 2. */
+    _6("6", "Force action code 2"),
     /** 7 - Outpatient history only. */
     _7("7", "Outpatient history only"),
     /** 8 - Benefits refused. */
