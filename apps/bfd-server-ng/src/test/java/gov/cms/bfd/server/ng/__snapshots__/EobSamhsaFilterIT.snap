@@ -12145,6 +12145,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaNoCert[412457726]=[
         "code" : {
           "coding" : [ {
             "code" : "7",
+            "display" : "Outpatient history only",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
           } ]
         },
@@ -20190,6 +20191,7 @@ gov.cms.bfd.server.ng.EobSamhsaFilterIT.shouldFilterSamhsaSamhsaNotAllowedCert[4
         "code" : {
           "coding" : [ {
             "code" : "7",
+            "display" : "Outpatient history only",
             "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-FI-ACTN-CD"
           } ]
         },

@@ -7,5 +7,10 @@ Description: "The type of action requested by the intermediary to be taken on an
 * ^content = #complete
 
 * #1 "Original debit action (always a 1 for all regular bills)"
+* #2 "Cancel by credit adjustment"
+* #3 "Secondary debit adjustment"
+* #4 "Cancel only adjustment"
 * #5 "Force action code 3 (secondary debit adjustment)"
+* #7 "Outpatient history only"
 * #8 "Benefits refused"
+* #9 "Payment requested"
