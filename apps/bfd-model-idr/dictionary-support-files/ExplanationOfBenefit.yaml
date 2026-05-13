@@ -3517,6 +3517,8 @@
   profiles:
     - Basis
     - Regular
+    - CMS
+    - Regular
 - inputPath: LineItemComponent.CLM_LINE_PRFNL_DME_PRICE_AMT
   appliesTo:
     - DME
