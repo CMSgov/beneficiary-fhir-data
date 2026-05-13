@@ -11,11 +11,20 @@ group createAuditEvent(source src: BFDAuditLogLogical, target tgt: FHIRAuditEven
         src -> typeCoding.code = "rest" "Set code for Query";
     } "Set type";
 
+    src -> tgt.subType = c('urn:cms:hte','patient-match-request') "Add event subtype";
+    src -> tgt.action = "E" "Add action type";
+    src -> tgt.outcome = "0" "Add success outcome"; // we have this because we only log successful events for now.
+
+    src -> tgt.source = create('Reference') as tgtReference then {
+        src -> tgtReference.display = "CMS Beneficiary FHIR Data Server" "Add source of AuditEvent as BFD";
+    } "Create source";
+
     src -> tgt.purposeOfEvent = cc("http://terminology.hl7.org/CodeSystem/v3-ActReason", "PATRQT") "Set purpose of event";
 
     src -> tgt.agent = create('BackboneElement') as agent then {
         src -> agent.requestor = true "Set requestor";
-        src.clientName as name -> agent.name = name "Set client name as altId";
+        src.clientName as name -> agent.name = name "Set client name";
+        src.clientName as altId -> agent.altId = altId "Set alternate id (client name). May be changed to clientId in future";
         src.clientIp as ip -> agent.network = create('BackboneElement') as network then {
             ip -> network.address = ip "Set IP address";
             src -> network.type = "2" "Set network type (IP address)";
