@@ -18,8 +18,8 @@ import org.springframework.stereotype.Component;
 @Component
 @WebServlet(urlPatterns = {"/v3/fhir*"})
 public class V3Server extends RestfulServer {
-  private final List<IResourceProvider> resourceProviders;
-  private final RequestMetricsInterceptor requestMetricsInterceptor;
+  private final transient List<IResourceProvider> resourceProviders;
+  private final transient RequestMetricsInterceptor requestMetricsInterceptor;
 
   @Override
   public void initialize() {

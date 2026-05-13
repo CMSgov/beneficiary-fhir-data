@@ -13,7 +13,6 @@ import gov.cms.bfd.server.ng.input.CoveragePart;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.loadprogress.LoadProgressRepository;
 import gov.cms.bfd.server.ng.log.AuditLogger;
-import gov.cms.bfd.server.ng.log.RequestTelemetryLogger;
 import gov.cms.bfd.server.ng.model.ProfileType;
 import gov.cms.bfd.server.ng.util.FhirUtil;
 import gov.cms.bfd.server.ng.util.SystemUrls;
@@ -48,7 +47,6 @@ public class PatientHandler {
   private final LoadProgressRepository loadProgressRepository;
   private final CoverageRepository coverageRepository;
   private final AuditLogger auditLogger;
-  private final RequestTelemetryLogger requestTelemetryLogger;
 
   /**
    * Returns a {@link Patient} by their {@link IdType}.
@@ -154,9 +152,7 @@ public class PatientHandler {
             .flatMap(Optional::stream);
 
     var resources = Stream.concat(Stream.of(patient, cmsOrg), coverages);
-    var bundle = FhirUtil.bundleWithFullUrls(resources, loadProgressRepository::lastUpdated);
-    requestTelemetryLogger.recordResourcesReturned(bundle.getEntry().size());
-    return bundle;
+    return FhirUtil.bundleWithFullUrls(resources, loadProgressRepository::lastUpdated);
   }
 
   private Patient toFhir(Beneficiary beneficiary) {

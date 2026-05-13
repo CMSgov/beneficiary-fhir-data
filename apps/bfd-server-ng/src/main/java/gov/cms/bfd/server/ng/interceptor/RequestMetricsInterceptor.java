@@ -7,6 +7,8 @@ import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import gov.cms.bfd.server.ng.log.RequestTelemetryLogger;
 import lombok.RequiredArgsConstructor;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Bundle;
 import org.springframework.stereotype.Component;
 
 /** HAPI FHIR interceptor that records request lifecycle timing metrics. */
@@ -35,10 +37,18 @@ public class RequestMetricsInterceptor {
     requestTelemetryLogger.recordTimestamp(HAPI_INCOMING_PRE_HANDLE);
   }
 
-  /** Pointcut to log timestamp in milliseconds when a request has an outgoing response. */
+  /**
+   * Pointcut to log timestamp in milliseconds when a request has an outgoing response.
+   *
+   * @param responseObject the resource being returned
+   */
   @Hook(Pointcut.SERVER_OUTGOING_RESPONSE)
-  public void serverOutgoingResponse() {
+  public void serverOutgoingResponse(IBaseResource responseObject) {
     requestTelemetryLogger.recordTimestamp(HAPI_OUTGOING_RESPONSE);
+
+    if (responseObject instanceof Bundle bundle) {
+      requestTelemetryLogger.recordResourcesReturned(bundle.getEntry().size());
+    }
   }
 
   /** Pointcut to log timestamp in milliseconds when a request has completed processing normally. */
