@@ -371,6 +371,7 @@ class _ClaimsFile(StrEnum):
             f.CLM_SUPLR_TYPE_CD,
             f.CLM_LINE_PRFNL_DME_PRICE_AMT,
             f.CLM_LINE_HCT_HGB_RSLT_NUM,  # TODO: not generated yet
+            f.CLM_PRVDR_SPCLTY_CD,
             f.IDR_INSRT_TS,
             f.IDR_UPDT_TS,
         ],
