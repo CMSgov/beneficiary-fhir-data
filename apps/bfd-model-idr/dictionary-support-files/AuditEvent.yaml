@@ -26,5 +26,5 @@
 - inputPath: BFDAuditLog.finalDetermination
   appliesTo: 
     - Audit
-  fhirPath: AuditEvent.entity.where(type.coding.code = 'Patient').name
-  notes: The combination evaluated that returned a unique match.
+  fhirPath: AuditEvent.entity.where(type.coding.code = 'Patient').detail
+  notes: The combination evaluated that returned a unique match. Includes version + algorithm number.
