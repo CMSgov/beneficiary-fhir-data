@@ -4,7 +4,7 @@
   <parent>
     <groupId>gov.cms.bfd</groupId>
     <artifactId>bfd-parent</artifactId>
-    <version>2.243.0-SNAPSHOT</version>
+    <version>2.247.0-SNAPSHOT</version>
   </parent>
   <groupId>gov.cms.bfd</groupId>
   <artifactId>report-aggregate</artifactId>
@@ -20,6 +20,11 @@
       <groupId>gov.cms.bfd</groupId>
       <version>${project.version}</version>
       <artifactId>bfd-db-migrator-ng</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>gov.cms.bfd</groupId>
+      <version>${project.version}</version>
+      <artifactId>bfd-db-migrator-synthetic</artifactId>
     </dependency>
     <dependency>
       <groupId>gov.cms.bfd</groupId>

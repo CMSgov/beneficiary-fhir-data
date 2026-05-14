@@ -110,7 +110,7 @@ public class EobResourceProvider implements IResourceProvider {
   /**
    * Search for claims data by FHIR ID.
    *
-   * @param fhirId FHIR ID
+   * @param fhirIds FHIR IDs
    * @param serviceDate service date
    * @param lastUpdated last updated
    * @param request HTTP request details
@@ -118,13 +118,13 @@ public class EobResourceProvider implements IResourceProvider {
    */
   @Search
   public Bundle searchById(
-      @RequiredParam(name = ExplanationOfBenefit.SP_RES_ID) final IdType fhirId,
+      @RequiredParam(name = ExplanationOfBenefit.SP_RES_ID) final TokenAndListParam fhirIds,
       @OptionalParam(name = SERVICE_DATE) final DateRangeParam serviceDate,
       @OptionalParam(name = ExplanationOfBenefit.SP_RES_LAST_UPDATED)
           final DateRangeParam lastUpdated,
       final HttpServletRequest request) {
     return eobHandler.searchById(
-        FhirInputConverter.toLong(fhirId),
+        FhirInputConverter.toLongList(fhirIds),
         FhirInputConverter.toDateTimeRange(serviceDate),
         FhirInputConverter.toDateTimeRange(lastUpdated),
         getFilterModeForRequest(request, SamhsaSearchIntent.UNSPECIFIED));

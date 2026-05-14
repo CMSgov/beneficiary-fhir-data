@@ -8,12 +8,15 @@ import jakarta.persistence.Convert;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.MappedSuperclass;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.StringType;
 
 /** Institutional claim line table. */
@@ -39,6 +42,9 @@ public abstract class ClaimLineInstitutionalBase implements ClaimLineBase {
   @Column(name = "clm_line_instnl_rev_ctr_dt")
   private Optional<LocalDate> revenueCenterDate;
 
+  @Column(name = "clm_line_thru_dt")
+  private Optional<LocalDate> thruDate;
+
   @Embedded private ClaimLineHippsCode hippsCode;
   @Embedded private ClaimLineInstitutionalExtensions extensions;
   @Embedded private ClaimLineHcpcsCode hcpcsCode;
@@ -48,14 +54,18 @@ public abstract class ClaimLineInstitutionalBase implements ClaimLineBase {
   @Embedded private RenderingCareTeamLine claimLineRenderingProvider;
 
   @Override
-  public Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhirSupportingInfo(
+  public List<ExplanationOfBenefit.SupportingInformationComponent> toFhirSupportingInfo(
       SupportingInfoFactory supportingInfoFactory) {
-    return trackingNumber.map(
-        number ->
-            supportingInfoFactory
-                .createSupportingInfo()
-                .setCategory(BlueButtonSupportingInfoCategory.CLM_LINE_PMD_UNIQ_TRKNG_NUM.toFhir())
-                .setValue(new StringType(number)));
+    return Stream.of(
+            trackingNumber.map(
+                number ->
+                    supportingInfoFactory
+                        .createSupportingInfo()
+                        .setCategory(
+                            BlueButtonSupportingInfoCategory.CLM_LINE_PMD_UNIQ_TRKNG_NUM.toFhir())
+                        .setValue(new StringType(number))))
+        .flatMap(Optional::stream)
+        .toList();
   }
 
   @Override
@@ -91,8 +101,19 @@ public abstract class ClaimLineInstitutionalBase implements ClaimLineBase {
         });
 
     line.addModifier(hcpcsModifierCode.toFhir());
-    getRevenueCenterDate().ifPresent(d -> line.setServiced(new DateType(DateUtil.toDate(d))));
-    fromDate.ifPresent(d -> line.setServiced(new DateType(DateUtil.toDate(d))));
+    thruDate.ifPresentOrElse(
+        thru -> {
+          var period = new Period();
+          getRevenueCenterDate().ifPresent(d -> period.setStartElement(DateUtil.toFhirDate(d)));
+          fromDate.ifPresent(d -> period.setStartElement(DateUtil.toFhirDate(d)));
+          period.setEndElement(DateUtil.toFhirDate(thru));
+          line.setServiced(period);
+        },
+        () -> {
+          getRevenueCenterDate().ifPresent(d -> line.setServiced(new DateType(DateUtil.toDate(d))));
+          fromDate.ifPresent(d -> line.setServiced(new DateType(DateUtil.toDate(d))));
+        });
+
     addAdjudication(line);
     getExtensions().toFhir().forEach(line::addExtension);
 
@@ -100,4 +121,9 @@ public abstract class ClaimLineInstitutionalBase implements ClaimLineBase {
   }
 
   abstract void addAdjudication(ExplanationOfBenefit.ItemComponent line);
+
+  @Override
+  public Optional<String> getClaimLineDiagnosisCode() {
+    return Optional.empty();
+  }
 }

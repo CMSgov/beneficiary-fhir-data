@@ -69,6 +69,40 @@ public class FhirInputConverter {
   }
 
   /**
+   * Converts a {@link TokenAndListParam} to a list of {@link Long}.
+   *
+   * @param ids FHIR IDs
+   * @return list of long values
+   */
+  public static List<Long> toLongList(@Nullable TokenAndListParam ids) {
+    if (ids == null) {
+      throw new InvalidRequestException("ID is missing");
+    }
+    var longIds = FhirTokenParameterParser.flatten(ids).map(FhirInputConverter::toLong).toList();
+    if (longIds.size() > 100) {
+      throw new InvalidRequestException("A maximum of 100 claim IDs may be requested at once.");
+    }
+    return longIds;
+  }
+
+  /**
+   * Converts a {@link TokenParam} to a {@link Long}.
+   *
+   * @param token FHIR token
+   * @return long value
+   */
+  public static Long toLong(@Nullable TokenParam token) {
+    if (token == null || token.getValue() == null) {
+      throw new InvalidRequestException("ID is missing");
+    }
+    try {
+      return Long.parseLong(token.getValue());
+    } catch (NumberFormatException _) {
+      throw new InvalidRequestException("ID is not a valid number");
+    }
+  }
+
+  /**
    * Converts an {@link IdType} to a {@link Long}.
    *
    * @param id FHIR ID

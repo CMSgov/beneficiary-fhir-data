@@ -1,0 +1,47 @@
+name: Discover Tofuservices
+description: Composite action to discover BFD Tofuservices within an directory and return as JSON
+inputs:
+  service-type:
+    description: The type of Tofuservices to discover within the repository
+    required: true
+outputs:
+  services-json:
+    description: Auto-discovered Tofuservices partitioned by layer in JSON format
+    value: ${{ steps.discover-services.outputs.services-json }}
+runs:
+  using: composite
+  steps:
+    # This step is necessary as it seems that some objects (like "github" or "inputs") are
+    # unavailable when the top-level "env" is evaluated for Composite Actions
+    - name: Setup environment
+      run: |
+        echo "DISCOVERY_SCRIPT=${{ github.workspace }}/.github/scripts/discover-tofuservices.sh" \
+          >> $GITHUB_ENV
+        echo 'SERVICE_TYPES_JSON={"PLATFORM":"ops/platform","ENVIRONMENT":"ops/services"}' \
+          >> $GITHUB_ENV
+      shell: bash
+
+    - name: Get services discovery path
+      id: get-discovery-path
+      env:
+        SERVICE_TYPE: ${{ inputs.service-type }}
+      run: |
+        discovery_path="$(jq -rc --arg type "$SERVICE_TYPE" '.[$type] // null' <<<"$SERVICE_TYPES_JSON")"
+        if [[ $discovery_path == "null" ]]; then
+          echo "Invalid service-type '$SERVICE_TYPE', must be one of: $(jq -r 'keys | @csv' <<<"$SERVICE_TYPES_JSON")"
+          exit 1
+        fi
+        echo "Discovery path: $discovery_path"
+
+        echo "path=${{ github.workspace }}/$discovery_path" >> $GITHUB_OUTPUT
+      shell: bash
+
+    - name: Discover services
+      id: discover-services
+      run: |
+        services_json="$("$DISCOVERY_SCRIPT" | jq -c)"
+        echo "Services: $services_json"
+
+        echo "services-json=$services_json" >> $GITHUB_OUTPUT
+      shell: bash
+      working-directory: ${{ steps.get-discovery-path.outputs.path }}

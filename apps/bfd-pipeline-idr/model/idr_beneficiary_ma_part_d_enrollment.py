@@ -5,9 +5,9 @@ from pydantic import BeforeValidator
 
 from constants import (
     DEFAULT_MAX_DATE,
+    IDR_BENE_MA_PART_D_TABLE,
 )
 from load_partition import LoadPartition
-from loader import LoadMode
 from model.base_model import (
     ALIAS_HSTRY,
     BATCH_ID,
@@ -17,6 +17,7 @@ from model.base_model import (
     UPDATE_TIMESTAMP,
     IdrBaseModel,
     ModelType,
+    Source,
     deceased_bene_filter,
     transform_default_string,
     transform_null_date_to_max,
@@ -62,19 +63,17 @@ class IdrBeneficiaryMaPartDEnrollment(IdrBaseModel):
 
     @override
     @classmethod
-    def fetch_query(
-        cls, partition: LoadPartition, start_time: datetime, load_mode: LoadMode
-    ) -> str:
+    def fetch_query(cls, partition: LoadPartition, start_time: datetime, source: Source) -> str:
         # There are only a very few instances where non-obsolete records have a
         # bene_enrlmt_pgm_type_cd set to '~' and these are all from the 80s,
         # so it should be safe to filter these.
         hstry = ALIAS_HSTRY
         return f"""
             SELECT {{COLUMNS}}
-            FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_mapd_enrlmt enrlmt
+            FROM {IDR_BENE_MA_PART_D_TABLE} enrlmt
             {{WHERE_CLAUSE}}
             AND NOT EXISTS (
-                {deceased_bene_filter(hstry)}
+                {deceased_bene_filter(hstry, start_time)}
                 AND {hstry}.bene_sk = enrlmt.bene_sk
             )
             AND idr_trans_obslt_ts >= '{DEFAULT_MAX_DATE}'

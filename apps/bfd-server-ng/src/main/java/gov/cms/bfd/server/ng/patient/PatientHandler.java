@@ -14,8 +14,10 @@ import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.loadprogress.LoadProgressRepository;
 import gov.cms.bfd.server.ng.log.AuditLogger;
 import gov.cms.bfd.server.ng.model.ProfileType;
-import gov.cms.bfd.server.ng.util.*;
+import gov.cms.bfd.server.ng.util.FhirUtil;
+import gov.cms.bfd.server.ng.util.SystemUrls;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.UUID;
@@ -117,9 +119,10 @@ public class PatientHandler {
    * Searches for all Coverage resources associated with a given beneficiary SK.
    *
    * @param beneSk The beneficiary surrogate key.
+   * @param benefitDate date used to determine Coverage status.
    * @return A Bundle of Coverage resources.
    */
-  public Bundle searchByBeneficiaryC4DIC(Long beneSk) {
+  public Bundle searchByBeneficiaryC4DIC(Long beneSk, LocalDate benefitDate) {
     var beneficiaryOpt =
         coverageRepository
             .searchBeneficiaryWithCoverage(beneSk, new DateTimeRange())
@@ -140,7 +143,9 @@ public class PatientHandler {
             .map(
                 c ->
                     beneficiary.toFhirCoverageIfPresentC4DIC(
-                        new CoverageCompositeId(c, beneficiary.getBeneSk()), cmsOrg.getId()))
+                        new CoverageCompositeId(c, beneficiary.getBeneSk()),
+                        cmsOrg.getId(),
+                        benefitDate))
             .flatMap(Optional::stream);
 
     var resources = Stream.concat(Stream.of(patient, cmsOrg), coverages);

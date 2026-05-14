@@ -513,13 +513,16 @@ public class StandardGrpcRdaSourceIT {
     /** Creates a json capture sink with a set configuration. */
     public JsonCaptureSink() {
       mapper =
-          new JsonMapper()
+          JsonMapper.builder()
               .enable(SerializationFeature.INDENT_OUTPUT)
-              .registerModule(new Jdk8Module())
-              .registerModule(new JavaTimeModule())
-              .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-              .configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true)
-              .setSerializationInclusion(JsonInclude.Include.NON_NULL);
+              .addModule(new Jdk8Module())
+              .addModule(new JavaTimeModule())
+              .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+              .enable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY)
+              .defaultPropertyInclusion(
+                  JsonInclude.Value.construct(
+                      JsonInclude.Include.NON_NULL, JsonInclude.Include.ALWAYS))
+              .build();
     }
 
     @Override

@@ -8,6 +8,7 @@ import io.micrometer.core.aop.MeterTagAnnotationHandler;
 import io.micrometer.core.aop.TimedAspect;
 import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.servlet.Servlet;
+import java.time.Clock;
 import javax.sql.DataSource;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -16,6 +17,7 @@ import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 
@@ -83,6 +85,17 @@ public class Application {
   }
 
   /**
+   * Configures a date that propagates throughout the application that is overridable in test
+   * configurations.
+   *
+   * @return clock
+   */
+  @Bean
+  public Clock systemClock() {
+    return Clock.systemUTC();
+  }
+
+  /**
    * Creates the audit logger(s).
    *
    * @param configuration app configuration
@@ -103,5 +116,15 @@ public class Application {
   @Bean
   public DynamoDbClient dynamoDbClient(Configuration configuration) {
     return configuration.getDynamoDbClient();
+  }
+
+  /**
+   * Creates the custom task executor.
+   *
+   * @return task executor
+   */
+  @Bean
+  public ThreadPoolTaskExecutor taskExecutor() {
+    return new MdcAwareThreadPoolExecutor();
   }
 }

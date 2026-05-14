@@ -55,7 +55,9 @@ public class JacksonJsonConverter implements JsonConverter {
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
             .addModule(new Jdk8Module())
             .addModule(new JavaTimeModule())
-            .serializationInclusion(JsonInclude.Include.NON_NULL)
+            .defaultPropertyInclusion(
+                JsonInclude.Value.construct(
+                    JsonInclude.Include.NON_NULL, JsonInclude.Include.ALWAYS))
             .build();
     writer = prettyPrint ? jsonMapper.writerWithDefaultPrettyPrinter() : jsonMapper.writer();
     reader = jsonMapper.reader();

@@ -1297,7 +1297,7 @@ public class AbstractSamhsaMatcherTest {
    */
   @Test
   public void testNumberOfIcd10DiagnosisCodesReturned() {
-    int expected = 405;
+    int expected = 447;
     List<String> actual =
         AbstractSamhsaMatcher.resourceCsvColumnToList(
             "samhsa-related-codes/codes-icd-10-diagnosis.csv", "ICD-10-CM Diagnosis Code");

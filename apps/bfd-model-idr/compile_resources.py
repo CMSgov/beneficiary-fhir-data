@@ -185,6 +185,13 @@ def main():
         action="store_true",
         help="Skip generating StructureMap (speeds up generating all resources if no changes)",
     )
+    parser.add_argument(
+        "--profileType",
+        "-p",
+        type=str,
+        choices=["Basis", "Regular", "CMS"],
+        help="Profile type to use for filtering (Basis, Regular, or CMS)",
+    )
     args = parser.parse_args()
 
     script_dir = Path(__file__).parent.absolute()
@@ -232,14 +239,15 @@ def main():
     (input_file,) = {args.input}
     if 'EOB' in input_file:
         print("Augmenting input file")
-        augmentation_cmd = f"python augment_sample_resources.py {args.input}"
+        profile_flag = f" {args.profileType}" if args.profileType else ""
+        augmentation_cmd = f"python augment_sample_resources.py {args.input}{profile_flag}"
         stdout, stderr = run_command(augmentation_cmd, cwd=script_dir)
         input_file = 'out/temporary-sample.json'
 
     print("Executing Transform")
     execute_cmd = f"java -jar validator_cli.jar {input_file} -output {args.output} -transform \
         {args.resource} -version 4.0.1 -ig {compiled_map_path} \
-            -ig hl7.fhir.us.carin-bb#2.1.0 {map_imports} {sushi_resources} -tx {MATCHBOX_SERVER}/tx"
+            -ig hl7.fhir.us.carin-bb#2.2.0 {map_imports} {sushi_resources} -tx {MATCHBOX_SERVER}/tx"
     stdout, stderr = run_command(execute_cmd, cwd=script_dir)
 
     print("Execution output:")

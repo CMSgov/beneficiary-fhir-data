@@ -9,7 +9,7 @@
         <include resource="org/springframework/boot/logging/logback/console-appender.xml" />
         <logger name="org.springframework.web" level="DEBUG" />
     </springProfile>
-    <springProfile name="aws">
+    <springProfile name="structured-log">
         <!-- use structured logging in the deployed environment only -->
         <include resource="org/springframework/boot/logging/logback/structured-console-appender.xml" />
     </springProfile>

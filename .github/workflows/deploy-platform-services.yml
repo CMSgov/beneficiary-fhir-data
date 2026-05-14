@@ -1,11 +1,15 @@
----
 name: "Deploy Platform Services"
 on:
   workflow_dispatch:
     inputs:
       account-type:
         description: The BFD account type to deploy services to
+        default: non-prod
         required: true
+        type: choice
+        options:
+          - non-prod
+          - prod
       services:
         description: Comma-separated list of services to deploy
         default: >-
@@ -16,6 +20,10 @@ on:
           ecr,
           network
         required: true
+      per-service-vars-json:
+        description: >-
+          Tofu plan variables per-service in JSON; see Workflow for format
+        required: false
       aws-region:
         description: >-
           Override the AWS Region
@@ -54,6 +62,11 @@ on:
           ecr,
           network
         required: false
+      per-service-vars-json:
+        type: string
+        description: >-
+          Tofu plan variables per-service in JSON; see Workflow for format
+        required: false
       aws-region:
         type: string
         description: >-
@@ -74,99 +87,19 @@ on:
         default: ""
         required: false
 
-
 permissions:
   id-token: write # This is required for requesting the AWS IAM OIDC JWT
   contents: write # This is required for actions/checkout
 
-env:
-  DEPLOY_JOBS_MATRIX_JSON: |
-    {
-      "000": [
-        { "layer": "000", "service": "bootstrap", "runner": "lambda" }
-      ],
-      "01": [
-        { "layer": "01", "service": "config", "runner": "lambda" }
-      ],
-      "02": [
-        { "layer": "02", "service": "alerting", "runner": "lambda" },
-        { "layer": "02", "service": "backup", "runner": "lambda" },
-        { "layer": "02", "service": "ecr", "runner": "lambda" },
-        { "layer": "02", "service": "network", "runner": "lambda" }
-      ]
-    }
-
-defaults:
-  run:
-    shell: bash
-
 jobs:
-  setup:
-    runs-on: ubuntu-24.04
-    outputs:
-      deploy-jobs-matrix-json: ${{ steps.get-deploy-jobs-matrix-json.outputs.deploy-jobs-matrix-json }}
-    steps:
-      - name: Get filtered deploy jobs matrix JSON as output
-        id: get-deploy-jobs-matrix-json
-        env:
-          SERVICES: ${{ inputs.services }}
-        run: |
-          deploy_jobs_matrix_json="$(
-            jq -c --arg services "$SERVICES" '
-              # Convert the CSV list of services into an array
-              ($services | split(",") | map(gsub("^\\s+|\\s+$"; ""))) as $filterServices
-              | to_entries
-              | map(
-                  .value |= map(select(.service | IN($filterServices[])))
-                )
-              | from_entries
-            ' <<<"$DEPLOY_JOBS_MATRIX_JSON"
-          )"
-
-          echo "deploy-jobs-matrix-json=$deploy_jobs_matrix_json" >> "$GITHUB_OUTPUT"
-
-  deploy-layer-000:
-    uses: ./.github/workflows/_deploy-platform-service-layer.yml
-    needs: [setup]
-    permissions:
-      contents: read
-      id-token: write
+  deploy:
+    uses: ./.github/workflows/_deploy-tofuservices.yml
     with:
-      layer-level: '000'
-      account-type: ${{ inputs.account-type }}
-      matrix-json: ${{ needs.setup.outputs.deploy-jobs-matrix-json }}
+      service-type: PLATFORM
+      env-or-account: ${{ inputs.account-type }}
+      services: ${{ inputs.services }}
+      per-service-vars-json: ${{ inputs.per-service-vars-json }}
       aws-region: ${{ inputs.aws-region }}
       skip-applies: ${{ inputs.skip-applies }}
-      git-ref: ${{ inputs.git-ref || github.ref }}
+      git-ref: ${{ inputs.git-ref }}
     secrets: inherit
-
-  deploy-layer-01:
-    uses: ./.github/workflows/_deploy-platform-service-layer.yml
-    needs: [setup, deploy-layer-000]
-    permissions:
-      contents: read
-      id-token: write
-    with:
-      layer-level: '01'
-      account-type: ${{ inputs.account-type }}
-      matrix-json: ${{ needs.setup.outputs.deploy-jobs-matrix-json }}
-      aws-region: ${{ inputs.aws-region }}
-      skip-applies: ${{ inputs.skip-applies }}
-      git-ref: ${{ inputs.git-ref || github.ref }}
-    secrets: inherit
-
-  deploy-layer-02:
-    uses: ./.github/workflows/_deploy-platform-service-layer.yml
-    needs: [setup, deploy-layer-01]
-    permissions:
-      contents: read
-      id-token: write
-    with:
-      layer-level: '02'
-      account-type: ${{ inputs.account-type }}
-      matrix-json: ${{ needs.setup.outputs.deploy-jobs-matrix-json }}
-      aws-region: ${{ inputs.aws-region }}
-      skip-applies: ${{ inputs.skip-applies }}
-      git-ref: ${{ inputs.git-ref || github.ref }}
-    secrets: inherit
-

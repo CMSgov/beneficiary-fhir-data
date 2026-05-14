@@ -38,9 +38,11 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 @ConfigurationProperties(prefix = "bfd")
 public class Configuration implements Serializable {
   // Unfortunately, constructor injection doesn't work with @ConfigurationProperties
+  private static final String LOCAL_ENV = "local";
 
   /** Identifies which Spring profiles indicate that the server is being run on a local machine. */
-  private static final List<String> ALLOWED_LOCAL_PROFILES = List.of("local", "sqlprofile");
+  private static final List<String> ALLOWED_LOCAL_PROFILES =
+      List.of(LOCAL_ENV, "sql-profile", "structured-log");
 
   // Getters should only be generated for configuration properties, not dependencies
   @Getter(value = AccessLevel.NONE)
@@ -57,12 +59,11 @@ public class Configuration implements Serializable {
   @Autowired(required = false)
   private JdbcConnectionDetails jdbcConnectionDetails;
 
-  private static final String BFD_ENV_LOCAL = "local";
   private String dynamoLocalUrl = "http://localhost:8000";
 
   // Default to local configuration, this should be overridden on deployment with the correct
   // environment.
-  private String env = BFD_ENV_LOCAL;
+  private String env = LOCAL_ENV;
   private String dbIdentifier = "";
   private Local local = new Local();
   private Sensitive sensitive = new Sensitive();
@@ -129,7 +130,7 @@ public class Configuration implements Serializable {
   }
 
   boolean isLocal() {
-    return env.equalsIgnoreCase(BFD_ENV_LOCAL);
+    return env.equalsIgnoreCase(LOCAL_ENV);
   }
 
   /** Represents possible types of audit logging. */

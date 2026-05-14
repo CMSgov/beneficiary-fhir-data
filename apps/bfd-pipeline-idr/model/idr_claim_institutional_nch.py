@@ -6,9 +6,13 @@ from pydantic import BeforeValidator
 from constants import (
     CLAIM_INSTITUTIONAL_NCH_TABLE,
     DEFAULT_MAX_DATE,
+    IDR_CLAIM_DATE_SIGNATURE_TABLE,
+    IDR_CLAIM_DOCUMENTATION_TABLE,
+    IDR_CLAIM_INSTITUTIONAL_TABLE,
+    IDR_CLAIM_TABLE,
+    IDR_PROVIDER_HISTORY_TABLE,
 )
 from load_partition import LoadPartition
-from loader import LoadMode
 from model.base_model import (
     ALIAS,
     ALIAS_CLM,
@@ -35,6 +39,7 @@ from model.base_model import (
     UPDATE_FIELD,
     IdrBaseModel,
     ModelType,
+    Source,
     base_claim_filter,
     claim_occurrence_cte,
     claim_related_conditions_cte,
@@ -458,9 +463,7 @@ class IdrClaimInstitutionalNch(IdrBaseModel):
 
     @override
     @classmethod
-    def fetch_query(
-        cls, partition: LoadPartition, start_time: datetime, load_mode: LoadMode
-    ) -> str:
+    def fetch_query(cls, partition: LoadPartition, start_time: datetime, source: Source) -> str:
         clm = ALIAS_CLM
         dcmtn = ALIAS_DCMTN
         sgntr = ALIAS_SGNTR
@@ -475,7 +478,7 @@ class IdrClaimInstitutionalNch(IdrBaseModel):
         rlt_cond = ALIAS_RLT_COND
         ocrnc_sgntr_dd = ALIAS_OCRNC_SGNTR_DERIVED_DATES
         rlt_ocrnc_sgntr_dd = ALIAS_RLT_OCRNC_SGNTR_DERIVED_DATES
-        not_materialized = "" if load_mode == LoadMode.IDR else "NOT MATERIALIZED"
+        not_materialized = "" if source == Source.SNOWFLAKE else "NOT MATERIALIZED"
         return f"""
             WITH claim_base AS (
                 {clm_base_query(start_time, partition, cls.model_type())}
@@ -485,9 +488,9 @@ class IdrClaimInstitutionalNch(IdrBaseModel):
                 UNION
                 {clm_dt_sgntr_query()}
                 UNION
-                {clm_child_query("v2_mdcr_clm_instnl")}
+                {clm_child_query(IDR_CLAIM_INSTITUTIONAL_TABLE)}
                 UNION
-                {clm_child_query("v2_mdcr_clm_dcmtn")}
+                {clm_child_query(IDR_CLAIM_DOCUMENTATION_TABLE)}
                 UNION
                 {clm_ocrnc_sgntr_query()}
                 UNION
@@ -500,45 +503,45 @@ class IdrClaimInstitutionalNch(IdrBaseModel):
             claim_related_occurrences_dates AS {not_materialized} 
                 ({claim_related_occurrences_cte()}),
             claim_related_conditions AS {not_materialized} 
-                ({claim_related_conditions_cte(load_mode)})
+                ({claim_related_conditions_cte(source)})
             SELECT {{COLUMNS}}
             FROM claims c
-            JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm {clm} ON
+            JOIN {IDR_CLAIM_TABLE} {clm} ON
                 {clm}.geo_bene_sk = c.geo_bene_sk AND
                 {clm}.clm_dt_sgntr_sk = c.clm_dt_sgntr_sk AND
                 {clm}.clm_type_cd = c.clm_type_cd AND
                 {clm}.clm_num_sk = c.clm_num_sk
-            JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_dt_sgntr {sgntr} ON 
+            JOIN {IDR_CLAIM_DATE_SIGNATURE_TABLE} {sgntr} ON 
                 {sgntr}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
-            LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_instnl {instnl} ON
+            LEFT JOIN {IDR_CLAIM_INSTITUTIONAL_TABLE} {instnl} ON
                 {clm}.geo_bene_sk = {instnl}.geo_bene_sk AND
                 {clm}.clm_dt_sgntr_sk = {instnl}.clm_dt_sgntr_sk AND
                 {clm}.clm_type_cd = {instnl}.clm_type_cd AND
                 {clm}.clm_num_sk = {instnl}.clm_num_sk
-            LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_clm_dcmtn {dcmtn} ON
+            LEFT JOIN {IDR_CLAIM_DOCUMENTATION_TABLE} {dcmtn} ON
                 {clm}.geo_bene_sk = {dcmtn}.geo_bene_sk AND
                 {clm}.clm_dt_sgntr_sk = {dcmtn}.clm_dt_sgntr_sk AND
                 {clm}.clm_type_cd = {dcmtn}.clm_type_cd AND
                 {clm}.clm_num_sk = {dcmtn}.clm_num_sk
-            LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_prvdr_hstry {prvdr_atng} ON
+            LEFT JOIN {IDR_PROVIDER_HISTORY_TABLE} {prvdr_atng} ON
                 {prvdr_atng}.prvdr_npi_num = {clm}.prvdr_atndg_prvdr_npi_num AND
                 {prvdr_atng}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
-            LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_prvdr_hstry {prvdr_rfrg} ON 
+            LEFT JOIN {IDR_PROVIDER_HISTORY_TABLE} {prvdr_rfrg} ON 
                 {prvdr_rfrg}.prvdr_npi_num = {clm}.prvdr_rfrg_prvdr_npi_num AND
                 {prvdr_rfrg}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
-            LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_prvdr_hstry {prvdr_blg} ON 
+            LEFT JOIN {IDR_PROVIDER_HISTORY_TABLE} {prvdr_blg} ON 
                 {prvdr_blg}.prvdr_npi_num = {clm}.prvdr_blg_prvdr_npi_num AND
                 {prvdr_blg}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
-            LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_prvdr_hstry {prvdr_oprtg} ON 
+            LEFT JOIN {IDR_PROVIDER_HISTORY_TABLE} {prvdr_oprtg} ON 
                 {prvdr_oprtg}.prvdr_npi_num = {clm}.prvdr_oprtg_prvdr_npi_num AND
                 {prvdr_oprtg}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
-            LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_prvdr_hstry {prvdr_rndrg} ON 
+            LEFT JOIN {IDR_PROVIDER_HISTORY_TABLE} {prvdr_rndrg} ON 
                 {prvdr_rndrg}.prvdr_npi_num = {clm}.prvdr_rndrng_prvdr_npi_num AND
                 {prvdr_rndrg}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
-            LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_prvdr_hstry {prvdr_othr} ON 
+            LEFT JOIN {IDR_PROVIDER_HISTORY_TABLE} {prvdr_othr} ON 
                 {prvdr_othr}.prvdr_npi_num = {clm}.prvdr_othr_prvdr_npi_num AND
                 {prvdr_othr}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
-            LEFT JOIN cms_vdm_view_mdcr_prd.v2_mdcr_prvdr_hstry {prvdr_srvc} ON 
+            LEFT JOIN {IDR_PROVIDER_HISTORY_TABLE} {prvdr_srvc} ON 
                 {prvdr_srvc}.prvdr_npi_num = {clm}.prvdr_srvc_prvdr_npi_num AND
                 {prvdr_srvc}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
             LEFT JOIN claim_related_conditions {rlt_cond}

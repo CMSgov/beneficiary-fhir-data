@@ -27,6 +27,8 @@ class ClaimInstitutionalNchSupportingInfo implements SupportingInfoComponentBase
 
   @Embedded ClaimInstitutionalSupportingInfoBase claimInstitutionalSupportingInfo;
 
+  @Embedded BillingProviderSsaStateCode billingProviderSsaStateCode;
+
   @Override
   public List<ExplanationOfBenefit.SupportingInformationComponent> toFhir(
       SupportingInfoFactory supportingInfoFactory) {
@@ -37,7 +39,8 @@ class ClaimInstitutionalNchSupportingInfo implements SupportingInfoComponentBase
                     hhaLupaIndicatorCode.map(s -> s.toFhir(supportingInfoFactory)),
                     hhaReferralCode.map(s -> s.toFhir(supportingInfoFactory)),
                     ppsIndicatorCode.map(c -> c.toFhir(supportingInfoFactory)),
-                    claimOutpatientServiceTypeCode.map(c -> c.toFhir(supportingInfoFactory)))
+                    claimOutpatientServiceTypeCode.map(c -> c.toFhir(supportingInfoFactory)),
+                    billingProviderSsaStateCode.toFhir(supportingInfoFactory))
                 .flatMap(Optional::stream))
         .toList();
   }

@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import gov.cms.bfd.server.ng.eob.EobHandler;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.testUtil.ThreadSafeAppender;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +26,7 @@ class EobSamhsaFilterLoggingIT extends IntegrationTestBase {
     var events = ThreadSafeAppender.startRecord();
 
     eobHandler.searchById(
-        CLAIM_ID_WITH_SAMHSA_DIAGNOSIS,
+        List.of(CLAIM_ID_WITH_SAMHSA_DIAGNOSIS),
         new DateTimeRange(),
         new DateTimeRange(),
         SamhsaFilterMode.EXCLUDE);
@@ -52,7 +53,7 @@ class EobSamhsaFilterLoggingIT extends IntegrationTestBase {
     var events = ThreadSafeAppender.startRecord();
 
     eobHandler.searchById(
-        CLAIM_ID_WITH_NO_SAMHSA,
+        List.of(CLAIM_ID_WITH_NO_SAMHSA),
         new DateTimeRange(),
         new DateTimeRange(),
         SamhsaFilterMode.EXCLUDE);

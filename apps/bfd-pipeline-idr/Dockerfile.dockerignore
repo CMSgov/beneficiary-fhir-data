@@ -26,6 +26,10 @@
 !model/idr_contract_pbp_contact.py
 !model/idr_contract_pbp_number.py
 !model/load_progress.py
+!matching/__init__.py
+!matching/constants.py
+!matching/parser.py
+!matching/test_parser.py
 !constants.py
 !extractor.py
 !load_events.py

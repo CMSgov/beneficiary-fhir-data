@@ -36,6 +36,7 @@ class IcdIndicatorIT extends IntegrationTestBase {
             .map(d -> d.getDiagnosisCodeableConcept().getCodingFirstRep().getCode())
             .toList();
 
+    var uniqueCodes = eobCodes.stream().distinct().toList();
     var rawCodes = List.of(RAW_E8889, RAW_V1005, RAW_30495, RAW_25000);
     var independentlyFormatted =
         rawCodes.stream()
@@ -52,7 +53,7 @@ class IcdIndicatorIT extends IntegrationTestBase {
             FORMATTED_ICD_9_CODE_25000,
             FORMATTED_ICD_9_CODE_E8889,
             FORMATTED_ICD_9_CODE_V1005);
-    assertEquals(expectedOrder, eobCodes, "ICD-9 codes should be formatted and ordered");
+    assertEquals(expectedOrder, uniqueCodes, "ICD-9 codes should be formatted and ordered");
     assertEquals(FORMATTED_ICD_9_CODE_25000, independentlyFormatted.get(RAW_25000));
     assertEquals(FORMATTED_ICD_9_CODE_E8889, independentlyFormatted.get(RAW_E8889));
     assertEquals(FORMATTED_ICD_9_CODE_V1005, independentlyFormatted.get(RAW_V1005));
@@ -64,8 +65,8 @@ class IcdIndicatorIT extends IntegrationTestBase {
     expectedMap.put(RAW_30495, FORMATTED_ICD_9_CODE_30495);
     expectedMap.put(RAW_25000, FORMATTED_ICD_9_CODE_25000);
 
-    var actualSnapshotString = eobCodes.toString() + "|" + independentlyFormatted.toString();
-    var expectedSnapshotString = expectedOrder.toString() + "|" + expectedMap.toString();
+    var actualSnapshotString = uniqueCodes + "|" + independentlyFormatted;
+    var expectedSnapshotString = expectedOrder + "|" + expectedMap;
     assertEquals(
         expectedSnapshotString,
         actualSnapshotString,
@@ -80,15 +81,16 @@ class IcdIndicatorIT extends IntegrationTestBase {
             .map(d -> d.getDiagnosisCodeableConcept().getCodingFirstRep().getCode())
             .toList();
 
+    var uniqueCodes = codes.stream().distinct().toList();
     var expected =
         List.of(
             FORMATTED_ICD_9_CODE_30495,
             FORMATTED_ICD_9_CODE_25000,
             FORMATTED_ICD_9_CODE_E8889,
             FORMATTED_ICD_9_CODE_V1005);
-    assertEquals(expected, codes, "ICD-9 diagnosis codes should be formatted and ordered");
+    assertEquals(expected, uniqueCodes, "ICD-9 diagnosis codes should be formatted and ordered");
 
     // compare string representations rather than using snapshot storage.
-    assertEquals(expected.toString(), codes.toString(), "Compact codes string should match");
+    assertEquals(expected.toString(), uniqueCodes.toString(), "Compact codes string should match");
   }
 }

@@ -9,10 +9,12 @@ import jakarta.persistence.MappedSuperclass;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 import lombok.Getter;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.StringType;
 
 /** Claim line info. */
@@ -26,12 +28,15 @@ abstract class ClaimLineProfessionalBase implements ClaimLineBase {
   private Optional<Integer> claimLineNumber;
 
   @Column(name = "clm_line_dgns_cd")
-  private Optional<String> diagnosisCode;
+  private Optional<String> claimLineDiagnosisCode;
 
   private Optional<String> trackingNumber;
 
   @Column(name = "clm_line_from_dt")
   private Optional<LocalDate> fromDate;
+
+  @Column(name = "clm_line_thru_dt")
+  private Optional<LocalDate> thruDate;
 
   @Column(name = "clm_pos_cd")
   private Optional<ClaimPlaceOfServiceCode> placeOfServiceCode;
@@ -51,7 +56,16 @@ abstract class ClaimLineProfessionalBase implements ClaimLineBase {
     line.setSequence(claimLineNumber.get());
     populateProductAndQuantity(line);
     line.addModifier(hcpcsModifierCode.toFhir());
-    fromDate.map(d -> line.setServiced(new DateType(DateUtil.toDate(d))));
+
+    thruDate.ifPresentOrElse(
+        thru -> {
+          var period = new Period();
+          fromDate.ifPresent(d -> period.setStartElement(DateUtil.toFhirDate(d)));
+          period.setEndElement(DateUtil.toFhirDate(thru));
+          line.setServiced(period);
+        },
+        () -> fromDate.ifPresent(d -> line.setServiced(new DateType(DateUtil.toDate(d)))));
+
     getAdjudicationCharge().toFhir().forEach(line::addAdjudication);
     placeOfServiceCode.map(c -> line.setLocation(c.toFhir()));
     getFhirExtensions().forEach(line::addExtension);
@@ -65,14 +79,18 @@ abstract class ClaimLineProfessionalBase implements ClaimLineBase {
   }
 
   @Override
-  public Optional<ExplanationOfBenefit.SupportingInformationComponent> toFhirSupportingInfo(
+  public List<ExplanationOfBenefit.SupportingInformationComponent> toFhirSupportingInfo(
       SupportingInfoFactory supportingInfoFactory) {
-    return trackingNumber.map(
-        number ->
-            supportingInfoFactory
-                .createSupportingInfo()
-                .setCategory(BlueButtonSupportingInfoCategory.CLM_LINE_PMD_UNIQ_TRKNG_NUM.toFhir())
-                .setValue(new StringType(number)));
+    return Stream.of(
+            trackingNumber.map(
+                number ->
+                    supportingInfoFactory
+                        .createSupportingInfo()
+                        .setCategory(
+                            BlueButtonSupportingInfoCategory.CLM_LINE_PMD_UNIQ_TRKNG_NUM.toFhir())
+                        .setValue(new StringType(number))))
+        .flatMap(Optional::stream)
+        .toList();
   }
 
   abstract ClaimLineAdjudicationChargeProfessionalBase getAdjudicationCharge();

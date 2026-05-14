@@ -25,3 +25,4 @@ sushi/fsh-generated/*
 validator_cli.jar
 ReferenceTables/source-to-target-mappings
 data/*
+temp_packages/*

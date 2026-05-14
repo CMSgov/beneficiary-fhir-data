@@ -83,8 +83,8 @@ resource "aws_cloudwatch_event_rule" "this" {
   count = local.conditional_count
 
   name                = local.lambda_full_name
-  description         = "Trigger {aws_lambda_function.this[0].function_name}"
-  schedule_expression = "cron(17 10,22 ? * MON-SAT *)"
+  description         = "Trigger ${aws_lambda_function.this[0].function_name}"
+  schedule_expression = "cron(17 10,22 ? * * *)"
 }
 
 resource "aws_cloudwatch_event_target" "this" {

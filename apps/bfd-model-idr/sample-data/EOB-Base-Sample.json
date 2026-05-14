@@ -13,6 +13,7 @@
     "CLM_SRC_ID": "20000",
     "PRVDR_BLG_PRVDR_NPI_NUM": "1548226988",
     "CLM_BLG_PRVDR_ZIP5_CD": "77550",
+    "GEO_BLG_SSA_STATE_CD": "03",
     "diagnoses": [
         {
             "CLM_VAL_SQNC_NUM": "1",
@@ -228,7 +229,6 @@
     ],
     "lineItemComponents":[
         {
-            "CLM_LINE_DGNS_CD": "M48.062",
             "PRVDR_RNDRNG_PRVDR_NPI_NUM": "1942945159",
             "CLM_LINE_ADD_ON_PYMT_AMT": "11.11",
             "CLM_LINE_NON_EHR_RDCTN_AMT": "11.12",

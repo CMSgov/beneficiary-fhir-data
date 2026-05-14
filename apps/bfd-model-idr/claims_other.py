@@ -79,8 +79,20 @@ class OtherGeneratorUtil:
         all_provider_historys = init_provider_historys + additional_provider_historys
 
         provider_historys: list[RowAdapter] = []
-        for provider_history in all_provider_historys:
+        generated_type_1_npis = set()
+        generated_type_2_npis = set()
+        for idx, provider_history in enumerate(all_provider_historys):
             prvdr_sk = gen_basic_id(field="PRVDR_SK", length=9)
+            # make half of providers type 1 npi and half type 2
+            # type 1 npis never have a legal name
+            # need to return both the subsets of type 1/2 npis that were used so that
+            # generated claims can reference provider histories that actually exist
+            if idx % 2 == 0:
+                prvdr_lgl_name = ""
+                generated_type_1_npis.add(prvdr_sk)
+            else:
+                prvdr_lgl_name = random.choice(AVAILABLE_PROVIDER_LEGAL_NAMES)
+                generated_type_2_npis.add(prvdr_sk)
             provider_history.extend(
                 {
                     f.PRVDR_SK: prvdr_sk,
@@ -90,7 +102,7 @@ class OtherGeneratorUtil:
                     f.PRVDR_MDL_NAME: random.choice(AVAILABLE_GIVEN_NAMES),
                     f.PRVDR_LAST_NAME: random.choice(AVAILABLE_FAMILY_NAMES),
                     f.PRVDR_NAME: random.choice(AVAILABLE_PROVIDER_NAMES),
-                    f.PRVDR_LGL_NAME: random.choice(AVAILABLE_PROVIDER_LEGAL_NAMES),
+                    f.PRVDR_LGL_NAME: prvdr_lgl_name,
                     f.PRVDR_NPI_NUM: prvdr_sk,
                     f.PRVDR_EMPLR_ID_NUM: gen_basic_id(field=f.PRVDR_EMPLR_ID_NUM, length=9),
                     f.PRVDR_OSCAR_NUM: gen_basic_id(field=f.PRVDR_OSCAR_NUM, length=6),
@@ -102,4 +114,4 @@ class OtherGeneratorUtil:
 
             provider_historys.append(provider_history)
 
-        return provider_historys
+        return provider_historys, list(generated_type_1_npis), list(generated_type_2_npis)

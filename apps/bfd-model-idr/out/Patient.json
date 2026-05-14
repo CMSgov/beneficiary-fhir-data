@@ -3,8 +3,8 @@
   "id" : "123456789",
   "meta" : {
     "lastUpdated" : "2020-01-07T03:02:28.000000Z",
-    "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.1.0",
-    "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0"]
+    "profile" : ["http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.2.0",
+    "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|7.0.0"]
   },
   "extension" : [{
     "url" : "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",

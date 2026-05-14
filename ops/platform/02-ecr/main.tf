@@ -44,6 +44,7 @@ locals {
     "bfd-platform-server-fluent-bit",
     # application container image repositories
     "bfd-platform-idr-pipeline",
+    "bfd-platform-migrator-ng",
     "bfd-db-migrator",
     "bfd-pipeline-app",
     "bfd-server",

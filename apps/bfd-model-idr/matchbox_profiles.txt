@@ -1,0 +1,67 @@
+# C4BB
+[hl7.fhir.us.carin-bb#2.2.0]
+# Main EOB Profiles
+StructureDefinition-C4BB-ExplanationOfBenefit-Inpatient-Institutional
+StructureDefinition-C4BB-ExplanationOfBenefit-Outpatient-Institutional
+StructureDefinition-C4BB-ExplanationOfBenefit-Pharmacy
+StructureDefinition-C4BB-ExplanationOfBenefit-Professional-NonClinician
+
+# Basis Profiles
+StructureDefinition-C4BB-ExplanationOfBenefit-Inpatient-Institutional-Basis
+StructureDefinition-C4BB-ExplanationOfBenefit-Outpatient-Institutional-Basis
+StructureDefinition-C4BB-ExplanationOfBenefit-Pharmacy-Basis
+StructureDefinition-C4BB-ExplanationOfBenefit-Professional-NonClinician-Basis
+
+# Core CARIN BB Profiles
+StructureDefinition-C4BB-Patient
+StructureDefinition-C4BB-Coverage
+StructureDefinition-C4BB-Organization
+StructureDefinition-C4BB-Practitioner
+
+# CARIN BB Terminology
+CodeSystem-C4BBAdjudication
+CodeSystem-C4BBAdjudicationDiscriminator
+CodeSystem-C4BBClaimCareTeamRole
+CodeSystem-C4BBClaimDiagnosisType
+CodeSystem-C4BBClaimProcedureType
+CodeSystem-C4BBCompoundLiteral
+CodeSystem-C4BBIdentifierType
+CodeSystem-C4BBInstitutionalClaimSubType
+CodeSystem-C4BBPayerAdjudicationStatus
+CodeSystem-C4BBSupportingInfoType
+
+# ValueSets
+ValueSet-C4BBAdjudication
+ValueSet-C4BBAdjudicationCategoryDiscriminator
+ValueSet-C4BBClaimInpatientInstitutionalDiagnosisType
+ValueSet-C4BBClaimOutpatientInstitutionalDiagnosisType
+ValueSet-C4BBClaimProfessionalAndNonClinicianDiagnosisType
+ValueSet-C4BBClaimInstitutionalCareTeamRole
+ValueSet-C4BBClaimProfessionalAndNonClinicianCareTeamRole
+ValueSet-C4BBPayerBenefitPaymentStatus
+ValueSet-C4BBPayerClaimPaymentStatusCode
+ValueSet-C4BBPayerProviderNetworkStatus
+
+# US Core (Point to 6.1.0 until deprecated.)
+[hl7.fhir.us.core#6.1.0]
+StructureDefinition-us-core-patient
+StructureDefinition-us-core-organization
+StructureDefinition-us-core-practitioner
+StructureDefinition-us-core-practitionerrole
+StructureDefinition-us-core-relatedperson
+StructureDefinition-us-core-coverage
+StructureDefinition-us-core-ethnicity
+StructureDefinition-us-core-race
+StructureDefinition-us-core-sex
+StructureDefinition-us-core-birthsex
+StructureDefinition-us-core-genderIdentity
+StructureDefinition-us-core-tribal-affiliation
+StructureDefinition-us-core-location
+
+# Digital Insurance Card (Required for Operation-C4DIC. update to 2.0.0 after ballot)
+[hl7.fhir.us.insurance-card#1.1.0]
+StructureDefinition-C4DIC-Patient
+StructureDefinition-C4DIC-Coverage
+StructureDefinition-C4DIC-Organization
+StructureDefinition-C4DIC-AdditionalCardInformation-extension
+

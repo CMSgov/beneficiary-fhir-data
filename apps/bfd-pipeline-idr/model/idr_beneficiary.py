@@ -9,9 +9,10 @@ from unidecode import unidecode
 
 from constants import (
     BENEFICIARY_TABLE,
+    IDR_BENE_HISTORY_TABLE,
+    IDR_BENE_XREF_TABLE,
 )
 from load_partition import LoadPartition
-from loader import LoadMode
 from matching import normalize_address
 from model.base_model import (
     ALIAS,
@@ -26,6 +27,7 @@ from model.base_model import (
     UPDATE_TIMESTAMP,
     IdrBaseModel,
     ModelType,
+    Source,
     deceased_bene_filter,
     transform_default_string,
     transform_null_date_to_max,
@@ -169,9 +171,7 @@ class IdrBeneficiary(IdrBaseModel):
 
     @override
     @classmethod
-    def fetch_query(
-        cls, partition: LoadPartition, start_time: datetime, load_mode: LoadMode
-    ) -> str:
+    def fetch_query(cls, partition: LoadPartition, start_time: datetime, source: Source) -> str:
         hstry = ALIAS_HSTRY
         xref = ALIAS_XREF
         # There can be multiple xref records for the same bene_sk/bene_ref_sk combo
@@ -193,7 +193,7 @@ class IdrBeneficiary(IdrBaseModel):
                         PARTITION BY bene_sk, bene_xref_sk
                         ORDER BY src_rec_updt_ts DESC
                     ) AS row_order
-                FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_xref
+                FROM {IDR_BENE_XREF_TABLE}
             ),
             current_xref AS (
                 SELECT
@@ -204,7 +204,7 @@ class IdrBeneficiary(IdrBaseModel):
                     bx.idr_insrt_ts,
                     bx.idr_updt_ts
                 FROM ordered_xref ox
-                JOIN cms_vdm_view_mdcr_prd.v2_mdcr_bene_xref bx
+                JOIN {IDR_BENE_XREF_TABLE} bx
                     ON bx.bene_sk = ox.bene_sk
                     AND bx.bene_xref_sk = ox.bene_xref_sk
                     AND bx.bene_hicn_num = ox.bene_hicn_num
@@ -212,10 +212,10 @@ class IdrBeneficiary(IdrBaseModel):
                 WHERE ox.row_order = 1
             ),
             deceased_benes AS (
-                {deceased_bene_filter(hstry)}
+                {deceased_bene_filter(hstry, start_time)}
             )
             SELECT {{COLUMNS}}
-            FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry {hstry}
+            FROM {IDR_BENE_HISTORY_TABLE} {hstry}
             -- NOTE: the join condition is intentionally inverted here
             -- In the xref table, the bene_sk and bene_xref_sk fields are mirrored
             LEFT JOIN current_xref {xref}

@@ -31,7 +31,8 @@ public class AbstractJsonConverter<T> implements AttributeConverter<T, String> {
           .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
           .addModule(new Jdk8Module())
           .addModule(new JavaTimeModule())
-          .serializationInclusion(JsonInclude.Include.NON_NULL)
+          .defaultPropertyInclusion(
+              JsonInclude.Value.construct(JsonInclude.Include.NON_NULL, JsonInclude.Include.ALWAYS))
           .build();
 
   /** The class of objects being converted to and from JSON. */

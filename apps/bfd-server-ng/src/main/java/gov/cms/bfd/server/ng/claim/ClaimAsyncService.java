@@ -22,12 +22,13 @@ public class ClaimAsyncService {
   @PersistenceContext private final EntityManager entityManager;
 
   @Async
+  @SuppressWarnings("java:S2077")
   protected <C extends ClaimBase, B extends DbFilterBuilder>
-      CompletableFuture<Optional<C>> findByIdInClaimType(
+      CompletableFuture<List<C>> findByIdsInClaimType(
           String baseQuery,
           Class<C> claimClass,
           SystemType systemType,
-          long claimUniqueId,
+          List<Long> claimUniqueIds,
           List<B> filterBuilders) {
 
     var filters = getFilters(filterBuilders, systemType);
@@ -36,18 +37,18 @@ public class ClaimAsyncService {
         String.format(
             """
             %s
-            WHERE c.claimUniqueId = :claimUniqueId
+            WHERE c.claimUniqueId IN :claimUniqueIds
             %s
             """,
             baseQuery, whereClause);
 
     var result =
         DbFilterParam.withParams(entityManager.createQuery(jpql, claimClass), filters.params())
-            .setParameter("claimUniqueId", claimUniqueId)
-            .getResultList()
-            .stream()
-            .findFirst();
-    result.ifPresent(claim -> LogUtil.logBeneSk(claim.getBeneficiary().getBeneSk()));
+            .setParameter("claimUniqueIds", claimUniqueIds)
+            .getResultList();
+    result.stream()
+        .findFirst()
+        .ifPresent(claim -> LogUtil.logBeneSk(claim.getBeneficiary().getBeneSk()));
     return CompletableFuture.completedFuture(result);
   }
 

@@ -12,6 +12,7 @@
     "CLM_SRC_ID": "20000",
     "PRVDR_BLG_PRVDR_NPI_NUM": "1548226988",
     "META_SRC_SK": 7,
+    "GEO_BLG_SSA_STATE_CD": "03",
     "diagnoses": [
         {
             "CLM_VAL_SQNC_NUM": "1",
@@ -187,7 +188,8 @@
             "CLM_DDCTBL_COINSRNC_CD": "M",
             "GEO_FAC_SSA_STATE_CD": "01",
             "CLM_LINE_PRVDR_PMT_AMT": "11.15",
-            "CLM_LINE_SBMT_CHRG_AMT": "50.11"
+            "CLM_LINE_SBMT_CHRG_AMT": "50.11",
+            "GEO_RNDRG_SSA_STATE_CD": "03"
         },
         {
             "CLM_POS_CD": "07",
@@ -208,7 +210,8 @@
             "CLM_LINE_BENE_PD_AMT": "13.22",
             "CLM_LINE_CVRD_PD_AMT": "11.14",
             "CLM_LINE_BLOOD_DDCTBL_AMT": "17.11",
-            "CLM_LINE_MDCR_DDCTBL_AMT": "3.50"
+            "CLM_LINE_MDCR_DDCTBL_AMT": "3.50",
+            "GEO_RNDRG_SSA_STATE_CD": "03"
         },
         {
             "CLM_POS_CD": "07",
@@ -224,7 +227,8 @@
             "HCPCS_1_MDFR_CD": "99",
             "CLM_LINE_NCVRD_CHRG_AMT": "",
             "CLM_LINE_FROM_DT": "2025-01-01",
-            "CLM_LINE_PRVDR_PMT_AMT": "14.11"
+            "CLM_LINE_PRVDR_PMT_AMT": "14.11",
+            "GEO_RNDRG_SSA_STATE_CD": "03"
         },
         {
             "CLM_POS_CD": "07",
@@ -245,7 +249,8 @@
             "CLM_LINE_INSTNL_MSP1_PD_AMT": "17.00",
             "CLM_LINE_INSTNL_MSP2_PD_AMT": "14.21",
             "CLM_LINE_INSTNL_RATE_AMT": "0.85",
-            "CLM_LINE_BLOOD_DDCTBL_AMT": "1234.0"
+            "CLM_LINE_BLOOD_DDCTBL_AMT": "1234.0",
+            "GEO_RNDRG_SSA_STATE_CD": "03"
         }
     ],
     "profComponents": {

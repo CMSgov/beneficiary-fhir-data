@@ -72,7 +72,7 @@ gov.cms.bfd.server.ng.PatientMatchIT.patientMatchSnapshot=[
       } ],
       "meta" : {
         "lastUpdated" : "9999-12-31T00:00:00.000+00:00",
-        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.1.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|6.1.0" ]
+        "profile" : [ "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient|2.2.0", "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient|7.0.0" ]
       },
       "name" : [ {
         "family" : "Erdapfel",

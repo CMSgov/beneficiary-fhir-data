@@ -50,7 +50,10 @@ public class EobHandler {
    * @return an Optional containing the ExplanationOfBenefit if found
    */
   public Optional<ExplanationOfBenefit> find(final Long fhirId, SamhsaFilterMode samhsaFilterMode) {
-    return searchByIdInner(fhirId, new DateTimeRange(), new DateTimeRange(), samhsaFilterMode);
+    var eobs =
+        searchByIdsInner(
+            List.of(fhirId), new DateTimeRange(), new DateTimeRange(), samhsaFilterMode);
+    return eobs.stream().findFirst();
   }
 
   /**
@@ -82,81 +85,78 @@ public class EobHandler {
     var claims = claimRepository.findByBeneXrefSk(repositoryCriteria);
 
     var filteredClaims =
-        filterSamhsaClaims(claims, samhsaFilterMode, repositoryCriteria)
-            .map(
-                claim -> {
-                  var hasSamhsaClaims =
-                      samhsaFilterMode == SamhsaFilterMode.INCLUDE && claimHasSamhsa(claim);
-
-                  var securityStatus =
-                      hasSamhsaClaims
-                          ? ClaimSecurityStatus.SAMHSA_APPLICABLE
-                          : ClaimSecurityStatus.NONE;
-
-                  return claim.toFhir(securityStatus);
-                });
+        filterSamhsaClaims(claims, samhsaFilterMode)
+            .skip(repositoryCriteria.resolveOffset())
+            .limit(repositoryCriteria.resolveLimit())
+            .map(claim -> transformToFhir(claim, samhsaFilterMode));
 
     return FhirUtil.bundleOrDefault(filteredClaims, loadProgressRepository::lastUpdated);
   }
 
   private Stream<? extends ClaimBase> filterSamhsaClaims(
-      List<? extends ClaimBase> claims,
-      SamhsaFilterMode samhsaFilterMode,
-      ClaimSearchCriteria claimSearchCriteria) {
+      List<? extends ClaimBase> claims, SamhsaFilterMode samhsaFilterMode) {
     // Process claims in parallel
     // Note: DO NOT call toList() until the very end as materializing the list multiple times could
     // negatively impact perf.
     var claimStream =
         claims.parallelStream().sorted(Comparator.comparing(ClaimBase::getClaimUniqueId));
-    var filteredClaimStream =
-        switch (samhsaFilterMode) {
-          case INCLUDE -> claimStream;
-          case ONLY_SAMHSA -> claimStream.filter(this::claimHasSamhsa);
-          case EXCLUDE -> claimStream.filter(claim -> !claimHasSamhsa(claim));
-        };
-
-    return filteredClaimStream
-        .skip(claimSearchCriteria.resolveOffset())
-        .limit(claimSearchCriteria.resolveLimit());
+    return switch (samhsaFilterMode) {
+      case INCLUDE -> claimStream;
+      case ONLY_SAMHSA -> claimStream.filter(this::claimHasSamhsa);
+      case EXCLUDE -> claimStream.filter(claim -> !claimHasSamhsa(claim));
+    };
   }
 
   /**
    * Search for claims data by claim ID.
    *
-   * @param claimUniqueId claim ID
+   * @param claimUniqueIds claim IDs
    * @param serviceDate service date
    * @param lastUpdated last updated
    * @param samhsaFilterMode SAMHSA filter mode
    * @return bundle
    */
   public Bundle searchById(
-      Long claimUniqueId,
+      List<Long> claimUniqueIds,
       DateTimeRange serviceDate,
       DateTimeRange lastUpdated,
       SamhsaFilterMode samhsaFilterMode) {
-    var eob = searchByIdInner(claimUniqueId, serviceDate, lastUpdated, samhsaFilterMode);
-    return FhirUtil.bundleOrDefault(eob.map(e -> e), loadProgressRepository::lastUpdated);
+    var eobs = searchByIdsInner(claimUniqueIds, serviceDate, lastUpdated, samhsaFilterMode);
+    return FhirUtil.bundleOrDefault(eobs.stream(), loadProgressRepository::lastUpdated);
   }
 
-  private Optional<ExplanationOfBenefit> searchByIdInner(
-      Long claimUniqueId,
+  private List<ExplanationOfBenefit> searchByIdsInner(
+      List<Long> claimUniqueIds,
       DateTimeRange serviceDate,
       DateTimeRange lastUpdated,
       SamhsaFilterMode samhsaFilterMode) {
-    var claimOpt = claimRepository.findById(claimUniqueId, serviceDate, lastUpdated);
-    if (claimOpt.isEmpty()) {
-      return Optional.empty();
-    }
-    var claim = claimOpt.get();
-    var claimHasSamhsa = claimHasSamhsa(claim);
+    var claims = claimRepository.findByIds(claimUniqueIds, serviceDate, lastUpdated);
 
-    if (samhsaFilterMode == SamhsaFilterMode.EXCLUDE && claimHasSamhsa) {
-      return Optional.empty();
-    }
+    return filterSamhsaClaims(claims, samhsaFilterMode)
+        .map(claim -> transformToFhir(claim, samhsaFilterMode))
+        .toList();
+  }
+
+  /**
+   * Transforms a claim to an EOB, applying SAMHSA security labels if applicable based on the filter
+   * mode.
+   *
+   * @param claim the claim
+   * @param samhsaFilterMode filter mode (only samhsa/exclude claims/include)
+   * @return the transformed EOB
+   */
+  private ExplanationOfBenefit transformToFhir(ClaimBase claim, SamhsaFilterMode samhsaFilterMode) {
+    var isSamhsa =
+        switch (samhsaFilterMode) {
+          case ONLY_SAMHSA -> true;
+          case EXCLUDE -> false;
+          case INCLUDE -> claimHasSamhsa(claim);
+        };
+
     var securityStatus =
-        claimHasSamhsa ? ClaimSecurityStatus.SAMHSA_APPLICABLE : ClaimSecurityStatus.NONE;
+        isSamhsa ? ClaimSecurityStatus.SAMHSA_APPLICABLE : ClaimSecurityStatus.NONE;
 
-    return Optional.of(claim.toFhir(securityStatus));
+    return claim.toFhir(securityStatus);
   }
 
   private boolean isCodeSamhsa(

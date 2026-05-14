@@ -437,8 +437,8 @@ class EobSamhsaFilterIT extends IntegrationTestBase {
     // Check that serialization is not empty
     assertFalse(serialized.isEmpty(), "Serialized YAML should not be empty");
 
-    // security_labels.yml has 680 active and 2 inactive items
-    assertEquals(682, totalItems, "Expected 682 items, got: " + totalItems);
+    // security_labels.yml has 722 active and 2 inactive items
+    assertEquals(724, totalItems, "Expected 724 items, got: " + totalItems);
 
     for (var code : samhsaCodesToCheck) {
       assertTrue(checkSamhsaCode(SecurityLabel.normalize(code.get(1))));

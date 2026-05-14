@@ -1,12 +1,13 @@
 from datetime import datetime
 from typing import Annotated, override
 
+from constants import IDR_BENE_HISTORY_TABLE, IDR_BENE_XREF_TABLE
 from load_partition import LoadPartition
-from loader import LoadMode
 from model.base_model import (
     PRIMARY_KEY,
     IdrBaseModel,
     ModelType,
+    Source,
 )
 
 
@@ -35,9 +36,7 @@ class IdrBeneficiaryOvershareMbi(IdrBaseModel):
 
     @override
     @classmethod
-    def fetch_query(
-        cls, partition: LoadPartition, start_time: datetime, load_mode: LoadMode
-    ) -> str:
+    def fetch_query(cls, partition: LoadPartition, start_time: datetime, source: Source) -> str:
         # The xref data in the bene_hstry table is not completely reliable
         # because sometimes HICNs can be reused, causing two records to be
         # xref'd even if they're not the same person.
@@ -46,12 +45,12 @@ class IdrBeneficiaryOvershareMbi(IdrBaseModel):
         # table (this means it's coming from CME). For any MBIs tied to more than
         # one bene_sk that doesn't have a valid xref, we will prevent it from being
         # shown since it may be incorrectly linked to more than one person.
-        return """
+        return f"""
                SELECT hstry.bene_mbi_id
-               FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_hstry hstry
+               FROM {IDR_BENE_HISTORY_TABLE} hstry
                WHERE NOT EXISTS (
                    SELECT 1
-                   FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_xref xref
+                   FROM {IDR_BENE_XREF_TABLE} xref
                    WHERE hstry.bene_xref_efctv_sk = xref.bene_sk
                      AND hstry.bene_sk = xref.bene_xref_sk
                      AND xref.bene_kill_cred_cd = '2'

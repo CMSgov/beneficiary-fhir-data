@@ -5,9 +5,9 @@ from pydantic import BeforeValidator
 
 from constants import (
     DEFAULT_MAX_DATE,
+    IDR_BENE_MA_PART_D_RX_TABLE,
 )
 from load_partition import LoadPartition
-from loader import LoadMode
 from model.base_model import (
     ALIAS_HSTRY,
     BATCH_ID,
@@ -17,6 +17,7 @@ from model.base_model import (
     UPDATE_TIMESTAMP,
     IdrBaseModel,
     ModelType,
+    Source,
     deceased_bene_filter,
     transform_default_string,
     transform_null_date_to_min,
@@ -59,16 +60,14 @@ class IdrBeneficiaryMaPartDEnrollmentRx(IdrBaseModel):
 
     @override
     @classmethod
-    def fetch_query(
-        cls, partition: LoadPartition, start_time: datetime, load_mode: LoadMode
-    ) -> str:
+    def fetch_query(cls, partition: LoadPartition, start_time: datetime, source: Source) -> str:
         hstry = ALIAS_HSTRY
         return f"""
                 SELECT {{COLUMNS}}
-                FROM cms_vdm_view_mdcr_prd.v2_mdcr_bene_mapd_enrlmt_rx enrlmt_rx
+                FROM {IDR_BENE_MA_PART_D_RX_TABLE} enrlmt_rx
                 {{WHERE_CLAUSE}}
                 AND NOT EXISTS (
-                    {deceased_bene_filter(hstry)}
+                    {deceased_bene_filter(hstry, start_time)}
                     AND {hstry}.bene_sk = enrlmt_rx.bene_sk
                 )
                 AND idr_trans_obslt_ts >= '{DEFAULT_MAX_DATE}'

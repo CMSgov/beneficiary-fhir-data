@@ -54,11 +54,11 @@ resource "aws_lambda_function" "run_idr" {
     variables = {
       BFD_ENVIRONMENT                            = local.env
       ECS_CLUSTER_ARN                            = data.aws_ecs_cluster.main.arn
-      IDR_TASK_DEFINITION_ARN                    = aws_ecs_task_definition.idr_new.arn
+      IDR_TASK_DEFINITION_ARN                    = aws_ecs_task_definition.idr.arn
       IDR_CONTAINER_NAME                         = local.service
       IDR_TASK_GROUP                             = local.service
       IDR_TASK_SUBNET_IDS_JSON                   = jsonencode(local.writer_adjacent_subnets)
-      IDR_TASK_SECURITY_GROUP_ID                 = aws_security_group.idr_new.id
+      IDR_TASK_SECURITY_GROUP_ID                 = aws_security_group.idr.id
       IDR_TASK_CAPACITY_PROVIDER_STRATEGIES_JSON = jsonencode(local.idr_capacity_provider_strategies)
       IDR_TASK_SCHEDULES_GROUP                   = aws_scheduler_schedule_group.run_idr.name
       IDR_TASK_SCHEDULER_ROLE_ARN                = aws_iam_role.run_idr_scheduler.arn

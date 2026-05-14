@@ -94,9 +94,10 @@ group addItem(source src: LineItemComponent, target tgt: BackboneElement){
     } "Add location codeable concept";
     
     //only pull in valid dates here.
-    src.CLM_LINE_FROM_DT as clmLineFromDt -> tgt.serviced = create('Period') as tgtPeriod then{
-        clmLineFromDt -> tgtPeriod.start = clmLineFromDt "add start";
-        src.CLM_LINE_THRU_DT as clmLineThruDt -> tgtPeriod.end = clmLineThruDt "add end";
+    src.CLM_LINE_FROM_DT as clmLineFromDt where src.CLM_LINE_THRU_DT.exists().not() -> tgt.serviced = clmLineFromDt "Add serviced Date";
+    src.CLM_LINE_THRU_DT as clmLineThruDt -> tgt.serviced = create('Period') as tgtPeriod then{
+        src.CLM_LINE_FROM_DT as clmLineFromDt -> tgtPeriod.start = clmLineFromDt "add start";
+        clmLineThruDt -> tgtPeriod.end = clmLineThruDt "add end";
     } "Add serviced period";
 
 
@@ -267,10 +268,10 @@ group addAdjudicationReason1(source src: LineItemComponent, target tgt: Backbone
     src -> tgt.category = cc("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator", "adjustmentreason") "added rule";
     src.CLM_1_REV_CNTR_ANSI_GRP_CD as grpCode -> tgt.reason = create('CodeableConcept') as tgtCC then {
         grpCode -> tgtCC.coding = c("https://x12.org/codes/claim-adjustment-group-codes", grpCode) "Add x12 group code";
-        grpCode -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CODE", grpCode) "Add non-proprietary group code";
+        grpCode -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CD", grpCode) "Add non-proprietary group code";
         src.CLM_1_REV_CNTR_ANSI_RSN_CD as rsnCode -> tgt then {
             rsnCode -> tgtCC.coding = c("https://x12.org/codes/claim-adjustment-reason-codes", rsnCode) "Add x12 group code";
-            rsnCode -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CODE", rsnCode) "Add non-proprietary group code";
+            rsnCode -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CD", rsnCode) "Add non-proprietary group code";
         } "Add reason code";
     } "Add group and reason codes";
 }
@@ -279,10 +280,10 @@ group addAdjudicationReason2(source src: LineItemComponent, target tgt: Backbone
     src -> tgt.category = cc("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator", "adjustmentreason") "added rule";
     src.CLM_2_REV_CNTR_ANSI_GRP_CD as grpCode -> tgt.reason = create('CodeableConcept') as tgtCC then {
         grpCode -> tgtCC.coding = c("https://x12.org/codes/claim-adjustment-group-codes", grpCode) "Add x12 group code";
-        grpCode -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CODE", grpCode) "Add non-proprietary group code";
+        grpCode -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CD", grpCode) "Add non-proprietary group code";
         src.CLM_2_REV_CNTR_ANSI_RSN_CD as rsnCode -> tgt then {
             rsnCode -> tgtCC.coding = c("https://x12.org/codes/claim-adjustment-reason-codes", rsnCode) "Add x12 group code";
-            rsnCode -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CODE", rsnCode) "Add non-proprietary group code";
+            rsnCode -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CD", rsnCode) "Add non-proprietary group code";
         } "Add reason code";
     } "Add group and reason codes";
 }
@@ -291,10 +292,10 @@ group addAdjudicationReason3(source src: LineItemComponent, target tgt: Backbone
     src -> tgt.category = cc("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator", "adjustmentreason") "added rule";
     src.CLM_3_REV_CNTR_ANSI_GRP_CD as grpCode -> tgt.reason = create('CodeableConcept') as tgtCC then {
         grpCode -> tgtCC.coding = c("https://x12.org/codes/claim-adjustment-group-codes", grpCode) "Add x12 group code";
-        grpCode -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CODE", grpCode) "Add non-proprietary group code";
+        grpCode -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CD", grpCode) "Add non-proprietary group code";
         src.CLM_3_REV_CNTR_ANSI_RSN_CD as rsnCode -> tgt then {
             rsnCode -> tgtCC.coding = c("https://x12.org/codes/claim-adjustment-reason-codes", rsnCode) "Add x12 group code";
-            rsnCode -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CODE", rsnCode) "Add non-proprietary group code";
+            rsnCode -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CD", rsnCode) "Add non-proprietary group code";
         } "Add reason code";
     } "Add group and reason codes";
 }
@@ -303,10 +304,10 @@ group addAdjudicationReason4(source src: LineItemComponent, target tgt: Backbone
     src -> tgt.category = cc("http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudicationDiscriminator", "adjustmentreason") "added rule";
     src.CLM_4_REV_CNTR_ANSI_GRP_CD as grpCode -> tgt.reason = create('CodeableConcept') as tgtCC then {
         grpCode -> tgtCC.coding = c("https://x12.org/codes/claim-adjustment-group-codes", grpCode) "Add x12 group code";
-        grpCode -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CODE", grpCode) "Add non-proprietary group code";
+        grpCode -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-GRP-CD", grpCode) "Add non-proprietary group code";
         src.CLM_4_REV_CNTR_ANSI_RSN_CD as rsnCode -> tgt then {
             rsnCode -> tgtCC.coding = c("https://x12.org/codes/claim-adjustment-reason-codes", rsnCode) "Add x12 group code";
-            rsnCode -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CODE", rsnCode) "Add non-proprietary group code";
+            rsnCode -> tgtCC.coding = c("https://bluebutton.cms.gov/fhir/CodeSystem/ANSI-RSN-CD", rsnCode) "Add non-proprietary group code";
         } "Add reason code";
     } "Add group and reason codes";
 }

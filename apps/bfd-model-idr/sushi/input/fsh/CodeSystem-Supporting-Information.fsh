@@ -56,3 +56,5 @@ Description: "A selection of codes that provide supporting information about the
 * #CLM_NGACO_CPTATN_SW "AIPBP Benefit Enhancement Indicator" "A single character code of “Y” or “N” that indicates whether a particular claim/claim line is tied to an AIPBP benefit enhancement."
 * #CLM_ACO_CARE_MGMT_HCBS_SW "Care Management Home Visits Enhancement" "A single character code of “Y” or “N” that indicates whether a particular claim/claim line is tied to a Care Management Home Visits benefit enhancement."
 * #CLM_PD_STUS_CD "Claim Paid Status Code" "A status code indicating the paid status of a claim."
+* #PRVDR_FAC_FIPS_ST_CD "Federal Information Processing Standards (FIPS) State Code" "Identifies the state where the facility providing services is located."
+* #RNDRG_PRVDR_FIPS_ST_CD "Rendering Provider FIPS State Code" "Identifies the state that the provider providing the service is located in"
