@@ -34,7 +34,7 @@ chmod 600 "${TEMP_KEY_FILE}"
 (
     cd "$SCRIPT_DIR"
     mvn flyway:migrate \
-        "-Dflyway.url=jdbc:snowflake://$IDR_ACCOUNT.snowflakecomputing.com/?db=${IDR_DATABASE}&warehouse=${IDR_WAREHOUSE}&role=SERVICE_USER&JDBC_QUERY_RESULT_FORMAT=JSON&authenticator=snowflake_jwt&private_key_file=${TEMP_KEY_FILE}" \
+        "-Dflyway.url=jdbc:snowflake://$IDR_ACCOUNT.snowflakecomputing.com/?db=${IDR_DATABASE}&warehouse=${IDR_WAREHOUSE}&role=${BFD_ENV}_SERVICE_USER&JDBC_QUERY_RESULT_FORMAT=JSON&authenticator=snowflake_jwt&private_key_file=${TEMP_KEY_FILE}" \
         "-Dflyway.user=$IDR_USERNAME"
 ) || rm "${TEMP_KEY_FILE}" # ensure private key gets deleted on failure
 

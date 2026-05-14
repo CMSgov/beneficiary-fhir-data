@@ -2,7 +2,7 @@
 
 set -e
 
-read -p "Are you sure you want to overwrite the data in ${BFD_ENV}? " -n 1 -r
+read -p "Are you sure you want to overwrite the data in ${BFD_ENV}? [yn] " -n 1 -r
 echo    # (optional) move to a new line
 if ! [[ $REPLY =~ ^[Yy]$ ]]
 then
