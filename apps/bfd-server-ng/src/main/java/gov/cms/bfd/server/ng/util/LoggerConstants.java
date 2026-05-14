@@ -98,26 +98,36 @@ public class LoggerConstants {
   public static final String REQUEST_START_TIME = "request_start_time";
 
   /** Name of the Accept-Encoding header. */
-  public static final String HTTP_ACCEPT_ENCODING = "http_access_request_header_Accept-Encoding";
+  public static final String HTTP_ACCESS_REQUEST_HEADER_ACCEPT_ENCODING =
+      "http_access_request_header_Accept-Encoding";
 
   /** Name of the X-Request-ID header. */
-  public static final String HTTP_RESPONSE_X_REQUEST_ID =
+  public static final String HTTP_ACCESS_RESPONSE_HEADER_REQUEST_ID =
       "http_access_response_header_X-Request-ID";
 
   /** Name of the outgoing response status code. */
-  public static final String HTTP_RESPONSE_STATUS = "http_access_response_status";
+  public static final String HTTP_ACCESS_RESPONSE_STATUS = "http_access_response_status";
 
   /** Name of the Content-Length header. */
-  public static final String HTTP_RESPONSE_CONTENT_LENGTH =
+  public static final String HTTP_ACCESS_RESPONSE_CONTENT_LENGTH =
       "http_access_response_header_Content-Length";
 
   /** Name of the total request duration in milliseconds. */
-  public static final String HTTP_RESPONSE_DURATION_MS =
+  public static final String HTTP_ACCESS_RESPONSE_DURATION_MILLISECONDS =
       "http_access_response_duration_milliseconds";
 
   /** Name of the Content-Encoding header. */
-  public static final String HTTP_RESPONSE_CONTENT_ENCODING =
+  public static final String HTTP_ACCESS_RESPONSE_HEADER_ENCODING =
       "http_access_response_header_Content-Encoding";
+
+  /** Name of the HTTP request method. */
+  public static final String HTTP_ACCESS_REQUEST_HTTP_METHOD = "http_access_request_http_method";
+
+  /** Name of the HTTP request url. */
+  public static final String HTTP_ACCESS_REQUEST_URL = "http_access_request_url";
+
+  /** Name of the HTTP request uri. */
+  public static final String HTTP_ACCESS_REQUEST_URI = "http_access_request_uri";
 
   /** Name for the number of FHIR resources returned in the response. */
   public static final String RESOURCES_RETURNED_COUNT = "resources_returned_count";

@@ -5,6 +5,7 @@ import static gov.cms.bfd.server.ng.util.MetricTimer.*;
 import gov.cms.bfd.server.ng.coverage.model.BeneficiaryCoverage;
 import gov.cms.bfd.server.ng.input.CoveragePart;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
+import gov.cms.bfd.server.ng.log.QueryTelemetryUtil;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import gov.cms.bfd.server.ng.util.LogUtil;
 import gov.cms.bfd.server.ng.util.MetricTimer;
@@ -24,6 +25,7 @@ public class CoverageRepository {
   private final EntityManager entityManager;
   private final DateUtil dateUtil;
   private final MeterRegistry meterRegistry;
+  private final QueryTelemetryUtil queryTelemetryUtil;
 
   /**
    * Retrieves a {@link BeneficiaryCoverage} record by its ID and last updated timestamp.
@@ -51,7 +53,7 @@ public class CoverageRepository {
     var hasLis = false;
 
     try {
-      var beneficiaryCoverage =
+      var query =
           entityManager
               .createQuery(
                   String.format(
@@ -143,9 +145,10 @@ public class CoverageRepository {
               .setParameter("lowerBound", lastUpdatedRange.getLowerBoundDateTime().orElse(null))
               .setParameter("upperBound", lastUpdatedRange.getUpperBoundDateTime().orElse(null))
               .setParameter("today", benefitDate)
-              .setParameter("beneSk", beneSk)
-              .getResultList()
-              .stream()
+              .setParameter("beneSk", beneSk);
+
+      var beneficiaryCoverage =
+          queryTelemetryUtil.executeAndTrack("searchBeneficiaryWithCoverage", query).stream()
               .findFirst();
 
       if (beneficiaryCoverage.isPresent()) {

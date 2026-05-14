@@ -3,6 +3,7 @@ package gov.cms.bfd.server.ng.filter;
 import static gov.cms.bfd.server.ng.util.LoggerConstants.*;
 
 import com.google.common.base.Strings;
+import gov.cms.bfd.server.ng.log.RequestTelemetryContext;
 import gov.cms.bfd.server.ng.log.RequestTelemetryLogger;
 import gov.cms.bfd.server.ng.util.CertificateUtil;
 import jakarta.servlet.Filter;
@@ -41,6 +42,7 @@ public class ExtractMetadataFilter implements Filter {
     if (servletRequest instanceof HttpServletRequest httpRequest
         && servletResponse instanceof HttpServletResponse httpResponse) {
 
+      RequestTelemetryContext.createContext();
       requestTelemetryLogger.setRequestStartTime(httpRequest);
 
       final var certAlias = certificateUtil.getAliasFromCert(httpRequest);
@@ -83,10 +85,13 @@ public class ExtractMetadataFilter implements Filter {
       if (servletRequest instanceof HttpServletRequest httpRequest
           && servletResponse instanceof HttpServletResponse httpResponse) {
         requestTelemetryLogger.recordResponse(httpRequest, httpResponse);
+        var telemetryContext = RequestTelemetryContext.current();
+        requestTelemetryLogger.recordDatabaseQueries(telemetryContext.getDbQueries());
         requestTelemetryLogger.logRequestComplete();
       }
       // Clean up to prevent leaks
       MDC.clear();
+      RequestTelemetryContext.clear();
     }
   }
 }

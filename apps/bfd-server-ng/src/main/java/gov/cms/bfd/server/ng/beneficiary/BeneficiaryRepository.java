@@ -7,6 +7,7 @@ import gov.cms.bfd.server.ng.beneficiary.filter.PatientMatchFilter;
 import gov.cms.bfd.server.ng.beneficiary.model.*;
 import gov.cms.bfd.server.ng.claim.model.SystemType;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
+import gov.cms.bfd.server.ng.log.QueryTelemetryUtil;
 import gov.cms.bfd.server.ng.util.LogUtil;
 import gov.cms.bfd.server.ng.util.MetricTimer;
 import io.micrometer.core.annotation.Timed;
@@ -26,6 +27,7 @@ import org.springframework.stereotype.Repository;
 public class BeneficiaryRepository {
   private final EntityManager entityManager;
   private final MeterRegistry meterRegistry;
+  private final QueryTelemetryUtil queryTelemetryUtil;
 
   private static final String PATIENT_MATCH_TYPE = "exact";
 
@@ -39,16 +41,17 @@ public class BeneficiaryRepository {
    */
   @Timed(value = "application.beneficiary.search_identities")
   public List<BeneficiaryIdentity> getValidBeneficiaryIdentities(long beneXrefSk) {
-    return entityManager
-        .createQuery(
-            """
+    var query =
+        entityManager
+            .createQuery(
+                """
                  SELECT identity
                  FROM BeneficiaryIdentity identity
                  WHERE identity.id.xrefSk = :beneXrefSk
                 """,
-            BeneficiaryIdentity.class)
-        .setParameter("beneXrefSk", beneXrefSk)
-        .getResultList();
+                BeneficiaryIdentity.class)
+            .setParameter("beneXrefSk", beneXrefSk);
+    return queryTelemetryUtil.executeAndTrack("getValidBeneficiaryIdentities", query);
   }
 
   /**
@@ -65,7 +68,7 @@ public class BeneficiaryRepository {
               key = "hasLastUpdated",
               expression = "lowerBound.isPresent() || upperBound.isPresent()")
           DateTimeRange lastUpdatedRange) {
-    var optionalBeneficiary =
+    var query =
         entityManager
             .createQuery(
                 String.format(
@@ -82,10 +85,10 @@ public class BeneficiaryRepository {
                 Beneficiary.class)
             .setParameter("beneSk", beneSk)
             .setParameter("lowerBound", lastUpdatedRange.getLowerBoundDateTime().orElse(null))
-            .setParameter("upperBound", lastUpdatedRange.getUpperBoundDateTime().orElse(null))
-            .getResultList()
-            .stream()
-            .findFirst();
+            .setParameter("upperBound", lastUpdatedRange.getUpperBoundDateTime().orElse(null));
+
+    var optionalBeneficiary =
+        queryTelemetryUtil.executeAndTrack("findById", query).stream().findFirst();
 
     optionalBeneficiary.ifPresent(beneficiary -> LogUtil.logBeneSk(beneficiary.getBeneSk()));
     return optionalBeneficiary;
@@ -99,18 +102,17 @@ public class BeneficiaryRepository {
    */
   @Timed(value = "application.beneficiary.search_xref_by_bene_sk")
   public Optional<Long> getXrefSkFromBeneSk(long beneSk) {
-    return entityManager
-        .createQuery(
-            """
+    var query =
+        entityManager
+            .createQuery(
+                """
                  SELECT bene.xrefSk
                  FROM Beneficiary bene
                  WHERE bene.beneSk = :beneSk
                """,
-            Long.class)
-        .setParameter("beneSk", beneSk)
-        .getResultList()
-        .stream()
-        .findFirst();
+                Long.class)
+            .setParameter("beneSk", beneSk);
+    return queryTelemetryUtil.executeAndTrack("getXrefSkFromBeneSk", query).stream().findFirst();
   }
 
   /**
@@ -121,18 +123,18 @@ public class BeneficiaryRepository {
    */
   @Timed(value = "application.beneficiary.search_xref_by_mbi")
   public Optional<Long> getXrefSkFromMbi(String mbi) {
-    return entityManager
-        .createQuery(
-            """
+    var query =
+        entityManager
+            .createQuery(
+                """
                  SELECT bene.xrefSk
                  FROM Beneficiary bene
                  WHERE bene.identifier.mbi = :mbi
                 """,
-            Long.class)
-        .setParameter("mbi", mbi)
-        .getResultList()
-        .stream()
-        .findFirst();
+                Long.class)
+            .setParameter("mbi", mbi);
+
+    return queryTelemetryUtil.executeAndTrack("getXrefSkFromMbi", query).stream().findFirst();
   }
 
   /**
@@ -157,7 +159,7 @@ public class BeneficiaryRepository {
         var scenario = indexedScenario.entries();
         var filters = new PatientMatchFilter(scenario).getFilters("bene", SystemType.UNKNOWN);
 
-        var query =
+        var jpql =
             entityManager.createQuery(
                 String.format(
                     """
@@ -169,8 +171,9 @@ public class BeneficiaryRepository {
                     """,
                     filters.filterClause()),
                 Beneficiary.class);
+        var query = DbFilterParam.withParams(jpql, filters.params());
         var benes =
-            DbFilterParam.withParams(query, filters.params()).getResultList().stream().toList();
+            queryTelemetryUtil.executeAndTrack("searchPatientMatch", query).stream().toList();
         var matchedRecords =
             benes.stream()
                 .map(b -> new MatchedRecord(b.getBeneSk(), b.getEffectiveTimestamp()))

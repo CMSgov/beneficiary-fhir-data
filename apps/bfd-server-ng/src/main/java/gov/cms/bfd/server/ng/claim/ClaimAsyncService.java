@@ -7,6 +7,7 @@ import gov.cms.bfd.server.ng.DbFilterBuilder;
 import gov.cms.bfd.server.ng.DbFilterParam;
 import gov.cms.bfd.server.ng.claim.model.*;
 import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
+import gov.cms.bfd.server.ng.log.QueryTelemetryUtil;
 import gov.cms.bfd.server.ng.util.LogUtil;
 import gov.cms.bfd.server.ng.util.MetricTimer;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -25,6 +26,7 @@ public class ClaimAsyncService {
 
   @PersistenceContext private final EntityManager entityManager;
   private final MeterRegistry meterRegistry;
+  private final QueryTelemetryUtil queryTelemetryUtil;
 
   @Async
   @SuppressWarnings("java:S2077")
@@ -50,10 +52,10 @@ public class ClaimAsyncService {
     var timer = new MetricTimer(meterRegistry);
 
     try {
-      var result =
+      var query =
           DbFilterParam.withParams(entityManager.createQuery(jpql, claimClass), filters.params())
-              .setParameter("claimUniqueIds", claimUniqueIds)
-              .getResultList();
+              .setParameter("claimUniqueIds", claimUniqueIds);
+      var result = queryTelemetryUtil.executeAndTrack("findByIdsInClaimType", query);
       result.stream()
           .findFirst()
           .ifPresent(claim -> LogUtil.logBeneSk(claim.getBeneficiary().getBeneSk()));
@@ -86,10 +88,11 @@ public class ClaimAsyncService {
     var timer = new MetricTimer(meterRegistry);
 
     try {
-      var result =
+      var query =
           DbFilterParam.withParams(entityManager.createQuery(jpql, claimClass), filters.params())
-              .setParameter("beneSk", criteria.beneSk())
-              .getResultList();
+              .setParameter("beneSk", criteria.beneSk());
+      var result =
+          queryTelemetryUtil.executeAndTrack("fetchClaims_" + claimClass.getSimpleName(), query);
       result.stream()
           .findFirst()
           .ifPresent(claim -> LogUtil.logBeneSk(claim.getBeneficiary().getBeneSk()));
