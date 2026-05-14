@@ -132,6 +132,38 @@ header_to_supp_info_cols = {
     "CLM_NRLN_RIC_CD": "CLM_NRLN_RIC_CD",
     "CLM_RIC_CD": "CLM_RIC_CD",
     "GEO_BLG_SSA_STATE_CD": "GEO_BLG_SSA_STATE_CD",
+    "CLM_MDCR_EXHSTD_DT": "CLM_MDCR_EXHSTD_DT",
+    "BENE_PTNT_STUS_CD": "BENE_PTNT_STUS_CD",
+    "CLM_ADMSN_SRC_CD": "CLM_ADMSN_SRC_CD",
+    "CLM_ADMSN_TYPE_CD": "CLM_ADMSN_TYPE_CD",
+    "CLM_FI_ACTN_CD": "CLM_FI_ACTN_CD",
+    "CLM_HHA_LUP_IND_CD": "CLM_HHA_LUP_IND_CD",
+    "CLM_HHA_RFRL_CD": "CLM_HHA_RFRL_CD",
+    "CLM_MDCR_INSTNL_MCO_PD_SW": "CLM_MDCR_INSTNL_MCO_PD_SW",
+    "CLM_MDCR_NCH_PTNT_STUS_IND_CD": "CLM_MDCR_NCH_PTNT_STUS_IND_CD",
+    "CLM_MDCR_NPMT_RSN_CD": "CLM_MDCR_NPMT_RSN_CD",
+    "CLM_OP_SRVC_TYPE_CD": "CLM_OP_SRVC_TYPE_CD",
+    "CLM_PPS_IND_CD": "CLM_PPS_IND_CD",
+    "DGNS_DRG_CD": "DGNS_DRG_CD",
+    "DGNS_DRG_OUTLIER_CD": "DGNS_DRG_OUTLIER_CD",
+    "CLM_ACTV_CARE_THRU_DT": "CLM_ACTV_CARE_THRU_DT",
+    "CLM_CMS_PROC_DT": "CLM_CMS_PROC_DT",
+    "CLM_NCH_WKLY_PROC_DT": "CLM_NCH_WKLY_PROC_DT",
+    "CLM_NCVRD_FROM_DT": "CLM_NCVRD_FROM_DT",
+    "CLM_NCVRD_THRU_DT": "CLM_NCVRD_THRU_DT",
+    "CLM_QLFY_STAY_FROM_DT": "CLM_QLFY_STAY_FROM_DT",
+    "CLM_QLFY_STAY_THRU_DT": "CLM_QLFY_STAY_THRU_DT",
+    "CLM_SUBMSN_DT": "CLM_SUBMSN_DT",
+    "CLM_ADJSTMT_TYPE_CD": "CLM_ADJSTMT_TYPE_CD",
+    "CLM_BLOOD_PT_FRNSH_QTY": "CLM_BLOOD_PT_FRNSH_QTY",
+    "CLM_CNTRCTR_NUM": "CLM_CNTRCTR_NUM",
+    "CLM_DISP_CD": "CLM_DISP_CD",
+    "CLM_IDR_LD_DT": "CLM_IDR_LD_DT",
+    "CLM_NCH_PRMRY_PYR_CD": "CLM_NCH_PRMRY_PYR_CD",
+    "CLM_QUERY_CD": "CLM_QUERY_CD",
+    "CLM_CARR_PMT_DNL_CD": "CLM_CARR_PMT_DNL_CD",
+    "CLM_CLNCL_TRIL_NUM": "CLM_CLNCL_TRIL_NUM",
+    "CLM_MDCR_PRFNL_PRVDR_ASGNMT_SW": "CLM_MDCR_PRFNL_PRVDR_ASGNMT_SW",
 }
 
 line_to_supp_info_cols = {
@@ -356,10 +388,29 @@ for si_comp in supporting_info_components:
 
 for source_col, target_col in header_to_supp_info_cols.items():
     value = cur_sample_data.get(source_col)
+    if value is None and "institutionalComponents" in cur_sample_data:
+        value = cur_sample_data["institutionalComponents"].get(source_col)
+    if value is None and "profComponents" in cur_sample_data:
+        value = cur_sample_data["profComponents"].get(source_col)
+
     if value:
         temp_var = {"ROW_NUM": supporting_info_seq, target_col: value}
         supporting_info_components.append(temp_var)
         supporting_info_seq += 1
+
+# special case - want these in a single supportinginfo component
+actv_from = cur_sample_data.get("CLM_ACTV_CARE_FROM_DT")
+
+dschrg_dt = cur_sample_data.get("CLM_DSCHRG_DT")
+
+if actv_from or dschrg_dt:
+    temp_var = {"ROW_NUM": supporting_info_seq}
+    if actv_from:
+        temp_var["CLM_ACTV_CARE_FROM_DT"] = actv_from
+    if dschrg_dt:
+        temp_var["CLM_DSCHRG_DT"] = dschrg_dt
+    supporting_info_components.append(temp_var)
+    supporting_info_seq += 1
 
 
 # There can be line item NPIs that are not present at header level, but

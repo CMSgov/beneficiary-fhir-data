@@ -251,7 +251,7 @@
     - Basis
     - Regular
     - CMS
-- inputPath: SupportingInfoComponent.CLM_IDR_LD_DT
+- inputPath: ExplanationOfBenefit-Base.CLM_IDR_LD_DT
   appliesTo:
     - Inpatient
     - Outpatient
@@ -387,7 +387,7 @@
     - Basis
     - Regular
     - CMS
-- inputPath: SupportingInfoComponent.CLM_QUERY_CD
+- inputPath: ExplanationOfBenefit-Base.CLM_QUERY_CD
   appliesTo:
     - Inpatient
     - Outpatient
@@ -475,7 +475,7 @@
     - Basis
     - Regular
     - CMS
-- inputPath: SupportingInfoComponent.CLM_OP_SRVC_TYPE_CD
+- inputPath: ExplanationOfBenefit-Institutional-Base.CLM_OP_SRVC_TYPE_CD
   appliesTo:
     - Outpatient
   sources:
@@ -516,7 +516,7 @@
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_OPRTNL_IME_AMT').exists()).amount.value
   profiles:
     - CMS
-- inputPath: SupportingInfoComponent.CLM_CMS_PROC_DT
+- inputPath: ExplanationOfBenefit-Base.CLM_CMS_PROC_DT
   appliesTo:
     - Inpatient
     - Outpatient
@@ -1791,7 +1791,7 @@
     - Basis
     - Regular
     - CMS
-- inputPath: SupportingInfoComponent.CLM_ACTV_CARE_FROM_DT
+- inputPath: ExplanationOfBenefit-Base.CLM_ACTV_CARE_FROM_DT
   appliesTo:
     - Inpatient
     - HHA
@@ -1813,7 +1813,7 @@
     - Basis
     - Regular
     - CMS
-- inputPath: SupportingInfoComponent.CLM_DSCHRG_DT
+- inputPath: ExplanationOfBenefit-Base.CLM_DSCHRG_DT
   appliesTo:
     - Inpatient
     - SNF
@@ -1832,7 +1832,7 @@
     - Basis
     - Regular
     - CMS
-- inputPath: SupportingInfoComponent.CLM_ADMSN_TYPE_CD
+- inputPath: ExplanationOfBenefit-Institutional-Base.CLM_ADMSN_TYPE_CD
   appliesTo:
     - Inpatient
     - SNF
@@ -1851,7 +1851,7 @@
     - Basis
     - Regular
     - CMS
-- inputPath: SupportingInfoComponent.CLM_SUBMSN_DT
+- inputPath: ExplanationOfBenefit-Base.CLM_SUBMSN_DT
   appliesTo:
     - Inpatient
     - Carrier
@@ -1872,7 +1872,7 @@
     - Basis
     - Regular
     - CMS
-- inputPath: SupportingInfoComponent.BENE_PTNT_STUS_CD
+- inputPath: ExplanationOfBenefit-Institutional-Base.BENE_PTNT_STUS_CD
   appliesTo:
     - Inpatient
     - Outpatient
@@ -1896,7 +1896,7 @@
     - Basis
     - Regular
     - CMS
-- inputPath: SupportingInfoComponent.DGNS_DRG_CD
+- inputPath: ExplanationOfBenefit-Institutional-Base.DGNS_DRG_CD
   appliesTo:
     - Inpatient
     - SNF
@@ -1914,7 +1914,7 @@
     - Basis
     - Regular
     - CMS
-- inputPath: SupportingInfoComponent.CLM_BLOOD_PT_FRNSH_QTY
+- inputPath: ExplanationOfBenefit-Base.CLM_BLOOD_PT_FRNSH_QTY
   appliesTo:
     - Inpatient
     - SNF
@@ -1929,7 +1929,7 @@
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_BLOOD_PT_FRNSH_QTY').exists()).value.value
   profiles:
     - CMS
-- inputPath: SupportingInfoComponent.CLM_MDCR_INSTNL_MCO_PD_SW
+- inputPath: ExplanationOfBenefit-Institutional-Base.CLM_MDCR_INSTNL_MCO_PD_SW
   appliesTo:
     - Inpatient
     - Outpatient 
@@ -1947,7 +1947,7 @@
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_MDCR_INSTNL_MCO_PD_SW').exists()).code.coding.code
   profiles:
     - CMS
-- inputPath: SupportingInfoComponent.CLM_ADMSN_SRC_CD
+- inputPath: ExplanationOfBenefit-Institutional-Base.CLM_ADMSN_SRC_CD
   appliesTo:
     - Inpatient
     - SNF
@@ -2051,7 +2051,7 @@
     - Basis
     - Regular
     - CMS
-- inputPath: SupportingInfoComponent.CLM_NCH_WKLY_PROC_DT
+- inputPath: ExplanationOfBenefit-Base.CLM_NCH_WKLY_PROC_DT
   appliesTo:
     - Inpatient
     - Outpatient
@@ -2069,7 +2069,7 @@
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_NCH_WKLY_PROC_DT').exists()).timing
   profiles:
     - CMS
-- inputPath: SupportingInfoComponent.CLM_NCVRD_FROM_DT
+- inputPath: ExplanationOfBenefit-Base.CLM_NCVRD_FROM_DT
   appliesTo:
     - Inpatient
     - SNF
@@ -2082,7 +2082,7 @@
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_NCVRD_FROM_DT').exists()).timing
   profiles:
     - CMS
-- inputPath: SupportingInfoComponent.CLM_NCVRD_THRU_DT
+- inputPath: ExplanationOfBenefit-Base.CLM_NCVRD_THRU_DT
   appliesTo:
     - Inpatient
     - SNF
@@ -2095,7 +2095,7 @@
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_NCVRD_THRU_DT').exists()).timing
   profiles:
     - CMS
-- inputPath: SupportingInfoComponent.CLM_QLFY_STAY_FROM_DT
+- inputPath: ExplanationOfBenefit-Base.CLM_QLFY_STAY_FROM_DT
   appliesTo:
     - SNF
     - Inpatient
@@ -2110,7 +2110,7 @@
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_QLFY_STAY_FROM_DT').exists()).timing
   profiles:
     - CMS
-- inputPath: SupportingInfoComponent.CLM_QLFY_STAY_THRU_DT
+- inputPath: ExplanationOfBenefit-Base.CLM_QLFY_STAY_THRU_DT
   appliesTo:
     - SNF
     - Inpatient
@@ -2125,7 +2125,7 @@
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_QLFY_STAY_THRU_DT').exists()).timing
   profiles:
     - CMS
-- inputPath: SupportingInfoComponent.CLM_ACTV_CARE_THRU_DT
+- inputPath: ExplanationOfBenefit-Base.CLM_ACTV_CARE_THRU_DT
   appliesTo:
     - Inpatient
     - SNF
@@ -2138,7 +2138,7 @@
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_ACTV_CARE_THRU_DT').exists()).timing
   profiles:
     - CMS
-- inputPath: SupportingInfoComponent.CLM_MDCR_EXHSTD_DT
+- inputPath: ExplanationOfBenefit-Base.CLM_MDCR_EXHSTD_DT
   appliesTo:
     - Inpatient
     - Hospice
@@ -2152,7 +2152,7 @@
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_MDCR_EXHSTD_DT').exists()).timing
   profiles:
     - CMS
-- inputPath: SupportingInfoComponent.CLM_FI_ACTN_CD
+- inputPath: ExplanationOfBenefit-Institutional-Base.CLM_FI_ACTN_CD
   appliesTo:
     - Inpatient
     - SNF
@@ -2214,7 +2214,7 @@
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_INSTNL_MDCR_COINS_DAY_CNT').exists()).value
   profiles:
     - CMS
-- inputPath: SupportingInfoComponent.CLM_DISP_CD
+- inputPath: ExplanationOfBenefit-Base.CLM_DISP_CD
   appliesTo:
     - Inpatient
     - SNF
@@ -2292,7 +2292,7 @@
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_INSTNL_PER_DIEM_AMT').exists()).amount.value
   profiles:
     - CMS
-- inputPath: SupportingInfoComponent.CLM_MDCR_NPMT_RSN_CD
+- inputPath: ExplanationOfBenefit-Institutional-Base.CLM_MDCR_NPMT_RSN_CD
   appliesTo:
     - Inpatient
     - HHA
@@ -2414,7 +2414,7 @@
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_MDCR_IP_PPS_CPTL_HRMLS_AMT').exists()).amount.value
   profiles:
     - CMS
-- inputPath: SupportingInfoComponent.CLM_PPS_IND_CD
+- inputPath: ExplanationOfBenefit-Institutional-Base.CLM_PPS_IND_CD
   appliesTo:
     - Inpatient
     - Outpatient
@@ -2458,7 +2458,7 @@
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_INSTNL_CVRD_DAY_CNT').exists()).value
   profiles:
     - CMS
-- inputPath: SupportingInfoComponent.CLM_CNTRCTR_NUM
+- inputPath: ExplanationOfBenefit-Base.CLM_CNTRCTR_NUM
   appliesTo:
     - Inpatient
     - HHA
@@ -2484,7 +2484,7 @@
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_CNTRCTR_NUM').exists()).code.coding.code
   profiles:
     - CMS
-- inputPath: SupportingInfoComponent.CLM_NCH_PRMRY_PYR_CD
+- inputPath: ExplanationOfBenefit-Base.CLM_NCH_PRMRY_PYR_CD
   appliesTo:
     - Inpatient
     - HHA
@@ -2827,7 +2827,7 @@
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication' and code='CLM_MDCR_HOSPC_PRD_CNT').exists()).value
   profiles:
     - CMS
-- inputPath: SupportingInfoComponent.CLM_HHA_LUP_IND_CD
+- inputPath: ExplanationOfBenefit-Institutional-Base.CLM_HHA_LUP_IND_CD
   appliesTo:
     - HHA
   sources:
@@ -2840,7 +2840,7 @@
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_HHA_LUP_IND_CD').exists()).code.coding.code
   profiles:
     - CMS
-- inputPath: SupportingInfoComponent.CLM_HHA_RFRL_CD
+- inputPath: ExplanationOfBenefit-Institutional-Base.CLM_HHA_RFRL_CD
   appliesTo:
     - HHA
   sources:
@@ -3194,7 +3194,7 @@
     - CMS
     - Basis
     - Regular
-- inputPath: SupportingInfoComponent.CLM_CARR_PMT_DNL_CD
+- inputPath: ExplanationOfBenefit-Professional-Base.CLM_CARR_PMT_DNL_CD
   appliesTo:
     - Carrier
     - DME
@@ -3226,7 +3226,7 @@
   fhirPath: ExplanationOfBenefit.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication').exists() and category.coding.where(code='CLM_MDCR_PRFNL_PRMRY_PYR_AMT').exists()).amount.value
   profiles:
     - CMS
-- inputPath: SupportingInfoComponent.CLM_MDCR_PRFNL_PRVDR_ASGNMT_SW
+- inputPath: ExplanationOfBenefit-Professional-Base.CLM_MDCR_PRFNL_PRVDR_ASGNMT_SW
   appliesTo:
     - Carrier
     - DME
@@ -3241,7 +3241,7 @@
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_MDCR_PRFNL_PRVDR_ASGNMT_SW').exists()).code.coding.code
   profiles:
     - CMS
-- inputPath: SupportingInfoComponent.CLM_CLNCL_TRIL_NUM
+- inputPath: ExplanationOfBenefit-Professional-Base.CLM_CLNCL_TRIL_NUM
   appliesTo:
     - Carrier
     - DME
@@ -3530,7 +3530,7 @@
   sourceView: V2_MDCR_CLM_LINE_PRFNL
   sourceColumn: CLM_LINE_PRFNL_DME_PRICE_AMT
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_PRFNL_DME_PRICE_AMT')).amount.value
-- inputPath: SupportingInfoComponent.CLM_ADJSTMT_TYPE_CD
+- inputPath: ExplanationOfBenefit-Base.CLM_ADJSTMT_TYPE_CD
   appliesTo:
     - Inpatient
     - Outpatient
@@ -3963,7 +3963,7 @@
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_MDCR_PRMRY_PYR_ALOWD_AMT')).amount.value
   profiles:
     - CMS
-- inputPath: SupportingInfoComponent.CLM_MDCR_NCH_PTNT_STUS_IND_CD
+- inputPath: ExplanationOfBenefit-Institutional-Base.CLM_MDCR_NCH_PTNT_STUS_IND_CD
   appliesTo:
     - Inpatient
     - Hospice
