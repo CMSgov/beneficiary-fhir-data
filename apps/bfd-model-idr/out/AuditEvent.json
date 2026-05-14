@@ -1,10 +1,19 @@
 {
   "resourceType" : "AuditEvent",
-  "type" : {
-    "system" : "http://terminology.hl7.org/CodeSystem/audit-event-type",
-    "code" : "rest"
+  "meta" : {
+    "profile" : ["http://hl7.org/fhir/StructureDefinition/AuditEvent"]
   },
+  "type" : {
+    "system" : "http://terminology.hl7.org/CodeSystem/iso-21089-lifecycle",
+    "code" : "transmit"
+  },
+  "subtype" : [{
+    "system" : "urn:cms:hte",
+    "code" : "patient-match-request"
+  }],
+  "action" : "E",
   "recorded" : "2026-04-06T15:10:21.178850077Z",
+  "outcome" : "0",
   "purposeOfEvent" : [{
     "coding" : [{
       "system" : "http://terminology.hl7.org/CodeSystem/v3-ActReason",
@@ -13,6 +22,7 @@
     }]
   }],
   "agent" : [{
+    "altId" : "Alex's test app",
     "name" : "Alex's test app",
     "requestor" : true,
     "network" : {
@@ -20,6 +30,11 @@
       "type" : "2"
     }
   }],
+  "source" : {
+    "observer" : {
+      "display" : "CMS Beneficiary FHIR Data Server"
+    }
+  },
   "entity" : [{
     "what" : {
       "reference" : "Patient/-427786917"
@@ -34,7 +49,15 @@
       "code" : "1",
       "display" : "Patient"
     },
-    "name" : "01",
-    "description" : "Name refers to the combination evaluated that returned a unique match. 'What' refers to the unique match itself."
+    "name" : "Match Info",
+    "description" : "The detail elements refer to the matching algorithm + version combination that resulted in a unique match.",
+    "detail" : [{
+      "type" : "matchAlgorithm",
+      "valueString" : "01"
+    },
+    {
+      "type" : "matchAlgorithmVersion",
+      "valueString" : "3.2.2"
+    }]
   }]
 }

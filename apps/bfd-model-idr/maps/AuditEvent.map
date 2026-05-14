@@ -5,19 +5,28 @@ uses "http://hl7.org/fhir/StructureDefinition/AuditEvent" alias FHIRAuditEvent a
 
 group createAuditEvent(source src: BFDAuditLogLogical, target tgt: FHIRAuditEvent) {
     src.timeStamp as time -> tgt.recorded = time "Set recorded time";
-    
+    /*
+    //Uncomment this block when doing validation. It will be replaced when an HTE AuditEvent profile is published.
+    //Until then, it's necessary to hint the profile when validating, but you don't want to publish resources
+    //with this as a "profile". 
+    src -> tgt.meta = create('Meta') as tgtMeta then {
+      src -> tgtMeta.profile = "http://hl7.org/fhir/StructureDefinition/AuditEvent" "add profile";
+    } "Create metadata";
+    */
     src -> tgt.type = create('Coding') as typeCoding then {
-        src -> typeCoding.system = "http://terminology.hl7.org/CodeSystem/audit-event-type" "Set system";
-        src -> typeCoding.code = "rest" "Set code for Query";
+        src -> typeCoding.system = "http://terminology.hl7.org/CodeSystem/iso-21089-lifecycle" "Set system";
+        src -> typeCoding.code = "transmit" "Set code for Query (aligned with HTE spec)";
     } "Set type";
 
-    src -> tgt.subType = c('urn:cms:hte','patient-match-request') "Add event subtype";
+    src -> tgt.subtype = c('urn:cms:hte','patient-match-request') "Add event subtype";
     src -> tgt.action = "E" "Add action type";
     src -> tgt.outcome = "0" "Add success outcome"; // we have this because we only log successful events for now.
 
-    src -> tgt.source = create('Reference') as tgtReference then {
-        src -> tgtReference.display = "CMS Beneficiary FHIR Data Server" "Add source of AuditEvent as BFD";
-    } "Create source";
+    src -> tgt.source = create('BackboneElement') as bbElement then{
+        src -> bbElement.observer = create('Reference') as tgtReference then {
+            src -> tgtReference.display = "CMS Beneficiary FHIR Data Server" "Add source of AuditEvent as BFD";
+        } "Create source";
+    } "Add source";
 
     src -> tgt.purposeOfEvent = cc("http://terminology.hl7.org/CodeSystem/v3-ActReason", "PATRQT") "Set purpose of event";
 
@@ -45,7 +54,17 @@ group createAuditEvent(source src: BFDAuditLogLogical, target tgt: FHIRAuditEven
         beneSk -> entity.what = create('Reference') as tgtRef then {
             beneSk -> tgtRef.reference = append("Patient/", beneSk) "Set patient reference";
         } "Add reference";
-        src.finalDetermination as det -> entity.name = det "Set final determination (table 2 combination) as entity name";
-        src -> entity.description = "Name refers to the combination evaluated that returned a unique match. 'What' refers to the unique match itself." "Set SKs found as description";
-    } "Set unique match (Patient) entity";
+        src -> entity.name = "Match Info" "add name";
+        src -> entity.description = "The detail elements refer to the matching algorithm + version combination that resulted in a unique match." "add description";
+
+        src.finalDetermination as det -> entity.detail = create('BackboneElement') as tgtDetail then {
+            src -> tgtDetail.type = "matchAlgorithm" "note as algorithm";
+            det -> tgtDetail.value = det "add algorithm";
+        } "Add algorithm version";
+        src -> entity.detail = create('BackboneElement') as tgtDetail then {
+            src -> tgtDetail.type = "matchAlgorithmVersion" "note as version";
+            src -> tgtDetail.value = "3.2.2" "note version, hardcoded to 3.2.2 for now";
+        } "Add versioning info";
+    } "finish entity";
+
 }
