@@ -82,7 +82,7 @@ Id: ExplanationOfBenefit-Base
 * CLM_BILL_FREQ_CD 0..1 string "Bill Frequency Code" "A CODE INDICATING THE SEQUENCE OF AN INSTITUTIONAL CLAIM IN THE BENEFICIARYS CURRENT EPISODE OF CARE. IT IS THE THIRD DIGIT OF THE TYPE OF BILL (TOB)."
 * providerList 0..* Provider "Provider List" "Provider List"
   * ^type.targetProfile = "http://hl7.org/fhir/StructureDefinition/Provider"
-* META_SRC_SK 0..1 string "Meta Source SK"
+* META_SRC_SK 0..1 string "Source system information for the "
 * CLM_AUDT_TRL_STUS_CD 0..1 string "Claim Status Code" "THE CURRENT STATUS INFORMATION FOR THE PENDING AND PAID CLAIMS CURRENTLY IN THE SYSTEM."
 * CLM_PD_STUS_CD 0..1 string "Claim Paid Status Code" "A CODE IDENTIFYING THE STATUS OF A CLAIM.    REFERENCE TABLE: CLM_PD_STUS_CD"
 * CLM_BNFT_ENHNCMT_1_CD 0..1 string "Claim Benefit Enhancement Code 1" "A CODE IDENTIFYING THE FIRST APPLICABLE ACCOUNTABLE CARE ORGANIZATION (ACO) BENEFIT ENHANCEMENT INDICATOR (BEI) THAT APPLIED TO THE CLAIM."
