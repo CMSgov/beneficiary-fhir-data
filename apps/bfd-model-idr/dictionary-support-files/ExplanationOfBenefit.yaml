@@ -3856,7 +3856,7 @@
   fhirPath: ExplanationOfBenefit.item.adjudication.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Adjudication') and category.coding.where(code='CLM_LINE_OTAF_AMT')).amount.value
   profiles:
     - CMS
-- inputPath: SupportingInfoComponent.CLM_RLT_COND_CD
+- inputPath: ExplanationOfBenefit-Base.CLM_RLT_COND_SGNTR_SK
   appliesTo:
     - Inpatient
     - Outpatient

@@ -47,7 +47,7 @@ Id: SupportingInfoComponent
 * DGNS_DRG_OUTLIER_CD 0..1 string "Claim Diagnosis Related Group Outlier Stay Code" ""
 * CLM_NRLN_RIC_CD 0..1 string "Near Line Record Identification Code" ""
 * CLM_RIC_CD 0..1 string "Record Identification Code" ""
-* CLM_RLT_COND_CD 0..1 string "Claim Related Condition Code" "AN INTEGRATED DATA REPOSITORY (IDR) ASSIGNED SURROGATE KEY THAT UNIQUELY IDENTIFIES A COMBINATION OF RELATED CONDITIONS THAT HAVE CO-OCCURRED WITHIN SOME SET OF CLAIMS."
+* CLM_RLT_COND_CD 0..1 string "Claim Related Condition Code" ""
 * CLM_QUERY_CD 1..1 string "Claim Query Code" ""
 * CLM_IDR_LD_DT 1..1 date "Claim IDR Load Date" ""
 * CLM_CNTRCTR_NUM 0..1 string "FI Number" ""
