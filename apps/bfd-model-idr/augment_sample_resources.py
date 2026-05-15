@@ -74,7 +74,15 @@ def cleanup_empty_items(data):
         new_sic = []
         si_map = {}
         # Filter for non-empty items (items having more than just ROW_NUM)
-        for next_row, item in enumerate((i for i in sic if any(k != "ROW_NUM" for k in i)), start=1):
+        filtered_sic = [i for i in sic if any(k != "ROW_NUM" for k in i)]
+
+        # Sort on avail columns for consistency.
+        def get_sort_key(item):
+            return sorted([(k, str(v)) for k, v in item.items() if k != "ROW_NUM"])
+
+        sorted_sic = sorted(filtered_sic, key=get_sort_key)
+
+        for next_row, item in enumerate(sorted_sic, start=1):
             if (old_row := item.get("ROW_NUM")) is not None:
                 si_map.update({str(old_row): next_row, int(old_row): next_row})
             item["ROW_NUM"] = next_row
