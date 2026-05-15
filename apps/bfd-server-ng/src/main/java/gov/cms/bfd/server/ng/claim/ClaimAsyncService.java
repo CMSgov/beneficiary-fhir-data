@@ -10,7 +10,7 @@ import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
 import gov.cms.bfd.server.ng.log.QueryTelemetryUtil;
 import gov.cms.bfd.server.ng.util.LogUtil;
 import gov.cms.bfd.server.ng.util.MetricTimer;
-import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Tags;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.util.*;
@@ -25,7 +25,7 @@ import org.springframework.stereotype.Repository;
 public class ClaimAsyncService {
 
   @PersistenceContext private final EntityManager entityManager;
-  private final MeterRegistry meterRegistry;
+  private final MetricTimer metricTimer;
   private final QueryTelemetryUtil queryTelemetryUtil;
 
   @Async
@@ -49,21 +49,20 @@ public class ClaimAsyncService {
             """,
             baseQuery, whereClause);
 
-    var timer = new MetricTimer(meterRegistry);
-
-    try {
-      var query =
-          DbFilterParam.withParams(entityManager.createQuery(jpql, claimClass), filters.params())
-              .setParameter("claimUniqueIds", claimUniqueIds);
-      var result = queryTelemetryUtil.executeAndTrack("findByIdsInClaimType", query);
-      result.stream()
-          .findFirst()
-          .ifPresent(claim -> LogUtil.logBeneSk(claim.getBeneficiary().getBeneSk()));
-      return CompletableFuture.completedFuture(result);
-    } finally {
-      timer.stop(
-          "application.claim.search_by_ids_in_claim_type", CLAIM_TYPE, claimClass.getSimpleName());
-    }
+    return metricTimer.recordMetricAsync(
+        "application.claim.search_by_ids_in_claim_type",
+        () -> Tags.of(CLAIM_TYPE, claimClass.getSimpleName()),
+        () -> {
+          var query =
+              DbFilterParam.withParams(
+                      entityManager.createQuery(jpql, claimClass), filters.params())
+                  .setParameter("claimUniqueIds", claimUniqueIds);
+          var result = queryTelemetryUtil.executeAndTrack("findByIdsInClaimType", query);
+          result.stream()
+              .findFirst()
+              .ifPresent(claim -> LogUtil.logBeneSk(claim.getBeneficiary().getBeneSk()));
+          return CompletableFuture.completedFuture(result);
+        });
   }
 
   @Async
@@ -85,22 +84,22 @@ public class ClaimAsyncService {
             """,
             baseQuery, whereClause);
 
-    var timer = new MetricTimer(meterRegistry);
-
-    try {
-      var query =
-          DbFilterParam.withParams(entityManager.createQuery(jpql, claimClass), filters.params())
-              .setParameter("beneSk", criteria.beneSk());
-      var result =
-          queryTelemetryUtil.executeAndTrack("fetchClaims_" + claimClass.getSimpleName(), query);
-      result.stream()
-          .findFirst()
-          .ifPresent(claim -> LogUtil.logBeneSk(claim.getBeneficiary().getBeneSk()));
-      return CompletableFuture.completedFuture(result);
-    } finally {
-      timer.stop(
-          "application.claim.fetch_claims_with_claim_type", CLAIM_TYPE, claimClass.getSimpleName());
-    }
+    return metricTimer.recordMetricAsync(
+        "application.claim.fetch_claims_with_claim_type",
+        () -> Tags.of(CLAIM_TYPE, claimClass.getSimpleName()),
+        () -> {
+          var query =
+              DbFilterParam.withParams(
+                      entityManager.createQuery(jpql, claimClass), filters.params())
+                  .setParameter("beneSk", criteria.beneSk());
+          var result =
+              queryTelemetryUtil.executeAndTrack(
+                  "fetchClaims_" + claimClass.getSimpleName(), query);
+          result.stream()
+              .findFirst()
+              .ifPresent(claim -> LogUtil.logBeneSk(claim.getBeneficiary().getBeneSk()));
+          return CompletableFuture.completedFuture(result);
+        });
   }
 
   private String buildWhereClause(DbFilter filter, SystemType systemType) {

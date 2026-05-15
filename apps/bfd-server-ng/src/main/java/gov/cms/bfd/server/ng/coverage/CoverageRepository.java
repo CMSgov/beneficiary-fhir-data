@@ -7,10 +7,9 @@ import gov.cms.bfd.server.ng.input.CoveragePart;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.log.QueryTelemetryUtil;
 import gov.cms.bfd.server.ng.util.DateUtil;
-import gov.cms.bfd.server.ng.util.LogUtil;
 import gov.cms.bfd.server.ng.util.MetricTimer;
 import io.micrometer.core.aop.MeterTag;
-import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Tags;
 import jakarta.persistence.EntityManager;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
@@ -24,8 +23,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class CoverageRepository {
   private final EntityManager entityManager;
   private final DateUtil dateUtil;
-  private final MeterRegistry meterRegistry;
   private final QueryTelemetryUtil queryTelemetryUtil;
+  private final MetricTimer metricTimer;
 
   /**
    * Retrieves a {@link BeneficiaryCoverage} record by its ID and last updated timestamp.
@@ -47,17 +46,11 @@ public class CoverageRepository {
     // In the case of rx enrollments, if multiple records have matching begin dates then we sort by
     // latest pdp rx info begin date.
 
-    var timer = new MetricTimer(meterRegistry);
-    var hasPartC = false;
-    var hasPartD = false;
-    var hasLis = false;
-
-    try {
-      var query =
-          entityManager
-              .createQuery(
-                  String.format(
-                      """
+    var query =
+        entityManager
+            .createQuery(
+                String.format(
+                    """
                         WITH latestPartCDEnrollments AS (
                             SELECT e.id AS id,
                                 ROW_NUMBER() OVER (
@@ -139,47 +132,32 @@ public class CoverageRepository {
                           ))
                         ORDER BY b.obsoleteTimestamp DESC
                       """,
-                      lastUpdatedRange.getLowerBoundSqlOperator(),
-                      lastUpdatedRange.getUpperBoundSqlOperator()),
-                  BeneficiaryCoverage.class)
-              .setParameter("lowerBound", lastUpdatedRange.getLowerBoundDateTime().orElse(null))
-              .setParameter("upperBound", lastUpdatedRange.getUpperBoundDateTime().orElse(null))
-              .setParameter("today", benefitDate)
-              .setParameter("beneSk", beneSk);
+                    lastUpdatedRange.getLowerBoundSqlOperator(),
+                    lastUpdatedRange.getUpperBoundSqlOperator()),
+                BeneficiaryCoverage.class)
+            .setParameter("lowerBound", lastUpdatedRange.getLowerBoundDateTime().orElse(null))
+            .setParameter("upperBound", lastUpdatedRange.getUpperBoundDateTime().orElse(null))
+            .setParameter("today", benefitDate)
+            .setParameter("beneSk", beneSk);
 
-      var beneficiaryCoverage =
-          queryTelemetryUtil.executeAndTrack("searchBeneficiaryWithCoverage", query).stream()
-              .findFirst();
+    return metricTimer.recordMetric(
+        "application.coverage.search_by_bene",
+        () ->
+            queryTelemetryUtil.executeAndTrack("searchBeneficiaryWithCoverage", query).stream()
+                .findFirst(),
+        coverageOptional -> {
+          if (coverageOptional.isEmpty()) {
+            return Tags.empty();
+          }
+          var coverage = coverageOptional.get();
 
-      if (beneficiaryCoverage.isPresent()) {
-        var coverage = beneficiaryCoverage.get();
-        LogUtil.logBeneSk(coverage.getBeneSk());
-        var tags = getCoverageTags(coverage);
-        hasPartC = tags.hasPartC;
-        hasPartD = tags.hasPartD;
-        hasLis = tags.hasLis;
-      }
-
-      return beneficiaryCoverage;
-    } finally {
-      timer.stop(
-          "application.coverage.search_by_bene",
-          HAS_PART_C,
-          String.valueOf(hasPartC),
-          HAS_PART_D,
-          String.valueOf(hasPartD),
-          HAS_LIS,
-          String.valueOf(hasLis));
-    }
+          return Tags.of(
+              HAS_PART_C,
+              String.valueOf(coverage.getEnrollment(CoveragePart.PART_C).isPresent()),
+              HAS_PART_D,
+              String.valueOf(coverage.getEnrollment(CoveragePart.PART_D).isPresent()),
+              HAS_LIS,
+              String.valueOf(!coverage.getBeneficiaryLowIncomeSubsidies().isEmpty()));
+        });
   }
-
-  private CoverageTags getCoverageTags(BeneficiaryCoverage coverage) {
-    var hasPartC = coverage.getEnrollment(CoveragePart.PART_C).isPresent();
-    var hasPartD = coverage.getEnrollment(CoveragePart.PART_D).isPresent();
-    var hasLis = !coverage.getBeneficiaryLowIncomeSubsidies().isEmpty();
-
-    return new CoverageTags(hasPartC, hasPartD, hasLis);
-  }
-
-  private record CoverageTags(boolean hasPartC, boolean hasPartD, boolean hasLis) {}
 }
