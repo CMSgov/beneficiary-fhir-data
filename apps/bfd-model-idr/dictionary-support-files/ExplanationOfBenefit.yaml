@@ -3256,7 +3256,7 @@
   fhirPath: ExplanationOfBenefit.supportingInfo.where(category.coding.where(system='https://bluebutton.cms.gov/fhir/CodeSystem/Supporting-Information').exists() and category.coding.where(code='CLM_CLNCL_TRIL_NUM').exists()).code.coding.code
   profiles:
     - CMS
-- inputPath: SupportingInfoComponent.CLM_LINE_HCT_HGB_RSLT_NUM
+- inputPath: LineItemComponent.CLM_LINE_HCT_HGB_RSLT_NUM
   appliesTo:
     - Carrier
     - DME
@@ -3270,7 +3270,7 @@
   fhirPath: ExplanationOfBenefit.contained.where(id = %root.supportingInfo.valueReference.reference.substring(1)).value
   profiles:
     - CMS
-- inputPath: SupportingInfoComponent.CLM_LINE_HCT_HGB_TYPE_CD
+- inputPath: LineItemComponent.CLM_LINE_HCT_HGB_TYPE_CD
   appliesTo:
     - Carrier
     - DME
@@ -3284,7 +3284,7 @@
   fhirPath: ExplanationOfBenefit.contained.where(id = %root.supportingInfo.valueReference.reference.substring(1)).code.coding
   profiles:
     - CMS
-- inputPath: SupportingInfoComponent.CLM_LINE_CARR_CLNCL_LAB_NUM
+- inputPath: LineItemComponent.CLM_LINE_CARR_CLNCL_LAB_NUM
   appliesTo:
     - Carrier
   sources:

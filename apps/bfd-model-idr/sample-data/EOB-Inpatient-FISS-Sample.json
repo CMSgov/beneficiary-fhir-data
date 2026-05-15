@@ -91,77 +91,7 @@
             "CLM_DGNS_PRCDR_ICD_IND": "0"
         }
     ],
-    "supportingInfoComponents": [
-        {
-            "ROW_NUM": "1",
-            "CLM_ACTV_CARE_FROM_DT": "2021-01-01",
-            "CLM_DSCHRG_DT": "2021-01-02"
-        },
-        {
-            "ROW_NUM": "2",
-            "CLM_ADMSN_TYPE_CD": "3"
-        },
-        {
-            "ROW_NUM": "3",
-            "CLM_SUBMSN_DT": "2020-01-13"
-        },
-        {
-            "ROW_NUM": "4",
-            "BENE_PTNT_STUS_CD": "06"
-        },
-        {
-            "ROW_NUM": "5",
-            "DGNS_DRG_CD": "460"
-        },
-        {
-            "ROW_NUM": "6",
-            "CLM_BLOOD_PT_FRNSH_QTY": "15"
-        },
-        {
-            "ROW_NUM": "7",
-            "CLM_MDCR_INSTNL_MCO_PD_SW": "0"
-        },
-        {
-            "ROW_NUM": "9",
-            "CLM_ADMSN_SRC_CD": "2"
-        },
-        {
-            "ROW_NUM": "11",
-            "CLM_NCH_PRMRY_PYR_CD": "Z"
-        },
-        {
-            "ROW_NUM": "12",
-            "CLM_RIC_CD": "U"
-        },
-        {
-            "ROW_NUM": "13",
-            "CLM_QUERY_CD": "3"
-        },
-        {
-            "ROW_NUM": "14",
-            "CLM_IDR_LD_DT": "2025-01-18"
-        },
-        {
-            "ROW_NUM": "15",
-            "CLM_ADJSTMT_TYPE_CD": "0"
-        },
-        {
-            "ROW_NUM": "16",
-            "CLM_DISP_CD": "1"
-        },
-        {
-            "ROW_NUM": "17",
-            "CLM_CMS_PROC_DT": "2025-01-01"
-        },
-        {
-            "ROW_NUM": "18",
-            "CLM_MDCR_NPMT_RSN_CD": "P"
-        },
-        {
-            "ROW_NUM": "19",
-            "CLM_FI_ACTN_CD": "1"
-        }
-    ],
+    "supportingInfoComponents": [],
     "lineItemComponents": [
         {
             "diagnosisRelatedLine": "5",
@@ -233,7 +163,14 @@
         "CLM_MDCR_IP_LRD_USE_CNT": "7",
         "CLM_INSTNL_PER_DIEM_AMT": "5.00",
         "CLM_INSTNL_CVRD_DAY_CNT": "30",
-        "CLM_HIPPS_UNCOMPD_CARE_AMT": "15.00"
+        "CLM_HIPPS_UNCOMPD_CARE_AMT": "15.00",
+        "DGNS_DRG_CD": "460",
+        "CLM_ADMSN_TYPE_CD": "3",
+        "BENE_PTNT_STUS_CD": "06",
+        "CLM_MDCR_INSTNL_MCO_PD_SW": "0",
+        "CLM_ADMSN_SRC_CD": "2",
+        "CLM_MDCR_NPMT_RSN_CD": "P",
+        "CLM_FI_ACTN_CD": "1"
     },
     "PRVDR_ATNDG_PRVDR_NPI_NUM": "1942945159",
     "PRVDR_OPRTG_PRVDR_NPI_NUM": "1942945159",
@@ -242,5 +179,15 @@
     "CLM_BLG_PRVDR_OSCAR_NUM": "00054",
     "CLM_BILL_FAC_TYPE_CD": "1",
     "CLM_BILL_CLSFCTN_CD": "2",
-    "CLM_BILL_FREQ_CD": "3"
+    "CLM_BILL_FREQ_CD": "3",
+    "CLM_ACTV_CARE_FROM_DT": "2021-01-01",
+    "CLM_DSCHRG_DT": "2021-01-02",
+    "CLM_SUBMSN_DT": "2020-01-13",
+    "CLM_CMS_PROC_DT": "2025-01-01",
+    "CLM_BLOOD_PT_FRNSH_QTY": "15",
+    "CLM_NCH_PRMRY_PYR_CD": "Z",
+    "CLM_QUERY_CD": "3",
+    "CLM_IDR_LD_DT": "2025-01-18",
+    "CLM_ADJSTMT_TYPE_CD": "0",
+    "CLM_DISP_CD": "1"
 }
