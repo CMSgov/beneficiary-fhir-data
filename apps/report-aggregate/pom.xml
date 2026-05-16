@@ -24,6 +24,11 @@
     <dependency>
       <groupId>gov.cms.bfd</groupId>
       <version>${project.version}</version>
+      <artifactId>bfd-db-migrator-synthetic</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>gov.cms.bfd</groupId>
+      <version>${project.version}</version>
       <artifactId>bfd-model-codebook-data</artifactId>
     </dependency>
     <dependency>
