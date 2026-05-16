@@ -4,7 +4,6 @@ import static gov.cms.bfd.server.ng.util.LoggerConstants.*;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import lombok.AllArgsConstructor;
@@ -19,25 +18,6 @@ import org.springframework.stereotype.Component;
 public class RequestTelemetryLogger {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(RequestTelemetryLogger.class);
-
-  private static final List<String> REQUEST_MDC_LOG_KEYS =
-      List.of(
-          HAPI_INCOMING_PRE_HANDLE,
-          HAPI_INCOMING_PRE_PROCESS,
-          HAPI_INCOMING_POST_PROCESS,
-          HAPI_PROCESS_COMPLETED_NORMALLY,
-          HAPI_PROCESS_COMPLETED,
-          HAPI_OUTGOING_RESPONSE,
-          HTTP_ACCESS_REQUEST_URL,
-          HTTP_ACCESS_REQUEST_URI,
-          HTTP_ACCESS_REQUEST_HTTP_METHOD,
-          HTTP_ACCESS_REQUEST_HEADER_ACCEPT_ENCODING,
-          HTTP_ACCESS_RESPONSE_HEADER_REQUEST_ID,
-          HTTP_ACCESS_RESPONSE_STATUS,
-          HTTP_ACCESS_RESPONSE_CONTENT_LENGTH,
-          HTTP_ACCESS_RESPONSE_DURATION_MILLISECONDS,
-          HTTP_ACCESS_RESPONSE_HEADER_ENCODING,
-          RESOURCES_RETURNED_COUNT);
 
   private static final String OBFUSCATED_MBI = "*********";
 
@@ -110,20 +90,12 @@ public class RequestTelemetryLogger {
     MDC.put(logKey(MDC_PREFIX, RESOURCES_RETURNED_COUNT), String.valueOf(count));
   }
 
-  /** Emits a structured log containing all metrics and attributes of a request. */
+  /**
+   * Emits a structured log containing a summary of all metrics and attributes of a request as
+   * populated by the MDC.
+   */
   public void logRequestComplete() {
-
-    var logBuilder =
-        LOGGER.atInfo().setMessage("Request Completed").addKeyValue(LOG_TYPE, "requestTelemetry");
-
-    for (var key : REQUEST_MDC_LOG_KEYS) {
-      var value = MDC.get(MDC_PREFIX + key);
-      if (value != null) {
-        logBuilder = logBuilder.addKeyValue(key, value);
-      }
-    }
-
-    logBuilder.log();
+    LOGGER.atInfo().setMessage("Request Completed").addKeyValue(LOG_TYPE, "requestTelemetry").log();
   }
 
   private void putIfPresent(String key, String value) {
