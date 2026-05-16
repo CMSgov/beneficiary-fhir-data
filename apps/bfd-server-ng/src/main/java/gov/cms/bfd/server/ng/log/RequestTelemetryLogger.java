@@ -2,8 +2,6 @@ package gov.cms.bfd.server.ng.log;
 
 import static gov.cms.bfd.server.ng.util.LoggerConstants.*;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
@@ -13,7 +11,6 @@ import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
-import org.slf4j.spi.LoggingEventBuilder;
 import org.springframework.stereotype.Component;
 
 /** Logs request telemetry logs. */
@@ -23,9 +20,24 @@ public class RequestTelemetryLogger {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(RequestTelemetryLogger.class);
 
-  private final ObjectMapper objectMapper;
-
-  private static final String DB_QUERIES = "database_queries";
+  private static final List<String> REQUEST_MDC_LOG_KEYS =
+      List.of(
+          HAPI_INCOMING_PRE_HANDLE,
+          HAPI_INCOMING_PRE_PROCESS,
+          HAPI_INCOMING_POST_PROCESS,
+          HAPI_PROCESS_COMPLETED_NORMALLY,
+          HAPI_PROCESS_COMPLETED,
+          HAPI_OUTGOING_RESPONSE,
+          HTTP_ACCESS_REQUEST_URL,
+          HTTP_ACCESS_REQUEST_URI,
+          HTTP_ACCESS_REQUEST_HTTP_METHOD,
+          HTTP_ACCESS_REQUEST_HEADER_ACCEPT_ENCODING,
+          HTTP_ACCESS_RESPONSE_HEADER_REQUEST_ID,
+          HTTP_ACCESS_RESPONSE_STATUS,
+          HTTP_ACCESS_RESPONSE_CONTENT_LENGTH,
+          HTTP_ACCESS_RESPONSE_DURATION_MILLISECONDS,
+          HTTP_ACCESS_RESPONSE_HEADER_ENCODING,
+          RESOURCES_RETURNED_COUNT);
 
   private static final String OBFUSCATED_MBI = "*********";
 
@@ -98,45 +110,18 @@ public class RequestTelemetryLogger {
     MDC.put(logKey(MDC_PREFIX, RESOURCES_RETURNED_COUNT), String.valueOf(count));
   }
 
-  /**
-   * Records database query telemetry for the current request.
-   *
-   * @param dbQueries the database query telemetry collected
-   */
-  public void recordDatabaseQueries(List<DbQueryTelemetry> dbQueries) {
-    if (dbQueries.isEmpty()) {
-      return;
-    }
-    try {
-      MDC.put(logKey(MDC_PREFIX, DB_QUERIES), objectMapper.writeValueAsString(dbQueries));
-    } catch (JsonProcessingException _) {
-      MDC.put(logKey(MDC_PREFIX, DB_QUERIES), "Failed to serialize database queries metrics");
-    }
-  }
-
   /** Emits a structured log containing all metrics and attributes of a request. */
   public void logRequestComplete() {
 
     var logBuilder =
         LOGGER.atInfo().setMessage("Request Completed").addKeyValue(LOG_TYPE, "requestTelemetry");
 
-    logBuilder = addMdcIfPresent(logBuilder, HAPI_INCOMING_PRE_HANDLE);
-    logBuilder = addMdcIfPresent(logBuilder, HAPI_INCOMING_PRE_PROCESS);
-    logBuilder = addMdcIfPresent(logBuilder, HAPI_INCOMING_POST_PROCESS);
-    logBuilder = addMdcIfPresent(logBuilder, HAPI_PROCESS_COMPLETED_NORMALLY);
-    logBuilder = addMdcIfPresent(logBuilder, HAPI_PROCESS_COMPLETED);
-    logBuilder = addMdcIfPresent(logBuilder, HAPI_OUTGOING_RESPONSE);
-
-    logBuilder = addMdcIfPresent(logBuilder, HTTP_ACCESS_REQUEST_HTTP_METHOD);
-    logBuilder = addMdcIfPresent(logBuilder, HTTP_ACCESS_REQUEST_HEADER_ACCEPT_ENCODING);
-    logBuilder = addMdcIfPresent(logBuilder, HTTP_ACCESS_RESPONSE_HEADER_REQUEST_ID);
-    logBuilder = addMdcIfPresent(logBuilder, HTTP_ACCESS_RESPONSE_STATUS);
-    logBuilder = addMdcIfPresent(logBuilder, HTTP_ACCESS_RESPONSE_CONTENT_LENGTH);
-    logBuilder = addMdcIfPresent(logBuilder, HTTP_ACCESS_RESPONSE_DURATION_MILLISECONDS);
-    logBuilder = addMdcIfPresent(logBuilder, HTTP_ACCESS_RESPONSE_HEADER_ENCODING);
-
-    logBuilder = addMdcIfPresent(logBuilder, RESOURCES_RETURNED_COUNT);
-    logBuilder = addMdcIfPresent(logBuilder, DB_QUERIES);
+    for (var key : REQUEST_MDC_LOG_KEYS) {
+      var value = MDC.get(MDC_PREFIX + key);
+      if (value != null) {
+        logBuilder = logBuilder.addKeyValue(key, value);
+      }
+    }
 
     logBuilder.log();
   }
@@ -145,15 +130,6 @@ public class RequestTelemetryLogger {
     if (value != null) {
       MDC.put(logKey(MDC_PREFIX, key), value);
     }
-  }
-
-  private LoggingEventBuilder addMdcIfPresent(
-      LoggingEventBuilder loggingEventBuilder, String mdcKey) {
-    var value = MDC.get(MDC_PREFIX + mdcKey);
-    if (value != null) {
-      return loggingEventBuilder.addKeyValue(mdcKey, value);
-    }
-    return loggingEventBuilder;
   }
 
   private String replaceAllMbis(String input) {

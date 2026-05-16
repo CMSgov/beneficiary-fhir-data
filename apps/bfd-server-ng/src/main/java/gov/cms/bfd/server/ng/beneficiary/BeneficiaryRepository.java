@@ -22,9 +22,13 @@ import java.util.Optional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
 
-/** Repository for querying beneficiary information. */
+/**
+ * Repository for querying beneficiary information. Suppress SonarQube about dynamically formatted
+ * SQL queries being safe here. Ignore. These are internally generated.
+ */
 @Repository
 @AllArgsConstructor
+@SuppressWarnings("java:S2077")
 public class BeneficiaryRepository {
   private final EntityManager entityManager;
   private final MeterRegistry meterRegistry;

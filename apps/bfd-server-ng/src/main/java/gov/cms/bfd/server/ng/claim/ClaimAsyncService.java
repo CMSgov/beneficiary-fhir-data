@@ -19,9 +19,13 @@ import lombok.AllArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Repository;
 
-/** Repository methods for claims. */
+/**
+ * Repository methods for claims. Suppress SonarQube about dynamically formatted SQL queries being
+ * safe here. Ignore. These are internally generated.
+ */
 @Repository
 @AllArgsConstructor
+@SuppressWarnings("java:S2077")
 public class ClaimAsyncService {
 
   @PersistenceContext private final EntityManager entityManager;
