@@ -43,12 +43,15 @@ class Identifiers {
                       .setSystem(SystemUrls.BLUE_BUTTON_CLAIM_CONTROL_NUMBER)
                       .setValue(s)));
     } else {
-      claimOriginalControlNumber.ifPresent(
-          s ->
-              identifiers.add(
-                  new Identifier()
-                      .setSystem(SystemUrls.BLUE_BUTTON_CLAIM_CONTROL_NUMBER)
-                      .setValue(s)));
+      // we need the or to handle cases where CLM_CNTL_NUM=ORIG_CLM_CNTL_NUM
+      claimOriginalControlNumber
+          .or(() -> claimControlNumber)
+          .ifPresent(
+              s ->
+                  identifiers.add(
+                      new Identifier()
+                          .setSystem(SystemUrls.BLUE_BUTTON_CLAIM_CONTROL_NUMBER)
+                          .setValue(s)));
     }
     return identifiers;
   }

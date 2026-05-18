@@ -707,6 +707,9 @@ gov.cms.bfd.server.ng.EobPharmacyIT.eobReadPharmacyWithOrganization=[
       } ]
     },
     "value" : "1409088853940"
+  }, {
+    "system" : "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
+    "value" : "31646182683546TDF"
   } ],
   "insurance" : [ {
     "coverage" : {
