@@ -108,7 +108,7 @@ public class RequestTelemetryLogger {
     if (input == null) {
       return input;
     }
-    Matcher matcher = MBI_REGEX.matcher(input);
+    var matcher = MBI_REGEX.matcher(input);
     while (matcher.find()) {
       input = input.replace(matcher.group(), OBFUSCATED_MBI);
     }
