@@ -35,44 +35,38 @@ class Identifiers {
                             .setCode("uc")
                             .setDisplay("Unique Claim ID")));
     var identifiers = new ArrayList<>(Collections.singletonList(claimId));
-    if (!claimTypeCode.isClaimSubtype(ClaimSubtype.PDE)) {
-      claimControlNumber.ifPresent(
-          s ->
-              identifiers.add(
-                  new Identifier()
-                      .setSystem(SystemUrls.BLUE_BUTTON_CLAIM_CONTROL_NUMBER)
-                      .setValue(s)));
-    } else {
-      // we need the or to handle cases where CLM_CNTL_NUM=ORIG_CLM_CNTL_NUM
-      claimOriginalControlNumber
-          .or(() -> claimControlNumber)
-          .ifPresent(
-              s ->
-                  identifiers.add(
-                      new Identifier()
-                          .setSystem(SystemUrls.BLUE_BUTTON_CLAIM_CONTROL_NUMBER)
-                          .setValue(s)));
-    }
+    var controlNumber =
+        claimTypeCode.isClaimSubtype(ClaimSubtype.PDE)
+            ? claimOriginalControlNumber.or(() -> claimControlNumber)
+            : claimControlNumber;
+
+    controlNumber.ifPresent(
+        s ->
+            identifiers.add(
+                new Identifier()
+                    .setSystem(SystemUrls.BLUE_BUTTON_CLAIM_CONTROL_NUMBER)
+                    .setValue(s)));
+
     return identifiers;
   }
 
   public Optional<ExplanationOfBenefit.RelatedClaimComponent> toFhirRelatedClaim(
       ClaimTypeCode claimTypeCode) {
-    if (!claimTypeCode.isClaimSubtype(ClaimSubtype.PDE)) {
-      return claimOriginalControlNumber.map(
-          origCntlNum ->
-              new ExplanationOfBenefit.RelatedClaimComponent()
-                  .setRelationship(
-                      new CodeableConcept()
-                          .addCoding(
-                              new Coding()
-                                  .setSystem(SystemUrls.HL7_EX_RELATED_CLAIM_RELATIONSHIP)
-                                  .setCode("prior")))
-                  .setReference(
-                      new Identifier()
-                          .setSystem(SystemUrls.BLUE_BUTTON_CLAIM_CONTROL_NUMBER)
-                          .setValue(origCntlNum)));
+    if (claimTypeCode.isClaimSubtype(ClaimSubtype.PDE)) {
+      return Optional.empty();
     }
-    return Optional.empty();
+    return claimOriginalControlNumber.map(
+        origCntlNum ->
+            new ExplanationOfBenefit.RelatedClaimComponent()
+                .setRelationship(
+                    new CodeableConcept()
+                        .addCoding(
+                            new Coding()
+                                .setSystem(SystemUrls.HL7_EX_RELATED_CLAIM_RELATIONSHIP)
+                                .setCode("prior")))
+                .setReference(
+                    new Identifier()
+                        .setSystem(SystemUrls.BLUE_BUTTON_CLAIM_CONTROL_NUMBER)
+                        .setValue(origCntlNum)));
   }
 }
