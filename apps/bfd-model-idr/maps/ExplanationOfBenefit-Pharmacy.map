@@ -53,6 +53,7 @@ group createEOBPharmacy(source src: ExplanationOfBenefitPharmacy, target tgt: BF
           src.CLM_UNIQ_ID as claimId -> tgtIdentifier.value = claimId "Set identifier Value";
     } "Add CLM_UNIQ_ID as unique identifier";
 
+    //We only use CLM_ORIG_CNTL_NUM because it is stable for a submitted PDE, even across deleted PDEs.
     src -> tgt.identifier = create('Identifier') as tgtIdentifier then {
       src -> tgtIdentifier.system = "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM" "set system";
       src.CLM_ORIG_CNTL_NUM as claimCntlNum -> tgtIdentifier.value = claimCntlNum "Set identifier Value";
