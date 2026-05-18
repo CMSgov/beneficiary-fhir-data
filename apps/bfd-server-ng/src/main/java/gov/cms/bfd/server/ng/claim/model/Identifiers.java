@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Identifier;
 
 @Embeddable
@@ -22,7 +23,7 @@ class Identifiers {
   @Column(name = "clm_orig_cntl_num")
   private Optional<String> claimOriginalControlNumber;
 
-  public List<Identifier> toFhir() {
+  public List<Identifier> toFhir(ClaimTypeCode claimTypeCode) {
     var claimId =
         new Identifier()
             .setValue(String.valueOf(claimUniqueId))
@@ -34,19 +35,41 @@ class Identifiers {
                             .setCode("uc")
                             .setDisplay("Unique Claim ID")));
     var identifiers = new ArrayList<>(Collections.singletonList(claimId));
-    claimControlNumber.ifPresent(
-        s ->
-            identifiers.add(
-                new Identifier()
-                    .setSystem(SystemUrls.BLUE_BUTTON_CLAIM_CONTROL_NUMBER)
-                    .setValue(s)));
-
-    claimOriginalControlNumber.ifPresent(
-        s ->
-            identifiers.add(
-                new Identifier()
-                    .setSystem(SystemUrls.BLUE_BUTTON_CLAIM_CONTROL_NUMBER)
-                    .setValue(s)));
+    if (!claimTypeCode.isClaimSubtype(ClaimSubtype.PDE)) {
+      claimControlNumber.ifPresent(
+          s ->
+              identifiers.add(
+                  new Identifier()
+                      .setSystem(SystemUrls.BLUE_BUTTON_CLAIM_CONTROL_NUMBER)
+                      .setValue(s)));
+    } else {
+      claimOriginalControlNumber.ifPresent(
+          s ->
+              identifiers.add(
+                  new Identifier()
+                      .setSystem(SystemUrls.BLUE_BUTTON_CLAIM_CONTROL_NUMBER)
+                      .setValue(s)));
+    }
     return identifiers;
+  }
+
+  public Optional<ExplanationOfBenefit.RelatedClaimComponent> toFhirRelatedClaim(
+      ClaimTypeCode claimTypeCode) {
+    if (!claimTypeCode.isClaimSubtype(ClaimSubtype.PDE)) {
+      return claimOriginalControlNumber.map(
+          origCntlNum ->
+              new ExplanationOfBenefit.RelatedClaimComponent()
+                  .setRelationship(
+                      new CodeableConcept()
+                          .addCoding(
+                              new Coding()
+                                  .setSystem(SystemUrls.HL7_EX_RELATED_CLAIM_RELATIONSHIP)
+                                  .setCode("prior")))
+                  .setReference(
+                      new Identifier()
+                          .setSystem(SystemUrls.BLUE_BUTTON_CLAIM_CONTROL_NUMBER)
+                          .setValue(origCntlNum)));
+    }
+    return Optional.empty();
   }
 }
