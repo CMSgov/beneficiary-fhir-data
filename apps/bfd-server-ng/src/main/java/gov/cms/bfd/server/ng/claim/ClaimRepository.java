@@ -7,6 +7,8 @@ import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
 import io.micrometer.core.annotation.Timed;
 import io.micrometer.core.aop.MeterTag;
+import io.micrometer.core.instrument.DistributionSummary;
+import io.micrometer.core.instrument.MeterRegistry;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
@@ -19,6 +21,7 @@ import org.springframework.stereotype.Repository;
 public class ClaimRepository {
 
   private final ClaimAsyncService asyncService;
+  private final MeterRegistry meterRegistry;
 
   private static final String CLAIM_PROFESSIONAL_SHARED_SYSTEMS =
       """
@@ -188,6 +191,10 @@ public class ClaimRepository {
                     asyncService.fetchClaims(
                         d.baseQuery(), d.claimClass(), d.systemType(), criteria, filterBuilders))
             .toList();
+
+    DistributionSummary.builder("application.claim.search_by_bene.fan_out")
+        .register(meterRegistry)
+        .record(futures.size());
 
     CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
     Stream<ClaimBase> claims = futures.stream().flatMap(f -> f.join().stream());

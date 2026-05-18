@@ -98,6 +98,21 @@ resource "aws_iam_policy" "dynamodb" {
   policy      = data.aws_iam_policy_document.dynamodb.json
 }
 
+data "aws_iam_policy_document" "server_metrics" {
+  statement {
+    sid       = "AllowCloudWatchPutMetrics"
+    actions   = ["cloudwatch:PutMetricData"]
+    resources = ["*"]
+  }
+}
+
+resource "aws_iam_policy" "server_metrics" {
+  name        = "${local.name_prefix}-metrics-policy"
+  path        = local.iam_path
+  description = "Permissions for the ${local.env} ${local.service} ECS task containers to publish metrics to CloudWatch"
+  policy      = data.aws_iam_policy_document.server_metrics.json
+}
+
 resource "aws_iam_role" "service_role" {
   name                  = "${local.name_prefix}-service-role"
   path                  = local.iam_path
@@ -114,6 +129,7 @@ resource "aws_iam_role_policy_attachment" "service_role" {
     logs       = aws_iam_policy.logs.arn
     ssm_params = aws_iam_policy.ssm_params.arn
     dynamodb   = aws_iam_policy.dynamodb.arn
+    metrics    = aws_iam_policy.server_metrics.arn
   }
 
   role       = aws_iam_role.service_role.name

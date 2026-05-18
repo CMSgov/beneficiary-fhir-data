@@ -70,10 +70,22 @@ public sealed interface ClaimFiscalIntermediaryActionCode
   enum Valid implements ClaimFiscalIntermediaryActionCode {
     /** 1 - Original debit action (always a 1 for all regular bills). */
     _1("1", "Original debit action (always a 1 for all regular bills)"),
+    /** 2 - Cancel by credit adjustment. */
+    _2("2", "Cancel by credit adjustment"),
+    /** 3 - Secondary debit adjustment. */
+    _3("3", "Secondary debit adjustment"),
+    /** 4 - Cancel only adjustment. */
+    _4("4", "Cancel only adjustment"),
     /** 5 - Force action code 3 (secondary debit adjustment). */
     _5("5", "Force action code 3 (secondary debit adjustment)"),
+    /** 6 - Force action code 2. */
+    _6("6", "Force action code 2"),
+    /** 7 - Outpatient history only. */
+    _7("7", "Outpatient history only"),
     /** 8 - Benefits refused. */
-    _8("8", "Benefits refused");
+    _8("8", "Benefits refused"),
+    /** 9 - Payment requested. */
+    _9("9", "Payment requested");
 
     private final String code;
     private final String display;

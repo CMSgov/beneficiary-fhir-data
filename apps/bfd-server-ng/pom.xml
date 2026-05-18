@@ -234,6 +234,27 @@
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>dynamodb</artifactId>
         </dependency>
+        <dependency>
+            <!-- Used to interact with AWS' DynamoDB service -->
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>cloudwatch</artifactId>
+        </dependency>
+
+        <dependency>
+            <!-- Used to transmit metrics to CloudWatch for alerts and dashboards.
+                CloudWatch2 is required for the AWS SDK v2 -->
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-cloudwatch2</artifactId>
+        </dependency>
+        <dependency>
+            <!-- Used to collect metrics for virtual threads.
+            Note that java21 refers to the minimum required java version
+            for this package, not the exact version.
+            -->
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-java21</artifactId>
+            <version>${micrometer.version}</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

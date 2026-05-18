@@ -35,59 +35,80 @@ enum BlueButtonSupportingInfoCategory {
   CLM_HHA_LUP_IND_CD("CLM_HHA_LUP_IND_CD", "Claim Lupa Indicator Code"),
   /** CLM_HHA_RFRL_CD - Claim Referral Code. */
   CLM_HHA_RFRL_CD("CLM_HHA_RFRL_CD", "Claim Referral Code"),
-  /** CLM_NRLN_RIC_CD - Near Line Record Identification Code. */
-  CLM_NRLN_RIC_CD("CLM_NRLN_RIC_CD", "Near Line Record Identification Code"),
-  /** CLM_CTSTRPHC_CVRG_IND_CD - Catastrophic Coverage Code. */
-  CLM_CTSTRPHC_CVRG_IND_CD("CLM_CTSTRPHC_CVRG_IND_CD", "Catastrophic Coverage Code"),
-  /** CLM_DRUG_CVRG_STUS_CD - Drug Coverage Status Code. */
-  CLM_DRUG_CVRG_STUS_CD("CLM_DRUG_CVRG_STUS_CD", "Drug Coverage Status Code"),
-  /** CLM_DSPNSNG_STUS_CD - Claim Dispensing Status Code. */
-  CLM_DSPNSNG_STUS_CD("CLM_DSPNSNG_STUS_CD", "Claim Dispensing Status Code"),
-  /** CLM_LTC_DSPNSNG_MTHD_CD - Submission clarification code. */
-  CLM_LTC_DSPNSNG_MTHD_CD("CLM_LTC_DSPNSNG_MTHD_CD", "Submission clarification code"),
-  /** CLM_PHRMCY_SRVC_TYPE_CD - Pharmacy service type code. */
-  CLM_PHRMCY_SRVC_TYPE_CD("CLM_PHRMCY_SRVC_TYPE_CD", "Pharmacy service type code"),
+  /** CLM_PHRMCY_SRVC_TYPE_CD - Pharmacy Service Type Code. */
+  CLM_PHRMCY_SRVC_TYPE_CD("CLM_PHRMCY_SRVC_TYPE_CD", "Pharmacy Service Type Code"),
   /** CLM_PTNT_RSDNC_CD - Patient Residence Code. */
   CLM_PTNT_RSDNC_CD("CLM_PTNT_RSDNC_CD", "Patient Residence Code"),
+  /** CLM_LTC_DSPNSNG_MTHD_CD - Submission Clarification Code. */
+  CLM_LTC_DSPNSNG_MTHD_CD("CLM_LTC_DSPNSNG_MTHD_CD", "Submission Clarification Code"),
+  /** CLM_DRUG_CVRG_STUS_CD - Drug Coverage Status Code. */
+  CLM_DRUG_CVRG_STUS_CD("CLM_DRUG_CVRG_STUS_CD", "Drug Coverage Status Code"),
+  /** CLM_CTSTRPHC_CVRG_IND_CD - Catastrophic Coverage Code. */
+  CLM_CTSTRPHC_CVRG_IND_CD("CLM_CTSTRPHC_CVRG_IND_CD", "Catastrophic Coverage Code"),
+  /** CLM_LINE_HCT_HGB_RSLT_NUM - HCT/HGB Test Result. */
+  CLM_LINE_HCT_HGB_RSLT_NUM("CLM_LINE_HCT_HGB_RSLT_NUM", "HCT/HGB Test Result"),
+  /** CLM_DSPNSNG_STUS_CD - Claim Dispensing Status Code. */
+  CLM_DSPNSNG_STUS_CD("CLM_DSPNSNG_STUS_CD", "Claim Dispensing Status Code"),
   /** CLM_LINE_RX_NUM - Claim Line Prescription Service Reference Number. */
   CLM_LINE_RX_NUM("CLM_LINE_RX_NUM", "Claim Line Prescription Service Reference Number"),
+  /** DGNS_DRG_OUTLIER_CD - Claim Diagnosis Related Group Outlier Stay Code. */
+  DGNS_DRG_OUTLIER_CD("DGNS_DRG_OUTLIER_CD", "Claim Diagnosis Related Group Outlier Stay Code"),
+  /** CLM_NRLN_RIC_CD - Near Line Record Identification Code. */
+  CLM_NRLN_RIC_CD("CLM_NRLN_RIC_CD", "Near Line Record Identification Code"),
   /** CLM_RLT_COND_CD - Claim Related Condition Code. */
   CLM_RLT_COND_CD("CLM_RLT_COND_CD", "Claim Related Condition Code"),
-  /** CLM_IDR_LD_DT - Claim IDR Load Date. */
-  CLM_IDR_LD_DT("CLM_IDR_LD_DT", "Claim IDR Load Date"),
+  /** CLM_QUERY_CD - Claim Query Code. */
+  CLM_QUERY_CD("CLM_QUERY_CD", "Claim Query Code"),
+  /** CLM_SBMT_FRMT_CD - Claim Submission Format Code. */
+  CLM_SBMT_FRMT_CD("CLM_SBMT_FRMT_CD", "Claim Submission Format Code"),
   /** CLM_CNTRCTR_NUM - Claim Contractor Number. */
   CLM_CNTRCTR_NUM("CLM_CNTRCTR_NUM", "Claim Contractor Number"),
   /** CLM_ADJSTMT_TYPE_CD - Claim Adjustment Type Code. */
   CLM_ADJSTMT_TYPE_CD("CLM_ADJSTMT_TYPE_CD", "Claim Adjustment Type Code"),
   /** CLM_DISP_CD - Claim Disposition Code. */
   CLM_DISP_CD("CLM_DISP_CD", "Claim Disposition Code"),
-  /** CLM_CMS_PROC_DT - FI Claim Process Date. */
-  CLM_CMS_PROC_DT("CLM_CMS_PROC_DT", "FI Claim Process Date"),
   /** CLM_CARR_PMT_DNL_CD - Claim Payment Denial Code. */
   CLM_CARR_PMT_DNL_CD("CLM_CARR_PMT_DNL_CD", "Claim Payment Denial Code"),
   /** CLM_MDCR_PRFNL_PRVDR_ASGNMT_SW - Provider Assignment Indicator. */
   CLM_MDCR_PRFNL_PRVDR_ASGNMT_SW("CLM_MDCR_PRFNL_PRVDR_ASGNMT_SW", "Provider Assignment Indicator"),
-  /** CLM_CLNCL_TRIL_NUM - Clinical Trial Number. */
-  CLM_CLNCL_TRIL_NUM("CLM_CLNCL_TRIL_NUM", "Clinical Trial Number"),
   /** CLM_MDCR_NPMT_RSN_CD - Claim Non Payment Reason Code. */
   CLM_MDCR_NPMT_RSN_CD("CLM_MDCR_NPMT_RSN_CD", "Claim Non Payment Reason Code"),
   /** CLM_FI_ACTN_CD - Claim Fiscal Intermediary Action Code. */
   CLM_FI_ACTN_CD("CLM_FI_ACTN_CD", "Claim Fiscal Intermediary Action Code"),
   /** CLM_OP_SRVC_TYPE_CD - Claim Outpatient Service Type Code. */
   CLM_OP_SRVC_TYPE_CD("CLM_OP_SRVC_TYPE_CD", "Claim Outpatient Service Type Code"),
-  /** CLM_QUERY_CD - Claim Query Code. */
-  CLM_QUERY_CD("CLM_QUERY_CD", "Claim Query Code"),
-  /** CLM_SBMT_FRMT_CD - Claim Submission Format Code. */
-  CLM_SBMT_FRMT_CD("CLM_SBMT_FRMT_CD", "Claim Submission Format Code"),
-  /** CLM_SBMTR_CNTRCT_NUM - Submitter Contract Number. */
-  CLM_SBMTR_CNTRCT_NUM("CLM_SBMTR_CNTRCT_NUM", "Submitter Contract Number"),
-  /** CLM_SBMTR_CNTRCT_PBP_NUM - Submitter Contract PBP Number. */
-  CLM_SBMTR_CNTRCT_PBP_NUM("CLM_SBMTR_CNTRCT_PBP_NUM", "Submitter Contract PBP Number"),
-  /** CLM_AUDT_TRL_STUS_CD - Claim Audit Trail Status Code. */
+  /** CLM_IDR_LD_DT - Claim IDR Load Date. */
+  CLM_IDR_LD_DT("CLM_IDR_LD_DT", "Claim IDR Load Date"),
+  /** CLM_CMS_PROC_DT - FI Claim Process Date. */
+  CLM_CMS_PROC_DT("CLM_CMS_PROC_DT", "FI Claim Process Date"),
+  /** CLM_CLNCL_TRIL_NUM - Clinical Trial Number. */
+  CLM_CLNCL_TRIL_NUM("CLM_CLNCL_TRIL_NUM", "Clinical Trial Number"),
+  /** CLM_AUDT_TRL_STUS_CD - Claim Status Code. */
   CLM_AUDT_TRL_STUS_CD("CLM_AUDT_TRL_STUS_CD", "Claim Status Code"),
   /** CLM_LINE_PMD_UNIQ_TRKNG_NUM - Prior Authorization Unique Tracking Number. */
   CLM_LINE_PMD_UNIQ_TRKNG_NUM(
       "CLM_LINE_PMD_UNIQ_TRKNG_NUM", "Prior Authorization Unique Tracking Number"),
+  /** CLM_SBMTR_CNTRCT_NUM - Submitter Contract Number. */
+  CLM_SBMTR_CNTRCT_NUM("CLM_SBMTR_CNTRCT_NUM", "Submitter Contract Number"),
+  /** CLM_SBMTR_CNTRCT_PBP_NUM - Submitter Contract PBP Number. */
+  CLM_SBMTR_CNTRCT_PBP_NUM("CLM_SBMTR_CNTRCT_PBP_NUM", "Submitter Contract PBP Number"),
+  /** CLM_BNFT_ENHNCMT_CD - Claim Benefit Enhancement Code. */
+  CLM_BNFT_ENHNCMT_CD("CLM_BNFT_ENHNCMT_CD", "Claim Benefit Enhancement Code"),
+  /** CLM_NGACO_PBPMT_SW - PBP Benefit Enhancement Indicator. */
+  CLM_NGACO_PBPMT_SW("CLM_NGACO_PBPMT_SW", "PBP Benefit Enhancement Indicator"),
+  /** CLM_NGACO_PDSCHRG_HCBS_SW - Post Discharge Home Visit Benefit Enhancement Indicator. */
+  CLM_NGACO_PDSCHRG_HCBS_SW(
+      "CLM_NGACO_PDSCHRG_HCBS_SW", "Post Discharge Home Visit Benefit Enhancement Indicator"),
+  /** CLM_NGACO_SNF_WVR_SW - SNF 3-Day Waiver Enhancement. */
+  CLM_NGACO_SNF_WVR_SW("CLM_NGACO_SNF_WVR_SW", "SNF 3-Day Waiver Enhancement"),
+  /** CLM_NGACO_TLHLTH_SW - Telehealth Benefit Enhancement Indicator. */
+  CLM_NGACO_TLHLTH_SW("CLM_NGACO_TLHLTH_SW", "Telehealth Benefit Enhancement Indicator"),
+  /** CLM_NGACO_CPTATN_SW - AIPBP Benefit Enhancement Indicator. */
+  CLM_NGACO_CPTATN_SW("CLM_NGACO_CPTATN_SW", "AIPBP Benefit Enhancement Indicator"),
+  /** CLM_ACO_CARE_MGMT_HCBS_SW - Care Management Home Visits Enhancement. */
+  CLM_ACO_CARE_MGMT_HCBS_SW("CLM_ACO_CARE_MGMT_HCBS_SW", "Care Management Home Visits Enhancement"),
+  /** CLM_PD_STUS_CD - Claim Paid Status Code. */
+  CLM_PD_STUS_CD("CLM_PD_STUS_CD", "Claim Paid Status Code"),
   /** PRVDR_FAC_FIPS_ST_CD - Federal Information Processing Standards (FIPS) State Code. */
   PRVDR_FAC_FIPS_ST_CD(
       "PRVDR_FAC_FIPS_ST_CD", "Federal Information Processing Standards (FIPS) State Code"),

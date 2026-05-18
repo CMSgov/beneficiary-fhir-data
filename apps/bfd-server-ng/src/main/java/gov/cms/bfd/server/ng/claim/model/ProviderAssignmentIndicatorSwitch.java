@@ -70,6 +70,14 @@ public sealed interface ProviderAssignmentIndicatorSwitch
   @AllArgsConstructor
   @Getter
   enum Valid implements ProviderAssignmentIndicatorSwitch {
+    /** A - Assigned Claim. */
+    A("A", "Assigned Claim"),
+    /** B - Clinical Lab Split. */
+    B("B", "Clinical Lab Split"),
+    /** G - Group. */
+    G("G", "Group"),
+    /** H - HBP Claim. */
+    H("H", "HBP Claim"),
     /** L - Assigned Claim. */
     L("L", "Assigned Claim"),
     /** N - Non-assigned claim. */

@@ -6,6 +6,7 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import gov.cms.bfd.server.ng.interceptor.BanUnsupportedHttpMethodsInterceptor;
 import gov.cms.bfd.server.ng.interceptor.ExceptionHandlingInterceptor;
 import gov.cms.bfd.server.ng.interceptor.LoggingInterceptor;
+import gov.cms.bfd.server.ng.interceptor.RequestMetricsInterceptor;
 import gov.cms.bfd.server.openapi.OpenApiInterceptor;
 import jakarta.servlet.annotation.WebServlet;
 import java.util.List;
@@ -17,7 +18,8 @@ import org.springframework.stereotype.Component;
 @Component
 @WebServlet(urlPatterns = {"/v3/fhir*"})
 public class V3Server extends RestfulServer {
-  private final List<IResourceProvider> resourceProviders;
+  private final transient List<IResourceProvider> resourceProviders;
+  private final transient RequestMetricsInterceptor requestMetricsInterceptor;
 
   @Override
   public void initialize() {
@@ -39,5 +41,6 @@ public class V3Server extends RestfulServer {
     this.registerInterceptor(new BanUnsupportedHttpMethodsInterceptor());
     this.registerInterceptor(new ExceptionHandlingInterceptor());
     this.registerInterceptor(new OpenApiInterceptor());
+    this.registerInterceptor(requestMetricsInterceptor);
   }
 }

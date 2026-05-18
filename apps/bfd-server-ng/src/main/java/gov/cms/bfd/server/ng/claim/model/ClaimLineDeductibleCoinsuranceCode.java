@@ -75,12 +75,26 @@ public sealed interface ClaimLineDeductibleCoinsuranceCode
     _4(
         "4",
         "No charge or units associated with this revenue center code. (For multiple HCPCS per single revenue center code) For revenue center code 0001, the following MSP override values may be present:"),
+    /** 5 - RHC or CORF psychiatric. */
+    _5("5", "RHC or CORF psychiatric"),
+    /** A - voluntary agreement. */
+    A("A", "voluntary agreement"),
+    /** H - JMO cell rate (55555). */
+    H("H", "JMO cell rate (55555)"),
+    /** I - IRS/SSA/CMS Data Match project (77777). */
+    I("I", "IRS/SSA/CMS Data Match project (77777)"),
+    /** L - litigation. */
+    L("L", "litigation"),
     /** M - Override code; EGHP (employer group health plan) services involved. */
     M("M", "Override code; EGHP (employer group health plan) services involved"),
     /** N - Override code; non-EGHP services involved. */
     N("N", "Override code; non-EGHP services involved"),
+    /** Q - initial enrollment questionnaire (IEQ 99999). */
+    Q("Q", "initial enrollment questionnaire (IEQ 99999)"),
     /** X - Override code: MSP (Medicare is secondary payer) cost avoided. */
-    X("X", "Override code: MSP (Medicare is secondary payer) cost avoided");
+    X("X", "Override code: MSP (Medicare is secondary payer) cost avoided"),
+    /** Y - MSP cost avoided. */
+    Y("Y", "MSP cost avoided");
 
     private final String code;
     private final String display;

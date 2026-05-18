@@ -3629,7 +3629,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
     "type" : [ {
       "coding" : [ {
         "code" : "principal",
-        "system" : "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimDiagnosisType"
+        "system" : "http://terminology.hl7.org/CodeSystem/ex-diagnosistype"
       } ]
     } ]
   }, {
@@ -3677,7 +3677,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
   } ],
   "insurance" : [ {
     "coverage" : {
-      "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA])"
+      "display" : "Part A"
     },
     "focal" : true
   } ],
@@ -4996,7 +4996,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
   } ],
   "insurance" : [ {
     "coverage" : {
-      "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA])"
+      "display" : "Part A"
     },
     "focal" : true
   } ],
@@ -6639,7 +6639,7 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
   } ],
   "insurance" : [ {
     "coverage" : {
-      "display" : "Part A institutional claim record (inpatient [IP], skilled nursing facility [SNF], hospice [HOS], or home health agency [HHA])"
+      "display" : "Part A"
     },
     "focal" : true
   } ],

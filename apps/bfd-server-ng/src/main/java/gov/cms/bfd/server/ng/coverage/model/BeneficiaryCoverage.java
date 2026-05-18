@@ -84,7 +84,7 @@ public class BeneficiaryCoverage extends BeneficiaryBase {
    * @param coveragePart The coverage part
    * @return Optional containing the matching enrollment, or empty if not found.
    */
-  private Optional<BeneficiaryPartCDEnrollment> getEnrollment(CoveragePart coveragePart) {
+  public Optional<BeneficiaryPartCDEnrollment> getEnrollment(CoveragePart coveragePart) {
     return beneficiaryPartCDEnrollments.stream()
         .filter(
             e ->

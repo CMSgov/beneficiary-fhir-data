@@ -74,6 +74,8 @@ public sealed interface PatientStatusCode
   @AllArgsConstructor
   @Getter
   enum Valid implements PatientStatusCode {
+    /** 00 - UNKNOWN. */
+    _00("00", "UNKNOWN"),
     /** 01 - DISCHARGED TO HOME OR SELF CARE (ROUTINE DISCHARGE). */
     _01("01", "DISCHARGED TO HOME OR SELF CARE (ROUTINE DISCHARGE)"),
     /** 02 - DISCHARGED/TRANSFERRED TO A SHORT TERM GENERAL HOSPITAL FOR INPATIENT CARE. */

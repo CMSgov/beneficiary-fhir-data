@@ -58,7 +58,7 @@ Id: SupportingInfoComponent
 * CLM_SBMTR_CNTRCT_NUM 0..1 string "Submitter Contract Number" ""
 * CLM_SBMTR_CNTRCT_PBP_NUM 0..1 string "Submitter Contract PBP Number" ""
 * CLM_CARR_PMT_DNL_CD 0..1 string "Claim Payment Denial Code" ""
-* CLM_MDCR_PRFNL_PRVDR_ASGNMT_SW 0..1 string "Provider Assignement Indicator" ""
+* CLM_MDCR_PRFNL_PRVDR_ASGNMT_SW 0..1 string "Provider Assignment Indicator" ""
 * CLM_CLNCL_TRIL_NUM 0..1 string "Clinical Trial Number" ""
 * CLM_MDCR_NPMT_RSN_CD 0..1 string "Claim Non Payment Reason Code" ""
 * CLM_FI_ACTN_CD 0..1 string "FI Claim Action Code" ""

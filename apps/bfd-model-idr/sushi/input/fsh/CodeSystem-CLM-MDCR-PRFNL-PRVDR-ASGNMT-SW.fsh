@@ -6,5 +6,9 @@ Description: "Variable indicates whether or not the provider accepts assignment 
 * ^status = #active
 * ^content = #complete
 
+* #A "Assigned Claim"
+* #B "Clinical Lab Split"
+* #G "Group"
+* #H "HBP Claim"
 * #L "Assigned Claim"
 * #N "Non-assigned claim"
