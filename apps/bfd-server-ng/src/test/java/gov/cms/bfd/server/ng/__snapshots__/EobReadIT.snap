@@ -2346,6 +2346,18 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
   "provider" : {
     "reference" : "#1104867175"
   },
+  "related" : [ {
+    "reference" : {
+      "system" : "https://bluebutton.cms.gov/identifiers/CLM-CNTL-NUM",
+      "value" : "31646182683541TDF"
+    },
+    "relationship" : {
+      "coding" : [ {
+        "code" : "prior",
+        "system" : "http://terminology.hl7.org/CodeSystem/ex-relatedclaimrelationship"
+      } ]
+    }
+  } ],
   "resourceType" : "ExplanationOfBenefit",
   "status" : "active",
   "subType" : {
