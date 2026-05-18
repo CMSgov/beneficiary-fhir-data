@@ -19,6 +19,7 @@ In practice, Patient will be the least complex (no dependent variables), followe
 For the initial version, we'll start simple and hard code no dependent variables for each of those.
 """
 sample_sources = {
+    "AuditEvent": "out/AuditEvent.json",
     "Patient": "out/Patient.json",
     "ExplanationOfBenefit": "out/ExplanationOfBenefit.json",
     "ExplanationOfBenefit-Pharmacy": "out/ExplanationOfBenefit-Pharmacy.json",
@@ -38,7 +39,8 @@ sample_sources_by_profile = {
     "Carrier": "out/ExplanationOfBenefit-Carrier.json",
     "DME": "out/ExplanationOfBenefit-DME.json",
     "Pharmacy": "out/ExplanationOfBenefit-Pharmacy.json",
-    "Patient": "out/Patient.json"
+    "Patient": "out/Patient.json",
+    "Audit": "out/AuditEvent.json",
 }
 
 sample_resources_by_profile = {}
@@ -77,10 +79,11 @@ for walk_info in os.walk(dd_support_folder):
             data = yaml.safe_load(file)
             current_resource_type = file_name[0 : len(file_name) - 5]
             for entry in data:
-                if "suppressInDD" in entry and entry["suppressInDD"]:
+                if entry.get("suppressInDD"):
                     continue
                 if "fhirPath" in entry:
-                    entry["appliesTo"].sort()
+                    if "appliesTo" in entry:
+                        entry["appliesTo"].sort()
                     if "sources" in entry:
                         entry["sources"].sort()
                     if "Patient" in entry["appliesTo"]:
@@ -91,6 +94,8 @@ for walk_info in os.walk(dd_support_folder):
                     elif any(x in claim_profiles for x in entry["appliesTo"]):
                         entry["FHIR Resource"] = "ExplanationOfBenefit"
                         entry["Coverage / Claim Type"] = entry["appliesTo"]
+                    else:
+                        entry["FHIR Resource"] = "AuditEvent"
 
                     # This opportunistically populates examples based upon the samples created from executing FML
                     result = subprocess.run(

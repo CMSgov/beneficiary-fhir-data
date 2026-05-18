@@ -105,3 +105,9 @@ uv run compile_resources.py \
     -o out/ExplanationOfBenefit-Pharmacy.json \
     -r https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Pharmacy \
     --test 
+
+uv run compile_resources.py \
+    -m maps/AuditEvent.map \
+    -i sample-data/BFDAuditLog-Sample.json \
+    -o out/AuditEvent.json \
+    -r https://bfd.cms.gov/MappingLanguage/Maps/BFDAuditLog 
