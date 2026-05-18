@@ -567,6 +567,10 @@ public class SystemUrls {
   public static final String HL7_DIAGNOSIS_TYPE =
       "http://terminology.hl7.org/CodeSystem/ex-diagnosistype";
 
+  /** HL7 - Example Related Claim Relationship Codes. */
+  public static final String HL7_EX_RELATED_CLAIM_RELATIONSHIP =
+      "http://terminology.hl7.org/CodeSystem/ex-relatedclaimrelationship";
+
   /** HL7 - Claim Information Category Codes. */
   public static final String HL7_CLAIM_INFORMATION =
       "http://terminology.hl7.org/CodeSystem/claiminformationcategory";
