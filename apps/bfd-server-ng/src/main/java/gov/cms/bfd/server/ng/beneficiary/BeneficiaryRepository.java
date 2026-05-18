@@ -1,13 +1,20 @@
 package gov.cms.bfd.server.ng.beneficiary;
 
+import static gov.cms.bfd.server.ng.util.MetricTimer.PATIENT_MATCH_OUTCOME;
+
 import gov.cms.bfd.server.ng.DbFilterParam;
 import gov.cms.bfd.server.ng.beneficiary.filter.PatientMatchFilter;
 import gov.cms.bfd.server.ng.beneficiary.model.*;
 import gov.cms.bfd.server.ng.claim.model.SystemType;
 import gov.cms.bfd.server.ng.input.DateTimeRange;
+import gov.cms.bfd.server.ng.log.QueryTelemetryUtil;
 import gov.cms.bfd.server.ng.util.LogUtil;
+import gov.cms.bfd.server.ng.util.MetricTimer;
 import io.micrometer.core.annotation.Timed;
 import io.micrometer.core.aop.MeterTag;
+import io.micrometer.core.instrument.DistributionSummary;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Tags;
 import jakarta.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,11 +22,18 @@ import java.util.Optional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
 
-/** Repository for querying beneficiary information. */
+/**
+ * Repository for querying beneficiary information. Suppress SonarQube about dynamically formatted
+ * SQL queries being safe here. Ignore. These are internally generated.
+ */
 @Repository
 @AllArgsConstructor
+@SuppressWarnings("java:S2077")
 public class BeneficiaryRepository {
   private final EntityManager entityManager;
+  private final MeterRegistry meterRegistry;
+  private final MetricTimer metricTimer;
+  private final QueryTelemetryUtil queryTelemetryUtil;
 
   private static final String PATIENT_MATCH_TYPE = "exact";
 
@@ -33,16 +47,17 @@ public class BeneficiaryRepository {
    */
   @Timed(value = "application.beneficiary.search_identities")
   public List<BeneficiaryIdentity> getValidBeneficiaryIdentities(long beneXrefSk) {
-    return entityManager
-        .createQuery(
-            """
-                SELECT identity
-                FROM BeneficiaryIdentity identity
-                WHERE identity.id.xrefSk = :beneXrefSk
+    var query =
+        entityManager
+            .createQuery(
+                """
+                 SELECT identity
+                 FROM BeneficiaryIdentity identity
+                 WHERE identity.id.xrefSk = :beneXrefSk
                 """,
-            BeneficiaryIdentity.class)
-        .setParameter("beneXrefSk", beneXrefSk)
-        .getResultList();
+                BeneficiaryIdentity.class)
+            .setParameter("beneXrefSk", beneXrefSk);
+    return queryTelemetryUtil.executeAndTrack("getValidBeneficiaryIdentities", query);
   }
 
   /**
@@ -59,27 +74,27 @@ public class BeneficiaryRepository {
               key = "hasLastUpdated",
               expression = "lowerBound.isPresent() || upperBound.isPresent()")
           DateTimeRange lastUpdatedRange) {
-    var optionalBeneficiary =
+    var query =
         entityManager
             .createQuery(
                 String.format(
                     """
-                    SELECT bene
-                    FROM Beneficiary bene
-                    WHERE bene.beneSk = :beneSk
-                      AND ((cast(:lowerBound AS ZonedDateTime)) IS NULL OR bene.patientMeta.updatedTimestamp %s :lowerBound)
-                      AND ((cast(:upperBound AS ZonedDateTime)) IS NULL OR bene.patientMeta.updatedTimestamp %s :upperBound)
-                    ORDER BY bene.obsoleteTimestamp DESC
+                      SELECT bene
+                      FROM Beneficiary bene
+                      WHERE bene.beneSk = :beneSk
+                        AND ((cast(:lowerBound AS ZonedDateTime)) IS NULL OR bene.patientMeta.updatedTimestamp %s :lowerBound)
+                        AND ((cast(:upperBound AS ZonedDateTime)) IS NULL OR bene.patientMeta.updatedTimestamp %s :upperBound)
+                      ORDER BY bene.obsoleteTimestamp DESC
                     """,
                     lastUpdatedRange.getLowerBoundSqlOperator(),
                     lastUpdatedRange.getUpperBoundSqlOperator()),
                 Beneficiary.class)
             .setParameter("beneSk", beneSk)
             .setParameter("lowerBound", lastUpdatedRange.getLowerBoundDateTime().orElse(null))
-            .setParameter("upperBound", lastUpdatedRange.getUpperBoundDateTime().orElse(null))
-            .getResultList()
-            .stream()
-            .findFirst();
+            .setParameter("upperBound", lastUpdatedRange.getUpperBoundDateTime().orElse(null));
+
+    var optionalBeneficiary =
+        queryTelemetryUtil.executeAndTrack("findById", query).stream().findFirst();
 
     optionalBeneficiary.ifPresent(beneficiary -> LogUtil.logBeneSk(beneficiary.getBeneSk()));
     return optionalBeneficiary;
@@ -93,18 +108,17 @@ public class BeneficiaryRepository {
    */
   @Timed(value = "application.beneficiary.search_xref_by_bene_sk")
   public Optional<Long> getXrefSkFromBeneSk(long beneSk) {
-    return entityManager
-        .createQuery(
-            """
+    var query =
+        entityManager
+            .createQuery(
+                """
                  SELECT bene.xrefSk
                  FROM Beneficiary bene
                  WHERE bene.beneSk = :beneSk
                """,
-            Long.class)
-        .setParameter("beneSk", beneSk)
-        .getResultList()
-        .stream()
-        .findFirst();
+                Long.class)
+            .setParameter("beneSk", beneSk);
+    return queryTelemetryUtil.executeAndTrack("getXrefSkFromBeneSk", query).stream().findFirst();
   }
 
   /**
@@ -115,18 +129,18 @@ public class BeneficiaryRepository {
    */
   @Timed(value = "application.beneficiary.search_xref_by_mbi")
   public Optional<Long> getXrefSkFromMbi(String mbi) {
-    return entityManager
-        .createQuery(
-            """
-                  SELECT bene.xrefSk
-                  FROM Beneficiary bene
-                  WHERE bene.identifier.mbi = :mbi
+    var query =
+        entityManager
+            .createQuery(
+                """
+                 SELECT bene.xrefSk
+                 FROM Beneficiary bene
+                 WHERE bene.identifier.mbi = :mbi
                 """,
-            Long.class)
-        .setParameter("mbi", mbi)
-        .getResultList()
-        .stream()
-        .findFirst();
+                Long.class)
+            .setParameter("mbi", mbi);
+
+    return queryTelemetryUtil.executeAndTrack("getXrefSkFromMbi", query).stream().findFirst();
   }
 
   /**
@@ -136,45 +150,69 @@ public class BeneficiaryRepository {
    * @param patientMatch patient match request
    * @return beneficiary, if found
    */
-  @Timed(value = "application.beneficiary.patient_match")
   public PatientMatchResult searchPatientMatch(PatientMatch patientMatch) {
-    var combinationResults = new ArrayList<MatchCombinationResult>();
-    for (var indexedScenario : patientMatch.getValidScenarios()) {
-      var combinationIndex = indexedScenario.combinationIndex();
-      var scenario = indexedScenario.entries();
-      var filters = new PatientMatchFilter(scenario).getFilters("bene", SystemType.UNKNOWN);
+    var queryBase =
+        """
+                      SELECT bene
+                      FROM Beneficiary bene
+                      WHERE bene.latestTransactionFlag = 'Y'
+                      %s
+                      ORDER BY bene.obsoleteTimestamp DESC
+                    """;
 
-      var query =
-          entityManager.createQuery(
-              String.format(
-                  """
-                  SELECT bene
-                  FROM Beneficiary bene
-                  WHERE bene.latestTransactionFlag = 'Y'
-                  %s
-                  ORDER BY bene.obsoleteTimestamp DESC
-                  """,
-                  filters.filterClause()),
-              Beneficiary.class);
-      var benes =
-          DbFilterParam.withParams(query, filters.params()).getResultList().stream().toList();
-      var matchedRecords =
-          benes.stream()
-              .map(b -> new MatchedRecord(b.getBeneSk(), b.getEffectiveTimestamp()))
-              .toList();
-      combinationResults.add(
-          new MatchCombinationResult(combinationIndex, PATIENT_MATCH_TYPE, matchedRecords));
-      var uniqueXrefs = benes.stream().map(BeneficiaryBase::getXrefSk).distinct().toList();
+    var result =
+        metricTimer.recordMetric(
+            "application.beneficiary.patient_match.outcome",
+            () -> {
+              var combinationResults = new ArrayList<MatchCombinationResult>();
 
-      if (uniqueXrefs.size() == 1) {
-        var matchedBene = benes.getFirst();
-        LogUtil.logBeneSk(matchedBene.getBeneSk());
-        var finalDetermination =
-            new FinalDetermination(combinationIndex, matchedRecords.getFirst());
-        return new PatientMatchResult(
-            combinationResults, Optional.of(finalDetermination), Optional.of(matchedBene));
-      }
-    }
-    return new PatientMatchResult(combinationResults, Optional.empty(), Optional.empty());
+              for (var indexedScenario : patientMatch.getValidScenarios()) {
+                var combinationIndex = indexedScenario.combinationIndex();
+                var scenario = indexedScenario.entries();
+                var filters =
+                    new PatientMatchFilter(scenario).getFilters("bene", SystemType.UNKNOWN);
+
+                var jpql =
+                    entityManager.createQuery(
+                        String.format(queryBase, filters.filterClause()), Beneficiary.class);
+                var query = DbFilterParam.withParams(jpql, filters.params());
+                var benes =
+                    queryTelemetryUtil.executeAndTrack("searchPatientMatch", query).stream()
+                        .toList();
+                var matchedRecords =
+                    benes.stream()
+                        .map(b -> new MatchedRecord(b.getBeneSk(), b.getEffectiveTimestamp()))
+                        .toList();
+                combinationResults.add(
+                    new MatchCombinationResult(
+                        combinationIndex, PATIENT_MATCH_TYPE, matchedRecords));
+                var uniqueXrefs =
+                    benes.stream().map(BeneficiaryBase::getXrefSk).distinct().toList();
+
+                if (uniqueXrefs.size() == 1) {
+
+                  var matchedBene = benes.getFirst();
+                  LogUtil.logBeneSk(matchedBene.getBeneSk());
+                  var finalDetermination =
+                      new FinalDetermination(combinationIndex, matchedRecords.getFirst());
+                  return new PatientMatchResult(
+                      combinationResults,
+                      Optional.of(finalDetermination),
+                      Optional.of(matchedBene));
+                }
+              }
+
+              return new PatientMatchResult(combinationResults, Optional.empty(), Optional.empty());
+            },
+            r ->
+                Tags.of(
+                    PATIENT_MATCH_OUTCOME,
+                    r.matchedBeneficiary().isPresent() ? "match" : "no_match"));
+
+    DistributionSummary.builder("application.beneficiary.patient_match.scenarios_attempted")
+        .tag(PATIENT_MATCH_OUTCOME, result.matchedBeneficiary().isPresent() ? "match" : "no_match")
+        .register(meterRegistry)
+        .record(result.combinations().size());
+    return result;
   }
 }

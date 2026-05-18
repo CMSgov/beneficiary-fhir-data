@@ -1,11 +1,16 @@
 package gov.cms.bfd.server.ng.claim;
 
+import static gov.cms.bfd.server.ng.util.MetricTimer.CLAIM_TYPE;
+
 import gov.cms.bfd.server.ng.DbFilter;
 import gov.cms.bfd.server.ng.DbFilterBuilder;
 import gov.cms.bfd.server.ng.DbFilterParam;
 import gov.cms.bfd.server.ng.claim.model.*;
 import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
+import gov.cms.bfd.server.ng.log.QueryTelemetryUtil;
 import gov.cms.bfd.server.ng.util.LogUtil;
+import gov.cms.bfd.server.ng.util.MetricTimer;
+import io.micrometer.core.instrument.Tags;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.util.*;
@@ -14,12 +19,18 @@ import lombok.AllArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Repository;
 
-/** Repository methods for claims. */
+/**
+ * Repository methods for claims. Suppress SonarQube about dynamically formatted SQL queries being
+ * safe here. Ignore. These are internally generated.
+ */
 @Repository
 @AllArgsConstructor
+@SuppressWarnings("java:S2077")
 public class ClaimAsyncService {
 
   @PersistenceContext private final EntityManager entityManager;
+  private final MetricTimer metricTimer;
+  private final QueryTelemetryUtil queryTelemetryUtil;
 
   @Async
   @SuppressWarnings("java:S2077")
@@ -42,14 +53,20 @@ public class ClaimAsyncService {
             """,
             baseQuery, whereClause);
 
-    var result =
-        DbFilterParam.withParams(entityManager.createQuery(jpql, claimClass), filters.params())
-            .setParameter("claimUniqueIds", claimUniqueIds)
-            .getResultList();
-    result.stream()
-        .findFirst()
-        .ifPresent(claim -> LogUtil.logBeneSk(claim.getBeneficiary().getBeneSk()));
-    return CompletableFuture.completedFuture(result);
+    return metricTimer.recordMetricAsync(
+        "application.claim.search_by_ids_in_claim_type",
+        () -> Tags.of(CLAIM_TYPE, claimClass.getSimpleName()),
+        () -> {
+          var query =
+              DbFilterParam.withParams(
+                      entityManager.createQuery(jpql, claimClass), filters.params())
+                  .setParameter("claimUniqueIds", claimUniqueIds);
+          var result = queryTelemetryUtil.executeAndTrack("findByIdsInClaimType", query);
+          result.stream()
+              .findFirst()
+              .ifPresent(claim -> LogUtil.logBeneSk(claim.getBeneficiary().getBeneSk()));
+          return CompletableFuture.completedFuture(result);
+        });
   }
 
   @Async
@@ -71,14 +88,22 @@ public class ClaimAsyncService {
             """,
             baseQuery, whereClause);
 
-    var result =
-        DbFilterParam.withParams(entityManager.createQuery(jpql, claimClass), filters.params())
-            .setParameter("beneSk", criteria.beneSk())
-            .getResultList();
-    result.stream()
-        .findFirst()
-        .ifPresent(claim -> LogUtil.logBeneSk(claim.getBeneficiary().getBeneSk()));
-    return CompletableFuture.completedFuture(result);
+    return metricTimer.recordMetricAsync(
+        "application.claim.fetch_claims_with_claim_type",
+        () -> Tags.of(CLAIM_TYPE, claimClass.getSimpleName()),
+        () -> {
+          var query =
+              DbFilterParam.withParams(
+                      entityManager.createQuery(jpql, claimClass), filters.params())
+                  .setParameter("beneSk", criteria.beneSk());
+          var result =
+              queryTelemetryUtil.executeAndTrack(
+                  "fetchClaims_" + claimClass.getSimpleName(), query);
+          result.stream()
+              .findFirst()
+              .ifPresent(claim -> LogUtil.logBeneSk(claim.getBeneficiary().getBeneSk()));
+          return CompletableFuture.completedFuture(result);
+        });
   }
 
   private String buildWhereClause(DbFilter filter, SystemType systemType) {

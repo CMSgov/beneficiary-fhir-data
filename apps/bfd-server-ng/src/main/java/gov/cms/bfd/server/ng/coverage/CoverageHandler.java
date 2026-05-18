@@ -7,6 +7,7 @@ import gov.cms.bfd.server.ng.input.DateTimeRange;
 import gov.cms.bfd.server.ng.loadprogress.LoadProgressRepository;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import gov.cms.bfd.server.ng.util.FhirUtil;
+import io.micrometer.core.annotation.Timed;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -51,6 +52,7 @@ public class CoverageHandler {
    * @param lastUpdated The date range for _lastUpdated filter.
    * @return A Bundle of Coverage resources.
    */
+  @Timed("application.coverage.handler.search_by_coverage_id")
   public Bundle searchByCoverageId(
       CoverageCompositeId parsedCoverageId, DateTimeRange lastUpdated) {
     var beneficiaryOpt =
@@ -73,6 +75,7 @@ public class CoverageHandler {
    * @param lastUpdated The date range for _lastUpdated filter.
    * @return A Bundle of Coverage resources.
    */
+  @Timed("application.coverage.handler.search_by_beneficiary")
   public Bundle searchByBeneficiary(Long beneSk, DateTimeRange lastUpdated) {
     var beneficiaryOpt =
         coverageRepository
@@ -91,6 +94,6 @@ public class CoverageHandler {
                         new CoverageCompositeId(c, beneficiary.getBeneSk()), benefitDate))
             .flatMap(Optional::stream);
 
-    return FhirUtil.bundleOrDefault(coverages.map(c -> c), loadProgressRepository::lastUpdated);
+    return FhirUtil.bundleOrDefault(coverages, loadProgressRepository::lastUpdated);
   }
 }

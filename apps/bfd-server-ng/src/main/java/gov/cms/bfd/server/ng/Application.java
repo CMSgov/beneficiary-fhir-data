@@ -3,10 +3,6 @@ package gov.cms.bfd.server.ng;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.bfd.server.ng.log.AuditLogger;
-import io.micrometer.common.annotation.ValueResolver;
-import io.micrometer.core.aop.MeterTagAnnotationHandler;
-import io.micrometer.core.aop.TimedAspect;
-import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.servlet.Servlet;
 import java.time.Clock;
 import javax.sql.DataSource;
@@ -62,26 +58,6 @@ public class Application {
     servletRegistrationBean.addUrlMappings("/v3/fhir/*");
 
     return servletRegistrationBean;
-  }
-
-  /**
-   * Configures Micrometer to support @MeterTag annotations with SPEL expressions.
-   *
-   * <p>IMPORTANT: @Timed annotations only work on public methods for classes that are registered
-   * beans. Attempting to use this for private methods or non-bean classes will not work since it
-   * relies on Spring AOP's proxies.
-   *
-   * @param registry meter registry
-   * @return timed aspect
-   */
-  @Bean
-  public TimedAspect timedAspect(MeterRegistry registry) {
-    var timedAspect = new TimedAspect(registry);
-    ValueResolver valueResolver = Object::toString;
-    var valueExpressionResolver = new SpelValueExpressionResolver();
-    timedAspect.setMeterTagAnnotationHandler(
-        new MeterTagAnnotationHandler(aClass -> valueResolver, aClass -> valueExpressionResolver));
-    return timedAspect;
   }
 
   /**

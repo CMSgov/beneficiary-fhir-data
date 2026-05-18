@@ -3,6 +3,7 @@ package gov.cms.bfd.server.ng.filter;
 import static gov.cms.bfd.server.ng.util.LoggerConstants.*;
 
 import com.google.common.base.Strings;
+import gov.cms.bfd.server.ng.log.RequestTelemetryLogger;
 import gov.cms.bfd.server.ng.util.CertificateUtil;
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
@@ -30,6 +31,7 @@ import org.springframework.stereotype.Component;
 public class ExtractMetadataFilter implements Filter {
 
   private final CertificateUtil certificateUtil;
+  private final RequestTelemetryLogger requestTelemetryLogger;
 
   @Override
   public void doFilter(
@@ -38,9 +40,14 @@ public class ExtractMetadataFilter implements Filter {
 
     if (servletRequest instanceof HttpServletRequest httpRequest
         && servletResponse instanceof HttpServletResponse httpResponse) {
+
+      requestTelemetryLogger.setRequestStartTime(httpRequest);
+
       final var certAlias = certificateUtil.getAliasFromCert(httpRequest);
       final var uri = httpRequest.getRequestURI();
+
       var isPatientMatchRequest = uri != null && uri.contains("/Patient/$idi-match");
+
       if (certAlias.isPresent()) {
         certificateUtil.attachCertAliasToRequest(httpRequest, certAlias.get());
         MDC.put(logKey(MDC_PREFIX, CERTIFICATE_ALIAS), certAlias.get());
@@ -66,11 +73,20 @@ public class ExtractMetadataFilter implements Filter {
       MDC.put(logKey(MDC_PREFIX, CLIENT_IP_KEY), clientIp);
       MDC.put(logKey(MDC_PREFIX, CLIENT_NAME_KEY), clientName);
       MDC.put(logKey(MDC_PREFIX, CLIENT_ID_KEY), clientId);
+
+      requestTelemetryLogger.recordRequestHeaders(httpRequest);
     }
 
-    filterChain.doFilter(servletRequest, servletResponse);
-
-    // Clean up to prevent leaks
-    MDC.clear();
+    try {
+      filterChain.doFilter(servletRequest, servletResponse);
+    } finally {
+      if (servletRequest instanceof HttpServletRequest httpRequest
+          && servletResponse instanceof HttpServletResponse httpResponse) {
+        requestTelemetryLogger.recordResponse(httpRequest, httpResponse);
+        requestTelemetryLogger.logRequestComplete();
+      }
+      // Clean up to prevent leaks
+      MDC.clear();
+    }
   }
 }
