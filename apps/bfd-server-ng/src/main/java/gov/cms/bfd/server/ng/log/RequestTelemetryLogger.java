@@ -4,7 +4,6 @@ import static gov.cms.bfd.server.ng.util.LoggerConstants.*;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
