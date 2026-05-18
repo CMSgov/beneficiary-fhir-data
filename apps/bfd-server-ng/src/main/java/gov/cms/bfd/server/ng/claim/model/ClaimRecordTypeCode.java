@@ -28,6 +28,13 @@ public sealed interface ClaimRecordTypeCode
   String getDisplay();
 
   /**
+   * Gets the part display value (used in EoB.insurance).
+   *
+   * @return the part display
+   */
+  String getPartDisplay();
+
+  /**
    * Convert from a database code.
    *
    * @param code database code
@@ -106,6 +113,11 @@ public sealed interface ClaimRecordTypeCode
     @Override
     public String getCode() {
       return code;
+    }
+
+    @Override
+    public String getPartDisplay() {
+      return "";
     }
   }
 }

@@ -61,7 +61,13 @@ public sealed interface ClaimServiceDeductibleCode
     /** 0 - Service Subject to Deductible. */
     _0("0", "Service Subject to Deductible"),
     /** 1 - Service Not Subject to Deductible. */
-    _1("1", "Service Not Subject to Deductible");
+    _1("1", "Service Not Subject to Deductible"),
+    /** D - Special Durable Medical Equipment. */
+    D("D", "Special Durable Medical Equipment"),
+    /** P - 100% - Durable Medical Equipment. */
+    P("P", "100% - Durable Medical Equipment"),
+    /** S - Suppress Deductible, but calculate Coinsurance. */
+    S("S", "Suppress Deductible, but calculate Coinsurance");
 
     private final String code;
     private final String display;

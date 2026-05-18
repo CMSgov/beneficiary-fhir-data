@@ -58,24 +58,26 @@ public sealed interface ClaimPricingLocalityCode
   @AllArgsConstructor
   @Getter
   enum Valid implements ClaimPricingLocalityCode {
-    /** 1 - ALABAMA. */
-    _1("1", "ALABAMA"),
-    /** 2 - ALASKA. */
-    _2("2", "ALASKA"),
-    /** 3 - ARIZONA. */
-    _3("3", "ARIZONA"),
-    /** 4 - ARKANSAS. */
-    _4("4", "ARKANSAS"),
-    /** 5 - ANAHEIM/SANTA ANA, CA. */
-    _5("5", "ANAHEIM/SANTA ANA, CA"),
-    /** 6 - LOS ANGELES, CA. */
-    _6("6", "LOS ANGELES, CA"),
-    /** 7 - MARIN/NAPA/SOLANO, CA. */
-    _7("7", "MARIN/NAPA/SOLANO, CA"),
-    /** 8 - OAKLAND/BERKELEY, CA. */
-    _8("8", "OAKLAND/BERKELEY, CA"),
-    /** 9 - REST OF CALIFORNIA. */
-    _9("9", "REST OF CALIFORNIA"),
+    /** 00 - UNKNOWN. */
+    _0("00", "UNKNOWN"),
+    /** 01 - ALABAMA. */
+    _1("01", "ALABAMA"),
+    /** 02 - ALASKA. */
+    _2("02", "ALASKA"),
+    /** 03 - ARIZONA. */
+    _3("03", "ARIZONA"),
+    /** 04 - ARKANSAS. */
+    _4("04", "ARKANSAS"),
+    /** 05 - ANAHEIM/SANTA ANA, CA. */
+    _5("05", "ANAHEIM/SANTA ANA, CA"),
+    /** 06 - LOS ANGELES, CA. */
+    _6("06", "LOS ANGELES, CA"),
+    /** 07 - MARIN/NAPA/SOLANO, CA. */
+    _7("07", "MARIN/NAPA/SOLANO, CA"),
+    /** 08 - OAKLAND/BERKELEY, CA. */
+    _8("08", "OAKLAND/BERKELEY, CA"),
+    /** 09 - REST OF CALIFORNIA. */
+    _9("09", "REST OF CALIFORNIA"),
     /** 10 - SAN FRANCISCO, CA. */
     _10("10", "SAN FRANCISCO, CA"),
     /** 11 - SAN MATEO, CA. */

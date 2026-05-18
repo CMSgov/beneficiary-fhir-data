@@ -25,7 +25,7 @@ public class ClaimRecordType {
    */
   public Optional<Reference> toFhirReference() {
     return claimRecordTypeCode
-        .map(ClaimRecordTypeCode::getDisplay)
+        .map(ClaimRecordTypeCode::getPartDisplay)
         .map(display -> new Reference().setDisplay(display));
   }
 

@@ -8,3 +8,6 @@ Description: "Switch indicating whether or not the line-item service on the non-
 
 * #0 "Service Subject to Deductible"
 * #1 "Service Not Subject to Deductible"
+* #D "Special Durable Medical Equipment"
+* #P "100% - Durable Medical Equipment"
+* #S "Suppress Deductible, but calculate Coinsurance"

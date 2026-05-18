@@ -14,17 +14,17 @@ public class ClaimProcedureProfessional extends ClaimProcedureBase {
   @Override
   public Optional<ExplanationOfBenefit.DiagnosisComponent> toFhirDiagnosis(
       SequenceGenerator sequenceGenerator) {
-    if (getDiagnosisType()
+    return getDiagnosisType()
         .filter(type -> type == ClaimDiagnosisType.BASE_DIAGNOSIS_CODE)
-        .isEmpty()) {
-      return Optional.empty();
-    }
-    var type =
-        getSequenceNumber()
-            .filter(sequence -> sequence == 1)
-            .map(_ -> "principal")
-            .orElse("secondary");
-    return buildBaseDiagnosis(
-        sequenceGenerator, type, ClaimDiagnosisType.BASE_DIAGNOSIS_CODE.getSystem());
+        .flatMap(
+            _ -> {
+              var isPrincipal = getSequenceNumber().filter(s -> s == 1).isPresent();
+              var typeCode = isPrincipal ? "principal" : "secondary";
+              var typeSystem =
+                  isPrincipal
+                      ? ClaimDiagnosisType.PRINCIPAL.getSystem()
+                      : ClaimDiagnosisType.BASE_DIAGNOSIS_CODE.getSystem();
+              return buildBaseDiagnosis(sequenceGenerator, typeCode, typeSystem);
+            });
   }
 }
