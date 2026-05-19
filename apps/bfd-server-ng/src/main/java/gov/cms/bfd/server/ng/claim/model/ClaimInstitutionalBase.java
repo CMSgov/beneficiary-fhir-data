@@ -39,6 +39,7 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
   @Embedded private RenderingCareTeam renderingProviderHistory;
   @Embedded private ReferringInstitutionalCareTeam referringProviderHistory;
   @Embedded private AdjudicationChargeInstitutional adjudicationChargeInstitutional;
+  @Embedded private BenefitEnhancementCodes benefitEnhancementCodes;
 
   abstract SupportingInfoComponentBase getClaimDateSupportingInfo();
 
@@ -173,9 +174,12 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
   private void addAllSupportingInfo(ExplanationOfBenefit eob) {
     var sharedInitialSupportingInfo =
         Stream.of(
-                getTypeOfBillCode().toFhir(supportingInfoFactory).stream(),
-                buildSubclassSupportingInfo().stream())
-            .flatMap(s -> s)
+                getTypeOfBillCode().toFhir(supportingInfoFactory).stream().toList(),
+                buildSubclassSupportingInfo(),
+                Optional.ofNullable(benefitEnhancementCodes)
+                    .map(c -> c.toFhir(supportingInfoFactory))
+                    .orElse(List.of()))
+            .flatMap(Collection::stream)
             .toList();
 
     // Handle claim related condition codes after BFD-4523

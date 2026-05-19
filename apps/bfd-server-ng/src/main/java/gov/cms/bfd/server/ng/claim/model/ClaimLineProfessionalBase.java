@@ -7,6 +7,7 @@ import jakarta.persistence.Convert;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.MappedSuperclass;
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -45,6 +46,7 @@ abstract class ClaimLineProfessionalBase implements ClaimLineBase {
   @Embedded private ClaimLineServiceUnitQuantity serviceUnitQuantity;
   @Embedded private ClaimLineHcpcsModifierCode hcpcsModifierCode;
   @Embedded private RenderingCareTeamLine claimLineRenderingProvider;
+  @Embedded private LineBenefitEnhancementCodes lineBenefitEnhancementCodes;
   @Embedded private ClaimLineProfessionalExtensions extensions;
 
   @Override
@@ -81,15 +83,21 @@ abstract class ClaimLineProfessionalBase implements ClaimLineBase {
   @Override
   public List<ExplanationOfBenefit.SupportingInformationComponent> toFhirSupportingInfo(
       SupportingInfoFactory supportingInfoFactory) {
+    var trackingSupportingInfo =
+        trackingNumber.map(
+            number ->
+                supportingInfoFactory
+                    .createSupportingInfo()
+                    .setCategory(
+                        BlueButtonSupportingInfoCategory.CLM_LINE_PMD_UNIQ_TRKNG_NUM.toFhir())
+                    .setValue(new StringType(number)));
+
     return Stream.of(
-            trackingNumber.map(
-                number ->
-                    supportingInfoFactory
-                        .createSupportingInfo()
-                        .setCategory(
-                            BlueButtonSupportingInfoCategory.CLM_LINE_PMD_UNIQ_TRKNG_NUM.toFhir())
-                        .setValue(new StringType(number))))
-        .flatMap(Optional::stream)
+            trackingSupportingInfo.stream().toList(),
+            Optional.ofNullable(lineBenefitEnhancementCodes)
+                .map(c -> c.toFhir(supportingInfoFactory))
+                .orElse(List.of()))
+        .flatMap(Collection::stream)
         .toList();
   }
 

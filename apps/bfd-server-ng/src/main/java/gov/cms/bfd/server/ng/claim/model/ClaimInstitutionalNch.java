@@ -9,6 +9,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.SortedSet;
@@ -40,6 +41,7 @@ public class ClaimInstitutionalNch extends ClaimInstitutionalBase {
   @Embedded private ServiceCareTeam serviceProviderHistory;
   @Embedded private BloodPints bloodPints;
   @Embedded private ClaimRelatedCondition claimRelatedCondition;
+  @Embedded private NchBenefitEnhancementSwitches nchBenefitEnhancementSwitches;
 
   @OneToMany(fetch = FetchType.EAGER)
   @JoinColumn(name = "clm_uniq_id")
@@ -55,7 +57,13 @@ public class ClaimInstitutionalNch extends ClaimInstitutionalBase {
   @Override
   protected List<ExplanationOfBenefit.SupportingInformationComponent>
       buildSubclassSupportingInfo() {
-    return Stream.of(bloodPints.toFhir(supportingInfoFactory)).flatMap(Optional::stream).toList();
+    return Stream.of(
+            bloodPints.toFhir(supportingInfoFactory).stream().toList(),
+            Optional.ofNullable(nchBenefitEnhancementSwitches)
+                .map(c -> c.toFhir(supportingInfoFactory))
+                .orElse(List.of()))
+        .flatMap(Collection::stream)
+        .toList();
   }
 
   @Override
