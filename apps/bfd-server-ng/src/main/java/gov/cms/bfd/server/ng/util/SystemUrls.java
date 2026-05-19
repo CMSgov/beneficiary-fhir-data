@@ -820,6 +820,14 @@ public class SystemUrls {
   public static final String BLUE_BUTTON_CODE_SYSTEM_PPS_INDICATOR_CODE =
       "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-PPS-IND-CD";
 
+  /** Blue Button code system - benefit enhancement code. */
+  public static final String BLUE_BUTTON_CODE_SYSTEM_BENEFIT_ENHANCEMENT_CODE =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD";
+
+  /** Blue Button code system - benefit enhancement code switch. */
+  public static final String BLUE_BUTTON_CODE_SYSTEM_BENEFIT_ENHANCEMENT_CODE_SWITCH =
+      "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD-SWITCH";
+
   /** Blue Button structure definition - discount indicator code. */
   public static final String BLUE_BUTTON_STRUCTURE_DEFINITION_REVENUE_DISCOUNT_INDICATOR_CODE =
       "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-REV-DSCNT-IND-CD";

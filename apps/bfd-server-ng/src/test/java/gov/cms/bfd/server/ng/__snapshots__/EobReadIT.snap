@@ -2403,8 +2403,13 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 3,
-    "valueString" : "3"
+    "code" : {
+      "coding" : [ {
+        "code" : "3",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD"
+      } ]
+    },
+    "sequence" : 3
   }, {
     "category" : {
       "coding" : [ {
@@ -2417,8 +2422,13 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadPhase2=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 4,
-    "valueString" : "4"
+    "code" : {
+      "coding" : [ {
+        "code" : "4",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD"
+      } ]
+    },
+    "sequence" : 4
   }, {
     "category" : {
       "coding" : [ {
@@ -3282,8 +3292,13 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaim=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 2,
-    "valueString" : "5"
+    "code" : {
+      "coding" : [ {
+        "code" : "5",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD"
+      } ]
+    },
+    "sequence" : 2
   }, {
     "category" : {
       "coding" : [ {
@@ -4078,8 +4093,13 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 2,
-    "valueString" : "5"
+    "code" : {
+      "coding" : [ {
+        "code" : "5",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD"
+      } ]
+    },
+    "sequence" : 2
   }, {
     "category" : {
       "coding" : [ {
@@ -4092,8 +4112,13 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 3,
-    "valueString" : "3"
+    "code" : {
+      "coding" : [ {
+        "code" : "3",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD"
+      } ]
+    },
+    "sequence" : 3
   }, {
     "category" : {
       "coding" : [ {
@@ -4125,8 +4150,13 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 5,
-    "valueString" : "Y"
+    "code" : {
+      "coding" : [ {
+        "code" : "Y",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD-SWITCH"
+      } ]
+    },
+    "sequence" : 5
   }, {
     "category" : {
       "coding" : [ {
@@ -4139,8 +4169,13 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadProfessionalClaimBillingOrg=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 6,
-    "valueString" : "Y"
+    "code" : {
+      "coding" : [ {
+        "code" : "Y",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD-SWITCH"
+      } ]
+    },
+    "sequence" : 6
   }, {
     "category" : {
       "coding" : [ {
@@ -5491,8 +5526,13 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 4,
-    "valueString" : "Y"
+    "code" : {
+      "coding" : [ {
+        "code" : "Y",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD-SWITCH"
+      } ]
+    },
+    "sequence" : 4
   }, {
     "category" : {
       "coding" : [ {
@@ -5505,8 +5545,13 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 5,
-    "valueString" : "Y"
+    "code" : {
+      "coding" : [ {
+        "code" : "Y",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD-SWITCH"
+      } ]
+    },
+    "sequence" : 5
   }, {
     "category" : {
       "coding" : [ {
@@ -5519,8 +5564,13 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 6,
-    "valueString" : "Y"
+    "code" : {
+      "coding" : [ {
+        "code" : "Y",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD-SWITCH"
+      } ]
+    },
+    "sequence" : 6
   }, {
     "category" : {
       "coding" : [ {
@@ -5533,8 +5583,13 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 7,
-    "valueString" : "Y"
+    "code" : {
+      "coding" : [ {
+        "code" : "Y",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD-SWITCH"
+      } ]
+    },
+    "sequence" : 7
   }, {
     "category" : {
       "coding" : [ {
@@ -5547,8 +5602,13 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 8,
-    "valueString" : "1"
+    "code" : {
+      "coding" : [ {
+        "code" : "1",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD"
+      } ]
+    },
+    "sequence" : 8
   }, {
     "category" : {
       "coding" : [ {
@@ -5561,8 +5621,13 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidLong=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 9,
-    "valueString" : "2"
+    "code" : {
+      "coding" : [ {
+        "code" : "2",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD"
+      } ]
+    },
+    "sequence" : 9
   }, {
     "category" : {
       "coding" : [ {
@@ -7218,8 +7283,13 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 4,
-    "valueString" : "Y"
+    "code" : {
+      "coding" : [ {
+        "code" : "Y",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD-SWITCH"
+      } ]
+    },
+    "sequence" : 4
   }, {
     "category" : {
       "coding" : [ {
@@ -7232,8 +7302,13 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 5,
-    "valueString" : "Y"
+    "code" : {
+      "coding" : [ {
+        "code" : "Y",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD-SWITCH"
+      } ]
+    },
+    "sequence" : 5
   }, {
     "category" : {
       "coding" : [ {
@@ -7246,8 +7321,13 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 6,
-    "valueString" : "Y"
+    "code" : {
+      "coding" : [ {
+        "code" : "Y",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD-SWITCH"
+      } ]
+    },
+    "sequence" : 6
   }, {
     "category" : {
       "coding" : [ {
@@ -7260,8 +7340,13 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 7,
-    "valueString" : "Y"
+    "code" : {
+      "coding" : [ {
+        "code" : "Y",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD-SWITCH"
+      } ]
+    },
+    "sequence" : 7
   }, {
     "category" : {
       "coding" : [ {
@@ -7274,8 +7359,13 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 8,
-    "valueString" : "1"
+    "code" : {
+      "coding" : [ {
+        "code" : "1",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD"
+      } ]
+    },
+    "sequence" : 8
   }, {
     "category" : {
       "coding" : [ {
@@ -7288,8 +7378,13 @@ gov.cms.bfd.server.ng.EobReadIT.eobReadValidString=[
         "system" : "http://terminology.hl7.org/CodeSystem/claiminformationcategory"
       } ]
     },
-    "sequence" : 9,
-    "valueString" : "2"
+    "code" : {
+      "coding" : [ {
+        "code" : "2",
+        "system" : "https://bluebutton.cms.gov/fhir/CodeSystem/CLM-BNFT-ENHNCMT-CD"
+      } ]
+    },
+    "sequence" : 9
   }, {
     "category" : {
       "coding" : [ {

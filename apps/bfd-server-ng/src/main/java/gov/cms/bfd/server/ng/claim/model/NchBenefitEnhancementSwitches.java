@@ -1,13 +1,15 @@
 package gov.cms.bfd.server.ng.claim.model;
 
+import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 import lombok.Getter;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
-import org.hl7.fhir.r4.model.StringType;
 
 /** Claim header-level NCH benefit enhancement switches. */
 @Embeddable
@@ -79,6 +81,13 @@ public class NchBenefitEnhancementSwitches {
             supportingInfoFactory
                 .createSupportingInfo()
                 .setCategory(category.toFhir())
-                .setValue(new StringType(v)));
+                .setCode(
+                    new CodeableConcept()
+                        .addCoding(
+                            new Coding()
+                                .setSystem(
+                                    SystemUrls
+                                        .BLUE_BUTTON_CODE_SYSTEM_BENEFIT_ENHANCEMENT_CODE_SWITCH)
+                                .setCode(v))));
   }
 }
