@@ -11,6 +11,7 @@ import gov.cms.bfd.server.ng.util.MetricTimer;
 import io.micrometer.core.aop.MeterTag;
 import io.micrometer.core.instrument.Tags;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -21,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Repository
 @AllArgsConstructor
 public class CoverageRepository {
-  private final EntityManager entityManager;
+  @PersistenceContext private final EntityManager entityManager;
   private final DateUtil dateUtil;
   private final QueryTelemetryUtil queryTelemetryUtil;
   private final MetricTimer metricTimer;

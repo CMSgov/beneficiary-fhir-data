@@ -16,6 +16,7 @@ import io.micrometer.core.instrument.DistributionSummary;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tags;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -30,7 +31,7 @@ import org.springframework.stereotype.Repository;
 @AllArgsConstructor
 @SuppressWarnings("java:S2077")
 public class BeneficiaryRepository {
-  private final EntityManager entityManager;
+  @PersistenceContext private final EntityManager entityManager;
   private final MeterRegistry meterRegistry;
   private final MetricTimer metricTimer;
   private final QueryTelemetryUtil queryTelemetryUtil;

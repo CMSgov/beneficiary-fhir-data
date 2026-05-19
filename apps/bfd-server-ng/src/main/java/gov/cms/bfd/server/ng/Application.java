@@ -6,14 +6,16 @@ import gov.cms.bfd.server.ng.log.AuditLogger;
 import jakarta.servlet.Servlet;
 import java.time.Clock;
 import javax.sql.DataSource;
+import org.slf4j.MDC;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.task.SimpleAsyncTaskExecutorBuilder;
 import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 
@@ -97,10 +99,26 @@ public class Application {
   /**
    * Creates the custom task executor.
    *
+   * @param builder builder
    * @return task executor
    */
   @Bean
-  public ThreadPoolTaskExecutor taskExecutor() {
-    return new MdcAwareThreadPoolExecutor();
+  public SimpleAsyncTaskExecutor taskExecutor(SimpleAsyncTaskExecutorBuilder builder) {
+    return builder.virtualThreads(true).taskDecorator(Application::wrapWithMdcContext).build();
+  }
+
+  private static Runnable wrapWithMdcContext(Runnable task) {
+    // save the current MDC context
+    var contextMap = MDC.getCopyOfContextMap();
+    return () -> {
+      MDC.clear();
+      MDC.setContextMap(contextMap);
+      try {
+        task.run();
+      } finally {
+        // once the task is complete, clear MDC
+        MDC.clear();
+      }
+    };
   }
 }
