@@ -10,6 +10,7 @@ import io.micrometer.core.instrument.config.MeterFilter;
 import io.micrometer.java21.instrument.binder.jdk.VirtualThreadMetrics;
 import java.time.Duration;
 import java.util.Set;
+import lombok.AllArgsConstructor;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -18,7 +19,10 @@ import software.amazon.awssdk.services.cloudwatch.CloudWatchAsyncClient;
 
 /** Configuration for Micrometer metrics integration. */
 @Configuration
+@AllArgsConstructor
 public class MetricsConfiguration {
+
+  private final gov.cms.bfd.server.ng.Configuration configuration;
 
   /** List of metric names that are allowed to be published to Cloudwatch by Micrometer. */
   public static final Set<String> MICROMETER_ALLOWED_METRIC_PREFIX_NAMES =
@@ -78,7 +82,7 @@ public class MetricsConfiguration {
 
       @Override
       public String namespace() {
-        return "bfd-v3";
+        return String.format("bfd-%s/server-ng", configuration.getEnv());
       }
 
       @Override

@@ -2,6 +2,8 @@ package gov.cms.bfd.server.ng.log;
 
 import static gov.cms.bfd.server.ng.util.LoggerConstants.*;
 
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.regex.Pattern;
@@ -87,6 +89,37 @@ public class RequestTelemetryLogger {
    */
   public void recordResourcesReturned(int count) {
     MDC.put(logKey(MDC_PREFIX, RESOURCES_RETURNED_COUNT), String.valueOf(count));
+  }
+
+  /**
+   * Records HAPI request metadata into MDC.
+   *
+   * @param requestDetails the request details
+   */
+  public void recordRequestDetails(RequestDetails requestDetails) {
+    putIfPresent("resource", requestDetails.getResourceName());
+    putIfPresent("operation", requestDetails.getOperation());
+    var operationType = requestDetails.getRestOperationType();
+    putIfPresent("operationType", operationType.getCode());
+  }
+
+  /**
+   * Logs a request exception.
+   *
+   * @param exception the exception
+   */
+  public void logRequestException(BaseServerResponseException exception) {
+    // If there's a valid status code < 500, it's an invalid input
+    var logBuilder =
+        exception.getStatusCode() > 0 && exception.getStatusCode() < 500
+            ? LOGGER.atWarn()
+            : LOGGER.atError();
+    logBuilder
+        .setMessage(exception.getMessage())
+        .addKeyValue(LOG_TYPE, "requestException")
+        .addKeyValue("stackTrace", exception.getStackTrace())
+        .addKeyValue("statusCode", exception.getStatusCode())
+        .log();
   }
 
   /**

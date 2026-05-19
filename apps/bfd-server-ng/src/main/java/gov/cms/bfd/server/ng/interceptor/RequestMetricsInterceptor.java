@@ -5,6 +5,8 @@ import static gov.cms.bfd.server.ng.util.LoggerConstants.*;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import gov.cms.bfd.server.ng.log.RequestTelemetryLogger;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -31,10 +33,15 @@ public class RequestMetricsInterceptor {
     requestTelemetryLogger.recordTimestamp(HAPI_INCOMING_POST_PROCESS);
   }
 
-  /** Pointcut to log timestamp in milliseconds when a request is pre-handled. */
+  /**
+   * Pointcut to log timestamp in milliseconds when a request is pre-handled.
+   *
+   * @param requestDetails the request details
+   */
   @Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED)
-  public void requestPreHandled() {
+  public void requestPreHandled(RequestDetails requestDetails) {
     requestTelemetryLogger.recordTimestamp(HAPI_INCOMING_PRE_HANDLE);
+    requestTelemetryLogger.recordRequestDetails(requestDetails);
   }
 
   /**
@@ -61,5 +68,15 @@ public class RequestMetricsInterceptor {
   @Hook(Pointcut.SERVER_PROCESSING_COMPLETED)
   public void serverProcessCompleted() {
     requestTelemetryLogger.recordTimestamp(HAPI_PROCESS_COMPLETED);
+  }
+
+  /**
+   * Pointcut to log exceptions.
+   *
+   * @param exception exception
+   */
+  @Hook(Pointcut.SERVER_HANDLE_EXCEPTION)
+  public void handleException(BaseServerResponseException exception) {
+    requestTelemetryLogger.logRequestException(exception);
   }
 }
