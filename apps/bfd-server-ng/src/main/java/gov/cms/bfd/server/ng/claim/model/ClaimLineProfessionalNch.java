@@ -4,6 +4,7 @@ import gov.cms.bfd.server.ng.converter.NonZeroDoubleConverter;
 import gov.cms.bfd.server.ng.util.FhirUtil;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Embeddable;
@@ -27,7 +28,29 @@ public class ClaimLineProfessionalNch extends ClaimLineProfessionalBase implemen
   @Embedded private ClaimLineAdjudicationChargeProfessionalNch adjudicationCharge;
   @Embedded private ClaimLineProfessionalNchExtensions claimLineProfessionalNchExtensions;
   @Embedded private RenderingProviderSsaStateCode renderingProviderSsaStateCode;
-  @Embedded private LineNchBenefitEnhancementSwitches lineNchBenefitEnhancementSwitches;
+
+  @Embedded
+  @AttributeOverrides({
+    @AttributeOverride(
+        name = "pbpBenefitEnhancementIndicator",
+        column = @Column(name = "clm_line_ngaco_pbpmt_sw")),
+    @AttributeOverride(
+        name = "postDischargeHomeVisitBenefitEnhancementIndicator",
+        column = @Column(name = "clm_line_ngaco_pdschrg_hcbs_sw")),
+    @AttributeOverride(
+        name = "snf3DayWaiverEnhancement",
+        column = @Column(name = "clm_line_ngaco_snf_wvr_sw")),
+    @AttributeOverride(
+        name = "telehealthBenefitEnhancementIndicator",
+        column = @Column(name = "clm_line_ngaco_tlhlth_sw")),
+    @AttributeOverride(
+        name = "aipbpBenefitEnhancementIndicator",
+        column = @Column(name = "clm_line_ngaco_cptatn_sw")),
+    @AttributeOverride(
+        name = "careManagementHomeVisitsEnhancement",
+        column = @Column(name = "clm_line_aco_care_mgmt_hcbs_sw"))
+  })
+  private NchBenefitEnhancementSwitches lineNchBenefitEnhancementSwitches;
 
   @Column(name = "clm_line_hct_hgb_type_cd")
   private Optional<ClaimLineHCTHGBTestTypeCode> claimLineHCTHGBTestTypeCode;
