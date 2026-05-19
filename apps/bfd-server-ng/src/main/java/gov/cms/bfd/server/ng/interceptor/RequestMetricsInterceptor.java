@@ -11,8 +11,6 @@ import gov.cms.bfd.server.ng.log.RequestTelemetryLogger;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /** HAPI FHIR interceptor that records request lifecycle timing metrics. */
@@ -20,8 +18,6 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class RequestMetricsInterceptor {
-
-  private static final Logger LOGGER = LoggerFactory.getLogger(RequestMetricsInterceptor.class);
 
   private final RequestTelemetryLogger requestTelemetryLogger;
 
