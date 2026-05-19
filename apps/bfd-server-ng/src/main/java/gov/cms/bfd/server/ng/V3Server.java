@@ -5,7 +5,6 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import gov.cms.bfd.server.ng.interceptor.BanUnsupportedHttpMethodsInterceptor;
 import gov.cms.bfd.server.ng.interceptor.ExceptionHandlingInterceptor;
-import gov.cms.bfd.server.ng.interceptor.LoggingInterceptor;
 import gov.cms.bfd.server.ng.interceptor.RequestMetricsInterceptor;
 import gov.cms.bfd.server.openapi.OpenApiInterceptor;
 import jakarta.servlet.annotation.WebServlet;
@@ -37,7 +36,6 @@ public class V3Server extends RestfulServer {
     this.setFhirContext(FhirContext.forR4());
 
     this.registerProviders(resourceProviders);
-    this.registerInterceptor(new LoggingInterceptor());
     this.registerInterceptor(new BanUnsupportedHttpMethodsInterceptor());
     this.registerInterceptor(new ExceptionHandlingInterceptor());
     this.registerInterceptor(new OpenApiInterceptor());
