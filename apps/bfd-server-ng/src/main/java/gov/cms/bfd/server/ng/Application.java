@@ -104,7 +104,7 @@ public class Application {
    */
   @Bean
   public SimpleAsyncTaskExecutor taskExecutor(SimpleAsyncTaskExecutorBuilder builder) {
-    return builder.virtualThreads(true).taskDecorator(Application::wrapWithMdcContext).build();
+    return builder.taskDecorator(Application::wrapWithMdcContext).build();
   }
 
   private static Runnable wrapWithMdcContext(Runnable task) {
