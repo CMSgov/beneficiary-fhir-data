@@ -3,7 +3,6 @@ package gov.cms.bfd.server.ng.claim.model;
 import gov.cms.bfd.server.ng.converter.NonZeroIntConverter;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import jakarta.persistence.AttributeOverride;
-import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Embedded;
@@ -50,23 +49,21 @@ abstract class ClaimLineProfessionalBase implements ClaimLineBase {
   @Embedded private RenderingCareTeamLine claimLineRenderingProvider;
 
   @Embedded
-  @AttributeOverrides({
-    @AttributeOverride(
-        name = "benefitEnhancement1Code",
-        column = @Column(name = "clm_line_bnft_enhncmt_1_cd")),
-    @AttributeOverride(
-        name = "benefitEnhancement2Code",
-        column = @Column(name = "clm_line_bnft_enhncmt_2_cd")),
-    @AttributeOverride(
-        name = "benefitEnhancement3Code",
-        column = @Column(name = "clm_line_bnft_enhncmt_3_cd")),
-    @AttributeOverride(
-        name = "benefitEnhancement4Code",
-        column = @Column(name = "clm_line_bnft_enhncmt_4_cd")),
-    @AttributeOverride(
-        name = "benefitEnhancement5Code",
-        column = @Column(name = "clm_line_bnft_enhncmt_5_cd"))
-  })
+  @AttributeOverride(
+      name = "benefitEnhancement1Code",
+      column = @Column(name = "clm_line_bnft_enhncmt_1_cd"))
+  @AttributeOverride(
+      name = "benefitEnhancement2Code",
+      column = @Column(name = "clm_line_bnft_enhncmt_2_cd"))
+  @AttributeOverride(
+      name = "benefitEnhancement3Code",
+      column = @Column(name = "clm_line_bnft_enhncmt_3_cd"))
+  @AttributeOverride(
+      name = "benefitEnhancement4Code",
+      column = @Column(name = "clm_line_bnft_enhncmt_4_cd"))
+  @AttributeOverride(
+      name = "benefitEnhancement5Code",
+      column = @Column(name = "clm_line_bnft_enhncmt_5_cd"))
   private BenefitEnhancementCodes lineBenefitEnhancementCodes;
 
   @Embedded private ClaimLineProfessionalExtensions extensions;
