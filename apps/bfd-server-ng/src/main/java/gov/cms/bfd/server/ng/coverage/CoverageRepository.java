@@ -22,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Repository
 @AllArgsConstructor
 public class CoverageRepository {
-  @PersistenceContext private final EntityManager entityManager;
+  @PersistenceContext private EntityManager entityManager;
   private final DateUtil dateUtil;
   private final QueryTelemetryUtil queryTelemetryUtil;
   private final MetricTimer metricTimer;

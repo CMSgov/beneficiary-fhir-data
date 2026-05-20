@@ -31,7 +31,7 @@ import org.springframework.stereotype.Repository;
 @AllArgsConstructor
 @SuppressWarnings("java:S2077")
 public class BeneficiaryRepository {
-  @PersistenceContext private final EntityManager entityManager;
+  @PersistenceContext private EntityManager entityManager;
   private final MeterRegistry meterRegistry;
   private final MetricTimer metricTimer;
   private final QueryTelemetryUtil queryTelemetryUtil;
