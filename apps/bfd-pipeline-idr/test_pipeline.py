@@ -7,7 +7,6 @@ from typing import cast
 from uuid import uuid4
 
 import psycopg
-import pytest
 from psycopg import Connection, sql
 from psycopg.rows import DictRow, dict_row
 from testcontainers.core.config import testcontainers_config  # type: ignore
@@ -52,41 +51,6 @@ def _run_migrator(postgres: PostgresContainer) -> None:
     except subprocess.CalledProcessError as ex:
         print(ex.output)
         raise
-
-
-@pytest.mark.parametrize(
-    argnames="load_type",
-    argvalues=[LoadType.INCREMENTAL, LoadType.INITIAL],
-    ids=["test_pipeline--incremental", "test_pipeline--initial"],
-)
-def test_pipeline(load_type: LoadType) -> None:
-    with (
-        PostgresContainer("postgres:16", driver="") as postgres,
-        # No idea why pyright is upset about "row_factory", but we need to tell it to ignore the
-        # argument type here.
-        psycopg.connect(conninfo=postgres.get_connection_url(), row_factory=dict_row) as conn,  # pyright: ignore[reportArgumentType]
-    ):
-        with Path(__file__).parent.joinpath("./mock-idr.sql").open() as f:
-            conn.execute(f.read())  # type: ignore
-        conn.commit()
-
-        _run_migrator(postgres)
-        load_from_csv(PostgresExecutor(conn), Path(__file__).parent.joinpath("./test_samples1"))  # type: ignore
-
-        info = conn.info
-        # Info level logs obscure the error output when running tests
-        # so we want to override this unless the calling process has set this explicitly
-        os.environ.setdefault("IDR_LOG_LEVEL", "warning")
-        os.environ["BFD_DB_ENDPOINT"] = info.host
-        os.environ["BFD_DB_PORT"] = str(info.port)
-        os.environ["BFD_DB_NAME"] = info.dbname
-        os.environ["BFD_DB_USERNAME"] = info.user
-        os.environ["BFD_DB_PASSWORD"] = info.password
-        os.environ["IDR_BATCH_SIZE"] = "100000"
-        os.environ["IDR_FORCE_LOAD_PROGRESS"] = "1"
-        os.environ["BFD_TEST_DATE"] = "2023-04-02"
-
-        _do_test_pipeline(cast(Connection[DictRow], conn), load_type)
 
 
 def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
@@ -521,3 +485,40 @@ def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
 def advance_time(timestamp: datetime) -> None:
     new_time = timestamp + timedelta(minutes=1)
     os.environ["BFD_TEST_DATE"] = new_time.isoformat()
+
+
+def test_pipeline() -> None:
+    # This is REALLY dumb. Typically we would use a parameterized test plus a fixture to setup the
+    # database and run the same test with both load types, but GitHub Actions Runners seem to have
+    # some issue with testcontainers where only a single test case succeeds and all others fail to
+    # connect. This forces sequential execution of each test case and guarantees each Postgres
+    # container is cleaned-up prior to the next case running, avoiding the issue in CI
+    # TODO: Don't do this, find a way to make parameterized tests work in CI
+    for load_type in [LoadType.INCREMENTAL, LoadType.INITIAL]:
+        with (
+            PostgresContainer("postgres:16", driver="") as postgres,
+            # No idea why pyright is upset about "row_factory", but we need to tell it to ignore the
+            # argument type here.
+            psycopg.connect(conninfo=postgres.get_connection_url(), row_factory=dict_row) as conn,  # pyright: ignore[reportArgumentType]
+        ):
+            with Path(__file__).parent.joinpath("./mock-idr.sql").open() as f:
+                conn.execute(f.read())  # type: ignore
+            conn.commit()
+
+            _run_migrator(postgres)
+            load_from_csv(PostgresExecutor(conn), Path(__file__).parent.joinpath("./test_samples1"))  # type: ignore
+
+            info = conn.info
+            # Info level logs obscure the error output when running tests
+            # so we want to override this unless the calling process has set this explicitly
+            os.environ.setdefault("IDR_LOG_LEVEL", "warning")
+            os.environ["BFD_DB_ENDPOINT"] = info.host
+            os.environ["BFD_DB_PORT"] = str(info.port)
+            os.environ["BFD_DB_NAME"] = info.dbname
+            os.environ["BFD_DB_USERNAME"] = info.user
+            os.environ["BFD_DB_PASSWORD"] = info.password
+            os.environ["IDR_BATCH_SIZE"] = "100000"
+            os.environ["IDR_FORCE_LOAD_PROGRESS"] = "1"
+            os.environ["BFD_TEST_DATE"] = "2023-04-02"
+
+            _do_test_pipeline(cast(Connection[DictRow], conn), load_type)
