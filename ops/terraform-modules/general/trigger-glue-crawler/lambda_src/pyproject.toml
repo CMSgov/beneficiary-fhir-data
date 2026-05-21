@@ -3,7 +3,7 @@
 requires-python = ">=3.13"
 name = "trigger-glue-trigger"
 version = "1.0.0"
-dependencies = ["boto3", "aws-lambda-powertools[all]"]
+dependencies = ["boto3>=1.38.30", "aws-lambda-powertools[all]>=3.14.0"]
 
 [dependency-groups]
 dev = ["boto3-stubs[glue]", "ruff", "uv"]

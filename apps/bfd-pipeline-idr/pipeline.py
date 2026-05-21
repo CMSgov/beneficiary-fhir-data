@@ -4,7 +4,7 @@ from datetime import UTC, datetime
 
 import click
 import psycopg  # type: ignore
-from hamilton import driver, telemetry  # type: ignore
+from hamilton import driver  # type: ignore
 from hamilton.execution import executors  # type: ignore
 
 import pipeline_nodes
@@ -29,8 +29,6 @@ from settings import (
     TABLES_TO_LOAD,
     bfd_test_date,
 )
-
-telemetry.disable_telemetry()
 
 logger = logging.getLogger(__name__)
 
