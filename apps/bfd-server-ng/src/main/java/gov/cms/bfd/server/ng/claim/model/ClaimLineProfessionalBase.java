@@ -113,9 +113,7 @@ abstract class ClaimLineProfessionalBase implements ClaimLineBase {
 
     return Stream.of(
             trackingSupportingInfo.stream().toList(),
-            Optional.ofNullable(lineBenefitEnhancementCodes)
-                .map(c -> c.toFhir(supportingInfoFactory))
-                .orElse(List.of()))
+            lineBenefitEnhancementCodes.toFhir(supportingInfoFactory))
         .flatMap(Collection::stream)
         .toList();
   }

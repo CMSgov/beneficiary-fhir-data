@@ -59,9 +59,7 @@ public class ClaimInstitutionalNch extends ClaimInstitutionalBase {
       buildSubclassSupportingInfo() {
     return Stream.of(
             bloodPints.toFhir(supportingInfoFactory).stream().toList(),
-            Optional.ofNullable(nchBenefitEnhancementSwitches)
-                .map(c -> c.toFhir(supportingInfoFactory))
-                .orElse(List.of()))
+            nchBenefitEnhancementSwitches.toFhir(supportingInfoFactory))
         .flatMap(Collection::stream)
         .toList();
   }

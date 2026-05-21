@@ -176,9 +176,7 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
         Stream.of(
                 getTypeOfBillCode().toFhir(supportingInfoFactory).stream().toList(),
                 buildSubclassSupportingInfo(),
-                Optional.ofNullable(benefitEnhancementCodes)
-                    .map(c -> c.toFhir(supportingInfoFactory))
-                    .orElse(List.of()))
+                benefitEnhancementCodes.toFhir(supportingInfoFactory))
             .flatMap(Collection::stream)
             .toList();
 

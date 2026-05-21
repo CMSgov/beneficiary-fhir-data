@@ -111,9 +111,7 @@ public class ClaimLineProfessionalNch extends ClaimLineProfessionalBase implemen
     return Stream.of(
             super.toFhirSupportingInfo(supportingInfoFactory),
             renderingProviderSsaStateCode.toFhir(supportingInfoFactory).stream().toList(),
-            Optional.ofNullable(lineNchBenefitEnhancementSwitches)
-                .map(c -> c.toFhir(supportingInfoFactory))
-                .orElse(List.of()))
+            lineNchBenefitEnhancementSwitches.toFhir(supportingInfoFactory))
         .flatMap(Collection::stream)
         .toList();
   }

@@ -16,6 +16,9 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @Getter
 public class NchBenefitEnhancementSwitches {
 
+  @Column(name = "clm_uniq_id", insertable = false, updatable = false)
+  private long claimUniqueId;
+
   @Column(name = "clm_ngaco_pbpmt_sw")
   private Optional<String> pbpBenefitEnhancementIndicator;
 

@@ -16,6 +16,9 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 @Getter
 public class BenefitEnhancementCodes {
 
+  @Column(name = "clm_uniq_id", insertable = false, updatable = false)
+  private long claimUniqueId;
+
   @Column(name = "clm_bnft_enhncmt_1_cd")
   private Optional<String> benefitEnhancement1Code;
 
