@@ -2,6 +2,7 @@ package gov.cms.bfd.server.ng.loadprogress;
 
 import gov.cms.bfd.server.ng.util.DateUtil;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import lombok.AllArgsConstructor;
@@ -15,7 +16,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 @AllArgsConstructor
 public class LoadProgressRepository {
-  private final EntityManager entityManager;
+  @PersistenceContext private EntityManager entityManager;
 
   /**
    * Returns the global max batch completion timestamp or {@link DateUtil#MIN_DATETIME} if none.
