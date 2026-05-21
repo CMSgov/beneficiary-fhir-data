@@ -1,7 +1,6 @@
 import os
 import shutil
 import subprocess
-from collections.abc import Generator
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import cast
