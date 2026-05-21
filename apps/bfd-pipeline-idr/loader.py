@@ -4,7 +4,7 @@ from datetime import UTC, date, datetime
 
 import psycopg
 from psycopg.abc import Params, QueryNoTemplate
-from psycopg.errors import DeadlockDetected, LockNotAvailable
+from psycopg.errors import DeadlockDetected, LockNotAvailable, QueryCanceled
 
 from constants import DEFAULT_MIN_DATE
 from load_partition import LoadPartition, LoadType
@@ -96,12 +96,15 @@ class BatchLoader:
         self.meta_keys = (
             ["bfd_created_ts"] if self.immutable else ["bfd_created_ts", "bfd_updated_ts"]
         )
+        self.progress_start_timer = Timer("progress_start", model, partition)
         self.idr_query_timer = Timer("idr_query", model, partition)
         self.temp_table_timer = Timer("temp_table", model, partition)
         self.copy_timer = Timer("copy", model, partition)
-        self.insert_timer = Timer("insert", model, partition)
-        self.commit_timer = Timer("commit", model, partition)
+        self.upsert_timer = Timer("upsert", model, partition)
         self.last_updated_timer = Timer("last_updated", model, partition)
+        self.total_insert_timer = Timer("total_insert", model, partition)
+        self.update_progress_timer = Timer("update_progress", model, partition)
+        self.commit_timer = Timer("commit", model, partition)
         self.load_type = load_type
         self.enable_load_progress = should_track_load_progress(load_mode)
 
@@ -113,8 +116,10 @@ class BatchLoader:
         # (temp tables can't be created with an explicit schema set)
 
         with self.conn.cursor() as cur:
+            self.progress_start_timer.start()
             self._insert_batch_start(cur)
             self.conn.commit()
+            self.progress_start_timer.stop()
             data_loaded = False
             num_rows = 0
 
@@ -142,11 +147,13 @@ class BatchLoader:
 
                 if results:
                     # Upsert into the main table
-                    self.insert_timer.start()
+                    self.total_insert_timer.start()
                     self._merge(cur, timestamp)
-                    self.insert_timer.stop()
+                    self.total_insert_timer.stop()
 
+                    self.update_progress_timer.start()
                     self._calculate_load_progress(cur, results)
+                    self.update_progress_timer.stop()
 
                 self.commit_timer.start()
                 self.conn.commit()
@@ -279,11 +286,15 @@ class BatchLoader:
         on_conflict = (
             "DO NOTHING"
             if self.immutable or not update_set
-            else f"DO UPDATE SET {update_set}, bfd_updated_ts=%(timestamp)s"
+            else (
+                f"DO UPDATE SET {update_set}, bfd_updated_ts=%(timestamp)s "
+                "WHERE (t.*) IS DISTINCT FROM (EXCLUDED.*)"
+            )
         )
-        timestamp_placeholders = ",".join("%(timestamp)s" for _ in self.meta_keys)
+        timestamp_placeholders = ", ".join("%(timestamp)s" for _ in self.meta_keys)
 
         # Upsert into the main table
+        self.upsert_timer.start()
         if self.model.should_replace():
             # Delete before inserting since we've specified that the data should be
             # replaced rather than merged.
@@ -292,25 +303,29 @@ class BatchLoader:
             cur.execute(f"DELETE FROM {self.table}")  # type: ignore
         cur.execute(
             f"""
-            INSERT INTO {self.table}({self.cols_str}, {",".join(self.meta_keys)})
-            SELECT {self.cols_str},{timestamp_placeholders} FROM {self.temp_table}
-            ON CONFLICT ({",".join(unique_key)}) {on_conflict}
+            INSERT INTO {self.table} AS t ({self.cols_str}, {", ".join(self.meta_keys)})
+            SELECT {self.cols_str}, {timestamp_placeholders} FROM {self.temp_table}
+            ON CONFLICT ({", ".join(unique_key)}) {on_conflict}
             """,  # type: ignore
             {"timestamp": timestamp},
+            binary=True,
         )
         self.conn.commit()
+        self.upsert_timer.stop()
 
         if self.load_type == LoadType.INCREMENTAL and self.model.last_updated_date_table():
             key = self.model.last_updated_timestamp_col()
             last_updated_cols = self.model.last_updated_date_column()
             set_clause = ", ".join(f"{col} = %(timestamp)s" for col in last_updated_cols)
 
+            self.last_updated_timer.start()
             try:
-                self.last_updated_timer.start()
                 # We want to immediately terminate the transaction if there is already a lock on
                 # the table so that we avoid extraneous waits because if there is a lock this table
                 # is being updated concurrently and that existing update will have the same result
-                cur.execute("SET lock_timeout=1")
+                cur.execute("SAVEPOINT pre_last_updated")
+                cur.execute("SET LOCAL lock_timeout=1")
+                cur.execute("SET LOCAL statement_timeout=3000")
                 cur.execute(
                     f"""
                     WITH current_ts AS (
@@ -330,9 +345,12 @@ class BatchLoader:
                     {"timestamp": timestamp},
                 )
                 self.conn.commit()
-                self.last_updated_timer.stop()
-            except (DeadlockDetected, LockNotAvailable) as ex:
-                logger.warning("deadlock/lock timeout updating update timestamp, ignoring: %s", ex)
+            except (DeadlockDetected, LockNotAvailable, QueryCanceled) as ex:
+                logger.warning(
+                    "deadlock/lock/statement timeout updating update timestamp, ignoring: %s", ex
+                )
+                cur.execute("ROLLBACK TO SAVEPOINT pre_last_updated")
+            self.last_updated_timer.stop()
 
     def _copy_data(self, cur: psycopg.Cursor, results: Sequence[T]) -> None:
         # Use COPY to load the batch into Postgres.
