@@ -491,16 +491,38 @@ def test_pipeline() -> None:
     # This is REALLY dumb. Typically we would use a parameterized test plus a fixture to setup the
     # database and run the same test with both load types, but GitHub Actions Runners seem to have
     # some issue with testcontainers where only a single test case succeeds and all others fail to
-    # connect. This forces sequential execution of each test case and guarantees each Postgres
-    # container is cleaned-up prior to the next case running, avoiding the issue in CI
+    # connect. This forces sequential execution of each test case and ensures only a single
+    # container is ever started, avoiding the issue in CI
     # TODO: Don't do this, find a way to make parameterized tests work in CI
-    for load_type in [LoadType.INCREMENTAL, LoadType.INITIAL]:
-        with (
-            PostgresContainer("postgres:16", driver="") as postgres,
-            # No idea why pyright is upset about "row_factory", but we need to tell it to ignore the
-            # argument type here.
-            psycopg.connect(conninfo=postgres.get_connection_url(), row_factory=dict_row) as conn,  # pyright: ignore[reportArgumentType]
-        ):
+    with (
+        PostgresContainer("postgres:16", driver="") as postgres,
+        # No idea why pyright is upset about "row_factory", but we need to tell it to ignore the
+        # argument type here.
+        psycopg.connect(conninfo=postgres.get_connection_url(), row_factory=dict_row) as conn,  # pyright: ignore[reportArgumentType]
+    ):
+        for load_type in [LoadType.INCREMENTAL, LoadType.INITIAL]:
+            # Truncate all tables first. See above for justification
+            conn.execute(
+                """
+                DO $$ DECLARE
+                    r RECORD;
+                BEGIN
+                    FOR r IN (SELECT tablename FROM pg_tables WHERE schemaname = 'idr') LOOP
+                        EXECUTE 'DROP TABLE idr.' || quote_ident(r.tablename) || ' CASCADE';
+                    END LOOP;
+
+                    FOR r IN (
+                        SELECT tablename FROM pg_tables WHERE schemaname = 'cms_vdm_view_mdcr_prd'
+                    ) LOOP
+                        EXECUTE 'DROP TABLE cms_vdm_view_mdcr_prd.'
+                            || quote_ident(r.tablename)
+                            || ' CASCADE';
+                    END LOOP;
+                END $$;
+                """
+            )
+            conn.commit()
+
             with Path(__file__).parent.joinpath("./mock-idr.sql").open() as f:
                 conn.execute(f.read())  # type: ignore
             conn.commit()
