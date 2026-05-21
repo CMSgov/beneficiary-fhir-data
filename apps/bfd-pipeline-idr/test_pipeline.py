@@ -9,7 +9,7 @@ from uuid import uuid4
 
 import psycopg
 import pytest
-from psycopg import sql
+from psycopg import Connection, sql
 from psycopg.rows import DictRow, dict_row
 from testcontainers.core.config import testcontainers_config  # type: ignore
 
@@ -55,45 +55,42 @@ def _run_migrator(postgres: PostgresContainer) -> None:
         raise
 
 
-@pytest.fixture
-def setup_db() -> Generator[PostgresContainer]:
-    with PostgresContainer("postgres:16", driver="") as postgres:
-        with psycopg.connect(postgres.get_connection_url()) as conn:
-            with Path(__file__).parent.joinpath("./mock-idr.sql").open() as f:
-                conn.execute(f.read())  # type: ignore
-            conn.commit()
-
-            _run_migrator(postgres)
-            load_from_csv(PostgresExecutor(conn), Path(__file__).parent.joinpath("./test_samples1"))  # type: ignore
-
-            info = conn.info
-            # Info level logs obscure the error output when running tests
-            # so we want to override this unless the calling process has set this explicitly
-            os.environ.setdefault("IDR_LOG_LEVEL", "warning")
-            os.environ["BFD_DB_ENDPOINT"] = info.host
-            os.environ["BFD_DB_PORT"] = str(info.port)
-            os.environ["BFD_DB_NAME"] = info.dbname
-            os.environ["BFD_DB_USERNAME"] = info.user
-            os.environ["BFD_DB_PASSWORD"] = info.password
-            os.environ["IDR_BATCH_SIZE"] = "100000"
-            os.environ["IDR_FORCE_LOAD_PROGRESS"] = "1"
-            os.environ["BFD_TEST_DATE"] = "2023-04-02"
-        yield postgres
-
-
 @pytest.mark.parametrize(
     argnames="load_type",
     argvalues=[LoadType.INCREMENTAL, LoadType.INITIAL],
     ids=["test_pipeline--incremental", "test_pipeline--initial"],
 )
-def test_pipeline(setup_db: PostgresContainer, load_type: LoadType) -> None:
-    conn = cast(
-        psycopg.Connection[DictRow],
-        psycopg.connect(setup_db.get_connection_url(), row_factory=dict_row),  # type: ignore
-    )
+def test_pipeline(load_type: LoadType) -> None:
+    with (
+        PostgresContainer("postgres:16", driver="") as postgres,
+        # No idea why pyright is upset about "row_factory", but we need to tell it to ignore the
+        # argument type here.
+        psycopg.connect(conninfo=postgres.get_connection_url(), row_factory=dict_row) as conn,  # pyright: ignore[reportArgumentType]
+    ):
+        with Path(__file__).parent.joinpath("./mock-idr.sql").open() as f:
+            conn.execute(f.read())  # type: ignore
+        conn.commit()
 
-    conn.commit()
+        _run_migrator(postgres)
+        load_from_csv(PostgresExecutor(conn), Path(__file__).parent.joinpath("./test_samples1"))  # type: ignore
 
+        info = conn.info
+        # Info level logs obscure the error output when running tests
+        # so we want to override this unless the calling process has set this explicitly
+        os.environ.setdefault("IDR_LOG_LEVEL", "warning")
+        os.environ["BFD_DB_ENDPOINT"] = info.host
+        os.environ["BFD_DB_PORT"] = str(info.port)
+        os.environ["BFD_DB_NAME"] = info.dbname
+        os.environ["BFD_DB_USERNAME"] = info.user
+        os.environ["BFD_DB_PASSWORD"] = info.password
+        os.environ["IDR_BATCH_SIZE"] = "100000"
+        os.environ["IDR_FORCE_LOAD_PROGRESS"] = "1"
+        os.environ["BFD_TEST_DATE"] = "2023-04-02"
+
+        _do_test_pipeline(cast(Connection[DictRow], conn), load_type)
+
+
+def _do_test_pipeline(conn: Connection[DictRow], load_type: LoadType) -> None:
     run(Source.POSTGRES, LoadMode.SYNTHETIC, load_type)
 
     cur = conn.execute("select * from idr.beneficiary order by bene_sk")
