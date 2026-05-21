@@ -23,6 +23,8 @@ with Path(cur_sample).open("r") as file:
 if len(sys.argv) > 2:
     cur_sample_data["profileType"] = sys.argv[2]
 
+is_pharmacy = cur_sample_data.get("resourceType") == "ExplanationOfBenefit-Pharmacy"
+
 OTHR_PRVDR_MEANING = (
     "supervisor" if cur_sample_data.get("CLM_TYPE_CD") in ("1700", "2700") else "otheroperating"
 )
@@ -72,7 +74,15 @@ def cleanup_empty_items(data):
         new_sic = []
         si_map = {}
         # Filter for non-empty items (items having more than just ROW_NUM)
-        for next_row, item in enumerate((i for i in sic if any(k != "ROW_NUM" for k in i)), start=1):
+        filtered_sic = [i for i in sic if any(k != "ROW_NUM" for k in i)]
+
+        # Sort on avail columns for consistency.
+        def get_sort_key(item):
+            return sorted([(k, str(v)) for k, v in item.items() if k != "ROW_NUM"])
+
+        sorted_sic = sorted(filtered_sic, key=get_sort_key)
+
+        for next_row, item in enumerate(sorted_sic, start=1):
             if (old_row := item.get("ROW_NUM")) is not None:
                 si_map.update({str(old_row): next_row, int(old_row): next_row})
             item["ROW_NUM"] = next_row
@@ -132,6 +142,41 @@ header_to_supp_info_cols = {
     "CLM_NRLN_RIC_CD": "CLM_NRLN_RIC_CD",
     "CLM_RIC_CD": "CLM_RIC_CD",
     "GEO_BLG_SSA_STATE_CD": "GEO_BLG_SSA_STATE_CD",
+    "CLM_MDCR_EXHSTD_DT": "CLM_MDCR_EXHSTD_DT",
+    "BENE_PTNT_STUS_CD": "BENE_PTNT_STUS_CD",
+    "CLM_ADMSN_SRC_CD": "CLM_ADMSN_SRC_CD",
+    "CLM_ADMSN_TYPE_CD": "CLM_ADMSN_TYPE_CD",
+    "CLM_FI_ACTN_CD": "CLM_FI_ACTN_CD",
+    "CLM_HHA_LUP_IND_CD": "CLM_HHA_LUP_IND_CD",
+    "CLM_HHA_RFRL_CD": "CLM_HHA_RFRL_CD",
+    "CLM_MDCR_INSTNL_MCO_PD_SW": "CLM_MDCR_INSTNL_MCO_PD_SW",
+    "CLM_MDCR_NCH_PTNT_STUS_IND_CD": "CLM_MDCR_NCH_PTNT_STUS_IND_CD",
+    "CLM_MDCR_NPMT_RSN_CD": "CLM_MDCR_NPMT_RSN_CD",
+    "CLM_OP_SRVC_TYPE_CD": "CLM_OP_SRVC_TYPE_CD",
+    "CLM_PPS_IND_CD": "CLM_PPS_IND_CD",
+    "DGNS_DRG_CD": "DGNS_DRG_CD",
+    "DGNS_DRG_OUTLIER_CD": "DGNS_DRG_OUTLIER_CD",
+    "CLM_ACTV_CARE_THRU_DT": "CLM_ACTV_CARE_THRU_DT",
+    "CLM_CMS_PROC_DT": "CLM_CMS_PROC_DT",
+    "CLM_NCH_WKLY_PROC_DT": "CLM_NCH_WKLY_PROC_DT",
+    "CLM_NCVRD_FROM_DT": "CLM_NCVRD_FROM_DT",
+    "CLM_NCVRD_THRU_DT": "CLM_NCVRD_THRU_DT",
+    "CLM_QLFY_STAY_FROM_DT": "CLM_QLFY_STAY_FROM_DT",
+    "CLM_QLFY_STAY_THRU_DT": "CLM_QLFY_STAY_THRU_DT",
+    "CLM_SUBMSN_DT": "CLM_SUBMSN_DT",
+    "CLM_ADJSTMT_TYPE_CD": "CLM_ADJSTMT_TYPE_CD",
+    "CLM_BLOOD_PT_FRNSH_QTY": "CLM_BLOOD_PT_FRNSH_QTY",
+    "CLM_CNTRCTR_NUM": "CLM_CNTRCTR_NUM",
+    "CLM_DISP_CD": "CLM_DISP_CD",
+    "CLM_IDR_LD_DT": "CLM_IDR_LD_DT",
+    "CLM_NCH_PRMRY_PYR_CD": "CLM_NCH_PRMRY_PYR_CD",
+    "CLM_QUERY_CD": "CLM_QUERY_CD",
+    "CLM_CARR_PMT_DNL_CD": "CLM_CARR_PMT_DNL_CD",
+    "CLM_CLNCL_TRIL_NUM": "CLM_CLNCL_TRIL_NUM",
+    "CLM_MDCR_PRFNL_PRVDR_ASGNMT_SW": "CLM_MDCR_PRFNL_PRVDR_ASGNMT_SW",
+    "CLM_SBMT_FRMT_CD": "CLM_SBMT_FRMT_CD",
+    "CLM_SBMTR_CNTRCT_NUM": "CLM_SBMTR_CNTRCT_NUM",
+    "CLM_SBMTR_CNTRCT_PBP_NUM": "CLM_SBMTR_CNTRCT_PBP_NUM",
 }
 
 line_to_supp_info_cols = {
@@ -147,6 +192,20 @@ line_to_supp_info_cols = {
     "CLM_LINE_NGACO_CPTATN_SW": "CLM_NGACO_CPTATN_SW",
     "CLM_LINE_ACO_CARE_MGMT_HCBS_SW": "CLM_ACO_CARE_MGMT_HCBS_SW",
     "GEO_RNDRG_SSA_STATE_CD": "GEO_RNDRG_SSA_STATE_CD",
+    "CLM_BRND_GNRC_CD": "CLM_BRND_GNRC_CD",
+    "CLM_CMPND_CD": "CLM_CMPND_CD",
+    "CLM_CTSTRPHC_CVRG_IND_CD": "CLM_CTSTRPHC_CVRG_IND_CD",
+    "CLM_DAW_PROD_SLCTN_CD": "CLM_DAW_PROD_SLCTN_CD",
+    "CLM_DRUG_CVRG_STUS_CD": "CLM_DRUG_CVRG_STUS_CD",
+    "CLM_DSPNSNG_STUS_CD": "CLM_DSPNSNG_STUS_CD",
+    "CLM_LINE_AUTHRZD_FILL_NUM": "CLM_LINE_AUTHRZD_FILL_NUM",
+    "CLM_LINE_DAYS_SUPLY_QTY": "CLM_LINE_DAYS_SUPLY_QTY",
+    "CLM_LINE_RX_FILL_NUM": "CLM_LINE_RX_FILL_NUM",
+    "CLM_LINE_RX_ORGN_CD": "CLM_LINE_RX_ORGN_CD",
+    "CLM_LTC_DSPNSNG_MTHD_CD": "CLM_LTC_DSPNSNG_MTHD_CD",
+    "CLM_PHRMCY_SRVC_TYPE_CD": "CLM_PHRMCY_SRVC_TYPE_CD",
+    "CLM_PTNT_RSDNC_CD": "CLM_PTNT_RSDNC_CD",
+    "CLM_LINE_RX_NUM": "CLM_LINE_RX_NUM",
 }
 
 npis_used = []
@@ -356,10 +415,29 @@ for si_comp in supporting_info_components:
 
 for source_col, target_col in header_to_supp_info_cols.items():
     value = cur_sample_data.get(source_col)
+    if value is None and "institutionalComponents" in cur_sample_data:
+        value = cur_sample_data["institutionalComponents"].get(source_col)
+    if value is None and "profComponents" in cur_sample_data:
+        value = cur_sample_data["profComponents"].get(source_col)
+
     if value:
         temp_var = {"ROW_NUM": supporting_info_seq, target_col: value}
         supporting_info_components.append(temp_var)
         supporting_info_seq += 1
+
+# special case - want these in a single supportinginfo component
+actv_from = cur_sample_data.get("CLM_ACTV_CARE_FROM_DT")
+
+dschrg_dt = cur_sample_data.get("CLM_DSCHRG_DT")
+
+if actv_from or dschrg_dt:
+    temp_var = {"ROW_NUM": supporting_info_seq}
+    if actv_from:
+        temp_var["CLM_ACTV_CARE_FROM_DT"] = actv_from
+    if dschrg_dt:
+        temp_var["CLM_DSCHRG_DT"] = dschrg_dt
+    supporting_info_components.append(temp_var)
+    supporting_info_seq += 1
 
 
 # There can be line item NPIs that are not present at header level, but
@@ -375,12 +453,31 @@ for item in line_items:
             supporting_info_seq += 1
 
     for source_col, target_col in line_to_supp_info_cols.items():
+        if source_col == "CLM_LINE_RX_NUM" and not is_pharmacy:
+            continue
         value = item.get(source_col)
         if value:
             temp_var = {"ROW_NUM": supporting_info_seq, target_col: value}
             supporting_info_components.append(temp_var)
             item.setdefault("SEQUENCE_INFO", []).append(supporting_info_seq)
             supporting_info_seq += 1
+
+    # special case - want these in a single supportinginfo component. See EOB-base map.
+    hct_hgb_rslt = item.get("CLM_LINE_HCT_HGB_RSLT_NUM")
+    hct_hgb_type = item.get("CLM_LINE_HCT_HGB_TYPE_CD")
+    clncl_lab_num = item.get("CLM_LINE_CARR_CLNCL_LAB_NUM")
+
+    if hct_hgb_rslt or hct_hgb_type or clncl_lab_num:
+        temp_var = {"ROW_NUM": supporting_info_seq}
+        if hct_hgb_rslt:
+            temp_var["CLM_LINE_HCT_HGB_RSLT_NUM"] = hct_hgb_rslt
+        if hct_hgb_type:
+            temp_var["CLM_LINE_HCT_HGB_TYPE_CD"] = hct_hgb_type
+        if clncl_lab_num:
+            temp_var["CLM_LINE_CARR_CLNCL_LAB_NUM"] = clncl_lab_num
+        supporting_info_components.append(temp_var)
+        item.setdefault("SEQUENCE_INFO", []).append(supporting_info_seq)
+        supporting_info_seq += 1
 
     # for part D claims, sum CLM_LINE_INGRDNT_CST_AMT, CLM_LINE_SRVC_CST_AMT, CLM_LINE_SLS_TAX_AMT,
     # CLM_LINE_VCCN_ADMIN_FEE_AMT to set TOT_RX_CST_AMT

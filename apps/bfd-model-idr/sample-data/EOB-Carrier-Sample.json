@@ -54,92 +54,7 @@
             "CLM_POA_IND": "~"
         }
     ],
-    "supportingInfoComponents": [
-        {
-            "CLM_ACTV_CARE_FROM_DT": "2021-01-01",
-            "CLM_DSCHRG_DT": "2021-01-02"
-        },
-        {
-            "CLM_ADMSN_TYPE_CD": "3"
-        },
-        {
-            "CLM_SUBMSN_DT": "2020-01-13"
-        },
-        {
-            "BENE_PTNT_STUS_CD": "06"
-        },
-        {
-            "DGNS_DRG_CD": "460"
-        },
-        {
-            "CLM_BLOOD_PT_FRNSH_QTY": "15"
-        },
-        {
-            "CLM_MDCR_INSTNL_MCO_PD_SW": "1"
-        },
-        {
-            "CLM_ADMSN_SRC_CD": "2"
-        },
-        {
-            "CLM_NCH_WKLY_PROC_DT": "2025-01-18"
-        },
-        {
-            "CLM_NCVRD_FROM_DT": "2025-01-01"
-        },
-        {
-            "CLM_NCVRD_THRU_DT": "2025-01-02"
-        },
-        {
-            "CLM_ACTV_CARE_THRU_DT": "2025-01-11"
-        },
-        {
-            "CLM_MDCR_EXHSTD_DT": "2025-01-11"
-        },
-        {
-            "CLM_NCH_PRMRY_PYR_CD": "I"
-        },
-        {
-            "CLM_QLFY_STAY_FROM_DT": "2025-01-02"
-        },
-        {
-            "CLM_QLFY_STAY_THRU_DT": "2025-01-01"
-        },
-        {
-            "CLM_LINE_HCT_HGB_TYPE_CD": "R1",
-            "CLM_LINE_HCT_HGB_RSLT_NUM": "1.11",
-            "CLM_LINE_CARR_CLNCL_LAB_NUM": "11D1343434"
-        },
-        {
-            "CLM_NRLN_RIC_CD": "O"
-        },
-        {
-            "CLM_QUERY_CD": "3"
-        },
-        {
-            "CLM_IDR_LD_DT": "2025-01-18"
-        },
-        {
-            "CLM_CNTRCTR_NUM": "10312"
-        },
-        {
-            "CLM_ADJSTMT_TYPE_CD": "0"
-        },
-        {
-            "CLM_DISP_CD": "1"
-        },
-        {
-            "CLM_CMS_PROC_DT": "2025-01-01"
-        },
-        {
-            "CLM_CARR_PMT_DNL_CD": "8"
-        },
-        {
-            "CLM_MDCR_PRFNL_PRVDR_ASGNMT_SW": "L"
-        },
-        {
-            "CLM_CLNCL_TRIL_NUM": "1337"
-        }
-    ],
+    "supportingInfoComponents": [],
     "lineItemComponents": [
         {
             "CLM_LINE_DGNS_CD": "M48.062",
@@ -178,7 +93,10 @@
             "CLM_LINE_PRFNL_INTRST_AMT": "11.13",
             "CLM_MDCR_PRMRY_PYR_ALOWD_AMT": "11.14",
             "CLM_LINE_PMD_UNIQ_TRKNG_NUM": "ALA00000047747",
-            "GEO_RNDRG_SSA_STATE_CD": "03"
+            "GEO_RNDRG_SSA_STATE_CD": "03",
+            "CLM_LINE_HCT_HGB_RSLT_NUM": "1.11",
+            "CLM_LINE_HCT_HGB_TYPE_CD": "R1",
+            "CLM_LINE_CARR_CLNCL_LAB_NUM": "11D1343434"
         },
         {
             "PRVDR_RNDRNG_PRVDR_NPI_NUM": "1952378861",
@@ -259,8 +177,12 @@
     "profComponents": {
         "CLM_PRVDR_ACNT_RCVBL_OFST_AMT": "19.00",
         "CLM_MDCR_PRFNL_PRMRY_PYR_AMT": "8201.1",
-        "CLM_AUDT_TRL_STUS_CD": "D"
+        "CLM_AUDT_TRL_STUS_CD": "D",
+        "CLM_CARR_PMT_DNL_CD": "8",
+        "CLM_MDCR_PRFNL_PRVDR_ASGNMT_SW": "L",
+        "CLM_CLNCL_TRIL_NUM": "1337"
     },
+    "CLM_NRLN_RIC_CD": "O",
     "CLM_MDCR_DDCTBL_AMT": "17.85",
     "CLM_PMT_AMT": "3.50",
     "CLM_PRVDR_PMT_AMT": "11.11",
@@ -277,5 +199,15 @@
     "PRVDR_RNDRNG_PRVDR_NPI_NUM": "1942945159",
     "CLM_BILL_FAC_TYPE_CD": "1",
     "CLM_BILL_CLSFCTN_CD": "2",
-    "CLM_BILL_FREQ_CD": "3"
+    "CLM_BILL_FREQ_CD": "3",
+    "CLM_SUBMSN_DT": "2020-01-13",
+    "CLM_NCH_WKLY_PROC_DT": "2025-01-18",
+    "CLM_CMS_PROC_DT": "2025-01-01",
+    "CLM_BLOOD_PT_FRNSH_QTY": "15",
+    "CLM_NCH_PRMRY_PYR_CD": "I",
+    "CLM_QUERY_CD": "3",
+    "CLM_IDR_LD_DT": "2025-01-18",
+    "CLM_CNTRCTR_NUM": "10312",
+    "CLM_ADJSTMT_TYPE_CD": "0",
+    "CLM_DISP_CD": "1"
 }
