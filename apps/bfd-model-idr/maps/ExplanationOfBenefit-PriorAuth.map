@@ -1,0 +1,36 @@
+map "https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-PriorAuth" = "BFD-ExplanationOfBenefit-PriorAuth-Map"
+
+uses "https://bfd.cms.gov/fhir/StructureDefinition/ExplanationOfBenefit-PriorAuth" alias ExplanationOfBenefitPA as source
+//hl7.org urls are used for dependent resources as the FHIR validator resolves them as such. 
+uses "http://hl7.org/fhir/StructureDefinition/ProcedureComponent" alias ProcedureComponent as source
+uses "http://hl7.org/fhir/StructureDefinition/DiagnosisComponent" alias DiagnosisComponent as source
+uses "http://hl7.org/fhir/StructureDefinition/SupportingInfoComponent" alias SupportingInfoComponent as source
+uses "http://hl7.org/fhir/StructureDefinition/LineItemComponent" alias LineItemComponent as source
+uses "http://hl7.org/fhir/StructureDefinition/Provider" alias ProviderComponent as source
+
+
+//The first specified target is what the default output will output as the ResourceType
+uses "http://hl7.org/fhir/StructureDefinition/ExplanationOfBenefit" alias BFDEOB as target
+
+imports "https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper" 
+imports "https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-SupportingInfo-Helper" 
+imports "https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Item-Helper" 
+
+group createEOBPriorAuth(source src: ExplanationOfBenefitPA, target tgt: BFDEOB){
+    
+    src -> tgt.status = "active" "Set status";
+    src -> tgt.use = "preauthorization" "Set use code";
+    src -> tgt.meta = create('Meta') as tgtMeta then {
+      src.lastUpdated as lastUpdated -> tgtMeta.lastUpdated = lastUpdated "set lastUpdated";
+      src -> tgtMeta.profile = "http://hl7.org/fhir/us/davinci-pdex/StructureDefinition/pdex-priorauthorization" "Add profile";
+      src -> tgtMeta.tag = c("https://bluebutton.cms.gov/fhir/CodeSystem/System-Type","SharedSystem") "Add system type";
+      src -> tgtMeta.source = "CWF" "Add source";
+    } "Create metadata";
+
+    src -> tgt.type = create('CodeableConcept') as tgtCC then {
+      //CodeSystem -> CLM_TYPE_CD
+      src.CLM_TYPE_CD as typeCd -> tgtCC.coding = translate(typeCd,'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#CLM_TYPE_CD','coding') "translate code";
+      src.CLM_TYPE_CD as typeCd -> tgtCC.coding = c('https://bluebutton.cms.gov/fhir/CodeSystem/CLM-TYPE-CD', typeCd) "Add claim type code";
+    } "Create type";
+
+}
