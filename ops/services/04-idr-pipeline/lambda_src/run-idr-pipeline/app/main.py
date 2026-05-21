@@ -95,7 +95,9 @@ class IdrContainerOverrides:
     @classmethod
     def from_invoke(cls, invoke_model: InvokeModel) -> IdrContainerOverrides:
         env_kvs = (
-            [EnvKeyValue(name=k, value=v) for k, v in invoke_model.env] if invoke_model.env else []
+            [EnvKeyValue(name=k, value=v) for k, v in invoke_model.env.items()]
+            if invoke_model.env
+            else []
         )
         command_seq = invoke_model.command.split() if invoke_model.command else None
 
