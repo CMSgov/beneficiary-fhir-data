@@ -27,10 +27,74 @@ group createEOBPriorAuth(source src: ExplanationOfBenefitPA, target tgt: BFDEOB)
       src -> tgtMeta.source = "CWF" "Add source";
     } "Create metadata";
 
+
+
+
     src -> tgt.type = create('CodeableConcept') as tgtCC then {
       //CodeSystem -> CLM_TYPE_CD
-      src.CLM_TYPE_CD as typeCd -> tgtCC.coding = translate(typeCd,'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#CLM_TYPE_CD','coding') "translate code";
-      src.CLM_TYPE_CD as typeCd -> tgtCC.coding = c('https://bluebutton.cms.gov/fhir/CodeSystem/CLM-TYPE-CD', typeCd) "Add claim type code";
+      //Two types -  1: PDEX, 2: CMS-specific. use concept map
+      src.CLM_TYPE as typeCd -> tgtCC.coding = translate(typeCd,'https://bfd.cms.gov/MappingLanguage/Maps/ExplanationOfBenefit-Helper#PriorAuthType','coding') "translate code";
+      //TODO: define codesystem.
+      /*
+        Claim Types:
+        Valid Claim Types - Blank, B, D, I, O, H, C
+        Blank - Space
+        Part B - B
+        DME - D
+        Inpatient - I
+        Outpatient - O
+        Home Health - H
+        Hospice - C
+    */
+      src.CLM_TYPE as typeCd -> tgtCC.coding = c('https://bluebutton.cms.gov/fhir/CodeSystem/CLM-TYPE', typeCd) "Add claim type code";
     } "Create type";
+
+    //UTN - Universal Tracking Number
+    //SEGMENT COUNT
+    //Current_segment (line item)
+    //UTN_VALID_ST_DT - start date of validity - populated
+    //UTN_VALID_EN_DT - end date of validity - populated
+    //PA_IND - chars, what does this actually mean?
+    // HCPCS_OR_CPT_OR_HIPPS - HCPCS/CPT code
+    //ICD_PROC_IND - ICD Proc Indicator -> always empty
+    //ICD_PROC_CODE - ICD Procedure code -> always empty
+    //MAC_ID - mac id, should be able to re-use clm_cntrctr_num
+    //PA_filler - not inclined to use this
+    //ICN_DCN - Internal Control Number /DCN. see if it matches up with clm cntl num?
+    //PA_DT_ADDED - date added -> per segment? 
+    //PA_DT_UPDATED - date updated in CWF -> per segment? 
+    //SERVICE_CNTS - "Number of Services" -> PER segment
+    //PA_DECISION - A P N
+    //PA_REQ_SUB_DT
+    //PA_REQ_REC_DT
+    //PA_DECISION_DT - decision date
+    //PA_DECISION_EXP_DT - decision expiration date
+    //ORDER_REFER_NPI - yes populated
+    //RENDER_NPI - yes populated
+    //OPERATE_NPI - not populated since 2024-01-01
+    //SVC_RENDER_ST - Rendering service state - populated
+    // PRICE_MOD1 - Price Modifier 1
+    // PRICE_MOD2 - Price Modifier 2 -> both populated
+    //PLACE_OF_SERV - populated?  -> yes
+
+
+    // ICD_DIAG_IND_1 / ICD_DIAG_CODE_1 - indicator / diagnosis code - able to group? ever different? 
+    //assume diag ind = 0, none with 9, also not populated 
+    //not populated after 2022?
+
+    //NPI - Facility NPI on the PA
+    // NAME - Facility Name
+    //CMS_CERT - CCN (CMS certification number)
+    //REV_CODE_1 to REV_CODE_20 -> only 1 is populated, ever.
+    //COND_CODE_1 to COND_CODE_4 -> all empty 
+    //OCCUR_CODE_1 to OCCUR_CODE_4 -> all empty
+    //TOB
+    //MR_COUNT_IND - MR Count Indicator - what is this?? medical review count indicator
+    //MR_COUNT_ST_DT - medical review count start date
+    //MR_COUNT_END_DT - 
+    // ATT_PHY_NPI - Attending Physician NPI -> populated infrequently. 
+
+
+
 
 }
