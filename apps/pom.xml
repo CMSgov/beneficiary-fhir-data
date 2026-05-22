@@ -183,6 +183,7 @@
         <javapoet.version>1.13.0</javapoet.version>
 
         <!-- Fix for Snyk vulnerability (CWE-770 and CWE-436)-->
+        <netty.version>4.1.133.Final</netty.version>
         <jetty.version>12.1.7</jetty.version>
         <org.apache.httpcomponents.httpclient.version>4.5.14</org.apache.httpcomponents.httpclient.version>
         <datasource-proxy.version>1.10</datasource-proxy.version>
@@ -311,20 +312,20 @@
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-codec-http2</artifactId>
-                <version>4.1.133.Final</version>
+                <version>${netty.version}</version>
             </dependency>
- 
+
             <!-- Fix for Snyk vulnerability (CWE-93 and CWE-444)-->
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-codec-http</artifactId>
-                <version>4.1.133.Final</version>
+                <version>${netty.version}</version>
             </dependency>
             <!-- Fix for Snyk vulnerability (CVE-2026-42583: Lz4FrameDecoder resource exhaustion)-->
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-codec</artifactId>
-                <version>4.1.133.Final</version>
+                <version>${netty.version}</version>
             </dependency>
             <!-- Fix for Snyk vulnerability (CWE-835 and CWE-770)-->
             <dependency>
