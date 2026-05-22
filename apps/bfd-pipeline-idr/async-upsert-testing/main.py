@@ -2010,9 +2010,9 @@ class DatabaseDetailsModel(BaseModel):
     def from_env(cls) -> DatabaseDetailsModel:
         return DatabaseDetailsModel.model_validate(
             {
-                "host": os.environ.get("PGHOST"),
-                "user": os.environ.get("PGUSER"),
-                "password": os.environ.get("PGPASSWORD"),
+                "host": os.environ.get("BFD_DB_ENDPOINT"),
+                "user": os.environ.get("BFD_DB_USERNAME"),
+                "password": os.environ.get("BFD_DB_PASSWORD"),
                 "port": os.environ.get("PGPORT"),
                 "dbname": os.environ.get("PGDATABASE"),
             }
