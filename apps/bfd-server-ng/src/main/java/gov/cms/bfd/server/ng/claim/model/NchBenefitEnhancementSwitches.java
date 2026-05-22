@@ -1,7 +1,9 @@
 package gov.cms.bfd.server.ng.claim.model;
 
+import gov.cms.bfd.server.ng.converter.WhitespaceTrimConverter;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Embeddable;
 import java.util.List;
 import java.util.Optional;
@@ -17,21 +19,27 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 public class NchBenefitEnhancementSwitches {
 
   @Column(name = "clm_ngaco_pbpmt_sw")
+  @Convert(converter = WhitespaceTrimConverter.class)
   private Optional<String> pbpBenefitEnhancementIndicator;
 
   @Column(name = "clm_ngaco_pdschrg_hcbs_sw")
+  @Convert(converter = WhitespaceTrimConverter.class)
   private Optional<String> postDischargeHomeVisitBenefitEnhancementIndicator;
 
   @Column(name = "clm_ngaco_snf_wvr_sw")
+  @Convert(converter = WhitespaceTrimConverter.class)
   private Optional<String> snf3DayWaiverEnhancement;
 
   @Column(name = "clm_ngaco_tlhlth_sw")
+  @Convert(converter = WhitespaceTrimConverter.class)
   private Optional<String> telehealthBenefitEnhancementIndicator;
 
   @Column(name = "clm_ngaco_cptatn_sw")
+  @Convert(converter = WhitespaceTrimConverter.class)
   private Optional<String> aipbpBenefitEnhancementIndicator;
 
   @Column(name = "clm_aco_care_mgmt_hcbs_sw")
+  @Convert(converter = WhitespaceTrimConverter.class)
   private Optional<String> careManagementHomeVisitsEnhancement;
 
   /**

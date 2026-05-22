@@ -1,7 +1,9 @@
 package gov.cms.bfd.server.ng.claim.model;
 
+import gov.cms.bfd.server.ng.converter.WhitespaceTrimConverter;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Embeddable;
 import java.util.List;
 import java.util.Optional;
@@ -17,18 +19,23 @@ import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 public class BenefitEnhancementCodes {
 
   @Column(name = "clm_bnft_enhncmt_1_cd")
+  @Convert(converter = WhitespaceTrimConverter.class)
   private Optional<String> benefitEnhancement1Code;
 
   @Column(name = "clm_bnft_enhncmt_2_cd")
+  @Convert(converter = WhitespaceTrimConverter.class)
   private Optional<String> benefitEnhancement2Code;
 
   @Column(name = "clm_bnft_enhncmt_3_cd")
+  @Convert(converter = WhitespaceTrimConverter.class)
   private Optional<String> benefitEnhancement3Code;
 
   @Column(name = "clm_bnft_enhncmt_4_cd")
+  @Convert(converter = WhitespaceTrimConverter.class)
   private Optional<String> benefitEnhancement4Code;
 
   @Column(name = "clm_bnft_enhncmt_5_cd")
+  @Convert(converter = WhitespaceTrimConverter.class)
   private Optional<String> benefitEnhancement5Code;
 
   /**
@@ -47,7 +54,6 @@ public class BenefitEnhancementCodes {
             benefitEnhancement4Code,
             benefitEnhancement5Code)
         .flatMap(Optional::stream)
-        .filter(s -> !s.isBlank())
         .map(
             code ->
                 supportingInfoFactory
