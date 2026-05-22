@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Lambda to consume IDR load events from the IDR Events SQS Queue into the v3 DB"
 readme = "README.md"
 requires-python = "~=3.14.0"
-dependencies = ["boto3", "aws-lambda-powertools", "psycopg[binary]", "pydantic"]
+dependencies = ["boto3>=1.42.81", "aws-lambda-powertools>=3.26.0", "psycopg[binary]>=3.3.3", "pydantic>=2.12.5"]
 
 [dependency-groups]
 dev = ["boto3-stubs[lambda]", "ruff", "uv", "pyright"]

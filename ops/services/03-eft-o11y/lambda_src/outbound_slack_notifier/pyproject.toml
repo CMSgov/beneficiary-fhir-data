@@ -2,7 +2,7 @@
 name = "outbound-slack-notifier"
 version = "1.0.0"
 requires-python = ">=3.13"
-dependencies = ["aws-lambda-powertools[all]"]
+dependencies = ["aws-lambda-powertools[all]>=3.19.0"]
 
 [dependency-groups]
 dev = ["pyright", "ruff"]

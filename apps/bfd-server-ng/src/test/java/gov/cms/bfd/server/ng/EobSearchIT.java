@@ -15,11 +15,8 @@ import gov.cms.bfd.server.ng.claim.model.ClaimFinalAction;
 import gov.cms.bfd.server.ng.claim.model.ClaimProfessionalNch;
 import gov.cms.bfd.server.ng.claim.model.ClaimSubtype;
 import gov.cms.bfd.server.ng.claim.model.MetaSourceSk;
-import gov.cms.bfd.server.ng.eob.EobResourceProvider;
 import gov.cms.bfd.server.ng.util.DateUtil;
 import gov.cms.bfd.server.ng.util.SystemUrls;
-import jakarta.persistence.EntityManager;
-import jakarta.servlet.http.HttpServletRequest;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
@@ -38,13 +35,8 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.Mock;
-import org.springframework.beans.factory.annotation.Autowired;
 
 class EobSearchIT extends IntegrationTestBase {
-  @Autowired private EobResourceProvider eobResourceProvider;
-  @Autowired private EntityManager entityManager;
-  @Mock HttpServletRequest request;
 
   private IQuery<Bundle> searchBundle() {
     return getFhirClient()
