@@ -2013,8 +2013,8 @@ class DatabaseDetailsModel(BaseModel):
                 "host": os.environ.get("BFD_DB_ENDPOINT"),
                 "user": os.environ.get("BFD_DB_USERNAME"),
                 "password": os.environ.get("BFD_DB_PASSWORD"),
-                "port": os.environ.get("PGPORT"),
-                "dbname": os.environ.get("PGDATABASE"),
+                "port": 5432,
+                "dbname": "fhirdb",
             }
         )
 
