@@ -61,12 +61,12 @@ group createEOBPriorAuth(source src: ExplanationOfBenefitPA, target tgt: BFDEOB)
     //MAC_ID - mac id, should be able to re-use clm_cntrctr_num
     //PA_filler - not inclined to use this
     //ICN_DCN - Internal Control Number /DCN. see if it matches up with clm cntl num?
-    //PA_DT_ADDED - date added -> per segment? 
-    //PA_DT_UPDATED - date updated in CWF -> per segment? 
+    //PA_DT_ADDED - date added -> per segment? -> yes. 
+    //PA_DT_UPDATED - date updated in CWF -> per segment? -> yes.  
     //SERVICE_CNTS - "Number of Services" -> PER segment
     //PA_DECISION - A P N
-    //PA_REQ_SUB_DT
-    //PA_REQ_REC_DT
+    //PA_REQ_SUB_DT - "submitted date".. to whom? 
+    //PA_REQ_REC_DT - "received" date.. by whom?
     //PA_DECISION_DT - decision date
     //PA_DECISION_EXP_DT - decision expiration date
     //ORDER_REFER_NPI - yes populated
