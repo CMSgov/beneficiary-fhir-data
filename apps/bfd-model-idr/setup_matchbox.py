@@ -3,6 +3,7 @@ import http
 import json
 import logging
 import tarfile
+import time
 from collections import defaultdict
 from pathlib import Path
 
@@ -75,12 +76,19 @@ def upload_resource(base_url, resource_json, session):
         logger.error("Error uploading %s: %s", rid, e)
 
 
-
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--url", default="http://localhost:8080/matchboxv3/fhir")
     parser.add_argument("--manifest", default="matchbox_profiles.txt")
     args = parser.parse_args()
+
+    for _ in range(30):
+        try:
+            if requests.get(args.url, timeout=5).ok:
+                break
+        except requests.RequestException:
+            pass
+        time.sleep(5)
 
     session = requests.Session()
     package_map = parse_manifest(args.manifest)
