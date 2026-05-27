@@ -83,11 +83,12 @@ def main():
     args = parser.parse_args()
 
     # This replicates the healthcheck in the docker compose because podman doesn't like healthchecks
-    # This also assumes it will eventually work
-    logger.info("Waiting for matchbox server to start...")
+    # This also assumes it will eventually work, and also assumes it is being run from inside the
+    # container and targeting the local matchbox server.
+    logger.info("Waiting for local matchbox server to start...")
     for _ in range(30):
         try:
-            if requests.get(args.url, timeout=5).ok:
+            if requests.get("http://matchbox:8080/matchboxv3/actuator/health", timeout=5).ok:
                 break
         except requests.RequestException:
             pass
