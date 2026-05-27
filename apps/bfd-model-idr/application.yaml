@@ -2,6 +2,8 @@ server:
   servlet:
     context-path: /matchboxv3
 spring:
+  main:
+    lazy-initialization: true
   datasource:
     url: 'jdbc:postgresql://matchbox-db:5432/matchbox'
     username: matchbox
@@ -36,6 +38,8 @@ hapi:
     mdm_enabled: false
     openapi_enabled: false
     narrative_enabled: false
+    pre_expand_value_sets: false
+    enable_task_pre_expand_value_sets: false
     jpa:
       subscription_matching_enabled: false
       bulk_export_enabled: false
