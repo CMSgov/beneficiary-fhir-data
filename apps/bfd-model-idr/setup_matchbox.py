@@ -82,6 +82,9 @@ def main():
     parser.add_argument("--manifest", default="matchbox_profiles.txt")
     args = parser.parse_args()
 
+    # This replicates the healthcheck in the docker compose because podman doesn't like healthchecks
+    # This also assumes it will eventually work
+    logger.info("Waiting for matchbox server to start...")
     for _ in range(30):
         try:
             if requests.get(args.url, timeout=5).ok:
