@@ -78,6 +78,10 @@ data "aws_iam_policy" "permissions_boundary" {
   name = "ct-ado-poweruser-permissions-boundary-policy"
 }
 
+# Prevents accidental destruction of the environment
+# Since platform services do not support ephemeral environments,
+# we _always_ want to prevent destruction
+# This can be manually commented out if it needs to be bypassed for some reason.
 resource "terraform_data" "no_op_prevent_destroy" {
   lifecycle {
     prevent_destroy = true

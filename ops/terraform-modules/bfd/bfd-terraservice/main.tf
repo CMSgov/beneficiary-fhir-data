@@ -192,6 +192,7 @@ data "aws_security_group" "cms_cloud_shared_services" {
   }
 }
 
+# Prevents accidental destruction of established environments.
 resource "terraform_data" "no_op_prevent_destroy" {
   lifecycle {
     prevent_destroy = !local.is_ephemeral_env
