@@ -181,15 +181,18 @@
         <jakarta.el.version>4.0.2</jakarta.el.version>
         <poi.version>5.4.0</poi.version>
         <javapoet.version>1.13.0</javapoet.version>
-
-        <!-- Fix for Snyk vulnerability (CWE-770 and CWE-436)-->
+        <netty.version>4.1.133.Final</netty.version>
         <jetty.version>12.1.7</jetty.version>
         <org.apache.httpcomponents.httpclient.version>4.5.14</org.apache.httpcomponents.httpclient.version>
         <datasource-proxy.version>1.10</datasource-proxy.version>
         <cors.filter.version>1.0.1</cors.filter.version>
         <org.apache.spark.version>3.5.0</org.apache.spark.version>
         <hapi-fhir.version>8.8.0</hapi-fhir.version>
-        <thymeleaf.version>3.1.4.RELEASE</thymeleaf.version>
+        <thymeleaf.version>3.1.5.RELEASE</thymeleaf.version>
+        <swagger-core.version>2.2.28</swagger-core.version>
+        <swagger-ui.version>5.20.1</swagger-ui.version>
+        <flexmark.version>0.64.8</flexmark.version>
+        <htmlunit.version>4.11.1</htmlunit.version>
         <jersey.version>2.25.1</jersey.version>
         <org.apache.poi.version>5.4.0</org.apache.poi.version>
 
@@ -311,14 +314,20 @@
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-codec-http2</artifactId>
-                <version>4.1.132.Final</version>
+                <version>${netty.version}</version>
             </dependency>
- 
+
             <!-- Fix for Snyk vulnerability (CWE-93 and CWE-444)-->
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-codec-http</artifactId>
-                <version>4.1.132.Final</version>
+                <version>${netty.version}</version>
+            </dependency>
+            <!-- Fix for Snyk vulnerability (CVE-2026-42583: Lz4FrameDecoder resource exhaustion)-->
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-codec</artifactId>
+                <version>${netty.version}</version>
             </dependency>
             <!-- Fix for Snyk vulnerability (CWE-835 and CWE-770)-->
             <dependency>
@@ -356,6 +365,71 @@
                 <groupId>org.thymeleaf</groupId>
                 <artifactId>thymeleaf</artifactId>
                 <version>${thymeleaf.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.swagger.core.v3</groupId>
+                <artifactId>swagger-models-jakarta</artifactId>
+                <version>${swagger-core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.swagger.core.v3</groupId>
+                <artifactId>swagger-core-jakarta</artifactId>
+                <version>${swagger-core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.webjars</groupId>
+                <artifactId>swagger-ui</artifactId>
+                <version>${swagger-ui.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.vladsch.flexmark</groupId>
+                <artifactId>flexmark</artifactId>
+                <version>${flexmark.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.htmlunit</groupId>
+                <artifactId>htmlunit</artifactId>
+                <version>${htmlunit.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ca.uhn.hapi.fhir</groupId>
+                <artifactId>hapi-fhir-base</artifactId>
+                <version>${hapi-fhir.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ca.uhn.hapi.fhir</groupId>
+                <artifactId>hapi-fhir-server</artifactId>
+                <version>${hapi-fhir.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ca.uhn.hapi.fhir</groupId>
+                <artifactId>hapi-fhir-client</artifactId>
+                <version>${hapi-fhir.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ca.uhn.hapi.fhir</groupId>
+                <artifactId>hapi-fhir-converter</artifactId>
+                <version>${hapi-fhir.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ca.uhn.hapi.fhir</groupId>
+                <artifactId>hapi-fhir-structures-dstu3</artifactId>
+                <version>${hapi-fhir.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ca.uhn.hapi.fhir</groupId>
+                <artifactId>hapi-fhir-structures-r4</artifactId>
+                <version>${hapi-fhir.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ca.uhn.hapi.fhir</groupId>
+                <artifactId>hapi-fhir-structures-r5</artifactId>
+                <version>${hapi-fhir.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ca.uhn.hapi.fhir</groupId>
+                <artifactId>hapi-fhir-test-utilities</artifactId>
+                <version>${hapi-fhir.version}</version>
             </dependency>
             <dependency>
                 <!-- Adds java-8 types to jackson. -->
