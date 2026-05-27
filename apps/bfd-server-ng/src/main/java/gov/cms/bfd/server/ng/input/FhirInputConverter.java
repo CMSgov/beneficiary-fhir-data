@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.ng.input;
 
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.base.Strings;
@@ -452,5 +453,31 @@ public class FhirInputConverter {
                 new InvalidRequestException(
                     "Unknown source. Supported sources are: "
                         + Arrays.toString(MetaSourceSk.values())));
+  }
+
+  /**
+   * Checks a RequestDetails object for headers, returns True if 1 exists
+   *
+   * @param requestDetails
+   * @param headerName
+   * @return True if the header exists and there is only 1, False otherwise
+   */
+  public static Optional<Boolean> parseBooleanHeader(
+      RequestDetails requestDetails, String headerName) {
+    List<String> headerValues = requestDetails.getHeaders(headerName);
+
+    if (headerValues == null || headerValues.isEmpty()) {
+      return Optional.of(false);
+    } else if (headerValues.size() == 1) {
+      String headerValue = headerValues.get(0);
+      if ("true".equalsIgnoreCase(headerValue)) {
+        return Optional.of(true);
+      } else if ("false".equalsIgnoreCase(headerValue)) {
+        return Optional.of(false);
+      }
+    }
+
+    throw new InvalidRequestException(
+        "Unsupported " + headerName + " header value: " + headerValues);
   }
 }

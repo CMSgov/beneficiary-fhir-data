@@ -7,6 +7,7 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -87,8 +88,11 @@ public class EobResourceProvider implements IResourceProvider {
       @OptionalParam(name = TYPE) final TokenAndListParam type,
       @OptionalParam(name = Constants.PARAM_SOURCE) final TokenAndListParam source,
       @OptionalParam(name = Constants.PARAM_SECURITY) final TokenAndListParam security,
+      final RequestDetails requestDetails,
       final HttpServletRequest request) {
 
+    var includeTaxNumbers =
+        FhirInputConverter.parseBooleanHeader(requestDetails, "IncludeTaxNumbers");
     var tagCriteria = FhirInputConverter.parseTagParameter(tag);
     var claimTypeCodes = FhirInputConverter.getClaimTypeCodesForType(type);
     var samhsaSearchIntent = FhirInputConverter.parseSecurityParameter(security);
