@@ -10,6 +10,8 @@ locals {
   parent_env = try(one([for x in local.established_envs : x if can(regex("${x}$$", terraform.workspace))]), null)
   env        = terraform.workspace
 
+  is_ephemeral_env = local.env != local.parent_env
+
   # There are no tags from which we can divine the environment a VPC is associated. Fortunately, we
   # know the name of our VPCs, and they should _never_ change, so it's OK to just check the name of
   # the VPC and return its associated env.
@@ -187,5 +189,11 @@ data "aws_security_group" "cms_cloud_shared_services" {
   filter {
     name   = "tag:Name"
     values = [local.cms_cloud_shared_services_sg]
+  }
+}
+
+resource "terraform_data" "no_op_prevent_destroy" {
+  lifecycle {
+    prevent_destroy = !local.is_ephemeral_env
   }
 }

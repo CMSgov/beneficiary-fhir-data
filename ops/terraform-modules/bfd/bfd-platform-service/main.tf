@@ -77,3 +77,9 @@ data "aws_kms_key" "platform" {
 data "aws_iam_policy" "permissions_boundary" {
   name = "ct-ado-poweruser-permissions-boundary-policy"
 }
+
+resource "terraform_data" "no_op_prevent_destroy" {
+  lifecycle {
+    prevent_destroy = true
+  }
+}
