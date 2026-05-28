@@ -73,6 +73,7 @@ public class EobResourceProvider implements IResourceProvider {
    * @param type claim type to filter by
    * @param source claim source to filter by
    * @param security security to filter SAMHSA by
+   * @param requestDetails request details object
    * @param request HTTP request details
    * @return bundle
    */

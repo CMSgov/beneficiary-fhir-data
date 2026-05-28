@@ -456,10 +456,10 @@ public class FhirInputConverter {
   }
 
   /**
-   * Checks a RequestDetails object for headers, returns True if 1 exists
+   * Checks a RequestDetails object for headers, returns True if 1 exists.
    *
-   * @param requestDetails
-   * @param headerName
+   * @param requestDetails requestDetails object from call
+   * @param headerName name of header to check for existence
    * @return True if the header exists and there is only 1, False otherwise
    */
   public static Optional<Boolean> parseBooleanHeader(
@@ -469,7 +469,7 @@ public class FhirInputConverter {
     if (headerValues == null || headerValues.isEmpty()) {
       return Optional.of(false);
     } else if (headerValues.size() == 1) {
-      String headerValue = headerValues.get(0);
+      String headerValue = headerValues.getFirst();
       if ("true".equalsIgnoreCase(headerValue)) {
         return Optional.of(true);
       } else if ("false".equalsIgnoreCase(headerValue)) {

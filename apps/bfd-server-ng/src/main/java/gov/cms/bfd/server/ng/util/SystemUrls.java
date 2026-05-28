@@ -1070,4 +1070,8 @@ public class SystemUrls {
   /** Claim line anesthesia unit count extension URL. */
   public static final String EXT_CLM_LINE_ANSTHSA_UNIT_CNT_URL =
       "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-LINE-ANSTHSA-UNIT-CNT";
+
+  /** Claim Provider Tax Number. */
+  public static final String EXT_CLM_RNDRG_PRVDR_TAX_NUM_URL =
+      "https://bluebutton.cms.gov/fhir/StructureDefinition/CLM-PRVDR-TAX-NUM";
 }
