@@ -1,16 +1,3 @@
-# `ecr` Platform Terraservice
-
-This Terraservice is responsible for defining account-wide ECR repositories.
-
-## Direct Terraservice Dependencies
-
-_Note: This does not include transitive dependencies (dependencies of dependencies)._
-
-| Terraservice | Required?
-|---|---|---|---|
-| `bootstrap` | Yes |
-| `config` | Yes |
-
 <!-- BEGIN_TF_DOCS -->
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
      'terraform-docs --config "$(git rev-parse --show-toplevel)/.terraform-docs.yml" .'
@@ -22,7 +9,6 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 | Name | Version |
 | ---- | ------- |
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.12.0 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 6 |
 
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
      'terraform-docs --config "$(git rev-parse --show-toplevel)/.terraform-docs.yml" .'
@@ -44,9 +30,7 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 -->
 ## Modules
 
-| Name | Source | Version |
-| ---- | ------ | ------- |
-| <a name="module_terraservice"></a> [terraservice](#module\_terraservice) | ../../terraform-modules/bfd/bfd-platform-service | n/a |
+No modules.
 
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
      'terraform-docs --config "$(git rev-parse --show-toplevel)/.terraform-docs.yml" .'
@@ -55,12 +39,7 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 -->
 ## Resources
 
-| Name | Type |
-| ---- | ---- |
-| [aws_ecr_lifecycle_policy.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecr_lifecycle_policy) | resource |
-| [aws_ecr_repository.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecr_repository) | resource |
-| [aws_ecr_repository_policy.name](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecr_repository_policy) | resource |
-| [aws_iam_policy_document.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
+No resources.
 
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
      'terraform-docs --config "$(git rev-parse --show-toplevel)/.terraform-docs.yml" .'

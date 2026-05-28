@@ -13,8 +13,8 @@ This module exports the full properties of the created `aws_sns_topic` resource.
 ## Requirements
 
 | Name | Version |
-|------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.10.0 |
+| ---- | ------- |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.12.0 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~>6 |
 | <a name="requirement_external"></a> [external](#requirement\_external) | ~>2 |
 | <a name="requirement_http"></a> [http](#requirement\_http) | ~>3 |
@@ -27,7 +27,7 @@ This module exports the full properties of the created `aws_sns_topic` resource.
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
+| ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_iam_path"></a> [iam\_path](#input\_iam\_path) | Kion-compliant IAM path | `string` | n/a | yes |
 | <a name="input_kms_key_arn"></a> [kms\_key\_arn](#input\_kms\_key\_arn) | ARN of the KMS Key that will be used to encrypt the topic and the logs it emits. | `string` | n/a | yes |
 | <a name="input_permissions_boundary_arn"></a> [permissions\_boundary\_arn](#input\_permissions\_boundary\_arn) | Kion-compliant Permissions Boundary ARN | `string` | n/a | yes |
@@ -58,7 +58,7 @@ No modules.
 ## Resources
 
 | Name | Type |
-|------|------|
+| ---- | ---- |
 | [aws_cloudwatch_log_group.failure](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
 | [aws_cloudwatch_log_group.success](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
 | [aws_iam_policy.logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
@@ -81,6 +81,6 @@ No modules.
 ## Outputs
 
 | Name | Description |
-|------|-------------|
+| ---- | ----------- |
 | <a name="output_topic"></a> [topic](#output\_topic) | `aws_sns_topic` resource created by this module. |
 <!-- END_TF_DOCS -->

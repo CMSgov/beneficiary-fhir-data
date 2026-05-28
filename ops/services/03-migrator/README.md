@@ -22,7 +22,8 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 ## Requirements
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.12.0 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 6 |
 
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
@@ -33,7 +34,7 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
+| ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_db_environment_override"></a> [db\_environment\_override](#input\_db\_environment\_override) | For use in database maintenance contexts or in ephemeral environments only | `string` | `null` | no |
 | <a name="input_migrator_repository_override"></a> [migrator\_repository\_override](#input\_migrator\_repository\_override) | Overrides the ECR repository for the migrator container image. If not provided, the default will be used | `string` | `null` | no |
 | <a name="input_migrator_version_override"></a> [migrator\_version\_override](#input\_migrator\_version\_override) | Overrides the version for migrator container image resolution. If not provided, the latest BFD version will be used | `string` | `null` | no |
@@ -49,7 +50,7 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 ## Modules
 
 | Name | Source | Version |
-|------|--------|---------|
+| ---- | ------ | ------- |
 | <a name="module_data_db_writer_instance"></a> [data\_db\_writer\_instance](#module\_data\_db\_writer\_instance) | ../../terraform-modules/general/data-db-writer-instance | n/a |
 | <a name="module_data_strategies"></a> [data\_strategies](#module\_data\_strategies) | ../../terraform-modules/bfd/bfd-data-ecs-strategies | n/a |
 | <a name="module_terraservice"></a> [terraservice](#module\_terraservice) | ../../terraform-modules/bfd/bfd-terraservice | n/a |
@@ -62,7 +63,7 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 ## Resources
 
 | Name | Type |
-|------|------|
+| ---- | ---- |
 | [aws_cloudwatch_log_group.messages](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
 | [aws_ecs_task_definition.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecs_task_definition) | resource |
 | [aws_iam_policy.execution_ecr](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |

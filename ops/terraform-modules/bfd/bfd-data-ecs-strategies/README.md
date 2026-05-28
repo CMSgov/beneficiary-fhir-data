@@ -11,8 +11,8 @@ This _data_ module looks up the capacity providers configured on the given ECS C
 ## Requirements
 
 | Name | Version |
-|------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.10.0 |
+| ---- | ------- |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.12.0 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~>6 |
 | <a name="requirement_external"></a> [external](#requirement\_external) | ~>2 |
 | <a name="requirement_http"></a> [http](#requirement\_http) | ~>3 |
@@ -25,7 +25,7 @@ This _data_ module looks up the capacity providers configured on the given ECS C
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
+| ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | ECS Cluster Name to lookup Capacity Providers on. | `string` | n/a | yes |
 | <a name="input_service"></a> [service](#input\_service) | Terraservice name corresponding to SSM service hierarchy. | `string` | n/a | yes |
 | <a name="input_ssm_config"></a> [ssm\_config](#input\_ssm\_config) | bfd-terraservice generated SSM config map from which capacity provider strategy values are pulled. | `map(string)` | n/a | yes |
@@ -47,7 +47,7 @@ No modules.
 ## Resources
 
 | Name | Type |
-|------|------|
+| ---- | ---- |
 | [aws_ecs_cluster.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ecs_cluster) | data source |
 | [external_external.aws_cli_ecs_cluster](https://registry.terraform.io/providers/hashicorp/external/latest/docs/data-sources/external) | data source |
 
@@ -59,6 +59,6 @@ No modules.
 ## Outputs
 
 | Name | Description |
-|------|-------------|
+| ---- | ----------- |
 | <a name="output_strategies"></a> [strategies](#output\_strategies) | List of objects each representing a valid, configured capacity provider strategy that can be used in `aws_ecs_service` resources or Task executions |
 <!-- END_TF_DOCS -->
