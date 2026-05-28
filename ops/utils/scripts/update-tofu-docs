@@ -3,6 +3,6 @@ set -euo pipefail
 
 # false positive, fd uses braces as a placeholder
 # shellcheck disable=SC1083
-fd -t l tofu.tf -x terraform-docs --config "$(git rev-parse --show-toplevel)/.terraform-docs.yml" {//}
+fd -t l '^tofu.tf$' -x terraform-docs --config "$(git rev-parse --show-toplevel)/.terraform-docs.yml" {//}
 # shellcheck disable=SC1083
-fd -t f tofu.tf -x terraform-docs --config "$(git rev-parse --show-toplevel)/.terraform-docs.yml" {//}
+fd -t f '^tofu.tf$' -x terraform-docs --config "$(git rev-parse --show-toplevel)/.terraform-docs.yml" {//}
