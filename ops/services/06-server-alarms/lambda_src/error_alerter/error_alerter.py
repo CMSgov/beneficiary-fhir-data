@@ -73,51 +73,54 @@ def __get_value_by_key(cell_key: str, row_list: list[LogInsightsQueryResultTypeD
     )["value"]
 
 
+def __escape(input_str: str) -> str:
+    for char in input_str:
+        if char.isalpha() or char.isdigit() or char in ["-", "."]:
+            continue
+        char_hex = f"*{ord(char):02x}"
+        input_str = input_str.replace(char, char_hex)
+    return input_str
+
+
+def __gen_log_insights_url(cw_params: Mapping[str, str | list[str] | int | bool]) -> str:
+    S1 = "$257E"
+    S2 = "$2528"
+    S3 = "$2527"
+    S4 = "$2529"
+
+    config_str = f"{S1}{S2}"
+    for key in cw_params:
+        cw_value = cw_params[key]
+        if isinstance(cw_value, str):
+            cw_value = __escape(cw_value)
+        elif isinstance(cw_value, list):
+            for i in range(len(cw_value)):
+                cw_value[i] = __escape(cw_value[i])
+        prefix = S1 if next(iter(cw_params.items()))[0] != key else ""
+        suffix = f"{S1}{S3}"
+        if isinstance(cw_value, list):
+            cw_value = "".join([f"{S1}{S3}{n}" for n in cw_value])
+            suffix = f"{S1}{S2}"
+        elif isinstance(cw_value, int | bool):
+            cw_value = str(cw_value).lower()
+            suffix = S1
+
+        config_str += f"{prefix}{key}{suffix}{cw_value}"
+    config_str += f"{S4}{S4}"
+    QUERY = f"logsV2:logs-insights$3Ftab$3Dlogs$26queryDetail$3D{config_str}"
+    return f"https://{REGION}.console.aws.amazon.com/cloudwatch/home?region={REGION}#{QUERY}"
+
+
 # Implementation based on https://stackoverflow.com/questions/68429312/generate-aws-logs-insights-url-with-query-and-search-creteria
 def __generate_cloudwatch_url(
     log_groups: list[str], query: str, start_time: datetime, end_time: datetime
 ) -> str:
-    def escape(s: str) -> str:
-        for c in s:
-            if c.isalpha() or c.isdigit() or c in ["-", "."]:
-                continue
-            c_hex = f"*{ord(c):02x}"
-            s = s.replace(c, c_hex)
-        return s
-
-    def __gen_log_insights_url(params: Mapping[str, str | list[str] | int | bool]) -> str:
-        S1 = "$257E"
-        S2 = "$2528"
-        S3 = "$2527"
-        S4 = "$2529"
-
-        res = f"{S1}{S2}"
-        for k in params:
-            value = params[k]
-            if isinstance(value, str):
-                value = escape(value)
-            elif isinstance(value, list):
-                for i in range(len(value)):
-                    value[i] = escape(value[i])
-            prefix = S1 if next(iter(params.items()))[0] != k else ""
-            suffix = f"{S1}{S3}"
-            if isinstance(value, list):
-                value = "".join([f"{S1}{S3}{n}" for n in value])
-                suffix = f"{S1}{S2}"
-            elif isinstance(value, int | bool):
-                value = str(value).lower()
-                suffix = S1
-
-            res += f"{prefix}{k}{suffix}{value}"
-        res += f"{S4}{S4}"
-        QUERY = f"logsV2:logs-insights$3Ftab$3Dlogs$26queryDetail$3D{res}"
-        return f"https://{REGION}.console.aws.amazon.com/cloudwatch/home?region={REGION}#{QUERY}"
-
     params = {
         "start": __format_time(start_time),
         "end": __format_time(end_time),
-        # "unit": "seconds", # Not necessary for absolute time
-        "timeType": "ABSOLUTE",  # OR RELATIVE and end = 0 and start is negative seconds
+        # "unit": "seconds", # Not necessary for absolute time, keeping it here in case
+        #                      we want to re-use this for relative time in the future though
+        "timeType": "ABSOLUTE",  # IF RELATIVE, end = 0 and start is negative seconds
         "tz": "UTC",
         "editorString": query,
         "isLiveTail": False,
