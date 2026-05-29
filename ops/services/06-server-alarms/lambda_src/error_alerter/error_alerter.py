@@ -48,6 +48,14 @@ fields @message
 | sort @timestamp desc
 """.strip()
 
+# Special escape sequences for cloudwatch query URLs
+S1 = "$257E"
+S2 = "$2528"
+S3 = "$2527"
+S4 = "$2529"
+
+type CwValue = str | list[str] | int | bool
+
 
 class LogInsightsQueryResultTypeDef(TypedDict, total=False):
     field: str
@@ -82,31 +90,26 @@ def __escape(input_str: str) -> str:
     return input_str
 
 
-def __gen_log_insights_url(cw_params: Mapping[str, str | list[str] | int | bool]) -> str:
-    S1 = "$257E"
-    S2 = "$2528"
-    S3 = "$2527"
-    S4 = "$2529"
-
-    config_str = f"{S1}{S2}"
-    for key in cw_params:
-        cw_value = cw_params[key]
-        if isinstance(cw_value, str):
+def __get_cw_param(cw_value: CwValue) -> str:
+    suffix = f"{S1}{S3}"
+    match cw_value:
+        case str():
             cw_value = __escape(cw_value)
-        elif isinstance(cw_value, list):
+        case list():
             for i in range(len(cw_value)):
                 cw_value[i] = __escape(cw_value[i])
-        prefix = S1 if next(iter(cw_params.items()))[0] != key else ""
-        suffix = f"{S1}{S3}"
-        if isinstance(cw_value, list):
             cw_value = "".join([f"{S1}{S3}{n}" for n in cw_value])
             suffix = f"{S1}{S2}"
-        elif isinstance(cw_value, int | bool):
+        case bool() | int():
             cw_value = str(cw_value).lower()
             suffix = S1
 
-        config_str += f"{prefix}{key}{suffix}{cw_value}"
-    config_str += f"{S4}{S4}"
+    return f"{suffix}{cw_value}"
+
+
+def __gen_log_insights_url(cw_params: Mapping[str, CwValue]) -> str:
+    config_items = [f"{key}{__get_cw_param(cw_params[key])}" for key in cw_params]
+    config_str = f"{S1}{S2}{S1.join(config_items)}{S4}{S4}"
     QUERY = f"logsV2:logs-insights$3Ftab$3Dlogs$26queryDetail$3D{config_str}"
     return f"https://{REGION}.console.aws.amazon.com/cloudwatch/home?region={REGION}#{QUERY}"
 
