@@ -28,21 +28,25 @@ BOTO_CONFIG = Config(
     },
 )
 
-LOG_INSIGHTS_NOTIF_QUERY = "fields mdc.http_access_response_status as status\n"
-"mdc.http_access_request_clientSSL_DN as partner\n"
-"mdc.http_access_request_operation as op\n"
-"| filter status == 500\n"
-"| stats count(status) by partner, op"
-
-LOG_INSIGHTS_ACCESS_JSON_ERRORS_QUERY = (
-    "fields @message, mdc.http_access_response_status as status\n"
-)
-"| filter status == 500\n"
-"| sort @timestamp desc"
-
-LOG_INSIGHTS_MESSAGES_JSON_ERRORS_QUERY = "fields @message\n"
-"| filter ispresent(exception) and ispresent(mdc.http_access_request_uri) and level = 'ERROR'\n"
-"| sort @timestamp desc"
+LOG_INSIGHTS_NOTIF_QUERY = """
+fields
+mdc.http_access_response_status as status,
+mdc.http_access_request_clientSSL_DN as partner,
+mdc.http_access_request_operation as op
+| filter status == 500
+| stats count(status) by partner, op
+""".strip()
+LOG_INSIGHTS_ACCESS_JSON_ERRORS_QUERY = """
+fields @message,
+mdc.http_access_response_status as status
+| filter status == 500
+| sort @timestamp desc
+""".strip()
+LOG_INSIGHTS_MESSAGES_JSON_ERRORS_QUERY = """
+fields @message
+| filter ispresent(exception) and ispresent(mdc.http_access_request_uri) and level = 'ERROR'
+| sort @timestamp desc
+""".strip()
 
 
 class LogInsightsQueryResultTypeDef(TypedDict, total=False):
@@ -107,7 +111,7 @@ def __generate_cloudwatch_url(
             res += f"{prefix}{k}{suffix}{value}"
         res += f"{S4}{S4}"
         QUERY = f"logsV2:logs-insights$3Ftab$3Dlogs$26queryDetail$3D{res}"
-        return f"https://{REGION}.console.aws.amazon.com/cloudwatch/home?region=us-east-1#{QUERY}"
+        return f"https://{REGION}.console.aws.amazon.com/cloudwatch/home?region={REGION}#{QUERY}"
 
     params = {
         "start": __format_time(start_time),
