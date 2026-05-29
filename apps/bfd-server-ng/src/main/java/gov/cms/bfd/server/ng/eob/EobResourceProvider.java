@@ -118,6 +118,7 @@ public class EobResourceProvider implements IResourceProvider {
    * @param fhirIds FHIR IDs
    * @param serviceDate service date
    * @param lastUpdated last updated
+   * @param requestDetails request Details object
    * @param request HTTP request details
    * @return bundle
    */
@@ -127,7 +128,9 @@ public class EobResourceProvider implements IResourceProvider {
       @OptionalParam(name = SERVICE_DATE) final DateRangeParam serviceDate,
       @OptionalParam(name = ExplanationOfBenefit.SP_RES_LAST_UPDATED)
           final DateRangeParam lastUpdated,
+      final RequestDetails requestDetails,
       final HttpServletRequest request) {
+
     return eobHandler.searchById(
         FhirInputConverter.toLongList(fhirIds),
         FhirInputConverter.toDateTimeRange(serviceDate),
