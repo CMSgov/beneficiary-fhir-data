@@ -127,7 +127,7 @@ def __generate_cloudwatch_url(
 
 
 def __format_time(time: datetime) -> str:
-    return time.isoformat(timespec="seconds") + ".000Z"
+    return time.replace(tzinfo=None).isoformat(timespec="seconds") + ".000Z"
 
 
 def handler(event: dict[str, str], context: Any):
