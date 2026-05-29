@@ -20,9 +20,6 @@ public class LoggerConstants {
   /** Name of message for logging bene_sk. */
   public static final String BENE_SK_FOUND = "bene_sk found";
 
-  /** Name of the URI key for logging. */
-  public static final String URI_KEY = "uri";
-
   /** Name of the request ID key for logging. */
   public static final String REQUEST_ID_KEY = "requestId";
 
@@ -102,7 +99,7 @@ public class LoggerConstants {
       "http_access_request_header_Accept-Encoding";
 
   /** Name of the X-Request-ID header. */
-  public static final String HTTP_ACCESS_RESPONSE_HEADER_REQUEST_ID =
+  public static final String HTTP_ACCESS_REQUEST_HEADER_REQUEST_ID =
       "http_access_response_header_X-Request-ID";
 
   /** Name of the outgoing response status code. */
@@ -131,6 +128,20 @@ public class LoggerConstants {
 
   /** Name for the number of FHIR resources returned in the response. */
   public static final String RESOURCES_RETURNED_COUNT = "resources_returned_count";
+
+  /** Name of the bulk-jobid header. */
+  public static final String HTTP_ACCESS_REQUEST_HEADER_BULK_JOBID =
+      "http_access_request_header_BULK-JOBID";
+
+  /**
+   * Name of the bulk-clientid header. This is a unique identifier of the bulk client for whom this
+   * request is for (i.e. UUID, ACO ID, NPI, Part D Contract)
+   */
+  public static final String HTTP_ACCESS_REQUEST_HEADER_BULK_CLIENTID =
+      "http_access_request_header_BULK-CLIENTID";
+
+  /** Name for the query parameters used in a request. */
+  public static final String REQUEST_QUERY_PARAMETERS = "http_access_request_query_parameters";
 
   /**
    * Returns a log specific key.
