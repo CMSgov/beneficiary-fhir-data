@@ -4,10 +4,10 @@ import logging
 import os
 import sys
 import time
+from collections.abc import Mapping
 from datetime import UTC, datetime, timedelta
 from typing import Any, TypedDict
 from urllib.error import URLError
-from urllib.parse import quote_plus
 from urllib.request import Request, urlopen
 
 import boto3
@@ -28,25 +28,21 @@ BOTO_CONFIG = Config(
     },
 )
 
-LOG_INSIGHTS_NOTIF_QUERY = """
-fields
-mdc.http_access_response_status as status,
-mdc.http_access_request_clientSSL_DN as partner,
-mdc.http_access_request_operation as op
-| filter status == 500
-| stats count(status) by partner, op
-""".strip()
-LOG_INSIGHTS_ACCESS_JSON_ERRORS_QUERY = """
-fields @message,
-mdc.http_access_response_status as status
-| filter status == 500
-| sort @timestamp desc
-""".strip()
-LOG_INSIGHTS_MESSAGES_JSON_ERRORS_QUERY = """
-fields @message
-| filter ispresent(exception) and ispresent(mdc.http_access_request_uri) and level = 'ERROR'
-| sort @timestamp desc
-""".strip()
+LOG_INSIGHTS_NOTIF_QUERY = "fields mdc.http_access_response_status as status\n"
+"mdc.http_access_request_clientSSL_DN as partner\n"
+"mdc.http_access_request_operation as op\n"
+"| filter status == 500\n"
+"| stats count(status) by partner, op"
+
+LOG_INSIGHTS_ACCESS_JSON_ERRORS_QUERY = (
+    "fields @message, mdc.http_access_response_status as status\n"
+)
+"| filter status == 500\n"
+"| sort @timestamp desc"
+
+LOG_INSIGHTS_MESSAGES_JSON_ERRORS_QUERY = "fields @message\n"
+"| filter ispresent(exception) and ispresent(mdc.http_access_request_uri) and level = 'ERROR'\n"
+"| sort @timestamp desc"
 
 
 class LogInsightsQueryResultTypeDef(TypedDict, total=False):
@@ -59,9 +55,8 @@ logger = logging.getLogger()
 try:
     logs_client = boto3.client("logs", config=BOTO_CONFIG)  # type: ignore
 except Exception:
-    logger.error(
+    logger.exception(
         "Unrecoverable exception occurred when attempting to create boto3 clients/resources:",
-        exc_info=True,
     )
     sys.exit(0)
 
@@ -74,36 +69,61 @@ def __get_value_by_key(cell_key: str, row_list: list[LogInsightsQueryResultTypeD
     )["value"]
 
 
-def __escape_log_insights_url_str(unescaped_str: str) -> str:
-    return quote_plus(unescaped_str).replace("%", "*")
-
-
-def __gen_log_insights_url(
-    start_time: datetime, end_time: datetime, editor_string: str, source_log_group: str
+# Implementation based on https://stackoverflow.com/questions/68429312/generate-aws-logs-insights-url-with-query-and-search-creteria
+def __generate_cloudwatch_url(
+    log_groups: list[str], query: str, start_time: datetime, end_time: datetime
 ) -> str:
-    # Log Insights uses a _strange_ escape and query string scheme that fully and properly
-    # implementing would be too much effort. Instead, some shortcuts are made here with the
-    # assumption that these URLs will have _very_ little variation in what data is used to generate
-    # them.
+    def escape(s: str) -> str:
+        for c in s:
+            if c.isalpha() or c.isdigit() or c in ["-", "."]:
+                continue
+            c_hex = f"*{ord(c):02x}"
+            s = s.replace(c, c_hex)
+        return s
 
-    url_prefix = f"https://{REGION}.console.aws.amazon.com/cloudwatch/home?region={REGION}#logsV2:logs-insights$3FqueryDetail$3D~"
-    start_time_iso = (
-        f"{__escape_log_insights_url_str(start_time.isoformat(timespec='seconds'))}.000Z"
-    )
-    end_time_iso = f"{__escape_log_insights_url_str(end_time.isoformat(timespec='seconds'))}.000Z"
-    editor_string = __escape_log_insights_url_str(editor_string)
-    query_params = {
-        "end": end_time_iso,
-        "start": start_time_iso,
-        "timeType": "ABSOLUTE",
+    def __gen_log_insights_url(params: Mapping[str, str | list[str] | int | bool]) -> str:
+        S1 = "$257E"
+        S2 = "$2528"
+        S3 = "$2527"
+        S4 = "$2529"
+
+        res = f"{S1}{S2}"
+        for k in params:
+            value = params[k]
+            if isinstance(value, str):
+                value = escape(value)
+            elif isinstance(value, list):
+                for i in range(len(value)):
+                    value[i] = escape(value[i])
+            prefix = S1 if next(iter(params.items()))[0] != k else ""
+            suffix = f"{S1}{S3}"
+            if isinstance(value, list):
+                value = "".join([f"{S1}{S3}{n}" for n in value])
+                suffix = f"{S1}{S2}"
+            elif isinstance(value, int | bool):
+                value = str(value).lower()
+                suffix = S1
+
+            res += f"{prefix}{k}{suffix}{value}"
+        res += f"{S4}{S4}"
+        QUERY = f"logsV2:logs-insights$3Ftab$3Dlogs$26queryDetail$3D{res}"
+        return f"https://{REGION}.console.aws.amazon.com/cloudwatch/home?region=us-east-1#{QUERY}"
+
+    params = {
+        "start": __format_time(start_time),
+        "end": __format_time(end_time),
+        # "unit": "seconds", # Not necessary for absolute time
+        "timeType": "ABSOLUTE",  # OR RELATIVE and end = 0 and start is negative seconds
         "tz": "UTC",
-        "editorString": editor_string,
+        "editorString": query,
+        "isLiveTail": False,
+        "source": log_groups,
     }
-    # For whatever reason, '=' is escaped as "~'"
-    query_param_fragments = [f"{k}~'{v}" for k, v in query_params.items()]
-    query_params_str = f"({'~'.join(query_param_fragments)}~source~(~'{__escape_log_insights_url_str(source_log_group)}))"
+    return __gen_log_insights_url(params)
 
-    return f"{url_prefix}{query_params_str}"
+
+def __format_time(time: datetime) -> str:
+    return time.isoformat(timespec="seconds") + ".000Z"
 
 
 def handler(event: dict[str, str], context: Any):
@@ -134,10 +154,9 @@ def handler(event: dict[str, str], context: Any):
             queryString=LOG_INSIGHTS_NOTIF_QUERY,
         )
     except logs_client.exceptions.ClientError:
-        logger.error(
+        logger.exception(
             "An unrecoverable error occurred when trying to query for 500s in %s:",
             ACCESS_JSON_LOG_GROUP,
-            exc_info=True,
         )
         return
 
@@ -152,9 +171,9 @@ def handler(event: dict[str, str], context: Any):
             time.sleep(1)
             response = logs_client.get_query_results(queryId=start_query_response["queryId"])
     except logs_client.exceptions.ClientError:
-        logger.error(
+        logger.exception(
             'Retrieving results for query ID "%s" has failed due to an unrecoverable error:',
-            exc_info=True,
+            start_query_response["queryId"],
         )
         return
 
@@ -213,9 +232,10 @@ def handler(event: dict[str, str], context: Any):
 
     per_partner_tables: dict[str, str] = {}
     for partner, op_counts in partner_to_errors.items():
-        longest_op_chars_count = max(len(x) for x in op_counts.keys())
+        longest_op_chars_count = max(len(x) for x in op_counts)
         longest_err_chars_count = max(len(str(x)) for x in op_counts.values())
-        table_block_str = f"```\n{'Operation':<{longest_op_chars_count}} {'Error Count':<{longest_err_chars_count}}\n"
+        table_block_str = f"```\n{'Operation':<{longest_op_chars_count}}"
+        "{'Error Count':<{longest_err_chars_count}}\n"
         for op, count in op_counts.items():
             table_block_str += (
                 f"{op:<{longest_op_chars_count}} {count:<{longest_err_chars_count}}\n"
@@ -224,17 +244,17 @@ def handler(event: dict[str, str], context: Any):
 
         per_partner_tables[partner] = table_block_str
 
-    log_insights_access_json_url = __gen_log_insights_url(
+    log_insights_access_json_url = __generate_cloudwatch_url(
         start_time=start_time,
         end_time=end_time,
-        editor_string=LOG_INSIGHTS_ACCESS_JSON_ERRORS_QUERY,
-        source_log_group=ACCESS_JSON_LOG_GROUP,
+        query=LOG_INSIGHTS_ACCESS_JSON_ERRORS_QUERY,
+        log_groups=[ACCESS_JSON_LOG_GROUP],
     )
-    log_insights_messages_json_errors_url = __gen_log_insights_url(
+    log_insights_messages_json_errors_url = __generate_cloudwatch_url(
         start_time=start_time,
         end_time=end_time,
-        editor_string=LOG_INSIGHTS_MESSAGES_JSON_ERRORS_QUERY,
-        source_log_group=MESSAGES_JSON_LOG_GROUP,
+        query=LOG_INSIGHTS_MESSAGES_JSON_ERRORS_QUERY,
+        log_groups=[MESSAGES_JSON_LOG_GROUP],
     )
     slack_message = {
         "blocks": [
@@ -298,10 +318,7 @@ def handler(event: dict[str, str], context: Any):
                 else:
                     logger.error("%s response received from Slack", response.status)
         except URLError:
-            logger.error(
-                "An unrecoverable error occurred attempting to post Slack message: ",
-                exc_info=True,
-            )
+            logger.exception("An unrecoverable error occurred attempting to post Slack message: ")
     else:
         logger.info("No Slack webhook defined, logging Slack message instead")
         logger.info(slack_message)
