@@ -289,12 +289,12 @@ class BatchLoader:
         # just drop the columns we need to ignore.
         full_tablename = f"{self.temp_table}_{suffix or ''}"
         await cur.execute(
-            f"CREATE TEMPORARY TABLE {full_tablename} (LIKE {self.table}) "  # type: ignore
+            f'CREATE TEMPORARY TABLE "{full_tablename}" (LIKE {self.table}) '  # type: ignore
             "ON COMMIT DROP"
         )
         # Created/updated columns don't need to be loaded from the source.
         for col in self.meta_keys:
-            await cur.execute(f"ALTER TABLE {full_tablename} DROP COLUMN {col}")  # type: ignore
+            await cur.execute(f'ALTER TABLE "{full_tablename}" DROP COLUMN {col}')  # type: ignore
 
         return full_tablename
 
@@ -357,11 +357,11 @@ class BatchLoader:
             await cur.execute(f"DELETE FROM {self.table}")  # type: ignore
         await cur.execute("SET LOCAL synchronous_commit TO OFF")
         await cur.execute(
-            f"""
+            f'''
             INSERT INTO {self.table} AS t ({self.cols_str}, {self.meta_keys_str})
-            SELECT {self.cols_str}, {self.timestamp_placeholders} FROM {temp_tablename}
+            SELECT {self.cols_str}, {self.timestamp_placeholders} FROM "{temp_tablename}"
             ON CONFLICT ({self.unique_keys_str}) {self.on_conflict_clause}
-            """,  # type: ignore
+            ''',  # type: ignore
             {"timestamp": timestamp},
         )
 
@@ -413,7 +413,7 @@ class BatchLoader:
         # Even though we need to move the data from the temp table in the next step,
         # it should still be faster than alternatives.
         async with cur.copy(
-            f"COPY {temp_tablename} ({self.cols_str}) FROM STDIN"  # type: ignore
+            f'COPY "{temp_tablename}" ({self.cols_str}) FROM STDIN'  # type: ignore
         ) as copy:
             for row in data:
                 await copy.write_row(
