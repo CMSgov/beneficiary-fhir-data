@@ -207,13 +207,15 @@ class BatchLoader:
             self.insert_batch_timer.stop()
 
             async with self.pool.connection() as conn, conn.cursor(binary=True) as cur:
-                if self.load_type == LoadType.INCREMENTAL and self.model.last_updated_date_table():
-                    self.last_updated_timer.start()
-                    full_temp_table = await self._setup_temp_table(cur, self.partition.name)
-                    await self._copy_data(cur, full_temp_table, results)
-                    await self._last_updated(cur, full_temp_table, timestamp)
-                    await conn.commit()
-                    self.last_updated_timer.stop()
+                # TODO: Replace this with a background queue to be able to process this.
+                # if self.load_type == LoadType.INCREMENTAL
+                #   and self.model.last_updated_date_table():
+                #     self.last_updated_timer.start()
+                #     full_temp_table = await self._setup_temp_table(cur, self.partition.name)
+                #     await self._copy_data(cur, full_temp_table, results)
+                #     await self._last_updated(cur, full_temp_table, timestamp)
+                #     await conn.commit()
+                #     self.last_updated_timer.stop()
 
                 await self._calculate_load_progress(cur, results)
             self.full_batch_timer.stop()
