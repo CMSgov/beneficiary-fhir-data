@@ -10,7 +10,6 @@ from model.base_model import (
     ALIAS_CNTRCT_SGMT,
     ALIAS_PBP_NUM,
     BATCH_ID,
-    DERIVED,
     PRIMARY_KEY,
     IdrBaseModel,
     ModelType,
@@ -29,7 +28,6 @@ class IdrContractPbpNumber(IdrBaseModel):
     cntrct_pbp_sgmt_num: Annotated[
         str, ALIAS:ALIAS_CNTRCT_SGMT, BeforeValidator(transform_default_string)
     ]
-    bfd_contract_version_rank: Annotated[int, {DERIVED: True}]
 
     @override
     @staticmethod
@@ -52,10 +50,6 @@ class IdrContractPbpNumber(IdrBaseModel):
         pbp_num = ALIAS_PBP_NUM
         # We need to include obsolete records since some bene_mapd records are tied to
         # obsolete pbp_sks.
-        # Additionally, some contracts are marked obsolete and no non-obsolete record
-        # is created, so we have to use RANK to get the latest version of each contract.
-        # Then, these can be queried by searching for rows where
-        # bfd_contract_version_rank = 1
         return f"""
             WITH sgmt as (
                 SELECT
@@ -66,10 +60,7 @@ class IdrContractPbpNumber(IdrBaseModel):
                 HAVING COUNT(*) = 1
             )
             SELECT 
-                {{COLUMNS}},
-                ROW_NUMBER() OVER (
-                    PARTITION BY cntrct_num, cntrct_pbp_num 
-                    ORDER BY cntrct_pbp_sk_obslt_dt DESC) AS bfd_contract_version_rank
+                {{COLUMNS}}
             FROM {IDR_CONTRACT_PBP_NUM_TABLE} {pbp_num}
             LEFT JOIN sgmt
                     ON {pbp_num}.cntrct_pbp_sk = sgmt.cntrct_pbp_sk
