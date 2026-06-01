@@ -189,8 +189,10 @@ class BatchLoader:
             self.insert_batch_timer.start()
             await asyncio.gather(
                 *(
-                    self._load_batch_part(part, timestamp)
-                    for part in itertools.batched(results, PER_BATCH_CONCURRENT_ROWS, strict=False)
+                    self._load_batch_part(idx, part, timestamp)
+                    for idx, part in enumerate(
+                        itertools.batched(results, PER_BATCH_CONCURRENT_ROWS, strict=False)
+                    )
                 )
             )
             self.insert_batch_timer.stop()
@@ -198,9 +200,9 @@ class BatchLoader:
             async with self.pool.connection() as conn, conn.cursor(binary=True) as cur:
                 if self.load_type == LoadType.INCREMENTAL and self.model.last_updated_date_table():
                     self.last_updated_timer.start()
-                    await self._setup_temp_table(cur)
-                    await self._copy_data(cur, results)
-                    await self._last_updated(cur, timestamp)
+                    full_temp_table = await self._setup_temp_table(cur, self.partition.name)
+                    await self._copy_data(cur, full_temp_table, results)
+                    await self._last_updated(cur, full_temp_table, timestamp)
                     await conn.commit()
                     self.last_updated_timer.stop()
 
@@ -215,14 +217,18 @@ class BatchLoader:
         logger.info("%s-%s: loaded %s rows", self.table, self.partition.name, num_rows)
         return data_loaded
 
-    async def _load_batch_part(self, batch_part: Sequence[T], timestamp: datetime) -> None:
+    async def _load_batch_part(
+        self, batch_num: int, batch_part: Sequence[T], timestamp: datetime
+    ) -> None:
         async with self.pool.connection() as conn, conn.cursor(binary=True) as cur:
-            await self._setup_temp_table(cur)
+            full_temp_table = await self._setup_temp_table(
+                cur, f"{self.partition.name}_{batch_num}"
+            )
 
-            await self._copy_data(cur, batch_part)
+            await self._copy_data(cur, full_temp_table, batch_part)
 
             # Upsert into the main table
-            await self._upsert(cur, timestamp)
+            await self._upsert(cur, full_temp_table, timestamp)
 
             await conn.commit()
 
@@ -271,7 +277,7 @@ class BatchLoader:
             {"table": self.table, "batch_partition": self.partition.name},
         )
 
-    async def _setup_temp_table(self, cur: psycopg.AsyncCursor) -> None:
+    async def _setup_temp_table(self, cur: psycopg.AsyncCursor, suffix: str | None = None) -> str:
         # Load each batch into a temp table
         # This is necessary because we want to use COPY to quickly
         # transfer everything into Postgres, but COPY can't handle
@@ -281,14 +287,16 @@ class BatchLoader:
         #
         # For simplicity's sake, we'll create our temp tables using the existing schema and
         # just drop the columns we need to ignore.
+        full_tablename = f"{self.temp_table}_{suffix or ''}"
         await cur.execute(
-            f"CREATE TEMPORARY TABLE IF NOT EXISTS {self.temp_table} (LIKE {self.table}) "
-            "ON COMMIT PRESERVE ROWS"  # type: ignore
+            f"CREATE TEMPORARY TABLE {full_tablename} (LIKE {self.table}) "  # type: ignore
+            "ON COMMIT DROP"
         )
-        await cur.execute(f"TRUNCATE TABLE {self.temp_table}")  # type: ignore
         # Created/updated columns don't need to be loaded from the source.
         for col in self.meta_keys:
-            await cur.execute(f"ALTER TABLE {self.temp_table} DROP COLUMN IF EXISTS {col}")  # type: ignore
+            await cur.execute(f"ALTER TABLE {full_tablename} DROP COLUMN {col}")  # type: ignore
+
+        return full_tablename
 
     async def _calculate_load_progress(
         self, cur: psycopg.AsyncCursor, results: Sequence[T]
@@ -337,7 +345,9 @@ class BatchLoader:
             await cur.execute(query, params)  # type: ignore
             await cur.connection.commit()
 
-    async def _upsert(self, cur: psycopg.AsyncCursor, timestamp: datetime) -> None:
+    async def _upsert(
+        self, cur: psycopg.AsyncCursor, temp_tablename: str, timestamp: datetime
+    ) -> None:
         # Upsert into the main table
         if self.model.should_replace():
             # Delete before inserting since we've specified that the data should be
@@ -349,13 +359,15 @@ class BatchLoader:
         await cur.execute(
             f"""
             INSERT INTO {self.table} AS t ({self.cols_str}, {self.meta_keys_str})
-            SELECT {self.cols_str}, {self.timestamp_placeholders} FROM {self.temp_table}
+            SELECT {self.cols_str}, {self.timestamp_placeholders} FROM {temp_tablename}
             ON CONFLICT ({self.unique_keys_str}) {self.on_conflict_clause}
             """,  # type: ignore
             {"timestamp": timestamp},
         )
 
-    async def _last_updated(self, cur: psycopg.AsyncCursor, timestamp: datetime) -> None:
+    async def _last_updated(
+        self, cur: psycopg.AsyncCursor, temp_tablename: str, timestamp: datetime
+    ) -> None:
         key = self.model.last_updated_timestamp_col()
 
         try:
@@ -369,7 +381,7 @@ class BatchLoader:
                     SELECT {key}
                     FROM {self.model.last_updated_date_table()}
                     WHERE {key} IN (
-                        SELECT {key} FROM {self.temp_table}
+                        SELECT {key} FROM {temp_tablename}
                     )
                     ORDER BY {key}
                     FOR UPDATE SKIP LOCKED
@@ -381,7 +393,6 @@ class BatchLoader:
                 """,  # type: ignore
                 {"timestamp": timestamp},
             )
-            await cur.connection.commit()
         except (DeadlockDetected, LockNotAvailable, QueryCanceled) as ex:
             logger.warning(
                 "%s-%s: deadlock/lock/statement timeout updating update timestamp, ignoring: %s",
@@ -390,7 +401,9 @@ class BatchLoader:
                 ex,
             )
 
-    async def _copy_data(self, cur: psycopg.AsyncCursor, data: Sequence[T]) -> None:
+    async def _copy_data(
+        self, cur: psycopg.AsyncCursor, temp_tablename: str, data: Sequence[T]
+    ) -> None:
         # Use COPY to load the batch into Postgres.
         # COPY has a number of optimizations that make bulk loading more efficient
         # than a bunch of INSERTs.
@@ -400,7 +413,7 @@ class BatchLoader:
         # Even though we need to move the data from the temp table in the next step,
         # it should still be faster than alternatives.
         async with cur.copy(
-            f"COPY {self.temp_table} ({self.cols_str}) FROM STDIN"  # type: ignore
+            f"COPY {temp_tablename} ({self.cols_str}) FROM STDIN"  # type: ignore
         ) as copy:
             for row in data:
                 await copy.write_row(
