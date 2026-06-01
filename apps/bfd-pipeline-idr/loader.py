@@ -381,11 +381,9 @@ class BatchLoader:
 
         # Even though we need to move the data from the temp table in the next step,
         # it should still be faster than alternatives.
-        # cur.adapters.register_dumper("numeric", FloatDumper)
         async with cur.copy(
             f"COPY {self.temp_table} ({self.cols_str}) FROM STDIN"  # type: ignore
         ) as copy:
-            # copy.set_types([col_types[k] for k in self.insert_cols])
             for row in results:
                 await copy.write_row(
                     [_remove_null_bytes(getattr(row, k)) for k in self.insert_cols]
