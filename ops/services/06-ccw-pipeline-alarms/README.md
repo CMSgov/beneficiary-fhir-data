@@ -22,7 +22,8 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 ## Requirements
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.12.0 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 6 |
 
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
@@ -33,7 +34,7 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
+| ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_manifests_verifier_repository_override"></a> [manifests\_verifier\_repository\_override](#input\_manifests\_verifier\_repository\_override) | Overrides the ECR repository for the manifests-verifier container image. If not provided, the default will be used | `string` | `null` | no |
 | <a name="input_manifests_verifier_version_override"></a> [manifests\_verifier\_version\_override](#input\_manifests\_verifier\_version\_override) | Overrides the version for manifests-verifier container image resolution. If not provided, the latest BFD version will be used | `string` | `null` | no |
 | <a name="input_parent_env"></a> [parent\_env](#input\_parent\_env) | The parent environment of the current solution. Will correspond with `terraform.workspace`".<br/>Necessary on `tofu init` and `tofu workspace select` \_only\_. In all other situations, parent env<br/>will be divined from `terraform.workspace`. | `string` | `null` | no |
@@ -48,7 +49,7 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 ## Modules
 
 | Name | Source | Version |
-|------|--------|---------|
+| ---- | ------ | ------- |
 | <a name="module_terraservice"></a> [terraservice](#module\_terraservice) | ../../terraform-modules/bfd/bfd-terraservice | n/a |
 
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
@@ -59,7 +60,7 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 ## Resources
 
 | Name | Type |
-|------|------|
+| ---- | ---- |
 | [aws_cloudwatch_log_group.verifier](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
 | [aws_cloudwatch_metric_alarm.dataset_failed](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_metric_alarm) | resource |
 | [aws_cloudwatch_metric_alarm.errors](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_metric_alarm) | resource |

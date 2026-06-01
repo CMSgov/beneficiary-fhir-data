@@ -31,7 +31,7 @@ output "env" {
 output "is_ephemeral_env" {
   description = "Returns true when environment is _ephemeral_, false when _established_"
   sensitive   = false
-  value       = local.env != local.parent_env
+  value       = local.is_ephemeral_env
 }
 
 output "default_tags" {

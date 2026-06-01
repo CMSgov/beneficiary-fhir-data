@@ -13,8 +13,8 @@ This module exports the full properties of the `data.aws_db_instance` data resou
 ## Requirements
 
 | Name | Version |
-|------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.10.0 |
+| ---- | ------- |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.12.0 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~>6 |
 | <a name="requirement_external"></a> [external](#requirement\_external) | ~>2 |
 | <a name="requirement_http"></a> [http](#requirement\_http) | ~>3 |
@@ -27,7 +27,7 @@ This module exports the full properties of the `data.aws_db_instance` data resou
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
+| ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_cluster_identifier"></a> [cluster\_identifier](#input\_cluster\_identifier) | RDS Cluster Identifier. Maps to data.aws\_rds\_cluster.cluster\_identifier. | `string` | n/a | yes |
 
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
@@ -47,7 +47,7 @@ No modules.
 ## Resources
 
 | Name | Type |
-|------|------|
+| ---- | ---- |
 | [aws_db_instance.writer](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/db_instance) | data source |
 | [aws_rds_cluster.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/rds_cluster) | data source |
 | [external_external.writer_identifier](https://registry.terraform.io/providers/hashicorp/external/latest/docs/data-sources/external) | data source |
@@ -60,6 +60,6 @@ No modules.
 ## Outputs
 
 | Name | Description |
-|------|-------------|
+| ---- | ----------- |
 | <a name="output_writer"></a> [writer](#output\_writer) | `data.aws_db_instance` data resource corresponding to the WRITER Instance of the provided Cluster. |
 <!-- END_TF_DOCS -->
