@@ -131,6 +131,9 @@ public class EobResourceProvider implements IResourceProvider {
       final RequestDetails requestDetails,
       final HttpServletRequest request) {
 
+    var includeTaxNumbers =
+            FhirInputConverter.parseBooleanHeader(requestDetails, "IncludeTaxNumbers");
+
     return eobHandler.searchById(
         FhirInputConverter.toLongList(fhirIds),
         FhirInputConverter.toDateTimeRange(serviceDate),

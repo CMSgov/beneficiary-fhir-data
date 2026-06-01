@@ -27,7 +27,8 @@ public class ClaimLineProfessionalExtensions {
   @Column(name = "clm_srvc_ddctbl_sw")
   private Optional<ClaimServiceDeductibleCode> serviceDeductibleCode;
 
-  @Embedded ClaimTaxNumberCode claimTaxNumberCode;
+  @Embedded
+  ClaimTaxNumberCode claimTaxNumberCode;
 
   List<Extension> toFhir() {
     return Stream.of(
