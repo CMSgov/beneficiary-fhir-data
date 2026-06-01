@@ -2,7 +2,7 @@ package gov.cms.bfd.server.ng.claim.model;
 
 import static gov.cms.bfd.server.ng.claim.model.ClaimSubtype.PDE;
 
-import gov.cms.bfd.server.ng.ClaimSecurityStatus;
+import gov.cms.bfd.server.ng.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import gov.cms.bfd.server.ng.util.SystemUrls;
 import jakarta.persistence.Column;
@@ -53,8 +53,8 @@ public class ClaimRx extends ClaimBase {
 
   /** {@inheritDoc} */
   @Override
-  public ExplanationOfBenefit toFhir(ClaimSecurityStatus securityStatus) {
-    var eob = super.toFhir(securityStatus);
+  public ExplanationOfBenefit toFhir(ClaimFilterOptions options) {
+    var eob = super.toFhir(options);
 
     addPartDInsurer(eob);
     addClaimLineItem(eob);

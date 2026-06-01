@@ -2,7 +2,7 @@ package gov.cms.bfd.server.ng.claim.model;
 
 import static gov.cms.bfd.server.ng.claim.model.ClaimDiagnosisType.*;
 
-import gov.cms.bfd.server.ng.ClaimSecurityStatus;
+import gov.cms.bfd.server.ng.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.util.SequenceGenerator;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
@@ -83,8 +83,8 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
   protected void applyOutcomeOverride(ExplanationOfBenefit eob) {}
 
   @Override
-  public ExplanationOfBenefit toFhir(ClaimSecurityStatus securityStatus) {
-    var eob = super.toFhir(securityStatus);
+  public ExplanationOfBenefit toFhir(ClaimFilterOptions options) {
+    var eob = super.toFhir(options);
 
     addClaimItems(eob);
     addDiagnoses(eob);

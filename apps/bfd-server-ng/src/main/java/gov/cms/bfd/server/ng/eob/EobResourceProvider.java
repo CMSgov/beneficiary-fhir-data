@@ -14,6 +14,7 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import gov.cms.bfd.server.ng.ClaimFilterOptions;
 import gov.cms.bfd.server.ng.Configuration;
 import gov.cms.bfd.server.ng.SamhsaFilterMode;
 import gov.cms.bfd.server.ng.claim.model.SamhsaSearchIntent;
@@ -50,14 +51,25 @@ public class EobResourceProvider implements IResourceProvider {
    *
    * @param fhirId FHIR ID
    * @param request HTTP request details
+   * @param requestDetails different HTTP request details
    * @return patient
    */
   @Read
-  public ExplanationOfBenefit find(@IdParam final IdType fhirId, final HttpServletRequest request) {
-    var eob =
-        eobHandler.find(
-            FhirInputConverter.toLong(fhirId),
-            getFilterModeForRequest(request, SamhsaSearchIntent.UNSPECIFIED));
+  public ExplanationOfBenefit find(
+      @IdParam final IdType fhirId,
+      final HttpServletRequest request,
+      final RequestDetails requestDetails) {
+
+    var includeTaxNumbers =
+        FhirInputConverter.parseBooleanHeader(requestDetails, "IncludeTaxNumbers");
+    var samhsaFilterMode = getFilterModeForRequest(request, SamhsaSearchIntent.UNSPECIFIED);
+    var options =
+        ClaimFilterOptions.builder()
+            .samhsaFilterMode(samhsaFilterMode)
+            .includeTaxNumber(includeTaxNumbers)
+            .build();
+
+    var eob = eobHandler.find(FhirInputConverter.toLong(fhirId), options);
     return eob.orElseThrow(() -> new ResourceNotFoundException(fhirId));
   }
 
@@ -98,6 +110,12 @@ public class EobResourceProvider implements IResourceProvider {
     var claimTypeCodes = FhirInputConverter.getClaimTypeCodesForType(type);
     var samhsaSearchIntent = FhirInputConverter.parseSecurityParameter(security);
 
+    var options =
+        ClaimFilterOptions.builder()
+            .samhsaFilterMode(getFilterModeForRequest(request, samhsaSearchIntent))
+            .includeTaxNumber(includeTaxNumbers)
+            .build();
+
     var criteria =
         new ClaimSearchCriteria(
             FhirInputConverter.toLong(patient, "Patient"),
@@ -109,7 +127,7 @@ public class EobResourceProvider implements IResourceProvider {
             claimTypeCodes,
             FhirInputConverter.parseSourceParameter(source));
 
-    return eobHandler.searchByBene(criteria, getFilterModeForRequest(request, samhsaSearchIntent));
+    return eobHandler.searchByBene(criteria, options);
   }
 
   /**
@@ -132,13 +150,19 @@ public class EobResourceProvider implements IResourceProvider {
       final HttpServletRequest request) {
 
     var includeTaxNumbers =
-            FhirInputConverter.parseBooleanHeader(requestDetails, "IncludeTaxNumbers");
+        FhirInputConverter.parseBooleanHeader(requestDetails, "IncludeTaxNumbers");
+    var samhsaFilterMode = getFilterModeForRequest(request, SamhsaSearchIntent.UNSPECIFIED);
+    var options =
+        ClaimFilterOptions.builder()
+            .samhsaFilterMode(samhsaFilterMode)
+            .includeTaxNumber(includeTaxNumbers)
+            .build();
 
     return eobHandler.searchById(
         FhirInputConverter.toLongList(fhirIds),
         FhirInputConverter.toDateTimeRange(serviceDate),
         FhirInputConverter.toDateTimeRange(lastUpdated),
-        getFilterModeForRequest(request, SamhsaSearchIntent.UNSPECIFIED));
+        options);
   }
 
   private SamhsaFilterMode getFilterModeForRequest(
