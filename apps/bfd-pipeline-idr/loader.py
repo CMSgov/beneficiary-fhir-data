@@ -178,7 +178,11 @@ class BatchLoader:
             self.full_batch_timer.start()
             data_loaded = True
             logger.info(
-                "%s-%s: loading next %s results", self.table, self.partition.name, len(results)
+                "%s-%s: loading next %s results concurrently %d row(s) at a time",
+                self.table,
+                self.partition.name,
+                len(results),
+                PER_BATCH_CONCURRENT_ROWS,
             )
             num_rows += len(results)
 
