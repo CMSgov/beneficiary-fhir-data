@@ -43,6 +43,9 @@ locals {
 
   log_type                  = "$.logType = \"requestTelemetry\""
   certificate_alias_pattern = "$.mdc.certificateAlias = \"*\""
+  status_code_dimension = {
+    status_code = "$.mdc.http_access_response_status"
+  }
 }
 
 data "aws_ecs_cluster" "main" {
@@ -98,45 +101,39 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_latency" {
   }
 }
 
-# Count HTTP 5xxs with partner certificate alias as dimension
-resource "aws_cloudwatch_log_metric_filter" "http_requests_count_500_responses" {
-  for_each = local.filter_variations
-
-  name           = "${local.namespace}/http-requests/count/500-responses/${each.value.name_suffix}"
+# Count HTTP 5xxs with status code as dimension
+resource "aws_cloudwatch_log_metric_filter" "http_requests_count_5xx_responses" {
+  name           = "${local.namespace}/http-requests/count/5xx-responses"
   log_group_name = local.log_groups.messages
 
   pattern = join("", [
     "{${local.log_type} && ",
-    "$.mdc.http_access_response_status = 500 && ",
-    "${local.certificate_alias_pattern}}",
+    "$.mdc.http_access_response_status >= 500}",
   ])
   metric_transformation {
-    name       = "http-requests/count/500-responses"
+    name       = "http-requests/count/5xx-responses"
     namespace  = local.namespace
     value      = "1"
-    dimensions = each.value.dimensions
     unit       = "Count"
+    dimensions = local.status_code_dimension
   }
 }
 
-# Count HTTP non-2XXs with partner certificate alias as dimension
-resource "aws_cloudwatch_log_metric_filter" "http_requests_count_non_2xx_responses" {
-  for_each = local.filter_variations
-
-  name           = "${local.namespace}/http-requests/count/non-2xx-responses/${each.value.name_suffix}"
+# Count HTTP non-200s with status code as dimension
+resource "aws_cloudwatch_log_metric_filter" "http_requests_count_non_200_responses" {
+  name           = "${local.namespace}/http-requests/count/non-200-responses"
   log_group_name = local.log_groups.messages
 
   pattern = join("", [
     "{${local.log_type} && ",
-    "$.mdc.http_access_response_status != 200 && ",
-    "${local.certificate_alias_pattern}}",
+    "$.mdc.http_access_response_status != 200} ",
   ])
 
   metric_transformation {
-    name       = "http-requests/count/non-2xx-responses"
+    name       = "http-requests/count/non-200-responses"
     namespace  = local.namespace
     value      = "1"
-    dimensions = each.value.dimensions
     unit       = "Count"
+    dimensions = local.status_code_dimension
   }
 }

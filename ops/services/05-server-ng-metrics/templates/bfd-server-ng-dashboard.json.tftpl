@@ -2,8 +2,8 @@
     "widgets": [
         {
             "type": "metric",
-            "x": 6,
-            "y": 12,
+            "x": 0,
+            "y": 24,
             "width": 6,
             "height": 6,
             "properties": {
@@ -30,8 +30,8 @@
         },
         {
             "type": "metric",
-            "x": 18,
-            "y": 12,
+            "x": 12,
+            "y": 24,
             "width": 6,
             "height": 6,
             "properties": {
@@ -57,8 +57,8 @@
         },
         {
             "type": "metric",
-            "x": 0,
-            "y": 18,
+            "x": 6,
+            "y": 30,
             "width": 6,
             "height": 6,
             "properties": {
@@ -77,8 +77,8 @@
         },
         {
             "type": "metric",
-            "x": 6,
-            "y": 18,
+            "x": 0,
+            "y": 30,
             "width": 6,
             "height": 6,
             "properties": {
@@ -97,7 +97,7 @@
         },
         {
             "type": "metric",
-            "x": 0,
+            "x": 12,
             "y": 6,
             "width": 6,
             "height": 6,
@@ -119,52 +119,6 @@
         },
         {
             "type": "metric",
-            "x": 18,
-            "y": 6,
-            "width": 6,
-            "height": 6,
-            "properties": {
-                "metrics": [
-                    [ "${namespace}", "http-requests/count/eob-all", "certificate_alias", "${internal_client_alias}", { "label": "EOB Request Count", "region": "${region}" } ],
-                    [ ".", "http-requests/count/coverage-all", ".", ".", { "label": "Coverage Request Count", "region": "${region}" } ],
-                    [ ".", "http-requests/count/patient-all ", "certificate_alias", ".", { "label": "Patient Request Count", "region": "${region}" } ],
-                    [ ".", "http-requests/count/metadata", ".", ".", { "label": "Metadata Request Count", "region": "${region}" } ],
-                    [ ".", "http-requests/count/all", "certificate_alias", ".", { "label": "All Requests Count" } ]
-                ],
-                "view": "timeSeries",
-                "stacked": false,
-                "region": "${region}",
-                "stat": "Sum",
-                "period": 60,
-                "liveData": true,
-                "title": "Internal Test Traffic Request Count per-Endpoint with 1 Minute Period"
-            }
-        },
-        {
-            "type": "metric",
-            "x": 0,
-            "y": 12,
-            "width": 6,
-            "height": 6,
-            "properties": {
-                "metrics": [
-                    [ "${namespace}", "http-requests/latency/patient-all ", "certificate_alias", "${internal_client_alias}", { "label": "Patient Request Latency", "region": "${region}" } ],
-                    [ ".", "http-requests/latency/eob-all", ".", ".", { "label": "Explanation Request Latency", "region": "${region}" } ],
-                    [ ".", "http-requests/latency/coverage-all ", ".", ".", { "label": "Coverage Request Latency", "region": "${region}" } ],
-                    [ ".", "http-requests/latency/metadata", ".", ".", { "label": "Metadata Request Latency", "region": "${region}" } ],
-                    [ ".", "http-requests/latency/all", ".", ".", { "region": "${region}", "label": "All Requests Latency" } ]
-                ],
-                "view": "timeSeries",
-                "stacked": false,
-                "region": "${region}",
-                "title": "Internal Average Request Latency per-Endpoint with 1 Minute Period",
-                "stat": "Average",
-                "period": 60,
-                "liveData": true
-            }
-        },
-        {
-            "type": "metric",
             "x": 0,
             "y": 0,
             "width": 6,
@@ -179,7 +133,7 @@
                 "region": "${region}",
                 "stat": "Average",
                 "period": 60,
-                "title": "CPU and Memory Utilization of ${service} Service",
+                "title": "CPU and Memory Utilization of server-ng Service",
                 "liveData": true,
                 "yAxis": {
                     "left": {
@@ -210,13 +164,13 @@
                 "stat": "Average",
                 "period": 60,
                 "liveData": true,
-                "title": "${service} Service Running and Desired Task Count"
+                "title": "server-ng Service Running and Desired Task Count"
             }
         },
         {
             "type": "metric",
-            "x": 12,
-            "y": 12,
+            "x": 6,
+            "y": 24,
             "width": 6,
             "height": 6,
             "properties": {
@@ -301,7 +255,7 @@
         },
         {
             "type": "metric",
-            "x": 12,
+            "x": 18,
             "y": 6,
             "width": 6,
             "height": 6,
@@ -322,8 +276,8 @@
         },
         {
             "type": "metric",
-            "x": 6,
-            "y": 6,
+            "x": 18,
+            "y": 12,
             "width": 6,
             "height": 6,
             "properties": {
@@ -345,17 +299,17 @@
         },
         {
             "type": "metric",
-            "x": 18,
+            "x": 0,
             "y": 18,
             "width": 6,
             "height": 6,
             "properties": {
                 "metrics": [
-                    [ "${namespace}", "http-requests/count/eob-all", "certificate_alias", "${ab2d_client_alias}", { "label": "AB2D EOB Requests Count", "region": "${region}" } ],
-                    [ ".", "http-requests/count/all", ".", ".", { "label": "AB2D All Requests Count", "region": "${region}" } ],
-                    [ ".", "http-requests/count/coverage-all", ".", ".", { "label": "AB2D Coverage Requests Count", "region": "${region}" } ],
-                    [ ".", "http-requests/count/metadata", "certificate_alias", ".", { "label": "AB2D Metadata Requests Count" } ],
-                    [ ".", "http-requests/count/patient-all ", ".", ".", { "label": "AB2D Patient Requests Count" } ]
+                    [ "${namespace}", "http-requests/count/eob-all", "certificate_alias", "${bcda_client_alias}", { "label": "BCDA", "region": "${region}", "id": "m1" } ],
+                    [ "...", "${ab2d_client_alias}", { "label": "AB2D", "region": "${region}", "id": "m2" } ],
+                    [ "...", "${bb_client_alias}", { "label": "BB2", "region": "${region}", "id": "m3" } ],
+                    [ "...", "${dpc_client_alias}", { "label": "DPC", "region": "${region}", "id": "m4" } ],
+                    [ "...", "${internal_client_alias}", { "label": "Internal", "region": "${region}", "id": "m5" } ]
                 ],
                 "view": "timeSeries",
                 "stacked": false,
@@ -363,45 +317,22 @@
                 "stat": "Sum",
                 "period": 60,
                 "liveData": true,
-                "title": "AB2D Request Count per-Endpoint with 1 Minute Period"
-            }
-        },
-        {
-            "type": "metric",
-            "x": 18,
-            "y": 24,
-            "width": 6,
-            "height": 6,
-            "properties": {
-                "metrics": [
-                    [ "${namespace}", "http-requests/count/eob-all", "certificate_alias", "${bcda_client_alias}", { "label": "BCDA EOB Requests Count", "region": "${region}", "id": "m1" } ],
-                    [ ".", "http-requests/count/all", ".", ".", { "label": "BCDA All Requests Count", "region": "${region}", "id": "m2" } ],
-                    [ ".", "http-requests/count/coverage-all", ".", ".", { "label": "BCDA Coverage Requests Count", "region": "${region}", "id": "m3" } ],
-                    [ ".", "http-requests/count/metadata", "certificate_alias", ".", { "label": "BCDA Metadata Requests Count", "region": "${region}", "id": "m4" } ],
-                    [ ".", "http-requests/count/patient-all ", ".", ".", { "label": "BCDA Patient Requests Count", "region": "${region}", "id": "m5" } ]
-                ],
-                "view": "timeSeries",
-                "stacked": false,
-                "region": "${region}",
-                "stat": "Sum",
-                "period": 60,
-                "liveData": true,
-                "title": "BCDA Request Count per-Endpoint with 1 Minute Period"
+                "title": "EOB Request Count with 1 Minute Period per Partner"
             }
         },
         {
             "type": "metric",
             "x": 6,
-            "y": 24,
+            "y": 18,
             "width": 6,
             "height": 6,
             "properties": {
                 "metrics": [
-                    [ "${namespace}", "http-requests/count/eob-all", "certificate_alias", "${dpc_client_alias}", { "label": "DPC EOB Requests Count", "region": "${region}", "id": "m1" } ],
-                    [ ".", "http-requests/count/all", ".", ".", { "label": "DPC All Requests Count", "region": "${region}", "id": "m2" } ],
-                    [ ".", "http-requests/count/coverage-all", ".", ".", { "label": "DPC Coverage Requests Count", "region": "${region}", "id": "m3" } ],
-                    [ ".", "http-requests/count/metadata", "certificate_alias", ".", { "label": "DPC Metadata Requests Count", "region": "${region}", "id": "m4" } ],
-                    [ ".", "http-requests/count/patient-all ", ".", ".", { "label": "DPC Patient Requests Count", "region": "${region}", "id": "m5" } ]
+                    [ "${namespace}", "http-requests/count/patient-all", "certificate_alias", "${bcda_client_alias}", { "label": "BCDA", "region": "${region}", "id": "m1" } ],
+                    [ "...", "${ab2d_client_alias}", { "label": "AB2D", "region": "${region}", "id": "m2" } ],
+                    [ "...", "${bb_client_alias}", { "label": "BB2", "region": "${region}", "id": "m3" } ],
+                    [ "...", "${dpc_client_alias}", { "label": "DPC", "region": "${region}", "id": "m4" } ],
+                    [ "...", "${internal_client_alias}", { "label": "Internal", "region": "${region}", "id": "m5" } ]
                 ],
                 "view": "timeSeries",
                 "stacked": false,
@@ -409,30 +340,7 @@
                 "stat": "Sum",
                 "period": 60,
                 "liveData": true,
-                "title": "DPC Request Count per-Endpoint with 1 Minute Period"
-            }
-        },
-        {
-            "type": "metric",
-            "x": 6,
-            "y": 30,
-            "width": 6,
-            "height": 6,
-            "properties": {
-                "metrics": [
-                    [ "${namespace}", "http-requests/count/eob-all", "certificate_alias", "${bb_client_alias}", { "label": "BlueButton EOB Requests Count", "region": "${region}", "id": "m1" } ],
-                    [ ".", "http-requests/count/all", ".", ".", { "label": "BlueButton All Requests Count", "region": "${region}", "id": "m2" } ],
-                    [ ".", "http-requests/count/coverage-all", ".", ".", { "label": "BlueButton Coverage Requests Count", "region": "${region}", "id": "m3" } ],
-                    [ ".", "http-requests/count/metadata", "certificate_alias", ".", { "label": "BlueButton Metadata Requests Count", "region": "${region}", "id": "m4" } ],
-                    [ ".", "http-requests/count/patient-all ", ".", ".", { "label": "BlueButton Patient Requests Count", "region": "${region}", "id": "m5" } ]
-                ],
-                "view": "timeSeries",
-                "stacked": false,
-                "region": "${region}",
-                "stat": "Sum",
-                "period": 60,
-                "liveData": true,
-                "title": "BlueButton Request Count per-Endpoint with 1 Minute Period"
+                "title": "Patient Request Count with 1 Minute Period per Partner"
             }
         },
         {
@@ -443,114 +351,180 @@
             "height": 6,
             "properties": {
                 "metrics": [
-                    [ "${namespace}", "http-requests/latency/all", "certificate_alias", "${ab2d_client_alias}", { "label": "AB2D All Requests Latency" } ],
-                    [ ".", "http-requests/latency/metadata", ".", ".", { "label": "AB2D Metadata Request Latency" } ],
-                    [ ".", "http-requests/latency/eob-all", ".", ".", { "label": "AB2D EOB Request Latency" } ],
-                    [ ".", "http-requests/latency/patient-all ", ".", ".", { "label": "AB2D Patient Request Latency" } ],
-                    [ ".", "http-requests/latency/coverage-all ", ".", ".", { "label": "AB2D Coverage Request Latency" } ]
-                ],
-                "view": "timeSeries",
-                "stacked": false,
-                "region": "${region}",
-                "stat": "Average",
-                "period": 60,
-                "liveData": true,
-                "title": "AB2D Average Request Latency per-Endpoint with 1 Minute Period"
-            }
-        },
-        {
-            "type": "metric",
-            "x": 0,
-            "y": 24,
-            "width": 6,
-            "height": 6,
-            "properties": {
-                "metrics": [
-                    [ "${namespace}", "http-requests/latency/all", "certificate_alias", "${dpc_client_alias}", { "label": "DPC All Requests Latency", "region": "${region}", "id": "m1" } ],
-                    [ ".", "http-requests/latency/metadata", ".", ".", { "label": "DPC Metadata Request Latency", "region": "${region}", "id": "m2" } ],
-                    [ ".", "http-requests/latency/eob-all", ".", ".", { "label": "DPC EOB Request Latency", "region": "${region}", "id": "m3" } ],
-                    [ ".", "http-requests/latency/patient-all ", ".", ".", { "label": "DPC Patient Request Latency", "region": "${region}", "id": "m4" } ],
-                    [ ".", "http-requests/latency/coverage-all ", ".", ".", { "label": "DPC Coverage Request Latency", "region": "${region}", "id": "m5" } ]
-                ],
-                "view": "timeSeries",
-                "stacked": false,
-                "region": "${region}",
-                "stat": "Average",
-                "period": 60,
-                "liveData": true,
-                "title": "DPC Average Request Latency per-Endpoint with 1 Minute Period"
-            }
-        },
-        {
-            "type": "metric",
-            "x": 12,
-            "y": 24,
-            "width": 6,
-            "height": 6,
-            "properties": {
-                "metrics": [
-                    [ "${namespace}", "http-requests/latency/all", "certificate_alias", "${bcda_client_alias}", { "label": "BCDA All Requests Latency", "region": "${region}", "id": "m1" } ],
-                    [ ".", "http-requests/latency/metadata", ".", ".", { "label": "BCDA Metadata Request Latency", "region": "${region}", "id": "m2" } ],
-                    [ ".", "http-requests/latency/eob-all", ".", ".", { "label": "BCDA EOB Request Latency", "region": "${region}", "id": "m3" } ],
-                    [ ".", "http-requests/latency/patient-all ", ".", ".", { "label": "BCDA Patient Request Latency", "region": "${region}", "id": "m4" } ],
-                    [ ".", "http-requests/latency/coverage-all ", ".", ".", { "label": "BCDA Coverage Request Latency", "region": "${region}", "id": "m5" } ]
-                ],
-                "view": "timeSeries",
-                "stacked": false,
-                "region": "${region}",
-                "stat": "Average",
-                "period": 60,
-                "liveData": true,
-                "title": "BCDA Average Request Latency per-Endpoint with 1 Minute Period"
-            }
-        },
-        {
-            "type": "metric",
-            "x": 0,
-            "y": 30,
-            "width": 6,
-            "height": 6,
-            "properties": {
-                "metrics": [
-                    [ "${namespace}", "http-requests/latency/all", "certificate_alias", "${bb_client_alias}", { "label": "BlueButton All Requests Latency", "region": "${region}", "id": "m1" } ],
-                    [ ".", "http-requests/latency/metadata", ".", ".", { "label": "BlueButton Metadata Request Latency", "region": "${region}", "id": "m2" } ],
-                    [ ".", "http-requests/latency/eob-all", ".", ".", { "label": "BlueButton EOB Request Latency", "region": "${region}", "id": "m3" } ],
-                    [ ".", "http-requests/latency/patient-all ", ".", ".", { "label": "BlueButton Patient Request Latency", "region": "${region}", "id": "m4" } ],
-                    [ ".", "http-requests/latency/coverage-all ", ".", ".", { "label": "BlueButton Coverage Request Latency", "region": "${region}", "id": "m5" } ]
-                ],
-                "view": "timeSeries",
-                "stacked": false,
-                "region": "${region}",
-                "stat": "Average",
-                "period": 60,
-                "liveData": true,
-                "title": "BlueButton Average Request Latency per-Endpoint with 1 Minute Period"
-            }
-        },
-        {
-            "type": "metric",
-            "x": 12,
-            "y": 30,
-            "width": 6,
-            "height": 6,
-            "properties": {
-                "metrics": [
-                    [ { "expression": "SEARCH('http-requests/count/non-2xx-responses ${namespace} certificate_alias', 'Sum', 60)", "label": "non-2xx responses", "id": "e1", "region": "${region}" } ],
-                    [ { "expression": "SEARCH('http-requests/count/500-responses ${namespace} certificate_alias', 'Sum', 60)", "label": "500-responses", "id": "e2", "region": "${region}" } ]
+                    [ "${namespace}", "http-requests/count/coverage-all", "certificate_alias", "${bcda_client_alias}", { "label": "BCDA", "region": "${region}", "id": "m1" } ],
+                    [ "...", "${ab2d_client_alias}", { "label": "AB2D", "region": "${region}", "id": "m2" } ],
+                    [ "...", "${bb_client_alias}", { "label": "BB2", "region": "${region}", "id": "m3" } ],
+                    [ "...", "${dpc_client_alias}", { "label": "DPC", "region": "${region}", "id": "m4" } ],
+                    [ "...", "${internal_client_alias}", { "label": "Internal", "region": "${region}", "id": "m5" } ]
                 ],
                 "view": "timeSeries",
                 "stacked": false,
                 "region": "${region}",
                 "stat": "Sum",
                 "period": 60,
+                "liveData": true,
+                "title": "Coverage Request Count with 1 Minute Period per Partner"
+            }
+        },
+        {
+            "type": "metric",
+            "x": 18,
+            "y": 24,
+            "width": 6,
+            "height": 6,
+            "properties": {
+                "metrics": [
+                    [ "${namespace}", "http-requests/count/metadata", "certificate_alias", "${bcda_client_alias}", { "label": "BCDA", "region": "${region}", "id": "m1" } ],
+                    [ "...", "${ab2d_client_alias}", { "label": "AB2D", "region": "${region}", "id": "m2" } ],
+                    [ "...", "${bb_client_alias}", { "label": "BB2", "region": "${region}", "id": "m3" } ],
+                    [ "...", "${dpc_client_alias}", { "label": "DPC", "region": "${region}", "id": "m4" } ],
+                    [ "...", "${internal_client_alias}", { "label": "Internal", "region": "${region}", "id": "m5" } ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${region}",
+                "stat": "Sum",
+                "period": 60,
+                "liveData": true,
+                "title": "Metadata Request Count with 1 Minute Period per Partner"
+            }
+        },
+        {
+            "type": "metric",
+            "x": 0,
+            "y": 12,
+            "width": 6,
+            "height": 6,
+            "properties": {
+                "metrics": [
+                    [ "${namespace}", "http-requests/latency/eob-all", "certificate_alias", "${bcda_client_alias}", { "label": "BCDA", "region": "${region}", "id": "m1" } ],
+                    [ "...", "${ab2d_client_alias}", { "label": "AB2D", "region": "${region}", "id": "m2" } ],
+                    [ "...", "${bb_client_alias}", { "label": "BB2", "region": "${region}", "id": "m3" } ],
+                    [ "...", "${dpc_client_alias}", { "label": "DPC", "region": "${region}", "id": "m4" } ],
+                    [ "...", "${internal_client_alias}", { "label": "Internal", "region": "${region}", "id": "m5" } ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${region}",
+                "stat": "Average",
+                "period": 60,
+                "liveData": true,
+                "title": "Average EOB Request Latency with 1 Minute Period per Partner"
+            }
+        },
+        {
+            "type": "metric",
+            "x": 6,
+            "y": 12,
+            "width": 6,
+            "height": 6,
+            "properties": {
+                "metrics": [
+                    [ "${namespace}", "http-requests/latency/patient-all", "certificate_alias", "${bcda_client_alias}", { "label": "BCDA", "region": "${region}", "id": "m1" } ],
+                    [ "...", "${ab2d_client_alias}", { "label": "AB2D", "region": "${region}", "id": "m2" } ],
+                    [ "...", "${bb_client_alias}", { "label": "BB2", "region": "${region}", "id": "m3" } ],
+                    [ "...", "${dpc_client_alias}", { "label": "DPC", "region": "${region}", "id": "m4" } ],
+                    [ "...", "${internal_client_alias}", { "label": "Internal", "region": "${region}", "id": "m5" } ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${region}",
+                "stat": "Average",
+                "period": 60,
+                "liveData": true,
+                "title": "Average Patient Request Latency with 1 Minute Period per Partner"
+            }
+        },
+        {
+            "type": "metric",
+            "x": 18,
+            "y": 18,
+            "width": 6,
+            "height": 6,
+            "properties": {
+                "metrics": [
+                    [ "${namespace}", "http-requests/latency/metadata", "certificate_alias", "${bcda_client_alias}", { "label": "BCDA", "region": "${region}", "id": "m1" } ],
+                    [ "...", "${ab2d_client_alias}", { "label": "AB2D", "region": "${region}", "id": "m2" } ],
+                    [ "...", "${bb_client_alias}", { "label": "BB2", "region": "${region}", "id": "m3" } ],
+                    [ "...", "${dpc_client_alias}", { "label": "DPC", "region": "${region}", "id": "m4" } ],
+                    [ "...", "${internal_client_alias}", { "label": "Internal", "region": "${region}", "id": "m5" } ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${region}",
+                "stat": "Average",
+                "period": 60,
+                "liveData": true,
+                "title": "Average Metadata Request Latency with 1 Minute Period per Partner"
+            }
+        },
+        {
+            "type": "metric",
+            "x": 6,
+            "y": 6,
+            "width": 6,
+            "height": 6,
+            "properties": {
+                "metrics": [
+                    [ { "expression": "SEARCH('http-requests/count/non-200-responses ${namespace} status_code', 'Sum', 60)", "id": "e1", "region": "${region}" } ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${region}",
+                "stat": "Average",
+                "period": 60,
+                "title": "Non-200 Responses by Status Code",
                 "liveData": true,
                 "yAxis": {
                     "left": {
-                        "showUnits": false,
-                        "label": "Response Count"
+                        "label": "",
+                        "showUnits": false
+                    },
+                    "right": {
+                        "showUnits": false
                     }
-                },
-                "title": "Non-2xx and 500 Response Count Per-Partner"
+                }
+            }
+        },
+        {
+            "type": "metric",
+            "x": 0,
+            "y": 6,
+            "width": 6,
+            "height": 6,
+            "properties": {
+                "metrics": [
+                    [ { "expression": "SEARCH('{${namespace},status_code} MetricName=\"http-requests/count/5xx-responses\"', 'Sum', 60)", "id": "e1" } ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${region}",
+                "stat": "Average",
+                "period": 60,
+                "liveData": true,
+                "title": "5xx Responses by Status Code"
+            }
+        },
+        {
+            "type": "metric",
+            "x": 12,
+            "y": 12,
+            "width": 6,
+            "height": 6,
+            "properties": {
+                "metrics": [
+                    [ "${namespace}", "http-requests/latency/coverage-all", "certificate_alias", "${bcda_client_alias}", { "region": "${region}", "label": "BCDA" } ],
+                    [ ".", "http-requests/latency/coverage-all", ".", "${ab2d_client_alias}", { "region": "${region}", "label": "AB2D" } ],
+                    [ "...", "${bb_client_alias}", { "region": "${region}", "label": "BB2" } ],
+                    [ "...", "${dpc_client_alias}", { "region": "${region}", "label": "DPC" } ],
+                    [ "...", "${internal_client_alias}", { "region": "${region}", "label": "Internal" } ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "title": "Average Coverage Request Latency with 1 Minute Period per Partner",
+                "region": "${region}",
+                "period": 60,
+                "stat": "Average"
             }
         }
     ]

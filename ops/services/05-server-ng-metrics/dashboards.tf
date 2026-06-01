@@ -7,13 +7,13 @@ locals {
     }
     ab2d_client_alias = {
       prod    = "ab2d_cms_gov"
-      sandbox = "ab2d_cms_gov"
-      test    = "ab2d_cms_gov"
+      sandbox = "ab2d_cms_gov_non_prod"
+      test    = "ab2d_cms_gov_non_prod"
     }
     bcda_client_alias = {
       prod    = "bcda_prod_client"
       sandbox = "bcda_sbx_client"
-      test    = "bcda_test_client"
+      test    = "bcda_dev_client"
     }
     dpc_client_alias = {
       sandbox = "dpc_prod_sbx_client"
