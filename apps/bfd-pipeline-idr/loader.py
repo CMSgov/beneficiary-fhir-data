@@ -145,7 +145,10 @@ class BatchLoader:
         self.progress = progress
         self.progress_start_timer = Timer("progress_start", model, partition)
         self.idr_query_timer = Timer("idr_query", model, partition)
-        self.total_insert_timer = Timer("total_insert", model, partition)
+        self.insert_batch_timer = Timer("insert_batch", model, partition)
+        self.last_updated_timer = Timer("last_updated", model, partition)
+        self.full_batch_timer = Timer("full_batch", model, partition)
+        self.full_load_timer = Timer("full_load", model, partition)
         self.load_type = load_type
         self.enable_load_progress = should_track_load_progress(load_mode)
 
@@ -154,6 +157,7 @@ class BatchLoader:
     ) -> bool:
         timestamp = datetime.now(UTC)
 
+        self.full_load_timer.start()
         async with self.pool.connection() as conn, conn.cursor(binary=True) as cur:
             self.progress_start_timer.start()
             await self._insert_batch_start(cur)
@@ -171,38 +175,52 @@ class BatchLoader:
             if not results:
                 break
 
+            self.full_batch_timer.start()
             data_loaded = True
             logger.info(
                 "%s-%s: loading next %s results", self.table, self.partition.name, len(results)
             )
             num_rows += len(results)
 
-            self.total_insert_timer.start()
+            self.insert_batch_timer.start()
             await asyncio.gather(
                 *(
-                    self._do_upsert(part, timestamp)
+                    self._load_batch_part(part, timestamp)
                     for part in itertools.batched(results, PER_BATCH_CONCURRENT_ROWS, strict=False)
                 )
             )
-            self.total_insert_timer.stop()
+            self.insert_batch_timer.stop()
+
+            async with self.pool.connection() as conn, conn.cursor(binary=True) as cur:
+                if self.load_type == LoadType.INCREMENTAL and self.model.last_updated_date_table():
+                    self.last_updated_timer.start()
+                    await self._setup_temp_table(cur)
+                    await self._copy_data(cur, results)
+                    await self._last_updated(cur, timestamp)
+                    await conn.commit()
+                    self.last_updated_timer.stop()
+
+                await self._calculate_load_progress(cur, results)
+            self.full_batch_timer.stop()
 
         async with self.pool.connection() as conn, conn.cursor(binary=True) as cur:
             await self._mark_batch_complete(cur)
             await conn.commit()
 
+        self.full_load_timer.stop()
         logger.info("%s-%s: loaded %s rows", self.table, self.partition.name, num_rows)
         return data_loaded
 
-    async def _do_upsert(self, results: Sequence[T], timestamp: datetime) -> None:
+    async def _load_batch_part(self, batch_part: Sequence[T], timestamp: datetime) -> None:
         async with self.pool.connection() as conn, conn.cursor(binary=True) as cur:
             await self._setup_temp_table(cur)
 
-            await self._copy_data(cur, results)
+            await self._copy_data(cur, batch_part)
 
             # Upsert into the main table
-            await self._merge(cur, timestamp)
+            await self._upsert(cur, timestamp)
 
-            await self._calculate_load_progress(cur, results)
+            await conn.commit()
 
     async def _insert_batch_start(self, cur: psycopg.AsyncCursor) -> None:
         await self._update_load_progress(
@@ -315,7 +333,7 @@ class BatchLoader:
             await cur.execute(query, params)  # type: ignore
             await cur.connection.commit()
 
-    async def _merge(self, cur: psycopg.AsyncCursor, timestamp: datetime) -> None:
+    async def _upsert(self, cur: psycopg.AsyncCursor, timestamp: datetime) -> None:
         # Upsert into the main table
         if self.model.should_replace():
             # Delete before inserting since we've specified that the data should be
@@ -332,47 +350,43 @@ class BatchLoader:
             """,  # type: ignore
             {"timestamp": timestamp},
         )
-        await cur.connection.commit()
 
-        if self.load_type == LoadType.INCREMENTAL and self.model.last_updated_date_table():
-            key = self.model.last_updated_timestamp_col()
+    async def _last_updated(self, cur: psycopg.AsyncCursor, timestamp: datetime) -> None:
+        key = self.model.last_updated_timestamp_col()
 
-            try:
-                # We want to immediately terminate the transaction if there is already a lock on
-                # the table so that we avoid extraneous waits because if there is a lock this table
-                # is being updated concurrently and that existing update will have the same result
-                await cur.execute("SAVEPOINT pre_last_updated")
-                await cur.execute("SET LOCAL statement_timeout=500")
-                await cur.execute(
-                    f"""
-                    WITH current_ts AS (
-                        SELECT {key}
-                        FROM {self.model.last_updated_date_table()}
-                        WHERE {key} IN (
-                            SELECT {key} FROM {self.temp_table}
-                        )
-                        ORDER BY {key}
-                        FOR UPDATE SKIP LOCKED
+        try:
+            # We want to immediately terminate the transaction if there is already a lock on
+            # the table so that we avoid extraneous waits because if there is a lock this table
+            # is being updated concurrently and that existing update will have the same result
+            await cur.execute("SET LOCAL statement_timeout=500")
+            await cur.execute(
+                f"""
+                WITH current_ts AS (
+                    SELECT {key}
+                    FROM {self.model.last_updated_date_table()}
+                    WHERE {key} IN (
+                        SELECT {key} FROM {self.temp_table}
                     )
-                    UPDATE {self.model.last_updated_date_table()} u
-                    SET {self.last_updated_set_clause}
-                    FROM current_ts t
-                    WHERE u.{key} = t.{key};
-                    """,  # type: ignore
-                    {"timestamp": timestamp},
+                    ORDER BY {key}
+                    FOR UPDATE SKIP LOCKED
                 )
-                await cur.connection.commit()
-            except (DeadlockDetected, LockNotAvailable, QueryCanceled) as ex:
-                logger.warning(
-                    "%s-%s: deadlock/lock/statement timeout updating update timestamp, ignoring: "
-                    "%s",
-                    self.table,
-                    self.partition.name,
-                    ex,
-                )
-                await cur.execute("ROLLBACK TO SAVEPOINT pre_last_updated")
+                UPDATE {self.model.last_updated_date_table()} u
+                SET {self.last_updated_set_clause}
+                FROM current_ts t
+                WHERE u.{key} = t.{key};
+                """,  # type: ignore
+                {"timestamp": timestamp},
+            )
+            await cur.connection.commit()
+        except (DeadlockDetected, LockNotAvailable, QueryCanceled) as ex:
+            logger.warning(
+                "%s-%s: deadlock/lock/statement timeout updating update timestamp, ignoring: %s",
+                self.table,
+                self.partition.name,
+                ex,
+            )
 
-    async def _copy_data(self, cur: psycopg.AsyncCursor, results: Sequence[T]) -> None:
+    async def _copy_data(self, cur: psycopg.AsyncCursor, data: Sequence[T]) -> None:
         # Use COPY to load the batch into Postgres.
         # COPY has a number of optimizations that make bulk loading more efficient
         # than a bunch of INSERTs.
@@ -384,7 +398,7 @@ class BatchLoader:
         async with cur.copy(
             f"COPY {self.temp_table} ({self.cols_str}) FROM STDIN"  # type: ignore
         ) as copy:
-            for row in results:
+            for row in data:
                 await copy.write_row(
                     [_remove_null_bytes(getattr(row, k)) for k in self.insert_cols]
                 )
