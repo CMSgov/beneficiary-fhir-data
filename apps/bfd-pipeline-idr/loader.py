@@ -1,4 +1,3 @@
-import asyncio
 import itertools
 import logging
 from collections.abc import Iterator, Sequence
