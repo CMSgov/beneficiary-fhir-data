@@ -358,7 +358,7 @@ class BatchLoader:
             # We want to immediately terminate the transaction if there is already a lock on
             # the table so that we avoid extraneous waits because if there is a lock this table
             # is being updated concurrently and that existing update will have the same result
-            await cur.execute("SET LOCAL statement_timeout=500")
+            await cur.execute("SET LOCAL statement_timeout=3000")
             await cur.execute(
                 f"""
                 WITH current_ts AS (
