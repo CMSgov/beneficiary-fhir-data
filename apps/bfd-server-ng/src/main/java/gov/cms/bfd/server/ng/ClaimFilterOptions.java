@@ -27,7 +27,8 @@ public final class ClaimFilterOptions {
   }
 
   public static final class Builder {
-    private SamhsaFilterMode samhsaFilterMode;
+    // Sensible defaults (hopefully)
+    private SamhsaFilterMode samhsaFilterMode = SamhsaFilterMode.EXCLUDE;
     private boolean includeTaxNumber = false;
     private ClaimSecurityStatus securityStatus = ClaimSecurityStatus.NONE;
 

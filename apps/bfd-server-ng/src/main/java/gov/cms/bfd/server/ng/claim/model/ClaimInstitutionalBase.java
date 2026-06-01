@@ -114,10 +114,12 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
   }
 
   private void addClaimItems(ExplanationOfBenefit eob) {
+    var options = ClaimFilterOptions.builder().build();
+
     getItems()
         .forEach(
             item -> {
-              var claimLine = item.getClaimLine().toFhirItemComponent();
+              var claimLine = item.getClaimLine().toFhirItemComponent(options);
               var claimContext = getClaimTypeCode().toContext();
 
               claimLine.ifPresent(eob::addItem);

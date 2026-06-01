@@ -68,7 +68,7 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
     var diagnosisSequenceGenerator = new SequenceGenerator();
     var diagnosisSequenceMap = buildDiagnosisSequences(eob, diagnosisSequenceGenerator);
 
-    getItems().forEach(item -> addClaimItemToEob(eob, item, diagnosisSequenceMap));
+    getItems().forEach(item -> addClaimItemToEob(eob, item, diagnosisSequenceMap, options));
     addProviders(eob);
     addAllSupportingInfo(eob);
     addCareTeam(eob);
@@ -85,9 +85,10 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
   private void addClaimItemToEob(
       ExplanationOfBenefit eob,
       ClaimItemBase item,
-      Map<String, List<Integer>> diagnosisSequenceMap) {
+      Map<String, List<Integer>> diagnosisSequenceMap,
+      ClaimFilterOptions options) {
 
-    var claimLine = item.getClaimLine().toFhirItemComponent();
+    var claimLine = item.getClaimLine().toFhirItemComponent(options);
     claimLine.ifPresent(eob::addItem);
 
     // populates diagnosisSequence only if CLM_LINE_DGNS_CD is present in D-type codes

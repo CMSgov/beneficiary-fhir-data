@@ -57,7 +57,7 @@ public class ClaimRx extends ClaimBase {
     var eob = super.toFhir(options);
 
     addPartDInsurer(eob);
-    addClaimLineItem(eob);
+    addClaimLineItem(eob, options);
     addServiceProvider(eob);
     addSupportingInfo(eob);
     addPrescribingProviderCareTeam(eob);
@@ -77,8 +77,8 @@ public class ClaimRx extends ClaimBase {
             });
   }
 
-  private void addClaimLineItem(ExplanationOfBenefit eob) {
-    getClaimItems().getClaimLine().toFhirItemComponent().ifPresent(eob::addItem);
+  private void addClaimLineItem(ExplanationOfBenefit eob, ClaimFilterOptions options) {
+    getClaimItems().getClaimLine().toFhirItemComponent(options).ifPresent(eob::addItem);
   }
 
   private void addServiceProvider(ExplanationOfBenefit eob) {
