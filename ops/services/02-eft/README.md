@@ -21,7 +21,8 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 ## Requirements
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.12.0 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 6 |
 
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
@@ -32,7 +33,7 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
+| ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_outbound_lambda_repository_override"></a> [outbound\_lambda\_repository\_override](#input\_outbound\_lambda\_repository\_override) | Overrides the ECR repository for the 'sftp-outbound-transfer' container image. If not provided, the default will be used | `string` | `null` | no |
 | <a name="input_outbound_lambda_version_override"></a> [outbound\_lambda\_version\_override](#input\_outbound\_lambda\_version\_override) | Overrides the version for 'sftp-outbound-transfer' container image resolution. If not provided, the latest BFD version will be used | `string` | `null` | no |
 | <a name="input_parent_env"></a> [parent\_env](#input\_parent\_env) | The parent environment of the current solution. Will correspond with `terraform.workspace`".<br/>Necessary on `tofu init` and `tofu workspace select` \_only\_. In all other situations, parent env<br/>will be divined from `terraform.workspace`. | `string` | `null` | no |
@@ -47,7 +48,7 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 ## Modules
 
 | Name | Source | Version |
-|------|--------|---------|
+| ---- | ------ | ------- |
 | <a name="module_bucket_eft"></a> [bucket\_eft](#module\_bucket\_eft) | ../../terraform-modules/general/secure-bucket | n/a |
 | <a name="module_terraservice"></a> [terraservice](#module\_terraservice) | ../../terraform-modules/bfd/bfd-terraservice | n/a |
 | <a name="module_topic_inbound_received_s3_notifs"></a> [topic\_inbound\_received\_s3\_notifs](#module\_topic\_inbound\_received\_s3\_notifs) | ../../terraform-modules/general/logging-sns-topic | n/a |
@@ -63,7 +64,7 @@ _Note: This does not include transitive dependencies (dependencies of dependenci
 ## Resources
 
 | Name | Type |
-|------|------|
+| ---- | ---- |
 | [aws_alb_target_group_attachment.nlb_to_vpc_endpoint](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/alb_target_group_attachment) | resource |
 | [aws_cloudwatch_log_group.sftp_outbound_transfer](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
 | [aws_cloudwatch_log_group.sftp_server](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |

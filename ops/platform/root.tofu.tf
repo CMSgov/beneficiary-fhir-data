@@ -59,7 +59,7 @@ provider "aws" {
 }
 
 terraform {
-  required_version = "~> 1.10.0"
+  required_version = "~> 1.12.0"
   backend "s3" {
     bucket       = "bfd-platform-${local.account_type}-tf-state"
     key          = "ops/platform/${local.service}/tofu.tfstate"

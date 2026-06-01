@@ -4,8 +4,8 @@ RUN dnf install jq unzip tar gzip libicu aws-cli git gettext java-25-amazon-corr
 
 FROM dnf as opentofu
 
-ARG opentofu_version=1.10.6
-ARG opentofu_checksum=a32f653d686a8cad9b9be82101eb5b5e834fbfa8d095842fa1820c5d27fad967
+ARG opentofu_version=1.12.1
+ARG opentofu_checksum=1a53dd57697dc04d243ddb81a0f70e44ab83c256f15dde173e5538120dc6a0bb
 
 RUN curl -fsSL -o /tmp/tofu.zip https://github.com/opentofu/opentofu/releases/download/v${opentofu_version}/tofu_${opentofu_version}_linux_arm64.zip \
     && checksum=$(sha256sum /tmp/tofu.zip | cut -f 1 -d ' ') \

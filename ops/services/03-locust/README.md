@@ -58,7 +58,8 @@ The Lambda, if successful (note, that doesn't mean _Locust_ is successful, just 
 ## Requirements
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.12.0 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 6 |
 
 <!--WARNING: GENERATED CONTENT with terraform-docs, e.g.
@@ -69,7 +70,7 @@ The Lambda, if successful (note, that doesn't mean _Locust_ is successful, just 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
+| ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_parent_env"></a> [parent\_env](#input\_parent\_env) | The parent environment of the current solution. Will correspond with `terraform.workspace`".<br/>Necessary on `tofu init` and `tofu workspace select` \_only\_. In all other situations, parent env<br/>will be divined from `terraform.workspace`. | `string` | `null` | no |
 | <a name="input_region"></a> [region](#input\_region) | n/a | `string` | `"us-east-1"` | no |
 | <a name="input_run_locust_repository_override"></a> [run\_locust\_repository\_override](#input\_run\_locust\_repository\_override) | Overrides the ECR repository for the 'run-locust' container image. If not provided, the default will be used | `string` | `null` | no |
@@ -84,7 +85,7 @@ The Lambda, if successful (note, that doesn't mean _Locust_ is successful, just 
 ## Modules
 
 | Name | Source | Version |
-|------|--------|---------|
+| ---- | ------ | ------- |
 | <a name="module_bucket_athena"></a> [bucket\_athena](#module\_bucket\_athena) | ../../terraform-modules/general/secure-bucket | n/a |
 | <a name="module_locust_stats_trigger"></a> [locust\_stats\_trigger](#module\_locust\_stats\_trigger) | ../../terraform-modules/general/trigger-glue-crawler | n/a |
 | <a name="module_terraservice"></a> [terraservice](#module\_terraservice) | ../../terraform-modules/bfd/bfd-terraservice | n/a |
@@ -97,7 +98,7 @@ The Lambda, if successful (note, that doesn't mean _Locust_ is successful, just 
 ## Resources
 
 | Name | Type |
-|------|------|
+| ---- | ---- |
 | [aws_athena_workgroup.locust_stats](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/athena_workgroup) | resource |
 | [aws_cloudwatch_log_group.run_locust](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
 | [aws_glue_crawler.locust_stats](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/glue_crawler) | resource |
