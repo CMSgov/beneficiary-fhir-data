@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.ng.claim.model;
 
+import gov.cms.bfd.server.ng.ClaimFilterOptions;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
@@ -29,14 +30,14 @@ public class ClaimLineProfessionalExtensions {
 
   @Embedded ClaimTaxNumberCode claimTaxNumberCode;
 
-  List<Extension> toFhir() {
+  List<Extension> toFhir(ClaimFilterOptions options) {
     return Stream.of(
             supplierTypeCode.map(ClaimSupplierTypeCode::toFhir),
             federalTypeOfServiceCode.map(ClaimFederalTypeOfServiceCode::toFhir),
             paymentCode.map(ClaimPaymentCode::toFhir),
             providerSpecialtyCode.map(ProviderSpecialtyCode::toFhirExtension),
             serviceDeductibleCode.map(ClaimServiceDeductibleCode::toFhir),
-            claimTaxNumberCode.toFhir())
+            options.isIncludeTaxNumber() ? claimTaxNumberCode.toFhir() : Optional.<Extension>empty())
         .flatMap(Optional::stream)
         .toList();
   }

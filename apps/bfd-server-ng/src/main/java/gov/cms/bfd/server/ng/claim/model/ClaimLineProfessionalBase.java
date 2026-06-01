@@ -91,7 +91,7 @@ abstract class ClaimLineProfessionalBase implements ClaimLineBase {
 
     getAdjudicationCharge().toFhir().forEach(line::addAdjudication);
     placeOfServiceCode.map(c -> line.setLocation(c.toFhir()));
-    getFhirExtensions().forEach(line::addExtension);
+    getFhirExtensions(options).forEach(line::addExtension);
 
     return Optional.of(line);
   }
@@ -124,7 +124,7 @@ abstract class ClaimLineProfessionalBase implements ClaimLineBase {
 
   abstract void populateProductAndQuantity(ExplanationOfBenefit.ItemComponent item);
 
-  protected List<Extension> getFhirExtensions() {
-    return getExtensions().toFhir();
+  protected List<Extension> getFhirExtensions(ClaimFilterOptions options) {
+    return getExtensions().toFhir(options);
   }
 }
