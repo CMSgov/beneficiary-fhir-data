@@ -37,7 +37,9 @@ public class ClaimLineProfessionalExtensions {
             paymentCode.map(ClaimPaymentCode::toFhir),
             providerSpecialtyCode.map(ProviderSpecialtyCode::toFhirExtension),
             serviceDeductibleCode.map(ClaimServiceDeductibleCode::toFhir),
-            options.isIncludeTaxNumber() ? claimTaxNumberCode.toFhir() : Optional.<Extension>empty())
+            options.isIncludeTaxNumber()
+                ? claimTaxNumberCode.toFhir()
+                : Optional.<Extension>empty())
         .flatMap(Optional::stream)
         .toList();
   }
