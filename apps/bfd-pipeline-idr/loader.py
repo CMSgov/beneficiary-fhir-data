@@ -4,6 +4,7 @@ import logging
 from collections.abc import Iterator, Sequence
 from datetime import UTC, date, datetime
 
+import anyio
 import psycopg
 import psycopg_pool
 from psycopg.abc import Params, QueryNoTemplate
@@ -49,10 +50,15 @@ class PostgresLoader:
         load_type: LoadType,
         load_mode: LoadMode,
     ) -> bool:
-        return asyncio.run(
-            self._async_load(
-                fetch_results, model, job_start, partition, progress, load_type, load_mode
-            )
+        return anyio.run(
+            self._async_load,
+            fetch_results,
+            model,
+            job_start,
+            partition,
+            progress,
+            load_type,
+            load_mode,
         )
 
     async def _async_load(
@@ -187,14 +193,18 @@ class BatchLoader:
             num_rows += len(results)
 
             self.insert_batch_timer.start()
-            await asyncio.gather(
-                *(
-                    self._load_batch_part(idx, part, timestamp)
-                    for idx, part in enumerate(
-                        itertools.batched(results, PER_BATCH_CONCURRENT_ROWS, strict=False)
+            async with anyio.create_task_group() as tg:
+                for idx, part in enumerate(
+                    itertools.batched(results, PER_BATCH_CONCURRENT_ROWS, strict=False)
+                ):
+                    tg.start_soon(
+                        self._load_batch_part,
+                        idx,
+                        part,
+                        timestamp,
+                        name=f"{self.table}-{self.partition.name}-{idx}",
                     )
-                )
-            )
+
             self.insert_batch_timer.stop()
 
             async with self.pool.connection() as conn, conn.cursor(binary=True) as cur:
