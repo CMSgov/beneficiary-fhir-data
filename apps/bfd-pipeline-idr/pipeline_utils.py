@@ -53,7 +53,7 @@ def extract_and_load(
 
     logger.info("loading %s", cls.table())
     last_error = datetime.min.replace(tzinfo=UTC)
-    loader = PostgresLoader(load_mode)
+    loader = PostgresLoader()
     error_count = 0
     max_errors = 3
 
@@ -76,7 +76,6 @@ def extract_and_load(
             data_iter = data_extractor.extract_idr_data(progress, job_start, source)
             res = loader.load(data_iter, cls, job_start, partition, progress, load_type, load_mode)
             data_extractor.close()
-            loader.close()
             return res
         # Snowflake will throw a reauth error if the pipeline has been running for several hours
         # but it seems to be wrapped in a ProgrammingError.
