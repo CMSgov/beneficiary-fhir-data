@@ -110,8 +110,8 @@ def __get_cw_param(cw_value: CwValue) -> str:
 def __gen_log_insights_url(cw_params: Mapping[str, CwValue]) -> str:
     config_items = [f"{key}{__get_cw_param(cw_params[key])}" for key in cw_params]
     config_str = f"{S1}{S2}{S1.join(config_items)}{S4}{S4}"
-    QUERY = f"logsV2:logs-insights$3Ftab$3Dlogs$26queryDetail$3D{config_str}"
-    return f"https://{REGION}.console.aws.amazon.com/cloudwatch/home?region={REGION}#{QUERY}"
+    query = f"logsV2:logs-insights$3Ftab$3Dlogs$26queryDetail$3D{config_str}"
+    return f"https://{REGION}.console.aws.amazon.com/cloudwatch/home?region={REGION}#{query}"
 
 
 # Implementation based on https://stackoverflow.com/questions/68429312/generate-aws-logs-insights-url-with-query-and-search-creteria
