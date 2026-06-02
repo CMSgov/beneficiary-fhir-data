@@ -40,6 +40,7 @@ public class EobResourceProvider implements IResourceProvider {
   private static final String SERVICE_DATE = "service-date";
   private static final String START_INDEX = "startIndex";
   private static final String TYPE = "type";
+  private static final String INCLUDE_TAX_NUMBERS_HEADER = "IncludeTaxNumbers";
 
   @Override
   public Class<ExplanationOfBenefit> getResourceType() {
@@ -61,7 +62,7 @@ public class EobResourceProvider implements IResourceProvider {
       final RequestDetails requestDetails) {
 
     var includeTaxNumbers =
-        FhirInputConverter.parseBooleanHeader(requestDetails, "IncludeTaxNumbers");
+        FhirInputConverter.parseBooleanHeader(requestDetails, INCLUDE_TAX_NUMBERS_HEADER);
     var samhsaFilterMode = getFilterModeForRequest(request, SamhsaSearchIntent.UNSPECIFIED);
     var options =
         ClaimFilterOptions.builder()
@@ -105,7 +106,7 @@ public class EobResourceProvider implements IResourceProvider {
       final HttpServletRequest request) {
 
     var includeTaxNumbers =
-        FhirInputConverter.parseBooleanHeader(requestDetails, "IncludeTaxNumbers");
+        FhirInputConverter.parseBooleanHeader(requestDetails, INCLUDE_TAX_NUMBERS_HEADER);
     var tagCriteria = FhirInputConverter.parseTagParameter(tag);
     var claimTypeCodes = FhirInputConverter.getClaimTypeCodesForType(type);
     var samhsaSearchIntent = FhirInputConverter.parseSecurityParameter(security);
@@ -150,7 +151,7 @@ public class EobResourceProvider implements IResourceProvider {
       final HttpServletRequest request) {
 
     var includeTaxNumbers =
-        FhirInputConverter.parseBooleanHeader(requestDetails, "IncludeTaxNumbers");
+        FhirInputConverter.parseBooleanHeader(requestDetails, INCLUDE_TAX_NUMBERS_HEADER);
     var samhsaFilterMode = getFilterModeForRequest(request, SamhsaSearchIntent.UNSPECIFIED);
     var options =
         ClaimFilterOptions.builder()

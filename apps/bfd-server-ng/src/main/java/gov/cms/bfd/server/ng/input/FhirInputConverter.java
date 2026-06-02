@@ -467,16 +467,13 @@ public class FhirInputConverter {
 
     if (headerValues == null || headerValues.isEmpty()) {
       return false;
-    } else if (headerValues.size() == 1) {
-      String headerValue = headerValues.getFirst();
-      if ("true".equalsIgnoreCase(headerValue)) {
-        return true;
-      } else if ("false".equalsIgnoreCase(headerValue)) {
-        return false;
-      }
+    } else if (headerValues.size() > 1) {
+      // we do not know which to honor
+      throw new InvalidRequestException(
+          "Unsupported " + headerName + " header value: " + headerValues);
+    } else {
+      // if not true is false and doesn't need an error
+      return Boolean.parseBoolean(headerValues.getFirst());
     }
-
-    throw new InvalidRequestException(
-        "Unsupported " + headerName + " header value: " + headerValues);
   }
 }
