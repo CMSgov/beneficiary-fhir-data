@@ -37,7 +37,8 @@ The high-level purpose and location of each piece of the project is listed below
     * [bfd-model-idr](apps/bfd-model-idr) - data models and synthetic data generation used for mapping IDR data
     * [bfd-pipeline-idr](apps/bfd-pipeline-idr) - ETL pipeline for transforming and loading IDR data
     * [bfd-server-ng](apps/bfd-server-ng) - New version of the BFD REST API, serving FHIR data
-    * [bfd-db-migrator-ng](apps/bfd-db-migrator-ng) - simple facade for running flyway migrations using maven
+    * [bfd-db-migrator-ng](apps/bfd-db-migrator-ng) - simple facade for running flyway migrations against the Postgres DB using maven
+    * [bfd-db-migrator-synthetic](apps/bfd-db-migrator-synthetic) - simple facade for running flyway migrations against the dev Snowflake DB using maven
 * [insights](insights) - contains documentation and resources for maintaining BFD Insights, a platform using AWS Cloudwatch to provide analytics and metrics for BFD applications
 * [ops](ops) - contains the scripts and resources required for packaging and deploying BFD applications
 * [rfcs](docs/rfcs) - holds the archived and active RFC (Request for Comment) documents for BFD

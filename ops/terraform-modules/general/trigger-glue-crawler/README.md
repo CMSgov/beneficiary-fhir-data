@@ -11,8 +11,8 @@ This Module defines a single Lambda function, its Log Group, and corresponding I
 ## Requirements
 
 | Name | Version |
-|------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.10.0 |
+| ---- | ------- |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.12.0 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~>6 |
 | <a name="requirement_external"></a> [external](#requirement\_external) | ~>2 |
 | <a name="requirement_http"></a> [http](#requirement\_http) | ~>3 |
@@ -25,7 +25,7 @@ This Module defines a single Lambda function, its Log Group, and corresponding I
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
+| ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_crawler_arn"></a> [crawler\_arn](#input\_crawler\_arn) | ARN of the Glue Crawler that the trigger Lambda will invoke | `string` | n/a | yes |
 | <a name="input_crawler_name"></a> [crawler\_name](#input\_crawler\_name) | Name of the Glue Crawler that the trigger Lambda will invoke | `string` | n/a | yes |
 | <a name="input_database_name"></a> [database\_name](#input\_database\_name) | Name of the Glue Database that will be crawled | `string` | n/a | yes |
@@ -53,7 +53,7 @@ No modules.
 ## Resources
 
 | Name | Type |
-|------|------|
+| ---- | ---- |
 | [aws_cloudwatch_log_group.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
 | [aws_iam_policy.glue](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.logs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
@@ -75,6 +75,6 @@ No modules.
 ## Outputs
 
 | Name | Description |
-|------|-------------|
+| ---- | ----------- |
 | <a name="output_lambda"></a> [lambda](#output\_lambda) | Resource object (aws\_lambda\_function) representing the trigger Lambda created by this module |
 <!-- END_TF_DOCS -->

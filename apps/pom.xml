@@ -3,7 +3,7 @@
 
     <groupId>gov.cms.bfd</groupId>
     <artifactId>bfd-parent</artifactId>
-    <version>2.248.0-SNAPSHOT</version>
+    <version>2.249.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>bfd-parent</name>
@@ -72,7 +72,7 @@
         <javaSourceVersion>25</javaSourceVersion>
         <maven.compiler.release>25</maven.compiler.release>
 
-        <project.build.outputTimestamp>2026-05-20T17:33:54Z</project.build.outputTimestamp>
+        <project.build.outputTimestamp>2026-06-01T17:11:59Z</project.build.outputTimestamp>
         <!-- Disable jacoco until automated coverage generation is desired -->
         <maven.jacoco.skip>true</maven.jacoco.skip>
         <sonar.coverageReportPaths>coverage.xml</sonar.coverageReportPaths>
@@ -187,7 +187,7 @@
         <datasource-proxy.version>1.10</datasource-proxy.version>
         <cors.filter.version>1.0.1</cors.filter.version>
         <org.apache.spark.version>3.5.0</org.apache.spark.version>
-        <hapi-fhir.version>8.8.0</hapi-fhir.version>
+        <hapi-fhir.version>8.10.0</hapi-fhir.version>
         <thymeleaf.version>3.1.5.RELEASE</thymeleaf.version>
         <swagger-core.version>2.2.28</swagger-core.version>
         <swagger-ui.version>5.20.1</swagger-ui.version>
