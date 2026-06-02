@@ -100,7 +100,7 @@ public class LoggerConstants {
 
   /** Name of the X-Request-ID header. */
   public static final String HTTP_ACCESS_REQUEST_HEADER_REQUEST_ID =
-      "http_access_response_header_X-Request-ID";
+      "http_access_request_header_X-Request-ID";
 
   /** Name of the outgoing response status code. */
   public static final String HTTP_ACCESS_RESPONSE_STATUS = "http_access_response_status";

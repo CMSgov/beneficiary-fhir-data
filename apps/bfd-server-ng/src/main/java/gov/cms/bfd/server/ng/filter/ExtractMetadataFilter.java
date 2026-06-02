@@ -57,7 +57,7 @@ public class ExtractMetadataFilter implements Filter {
       if (servletRequest instanceof HttpServletRequest httpRequest
           && servletResponse instanceof HttpServletResponse httpResponse) {
         requestTelemetryLogger.recordResponse(httpRequest, httpResponse);
-        requestTelemetryLogger.logRequestComplete(httpRequest);
+        requestTelemetryLogger.logRequestComplete(httpRequest, httpResponse);
       }
       // Clean up to prevent leaks
       MDC.clear();

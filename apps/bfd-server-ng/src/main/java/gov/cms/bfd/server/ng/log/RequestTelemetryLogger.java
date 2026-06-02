@@ -102,7 +102,6 @@ public class RequestTelemetryLogger {
    * @param response the response
    */
   public void recordResponse(HttpServletRequest request, HttpServletResponse response) {
-    MDC.put(logKey(MDC_PREFIX, HTTP_ACCESS_RESPONSE_STATUS), String.valueOf(response.getStatus()));
     putIfPresent(HTTP_ACCESS_RESPONSE_HEADER_ENCODING, response.getHeader("Content-Encoding"));
     putIfPresent(HTTP_ACCESS_RESPONSE_CONTENT_LENGTH, response.getHeader("Content-Length"));
 
@@ -174,14 +173,17 @@ public class RequestTelemetryLogger {
    * populated by the MDC.
    *
    * @param request the request
+   * @param response the response
    */
-  public void logRequestComplete(HttpServletRequest request) {
+  public void logRequestComplete(HttpServletRequest request, HttpServletResponse response) {
     var queryParams = request.getAttribute(REQUEST_QUERY_PARAMETERS);
+    var responseStatusCode = response.getStatus();
     LOGGER
         .atInfo()
         .setMessage("Request Completed")
         .addKeyValue(LOG_TYPE, "requestTelemetry")
         .addKeyValue(REQUEST_QUERY_PARAMETERS, queryParams)
+        .addKeyValue(HTTP_ACCESS_RESPONSE_STATUS, responseStatusCode)
         .log();
   }
 

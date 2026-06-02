@@ -43,9 +43,7 @@ locals {
 
   log_type                  = "$.logType = \"requestTelemetry\""
   certificate_alias_pattern = "$.mdc.certificateAlias = \"*\""
-  status_code_dimension = {
-    status_code = "$.mdc.http_access_response_status"
-  }
+  response_status_code      = "$.http_access_response_status"
 }
 
 data "aws_ecs_cluster" "main" {
@@ -108,32 +106,37 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_count_5xx_responses" 
 
   pattern = join("", [
     "{${local.log_type} && ",
-    "$.mdc.http_access_response_status >= 500}",
+    "${local.response_status_code} >= 500}",
   ])
   metric_transformation {
-    name       = "http-requests/count/5xx-responses"
-    namespace  = local.namespace
-    value      = "1"
-    unit       = "Count"
-    dimensions = local.status_code_dimension
+    name      = "http-requests/count/5xx-responses"
+    namespace = local.namespace
+    value     = "1"
+    unit      = "Count"
+    dimensions = {
+      status_code = "${local.response_status_code}"
+    }
   }
 }
 
-# Count HTTP non-200s with status code as dimension
-resource "aws_cloudwatch_log_metric_filter" "http_requests_count_non_200_responses" {
-  name           = "${local.namespace}/http-requests/count/non-200-responses"
+# Count HTTP non-success responses with status code as dimension
+resource "aws_cloudwatch_log_metric_filter" "http_requests_count_non_success_responses" {
+  name           = "${local.namespace}/http-requests/count/non-success-responses"
   log_group_name = local.log_groups.messages
 
   pattern = join("", [
     "{${local.log_type} && ",
-    "$.mdc.http_access_response_status != 200} ",
+    "${local.response_status_code} >= 400 && ",
+    "${local.response_status_code} < 500} ",
   ])
 
   metric_transformation {
-    name       = "http-requests/count/non-200-responses"
-    namespace  = local.namespace
-    value      = "1"
-    unit       = "Count"
-    dimensions = local.status_code_dimension
+    name      = "http-requests/count/non-success-responses"
+    namespace = local.namespace
+    value     = "1"
+    unit      = "Count"
+    dimensions = {
+      status_code = "${local.response_status_code}"
+    }
   }
 }

@@ -466,14 +466,14 @@
             "height": 6,
             "properties": {
                 "metrics": [
-                    [ { "expression": "SEARCH('http-requests/count/non-200-responses ${namespace} status_code', 'Sum', 60)", "id": "e1", "region": "${region}" } ]
+                    [ { "expression": "SEARCH('http-requests/count/non-success-responses ${namespace} status_code', 'Sum', 60)", "id": "e1", "region": "${region}" } ]
                 ],
                 "view": "timeSeries",
                 "stacked": false,
                 "region": "${region}",
                 "stat": "Average",
                 "period": 60,
-                "title": "Non-200 Responses by Status Code",
+                "title": "Unsuccessful Responses by Status Code",
                 "liveData": true,
                 "yAxis": {
                     "left": {
