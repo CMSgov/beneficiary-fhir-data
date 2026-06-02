@@ -102,6 +102,7 @@ public class RequestTelemetryLogger {
    * @param response the response
    */
   public void recordResponse(HttpServletRequest request, HttpServletResponse response) {
+    MDC.put(logKey(MDC_PREFIX, HTTP_ACCESS_RESPONSE_STATUS), String.valueOf(response.getStatus()));
     putIfPresent(HTTP_ACCESS_RESPONSE_HEADER_ENCODING, response.getHeader("Content-Encoding"));
     putIfPresent(HTTP_ACCESS_RESPONSE_CONTENT_LENGTH, response.getHeader("Content-Length"));
 

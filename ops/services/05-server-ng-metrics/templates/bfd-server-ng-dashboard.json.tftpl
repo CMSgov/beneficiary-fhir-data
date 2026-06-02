@@ -466,14 +466,14 @@
             "height": 6,
             "properties": {
                 "metrics": [
-                    [ { "expression": "SEARCH('http-requests/count/non-success-responses ${namespace} status_code', 'Sum', 60)", "id": "e1", "region": "${region}" } ]
+                    [ { "expression": "SEARCH('http-requests/count/4xx-responses bfd-test/server-ng status_code', 'Sum', 60)", "label": "$${PROP('Dim.status_code')}", "id": "e1", "region": "us-east-1" } ]
                 ],
                 "view": "timeSeries",
                 "stacked": false,
-                "region": "${region}",
+                "region": "us-east-1",
                 "stat": "Average",
                 "period": 60,
-                "title": "Unsuccessful Responses by Status Code",
+                "title": "4xx Responses by Status Code",
                 "liveData": true,
                 "yAxis": {
                     "left": {

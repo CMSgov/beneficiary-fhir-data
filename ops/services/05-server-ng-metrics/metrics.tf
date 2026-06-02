@@ -119,9 +119,9 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_count_5xx_responses" 
   }
 }
 
-# Count HTTP non-success responses with status code as dimension
-resource "aws_cloudwatch_log_metric_filter" "http_requests_count_non_success_responses" {
-  name           = "${local.namespace}/http-requests/count/non-success-responses"
+# Count HTTP 4xxs with status code as dimension
+resource "aws_cloudwatch_log_metric_filter" "http_requests_count_4xx-responses" {
+  name           = "${local.namespace}/http-requests/count/4xx-responses"
   log_group_name = local.log_groups.messages
 
   pattern = join("", [
@@ -131,7 +131,7 @@ resource "aws_cloudwatch_log_metric_filter" "http_requests_count_non_success_res
   ])
 
   metric_transformation {
-    name      = "http-requests/count/non-success-responses"
+    name      = "http-requests/count/4xx-responses"
     namespace = local.namespace
     value     = "1"
     unit      = "Count"
