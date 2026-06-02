@@ -74,6 +74,14 @@ class PostgresLoader:
             conninfo=get_connection_string(load_mode),
             min_size=PER_BATCH_MIN_CONNECTIONS if not LoadMode.LOCAL else 1,
             max_size=PER_BATCH_MAX_CONNECTIONS if not LoadMode.LOCAL else 1,
+            # Testing both psycopg and asyncpg by introducing a Timer for the statement that
+            # acquires a connection from either library's implementation of a pool showed that
+            # the majority of the time spent was actually in acquiring a connection, _not_ the
+            # upsert queries themselves. We were unable to determine why this was the case, and
+            # there is little to no information online about this behavior. Thus, we need to
+            # increase the pool timeout or some partitions will fail to load. It does not seem to
+            # matter whether we use a pool or not, either
+            # TODO: Investigate pool timeout further so that this can be removed
             timeout=600,
         ) as pool:
             await pool.wait()
