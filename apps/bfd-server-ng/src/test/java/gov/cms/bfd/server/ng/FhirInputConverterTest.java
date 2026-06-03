@@ -15,8 +15,12 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import gov.cms.bfd.server.ng.input.FhirInputConverter;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.IdType;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 class FhirInputConverterTest {
 
@@ -80,52 +84,25 @@ class FhirInputConverterTest {
     assertEquals("A maximum of 100 claim IDs may be requested at once.", thrown.getMessage());
   }
 
-  @Test
-  void parseBooleanHeaderReturnsFalseWhenHeaderMissing() {
-    var requestDetails = mock(RequestDetails.class);
-    when(requestDetails.getHeaders(INCLUDE_TAX_NUMBERS)).thenReturn(List.of());
-
-    assertEquals(false, FhirInputConverter.parseBooleanHeader(requestDetails, INCLUDE_TAX_NUMBERS));
+  static Stream<Arguments> provideBooleanHeaderScenarios() {
+    return Stream.of(
+        Arguments.of(List.of(), false),
+        Arguments.of(List.of("true"), true),
+        Arguments.of(List.of("false"), false),
+        Arguments.of(List.of("TRUE"), true),
+        Arguments.of(List.of("FALSE"), false),
+        Arguments.of(List.of("yes"), false));
   }
 
-  @Test
-  void parseBooleanHeaderReturnsTrueWhenHeaderTrue() {
+  @ParameterizedTest
+  @MethodSource("provideBooleanHeaderScenarios")
+  void parseBooleanHeader(List<String> headerValues, boolean expected) {
     var requestDetails = mock(RequestDetails.class);
-    when(requestDetails.getHeaders(INCLUDE_TAX_NUMBERS)).thenReturn(List.of("true"));
+    when(requestDetails.getHeaders(INCLUDE_TAX_NUMBERS)).thenReturn(headerValues);
 
-    assertEquals(true, FhirInputConverter.parseBooleanHeader(requestDetails, INCLUDE_TAX_NUMBERS));
-  }
-
-  @Test
-  void parseBooleanHeaderReturnsFalseWhenHeaderFalse() {
-    var requestDetails = mock(RequestDetails.class);
-    when(requestDetails.getHeaders(INCLUDE_TAX_NUMBERS)).thenReturn(List.of("false"));
-
-    assertEquals(false, FhirInputConverter.parseBooleanHeader(requestDetails, INCLUDE_TAX_NUMBERS));
-  }
-
-  @Test
-  void parseBooleanHeaderReturnsTrueWhenHeaderIgnoreCaseTrue() {
-    var requestDetails = mock(RequestDetails.class);
-    when(requestDetails.getHeaders(INCLUDE_TAX_NUMBERS)).thenReturn(List.of("TRUE"));
-
-    assertEquals(true, FhirInputConverter.parseBooleanHeader(requestDetails, INCLUDE_TAX_NUMBERS));
-  }
-
-  @Test
-  void parseBooleanHeaderReturnsFalseWhenHeaderIgnoreCaseFalse() {
-    var requestDetails = mock(RequestDetails.class);
-    when(requestDetails.getHeaders(INCLUDE_TAX_NUMBERS)).thenReturn(List.of("FALSE"));
-
-    assertEquals(false, FhirInputConverter.parseBooleanHeader(requestDetails, INCLUDE_TAX_NUMBERS));
-  }
-
-  @Test
-  void parseBooleanHeaderReturnsFalseWhenHeaderInvalid() {
-    var requestDetails = mock(RequestDetails.class);
-    when(requestDetails.getHeaders(INCLUDE_TAX_NUMBERS)).thenReturn(List.of("yes"));
-
-    assertEquals(false, FhirInputConverter.parseBooleanHeader(requestDetails, INCLUDE_TAX_NUMBERS));
+    assertEquals(
+        Optional.of(expected),
+        FhirInputConverter.parseBooleanHeader(requestDetails, INCLUDE_TAX_NUMBERS));
   }
 
   @Test
@@ -138,6 +115,6 @@ class FhirInputConverterTest {
             InvalidRequestException.class,
             () -> FhirInputConverter.parseBooleanHeader(requestDetails, INCLUDE_TAX_NUMBERS));
 
-    assertEquals("Unsupported IncludeTaxNumbers header value: [true, false]", thrown.getMessage());
+    assertEquals("Multiple values supplied for header: IncludeTaxNumbers", thrown.getMessage());
   }
 }

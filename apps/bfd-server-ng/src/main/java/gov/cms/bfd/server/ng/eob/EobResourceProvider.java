@@ -61,13 +61,13 @@ public class EobResourceProvider implements IResourceProvider {
       final HttpServletRequest request,
       final RequestDetails requestDetails) {
 
-    var includeTaxNumbers =
+    Optional<Boolean> includeTaxNumbers =
         FhirInputConverter.parseBooleanHeader(requestDetails, INCLUDE_TAX_NUMBERS_HEADER);
     var samhsaFilterMode = getFilterModeForRequest(request, SamhsaSearchIntent.UNSPECIFIED);
     var options =
         ClaimFilterOptions.builder()
             .samhsaFilterMode(samhsaFilterMode)
-            .includeTaxNumber(includeTaxNumbers)
+            .includeTaxNumber(includeTaxNumbers.orElse(false))
             .build();
 
     var eob = eobHandler.find(FhirInputConverter.toLong(fhirId), options);
@@ -105,7 +105,7 @@ public class EobResourceProvider implements IResourceProvider {
       final RequestDetails requestDetails,
       final HttpServletRequest request) {
 
-    var includeTaxNumbers =
+    Optional<Boolean> includeTaxNumbers =
         FhirInputConverter.parseBooleanHeader(requestDetails, INCLUDE_TAX_NUMBERS_HEADER);
     var tagCriteria = FhirInputConverter.parseTagParameter(tag);
     var claimTypeCodes = FhirInputConverter.getClaimTypeCodesForType(type);
@@ -114,7 +114,7 @@ public class EobResourceProvider implements IResourceProvider {
     var options =
         ClaimFilterOptions.builder()
             .samhsaFilterMode(getFilterModeForRequest(request, samhsaSearchIntent))
-            .includeTaxNumber(includeTaxNumbers)
+            .includeTaxNumber(includeTaxNumbers.orElse(false))
             .build();
 
     var criteria =
@@ -150,13 +150,13 @@ public class EobResourceProvider implements IResourceProvider {
       final RequestDetails requestDetails,
       final HttpServletRequest request) {
 
-    var includeTaxNumbers =
+    Optional<Boolean> includeTaxNumbers =
         FhirInputConverter.parseBooleanHeader(requestDetails, INCLUDE_TAX_NUMBERS_HEADER);
     var samhsaFilterMode = getFilterModeForRequest(request, SamhsaSearchIntent.UNSPECIFIED);
     var options =
         ClaimFilterOptions.builder()
             .samhsaFilterMode(samhsaFilterMode)
-            .includeTaxNumber(includeTaxNumbers)
+            .includeTaxNumber(includeTaxNumbers.orElse(false))
             .build();
 
     return eobHandler.searchById(

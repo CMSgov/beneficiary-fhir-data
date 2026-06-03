@@ -462,18 +462,18 @@ public class FhirInputConverter {
    * @param headerName name of header to check for existence
    * @return True if the header exists and there is only 1, False otherwise
    */
-  public static Boolean parseBooleanHeader(RequestDetails requestDetails, String headerName) {
+  public static Optional<Boolean> parseBooleanHeader(
+      RequestDetails requestDetails, String headerName) {
     List<String> headerValues = requestDetails.getHeaders(headerName);
 
     if (headerValues == null || headerValues.isEmpty()) {
-      return false;
+      return Optional.of(false);
     } else if (headerValues.size() > 1) {
       // we do not know which to honor
-      throw new InvalidRequestException(
-          "Unsupported " + headerName + " header value: " + headerValues);
+      throw new InvalidRequestException("Multiple values supplied for header: " + headerName);
     } else {
       // if not true is false and doesn't need an error
-      return Boolean.parseBoolean(headerValues.getFirst());
+      return Optional.of(Boolean.parseBoolean(headerValues.getFirst()));
     }
   }
 }
