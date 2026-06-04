@@ -99,7 +99,8 @@ public class EobHandler {
             () ->
                 filterSamhsaClaims(claims, samhsaFilterMode)
                     .skip(repositoryCriteria.resolveOffset())
-                    .limit(repositoryCriteria.resolveLimit())
+                    // we need to do this to know if we need include a link down stream
+                    .limit(repositoryCriteria.resolveLimit() + 1)
                     .map(claim -> transformToFhir(claim, samhsaFilterMode)),
             _ -> Tags.of(SAMHSA_FILTER_MODE, samhsaFilterMode.name()));
 
