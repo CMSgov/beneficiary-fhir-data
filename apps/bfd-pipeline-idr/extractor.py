@@ -101,9 +101,11 @@ class Extractor(ABC, Generic[T]):  # noqa: UP046
         fetch_query = self.get_query(start_time, source)
         # GREATEST doesn't work with nulls so we need to coalesce here
         batch_timestamp_cols = self._coalesce_dates(
-            self.cls.batch_timestamp_col_alias(is_historical)
+            self.cls.format_aliases(self.cls.batch_timestamp_col(is_historical))
         )
-        update_timestamp_cols = self._coalesce_dates(self.cls.update_timestamp_col_alias())
+        update_timestamp_cols = self._coalesce_dates(
+            self.cls.format_aliases(self.cls.update_timestamp_col())
+        )
         # We need to create batches using the most recent timestamp from all of the
         # insert/update timestamps
         batch_timestamp_clause = self._greatest_col([*batch_timestamp_cols, *update_timestamp_cols])
