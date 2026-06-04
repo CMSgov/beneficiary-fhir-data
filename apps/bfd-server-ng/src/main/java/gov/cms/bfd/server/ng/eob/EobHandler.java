@@ -73,41 +73,39 @@ public class EobHandler {
    */
   public Bundle searchByBene(ClaimSearchCriteria criteria, SamhsaFilterMode samhsaFilterMode) {
 
-    return metricTimer.recordMetric(
-        "application.eob.handler.search_by_bene",
-        () -> {
-          var beneSk = criteria.beneSk();
-          var beneXrefSk = beneficiaryRepository.getXrefSkFromBeneSk(beneSk);
-          // Don't return data for historical beneSks
-          if (beneXrefSk.isEmpty() || !beneXrefSk.get().equals(beneSk)) {
-            return new Bundle();
-          }
+    var beneSk = criteria.beneSk();
+    var beneXrefSk = beneficiaryRepository.getXrefSkFromBeneSk(beneSk);
+    // Don't return data for historical beneSks
+    if (beneXrefSk.isEmpty() || !beneXrefSk.get().equals(beneSk)) {
+      return new Bundle();
+    }
 
-          var repositoryCriteria =
-              new ClaimSearchCriteria(
-                  beneXrefSk.get(),
-                  criteria.claimThroughDate(),
-                  criteria.lastUpdated(),
-                  criteria.limit(),
-                  criteria.offset(),
-                  criteria.tagCriteria(),
-                  criteria.claimTypeCodes(),
-                  criteria.sources());
+    var repositoryCriteria =
+        new ClaimSearchCriteria(
+            beneXrefSk.get(),
+            criteria.claimThroughDate(),
+            criteria.lastUpdated(),
+            criteria.limit(),
+            criteria.offset(),
+            criteria.tagCriteria(),
+            criteria.claimTypeCodes(),
+            criteria.sources());
 
-          var claims = claimRepository.findByBeneXrefSk(repositoryCriteria);
+    var claims = claimRepository.findByBeneXrefSk(repositoryCriteria);
 
-          var filteredClaims =
-              filterSamhsaClaims(claims, samhsaFilterMode)
-                  .skip(repositoryCriteria.resolveOffset())
-                  .limit(repositoryCriteria.resolveLimit())
-                  .map(claim -> transformToFhir(claim, samhsaFilterMode));
+    var filteredClaims =
+        metricTimer.recordMetric(
+            "application.eob.handler.search_by_bene",
+            () ->
+                filterSamhsaClaims(claims, samhsaFilterMode)
+                    .skip(repositoryCriteria.resolveOffset())
+                    .limit(repositoryCriteria.resolveLimit())
+                    .map(claim -> transformToFhir(claim, samhsaFilterMode)),
+            _ -> Tags.of(SAMHSA_FILTER_MODE, samhsaFilterMode.name()));
 
-          var bundle =
-              FhirUtil.bundleOrDefault(filteredClaims, loadProgressRepository::lastUpdated);
-          recordResultSize(bundle, samhsaFilterMode);
-          return bundle;
-        },
-        _ -> Tags.of(SAMHSA_FILTER_MODE, samhsaFilterMode.name()));
+    var bundle = FhirUtil.bundleOrDefault(filteredClaims, loadProgressRepository::lastUpdated);
+    recordResultSize(bundle, samhsaFilterMode);
+    return bundle;
   }
 
   private void recordResultSize(Bundle bundle, SamhsaFilterMode samhsaFilterMode) {
