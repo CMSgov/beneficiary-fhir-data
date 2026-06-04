@@ -5,8 +5,10 @@ locals {
   log_router_repository_default = "bfd-platform-server-fluent-bit"
   log_router_repository_name    = coalesce(var.log_router_repository_override, local.log_router_repository_default)
   server_repository_name        = coalesce(var.server_repository_override, "bfd-server-ng")
+  datadog_agent_repository_name = coalesce(var.datadog_agent_repository_override, "bfd-platform-server-datadog-agent")
   log_router_version            = coalesce(var.log_router_version_override, local.bfd_version)
   server_version                = coalesce(var.server_version_override, local.bfd_version)
+  datadog_agent_version         = coalesce(var.datadog_agent_version_override, local.bfd_version)
 
   server_ssm_hierarchies              = ["/bfd/${local.env}/${local.service}"]
   server_port                         = 8080
@@ -19,6 +21,16 @@ locals {
   server_healthcheck_client_cert      = replace(urlencode(trimspace(nonsensitive(local.ssm_config["/bfd/${local.service}/test_client_cert"]))), "+", "%20")
   server_healthcheck_bene_id          = nonsensitive(local.ssm_config["/bfd/${local.service}/heathcheck/testing_bene_id"])
   server_healthcheck_uri              = "http://localhost:${local.server_port}/v3/fhir/metadata"
+
+  datadog_agent_key = {
+    DD_API_KEY = "/bfd/${local.env}/${local.service}/sensitive/datadog_api_key" #todo: get dd api key & add to configs
+  }
+
+  datadog_agent_task_ssm = {
+    for k, v in local.datadog_agent_key :
+    k => "arn:aws:ssm:${local.region}:${local.account_id}:parameter/${trim(v, "/")}"
+  }
+  datadog_agent_export_port = 8126
 }
 
 data "aws_rds_cluster" "main" {
@@ -53,6 +65,15 @@ data "aws_ecr_repository" "server" {
 data "aws_ecr_image" "server" {
   repository_name = data.aws_ecr_repository.server.name
   image_tag       = local.server_version
+}
+
+data "aws_ecr_repository" "datadog_agent" {
+  name = local.datadog_agent_repository_name
+}
+
+data "aws_ecr_image" "datadog_agent" {
+  repository_name = data.aws_ecr_repository.datadog_agent.name
+  image_tag       = local.datadog_agent_version
 }
 
 resource "aws_cloudwatch_log_group" "log_router_messages" {
@@ -192,7 +213,8 @@ resource "aws_ecs_task_definition" "server" {
               "-XX:MaxRAMPercentage=75.0",
               "-XX:+PreserveFramePointer",
               "-Dnetworkaddress.cache.ttl=5",
-              "-Dsun.net.inetaddr.ttl=0"
+              "-Dsun.net.inetaddr.ttl=0",
+              "-javaagent:/opt/datadog/dd-java-agent.jar"
             ])
           },
           {
@@ -211,6 +233,22 @@ resource "aws_ecs_task_definition" "server" {
             name  = "TZ"
             value = "UTC"
           },
+          {
+            name  = "DD_SERVICE"
+            value = local.service
+          },
+          {
+            name  = "DD_ENV"
+            value = local.env
+          },
+          {
+            name  = "DD_VERSION"
+            value = local.server_version
+          },
+          {
+            name  = "DD_PROFILING_ENABLED"
+            value = "true"
+          }
         ]
         healthCheck = {
           command     = ["CMD-SHELL", "curl --silent --output /dev/null --fail -H 'X-Amzn-Mtls-Clientcert: ${local.server_healthcheck_client_cert}' '${local.server_healthcheck_uri}' || exit 1"]
@@ -246,6 +284,51 @@ resource "aws_ecs_task_definition" "server" {
         dependsOn      = []
         systemControls = []
         volumesFrom    = []
+      },
+      {
+        name      = "datadog-agent"
+        image     = data.aws_ecr_image.datadog_agent.image_uri
+        essential = true
+
+        environment = [
+          {
+            name  = "ECS_FARGATE"
+            value = "true"
+          },
+          {
+            name  = "DD_APM_NON_LOCAL_TRAFFIC"
+            value = "true"
+          },
+          {
+            name  = "DD_APM_ENABLED"
+            value = "true"
+          },
+          {
+            name  = "DD_PROFILING_ENABLED"
+            value = "true"
+          },
+          {
+            name  = "DD_SITE"
+            value = "ddog-gov.com"
+          },
+        ]
+
+        secrets = [
+          for k, v in local.datadog_agent_task_ssm :
+          {
+            name      = k
+            valueFrom = v
+          }
+        ]
+
+        portMappings = [
+          {
+            containerPort = tonumber(local.datadog_agent_export_port)
+            hostPort      = tonumber(local.datadog_agent_export_port)
+            name          = "datadog-agent-${local.datadog_agent_export_port}-${local.server_protocol}"
+            protocol      = "${local.server_protocol}"
+          },
+        ]
       },
     ]
   )
