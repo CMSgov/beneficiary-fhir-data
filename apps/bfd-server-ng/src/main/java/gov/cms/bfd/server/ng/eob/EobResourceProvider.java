@@ -1,12 +1,8 @@
 package gov.cms.bfd.server.ng.eob;
 
-import ca.uhn.fhir.rest.annotation.Count;
-import ca.uhn.fhir.rest.annotation.IdParam;
-import ca.uhn.fhir.rest.annotation.OptionalParam;
-import ca.uhn.fhir.rest.annotation.Read;
-import ca.uhn.fhir.rest.annotation.RequiredParam;
-import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -19,13 +15,15 @@ import gov.cms.bfd.server.ng.claim.model.SamhsaSearchIntent;
 import gov.cms.bfd.server.ng.input.ClaimSearchCriteria;
 import gov.cms.bfd.server.ng.input.FhirInputConverter;
 import gov.cms.bfd.server.ng.util.CertificateUtil;
+import gov.cms.bfd.server.ng.util.FhirUtil;
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.IdType;
 import org.springframework.stereotype.Component;
+
+import java.util.Optional;
 
 /** FHIR endpoints for the ExplanationOfBenefit resource. */
 @RequiredArgsConstructor
@@ -87,7 +85,8 @@ public class EobResourceProvider implements IResourceProvider {
       @OptionalParam(name = TYPE) final TokenAndListParam type,
       @OptionalParam(name = Constants.PARAM_SOURCE) final TokenAndListParam source,
       @OptionalParam(name = Constants.PARAM_SECURITY) final TokenAndListParam security,
-      final HttpServletRequest request) {
+      final HttpServletRequest request,
+      final RequestDetails requestDetails) {
 
     var tagCriteria = FhirInputConverter.parseTagParameter(tag);
     var claimTypeCodes = FhirInputConverter.getClaimTypeCodesForType(type);
@@ -104,7 +103,9 @@ public class EobResourceProvider implements IResourceProvider {
             claimTypeCodes,
             FhirInputConverter.parseSourceParameter(source));
 
-    return eobHandler.searchByBene(criteria, getFilterModeForRequest(request, samhsaSearchIntent));
+    var bundle = eobHandler.searchByBene(criteria, getFilterModeForRequest(request, samhsaSearchIntent));
+
+    return FhirUtil.applyBundleLinks(requestDetails,START_INDEX,criteria.offset(),criteria.limit(),bundle);
   }
 
   /**

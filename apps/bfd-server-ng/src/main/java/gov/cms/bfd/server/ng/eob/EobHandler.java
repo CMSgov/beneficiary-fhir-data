@@ -1,7 +1,5 @@
 package gov.cms.bfd.server.ng.eob;
 
-import static gov.cms.bfd.server.ng.util.MetricTimer.SAMHSA_FILTER_MODE;
-
 import gov.cms.bfd.server.ng.ClaimSecurityStatus;
 import gov.cms.bfd.server.ng.SamhsaFilterMode;
 import gov.cms.bfd.server.ng.SecurityLabel;
@@ -18,18 +16,21 @@ import gov.cms.bfd.server.ng.util.SystemUrls;
 import io.micrometer.core.instrument.DistributionSummary;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tags;
-import java.time.LocalDate;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+
+import java.time.LocalDate;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Stream;
+
+import static gov.cms.bfd.server.ng.util.MetricTimer.SAMHSA_FILTER_MODE;
 
 /**
  * Handler methods for the ExplanationOfBenefit resource. This is called after the FHIR inputs from
@@ -99,7 +100,8 @@ public class EobHandler {
           var filteredClaims =
               filterSamhsaClaims(claims, samhsaFilterMode)
                   .skip(repositoryCriteria.resolveOffset())
-                  .limit(repositoryCriteria.resolveLimit())
+                  // we need to do this to know if we need include a link down stream
+                  .limit(repositoryCriteria.resolveLimit() + 1)
                   .map(claim -> transformToFhir(claim, samhsaFilterMode));
 
           var bundle =

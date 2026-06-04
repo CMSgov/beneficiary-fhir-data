@@ -1,15 +1,14 @@
 package gov.cms.bfd.server.ng.util;
 
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import org.hl7.fhir.r4.model.*;
+
 import java.time.ZonedDateTime;
 import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.Meta;
-import org.hl7.fhir.r4.model.Resource;
 
 /** FHIR-related utility methods. */
 public class FhirUtil {
@@ -127,5 +126,53 @@ public class FhirUtil {
     var bundle = new Bundle();
     bundle.setMeta(new Meta().setLastUpdated(DateUtil.toDate(batchLastUpdated.get())));
     return bundle;
+  }
+
+  /**
+   * Returns a bundle updated with previous and next links.
+   * This method assumes you have at least one addition item in your bundle than the limit to know to add the updated next link
+   *
+   * @param requestDetails current request
+   * @param offset current offset
+   * @param limit requested limit
+   * @return bundle
+   */
+  public static Bundle applyBundleLinks(RequestDetails requestDetails, String offsetParamName, Optional<Integer> offset, Optional<Integer> limit, Bundle bundle) {
+    if (limit.isPresent()) {
+      // we need a next link
+      if (limit.get() < bundle.getEntry().size()) {
+        // remove the extra entry that let us know we had next
+
+        bundle.setEntry(bundle.getEntry().subList(0, limit.get()));
+        var nextOffset = Math.max(0, offset.orElse(0) + limit.orElse(0));
+        bundle.addLink()
+                .setRelation(Constants.LINK_NEXT)
+                .setUrl(buildLinkURL(requestDetails, nextOffset, offsetParamName));
+      }
+    }
+    if (offset.isPresent()) {
+      // we need a previous link
+      if (offset.get() > 0) {
+        // get previous offset
+        var previousOffset = Math.max(0, offset.get() - limit.orElse(0));
+        bundle.addLink()
+                .setRelation(Constants.LINK_PREVIOUS)
+                .setUrl(buildLinkURL(requestDetails, previousOffset, offsetParamName));
+      }
+    }
+    return bundle;
+  }
+
+  private static String buildLinkURL(RequestDetails requestDetails, Integer startIndex, String offsetParamName) {
+    String baseUrl = requestDetails.getCompleteUrl();
+    // Remove existing offset parameter if present
+    String urlWithoutOffset = baseUrl.replaceAll("[&?]" + offsetParamName + "=[^&]*", "");
+    // If startIndex is zero, don't add the parameter
+    if (startIndex == 0) {
+      return urlWithoutOffset;
+    }
+    // Add the new offset parameter
+    String separator = urlWithoutOffset.contains("?") ? "&" : "?";
+    return urlWithoutOffset + separator + offsetParamName + "=" + startIndex;
   }
 }
