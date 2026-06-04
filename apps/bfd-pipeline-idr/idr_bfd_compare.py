@@ -14,25 +14,6 @@ def compare_table(
     num_rows: int,
 ) -> None:
     param_names = model.unique_key()
-    insert_columns = ",".join(model.insert_keys())
-    param_name_list = ",".join(param_names)
-    bfd_values = bfd_extractor.extract_many(
-        f"""
-        WITH rows AS (
-            SELECT {insert_columns} FROM {model.table()}
-            TABLESAMPLE BERNOULLI(1) LIMIT {num_rows}
-        )
-        SELECT * from rows ORDER BY {param_name_list}
-        """,
-        {},
-    )
-    bfd_rows = [row.model_dump() for batch in bfd_values for row in batch]
-
-    params = ",".join(
-        "(" + ",".join(escape_sql_val(row[param_name]) for param_name in param_names) + ")"
-        for row in bfd_rows
-    )
-
     columns = ",".join(model.column_aliases())
     columns_raw = ",".join(model.columns_raw())
 
@@ -41,11 +22,31 @@ def compare_table(
         model.fetch_query(DEFAULT_PARTITION, datetime.now(UTC), Source.SNOWFLAKE)
         .replace("{COLUMNS}", columns)
         .replace("{COLUMNS_NO_ALIAS}", columns_raw)
-        .replace("{WHERE_CLAUSE}", f"WHERE ({idr_param_names}) IN ({params})")
+        .replace("{WHERE_CLAUSE}", "WHERE TRUE")
+        .replace("{TABLESAMPLE}", "TABLESAMPLE (100)")
+        .replace("{LIMIT}", f"LIMIT {num_rows}")
         .replace("{ORDER_BY}", f"ORDER BY {idr_param_names}"),
         {},
     )
     idr_rows = [row.model_dump() for batch in idr_values for row in batch]
+
+    params = ",".join(
+        "(" + ",".join(escape_sql_val(row[param_name]) for param_name in param_names) + ")"
+        for row in idr_rows
+    )
+    bfd_param_names = ",".join(param_names)
+
+    insert_columns = ",".join(model.insert_keys())
+    param_name_list = ",".join(param_names)
+    bfd_values = bfd_extractor.extract_many(
+        f"""
+        SELECT {insert_columns} FROM {model.table()}
+        WHERE ({bfd_param_names}) IN ({params})
+        ORDER BY {param_name_list}
+        """,
+        {},
+    )
+    bfd_rows = [row.model_dump() for batch in bfd_values for row in batch]
 
     if len(bfd_rows) != len(idr_rows):
         print(len(bfd_rows), len(idr_rows))
