@@ -22,13 +22,12 @@ import gov.cms.bfd.server.ng.input.FhirInputConverter;
 import gov.cms.bfd.server.ng.util.CertificateUtil;
 import gov.cms.bfd.server.ng.util.FhirUtil;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.IdType;
 import org.springframework.stereotype.Component;
-
-import java.util.Optional;
 
 /** FHIR endpoints for the ExplanationOfBenefit resource. */
 @RequiredArgsConstructor
@@ -76,6 +75,7 @@ public class EobResourceProvider implements IResourceProvider {
    * @param source claim source to filter by
    * @param security security to filter SAMHSA by
    * @param request HTTP request details
+   * @param requestDetails HAPI FHIR request details
    * @return bundle
    */
   @Search
@@ -108,9 +108,11 @@ public class EobResourceProvider implements IResourceProvider {
             claimTypeCodes,
             FhirInputConverter.parseSourceParameter(source));
 
-    var bundle = eobHandler.searchByBene(criteria, getFilterModeForRequest(request, samhsaSearchIntent));
+    var bundle =
+        eobHandler.searchByBene(criteria, getFilterModeForRequest(request, samhsaSearchIntent));
 
-    return FhirUtil.applyBundleLinks(requestDetails,START_INDEX,criteria.offset(),criteria.limit(),bundle);
+    return FhirUtil.applyBundleLinks(
+        requestDetails, START_INDEX, criteria.offset(), criteria.limit(), bundle);
   }
 
   /**

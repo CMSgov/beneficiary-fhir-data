@@ -2,7 +2,6 @@ package gov.cms.bfd.server.ng.util;
 
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-
 import java.time.ZonedDateTime;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -133,15 +132,22 @@ public class FhirUtil {
   }
 
   /**
-   * Returns a bundle updated with previous and next links.
-   * This method assumes you have at least one addition item in your bundle than the limit to know to add the updated next link
+   * Returns a bundle updated with previous and next links. This method assumes you have at least
+   * one addition item in your bundle than the limit to know to add the updated next link
    *
    * @param requestDetails current request
+   * @param offsetParamName name of the offset parameter to use in the links
    * @param offset current offset
    * @param limit requested limit
+   * @param bundle bundle
    * @return bundle
    */
-  public static Bundle applyBundleLinks(RequestDetails requestDetails, String offsetParamName, Optional<Integer> offset, Optional<Integer> limit, Bundle bundle) {
+  public static Bundle applyBundleLinks(
+      RequestDetails requestDetails,
+      String offsetParamName,
+      Optional<Integer> offset,
+      Optional<Integer> limit,
+      Bundle bundle) {
     if (limit.isPresent()) {
       // we need a next link
       if (limit.get() < bundle.getEntry().size()) {
@@ -149,9 +155,10 @@ public class FhirUtil {
 
         bundle.setEntry(bundle.getEntry().subList(0, limit.get()));
         var nextOffset = Math.max(0, offset.orElse(0) + limit.orElse(0));
-        bundle.addLink()
-                .setRelation(Constants.LINK_NEXT)
-                .setUrl(buildLinkURL(requestDetails, nextOffset, offsetParamName));
+        bundle
+            .addLink()
+            .setRelation(Constants.LINK_NEXT)
+            .setUrl(buildLinkURL(requestDetails, nextOffset, offsetParamName));
       }
     }
     if (offset.isPresent()) {
@@ -159,15 +166,17 @@ public class FhirUtil {
       if (offset.get() > 0) {
         // get previous offset
         var previousOffset = Math.max(0, offset.get() - limit.orElse(0));
-        bundle.addLink()
-                .setRelation(Constants.LINK_PREVIOUS)
-                .setUrl(buildLinkURL(requestDetails, previousOffset, offsetParamName));
+        bundle
+            .addLink()
+            .setRelation(Constants.LINK_PREVIOUS)
+            .setUrl(buildLinkURL(requestDetails, previousOffset, offsetParamName));
       }
     }
     return bundle;
   }
 
-  private static String buildLinkURL(RequestDetails requestDetails, Integer startIndex, String offsetParamName) {
+  private static String buildLinkURL(
+      RequestDetails requestDetails, Integer startIndex, String offsetParamName) {
     String baseUrl = requestDetails.getCompleteUrl();
     // Remove existing offset parameter if present
     String urlWithoutOffset = baseUrl.replaceAll("[&?]" + offsetParamName + "=[^&]*", "");
