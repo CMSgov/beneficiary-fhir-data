@@ -1,0 +1,499 @@
+{
+    "widgets": [
+        {
+            "type": "metric",
+            "x": 0,
+            "y": 24,
+            "width": 6,
+            "height": 6,
+            "properties": {
+                "metrics": [
+                    [ "${namespace}", "application.claim.fetch_claims_with_claim_type.avg", "claim_type", "ClaimInstitutionalNch", { "region": "${region}", "label": "Avg Institutional NCH", "yAxis": "right" } ],
+                    [ "...", "ClaimInstitutionalSharedSystems", { "region": "${region}", "label": "Avg Institutional Shared Systems", "yAxis": "right" } ],
+                    [ "...", "ClaimProfessionalNch", { "region": "${region}", "label": "Avg Professional NCH", "yAxis": "right" } ],
+                    [ "...", "ClaimProfessionalSharedSystems", { "region": "${region}", "label": "Avg Professional Shared Systems", "yAxis": "right" } ],
+                    [ "...", "ClaimRx", { "region": "${region}", "label": "Avg Rx", "yAxis": "right" } ],
+                    [ ".", "application.claim.fetch_claims_with_claim_type.max", ".", "ClaimInstitutionalNch", { "region": "${region}", "stat": "Maximum", "label": "Max Institutional NCH" } ],
+                    [ "...", "ClaimInstitutionalSharedSystems", { "region": "${region}", "stat": "Maximum", "label": "Max Institutional Shared Systems" } ],
+                    [ "...", "ClaimProfessionalNch", { "region": "${region}", "stat": "Maximum", "label": "Max Professional NCH" } ],
+                    [ "...", "ClaimProfessionalSharedSystems", { "region": "${region}", "stat": "Maximum", "label": "Max Professional Shared Systems" } ],
+                    [ "...", "ClaimRx", { "region": "${region}", "stat": "Maximum", "label": "Max Rx" } ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${region}",
+                "stat": "Average",
+                "period": 60,
+                "liveData": false,
+                "title": "Claim Query Latency by Claim Type"
+            }
+        },
+        {
+            "type": "metric",
+            "x": 12,
+            "y": 24,
+            "width": 6,
+            "height": 6,
+            "properties": {
+                "metrics": [
+                    [ "${namespace}", "application.beneficiary.patient_match.outcome.count", "outcome", "match", { "region": "${region}", "label": "Patient Matched", "id": "m1", "yAxis": "right" } ],
+                    [ "...", "no_match", { "region": "${region}", "label": "Patient Not Matched", "id": "m2", "yAxis": "right" } ],
+                    [ { "expression": "IF((m1+m2)>0, 100*m1/(m1 + m2), 0)", "label": "Patient Match %", "id": "e1", "region": "${region}" } ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "title": "Patient Match Outcomes",
+                "region": "${region}",
+                "stat": "Sum",
+                "period": 300,
+                "liveData": false,
+                "yAxis": {
+                    "right": {
+                        "min": 0,
+                        "max": 100
+                    }
+                }
+            }
+        },
+        {
+            "type": "metric",
+            "x": 6,
+            "y": 30,
+            "width": 6,
+            "height": 6,
+            "properties": {
+                "metrics": [
+                    [ "${namespace}", "jvm.threads.virtual.pinned.max", { "region": "${region}", "label": "Max Pinned Virtual Threads", "stat": "Maximum" } ],
+                    [ ".", "jvm.threads.virtual.pinned.count", { "region": "${region}", "label": "Pinned Virtual Threads" } ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${region}",
+                "stat": "Sum",
+                "period": 60,
+                "title": "Virtual Thread Pinning",
+                "liveData": false
+            }
+        },
+        {
+            "type": "metric",
+            "x": 0,
+            "y": 30,
+            "width": 6,
+            "height": 6,
+            "properties": {
+                "metrics": [
+                    [ "${namespace}", "executor.queued.value", "name", "taskExecutor", { "region": "${region}", "label": "Queued Tasks" } ],
+                    [ ".", "executor.active.value", ".", ".", { "label": "Active Threads", "yAxis": "right", "region": "${region}" } ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "title": "Executor Queue Depth",
+                "region": "${region}",
+                "stat": "Average",
+                "period": 60,
+                "liveData": false
+            }
+        },
+        {
+            "type": "metric",
+            "x": 12,
+            "y": 6,
+            "width": 6,
+            "height": 6,
+            "properties": {
+                "metrics": [
+                    [ { "expression": "SEARCH('http-requests/count/all ${namespace} certificate_alias', 'Sum', 60)", "id": "e1", "region": "${region}" } ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "title": "All Traffic per-Partner",
+                "region": "${region}",
+                "stat": "SampleCount",
+                "period": 60,
+                "liveData": true,
+                "setPeriodToTimeRange": false,
+                "sparkline": true,
+                "trend": true
+            }
+        },
+        {
+            "type": "metric",
+            "x": 0,
+            "y": 0,
+            "width": 6,
+            "height": 6,
+            "properties": {
+                "metrics": [
+                    [ "ECS/ContainerInsights", "TaskMemoryUtilization", "ServiceName", "${service}", "ClusterName", "bfd-${env}-cluster", { "yAxis": "right", "label": "Memory Utilization %" } ],
+                    [ ".", "TaskCpuUtilization", ".", ".", ".", ".", { "label": "CPU Utilization %" } ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${region}",
+                "stat": "Average",
+                "period": 60,
+                "title": "CPU and Memory Utilization of server-ng Service",
+                "liveData": true,
+                "yAxis": {
+                    "left": {
+                        "max": 100,
+                        "min": 0
+                    },
+                    "right": {
+                        "max": 100,
+                        "min": 0
+                    }
+                }
+            }
+        },
+        {
+            "type": "metric",
+            "x": 12,
+            "y": 0,
+            "width": 6,
+            "height": 6,
+            "properties": {
+                "metrics": [
+                    [ "ECS/ContainerInsights", "RunningTaskCount", "ServiceName", "${service}", "ClusterName", "bfd-${env}-cluster" ],
+                    [ ".", "DesiredTaskCount", ".", ".", ".", "." ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${region}",
+                "stat": "Average",
+                "period": 60,
+                "liveData": true,
+                "title": "server-ng Service Running and Desired Task Count"
+            }
+        },
+        {
+            "type": "metric",
+            "x": 6,
+            "y": 24,
+            "width": 6,
+            "height": 6,
+            "properties": {
+                "metrics": [
+                    [ "${namespace}", "application.eob.handler.search_by_bene.avg", "samhsa_filter_mode", "EXCLUDE", { "label": "EXCLUDE" } ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "title": "EOB Seatch Latency by SAMHSA Mode",
+                "region": "${region}",
+                "stat": "Average",
+                "period": 60
+            }
+        },
+        {
+            "type": "metric",
+            "x": 18,
+            "y": 0,
+            "width": 6,
+            "height": 6,
+            "properties": {
+                "metrics": [
+                    [ { "expression": "SEARCH('{AWS/ApplicationELB,LoadBalancer,TargetGroup} bfd-${env}-server-ng-alb healthyhostcount', 'Average', 60)", "label": "Healthy Hosts", "id": "e2", "period": 60, "region": "${region}" } ],
+                    [ { "expression": "SEARCH('{AWS/ApplicationELB,LoadBalancer,TargetGroup} bfd-${env}-server-ng-alb unhealthyhostcount', 'Average', 60)", "label": "Unhealthy Hosts", "id": "e1", "yAxis": "right", "period": 60, "region": "${region}" } ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${region}",
+                "stat": "Average",
+                "period": 60,
+                "liveData": true,
+                "yAxis": {
+                    "left": {
+                        "min": 0,
+                        "showUnits": false,
+                        "label": "Healthy Hosts"
+                    },
+                    "right": {
+                        "showUnits": false,
+                        "label": "Unhealthy Hosts",
+                        "min": 0
+                    }
+                },
+                "title": "Healthy and Unhealthy Hosts in bfd-${env}-server-ng ALB",
+                "legend": {
+                    "position": "hidden"
+                }
+            }
+        },
+        {
+            "type": "metric",
+            "x": 6,
+            "y": 0,
+            "width": 6,
+            "height": 6,
+            "properties": {
+                "metrics": [
+                    [ "AWS/RDS", "CPUUtilization", "Role", "READER", "DBClusterIdentifier", "bfd-${env}-aurora-cluster", { "label": "Reader CPU Utilization", "region": "${region}" } ],
+                    [ "...", "WRITER", ".", ".", { "region": "${region}", "label": "Writer CPU Utilization", "yAxis": "right" } ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${region}",
+                "stat": "Average",
+                "period": 60,
+                "title": "RDS Reader Nodes and Writer CPU Utilization",
+                "yAxis": {
+                    "left": {
+                        "label": "",
+                        "showUnits": true,
+                        "min": 0,
+                        "max": 100
+                    },
+                    "right": {
+                        "showUnits": true,
+                        "min": 0,
+                        "max": 100
+                    }
+                },
+                "liveData": true
+            }
+        },
+        {
+            "type": "metric",
+            "x": 18,
+            "y": 6,
+            "width": 6,
+            "height": 6,
+            "properties": {
+                "metrics": [
+                    [ "${namespace}", "http-requests/latency/all", { "stat": "Average", "color": "#2ca02c", "label": "Aggregated", "region": "${region}", "id": "m1" } ],
+                    [ "...", { "color": "#ff7f0e", "stat": "p99", "label": "99th Percentile", "region": "${region}", "id": "m2" } ],
+                    [ "...", { "color": "#d62728", "label": "Maximum", "region": "${region}", "id": "m3" } ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "title": "Aggregated Latency Statistics with 1 Minute Period",
+                "region": "${region}",
+                "stat": "Maximum",
+                "period": 60,
+                "liveData": true
+            }
+        },
+        {
+            "type": "metric",
+            "x": 18,
+            "y": 12,
+            "width": 6,
+            "height": 6,
+            "properties": {
+                "metrics": [
+                    [ "${namespace}", "http-requests/count/all", { "region": "${region}", "visible": false, "id": "m1" } ],
+                    [ ".", "http-requests/count/metadata", { "region": "${region}", "id": "m2", "label": "Metadata Requests" } ],
+                    [ ".", "http-requests/count/coverage-all", { "region": "${region}", "id": "m3", "label": "Coverage Requests" } ],
+                    [ ".", "http-requests/count/patient-all", { "region": "${region}", "id": "m4", "label": "Patient Requests" } ],
+                    [ ".", "http-requests/count/eob-all", { "region": "${region}", "id": "m5", "label": "EOB Requests" } ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "title": "Aggregated Request Counts per-Endpoint with 1 Minute Period",
+                "region": "${region}",
+                "stat": "Sum",
+                "period": 60,
+                "liveData": true
+            }
+        },
+        {
+            "type": "metric",
+            "x": 0,
+            "y": 18,
+            "width": 6,
+            "height": 6,
+            "properties": {
+                "metrics": [
+                    [ { "expression": "SEARCH('{${namespace},certificate_alias} MetricName=\"http-requests/count/eob-all\"', 'Sum', 60)", "label": "", "id": "e1" } ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${region}",
+                "stat": "Sum",
+                "period": 60,
+                "liveData": true,
+                "title": "EOB Request Count with 1 Minute Period per Client"
+            }
+        },
+        {
+            "type": "metric",
+            "x": 6,
+            "y": 18,
+            "width": 6,
+            "height": 6,
+            "properties": {
+                "metrics": [
+                    [ { "expression": "SEARCH('{${namespace},certificate_alias} MetricName=\"http-requests/count/patient-all\"', 'Sum', 60)", "label": "", "id": "e1" } ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${region}",
+                "stat": "Sum",
+                "period": 60,
+                "liveData": true,
+                "title": "Patient Request Count with 1 Minute Period per Client"
+            }
+        },
+        {
+            "type": "metric",
+            "x": 12,
+            "y": 18,
+            "width": 6,
+            "height": 6,
+            "properties": {
+                "metrics": [
+                    [ { "expression": "SEARCH('{${namespace},certificate_alias} MetricName=\"http-requests/count/coverage-all\"', 'Sum', 60)", "label": "", "id": "e1" } ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${region}",
+                "stat": "Sum",
+                "period": 60,
+                "liveData": true,
+                "title": "Coverage Request Count with 1 Minute Period per Client"
+            }
+        },
+        {
+            "type": "metric",
+            "x": 18,
+            "y": 24,
+            "width": 6,
+            "height": 6,
+            "properties": {
+                "metrics": [
+                    [ { "expression": "SEARCH('{${namespace},certificate_alias} MetricName=\"http-requests/count/metadata\"', 'Sum', 60)", "label": "", "id": "e1" } ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${region}",
+                "stat": "Sum",
+                "period": 60,
+                "liveData": true,
+                "title": "Metadata Request Count with 1 Minute Period per Client"
+            }
+        },
+        {
+            "type": "metric",
+            "x": 0,
+            "y": 12,
+            "width": 6,
+            "height": 6,
+            "properties": {
+                "metrics": [
+                    [ { "expression": "SEARCH('{${namespace},certificate_alias} MetricName=\"http-requests/latency/eob-all\"', 'Average', 60)", "label": "", "id": "e1" } ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${region}",
+                "stat": "Average",
+                "period": 60,
+                "liveData": true,
+                "title": "Average EOB Request Latency with 1 Minute Period per Client"
+            }
+        },
+        {
+            "type": "metric",
+            "x": 6,
+            "y": 12,
+            "width": 6,
+            "height": 6,
+            "properties": {
+                "metrics": [
+                    [ { "expression": "SEARCH('{${namespace},certificate_alias} MetricName=\"http-requests/latency/patient-all\"', 'Average', 60)", "label": "", "id": "e1" } ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${region}",
+                "stat": "Average",
+                "period": 60,
+                "liveData": true,
+                "title": "Average Patient Request Latency with 1 Minute Period per Client"
+            }
+        },
+        {
+            "type": "metric",
+            "x": 18,
+            "y": 18,
+            "width": 6,
+            "height": 6,
+            "properties": {
+                "metrics": [
+                    [ { "expression": "SEARCH('{${namespace},certificate_alias} MetricName=\"http-requests/latency/metadata\"', 'Average', 60)", "label": "", "id": "e1", "region": "${region}" } ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${region}",
+                "stat": "Average",
+                "period": 60,
+                "liveData": true,
+                "title": "Average Metadata Request Latency with 1 Minute Period per Client"
+            }
+        },
+        {
+            "type": "metric",
+            "x": 6,
+            "y": 6,
+            "width": 6,
+            "height": 6,
+            "properties": {
+                "metrics": [
+                    [ { "expression": "SEARCH('http-requests/count/4xx-responses ${namespace} status_code', 'Sum', 60)", "label": "$${PROP('Dim.status_code')}", "id": "e1", "region": "${region}" } ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${region}",
+                "stat": "Average",
+                "period": 60,
+                "title": "4xx Responses by Status Code",
+                "liveData": true,
+                "yAxis": {
+                    "left": {
+                        "label": "",
+                        "showUnits": false
+                    },
+                    "right": {
+                        "showUnits": false
+                    }
+                }
+            }
+        },
+        {
+            "type": "metric",
+            "x": 0,
+            "y": 6,
+            "width": 6,
+            "height": 6,
+            "properties": {
+                "metrics": [
+                    [ { "expression": "SEARCH('{${namespace},status_code} MetricName=\"http-requests/count/5xx-responses\"', 'Sum', 60)", "id": "e1" } ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${region}",
+                "stat": "Average",
+                "period": 60,
+                "liveData": true,
+                "title": "5xx Responses by Status Code"
+            }
+        },
+        {
+            "type": "metric",
+            "x": 12,
+            "y": 12,
+            "width": 6,
+            "height": 6,
+            "properties": {
+                "metrics": [
+                    [ { "expression": "SEARCH('{${namespace},certificate_alias} MetricName=\"http-requests/latency/coverage-all\"', 'Average', 60)", "label": "", "id": "e1" } ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "title": "Average Coverage Request Latency with 1 Minute Period per Client",
+                "region": "${region}",
+                "period": 60,
+                "stat": "Average"
+            }
+        }
+    ]
+}

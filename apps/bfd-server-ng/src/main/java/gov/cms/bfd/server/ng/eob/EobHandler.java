@@ -1,5 +1,7 @@
 package gov.cms.bfd.server.ng.eob;
 
+import static gov.cms.bfd.server.ng.util.MetricTimer.SAMHSA_FILTER_MODE;
+
 import gov.cms.bfd.server.ng.ClaimSecurityStatus;
 import gov.cms.bfd.server.ng.SamhsaFilterMode;
 import gov.cms.bfd.server.ng.SecurityLabel;
@@ -16,21 +18,18 @@ import gov.cms.bfd.server.ng.util.SystemUrls;
 import io.micrometer.core.instrument.DistributionSummary;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tags;
-import lombok.RequiredArgsConstructor;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.ExplanationOfBenefit;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
-
-import static gov.cms.bfd.server.ng.util.MetricTimer.SAMHSA_FILTER_MODE;
+import lombok.RequiredArgsConstructor;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 /**
  * Handler methods for the ExplanationOfBenefit resource. This is called after the FHIR inputs from
@@ -74,42 +73,39 @@ public class EobHandler {
    */
   public Bundle searchByBene(ClaimSearchCriteria criteria, SamhsaFilterMode samhsaFilterMode) {
 
-    return metricTimer.recordMetric(
-        "application.eob.handler.search_by_bene",
-        () -> {
-          var beneSk = criteria.beneSk();
-          var beneXrefSk = beneficiaryRepository.getXrefSkFromBeneSk(beneSk);
-          // Don't return data for historical beneSks
-          if (beneXrefSk.isEmpty() || !beneXrefSk.get().equals(beneSk)) {
-            return new Bundle();
-          }
+    var beneSk = criteria.beneSk();
+    var beneXrefSk = beneficiaryRepository.getXrefSkFromBeneSk(beneSk);
+    // Don't return data for historical beneSks
+    if (beneXrefSk.isEmpty() || !beneXrefSk.get().equals(beneSk)) {
+      return new Bundle();
+    }
 
-          var repositoryCriteria =
-              new ClaimSearchCriteria(
-                  beneXrefSk.get(),
-                  criteria.claimThroughDate(),
-                  criteria.lastUpdated(),
-                  criteria.limit(),
-                  criteria.offset(),
-                  criteria.tagCriteria(),
-                  criteria.claimTypeCodes(),
-                  criteria.sources());
+    var repositoryCriteria =
+        new ClaimSearchCriteria(
+            beneXrefSk.get(),
+            criteria.claimThroughDate(),
+            criteria.lastUpdated(),
+            criteria.limit(),
+            criteria.offset(),
+            criteria.tagCriteria(),
+            criteria.claimTypeCodes(),
+            criteria.sources());
 
-          var claims = claimRepository.findByBeneXrefSk(repositoryCriteria);
+    var claims = claimRepository.findByBeneXrefSk(repositoryCriteria);
 
-          var filteredClaims =
-              filterSamhsaClaims(claims, samhsaFilterMode)
-                  .skip(repositoryCriteria.resolveOffset())
-                  // we need to do this to know if we need include a link down stream
-                  .limit(repositoryCriteria.resolveLimit() + 1)
-                  .map(claim -> transformToFhir(claim, samhsaFilterMode));
+    var filteredClaims =
+        metricTimer.recordMetric(
+            "application.eob.handler.search_by_bene",
+            () ->
+                filterSamhsaClaims(claims, samhsaFilterMode)
+                    .skip(repositoryCriteria.resolveOffset())
+                    .limit(repositoryCriteria.resolveLimit())
+                    .map(claim -> transformToFhir(claim, samhsaFilterMode)),
+            _ -> Tags.of(SAMHSA_FILTER_MODE, samhsaFilterMode.name()));
 
-          var bundle =
-              FhirUtil.bundleOrDefault(filteredClaims, loadProgressRepository::lastUpdated);
-          recordResultSize(bundle, samhsaFilterMode);
-          return bundle;
-        },
-        _ -> Tags.of(SAMHSA_FILTER_MODE, samhsaFilterMode.name()));
+    var bundle = FhirUtil.bundleOrDefault(filteredClaims, loadProgressRepository::lastUpdated);
+    recordResultSize(bundle, samhsaFilterMode);
+    return bundle;
   }
 
   private void recordResultSize(Bundle bundle, SamhsaFilterMode samhsaFilterMode) {
