@@ -148,29 +148,25 @@ public class FhirUtil {
       Optional<Integer> offset,
       Optional<Integer> limit,
       Bundle bundle) {
-    if (limit.isPresent()) {
-      // we need a next link
-      if (limit.get() < bundle.getEntry().size()) {
+    if (limit.isPresent()
+            // we need a next link
+            && limit.get() < bundle.getEntry().size()) {
         // remove the extra entry that let us know we had next
-
         bundle.setEntry(bundle.getEntry().subList(0, limit.get()));
         var nextOffset = Math.max(0, offset.orElse(0) + limit.orElse(0));
         bundle
             .addLink()
             .setRelation(Constants.LINK_NEXT)
             .setUrl(buildLinkURL(requestDetails, nextOffset));
-      }
     }
-    if (offset.isPresent()) {
-      // we need a previous link
-      if (offset.get() > 0) {
+    // check if a previous link is needed
+    if (offset.isPresent() && offset.get() > 0) {
         // get previous offset
         var previousOffset = Math.max(0, offset.get() - limit.orElse(0));
         bundle
             .addLink()
             .setRelation(Constants.LINK_PREVIOUS)
             .setUrl(buildLinkURL(requestDetails, previousOffset));
-      }
     }
     return bundle;
   }
@@ -180,7 +176,7 @@ public class FhirUtil {
     // Always use FHIR _offset in links and remap/remove legacy startIndex if present.
     String urlWithoutOffset =
         baseUrl.replaceAll("([&?])(" + OFFSET_PARAM + "|" + START_INDEX_PARAM + ")=[^&]*", "$1");
-    urlWithoutOffset = urlWithoutOffset.replace("?&", "?").replaceAll("&&", "&");
+    urlWithoutOffset = urlWithoutOffset.replace("?&", "?").replace("&&", "&");
     urlWithoutOffset = urlWithoutOffset.replaceAll("[?&]+$", "");
     // If startIndex is zero, don't add the parameter
     if (startIndex == 0) {
