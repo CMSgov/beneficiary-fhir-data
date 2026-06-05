@@ -41,7 +41,7 @@ def get_connection_string(load_mode: LoadMode) -> str:
 class PostgresLoader:
     def load(
         self,
-        fetch_results: Iterator[Sequence[T]],
+        fetch_results: Iterator[list[T]],
         model: type[T],
         job_start: datetime,
         partition: LoadPartition,
@@ -62,7 +62,7 @@ class PostgresLoader:
 
     async def _async_load(
         self,
-        fetch_results: Iterator[Sequence[T]],
+        fetch_results: Iterator[list[T]],
         model: type[T],
         job_start: datetime,
         partition: LoadPartition,
@@ -100,7 +100,7 @@ class PostgresLoader:
 class BatchLoader:
     def __init__(
         self,
-        fetch_results: Iterator[Sequence[T]],
+        fetch_results: Iterator[list[T]],
         model: type[T],
         pool: psycopg_pool.AsyncConnectionPool[ACT],
         job_start: datetime,
@@ -316,9 +316,7 @@ class BatchLoader:
 
         return full_tablename
 
-    async def _calculate_load_progress(
-        self, cur: psycopg.AsyncCursor, results: Sequence[T]
-    ) -> None:
+    async def _calculate_load_progress(self, cur: psycopg.AsyncCursor, results: list[T]) -> None:
         last = results[len(results) - 1].model_dump()
         # Some tables that contain reference data (like contract info) may not have the
         # normal IDR timestamps.

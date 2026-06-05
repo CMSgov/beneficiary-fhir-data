@@ -2,7 +2,7 @@ import csv
 import logging
 from abc import ABC, abstractmethod
 from collections import OrderedDict
-from collections.abc import Iterator, Mapping, Sequence
+from collections.abc import Iterator
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
@@ -68,7 +68,7 @@ class Extractor(ABC, Generic[T]):  # noqa: UP046
         self.transform_timer = Timer("transform", cls, partition)
 
     @abstractmethod
-    def extract_many(self, sql: str, params: dict[str, DbType]) -> Iterator[Sequence[T]]:
+    def extract_many(self, sql: str, params: dict[str, DbType]) -> Iterator[list[T]]:
         pass
 
     @abstractmethod
@@ -101,7 +101,7 @@ class Extractor(ABC, Generic[T]):  # noqa: UP046
 
     def extract_idr_data(
         self, progress: LoadProgress | None, start_time: datetime, source: Source
-    ) -> Iterator[Sequence[T]]:
+    ) -> Iterator[list[T]]:
         is_historical = progress is None or progress.is_historical()
         fetch_query = self.get_query(start_time, source)
         # GREATEST doesn't work with nulls so we need to coalesce here
@@ -182,7 +182,7 @@ class Extractor(ABC, Generic[T]):  # noqa: UP046
             {"timestamp": compare_timestamp},
         )
 
-    def _transform(self, batch: list[dict[str, DbType]]) -> Sequence[T]:
+    def _transform(self, batch: list[dict[str, DbType]]) -> list[T]:
         self.transform_timer.start()
         res = self.type_adapter.validate_python(
             [{k.lower(): v for k, v in row.items()} for row in batch]
@@ -223,8 +223,8 @@ class PostgresExtractor(Extractor[T]):
     def extract_many(
         self,
         sql: str,
-        params: Mapping[str, DbType],
-    ) -> Iterator[Sequence[T]]:
+        params: dict[str, DbType],
+    ) -> Iterator[list[T]]:
         logger.debug(sql)
         batch_size = self._get_batch_size()
         with self.conn.cursor(row_factory=dict_row) as cur:
@@ -316,7 +316,7 @@ class SnowflakeExtractor(Extractor[T]):
         self,
         sql: str,
         params: dict[str, DbType],
-    ) -> Iterator[Sequence[T]]:
+    ) -> Iterator[list[T]]:
         cur = None
         logger.debug(sql)
         try:
