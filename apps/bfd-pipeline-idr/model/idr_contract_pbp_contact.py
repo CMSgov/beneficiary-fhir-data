@@ -10,7 +10,7 @@ from constants import (
 from load_partition import LoadPartition
 from model.base_model import (
     BATCH_ID,
-    PRIMARY_KEY,
+    PRIMARY_KEY_ORDER,
     IdrBaseModel,
     ModelType,
     Source,
@@ -19,7 +19,7 @@ from model.base_model import (
 
 
 class IdrContractPbpContact(IdrBaseModel):
-    cntrct_pbp_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True}]
+    cntrct_pbp_sk: Annotated[int, {PRIMARY_KEY_ORDER: 0, BATCH_ID: True}]
     cntrct_plan_cntct_obslt_dt: date
     cntrct_plan_cntct_type_cd: Annotated[str, BeforeValidator(transform_default_string)]
     cntrct_plan_free_extnsn_num: Annotated[str, BeforeValidator(transform_default_string)]

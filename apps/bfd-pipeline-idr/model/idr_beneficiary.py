@@ -23,7 +23,7 @@ from model.base_model import (
     COLUMN_MAP,
     EXPR,
     LAST_UPDATED_TIMESTAMP,
-    PRIMARY_KEY,
+    PRIMARY_KEY_ORDER,
     UPDATE_TIMESTAMP,
     IdrBaseModel,
     ModelType,
@@ -49,7 +49,7 @@ class IdrBeneficiary(IdrBaseModel):
     # columns from V2_MDCR_BENE_HSTRY
     bene_sk: Annotated[
         int,
-        {PRIMARY_KEY: True, BATCH_ID: True, ALIAS: ALIAS_HSTRY, LAST_UPDATED_TIMESTAMP: True},
+        {PRIMARY_KEY_ORDER: 0, BATCH_ID: True, ALIAS: ALIAS_HSTRY, LAST_UPDATED_TIMESTAMP: True},
     ]
     bene_xref_efctv_sk: Annotated[
         int,
@@ -92,7 +92,7 @@ class IdrBeneficiary(IdrBaseModel):
     bene_line_6_adr: Annotated[str, BeforeValidator(transform_default_string)]
     cntct_lang_cd: Annotated[str, BeforeValidator(transform_default_string)]
     idr_ltst_trans_flg: Annotated[str, BeforeValidator(transform_default_string)]
-    idr_trans_efctv_ts: Annotated[datetime, {PRIMARY_KEY: True}]
+    idr_trans_efctv_ts: Annotated[datetime, {PRIMARY_KEY_ORDER: 1}]
     idr_trans_obslt_ts: datetime
     idr_insrt_ts_bene: Annotated[
         datetime, {BATCH_TIMESTAMP: True, ALIAS: ALIAS_HSTRY, COLUMN_MAP: "idr_insrt_ts"}

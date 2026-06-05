@@ -33,7 +33,7 @@ from model.base_model import (
     INSERT_EXCLUDE,
     INSERT_FIELD,
     LAST_UPDATED_TIMESTAMP,
-    PRIMARY_KEY,
+    PRIMARY_KEY_ORDER,
     UPDATE_TIMESTAMP,
     IdrBaseModel,
     ModelType,
@@ -59,7 +59,8 @@ from model.base_model import (
 class IdrClaimProfessionalSs(IdrBaseModel):
     # Columns from v2_mdcr_clm
     clm_uniq_id: Annotated[
-        int, {PRIMARY_KEY: True, BATCH_ID: True, ALIAS: ALIAS_CLM, LAST_UPDATED_TIMESTAMP: True}
+        int,
+        {PRIMARY_KEY_ORDER: 0, BATCH_ID: True, ALIAS: ALIAS_CLM, LAST_UPDATED_TIMESTAMP: True},
     ]
     clm_type_cd: Annotated[int, {ALIAS: ALIAS_CLM}]
     bene_sk: Annotated[int, ALIAS:ALIAS_CLM]

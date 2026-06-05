@@ -328,7 +328,7 @@ def base_claim_filter(partition: LoadPartition) -> str:
     """
 
 
-PRIMARY_KEY = "primary_key"
+PRIMARY_KEY_ORDER = "primary_key_order"
 BATCH_TIMESTAMP = "batch_timestamp"
 HISTORICAL_BATCH_TIMESTAMP = "historical_batch_timestamp"
 BATCH_ID = "batch_id"
@@ -484,7 +484,7 @@ class IdrBaseModel(BaseModel, ABC):
 
     @classmethod
     def unique_key(cls) -> list[str]:
-        return cls._extract_meta_keys(PRIMARY_KEY)
+        return cls._extract_meta_keys(PRIMARY_KEY_ORDER)
 
     @classmethod
     def batch_timestamp_col(cls, is_historical: bool) -> list[str]:
@@ -523,7 +523,15 @@ class IdrBaseModel(BaseModel, ABC):
 
     @classmethod
     def _extract_meta_keys(cls, meta_key: str) -> list[str]:
-        return [key for key in cls.model_fields if cls._extract_meta(key, meta_key)]
+        keys_with_meta = [
+            (key, meta)
+            for key in cls.model_fields
+            if (meta := cls._extract_meta(key, meta_key)) is not None
+        ]
+        if keys_with_meta and isinstance(keys_with_meta[0][1], str | int):
+            keys_with_meta.sort(key=lambda tupl: cast(str | int, tupl[1]))
+
+        return [key for (key, _) in keys_with_meta]
 
     @classmethod
     def _single_or_default(cls, meta_key: str) -> str | None:
