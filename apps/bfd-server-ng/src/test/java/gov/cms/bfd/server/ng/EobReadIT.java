@@ -5,13 +5,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import ca.uhn.fhir.rest.client.interceptor.AdditionalRequestHeadersInterceptor;
 import ca.uhn.fhir.rest.gclient.IReadTyped;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import gov.cms.bfd.server.ng.claim.model.ClaimProfessionalNch;
 import gov.cms.bfd.server.ng.eob.EobResourceProvider;
-import gov.cms.bfd.server.ng.util.SystemUrls;
 import io.restassured.RestAssured;
 import jakarta.servlet.http.HttpServletRequest;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
@@ -28,29 +26,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 class EobReadIT extends IntegrationTestBase {
-  private static final String INCLUDE_TAX_NUMBERS = "IncludeTaxNumbers";
 
   @Autowired private EobResourceProvider eobResourceProvider;
   @Mock HttpServletRequest request;
 
   private IReadTyped<ExplanationOfBenefit> eobRead() {
     return getFhirClient().read().resource(ExplanationOfBenefit.class);
-  }
-
-  private IReadTyped<ExplanationOfBenefit> eobReadWithIncludeTaxNumbersHeader(String headerValue) {
-    final var fhirClient = getFhirClient();
-    final var headersInterceptor = new AdditionalRequestHeadersInterceptor();
-    headersInterceptor.addHeaderValue(INCLUDE_TAX_NUMBERS, headerValue);
-    fhirClient.registerInterceptor(headersInterceptor);
-
-    return fhirClient.read().resource(ExplanationOfBenefit.class);
-  }
-
-  private boolean hasTaxNumberExtension(ExplanationOfBenefit eob) {
-    return eob.getItem().stream()
-        .flatMap(item -> item.getExtension().stream())
-        .anyMatch(
-            extension -> SystemUrls.EXT_CLM_RNDRG_PRVDR_TAX_NUM_URL.equals(extension.getUrl()));
   }
 
   @Test
@@ -158,12 +139,12 @@ class EobReadIT extends IntegrationTestBase {
         entityManager
             .createQuery(
                 """
-                            SELECT c
-                              FROM ClaimProfessionalNch c
-                              JOIN FETCH c.beneficiary b
-                              JOIN FETCH c.claimItems cl
-                              WHERE c.claimUniqueId = :claimId
-                            """,
+                SELECT c
+                FROM ClaimProfessionalNch c
+                JOIN FETCH c.beneficiary b
+                JOIN FETCH c.claimItems cl
+                WHERE c.claimUniqueId = :claimId
+                """,
                 ClaimProfessionalNch.class)
             .setParameter("claimId", Long.parseLong(CLAIM_ID_PROFESSIONAL_NON_LATEST))
             .getResultList();

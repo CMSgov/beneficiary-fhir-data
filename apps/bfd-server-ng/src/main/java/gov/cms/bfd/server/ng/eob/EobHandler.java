@@ -179,9 +179,9 @@ public class EobHandler {
     var securityStatus =
         isSamhsa ? ClaimSecurityStatus.SAMHSA_APPLICABLE : ClaimSecurityStatus.NONE;
 
-    var newOptions = options.withSecurityStatus(securityStatus);
+    var claimState = ClaimState.builder().securityStatus(securityStatus).build();
 
-    return claim.toFhir(newOptions);
+    return claim.toFhir(options, claimState);
   }
 
   private boolean isCodeSamhsa(

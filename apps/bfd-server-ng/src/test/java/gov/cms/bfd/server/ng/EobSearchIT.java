@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SearchStyleEnum;
-import ca.uhn.fhir.rest.client.interceptor.AdditionalRequestHeadersInterceptor;
 import ca.uhn.fhir.rest.gclient.DateClientParam;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
@@ -39,29 +38,11 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 class EobSearchIT extends IntegrationTestBase {
 
-  private static final String INCLUDE_TAX_NUMBERS = "IncludeTaxNumbers";
-
   private IQuery<Bundle> searchBundle() {
     return getFhirClient()
         .search()
         .forResource(ExplanationOfBenefit.class)
         .returnBundle(Bundle.class);
-  }
-
-  private IQuery<Bundle> searchBundleWithIncludeTaxNumbersHeader(String headerValue) {
-    final var fhirClient = getFhirClient();
-    final var headersInterceptor = new AdditionalRequestHeadersInterceptor();
-    headersInterceptor.addHeaderValue(INCLUDE_TAX_NUMBERS, headerValue);
-    fhirClient.registerInterceptor(headersInterceptor);
-
-    return fhirClient.search().forResource(ExplanationOfBenefit.class).returnBundle(Bundle.class);
-  }
-
-  private boolean hasTaxNumberExtension(ExplanationOfBenefit eob) {
-    return eob.getItem().stream()
-        .flatMap(item -> item.getExtension().stream())
-        .anyMatch(
-            extension -> SystemUrls.EXT_CLM_RNDRG_PRVDR_TAX_NUM_URL.equals(extension.getUrl()));
   }
 
   @ParameterizedTest
@@ -225,19 +206,19 @@ class EobSearchIT extends IntegrationTestBase {
             entityManager
                 .createNativeQuery(
                     """
-                                       select max(bfd_claim_updated_ts)
-                                       from (
-                                           select bfd_claim_updated_ts from idr.claim_professional_nch where bene_sk = :beneSk
-                                           union all
-                                           select bfd_claim_updated_ts from idr.claim_professional_ss where bene_sk = :beneSk
-                                           union all
-                                           select bfd_claim_updated_ts from idr.claim_institutional_nch where bene_sk = :beneSk
-                                           union all
-                                           select bfd_claim_updated_ts from idr.claim_institutional_ss where bene_sk = :beneSk
-                                           union all
-                                           select bfd_claim_updated_ts from idr.claim_rx where bene_sk = :beneSk
-                                       ) all_claims
-                                    """)
+                  select max(bfd_claim_updated_ts)
+                  from (
+                      select bfd_claim_updated_ts from idr.claim_professional_nch where bene_sk = :beneSk
+                      union all
+                      select bfd_claim_updated_ts from idr.claim_professional_ss where bene_sk = :beneSk
+                      union all
+                      select bfd_claim_updated_ts from idr.claim_institutional_nch where bene_sk = :beneSk
+                      union all
+                      select bfd_claim_updated_ts from idr.claim_institutional_ss where bene_sk = :beneSk
+                      union all
+                      select bfd_claim_updated_ts from idr.claim_rx where bene_sk = :beneSk
+                  ) all_claims
+                  """)
                 .setParameter("beneSk", Long.valueOf(BENE_ID_NON_CURRENT))
                 .getSingleResult();
     ZonedDateTime lastUpdated = instant == null ? null : instant.atZone(ZoneOffset.UTC);
@@ -277,10 +258,10 @@ class EobSearchIT extends IntegrationTestBase {
             entityManager
                 .createQuery(
                     """
-                                    SELECT billablePeriod.claimThroughDate
-                                    FROM ClaimInstitutionalNch c
-                                    WHERE c.claimUniqueId = :id
-                                    """,
+                SELECT billablePeriod.claimThroughDate
+                FROM ClaimInstitutionalNch c
+                WHERE c.claimUniqueId = :id
+                """,
                     Optional.class)
                 .setParameter("id", claimId)
                 .getResultList()
@@ -553,9 +534,9 @@ class EobSearchIT extends IntegrationTestBase {
             entityManager
                 .createNativeQuery(
                     """
-                                    SELECT COUNT(*) FROM idr.beneficiary
-                                    WHERE bene_xref_efctv_sk = :beneSk AND bene_sk = :beneSk
-                                    """,
+                SELECT COUNT(*) FROM idr.beneficiary
+                WHERE bene_xref_efctv_sk = :beneSk AND bene_sk = :beneSk
+                """,
                     Integer.class)
                 .setParameter("beneSk", Long.parseLong(CURRENT_MERGED_BENE_SK))
                 .getResultList()
@@ -655,12 +636,12 @@ class EobSearchIT extends IntegrationTestBase {
         entityManager
             .createQuery(
                 """
-                            SELECT c
-                            FROM ClaimProfessionalNch c
-                            JOIN FETCH c.beneficiary b
-                            JOIN FETCH c.claimItems cl
-                            WHERE c.claimUniqueId = :claimId
-                            """,
+                SELECT c
+                FROM ClaimProfessionalNch c
+                JOIN FETCH c.beneficiary b
+                JOIN FETCH c.claimItems cl
+                WHERE c.claimUniqueId = :claimId
+                """,
                 ClaimProfessionalNch.class)
             .setParameter("claimId", Long.parseLong(CLAIM_ID_PROFESSIONAL_NON_LATEST))
             .getResultList();

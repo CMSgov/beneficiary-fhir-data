@@ -63,8 +63,8 @@ public abstract class ClaimProfessionalBase extends ClaimBase {
 
   /** {@inheritDoc} */
   @Override
-  public ExplanationOfBenefit toFhir(ClaimFilterOptions options) {
-    var eob = super.toFhir(options);
+  public ExplanationOfBenefit toFhir(ClaimFilterOptions options, ClaimState claimState) {
+    var eob = super.toFhir(options, claimState);
     var diagnosisSequenceGenerator = new SequenceGenerator();
     var diagnosisSequenceMap = buildDiagnosisSequences(eob, diagnosisSequenceGenerator);
 

@@ -15,20 +15,27 @@ public class ClaimTaxNumberCode {
   private Optional<String> taxNumber;
 
   Optional<Extension> toFhir() {
-    return taxNumber.map(
-        number ->
-            new Extension()
-                .setUrl(SystemUrls.EXT_CLM_RNDRG_PRVDR_TAX_NUM_URL)
-                .setValue(
-                    new Identifier()
-                        .setType(
-                            new CodeableConcept()
-                                .setCoding(
-                                    List.of(
-                                        new Coding()
-                                            .setSystem(SystemUrls.HL7_IDENTIFIER)
-                                            .setCode("TAX"))))
-                        .setSystem(SystemUrls.US_EIN)
-                        .setValue(number)));
+    return taxNumber.map(this::createTaxNumberExtension);
+  }
+
+  private Extension createTaxNumberExtension(String number) {
+    return new Extension()
+        .setUrl(SystemUrls.EXT_CLM_RNDRG_PRVDR_TAX_NUM_URL)
+        .setValue(createTaxNumberIdentifier(number));
+  }
+
+  private Identifier createTaxNumberIdentifier(String number) {
+    return new Identifier()
+        .setType(createTaxNumberType())
+        .setSystem(SystemUrls.US_EIN)
+        .setValue(number);
+  }
+
+  private CodeableConcept createTaxNumberType() {
+    return new CodeableConcept().setCoding(List.of(createTaxNumberCoding()));
+  }
+
+  private Coding createTaxNumberCoding() {
+    return new Coding().setSystem(SystemUrls.HL7_IDENTIFIER).setCode("TAX");
   }
 }

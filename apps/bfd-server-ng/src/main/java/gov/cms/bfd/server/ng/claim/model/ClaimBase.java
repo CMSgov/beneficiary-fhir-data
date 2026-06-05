@@ -65,9 +65,10 @@ public abstract class ClaimBase {
    * Convert the claim info to a FHIR ExplanationOfBenefit.
    *
    * @param options claim filter options
+   * @param claimState computed claim state
    * @return ExplanationOfBenefit
    */
-  public ExplanationOfBenefit toFhir(ClaimFilterOptions options) {
+  public ExplanationOfBenefit toFhir(ClaimFilterOptions options, ClaimState claimState) {
     var eob = new ExplanationOfBenefit();
     eob.setId(String.valueOf(claimUniqueId));
     eob.setPatient(PatientReferenceFactory.toFhir(beneficiary.getXrefSk()));
@@ -78,7 +79,8 @@ public abstract class ClaimBase {
     claimTypeCode.toFhirAdjudication().ifPresent(eob::addAdjudication);
 
     eob.setMeta(
-        meta.toFhir(claimTypeCode, options.getSecurityStatus(), finalAction, getMetaSourceSk()));
+        meta.toFhir(claimTypeCode, claimState.getSecurityStatus(), finalAction, getMetaSourceSk()));
+
     identifiers.toFhir(claimTypeCode).forEach(eob::addIdentifier);
     identifiers.toFhirRelatedClaim(claimTypeCode).ifPresent(eob::addRelated);
     eob.setBillablePeriod(billablePeriod.toFhir());

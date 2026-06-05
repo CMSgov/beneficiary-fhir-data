@@ -1,5 +1,6 @@
 package gov.cms.bfd.server.ng;
 
+import static gov.cms.bfd.server.ng.IntegrationTestBase.INCLUDE_TAX_NUMBERS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
@@ -23,8 +24,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 class FhirInputConverterTest {
-
-  private static final String INCLUDE_TAX_NUMBERS = "IncludeTaxNumbers";
 
   // These scenarios may not be easy to reproduce in an integration test, but we should be sure our
   // input validation is resilient against null/empty inputs.
@@ -86,23 +85,22 @@ class FhirInputConverterTest {
 
   static Stream<Arguments> provideBooleanHeaderScenarios() {
     return Stream.of(
-        Arguments.of(List.of(), false),
-        Arguments.of(List.of("true"), true),
-        Arguments.of(List.of("false"), false),
-        Arguments.of(List.of("TRUE"), true),
-        Arguments.of(List.of("FALSE"), false),
-        Arguments.of(List.of("yes"), false));
+        Arguments.of(List.of(), Optional.empty()),
+        Arguments.of(List.of("true"), Optional.of(true)),
+        Arguments.of(List.of("false"), Optional.of(false)),
+        Arguments.of(List.of("TRUE"), Optional.of(true)),
+        Arguments.of(List.of("FALSE"), Optional.of(false)),
+        Arguments.of(List.of("yes"), Optional.of(false)));
   }
 
   @ParameterizedTest
   @MethodSource("provideBooleanHeaderScenarios")
-  void parseBooleanHeader(List<String> headerValues, boolean expected) {
+  void parseBooleanHeader(List<String> headerValues, Optional<Boolean> expected) {
     var requestDetails = mock(RequestDetails.class);
     when(requestDetails.getHeaders(INCLUDE_TAX_NUMBERS)).thenReturn(headerValues);
 
     assertEquals(
-        Optional.of(expected),
-        FhirInputConverter.parseBooleanHeader(requestDetails, INCLUDE_TAX_NUMBERS));
+        expected, FhirInputConverter.parseBooleanHeader(requestDetails, INCLUDE_TAX_NUMBERS));
   }
 
   @Test

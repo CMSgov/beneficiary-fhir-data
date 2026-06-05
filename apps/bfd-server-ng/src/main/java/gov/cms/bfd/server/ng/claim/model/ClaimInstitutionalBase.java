@@ -83,8 +83,8 @@ public abstract class ClaimInstitutionalBase extends ClaimBase {
   protected void applyOutcomeOverride(ExplanationOfBenefit eob) {}
 
   @Override
-  public ExplanationOfBenefit toFhir(ClaimFilterOptions options) {
-    var eob = super.toFhir(options);
+  public ExplanationOfBenefit toFhir(ClaimFilterOptions options, ClaimState claimState) {
+    var eob = super.toFhir(options, claimState);
 
     addClaimItems(eob);
     addDiagnoses(eob);

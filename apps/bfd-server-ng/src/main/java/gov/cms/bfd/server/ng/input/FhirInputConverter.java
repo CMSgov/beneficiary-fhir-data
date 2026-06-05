@@ -456,23 +456,23 @@ public class FhirInputConverter {
   }
 
   /**
-   * Checks a RequestDetails object for headers, returns True if 1 exists.
+   * Parses a boolean header from a RequestDetails object.
    *
    * @param requestDetails requestDetails object from call
-   * @param headerName name of header to check for existence
-   * @return True if the header exists and there is only 1, False otherwise
+   * @param headerName name of header to parse
+   * @return Optional containing the parsed boolean value if a single header is present,
+   *     Optional.empty() if the header is not present
    */
   public static Optional<Boolean> parseBooleanHeader(
       RequestDetails requestDetails, String headerName) {
-    List<String> headerValues = requestDetails.getHeaders(headerName);
+    var headerValues = requestDetails.getHeaders(headerName);
 
     if (headerValues == null || headerValues.isEmpty()) {
-      return Optional.of(false);
+      return Optional.empty();
     } else if (headerValues.size() > 1) {
-      // we do not know which to honor
+      // Multiple headers with the same name is not valid input, throw an error
       throw new InvalidRequestException("Multiple values supplied for header: " + headerName);
     } else {
-      // if not true is false and doesn't need an error
       return Optional.of(Boolean.parseBoolean(headerValues.getFirst()));
     }
   }
