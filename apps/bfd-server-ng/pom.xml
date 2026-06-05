@@ -223,6 +223,16 @@
             <version>${hapi-fhir.version}</version>
         </dependency>
         <dependency>
+            <groupId>ca.uhn.hapi.fhir</groupId>
+            <artifactId>hapi-fhir-validation</artifactId>
+            <version>${hapi-fhir.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ca.uhn.hapi.fhir</groupId>
+            <artifactId>hapi-fhir-validation-resources-r4</artifactId>
+            <version>${hapi-fhir.version}</version>
+        </dependency>
+        <dependency>
             <groupId>gov.cms.bfd</groupId>
             <artifactId>bfd-server-openapi</artifactId>
             <version>${project.version}</version>
@@ -258,6 +268,12 @@
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-java21</artifactId>
             <version>${micrometer.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>RELEASE</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
     <build>
