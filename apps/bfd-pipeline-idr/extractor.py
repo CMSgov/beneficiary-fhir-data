@@ -1,11 +1,12 @@
 import csv
 import logging
 from abc import ABC, abstractmethod
+from collections import OrderedDict
 from collections.abc import Iterator, Mapping, Sequence
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Generic, OrderedDict, override
+from typing import Generic, override
 
 import psycopg
 import snowflake.connector
