@@ -72,8 +72,8 @@ class PostgresLoader:
     ) -> bool:
         async with psycopg_pool.AsyncConnectionPool(
             conninfo=get_connection_string(load_mode),
-            min_size=PER_BATCH_MIN_CONNECTIONS if not LoadMode.LOCAL else 1,
-            max_size=PER_BATCH_MAX_CONNECTIONS if not LoadMode.LOCAL else 1,
+            min_size=PER_BATCH_MIN_CONNECTIONS if load_mode != LoadMode.LOCAL else 1,
+            max_size=PER_BATCH_MAX_CONNECTIONS if load_mode != LoadMode.LOCAL else 1,
             # Testing both psycopg and asyncpg by introducing a Timer for the statement that
             # acquires a connection from either library's implementation of a pool showed that
             # the majority of the time spent was actually in acquiring a connection, _not_ the
@@ -211,7 +211,6 @@ class BatchLoader:
                         timestamp,
                         name=f"{self.table}-{self.partition.name}-{idx}",
                     )
-
             self.insert_batch_timer.stop()
 
             async with self.pool.connection() as conn, conn.cursor(binary=True) as cur:
