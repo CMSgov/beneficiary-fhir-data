@@ -58,6 +58,10 @@ class EobSearchIT extends IntegrationTestBase {
             .execute();
     assertEquals(1, eobBundle.getEntry().size());
     expectFhir().scenario(searchStyle.name()).toMatchSnapshot(eobBundle);
+
+    if (searchStyle == SearchStyleEnum.POST) {
+      expectFhir().scenario(searchStyle.name() + "_duplicate").toMatchSnapshot(eobBundle);
+    }
   }
 
   @ParameterizedTest
