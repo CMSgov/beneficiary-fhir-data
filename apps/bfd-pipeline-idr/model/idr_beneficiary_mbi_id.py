@@ -8,7 +8,7 @@ from load_partition import LoadPartition
 from model.base_model import (
     BATCH_TIMESTAMP,
     LAST_UPDATED_TIMESTAMP,
-    PRIMARY_KEY,
+    PRIMARY_KEY_ORDER,
     UPDATE_TIMESTAMP,
     IdrBaseModel,
     ModelType,
@@ -20,11 +20,11 @@ from model.base_model import (
 
 
 class IdrBeneficiaryMbiId(IdrBaseModel):
-    bene_mbi_id: Annotated[str, {PRIMARY_KEY: True, LAST_UPDATED_TIMESTAMP: True}]
+    bene_mbi_id: Annotated[str, {PRIMARY_KEY_ORDER: 0, LAST_UPDATED_TIMESTAMP: True}]
     bene_mbi_efctv_dt: date
     bene_mbi_obslt_dt: Annotated[date, BeforeValidator(transform_null_date_to_max)]
     idr_ltst_trans_flg: Annotated[str, BeforeValidator(transform_default_string)]
-    idr_trans_efctv_ts: Annotated[datetime, {PRIMARY_KEY: True}]
+    idr_trans_efctv_ts: Annotated[datetime, {PRIMARY_KEY_ORDER: 1}]
     idr_trans_obslt_ts: datetime
     idr_insrt_ts: Annotated[datetime, {BATCH_TIMESTAMP: True}]
     idr_updt_ts: Annotated[
