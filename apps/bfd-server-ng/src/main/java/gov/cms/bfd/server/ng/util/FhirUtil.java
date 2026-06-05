@@ -150,22 +150,22 @@ public class FhirUtil {
       Bundle bundle) {
     // check if a link is needed
     if (limit.isPresent() && limit.get() < bundle.getEntry().size()) {
-        // remove the extra entry that let us know we had next
-        bundle.setEntry(bundle.getEntry().subList(0, limit.get()));
-        var nextOffset = Math.max(0, offset.orElse(0) + limit.orElse(0));
-        bundle
-            .addLink()
-            .setRelation(Constants.LINK_NEXT)
-            .setUrl(buildLinkURL(requestDetails, nextOffset));
+      // remove the extra entry that let us know we had next
+      bundle.setEntry(bundle.getEntry().subList(0, limit.get()));
+      var nextOffset = Math.max(0, offset.orElse(0) + limit.orElse(0));
+      bundle
+          .addLink()
+          .setRelation(Constants.LINK_NEXT)
+          .setUrl(buildLinkURL(requestDetails, nextOffset));
     }
     // check if a previous link is needed
     if (offset.isPresent() && offset.get() > 0) {
-        // get previous offset
-        var previousOffset = Math.max(0, offset.get() - limit.orElse(0));
-        bundle
-            .addLink()
-            .setRelation(Constants.LINK_PREVIOUS)
-            .setUrl(buildLinkURL(requestDetails, previousOffset));
+      // get previous offset
+      var previousOffset = Math.max(0, offset.get() - limit.orElse(0));
+      bundle
+          .addLink()
+          .setRelation(Constants.LINK_PREVIOUS)
+          .setUrl(buildLinkURL(requestDetails, previousOffset));
     }
     return bundle;
   }
