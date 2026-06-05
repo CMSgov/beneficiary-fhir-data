@@ -30,7 +30,7 @@ from model.base_model import (
     HISTORICAL_BATCH_TIMESTAMP,
     INSERT_FIELD,
     LAST_UPDATED_TIMESTAMP,
-    PRIMARY_KEY,
+    PRIMARY_KEY_ORDER,
     UPDATE_FIELD,
     IdrBaseModel,
     ModelType,
@@ -56,7 +56,8 @@ from model.base_model import (
 class IdrClaimProfessionalNch(IdrBaseModel):
     # Columns from v2_mdcr_clm
     clm_uniq_id: Annotated[
-        int, {PRIMARY_KEY: True, BATCH_ID: True, ALIAS: ALIAS_CLM, LAST_UPDATED_TIMESTAMP: True}
+        int,
+        {PRIMARY_KEY_ORDER: 0, BATCH_ID: True, ALIAS: ALIAS_CLM, LAST_UPDATED_TIMESTAMP: True},
     ]
     clm_type_cd: Annotated[int, {ALIAS: ALIAS_CLM}]
     bene_sk: Annotated[int, ALIAS:ALIAS_CLM]
@@ -278,9 +279,9 @@ class IdrClaimProfessionalNch(IdrBaseModel):
                 UNION
                 {clm_rlt_ocrnc_clause()}
             ),
-            claim_occurrence_spans_dates AS {not_materialized} 
+            claim_occurrence_spans_dates AS {not_materialized}
                 ({claim_occurrence_cte()}),
-            claim_related_occurrences_dates AS {not_materialized} 
+            claim_related_occurrences_dates AS {not_materialized}
                 ({claim_related_occurrences_cte()})
             SELECT {{COLUMNS}}
             FROM claims c
@@ -289,7 +290,7 @@ class IdrClaimProfessionalNch(IdrBaseModel):
                 {clm}.clm_dt_sgntr_sk = c.clm_dt_sgntr_sk AND
                 {clm}.clm_type_cd = c.clm_type_cd AND
                 {clm}.clm_num_sk = c.clm_num_sk
-            JOIN {IDR_CLAIM_DATE_SIGNATURE_TABLE} {sgntr} ON 
+            JOIN {IDR_CLAIM_DATE_SIGNATURE_TABLE} {sgntr} ON
                 {sgntr}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
             LEFT JOIN {IDR_CLAIM_PROFESSIONAL_TABLE} {prfnl} ON
                 {clm}.geo_bene_sk = {prfnl}.geo_bene_sk AND
@@ -310,7 +311,7 @@ class IdrClaimProfessionalNch(IdrBaseModel):
             LEFT JOIN {IDR_PROVIDER_HISTORY_TABLE} {prvdr_srvc}
                 ON {prvdr_srvc}.prvdr_npi_num = {clm}.prvdr_srvc_prvdr_npi_num
                 AND {prvdr_srvc}.prvdr_hstry_obslt_dt >= '{DEFAULT_MAX_DATE}'
-            LEFT JOIN claim_occurrence_spans_dates {ocrnc_sgntr_dd} 
+            LEFT JOIN claim_occurrence_spans_dates {ocrnc_sgntr_dd}
                 ON {ocrnc_sgntr_dd}.clm_ocrnc_sgntr_sk = {clm}.clm_ocrnc_sgntr_sk
             LEFT JOIN claim_related_occurrences_dates {rlt_ocrnc_sgntr_dd}
                 ON {rlt_ocrnc_sgntr_dd}.clm_rlt_ocrnc_sgntr_sk = {clm}.clm_rlt_ocrnc_sgntr_sk

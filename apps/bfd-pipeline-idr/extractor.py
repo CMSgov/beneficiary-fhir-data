@@ -1,7 +1,8 @@
 import csv
 import logging
 from abc import ABC, abstractmethod
-from collections.abc import Iterator, Mapping, Sequence
+from collections import OrderedDict
+from collections.abc import Iterator
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
@@ -67,7 +68,7 @@ class Extractor(ABC, Generic[T]):  # noqa: UP046
         self.transform_timer = Timer("transform", cls, partition)
 
     @abstractmethod
-    def extract_many(self, sql: str, params: dict[str, DbType]) -> Iterator[Sequence[T]]:
+    def extract_many(self, sql: str, params: dict[str, DbType]) -> Iterator[list[T]]:
         pass
 
     @abstractmethod
@@ -100,7 +101,7 @@ class Extractor(ABC, Generic[T]):  # noqa: UP046
 
     def extract_idr_data(
         self, progress: LoadProgress | None, start_time: datetime, source: Source
-    ) -> Iterator[Sequence[T]]:
+    ) -> Iterator[list[T]]:
         is_historical = progress is None or progress.is_historical()
         fetch_query = self.get_query(start_time, source)
         # GREATEST doesn't work with nulls so we need to coalesce here
@@ -113,13 +114,15 @@ class Extractor(ABC, Generic[T]):  # noqa: UP046
         batch_timestamp_clause = self._greatest_col([*batch_timestamp_cols, *update_timestamp_cols])
         min_transaction_date = self.cls.model_type().min_transaction_date
 
-        batch_id_order = ""
         batch_id_clause = ""
         batch_id_col = self.cls.batch_id_col_alias()
-        if batch_id_col is not None:
-            batch_id_order = f", {batch_id_col}"
+        additional_order_by = list(
+            OrderedDict.fromkeys(
+                [x for x in [batch_id_col, *self.cls.ordered_pkeys()] if x is not None]
+            )  # Use an OrderedDict as an ordered set because there is no ordered set in stdlib
+        )
         logger.info("extracting %s", self.cls.table())
-        order_by = f"ORDER BY {batch_timestamp_clause} {batch_id_order}"
+        order_by = f"ORDER BY {', '.join([batch_timestamp_clause, *additional_order_by])}"
         if progress is None:
             # No saved progress, process the whole table from the beginning
             return self.extract_many(
@@ -158,7 +161,7 @@ class Extractor(ABC, Generic[T]):  # noqa: UP046
         if batch_id_col is not None:
             batch_id_clause = f"""
                 OR (
-                    {batch_timestamp_clause} = %(timestamp)s 
+                    {batch_timestamp_clause} = %(timestamp)s
                     AND {batch_id_col} {filter_op} {progress.last_id}
                 )"""
 
@@ -179,7 +182,7 @@ class Extractor(ABC, Generic[T]):  # noqa: UP046
             {"timestamp": compare_timestamp},
         )
 
-    def _transform(self, batch: list[dict[str, DbType]]) -> Sequence[T]:
+    def _transform(self, batch: list[dict[str, DbType]]) -> list[T]:
         self.transform_timer.start()
         res = self.type_adapter.validate_python(
             [{k.lower(): v for k, v in row.items()} for row in batch]
@@ -220,8 +223,8 @@ class PostgresExtractor(Extractor[T]):
     def extract_many(
         self,
         sql: str,
-        params: Mapping[str, DbType],
-    ) -> Iterator[Sequence[T]]:
+        params: dict[str, DbType],
+    ) -> Iterator[list[T]]:
         logger.debug(sql)
         batch_size = self._get_batch_size()
         with self.conn.cursor(row_factory=dict_row) as cur:
@@ -313,7 +316,7 @@ class SnowflakeExtractor(Extractor[T]):
         self,
         sql: str,
         params: dict[str, DbType],
-    ) -> Iterator[Sequence[T]]:
+    ) -> Iterator[list[T]]:
         cur = None
         logger.debug(sql)
         try:
@@ -378,11 +381,11 @@ class SnowflakeExecutor(DbExecutor):
     def copy(self, file: CsvFile) -> None:
         self.session.sql("create or replace temp stage source_stage").collect()
         self.session.file.put(str(file.csv_file.absolute()), "@source_stage")
-        self.session.sql(f"""COPY INTO 
+        self.session.sql(f"""COPY INTO
                             {file.full_table()}
                             FROM @source_stage/{file.csv_file.name}
                             FILE_FORMAT = (
-                                TYPE = 'CSV', 
+                                TYPE = 'CSV',
                                 PARSE_HEADER = TRUE
                                 ERROR_ON_COLUMN_COUNT_MISMATCH = FALSE
                                 FIELD_OPTIONALLY_ENCLOSED_BY = '"'

@@ -10,7 +10,7 @@ from model.base_model import (
     BATCH_ID,
     BATCH_TIMESTAMP,
     LAST_UPDATED_TIMESTAMP,
-    PRIMARY_KEY,
+    PRIMARY_KEY_ORDER,
     UPDATE_TIMESTAMP,
     IdrBaseModel,
     ModelType,
@@ -22,12 +22,12 @@ from model.base_model import (
 
 
 class IdrBeneficiaryStatus(IdrBaseModel):
-    bene_sk: Annotated[int, {PRIMARY_KEY: True, BATCH_ID: True, LAST_UPDATED_TIMESTAMP: True}]
+    bene_sk: Annotated[int, {PRIMARY_KEY_ORDER: 0, BATCH_ID: True, LAST_UPDATED_TIMESTAMP: True}]
     bene_mdcr_stus_cd: str
-    mdcr_stus_bgn_dt: Annotated[date, {PRIMARY_KEY: True}]
-    mdcr_stus_end_dt: Annotated[date, {PRIMARY_KEY: True}]
+    mdcr_stus_bgn_dt: Annotated[date, {PRIMARY_KEY_ORDER: 1}]
+    mdcr_stus_end_dt: Annotated[date, {PRIMARY_KEY_ORDER: 2}]
     idr_ltst_trans_flg: Annotated[str, BeforeValidator(transform_default_string)]
-    idr_trans_efctv_ts: Annotated[datetime, {PRIMARY_KEY: True}]
+    idr_trans_efctv_ts: Annotated[datetime, {PRIMARY_KEY_ORDER: 3}]
     idr_trans_obslt_ts: datetime
     idr_insrt_ts: Annotated[datetime, {BATCH_TIMESTAMP: True}]
     idr_updt_ts: Annotated[
