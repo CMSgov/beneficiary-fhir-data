@@ -18,6 +18,8 @@ public class FhirUtil {
   private FhirUtil() {}
 
   private static final Pattern IS_INTEGER = Pattern.compile("\\d+");
+  private static final String OFFSET_PARAM = "_offset";
+  private static final String START_INDEX_PARAM = "startIndex";
 
   /**
    * Adds a data absent reason of the coding is empty.
@@ -136,7 +138,6 @@ public class FhirUtil {
    * one addition item in your bundle than the limit to know to add the updated next link
    *
    * @param requestDetails current request
-   * @param offsetParamName name of the offset parameter to use in the links
    * @param offset current offset
    * @param limit requested limit
    * @param bundle bundle
@@ -144,7 +145,6 @@ public class FhirUtil {
    */
   public static Bundle applyBundleLinks(
       RequestDetails requestDetails,
-      String offsetParamName,
       Optional<Integer> offset,
       Optional<Integer> limit,
       Bundle bundle) {
@@ -158,7 +158,7 @@ public class FhirUtil {
         bundle
             .addLink()
             .setRelation(Constants.LINK_NEXT)
-            .setUrl(buildLinkURL(requestDetails, nextOffset, offsetParamName));
+            .setUrl(buildLinkURL(requestDetails, nextOffset));
       }
     }
     if (offset.isPresent()) {
@@ -169,23 +169,25 @@ public class FhirUtil {
         bundle
             .addLink()
             .setRelation(Constants.LINK_PREVIOUS)
-            .setUrl(buildLinkURL(requestDetails, previousOffset, offsetParamName));
+            .setUrl(buildLinkURL(requestDetails, previousOffset));
       }
     }
     return bundle;
   }
 
-  private static String buildLinkURL(
-      RequestDetails requestDetails, Integer startIndex, String offsetParamName) {
+  private static String buildLinkURL(RequestDetails requestDetails, Integer startIndex) {
     String baseUrl = requestDetails.getCompleteUrl();
-    // Remove existing offset parameter if present
-    String urlWithoutOffset = baseUrl.replaceAll("[&?]" + offsetParamName + "=[^&]*", "");
+    // Always use FHIR _offset in links and remap/remove legacy startIndex if present.
+    String urlWithoutOffset =
+        baseUrl.replaceAll("([&?])(" + OFFSET_PARAM + "|" + START_INDEX_PARAM + ")=[^&]*", "$1");
+    urlWithoutOffset = urlWithoutOffset.replace("?&", "?").replaceAll("&&", "&");
+    urlWithoutOffset = urlWithoutOffset.replaceAll("[?&]+$", "");
     // If startIndex is zero, don't add the parameter
     if (startIndex == 0) {
       return urlWithoutOffset;
     }
     // Add the new offset parameter
     String separator = urlWithoutOffset.contains("?") ? "&" : "?";
-    return urlWithoutOffset + separator + offsetParamName + "=" + startIndex;
+    return urlWithoutOffset + separator + OFFSET_PARAM + "=" + startIndex;
   }
 }

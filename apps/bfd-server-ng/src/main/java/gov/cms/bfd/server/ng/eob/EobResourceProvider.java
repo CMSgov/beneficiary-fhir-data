@@ -1,11 +1,6 @@
 package gov.cms.bfd.server.ng.eob;
 
-import ca.uhn.fhir.rest.annotation.Count;
-import ca.uhn.fhir.rest.annotation.IdParam;
-import ca.uhn.fhir.rest.annotation.OptionalParam;
-import ca.uhn.fhir.rest.annotation.Read;
-import ca.uhn.fhir.rest.annotation.RequiredParam;
-import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -70,6 +65,7 @@ public class EobResourceProvider implements IResourceProvider {
    * @param serviceDate service date
    * @param lastUpdated last updated
    * @param startIndex start index
+   * @param offset offset
    * @param tag tags to filter by
    * @param type claim type to filter by
    * @param source claim source to filter by
@@ -86,6 +82,7 @@ public class EobResourceProvider implements IResourceProvider {
       @OptionalParam(name = ExplanationOfBenefit.SP_RES_LAST_UPDATED)
           final DateRangeParam lastUpdated,
       @OptionalParam(name = START_INDEX) final NumberParam startIndex,
+      @Offset final Integer offset,
       @OptionalParam(name = Constants.PARAM_TAG) final TokenAndListParam tag,
       @OptionalParam(name = TYPE) final TokenAndListParam type,
       @OptionalParam(name = Constants.PARAM_SOURCE) final TokenAndListParam source,
@@ -103,7 +100,9 @@ public class EobResourceProvider implements IResourceProvider {
             FhirInputConverter.toDateTimeRange(serviceDate),
             FhirInputConverter.toDateTimeRange(lastUpdated),
             Optional.ofNullable(count),
-            FhirInputConverter.toIntOptional(startIndex),
+            // we will support both offset and startIndex for now, but they can't be used together.
+            // If both are provided, offset will take precedence
+            offset != null ? Optional.of(offset) : FhirInputConverter.toIntOptional(startIndex),
             tagCriteria,
             claimTypeCodes,
             FhirInputConverter.parseSourceParameter(source));
@@ -111,8 +110,7 @@ public class EobResourceProvider implements IResourceProvider {
     var bundle =
         eobHandler.searchByBene(criteria, getFilterModeForRequest(request, samhsaSearchIntent));
 
-    return FhirUtil.applyBundleLinks(
-        requestDetails, START_INDEX, criteria.offset(), criteria.limit(), bundle);
+    return FhirUtil.applyBundleLinks(requestDetails, criteria.offset(), criteria.limit(), bundle);
   }
 
   /**
