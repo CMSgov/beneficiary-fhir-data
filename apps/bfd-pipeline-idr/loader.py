@@ -72,8 +72,8 @@ class PostgresLoader:
     ) -> bool:
         async with psycopg_pool.AsyncConnectionPool(
             conninfo=get_connection_string(load_mode),
-            min_size=PER_BATCH_MIN_CONNECTIONS if load_mode != LoadMode.LOCAL else 1,
-            max_size=PER_BATCH_MAX_CONNECTIONS if load_mode != LoadMode.LOCAL else 1,
+            min_size=PER_BATCH_MIN_CONNECTIONS,
+            max_size=PER_BATCH_MAX_CONNECTIONS,
             # Testing both psycopg and asyncpg by introducing a Timer for the statement that
             # acquires a connection from either library's implementation of a pool showed that
             # the majority of the time spent was actually in acquiring a connection, _not_ the
