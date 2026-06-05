@@ -3,6 +3,8 @@ package gov.cms.bfd.server.ng.util;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
@@ -170,19 +172,31 @@ public class FhirUtil {
     return bundle;
   }
 
-  private static String buildLinkURL(RequestDetails requestDetails, Integer startIndex) {
+  private static String buildLinkURL(RequestDetails requestDetails, Integer offset) {
     String baseUrl = requestDetails.getCompleteUrl();
-    // Always use FHIR _offset in links and remap/remove legacy startIndex if present.
-    String urlWithoutOffset =
-        baseUrl.replaceAll("([&?])(" + OFFSET_PARAM + "|" + START_INDEX_PARAM + ")=[^&]*", "$1");
-    urlWithoutOffset = urlWithoutOffset.replace("?&", "?").replace("&&", "&");
-    urlWithoutOffset = urlWithoutOffset.replace("[?&]+$", "");
-    // If startIndex is zero, don't add the parameter
-    if (startIndex == 0) {
-      return urlWithoutOffset;
+    String[] urlParts = baseUrl.split("\\?", 2);
+    String path = urlParts[0];
+
+    List<String> retainedParams = new ArrayList<>();
+    if (urlParts.length == 2 && !urlParts[1].isBlank()) {
+      for (String param : urlParts[1].split("&")) {
+        if (param.isBlank()) {
+          continue;
+        }
+        String key = param.split("=", 2)[0];
+        if (!OFFSET_PARAM.equals(key) && !START_INDEX_PARAM.equals(key)) {
+          retainedParams.add(param);
+        }
+      }
     }
-    // Add the new offset parameter
-    String separator = urlWithoutOffset.contains("?") ? "&" : "?";
-    return urlWithoutOffset + separator + OFFSET_PARAM + "=" + startIndex;
+
+    if (offset != 0) {
+      retainedParams.add(OFFSET_PARAM + "=" + offset);
+    }
+
+    if (retainedParams.isEmpty()) {
+      return path;
+    }
+    return path + "?" + String.join("&", retainedParams);
   }
 }
