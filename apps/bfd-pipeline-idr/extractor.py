@@ -5,7 +5,7 @@ from collections.abc import Iterator, Mapping, Sequence
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Generic, override
+from typing import Generic, OrderedDict, override
 
 import psycopg
 import snowflake.connector
@@ -113,13 +113,15 @@ class Extractor(ABC, Generic[T]):  # noqa: UP046
         batch_timestamp_clause = self._greatest_col([*batch_timestamp_cols, *update_timestamp_cols])
         min_transaction_date = self.cls.model_type().min_transaction_date
 
-        batch_id_order = ""
         batch_id_clause = ""
         batch_id_col = self.cls.batch_id_col_alias()
-        if batch_id_col is not None:
-            batch_id_order = f", {batch_id_col}"
+        additional_order_by = list(
+            OrderedDict.fromkeys(
+                [x for x in [batch_id_col, *self.cls.unique_key()] if x is not None]
+            )  # Use an OrderedDict as an ordered set because there is no ordered set in stdlib
+        )
         logger.info("extracting %s", self.cls.table())
-        order_by = f"ORDER BY {batch_timestamp_clause} {batch_id_order}"
+        order_by = f"ORDER BY {', '.join([batch_timestamp_clause, *additional_order_by])}"
         if progress is None:
             # No saved progress, process the whole table from the beginning
             return self.extract_many(
