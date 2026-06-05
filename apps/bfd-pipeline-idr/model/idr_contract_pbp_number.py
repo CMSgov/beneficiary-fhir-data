@@ -59,7 +59,7 @@ class IdrContractPbpNumber(IdrBaseModel):
                 GROUP BY cntrct_pbp_sk, cntrct_pbp_sgmt_num
                 HAVING COUNT(*) = 1
             )
-            SELECT 
+            SELECT
                 {{COLUMNS}}
             FROM {IDR_CONTRACT_PBP_NUM_TABLE} {pbp_num}
             LEFT JOIN sgmt

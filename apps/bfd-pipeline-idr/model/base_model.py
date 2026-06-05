@@ -123,9 +123,9 @@ def _normalize_to_null(col: str) -> str:
 
 
 def clm_orig_cntl_num_expr() -> str:
-    return f"""CASE 
-                WHEN {ALIAS_CLM}.clm_cntl_num = {ALIAS_CLM}.clm_orig_cntl_num 
-                THEN '' 
+    return f"""CASE
+                WHEN {ALIAS_CLM}.clm_cntl_num = {ALIAS_CLM}.clm_orig_cntl_num
+                THEN ''
                 ELSE {ALIAS_CLM}.clm_orig_cntl_num
                 END"""
 
@@ -141,11 +141,11 @@ def provider_careteam_name_expr(alias: str, type: str | None) -> str:
     return f"""
         COALESCE(
             {f"{_normalize_to_null(f'{ALIAS_CLM}.clm_{type}_prvdr_name')}" if type else "NULL"},
-            CASE 
-                WHEN {alias}.prvdr_last_name IS NULL 
+            CASE
+                WHEN {alias}.prvdr_last_name IS NULL
                     OR {_normalize(f"{alias}.prvdr_last_name")} = ''
                 THEN {_normalize(f"{alias}.prvdr_lgl_name")}
-                ELSE {_normalize(f"{alias}.prvdr_last_name")} 
+                ELSE {_normalize(f"{alias}.prvdr_last_name")}
                     || COALESCE(', ' || {_normalize(f"{alias}.prvdr_1st_name")}, '')
             END
         )
@@ -174,7 +174,7 @@ def clm_base_query(start_time: datetime, partition: LoadPartition, model_type: M
             idr_insrt_ts,
             idr_updt_ts
         FROM {IDR_CLAIM_TABLE} {clm}
-        WHERE 
+        WHERE
             {claim_filter(start_time, partition)} AND
             {clm}.clm_idr_ld_dt >= '{model_type.min_transaction_date}'
     """
@@ -192,10 +192,10 @@ def clm_query() -> str:
             {clm}.clm_idr_ld_dt
         FROM claim_base {clm}
         WHERE (
-            {clm}.clm_idr_ld_dt {{FILTER_OP}} {{LAST_TS}} 
-            OR {clm}.idr_insrt_ts {{FILTER_OP}} {{LAST_TS}} 
+            {clm}.clm_idr_ld_dt {{FILTER_OP}} {{LAST_TS}}
+            OR {clm}.idr_insrt_ts {{FILTER_OP}} {{LAST_TS}}
             OR {clm}.idr_updt_ts {{FILTER_OP}} {{LAST_TS}}
-        )       
+        )
     """
 
 
@@ -215,7 +215,7 @@ def clm_child_query(table: str) -> str:
             {clm}.clm_dt_sgntr_sk = temp.clm_dt_sgntr_sk AND
             {clm}.clm_type_cd = temp.clm_type_cd AND
             {clm}.clm_num_sk = temp.clm_num_sk
-        WHERE (temp.idr_insrt_ts {{FILTER_OP}} {{LAST_TS}} 
+        WHERE (temp.idr_insrt_ts {{FILTER_OP}} {{LAST_TS}}
             OR temp.idr_updt_ts {{FILTER_OP}} {{LAST_TS}})
         """
 
@@ -233,7 +233,7 @@ def clm_ansi_sgntr_query() -> str:
         FROM {IDR_CLAIM_ANSI_SIGNATURE_TABLE} sgntr
         JOIN claim_base clm ON
             {clm}.clm_dt_sgntr_sk = sgntr.clm_ansi_sgntr_sk
-        WHERE (sgntr.idr_insrt_ts {{FILTER_OP}} {{LAST_TS}} 
+        WHERE (sgntr.idr_insrt_ts {{FILTER_OP}} {{LAST_TS}}
             OR sgntr.idr_updt_ts {{FILTER_OP}} {{LAST_TS}})
     """
 
@@ -251,7 +251,7 @@ def clm_dt_sgntr_query() -> str:
         FROM {IDR_CLAIM_DATE_SIGNATURE_TABLE} sgntr
         JOIN claim_base clm ON
             {clm}.clm_dt_sgntr_sk = sgntr.clm_dt_sgntr_sk
-        WHERE (sgntr.idr_insrt_ts {{FILTER_OP}} {{LAST_TS}} 
+        WHERE (sgntr.idr_insrt_ts {{FILTER_OP}} {{LAST_TS}}
             OR sgntr.idr_updt_ts {{FILTER_OP}} {{LAST_TS}})
         """
 
@@ -259,7 +259,7 @@ def clm_dt_sgntr_query() -> str:
 def clm_ocrnc_sgntr_query() -> str:
     clm = ALIAS_CLM
     return f"""
-        SELECT 
+        SELECT
             {clm}.clm_uniq_id,
             {clm}.geo_bene_sk,
             {clm}.clm_type_cd,
@@ -269,10 +269,10 @@ def clm_ocrnc_sgntr_query() -> str:
         FROM {IDR_CLAIM_OCCURRENCE_SIGNATURE_TABLE} sgntr
         JOIN claim_base clm ON
             {clm}.clm_ocrnc_sgntr_sk = sgntr.clm_ocrnc_sgntr_sk
-        WHERE sgntr.clm_ocrnc_span_cd IN ('{QUALIFYING_STAY_CD}', '{NON_COVERED_STAY_CD}') 
+        WHERE sgntr.clm_ocrnc_span_cd IN ('{QUALIFYING_STAY_CD}', '{NON_COVERED_STAY_CD}')
         AND (
-            sgntr.idr_insrt_ts {{FILTER_OP}} {{LAST_TS}} 
-            OR sgntr.idr_updt_ts {{FILTER_OP}} {{LAST_TS}} 
+            sgntr.idr_insrt_ts {{FILTER_OP}} {{LAST_TS}}
+            OR sgntr.idr_updt_ts {{FILTER_OP}} {{LAST_TS}}
         )
     """
 
@@ -291,7 +291,7 @@ def clm_rlt_ocrnc_clause() -> str:
         JOIN claim_base clm ON
             {clm}.clm_rlt_ocrnc_sgntr_sk = sgntr.clm_rlt_ocrnc_sgntr_sk
         WHERE sgntr.clm_rlt_ocrnc_cd IN ('{MEDICARE_EXHAUSTED_CD}', '{ACTIVE_CARE_CD}') AND (
-            sgntr.idr_insrt_ts {{FILTER_OP}} {{LAST_TS}} 
+            sgntr.idr_insrt_ts {{FILTER_OP}} {{LAST_TS}}
             OR sgntr.idr_updt_ts {{FILTER_OP}} {{LAST_TS}}
             )
     """
@@ -311,9 +311,9 @@ def clm_rlt_cond_sgntr_query() -> str:
             JOIN claim_base {clm} ON
                 {clm}.clm_rlt_cond_sgntr_sk = sgntr.clm_rlt_cond_sgntr_sk
             WHERE sgntr.clm_rlt_cond_sgntr_sk NOT IN (0, 1, -1)
-                AND sgntr.clm_rlt_cond_cd != '~' 
+                AND sgntr.clm_rlt_cond_cd != '~'
                 AND (
-                    sgntr.idr_insrt_ts {{FILTER_OP}} {{LAST_TS}} 
+                    sgntr.idr_insrt_ts {{FILTER_OP}} {{LAST_TS}}
                     OR sgntr.idr_updt_ts {{FILTER_OP}} {{LAST_TS}}
                 )
     """
@@ -610,7 +610,7 @@ def deceased_bene_filter(alias: str, start_time: datetime) -> str:
             SELECT bene_sk
             FROM {IDR_BENE_HISTORY_TABLE} {alias}
             WHERE {alias}.bene_vrfy_death_day_sw = 'Y'
-            AND {alias}.bene_death_dt < DATE '{start_time.strftime("%Y-%m-%d")}' 
+            AND {alias}.bene_death_dt < DATE '{start_time.strftime("%Y-%m-%d")}'
             - INTERVAL '{DEATH_DATE_CUTOFF_YEARS} years'
     """
 
@@ -658,7 +658,7 @@ def idr_dates_from_meta_sk() -> str:
                             'YYYY-MM-DD HH24:MI:SS'
                     )
                 END AS idr_insrt_ts,
-        
+
             CASE
                 WHEN meta_sk != 501 AND meta_lst_updt_sk > 0 THEN
                     TO_TIMESTAMP(
@@ -699,7 +699,7 @@ def claim_filter(start_time: datetime, partition: LoadPartition) -> str:
         AND
         (
             {clm}.clm_type_cd NOT BETWEEN {pac_phase_1_min} AND {pac_phase_1_max}
-            OR 
+            OR
             (
                 {clm}.clm_src_id IN (
                     '{FISS_CLM_SOURCE}',
@@ -733,7 +733,7 @@ def claim_filter(start_time: datetime, partition: LoadPartition) -> str:
     return f"""
     (
         {clm}.bene_sk != 0
-        AND NOT EXISTS ({deceased_bene_filter(hstry, start_time)} 
+        AND NOT EXISTS ({deceased_bene_filter(hstry, start_time)}
             AND {hstry}.bene_sk = {clm}.bene_sk)
         AND {clm}.clm_type_cd IN ({",".join([str(c) for c in claim_type_codes])})
         {clm_from_filter}

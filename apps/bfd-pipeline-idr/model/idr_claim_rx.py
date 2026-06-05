@@ -61,9 +61,9 @@ class IdrClaimRx(IdrBaseModel):
         str,
         {
             ALIAS: ALIAS_CLM,
-            EXPR: f"""CASE 
-                WHEN {ALIAS_CLM}.clm_cntl_num = {ALIAS_CLM}.clm_prnt_cntl_num 
-                THEN '' 
+            EXPR: f"""CASE
+                WHEN {ALIAS_CLM}.clm_cntl_num = {ALIAS_CLM}.clm_prnt_cntl_num
+                THEN ''
                 ELSE {ALIAS_CLM}.clm_prnt_cntl_num
                 END""",
         },
@@ -282,7 +282,7 @@ class IdrClaimRx(IdrBaseModel):
             contracts AS (
                 SELECT cntrct_pbp_name, cntrct_num, cntrct_pbp_num,
                 RANK() OVER (
-                    PARTITION BY cntrct_num, cntrct_pbp_num 
+                    PARTITION BY cntrct_num, cntrct_pbp_num
                     ORDER BY cntrct_pbp_sk_obslt_dt DESC
                 ) AS contract_version_rank
                 FROM {IDR_CONTRACT_PBP_NUM_TABLE}
@@ -294,14 +294,14 @@ class IdrClaimRx(IdrBaseModel):
                 {clm}.clm_dt_sgntr_sk = c.clm_dt_sgntr_sk AND
                 {clm}.clm_type_cd = c.clm_type_cd AND
                 {clm}.clm_num_sk = c.clm_num_sk
-            JOIN {IDR_CLAIM_DATE_SIGNATURE_TABLE} {sgntr} ON 
+            JOIN {IDR_CLAIM_DATE_SIGNATURE_TABLE} {sgntr} ON
                 {sgntr}.clm_dt_sgntr_sk = {clm}.clm_dt_sgntr_sk
             JOIN {IDR_CLAIM_LINE_TABLE} {line} ON
                 {clm}.geo_bene_sk = {line}.geo_bene_sk AND
                 {clm}.clm_dt_sgntr_sk = {line}.clm_dt_sgntr_sk AND
                 {clm}.clm_type_cd = {line}.clm_type_cd AND
                 {clm}.clm_num_sk = {line}.clm_num_sk
-            LEFT JOIN {IDR_CLAIM_LINE_RX_TABLE} {rx_line} ON 
+            LEFT JOIN {IDR_CLAIM_LINE_RX_TABLE} {rx_line} ON
                 {clm}.geo_bene_sk = {rx_line}.geo_bene_sk AND
                 {clm}.clm_dt_sgntr_sk = {rx_line}.clm_dt_sgntr_sk AND
                 {clm}.clm_type_cd = {rx_line}.clm_type_cd AND

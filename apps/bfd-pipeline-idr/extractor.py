@@ -160,7 +160,7 @@ class Extractor(ABC, Generic[T]):  # noqa: UP046
         if batch_id_col is not None:
             batch_id_clause = f"""
                 OR (
-                    {batch_timestamp_clause} = %(timestamp)s 
+                    {batch_timestamp_clause} = %(timestamp)s
                     AND {batch_id_col} {filter_op} {progress.last_id}
                 )"""
 
@@ -380,11 +380,11 @@ class SnowflakeExecutor(DbExecutor):
     def copy(self, file: CsvFile) -> None:
         self.session.sql("create or replace temp stage source_stage").collect()
         self.session.file.put(str(file.csv_file.absolute()), "@source_stage")
-        self.session.sql(f"""COPY INTO 
+        self.session.sql(f"""COPY INTO
                             {file.full_table()}
                             FROM @source_stage/{file.csv_file.name}
                             FILE_FORMAT = (
-                                TYPE = 'CSV', 
+                                TYPE = 'CSV',
                                 PARSE_HEADER = TRUE
                                 ERROR_ON_COLUMN_COUNT_MISMATCH = FALSE
                                 FIELD_OPTIONALLY_ENCLOSED_BY = '"'
