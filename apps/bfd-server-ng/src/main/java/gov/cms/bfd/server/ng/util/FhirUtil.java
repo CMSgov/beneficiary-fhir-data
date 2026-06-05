@@ -148,9 +148,8 @@ public class FhirUtil {
       Optional<Integer> offset,
       Optional<Integer> limit,
       Bundle bundle) {
-    if (limit.isPresent()
-            // we need a next link
-            && limit.get() < bundle.getEntry().size()) {
+    // check if a link is needed
+    if (limit.isPresent() && limit.get() < bundle.getEntry().size()) {
         // remove the extra entry that let us know we had next
         bundle.setEntry(bundle.getEntry().subList(0, limit.get()));
         var nextOffset = Math.max(0, offset.orElse(0) + limit.orElse(0));
