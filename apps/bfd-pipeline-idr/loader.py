@@ -1,5 +1,6 @@
 import itertools
 import logging
+import operator
 from collections.abc import Iterator, Sequence
 from datetime import UTC, date, datetime
 
@@ -126,7 +127,8 @@ class BatchLoader:
         )
         self.cols_str = ", ".join(self.insert_cols)
         self.meta_keys_str = ", ".join(self.meta_keys)
-        self.primary_keys_str = ", ".join(model.ordered_pkeys())
+        self.ordered_pkeys = model.ordered_pkeys()
+        self.primary_keys_str = ", ".join(self.ordered_pkeys)
         self.update_set = [v for v in self.insert_cols if v not in model.ordered_pkeys()]
         self.update_set_str = ", ".join([f"{v}=EXCLUDED.{v}" for v in self.update_set])
         self.where_clause = (
@@ -159,6 +161,7 @@ class BatchLoader:
         self.progress_start_timer = Timer("progress_start", model, partition)
         self.idr_query_timer = Timer("idr_query", model, partition)
         self.insert_batch_timer = Timer("insert_batch", model, partition)
+        self.sort_batch_timer = Timer("sort_batch", model, partition)
         self.last_updated_timer = Timer("last_updated", model, partition)
         self.full_batch_timer = Timer("full_batch", model, partition)
         self.full_load_timer = Timer("full_load", model, partition)
@@ -198,6 +201,10 @@ class BatchLoader:
                 PER_BATCH_CONCURRENT_ROWS,
             )
             num_rows += len(results)
+
+            self.sort_batch_timer.start()
+            results.sort(key=operator.attrgetter(*self.ordered_pkeys))
+            self.sort_batch_timer.stop()
 
             self.insert_batch_timer.start()
             async with anyio.create_task_group() as tg:
