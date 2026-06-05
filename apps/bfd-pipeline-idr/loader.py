@@ -126,8 +126,8 @@ class BatchLoader:
         )
         self.cols_str = ", ".join(self.insert_cols)
         self.meta_keys_str = ", ".join(self.meta_keys)
-        self.unique_keys_str = ", ".join(model.unique_key())
-        self.update_set = [v for v in self.insert_cols if v not in model.unique_key()]
+        self.primary_keys_str = ", ".join(model.ordered_pkeys())
+        self.update_set = [v for v in self.insert_cols if v not in model.ordered_pkeys()]
         self.update_set_str = ", ".join([f"{v}=EXCLUDED.{v}" for v in self.update_set])
         self.where_clause = (
             f"WHERE ({', '.join(f't.{v}' for v in self.update_set)}) IS "
@@ -378,7 +378,7 @@ class BatchLoader:
             f'''
             INSERT INTO {self.table} AS t ({self.cols_str}, {self.meta_keys_str})
             SELECT {self.cols_str}, {self.timestamp_placeholders} FROM "{temp_tablename}"
-            ON CONFLICT ({self.unique_keys_str}) {self.on_conflict_clause}
+            ON CONFLICT ({self.primary_keys_str}) {self.on_conflict_clause}
             ''',  # type: ignore
             {"timestamp": timestamp},
         )

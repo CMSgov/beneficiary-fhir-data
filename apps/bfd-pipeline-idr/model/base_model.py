@@ -483,8 +483,11 @@ class IdrBaseModel(BaseModel, ABC):
         """Value representing the type of model."""
 
     @classmethod
-    def unique_key(cls) -> list[str]:
-        return cls._extract_meta_keys(PRIMARY_KEY_ORDER)
+    def ordered_pkeys(cls) -> list[str]:
+        keys_with_meta = cls._extract_meta_and_keys(PRIMARY_KEY_ORDER)
+        keys_with_meta.sort(key=lambda tupl: cast(int, tupl[1]))
+
+        return [key for (key, _) in keys_with_meta]
 
     @classmethod
     def batch_timestamp_col(cls, is_historical: bool) -> list[str]:
@@ -523,15 +526,15 @@ class IdrBaseModel(BaseModel, ABC):
 
     @classmethod
     def _extract_meta_keys(cls, meta_key: str) -> list[str]:
-        keys_with_meta = [
+        return [key for (key, _) in cls._extract_meta_and_keys(meta_key)]
+
+    @classmethod
+    def _extract_meta_and_keys(cls, meta_key: str) -> list[tuple[str, object]]:
+        return [
             (key, meta)
             for key in cls.model_fields
             if (meta := cls._extract_meta(key, meta_key)) is not None
         ]
-        if keys_with_meta and isinstance(keys_with_meta[0][1], str | int):
-            keys_with_meta.sort(key=lambda tupl: cast(str | int, tupl[1]))
-
-        return [key for (key, _) in keys_with_meta]
 
     @classmethod
     def _single_or_default(cls, meta_key: str) -> str | None:

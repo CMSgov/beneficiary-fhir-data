@@ -118,7 +118,7 @@ class Extractor(ABC, Generic[T]):  # noqa: UP046
         batch_id_col = self.cls.batch_id_col_alias()
         additional_order_by = list(
             OrderedDict.fromkeys(
-                [x for x in [batch_id_col, *self.cls.unique_key()] if x is not None]
+                [x for x in [batch_id_col, *self.cls.ordered_pkeys()] if x is not None]
             )  # Use an OrderedDict as an ordered set because there is no ordered set in stdlib
         )
         logger.info("extracting %s", self.cls.table())
