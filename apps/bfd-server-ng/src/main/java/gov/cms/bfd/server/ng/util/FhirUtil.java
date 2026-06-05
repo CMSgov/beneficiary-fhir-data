@@ -176,7 +176,7 @@ public class FhirUtil {
     String urlWithoutOffset =
         baseUrl.replaceAll("([&?])(" + OFFSET_PARAM + "|" + START_INDEX_PARAM + ")=[^&]*", "$1");
     urlWithoutOffset = urlWithoutOffset.replace("?&", "?").replace("&&", "&");
-    urlWithoutOffset = urlWithoutOffset.replaceAll("[?&]+$", "");
+    urlWithoutOffset = urlWithoutOffset.replace("[?&]+$", "");
     // If startIndex is zero, don't add the parameter
     if (startIndex == 0) {
       return urlWithoutOffset;
