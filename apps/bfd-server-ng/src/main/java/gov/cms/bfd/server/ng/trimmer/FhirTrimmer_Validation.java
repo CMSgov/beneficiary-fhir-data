@@ -9,23 +9,31 @@ import java.util.regex.Pattern;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Base;
 
+/** Old version of FhirTrimmer that used FhirValidator to validate, too slow for production. */
 public class FhirTrimmer_Validation {
 
   private static final Pattern NODE_PATTERN = Pattern.compile("^([a-zA-Z0-9]+)(?:\\[(\\d+)])?$");
 
-  private static final List<String> VIOLATION_KEYWORDS = List.of(
-          "not allowed",
-          "max allowed",
-          "maximum allowed",
-          "unknown extension"
-  );
+  private static final List<String> VIOLATION_KEYWORDS =
+      List.of("not allowed", "max allowed", "maximum allowed", "unknown extension");
 
   private final FhirValidator validator;
 
+  /**
+   * Constructor that takes a validator.
+   *
+   * @param validator the FhirValidator instance
+   */
   public FhirTrimmer_Validation(FhirValidator validator) {
     this.validator = Objects.requireNonNull(validator, "FhirValidator cannot be null");
   }
 
+  /**
+   * Trim the resource with the instantiated validator.
+   *
+   * @param resource resource to be trimmed
+   * @return the trimmed resource
+   */
   public IBaseResource trim(IBaseResource resource) {
     if (resource == null) {
       return null;
@@ -33,7 +41,8 @@ public class FhirTrimmer_Validation {
 
     var result = validator.validateWithResult(resource);
 
-    var pathsToRemove = result.getMessages().stream()
+    var pathsToRemove =
+        result.getMessages().stream()
             .filter(this::isValidStructuralViolation)
             .map(SingleValidationMessage::getLocationString)
             .sorted(Comparator.reverseOrder())

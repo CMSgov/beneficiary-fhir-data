@@ -5,21 +5,20 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
+import org.apache.commons.lang3.time.StopWatch;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.PrePopulatedValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Claim;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import org.apache.commons.lang3.time.StopWatch;
-import org.hl7.fhir.r4.model.Bundle;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 class FhirTrimmerValidationTest {
 
@@ -37,7 +36,7 @@ class FhirTrimmerValidationTest {
             new InMemoryTerminologyServerValidationSupport(ctx),
             new CommonCodeSystemsTerminologyService(ctx));
 
-    var sdJson =
+    var structureDefinition =
         """
             {
               "resourceType": "StructureDefinition",
@@ -62,18 +61,14 @@ class FhirTrimmerValidationTest {
             }
             """;
 
-    var strictClaimDef = ctx.newJsonParser().parseResource(StructureDefinition.class, sdJson);
-
+    // Add our new validator with the structure definition above
+    var strictClaimDef =
+        ctx.newJsonParser().parseResource(StructureDefinition.class, structureDefinition);
     var prePopulatedSupport = new PrePopulatedValidationSupport(ctx);
     prePopulatedSupport.addStructureDefinition(strictClaimDef);
-
     supportChain.addValidationSupport(prePopulatedSupport);
-
     var instanceValidator = new FhirInstanceValidator(supportChain);
-    instanceValidator.setAnyExtensionsAllowed(false);
-
     var validator = ctx.newValidator().registerValidatorModule(instanceValidator);
-
     trimmer = new FhirTrimmer_Validation(validator);
   }
 
@@ -81,7 +76,8 @@ class FhirTrimmerValidationTest {
   void testFhirTrimmer() {
 
     // Valid claim with all required elements filled out to quiet validation
-    var validClaimJson = """
+    var validClaimJson =
+        """
         {
           "resourceType": "Claim",
           "status": "active",
@@ -100,19 +96,22 @@ class FhirTrimmerValidationTest {
     fullClaim.getMeta().addProfile("http://example.com/StructureDefinition/StrictClaim");
 
     // Add illegal extensions
-    fullClaim.addExtension(new Extension("http://example.com/ext/bad", new StringType("very illegal")));
-    fullClaim.addExtension(new Extension("http://example.com/ext/not-allowed", new StringType("so illegal")));
+    fullClaim.addExtension(
+        new Extension("http://example.com/ext/bad", new StringType("very illegal")));
+    fullClaim.addExtension(
+        new Extension("http://example.com/ext/not-allowed", new StringType("so illegal")));
     assertEquals(2, fullClaim.getExtension().size(), "Resource should have 2 extensions");
 
     var trimmedClaim = (Claim) trimmer.trim(fullClaim);
 
-    assertTrue(trimmedClaim.getExtension().isEmpty(), "Extensions should be empty");
+    assertTrue(trimmedClaim.getExtension().isEmpty(), "Resource should have 0 extensions");
   }
 
   @Test
   @Disabled
   void reallyTestFhirTrimmer() {
-    var validClaimJson = """
+    var validClaimJson =
+        """
       {
         "resourceType": "Claim",
         "status": "active",
@@ -132,6 +131,7 @@ class FhirTrimmerValidationTest {
     var totalIterations = 100000;
     var warmupIterations = 5000;
 
+    // Shamelessly stolen from Google AI
     System.out.println("Warming up JIT compiler with " + warmupIterations + " runs...");
     for (int i = 0; i < warmupIterations; i++) {
       var warmupBundle = createBloatedBundle(baseClaim);
@@ -149,7 +149,7 @@ class FhirTrimmerValidationTest {
 
       trimmer.trim(targetBundle);
 
-      if (i > 0 && i % (totalIterations/5) == 0) {
+      if (i > 0 && i % (totalIterations / 5) == 0) {
         double currentThroughput = (i * 1000.0) / watch.getTime();
         System.out.printf("Processed %d bundles... Current rate: %.2f/sec%n", i, currentThroughput);
       }
@@ -158,24 +158,26 @@ class FhirTrimmerValidationTest {
     var totalMillis = watch.getTime();
     var finalThroughput = (totalIterations * 1000.0) / totalMillis;
 
+    // Also shamelessly stolen
     System.out.println("=================== LOAD TEST RESULTS ===================");
     System.out.println("Total Time: " + watch);
     System.out.printf("Throughput: %.2f Bundles per second%n", finalThroughput);
-    System.out.printf("Avg Latency: %.2f ms per Bundle%n", ((double) totalMillis / totalIterations));
+    System.out.printf(
+        "Avg Latency: %.2f ms per Bundle%n", ((double) totalMillis / totalIterations));
     System.out.println("=========================================================");
   }
 
-  /**
-   * Use copy to save time.
-   */
+  /** Use copy to save time. */
   private Bundle createBloatedBundle(Claim templateClaim) {
     var bundle = new Bundle();
     bundle.setType(Bundle.BundleType.COLLECTION);
 
     var claimCopy = templateClaim.copy();
 
-    claimCopy.addExtension(new Extension("http://example.com/ext/forbidden", new StringType("illegal 1")));
-    claimCopy.addExtension(new Extension("http://example.com/ext/also-forbidden", new StringType("illegal 2")));
+    claimCopy.addExtension(
+        new Extension("http://example.com/ext/extra-illegal", new StringType("42")));
+    claimCopy.addExtension(
+        new Extension("http://example.com/ext/literal-crime", new StringType("crime 2.0")));
 
     bundle.addEntry().setResource(claimCopy);
     return bundle;
